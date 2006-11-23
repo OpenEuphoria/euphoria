@@ -1,0 +1,124 @@
+-- Simple MAPI (Messaging API) Demo Program
+
+-- Performs MapiLogon, MapiSendMail, MapiLogoff
+-- Constants and structure declarations are from 
+-- the file MAPI.H available from Microsoft
+
+-- If you have Outlook Express you can make it your
+-- "default Simple MAPI client" on the Tools/Options menu.
+
+-- MS Exchange Inbox should work too.
+
+include dll.e
+include machine.e
+include wildcard.e
+include msgbox.e
+
+without warning
+
+constant MAPI_TO = 1,
+	 MAPI_LOGON_UI = 1,           -- display a logon user interface
+	 MAPI_FORCE_DOWNLOAD = #1000, -- force download of new messages 
+				      -- when logging in to MAPI
+	 MAPI_USE_DEFAULT = #0040     -- use default profile
+
+constant Title = "Euphoria E-Mail Demo"
+
+integer MAPILogon, MAPILogoff, MAPISendMail
+atom mapi_dll, session, error, message, recipient
+
+mapi_dll = open_dll("mapi32.dll")
+if mapi_dll = 0 then
+    puts(1, "Couldn't find MAPI DLL\n")
+    abort(1)
+end if
+
+MAPILogon = define_c_func(mapi_dll, "MAPILogon", 
+	       {C_LONG, C_POINTER, C_POINTER, C_LONG, C_LONG, C_POINTER}, 
+	       C_LONG)
+if MAPILogon = -1 then
+    puts(1, "Couldn't find MAPILogon\n")
+    abort(1)
+end if
+
+MAPILogoff = define_c_func(mapi_dll, "MAPILogoff",
+		{C_INT, C_INT, C_INT, C_INT},
+		C_LONG)
+if MAPILogoff = -1 then
+    puts(1, "Couldn't find MapiLogoff\n")
+    abort(1)
+end if
+
+MAPISendMail = define_c_func(mapi_dll, "MAPISendMail",
+		{C_INT, C_INT, C_POINTER, C_INT, C_INT},
+		C_LONG)
+if MAPISendMail = -1 then
+    puts(1, "Couldn't find MapiSendMail\n")
+    abort(1)
+end if
+
+session = allocate(4)
+
+integer yn
+
+yn = message_box(
+      "Would you like to send an e-mail message\nto the U.S. President?",
+      Title, MB_YESNO)
+if yn = IDNO then
+    abort(0)
+end if
+
+error = c_func(MAPILogon, {0, 0, 0, MAPI_USE_DEFAULT, 0, session})
+
+if error then
+    error = message_box(sprintf("MAPILogon failed - code %d\n", error),
+			       Title, MB_ICONWARNING)
+    abort(error)
+end if
+
+session = peek4u(session) 
+
+-- recipient structure:
+constant RECIPCLASS = 4,
+	 NAME = 8,
+	 ADDRESS = 12
+
+recipient = allocate(100)
+mem_set(recipient, 0, 100)
+poke4(recipient+RECIPCLASS, MAPI_TO)
+poke4(recipient+NAME, allocate_string("George W. Bush"))
+poke4(recipient+ADDRESS, allocate_string("SMTP:president@whitehouse.gov"))
+
+-- message structure offsets:
+constant SUBJECT = 4,
+	 TEXT = 8,
+	 RECIPCOUNT = 32,
+	 RECIPIENTS = 36
+
+message = allocate(100) 
+mem_set(message, 0, 100)
+poke4(message+SUBJECT, allocate_string("Euphoria Programming Language"))
+poke4(message+TEXT, allocate_string(
+		      "Hi George,\n\n" &
+		      "\tEuphoria is a GREAT programming language!\n\n" & 
+		      "\tPlease visit http://www.RapidEuphoria.com\n"))
+poke4(message+RECIPCOUNT, 1)
+poke4(message+RECIPIENTS, recipient)
+
+error = c_func(MAPISendMail, {session, 0, message, MAPI_LOGON_UI, 0})
+if error then
+    error = message_box(sprintf("MAPISendMail failed, code %d\n", error),
+		       Title, MB_ICONWARNING)
+    abort(1)
+end if
+
+-- MAPILogoff may crash if your system isn't set up right for MAPI
+-- error = c_func(MAPILogoff, {session, 0, 0, 0}) 
+-- if error then
+--  error = message_box(sprintf("MAPILogoff failed, code %d\n", error),
+--                     Title, MB_ICONWARNING)
+-- end if
+
+error = message_box("Check your OUTBOX (or Sent Mail)",
+		   Title, MB_ICONINFORMATION)
+

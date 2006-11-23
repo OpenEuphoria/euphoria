@@ -1,0 +1,225 @@
+
+
+ ---> Is this the latest version of Euphoria?
+      Visit:  http://www.RapidEuphoria.com
+      
+ ---> To install/uninstall Euphoria, see install.htm
+      
+ ---> What's new in this release?
+      See relnotes.doc 
+
+
+ 
+                        Euphoria Programming Language
+                               version 3.0.1
+                              November 3, 2006
+ 
+
+
+ Welcome to Euphoria! ... End User Programming with Hierarchical Objects for
+                          Robust Interpreted Applications
+
+
+ Euphoria has come a long way since v1.0 was released in July 1993. There are
+ now thousands of users around the world. There's an automated discussion
+ forum, managed and moderated by a Euphoria program, and supporting over 500
+ subscribers. The Euphoria Web site contains over 1600 contributed .zip files
+ packed with Euphoria source programs and library routines. Dozens of people
+ have set up their own independent Web pages with Euphoria-related content.
+ Euphoria has been used in a variety of commercial programs. The Windows
+ version has been used to create numerous GUI, utility and Internet-related
+ programs. The DOS version has been used to create many exciting high-speed
+ action games, complete with Sound Blaster sound effects. The Linux and FreeBSD
+ versions have been used to write X Windows GUI programs, Web-based (CGI)
+ programs, and lots of useful tools and utilities.
+
+
+ Yet Another Programming Language?
+ =================================
+
+ Euphoria is a very-high-level programming language with several features that
+ set it apart from the crowd:
+
+      * Euphoria programs run on Windows, DOS, Linux, and FreeBSD.
+
+      * Euphoria is free and open source. The complete source code for the
+        Euphoria interpreter, translator and binder is included in the download
+        package.
+
+      * The language is flexible, powerful, and easy to learn.
+
+      * There is no waiting for compiles and links - just edit and run.
+
+      * You can create and distribute a royalty-free, stand-alone .exe file.
+
+      * Dynamic storage allocation is fundamental to Euphoria. Variables grow
+        or shrink in size without the programmer having to worry about
+        allocating and freeing chunks of memory. Elements of an array (Euphoria
+        sequence) can be a dynamic mixture of different types and sizes of
+        data.
+
+      * Euphoria provides extensive run-time error checking for: out-of-bounds
+        subscripts, uninitialized variables, bad parameter values for library
+        routines, illegal value assigned to a variable, and many more. If
+        something goes wrong you'll get a full error message, with a call
+        traceback and a listing of variable values. With other languages you'll
+        typically get protection faults with useless dumps of machine registers
+        and addresses.
+
+      * The Euphoria interpreter is more than 30 times faster than either Perl
+        or Python, and it's considerably faster than all other interpreted
+        languages, according to the "Great Computer Language Shootout"
+        benchmark (see demo\bench\bench.doc).
+
+      * If that isn't enough, there's a Euphoria To C Translator that can
+        translate any Euphoria program to C, and boost your speed even more.
+        Why waste time debugging hand-coded C/C++? You can easily develop a
+        Euphoria program, and then generate the C code.
+
+      * Euphoria programs are not constrained by any 640K memory restrictions
+        for which MS-DOS is infamous. All versions of Euphoria let you use all
+        the memory on your system, and if that isn't enough, a swap file on
+        disk will provide additional virtual memory.
+
+      * An integrated, easy-to-use, full-screen source-level debugger/tracer is
+        included.
+
+      * Both an execution-count profiler, and a time profiler are available.
+
+      * There is a large and rapidly growing collection of excellent 3rd party
+        programs and libraries, most with full source code.
+
+      * RDS has developed an extremely flexible database system (EDS) that is
+        portable across all Euphoria platforms.
+
+      * The WIN32 implementation of Euphoria can access any WIN32 API routine,
+        as well as C or Euphoria routines in .DLL files. A team of people has
+        developed a Windows GUI library (Win32Lib), complete with a powerful
+        Interactive Development Environment. You can design a user interface
+        graphically, specify the Euphoria statements to be executed when
+        someone clicks, and the IDE will create a complete Euphoria program for
+        you. There are Windows Euphoria libraries for Internet access, 3-D
+        games, and many other application areas.
+
+      * The DOS32 implementation of Euphoria on MS-DOS contains a built-in
+        graphics library. If necessary, you can access DOS software interrupts.
+        You can call machine-code routines. You can even set up your own
+        hardware interrupt handlers. Many high-speed action games, complete
+        with Sound Blaster sound effects, have been developed 100% in Euphoria,
+        without the need for any machine code.
+
+      * The Linux and FreeBSD implementations of Euphoria let you access C
+        routines and variables in shared libraries, for tasks ranging from
+        graphics, to X windows GUI programming, to Internet CGI programming.
+        The good news is, you'll be programming in Euphoria, not C.
+
+
+ Platforms and Products
+ ======================
+
+ Euphoria runs on four different platforms, WIN32, DOS32, Linux, and FreeBSD.
+
+ This Euphoria Interpreter, Translator and Binder package is free for anyone to
+ use.
+
+ Using the Euphoria Binder you can shroud (encrypt) and bind any Euphoria
+ program with a copy of the interpreter back-end, to create a single,
+ stand-alone, tamper-resistant .exe file for easy distribution. See bind.doc)
+
+ The Euphoria To C Translator converts any Euphoria program into a stand-alone
+ .exe file, but it has the added advantage of boosting the program's speed as
+ well. To use it, you must have one of 7 free C compilers installed on your
+ machine, but no knowledge of C is required.
+
+ The documentation contained in this package comes in both plain text and HTML
+ form. The plain text (.doc) files can be viewed with any text editor, such as
+ Windows NotePad or WordPad. The HTML (.htm) files can be viewed with your Web
+ browser. A tool that we developed in Euphoria allows us to automatically
+ generate both plain text and HTML files, from a common source. Thus the
+ content of each file in the doc subdirectory should be identical to the
+ content of the corresponding file in the html subdirectory, aside from the
+ lack of links, fonts, colors, etc. See doc\overview.doc (or html\overview.htm)
+ for a summary of the documentation files.
+
+ You can freely distribute the Euphoria interpreter, and any other files
+ contained in this package, in whole or in part, so anyone can run a Euphoria
+ program that you have developed. You are completely free to distribute any
+ Euphoria programs that you write.
+
+ To run the WIN32 version of Euphoria, you need Windows 95 or any later version
+ of Windows. It runs fine on XP.
+
+ The DOS32 version will run on any version of Windows, and will also run on
+ plain DOS on any 386 or higher processor. Contrary to popular opinion, DOS is
+ not dead. You can run DOS Euphoria programs on Windows XP in a command prompt
+ window.
+
+ To run the Linux version of Euphoria you need any reasonably up-to-date Linux
+ distribution, that has libc6 or later. For example, Red Hat 5.2 or later will
+ work fine.
+
+ To run the FreeBSD version of Euphoria you need any reasonably up-to-date
+ FreeBSD distribution.
+
+
+ Getting Started
+ ===============
+
+ 0.   The Euphoria interpreter is an engine for running Euphoria programs. It
+      does not have a fancy GUI interface. When you are ready to do Windows GUI
+      programming, you should download Judith Evans' IDE (written in open
+      source Euphoria code). It will provide you with a very nice graphical
+      environment for Windows programming. For most other programming, all you
+      really need is an editor, such as NotePad.
+
+ 1.   After you install Euphoria, the documentation files will be in the doc
+      and html directories. overview.doc gives an overview of the
+      documentation. refman.htm (or refman.doc) should be read first. If you
+      want to search for information on any topic, type guru.
+
+ 2.   Have fun running the programs in the demo directory. Feel free to modify
+      them, or run them in trace mode by adding:
+
+              with trace
+              trace(1)
+      
+      as the first two lines in the .ex or .exw file.
+
+ 3.   Try typing in some simple statements and running them. You can use any
+      text editor. Later you may want to use the Euphoria editor, ed, or
+      download David Cuny's Euphoria editor from the Euphoria Web site.
+
+      Don't be afraid to try things. Euphoria won't bite!
+
+ 4.   See what2do.doc for more ideas.
+
+ 5.   Visit the Euphoria Web site, download some files, and subscribe to the
+      Euphoria mailing list.
+
+
+ If you are new to programming, and you find refman.htm hard to follow,
+ download David Gay's interactive tutorial called "A Beginner's Guide To
+ Euphoria". It's in the Documentation section of our Archive.
+
+
+ *** If you have any trouble installing, see install.doc ***
+
+
+
+ Notice to Shareware Vendors:
+ ============================
+        We encourage you to distribute this Euphoria Interpreter package. You
+        can charge whatever you like for it. People can use Euphoria for as
+        long as they like without obligation.
+
+
+
+ DISCLAIMER:
+ ===========
+        Euphoria is provided "as is" without warranty of any kind. In no event
+        shall Rapid Deployment Software be held liable for any damages arising
+        from the use of, or inability to use, this product.
+
+
+
+

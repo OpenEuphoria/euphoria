@@ -1,0 +1,181 @@
+<_init_comment>
+<html>
+<head><title>Guide to Documentation Files</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
+<br>
+                      Guide to Documentation Files
+</font></_center>
+<p>&nbsp;<br>
+
+ The Euphoria documentation is spread over several plain text files in the
+ <font color="#5500FF"><b>euphoria\doc</b></font> directory. For each
+ <b>.doc</b> file in the <font color="#5500FF"><b>euphoria\doc</b></font>
+ directory, there is a corresponding <b>.htm</b> file in the
+ <font color="#5500FF"><b>euphoria\html</b></font> directory. You can also
+ type <font color="#993333"><b>guru</b></font> to quickly search for relevant
+ information from all directories under
+ <font color="#5500FF"><b>\euphoria</b></font>. 
+
+<p>
+ Everyone should start with 
+ <font color="#5500FF"><b>euphoria\readme.doc</b></font>
+ (<font color="#5500FF"><b>euphoria\readme.htm</b></font>).
+<p> 
+ <_sul>If you are having trouble installing Euphoria read:</_sul>
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+ 
+<_4clist
+  href="install.htm"
+  name="install.doc"
+  pos=18
+  description="Instructions for installing Euphoria"
+>
+
+</table>
+
+<p>
+ <_sul>Read the following files first, if you want to learn to program in
+ Euphoria:</_sul>
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_4clist
+  href="refman.htm"
+  name="refman.doc"
+  pos=18
+  description="The manual for the Euphoria core language"
+>
+
+<_4clist
+  href="library.htm"
+  name="library.doc"
+  pos=18
+  description="Documentation for all of the Euphoria library routines"
+>
+
+<_4clist
+  href="what2do.htm"
+  name="what2do.doc"
+  pos=18
+  description="Some things you can do to get started with Euphoria"
+>
+
+<_4clist
+  href="platform.htm"
+  name="platform.doc"
+  pos=18
+  description="A discussion of the differences between the four
+   <font color=\"#993333\"><b><i>platforms</i></b></font>
+   that Euphoria runs on, i.e.
+   <font color=\"#CC3366\"><b>DOS32</b></font>
+   (<font color=\"#993333\"><b>ex.exe</b></font>)
+   vs. 
+   <font color=\"#CC3366\"><b>WIN32</b></font>
+   (<font color=\"#993333\"><b>exw.exe</b></font>)
+   vs. 
+   <font color=\"#CC3366\"><b>Linux</b></font>
+   (<font color=\"#993333\"><b>exu</b></font>)
+   vs. 
+   <font color=\"#CC3366\"><b>FreeBSD</b></font>
+   (<font color=\"#993333\"><b>exu</b></font>). Also included is a discussion
+   of how to interface Euphoria programs with C libraries."
+>
+</table>
+
+<p>
+ <_sul>The rest of the files can be read any time, as needed:</_sul>
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_4clist
+  href="database.htm"
+  name="database.doc"
+  pos=18
+  description="The Euphoria Database System (EDS)"
+>
+
+<_4clist
+  href="e2c.htm"
+  name="e2c.doc"
+  pos=18
+  description="The Euphoria To C Translator"
+>
+
+<_4clist
+  href="tasking.htm"
+  name="tasking.doc"
+  pos=18
+  description="Multitasking in Euphoria"
+>
+
+<_4clist
+  href="ed.htm"
+  name="ed.doc"
+  pos=18
+  description="Documentation for the standard Euphoria editor,
+   <font color=\"#993333\"><b>ed</b></font>"
+>
+
+<_4clist
+  href="trouble.htm"
+  name="trouble.doc"
+  pos=18
+  description="A list of the most common problems and their solutions"
+>
+
+<_4clist
+  href="bind.htm"
+  name="bind.doc"
+  pos=18
+  description="Describes <font color=\"#5500FF\"><b>bind.bat</b></font> and
+   <font color=\"#5500FF\"><b>shroud.bat</b></font> options for
+   <font color=\"#993333\"><b>binding</b></font> and
+   <font color=\"#993333\"><b>shrouding</b></font>"
+>
+
+<_4clist
+  href="perform.htm"
+  name="perform.doc"
+  pos=18
+  description="Performance tips"
+>
+
+<_4clist
+  href="relnotes.htm"
+  name="relnotes.doc"
+  pos=18
+  description="A description of what's new in the current release and
+   a summary of previous releases of Euphoria"
+>
+
+<_4clist
+  href="cgi.htm"
+  name="cgi.doc"
+  pos=18
+  description="Web-based Programming using CGI and Euphoria"
+>
+
+<_4clist
+  href="c.htm"
+  name="c.doc"
+  pos=18
+  description="Propaganda aimed at C/C++ programmers"
+>
+
+</table>
+
+<p>
+ Most subdirectories under <font color="#5500FF"><b>\euphoria</b></font> have
+ a <b>.doc</b> file that describes the files in that subdirectory. 
+ 
+<p>&nbsp;
+
+</_width>
+</body>
+</html>
+

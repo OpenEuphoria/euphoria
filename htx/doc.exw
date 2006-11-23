@@ -1,0 +1,287 @@
+-- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+
+-- Documentation Generator
+-- written by: Junko C. Miura of Rapid Deployment Software 
+-- (JCMiura@RapidEuphoria.com)
+
+constant files = {
+    "refman_0.htx",
+    "refman_1.htx",
+    "refman_2.htx",
+    "refman_3.htx",
+    "lib_0.htx",
+    "lib_a_b.htx",
+    "lib_c_d.htx",
+    "lib_e_g.htx",
+    "lib_h_o.htx",
+    "lib_p_r.htx",
+    "lib_s_t.htx",
+    "lib_u_z.htx", 
+    "readme.htx",
+    "install.htx", 
+    "ed.htx",
+    "c.htx",
+    "cgi.htx",
+    "relnotes.htx",
+    "perform.htx",
+    "bind.htx",
+    "trouble.htx",
+    "platform.htx",
+    "overview.htx",
+    "what2do.htx",
+    "database.htx",
+    "tasking.htx",
+    "e2c.htx"
+}
+
+without warning
+include docgen.e   -- common include file for RTF, HTML, and plain text
+include html.e     -- output format: HTML
+include text.e     -- output format: plain text
+
+-- EUDIR might not be set, shroud should be ok
+include wildcard.e  
+with warning
+
+function param_list(object text)
+-- read an HTMX tag and extract all the parameters and their values.
+-- text must contain a '>' at the end, or text may be an atom.
+-- format of text, before '>', when it is not an atom, should be:  
+--           name1(=value1) name2(=value2) ...
+--        where () means optional
+    integer i, value_part
+    sequence word, list
+    
+    if atom(text) then
+	return {}
+    end if
+    
+    list = {}
+    i = 1
+    value_part = FALSE
+    while TRUE do
+	while whitespace(text[i]) do
+	    i = i + 1
+	end while
+	if text[i] = '>' then
+	    exit
+	end if
+	if text[i] = '=' then
+	    i = i + 1   
+	    value_part = TRUE
+	    while whitespace(text[i]) do
+		i = i + 1
+	    end while
+	end if
+	
+	if text[i] = '"' then
+	    -- read quoted-string parameter
+	    word = ""
+	    i = i + 1
+	    while text[i] != '"' and i < length(text) do
+		if text[i] = '\\' then
+		    if text[i + 1] = '"' then
+			word = word & text[i + 1]
+		    else
+			word = word & text[i] & text[i + 1]
+		    end if
+		    i = i + 2
+		else
+		    word = word & text[i]
+		    i = i + 1
+		end if
+	    end while
+	    if text[i] = '"' then
+		i = i + 1
+	    end if
+	else 
+	    word = ""
+	    while not whitespace(text[i]) and text[i] != '=' and 
+		  text[i] != '>' do
+		word = word & text[i]
+		i = i + 1
+	    end while
+	end if
+	if value_part then
+	    -- make a pair
+	    list[length(list)] = {list[length(list)], word}
+	    value_part = FALSE
+	else
+	    list = append(list, word)
+	end if
+    end while
+    return list
+end function
+
+procedure tag(sequence name, object param, object raw)
+-- process a tag (or literal text)
+    integer r
+    
+    r = find(name, handler_name)
+    if r = 0 then
+	r = find("_default", handler_name)
+	if r = 0 then
+	    quit("Need a default handler")
+	end if
+    end if
+    if equal(name, "!--") then
+	call_proc(handler_id[r], {raw, ""})
+    else
+	call_proc(handler_id[r], {raw, param_list(param)})
+    end if
+end procedure
+
+procedure scan()
+    integer c, inDQuote
+    sequence raw, name, param
+    
+    while TRUE do
+	c = getc(in_file)
+      
+	if c = EOF then
+	    exit
+	elsif c = '<' then
+	    -- an htmX tag?
+	    c = getc(in_file)
+	    if whitespace(c) or c = '=' then
+		tag("_literal", '<', '<')
+		tag("_literal", c, c)
+	    else
+		raw = "<"
+		
+		-- read the name
+		name = ""
+		while not whitespace(c) and c != '>' and c != EOF do
+		    name = name & c
+		    c = getc(in_file)
+		end while
+		name = lower(name)
+		raw = raw & name
+	    
+		-- read the parameter list (if any)
+		param = ""
+		inDQuote = FALSE
+		while not inDQuote and c != '>' and c != EOF do
+		    if c = '"' then
+			inDQuote = TRUE
+			param = param & c
+			c = getc(in_file)
+			while inDQuote and c != EOF do
+			    if c = '"' then
+				inDQuote = FALSE
+			    elsif c = '\\' then  
+				-- control char. Just read in the next char.
+				param = param & c
+				c = getc(in_file) -- c might be EOF, watch...  
+			    end if
+			    param = param & c   -- so, c may be EOF, but ok
+			    c = getc(in_file)   --   because it will be caught.
+			end while
+		    else
+			param = param & c
+			c = getc(in_file)
+		    end if
+		end while
+	    
+		if inDQuote then       -- checking inDQuote first makes sense
+		    quit("double quote never closed") 
+		elsif c = '>' then
+		    param = param & '>'
+		    raw = raw & param 
+		    tag(name, param, raw)
+		elsif c = EOF then
+		    quit("premature EOF")
+		end if
+	    end if
+	else
+	    tag("_literal", c, c)
+	end if
+    end while
+end procedure
+
+sequence app_dir, cmd_line, format
+integer param
+
+cmd_line = command_line()
+
+if length(cmd_line) < 3 then
+    quit("no dir was passed to doc2")
+end if
+
+if equal(cmd_line[3], "HTML") then
+    format = "HTML"
+    html_init()
+else
+    format = "PLAIN"
+    text_init()
+end if
+
+cmd_line = cmd_line[1..2] & cmd_line[4..length(cmd_line)]
+
+
+if length(cmd_line) >= 4 then
+    -- space in path and forgot quotes
+    app_dir = cmd_line[3]
+    param = 4
+    while param <= length(cmd_line) do
+	app_dir = app_dir & " " & cmd_line[param]
+	param += 1
+    end while
+
+else
+    app_dir = cmd_line[3] 
+end if
+
+app_dir &= "\\"
+
+procedure main(sequence in_name, sequence format, sequence dest)
+    sequence out_name
+    integer p
+    
+    if not match(".htx", in_name) then
+	quit("must be a .htx file")
+    end if
+    in_file = open(in_name, "r")
+    if in_file = -1 then
+	quit("couldn't open " & in_name)
+    end if
+    p = find('.', in_name)
+    
+    out_name = in_name[1..p] & out_type
+    if find('_', out_name) and equal(format, "PLAIN") then
+	out_file = open(out_name, "w") -- place in current dir
+    elsif match("readme.", out_name) then
+	out_file = open(app_dir & "\\" & out_name, "w")
+    elsif equal("lib_0.htm", out_name) then
+	out_file = open(app_dir & "\\html\\LIBRARY.HTM", "w")
+    elsif equal("refman_0.htm", out_name) then
+	out_file = open(app_dir & "\\html\\REFMAN.HTM", "w")
+    else    
+	out_file = open(app_dir & dest & '\\' & out_name, "w")
+    end if
+    
+    if out_file = -1 then
+	quit("couldn't open " & out_name)
+    end if
+
+    scan()
+    
+    if equal(format, "PLAIN") then
+	text_end()
+    end if
+    close(in_file)
+    close(out_file)
+end procedure
+
+if equal(format, "HTML") then
+    for f = 1 to length(files) do
+	main(files[f], "HTML", "\\HTML")
+    end for
+else    
+    for f = 1 to length(files) do
+	main(files[f], "PLAIN", "\\DOC")
+    end for
+end if
+
+
+

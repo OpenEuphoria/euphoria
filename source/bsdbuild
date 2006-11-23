@@ -1,0 +1,23 @@
+# build everything for FreeBSD
+echo Translator library 
+./bsdlib
+mv ecu.a /usr231/home/r/h/rhc/euphoria/bin
+
+echo Interpreter
+./bsdimakeu
+
+echo Back-end for binding
+./bsdbmakeu
+
+echo Translator 
+exu ec.ex ec.ex  
+#ecu ec.ex
+./emake
+mv ec ecu
+ls -l ecu
+
+echo moving to euphoria/bin
+mv exu $EUDIR/bin
+mv backendu $EUDIR/bin
+mv ecu $EUDIR/bin
+
