@@ -284,11 +284,17 @@ void push(void);
 	modify [ESP];
 #else
 // EWINDOWS
+// For OW, needs to be 62
+#ifdef EOW
+#pragma aux push = \
+	"PUSH  +62H[EBP]" \
+	modify [ESP];
+#else
 #pragma aux push = \
 	"PUSH  +5AH[EBP]" \
 	modify [ESP];
+#endif // EOW
 #endif
-
 #endif // EWATCOM
 
 

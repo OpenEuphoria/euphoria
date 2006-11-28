@@ -440,7 +440,7 @@ extern int color_trace;
 
 #ifndef EDJGPP
 #undef matherr // avoid OpenWATCOM problem
-#if defined(ELCC) || defined(EWATCOM) || defined(ELINUX)
+#if (defined(ELCC) || defined(EWATCOM) || defined(ELINUX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
 #else
 int matherr(struct _exception *err)  // OW wants this
