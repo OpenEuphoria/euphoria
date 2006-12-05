@@ -1192,24 +1192,27 @@
 
  Platform:    WIN32, Linux, FreeBSD
 
- Syntax:      a = c_func(i, s)
+ Syntax:      x = c_func(i, s)
 
- Description: Call the C function, or machine code routine, with routine id i.
-              i must be a valid routine id returned by define_c_func(). s is a
+ Description: Call the C function, or machine code function, or
+              translated/compiled Euphoria function with routine id i. i must
+              be a valid routine id returned by define_c_func(). s is a
               sequence of argument values of length n, where n is the number of
-              arguments required by the function. a will be the result returned
-              by the C function.
+              arguments required by the function. x will be the result returned
+              by the function.
 
- Comments:    If the C function does not take any arguments then s should be
-              {}.
+ Comments:    If the function does not take any arguments then s should be {}.
 
               If you pass an argument value which contains a fractional part,
               where the C function expects a C integer type, the argument will
               be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be
               passed as -5.
 
-              The C function could be part of a .dll created by the Euphoria To
-              C Translator.
+              The function could be part of a .dll or .so created by the
+              Euphoria To C Translator. In this case, a Euphoria atom or
+              sequence could be returned. C and machine code functions can only
+              return integers, or more generally, atoms (IEEE floating-point
+              numbers).
 
  Example:
 
