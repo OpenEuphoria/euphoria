@@ -2036,6 +2036,10 @@ DOS emulation under Windows XP is not perfect. When you do time profiling,
 This problem does not occur on Windows ME/98/95.
 </td></tr>
 
+On some machines, time() can return a negative number.
+However, you can still use the difference in calls to time() to measure
+elapsed time.
+ >
 <tr><td valign=top><b>Example:</b></td>
 <td>
 </td></tr>
