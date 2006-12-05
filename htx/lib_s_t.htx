@@ -1937,6 +1937,11 @@ and accumulates the ticks in a larger, 32-bit variable.
 DOS emulation under Windows XP is not perfect. When you do time profiling,
 (with profile_time) the time() function might be off by several percent. 
 This problem does not occur on Windows ME/98/95."
+ 
+<p>
+On some machines, time() can return a negative number.
+However, you can still use the difference in calls to time() to measure
+elapsed time.
  >
 <_2clist
   name="Example:"
