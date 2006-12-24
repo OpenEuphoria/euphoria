@@ -120,9 +120,9 @@ EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 !endif
 
-all : .SYMBOLIC $(TARGET)
+all :  $(TARGET)
 
-clean : .SYMBOLIC 
+clean : 
 	-if exist *.obj del *.obj
 	-if exist *.lbc del *.lbc
 	-if exist *.ilk del *.ilk

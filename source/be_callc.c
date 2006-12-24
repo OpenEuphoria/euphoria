@@ -56,9 +56,16 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 #define push() asm("pushl -4(%ebp)")
 #define  pop() asm( "addl -8(%ebp), %esp")
 #else
+
+#if (__GNUC__ == 4)
+// the offsets changed from 3.x to 4.x
+#define push() asm("pushl -20(%ebp)")
+#define  pop() asm( "addl -24(%ebp), %esp")
+#else
 // RH Linux - ListFilter
 #define push() asm("pushl -28(%ebp)")
 #define  pop() asm( "addl -32(%ebp), %esp")
+#endif
 #endif
 #endif
 

@@ -2285,10 +2285,11 @@ void do_exec(int *start_pc)
 		START_BIN_OP
 		    /* INT:INT case */
 		    top = INT_VAL(a) + INT_VAL(top);
-		    if (top + HIGH_BITS >= 0) {
+		    // mwl: gcc 4.1 doesn't do this right unless you do the unsigned casts:
+		    if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
 			goto dblplus;
 		    }
-		contplus:   
+		contplus:
 		    STORE_TOP_I
 		}
 		else {
@@ -2344,7 +2345,7 @@ void do_exec(int *start_pc)
 		START_BIN_OP
 		    /* INT:INT case L_*/
 		    top = INT_VAL(a) - INT_VAL(top);
-		    if (top + HIGH_BITS >= 0) {
+		    if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
 			tpc = pc;
 			v = top;
 			top = NewDouble((double)v);

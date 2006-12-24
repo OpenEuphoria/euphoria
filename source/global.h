@@ -8,7 +8,9 @@
 #undef FALSE
 #define TRUE  1
 #define FALSE 0
-
+#ifndef CLK_TCK
+#define CLK_TCK CLOCKS_PER_SEC
+#endif
 /* screens */
 #define MAIN_SCREEN 1
 #define DEBUG_SCREEN 2

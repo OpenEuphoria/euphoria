@@ -261,7 +261,8 @@ struct rccoord _gettextposition();
 void do_exec(int *);
 void AfterExecute(void);
 void Machine_Handler();
-
+object SetTColor();
+object SetBColor();
 #ifndef EDOS
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
@@ -4354,8 +4355,11 @@ object DefineC(object x)
     return c_routine_next++;
 }
 
+#if __GNUC__ == 4
+#define CALLBACK_SIZE 92
+#else
 #define CALLBACK_SIZE 80
-
+#endif
 extern struct routine_list *rt00;
 
 object CallBack(object x)
@@ -4432,7 +4436,7 @@ object CallBack(object x)
     copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
 #ifdef ELINUX   
 #ifndef EBSD    
-    mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page 
+    mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
 	     pagesize,  // one page
 	     PROT_READ+PROT_WRITE+PROT_EXEC);
 #endif
@@ -4445,7 +4449,7 @@ object CallBack(object x)
 	    copy_addr[i+1] == 0x056) {
 #ifdef ERUNTIME         
 	    *(int *)(copy_addr+i) = routine_id;
-#else           
+#else      
 	    *(symtab_ptr *)(copy_addr+i) = e_routine[routine_id];
 #endif          
 	    break;
