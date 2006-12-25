@@ -305,7 +305,7 @@ static void end_of_line(int c)
 	    CHAR_INFO fill_char;
 
 	    src.Left = 0;
-	    src.Right = 79;  // assume 80-char screen for now
+	    src.Right = console_info.dwSize.X; //79;  // assume 80-char screen for now
 	    src.Top = 0;
 	    src.Bottom = console_info.dwSize.Y-1; // -1 ???
 	    clip = src;
