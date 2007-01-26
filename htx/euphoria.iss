@@ -20,8 +20,7 @@ AppUpdatesURL=http://www.rapideuphoria.com
 DefaultDirName=C:\EUPHORIA
 DefaultGroupName=Euphoria
 AllowNoIcons=yes
-;AlwaysCreateUninstallIcon=yes
-;LicenseFile=license.txt
+;LicenseFile=License.txt
 ; uncomment the following line if you want your installation to run on NT 3.51 too.
 ;MinVersion=4,3.51
 DisableStartupPrompt=yes
