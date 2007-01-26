@@ -9,7 +9,6 @@
  * Introduction
  
    The Euphoria to C Translator is a program written entirely in Euphoria.
-   It shares a common front-end (parser) with the Interpreter and the Binder. 
    The job of the Translator is to convert any Euphoria program into a set 
    of C source files. These C source files can then be compiled by a 
    C compiler to produce an executable file. Several different C/C++ 
@@ -20,7 +19,7 @@
    execution speed of the user's Euphoria program. Many decisions that
    the Interpreter would make at run-time are made by the Translator at
    translation time. The Translator is thus able to produce streamlined
-   C code, which is then further optimized by the C compiler to produce
+   C code, which is then further optimized by a C compiler to produce
    efficient machine code. This machine code can often outperform the 
    Interpreter on a given Euphoria program by a factor of about 2 to 
    5 times.
@@ -28,8 +27,8 @@
  
  * Front-end / Back-end Structure
  
-   The Translator uses the common Euphoria front-end, although there are 
-   a few places where it was convenient to add some extra code, or slightly 
+   The Translator uses the common Euphoria front-end. In a few places 
+   it was convenient to add some Translator-specific code, or slightly 
    modify the actions of the front-end.
     
    The meat of the Translator is in the alternate back-end that it provides
@@ -39,26 +38,62 @@
    C code for performing that IL opcode. The Binder also uses the common
    front-end, with its back-end simply attaching the IL plus symbol table 
    to a copy of the interpreter executable file. There is also a
-   Euphoria back-end written in Euphoria (execute.e), that uses the
-   common front-end.
+   Euphoria back-end written in pure Euphoria (execute.e), that uses the
+   same common front-end.
    
+ 
+ * Ground Rules
+ 
+   The Translator must always translate a correct Euphoria program into
+   a correct C program. The Translator can assume that a program does
+   not have run-time errors (and in the interests of speed, it rarely checks 
+   for run-time errors). This allows it to deduce additional information.
+   For example, if it sees:
+   
+       integer x
+       
+       ...
+       
+       y[x] = 0
+       
+   it can assume that x will not cause a subscript error, and must therefore
+   be a reasonable-sized integer value at this point in the code.
+   
+   As another example, if it sees:
+   
+   
+       integer x
+       
+       x = y
+       
+   it can assume that y has an integer value at this point in the code.    
+      
  
  * Converting Euphoria IL Operations to C Code
  
    When the Translator was first developed, it was a straightforward matter
    to study the C code in the Interpreter for a given IL opcode, and 
-   output essentially the same C code. At the very least, this eliminated 
-   the indirect jump from one opcode to the next that takes place in the 
-   interpreter, so already the Translated code was faster. The last C 
-   statement executed for one opcode was followed immediately by the 
-   first C statement for the next opcode. Futhermore, one level of indirection
-   in accessing the operands of an operator could usually be removed,
-   since the operands are picked up indirectly via pointers by
-   the Interpreter, whereas the Translated code could refer directly to 
-   operands. (REALLY TRUE? elaborate, give example)   
+   output essentially the same C code. 
    
-   Once this was working, many Translation-time optimizations were 
-   devised to make the translated code even smaller and faster.
+   At the very least, this eliminated the indirect jump from one opcode 
+   to the next that takes place in the interpreter, so already the 
+   Translated code was faster. The last C statement executed for one opcode 
+   was followed immediately by the first C statement for the next opcode. 
+   
+   Futhermore, one level of indirection in accessing the operands of an 
+   operator could usually be removed, since the operand values are picked up 
+   indirectly via pointers by the Interpreter, whereas the Translated code 
+   could refer directly to the operands as C variables. 
+   
+   IL operations in the Interpreter must dynamically test the data types of
+   each operand and select the appropriate code to execute. The Translator
+   often has a good idea at translation time of what the possible data types
+   are, and can eliminate run-time tests. In some cases it may also know the
+   actual value of one or more operands, and can produce some very lean and 
+   efficient code in those cases.
+   
+   Once this much was working, many additional Translation-time optimizations 
+   were devised to make the translated code even smaller and faster.
 
  
  * Run-time routines
@@ -69,8 +104,8 @@
    these routines saves maintenance effort and promotes compatibility 
    between the Interpreter and the Translator.
  
- 
- * Run-time Start-up Code
+   The Translator understands the possible data types returned by each
+   run-time routine, and uses that information to help stream-line the code.
  
  
  * Information Maintained at Translation time for variables and temps
@@ -81,33 +116,20 @@
       its current best estimate of the type that that data will have at
       run-time.
       
-      TYPE_NULL - no idea yet
-      
-      TYPE_INTEGER - a Euphoria 31-bit integer
-      
-      TYPE_DOUBLE - a f.p. number
-      
-      TYPE_ATOM - a double or integer
-      
-      TYPE_SEQUENCE - a sequence
-      
-      TYPE_OBJECT - could be anything
-   
    - Other Information
   
       To further improve the quality of the emitted C code, the Translator
       also tracks other information.
       
-      range of possible integer values: min, max
+        range of possible integer values: min ... max
       
-      sequence length
+        sequence length (if length is constant)
       
  
-
  * Local vs Global Information
    
    As it calculates the best C code to emit for each Euphoria statement,
-   the translator tracks the range of possible values of each variable
+   the Translator tracks the range of possible values of each variable
    or temp used in the current statement, as well as the range of possible
    values across the entire Euphoria program. For instance, a global 
    variable x might be known to be an integer at the current statement 
@@ -116,28 +138,29 @@
    at the current point, but across the whole program we can only be 
    sure that x is an integer.
    
+ 
  * Basic Blocks
    
    Local information is computed for each *basic block*. A basic block
    is a stright-line series of Euphoria statements, with no branches
    in or out. At a branch in, or out, we usually have to discard much of 
-   the information. Euphoria does not have a GOTO statement for branching, 
+   our information. Euphoria does not have a GOTO statement for branching, 
    but branches are created by if-statements, while-statements, 
-   for-statements, exits etc, as well as subroutine calls. e.g. ...
+   for-statements, exits etc, as well as subroutine calls, etc.
      
    When there is no local information available for a variable, the
    Translator falls back to using any available global information.
    In general, it at least knows the type that was used in declaring
    the variable, but it tries to do better than that where possible.
      
+ 
  * Type information
    
    For each piece of data in a program, the Translator keeps track
    of the current, worst-case type that the data might have at run-time. 
    The possible types are:
         
-        TYPE_NULL - no idea, haven't seen any relevant information yet on
-                    this pass
+        TYPE_NULL - no idea, haven't seen any relevant information yet
         
         TYPE_INTEGER - the data is in Euphoria 31-bit integer format
         
@@ -150,22 +173,24 @@
         
         TYPE_OBJECT - the data could be anything
    
-   During a pass through the IL, the global type information
-   will tend to become more pessimistic, for example, if
-   during the first pass, if the translator sees something like:
+   During a pass through the IL, the global type information will tend to 
+   become more pessimistic, for example, if during the first pass, if the 
+   Translator sees something like:
      
         x = 1
         
-   it will mark x as being an integer, both locally and
-   globally, but later in the source code, when it sees:
+   it will mark x as being TYPE_INTEGER locally, and later in the source code, 
+   when it sees:
 
         x = 9.9
         
-   it will mark x as being TYPE_DOUBLE locally, but TYPE_ATOM globally.
+   it will mark x as being TYPE_DOUBLE locally, but by the end
+   of the pass it will mark x as being TYPE_ATOM globally.
      
    The function or_type(a, b) will take any two types and merge them
    to return the most precise type that includes both of those types.
    
+ 
  * Deletion of unreachable routines and statements
    
    Deleting code that can never be executed is useful in two ways. 
@@ -180,17 +205,20 @@
         else
             x = 5 -- somewhere else in the program
         end if
+        
         -- x must be 5
         
    then we can safely assume that x = 9.9 will not be executed
    and x will have the value 5 after this piece of code.
    That might even enable the Translator to mark x as being an 
-   integer globally throughout the program.   
+   integer globally throughout the program, or even as having the 
+   value 5 globally.
      
    In some cases, the Translator is not smart enough to delete a chunk
    of code, but by issuing code with constants in it, rather than variables,
    it will allow a good C compiler to see that certain code is unreachable.
      
+ 
  * Use of Multiple Passes to Improve the Generated Code
    
    During the first pass through a program, (i.e. through the IL for 
@@ -199,7 +227,7 @@
    about the type and possible values that the variable might take on 
    at run-time. After a complete pass, it will have seen all assignments,
    and this could allow it to assume a more restrictive type, 
-   or narrower range of values for the variable. 
+   or narrower range of values for the variable for subsequent passes.
      
    Now, suppose that somewhere in the source code we have:
      
@@ -218,8 +246,10 @@
       
    In general, the more passes that the Translators makes through the IL,
    the better it understands the type/value information for the variables
-   and the better it can produce C code. Currently, in c_decl.e, we have
-   set:
+   and the better it can produce C code. Type information can gradually
+   propagate and become more refined with each pass.
+   
+   Currently, in c_decl.e, we have set:
      
       global constant LAST_PASS = 7  -- number of Translator passes
       
@@ -248,24 +278,27 @@
      
    Example: If the Translator sees that your program always passes the
    value 1 (say), as a parameter, it might be able to use that fact to
-   eliminate a chunk of code inside the subroutine where other (non 1) 
+   eliminate chunks of code inside the subroutine where other (non 1) 
    values are processed.
      
    Thus a very general subroutine might be customized into a faster, 
-   smaller version in C that works for the specific program being 
-   translated. (Of course this cannot be done when creating shared library 
+   smaller version in C that only works for the specific program being 
+   translated. This cannot be done when creating shared library 
    (.dll/.so) routines, since those routines will be called from 
    main programs that the Translator has not seen. The C code 
-   for those routines must be general.)
+   for those routines must be fully general.
    
+ 
  * Folding of constant integer expressions
    
    The Translator has some ability to "fold" constant expressions
    at translation time. For instance 8*5 would be calculated as 40,
    and no C multiply operation would be issued. This is particularly useful
    when a variable, such as a subroutine parameter, is determined to 
-   always have a known constant value at some place in the source program.
+   always have a known constant value at a particular place in the 
+   source program.
    
+ 
  * Eliminating Refs and DeRefs
    
    Since the Translator and Interpreter share the same run-time
@@ -290,19 +323,25 @@
       
      
  * Limitations to optimization
+ 
+   The Translator is never allowed to "cheat". A correct Euphoria program
+   must be translated into a completely correct C program that will work
+   in all cases. e.g.
      
      integer y, z
      atom x
+     sequence s
      
-     x = y + z -- can we assume that x has an integer value here? No.
+     x = y + z -- can we assume that x will be assigned an integer value here? 
+               -- No! Integer overflow could occur and we must be prepared
+               -- for it!
      
-     x = y + 1 -- not here either!
+     x = y + 1 -- Not here either!
      
      y = length(s)
-     
-     x = y + 1 -- OK, length's are assumed to not get too close to 
-               -- the maximum integer value (1.07 billion), so x can
-               -- be assumed to be an integer
+     x = y + 1 -- OK, sequence lengths are assumed to not get too close to 
+               -- the maximum integer value (1.07 billion, or 4Gb of storage), 
+               -- so we assume that x will be assigned an integer
      
  
  * Generating the emake batch file
@@ -330,8 +369,8 @@
    
    Translated code is compiled by a C compiler and uses the hardware 
    stack that is manipulated by CPU instructions such as PUSH and POP. When
-   a compiled C subroutine is entered, information is automatically pushed 
-   on the hardware stack, and the CPU stack register (ESP) is adjusted
+   a compiled C subroutine is entered, the CPU automatically pushes information
+   onto the hardware stack, and the CPU stack register (ESP) is adjusted
    accordingly. When Euphoria's task_yield() is called, the Euphoria scheduler 
    must do some tricky low-level machine operations to point ESP to the new 
    stack top for the new task. If this is the start of a brand new task, some 
@@ -344,8 +383,8 @@
    actually "returns" to the place just after a call to task_yield(),
    but from the new task to be run. This is accomplished by pointing the
    hardware stack pointer to a new position prior to executing the hardware 
-   return instruction. This is all done quite efficiently, requiring the 
-   execution of just a few machine instructions.
+   RET (return) instruction. Task switching is thus highly efficient, requiring 
+   the execution of just a few machine instructions.
 
  
  * Routine Id's
