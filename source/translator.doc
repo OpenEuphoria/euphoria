@@ -408,7 +408,9 @@
  
    The -dll option will cause the Translator to create a Linux/FreeBSD
    shared library (.so file), or a Windows dynamic link library (.dll file).
- 
+   
+   The library code and the main program share the same heap, but each
+   has its own storage cache.
  
  * Some Other Issues
    
