@@ -38,7 +38,8 @@ constant
     LINETAB = 9,
     TEMPS = 10,
     NUM_ARGS = 11,
-    FIRSTLINE = 12 
+    FIRSTLINE = 12,
+    STACK_SPACE = 13
 
 integer il_file
 
@@ -276,6 +277,9 @@ procedure showSymTab(integer f, integer flist)
 		
 		puts(flist, "\nFIRSTLINE: ")
 		print(flist, entry[FIRSTLINE])
+		
+		puts(flist, "\n   STACK_SPACE: ")
+		print(flist, entry[STACK_SPACE])
 		
 	    end if
 	    
