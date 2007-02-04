@@ -21,7 +21,7 @@ struct symtab_entry {
 		  // NOVALUE for other temps 
 		  // run time object (vars)  
 		  // must be first field 
-    struct symtab_entry *next;  // pointer to next symbol, or EndDummySym 
+    struct symtab_entry *next;  // pointer to next symbol, or NULL
     char mode;      
 #define M_NORMAL   1      // all variables      
 #define M_CONSTANT 2      // literals and declared constants 
