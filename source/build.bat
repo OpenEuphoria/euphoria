@@ -3,6 +3,7 @@
 
 rem Note: Can't build properly if exwc (e.g. ed) is running
 
+echo deleting any existing target files ...
 del ec.a
 del ec*.lib
 del backend*.exe
@@ -24,6 +25,7 @@ if not exist ec.lib goto fail
 call watlibw.bat
 if not exist ecw.lib goto fail
 
+echo a compiler error with Borland is probably OK ...
 call borelib.bat
 if not exist ecwb.lib goto fail
 
