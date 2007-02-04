@@ -1274,7 +1274,7 @@ void fe_set_pointers()
 
 static object *save_private_block(symtab_ptr routine)
 // Save block for resident task on the private list for this routine.
-// Reuse any empty spot. Save in last-in, first-out order.
+// Save in last-in, first-out order.
 // We use a linked list. The data is filled in by the caller after the call.
 {   
     struct private_block *entry;
@@ -1295,7 +1295,7 @@ static object *save_private_block(symtab_ptr routine)
 }
 
 
-static object *load_private_block(symtab_ptr routine, int task)
+static load_private_block(symtab_ptr routine, int task)
 // Retrieve a private block and remove it from the list for this routine.
 // We know that the block will be there, often near the start of the list.
 {   
@@ -1303,6 +1303,7 @@ static object *load_private_block(symtab_ptr routine, int task)
     struct private_block *prev_p;
     struct private_block *defunct;
     object *block;
+    symtab_ptr sym;
      
     p = routine->u.subp.saved_privates; // won't be NULL
     prev_p = NULL;
@@ -1319,8 +1320,24 @@ static object *load_private_block(symtab_ptr routine, int task)
 		prev_p->next = p->next;
 	    }
 
-	    EFree(p);
-	    return block;
+	    // N.B. must read temps and privates *before* freeing p
+	    
+	    // private vars
+	    sym = routine->next;
+	    while (sym != NULL && sym->scope <= S_PRIVATE) {
+		sym->obj = *block++;
+		sym = sym->next;
+	    }
+	    
+	    // temps
+	    sym = routine->u.subp.temps;
+	    while (sym != NULL) {
+		sym->obj = *block++;
+		sym = sym->next;
+	    }
+	    
+	    EFree(p); 
+	    return;
 	}
 	prev_p = p;
 	p = p->next;
@@ -1361,22 +1378,8 @@ void restore_privates(symtab_ptr this_routine)
 	
 	// restore the current task's private data (will always be there)
 
-	block = load_private_block(this_routine, current_task);
+	load_private_block(this_routine, current_task);
 
-	// private vars
-	sym = this_routine->next;
-	while (sym != NULL && sym->scope <= S_PRIVATE) {
-	    sym->obj = *block++;
-	    sym = sym->next;
-	}
-	    
-	// temps
-	sym = this_routine->u.subp.temps;
-	while (sym != NULL) {
-	    sym->obj = *block++;
-	    sym = sym->next;
-	}
-    
 	this_routine->u.subp.resident_task = current_task;
     }
 }
