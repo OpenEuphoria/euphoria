@@ -1,4 +1,4 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Euphoria 3.0
 -- Front End - main routine 
@@ -49,7 +49,7 @@ function ProcessOptions()
 	    end if
 	end if
 
-	screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2006 \n")
+	screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2007 \n")
 
 	screen_output(STDERR, 
 	    "See http://www.RapidEuphoria.com/License.txt \n")

@@ -37,6 +37,75 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <p>&nbsp;<br>
 
 <font face="Arial, Helvetica" color="#003366">
+<b>Version 3.0.2 February 9, 2007:</b></font>
+<p>
+This release fixes some important bugs in 3.0.1, and improves the
+source code documentation.
+
+<p>
+<font color="#993333"><b>Bug Fixes</b></font>
+<ul>
+ 
+<li>
+<p>
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Translator: </b>
+ Programs translated to C and compiled for Windows 
+ would crash if they used the new multitasking feature.
+ (This worked in 3.0.0 but was broken accidentally in 3.0.1 
+ because some stack offsets changed.)
+
+<li>
+<p>
+ 
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Interpreter: </b>
+ 
+ In fairly rare situations, the interpreter for Windows might crash.
+ This was due to a bug in load_private_block() where it was freeing 
+ a block of memory and then returning a pointer into that block. 
+ In rare cases, a page of virtual memory might be removed from 
+ the heap by the Windows O/S before the block could be read. 
+ Thanks to Andy Serpa, 
+ Pete Lomax, Matt Lewis, Derek Parnell, and others for helping to 
+ pin-point the location of the bug.
+ 
+<li>
+<p>
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Source Code: </b>
+ "\euphoria" was changed to to %EUDIR% in 4 .bat files in the
+ source directory. Thanks to Jaime Marcos.
+ 
+</ul>
+
+<p>
+<font color="#993333"><b>Improved Documentation</b></font>
+<ul>
+<li>
+<p>
+A new document (translator.doc) was added to euphoria\source. It describes
+the internals of the Translator, with emphasis on the many optimizations
+that the Translator performs.
+
+<li>
+<p>
+ The user documentation was also improved in a few places. 
+</ul>
+
+<font color="#993333"><b>C Source Code Changes</b></font>
+<ul>
+<li>
+<p>
+ Matthew Lewis added a Linux/FreeBSD make file, and made source code 
+ changes to better support Open Watcom and a newer version of GCC.
+</ul> 
+
+
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
 <b>Version 3.0.1 November 3, 2006:</b></font>
 <p>
 This release cleans up a number of bugs and documentation errors

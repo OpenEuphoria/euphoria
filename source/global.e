@@ -1,10 +1,10 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Euphoria 3.0
 -- Global declarations 
 
-global constant INTERPRETER_VERSION = "3.0.1"
-global constant  TRANSLATOR_VERSION = "3.0.1"
+global constant INTERPRETER_VERSION = "3.0.2"
+global constant  TRANSLATOR_VERSION = "3.0.2"
 
 global type boolean(integer x)
     return x = TRUE or x = FALSE

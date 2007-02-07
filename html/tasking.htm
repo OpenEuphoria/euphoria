@@ -111,18 +111,20 @@ any given time.
  specified by a number of seconds or fractions of a second. You might
  schedule one real-time task to be activated every 3 seconds, while another is
  activated every 0.1 seconds. 
+ In Language War, when the Euphoria ship moves at warp 4, or a torpedo 
+ flies across the screen, it's important that they move at a 
+ steady, timed pace.
  
  <p>
  <b>Time-share tasks</b> need a share of the CPU
  but they needn't be rigidly scheduled according to any clock. The 4 sorting 
- tasks in the demo\dos32\tasksort.ex demo, share the CPU, but it isn't important that they
- be scheduled at a particular time. On the other hand, in Language War, 
- when the Euphoria ship moves at warp 4, or a torpedo flies across the screen, 
- it's important that they move at a steady timed pace.
+ tasks in the demo\dos32\tasksort.ex demo, share the CPU, but it isn't 
+ important that they be scheduled at a particular time. 
 
  <p>
- It's possible to reschedule a task at any time, and to convert a task from
- one type to the other dynamically.
+ It's possible to reschedule a task at any time, changing its timing or its
+ slice of the CPU. You can even convert a task from one type to the 
+ other dynamically.
 
 
 <p>
