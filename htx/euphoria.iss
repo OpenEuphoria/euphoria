@@ -12,7 +12,7 @@
 [Setup]
 AppName=Euphoria
 AppVersion=3.0
-AppVerName=Euphoria v3.0
+AppVerName=Euphoria v3.0.2
 AppPublisher=Rapid Deployment Software
 AppPublisherURL=http://www.rapideuphoria.com
 AppSupportURL=http://www.rapideuphoria.com
@@ -149,12 +149,12 @@ Source: C:\EUPHORIA\BIN\ECWL.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
 Source: C:\EUPHORIA\BIN\EUPHORIA.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
 
 ;DEMO
-Source: C:\EUPHORIA\DEMO\*.ex; DestDir: {app}\DEMO\; Flags: ignoreversion recursesubdirs;
-Source: C:\EUPHORIA\DEMO\*.doc; DestDir: {app}\DEMO\; Flags: ignoreversion recursesubdirs;
-Source: C:\EUPHORIA\DEMO\WIN32\*.*; DestDir: {app}\DEMO\WIN32; Flags: ignoreversion recursesubdirs;
-Source: C:\EUPHORIA\DEMO\DOS32\*.*; DestDir: {app}\DEMO\DOS32; Flags: ignoreversion recursesubdirs;
+Source: C:\EUPHORIA\DEMO\*.ex; DestDir: {app}\DEMO\; Flags: ignoreversion;
+Source: C:\EUPHORIA\DEMO\*.doc; DestDir: {app}\DEMO\; Flags: ignoreversion;
+Source: C:\EUPHORIA\DEMO\WIN32\*.*; DestDir: {app}\DEMO\WIN32; Flags: ignoreversion;
+Source: C:\EUPHORIA\DEMO\DOS32\*.*; DestDir: {app}\DEMO\DOS32; Flags: ignoreversion;
 Source: C:\EUPHORIA\DEMO\LANGWAR\*.*; DestDir: {app}\DEMO\LANGWAR; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\BENCH\*.*; DestDir: {app}\DEMO\BENCH; Flags: ignoreversion recursesubdirs;
+Source: C:\EUPHORIA\DEMO\BENCH\*.*; DestDir: {app}\DEMO\BENCH; Flags: ignoreversion;
 ;HTX
 Source: C:\EUPHORIA\HTX\*.HTX; DestDir: {tmp}; Flags: ignoreversion;
 ;INCLUDE

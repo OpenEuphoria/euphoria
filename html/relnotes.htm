@@ -46,8 +46,8 @@ source code documentation.
 <font color="#993333"><b>Bug Fixes</b></font>
 <ul>
  
-<li>
 <p>
+<li>
  <b><font color="#009999">bug fixed: </font></b>
  <b>Translator: </b>
  Programs translated to C and compiled for Windows 
@@ -55,8 +55,8 @@ source code documentation.
  (This worked in 3.0.0 but was broken accidentally in 3.0.1 
  because some stack offsets changed.)
 
-<li>
 <p>
+<li>
  
  <b><font color="#009999">bug fixed: </font></b>
  <b>Interpreter: </b>
@@ -70,8 +70,8 @@ source code documentation.
  Pete Lomax, Matt Lewis, Derek Parnell, and others for helping to 
  pin-point the location of the bug.
  
-<li>
 <p>
+<li>
  <b><font color="#009999">bug fixed: </font></b>
  <b>Source Code: </b>
  "\euphoria" was changed to to %EUDIR% in 4 .bat files in the
@@ -82,21 +82,22 @@ source code documentation.
 <p>
 <font color="#993333"><b>Improved Documentation</b></font>
 <ul>
-<li>
+
 <p>
+<li>
 A new document (translator.doc) was added to euphoria\source. It describes
 the internals of the Translator, with emphasis on the many optimizations
 that the Translator performs.
 
-<li>
 <p>
+<li>
  The user documentation was also improved in a few places. 
 </ul>
 
 <font color="#993333"><b>C Source Code Changes</b></font>
 <ul>
-<li>
 <p>
+<li>
  Matthew Lewis added a Linux/FreeBSD make file, and made source code 
  changes to better support Open Watcom and a newer version of GCC.
 </ul> 
@@ -114,13 +115,13 @@ in 3.0.0.
 <p>
 <font color="#993333"><b>Improved Documentation</b></font>
 <ul>
-<li>
 <p>
+<li>
  A separate new document on <a href=tasking.htm>multitasking</a>
  was added.
 
-<li>
 <p>
+<li>
  Obsolete pre-open-source concepts in the 3.0.0 documentation
  were deleted or corrected.
  
@@ -129,8 +130,8 @@ in 3.0.0.
 <font color="#993333"><b>Bug Fixes</b></font>
 <ul>
  
-<li>
 <p>
+<li>
  Euphoria-coded .dll / .so files were not working at all, due to a 
  multitasking-related glitch. Thanks to Andrea Cini.
  <p>
@@ -142,20 +143,20 @@ in 3.0.0.
  Euphoria-coded .dll / .so files by main programs that do 
  multitasking is fine.
  
-<li>
 <p>
+<li>
  A text console bug was fixed.
  It involved output to the screen involving tabs and/or 
  wrap-around (at 80 columns). Thanks to 
  Pete Lomax, Juergen Luethje, Matt Lewis.
  
-<li>
 <p>
+<li>
  bind.bat, bindw.bat and shroud.bat were changed to use %EUDIR%
  rather than \EUPHORIA. Thanks to Ray Smith.
  
-<li>
 <p>
+<li>
  syncolor.e now includes keywords.e (relative to euphoria\bin)
  rather than \euphoria\bin\keywords.e. Thanks to Rick Bettis.
  
@@ -163,13 +164,13 @@ in 3.0.0.
 
 <font color="#993333"><b>C Source Code Changes</b></font>
 <ul>
-<li>
 <p>
+<li>
  All of the #ifdef ENCURSES code was stripped out.
  We don't plan to use ncurses again, and this change
  makes parts of the source code much more readable.
-<li>
 <p>
+<li>
  A thread5() machine language macro was added to be_execute.c 
  This helps the interpreter to compile correctly with 
  Open Watcom, avoiding a C optimizer bug.
