@@ -1,7 +1,7 @@
 @echo creating DOCUMENTATION FILES
 
-rem need syncolor.e and keywords.e
-rem EUINC will be changed temporarily
+rem need syncolor.e and keywords.e - EUINC will be changed temporarily
+
 set TEMP_EUINC=%EUINC%
 SET EUINC=%EUDIR%\bin
 
