@@ -72,93 +72,93 @@ Source: "{app}\demo\win32\*.*"; DestDir: "{app}\backup\demo\win32"; Flags: exter
 ; demo\langwar
 Source: "{app}\demo\langwar\*.*"; DestDir: "{app}\backup\demo\langwar"; Flags: external skipifsourcedoesntexist
 ; demo\bench
-Source: "{app}\demo\bench\*.*"; DestDir: "{app}\backup\demo\bench"; Flags: external skipifsourcedoesntexist
+Source: "{app}\demo\bench\*.*"; DestDir: "{app}\backup\demo\bench"; Flags: external skipifsourcedoesntexist;
 ; source
-Source: "{app}\source\*.*"; DestDir: "{app}\backup\source"; Flags: external skipifsourcedoesntexist
+Source: "{app}\source\*.*"; DestDir: "{app}\backup\source"; Flags: external skipifsourcedoesntexist;
 ; top level
-Source: "{app}\readme.doc"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist
-Source: "{app}\readme.htm"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist
-Source: "{app}\License.txt"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist
+Source: "{app}\readme.doc"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
+Source: "{app}\readme.htm"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
+Source: "{app}\License.txt"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
 
 ; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
 ; create the docs, and exwc.exe (see [Run] section below)
-Source: c:\euphoria\bin\exw.exe; DestDir: {tmp}; CopyMode:alwaysoverwrite;  Flags: deleteafterinstall;
-Source: c:\euphoria\bin\makecon.exw; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\htx\setupae.exw; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;  MinVersion: 4.0,0
-Source: c:\euphoria\htx\doc.exw; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\htx\docgen.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\htx\html.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\htx\text.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\htx\combine.exw; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
+Source: c:\euphoria\bin\exw.exe; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\bin\makecon.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\htx\setupae.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;  MinVersion: 4.0,0
+Source: c:\euphoria\htx\doc.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\htx\docgen.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\htx\html.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\htx\text.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\htx\combine.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; We temporarily need these includes as well, but EUDIR will not have been set.
-Source: c:\euphoria\include\wildcard.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\include\get.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\include\misc.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\bin\keywords.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
-Source: c:\euphoria\bin\syncolor.e; DestDir: {tmp}; CopyMode: alwaysoverwrite; Flags: deleteafterinstall;
+Source: c:\euphoria\include\wildcard.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\include\get.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\include\misc.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\bin\keywords.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\bin\syncolor.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ;Root
-Source: C:\EUPHORIA\FILE_ID.DIZ; DestDir: {app}; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\License.txt; DestDir: {app}; CopyMode: alwaysoverwrite;
+Source: C:\EUPHORIA\FILE_ID.DIZ; DestDir: {app}; Flags: ignoreversion;
+Source: C:\EUPHORIA\License.txt; DestDir: {app}; Flags: ignoreversion;
 ;BIN
-Source: C:\EUPHORIA\BIN\EX.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EXW.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\BACKEND.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\BACKENDW.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\SYNCOLOR.E; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\BIN.DOC; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\KEYWORDS.E; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ED.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\LINES.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ASCII.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: "C:\EUPHORIA\BIN\KEY.EX"; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\GURU.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\WHERE.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\SEARCH.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EPRINT.EX; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\LINES.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\GURU.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EPRINT.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ED.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite; MinVersion: 0,4.0
-Source: C:\EUPHORIA\BIN\OLDED.BAT; DestDir: {app}\BIN\; DestName: ed.bat; CopyMode: alwaysoverwrite; MinVersion: 4.0,0
-Source: C:\EUPHORIA\BIN\CDGURU.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\SEARCH.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ASCII.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\WHERE.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: "C:\EUPHORIA\BIN\KEY.BAT"; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\MAKE31.EXW; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\MAKECON.EXW; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EUINC.ICO; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EC.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ECW.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\LE23P.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\CWC.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\CWSTUB.EXE; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\LIBALLEG.A; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\BIND.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\BINDW.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\SHROUD.BAT; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EC.A; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EC.LIB; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ECFASTFP.LIB; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ECW.LIB; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ECWB.LIB; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\ECWL.LIB; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\BIN\EUPHORIA.ICO; DestDir: {app}\BIN\; CopyMode: alwaysoverwrite;
+Source: C:\EUPHORIA\BIN\EX.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EXW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\BACKEND.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\BACKENDW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\SYNCOLOR.E; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\BIN.DOC; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\KEYWORDS.E; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ED.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\LINES.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ASCII.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: "C:\EUPHORIA\BIN\KEY.EX"; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\GURU.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\WHERE.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\SEARCH.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EPRINT.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\LINES.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\GURU.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EPRINT.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ED.BAT; DestDir: {app}\BIN\; Flags: ignoreversion; MinVersion: 0,4.0
+Source: C:\EUPHORIA\BIN\OLDED.BAT; DestDir: {app}\BIN\; DestName: ed.bat; Flags: ignoreversion; MinVersion: 4.0,0
+Source: C:\EUPHORIA\BIN\CDGURU.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\SEARCH.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ASCII.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\WHERE.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: "C:\EUPHORIA\BIN\KEY.BAT"; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\MAKE31.EXW; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\MAKECON.EXW; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EUINC.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EC.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ECW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\LE23P.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\CWC.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\CWSTUB.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\LIBALLEG.A; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\BIND.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\BINDW.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\SHROUD.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EC.A; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EC.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ECFASTFP.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ECW.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ECWB.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\ECWL.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUPHORIA\BIN\EUPHORIA.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
 
 ;DEMO
-Source: C:\EUPHORIA\DEMO\*.*; DestDir: {app}\DEMO\; CopyMode: alwaysoverwrite; Flags: recursesubdirs;
+Source: C:\EUPHORIA\DEMO\*.*; DestDir: {app}\DEMO\; Flags: ignoreversion recursesubdirs;
 ;HTX
-Source: C:\EUPHORIA\HTX\*.HTX; DestDir: {tmp}; CopyMode: alwaysoverwrite;
+Source: C:\EUPHORIA\HTX\*.HTX; DestDir: {tmp}; Flags: ignoreversion;
 ;INCLUDE
-Source: C:\EUPHORIA\INCLUDE\*.E; DestDir: {app}\INCLUDE\; CopyMode: alwaysoverwrite;
-Source: C:\EUPHORIA\INCLUDE\EUPHORIA.H; DestDir: {app}\INCLUDE\; CopyMode: alwaysoverwrite;
+Source: C:\EUPHORIA\INCLUDE\*.E; DestDir: {app}\INCLUDE\; Flags: ignoreversion;
+Source: C:\EUPHORIA\INCLUDE\EUPHORIA.H; DestDir: {app}\INCLUDE\; Flags: ignoreversion;
 ;SOURCE
-Source: C:\EUPHORIA\source\*.*; DestDir: {app}\SOURCE\; CopyMode: alwaysoverwrite;
+Source: C:\EUPHORIA\source\*.*; DestDir: {app}\SOURCE\; Flags: ignoreversion;
 ;TUTORIAL
-Source: C:\EUPHORIA\TUTORIAL\*.*; DestDir: {app}\TUTORIAL\; CopyMode: alwaysoverwrite;
+Source: C:\EUPHORIA\TUTORIAL\*.*; DestDir: {app}\TUTORIAL\; Flags: ignoreversion;
 
 [INI]
 ; shortcut file to launch Rapid Euphoria website
