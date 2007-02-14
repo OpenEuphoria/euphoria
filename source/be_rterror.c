@@ -11,15 +11,15 @@
 /******************/
 #include <stdio.h>
 #include <setjmp.h>
-#ifdef ELINUX
-#include <curses.h>
-#else
+
+#ifndef ELINUX
 #if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP)
 #include <graph.h>
 #include <bios.h>
 #endif
 #include <conio.h>
 #endif
+
 #include <signal.h>
 #include <string.h>
 #ifdef EWINDOWS
@@ -136,11 +136,11 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 static char FErrBuff[300];
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
-#ifdef ELINUX
-static WINDOW *var_scr = NULL;      // variable display screen
-static WINDOW *debug_scr = NULL;    // debug screen
-static WINDOW *main_scr  = NULL;    // main screen
-#endif
+//#ifdef ELINUX
+//static WINDOW *var_scr = NULL;      // variable display screen
+//static WINDOW *debug_scr = NULL;    // debug screen
+//static WINDOW *main_scr  = NULL;    // main screen
+//#endif
 #ifdef EDOS
 static char *MainScreenSave = NULL;     /* place to save main screen */
 static int MainScreenSize = 0;
