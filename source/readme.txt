@@ -2,10 +2,10 @@
 		---------------------------------
 
                 
-How to Build Everything for DOS/WINDOWS
----------------------------------------	
+How to Build Everything
+-----------------------
 
-On DOS/Windows, simply run build.bat
+* On DOS/Windows, simply run build.bat
 		
 This will build:
    - the normal (C-backend) Interpreter
@@ -19,12 +19,12 @@ interpreted Euphoria program. See bind.bat, shroud.bat, etc.
 Running clean.bat will clean up the source directory by
 deleting unnecessary files, such as .obj files.
 
-On Linux, run:
-     buildu
+* On Linux, run:
+     ./buildu
 		
-On FreeBSD, run:
-     bsdbuild
-but first check that in global.e, EBSD=TRUE and in backend.ex, EBSD=1
+* On FreeBSD, run:
+     ./bsdbuild
+  but first check that in global.e, EBSD=TRUE and in backend.ex, EBSD=1
 
 
 WARNING: Tricky Bits
