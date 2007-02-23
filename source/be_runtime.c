@@ -4445,8 +4445,12 @@ int wingetch()
     int c;
     
     c = MyReadConsoleChar();
-    if (c == '\r')
-	c = MyReadConsoleChar();
+    
+    // Fix by Jacques Deschenes, Feb 2007
+    // Take this out:
+    // if (c == '\r')
+    //     c = MyReadConsoleChar();
+    
     return c;
 #else
     int c;
