@@ -310,8 +310,6 @@ function path_open()
     object inc_path
     sequence errbuff
 
-    absolute = FALSE
-    
     -- skip whitespace not necessary - String Token does it  
     
     -- check for leading backslash  
