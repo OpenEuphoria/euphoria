@@ -305,7 +305,7 @@ end procedure
 
 function path_open()
 -- open an include file (new_include_name) according to the include path rules  
-    integer absolute, try
+    integer try
     sequence full_path
     object inc_path
     sequence errbuff
@@ -313,10 +313,8 @@ function path_open()
     -- skip whitespace not necessary - String Token does it  
     
     -- check for leading backslash  
-    absolute = find(new_include_name[1], SLASH_CHARS) or
-	       (not ELINUX and find(':', new_include_name))
-    
-    if absolute then
+    if find(new_include_name[1], SLASH_CHARS) or
+       (not ELINUX and find(':', new_include_name)) then
 	-- open new_include_name exactly as it is  
 	try = open(new_include_name, "r")
 	if try = -1 then
