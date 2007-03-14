@@ -303,30 +303,57 @@ procedure ungetch()
     bp -= 1               
 end procedure
 
+function get_file_path(sequence s)
+-- return a directory path from a file path
+	for t=length(s) to 1 by -1 do
+		if find(s[t],SLASH_CHARS) then
+			return s[1..t]
+		end if
+	end for
+	-- if no slashes were found then can't assume it's a directory
+	return "." & SLASH
+end function
+
 function path_open()
 -- open an include file (new_include_name) according to the include path rules  
-    integer try
+    integer absolute, try
     sequence full_path
     object inc_path
     sequence errbuff
-
-    -- skip whitespace not necessary - String Token does it  
+	sequence currdir
+	
+    absolute = FALSE
     
-    -- check for leading backslash  
-    if find(new_include_name[1], SLASH_CHARS) or
-       (not ELINUX and find(':', new_include_name)) then
-	-- open new_include_name exactly as it is  
-	try = open(new_include_name, "r")
-	if try = -1 then
-	    errbuff = sprintf("can't open %s", new_include_name)
-	    CompileErr(errbuff)
-	end if
-	return try
+    -- skip whitespace not necessary - String Token does it
+    
+    -- check for leading backslash
+    absolute = find(new_include_name[1], SLASH_CHARS) or
+	       (not ELINUX and find(':', new_include_name))
+    
+    if absolute then
+		-- open new_include_name exactly as it is  
+		try = open(new_include_name, "r")
+		if try = -1 then
+		    errbuff = sprintf("can't open %s", new_include_name)
+		    CompileErr(errbuff)
+		end if
+		return try
     end if
+
+    -- first try path from current file path
+	-- cklester
+    currdir = get_file_path( file_name[current_file_no] )
+    full_path = currdir & new_include_name
+    try = open(full_path, "r")
     
-    -- relative path name - first try main_path  
-    full_path = main_path & new_include_name
-    try = open(full_path,  "r")
+    if try = -1 then
+	    -- relative path name - first try main_path
+	    full_path = main_path & new_include_name
+	    try = open(full_path,  "r")
+    end if
+    -- END OF NEW AND REVISED CODE FOR USING RELATIVE INCLUDE FILE PATHS
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
     
     if try = -1 then
 	-- Search directories listed on EUINC environment var  
@@ -385,9 +412,11 @@ function path_open()
     if atom(inc_path) then
 	errbuff = sprintf("can't find %s in %s\nor in %s%sinclude", 
 			  {new_include_name, main_path, eudir, SLASH})
+		  	puts(1,"\n   " & file_name[current_file_no] & "\n")
     else 
 	errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s%sinclude", 
 			  {new_include_name, main_path, inc_path, eudir, SLASH})
+		  	puts(1,"\n   " & file_name[current_file_no] & "\n")
     end if
     CompileErr(errbuff)
 end function
