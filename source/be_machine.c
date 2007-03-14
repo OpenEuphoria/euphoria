@@ -4886,12 +4886,10 @@ object machine(object opcode, object x)
 	    case M_SLEEP:
 		return e_sleep(x);
 		break;
+
 #ifndef ERUNTIME            
 	    case M_BACKEND:
-		if (Executing)
-		    return ATOM_1;
-		else
-		    return start_backend(x);
+		return start_backend(x);
 		break;
 #endif
 	    case M_CRASH_ROUTINE:
