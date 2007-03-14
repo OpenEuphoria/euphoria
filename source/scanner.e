@@ -351,10 +351,7 @@ function path_open()
 	    full_path = main_path & new_include_name
 	    try = open(full_path,  "r")
     end if
-    -- END OF NEW AND REVISED CODE FOR USING RELATIVE INCLUDE FILE PATHS
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-    
+ 
     if try = -1 then
 	-- Search directories listed on EUINC environment var  
 	inc_path = getenv("EUINC")
@@ -412,11 +409,9 @@ function path_open()
     if atom(inc_path) then
 	errbuff = sprintf("can't find %s in %s\nor in %s%sinclude", 
 			  {new_include_name, main_path, eudir, SLASH})
-		  	puts(1,"\n   " & file_name[current_file_no] & "\n")
     else 
 	errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s%sinclude", 
 			  {new_include_name, main_path, inc_path, eudir, SLASH})
-		  	puts(1,"\n   " & file_name[current_file_no] & "\n")
     end if
     CompileErr(errbuff)
 end function
