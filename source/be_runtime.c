@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2006 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*                            Run-time Routines                              */
@@ -3500,7 +3500,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 {
     char *routine_string;
     s1_ptr routine_ptr;
-    int i, ns_num, found;
+    int i, f, ns_num, found;
     char *colon;
     char *simple_name;
     char *p;
@@ -3575,10 +3575,12 @@ int CRoutineId(int seq_num, int current_file_no, object name)
     else {
 	/* look up simple unqualified name */
 	
-	/* first look for local symbol */
+	/* first look for local or global symbol in the same file */
 	i = 0;
 	while (rt00[i].seq_num <= seq_num) {
-	    if (current_file_no == rt00[i].file_num &&
+	    f = rt00[i].file_num;
+	    if ((current_file_no == f || 
+		 current_file_no == -f) &&
 		strcmp(routine_string, rt00[i].name) == 0) {
 		return i;
 	    }
