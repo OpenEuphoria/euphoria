@@ -84,13 +84,6 @@ procedure search_url(sequence url, sequence string)
     object line
     sequence mytemp, ustring
     
-    if task_self() > 20 or task_self() < 0 then
-	printf(1, "\n1. my task id is rubbish: %g\n", task_self())
-	if getc(0) then
-	end if
-	abort(0)
-    end if
-    
     position(task_self()*2+1, 1)
     printf(1, "task %2.0f: %s\n         waiting for wget...", {task_self(), url})
     
@@ -106,12 +99,6 @@ procedure search_url(sequence url, sequence string)
 	-- wait until file exists
 	if quit then
 	    return
-	end if
-	if task_self() > 20 or task_self() < 0 then
-	    printf(1, "\n2. my task id is rubbish: %.0f\n", task_self())
-	    if getc(0) then
-	    end if
-	    abort(0)
 	end if
     
 	task_schedule(task_self(), {1.0, 2.0})
