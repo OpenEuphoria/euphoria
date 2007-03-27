@@ -38,7 +38,7 @@ if length(cl) >= 3 then
     search_phrase = cl[3]
 else
     puts(1, "Usage:\n")
-    puts(1, "       exw news search-phrase\n")
+    puts(1, "       exw news.exu search-phrase\n")
     if getc(0) then
     end if
     abort(1)
