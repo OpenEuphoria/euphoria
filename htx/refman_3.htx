@@ -1,0 +1,512 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part I - Section 3 </title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font color="#FF0099" size=+2>
+<br>
+                       3. Debugging and Profiling
+</font></_center>
+<p>
+<a name=1></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.1 Debugging</_dul>
+
+</font>
+<p>
+
+ Debugging in Euphoria is much easier than in most other programming languages.
+ Extensive run-time checking provided by the Euphoria interpreter
+ catches many bugs that in other languages might take hours of
+ your time to track down. When the interpreter catches an error, you will always get
+ a brief report on your screen, and a detailed report in a file called
+ <font color="#993333"><_bq>ex.err</_bq></font>. These reports 
+ include a full English description of what happened, along with a
+ call-stack traceback. The file <font color="#993333"><b>ex.err</b></font>
+ will also have a dump of all variable values, and optionally a list of 
+ the most recently executed statements. For extremely large sequences, 
+ only a partial dump is shown. If <font color="#993333"><b>ex.err</b></font> 
+ is not convenient, you can choose another file name, anywhere on your system, 
+ by calling <a href="lib_c_d.htm#crash_file">crash_file</a>().
+
+<p>
+ In addition, you are able to create
+ <a href="refman_2.htm#type">user-defined types</a> that precisely
+ determine the set of legal values for each of your variables. An error report
+ will occur the moment that one of your variables is assigned an illegal value.
+
+<p>
+ Sometimes a program will misbehave without failing any run-time checks. In
+ any programming language it may be a good idea to simply study the source
+ code and rethink the algorithm that you have coded. It may also be useful
+ to insert print statements at strategic locations in order to monitor the
+ internal logic of the program. This approach is particularly convenient in
+ an interpreted language like Euphoria since you can simply edit the source
+ and rerun the program without waiting for a re-compile/re-link.
+
+<p>
+ <a name=trace></a>
+ The interpreter provides you with additional powerful tools for debugging. 
+ Using trace(1) you can <font color="#993333"><b><i>trace</i></b></font>
+ the execution of your program on one screen while
+ you witness the output of your program on another. 
+ trace(2) is the same as trace(1) but the trace screen will be 
+ in monochrome. Finally, using trace(3), you can log all 
+ executed statements to a file called <b>ctrace.out</b>.
+ 
+ <p>
+ <b><a class="brown" href="refman_2.htm#62">with trace</a> /
+ <a class="brown" href="refman_2.htm#62">without trace</a></b>
+ special statements select the
+ parts of your program that are available for tracing. Often you
+ will simply insert a <font color="#993333"><_bq>with trace</_bq></font>
+ statement at the very beginning of
+ your source code to make it all traceable. Sometimes it is better to place
+ the first <font color="#993333"><_bq>with trace</_bq></font>
+ after all of your <a href="refman_2.htm#type">user-defined types</a>, so
+ you don't trace into these routines after each assignment to a variable.
+ At other times, you may know exactly which routine or routines you are
+ interested in tracing, and you will want to select only these ones. Of
+ course, once you are in the trace window, you can  
+ skip viewing the execution of any routine by pressing down-arrow 
+ on the keyboard rather than Enter.
+
+<p>
+ Only traceable lines can appear in <font color="#993333">
+ <b>ctrace.out</b></font> or in
+ <font color="#993333"><b>ex.err</b></font>
+ as "Traced lines leading up to the failure" should a run-time error occur.
+ If you want this information and didn't get it, you should insert a
+ <font color="#993333"><_bq>with trace</_bq></font>
+ and then rerun your program.
+ Execution will be slower when lines compiled
+ <font color="#993333"><_bq>with trace</_bq></font> are executed, especially
+ when trace(3) is used.
+
+<p>
+ After you have predetermined the lines that are traceable, your program must
+ then dynamically cause the trace facility to be activated by executing a
+ <a href="lib_s_t.htm#trace">trace()</a> statement.
+ You could simply say:
+
+<_eucode>
+        with trace
+        trace(1)
+</_eucode>
+
+ at the top of your program, so you can start tracing from the beginning of
+ execution. More commonly, you will want to trigger tracing when a certain
+ routine is entered, or when some condition arises. e.g.
+
+<_eucode>
+        if x < 0 then
+            trace(1)
+        end if
+</_eucode>
+
+<p>
+ You can turn off tracing by executing a
+ <a href="lib_s_t.htm#trace">trace(0)</a> statement. You can also
+ turn it off interactively by typing 'q' to quit tracing. Remember that
+ <font color="#993333"><_bq>with trace</_bq></font> must appear
+ <b><i>outside</i></b> of any routine, whereas
+ trace() can appear <b><i>inside</i></b> a routine <b><i>or outside</i></b>.
+
+<p>
+ You might want to turn on tracing from within a
+ <a href="refman_2.htm#413">type</a>. Suppose you run your
+ program and it fails, with the <font color="#993333"><b>ex.err</b></font>
+ file showing that one of your variables has been set to a strange,
+ although not illegal value, and you wonder how it could have happened. Simply
+ <a href="refman_2.htm#type">create a type</a> for that variable
+ that executes <font color="#006699">trace(1)</font> if the value being
+ assigned to the variable is the strange one that you are interested in.
+ e.g.
+
+<_eucode>
+        type positive_int(integer x)
+            if x = 99 then
+                trace(1) -- how can this be???
+                return 1 -- keep going
+            else
+                return x > 0
+            end if
+        end type
+</_eucode>
+
+<p>
+ When positive_int() returns,
+ you will see the exact statement that caused your variable to be set to the
+ strange value, and you will be able to check the values of other variables.
+ You will also be able to check the output screen to
+ see what has happened up to this precise moment. If you define
+ positive_int() so it returns 0 for the strange value (99) instead of 1, you
+ can force a diagnostic dump into <font color="#993333"><b>ex.err</b></font>.
+
+<p>
+
+<a name=11></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>3.1.1 The Trace Screen</_sul>
+
+</font>
+<p>
+
+ When a <a href="lib_s_t.htm#trace">trace(1)</a> or trace(2) 
+ statement is executed by the interpreter,
+ your main output screen is saved and
+ a <font color="#993333"><b>trace screen</b></font> appears.
+ It shows a view of your program with the statement
+ that will be executed next highlighted, and several statements before and
+ after showing as well. Several lines at the bottom of the screen are
+ reserved for displaying variable names and values. The top line shows the
+ commands that you can enter at this point:
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  name="<font color=\"#993333\">F1</font>"
+  description="display main output screen - take a look at your program's
+     output so far"
+>
+
+<_3clist
+  name="<font color=\"#993333\">F2</font>"
+  description="redisplay trace screen. Press this key while viewing the
+     main output screen to return to the trace display."
+>
+
+<_3clist
+  name="<font color=\"#993333\">Enter</font>"
+  description="execute the currently-highlighted statement only"
+>
+
+<_3clist
+  name="<font color=\"#993333\">down-arrow</font>"
+  description="continue execution and break when any statement coming after
+   this one in the source listing is about to be executed. This lets you skip
+   over subroutine calls. It also lets you stop on the first statement
+   following the end of a <a href=\"refman_2.htm#for\">for-loop</a> or
+   <a href=\"refman_2.htm#while\">while-loop</a> without having to witness
+   all iterations of the loop."
+>
+
+<_3clist
+  name="<font color=\"#993333\">?</font>"
+  description="display the value of a variable. 
+     After hitting
+     <font color=\"#993333\"><b>?</b></font>
+     you will be prompted for the name of the variable. 
+     Many variables are displayed
+     for you automatically as they are assigned a value. If a variable is 
+     not currently being displayed, or is only partially displayed, 
+     you can ask for it. Large sequences are 
+     limited to one line on the trace screen, but when you 
+     ask for the value of a variable that contains a large sequence, 
+     the screen will clear, and you can scroll through a pretty-printed 
+     display of the sequence. You will then be returned to the trace screen,
+     where only one line of the variable is displayed.
+     Variables that are not defined at this point in the program 
+     cannot be shown. Variables that have not yet been initialized will 
+     have \"< NO VALUE >\" beside their name. Only
+     variables, not general expressions, can be displayed. As you step
+     through execution of the program, the system
+     will update any values showing on the screen. Occasionally it will
+     remove variables that are no longer in scope, or that haven't been
+     updated in a long time compared with newer, recently-updated variables."
+>
+
+<_3clist
+  name="<font color=\"#993333\">q</font>"
+  description="quit tracing and resume normal execution. Tracing will
+     start again when the next trace(1) is executed."
+>
+
+<_3clist
+  name="<font color=\"#993333\">Q</font>"
+  description="quit tracing and let the program run freely to its normal
+     completion. trace() statements will be ignored."
+>
+
+<_3clist
+  name="<font color=\"#993333\">!</font>"
+  description="this will abort execution of your program. A traceback
+     and dump of variable values will go to
+     <font color=\"#993333\"><b>ex.err</b></font>."
+>
+
+</table>
+
+<p>
+ As you trace your program, variable names and values appear automatically in
+ the bottom portion of the screen. Whenever a variable is assigned-to, you will
+ see its name and new value appear at the bottom. This value is always kept
+ up-to-date. Private variables are automatically cleared from the screen
+ when their routine returns. When the variable display area is full,
+ least-recently referenced variables will be discarded to make room for
+ new variables. The value of a long sequence will be cut off after 80
+ characters.
+
+<p>
+ For your convenience, numbers that are in the range of printable ASCII
+ characters (32-127) are displayed along with the ASCII character itself. The
+ ASCII character will be in a different color (or in quotes in a mono display).
+ This is done for all variables, since Euphoria does not know in general
+ whether you are thinking of a number as an ASCII character or not. You will
+ also see ASCII characters (in quotes) in
+ <font color="#993333"><b>ex.err</b></font>. This can make for a rather
+ "busy" display, but the ASCII information is often very useful.
+
+<p>
+ The trace screen adopts the same graphics mode as the main output screen.
+ This makes flipping between them quicker and easier.
+
+<p>
+ When a traced program requests keyboard input, the main output screen will
+ appear, to let you type your input as you normally would. This works fine for
+ <a href="lib_e_g.htm#gets">gets()</a> (read one line) input.
+ When <a href="lib_e_g.htm#get_key">get_key()</a> (quickly sample the
+ keyboard) is
+ called you will be given 8 seconds to type a character, otherwise it is
+ assumed that there is no input for this call to get_key(). This allows you to
+ test the case of input and also the case of no input for get_key().
+
+<p>
+<font color="#FF0099" size=+1>
+<br>
+
+<a name=12></a>
+<_sul>3.1.2 The Trace File</_sul>
+
+
+</font>
+
+<p>
+When your program calls trace(3), tracing to a file is activated.
+The file, <b>ctrace.out</b> will be created in the current directory.
+It contains the last 500 Euphoria statements that your program executed.
+It is set up as a circular buffer that holds a maximum of 500
+statements. Whenever the end of <b>ctrace.out</b> is reached, 
+the next statement is written back at the beginning.
+The very last statement executed is
+always followed by "=== THE END ===". Because it's circular, the
+last statement executed could appear anywhere in <b>ctrace.out</b>.
+The statement coming after "=== THE END ===" is the 500th-last.
+
+<p>
+This form of tracing is supported by both the Interpreter and
+the the Euphoria To C Translator. 
+It is particularly useful when
+a machine-level error occurs that prevents Euphoria from writing
+out an <b>ex.err</b> diagnostic file. By looking at the last
+statement executed, you may be able to guess why the program
+crashed. Perhaps the last statement was a poke() into an illegal
+area of memory. Perhaps it was a call to a C routine. In some
+cases it might be a bug in the interpreter or the Translator.
+
+<p>
+The source code for a statement is written to <b>ctrace.out</b>, and flushed, 
+just <i>before</i> the statement is performed, so the crash will 
+likely have happened <i>during</i> execution of the final statement
+that you see in <b>ctrace.out</b>.
+
+<p>
+
+
+<hr>
+
+<a name=2></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.2 Profiling</_dul> 
+
+</font>
+<p>
+
+ If you specify <a class="brown" href="refman_2.htm#62">
+ <_bq>with profile</_bq></a> (DOS32, WIN32, Linux, FreeBSD), or
+ <a class="brown" href="refman_2.htm#62">
+ <_bq>with profile_time</_bq></a>
+ (DOS32 only) then a special listing of your program, called
+ a <font color="#993333"><_bq><i>profile</i></_bq></font>,
+ will be produced by the interpreter when your program finishes execution. 
+ This listing is
+ written to the file <font color="#993333"><_bq>ex.pro</_bq></font> in
+ the current directory.
+
+<p>
+ There are two types of profiling available:
+ <font color="#993333"><b>execution-count profiling</b></font>,
+ and <font color="#993333"><b>time profiling</b></font>.
+ You get execution-count profiling when you specify
+ <font color="#993333"><_bq>with profile</_bq></font>. You get time
+ profiling when you specify
+ <font color="#993333"><_bq>with profile_time</_bq></font>.
+ You can't mix the two types of profiling in a single run of your program.
+ You need to make two separate runs.
+
+<p>
+ We ran the <font color="#5500FF"><b>sieve8k.ex</b></font> benchmark program in
+ <font color="#5500FF"><b>demo\bench</b></font> under both types of
+ profiling. The results are in
+ <font color="#5500FF"><b>sieve8k.pro</b></font> (execution-count profiling)
+ and <font color="#5500FF"><b>sieve8k.pro2</b></font> (time profiling).
+
+<p>
+ Execution-count profiling shows precisely how many times each statement
+ in your program was executed. If the statement was never executed the
+ count field will be blank.
+
+<p>
+ Time profiling (DOS32 only) shows an estimate of the total time spent
+ executing each statement. This estimate is expressed as a percentage of the
+ time spent profiling your program. If a statement was never sampled, 
+ the percentage field will be blank. If you see 0.00 it means the 
+ statement was sampled, but not enough to get a score of 0.01.
+
+<p>
+ Only statements compiled <font color="#993333"><_bq>with profile</_bq></font>
+ or <font color="#993333"><_bq>with profile_time</_bq></font> are shown in
+ the listing. Normally you will specify either
+ <font color="#993333"><_bq>with profile</_bq></font>
+ or <font color="#993333"><_bq>with profile_time</_bq></font> at the top
+ of your main <b>.ex</b> file, so you can get a complete listing.
+ View this file with the Euphoria editor to see a color display.
+
+<p>
+ Profiling can help you in many ways:
+
+<ul>
+<li>
+       it lets you see which statements are heavily executed,
+       as a clue to speeding up your program
+
+<li>
+       it lets you verify that your program is actually working
+       the way you intended
+
+<li>
+       it can provide you with statistics about the input data
+
+<li>
+       it lets you see which sections of code were never tested
+       - don't let your users be the first!
+</ul>
+
+<p>
+ Sometimes you will want to focus on a particular action performed by your
+ program. For example, in the
+ <font color="#5500FF"><b>Language War</b></font> game, we found that the game
+ in general was fast enough, but when a planet exploded, shooting 2500
+ pixels off in all directions, the game slowed down. We wanted to speed
+ up the explosion routine. We didn't care about the rest of the code. The
+ solution was to call <a href="lib_p_r.htm#profile">profile(0)</a>
+ at the beginning of Language War, just after
+ <font color="#993333"><_bq>with profile_time</_bq></font>,
+ to turn off profiling, and then to call
+ <font color="#006699">profile(1)</font> at the beginning of the
+ explosion routine and <font color="#006699">profile(0)</font>
+ at the end of the routine. In this way
+ we could run the game, creating numerous explosions, and logging a lot
+ of samples, just for the explosion effect. If samples were charged against
+ other lower-level routines, we knew that those samples occurred during
+ an explosion. If we had simply profiled the whole program, the picture
+ would not have been clear, as the lower-level routines would also
+ have been used for moving ships, drawing phasors etc. profile() can help
+ in the same way when you do execution-count profiling.
+
+<p>
+
+<a name=21></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>3.2.1 Some Further Notes on Time Profiling</_sul>
+
+</font>
+<p>
+
+ With each click of the system clock, an interrupt is generated. When you
+ specify <font color="#993333"><_bq>with profile_time</_bq></font> Euphoria
+ will sample your program to see which
+ statement is being executed at the exact moment that each interrupt occurs.
+
+<p>
+ These interrupts normally occur 18.2 times per second, but if you call
+ <a href="lib_s_t.htm#tick_rate">tick_rate()</a> you can choose a much higher
+ rate and thus get a more accurate
+ time profile, since it will be based on more samples. By default, if you
+ haven't called tick_rate(), then tick_rate(100) will be called automatically
+ when you start profiling. You can set it even higher (up to say 1000) but you
+ may start to affect your program's performance.
+
+<p>
+ Each sample requires 4 bytes of memory and buffer space is normally reserved
+ for 25000 samples. If you need more than 25000 samples you can request it:
+
+<_eucode>
+        with profile_time 100000
+</_eucode>
+
+ will reserve space for 100000 samples (for example). If the buffer overflows
+ you'll see a warning at the top of <font color="#993333"><b>ex.pro</b></font>.
+ At 100 samples per second your
+ program can run for 250 seconds before using up the default 25000 samples.
+ It's not feasible for Euphoria to dynamically enlarge the sample buffer
+ during the handling of an interrupt. That's why you might have to specify it
+ in your program. After completing each top-level executable statement,
+ Euphoria will process the samples accumulated so far, and free up the
+ buffer for more samples. In this way the profile can be based on more samples
+ than you have actually reserved space for.
+
+<p>
+ The percentages shown in the left margin of
+ <font color="#993333"><b>ex.pro</b></font>,
+ are calculated by dividing
+ the number of times that a particular statement was sampled, by the total
+ number of samples taken. e.g. if a statement were sampled 50 times out of a
+ total of 500 samples, then a value of 10.0 (10 per cent) would appear in the
+ margin beside that statement. When profiling is disabled with profile(0),
+ interrupts are ignored, no samples are taken and the total
+ number of samples does not increase.
+
+<p>
+ By taking more samples you can get more accurate results. However, one
+ situation to watch out for is the case where a program synchronizes itself
+ to the clock interrupt, by waiting for <a href="lib_s_t.htm#time">time()</a>
+ to advance. The statements executed just after the point where the clock
+ advances might <font color="#CC0099"><_ba><i>never</i></_ba></font> be
+ sampled, which could give you a very distorted picture. e.g.
+<_eucode>
+        while time() < LIMIT do
+        end while
+        x += 1 -- This statement will never be sampled
+</_eucode>
+
+<p>
+ Sometimes you will see a significant percentage beside a return statement.
+ This is usually due to time spent deallocating storage for temporary and
+ private variables used within the routine. Significant storage deallocation
+ time can also occur when you assign a new value to a large sequence.
+
+<p>
+ If disk swapping starts to happen, you may see large times attributed to
+ statements that need to access the swap file, such as statements
+ that access elements of a large swapped-out sequence.
+
+<_continue
+  href="library.htm"
+  name="Part II - Library Routines"
+>
+
+</_width>
+</body>
+</html>

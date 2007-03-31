@@ -1,0 +1,63 @@
+   EUPHORIA\BIN
+
+   Euphoria Executables:
+        ex.exe       - the interpreter for DOS
+        exw.exe      - the interpreter for Windows
+        exwc.exe     - the interpreter for Windows (console mode)
+        ec.exe       - the Euphoria to C Translator for DOS
+        ecw.exe      - the Euphoria to C Translator for Windows
+        backend.exe  - the interpreter back-end for DOS
+        backendw.exe - the interpreter back-end for Windows
+
+   Binder files:
+	bind.bat     - bind a DOS32 Euphoria program with backend.exe 
+	               to make a stand-alone .exe file
+	bindw.bat    - bind a WIN32 Euphoria program with backendw.exe
+	               to make a stand-alone .exe file
+	shroud.bat   - source code shrouder, makes a .il file that can be
+	               run with backend.exe or backendw.exe
+   	euphoria.ico - default icon for binding .exe's
+   
+   Public Domain Causeway executables for Translator using Watcom (DOS):
+        le23p.exe
+        cwc.exe
+        cwstub.exe
+   
+   Free "giftware" Allegro graphics library for Translator using DJGPP (DOS):
+        liballeg.a   - slightly smaller than the standard build of this library
+        
+   Translator libraries:
+        ec.a         - for DJGPP (DOS)
+        ec.lib       - for Watcom (DOS)
+        ecw.lib      - for Watcom (Windows)
+        ecwb.lib     - for Borland (Windows)
+        ecwl.lib     - for Lcc (Windows)
+   
+   Utility programs written in Euphoria. You are free to use them
+   and modify them. See License.txt.
+
+	ascii.ex     - prints a character chart from 0 to 255
+	cdguru.bat   - The Guru search engine applied to the current directory 
+		       that you are in. Searches any kind of text files.
+	ed.ex        - the Euphoria editor
+	eprint.ex    - prints Euphoria or other files in two-column condensed
+		         mode. Highlights syntax of Euphoria files.
+	guru.ex      - The Euphoria "Guru" search engine
+	key.ex	     - shows the numeric key code for any key on the keyboard
+	lines.ex     - count lines and characters in a bunch of files
+	search.ex    - search files for a string-pattern
+	where.ex     - search for a file on your PATH
+	make31.exw   - build a version of exw.exe that uses version 3.1 of
+                       the Windows GUI (instead of 4.0)
+        makecon.exw  - makes exwc.exe from exw.exe 
+        euinc.ico    - gray scale version of the Euphoria icon
+        
+   	
+   There are small .bat files for most of the .ex utilities, so you
+   don't have to type "ex ...", e.g. just type "ascii" to turn run the
+   ascii.ex program. 
+
+   Many of these programs expect to be run from a command line interface.
+
+   For more documentation, see the comments at the top of each file.
+   

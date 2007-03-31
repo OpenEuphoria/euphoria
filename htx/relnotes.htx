@@ -1,0 +1,4253 @@
+<_init_comment>
+<html>
+<head><title>Euphoria v3.0 Release Notes</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font face="Arial, Helvetica" color="#006633" size=+2><b>
+<br>
+                           Euphoria Release Notes<br>
+</b></font></_center>
+
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 3.0.2 February 9, 2007:</_dul></b></font>
+<p>
+This release fixes some important bugs in 3.0.1, and improves the
+source code documentation.
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+<ul>
+    
+<p>
+<li>
+     <b><font color="#009999">bug fixed: </font></b>
+     <b>Translator: </b>
+     Programs translated to C and compiled for Windows 
+     would crash if they used the new multitasking feature.
+     (This worked in 3.0.0 but was broken accidentally in 3.0.1 
+     because some stack offsets changed.)
+
+<p>
+<li>
+    
+    <b><font color="#009999">bug fixed: </font></b>
+     <b>Interpreter: </b>
+    
+    In fairly rare situations, the interpreter for Windows might crash.
+    This was due to a bug in load_private_block() where it was freeing 
+    a block of memory and then returning a pointer into that block. 
+    In rare cases, a page of virtual memory might be removed from 
+    the heap by the Windows O/S before the block could be read. 
+    Thanks to Andy Serpa, 
+    Pete Lomax, Matt Lewis, Derek Parnell, and others for helping to 
+    pin-point the location of the bug.
+  
+<p>
+<li>
+    <b><font color="#009999">bug fixed: </font></b>
+     <b>Source Code: </b>
+    "\euphoria" was changed to to %EUDIR% in 4 .bat files in the
+    source directory. Thanks to Jaime Marcos.
+    
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Improved Documentation</b></_sul></font>
+<ul>
+
+<p>
+<li>
+A new document (translator.doc) was added to euphoria\source. It describes
+the internals of the Translator, with emphasis on the many optimizations
+that the Translator performs.
+
+<p>
+<li>
+    The user documentation was also improved in a few places.     
+</ul>
+
+<font color="#993333"><_sul><b>C Source Code Changes</b></_sul></font>
+<ul>
+<p>
+<li>
+    Matthew Lewis added a Linux/FreeBSD make file, and made source code 
+    changes to better support Open Watcom and a newer version of GCC.
+</ul>  
+
+
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 3.0.1 November 3, 2006:</_dul></b></font>
+<p>
+This release cleans up a number of bugs and documentation errors
+in 3.0.0.
+
+<p>
+<font color="#993333"><_sul><b>Improved Documentation</b></_sul></font>
+<ul>
+<p>
+<li>
+     A separate new document on <a href=tasking.htm>multitasking</a>
+     was added.
+
+<p>
+<li>
+     Obsolete pre-open-source concepts in the 3.0.0 documentation
+     were deleted or corrected.
+     
+</ul>
+
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+<ul>
+    
+<p>
+<li>
+     Euphoria-coded .dll / .so files were not working at all, due to a 
+     multitasking-related glitch. Thanks to Andrea Cini.
+     <p>
+     Note: execution of multitasking built-in routines is currently not 
+     supported inside a Euphoria-coded .dll / .so. 
+     You'll get a compile-time error message from the 
+     Translator if you use the -dll option and your library source code 
+     contains multitasking operations. Other than that, use of 
+     Euphoria-coded .dll / .so files by main programs that do 
+     multitasking is fine.
+    
+<p>
+<li>
+     A text console bug was fixed.
+     It involved output to the screen involving tabs and/or 
+     wrap-around (at 80 columns). Thanks to 
+     Pete Lomax, Juergen Luethje, Matt Lewis.
+  
+<p>
+<li>
+     bind.bat, bindw.bat and shroud.bat were changed to use %EUDIR%
+     rather than \EUPHORIA. Thanks to Ray Smith.
+    
+<p>
+<li>
+     syncolor.e now includes keywords.e (relative to euphoria\bin)
+     rather than \euphoria\bin\keywords.e. Thanks to Rick Bettis.
+    
+</ul>
+
+<font color="#993333"><_sul><b>C Source Code Changes</b></_sul></font>
+<ul>
+<p>
+<li>
+     All of the #ifdef ENCURSES code was stripped out.
+     We don't plan to use ncurses again, and this change
+     makes parts of the source code much more readable.
+<p>
+<li>
+     A thread5() machine language macro was added to be_execute.c 
+     This helps the interpreter to compile correctly with 
+     Open Watcom, avoiding a C optimizer bug.
+     Thanks to Matt Lewis. 
+</ul>  
+
+
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 3.0.0 October 17, 2006:</_dul></b></font>
+<p>
+
+With this release, Euphoria has become a totally <b>free</b>
+and totally <b>open source</b> product! RDS will continue to develop
+Euphoria with the aid of many additional clever programmers.
+The free download package now includes the Interpreter (with either 
+a C or a Euphoria-coded back-end), Binder/shrouder, fully-enabled 
+Translator, and the full source code for all of these. 
+Thousands of people can now examine the full source code for bugs, 
+performance improvements, and potential new features.
+<p>
+Rather than having alpha, beta and official releases, we will now
+simply have numbers, 3.0.0, 3.0.1 ... We expect to have releases
+more frequently, though each release will likely be a smaller
+change compared to the previous release.
+
+<p>
+<font color="#993333"><_sul><b>Enhanced Features</b></_sul></font>
+ 
+<ul>
+<p>
+<li>
+ <b>Cooperative Multitasking</b>. Rather than having just a single thread of execution,
+ you can now create multiple tasks that run independently
+ of one another. Each task has its own currently-executing statement,
+ subroutine call-stack, and private variables for all routines on 
+ its call-stack. Tasks share global and local variables but not private
+ variables. At any point during its execution, a task can call task_yield()
+ to transfer control to the Euphoria scheduler which will choose the next 
+ task to run. When control returns to the original task, 
+ execution will continue from the statement after task_yield().
+ <p>
+ New Run-time routines:
+ 
+ task_create(), task_schedule(), task_yield(), task_suspend(),
+ task_self(), task_list(), task_status(), task_clock_start(),
+ task_clock_stop()
+ 
+<p>
+<li>
+ Use of the <b>ncurses</b> library has been eliminated for Linux 
+ and FreeBSD. ncurses routines sometimes caused problems on some 
+ Linux/FreeBSD systems.
+  The Euphoria backend now uses ANSI escape chars to 
+  get 2-d positioning and colors for a plain text-mode console.
+  Also, the use of libgpm (console mouse support) has been dropped on Linux. 
+  (It was never supported by Euphoria on FreeBSD). 
+    
+<p>
+<li>
+  <b>Include files</b> with the same file name but a different path as an earlier
+  include, will no longer be ignored. To be ignored, an include must 
+  refer to the exact same file as an earlier include. 
+  (a new name space can still be defined, even
+   though the include file is not actually included again.)
+   On Linux/FreeBSD a case-sensitive file-name comparison is now used.
+   
+   There is possible (but unlikely) breakage of old code:
+   
+   <p> 
+   You might start including files 
+   that you did not intend to include, if you have a previously-ignored 
+   include statement for them in your code. 
+   Solution: Delete the undesired include statement.
+   
+   <p>
+   If an include is incorrect (file is not
+   on the include search path), this error may have been hidden 
+   under the old system, if a correct include with the same file name 
+   (but different path) came earlier. Solution: Specify the correct path 
+   to the include file.
+   
+<p>
+<li>
+  There is no longer a limit on the number of <b>warnings</b> that can be
+  displayed. Instead, you will be given the chance to scroll through all the
+  warnings, 20 at a time. As before, if a ex.err file is created,
+  then all warnings will also be stored at the end of the ex.err file.
+  Thanks to Judith Evans.
+
+<p>
+<li>
+  <font color="#0066CC"><b>Translator</b></font>: You can set the run-time stack size for your program
+  using the -stack nnnn option. The default stack size has been increased
+  for most of the supported C compilers, especially when your program
+  contains a call to task_create().
+     
+<p>
+<li>
+ If a run-time error occurs and ex.err can't be opened,
+ a check will be made to see if it's because you have
+ <b>too many open files</b>. An appropriate message will then
+ be issued. Several people ran into this situation.
+ 
+<p>
+<li>
+  <b>execute.e</b>: Additional run-time error checks were added to several
+   run-time routines to allow the pure-Euphoria source interpreter 
+   to catch more errors itself, rather than letting the C-coded 
+   run-time routines used by the "real" interpreter or translator catch them.
+       
+<p>
+<li>
+  <b>pretty_print()</b>, option 3, now includes \t \r and \n as 
+  valid "ASCII range" characters. This increases the
+  likelihood of strings being displayed. Thanks to Juergen Luethje.
+       
+<p>
+<li>
+  The <b>ASCII 127</b> char will not be graphically displayed on Linux in 
+  trace or in default pretty_print(). It displays as a backspace when 
+  ANSI codes are used.
+         
+<p>
+<li>
+  <b>Binder</b> options are checked more strictly. e.g. -xxxoutxxx was dangerous
+  The binder now looks for match(x,y) = 1, rather than match(x,y) != 0.
+  The binder also avoids overwriting a source file when -out is used.
+  Thanks to Mike Sabal, Greg Haberek
+   
+<p>
+<li>
+  We've switched to using transparent Euphoria icons.
+  Thanks to Vincent Howell.
+ 
+<p>
+<li>
+  Pure Euphoria interpreter (eu.ex): 
+  The "not initialized" message has been improved to:
+  "xyz has not been initialized"
+  
+<p>
+<li>
+  Many small improvements were made to the <b>documentation</b>. e.g. 
+  the use of a single atom value by multiple printf() formats was 
+  documented for the first time. Thanks to Pete Lomax.
+ 
+</ul> 
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+
+<ul> 
+<p>
+<li>
+  <b><font color="#009999">bug fixed: </font></b>
+  <font color="#0066CC"><b>Translator</b></font>: a Euphoria file 
+  named "main.e" or "init.e"
+   could possibly lead to a file naming conflict. The chance of a conflict
+   is now greatly reduced, and if a conflict occurs, a meaningful error
+   message will be issued.
+   Thanks to Vincent Howell.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed: </font></b>
+  <font color="#0066CC"><b>Translator</b></font>: using "interrupt" 
+   as a Euphoria variable name caused
+   a naming conflict when compiling with Watcom. Thanks to Louis Bryant.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed: </font></b>
+  <font color="#0066CC"><b>Translator</b></font>: A backslash 
+  at the end of a Euphoria comment could be considered a 
+  line continuation character by the C compiler. This could result in
+  incorrect code being generated. Thanks to Mark Honnor.
+    
+<p>
+<li>
+  <b><font color="#009999">bug fixed: </font></b>
+  <font color="#0066CC"><b>Translator</b></font>: A call to a Euphoria-coded
+  routine in a .dll, i.e. via c_func(), could cause a bug if the 
+  return type was sequence or object. Thanks to Thomas Jansen.
+    
+<p>
+<li>
+  <b><font color="#009999">bug fixed:</font></b> If you pass file number -1
+   to <b>printf()</b> you will now get a run-time error report. 
+   In all previous releases, -1 would simply cause printf() 
+   to produce no output. Thanks to Daniel Kluss.
+    
+<p>
+<li>
+  <b><font color="#009999">bug fixed:</font></b>
+   scanner.e: Source lines longer than 10000 characters caused a problem.
+   Also we were not checking for allocate() returning 0 
+   in pack_source() (i.e. out of memory condition). Thanks to Antonio Alessi.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed:</font></b> <b>execute.e</b>: (pure Euphoria
+  interpreter) In some cases slice 
+  indexes were not being bounds checked before being used. eu.ex would crash 
+  rather than report the error in the user's program.
+         
+<p>
+<li>
+  <b><font color="#009999">bug fixed:</font></b> Assignments of the form:<br>
+     x[a][b..c] += expr<br>
+   were likely to trigger an erroneous subscript error in 
+   <b>execute.e</b>, the pure Euphoria interpreter.
+   Thanks to Vincent Howell.
+ 
+<p>
+<li>
+  <b><font color="#009999">bug fixed:</font></b> <b>execute.e</b> 
+  did not handle fractional subscripts correctly in some situations. 
+  Thanks to C Bouzy and Vincent Howell.
+
+</ul>
+   
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.5 Official Release March 8, 2005:</_dul></b></font>
+
+<p>
+<font color="#993333"><_sul><b>Enhanced Features</b></_sul></font>
+
+<ul>
+<p>
+<li>
+The Source Code Product now includes the C code for interactive
+trace/debug and profiling. This was not provided in any previous release.
+
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: A new <b>-fastfp</b> 
+option has been added for WATCOM/DOS (registered version only). 
+This option can double the speed of a floating-point intensive, 
+translated/compiled, program. The resulting .exe file requires a 
+Pentium class CPU, or a 386/486 with floating-point hardware.
+
+<p>
+<li>
+<b>eu.ex</b>: execute.e now uses call-back machine code supplied by 
+Matthew Lewis. As a result, there is no longer a limit on the number 
+of call-backs a program can use. 
+
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: There is now a <b>-keep</b> 
+option that prevents the deletion of any C files or object files created
+during translation. Thanks to Matthew Lewis.
+
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: In order to handle huge
+programs without exceeding the limits of the C compiler, the translator 
+will split init_.c into several pieces. Thanks to Matthew Lewis.
+    
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: Better checking is provided for
+incorrect command-line options.
+      
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>:  The translator avoids 
+creating any files until it confirms that a valid source file 
+has been provided on the command line, or via the interactive prompt.
+    
+<p>
+<li>
+<b>ed.ex</b>: <b>ed</b> will only call free_console() at the end of execution
+on Linux or FreeBSD. It was causing a slight screen flicker on DOS/Windows, 
+and was not necessary.
+
+
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+
+<ul>
+<li>
+<b><font color="#009999">bug fixed</font></b>: The error traceback from
+a bound or shrouded program had garbage showing for the file names and
+line numbers. This bug was introduced in the beta release.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: 
+Bound or shrouded programs were not starting off with a fresh
+random seed value. Normal interpreted or translated
+programs were OK. Thanks to Michael Bolin.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: The error traceback 
+could be wrong if you (illegally) tried to pass a sequence as the 
+routine id for call_proc/func. Thanks to Mario Steele.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: When displaying a large 
+variable value during interactive trace, the first few lines might be 
+printed in white, while the rest was printed in bright white.
+Thanks to Al Getz.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: routine_id() of the form:
+routine_id("namespace:name") was not working correctly in the interpreter
+or in the PD source interpreter. The Translator was ok. 
+This worked fine in 2.4 and earlier. Thanks to Verne Tice.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: command_line() now shows 
+the extra file name when the user types the file name interactively 
+at the ex/exw/exu prompt. This is now compatible with 2.4 and earlier.
+Thanks to Bob Elia.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: 
+Warnings were not getting reported when a program ended with a call to abort(),
+or it ended with a fatal run-time error. Thanks to Juergen Luethje.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: The platform() function 
+is now evaluated in backend/backendw/backendu for .il files (rather than
+in the front-end of the shrouder). This allows a .il file to be 
+portable to multiple platforms. In other situations, the interpreter 
+and translator will continue to evaluate platform() in the front-end 
+for maximum efficiency. Thanks to Ken Rhodes
+
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Documentation</b></_sul></font>
+
+<ul>
+<li>
+Many small corrections and improvements were made to the documentation.
+Some important ones were provided by Juergen Luethje and Wolfgang Fritz.
+
+<p>
+<li>
+A paragraph was added to the Reference Manual explaining what happens
+when you try to modify a variable by function side-effects at the
+same time that you try to modify it via subscripted assignment.
+The 2.5 alpha release notes were updated to point out an
+incompatibility with 2.4.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.5 Beta Release January 14, 2005:</_dul></b></font>
+
+<p>
+<font color="#993333"><_sul><b>Improved Performance</b></_sul></font>
+
+<ul>
+<li>
+The initial parse time (start-up time) of interpreted programs 
+has been reduced, typically by 25% 
+on newer machines, and 40% on older machines, when compared to 2.5 alpha.
+In the case of old machines running very large programs, 
+the start-up time can be 65% to 90% less, especially when
+<font color="#993333"><_bq>with trace</_bq></font> or
+<font color="#993333"><_bq>with profile</_bq></font> are in effect.
+
+<p>
+Most of the optimizations were made to the Euphoria front-end 
+source that's shared with the Public Domain source interpreter, 
+so <b>eu.ex</b> also has reduced parse times.
+
+<p>
+<li>
+A major speed improvement was made in opASSIGN_SUBS() in the PD source 
+interpreter. This operation handles assignments to subscripted sequences,
+and is executed a lot. Thanks to Greg Haberek for showing the slowness.
+
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: In many more cases,
+the <font color="#0066CC"><b>Translator</b></font> now knows 
+the type of all elements of a sequence. This is especially
+useful when the elements are known to be integers. Smaller and 
+faster code is generated for accessing the elements, and freeing the 
+sequence.
+
+<p>
+<li>
+In most cases, the <font color="#0066CC"><b>Interpreter</b></font> and
+the <font color="#0066CC"><b>Translator</b></font> now evaluate 
+sequence-formation {a, b, c, ...} expressions 
+once at compile-time, instead of each time at run-time, when
+the elements are all constant integers (either hard-coded numbers or 
+symbols declared as constant). This saves time, and also reduces 
+code size for translated programs.
+
+<p>
+<li>
+<font color="#5500FF"><b>database.e</b></font>:
+<font color="#006699"><b>db_select_table()</b></font> returns quickly if you
+happen to select the table that's already selected. This can save a 
+lot of time in situations where it's not convenient for the
+application to keep track of which table is currently selected.
+Thanks to Derek Parnell.
+
+</ul>
+      
+<p>
+<font color="#993333"><_sul><b>Enhanced Features</b></_sul></font>
+
+<ul>
+<li>
+The <font color="#0066CC"><b>shrouder</b></font> will now supply a
+default <b>#!</b> (shebang) line at the top of 
+the <b>.il</b> file, if none was specified. Thanks to Kenneth Rhodes.
+      
+<p>
+<li>
+On <font color="#CC3366"><b>Linux</b></font>, the
+<font color="#0066CC"><b>shrouder</b></font> will give the <b>.il</b> file
+execute permission. Thanks to Kenneth Rhodes.
+    
+<p>
+<li>
+On <font color="#CC3366"><b>Linux/FreeBSD</b></font> the
+<font color="#0066CC"><b>Binder</b></font> no longer creates bound executable
+programs with a ".exe" extension. Now, no extension is used. This is compatible
+with the <font color="#0066CC"><b>Translator</b></font>, and more in keeping
+with the standard on <font color="#CC3366"><b>Linux/FreeBSD</b></font>
+systems. Thanks to Jerry Story.
+
+<p>
+<li>
+<font color="#5500FF"><b>database.e</b></font>: Extra checks were added to
+some routines to give a more meaningful error message when no table has been
+selected yet. Thanks to Derek Parnell.
+
+<p>
+<li>
+Several small improvements in the Source Code product and its 
+documentation make it easier to compile using Open Watcom and 
+other compilers. Thanks to Jean-Marc Duro.
+
+<p>
+<li>
+The main source file is now closed right after the front-end finishes. 
+This allows a program to edit or otherwise modify its own source.
+
+<p>
+<li>
+The initial random seed value is now chosen more randomly
+on <font color="#CC3366"><b>Windows</b></font>. Thanks to Akusaya.
+
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>DOS/Windows Installation Program</b></_sul></font>
+
+<ul>
+<li>
+The install program will set up ed.bat to run ed.ex with ex.exe on ME/98/95,
+and exwc.exe on NT/2000/XP.
+
+<p>
+<li>
+The <font color="#993333"><b>install</b></font> program will not change any
+existing file associations
+for Euphoria file types. (If you install Euphoria in a new directory, 
+you might have to change these yourself.)
+Thanks to Juergen Luethje and others.
+
+<p>
+<li>
+The Start Menu links created by the <font color="#993333"><b>install</b></font>
+program were wrong: exw was incorrectly pointing to
+<font color="#993333"><b>ecw.exe</b></font>, and ex was incorrectly pointing 
+to <font color="#993333"><b>ec.exe</b></font>. Thanks to Akusaya.
+
+<p>
+<li>
+It's ok now to have a blank in the path of the installation directory: 
+e.g. "C:\Program Files". Thanks to Rich.
+</ul>
+
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+
+<ul>
+
+<li>
+<b><font color="#009999">bug fixed</font></b>: When building a Linux/FreeBSD
+.so file from Euphoria code that contained
+<font color="#006699"><b>call_proc()</b></font> or
+<font color="#006699"><b>call_func()</b></font>, an undefined "__stdcall" 
+symbol appeared in the C file by mistake. Thanks to Matt Lewis. 
+ 
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: The opening message displayed
+by the Binder on Linux/FreeBSD and on Windows was wrong.
+Thanks to Kenneth Rhodes and Igor Kachan.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>:
+<font color="#006699"><b>routine_id()</b></font> was checking for symbols
+coming later in the code. This happened in the Interpreter only, and only
+at the top-level, not inside a routine.
+<p>
+This fix requires .il files shrouded with 2.5 alpha to be reshrouded
+with 2.5 beta or later. Bound files are not a problem.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: A complex expression on the
+left hand side of an assignment, involving nested use of 
+<font color="#993333"><_bsq>$</_bsq></font>, could crash. Thanks to Andy Serpa.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Translator: </b>
+A call to <font color="#006699"><b>routine_id()</b></font> 
+would sometimes search past the end of a list and start reading garbage
+in memory. In most instances this did not cause a problem, but in some
+cases it could cause a crash. Thanks to Kenneth Rhodes.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Translator: </b>
+In a rare situation, the 2.5 alpha Translator could crash 
+while attempting to optimize some code.
+    
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Translator: </b>
+In a rare situation, at the end of execution of a particular routine,
+the translated code would fail to free some space used for a temporary value.
+Thanks to Wolfgang Fritz.
+    
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: After a compile error in
+<font color="#993333"><b>exw</b></font> you would have to hit Enter, 
+then a message would say: "Press Enter...".
+(Things worked properly for run-time errors).  Thanks to Tone Skoda.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: An incompatibility existed
+between the way that <font color="#006699"><b>abort(1)</b></font> was handled
+in the Translator vs the Interpreter. Thanks to Juergen Luethje.
+    
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>:
+<font color="#006699"><b>save_text_image()</b></font>,
+when run by <font color="#993333"><b>exw</b></font> or
+<font color="#993333"><b>exwc</b></font>, occasionally returned some garbage
+in the upper bits of the character attributes. Thanks to Brian Broker.
+    
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: The CAPS lock key generated a
+key code when using <font color="#993333"><b>ed</b></font> with
+<font color="#993333"><b>exwc</b></font>. 
+The key had the desired effect, but it caused
+<font color="#993333"><b>ed</b></font> to display a message at the top of the
+screen. <font color="#993333"><b>ed</b></font> will no longer display the
+message. Thanks Alex Caracatsanis.
+      
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>:
+<font color="#006699"><b>routine_id("")</b></font> would crash the Binder
+and Translator. Thanks to Antonio Alessi.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: A line longer than 200 chars
+crashed the <font color="#993333"><b>trace</b></font> display. Thanks to
+Thomas Betterly.
+      
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: Symbols declared as constant
+were not defined in the <font color="#993333"><b>trace</b></font> window.
+Thanks to Matthew Lewis.
+    
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>:
+<font color="#006699"><b>printf()</b></font> format strings were wrong in
+two error messages in <b>execute.e</b> &nbsp;Thanks to Derek Parnell.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: The caret (arrow) symbol, 
+displayed in compile-time error messages, was shifted one position to the 
+right, when compared with version 2.4. This has been corrected. 
+Thanks to Juergen Luethje.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font></b>: For compatibility with
+the official Interpreter, routine id's now start at 0
+instead of 1 in the PD source interpreter.
+    
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Documentation</b></_sul></font>
+      
+<ul>
+
+<li>
+A paragraph was added to "Scope" discussing how you can override 
+predefined routines with your own variables and routines. 
+Thanks to Mike.
+  
+<p>
+<li>
+A warning was added to <font color="#006699"><b>open()</b></font> about the
+use of CON and CON.*, and other file names that are reserved by DOS.
+Thanks to Igor Kachan.
+
+<p>
+<li>
+The fact that programs are now fully parsed before
+being executed was explained better in the Reference Manual.
+
+<p>
+<li>
+Obsolete uses of the phrase "Complete Edition" were removed from
+a few places in the documentation. Thanks to Juergen Luethje.
+
+<p>
+<li>
+Various documents were fixed where miscellaneous 2.4 information 
+has now become now obsolete.
+    
+<p>
+<li>
+The Reference Manual said that the limit on nested include files was 10 deep. 
+It should have said 30 deep. Thanks to Darkvincentdude.
+
+<p>
+<li>
+In the PD source interpreter, <b>eu.ex</b>, there was an error in the 
+comments at the top. Thanks to Akusaya.
+     
+<p>
+<li>
+The fact that <font color="#006699"><b>crash_message()</b></font> is now only
+useful for run-time errors was made clear. Thanks to Juergen Luethje.
+     
+<p>
+<li>
+A bad HTML link to the WIN32 API .hlp file was fixed. 
+Thanks to "Bro George".
+    
+<p>
+<li>
+Many other minor clarifications were made.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.5 Alpha Release November 15, 2004:</_dul></b></font>
+
+<p>
+<font color="#993333"><_sul><b>New Features</b></_sul></font>
+
+<ul>
+<li>
+<font color="#FF8000"><b>Source code for a complete Euphoria
+interpreter</b></font>,
+100% compatible with the official RDS
+<font color="#0066CC"><b>Interpreter</b></font> on all platforms,
+is now provided. See <font color="#5500FF"><b>euphoria\source</b></font>.
+It's written 100% in Euphoria and has the same front-end as 
+the official RDS <font color="#0066CC"><b>Interpreter</b></font>. 
+Since it's Public Domain, it may be
+used and modified for any purpose, including commercial or 
+closed-source applications. It can be bound into a single executable 
+file using the <font color="#0066CC"><b>Binder</b></font>, or translated 
+with the <font color="#0066CC"><b>Euphoria to C Translator</b></font> to 
+get a much faster executable.
+
+<p>
+<li>
+The official <font color="#0066CC"><b>Euphoria Interpreter</b></font> was
+re-written as 30% Euphoria (front-end), 
+and 70% hand-coded C (back-end). It was formerly 100% C, and the boundary 
+between front-end and back-end was fuzzy. 
+
+<p>
+<li>
+The <font color="#0066CC"><b>Euphoria Translator</b></font> has been
+re-written as 100% Euphoria. It was formerly 100% C. It uses the same 
+front-end as the <font color="#0066CC"><b>Interpreter</b></font> and the 
+<font color="#0066CC"><b>Binder</b></font>. This reduces future maintenance
+costs, and helps catch subtle bugs (subscript out of bounds, uninitialized
+variable etc.)
+
+<p>
+<li>
+The free Public Domain <font color="#0066CC"><b>Interpreter</b></font>
+(<font color="#993333"><b>ex.exe</b></font>,
+<font color="#993333"><b>exw.exe</b></font>,
+<font color="#993333"><b>exu</b></font>), 
+now includes full support for <font color="#006699"><b>trace()</b></font>
+beyond 300 statements, and for <font color="#993333"><b>profiling</b></font>.
+Thus there is no longer a registered "Complete Edition"
+interpreter. However, registration is still required for the 
+<font color="#0066CC"><b>Binder / shrouder</b></font>.
+
+<p>
+<li>
+A new <font color="#0066CC"><b>Binder</b></font> was developed 
+(100% in Euphoria). Since it shares the
+same front-end with the <font color="#0066CC"><b>Interpreter</b></font>
+and <font color="#0066CC"><b>Translator</b></font>,
+possible incompatibilities are avoided, and the future maintenance 
+cost has been greatly reduced. 
+
+<p>
+<li>
+A bound program can now provide a complete 
+<font color="#5500FF"><b>ex.err</b></font> dump, without including any lines
+of source code in the <b>.exe</b> file.
+
+<p>
+<li>
+Bound programs now start up immediately with no parsing required.
+
+<p>
+<li>
+The <font color="#0066CC"><b>Binder</b></font> for 
+<font color="#CC3366"><b>Windows</b></font> has a <_bq>-con</_bq>
+option, so you can make a console application.
+
+<p>
+<li>
+A separate <font color="#0066CC"><b>Interpreter back-end executable</b></font>
+was developed for use with the <font color="#0066CC"><b>Binder</b></font>.
+It executes intermediate code (<b>.il</b> files), 
+and is smaller than the <font color="#0066CC"><b>Interpreter</b></font>, 
+since it has no front-end (parser).
+This reduces the size of bound programs.
+
+<p>
+<li>
+ A new <font color="#993333"><_bsq>$</_bsq></font> symbol represents the length
+ of the current sequence.
+ Instead of saying s[length(s)], you can say s[$]. Instead of saying
+ s[1..length(s)-1], you can say s[1..$-1]. More complicated expressions
+ like s[i][$-5..$-1] are also possible. 
+ <p>
+ <b>Note:</b> In order to implement
+ this feature properly, a small incompatibility with version 2.4 was 
+ introduced. A change was made to the order of evaluation of expressions
+ in a multiply-subscripted assignment statement:
+ <p>
+ lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr
+ 
+ <p>
+ This change will cause a problem only if you are trying to modify 
+ lhs_var via a function call, during the same statement that is
+ assigning to lhs_var. You should change your code
+ to perform any such function calls before you perform the 
+ subscripted assignment, e.g.
+ <p>
+    temp = rhs_expr<br>
+    lhs_var[lhs_expr1][lhs_expr2] = temp <br>
+
+  <p>
+  The same would apply if one of the left-hand-side expressions contained
+  a function call that tried to modify lhs_var.
+  
+  <p>
+  This situation is very rare (and pretty weird), but a few examples have 
+  been found.
+
+<p>
+<li>
+  Programs now have the ability to get control after a crash 
+  (a Euphoria-detected or machine-detected run-time error).
+  Using <font color="#006699"><b>crash_routine()</b></font> you can specify
+  the routine id's of one or more
+  Euphoria routines to be invoked when something goes wrong. You can save
+  critical data to disk, inform the user, inform the programmer, etc.
+
+<p>
+<li>
+ The library routines: <font color="#006699"><b>put_screen_char()</b></font>, 
+ <font color="#006699"><b>get_screen_char()</b></font>,
+ <font color="#006699"><b>save_text_image()</b></font>
+  and <font color="#006699"><b>display_text_image()</b></font> have been
+  implemented for <font color="#CC3366"><b>Windows text-mode</b></font> 
+  consoles. These functions now work across all platforms. 
+  Suggested by C.K. Lester.
+
+
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: All the files you need
+for translating Euphoria programs to C are now included in the
+main download packages for <font color="#CC3366"><b>DOS/Windows</b></font> 
+and <font color="#CC3366"><b>Linux/FreeBSD</b></font>. You just need
+one or more of the supported free C compilers.
+
+<p>
+<li>
+<font color="#0066CC"><b>Translator</b></font>: The free Public Domain 
+<font color="#0066CC"><b>Translator</b></font>
+(<font color="#993333"><b>ec.exe</b></font>,
+<font color="#993333"><b>ecw.exe</b></font>,
+<font color="#993333"><b>ecu</b></font>) now includes
+Euphoria statements as comments in the C source. It also supports 
+<font color="#006699"><b>trace(3)</b></font>
+for debugging. When you register, you will eliminate the 
+initial message and delay on compiled programs.
+
+<p>
+<li>
+ <font color="#0066CC"><b>Translator</b></font>: 
+ Some new optimizations will speed things up, and also reduce 
+  the size of the C code. For example the code block:<br>
+  <_eucode>        if <i>expression</i> then
+           ...
+           <i>many statements of Euphoria code</i>
+           ...
+        end if
+  </_eucode>
+  will be completely deleted if the 
+  <font color="#0066CC"><b>Translator</b></font> can tell that <i>expression</i>
+  will always be false. This can lead to further optimizations, such as
+  a whole routine being deleted because there are no more calls to it.
+  An example where this is useful is when there is different code 
+  for different platforms, e.g.<br> 
+  <_eucode>        if platform() = DOS then ...
+  </_eucode>
+  <font color="#993333"><b>while</b></font> <i>expression</i> and
+  <font color="#993333"><b>elsif</b></font> <i>expression</i> can also be 
+  optimized in the same way. When the expression is always true, the 
+  <font color="#993333"><b>if/while/elsif</b></font> 
+  test and jump are eliminated.
+  
+<p>
+<li>
+ <font color="#0066CC"><b>Translator</b></font>: A couple of additional small improvements were made in 
+  converting the source from C to Euphoria. They allow for slightly 
+  better optimization.
+
+<p>
+<li>
+ <font color="#0066CC"><b>Translator</b></font>: A minor adjustment lets
+  the Translator produce slightly 
+  fewer C files, while reducing the slight risk of creating a huge C 
+  file that's too big for the C compiler to handle. Also, some empty .c 
+  files that were sometimes created, have now been eliminated.
+  
+<p>
+<li>
+  <font color="#0066CC"><b>Translator</b></font>: The Translator for Windows
+  has a new <_bq>-con</_bq> option for making
+  a console application.
+  It's supported for each of the three Windows C compilers.
+
+<p>
+<li>
+  <font color="#0066CC"><b>Translator</b></font>: After successfully building
+  a <b>.exe</b> (or <b>.dll</b>) file,
+  <font color="#5500FF"><b>emake.bat</b></font> will delete all the .c
+  and .h files that were created
+  by the Translator. This reduces clutter in the directory.
+  
+<p>
+<li>
+ The <font color="#993333"><b>install</b></font> program for
+ <font color="#CC3366"><b>DOS/Windows</b></font>
+ automatically creates <font color="#993333"><b>exwc.exe</b></font>, as well
+ as <font color="#993333"><b>exw.exe</b></font>.
+
+<p>
+<li>
+ <font color="#993333"><b>ed</b></font>:
+  <font color="#5500FF"><b>ed.bat</b></font> has been changed. It now runs 
+  ed.ex using <font color="#993333"><b>exwc.exe</b></font>.
+  Instead of using control-Home/control-End to move to the top/bottom 
+  of a file, use control-t/control-b.
+  On <font color="#CC3366"><b>Windows</b></font> XP, this change gives
+  <font color="#993333"><b>ed</b></font>
+  faster keyboard response, and full support for long filenames.
+
+<p>
+<li>
+ <font color="#993333"><b>ed</b></font>: A call to
+  <font color="#006699"><b>free_console()</b></font> is made at the very end,
+  so you won't see "Press Enter", as occurs on some
+  <font color="#CC3366"><b>Linux</b></font> systems.
+
+<p>
+<li>
+  The <font color="#0066CC"><b>Interpreter</b></font> 
+  <font color="#993333"><b>exw</b></font> no longer brings up a blank console
+  window while performing <font color="#006699"><b>trace(3)</b></font>.
+
+<p>
+<li>
+  <font color="#006699"><b>pretty_print()</b></font> has a new option to
+  limit the number of lines of output.
+  
+<p>
+<li>
+  Both types of slashes (backslash, forward slash) 
+  are now fully supported in pathnames on
+  <font color="#CC3366"><b>DOS</b></font> and
+  <font color="#CC3366"><b>Windows</b></font>.
+  Backslash is the standard, but since Windows also supports
+  forward slash in most cases, Euphoria also now supports 
+  either slash in all situations, not just a few situations as before.
+  On <font color="#CC3366"><b>Linux</b></font> and
+  <font color="#CC3366"><b>FreeBSD</b></font> only forward slash is supported.
+  
+<p>
+<li>
+  The <_bq>-m486</_bq> option was removed from the
+  <font color="#5500FF"><b>gnuexu</b></font> batch file used in building the
+  Euphoria interpreter on <font color="#CC3366"><b>Linux</b></font>.
+  It causes warnings and is not necessary.
+
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: 
+  <font color="#993333"><_bq>with profile</_bq></font> and similar
+  <font color="#993333"><b>with/without</b></font> statements
+  caused an error when followed immediately by a comment, with no whitespace 
+  before the start of the comment. Thanks to Daniel Kluss.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <font color="#5500FF"><b>ex.err</b></font> would sometimes report the wrong
+  value for a for-loop variable, when the for loop was used during a 
+  recursive call. Thanks to Pete Lomax.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: On Windows, using either 
+  the Interpreter, or translated code compiled by WATCOM, 
+  <font color="#006699"><b>dir()</b></font> caused an exception when given 
+  an argument that ended with "*.". This was due to a bug in the WATCOM 
+  routine used to implement dir(). Thanks to Daniel Kluss.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In 2.4, on ME/98/95 the 
+  argument to <font color="#006699"><b>dir()</b></font> could no longer be a
+  long file (or directory) name.
+  This used to work in 2.3. (Note: On XP it can't be long).
+  Thanks to Rangi and Juergen Luethje.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> Translator: </b>
+  On Windows when you create a Euphoria .dll, the global routines need to be
+  called using the __stdcall convention. However indirect calls to those 
+  routines via <font color="#006699"><b>call_func()</b></font> and 
+  <font color="#006699"><b>call_proc()</b></font> from within the 
+  same .dll, were using the __cdecl convention. Thanks to Andy Serpa.
+    
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: An error message referred to
+  "printf()", when it should have referred to "sprintf()". Thanks to Al Getz.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> safe.e: </b>
+  Poking an empty sequence into a 1-byte block 
+  of allocated memory caused a false-alarm error message. 
+  e.g. allocate_string("") &nbsp;
+  Thanks to Bernie Ryan and Josef Jindra.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: If you called 
+  <font color="#006699"><b>repeat()</b></font> with a repetition count that
+  was extremely close to the maximum size of a Euphoria integer
+  (1073741823), you would get a machine exception. You will now get 
+  an "Out of memory" error from Euphoria. Thanks to Bob Elia.
+    
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> Translator: </b>
+  In some cases, when using the Translator to build 
+  a dll, WATCOM C would give the error message "statement required after 
+  label" near the end of EuInit(). Lcc also complained. Borland C did not
+  complain, and things worked fine. Thanks to Matthew Lewis.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> Interpreter: </b>
+  In programs larger than a couple of 
+  thousand statements, an assignment operation with subscripting 
+  on the left might cause a machine exception. The chance of this 
+  happening was about 1 in 1000. Any change to the program 
+  that shifted the offending statement's position in memory 
+  would cause the bug to go away.  For example,<br>
+  <_eucode>        x[i] -= y
+  </_eucode>
+  This bug has been lurking since January 1999 (version 2.1 alpha).
+  The Translator was not affected. Thanks to Pete Lomax.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  On Windows, Linux and FreeBSD, when reading standard input, and an input
+  line was longer than 1040 characters,
+  <font color="#006699"><b>gets()</b></font> would set the 1041st character
+  to 0. DOS was OK, and files other than standard input were ok.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> EDS: </b>
+  When <font color="#006699"><b>db_open()</b></font> opened a database file but
+  failed to secure an exclusive or shared lock on the file, 
+  it was neglecting to close the file before returning a failure code.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> ttt.ex: </b>
+  A moderately-long human name would damage the 
+  board grid. Thanks to Igor Kachan.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The line number reported for 
+  run-time errors occurring in a short-circuited if-statement 
+  could be off slightly. Thanks to Kat.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> Translator: </b>
+  The range of return values assumed for
+  <font color="#006699"><b>getc()</b></font> was [0,255]. It should
+  have been [-1,255].
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed - </font> Translator: </b>
+  The generated C code failed to free the storage for the for-loop variable
+  when a return statement was executed inside a for-loop, and the loop variable
+  had a non-integer value. A similar problem could occur when there was 
+  an <_bq>else</_bq>, <_bq>exit</_bq> or <_bq>end while</_bq> immediately
+  after the for-loop, and the loop variable value was not an integer.
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Documentation</b></_sul></font>
+
+<ul>
+
+<li>
+  A document on <a href=cgi.htm>CGI Applications in Euphoria</a> has 
+  been added.
+<p>
+<li>
+  Thanks to Kenneth Rhodes,
+  <font color="#006699"><b>db_rename_table()</b></font> is now documented. This
+  had been accidentally left out of the <font color="#993333"><b>EDS</b></font>
+  documentation.
+
+<p>
+<li>
+  It's now mentioned that format strings 
+  in <font color="#006699"><b>pretty_print()</b></font> could have additional
+  text along with the format. Thanks to Juergen Luethje.
+  
+<p>
+<li>
+  The Reference manual now says that hex literals, such as #FFFFFFFF, are
+  never considered to be negative numbers. Thanks to Juergen Luethje.
+  
+<p>
+<li>
+  <font color="#006699"><b>sprintf()/printf()</b></font>: It's documented
+  that -1 prints as FFFFFFFF in %x format. Thanks to Juergen Luethje.
+
+</ul>
+
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.4 Official Release July 3, 2003:</_dul></b></font>
+
+<ul>
+
+<li>
+ 
+<font color="#006699"><b>define_c_proc()</b></font>
+and
+<font color="#006699"><b>define_c_func()</b></font>
+have been extended, so in addition to defining C routines in external 
+.dll's and shared libraries, you can now define the parameters 
+and return value for a machine-code routine that your program pokes
+into its own memory. You can call the machine-code routine using 
+<font color="#006699"><b>c_proc()</b></font>
+or
+<font color="#006699"><b>c_func()</b></font>. Thanks to Daniel Kluss.
+
+<p>
+<li>
+ Performance Improvement: <font color="#006699"><b>get4()</b></font> and
+ <font color="#006699"><b>put4()</b></font> in
+ <font color="#5500FF"><b>database.e</b></font> have been 
+ speeded up slightly. They are very important to the overall speed of
+ <font color="#993333"><b>EDS</b></font>. Thanks to Derek Parnell.
+
+<p>
+<li>
+ Performance Improvement: <font color="#006699"><b>get_bytes()</b></font>
+ is now much faster when the number of bytes requested far exceeds the number
+ of bytes remaining in the file. Thanks to Pier Feddema. 
+
+<p>
+<li>
+ <font color="#0066CC"><b>Translator</b></font>: When translating a huge
+  Euphoria routine (many hundreds of 
+  Euphoria statements), the Translator will now output calls to a 
+  dereference routine, rather than using
+  in-lined C statements. This reduces the chance of exceeding a
+  size limit imposed by the C compiler (especially Watcom C). It also
+  reduces the <b>.exe</b> size. Since the dereference routine is more 
+  likely than the in-lined statements to be in cache, the speed 
+  difference is not that great.
+
+<p>
+<li>
+ <font color="#0066CC"><b>Interpreter Source Code</b></font>: In
+  <font color="#5500FF"><b>watexw.bat</b></font>,
+  <b>runtime windows=4.0</b> was added
+  to the link command for building <font color="#993333"><b>exw.exe</b></font>.
+  
+<p>
+<li>
+ There are now some checks for invalid argument type and invalid
+  return type in calls to <font color="#006699"><b>define_c_func()</b></font>
+  and <font color="#006699"><b>define_c_proc()</b></font>.
+
+<p>
+<li>
+ Some syntax error messages are now more descriptive when namespace 
+ identifiers are involved.
+
+<p>
+<li>
+ The filesort.ex tutorial program was altered 
+ to make it more usable under Linux and FreeBSD.
+
+<p>
+<li>
+ By default, <font color="#5500FF"><b>safe.e</b></font> now does a less-strict,
+  "edges-only" check for memory corruption, when the platform is
+  <font color="#CC3366"><b>WIN32</b></font>.
+  Windows programs often access memory that was not allocated using Euphoria's
+  <font color="#006699"><b>allocate()</b></font>.
+  
+<p>
+<li>
+ <b><font color="#009999">bug fixed</font></b>: When a literal floating-point
+  constant in the Euphoria
+  program was larger than about 1e308, the Translator would output "inf" 
+  in <font color="#5500FF"><b>init_.c</b></font>.
+  This caused the C compiler to issue an undefined 
+  symbol error. Thanks to Juergen Luethje.
+
+<p>
+<li>
+ <b><font color="#009999">bug fixed</font></b>: In a rare case, the Translator 
+ was failing to emit C code to make a copy of a sequence with multiple 
+ references to it, before overwriting an element of that sequence. 
+ Thanks to Juergen Luethje. 
+
+<p>
+<li>
+ <b><font color="#009999">bug fixed</font></b>: In certain cases, when a
+  Euphoria program exchanged Euphoria data with a <b>.dll</b> written in
+  Euphoria, the data might not be freed (until
+  the program terminated). Thanks to Wayne Overman (Euman).
+  
+<p>
+<li>
+ <b><font color="#009999">bug fixed</font></b>: If you used "asm" in your
+  program, as a private variable or
+  parameter name, the Translator would use "_asm" in the C code. 
+  This was not acceptable for some C compilers. The Translator will now
+  avoid using "_asm", as well as "_try", "_Seg16", "_stdcall" and 
+  several other single-underscore names that are reserved by various 
+  C compilers. Thanks to George Papadopoulos and Matt Lewis.
+
+<p>
+<li>
+ <b><font color="#009999">bug fixed</font></b>: If the HOT_KEYS parameter in
+  <font color="#5500FF"><b>ed.ex</b></font> was set to FALSE,
+  then <b>Esc h Enter</b> would not bring up the help prompt.
+  Thanks to J. Brown.
+
+</ul>
+  
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.4 Beta-test Release April 10, 2003:</_dul></b></font>
+
+<p>
+This release updates the <font color="#0066CC"><b>Euphoria 
+Interpreter</b></font>, the <font color="#0066CC"><b>Euphoria To C 
+Translator</b></font>,
+and the <font color="#0066CC"><b>Interpreter Source Code</b></font> products,
+for <font color="#CC3366"><b>Windows</b></font>,
+<font color="#CC3366"><b>DOS</b></font>,
+<font color="#CC3366"><b>Linux</b></font> and
+<font color="#CC3366"><b>FreeBSD</b></font>.
+<p>
+
+<font color="#993333"><_sul><b>New Features</b></_sul></font>
+<ul>
+
+<li>
+    <font color="#993333"><b>bind</b></font> and
+    <font color="#993333"><b>shroud</b></font> now have an option
+    <_bq>-out</_bq> for specifying the output file,
+    so you won't be prompted for it. Thanks to Jonas Temple, Rusty Davis 
+    and others.
+  
+<p>
+<li>
+    <font color="#993333"><b>bind</b></font>
+    and <font color="#993333"><b>shroud</b></font> now have an option
+    <_bq>-quiet</_bq> that suppresses normal messages
+    and statistics, and therefore eliminates the window that normally pops up.
+    Only errors are reported. Thanks to Jonas Temple.
+
+<p>
+<li>
+    The namespace error message that's issued when you refer to a global 
+    symbol that's defined in two or more files, now 
+    gives you a list of all the files where that symbol 
+    has been defined. Thanks to Derek Parnell and Irv Mullins.
+  
+<p>
+<li>
+    <font color="#0066CC"><b>Translator</b></font>: In many cases,
+    the C code generated for <font color="#006699"><b>remainder()</b></font>,
+    integer multiplication, and <font color="#006699"><b>compare()</b></font>
+    is smaller and faster.
+
+<p>
+<li>
+    <b>exw, ecw -wat</b>: Deallocation of space for huge numbers of small 
+    objects (atoms or small sequences) is much faster than in 2.4 alpha. 
+    Thanks to Andy Serpa.
+    (Note that <i>allocation</i> of huge numbers of small objects in <b>exw</b>,
+    or <b>ecw -wat</b>, became much faster in 2.4 alpha, 
+    and remains much faster.)
+
+<p>
+<li>
+    When an <font color="#5500FF"><b>ex.err</b></font> file is created,
+    any warnings issued against the program will be listed at the end of
+    the <font color="#5500FF"><b>ex.err</b></font> file. Thanks to Al Getz.
+  
+<p>
+<li>
+    The file name is now included in the warning message that you get for
+    some of the common warnings (variable not used, variable not assigned to).
+    Thanks to Al Getz.
+
+<p>
+<li>
+    <font color="#550099"><b>New Icon</b></font>: On
+    <font color="#CC3366"><b>Windows</b></font>, Euphoria include files are
+    now labelled with a gray-scale version of the Euphoria <_bq>E)</_bq> icon.
+    This lets you easily distinguish the executable Euphoria files from the 
+    include files. Thanks to Wolfgang Fritz.
+    
+<p>
+<li>
+    Out-of-bounds floating-point subscript values 
+    were being reported after rounding down to an integer. 
+    Now the value before rounding is reported. 
+  
+<p>
+<li>
+    <font color="#993333"><b>Euphoria Database System (EDS)</b></font>:
+    <font color="#006699"><b>db_rename_table()</b></font> now checks to see
+    if the target table name already exists, before it renames a table.
+    Thanks to Mike Nelson.
+
+<p>
+<li>
+    The first value returned by <font color="#006699"><b>rand()</b></font>
+    (in the absence of <font color="#006699"><b>set_rand()</b></font>)
+    is now more "random". Thanks to Aku. 
+  
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+
+<ul>
+<li>
+    <b><font color="#009999">bug fixed</font></b>: Due to a change made in
+    2.4 alpha, the <font color="#006699"><b>dir()</b></font> routine 
+    for Borland and Lcc was concatenating the file attributes 
+    characters (if any)  to the file name field. 
+    Thanks to Dr. Juan R. Herguijuela.
+    
+<p>
+<li>
+    <b><font color="#009999">bug fixed</font></b>: No error message was
+    issued when ',' was followed immediately by ')' in a routine's parameter
+    declaration list. Thanks to Brage Moris.
+  
+<p>
+<li>
+    <b><font color="#009999">bug fixed</font></b>: Huge positive out-of-bounds
+    subscripts (over 2 billion) were reported as huge negative values. 
+    
+<p>
+<li>
+    <b><font color="#009999">bug fixed</font></b>:
+    <font color="#006699"><b>repeat(0, size)</b></font>, where size was a
+    huge positive floating-point number, incorrectly reported:
+    "repetition count must not be negative". Now it reports:
+    "repetition count is too large". Thanks to Martin Stachon.
+
+<p>
+<li>
+    <b><font color="#009999">bug fixed</font></b>:
+    <font color="#006699"><b>machine_proc(x, 5)</b></font>, where x was a huge 
+    floating-point number, incorrectly reported:
+    "an integer was expected, not a sequence".
+    Now it reports: "The first argument to machine_proc/func must be a small
+    positive integer". Thanks to Martin Stachon.
+    
+</ul>
+
+<br>
+<p>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.4 Alpha-test Release February 21, 2003:</_dul></b></font>
+
+<p>
+<font color="#993333"><_sul><b>New Features</b></_sul></font>
+
+<ul>
+
+<li>
+  Most machine-level exceptions (peek/poke to bad addresses etc.)
+  in both the main program and in .dlls, are now caught by
+  <font color="#993333"><b>exw</b></font>
+  and <font color="#993333"><b>exu</b></font>, 
+  and reported in the usual way, with a full traceback and
+  <font color="#5500FF"><b>ex.err</b></font> 
+  variable dump. This is a great improvement over the cryptic 
+  machine-level messages you used to get (and still get when using
+  compiled languages, and most interpreted languages) about 
+  "segmentation violation", "illegal instruction" etc.). 
+  Thanks to Martin Stachon.
+
+<p>
+<li>
+  In addition to <_bq>__stdcall</_bq>, the C <_bq>__cdecl</_bq> calling
+  convention 
+  is now supported for calls to C routines in .dll's and also call-backs 
+  to Euphoria routines from C code.
+  
+<p>
+<li>
+  Euphoria's support for DOS long filenames has been extended to
+  Windows XP.
+
+<p>
+<li>
+  The <font color="#993333"><b>trace</b></font> screen shows you large
+  sequences in pretty-print display on a separate
+  screen. You can scroll through the whole sequence.
+  
+<p>
+<li>
+  <font color="#006699"><b>pretty_print()</b></font> was added to
+  <font color="#5500FF"><b>misc.e</b></font>. 
+  It lets you display Euphoria objects
+  with a nice, readable structured display, and many formatting options.
+
+<p>
+<li>
+  Pretty-printing of sequences is now done in
+  <font color="#5500FF"><b>ex.err</b></font>,
+  the <font color="#993333"><b>?</b></font> command, and
+  <font color="#006699"><b>db_dump()</b></font>. 
+  
+<p>
+<li>
+  <font color="#993333"><b>Euphoria Database System (EDS)</b></font>:
+  <font color="#006699"><b>db_rename_table(name, new_name)</b></font>
+  was added to <font color="#5500FF"><b>database.e</b></font>.
+  This routine was submitted by Jordah Ferguson, and included 
+  with only trivial changes.
+
+<p>
+<li>
+  <font color="#CC3366"><b>Linux/FreeBSD</b></font>:
+  <font color="#006699"><b>system()</b></font> no longer initializes
+  curses when there is no console window yet. Thanks to Daniel Johnson.
+
+<p>
+<li>
+  The number of levels of nested include files has been raised to 30 (from 10).
+  Thanks to Tone Skoda.
+
+<p>
+<li>
+  Include statement path names can have double-quotes around them, 
+  so paths containing blanks can be handled correctly. This was 
+  actually implemented for 2.3 but never documented.
+
+<p>
+<li>
+  <font color="#993333"><b>exw.exe</b></font>, and any executables
+  produced by the <font color="#0066CC"><b>Translator</b></font> with Watcom,
+  now have the subsystem set to 4.0 instead of 3.1. This improves the
+  appearance of GUI's in some cases. The utility
+  <font color="#993333"><b>make31.exw</b></font> will 
+  create a version of <font color="#993333"><b>exw.exe</b></font> that
+  supports Windows GUI 3.1 as before, 
+  in the unlikely case that there are compatibility problems with
+  Euphoria 2.3. Thanks to H. W. Overman, Brian Broker and others for 
+  recommending this change.
+
+<p>
+<li>
+  <font color="#993333"><b>makecon.exw</b></font> - will create a version
+  of <font color="#993333"><b>exw.exe</b></font> that
+  operates as a console application - no console window is popped up,
+  and <b>stdin/stdout</b> can be redirected
+
+<p>
+<li>
+  <font color="#006699"><b>trace(1 2 and 3)</b></font> are now allowed
+  with <b>bind -clear</b>
+  (still not allowed with <font color="#993333"><b>shrouded bind</b></font>
+  for security reasons). Thanks to Jonas Temple.
+
+<p>
+<li>
+  <font color="#0066CC"><b>Translator</b></font>: You can now make a
+  Euphoria .dll using Lcc and interface it with interpreted programs running
+  under <font color="#993333"><b>exw</b></font>, and translated programs
+  using Borland and Watcom. Previously, the main program had to also be
+  compiled with Lcc.
+  
+<p>
+<li>
+  The <font color="#0066CC"><b>Translator</b></font> no longer uses
+  the <b>-m486</b> or <b>-mpentium</b> options available with
+  GCC and DJGPP.
+  These options were causing warnings, and the C compiler apparently
+  sets the machine model correctly by itself. Thanks to Kenneth Rhodes.
+
+<p>
+<li> 
+  The <font color="#0066CC"><b>Translator</b></font> will now perform 
+  automatic calls
+  to user-defined types, in the
+  unusual case where the type routine has side-effects (it sets global
+  variables, performs I/O etc.). Thanks to Andy Serpa.
+
+<p>
+<li>  
+  <font color="#5500FF"><b>euphoria\demo\bench</b></font> compares 
+  the 
+  <font color="#0066CC"><b>Euphoria Interpreter</b></font> and the
+  <font color="#0066CC"><b>Euphoria To C Translator</b></font> against
+  more than 20 other interpreted languages.
+
+</ul>  
+
+<p>
+<font color="#993333"><_sul><b>Porting Activity</b></_sul></font>
+<ul>
+<li>
+  We ported the <font color="#0066CC"><b>Interpreter</b></font>
+  and <font color="#0066CC"><b>Translator</b></font>
+  to <font color="#CC3366"><b>FreeBSD.</b></font>
+  The source now has several C #ifdef's for FreeBSD.
+  
+<p>
+<li>
+  Andy Cranston has ported Euphoria to HP Unix, and he plans to do 
+  Sun Unix.
+
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Optimizations</b></_sul></font>
+	
+<p>
+<font color="#339900"><b>- Interpreter -</b></font>
+  
+<ul>
+<li>
+  Typical large slices are faster.
+  About 30% faster for slices from about 100 to 50000 in length.
+  (Overhead dominates for smaller slices, and lack of caching
+  affects larger slices.)
+  This assumes the slice is mostly integers (usually true), 
+  and an actual copy of the data is made (usually true since v1.4b).
+  
+<p>
+<li>
+  Statements that contain multiple <font color="#993333"><_bsq>&</_bsq></font>
+  concatenations are much faster. <br>
+  <pre>        e.g. instead of:
+             <b>result = a & b & c</b>
+             being evaluated as:
+               1. copy a and b into temp
+               2. copy temp and c into result 
+                  (a and b are effectively copied twice!)
+  
+             We now do:
+               1. copy a and b and c directly into result
+  </pre>
+  So there is less copying of data and fewer temp sequences to create.
+  The more <font color="#993333"><_bsq>&</_bsq></font> operators in an
+  expression, the greater the speed-up. e.g. with 3
+  <font color="#993333"><_bsq>&</_bsq></font> operators some of the data
+  was copied 3 times, etc.
+  Jordah Ferguson pointed out that this was slow.
+
+<p>
+<li>
+  The time overhead involved in calling and returning from a 
+  Euphoria call-back routine has been reduced by about 10 percent.
+
+<p>
+<li>
+  In <b>exw</b> and <b>ecw -wat</b>, allocation of space for large numbers of 
+  objects is faster. It can be tremendously faster when hundreds of
+  thousands or millions of objects are involved.
+  
+<p>
+<li>
+  Better UPX compression has chopped a few K off
+  <font color="#993333"><b>exw.exe</b></font> vs. 2.3 
+  (even though new code was added). Thanks to Wolfgang Fritz
+
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Euphoria Database System -</b></font>
+
+<ul>
+
+<li>
+  Keys and records are read faster due to a faster
+  <font color="#006699"><b>decompress()</b></font> routine.
+  Almost twice as fast when the key or record data to be retrieved 
+  consists mainly of sequences of characters or small integers. 
+  This case is quite common.
+   
+<p>
+<li>
+  Allocating new space in a database is much faster, up to 4x faster,
+  especially in large databases with a large list of free blocks
+     
+<p>
+<li>
+  Inserting and deleting records in huge tables is now much faster. 
+  Combined with the speeded-up slices in Euphoria 2.4,
+  <font color="#5500FF"><b>database.e</b></font> is
+  now about 25% faster for a table with 10,000 records and 
+  over 3x faster for a table with 100,000 records.
+  This really only matters if you are trying to insert/delete hundreds
+  of records per second. In the typical case of a human operator
+  entering data via GUI, you would never notice the insert/delete time
+  for one record (a few milliseconds). Derek Parnell pointed out the
+  slowness.
+
+<p>
+<li>
+  <font color="#006699"><b>db_select_table()</b></font> is significantly
+  faster.
+
+<p>
+<li>
+  <font color="#006699"><b>get4()</b></font> is faster which speeds up
+  everything.
+     
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Other Optimizations -</b></font>
+
+<ul>
+
+<li>
+  <font color="#006699"><b>bytes_to_int()</b></font> in
+  <font color="#5500FF"><b>machine.e</b></font> is now more than twice as fast.
+
+<p>
+<li>
+  <font color="#006699"><b>gets()</b></font> is about 5% faster
+
+<p>
+<li>
+  <font color="#006699"><b>sort()</b></font> and
+  <font color="#006699"><b>custom_sort()</b></font> are a few percent faster.
+  Thanks to Ricardo Forno for tweaking the Shell sort algorithm. 
+  
+<p>
+<li>
+  Several additional optimizations have been added to the
+  <font color="#0066CC"><b>Translator</b></font>.
+  It produces executables that are faster and smaller 
+  than version 2.3. The 2.4 Translator has been successfully tested 
+  on hundreds of thousands of lines of Euphoria code, and there are
+  currently no known code generation bugs. Some Translator 
+  benchmark results are in
+  <font color="#5500FF"><b>euphoria\demo\bench</b></font>.
+
+</ul>
+
+<p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+
+<p>
+ <font color="#339900"><b>- Source Code -</b></font>
+
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The
+  <font color="#5500FF"><b>gnubsd</b></font> batch file referred to
+  <font color="#5500FF"><b>syncolor.c</b></font> and
+  <font color="#5500FF"><b>syncolor.o</b></font>.
+  (<font color="#5500FF"><b>gnuexu</b></font> was ok.)
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: Karl Bochert pointed out a necessary C coding 
+  change to make <font color="#006699"><b>poke()</b></font> work with
+  the latest version of Lcc. The change 
+  corrected the <font color="#0066CC"><b>Translator</b></font> (with
+  recent versions of Lcc) and the <font color="#0066CC"><b>Interpreter
+  Source Code</b></font> (compiled with Lcc)
+</ul>                
+
+  <p>
+  <font color="#339900"><b>- Interpreter -</b></font>
+
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: A crash might occur in situations where a call-back routine
+  indirectly called itself recursively. Thanks to Matthew Lewis 
+  and George Papadopoulos.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In for-loops at the top-level of a program 
+  (outside of any routine), 
+  that incremented the loop variable by an integer other than the default 
+  of +1, <font color="#993333"><_bq>end for</_bq></font> was taking up to
+  15x longer than necessary due to a 
+  bug fix that was made back in November 1999. Only the
+  <font color="#993333"><_bq>end for</_bq></font>
+  itself was slow, not the code contained in the body of the loop.
+  Antoine Tammer detected this.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: On XP, when you open a new DOS window that has more than 25 lines,
+  the Virtual DOS Machine (VDM) is at first confused about the true number
+  of lines. The first time (only) when you ran a Euphoria program in 
+  that window, if you ran it near the very bottom of the screen, the output 
+  might disappear, or the VDM or Euphoria might report an error etc. 
+  Euphoria (<font color="#993333"><b>ex.exe</b></font>) now detects the
+  rare cases when VDM is
+  confused and clears the screen, which clears up the confusion. 
+  A similar problem existed on NT, and was fixed a few years ago.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The interpreter was referring
+  to "call back from Windows" in <font color="#5500FF"><b>ex.err</b></font>,
+  even on Linux or FreeBSD. It now says "call-back from external source"
+  on those systems. Thanks to Pete Eberlein.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: When an include file couldn't
+  be found, the error message 
+  referred to "euphoria\include". It now uses %EUDIR%\include
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: An error message will no longer be generated on any platform 
+  for <_bq>without profile_time</_bq>. Thanks to Alan Oxley.
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Translator -</b></font>
+
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: When assigning
+  the result of an arithmetic calculation (typically multiply) 
+  involving two integers, to a variable declared as atom, 
+  where the atom variable had already (in the same basic block) 
+  been assigned an integer value, the Translator might 
+  not output any code to check for integer overflow (result outside
+  of +/- one billion). This could cause a crash. Thanks to Andy Serpa.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: DJGPP strip.exe command
+  in <font color="#5500FF"><b>emake.bat</b></font> would fail on XP,2000 due to
+  a bug in DJGPP.
+  Now <font color="#5500FF"><b>emake.bat</b></font> has: <b>SET LFN=n</b>
+  to work around the bug in strip.exe  
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: Translated code compiled
+  with Borland C was not producing 
+  INF's and NAN's, like Watcom and Lcc. Rather, it was crashing when
+  a floating-point overflow (over 1e308), or an undefined f.p. 
+  result was calculated. The <font color="#0066CC"><b>Interpreter Source
+  Code</b></font> was also 
+  corrected for those who wish to compile <font color="#993333"><b>exw.exe</b>
+  </font> using Borland.
+  Thanks to Andy Serpa.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In the first basic block
+  of a Euphoria routine (i.e. before any control-flow statements),
+  <font color="#006699"><b>peek4u()</b></font>, <font color="#006699">
+  <b>peek4s()</b></font>, and the
+  "add integer 1" operation, would sometimes neglect to check for 
+  possible 31-bit integer overflow when assigning to a private variable 
+  declared as atom, unless the variable had been previously
+  initialized. Thanks to Mike Duffy.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In some cases, when
+  assigning a sequence element
+  to a variable declared as integer, and known to have an integer value
+  at this point, the case where the element was an integer value stored
+  in C double form was not handled correctly.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In rare cases, the
+  translator might output two unary minus operators
+  in a row, which would be parsed by a C compiler as the 
+  C decrement operator "--".
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: Euphoria .dll's were not
+  always correctly freeing storage
+  allocated by the main program, and vice versa. Memory could be wasted,
+  and you might get a machine-level crash. Thanks to H. W. Overman.
+  <p>
+  <b>Note:</b> Due to this fix, any Euphoria .dll's created with the 
+  Translator version 2.3 or earlier, must be re-translated with 2.4, 
+  and re-compiled, in order to interface with the Euphoria 2.4 (or later) 
+  interpreter or translated code. New .dll's created with version 2.4 
+  or later, will not work with the interpreter version 2.3 or earlier, 
+  except in trivial cases.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The
+  <font color="#006699"><b>sleep(x)</b></font> function was only sleeping
+  for x milliseconds 
+  when using the Lcc run-time library. It now sleeps for x seconds, 
+  to conform with the Euphoria documentation for
+  <font color="#006699"><b>sleep()</b></font>. Thanks to Wolfgang Fritz.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: On some versions of Linux, a translated/compiled Euphoria
+  program would crash if standard output was redirected, e.g. for CGI
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: On some versions of Linux, a translated/compiled Euphoria
+  program would crash if machine(M_GET_SCREEN_CHAR, {row, col}) were called.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In some cases the code was not correct when an 
+  integer variable was assigned the unary minus of an atom variable.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: In a very rare case, an uninitialized value in memory
+  might be used to determine if a literal floating-point value should be
+  treated as an integer or not. Incorrect code could result.
+  
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Binder -</b></font>
+
+<ul>
+  
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The binder would crash
+  after seeing a comment with no new-line character, just EOF, on the last
+  line of a file. Some versions of Win32Lib.ew had this.
+   Thanks to Henri Goffin.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The usage report of
+  <font color="#993333"><b>bind</b></font>/<font color="#993333"><b>shroud</b>
+  </font> still said "-scramble", instead of "-clear" and had other
+  errors for Linux/FreeBSD. Thanks to Chris Bensler.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <b>bind/shroud -clear</b> might neglect to 
+  rename a private variable, when an earlier local variable gets renamed 
+  into the same name. Thanks to Pete Lomax.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: When an include file was
+  missing <_bsq>\n</_bsq> on the last line,
+  <b>bind/shroud -clear</b> might neglect to leave some whitespace 
+  before the next word in the main file. Thanks to Pete Lomax.
+  
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: If you defined a constant
+   that was never used, and
+   it was defined using an expression that contained a binary 
+   minus operator, a syntax error could occur in the bound or 
+   shrouded file that you create. Thanks to Chris Bensler.
+
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Library Routines -</b></font>
+
+<ul>  
+
+<li>
+  <b><font color="#009999">bug fixed</font></b>: 
+  <font color="#006699"><b>walk_dir("/",...)</b></font> would fail on Linux.
+  Thanks to Ricardo Forno.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <font color="#006699"><b>db_compress()</b></font> of EDS had an error
+  if the database file or it's path contained a blank character. A
+  blank is ok now on all platforms except DOS. Thanks to Virtual B.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <font color="#006699"><b>wildcard_file()</b></font> in
+  <font color="#5500FF"><b>euphoria\include\wildcard.e</b></font> is now case 
+  sensitive on Linux/FreeBSD (but is still case insensitive on DOS/Windows). 
+  Thanks to Jeff Fielding.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <font color="#006699"><b>dir()</b></font> was not always reporting file
+  sizes greater than 1 Gb correctly. It now handles up to 4 Gb. Arithmetic
+  performed on the file size would probably fail. Thanks to Ricardo Forno.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <font color="#006699"><b>where()</b></font> was not always reporting file
+  positions greater than 1 Gb
+  correctly. Arithmetic performed on the position would probably fail. 
+  It now handles up to 2 Gb.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <b>ex, exw, ec -wat, ecw -wat</b>: The
+  <font color="#006699"><b>dir()</b></font> function for 
+  DOS and Windows was not handling wildcards correctly when a backslash 
+  appeared at the end of the file or directory path. Thanks to Juergen Luethje.
+
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Namespace Feature -</b></font>
+
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: If you tried to declare a
+  new variable, using a namespace
+  qualifier, e.g. <b>integer y:x</b> (which is illegal)
+  it wouldn't complain, and would just ignore the "y:" part,
+  as long as y:x was a routine (not a variable) in an earlier file. 
+  This is now caught as an error. Thanks to Martin Stachon.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: When declaring the type of a parameter, using a global type that was
+  defined in more than one file, you would get an unclear error
+  message stating "a type is expected here". Now you'll get a
+  message pointing out that the type requires a namespace identifier
+  to resolve it. Thanks to Juergen Luethje.
+   
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: The error message that you get if you specify a namespace
+  qualifier and a ':', but you neglect to follow it with a properly-formed 
+  identifier, has been improved.  Thanks to Carl White.
+
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Demo Programs -</b></font>
+  
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  In the <font color="#5500FF"><b>window.exw</b></font> demo program,
+  <font color="#006699"><b>allocate(64)</b></font> and
+  <font color="#006699"><b>allocate(16)</b></font> 
+  caused a storage leak. Thanks to Wolfgang Fritz and Jordah Ferguson.
+</ul>
+
+  <p>
+  <font color="#339900"><b>- Trace/Debug -</b></font>
+  
+<ul>
+<li>
+  <b><font color="#009999">bug fixed</font></b>: When
+  <font color="#006699"><b>trace(0)</b></font> was executed, followed later by
+  <font color="#006699"><b>trace(1)</b></font>, with no
+  screen I/O in between, the values of some variables on the trace screen 
+  were not updated. Thanks to Ricardo Forno.
+
+<p>
+<li>
+  <b><font color="#009999">bug fixed</font></b>:
+  <font color="#993333"><b>with trace</b></font> /
+  <font color="#993333"><b>with profile</b></font> /
+  <font color="#006699"><b>trace(3)</b></font>, used all together,
+  produced garbage source lines in
+  <font color="#5500FF"><b>ctrace.out</b></font>. Thanks to Kat.
+
+</ul>
+
+<a name="v2.3"></a>
+<br>
+
+<p>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.3 Official Release February 11, 2002:</_dul></b></font>
+<p>
+This release updates the Euphoria Interpreter, 
+the Euphoria To C Translator, and the Interpreter Source Code product,
+for all platforms.
+<ul>
+
+<li>
+ The DJGPP version of the interpreter source code now uses 
+ GNU C's dynamic labels, just like the Linux version. This allows
+ it to achieve full speed, without the need for any assembly-level 
+ tweaking. Thanks to Bernie Ryan.
+
+<p>
+<li>
+ The Interpreter Source Code now includes an overview document
+ describing how the interpreter works.
+ 
+<p>
+<li>
+ In the Complete Edition, bind.bat and bindw.bat now use exw to run
+ the binder/shrouder. This avoids problems with long filenames
+ on some systems. A console window will appear while the binder/shrouder
+ is running. Thanks to "void", Bruce Axtens, and others.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed </font>: </b>
+ Due to a bug in the WATCOM 10.6 C library, the ex and exw interpreters,
+ and code translated to C and compiled by Watcom, might get the wrong
+ result from Euphoria's where() function when the file was opened in 
+ append mode, and the file pointer was in the uncommitted (not written 
+ to disk yet) portion of the file. The bug has been worked around 
+ by having Euphoria flush() the file in this particular case, 
+ before calling the Watcom routine. Thanks to Bob Elia.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed </font>: </b>
+ A bug introduced in the binder for 2.3 beta, might cause
+ a function call on the last line of a program to be ignored.
+ Thanks to Wolfgang Fritz.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed </font>: </b>
+ Several Euphoria files in the WIN32+DOS32 distribution had Linux-style
+ line terminators (\n only). This made them hard to view using 
+ NotePad and some other editors. Thanks to Pete Lomax.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed </font>: </b>
+ If "with type_check" was turned on, ed.ex would get a type_check failure
+ when the Esc key was pressed. Thanks to Kenneth Orr.
+ 
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.3 Beta Release January 15, 2002:</_dul></b></font>
+<p>
+This release updates the Euphoria Interpreter, 
+the Euphoria To C Translator, and the Interpreter Source Code product,
+for all platforms.
+<ul>
+
+<p>
+<li>
+  You can now override a Euphoria built-in routine with your own
+  variable or namespace identifier of the same name. 
+  Previously this was only allowed for user-defined routines.
+  Besides giving programmers more freedom, it will allow RDS
+  to add new built-in routines in the future without breaking 
+  existing code.
+
+<p>
+<li>
+  The warning about having multiple global symbols with the same name
+  in different source files has been removed. It was felt to be unnecessary 
+  since you'll be asked to supply a namespace identifier if you actually 
+  make an ambiguous reference to a global symbol.
+
+<p>
+<li>
+  You can now have a trailing \ (or Linux /) on the end of all directory names 
+  in <b>EUINC</b>, and you can have blanks in the directory name.
+
+<p>
+<li>
+  To eliminate confusion, the binder/shrouder will now delete the 
+  output file if a fatal error occurs during the bind or shroud.
+
+<p>
+<li>
+  Numerous improvements and corrections were made to the documentation.
+  Thanks to Igor Kachan.
+
+<p>
+<li>
+  Old, pre-ANSI function definitions in the interpreter source code,
+  have been updated to ANSI-style, which is more compatible with C++.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed </font>: </b>
+  With DJGPP C, when compiling code produced by the Translator, 
+  or compiling the Interpreter source code, 
+  there was a memory allocation bug that could waste a bit of time, 
+  or, in rare cases, cause a crash.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed </font>: </b>
+  On Windows, using the Interpreter, or a Translated program, you were 
+  sometimes required to hit Enter twice to exit from a console window. 
+  Thanks to Tone Skoda.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed</font>: </b>
+   The Euphoria dir() function, as implemented for Lcc or Borland,
+   did not handle directories properly when they had extra attributes
+   set, such as READ_ONLY. Thanks to Euman, who encountered the problem,
+   and then showed how to fix the Interpreter source code for dir().
+<p>
+
+<li>
+<b><font color="#009999">bug fixed</font>: </b>
+  You can now declare a namespace identifier with the same name as a built-in function,
+  without causing a lot of errors. Thanks to Martin Stachon 
+  (although he recommended a different solution).
+  
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Binder: </b>
+ Support for the new <b>EUINC</b> environment variable
+ has now been added to the binder. Thanks to Ross Boyd. 
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Binder: </b>
+  Appending resource files to a bound .exe didn't work
+  correctly when bind -clear was used. Thanks to Wolfgang Fritz. 
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Binder: </b>
+ When using the binder interactively, you would get a
+ "variable not initialized" error when trying to substitute a
+ different Windows icon. Thanks to Tony Steward.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Binder: </b>
+ In some cases the keyword "constant" would be dropped from 
+ the shrouded output, when the previous line of input had a 
+ constant declaration ending in ']'. Thanks to Ross Boyd.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Binder: </b>
+When a general expression, (not just a string in quotes), 
+was used as the argument to routine_id(), local routines that were
+potentially the target of that expression, might have their
+names changed (unless -clear was used), thus causing routine_id()
+to return -1 at run-time. Global routines were ok.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Binder: </b>
+The binder/shrouder kept going even though an include file was missing.
+Thanks to Ross Boyd.
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Linux Binder:</b>
+ The Linux search path bug for bound executables, supposedly fixed
+ by the 2.3 alpha release, wasn't fixed properly. Fixed now.
+ Thanks to Kenneth Rhodes. 
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Linux Binder:</b>
+  bindu -clear  and shroud -clear with a file containing 
+  DOS/Windows-style \r\n line terminators gave you errors 
+  "illegal character" when your shrouded program was run, 
+  and "not bound correctly" when your bound file was run. 
+
+<p>
+<li>
+<b><font color="#009999">bug fixed - </font> Interpreter Source:</b>
+  The link command for building the DOS interpreter with WATCOM C,
+  listed a non-existent .obj file.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.3 Alpha Release November 30, 2001:</_dul></b></font>
+<p>
+This release updates the Euphoria Interpreter for WIN32, DOS32 and Linux.
+It also updates the Euphoria To C Translator for all platforms, 
+and it introduces a new product - the Euphoria Interpreter Source Code.
+
+<ul>
+<p>
+<li>
+The registration incentives and prices have changed.
+<ul>
+<p>
+<li>The Interpreter product now has just one option: 
+   WIN32, DOS32 <i>and</i> Linux, formerly $59, for just $39.
+
+<p>
+<li>The Interpreter source code (minus a few registered features)
+    is now available for $49. See the <a href=license.htm>source license</a>
+    and <a href=register.htm>register.doc</a> for more details.
+<p>
+<li>
+The Translator continues to cost $29.
+
+<p>
+<li> When Public Domain users reach 300 statements, they will no longer
+lose the run-time error diagnostics. They will only lose the trace() facility.
+
+</ul>
+<p>
+<a href=register.htm>register.doc</a> has more details, including the
+requirements for getting a free upgrade.
+
+<p>
+<li> 
+ The Euphoria interpreter can now be built successfully by 6 different 
+ C compilers on 3 platforms.
+
+<p>
+<li> 
+ New <i>namespace qualifiers</i> eliminate naming conflicts
+ between identical global symbols declared in different include files.
+ Also, local symbols will now override global symbols of the same name,
+ rather than causing an error. See <a href=refman_2.htm#42>Scope Rules</a>.
+
+<p>
+<li> 
+ The Complete Edition Interpreter product comes with a new 
+ 2-pass binder/shrouder that eliminates all unused routines and constants,
+ resulting in smaller executable files. It also has an option to bind 
+ clear source, so you can get understandable error messages from your users.
+ 
+<p>
+<li> 
+ A new environment variable, EUINC, has been introduced.
+ If present, it specifies a list of additional directories that will be
+ searched for include files. The directory containing the main file 
+ is always searched first, then the directories in EUINC, 
+ then euphoria\include.
+
+<p>
+<li> 
+ The Interpreter now supports a new trace mode, trace(3).
+ It logs all executed Euphoria statements to a file, so 
+ you'll be able to see the last statement that was 
+ executed at the time of any crash, as well as the 499 statements 
+ that preceded it.
+ This is particularly helpful in the case of machine-level crashes
+ where Euphoria is unable to write an ex.err file.
+ Thanks to Matthew Lewis.
+
+<p>
+<li> 
+ The Euphoria interpreter can now pass Euphoria data - 
+ atoms and sequences, to .dll files coded in Euphoria and built 
+ by the Translator. Use the new E_ types in dll.e
+  
+<p>
+<li> 
+ On Linux we added RTLD_GLOBAL on the dlopen() call. This lets you link
+ successfully with more shared libraries.
+   
+<p>
+<li> 
+ On Linux, when using the #! feature on the first line, 
+ to make your source file directly executable, 
+ you no longer need a .exu extension on your file.
+ Linux programmers often prefer to have no extension on their executable files.
+
+<p>
+<li> 
+  Windows callback routines written in Euphoria can now take 9
+  arguments (was 8). Thanks to Matt Lewis.
+
+<p>
+<li> 
+  In addition to C_DOUBLE (8-byte floating point), C_FLOAT 
+  (4-byte floating-point) is now supported for arguments and 
+  return values from C routines. Thanks to David Guy.
+  
+<p>
+<li> 
+  Windows .dlls opened with open_dll() are now closed automatically
+  when your program terminates. This avoids a tiny bit of memory leakage.
+  Thanks to Euman.
+  
+<p>
+<li> 
+  safe.e has a new option to check just the edges of registered blocks
+  and not complain if other blocks of memory are used.
+
+<p>
+<li> 
+  get_bytes() is 30% faster.
+
+<p>
+<li> 
+  allocate_string() was speeded up. Thanks to Aku.
+
+<p>
+<li> 
+  The mydata.ex demo program now uses an EDS database.
+    
+<p>
+<li>
+ <b><font color="#009999">bug fixed - </font> Translator: </b> 
+  When a global or local variable containing a sequence or floating-point
+  number was assigned the result of a function,
+  and at some point during the function call 
+  the global or local variable was overwritten, 
+  some corruption would take place, leading to a probable
+  crash later in the program. Thanks to Sergio Gelli.
+
+<p>
+<li><b><font color="#009999">bug fixed - </font> Linux Interpreter: </b>
+programs of more than a few thousand lines had a chance (maybe 20%)
+of having one of their statements crash whenever it was executed.
+
+<p>
+<li><b><font color="#009999">bug fixed - </font>Interpreter: </b> <b>s[i][j]...[k] = s</b>
+ caused the interpreter to crash. i.e. an assignment of an entire sequence 
+ to an element of an element of itself using 2 or more levels of 
+ subscripting. Thanks to Henri Goffin.
+
+<p>
+<li><b><font color="#009999">bug fixed - </font> Linux binder: </b> (Kenneth Rhodes)  
+  Bound executable programs stored somewhere on the search path
+  would not run properly unless they were in the current directory
+  or unless you specified the full path to the executable.
+   
+<p>
+<li><b><font color="#009999">bug fixed - </font> Binder: </b> "with profile_time" in a 
+bound or shrouded program would cause a crash
+
+<p>
+<li><b><font color="#009999">bug fixed - </font> DOS Interpreter: </b> In image.e,
+ put_screen_char() has been corrected to have:
+  <b>if overflow > 0 then ...</b> instead of: <b> if overflow then ... </b>
+
+<p>
+<li><b><font color="#009999">bug fixed - </font> Interpreter: </b> 
+  A time optimization for slicing could in rare cases cause a lot of
+  wasted space. The optimization has been adjusted to handle those cases.
+  Thanks to Brian Clausing.
+
+<p>
+<li><b><font color="#009999">bug fixed - </font>safe.e: </b> free() and free_low() 
+were not actually freeing the block of memory, and on Linux free() 
+could cause a segmentation violation. The same routines in 
+<b>machine.e</b> were ok.
+
+<p>
+<li><b><font color="#009999">bug fixed - </font>Translator for DJGPP: </b>A 
+  couple of minor differences from ex.exe in the display of text 
+  were corrected.
+
+<p>
+<li><b><font color="#009999">bug fixed - </font>define_c_var(): </b> 
+works on WIN32 too. The documentation was corrected.  
+
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Official Release June 5, 2001:</_dul></b></font>
+<ul>
+<li> A couple of minor enhancements and bug fixes.
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Beta-2 Release May 8, 2001:</_dul></b></font>
+<ul>
+<li> You can now use the translator to make a .dll file.
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Beta-1 Release February 15, 2001:</_dul></b></font>
+<ul>
+<li> Some bugs were fixed. Smaller, faster C code is produced.
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Alpha-4 Release December 14, 2000:</_dul></b></font>
+<ul>
+<li> Pixel-graphics and mouse support was added for DJGPP C.
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Alpha-3 Release November 27, 2000:</_dul></b></font>
+<ul>
+<li> Some bugs were fixed. Some new features were added. 
+     Borland C++ is now supported.
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Alpha-2 Release October 26, 2000:</_dul></b></font>
+<ul>
+<li> Support for the Lcc C compiler for Windows was added. DJGPP C (DOS) 
+     is partially supported (no pixel graphics).
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Euphoria to C Translator Alpha Release September 6, 2000:</_dul></b></font>
+<ul>
+<li> The first release of the translator. It supports Euphoria version 2.2.
+It relies on WATCOM C for DOS and Windows, and GNU C for Linux. Prime sieve
+runs 3.2x faster than with the interpreter. Shell sort runs 4.5 times faster.
+</ul>
+
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 Official Release for WIN32+DOS32 January 14, 2000:</_dul></b></font>
+<ul>
+<li> Better error messages are now issued from the interpreter, and from
+the bind program, for some typical errors that users can make when 
+binding a program.
+<p>
+<li> The documentation has been improved in a few places.
+<p>
+<li> The <b>window.exw</b> demo program shows how to load the 
+Euphoria icon contained in exw.exe.
+<p>
+<li> Language War uses Jiri Babor's improved version of <b>putsxy.e</b>.
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 Beta Release for WIN32+DOS32 December 23, 1999:</_dul></b></font>
+<p>
+Most of the new library routines developed for Euphoria 2.2 on 
+Linux, have now been ported to WIN32 and DOS32. 
+These are: sleep(), chdir(), flush(), lock_file(), unlock_file(),
+crash_file(), get_screen_char() and put_screen_char(). For a
+description of these routines refer to the Linux release notes below,
+or <a href=library.htm>LIBRARY.DOC</a>.
+
+<p>
+Some cross-platform bug fixes and other miscellaneous improvements 
+were made during the Linux port. These bug fixes and improvements
+have now been ported back to WIN32+DOS32. See the Linux release notes (below).
+
+<p>
+In addition, the following improvements have been made specifically 
+for WIN32 and DOS32:
+<ul>
+<p>
+<li> <b>exw.exe</b> now contains a Euphoria icon that is displayed 
+automatically by Windows. The icon was contributed by Gary Dumer.
+Registered users may change this icon when they bind a program.
+<p>
+<li> <b>exw.exe</b> is now a compressed executable of just 73K (or so).
+It's compressed using the UPX compression tool for .exe files.
+<p>
+<li> <b>ex.exe</b> has been updated with the latest release of 
+the CauseWay DOS extender. A problem where
+CauseWay would sometimes limit you to 64Mb of memory under
+some DOS configurations has been eliminated, and a few other minor
+bugs were fixed.
+<p>
+<li> <b><font color="#009999">bug fixed:</font></b>
+The error traceback could sometimes crash or be misprinted when
+a type_check failure occurred. It could only happen when 1 was added to
+an expression, and the non-integer result of the expression 
+was assigned to a variable declared as integer.
+<p>
+<li> <b><font color="#009999">bug fixed:</font></b>
+If text_rows() was called as the first routine needing a WIN32 console
+window, Euphoria would fail to set the new number of lines of
+text on the console.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 Official Release for Linux November 22, 1999:</_dul></b></font>
+<ul>
+<li> <b>All platforms: <font color="#009999">bug fixed:</font></b>
+If a Euphoria routine called itself recursively from inside a
+for-loop, and at one level of recursion the for-loop counted <i>up</i> 
+to an upper limit, and at another level of recursion the for-loop 
+counted <i>down</i> to a 
+lower limit, the for-loop would probably malfunction at one of the levels.
+Thanks to Delroy Gayle.
+<p>
+<li> The documentation was improved in many places, especially with respect
+to the Linux platform.
+</ul>
+<p>
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 beta-test release for Linux October 22, 1999:</_dul></b></font>
+<p>
+<i>Most of these features and bug fixes will also be made available 
+in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>. 
+<ul>
+<p>
+<li>
+<font color="#006699"><b>platform()</b></font> has been moved from misc.e into exu to eliminate 
+the function call overhead. platform() now takes zero time to compute.
+The compiler simply plugs in the appropriate constant value.
+<p>
+<li>
+ <font color="#006699"><b>lock_file()</b></font> 
+ and <font color="#006699"><b>unlock_file()</b></font> have been added 
+ to allow multiple processes
+ to share access to files. This can be important in CGI programming and
+ other areas.
+<p>
+<li>
+<font color="#006699"><b>flush()</b></font> will force the contents of the memory buffer out to a file or device.
+<p>
+<li>
+<font color="#006699"><b>chdir()</b></font> will change to a new current directory and let you know if it
+was successful.
+<p>
+<li>
+<font color="#006699"><b>sleep()</b></font> will suspend execution of your program for a number of seconds,
+and let the operating system schedule another process.
+<p>
+<li>
+<font color="#006699"><b>put_screen_char()</b></font> will write a character and its attributes (colors etc.)
+to the screen.
+<p>
+<li>
+<font color="#006699"><b>get_screen_char()</b></font> will read a character and its attributes from the screen.
+<p>
+<li>
+<font color="#006699"><b>save_text_image()</b></font> now works on Linux (as well as DOS32). It copies
+a rectangular text image from the screen.
+<p>
+<li>
+<font color="#006699"><b>display_text_image()</b></font> now works under Linux (as well as DOS32). 
+It writes a rectangular text image to the screen.
+<p>  
+<li>
+The "short-circuit" warning now gives the filename and line number of the 
+  possibly short-circuited call. Minor clarifications were made in some 
+  other error messages as well.
+<p>
+<li>
+Minor improvements were made to <b>ed</b> and <b>search</b>.
+<p>
+<li>
+A portability problem in <b>how2reg.ex</b> was fixed.
+<p>
+<li>
+<b>exu</b> is compressed better. It's actually a bit smaller now,
+although functionality has been added to it. 
+</ul>
+
+
+<p>&nbsp;<br>
+ 
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 alpha-test release for Linux August 24, 1999:</_dul></b></font>
+
+<p>
+<i>Many of these features and bug fixes will also be made available 
+in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>. 
+<ul>
+<p>
+<li>
+ The documentation has been brought up-to-date to include 
+  <font color="#CC3366"><b>Linux</b></font>-specific information for library
+  routines and Euphoria in general.
+<p>
+<li>
+ There is now a Complete Edition for
+  <font color="#CC3366"><b>Linux</b></font>, including
+  <font color="#993333"><b>binding</b></font> and 
+  <font color="#993333"><b>shrouding</b></font>. See
+  <font color="#5500FF"><b>register\register.doc</b></font>.
+<p>
+<li>
+ There is now <font color="#CC3366"><b>text mode</b></font> mouse support using
+  <font color="#006699"><b>get_mouse()</b></font>. You must have <b>GPM
+  server</b> running. It works in a text console or an <b>xterm</b> window.
+<p>
+<li>
+ <font color="#CC3366"><b>Linux:</b></font>
+  <font color="#006699"><b>define_c_var(name)</b></font> will return the
+  address of a global C variable in a shared library.
+<p>
+<li>
+ It was confirmed that you can call Euphoria routines from
+  <font color="#CC3366"><b>Linux</b></font> C routines using exactly the same
+  mechanism as in <font color="#CC3366"><b>WIN32</b></font> Euphoria.
+  See <font color="#5500FF"><b>euphoria/demo/linux</b></font>.
+<p>
+<li>
+ An example of creating your own shared library routines and calling them from
+  Euphoria was added. See
+  <font color="#5500FF"><b>euphoria/demo/linux</b></font>.
+<p>
+<li>
+ <b>All platforms: <font color="#006699">crash_file(file_name)</font></b> will
+  cause diagnostic messages to be written to <b>file_name</b> instead of
+  <font color="#5500FF"><b>ex.err</b></font>. You can use 
+  <font color="#006699"><b>crash_file("/dev/null")</b></font> to get
+  diagnostics on screen but not in a file.<br>
+  <font color="#006699"><b>crash_file("")</b></font> means
+  "no diagnostics" (to screen or ex.err). 
+<p>
+<li>
+ <font color="#993333"><b>Trace</b></font> mode in <b>xterm</b> now detects
+  the <b>F1/F2</b> keys.
+<p>
+<li>
+ <font color="#006699"><b>time()</b></font> now reports real "wall-clock" time,
+  not CPU time.
+<p>
+<li>
+ <font color="#993333"><b>search</b></font>,
+  <font color="#993333"><b>guru</b></font> and
+  <font color="#993333"><b>cdguru</b></font> now place their output in your
+  $HOME directory instead of the current directory.
+<p>
+<li>
+ <b>#!</b> is now restricted to just the first line of a file.
+<p>
+<li>
+ <b>All platforms:</b> In <font color="#993333"><b>ed</b></font>, the
+  <b>Esc n</b>, <b>Esc d</b>, <b>Esc f</b> and <b>Esc r</b> commands will
+  immediately redisplay your last choice. You can press
+  <b>up-arrow/down-arrow</b> to 
+  see other choices, or clear the choice. If you start typing without
+  editing, it will clear the choice and take your new input.
+<p>
+<li>
+ <font color="#006699"><b>free_console()</b></font> will set the terminal
+  parameters back to normal. Normally, when running a Euphoria program the
+  parameters are set the way that <b>curses</b> wants them and they are set
+  back to normal when the program terminates.
+  If your program needs to terminate
+  in a strange way (other than calling <font color="#006699">abort()</font>),
+  <font color="#006699"><b>free_console()</b></font> should be called first. 
+<p>
+<li>
+ <b><font color="#009999">bug fixed:</font> <font color="#006699">get()</font>
+  </b> now considers '\r' to be a whitespace character. This is important when
+  reading DOS files.
+<p>
+<li>
+ <b>All platforms: <font color="#009999">bug fixed:</font></b> It was not
+  immediately issuing a <font color="#993333"><b>type_check</b></font> 
+  failure when 1 was added to an integer variable that was set to the maximum
+  value for an integer (1.07 billion). Thanks to Jeff Fielding.
+<p>
+<li>
+ <b>All platforms: <font color="#009999">bug fixed:</font></b> It was not
+  always detecting an improperly-formed 
+  exponent on a floating-point number. Thanks to Lionel Wong.
+<p>
+<li>
+ <b>All platforms:</b> The performance of the storage allocator has been 
+  improved in certain cases. A bug that could cause the interpreter to 
+  crash when you are almost out of memory has been fixed. 
+</ul>       
+<p>&nbsp;<br>
+ 
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 pre-alpha #4 for Linux July 15, 1999:</_dul></b></font>
+<ul>
+<li>
+ You can call C routines in <font color="#CC3366"><b>Linux</b></font>
+  shared libraries (<b>.so</b> files). See
+  <font color="#5500FF"><b>euphoria/demo/linux/callc.exu</b></font> for
+  some examples.
+<p>
+<li>
+ If your program does not output anything to the <b>xterm</b> window, 
+  <font color="#993333"><b>exu</b></font> will not issue the "Press Enter"
+  prompt.
+<p>
+<li>
+  <b>All platforms: <font color="#993333">ed</font></b> now lets you recall
+   previous top-line command text using <b>up-arrow</b> and <b>down-arrow</b>,
+   similar to doskey in DOS and the shell history in Linux. This works with
+   any strings that you type for <b>Esc n</b> (new file),
+   <b>Esc d</b> (Linux command), <b>Esc f</b> (find string) or
+   <b>Esc r</b> (replace string). In addition, you can now use
+   <b>arrow keys</b>, <b>Home</b>, <b>End</b>, <b>Delete</b> etc. to edit
+   strings before you press <b>Enter</b>. 
+</ul>       
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 pre-alpha #3 for Linux July 8, 1999:</_dul></b></font>
+<ul>
+<li>
+ In an <b>xterm</b> window, <font color="#993333"><b>exu</b></font> will
+  prompt you to hit <b>Enter</b> before it exits. Without this, <b>xterm</b>
+  restores the screen so fast that you don't see any output or error messages.
+<p>
+<li>
+ An internal coding change was made to Euphoria's
+  <font color="#006699"><b>rand()</b></font> function. 
+  (The algorithm has not changed.)
+  Hopefully this will
+  allow <font color="#006699">rand()</font> to work on all distributions of
+  <font color="#CC3366"><b>Linux</b></font>. Please let us know if
+  <font color="#006699">rand()</font> still fails.
+<p>
+<li>
+ <font color="#993333"><b>ed:</b></font> The <b>Esc h</b> command will
+  display the Euphoria help files. This was broken in pre-alpha#2.
+<p>
+<li>
+ In an <b>xterm</b> window, Euphoria's
+  <font color="#006699"><b>video_config()</b></font> now reports the correct 
+  number of lines and columns - this helps
+  <font color="#993333"><b>ed</b></font> to work much better.
+  <font color="#993333"><b>ed</b></font> will work with the initial size of
+  window in effect when <font color="#993333"><b>ed</b></font> starts up.
+<p>
+<li>
+ <font color="#993333"><b>ed:</b></font> <b>F1</b>, <b>F2</b>, <b>F3</b>,
+  <b>F4</b>, <b>Home</b>, <b>End</b>, and the <b>Delete</b> key work now in
+  <b>xterm</b> (under Red Hat 5.2 at least). The other F-keys were already
+  working. <b>PageUp/PageDown</b> and some other keys still don't work - feel
+  free to add your own alternate keys.
+<p>
+<li>
+ <font color="#993333"><b>exu</b></font> is now even smaller - just 82K.
+</ul>       
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 pre-alpha #2 for Linux July 6, 1999:</_dul></b></font>
+<ul>
+<li>
+ The <b>ncurses</b> library has been statically linked into
+  <font color="#993333"><b>exu</b></font>.
+<p>
+<li>
+ <font color="#993333"><b>exu</b></font> is now a compressed executable (97K).
+<p>
+<li>
+ <b><font color="#009999">bug fixed:</font> <font color="#993333">ed</font></b>
+  can now edit files with upper case letters in the name.
+<p>
+<li>
+ The fraction of a second delay when you press the <b>Esc</b> key in
+  <font color="#993333"><b>ed</b></font> has been removed.
+
+</ul>
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.2 pre-alpha #1 for Linux July 1, 1999:</_dul></b></font>
+<ul>
+<li> The first version of Euphoria for
+ <font color="#CC3366"><b>Linux</b></font> was released.
+</ul>       
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366"><b>
+<_dul>Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:</_dul>
+</b></font>
+
+<ul>
+<li>
+  Updates to the <font color="#993333"><b>trace</b></font> screen have been
+  optimized. Unnecessary refreshes of the source code, and the variables on
+  the trace screen, have been eliminated. When a refresh is necessary, it is
+  now slightly faster. This makes a noticeable difference in
+  <font color="#993333"><b>exw.exe</b></font>, and also in
+  <font color="#993333"><b>ex.exe</b></font> in
+  <font color="#CC3366">pixel-graphics modes</font>. For 
+  <font color="#993333"><b>ex.exe</b></font> in 
+  <font color="#CC3366">text modes</font>, it reduces screen flicker 
+  slightly.
+<p>
+<li>
+  The <font color="#993333"><b>install</b></font> program no longer requires 
+  that your PATH be less than 128 characters. It will simply warn you if it 
+  isn't. Newer versions of DOS allow for a longer PATH. Thanks to Steve Adams.
+<p>
+<li>
+  An extra error check was added to
+  <font color="#006699"><b>unregister_block()</b></font> in
+  <font color="#5500FF"><b>safe.e</b></font>. Thanks to David Guy.
+</ul>
+  
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.1 beta-test release March 5, 1999:</_dul></b></font>
+
+<ul>
+<li>
+  The rest of the files in the <font color="#5500FF"><b>euphoria\doc</b></font>
+  directory have now been converted to HTML. Every <b>.doc</b> file in the
+  <font color="#5500FF"><b>doc</b></font> directory now has a corresponding
+  <b>.htm</b> file in the <font color="#5500FF"><b>euphoria\html</b></font>
+  directory. Many improvements and clarifications were made to the
+  documentation.
+<p>
+<li>
+  You will now be warned when you have code that comes immediately
+  after an <font color="#993333"><b>exit</b></font>,
+  <font color="#993333"><b>return</b></font> or
+  <font color="#993333"><b>abort()</b></font> statement. This code can never
+  be executed. Suggested by Gabriel Boehme.
+<p>
+<li>
+  <font color="#5500FF"><b>safe.e</b></font> no longer includes
+  <font color="#5500FF"><b>graphics.e</b></font>. This eliminates possible
+  naming conflicts when <font color="#5500FF"><b>safe.e</b></font> is
+  substituted for <font color="#5500FF"><b>machine.e</b></font>.
+<p>
+<li>
+  Using code supplied by David Guy, <font color="#5500FF"><b>safe.e</b></font>
+  will now let you add or remove externally-allocated blocks of memory on
+  the "safe address list". <font color="#006633"><b>See the new library
+  routines:</b></font>
+  <font color="#006699"><b>register_block()</b></font> and
+  <font color="#006699"><b>unregister_block()</b></font>.
+<p>
+<li>
+  <font color="#006699"><b>message_box()</b></font> now uses the <b>handle of
+  the active window</b> rather than NULL. This forces the user to reply to
+  your message before he can continue to interact with your program.
+  He won't be prevented from interacting with other programs. Thanks to
+  Austin C.
+<p>
+<li>
+  <font color="#006699"><b>get()</b></font> and
+  <font color="#006699"><b>value()</b></font> have been sped up by a
+  further 5% thanks to Gabriel Boehme.
+<p>
+<li>
+  <font color="#993333"><b>exw.exe</b></font> has been made less likely
+  to crash mysteriously when attacked by a virus.
+<p>
+<li>
+  <font color="#5500FF"><b>sanity.ex</b></font> now checks your installation
+  of Euphoria. You'll be warned if your PATH or EUDIR variables are not set,
+  or your <font color="#993333"><b>ex.exe</b></font>,
+  <font color="#993333"><b>exw.exe</b></font>,
+  <font color="#993333"><b>pdex.exe</b></font>, or
+  <font color="#993333"><b>pdexw.exe</b></font> files have been corrupted
+  or not installed correctly in
+  <font color="#5500FF"><b>euphoria\bin</b></font>.
+<p>
+<li>
+  The security of <font color="#993333"><b>bound</b></font> and
+  <font color="#993333"><b>scrambled</b></font> programs has been tightened
+  some more. Thanks to Rusty Davis.
+<p>
+<li>
+  To save space in <b>euphor21.zip</b>, the
+  <font color="#993333"><b>install</b></font> program now <i>generates</i> the
+  HTML and DOC files from a common source, using Junko Miura's
+  <font color="#993333"><b>documentation generator</b></font>. In the process,
+  the generator is deleted, but you can download it from the RDS site.
+<p>
+<li>
+  When a <font color="#993333"><b>type_check</b></font> failure occurs
+  you'll be warned if the type erroneously returned a <i>sequence</i> for it's
+  "true/false" result. Previously, a sequence result was simply reported
+  as a type_check failure. Suggested by Ralf Nieuwenhuijsen.
+<p>
+<li>
+ The code for <font color="#5500FF"><b>demo\win32\winwire.exw</b></font> was
+ cleaned up considerably.
+<p>
+<li>
+ The <font color="#993333"><b>install</b></font> program will warn you to
+ change your <b>autoexec.bat</b> file when you install a new
+ release of Euphoria onto a <i>different</i> drive.
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.1 alpha-test release January 15, 1999:</_dul></b></font>
+
+<ul>
+<li>
+ We've made a number of changes to the packaging, pricing, and registration
+ incentives for the Euphoria product:
+
+<ul>
+<p>
+<li>
+     The Dual-Platform (DOS32+WIN32) package, formerly $53 has been reduced
+     to $39 U.S., effective immediately.
+<p>
+<li>
+     The Single-Platform (DOS32-only) package, formerly $32, has been
+     discontinued.
+<p>
+<li>
+     The printed manual has been discontinued. Instead, there is now an
+     official HTML version of the manual, included with the Public Domain
+     .zip file.
+<p>
+<li>
+     All useful 3rd-party include files, such as <b>Win32Lib.ew</b> and many
+     others, will be "stamped" by RDS with a code number that makes them
+     <font color="#CC0099"><b><i>free</i></b></font>, just like the files in
+     <font color="#5500FF"><b>euphoria\include</b></font>. They will not 
+     add to your statement count, provided you do not significantly modify
+     them. This will also allow 3rd-party developers to get better diagnostic
+     information from their users.
+<p>
+<li>
+     <font color="#993333"><b>Binding</b></font>,
+     <font color="#993333"><b>shrouding</b></font> and
+     <font color="#993333"><b>profiling</b></font> will now be part of the
+     Complete Edition only. These are features that beginners do not require,
+     but serious users might find valuable.
+
+</ul>
+
+<p>
+<li>
+ Short-form assignment operators <font color="#993333"><b>&nbsp; += &nbsp;
+ -= &nbsp; *= &nbsp; /= &nbsp; &= &nbsp;</b></font> have been added. 
+ For example, instead of saying:
+<_eucode>
+           count = count + 1
+</_eucode>
+ You can now say:
+<_eucode>
+           count += 1
+</_eucode>
+
+ Instead of saying:
+<_eucode>
+           matrix[row][column] = matrix[row][column] * 5.0
+</_eucode>
+ You can say:
+<_eucode>
+           matrix[row][column] *= 5.0
+</_eucode>
+
+ Instead of saying:
+<_eucode>
+           test_scores[start..finish] = test_scores[start..finish] / 100
+</_eucode>
+ You can say:
+<_eucode>
+           test_scores[start..finish] /= 100
+</_eucode>
+ See <a class="blue" href="refman_2.htm#assignop">
+ <b>refman.doc</b></a> for the details.
+
+<p>
+<li>
+ Euphoria now uses "short-circuit" evaluation of
+ <font color="#993333"><_bq>and</_bq></font> and
+ <font color="#993333"><_bq>or</_bq></font> expressions in
+ <font color="#993333"><b>if/elsif/while</b></font> conditions.
+ e.g. in an <font color="#993333"><_bq>and</_bq></font> condition:
+<_eucode>
+           if A and B then ...
+</_eucode>
+   the interpreter will skip the evaluation of expression B whenever 
+   expression A is 0 (false), since it knows that the overall result
+   must be false. In an <font color="#993333"><_bq>or</_bq></font> condition:
+<_eucode>
+           while A or B do ...
+</_eucode>
+   the interpreter will skip the evaluation of expression B whenever
+   expression A is non-zero (true), since it knows that the overall result
+   must be true.
+<p>
+   Euphoria code written prior to version 2.1 may no longer work correctly if
+   expression B contains a function with <b><i>side-effects</i></b> such as
+   setting a global variable, doing I/O etc. In practice this kind of code is
+   very rare, but just in case, a warning will now be issued if a function
+   with side-effects might be short-circuited. 
+<p>
+   By skipping the evaluation of B, short-circuit evaluation is typically
+   faster, and will allow you to write statements such as:
+<_eucode>
+           if atom(x) or length(x)=1 then ...
+</_eucode>
+   that would generate an error on older versions of Euphoria whenever x
+   was an <font color="#993333"><b>atom</b></font>, since
+   <font color="#006699">length()</font> is not defined for atoms.
+<p>
+   See <a class="blue" href="refman_2.htm#shortcir">
+   <b>refman.doc</b></a> for the details.
+
+<p>
+<li>
+ Several new routines were added.
+<p>
+ <font color="#006633"><_sul><b>Built-in to ex.exe/exw.exe:</b></_sul></font>
+<p>
+ <table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td width=24 nowrap></td>
+   <td width=120 nowrap></td>
+   <td width=10></td>
+   <td></td>
+   </tr>
+ 
+ <_4clist
+   name="<font color=\"#006699\">profile()</font>"
+   pos=25
+   description="turns <font color=\"#993333\"><b>profiling</b></font>
+    <b>on/off</b> so you can focus your
+    <font color=\"#993333\"><b>profile</b></font> and
+    <font color=\"#993333\"><b>profile_time</b></font> runs on particular
+    events within your program."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">system_exec()</font>"
+   pos=25
+   description="gives you the exit code from calling a <b>.exe</b> or
+    <b>.com</b> file, or another Euphoria program."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">equal()</font>"
+   pos=25
+   description="compares any 2 Euphoria objects for equality.
+     equivalent to: <font color=\"#006699\">compare(a,b) = 0 </font> but
+     more readable."
+ >
+ 
+ </table>
+
+<p>
+ <font color="#006633"><_sul><b>Added to various include files:</b></_sul>
+ </font>
+<p>
+ <table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td width=24 nowrap></td>
+   <td width=120 nowrap></td>
+   <td width=10></td>
+   <td></td>
+   </tr>
+
+ <_4clist
+   name="<font color=\"#006699\">walk_dir()</font>"
+   pos=26
+   description="recursively goes through a directory and subdirectories,
+     calling a routine that you supply."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">reverse()</font>"
+   pos=26
+   description="returns a sequence in reverse order."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">sprint()</font>"
+   pos=26
+   description="returns the string representation of any Euphoria object."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">arcsin()</font>"
+   pos=26
+   description="inverse trig function."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">arccos()</font>"
+   pos=26
+   description="inverse trig function."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">get_bytes()</font>"
+   pos=26
+   description="returns the next n bytes from a file."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">prompt_number()</font>"
+   pos=26
+   description="prompts the user to enter a number."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">prompt_string()</font>"
+   pos=26
+   description="prompts the user to enter a string."
+ >
+
+ <_4clist
+   name="<font color=\"#006699\">instance()</font>"
+   pos=26
+   description="<font color=\"#CC3366\"><b>WIN32:</b></font> returns the
+    instance handle of the program."
+ >
+
+ <_4clist
+   name="PI"
+   pos=26
+   description="the constant PI - 3.14159... was added to
+    <font color=\"#5500FF\"><b>misc.e</b></font>."
+ >
+
+ </table>
+
+<p>
+   See <a class="blue" href="library.htm"><b>library.doc</b>
+   </a> for the details.
+
+<p>
+<li>
+ The main Euphoria documentation can now be viewed locally with a Web 
+   browser. The plain-text files <font color="#5500FF"><b>refman.doc</b></font>
+   and <font color="#5500FF"><b>library.doc</b></font> are still 
+   available in the <font color="#5500FF"><b>doc</b></font> subdirectory,
+   but we now have <font color="#5500FF"><b>refman.htm</b></font> and 
+   <font color="#5500FF"><b>library.htm</b></font> in the new
+   <font color="#5500FF"><b>html</b></font> subdirectory. We have developed
+   a tool (written in Euphoria) that lets us easily maintain both an
+   up-to-date HTML version, and an up-to-date plain-text version of
+   <font color="#5500FF"><b>refman</b></font> and
+   <font color="#5500FF"><b>library</b></font>.
+<p>  
+   The documentation has also been clarified and expanded in many places.
+
+<p>
+<li>
+ <font color="#CC3366"><b>WIN32:</b></font> you can create an
+ <font color="#CC0099"><b>unlimited</b></font> number of Euphoria
+ call-back routines,
+   as long as each routine is a function with 0 to 8 parameters. 
+   See <a class="blue" href="platform.htm#callback">
+   <b>platform.doc</b></a>. In version 2.0 you could only have one
+   call-back routine and it had to have exactly 4 parameters.
+
+<p>
+<li>
+ The <font color="#993333"><_bq>xor</_bq></font> keyword has been added to
+  complement: <font color="#993333"><b>and/or/not</b></font> and
+  <font color="#006699"><b>xor_bits()</b></font> e.g.
+<_eucode>
+           if a xor b then...
+</_eucode>
+   <font color="#993333"><_bq>xor</_bq></font> works on sequences too.
+   It's similar to <font color="#993333"><_bq>or</_bq></font>.
+
+<p>
+<li>
+ The <font color="#006699"><b>dir(path)</b></font> library routine now
+ officially supports the use of <b>wildcards *</b> and <b>?</b> in the path
+ that you supply. This feature was always available, but wasn't
+ documented until now. e.g.
+<_eucode>
+           info = dir("mydata\\*.d?t")
+</_eucode>
+
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+  Subroutine call+return overhead was reduced by an average of 
+   30%. The speed-up occurs for all normal function/procedure/type calls, 
+   user-defined type-checks,
+   <font color="#006699">call_proc()/call_func()</font> calls using a
+   <font color="#993333"><b>routine id</b></font>, 
+   and Windows call-backs. Only recursive calls cost the same as before. 
+   Programs with a reasonably-high frequency of calls can easily be 10% faster 
+   overall because of this.
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+ Branch <font color="#CC0099"><_bq><i>straightening</i></_bq></font> has been
+  implemented. The compiler will optimize branches in the internal code
+   such that a branch from A->B where location B contains a branch to
+   location C, will be optimized to a direct branch from A->C. Even something
+   like A->B->C->D can be straightened to A->D. This often occurs in
+   while-loops that contain if-statements.
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+ In many cases, variable initialization checks are
+   now replaced by "no-ops" after the first check is performed. Euphoria
+   was already optimizing out many checks at compile-time.
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+ <font color="#006699"><b>get()</b></font> and
+ <font color="#006699"><b>value()</b></font> are now much faster in most
+  cases thanks to Jiri Babor and some further optimizations by RDS.
+   The new v2.1 <font color="#993333"><b>ex.exe</b></font> with the new
+   v2.1 <font color="#5500FF"><b>get.e</b></font> is:
+<blockquote>
+          <p>
+          1.45x faster reading a sequence of f.p. numbers from a file and<br>
+          2.25x faster when reading a sequence of integers from a file.
+</blockquote>
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+ <font color="#006699"><b>power(x,2)</b></font> is converted internally
+  to x*x which is faster in all cases, especially when x is a large
+  integer or a f.p. number. 
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font> Thanks to Jiri Babor,
+ <font color="#006699"><b>int_to_bits()</b></font> is at least 15% faster
+   in most cases.
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+ Plotting a long sequence of pixels in 16-color graphics modes 
+ is about 3% faster.
+
+<p>
+<li>
+ <font color="#CC3366"><b>optimization:</b></font>
+ <font color="#006699"><b>draw_line()</b></font> has been sped up by a
+  few percent.
+
+<p>
+<li>
+ <font color="#5500FF"><b>Language War</b></font> has had a major
+ face-lift. It now runs in <font color="#CC3366"><b>pixel-graphics
+   mode 18</b></font> (640 x 480 x 16 colors) instead of
+   <font color="#CC3366"><b>text mode</b></font>. It also has 
+   <font color="#CC0099"><_bq><i>fine-grain</i></_bq></font> parallelism,
+   i.e. virtually anything can happen in parallel 
+   with anything else. Multiple torpedos, phasors etc can be drawn on the 
+   screen simultaneously, while ships are moving, commands are being entered,
+   things are exploding etc. Even the timing needed for the PC speaker sound 
+   effects is handled by the <b>task scheduler</b>. There are
+   <font color="#CC0099"><b><i>no</i></b></font> time-delay "busy" 
+   loops executed during the game. The galaxy scan now shows you a scaled 
+   picture of the whole galaxy, rather than just a bunch of numbers.
+
+<p>
+<li>
+ The default print format for atoms was changed from "%g" to "%<b>.</b>10g".
+   This format is used by <font color="#006699">print()</font>,
+   <font color="#993333"><b>?</b></font>,
+   the <font color="#993333"><b>trace</b></font> facility, and
+   <font color="#5500FF"><b>ex.err</b></font> dumps. This allows large
+   integers -9,999,999,999 to +9,999,999,999
+   to be printed as integers, rather than as scientific notation. It also 
+   provides about 10 digits of accuracy to be displayed on fractional numbers,
+   rather than just 6. Art Adamson and others made it clear that more 
+   digits should be displayed.
+
+<p>
+<li>
+ The state of all <font color="#993333"><b>with/without</b></font> settings
+  is saved upon entering an <b>included file</b>, and restored at the end
+  of the <b>included file</b>. An included file can change the settings,
+  but they will be restored at the end of the included file. e.g. warnings
+   might be turned off just within the included file (and any files it
+   includes). As a result some 
+   programs now display warnings where none were seen before.
+
+<p>
+<li>
+ Warnings are now displayed
+ <font color="#CC0099"><_ba><i>after</i></_ba></font> your program finishes
+ execution, so they won't be erased by
+ <font color="#006699">clear_screen()</font>,
+ <font color="#006699">graphics_mode()</font> etc.
+ Some programs now show warnings where none were seen before.
+
+<p>
+<li>
+ The security of scrambled code and bound code has been improved thanks to 
+ ideas contributed by Rusty Davis. When a bound program starts executing,
+ a quick integrity check will be made to detect any corruption or tampering.
+ It's still ok to add data to the end of a
+ <b><font color="#993333">bound</font> .exe</b> file, as long as
+ your last line is <font color="#006699"><_bq>abort(x)</_bq></font>.
+
+<p>
+<li>
+ The <font color="#993333"><b>ed</b></font> editor now lets you view and
+ edit beyond column 80.
+
+<p>
+<li>
+ <font color="#993333"><b>ed</b></font> has a new command: <b>Esc m</b>
+ (modifications). It will show the differences between the original file on
+ disk and the current edit buffer. This can be very useful when you've
+ forgotten what changes you've made, and you are wondering if it's safe to
+ save them.
+
+<p>
+<li>
+ The <font color="#993333"><b>trace</b></font> window now provides an upper
+ case <b>Q</b> command which lets the program run to completion, ignoring
+ any <font color="#006699">trace(1)</font> commands. Lower case
+ <b>q</b> lets it run to the next <font color="#006699">trace(1)</font>.
+
+<p>
+<li>
+ <font color="#5500FF"><b>safe.e</b></font> (debug version of
+ <font color="#5500FF"><b>machine.e</b></font>) has been enhanced. It will now 
+   automatically catch additional cases where data is illegally written just 
+   <b><i>before</i></b>, or just <b><i>after</i></b>, the boundaries of an
+   allocated block of memory. This can be particularly useful in
+   <font color="#CC3366"><b>WIN32</b></font> where Windows might overwrite 
+   one of your under-sized blocks. Without a tool such as
+   <font color="#5500FF"><b>safe.e</b></font>, this type 
+   of bug could take hours or even days to track down.
+
+<p>
+<li>
+ The <font color="#5500FF"><b>euphoria\tutorial</b></font> directory
+ was created to hold several small tutorial programs.
+
+<p>
+<li>
+ The limit on the number of open files was raised to 25 from 15.
+   Three of these files are 0,1,2: standard-input, standard-output 
+   and standard-error, so you can now have up to 22 of your own files
+   open simultaneously. (As far as we know, no one ever exceeded the old 
+   limit, but it seemed wise to raise it.)
+
+<p>
+<li>
+ When the user simply types <font color="#993333"><_bq>ex</_bq></font> or
+ <font color="#993333"><_bq>exw</_bq></font> and is prompted for the 
+   name of the Euphoria <b>.ex</b> or <b>.exw</b> file to run,
+   <font color="#006699"><b>command_line()</b></font> will now 
+   be updated to include the filename as the second command-line argument,
+   just as if the user had originally typed: <_bq>ex filename</_bq>.
+   Thanks to Mathew Hounsell for suggesting this.
+
+<p>
+<li>
+ <font color="#5500FF"><b>mset.ex</b></font> now saves pictures in <b>.bmp</b>
+ format. Previously it was using a non-standard, compressed format.
+
+<p>
+<li>
+ <font color="#5500FF"><b>lines.ex</b></font>
+ (<font color="#5500FF"><b>lines.bat</b></font>) now reports
+ non-blank/non-comment lines as well. This is
+ <font color="#CC0099"><_ba><i>not</i></_ba></font> the same as the
+ "statement count" used by Euphoria for the diagnostic limit, but it's
+ usually within +/- 10%, assuming you write one statement per line.
+
+<p>
+<li>
+ Numeric literals greater than 1e308 (roughly) are now set to
+ <b>+/-</b> <_bq>inf</_bq>. They used to cause a compile-time error.
+
+</ul>
+<hr>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.0 Official Release March 25, 1998:</_dul></b></font>
+
+<ul>
+<li>
+ The install procedure has changed. The Euphoria .zip file now contains a 
+   large <_bq>bundle.dat</_bq> file that contains over 100 files. This
+   makes it easier for people to locate the important files:
+   <font color="#5500FF"><b>readme.doc</b></font>,
+   <font color="#5500FF"><b>install.bat</b></font>, etc. 
+   that they should look at before installing. The .zip file is also 35K
+   smaller as a result.
+
+<p>
+<li>
+ <font color="#993333"><b>shroud</b></font> will warn you to use
+ <font color="#993333"><b>bind/bindw</b></font> if you try to create a
+ shrouded source file with a name ending in "<b>.</b>exe".
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.0 (beta) February 26, 1998:</_dul></b></font>
+
+<ul>
+<li>
+ The WIN32 interpreter, <font color="#993333"><b>exw.exe</b></font>, is now
+ a <font color="#006633"><b>true WIN32 GUI</b></font> program. In 
+ 2.0 alpha it was a WIN32 <_bq><i>console</i></_bq> program that was always
+ associated with a <_bq><i>console</i></_bq> or DOS-window. A DOS-style
+ console window will now be created only if your program needs one.
+ <font color="#993333"><b>exw</b></font> will automatically create 
+ a new console window the first time your program writes to the screen, reads 
+ from the keyboard, or calls any library routine that requires a console to 
+ work. The console will disappear automatically when your program finishes 
+ execution. 
+
+<p>
+<li>
+ A new library routine, <font color="#006699"><b>free_console()</b></font>,
+ will immediately delete the console window if you currently have one.
+
+<p>
+<li>
+ The Complete Edition of Euphoria now provides a
+ <font color="#993333"><b>-scramble</b></font> option of
+ <font color="#993333"><b>bind</b></font> and
+ <font color="#993333"><b>shroud</b></font> to improve the security of
+ programs that you distribute.
+
+<p>
+<li>
+ You can now pass Euphoria <font color="#993333"><b>atoms</b></font> to
+ C routines as 64-bit C double type floating-point arguments, and you can
+ receive a floating-point result back from a C function.
+
+<p>
+<li>
+ <font color="#993333"><b>exw.exe (beta)</b></font> runs 10 to 15% faster
+ than <font color="#993333"><b>exw.exe (alpha)</b></font> (based on 
+ <font color="#5500FF"><b>sieve.ex</b></font>,
+ <font color="#5500FF"><b>shell.ex</b></font>, etc.). The WATCOM C compiler
+ was doing a bad job of optimizing a critical section of the interpreter
+ when building exw.exe, but was producing excellent code when building
+ <font color="#993333"><b>ex.exe</b></font>.
+ With some trivial changes to the interpreter C code, WATCOM now produces
+ excellent code for both platforms.
+
+<p>
+<li>
+ The average program now has 60K more memory available before having to 
+ use the swap file.
+
+<p>
+<li>
+ The limit on the size of a single procedure, function or type has been 
+ eliminated. 
+
+<p>
+<li>
+ The limit on the size of a single top-level statement has been eliminated.
+
+<p>
+<li>
+ The limit on the total number of include files that can make up a program
+   has been increased to 256 from 150.
+
+<p>
+<li>
+ Some <font color="#CC3366"><b>optimizations</b></font> were added. The
+ following general forms of expression are now faster:
+<_eucode>
+           2 * x 
+           x * 2 
+           1 + x 
+</_eucode>
+     where x can be any expression, and have type atom or sequence.
+
+<p>
+<li>
+ There is a new documentation file,
+ <font color="#5500FF"><b>perform.doc</b></font> with lots of tips for
+ performance-obsessed programmers.
+
+<p>
+<li>
+ If you call a C routine using <font color="#006699"><b>c_func()</b></font>,
+ but you linked the C routine using
+ <font color="#006699"><b>define_c_proc()</b></font> you will get an error
+ message. Similarly, if you call it using
+ <font color="#006699"><b>c_proc()</b></font>, but you linked it using
+ <font color="#006699"><b>define_c_func()</b></font> you'll get 
+ an error message. This restriction was documented, but not actually 
+ enforced in 2.0 alpha. Some programs written for the alpha release will 
+ have to be corrected.
+
+<p>
+<li>
+ You will now see the actual name of the C or Euphoria routine that you
+ were attempting to call, when you get an error message from
+ <font color="#006699"><b>call_proc()</b></font>,
+ <font color="#006699"><b>call_func()</b></font>,
+ <font color="#006699"><b>c_proc()</b></font>,
+ or <font color="#006699"><b>c_func()</b></font>.
+
+<p>
+<li>
+ A new <b>-clear_routines</b> option of
+  <font color="#993333"><b>bind</b></font> and
+  <font color="#993333"><b>shroud</b></font> will leave the names of
+  all routines unshrouded. This is necessary if your program calls 
+  <font color="#006699"><b>routine_id()</b></font>. You'll be warned if you
+  use routine_id() and do not choose this option. (Registered users can
+  use <font color="#993333"><b>-scramble</b></font> together with
+  <b>-clear_routines</b> to restore a high level of shrouding.)
+
+<p>
+<li>
+ If a name conflict arises with a global symbol, the
+  <font color="#993333"><b>shrouder</b></font> will now warn you, and then
+  choose a new name. It used to abort with a message.
+
+<p>
+<li>
+ It is no longer possible to <font color="#993333"><b>trace</b></font>
+ or <font color="#993333"><b>profile</b></font> shrouded code.
+
+<p>
+<li>
+ A new demo program, <font color="#5500FF"><b>hash.ex</b></font>, was added
+  to <font color="#5500FF"><b>euphoria\demo</b></font>.
+
+<p>
+<li>
+ <font color="#5500FF"><b>freq.ex</b></font> was moved from
+ <font color="#5500FF"><b>euphoria\bin</b></font> to
+ <font color="#5500FF"><b>euphoria\demo</b></font> and renamed as
+ <font color="#5500FF"><b>tree.ex</b></font>.
+
+<p>
+<li>
+ A new documentation file, <font color="#5500FF"><b>bind.doc</b></font>
+ describes all the features of <font color="#5500FF"><b>bind.bat</b></font>
+ and <font color="#5500FF"><b>shroud.bat</b></font>. The previous description
+ in <font color="#5500FF"><b>refman.doc</b></font> has been shrunk.
+
+<p>
+<li>
+ The file <font color="#5500FF"><b>overview.doc</b></font> gives a quick
+ overview of all documentation files.
+
+<p>
+<li>
+ The description of <font color="#006699"><b>get_mouse()</b></font> in
+ <font color="#5500FF"><b>library.doc</b></font> discusses the problem of
+ 320-wide graphics modes (you must divide the x coordinate value by 2).
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 2.0 (alpha) November 5, 1997:</_dul></b></font>
+
+<ul>
+<li>
+ A <font color="#CC0099"><b><i>new platform</i></b></font> is now supported.
+ <font color="#993333"><b>exw.exe</b></font> will run Euphoria programs using
+ the <font color="#CC3366"><b>WIN32</b></font> (Windows 32-bit) operating
+ system. <font color="#993333"><b>ex.exe</b></font> will run programs
+ using <font color="#CC3366"><b>DOS32</b></font> (extended DOS).
+ See <font color="#5500FF"><b>platform.doc</b></font> for further details.
+
+<p>
+<li>
+ The following library routines have been introduced.
+<p>
+ <font color="#006633"><_sul><b>For both DOS32 and WIN32:</b></_sul></font>
+<p>
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+ <tr><td width=24 nowrap></td>
+   <td width=120 nowrap></td>
+   <td width=10></td>
+   <td></td>
+   </tr>
+ 
+ <_4clist
+   name="<font color=\"#006699\">platform()</font>"
+   pos=25
+   description="find out which platform you are executing on. (The 
+   PLATFORM constant is available in Euphoria 2.2 and later)."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">routine_id()</font>"
+   pos=25
+   description="get a small integer id number for a Euphoria procedure or
+    function."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">call_proc()</font>"
+   pos=25
+   description="call a Euphoria procedure by using its id."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">call_func()</font>"
+   pos=25
+   description="call a Euphoria function by using its id."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">custom_sort()</font>"
+   pos=25
+   description="sort a sequence using a compare function that you specify."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">poke4()</font>"
+   pos=25
+   description="store a number into 4 bytes of memory.
+     <font color=\"#006699\">poke4(address, value)</font> is at least 10x
+     faster than:
+     <font color=\"#006699\">poke(address, int_to_bytes(value))</font>.
+     poke4() also works with sequences of values."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">peek4s()</font>"
+   pos=25
+   description="read 4 bytes of memory as a signed integer (works on
+     sequences too)."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">peek4u()</font>"
+   pos=25
+   description="read 4 bytes of memory as an unsigned integer (works on
+     sequences too). <font color=\"#006699\">peek4u(address)</font> is 10x
+     faster than:
+     <font color=\"#006699\">bytes_to_int(peek({address, 4}))</font>."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">allocate_string()</font>"
+   pos=25
+   description="allocate and store a 0-terminated string in memory."
+ >
+
+</table>
+
+<p>
+ <font color="#006633"><_sul><b>For WIN32 only:</b></_sul></font>
+<p>
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+ <tr><td width=24 nowrap></td>
+   <td width=120 nowrap></td>
+   <td width=10></td>
+   <td></td>
+   </tr>
+ 
+ <_4clist
+   name="<font color=\"#006699\">open_dll()</font>"
+   pos=26
+   description="open a Windows <b>.</b>dll file."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">define_c_proc()</font>"
+   pos=26
+   description="define a C routine that will be called from Euphoria
+     (no value returned)."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">define_c_func()</font>"
+   pos=26
+   description="define a C routine that will be called from Euphoria
+     (a value will be returned)."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">call_c_proc()</font>"
+   pos=26
+   description="call a C routine from Euphoria (no value is returned)."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">call_c_func()</font>"
+   pos=26
+   description="call a C routine from Euphoria (a value is returned)."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">call_back()</font>"
+   pos=26
+   description="get a <b><i>call-back address</i></b>, so Windows can call
+     your Euphoria routine when the user interacts with your window."
+ >
+ 
+ <_4clist
+   name="<font color=\"#006699\">message_box()</font>"
+   pos=26
+   description="display a simple <b>Yes/No/Cancel</b> window."
+ >
+
+</table>
+
+<p>
+<li>
+ New Demo programs:
+
+<ul>
+<p><li>
+<font color="#5500FF"><b>csort.ex</b></font>
+<p><li>
+<font color="#5500FF"><b>email.exw</b></font>
+<p><li>
+<font color="#5500FF"><b>window.exw</b></font>
+<p><li>
+<font color="#5500FF"><b>winwire.exw</b></font>
+<p><li>
+<font color="#5500FF"><b>dsearch.exw</b></font>
+</ul>
+
+<p>
+<li>
+ New include files:
+<p>
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+ <_4clist
+   name="<font color=\"#5500FF\">safe.e</font>"
+   pos=22
+   description="debug version of
+    <font color=\"#5500FF\"><b>machine.e</b></font>"
+ >
+ 
+ <_4clist
+   name="<font color=\"#5500FF\">misc.e</font>"
+   pos=22
+   description="miscellaneous"
+ >
+ 
+ <_4clist
+   name="<font color=\"#5500FF\">dll.e</font>"
+   pos=22
+   description="dll access"
+ >
+ 
+ <_4clist
+   name="<font color=\"#5500FF\">msgbox.e</font>"
+   pos=22
+   description="Windows message box"
+ >
+
+</table>
+
+<p>
+<li>
+ The following additional improvements have been made to the
+  <font color="#CC3366"><b>DOS32</b></font> version:
+
+<ul>
+<p><li>
+    On Pentium and higher systems, floating-point calculations are now
+    about 20% faster (and floating-point in
+    <font color="#993333"><b>exw</b></font> is a further 20%
+    faster than <font color="#993333"><b>ex</b></font> for 2.0).
+
+<p><li>
+    <font color="#006699"><b>printf()</b></font> to the screen, and
+    <font color="#006699"><b>print()</b></font> to the screen are both 
+    significantly faster in most cases.
+
+<p><li>
+    The <font color="#993333"><b>trace</b></font> screen is updated a bit
+    faster.
+
+<p><li>
+    The <font color="#993333"><b>time profile</b></font> is more accurate
+    regarding <font color="#006699"><b>getc()</b></font>.
+
+<p><li>
+    The <font color="#5500FF"><b>mset.ex</b></font> demo runs 30% faster.
+</ul>
+
+</ul>
+
+<hr>
+
+<p>&nbsp;
+
+<_center><font face="Arial, Helvetica" color="#006633"><b>
+<br>
+                      Highlights of Older Releases:<br>
+</b></font></_center>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.5a June 13, 1997:</_dul></b></font>
+
+<ul>
+<li>
+ Many operations and library routines were optimized. 
+
+<ul>
+<p><li>
+   <font color="#006699"><b>get_key()</b></font> is
+   100x faster when there is no key in the buffer.
+
+<p><li>
+   <font color="#006699"><b>get_all_palette()</b></font> is over 100x faster
+   and this makes <font color="#006699"><b>save_screen()</b></font> much faster.
+
+<p><li>
+   The following routines have now been built directly into
+   <font color="#993333"><b>ex.exe</b></font>, to avoid the overhead of
+   calling <font color="#006699">machine_proc()</font> or
+   <font color="#006699">machine_func()</font>:
+   <font color="#006699"><b>pixel()</b></font>, 
+   <font color="#006699"><b>get_pixel()</b></font>,
+   <font color="#006699"><b>mem_set()</b></font>,
+   <font color="#006699"><b>mem_copy()</b></font>.
+
+<p><li>
+   <font color="#006699"><b>poke()</b></font> of a long sequence into memory,
+   other than video memory, is 50% faster.
+
+<p><li>
+   <font color="#006699"><b>pixel()</b></font> is 4x faster in mode 19.
+
+<p><li>
+   <font color="#006699"><b>get_pixel()</b></font> is faster in all modes.
+
+<p><li>
+   <font color="#006699"><b>display_image()</b></font> is about 30% faster in
+   most modes and up to 4x faster in mode 19, 
+   because <br><font color="#006699">pixel()</font> is faster.
+
+<p><li>
+   All arithmetic and bitwise operations applied to sequences of integers are 
+   now 29% faster.  
+
+<p><li>
+   a <font color="#993333"><b>&</b></font> b (concatenation) is 15% faster
+   in most cases, and is dramatically faster in the case where you grow a
+   very long sequence by concatenating many small sequences onto it. 
+
+<p><li>
+   <font color="#006699"><b>getc()</b></font> is 12% faster.
+
+<p><li>
+   <font color="#006699"><b>match()</b></font> is 8% faster in typical cases.
+
+<p><li>
+   <font color="#006699"><b>append()/prepend()</b></font> are 15% faster in
+   many cases.
+
+<p><li>
+   <font color="#006699"><b>find()</b></font> of an integer within a
+   sequence of integers is 64% faster.
+
+<p><li>
+   Formation of a 2-element sequence <b>{a,b}</b> is 11% faster.
+
+<p><li>
+   Internal copying of a shared sequence when it can no longer be shared is
+   15% faster.
+</ul>
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.5 March 21, 1997:</_dul></b></font>
+
+<ul>
+<li>
+ The following library routines were added. They are described fully
+   in <font color="#5500FF"><b>library.doc</b></font>.
+
+<ul>
+<p><li>
+        <font color="#006699"><b>allow_break()</b></font>
+<p><li>
+        <font color="#006699"><b>check_break()</b></font>
+<p><li>
+        <font color="#006699"><b>mem_copy()</b></font>
+<p><li>
+        <font color="#006699"><b>mem_set()</b></font>
+<p><li>
+        <font color="#006699"><b>atom_to_float32()</b></font>
+<p><li>
+        <font color="#006699"><b>atom_to_float64()</b></font>
+<p><li>
+        <font color="#006699"><b>float32_to_atom()</b></font>
+<p><li>
+        <font color="#006699"><b>float64_to_atom()</b></font>
+<p><li>
+        <font color="#006699"><b>get_all_palette()</b></font>
+<p><li>
+        <font color="#006699"><b>save_bitmap()</b></font>
+<p><li>
+        <font color="#006699"><b>save_screen()</b></font>
+<p><li>
+        <font color="#006699"><b>arctan()</b></font>
+<p><li>
+        <font color="#006699"><b>and_bits()</b></font>
+<p><li>
+        <font color="#006699"><b>or_bits()</b></font>
+<p><li>
+        <font color="#006699"><b>xor_bits()</b></font>
+<p><li>
+        <font color="#006699"><b>not_bits()</b></font>
+<p><li>
+	<font color="#006699"><b>get_vector()</b></font>
+<p><li>
+	<font color="#006699"><b>set_vector()</b></font>
+<p><li>
+	<font color="#006699"><b>lock_memory()</b></font>
+<p><li>
+	<font color="#006699"><b>tick_rate()</b></font>
+</ul>
+
+<p>
+<li>
+ <font color="#993333"><b>with profile_time</b></font> (time profiling for
+ DOS32) was added.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.4b, October 1996:</_dul></b></font>
+
+<ul>
+<li>
+ <font color="#5500FF"><b>mset.ex</b></font> has a more visible selector
+ box on it's grid. It has also been sped up.
+
+<p>
+<li>
+ <font color="#5500FF"><b>ed.ex</b></font> now allows special characters
+ greater than ASCII 127 to be entered by pressing the <b>Alt</b> key and
+ typing digits on the numeric keypad.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.4a, July 1996:</_dul></b></font>
+
+<ul>
+<li>
+ <font color="#006699"><b>crash_message()</b></font> library routine was
+ added.
+
+<p>
+<li>
+ Programs <font color="#993333"><b>bound</b></font> by registered users
+ will now produce run-time error diagnostics regardless of the size of the
+ program.
+
+<p>
+<li>
+ <font color="#5500FF"><b>shroud.bat</b></font> has a new option
+ <_bq>-full_keywords</_bq>.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.4, May 1996:</_dul></b></font>
+
+<ul>
+<li>
+ You can now convert any Euphoria program into a
+ <font color="#CC0099"><b>stand-alone .exe</b></font> file.
+
+<p>
+<li>
+ The separate DOS4GW.EXE DOS extender file has been eliminated. 
+
+<p>
+<li>
+ Windows 95 long filename support.
+
+<p>
+<li>
+ Support for DOS software interrupts.
+
+<p>
+<li>
+ New utility programs: <font color="#5500FF"><b>key.ex</b></font>,
+ <font color="#5500FF"><b>where.ex</b></font>,
+ <font color="#5500FF"><b>ascii.ex</b></font>,
+ <font color="#5500FF"><b>guru.ex</b></font>.
+
+<p>
+<li>
+ New demo program: <font color="#5500FF"><b>dosint.ex</b></font>.
+
+<p>
+<li>
+ New library routines: <font color="#006699"><b>set_rand()</b></font>,
+ <font color="#006699"><b>use_vesa()</b></font>.
+
+<p>
+<li>
+ You can peek or poke an entire sequence of bytes.
+
+<p>
+<li>
+ Editor enhancements.
+
+<p>
+<li>
+ Reduction in space overhead for sequences.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.3, June 1995:</_dul></b></font>
+
+<ul>
+<li>
+ You can now edit multiple files using multiple edit windows. 
+
+<p>
+<li>
+ 20 new library routines were added.
+
+<p>
+<li>
+ Graphics performance was greatly improved.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.2, March 1994:</_dul></b></font>
+
+<ul>
+<li>
+  A problem that prevented Euphoria from running in a DOS prompt under 
+  Windows was eliminated.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.1, January 1994:</_dul></b></font>
+
+<ul>
+<li>
+  Several language features and demo programs were added.
+
+</ul>
+
+<p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 1.0, July 1993:</_dul></b></font>
+
+<ul>
+<li>
+  Euphoria was first released after 3 years of research and development
+  and 6 months of Beta testing. Many of the ideas behind Euphoria came
+  from Robert Craig's Master's Thesis in Computer Science at the University
+  of Toronto. That thesis was strongly influenced by the work of John Backus
+  on functional programming (FP) languages.
+
+</ul>
+
+<p>&nbsp;
+
+</_width>
+</body>
+</html>

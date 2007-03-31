@@ -1,0 +1,283 @@
+
+	A Brief Overview of The Euphoria Interpreter
+	
+	by Rob Craig, 
+	Rapid Deployment Software
+	February 2003
+	
+
+ 1. The Scanner (scanner.c)
+
+ The scanner reads Euphoria source files one character at a time,
+ and forms logical words or "tokens" that are returned to the parser 
+ (parser.c).
+ 
+ For example, the scanner will recognize the characters: w h i l e 
+ as being the keyword "while". It will return a token with 
+ code 46 to the parser. 46 means "while", see reswords.h:
+           
+           #define WHILE 46
+ 
+ See also keylist.h, where "while" is defined as a keyword:
+            
+	{"while",     S_KEYWORD, WHILE, 0, 0, 0},
+ 
+ The keywords, such as "while", are all pre-loaded into the symbol table,
+ along with predefined (built-in) routines. The scanner uses keyfind() to 
+ look up words in the symbol table, and determine whether they are
+ keywords, user-defined symbols etc.
+ 
+ By grouping the characters in a Euphoria source file into a series of 
+ logical words, the scanner allows the parser to operate at a higher level.
+ The scanner is really doing low-level parsing, while the parser is doing
+ high-level parsing.
+ 
+ No special scanning tool (such as Lex) is used. Everything is hand-coded,
+ and speed is important, since the scanner has to handle every single 
+ character in the source program. "get character" and "unget character"
+ are defined as simple macros for speed. Hashing is used in the symbol table
+ to make word look-ups fast.
+ 
+ 
+ 2. The Parser (parser.c)
+ 
+ The parser reads the stream of tokens coming from the scanner and
+ tries to match them against the various statements that are allowed in a 
+ Euphoria program. It will report syntax errors when it can't understand
+ a statement. The parser uses top-down hand-coded recursive descent parsing.
+ No special parsing tools (such as Yacc) are used. The parser always
+ knows what it is looking for, i.e. what things are possible next in the
+ source. If it doesn't see one of those things it gives a fatal error
+ message. No attempt is made to recover from syntax errors. The recursive
+ aspect is important when parsing expressions, since any operand in an
+ expression could be an expression itself. The order of precedence
+ of operators (+, *. / etc.) is handled by defining various levels of
+ expression, e.g. REXPR is defined in terms of lower-level CEXPR.
+ CEXPR is defined in terms of AEXPR. etc.
+
+ #define REXPR  CEXPR \
+		while (tok.id <= GREATER && tok.id >= LESS) { \
+			id2 = tok.id; \
+			CEXPR \
+			emit_op(id2); \
+		}
+ 
+ For speed, C macros (#define) are used to define these EXPR's instead of 
+ subroutines. Otherwise you'd have many levels of subroutine call
+ just to parse a trivial expression.
+ 
+ Syntax checking is just one job of the parser. Another job is to
+ enter information about user-defined symbols into the symbol table.
+ 
+ The main output from the parser is the Intermediate Language (IL). 
+ With the aid of emit.c, the parser breaks Euphoria statements and 
+ expressions down into a simpler form that is easier to execute. For example,
+ 
+     x = y + z * w
+     
+ gets converted by the parser into this IL stream:
+ 
+     MULTIPLY
+     z
+     w
+     temp1
+     ADD
+     y
+     temp1
+     x
+     
+  where each item above is really a 32-bit number or a pointer.
+  i.e. by "z" we mean the memory address where the value of z is 
+  stored. "MULTIPLY" means the small integer code for the multiply
+  operation, or, when INT_CODES is not defined, MULTIPLY is the actual
+  memory location where the code that implements multiply is stored.
+ 
+  Years ago, a more traditional IL, called "postfix" was executed.
+  With postfix you are constantly pushing and popping operands 
+  on a run-time stack. Euphoria's current IL allocates temporary variables
+  to hold intermediate results. This is more efficient, especially
+  on Intel machines, where push & pop would need 2 cycles each, 
+  whereas reading from a temporary is only one cycle, provided 
+  the temporary is in the CPU cache, which it probably will be.
+  This also eliminates the operations that simply push or pop.
+  Having fewer operations, and doing more work per operation,
+  is better since there is overhead in jumping from one operation 
+  to the next.
+  
+  The parser still essentially outputs postfix to the routines in emit.c,
+  but emit.c uses a stack to convert the postfix stream into Euphoria's IL.
+  
+ 
+ 3. The Executor (execute.c)
+  
+  The executor consists of a big C switch statement containing dozens
+  of cases. One case per IL operation. The switch is enclosed in an
+  infinite while loop. This is typical of most interpreters,
+  and when INT_CODES is defined, Euphoria simply executes the C
+  switch over and over, just like other interpreters. When INT_CODES
+  is not defined, the cases don't waste time jumping to the top of
+  the loop and performing the switch (which wastes several machine
+  instructions). Rather, each case jumps immediately to the next
+  case to be performed. The address of the next case is in the IL.
+  With WATCOM C, this is accomplished via a single machine-level 
+  jump instruction to an address stored in a register. 
+  See thread() macro. This works because we know that WATCOM will store
+  the pc variable in a particular register and always retrieve it from
+  that register. With GNU C and DJGPP C we avoid this assumption, and use an 
+  extension to the C language provided by GNU. This extension allows 
+  the use of dynamic C labels. This is not supported by ANSI C, 
+  but is very convenient in this situation.
+  
+  Simple operations are performed in-line. More complicated ones result
+  in a call to a routine, usually one in runtime.c
+  
+ 
+ 4. Storage Allocator (alloc.c)
+  
+ Heavy use is made of C's malloc() and free() to provide storage for
+ sequences and floating-point numbers.
+ 
+ Euphoria's internal representation of atoms and sequences requires that
+ all allocated addresses be aligned on an 8-byte boundary.
+ 
+ Although Watcom claims to always return addresses aligned on an 8-byte
+ boundary, they lie. About 1% of the addresses returned by Watcom's
+ malloc() are only 4-byte aligned. alloc.c must therefore allocate an
+ extra 4-bytes and adjust the pointer up by 4 bytes when necessary.
+ 
+ To speed up allocations, alloc.c has something called a storage cache.
+ There is a linked list for each supported size of block under 1K bytes.
+ When a request for space comes in, it is rounded up to the next
+ standard size, and then the corresponding linked list of blocks is checked.
+ About 90% of the time or more, the block can be quickly pulled off the
+ linked list, avoiding a call to malloc(). When the block is freed it will
+ be quickly put back on the list, avoiding a call to free(). How useful 
+ this scheme is depends on how fast the underlying malloc implementation is. 
+ In fact, some mallocs implement their own scheme very similar to this.
+ 
+ One portability issue is that Euphoria needs to get the size of
+ each allocated block, from the pointer to the block. Usually 
+ this information is stored in the 4 bytes preceding the block, 
+ but there is no standard for this, and no standard routine that 
+ you can call to find out. Usually a couple of bits in the size 
+ are stolen to indicate "block-in-use" or "block-free" etc.
+ Euphoria could allocate an extra 4 bytes and store the size itself,
+ at malloc time, but this would waste a bit of space.
+ 
+ 
+ 5. Symbol table (symtab.c, symtab.h)
+ 
+ The symbol table is a hash table. Hashing is important for performance
+ when parsing a large program. symtab.h shows the various fields recorded
+ for variables and routines. Temporaries have their own subset symbol 
+ table entries.
+ 
+ 
+ 6. Calling C routines in .dll's (callc.c)
+ 
+ To call a C routine in a .dll, the interpreter needs to make a call
+ via a pointer to a routine where the number and type of arguments is decided
+ at run-time. This is not possible in C. We therefore resort to a 
+ machine-level hack that lets us push an arbitrary number of values onto 
+ the machine-level call stack. A "push" instruction, that grabs the value 
+ in our C "arg" variable, and pushes it on the stack, is used. The trouble is,
+ we need to know the address of the arg variable to plug into the push 
+ instruction. Since arg is a local C variable, it has an address relative 
+ to the stack. This address or offset can be determined by generating 
+ an assembly listing of callc.c. and studying the code carefully.
+ 
+  
+ 7. Callbacks (runtime.c, machine.c)
+ 
+ Euphoria allows an infinite number of callback routines. C routines
+ in user .dll's or in Windows itself, can call a Euphoria routine if they
+ know its callback address. The callback address is really the address
+ of a C routine that Euphoria has created in memory. That C routine
+ will receive the arguments from the outside world, convert them to
+ Euphoria values, and then set up a call to the Euphoria routine.
+ Euphoria manufactures these C routines at run-time, by copying a
+ standard C routine with the desired number of arguments into a block
+ of data that has been allocated from malloc. Execution of code within
+ the data segment is acceptable, with Intel CPU's at least.
+ 
+ 
+ 8. The Internal Representation of Atoms and Sequences
+  
+ The top of execute.h describes how Euphoria atoms and sequences (objects) 
+ are represented as C 32-bit integers. The choice of internal representation 
+ for Euphoria objects is critical for performance. Since integers are the 
+ most commonly manipulated values, it was important that integers (up to 
+ 31-bits) be represented just as they are. Also, with a single machine-level 
+ test (if-statement in C), you can tell if something is an integer or not. 
+ A single test will also distinguish atoms from sequences. 
+ 
+ Each floating-point value and each sequence is represented by a pointer 
+ to a block of data. Since these blocks of data are always 8-byte aligned,
+ the low order 3 bits of each pointer must be 0. That means we need only
+ store the upper 29 bits, and fill in the lower 3 bits when we actually
+ use the pointer. The extra 3 bits that we free up are used to tag
+ the object as sequence, floating-point, or integer.
+ 
+ Note that the upper one quarter of the 32-bit range is currently not used.
+ (Previous versions of the internal representation did use it.)
+ It could be used to extend the range of integers, but you'd have some
+ difficulty in detecting overflows. It might also be used for some new
+ type of data.
+ 
+ Floating-point objects point to an 8-byte floating-point value in memory,
+ plus a 4-byte reference count.
+ 
+ Sequence objects point to a "s1" control block containing a reference count, 
+ sequence length, pointer to the first element of the sequence, and a 
+ "postfill" count. Postfill shows the amount of unused space at the end of 
+ the block. A sequence with some postfill can be quickly appended-to without 
+ requiring a re-allocation or copying of data. Typically, the elements of 
+ the sequence follow the control block immediately. (A few releases ago 
+ they were in a separately-allocated block of memory.) But the pointer to 
+ the first element is not redundant, since in some cases there may be unused 
+ space prior to the first element (e.g. after slicing, prepending etc.).  
+ 
+ 
+ 9. Reference Counting
+ 
+ The reference count on an object keeps track of the number of pointers
+ to that object. Integers do not need a reference count since integers
+ are always copied, not pointed-to.
+ 
+ When the reference count drops to 0, the object is immediately freed.
+ The C macros Ref() and DeRef() perform this operation. There are also
+ slightly faster versions, such as RefDS() and DeRefDS(), which eliminate a
+ test when we are sure something is not an integer.
+ 
+ Reference counting is a simple concept, but it requires great discipline.
+ Forget to Ref() something, or DeRef() too often, and some data will be
+ prematurely freed, leading to a crash. Ref() too often, or forget to 
+ DeRef() and you've got a storage leak - blocks of memory will be 
+ allocated but never freed.
+ 
+ The alternative to reference counting is garbage collection.
+ You could remove all the Ref's and DeRef's from the code, making things
+ simpler and faster. The C code produced by the Euphoria to C Translator 
+ would be smaller too. You would also eliminate all the 4-byte "ref" fields. 
+ You could pre-allocate a huge chunk of memory and consume it very 
+ efficiently, simply incrementing a pointer with each allocation. You could
+ eliminate the storage overhead per block normally required by malloc.
+ Eventually though, you will run out of space. To reclaim the unused space, 
+ you could go through all the currently active Euphoria variables, marking 
+ all the blocks that they point-to, directly or indirectly. Any blocks not 
+ marked could be reclaimed. With some schemes it would be necessary to 
+ copy the still-in-use blocks to a new area of memory.
+ 
+ There are many ways that garbage collection could be implemented, and there 
+ are many advantages. However there are also many disadvantages. For instance, 
+ depending on the scheme you chose, you might need an expensive copy operation 
+ in place of each Ref(). For efficiency, you'd need to pre-allocate large 
+ areas of memory, and keep most areas empty most of the time. You'd lose 
+ the information that reference counts provide, so you wouldn't know when 
+ a sequence could be modified in-place, without making a copy. You'd 
+ introduce random delays in execution, whenever the garbage collector 
+ was activated. You'd eliminate the headache of reference counting, but 
+ bug-free garbage collectors are notoriously difficult to write. 
+ 
+ 
+ 

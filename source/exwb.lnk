@@ -1,0 +1,22 @@
+NAME backendw
+FILE main-.obj
+FILE pathopen.obj
+FILE init-.obj
+FILE machine.obj
+FILE wildcard.obj
+FILE backend.obj
+FILE 0ackend.obj
+FILE compress.obj
+FILE file.obj
+FILE be_execute.obj
+FILE be_main.obj
+FILE be_alloc.obj
+FILE be_callc.obj
+FILE be_inline.obj
+FILE be_machine.obj
+FILE be_rterror.obj
+FILE be_runtime.obj
+FILE be_task.obj
+FILE be_symtab.obj
+FILE be_w.obj
+
