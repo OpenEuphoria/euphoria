@@ -1479,6 +1479,18 @@ run your task (up to) another 5 times etc. provided your task can
 be completed 5 times in one clock period.
 
 <p>
+For time-shared tasks, increasing parameter x 
+will increase the percentage of CPU time given to the selected task,
+while decreasing the percentage given to other time-shared tasks.
+It will also increase the efficiency of the program, since each actual task
+switch wastes a bit of time. A task_yield() where the same task continues
+executing takes less time. However it may not be desirable to block other
+time-shared tasks from running for long periods of time. Note that 
+real-time tasks are always given priority at any task_yield(), once 
+their activation time has been reached.
+</ul>
+
+<p>
 At program start-up there is a single task running. Its task id is 0,
 and initially it's a time-shared task allowed 1 run per task_yield(). 
 No other task can run until task 0 executes a task_yield().
