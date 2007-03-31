@@ -95,6 +95,9 @@ Source: c:\euphoria\htx\combine.exw; DestDir: {tmp}; Flags: ignoreversion delete
 Source: c:\euphoria\include\wildcard.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: c:\euphoria\include\get.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: c:\euphoria\include\misc.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\include\msgbox.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\include\machine.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\euphoria\include\dll.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: c:\euphoria\bin\keywords.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: c:\euphoria\bin\syncolor.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
@@ -150,6 +153,7 @@ Source: C:\EUPHORIA\BIN\EUPHORIA.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
 
 ;DEMO
 Source: C:\EUPHORIA\DEMO\*.ex; DestDir: {app}\DEMO\; Flags: ignoreversion;
+Source: C:\EUPHORIA\DEMO\*.exu; DestDir: {app}\DEMO\; Flags: ignoreversion;
 Source: C:\EUPHORIA\DEMO\*.doc; DestDir: {app}\DEMO\; Flags: ignoreversion;
 Source: C:\EUPHORIA\DEMO\WIN32\*.*; DestDir: {app}\DEMO\WIN32; Flags: ignoreversion;
 Source: C:\EUPHORIA\DEMO\DOS32\*.*; DestDir: {app}\DEMO\DOS32; Flags: ignoreversion;
