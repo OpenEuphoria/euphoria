@@ -321,11 +321,11 @@ it's not necessary to include any library file.
   (if possible) be scheduled to run a minimum of min seconds from now, 
   and a maximum of max seconds from now. Subsequent runs of the task 
   will also wait for min/max seconds. So you might say that a task
-  must run every 3.5 to 4.0 seconds. The second way using a time-sharing system
+  must run every 3.5 to 4.0 seconds. The second way uses a time-sharing system
   where a task can execute task_yield() a certain number of times before
   it must give up the CPU. So one task might be allowed 10 task_yields,
   where another, perhaps lower priority task must give up the CPU on every
-  task_yield(), if possible"
+  task_yield(), if possible."
 >
 
 <_3clist
