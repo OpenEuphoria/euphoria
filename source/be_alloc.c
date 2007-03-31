@@ -615,7 +615,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
     char *q;
     unsigned long oldsize;
 
-#ifdef EBSD 
+#ifdef ELINUX 
     // we always have 8-alignment
     return realloc(orig, newsize);  // should do bookkeeping on block size?
 
@@ -737,7 +737,7 @@ s1_ptr NewS1(long size)
 	// multiply by 4 could overflow 32 bits
 	SpaceMessage();
     }
-    s1 = (s1_ptr)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object));
+    s1 = (s1_ptr)EMalloc(sizeof(struct s1) + (size+2) * sizeof(object));
     s1->ref = 1;
     s1->base = (object_ptr)(s1 + 1);
     s1->length = size;
