@@ -1,0 +1,24 @@
+                     Language War Command Summary
+                     ============================
+ COMMANDS
+ --------
+ d1              move in direction d1 (d1 = 1 to 8) 
+ w s             set warp speed (s = 0 to 5)  
+ p e d1 d2       shoot e-hundred unit phasor in direction d1.d2 (e = 0 to 9)  
+ t d1 d2         shoot torpedo in direction d1.d2
+ a d1 d2         shoot antimatter pod in direction d1.d2 
+		 Press Enter to detonate.
+ g               display / cancel galaxy scan
+ $               abandon the Euphoria for the Assembler shuttlecraft
+ x               cancel a partially entered command
+ !               pause the game - hit 'x' to resume
+ Esc             abort the game
+
+                    directions
+                        3
+                   4    |    2
+                        |   
+                 5------+------1
+                        |
+                   6    |    8
+                        7 

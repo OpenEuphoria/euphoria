@@ -8,11 +8,13 @@ ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME
 endif
 
-
+ifdef EDEBUG
+DEBUG_FLAGS=-g3
+endif
 
 CC = gcc
-FE_FLAGS = -c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer
-BE_FLAGS = -c -w -DELINUX $(RUNTIME_FLAGS) -fsigned-char -O2 -ffast-math -fomit-frame-pointer
+FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS)
+BE_FLAGS =  -c -w -DELINUX $(RUNTIME_FLAGS) -fsigned-char -O2 -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS)
 
 
 EU_CORE_FILES = \
@@ -163,7 +165,7 @@ ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	gcc $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm -ldl -oecu
 
 main-.o :   $(EU_MAIN)
-	ecu $(EU_TARGET)
+	exu ec.ex $(EU_TARGET)
 	$(CC) $(FE_FLAGS) $*.c
 
 main-0.o :   ./main-.o 
@@ -302,7 +304,8 @@ be_alloc.o : ./be_alloc.c
 	$(CC) $(BE_FLAGS) $(ERUNTIME) $*.c
 
 be_callc.o : ./be_callc.c
-	$(CC) -c -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $*.c
+	$(CC) -c -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(DEBUG_FLAGS) $*.c
+	$(CC) -S -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(DEBUG_FLAGS) $*.c
 
 be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(ERUNTIME) $*.c
@@ -311,10 +314,10 @@ be_machine.o : ./be_machine.c
 	$(CC) $(BE_FLAGS) $(ERUNTIME)  $*.c
 
 be_rterror.o : ./be_rterror.c
-	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer $*.c
+	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS) $*.c
 
 be_syncolor.o : ./be_syncolor.c
-	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer $*.c
+	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS) $*.c
 
 be_runtime.o : ./be_runtime.c
 	$(CC) $(BE_FLAGS) $(ERUNTIME) $*.c

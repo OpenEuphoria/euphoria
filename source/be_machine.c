@@ -4138,9 +4138,10 @@ object OpenDll(object x)
     open_dll_list[open_dll_count++] = lib;
 #else
     // Linux
-    lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL); 
-#endif
     
+    lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL); 
+    
+#endif
     if ((unsigned)lib <= (unsigned)MAXINT_VAL)
 	return MAKE_INT((unsigned long)lib);
     else

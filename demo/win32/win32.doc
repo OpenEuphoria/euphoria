@@ -1,0 +1,34 @@
+		
+		DEMO Programs for the WIN32 Platform
+		------------------------------------
+ 
+ These are very primitive examples of how to call C routines in .DLL's and
+ how to create simple windows. Bigger and better Windows demo programs are
+ on the Archive page in the WIN32 section, and on the Recent User Contributions
+ page. Most use the Win32Lib package, also on the Euphoria Web site.
+ 
+ Run each program using exw.exe.
+ 
+ window.exw  - A simple example of making a Window
+
+ email.exw   - A demo of the MAPI (Messaging API) subsystem of the WIN32 API
+               You may have to set up Outlook Express as your 
+               "default Simple MAPI client" on the Tools/Options menu.
+               Warning: this may send an e-mail message to the U.S. president.
+               
+ winwire.exw - A wire frame spinning E, inside a window (or full-screen if
+               you edit a line in the file)
+ 
+ taskwire.exw - A multitasking demo with several wire frame shapes spinning
+                in parallel.
+ 
+ dsearch.exw - A tool for finding out which .DLL contains the C function
+               that you want to call
+               
+ 
+ For more information on WIN32 programming in Euphoria, see DOC\PLATFORM.DOC
+ 
+ To make GUI programs in Euphoria, download the Win32Lib package plus
+ Judith Evans' Visual development environment for Win32Lib. You might also
+ consider Andrea Cini's GUI library and IDE, or Mike's ARWEN library. 
+ 

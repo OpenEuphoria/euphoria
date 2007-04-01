@@ -2894,7 +2894,7 @@ procedure opPLUS()
     gencode = "@ = binary_op(PLUS, @, @);\n"
     intcode2= "@1 = @2 + @3;\n"
     intcode = "@1 = @2 + @3;\n"
-    intcode_extra = "if (@1 + HIGH_BITS >= 0) \n" &
+    intcode_extra = "if ((long)((unsigned long)@1 + (unsigned long)HIGH_BITS) >= 0) \n" &
 		    "@1 = NewDouble((double)@1);\n"
     if TypeIs(Code[pc+1], TYPE_DOUBLE) or
        TypeIs(Code[pc+2], TYPE_DOUBLE) then
@@ -2911,7 +2911,7 @@ procedure opMINUS()
     gencode = "@ = binary_op(MINUS, @, @);\n"
     intcode2 ="@1 = @2 - @3;\n"
     intcode = "@1 = @2 - @3;\n"
-    intcode_extra = "if (@1 + HIGH_BITS >= 0)\n" &
+    intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0)\n" &
 		    "@1 = NewDouble((double)@1);\n"
     if TypeIs(Code[pc+1], TYPE_DOUBLE) or
        TypeIs(Code[pc+2], TYPE_DOUBLE) then
@@ -3410,7 +3410,7 @@ procedure opENDFOR_GENERAL()
 
     -- rvalue for CName should be ok - we've initialized loop var
     intcode = "@1 = @2 + @3;\n" &
-	      "if (@1 + HIGH_BITS >= 0) \n" &
+	      "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0) \n" &
 	      "@1 = NewDouble((double)@1);\n"
 		
     if TypeIs(Code[pc+3], TYPE_INTEGER) and 
@@ -4487,7 +4487,7 @@ end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1 
-    if not EDOS then
+    if not EDOS and EWINDOWS then
 	c_stmt0("show_console();\n")
     end if
     CSaveStr("_0", Code[pc+1], 0, 0)
