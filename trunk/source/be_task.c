@@ -227,6 +227,8 @@ static void grow_stack(int x)
 	return;
     else
 	grow_stack(x-1);
+
+    a[10] = &a; // gcc 4.1 seems to need this to avoid segfaulting
 }
 #endif
 #endif

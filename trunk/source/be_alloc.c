@@ -161,7 +161,7 @@ void InitEMalloc()
     int i, j, p;
 #ifdef ELINUX
     pagesize = getpagesize();
-#endif  
+#else
     eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
     pool[0].size = 8;
     pool[0].first = NULL;
@@ -181,7 +181,7 @@ void InitEMalloc()
 	    j++;
 	pool_map[i] = &pool[j];
     }
-
+#endif
     call_back_arg1 = tmp_alloc();
     call_back_arg1->mode = M_TEMP;
     call_back_arg1->obj = NOVALUE;
@@ -405,6 +405,22 @@ char *EMalloc(unsigned long nbytes)
     int alignment;
     int min_align;
 
+#ifdef ELINUX
+#ifndef EBSD62
+	return malloc(nbytes);
+#else
+	p = malloc( nbytes + 8 );
+	if( (unsigned long)p & 7 ){
+		*(int *)p = MAGIC_FILLER;
+		p += 4;
+	}
+	else{
+	       *(int  *)(p+4) = 0;
+	        p += 8;
+	}
+	return p;
+#endif
+#else
 #ifdef HEAP_CHECK
     long size;
 
@@ -497,6 +513,8 @@ char *EMalloc(unsigned long nbytes)
 	align4 = 4;  // start handling 4-aligned blocks
 	nbytes += align4;
     } while (TRUE);
+#endif
+// !ELINUX
 }
 
 void EFree(unsigned char *p)
@@ -508,6 +526,16 @@ void EFree(unsigned char *p)
     int align;
 #ifdef HEAP_CHECK
     char msg[80];
+#endif
+
+#ifdef ELINUX
+#ifndef EBSD62
+	free(p);
+#else
+	if((int*)(p-4)==MAGIC_FILLER) free( p-4 );
+	else                          free( p - 8 );
+#endif
+	return;
 #endif
 
 #ifdef HEAP_CHECK
@@ -616,9 +644,41 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
     unsigned long oldsize;
 
 #ifdef ELINUX 
+#ifndef EBSD62
     // we always have 8-alignment
     return realloc(orig, newsize);  // should do bookkeeping on block size?
-
+#else
+    // FreeBSD 6.2 doesn't necessarily give us 8-byte alignment,
+    // so we have to make sure it all works out...
+    if( (int*)(orig-4) == MAGIC_FILLER ){
+	// orig not 8 byte aligned
+	p = realloc((orig-4), newsize + 8 );
+	if( (unsigned long)p & 7 == 0 ){
+	    // the original block wasn't aligned, but this one is, so
+	    // we need to adjust the memory in order to compensate
+	    memcpy(p+8, orig, newsize );
+	    *(int*)(p+4) = 0;
+	    p += 8;
+	}
+	else{
+	    p += 4;
+	}
+    }
+    else{
+	// orig was 8 byte aligned
+	p = realloc((orig-8), newsize + 8 );
+	if( (unsigned long)p & 7 != 0 ){
+	    // the orignal was 8-byte aligned, but the new block isn't
+	    memcpy( p+4, orig-4, newsize+4);
+	    p += 4;
+	}
+	else{
+	    p += 8;
+	}
+    
+    }
+    return p;
+#endif
 #else
     p = orig;
     if (align4 && *(int *)(p-4) == MAGIC_FILLER)
@@ -737,13 +797,13 @@ s1_ptr NewS1(long size)
 	// multiply by 4 could overflow 32 bits
 	SpaceMessage();
     }
-    s1 = (s1_ptr)EMalloc(sizeof(struct s1) + (size+2) * sizeof(object));
+    s1 = (s1_ptr)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object));
     s1->ref = 1;
     s1->base = (object_ptr)(s1 + 1);
     s1->length = size;
     s1->postfill = 0; /* there may be some available but don't waste time */
 		      /* prepend assumes this is set to 0 */
-    *(s1->base + size) = NOVALUE;
+    s1->base[size] = NOVALUE;
     s1->base--;  // point to "0th" element
     return(s1);
 }

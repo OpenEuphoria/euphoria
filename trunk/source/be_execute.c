@@ -2337,7 +2337,7 @@ void do_exec(int *start_pc)
 		/* we know that the inputs and the output must be integers */
 		START_BIN_OP_I
 		top = INT_VAL(a) + INT_VAL(top);
-		if (top + HIGH_BITS >= 0) { 
+		if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) { 
 		    goto dblplus_i;
 		}
 	    contplus_i:  
@@ -2386,7 +2386,7 @@ void do_exec(int *start_pc)
 	    case L_MINUS_I:
 		START_BIN_OP_I
 		top = a - top;
-		if (top + HIGH_BITS >= 0) {
+		if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
 		    tpc = pc;
 		    b = top;
 		    top = NewDouble((double)b);
@@ -2885,7 +2885,7 @@ void do_exec(int *start_pc)
 		top = *(object_ptr)pc[1];    /* inc */
 		a = *(object_ptr)pc[2];      /* limit */
 	      intloop:
-		if (a + top + HIGH_BITS < 0) { 
+		if ((long)((unsigned long)a + (unsigned long)top + (unsigned long)HIGH_BITS) < 0) { 
 		    /* purely integer loop */
 		    if ((top >= 0)) {
 			/* going up */

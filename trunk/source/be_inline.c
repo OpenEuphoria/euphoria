@@ -40,6 +40,11 @@ object NewDouble(double d)
 /* allocate space for a new double value */
 {
     register d_ptr new;
+
+#ifdef ELINUX
+
+   new = EMalloc((long)D_SIZE);
+#else
 #ifdef HEAP_CHECK  
     char *q;
     int align;
@@ -68,6 +73,9 @@ object NewDouble(double d)
     if ((long)new % 8 != 0)
 	RTInternal("NewDouble returns misaligned pointer");
 #endif
+
+#endif
+
     new->ref = 1;
     new->dbl = d;
     return MAKE_DBL(new);
