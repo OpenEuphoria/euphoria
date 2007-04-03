@@ -1,7 +1,7 @@
 option osname='CauseWay'
 libpath C:\WATCOM\lib386
 libpath C:\WATCOM\lib386\dos
-OPTION stub=C:\EUPHORIA\bin\cwstub.exe
+OPTION stub=..\bin\cwstub.exe
 format os2 le ^
 OPTION STACK=49152
 OPTION QUIET
