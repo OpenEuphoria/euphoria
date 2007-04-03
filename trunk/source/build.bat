@@ -32,7 +32,7 @@ if not exist ecwb.lib goto fail
 call lccelib.bat
 if not exist ecwl.lib goto fail
 
-echo OK to copy all translator libs to euphoria\bin? (Control-C to abort)
+echo OK to copy all translator libs to %EUDIR%\bin? (Control-C to abort)
 pause
 
 move ec.a %EUDIR%\bin
@@ -77,7 +77,7 @@ echo Windows backend
 call bmakew.bat
 if not exist backendw.exe goto fail
 
-echo OK to copy all .exe's to euphoria\bin? (Control-C to abort)
+echo OK to copy all .exe's to %EUDIR%\bin? (Control-C to abort)
 pause 
 
 move ex.exe %EUDIR%\bin
