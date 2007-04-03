@@ -5,15 +5,15 @@ rem need syncolor.e and keywords.e - EUINC will be changed temporarily
 set TEMP_EUINC=%EUINC%
 SET EUINC=%EUDIR%\bin
 
-ex doc.exw HTML \EUPHORIA
-ex doc.exw TEXT \EUPHORIA
+ex doc.exw HTML %EUDIR%
+ex doc.exw TEXT %EUDIR%
 
-ex combine.exw \EUPHORIA
+ex combine.exw %EUDIR%
 
-del \euphoria\doc\refman_?.doc
-del \euphoria\doc\lib_*.doc
+del %EUDIR%\doc\refman_?.doc
+del %EUDIR%\doc\lib_*.doc
 
-rem move \euphoria\html\readme.htm \euphoria > NUL
+rem move %EUDIR%\html\readme.htm \euphoria > NUL
 
 SET EUINC=%TEMP_EUINC%
 
