@@ -8,7 +8,7 @@ echo      change "be_callc.c" to "be_callc.obj" in borfiles.lnk
 del *.obj
 
 echo translating the front end...
-\euphoria\bin\ecw -bor int.ex
+..\bin\ecw -bor int.ex
 
 bcc32 -DINT_CODES -DEWINDOWS -DEBORLAND -eexw.exe -tW -q -w- -O2 -5 -a4 -Ic:\borland\bcc55\include -LC:\BORLAND\BCC55\LIB @borfiles.lnk 
 del *.tds > NUL
