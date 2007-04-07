@@ -31,13 +31,6 @@ global constant
 	 MAX3B =  power(2, 23)-1,
 	 MIN4B = -power(2, 31)
 
-constant COMP_CACHE_SIZE = 64  -- power of 2: number of large integers to cache 
-
-constant CACHE0 = 255-7-COMP_CACHE_SIZE -- just before cache
-
-global integer max1b   -- maximum integer value to store in one byte
-max1b = CACHE0 + MIN1B
-
 global function compress(object x)
 -- Return the compressed representation of a Euphoria object 
 -- as a sequence of bytes (in memory). 
@@ -85,8 +78,27 @@ global function compress(object x)
     end if
 end function
 
+-- Compression Cache: To save space on disk, we allocate a series of
+-- dynamic one-byte codes to represent recently-seen (large) integer values, 
+-- rather than reserving those codes for specific small integer values.
+-- We use the lower bits of the integer value to provide fast access to the
+-- cache slot that it would occupy if it were present in the cache,
+-- i.e. if it is the most recently-seen value for that particular cache slot.
+-- Both the compressor and decompressor update the cache as they go through
+-- the IL stream. This often allows us to issue a one-byte code rather than a
+-- 3, 4 or 5-byte code to indicate a large integer. Experiments show that
+-- this reduces the size of the IL by a significant amount (maybe 30%), 
+-- as we often see the same large integers (such as symbol table indexes)
+-- repeated several times within a short segment of the IL.
 
-sequence comp_cache           -- recent large (over one byte) values
+constant COMP_CACHE_SIZE = 64  -- power of 2: number of large integers to cache 
+
+constant CACHE0 = 255-7-COMP_CACHE_SIZE -- just before cache
+
+global integer max1b  -- maximum integer value to store in one byte
+max1b = CACHE0 + MIN1B
+
+sequence comp_cache  -- stores recent large (hopefully over one byte) values
 
 global procedure init_compress()
 -- do this before a series of calls to fcompress() or fdecompress()    
@@ -101,18 +113,22 @@ global procedure fcompress(integer f, object x)
     
     if integer(x) then
 	if x >= MIN1B and x <= max1b then
-	    puts(f, x - MIN1B)
+	    puts(f, x - MIN1B) -- normal, quite small integer
 	    
 	else
+	    -- check the appropriate slot in the compression cache
 	    p = 1 + and_bits(x, COMP_CACHE_SIZE-1)
 	    if equal(comp_cache[p], x) then
 		-- a cache hit
-		puts(f, CACHE0 + p)
+		puts(f, CACHE0 + p) -- output the cache slot number
 	    
 	    else
 		-- cache miss
-		comp_cache[p] = x
+		comp_cache[p] = x -- store it in cache slot p
 		
+		-- write out the full value this time (but hopefully next time
+		-- we can just write the one-byte cache slot number 
+		-- representing this number)
 		if x >= MIN2B and x <= MAX2B then
 		    x -= MIN2B
 		    puts(f, {I2B, and_bits(x, #FF), floor(x / #100)})
@@ -180,10 +196,11 @@ global function fdecompress(integer c)
     if c = 0 then
 	c = getc(current_db)
 	if c <= CACHE0 then
-	    return c + MIN1B
+	    return c + MIN1B  -- a normal, quite small integer
 	
 	elsif c <= CACHE0 + COMP_CACHE_SIZE then
-	    -- a value from cache
+	    -- a cache slot number - use the value currently stored in 
+	    -- the compression cache at this slot
 	    return comp_cache[c-CACHE0]
 	    
 	end if
@@ -193,6 +210,7 @@ global function fdecompress(integer c)
 	ival = getc(current_db) + 
 	       #100 * getc(current_db) +
 	       MIN2B
+	-- update the appropriate compression cache slot
 	comp_cache[1 + and_bits(ival, COMP_CACHE_SIZE-1)] = ival
 	return ival
     
@@ -201,11 +219,13 @@ global function fdecompress(integer c)
 	       #100 * getc(current_db) + 
 	       #10000 * getc(current_db) +
 	       MIN3B
+	-- update the appropriate compression cache slot
 	comp_cache[1 + and_bits(ival, COMP_CACHE_SIZE-1)] = ival
 	return ival
     
     elsif c = I4B  then 
 	ival = get4() + MIN4B
+	-- update the appropriate compression cache slot
 	comp_cache[1 + and_bits(ival, COMP_CACHE_SIZE-1)] = ival
 	return ival
 	
@@ -226,7 +246,7 @@ global function fdecompress(integer c)
 	end if
 	s = repeat(0, len)
 	for i = 1 to len do
-	    -- inline small integer case for greater speed on strings
+	    -- inline the small integer case for greater speed on strings
 	    c = getc(current_db)
 	    if c < I2B then
 		if c <= CACHE0 then
