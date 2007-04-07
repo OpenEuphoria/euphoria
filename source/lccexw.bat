@@ -5,7 +5,7 @@ rem using the Lcc C compiler
 del *.obj 
 
 echo translating the front end...
-\euphoria\bin\ecw -lcc int.ex
+..\bin\ecw -lcc int.ex
 
 SET FE_FLAGS=-w -O -Zp4 
 lcc %FE_FLAGS% main-.c
