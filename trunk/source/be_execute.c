@@ -174,6 +174,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
+extern int clk_tck;
 extern int current_task;
 extern struct tcb *tcb;
 extern char *file_name_entered;
@@ -3834,7 +3835,7 @@ void do_exec(int *start_pc)
 		if (top == ATOM_M1 && TraceOn) {
 #ifdef ELINUX
 		    struct tms buf;
-		    c0 = times(&buf) + 8 * CLK_TCK; // wait 8 real seconds
+		    c0 = times(&buf) + 8 * clk_tck; // wait 8 real seconds
 		    while (times(&buf)
 #else
 		    c0 = clock() + 8 * clocks_per_sec;
