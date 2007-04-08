@@ -15,6 +15,7 @@
 #include <windows.h>
 #endif
 #ifdef ELINUX
+#include <unistd.h>
 #ifdef EBSD
 #include <limits.h>
 #else
@@ -158,7 +159,11 @@ void be_init()
 #ifdef ELCC 
     clk_tck = CLOCKS_PER_SEC;
 #else   
+#ifdef CLK_TCK
     clk_tck = CLK_TCK;
+#else
+    clk_tck = sysconf(_SC_CLK_TCK);
+#endif
 #endif
 
 #ifdef EWINDOWS

@@ -14,10 +14,6 @@
 #define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 #define HIGH_BITS    ((long)0xC0000000L)
 
-#ifndef CLK_TCK
-#define CLK_TCK CLOCKS_PER_SEC
-#endif
-
 #undef MININT
 #undef MAXINT
 #define MININT     (long)0xC0000000
