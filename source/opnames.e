@@ -180,6 +180,8 @@ global constant opnames = {
 "TASK_LIST",
 "TASK_STATUS",
 "TASK_CLOCK_STOP",
-"TASK_CLOCK_START"  -- 177
+"TASK_CLOCK_START",  -- 177
+"FIND_FROM",
+"MATCH_FROM"
 }
 

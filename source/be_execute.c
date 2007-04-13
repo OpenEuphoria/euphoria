@@ -243,7 +243,8 @@ void do_exec();
 s1_ptr NewS1();
 double current_time();
 void Machine_Handler();
-
+long find_from();
+long e_match_from();
 /**********************/
 /* Exported variables */
 /**********************/
@@ -988,6 +989,8 @@ void code_set_pointers(int **code)
 	    case LHS_SUBS1:
 	    case LHS_SUBS1_COPY:
 	    case C_FUNC:
+	    case FIND_FROM:
+	    case MATCH_FROM:
 		// 4 operands follow
 		code[i+1] = SET_OPERAND(code[i+1]);
 		code[i+2] = SET_OPERAND(code[i+2]);
@@ -1504,7 +1507,7 @@ void do_exec(int *start_pc)
   &&L_LHS_SUBS1_COPY, &&L_TASK_CREATE, &&L_TASK_SCHEDULE, &&L_TASK_YIELD,
   &&L_TASK_SELF, &&L_TASK_SUSPEND, &&L_TASK_LIST,
   &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, 
-/* 178 */ &&L_TASK_CLOCK_START
+/* 178 */ &&L_TASK_CLOCK_START, &&L_FIND_FROM, &&L_MATCH_FROM
   };
 #endif
 #endif
@@ -4169,6 +4172,27 @@ void do_exec(int *start_pc)
 		    RTFatal("argument to abort() must be an atom");
 		UserCleanup(i);  
 		BREAK;
+		
+		case L_FIND_FROM:
+			tpc = pc;
+			a = find_from(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2], *(object_ptr)pc[3]);
+			top = MAKE_INT(a);
+			DeRef(*(object_ptr)pc[4]);
+			*(object_ptr)pc[4] = top;               
+			thread5();
+			BREAK;
+			
+		case L_MATCH_FROM:
+			tpc = pc;
+			a = e_match_from((s1_ptr)*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2],
+				*(object_ptr) pc[3]);
+			top = MAKE_INT(a);
+			DeRef(*(object_ptr)pc[4]);
+			*(object_ptr)pc[4] = top;
+			
+			thread5();
+			BREAK;
+			
 #ifdef INT_CODES
 	}
 #else

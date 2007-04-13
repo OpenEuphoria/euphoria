@@ -177,5 +177,7 @@ static char *opnames[] = {
 "TASK_LIST",
 "TASK_STATUS",
 "TASK_CLOCK_STOP",
-"TASK_CLOCK_START"
+"TASK_CLOCK_START",
+"FIND_FROM",
+"MATCH_FROM"
 };

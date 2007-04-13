@@ -603,12 +603,51 @@ it repeatedly, before the lock request is granted.
 
 <tr><td valign=top><b>See Also:</b></td>
 <td><a href="lib_e_g.htm#find">find</a>,
+  <a href="lib_e_g.htm#find">find_from</a>,
 <a href="lib_c_d.htm#compare">compare</a>,
+<a href="lib_e_g.htm#find">match_from</a>,
 <a href="lib_u_z.htm#wildcard_match">wildcard_match</a>
 </td></tr>
 
 </table>
 
+<a name=match_from></a><font color="#006633" size=+2><br>
+<center><b>match_from</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> i1 = match_from(s1, s2, i2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>  Try to match s1 against some slice of s2, starting from element i2. If successful, 
+ return the element number of s2 where the (first) matching slice begins,
+ else return 0. 
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">location = </font><font color="#FF00FF">match_from</font><font color="#330033">(</font><font color="#00A033">"pho"</font><font color="#330033">, </font><font color="#00A033">"phoEuphoria"</font><font color="#330033">, 4)</font>
+<font color="#FF0055">-- location is set to 6</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_e_g.htm#find">find</a>,
+  <a href="lib_e_g.htm#find">find_from</a>,
+  <a href="lib_h_o.htm#find">match</a>,
+<a href="lib_c_d.htm#compare">compare</a>,
+<a href="lib_u_z.htm#wildcard_match">wildcard_match</a>
+</td></tr>
+
+</table>
 
 <a name=mem_copy></a><font color="#006633" size=+2><br>
 <center><b>mem_copy</b></center>

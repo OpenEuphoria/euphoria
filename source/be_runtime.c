@@ -4597,3 +4597,123 @@ int mgetch(int wait)
 }
 #endif
 #endif
+
+long find_from(object a, s1_ptr b, object c)
+/* find object a as an element of sequence b starting from c*/
+{
+    register long length;
+    register object_ptr bp;
+    register object bv;
+
+    if (!IS_SEQUENCE(b))
+		RTFatal("second argument of find_from() must be a sequence");
+
+	if (!IS_ATOM_INT(c))
+		RTFatal("third argument of find_from() must be an integer");
+		
+    b = SEQ_PTR(b);
+    length = b->length;
+    if (length == 0)
+		return 0;
+		
+
+	if (length < c) // should this be an error instead?
+		return 0;
+		
+    bp = b->base;
+    bp += c;
+    if (IS_ATOM_INT(a)) {
+		while (TRUE) {
+		    bv = *(++bp);
+		    if (IS_ATOM_INT(bv)) {
+				if (a == bv) 
+				    return bp - (object_ptr)b->base;
+		    }
+		    else if (bv == NOVALUE) {
+				break;
+		    }
+		    else if (compare(a, bv) == 0) {  /* not INT-INT case */
+				return bp - (object_ptr)b->base;
+		    }
+		}
+    }
+    else if (IS_SEQUENCE(a)) {
+		long a_len;
+		
+		a_len = SEQ_PTR(a)->length;
+		do {
+		    bv = *(++bp);
+		    if (IS_SEQUENCE(bv)) {
+				if (a_len == SEQ_PTR(bv)->length) {
+				    /* a is SEQUENCE => not INT-INT case */
+				    if (compare(a, bv) == 0)
+						return bp - (object_ptr)b->base;
+				}
+		    }
+		} while (--length > 0);
+    }
+    else {
+		do {
+		    /* a is ATOM double => not INT-INT case */
+		    if (compare(a, *(++bp)) == 0)
+			return bp - (object_ptr)b->base;
+		} while (--length > 0);
+    }
+    return(0); 
+}
+
+e_match_from(s1_ptr a, s1_ptr b, object c)
+/* find sequence a as a slice within sequence b 
+   sequence a may not be empty */
+{
+    register long ntries, len_remaining;
+    object_ptr a1, b1, bp;
+    register object_ptr ai, bi;
+    object av, bv;
+    long lengtha, lengthb;
+
+    if (!IS_SEQUENCE(a))
+		RTFatal("first argument of match_from() must be a sequence");
+    if (!IS_SEQUENCE(b))
+		RTFatal("second argument of match_from() must be a sequence");
+	if (!IS_ATOM_INT(c))
+		RTFatal("third argument of match_from() must be an integer");
+    a = SEQ_PTR(a);
+    b = SEQ_PTR(b);
+    lengtha = a->length;
+    if (lengtha == 0)
+		RTFatal("first argument of match_from() must be a non-empty sequence");
+    lengthb = b->length;
+
+    if (lengthb < c )  // should this be an error?
+    	return (0);
+    b1 = b->base;
+    bp = b1 + c;
+    a1 = a->base;
+    ntries = lengthb - lengtha + 1;
+    while (--ntries >= 0) {
+	ai = a1;
+	bi = bp;
+
+	len_remaining = lengtha;
+	do {
+	    ai++;
+	    bi++;
+	    av = *ai;
+	    bv = *bi;
+	    if (av != bv) {
+		if (IS_ATOM_INT(av) && IS_ATOM_INT(bv)) {
+		    bp++;
+		    break;
+		}
+		else if (compare(av, bv) != 0) {
+		    bp++;
+		    break;
+		}
+	    }
+	    if (--len_remaining == 0)
+		return(bp - b1 + 1); /* perfect match */
+	} while(TRUE);
+    }
+    return(0); /* couldn't match */
+}

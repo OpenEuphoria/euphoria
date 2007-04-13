@@ -71,6 +71,13 @@
  If you have an autoexec.bat file, but it doesn't contain a PATH command, you
  will have to create one that includes C:\EUPHORIA\BIN.
 
+ There is another, optional, environment variable used by some experienced
+ users of Euphoria. It is called EUINC (see
+ http://www.rapideuphoria.com/cgi-bin/guru.exu?refDoc=on
+ &libDoc=on&otherDoc=on&keywords=euinc ). It determines the search path for
+ included files. You might want to add it, or change it, when you install a new
+ version of Euphoria.
+
  How to Uninstall Euphoria
  =========================
 
