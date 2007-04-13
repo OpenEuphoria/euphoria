@@ -181,7 +181,9 @@ TASK_LIST = 174,
 TASK_STATUS = 175,
 TASK_CLOCK_STOP = 176,
 TASK_CLOCK_START = 177,
-MAX_OPCODE = 177
+FIND_FROM = 178,
+MATCH_FROM = 179,
+MAX_OPCODE = 179
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c - optable[], localjumptab[]

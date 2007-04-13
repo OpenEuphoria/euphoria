@@ -23,6 +23,7 @@ global constant builtins = {
     "poke4", "peek4s", "peek4u", "profile", "equal", "system_exec",
     "platform", "task_create", "task_schedule", "task_yield",
     "task_self", "task_suspend", "task_list",
-    "task_status", "task_clock_stop", "task_clock_start"}
+    "task_status", "task_clock_stop", "task_clock_start","find_from",
+    "match_from"}
 
 

@@ -190,7 +190,10 @@
 #define TASK_CLOCK_STOP 176
 #define TASK_CLOCK_START 177
 
-#define MAX_OPCODE 177  /* remember to update reswords.e, opnames.e,
+#define FIND_FROM  178
+#define MATCH_FROM  179
+
+#define MAX_OPCODE 179  /* remember to update reswords.e, opnames.e,
 			   opnames.h, optable[], localjumptab[]
 			   in be_execute.c, be_runtime.c. redef.h, and maybe 
 			   Also, run makename.ex */

@@ -145,11 +145,56 @@ location = find("mary", names)
  </_eucode>
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_h_o.htm#match\">match</a>,
+  description="<a href=\"lib_h_o.htm#find_from\">find_from</a>,
+  <a href=\"lib_h_o.htm#match\">match</a>,
+  <a href=\"lib_h_o.htm#match_from\">match_from</a>,
 <a href=\"lib_c_d.htm#compare\">compare</a>"
  >
 </table>
 
+<_routine name="find_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i1 = find_from(x, s, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Find x as an element of s, starting with element i2. If successful, return the index
+ of the first element of s that matches. If unsuccessful
+ return 0. "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+location = find(11, {11, 8, 11, 2, 3}, 2)
+-- location is set to 3
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+names = {"mary", "rob", "george", "mary", ""}
+location = find_from("mary", names, 3)
+-- location is set to 4
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_h_o.htm#find\">find</a>,
+  <a href=\"lib_h_o.htm#match\">match</a>,
+  <a href=\"lib_h_o.htm#match_from\">match_from</a>,
+<a href=\"lib_c_d.htm#compare\">compare</a>"
+ >
+</table>
 
 <_routine name="float32_to_atom">
 <table border=0 cellspacing=2 cellpadding=2>

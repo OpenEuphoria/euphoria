@@ -2312,7 +2312,31 @@
               -- location is set to 4
               
                
- See Also:    match, compare
+ See Also:    find_from, match, match_from, compare
+
+
+ ----------------------------------<find_from>----------------------------------
+
+ Syntax:      i1 = find_from(x, s, i2)
+
+ Description: Find x as an element of s, starting with element i2. If
+              successful, return the index of the first element of s that
+              matches. If unsuccessful return 0.
+
+ Example 1:
+
+              location = find(11, {11, 8, 11, 2, 3}, 2)
+              -- location is set to 3
+              
+               
+ Example 2:
+
+              names = {"mary", "rob", "george", "mary", ""}
+              location = find_from("mary", names, 3)
+              -- location is set to 4
+              
+               
+ See Also:    find, match, match_from, compare
 
 
  -------------------------------<float32_to_atom>-------------------------------
@@ -3376,7 +3400,24 @@
               -- location is set to 3
               
                
- See Also:    find, compare, wildcard_match
+ See Also:    find, find_from, compare, match_from, wildcard_match
+
+
+ ---------------------------------<match_from>----------------------------------
+
+ Syntax:      i1 = match_from(s1, s2, i2)
+
+ Description: Try to match s1 against some slice of s2, starting from element
+              i2. If successful, return the element number of s2 where the
+              (first) matching slice begins, else return 0.
+
+ Example:
+
+              location = match_from("pho", "phoEuphoria", 4)
+              -- location is set to 6
+              
+               
+ See Also:    find, find_from, match, compare, wildcard_match
 
 
  ----------------------------------<mem_copy>-----------------------------------
@@ -5680,6 +5721,17 @@
               next 0.01 seconds it will run your task (up to) another 5 times
               etc. provided your task can be completed 5 times in one clock
               period.
+
+              For time-shared tasks, increasing parameter x will increase the
+              percentage of CPU time given to the selected task, while
+              decreasing the percentage given to other time-shared tasks. It
+              will also increase the efficiency of the program, since each
+              actual task switch wastes a bit of time. A task_yield() where the
+              same task continues executing takes less time. However it may not
+              be desirable to block other time-shared tasks from running for
+              long periods of time. Note that real-time tasks are always given
+              priority at any task_yield(), once their activation time has been
+              reached.
 
               At program start-up there is a single task running. Its task id
               is 0, and initially it's a time-shared task allowed 1 run per

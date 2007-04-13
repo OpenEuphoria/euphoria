@@ -116,7 +116,9 @@ keylist =
     {"task_list", SC_PREDEF, FUNC, TASK_LIST, 0, E_PURE},
     {"task_status", SC_PREDEF, FUNC, TASK_STATUS, 1, E_PURE},
     {"task_clock_stop", SC_PREDEF, PROC, TASK_CLOCK_STOP, 0, E_PURE},
-    {"task_clock_start", SC_PREDEF, PROC, TASK_CLOCK_START, 0, E_PURE}
+    {"task_clock_start", SC_PREDEF, PROC, TASK_CLOCK_START, 0, E_PURE},
+    {"find_from", SC_PREDEF, FUNC, FIND_FROM, 3, E_PURE },
+    {"match_from", SC_PREDEF, FUNC, MATCH_FROM, 3, E_PURE }
 }
     -- new words must go at end to maintain compatibility 
 

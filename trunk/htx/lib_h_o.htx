@@ -551,11 +551,47 @@ location = match("pho", "Euphoria")
 <_2clist
   name="See Also:"
   description="<a href=\"lib_e_g.htm#find\">find</a>,
+  <a href=\"lib_e_g.htm#find\">find_from</a>,
 <a href=\"lib_c_d.htm#compare\">compare</a>,
+<a href=\"lib_e_g.htm#find\">match_from</a>,
 <a href=\"lib_u_z.htm#wildcard_match\">wildcard_match</a>"
  >
 </table>
 
+<_routine name="match_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i1 = match_from(s1, s2, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Try to match s1 against some slice of s2, starting from element i2. If successful, 
+ return the element number of s2 where the (first) matching slice begins,
+ else return 0. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = match_from("pho", "phoEuphoria", 4)
+-- location is set to 6
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_e_g.htm#find\">find</a>,
+  <a href=\"lib_e_g.htm#find\">find_from</a>,
+  <a href=\"lib_h_o.htm#find\">match</a>,
+<a href=\"lib_c_d.htm#compare\">compare</a>,
+<a href=\"lib_u_z.htm#wildcard_match\">wildcard_match</a>"
+ >
+</table>
 
 <_routine name="mem_copy">
 <table border=0 cellspacing=2 cellpadding=2>

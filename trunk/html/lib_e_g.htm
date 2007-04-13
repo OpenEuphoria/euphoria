@@ -176,12 +176,61 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
-<td><a href="lib_h_o.htm#match">match</a>,
+<td><a href="lib_h_o.htm#find_from">find_from</a>,
+  <a href="lib_h_o.htm#match">match</a>,
+  <a href="lib_h_o.htm#match_from">match_from</a>,
 <a href="lib_c_d.htm#compare">compare</a>
 </td></tr>
 
 </table>
 
+<a name=find_from></a><font color="#006633" size=+2><br>
+<center><b>find_from</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> i1 = find_from(x, s, i2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>  Find x as an element of s, starting with element i2. If successful, return the index
+ of the first element of s that matches. If unsuccessful
+ return 0. 
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">location = </font><font color="#FF00FF">find</font><font color="#330033">(11, </font><font color="#993333">{</font><font color="#330033">11, 8, 11, 2, 3</font><font color="#993333">}</font><font color="#330033">, 2)</font>
+<font color="#FF0055">-- location is set to 3</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">names = {</font><font color="#00A033">"mary"</font><font color="#330033">, </font><font color="#00A033">"rob"</font><font color="#330033">, </font><font color="#00A033">"george"</font><font color="#330033">, </font><font color="#00A033">"mary"</font><font color="#330033">, </font><font color="#00A033">""</font><font color="#330033">}</font>
+<font color="#330033">location = </font><font color="#FF00FF">find_from</font><font color="#330033">(</font><font color="#00A033">"mary"</font><font color="#330033">, names, 3)</font>
+<font color="#FF0055">-- location is set to 4</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_h_o.htm#find">find</a>,
+  <a href="lib_h_o.htm#match">match</a>,
+  <a href="lib_h_o.htm#match_from">match_from</a>,
+<a href="lib_c_d.htm#compare">compare</a>
+</td></tr>
+
+</table>
 
 <a name=float32_to_atom></a><font color="#006633" size=+2><br>
 <center><b>float32_to_atom</b></center>
