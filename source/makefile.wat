@@ -5,9 +5,7 @@
 #   Translator Library (ecw.lib):  wmake -f makefile.wat library
 
 
-CC = wcc386
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s
-BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW
+
 
 
 EU_CORE_FILES = &
@@ -122,17 +120,26 @@ EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 
 all :  $(TARGET)
 
-clean : 
+clean : .SYMBOLIC
 	-if exist *.obj del *.obj
 	-if exist *.lbc del *.lbc
 	-if exist *.ilk del *.ilk
 	-if exist *.pch del *.pch
 	-if exist main-.c del main-.c
 
-library : .SYMBOLIC $(EU_LIB_OBJECTS)
+
+CC = wcc386
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s
+BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW $(%ERUNTIME)
+
+library : .SYMBOLIC ecw.lib
+
+runtime: .SYMBOLIC
+	set ERUNTIME=/dERUNTIME
+
+ecw.lib : runtime $(EU_LIB_OBJECTS)
 	wlib -q ecw.lib $(EU_LIB_OBJECTS)
 
-	
 $(TARGET) :  $(EU_OBJS)
 	@%create $(TARGET).lbc
 	@%append $(TARGET).lbc option quiet
