@@ -341,7 +341,9 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-{x, x}  // 177
+{x, x},
+{x, x},
+{x, x}  // 179
 };
 
 int TraceOn = FALSE;
@@ -4686,7 +4688,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
     lengthb = b->length;
 
     if (lengthb < c )  // should this be an error?
-    	return (0);
+	return (0);
     b1 = b->base;
     bp = b1 + c;
     a1 = a->base;
