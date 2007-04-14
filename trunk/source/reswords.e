@@ -186,12 +186,13 @@ MATCH_FROM = 179,
 MAX_OPCODE = 179
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
--- be_execute.c - optable[], localjumptab[]
--- be_runtime.c, redef.h, and maybe scanner.e, 
--- emit.e, keylist.h. Also, run makename.ex 
+-- be_execute.c (localjumptab[])
+-- be_runtime.c (optable[]), redef.h, and maybe scanner.e, 
+-- emit.e, keylist.e and the Translator (compile.e)
+-- Also, run makename.ex 
 
 -- scanner codes
-
+--
 -- codes for characters that are simply returned to the parser 
 -- without any processing <= -20
 global constant
