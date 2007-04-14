@@ -11,7 +11,7 @@ constant MAX_FILE = 256       -- maximum number of source files
 
 -- Single-byte codes used by (legacy) binder/shrouder
 -- update when keyword or builtin added 
--- see also euphoria\bin\keywords.e, keylist.h
+-- see also keylist.e, euphoria\bin\keywords.e
 constant NUM_KEYWORDS = 24 
 constant NUM_BUILTINS = 64 
 constant KEYWORD_BASE = 128  -- 129..152  must be one-byte values - no overlap
