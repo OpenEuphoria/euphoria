@@ -450,17 +450,19 @@ procedure CRefn(integer v, integer n)
     c_printf(", %d);\n", n)
 end procedure
 
-function target_differs(integer target, integer opnd1, integer opnd2)
+function target_differs(integer target, integer opnd1, integer opnd2, 
+			integer opnd3)
 -- see if target is not used as an operand - it can be DeRef'd early
     if SymTab[target][S_MODE] = M_NORMAL then
-	return target != opnd1 and target != opnd2
+	return target != opnd1 and target != opnd2 and target != opnd3
 
     elsif SymTab[target][S_MODE] = M_TEMP then
 	if (opnd1 = 0 or
-	    SymTab[target][S_TEMP_NAME] != SymTab[opnd1][S_TEMP_NAME]) 
-	    and
-	    (opnd2 = 0 or
-	    SymTab[target][S_TEMP_NAME] != SymTab[opnd2][S_TEMP_NAME]) then
+	    SymTab[target][S_TEMP_NAME] != SymTab[opnd1][S_TEMP_NAME]) and
+	   (opnd2 = 0 or
+	    SymTab[target][S_TEMP_NAME] != SymTab[opnd2][S_TEMP_NAME]) and
+	   (opnd3 = 0 or
+	    SymTab[target][S_TEMP_NAME] != SymTab[opnd3][S_TEMP_NAME]) then
 	    return TRUE
 	else
 	    return FALSE
@@ -477,7 +479,7 @@ integer deref_type
 integer deref_elem_type
 integer deref_short
 
-procedure CSaveStr(sequence target, integer v, integer a, integer b)
+procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 -- save a value (to be deref'd) in immediate target 
 -- if value isn't known to be an integer 
     boolean deref_exist
@@ -508,7 +510,7 @@ procedure CSaveStr(sequence target, integer v, integer a, integer b)
 		  deref_exist)
 
     if deref_type != TYPE_INTEGER then
-	if target_differs(v, a, b) then
+	if target_differs(v, a, b, c) then
 	    -- target differs from operands - can DeRef it immediately
 	    if savespace() then
 		c_stmt0("DeRef1(")  -- less machine code
@@ -646,7 +648,7 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 -- unary_op() for non-ints is acceptable
     integer target_type
     
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     
     if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
 	-- test for integer
@@ -1289,7 +1291,7 @@ end function
 procedure unary_div(integer pc, integer target_type, sequence intcode,
 		    sequence gencode)
 -- unary divide ops
-    CSaveStr("_0", Code[pc+3], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+3], Code[pc+1], 0, 0)
 		
     if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
 	c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
@@ -1323,7 +1325,7 @@ without warning  -- lots of short-circuit warnings
 function unary_optimize(integer pc, integer target_type, sequence target_val,
 			sequence intcode, sequence intcode2, sequence gencode)
 -- handle a few special unary ops            
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 		
     if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
 	c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
@@ -1501,7 +1503,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		
     end if
 		
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 		
     close_brace = FALSE
 		
@@ -1878,7 +1880,7 @@ procedure opPROC()
 	    -- so complete the call before setting DeRef value
 	    c_stmt("_0 = ", p)
 	else 
-	    CSaveStr("_0", p, p, 0)
+	    CSaveStr("_0", p, p, 0, 0)
 	    c_stmt("@ = ", p)
 	end if
 	temp_indent = -indent
@@ -1935,7 +1937,7 @@ procedure opRHS_SUBS()
 -- pc+2 is the subscript
 -- pc+3 is the target
     
-    CSaveStr("_0", Code[pc+3], Code[pc+2], Code[pc+1])
+    CSaveStr("_0", Code[pc+3], Code[pc+2], Code[pc+1], 0)
     SymTab[Code[pc+3]][S_ONE_REF] = FALSE
 		
     if Code[pc] = ASSIGN_OP_SUBS or Code[pc] = PASSIGN_OP_SUBS then
@@ -2177,7 +2179,7 @@ end procedure
 
 procedure opLENGTH()
 -- LENGTH / PLENGTH
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     if opcode = LENGTH and 
        TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
 	if SeqLen(Code[pc+1]) != NOVALUE then
@@ -2254,9 +2256,9 @@ procedure opRIGHT_BRACE_N()
 -- form a sequence of any length 
     len = Code[pc+1]+2
     if Code[pc+1] = 0 then
-	CSaveStr("_0", Code[pc+len], 0, 0) -- no need to delay DeRef
+	CSaveStr("_0", Code[pc+len], 0, 0, 0) -- no need to delay DeRef
     else
-	CSaveStr("_0", Code[pc+len], Code[pc+len], 0) 
+	CSaveStr("_0", Code[pc+len], Code[pc+len], 0, 0) 
 	-- must delay DeRef
     end if  
     c_stmt0("_1 = NewS1(")
@@ -2313,7 +2315,7 @@ end procedure
 
 procedure opRIGHT_BRACE_2()
 -- form a sequence of length 2
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt0("_1 = NewS1(2);\n")
     c_stmt0("_2 = (int)((s1_ptr)_1)->base;\n")
     c_stmt("((int *)_2)[1] = @;\n", Code[pc+2])
@@ -2332,7 +2334,7 @@ end procedure
 
 procedure opPLUS1()
 -- PLUS1 / PLUS1_I
-    CSaveStr("_0", Code[pc+3], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+3], Code[pc+1], 0, 0)
 		
     target_type = GType(Code[pc+1])
     if target_type = TYPE_INTEGER then
@@ -2588,7 +2590,7 @@ procedure opTYPE_CHECK()
 end procedure
 	    
 procedure opIS_AN_INTEGER()
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     if TypeIs(Code[pc+1], TYPE_INTEGER) then
 	c_stmt("@ = 1;\n", Code[pc+2])
     elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
@@ -2610,7 +2612,7 @@ procedure opIS_AN_INTEGER()
 end procedure
 
 procedure opIS_AN_ATOM()
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
 	c_stmt("@ = 1;\n", Code[pc+2])
     elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
@@ -2625,7 +2627,7 @@ procedure opIS_AN_ATOM()
 end procedure
 		
 procedure opIS_A_SEQUENCE()
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
 	c_stmt("@ = 0;\n", Code[pc+2])
     elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
@@ -3402,7 +3404,7 @@ procedure opENDFOR_GENERAL()
     sequence gencode, intcode
     
     in_loop = in_loop[1..length(in_loop)-1]
-    CSaveStr("_0", Code[pc+3], Code[pc+3], Code[pc+4])
+    CSaveStr("_0", Code[pc+3], Code[pc+3], Code[pc+4], 0)
     -- always delay the DeRef
 		
     close_brace = FALSE
@@ -3729,7 +3731,7 @@ procedure opRETURNP()
 end procedure
 
 procedure opROUTINE_ID()
-    CSaveStr("_0", Code[pc+4], Code[pc+2], 0)
+    CSaveStr("_0", Code[pc+4], Code[pc+2], 0, 0)
     c_stmt("@ = CRoutineId(", Code[pc+4])
     c_printf("%d, ", Code[pc+1])  -- sequence number
     c_printf("%d", Code[pc+3])  -- current file number
@@ -3934,7 +3936,7 @@ procedure opCONCAT_N()
 end procedure
 	    
 procedure opREPEAT()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("@ = Repeat(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
     SymTab[Code[pc+1]][S_ONE_REF] = FALSE
     CDeRefStr("_0")
@@ -3963,7 +3965,7 @@ procedure opTIME()
 end procedure
 
 procedure opSPACE_USED() -- #ifdef EXTRA_STATS or HEAP_CHECK
-    CSaveStr("_0", Code[pc+1], 0, 0)
+    CSaveStr("_0", Code[pc+1], 0, 0, 0)
     c_stmt("@ = bytes_allocated;\n", Code[pc+1])
     CDeRefStr("_0")
     SetBBType(Code[pc+1], TYPE_INTEGER, novalue, TYPE_OBJECT)
@@ -3976,7 +3978,7 @@ procedure opPOSITION()
 end procedure
 	    
 procedure opEQUAL()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("if (@ == @)\n", {Code[pc+1], Code[pc+2]})
     c_stmt("@ = 1;\n", Code[pc+3])
     c_stmt("else if (IS_ATOM_INT(@) && IS_ATOM_INT(@))\n", 
@@ -3992,7 +3994,7 @@ end procedure
 		
 procedure opCOMPARE()
     -- OPTIMIZE THIS SOME MORE - IMPORTANT FOR SORTING
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@))\n", {Code[pc+1], Code[pc+2]})
     c_stmt("@ = (@ < @) ? -1 : ", {Code[pc+3], Code[pc+1], Code[pc+2]})
     temp_indent = -indent
@@ -4006,27 +4008,49 @@ procedure opCOMPARE()
 end procedure
 
 procedure opFIND()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
-    c_stmt("@ = find(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
+    c_stmt("@ = find(@, @);\n", 
+	   {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
     target = {0, MAXLEN}
     SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
     pc += 4
 end procedure
 
+procedure opFIND_FROM() -- extra 3rd atom arg
+    CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3])
+    c_stmt("@ = find_from(@, @, @);\n", 
+	   {Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3]})
+    CDeRefStr("_0")
+    target = {0, MAXLEN}
+    SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT)
+    pc += 5
+end procedure
+
 procedure opMATCH()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
-    c_stmt("@ = e_match(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
+    c_stmt("@ = e_match(@, @);\n", 
+	   {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
     target = {0, MAXLEN}
     SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
     pc += 4
 end procedure
+
+procedure opMATCH_FROM()
+    CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3])
+    c_stmt("@ = e_match_from(@, @, @);\n", 
+	   {Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3]})
+    CDeRefStr("_0")
+    target = {0, MAXLEN}
+    SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT)
+    pc += 5
+end procedure
 	
 procedure opPEEK()
 -- PEEK / PEEK4U / PEEK4S   
     
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 		
     if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
 	c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
@@ -4343,7 +4367,7 @@ procedure opPIXEL()
 end procedure
 	    
 procedure opGET_PIXEL()
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     c_stmt("@ = Get_Pixel(@);\n", {Code[pc+2], Code[pc+1]})
     CDeRefStr("_0")
     if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
@@ -4376,7 +4400,7 @@ procedure opSYSTEM()
 end procedure
 		
 procedure opSYSTEM_EXEC()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("@ = system_exec_call(@, @);\n", 
 	    {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
@@ -4388,7 +4412,7 @@ end procedure
 -- start of I/O routines */
 
 procedure opOPEN()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("@ = EOpen(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
     target = {-1, 100000}
@@ -4426,7 +4450,7 @@ end procedure
 
 procedure opGETC()
 -- read a character from a file 
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     c_stmt("if (@ != last_r_file_no) {\n", Code[pc+1])
     c_stmt("last_r_file_ptr = which_file(@, EF_READ);\n", Code[pc+1])
 		
@@ -4478,7 +4502,7 @@ end procedure
  
 procedure opGETS()
 -- read a line from a file
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     c_stmt("@ = EGets(@);\n", {Code[pc+2], Code[pc+1]})   
     CDeRefStr("_0")
     SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER) -- N.B.
@@ -4490,7 +4514,7 @@ procedure opGET_KEY()
     if not EDOS and EWINDOWS then
 	c_stmt0("show_console();\n")
     end if
-    CSaveStr("_0", Code[pc+1], 0, 0)
+    CSaveStr("_0", Code[pc+1], 0, 0, 0)
     c_stmt("@ = get_key(0);\n", Code[pc+1])
     CDeRefStr("_0")
     target = {-1, 1000}
@@ -4526,7 +4550,7 @@ end procedure
 constant DOING_SPRINTF = -9999999
 
 procedure opSPRINTF()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("@ = EPrintf(" & sprintf("%d", DOING_SPRINTF) & ", @, @);\n", 
 	   {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
@@ -4535,7 +4559,7 @@ procedure opSPRINTF()
 end procedure
 
 procedure opCOMMAND_LINE()
-    CSaveStr("_0", Code[pc+1], 0, 0)
+    CSaveStr("_0", Code[pc+1], 0, 0, 0)
     c_stmt("@ = Command_Line();\n" , Code[pc+1])
     CDeRefStr("_0")
     SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE)
@@ -4543,7 +4567,7 @@ procedure opCOMMAND_LINE()
 end procedure
 
 procedure opGETENV()
-    CSaveStr("_0", Code[pc+2], 0, 0)
+    CSaveStr("_0", Code[pc+2], 0, 0, 0)
     c_stmt("@ = EGetEnv(@);\n", {Code[pc+2], Code[pc+1]})
     CDeRefStr("_0")
     SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER) -- N.B.
@@ -4551,7 +4575,7 @@ procedure opGETENV()
 end procedure
 
 procedure opMACHINE_FUNC()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("@ = machine(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
     target = machine_func_type(Code[pc+1])
@@ -4568,7 +4592,7 @@ end procedure
 procedure opC_FUNC()
     -- not available under DOS, but better to leave it in
     -- [3] not used
-    CSaveStr("_0", Code[pc+4], Code[pc+2], Code[pc+1])
+    CSaveStr("_0", Code[pc+4], Code[pc+2], Code[pc+1], 0)
     c_stmt("@ = call_c(1, @, @);\n", {Code[pc+4], Code[pc+1], Code[pc+2]})
     SymTab[Code[pc+4]][S_ONE_REF] = FALSE  
     -- in elsif opcode = it's a sequence returned by Euphoria .dll
@@ -4633,7 +4657,7 @@ end procedure
 
 procedure opTASK_CREATE()
     dll_tasking()
-    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2])
+    CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
     c_stmt("@ = task_create(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
     CDeRefStr("_0")
     SetBBType(Code[pc+3], TYPE_DOUBLE, novalue, TYPE_OBJECT) -- always TYPE_DOUBLE
@@ -4677,7 +4701,7 @@ end procedure
 
 procedure opTASK_STATUS()
     dll_tasking()
-    CSaveStr("_0", Code[pc+2], Code[pc+1], 0)
+    CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
     c_stmt("@ = task_status(@);\n", {Code[pc+2], Code[pc+1]})
     CDeRefStr("_0")
     SetBBType(Code[pc+2], TYPE_INTEGER, {-1,+1}, TYPE_OBJECT)
@@ -5027,7 +5051,7 @@ global procedure BackEnd(atom ignore)
 	    c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
 	end if
     else
-    	c_puts("#ifdef CLK_TCK\n")
+	c_puts("#ifdef CLK_TCK\n")
 	c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
 	c_puts("#else\n")
 	c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
