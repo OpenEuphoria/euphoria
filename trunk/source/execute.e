@@ -2626,12 +2626,12 @@ procedure opFIND_FROM()
 
 	c = val[Code[pc+3]]
 	target = Code[pc+4]
-	s = val[Code[pc+2]][c..$]
-	if not sequence(val[Code[pc+1]]) then
+	if not sequence(val[Code[pc+2]]) then
 		RTFatal("second argument of find_from() must be a sequence")
 		pc += 5
 		return
 	end if
+	s = val[Code[pc+2]][c..$]
 	b = find( val[Code[pc+1]], s )
 	if b then
 		b += c - 1
@@ -2641,14 +2641,19 @@ procedure opFIND_FROM()
 end procedure
 
 procedure opMATCH_FROM()
-	sequence s
+	object s
 
 	c = val[Code[pc+3]]
 	target = Code[pc+4]
-	s = val[Code[pc+2]][c..$]
-	a = val[Code[pc+1]]
-	if not sequence(a) then
+	s = val[Code[pc+2]]
+	a = Code[pc+1]
+	if not sequence(val[a]) then
 		RTFatal("first argument of match_from() must be a sequence")
+		pc += 5
+		return
+	end if
+	if length(val[a]) = 0 then
+		RTFatal("first argument of match_from() must be a non-empty sequence")
 		pc += 5
 		return
 	end if
@@ -2657,8 +2662,8 @@ procedure opMATCH_FROM()
 		pc += 5
 		return
 	end if
-	if length(val[a]) = 0 then
-		RTFatal("first argument of match_from() must be a non-empty sequence")
+	if c < 1 then
+		RTFatal("index out of bounds in match_from()")
 		pc += 5
 		return
 	end if
