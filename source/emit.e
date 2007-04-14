@@ -262,7 +262,9 @@ op_result[IS_A_SEQUENCE] = T_INTEGER
 op_result[COMPARE] = T_INTEGER
 op_result[EQUAL] = T_INTEGER
 op_result[FIND] = T_INTEGER
+op_result[FIND_FROM] = T_INTEGER
 op_result[MATCH]  = T_INTEGER
+op_result[MATCH_FROM]  = T_INTEGER
 op_result[GET_KEY] = T_INTEGER
 op_result[IS_AN_INTEGER] = T_INTEGER
 op_result[ASSIGN_I] = T_INTEGER
@@ -873,7 +875,7 @@ global procedure emit_op(integer op)
 	assignable = FALSE
 
     -- 3 inputs, 1 output 
-    elsif op = RHS_SLICE then -- rhs slice of a sequence a[i:j] 
+    elsif op = RHS_SLICE or op = FIND_FROM or op = MATCH_FROM then 
 	emit_opcode(op)
 	c = Pop()
 	b = Pop()
