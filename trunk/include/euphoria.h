@@ -197,4 +197,5 @@ void Position(int, int);
 int CommandLine(void);
 void system_call(int, int);
 void RTFatal(char *);
-
+int e_match_from(s1_ptr,s1_ptr,int);
+int find_from(s1_ptr,s1_ptr,int);
