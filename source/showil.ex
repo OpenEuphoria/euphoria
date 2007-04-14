@@ -141,7 +141,7 @@ procedure showCode(integer flist, sequence Code)
 			  ENDFOR_INT_DOWN, ASSIGN_OP_SLICE, ASSIGN_SLICE,
 			  PASSIGN_SLICE, PASSIGN_OP_SLICE, LHS_SUBS, LHS_SUBS1, 
 			  LHS_SUBS1_COPY, RHS_SLICE, ENDFOR_UP, ENDFOR_DOWN, 
-			  C_FUNC, ENDFOR_GENERAL 
+			  C_FUNC, ENDFOR_GENERAL, FIND_FROM, MATCH_FROM
 			  }) then
 	    -- 4 operands follow
 	    word = Code[i+1]
