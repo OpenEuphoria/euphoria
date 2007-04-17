@@ -114,7 +114,7 @@ global procedure CompileErr(sequence msg)
     
     Errors += 1
     if length(file_name) then
-	errmsg = sprintf("%.99s:%d\n%s\n", {file_name[current_file_no], 
+	errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no], 
 		     line_number, msg})
     else
 	errmsg = msg
