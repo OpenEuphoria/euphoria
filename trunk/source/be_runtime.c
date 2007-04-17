@@ -4623,7 +4623,7 @@ long find_from(object a, s1_ptr b, object c)
 		return 0;
 		
     bp = b->base;
-    bp += c;
+    bp += c - 1;
     if (IS_ATOM_INT(a)) {
 		while (TRUE) {
 		    bv = *(++bp);
@@ -4690,7 +4690,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
     if (lengthb < c )  // should this be an error?
 	return (0);
     b1 = b->base;
-    bp = b1 + c;
+    bp = b1 + c -1;
     a1 = a->base;
     ntries = lengthb - lengtha + 1;
     while (--ntries >= 0) {

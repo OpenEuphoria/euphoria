@@ -1226,7 +1226,7 @@ static void DumpGlobals(FILE *f)
 
 static int screen_err_out;
 
-static char TPTempBuff[200]; // TempBuff might contain the error message
+static char TPTempBuff[400]; // TempBuff might contain the error message
 
 static sf_output(char *string)
 // output error info to ex.err and optionally to the screen
@@ -1259,11 +1259,11 @@ static void TracePrint(symtab_ptr proc, int *pc)
 	subtype = "type";
 
     if (proc == TopLevelSub) {
-	sprintf(TPTempBuff, "%.99s:%u", file_name[file], line);
+	sprintf(TPTempBuff, "%.300s:%u", file_name[file], line);
 	sf_output(TPTempBuff);
     }
     else {
-	sprintf(TPTempBuff, "%.99s:%u in %s %.99s() ", 
+	sprintf(TPTempBuff, "%.300s:%u in %s %.99s() ", 
 		file_name[file], line, subtype, proc->name);
 	sf_output(TPTempBuff);
     }
