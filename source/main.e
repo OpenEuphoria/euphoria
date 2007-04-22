@@ -11,7 +11,7 @@ function ProcessOptions()
 -- record command line options, return source file number
     integer src_file
     boolean dot_found
-    sequence src_name, raw_name
+    sequence src_name, raw_name, exts
     
     if Argc >= 3 then
 	src_name = Argv[3]
@@ -107,36 +107,37 @@ function ProcessOptions()
     if not dot_found then
 	-- no dot found */
 	if ELINUX then
-	    src_name &= ".exu"
+	    exts = { ".exu", ".exw", ".ex", "" }
 	
 	elsif BIND then
 	    if w32 then
-		src_name &= ".exw"
-	    else    
-		src_name &= ".ex"
+		exts = { ".exw", ".ex", ".exu" }
+	    else
+		exts = { ".ex", ".exw", ".exu" }
 	    end if
 	
 	else    
 	    if EWINDOWS then
-		src_name &= ".exw"
+		exts = { ".exw", ".ex", ".exu" }
 	    else
 		src_name &= ".ex"
+		exts = { ".ex", ".exw", ".exu" }
 	    end if
 	end if
-    end if
-
-    file_name = append(file_name, src_name)
-    src_file = e_path_open(src_name, "r")
-
-    if ELINUX then
-	if src_file = -1 then
-	    -- do this especially so #! will work on Linux without .exu extension 
-	    src_file = open(raw_name, "r")      
+	file_name = append(file_name, src_name)
+	for i = 1 to length( exts ) do
+	    file_name[$] = src_name & exts[i]
+	    src_file = e_path_open(src_name & exts[i], "r")
 	    if src_file != -1 then
-		src_name = raw_name
+		src_name &= exts[i]
+		exit
 	    end if
-	end if
-    end if  
+	end for
+	else
+	file_name = append(file_name, src_name)
+	src_file = e_path_open(src_name, "r")
+    end if
+  
     return src_file
 end function
 
