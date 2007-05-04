@@ -55,7 +55,7 @@
    * task_docking
     
      Activated when the Euphoria bumps into a planet or base. It manages
-     the docking progress inidcator.
+     the docking progress indicator.
 
    * task_message
  
