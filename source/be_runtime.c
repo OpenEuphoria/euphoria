@@ -440,7 +440,7 @@ void MainScreen()
 extern int color_trace;
 #endif
 
-#ifndef EDJGPP
+#if !defined(EDJGPP) && !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
 #if (defined(ELCC) || defined(EWATCOM) || defined(ELINUX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this

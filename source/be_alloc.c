@@ -406,20 +406,8 @@ char *EMalloc(unsigned long nbytes)
     int min_align;
 
 #ifdef ELINUX
-#ifndef EBSD62
+
 	return malloc(nbytes);
-#else
-	p = malloc( nbytes + 8 );
-	if( (unsigned long)p & 7 ){
-		*(int *)p = MAGIC_FILLER;
-		p += 4;
-	}
-	else{
-	       *(int  *)(p+4) = 0;
-	        p += 8;
-	}
-	return p;
-#endif
 #else
 #ifdef HEAP_CHECK
     long size;
@@ -529,14 +517,9 @@ void EFree(unsigned char *p)
 #endif
 
 #ifdef ELINUX
-#ifndef EBSD62
 	free(p);
-#else
-	if((int*)(p-4)==MAGIC_FILLER) free( p-4 );
-	else                          free( p - 8 );
-#endif
 	return;
-#endif
+#else
 
 #ifdef HEAP_CHECK
     check_pool();
@@ -580,6 +563,7 @@ void EFree(unsigned char *p)
 	list->first = (free_block_ptr)p;
 	cache_size += 2;
     }
+#endif // linux
 }
 
 #ifndef EDJGPP
@@ -644,41 +628,9 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
     unsigned long oldsize;
 
 #ifdef ELINUX 
-#ifndef EBSD62
+
     // we always have 8-alignment
     return realloc(orig, newsize);  // should do bookkeeping on block size?
-#else
-    // FreeBSD 6.2 doesn't necessarily give us 8-byte alignment,
-    // so we have to make sure it all works out...
-    if( (int*)(orig-4) == MAGIC_FILLER ){
-	// orig not 8 byte aligned
-	p = realloc((orig-4), newsize + 8 );
-	if( (unsigned long)p & 7 == 0 ){
-	    // the original block wasn't aligned, but this one is, so
-	    // we need to adjust the memory in order to compensate
-	    memcpy(p+8, orig, newsize );
-	    *(int*)(p+4) = 0;
-	    p += 8;
-	}
-	else{
-	    p += 4;
-	}
-    }
-    else{
-	// orig was 8 byte aligned
-	p = realloc((orig-8), newsize + 8 );
-	if( (unsigned long)p & 7 != 0 ){
-	    // the orignal was 8-byte aligned, but the new block isn't
-	    memcpy( p+4, orig-4, newsize+4);
-	    p += 4;
-	}
-	else{
-	    p += 8;
-	}
-    
-    }
-    return p;
-#endif
 #else
     p = orig;
     if (align4 && *(int *)(p-4) == MAGIC_FILLER)
