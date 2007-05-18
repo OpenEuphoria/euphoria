@@ -894,7 +894,6 @@ global procedure new_c_file(sequence name)
     if c_code = -1 then
 	CompileErr("Couldn't open .c file for output")
     end if  
-    files_to_delete = append(files_to_delete, name & ".c")
     cfile_count += 1
     version()
     if EDOS and sequence(dj_path) then
@@ -903,48 +902,45 @@ global procedure new_c_file(sequence name)
     c_puts("#include \"")
     c_puts(eudir & SLASH & "include" & SLASH & "euphoria.h\"\n")
     c_puts("#include \"main-.h\"\n\n")
+
+    if not ELINUX then
+	name = lower(name)  -- for faster compare later
+    end if
+    files_to_delete = append(files_to_delete, name & ".c")
 end procedure
 
-constant funny_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-integer next_funny 
-next_funny = 1
+-- These characters are assumed to be legal and safe to use 
+-- in a file name on any platform. We can generate up to 
+-- length(file_chars) squared (i.e. over 1000) .c files per Euphoria file.
+constant file_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-function unique_name(sequence name, integer file_no)
--- see if base file name has been used already 
-    integer i, j
-    sequence fn, a, b
+function unique_c_name(sequence name)
+-- See if name has been used already. If so, change the first char.
+    integer i
+    sequence compare_name
+    integer next_fc 
     
+    compare_name = name & ".c"
+    if not ELINUX then
+	compare_name = lower(compare_name)
+	-- .c's on files_to_delete are already lower
+    end if
+    next_fc = 1
     i = 1
-    while i < file_no do
+    while i <= length(files_to_delete) do
 	-- extract the base name
-	j = length(file_name[i])
-	while j >= 1 do
-	    if find(file_name[i][j], "\\/") then
-		exit
-	    end if
-	    j -= 1
-	end while
-	fn = file_name[i][j+1..$]
-	j = find('.', fn)
-	if j then
-	    fn = fn[1..j-1]
-	end if
-	
-	if ELINUX then
-	    a = fn
-	    b = name
-	else
-	    a = lower(fn)
-	    b = lower(name)
-	end if
-	if equal(a, b) then
+	if equal(files_to_delete[i], compare_name) then
 	    -- name conflict 
-	    if next_funny > length(funny_char) then
-		CompileErr("too many files with the same base name")
+	    if next_fc > length(file_chars) then
+		CompileErr("Sorry, too many .c files with the same base name")
 	    end if
-	    name[1] = funny_char[next_funny]
-	    next_funny += 1
-	    i = 1 -- back up and start the search again
+	    name[1] = file_chars[next_fc]
+	    compare_name = name & ".c"
+	    if not ELINUX then
+		compare_name = lower(compare_name)
+	    end if
+	    next_fc += 1
+	    i = 1 -- start over and compare again
 	else
 	    i += 1
 	end if
@@ -1314,14 +1310,14 @@ global procedure GenerateUserRoutines()
 -- walk through the user-defined routines, computing types and
 -- optionally generating code 
     symtab_index s, sp
-    integer next_c_num, q, temps
+    integer next_c_char, q, temps
     sequence buff, base_name, c_file
 
     for file_no = 1 to length(file_name) do
 	if file_no = 1 or any_code(file_no) then 
 	    -- generate a .c file for this Euphoria file
 	    -- (we need to use the name of the first file - don't skip it)
-	    next_c_num = '0'
+	    next_c_char = 1
 	    base_name = name_ext(file_name[file_no])
 	    c_file = base_name
 	    q = length(c_file)
@@ -1338,7 +1334,7 @@ global procedure GenerateUserRoutines()
 	    end if
 	    
 	    if Pass = LAST_PASS and file_no > 1 then
-		c_file = unique_name(c_file, file_no)
+		c_file = unique_c_name(c_file)
 		add_file(c_file)
 	    end if
 	
@@ -1381,32 +1377,37 @@ global procedure GenerateUserRoutines()
 	      
 		    -- Check for oversize C file 
 		    if Pass = LAST_PASS and 
-		       (cfile_size > MAX_CFILE_SIZE or 
+		       cfile_size > MAX_CFILE_SIZE or 
 			(cfile_size > MAX_CFILE_SIZE/4 and 
-			length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE)) and 
-		       next_c_num <= 'Z' then
+			length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE) then
 			-- start a new C file 
 			-- (we generate about 1 line of C per element of CODE)
 			
+			-- choose new file name, based on base_name
 			if length(c_file) = 7 then
 			    -- make it size 8
 			    c_file &= " "
 			end if
 			if length(c_file) >= 8 then
 			    c_file[7] = '_'
-			    c_file[8] = next_c_num
+			    c_file[8] = file_chars[next_c_char]
 			else 
 			    -- 6 or less
 			    if find('_', c_file) = 0 then
 				c_file &= "_ "
 			    end if
-			    c_file[$] = next_c_num
+			    c_file[$] = file_chars[next_c_char]
 			end if
-			next_c_num += 1
-			if next_c_num = '9' + 1 then
-			    next_c_num = 'A'
-			end if
+			
+			-- make sure we haven't created a duplicate name
+			c_file = unique_c_name(c_file)
 			new_c_file(c_file)
+
+			next_c_char += 1
+			if next_c_char > length(file_chars) then
+			    next_c_char = 1  -- (unique_c_name will resolve)
+			end if
+			
 			if atom(bor_path) then
 			    printf(doit, "%s %s.c\n", {echo, c_file})
 			    printf(doit, "%s %s %s.c\n", {cc_name, c_opts, c_file})
