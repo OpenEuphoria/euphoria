@@ -641,8 +641,11 @@ procedure sequence_ops2()
 -- more tests of sequence operations
 object x, y
 
-    x = "ABCDEFGHIJKLMNOP"
+    x = "ABCDEFGHIJKLMNOPD"
     if find('D', x) != 4 then
+	abort()
+    end if
+    if find_from('D', x, 10) != length(x) then
 	abort()
     end if
     if match("EFGH", x) != 5 then
@@ -651,6 +654,10 @@ object x, y
     if match({"AB", "CD"}, {0, 1, 3, {}, {"AB", "C"}, "AB", "CD", "EF"}) != 6 then
 	abort()
     end if
+    if match_from("EU", "EUEUXXXEUXXX", 7) != 8 then
+	abort()
+    end if
+    
     if not equal(x,x) then
 	abort()
     end if
