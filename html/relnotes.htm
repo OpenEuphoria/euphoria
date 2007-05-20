@@ -37,6 +37,116 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <p>&nbsp;<br>
 
 <font face="Arial, Helvetica" color="#003366">
+<b>Version 3.0.3 May 25, 2007:</b></font>
+<p>
+
+This release adds some new features, fixes some bugs,
+and improves the documentation.
+
+<p>
+<font color="#993333"><b>New Features</b></font>
+<ul>
+<p>
+<li>
+ New built-in routines, <b>find_from()</b> and <b>match_from()</b> 
+ have been added.
+ These work like find() and match() but they let you start searching
+ from any element in the sequence, not necessarily at element 1.
+ This makes some algorithms simpler
+ and much faster. Implemented by Matthew Lewis.
+ 
+<p>
+<li>
+ When searching for an include file specified with a relative 
+ (i.e. not absolute) file path, Euphoria will check first for 
+ a file relative to the location of the current source file. 
+ If not found, then the usual rules will apply, i.e. it will
+ check relative to the main program file, then check the EUINC
+ directories (if any), and finally euphoria\include.
+ Suggested by C.K. Lester. 
+ Implemented by Matt Lewis.
+ 
+<p>
+<li>
+ <b>ex int.ex</b> (in euphoria\source) will now work, since the 
+ interpreter now supports machine_proc(65,...) which passes IL to 
+ the fast C-coded back-end. You can also run
+ int.ex with exw or exu.
+ This lets you easily modify the front end and get a modified 
+ Euphoria interpreter, for all platforms, that runs programs 
+ at full speed (much faster than the Euphoria-coded execute.e). You might 
+ also bind int.ex to get a single executable file for whatever
+ platform you like.
+ 
+<p>
+<li>
+ <b>Translator: </b>
+ The limit on the number of additional .c files 
+ that can be created per Euphoria file has been raised from 36 to 
+ well over 1000.
+</ul>
+
+
+<p>
+<font color="#993333"><b>New Documentation</b></font>
+<ul>
+<p>
+<li>
+ The "storage cache" compression technique that's used for bound 
+ executables and .il files, was documented in comments added to 
+ compress.e. 
+ It reduces the size of the IL by 30% or more, while allowing
+ fast decompression.
+ 
+<p>
+<li>
+ A documentation file, tasks.doc, was added to euphoria\demo\langwar.
+ It describes the multiple tasks used in Language War.
+</ul>
+
+
+<p>
+<font color="#993333"><b>Bug Fixes</b></font>
+<ul>
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Translator: </b>
+ Translated code for routine_id() 
+ erroneously returned -1 when a global symbol was looked up which
+ matched a symbol in the same file as the call to routine_id(),
+ as well as a global symbol in another earlier file. It was treated 
+ incorrectly as a multiply-defined symbol that was lacking a 
+ namespace qualifier. Thanks to Daniel Kluss.
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Translator: </b>
+ In rare situations, a naming conflict could 
+ occur when more than one .c file is created for a Euphoria file. 
+ Thanks to DB James.
+ 
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Translator: </b>
+ get_key(), when translated/compiled with Borland or LCC
+ required an extra keystroke after a carriage return,
+ Thanks to Jacques Deschenes.
+ 
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ <b>Source Code Portability:</b>
+ euphoria.h: CLK_TCK is now defined as CLOCKS_PER_SEC
+ if not defined previously in the source. Implemented by Matt Lewis.
+ 
+</ul>
+
+
+<p><br>
+
+<font face="Arial, Helvetica" color="#003366">
 <b>Version 3.0.2 February 9, 2007:</b></font>
 <p>
 This release fixes some important bugs in 3.0.1, and improves the
