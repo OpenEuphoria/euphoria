@@ -341,15 +341,15 @@ function path_open()
     end if
 
     -- first try path from current file path
-	-- cklester
+    -- c.k. lester
     currdir = get_file_path( file_name[current_file_no] )
     full_path = currdir & new_include_name
     try = open(full_path, "r")
     
     if try = -1 then
-	    -- relative path name - first try main_path
-	    full_path = main_path & new_include_name
-	    try = open(full_path,  "r")
+	-- relative path name - first try main_path
+	full_path = main_path & new_include_name
+	try = open(full_path,  "r")
     end if
  
     if try = -1 then
