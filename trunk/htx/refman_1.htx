@@ -320,7 +320,8 @@ distribution. In this manual, directory names are shown using backslash
  ".exw", and <font color="#993333"><b>exu</b></font> 
  will supply ".exu". Each will try the other possible extensions as well
  if the default fails. If the file can't be found in the current directory,
- your PATH will be searched. You can redirect standard input and standard
+ your PATH will be searched (using the most likely extension, then the others). 
+ You can redirect standard input and standard
  output when you run a Euphoria program, for example:
 
 <pre>
