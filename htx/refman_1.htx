@@ -318,7 +318,8 @@ distribution. In this manual, directory names are shown using backslash
  the <font color="#993333"><b>ex</b></font> command will supply it for you
  automatically. <font color="#993333"><b>exw.exe</b></font> will supply
  ".exw", and <font color="#993333"><b>exu</b></font> 
- will supply ".exu". If the file can't be found in the current directory,
+ will supply ".exu". Each will try the other possible extensions as well
+ if the default fails. If the file can't be found in the current directory,
  your PATH will be searched. You can redirect standard input and standard
  output when you run a Euphoria program, for example:
 
