@@ -2250,32 +2250,50 @@ containing the code. The first form of the include statement is:
 
 <p>
                    If an absolute <i>filename</i> is given,
-                   Euphoria will use it. When
+                   Euphoria will open it and start parsing it. When
                    a relative <i>filename</i> is given, Euphoria will
-                   first look for
-                   it in the same directory as the main file given on
-                   the <font color="#993333"><b>ex</b></font>
-                   (or <font color="#993333"><b>exw</b></font> or
-                   <font color="#993333"><b>exu</b></font>)
+                   try to open the file relative to the following directories, 
+                   in the following order:
+                   <ol>
+                   <li> 
+                   <p>
+                   The directory containing the current source file.
+                   i.e. the source file that contains the include statement
+                   that is being processed..
+                   <li> 
+                   <p>
+                   The directory containing the main file given on
+                   the interpreter, translator or binder
                    <a href="refman_1.htm#3">command-line</a>.
-                   If it's not there, and you've defined an environment
-                   variable, <b>EUINC</b>, it will search each directory listed
+                   <li> 
+                   <p>
+                   If you've defined an environment
+                   variable, <b>EUINC</b>, Euphoria will check each directory listed
                    in <b>EUINC</b> (from left to right).
+                   <b>EUINC</b> should be a list of directories, separated by 
+                   semicolons (colons on Linux / FreeBSD), similar in form to your PATH 
+                   variable. <b>EUINC</b> can be added to your set of Linux / FreeBSD
+                   or DOS / Windows environment  variables. 
+                   (Via Control Panel / Performance & Maintenance 
+                   / System / Advanced on XP, or AUTOEXEC.BAT on older versions of Windows).
+                   e.g.<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB<br>
+                   
+                   <b>EUINC</b> lets you organize your include files according
+                   to application areas, and avoid adding
+                   numerous unrelated files to euphoria\include.
+                   
+                   <li> 
+                   <p>
                    Finally, if it still hasn't found the file,
-                   it will search        
+                   it will look in        
                    <font color="#5500FF"><b>euphoria\include</b></font>.
                    This directory contains the standard
                    Euphoria include files. The environment variable <b>EUDIR</b> tells
-                   <font color="#993333"><b>ex.exe/exw.exe/exu</b></font>
+                   Euphoria
                    where to find your
                    <font color="#993333"><b>euphoria</b></font> directory.
-                   <b>EUINC</b> should be a list of directories, separated by 
-                   semicolons (colons on Linux), similar in form to your PATH variable. It can 
-                   be added to your AUTOEXEC.BAT file, e.g.<br>
-                   SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB<br>
-                   This lets you organize your include files according
-                   to application areas, and avoid adding
-                   numerous unrelated files to euphoria\include.
+                   </ol>
 
 <p>
                    An included file can include other files. In fact, you can
