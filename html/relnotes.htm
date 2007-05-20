@@ -80,6 +80,13 @@ and improves the documentation.
  
 <p>
 <li>
+ If the user invokes the interpreter with a filename without an extension,
+ the interpreter will attempt to open a file first with the standard
+ extension for its respective platform, but if it does not find it, it
+ will also look for files with the standard extensions for the other
+ platforms. Implemented by Matthew Lewis.
+<p>
+<li>
  <b>Translator: </b>
  The limit on the number of additional .c files 
  that can be created per Euphoria file has been raised from 36 to 
