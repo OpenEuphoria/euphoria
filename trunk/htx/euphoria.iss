@@ -12,7 +12,7 @@
 [Setup]
 AppName=Euphoria
 AppVersion=3.0
-AppVerName=Euphoria v3.0.2
+AppVerName=Euphoria v3.0.3
 AppPublisher=Rapid Deployment Software
 AppPublisherURL=http://www.rapideuphoria.com
 AppSupportURL=http://www.rapideuphoria.com
