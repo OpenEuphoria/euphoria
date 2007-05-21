@@ -379,9 +379,11 @@
  are meant to be included in a larger program, end in ".e" or sometimes ".ew"
  or ".eu". To save typing, you can leave off the ".ex", and the ex command will
  supply it for you automatically. exw.exe will supply ".exw", and exu will
- supply ".exu". If the file can't be found in the current directory, your PATH
- will be searched. You can redirect standard input and standard output when you
- run a Euphoria program, for example:
+ supply ".exu". Each will try the other possible extensions as well if the
+ default fails. If the file can't be found in the current directory, your PATH
+ will be searched (using the most likely extension, then the others). You can
+ redirect standard input and standard output when you run a Euphoria program,
+ for example:
 
         ex filesort.ex < raw.txt > sorted.txt
 
@@ -2169,20 +2171,32 @@
         N.B. Only those symbols defined as "global" in the included file will
         be visible (accessible) in the remainder of the program.
 
-        If an absolute filename is given, Euphoria will use it. When a relative
-        filename is given, Euphoria will first look for it in the same
-        directory as the main file given on the ex (or exw or exu)
-        command-line. If it's not there, and you've defined an environment
-        variable, EUINC, it will search each directory listed in EUINC (from
-        left to right). Finally, if it still hasn't found the file, it will
-        search euphoria\include. This directory contains the standard Euphoria
-        include files. The environment variable EUDIR tells ex.exe/exw.exe/exu
-        where to find your euphoria directory. EUINC should be a list of
-        directories, separated by semicolons (colons on Linux), similar in form
-        to your PATH variable. It can be added to your AUTOEXEC.BAT file, e.g.
-        SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB
-        This lets you organize your include files according to application
+        If an absolute filename is given, Euphoria will open it and start
+        parsing it. When a relative filename is given, Euphoria will try to
+        open the file relative to the following directories, in the following
+        order:
+      *
+        The directory containing the current source file. i.e. the source file
+        that contains the include statement that is being processed..
+      *
+        The directory containing the main file given on the interpreter,
+        translator or binder command-line.
+      *
+        If you've defined an environment variable, EUINC, Euphoria will check
+        each directory listed in EUINC (from left to right). EUINC should be a
+        list of directories, separated by semicolons (colons on Linux /
+        FreeBSD), similar in form to your PATH variable. EUINC can be added to
+        your set of Linux / FreeBSD or DOS / Windows environment variables.
+        (Via Control Panel / Performance & Maintenance / System / Advanced on
+        XP, or AUTOEXEC.BAT on older versions of Windows). e.g.
+             SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB
+        EUINC lets you organize your include files according to application
         areas, and avoid adding numerous unrelated files to euphoria\include.
+      *
+        Finally, if it still hasn't found the file, it will look in
+        euphoria\include. This directory contains the standard Euphoria include
+        files. The environment variable EUDIR tells Euphoria where to find your
+        euphoria directory.
 
         An included file can include other files. In fact, you can "nest"
         included files up to 30 levels deep.
