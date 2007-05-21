@@ -30,8 +30,8 @@ OutputBaseFilename=e30setup
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
-InfoBeforeFile=c:\euphoria\htx\before.txt
-InfoAfterFile=c:\euphoria\htx\after.txt
+InfoBeforeFile=c:\eusvn\trunk\htx\before.txt
+InfoAfterFile=c:\eusvn\trunk\htx\after.txt
 Uninstallable=no
 
 [Types]
@@ -82,92 +82,92 @@ Source: "{app}\License.txt"; DestDir: "{app}\backup"; Flags: external skipifsour
 
 ; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
 ; create the docs, and exwc.exe (see [Run] section below)
-Source: c:\euphoria\bin\exw.exe; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\bin\makecon.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\htx\setupae.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;  MinVersion: 4.0,0
-Source: c:\euphoria\htx\doc.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\htx\docgen.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\htx\html.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\htx\text.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\htx\combine.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\bin\exw.exe; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\bin\makecon.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\htx\setupae.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;  MinVersion: 4.0,0
+Source: c:\eusvn\trunk\htx\doc.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\htx\docgen.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\htx\html.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\htx\text.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\htx\combine.exw; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; We temporarily need these includes as well, but EUDIR will not have been set.
-Source: c:\euphoria\include\wildcard.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\include\get.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\include\misc.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\include\msgbox.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\include\machine.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\include\dll.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\bin\keywords.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: c:\euphoria\bin\syncolor.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\include\wildcard.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\include\get.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\include\misc.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\include\msgbox.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\include\machine.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\include\dll.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\bin\keywords.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: c:\eusvn\trunk\bin\syncolor.e; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ;Root
-Source: C:\EUPHORIA\FILE_ID.DIZ; DestDir: {app}; Flags: ignoreversion;
-Source: C:\EUPHORIA\License.txt; DestDir: {app}; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\FILE_ID.DIZ; DestDir: {app}; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\License.txt; DestDir: {app}; Flags: ignoreversion;
 ;BIN
-Source: C:\EUPHORIA\BIN\EX.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EXW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\BACKEND.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\BACKENDW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\SYNCOLOR.E; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\BIN.DOC; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\KEYWORDS.E; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ED.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\LINES.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ASCII.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: "C:\EUPHORIA\BIN\KEY.EX"; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\GURU.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\WHERE.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\SEARCH.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EPRINT.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\LINES.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\GURU.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EPRINT.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ED.BAT; DestDir: {app}\BIN\; Flags: ignoreversion; MinVersion: 0,4.0
-Source: C:\EUPHORIA\BIN\OLDED.BAT; DestDir: {app}\BIN\; DestName: ed.bat; Flags: ignoreversion; MinVersion: 4.0,0
-Source: C:\EUPHORIA\BIN\CDGURU.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\SEARCH.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ASCII.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\WHERE.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: "C:\EUPHORIA\BIN\KEY.BAT"; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\MAKE31.EXW; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\MAKECON.EXW; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EUINC.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EC.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ECW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\LE23P.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\CWC.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\CWSTUB.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\LIBALLEG.A; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\BIND.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\BINDW.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\SHROUD.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EC.A; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EC.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ECFASTFP.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ECW.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ECWB.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\ECWL.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
-Source: C:\EUPHORIA\BIN\EUPHORIA.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EX.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EXW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\BACKEND.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\BACKENDW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\SYNCOLOR.E; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\BIN.DOC; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\KEYWORDS.E; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ED.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\LINES.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ASCII.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: "C:\EUSVN\TRUNK\BIN\KEY.EX"; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\GURU.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\WHERE.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\SEARCH.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EPRINT.EX; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\LINES.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\GURU.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EPRINT.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ED.BAT; DestDir: {app}\BIN\; Flags: ignoreversion; MinVersion: 0,4.0
+Source: C:\EUSVN\TRUNK\BIN\OLDED.BAT; DestDir: {app}\BIN\; DestName: ed.bat; Flags: ignoreversion; MinVersion: 4.0,0
+Source: C:\EUSVN\TRUNK\BIN\CDGURU.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\SEARCH.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ASCII.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\WHERE.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: "C:\EUSVN\TRUNK\BIN\KEY.BAT"; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\MAKE31.EXW; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\MAKECON.EXW; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EUINC.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EC.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ECW.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\LE23P.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\CWC.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\CWSTUB.EXE; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\LIBALLEG.A; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\BIND.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\BINDW.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\SHROUD.BAT; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EC.A; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EC.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ECFASTFP.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ECW.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ECWB.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\ECWL.LIB; DestDir: {app}\BIN\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\BIN\EUPHORIA.ICO; DestDir: {app}\BIN\; Flags: ignoreversion;
 
 ;DEMO
-Source: C:\EUPHORIA\DEMO\*.ex; DestDir: {app}\DEMO\; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\*.exu; DestDir: {app}\DEMO\; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\*.doc; DestDir: {app}\DEMO\; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\WIN32\*.*; DestDir: {app}\DEMO\WIN32; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\DOS32\*.*; DestDir: {app}\DEMO\DOS32; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\LANGWAR\*.*; DestDir: {app}\DEMO\LANGWAR; Flags: ignoreversion;
-Source: C:\EUPHORIA\DEMO\BENCH\*.*; DestDir: {app}\DEMO\BENCH; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\*.ex; DestDir: {app}\DEMO\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\*.exu; DestDir: {app}\DEMO\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\*.doc; DestDir: {app}\DEMO\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\WIN32\*.*; DestDir: {app}\DEMO\WIN32; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\DOS32\*.*; DestDir: {app}\DEMO\DOS32; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\LANGWAR\*.*; DestDir: {app}\DEMO\LANGWAR; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\DEMO\BENCH\*.*; DestDir: {app}\DEMO\BENCH; Flags: ignoreversion;
 ;HTX
-Source: C:\EUPHORIA\HTX\*.HTX; DestDir: {tmp}; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\HTX\*.HTX; DestDir: {tmp}; Flags: ignoreversion;
 ;INCLUDE
-Source: C:\EUPHORIA\INCLUDE\*.E; DestDir: {app}\INCLUDE\; Flags: ignoreversion;
-Source: C:\EUPHORIA\INCLUDE\EUPHORIA.H; DestDir: {app}\INCLUDE\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\INCLUDE\*.E; DestDir: {app}\INCLUDE\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\INCLUDE\EUPHORIA.H; DestDir: {app}\INCLUDE\; Flags: ignoreversion;
 ;SOURCE
-Source: C:\EUPHORIA\source\*.*; DestDir: {app}\SOURCE\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\source\*.*; DestDir: {app}\SOURCE\; Flags: ignoreversion;
 ;TUTORIAL
-Source: C:\EUPHORIA\TUTORIAL\*.*; DestDir: {app}\TUTORIAL\; Flags: ignoreversion;
+Source: C:\EUSVN\TRUNK\TUTORIAL\*.*; DestDir: {app}\TUTORIAL\; Flags: ignoreversion;
 
 [INI]
 ; shortcut file to launch Rapid Euphoria website
