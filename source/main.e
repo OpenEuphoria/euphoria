@@ -120,7 +120,6 @@ function ProcessOptions()
 	    if EWINDOWS then
 		exts = { ".exw", ".ex", ".exu" }
 	    else
-		src_name &= ".ex"
 		exts = { ".ex", ".exw", ".exu" }
 	    end if
 	end if
