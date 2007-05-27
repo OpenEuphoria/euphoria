@@ -1,5 +1,6 @@
 @echo off
 @echo Build everything for DOS/Windows
+@echo EUDIR is %EUDIR%
 
 rem Note: Can't build properly if exwc (e.g. ed) is running
 
