@@ -214,9 +214,9 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 
 [Run]
 ;Generate DOCS, and update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
-Filename: "{tmp}\exw.exe"; Description: "Generate Documentation Files as HTML"; Parameters: "{tmp}\doc.exw HTML {app}"; StatusMsg: "Generating HTML documentation files ...";
-Filename: "{tmp}\exw.exe"; Description: "Generate Documentation Files as plain text"; Parameters: "{tmp}\doc.exw TEXT {app}"; StatusMsg: "Generating plain text documentation files ...";
-Filename: "{tmp}\exw.exe"; Description: "Combine Documentation Files"; Parameters: "{tmp}\combine.exw {app}"; StatusMsg: "Combining documentation files ...";
-Filename: "{tmp}\exw.exe"; Description: "Create exwc.exe"; Parameters: "{tmp}\makecon.exw ""{app}"""; StatusMsg: "Making exwc.exe ...";
-Filename: "{tmp}\exw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: "{tmp}\setupae.exw {app}"; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
+Filename: "{tmp}\exw.exe"; Description: "Generate Documentation Files as HTML"; Parameters: """{tmp}\doc.exw"" HTML ""{app}"""; StatusMsg: "Generating HTML documentation files ...";
+Filename: "{tmp}\exw.exe"; Description: "Generate Documentation Files as plain text"; Parameters: """{tmp}\doc.exw"" TEXT ""{app}"""; StatusMsg: "Generating plain text documentation files ...";
+Filename: "{tmp}\exw.exe"; Description: "Combine Documentation Files"; Parameters: """{tmp}\combine.exw"" ""{app}"""; StatusMsg: "Combining documentation files ...";
+Filename: "{tmp}\exw.exe"; Description: "Create exwc.exe"; Parameters: """{tmp}\makecon.exw"" ""{app}"""; StatusMsg: "Making exwc.exe ...";
+Filename: "{tmp}\exw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
 
