@@ -73,10 +73,6 @@
         occur when more than one .c file is created for a Euphoria file. Thanks
         to DB James.
 
-      * bug fixed: Translator: get_key(), when translated/compiled with Borland
-        or LCC required an extra keystroke after a carriage return, Thanks to
-        Jacques Deschenes.
-
       * bug fixed: Source Code Portability: euphoria.h: CLK_TCK is now defined
         as CLOCKS_PER_SEC if not defined previously in the source. Implemented
         by Matt Lewis.
