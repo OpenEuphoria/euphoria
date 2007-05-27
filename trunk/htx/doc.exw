@@ -204,6 +204,12 @@ integer param
 
 cmd_line = command_line()
 
+-- check command line...
+-- for i = 1 to length(cmd_line) do
+--    printf(1, "\"%s\"\n", {cmd_line[i]})
+-- end for
+-- ?getc(0)
+
 if length(cmd_line) < 3 then
     quit("no dir was passed to doc2")
 end if
@@ -217,7 +223,6 @@ else
 end if
 
 cmd_line = cmd_line[1..2] & cmd_line[4..length(cmd_line)]
-
 
 if length(cmd_line) >= 4 then
     -- space in path and forgot quotes
@@ -282,6 +287,4 @@ else
 	main(files[f], "PLAIN", "\\DOC")
     end for
 end if
-
-
 
