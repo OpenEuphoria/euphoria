@@ -4692,7 +4692,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
     b1 = b->base;
     bp = b1 + c -1;
     a1 = a->base;
-    ntries = lengthb - lengtha + 1;
+    ntries = lengthb - lengtha  - c + 1;
     while (--ntries >= 0) {
 	ai = a1;
 	bi = bp;
