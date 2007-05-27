@@ -1,4 +1,5 @@
 @echo creating DOCUMENTATION FILES
+@echo EUDIR is %EUDIR%
 
 rem need syncolor.e and keywords.e - EUINC will be changed temporarily
 
@@ -12,8 +13,6 @@ ex combine.exw %EUDIR%
 
 del %EUDIR%\doc\refman_?.doc
 del %EUDIR%\doc\lib_*.doc
-
-rem move %EUDIR%\html\readme.htm \euphoria > NUL
 
 SET EUINC=%TEMP_EUINC%
 
