@@ -40,8 +40,9 @@ and improves the documentation.
       If not found, then the usual rules will apply, i.e. it will
       check relative to the main program file, then check the EUINC
       directories (if any), and finally euphoria\include.
-      Suggested by C.K. Lester. 
-      Implemented by Matt Lewis.
+      Suggested by C.K. Lester and, in various forms, 
+      by several other people. Implemented by C.K. Lester. 
+      Checked in by Matt Lewis.
       
 <p>
 <li>
@@ -125,6 +126,13 @@ and improves the documentation.
        euphoria.h: CLK_TCK is now defined as CLOCKS_PER_SEC
        if not defined previously in the source. Implemented by Matt Lewis.
   
+<p>
+<li>
+     <b><font color="#009999">bug fixed: </font></b>
+      <b>Installer:</b>
+      Double-quotes were added around several filenames used in the
+      INNO installer script (though this did not seem to affect many people).
+
 </ul>
 
 
