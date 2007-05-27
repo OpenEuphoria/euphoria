@@ -4451,9 +4451,11 @@ int wingetch()
     c = MyReadConsoleChar();
     
     // Fix by Jacques Deschenes, Feb 2007
-    // Take this out:
-    // if (c == '\r')
-    //     c = MyReadConsoleChar();
+    // Take this out: 
+    // Juergen Luethje says it causes problems with special keys 
+    // - put it back in - Rob
+    if (c == '\r')
+	c = MyReadConsoleChar();
     
     return c;
 #else
