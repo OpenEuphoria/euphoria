@@ -25,7 +25,9 @@
         the location of the current source file. If not found, then the usual
         rules will apply, i.e. it will check relative to the main program file,
         then check the EUINC directories (if any), and finally
-        euphoria\include. Suggested by C.K. Lester. Implemented by Matt Lewis.
+        euphoria\include. Suggested by C.K. Lester and, in various forms, by
+        several other people. Implemented by C.K. Lester. Checked in by Matt
+        Lewis.
 
       * ex int.ex (in euphoria\source) will now work, since the interpreter now
         supports machine_proc(65,...) which passes IL to the fast C-coded
@@ -78,6 +80,10 @@
       * bug fixed: Source Code Portability: euphoria.h: CLK_TCK is now defined
         as CLOCKS_PER_SEC if not defined previously in the source. Implemented
         by Matt Lewis.
+
+      * bug fixed: Installer: Double-quotes were added around several filenames
+        used in the INNO installer script (though this did not seem to affect
+        many people).
 
 
  Version 3.0.2 February 9, 2007:
