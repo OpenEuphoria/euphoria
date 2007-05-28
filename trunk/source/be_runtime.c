@@ -4691,8 +4691,9 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 
     if (lengthb < c )  // should this be an error?
 	return (0);
+
     b1 = b->base;
-    bp = b1 + c -1;
+    bp = b1 + c ;
     a1 = a->base;
     ntries = lengthb - lengtha  - c + 1;
     while (--ntries >= 0) {
