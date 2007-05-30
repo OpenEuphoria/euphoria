@@ -84,9 +84,17 @@
 
  equal           - test if two objects are identical
 
- find            - find an object in a sequence
+ find            - find an object in a sequence - start searching from element
+                   number 1
 
- match           - find a sequence as a slice of another sequence
+ find_from       - find an object in a sequence - start searching from any
+                   element number
+
+ match           - find a sequence as a slice of another sequence - start
+                   searching from element number 1
+
+ match_from      - find a sequence as a slice of another sequence - start
+                   searching from any element number
 
  sort            - sort the elements of a sequence into ascending order
 
