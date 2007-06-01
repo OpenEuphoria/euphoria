@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2006 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*                 The Interpreter Back-end Main Program                     */

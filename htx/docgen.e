@@ -1,4 +1,4 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 
 -- written by: Junko C. Miura of Rapid Deployment Software (JCMiura@aol.com)
 include get.e

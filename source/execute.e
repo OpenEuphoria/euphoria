@@ -1,6 +1,6 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.0
+-- Euphoria 3.1
 -- The Interpreter Back-End
 
 -- This back-end is written in Euphoria. It uses the same front-end

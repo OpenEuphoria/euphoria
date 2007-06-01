@@ -1,4 +1,4 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 
 -- Handlers for HTML output format
 -- Special Enhanced HTML tags (ie, HTMX tags) that we created are processed.

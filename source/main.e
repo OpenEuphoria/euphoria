@@ -1,6 +1,6 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.0
+-- Euphoria 3.1
 -- Front End - main routine 
 
 include file.e
