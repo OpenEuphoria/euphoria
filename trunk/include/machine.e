@@ -1,6 +1,6 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.0
+-- Euphoria 3.1
 -- Machine Level Programming (386/486/Pentium)
 
 -- Warning: Some of these routines require a knowledge of 

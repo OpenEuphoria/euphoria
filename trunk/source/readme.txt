@@ -1,4 +1,4 @@
-		Euphoria 3.0 Open Source Software
+		Euphoria 3.1 Open Source Software
 		---------------------------------
 
                 

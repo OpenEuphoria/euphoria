@@ -1,4 +1,4 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- mini Euphoria front-end for stand-alone back-end
 -- we redundantly declare some things to keep the size down

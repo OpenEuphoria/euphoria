@@ -1,6 +1,6 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.0
+-- Euphoria 3.1
 -- Symbol Table Routines
 
 constant NBUCKETS = 2003  -- prime helps  

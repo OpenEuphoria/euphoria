@@ -4,8 +4,8 @@
  
 
 
- Version 3.0.3 May 25, 2007:
- ===========================
+ Version 3.1 June 1, 2007:
+ =========================
 
  This release adds some new features, fixes some bugs, and improves the
  documentation.
@@ -72,6 +72,10 @@
       * bug fixed: Translator: In rare situations, a naming conflict could
         occur when more than one .c file is created for a Euphoria file. Thanks
         to DB James.
+
+      * bug fixed: Translator: get_key(), when translated/compiled with Borland
+        or LCC, required an extra keystroke after a carriage return.
+        Implemented by Jacques Deschenes.
 
       * bug fixed: Source Code Portability: euphoria.h: CLK_TCK is now defined
         as CLOCKS_PER_SEC if not defined previously in the source. Implemented

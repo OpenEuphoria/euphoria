@@ -1,4 +1,4 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 
 -- Store front-end data structures in memory
 -- Called from (a) interpreter front-end

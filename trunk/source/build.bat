@@ -92,6 +92,7 @@ move backendw.exe %EUDIR%\bin
 move ec.exe %EUDIR%\bin
 move ecw.exe %EUDIR%\bin
 
+call clean.bat
 dir %EUDIR%\bin /od
 
 goto done

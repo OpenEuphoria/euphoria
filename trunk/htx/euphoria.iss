@@ -11,8 +11,8 @@
 
 [Setup]
 AppName=Euphoria
-AppVersion=3.0
-AppVerName=Euphoria v3.0.3
+AppVersion=3.1
+AppVerName=Euphoria v3.1
 AppPublisher=Rapid Deployment Software
 AppPublisherURL=http://www.rapideuphoria.com
 AppSupportURL=http://www.rapideuphoria.com
@@ -26,7 +26,7 @@ AllowNoIcons=yes
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=..\Setup
-OutputBaseFilename=e30setup
+OutputBaseFilename=e31setup
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
