@@ -2333,7 +2333,7 @@
 
  Example 1:
 
-              location = find(11, {11, 8, 11, 2, 3}, 2)
+              location = find_from(11, {11, 8, 11, 2, 3}, 2)
               -- location is set to 3
               
                
