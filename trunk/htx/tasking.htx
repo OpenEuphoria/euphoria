@@ -196,7 +196,7 @@ puts(1, "main task: stop\n")
  to transfer control to any other task. When control comes back to
  the original task, it will resume execution at the statement
  after task_yield(), with its call stack and all private variables 
- intact. Each task has it's own call stack, program counter 
+ intact. Each task has its own call stack, program counter 
  (i.e. current statement being executed), and private variables. 
  You might have several tasks all executing a routine at the same time, 
  and each task will have its own set of private variable values 
