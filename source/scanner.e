@@ -314,13 +314,14 @@ function get_file_path(sequence s)
 	return "." & SLASH
 end function
 
+include pathopen.e
 function path_open()
 -- open an include file (new_include_name) according to the include path rules  
     integer absolute, try
     sequence full_path
-    object inc_path
     sequence errbuff
 	sequence currdir
+    object scan_result, inc_path
 	
     absolute = FALSE
     
@@ -331,13 +332,13 @@ function path_open()
 	       (not ELINUX and find(':', new_include_name))
     
     if absolute then
-		-- open new_include_name exactly as it is  
-		try = open(new_include_name, "r")
-		if try = -1 then
-		    errbuff = sprintf("can't open %s", new_include_name)
-		    CompileErr(errbuff)
-		end if
-		return try
+	-- open new_include_name exactly as it is
+	try = open(new_include_name, "r")
+	if try = -1 then
+            errbuff = sprintf("can't open %s", new_include_name)
+            CompileErr(errbuff)
+	end if
+	return try
     end if
 
     -- first try path from current file path
@@ -352,65 +353,36 @@ function path_open()
 	try = open(full_path,  "r")
     end if
  
-    if try = -1 then
-	-- Search directories listed on EUINC environment var  
-	inc_path = getenv("EUINC")
-	if sequence(inc_path) and length(inc_path) > 0 then  
-	    inc_path = append(inc_path, PATH_SEPARATOR)
-	    full_path = ""
-	    for p = 1 to length(inc_path) do
-		if inc_path[p] = PATH_SEPARATOR then
-		    -- end of a directory. 
-		    -- remove any trailing blanks and SLASH in directory
-		    while length(full_path) and 
-			  find(full_path[$], " \t" & SLASH_CHARS) do
-			full_path = full_path[1..$-1]
-		    end while
-		    
-		    if length(full_path) then
-			full_path = full_path & SLASH & new_include_name
-			try = open(full_path, "r")
-			if try != -1 then
-			    exit
-			end if
-			full_path = ""
-		    end if
-		else 
-		    -- don't store leading blanks in directory
-		    if length(full_path) or 
-		       (inc_path[p] != ' ' and inc_path[p] != '\t') then
-			full_path &= inc_path[p]
-		    end if
-		end if
-	    end for
-	    inc_path = inc_path[1..$-1] 
-	end if
-    end if
-    
-    if try = -1 then
-	-- Finally, try EUDIR\INCLUDE  
-	full_path = eudir & SLASH & "include" & SLASH & new_include_name
-	try = open(full_path, "r")
-    end if
-    
     if try != -1 then
-	-- successful  
-	new_include_name = full_path
-	return try
+        new_include_name = full_path
+        return try
     end if
-    
+
+    scan_result = ScanPath(new_include_name,"EUINC",0)
+
+    if atom(scan_result) then
+        scan_result = ScanPath(new_include_name, "EUDIR",1)
+    end if
+
+    if sequence(scan_result) then
+	-- successful
+	new_include_name = scan_result[1]
+	return scan_result[2]
+    end if
+
     if length(main_path) = 0 then
 	main_path = "."
-    end if  
+    end if
     if find(main_path[$], SLASH_CHARS) then
 	main_path = main_path[1..$-1]  -- looks better
     end if
-    
+
+    inc_path = getenv("EUINC")
     if atom(inc_path) then
-	errbuff = sprintf("can't find %s in %s\nor in %s%sinclude", 
+	errbuff = sprintf("can't find %s in %s\nor in %s%sinclude",
 			  {new_include_name, main_path, eudir, SLASH})
-    else 
-	errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s%sinclude", 
+    else
+	errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s%sinclude",
 			  {new_include_name, main_path, inc_path, eudir, SLASH})
     end if
     CompileErr(errbuff)
