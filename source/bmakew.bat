@@ -43,4 +43,4 @@ wrc -q -ad exw.res backendw.exe
 upx -q --best backendw.exe
 echo you can now bind with: backendw.exe
 :done
-
+pause
