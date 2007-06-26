@@ -1,3 +1,6 @@
+-- special version for FreeBSD
+-- should try to merge with standard ed.ex for DOS/WIN/Linux
+
 	----------------------------------------------------------
 	--       This Euphoria Editor was developed by          --
 	--            Rapid Deployment Software.                --
@@ -1755,7 +1758,7 @@ procedure get_escape(boolean help)
 	    end if
 	end if
 	if platform() = LINUX then
-	    shell("exu " & file_name)
+	    shell("exu " & "\"" & file_name & "\"")
 	elsif match(".exw", lower(file_name)) or 
 	      match(".ew",  lower(file_name)) then
 	    shell("exw " & file_name)
