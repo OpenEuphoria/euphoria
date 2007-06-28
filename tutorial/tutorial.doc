@@ -23,7 +23,7 @@
  
     1. hello.ex - Hello World
     
-    2. celcius.ex - Fahrenheit to Celsius converter (simple, not traced)
+    2. celsius.ex - Fahrenheit to Celsius converter (simple, not traced)
     
     3. calc.ex - Simple Calculations
     
