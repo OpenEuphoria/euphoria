@@ -355,6 +355,7 @@ global function get(integer file)
 -- Return {error_status, value}.
     input_file = file
     input_string = 0
+    string_next = 1
     get_ch()
     return Get2()
 end function
