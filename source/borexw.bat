@@ -14,4 +14,4 @@ bcc32 -DINT_CODES -DEWINDOWS -DEBORLAND -eexw.exe -tW -q -w- -O2 -5 -a4 -Ic:\bor
 del *.tds > NUL
 
 dir exw.exe
-
+pause

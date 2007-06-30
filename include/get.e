@@ -1,6 +1,6 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2006 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
+-- Euphoria 3.0
 -- Input and Conversion Routines:
 -- get()
 -- value()
@@ -289,6 +289,66 @@ function Get()
     end if
 end function
 
+integer leading_whitespace
+
+function Get2()
+-- read a Euphoria data object as a string of characters
+-- and return {error_flag, value} unless the record_whitespace flag is set, 
+-- which only happens on the first call of Get() by value(). In that case, the total
+-- number of characters interpreted and the number of leading whitespace characters are
+-- also returned.
+-- Note: ch is "live" at entry and exit of this routine
+    sequence s, e
+
+    skip_blanks()
+    if ch = -1 then -- string is made of whitespace only
+	return {GET_EOF, 0,string_next-1,string_next-1}
+    end if
+
+    leading_whitespace = string_next-2 -- index of the last whitespace: string_next points past the first non whitespace
+
+    if find(ch, START_NUMERIC) then
+	e = get_number()
+
+    elsif ch = '{' then
+	-- process a sequence
+	s = {}
+	get_ch()
+	skip_blanks()
+	if ch = '}' then
+	    get_ch()
+	    return {GET_SUCCESS, s,string_next-1,leading_whitespace} -- empty sequence
+	end if
+	
+	while TRUE do
+	    e = Get() -- read next element, using standard function
+	    if e[1] != GET_SUCCESS then
+		return e & {string_next-1,leading_whitespace}
+	    end if
+	    s = append(s, e[2])
+	    skip_blanks()
+	    if ch = '}' then
+		get_ch()
+		return {GET_SUCCESS, s,string_next-1,leading_whitespace}
+	    elsif ch != ',' then
+		return {GET_FAIL, 0,string_next-1,leading_whitespace}
+	    end if
+	    get_ch() -- skip comma
+	end while
+
+    elsif ch = '\"' then
+	e = get_string()
+
+    elsif ch = '\'' then
+	e = get_qchar()
+
+    else
+	return {GET_FAIL, 0,string_next-1,leading_whitespace}
+
+    end if
+    return e & {string_next-1,leading_whitespace}
+end function
+
 global function get(integer file)
 -- Read the string representation of a Euphoria object 
 -- from a file. Convert to the value of the object.
@@ -296,21 +356,23 @@ global function get(integer file)
     input_file = file
     input_string = 0
     get_ch()
-    return Get()
+    return Get2()
 end function
 
 global function value(sequence string)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
--- Return {error_status, value).
+-- Trailing whitespace is not considered.
+-- Return {error_status, value,total # of characters,# leading whitespaces).
+-- On error, the third element is the index at which the error condition was seen.
     input_string = string
     string_next = 1
     get_ch()
-    return Get()
+    return Get2()
 end function
 
 global function prompt_number(sequence prompt, sequence range)
--- Prompt the user to enter a number. 
+-- Prompt the user to enter a number.
 -- A range of allowed values may be specified.
     object answer
     

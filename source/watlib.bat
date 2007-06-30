@@ -28,4 +28,5 @@ wcc386 %CFLAGS% be_callc.c
 del ec.lib
 wlib -q ec.lib be_machine.obj be_task.obj be_inline.obj be_w.obj be_alloc.obj be_runtime.obj be_callc.obj
 dir ec.lib
+pause
 

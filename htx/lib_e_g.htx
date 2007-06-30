@@ -564,7 +564,17 @@ Do not use free_low() to deallocate memory that was allocated using
  could have a long sequence of values in braces and separated by
  commas, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', \"john\"}.
  <font color=\"#CC0099\"><b>A single call to get() will read in this
- entire sequence and return it's value as a result.</b></font>
+ entire sequence and return its value as a result, as well as complementary information.</b></font>
+<P>
+get() returns a 4 element sequence, like value() does:
+<ul>
+<li> a status code (success/error/end of file),
+<li> the value just read (meaningful only when the status code is GET_SUCCESS), 
+<li> the number of characters read, 
+<li> the number of leading whitespace characters. 
+</ul>
+When the status code is not GET_SUCCESS, the character count is the index of the
+ character at which reading stopped.
 <P>
 Each call to get() picks up where the previous call left off. For
  instance, a series of 5 calls to get() would be needed to read
@@ -582,10 +592,12 @@ in the input stream you would see a GET_FAIL error status
 <P>
 Multiple \"top-level\" objects in the input stream must be
  separated from each other with one or more \"whitespace\"
- characters (blank, tab, \r or \n). Whitespace is not necessary
- <b><i>within</i></b> a top-level object. A call to get() will 
- read one entire top-level object, plus one additional 
- (whitespace) character."
+ characters (blank, tab, \r or \n). At the very least, a top
+ level number must be followed by a white space from the following object.
+ Whitespace is not necessary <b><i>within</i></b> a top-level object. 
+ A call to get() will read one entire top-level object, plus possibly one additional
+ (whitespace) character. This extra whitespace does not count in 
+ the returned character count."
  >
 <_2clist
   name="Comments:"

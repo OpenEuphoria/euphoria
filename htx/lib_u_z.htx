@@ -182,9 +182,9 @@ fail = graphics_mode(261)
   name="Description:"
   description=
 "Read the string representation of a Euphoria object, and compute
- the value of that object. A 2-element sequence,
- <b>{error_status, value}</b> is actually returned, where error_status
- can be one of:"
+ the value of that object. A 4-element sequence,
+ <b>{error_status, value, total characters read, number of leading whitespace}</b> is
+  actually returned, where error_status can be one of:"
  >
 <_eucode>
     GET_SUCCESS -- a valid object representation was found
@@ -196,19 +196,22 @@ fail = graphics_mode(261)
   name="Comments:"
   description=
 "This works the same as <b>get()</b>, but it reads from a string
- that you supply, rather than from a file or device.
+ that you supply, rather than from a file or device, and returns some extra information useful
+  when you process text, and which <b>get()</b> doesn't return.
  <p>
  After reading one valid representation of a Euphoria object, value() will
- stop reading and ignore any additional characters in the string. For 
- example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36}."
+ stop reading and ignore any additional characters in the string. For
+ example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
+ invalid representation, the value field is undefined (usually 0), and the third field is the
+ 1 based index of the character the reading of which caused an error.
  >
 <_2clist
   name="Example 1:"
   description=""
  >
 <_eucode>
-s = value("12345"}
--- s is {GET_SUCCESS, 12345}
+s = value("  12345"} -- notice the two leading spaces
+-- s is {GET_SUCCESS, 12345, 7, 2}
 
  </_eucode>
 <_2clist
@@ -217,7 +220,7 @@ s = value("12345"}
  >
 <_eucode>
 s = value("{0, 1, -99.9}")
--- s is {GET_SUCCESS, {0, 1, -99.9}}
+-- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
 
  </_eucode>
 <_2clist
@@ -226,7 +229,7 @@ s = value("{0, 1, -99.9}")
  >
 <_eucode>
 s = value("+++")
--- s is {GET_FAIL, 0}
+-- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
 
  </_eucode>
 <_2clist

@@ -20,7 +20,7 @@ call watlib.bat /fp5 /fpi87
 move ec.lib ecfastfp.lib
 if not exist ecfastfp.lib goto fail
 
-call watlib.bat /fpc 
+call watlib.bat /fpc
 if not exist ec.lib goto fail
 
 call watlibw.bat
@@ -99,6 +99,7 @@ goto done
 
 :fail
 echo FAILED!
+pause
 
 :done
 
