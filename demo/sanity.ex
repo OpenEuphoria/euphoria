@@ -727,17 +727,17 @@ procedure conversions()
     if compare(v, "values are:  1234, -89, 6.22") != 0 then
 	abort()
     end if
-    v = value("{1,2,3}")
-    if compare(v, {GET_SUCCESS, {1,2,3}}) != 0 then
+    v = value("  {1,2,3}")
+    if compare(v, {GET_SUCCESS, {1,2,3},9,2}) != 0 then
 	abort()
     end if
     for x = 1 to 100 by 3 do
 	v = value(sprintf("%d", x)) 
-	if compare(v, {GET_SUCCESS, x}) != 0 then
+	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
 	    abort()
 	end if
 	v = value(sprintf("#%x ", x))
-	if compare(v, {GET_SUCCESS, x}) != 0 then
+	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
 	    abort()
 	end if
     end for
