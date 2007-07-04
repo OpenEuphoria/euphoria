@@ -101,6 +101,9 @@ static int e_path_open(char *name, int mode)
 /* follow the search path, if necessary to open the main file */
 {
     int src_file, fn;
+#ifdef EWINDOWS
+    int accents;
+#endif
     char *path;
     char *full_name;
     char *p;
@@ -119,7 +122,10 @@ static int e_path_open(char *name, int mode)
     if (path == NULL)
 	return -1;
     full_name = EMalloc(PATH_MAX+1);
-    fn = 0; 
+    fn = 0;
+#ifdef EWINDOWS
+    accents = 0;
+#endif
     for (p = path; ; p++) {
 	if (*p == ' ' || *p == '\t')
 	    continue;
@@ -134,14 +140,30 @@ static int e_path_open(char *name, int mode)
 		    return src_file;
 		}
 		else {
-		    fn = 0;
+#ifdef EWINDOWS                         
+                    if (accents) {
+                        accents = OemToCharBuffA(full_name,full_name,fn);
+        		src_file = long_open(full_name, mode);
+        		if (src_file > -1) {
+        		    file_name[1] = full_name;           
+        		    return src_file;
+        		}
+                    }
+#endif
+                    fn = 0;
 		}
 	    }
 	    if (*p == '\0')
 		break;
+#ifdef EWINDOWS
+            accents = 0;
+#endif
 	}
 	else {
 	    full_name[fn++] = *p;
+#ifdef EWINDOWS
+	    if (*p >= 128) accents = 1;
+#endif
 	}
     }
     return -1;
