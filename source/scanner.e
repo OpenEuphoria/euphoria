@@ -6,6 +6,7 @@
 include machine.e
 include file.e
 
+
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
 constant MAX_FILE = 256       -- maximum number of source files
 
@@ -36,14 +37,14 @@ global integer AnyStatementProfile -- statement profile option was ever selected
 global integer AnyTimeProfile      -- time profile option was ever selected 
 
 global object shebang              -- #! line (if any) for Linux/FreeBSD
-shebang = 0
+shebang = routine_id("upper")      -- otherwise, wildcard.c is optimised away
 
 -- Local variables
 sequence char_class  -- character classes, some are negative
 sequence id_char     -- char that could be in an identifier
 sequence IncludeStk  -- stack of include file info
 
--- IncludeStk entry 
+-- IncludeStk entry
 constant FILE_NO = 1,           -- file number
 	 LINE_NO = 2,           -- local line number
 	 FILE_PTR = 3,          -- open file number 
@@ -388,6 +389,59 @@ function path_open()
     CompileErr(errbuff)
 end function
 
+function win_compare(sequence a,sequence b)
+    atom conv
+    integer rc
+
+    conv=allocate_string(a)
+    conv=c_func(char_upper,{conv}) -- conv is unchanged
+    a=peek({conv,length(a)})
+    poke(conv,b)
+    conv=c_func(char_upper,{conv}) -- conv is unchanged
+    rc = equal(a,peek({conv,length(a)}))
+    free(conv)
+    return rc
+end function
+
+function dos_compare(sequence a,sequence b)
+    integer ai,bi,c
+    
+    for i=1 to length(a) do
+        ai=a[i]
+        bi=b[i]
+        if ai!=bi then -- do some work
+            c = xor_bits(ai,bi)
+            if c >= #40 then
+            -- either one of the chars is accented and not the other, or one is a letter and not the other
+                return FALSE
+            end if
+            -- both char are allowed in filenames and different
+            if ai<128 then  -- unaccented chars
+                if c != #20 or and_bits(ai,31)>26 then -- not case insensitive equal
+                -- if c=#20, then both chars ar in 'A'..#7F. Hence the need to filter out spurious positives from #7B..#7F.
+                    return FALSE
+                end if
+            else  -- accented chars
+                if not fc_table then -- no capitalisation supported, chars differ
+                    return FALSE
+                end if
+                -- speed things up by not always peeking twice
+                c = peek(fc_table+ai)
+                if c != ai then -- a[i] is lowercase
+                    if c != bi then -- b[i] is neither of the allowed two
+                        return FALSE
+                    end if
+                else -- a[i] is uppercase, so check b[i] directly
+                    if ai != peek(fc_table+bi) then -- different after uppercasing
+                        return FALSE
+                    end if
+                end if
+            end if
+        end if
+    end for
+    return TRUE
+end function
+
 function same_name(sequence a, sequence b)
 -- return TRUE if two file names (or paths) are equal
     if ELINUX then
@@ -396,20 +450,18 @@ function same_name(sequence a, sequence b)
     -- DOS/Windows
     if length(a) != length(b) then
 	return FALSE
+    elsif EWINDOWS then
+        return win_compare(a,b)
+    else
+        return dos_compare(a,b)
     end if
-    for i = 1 to length(a) do
-	if upper(a[i]) != upper(b[i]) then
-	    return FALSE
-	end if
-    end for
-    return TRUE
 end function
 
 procedure IncludePush()
 -- start reading from new source file with given name  
     integer new_file
     sequence new_name
-    
+
     start_include = FALSE
 
     new_file = path_open() -- sets new_include_name to full path 

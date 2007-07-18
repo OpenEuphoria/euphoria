@@ -1,14 +1,33 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 
-atom u32,oem2char,convert_buffer
+atom oem2char,convert_buffer
 integer convert_length
+global atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
-if platform()=WIN32 then                  
+sequence regs
+if platform()=WIN32 then
     u32=machine_func(50,"user32.dll")
     oem2char=machine_func(51,{u32,"OemToCharA",{C_POINTER,C_POINTER},C_POINTER})
+    char_upper=machine_func(51,{u32,"CharUpperA",{C_POINTER},C_POINTER})
     convert_length=64
     convert_buffer=allocate(convert_length)
+elsif platform()=DOS32 then
+    regs=repeat(0,10)
+    fc_table=allocate_low(5)
+    -- query filename country dependent capitalisation table pointer
+    regs[REG_DX]=and_bits(fc_table,15)
+    regs[REG_DS]=floor(fc_table/16)
+    regs[REG_AX]=#6504
+    regs=dos_interrupt(#21,regs)
+    if and_bits(regs[REG_FLAGS],1) then -- DOS earlier than 4.0, or something very wrong
+        free_low(fc_table)
+        fc_table=0
+    else -- turn received dword into a 32 bit address, altered so as to access it faster
+        regs=peek({fc_table+1,4})
+        free_low(fc_table)
+        fc_table=regs[1]+256*regs[2]+16*regs[3]+4096*regs[4]-126
+    end if
 end if
 
 function convert_from_OEM(sequence s)
