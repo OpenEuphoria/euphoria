@@ -3,7 +3,6 @@ main-0.c
 pathopen.c
 init-.c
 int.c
-wildcard.c
 error.c
 machine.c
 symtab.c

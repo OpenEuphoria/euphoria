@@ -12,7 +12,6 @@ FILE main-0.obj
 FILE pathopen.obj
 FILE init-.obj
 FILE int.obj
-FILE wildcard.obj
 FILE file.obj
 FILE error.obj
 FILE machine.obj

@@ -14,7 +14,6 @@ FILE pathopen.obj
 FILE compress.obj
 FILE file.obj
 FILE machine.obj
-FILE wildcard.obj
 FILE be_main.obj
 FILE be_symtab.obj
 FILE be_callc.obj

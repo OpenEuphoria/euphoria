@@ -3,7 +3,6 @@ FILE main-.obj
 FILE pathopen.obj
 FILE init-.obj
 FILE machine.obj
-FILE wildcard.obj
 FILE backend.obj
 FILE 0ackend.obj
 FILE compress.obj

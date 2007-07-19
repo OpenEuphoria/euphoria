@@ -14,7 +14,6 @@ wcc386 %FLAGS% main-.c
 wcc386 %FLAGS% init-.c
 wcc386 %FLAGS% file.c
 wcc386 %FLAGS% machine.c
-wcc386 %FLAGS% wildcard.c
 wcc386 %FLAGS% 0ackend.c
 wcc386 %FLAGS% pathopen.c
 wcc386 %FLAGS% backend.c

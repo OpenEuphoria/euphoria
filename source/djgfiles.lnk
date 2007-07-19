@@ -2,7 +2,6 @@ main-.o
 main-0.o
 init-.o
 int.o
-wildcard.o
 error.o
 machine.o
 symtab.o

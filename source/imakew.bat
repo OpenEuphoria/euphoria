@@ -17,7 +17,6 @@ wcc386 %FLAGS% main-0.c
 wcc386 %FLAGS% pathopen.c
 wcc386 /os %FLAGS% init-.c
 wcc386 %FLAGS% int.c
-wcc386 %FLAGS% wildcard.c
 wcc386 %FLAGS% file.c
 wcc386 /os %FLAGS% error.c
 wcc386 %FLAGS% machine.c

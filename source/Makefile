@@ -76,7 +76,6 @@ EU_CORE_OBJECTS = \
 	main-0.o \
 	pathopen.o \
 	init-.o \
-	wildcard.o \
 	file.o \
 	error.o \
 	machine.o \
@@ -96,7 +95,6 @@ EU_CORE_C_FILES = \
 	main-0.c \
 	pathopen.c \
 	init-.c \
-	wildcard.c \
 	file.c \
 	error.c \
 	machine.c \
@@ -178,9 +176,6 @@ pathopen.o :   ./pathopen.e
 	$(CC) $(FE_FLAGS) $*.c
 
 init-.o :   ./main-.o
-	$(CC) $(FE_FLAGS) $*.c
-
-wildcard.o :   ./main-.o 
 	$(CC) $(FE_FLAGS) $*.c
 
 file.o :   ./main-.o

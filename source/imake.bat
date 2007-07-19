@@ -18,7 +18,6 @@ wcc386 %FLAGS% main-0.c
 wcc386 %FLAGS% pathopen.c
 wcc386 %FLAGS% init-.c
 wcc386 %FLAGS% int.c
-wcc386 %FLAGS% wildcard.c
 wcc386 %FLAGS% file.c
 wcc386 %FLAGS% error.c
 wcc386 %FLAGS% machine.c
@@ -39,7 +38,7 @@ echo compiling the back-end files...
 REM /dINT_CODES /dHEAP_CHECK /dINT_CODES  -- next line for User Source only
 SET BE_FLAGS=/w0 /ol /dEDOS /dEWATCOM /dINT_CODES
 rem --PRIVATE /ol necessary for good code in do_exec()
-SET BE_FLAGS=/w0 /ol /dEDOS /dEWATCOM 
+SET BE_FLAGS=/w0 /ol /dEDOS /dEWATCOM
 rem --END PRIVATE
 wcc386 %BE_FLAGS% %FLAGS% be_main.c
 wcc386 %BE_FLAGS% %FLAGS% be_symtab.c

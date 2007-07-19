@@ -67,7 +67,6 @@ EU_CORE_OBJECTS = &
 	main-0.obj &
 	pathopen.obj &
 	init-.obj &
-	wildcard.obj &
 	file.obj &
 	error.obj &
 	machine.obj &
@@ -163,9 +162,6 @@ pathopen.obj :  .MULTIPLE ./pathopen.e
 	$(CC) $(FE_FLAGS) $*.c
 
 init-.obj :  .MULTIPLE ./init-.c 
-	$(CC) $(FE_FLAGS) $[@
-
-wildcard.obj : .MULTIPLE  ./wildcard.c 
 	$(CC) $(FE_FLAGS) $[@
 
 file.obj :  .MULTIPLE ./file.c

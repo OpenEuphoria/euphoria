@@ -3,7 +3,6 @@ main-0.obj
 pathopen.obj
 init-.obj
 int.obj
-wildcard.obj
 error.obj
 machine.obj
 symtab.obj

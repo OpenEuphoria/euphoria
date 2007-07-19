@@ -18,7 +18,6 @@ SET FEFLAGS=-c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer
 @gcc %FEFLAGS% main-0.c
 @gcc %FEFLAGS% init-.c
 @gcc %FEFLAGS% int.c
-@gcc %FEFLAGS% wildcard.c
 @gcc %FEFLAGS% error.c
 @gcc %FEFLAGS% machine.c
 @gcc %FEFLAGS% symtab.c

@@ -37,7 +37,7 @@ global integer AnyStatementProfile -- statement profile option was ever selected
 global integer AnyTimeProfile      -- time profile option was ever selected 
 
 global object shebang              -- #! line (if any) for Linux/FreeBSD
-shebang = routine_id("upper")      -- otherwise, wildcard.c is optimised away
+shebang = 0
 
 -- Local variables
 sequence char_class  -- character classes, some are negative

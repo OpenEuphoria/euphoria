@@ -13,7 +13,6 @@ lcc %FE_FLAGS% main-0.c
 lcc %FE_FLAGS% pathopen.c
 lcc %FE_FLAGS% init-.c
 lcc %FE_FLAGS% int.c
-lcc %FE_FLAGS% wildcard.c
 lcc %FE_FLAGS% error.c
 lcc %FE_FLAGS% machine.c
 lcc %FE_FLAGS% symtab.c
