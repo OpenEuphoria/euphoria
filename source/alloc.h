@@ -20,6 +20,9 @@ struct block_list {
 #ifdef HEAP_CHECK 
 #define FreeD(p) freeD(p)
 #else
+#ifdef ELINUX
+#define FreeD(p) free(p);
+#else
 #define FreeD(p){ if (eu_dll_exists && cache_size > CACHE_LIMIT) { \
 		      if (align4 && *(int *)((char *)p-4) == MAGIC_FILLER) \
 			  free((char *)p-4); \
@@ -31,6 +34,7 @@ struct block_list {
 		      d_list = (d_ptr)p; \
 		      cache_size += 1; } \
 		  }
+#endif
 #endif
 
 // Size of the usable space in an allocated block
