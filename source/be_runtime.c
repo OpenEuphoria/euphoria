@@ -4623,6 +4623,7 @@ long find_from(object a, s1_ptr b, object c)
 		
     bp = b->base;
     bp += c - 1;
+    length -= c - 1;
     if (IS_ATOM_INT(a)) {
 		while (TRUE) {
 		    bv = *(++bp);

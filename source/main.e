@@ -132,6 +132,9 @@ function ProcessOptions()
 		exit
 	    end if
 	end for
+	if src_file = -1 then
+	    file_name[$] = src_name & exts[1]	
+	end if
 	else
 	file_name = append(file_name, src_name)
 	src_file = e_path_open(src_name, "r")
