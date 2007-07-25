@@ -278,7 +278,7 @@ end function
 
 constant SAFE_FILE_SIZE = 100000
 
-function scan(sequence file_name, integer file_size, sequence string)
+function scan(sequence file_name, atom file_size, sequence string)
 -- print all lines in current file containing the string
     object line
     sequence match_line
