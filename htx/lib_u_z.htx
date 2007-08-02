@@ -181,7 +181,7 @@ fail = graphics_mode(261)
  <_2clist
   name="Description:"
   description=
-"Read the string representation of a Euphoria object, and compute
+"Read the string representation of a Euphoria object, and computes
  the value of that object. A 4-element sequence,
  <b>{error_status, value, total characters read, number of leading whitespace}</b> is
   actually returned, where error_status can be one of:"
@@ -196,8 +196,7 @@ fail = graphics_mode(261)
   name="Comments:"
   description=
 "This works the same as <b>get()</b>, but it reads from a string
- that you supply, rather than from a file or device, and returns some extra information useful
-  when you process text, and which <b>get()</b> doesn't return.
+ that you supply, rather than from a file or device.
  <p>
  After reading one valid representation of a Euphoria object, value() will
  stop reading and ignore any additional characters in the string. For
@@ -695,10 +694,6 @@ a = xor_bits(#0110, #1010)
  >
 
 </table>
-
-<_continueAll
-  libDoc="lib_u_z.htm"
->
 
 </body>
 </html>

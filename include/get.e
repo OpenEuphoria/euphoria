@@ -58,11 +58,12 @@ procedure get_ch()
     end if
 end procedure
 
+constant white_space = " \t\n\r"
 procedure skip_blanks()
 -- skip white space
 -- ch is "live" at entry and exit
 
-    while find(ch, " \t\n\r") do
+    while find(ch, white_space) do
 	get_ch()
     end while
 end procedure
@@ -135,8 +136,31 @@ type plus_or_minus(integer x)
     return x = -1 or x = +1
 end type
 
+constant GET_IGNORE = -2
+function read_comment()
+    if atom(input_string) then
+        while ch!='\n' and ch!='\r' and ch!=-1 do
+            get_ch()
+        end while
+        if ch=-1 then
+            return {GET_EOF,0}
+        else
+            return {GET_IGNORE,0}
+        end if
+    else
+        for i=string_next to length(input_string) do
+            ch=input_string[i]
+            if ch='\n' or ch='\r' then
+                string_next=i+1
+                return {GET_IGNORE,0}
+            end if
+        end for
+        return {GET_EOF,0}
+    end if
+end function
+
 function get_number()
--- read a number
+-- read a number or a comment
 -- ch is "live" at entry and exit
     plus_or_minus sign, e_sign
     natural ndigits
@@ -151,6 +175,9 @@ function get_number()
     if ch = '-' then
 	sign = -1
 	get_ch()
+	if ch='-' then
+	    return read_comment()
+	end if
     elsif ch = '+' then
 	get_ch()
     end if
@@ -167,7 +194,7 @@ function get_number()
 		get_ch()
 	    else
 		if ndigits > 0 then
-		    return {GET_SUCCESS, sign * mantissa}
+                    return {GET_SUCCESS, sign * mantissa}
 		else
 		    return {GET_FAIL, 0}
 		end if
@@ -245,8 +272,11 @@ function Get()
 -- and return {error_flag, value}
 -- Note: ch is "live" at entry and exit of this routine
     sequence s, e
+    integer e1
 
-    skip_blanks()
+    while find(ch, white_space) do
+	get_ch()
+    end while
 
     if find(ch, START_NUMERIC) then
 	return get_number()
@@ -263,15 +293,25 @@ function Get()
 	
 	while TRUE do
 	    e = Get() -- read next element
-	    if e[1] != GET_SUCCESS then
+	    e1=e[1]
+            if e1 = GET_SUCCESS then
+        	s = append(s, e[2])
+            elsif e1 != GET_IGNORE then
 		return e
 	    end if
-	    s = append(s, e[2])
 	    skip_blanks()
 	    if ch = '}' then
 		get_ch()
 		return {GET_SUCCESS, s}
-	    elsif ch != ',' then
+	    elsif ch='-' then -- could be a comment before a comma
+	        get_ch()
+	        if ch='-' then
+                    return read_comment()
+	        else
+                    return {GET_FAIL, 0}
+	        end if
+	    end if
+            if ch != ',' then
 		return {GET_FAIL, 0}
 	    end if
 	    get_ch() -- skip comma
@@ -296,70 +336,101 @@ integer leading_whitespace
 
 function Get2()
 -- read a Euphoria data object as a string of characters
--- and return {error_flag, value} unless the record_whitespace flag is set, 
+-- and return {error_flag, value} unless the record_whitespace flag is set,
 -- which only happens on the first call of Get() by value(). In that case, the total
 -- number of characters interpreted and the number of leading whitespace characters are
 -- also returned.
 -- Note: ch is "live" at entry and exit of this routine
     sequence s, e
+    integer e1
+                      
+    -- init
+    string_next = 1
+    get_ch()
+    while find(ch, white_space) do
+	get_ch()
+    end while
 
-    skip_blanks()
     if ch = -1 then -- string is made of whitespace only
 	return {GET_EOF, 0,string_next-1,string_next-1}
     end if
 
     leading_whitespace = string_next-2 -- index of the last whitespace: string_next points past the first non whitespace
 
-    if find(ch, START_NUMERIC) then
-	e = get_number()
+    while 1 do
+        if find(ch, START_NUMERIC) then
+            e = get_number()
+       	    if e[1] != GET_IGNORE then -- either a number or something illegal was read, so exit: the other goto
+                return e & {string_next-1,leading_whitespace}
+            end if          -- else go read next item, startunt at top of loop: one of the goto
 
-    elsif ch = '{' then
-	-- process a sequence
-	s = {}
-	get_ch()
-	skip_blanks()
-	if ch = '}' then
-	    get_ch()
-	    return {GET_SUCCESS, s,string_next-1,leading_whitespace} -- empty sequence
-	end if
-	
-	while TRUE do
-	    e = Get() -- read next element, using standard function
-	    if e[1] != GET_SUCCESS then
-		return e & {string_next-1,leading_whitespace}
-	    end if
-	    s = append(s, e[2])
-	    skip_blanks()
-	    if ch = '}' then
-		get_ch()
-		return {GET_SUCCESS, s,string_next-1,leading_whitespace}
-	    elsif ch != ',' then
-		return {GET_FAIL, 0,string_next-1,leading_whitespace}
-	    end if
-	    get_ch() -- skip comma
-	end while
+        elsif ch = '{' then
+            -- process a sequence
+            s = {}
+            get_ch()
+            skip_blanks()
+            if ch = '}' then -- empty sequence
+                get_ch()
+                return {GET_SUCCESS, s,string_next-1,leading_whitespace} -- empty sequence
+            end if
+        	
+            while TRUE do -- read: comment(s),element,comment(s),comma and so on till it terminates or errors out
+                while 1 do -- read zero or more comments and an element
+                    e = Get() -- read next element, using standard function
+                    e1 = e[1]
+                    if e1 = GET_SUCCESS then
+                        s = append(s, e[2])
+                        exit  -- element read and added to result
+                    elsif e1 != GET_IGNORE then
+                        return e & {string_next-1,leading_whitespace}
+                	-- else it was a comment, keep going
+                    end if
+                end while
+                
+                while 1 do -- now read zero or more post element comments
+                    skip_blanks()
+                    if ch = '}' then
+                        get_ch()
+      		        return {GET_SUCCESS, s,string_next-1,leading_whitespace}
+       	            elsif ch!='-' then 
+                        exit
+                    else -- comment starts after item and before comma
+                        e = get_number() -- reads anything starting witn '-'
+                        if e[1] != GET_IGNORE then  -- it wasn't a coment, this is illegal
+                            return {GET_FAIL, 0,string_next-1,leading_whitespace}
+                        end if
+                        -- read next comment or , or }
+                    end if
+        	end while
+                if ch != ',' then
+        	    return {GET_FAIL, 0,string_next-1,leading_whitespace}
+    	        end if
+        	get_ch() -- skip comma
+       	    end while
 
-    elsif ch = '\"' then
-	e = get_string()
+        elsif ch = '\"' then
+    	    e = get_string()
 
-    elsif ch = '\'' then
-	e = get_qchar()
+        elsif ch = '\'' then
+    	    e = get_qchar()
 
-    else
-	return {GET_FAIL, 0,string_next-1,leading_whitespace}
+        else
+    	    return {GET_FAIL, 0,string_next-1,leading_whitespace}
 
-    end if
-    return e & {string_next-1,leading_whitespace}
+        end if
+        
+    end while
+    
 end function
 
 global function get(integer file)
 -- Read the string representation of a Euphoria object 
 -- from a file. Convert to the value of the object.
--- Return {error_status, value}.
+-- Return {error_status, value,total # of characters,# leading whitespaces}.
+-- On error, the third element is the index at which the error condition was seen.
+-- Embedded comments inside sequence are now supported.
     input_file = file
     input_string = 0
-    string_next = 1
-    get_ch()
     return Get2()
 end function
 
@@ -369,9 +440,8 @@ global function value(sequence string)
 -- Trailing whitespace is not considered.
 -- Return {error_status, value,total # of characters,# leading whitespaces).
 -- On error, the third element is the index at which the error condition was seen.
+-- Embedded comments inside sequence are now supported.
     input_string = string
-    string_next = 1
-    get_ch()
     return Get2()
 end function
 
@@ -461,5 +531,3 @@ global function get_bytes(integer fn, integer n)
     end while   
     return s
 end function
-
-

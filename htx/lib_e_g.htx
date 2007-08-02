@@ -580,7 +580,7 @@ Each call to get() picks up where the previous call left off. For
  instance, a series of 5 calls to get() would be needed to read
  in:
 <P>
-99 5.2 {1,2,3} \"Hello\" -1
+"99 5.2 {1,2,3} \"Hello\" -1"
 <P>
 On the sixth and any subsequent call to get() you would see a
  GET_EOF status. If you had something like:
@@ -594,7 +594,8 @@ Multiple \"top-level\" objects in the input stream must be
  separated from each other with one or more \"whitespace\"
  characters (blank, tab, \r or \n). At the very least, a top
  level number must be followed by a white space from the following object.
- Whitespace is not necessary <b><i>within</i></b> a top-level object. 
+ Whitespace is not necessary <b><i>within</i></b> a top-level object. Comments, terminated by either '\n' or '\r',
+ are allowed anywhere inside sequences.
  A call to get() will read one entire top-level object, plus possibly one additional
  (whitespace) character. This extra whitespace does not count in 
  the returned character count."
