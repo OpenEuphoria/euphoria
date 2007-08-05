@@ -578,7 +578,7 @@ void RTFatal(char *msg)
 void InitFiles()
 /* initialize user files before executing */
 {
-    register int i;
+    int i;
 
     user_file[0].fptr = stdin;
     user_file[0].mode = EF_READ;
@@ -1157,7 +1157,7 @@ object x()
 object add(long a, long b)
 /* integer add */
 {
-    register long c;
+    long c;
 
     c = a + b;
     if (c + HIGH_BITS < 0)    
@@ -1169,7 +1169,7 @@ object add(long a, long b)
 object minus(long a, long b)
 /* integer subtract */
 {
-    register long c;
+    long c;
 
     c = a - b;
     if (c + HIGH_BITS < 0)
@@ -2039,18 +2039,16 @@ int compare(object a, object b)
 long find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-    register long length;
-    register object_ptr bp;
-    register object bv;
+    long length;
+    object_ptr bp;
+    object bv;
 
     if (!IS_SEQUENCE(b))
 	RTFatal("second argument of find() must be a sequence");
 
     b = SEQ_PTR(b);
-    length = b->length;
-    if (length == 0)
-	return 0;
     bp = b->base;
+    
     if (IS_ATOM_INT(a)) {
 	while (TRUE) {
 	    bv = *(++bp);
@@ -2059,18 +2057,20 @@ long find(object a, s1_ptr b)
 		    return bp - (object_ptr)b->base;
 	    }
 	    else if (bv == NOVALUE) {
-		break;
+		break;  // we hit the end marker
 	    }
 	    else if (compare(a, bv) == 0) {  /* not INT-INT case */
 		return bp - (object_ptr)b->base;
 	    }
 	}
     }
+    
     else if (IS_SEQUENCE(a)) {
 	long a_len;
 	
+	length = b->length;
 	a_len = SEQ_PTR(a)->length;
-	do {
+	while (length > 0) {
 	    bv = *(++bp);
 	    if (IS_SEQUENCE(bv)) {
 		if (a_len == SEQ_PTR(bv)->length) {
@@ -2079,16 +2079,21 @@ long find(object a, s1_ptr b)
 			return bp - (object_ptr)b->base;
 		}
 	    }
-	} while (--length > 0);
+	    length--;
+	}
     }
+    
     else {
-	do {
+	length = b->length;
+	while (length > 0) {
 	    /* a is ATOM double => not INT-INT case */
 	    if (compare(a, *(++bp)) == 0)
 		return bp - (object_ptr)b->base;
-	} while (--length > 0);
+	    length--;
+	}
     }
-    return(0); 
+    
+    return 0; 
 }
 
 
@@ -2096,30 +2101,36 @@ long e_match(s1_ptr a, s1_ptr b)
 /* find sequence a as a slice within sequence b 
    sequence a may not be empty */
 {
-    register long ntries, len_remaining;
+    long ntries, len_remaining;
     object_ptr a1, b1, bp;
-    register object_ptr ai, bi;
+    object_ptr ai, bi;
     object av, bv;
     long lengtha, lengthb;
 
     if (!IS_SEQUENCE(a))
 	RTFatal("first argument of match() must be a sequence");
+    
     if (!IS_SEQUENCE(b))
 	RTFatal("second argument of match() must be a sequence");
+    
     a = SEQ_PTR(a);
     b = SEQ_PTR(b);
+    
     lengtha = a->length;
     if (lengtha == 0)
 	RTFatal("first argument of match() must be a non-empty sequence");
+    
     lengthb = b->length;
     b1 = b->base;
     bp = b1;
     a1 = a->base;
     ntries = lengthb - lengtha + 1;
+    
     while (--ntries >= 0) {
 	ai = a1;
 	bi = bp;
 	len_remaining = lengtha;
+	
 	do {
 	    ai++;
 	    bi++;
@@ -2136,10 +2147,11 @@ long e_match(s1_ptr a, s1_ptr b)
 		}
 	    }
 	    if (--len_remaining == 0)
-		return(bp - b1 + 1); /* perfect match */
-	} while(TRUE);
+		return bp - b1 + 1; /* perfect match */
+	} while (TRUE);
     }
-    return(0); /* couldn't match */
+    
+    return 0; /* couldn't match */
 }
 
 #ifndef ERUNTIME
@@ -2275,10 +2287,10 @@ void RHS_Slice(s1_ptr a, object start, object end)
 void AssignSlice(object start, object end, s1_ptr val)
 /* assign to a sliced variable */
 {
-    register s1_ptr *seq_ptr, sp;
+    s1_ptr *seq_ptr, sp;
     long startval, endval, length;
-    register object_ptr s_elem;
-    register object_ptr v_elem;
+    object_ptr s_elem;
+    object_ptr v_elem;
 
     seq_ptr = assign_slice_seq; /* "4th" arg */   
 
@@ -2368,7 +2380,7 @@ void MakeCString(char *s, object obj)
 /* make an atom or sequence into a C string */
 /* N.B. caller must allow one extra for the null terminator */
 {
-    register object_ptr elem;
+    object_ptr elem;
     object x;
 
     if (IS_ATOM(obj)) 
@@ -2567,10 +2579,10 @@ void EClose(object a)
 object EGets(object file_no)
 /* reads a line from a file for the user (GETS) */
 {
-    register int i, c;
-    register FILE *f;
-    register char *line_ptr;
-    register object_ptr obj_ptr;
+    int i, c;
+    FILE *f;
+    char *line_ptr;
+    object_ptr obj_ptr;
     int len;
     object result_line;
     
@@ -3011,9 +3023,9 @@ void StdPrint(int fn, object a, int new_lines)
 void EPuts(object file_no, object obj)
 /* print out a string of characters */
 {
-    register object_ptr elem;
-    register char *out_ptr;
-    register long n;
+    object_ptr elem;
+    char *out_ptr;
+    long n;
     int c, size;
     long len;
     FILE *f;
@@ -3075,12 +3087,12 @@ void EPuts(object file_no, object obj)
 static object_ptr FormatItem(f, cstring, f_elem, f_last, v_elem)
 /* print one format item from printf */
 FILE *f;
-register char *cstring;
-register object_ptr f_elem;
+char *cstring;
+object_ptr f_elem;
 object_ptr f_last;
 object_ptr v_elem;
 {
-    register int flen;
+    int flen;
     char c;
     long dval;
     unsigned long uval;
@@ -3910,7 +3922,7 @@ static void show_prof_line(FILE *f, long i)
 void ProfileCommand()
 /* display the execution profile */
 {
-    register long i;
+    long i;
     FILE *f;
 
     f = fopen("ex.pro", "w");
@@ -4280,9 +4292,9 @@ void shift_args(int argc, char *argv[])
 object Command_Line()
 /* return a sequence of command line strings */
 {
-    register int i;
-    register object_ptr obj_ptr;
-    register char **argv;
+    int i;
+    object_ptr obj_ptr;
+    char **argv;
     s1_ptr result;
 
 #ifndef ERUNTIME
@@ -4602,98 +4614,128 @@ int mgetch(int wait)
 long find_from(object a, s1_ptr b, object c)
 /* find object a as an element of sequence b starting from c*/
 {
-    register long length;
-    register object_ptr bp;
-    register object bv;
+    long length;
+    object_ptr bp;
+    object bv;
 
     if (!IS_SEQUENCE(b))
-		RTFatal("second argument of find_from() must be a sequence");
+	RTFatal("second argument of find_from() must be a sequence");
 
-	if (!IS_ATOM_INT(c))
-		RTFatal("third argument of find_from() must be an integer");
-		
     b = SEQ_PTR(b);
     length = b->length;
-    if (length == 0)
-		return 0;
-		
 
-	if (length < c) // should this be an error instead?
-		return 0;
+    // same rules as the lower limit on a slice
+    if (IS_ATOM_INT(c)) {
+	;
+    }
+    else if (IS_ATOM_DBL(c)) {
+	c = (long)(DBL_PTR(c)->dbl);
+    }
+    else
+	RTFatal("third argument of find_from() must be an atom");
+		
+    // we allow c to be $+1, just as we allow the lower limit
+    // of a slice to be $+1, i.e. the empty sequence
+    if (c < 1 || c > length+1) {
+	sprintf(TempBuff, "third argument of find_from() is out of bounds (%ld)", c);
+	RTFatal(TempBuff);
+    }
 		
     bp = b->base;
     bp += c - 1;
-    length -= c - 1;
     if (IS_ATOM_INT(a)) {
-		while (TRUE) {
-		    bv = *(++bp);
-		    if (IS_ATOM_INT(bv)) {
-				if (a == bv) 
-				    return bp - (object_ptr)b->base;
-		    }
-		    else if (bv == NOVALUE) {
-				break;
-		    }
-		    else if (compare(a, bv) == 0) {  /* not INT-INT case */
-				return bp - (object_ptr)b->base;
-		    }
-		}
+	while (TRUE) {
+	    bv = *(++bp);
+	    if (IS_ATOM_INT(bv)) {
+		if (a == bv) 
+		    return bp - (object_ptr)b->base;
+	    }
+	    else if (bv == NOVALUE) {
+		break; // we hit the end marker
+	    }
+	    else if (compare(a, bv) == 0) {  /* not INT-INT case */
+		return bp - (object_ptr)b->base;
+	    }
+	}
     }
+    
     else if (IS_SEQUENCE(a)) {
-		long a_len;
+	long a_len;
 		
-		a_len = SEQ_PTR(a)->length;
-		do {
-		    bv = *(++bp);
-		    if (IS_SEQUENCE(bv)) {
-				if (a_len == SEQ_PTR(bv)->length) {
-				    /* a is SEQUENCE => not INT-INT case */
-				    if (compare(a, bv) == 0)
-						return bp - (object_ptr)b->base;
-				}
-		    }
-		} while (--length > 0);
-    }
-    else {
-		do {
-		    /* a is ATOM double => not INT-INT case */
-		    if (compare(a, *(++bp)) == 0)
+	length -= c - 1;
+	a_len = SEQ_PTR(a)->length;
+	while (length > 0) {
+	    bv = *(++bp);
+	    if (IS_SEQUENCE(bv)) {
+		if (a_len == SEQ_PTR(bv)->length) {
+		    /* a is SEQUENCE => not INT-INT case */
+		    if (compare(a, bv) == 0)
 			return bp - (object_ptr)b->base;
-		} while (--length > 0);
+		}
+	    }
+	    length--;
+	}
     }
-    return(0); 
+    
+    else {
+	length -= c - 1;
+	while (length > 0) {
+	    /* a is ATOM double => not INT-INT case */
+	    if (compare(a, *(++bp)) == 0)
+		return bp - (object_ptr)b->base;
+	    length--;
+	}
+    }
+    
+    return 0; 
 }
 
 e_match_from(s1_ptr a, s1_ptr b, object c)
 /* find sequence a as a slice within sequence b 
    sequence a may not be empty */
 {
-    register long ntries, len_remaining;
+    long ntries, len_remaining;
     object_ptr a1, b1, bp;
-    register object_ptr ai, bi;
+    object_ptr ai, bi;
     object av, bv;
     long lengtha, lengthb;
 
     if (!IS_SEQUENCE(a))
-		RTFatal("first argument of match_from() must be a sequence");
+	RTFatal("first argument of match_from() must be a sequence");
+    
     if (!IS_SEQUENCE(b))
-		RTFatal("second argument of match_from() must be a sequence");
-	if (!IS_ATOM_INT(c))
-		RTFatal("third argument of match_from() must be an integer");
+	RTFatal("second argument of match_from() must be a sequence");
+    
     a = SEQ_PTR(a);
     b = SEQ_PTR(b);
+    
     lengtha = a->length;
     if (lengtha == 0)
-		RTFatal("first argument of match_from() must be a non-empty sequence");
+	RTFatal("first argument of match_from() must be a non-empty sequence");
+    
+    // same rules as the lower limit on a slice
+    if (IS_ATOM_INT(c)) {
+	;
+    }
+    else if (IS_ATOM_DBL(c)) {
+	c = (long)(DBL_PTR(c)->dbl);
+    }
+    else
+	RTFatal("third argument of match_from() must be an atom");
+		
     lengthb = b->length;
 
-    if (lengthb < c )  // should this be an error?
-	return (0);
+    // we allow c to be $+1, just as we allow the lower limit
+    // of a slice to be $+1, i.e. the empty sequence
+    if (c < 1 || c > lengthb+1) {
+	sprintf(TempBuff, "third argument of match_from() is out of bounds (%ld)", c);
+	RTFatal(TempBuff);
+    }
 
     b1 = b->base;
     bp = b1 + c - 1;
     a1 = a->base;
-    ntries = lengthb - lengtha  - c + 2;
+    ntries = lengthb - lengtha - c + 2; // will be max 0, when c is lengthb+1
     while (--ntries >= 0) {
 	ai = a1;
 	bi = bp;
@@ -4716,7 +4758,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 	    }
 	    if (--len_remaining == 0)
 		return(bp - b1 + 1); /* perfect match */
-	} while(TRUE);
+	} while (TRUE);
     }
-    return(0); /* couldn't match */
+    return 0; /* couldn't match */
 }
