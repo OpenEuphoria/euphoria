@@ -605,7 +605,7 @@ it repeatedly, before the lock request is granted.
 <td><a href="lib_e_g.htm#find">find</a>,
   <a href="lib_e_g.htm#find">find_from</a>,
 <a href="lib_c_d.htm#compare">compare</a>,
-<a href="lib_e_g.htm#find">match_from</a>,
+<a href="lib_e_g.htm#match_from">match_from</a>,
 <a href="lib_u_z.htm#wildcard_match">wildcard_match</a>
 </td></tr>
 
@@ -624,9 +624,11 @@ it repeatedly, before the lock request is granted.
 </td></tr>
 
  <tr><td valign=top><b>Description:</b></td>
-<td>  Try to match s1 against some slice of s2, starting from element i2. If successful, 
- return the element number of s2 where the (first) matching slice begins,
- else return 0. 
+<td>Try to match s1 against some slice of s2, starting from index i2. 
+ If successful, return the element number of s2 where the (first) 
+ matching slice begins, else return 0. i2 may have any value from
+ 1 to the length of s plus 1. (Just like the first index of a slice
+ of s.)
 </td></tr>
 
 <tr><td valign=top><b>Example:</b></td>
@@ -641,8 +643,8 @@ it repeatedly, before the lock request is granted.
 
 <tr><td valign=top><b>See Also:</b></td>
 <td><a href="lib_e_g.htm#find">find</a>,
-  <a href="lib_e_g.htm#find">find_from</a>,
-  <a href="lib_h_o.htm#find">match</a>,
+  <a href="lib_e_g.htm#find_from">find_from</a>,
+  <a href="lib_h_o.htm#match">match</a>,
 <a href="lib_c_d.htm#compare">compare</a>,
 <a href="lib_u_z.htm#wildcard_match">wildcard_match</a>
 </td></tr>
