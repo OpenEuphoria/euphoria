@@ -2327,9 +2327,11 @@
 
  Syntax:      i1 = find_from(x, s, i2)
 
- Description: Find x as an element of s, starting with element i2. If
+ Description: Find x as an element of s. Start the search at index i2. If
               successful, return the index of the first element of s that
-              matches. If unsuccessful return 0.
+              matches. If unsuccessful return 0. i2 may have any value from 1
+              to the length of s plus 1. (Analogous to the first index of a
+              slice of s).
 
  Example 1:
 
@@ -3415,9 +3417,11 @@
 
  Syntax:      i1 = match_from(s1, s2, i2)
 
- Description: Try to match s1 against some slice of s2, starting from element
-              i2. If successful, return the element number of s2 where the
-              (first) matching slice begins, else return 0.
+ Description: Try to match s1 against some slice of s2, starting from index i2.
+              If successful, return the element number of s2 where the (first)
+              matching slice begins, else return 0. i2 may have any value from
+              1 to the length of s plus 1. (Just like the first index of a
+              slice of s.)
 
  Example:
 
