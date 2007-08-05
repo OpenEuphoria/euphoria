@@ -645,7 +645,16 @@ object x, y
     if find('D', x) != 4 then
 	abort()
     end if
-    if find_from('D', x, 10) != length(x) then
+    if find("ABC", {"", 0.0, 0, "ABC"}) != 4 then
+	abort()
+    end if
+    if find(0.0, {"", 0.0, 0, "ABC"}) != 2 then
+	abort()
+    end if
+    if find_from('D', x, 10.0) != length(x) then
+	abort()
+    end if
+    if find_from('D', x, length(x)+1) != 0 then
 	abort()
     end if
     if match("EFGH", x) != 5 then
