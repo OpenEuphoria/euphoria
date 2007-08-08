@@ -19,7 +19,7 @@ global procedure BackEnd(integer il_file)
 -- Offsets are used in some places rather than pointers.
 -- They will be replaced in the back-end.
     atom addr, st, tc, sc, nm, ms, tlt, slt, sl, src, lit, fn, entry_addr
-    atom e_addr, l_addr, no_name, sli
+    atom e_addr, l_addr, no_name, sli, include_info, include_node, include_array
     integer string_size, short, size, repcount
     sequence lit_string, other_strings
     object entry
@@ -229,7 +229,21 @@ global procedure BackEnd(integer il_file)
 	poke(fn, 0)
 	fn += 1
     end for
-
-    machine_proc(65, {st, sl, ms, lit})
+    
+    -- include info
+    include_info = allocate( 8 )
+    include_node = allocate( 8 * (1 + length( file_include ) )) 
+    poke4( include_info, length( file_include ) & include_node )
+    include_node += 8
+    for i = 1 to length( file_include ) do
+    	
+    	include_array = allocate( 4 * length( file_include[i] ) )
+    	poke4( include_array, (file_include[i] ) )
+    	poke4( include_node, {length(file_include[i]), include_array })
+    	
+    	include_node += 8
+    end for
+    
+    machine_proc(65, {st, sl, ms, lit, include_info})
 end procedure
 

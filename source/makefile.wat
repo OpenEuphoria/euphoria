@@ -308,5 +308,3 @@ be_symtab.obj : ./be_symtab.c
 
 be_w.obj : ./be_w.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
-
-

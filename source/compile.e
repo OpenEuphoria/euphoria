@@ -4852,6 +4852,7 @@ global procedure BackEnd(atom ignore)
     integer c, tp_count
     object xterm
     boolean use_hex
+    integer max_len
     
     close(c_code)
     emit_c_output = FALSE
@@ -5042,13 +5043,36 @@ global procedure BackEnd(atom ignore)
 	c_stmt0("stack_base = (char *)&_0;\n")
     end if
     
+    -- include path initialization
+    c_puts("\n")
+    max_len = 0
+    for i = 1 to length(file_include) do
+    	if length(file_include[i]) > max_len then
+    	    max_len = length(file_include[i])
+    	end if
+    end for
+    c_stmt0(sprintf("_02 = (int**) malloc( 4 * %d );\n", length(file_include) + 1 ))
+    c_stmt0("_02[0] = (int*) malloc( 4 );\n" )
+    c_stmt0(sprintf("_02[0][0] = %d;\n", length(file_include) ))
+
+    for i = 1 to length(file_include) do
+    	c_stmt0(sprintf("_02[%d] = (int*) malloc( 4 * %d );\n", {i, length(file_include[i]) + 1} ))
+    	c_stmt0(sprintf("_02[%d][0] = %d;\n", {i, length(file_include[i])}))
+    	
+    	for j = 1 to length(file_include[i]) do
+	    c_stmt0(sprintf("_02[%d][%d] = %d;\n", {i,j, file_include[i][j]}) )
+	end for
+    	
+    end for
+    c_puts("\n")
+    
     -- fail safe mechanism in case 
     -- Complete Edition library gets out by mistake
     if EWINDOWS then
 	if atom(wat_path) then
-	    c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
+	    c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
 	else
-	    c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
+	    c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
 	end if
     else
 	c_puts("#ifdef CLK_TCK\n")
@@ -5118,11 +5142,10 @@ global procedure BackEnd(atom ignore)
     DeclareNameSpaceList()
     
     c_stmt0("void init_literal()\n{\n")
-    
+
     -- initialize the (non-integer) literals
     tp = literal_init
     c_stmt0("extern double sqrt();\n")
-    
     tp_count = 0
     
     while tp != 0 do

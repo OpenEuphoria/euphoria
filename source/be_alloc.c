@@ -405,7 +405,7 @@ char *EMalloc(unsigned long nbytes)
     int alignment;
     int min_align;
 
-#ifdef ELINUX
+#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
 
 	return malloc(nbytes);
 #else
@@ -516,7 +516,7 @@ void EFree(unsigned char *p)
     char msg[80];
 #endif
 
-#ifdef ELINUX
+#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
 	free(p);
 	return;
 #else
@@ -627,7 +627,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
     char *q;
     unsigned long oldsize;
 
-#ifdef ELINUX 
+#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
 
     // we always have 8-alignment
     return realloc(orig, newsize);  // should do bookkeeping on block size?

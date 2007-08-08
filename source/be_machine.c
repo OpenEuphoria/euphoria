@@ -4532,13 +4532,14 @@ object start_backend(object x)
     
     x_ptr = SEQ_PTR(x);
 
-    if (IS_ATOM(x) || x_ptr->length != 4)
-	RTFatal("BACKEND requires a sequence of length 4");
+    if (IS_ATOM(x) || x_ptr->length != 5)
+	RTFatal("BACKEND requires a sequence of length 5");
 
     fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
     fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
     fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
     fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
+    fe.includes = (struct include_info *) get_pos_int(w, *(x_ptr->base+5));
 
 #if defined(ELINUX) || defined(EDJGPP)
     do_exec(NULL);  // init jumptable

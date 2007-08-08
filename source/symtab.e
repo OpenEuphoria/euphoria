@@ -472,17 +472,34 @@ global procedure MarkTargets(symtab_index s, integer attribute)
     end if
 end procedure
 
-global sequence dup_globals
+global sequence dup_globals, in_include_path
+
+function symbol_in_include_path( symtab_index sym, integer check_file  )
+	integer file_no
+	file_no = SymTab[sym][S_FILE_NO]
+	if file_no = check_file or find( file_no, file_include[check_file] ) then
+		return 1
+	else
+		for i = 1 to length( file_include[check_file] ) do
+			if symbol_in_include_path( sym, file_include[check_file][i] ) then
+				return 1
+			end if
+		end for
+	end if
+	return 0
+end function
 
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL. 
-    integer hashval, scope, defined
+    integer hashval, scope, defined, ix
     symtab_index st_ptr
     token tok, gtok
 
     dup_globals = {}
+    in_include_path = {}
+    
     hashval = hashfn(word)
     st_ptr = buckets[hashval] 
     
@@ -511,7 +528,9 @@ global function keyfind(sequence word, integer file_no)
 		    end if
 		    -- found global in another file 
 		    gtok = tok
-		    dup_globals &= st_ptr               
+		    dup_globals &= st_ptr
+		    in_include_path &= symbol_in_include_path( st_ptr, current_file_no )
+		    
 		    -- continue looking for more globals with same name 
 		
 		elsif scope = SC_LOCAL then 
@@ -547,8 +566,8 @@ global function keyfind(sequence word, integer file_no)
 		end if
 	    
 	    else 
-		-- qualified - must match global symbol in specified file 
-		if file_no = SymTab[tok[T_SYM]][S_FILE_NO] and
+		-- qualified - must match global symbol in specified file (or be in the file's include path)
+		if (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no)) and
 		    SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL then
 		       
 		    if BIND then
@@ -564,6 +583,24 @@ global function keyfind(sequence word, integer file_no)
 	
 	st_ptr = SymTab[st_ptr][S_SAMEHASH]
     end while
+    
+    if length(dup_globals) > 1 and find( 1, in_include_path ) then
+    	-- filter out based on include path
+    	ix = 1
+	while ix <= length(dup_globals) do
+    	    if in_include_path[ix] then
+    	    	ix += 1
+    	    else
+    	        dup_globals = dup_globals[1..ix-1] & dup_globals[ix+1..$]
+    	        in_include_path = in_include_path[1..ix-1] & in_include_path[ix+1..$]
+    	    end if
+	end while
+	
+	if length(dup_globals) = 1 then
+		st_ptr = dup_globals[1]
+		gtok = {SymTab[st_ptr][S_TOKEN], st_ptr}
+	end if
+    end if
     
     if length(dup_globals) = 1 then
 	-- matched exactly one global

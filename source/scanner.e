@@ -480,6 +480,10 @@ procedure IncludePush()
 		SymTab[new_include_space][S_OBJ] = i -- but note any namespace
 	    end if
 	    close(new_file)
+	    if not find( i, file_include[current_file_no] ) then
+	    	-- don't reparse the file, but note that it was included here
+	    	file_include[current_file_no] &= i
+	    end if
 	    return -- ignore it  
 	end if
     end for
@@ -498,6 +502,10 @@ procedure IncludePush()
 			       OpTypeCheck,
 			       OpProfileTime,
 			       OpProfileStatement})
+			       
+    file_include = append( file_include, {} )
+    file_include[current_file_no] &= length( file_include )
+    
     src_file = new_file
     file_start_sym = last_sym
     if current_file_no >= MAX_FILE then

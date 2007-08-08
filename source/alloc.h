@@ -20,7 +20,7 @@ struct block_list {
 #ifdef HEAP_CHECK 
 #define FreeD(p) freeD(p)
 #else
-#ifdef ELINUX
+#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
 #define FreeD(p) free(p);
 #else
 #define FreeD(p){ if (eu_dll_exists && cache_size > CACHE_LIMIT) { \
@@ -57,3 +57,8 @@ struct block_list {
 #endif
 #endif
 
+#ifdef ESIMPLE_MALLOC
+#define EMalloc(size) malloc(size)
+#define EFree(ptr) free(ptr)
+#define ERealloc(orig, newsize) realloc(orig, newsize)
+#endif

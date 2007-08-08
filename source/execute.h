@@ -193,11 +193,22 @@ struct arg_info {
     int convention;       // calling convention
 };
 
+struct include_node {
+	int size;
+	int * file_no;
+};
+
+struct include_info {
+	int size;
+	struct include_node * nodes;
+};
+
 struct IL {
     struct symtab_entry *st;
     struct sline *sl;
     int *misc;
     char *lit;
+    struct include_info * includes;
 };
 
 // Task Control Block - sync with euphoria\include\euphoria.h

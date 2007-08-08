@@ -255,7 +255,9 @@ end type
 
 global object eudir           -- path to Euphoria directory 
 global sequence file_name     -- names of all the source files 
+global sequence file_include  -- remember which files were included where
 file_name = {}
+file_include = {{}}
 global sequence file_name_entered -- interactively entered file name
 file_name_entered = ""
 global integer shroud_only   -- making an unbound .il file

@@ -3493,7 +3493,23 @@ void RTInternal(char *msg)
 
 struct routine_list *rt00;
 struct ns_list *rt01;
+int ** rt02;
 void *xstdin;
+
+int file_in_include_path( int using, int target )
+/* Checks to see if the target file is in the include path for using */
+{
+    int i;
+    int node_file;
+    if( using == target ) return 1;
+    
+    for( i = 1; i <= rt02[using][0]; i++ ){
+	node_file = rt02[using][i];	
+	if( target == node_file || file_in_include_path( node_file, target ) )
+	    return 1;
+    }
+    return 0;
+}
 
 int CRoutineId(int seq_num, int current_file_no, object name)
 /* Routine_id for compiled code. 
@@ -3507,6 +3523,9 @@ int CRoutineId(int seq_num, int current_file_no, object name)
     char *simple_name;
     char *p;
     char *ns;
+    int in_include_path;
+    int out_of_path_found;
+    int in_path_found;
     
     if (IS_ATOM(name))
 	return ATOM_M1;
@@ -3565,7 +3584,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	i = 0;
 	ns_num = -ns_num; // to match global only
 	while (rt00[i].seq_num <= seq_num) {
-	    if (rt00[i].file_num == ns_num &&
+	    if ((rt00[i].file_num == ns_num || file_in_include_path(-ns_num, -rt00[i].file_num))  &&
 		strcmp(simple_name, rt00[i].name) == 0)
 		return i;
 	    i++;
@@ -3592,27 +3611,39 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	/* then look for unique global symbol */
 	i = 0;
 	found = ATOM_M1;
+	out_of_path_found = 0;
+	in_path_found = 0;
 	while (rt00[i].seq_num <= seq_num) {
+	    
 	    if (rt00[i].file_num < 0 &&
 		strcmp(routine_string, rt00[i].name) == 0) {
-		if (found == ATOM_M1)
+		in_include_path = file_in_include_path( current_file_no, -rt00[i].file_num );
+		if (in_include_path) {
 		    found = i;
-		else
-		    return ATOM_M1; // multiple declarations
+		    in_path_found++;
+		}
+		else{
+		    out_of_path_found++;
+		    if(!in_path_found) found = i;
+		}
 	    }
 	    i++;
 	}
 	
+	if( in_path_found != 1  && ((in_path_found + out_of_path_found) != 1) )
+	    return ATOM_M1;
 	return found;
+
     }
 }
 
-void eu_startup(struct routine_list *rl, struct ns_list *nl, int code, 
+void eu_startup(struct routine_list *rl, struct ns_list *nl, int **ip, int code, 
 		int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
     rt00 = rl;
     rt01 = nl;
+    rt02 = ip;
     clocks_per_sec = cps;
     clk_tck = clk;
     xstdin = (void *)stdin;

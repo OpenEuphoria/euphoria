@@ -149,6 +149,26 @@ symtab_ptr Locate(int *pc)
     return NULL; 
 }
 
+int symbol_in_include_path( symtab_ptr sym, int check_file )
+/* Determines if sym is in the include path of file #check_file */
+{
+    int i;
+    int node_file;
+    int file_no = sym->file_no;
+    struct include_node * node;
+    
+    if( file_no == check_file ) return 1;
+    
+    node = fe.includes->nodes + check_file;
+    
+    for( i = 0; i < node->size; i++ ){
+	node_file = *( node->file_no + i);
+	if( file_no == node_file || symbol_in_include_path( sym, node_file ) )
+	    return 1;
+    }
+    return 0;
+}
+
 symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen)
 /* Look up a name (routine or var) in the symbol table at runtime.
    The name must have been defined earlier in the source than
@@ -163,6 +183,9 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
     char *p;
     char *ns;
     int ns_file;
+    int found_in_path;
+    int found_outside_path;
+    int s_in_include_path;
 
     if (pc == NULL) {
 	proc = routine;
@@ -219,7 +242,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	
 	/* find global name in ns file */
 	for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
-	    if (s->file_no == ns_file && 
+	    if ((s->file_no == ns_file || symbol_in_include_path( s, ns_file) ) && 
 		s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {
 		return s;
 	    }
@@ -257,16 +280,23 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	global_found = NULL;
 	for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
 	    if (s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {  
-		if (global_found == NULL)
+		
+		s_in_include_path = symbol_in_include_path( s, routine->file_no );
+		if ( s_in_include_path){
 		    global_found = s;
-		else
-		    return NULL; // 2nd global with same name
+		    found_in_path++;
+		}
+		else{
+		    if(!found_in_path) global_found = s;
+		    found_outside_path;
+		}
 	    }
 	} 
-
+	if(found_in_path != 1 && ((found_in_path + found_outside_path) != 1) ) return NULL;
 	return global_found;
     }
 }
+
 
 int RoutineId(symtab_ptr current_sub, object name, int file_no)
 /* Look up routine name in symbol table.
