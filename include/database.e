@@ -94,7 +94,13 @@ integer current_db
 atom current_table
 sequence db_names, db_file_nums, db_lock_methods
 integer current_lock
-
+sequence SLASH_CHAR
+if platform() = LINUX then
+    SLASH_CHAR = "/"
+else
+    SLASH_CHAR = "\\/"
+end if
+ 
 current_db = -1
 current_table = -1
 
@@ -1296,7 +1302,7 @@ function name_only(sequence s)
     
     filename = ""
     for i = length(s) to 1 by -1 do
-	if s[i] = '\\' then
+	if find(s[i], SLASH_CHAR) then
 	    exit
 	end if
 	filename = s[i] & filename
