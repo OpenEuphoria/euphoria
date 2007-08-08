@@ -410,17 +410,17 @@ function Get2()
 
         elsif ch = '\"' then
     	    e = get_string()
-
+            return e & {string_next-1,leading_whitespace}
         elsif ch = '\'' then
     	    e = get_qchar()
-
+            return e & {string_next-1,leading_whitespace}
         else
     	    return {GET_FAIL, 0,string_next-1,leading_whitespace}
 
         end if
         
     end while
-    
+
 end function
 
 global function get(integer file)
