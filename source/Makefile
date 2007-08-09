@@ -64,7 +64,8 @@ EU_TRANSLATOR_OBJECTS = \
 	misc.o \
 	sort.o \
 	symtab_0.o \
-	traninit.o
+	traninit.o \
+	wildcard.o
 
 EU_INTERPRETER_OBJECTS =  \
 	backend.o \
@@ -275,6 +276,9 @@ compil_9.o :   ./compile.e
 	$(CC) $(FE_FLAGS) $*.c
 
 traninit.o :   ./traninit.e
+	$(CC) $(FE_FLAGS) $*.c
+
+wildcard.o : ./main-.o
 	$(CC) $(FE_FLAGS) $*.c
 
 misc.o :   ./main-.o 
