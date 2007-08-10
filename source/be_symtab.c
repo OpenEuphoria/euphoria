@@ -30,6 +30,7 @@ extern unsigned char TempBuff[];
 extern int gline_number;
 extern struct IL fe;
 extern int SymTabLen; // avoid > 3 args
+extern unsigned default_heap;
 
 /**********************/
 /* Exported variables */

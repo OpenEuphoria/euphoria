@@ -31,7 +31,8 @@ EU_TRANSLATOR_FILES = &
 	c_decl.e &
 	c_out.e &
 	global.e &
-	traninit.e
+	traninit.e 
+	
 
 EU_TRANSLATOR_OBJECTS = &
 	ec.obj &
@@ -55,7 +56,8 @@ EU_TRANSLATOR_OBJECTS = &
 	misc.obj &
 	sort.obj &
 	symtab_0.obj &
-	traninit.obj
+	traninit.obj &
+	wildcard.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	backend.obj &
@@ -271,6 +273,9 @@ get.obj :  .MULTIPLE ./get.c
 	$(CC) $(FE_FLAGS) $[@
 
 sort.obj :  .MULTIPLE ./sort.c
+	$(CC) $(FE_FLAGS) $[@
+
+wildcard.obj :  .MULTIPLE ./wildcard.c
 	$(CC) $(FE_FLAGS) $[@
 
 be_execute.obj : ./be_execute.c
