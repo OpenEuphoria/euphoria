@@ -474,14 +474,18 @@ end procedure
 
 global sequence dup_globals, in_include_path
 
-function symbol_in_include_path( symtab_index sym, integer check_file  )
+function symbol_in_include_path( symtab_index sym, integer check_file, sequence path_checked  )
 	integer file_no
 	file_no = SymTab[sym][S_FILE_NO]
+	if find(check_file, path_checked ) then
+	    return 0
+	end if
+	path_checked &= check_file
 	if file_no = check_file or find( file_no, file_include[check_file] ) then
 		return 1
 	else
 		for i = 1 to length( file_include[check_file] ) do
-			if symbol_in_include_path( sym, file_include[check_file][i] ) then
+			if symbol_in_include_path( sym, file_include[check_file][i], path_checked ) then
 				return 1
 			end if
 		end for
@@ -529,7 +533,7 @@ global function keyfind(sequence word, integer file_no)
 		    -- found global in another file 
 		    gtok = tok
 		    dup_globals &= st_ptr
-		    in_include_path &= symbol_in_include_path( st_ptr, current_file_no )
+		    in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
 		    
 		    -- continue looking for more globals with same name 
 		
@@ -567,7 +571,7 @@ global function keyfind(sequence word, integer file_no)
 	    
 	    else 
 		-- qualified - must match global symbol in specified file (or be in the file's include path)
-		if (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no)) and
+		if (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
 		    SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL then
 		       
 		    if BIND then

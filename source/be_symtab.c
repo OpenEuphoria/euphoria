@@ -149,23 +149,36 @@ symtab_ptr Locate(int *pc)
     return NULL; 
 }
 
-int symbol_in_include_path( symtab_ptr sym, int check_file )
+int symbol_in_include_path( symtab_ptr sym, int check_file, char * checked_file )
 /* Determines if sym is in the include path of file #check_file */
 {
     int i;
     int node_file;
     int file_no = sym->file_no;
+    char * files;
     struct include_node * node;
+    
     
     if( file_no == check_file ) return 1;
     
     node = fe.includes->nodes + check_file;
+    files = NULL;
+    if( checked_file == NULL ){
+    	files = malloc( fe.misc[0] +1 );
+    	memset( files, 0, fe.misc[0] + 1 );
+    	checked_file = files;
+    }
+    else if( checked_file[check_file] ) return 0;
+    checked_file[check_file] = 1;
     
     for( i = 0; i < node->size; i++ ){
 	node_file = *( node->file_no + i);
-	if( file_no == node_file || symbol_in_include_path( sym, node_file ) )
+	if( file_no == node_file || symbol_in_include_path( sym, node_file, checked_file ) ){
+	    free(files);
 	    return 1;
+	}
     }
+    free(files);
     return 0;
 }
 
@@ -242,7 +255,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	
 	/* find global name in ns file */
 	for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
-	    if ((s->file_no == ns_file || symbol_in_include_path( s, ns_file) ) && 
+	    if ((s->file_no == ns_file || symbol_in_include_path( s, ns_file, NULL) ) && 
 		s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {
 		return s;
 	    }
@@ -278,10 +291,12 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 
 	/* try to match a single earlier GLOBAL symbol */
 	global_found = NULL;
+	found_in_path = 0;
+	found_outside_path = 0;
 	for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
 	    if (s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {  
 		
-		s_in_include_path = symbol_in_include_path( s, routine->file_no );
+		s_in_include_path = symbol_in_include_path( s, routine->file_no, NULL );
 		if ( s_in_include_path){
 		    global_found = s;
 		    found_in_path++;
@@ -292,7 +307,9 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		}
 	    }
 	} 
-	if(found_in_path != 1 && ((found_in_path + found_outside_path) != 1) ) return NULL;
+	if(found_in_path != 1 && ((found_in_path + found_outside_path) != 1) ){
+		return NULL;
+	}
 	return global_found;
     }
 }

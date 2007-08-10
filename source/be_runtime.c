@@ -3496,18 +3496,29 @@ struct ns_list *rt01;
 int ** rt02;
 void *xstdin;
 
-int file_in_include_path( int using, int target )
+int file_in_include_path( int using, int target, char * checked_files )
 /* Checks to see if the target file is in the include path for using */
 {
     int i;
     int node_file;
+    char * files;
+    files = NULL;
     if( using == target ) return 1;
-    
+    if( checked_files == NULL ){
+    	files = malloc( rt02[0][0] + 1 );
+    	memset( files, 0, rt02[0][0] );
+    	checked_files = files;
+    }
+    if(checked_files[using]) return 0;
+    checked_files[using] = 1;
     for( i = 1; i <= rt02[using][0]; i++ ){
 	node_file = rt02[using][i];	
-	if( target == node_file || file_in_include_path( node_file, target ) )
+	if( target == node_file || file_in_include_path( node_file, target, checked_files ) ){
+	    free(files);
 	    return 1;
+	}
     }
+    free(files);
     return 0;
 }
 
@@ -3584,7 +3595,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	i = 0;
 	ns_num = -ns_num; // to match global only
 	while (rt00[i].seq_num <= seq_num) {
-	    if ((rt00[i].file_num == ns_num || file_in_include_path(-ns_num, -rt00[i].file_num))  &&
+	    if ((rt00[i].file_num == ns_num || file_in_include_path(-ns_num, -rt00[i].file_num, NULL))  &&
 		strcmp(simple_name, rt00[i].name) == 0)
 		return i;
 	    i++;
@@ -3617,7 +3628,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	    
 	    if (rt00[i].file_num < 0 &&
 		strcmp(routine_string, rt00[i].name) == 0) {
-		in_include_path = file_in_include_path( current_file_no, -rt00[i].file_num );
+		in_include_path = file_in_include_path( current_file_no, -rt00[i].file_num, NULL );
 		if (in_include_path) {
 		    found = i;
 		    in_path_found++;

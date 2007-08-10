@@ -5076,9 +5076,9 @@ global procedure BackEnd(atom ignore)
 	end if
     else
 	c_puts("#ifdef CLK_TCK\n")
-	c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
 	c_puts("#else\n")
-	c_stmt0("eu_startup(_00, _01, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
+	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
 	c_puts("#endif\n")
     end if  
     
