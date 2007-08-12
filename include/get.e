@@ -361,7 +361,7 @@ function Get2()
         if find(ch, START_NUMERIC) then
             e = get_number()
        	    if e[1] != GET_IGNORE then -- either a number or something illegal was read, so exit: the other goto
-                return e & {string_next-1,leading_whitespace}
+                return e & {string_next-1-(ch!=-1),leading_whitespace}
             end if          -- else go read next item, startunt at top of loop: one of the goto
 
         elsif ch = '{' then
