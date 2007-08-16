@@ -14,6 +14,10 @@ global function extract_options(sequence s)
     return s
 end function
 
+function upper(sequence s)
+    return and_bits(s,#DF)
+end function
+
 global procedure transoptions()
 -- set translator command-line options  
     integer i
