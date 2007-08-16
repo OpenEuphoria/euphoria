@@ -32,6 +32,9 @@ end if
 global sequence file_name
 file_name = {""} -- for now
 
+global sequence file_include  -- remember which files were included where
+file_include = {{}}
+
 global sequence file_name_entered, warning_list
 file_name_entered = ""
 warning_list = {}
