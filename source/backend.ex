@@ -228,7 +228,7 @@ while 1 do
     if atom(line) then
 	-- EOF, no eu code found in our .exe
 	-- see if a filename was specified on the command line
-	if length(cl) > 2 and match("BACKEND", upper(cl[1])) then
+	if length(cl) > 2 and match("BACKEND", and_bits(cl[1],#DF)) then
 	    filename = cl[3]
 	    close(current_db)
 	    current_db = e_path_open(filename, "rb")
