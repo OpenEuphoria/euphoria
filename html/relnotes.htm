@@ -37,6 +37,58 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <p>&nbsp;<br>
 
 <font face="Arial, Helvetica" color="#003366">
+<b>Version 3.1.1 August 2007:</b></font>
+<p>
+
+This release is a minor update to fix some bugs.
+
+<p>
+<font color="#993333"><b>Bug Fixes</b></font>
+<ul>
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ A storage leak (memory allocated but never freed) 
+ was introduced in version 3.1, on the Linux and FreeBSD platforms.
+ Fixed by Matthew Lewis.
+ 
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ When Euphoria failed to open the main program file, the error
+ message would sometimes show the wrong file type.
+ Fixed by Matthew Lewis.
+ 
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ Bugs in the new library routines, find_from() and match_from()
+ were corrected. The third argument (the starting index) 
+ is now tightly-checked. Fixed by Matthew Lewis and Rob Craig.
+
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ The ed script on Linux was changed to allow blanks in the path
+ of the file to be edited. Fixed by Rob Craig.
+ 
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ Double-quotes were added to ed.ex so Esc e 
+ will work with paths containing blanks.
+ Reported by Alex Caracatsanis. Fixed by Rob Craig.
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>
+ database.e was fixed so forward slashes are allowed in the 
+ db_compress() file name. Reported by Frank Dowling. 
+ Fixed by Rob Craig.
+ 
+</ul>
+
+<font face="Arial, Helvetica" color="#003366">
+
 <b>Version 3.1 June 2007:</b></font>
 <p>
 
