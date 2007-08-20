@@ -21,3 +21,5 @@ mv exu $EUDIR/bin
 mv backendu $EUDIR/bin
 mv ecu $EUDIR/bin
 
+rm int.c compress.c backend.c 0ackend.c emake
+
