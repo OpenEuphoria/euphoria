@@ -11,6 +11,7 @@ ex doc.exw TEXT %EUDIR%
 
 ex combine.exw %EUDIR%
 
+rem these files are only needed to update RDS Web site
 del %EUDIR%\doc\refman_?.doc
 del %EUDIR%\doc\lib_*.doc
 
