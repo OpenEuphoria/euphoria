@@ -54,7 +54,7 @@ procedure make_sound()
 end procedure
 
 without warning
-procedure abort()
+procedure abort()  
 -- force abort with trace back
     puts(msg, "\ndivide by 0 to get trace back...Press Enter\n")
     if sequence(gets(0)) then
@@ -720,23 +720,37 @@ procedure patterns()
 end procedure
 
 procedure conversions()
--- test conversion of values to/from string representation   
+-- test conversion of values to/from string representation
     sequence v
     
     v = sprintf("values are: %5d, %3d, %4.2f", {1234, -89, 6.22})
     if compare(v, "values are:  1234, -89, 6.22") != 0 then
 	abort()
     end if
-    v = value("  {1,2,3}")
-    if compare(v, {GET_SUCCESS, {1,2,3},9,2}) != 0 then
+    v = value("{1,2,3}")
+    if compare(v, {GET_SUCCESS, {1,2,3}}) != 0 then
 	abort()
     end if
     for x = 1 to 100 by 3 do
 	v = value(sprintf("%d", x)) 
-	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
+	if compare(v, {GET_SUCCESS, x}) != 0 then
 	    abort()
 	end if
 	v = value(sprintf("#%x ", x))
+	if compare(v, {GET_SUCCESS, x}) != 0 then
+	    abort()
+	end if
+    end for
+    v = value_from("  {1,2,3}",2)
+    if compare(v, {GET_SUCCESS, {1,2,3},8,1}) != 0 then
+	abort()
+    end if
+    for x = 1 to 100 by 3 do
+	v = value_from(sprintf("%d", x),1)
+	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
+	    abort()
+	end if
+	v = value_from(sprintf("#%x ", x),1)
 	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
 	    abort()
 	end if

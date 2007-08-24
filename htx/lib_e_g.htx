@@ -553,8 +553,9 @@ Do not use free_low() to deallocate memory that was allocated using
  >
 <_eucode>
     GET_SUCCESS -- object was read successfully
-    GET_EOF     -- end of file before object was read
+    GET_EOF     -- end of file before object was read completely
     GET_FAIL    -- object is not syntactically correct
+    GET_NOTHING -- nothing was read, even a partial object string, before end of input
 </_eucode>
  
  <_2clist
@@ -562,20 +563,15 @@ Do not use free_low() to deallocate memory that was allocated using
   description=
 "get() can read arbitrarily complicated Euphoria objects. You
  could have a long sequence of values in braces and separated by
- commas, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', \"john\"}.
+ commas and comments, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', \"john\"}.
  <font color=\"#CC0099\"><b>A single call to get() will read in this
  entire sequence and return its value as a result, as well as complementary information.</b></font>
 <P>
-get() returns a 4 element sequence, like value() does:
+get() returns a 2 element sequence, like value() does:
 <ul>
-<li> a status code (success/error/end of file),
-<li> the value just read (meaningful only when the status code is GET_SUCCESS), 
-<li> the number of characters read, 
-<li> the number of leading whitespace characters. 
+<li> a status code (success/error/end of file/no value at all),
+<li> the value just read (meaningful only when the status code is GET_SUCCESS),
 </ul>
-When the status code is not GET_SUCCESS, the character count is the index of the
- character at which reading stopped.
-<P>
 Each call to get() picks up where the previous call left off. For
  instance, a series of 5 calls to get() would be needed to read
  in:
@@ -588,17 +584,21 @@ On the sixth and any subsequent call to get() you would see a
 {1, 2, xxx}
 <P>
 in the input stream you would see a GET_FAIL error status
- because xxx is not a Euphoria object.
+ because xxx is not a Euphoria object. And seeing
+ <P>
+   -- something\nBut no value
+<P>
+and the input stream stops right there, you'll  receive a status
+ code of GET_NOTHING, because nothing but whitespace or comments was read.
 <P>
 Multiple \"top-level\" objects in the input stream must be
  separated from each other with one or more \"whitespace\"
  characters (blank, tab, \r or \n). At the very least, a top
  level number must be followed by a white space from the following object.
  Whitespace is not necessary <b><i>within</i></b> a top-level object. Comments, terminated by either '\n' or '\r',
- are allowed anywhere inside sequences.
+ are allowed anywhere inside sequences, and ignored if at the top level.
  A call to get() will read one entire top-level object, plus possibly one additional
- (whitespace) character. This extra whitespace does not count in 
- the returned character count."
+ (whitespace) character, after a top level number, even though the next object may have an identifiable starting pont.."
  >
 <_2clist
   name="Comments:"
@@ -609,7 +609,8 @@ Multiple \"top-level\" objects in the input stream must be
  Euphoria sequences stored in disk files. The sequences could be
  read into memory, updated and then written back to disk after
  each series of transactions is complete. Remember to write out
- a whitespace character (using puts()) after each call to print().
+ a whitespace character (using puts()) after each call to print(),
+ at least when a top level number was just printed.
 <P>
 The value returned is not meaningful unless you have a
  GET_SUCCESS status.

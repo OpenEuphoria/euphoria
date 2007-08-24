@@ -182,14 +182,15 @@ fail = graphics_mode(261)
   name="Description:"
   description=
 "Read the string representation of a Euphoria object, and computes
- the value of that object. A 4-element sequence,
- <b>{error_status, value, total characters read, number of leading whitespace}</b> is
+ the value of that object. A 2 element sequence,
+ <b>{error_status, value}</b> is
   actually returned, where error_status can be one of:"
  >
 <_eucode>
     GET_SUCCESS -- a valid object representation was found
     GET_EOF     -- end of string reached too soon
     GET_FAIL    -- syntax is wrong
+    GET_NOTHING -- end of string reached without any value being even partially read
 </_eucode>
 
 <_2clist
@@ -200,17 +201,16 @@ fail = graphics_mode(261)
  <p>
  After reading one valid representation of a Euphoria object, value() will
  stop reading and ignore any additional characters in the string. For
- example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
- invalid representation, the value field is undefined (usually 0), and the third field is the
- 1 based index of the character the reading of which caused an error.
+ example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36}.". After reading an
+ invalid representation, the value field is undefined (usually 0).
  >
 <_2clist
   name="Example 1:"
   description=""
  >
 <_eucode>
-s = value("  12345"} -- notice the two leading spaces
--- s is {GET_SUCCESS, 12345, 7, 2}
+s = value("12345"}
+-- s is {GET_SUCCESS, 12345}
 
  </_eucode>
 <_2clist
@@ -219,7 +219,7 @@ s = value("  12345"} -- notice the two leading spaces
  >
 <_eucode>
 s = value("{0, 1, -99.9}")
--- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
+-- s is {GET_SUCCESS, {0, 1, -99.9}}
 
  </_eucode>
 <_2clist
@@ -228,6 +228,88 @@ s = value("{0, 1, -99.9}")
  >
 <_eucode>
 s = value("+++")
+-- s is {GET_FAIL, 0} -- '+' is correct, but "++" is not
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_e_g.htm#get\">get</a>,
+<a href=\"lib_s_t.htm#sprintf\">sprintf</a>,
+<a href=\"lib_p_r.htm#print\">print</a>"
+<a href=\"lib_u_z.htm#value_from\">value_from</a>"
+ >
+</table>
+
+<_routine name="value_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include get.e<BR>
+ s = value_from(st, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Read the string representation of a Euphoria object, and computes
+ the value of that object. The string which is read is the tail of st which starts at index i.
+ A 4-element sequence,
+ <b>{error_status, value, total characters read, number of leading whitespace}</b> is
+  actually returned, where error_status can be one of:"
+ >
+<_eucode>
+    GET_SUCCESS -- a valid object representation was found
+    GET_EOF     -- end of string reached too soon
+    GET_FAIL    -- syntax is wrong
+    GET_NOTHING -- end of string reached without any value being even partially read
+</_eucode>
+
+<_2clist
+  name="Comments:"
+  description=
+"This works the same as <b>value()</b>, but
+<ul>
+<li> reading starts where you instruct the routine to, instead of starting from the beginning of the 
+string. You can always pass value() a slice to achieve a similar effect.
+<li> it returns extra information value() doesn't.
+</ul>
+ <p>
+ After reading one valid representation of a Euphoria object, value_from() will
+ stop reading and ignore any additional characters in the string. For
+ example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
+ invalid representation, the value field is undefined (usually 0), and the third field is the
+ 1 based index of the character the reading of which caused an error.
+ <p>
+ If the representation was valid, you can use the third returned element to pick up where you 
+ left, like get() does in a file. There is no corresponding get_from(), at least because 
+ calling where() before and after get() will tell you how many characters were read.
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = value_from("  12345"} -- notice the two leading spaces
+-- s is {GET_SUCCESS, 12345, 7, 2}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = value_from("{0, 1, -99.9}")
+-- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+s = value_from("+++")
 -- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
 
  </_eucode>
@@ -236,6 +318,7 @@ s = value("+++")
   description="<a href=\"lib_e_g.htm#get\">get</a>,
 <a href=\"lib_s_t.htm#sprintf\">sprintf</a>,
 <a href=\"lib_p_r.htm#print\">print</a>"
+<a href=\"lib_u_z.htm#value\">value</a>"
  >
 </table>
 

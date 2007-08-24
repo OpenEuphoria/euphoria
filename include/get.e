@@ -1,6 +1,6 @@
--- (c) Copyright 2006 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.0
+-- Euphoria 3.1
 -- Input and Conversion Routines:
 -- get()
 -- value()
@@ -9,7 +9,8 @@
 -- error status values returned from get() and value():
 global constant GET_SUCCESS = 0,
 		GET_EOF = -1,
-		GET_FAIL = 1
+		GET_FAIL = 1,
+		GET_NOTHING = -2
 
 constant M_WAIT_KEY = 26
 
@@ -136,12 +137,13 @@ type plus_or_minus(integer x)
     return x = -1 or x = +1
 end type
 
-constant GET_IGNORE = -2
+constant GET_IGNORE = GET_NOTHING
 function read_comment()
     if atom(input_string) then
         while ch!='\n' and ch!='\r' and ch!=-1 do
             get_ch()
         end while
+        get_ch()
         if ch=-1 then
             return {GET_EOF,0}
         else
@@ -201,7 +203,7 @@ function get_number()
 	    end if
 	end while       
     end if
-    
+
     -- decimal integer or floating point
     while ch >= '0' and ch <= '9' do
 	ndigits += 1
@@ -334,35 +336,36 @@ end function
 
 integer leading_whitespace
 
-function Get2()
+function Get2(natural offset)
 -- read a Euphoria data object as a string of characters
--- and return {error_flag, value} unless the record_whitespace flag is set,
--- which only happens on the first call of Get() by value(). In that case, the total
--- number of characters interpreted and the number of leading whitespace characters are
--- also returned.
--- Note: ch is "live" at entry and exit of this routine
+-- and return {error_flag, value,total number of characters, leading whitespace}
+-- Note: ch is "live" at entry and exit of this routine.
+-- Uses the regular Get() to read esequence elements.
     sequence s, e
     integer e1
-                      
+
     -- init
-    string_next = 1
     get_ch()
     while find(ch, white_space) do
 	get_ch()
     end while
 
     if ch = -1 then -- string is made of whitespace only
-	return {GET_EOF, 0,string_next-1,string_next-1}
+	return {GET_EOF, 0,string_next-1-offset,string_next-1}
     end if
 
-    leading_whitespace = string_next-2 -- index of the last whitespace: string_next points past the first non whitespace
+    leading_whitespace = string_next-2-offset -- index of the last whitespace: string_next points past the first non whitespace
 
     while 1 do
         if find(ch, START_NUMERIC) then
             e = get_number()
        	    if e[1] != GET_IGNORE then -- either a number or something illegal was read, so exit: the other goto
-                return e & {string_next-1-(ch!=-1),leading_whitespace}
-            end if          -- else go read next item, startunt at top of loop: one of the goto
+                return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
+            end if          -- else go read next item, starting at top of loop
+            get_ch()
+            if ch=-1 then
+                return {GET_NOTHING, 0,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
+            end if
 
         elsif ch = '{' then
             -- process a sequence
@@ -371,7 +374,7 @@ function Get2()
             skip_blanks()
             if ch = '}' then -- empty sequence
                 get_ch()
-                return {GET_SUCCESS, s,string_next-1,leading_whitespace} -- empty sequence
+                return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
             end if
         	
             while TRUE do -- read: comment(s),element,comment(s),comma and so on till it terminates or errors out
@@ -382,7 +385,7 @@ function Get2()
                         s = append(s, e[2])
                         exit  -- element read and added to result
                     elsif e1 != GET_IGNORE then
-                        return e & {string_next-1,leading_whitespace}
+                        return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
                 	-- else it was a comment, keep going
                     end if
                 end while
@@ -391,31 +394,31 @@ function Get2()
                     skip_blanks()
                     if ch = '}' then
                         get_ch()
-      		        return {GET_SUCCESS, s,string_next-1,leading_whitespace}
+      		        return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace}
        	            elsif ch!='-' then 
                         exit
                     else -- comment starts after item and before comma
                         e = get_number() -- reads anything starting witn '-'
                         if e[1] != GET_IGNORE then  -- it wasn't a coment, this is illegal
-                            return {GET_FAIL, 0,string_next-1,leading_whitespace}
+                            return {GET_FAIL, 0,string_next-1-offset-(ch!=-1),leading_whitespace}
                         end if
                         -- read next comment or , or }
                     end if
         	end while
                 if ch != ',' then
-        	    return {GET_FAIL, 0,string_next-1,leading_whitespace}
+        	    return {GET_FAIL, 0,string_next-1-offset-(ch!=-1),leading_whitespace}
     	        end if
         	get_ch() -- skip comma
        	    end while
 
         elsif ch = '\"' then
     	    e = get_string()
-            return e & {string_next-1,leading_whitespace}
+            return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
         elsif ch = '\'' then
     	    e = get_qchar()
-            return e & {string_next-1,leading_whitespace}
+            return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
         else
-    	    return {GET_FAIL, 0,string_next-1,leading_whitespace}
+    	    return {GET_FAIL, 0,string_next-1-offset-(ch!=-1),leading_whitespace}
 
         end if
         
@@ -424,32 +427,45 @@ function Get2()
 end function
 
 global function get(integer file)
--- Read the string representation of a Euphoria object 
+-- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
--- Return {error_status, value,total # of characters,# leading whitespaces}.
--- On error, the third element is the index at which the error condition was seen.
--- Embedded comments inside sequence are now supported.
+-- Return {error_status, value}.
+-- Embedded comments inside sequences are now supported.
     input_file = file
-    input_string = 0
-    return Get2()
+    string_next = 1
+    input_string = 0 
+    return Get()
 end function
 
 global function value(sequence string)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
--- Trailing whitespace is not considered.
--- Return {error_status, value,total # of characters,# leading whitespaces).
--- On error, the third element is the index at which the error condition was seen.
+-- Trailing whitespace or comments are not considered.
+-- Return {error_status, value}.
 -- Embedded comments inside sequence are now supported.
     input_string = string
-    return Get2()
+    string_next = 1
+    return Get()
+end function
+
+global function value_from(sequence string, natural starting_point)
+-- Read the representation of a Euphoria object
+-- from a sequence of characters. Convert to the value of the object.
+-- Trailing whitespace or comment are not considered.
+-- Return {error_status, value,total # of characters,# leading whitespaces).
+-- On error, the third element is the index at which the error condition was seen.
+-- Embedded comments inside sequences are supported.
+    if string[starting_point] then end if -- checks whether starting_point is valid
+    input_string = string
+    string_next = starting_point
+    return Get2(starting_point-1)
 end function
 
 global function prompt_number(sequence prompt, sequence range)
 -- Prompt the user to enter a number.
 -- A range of allowed values may be specified.
     object answer
-    
+
     while 1 do
 	 puts(1, prompt)
 	 answer = gets(0) -- make sure whole line is read
@@ -497,7 +513,7 @@ global function get_bytes(integer fn, integer n)
 -- This function is normally used with files opened in binary mode.
     sequence s
     integer c, first, last
-    
+
     if n = 0 then
 	return {}
     end if
@@ -531,3 +547,4 @@ global function get_bytes(integer fn, integer n)
     end while   
     return s
 end function
+
