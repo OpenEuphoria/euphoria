@@ -268,14 +268,14 @@ function get_number()
     
     return {GET_SUCCESS, mantissa}
 end function
-          
+
 function Get()
 -- read a Euphoria data object as a string of characters
 -- and return {error_flag, value}
 -- Note: ch is "live" at entry and exit of this routine
     sequence s, e
     integer e1
-            
+
     -- init
     while find(ch, white_space) do
 	get_ch()
@@ -291,8 +291,8 @@ function Get()
        	    if e[1] != GET_IGNORE then -- either a number or something illegal was read, so exit: the other goto
                 return e
             end if          -- else go read next item, starting at top of loop
-            get_ch()
-            if ch=-1 then
+            skip_blanks()
+            if ch=-1 or ch='}' then -- '}' is expected only in the "{--\n}" case
                 return {GET_NOTHING, 0} -- just a comment
             end if
 
@@ -316,6 +316,9 @@ function Get()
                     elsif e1 != GET_IGNORE then
                         return e
                 	-- else it was a comment, keep going
+                    elsif ch='}' then
+                        get_ch()
+                        return {GET_SUCCESS, s} -- empty sequence
                     end if
                 end while
                 
@@ -395,7 +398,7 @@ function Get2(natural offset)
                 get_ch()
                 return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
             end if
-        	
+
             while TRUE do -- read: comment(s),element,comment(s),comma and so on till it terminates or errors out
                 while 1 do -- read zero or more comments and an element
                     e = Get() -- read next element, using standard function
@@ -406,6 +409,9 @@ function Get2(natural offset)
                     elsif e1 != GET_IGNORE then
                         return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
                 	-- else it was a comment, keep going
+                    elsif ch='}' then
+                        get_ch()
+                        return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
                     end if
                 end while
                 
