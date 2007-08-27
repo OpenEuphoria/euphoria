@@ -268,14 +268,14 @@ function get_number()
     
     return {GET_SUCCESS, mantissa}
 end function
-          with trace
+          
 function Get()
 -- read a Euphoria data object as a string of characters
 -- and return {error_flag, value}
 -- Note: ch is "live" at entry and exit of this routine
     sequence s, e
     integer e1
-            trace(1)
+            
     -- init
     while find(ch, white_space) do
 	get_ch()
@@ -569,4 +569,3 @@ global function get_bytes(integer fn, integer n)
     return s
 end function
 
-?value("{1,--a\n1}")?machine_func(26,0)
