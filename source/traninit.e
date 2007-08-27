@@ -15,7 +15,12 @@ global function extract_options(sequence s)
 end function
 
 function upper(sequence s)
-    return and_bits(s,#DF)
+    for i=1 to length(s) do
+        if s[i]>='a' and s[i]<='z' then
+            s[i]-=('a'-'A')
+        end if
+    end for
+    return s
 end function
 
 global procedure transoptions()
@@ -86,13 +91,13 @@ global procedure transoptions()
 	end if      
     end while
 end procedure
-    
+                
 function get_bor_path()
 -- return the path to the Borland C++ files, e.g. c:\borland\bcc55 
     object p
     integer b, c
     sequence path
-    
+                  
     p = getenv("PATH")
     if atom(p) then
 	return 0

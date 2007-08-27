@@ -54,7 +54,7 @@ procedure make_sound()
 end procedure
 
 without warning
-procedure abort()  
+procedure abort()
 -- force abort with trace back
     puts(msg, "\ndivide by 0 to get trace back...Press Enter\n")
     if sequence(gets(0)) then
@@ -747,11 +747,11 @@ procedure conversions()
     end if
     for x = 1 to 100 by 3 do
 	v = value_from(sprintf("%d", x),1)
-	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
+	if compare(v, {GET_SUCCESS, x,1+(x>=10)+(x>=100),0}) != 0 then
 	    abort()
 	end if
-	v = value_from(sprintf("#%x ", x),1)
-	if compare(v, {GET_SUCCESS, x,1+x>=10+x>=100,0}) != 0 then
+	v = value(sprintf("#%x ", x))
+	if compare(v, {GET_SUCCESS, x}) != 0 then
 	    abort()
 	end if
     end for
