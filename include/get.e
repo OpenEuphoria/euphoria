@@ -268,70 +268,89 @@ function get_number()
     
     return {GET_SUCCESS, mantissa}
 end function
-
+          with trace
 function Get()
 -- read a Euphoria data object as a string of characters
 -- and return {error_flag, value}
 -- Note: ch is "live" at entry and exit of this routine
     sequence s, e
     integer e1
-
+            trace(1)
+    -- init
     while find(ch, white_space) do
 	get_ch()
     end while
 
-    if find(ch, START_NUMERIC) then
-	return get_number()
-
-    elsif ch = '{' then
-	-- process a sequence
-	s = {}
-	get_ch()
-	skip_blanks()
-	if ch = '}' then
-	    get_ch()
-	    return {GET_SUCCESS, s} -- empty sequence
-	end if
-	
-	while TRUE do
-	    e = Get() -- read next element
-	    e1=e[1]
-            if e1 = GET_SUCCESS then
-        	s = append(s, e[2])
-            elsif e1 != GET_IGNORE then
-		return e
-	    end if
-	    skip_blanks()
-	    if ch = '}' then
-		get_ch()
-		return {GET_SUCCESS, s}
-	    elsif ch='-' then -- could be a comment before a comma
-	        get_ch()
-	        if ch='-' then
-                    return read_comment()
-	        else
-                    return {GET_FAIL, 0}
-	        end if
-	    end if
-            if ch != ',' then
-		return {GET_FAIL, 0}
-	    end if
-	    get_ch() -- skip comma
-	end while
-
-    elsif ch = '\"' then
-	return get_string()
-
-    elsif ch = '\'' then
-	return get_qchar()
-
-    elsif ch = -1 then
+    if ch = -1 then -- string is made of whitespace only
 	return {GET_EOF, 0}
-
-    else
-	return {GET_FAIL, 0}
-
     end if
+
+    while 1 do
+        if find(ch, START_NUMERIC) then
+            e = get_number()
+       	    if e[1] != GET_IGNORE then -- either a number or something illegal was read, so exit: the other goto
+                return e
+            end if          -- else go read next item, starting at top of loop
+            get_ch()
+            if ch=-1 then
+                return {GET_NOTHING, 0} -- just a comment
+            end if
+
+        elsif ch = '{' then
+            -- process a sequence
+            s = {}
+            get_ch()
+            skip_blanks()
+            if ch = '}' then -- empty sequence
+                get_ch()
+                return {GET_SUCCESS, s} -- empty sequence
+            end if
+        	
+            while TRUE do -- read: comment(s),element,comment(s),comma and so on till it terminates or errors out
+                while 1 do -- read zero or more comments and an element
+                    e = Get() -- read next element, using standard function
+                    e1 = e[1]
+                    if e1 = GET_SUCCESS then
+                        s = append(s, e[2])
+                        exit  -- element read and added to result
+                    elsif e1 != GET_IGNORE then
+                        return e
+                	-- else it was a comment, keep going
+                    end if
+                end while
+                
+                while 1 do -- now read zero or more post element comments
+                    skip_blanks()
+                    if ch = '}' then
+                        get_ch()
+      		        return {GET_SUCCESS, s}
+       	            elsif ch!='-' then 
+                        exit
+                    else -- comment starts after item and before comma
+                        e = get_number() -- reads anything starting witn '-'
+                        if e[1] != GET_IGNORE then  -- it wasn't a coment, this is illegal
+                            return {GET_FAIL, 0}
+                        end if
+                        -- read next comment or , or }
+                    end if
+        	end while
+                if ch != ',' then
+        	    return {GET_FAIL, 0}
+    	        end if
+        	get_ch() -- skip comma
+       	    end while
+
+        elsif ch = '\"' then
+    	    return get_string()
+        elsif ch = '\'' then
+    	    return get_qchar()
+        else
+    	    return {GET_FAIL, 0}
+
+        end if
+        
+    end while
+
 end function
 
 integer leading_whitespace
@@ -395,7 +414,7 @@ function Get2(natural offset)
                     if ch = '}' then
                         get_ch()
       		        return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace}
-       	            elsif ch!='-' then 
+       	            elsif ch!='-' then
                         exit
                     else -- comment starts after item and before comma
                         e = get_number() -- reads anything starting witn '-'
@@ -433,7 +452,8 @@ global function get(integer file)
 -- Embedded comments inside sequences are now supported.
     input_file = file
     string_next = 1
-    input_string = 0 
+    input_string = 0
+    get_ch() 
     return Get()
 end function
 
@@ -445,6 +465,7 @@ global function value(sequence string)
 -- Embedded comments inside sequence are now supported.
     input_string = string
     string_next = 1
+    get_ch() 
     return Get()
 end function
 
@@ -508,7 +529,7 @@ constant CHUNK = 100
 
 global function get_bytes(integer fn, integer n)
 -- Return a sequence of n bytes (maximum) from an open file.
--- If n > 0 and fewer than n bytes are returned, 
+-- If n > 0 and fewer than n bytes are returned,
 -- you've reached the end of file.
 -- This function is normally used with files opened in binary mode.
     sequence s
@@ -524,7 +545,7 @@ global function get_bytes(integer fn, integer n)
     end if
     
     s = repeat(c, n)
-    
+
     last = 1
     while last < n do
 	-- for speed, read a chunk without checking for EOF
@@ -548,3 +569,4 @@ global function get_bytes(integer fn, integer n)
     return s
 end function
 
+?value("{1,--a\n1}")?machine_func(26,0)
