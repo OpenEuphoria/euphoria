@@ -21,7 +21,8 @@ wcc386 %FLAGS% compress.c
 
 echo compiling the back-end files...
 REM /dINT_CODES /dHEAP_CHECK
-SET BE_FLAGS=/ol /dEWINDOWS /dEWATCOM /dBACKEND /dEOW
+SET BE_FLAGS=/ol /dEWINDOWS /dEWATCOM /dBACKEND 
+REM /dEOW
 wcc386 %BE_FLAGS% %FLAGS% be_main.c
 wcc386 %BE_FLAGS% %FLAGS% be_symtab.c
 wcc386 %BE_FLAGS% %FLAGS% be_callc.c

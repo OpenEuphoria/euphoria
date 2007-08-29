@@ -142,7 +142,6 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 <table border=0 cellspacing=2 cellpadding=2>
 
-
  <tr><td valign=top><b>Syntax:</b></td>
 <td><font face = "Arial, Helvetica"> i = find(x, s)
 </font>
@@ -176,7 +175,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
-<td><a href="lib_h_o.htm#find_from">find_from</a>,
+<td><a href="lib_e_g.htm#find_from">find_from</a>,
   <a href="lib_h_o.htm#match">match</a>,
   <a href="lib_h_o.htm#match_from">match_from</a>,
 <a href="lib_c_d.htm#compare">compare</a>
@@ -190,16 +189,16 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 <table border=0 cellspacing=2 cellpadding=2>
 
-
  <tr><td valign=top><b>Syntax:</b></td>
 <td><font face = "Arial, Helvetica"> i1 = find_from(x, s, i2)
 </font>
 </td></tr>
 
  <tr><td valign=top><b>Description:</b></td>
-<td>  Find x as an element of s, starting with element i2. If successful, return the index
- of the first element of s that matches. If unsuccessful
- return 0. 
+<td>Find x as an element of s. Start the search at index i2. If successful, 
+ return the index of the first element of s that matches. If unsuccessful
+ return 0. i2 may have any value from 1 to the length of s plus 1. 
+ (Analogous to the first index of a slice of s).
 </td></tr>
 
 <tr><td valign=top><b>Example 1:</b></td>
@@ -224,7 +223,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
-<td><a href="lib_h_o.htm#find">find</a>,
+<td><a href="lib_e_g.htm#find">find</a>,
   <a href="lib_h_o.htm#match">match</a>,
   <a href="lib_h_o.htm#match_from">match_from</a>,
 <a href="lib_c_d.htm#compare">compare</a>

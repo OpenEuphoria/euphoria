@@ -1796,9 +1796,9 @@ procedure get_escape(boolean help)
 	    shell("exu \"" & file_name & "\"")
 	elsif match(".exw", lower(file_name)) or 
 	      match(".ew",  lower(file_name)) then
-	    shell("exw " & file_name)
+	    shell("exw \"" & file_name & "\"")
 	else
-	    shell("ex " & file_name)
+	    shell("ex \"" & file_name & "\"")
 	end if
 	goto_line(0, b_col)
 	if equal(file_name, get_err_line()) then

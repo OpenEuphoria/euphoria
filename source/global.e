@@ -3,8 +3,8 @@
 -- Euphoria 3.1
 -- Global declarations 
 
-global constant INTERPRETER_VERSION = "3.1"
-global constant  TRANSLATOR_VERSION = "3.1"
+global constant INTERPRETER_VERSION = "3.1.1"
+global constant  TRANSLATOR_VERSION = "3.1.1"
 
 global type boolean(integer x)
     return x = TRUE or x = FALSE

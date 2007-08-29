@@ -24,7 +24,8 @@ REM /dEDOS for DOS compile
 REM /dECOMPILE to build Translator
 REM /dERUNTIME to build runtime library
 
-SET COMMON_FLAGS=/w0 /zq /j /zp4 /5r /fp5 /fpi87 /bt=nt /mf /dEWINDOWS /dEWATCOM /dEOW
+SET COMMON_FLAGS=/w0 /zq /j /zp4 /5r /fp5 /fpi87 /bt=nt /mf /dEWINDOWS /dEWATCOM 
+REM /dEOW
 SET OPTIMIZE_FLAGS=/ot /oi /ol /om /or /oa /s
 SET CFLAGS=%COMMON_FLAGS% %OPTIMIZE_FLAGS% /dERUNTIME
 

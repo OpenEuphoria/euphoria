@@ -37,7 +37,8 @@ echo compiling the back-end files...
 REM /dINT_CODES /dHEAP_CHECK /dINT_CODES -- next line for User Source only
 SET BE_FLAGS=/ol /dEWINDOWS /dEWATCOM /dINT_CODES
 rem --PRIVATE /ol is necessary to get good code in do_exec()
-SET BE_FLAGS=/ol /dEWINDOWS /dEWATCOM /dEOW
+SET BE_FLAGS=/ol /dEWINDOWS /dEWATCOM 
+REM /dEOW
 rem --END PRIVATE
 wcc386 %BE_FLAGS% %FLAGS% be_main.c
 wcc386 %BE_FLAGS% %FLAGS% be_symtab.c

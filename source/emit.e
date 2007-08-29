@@ -57,7 +57,7 @@ constant token_name =
     {ELSIF, "'elsif'"},
     {END, "'end'"},
     {END_OF_FILE, "the end of file"},
-    {EQUAL, "'='"},
+    {EQUALS, "'='"},
     {EXIT, "'exit'"},
     {FOR, "'for'"},
     {FUNC, "a function"},
