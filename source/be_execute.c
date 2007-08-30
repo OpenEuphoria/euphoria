@@ -237,7 +237,9 @@ object x(); /* error */
 symtab_ptr PrivateVar();
 long find(), e_match();
 FILE *which_file();
+#ifndef ESIMPLE_MALLOC
 char *EMalloc();
+#endif
 object_ptr BiggerStack();
 void do_exec();
 s1_ptr NewS1();

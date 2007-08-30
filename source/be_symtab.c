@@ -49,8 +49,11 @@ static int e_routine_size = 0;   /* number of symbol table pointers allocated */
 /**********************/
 /* Declared functions */
 /**********************/
+#ifndef ESIMPLE_MALLOC
 char *EMalloc();
-
+#else
+#include "alloc.h"
+#endif
 /*********************/
 /* Defined functions */
 /*********************/

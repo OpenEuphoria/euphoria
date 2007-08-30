@@ -97,8 +97,12 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 /**********************/
 /* Declared functions */
 /**********************/
+#ifndef ESIMPLE_MALLOC
 char *EMalloc();
 char *ERealloc();
+#else
+#include "alloc.h"
+#endif
 static void expand_tabs();
 void SetPosition();
 void RTInternal();

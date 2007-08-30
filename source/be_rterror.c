@@ -174,7 +174,11 @@ static FILE *conin;
 /* Declared functions */
 /**********************/
 symtab_ptr Locate();
+#ifndef ESIMPLE_MALLOC
 char *EMalloc();
+#else
+#include "alloc.h"
+#endif
 #ifndef EWINDOWS  // !defined(EBORLAND) && !defined(ELCC)
 char *malloc();
 #endif

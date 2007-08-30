@@ -46,7 +46,6 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
-#include "alloc.h"
 
 
 /******************/
@@ -379,8 +378,12 @@ s1_ptr NewS1();
 object NewString();
 object machine();
 s1_ptr SequenceCopy();
+#ifndef ESIMPLE_MALLOC
 char *EMalloc();
 char *ERealloc();
+#else
+#include "alloc.h"
+#endif
 char *getenv();
 FILE *long_fopen();
 void Cleanup();

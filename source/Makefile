@@ -10,12 +10,13 @@ endif
 
 ifdef EDEBUG
 DEBUG_FLAGS=-g3
+else
+DEBUG_FLAGS=-fomit-frame-pointer
 endif
 
 CC = gcc
-FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS)
-BE_FLAGS =  -c -w -DELINUX $(RUNTIME_FLAGS) -fsigned-char -O2 -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS)
-
+FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS)
+BE_FLAGS =  -c -w -DELINUX $(RUNTIME_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
 EU_CORE_FILES = \
 	main.e \
@@ -313,10 +314,10 @@ be_machine.o : ./be_machine.c
 	$(CC) $(BE_FLAGS) $(ERUNTIME)  $*.c
 
 be_rterror.o : ./be_rterror.c
-	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS) $*.c
+	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer -DESIMPLE_MALLOC $(DEBUG_FLAGS) $*.c
 
 be_syncolor.o : ./be_syncolor.c
-	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer $(DEBUG_FLAGS) $*.c
+	$(CC) -c -w -DELINUX -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer  $(DEBUG_FLAGS) -DESIMPLE_MALLOC $*.c
 
 be_runtime.o : ./be_runtime.c
 	$(CC) $(BE_FLAGS) $(ERUNTIME) $*.c

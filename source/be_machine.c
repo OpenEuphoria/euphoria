@@ -105,6 +105,7 @@ END_COLOR_DEPTH_LIST
 #endif
 
 #include "alldefs.h"
+#include "alloc.h"
 #include <signal.h>
 
 /*****************/
@@ -252,7 +253,9 @@ char *version_name =
 /**********************/
 /* Declared Functions */
 /**********************/
+#ifndef ESIMPLE_MALLOC
 char *EMalloc();
+#endif
 FILE *which_file();
 void NewConfig();
 s1_ptr NewS1();

@@ -204,7 +204,11 @@ extern int total_stack_size; // total amount of stack available
 /* Declared functions */
 /*********************/
 extern double current_time();
+#ifndef ESIMPLE_MALLOC
 extern char *EMalloc();
+#else
+#include "alloc.h"
+#endif
 extern void debug_dbl(double);
 void scheduler(double);
 #ifdef ERUNTIME

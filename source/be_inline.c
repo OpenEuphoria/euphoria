@@ -31,8 +31,9 @@ extern unsigned default_heap;
 /**********************/
 /* Declared Functions */
 /**********************/
+#ifndef ESIMPLE_MALLOC
 char *EMalloc(long);
-
+#endif
 /*********************/
 /* Defined Functions */
 /*********************/

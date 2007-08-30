@@ -57,7 +57,7 @@ struct block_list {
 #endif
 #endif
 
-#ifdef ESIMPLE_MALLOC
+#if defined( ESIMPLE_MALLOC )
 #define EMalloc(size) malloc(size)
 #define EFree(ptr) free(ptr)
 #define ERealloc(orig, newsize) realloc(orig, newsize)

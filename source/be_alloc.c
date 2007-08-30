@@ -115,9 +115,11 @@ static unsigned int tmps_remaining = 0;
 #ifndef EBORLAND
 char *_expand();
 #endif
+#ifndef ESIMPLE_MALLOC
 char *EMalloc(unsigned long);
 char *ERealloc(unsigned char *, unsigned long);
 void EFree(unsigned char *);
+#endif
 #ifndef EWINDOWS
 void free();
 #endif
@@ -393,7 +395,7 @@ static char *Out_Of_Space(long nbytes)
     char msg[80];
 #endif
 
-
+#ifndef ESIMPLE_MALLOC
 char *EMalloc(unsigned long nbytes) 
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
@@ -565,6 +567,7 @@ void EFree(unsigned char *p)
     }
 #endif // linux
 }
+#endif // !ESIMPLE_MALLOC
 
 #ifndef EDJGPP
 #ifndef ELINUX
@@ -614,7 +617,7 @@ int heap_dump(char *ptr)
 #endif
 #endif
 #endif
-
+#ifndef ESIMPLE_MALLOC
 char *ERealloc(unsigned char *orig, unsigned long newsize)
 /* Enlarge or shrink a malloc'd block. 
    orig must not be NULL - not supported.
@@ -692,7 +695,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
     return q;
 #endif
 }
-
+#endif // !ESIMPLE_MALLOC
 
 #ifdef HEAP_CHECK
 static void AlreadyFree(free_block_ptr q, free_block_ptr p)

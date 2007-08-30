@@ -88,7 +88,11 @@ static int src_file;
 /* Declared functions */
 /**********************/
 extern char *getenv();
+#ifndef ESIMPLE_MALLOC
 extern char *EMalloc();
+#else
+#include "alloc.h"
+#endif
 #ifndef EWINDOWS // !defined(EBORLAND) && !defined(ELCC)
 extern void *malloc();
 #endif
