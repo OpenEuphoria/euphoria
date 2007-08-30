@@ -176,6 +176,8 @@ static char *predefined[] = {
     "task_status",
     "task_clock_stop", 
     "task_clock_start",
+    "find_from",
+    "match_from",
     NULL
 };
 
