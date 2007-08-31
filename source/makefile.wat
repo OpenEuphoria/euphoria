@@ -151,7 +151,7 @@ $(TARGET) :  $(EU_OBJS)
 	wrc -q -ad exw.res $(TARGET)
 
 main-.obj :  .MULTIPLE $(EU_MAIN)
-	ecw -wat $(EU_TARGET)
+	exwc ec -wat $(EU_TARGET)
 	$(CC) $(FE_FLAGS) $*.c
 
 main-0.obj : .MULTIPLE  .\main-0.c 
