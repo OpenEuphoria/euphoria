@@ -77,6 +77,21 @@ global procedure transoptions()
 			Argv[j] = Argv[j+1]
 		    end for
 		end if
+		
+	    elsif match("-DEBUG", uparg) then
+	    	debug_option = TRUE
+	    	
+	    elsif match("-LIB", uparg ) then
+	    	if i < Argc then
+	    	    user_library = Argv[i+1]
+	    	    Argc -= 1
+		    for j = i to Argc do
+			Argv[j] = Argv[j+1]
+		    end for
+		else
+		    OpWarning = TRUE
+		    Warning("-lib option missing library name")
+	    	end if
 	    else
 		OpWarning = TRUE
 		Warning("unknown option: " & Argv[i])

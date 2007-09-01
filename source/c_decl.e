@@ -40,6 +40,12 @@ files_to_delete = {
 global boolean keep -- emake should keep .c files or delete?
 keep = FALSE
 
+global boolean debug_option
+debug_option = FALSE
+
+global sequence user_library
+user_library = ""
+
 global integer total_stack_size  -- default size for OPTION STACK
 total_stack_size = -1  -- (for now) 
 
@@ -1000,7 +1006,9 @@ sequence file0
 
 global procedure start_emake()
 -- start creating emake.bat     
-	
+    sequence debug_flag
+    debug_flag = ""
+    
     if ELINUX then      
 	doit = open("emake", "w")
     else       
@@ -1017,37 +1025,51 @@ global procedure start_emake()
     end if
 	
     if EDOS then
+	if debug_option then
+	    debug_flag = " /g3"
+	end if
 	if atom(dj_path) then
 	    -- /ol removed due to bugs with SEQ_PTR() inside a loop
 	    -- can remove /fpc and add /fp5 /fpi87 for extra speed
 	    puts(doit, "echo compiling with WATCOM\n")
 	    if fastfp then
 		-- fast f.p. that assumes f.p. hardware
-		c_opts = "/w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s"
+		c_opts = "/w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
 	    else    
 		-- slower f.p. but works on all machines
-		c_opts = "/w0 /zq /j /zp4 /fpc /5r /otimra /s"
+		c_opts = "/w0 /zq /j /zp4 /fpc /5r /otimra /s" & debug_flag
 	    end if
 		
 	else 
+	    if debug_option then
+		debug_flag = " -g3"
+	    else
+		debug_flag = " -fomit-frame-pointer -g4"
+	    end if
 	    puts(doit, "echo compiling with DJGPP\n")
-	    c_opts = "-c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer"
+	    c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
 	end if
     end if
 
     if EWINDOWS then
 	if sequence(wat_path) then
 	    puts(doit, "echo compiling with WATCOM\n")
+	    if debug_option then
+	    	debug_flag = " /d3"
+	    end if
 	    --  /ol removed due to bugs with SEQ_PTR() inside a loop
 	    if dll_option then
-		c_opts = "/bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s"
+		c_opts = "/bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
 	    else
-		c_opts = "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s"
+		c_opts = "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
 	    end if
 	    
 	elsif sequence(bor_path) then
+	    if debug_option then
+		debug_flag = " -v "
+	    end if
 	    puts(doit, "echo compiling with BORLAND\n")
-	    c_opts = " -q -w- -O2 -5 -a4 -I"
+	    c_opts = " -q -w- -O2 -5 -a4 -I" & debug_flag
 	    if dll_option then
 		c_opts = "-tWD" & c_opts
 	    elsif con_option then
@@ -1059,8 +1081,11 @@ global procedure start_emake()
 
 	else 
 	    -- LccWin 
+	    if debug_option then
+	    	debug_flag = " -g"
+	    end if
 	    puts(doit, "echo compiling with LCCWIN\n")
-	    c_opts = "-w -O -Zp4" -- -O is sometimes buggy
+	    c_opts = "-w -O -Zp4" & debug_flag -- -O is sometimes buggy
 	end if
     end if
     
@@ -1068,10 +1093,15 @@ global procedure start_emake()
 	puts(doit, "echo compiling with GNU C\n")
 	cc_name = "gcc"
 	echo = "echo"
+	if debug_option then
+	    debug_flag = " -g3"
+	else
+	    debug_flag = " -fomit-frame-pointer"
+	end if
 	if dll_option then
-	    c_opts = "-c -w -fPIC -fsigned-char -O2 -ffast-math -fomit-frame-pointer"
+	    c_opts = "-c -w -fPIC -fsigned-char -O2 -ffast-math" & debug_flag
 	else 
-	    c_opts = "-c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer"
+	    c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
 	end if
 	link_line = ""
     else       
@@ -1158,6 +1188,8 @@ global procedure finish_emake()
 	    printf(link_file, "FILE %s\\bin\\", {eudir})
 	    if fastfp then
 		puts(link_file, "ecfastfp.lib\n") 
+	    elsif length(user_library) then
+	    	printf(link_file, "%s\n", {user_library})
 	    else    
 		puts(link_file, "ec.lib\n") 
 	    end if
@@ -1180,7 +1212,12 @@ global procedure finish_emake()
 
 	else 
 	    -- DJGPP 
-	    printf(link_file, "%s\\bin\\ec.a\n", {eudir}) 
+	    if length(user_library) then
+		printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
+	    else
+		printf(link_file, "%s\\bin\\ec.a\n", {eudir}) 
+	    end if
+	    
 	    printf(link_file, "%s\\bin\\liballeg.a\n", {eudir}) 
 	    printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk\n", {file0, file0})
 	    if not keep then
@@ -1195,11 +1232,21 @@ global procedure finish_emake()
     if EWINDOWS then
 	if sequence(wat_path) then     
 	    printf(doit, "wlink FILE %s.obj @objfiles.lnk\n", {file0})
-	    printf(link_file, "FILE %s\\bin\\ecw.lib\n", {eudir}) 
+	    if length(user_library) then
+		printf(link_file, "FILE %s\\bin\\%s\n", {eudir, user_library}) 
+	    else
+		printf(link_file, "FILE %s\\bin\\ecw.lib\n", {eudir}) 	
+	    end if
+	    
 
 	elsif sequence(bor_path) then
 	    printf(doit, "bcc32 %s %s.c @objfiles.lnk\n", {c_opts, file0})
-	    printf(link_file, "%s\\bin\\ecwb.lib\n", {eudir}) 
+	    if length(user_library) then
+		printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
+	    else
+		printf(link_file, "%s\\bin\\ecwb.lib\n", {eudir}) 	
+	    end if
+	    
 	    if not keep then
 		puts(doit, "del *.tds > NUL\n")
 	    end if
@@ -1220,7 +1267,12 @@ global procedure finish_emake()
 		"lcclnk -s -subsystem %s -stack-reserve %d -stack-commit %d %s.obj @objfiles.lnk\n", 
 		{subsystem, total_stack_size, total_stack_size, file0})
 	    end if
-	    printf(link_file, "%s\\bin\\ecwl.lib\n", {eudir}) 
+	    if length(user_library) then
+		printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
+	    else
+		printf(link_file, "%s\\bin\\ecwl.lib\n", {eudir}) 
+	    end if
+	    
 	end if
 	    
 	if not keep then
@@ -1269,10 +1321,16 @@ global procedure finish_emake()
 	    dll_flag = ""
 	    exe_suffix = ""
 	end if
-	    
-	printf(doit, 
+	if length(user_library) then
+	    printf(doit, 
+		  "gcc %s %s.o %s %s/bin/%s -lm ",
+		  {dll_flag, file0, link_line, eudir, user_library})
+	else
+	    printf(doit, 
 		  "gcc %s %s.o %s %s/bin/ecu.a -lm ",
 		  {dll_flag, file0, link_line, eudir})
+	end if
+	
 	if not EBSD then
 	    puts(doit, " -ldl")
 	end if      
