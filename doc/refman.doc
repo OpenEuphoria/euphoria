@@ -1580,6 +1580,24 @@
  current routine, then the current file, then globals in other files. Symbols
  that are more local will override symbols that are more global. At the end of
  the scope of the local symbol, the more global symbol will be visible again.
+ If multiple global symbols are found, Euphoria will look to see if there is
+ only one matching symbol that resides in a file that was directly or
+ indirectly included from the file which is attempting to use the symbol. This
+ way, third party libraries can be used in the same application, even if they
+ have conflicting symbols. The application code that uses the libraries will
+ have to use explicit namespaces to deconflict the symbols, but the libraries
+ themselves will not need to be edited.
+
+ Using a namespace identifier with a symbol name causes Euphoria to resolve the
+ symbol as though it were being used from the file associated with the
+ namespace. This means that a namespace could be associated with the main
+ include file of a multi-file library, and using the namespace associated with
+ the main file will allow deconfliction of all symbols within the library from
+ other symbols in files independent of the library. Of course, if there are
+ conflicting symbols within the library that require the use of namespace
+ identifiers from within the library itself, users of the library will not be
+ able to deconflict those symbols with the namespace associated with the main
+ file of the library.
 
  Constant declarations must be outside of any subroutine. Constants can be
  global or local, but not private.

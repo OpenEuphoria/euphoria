@@ -2556,42 +2556,56 @@
               {error status, value}. Error status codes are:
 
                   GET_SUCCESS -- object was read successfully
-                  GET_EOF     -- end of file before object was read
+                  GET_EOF     -- end of file before object was read completely
                   GET_FAIL    -- object is not syntactically correct
+                  GET_NOTHING -- nothing was read, even a partial object string, before end of input
               
               get() can read arbitrarily complicated Euphoria objects. You
               could have a long sequence of values in braces and separated by
-              commas, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', "john"}. A single
-              call to get() will read in this entire sequence and return it's
-              value as a result.
+              commas and comments, e.g. {23, {49, 57}, 0.5, -1, 99, 'A',
+              "john"}. A single call to get() will read in this entire sequence
+              and return its value as a result, as well as complementary
+              information.
 
-              Each call to get() picks up where the previous call left off. For
+              get() returns a 2 element sequence, like value() does:   a status
+              code (success/error/end of file/no value at all),  the value just
+              read (meaningful only when the status code is GET_SUCCESS),  Each
+              call to get() picks up where the previous call left off. For
               instance, a series of 5 calls to get() would be needed to read
               in:
 
-              99 5.2 {1,2,3} "Hello" -1
 
-              On the sixth and any subsequent call to get() you would see a
-              GET_EOF status. If you had something like:
 
-              {1, 2, xxx}
+ On the sixth and any subsequent call to get() you would see a GET_EOF status.
+ If you had something like:
 
-              in the input stream you would see a GET_FAIL error status because
-              xxx is not a Euphoria object.
+ {1, 2, xxx}
 
-              Multiple "top-level" objects in the input stream must be
-              separated from each other with one or more "whitespace"
-              characters (blank, tab, \r or \n). Whitespace is not necessary
-              within a top-level object. A call to get() will read one entire
-              top-level object, plus one additional (whitespace) character.
+ in the input stream you would see a GET_FAIL error status because xxx is not a
+ Euphoria object. And seeing
 
+ -- something\nBut no value
+
+ and the input stream stops right there, you'll receive a status code of
+ GET_NOTHING, because nothing but whitespace or comments was read.
+
+ Multiple \"top-level\" objects in the input stream must be separated from each
+ other with one or more \"whitespace\" characters (blank, tab, \r or \n). At
+ the very least, a top level number must be followed by a white space from the
+ following object. Whitespace is not necessary within a top-level object.
+ Comments, terminated by either '\n' or '\r', are allowed anywhere inside
+ sequences, and ignored if at the top level. A call to get() will read one
+ entire top-level object, plus possibly one additional (whitespace) character,
+ after a top level number, even though the next object may have an identifiable
+ starting pont.." >
  Comments:    The combination of print() and get() can be used to save a
               Euphoria object to disk and later read it back. This technique
               could be used to implement a database as one or more large
               Euphoria sequences stored in disk files. The sequences could be
               read into memory, updated and then written back to disk after
               each series of transactions is complete. Remember to write out a
-              whitespace character (using puts()) after each call to print().
+              whitespace character (using puts()) after each call to print(),
+              at least when a top level number was just printed.
 
               The value returned is not meaningful unless you have a
               GET_SUCCESS status.
@@ -6201,13 +6215,14 @@
  Syntax:      include get.e
               s = value(st)
 
- Description: Read the string representation of a Euphoria object, and compute
-              the value of that object. A 2-element sequence, {error_status,
+ Description: Read the string representation of a Euphoria object, and computes
+              the value of that object. A 2 element sequence, {error_status,
               value} is actually returned, where error_status can be one of:
 
                   GET_SUCCESS -- a valid object representation was found
                   GET_EOF     -- end of string reached too soon
                   GET_FAIL    -- syntax is wrong
+                  GET_NOTHING -- end of string reached without any value being even partially read
               
  Comments:    This works the same as get(), but it reads from a string that you
               supply, rather than from a file or device.
@@ -6232,7 +6247,58 @@
  Example 3:
 
               s = value("+++")
-              -- s is {GET_FAIL, 0}
+              -- s is {GET_FAIL, 0} -- '+' is correct, but "++" is not
+              
+               
+ See Also:    get, sprintf, print
+
+
+ ---------------------------------<value_from>----------------------------------
+
+ Syntax:      include get.e
+              s = value_from(st, i)
+
+ Description: Read the string representation of a Euphoria object, and computes
+              the value of that object. The string which is read is the tail of
+              st which starts at index i. A 4-element sequence, {error_status,
+              value, total characters read, number of leading whitespace} is
+              actually returned, where error_status can be one of:
+
+                  GET_SUCCESS -- a valid object representation was found
+                  GET_EOF     -- end of string reached too soon
+                  GET_FAIL    -- syntax is wrong
+                  GET_NOTHING -- end of string reached without any value being even partially read
+              
+ Comments:    This works the same as value(), but   reading starts where you
+              instruct the routine to, instead of starting from the beginning
+              of the string. You can always pass value() a slice to achieve a
+              similar effect.  it returns extra information value() doesn't.
+
+              After reading one valid representation of a Euphoria object,
+              value_from() will stop reading and ignore any additional
+              characters in the string. For example, "36" and "36P" will both
+              give you {GET_SUCCESS, 36, 2, 0}.
+
+ If the representation was valid, you can use the third returned element to
+ pick up where you left, like get() does in a file. There is no corresponding
+ get_from(), at least because calling where() before and after get() will tell
+ you how many characters were read. >
+ Example 1:
+
+              s = value_from("  12345"} -- notice the two leading spaces
+              -- s is {GET_SUCCESS, 12345, 7, 2}
+              
+               
+ Example 2:
+
+              s = value_from("{0, 1, -99.9}")
+              -- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
+              
+               
+ Example 3:
+
+              s = value_from("+++")
+              -- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
               
                
  See Also:    get, sprintf, print

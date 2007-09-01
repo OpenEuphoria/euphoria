@@ -215,16 +215,17 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
  <tr><td valign=top><b>Description:</b></td>
-<td>Read the string representation of a Euphoria object, and compute
- the value of that object. A 2-element sequence,
- <b>{error_status, value}</b> is actually returned, where error_status
- can be one of:
+<td>Read the string representation of a Euphoria object, and computes
+ the value of that object. A 2 element sequence,
+ <b>{error_status, value}</b> is
+  actually returned, where error_status can be one of:
 </td></tr>
 
 <tr><td></td><td>
 <pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- a valid object representation was found</font>
 <font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of string reached too soon</font>
 <font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- syntax is wrong</font>
+<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- end of string reached without any value being even partially read</font>
 </pre></td></tr>
 
 
@@ -233,7 +234,7 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
  that you supply, rather than from a file or device.
  <p>
  After reading one valid representation of a Euphoria object, value() will
- stop reading and ignore any additional characters in the string. For 
+ stop reading and ignore any additional characters in the string. For
  example, "36" and "36P" will both give you {GET_SUCCESS, 36}.
 </td></tr>
 
@@ -263,7 +264,91 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 
 <tr><td></td><td>
 <pre><font color="#330033">s = value(</font><font color="#00A033">"+++"</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {GET_FAIL, 0}</font>
+<font color="#FF0055">-- s is {GET_FAIL, 0} -- '+' is correct, but "++" is not</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_e_g.htm#get">get</a>,
+<a href="lib_s_t.htm#sprintf">sprintf</a>,
+<a href="lib_p_r.htm#print">print</a>
+</td></tr>
+
+</table>
+
+<a name=value_from></a><font color="#006633" size=+2><br>
+<center><b>value_from</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include get.e<BR>
+ s = value_from(st, i)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Read the string representation of a Euphoria object, and computes
+ the value of that object. The string which is read is the tail of st which starts at index i.
+ A 4-element sequence,
+ <b>{error_status, value, total characters read, number of leading whitespace}</b> is
+  actually returned, where error_status can be one of:
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- a valid object representation was found</font>
+<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of string reached too soon</font>
+<font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- syntax is wrong</font>
+<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- end of string reached without any value being even partially read</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>This works the same as <b>value()</b>, but
+<ul>
+<li> reading starts where you instruct the routine to, instead of starting from the beginning of the 
+string. You can always pass value() a slice to achieve a similar effect.
+<li> it returns extra information value() doesn't.
+</ul>
+ <p>
+ After reading one valid representation of a Euphoria object, value_from() will
+ stop reading and ignore any additional characters in the string. For
+ example, "36" and "36P" will both give you {GET_SUCCESS, 36, 2, 0}.
+</td></tr>
+
+ If the representation was valid, you can use the third returned element to pick up where you 
+ left, like get() does in a file. There is no corresponding get_from(), at least because 
+ calling where() before and after get() will tell you how many characters were read.
+ >
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s = value_from(</font><font color="#00A033">"  12345"</font><font color="#330033">} </font><font color="#FF0055">-- notice the two leading spaces</font>
+<font color="#FF0055">-- s is {GET_SUCCESS, 12345, 7, 2}</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s = value_from(</font><font color="#00A033">"{0, 1, -99.9}"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+<tr><td valign=top><b>Example 3:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s = value_from(</font><font color="#00A033">"+++"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character</font>
 <font color="#330033"></font>
 </pre></td></tr>
 
@@ -749,18 +834,6 @@ Results are treated as signed numbers. They will be
 
 
 </table>
-
-<p>&nbsp;<p><center>
-<font color="#006633" face="Arial, Helvetica" size=+1>... continue</font><br>&nbsp;<br>
-<font face="Arial, Helvetica" size=-1>
-<a href="lib_a_b.htm">from A to B</a> &nbsp; | &nbsp;
-<a href="lib_c_d.htm">from C to D</a> &nbsp; | &nbsp;
-<a href="lib_e_g.htm">from E to G</a> &nbsp; | &nbsp;
-<a href="lib_h_o.htm">from H to O</a> &nbsp; | &nbsp;
-<a href="lib_p_r.htm">from P to R</a> &nbsp; | &nbsp;
-<a href="lib_s_t.htm">from S to T</a> &nbsp; | &nbsp;
-from U to Z
-
 
 </body>
 </html>

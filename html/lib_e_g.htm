@@ -601,40 +601,53 @@ Do not use free_low() to deallocate memory that was allocated using
 
 <tr><td></td><td>
 <pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- object was read successfully</font>
-<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of file before object was read</font>
+<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of file before object was read completely</font>
 <font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- object is not syntactically correct</font>
+<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- nothing was read, even a partial object string, before end of input</font>
 </pre></td></tr>
 
  
  <tr><td valign=top><b></b></td>
 <td>get() can read arbitrarily complicated Euphoria objects. You
  could have a long sequence of values in braces and separated by
- commas, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', "john"}.
+ commas and comments, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', "john"}.
  <font color="#CC0099"><b>A single call to get() will read in this
- entire sequence and return it's value as a result.</b></font>
+ entire sequence and return its value as a result, as well as complementary information.</b></font>
 <P>
+get() returns a 2 element sequence, like value() does:
+<ul>
+<li> a status code (success/error/end of file/no value at all),
+<li> the value just read (meaningful only when the status code is GET_SUCCESS),
+</ul>
 Each call to get() picks up where the previous call left off. For
  instance, a series of 5 calls to get() would be needed to read
  in:
 <P>
-99 5.2 {1,2,3} "Hello" -1
-<P>
-On the sixth and any subsequent call to get() you would see a
- GET_EOF status. If you had something like:
-<P>
-{1, 2, xxx}
-<P>
-in the input stream you would see a GET_FAIL error status
- because xxx is not a Euphoria object.
-<P>
-Multiple "top-level" objects in the input stream must be
- separated from each other with one or more "whitespace"
- characters (blank, tab, \r or \n). Whitespace is not necessary
- <b><i>within</i></b> a top-level object. A call to get() will 
- read one entire top-level object, plus one additional 
- (whitespace) character.
+
 </td></tr>
 
+On the sixth and any subsequent call to get() you would see a
+ GET_EOF status. If you had something like:
+<p>
+{1, 2, xxx}
+<p>
+in the input stream you would see a GET_FAIL error status
+ because xxx is not a Euphoria object. And seeing
+ <p>
+ -- something\nBut no value
+<p>
+and the input stream stops right there, you'll receive a status
+ code of GET_NOTHING, because nothing but whitespace or comments was read.
+<p>
+Multiple \"top-level\" objects in the input stream must be
+ separated from each other with one or more \"whitespace\"
+ characters (blank, tab, \r or \n). At the very least, a top
+ level number must be followed by a white space from the following object.
+ Whitespace is not necessary <b><i>within</i></b> a top-level object. Comments, terminated by either '\n' or '\r',
+ are allowed anywhere inside sequences, and ignored if at the top level.
+ A call to get() will read one entire top-level object, plus possibly one additional
+ (whitespace) character, after a top level number, even though the next object may have an identifiable starting pont.."
+ >
 <tr><td valign=top><b>Comments:</b></td>
 <td>The combination of print() and get() can be used to save a
  Euphoria object to disk and later read it back. This technique
@@ -642,7 +655,8 @@ Multiple "top-level" objects in the input stream must be
  Euphoria sequences stored in disk files. The sequences could be
  read into memory, updated and then written back to disk after
  each series of transactions is complete. Remember to write out
- a whitespace character (using puts()) after each call to print().
+ a whitespace character (using puts()) after each call to print(),
+ at least when a top level number was just printed.
 <P>
 The value returned is not meaningful unless you have a
  GET_SUCCESS status.
