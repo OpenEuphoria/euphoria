@@ -107,6 +107,10 @@ EU_LIB_OBJECTS = &
 	be_task.obj &
 	be_callc.obj
 
+!ifndef MANAGED_MEM
+MEMFLAG = -DESIMPLE_MALLOC
+!endif
+
 !ifdef TRANSLATOR
 TARGET = ecw.exe
 EU_TARGET = ec.ex
@@ -130,8 +134,8 @@ clean : .SYMBOLIC
 
 
 CC = wcc386
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s
-BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW $(%ERUNTIME)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG)
+BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW $(%ERUNTIME) $(MEMFLAG)
 
 library : .SYMBOLIC ecw.lib
 

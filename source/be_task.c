@@ -17,6 +17,9 @@
 #include <io.h>
 #include <windows.h>
 #endif
+#if defined(ESIMPLE_MALLOC) && defined(EWINDOWS)
+#include <windows.h>
+#endif
 #include "global.h"
 #include "execute.h"
 #include "symtab.h"
@@ -208,6 +211,9 @@ extern double current_time();
 extern char *EMalloc();
 #else
 #include "alloc.h"
+#ifdef EWINDOWS
+extern unsigned default_heap;
+#endif
 #endif
 extern void debug_dbl(double);
 void scheduler(double);

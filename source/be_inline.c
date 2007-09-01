@@ -33,6 +33,10 @@ extern unsigned default_heap;
 /**********************/
 #ifndef ESIMPLE_MALLOC
 char *EMalloc(long);
+#else
+#ifdef EWINDOWS
+extern unsigned default_heap;
+#endif
 #endif
 /*********************/
 /* Defined Functions */

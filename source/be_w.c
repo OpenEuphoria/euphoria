@@ -102,6 +102,9 @@ char *EMalloc();
 char *ERealloc();
 #else
 #include "alloc.h"
+#ifdef EWINDOWS
+extern unsigned default_heap;
+#endif
 #endif
 static void expand_tabs();
 void SetPosition();
