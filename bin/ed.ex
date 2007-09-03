@@ -55,7 +55,7 @@ constant CONTROL_B = 2,
 	 
 constant CAPS_LOCK = 314  -- exwc only
 
-integer ESCAPE, CR, BS, HOME, END, CONTROL_HOME, CONTROL_END,
+integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 	PAGE_UP, PAGE_DOWN, INSERT, 
 	DELETE, XDELETE, ARROW_LEFT, ARROW_RIGHT,
 	CONTROL_ARROW_LEFT, CONTROL_ARROW_RIGHT, ARROW_UP, ARROW_DOWN,
@@ -73,6 +73,7 @@ if platform() = LINUX then
     compare_cmd = "diff "
     ESCAPE = 27
     CR = 10
+    NUM_PAD_ENTER = 10
     BS = 127 -- 263
     HOME = 262 
     END = 360 
@@ -124,9 +125,11 @@ else
     if platform() = WIN32 then
 	F11 = 343
 	F12 = 344
+	NUM_PAD_ENTER = 284
     else
 	F11 = 389
 	F12 = 390
+	NUM_PAD_ENTER = 13
     end if
     CONTROL_DELETE = 403 -- key for line-delete 
 			 -- (not available on some systems)
@@ -1069,6 +1072,9 @@ function next_key()
 	if check_break() then
 	    c = CONTROL_C
 	end if
+	if c = NUM_PAD_ENTER then
+	    c = CR
+	end if
 	if c = ESCAPE then
 	    -- process escape sequence
 	    c = get_key()
@@ -1992,7 +1998,7 @@ procedure try_auto_complete(char key)
 	    word = this_line[first_non_blank..b_col - 1 - (key = ' ')]
 	    wordnum = find(word, expand_word)           
 	    
-	    if key = CR and equal(word, "else") then    
+	    if key = CR and equal(word, "else") then
 		 leading_white &= '\t'
 	    
 	    elsif wordnum > 0 then
