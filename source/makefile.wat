@@ -1,12 +1,19 @@
 # OpenWatcom makefile for Euphoria (Win32)
 # Syntax:
-#   Interpreter       (exwc.exe):  wmake -f makefile.wat interpreter=1
-#   Translator         (ecw.exe):  wmake -f makefile.wat translator=1
-#   Translator Library (ecw.lib):  wmake -f makefile.wat library
-
-
-
-
+#   Interpreter       (exwc.exe):  wmake -f makefile.wat clean interpreter
+#   Translator         (ecw.exe):  wmake -f makefile.wat clean translator
+#   Translator Library (ecw.lib):  wmake -f makefile.wat clean library
+#   Backend       (backendw.exe):  wmake -f makefile.wat clean backend 
+#                (backendwc.exe)
+#               Make all targets:  wmake -f makefile.wat
+#                                  wmake -f makefile.wat all
+#   Options:
+#                    MANAGED_MEM:  Define this to use Euphoria's memory cache.
+#                                  The default is to use straight HeapAlloc/HeapFree calls. ex:
+#                                      wmake -f makefile.wat interpreter MANAGED_MEM=1
+#
+#                          DEBUG:  Define this to build debug versions of the targets.  ex:
+#                                      wmake -f makefile.wat interpreter DEBUG=1
 
 EU_CORE_FILES = &
 	main.e &
@@ -107,35 +114,86 @@ EU_LIB_OBJECTS = &
 	be_task.obj &
 	be_callc.obj
 
+EU_BACKEND_RUNNER_OBJECTS = &
+	main-.obj &
+	init-.obj &
+	file.obj &
+	machine.obj &
+	0ackend.obj &
+	pathopen.obj &
+	backend.obj &
+	compress.obj
+
+EU_TRANSLATED_FILES =  &
+	0ackend.c &
+	backend.c &
+	c_dec0.c &
+	c_dec1.c &
+	c_decl.c &
+	c_out.c &
+	compil_0.c &
+	compil_1.c &
+	compil_2.c &
+	compil_3.c &
+	compil_4.c &
+	compil_5.c &
+	compil_6.c &
+	compil_7.c &
+	compil_8.c &
+	compil_9.c &
+	compile.c &
+	compress.c &
+	ec.c &
+	emit.c &
+	emit_0.c &
+	emit_1.c &
+	error.c &
+	file.c &
+	get.c &
+	global.c &
+	init-.c &
+	int.c &
+	machine.c &
+	main-.c &
+	main-0.c &
+	main.c &
+	misc.c &
+	parser.c &
+	parser_0.c &
+	parser_1.c &
+	pathopen.c &
+	scanne_0.c &
+	scanner.c &
+	sort.c &
+	symtab.c &
+	symtab_0.c &
+	traninit.c &
+	wildcard.c 
+	
 !ifndef MANAGED_MEM
 MEMFLAG = -DESIMPLE_MALLOC
 !endif
 
-!ifdef TRANSLATOR
-TARGET = ecw.exe
-EU_TARGET = ec.ex
-EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
-EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-!else
-TARGET = exwc.exe
-EU_TARGET = int.ex
-EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
-EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+!ifdef DEBUG
+DEBUGFLAG = /g3
 !endif
 
-all :  $(TARGET)
+all :  .SYMBOLIC
+	wmake -f makefile.wat clean interpreter
+	wmake -f makefile.wat clean translator
+	wmake -f makefile.wat clean library
+	wmake -f makefile.wat clean backend
 
 clean : .SYMBOLIC
+	-del /Q $(EU_TRANSLATED_FILES)
 	-if exist *.obj del *.obj
 	-if exist *.lbc del *.lbc
 	-if exist *.ilk del *.ilk
 	-if exist *.pch del *.pch
-	-if exist main-.c del main-.c
-
 
 CC = wcc386
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG)
-BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW $(%ERUNTIME) $(MEMFLAG)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG)
+BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW $(%ERUNTIME) $(MEMFLAG) $(DEBUGFLAG)
 
 library : .SYMBOLIC ecw.lib
 
@@ -145,17 +203,63 @@ runtime: .SYMBOLIC
 ecw.lib : runtime $(EU_LIB_OBJECTS)
 	wlib -q ecw.lib $(EU_LIB_OBJECTS)
 
-$(TARGET) :  $(EU_OBJS)
-	@%create $(TARGET).lbc
-	@%append $(TARGET).lbc option quiet
-	@%append $(TARGET).lbc name $^@
-	@%append $(TARGET).lbc option caseexact
-	@for %i in ($(EU_OBJS)) do @%append $(TARGET).lbc file %i
-	wlink SYS nt op maxe=25 op q op symf op el @$(TARGET).lbc
-	wrc -q -ad exw.res $(TARGET)
 
-main-.obj :  .MULTIPLE $(EU_MAIN)
-	exwc ec -wat $(EU_TARGET)
+interpreter_objects : .SYMBOLIC int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create int.lbc
+	@%append int.lbc option quiet
+	@%append int.lbc option caseexact
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append int.lbc file %i
+
+exw.exe : interpreter_objects 
+	wlink SYS nt_win op maxe=25 op q op symf op el @int.lbc name exw.exe
+	wrc -q -ad exw.res exw.exe
+
+exwc.exe : interpreter_objects 
+	wlink SYS nt op maxe=25 op q op symf op el @int.lbc name exwc.exe
+	wrc -q -ad exw.res exwc.exe
+
+interpreter : .SYMBOLIC exw.exe exwc.exe
+
+install : .SYMBOLIC
+	copy ecw.exe $(%EUDIR)\bin\
+	copy exw.exe $(%EUDIR)\bin\
+	copy exwc.exe $(%EUDIR)\bin\
+	copy backendw.exe $(%EUDIR)\bin\
+	copy backendc.exe $(%EUDIR)\bin\
+	copy ecw.lib $(%EUDIR)\bin\
+	
+ecw.exe : ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create ec.lbc
+	@%append ec.lbc option quiet
+	@%append ec.lbc option caseexact
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append ec.lbc file %i
+	wlink SYS nt op maxe=25 op q op symf op el @ec.lbc name ecw.exe
+	wrc -q -ad exw.res ecw.exe
+
+translator : .SYMBOLIC ecw.exe
+
+backendw.exe : backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create exwb.lbc
+	@%append exwb.lbc option quiet
+	@%append exwb.lbc option caseexact
+	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append exwb.lbc file %i
+	wlink SYS nt_win op maxe=25 op q op symf op el @exwb.lbc name backendw.exe
+	wrc -q -ad exw.res backendw.exe
+	wlink SYS nt op maxe=25 op q op symf op el @exwb.lbc name backendc.exe
+	wrc -q -ad exw.res backendc.exe
+		
+backend : .SYMBOLIC backendw.exe
+
+int.c : int.ex $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+	exwc.exe ec.ex int.ex
+	
+ec.c : ec.ex $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
+	exwc.exe ec.ex ec.ex
+
+backend.c : backend.ex $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+	exwc.exe ec.ex backend.ex
+
+main-.obj :  .MULTIPLE
 	$(CC) $(FE_FLAGS) $*.c
 
 main-0.obj : .MULTIPLE  .\main-0.c 
@@ -210,6 +314,9 @@ parser_0.obj :  .MULTIPLE ./parser.e
 	$(CC) $(FE_FLAGS) $*.c
 
 parser_1.obj :  .MULTIPLE ./parser.e
+	$(CC) $(FE_FLAGS) $*.c
+
+0ackend.obj :  .MULTIPLE ./backend.e
 	$(CC) $(FE_FLAGS) $*.c
 
 backend.obj :  .MULTIPLE ./backend.e
