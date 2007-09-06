@@ -178,6 +178,7 @@ procedure InputIL()
     
     SymTab = fdecompress(0)
     slist = fdecompress(0)
+    file_include = fdecompress(0)
 end procedure
 
 sequence cl, filename

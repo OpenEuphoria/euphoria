@@ -5,7 +5,8 @@
 global constant IL_MAGIC = 79, -- indicates an IL file
 	      IL_VERSION = -- 10 (2.5 alpha) IL version number
 			   -- 11 -- (2.5 beta)
-			      12 -- 3.0.0 Open Source, no encryption
+			   -- 12 -- 3.0.0 Open Source, no encryption
+			   13 -- 3.2? Added file_include
   
 global constant IL_START = "YTREWQ\n"
 

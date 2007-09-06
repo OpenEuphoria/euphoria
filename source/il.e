@@ -460,6 +460,7 @@ global procedure OutputIL()
     OutputMisc(out)
     OutputSymTab(out)
     OutputSlist(out) 
+    fcompress( out, file_include )
     close(out)
     
     store_checksum(out_name)
