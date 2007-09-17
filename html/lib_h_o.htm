@@ -1019,7 +1019,8 @@ Files opened for read or update must already exist. Files opened
  for write will be set to 0 bytes. Output to a file opened for
  append will start at the end of file.
 <P>
-Output to <b>text files</b> will have carriage-return characters
+On DOS or Windows, output to <b>text files</b> will have 
+carriage-return characters
  automatically added before linefeed characters. On input, these
  carriage-return characters are removed. A control-Z character
  (ASCII 26) will signal an immediate end of file. Note: on some versions
@@ -1027,21 +1028,8 @@ Output to <b>text files</b> will have carriage-return characters
  to permanently appear to be at the end-of-file, until the DOS window is closed.
 <P>
 I/O to <b>binary files</b> is not modified in any way. Any byte values
- from 0 to 255 can be read or written.
-<P>
-Some typical devices that you can open on DOS or Windows are:
-<P>
- "CON" - the console (screen)<BR>
- "AUX" - the serial auxiliary port<BR>
- "COM1" - serial port 1<BR>
- "COM2" - serial port 2<BR>
- "PRN" - the printer on the parallel port<BR>
- "NUL" - a non-existent device that accepts and discards output<BR>
-<p>
-Currently, files up to 2 Gb in size can be handled. Beyond that, 
-some file operations may not work correctly. This limit will likely 
-be increased in the future.
- 
+ from 0 to 255 can be read or written. On Linux and FreeBSD, all files
+ are binary files, so 
 </td></tr>
 
 <tr><td valign=top><b>Comments:</b></td>
