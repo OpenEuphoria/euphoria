@@ -3023,9 +3023,14 @@
               The last line in a file might not end with a new-line '\n'
               character.
 
-              When your program reads from the keyboard, the user can type
-              control-Z, which the operating system treats as "end of file". -1
-              will be returned.
+              On DOS/Windows when your program reads from the keyboard, the
+              user can type control-Z, which the operating system treats as
+              "end of file". -1 will be returned.
+
+              The official line-terminator on DOS/Windows is \r\n, though \n by
+              itself will also work OK with gets(). In either case a single \n
+              will appear at the end of the returned line. On Linux and FreeBSD
+              the official line-terminator is simply '\n'.
 
               In SVGA modes, DOS might set the wrong cursor position, after a
               call to gets(0) to read the keyboard. You should set it yourself
@@ -3645,29 +3650,17 @@
               for write will be set to 0 bytes. Output to a file opened for
               append will start at the end of file.
 
-              Output to text files will have carriage-return characters
-              automatically added before linefeed characters. On input, these
-              carriage-return characters are removed. A control-Z character
-              (ASCII 26) will signal an immediate end of file. Note: on some
-              versions of DOS, a control-Z typed by the user might cause
-              standard input to permanently appear to be at the end-of-file,
-              until the DOS window is closed.
+              On DOS or Windows, output to text files will have carriage-return
+              characters automatically added before linefeed characters. On
+              input, these carriage-return characters are removed. A control-Z
+              character (ASCII 26) will signal an immediate end of file. Note:
+              on some versions of DOS, a control-Z typed by the user might
+              cause standard input to permanently appear to be at the
+              end-of-file, until the DOS window is closed.
 
               I/O to binary files is not modified in any way. Any byte values
-              from 0 to 255 can be read or written.
-
-              Some typical devices that you can open on DOS or Windows are:
-
-              "CON" - the console (screen)
-              "AUX" - the serial auxiliary port
-              "COM1" - serial port 1
-              "COM2" - serial port 2
-              "PRN" - the printer on the parallel port
-              "NUL" - a non-existent device that accepts and discards output
-
-              Currently, files up to 2 Gb in size can be handled. Beyond that,
-              some file operations may not work correctly. This limit will
-              likely be increased in the future.
+              from 0 to 255 can be read or written. On Linux and FreeBSD, all
+              files are binary files, so
 
  Comments:    DOS32: When running under Windows 95 or later, you can open any
               existing file that has a long file or directory name in its path
