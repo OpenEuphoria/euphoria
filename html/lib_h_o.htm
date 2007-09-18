@@ -1029,7 +1029,22 @@ carriage-return characters
 <P>
 I/O to <b>binary files</b> is not modified in any way. Any byte values
  from 0 to 255 can be read or written. On Linux and FreeBSD, all files
- are binary files, so 
+ are binary files, so "r" mode and "rb" mode are equivalent,
+ as are "w" and "wb" modes.
+<P>
+Some typical devices that you can open on DOS or Windows are:
+<P>
+ "CON" - the console (screen)<BR>
+ "AUX" - the serial auxiliary port<BR>
+ "COM1" - serial port 1<BR>
+ "COM2" - serial port 2<BR>
+ "PRN" - the printer on the parallel port<BR>
+ "NUL" - a non-existent device that accepts and discards output<BR>
+<p>
+Currently, files up to 2 Gb in size can be handled. Beyond that, 
+some file operations may not work correctly. This limit will likely 
+be increased in the future.
+ 
 </td></tr>
 
 <tr><td valign=top><b>Comments:</b></td>
