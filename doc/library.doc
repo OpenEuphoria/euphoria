@@ -3660,7 +3660,21 @@
 
               I/O to binary files is not modified in any way. Any byte values
               from 0 to 255 can be read or written. On Linux and FreeBSD, all
-              files are binary files, so
+              files are binary files, so "r" mode and "rb" mode are equivalent,
+              as are "w" and "wb" modes.
+
+              Some typical devices that you can open on DOS or Windows are:
+
+              "CON" - the console (screen)
+              "AUX" - the serial auxiliary port
+              "COM1" - serial port 1
+              "COM2" - serial port 2
+              "PRN" - the printer on the parallel port
+              "NUL" - a non-existent device that accepts and discards output
+
+              Currently, files up to 2 Gb in size can be handled. Beyond that,
+              some file operations may not work correctly. This limit will
+              likely be increased in the future.
 
  Comments:    DOS32: When running under Windows 95 or later, you can open any
               existing file that has a long file or directory name in its path
