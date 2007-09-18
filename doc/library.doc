@@ -3661,7 +3661,7 @@
               I/O to binary files is not modified in any way. Any byte values
               from 0 to 255 can be read or written. On Linux and FreeBSD, all
               files are binary files, so "r" mode and "rb" mode are equivalent,
-              as are "w" and "wb" modes.
+              as are "w" and "wb", "u" and "ub", and "a" and "ab".
 
               Some typical devices that you can open on DOS or Windows are:
 
