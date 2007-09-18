@@ -1317,9 +1317,15 @@ After reading a line of text from the keyboard, you should
 The last line in a file might not end with a new-line '\n'
  character.
 <P>
-When your program reads from the keyboard, the user can type
+On DOS/Windows when your program reads from the keyboard, the user can type
  control-Z, which the operating system treats as \"end of file\".
  -1 will be returned.
+<p>
+The official line-terminator on DOS/Windows is \r\n, though \n
+by itself will also work OK with gets(). In either case 
+a single \n will appear at the end of the returned line. 
+On Linux and FreeBSD the official line-terminator is simply '\n'.
+
 <P>
 In SVGA modes, DOS might set the wrong cursor position, after a call to
  gets(0) to read the keyboard. You should set it yourself using
