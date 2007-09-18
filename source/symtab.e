@@ -492,7 +492,7 @@ function symbol_in_include_path( symtab_index sym, integer check_file, sequence 
 	end if
 	return 0
 end function
-
+with trace
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 
@@ -506,7 +506,7 @@ global function keyfind(sequence word, integer file_no)
     
     hashval = hashfn(word)
     st_ptr = buckets[hashval] 
-    
+
     while st_ptr do
 	if equal(word, SymTab[st_ptr][S_NAME]) then
 	    -- name matches 
@@ -574,11 +574,19 @@ global function keyfind(sequence word, integer file_no)
 		if (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
 		    SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL then
 		       
-		    if BIND then
-			add_ref(tok)
+
+		    
+		    if file_no = SymTab[tok[T_SYM]][S_FILE_NO] then
+			if BIND then
+			    add_ref(tok)
+			end if
+		    	return tok 
 		    end if
-		       
-		    return tok 
+
+		    gtok = tok
+		    dup_globals &= st_ptr
+		    in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
+		    
 		end if
 	    end if
 	    
