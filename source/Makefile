@@ -10,6 +10,7 @@ endif
 
 ifdef EDEBUG
 DEBUG_FLAGS=-g3
+CALLC_DEBUG=-g3
 else
 DEBUG_FLAGS=-fomit-frame-pointer
 endif
@@ -304,8 +305,8 @@ be_alloc.o : ./be_alloc.c
 	$(CC) $(BE_FLAGS) $(ERUNTIME) $*.c
 
 be_callc.o : ./be_callc.c
-	$(CC) -c -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(DEBUG_FLAGS) $*.c
-	$(CC) -S -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(DEBUG_FLAGS) $*.c
+	$(CC) -c -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $*.c
+	$(CC) -S -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $*.c
 
 be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(ERUNTIME) $*.c

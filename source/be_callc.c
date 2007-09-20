@@ -60,21 +60,28 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 #if (__GNUC__ == 4)
 // the offsets changed from 3.x to 4.x
 #define __GNUC_VERSION_NUM__ __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__
+
 #if (__GNUC_VERSION_NUM__ <= 101)
+
 #define push() asm("pushl -20(%ebp)")
 #define  pop() asm( "addl -24(%ebp), %esp")
-#else
+
+#else // (__GNUC_VERSION_NUM__ <= 101)
 // and they changed again from 4.1.1 to 4.1.2
+
 #define push() asm("pushl -124(%ebp)")
 #define  pop() asm( "addl -128(%ebp), %esp")
-#endif
-#else
+
+#endif // (__GNUC_VERSION_NUM__ <= 101)
+
+#else  // (__GNUC__ == 4)
 // RH Linux - ListFilter
 #define push() asm("pushl -28(%ebp)")
 #define  pop() asm( "addl -32(%ebp), %esp")
-#endif
-#endif
-#endif
+
+#endif  // (__GNUC__ == 4)
+#endif  // EBSD
+#endif  // ELINUX
 
 #ifdef ELCC
 #define push() _asm("pushl -8(%ebp)")
