@@ -1149,7 +1149,7 @@ The coordinate system for displaying text is different from the
 -- read character and attributes at top left corner
 s = get_screen_char(1,1) 
 -- store character and attributes at line 25, column 10
-put_screen_char(25, 10, {s})
+put_screen_char(25, 10, s)
 </_eucode>
 <_2clist
   name="See Also:"
