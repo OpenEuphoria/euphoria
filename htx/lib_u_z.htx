@@ -460,7 +460,10 @@ You could also use <b>getc(0)</b>, assuming file number 0 was input
 The routine that you supply should accept the path name and 
  <a href=\"lib_c_d.htm#dir_entry\">dir() entry</a> for each file and
  subdirectory. It should return 0 to keep going, or
- non-zero to stop walk_dir()."
+ non-zero to stop walk_dir(). walk_dir() returns 0 when it runs successfully
+ to completion. It returns -1 if it can't open the path name st. Otherwise,
+ it returns whatever non-zero value your routine returned when it chose
+ to stop walk_dir prematurely."
  >
 <_2clist
   name="Comments:"
