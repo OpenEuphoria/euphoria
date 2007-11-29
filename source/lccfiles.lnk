@@ -17,6 +17,9 @@ parser_1.obj
 backend.obj
 compress.obj
 main.obj
+mode.obj
+c_out.obj
+symtab_0.obj
 be_main.obj
 be_symtab.obj
 be_callc.obj

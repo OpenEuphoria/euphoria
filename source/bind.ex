@@ -5,6 +5,9 @@
 
 without type_check
 
+include mode.e
+set_mode( "bind", 0 )
+
 global constant TRUE = 1, FALSE = 0
 
 global constant TRANSLATE = FALSE,  

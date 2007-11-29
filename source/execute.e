@@ -30,6 +30,13 @@ include opnames.e
 -- in the user program, not the interpreter itself. We can't just let 
 -- Euphoria do the work.
 
+include global.e
+include reswords.e
+include symtab.e
+include wildcard.e
+include scanner.e
+include mode.e as mode
+
 constant M_CALL_BACK = 52,  
 	 M_CRASH_ROUTINE = 66,
 	 M_CRASH_MESSAGE = 37,
@@ -3142,7 +3149,7 @@ procedure opMACHINE_PROC()
     pc += 3
 end procedure
 	 
-global procedure InitBackEnd(integer ignore)
+procedure InitBackEnd(integer ignore)
 -- initialize Interpreter
 -- Some ops are treated exactly the same as other ops.
 -- In the hand-coded C back-end, they might be treated differently
@@ -3214,6 +3221,7 @@ global procedure InitBackEnd(integer ignore)
 	end if
     end for
 end procedure
+mode:set_init_backend( routine_id("InitBackEnd") )
 
 global procedure Execute(symtab_index proc, integer start_index)
 -- top level executor 
@@ -3226,10 +3234,11 @@ end procedure
 Execute_id = routine_id("Execute")
 
 without warning
-global procedure BackEnd(atom ignore)
+procedure BackEnd(atom ignore)
 -- The Interpreter back end
     Execute(TopLevelSub, 1)
 end procedure
+set_backend( routine_id("BackEnd") )
 
 -- dummy routines, not used
 global procedure OutputIL()

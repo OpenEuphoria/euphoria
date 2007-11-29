@@ -3,6 +3,11 @@
 -- Euphoria 3.1
 -- Symbol Table Routines
 
+include global.e
+include c_out.e
+include keylist.e
+include error.e
+
 constant NBUCKETS = 2003  -- prime helps  
 global sequence buckets   -- hash buckets
 buckets = repeat(0, NBUCKETS)
@@ -477,6 +482,10 @@ global sequence dup_globals, in_include_path
 function symbol_in_include_path( symtab_index sym, integer check_file, sequence path_checked  )
 	integer file_no
 	file_no = SymTab[sym][S_FILE_NO]
+	
+	if file_no = check_file then
+	    return 1
+	end if
 	if find(check_file, path_checked ) then
 	    return 0
 	end if
@@ -503,6 +512,7 @@ global function keyfind(sequence word, integer file_no)
 
     dup_globals = {}
     in_include_path = {}
+    symbol_resolution_warning = ""
     
     hashval = hashfn(word)
     st_ptr = buckets[hashval] 
@@ -582,6 +592,7 @@ global function keyfind(sequence word, integer file_no)
 			end if
 		    	return tok 
 		    end if
+		    
 
 		    gtok = tok
 		    dup_globals &= st_ptr
@@ -620,7 +631,11 @@ global function keyfind(sequence word, integer file_no)
 	if BIND then
 	    add_ref(gtok)
 	end if
-		       
+	if not in_include_path[1] then
+	    symbol_resolution_warning = sprintf("%s:%d - identifier '%s' in '%s' is not included", 
+		{name_ext(file_name[current_file_no]), line_number, word, 
+		name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]) })
+	end if	
 	return gtok
     end if
     

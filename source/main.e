@@ -6,6 +6,9 @@
 include file.e
 include get.e
 include pathopen.e
+include error.e
+include parser.e
+include mode.e
 
 function ProcessOptions()
 -- record command line options, return source file number

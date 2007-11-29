@@ -1,10 +1,10 @@
 # OpenWatcom makefile for Euphoria (Win32)
 # Syntax:
-#   Interpreter       (exwc.exe):  wmake -f makefile.wat clean interpreter
-#   Translator         (ecw.exe):  wmake -f makefile.wat clean translator
-#   Translator Library (ecw.lib):  wmake -f makefile.wat clean library
-#   Backend       (backendw.exe):  wmake -f makefile.wat clean backend 
-#                (backendwc.exe)
+#   Interpreter       (exwc.exe):  wmake -f makefile.wat interpreter
+#   Translator         (ecw.exe):  wmake -f makefile.wat translator
+#   Translator Library (ecw.lib):  wmake -f makefile.wat library
+#   Backend       (backendw.exe):  wmake -f makefile.wat backend 
+#                 (backendc.exe)
 #               Make all targets:  wmake -f makefile.wat
 #                                  wmake -f makefile.wat all
 #   Options:
@@ -17,6 +17,7 @@
 
 EU_CORE_FILES = &
 	main.e &
+	mode.e &
 	pathopen.e &
 	error.e &
 	symtab.e &
@@ -30,6 +31,7 @@ EU_CORE_FILES = &
 EU_INTERPRETER_FILES = &
 	compress.e &
 	backend.e &
+	c_out.e &
 	int.ex
 
 EU_TRANSLATOR_FILES = &
@@ -42,183 +44,192 @@ EU_TRANSLATOR_FILES = &
 	
 
 EU_TRANSLATOR_OBJECTS = &
-	ec.obj &
-	c_decl.obj &
-	c_dec0.obj &
-	c_dec1.obj &
-	c_out.obj &
-	compile.obj &
-	compil_0.obj &
-	compil_1.obj &
-	compil_2.obj &
-	compil_3.obj &
-	compil_4.obj &
-	compil_5.obj &
-	compil_6.obj &
-	compil_7.obj &
-	compil_8.obj &
-	compil_9.obj &
-	get.obj &
-	global.obj &
-	misc.obj &
-	sort.obj &
-	symtab_0.obj &
-	traninit.obj &
-	wildcard.obj
+	.\$(OBJDIR)\ec.obj &
+	.\$(OBJDIR)\c_decl.obj &
+	.\$(OBJDIR)\c_dec0.obj &
+	.\$(OBJDIR)\c_dec1.obj &
+	.\$(OBJDIR)\c_out.obj &
+	.\$(OBJDIR)\compile.obj &
+	.\$(OBJDIR)\compil_0.obj &
+	.\$(OBJDIR)\compil_1.obj &
+	.\$(OBJDIR)\compil_2.obj &
+	.\$(OBJDIR)\compil_3.obj &
+	.\$(OBJDIR)\compil_4.obj &
+	.\$(OBJDIR)\compil_5.obj &
+	.\$(OBJDIR)\compil_6.obj &
+	.\$(OBJDIR)\compil_7.obj &
+	.\$(OBJDIR)\compil_8.obj &
+	.\$(OBJDIR)\compil_9.obj &
+	.\$(OBJDIR)\compil_A.obj &
+	.\$(OBJDIR)\get.obj &
+	.\$(OBJDIR)\global.obj &
+	.\$(OBJDIR)\misc.obj &
+	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\traninit.obj &
+	.\$(OBJDIR)\wildcard.obj
 
 EU_INTERPRETER_OBJECTS =  &
-	backend.obj &
-	compress.obj 
+	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\c_out.obj &
+	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\symtab_0.obj 
 
 	
 EU_CORE_OBJECTS = &
-	main-.obj &
-	main-0.obj &
-	pathopen.obj &
-	init-.obj &
-	file.obj &
-	error.obj &
-	machine.obj &
-	symtab.obj &
-	scanner.obj &
-	scanne_0.obj &
-	main.obj &
-	emit.obj &
-	emit_0.obj &
-	emit_1.obj &
-	parser.obj &
-	parser_0.obj &
-	parser_1.obj 
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\main-0.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\file.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\machine.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\symtab.obj &
+	.\$(OBJDIR)\scanner.obj &
+	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\main.obj &
+	.\$(OBJDIR)\emit.obj &
+	.\$(OBJDIR)\emit_0.obj &
+	.\$(OBJDIR)\emit_1.obj &
+	.\$(OBJDIR)\parser.obj &
+	.\$(OBJDIR)\parser_0.obj &
+	.\$(OBJDIR)\parser_1.obj 
 	
 
 EU_BACKEND_OBJECTS = &
-	be_execute.obj &
-	be_task.obj &
-	be_main.obj &
-	be_alloc.obj &
-	be_callc.obj &
-	be_inline.obj &
-	be_machine.obj &
-	be_rterror.obj &
-	be_syncolor.obj &
-	be_runtime.obj &
-	be_symtab.obj &
-	be_w.obj
+	.\$(OBJDIR)\back\be_execute.obj &
+	.\$(OBJDIR)\back\be_task.obj &
+	.\$(OBJDIR)\back\be_main.obj &
+	.\$(OBJDIR)\back\be_alloc.obj &
+	.\$(OBJDIR)\back\be_callc.obj &
+	.\$(OBJDIR)\back\be_inline.obj &
+	.\$(OBJDIR)\back\be_machine.obj &
+	.\$(OBJDIR)\back\be_rterror.obj &
+	.\$(OBJDIR)\back\be_syncolor.obj &
+	.\$(OBJDIR)\back\be_runtime.obj &
+	.\$(OBJDIR)\back\be_symtab.obj &
+	.\$(OBJDIR)\back\be_w.obj
 
 EU_LIB_OBJECTS = &
-	be_machine.obj &
-	be_w.obj &
-	be_alloc.obj &
-	be_inline.obj &
-	be_runtime.obj &
-	be_task.obj &
-	be_callc.obj
+	.\$(OBJDIR)\back\be_machine.obj &
+	.\$(OBJDIR)\back\be_w.obj &
+	.\$(OBJDIR)\back\be_alloc.obj &
+	.\$(OBJDIR)\back\be_inline.obj &
+	.\$(OBJDIR)\back\be_runtime.obj &
+	.\$(OBJDIR)\back\be_task.obj &
+	.\$(OBJDIR)\back\be_callc.obj
 
 EU_BACKEND_RUNNER_OBJECTS = &
-	main-.obj &
-	init-.obj &
-	file.obj &
-	machine.obj &
-	0ackend.obj &
-	pathopen.obj &
-	backend.obj &
-	compress.obj
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\file.obj &
+	.\$(OBJDIR)\machine.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\0ackend.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\compress.obj
 
-EU_TRANSLATED_FILES =  &
-	0ackend.c &
-	backend.c &
-	c_dec0.c &
-	c_dec1.c &
-	c_decl.c &
-	c_out.c &
-	compil_0.c &
-	compil_1.c &
-	compil_2.c &
-	compil_3.c &
-	compil_4.c &
-	compil_5.c &
-	compil_6.c &
-	compil_7.c &
-	compil_8.c &
-	compil_9.c &
-	compile.c &
-	compress.c &
-	ec.c &
-	emit.c &
-	emit_0.c &
-	emit_1.c &
-	error.c &
-	file.c &
-	get.c &
-	global.c &
-	init-.c &
-	int.c &
-	machine.c &
-	main-.c &
-	main-0.c &
-	main.c &
-	misc.c &
-	parser.c &
-	parser_0.c &
-	parser_1.c &
-	pathopen.c &
-	scanne_0.c &
-	scanner.c &
-	sort.c &
-	symtab.c &
-	symtab_0.c &
-	traninit.c &
-	wildcard.c 
+EU_DOS_OBJECTS = &
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\main-0.obj &
+	.\$(OBJDIR)\int.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\machine.obj &
+	.\$(OBJDIR)\c_out.obj &
+	.\$(OBJDIR)\symtab.obj &
+	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\scanner.obj &
+	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\file.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\emit.obj &
+	.\$(OBJDIR)\emit_0.obj &
+	.\$(OBJDIR)\emit_1.obj &
+	.\$(OBJDIR)\parser.obj &
+	.\$(OBJDIR)\parser_0.obj &
+	.\$(OBJDIR)\parser_1.obj &
+	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\main.obj &
+	.\$(OBJDIR)\init-.obj 
 	
-!ifndef MANAGED_MEM
+!ifeq MANAGED_MEM=1
 MEMFLAG = -DESIMPLE_MALLOC
 !endif
 
-!ifdef DEBUG
+!ifeq DEBUG 1
 DEBUGFLAG = /g3
 !endif
 
 all :  .SYMBOLIC
-	wmake -f makefile.wat clean interpreter
-	wmake -f makefile.wat clean translator
-	wmake -f makefile.wat clean library
-	wmake -f makefile.wat clean backend
+	wmake -f makefile.wat interpreter
+	wmake -f makefile.wat translator
+	wmake -f makefile.wat library
+	wmake -f makefile.wat backend
+	wmake -f makefile.wat dos
+	wmake -f makefile.wat library OS=DOS
 
 clean : .SYMBOLIC
-	-del /Q $(EU_TRANSLATED_FILES)
-	-if exist *.obj del *.obj
-	-if exist *.lbc del *.lbc
-	-if exist *.ilk del *.ilk
-	-if exist *.pch del *.pch
+	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h
+	-del /Q /S intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
+
+!ifeq OS DOS
+OSFLAG=EDOS
+LIBTARGET=ec.lib
+!else
+OSFLAG=EWINDOWS
+LIBTARGET=ecw.lib
+!endif
 
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG)
-BE_FLAGS = /ol /dEWINDOWS /dEWATCOM  /dEOW $(%ERUNTIME) $(MEMFLAG) $(DEBUGFLAG)
+BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(MEMFLAG) $(DEBUGFLAG)
 
-library : .SYMBOLIC ecw.lib
+builddirs : .SYMBOLIC
+	if not exist intobj mkdir intobj
+	if not exist transobj mkdir transobj
+	if not exist libobj mkdir libobj
+	if not exist backobj mkdir backobj
+	if not exist intobj\back mkdir intobj\back
+	if not exist transobj\back mkdir transobj\back
+	if not exist libobj\back mkdir libobj\back
+	if not exist dosobj mkdir dosobj
+	if not exist dosobj\back mkdir dosobj\back
+	if not exist doslibobj mkdir doslibobj
+	if not exist doslibobj mkdir doslibobj\back
+	
+library : .SYMBOLIC builddirs
+	wmake -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-runtime: .SYMBOLIC
+runtime: .SYMBOLIC 
 	set ERUNTIME=/dERUNTIME
 
 ecw.lib : runtime $(EU_LIB_OBJECTS)
 	wlib -q ecw.lib $(EU_LIB_OBJECTS)
 
+ec.lib : runtime $(EU_LIB_OBJECTS)
+	
 
-interpreter_objects : .SYMBOLIC int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@%create int.lbc
-	@%append int.lbc option quiet
-	@%append int.lbc option caseexact
-	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append int.lbc file %i
+interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\int.lbc
+	@%append .\$(OBJDIR)\int.lbc option quiet
+	@%append .\$(OBJDIR)\int.lbc option caseexact
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
 exw.exe : interpreter_objects 
-	wlink SYS nt_win op maxe=25 op q op symf op el @int.lbc name exw.exe
+	wlink SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
 	wrc -q -ad exw.res exw.exe
 
 exwc.exe : interpreter_objects 
-	wlink SYS nt op maxe=25 op q op symf op el @int.lbc name exwc.exe
+	wlink SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exwc.exe
 	wrc -q -ad exw.res exwc.exe
 
-interpreter : .SYMBOLIC exw.exe exwc.exe
+interpreter : .SYMBOLIC builddirs 
+	wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
 	copy ecw.exe $(%EUDIR)\bin\
@@ -228,199 +239,234 @@ install : .SYMBOLIC
 	copy backendc.exe $(%EUDIR)\bin\
 	copy ecw.lib $(%EUDIR)\bin\
 	
-ecw.exe : ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@%create ec.lbc
-	@%append ec.lbc option quiet
-	@%append ec.lbc option caseexact
-	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append ec.lbc file %i
-	wlink SYS nt op maxe=25 op q op symf op el @ec.lbc name ecw.exe
+ecw.exe : $(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\ec.lbc
+	@%append .\$(OBJDIR)\ec.lbc option quiet
+	@%append .\$(OBJDIR)\ec.lbc option caseexact
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	wlink SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\ec.lbc name ecw.exe
 	wrc -q -ad exw.res ecw.exe
 
-translator : .SYMBOLIC ecw.exe
 
-backendw.exe : backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@%create exwb.lbc
-	@%append exwb.lbc option quiet
-	@%append exwb.lbc option caseexact
-	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append exwb.lbc file %i
-	wlink SYS nt_win op maxe=25 op q op symf op el @exwb.lbc name backendw.exe
+translator : .SYMBOLIC builddirs
+	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+
+backendw.exe : $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS)
+	@%create .\$(OBJDIR)\exwb.lbc
+	@%append .\$(OBJDIR)\exwb.lbc option quiet
+	@%append .\$(OBJDIR)\exwb.lbc option caseexact
+	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) ecw.lib) do @%append .\$(OBJDIR)\exwb.lbc file %i
+	wlink SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendw.exe
 	wrc -q -ad exw.res backendw.exe
-	wlink SYS nt op maxe=25 op q op symf op el @exwb.lbc name backendc.exe
+	wlink SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendc.exe
 	wrc -q -ad exw.res backendc.exe
-		
-backend : .SYMBOLIC backendw.exe
 
-int.c : int.ex $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
-	exwc.exe ec.ex int.ex
+
+backend : .SYMBOLIC builddirs
+	wmake -f makefile.wat backendw.exe EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+
+dos : .SYMBOLIC builddirs
+	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+
+ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\ex.lbc
+	@%append .\$(OBJDIR)\ex.lbc option quiet
+	@%append .\$(OBJDIR)\ex.lbc option caseexact
+	@%append .\$(OBJDIR)\ex.lbc option osname='CauseWay'
+	@%append .\$(OBJDIR)\ex.lbc libpath C:\WATCOM\lib386
+	@%append .\$(OBJDIR)\ex.lbc libpath C:\WATCOM\lib386\dos
+	@%append .\$(OBJDIR)\ex.lbc OPTION stub=C:\euphoria\bin\cwstub.exe
+	@%append .\$(OBJDIR)\ex.lbc format os2 le ^
+	@%append .\$(OBJDIR)\ex.lbc OPTION STACK=262144
+	@%append .\$(OBJDIR)\ex.lbc OPTION QUIET
+	@%append .\$(OBJDIR)\ex.lbc OPTION ELIMINATE
+	@%append .\$(OBJDIR)\ex.lbc OPTION CASEEXACT
+	@for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
+	wlink @.\$(OBJDIR)\ex.lbc name ex.exe
+	le23p ex.exe
+	cwc ex.exe
+
+.\$(OBJDIR)\main-.c : .\$(OBJDIR)\$(EU_TARGET)c
+	cd .\$(OBJDIR)
+	$(EX) ..\ec.ex ..\$(EU_TARGET)ex
+	cd ..
+
+$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
+	cd .\$(OBJDIR)
+	$(EX) ..\ec.ex ..\$(EU_TARGET)ex
+	cd ..
+
+.\$(OBJDIR)\int.obj :  .\$(OBJDIR)\int.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\main-.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\main-0.obj : $(OBJDIR)\main-0.c 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+
+.\$(OBJDIR)\mode.obj : $(OBJDIR)\mode.c 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 	
-ec.c : ec.ex $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
-	exwc.exe ec.ex ec.ex
+.\$(OBJDIR)\global.obj :.\global.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-backend.c : backend.ex $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
-	exwc.exe ec.ex backend.ex
+.\$(OBJDIR)\pathopen.obj :  .MULTIPLE ./pathopen.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-main-.obj :  .MULTIPLE
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\init-.obj :  .MULTIPLE ./$(OBJDIR)\init-.c 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-main-0.obj : .MULTIPLE  .\main-0.c 
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\file.obj :  .MULTIPLE ./$(OBJDIR)\file.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-global.obj : .MULTIPLE .\global.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\error.obj :  .MULTIPLE ./error.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-pathopen.obj :  .MULTIPLE ./pathopen.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\machine.obj :  .MULTIPLE ./machine.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-init-.obj :  .MULTIPLE ./init-.c 
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\symtab.obj :  .MULTIPLE ./symtab.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-file.obj :  .MULTIPLE ./file.c
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\symtab_0.obj :  .MULTIPLE ./symtab.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-error.obj :  .MULTIPLE ./error.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\scanner.obj :  .MULTIPLE ./scanner.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-machine.obj :  .MULTIPLE ./machine.c
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\scanne_0.obj :  .MULTIPLE ./scanner.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+	
+.\$(OBJDIR)\main.obj :  .MULTIPLE ./main.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-symtab.obj :  .MULTIPLE ./symtab.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\emit.obj :  .MULTIPLE ./emit.e 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-symtab_0.obj :  .MULTIPLE ./symtab.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\emit_0.obj :  .MULTIPLE ./emit.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-scanner.obj :  .MULTIPLE ./scanner.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\emit_1.obj :  .MULTIPLE ./emit.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-scanne_0.obj :  .MULTIPLE ./scanner.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\parser.obj :  .MULTIPLE ./parser.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-main.obj :  .MULTIPLE ./main.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\parser_0.obj :  .MULTIPLE ./parser.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-emit.obj :  .MULTIPLE ./emit.e 
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\parser_1.obj :  .MULTIPLE ./parser.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-emit_0.obj :  .MULTIPLE ./emit.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\0ackend.obj :  .MULTIPLE ./backend.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-emit_1.obj :  .MULTIPLE ./emit.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\backend.obj :  .MULTIPLE ./backend.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-parser.obj :  .MULTIPLE ./parser.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compress.obj :  .MULTIPLE ./compress.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-parser_0.obj :  .MULTIPLE ./parser.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\c_out.obj :  .MULTIPLE ./c_out.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-parser_1.obj :  .MULTIPLE ./parser.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\ec.obj :  .MULTIPLE ./ec.ex 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-0ackend.obj :  .MULTIPLE ./backend.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\c_decl.obj :  .MULTIPLE ./c_decl.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-backend.obj :  .MULTIPLE ./backend.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\c_dec0.obj :  .MULTIPLE ./c_decl.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compress.obj :  .MULTIPLE ./compress.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\c_dec1.obj :  .MULTIPLE ./c_decl.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
+.\$(OBJDIR)\compile.obj :  .MULTIPLE ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-c_out.obj :  .MULTIPLE ./c_out.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_0.obj :  .MULTIPLE ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-ec.obj :  .MULTIPLE ./ec.ex 
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_1.obj :  .MULTIPLE ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-c_decl.obj :  .MULTIPLE ./c_decl.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_2.obj :  .MULTIPLE ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-c_dec0.obj :  .MULTIPLE ./c_decl.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_3.obj :  .MULTIPLE ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-c_dec1.obj :  .MULTIPLE ./c_decl.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_4.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compile.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_5.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_0.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_6.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_1.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_7.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_2.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_8.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_3.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_9.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_4.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\compil_A.obj :  ./compile.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_5.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\traninit.obj :  ./traninit.e
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_6.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\misc.obj : .\$(OBJDIR)\main-.c 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_7.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\get.obj :  .\$(OBJDIR)\main-.c 
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_8.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\sort.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-compil_9.obj :  .MULTIPLE ./compile.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\wildcard.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-traninit.obj :  .MULTIPLE ./traninit.e
-	$(CC) $(FE_FLAGS) $*.c
+.\$(OBJDIR)\back\be_execute.obj : ./be_execute.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS)  $^&.c -fo=.\$(OBJDIR)\back\$^.
 
-misc.obj :  .MULTIPLE .\misc.c 
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_task.obj : ./be_task.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-get.obj :  .MULTIPLE ./get.c 
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_main.obj : ./be_main.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-sort.obj :  .MULTIPLE ./sort.c
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_alloc.obj : ./be_alloc.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-wildcard.obj :  .MULTIPLE ./wildcard.c
-	$(CC) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_callc.obj : ./be_callc.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_execute.obj : ./be_execute.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS)  $[@
+.\$(OBJDIR)\back\be_inline.obj : ./be_inline.c
+	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_task.obj : ./be_task.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_machine.obj : ./be_machine.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_main.obj : ./be_main.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_rterror.obj : ./be_rterror.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_alloc.obj : ./be_alloc.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_syncolor.obj : ./be_syncolor.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_callc.obj : ./be_callc.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_runtime.obj : ./be_runtime.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_inline.obj : ./be_inline.c
-	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_symtab.obj : ./be_symtab.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-be_machine.obj : ./be_machine.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
-
-be_rterror.obj : ./be_rterror.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
-
-be_syncolor.obj : ./be_syncolor.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
-
-be_runtime.obj : ./be_runtime.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
-
-be_symtab.obj : ./be_symtab.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
-
-be_w.obj : ./be_w.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $[@
+.\$(OBJDIR)\back\be_w.obj : ./be_w.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@

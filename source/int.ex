@@ -4,13 +4,8 @@
 
 without type_check
 
-global constant TRUE = 1, FALSE = 0
-
-global constant TRANSLATE = FALSE,  
-		INTERPRET = TRUE,
-		BIND = FALSE
-		
-global constant EXTRA_CHECK = FALSE 
+include mode.e
+set_mode( "interpret", 0 )
 
 -- standard Euphoria includes
 include misc.e

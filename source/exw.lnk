@@ -18,6 +18,9 @@ FILE parser_0.obj
 FILE parser_1.obj
 FILE backend.obj
 FILE compress.obj
+FILE mode.obj
+FILE c_out.obj
+FILE symtab_0.obj
 FILE be_execute.obj
 FILE be_task.obj
 FILE be_main.obj

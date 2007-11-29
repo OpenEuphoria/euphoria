@@ -6,6 +6,12 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
+include wildcard.e
+
+include global.e
+include reswords.e
+include symtab.e
+
 -- Translator
 global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
 

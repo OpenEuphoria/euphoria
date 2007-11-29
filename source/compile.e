@@ -10,6 +10,8 @@
 -- until the final pass.
 
 include global.e
+include mode.e as mode
+include c_decl.e
 
 constant MAXLEN = MAXINT - 1000000  -- assumed maximum length of a sequence
 
@@ -4844,7 +4846,7 @@ function hex_char(integer c)
 end function
 
 without warning
-global procedure BackEnd(atom ignore)
+procedure BackEnd(atom ignore)
 -- Translate the IL into C 
     integer w
     symtab_index tp
@@ -5255,8 +5257,9 @@ global procedure BackEnd(atom ignore)
     end if
 
 end procedure
+mode:set_backend( routine_id("BackEnd") )
 
-global procedure OutputIL()
+procedure OutputIL()
 -- not used
 end procedure
-
+set_output_il( routine_id("OutputIL" ))

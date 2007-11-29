@@ -1,13 +1,17 @@
+#!/bin/bash
 # build everything for Linux
 echo Translator library
+chmod +x gnulib
 ./gnulib
 echo moving translator library to euphoria/bin
 mv ecu.a $EUDIR/bin
 
 echo Interpreter
+chmod +x imakeu
 ./imakeu
 
 echo Back-end for binding
+chmod +x bmakeu
 ./bmakeu
 
 echo Translator 

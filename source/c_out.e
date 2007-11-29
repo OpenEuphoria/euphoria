@@ -2,6 +2,8 @@
 --
 -- Translator Routines for outputting C code
 
+include global.e
+
 -- gtype values, TRANSLATOR:
 global constant TYPE_NULL = 0,    -- initial value for ORing of types
 	 TYPE_INTEGER = 1, -- definitely in Euphoria integer form

@@ -17,6 +17,9 @@ parser_1.c
 backend.c
 compress.c
 main.c
+mode.c
+symtab_0.c
+c_out.c
 be_main.c
 be_symtab.c
 be_callc.c

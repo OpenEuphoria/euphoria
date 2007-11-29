@@ -17,6 +17,9 @@ compress.o
 backend.o
 main.o
 pathopen.o
+mode.o
+c_out.o
+symtab_0.o
 be_main.o
 be_callc.o
 be_w.o

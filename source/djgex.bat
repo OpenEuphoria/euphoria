@@ -33,6 +33,9 @@ SET FEFLAGS=-c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer
 @gcc %FEFLAGS% backend.c
 @gcc %FEFLAGS% main.c
 @gcc %FEFLAGS% pathopen.c
+@gcc %FEFLAGS% mode.c
+@gcc %FEFLAGS% symtab_0.c
+@gcc %FEFLAGS% c_out.c
 
 echo compiling the back-end files...
 gcc -c @gopts -fomit-frame-pointer be_main.c

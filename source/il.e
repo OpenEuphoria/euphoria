@@ -11,6 +11,9 @@ include machine.e
 include file.e
 include compress.e
 include backend.e
+include reswords.e
+include scanner.e
+include wildcard.e
 
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con
@@ -213,7 +216,7 @@ procedure usage()
     fatal(  "          [-out shrouded_file] filename")
 end procedure
 
-global function extract_options(sequence cl)
+function extract_options(sequence cl)
 -- process the command line for any options 
     sequence option
     integer op
@@ -271,6 +274,7 @@ global function extract_options(sequence cl)
     end while
     return cl
 end function
+set_extract_options( routine_id("extract_options") )
 
 integer check_place -- place where size and checksum are stored
 
@@ -327,7 +331,7 @@ procedure store_checksum(sequence backend_name)
     puts(bound_file, base200(checksum))
 end procedure
 
-global procedure OutputIL()
+procedure OutputIL()
 -- BIND only: output the IL: symbol table, code, line table, etc.
     integer out, be, m, c, ic, size
     sequence out_name, last6, backend_name
@@ -492,4 +496,4 @@ global procedure OutputIL()
 	end if
     end if
 end procedure
-
+set_output_il( routine_id("OutputIL") )

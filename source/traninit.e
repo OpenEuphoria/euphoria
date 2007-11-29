@@ -2,6 +2,13 @@
 --
 -- Translator initialization
 include get.e
+include common.e
+include global.e
+include mode.e as mode
+include c_out.e
+include c_decl.e
+include error.e
+include compile.e
 
 global boolean wat_option, djg_option, bor_option, lcc_option
 wat_option = FALSE
@@ -9,10 +16,11 @@ djg_option = FALSE
 bor_option = FALSE
 lcc_option = FALSE 
 
-global function extract_options(sequence s)
+function extract_options(sequence s)
 -- dummy    
     return s
 end function
+set_extract_options( routine_id("extract_options") )
 
 function upper(sequence s)
     for i=1 to length(s) do
@@ -181,7 +189,7 @@ procedure OpenCFiles()
     end if
 end procedure
 
-global procedure InitBackEnd(integer c)
+procedure InitBackEnd(integer c)
 -- Initialize special stuff for the translator
     
     if c = 1 then
@@ -235,5 +243,4 @@ global procedure InitBackEnd(integer c)
 	end if
     end if
 end procedure
-
-
+mode:set_init_backend( routine_id("InitBackEnd") )

@@ -7,6 +7,7 @@ without type_check
 include file.e
 include machine.e
 include wildcard.e
+include common.e
 include reswords.e
 include compress.e
 include misc.e
@@ -14,22 +15,7 @@ include misc.e
 ----------------------------------------------------------------------
 -- copied from global.e to avoid bringing in all of global.e
 
-constant ELINUX = platform() = LINUX 
-constant EBSD = 0 -- set manually to 1 on FreeBSD - see also global.e
 
-global integer PATH_SEPARATOR, SLASH
-global sequence SLASH_CHARS
-if ELINUX then
-    PATH_SEPARATOR = ':' -- in PATH environment variable
-    SLASH = '/'          -- preferred on Linux/FreeBSD
-    SLASH_CHARS =  "/"   -- special chars allowed in a path
-else
-    PATH_SEPARATOR = ';'
-    SLASH = '\\'
-    SLASH_CHARS = "\\/:"
-end if
-
-global sequence file_name
 file_name = {""} -- for now
 
 global sequence file_include  -- remember which files were included where
@@ -41,7 +27,7 @@ warning_list = {}
 
 include pathopen.e
 
-global sequence misc, SymTab, slist
+global sequence misc, slist
 global integer AnyTimeProfile, AnyStatementProfile, sample_size, 
 	       gline_number, max_stack_per_call, il_file
 il_file = 0

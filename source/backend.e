@@ -3,10 +3,13 @@
 -- Store front-end data structures in memory
 -- Called from (a) interpreter front-end
 --          or (b) backend.ex (using different s.t. offsets)
+include mode.e as mode
+--include global.e
 
-global procedure InitBackEnd(integer x)
+procedure InitBackEnd(integer x)
 -- not needed by Interpreter or Binder
 end procedure
+mode:set_init_backend( routine_id("InitBackEnd") )
 
 constant ST_ENTRY_SIZE = 52  -- size (bytes) of back-end symbol table entry
 			     -- for interpreter. Fixed size for all entries.
@@ -14,7 +17,7 @@ constant ST_ENTRY_SIZE = 52  -- size (bytes) of back-end symbol table entry
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
 
 without warning
-global procedure BackEnd(integer il_file)
+procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
 -- They will be replaced in the back-end.
@@ -246,4 +249,4 @@ global procedure BackEnd(integer il_file)
     
     machine_proc(65, {st, sl, ms, lit, include_info})
 end procedure
-
+mode:set_backend( routine_id("BackEnd") )

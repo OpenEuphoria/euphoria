@@ -1,6 +1,10 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 
+include common.e
+include misc.e
+include machine.e
+
 atom oem2char,convert_buffer
 integer convert_length
 global atom u32,fc_table,char_upper

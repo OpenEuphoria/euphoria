@@ -33,6 +33,9 @@ wcc386 %FLAGS% parser_1.c
 wcc386 %FLAGS% backend.c
 wcc386 %FLAGS% compress.c
 wcc386 %FLAGS% main.c
+wcc386 %FLAGS% mode.c
+wcc386 %FLAGS% c_out.c
+wcc386 %FLAGS% symtab_0.c
 
 echo compiling the back-end files...
 REM /dINT_CODES /dHEAP_CHECK /dINT_CODES  -- next line for User Source only

@@ -2,16 +2,13 @@
 --
 -- Euphoria 3.1
 -- Parser
+include global.e
+include emit.e
+include symtab.e
+include scanner.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
-
-global integer max_stack_per_call  -- max stack required per (recursive) call 
-
-global integer sample_size         -- profile_time sample size 
-sample_size = 0
-
-max_stack_per_call = 1
 
 --*****************
 -- Local variables 
@@ -297,6 +294,9 @@ procedure UndefinedVar(symtab_index s)
 	end for
 	
 	CompileErr(errmsg)
+
+    elsif length(symbol_resolution_warning) then
+	Warning( symbol_resolution_warning )
     end if
 end procedure
 
@@ -425,6 +425,10 @@ procedure Factor()
 	tok_match(RIGHT_ROUND)
 
     elsif find(id, {FUNC, TYPE, QUALIFIED_FUNC, QUALIFIED_TYPE}) then
+	if id = FUNC or id = TYPE then
+	    -- to warn if not in include tree
+	    UndefinedVar( tok[T_SYM] )
+	end if
 	e = SymTab[tok[T_SYM]][S_EFFECT]
 	if e then
 	    -- the routine we are calling has side-effects
@@ -1358,6 +1362,10 @@ procedure Statement_list()
 	    Assignment(tok)
 	    
 	elsif id = PROC or id = QUALIFIED_PROC then
+	    if id = PROC then
+	    	-- possibly warn for non-inclusion
+	    	UndefinedVar( tok[T_SYM] )
+	    end if
 	    StartSourceLine(TRUE)
 	    Procedure_call(tok)
 	    
@@ -1737,6 +1745,10 @@ global procedure parser()
 
 	elsif id = PROC or id = QUALIFIED_PROC then
 	    StartSourceLine(TRUE)
+	    if id = PROC then
+		-- to check for warning if proc not in include tree
+		UndefinedVar( tok[T_SYM] )
+	    end if
 	    Procedure_call(tok)
 	    ExecCommand()
 	    

@@ -195,7 +195,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
    which should normally only be done once for an indirectly-callable 
    routine. */
 {
-    symtab_ptr proc, s, global_found, stop, current_s;
+    symtab_ptr proc, s, global_found, stop;
     char *colon;
     char *p;
     char *ns;
@@ -269,31 +269,29 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
     
     else {
 	/* look up simple unqualified name */
-        current_s = 0;
-	if (proc != TopLevelSub) {
+	
+	if (proc != TopLevelSub) {  
 	    /* inside a routine - check PRIVATEs and LOOP_VARs */
 	    for (s = proc->next; 
 		 s != NULL && 
 		 (s->scope == S_PRIVATE || s->scope == S_LOOP_VAR);
 		s = s->next) {
 		if (strcmp(name, s->name) == 0)
-                    current_s = s;
-	    }
-            if (current_s != 0) return current_s;
+		    return s;           
+	    }    
 	}
 
 	/* try to match a LOCAL or GLOBAL symbol in the same source file */
 	for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
 	    if (s->file_no == file && 
-	      (s->scope == S_LOCAL || s->scope == S_GLOBAL ||
-	      (proc == TopLevelSub && s->scope == S_GLOOP_VAR)) &&
-	      strcmp(name, s->name) == 0) {
+		(s->scope == S_LOCAL || s->scope == S_GLOBAL || 
+		(proc == TopLevelSub && s->scope == S_GLOOP_VAR)) &&
+		strcmp(name, s->name) == 0) {  
 		// shouldn't really be able to see GLOOP_VARs unless we are
 		// currently inside the loop - only affects interactive var display
-		current_s = s;
+		return s;
 	    }
-	}
-        if (current_s != 0) return current_s;
+	} 
 
 	/* try to match a single earlier GLOBAL symbol */
 	global_found = NULL;

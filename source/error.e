@@ -4,6 +4,8 @@
 -- Compile-time Error Handling
 
 include machine.e
+include global.e
+include reswords.e
 
 global constant STDIN = 0, STDERR = 2
 

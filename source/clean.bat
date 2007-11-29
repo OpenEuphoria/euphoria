@@ -36,3 +36,6 @@ del 0ACKEND.C
 del MAIN-.C
 del MAIN-.H
 del INIT-.C
+del MODE.C
+del C_OUT.C
+del SYMTAB_0.c

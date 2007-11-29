@@ -17,13 +17,11 @@
 
 without type_check -- FASTER
 
-global constant TRUE = 1, FALSE = 0
 
-global constant INTERPRET = TRUE,
-		TRANSLATE = FALSE,
-		BIND = FALSE
-		
-global constant EXTRA_CHECK = FALSE 
+
+include mode.e
+set_mode( "interpret", 1 )		
+
 
 -- standard Euphoria includes
 include misc.e

@@ -3,20 +3,23 @@
 -- Euphoria 3.1
 -- Global declarations 
 
+include mode.e as mode
+include misc.e
+include common.e
+
 global constant INTERPRETER_VERSION = "3.1.1"
 global constant  TRANSLATOR_VERSION = "3.1.1"
+
+global constant INTERPRET = mode:get_interpret(),
+		TRANSLATE = mode:get_translate(),
+		BIND      = mode:get_bind()
+global constant EXTRA_CHECK = mode:get_extra_check()
 
 global type boolean(integer x)
     return x = TRUE or x = FALSE
 end type
 
 global boolean mybsd -- set to true if very little RAM available (build fails)
-
--- operating system:
-global constant ELINUX = platform() = LINUX,
-		EWINDOWS = platform() = WIN32,
-		EDOS = platform() = DOS32,
-		EBSD = FALSE -- set manually - see also backend.ex
 
 -- specific C compiler used (one may be TRUE)
 global constant EWATCOM = TRUE,
@@ -40,18 +43,6 @@ elsif EWINDOWS then
     version_name = "WIN32"
 elsif ELINUX then 
     version_name = "Linux"
-end if
-
-global integer PATH_SEPARATOR, SLASH
-global sequence SLASH_CHARS
-if ELINUX then
-    PATH_SEPARATOR = ':' -- in PATH environment variable
-    SLASH = '/'          -- preferred on Linux/FreeBSD
-    SLASH_CHARS =  "/"   -- special chars allowed in a path
-else
-    PATH_SEPARATOR = ';'
-    SLASH = '\\'
-    SLASH_CHARS = "\\/:"
 end if
 
 -- common fields for all symbols, literal constants and temporaries 
@@ -208,9 +199,6 @@ global constant NOVALUE = -1.295837195871e307
 -- as we will not know the value of a variable at compile time.
 -- (NaN could be used, but it's not 100% portable).
 
-global sequence SymTab  -- the symbol table
-SymTab = {}
-
 
 --------- Global Types for Debugging -----------
 
@@ -254,9 +242,8 @@ end type
 ---------------- Global Variables ----------------------
 
 global object eudir           -- path to Euphoria directory 
-global sequence file_name     -- names of all the source files 
 global sequence file_include  -- remember which files were included where
-file_name = {}
+file_name = {} -- declared in common.e
 file_include = {{}}
 global sequence file_name_entered -- interactively entered file name
 file_name_entered = ""
@@ -315,3 +302,12 @@ global constant SOP_TRACE = #01,      -- statement trace
 	 SOP_PROFILE_TIME = #02       -- time profile
 
 
+global integer previous_op  -- the previous opcode emitted
+
+global integer max_stack_per_call  -- max stack required per (recursive) call 
+global integer sample_size         -- profile_time sample size 
+sample_size = 0
+
+max_stack_per_call = 1
+
+global sequence symbol_resolution_warning

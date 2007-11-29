@@ -2,7 +2,8 @@
 --
 -- Euphoria 3.1
 -- KEYWORDS and BUILTIN ROUTINES
-
+include global.e
+include reswords.e
 global constant 
     K_NAME = 1,      -- string
     K_SCOPE = 2,     -- keyword or predefined 

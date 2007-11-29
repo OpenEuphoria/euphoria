@@ -18,6 +18,7 @@ wcc386 %FLAGS% 0ackend.c
 wcc386 %FLAGS% pathopen.c
 wcc386 %FLAGS% backend.c
 wcc386 %FLAGS% compress.c
+wcc386 %FLAGS% mode.c
 
 echo compiling the back-end files...
 REM /dINT_CODES /dHEAP_CHECK

@@ -6,6 +6,10 @@
 include machine.e
 include file.e
 
+include global.e
+include reswords.e
+include error.e
+include symtab.e
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
 constant MAX_FILE = 256       -- maximum number of source files

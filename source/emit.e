@@ -3,6 +3,11 @@
 -- Euphoria 3.1
 -- Routines to emit the IL opcode stream
 
+include reswords.e
+include global.e
+include symtab.e
+include scanner.e
+
 global integer op_info1, op_info2
 global integer optimized_while
 
@@ -18,7 +23,6 @@ max_params = 0
 global integer last_max_params
 last_max_params = 0
 
-global integer previous_op  -- the previous opcode emitted
 previous_op = -1  
 
 global sequence current_sequence  -- stack needed by $ operation

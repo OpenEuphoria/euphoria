@@ -179,9 +179,6 @@ char *EMalloc();
 #else
 #include "alloc.h"
 #endif
-#ifndef EWINDOWS  // !defined(EBORLAND) && !defined(ELCC)
-char *malloc();
-#endif
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();

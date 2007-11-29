@@ -27,6 +27,9 @@ lcc %FE_FLAGS% parser_1.c
 lcc %FE_FLAGS% backend.c
 lcc %FE_FLAGS% compress.c
 lcc %FE_FLAGS% main.c
+lcc %FE_FLAGS% mode.c
+lcc %FE_FLAGS% c_out.c
+lcc %FE_FLAGS% symtab_0.c
 
 echo translating the backend...
 SET BE_FLAGS=-w -O -Zp4 -DEWINDOWS -DELCC -DINT_CODES
