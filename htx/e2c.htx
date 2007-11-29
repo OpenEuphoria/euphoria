@@ -219,6 +219,16 @@
     or 
        <b>ec allsorts</b>
  </pre>
+ On Windows you would type:
+ <pre>       <b>ecw taskwire.exw</b>
+    or 
+       <b>ecw taskwire</b>
+ </pre>
+ On Linux/FreeBSD you would type:
+ <pre>       <b>ecu qsort.exu</b>
+    or 
+       <b>ecu qsort</b>
+ </pre>
  but instead of running the allsorts.ex program, the
  <font color="#0066CC"><b>Translator</b></font> will
  create several C source files. Anyone can run the 
