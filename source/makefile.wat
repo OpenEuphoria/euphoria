@@ -1,12 +1,15 @@
 # OpenWatcom makefile for Euphoria (Win32)
 # Syntax:
-#   Interpreter       (exwc.exe):  wmake -f makefile.wat interpreter
-#   Translator         (ecw.exe):  wmake -f makefile.wat translator
-#   Translator Library (ecw.lib):  wmake -f makefile.wat library
-#   Backend       (backendw.exe):  wmake -f makefile.wat backend 
-#                 (backendc.exe)
-#               Make all targets:  wmake -f makefile.wat
-#                                  wmake -f makefile.wat all
+#   Interpreter(exw.exe, exwc.exe):  wmake -f makefile.wat interpreter
+#   Translator           (ecw.exe):  wmake -f makefile.wat translator
+#   Translator Library   (ecw.lib):  wmake -f makefile.wat library
+#   Backend         (backendw.exe):  wmake -f makefile.wat backend 
+#                   (backendc.exe)
+#                 Make all targets:  wmake -f makefile.wat
+#                                    wmake -f makefile.wat all
+#          Make all Win32 Binaries:  wmake -f makefile.wat winall
+#          Make all Dos32 Binaries:  wmake -f makefile.wat dosall
+#
 #   Options:
 #                    MANAGED_MEM:  Define this to use Euphoria's memory cache.
 #                                  The default is to use straight HeapAlloc/HeapFree calls. ex:
@@ -165,10 +168,16 @@ DEBUGFLAG = /g3
 !endif
 
 all :  .SYMBOLIC
+	wmake -f makefile.wat winall
+	wmake -f makefile.wat dosall
+
+winall : .SYMBOLIC
 	wmake -f makefile.wat interpreter
 	wmake -f makefile.wat translator
 	wmake -f makefile.wat library
 	wmake -f makefile.wat backend
+
+dosall : .SYMBOLIC
 	wmake -f makefile.wat dos
 	wmake -f makefile.wat library OS=DOS
 
@@ -199,7 +208,7 @@ builddirs : .SYMBOLIC
 	if not exist dosobj mkdir dosobj
 	if not exist dosobj\back mkdir dosobj\back
 	if not exist doslibobj mkdir doslibobj
-	if not exist doslibobj mkdir doslibobj\back
+	if not exist doslibobj\back mkdir doslibobj\back
 	
 library : .SYMBOLIC builddirs
 	wmake -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -286,6 +295,7 @@ ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	le23p ex.exe
 	cwc ex.exe
 
+
 .\$(OBJDIR)\main-.c : .\$(OBJDIR)\$(EU_TARGET)c
 	cd .\$(OBJDIR)
 	$(EX) ..\ec.ex ..\$(EU_TARGET)ex
@@ -302,11 +312,11 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\main-.obj :  .\$(OBJDIR)\main-.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\main-0.obj : $(OBJDIR)\main-0.c 
+.\$(OBJDIR)\main-0.obj : $(OBJDIR)\main-0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 
-.\$(OBJDIR)\mode.obj : $(OBJDIR)\mode.c 
+.\$(OBJDIR)\mode.obj : $(OBJDIR)\mode.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 	
 .\$(OBJDIR)\global.obj :.\global.e

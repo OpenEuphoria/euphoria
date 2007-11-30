@@ -1,14 +1,14 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
+-- Euphoria 3.2
 -- Global declarations 
 
 include mode.e as mode
 include misc.e
 include common.e
 
-global constant INTERPRETER_VERSION = "3.1.1"
-global constant  TRANSLATOR_VERSION = "3.1.1"
+global constant INTERPRETER_VERSION = "3.2 (development)"
+global constant  TRANSLATOR_VERSION = "3.2 (development)"
 
 global constant INTERPRET = mode:get_interpret(),
 		TRANSLATE = mode:get_translate(),
