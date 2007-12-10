@@ -178,6 +178,11 @@ static char *predefined[] = {
     "task_clock_start",
     "find_from",
     "match_from",
+    "poke2",
+    "peek2s",
+    "peek2u",
+    "peeks",
+    "peek_string",
     NULL
 };
 

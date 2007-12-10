@@ -265,6 +265,79 @@ global function peek(object x)
     end if
 end function
 
+function original_peeks(object x)
+    return peeks(x) -- Euphoria's normal peek
+end function
+
+-- override "peeks" with debug peek
+global function peeks(object x)
+-- safe version of peek 
+    integer len
+    atom a
+    
+    if atom(x) then
+	len = 1
+	a = x
+    else
+	len = x[2]
+	a = x[1]
+    end if
+    if safe_address(a, len) then
+	return original_peeks(x)
+    else
+	die("BAD PEEK" & bad_address(a))
+    end if
+end function
+
+function original_peek2u(object x)
+    return peek2u(x) -- Euphoria's normal peek2u
+end function
+
+without warning
+-- override "peek2u" with debug peek
+global function peek2u(object x)
+-- safe version of peek 
+    integer len
+    atom a
+    
+    if atom(x) then
+	len = 1
+	a = x
+    else
+	len = x[2] * 2
+	a = x[1]
+    end if
+    if safe_address(a, len) then
+	return original_peek2u(x)
+    else
+	die("BAD PEEK2U" & bad_address(a))
+    end if
+end function
+
+function original_peek2s(object x)
+    return peeks(x) -- Euphoria's normal peek
+end function
+
+-- override "peek2s" with debug peek
+global function peek2s(object x)
+-- safe version of peek 
+    integer len
+    atom a
+    
+    if atom(x) then
+	len = 1
+	a = x
+    else
+	len = x[2] * 2
+	a = x[1]
+    end if
+    if safe_address(a, len) then
+	return original_peek2s(x)
+    else
+	die("BAD PEEK2S" & bad_address(a))
+    end if
+end function
+
 function original_peek4s(object x)
     return peek4s(x) -- Euphoria's normal peek
 end function
@@ -313,6 +386,31 @@ global function peek4u(object x)
     end if
 end function
 
+function original_peek_string(object x)
+    return peek(x) -- Euphoria's normal peek_string
+end function
+
+without warning
+-- override "peek_string" with debug peek_string
+global function peek_string(object x)
+-- safe version of peek_string 
+    integer len
+    atom a
+    
+    len = 1
+    while 1 do
+	if safe_address( a, len ) then
+	    if not original_peek( a + len - 1 ) then
+		exit
+	    else
+		len += 1
+	    end if
+	else
+	    die("BAD PEEK_STRING" & bad_address(a))
+    end while
+    return original_peek_string(x)
+end function
+
 procedure original_poke(atom a, object v)
     poke(a, v)
 end procedure
@@ -328,6 +426,26 @@ global procedure poke(atom a, object v)
     end if
     if safe_address(a, len) then
 	original_poke(a, v)
+    else
+	die("BAD POKE" & bad_address(a))
+    end if
+end procedure
+
+procedure original_poke2(atom a, object v)
+    poke(a, v)
+end procedure
+
+global procedure poke2(atom a, object v)
+-- safe version of poke2 
+    integer len
+    
+    if atom(v) then
+	len = 1
+    else
+	len = length(v) * 4
+    end if
+    if safe_address(a, len) then
+	original_poke2(a, v)
     else
 	die("BAD POKE" & bad_address(a))
     end if

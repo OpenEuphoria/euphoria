@@ -667,7 +667,7 @@ global procedure emit_op(integer op)
 	
     -- 1 input, 1 output 
     elsif find(op, {RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, 
-		    TASK_STATUS}) then
+		    TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING}) then
 	cont11ii(op, TRUE)
 	    
     elsif op = UMINUS then
@@ -748,7 +748,7 @@ global procedure emit_op(integer op)
 	
     -- 2 inputs, 0 outputs 
     elsif find(op, {SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
-		    C_PROC, PIXEL, POKE, POKE4, TASK_SCHEDULE}) then
+		    C_PROC, PIXEL, POKE, POKE4, TASK_SCHEDULE, POKE2}) then
 	emit_opcode(op)
 	b = Pop()
 	emit_addr(Pop())

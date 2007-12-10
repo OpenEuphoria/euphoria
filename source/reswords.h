@@ -193,9 +193,15 @@
 #define FIND_FROM  178
 #define MATCH_FROM  179
 
-#define MAX_OPCODE 179  /* remember to update reswords.e, opnames.e,
+#define POKE2 180
+#define PEEK2S 181
+#define PEEK2U 182
+#define PEEKS 183
+#define PEEK_STRING 184
+#define MAX_OPCODE 184  /* remember to update reswords.e, opnames.e,
 			   opnames.h, optable[], localjumptab[]
-			   in be_execute.c, be_runtime.c. redef.h, and maybe 
+			   in be_execute.c, be_runtime.c. redef.h, 
+			   emit.e, keylist.e, compile.e and maybe 
 			   Also, run makename.ex */
 
 #define END_OF_FILE_CHAR 26    

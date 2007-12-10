@@ -342,7 +342,12 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-{x, x}  // 179
+{x, x},  // 179
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x}
 };
 
 int TraceOn = FALSE;
@@ -3214,7 +3219,7 @@ object_ptr v_elem;
 }
 
 
-object EPrintf(int file_no, s1_ptr format, s1_ptr values)
+object EPrintf(int file_no, object format_obj, object values)
 /* formatted print */
 /* file_no could be DOING_SPRINTF (for sprintf) */
 {
@@ -3229,6 +3234,7 @@ object EPrintf(int file_no, s1_ptr format, s1_ptr values)
     int s;
     FILE *f;
     object result;
+    s1_ptr format;
     
     if (file_no == DOING_SPRINTF) {
 	/* sprintf */
@@ -3249,13 +3255,13 @@ object EPrintf(int file_no, s1_ptr format, s1_ptr values)
     }
     free_cs = FALSE;
     buffer_screen();
-    if (IS_ATOM(format)) { 
-	out_string[0] = doChar((object)format); 
+    if (IS_ATOM(format_obj)) { 
+	out_string[0] = doChar(format_obj); 
 	out_string[1] = '\0';
 	screen_output(f, out_string);
     }
     else {
-	format = SEQ_PTR(format);
+	format = SEQ_PTR(format_obj);
 	flen = format->length;
 	if (flen == 0) {
 	    screen_output(f, "");
@@ -3271,7 +3277,7 @@ object EPrintf(int file_no, s1_ptr format, s1_ptr values)
 	    else
 		cstring = quick_alloc;
 	    if (IS_ATOM(values)) 
-		v_elem = (object_ptr)&values;
+		v_elem = &values;
 	    else {
 		v_elem = SEQ_PTR(values)->base;
 		v_last = v_elem + SEQ_PTR(values)->length;

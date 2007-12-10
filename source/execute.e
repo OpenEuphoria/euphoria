@@ -2688,6 +2688,20 @@ procedure opMATCH_FROM()
 	pc += 5
 end procedure
 
+procedure opPEEK2U()
+    a = Code[pc+1]
+    target = Code[pc+2]
+    val[target] = peek2u(val[a])
+    pc += 3
+end procedure
+	
+procedure opPEEK2S()
+    a = Code[pc+1]
+    target = Code[pc+2]
+    val[target] = peek2s(val[a])
+    pc += 3
+end procedure
+
 procedure opPEEK4U()
     a = Code[pc+1]
     target = Code[pc+2]
@@ -2701,11 +2715,25 @@ procedure opPEEK4S()
     val[target] = peek4s(val[a])
     pc += 3
 end procedure
+
+procedure opPEEK_STRING()
+    a = Code[pc+1]
+    target = Code[pc+2]
+    val[target] = peek_string(val[a])
+    pc += 3
+end procedure
 	
 procedure opPEEK()
     a = Code[pc+1]
     target = Code[pc+2]
     val[target] = peek(val[a])
+    pc += 3
+end procedure
+
+procedure opPEEKS()
+    a = Code[pc+1]
+    target = Code[pc+2]
+    val[target] = peeks(val[a])
     pc += 3
 end procedure
 
@@ -2722,6 +2750,14 @@ procedure opPOKE4()
     poke4(val[a], val[b])
     pc += 3
 end procedure
+
+procedure opPOKE2()
+    a = Code[pc+1]
+    b = Code[pc+2]
+    poke2(val[a], val[b])
+    pc += 3
+end procedure
+
 
 procedure opMEM_COPY()
     a = Code[pc+1]

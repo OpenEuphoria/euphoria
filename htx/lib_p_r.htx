@@ -96,6 +96,9 @@ s = peek({100, 4})
 <_2clist
   name="See Also:"
   description="<a href=\"lib_p_r.htm#poke\">poke</a>,
+<a href=\"lib_p_r.htm#peeks\">peeks</a>,
+<a href=\"lib_p_r.htm#peek2s\">peek2s</a>,
+<a href=\"lib_p_r.htm#peek2u\">peek2u</a>,
 <a href=\"lib_p_r.htm#peek4s\">peek4s</a>,
 <a href=\"lib_p_r.htm#peek4u\">peek4u</a>,
 <a href=\"lib_a_b.htm#allocate\">allocate</a>,
@@ -106,6 +109,185 @@ s = peek({100, 4})
  >
 </table>
 
+<_routine name="peeks">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = peeks(a)<BR>
+ or ...<BR>
+  s = peeks({a, i})
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a single signbed byte value in the range -128 to 127 from machine
+ address a, or return a sequence containing i consecutive signed byte
+ values starting at address a in memory."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Since addresses are 32-bit numbers, they can be larger than the largest
+ value of type integer (31-bits). Variables that hold an address should
+ therefore be declared as <font color=\"#993333\"><b>atoms</b></font>.
+<P>
+It is faster to read several bytes at once using the second
+ form of peeks() than it is to read one byte at a time in a loop.
+<P>
+Remember that peek takes just one argument, which in the
+ second form is actually a 2-element sequence."
+ >
+<_2clist
+  name="Example:"
+  description=" The following are equivalent:"
+ >
+<_eucode>
+
+-- method 1
+s = {peeks(100), peeks(101), peeks(102), peeks(103)}
+
+-- method 2
+s = peeks({100, 4})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#poke\">poke</a>,
+<a href=\"lib_p_r.htm#peek\">peek</a>,
+<a href=\"lib_p_r.htm#peek2s\">peek2s</a>,
+<a href=\"lib_p_r.htm#peek2u\">peek2u</a>,
+<a href=\"lib_p_r.htm#peek4s\">peek4s</a>,
+<a href=\"lib_p_r.htm#peek4u\">peek4u</a>,
+<a href=\"lib_a_b.htm#allocate\">allocate</a>,
+<a href=\"lib_e_g.htm#free\">free</a>,
+<a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
+<a href=\"lib_e_g.htm#free_low\">free_low</a>,
+<a href=\"lib_c_d.htm#call\">call</a>"
+ >
+</table>
+
+<_routine name="peek2s">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = peek2s(a)<BR>
+ or ...<BR>
+  s = peek2s({a, i})
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a signed two-byte value in the range -32768 to 32767 from machine
+ address a, or return a sequence containing i consecutive byte
+ values starting at address a in memory."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Since addresses are 32-bit numbers, they can be larger than the largest
+ value of type integer (31-bits). Variables that hold an address should
+ therefore be declared as <font color=\"#993333\"><b>atoms</b></font>.
+<P>
+It is faster to read several bytes at once using the second
+ form of peek2s() than it is to read one byte at a time in a loop.
+<P>
+Remember that peek takes just one argument, which in the
+ second form is actually a 2-element sequence."
+ >
+<_2clist
+  name="Example:"
+  description=" The following are equivalent:"
+ >
+<_eucode>
+
+-- method 1
+s = {peek2s(100), peek2s(102), peek2s(104), peek2s(106)}
+
+-- method 2
+s = peek2s({100, 4})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#poke2\">poke</a>,
+<a href=\"lib_p_r.htm#peek\">peek</a>,
+<a href=\"lib_p_r.htm#peeks\">peeks</a>,
+<a href=\"lib_p_r.htm#peek2u\">peek2u</a>,
+<a href=\"lib_p_r.htm#peek4s\">peek4s</a>,
+<a href=\"lib_p_r.htm#peek4u\">peek4u</a>,
+<a href=\"lib_a_b.htm#allocate\">allocate</a>,
+<a href=\"lib_e_g.htm#free\">free</a>,
+<a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
+<a href=\"lib_e_g.htm#free_low\">free_low</a>,
+<a href=\"lib_c_d.htm#call\">call</a>"
+ >
+</table>
+
+<_routine name="peek2u">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = peek2u(a)<BR>
+ or ...<BR>
+  s = peek2u({a, i})
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a two-byte value in the range 0 to 65535 from machine
+ address a, or return a sequence containing i consecutive byte
+ values starting at address a in memory."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Since addresses are 32-bit numbers, they can be larger than the largest
+ value of type integer (31-bits). Variables that hold an address should
+ therefore be declared as <font color=\"#993333\"><b>atoms</b></font>.
+<P>
+It is faster to read several bytes at once using the second
+ form of peek2u() than it is to read one byte at a time in a loop.
+<P>
+Remember that peek takes just one argument, which in the
+ second form is actually a 2-element sequence."
+ >
+<_2clist
+  name="Example:"
+  description=" The following are equivalent:"
+ >
+<_eucode>
+
+-- method 1
+s = {peek2u(100), peek2u(102), peek2u(104), peek2u(106)}
+
+-- method 2
+s = peek2u({100, 4})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#poke2\">poke</a>,
+<a href=\"lib_p_r.htm#peek\">peek</a>,
+<a href=\"lib_p_r.htm#peeks\">peeks</a>,
+<a href=\"lib_p_r.htm#peek2s\">peek2s</a>,
+<a href=\"lib_p_r.htm#peek4s\">peek4s</a>,
+<a href=\"lib_p_r.htm#peek4u\">peek4u</a>,
+<a href=\"lib_a_b.htm#allocate\">allocate</a>,
+<a href=\"lib_e_g.htm#free\">free</a>,
+<a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
+<a href=\"lib_e_g.htm#free_low\">free_low</a>,
+<a href=\"lib_c_d.htm#call\">call</a>"
+ >
+</table>
 
 <_routine name="peek4s">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -161,6 +343,9 @@ s = peek4s({100, 4})
   name="See Also:"
   description="<a href=\"lib_p_r.htm#peek4u\">peek4u</a>,
 <a href=\"lib_p_r.htm#peek\">peek</a>,
+<a href=\"lib_p_r.htm#peeks\">peeks</a>,
+<a href=\"lib_p_r.htm#peek2s\">peek2s</a>,
+<a href=\"lib_p_r.htm#peek2s\">peek2u</a>,
 <a href=\"lib_p_r.htm#poke4\">poke4</a>,
 <a href=\"lib_a_b.htm#allocate\">allocate</a>,
 <a href=\"lib_e_g.htm#free\">free</a>,
@@ -231,6 +416,46 @@ s = peek4u({100, 4})
 <a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
 <a href=\"lib_e_g.htm#free_low\">free_low</a>,
 <a href=\"lib_c_d.htm#call\">call</a>"
+ >
+</table>
+
+<_routine name="peek_string">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> s = peek_string(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a sequence of text from a null terminated string starting at
+ machine address a."
+ >
+<_2clist
+  name="Comments:"
+  description=""
+ >
+<_2clist
+  name="Example:"
+  description=" The following reads the null-terminated string starting at 100 
+  into the sequence s:"
+ >
+<_eucode>
+
+s = peek_string(100)
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#poke\">poke</a>,
+<a href=\"lib_p_r.htm#peek\">peek</a>,
+<a href=\"lib_a_b.htm#allocate\">allocate</a>,
+<a href=\"lib_e_g.htm#free\">free</a>,
+<a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
+<a href=\"lib_e_g.htm#free_low\">free_low</a>,
  >
 </table>
 
@@ -486,6 +711,62 @@ poke(a, {97, 98, 99})
  >
 </table>
 
+<_routine name="poke2">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> poke2(a, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"If x is an atom, write a word (two-byte) value to memory address a.<P>
+If x is a sequence, write a sequence of word values to
+ consecutive memory locations starting at location a."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The lower 16-bits of each byte value, i.e. <b>remainder(x, 65535)</b>,
+ is actually stored in memory.
+<P>
+It is faster to write several words at once by poking a sequence
+ of values, than it is to write one word at a time in a loop."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+a = allocate(100)   -- allocate 100 bytes in memory
+
+-- poke one word at a time:
+poke(a, 10097)
+poke(a+2, 10098)
+poke(a+4, 10099)
+
+-- poke 3 words at once:
+poke(a, {10097, 10098, 10099})
+
+ </_eucode>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#peek2u\">peek2u</a>,
+<a href=\"lib_p_r.htm#peek2u\">peek2s</a>,
+<a href=\"lib_p_r.htm#poke\">poke</a>,
+<a href=\"lib_p_r.htm#poke4\">poke4</a>,
+<a href=\"lib_a_b.htm#allocate\">allocate</a>,
+<a href=\"lib_e_g.htm#free\">free</a>,
+<a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
+<a href=\"lib_e_g.htm#free_low\">free_low</a>,
+<a href=\"lib_c_d.htm#call\">call</a>,
+<a class=\"blue\" href=\"library.htm#safe\"><b>safe.e</b></a>"
+ >
+</table>
 
 <_routine name="poke4">
 <table border=0 cellspacing=2 cellpadding=2>

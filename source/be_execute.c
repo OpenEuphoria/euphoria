@@ -342,6 +342,103 @@ static void profile_command(object x)
 	RTFatal("argument to profile() must be 0 or 1");
 }
 
+static object do_peek2(object a, int b, int *pc)
+// peek2u, peek2s
+// moved it here because it was causing bad code generation for WIN32
+{
+    int i;              
+    unsigned short *peek2_addr;
+    object top;
+    s1_ptr s1;
+    object_ptr obj_ptr;
+		
+    /* check address */
+    if (IS_ATOM_INT(a)) {
+	peek2_addr = (unsigned short *)a;
+    }
+    else if (IS_ATOM(a)) {
+	peek2_addr = (unsigned short *)(unsigned long)(DBL_PTR(a)->dbl);
+    }
+    else {
+	/* a sequence: {addr, nbytes} */
+	s1 = SEQ_PTR(a);                                        
+	i = s1->length;
+	if (i != 2) {
+	    RTFatal("argument to peek() must be an atom or a 2-element sequence");
+	}
+	peek2_addr = (unsigned short *)get_pos_int("peek2s/peek2u", *(s1->base+1));
+#ifdef EDOS                    
+	if (current_screen != MAIN_SCREEN && 
+	    (unsigned)peek2_addr >= (unsigned)0xA0000 && 
+	    (unsigned)peek2_addr < (unsigned)0xC0000) 
+	    MainScreen();
+#endif                  
+	i = get_pos_int("peek2s/peek2u", *(s1->base+2));/* length*/
+	if (i < 0)
+	    RTFatal("number of bytes to peek is less than 0");
+	s1 = NewS1(i);
+	obj_ptr = s1->base;
+	if (b) {
+	    // unsigned
+	    while (--i >= 0) {
+#ifdef EDJGPP                       
+		if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
+		    top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
+				       (unsigned)peek4_addr++);
+		else    
+#endif                      
+		    top = (object)*peek2_addr++;
+		if ((unsigned)top > (unsigned)MAXINT)
+		    top = NewDouble((double)(unsigned long)top);
+		*(++obj_ptr) = top;
+	    }
+	}
+	else {
+	    // signed
+	    while (--i >= 0) {
+#ifdef EDJGPP                       
+		if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
+		    top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
+						(unsigned)peek2_addr++);
+		else    
+#endif                      
+		    top = (object)(short)*peek2_addr++;
+		if (top < MININT || top > MAXINT)
+		    top = NewDouble((double)(long)top);
+		*(++obj_ptr) = top;
+	    }
+	}
+	return (object)MAKE_SEQ(s1);
+    }
+#ifdef EDOS
+    if (current_screen != MAIN_SCREEN && 
+	(unsigned)peek2_addr >= (unsigned)0xA0000 && 
+	(unsigned)peek2_addr < (unsigned)0xC0000) 
+	MainScreen();
+#endif              
+#ifdef EDJGPP                       
+    if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
+	top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
+						   (unsigned)peek2_addr);
+    else    
+#endif                      
+	
+    if (b) {
+	// unsigned
+	top = (object)*peek2_addr;
+	if ((unsigned)top > (unsigned)MAXINT)
+	    top = NewDouble((double)(unsigned long)top);
+    }
+    else {
+	// signed
+	top = (object)(signed short)*peek2_addr;
+	if (top < MININT || top > MAXINT)
+	    top = NewDouble((double)(long)top);
+    }
+    
+    return top;
+}
+
 static object do_peek4(object a, int b, int *pc)
 // peek4u, peek4s
 // moved it here because it was causing bad code generation for WIN32
@@ -437,6 +534,87 @@ static object do_peek4(object a, int b, int *pc)
     return top;
 }
 
+static void do_poke2(object a, object top)
+// moved it here because it was causing bad code generation for WIN32
+{
+    unsigned short *poke2_addr;
+    double temp_dbl;
+    s1_ptr s1;
+    object_ptr obj_ptr;
+	
+    /* determine the address to be poked */
+    if (IS_ATOM_INT(a)) {
+	poke2_addr = (unsigned short *)INT_VAL(a);
+    }
+    else if (IS_ATOM(a)) {
+	poke2_addr = (unsigned short *)(unsigned long)(DBL_PTR(a)->dbl);
+    }
+    else {
+	RTFatal("first argument to poke2 must be an atom");
+    }
+#ifdef EDOS
+    if (current_screen != MAIN_SCREEN && 
+	(unsigned)poke2_addr >= (unsigned)0xA0000 && 
+	(unsigned)poke2_addr < (unsigned)0xC0000)
+	MainScreen();
+#endif
+    /* look at the value to be poked */
+    if (IS_ATOM_INT(top)) {
+#ifdef EDJGPP       
+	if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
+	    _farpokel(_go32_info_block.selector_for_linear_memory,
+		      (unsigned long)poke4_addr, (unsigned long)INT_VAL(top));
+	else
+#endif      
+	    *poke2_addr = (unsigned long)INT_VAL(top);
+    }
+    else if (IS_ATOM(top)) {
+	temp_dbl = DBL_PTR(top)->dbl;
+	if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
+	    RTFatal("poke2 is limited to 32-bit numbers");
+#ifdef EDJGPP       
+	if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
+	    _farpokel(_go32_info_block.selector_for_linear_memory,
+		      (unsigned long)poke2_addr, (unsigned long)temp_dbl);
+	else
+#endif      
+	    *poke2_addr = (unsigned short)temp_dbl;
+    }
+    else {
+	/* second arg is sequence */
+	s1 = SEQ_PTR(top);
+	obj_ptr = s1->base;
+	while (TRUE) { 
+	    top = *(++obj_ptr); 
+	    if (IS_ATOM_INT(top)) {
+#ifdef EDJGPP       
+		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
+		    _farpokel(_go32_info_block.selector_for_linear_memory,
+		      (unsigned long)poke2_addr++, (unsigned long)INT_VAL(top));
+		else
+#endif      
+		    *poke2_addr++ = (unsigned short)INT_VAL(top);
+	    }
+	    else if (IS_ATOM(top)) {
+		if (top == NOVALUE)
+		    break;
+		temp_dbl = DBL_PTR(top)->dbl;
+		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
+		    RTFatal("poke2 is limited to 32-bit numbers");
+#ifdef EDJGPP       
+		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
+		    _farpokel(_go32_info_block.selector_for_linear_memory,
+		      (unsigned long)poke2_addr++, (unsigned long)temp_dbl);
+		else
+#endif      
+		    *poke2_addr++ = (unsigned long)temp_dbl;
+	    }
+	    else {
+		RTFatal("sequence to be poked must only contain atoms");
+	    }
+	}
+    }
+}
 
 static void do_poke4(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
@@ -852,6 +1030,8 @@ void code_set_pointers(int **code)
 	    case TAN: 
 	    case RAND:
 	    case PEEK:
+	    case PEEK_STRING:
+	    case PEEKS:
 	    case FLOOR:
 	    case ASSIGN_I:
 	    case ASSIGN:
@@ -863,6 +1043,8 @@ void code_set_pointers(int **code)
 	    case POSITION: 
 	    case PEEK4S: 
 	    case PEEK4U:
+	    case PEEK2S:
+	    case PEEK2U:
 	    case PIXEL: 
 	    case GET_PIXEL:
 	    case SYSTEM: 
@@ -873,6 +1055,7 @@ void code_set_pointers(int **code)
 	    case MACHINE_PROC:
 	    case POKE4:
 	    case POKE:
+	    case POKE2:
 	    case SC2_AND:
 	    case SC2_OR:
 	    case TASK_SCHEDULE: 
@@ -1509,7 +1692,8 @@ void do_exec(int *start_pc)
   &&L_LHS_SUBS1_COPY, &&L_TASK_CREATE, &&L_TASK_SCHEDULE, &&L_TASK_YIELD,
   &&L_TASK_SELF, &&L_TASK_SUSPEND, &&L_TASK_LIST,
   &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, 
-/* 178 */ &&L_TASK_CLOCK_START, &&L_FIND_FROM, &&L_MATCH_FROM
+/* 178 */ &&L_TASK_CLOCK_START, &&L_FIND_FROM, &&L_MATCH_FROM,
+  &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING
   };
 #endif
 #endif
@@ -3498,7 +3682,40 @@ void do_exec(int *start_pc)
 		thread();
 		BREAK;
 
+	    case L_PEEK2U:
+		b = 1;
+		goto peek2s1;
+		
+	    case L_PEEK2S:
+		b = 0;
+	     peek2s1:
+		a = *(object_ptr)pc[1]; /* the address */
+		tpc = pc;  // in case of machine exception
+		top = do_peek2(a, b, pc);
+		DeRefx(*(object_ptr)pc[2]);
+		*(object_ptr)pc[2] = top;
+		inc3pc();
+		thread();
+		BREAK;
+	    
+	    case L_PEEK_STRING:
+		a = *(object_ptr)pc[1]; /* the address */
+		tpc = pc;  // in case of machine exception
+		top = NewString(a);
+		DeRefx(*(object_ptr)pc[2]);
+		*(object_ptr)pc[2] = top;
+		inc3pc();
+		thread();
+		BREAK;
+	
+	    case L_PEEKS:
+		b = 1;
+		goto peeks1;	
 	    case L_PEEK:
+		b = 0;
+		
+	        peeks1:
+
 		a = *(object_ptr)pc[1]; /* the address */
 		tpc = pc;  // in case of machine exception
 		
@@ -3507,7 +3724,11 @@ void do_exec(int *start_pc)
 		    poke_addr = (unsigned char *)INT_VAL(a);
 		}
 		else if (IS_ATOM(a)) {
-		    poke_addr = (unsigned char *)(unsigned long)
+		    if( b )
+			poke_addr = (signed char *)(unsigned long)
+				(DBL_PTR(a)->dbl);
+		    else
+			poke_addr = (unsigned char *)(unsigned long)
 				(DBL_PTR(a)->dbl);
 		}
 		else {
@@ -3538,6 +3759,9 @@ void do_exec(int *start_pc)
 						   (unsigned)poke_addr);
 			else    
 #endif                      
+			if(b)
+			    *obj_ptr = (signed char)*poke_addr; 
+			else
 			    *obj_ptr = *poke_addr; 
 			poke_addr++;
 		    }
@@ -3558,8 +3782,13 @@ void do_exec(int *start_pc)
 		    *(object_ptr)pc[2] = _farpeekb(_go32_info_block.selector_for_linear_memory, 
 						   (unsigned)poke_addr);
 		else    
-#endif                      
-		    *(object_ptr)pc[2] = *poke_addr;               
+#endif              
+		{
+		    if(b)        
+			*(object_ptr)pc[2] = (signed char)*poke_addr;               
+		    else
+			*(object_ptr)pc[2] = *poke_addr; 
+		}             
 		inc3pc();
 		thread();
 		BREAK;
@@ -3573,6 +3802,15 @@ void do_exec(int *start_pc)
 		thread();
 		BREAK;
 
+	    case L_POKE2:
+		a = *(object_ptr)pc[1];   /* address */
+		top = *(object_ptr)pc[2]; /* byte value */
+		tpc = pc;
+		do_poke2(a, top);
+		inc3pc();
+		thread();
+		BREAK;
+		
 	    case L_POKE:
 		a = *(object_ptr)pc[1];   /* address */
 		top = *(object_ptr)pc[2]; /* byte value */

@@ -183,7 +183,12 @@ TASK_CLOCK_STOP = 176,
 TASK_CLOCK_START = 177,
 FIND_FROM = 178,
 MATCH_FROM = 179,
-MAX_OPCODE = 179
+POKE2 = 180,
+PEEK2S = 181,
+PEEK2U = 182,
+PEEKS = 183,
+PEEK_STRING = 184,
+MAX_OPCODE = 184
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])

@@ -119,7 +119,12 @@ keylist =
     {"task_clock_stop", SC_PREDEF, PROC, TASK_CLOCK_STOP, 0, E_PURE},
     {"task_clock_start", SC_PREDEF, PROC, TASK_CLOCK_START, 0, E_PURE},
     {"find_from", SC_PREDEF, FUNC, FIND_FROM, 3, E_PURE },
-    {"match_from", SC_PREDEF, FUNC, MATCH_FROM, 3, E_PURE }
+    {"match_from", SC_PREDEF, FUNC, MATCH_FROM, 3, E_PURE },
+    {"poke2",     SC_PREDEF, PROC, POKE2, 2, E_OTHER_EFFECT},
+    {"peek2s",    SC_PREDEF, FUNC, PEEK2S, 1, E_PURE},
+    {"peek2u",    SC_PREDEF, FUNC, PEEK2U, 1, E_PURE},
+    {"peeks",    SC_PREDEF, FUNC, PEEKS, 1, E_PURE},
+    {"peek_string",SC_PREDEF, FUNC, PEEK_STRING, 1, E_PURE}
 }
     -- new words must go at end to maintain compatibility 
 

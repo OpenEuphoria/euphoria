@@ -179,5 +179,10 @@ static char *opnames[] = {
 "TASK_CLOCK_STOP",
 "TASK_CLOCK_START",
 "FIND_FROM",
-"MATCH_FROM"
+"MATCH_FROM",
+"POKE2",
+"PEEK2S",
+"PEEK2U",
+"PEEKS",
+"PEEK_STRING"
 };
