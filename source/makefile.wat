@@ -334,7 +334,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\error.obj :  .MULTIPLE ./error.e
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\machine.obj :  .MULTIPLE ./machine.c
+.\$(OBJDIR)\machine.obj :  .MULTIPLE ./$(OBJDIR)/machine.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\symtab.obj :  .MULTIPLE ./symtab.e
