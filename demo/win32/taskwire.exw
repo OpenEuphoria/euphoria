@@ -308,8 +308,6 @@ procedure link_dll_routines()
 
     CreatePen = link_c_func(gdi32, "CreatePen",
 			       {C_LONG, C_LONG, C_LONG}, C_LONG)
-
-    GetStockObject = link_c_func(gdi32, "GetStockObject", {C_LONG}, C_LONG)
 end procedure
 
 link_dll_routines()
@@ -536,7 +534,7 @@ for i = 1 to NTASKS do
     task_ids = append(task_ids, tid) 
 end for
 
--- schedule thme all:
+-- schedule them all:
 for i = 1 to NTASKS do
     task_schedule(task_ids[i], rand(5))
 end for
