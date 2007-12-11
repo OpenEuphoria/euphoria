@@ -173,7 +173,7 @@ atom screen_size_x, screen_size_y   -- current screen size
 integer CreateDC, GetDC, MoveToEx, LineTo, CreatePen, SelectObject
 integer GetStockObject
 atom black_pen, white_pen, red_pen, green_pen, blue_pen
-atom gdi_dll, user_dll, hdc
+atom hdc
 integer axis
 atom sin_angle, cos_angle
 
