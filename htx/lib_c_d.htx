@@ -1204,8 +1204,29 @@ Currently, there is no way to pass a C structure by value or
 If you are not interested in using the value returned by the
  C function, you should instead define it with define_c_proc()
  and call it with c_proc().
- 
- <p> If you use exw to call a cdecl C routine that returns
+<p>
+Some routines in shared libraries - there are cases in the Windows API - expect a 64 bit integer
+ to be passed to them as one of its arguments. There is no such data type in Euphoria, even though
+ it exists in C. However, there is a workaround:
+<ul>
+<li>represent your 64 bit parameter as two consecutive C_LONG parameters. As mentioned above, this
+will work whether the integer is specified as signed or unsigned.
+<li>when calling the routine, the first C_LONG parameter must contain the lower 32 bits of
+ the actual 64 bit parameter, and the second parameter must hold the upper 32 bits.
+<li>do not store the 64 bit integer you supply as an atom, because it would be encoded in a
+way the routine you are calling will not understand. Further, an atom cannot hold more than 53
+bits of information, which is too short for 64 bit data.
+</ul>
+<p>
+If an external routine returns a 64 bit integer, changing the return type like shown above
+will not work. You must design a machine code wrapper that will call the routine (check its call
+convention under Windows) and retrieve the integer returned in edx:eax. Then code an Euphoria function
+that will call() your machine code and retrieve the two parts as two atoms, returning them as
+appropriate, typically in a {lower 32 bits, upper 32 bits} sequence. How you reassemble the two parts
+will depend on the returned value being specified as signed or unsigned.
+
+<p>
+If you use exw to call a cdecl C routine that returns
  a floating-point value, it might not work. This is because
  the Watcom C compiler (used to build exw) has a non-standard
  way of handling cdecl floating-point return values.
@@ -1330,7 +1351,27 @@ Currently, there is no way to pass a C structure by value.
 The C function can return a value but it will be ignored.
  If you want to use the value returned by the C function,
  you must instead define it with define_c_func() and call it
- with c_func()."
+ with c_func().
+<p>
+Some routines in shared libraries - there are cases in the Windows API - expect a 64 bit integer
+ to be passed to them as one of its arguments. There is no such data type in Euphoria, even though
+ it exists in C. However, there is a workaround:
+<ul>
+<li>represent your 64 bit parameter as two consecutive C_LONG parameters. As mentioned above, this
+will work whether the integer is specified as signed or unsigned.
+<li>when calling the routine, the first C_LONG parameter must contain the lower 32 bits of
+ the actual 64 bit parameter, and the second parameter must hold the upper 32 bits.
+<li>do not store the 64 bit integer you supply as an atom, because it would be encoded in a
+way the routine you are calling will not understand. Further, an atom cannot hold more than 53
+bits of information, which is too short for 64 bit data.
+</ul>
+<p>
+If an external routine returns a 64 bit integer, changing the return type like shown above
+will not work. You must design a machine code wrapper that will call the routine (check its call
+convention under Windows) and retrieve the integer returned in edx:eax. Then code an Euphoria function
+that will call() your machine code and retrieve the two parts as two atoms, returning them as
+appropriate, typically in a {lower 32 bits, upper 32 bits} sequence. How you reassemble the two parts
+will depend on the returned value being specified as signed or unsigned."
  >
 <_2clist
   name="Example:"
