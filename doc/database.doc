@@ -1,6 +1,6 @@
 
- 
-                    Euphoria Database System (EDS) 
+  
+                     Euphoria Database System (EDS)  
 
 
  Introduction
@@ -220,7 +220,7 @@
 
  Example:
 
-              if db_create("mydata", DB_LOCK_NO) != DB_OK then
+              if db_create("mydata", DB_LOCK_NO) != DB_OK then
                   puts(2, "Couldn't create the database!\n")
                   abort(1)
               end if
@@ -242,7 +242,7 @@
 
               The return codes are:
 
-                  global constant DB_OK = 0   -- success
+                  global constant DB_OK = 0   -- success
                            DB_OPEN_FAIL = -1  -- couldn't open the file 
                            DB_LOCK_FAIL = -3  -- couldn't lock the file in the
                                               --     manner requested
@@ -263,7 +263,7 @@
 
  Example:
 
-              tries = 0
+              tries = 0
               while 1 do
                   err = db_open("mydata", DB_LOCK_SHARED) 
                   if err = DB_OK then
@@ -307,7 +307,7 @@
 
  Example:
 
-              if db_select("employees") != DB_OK then
+              if db_select("employees") != DB_OK then
                   puts(2, "Couldn't select employees database\n")
               end if
               
@@ -342,7 +342,7 @@
 
  Example:
 
-              if db_create_table("my_new_table") != DB_OK then
+              if db_create_table("my_new_table") != DB_OK then
                   puts(2, "Couldn't create my_new_table!\n")
               end if
               
@@ -363,7 +363,7 @@
 
  Example:
 
-              if db_select_table("salary") != DB_OK then
+              if db_select_table("salary") != DB_OK then
                   puts(2, "Couldn't find salary table!\n")
                   abort(1)
               end if
@@ -415,7 +415,7 @@
 
  Example:
 
-              sequence names
+              sequence names
               
               names = db_table_list()
               for i = 1 to length(names) do
@@ -434,7 +434,7 @@
 
  Example:
 
-              -- look at all records in the current table
+              -- look at all records in the current table
               for i = 1 to db_table_size() do
                   if db_record_key(i) = 0 then
                   	puts(1, "0 key found\n")
@@ -471,7 +471,7 @@
 
  Example:
 
-              rec_num = db_find_key("Millennium")
+              rec_num = db_find_key("Millennium")
               if rec_num > 0 then
                   ? db_record_key(rec_num)
                   ? db_record_data(rec_num)
@@ -496,7 +496,7 @@
 
  Example:
 
-              puts(1, "The 6th record has key value: ")
+              puts(1, "The 6th record has key value: ")
               ? db_record_key(6)
               
  See Also:    db_record_data
@@ -515,7 +515,7 @@
 
  Example:
 
-              puts(1, "The 6th record has data value: ")
+              puts(1, "The 6th record has data value: ")
               ? db_record_data(6)
               
  See Also:    db_record_key
@@ -537,7 +537,7 @@
 
  Example:
 
-              if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
+              if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
                   puts(2, "insert failed!\n")
               end if
               
@@ -556,7 +556,7 @@
 
  Example:
 
-              db_delete_record(55)
+              db_delete_record(55)
               
  See Also:    db_insert, db_table_size
 
@@ -574,7 +574,7 @@
 
  Example:
 
-              db_replace_data(67, {"Peter", 150, 34.5})
+              db_replace_data(67, {"Peter", 150, 34.5})
               
  See Also:    db_delete_record
 
@@ -605,7 +605,7 @@
 
  Example:
 
-              if db_compress() != DB_OK then
+              if db_compress() != DB_OK then
                   puts(2, "compress failed!\n")
               end if
               
@@ -626,7 +626,7 @@
 
  Example:
 
-              if db_open("mydata", DB_LOCK_SHARED) != DB_OK then
+              if db_open("mydata", DB_LOCK_SHARED) != DB_OK then
                   puts(2, "Couldn't open the database!\n")
                   abort(1)
               end if
@@ -652,7 +652,7 @@
 
  Example:
 
-              procedure my_fatal(sequence msg)
+              procedure my_fatal(sequence msg)
                   puts(2, "A fatal error occurred - " & msg & '\n')
                   abort(1)
               end procedure

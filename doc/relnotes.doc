@@ -1,9 +1,46 @@
 
- 
-                            Euphoria Release Notes
- 
+  
+                             Euphoria Release Notes
+  
 
 
+ Version 3.2 ??? ????:
+ =====================
+
+
+ New Features
+ ------------
+
+
+      * Include file names with accent characters now supported. Implemented by
+        C. Cuvier
+
+      * Comments may now be embedded in data passed to value() in get.e.
+        Implemented by C. Cuvier
+
+      * Enhanced symbol resolution to take into account information regarding
+        which files were included by which files. Implemented by Matthew Lewis
+
+      * Namespaces for a source file now can be used for symbols in the
+        specified file and for global symbols in all files included by the
+        specified file. Implemented by Matthew Lewis
+
+      * Added value_from() in get.e to return additional information about the
+        parsing activity. Implemented by C. Cuvier
+
+      * Command line arguments for the translator allow for creating binaries
+        with debugging symbols, and to specify a different runtime library.
+        Implemented by C. Cuvier
+
+      * In trace mode, '?' will show the last defined variable of the requested
+        name. Implemented by C. Cuvier
+
+      * New builtin routines: peeks(), peek2s(), peek2u(), peek_string(),
+        poke2() Implemented by Matthew Lewis
+
+      * Include directories can now be specified based on command line
+        arguments and config files in addition to environment variables.
+        Implemented by Matthew Lewis
  Version 3.1.1 August 2007:
  ==========================
 
@@ -2484,9 +2521,9 @@
 
 
 
- 
-                       Highlights of Older Releases:
- 
+  
+                        Highlights of Older Releases:
+  
 
 
  Version 1.5a June 13, 1997:

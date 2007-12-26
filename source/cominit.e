@@ -34,8 +34,9 @@ end function
 procedure move_args( integer start, integer args )
     Argc -= args
     for j = start to Argc do
-    	Argv[j] = Argv[j+1]
+    	Argv[j] = Argv[j+args]
     end for
+    
 end procedure
 
 

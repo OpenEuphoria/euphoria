@@ -1,6 +1,6 @@
 <_init_comment>
 <html>
-<head><title>Euphoria v3.1 Release Notes</title>
+<head><title>Euphoria v3.2 Release Notes</title>
 <_css>
 </head>
 <body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
@@ -12,6 +12,61 @@
 
 
 <p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b><_dul>Version 3.2 ??? ????:</_dul></b></font>
+<p>
+
+<p>
+<font color="#993333"><_sul><b>New Features</b></_sul></font>
+<ul>
+<p>
+<li>
+     Include file names with accent characters now supported.
+     Implemented by C. Cuvier
+<p>
+<li>
+     Comments may now be embedded in data passed to value() in get.e.
+     Implemented by C. Cuvier
+<p>
+<li>
+     Enhanced symbol resolution to take into account information
+     regarding which files were included by which files.
+     Implemented by Matthew Lewis
+<p>
+<li>
+     Namespaces for a source file now can be used for symbols in the
+     specified file and for global symbols in all files included by
+     the specified file.
+     Implemented by Matthew Lewis
+<p>
+<li>
+     Added value_from() in get.e to return additional information
+     about the parsing activity.
+     Implemented by C. Cuvier
+<p>
+<li>
+     Command line arguments for the translator allow for creating
+     binaries with debugging symbols, and to specify a different
+     runtime library.
+     Implemented by C. Cuvier
+<p>
+<li>
+     In trace mode, '?' will show the last defined variable of the requested
+     name.
+     Implemented by C. Cuvier
+<p>
+<li>
+     New builtin routines: peeks(), peek2s(), peek2u(), peek_string(),
+     poke2()
+     Implemented by Matthew Lewis
+<p>
+<li>
+     Include directories can now be specified based on command line arguments
+     and config files in addition to environment variables.
+     Implemented by Matthew Lewis
+
+</ul>
 
 <font face="Arial, Helvetica" color="#003366">
 <b><_dul>Version 3.1.1 August 2007:</_dul></b></font>

@@ -3,7 +3,10 @@
 -- written by: Junko C. Miura of Rapid Deployment Software (JCMiura@aol.com)
 include get.e
 include wildcard.e
-
+global sequence current_file
+current_file = ""
+global integer current_line
+current_line = 0
 global constant SCREEN = 1
 global constant TRUE = 1, FALSE = 0, EOF = -1
 global sequence out_type
@@ -16,10 +19,11 @@ global integer in_file, out_file
 
 global procedure quit(sequence msg)
     puts(SCREEN, "DOC GEN ABORTED: " & msg & '\n')
+    printf(SCREEN, "Inside file: %s:%d\n", {current_file, current_line})
     puts(SCREEN, "Contact Rapid Deployment Software - rds@RapidEuphoria.com\n")
     if getc(0) then
     end if
-    abort(1)
+    abort(1/0)
 end procedure
 
 global function whitespace(integer c)

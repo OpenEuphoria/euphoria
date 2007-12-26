@@ -1,6 +1,6 @@
 
- 
-                        Euphoria To C Translator 
+  
+                         Euphoria To C Translator  
 
 
 
@@ -127,6 +127,16 @@
     or 
        ec allsorts
  
+ On Windows you would type:
+       ecw taskwire.exw
+    or 
+       ecw taskwire
+ 
+ On Linux/FreeBSD you would type:
+       ecu qsort.exu
+    or 
+       ecu qsort
+ 
  but instead of running the allsorts.ex program, the Translator will create
  several C source files. Anyone can run the Translator. It's included in
  euphoria\bin along with the interpreter. To compile and link the C files, you
@@ -234,6 +244,23 @@
  On all other platforms, Euphoria uses fast hardware floating-point
  instructions, and the operating system handles the case where hardware f.p. is
  missing.
+
+ To compile your program with debugging information, usable with a debugger
+ compatible with your compiler, use the -debug option:
+
+     ecu -debug myapp.exu
+ 
+
+ It is sometimes useful to link your translated code to a Euphoria runtime
+ library other than the default supplied library. This ability is probably
+ mostly useful for testing and debugging the runtime library itself, or to give
+ additional debugging information when debugging translated Euphoria code. Note
+ that only the default library is supplied. The custom library must be put into
+ your EUDIR/bin directory along with the default library. Use the -lib
+ {library} option:
+
+    ecu -lib decu.a myapp.exu
+ 
 
 
  4. Dynamic Link Libraries (Shared Libraries)

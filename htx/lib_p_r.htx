@@ -455,7 +455,7 @@ s = peek_string(100)
 <a href=\"lib_a_b.htm#allocate\">allocate</a>,
 <a href=\"lib_e_g.htm#free\">free</a>,
 <a href=\"lib_a_b.htm#allocate_low\">allocate_low</a>,
-<a href=\"lib_e_g.htm#free_low\">free_low</a>,
+<a href=\"lib_e_g.htm#free_low\">free_low</a>"
  >
 </table>
 

@@ -2,7 +2,7 @@
 
 
 <html>
-<head><title>Euphoria v3.1 Release Notes</title>
+<head><title>Euphoria v3.2 Release Notes</title>
 <style type="text/css">
 <!--
 body        {background-color: "#FFFFFF";}
@@ -35,6 +35,61 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 
 <p>&nbsp;<br>
+
+<font face="Arial, Helvetica" color="#003366">
+<b>Version 3.2 ??? ????:</b></font>
+<p>
+
+<p>
+<font color="#993333"><b>New Features</b></font>
+<ul>
+<p>
+<li>
+ Include file names with accent characters now supported.
+ Implemented by C. Cuvier
+<p>
+<li>
+ Comments may now be embedded in data passed to value() in get.e.
+ Implemented by C. Cuvier
+<p>
+<li>
+ Enhanced symbol resolution to take into account information
+ regarding which files were included by which files.
+ Implemented by Matthew Lewis
+<p>
+<li>
+ Namespaces for a source file now can be used for symbols in the
+ specified file and for global symbols in all files included by
+ the specified file.
+ Implemented by Matthew Lewis
+<p>
+<li>
+ Added value_from() in get.e to return additional information
+ about the parsing activity.
+ Implemented by C. Cuvier
+<p>
+<li>
+ Command line arguments for the translator allow for creating
+ binaries with debugging symbols, and to specify a different
+ runtime library.
+ Implemented by C. Cuvier
+<p>
+<li>
+ In trace mode, '?' will show the last defined variable of the requested
+ name.
+ Implemented by C. Cuvier
+<p>
+<li>
+ New builtin routines: peeks(), peek2s(), peek2u(), peek_string(),
+ poke2()
+ Implemented by Matthew Lewis
+<p>
+<li>
+ Include directories can now be specified based on command line arguments
+ and config files in addition to environment variables.
+ Implemented by Matthew Lewis
+
+</ul>
 
 <font face="Arial, Helvetica" color="#003366">
 <b>Version 3.1.1 August 2007:</b></font>
@@ -1194,11 +1249,11 @@ initial message and delay on compiled programs.
  <font color="#0066CC"><b>Translator</b></font>: 
  Some new optimizations will speed things up, and also reduce 
  the size of the C code. For example the code block:<br>
- <i></i><pre><font color="#0000FF">        if </font><font color="#330033">expression </font><font color="#0000FF">then</font>
-<font color="#330033">           ...</font>
-<i></i><font color="#330033">           many statements of Euphoria code</font>
-<font color="#330033">           ...</font>
-<font color="#0000FF">        end if</font>
+ <i></i><pre><font color="#0000FF">        if </font><font color="#330033">expression </font><font color="#0000FF">then</font>
+<font color="#330033">           ...</font>
+<i></i><font color="#330033">           many statements of Euphoria code</font>
+<font color="#330033">           ...</font>
+<font color="#0000FF">        end if</font>
 </pre>
  will be completely deleted if the 
  <font color="#0066CC"><b>Translator</b></font> can tell that <i>expression</i>
@@ -1206,7 +1261,7 @@ initial message and delay on compiled programs.
  a whole routine being deleted because there are no more calls to it.
  An example where this is useful is when there is different code 
  for different platforms, e.g.<br> 
- <pre><font color="#0000FF">        if </font><font color="#FF00FF">platform</font><font color="#330033">() = DOS </font><font color="#0000FF">then </font><font color="#330033">...</font>
+ <pre><font color="#0000FF">        if </font><font color="#FF00FF">platform</font><font color="#330033">() = DOS </font><font color="#0000FF">then </font><font color="#330033">...</font>
 </pre>
  <font color="#993333"><b>while</b></font> <i>expression</i> and
  <font color="#993333"><b>elsif</b></font> <i>expression</i> can also be 
@@ -1381,7 +1436,7 @@ initial message and delay on compiled programs.
  happening was about 1 in 1000. Any change to the program 
  that shifted the offending statement's position in memory 
  would cause the bug to go away. For example,<br>
- <pre><font color="#330033">        x[i] -= y</font>
+ <pre><font color="#330033">        x[i] -= y</font>
 </pre>
  This bug has been lurking since January 1999 (version 2.1 alpha).
  The Translator was not affected. Thanks to Pete Lomax.
@@ -3299,24 +3354,24 @@ Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
  Short-form assignment operators <font color="#993333"><b>&nbsp; += &nbsp;
  -= &nbsp; *= &nbsp; /= &nbsp; &= &nbsp;</b></font> have been added. 
  For example, instead of saying:
-<pre><font color="#330033">           count = count + 1</font>
+<pre><font color="#330033">           count = count + 1</font>
 </pre>
  You can now say:
-<pre><font color="#330033">           count += 1</font>
+<pre><font color="#330033">           count += 1</font>
 </pre>
 
  Instead of saying:
-<pre><font color="#330033">           matrix[row][column] = matrix[row][column] * 5.0</font>
+<pre><font color="#330033">           matrix[row][column] = matrix[row][column] * 5.0</font>
 </pre>
  You can say:
-<pre><font color="#330033">           matrix[row][column] *= 5.0</font>
+<pre><font color="#330033">           matrix[row][column] *= 5.0</font>
 </pre>
 
  Instead of saying:
-<pre><font color="#330033">           test_scores[start..finish] = test_scores[start..finish] / 100</font>
+<pre><font color="#330033">           test_scores[start..finish] = test_scores[start..finish] / 100</font>
 </pre>
  You can say:
-<pre><font color="#330033">           test_scores[start..finish] /= 100</font>
+<pre><font color="#330033">           test_scores[start..finish] /= 100</font>
 </pre>
  See <a class="blue" href="refman_2.htm#assignop">
  <b>refman.doc</b></a> for the details.
@@ -3328,12 +3383,12 @@ Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
  <font color="#993333"><b>or</b></font> expressions in
  <font color="#993333"><b>if/elsif/while</b></font> conditions.
  e.g. in an <font color="#993333"><b>and</b></font> condition:
-<pre><font color="#0000FF">           if </font><font color="#330033">A </font><font color="#0000FF">and </font><font color="#330033">B </font><font color="#0000FF">then </font><font color="#330033">...</font>
+<pre><font color="#0000FF">           if </font><font color="#330033">A </font><font color="#0000FF">and </font><font color="#330033">B </font><font color="#0000FF">then </font><font color="#330033">...</font>
 </pre>
  the interpreter will skip the evaluation of expression B whenever 
  expression A is 0 (false), since it knows that the overall result
  must be false. In an <font color="#993333"><b>or</b></font> condition:
-<pre><font color="#0000FF">           while </font><font color="#330033">A </font><font color="#0000FF">or </font><font color="#330033">B </font><font color="#0000FF">do </font><font color="#330033">...</font>
+<pre><font color="#0000FF">           while </font><font color="#330033">A </font><font color="#0000FF">or </font><font color="#330033">B </font><font color="#0000FF">do </font><font color="#330033">...</font>
 </pre>
  the interpreter will skip the evaluation of expression B whenever
  expression A is non-zero (true), since it knows that the overall result
@@ -3347,7 +3402,7 @@ Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
 <p>
  By skipping the evaluation of B, short-circuit evaluation is typically
  faster, and will allow you to write statements such as:
-<pre><font color="#0000FF">           if </font><font color="#FF00FF">atom</font><font color="#330033">(x) </font><font color="#0000FF">or </font><font color="#FF00FF">length</font><font color="#330033">(x)=1 </font><font color="#0000FF">then </font><font color="#330033">...</font>
+<pre><font color="#0000FF">           if </font><font color="#FF00FF">atom</font><font color="#330033">(x) </font><font color="#0000FF">or </font><font color="#FF00FF">length</font><font color="#330033">(x)=1 </font><font color="#0000FF">then </font><font color="#330033">...</font>
 </pre>
  that would generate an error on older versions of Euphoria whenever x
  was an <font color="#993333"><b>atom</b></font>, since
@@ -3496,7 +3551,7 @@ Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
  The <font color="#993333"><b>xor</b></font> keyword has been added to
  complement: <font color="#993333"><b>and/or/not</b></font> and
  <font color="#006699"><b>xor_bits()</b></font> e.g.
-<pre><font color="#0000FF">           if </font><font color="#330033">a </font><font color="#0000FF">xor </font><font color="#330033">b </font><font color="#0000FF">then</font><font color="#330033">...</font>
+<pre><font color="#0000FF">           if </font><font color="#330033">a </font><font color="#0000FF">xor </font><font color="#330033">b </font><font color="#0000FF">then</font><font color="#330033">...</font>
 </pre>
  <font color="#993333"><b>xor</b></font> works on sequences too.
  It's similar to <font color="#993333"><b>or</b></font>.
@@ -3507,7 +3562,7 @@ Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
  officially supports the use of <b>wildcards *</b> and <b>?</b> in the path
  that you supply. This feature was always available, but wasn't
  documented until now. e.g.
-<pre><font color="#330033">           info = dir(</font><font color="#00A033">"mydata\\*.d?t"</font><font color="#330033">)</font>
+<pre><font color="#330033">           info = dir(</font><font color="#00A033">"mydata\\*.d?t"</font><font color="#330033">)</font>
 </pre>
 
 <li>
@@ -3806,9 +3861,9 @@ Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
 <li>
  Some <font color="#CC3366"><b>optimizations</b></font> were added. The
  following general forms of expression are now faster:
-<pre><font color="#330033">           2 * x </font>
-<font color="#330033">           x * 2 </font>
-<font color="#330033">           1 + x </font>
+<pre><font color="#330033">           2 * x </font>
+<font color="#330033">           x * 2 </font>
+<font color="#330033">           1 + x </font>
 </pre>
  where x can be any expression, and have type atom or sequence.
 

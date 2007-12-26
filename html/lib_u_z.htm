@@ -131,15 +131,15 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = upper(</font><font color="#00A033">"Euphoria"</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is "EUPHORIA"</font>
-<font color="#330033"></font>
-<font color="#330033">a = upper(</font><font color="#00A033">'g'</font><font color="#330033">)</font>
-<font color="#FF0055">-- a is 'G'</font>
-<font color="#330033"></font>
-<font color="#330033">s = upper(</font><font color="#993333">{</font><font color="#00A033">"Euphoria"</font><font color="#330033">, </font><font color="#00A033">"Programming"</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {"EUPHORIA", "PROGRAMMING"}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = upper(</font><font color="#00A033">"Euphoria"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is "EUPHORIA"</font>
+<font color="#330033"></font>
+<font color="#330033">a = upper(</font><font color="#00A033">'g'</font><font color="#330033">)</font>
+<font color="#FF0055">-- a is 'G'</font>
+<font color="#330033"></font>
+<font color="#330033">s = upper(</font><font color="#993333">{</font><font color="#00A033">"Euphoria"</font><font color="#330033">, </font><font color="#00A033">"Programming"</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {"EUPHORIA", "PROGRAMMING"}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -189,9 +189,9 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">use_vesa(1)</font>
-<font color="#330033">fail = graphics_mode(261)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">use_vesa(1)</font>
+<font color="#330033">fail = graphics_mode(261)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -222,10 +222,10 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- a valid object representation was found</font>
-<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of string reached too soon</font>
-<font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- syntax is wrong</font>
-<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- end of string reached without any value being even partially read</font>
+<pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- a valid object representation was found</font>
+<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of string reached too soon</font>
+<font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- syntax is wrong</font>
+<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- end of string reached without any value being even partially read</font>
 </pre></td></tr>
 
 
@@ -243,9 +243,9 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = value(</font><font color="#00A033">"12345"</font><font color="#330033">}</font>
-<font color="#FF0055">-- s is {GET_SUCCESS, 12345}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = value(</font><font color="#00A033">"12345"</font><font color="#330033">}</font>
+<font color="#FF0055">-- s is {GET_SUCCESS, 12345}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -253,9 +253,9 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = value(</font><font color="#00A033">"{0, 1, -99.9}"</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {GET_SUCCESS, {0, 1, -99.9}}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = value(</font><font color="#00A033">"{0, 1, -99.9}"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {GET_SUCCESS, {0, 1, -99.9}}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 3:</b></td>
@@ -263,9 +263,9 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = value(</font><font color="#00A033">"+++"</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {GET_FAIL, 0} -- '+' is correct, but "++" is not</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = value(</font><font color="#00A033">"+++"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {GET_FAIL, 0} -- '+' is correct, but "++" is not</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -298,10 +298,10 @@ Arguments to use_vesa() other than 0 or 1 should not be used.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- a valid object representation was found</font>
-<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of string reached too soon</font>
-<font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- syntax is wrong</font>
-<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- end of string reached without any value being even partially read</font>
+<pre><font color="#330033">    GET_SUCCESS </font><font color="#FF0055">-- a valid object representation was found</font>
+<font color="#330033">    GET_EOF     </font><font color="#FF0055">-- end of string reached too soon</font>
+<font color="#330033">    GET_FAIL    </font><font color="#FF0055">-- syntax is wrong</font>
+<font color="#330033">    GET_NOTHING </font><font color="#FF0055">-- end of string reached without any value being even partially read</font>
 </pre></td></tr>
 
 
@@ -327,9 +327,9 @@ string. You can always pass value() a slice to achieve a similar effect.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = value_from(</font><font color="#00A033">"  12345"</font><font color="#330033">} </font><font color="#FF0055">-- notice the two leading spaces</font>
-<font color="#FF0055">-- s is {GET_SUCCESS, 12345, 7, 2}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = value_from(</font><font color="#00A033">"  12345"</font><font color="#330033">} </font><font color="#FF0055">-- notice the two leading spaces</font>
+<font color="#FF0055">-- s is {GET_SUCCESS, 12345, 7, 2}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -337,9 +337,9 @@ string. You can always pass value() a slice to achieve a similar effect.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = value_from(</font><font color="#00A033">"{0, 1, -99.9}"</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = value_from(</font><font color="#00A033">"{0, 1, -99.9}"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 3:</b></td>
@@ -347,9 +347,9 @@ string. You can always pass value() a slice to achieve a similar effect.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = value_from(</font><font color="#00A033">"+++"</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = value_from(</font><font color="#00A033">"+++"</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -384,14 +384,14 @@ The following constants are defined in
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">VC_COLOR   = 1,</font>
-<font color="#330033">                    VC_MODE    = 2,</font>
-<font color="#330033">                    VC_LINES   = 3,</font>
-<font color="#330033">                    VC_COLUMNS = 4,</font>
-<font color="#330033">                    VC_XPIXELS = 5,</font>
-<font color="#330033">                    VC_YPIXELS = 6,</font>
-<font color="#330033">                    VC_NCOLORS = 7,</font>
-<font color="#330033">                    VC_PAGES   = 8</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">VC_COLOR   = 1,</font>
+<font color="#330033">                    VC_MODE    = 2,</font>
+<font color="#330033">                    VC_LINES   = 3,</font>
+<font color="#330033">                    VC_COLUMNS = 4,</font>
+<font color="#330033">                    VC_XPIXELS = 5,</font>
+<font color="#330033">                    VC_YPIXELS = 6,</font>
+<font color="#330033">                    VC_NCOLORS = 7,</font>
+<font color="#330033">                    VC_PAGES   = 8</font>
 </pre></td></tr>
  
 
@@ -416,9 +416,9 @@ On the PC there are two types of graphics mode. The first type,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">vc = video_config()  </font><font color="#FF0055">-- in mode 3 with 25-lines of text:</font>
-<font color="#FF0055">-- vc is {1, 3, 25, 80, 0, 0, 32, 8}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">vc = video_config()  </font><font color="#FF0055">-- in mode 3 with 25-lines of text:</font>
+<font color="#FF0055">-- vc is {1, 3, 25, 80, 0, 0, 32, 8}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -451,12 +451,12 @@ On the PC there are two types of graphics mode. The first type,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    while </font><font color="#330033">1 </font><font color="#0000FF">do</font>
-<font color="#330033">        k = </font><font color="#FF00FF">get_key</font><font color="#330033">()</font>
-<font color="#0000FF">        if </font><font color="#330033">k != -1 </font><font color="#0000FF">then</font>
-<font color="#0000FF">            exit</font>
-<font color="#0000FF">        end if</font>
-<font color="#0000FF">    end while</font>
+<pre><font color="#0000FF">    while </font><font color="#330033">1 </font><font color="#0000FF">do</font>
+<font color="#330033">        k = </font><font color="#FF00FF">get_key</font><font color="#330033">()</font>
+<font color="#0000FF">        if </font><font color="#330033">k != -1 </font><font color="#0000FF">then</font>
+<font color="#0000FF">            exit</font>
+<font color="#0000FF">        end if</font>
+<font color="#0000FF">    end while</font>
 </pre></td></tr>
 
 <tr><td valign=top><b></b></td>
@@ -532,15 +532,15 @@ By default, the files and subdirectories will be visited in
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">function </font><font color="#330033">look_at(</font><font color="#FF00FF">sequence </font><font color="#330033">path_name, </font><font color="#FF00FF">sequence </font><font color="#330033">entry)</font>
-<font color="#FF0055">-- this function accepts two sequences as arguments</font>
-<font color="#FF00FF">    printf</font><font color="#330033">(1, </font><font color="#00A033">"%s\\%s: %d\n"</font><font color="#330033">,</font>
-<font color="#330033">           {path_name, entry</font><font color="#993333">[</font><font color="#330033">D_NAME</font><font color="#993333">]</font><font color="#330033">, entry</font><font color="#993333">[</font><font color="#330033">D_SIZE</font><font color="#993333">]</font><font color="#330033">})</font>
-<font color="#0000FF">    return </font><font color="#330033">0 </font><font color="#FF0055">-- keep going</font>
-<font color="#0000FF">end function</font>
-<font color="#330033"></font>
-<font color="#330033">exit_code = walk_dir(</font><font color="#00A033">"C:\\MYFILES"</font><font color="#330033">, </font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"look_at"</font><font color="#993333">)</font><font color="#330033">, TRUE)</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">function </font><font color="#330033">look_at(</font><font color="#FF00FF">sequence </font><font color="#330033">path_name, </font><font color="#FF00FF">sequence </font><font color="#330033">entry)</font>
+<font color="#FF0055">-- this function accepts two sequences as arguments</font>
+<font color="#FF00FF">    printf</font><font color="#330033">(1, </font><font color="#00A033">"%s\\%s: %d\n"</font><font color="#330033">,</font>
+<font color="#330033">           {path_name, entry</font><font color="#993333">[</font><font color="#330033">D_NAME</font><font color="#993333">]</font><font color="#330033">, entry</font><font color="#993333">[</font><font color="#330033">D_SIZE</font><font color="#993333">]</font><font color="#330033">})</font>
+<font color="#0000FF">    return </font><font color="#330033">0 </font><font color="#FF0055">-- keep going</font>
+<font color="#0000FF">end function</font>
+<font color="#330033"></font>
+<font color="#330033">exit_code = walk_dir(</font><font color="#00A033">"C:\\MYFILES"</font><font color="#330033">, </font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"look_at"</font><font color="#993333">)</font><font color="#330033">, TRUE)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -621,9 +621,9 @@ In DOS "*ABC.*" will match <b><i>all</i></b> files.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">i = wildcard_file(</font><font color="#00A033">"AB*CD.?"</font><font color="#330033">, </font><font color="#00A033">"aB123cD.e"</font><font color="#330033">)</font>
-<font color="#FF0055">-- i is set to 1 on DOS or Windows, 0 on Linux or FreeBSD</font>
-<font color="#330033"></font>
+<pre><font color="#330033">i = wildcard_file(</font><font color="#00A033">"AB*CD.?"</font><font color="#330033">, </font><font color="#00A033">"aB123cD.e"</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is set to 1 on DOS or Windows, 0 on Linux or FreeBSD</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -631,10 +631,10 @@ In DOS "*ABC.*" will match <b><i>all</i></b> files.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">i = wildcard_file(</font><font color="#00A033">"AB*CD.?"</font><font color="#330033">, </font><font color="#00A033">"abcd.ex"</font><font color="#330033">)</font>
-<font color="#FF0055">-- i is set to 0 on all systems, </font>
-<font color="#FF0055">-- because the file type has 2 letters not 1</font>
-<font color="#330033"></font>
+<pre><font color="#330033">i = wildcard_file(</font><font color="#00A033">"AB*CD.?"</font><font color="#330033">, </font><font color="#00A033">"abcd.ex"</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is set to 0 on all systems, </font>
+<font color="#FF0055">-- because the file type has 2 letters not 1</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -681,7 +681,7 @@ If you want to detect a pattern anywhere within a string,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">'*' </font><font color="#330033">& pattern & </font><font color="#00A033">'*'</font><font color="#330033">, string)</font>
+<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">'*' </font><font color="#330033">& pattern & </font><font color="#00A033">'*'</font><font color="#330033">, string)</font>
 </pre></td></tr>
 
 
@@ -694,9 +694,9 @@ If you want to detect a pattern anywhere within a string,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">"A?B*"</font><font color="#330033">, </font><font color="#00A033">"AQBXXYY"</font><font color="#330033">)</font>
-<font color="#FF0055">-- i is 1 (TRUE)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">"A?B*"</font><font color="#330033">, </font><font color="#00A033">"AQBXXYY"</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1 (TRUE)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -704,9 +704,9 @@ If you want to detect a pattern anywhere within a string,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">"*xyz*"</font><font color="#330033">, </font><font color="#00A033">"AAAbbbxyz"</font><font color="#330033">)</font>
-<font color="#FF0055">-- i is 1 (TRUE)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">"*xyz*"</font><font color="#330033">, </font><font color="#00A033">"AAAbbbxyz"</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1 (TRUE)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 3:</b></td>
@@ -714,9 +714,9 @@ If you want to detect a pattern anywhere within a string,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">"A*B*C"</font><font color="#330033">, </font><font color="#00A033">"a111b222c"</font><font color="#330033">)</font>
-<font color="#FF0055">-- i is 0 (FALSE) because upper/lower case doesn't match</font>
-<font color="#330033"></font>
+<pre><font color="#330033">i = wildcard_match(</font><font color="#00A033">"A*B*C"</font><font color="#330033">, </font><font color="#00A033">"a111b222c"</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0 (FALSE) because upper/lower case doesn't match</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -766,12 +766,12 @@ Use wrap() in <font color="#CC3366">text modes</font> or
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#FF00FF">repeat</font><font color="#993333">(</font><font color="#00A033">'x'</font><font color="#330033">, 100</font><font color="#993333">) </font><font color="#330033">& </font><font color="#00A033">"\n\n"</font><font color="#330033">)</font>
-<font color="#FF0055">-- now have a line of 80 'x' followed a line of 20 more 'x'</font>
-<font color="#330033">wrap(0)</font>
-<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#FF00FF">repeat</font><font color="#993333">(</font><font color="#00A033">'x'</font><font color="#330033">, 100</font><font color="#993333">) </font><font color="#330033">& </font><font color="#00A033">"\n\n"</font><font color="#330033">)</font>
-<font color="#FF0055">-- creates just one line of 80 'x'</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#FF00FF">repeat</font><font color="#993333">(</font><font color="#00A033">'x'</font><font color="#330033">, 100</font><font color="#993333">) </font><font color="#330033">& </font><font color="#00A033">"\n\n"</font><font color="#330033">)</font>
+<font color="#FF0055">-- now have a line of 80 'x' followed a line of 20 more 'x'</font>
+<font color="#330033">wrap(0)</font>
+<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#FF00FF">repeat</font><font color="#993333">(</font><font color="#00A033">'x'</font><font color="#330033">, 100</font><font color="#993333">) </font><font color="#330033">& </font><font color="#00A033">"\n\n"</font><font color="#330033">)</font>
+<font color="#FF0055">-- creates just one line of 80 'x'</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -822,9 +822,9 @@ Results are treated as signed numbers. They will be
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">a = </font><font color="#FF00FF">xor_bits</font><font color="#330033">(#0110, #1010)</font>
-<font color="#FF0055">-- a is #1100</font>
-<font color="#330033"></font>
+<pre><font color="#330033">a = </font><font color="#FF00FF">xor_bits</font><font color="#330033">(#0110, #1010)</font>
+<font color="#FF0055">-- a is #1100</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>

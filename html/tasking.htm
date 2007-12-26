@@ -145,53 +145,53 @@ while task 2 gets control every 5 to 5.1 seconds.
 In between, the main task (task 0), has control as it
 checks for a 'q' character to abort execution.
 
-<pre><font color="#0000FF">constant </font><font color="#330033">TRUE = 1, FALSE = 0</font>
-<font color="#330033"></font>
-<font color="#0000FF">type </font><font color="#330033">boolean(</font><font color="#FF00FF">integer </font><font color="#330033">x)</font>
-<font color="#0000FF">	return </font><font color="#330033">x = 0 </font><font color="#0000FF">or </font><font color="#330033">x = 1</font>
-<font color="#0000FF">end type</font>
-<font color="#330033"></font>
-<font color="#330033">boolean t1_running, t2_running</font>
-<font color="#330033"></font>
-<font color="#0000FF">procedure </font><font color="#330033">task1(</font><font color="#FF00FF">sequence </font><font color="#330033">message)</font>
-<font color="#0000FF">	for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
-<font color="#FF00FF">		printf</font><font color="#330033">(1, </font><font color="#00A033">"task1 (%d) %s\n"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">i, message</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF00FF">		task_yield</font><font color="#330033">()</font>
-<font color="#0000FF">	end for</font>
-<font color="#330033">	t1_running = FALSE</font>
-<font color="#0000FF">end procedure</font>
-<font color="#330033"></font>
-<font color="#0000FF">procedure </font><font color="#330033">task2(</font><font color="#FF00FF">sequence </font><font color="#330033">message)</font>
-<font color="#0000FF">	for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
-<font color="#FF00FF">		printf</font><font color="#330033">(1, </font><font color="#00A033">"task2 (%d) %s\n"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">i, message</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF00FF">		task_yield</font><font color="#330033">()</font>
-<font color="#0000FF">	end for</font>
-<font color="#330033">	t2_running = FALSE</font>
-<font color="#0000FF">end procedure</font>
-<font color="#330033"></font>
-<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"main task: start\n"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF00FF">atom </font><font color="#330033">t1, t2</font>
-<font color="#330033"></font>
-<font color="#330033">t1 = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"task1"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Hello"</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033">t2 = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"task2"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Goodbye"</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF00FF">task_schedule</font><font color="#330033">(t1, </font><font color="#993333">{</font><font color="#330033">2.5, 3</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF00FF">task_schedule</font><font color="#330033">(t2, </font><font color="#993333">{</font><font color="#330033">5, 5.1</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#330033">t1_running = TRUE</font>
-<font color="#330033">t2_running = TRUE</font>
-<font color="#330033"></font>
-<font color="#0000FF">while </font><font color="#330033">t1_running </font><font color="#0000FF">or </font><font color="#330033">t2_running </font><font color="#0000FF">do</font>
-<font color="#0000FF">	if </font><font color="#FF00FF">get_key</font><font color="#330033">() = </font><font color="#00A033">'q' </font><font color="#0000FF">then</font>
-<font color="#0000FF">		exit</font>
-<font color="#0000FF">	end if  </font>
-<font color="#FF00FF">	task_yield</font><font color="#330033">()</font>
-<font color="#0000FF">end while</font>
-<font color="#330033"></font>
-<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"main task: stop\n"</font><font color="#330033">)</font>
-<font color="#FF0055">-- program ends when main task is finished</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">constant </font><font color="#330033">TRUE = 1, FALSE = 0</font>
+<font color="#330033"></font>
+<font color="#0000FF">type </font><font color="#330033">boolean(</font><font color="#FF00FF">integer </font><font color="#330033">x)</font>
+<font color="#0000FF">	return </font><font color="#330033">x = 0 </font><font color="#0000FF">or </font><font color="#330033">x = 1</font>
+<font color="#0000FF">end type</font>
+<font color="#330033"></font>
+<font color="#330033">boolean t1_running, t2_running</font>
+<font color="#330033"></font>
+<font color="#0000FF">procedure </font><font color="#330033">task1(</font><font color="#FF00FF">sequence </font><font color="#330033">message)</font>
+<font color="#0000FF">	for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
+<font color="#FF00FF">		printf</font><font color="#330033">(1, </font><font color="#00A033">"task1 (%d) %s\n"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">i, message</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF00FF">		task_yield</font><font color="#330033">()</font>
+<font color="#0000FF">	end for</font>
+<font color="#330033">	t1_running = FALSE</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"></font>
+<font color="#0000FF">procedure </font><font color="#330033">task2(</font><font color="#FF00FF">sequence </font><font color="#330033">message)</font>
+<font color="#0000FF">	for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
+<font color="#FF00FF">		printf</font><font color="#330033">(1, </font><font color="#00A033">"task2 (%d) %s\n"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">i, message</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF00FF">		task_yield</font><font color="#330033">()</font>
+<font color="#0000FF">	end for</font>
+<font color="#330033">	t2_running = FALSE</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"></font>
+<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"main task: start\n"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF00FF">atom </font><font color="#330033">t1, t2</font>
+<font color="#330033"></font>
+<font color="#330033">t1 = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"task1"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Hello"</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033">t2 = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"task2"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Goodbye"</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(t1, </font><font color="#993333">{</font><font color="#330033">2.5, 3</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(t2, </font><font color="#993333">{</font><font color="#330033">5, 5.1</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#330033">t1_running = TRUE</font>
+<font color="#330033">t2_running = TRUE</font>
+<font color="#330033"></font>
+<font color="#0000FF">while </font><font color="#330033">t1_running </font><font color="#0000FF">or </font><font color="#330033">t2_running </font><font color="#0000FF">do</font>
+<font color="#0000FF">	if </font><font color="#FF00FF">get_key</font><font color="#330033">() = </font><font color="#00A033">'q' </font><font color="#0000FF">then</font>
+<font color="#0000FF">		exit</font>
+<font color="#0000FF">	end if  </font>
+<font color="#FF00FF">	task_yield</font><font color="#330033">()</font>
+<font color="#0000FF">end while</font>
+<font color="#330033"></font>
+<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"main task: stop\n"</font><font color="#330033">)</font>
+<font color="#FF0055">-- program ends when main task is finished</font>
+<font color="#330033"></font>
 </pre>
  
  

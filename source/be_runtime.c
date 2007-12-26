@@ -113,7 +113,7 @@ extern unsigned char TempBuff[];
 extern d_ptr d_list;
 extern struct videoconfig config;
 extern int il_file;
-
+extern struct IL fe;
 FILE *TempErrFile;
 char *TempErrName; // "ex.err" - but must be malloc'd
 extern int Executing;
@@ -4339,6 +4339,7 @@ object Command_Line()
     object_ptr obj_ptr;
     char **argv;
     s1_ptr result;
+    int switch_len;
 #ifdef ELINUX
     char * buff;
     ssize_t len;
@@ -4351,7 +4352,8 @@ object Command_Line()
 #endif      
 	// user's program sees one less arg
 	argv = Argv+1; // skip first one
-	result = NewS1(Argc - (*file_name_entered == 0)); 
+	switch_len = SEQ_PTR(fe.switches)->length;
+	result = NewS1(Argc - (*file_name_entered == 0) - switch_len); 
 	obj_ptr = result->base;
 #ifdef ELINUX
 	// We try to get the actual path of the executable on *nix 
@@ -4361,15 +4363,21 @@ object Command_Line()
 	if( len != -1 ){
 	    buff[len] = 0;
 	    *(++obj_ptr) = NewString( buff );
-	    len = 2;
-	    argv++;  // skip the actual passed value
 	}
-	else len = 1;  // readlink failed, so we'll just report the actual cmd line
-	free(buff);
-	for (i = len; i < Argc; i++){
-#else
-	for (i = 1; i < Argc; i++) {
+	else
 #endif
+	{
+		// not LINUX, or readlink failed, so we'll just report the actual cmd line
+		*(++obj_ptr) = NewString(*Argv);  
+	}
+#ifdef ELINUX
+	free(buff);
+#endif
+	for(i=0; i <= switch_len; i++){
+		argv++;
+	}
+	
+	for (i = switch_len + 2; i < Argc; i++){
 	    *(++obj_ptr) = NewString(*argv++);
 	}
 	if (*file_name_entered) {

@@ -242,6 +242,16 @@ a.brown:hover     {color: red; text-decoration: underline;}
     or 
        <b>ec allsorts</b>
  </pre>
+ On Windows you would type:
+ <pre>       <b>ecw taskwire.exw</b>
+    or 
+       <b>ecw taskwire</b>
+ </pre>
+ On Linux/FreeBSD you would type:
+ <pre>       <b>ecu qsort.exu</b>
+    or 
+       <b>ecu qsort</b>
+ </pre>
  but instead of running the allsorts.ex program, the
  <font color="#0066CC"><b>Translator</b></font> will
  create several C source files. Anyone can run the 
@@ -398,7 +408,23 @@ a.brown:hover     {color: red; text-decoration: underline;}
  <p>
  On all other platforms, Euphoria uses fast hardware floating-point instructions,
  and the operating system handles the case where hardware f.p. is missing.
- 
+ <p>
+ To compile your program with debugging information, usable with a debugger
+ compatible with your compiler, use the <b>-debug</b> option:
+ <pre>
+     <b>ecu -debug myapp.exu</b>
+ </pre>
+ <p>
+ It is sometimes useful to link your translated code to a Euphoria runtime 
+ library other than the default supplied library. This ability is probably
+ mostly useful for testing and debugging the runtime library itself, or
+ to give additional debugging information when debugging translated Euphoria
+ code. Note that only the default library is supplied. The custom library 
+ must be put into your EUDIR/bin directory along with the default library.
+ Use the <b>-lib {library}</b> option:
+ <pre>
+    <b>ecu -lib decu.a myapp.exu</b>
+ </pre>
  
 <p>
 <a name="dynamic"></a>
@@ -511,12 +537,12 @@ To pass Euphoria data (atoms and sequences) as arguments, or to receive a
 Euphoria object as a result, you will need to use the following 
 constants in <font color="#5500FF"><b>euphoria\include\dll.e</b></font>:
 
-<pre><font color="#FF0055">      -- Euphoria types for .dll (.so) arguments and return values:</font>
-<font color="#0000FF">      global constant</font>
-<font color="#330033">		      E_INTEGER = #06000004,</font>
-<font color="#330033">		      E_ATOM    = #07000004,</font>
-<font color="#330033">		      E_SEQUENCE= #08000004,</font>
-<font color="#330033">		      E_OBJECT  = #09000004</font>
+<pre><font color="#FF0055">      -- Euphoria types for .dll (.so) arguments and return values:</font>
+<font color="#0000FF">      global constant</font>
+<font color="#330033">		      E_INTEGER = #06000004,</font>
+<font color="#330033">		      E_ATOM    = #07000004,</font>
+<font color="#330033">		      E_SEQUENCE= #08000004,</font>
+<font color="#330033">		      E_OBJECT  = #09000004</font>
 </pre>
 
 Use these in <font color="#006699"><b>define_c_proc()</b></font> and

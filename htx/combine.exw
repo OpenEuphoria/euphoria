@@ -1,4 +1,11 @@
 -- combine a bunch of files into one
+include misc.e
+integer SLASH
+if platform() = LINUX then
+    SLASH = '/'
+else
+    SLASH = '\\'
+end if
 
 sequence ref_files, lib_files
 
@@ -62,9 +69,9 @@ end function
 integer fn, ref_out, lib_out
 object line
 
-ref_out = try_open(app_dir & "\\doc\\REFMAN.DOC", "w")
+ref_out = try_open(app_dir & SLASH & "doc" & SLASH &"REFMAN.DOC", "w")
 puts(ref_out, 
-"[To view this manual with your Web browser, double-click on html\\refman.htm]\n\n")
+"[To view this manual with your Web browser, double-click on html" & SLASH & "refman.htm]\n\n")
 for i = 1 to length(ref_files) do
     fn = try_open(ref_files[i], "r")
     while 1 do
@@ -78,7 +85,7 @@ for i = 1 to length(ref_files) do
 end for
 close(ref_out)
 
-lib_out = try_open(app_dir & "\\doc\\LIBRARY.DOC", "w")
+lib_out = try_open(app_dir & SLASH & "doc" & SLASH & "LIBRARY.DOC", "w")
 for i = 1 to length(lib_files) do
     fn = try_open(lib_files[i], "r")
     while 1 do
