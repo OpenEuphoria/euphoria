@@ -11,6 +11,10 @@ ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME
 endif
 
+ifdef EBACKEND
+BACKEND_FLAGS = -DBACKEND
+endif
+
 ifdef EDEBUG
 DEBUG_FLAGS=-g3
 CALLC_DEBUG=-g3
@@ -20,7 +24,7 @@ endif
 
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
-BE_FLAGS =  -c -w -DELINUX $(RUNTIME_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+BE_FLAGS =  -c -w -DELINUX $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
 
 EU_CORE_FILES = \
@@ -42,6 +46,8 @@ EU_INTERPRETER_FILES = \
 	compress.e \
 	backend.e \
 	c_out.e \
+	cominit.e \
+	intinit.e \
 	int.ex
 
 EU_TRANSLATOR_FILES = \
@@ -51,6 +57,7 @@ EU_TRANSLATOR_FILES = \
 	c_decl.e \
 	c_out.e \
 	global.e \
+	cominit.e \
 	traninit.e
 
 EU_TRANSLATOR_OBJECTS = \
@@ -79,12 +86,14 @@ EU_TRANSLATOR_OBJECTS = \
 
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
+	./$(OBJDIR)/intinit.o \
+	./$(OBJDIR)/wildcard.o \
 	./$(OBJDIR)/compress.o
 
-	
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \
 	./$(OBJDIR)/main-0.o \
+	./$(OBJDIR)/cominit.o \
 	./$(OBJDIR)/pathopen.o \
 	./$(OBJDIR)/init-.o \
 	./$(OBJDIR)/file.o \
@@ -148,6 +157,33 @@ EU_LIB_OBJECTS = \
 	./$(OBJDIR)/back/be_task.o \
 	./$(OBJDIR)/back/be_callc.o
 
+EU_BACKEND_RUNNER_OBJECTS = \
+	./$(OBJDIR)/main-.o \
+	./$(OBJDIR)/init-.o \
+	./$(OBJDIR)/intinit.o \
+	./$(OBJDIR)/cominit.o \
+	./$(OBJDIR)/file.o \
+	./$(OBJDIR)/machine.o \
+	./$(OBJDIR)/0ackend.o \
+	./$(OBJDIR)/pathopen.o \
+	./$(OBJDIR)/backend.o \
+	./$(OBJDIR)/compress.o \
+	./$(OBJDIR)/wildcard.o \
+	./$(OBJDIR)/error.o \
+	./$(OBJDIR)/mode.o
+
+EU_BACKEND_RUNNER_FILES = \
+	intinit.e \
+	cominit.e \
+	backend.e \
+	pathopen.e \
+	backend.ex \
+	compress.e \
+	backend.e \
+	error.e \
+	mode.e
+
+
 all : interpreter translator library backend
 
 cleandir = -rm $(1)/*c $(1)/*o $(1)/back/*o
@@ -163,7 +199,7 @@ ecu.a : $(EU_LIB_OBJECTS)
 	ar -rc ecu.a $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
-builddirs : intobj/ transobj/ libobj/ backobj/ intobj/back/ transobj/back/ libobj/back/
+builddirs : intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
 
 interpreter : builddirs
 	make exu OBJDIR=intobj
@@ -192,16 +228,15 @@ ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	gcc $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm -ldl -oecu
 
 backend : builddirs
-	make backendu OBJDIR=backobj
+	make backendu EBACKEND=1 OBJDIR=backobj
 
+backendu : OBJDIR = backobj
 backendu : EU_TARGET = backend.ex
-backendu : EU_MAIN = backend.ex compress.e mode.e pathopen.e
-backendu : EU_OBJS = $(OBJDIR)/main-.o $(OBJDIR)/init-.o $(OBJDIR)/file.o $(OBJDIR)/machine.o $(OBJDIR)/0ackend.o $(OBJDIR)/pathopen.o $(OBJDIR)/backend.o $(OBJDIR)/compress.o $(OBJDIR)/mode.o
-backendu : library
-backendu : $(OBJDIR)/main-.o $(OBJDIR)/init-.o $(OBJDIR)/file.o $(OBJDIR)/machine.o $(OBJDIR)/0ackend.o $(OBJDIR)/pathopen.o $(OBJDIR)/backend.o $(OBJDIR)/compress.o $(OBJDIR)/mode.o
-	@echo making backendu
-	ls *.o
-	gcc $(EU_OBJS) ecu.a -lm -ldl -obackendu
+backendu : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
+backendu : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendu : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@echo making backendu $(OBJDIR)
+	gcc $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm -ldl -obackendu
 
 %obj : 
 	mkdir $@

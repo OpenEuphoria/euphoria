@@ -184,5 +184,6 @@ static char *opnames[] = {
 "PEEK2S",
 "PEEK2U",
 "PEEKS",
-"PEEK_STRING"
+"PEEK_STRING",
+"OPTION_SWITCHES"
 };

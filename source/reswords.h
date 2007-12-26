@@ -198,11 +198,14 @@
 #define PEEK2U 182
 #define PEEKS 183
 #define PEEK_STRING 184
-#define MAX_OPCODE 184  /* remember to update reswords.e, opnames.e,
+
+#define OPTION_SWITCHES 185
+
+#define MAX_OPCODE 185  /* remember to update reswords.e, opnames.e,
 			   opnames.h, optable[], localjumptab[]
 			   in be_execute.c, be_runtime.c. redef.h, 
-			   emit.e, keylist.e, compile.e and maybe 
-			   Also, run makename.ex */
+			   emit.e, keylist.e, compile.e, be_syncolor.c
+			 */
 
 #define END_OF_FILE_CHAR 26    
 #define VARIABLE     -100

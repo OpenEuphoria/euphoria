@@ -817,6 +817,9 @@ global procedure DeclareRoutineList()
 
     c_hputs("extern int ** _02;\n")
     c_puts("int ** _02;\n")
+    
+    c_hputs("extern object _0switches;\n")
+    c_puts("object _0switches;\n")
 end procedure   
 
 
@@ -1239,7 +1242,7 @@ global procedure finish_emake()
 	if sequence(wat_path) then     
 	    printf(doit, "wlink FILE %s.obj @objfiles.lnk\n", {file0})
 	    if length(user_library) then
-		printf(link_file, "FILE %s\\bin\\%s\n", {eudir, user_library}) 
+		printf(link_file, "FILE %s\n", {user_library}) 
 	    else
 		printf(link_file, "FILE %s\\bin\\ecw.lib\n", {eudir}) 	
 	    end if

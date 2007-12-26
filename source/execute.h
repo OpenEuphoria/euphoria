@@ -209,6 +209,7 @@ struct IL {
     int *misc;
     char *lit;
     struct include_info * includes;
+    object switches;
 };
 
 // Task Control Block - sync with euphoria\include\euphoria.h

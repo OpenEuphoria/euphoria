@@ -14,7 +14,7 @@ include backend.e
 include reswords.e
 include scanner.e
 include wildcard.e
-
+include cominit.e
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con
 integer del_routines, del_vars
@@ -172,6 +172,7 @@ procedure OutputSymTab(file f)
 	end if
     end for
     fcompress(f, SymTab)
+    
 end procedure
 
 procedure OutputSlist(file f)
@@ -265,6 +266,18 @@ function extract_options(sequence cl)
 		user_out = cl[op+1]
 		cl = cl[1..op-1] & cl[op+2..$]
 	    
+	    elsif match("I", option) = 1 and op < length(cl) then
+		add_switch( "-i", 0 )
+		add_switch( cl[op+1], 0 )
+		add_include_directory( cl[op+1] )
+		cl = cl[1..op-1] & cl[op+2..$]
+		
+	    elsif match("C", option ) = 1 and op < length(cl) then
+		add_switch( "-c", 0 )
+		add_switch( cl[op+1], 0 )
+		load_euinc_conf( cl[op+1] )
+		cl = cl[1..op-1] & cl[op+2..$]
+		
 	    else
 		fatal("Invalid option: " & cl[op])
 	    end if
@@ -465,6 +478,7 @@ procedure OutputIL()
     OutputSymTab(out)
     OutputSlist(out) 
     fcompress( out, file_include )
+    fcompress( out, get_switches() )
     close(out)
     
     store_checksum(out_name)

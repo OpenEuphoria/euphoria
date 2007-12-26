@@ -31,3 +31,13 @@ global sequence SymTab  -- the symbol table
 SymTab = {}
 
 global sequence file_name
+global sequence file_include  -- remember which files were included where
+file_name = {} -- declared in common.e
+file_include = {{}}
+
+global integer AnyTimeProfile      -- time profile option was ever selected 
+global integer AnyStatementProfile -- statement profile option was ever selected 
+
+global sequence all_source  -- pointers to chunks
+
+all_source = {}

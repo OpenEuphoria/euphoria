@@ -881,16 +881,20 @@ void InitStack(int size, int toplevel)
 
 void InitExecute()
 {
+#ifndef EDEBUG
     // signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
     signal(SIGINT, INT_Handler); 
     // SIG_IGN=> still see ^C echoed, but it has no effect other
     // than messing up the screen. INT_Handler lets us do
     // a bit of cleanup - tick rate, profile, active page etc.
+#endif
 
 #ifndef EDOS      // doesn't work on DOS
 #ifndef ERUNTIME  // dll shouldn't take handler away from main program
+#ifndef EDEBUG
     signal(SIGILL,  Machine_Handler);
     signal(SIGSEGV, Machine_Handler);
+#endif
 #endif
 #endif
 
@@ -948,7 +952,7 @@ void code_set_pointers(int **code)
 	word = (int)code[i];
 	
 	if (word > MAX_OPCODE || word < 1) {
-	    sprintf(msg, "BAD IL OPCODE: i is %d, word is %d, len is %d", 
+	    sprintf(msg, "BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d", 
 		    i, word, len);
 	    RTFatal(msg);
 	}
@@ -987,6 +991,7 @@ void code_set_pointers(int **code)
 	    case CLOSE:
 	    case GET_KEY: 
 	    case COMMAND_LINE:
+	    case OPTION_SWITCHES:
 	    case TRACE:
 	    case PROFILE: 
 	    case DISPLAY_VAR:
@@ -1387,7 +1392,6 @@ void symtab_set_pointers()
 	    if (s->token == PROC || 
 		s->token == FUNC || 
 		s->token == TYPE) {
-
 		code = (int **)s->u.subp.code;
 		if (code != NULL) {
 		    code_set_pointers(code);
@@ -1693,7 +1697,8 @@ void do_exec(int *start_pc)
   &&L_TASK_SELF, &&L_TASK_SUSPEND, &&L_TASK_LIST,
   &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, 
 /* 178 */ &&L_TASK_CLOCK_START, &&L_FIND_FROM, &&L_MATCH_FROM,
-  &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING
+  &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
+  &&L_OPTION_SWITCHES
   };
 #endif
 #endif
@@ -4149,6 +4154,16 @@ void do_exec(int *start_pc)
 		tpc = pc;
 		top = Command_Line();
 		DeRef(*(object_ptr)pc[1]);
+		*(object_ptr)pc[1] = top;
+		pc += 2;
+		thread();
+		BREAK;
+		
+	    case L_OPTION_SWITCHES:
+		tpc = pc;
+		top = fe.switches;
+		RefDS( top );
+		
 		*(object_ptr)pc[1] = top;
 		pc += 2;
 		thread();

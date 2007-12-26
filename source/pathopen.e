@@ -4,6 +4,7 @@
 include common.e
 include misc.e
 include machine.e
+include file.e
 
 atom oem2char,convert_buffer
 integer convert_length
@@ -71,6 +72,29 @@ sequence cache_delims
 cache_delims = {}
 integer num_var
 
+sequence config_inc_paths
+config_inc_paths = {}
+integer loaded_config_inc_paths
+loaded_config_inc_paths = 0
+
+object exe_path_cache
+exe_path_cache = 0
+
+sequence pwd
+pwd = current_dir()
+
+global function exe_path()
+    
+    if sequence(exe_path_cache) then
+	return exe_path_cache
+    end if
+
+    exe_path_cache = command_line()
+    exe_path_cache = exe_path_cache[1]
+    
+    return exe_path_cache
+end function
+
 function check_cache(sequence env,sequence inc_path)
     integer delim,pos
 
@@ -121,6 +145,167 @@ function check_cache(sequence env,sequence inc_path)
     return 1
 end function
 
+
+global function get_conf_dirs()
+    integer delimiter
+    sequence dirs
+    
+    if ELINUX then
+	delimiter = ':'
+    else
+	delimiter = ';'
+    end if
+    
+    dirs = ""
+    for i = 1 to length(config_inc_paths) do
+    	dirs &= config_inc_paths[i]
+    	if i != length(config_inc_paths) then
+    	    dirs &= delimiter
+    	end if
+    end for
+    return dirs
+end function
+
+function strip_file_from_path( sequence full_path )
+    for i = length(full_path) to 1 by -1 do
+	if full_path[i] = SLASH then
+	    return full_path[1..i]
+	end if
+    end for
+    return ""
+end function
+
+function expand_path( sequence path, sequence prefix )
+    object home
+    integer absolute
+    
+    if not length(path) then
+    	return pwd
+    end if
+    
+    if ELINUX and length(path) and path[1] = '~' then
+    	home = getenv("HOME")
+    	if sequence(home) and length(home) then
+    	    path = home & path[2..$]
+    	end if
+    end if
+    
+    absolute = find(path[1], SLASH_CHARS) or
+	(not ELINUX and find(':', path))
+    if not absolute then
+    	path = prefix & SLASH & path
+    end if
+    
+    if length(path) and not find(path[$], SLASH_CHARS) then
+	path &= SLASH
+    end if
+    
+    return path
+end function
+
+global procedure add_include_directory( sequence path )
+
+    path = expand_path( path, pwd )
+   
+    if not find( path, config_inc_paths ) then
+    	config_inc_paths = append( config_inc_paths, path )
+    end if
+end procedure
+
+global procedure load_euinc_conf( sequence file )
+    integer fn, absolute
+    object in, home
+    sequence conf_path
+    
+    conf_path = strip_file_from_path( file )
+    home = ""
+    
+    if length(conf_path) = 0 then
+    	conf_path = pwd
+    else
+	conf_path = expand_path( conf_path, pwd )
+    end if
+    
+    fn = open( file, "r" )
+    if fn = -1 then return end if
+    
+    in = gets( fn )
+    while sequence( in ) do
+	while length(in) and find( in[$], "\n\r \t" ) do
+	    in = in[1..$-1]
+	end while
+	
+	while length(in) and find( in[1], " \t" ) do
+	    in = in[2..$]
+	end while
+	
+	if length(in) and match( "--", in ) != 1 then
+	    in = expand_path( in, conf_path )  -- allow ~ to refer to $HOME in *nix
+	    absolute = find(in[1], SLASH_CHARS) or
+	       (not ELINUX and find(':', in))
+	    
+
+	    config_inc_paths = append( config_inc_paths, in )
+	end if
+	
+	in = gets( fn )
+    end while
+    close(fn)
+end procedure
+
+
+
+global procedure load_platform_inc_paths()
+    object env
+    
+    if loaded_config_inc_paths then return end if
+    loaded_config_inc_paths = 1
+
+    -- load the local (same dir as interpreter/translator)
+    env = strip_file_from_path( exe_path() )
+    load_euinc_conf( env & "euinc.conf" )
+    
+    -- platform specific
+    if ELINUX then
+	env = getenv( "HOME" )
+	if sequence(env) then
+	    load_euinc_conf( env & "/.euinc.conf" )
+	end if
+	load_euinc_conf( "/etc/euphoria/euinc.conf" )
+	
+    elsif EWINDOWS then
+	env = getenv( "APPDATA" )
+	if sequence(env) then
+	    load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
+    	end if
+
+	env = getenv( "ALLUSERSPROFILE" )
+	if sequence(env) then
+	    load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
+    	end if
+    else
+	-- none for DOS
+    end if
+end procedure
+
+global function ConfPath(sequence file_name)
+-- Search directories listed on command line and in conf files
+    sequence full_path, file_path
+    integer try
+    if not loaded_config_inc_paths then
+    	load_platform_inc_paths()
+    end if
+    for i = 1 to length(config_inc_paths) do
+	full_path = config_inc_paths[i]
+	file_path = full_path & file_name
+	try = open( file_path, "r" )
+	if try != -1 then
+	    return {file_path, try}
+	end if
+    end for
+    return -1
+end function
+
 global function ScanPath(sequence file_name,sequence env,integer flag)
 -- returns -1 if no path in geenv(env) leads to file_name, else {full_path,handle}
 -- if flag is 1, the include_subfolder constant is prepended to filename
@@ -128,6 +313,7 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
     sequence full_path, file_path, strings
     integer end_path,start_path,try,use_cache, pos
 
+-- 
 -- Search directories listed on EUINC environment var
     inc_path = getenv(env)
     if compare(inc_path,{})!=1 then -- nothing to do, just fail

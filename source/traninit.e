@@ -9,6 +9,7 @@ include c_out.e
 include c_decl.e
 include error.e
 include compile.e
+include cominit.e
 
 global boolean wat_option, djg_option, bor_option, lcc_option
 wat_option = FALSE
@@ -33,7 +34,7 @@ end function
 
 global procedure transoptions()
 -- set translator command-line options  
-    integer i
+    integer i, option
     sequence uparg
     object s
     
@@ -75,6 +76,7 @@ global procedure transoptions()
 	    elsif match("-STACK", uparg) then
 		if i < Argc then
 		    s = value(Argv[i+1])
+		    add_switch( Argv[i+1], 1 )
 		    if s[1] = GET_SUCCESS then
 			if s[2] >= 16384 then
 			    total_stack_size = floor(s[2] / 4) * 4
@@ -92,6 +94,7 @@ global procedure transoptions()
 	    elsif match("-LIB", uparg ) then
 	    	if i < Argc then
 	    	    user_library = Argv[i+1]
+	    	    add_switch( user_library, 1 )
 	    	    Argc -= 1
 		    for j = i to Argc do
 			Argv[j] = Argv[j+1]
@@ -101,10 +104,17 @@ global procedure transoptions()
 		    Warning("-lib option missing library name")
 	    	end if
 	    else
-		OpWarning = TRUE
-		Warning("unknown option: " & Argv[i])
+	    	option = find( uparg, COMMON_OPTIONS )
+		if option then
+		    common_options( option, i )
+		else
+		    OpWarning = TRUE
+		    Warning("unknown option: " & Argv[i])
+		end if
+		
 	    end if
 	    -- delete "-" option from the list of args */
+	    add_switch( Argv[i], 0 )
 	    Argc -= 1
 	    for j = i to Argc do
 		Argv[j] = Argv[j+1]

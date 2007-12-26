@@ -188,7 +188,8 @@ PEEK2S = 181,
 PEEK2U = 182,
 PEEKS = 183,
 PEEK_STRING = 184,
-MAX_OPCODE = 184
+OPTION_SWITCHES = 185,
+MAX_OPCODE = 185
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])

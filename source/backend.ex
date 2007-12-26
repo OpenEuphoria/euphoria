@@ -4,6 +4,9 @@
 -- we redundantly declare some things to keep the size down
 without type_check
 
+include mode.e
+set_mode("backend", 0 )
+
 include file.e
 include machine.e
 include wildcard.e
@@ -11,56 +14,13 @@ include common.e
 include reswords.e
 include compress.e
 include misc.e
-
-----------------------------------------------------------------------
--- copied from global.e to avoid bringing in all of global.e
-
-
-file_name = {""} -- for now
-
-global sequence file_include  -- remember which files were included where
-file_include = {{}}
-
-global sequence file_name_entered, warning_list
-file_name_entered = ""
-warning_list = {}
-
+include cominit.e
 include pathopen.e
 
-global sequence misc, slist
-global integer AnyTimeProfile, AnyStatementProfile, sample_size, 
-	       gline_number, max_stack_per_call, il_file
+sequence misc
+integer il_file
 il_file = 0
 
-global sequence all_source
-all_source = {} -- there is no source when we read the IL from disk
-
--- fields for reduced symbol table stored in IL
-global constant 
-    S_OBJ = 1,
-    S_NEXT = 2,
-    S_MODE = 3,
-    S_SCOPE = 4,
-    S_FILE_NO = 5,
-    S_NAME = 6, 
-    S_TOKEN = 7, 
-    S_CODE = 8,
-    S_LINETAB = 9,
-    S_TEMPS = 10,
-    S_NUM_ARGS = 11,
-    S_FIRSTLINE = 12,
-    S_STACK_SPACE = 13
-
-global constant M_NORMAL = 1,  -- copied from global.e
-		M_CONSTANT = 2,
-		M_TEMP = 3,
-		SC_UNDEFINED = 9
-
-global constant SRC = 1,  -- from global.e
-	       LINE = 2,
-      LOCAL_FILE_NO = 3,
-	    OPTIONS = 4 
-----------------------------------------------------------------------
 
 include backend.e
 
@@ -114,6 +74,7 @@ procedure InputIL()
 -- Must match OutputIL() in il.e
     integer c1, c2, start
     atom size, checksum
+    sequence switches
     
     c1 = getc(current_db)
     if c1 = '#' then
@@ -165,6 +126,10 @@ procedure InputIL()
     SymTab = fdecompress(0)
     slist = fdecompress(0)
     file_include = fdecompress(0)
+    switches = fdecompress(0)
+    for i = 1 to length(switches) do
+	add_switch( switches[i], 0 )
+    end for
 end procedure
 
 sequence cl, filename
@@ -215,7 +180,9 @@ while 1 do
     if atom(line) then
 	-- EOF, no eu code found in our .exe
 	-- see if a filename was specified on the command line
-	if length(cl) > 2 and match("BACKEND", and_bits(cl[1],#DF)) then
+	
+	if length(cl) > 2 and match("BACKEND", and_bits(cl[1],#DF)) or
+	(length(cl[$]) > 3 and equal(".IL", upper(cl[$][$-2..$])) ) then
 	    filename = cl[3]
 	    close(current_db)
 	    current_db = e_path_open(filename, "rb")

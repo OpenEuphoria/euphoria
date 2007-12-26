@@ -60,10 +60,10 @@ global constant
 
 -- extra fields for vars (and routines) only but not temps 
 global constant 
-	 S_FILE_NO = 6,   -- file number where symbol is defined
-	 S_NAME = 7,      -- name string
+	 S_FILE_NO = 6 - get_backend(),   -- file number where symbol is defined
+	 S_NAME = 7 - get_backend(),      -- name string
 	 S_SAMEHASH = 8,  -- index of next symbol with same hash value
-	 S_TOKEN = 9,     -- token number to return to parser
+	 S_TOKEN = 9 - get_backend()*2,     -- token number to return to parser
 	 S_HASHVAL = 10,  -- hash value 
 	 S_NREFS = 11     -- number of references to this symbol 
 
@@ -75,19 +75,19 @@ global constant
 
 	 -- for routines only: 
 global constant 
-	 S_CODE = 15,     -- IL code for proc/func/type 
-	 S_LINETAB = 16,  -- Line table for traceback
-	 S_FIRSTLINE = 17,-- global line number of start of routine
-	 S_TEMPS = 18,    -- pointer to linked list of temps, or 0
+	 S_CODE = 15 - get_backend()*7,     -- IL code for proc/func/type 
+	 S_LINETAB = 16 - get_backend()*7,  -- Line table for traceback
+	 S_FIRSTLINE = 17 - get_backend()*5,-- global line number of start of routine
+	 S_TEMPS = 18 - get_backend()*8,    -- pointer to linked list of temps, or 0
 	 S_OPCODE = 19,   -- opcode to emit (predefined subprograms)
-	 S_NUM_ARGS = 20, -- number of arguments
+	 S_NUM_ARGS = 20 - get_backend()*9, -- number of arguments
 	 S_EFFECT = 21,   -- side effects
 	 S_REFLIST = 22,  -- list of referenced symbols (for BIND)
 	 S_RESIDENT_TASK = 23, -- the task that's currently using this routine 
 			       -- (at run-time) or 0 if none
 	 S_SAVED_PRIVATES = 24,-- private data of any suspended tasks 
 			       -- executing this routine
-	 S_STACK_SPACE = 25 -- amount of stack space needed by this routine
+	 S_STACK_SPACE = 25 - get_backend()*12 -- amount of stack space needed by this routine
 			    -- (for private data)
 	 
 -- extra fields for TRANSLATOR (for temps and vars/routines)
@@ -242,9 +242,6 @@ end type
 ---------------- Global Variables ----------------------
 
 global object eudir           -- path to Euphoria directory 
-global sequence file_include  -- remember which files were included where
-file_name = {} -- declared in common.e
-file_include = {{}}
 global sequence file_name_entered -- interactively entered file name
 file_name_entered = ""
 global integer shroud_only   -- making an unbound .il file

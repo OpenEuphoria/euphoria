@@ -11,12 +11,15 @@ integer init_backend_rid
 integer backend_rid
 integer extract_options_rid
 integer output_il_rid
+integer target_plat
+integer backend
+target_plat = platform()
 
 global procedure set_mode( sequence mode, integer extra_check )
     interpret = equal( mode, "interpret" )
     translate = equal( mode, "translate" )
     bind      = equal( mode, "bind" )
-
+    backend   = equal( mode, "backend" )
     do_extra_check = extra_check
 end procedure
 
@@ -48,6 +51,10 @@ global function get_bind()
     return bind
 end function
 
+global function get_backend()
+    return backend
+end function
+
 global function get_extra_check()
     return do_extra_check
 end function
@@ -67,3 +74,11 @@ end procedure
 global procedure OutputIL()
     call_proc( output_il_rid, {} )
 end procedure
+
+global procedure set_target_platform( integer target )
+    target_plat = target
+end procedure
+
+global function target_platform()
+    return target_plat
+end function

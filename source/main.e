@@ -199,7 +199,7 @@ procedure main()
     end if
     TempErrName = "ex.err"           
 
-    if TRANSLATE then
+    if TRANSLATE or INTERPRET or BIND then
 	InitBackEnd(0)
     end if
     
@@ -240,7 +240,6 @@ procedure main()
 	OutputIL()
     
     elsif INTERPRET then
-	InitBackEnd(0)
 	BackEnd(0) -- execute IL using Euphoria-coded back-end
     end if
 

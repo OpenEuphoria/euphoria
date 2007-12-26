@@ -37,9 +37,6 @@ start_include = FALSE
 global integer LastLineNumber  -- last global line number (avoid dups in line tab)
 LastLineNumber = -1     
 
-global integer AnyStatementProfile -- statement profile option was ever selected 
-global integer AnyTimeProfile      -- time profile option was ever selected 
-
 global object shebang              -- #! line (if any) for Linux/FreeBSD
 shebang = 0
 
@@ -128,7 +125,6 @@ end procedure
 -- helps old machines load huge programs more quickly
 -- Anyway, the C-coded back-end wants it in this form.
 constant SOURCE_CHUNK = 10000 -- size of one chunk (many lines) of source, in bytes
-global sequence all_source  -- pointers to chunks
 atom current_source  -- current place to store source lines
 integer current_source_next -- next position to store lines into
 all_source = {}
@@ -326,6 +322,7 @@ function path_open()
     sequence full_path
     sequence errbuff
 	sequence currdir
+    sequence conf_path
     object scan_result, inc_path
 	
     absolute = FALSE
@@ -362,8 +359,12 @@ function path_open()
         new_include_name = full_path
         return try
     end if
-
-    scan_result = ScanPath(new_include_name,"EUINC",0)
+    
+    scan_result = ConfPath(new_include_name)
+    
+    if atom(scan_result) then
+	scan_result = ScanPath(new_include_name,"EUINC",0)
+    end if
 
     if atom(scan_result) then
         scan_result = ScanPath(new_include_name, "EUDIR",1)
@@ -383,12 +384,13 @@ function path_open()
     end if
 
     inc_path = getenv("EUINC")
+    conf_path = get_conf_dirs()
     if atom(inc_path) then
-	errbuff = sprintf("can't find %s in %s\nor in %s%sinclude",
-			  {new_include_name, main_path, eudir, SLASH})
-    else
 	errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s%sinclude",
-			  {new_include_name, main_path, inc_path, eudir, SLASH})
+			  {new_include_name, main_path, conf_path, eudir, SLASH})
+    else
+	errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s\nor in %s%sinclude",
+			  {new_include_name, main_path, conf_path, inc_path, eudir, SLASH})
     end if
     CompileErr(errbuff)
 end function

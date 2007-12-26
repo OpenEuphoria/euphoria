@@ -4,10 +4,12 @@
 -- Called from (a) interpreter front-end
 --          or (b) backend.ex (using different s.t. offsets)
 include mode.e as mode
---include global.e
-
+include intinit.e
 procedure InitBackEnd(integer x)
--- not needed by Interpreter or Binder
+    if not BIND then
+	intoptions()	
+    end if
+    
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
@@ -17,6 +19,7 @@ constant ST_ENTRY_SIZE = 52  -- size (bytes) of back-end symbol table entry
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
 
 without warning
+
 procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
@@ -26,7 +29,7 @@ procedure BackEnd(integer il_file)
     integer string_size, short, size, repcount
     sequence lit_string, other_strings
     object entry
-
+    
     -- create a smaller back-end version of symbol table 
     
     -- allow extra for storing size 
@@ -121,7 +124,6 @@ procedure BackEnd(integer il_file)
     for i = 1 to length(SymTab) do
 	entry = SymTab[i]
 	entry_addr += ST_ENTRY_SIZE
-	
 	if sequence(entry) then 
 	    if length(entry) >= S_NAME then
 		if sequence(entry[S_NAME]) then
@@ -247,6 +249,6 @@ procedure BackEnd(integer il_file)
     	include_node += 8
     end for
     
-    machine_proc(65, {st, sl, ms, lit, include_info})
+    machine_proc(65, {st, sl, ms, lit, include_info, get_switches()})
 end procedure
 mode:set_backend( routine_id("BackEnd") )

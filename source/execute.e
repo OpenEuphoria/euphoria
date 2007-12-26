@@ -2928,6 +2928,15 @@ procedure opCOMMAND_LINE()
     pc += 2
 end procedure
 
+procedure opOPTION_SWITCHES()
+    sequence cmd
+    
+    target = Code[pc+1]
+    cmd = option_switches()
+    val[target] = cmd
+    pc += 2
+end procedure
+
 procedure opGETENV()
     a = Code[pc+1]
     target = Code[pc+2]

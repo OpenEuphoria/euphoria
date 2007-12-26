@@ -4490,8 +4490,10 @@ static object crash_routine(object x)
     if (crash_list == NULL) {
 #ifdef ERUNTIME     
 	// Interpreter does this in InitExecute()
+#ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);
 	signal(SIGSEGV, Machine_Handler);
+#endif
 #endif      
 	crash_size = 5;
 	crash_list = (int *)EMalloc(sizeof(int) * crash_size);
@@ -4535,14 +4537,15 @@ object start_backend(object x)
     
     x_ptr = SEQ_PTR(x);
 
-    if (IS_ATOM(x) || x_ptr->length != 5)
-	RTFatal("BACKEND requires a sequence of length 5");
+    if (IS_ATOM(x) || x_ptr->length != 6)
+	RTFatal("BACKEND requires a sequence of length 6");
 
     fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
     fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
     fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
     fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
     fe.includes = (struct include_info *) get_pos_int(w, *(x_ptr->base+5));
+    fe.switches = x_ptr->base[6];
 
 #if defined(ELINUX) || defined(EDJGPP)
     do_exec(NULL);  // init jumptable

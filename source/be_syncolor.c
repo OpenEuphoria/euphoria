@@ -183,6 +183,7 @@ static char *predefined[] = {
     "peek2u",
     "peeks",
     "peek_string",
+    "option_switches",
     NULL
 };
 

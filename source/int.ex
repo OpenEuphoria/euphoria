@@ -20,6 +20,7 @@ include symtab.e
 include scanner.e
 include emit.e
 include parser.e
+include intinit.e
 
 -- INTERPRETER C-backend interface:
 include compress.e

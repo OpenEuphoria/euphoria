@@ -12,6 +12,7 @@
 include global.e
 include mode.e as mode
 include c_decl.e
+include cominit.e
 
 integer np, pc
 
@@ -4810,9 +4811,19 @@ procedure opSPRINTF()
     pc += 4
 end procedure
 
+-- TODO: this doesn't work yet...
 procedure opCOMMAND_LINE()
     CSaveStr("_0", Code[pc+1], 0, 0, 0)
     c_stmt("@ = Command_Line();\n" , Code[pc+1])
+    CDeRefStr("_0")
+    SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE)
+    pc += 2
+end procedure
+
+procedure opOPTION_SWITCHES()
+    CSaveStr("_0", Code[pc+1], 0, 0, 0)
+    c_stmt0("RefDS(_0switches);\n")
+    c_stmt("@ = _0switches;\n", Code[pc+1] )
     CDeRefStr("_0")
     SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE)
     pc += 2
@@ -5100,12 +5111,12 @@ procedure BackEnd(atom ignore)
 -- Translate the IL into C 
     integer w
     symtab_index tp
-    sequence string, init_name
-    integer c, tp_count
+    sequence string, init_name, switches, switch
+    integer c, tp_count, slash_ix
     object xterm
     boolean use_hex
     integer max_len
-    
+
     close(c_code)
     emit_c_output = FALSE
     
@@ -5249,6 +5260,8 @@ procedure BackEnd(atom ignore)
     
     end if  
     c_stmt0("{\n")
+    
+    c_stmt0("s1_ptr _0switch_ptr;\n")
 
     main_temps()
     
@@ -5319,6 +5332,30 @@ procedure BackEnd(atom ignore)
 	end for
     	
     end for
+    c_puts("\n")
+    
+    -- options_switch initialization
+    switches = get_switches()
+    c_stmt0(sprintf("_0switch_ptr = NewS1( %d );\n", length(switches) ))
+    for i = 1 to length(switches) do
+	switch = switches[i]
+	slash_ix = 1
+	if find('\\', switch) then
+	    while slash_ix <= length(switch) do
+		if switch[slash_ix] = '\\' then
+		    if slash_ix = length(switch) then
+			switch &= '\\'
+		    elsif switch[slash_ix+1] != '\\' then
+			switch = switch[1..slash_ix] & '\\' & switch[slash_ix+1..$]
+		    end if
+		    slash_ix += 1
+		end if
+		slash_ix += 1
+	    end while
+	end if
+	c_stmt0(sprintf("_0switch_ptr->base[%d] = NewString(\"%s\");\n", {i, switch}))
+    end for
+    c_stmt0( "_0switches = MAKE_SEQ( _0switch_ptr );\n")
     c_puts("\n")
     
     -- fail safe mechanism in case 

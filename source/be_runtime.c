@@ -347,6 +347,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
+{x, x},
 {x, x}
 };
 
@@ -4338,7 +4339,10 @@ object Command_Line()
     object_ptr obj_ptr;
     char **argv;
     s1_ptr result;
-
+#ifdef ELINUX
+    char * buff;
+    ssize_t len;
+#endif
 #ifndef ERUNTIME
 #ifdef BACKEND  
     if (Executing && il_file) {
@@ -4349,7 +4353,23 @@ object Command_Line()
 	argv = Argv+1; // skip first one
 	result = NewS1(Argc - (*file_name_entered == 0)); 
 	obj_ptr = result->base;
+#ifdef ELINUX
+	// We try to get the actual path of the executable on *nix 
+	// systems using readlink()
+	buff = malloc( 2049 );
+	len = readlink( "/proc/self/exe\0", buff, 2048 );
+	if( len != -1 ){
+	    buff[len] = 0;
+	    *(++obj_ptr) = NewString( buff );
+	    len = 2;
+	    argv++;  // skip the actual passed value
+	}
+	else len = 1;  // readlink failed, so we'll just report the actual cmd line
+	free(buff);
+	for (i = len; i < Argc; i++){
+#else
 	for (i = 1; i < Argc; i++) {
+#endif
 	    *(++obj_ptr) = NewString(*argv++);
 	}
 	if (*file_name_entered) {

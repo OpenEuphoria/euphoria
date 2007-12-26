@@ -254,6 +254,7 @@ op_result[CONCAT] = T_SEQUENCE
 op_result[CONCAT_N] = T_SEQUENCE
 op_result[PREPEND] = T_SEQUENCE
 op_result[COMMAND_LINE] = T_SEQUENCE
+op_result[OPTION_SWITCHES] = T_SEQUENCE
 op_result[SPRINTF] = T_SEQUENCE
 op_result[ROUTINE_ID] = T_INTEGER
 op_result[GETC] = T_INTEGER
@@ -1060,7 +1061,7 @@ global procedure emit_op(integer op)
 	assignable = FALSE
 
     elsif find(op, {DATE, TIME, SPACE_USED, GET_KEY, TASK_LIST, 
-		    COMMAND_LINE}) then
+		    COMMAND_LINE, OPTION_SWITCHES}) then
 	emit_opcode(op)
 	c = NewTempSym()
 	assignable = TRUE

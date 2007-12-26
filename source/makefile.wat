@@ -11,11 +11,11 @@
 #          Make all Dos32 Binaries:  wmake -f makefile.wat dosall
 #
 #   Options:
-#                    MANAGED_MEM:  Define this to use Euphoria's memory cache.
+#                    MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
 #                                  The default is to use straight HeapAlloc/HeapFree calls. ex:
 #                                      wmake -f makefile.wat interpreter MANAGED_MEM=1
 #
-#                          DEBUG:  Define this to build debug versions of the targets.  ex:
+#                          DEBUG:  Set this to 1 to build debug versions of the targets.  ex:
 #                                      wmake -f makefile.wat interpreter DEBUG=1
 
 EU_CORE_FILES = &
@@ -35,6 +35,8 @@ EU_INTERPRETER_FILES = &
 	compress.e &
 	backend.e &
 	c_out.e &
+	cominit.e &
+	intinit.e &
 	int.ex
 
 EU_TRANSLATOR_FILES = &
@@ -43,6 +45,7 @@ EU_TRANSLATOR_FILES = &
 	c_decl.e &
 	c_out.e &
 	global.e &
+	cominit.e &
 	traninit.e 
 	
 
@@ -52,6 +55,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\c_dec0.obj &
 	.\$(OBJDIR)\c_dec1.obj &
 	.\$(OBJDIR)\c_out.obj &
+	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\compile.obj &
 	.\$(OBJDIR)\compil_0.obj &
 	.\$(OBJDIR)\compil_1.obj &
@@ -76,7 +80,10 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\c_out.obj &
 	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\symtab_0.obj 
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\intinit.obj &
+	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\wildcard.obj
 
 	
 EU_CORE_OBJECTS = &
@@ -123,15 +130,24 @@ EU_LIB_OBJECTS = &
 	.\$(OBJDIR)\back\be_task.obj &
 	.\$(OBJDIR)\back\be_callc.obj
 
+EU_BACKEND_RUNNER_FILES = &
+	.\$(OBJDIR)\backend.ex &
+	.\$(OBJDIR)\wildcard.e &
+	.\$(OBJDIR)\compress.e
+
 EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\file.obj &
 	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\0ackend.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\compress.obj
 
 EU_DOS_OBJECTS = &
@@ -159,27 +175,29 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj 
 	
-!ifeq MANAGED_MEM=1
+!ifneq MANAGED_MEM=1
 MEMFLAG = -DESIMPLE_MALLOC
 !endif
 
 !ifeq DEBUG 1
-DEBUGFLAG = /g3
+DEBUGFLAG = /d2 -DEDEBUG
+DEBUGLINK = debug all
 !endif
 
+VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 all :  .SYMBOLIC
-	wmake -f makefile.wat winall
-	wmake -f makefile.wat dosall
+	wmake -f makefile.wat winall $(VARS)
+	wmake -f makefile.wat dosall $(VARS)
 
 winall : .SYMBOLIC
-	wmake -f makefile.wat interpreter
-	wmake -f makefile.wat translator
-	wmake -f makefile.wat library
-	wmake -f makefile.wat backend
+	wmake -f makefile.wat interpreter $(VARS)
+	wmake -f makefile.wat translator $(VARS)
+	wmake -f makefile.wat library $(VARS)
+	wmake -f makefile.wat backend $(VARS)
 
 dosall : .SYMBOLIC
-	wmake -f makefile.wat dos
-	wmake -f makefile.wat library OS=DOS
+	wmake -f makefile.wat dos $(VARS)
+	wmake -f makefile.wat library OS=DOS $(VARS)
 
 clean : .SYMBOLIC
 	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h
@@ -195,13 +213,14 @@ LIBTARGET=ecw.lib
 
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG)
-BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(MEMFLAG) $(DEBUGFLAG)
+BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
 
 builddirs : .SYMBOLIC
 	if not exist intobj mkdir intobj
 	if not exist transobj mkdir transobj
 	if not exist libobj mkdir libobj
 	if not exist backobj mkdir backobj
+	if not exist backobj\back mkdir backobj\back
 	if not exist intobj\back mkdir intobj\back
 	if not exist transobj\back mkdir transobj\back
 	if not exist libobj\back mkdir libobj\back
@@ -216,6 +235,9 @@ library : .SYMBOLIC builddirs
 runtime: .SYMBOLIC 
 	set ERUNTIME=/dERUNTIME
 
+backendflag: .SYMBOLIC
+	set EBACKEND=/dBACKEND
+
 ecw.lib : runtime $(EU_LIB_OBJECTS)
 	wlib -q ecw.lib $(EU_LIB_OBJECTS)
 
@@ -229,11 +251,11 @@ interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRE
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
 exw.exe : interpreter_objects 
-	wlink SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
+	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
 	wrc -q -ad exw.res exw.exe
 
 exwc.exe : interpreter_objects 
-	wlink SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exwc.exe
+	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exwc.exe
 	wrc -q -ad exw.res exwc.exe
 
 interpreter : .SYMBOLIC builddirs 
@@ -241,33 +263,35 @@ interpreter : .SYMBOLIC builddirs
 	wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
-	copy ecw.exe $(%EUDIR)\bin\
-	copy exw.exe $(%EUDIR)\bin\
-	copy exwc.exe $(%EUDIR)\bin\
-	copy backendw.exe $(%EUDIR)\bin\
-	copy backendc.exe $(%EUDIR)\bin\
-	copy ecw.lib $(%EUDIR)\bin\
+	@copy ecw.exe $(%EUDIR)\bin\
+	@copy exw.exe $(%EUDIR)\bin\
+	@copy exwc.exe $(%EUDIR)\bin\
+	@copy backendw.exe $(%EUDIR)\bin\
+	@copy backendc.exe $(%EUDIR)\bin\
+	@copy ecw.lib $(%EUDIR)\bin\
+	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
+	@for %i in (*.ex) do @copy %i $(%EUDIR)\source\
 	
 ecw.exe : $(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
-	wlink SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\ec.lbc name ecw.exe
+	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\ec.lbc name ecw.exe
 	wrc -q -ad exw.res ecw.exe
 
 
 translator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-backendw.exe : $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS)
+backendw.exe : backendflag $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
 	@%append .\$(OBJDIR)\exwb.lbc option caseexact
-	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) ecw.lib) do @%append .\$(OBJDIR)\exwb.lbc file %i
-	wlink SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendw.exe
+	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exwb.lbc file %i
+	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendw.exe
 	wrc -q -ad exw.res backendw.exe
-	wlink SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendc.exe
+	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendc.exe
 	wrc -q -ad exw.res backendc.exe
 
 
@@ -291,7 +315,7 @@ ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%append .\$(OBJDIR)\ex.lbc OPTION ELIMINATE
 	@%append .\$(OBJDIR)\ex.lbc OPTION CASEEXACT
 	@for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
-	wlink @.\$(OBJDIR)\ex.lbc name ex.exe
+	wlink  $(DEBUGLINK) @.\$(OBJDIR)\ex.lbc name ex.exe
 	le23p ex.exe
 	cwc ex.exe
 
@@ -315,6 +339,11 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\main-0.obj : $(OBJDIR)\main-0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
+.\$(OBJDIR)\cominit.obj : $(OBJDIR)\cominit.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\intinit.obj : $(OBJDIR)\intinit.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\mode.obj : $(OBJDIR)\mode.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
