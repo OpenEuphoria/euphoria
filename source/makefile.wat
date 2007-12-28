@@ -20,6 +20,8 @@
 
 EU_CORE_FILES = &
 	main.e &
+	global.e &
+	common.e &
 	mode.e &
 	pathopen.e &
 	error.e &
@@ -44,7 +46,6 @@ EU_TRANSLATOR_FILES = &
 	ec.ex &
 	c_decl.e &
 	c_out.e &
-	global.e &
 	cominit.e &
 	traninit.e 
 	
@@ -319,6 +320,11 @@ ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	le23p ex.exe
 	cwc ex.exe
 
+.\intobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+.\transobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
+.\backobj\main-.c: $(EU_CORE_FILES) backend.ex
+.\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+
 
 .\$(OBJDIR)\main-.c : .\$(OBJDIR)\$(EU_TARGET)c
 	cd .\$(OBJDIR)
@@ -351,7 +357,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\global.obj :.\global.e
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\pathopen.obj :  .MULTIPLE ./pathopen.e
+.\$(OBJDIR)\pathopen.obj :  .MULTIPLE $(OBJDIR)\pathopen.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\init-.obj :  .MULTIPLE ./$(OBJDIR)\init-.c 
@@ -360,106 +366,106 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\file.obj :  .MULTIPLE ./$(OBJDIR)\file.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\error.obj :  .MULTIPLE ./error.e
+.\$(OBJDIR)\error.obj :  .MULTIPLE $(OBJDIR)\error.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\machine.obj :  .MULTIPLE ./$(OBJDIR)/machine.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\symtab.obj :  .MULTIPLE ./symtab.e
+.\$(OBJDIR)\symtab.obj :  .MULTIPLE ./$(OBJDIR)\symtab.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\symtab_0.obj :  .MULTIPLE ./symtab.e
+.\$(OBJDIR)\symtab_0.obj :  .MULTIPLE ./$(OBJDIR)\symtab.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\scanner.obj :  .MULTIPLE ./scanner.e
+.\$(OBJDIR)\scanner.obj :  .MULTIPLE ./$(OBJDIR)\scanner.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\scanne_0.obj :  .MULTIPLE ./scanner.e
+.\$(OBJDIR)\scanne_0.obj :  .MULTIPLE $(OBJDIR)\scanne_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 	
-.\$(OBJDIR)\main.obj :  .MULTIPLE ./main.e
+.\$(OBJDIR)\main.obj :  .MULTIPLE ./$(OBJDIR)\main.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\emit.obj :  .MULTIPLE ./emit.e 
+.\$(OBJDIR)\emit.obj :  .MULTIPLE ./$(OBJDIR)\emit.c 
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\emit_0.obj :  .MULTIPLE ./emit.e
+.\$(OBJDIR)\emit_0.obj :  .MULTIPLE ./$(OBJDIR)\emit_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\emit_1.obj :  .MULTIPLE ./emit.e
+.\$(OBJDIR)\emit_1.obj :  .MULTIPLE ./$(OBJDIR)\emit_1.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\parser.obj :  .MULTIPLE ./parser.e
+.\$(OBJDIR)\parser.obj :  .MULTIPLE ./$(OBJDIR)\parser.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\parser_0.obj :  .MULTIPLE ./parser.e
+.\$(OBJDIR)\parser_0.obj :  .MULTIPLE ./$(OBJDIR)\parser_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\parser_1.obj :  .MULTIPLE ./parser.e
+.\$(OBJDIR)\parser_1.obj :  .MULTIPLE ./$(OBJDIR)\parser_1.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\0ackend.obj :  .MULTIPLE ./backend.e
+.\$(OBJDIR)\0ackend.obj :  .MULTIPLE ./$(OBJDIR)\0ackend.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\backend.obj :  .MULTIPLE ./backend.e
+.\$(OBJDIR)\backend.obj :  .MULTIPLE ./$(OBJDIR)\backend.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compress.obj :  .MULTIPLE ./compress.e
+.\$(OBJDIR)\compress.obj :  .MULTIPLE ./$(OBJDIR)\compress.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\c_out.obj :  .MULTIPLE ./c_out.e
+.\$(OBJDIR)\c_out.obj :  .MULTIPLE ./$(OBJDIR)\c_out.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\ec.obj :  .MULTIPLE ./ec.ex 
+.\$(OBJDIR)\ec.obj :  .MULTIPLE ./ec.ex $(OBJDIR)\ec.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\c_decl.obj :  .MULTIPLE ./c_decl.e
+.\$(OBJDIR)\c_decl.obj :  .MULTIPLE ./$(OBJDIR)\c_decl.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\c_dec0.obj :  .MULTIPLE ./c_decl.e
+.\$(OBJDIR)\c_dec0.obj :  .MULTIPLE ./$(OBJDIR)\c_dec0.e
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\c_dec1.obj :  .MULTIPLE ./c_decl.e
+.\$(OBJDIR)\c_dec1.obj :  .MULTIPLE ./$(OBJDIR)\c_dec1.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compile.obj :  .MULTIPLE ./compile.e
+.\$(OBJDIR)\compile.obj :  .MULTIPLE ./$(OBJDIR)\compile.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_0.obj :  .MULTIPLE ./compile.e
+.\$(OBJDIR)\compil_0.obj :  .MULTIPLE ./$(OBJDIR)\compil_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_1.obj :  .MULTIPLE ./compile.e
+.\$(OBJDIR)\compil_1.obj :  .MULTIPLE ./$(OBJDIR)\compil_1.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_2.obj :  .MULTIPLE ./compile.e
+.\$(OBJDIR)\compil_2.obj :  .MULTIPLE ./$(OBJDIR)\compil_2.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_3.obj :  .MULTIPLE ./compile.e
+.\$(OBJDIR)\compil_3.obj :  .MULTIPLE ./$(OBJDIR)\compil_3.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_4.obj :  ./compile.e
+.\$(OBJDIR)\compil_4.obj :  ./$(OBJDIR)\compil_4.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_5.obj :  ./compile.e
+.\$(OBJDIR)\compil_5.obj :  ./$(OBJDIR)\compil_5.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_6.obj :  ./compile.e
+.\$(OBJDIR)\compil_6.obj :  ./$(OBJDIR)\compil_6.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_7.obj :  ./compile.e
+.\$(OBJDIR)\compil_7.obj :  ./$(OBJDIR)\compil_7.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_8.obj :  ./compile.e
+.\$(OBJDIR)\compil_8.obj :  ./$(OBJDIR)\compil_8.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_9.obj :  ./compile.e
+.\$(OBJDIR)\compil_9.obj :  ./$(OBJDIR)\compil_9.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_A.obj :  ./compile.e
+.\$(OBJDIR)\compil_A.obj :  ./$(OBJDIR)\compil_A.obj
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\traninit.obj :  ./traninit.e
+.\$(OBJDIR)\traninit.obj :  ./$(OBJDIR)\traninit.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\misc.obj : .\$(OBJDIR)\main-.c 
