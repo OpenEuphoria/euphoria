@@ -354,7 +354,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\mode.obj : $(OBJDIR)\mode.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 	
-.\$(OBJDIR)\global.obj :.\global.e
+.\$(OBJDIR)\global.obj :.\$(OBJDIR)\global.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\pathopen.obj :  .MULTIPLE $(OBJDIR)\pathopen.c
@@ -423,7 +423,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\c_decl.obj :  .MULTIPLE ./$(OBJDIR)\c_decl.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\c_dec0.obj :  .MULTIPLE ./$(OBJDIR)\c_dec0.e
+.\$(OBJDIR)\c_dec0.obj :  .MULTIPLE ./$(OBJDIR)\c_dec0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\c_dec1.obj :  .MULTIPLE ./$(OBJDIR)\c_dec1.c
@@ -462,7 +462,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\compil_9.obj :  ./$(OBJDIR)\compil_9.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_A.obj :  ./$(OBJDIR)\compil_A.obj
+.\$(OBJDIR)\compil_A.obj :  ./$(OBJDIR)\compil_A.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\traninit.obj :  ./$(OBJDIR)\traninit.c
