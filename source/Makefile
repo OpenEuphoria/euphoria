@@ -6,6 +6,18 @@
 #   Translator           (ecu):  make translator
 #   Translator Library (ecu.a):  make library
 #   Backend         (backendu):  make backendu
+#
+#  FreeBSD (6.2)
+#   NOTE:  Versions before 6.2 may not need EBSD=1
+#   Clean up                  :  gmake clean
+#   Everything                :  gmake
+#   Interpreter          (exu):  gmake interpreter EBSD=1
+#   Translator           (ecu):  gmake translator EBSD=1
+#   Translator Library (ecu.a):  gmake library
+#   Backend         (backendu):  gmake backendu EBSD=1
+#
+#   The make process will adjust common.e to set EBSD to the
+#   correct value.  To reset this value, run gmake clean.
 
 ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME
@@ -22,9 +34,22 @@ else
 DEBUG_FLAGS=-fomit-frame-pointer
 endif
 
+TOBSDREGEX="s/EBSD = FALSE/EBSD = TRUE/"
+FROMBSDREGEX="s/EBSD = TRUE/EBSD = FALSE/"
+
+ifeq  "$(EBSD)" "1"
+LDLFLAG=
+PREREGEX=$(TOBSDREGEX)
+BACKUPEXT=.bsd
+EBSDFLAG=-DEBSD -DEBSD62
+else
+LDLFLAG=-ldl
+PREREGEX=$(FROMBSDREGEX)
+endif
+
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
-BE_FLAGS =  -c -w -DELINUX $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
 
 EU_CORE_FILES = \
@@ -191,21 +216,23 @@ cleandir = -rm $(1)/*c $(1)/*o $(1)/back/*o
 clean : 
 	-rm -r intobj transobj libobj backobj
 	-rm exu ecu ecu.a backendu
+	-sed -Ei $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
 .PHONY : clean
 
 library : builddirs 
-	make ecu.a OBJDIR=libobj ERUNTIME=1
+	$(MAKE) ecu.a OBJDIR=libobj ERUNTIME=1
 ecu.a : $(EU_LIB_OBJECTS)
 	ar -rc ecu.a $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
 builddirs : intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
+	sed -Ei $(BACKUPEXT) -e $(PREREGEX) common.e
 
 interpreter : builddirs
-	make exu OBJDIR=intobj
+	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs 
-	make ecu OBJDIR=transobj
+	$(MAKE) ecu OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
 .PHONY : interpreter
@@ -217,7 +244,8 @@ exu :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 exu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 exu :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making exu
-	gcc $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm -ldl -oexu
+	@echo $(OS)
+	gcc $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oexu
 
 ecu :  OBJDIR = transobj
 ecu :  EU_TARGET = ec.ex
@@ -225,10 +253,10 @@ ecu :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 ecu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making ecu
-	gcc $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm -ldl -oecu
+	gcc $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oecu
 
 backend : builddirs
-	make backendu EBACKEND=1 OBJDIR=backobj
+	$(MAKE) backendu EBACKEND=1 OBJDIR=backobj
 
 backendu : OBJDIR = backobj
 backendu : EU_TARGET = backend.ex
@@ -236,7 +264,7 @@ backendu : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 backendu : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 backendu : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
-	gcc $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm -ldl -obackendu
+	gcc $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -obackendu
 
 %obj : 
 	mkdir $@
