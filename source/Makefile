@@ -42,9 +42,11 @@ LDLFLAG=
 PREREGEX=$(TOBSDREGEX)
 BACKUPEXT=.bsd
 EBSDFLAG=-DEBSD -DEBSD62
+SEDFLAG=-Ei
 else
 LDLFLAG=-ldl
 PREREGEX=$(FROMBSDREGEX)
+SEDFLAG=-ri
 endif
 
 CC = gcc
@@ -216,7 +218,7 @@ cleandir = -rm $(1)/*c $(1)/*o $(1)/back/*o
 clean : 
 	-rm -r intobj transobj libobj backobj
 	-rm exu ecu ecu.a backendu
-	-sed -Ei $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
+	-sed $(SEDFLAG) $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
 .PHONY : clean
 
 library : builddirs 
@@ -226,7 +228,7 @@ ecu.a : $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
 builddirs : intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
-	sed -Ei $(BACKUPEXT) -e $(PREREGEX) common.e
+	sed $(SEDFLAG) $(BACKUPEXT) -e $(PREREGEX) common.e
 
 interpreter : builddirs
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
