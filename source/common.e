@@ -11,7 +11,7 @@ global constant TRUE = 1, FALSE = 0
 global constant ELINUX = platform() = LINUX,
 		EWINDOWS = platform() = WIN32,
 		EDOS = platform() = DOS32,
-		EBSD = TRUE -- set manually - see also backend.ex
+		EBSD = FALSE -- set manually - see also backend.ex
 
 
 global integer PATH_SEPARATOR, SLASH
