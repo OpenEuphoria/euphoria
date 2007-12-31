@@ -1,0 +1,29 @@
+# Indirect GNU Makefile for Euphoria (Linux)
+# This makefile calls the real makefile located in ./source
+# Syntax:
+#   Clean up                  :  make clean
+#   Clean up binary and       :  make distclean
+#        translated files
+#   Everything                :  make
+#   Interpreter          (exu):  make interpreter
+#   Translator           (ecu):  make translator
+#   Translator Library (ecu.a):  make library
+#   Backend         (backendu):  make backend
+#
+#  FreeBSD (6.2)
+#   NOTE:  Versions before 6.2 may not need EBSD=1
+#   Clean up                  :  gmake clean
+#   Everything                :  gmake
+#   Interpreter          (exu):  gmake interpreter EBSD=1
+#   Translator           (ecu):  gmake translator EBSD=1
+#   Translator Library (ecu.a):  gmake library
+#   Backend         (backendu):  gmake backend EBSD=1
+#
+#   The make process will adjust common.e to set EBSD to the
+#   correct value.  To reset this value, run gmake clean.
+export
+all clean library interpreter translator backend source install uninstall distclean :
+	$(MAKE) -C source $@
+
+
+.PHONY : all clean library interpreter translator backendu source install distclean

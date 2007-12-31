@@ -1,0 +1,105 @@
+
+EU_VERSION =3.2
+EU_BASE_DIR =../rds
+EU_ALL_FILES = \
+	source/be_alloc.c \
+	source/be_callc.c \
+	source/be_execute.c \
+	source/be_inline.c \
+	source/be_machine.c \
+	source/be_main.c \
+	source/be_rterror.c \
+	source/be_runtime.c \
+	source/be_symtab.c \
+	source/be_syncolor.c \
+	source/be_task.c \
+	source/be_w.c \
+	source/int.ex \
+	source/ec.ex \
+	source/backend.ex \
+	source/bind.ex \
+	source/backend.e \
+	source/c_decl.e \
+	source/cominit.e \
+	source/common.e \
+	source/compile.e \
+	source/compress.e \
+	source/c_out.e \
+	source/emit.e \
+	source/error.e \
+	source/execute.e \
+	source/global.e \
+	source/il.e \
+	source/intinit.e \
+	source/keylist.e \
+	source/main.e \
+	source/mode.e \
+	source/opnames.e \
+	source/parser.e \
+	source/pathopen.e \
+	source/reswords.e \
+	source/scanner.e \
+	source/symtab.e \
+	source/traninit.e \
+	source/alldefs.h \
+	source/execute.h  \
+	source/opnames.h  \
+	source/reswords.h \
+	source/alloc.h \
+	source/global.h \
+	source/redef.h \
+	source/symtab.h \
+	source/Makefile
+
+EU_DIRS = include html doc demo tutorial demo/bench demo/linux demo/langwar demo/langwar/Linux
+EU_BIN_FILES = ed.ex ascii.ex eprint.ex guru.ex key.ex keywords.e \
+	lines.ex search.ex syncolor.e where.ex
+BUILD_DIRS = intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
+binclean :
+	for d in $(BUILD_DIRS); \
+	do \
+	    -rm "$$d"/*o; \
+	done
+	-rm exu ecu ecu.a eubackend
+
+clean : 
+	-rm -rf $(DEB_SOURCE_DIR)
+
+DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
+
+update :
+	@-mkdir -p $(DEB_SOURCE_DIR)/source
+	@for file in $(EU_ALL_FILES); \
+	do \
+	    cp $(EU_BASE_DIR)/"$$file" $(DEB_SOURCE_DIR)/"$$file"; \
+	done
+	@-for dir in $(EU_DIRS); \
+	do \
+	    mkdir -p $(DEB_SOURCE_DIR)/"$$dir"; \
+	    cp $(EU_BASE_DIR)/"$$dir"/* $(DEB_SOURCE_DIR)/"$$dir"; \
+	done
+	@-mkdir $(DEB_SOURCE_DIR)/bin
+	@for file in $(EU_BIN_FILES); \
+	do \
+	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
+	done
+	@cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
+	@$(MAKE) -C $(DEB_SOURCE_DIR)/source source
+	@-rm *.gz
+	@if [ -e $(DEB_SOURCE_DIR)/debian ]; \
+	then \
+	    cp rules $(DEB_SOURCE_DIR)/debian; \
+	    cp postinst.ex $(DEB_SOURCE_DIR)/debian; \
+	    cp *.1 $(DEB_SOURCE_DIR)/debian; \
+	fi
+
+dh-make : update
+	@cd $(DEB_SOURCE_DIR) && dh_make -e matthewwalkerlewis@gmail.com --createorig
+	@-rm $(DEB_SOURCE_DIR)/debian/emacsen*
+	@cp postinst.ex $(DEB_SOURCE_DIR)/debian
+	@cp rules $(DEB_SOURCE_DIR)/debian
+	@cp postinst.ex $(DEB_SOURCE_DIR)/debian;
+	@cp *.1 $(DEB_SOURCE_DIR)/debian;
+
+
+.PHONY : clean binclean update dh-make
