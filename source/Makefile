@@ -1,6 +1,8 @@
 # GNU Makefile for Euphoria (Linux)
 # Syntax:
-#   Clean up                  :  make clean
+#   Clean up binary files     :  make clean
+#   Clean up binary and       :  make distclean
+#        translated files
 #   Everything                :  make
 #   Interpreter          (exu):  make interpreter
 #   Translator           (ecu):  make translator
@@ -18,6 +20,8 @@
 #
 #   The make process will adjust common.e to set EBSD to the
 #   correct value.  To reset this value, run gmake clean.
+
+EU_VERSION = 3.2
 
 ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME
@@ -52,6 +56,52 @@ endif
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
 BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+
+EU_ALL_FILES = \
+	be_alloc.c \
+	be_callc.c \
+	be_execute.c \
+	be_inline.c \
+	be_machine.c \
+	be_main.c \
+	be_rterror.c \
+	be_runtime.c \
+	be_symtab.c \
+	be_syncolor.c \
+	be_task.c \
+	be_w.c \
+	int.ex \
+	ec.ex \
+	backend.ex \
+	bind.ex \
+	backend.e \
+	c_decl.e \
+	cominit.e \
+	common.e \
+	compile.e \
+	compress.e \
+	c_out.e \
+	emit.e \
+	error.e \
+	execute.e \
+	global.e \
+	il.e \
+	intinit.e \
+	keylist.e \
+	main.e \
+	mode.e \
+	opnames.e \
+	parser.e \
+	pathopen.e \
+	reswords.e \
+	scanner.e \
+	symtab.e \
+	traninit.e \
+	../include/machine.e \
+	../include/wildcard.e \
+	../include/misc.e \
+	../include/file.e \
+	../include/get.e
 
 
 EU_CORE_FILES = \
@@ -213,12 +263,21 @@ EU_BACKEND_RUNNER_FILES = \
 
 all : interpreter translator library backend
 
+BUILD_DIRS=intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
+
 cleandir = -rm $(1)/*c $(1)/*o $(1)/back/*o
- 
-clean : 
-	-rm -r intobj transobj libobj backobj
-	-rm exu ecu ecu.a backendu
+
+distclean : clean
+	-rm -r $(BUILD_DIRS)
 	-sed $(SEDFLAG) $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
+
+clean : 
+	@for d in $(BUILD_DIRS); \
+	do \
+	    rm "$$d"*.o; \
+	done
+	-rm exu ecu ecu.a backendu $(DEB_SOURCE_DIR).tar.gz
+
 .PHONY : clean
 
 library : builddirs 
@@ -227,8 +286,8 @@ ecu.a : $(EU_LIB_OBJECTS)
 	ar -rc ecu.a $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
-builddirs : intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
-	sed $(SEDFLAG) $(BACKUPEXT) -e $(PREREGEX) common.e
+builddirs : $(BUILD_DIRS)
+	-sed $(SEDFLAG) $(BACKUPEXT) -e $(PREREGEX) common.e
 
 interpreter : builddirs
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
@@ -240,6 +299,18 @@ translator : builddirs
 .PHONY : interpreter
 .PHONY : translator
 
+exusource : intobj/main-.c
+ecusource : transobj/main-.c
+backendsource : backobj/main-.c
+source : builddirs
+	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD)
+	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
+	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD)
+
+.PHONY : exusource
+.PHONY : ecusource
+.PHONY : backendsource
+.PHONY : source
 
 exu :  EU_TARGET = int.ex
 exu :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
@@ -258,21 +329,74 @@ ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	gcc $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oecu
 
 backend : builddirs
-	$(MAKE) backendu EBACKEND=1 OBJDIR=backobj
+	$(MAKE) eubackend EBACKEND=1 OBJDIR=backobj
 
-backendu : OBJDIR = backobj
-backendu : EU_TARGET = backend.ex
-backendu : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
-backendu : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-backendu : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+eubackend : OBJDIR = backobj
+eubackend : EU_TARGET = backend.ex
+eubackend : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
+eubackend : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
-	gcc $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -obackendu
+	gcc $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oeubackend
 
-%obj : 
-	mkdir $@
+install :
+	mkdir -p $(DESTDIR)/usr/share/euphoria/include
+	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/linux
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/bench
+	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/doc
+	mkdir -p $(DESTDIR)/usr/share/euphoria/tutorial 
+	mkdir -p $(DESTDIR)/usr/share/euphoria/bin 
+	mkdir -p $(DESTDIR)/etc/euphoria 
+	mkdir -p $(DESTDIR)/usr/share/euphoria/source 
+	mkdir -p $(DESTDIR)/usr/bin 
+	mkdir -p $(DESTDIR)/usr/lib
+	install exu ecu eubackend $(DESTDIR)/usr/bin
+	install ecu.a $(DESTDIR)/usr/lib
+	install ../include/*  $(DESTDIR)/usr/share/euphoria/include 
+	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar ../demo/langwar/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/Linux/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo/linux ../demo/linux/*
+	install -t $(DESTDIR)/usr/share/doc/euphoria/doc ../doc/*
+	install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
+	install -t $(DESTDIR)/usr/share/euphoria/bin \
+	           ../bin/ed.ex \
+	           ../bin/ascii.ex \
+	           ../bin/eprint.ex \
+	           ../bin/guru.ex \
+	           ../bin/key.ex \
+	           ../bin/keywords.e \
+	           ../bin/lines.ex \
+	           ../bin/search.ex \
+	           ../bin/syncolor.e \
+	           ../bin/where.ex
+	install -t $(DESTDIR)/usr/share/euphoria/source \
+	           *.ex \
+	           *.e \
+	           be_*.c \
+	           *.h
+
+uninstall :
+	-rm /usr/bin/exu /usr/bin/ecu /usr/lib/ecu.a
+	-rm -r /usr/share/euphoria
+	-rm -r /usr/share/doc/euphoria
+	-rm -r /etc/euphoria
+
+.PHONY : install
+.PHONY : uninstall
+intobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+transobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
+
+%obj :
+	mkdir -p $@
 
 %back : %
-	mkdir $@
+	mkdir -p $@
 	
 ./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
 	$(CC) $(FE_FLAGS) ./$(OBJDIR)/$*.c -o./$(OBJDIR)/$*.o
