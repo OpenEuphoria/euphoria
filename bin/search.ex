@@ -6,7 +6,7 @@
 -- If you don't supply a string on the command line you will be prompted 
 -- for it. The string may contain * and ? wildcard characters and so may 
 -- the list of file specifications. Lines containing the string are 
--- displayed on the screen, and also recorded in C:\SEARCH.OUT 
+-- displayed on the screen, and also recorded in %EUDIR%/SEARCH.OUT 
 -- (DOS/Windows), or in $HOME/search.out (Linux).
 -- Some statistics are printed at the end.
 -- Example:
@@ -26,6 +26,7 @@
 
 -- when you search "*.*" the following files 
 -- will be skipped (to save time):
+
 include misc.e
 
 sequence skip_list 
@@ -61,6 +62,7 @@ end type
 
 integer SLASH
 sequence log_name, log_path, home
+
 log_name = "search.out"
 if platform() = LINUX then
     SLASH='/'
@@ -72,7 +74,11 @@ if platform() = LINUX then
     end if
 else
     SLASH='\\'
-    log_path = "C:\\" & log_name  -- put at top of C drive
+    log_path = getenv("EUDIR")
+    if equal(log_path, -1) then
+	log_path = "C:" 
+    end if
+    log_path &= "\\" & log_name  -- put at top of C drive
 end if
 sequence pos, cmd, string, orig_string, file_spec
 

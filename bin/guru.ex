@@ -51,7 +51,11 @@ if platform() = LINUX then
     end if
 else
     SLASH = '\\'
-    log_path = "c:\\" & log_name  
+    log_path = getenv("EUDIR")
+    if equal(log_path, -1) then
+	log_path = "C:" 
+    end if
+    log_path &= "\\" & log_name  -- put at top of C drive
 end if
 
 -- some files to skip:
