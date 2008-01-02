@@ -64,6 +64,8 @@ binclean :
 
 clean : 
 	-rm -rf $(DEB_SOURCE_DIR)
+	-rm *deb
+	-rm *gz
 
 DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
 
@@ -84,22 +86,22 @@ update :
 	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
 	done
 	@cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
-	@$(MAKE) -C $(DEB_SOURCE_DIR)/source source
+	$(MAKE) -C $(DEB_SOURCE_DIR)/source distclean
+	$(MAKE) -C $(DEB_SOURCE_DIR)/source source
 	@-rm *.gz
-	@if [ -e $(DEB_SOURCE_DIR)/debian ]; \
-	then \
-	    cp rules $(DEB_SOURCE_DIR)/debian; \
-	    cp postinst.ex $(DEB_SOURCE_DIR)/debian; \
-	    cp *.1 $(DEB_SOURCE_DIR)/debian; \
-	fi
+	-cp rules $(DEB_SOURCE_DIR)/debian
+	-cp postinst $(DEB_SOURCE_DIR)/debian
+	-cp *.1 $(DEB_SOURCE_DIR)/debian
+	-cp control $(DEB_SOURCE_DIR)/debian
+	-rm $(DEB_SOURCE_DIR)/*stamp
 
 dh-make : update
 	@cd $(DEB_SOURCE_DIR) && dh_make -e matthewwalkerlewis@gmail.com --createorig
 	@-rm $(DEB_SOURCE_DIR)/debian/emacsen*
-	@cp postinst.ex $(DEB_SOURCE_DIR)/debian
 	@cp rules $(DEB_SOURCE_DIR)/debian
-	@cp postinst.ex $(DEB_SOURCE_DIR)/debian;
+	@cp postinst $(DEB_SOURCE_DIR)/debian;
 	@cp *.1 $(DEB_SOURCE_DIR)/debian;
+	@cp control $(DEB_SOURCE_DIR)/debian;
 
 
 .PHONY : clean binclean update dh-make

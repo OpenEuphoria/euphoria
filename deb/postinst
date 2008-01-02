@@ -21,13 +21,13 @@ set -e
 case "$1" in
     configure)
         if [ -e /etc/euphoria/euinc.conf ]; then
-            if [ ! grep '^/usr/share/euphoria/include$' ]; then
+            if [ ! `grep -r ^/usr/share/euphoria/include$ /etc/euphoria/euinc.conf` ]; then
                 echo '/usr/share/euphoria/include' >> /etc/euphoria/euinc.conf
             fi
         else
-            echo '/usr/share/euphoria/include' >> /etc/euphoria/euinc.conf
+            echo '/usr/share/euphoria/include' > /etc/euphoria/euinc.conf
         fi
-        exit 1
+        exit 0
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
