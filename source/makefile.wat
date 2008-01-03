@@ -27,6 +27,7 @@ EU_CORE_FILES = &
 	error.e &
 	symtab.e &
 	scanner.e &
+	scientific.e &
 	emit.e &
 	parser.e &
 	opnames.e &
@@ -98,6 +99,7 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
 	.\$(OBJDIR)\scanner.obj &
+	.\$(OBJDIR)\scientific.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
@@ -163,6 +165,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\scientific.obj &
 	.\$(OBJDIR)\file.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\emit.obj &
@@ -383,7 +386,10 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 
 .\$(OBJDIR)\scanne_0.obj :  .MULTIPLE $(OBJDIR)\scanne_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
-	
+
+.\$(OBJDIR)\scientific.obj :  .MULTIPLE ./$(OBJDIR)\scientific.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
 .\$(OBJDIR)\main.obj :  .MULTIPLE ./$(OBJDIR)\main.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 

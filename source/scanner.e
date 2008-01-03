@@ -10,7 +10,7 @@ include global.e
 include reswords.e
 include error.e
 include symtab.e
-
+include scientific.e
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
 constant MAX_FILE = 256       -- maximum number of source files
 
@@ -613,6 +613,9 @@ function my_sscanf(sequence yytext)
 	CompileErr("number not formed correctly")
     end if
     
+    if find( 'e', yytext ) or find( 'E', yytext ) then
+	return scientific_to_atom( yytext )
+    end if
     mantissa = 0.0
     ndigits = 0
     

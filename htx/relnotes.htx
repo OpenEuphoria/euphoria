@@ -65,7 +65,11 @@
      Include directories can now be specified based on command line arguments
      and config files in addition to environment variables.
      Implemented by Matthew Lewis
-
+<p>
+<li>
+     Improved accuracy in scanning numbers in scientific notation.  Scanned
+     numbers are accurate to the full precision of the IEEE 754 floating
+     point standard.  Implemented by Matthew Lewis
 </ul>
 
 <font face="Arial, Helvetica" color="#003366">

@@ -95,6 +95,7 @@ EU_ALL_FILES = \
 	pathopen.e \
 	reswords.e \
 	scanner.e \
+	scientific.e \
 	symtab.e \
 	traninit.e \
 	../include/machine.e \
@@ -112,6 +113,7 @@ EU_CORE_FILES = \
 	error.e \
 	symtab.e \
 	scanner.e \
+	scientific.e \
 	emit.e \
 	parser.e \
 	opnames.e \
@@ -181,6 +183,7 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/symtab.o \
 	./$(OBJDIR)/symtab_0.o \
 	./$(OBJDIR)/scanner.o \
+	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/scanne_0.o \
 	./$(OBJDIR)/main.o \
 	./$(OBJDIR)/emit.o \
@@ -202,6 +205,7 @@ EU_CORE_C_FILES = \
 	./$(OBJDIR)/symtab_0.o \
 	./$(OBJDIR)/scanner.c \
 	./$(OBJDIR)/scanne_0.c \
+	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/main.c \
 	./$(OBJDIR)/mode.c \
 	./$(OBJDIR)/emit.c \
@@ -272,7 +276,7 @@ distclean : clean
 	-sed $(SEDFLAG) $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
 
 clean : 
-	@for d in $(BUILD_DIRS); \
+	@-for d in $(BUILD_DIRS); \
 	do \
 	    rm "$$d"*.o; \
 	done
