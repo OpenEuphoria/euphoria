@@ -8,13 +8,7 @@ without type_check
 include mode.e
 set_mode( "bind", 0 )
 
-global constant TRUE = 1, FALSE = 0
 
-global constant TRANSLATE = FALSE,  
-		INTERPRET = TRUE,
-		BIND = TRUE
-		
-global constant EXTRA_CHECK = FALSE 
 
 -- standard Euphoria includes
 include misc.e
