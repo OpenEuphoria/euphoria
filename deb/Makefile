@@ -39,6 +39,7 @@ EU_ALL_FILES = \
 	source/pathopen.e \
 	source/reswords.e \
 	source/scanner.e \
+	source/scientific.e \
 	source/symtab.e \
 	source/traninit.e \
 	source/alldefs.h \
