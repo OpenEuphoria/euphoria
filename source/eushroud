@@ -1,0 +1,2 @@
+#!/usr/bin/sh
+/usr/bin/eubind -shroud_only $@

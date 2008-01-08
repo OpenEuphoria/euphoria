@@ -269,9 +269,7 @@ all : interpreter translator library backend
 
 BUILD_DIRS=intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
 
-cleandir = -rm $(1)/*c $(1)/*o $(1)/back/*o
-
-distclean : clean
+distclean : 
 	-rm -r $(BUILD_DIRS)
 	-sed $(SEDFLAG) $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
 
@@ -304,8 +302,11 @@ translator : builddirs
 .PHONY : translator
 
 exusource : intobj/main-.c
+exusource :  EU_TARGET = int.ex
 ecusource : transobj/main-.c
+ecusource :  EU_TARGET = ec.ex
 backendsource : backobj/main-.c
+backendsource :  EU_TARGET = backend.ex
 source : builddirs
 	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD)
 	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
@@ -356,14 +357,15 @@ install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/source 
 	mkdir -p $(DESTDIR)/usr/bin 
 	mkdir -p $(DESTDIR)/usr/lib
-	install exu ecu eubackend $(DESTDIR)/usr/bin
+	cp bind.ex eubind
+	install exu ecu eubackend eubind eushroud $(DESTDIR)/usr/bin
 	install ecu.a $(DESTDIR)/usr/lib
 	install ../include/*  $(DESTDIR)/usr/share/euphoria/include 
 	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar ../demo/langwar/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/Linux/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/linux ../demo/linux/*
 	install -t $(DESTDIR)/usr/share/doc/euphoria/doc ../doc/*
 	install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
@@ -406,7 +408,10 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(CC) $(FE_FLAGS) ./$(OBJDIR)/$*.c -o./$(OBJDIR)/$*.o
 
 ./$(OBJDIR)/main-.c : $(EU_MAIN)
+	echo Translating $(EU_TARGET)
 	cd ./$(OBJDIR) && exu ../ec.ex ../$(EU_TARGET)
+
+./$(OBJDIR)/%.c : ./$(OBJDIR)/main-.c
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $*.c -o./$(OBJDIR)/back/$*.o
