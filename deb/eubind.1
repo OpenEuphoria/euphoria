@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH EXU 1 "January 6, 2008"
+.TH EUBIND 1 "January 8, 2008"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,35 +16,28 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-exu \- Interpreter for the Euphoria programming language
+eubind \- Creates standalone euphoria executables
 .SH SYNOPSIS
-.B exu
-.RI [-i path] [-c conf-file] [euphoria-file] ...
+.B eubind
+.RI " files" ...
 .br
 .SH DESCRIPTION
 This manual page documents briefly the
-.B exu
-command.  The euphoria-file is optional.  If omitted, the interpreter will prompt
-for the file to be executed.  If the file is passed to the command line, any 
-additional command line info is passed to the euphoria program to 
+.B eubind
+command.  eubind is used for creating standalone executables from euphoria 
+programs.  The code is parsed and converted to euphoria IL code, and combined
+with the compiled backend.  The result is a file that can be run on its own,
+without the euphoria interpreter.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
-\fBeuphoria\fP is an interpreted or compiled programming language.
-.SH OPTIONS
-.TP
-.B \-i path
-Specifies an additional include path to the interpreter.
-.TP
-.B \-c path-to-euinc.conf
-Specifies a configuration file to be read in to specify additional
-include paths for the interpreter.
+\fBeuphoria\fP is a program that...
 .SH SEE ALSO
+.BR exu (1),
 .BR ecu (1),
-.BR eubackend (1),
-.BR eubind (1),
-.BR eushroud (1).
+.BR eushroud (1)
+.BR eubackend (1)
 .br
 The programs are documented fully
 in /usr/share/euphoria/html

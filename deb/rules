@@ -11,7 +11,7 @@
 # build-arch and build-indep targets  by Bill Allombert 2001
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
@@ -41,7 +41,7 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp 
 
 	# Add here commands to compile the arch part of the package.
-	$(MAKE) 
+	cd source && $(MAKE) 
 	touch $@
 
 build-indep: build-indep-stamp
@@ -57,7 +57,7 @@ clean:
 	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) clean
+	-$(MAKE) distclean
 
 	dh_clean 
 
@@ -82,7 +82,7 @@ install-arch:
 
 	# Add here commands to install the arch part of the package into 
 	# debian/tmp.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/euphoria install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
@@ -104,7 +104,7 @@ binary-common:
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
-	dh_installman debian/exu.1 debian/ecu.1 debian/eubackend.1
+	dh_installman debian/exu.1 debian/ecu.1 debian/eubackend.1 debian/eubind.1 debian/eushroud.1
 	dh_link
 	dh_strip
 	dh_compress 

@@ -1,6 +1,7 @@
 
 EU_VERSION =3.2
 EU_BASE_DIR =../rds
+DEBIAN_VERSION =1
 EU_ALL_FILES = \
 	source/be_alloc.c \
 	source/be_callc.c \
@@ -50,12 +51,16 @@ EU_ALL_FILES = \
 	source/global.h \
 	source/redef.h \
 	source/symtab.h \
-	source/Makefile
+	source/Makefile \
+	source/eushroud
 
 EU_DIRS = include html doc demo tutorial demo/bench demo/linux demo/langwar demo/langwar/Linux
 EU_BIN_FILES = ed.ex ascii.ex eprint.ex guru.ex key.ex keywords.e \
 	lines.ex search.ex syncolor.e where.ex
 BUILD_DIRS = intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
+euphoria-$(EU_VERSION)-$(DEBIAN_VERSION)_i386 : update
+	cd $(DEB_SOURCE_DIR) && fakeroot debian/rules binary
+
 binclean :
 	for d in $(BUILD_DIRS); \
 	do \
@@ -71,29 +76,34 @@ clean :
 DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
 
 update :
-	@-mkdir -p $(DEB_SOURCE_DIR)/source
-	@for file in $(EU_ALL_FILES); \
+	-mkdir -p $(DEB_SOURCE_DIR)/source
+	for file in $(EU_ALL_FILES); \
 	do \
 	    cp $(EU_BASE_DIR)/"$$file" $(DEB_SOURCE_DIR)/"$$file"; \
 	done
-	@-for dir in $(EU_DIRS); \
+	-for dir in $(EU_DIRS); \
 	do \
 	    mkdir -p $(DEB_SOURCE_DIR)/"$$dir"; \
 	    cp $(EU_BASE_DIR)/"$$dir"/* $(DEB_SOURCE_DIR)/"$$dir"; \
 	done
-	@-mkdir $(DEB_SOURCE_DIR)/bin
-	@for file in $(EU_BIN_FILES); \
+	-mkdir $(DEB_SOURCE_DIR)/bin
+	for file in $(EU_BIN_FILES); \
 	do \
 	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
 	done
-	@cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
-	$(MAKE) -C $(DEB_SOURCE_DIR)/source distclean
-	$(MAKE) -C $(DEB_SOURCE_DIR)/source source
-	@-rm *.gz
+	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
+	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  distclean
+	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  source
+	-rm *.gz
+	-rm -r $(DEB_SOURCE_DIR)/debian
+	tar -czf euphoria-$(EU_VERSION).tar.gz $(DEB_SOURCE_DIR)
+	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
 	-cp *.1 $(DEB_SOURCE_DIR)/debian
 	-cp control $(DEB_SOURCE_DIR)/debian
+	-cp changelog $(DEB_SOURCE_DIR)/debian
+	-cp copyright $(DEB_SOURCE_DIR)/debian
 	-rm $(DEB_SOURCE_DIR)/*stamp
 
 dh-make : update
@@ -103,6 +113,7 @@ dh-make : update
 	@cp postinst $(DEB_SOURCE_DIR)/debian;
 	@cp *.1 $(DEB_SOURCE_DIR)/debian;
 	@cp control $(DEB_SOURCE_DIR)/debian;
+
 
 
 .PHONY : clean binclean update dh-make

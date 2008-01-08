@@ -23,7 +23,7 @@
 #   correct value.  To reset this value, run gmake clean.
 export
 all clean library interpreter translator backend source install uninstall distclean :
-	$(MAKE) -C source $@
+	cd source && $(MAKE) $@
 
 
 .PHONY : all clean library interpreter translator backendu source install distclean
