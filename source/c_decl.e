@@ -918,7 +918,10 @@ global procedure new_c_file(sequence name)
 	c_puts("#include <go32.h>\n")
     end if
     c_puts("#include \"")
-    c_puts(eudir & SLASH & "include" & SLASH & "euphoria.h\"\n")
+    if not ELINUX then
+	c_puts(eudir & SLASH )
+    end if
+    c_puts( "include" & SLASH & "euphoria.h\"\n")
     c_puts("#include \"main-.h\"\n\n")
 
     if not ELINUX then
@@ -1108,9 +1111,9 @@ global procedure start_emake()
 	    debug_flag = " -fomit-frame-pointer"
 	end if
 	if dll_option then
-	    c_opts = "-c -w -fPIC -fsigned-char -O2 -ffast-math" & debug_flag
+	    c_opts = "-c -w -fPIC -fsigned-char -O2 -I/usr/share/euphoria -ffast-math" & debug_flag
 	else 
-	    c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
+	    c_opts = "-c -w -fsigned-char -O2 -I/usr/share/euphoria -ffast-math" & debug_flag
 	end if
 	link_line = ""
     else       
@@ -1170,6 +1173,7 @@ end procedure
 global procedure finish_emake()
 -- finish emake.bat 
     sequence path, def_name, dll_flag, exe_suffix, buff, subsystem
+    integer lib_dir
     integer fp, def_file
     
     -- init-.c files
@@ -1335,9 +1339,20 @@ global procedure finish_emake()
 		  "gcc %s %s.o %s %s/bin/%s -lm ",
 		  {dll_flag, file0, link_line, eudir, user_library})
 	else
-	    printf(doit, 
-		  "gcc %s %s.o %s %s/bin/ecu.a -lm ",
-		  {dll_flag, file0, link_line, eudir})
+	    -- need to check to see if euphoria is installed into
+	    -- the system:
+	    lib_dir = open("/usr/lib/ecu.a","r" )
+	    if lib_dir = -1 then
+		printf(doit, 
+		    "gcc %s %s.o %s -I%s %s/bin/ecu.a -lm ",
+		    {dll_flag, file0, link_line, eudir, eudir})
+	    else
+		close(lib_dir)
+		printf(doit,
+		    "gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/ecu.a -lm",
+		    {dll_flag, file0, link_line})
+	    end if
+	    
 	end if
 	
 	if not EBSD then

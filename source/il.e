@@ -382,21 +382,26 @@ procedure OutputIL()
     if not shroud_only then
 	-- binding:
 	-- first, copy backend[w].exe
+	
 	eu_dir = getenv("EUDIR")
 	if atom(eudir) then
 	    eudir = SLASH & "euphoria" -- Linux/FreeBSD?
 	end if
-    
+
 	backend_name = eudir & SLASH & "bin" & SLASH 
+	be = -1
 	if w32 then
 	    backend_name &= "backendw.exe"
 	elsif ELINUX then
 	    backend_name &= "backendu"
+	    -- try to get the installed eubackend, if it exists:
+	    be = open( "/usr/bin/eubackend", "r" )
 	else    
 	    backend_name &= "backend.exe"
 	end if
-    
-	be = open(backend_name, "rb")
+	if be = -1 then
+	    be = open(backend_name, "rb")
+	end if
 	if be = -1 then
 	    fatal("couldn't open " & backend_name & "!")
 	end if

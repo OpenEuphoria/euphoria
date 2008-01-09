@@ -357,10 +357,11 @@ install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/source 
 	mkdir -p $(DESTDIR)/usr/bin 
 	mkdir -p $(DESTDIR)/usr/lib
-	cp bind.ex eubind
+	mkdir -p $(DESTDIR)/usr/include/euphoria
 	install exu ecu eubackend eubind eushroud $(DESTDIR)/usr/bin
 	install ecu.a $(DESTDIR)/usr/lib
 	install ../include/*  $(DESTDIR)/usr/share/euphoria/include 
+	install ../include/euphoria.h $(DESTDIR)/usr/include/euphoria
 	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*
@@ -405,7 +406,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	mkdir -p $@
 	
 ./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
-	$(CC) $(FE_FLAGS) ./$(OBJDIR)/$*.c -o./$(OBJDIR)/$*.o
+	$(CC) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
 
 ./$(OBJDIR)/main-.c : $(EU_MAIN)
 	echo Translating $(EU_TARGET)

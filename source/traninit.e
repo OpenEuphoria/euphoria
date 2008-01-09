@@ -189,8 +189,10 @@ procedure OpenCFiles()
     emit_c_output = TRUE
 
     c_puts("#include \"")
-    c_puts(eudir)
-    c_puts(SLASH & "include" & SLASH & "euphoria.h\"\n")
+    if not ELINUX then
+	c_puts(eudir & SLASH)
+    end if
+    c_puts("include" & SLASH & "euphoria.h\"\n")
     c_puts("#include \"main-.h\"\n\n")
     
     c_h = open("main-.h", "w")

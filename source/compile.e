@@ -5162,11 +5162,12 @@ procedure BackEnd(atom ignore)
     end if
     c_puts("#include <time.h>\n")
     c_puts("#include \"")
-    c_puts(eudir)
+    
     if ELINUX then
-	c_puts("/include/euphoria.h\"\n")
+	c_puts("include/euphoria.h\"\n")
 	c_puts("#include <unistd.h>\n")
     else
+	c_puts(eudir)
 	c_puts("\\include\\euphoria.h\"\n")
     end if  
     if sequence(bor_path) then
