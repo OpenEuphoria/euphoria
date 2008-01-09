@@ -52,7 +52,8 @@ EU_ALL_FILES = \
 	source/redef.h \
 	source/symtab.h \
 	source/Makefile \
-	source/eushroud
+	source/eushroud \
+	source/eubind
 
 EU_DIRS = include html doc demo tutorial demo/bench demo/linux demo/langwar demo/langwar/Linux
 EU_BIN_FILES = ed.ex ascii.ex eprint.ex guru.ex key.ex keywords.e \
