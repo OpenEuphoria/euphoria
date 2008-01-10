@@ -1,14 +1,15 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Euphoria 3.1
 -- Machine Level Programming (386/486/Pentium)
--- This is a DEBUGGING VERSION of machine.e
+
+-- This is a slower DEBUGGING VERSION of machine.e
 
 -- How To Use This File:
 
--- 1. Copy safe.e into the same directory as your main .ex[w][u] file and 
---    rename safe.e as machine.e in that directory. (Do NOT simply 
---    include safe.e, or you may have naming conflicts.)
+-- 1. Temporarily replace machine.e with safe.e
+--    (Remember to set things back to normal 
+--     when you are finished debugging.)
 
 -- 2. If your program doesn't already include machine.e add:  
 --           include machine.e  
@@ -28,10 +29,6 @@
 --    Press Enter to clear the screen and see the error message. 
 --    There will be a "divide by zero" traceback in ex.err 
 --    so you can find the statement that is making the illegal memory access.
-
--- 6. When you are finished debugging and want to run at full speed,
---    remove or rename the local copy of machine.e (really safe.e) 
---    in your directory.
 
 -- This file is equivalent to machine.e, but it overrides the built-in 
 -- routines: 
