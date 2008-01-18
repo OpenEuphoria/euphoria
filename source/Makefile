@@ -1,5 +1,15 @@
-# GNU Makefile for Euphoria (Linux)
+# GNU Makefile for Euphoria (Linux and FreeBSD)
+#
+# NOTE: This is meant to be used with GNU make,
+#       so on BSD, you should use gmake instead
+#       of make
+#
 # Syntax:
+#
+#   Configure the make system :  ./configure
+#   You must run configure
+#   before building
+#
 #   Clean up binary files     :  make clean
 #   Clean up binary and       :  make distclean
 #        translated files
@@ -8,19 +18,8 @@
 #   Translator           (ecu):  make translator
 #   Translator Library (ecu.a):  make library
 #   Backend         (backendu):  make backendu
-#
-#  FreeBSD (6.2)
-#   NOTE:  Versions before 6.2 may not need EBSD=1
-#   Clean up                  :  gmake clean
-#   Everything                :  gmake
-#   Interpreter          (exu):  gmake interpreter EBSD=1
-#   Translator           (ecu):  gmake translator EBSD=1
-#   Translator Library (ecu.a):  gmake library
-#   Backend         (backendu):  gmake backendu EBSD=1
-#
-#   The make process will adjust common.e to set EBSD to the
-#   correct value.  To reset this value, run gmake clean.
 
+include Makefile.eu
 EU_VERSION = 3.2
 
 ifdef ERUNTIME
@@ -38,13 +37,8 @@ else
 DEBUG_FLAGS=-fomit-frame-pointer
 endif
 
-TOBSDREGEX="s/EBSD = FALSE/EBSD = TRUE/"
-FROMBSDREGEX="s/EBSD = TRUE/EBSD = FALSE/"
-
 ifeq  "$(EBSD)" "1"
 LDLFLAG=
-PREREGEX=$(TOBSDREGEX)
-BACKUPEXT=.bsd
 EBSDFLAG=-DEBSD -DEBSD62
 SEDFLAG=-Ei
 else
@@ -271,7 +265,6 @@ BUILD_DIRS=intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transob
 
 distclean : 
 	-rm -r $(BUILD_DIRS)
-	-sed $(SEDFLAG) $(BACKUPEXT) -e $(FROMBSDREGEX) common.e
 
 clean : 
 	@-for d in $(BUILD_DIRS); \
@@ -280,7 +273,7 @@ clean :
 	done
 	-rm exu ecu ecu.a backendu $(DEB_SOURCE_DIR).tar.gz
 
-.PHONY : clean
+.PHONY : clean distclean all
 
 library : builddirs 
 	$(MAKE) ecu.a OBJDIR=libobj ERUNTIME=1
@@ -289,7 +282,6 @@ ecu.a : $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS)
-	-sed $(SEDFLAG) $(BACKUPEXT) -e $(PREREGEX) common.e
 
 interpreter : builddirs
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
@@ -408,11 +400,14 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 ./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
 	$(CC) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
 
-./$(OBJDIR)/main-.c : $(EU_MAIN)
-	echo Translating $(EU_TARGET)
-	cd ./$(OBJDIR) && exu ../ec.ex ../$(EU_TARGET)
+#./$(OBJDIR)/main-.c : $(EU_MAIN)
+#	echo Translating $(EU_TARGET) to create $(EU_MAIN)
+#	cd ./$(OBJDIR) && exu ../ec.ex ../$(EU_TARGET)
 
-./$(OBJDIR)/%.c : ./$(OBJDIR)/main-.c
+#./$(OBJDIR)/main-.c
+./$(OBJDIR)/%.c : $(EU_MAIN) 
+	echo Translating $(EU_TARGET) to create $(EU_MAIN)
+	-cd ./$(OBJDIR) && exu ../ec.ex ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $*.c -o./$(OBJDIR)/back/$*.o

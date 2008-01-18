@@ -1,0 +1,34 @@
+#!/bin/sh
+
+UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
+
+if [ `grep -e "EBSD.*TRUE" common.e` ]; then
+	ECONFIG=BSD
+else
+	ECONFIG=LINUX
+fi
+
+
+if test $UNAME_SYSTEM = "Linux"; then
+	echo EU_VERSION=`grep -e INTERPRETER_VERSION global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > Makefile.eu
+	echo EBSD= >> Makefile.eu
+else
+	echo EU_VERSION=`grep -e INTERPRETER_VERSION global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > Makefile.eu
+	echo EBSD=1 >> Makefile.eu
+fi
+
+case "${UNAME_SYSTEM}:${ECONFIG}" in
+	Linux:BSD)
+		echo 1
+		sed -ri -e "s/EBSD = TRUE/EBSD = FALSE/" common.e
+		;;
+	*BSD:LINUX)
+		echo 2
+		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" common.e
+		;;
+	*)
+		# do nothing
+		;;
+esac
+
+cat Makefile.eu
