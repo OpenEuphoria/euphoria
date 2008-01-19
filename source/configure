@@ -2,7 +2,13 @@
 
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 
-if [ `grep -e "EBSD.*TRUE" common.e` ]; then
+if [ -e source/global.e ]; then
+	PREFIX=source/
+else
+	PREFIX=./
+fi
+
+if [ `grep -e "EBSD.*TRUE" "$PREFIX"common.e` ]; then
 	ECONFIG=BSD
 else
 	ECONFIG=LINUX
@@ -10,25 +16,23 @@ fi
 
 
 if test $UNAME_SYSTEM = "Linux"; then
-	echo EU_VERSION=`grep -e INTERPRETER_VERSION global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > Makefile.eu
-	echo EBSD= >> Makefile.eu
+	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"Makefile.eu
 else
-	echo EU_VERSION=`grep -e INTERPRETER_VERSION global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > Makefile.eu
-	echo EBSD=1 >> Makefile.eu
+	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"Makefile.eu
 fi
 
 case "${UNAME_SYSTEM}:${ECONFIG}" in
 	Linux:BSD)
 		echo 1
-		sed -ri -e "s/EBSD = TRUE/EBSD = FALSE/" common.e
+		sed -ri -e "s/EBSD = TRUE/EBSD = FALSE/" "$PREFIX"common.e
 		;;
 	*BSD:LINUX)
 		echo 2
-		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" common.e
+		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" "$PREFIX"common.e
 		;;
 	*)
 		# do nothing
 		;;
 esac
-
-cat Makefile.eu
