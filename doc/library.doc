@@ -5519,9 +5519,10 @@
               an executable program, possibly with some command-line arguments.
               If the program can be run, i1 will be the exit code from the
               program. If it is not possible to run the program, system_exec()
-              will return -1. i2 is a code that indicates what to do about the
-              graphics mode when system_exec() is finished. These codes are the
-              same as for system():
+              might return -1, or perhaps (on Linux/FreeBSD) some other
+              non-zero error code. i2 is a code that indicates what to do about
+              the graphics mode when system_exec() is finished. These codes are
+              the same as for system():
 
               When i2 is 0, the previous graphics mode is restored and the
               screen is cleared.
