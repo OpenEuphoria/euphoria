@@ -1851,6 +1851,30 @@
               function, you should instead define it with define_c_proc() and
               call it with c_proc().
 
+              Some routines in shared libraries - there are cases in the
+              Windows API - expect a 64 bit integer to be passed to them as one
+              of its arguments. There is no such data type in Euphoria, even
+              though it exists in C. However, there is a workaround:  represent
+              your 64 bit parameter as two consecutive C_LONG parameters. As
+              mentioned above, this will work whether the integer is specified
+              as signed or unsigned. when calling the routine, the first C_LONG
+              parameter must contain the lower 32 bits of the actual 64 bit
+              parameter, and the second parameter must hold the upper 32 bits.
+              do not store the 64 bit integer you supply as an atom, because it
+              would be encoded in a way the routine you are calling will not
+              understand. Further, an atom cannot hold more than 53 bits of
+              information, which is too short for 64 bit data.
+
+              If an external routine returns a 64 bit integer, changing the
+              return type like shown above will not work. You must design a
+              machine code wrapper that will call the routine (check its call
+              convention under Windows) and retrieve the integer returned in
+              edx:eax. Then code an Euphoria function that will call() your
+              machine code and retrieve the two parts as two atoms, returning
+              them as appropriate, typically in a {lower 32 bits, upper 32
+              bits} sequence. How you reassemble the two parts will depend on
+              the returned value being specified as signed or unsigned.
+
               If you use exw to call a cdecl C routine that returns a
               floating-point value, it might not work. This is because the
               Watcom C compiler (used to build exw) has a non-standard way of
@@ -1942,6 +1966,31 @@
               The C function can return a value but it will be ignored. If you
               want to use the value returned by the C function, you must
               instead define it with define_c_func() and call it with c_func().
+
+
+              Some routines in shared libraries - there are cases in the
+              Windows API - expect a 64 bit integer to be passed to them as one
+              of its arguments. There is no such data type in Euphoria, even
+              though it exists in C. However, there is a workaround:  represent
+              your 64 bit parameter as two consecutive C_LONG parameters. As
+              mentioned above, this will work whether the integer is specified
+              as signed or unsigned. when calling the routine, the first C_LONG
+              parameter must contain the lower 32 bits of the actual 64 bit
+              parameter, and the second parameter must hold the upper 32 bits.
+              do not store the 64 bit integer you supply as an atom, because it
+              would be encoded in a way the routine you are calling will not
+              understand. Further, an atom cannot hold more than 53 bits of
+              information, which is too short for 64 bit data.
+
+              If an external routine returns a 64 bit integer, changing the
+              return type like shown above will not work. You must design a
+              machine code wrapper that will call the routine (check its call
+              convention under Windows) and retrieve the integer returned in
+              edx:eax. Then code an Euphoria function that will call() your
+              machine code and retrieve the two parts as two atoms, returning
+              them as appropriate, typically in a {lower 32 bits, upper 32
+              bits} sequence. How you reassemble the two parts will depend on
+              the returned value being specified as signed or unsigned.
 
  Example:
 
@@ -2930,7 +2979,7 @@
               -- read character and attributes at top left corner
               s = get_screen_char(1,1) 
               -- store character and attributes at line 25, column 10
-              put_screen_char(25, 10, {s})
+              put_screen_char(25, 10, s)
               
  See Also:    put_screen_char, save_text_image
 
@@ -3847,8 +3896,110 @@
               s = peek({100, 4})
               
                
- See Also:    poke, peek4s, peek4u, allocate, free, allocate_low, free_low,
-              call
+ See Also:    poke, peeks, peek2s, peek2u, peek4s, peek4u, allocate, free,
+              allocate_low, free_low, call
+
+
+ ------------------------------------<peeks>------------------------------------
+
+ Syntax:      i = peeks(a)
+              or ...
+              s = peeks({a, i})
+
+ Description: Return a single signbed byte value in the range -128 to 127 from
+              machine address a, or return a sequence containing i consecutive
+              signed byte values starting at address a in memory.
+
+ Comments:    Since addresses are 32-bit numbers, they can be larger than the
+              largest value of type integer (31-bits). Variables that hold an
+              address should therefore be declared as atoms.
+
+              It is faster to read several bytes at once using the second form
+              of peeks() than it is to read one byte at a time in a loop.
+
+              Remember that peek takes just one argument, which in the second
+              form is actually a 2-element sequence.
+
+ Example:     The following are equivalent:
+
+              
+              -- method 1
+              s = {peeks(100), peeks(101), peeks(102), peeks(103)}
+              
+              -- method 2
+              s = peeks({100, 4})
+              
+               
+ See Also:    poke, peek, peek2s, peek2u, peek4s, peek4u, allocate, free,
+              allocate_low, free_low, call
+
+
+ -----------------------------------<peek2s>------------------------------------
+
+ Syntax:      i = peek2s(a)
+              or ...
+              s = peek2s({a, i})
+
+ Description: Return a signed two-byte value in the range -32768 to 32767 from
+              machine address a, or return a sequence containing i consecutive
+              byte values starting at address a in memory.
+
+ Comments:    Since addresses are 32-bit numbers, they can be larger than the
+              largest value of type integer (31-bits). Variables that hold an
+              address should therefore be declared as atoms.
+
+              It is faster to read several bytes at once using the second form
+              of peek2s() than it is to read one byte at a time in a loop.
+
+              Remember that peek takes just one argument, which in the second
+              form is actually a 2-element sequence.
+
+ Example:     The following are equivalent:
+
+              
+              -- method 1
+              s = {peek2s(100), peek2s(102), peek2s(104), peek2s(106)}
+              
+              -- method 2
+              s = peek2s({100, 4})
+              
+               
+ See Also:    poke, peek, peeks, peek2u, peek4s, peek4u, allocate, free,
+              allocate_low, free_low, call
+
+
+ -----------------------------------<peek2u>------------------------------------
+
+ Syntax:      i = peek2u(a)
+              or ...
+              s = peek2u({a, i})
+
+ Description: Return a two-byte value in the range 0 to 65535 from machine
+              address a, or return a sequence containing i consecutive byte
+              values starting at address a in memory.
+
+ Comments:    Since addresses are 32-bit numbers, they can be larger than the
+              largest value of type integer (31-bits). Variables that hold an
+              address should therefore be declared as atoms.
+
+              It is faster to read several bytes at once using the second form
+              of peek2u() than it is to read one byte at a time in a loop.
+
+              Remember that peek takes just one argument, which in the second
+              form is actually a 2-element sequence.
+
+ Example:     The following are equivalent:
+
+              
+              -- method 1
+              s = {peek2u(100), peek2u(102), peek2u(104), peek2u(106)}
+              
+              -- method 2
+              s = peek2u({100, 4})
+              
+               
+ See Also:    poke, peek, peeks, peek2s, peek4s, peek4u, allocate, free,
+              allocate_low, free_low, call
 
 
  -----------------------------------<peek4s>------------------------------------
@@ -3887,7 +4038,8 @@
               s = peek4s({100, 4})
               
                
- See Also:    peek4u, peek, poke4, allocate, free, allocate_low, free_low, call
+ See Also:    peek4u, peek, peeks, peek2s, peek2u, poke4, allocate, free,
+              allocate_low, free_low, call
 
 
  -----------------------------------<peek4u>------------------------------------
@@ -3927,6 +4079,25 @@
               
                
  See Also:    peek4s, peek, poke4, allocate, free, allocate_low, free_low, call
+
+
+ ---------------------------------<peek_string>---------------------------------
+
+ Syntax:      s = peek_string(a)
+
+ Description: Return a sequence of text from a null terminated string starting
+              at machine address a.
+
+ Comments:
+
+ Example:     The following reads the null-terminated string starting at 100
+              into the sequence s:
+
+              
+              s = peek_string(100)
+              
+               
+ See Also:    poke, peek, allocate, free, allocate_low, free_low
 
 
  -------------------------------------<PI>--------------------------------------
@@ -4070,6 +4241,39 @@
  Example Program: demo\callmach.ex
 
  See Also:    peek, poke4, allocate, free, allocate_low, free_low, call, safe.e
+
+
+ ------------------------------------<poke2>------------------------------------
+
+ Syntax:      poke2(a, x)
+
+ Description: If x is an atom, write a word (two-byte) value to memory address
+              a.
+
+              If x is a sequence, write a sequence of word values to
+              consecutive memory locations starting at location a.
+
+ Comments:    The lower 16-bits of each byte value, i.e. remainder(x, 65535),
+              is actually stored in memory.
+
+              It is faster to write several words at once by poking a sequence
+              of values, than it is to write one word at a time in a loop.
+
+ Example:
+
+              a = allocate(100)   -- allocate 100 bytes in memory
+              
+              -- poke one word at a time:
+              poke(a, 10097)
+              poke(a+2, 10098)
+              poke(a+4, 10099)
+              
+              -- poke 3 words at once:
+              poke(a, {10097, 10098, 10099})
+              
+               
+ See Also:    peek2u, peek2s, poke, poke4, allocate, free, allocate_low,
+              free_low, call, safe.e
 
 
  ------------------------------------<poke4>------------------------------------
