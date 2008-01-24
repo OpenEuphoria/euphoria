@@ -194,21 +194,21 @@ Euphoria function with <font color="#993333"><b>routine id</b></font> i.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">user32, hwnd, ps, hdc</font>
-<font color="#FF00FF">integer </font><font color="#330033">BeginPaint</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- open user32.dll - it contains the BeginPaint C function</font>
-<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- the C function BeginPaint takes a C int argument and</font>
-<font color="#FF0055">-- a C pointer, and returns a C int as a result:</font>
-<font color="#330033">BeginPaint = define_c_func(user32, </font><font color="#00A033">"BeginPaint"</font><font color="#330033">,</font>
-<font color="#330033">                           {C_INT, C_POINTER}, C_INT)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- call BeginPaint, passing hwnd and ps as the arguments,</font>
-<font color="#FF0055">-- hdc is assigned the result:</font>
-<font color="#330033">hdc = </font><font color="#FF00FF">c_func</font><font color="#330033">(BeginPaint, </font><font color="#993333">{</font><font color="#330033">hwnd, ps</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">user32, hwnd, ps, hdc</font>
+<font color="#FF00FF">integer </font><font color="#330033">BeginPaint</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- open user32.dll - it contains the BeginPaint C function</font>
+<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- the C function BeginPaint takes a C int argument and</font>
+<font color="#FF0055">-- a C pointer, and returns a C int as a result:</font>
+<font color="#330033">BeginPaint = define_c_func(user32, </font><font color="#00A033">"BeginPaint"</font><font color="#330033">,</font>
+<font color="#330033">                           {C_INT, C_POINTER}, C_INT)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- call BeginPaint, passing hwnd and ps as the arguments,</font>
+<font color="#FF0055">-- hdc is assigned the result:</font>
+<font color="#330033">hdc = </font><font color="#FF00FF">c_func</font><font color="#330033">(BeginPaint, </font><font color="#993333">{</font><font color="#330033">hwnd, ps</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -266,20 +266,20 @@ Euphoria function with <font color="#993333"><b>routine id</b></font> i.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">user32, hwnd, rect</font>
-<font color="#FF00FF">integer </font><font color="#330033">GetClientRect</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- open user32.dll - it contains the GetClientRect C function</font>
-<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- GetClientRect is a VOID C function that takes a C int</font>
-<font color="#FF0055">-- and a C pointer as its arguments:</font>
-<font color="#330033">GetClientRect = define_c_proc(user32, </font><font color="#00A033">"GetClientRect"</font><font color="#330033">,</font>
-<font color="#330033">                              {C_INT, C_POINTER})</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- pass hwnd and rect as the arguments</font>
-<font color="#FF00FF">c_proc</font><font color="#330033">(GetClientRect, </font><font color="#993333">{</font><font color="#330033">hwnd, rect</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">user32, hwnd, rect</font>
+<font color="#FF00FF">integer </font><font color="#330033">GetClientRect</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- open user32.dll - it contains the GetClientRect C function</font>
+<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- GetClientRect is a VOID C function that takes a C int</font>
+<font color="#FF0055">-- and a C pointer as its arguments:</font>
+<font color="#330033">GetClientRect = define_c_proc(user32, </font><font color="#00A033">"GetClientRect"</font><font color="#330033">,</font>
+<font color="#330033">                              {C_INT, C_POINTER})</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- pass hwnd and rect as the arguments</font>
+<font color="#FF00FF">c_proc</font><font color="#330033">(GetClientRect, </font><font color="#993333">{</font><font color="#330033">hwnd, rect</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -363,20 +363,20 @@ Euphoria function with <font color="#993333"><b>routine id</b></font> i.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">global </font><font color="#FF00FF">integer </font><font color="#330033">foo_id</font>
-<font color="#330033"></font>
-<font color="#0000FF">procedure </font><font color="#330033">x()</font>
-<font color="#FF00FF">    call_proc</font><font color="#330033">(foo_id, </font><font color="#993333">{</font><font color="#330033">1, </font><font color="#00A033">"Hello World\n"</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#0000FF">end procedure</font>
-<font color="#330033"></font>
-<font color="#0000FF">procedure </font><font color="#330033">foo(</font><font color="#FF00FF">integer </font><font color="#330033">a, </font><font color="#FF00FF">sequence </font><font color="#330033">s)</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(a, s)</font>
-<font color="#0000FF">end procedure</font>
-<font color="#330033"></font>
-<font color="#330033">foo_id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"foo"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#330033">x()</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">global </font><font color="#FF00FF">integer </font><font color="#330033">foo_id</font>
+<font color="#330033"></font>
+<font color="#0000FF">procedure </font><font color="#330033">x()</font>
+<font color="#FF00FF">    call_proc</font><font color="#330033">(foo_id, </font><font color="#993333">{</font><font color="#330033">1, </font><font color="#00A033">"Hello World\n"</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"></font>
+<font color="#0000FF">procedure </font><font color="#330033">foo(</font><font color="#FF00FF">integer </font><font color="#330033">a, </font><font color="#FF00FF">sequence </font><font color="#330033">s)</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(a, s)</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"></font>
+<font color="#330033">foo_id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"foo"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#330033">x()</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -422,11 +422,11 @@ affect the current directory of its parent process.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">chdir(</font><font color="#00A033">"c:\\euphoria"</font><font color="#330033">) </font><font color="#0000FF">then</font>
-<font color="#330033">    f = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"readme.doc"</font><font color="#330033">, </font><font color="#00A033">"r"</font><font color="#330033">)</font>
-<font color="#0000FF">else</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"Error: No euphoria directory?\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">chdir(</font><font color="#00A033">"c:\\euphoria"</font><font color="#330033">) </font><font color="#0000FF">then</font>
+<font color="#330033">    f = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"readme.doc"</font><font color="#330033">, </font><font color="#00A033">"r"</font><font color="#330033">)</font>
+<font color="#0000FF">else</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"Error: No euphoria directory?\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -472,14 +472,14 @@ Neither control-c nor control-Break will be returned as input
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">k = </font><font color="#FF00FF">get_key</font><font color="#330033">()</font>
-<font color="#0000FF">if </font><font color="#330033">check_break() </font><font color="#0000FF">then</font>
-<font color="#330033">    temp = graphics_mode(-1)</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"Shutting down..."</font><font color="#330033">)</font>
-<font color="#330033">    save_all_user_data()</font>
-<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#330033">k = </font><font color="#FF00FF">get_key</font><font color="#330033">()</font>
+<font color="#0000FF">if </font><font color="#330033">check_break() </font><font color="#0000FF">then</font>
+<font color="#330033">    temp = graphics_mode(-1)</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"Shutting down..."</font><font color="#330033">)</font>
+<font color="#330033">    save_all_user_data()</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -600,17 +600,17 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- The user types:  ex myprog myfile.dat 12345 "the end"</font>
-<font color="#330033"></font>
-<font color="#330033">cmd = </font><font color="#FF00FF">command_line</font><font color="#330033">()</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- cmd will be:</font>
-<font color="#330033">      {</font><font color="#00A033">"C:\EUPHORIA\BIN\EX.EXE"</font><font color="#330033">,</font>
-<font color="#00A033">       "myprog"</font><font color="#330033">,</font>
-<font color="#00A033">       "myfile.dat"</font><font color="#330033">,</font>
-<font color="#00A033">       "12345"</font><font color="#330033">,</font>
-<font color="#00A033">       "the end"</font><font color="#330033">}</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- The user types:  ex myprog myfile.dat 12345 "the end"</font>
+<font color="#330033"></font>
+<font color="#330033">cmd = </font><font color="#FF00FF">command_line</font><font color="#330033">()</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- cmd will be:</font>
+<font color="#330033">      {</font><font color="#00A033">"C:\EUPHORIA\BIN\EX.EXE"</font><font color="#330033">,</font>
+<font color="#00A033">       "myprog"</font><font color="#330033">,</font>
+<font color="#00A033">       "myfile.dat"</font><font color="#330033">,</font>
+<font color="#00A033">       "12345"</font><font color="#330033">,</font>
+<font color="#00A033">       "the end"</font><font color="#330033">}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -618,26 +618,26 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- Your program is bound with the name "myprog.exe"</font>
-<font color="#FF0055">-- and is stored in the directory c:\myfiles</font>
-<font color="#FF0055">-- The user types:  myprog myfile.dat 12345 "the end"</font>
-<font color="#330033"></font>
-<font color="#330033">cmd = </font><font color="#FF00FF">command_line</font><font color="#330033">()</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- cmd will be:</font>
-<font color="#330033">       {</font><font color="#00A033">"C:\MYFILES\MYPROG.EXE"</font><font color="#330033">,</font>
-<font color="#00A033">        "C:\MYFILES\MYPROG.EXE"</font><font color="#330033">, </font><font color="#FF0055">-- place holder</font>
-<font color="#00A033">        "myfile.dat"</font><font color="#330033">,</font>
-<font color="#00A033">        "12345"</font><font color="#330033">,</font>
-<font color="#00A033">        "the end"</font>
-<font color="#330033">        }</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- Note that all arguments remain the same as example 1</font>
-<font color="#FF0055">-- except for the first two. The second argument is always</font>
-<font color="#FF0055">-- the same as the first and is inserted to keep the numbering</font>
-<font color="#FF0055">-- of the subsequent arguments the same, whether your program</font>
-<font color="#FF0055">-- is bound or translated as a .exe, or not.</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- Your program is bound with the name "myprog.exe"</font>
+<font color="#FF0055">-- and is stored in the directory c:\myfiles</font>
+<font color="#FF0055">-- The user types:  myprog myfile.dat 12345 "the end"</font>
+<font color="#330033"></font>
+<font color="#330033">cmd = </font><font color="#FF00FF">command_line</font><font color="#330033">()</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- cmd will be:</font>
+<font color="#330033">       {</font><font color="#00A033">"C:\MYFILES\MYPROG.EXE"</font><font color="#330033">,</font>
+<font color="#00A033">        "C:\MYFILES\MYPROG.EXE"</font><font color="#330033">, </font><font color="#FF0055">-- place holder</font>
+<font color="#00A033">        "myfile.dat"</font><font color="#330033">,</font>
+<font color="#00A033">        "12345"</font><font color="#330033">,</font>
+<font color="#00A033">        "the end"</font>
+<font color="#330033">        }</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- Note that all arguments remain the same as example 1</font>
+<font color="#FF0055">-- except for the first two. The second argument is always</font>
+<font color="#FF0055">-- the same as the first and is inserted to keep the numbering</font>
+<font color="#FF0055">-- of the subsequent arguments the same, whether your program</font>
+<font color="#FF0055">-- is bound or translated as a .exe, or not.</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -671,9 +671,9 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">x = </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,</font><font color="#0000FF">{</font><font color="#330033">3,</font><font color="#5500FF">{</font><font color="#330033">4</font><font color="#5500FF">}</font><font color="#0000FF">}</font><font color="#330033">,5</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">2-1,1+1,</font><font color="#0000FF">{</font><font color="#330033">3,</font><font color="#5500FF">{</font><font color="#330033">4</font><font color="#5500FF">}</font><font color="#0000FF">}</font><font color="#330033">,6-1</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- identical, x is 0</font>
-<font color="#330033"></font>
+<pre><font color="#330033">x = </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,</font><font color="#0000FF">{</font><font color="#330033">3,</font><font color="#5500FF">{</font><font color="#330033">4</font><font color="#5500FF">}</font><font color="#0000FF">}</font><font color="#330033">,5</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">2-1,1+1,</font><font color="#0000FF">{</font><font color="#330033">3,</font><font color="#5500FF">{</font><font color="#330033">4</font><font color="#5500FF">}</font><font color="#0000FF">}</font><font color="#330033">,6-1</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- identical, x is 0</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -681,10 +681,10 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">"ABC"</font><font color="#330033">, </font><font color="#00A033">"ABCD"</font><font color="#330033">) < 0 </font><font color="#0000FF">then   </font><font color="#FF0055">-- -1</font>
-<font color="#FF0055">    -- will be true: ABC is "less" because it is shorter</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">if </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">"ABC"</font><font color="#330033">, </font><font color="#00A033">"ABCD"</font><font color="#330033">) < 0 </font><font color="#0000FF">then   </font><font color="#FF0055">-- -1</font>
+<font color="#FF0055">    -- will be true: ABC is "less" because it is shorter</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 3:</b></td>
@@ -692,10 +692,10 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">x = </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">12345, 99999, -1, 700, 2</font><font color="#993333">}</font><font color="#330033">,</font>
-<font color="#330033">            {12345, 99999, -1, 699, 3, 0})</font>
-<font color="#FF0055">-- x will be 1 because 700 > 699</font>
-<font color="#330033"></font>
+<pre><font color="#330033">x = </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">12345, 99999, -1, 700, 2</font><font color="#993333">}</font><font color="#330033">,</font>
+<font color="#330033">            {12345, 99999, -1, 699, 3, 0})</font>
+<font color="#FF0055">-- x will be 1 because 700 > 699</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 4:</b></td>
@@ -703,10 +703,10 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">x = </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">'a'</font><font color="#330033">, </font><font color="#00A033">"a"</font><font color="#330033">)</font>
-<font color="#FF0055">-- x will be -1 because 'a' is an atom</font>
-<font color="#FF0055">-- while "a" is a sequence</font>
-<font color="#330033"></font>
+<pre><font color="#330033">x = </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">'a'</font><font color="#330033">, </font><font color="#00A033">"a"</font><font color="#330033">)</font>
+<font color="#FF0055">-- x will be -1 because 'a' is an atom</font>
+<font color="#FF0055">-- while "a" is a sequence</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -745,10 +745,10 @@ If you convert your program into an executable file, either by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">x = </font><font color="#FF00FF">cos</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">.5, .6, .7</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- x is {0.8775826, 0.8253356, 0.7648422}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">x = </font><font color="#FF00FF">cos</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">.5, .6, .7</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- x is {0.8775826, 0.8253356, 0.7648422}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -806,8 +806,8 @@ You can call crash_file() as many times as you like from
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">crash_file(</font><font color="#00A033">"\\tmp\\mybug"</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">crash_file(</font><font color="#00A033">"\\tmp\\mybug"</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -864,10 +864,10 @@ You can call crash_message() as many times as you like from
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">crash_message(</font><font color="#00A033">"An unexpected error has occurred!\n" </font><font color="#330033">&</font>
-<font color="#00A033">              "Please contact john_doe@whoops.com\n" </font><font color="#330033">&</font>
-<font color="#00A033">              "Do not delete the file \"ex.err\".\n"</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">crash_message(</font><font color="#00A033">"An unexpected error has occurred!\n" </font><font color="#330033">&</font>
+<font color="#00A033">              "Please contact john_doe@whoops.com\n" </font><font color="#330033">&</font>
+<font color="#00A033">              "Do not delete the file \"ex.err\".\n"</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -950,17 +950,17 @@ You can call crash_message() as many times as you like from
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">function </font><font color="#330033">crash(</font><font color="#FF00FF">object </font><font color="#330033">x)</font>
-<font color="#FF0055">-- in case of fire ...</font>
-<font color="#330033">    </font>
-<font color="#FF0055">    -- (on Linux) send an e-mail containing ex.err</font>
-<font color="#FF00FF">    system</font><font color="#330033">(</font><font color="#00A033">"mail -s \"crash!\" myname@xxx.com < ex.err > /dev/null"</font><font color="#330033">, 2)</font>
-<font color="#330033">    </font>
-<font color="#0000FF">    return </font><font color="#330033">0</font>
-<font color="#0000FF">end function</font>
-<font color="#330033"></font>
-<font color="#330033">crash_routine(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"crash"</font><font color="#993333">)</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">function </font><font color="#330033">crash(</font><font color="#FF00FF">object </font><font color="#330033">x)</font>
+<font color="#FF0055">-- in case of fire ...</font>
+<font color="#330033">    </font>
+<font color="#FF0055">    -- (on Linux) send an e-mail containing ex.err</font>
+<font color="#FF00FF">    system</font><font color="#330033">(</font><font color="#00A033">"mail -s \"crash!\" myname@xxx.com < ex.err > /dev/null"</font><font color="#330033">, 2)</font>
+<font color="#330033">    </font>
+<font color="#0000FF">    return </font><font color="#330033">0</font>
+<font color="#0000FF">end function</font>
+<font color="#330033"></font>
+<font color="#330033">crash_routine(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"crash"</font><font color="#993333">)</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1004,10 +1004,10 @@ current directory, except under DOS/Windows, at the top-level of
 
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">s</font>
-<font color="#330033">s = current_dir()</font>
-<font color="#FF0055">-- s would have "C:\EUPHORIA\DOC" if you were in that directory</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">s</font>
+<font color="#330033">s = current_dir()</font>
+<font color="#FF0055">-- s would have "C:\EUPHORIA\DOC" if you were in that directory</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1042,11 +1042,11 @@ current directory, except under DOS/Windows, at the top-level of
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">NO_CURSOR = #2000,</font>
-<font color="#330033">             UNDERLINE_CURSOR = #0607,</font>
-<font color="#330033">       THICK_UNDERLINE_CURSOR = #0507,</font>
-<font color="#330033">            HALF_BLOCK_CURSOR = #0407,</font>
-<font color="#330033">                 BLOCK_CURSOR = #0007</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">NO_CURSOR = #2000,</font>
+<font color="#330033">             UNDERLINE_CURSOR = #0607,</font>
+<font color="#330033">       THICK_UNDERLINE_CURSOR = #0507,</font>
+<font color="#330033">            HALF_BLOCK_CURSOR = #0407,</font>
+<font color="#330033">                 BLOCK_CURSOR = #0007</font>
 </pre></td></tr>
  
  <tr><td valign=top><b></b></td>
@@ -1067,8 +1067,8 @@ current directory, except under DOS/Windows, at the top-level of
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">cursor(BLOCK_CURSOR)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">cursor(BLOCK_CURSOR)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1135,14 +1135,14 @@ current directory, except under DOS/Windows, at the top-level of
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">             { year,  </font><font color="#FF0055">-- since 1900</font>
-<font color="#330033">              month,  </font><font color="#FF0055">-- January = 1</font>
-<font color="#330033">                day,  </font><font color="#FF0055">-- day of month, starting at 1</font>
-<font color="#330033">               hour,  </font><font color="#FF0055">-- 0 to 23</font>
-<font color="#330033">             minute,  </font><font color="#FF0055">-- 0 to 59</font>
-<font color="#330033">             second,  </font><font color="#FF0055">-- 0 to 59</font>
-<font color="#330033">    day of the week,  </font><font color="#FF0055">-- Sunday = 1</font>
-<font color="#330033">    day of the year}  </font><font color="#FF0055">-- January 1st = 1</font>
+<pre><font color="#330033">             { year,  </font><font color="#FF0055">-- since 1900</font>
+<font color="#330033">              month,  </font><font color="#FF0055">-- January = 1</font>
+<font color="#330033">                day,  </font><font color="#FF0055">-- day of month, starting at 1</font>
+<font color="#330033">               hour,  </font><font color="#FF0055">-- 0 to 23</font>
+<font color="#330033">             minute,  </font><font color="#FF0055">-- 0 to 59</font>
+<font color="#330033">             second,  </font><font color="#FF0055">-- 0 to 59</font>
+<font color="#330033">    day of the week,  </font><font color="#FF0055">-- Sunday = 1</font>
+<font color="#330033">    day of the year}  </font><font color="#FF0055">-- January 1st = 1</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example:</b></td>
@@ -1150,10 +1150,10 @@ current directory, except under DOS/Windows, at the top-level of
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">now = </font><font color="#FF00FF">date</font><font color="#330033">()</font>
-<font color="#FF0055">-- now has: {95,3,24,23,47,38,6,83}</font>
-<font color="#FF0055">-- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year</font>
-<font color="#330033"></font>
+<pre><font color="#330033">now = </font><font color="#FF00FF">date</font><font color="#330033">()</font>
+<font color="#FF0055">-- now has: {95,3,24,23,47,38,6,83}</font>
+<font color="#FF0055">-- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Comments:</b></td>
@@ -1217,17 +1217,17 @@ current directory, except under DOS/Windows, at the top-level of
 
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">C_CHAR = #01000001,</font>
-<font color="#330033">                   C_UCHAR = #02000001,</font>
-<font color="#330033">                   C_SHORT = #01000002,</font>
-<font color="#330033">                  C_USHORT = #02000002,</font>
-<font color="#330033">                     C_INT = #01000004,</font>
-<font color="#330033">                    C_UINT = #02000004,</font>
-<font color="#330033">                    C_LONG = C_INT,</font>
-<font color="#330033">                   C_ULONG = C_UINT,</font>
-<font color="#330033">                 C_POINTER = C_ULONG,</font>
-<font color="#330033">                   C_FLOAT = #03000004,</font>
-<font color="#330033">                  C_DOUBLE = #03000008</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">C_CHAR = #01000001,</font>
+<font color="#330033">                   C_UCHAR = #02000001,</font>
+<font color="#330033">                   C_SHORT = #01000002,</font>
+<font color="#330033">                  C_USHORT = #02000002,</font>
+<font color="#330033">                     C_INT = #01000004,</font>
+<font color="#330033">                    C_UINT = #02000004,</font>
+<font color="#330033">                    C_LONG = C_INT,</font>
+<font color="#330033">                   C_ULONG = C_UINT,</font>
+<font color="#330033">                 C_POINTER = C_ULONG,</font>
+<font color="#330033">                   C_FLOAT = #03000004,</font>
+<font color="#330033">                  C_DOUBLE = #03000008</font>
 </pre></td></tr>
 
  
@@ -1240,11 +1240,11 @@ A list of Euphoria types is contained in
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant</font>
-<font color="#330033">		 E_INTEGER = #06000004,</font>
-<font color="#330033">		 E_ATOM    = #07000004,</font>
-<font color="#330033">		 E_SEQUENCE= #08000004,</font>
-<font color="#330033">		 E_OBJECT  = #09000004</font>
+<pre><font color="#0000FF">    global constant</font>
+<font color="#330033">		 E_INTEGER = #06000004,</font>
+<font color="#330033">		 E_ATOM    = #07000004,</font>
+<font color="#330033">		 E_SEQUENCE= #08000004,</font>
+<font color="#330033">		 E_OBJECT  = #09000004</font>
 </pre></td></tr>
 
 
@@ -1311,25 +1311,25 @@ If you use exw to call a cdecl C routine that returns
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">user32</font>
-<font color="#FF00FF">integer </font><font color="#330033">LoadIcon</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- open user32.dll - it contains the LoadIconA C function</font>
-<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- It takes a C pointer and a C int as parameters.</font>
-<font color="#FF0055">-- It returns a C int as a result.</font>
-<font color="#330033">LoadIcon = define_c_func(user32, </font><font color="#00A033">"LoadIconA"</font><font color="#330033">,</font>
-<font color="#330033">                         {C_POINTER, C_INT}, C_INT)</font>
-<font color="#FF0055">-- We use "LoadIconA" here because we know that LoadIconA</font>
-<font color="#FF0055">-- needs the stdcall convention, as do</font>
-<font color="#FF0055">-- all standard .dll routines in the WIN32 API. </font>
-<font color="#FF0055">-- To specify the cdecl convention, we would have used "+LoadIconA".</font>
-<font color="#330033"></font>
-<font color="#0000FF">if </font><font color="#330033">LoadIcon = -1 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"LoadIconA could not be found!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">user32</font>
+<font color="#FF00FF">integer </font><font color="#330033">LoadIcon</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- open user32.dll - it contains the LoadIconA C function</font>
+<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- It takes a C pointer and a C int as parameters.</font>
+<font color="#FF0055">-- It returns a C int as a result.</font>
+<font color="#330033">LoadIcon = define_c_func(user32, </font><font color="#00A033">"LoadIconA"</font><font color="#330033">,</font>
+<font color="#330033">                         {C_POINTER, C_INT}, C_INT)</font>
+<font color="#FF0055">-- We use "LoadIconA" here because we know that LoadIconA</font>
+<font color="#FF0055">-- needs the stdcall convention, as do</font>
+<font color="#FF0055">-- all standard .dll routines in the WIN32 API. </font>
+<font color="#FF0055">-- To specify the cdecl convention, we would have used "+LoadIconA".</font>
+<font color="#330033"></font>
+<font color="#0000FF">if </font><font color="#330033">LoadIcon = -1 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"LoadIconA could not be found!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1442,21 +1442,21 @@ will depend on the returned value being specified as signed or unsigned.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">user32</font>
-<font color="#FF00FF">integer </font><font color="#330033">ShowWindow</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- open user32.dll - it contains the ShowWindow C function</font>
-<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- It has 2 parameters that are both C int.</font>
-<font color="#330033">ShowWindow = define_c_proc(user32, </font><font color="#00A033">"ShowWindow"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">C_INT, C_INT</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- If ShowWindow used the cdecl convention, </font>
-<font color="#FF0055">-- we would have coded "+ShowWindow" here</font>
-<font color="#330033"></font>
-<font color="#0000FF">if </font><font color="#330033">ShowWindow = -1 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"ShowWindow not found!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">user32</font>
+<font color="#FF00FF">integer </font><font color="#330033">ShowWindow</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- open user32.dll - it contains the ShowWindow C function</font>
+<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- It has 2 parameters that are both C int.</font>
+<font color="#330033">ShowWindow = define_c_proc(user32, </font><font color="#00A033">"ShowWindow"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">C_INT, C_INT</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- If ShowWindow used the cdecl convention, </font>
+<font color="#FF0055">-- we would have coded "+ShowWindow" here</font>
+<font color="#330033"></font>
+<font color="#0000FF">if </font><font color="#330033">ShowWindow = -1 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"ShowWindow not found!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1554,17 +1554,17 @@ Each entry contains the name, attributes and file size as well as
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">D_NAME = 1,</font>
-<font color="#330033">              D_ATTRIBUTES = 2,</font>
-<font color="#330033">                    D_SIZE = 3,</font>
-<font color="#330033"></font>
-<font color="#330033">                    D_YEAR = 4,</font>
-<font color="#330033">                   D_MONTH = 5,</font>
-<font color="#330033">                     D_DAY = 6,</font>
-<font color="#330033"></font>
-<font color="#330033">                    D_HOUR = 7,</font>
-<font color="#330033">                  D_MINUTE = 8,</font>
-<font color="#330033">                  D_SECOND = 9</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">D_NAME = 1,</font>
+<font color="#330033">              D_ATTRIBUTES = 2,</font>
+<font color="#330033">                    D_SIZE = 3,</font>
+<font color="#330033"></font>
+<font color="#330033">                    D_YEAR = 4,</font>
+<font color="#330033">                   D_MONTH = 5,</font>
+<font color="#330033">                     D_DAY = 6,</font>
+<font color="#330033"></font>
+<font color="#330033">                    D_HOUR = 7,</font>
+<font color="#330033">                  D_MINUTE = 8,</font>
+<font color="#330033">                  D_SECOND = 9</font>
 </pre></td></tr>
 
 
@@ -1574,12 +1574,12 @@ Each entry contains the name, attributes and file size as well as
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#00A033">    'd' </font><font color="#FF0055">-- directory</font>
-<font color="#00A033">    'r' </font><font color="#FF0055">-- read only file</font>
-<font color="#00A033">    'h' </font><font color="#FF0055">-- hidden file</font>
-<font color="#00A033">    's' </font><font color="#FF0055">-- system file</font>
-<font color="#00A033">    'v' </font><font color="#FF0055">-- volume-id entry</font>
-<font color="#00A033">    'a' </font><font color="#FF0055">-- archive file</font>
+<pre><font color="#00A033">    'd' </font><font color="#FF0055">-- directory</font>
+<font color="#00A033">    'r' </font><font color="#FF0055">-- read only file</font>
+<font color="#00A033">    'h' </font><font color="#FF0055">-- hidden file</font>
+<font color="#00A033">    's' </font><font color="#FF0055">-- system file</font>
+<font color="#00A033">    'v' </font><font color="#FF0055">-- volume-id entry</font>
+<font color="#00A033">    'a' </font><font color="#FF0055">-- archive file</font>
 </pre></td></tr>
 
 
@@ -1616,18 +1616,18 @@ Under <font color="#CC3366"><b>Linux/FreeBSD</b></font>, the only attribute
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">d = dir(current_dir</font><font color="#993333">()</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- d might have:</font>
-<font color="#330033">  {</font>
-<font color="#330033">    {</font><font color="#00A033">"."</font><font color="#330033">,    </font><font color="#00A033">"d"</font><font color="#330033">,     0  1994, 1, 18,  9, 30, 02},</font>
-<font color="#330033">    {</font><font color="#00A033">".."</font><font color="#330033">,   </font><font color="#00A033">"d"</font><font color="#330033">,     0  1994, 1, 18,  9, 20, 14},</font>
-<font color="#330033">    {</font><font color="#00A033">"fred"</font><font color="#330033">, </font><font color="#00A033">"ra"</font><font color="#330033">, 2350, 1994, 1, 22, 17, 22, 40},</font>
-<font color="#330033">    {</font><font color="#00A033">"sub"</font><font color="#330033">,  </font><font color="#00A033">"d" </font><font color="#330033">,    0, 1993, 9, 20,  8, 50, 12}</font>
-<font color="#330033">  }</font>
-<font color="#330033"></font>
-<font color="#330033">d[3][D_NAME] would be </font><font color="#00A033">"fred"</font>
-<font color="#330033"></font>
+<pre><font color="#330033">d = dir(current_dir</font><font color="#993333">()</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- d might have:</font>
+<font color="#330033">  {</font>
+<font color="#330033">    {</font><font color="#00A033">"."</font><font color="#330033">,    </font><font color="#00A033">"d"</font><font color="#330033">,     0  1994, 1, 18,  9, 30, 02},</font>
+<font color="#330033">    {</font><font color="#00A033">".."</font><font color="#330033">,   </font><font color="#00A033">"d"</font><font color="#330033">,     0  1994, 1, 18,  9, 20, 14},</font>
+<font color="#330033">    {</font><font color="#00A033">"fred"</font><font color="#330033">, </font><font color="#00A033">"ra"</font><font color="#330033">, 2350, 1994, 1, 22, 17, 22, 40},</font>
+<font color="#330033">    {</font><font color="#00A033">"sub"</font><font color="#330033">,  </font><font color="#00A033">"d" </font><font color="#330033">,    0, 1993, 9, 20,  8, 50, 12}</font>
+<font color="#330033">  }</font>
+<font color="#330033"></font>
+<font color="#330033">d[3][D_NAME] would be </font><font color="#00A033">"fred"</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -1688,15 +1688,15 @@ The sequences (rows) of the image do not have to all be the
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">display_image(</font><font color="#993333">{</font><font color="#330033">20,30</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#330033">7,5,9,4,8</font><font color="#0000FF">}</font><font color="#330033">,</font>
-<font color="#330033">                        {2,4,1,2},</font>
-<font color="#330033">                        {1,0,1,0,4,6,1},</font>
-<font color="#330033">                        {5,5,5,5,5,5}})</font>
-<font color="#FF0055">-- This will display a small image containing 4 rows of</font>
-<font color="#FF0055">-- pixels. The first pixel (7) of the top row will be at</font>
-<font color="#FF0055">-- {20,30}. The top row contains 5 pixels. The last row</font>
-<font color="#FF0055">-- contains 6 pixels ending at {25,33}.</font>
-<font color="#330033"></font>
+<pre><font color="#330033">display_image(</font><font color="#993333">{</font><font color="#330033">20,30</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#330033">7,5,9,4,8</font><font color="#0000FF">}</font><font color="#330033">,</font>
+<font color="#330033">                        {2,4,1,2},</font>
+<font color="#330033">                        {1,0,1,0,4,6,1},</font>
+<font color="#330033">                        {5,5,5,5,5,5}})</font>
+<font color="#FF0055">-- This will display a small image containing 4 rows of</font>
+<font color="#FF0055">-- pixels. The first pixel (7) of the top row will be at</font>
+<font color="#FF0055">-- {20,30}. The top row contains 5 pixels. The last row</font>
+<font color="#FF0055">-- contains 6 pixels ending at {25,33}.</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -1758,20 +1758,20 @@ The sequences of the text image do not have to all be the same
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">clear_screen</font><font color="#330033">()</font>
-<font color="#330033">display_text_image(</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#00A033">'A'</font><font color="#330033">, WHITE, </font><font color="#00A033">'B'</font><font color="#330033">, GREEN</font><font color="#0000FF">}</font><font color="#330033">,</font>
-<font color="#330033">                           {</font><font color="#00A033">'C'</font><font color="#330033">, RED+16*WHITE},</font>
-<font color="#330033">                           {</font><font color="#00A033">'D'</font><font color="#330033">, BLUE}})</font>
-<font color="#FF0055">-- displays:</font>
-<font color="#330033">     AB</font>
-<font color="#330033">     C</font>
-<font color="#330033">     D</font>
-<font color="#FF0055">-- at the top left corner of the screen.</font>
-<font color="#FF0055">-- 'A' will be white with black (0) background color,</font>
-<font color="#FF0055">-- 'B' will be green on black, </font>
-<font color="#FF0055">-- 'C' will be red on white, and</font>
-<font color="#FF0055">-- 'D' will be blue on black.</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">clear_screen</font><font color="#330033">()</font>
+<font color="#330033">display_text_image(</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#00A033">'A'</font><font color="#330033">, WHITE, </font><font color="#00A033">'B'</font><font color="#330033">, GREEN</font><font color="#0000FF">}</font><font color="#330033">,</font>
+<font color="#330033">                           {</font><font color="#00A033">'C'</font><font color="#330033">, RED+16*WHITE},</font>
+<font color="#330033">                           {</font><font color="#00A033">'D'</font><font color="#330033">, BLUE}})</font>
+<font color="#FF0055">-- displays:</font>
+<font color="#330033">     AB</font>
+<font color="#330033">     C</font>
+<font color="#330033">     D</font>
+<font color="#FF0055">-- at the top left corner of the screen.</font>
+<font color="#FF0055">-- 'A' will be white with black (0) background color,</font>
+<font color="#FF0055">-- 'B' will be green on black, </font>
+<font color="#FF0055">-- 'C' will be red on white, and</font>
+<font color="#FF0055">-- 'D' will be blue on black.</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1812,16 +1812,16 @@ The sequences of the text image do not have to all be the same
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">REG_DI = 1,</font>
-<font color="#330033">                    REG_SI = 2,</font>
-<font color="#330033">                    REG_BP = 3,</font>
-<font color="#330033">                    REG_BX = 4,</font>
-<font color="#330033">                    REG_DX = 5,</font>
-<font color="#330033">                    REG_CX = 6,</font>
-<font color="#330033">                    REG_AX = 7,</font>
-<font color="#330033">                    REG_FLAGS = 8,</font>
-<font color="#330033">                    REG_ES = 9,</font>
-<font color="#330033">                    REG_DS = 10</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">REG_DI = 1,</font>
+<font color="#330033">                    REG_SI = 2,</font>
+<font color="#330033">                    REG_BP = 3,</font>
+<font color="#330033">                    REG_BX = 4,</font>
+<font color="#330033">                    REG_DX = 5,</font>
+<font color="#330033">                    REG_CX = 6,</font>
+<font color="#330033">                    REG_AX = 7,</font>
+<font color="#330033">                    REG_FLAGS = 8,</font>
+<font color="#330033">                    REG_ES = 9,</font>
+<font color="#330033">                    REG_DS = 10</font>
 </pre></td></tr>
 
 
@@ -1854,13 +1854,13 @@ http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html</a>
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">registers</font>
-<font color="#330033"></font>
-<font color="#330033">registers = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 10)  </font><font color="#FF0055">-- no registers need to be set</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- call DOS interrupt 5: Print Screen</font>
-<font color="#330033">registers = dos_interrupt(#5, registers)</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">registers</font>
+<font color="#330033"></font>
+<font color="#330033">registers = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 10)  </font><font color="#FF0055">-- no registers need to be set</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- call DOS interrupt 5: Print Screen</font>
+<font color="#330033">registers = dos_interrupt(#5, registers)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -1904,13 +1904,13 @@ http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html</a>
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">draw_line(WHITE, </font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#330033">100, 100</font><font color="#0000FF">}</font><font color="#330033">, </font><font color="#0000FF">{</font><font color="#330033">200, 200</font><font color="#0000FF">}</font><font color="#330033">, </font><font color="#0000FF">{</font><font color="#330033">900, 700</font><font color="#0000FF">}</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- This would connect the three points in the sequence using</font>
-<font color="#FF0055">-- a white line, i.e. a line would be drawn from {100, 100} to</font>
-<font color="#FF0055">-- {200, 200} and another line would be drawn from {200, 200} to</font>
-<font color="#FF0055">-- {900, 700}.</font>
-<font color="#330033"></font>
+<pre><font color="#330033">draw_line(WHITE, </font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#330033">100, 100</font><font color="#0000FF">}</font><font color="#330033">, </font><font color="#0000FF">{</font><font color="#330033">200, 200</font><font color="#0000FF">}</font><font color="#330033">, </font><font color="#0000FF">{</font><font color="#330033">900, 700</font><font color="#0000FF">}</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- This would connect the three points in the sequence using</font>
+<font color="#FF0055">-- a white line, i.e. a line would be drawn from {100, 100} to</font>
+<font color="#FF0055">-- {200, 200} and another line would be drawn from {200, 200} to</font>
+<font color="#FF0055">-- {900, 700}.</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
