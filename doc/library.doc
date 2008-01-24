@@ -3414,13 +3414,16 @@
               Your program will abort with a message if you try to take the log
               of a negative number or zero.
 
+              To compute the inverse, you can use power(e, x) where e is
+              2.7182818284590452...
+
  Example:
 
               a = log(100)
               -- a is 4.60517
               
                
- See Also:    sin, cos, tan, sqrt
+ See Also:    sin, cos, tan, power, sqrt
 
 
  ------------------------------------<lower>------------------------------------
