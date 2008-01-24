@@ -1,7 +1,7 @@
 
-  
-                             Euphoria Release Notes
-  
+ 
+                            Euphoria Release Notes
+ 
 
 
  Version 3.2 ??? ????:
@@ -41,6 +41,10 @@
       * Include directories can now be specified based on command line
         arguments and config files in addition to environment variables.
         Implemented by Matthew Lewis
+
+      * Improved accuracy in scanning numbers in scientific notation. Scanned
+        numbers are accurate to the full precision of the IEEE 754 floating
+        point standard. Implemented by Matthew Lewis
  Version 3.1.1 August 2007:
  ==========================
 
@@ -2521,9 +2525,9 @@
 
 
 
-  
-                        Highlights of Older Releases:
-  
+ 
+                       Highlights of Older Releases:
+ 
 
 
  Version 1.5a June 13, 1997:
