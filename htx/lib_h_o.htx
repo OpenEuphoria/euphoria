@@ -424,7 +424,10 @@ close(v)
 "This function may be applied to an atom or to all elements
  of a sequence. Note that log is only defined for positive
  numbers. Your program will abort with a message if you
- try to take the log of a negative number or zero."
+ try to take the log of a negative number or zero.
+ <p>
+ To compute the inverse, you can use power(e, x) 
+ where e is 2.7182818284590452..."
  >
 <_2clist
   name="Example:"
@@ -440,6 +443,7 @@ a = log(100)
   description="<a href=\"lib_s_t.htm#sin\">sin</a>,
 <a href=\"lib_c_d.htm#cos\">cos</a>,
 <a href=\"lib_s_t.htm#tan\">tan</a>,
+<a href=\"lib_p_r.htm#power\">power</a>,
 <a href=\"lib_s_t.htm#sqrt\">sqrt</a>"
  >
 </table>
