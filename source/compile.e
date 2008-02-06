@@ -5335,6 +5335,22 @@ procedure BackEnd(atom ignore)
     end for
     c_puts("\n")
     
+    -- fail safe mechanism in case 
+    -- Complete Edition library gets out by mistake
+    if EWINDOWS then
+	if atom(wat_path) then
+	    c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
+	else
+	    c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
+	end if
+    else
+	c_puts("#ifdef CLK_TCK\n")
+	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+	c_puts("#else\n")
+	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
+	c_puts("#endif\n")
+    end if
+    
     -- options_switch initialization
     switches = get_switches()
     c_stmt0(sprintf("_0switch_ptr = NewS1( %d );\n", length(switches) ))
@@ -5358,22 +5374,6 @@ procedure BackEnd(atom ignore)
     end for
     c_stmt0( "_0switches = MAKE_SEQ( _0switch_ptr );\n")
     c_puts("\n")
-    
-    -- fail safe mechanism in case 
-    -- Complete Edition library gets out by mistake
-    if EWINDOWS then
-	if atom(wat_path) then
-	    c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
-	else
-	    c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
-	end if
-    else
-	c_puts("#ifdef CLK_TCK\n")
-	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
-	c_puts("#else\n")
-	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
-	c_puts("#endif\n")
-    end if  
     
     c_stmt0("init_literal();\n")
     

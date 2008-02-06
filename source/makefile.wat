@@ -179,7 +179,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj 
 	
-!ifneq MANAGED_MEM=1
+!ifneq MANAGED_MEM 1
 MEMFLAG = -DESIMPLE_MALLOC
 !endif
 
