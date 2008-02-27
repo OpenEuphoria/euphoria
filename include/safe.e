@@ -404,6 +404,7 @@ global function peek_string(object x)
 	    end if
 	else
 	    die("BAD PEEK_STRING" & bad_address(a))
+	end if
     end while
     return original_peek_string(x)
 end function
