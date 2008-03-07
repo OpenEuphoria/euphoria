@@ -11,7 +11,7 @@ switch_cache = {}
 
 -- These flags are available for both the interpreter and translator
 global constant COMMON_OPTIONS = {
-	"-CONF",  -- specify a euinc.conf file
+	"-C",  -- specify a euinc.conf file
 	"-I"      -- specify a directory to search for include files
 	},
     EUINC_OPTION = 1,   -- -conf
