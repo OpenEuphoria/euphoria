@@ -56,7 +56,7 @@ constant CONTROL_B = 2,
 constant CAPS_LOCK = 314  -- exwc only
 
 integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
-	PAGE_UP, PAGE_DOWN, INSERT, 
+	PAGE_UP, PAGE_DOWN, INSERT, NUM_PAD_SLASH,
 	DELETE, XDELETE, ARROW_LEFT, ARROW_RIGHT,
 	CONTROL_ARROW_LEFT, CONTROL_ARROW_RIGHT, ARROW_UP, ARROW_DOWN,
 	F1, F10, F11, F12, 
@@ -96,6 +96,7 @@ if platform() = LINUX then
     F12 = 276
     CONTROL_DELETE = DELETE -- key for line-delete 
 			    -- (not available on some systems)
+    NUM_PAD_SLASH = -999  -- Please check on console and Xterm
 else
     -- DOS/Windows
     SLASH = '\\'
@@ -126,10 +127,12 @@ else
 	F11 = 343
 	F12 = 344
 	NUM_PAD_ENTER = 284
+	NUM_PAD_SLASH = 309
     else
 	F11 = 389
 	F12 = 390
 	NUM_PAD_ENTER = 13
+	NUM_PAD_SLASH = -999 -- Never needed
     end if
     CONTROL_DELETE = 403 -- key for line-delete 
 			 -- (not available on some systems)
@@ -190,6 +193,9 @@ constant SHIFT = 4   -- 1..78 should be ok
 
 -- name of edit buffer temp file for Esc m command
 constant TEMPFILE = "editbuff.tmp" 
+
+constant ACCENT = 1  -- Enables read accented from keyboard.  Usefull for
+		     -- write some languages.
 
 -------- END OF USER-MODIFIABLE PARAMETERS ------------------------------------
 
@@ -1071,11 +1077,16 @@ function next_key()
 	c = wait_key()
 	if check_break() then
 	    c = CONTROL_C
-	end if
+	end if 
+		
 	if c = NUM_PAD_ENTER then
 	    c = CR
-	end if
-	if c = ESCAPE then
+	elsif c = NUM_PAD_SLASH then
+	    c = '/'
+	elsif c = 296 or c = 282 and ACCENT = 1 then
+	    -- Discart accent keystroke, and get accented character.
+	    c = next_key()
+	elsif c = ESCAPE then
 	    -- process escape sequence
 	    c = get_key()
 	    if c = -1 then
