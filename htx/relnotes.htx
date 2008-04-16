@@ -70,6 +70,11 @@
      Improved accuracy in scanning numbers in scientific notation.  Scanned
      numbers are accurate to the full precision of the IEEE 754 floating
      point standard.  Implemented by Matthew Lewis
+<p>
+<li>
+     Added -lccopt-off option for translator to disable using the
+     optimization flag when compiling with LCC, as it has problems
+     sometimes.  Implemented by Jeremy Cowgar
 </ul>
 
 <font face="Arial, Helvetica" color="#003366">
