@@ -369,7 +369,15 @@
  It all depends on the maximum levels of calls that a task might need.
  At run-time, as your program creates more simultaneously-active tasks, 
  the stack space allotted to each task will tend to decrease.
- 
+
+ <p>
+ When using LCC, sometimes the default optimization causes problems. You
+ can disable this optimization by adding <_bq>-lccopt-off</_bq> to the
+ command line.
+ <pre>
+      <b>ecw -lcc -lccopt-off myprog.exw</b>
+ </pre>
+
  <p>
  To make a <font color="#CC3366"><b>DOS</b></font> program, 
  compiled by WATCOM, that uses fast hardware floating-point instructions,

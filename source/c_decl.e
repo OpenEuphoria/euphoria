@@ -31,10 +31,11 @@ BB_info = {}
 global integer LeftSym   -- to force name to appear, not value
 LeftSym = FALSE    
 
-global boolean dll_option, con_option, fastfp
+global boolean dll_option, con_option, fastfp, lccopt_option
 dll_option = FALSE
 con_option = FALSE
 fastfp = FALSE
+lccopt_option = TRUE
 
 sequence files_to_delete
 files_to_delete = {
@@ -1097,7 +1098,13 @@ global procedure start_emake()
 	    	debug_flag = " -g"
 	    end if
 	    puts(doit, "echo compiling with LCCWIN\n")
-	    c_opts = "-w -O -Zp4" & debug_flag -- -O is sometimes buggy
+	    c_opts = "-w -Zp4" & debug_flag
+
+            -- -O causes some problems sometimes. Use -LCCOPT-OFF to
+            -- disable the use of -O on LCC.
+            if lccopt_option = TRUE then
+                c_opts &= " -O"
+            end if
 	end if
     end if
     

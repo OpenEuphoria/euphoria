@@ -44,9 +44,9 @@ global procedure transoptions()
 	if Argv[i][1] = '-' then
 	    uparg = upper(Argv[i])
 		
-	    if ELINUX and 
-	    (match("-DLL", uparg) or
-	    match("-SO", uparg)) then
+	    if (ELINUX or EWINDOWS) and
+               (match("-DLL", uparg) or match("-SO", uparg))
+            then
 		dll_option = TRUE
 		
 	    elsif EWINDOWS and match("-DLL", uparg) then
@@ -67,9 +67,12 @@ global procedure transoptions()
 	    elsif EDOS and match("-FASTFP", uparg) then
 		fastfp = TRUE
 		
+            elsif EWINDOWS and match("-LCCOPT-OFF", uparg) then
+                lccopt_option = FALSE
+		
 	    elsif EWINDOWS and match("-LCC", uparg) then
 		lcc_option = TRUE
-		
+
 	    elsif EWINDOWS and match("-BOR", uparg) then
 		bor_option = TRUE
 		
