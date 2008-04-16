@@ -253,7 +253,11 @@ struct char_cell {
 };
 #endif
 
-#define MAX_FILE_NAME 255
+#ifdef PATH_MAX
+#  define MAX_FILE_NAME PATH_MAX
+#else
+#  define MAX_FILE_NAME 255
+#endif
 
 #define CONTROL_C 3
 

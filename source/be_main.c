@@ -13,6 +13,7 @@
 #include <time.h>
 #ifdef EWINDOWS
 #include <windows.h>
+#include <limits.h>
 #endif
 #ifdef ELINUX
 #include <unistd.h>

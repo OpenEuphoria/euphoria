@@ -2485,7 +2485,7 @@ object mode_obj;
 
     length = SEQ_PTR(filename)->length + 1;
     if (length > MAX_FILE_NAME)
-	RTFatal("file name for open() is too long");
+        return ATOM_M1;
     MakeCString(cname, filename);
 
     if (SEQ_PTR(mode_obj)->length > 3)
