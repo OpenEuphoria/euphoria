@@ -253,6 +253,16 @@ struct char_cell {
 };
 #endif
 
+#ifdef ELINUX
+#ifdef EBSD
+#include <limits.h>
+#else
+#include <linux/limits.h>
+#endif
+#else
+#include <limits.h>
+#endif
+
 #ifdef PATH_MAX
 #  define MAX_FILE_NAME PATH_MAX
 #else
