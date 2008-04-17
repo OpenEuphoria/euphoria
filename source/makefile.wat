@@ -165,7 +165,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scientific.obj &
+	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\file.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\emit.obj &
@@ -176,6 +176,9 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\parser_1.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\intinit.obj &
+	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj 
 	
@@ -388,6 +391,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\scientific.obj :  .MULTIPLE ./$(OBJDIR)\scientific.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\scientif.obj :  .MULTIPLE ./$(OBJDIR)\scientif.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\main.obj :  .MULTIPLE ./$(OBJDIR)\main.c
