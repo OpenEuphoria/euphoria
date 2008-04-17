@@ -1465,7 +1465,7 @@ end if
   description=
 "Return directory information for the file or directory named by
  st. If there is no file or directory with this name then -1 is
- returned. On Windows and DOS st can contain * and ? wildcards to select multiple
+ returned. st can also contain * and ? wildcards to select multiple
  files.
 <P>
 <a name=dir_entry></a>

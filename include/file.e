@@ -5,6 +5,7 @@
 
 include sort.e
 include misc.e
+include wildcard.e
 
 constant M_SEEK  = 19,
 	 M_WHERE = 20,
@@ -28,6 +29,13 @@ end type
 type boolean(integer b)
     return b = 0 or b = 1
 end type
+
+integer SLASH
+if platform() = LINUX then
+    SLASH='/'
+else
+    SLASH='\\'
+end if
 
 global function seek(file_number fn, file_position pos)
 -- Seeks to a byte position in the file, 
@@ -93,6 +101,7 @@ global constant
 	D_HOUR = 7,
 	D_MINUTE = 8,
 	D_SECOND = 9
+
 global function dir(sequence name)
 -- returns directory information, given the name
 -- of a file or directory. Format returned is:
@@ -100,7 +109,54 @@ global function dir(sequence name)
 --  {"name1", attributes, size, year, month, day, hour, minute, second},
 --  {"name2", ...                                                     },
 -- }
-    return machine_func(M_DIR, name)
+    object dir_data, data, the_name, the_dir
+    integer idx
+
+    -- Did the user give a wildcard? If not, just return the standard dir.
+    if find('*', name) > 0 or find('?', name) > 0 then
+        -- Empty if so that we can short circuit if * is found, otherwise
+        -- we would have to run a search for * and ? even if * is found.
+    else
+        return machine_func(M_DIR, name)
+    end if
+
+    -- Is there a path involved?
+    if find(SLASH, name) = 0 then
+        the_dir = "."
+        the_name = name
+    else
+        -- Find a SLASH character and break the name there resulting in
+        -- a directory and file name.
+        idx = length(name)
+        while idx > 0 do
+            if name[idx] = SLASH then
+                exit
+            end if
+            idx -= 1
+        end while
+
+        the_dir = name[1..idx]
+        the_name = name[idx+1..$]
+    end if
+
+    -- Get directory contents
+    dir_data = machine_func(M_DIR, the_dir)
+
+    -- Did an error occur?
+    if atom(dir_data) then
+        return dir_data
+    end if
+
+    data = {}
+    -- Filter the directory contents returning only those items
+    -- matching name.
+    for i = 1 to length(dir_data) do
+        if wildcard_file(the_name, dir_data[i][1]) then
+                data = append(data, dir_data[i])
+        end if
+    end for
+
+    return data
 end function
 
 global function current_dir()
@@ -144,13 +200,6 @@ function default_dir(sequence path)
 	return sort(d)
     end if
 end function
-
-integer SLASH
-if platform() = LINUX then
-    SLASH='/'
-else
-    SLASH='\\'
-end if
 
 -- override the dir sorting function with your own routine id
 constant DEFAULT = -2
@@ -215,5 +264,3 @@ global function walk_dir(sequence path_name, integer your_function,
     end for
     return 0
 end function
-
-
