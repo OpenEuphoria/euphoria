@@ -123,7 +123,7 @@ s = peek({100, 4})
  <_2clist
   name="Description:"
   description=
-"Return a single signbed byte value in the range -128 to 127 from machine
+"Return a single signed byte value in the range -128 to 127 from machine
  address a, or return a sequence containing i consecutive signed byte
  values starting at address a in memory."
  >

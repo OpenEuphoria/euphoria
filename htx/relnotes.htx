@@ -16,6 +16,17 @@
 <font face="Arial, Helvetica" color="#003366">
 <b><_dul>Version 3.2 ??? ????:</_dul></b></font>
 <p>
+<font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
+<ul>
+<p>
+<li>
+     <b><font color="#009999">bug fixed: </font></b>
+      open()'s max path length is now determined by the underlying
+      operating system and not a generic default. open() also now
+      returns -1 when the filename is too long instead of causing
+      a fatal error.  Fixed by Jeremy Cowgar
+
+</ul>
 
 <p>
 <font color="#993333"><_sul><b>New Features</b></_sul></font>
@@ -26,8 +37,8 @@
      Implemented by C. Cuvier
 <p>
 <li>
-     Comments may now be embedded in data passed to value() in get.e.
-     Implemented by C. Cuvier
+     Comments may now be embedded in data passed to <b>value()</b> in
+     <b>get.e</b>.  Implemented by C. Cuvier
 <p>
 <li>
      Enhanced symbol resolution to take into account information
@@ -41,8 +52,8 @@
      Implemented by Matthew Lewis
 <p>
 <li>
-     Added value_from() in get.e to return additional information
-     about the parsing activity.
+     Added <b>value_from()</b> in <b>get.e</b> to return additional
+     information about the parsing activity.
      Implemented by C. Cuvier
 <p>
 <li>
@@ -57,8 +68,8 @@
      Implemented by C. Cuvier
 <p>
 <li>
-     New builtin routines: peeks(), peek2s(), peek2u(), peek_string(),
-     poke2()
+     New builtin routines: <b>peeks()</b>, <b>peek2s()</b>, <b>peek2u()</b>,
+     <b>peek_string()</b>, <b>poke2()</b>
      Implemented by Matthew Lewis
 <p>
 <li>
@@ -72,9 +83,9 @@
      point standard.  Implemented by Matthew Lewis
 <p>
 <li>
-     Added -lccopt-off option for translator to disable using the
-     optimization flag when compiling with LCC, as it has problems
-     sometimes.  Implemented by Jeremy Cowgar
+     <b>Translator:</b> Added <b>-lccopt-off</b> option for translator to
+     disable using the optimization flag when compiling with LCC, as it has
+     problems sometimes.  Implemented by Jeremy Cowgar
 </ul>
 
 <font face="Arial, Helvetica" color="#003366">

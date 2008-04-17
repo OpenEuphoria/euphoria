@@ -1206,6 +1206,24 @@ in the Properties for the DOS Window.
 >
 
 <_3clist
+  href="lib_p_r.htm#peeks"
+  name="peeks"
+  description="read one or more signed bytes from memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#peek2s"
+  name="peek2s"
+  description="read 2-byte signed values from memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#peek2u"
+  name="peek2u"
+  description="read 2-byte unsigned values from memory"
+>
+
+<_3clist
   href="lib_p_r.htm#peek4s"
   name="peek4s"
   description="read 4-byte signed values from memory"
@@ -1218,9 +1236,21 @@ in the Properties for the DOS Window.
 >
 
 <_3clist
+  href="lib_p_r.htm#peek_string"
+  name="peek_string"
+  description="read a sequence of text from a null terminated string from memory"
+>
+
+<_3clist
   href="lib_p_r.htm#poke"
   name="poke"
   description="write one or more bytes to memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#poke2"
+  name="poke2"
+  description="write 2-bye values into memory"
 >
 
 <_3clist
