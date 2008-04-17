@@ -20,11 +20,17 @@
 <ul>
 <p>
 <li>
-     <b><font color="#009999">bug fixed: </font></b>
-      open()'s max path length is now determined by the underlying
+     <b><font color="#009999">bug fixed: </font></b>1855414.
+      <b>open()</b>'s max path length is now determined by the underlying
       operating system and not a generic default. open() also now
       returns -1 when the filename is too long instead of causing
       a fatal error.  Fixed by Jeremy Cowgar
+<p>
+<li>
+     <b><font color="#009999">bug fixed: </font></b> 1608870.
+      <b>dir()</b> now handles *.abc correctly, not showing a file
+      ending with .abcd. <b>dir()</b> also now supports wildcard
+      characters (* and ?) on all platforms. Fixed by Jeremy Cowgar
 
 </ul>
 
