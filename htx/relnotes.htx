@@ -102,15 +102,16 @@
      <b>max()</b>.
 <p>
      New routines in <b>sequence.e</b>:
-     <b>left()</b>, <b>mid()</b>, <b>slice()</b>, <b>right()</b>,
-     <b>split()</b>, <b>split_adv()</b>, <b>join()</b>, <b>findany()</b>,
-     and <b>findany_from()</b>.
+     <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,
+     <b>replace_range()</b>, <b>left()</b>, <b>mid()</b>, <b>slice()</b>,
+     <b>right()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
+     <b>findany()</b>, and <b>findany_from()</b>.
 <p>
      Implemented by Jeremy Cowgar
 <p>
 <li>
-     Began <b>unit testing</b>. 101 tests in total. To run, cd tests and
-     exw or exu all.ex ... Implemented by Jeremy Cowgar
+     Began <b>unit testing</b>. 116 library tests in total. To run, cd tests
+     and exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
 
 <p>

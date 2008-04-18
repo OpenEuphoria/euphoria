@@ -6,6 +6,46 @@
 <body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
 <br>
 
+<_routine name="insert">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = insert(s1, x, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Insert x into s1 at index i. The item is inserted before i, not after."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 and x can be any type of sequence, including nested sequences."
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = insert("John Doe", " Middle", 5)
+-- s is "John Middle Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = insert({10,30,40}, 20, 2)
+-- s is {10,20,30,40}
+</_eucode>
+
+</table>
 
 <_routine name="instance">
 <table border=0 cellspacing=2 cellpadding=2>

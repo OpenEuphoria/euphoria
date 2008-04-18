@@ -68,6 +68,39 @@ global function right(sequence st, atom n)
 	end if
 end function
 
+global function remove(sequence st, integer index)
+    if index > length(st) or index < 1 then
+        return st
+    end if
+
+    return st[1..index-1] & st[index+1..$]
+end function
+
+global function remove_range(sequence st, integer start, integer stop)
+    if start > length(st) then
+        return st
+    elsif stop >= length(st) then
+        return st[1..start-1]
+    end if
+
+    return st[1..start-1] & st[stop+1..$]
+end function
+
+global function insert(sequence st, object what, integer index)
+    if index > length(st) then
+        return st & what
+    elsif index = 1 then
+        return what & st
+    end if
+
+    return st[1..index-1] & what & st[index..$]
+end function
+
+global function replace_range(sequence st, object what, integer start, integer stop)
+    st = remove_range(st, start, stop)
+    return insert(st, what, start)
+end function
+
 -- TODO: instead of reassigning st all the time, use the new _from variants of
 --       findany and match.
 

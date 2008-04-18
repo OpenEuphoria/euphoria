@@ -191,6 +191,30 @@
 >
 
 <_3clist
+  href="lib_h_o.htm#insert"
+  name="insert"
+  description="insert one sequence into another"
+>
+
+<_3clist
+  href="lib_p_r.htm#remove"
+  name="remove"
+  description="remove an item from a sequence"
+>
+
+<_3clist
+  href="lib_p_r.htm#remove_range"
+  name="remove_range"
+  description="remove a range of items from a sequence"
+>
+
+<_3clist
+  href="lib_p_r.htm#replace_range"
+  name="replace_range"
+  description="replace a range of items with a new item or sequence"
+>
+
+<_3clist
   href="lib_h_o.htm#left"
   name="left"
   description="return the first n items of st with bounds checking"

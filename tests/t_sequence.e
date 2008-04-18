@@ -44,3 +44,19 @@ testEqual("split_adv() limit and any character", {"a", "b", "c|d"},
 
 testEqual("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
 testEqual("join() nested sequence", {"John", 0, "Doe"}, join({{"John"}, {"Doe"}}, 0))
+
+testEqual("remove() integer sequence", {1,3}, remove({1,2,3}, 2))
+testEqual("remove() string", "Jon", remove("John", 3))
+testEqual("remove() nested sequence", {{1,2}, {5,6}}, remove({{1,2},{3,4},{5,6}}, 2))
+testEqual("remove() bounds", "John", remove("John", 55))
+
+testEqual("remove_range() integer sequence", {1,5}, remove_range({1,2,3,4,5}, 2, 4))
+testEqual("remove_range() string", "John Doe", remove_range("John M Doe", 5, 6))
+testEqual("remove_range() bounds", "John", remove_range("John Doe", 5, 100))
+
+testEqual("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
+testEqual("insert() string", "John", insert("Jon", "h", 3))
+
+testEqual("replace_range() integer sequence", {1,2,3}, replace_range({1,8,9,3}, 2, 2, 3))
+testEqual("replace_range() integer sequence w/sequence", {1,2,3,4},
+    replace_range({1,8,9,4}, {2,3}, 2, 3))

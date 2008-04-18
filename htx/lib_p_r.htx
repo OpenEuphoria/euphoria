@@ -1824,6 +1824,98 @@ s = remainder(16, {2, 3, 5})
 
 </table>
 
+<_routine name="remove">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = remove(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Remove an item from a sequence"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 can be a string or complex sequence."
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = remove("Johnn Doe", 4)
+-- s is "John Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = remove({1,2,3,3,4}, 4)
+-- s is {1,2,3,4}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#remove_range\">remove_range</a>"
+ >
+</table>
+
+<_routine name="remove_range">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = remove_range(s1, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Remove items starting at index i1 thru i2 in s1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 can be a string or complex sequence."
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = remove_range("John Middle Doe", 6, 12)
+-- s is "John Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = remove_range({1,2,3,3,4,4}, 4, 5)
+-- s is {1,2,3,4}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#remove\">remove</a>"
+ >
+</table>
+
+
+
 
 <_routine name="repeat">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -1872,6 +1964,51 @@ repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
                <a href=\"refman_2.htm#28\">sequence-formation operator</a>"
  >
 </table>
+
+
+<_routine name="replace_range">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = replace_range(s1, x, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Replace from index i1 to i2 of s1 with object x. x can be any object."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 can be a string or complex sequence.
+
+To replace just one element, simply: s[index] = new_item"
+>
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = replace_range("John Middle Doe", "Smith", 6, 11)
+-- s is "John Smith Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = replace_range({45.3, "John", 5, {10, 20}}, 25, 2, 3)
+-- s is {45.3, 25, {10, 20}}
+</_eucode>
+
+</table>
+
+
 
 
 <_routine name="reverse">
