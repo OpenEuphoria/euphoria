@@ -209,7 +209,7 @@ i = findany(s1, s2)
  <_2clist
   name="Description:"
   description=
-"Find any item from s2 in s1 and return it's position or 0 if not found."
+"Find any element from s2 in s1 and return it's position or 0 if not found."
  >
 <_2clist
   name="Comments:"
@@ -245,7 +245,7 @@ i1 = findany_from(s1, s2, i2)
  <_2clist
   name="Description:"
   description=
-"Find any item from s2 in s1 starting at position i2 and return it's position or 0 if not found."
+"Find any element from s2 in s1 starting at position i2 and return it's position or 0 if not found."
  >
 <_2clist
   name="Comments:"

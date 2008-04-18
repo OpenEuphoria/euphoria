@@ -274,13 +274,13 @@
 <_3clist
   href="lib_e_g.htm#findany"
   name="findany"
-  description="find any atom in needle in haystack - start searching from element number 1"
+  description="find any element in needle in haystack - start searching from element number 1"
 >
 
 <_3clist
   href="lib_e_g.htm#findany_from"
   name="findany_from"
-  description="find any atom in needle in haystack - start searching from any element number"
+  description="find any element in needle in haystack - start searching from any element number"
 >
 
 <_3clist
