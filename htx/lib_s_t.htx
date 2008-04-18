@@ -801,6 +801,60 @@ puts(1, "Done.\n")
 </table>
 
 
+<_routine name="slice">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = slice(s1, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return items i1 to i2 from s1. If i2 is greater than the length of s1, then from i1 to the
+end of s1 will be returned. If i2 is zero, it will be treated as the end of s1. If i2 is a
+negative value, then it will be treated as i2 positions from the end of s1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = slice("John Doe", 6, 8)
+-- s2 is Doe
+
+s2 = slice("John Doe", 6, 50)
+-- s2 is Doe
+
+s2 = slice({1, 5.4, "John", 30}, 2, 3)
+-- s2 is {5.4, "John"}
+
+s2 = slice({1,2,3,4,5}, 2, -1)
+-- s2 is {2,3,4}
+
+s2 = slice({1,2,3,4,5}, 2, 0)
+-- s2 is {2,3,4,5}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#right\">right</a>,
+<a href=\"lib_h_o.htm#mid\">mid</a>,
+<a href=\"lib_h_o.htm#left\">left</a>"
+ >
+</table>
+
+
 <_routine name="sort">
 <table border=0 cellspacing=2 cellpadding=2>
 

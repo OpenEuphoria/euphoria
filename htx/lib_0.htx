@@ -190,6 +190,30 @@
   description="add a new element to the beginning of a sequence"
 >
 
+<_3clist
+  href="lib_h_o.htm#left"
+  name="left"
+  description="return the first n items of st with bounds checking"
+>
+
+<_3clist
+  href="lib_h_o.htm#mid"
+  name="mid"
+  description="return from n1 n2 number of items of st with bounds checking"
+>
+
+<_3clist
+  href="lib_s_t.htm#slice"
+  name="slice"
+  description="return from n1 to n2 of st with bounds checking"
+>
+
+<_3clist
+  href="lib_p_r.htm#right"
+  name="right"
+  description="return the last n items of st with bounds checking"
+>
+
 </table>
 
 <p>

@@ -94,15 +94,24 @@
      problems sometimes.  Implemented by Jeremy Cowgar
 <p>
 <li>
-     Began <b>standard library</b>. New routines in <b>math.e</b>:
+     Began <b>standard library</b>:
+<p>
+     New routines in <b>math.e</b>:
      <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
      <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b> and
-     <b>max()</b>.  Implemented by Jeremy Cowgar
+     <b>max()</b>.
+<p>
+     New routines in <b>sequence.e</b>:
+     <b>left()</b>, <b>mid()</b>, <b>slice()</b>, and <b>right()</b>.
+<p>
+     Implemented by Jeremy Cowgar
 <p>
 <li>
-     Began <b>unit testing</b>. 66 tests in total. To run, cd tests and
+     Began <b>unit testing</b>. 84 tests in total. To run, cd tests and
      exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
+
+<p>
 
 <font face="Arial, Helvetica" color="#003366">
 <b><_dul>Version 3.1.1 August 2007:</_dul></b></font>

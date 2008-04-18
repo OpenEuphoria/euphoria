@@ -207,6 +207,55 @@ end if
  >
 </table>
 
+<_routine name="left">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = left(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the first i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = left("John Doe", 4)
+-- s2 is John
+
+s2 = left("John Doe", 50)
+-- s2 is John Doe
+
+s2 = left({1, 5.4, "John", 30}, 3)
+-- s2 is {1, 5.4, "John"}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#right\">right</a>,
+<a href=\"lib_h_o.htm#mid\">mid</a>,
+<a href=\"lib_s_t.htm#slice\">slice</a>"
+ >
+</table>
+
+
+
+
 
 <_routine name="length">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -774,6 +823,53 @@ end if
   description="<font color=\"#5500FF\"><b>demo\win32\email.exw</b></font>"
  >
 
+</table>
+
+
+<_routine name="mid">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = mid(s1, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return i2 items starting at i1. If i1 + i2 is greater than the length of s1, then everything
+in s1 starting at i1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = mid("John Middle Doe", 6, 6)
+-- s2 is Middle
+
+s2 = left("John Middle Doe", 6, 50)
+-- s2 is Middle Doe
+
+s2 = left({1, 5.4, "John", 30}, 2, 2)
+-- s2 is {5.4, "John"}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#right\">right</a>,
+<a href=\"lib_h_o.htm#left\">left</a>,
+<a href=\"lib_s_t.htm#slice\">slice</a>"
+ >
 </table>
 
 
