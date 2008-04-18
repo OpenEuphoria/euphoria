@@ -116,17 +116,17 @@ a.brown:hover     {color: red; text-decoration: underline;}
  <a href="lib_s_t.htm#trace">trace()</a> statement.
  You could simply say:
 
-<pre><font color="#0000FF">        with </font><font color="#FF00FF">trace</font>
-<font color="#FF00FF">        trace</font><font color="#330033">(1)</font>
+<pre><font color="#0000FF">        with </font><font color="#FF00FF">trace</font>
+<font color="#FF00FF">        trace</font><font color="#330033">(1)</font>
 </pre>
 
  at the top of your program, so you can start tracing from the beginning of
  execution. More commonly, you will want to trigger tracing when a certain
  routine is entered, or when some condition arises. e.g.
 
-<pre><font color="#0000FF">        if </font><font color="#330033">x < 0 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">            trace</font><font color="#330033">(1)</font>
-<font color="#0000FF">        end if</font>
+<pre><font color="#0000FF">        if </font><font color="#330033">x < 0 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">            trace</font><font color="#330033">(1)</font>
+<font color="#0000FF">        end if</font>
 </pre>
 
 <p>
@@ -148,14 +148,14 @@ a.brown:hover     {color: red; text-decoration: underline;}
  assigned to the variable is the strange one that you are interested in.
  e.g.
 
-<pre><font color="#0000FF">        type </font><font color="#330033">positive_int(</font><font color="#FF00FF">integer </font><font color="#330033">x)</font>
-<font color="#0000FF">            if </font><font color="#330033">x = 99 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">                trace</font><font color="#330033">(1) </font><font color="#FF0055">-- how can this be???</font>
-<font color="#0000FF">                return </font><font color="#330033">1 </font><font color="#FF0055">-- keep going</font>
-<font color="#0000FF">            else</font>
-<font color="#0000FF">                return </font><font color="#330033">x > 0</font>
-<font color="#0000FF">            end if</font>
-<font color="#0000FF">        end type</font>
+<pre><font color="#0000FF">        type </font><font color="#330033">positive_int(</font><font color="#FF00FF">integer </font><font color="#330033">x)</font>
+<font color="#0000FF">            if </font><font color="#330033">x = 99 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">                trace</font><font color="#330033">(1) </font><font color="#FF0055">-- how can this be???</font>
+<font color="#0000FF">                return </font><font color="#330033">1 </font><font color="#FF0055">-- keep going</font>
+<font color="#0000FF">            else</font>
+<font color="#0000FF">                return </font><font color="#330033">x > 0</font>
+<font color="#0000FF">            end if</font>
+<font color="#0000FF">        end type</font>
 </pre>
 
 <p>
@@ -472,7 +472,7 @@ that you see in <b>ctrace.out</b>.
  Each sample requires 4 bytes of memory and buffer space is normally reserved
  for 25000 samples. If you need more than 25000 samples you can request it:
 
-<pre><font color="#0000FF">        with </font><font color="#330033">profile_time 100000</font>
+<pre><font color="#0000FF">        with </font><font color="#330033">profile_time 100000</font>
 </pre>
 
  will reserve space for 100000 samples (for example). If the buffer overflows
@@ -504,9 +504,9 @@ that you see in <b>ctrace.out</b>.
  to advance. The statements executed just after the point where the clock
  advances might <font color="#CC0099"><b><i>never</i></b></font> be
  sampled, which could give you a very distorted picture. e.g.
-<pre><font color="#0000FF">        while </font><font color="#FF00FF">time</font><font color="#330033">() < LIMIT </font><font color="#0000FF">do</font>
-<font color="#0000FF">        end while</font>
-<font color="#330033">        x += 1 </font><font color="#FF0055">-- This statement will never be sampled</font>
+<pre><font color="#0000FF">        while </font><font color="#FF00FF">time</font><font color="#330033">() < LIMIT </font><font color="#0000FF">do</font>
+<font color="#0000FF">        end while</font>
+<font color="#330033">        x += 1 </font><font color="#FF0055">-- This statement will never be sampled</font>
 </pre>
 
 <p>

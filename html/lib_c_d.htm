@@ -387,6 +387,47 @@ Euphoria function with <font color="#993333"><b>routine id</b></font> i.
 </table>
 
 
+<a name=ceil></a><font color="#006633" size=+2><br>
+<center><b>ceil</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetical"> include math.e<BR>
+ i = ceil()
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Computes next higher argument's integers. Returns the integers that are
+greater or equal to each element in the argument.
+</td></tr>
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">nums</font>
+<font color="#330033">nums = {8, -5, 3.14, 4.89, -7.62, -4.3}</font>
+<font color="#330033">nums = ceil(nums) </font><font color="#FF0055">-- {8, -5, 4, 5, -7, -4}</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_e_g.htm#floor">floor</a>,
+<a href="lib_p_r.htm#round">round</a>,
+<a href="lib_p_r.htm#round_prec">round_prec</a>
+</td></tr>
+
+
+</table>
+
 <a name=chdir></a><font color="#006633" size=+2><br>
 <center><b>chdir</b></center>
 </font><p>
@@ -1533,7 +1574,7 @@ will depend on the returned value being specified as signed or unsigned.
  <tr><td valign=top><b>Description:</b></td>
 <td>Return directory information for the file or directory named by
  st. If there is no file or directory with this name then -1 is
- returned. On Windows and DOS st can contain * and ? wildcards to select multiple
+ returned. st can also contain * and ? wildcards to select multiple
  files.
 <P>
 <a name=dir_entry></a>

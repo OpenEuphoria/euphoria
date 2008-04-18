@@ -56,8 +56,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">? {1, 2} + {3, 4}  </font><font color="#FF0055">-- will display {4, 6}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">? {1, 2} + {3, 4}  </font><font color="#FF0055">-- will display {4, 6}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 
@@ -108,18 +108,56 @@ If you don't use abort(), <font color="#993333"><b>ex.exe/exw.exe/exu</b></font>
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">x = 0 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(ERR, </font><font color="#00A033">"can't divide by 0 !!!\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">else</font>
-<font color="#330033">    z = y / x</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">if </font><font color="#330033">x = 0 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(ERR, </font><font color="#00A033">"can't divide by 0 !!!\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">else</font>
+<font color="#330033">    z = y / x</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
 <td><a href="lib_c_d.htm#crash_message">crash_message</a>,
 <a href="lib_s_t.htm#system_exec">system_exec</a>
+</td></tr>
+
+</table>
+
+<a name=abs></a><font color="#006633" size=+2><br>
+<center><b>abs</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include math.e<BR>
+x = abs(x)</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Returns the absolute value of each element of x
+</td></tr>
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+ <tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">x = abs(</font><font color="#993333">{</font><font color="#330033">10.5, -12, 3</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- x is {10.5, 12, 3}</font>
+<font color="#330033"></font>
+<font color="#330033">i = abs(-4)</font>
+<font color="#FF0055">-- i is 4</font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_s_t.htm#sign">sign</a>
 </td></tr>
 
 </table>
@@ -209,11 +247,11 @@ system will reclaim all memory for use with other programs.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">buffer = allocate(100)</font>
-<font color="#0000FF">for </font><font color="#330033">i = 0 </font><font color="#0000FF">to </font><font color="#330033">99 </font><font color="#0000FF">do</font>
-<font color="#FF00FF">    poke</font><font color="#330033">(buffer+i, 0)</font>
-<font color="#0000FF">end for</font>
-<font color="#330033"></font>
+<pre><font color="#330033">buffer = allocate(100)</font>
+<font color="#0000FF">for </font><font color="#330033">i = 0 </font><font color="#0000FF">to </font><font color="#330033">99 </font><font color="#0000FF">do</font>
+<font color="#FF00FF">    poke</font><font color="#330033">(buffer+i, 0)</font>
+<font color="#0000FF">end for</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -307,10 +345,10 @@ system will reclaim all memory for use with other programs.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">title</font>
-<font color="#330033"></font>
-<font color="#330033">title = allocate_string(</font><font color="#00A033">"The Wizard of Oz"</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">title</font>
+<font color="#330033"></font>
+<font color="#330033">title = allocate_string(</font><font color="#00A033">"The Wizard of Oz"</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -368,8 +406,8 @@ You can find out if the user has pressed control-c or
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">allow_break(0)  </font><font color="#FF0055">-- don't let the user kill me!</font>
-<font color="#330033"></font>
+<pre><font color="#330033">allow_break(0)  </font><font color="#FF0055">-- don't let the user kill me!</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -422,9 +460,9 @@ To understand the binary representation of a number you
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">a = </font><font color="#FF00FF">and_bits</font><font color="#330033">(#0F0F0000, #12345678)</font>
-<font color="#FF0055">-- a is #02040000</font>
-<font color="#330033"></font>
+<pre><font color="#330033">a = </font><font color="#FF00FF">and_bits</font><font color="#330033">(#0F0F0000, #12345678)</font>
+<font color="#FF0055">-- a is #02040000</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -432,9 +470,9 @@ To understand the binary representation of a number you
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">a = </font><font color="#FF00FF">and_bits</font><font color="#330033">(#FF, </font><font color="#993333">{</font><font color="#330033">#123456, #876543, #2211</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- a is {#56, #43, #11}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">a = </font><font color="#FF00FF">and_bits</font><font color="#330033">(#FF, </font><font color="#993333">{</font><font color="#330033">#123456, #876543, #2211</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- a is {#56, #43, #11}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 3:</b></td>
@@ -442,12 +480,12 @@ To understand the binary representation of a number you
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">a = </font><font color="#FF00FF">and_bits</font><font color="#330033">(#FFFFFFFF, #FFFFFFFF)</font>
-<font color="#FF0055">-- a is -1</font>
-<font color="#FF0055">-- Note that #FFFFFFFF is a positive number,</font>
-<font color="#FF0055">-- but the result of a bitwise logical operation is interpreted</font>
-<font color="#FF0055">-- as a signed 32-bit number, so it's negative.</font>
-<font color="#330033"></font>
+<pre><font color="#330033">a = </font><font color="#FF00FF">and_bits</font><font color="#330033">(#FFFFFFFF, #FFFFFFFF)</font>
+<font color="#FF0055">-- a is -1</font>
+<font color="#FF0055">-- Note that #FFFFFFFF is a positive number,</font>
+<font color="#FF0055">-- but the result of a bitwise logical operation is interpreted</font>
+<font color="#FF0055">-- as a signed 32-bit number, so it's negative.</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -494,14 +532,14 @@ The extra storage is allocated automatically and very
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">x</font>
-<font color="#330033"></font>
-<font color="#330033">x = {}</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
-<font color="#330033">    x = </font><font color="#FF00FF">append</font><font color="#330033">(x, i)</font>
-<font color="#0000FF">end for</font>
-<font color="#FF0055">-- x is now {1,2,3,4,5,6,7,8,9,10}</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">x</font>
+<font color="#330033"></font>
+<font color="#330033">x = {}</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
+<font color="#330033">    x = </font><font color="#FF00FF">append</font><font color="#330033">(x, i)</font>
+<font color="#0000FF">end for</font>
+<font color="#FF0055">-- x is now {1,2,3,4,5,6,7,8,9,10}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -509,15 +547,15 @@ The extra storage is allocated automatically and very
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">x, y, z</font>
-<font color="#330033"></font>
-<font color="#330033">x = {</font><font color="#00A033">"fred"</font><font color="#330033">, </font><font color="#00A033">"barney"</font><font color="#330033">}</font>
-<font color="#330033">y = </font><font color="#FF00FF">append</font><font color="#330033">(x, </font><font color="#00A033">"wilma"</font><font color="#330033">)</font>
-<font color="#FF0055">-- y is now {"fred", "barney", "wilma"}</font>
-<font color="#330033"></font>
-<font color="#330033">z = </font><font color="#FF00FF">append</font><font color="#330033">(</font><font color="#FF00FF">append</font><font color="#993333">(</font><font color="#330033">y, </font><font color="#00A033">"betty"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"bam"</font><font color="#330033">, </font><font color="#00A033">"bam"</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- z is now {"fred", "barney", "wilma", "betty", {"bam", "bam"}}</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">x, y, z</font>
+<font color="#330033"></font>
+<font color="#330033">x = {</font><font color="#00A033">"fred"</font><font color="#330033">, </font><font color="#00A033">"barney"</font><font color="#330033">}</font>
+<font color="#330033">y = </font><font color="#FF00FF">append</font><font color="#330033">(x, </font><font color="#00A033">"wilma"</font><font color="#330033">)</font>
+<font color="#FF0055">-- y is now {"fred", "barney", "wilma"}</font>
+<font color="#330033"></font>
+<font color="#330033">z = </font><font color="#FF00FF">append</font><font color="#330033">(</font><font color="#FF00FF">append</font><font color="#993333">(</font><font color="#330033">y, </font><font color="#00A033">"betty"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"bam"</font><font color="#330033">, </font><font color="#00A033">"bam"</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- z is now {"fred", "barney", "wilma", "betty", {"bam", "bam"}}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -537,7 +575,7 @@ The extra storage is allocated automatically and very
 
 
  <tr><td valign=top><b>Syntax:</b></td>
-<td><font face = "Arial, Helvetica"> include misc.e<BR>x2 = arccos(x1)
+<td><font face = "Arial, Helvetica"> include math.e<BR>x2 = arccos(x1)
 </font>
 </td></tr>
 
@@ -563,9 +601,9 @@ arccos() is not as fast as arctan().
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = arccos(</font><font color="#993333">{</font><font color="#330033">-1,0,1</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {3.141592654, 1.570796327, 0}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = arccos(</font><font color="#993333">{</font><font color="#330033">-1,0,1</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {3.141592654, 1.570796327, 0}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -585,7 +623,7 @@ arccos() is not as fast as arctan().
 
 
  <tr><td valign=top><b>Syntax:</b></td>
-<td><font face = "Arial, Helvetica">include misc.e<BR>x2 = arcsin(x1)
+<td><font face = "Arial, Helvetica">include math.e<BR>x2 = arcsin(x1)
 </font>
 </td></tr>
 
@@ -610,9 +648,9 @@ arcsin() is not as fast as arctan().
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = arcsin(</font><font color="#993333">{</font><font color="#330033">-1,0,1</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {-1.570796327, 0, 1.570796327}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = arcsin(</font><font color="#993333">{</font><font color="#330033">-1,0,1</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {-1.570796327, 0, 1.570796327}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -655,9 +693,9 @@ arctan() is faster than arcsin() or arccos().
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = </font><font color="#FF00FF">arctan</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- s is {0.785398, 1.10715, 1.24905}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = </font><font color="#FF00FF">arctan</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- s is {0.785398, 1.10715, 1.24905}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -697,9 +735,9 @@ arctan() is faster than arcsin() or arccos().
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">a</font>
-<font color="#330033">a = 5.99</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">a</font>
+<font color="#330033">a = 5.99</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -707,13 +745,13 @@ arctan() is faster than arcsin() or arccos().
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">object </font><font color="#330033">line</font>
-<font color="#330033"></font>
-<font color="#330033">line = </font><font color="#FF00FF">gets</font><font color="#330033">(0)</font>
-<font color="#0000FF">if </font><font color="#FF00FF">atom</font><font color="#330033">(line) </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(SCREEN, </font><font color="#00A033">"end of file\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">object </font><font color="#330033">line</font>
+<font color="#330033"></font>
+<font color="#330033">line = </font><font color="#FF00FF">gets</font><font color="#330033">(0)</font>
+<font color="#0000FF">if </font><font color="#FF00FF">atom</font><font color="#330033">(line) </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(SCREEN, </font><font color="#00A033">"end of file\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -766,9 +804,9 @@ Integer values will also be converted to 32-bit floating-point
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"numbers.dat"</font><font color="#330033">, </font><font color="#00A033">"wb"</font><font color="#330033">)</font>
-<font color="#FF00FF">puts</font><font color="#330033">(fn, atom_to_float32</font><font color="#993333">(</font><font color="#330033">157.82</font><font color="#993333">)</font><font color="#330033">) </font><font color="#FF0055">-- write 4 bytes to a file</font>
-<font color="#330033"></font>
+<pre><font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"numbers.dat"</font><font color="#330033">, </font><font color="#00A033">"wb"</font><font color="#330033">)</font>
+<font color="#FF00FF">puts</font><font color="#330033">(fn, atom_to_float32</font><font color="#993333">(</font><font color="#330033">157.82</font><font color="#993333">)</font><font color="#330033">) </font><font color="#FF0055">-- write 4 bytes to a file</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -813,14 +851,53 @@ Integer values will also be converted to 64-bit floating-point
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"numbers.dat"</font><font color="#330033">, </font><font color="#00A033">"wb"</font><font color="#330033">)</font>
-<font color="#FF00FF">puts</font><font color="#330033">(fn, atom_to_float64</font><font color="#993333">(</font><font color="#330033">157.82</font><font color="#993333">)</font><font color="#330033">) </font><font color="#FF0055">-- write 8 bytes to a file</font>
-<font color="#330033"></font>
+<pre><font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"numbers.dat"</font><font color="#330033">, </font><font color="#00A033">"wb"</font><font color="#330033">)</font>
+<font color="#FF00FF">puts</font><font color="#330033">(fn, atom_to_float64</font><font color="#993333">(</font><font color="#330033">157.82</font><font color="#993333">)</font><font color="#330033">) </font><font color="#FF0055">-- write 8 bytes to a file</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
 <td><a href="lib_a_b.htm#atom_to_float32">atom_to_float32</a>,
 <a href="lib_e_g.htm#float64_to_atom">float64_to_atom</a>
+</td></tr>
+
+</table>
+
+
+<a name=average></a><font color="#006633" size=+2><br>
+<center><b>average</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax</b></td>
+<td><font face = "Arial, Helvetica"> include math.e<BR>
+a = average(x)</font>
+</td></tr>
+
+
+ <tr><td valign=top><b>Description</b></td>
+<td>Compute the average of all the argument's elements
+</td></tr>
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+ <tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">  a = average(</font><font color="#993333">{</font><font color="#330033">8.5, 7.25, 10, 18.75</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">  -- a is 11.125</font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_s_t.htm#sum">sum</a>,
+<a href="lib_h_o.htm#max">max</a>,
+<a href="lib_h_o.htm#min">min</a>
 </td></tr>
 
 </table>
@@ -856,9 +933,9 @@ Integer values will also be converted to 64-bit floating-point
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">a = bits_to_int(</font><font color="#993333">{</font><font color="#330033">1,1,1,0,1</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- a is 23 (binary 10111)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">a = bits_to_int(</font><font color="#993333">{</font><font color="#330033">1,1,1,0,1</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- a is 23 (binary 10111)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -917,8 +994,8 @@ In <font color="#CC3366">text modes</font>, to restore the original
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">bk_color(BLACK)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">bk_color(BLACK)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -962,11 +1039,11 @@ s would normally contain positive values that have been read
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">atom </font><font color="#330033">int32</font>
-<font color="#330033"></font>
-<font color="#330033">int32 = bytes_to_int(</font><font color="#993333">{</font><font color="#330033">37,1,0,0</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- int32 is 37 + 256*1 = 293</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">atom </font><font color="#330033">int32</font>
+<font color="#330033"></font>
+<font color="#330033">int32 = bytes_to_int(</font><font color="#993333">{</font><font color="#330033">37,1,0,0</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- int32 is 37 + 256*1 = 293</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>

@@ -174,13 +174,13 @@ a.brown:hover     {color: red; text-decoration: underline;}
  You can force it to be created in a particular directory by setting the
  CAUSEWAY environment variable as follows:
  	
-<pre><font color="#330033">        SET CAUSEWAY=SWAP:path</font>
+<pre><font color="#330033">        SET CAUSEWAY=SWAP:path</font>
 </pre>
  
  where &nbsp; <b>path</b> &nbsp; is the full path to the directory. You can
  prevent the creation of a DOS swap file with:
 
-<pre><font color="#330033">        SET CAUSEWAY=NOVM</font>
+<pre><font color="#330033">        SET CAUSEWAY=NOVM</font>
 </pre>
 
 <p>
@@ -229,8 +229,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
  To prevent the console from quickly disappearing you might include a statement
  such as:
 
-<pre><font color="#0000FF">        if </font><font color="#FF00FF">getc</font><font color="#330033">(0) </font><font color="#0000FF">then</font>
-<font color="#0000FF">        end if</font>
+<pre><font color="#0000FF">        if </font><font color="#FF00FF">getc</font><font color="#330033">(0) </font><font color="#0000FF">then</font>
+<font color="#0000FF">        end if</font>
 </pre>
  which will wait for the user enter something.
 
@@ -448,20 +448,20 @@ see <a href=e2c.htm>the Translator</a>.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">include </font><font color="#330033">dll.e</font>
-<font color="#330033"></font>
-<font color="#FF00FF">atom </font><font color="#330033">user32</font>
-<font color="#FF00FF">integer </font><font color="#330033">LoadIcon, icon</font>
-<font color="#330033"></font>
-<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- The name of the routine in user32.dll is "LoadIconA".</font>
-<font color="#FF0055">-- It takes a pointer and an int as arguments, </font>
-<font color="#FF0055">-- and it returns an int.</font>
-<font color="#330033">LoadIcon = define_c_func(user32, </font><font color="#00A033">"LoadIconA"</font><font color="#330033">,</font>
-<font color="#330033">                         {C_POINTER, C_INT}, C_INT)</font>
-<font color="#330033"></font>
-<font color="#330033">icon = </font><font color="#FF00FF">c_func</font><font color="#330033">(LoadIcon, </font><font color="#993333">{</font><font color="#330033">NULL, IDI_APPLICATION</font><font color="#993333">}</font><font color="#330033">)</font>
+<pre><font color="#0000FF">include </font><font color="#330033">dll.e</font>
+<font color="#330033"></font>
+<font color="#FF00FF">atom </font><font color="#330033">user32</font>
+<font color="#FF00FF">integer </font><font color="#330033">LoadIcon, icon</font>
+<font color="#330033"></font>
+<font color="#330033">user32 = open_dll(</font><font color="#00A033">"user32.dll"</font><font color="#330033">)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- The name of the routine in user32.dll is "LoadIconA".</font>
+<font color="#FF0055">-- It takes a pointer and an int as arguments, </font>
+<font color="#FF0055">-- and it returns an int.</font>
+<font color="#330033">LoadIcon = define_c_func(user32, </font><font color="#00A033">"LoadIconA"</font><font color="#330033">,</font>
+<font color="#330033">                         {C_POINTER, C_INT}, C_INT)</font>
+<font color="#330033"></font>
+<font color="#330033">icon = </font><font color="#FF00FF">c_func</font><font color="#330033">(LoadIcon, </font><font color="#993333">{</font><font color="#330033">NULL, IDI_APPLICATION</font><font color="#993333">}</font><font color="#330033">)</font>
 </pre></td></tr>
 
 
@@ -545,9 +545,9 @@ You can then use poke() and peek() to access the value of the variable.
 
 <p>
  To allocate space for "struct example" you would need:
-<pre><font color="#FF00FF">        atom </font><font color="#330033">p</font>
-<font color="#330033"></font>
-<font color="#330033">        p = allocate(16) </font><font color="#FF0055">-- size of "struct example"</font>
+<pre><font color="#FF00FF">        atom </font><font color="#330033">p</font>
+<font color="#330033"></font>
+<font color="#330033">        p = allocate(16) </font><font color="#FF0055">-- size of "struct example"</font>
 </pre>
  
 <p>
@@ -561,14 +561,14 @@ You can then use poke() and peek() to access the value of the variable.
 
 <p>
  You can set the fields using something like:
-<pre><font color="#FF00FF">        poke4</font><font color="#330033">(p + 0, a)</font>
-<font color="#FF00FF">        poke4</font><font color="#330033">(p + 4, b)</font>
-<font color="#FF00FF">        poke4</font><font color="#330033">(p + 8, c)</font>
-<font color="#FF00FF">        poke4</font><font color="#330033">(p +12, d)</font>
+<pre><font color="#FF00FF">        poke4</font><font color="#330033">(p + 0, a)</font>
+<font color="#FF00FF">        poke4</font><font color="#330033">(p + 4, b)</font>
+<font color="#FF00FF">        poke4</font><font color="#330033">(p + 8, c)</font>
+<font color="#FF00FF">        poke4</font><font color="#330033">(p +12, d)</font>
 </pre>
 
  You can read a field with something like:
-<pre><font color="#330033">        d = peek4(p+12)</font>
+<pre><font color="#330033">        d = peek4(p+12)</font>
 </pre>
 
 <dl>
@@ -588,24 +588,24 @@ You can then use poke() and peek() to access the value of the variable.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">constant </font><font color="#330033">RECT_LEFT = 0,</font>
-<font color="#330033">         RECT_TOP  = 4,</font>
-<font color="#330033">         RECT_RIGHT = 8,</font>
-<font color="#330033">         RECT_BOTTOM = 12</font>
-<font color="#330033">         </font>
-<font color="#FF00FF">atom </font><font color="#330033">rect</font>
-<font color="#330033">rect = allocate(16)</font>
-<font color="#330033"></font>
-<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_LEFT,    10)</font>
-<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_TOP,     20)</font>
-<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_RIGHT,   90)</font>
-<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_BOTTOM, 100)</font>
-<font color="#330033">     </font>
-<font color="#FF0055">-- pass rect as a pointer to a C structure</font>
-<font color="#FF0055">-- hWnd is a "handle" to the window</font>
-<font color="#0000FF">if not </font><font color="#FF00FF">c_func</font><font color="#330033">(InvalidateRect, </font><font color="#993333">{</font><font color="#330033">hWnd, rect, 1</font><font color="#993333">}</font><font color="#330033">) </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"InvalidateRect failed\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">constant </font><font color="#330033">RECT_LEFT = 0,</font>
+<font color="#330033">         RECT_TOP  = 4,</font>
+<font color="#330033">         RECT_RIGHT = 8,</font>
+<font color="#330033">         RECT_BOTTOM = 12</font>
+<font color="#330033">         </font>
+<font color="#FF00FF">atom </font><font color="#330033">rect</font>
+<font color="#330033">rect = allocate(16)</font>
+<font color="#330033"></font>
+<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_LEFT,    10)</font>
+<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_TOP,     20)</font>
+<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_RIGHT,   90)</font>
+<font color="#FF00FF">poke4</font><font color="#330033">(rect + RECT_BOTTOM, 100)</font>
+<font color="#330033">     </font>
+<font color="#FF0055">-- pass rect as a pointer to a C structure</font>
+<font color="#FF0055">-- hWnd is a "handle" to the window</font>
+<font color="#0000FF">if not </font><font color="#FF00FF">c_func</font><font color="#330033">(InvalidateRect, </font><font color="#993333">{</font><font color="#330033">hWnd, rect, 1</font><font color="#993333">}</font><font color="#330033">) </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"InvalidateRect failed\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 
@@ -634,12 +634,12 @@ which will give you a big advantage over those forced to code in C.
  To set this up, you must get a 32-bit "call-back" 
  address for your routine and give it to Windows. For example (taken from 
  <font color="#5500FF"><b>demo\win32\window.exw</b></font>):
-<pre><font color="#FF00FF">        integer </font><font color="#330033">id</font>
-<font color="#FF00FF">        atom </font><font color="#330033">WndProcAddress</font>
-<font color="#330033">        </font>
-<font color="#330033">        id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"WndProc"</font><font color="#330033">) </font>
-<font color="#330033"></font>
-<font color="#330033">        WndProcAddress = call_back(id)</font>
+<pre><font color="#FF00FF">        integer </font><font color="#330033">id</font>
+<font color="#FF00FF">        atom </font><font color="#330033">WndProcAddress</font>
+<font color="#330033">        </font>
+<font color="#330033">        id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"WndProc"</font><font color="#330033">) </font>
+<font color="#330033"></font>
+<font color="#330033">        WndProcAddress = call_back(id)</font>
 </pre>
 
  <a href="lib_p_r.htm#routine_id">routine_id()</a> uniquely identifies a
@@ -737,7 +737,7 @@ which will give you a big advantage over those forced to code in C.
  If you need your Euphoria routine to be called using the __cdecl
  convention, you must code the call to call_back() as:
  
-<pre><font color="#330033">        myroutineaddr = call_back(</font><font color="#993333">{</font><font color="#00A033">'+'</font><font color="#330033">, id</font><font color="#993333">}</font><font color="#330033">)</font>
+<pre><font color="#330033">        myroutineaddr = call_back(</font><font color="#993333">{</font><font color="#00A033">'+'</font><font color="#330033">, id</font><font color="#993333">}</font><font color="#330033">)</font>
 </pre>
 
 The plus sign and braces indicate the __cdecl convention. The simple case,

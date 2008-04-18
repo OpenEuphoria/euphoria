@@ -56,10 +56,10 @@ The result will be one of the following codes:
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">BMP_SUCCESS = 0,</font>
-<font color="#330033">                BMP_OPEN_FAILED = 1,</font>
-<font color="#330033">               BMP_INVALID_MODE = 4 </font><font color="#FF0055">-- invalid graphics mode</font>
-<font color="#FF0055">                                    -- or invalid argument</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">BMP_SUCCESS = 0,</font>
+<font color="#330033">                BMP_OPEN_FAILED = 1,</font>
+<font color="#330033">               BMP_INVALID_MODE = 4 </font><font color="#FF0055">-- invalid graphics mode</font>
+<font color="#FF0055">                                    -- or invalid argument</font>
 </pre></td></tr>
 
  
@@ -80,10 +80,10 @@ save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">paletteData = get_all_palette() * 4</font>
-<font color="#330033">code = save_bitmap(</font><font color="#993333">{</font><font color="#330033">paletteData, imageData</font><font color="#993333">}</font><font color="#330033">,</font>
-<font color="#00A033">                   "c:\\example\\a1.bmp"</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">paletteData = get_all_palette() * 4</font>
+<font color="#330033">code = save_bitmap(</font><font color="#993333">{</font><font color="#330033">paletteData, imageData</font><font color="#993333">}</font><font color="#330033">,</font>
+<font color="#00A033">                   "c:\\example\\a1.bmp"</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -128,12 +128,12 @@ save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = save_image(</font><font color="#993333">{</font><font color="#330033">0,0</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">50,50</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033">display_image(</font><font color="#993333">{</font><font color="#330033">100,200</font><font color="#993333">}</font><font color="#330033">, s)</font>
-<font color="#330033">display_image(</font><font color="#993333">{</font><font color="#330033">300,400</font><font color="#993333">}</font><font color="#330033">, s)</font>
-<font color="#FF0055">-- saves a 51x51 square image, then redisplays it at {100,200}</font>
-<font color="#FF0055">-- and at {300,400}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = save_image(</font><font color="#993333">{</font><font color="#330033">0,0</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">50,50</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033">display_image(</font><font color="#993333">{</font><font color="#330033">100,200</font><font color="#993333">}</font><font color="#330033">, s)</font>
+<font color="#330033">display_image(</font><font color="#993333">{</font><font color="#330033">300,400</font><font color="#993333">}</font><font color="#330033">, s)</font>
+<font color="#FF0055">-- saves a 51x51 square image, then redisplays it at {100,200}</font>
+<font color="#FF0055">-- and at {300,400}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -176,10 +176,10 @@ The result will be one of the following codes:
 
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">BMP_SUCCESS = 0,</font>
-<font color="#330033">                BMP_OPEN_FAILED = 1,</font>
-<font color="#330033">               BMP_INVALID_MODE = 4 </font><font color="#FF0055">-- invalid graphics mode</font>
-<font color="#FF0055">                                    -- or invalid argument</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">BMP_SUCCESS = 0,</font>
+<font color="#330033">                BMP_OPEN_FAILED = 1,</font>
+<font color="#330033">               BMP_INVALID_MODE = 4 </font><font color="#FF0055">-- invalid graphics mode</font>
+<font color="#FF0055">                                    -- or invalid argument</font>
 </pre></td></tr>
 
 
@@ -197,9 +197,9 @@ save_screen() only works in
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- save whole screen:</font>
-<font color="#330033">code = save_screen(0, </font><font color="#00A033">"c:\\example\\a1.bmp"</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- save whole screen:</font>
+<font color="#330033">code = save_screen(0, </font><font color="#00A033">"c:\\example\\a1.bmp"</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -207,9 +207,9 @@ save_screen() only works in
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- save part of screen:</font>
-<font color="#330033">err = save_screen(</font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#330033">0,0</font><font color="#0000FF">}</font><font color="#330033">,</font><font color="#0000FF">{</font><font color="#330033">200, 15</font><font color="#0000FF">}</font><font color="#993333">}</font><font color="#330033">, </font><font color="#00A033">"b1.bmp"</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- save part of screen:</font>
+<font color="#330033">err = save_screen(</font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#330033">0,0</font><font color="#0000FF">}</font><font color="#330033">,</font><font color="#0000FF">{</font><font color="#330033">200, 15</font><font color="#0000FF">}</font><font color="#993333">}</font><font color="#330033">, </font><font color="#00A033">"b1.bmp"</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -269,8 +269,8 @@ On DOS32, if you are flipping video pages, note that this function reads
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">   Hello</font>
-<font color="#330033">   World</font>
+<pre><font color="#330033">   Hello</font>
+<font color="#330033">   World</font>
 </pre></td></tr>
 
 
@@ -279,7 +279,7 @@ On DOS32, if you are flipping video pages, note that this function reads
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = save_text_image(</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">2,5</font><font color="#993333">}</font><font color="#330033">)</font>
+<pre><font color="#330033">s = save_text_image(</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">2,5</font><font color="#993333">}</font><font color="#330033">)</font>
 </pre></td></tr>
 
 
@@ -288,10 +288,10 @@ On DOS32, if you are flipping video pages, note that this function reads
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">    {</font><font color="#00A033">"H-e-l-l-o-"</font><font color="#330033">,</font>
-<font color="#00A033">     "W-o-r-l-d-"</font><font color="#330033">}</font>
-<font color="#330033">where </font><font color="#00A033">'-' </font><font color="#330033">indicates the attribute bytes</font>
-<font color="#330033"></font>
+<pre><font color="#330033">    {</font><font color="#00A033">"H-e-l-l-o-"</font><font color="#330033">,</font>
+<font color="#00A033">     "W-o-r-l-d-"</font><font color="#330033">}</font>
+<font color="#330033">where </font><font color="#00A033">'-' </font><font color="#330033">indicates the attribute bytes</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -391,18 +391,18 @@ The position of the cursor after scrolling is not defined.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">include </font><font color="#330033">file.e</font>
-<font color="#330033"></font>
-<font color="#FF00FF">integer </font><font color="#330033">fn</font>
-<font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"mydata"</font><font color="#330033">, </font><font color="#00A033">"rb"</font><font color="#330033">)</font>
-<font color="#FF0055">-- read and display first line of file 3 times:</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">3 </font><font color="#0000FF">do</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#FF00FF">gets</font><font color="#993333">(</font><font color="#330033">fn</font><font color="#993333">)</font><font color="#330033">)</font>
-<font color="#0000FF">    if </font><font color="#330033">seek(fn, 0) </font><font color="#0000FF">then</font>
-<font color="#FF00FF">        puts</font><font color="#330033">(1, </font><font color="#00A033">"rewind failed!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">    end if</font>
-<font color="#0000FF">end for</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">include </font><font color="#330033">file.e</font>
+<font color="#330033"></font>
+<font color="#FF00FF">integer </font><font color="#330033">fn</font>
+<font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"mydata"</font><font color="#330033">, </font><font color="#00A033">"rb"</font><font color="#330033">)</font>
+<font color="#FF0055">-- read and display first line of file 3 times:</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">3 </font><font color="#0000FF">do</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#FF00FF">gets</font><font color="#993333">(</font><font color="#330033">fn</font><font color="#993333">)</font><font color="#330033">)</font>
+<font color="#0000FF">    if </font><font color="#330033">seek(fn, 0) </font><font color="#0000FF">then</font>
+<font color="#FF00FF">        puts</font><font color="#330033">(1, </font><font color="#00A033">"rewind failed!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">    end if</font>
+<font color="#0000FF">end for</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -441,9 +441,9 @@ The position of the cursor after scrolling is not defined.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">s</font>
-<font color="#330033">s = {1,2,3}</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">s</font>
+<font color="#330033">s = {1,2,3}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -451,16 +451,16 @@ The position of the cursor after scrolling is not defined.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#FF00FF">sequence</font><font color="#330033">(x) </font><font color="#0000FF">then</font>
-<font color="#330033">    sum = 0</font>
-<font color="#0000FF">    for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(x) </font><font color="#0000FF">do</font>
-<font color="#330033">        sum = sum + x[i]</font>
-<font color="#0000FF">    end for</font>
-<font color="#0000FF">else</font>
-<font color="#FF0055">    -- x must be an atom</font>
-<font color="#330033">    sum = x</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">if </font><font color="#FF00FF">sequence</font><font color="#330033">(x) </font><font color="#0000FF">then</font>
+<font color="#330033">    sum = 0</font>
+<font color="#0000FF">    for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(x) </font><font color="#0000FF">do</font>
+<font color="#330033">        sum = sum + x[i]</font>
+<font color="#0000FF">    end for</font>
+<font color="#0000FF">else</font>
+<font color="#FF0055">    -- x must be an atom</font>
+<font color="#330033">    sum = x</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -514,21 +514,21 @@ This works under DOS, or in a full-screen DOS window. In a
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">include </font><font color="#330033">image.e</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- active & display pages are initially both 0</font>
-<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"\nThis is page 0\n"</font><font color="#330033">)</font>
-<font color="#330033">set_active_page(1)     </font><font color="#FF0055">-- screen output will now go to page 1</font>
-<font color="#FF00FF">clear_screen</font><font color="#330033">()</font>
-<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"\nNow we've flipped to page 1\n"</font><font color="#330033">)</font>
-<font color="#0000FF">if </font><font color="#FF00FF">getc</font><font color="#330033">(0) </font><font color="#0000FF">then        </font><font color="#FF0055">-- wait for key-press</font>
-<font color="#0000FF">end if</font>
-<font color="#330033">set_display_page(1)    </font><font color="#FF0055">-- "Now we've ..." becomes visible</font>
-<font color="#0000FF">if </font><font color="#FF00FF">getc</font><font color="#330033">(0) </font><font color="#0000FF">then        </font><font color="#FF0055">-- wait for key-press</font>
-<font color="#0000FF">end if</font>
-<font color="#330033">set_display_page(0)    </font><font color="#FF0055">-- "This is ..." becomes visible again</font>
-<font color="#330033">set_active_page(0)</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">include </font><font color="#330033">image.e</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- active & display pages are initially both 0</font>
+<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"\nThis is page 0\n"</font><font color="#330033">)</font>
+<font color="#330033">set_active_page(1)     </font><font color="#FF0055">-- screen output will now go to page 1</font>
+<font color="#FF00FF">clear_screen</font><font color="#330033">()</font>
+<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"\nNow we've flipped to page 1\n"</font><font color="#330033">)</font>
+<font color="#0000FF">if </font><font color="#FF00FF">getc</font><font color="#330033">(0) </font><font color="#0000FF">then        </font><font color="#FF0055">-- wait for key-press</font>
+<font color="#0000FF">end if</font>
+<font color="#330033">set_display_page(1)    </font><font color="#FF0055">-- "Now we've ..." becomes visible</font>
+<font color="#0000FF">if </font><font color="#FF00FF">getc</font><font color="#330033">(0) </font><font color="#0000FF">then        </font><font color="#FF0055">-- wait for key-press</font>
+<font color="#0000FF">end if</font>
+<font color="#330033">set_display_page(0)    </font><font color="#FF0055">-- "This is ..." becomes visible again</font>
+<font color="#330033">set_active_page(0)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -623,21 +623,21 @@ This works under DOS, or in a full-screen DOS window. In a
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">s, t</font>
-<font color="#330033">s = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 3)</font>
-<font color="#330033">t = s</font>
-<font color="#330033"></font>
-<font color="#330033">set_rand(12345)</font>
-<font color="#330033">s[1] = </font><font color="#FF00FF">rand</font><font color="#330033">(10)</font>
-<font color="#330033">s[2] = </font><font color="#FF00FF">rand</font><font color="#330033">(100)</font>
-<font color="#330033">s[3] = </font><font color="#FF00FF">rand</font><font color="#330033">(1000)</font>
-<font color="#330033"></font>
-<font color="#330033">set_rand(12345)  </font><font color="#FF0055">-- same value for set_rand()</font>
-<font color="#330033">t[1] = </font><font color="#FF00FF">rand</font><font color="#330033">(10)  </font><font color="#FF0055">-- same arguments to rand() as before</font>
-<font color="#330033">t[2] = </font><font color="#FF00FF">rand</font><font color="#330033">(100)</font>
-<font color="#330033">t[3] = </font><font color="#FF00FF">rand</font><font color="#330033">(1000)</font>
-<font color="#FF0055">-- at this point s and t will be identical</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">s, t</font>
+<font color="#330033">s = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 3)</font>
+<font color="#330033">t = s</font>
+<font color="#330033"></font>
+<font color="#330033">set_rand(12345)</font>
+<font color="#330033">s[1] = </font><font color="#FF00FF">rand</font><font color="#330033">(10)</font>
+<font color="#330033">s[2] = </font><font color="#FF00FF">rand</font><font color="#330033">(100)</font>
+<font color="#330033">s[3] = </font><font color="#FF00FF">rand</font><font color="#330033">(1000)</font>
+<font color="#330033"></font>
+<font color="#330033">set_rand(12345)  </font><font color="#FF0055">-- same value for set_rand()</font>
+<font color="#330033">t[1] = </font><font color="#FF00FF">rand</font><font color="#330033">(10)  </font><font color="#FF0055">-- same arguments to rand() as before</font>
+<font color="#330033">t[2] = </font><font color="#FF00FF">rand</font><font color="#330033">(100)</font>
+<font color="#330033">t[3] = </font><font color="#FF00FF">rand</font><font color="#330033">(1000)</font>
+<font color="#FF0055">-- at this point s and t will be identical</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -711,8 +711,8 @@ You can call set_vector() with the far address returned by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">set_vector(#1C, </font><font color="#993333">{</font><font color="#330033">code_segment, my_handler_address</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">set_vector(#1C, </font><font color="#993333">{</font><font color="#330033">code_segment, my_handler_address</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example Program:</b></td>
@@ -728,6 +728,45 @@ You can call set_vector() with the far address returned by
 
 </table>
 
+<a name=sign></a><font color="#006633" size=+2><br>
+<center><b>sign</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include math.e<BR>
+i = sign(x)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return -1, 0 or 1 for each element according to it being negative, zero or positive
+</td></tr>
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+ <tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = sign(5)</font>
+<font color="#FF0055">-- i is 1</font>
+<font color="#330033"></font>
+<font color="#330033">i = sign(0)</font>
+<font color="#FF0055">-- i is 0</font>
+<font color="#330033"></font>
+<font color="#330033">i = sign(-2)</font>
+<font color="#FF0055">-- i is -1</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_a_b.htm#abs">abs</a>
+</td></tr>
+
+</table>
 
 <a name=sin></a><font color="#006633" size=+2><br>
 <center><b>sin</b></center>
@@ -754,9 +793,9 @@ You can call set_vector() with the far address returned by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">sin_x = </font><font color="#FF00FF">sin</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">.5, .9, .11</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- sin_x is {.479, .783, .110}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">sin_x = </font><font color="#FF00FF">sin</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">.5, .9, .11</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- sin_x is {.479, .783, .110}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -800,15 +839,71 @@ You can call set_vector() with the far address returned by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"Waiting 15 seconds...\n"</font><font color="#330033">)</font>
-<font color="#330033">sleep(15)</font>
-<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"Done.\n"</font><font color="#330033">)</font>
+<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"Waiting 15 seconds...\n"</font><font color="#330033">)</font>
+<font color="#330033">sleep(15)</font>
+<font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"Done.\n"</font><font color="#330033">)</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
 <td><a href="lib_h_o.htm#lock_file">lock_file</a>,
 <a href="lib_a_b.htm#abort">abort</a>,
 <a href="lib_s_t.htm#time">time</a>
+</td></tr>
+
+</table>
+
+
+<a name=slice></a><font color="#006633" size=+2><br>
+<center><b>slice</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include sequence.e<BR>
+s2 = slice(s1, i1, i2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return items i1 to i2 from s1. If i2 is greater than the length of s1, then from i1 to the
+end of s1 will be returned. If i2 is zero, it will be treated as the end of s1. If i2 is a
+negative value, then it will be treated as i2 positions from the end of s1.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s2 = slice(</font><font color="#00A033">"John Doe"</font><font color="#330033">, 6, 8)</font>
+<font color="#FF0055">-- s2 is Doe</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = slice(</font><font color="#00A033">"John Doe"</font><font color="#330033">, 6, 50)</font>
+<font color="#FF0055">-- s2 is Doe</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = slice(</font><font color="#993333">{</font><font color="#330033">1, 5.4, </font><font color="#00A033">"John"</font><font color="#330033">, 30</font><font color="#993333">}</font><font color="#330033">, 2, 3)</font>
+<font color="#FF0055">-- s2 is {5.4, "John"}</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = slice(</font><font color="#993333">{</font><font color="#330033">1,2,3,4,5</font><font color="#993333">}</font><font color="#330033">, 2, -1)</font>
+<font color="#FF0055">-- s2 is {2,3,4}</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = slice(</font><font color="#993333">{</font><font color="#330033">1,2,3,4,5</font><font color="#993333">}</font><font color="#330033">, 2, 0)</font>
+<font color="#FF0055">-- s2 is {2,3,4,5}</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_p_r.htm#right">right</a>,
+<a href="lib_h_o.htm#mid">mid</a>,
+<a href="lib_h_o.htm#left">left</a>
 </td></tr>
 
 </table>
@@ -839,9 +934,9 @@ You can call set_vector() with the far address returned by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">x = 0 & sort(</font><font color="#993333">{</font><font color="#330033">7,5,3,8</font><font color="#993333">}</font><font color="#330033">) & 0</font>
-<font color="#FF0055">-- x is set to {0, 3, 5, 7, 8, 0}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">x = 0 & sort(</font><font color="#993333">{</font><font color="#330033">7,5,3,8</font><font color="#993333">}</font><font color="#330033">) & 0</font>
+<font color="#FF0055">-- x is set to {0, 3, 5, 7, 8, 0}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -849,9 +944,9 @@ You can call set_vector() with the far address returned by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">y = sort(</font><font color="#993333">{</font><font color="#00A033">"Smith"</font><font color="#330033">, </font><font color="#00A033">"Jones"</font><font color="#330033">, </font><font color="#00A033">"Doe"</font><font color="#330033">, 5.5, 4, 6</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#FF0055">-- y is {4, 5.5, 6, "Doe", "Jones", "Smith"}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">y = sort(</font><font color="#993333">{</font><font color="#00A033">"Smith"</font><font color="#330033">, </font><font color="#00A033">"Jones"</font><font color="#330033">, </font><font color="#00A033">"Doe"</font><font color="#330033">, 5.5, 4, 6</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- y is {4, 5.5, 6, "Doe", "Jones", "Smith"}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 3:</b></td>
@@ -859,19 +954,19 @@ You can call set_vector() with the far address returned by
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">database = sort(</font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#00A033">"Smith"</font><font color="#330033">,   95.0, 29</font><font color="#0000FF">}</font><font color="#330033">,</font>
-<font color="#330033">                 {</font><font color="#00A033">"Jones"</font><font color="#330033">,   77.2, 31},</font>
-<font color="#330033">                 {</font><font color="#00A033">"Clinton"</font><font color="#330033">, 88.7, 44}})</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- The 3 database "records" will be sorted by the first "field"</font>
-<font color="#FF0055">-- i.e. by name. Where the first field (element) is equal it</font>
-<font color="#FF0055">-- will be sorted by the second field etc.</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- after sorting, database is:</font>
-<font color="#330033">               {</font><font color="#993333">{</font><font color="#00A033">"Clinton"</font><font color="#330033">, 88.7, 44</font><font color="#993333">}</font><font color="#330033">,</font>
-<font color="#330033">                {</font><font color="#00A033">"Jones"</font><font color="#330033">,   77.2, 31},</font>
-<font color="#330033">                {</font><font color="#00A033">"Smith"</font><font color="#330033">,   95.0, 29}}</font>
-<font color="#330033"></font>
+<pre><font color="#330033">database = sort(</font><font color="#993333">{</font><font color="#0000FF">{</font><font color="#00A033">"Smith"</font><font color="#330033">,   95.0, 29</font><font color="#0000FF">}</font><font color="#330033">,</font>
+<font color="#330033">                 {</font><font color="#00A033">"Jones"</font><font color="#330033">,   77.2, 31},</font>
+<font color="#330033">                 {</font><font color="#00A033">"Clinton"</font><font color="#330033">, 88.7, 44}})</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- The 3 database "records" will be sorted by the first "field"</font>
+<font color="#FF0055">-- i.e. by name. Where the first field (element) is equal it</font>
+<font color="#FF0055">-- will be sorted by the second field etc.</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- after sorting, database is:</font>
+<font color="#330033">               {</font><font color="#993333">{</font><font color="#00A033">"Clinton"</font><font color="#330033">, 88.7, 44</font><font color="#993333">}</font><font color="#330033">,</font>
+<font color="#330033">                {</font><font color="#00A033">"Jones"</font><font color="#330033">,   77.2, 31},</font>
+<font color="#330033">                {</font><font color="#00A033">"Smith"</font><font color="#330033">,   95.0, 29}}</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -918,8 +1013,8 @@ no sound will be made.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">sound(1000) </font><font color="#FF0055">-- starts a fairly high pitched sound</font>
-<font color="#330033"></font>
+<pre><font color="#330033">sound(1000) </font><font color="#FF0055">-- starts a fairly high pitched sound</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 </table>
@@ -955,9 +1050,9 @@ no sound will be made.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = sprint(12345)</font>
-<font color="#FF0055">-- s is "12345"</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = sprint(12345)</font>
+<font color="#FF0055">-- s is "12345"</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -965,9 +1060,9 @@ no sound will be made.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = sprint(</font><font color="#993333">{</font><font color="#330033">10,20,30</font><font color="#993333">}</font><font color="#330033">+5)</font>
-<font color="#FF0055">-- s is "{15,25,35}"</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = sprint(</font><font color="#993333">{</font><font color="#330033">10,20,30</font><font color="#993333">}</font><font color="#330033">+5)</font>
+<font color="#FF0055">-- s is "{15,25,35}"</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1014,9 +1109,9 @@ no sound will be made.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">s = </font><font color="#FF00FF">sprintf</font><font color="#330033">(</font><font color="#00A033">"%08d"</font><font color="#330033">, 12345)</font>
-<font color="#FF0055">-- s is "00012345"</font>
-<font color="#330033"></font>
+<pre><font color="#330033">s = </font><font color="#FF00FF">sprintf</font><font color="#330033">(</font><font color="#00A033">"%08d"</font><font color="#330033">, 12345)</font>
+<font color="#FF0055">-- s is "00012345"</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1059,14 +1154,56 @@ Taking the square root of a negative number will abort your
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">r = </font><font color="#FF00FF">sqrt</font><font color="#330033">(16)</font>
-<font color="#FF0055">-- r is 4</font>
-<font color="#330033"></font>
+<pre><font color="#330033">r = </font><font color="#FF00FF">sqrt</font><font color="#330033">(16)</font>
+<font color="#FF0055">-- r is 4</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
 <td><a href="lib_h_o.htm#log">log</a>,
 <a href="lib_p_r.htm#power">power</a>
+</td></tr>
+
+</table>
+
+
+<a name=sum></a><font color="#006633" size=+2><br>
+<center><b>sum</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax</b></td>
+<td><font face = "Arial, Helvetica"> include math.e<BR>
+a = sum(x)</font>
+</td></tr>
+
+
+ <tr><td valign=top><b>Description</b></td>
+<td>Compute the sum of all the argument's elements
+</td></tr>
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+ <tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">  a = sum(</font><font color="#993333">{</font><font color="#330033">10, 20, 30</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">  -- a is 60</font>
+<font color="#330033"></font>
+<font color="#330033">  a = sum(</font><font color="#993333">{</font><font color="#330033">10.5, 11.2, 8.1</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">  -- a is 29.8</font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_a_b.htm#average">average</a>,
+<a href="lib_h_o.htm#max">max</a>,
+<a href="lib_h_o.htm#min">min</a>
 </td></tr>
 
 </table>
@@ -1122,7 +1259,7 @@ Under <font color="#CC3366"><b>DOS32</b></font>, a Euphoria program
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">    SET CAUSEWAY=LOWMEM:xxx</font>
+<pre><font color="#330033">    SET CAUSEWAY=LOWMEM:xxx</font>
 </pre></td></tr>
 
 
@@ -1134,8 +1271,8 @@ Under <font color="#CC3366"><b>DOS32</b></font>, a Euphoria program
 
  
 <tr><td></td><td>
-<pre><font color="#330033">    SET CAUSEWAY=LOWMEM:80</font>
-<font color="#330033">    ex myprog.ex</font>
+<pre><font color="#330033">    SET CAUSEWAY=LOWMEM:80</font>
+<font color="#330033">    ex myprog.ex</font>
 </pre></td></tr>
 
 
@@ -1149,10 +1286,10 @@ Under <font color="#CC3366"><b>DOS32</b></font>, a Euphoria program
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">system</font><font color="#330033">(</font><font color="#00A033">"copy temp.txt a:\\temp.bak"</font><font color="#330033">, 2)</font>
-<font color="#FF0055">-- note use of double backslash in literal string to get</font>
-<font color="#FF0055">-- single backslash</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">system</font><font color="#330033">(</font><font color="#00A033">"copy temp.txt a:\\temp.bak"</font><font color="#330033">, 2)</font>
+<font color="#FF0055">-- note use of double backslash in literal string to get</font>
+<font color="#FF0055">-- single backslash</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -1160,10 +1297,10 @@ Under <font color="#CC3366"><b>DOS32</b></font>, a Euphoria program
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">system</font><font color="#330033">(</font><font color="#00A033">"ex \\test\\myprog.ex < indata > outdata"</font><font color="#330033">, 2)</font>
-<font color="#FF0055">-- executes myprog by redirecting standard input and</font>
-<font color="#FF0055">-- standard output</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">system</font><font color="#330033">(</font><font color="#00A033">"ex \\test\\myprog.ex < indata > outdata"</font><font color="#330033">, 2)</font>
+<font color="#FF0055">-- executes myprog by redirecting standard input and</font>
+<font color="#FF0055">-- standard output</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 
@@ -1235,17 +1372,17 @@ system_exec() does not start a new DOS shell.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">integer </font><font color="#330033">exit_code</font>
-<font color="#330033">exit_code = </font><font color="#FF00FF">system_exec</font><font color="#330033">(</font><font color="#00A033">"xcopy temp1.dat temp2.dat"</font><font color="#330033">, 2)</font>
-<font color="#330033"></font>
-<font color="#0000FF">if </font><font color="#330033">exit_code = -1 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"\n couldn't run xcopy.exe\n"</font><font color="#330033">)</font>
-<font color="#0000FF">elsif </font><font color="#330033">exit_code = 0 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"\n xcopy succeeded\n"</font><font color="#330033">)</font>
-<font color="#0000FF">else</font>
-<font color="#FF00FF">    printf</font><font color="#330033">(2, </font><font color="#00A033">"\n xcopy failed with code %d\n"</font><font color="#330033">, exit_code)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#FF00FF">integer </font><font color="#330033">exit_code</font>
+<font color="#330033">exit_code = </font><font color="#FF00FF">system_exec</font><font color="#330033">(</font><font color="#00A033">"xcopy temp1.dat temp2.dat"</font><font color="#330033">, 2)</font>
+<font color="#330033"></font>
+<font color="#0000FF">if </font><font color="#330033">exit_code = -1 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"\n couldn't run xcopy.exe\n"</font><font color="#330033">)</font>
+<font color="#0000FF">elsif </font><font color="#330033">exit_code = 0 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"\n xcopy succeeded\n"</font><font color="#330033">)</font>
+<font color="#0000FF">else</font>
+<font color="#FF00FF">    printf</font><font color="#330033">(2, </font><font color="#00A033">"\n xcopy failed with code %d\n"</font><font color="#330033">, exit_code)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>Example 2:</b></td>
@@ -1253,11 +1390,11 @@ system_exec() does not start a new DOS shell.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- executes myprog with two file names as arguments</font>
-<font color="#0000FF">if </font><font color="#FF00FF">system_exec</font><font color="#330033">(</font><font color="#00A033">"ex \\test\\myprog.ex indata outdata"</font><font color="#330033">, 2) </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"failure!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- executes myprog with two file names as arguments</font>
+<font color="#0000FF">if </font><font color="#FF00FF">system_exec</font><font color="#330033">(</font><font color="#00A033">"ex \\test\\myprog.ex indata outdata"</font><font color="#330033">, 2) </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"failure!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1293,9 +1430,9 @@ system_exec() does not start a new DOS shell.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">t = </font><font color="#FF00FF">tan</font><font color="#330033">(1.0)</font>
-<font color="#FF0055">-- t is 1.55741</font>
-<font color="#330033"></font>
+<pre><font color="#330033">t = </font><font color="#FF00FF">tan</font><font color="#330033">(1.0)</font>
+<font color="#FF0055">-- t is 1.55741</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1341,11 +1478,11 @@ system_exec() does not start a new DOS shell.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- freeze the game while the player answers the phone</font>
-<font color="#FF00FF">task_clock_stop</font><font color="#330033">()</font>
-<font color="#0000FF">while </font><font color="#FF00FF">get_key</font><font color="#330033">() = -1 </font><font color="#0000FF">do</font>
-<font color="#0000FF">end while</font>
-<font color="#FF00FF">task_clock_start</font><font color="#330033">()</font>
+<pre><font color="#FF0055">-- freeze the game while the player answers the phone</font>
+<font color="#FF00FF">task_clock_stop</font><font color="#330033">()</font>
+<font color="#0000FF">while </font><font color="#FF00FF">get_key</font><font color="#330033">() = -1 </font><font color="#0000FF">do</font>
+<font color="#0000FF">end while</font>
+<font color="#FF00FF">task_clock_start</font><font color="#330033">()</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1437,8 +1574,8 @@ task can also continue, unless it's a real-time task and it yields.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">mytask = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"myproc"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5, 9, </font><font color="#00A033">"ABC"</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">mytask = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"myproc"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5, 9, </font><font color="#00A033">"ABC"</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1478,14 +1615,14 @@ task can also continue, unless it's a real-time task and it yields.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">tasks</font>
-<font color="#330033">     </font>
-<font color="#330033">tasks = </font><font color="#FF00FF">task_list</font><font color="#330033">()</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(tasks) </font><font color="#0000FF">do</font>
-<font color="#0000FF">    if </font><font color="#FF00FF">task_status</font><font color="#330033">(tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">) > 0 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">        printf</font><font color="#330033">(1, </font><font color="#00A033">"task %d is active\n"</font><font color="#330033">, tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">)</font>
-<font color="#0000FF">    end if</font>
-<font color="#0000FF">end for</font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">tasks</font>
+<font color="#330033">     </font>
+<font color="#330033">tasks = </font><font color="#FF00FF">task_list</font><font color="#330033">()</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(tasks) </font><font color="#0000FF">do</font>
+<font color="#0000FF">    if </font><font color="#FF00FF">task_status</font><font color="#330033">(tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">) > 0 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">        printf</font><font color="#330033">(1, </font><font color="#00A033">"task %d is active\n"</font><font color="#330033">, tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">)</font>
+<font color="#0000FF">    end if</font>
+<font color="#0000FF">end for</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1595,17 +1732,17 @@ exit code code, similar to abort(0).
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033"></font>
-<font color="#FF0055">-- Task t1 will be executed up to 10 times in a row before</font>
-<font color="#FF0055">-- other time-shared tasks are given control. If a real-time</font>
-<font color="#FF0055">-- task needs control, t1 will lose control to the real-time task.</font>
-<font color="#FF00FF">task_schedule</font><font color="#330033">(t1, 10) </font>
-<font color="#330033"></font>
-<font color="#FF0055">-- Task t2 will be scheduled to run some time between 4 and 5 seconds</font>
-<font color="#FF0055">-- from now. Barring any rescheduling of t2, it will continue to</font>
-<font color="#FF0055">-- execute every 4 to 5 seconds thereafter.</font>
-<font color="#FF00FF">task_schedule</font><font color="#330033">(t2, </font><font color="#993333">{</font><font color="#330033">4, 5</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#330033"></font>
+<font color="#FF0055">-- Task t1 will be executed up to 10 times in a row before</font>
+<font color="#FF0055">-- other time-shared tasks are given control. If a real-time</font>
+<font color="#FF0055">-- task needs control, t1 will lose control to the real-time task.</font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(t1, 10) </font>
+<font color="#330033"></font>
+<font color="#FF0055">-- Task t2 will be scheduled to run some time between 4 and 5 seconds</font>
+<font color="#FF0055">-- from now. Barring any rescheduling of t2, it will continue to</font>
+<font color="#FF0055">-- execute every 4 to 5 seconds thereafter.</font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(t2, </font><font color="#993333">{</font><font color="#330033">4, 5</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1643,9 +1780,9 @@ itself.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- schedule self</font>
-<font color="#FF00FF">task_schedule</font><font color="#330033">(</font><font color="#FF00FF">task_self</font><font color="#993333">()</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5.9, 6.0</font><font color="#993333">}</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- schedule self</font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(</font><font color="#FF00FF">task_self</font><font color="#993333">()</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5.9, 6.0</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1688,16 +1825,16 @@ terminated naturally or was killed.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">integer </font><font color="#330033">s</font>
-<font color="#330033">     </font>
-<font color="#330033">s = </font><font color="#FF00FF">task_status</font><font color="#330033">(tid)</font>
-<font color="#0000FF">if </font><font color="#330033">s = 1 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"ACTIVE\n"</font><font color="#330033">)</font>
-<font color="#0000FF">elsif </font><font color="#330033">s = 0 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"SUSPENDED\n"</font><font color="#330033">)</font>
-<font color="#0000FF">else</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"DOESN'T EXIST\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#FF00FF">integer </font><font color="#330033">s</font>
+<font color="#330033">     </font>
+<font color="#330033">s = </font><font color="#FF00FF">task_status</font><font color="#330033">(tid)</font>
+<font color="#0000FF">if </font><font color="#330033">s = 1 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"ACTIVE\n"</font><font color="#330033">)</font>
+<font color="#0000FF">elsif </font><font color="#330033">s = 0 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"SUSPENDED\n"</font><font color="#330033">)</font>
+<font color="#0000FF">else</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"DOESN'T EXIST\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1742,12 +1879,12 @@ terminated naturally or was killed.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- suspend task 15</font>
-<font color="#FF00FF">task_suspend</font><font color="#330033">(15)</font>
-<font color="#330033"></font>
-<font color="#FF0055">-- suspend current task</font>
-<font color="#FF00FF">task_suspend</font><font color="#330033">(</font><font color="#FF00FF">task_self</font><font color="#993333">()</font><font color="#330033">)</font>
-<font color="#330033"></font>
+<pre><font color="#FF0055">-- suspend task 15</font>
+<font color="#FF00FF">task_suspend</font><font color="#330033">(15)</font>
+<font color="#330033"></font>
+<font color="#FF0055">-- suspend current task</font>
+<font color="#FF00FF">task_suspend</font><font color="#330033">(</font><font color="#FF00FF">task_self</font><font color="#993333">()</font><font color="#330033">)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1814,26 +1951,26 @@ languages support.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- From Language war game.</font>
-<font color="#FF0055">-- This small task deducts life support energy from either the </font>
-<font color="#FF0055">-- large Euphoria ship or the small shuttle.</font>
-<font color="#FF0055">-- It seems to run "forever" in an infinite loop, </font>
-<font color="#FF0055">-- but it's actually a real-time task that is called</font>
-<font color="#FF0055">-- every 1.7 to 1.8 seconds throughout the game.</font>
-<font color="#FF0055">-- It deducts either 3 units or 13 units of life support energy each time.</font>
-<font color="#330033"></font>
-<font color="#0000FF">global procedure </font><font color="#330033">task_life()</font>
-<font color="#FF0055">-- independent task: subtract life support energy </font>
-<font color="#0000FF">    while </font><font color="#330033">TRUE </font><font color="#0000FF">do</font>
-<font color="#0000FF">        if </font><font color="#330033">shuttle </font><font color="#0000FF">then</font>
-<font color="#330033">            p_energy(-3)</font>
-<font color="#0000FF">        else</font>
-<font color="#330033">            p_energy(-13)</font>
-<font color="#0000FF">        end if</font>
-<font color="#FF00FF">        task_yield</font><font color="#330033">()</font>
-<font color="#0000FF">    end while</font>
-<font color="#0000FF">end procedure</font>
-<font color="#330033"> </font>
+<pre><font color="#FF0055">-- From Language war game.</font>
+<font color="#FF0055">-- This small task deducts life support energy from either the </font>
+<font color="#FF0055">-- large Euphoria ship or the small shuttle.</font>
+<font color="#FF0055">-- It seems to run "forever" in an infinite loop, </font>
+<font color="#FF0055">-- but it's actually a real-time task that is called</font>
+<font color="#FF0055">-- every 1.7 to 1.8 seconds throughout the game.</font>
+<font color="#FF0055">-- It deducts either 3 units or 13 units of life support energy each time.</font>
+<font color="#330033"></font>
+<font color="#0000FF">global procedure </font><font color="#330033">task_life()</font>
+<font color="#FF0055">-- independent task: subtract life support energy </font>
+<font color="#0000FF">    while </font><font color="#330033">TRUE </font><font color="#0000FF">do</font>
+<font color="#0000FF">        if </font><font color="#330033">shuttle </font><font color="#0000FF">then</font>
+<font color="#330033">            p_energy(-3)</font>
+<font color="#0000FF">        else</font>
+<font color="#330033">            p_energy(-13)</font>
+<font color="#0000FF">        end if</font>
+<font color="#FF00FF">        task_yield</font><font color="#330033">()</font>
+<font color="#0000FF">    end while</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"> </font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1883,8 +2020,8 @@ When your program terminates, the last color that you selected
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">text_color(BRIGHT_BLUE)</font>
-<font color="#330033"></font>
+<pre><font color="#330033">text_color(BRIGHT_BLUE)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1993,10 +2130,10 @@ While <font color="#993333"><b>ex.exe</b></font> is running,
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">tick_rate(100)</font>
-<font color="#FF0055">-- time() will now advance in steps of .01 seconds</font>
-<font color="#FF0055">-- instead of the usual .055 seconds</font>
-<font color="#330033"></font>
+<pre><font color="#330033">tick_rate(100)</font>
+<font color="#FF0055">-- time() will now advance in steps of .01 seconds</font>
+<font color="#FF0055">-- instead of the usual .055 seconds</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -2058,23 +2195,23 @@ elapsed time.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">constant </font><font color="#330033">ITERATIONS = 1000000</font>
-<font color="#FF00FF">integer </font><font color="#330033">p</font>
-<font color="#FF00FF">atom </font><font color="#330033">t0, loop_overhead</font>
-<font color="#330033"></font>
-<font color="#330033">t0 = </font><font color="#FF00FF">time</font><font color="#330033">()</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">ITERATIONS </font><font color="#0000FF">do</font>
-<font color="#FF0055">    -- time an empty loop</font>
-<font color="#0000FF">end for</font>
-<font color="#330033">loop_overhead = </font><font color="#FF00FF">time</font><font color="#330033">() - t0</font>
-<font color="#330033"></font>
-<font color="#330033">t0 = </font><font color="#FF00FF">time</font><font color="#330033">()</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">ITERATIONS </font><font color="#0000FF">do</font>
-<font color="#330033">    p = </font><font color="#FF00FF">power</font><font color="#330033">(2, 20)</font>
-<font color="#0000FF">end for</font>
-<font color="#330033">? (</font><font color="#FF00FF">time</font><font color="#993333">() </font><font color="#330033">- t0 - loop_overhead)/ITERATIONS</font>
-<font color="#FF0055">-- calculates time (in seconds) for one call to power</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">constant </font><font color="#330033">ITERATIONS = 1000000</font>
+<font color="#FF00FF">integer </font><font color="#330033">p</font>
+<font color="#FF00FF">atom </font><font color="#330033">t0, loop_overhead</font>
+<font color="#330033"></font>
+<font color="#330033">t0 = </font><font color="#FF00FF">time</font><font color="#330033">()</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">ITERATIONS </font><font color="#0000FF">do</font>
+<font color="#FF0055">    -- time an empty loop</font>
+<font color="#0000FF">end for</font>
+<font color="#330033">loop_overhead = </font><font color="#FF00FF">time</font><font color="#330033">() - t0</font>
+<font color="#330033"></font>
+<font color="#330033">t0 = </font><font color="#FF00FF">time</font><font color="#330033">()</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">ITERATIONS </font><font color="#0000FF">do</font>
+<font color="#330033">    p = </font><font color="#FF00FF">power</font><font color="#330033">(2, 20)</font>
+<font color="#0000FF">end for</font>
+<font color="#330033">? (</font><font color="#FF00FF">time</font><font color="#993333">() </font><font color="#330033">- t0 - loop_overhead)/ITERATIONS</font>
+<font color="#FF0055">-- calculates time (in seconds) for one call to power</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -2126,13 +2263,13 @@ Only trace(3) is supported by the Euphoria To C Translator.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">x < 0 </font><font color="#0000FF">then</font>
-<font color="#FF0055">    -- ok, here's the case I want to debug...</font>
-<font color="#FF00FF">    trace</font><font color="#330033">(1)</font>
-<font color="#FF0055">    -- etc.</font>
-<font color="#330033">    ...</font>
-<font color="#0000FF">end if</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">if </font><font color="#330033">x < 0 </font><font color="#0000FF">then</font>
+<font color="#FF0055">    -- ok, here's the case I want to debug...</font>
+<font color="#FF00FF">    trace</font><font color="#330033">(1)</font>
+<font color="#FF0055">    -- etc.</font>
+<font color="#330033">    ...</font>
+<font color="#0000FF">end if</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>

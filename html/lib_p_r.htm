@@ -151,7 +151,7 @@ Remember that peek takes just one argument, which in the
 </td></tr>
 
  <tr><td valign=top><b>Description:</b></td>
-<td>Return a single signbed byte value in the range -128 to 127 from machine
+<td>Return a single signed byte value in the range -128 to 127 from machine
  address a, or return a sequence containing i consecutive signed byte
  values starting at address a in memory.
 </td></tr>
@@ -508,7 +508,7 @@ Remember that peek4u() takes just one argument, which in the
 
 
  <tr><td valign=top><b>Syntax:</b></td>
-<td><font face = "Arial, Helvetica"> include misc.e<BR>
+<td><font face = "Arial, Helvetica"> include math.e<BR>
  PI
 </font>
 </td></tr>
@@ -1919,9 +1919,15 @@ Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
 <font color="#330033">  </font>
 </pre></td></tr>
 
+
 <tr><td valign=top><b>See Also:</b></td>
-<td><a href="lib_e_g.htm#floor">floor</a>
+<td>
+<a href="lib_c_d.htm#ceil">ceil</a>,
+<a href="lib_e_g.htm#floor">floor</a>,
+<a href="lib_p_r.htm#round">round</a>,
+<a href="lib_p_r.htm#round_prec">round_prec</a>
 </td></tr>
+
 
 </table>
 
@@ -2045,6 +2051,139 @@ Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
 
 </table>
 
+
+<a name=right></a><font color="#006633" size=+2><br>
+<center><b>right</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include sequence.e<BR>
+s2 = right(s1, i)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the last i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s2 = right(</font><font color="#00A033">"John Doe"</font><font color="#330033">, 3)</font>
+<font color="#FF0055">-- s2 is Doe</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = right(</font><font color="#00A033">"John Doe"</font><font color="#330033">, 50)</font>
+<font color="#FF0055">-- s2 is John Doe</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = right(</font><font color="#993333">{</font><font color="#330033">1, 5.4, </font><font color="#00A033">"John"</font><font color="#330033">, 30</font><font color="#993333">}</font><font color="#330033">, 3)</font>
+<font color="#FF0055">-- s2 is {5.4, "John", 30}</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_h_o.htm#left">left</a>,
+<a href="lib_h_o.htm#mid">mid</a>,
+<a href="lib_s_t.htm#slice">slice</a>
+</td></tr>
+
+</table>
+
+
+<a name=round></a><font color="#006633" size=+2><br>
+<center><b>round</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> i = round(x)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the argument's elements rounded to the nearest integer.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td> This function may be applied to an atom or to all elements
+ of a sequence.
+ 
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">round(</font><font color="#993333">{</font><font color="#330033">4.12, 4.67, -5.8, -5.21</font><font color="#993333">}</font><font color="#330033">) </font><font color="#FF0055">-- {4, 5, -6, -5}</font>
+<font color="#330033">round(12.2) </font><font color="#FF0055">-- 12</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+<a href="lib_c_d.htm#ceil">ceil</a>,
+<a href="lib_e_g.htm#floor">floor</a>,
+<a href="lib_p_r.htm#remainder">remainder</a>,
+<a href="lib_p_r.htm#round_prec">round_prec</a>
+</td></tr>
+
+
+</table>
+
+<a name=round_prec></a><font color="#006633" size=+2><br>
+<center><b>round_prec</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> a = round_prec(x, i)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the argument's elements rounded to i precision.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td> This function may be applied to an atom or to all elements
+ of a sequence.
+ 
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">round_prec(</font><font color="#993333">{</font><font color="#330033">4.12, 4.67, -5.8, -5.21</font><font color="#993333">}</font><font color="#330033">, 10) </font><font color="#FF0055">-- {4.1, 4.7, -5.8, -5.2}</font>
+<font color="#330033">round_prec(12.2512, 100) </font><font color="#FF0055">-- 12.25</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+<a href="lib_c_d.htm#ceil">ceil</a>,
+<a href="lib_e_g.htm#floor">floor</a>,
+<a href="lib_p_r.htm#remainder">remainder</a>,
+<a href="lib_p_r.htm#round">round</a>
+</td></tr>
+
+
+</table>
 
 <a name=routine_id></a><font color="#006633" size=+2><br>
 <center><b>routine_id</b></center>

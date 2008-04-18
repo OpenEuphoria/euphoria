@@ -1,6 +1,6 @@
 
-  
-                          How to Install Euphoria on Windows  
+ 
+                         How to Install Euphoria on Windows 
 
 
 
@@ -45,7 +45,7 @@
 
  2.  - In the same autoexec.bat file add a new line:
 
-               SET EUDIR=C:\EUPHORIA
+               SET EUDIR=C:\EUPHORIA
        
        The EUDIR environment variable indicates the full path to the main
        Euphoria directory.

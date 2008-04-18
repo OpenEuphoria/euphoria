@@ -39,6 +39,23 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <font face="Arial, Helvetica" color="#003366">
 <b>Version 3.2 ??? ????:</b></font>
 <p>
+<font color="#993333"><b>Bug Fixes</b></font>
+<ul>
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>1855414.
+ <b>open()</b>'s max path length is now determined by the underlying
+ operating system and not a generic default. open() also now
+ returns -1 when the filename is too long instead of causing
+ a fatal error. Fixed by Jeremy Cowgar
+<p>
+<li>
+ <b><font color="#009999">bug fixed: </font></b>1608870.
+ <b>dir()</b> now handles *.abc correctly, not showing a file
+ ending with .abcd. <b>dir()</b> also now supports wildcard
+ characters (* and ?) on all platforms. Fixed by Jeremy Cowgar
+
+</ul>
 
 <p>
 <font color="#993333"><b>New Features</b></font>
@@ -49,8 +66,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
  Implemented by C. Cuvier
 <p>
 <li>
- Comments may now be embedded in data passed to value() in get.e.
- Implemented by C. Cuvier
+ Comments may now be embedded in data passed to <b>value()</b> in
+ <b>get.e</b>. Implemented by C. Cuvier
 <p>
 <li>
  Enhanced symbol resolution to take into account information
@@ -64,8 +81,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
  Implemented by Matthew Lewis
 <p>
 <li>
- Added value_from() in get.e to return additional information
- about the parsing activity.
+ Added <b>value_from()</b> in <b>get.e</b> to return additional
+ information about the parsing activity.
  Implemented by C. Cuvier
 <p>
 <li>
@@ -80,8 +97,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
  Implemented by C. Cuvier
 <p>
 <li>
- New builtin routines: peeks(), peek2s(), peek2u(), peek_string(),
- poke2()
+ New builtin routines: <b>peeks()</b>, <b>peek2s()</b>, <b>peek2u()</b>,
+ <b>peek_string()</b>, <b>poke2()</b>
  Implemented by Matthew Lewis
 <p>
 <li>
@@ -93,7 +110,31 @@ a.brown:hover     {color: red; text-decoration: underline;}
  Improved accuracy in scanning numbers in scientific notation. Scanned
  numbers are accurate to the full precision of the IEEE 754 floating
  point standard. Implemented by Matthew Lewis
+<p>
+<li>
+ <b>Translator:</b> Added <b>-lccopt-off</b> option for translator to
+ disable using the optimization flag when compiling with LCC, as it has
+ problems sometimes. Implemented by Jeremy Cowgar
+<p>
+<li>
+ Began <b>standard library</b>:
+<p>
+ New routines in <b>math.e</b>:
+ <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
+ <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b> and
+ <b>max()</b>.
+<p>
+ New routines in <b>sequence.e</b>:
+ <b>left()</b>, <b>mid()</b>, <b>slice()</b>, and <b>right()</b>.
+<p>
+ Implemented by Jeremy Cowgar
+<p>
+<li>
+ Began <b>unit testing</b>. 84 tests in total. To run, cd tests and
+ exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
+
+<p>
 
 <font face="Arial, Helvetica" color="#003366">
 <b>Version 3.1.1 August 2007:</b></font>

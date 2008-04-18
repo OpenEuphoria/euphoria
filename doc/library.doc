@@ -75,6 +75,14 @@
 
  prepend         - add a new element to the beginning of a sequence
 
+ left            - return the first n items of st with bounds checking
+
+ mid             - return from n1 n2 number of items of st with bounds checking
+
+ slice           - return from n1 to n2 of st with bounds checking
+
+ right           - return the last n items of st with bounds checking
+
 
 
  2.3 Searching and Sorting
@@ -142,9 +150,27 @@
 
  floor           - round down to the nearest integer
 
+ ceil            - round up to the nearest integer
+
+ round           - rounds's elements to the nearest integer
+
+ round_prec      - rounds's elements to the given precision
+
  remainder       - calculate the remainder when a number is divided by another
 
  power           - calculate a number raised to a power
+
+ sign            - test an objects signness
+
+ abs             - return the absolute value
+
+ average         - compute the average item in a sequence
+
+ sum             - add all items in a sequence
+
+ max             - find the maximum item in a sequence
+
+ min             - find the minumum item in a sequence
 
  PI              - the mathematical value PI (3.14159...)
 
@@ -456,11 +482,22 @@
 
  peek            - read one or more bytes from memory
 
+ peeks           - read one or more signed bytes from memory
+
+ peek2s          - read 2-byte signed values from memory
+
+ peek2u          - read 2-byte unsigned values from memory
+
  peek4s          - read 4-byte signed values from memory
 
  peek4u          - read 4-byte unsigned values from memory
 
+ peek_string     - read a sequence of text from a null terminated string from
+                   memory
+
  poke            - write one or more bytes to memory
+
+ poke2           - write 2-bye values into memory
 
  poke4           - write 4-byte values into memory
 
@@ -665,6 +702,27 @@
               
               
  See Also:    crash_message, system_exec
+
+
+ -------------------------------------<abs>-------------------------------------
+
+ Syntax:      include math.e
+              x = abs(x)
+
+ Description: Returns the absolute value of each element of x
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+              x = abs({10.5, -12, 3})
+              -- x is {10.5, 12, 3}
+              
+              i = abs(-4)
+              -- i is 4
+              
+ See Also:    sign
 
 
  ---------------------------------<all_palette>---------------------------------
@@ -889,7 +947,7 @@
 
  -----------------------------------<arccos>------------------------------------
 
- Syntax:      include misc.e
+ Syntax:      include math.e
               x2 = arccos(x1)
 
  Description: Return an angle with cosine equal to x1.
@@ -914,7 +972,7 @@
 
  -----------------------------------<arcsin>------------------------------------
 
- Syntax:      include misc.e
+ Syntax:      include math.e
               x2 = arcsin(x1)
 
  Description: Return an angle with sine equal to x1.
@@ -1040,6 +1098,24 @@
               
               
  See Also:    atom_to_float32, float64_to_atom
+
+
+ -----------------------------------<average>-----------------------------------
+
+ Syntax       include math.e
+              a = average(x)
+
+ Description  Compute the average of all the argument's elements
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+                a = average({8.5, 7.25, 10, 18.75})
+                -- a is 11.125
+              
+ See Also:    sum, max, min
 
 
  ---------------------------------<bits_to_int>---------------------------------
@@ -1331,6 +1407,26 @@
               
                
  See Also:    call_func, routine_id
+
+
+ ------------------------------------<ceil>-------------------------------------
+
+ Syntax:      include math.e
+              i = ceil()
+
+ Description: Computes next higher argument's integers. Returns the integers
+              that are greater or equal to each element in the argument.
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+              sequence nums
+              nums = {8, -5, 3.14, 4.89, -7.62, -4.3}
+              nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
+              
+ See Also:    floor, round, round_prec
 
 
  ------------------------------------<chdir>------------------------------------
@@ -2041,8 +2137,8 @@
 
  Description: Return directory information for the file or directory named by
               st. If there is no file or directory with this name then -1 is
-              returned. On Windows and DOS st can contain * and ? wildcards to
-              select multiple files.
+              returned. st can also contain * and ? wildcards to select
+              multiple files.
 
               This information is similar to what you would get from the DOS
               DIR command. A sequence is returned where each element is a
@@ -2463,7 +2559,7 @@
               -- y is {0, -2, 9, 100}
               
                
- See Also:    remainder
+ See Also:    ceil remainder round, round_prec
 
 
  ------------------------------------<flush>------------------------------------
@@ -3275,6 +3371,31 @@
  See Also:    atom, sequence, floor
 
 
+ ------------------------------------<left>-------------------------------------
+
+ Syntax:      include sequence.e
+              s2 = left(s1, i)
+
+ Description: Return the first i items of s1. If i is greater than the length
+              of s1, then the entire s1 will be returned.
+
+ Comments:    A new sequence is created. s1 can be any type of sequence,
+              including nested sequences.
+
+ Example:
+
+              s2 = left("John Doe", 4)
+              -- s2 is John
+              
+              s2 = left("John Doe", 50)
+              -- s2 is John Doe
+              
+              s2 = left({1, 5.4, "John", 30}, 3)
+              -- s2 is {1, 5.4, "John"}
+               
+ See Also:    right, mid, slice
+
+
  -----------------------------------<length>------------------------------------
 
  Syntax:      i = length(s)
@@ -3503,6 +3624,24 @@
  See Also:    find, find_from, match, compare, wildcard_match
 
 
+ -------------------------------------<max>-------------------------------------
+
+ Syntax:      include math.e
+              a = max(x)
+
+ Description: Computes the maximum value among all the argument's elements.
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+              a = max({10,15.4,3})
+              -- a is 15.4
+              
+ See Also:    average, min, sum
+
+
  ----------------------------------<mem_copy>-----------------------------------
 
  Syntax:      mem_copy(a1, a2, i)
@@ -3575,6 +3714,50 @@
               
                
  Example Program: demo\win32\email.exw
+
+
+ -------------------------------------<mid>-------------------------------------
+
+ Syntax:      include sequence.e
+              s2 = mid(s1, i1, i2)
+
+ Description: Return i2 items starting at i1. If i1 + i2 is greater than the
+              length of s1, then everything in s1 starting at i1 will be
+              returned.
+
+ Comments:    A new sequence is created. s1 can be any type of sequence,
+              including nested sequences.
+
+ Example:
+
+              s2 = mid("John Middle Doe", 6, 6)
+              -- s2 is Middle
+              
+              s2 = left("John Middle Doe", 6, 50)
+              -- s2 is Middle Doe
+              
+              s2 = left({1, 5.4, "John", 30}, 2, 2)
+              -- s2 is {5.4, "John"}
+               
+ See Also:    right, left, slice
+
+
+ -------------------------------------<min>-------------------------------------
+
+ Syntax:      include math.e
+              a = min(x)
+
+ Description: Computes the minimum value among all the argument's elements.
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+              a = min({10,15.4,3})
+              -- a is 3
+              
+ See Also:    average, max, sum
 
 
  --------------------------------<mouse_events>---------------------------------
@@ -3909,7 +4092,7 @@
               or ...
               s = peeks({a, i})
 
- Description: Return a single signbed byte value in the range -128 to 127 from
+ Description: Return a single signed byte value in the range -128 to 127 from
               machine address a, or return a sequence containing i consecutive
               signed byte values starting at address a in memory.
 
@@ -4105,7 +4288,7 @@
 
  -------------------------------------<PI>--------------------------------------
 
- Syntax:      include misc.e
+ Syntax:      include math.e
               PI
 
  Description: PI (3.14159...) has been defined as a global constant.
@@ -4920,7 +5103,7 @@
               -- s is {0, 1, 1}
                 
               
- See Also:    floor
+ See Also:    ceil, floor, round, round_prec
 
 
  -----------------------------------<repeat>------------------------------------
@@ -4979,6 +5162,65 @@
               
                
  See Also:    append, prepend, repeat
+
+
+ ------------------------------------<right>------------------------------------
+
+ Syntax:      include sequence.e
+              s2 = right(s1, i)
+
+ Description: Return the last i items of s1. If i is greater than the length of
+              s1, then the entire s1 will be returned.
+
+ Comments:    A new sequence is created. s1 can be any type of sequence,
+              including nested sequences.
+
+ Example:
+
+              s2 = right("John Doe", 3)
+              -- s2 is Doe
+              
+              s2 = right("John Doe", 50)
+              -- s2 is John Doe
+              
+              s2 = right({1, 5.4, "John", 30}, 3)
+              -- s2 is {5.4, "John", 30}
+               
+ See Also:    left, mid, slice
+
+
+ ------------------------------------<round>------------------------------------
+
+ Syntax:      i = round(x)
+
+ Description: Return the argument's elements rounded to the nearest integer.
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence.
+
+ Example:
+
+              round({4.12, 4.67, -5.8, -5.21}) -- {4, 5, -6, -5}
+              round(12.2) -- 12
+               
+ See Also:    ceil, floor, remainder, round_prec
+
+
+ ---------------------------------<round_prec>----------------------------------
+
+ Syntax:      a = round_prec(x, i)
+
+ Description: Return the argument's elements rounded to i precision.
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence.
+
+ Example:
+
+              round_prec({4.12, 4.67, -5.8, -5.21}, 10) -- {4.1, 4.7, -5.8, -5.2}
+              round_prec(12.2512, 100) -- 12.25
+               
+ See Also:    ceil, floor, remainder, round
 
 
  ---------------------------------<routine_id>----------------------------------
@@ -5473,6 +5715,31 @@
  See Also:    get_vector, lock_memory, allocate
 
 
+ ------------------------------------<sign>-------------------------------------
+
+ Syntax:      include math.e
+              i = sign(x)
+
+ Description: Return -1, 0 or 1 for each element according to it being
+              negative, zero or positive
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+              i = sign(5)
+              -- i is 1
+              
+              i = sign(0)
+              -- i is 0
+              
+              i = sign(-2)
+              -- i is -1
+              
+ See Also:    abs
+
+
  -------------------------------------<sin>-------------------------------------
 
  Syntax:      x2 = sin(x1)
@@ -5515,6 +5782,40 @@
               puts(1, "Done.\n")
               
  See Also:    lock_file, abort, time
+
+
+ ------------------------------------<slice>------------------------------------
+
+ Syntax:      include sequence.e
+              s2 = slice(s1, i1, i2)
+
+ Description: Return items i1 to i2 from s1. If i2 is greater than the length
+              of s1, then from i1 to the end of s1 will be returned. If i2 is
+              zero, it will be treated as the end of s1. If i2 is a negative
+              value, then it will be treated as i2 positions from the end of
+              s1.
+
+ Comments:    A new sequence is created. s1 can be any type of sequence,
+              including nested sequences.
+
+ Example:
+
+              s2 = slice("John Doe", 6, 8)
+              -- s2 is Doe
+              
+              s2 = slice("John Doe", 6, 50)
+              -- s2 is Doe
+              
+              s2 = slice({1, 5.4, "John", 30}, 2, 3)
+              -- s2 is {5.4, "John"}
+              
+              s2 = slice({1,2,3,4,5}, 2, -1)
+              -- s2 is {2,3,4}
+              
+              s2 = slice({1,2,3,4,5}, 2, 0)
+              -- s2 is {2,3,4,5}
+               
+ See Also:    right, mid, left
 
 
  ------------------------------------<sort>-------------------------------------
@@ -5649,6 +5950,27 @@
               
                
  See Also:    log, power
+
+
+ -------------------------------------<sum>-------------------------------------
+
+ Syntax       include math.e
+              a = sum(x)
+
+ Description  Compute the sum of all the argument's elements
+
+ Comments:    This function may be applied to an atom or to all elements of a
+              sequence
+
+ Example:
+
+                a = sum({10, 20, 30})
+                -- a is 60
+              
+                a = sum({10.5, 11.2, 8.1})
+                -- a is 29.8
+              
+ See Also:    average, max, min
 
 
  -----------------------------------<system>------------------------------------

@@ -238,6 +238,57 @@ This function will correctly convert integer values up to 32-bits. For
 
 </table>
 
+<a name=left></a><font color="#006633" size=+2><br>
+<center><b>left</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include sequence.e<BR>
+s2 = left(s1, i)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the first i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s2 = left(</font><font color="#00A033">"John Doe"</font><font color="#330033">, 4)</font>
+<font color="#FF0055">-- s2 is John</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = left(</font><font color="#00A033">"John Doe"</font><font color="#330033">, 50)</font>
+<font color="#FF0055">-- s2 is John Doe</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = left(</font><font color="#993333">{</font><font color="#330033">1, 5.4, </font><font color="#00A033">"John"</font><font color="#330033">, 30</font><font color="#993333">}</font><font color="#330033">, 3)</font>
+<font color="#FF0055">-- s2 is {1, 5.4, "John"}</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_p_r.htm#right">right</a>,
+<a href="lib_h_o.htm#mid">mid</a>,
+<a href="lib_s_t.htm#slice">slice</a>
+</td></tr>
+
+</table>
+
+
+
+
 
 <a name=length></a><font color="#006633" size=+2><br>
 <center><b>length</b></center>
@@ -655,6 +706,46 @@ it repeatedly, before the lock request is granted.
 
 </table>
 
+<a name=max></a><font color="#006633" size=+2><br>
+<center><b>max</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include math.e<BR>
+a = max(x)</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Computes the maximum value among all the argument's elements.
+</td></tr>
+
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+
+ <tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">a = max(</font><font color="#993333">{</font><font color="#330033">10,15.4,3</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- a is 15.4</font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_a_b.htm#average">average</a>,
+<a href="lib_h_o.htm#min">min</a>,
+<a href="lib_s_t.htm#sum">sum</a>
+</td></tr>
+
+</table>
+
+
 <a name=mem_copy></a><font color="#006633" size=+2><br>
 <center><b>mem_copy</b></center>
 </font><p>
@@ -797,6 +888,95 @@ mem_set(a1, i1, i2) is equivalent to: <b>poke(a1, repeat(i1, i2))</b>
 <td><font color="#5500FF"><b>demo\win32\email.exw</b></font>
 </td></tr>
 
+
+</table>
+
+
+<a name=mid></a><font color="#006633" size=+2><br>
+<center><b>mid</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include sequence.e<BR>
+s2 = mid(s1, i1, i2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return i2 items starting at i1. If i1 + i2 is greater than the length of s1, then everything
+in s1 starting at i1 will be returned.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s2 = mid(</font><font color="#00A033">"John Middle Doe"</font><font color="#330033">, 6, 6)</font>
+<font color="#FF0055">-- s2 is Middle</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = left(</font><font color="#00A033">"John Middle Doe"</font><font color="#330033">, 6, 50)</font>
+<font color="#FF0055">-- s2 is Middle Doe</font>
+<font color="#330033"></font>
+<font color="#330033">s2 = left(</font><font color="#993333">{</font><font color="#330033">1, 5.4, </font><font color="#00A033">"John"</font><font color="#330033">, 30</font><font color="#993333">}</font><font color="#330033">, 2, 2)</font>
+<font color="#FF0055">-- s2 is {5.4, "John"}</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_p_r.htm#right">right</a>,
+<a href="lib_h_o.htm#left">left</a>,
+<a href="lib_s_t.htm#slice">slice</a>
+</td></tr>
+
+</table>
+
+
+<a name=min></a><font color="#006633" size=+2><br>
+<center><b>min</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include math.e<BR>
+a = min(x)</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Computes the minimum value among all the argument's elements.
+</td></tr>
+
+
+ <tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or to all elements of a sequence
+</td></tr>
+
+
+ <tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">a = min(</font><font color="#993333">{</font><font color="#330033">10,15.4,3</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF0055">-- a is 3</font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_a_b.htm#average">average</a>,
+<a href="lib_h_o.htm#max">max</a>,
+<a href="lib_s_t.htm#sum">sum</a>
+</td></tr>
 
 </table>
 

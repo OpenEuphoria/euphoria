@@ -227,6 +227,12 @@
  simultaneously-active tasks, the stack space allotted to each task will tend
  to decrease.
 
+ When using LCC, sometimes the default optimization causes problems. You can
+ disable this optimization by adding "-lccopt-off" to the command line.
+
+      ecw -lcc -lccopt-off myprog.exw
+ 
+
  To make a DOS program, compiled by WATCOM, that uses fast hardware
  floating-point instructions, add "-fastfp" to the command line. e.g.
 

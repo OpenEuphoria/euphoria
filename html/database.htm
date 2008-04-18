@@ -98,17 +98,17 @@ a.brown:hover     {color: red; text-decoration: underline;}
  using "binary" mode copying, rather than "text" or "ASCII" mode which
  could change the line terminators.
  
-<pre><font color="#330033"> Example:</font>
-<font color="#330033">    database: </font><font color="#00A033">"mydata.edb"</font>
-<font color="#330033">          first table: </font><font color="#00A033">"passwords"</font>
-<font color="#330033">               record #1:  key: </font><font color="#00A033">"jones"   </font><font color="#330033">data: </font><font color="#00A033">"euphor123"</font>
-<font color="#330033">               record #2:  key: </font><font color="#00A033">"smith"   </font><font color="#330033">data: </font><font color="#00A033">"billgates"</font>
-<font color="#330033">        </font>
-<font color="#330033">          second table: </font><font color="#00A033">"parts"</font>
-<font color="#330033">               record #1:  key: 134525    data: {</font><font color="#00A033">"hammer"</font><font color="#330033">, 15.95, 500}</font>
-<font color="#330033">               record #2:  key: 134526    data: {</font><font color="#00A033">"saw"</font><font color="#330033">, 25.95, 100}</font>
-<font color="#330033">               record #3:  key: 134530    data: {</font><font color="#00A033">"screw driver"</font><font color="#330033">, 5.50, 1500}</font>
-<font color="#330033">        </font>
+<pre><font color="#330033"> Example:</font>
+<font color="#330033">    database: </font><font color="#00A033">"mydata.edb"</font>
+<font color="#330033">          first table: </font><font color="#00A033">"passwords"</font>
+<font color="#330033">               record #1:  key: </font><font color="#00A033">"jones"   </font><font color="#330033">data: </font><font color="#00A033">"euphor123"</font>
+<font color="#330033">               record #2:  key: </font><font color="#00A033">"smith"   </font><font color="#330033">data: </font><font color="#00A033">"billgates"</font>
+<font color="#330033">        </font>
+<font color="#330033">          second table: </font><font color="#00A033">"parts"</font>
+<font color="#330033">               record #1:  key: 134525    data: {</font><font color="#00A033">"hammer"</font><font color="#330033">, 15.95, 500}</font>
+<font color="#330033">               record #2:  key: 134526    data: {</font><font color="#00A033">"saw"</font><font color="#330033">, 25.95, 100}</font>
+<font color="#330033">               record #3:  key: 134530    data: {</font><font color="#00A033">"screw driver"</font><font color="#330033">, 5.50, 1500}</font>
+<font color="#330033">        </font>
 </pre>
  It's up to you to interpret the meaning of the key and data.
  <font color="#006633"><b>In keeping with the spirit of Euphoria, you have
@@ -415,10 +415,10 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_create(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_NO) != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't create the database!\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_create(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_NO) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't create the database!\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -455,10 +455,10 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 
 <tr><td></td><td>
-<pre><font color="#0000FF">    global constant </font><font color="#330033">DB_OK = 0   </font><font color="#FF0055">-- success</font>
-<font color="#330033">             DB_OPEN_FAIL = -1  </font><font color="#FF0055">-- couldn't open the file </font>
-<font color="#330033">             DB_LOCK_FAIL = -3  </font><font color="#FF0055">-- couldn't lock the file in the</font>
-<font color="#FF0055">                                --     manner requested</font>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">DB_OK = 0   </font><font color="#FF0055">-- success</font>
+<font color="#330033">             DB_OPEN_FAIL = -1  </font><font color="#FF0055">-- couldn't open the file </font>
+<font color="#330033">             DB_LOCK_FAIL = -3  </font><font color="#FF0055">-- couldn't lock the file in the</font>
+<font color="#FF0055">                                --     manner requested</font>
 </pre></td></tr>
 
 
@@ -482,25 +482,25 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">tries = 0</font>
-<font color="#0000FF">while </font><font color="#330033">1 </font><font color="#0000FF">do</font>
-<font color="#330033">    err = db_open(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_SHARED) </font>
-<font color="#0000FF">    if </font><font color="#330033">err = DB_OK </font><font color="#0000FF">then</font>
-<font color="#0000FF">        exit</font>
-<font color="#0000FF">    elsif </font><font color="#330033">err = DB_LOCK_FAIL </font><font color="#0000FF">then</font>
-<font color="#330033">    	tries += 1</font>
-<font color="#0000FF">    	if </font><font color="#330033">tries > 10 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">            puts</font><font color="#330033">(2, </font><font color="#00A033">"too many tries, giving up\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">            abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">    	else    </font>
-<font color="#330033">    	    sleep(5)</font>
-<font color="#0000FF">    	end if</font>
-<font color="#0000FF">    else</font>
-<font color="#FF00FF">    	puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't open the database!\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">    	abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">    end if</font>
-<font color="#0000FF">end while</font>
-<font color="#330033"></font>
+<pre><font color="#330033">tries = 0</font>
+<font color="#0000FF">while </font><font color="#330033">1 </font><font color="#0000FF">do</font>
+<font color="#330033">    err = db_open(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_SHARED) </font>
+<font color="#0000FF">    if </font><font color="#330033">err = DB_OK </font><font color="#0000FF">then</font>
+<font color="#0000FF">        exit</font>
+<font color="#0000FF">    elsif </font><font color="#330033">err = DB_LOCK_FAIL </font><font color="#0000FF">then</font>
+<font color="#330033">    	tries += 1</font>
+<font color="#0000FF">    	if </font><font color="#330033">tries > 10 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">            puts</font><font color="#330033">(2, </font><font color="#00A033">"too many tries, giving up\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">            abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">    	else    </font>
+<font color="#330033">    	    sleep(5)</font>
+<font color="#0000FF">    	end if</font>
+<font color="#0000FF">    else</font>
+<font color="#FF00FF">    	puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't open the database!\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    	abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">    end if</font>
+<font color="#0000FF">end while</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 
@@ -550,9 +550,9 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_select(</font><font color="#00A033">"employees"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't select employees database\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_select(</font><font color="#00A033">"employees"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't select employees database\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -624,9 +624,9 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_create_table(</font><font color="#00A033">"my_new_table"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't create my_new_table!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_create_table(</font><font color="#00A033">"my_new_table"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't create my_new_table!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -668,10 +668,10 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_select_table(</font><font color="#00A033">"salary"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't find salary table!\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_select_table(</font><font color="#00A033">"salary"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't find salary table!\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 
@@ -779,12 +779,12 @@ element of s is a sequence of characters containing the name of a table.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">sequence </font><font color="#330033">names</font>
-<font color="#330033"></font>
-<font color="#330033">names = db_table_list()</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(names) </font><font color="#0000FF">do</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(1, names</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">] </font><font color="#330033">& </font><font color="#00A033">'\n'</font><font color="#330033">)</font>
-<font color="#0000FF">end for</font>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">names</font>
+<font color="#330033"></font>
+<font color="#330033">names = db_table_list()</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(names) </font><font color="#0000FF">do</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, names</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">] </font><font color="#330033">& </font><font color="#00A033">'\n'</font><font color="#330033">)</font>
+<font color="#0000FF">end for</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -816,13 +816,13 @@ element of s is a sequence of characters containing the name of a table.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF0055">-- look at all records in the current table</font>
-<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">db_table_size() </font><font color="#0000FF">do</font>
-<font color="#0000FF">    if </font><font color="#330033">db_record_key(i) = 0 </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    	puts</font><font color="#330033">(1, </font><font color="#00A033">"0 key found\n"</font><font color="#330033">)</font>
-<font color="#0000FF">    	exit</font>
-<font color="#0000FF">    end if</font>
-<font color="#0000FF">end for</font>
+<pre><font color="#FF0055">-- look at all records in the current table</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">db_table_size() </font><font color="#0000FF">do</font>
+<font color="#0000FF">    if </font><font color="#330033">db_record_key(i) = 0 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    	puts</font><font color="#330033">(1, </font><font color="#00A033">"0 key found\n"</font><font color="#330033">)</font>
+<font color="#0000FF">    	exit</font>
+<font color="#0000FF">    end if</font>
+<font color="#0000FF">end for</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -875,14 +875,14 @@ element of s is a sequence of characters containing the name of a table.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">rec_num = db_find_key(</font><font color="#00A033">"Millennium"</font><font color="#330033">)</font>
-<font color="#0000FF">if </font><font color="#330033">rec_num > 0 </font><font color="#0000FF">then</font>
-<font color="#330033">    ? db_record_key(rec_num)</font>
-<font color="#330033">    ? db_record_data(rec_num)</font>
-<font color="#0000FF">else</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Not found, but if you insert it,\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">    printf</font><font color="#330033">(2, </font><font color="#00A033">"it will be #%d\n"</font><font color="#330033">, -rec_num)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#330033">rec_num = db_find_key(</font><font color="#00A033">"Millennium"</font><font color="#330033">)</font>
+<font color="#0000FF">if </font><font color="#330033">rec_num > 0 </font><font color="#0000FF">then</font>
+<font color="#330033">    ? db_record_key(rec_num)</font>
+<font color="#330033">    ? db_record_data(rec_num)</font>
+<font color="#0000FF">else</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Not found, but if you insert it,\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    printf</font><font color="#330033">(2, </font><font color="#00A033">"it will be #%d\n"</font><font color="#330033">, -rec_num)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -921,8 +921,8 @@ a data portion. Each of these can be any Euphoria atom or sequence.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"The 6th record has key value: "</font><font color="#330033">)</font>
-<font color="#330033">? db_record_key(6)</font>
+<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"The 6th record has key value: "</font><font color="#330033">)</font>
+<font color="#330033">? db_record_key(6)</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -959,8 +959,8 @@ a data portion. Each of these can be any Euphoria atom or sequence.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"The 6th record has data value: "</font><font color="#330033">)</font>
-<font color="#330033">? db_record_data(6)</font>
+<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"The 6th record has data value: "</font><font color="#330033">)</font>
+<font color="#330033">? db_record_data(6)</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1000,9 +1000,9 @@ is inserted.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_insert(</font><font color="#00A033">"Smith"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Peter"</font><font color="#330033">, 100, 34.5</font><font color="#993333">}</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"insert failed!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_insert(</font><font color="#00A033">"Smith"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Peter"</font><font color="#330033">, 100, 34.5</font><font color="#993333">}</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"insert failed!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1041,7 +1041,7 @@ of records in the current table.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">db_delete_record(55)</font>
+<pre><font color="#330033">db_delete_record(55)</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1080,7 +1080,7 @@ of records in the current table.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">db_replace_data(67, </font><font color="#993333">{</font><font color="#00A033">"Peter"</font><font color="#330033">, 150, 34.5</font><font color="#993333">}</font><font color="#330033">)</font>
+<pre><font color="#330033">db_replace_data(67, </font><font color="#993333">{</font><font color="#00A033">"Peter"</font><font color="#330033">, 150, 34.5</font><font color="#993333">}</font><font color="#330033">)</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1130,9 +1130,9 @@ If the backup filenames reach .t99 you will have to delete some of them.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_compress() != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"compress failed!\n"</font><font color="#330033">)</font>
-<font color="#0000FF">end if</font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_compress() != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"compress failed!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1170,13 +1170,13 @@ If the backup filenames reach .t99 you will have to delete some of them.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">if </font><font color="#330033">db_open(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_SHARED) != DB_OK </font><font color="#0000FF">then</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't open the database!\n"</font><font color="#330033">)</font>
-<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">end if</font>
-<font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"db.txt"</font><font color="#330033">, </font><font color="#00A033">"w"</font><font color="#330033">)</font>
-<font color="#330033">db_dump(fn, 0)</font>
-<font color="#330033"></font>
+<pre><font color="#0000FF">if </font><font color="#330033">db_open(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_SHARED) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't open the database!\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"db.txt"</font><font color="#330033">, </font><font color="#00A033">"w"</font><font color="#330033">)</font>
+<font color="#330033">db_dump(fn, 0)</font>
+<font color="#330033"></font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1212,12 +1212,12 @@ Your procedure should end by calling abort().
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#0000FF">procedure </font><font color="#330033">my_fatal(</font><font color="#FF00FF">sequence </font><font color="#330033">msg)</font>
-<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"A fatal error occurred - " </font><font color="#330033">& msg & </font><font color="#00A033">'\n'</font><font color="#330033">)</font>
-<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
-<font color="#0000FF">end procedure</font>
-<font color="#330033"></font>
-<font color="#330033">db_fatal_id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"my_fatal"</font><font color="#330033">)</font>
+<pre><font color="#0000FF">procedure </font><font color="#330033">my_fatal(</font><font color="#FF00FF">sequence </font><font color="#330033">msg)</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"A fatal error occurred - " </font><font color="#330033">& msg & </font><font color="#00A033">'\n'</font><font color="#330033">)</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"></font>
+<font color="#330033">db_fatal_id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"my_fatal"</font><font color="#330033">)</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
