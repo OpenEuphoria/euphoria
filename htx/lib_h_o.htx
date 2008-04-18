@@ -207,6 +207,46 @@ end if
  >
 </table>
 
+
+<_routine name="join">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s3 = join(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Join s1 by s2"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+result = join({"John", "Middle", "Doe"}, " ")
+-- result is "John Middle Doe"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#split\">split</a>,
+<a href=\"lib_s_t.htm#split_adv\">split_adv</a>"
+ >
+</table>
+
+
+
+
 <_routine name="left">
 <table border=0 cellspacing=2 cellpadding=2>
 

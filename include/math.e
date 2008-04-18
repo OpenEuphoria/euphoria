@@ -37,23 +37,7 @@ global function arcsin(trig_range x)
 end function
 
 global function ceil(object a)
--- returns next higher integers of the argument's integers
-    object t
-    if integer(a) then
-        return a
-    elsif atom(a) then
-	    return floor(a) + 1
-    end if
-    for i = 1 to length(a) do
-        t = a[i]
-        if integer(t) then
-        elsif atom(t) then
-            a[i] = floor(t) + 1
-        else
-            a[i] = ceil(t)
-        end if
-    end for
-    return a
+    return -floor(-a)
 end function
 
 global function round_prec(object a, object cent)

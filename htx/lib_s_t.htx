@@ -958,6 +958,92 @@ sound(1000) -- starts a fairly high pitched sound
 </_eucode>
 </table>
 
+<_routine name="split">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s3 = split(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"split s1 by s2"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+result = split("John,Middle,Doe", ",")
+-- result is {"John", "Middle", "Doe"}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#split_adv\">split_adv</a>,
+<a href=\"lib_h_o.htm#join\">join</a>"
+ >
+</table>
+
+<_routine name="split_adv">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s3 = split_adv(s1, s2, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"split s1 by s2.
+
+If i1 is > 0 then limit the number of tokens that will be split to i1.
+
+If i2 is 1 then split by any one item in s2 not s2 as a whole. If i2 is 0 then split
+by s2 as a whole."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+result = split_adv("John,Middle,Doe", ",", 2, 0)
+-- result is {"John", "Middle,Doe"}
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+result = split_adv("One,Two|Three.Four", ".,|", 0, 1)
+-- result is {"One", "Two", "Three", "Four"}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#split\">split</a>,
+<a href=\"lib_h_o.htm#join\">join</a>"
+ >
+</table>
 
 <_routine name="sprint">
 <table border=0 cellspacing=2 cellpadding=2>

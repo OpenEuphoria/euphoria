@@ -102,12 +102,14 @@
      <b>max()</b>.
 <p>
      New routines in <b>sequence.e</b>:
-     <b>left()</b>, <b>mid()</b>, <b>slice()</b>, and <b>right()</b>.
+     <b>left()</b>, <b>mid()</b>, <b>slice()</b>, <b>right()</b>,
+     <b>split()</b>, <b>split_adv()</b>, <b>join()</b>, <b>findany()</b>,
+     and <b>findany_from()</b>.
 <p>
      Implemented by Jeremy Cowgar
 <p>
 <li>
-     Began <b>unit testing</b>. 84 tests in total. To run, cd tests and
+     Began <b>unit testing</b>. 101 tests in total. To run, cd tests and
      exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
 

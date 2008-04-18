@@ -9,6 +9,7 @@ testEqual("ceil() float #2", 5, ceil(4.1))
 testEqual("ceil() float #3", 5, ceil(4.5))
 testEqual("ceil() float #4", 5, ceil(4.6))
 testEqual("ceil() sequence", {1,2,3,4,5}, ceil({0.6, 1.2, 3.0, 3.8, 4.4}))
+testEqual("ceil() large integer", 2192837283, ceil(2192837283))
 
 testEqual("round_prec() float #1", 5.5, round_prec(5.49854, 10))
 testEqual("round_prec() float #2", 5.50, round_prec(5.49854, 100))

@@ -214,6 +214,24 @@
   description="return the last n items of st with bounds checking"
 >
 
+<_3clist
+  href="lib_s_t.htm#split"
+  name="split"
+  description="split a sequence by a sequence"
+>
+
+<_3clist
+  href="lib_s_t.htm#split_adv"
+  name="split_adv"
+  description="advanced split that will allow setting a limit and split type"
+>
+
+<_3clist
+  href="lib_h_o.htm#join"
+  name="join"
+  description="join a sequence by another sequence"
+>
+
 </table>
 
 <p>
@@ -251,6 +269,18 @@
   href="lib_e_g.htm#find_from"
   name="find_from"
   description="find an object in a sequence - start searching from any element number"
+>
+
+<_3clist
+  href="lib_e_g.htm#findany"
+  name="findany"
+  description="find any atom in needle in haystack - start searching from element number 1"
+>
+
+<_3clist
+  href="lib_e_g.htm#findany_from"
+  name="findany_from"
+  description="find any atom in needle in haystack - start searching from any element number"
 >
 
 <_3clist
