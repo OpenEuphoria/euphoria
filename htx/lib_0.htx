@@ -375,6 +375,24 @@
 >
 
 <_3clist
+  href="lib_c_d.htm#ceil"
+  name="ceil"
+  description="round up to the nearest integer"
+>
+
+<_3clist
+  href="lib_p_r.htm#round"
+  name="round"
+  description="rounds's elements to the nearest integer"
+>
+
+<_3clist
+  href="lib_p_r.htm#round_prec"
+  name="round_prec"
+  description="rounds's elements to the given precision"
+>
+
+<_3clist
   href="lib_p_r.htm#remainder"
   name="remainder"
   description="calculate the remainder when a number is divided by another"
@@ -384,6 +402,42 @@
   href="lib_p_r.htm#power"
   name="power"
   description="calculate a number raised to a power"
+>
+
+<_3clist
+  href="lib_s_t.htm#sign"
+  name="sign"
+  description="test an objects signness"
+>
+
+<_3clist
+  href="lib_a_b.htm#abs"
+  name="abs"
+  description="return the absolute value"
+>
+
+<_3clist
+  href="lib_a_b.htm#average"
+  name="average"
+  description="compute the average item in a sequence"
+>
+
+<_3clist
+  href="lib_s_t.htm#sum"
+  name="sum"
+  description="add all items in a sequence"
+>
+
+<_3clist
+  href="lib_h_o.htm#max"
+  name="max"
+  description="find the maximum item in a sequence"
+>
+
+<_3clist
+  href="lib_h_o.htm#min"
+  name="min"
+  description="find the minumum item in a sequence"
 >
 
 <_3clist

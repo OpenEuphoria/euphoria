@@ -599,6 +599,44 @@ location = match_from("pho", "phoEuphoria", 4)
  >
 </table>
 
+<_routine name="max">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include math.e<BR>
+a = max(x)</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Computes the maximum value among all the argument's elements."
+ >
+
+ <_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or to all elements of a sequence"
+ >
+
+ <_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+a = max({10,15.4,3})
+-- a is 15.4
+</_eucode>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_a_b.htm#average\">average</a>,
+<a href=\"lib_h_o.htm#min\">min</a>,
+<a href=\"lib_s_t.htm#sum\">sum</a>"
+ >
+</table>
+
+
 <_routine name="mem_copy">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -736,6 +774,44 @@ end if
   description="<font color=\"#5500FF\"><b>demo\win32\email.exw</b></font>"
  >
 
+</table>
+
+
+<_routine name="min">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include math.e<BR>
+a = min(x)</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Computes the minimum value among all the argument's elements."
+ >
+
+ <_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or to all elements of a sequence"
+ >
+
+ <_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+a = min({10,15.4,3})
+-- a is 3
+</_eucode>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_a_b.htm#average\">average</a>,
+<a href=\"lib_h_o.htm#max\">max</a>,
+<a href=\"lib_s_t.htm#sum\">sum</a>"
+ >
 </table>
 
 

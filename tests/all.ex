@@ -20,6 +20,7 @@ end if
 
 -- Tests
 include t_get.e
+include t_math.e
 include t_misc.e
 include t_sort.e
 include t_wildcard.e

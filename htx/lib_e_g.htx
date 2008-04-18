@@ -315,10 +315,16 @@ y = floor({0.5, -1.6, 9.99, 100})
 -- y is {0, -2, 9, 100}
 
  </_eucode>
+
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_p_r.htm#remainder\">remainder</a>"
+  description="
+<a href=\"lib_c_d.htm#ceil\">ceil</a>
+<a href=\"lib_p_r.htm#remainder\">remainder</a>
+<a href=\"lib_p_r.htm#round\">round</a>,
+<a href=\"lib_p_r.htm#round_prec\">round_prec</a>"
  >
+
 </table>
 
 

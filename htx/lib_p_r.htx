@@ -1812,10 +1812,16 @@ s = remainder(16, {2, 3, 5})
 -- s is {0, 1, 1}
   
 </_eucode>
+
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_e_g.htm#floor\">floor</a>"
+  description="
+<a href=\"lib_c_d.htm#ceil\">ceil</a>,
+<a href=\"lib_e_g.htm#floor\">floor</a>,
+<a href=\"lib_p_r.htm#round\">round</a>,
+<a href=\"lib_p_r.htm#round_prec\">round_prec</a>"
  >
+
 </table>
 
 
@@ -1930,6 +1936,85 @@ reverse({})                 -- {}
  >
 </table>
 
+<_routine name="round">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = round(x)
+</font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+"Return the argument's elements rounded to the nearest integer."
+>
+<_2clist
+  name="Comments:"
+  description=
+" This function may be applied to an atom or to all elements
+ of a sequence.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+round({4.12, 4.67, -5.8, -5.21}) -- {4, 5, -6, -5}
+round(12.2) -- 12
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_c_d.htm#ceil\">ceil</a>,
+<a href=\"lib_e_g.htm#floor\">floor</a>,
+<a href=\"lib_p_r.htm#remainder\">remainder</a>,
+<a href=\"lib_p_r.htm#round_prec\">round_prec</a>"
+ >
+
+</table>
+
+<_routine name="round_prec">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> a = round_prec(x, i)
+</font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+"Return the argument's elements rounded to i precision."
+>
+<_2clist
+  name="Comments:"
+  description=
+" This function may be applied to an atom or to all elements
+ of a sequence.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+round_prec({4.12, 4.67, -5.8, -5.21}, 10) -- {4.1, 4.7, -5.8, -5.2}
+round_prec(12.2512, 100) -- 12.25
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_c_d.htm#ceil\">ceil</a>,
+<a href=\"lib_e_g.htm#floor\">floor</a>,
+<a href=\"lib_p_r.htm#remainder\">remainder</a>,
+<a href=\"lib_p_r.htm#round\">round</a>"
+ >
+
+</table>
 
 <_routine name="routine_id">
 <table border=0 cellspacing=2 cellpadding=2>

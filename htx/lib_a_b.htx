@@ -97,6 +97,41 @@ end if
  >
 </table>
 
+<_routine name="abs">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+   name="Syntax:"
+   description="<font face = \"Arial, Helvetica\">include math.e<BR>
+x = abs(x)</font>"
+ >
+ <_2clist
+  name="Description:"
+  description="Returns the absolute value of each element of x"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or to all elements of a sequence"
+ >
+ <_2clist
+   name="Example:"
+   description=""
+ >
+<_eucode>
+x = abs({10.5, -12, 3})
+-- x is {10.5, 12, 3}
+
+i = abs(-4)
+-- i is 4
+</_eucode>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#sign\">sign</a>"
+ >
+</table>
+
 
 <_routine name="all_palette">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -766,6 +801,42 @@ puts(fn, atom_to_float64(157.82)) -- write 8 bytes to a file
   name="See Also:"
   description="<a href=\"lib_a_b.htm#atom_to_float32\">atom_to_float32</a>,
 <a href=\"lib_e_g.htm#float64_to_atom\">float64_to_atom</a>"
+ >
+</table>
+
+
+<_routine name="average">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax"
+  description="<font face = \"Arial, Helvetica\"> include math.e<BR>
+a = average(x)</font>"
+ >
+
+ <_2clist
+  name="Description"
+  description="Compute the average of all the argument's elements"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or to all elements of a sequence"
+ >
+ <_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+  a = average({8.5, 7.25, 10, 18.75})
+  -- a is 11.125
+</_eucode>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#sum\">sum</a>,
+<a href=\"lib_h_o.htm#max\">max</a>,
+<a href=\"lib_h_o.htm#min\">min</a>"
  >
 </table>
 

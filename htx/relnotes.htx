@@ -92,6 +92,16 @@
      <b>Translator:</b> Added <b>-lccopt-off</b> option for translator to
      disable using the optimization flag when compiling with LCC, as it has
      problems sometimes.  Implemented by Jeremy Cowgar
+<p>
+<li>
+     Began <b>standard library</b>. New routines in <b>math.e</b>:
+     <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
+     <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b> and
+     <b>max()</b>.  Implemented by Jeremy Cowgar
+<p>
+<li>
+     Began <b>unit testing</b>. 66 tests in total. To run, cd tests and
+     exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
 
 <font face="Arial, Helvetica" color="#003366">

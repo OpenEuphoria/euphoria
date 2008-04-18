@@ -356,6 +356,45 @@ x()
 </table>
 
 
+<_routine name="ceil">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+   name="Syntax:"
+   description="<font face = \"Arial, Helvetical\"> include math.e<BR>
+ i = ceil()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Computes next higher argument's integers. Returns the integers that are
+greater or equal to each element in the argument."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or to all elements of a sequence"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+sequence nums
+nums = {8, -5, 3.14, 4.89, -7.62, -4.3}
+nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_e_g.htm#floor\">floor</a>,
+<a href=\"lib_p_r.htm#round\">round</a>,
+<a href=\"lib_p_r.htm#round_prec\">round_prec</a>"
+ >
+
+</table>
+
 <_routine name="chdir">
 <table border=0 cellspacing=2 cellpadding=2>
 
