@@ -466,7 +466,7 @@ s = peek_string(100)
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include misc.e<BR>
+  description="<font face = \"Arial, Helvetica\"> include math.e<BR>
  PI
 </font>"
  >

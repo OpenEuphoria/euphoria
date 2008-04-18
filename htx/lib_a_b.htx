@@ -527,7 +527,7 @@ z = append(append(y, "betty"), {"bam", "bam"})
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include misc.e<BR>x2 = arccos(x1)
+  description="<font face = \"Arial, Helvetica\"> include math.e<BR>x2 = arccos(x1)
 </font>"
  >
  <_2clist
@@ -573,7 +573,7 @@ s = arccos({-1,0,1})
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include misc.e<BR>x2 = arcsin(x1)
+  description="<font face = \"Arial, Helvetica\">include math.e<BR>x2 = arcsin(x1)
 </font>"
  >
  <_2clist
