@@ -107,6 +107,78 @@ end if
  >
 </table>
 
+<_routine name="filename">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+s2 = filename(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the file name portion of a fully qualified filename."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The host operating system path separator is used."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+fname = filename("/opt/euphoria/docs/readme.txt")
+-- fname is "readme.txt"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#pathinfo\">pathinfo</a>,
+<a href=\"lib_c_d.htm#dirname\">dirname</a>,
+<a href=\"lib_e_g.htm#fileext\">fileext</a>"
+ >
+</table>
+
+<_routine name="fileext">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+s2 = fileext(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the file extension of a fully qualified filename."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The host operating system path separator is used."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+fname = filename("/opt/euphoria/docs/readme.txt")
+-- fname is "txt"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#pathinfo\">pathinfo</a>,
+<a href=\"lib_c_d.htm#dirname\">dirname</a>,
+<a href=\"lib_e_g.htm#filename\">filename</a>"
+ >
+</table>
+
 
 <_routine name="find">
 <table border=0 cellspacing=2 cellpadding=2>

@@ -7,6 +7,97 @@
 <br>
 
 
+<_routine name="PATHSEP">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+PATHSEP
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"The platform's path separator character."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"When on DOS32 or WIN32, '\\'. When on LINUX or FREEBSD, '/'"
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+x = PATHSEP
+-- x is '/' or '\\' depending on platform
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#pathinfo\">pathinfo</a>"
+ >
+
+</table>
+
+
+
+
+<_routine name="pathinfo">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+s2 = pathinfo(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Parse the fully qualified pathname (s1) and return a sequence containing directory name,
+file name and file extension."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The host operating system path separator is used."
+>
+
+<_2clist
+  name="Example 1:"
+  description="DOS"
+ >
+<_eucode>
+info = pathinfo("C:\\euphoria\\docs\\readme.txt")
+-- info is {"C:\\euphoria\\docs", "readme", "txt"}
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description="Linux/FreeBSD"
+ >
+<_eucode>
+info = pathinfo("/opt/euphoria/docs/readme.txt")
+-- info is {"/opt/euphoria/docs", "readme", "txt"}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c_d.htm#dirname\">dirname</a>,
+<a href=\"lib_e_g.htm#filename\">filename</a>,
+<a href=\"lib_e_g.htm#fileext\">fileext</a>"
+>
+
+</table>
+
+
+
+
 <_routine name="palette">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -1693,6 +1784,106 @@ x = read_bitmap("c:\\windows\\arcade.bmp")
 <a href=\"lib_s_t.htm#save_bitmap\">save_bitmap</a>"
  >
 </table>
+
+<_routine name="readfile">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+s2 = readfile(s1)<BR>
+or<BR>
+s2 = readfile(i1)<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Read the contents of either file named s1 or an open file handle i1. Returns the
+contents as 1 sequence."
+ >
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+data = readfile("myfile.txt")
+-- data contains the entire contents of 'myfile.txt'
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+fh = open("myfile.txt", "r")
+data = readfile(fh)
+close(fh)
+
+-- data contains the entire contents of 'myfile.txt'
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#readlines\">readlines</a>,
+<a href=\"lib_h_o.htm#open\">open</a>"
+ >
+</table>
+
+
+<_routine name="readlines">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+s2 = readlines(s1)<BR>
+or<BR>
+s2 = readlines(i1)<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Read the contents of either file named s1 or an open file handle i1 as a sequence
+of lines."
+ >
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+data = readlines("myfile.txt")
+-- data contains the entire contents of 'myfile.txt', 1 sequence per line:
+-- {{"Line 1"}, {"Line 2"}, {"Line 3"}}
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+fh = open("myfile.txt", "r")
+data = readlines(fh)
+close(fh)
+
+-- data contains the entire contents of 'myfile.txt', 1 sequence per line:
+-- {{"Line 1"}, {"Line 2"}, {"Line 3"}}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#readfile\">readfile</a>,
+<a href=\"lib_h_o.htm#open\">open</a>"
+ >
+</table>
+
+
+
 
 <_routine name="register_block">
 <table border=0 cellspacing=2 cellpadding=2>

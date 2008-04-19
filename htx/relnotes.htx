@@ -107,10 +107,14 @@
      <b>right()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
      <b>findany()</b>, and <b>findany_from()</b>.
 <p>
+     New routines in <b>file.e</b>:
+     <b>readlines()</b>, <b>readfile()</b>, <b>pathinfo()</b>,
+     <b>dirname()</b>, <b>filename()</b> and <b>fileext()</b>
+<p>
      Implemented by Jeremy Cowgar
 <p>
 <li>
-     Began <b>unit testing</b>. 116 library tests in total. To run, cd tests
+     Began <b>unit testing</b>. 136 library tests in total. To run, cd tests
      and exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
 

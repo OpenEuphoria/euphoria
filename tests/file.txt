@@ -1,0 +1,9 @@
+This is a file used for unit tests. Please
+do not alter this file. Tests require this
+file to be of a known content.
+
+Changing it's content will cause unit tests
+to believe they have failed when there may
+in fact be nothing wrong with them.
+
+Thank You!

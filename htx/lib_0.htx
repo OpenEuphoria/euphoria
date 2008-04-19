@@ -659,6 +659,18 @@
 >
 
 <_3clist
+  href="lib_p_r.htm#readfile"
+  name="readfile"
+  description="read an entire file from an open file handle or from a given filename"
+>
+
+<_3clist
+  href="lib_p_r.htm#readlines"
+  name="readlines"
+  description="read all lines from an open file handle or from a given filename"
+>
+
+<_3clist
   href="lib_p_r.htm#print"
   name="print"
   description="<a name=print></a>print a Euphoria
@@ -772,6 +784,30 @@
 >
 
 <_3clist
+  href="lib_p_r.htm#pathinfo"
+  name="pathinfo"
+  description="return path information about a filename (dir, filename, extension)"
+>
+
+<_3clist
+  href="lib_c_d.htm#dirname"
+  name="dirname"
+  description="return the directory name of a fully qualified filename"
+>
+
+<_3clist
+  href="lib_e_g.htm#filename"
+  name="filename"
+  description="return the filename of a fully qualified filename"
+>
+
+<_3clist
+  href="lib_e_g.htm#fileext"
+  name="fileext"
+  description="return the extension of a filename"
+>
+
+<_3clist
   href="lib_c_d.htm#current_dir"
   name="current_dir"
   description="return the name of the current directory"
@@ -805,6 +841,12 @@
   href="lib_c_d.htm#check_break"
   name="check_break"
   description="check if user has pressed control-c or control-Break"
+>
+
+<_3clist
+  href="lib_p_r.htm#PATHSEP"
+  name="PATHSEP"
+  description="the platform's path separator"
 >
 
 </table>

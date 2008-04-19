@@ -19,6 +19,7 @@ if length(cmd) > 2 then
 end if
 
 -- Tests
+include t_file.e
 include t_get.e
 include t_math.e
 include t_misc.e

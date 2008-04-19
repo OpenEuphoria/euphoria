@@ -1488,6 +1488,42 @@ end if
  >
 </table>
 
+<_routine name="dirname">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+s2 = dirname(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the directory name of a fully qualified filename."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The host operating system path separator is used."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+fname = dirname("/opt/euphoria/docs/readme.txt")
+-- fname is "/opt/euphoria/docs"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#pathinfo\">pathinfo</a>,
+<a href=\"lib_e_g.htm#filename\">filename</a>,
+<a href=\"lib_e_g.htm#fileext\">fileext</a>"
+ >
+</table>
+
 
 <_routine name="dir">
 <table border=0 cellspacing=2 cellpadding=2>

@@ -30,11 +30,12 @@ type boolean(integer b)
     return b = 0 or b = 1
 end type
 
-integer SLASH
+-- TODO: document
+global integer PATHSEP
 if platform() = LINUX then
-    SLASH='/'
+    PATHSEP='/'
 else
-    SLASH='\\'
+    PATHSEP='\\'
 end if
 
 global function seek(file_number fn, file_position pos)
@@ -121,15 +122,15 @@ global function dir(sequence name)
     end if
 
     -- Is there a path involved?
-    if find(SLASH, name) = 0 then
+    if find(PATHSEP, name) = 0 then
         the_dir = "."
         the_name = name
     else
-        -- Find a SLASH character and break the name there resulting in
+        -- Find a PATHSEP character and break the name there resulting in
         -- a directory and file name.
         idx = length(name)
         while idx > 0 do
-            if name[idx] = SLASH then
+            if name[idx] = PATHSEP then
                 exit
             end if
             idx -= 1
@@ -231,7 +232,7 @@ global function walk_dir(sequence path_name, integer your_function,
     
     -- trim any trailing blanks or '\' characters from the path
     while length(path_name) > 0 and 
-	  find(path_name[$], {' ', SLASH}) do
+	  find(path_name[$], {' ', PATHSEP}) do
 	path_name = path_name[1..$-1]
     end while
     
@@ -244,7 +245,7 @@ global function walk_dir(sequence path_name, integer your_function,
 		    return abort_now
 		end if
 		if scan_subdirs then
-		    abort_now = walk_dir(path_name & SLASH & d[i][D_NAME],
+		    abort_now = walk_dir(path_name & PATHSEP & d[i][D_NAME],
 					 your_function, scan_subdirs)
 		    
 		    if not equal(abort_now, 0) and 
@@ -263,4 +264,128 @@ global function walk_dir(sequence path_name, integer your_function,
 	end if
     end for
     return 0
+end function
+
+global function readlines(object f)
+    object fn, ret, y
+	ret = {}
+	
+	if sequence(f) then
+		fn = open(f, "r")
+	else
+		fn = f
+	end if
+	if fn < 0 then return -1 end if
+	
+	while 1 do
+		y = gets(fn)
+		if atom(y) then
+			exit
+		end if
+		if length(y) and y[length(y)] = '\n' then
+			y = y[1..length(y)-1]
+		end if
+		if length(y) and y[length(y)] = '\r' then
+			y = y[1..length(y)-1]
+		end if
+		if length(y) then
+			ret = append(ret, y)
+		end if
+	end while
+	
+	if sequence(f) then
+		close(fn)
+	end if
+	return ret
+end function
+
+global function readfile(object f)
+    object fn, ret, y
+	ret = {}
+	
+	if sequence(f) then
+		fn = open(f, "r")
+	else
+		fn = f
+	end if
+	if fn < 0 then return -1 end if
+	
+	while 1 do
+		y = gets(fn)
+		if atom(y) then
+			exit
+		end if
+
+		ret &= y
+	end while
+	
+	if sequence(f) then
+		close(fn)
+	end if
+
+	return ret
+end function
+
+global function pathinfo(sequence path)
+    integer slash, period, ch
+    sequence dir_name, file_name, file_ext
+
+    dir_name  = ""
+    file_name = ""
+    file_ext  = ""
+
+    slash = 0
+    period = 0
+
+    for i = 1 to length(path) do
+        ch = path[i]
+        if ch = '.' then
+            period = i
+        elsif ch = PATHSEP then
+            slash = i
+            period = -1  -- extension has to be part of the filename
+        end if
+    end for
+
+    if slash > 0 then
+        dir_name = path[1..slash-1]
+    else
+        slash = 0
+    end if
+    if period > 0 then
+        file_name = path[slash+1..period-1]
+        file_ext = path[period+1..$]
+    else
+        file_name = path[slash+1..$]
+    end if
+
+    return {dir_name, file_name, file_ext}
+end function
+
+-- TODO: document
+global function dirname(sequence path)
+    sequence data
+    data = pathinfo(path)
+    return data[1]
+end function
+
+-- TODO: document
+global function filename(sequence path)
+    sequence data
+
+    data = pathinfo(path)
+    path = data[2]
+
+    if length(data[3]) then
+        path &= "." & data[3]
+    end if
+
+    return path
+end function
+
+-- TODO: document
+global function fileext(sequence path)
+    sequence data
+    data = pathinfo(path)
+    return data[3]
 end function
