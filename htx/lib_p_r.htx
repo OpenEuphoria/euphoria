@@ -70,7 +70,7 @@ file name and file extension."
 
 <_2clist
   name="Example 1:"
-  description="DOS"
+  description="DOS32/WIN32"
  >
 <_eucode>
 info = pathinfo("C:\\euphoria\\docs\\readme.txt")
@@ -2199,16 +2199,13 @@ s = replace_range({45.3, "John", 5, {10, 20}}, 25, 2, 3)
 
 </table>
 
-
-
-
 <_routine name="reverse">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include misc.e<BR>
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
  s2 = reverse(s1)
 </font>"
  >

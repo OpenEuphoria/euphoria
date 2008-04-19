@@ -5,7 +5,7 @@
 
 include unittest.e
 
-setTestVerbosity(TEST_SHOW_ALL)
+setTestVerbosity(TEST_SHOW_FAILED_ONLY)
 
 sequence cmd
 cmd = command_line()
@@ -19,6 +19,7 @@ if length(cmd) > 2 then
 end if
 
 -- Tests
+include t_ctype.e
 include t_file.e
 include t_get.e
 include t_math.e

@@ -247,6 +247,491 @@ end if
  >
 </table>
 
+<_routine name="isalnum">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isalnum(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is an alphanumeric character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isalnum('a')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isalnum('?')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isalpha">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isalpha(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is an alpha character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isalpha('a')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isalpha('6')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isascii">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isascii(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is an ASCII character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isascii('z')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isascii(2)
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="iscntrl">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = iscntrl(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a control character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = iscntrl('a')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = iscntrl(7)
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isdigit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isdigit(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a digit. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isdigit('3')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isdigit('?')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isgraph">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isgraph(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a printable character, not including space. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isgraph('a')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isgraph(2)
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="islower">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = islower(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a lower case character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = islower('a')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = islower('A')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isprint">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isprint(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a printable character including space. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isprint('a')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isprint(127)
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="ispunct">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = ispunct(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a punctuation character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = ispunct('a')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = ispunct('?')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isspace">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isspace(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a space. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isspace(' ')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isspace('a')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isupper">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isupper(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is an upper case character. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isupper('A')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isupper('a')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
+
+<_routine name="isxdigit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
+i = isxdigit(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a valid hex digit. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = isxdigit('a')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = isxdigit('F')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+i = isxdigit('3')
+-- i is 1
+</_eucode>
+
+<_2clist
+  name="Example 4:"
+  description=""
+ >
+<_eucode>
+i = isxdigit('i')
+-- i is 0
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
+ >
+</table>
+
 
 <_routine name="join">
 <table border=0 cellspacing=2 cellpadding=2>

@@ -25,24 +25,6 @@ global procedure sleep(integer t)
     end if
 end procedure
 
-global function reverse(sequence s)
--- reverse the top-level elements of a sequence.
--- Thanks to Hawke' for helping to make this run faster.
-    integer lower, n, n2
-    sequence t
-    
-    n = length(s)
-    n2 = floor(n/2)+1
-    t = repeat(0, n)
-    lower = 1
-    for upper = n to n2 by -1 do
-	t[upper] = s[lower]
-	t[lower] = s[upper]
-	lower += 1
-    end for
-    return t
-end function
-
 global function sprint(object x)
 -- Return the string representation of any Euphoria data object. 
 -- This is the same as the output from print(1, x) or '?', but it's
@@ -291,3 +273,8 @@ end procedure
 -- TODO: 3.3 or 3.4 this include should be removed
 
 include math.e
+
+-- reverse was defined here but has been moved to sequence.e
+-- TODO: 3.3 or 3.4 this include should be removed
+
+include sequence.e

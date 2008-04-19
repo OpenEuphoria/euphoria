@@ -108,7 +108,8 @@
 <font color="#FF0099" size=+1>
 <br>
 
-<_dul>2.1 Predefined Types</_dul>
+<a name="type_checking"></a>
+<_dul>2.1 Type checking</_dul>
 
 </font>
 <p>
@@ -144,6 +145,66 @@
   description="test if an object is an object (always true)"
 >
 
+<_3clist
+  href="lib_h_o.htm#isalnum"
+  name="isalnum"
+  description="test if an atom is an alphanumeric character"
+>
+<_3clist
+  href="lib_h_o.htm#isalpha"
+  name="isalpha"
+  description="test if an atom is an alpha character"
+>
+<_3clist
+  href="lib_h_o.htm#isascii"
+  name="isascii"
+  description="test if an atom is an ascii character"
+>
+<_3clist
+  href="lib_h_o.htm#iscntrl"
+  name="iscntrl"
+  description="test if an atom is a control character"
+>
+<_3clist
+  href="lib_h_o.htm#isdigit"
+  name="isdigit"
+  description="test if an atom is a digit"
+>
+<_3clist
+  href="lib_h_o.htm#isgraph"
+  name="isgraph"
+  description="test if an atom is a printable character not including space"
+>
+<_3clist
+  href="lib_h_o.htm#islower"
+  name="islower"
+  description="test if an atom is a lower case character"
+>
+<_3clist
+  href="lib_h_o.htm#isprint"
+  name="isprint"
+  description="test if an atom is a printable character including space"
+>
+<_3clist
+  href="lib_h_o.htm#ispunct"
+  name="ispunct"
+  description="test if an atom is a punctuation character"
+>
+<_3clist
+  href="lib_h_o.htm#isspace"
+  name="isspace"
+  description="test if an atom is a space"
+>
+<_3clist
+  href="lib_h_o.htm#isupper"
+  name="isupper"
+  description="test if an atom is an upper case character"
+>
+<_3clist
+  href="lib_h_o.htm#isxdigit"
+  name="isxdigit"
+  description="test if an atom is a valid hex digit"
+>
 </table>
 
 <p>

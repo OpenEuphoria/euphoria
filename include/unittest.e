@@ -20,6 +20,9 @@ testsFailed = 0
 -- Private variables
 --
 
+integer modShown
+modShown = 0
+
 atom verbose
 verbose = 0
 
@@ -32,6 +35,10 @@ currentMod = ""
 
 procedure testFailed(sequence name, object a, object b)
 	if verbose > 0 then
+        if modShown = 0 then
+            printf(2, "%s:\n", {currentMod})
+            modShown = 1
+        end if
 		printf(2, "  failed: %s. expected: ", {name})
 		pretty_print(2, a, {2})
 		puts(2, " but got: ")
@@ -44,6 +51,10 @@ end procedure
 
 procedure testPassed(sequence name)
 	if verbose > 1 then
+        if modShown = 0 then
+            printf(2, "%s:\n", {currentMod})
+            modShown = 1
+        end if
 		printf(2, "  passed: %s\n", {name})
 	end if
 	
@@ -60,15 +71,12 @@ end procedure
 
 global procedure setTestModuleName(sequence name)
 	currentMod = name
-	
-	printf(2, "%s:\n", {currentMod})
+    modShown = 0
 end procedure
 
 global procedure testSummary()
 	if verbose > 0 then
-		puts(2, "\n")
-	
-		printf(2, "%d tests run, %d passed, %d failed, %d%% success\n",
+		printf(2, "\n%d tests run, %d passed, %d failed, %d%% success\n",
 			{testCount, testsPassed, testsFailed, (testsPassed / testCount) * 100})
 	end if
 	

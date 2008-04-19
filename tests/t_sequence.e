@@ -3,6 +3,9 @@ include unittest.e
 
 setTestModuleName("sequence.e")
 
+testEqual("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
+testEqual("reverse() string", "nhoJ", reverse("John"))
+
 testEqual("findany_from() string", 7, findany_from("aeiou", "John Doe", 3))
 testEqual("findany_from() integers", 6, findany_from({1,3,5,8}, {2,4,5,6,7,8,9}, 4))
 testEqual("findany_from() floats", 6,
