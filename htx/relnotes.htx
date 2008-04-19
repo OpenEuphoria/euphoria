@@ -109,7 +109,7 @@
 <p>
      New routines in <b>file.e</b>:
      <b>readlines()</b>, <b>readfile()</b>, <b>pathinfo()</b>,
-     <b>dirname()</b>, <b>filename()</b> and <b>fileext()</b>
+     <b>dirname()</b>, <b>filename()</b>, <b>fileext()</b> and <b>PATHSEP</b>
 <p>
      Implemented by Jeremy Cowgar
 <p>
