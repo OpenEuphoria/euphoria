@@ -1,19 +1,18 @@
 @echo creating DOCUMENTATION FILES
-@echo EUDIR is %EUDIR%
 
 rem need syncolor.e and keywords.e - EUINC will be changed temporarily
 
 set TEMP_EUINC=%EUINC%
-SET EUINC=%EUDIR%\bin
+SET EUINC=..\bin;..\include
 
-ex doc.exw HTML %EUDIR%
-ex doc.exw TEXT %EUDIR%
+exwc doc.exw HTML ..
+exwc doc.exw TEXT ..
 
-ex combine.exw %EUDIR%
+exwc combine.exw ..
 
 rem these files are only needed to update RDS Web site
-del %EUDIR%\doc\refman_?.doc
-del %EUDIR%\doc\lib_*.doc
+del ..\doc\refman_?.doc
+del ..\doc\lib_*.doc
 
 SET EUINC=%TEMP_EUINC%
 

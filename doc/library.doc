@@ -280,10 +280,10 @@
 
  unlock_file     - unlock a file or device
 
- readfile        - read an entire file from an open file handle or from a given
+ read_file       - read an entire file from an open file handle or from a given
                    filename
 
- readlines       - read all lines from an open file handle or from a given
+ read_lines      - read all lines from an open file handle or from a given
                    filename
 
  print           - print a Euphoria object on one line, with braces and commas

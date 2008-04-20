@@ -103,34 +103,46 @@
      Began <b>library expansion</b>. The vast percentage of these functions
      have been found in The Archive. Many thanks must go to the original
      developers who have contributed these functions.
-<p>
+<ul>
+	<li>
      New routines in <b>math.e</b>:
      <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
      <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b> and
      <b>max()</b>.
-<p>
+	<li>
      New routines in <b>sequence.e</b>:
      <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,
      <b>replace_range()</b>, <b>left()</b>, <b>mid()</b>, <b>slice()</b>,
      <b>right()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
      <b>findany()</b>, and <b>findany_from()</b>.
-<p>
+	<li>
      New routines in <b>file.e</b>:
      <b>readlines()</b>, <b>readfile()</b>, <b>pathinfo()</b>,
      <b>dirname()</b>, <b>filename()</b>, <b>fileext()</b> and <b>PATHSEP</b>
-<p>
+	<li>
      New routines in <b>ctype.e</b>:
      <b>isalnum()</b>, <b>isalpha()</b>, <b>isascii()</b>, <b>iscntrl()</b>,
      <b>isdigit()</b>, <b>isgraph()</b>, <b>islower()</b>, <b>isprint()</b>,
      <b>ispunct()</b>, <b>isspace()</b>, <b>isupper()</b>, and
      <b>isxdigit()</b>
+	<li>
+     New routines in <b>map.e</b>:
+     <b>map_new()</b>,
+     <b>map_get()</b>,
+     <b>map_put()</b>,
+     <b>map_remove()</b>,
+     <b>map_size()</b>,
+     <b>map_keys()</b>,
+     <b>map_values()</b>. 
+     Implemented and tested by Yuku Sugianto
+</ul>
 <p>
      Most functions by various authors. Added, documented and testing by
-     Jeremy Cowgar
+     Jeremy Cowgar.
 <p>
 <li>
-     Began <b>unit testing</b>. 137 library tests in total. To run, cd tests
-     and exw or exu all.ex ... Implemented by Jeremy Cowgar
+     Began <b>unit testing</b>. 221 library tests in total. To run, cd tests
+     and exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
 </ul>
 
 <p>
@@ -913,7 +925,7 @@ This allows a program to edit or otherwise modify its own source.
 <p>
 <li>
 The initial random seed value is now chosen more randomly
-on <font color="#CC3366"><b>Windows</b></font>. Thanks to Akusaya.
+on <font color="#CC3366"><b>Windows</b></font>. Thanks to Yuku Sugianto.
 
 </ul>
 
@@ -938,7 +950,7 @@ Thanks to Juergen Luethje and others.
 The Start Menu links created by the <font color="#993333"><b>install</b></font>
 program were wrong: exw was incorrectly pointing to
 <font color="#993333"><b>ecw.exe</b></font>, and ex was incorrectly pointing 
-to <font color="#993333"><b>ec.exe</b></font>. Thanks to Akusaya.
+to <font color="#993333"><b>ec.exe</b></font>. Thanks to Yuku Sugianto.
 
 <p>
 <li>
@@ -1111,7 +1123,7 @@ It should have said 30 deep. Thanks to Darkvincentdude.
 <p>
 <li>
 In the PD source interpreter, <b>eu.ex</b>, there was an error in the 
-comments at the top. Thanks to Akusaya.
+comments at the top. Thanks to Yuku Sugianto.
      
 <p>
 <li>
@@ -1777,7 +1789,7 @@ for <font color="#CC3366"><b>Windows</b></font>,
 <li>
     The first value returned by <font color="#006699"><b>rand()</b></font>
     (in the absence of <font color="#006699"><b>set_rand()</b></font>)
-    is now more "random". Thanks to Aku. 
+    is now more "random". Thanks to Yuku Sugianto. 
   
 </ul>
 
@@ -2767,7 +2779,7 @@ requirements for getting a free upgrade.
 
 <p>
 <li> 
-  allocate_string() was speeded up. Thanks to Aku.
+  allocate_string() was speeded up. Thanks to Yuku Sugianto.
 
 <p>
 <li> 

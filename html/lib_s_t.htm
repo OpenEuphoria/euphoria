@@ -1570,10 +1570,10 @@ system_exec() does not start a new DOS shell.
 
 <tr><td></td><td>
 <pre><font color="#FF0055">-- freeze the game while the player answers the phone</font>
-<font color="#330033">task_clock_stop()</font>
+<font color="#FF00FF">task_clock_stop</font><font color="#330033">()</font>
 <font color="#0000FF">while </font><font color="#FF00FF">get_key</font><font color="#330033">() = -1 </font><font color="#0000FF">do</font>
 <font color="#0000FF">end while</font>
-<font color="#330033">task_clock_start()</font>
+<font color="#FF00FF">task_clock_start</font><font color="#330033">()</font>
 </pre></td></tr>
 
 <tr><td valign=top><b>See Also:</b></td>
@@ -1665,7 +1665,7 @@ task can also continue, unless it's a real-time task and it yields.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">mytask = task_create(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"myproc"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5, 9, </font><font color="#00A033">"ABC"</font><font color="#993333">}</font><font color="#330033">)</font>
+<pre><font color="#330033">mytask = </font><font color="#FF00FF">task_create</font><font color="#330033">(</font><font color="#FF00FF">routine_id</font><font color="#993333">(</font><font color="#00A033">"myproc"</font><font color="#993333">)</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5, 9, </font><font color="#00A033">"ABC"</font><font color="#993333">}</font><font color="#330033">)</font>
 <font color="#330033"></font>
 </pre></td></tr>
 
@@ -1708,9 +1708,9 @@ task can also continue, unless it's a real-time task and it yields.
 <tr><td></td><td>
 <pre><font color="#FF00FF">sequence </font><font color="#330033">tasks</font>
 <font color="#330033">     </font>
-<font color="#330033">tasks = task_list()</font>
+<font color="#330033">tasks = </font><font color="#FF00FF">task_list</font><font color="#330033">()</font>
 <font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(tasks) </font><font color="#0000FF">do</font>
-<font color="#0000FF">    if </font><font color="#330033">task_status(tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">) > 0 </font><font color="#0000FF">then</font>
+<font color="#0000FF">    if </font><font color="#FF00FF">task_status</font><font color="#330033">(tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">) > 0 </font><font color="#0000FF">then</font>
 <font color="#FF00FF">        printf</font><font color="#330033">(1, </font><font color="#00A033">"task %d is active\n"</font><font color="#330033">, tasks</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">]</font><font color="#330033">)</font>
 <font color="#0000FF">    end if</font>
 <font color="#0000FF">end for</font>
@@ -1827,12 +1827,12 @@ exit code code, similar to abort(0).
 <font color="#FF0055">-- Task t1 will be executed up to 10 times in a row before</font>
 <font color="#FF0055">-- other time-shared tasks are given control. If a real-time</font>
 <font color="#FF0055">-- task needs control, t1 will lose control to the real-time task.</font>
-<font color="#330033">task_schedule(t1, 10) </font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(t1, 10) </font>
 <font color="#330033"></font>
 <font color="#FF0055">-- Task t2 will be scheduled to run some time between 4 and 5 seconds</font>
 <font color="#FF0055">-- from now. Barring any rescheduling of t2, it will continue to</font>
 <font color="#FF0055">-- execute every 4 to 5 seconds thereafter.</font>
-<font color="#330033">task_schedule(t2, </font><font color="#993333">{</font><font color="#330033">4, 5</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(t2, </font><font color="#993333">{</font><font color="#330033">4, 5</font><font color="#993333">}</font><font color="#330033">)</font>
 <font color="#330033"></font>
 </pre></td></tr>
 
@@ -1872,7 +1872,7 @@ itself.
 
 <tr><td></td><td>
 <pre><font color="#FF0055">-- schedule self</font>
-<font color="#330033">task_schedule(task_self</font><font color="#993333">()</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5.9, 6.0</font><font color="#993333">}</font><font color="#330033">)</font>
+<font color="#FF00FF">task_schedule</font><font color="#330033">(</font><font color="#FF00FF">task_self</font><font color="#993333">()</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5.9, 6.0</font><font color="#993333">}</font><font color="#330033">)</font>
 <font color="#330033"></font>
 </pre></td></tr>
 
@@ -1918,7 +1918,7 @@ terminated naturally or was killed.
 <tr><td></td><td>
 <pre><font color="#FF00FF">integer </font><font color="#330033">s</font>
 <font color="#330033">     </font>
-<font color="#330033">s = task_status(tid)</font>
+<font color="#330033">s = </font><font color="#FF00FF">task_status</font><font color="#330033">(tid)</font>
 <font color="#0000FF">if </font><font color="#330033">s = 1 </font><font color="#0000FF">then</font>
 <font color="#FF00FF">    puts</font><font color="#330033">(1, </font><font color="#00A033">"ACTIVE\n"</font><font color="#330033">)</font>
 <font color="#0000FF">elsif </font><font color="#330033">s = 0 </font><font color="#0000FF">then</font>
@@ -1971,10 +1971,10 @@ terminated naturally or was killed.
 
 <tr><td></td><td>
 <pre><font color="#FF0055">-- suspend task 15</font>
-<font color="#330033">task_suspend(15)</font>
+<font color="#FF00FF">task_suspend</font><font color="#330033">(15)</font>
 <font color="#330033"></font>
 <font color="#FF0055">-- suspend current task</font>
-<font color="#330033">task_suspend(task_self</font><font color="#993333">()</font><font color="#330033">)</font>
+<font color="#FF00FF">task_suspend</font><font color="#330033">(</font><font color="#FF00FF">task_self</font><font color="#993333">()</font><font color="#330033">)</font>
 <font color="#330033"></font>
 </pre></td></tr>
 
@@ -2058,7 +2058,7 @@ languages support.
 <font color="#0000FF">        else</font>
 <font color="#330033">            p_energy(-13)</font>
 <font color="#0000FF">        end if</font>
-<font color="#330033">        task_yield()</font>
+<font color="#FF00FF">        task_yield</font><font color="#330033">()</font>
 <font color="#0000FF">    end while</font>
 <font color="#0000FF">end procedure</font>
 <font color="#330033"> </font>

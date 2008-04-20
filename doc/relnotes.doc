@@ -69,26 +69,25 @@
       * Began library expansion. The vast percentage of these functions have
         been found in The Archive. Many thanks must go to the original
         developers who have contributed these functions.
-
-        New routines in math.e: ceil(), round_prec(), round(), sign(), abs(),
-        sum(), average(), min() and max().
-
-        New routines in sequence.e: insert(), remove(), remove_range(),
-        replace_range(), left(), mid(), slice(), right(), split(), split_adv(),
-        join(), findany(), and findany_from().
-
-        New routines in file.e: readlines(), readfile(), pathinfo(), dirname(),
-        filename(), fileext() and PATHSEP
-
-        New routines in ctype.e: isalnum(), isalpha(), isascii(), iscntrl(),
-        isdigit(), isgraph(), islower(), isprint(), ispunct(), isspace(),
-        isupper(), and isxdigit()
+             * New routines in math.e: ceil(), round_prec(), round(), sign(),
+               abs(), sum(), average(), min() and max().
+             * New routines in sequence.e: insert(), remove(), remove_range(),
+               replace_range(), left(), mid(), slice(), right(), split(),
+               split_adv(), join(), findany(), and findany_from().
+             * New routines in file.e: readlines(), readfile(), pathinfo(),
+               dirname(), filename(), fileext() and PATHSEP
+             * New routines in ctype.e: isalnum(), isalpha(), isascii(),
+               iscntrl(), isdigit(), isgraph(), islower(), isprint(),
+               ispunct(), isspace(), isupper(), and isxdigit()
+             * New routines in map.e: map_new(), map_get(), map_put(),
+               map_remove(), map_size(), map_keys(), map_values(). Implemented
+               and tested by Yuku Sugianto
 
         Most functions by various authors. Added, documented and testing by
-        Jeremy Cowgar
+        Jeremy Cowgar.
 
-      * Began unit testing. 137 library tests in total. To run, cd tests and
-        exw or exu all.ex ... Implemented by Jeremy Cowgar
+      * Began unit testing. 221 library tests in total. To run, cd tests and
+        exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
 
  Version 3.1.1 August 2007:
  ==========================
@@ -597,7 +596,7 @@
         This allows a program to edit or otherwise modify its own source.
 
       * The initial random seed value is now chosen more randomly on Windows.
-        Thanks to Akusaya.
+        Thanks to Yuku Sugianto.
 
  DOS/Windows Installation Program
  --------------------------------
@@ -612,7 +611,7 @@
 
       * The Start Menu links created by the install program were wrong: exw was
         incorrectly pointing to ecw.exe, and ex was incorrectly pointing to
-        ec.exe. Thanks to Akusaya.
+        ec.exe. Thanks to Yuku Sugianto.
 
       * It's ok now to have a blank in the path of the installation directory:
         e.g. "C:\Program Files". Thanks to Rich.
@@ -708,7 +707,7 @@
         deep. It should have said 30 deep. Thanks to Darkvincentdude.
 
       * In the PD source interpreter, eu.ex, there was an error in the comments
-        at the top. Thanks to Akusaya.
+        at the top. Thanks to Yuku Sugianto.
 
       * The fact that crash_message() is now only useful for run-time errors
         was made clear. Thanks to Juergen Luethje.
@@ -1095,7 +1094,7 @@
         to Mike Nelson.
 
       * The first value returned by rand() (in the absence of set_rand()) is
-        now more "random". Thanks to Aku.
+        now more "random". Thanks to Yuku Sugianto.
 
  Bug Fixes
  ---------
@@ -1682,7 +1681,7 @@
 
       * get_bytes() is 30% faster.
 
-      * allocate_string() was speeded up. Thanks to Aku.
+      * allocate_string() was speeded up. Thanks to Yuku Sugianto.
 
       * The mydata.ex demo program now uses an EDS database.
 
