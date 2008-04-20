@@ -8,7 +8,7 @@ include machine.e
 -- [1] = bucket[]
 -- bucket = {key, value}[]
 -- [2] = elementCount
-global type Map(object o)
+global type map(object o)
 	return sequence(o) and length(o) = 2 and sequence(o[1]) and integer(o[2])
 end type
 
@@ -44,7 +44,7 @@ integer ret
 	return ret
 end function
 
-function rehash(Map m)
+function rehash(map m)
 integer size, index2
 sequence oldBuckets, newBuckets
 object key, value
@@ -75,7 +75,7 @@ global function map_new()
 	return {repeat({}, 16), 0}
 end function
 
-global function map_get(Map m, object key, object defaultValue)
+global function map_get(map m, object key, object defaultValue)
 integer hash, index
 object bucket
 	hash = hashCode(key)
@@ -92,7 +92,7 @@ object bucket
 	return defaultValue
 end function
 
-global function map_put(Map m, object key, object value) 
+global function map_put(map m, object key, object value) 
 integer hash, index
 integer found
 object bucket
@@ -125,7 +125,7 @@ object bucket
 	return m
 end function
 
-global function map_remove(Map m, object key)
+global function map_remove(map m, object key)
 integer hash, index
 object bucket
 	hash = hashCode(key)
@@ -144,12 +144,12 @@ object bucket
 	return m
 end function
 
-global function map_size(Map m)
+global function map_size(map m)
 	return m[2]
 end function
 
 
-global function map_keys(Map m)
+global function map_keys(map m)
 sequence buckets, bucket
 sequence ret
 integer pos
@@ -169,7 +169,7 @@ integer pos
 end function
 
 
-global function map_values(Map m)
+global function map_values(map m)
 sequence buckets, bucket
 sequence ret
 integer pos

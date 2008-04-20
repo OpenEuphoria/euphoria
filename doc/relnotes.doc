@@ -79,7 +79,7 @@
              * New routines in ctype.e: isalnum(), isalpha(), isascii(),
                iscntrl(), isdigit(), isgraph(), islower(), isprint(),
                ispunct(), isspace(), isupper(), and isxdigit()
-             * New routines in map.e: map_new(), map_get(), map_put(),
+             * New map routines in map.e: map_new(), map_get(), map_put(),
                map_remove(), map_size(), map_keys(), map_values(). Implemented
                and tested by Yuku Sugianto
 

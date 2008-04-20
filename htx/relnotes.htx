@@ -126,7 +126,7 @@
      <b>ispunct()</b>, <b>isspace()</b>, <b>isupper()</b>, and
      <b>isxdigit()</b>
 	<li>
-     New routines in <b>map.e</b>:
+     New map routines in <b>map.e</b>:
      <b>map_new()</b>,
      <b>map_get()</b>,
      <b>map_put()</b>,

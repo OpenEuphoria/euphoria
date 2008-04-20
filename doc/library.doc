@@ -4082,12 +4082,12 @@
 
  Description: Create a new map data structure.
 
- Comments:    A new object of type Map is created. type_check should be turned
+ Comments:    A new object of type map is created. type_check should be turned
               off for better performance.
 
  Example:
 
-              Map m
+              map m
               m = map_new()
               -- m is now an empty map (size = 0)
               
@@ -4105,7 +4105,7 @@
 
  Example:
 
-              Map ages
+              map ages
               ages = map_new()
               ages = map_put(ages, "Andy", 12)
               ages = map_put(ages, "Budi", 13)
@@ -4133,7 +4133,7 @@
 
  Example:
 
-              Map ages
+              map ages
               ages = map_new()
               ages = map_put(ages, "Andy", 12)
               ages = map_put(ages, "Budi", 13)
@@ -4154,7 +4154,7 @@
 
  Example:
 
-              Map m
+              map m
               m = map_put(m, 1, "a")
               m = map_put(m, 2, "b")
               ? map_size(m) -- outputs 2
@@ -4175,7 +4175,7 @@
 
  Example:
 
-              Map m
+              map m
               m = map_new()
               m = map_put(m, "Amy", 66.9)
               m = map_remove(m, "Amy")
@@ -4196,7 +4196,7 @@
 
  Example:
 
-              Map m
+              map m
               m = map_new()
               m = map_put(m, 10, "ten")
               m = map_put(m, 20, "twenty")
@@ -4220,7 +4220,7 @@
 
  Example:
 
-              Map m
+              map m
               m = map_new()
               m = map_put(m, 10, "ten")
               m = map_put(m, 20, "twenty")

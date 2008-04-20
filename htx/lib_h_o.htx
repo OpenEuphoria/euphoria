@@ -1155,14 +1155,14 @@ s = lower({"Euphoria", "Programming"})
 >
 <_2clist
   name="Comments:"
-  description="A new object of type Map is created. type_check should be turned off for better performance."
+  description="A new object of type map is created. type_check should be turned off for better performance."
 >
 <_2clist
   name="Example:"
   description=""
 >
 <_eucode>
-Map m
+map m
 m = map_new()
 -- m is now an empty map (size = 0)
 </_eucode>
@@ -1195,7 +1195,7 @@ m = map_new()
   description=""
 >
 <_eucode>
-Map ages
+map ages
 ages = map_new()
 ages = map_put(ages, "Andy", 12)
 ages = map_put(ages, "Budi", 13)
@@ -1240,7 +1240,7 @@ end if
   description=""
 >
 <_eucode>
-Map ages
+map ages
 ages = map_new()
 ages = map_put(ages, "Andy", 12)
 ages = map_put(ages, "Budi", 13)
@@ -1280,7 +1280,7 @@ ages = map_put(ages, "Budi", 14)
   description=""
 >
 <_eucode>
-Map m
+map m
 m = map_put(m, 1, "a")
 m = map_put(m, 2, "b")
 ? map_size(m) -- outputs 2
@@ -1318,7 +1318,7 @@ m = map_put(m, 2, "b")
   description=""
 >
 <_eucode>
-Map m
+map m
 m = map_new()
 m = map_put(m, "Amy", 66.9)
 m = map_remove(m, "Amy")
@@ -1357,7 +1357,7 @@ m = map_remove(m, "Amy")
   description=""
 >
 <_eucode>
-Map m
+map m
 m = map_new()
 m = map_put(m, 10, "ten")
 m = map_put(m, 20, "twenty")
@@ -1399,7 +1399,7 @@ keys = map_keys(m) -- keys might be {20,40,10,30} or some other orders
   description=""
 >
 <_eucode>
-Map m
+map m
 m = map_new()
 m = map_put(m, 10, "ten")
 m = map_put(m, 20, "twenty")
