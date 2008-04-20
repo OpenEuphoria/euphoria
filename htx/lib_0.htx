@@ -76,6 +76,12 @@
      or <a href=\"refman_2.htm#char\">single-character atom</a>"
 >
 
+<_3clist
+  name="m"
+  pos=10
+  description="a <a href=\"#map\">Map</a> created using <a href=\"lib_h_o.htm#map_new\">map_new()</a>"
+>
+
 </table></center>
 
 <p>
@@ -1796,11 +1802,115 @@ in the Properties for the DOS Window.
 <p>
 <hr>
 
+<a name=dyn_call></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.14 Dynamic Calls</_dul>
+
+</font>
+<p>
+
+      These routines let you call Euphoria procedures and functions using a
+      unique integer known as a
+      <font color="#993333"><b>routine identifier</b></font>, rather than by
+      specifying the name of the routine.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_p_r.htm#routine_id"
+  name="routine_id"
+  description="get a unique identifying number for a Euphoria routine"
+>
+
+<_3clist
+  href="lib_c_d.htm#call_proc"
+  name="call_proc"
+  description="call a Euphoria procedure using a routine id"
+>
+
+<_3clist
+  href="lib_c_d.htm#call_func"
+  name="call_func"
+  description="call a Euphoria function using a routine id"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=map></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.16 Map</_dul>
+
+</font>
+<p>
+
+An object that maintains mapping from keys to values. No duplicate keys are allowed,
+so each key can only map to one value.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#map_new"
+  name="map_new"
+  description="create a new map"
+>
+
+<_3clist
+  href="lib_h_o.htm#map_get"
+  name="map_get"
+  description="get the value of the specified key from the map"
+>
+
+<_3clist
+  href="lib_h_o.htm#map_put"
+  name="map_put"
+  description="put a new entry into the map"
+>
+
+<_3clist
+  href="lib_h_o.htm#map_remove"
+  name="map_remove"
+  description="remove an entry from the map"
+>
+
+<_3clist
+  href="lib_h_o.htm#map_size"
+  name="map_size"
+  description="get the number of entries in the map"
+>
+
+<_3clist
+  href="lib_h_o.htm#map_keys"
+  name="map_keys"
+  description="return all keys as a sequence"
+>
+
+<_3clist
+  href="lib_h_o.htm#map_values"
+  name="map_values"
+  description="return all values as a sequence"
+>
+
+
+</table>
+
+
+<p>
+<hr>
+
 <a name=tasking></a>
 <font color="#FF0099" size=+1>
 <br>
 
-<_dul>2.16 Multitasking</_dul>
+<_dul>2.17 Multitasking</_dul>
 </font>
 <p>
 This collection of routines lets you create multiple, independent

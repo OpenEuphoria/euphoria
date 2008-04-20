@@ -1141,6 +1141,287 @@ s = lower({"Euphoria", "Programming"})
 </table>
 
 
+<_routine name="map_new">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR> 
+  m = map_new() </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Create a new map data structure."
+>
+<_2clist
+  name="Comments:"
+  description="A new object of type Map is created. type_check should be turned off for better performance."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map m
+m = map_new()
+-- m is now an empty map (size = 0)
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_get\">map_get</a>,
+  <a href=\"lib_h_o.htm#map_put\">map_put</a>,
+  <a href=\"lib_h_o.htm#map_size\">map_size</a>,
+  <a href=\"lib_h_o.htm#map_remove\">map_remove</a>,
+  <a href=\"lib_h_o.htm#map_keys\">map_keys</a>,
+  <a href=\"lib_h_o.htm#map_values\">map_values</a>"
+>
+</table>
+
+<_routine name="map_get">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR> 
+  x1 = map_get(m, x2, x3) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return the value that corresponds to the key x2 in the map m. If the key is not in the map, the default value x3 is returned instead."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map ages
+ages = map_new()
+ages = map_put(ages, "Andy", 12)
+ages = map_put(ages, "Budi", 13)
+integer age
+age = map_get(ages, "Budi", -1)
+if age = -1 then
+	puts(1, "Age unknown")
+else
+	printf(1, "The age is %d", age)
+end if
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_new\">map_new</a>,
+  <a href=\"lib_h_o.htm#map_put\">map_put</a>,
+  <a href=\"lib_h_o.htm#map_size\">map_size</a>,
+  <a href=\"lib_h_o.htm#map_remove\">map_remove</a>,
+  <a href=\"lib_h_o.htm#map_keys\">map_keys</a>,
+  <a href=\"lib_h_o.htm#map_values\">map_values</a>"
+>
+</table>
+
+<_routine name="map_put">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  m1 = map_put(m1, x1, x2) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Put an entry on the map m1 with key x1 and value x2. The modified map is returned."
+>
+<_2clist
+  name="Comments:"
+  description="If existing entry with the same key is already in the map, the value of the entry is updated."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map ages
+ages = map_new()
+ages = map_put(ages, "Andy", 12)
+ages = map_put(ages, "Budi", 13)
+ages = map_put(ages, "Budi", 14)
+-- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_new\">map_new</a>,
+  <a href=\"lib_h_o.htm#map_get\">map_get</a>,
+  <a href=\"lib_h_o.htm#map_size\">map_size</a>,
+  <a href=\"lib_h_o.htm#map_remove\">map_remove</a>,
+  <a href=\"lib_h_o.htm#map_keys\">map_keys</a>,
+  <a href=\"lib_h_o.htm#map_values\">map_values</a>"
+>
+</table>
+
+<_routine name="map_size">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  i = map_size(m) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return the number of entries in the map m."
+>
+<_2clist
+  name="Comments:"
+  description="For an empty map, it will return 0"
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map m
+m = map_put(m, 1, "a")
+m = map_put(m, 2, "b")
+? map_size(m) -- outputs 2
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_new\">map_new</a>,
+  <a href=\"lib_h_o.htm#map_get\">map_get</a>,
+  <a href=\"lib_h_o.htm#map_put\">map_put</a>,
+  <a href=\"lib_h_o.htm#map_remove\">map_remove</a>,
+  <a href=\"lib_h_o.htm#map_keys\">map_keys</a>,
+  <a href=\"lib_h_o.htm#map_values\">map_values</a>"
+>
+</table>
+
+<_routine name="map_remove">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  m1 = map_remove(m2, x) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Remove an entry with key x from the map m2. The modified map is returned"
+>
+<_2clist
+  name="Comments:"
+  description="If the map has no entry with the specified key, the original map is returned."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map m
+m = map_new()
+m = map_put(m, "Amy", 66.9)
+m = map_remove(m, "Amy")
+-- m is now an empty map again
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_new\">map_new</a>,
+  <a href=\"lib_h_o.htm#map_get\">map_get</a>,
+  <a href=\"lib_h_o.htm#map_put\">map_put</a>,
+  <a href=\"lib_h_o.htm#map_size\">map_size</a>,
+  <a href=\"lib_h_o.htm#map_keys\">map_keys</a>,
+  <a href=\"lib_h_o.htm#map_values\">map_values</a>"
+>
+</table>
+
+<_routine name="map_keys">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  s = map_keys(m) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return all keys in the map as a sequence."
+>
+<_2clist
+  name="Comments:"
+  description="The order of the keys returned may not be the same as the putting order."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map m
+m = map_new()
+m = map_put(m, 10, "ten")
+m = map_put(m, 20, "twenty")
+m = map_put(m, 30, "thirty")
+m = map_put(m, 40, "forty")
+sequence keys
+keys = map_keys(m) -- keys might be {20,40,10,30} or some other orders
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_new\">map_new</a>,
+  <a href=\"lib_h_o.htm#map_get\">map_get</a>,
+  <a href=\"lib_h_o.htm#map_put\">map_put</a>,
+  <a href=\"lib_h_o.htm#map_size\">map_size</a>,
+  <a href=\"lib_h_o.htm#map_remove\">map_remove</a>,
+  <a href=\"lib_h_o.htm#map_values\">map_values</a>"
+>
+</table>
+
+<_routine name="map_values">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  s = map_values(m) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return all values in the map as a sequence."
+>
+<_2clist
+  name="Comments:"
+  description="The order of the values returned may not be the same as the putting order. Duplicate values are not removed."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+Map m
+m = map_new()
+m = map_put(m, 10, "ten")
+m = map_put(m, 20, "twenty")
+m = map_put(m, 30, "thirty")
+m = map_put(m, 40, "forty")
+sequence values
+values = map_values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_h_o.htm#map_new\">map_new</a>,
+  <a href=\"lib_h_o.htm#map_get\">map_get</a>,
+  <a href=\"lib_h_o.htm#map_put\">map_put</a>,
+  <a href=\"lib_h_o.htm#map_size\">map_size</a>,
+  <a href=\"lib_h_o.htm#map_remove\">map_remove</a>,
+  <a href=\"lib_h_o.htm#map_keys\">map_keys</a>"
+>
+</table>
+
+
+
 <_routine name="match">
 <table border=0 cellspacing=2 cellpadding=2>
 

@@ -28,6 +28,49 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
 <br>
 
+<a name=insert></a><font color="#006633" size=+2><br>
+<center><b>insert</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include sequence.e<BR>
+s2 = insert(s1, x, i)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Insert x into s1 at index i. The item is inserted before i, not after.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>A new sequence is created. s1 and x can be any type of sequence, including nested sequences.
+</td></tr>
+
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s = insert(</font><font color="#00A033">"John Doe"</font><font color="#330033">, </font><font color="#00A033">" Middle"</font><font color="#330033">, 5)</font>
+<font color="#FF0055">-- s is "John Middle Doe"</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">s = insert(</font><font color="#993333">{</font><font color="#330033">10,30,40</font><font color="#993333">}</font><font color="#330033">, 20, 2)</font>
+<font color="#FF0055">-- s is {10,20,30,40}</font>
+</pre></td></tr>
+
+
+</table>
 
 <a name=instance></a><font color="#006633" size=+2><br>
 <center><b>instance</b></center>
@@ -237,6 +280,583 @@ This function will correctly convert integer values up to 32-bits. For
 </td></tr>
 
 </table>
+
+<a name=isalnum></a><font color="#006633" size=+2><br>
+<center><b>isalnum</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isalnum(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is an alphanumeric character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isalnum(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isalnum(</font><font color="#00A033">'?'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isalpha></a><font color="#006633" size=+2><br>
+<center><b>isalpha</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isalpha(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is an alpha character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isalpha(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isalpha(</font><font color="#00A033">'6'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isascii></a><font color="#006633" size=+2><br>
+<center><b>isascii</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isascii(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is an ASCII character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isascii(</font><font color="#00A033">'z'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isascii(2)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=iscntrl></a><font color="#006633" size=+2><br>
+<center><b>iscntrl</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = iscntrl(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a control character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = iscntrl(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = iscntrl(7)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isdigit></a><font color="#006633" size=+2><br>
+<center><b>isdigit</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isdigit(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a digit. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isdigit(</font><font color="#00A033">'3'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isdigit(</font><font color="#00A033">'?'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isgraph></a><font color="#006633" size=+2><br>
+<center><b>isgraph</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isgraph(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a printable character, not including space. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isgraph(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isgraph(2)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=islower></a><font color="#006633" size=+2><br>
+<center><b>islower</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = islower(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a lower case character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = islower(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = islower(</font><font color="#00A033">'A'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isprint></a><font color="#006633" size=+2><br>
+<center><b>isprint</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isprint(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a printable character including space. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isprint(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isprint(127)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=ispunct></a><font color="#006633" size=+2><br>
+<center><b>ispunct</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = ispunct(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a punctuation character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = ispunct(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = ispunct(</font><font color="#00A033">'?'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isspace></a><font color="#006633" size=+2><br>
+<center><b>isspace</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isspace(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a space. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isspace(</font><font color="#00A033">' '</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isspace(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isupper></a><font color="#006633" size=+2><br>
+<center><b>isupper</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isupper(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is an upper case character. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isupper(</font><font color="#00A033">'A'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isupper(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=isxdigit></a><font color="#006633" size=+2><br>
+<center><b>isxdigit</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include ctype.e<BR>
+i = isxdigit(a)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Test if a is a valid hex digit. Returns 1 if true or 0 if false.
+</td></tr>
+
+<tr><td valign=top><b>Example 1:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isxdigit(</font><font color="#00A033">'a'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 2:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isxdigit(</font><font color="#00A033">'F'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 3:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isxdigit(</font><font color="#00A033">'3'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 1</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Example 4:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">i = isxdigit(</font><font color="#00A033">'i'</font><font color="#330033">)</font>
+<font color="#FF0055">-- i is 0</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="library.htm#type_checking">Type Checking</a>
+</td></tr>
+
+</table>
+
+
+<a name=join></a><font color="#006633" size=+2><br>
+<center><b>join</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include sequence.e<BR>
+s3 = join(s1, s2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Join s1 by s2
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to a string sequence or a complex sequence
+</td></tr>
+
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">result = join(</font><font color="#993333">{</font><font color="#00A033">"John"</font><font color="#330033">, </font><font color="#00A033">"Middle"</font><font color="#330033">, </font><font color="#00A033">"Doe"</font><font color="#993333">}</font><font color="#330033">, </font><font color="#00A033">" "</font><font color="#330033">)</font>
+<font color="#FF0055">-- result is "John Middle Doe"</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_s_t.htm#split">split</a>,
+<a href="lib_s_t.htm#split_adv">split_adv</a>
+</td></tr>
+
+</table>
+
+
+
 
 <a name=left></a><font color="#006633" size=+2><br>
 <center><b>left</b></center>
@@ -628,6 +1248,308 @@ it repeatedly, before the lock request is granted.
 </table>
 
 
+<a name=map_new></a><font color="#006633" size=+2><br>
+<center><b>map_new</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR> 
+  m = map_new() </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Create a new map data structure.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>A new object of type Map is created. type_check should be turned off for better performance.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map m</font>
+<font color="#330033">m = map_new()</font>
+<font color="#FF0055">-- m is now an empty map (size = 0)</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_get">map_get</a>,
+  <a href="lib_h_o.htm#map_put">map_put</a>,
+  <a href="lib_h_o.htm#map_size">map_size</a>,
+  <a href="lib_h_o.htm#map_remove">map_remove</a>,
+  <a href="lib_h_o.htm#map_keys">map_keys</a>,
+  <a href="lib_h_o.htm#map_values">map_values</a>
+</td></tr>
+
+</table>
+
+<a name=map_get></a><font color="#006633" size=+2><br>
+<center><b>map_get</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR> 
+  x1 = map_get(m, x2, x3) </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the value that corresponds to the key x2 in the map m. If the key is not in the map, the default value x3 is returned instead.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map ages</font>
+<font color="#330033">ages = map_new()</font>
+<font color="#330033">ages = map_put(ages, </font><font color="#00A033">"Andy"</font><font color="#330033">, 12)</font>
+<font color="#330033">ages = map_put(ages, </font><font color="#00A033">"Budi"</font><font color="#330033">, 13)</font>
+<font color="#FF00FF">integer </font><font color="#330033">age</font>
+<font color="#330033">age = map_get(ages, </font><font color="#00A033">"Budi"</font><font color="#330033">, -1)</font>
+<font color="#0000FF">if </font><font color="#330033">age = -1 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">	puts</font><font color="#330033">(1, </font><font color="#00A033">"Age unknown"</font><font color="#330033">)</font>
+<font color="#0000FF">else</font>
+<font color="#FF00FF">	printf</font><font color="#330033">(1, </font><font color="#00A033">"The age is %d"</font><font color="#330033">, age)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_new">map_new</a>,
+  <a href="lib_h_o.htm#map_put">map_put</a>,
+  <a href="lib_h_o.htm#map_size">map_size</a>,
+  <a href="lib_h_o.htm#map_remove">map_remove</a>,
+  <a href="lib_h_o.htm#map_keys">map_keys</a>,
+  <a href="lib_h_o.htm#map_values">map_values</a>
+</td></tr>
+
+</table>
+
+<a name=map_put></a><font color="#006633" size=+2><br>
+<center><b>map_put</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR>
+  m1 = map_put(m1, x1, x2) </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Put an entry on the map m1 with key x1 and value x2. The modified map is returned.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>If existing entry with the same key is already in the map, the value of the entry is updated.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map ages</font>
+<font color="#330033">ages = map_new()</font>
+<font color="#330033">ages = map_put(ages, </font><font color="#00A033">"Andy"</font><font color="#330033">, 12)</font>
+<font color="#330033">ages = map_put(ages, </font><font color="#00A033">"Budi"</font><font color="#330033">, 13)</font>
+<font color="#330033">ages = map_put(ages, </font><font color="#00A033">"Budi"</font><font color="#330033">, 14)</font>
+<font color="#FF0055">-- ages now contains 2 entries: "Andy"=>12, "Budi"=>14</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_new">map_new</a>,
+  <a href="lib_h_o.htm#map_get">map_get</a>,
+  <a href="lib_h_o.htm#map_size">map_size</a>,
+  <a href="lib_h_o.htm#map_remove">map_remove</a>,
+  <a href="lib_h_o.htm#map_keys">map_keys</a>,
+  <a href="lib_h_o.htm#map_values">map_values</a>
+</td></tr>
+
+</table>
+
+<a name=map_size></a><font color="#006633" size=+2><br>
+<center><b>map_size</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR>
+  i = map_size(m) </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the number of entries in the map m.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>For an empty map, it will return 0
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map m</font>
+<font color="#330033">m = map_put(m, 1, </font><font color="#00A033">"a"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 2, </font><font color="#00A033">"b"</font><font color="#330033">)</font>
+<font color="#330033">? map_size(m) </font><font color="#FF0055">-- outputs 2</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_new">map_new</a>,
+  <a href="lib_h_o.htm#map_get">map_get</a>,
+  <a href="lib_h_o.htm#map_put">map_put</a>,
+  <a href="lib_h_o.htm#map_remove">map_remove</a>,
+  <a href="lib_h_o.htm#map_keys">map_keys</a>,
+  <a href="lib_h_o.htm#map_values">map_values</a>
+</td></tr>
+
+</table>
+
+<a name=map_remove></a><font color="#006633" size=+2><br>
+<center><b>map_remove</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR>
+  m1 = map_remove(m2, x) </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Remove an entry with key x from the map m2. The modified map is returned
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>If the map has no entry with the specified key, the original map is returned.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map m</font>
+<font color="#330033">m = map_new()</font>
+<font color="#330033">m = map_put(m, </font><font color="#00A033">"Amy"</font><font color="#330033">, 66.9)</font>
+<font color="#330033">m = map_remove(m, </font><font color="#00A033">"Amy"</font><font color="#330033">)</font>
+<font color="#FF0055">-- m is now an empty map again</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_new">map_new</a>,
+  <a href="lib_h_o.htm#map_get">map_get</a>,
+  <a href="lib_h_o.htm#map_put">map_put</a>,
+  <a href="lib_h_o.htm#map_size">map_size</a>,
+  <a href="lib_h_o.htm#map_keys">map_keys</a>,
+  <a href="lib_h_o.htm#map_values">map_values</a>
+</td></tr>
+
+</table>
+
+<a name=map_keys></a><font color="#006633" size=+2><br>
+<center><b>map_keys</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR>
+  s = map_keys(m) </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return all keys in the map as a sequence.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The order of the keys returned may not be the same as the putting order.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map m</font>
+<font color="#330033">m = map_new()</font>
+<font color="#330033">m = map_put(m, 10, </font><font color="#00A033">"ten"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 20, </font><font color="#00A033">"twenty"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 30, </font><font color="#00A033">"thirty"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 40, </font><font color="#00A033">"forty"</font><font color="#330033">)</font>
+<font color="#FF00FF">sequence </font><font color="#330033">keys</font>
+<font color="#330033">keys = map_keys(m) </font><font color="#FF0055">-- keys might be {20,40,10,30} or some other orders</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_new">map_new</a>,
+  <a href="lib_h_o.htm#map_get">map_get</a>,
+  <a href="lib_h_o.htm#map_put">map_put</a>,
+  <a href="lib_h_o.htm#map_size">map_size</a>,
+  <a href="lib_h_o.htm#map_remove">map_remove</a>,
+  <a href="lib_h_o.htm#map_values">map_values</a>
+</td></tr>
+
+</table>
+
+<a name=map_values></a><font color="#006633" size=+2><br>
+<center><b>map_values</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+<tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica"> include map.e<BR>
+  s = map_values(m) </font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return all values in the map as a sequence.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The order of the values returned may not be the same as the putting order. Duplicate values are not removed.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">Map m</font>
+<font color="#330033">m = map_new()</font>
+<font color="#330033">m = map_put(m, 10, </font><font color="#00A033">"ten"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 20, </font><font color="#00A033">"twenty"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 30, </font><font color="#00A033">"thirty"</font><font color="#330033">)</font>
+<font color="#330033">m = map_put(m, 40, </font><font color="#00A033">"forty"</font><font color="#330033">)</font>
+<font color="#FF00FF">sequence </font><font color="#330033">values</font>
+<font color="#330033">values = map_values(m) </font><font color="#FF0055">-- values might be {"twenty","forty","ten","thirty"} or some other orders</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="lib_h_o.htm#map_new">map_new</a>,
+  <a href="lib_h_o.htm#map_get">map_get</a>,
+  <a href="lib_h_o.htm#map_put">map_put</a>,
+  <a href="lib_h_o.htm#map_size">map_size</a>,
+  <a href="lib_h_o.htm#map_remove">map_remove</a>,
+  <a href="lib_h_o.htm#map_keys">map_keys</a>
+</td></tr>
+
+</table>
+
+
+
 <a name=match></a><font color="#006633" size=+2><br>
 <center><b>match</b></center>
 </font><p>
@@ -691,7 +1613,7 @@ it repeatedly, before the lock request is granted.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">location = </font><font color="#FF00FF">match_from</font><font color="#330033">(</font><font color="#00A033">"pho"</font><font color="#330033">, </font><font color="#00A033">"phoEuphoria"</font><font color="#330033">, 4)</font>
+<pre><font color="#330033">location = match_from(</font><font color="#00A033">"pho"</font><font color="#330033">, </font><font color="#00A033">"phoEuphoria"</font><font color="#330033">, 4)</font>
 <font color="#FF0055">-- location is set to 6</font>
 <font color="#330033"></font>
 </pre></td></tr>

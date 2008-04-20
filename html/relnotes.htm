@@ -116,8 +116,16 @@ a.brown:hover     {color: red; text-decoration: underline;}
  disable using the optimization flag when compiling with LCC, as it has
  problems sometimes. Implemented by Jeremy Cowgar
 <p>
+<p>
 <li>
- Began <b>standard library</b>:
+ <b>Moved</b> function <b>reverse()</b> from <b>misc.e</b> to <b>sequence.e</b>
+ and functions/constant <b>PI</b>, <b>arccos</b>, <b>arcsin</b> moved from
+ <b>misc.e</b> to <b>math.e</b>.
+<p>
+<li>
+ Began <b>library expansion</b>. The vast percentage of these functions
+ have been found in The Archive. Many thanks must go to the original
+ developers who have contributed these functions.
 <p>
  New routines in <b>math.e</b>:
  <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
@@ -125,13 +133,27 @@ a.brown:hover     {color: red; text-decoration: underline;}
  <b>max()</b>.
 <p>
  New routines in <b>sequence.e</b>:
- <b>left()</b>, <b>mid()</b>, <b>slice()</b>, and <b>right()</b>.
+ <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,
+ <b>replace_range()</b>, <b>left()</b>, <b>mid()</b>, <b>slice()</b>,
+ <b>right()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
+ <b>findany()</b>, and <b>findany_from()</b>.
 <p>
- Implemented by Jeremy Cowgar
+ New routines in <b>file.e</b>:
+ <b>readlines()</b>, <b>readfile()</b>, <b>pathinfo()</b>,
+ <b>dirname()</b>, <b>filename()</b>, <b>fileext()</b> and <b>PATHSEP</b>
+<p>
+ New routines in <b>ctype.e</b>:
+ <b>isalnum()</b>, <b>isalpha()</b>, <b>isascii()</b>, <b>iscntrl()</b>,
+ <b>isdigit()</b>, <b>isgraph()</b>, <b>islower()</b>, <b>isprint()</b>,
+ <b>ispunct()</b>, <b>isspace()</b>, <b>isupper()</b>, and
+ <b>isxdigit()</b>
+<p>
+ Most functions by various authors. Added, documented and testing by
+ Jeremy Cowgar
 <p>
 <li>
- Began <b>unit testing</b>. 84 tests in total. To run, cd tests and
- exw or exu all.ex ... Implemented by Jeremy Cowgar
+ Began <b>unit testing</b>. 137 library tests in total. To run, cd tests
+ and exw or exu all.ex ... Implemented by Jeremy Cowgar
 </ul>
 
 <p>

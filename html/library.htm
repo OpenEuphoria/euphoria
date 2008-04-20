@@ -93,6 +93,11 @@ a.brown:hover     {color: red; text-decoration: underline;}
      or <a href="refman_2.htm#char">single-character atom</a></td></tr>
 
 
+<tr><td valign=top><b>m</b></td>
+<td width=10 align=center valign=top>-</td>
+<td>a <a href="#map">Map</a> created using <a href="lib_h_o.htm#map_new">map_new()</a></td></tr>
+
+
 </table></center>
 
 <p>
@@ -125,7 +130,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <font color="#FF0099" size=+1>
 <br>
 
-2.1 Predefined Types
+<a name="type_checking"></a>
+2.1 Type checking
 
 </font>
 <p>
@@ -156,6 +162,54 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <td width=10 align=center valign=top>-</td>
 <td>test if an object is an object (always true)</td></tr>
 
+
+<tr><td valign=top><a href="lib_h_o.htm#isalnum"><b>isalnum</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is an alphanumeric character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isalpha"><b>isalpha</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is an alpha character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isascii"><b>isascii</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is an ascii character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#iscntrl"><b>iscntrl</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a control character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isdigit"><b>isdigit</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a digit</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isgraph"><b>isgraph</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a printable character not including space</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#islower"><b>islower</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a lower case character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isprint"><b>isprint</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a printable character including space</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#ispunct"><b>ispunct</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a punctuation character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isspace"><b>isspace</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a space</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isupper"><b>isupper</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is an upper case character</td></tr>
+
+<tr><td valign=top><a href="lib_h_o.htm#isxdigit"><b>isxdigit</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>test if an atom is a valid hex digit</td></tr>
 
 </table>
 
@@ -198,6 +252,26 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <td>add a new element to the beginning of a sequence</td></tr>
 
 
+<tr><td valign=top><a href="lib_h_o.htm#insert"><b>insert</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>insert one sequence into another</td></tr>
+
+
+<tr><td valign=top><a href="lib_p_r.htm#remove"><b>remove</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>remove an item from a sequence</td></tr>
+
+
+<tr><td valign=top><a href="lib_p_r.htm#remove_range"><b>remove_range</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>remove a range of items from a sequence</td></tr>
+
+
+<tr><td valign=top><a href="lib_p_r.htm#replace_range"><b>replace_range</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>replace a range of items with a new item or sequence</td></tr>
+
+
 <tr><td valign=top><a href="lib_h_o.htm#left"><b>left</b></a></td>
 <td width=10 align=center valign=top>-</td>
 <td>return the first n items of st with bounds checking</td></tr>
@@ -216,6 +290,21 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <tr><td valign=top><a href="lib_p_r.htm#right"><b>right</b></a></td>
 <td width=10 align=center valign=top>-</td>
 <td>return the last n items of st with bounds checking</td></tr>
+
+
+<tr><td valign=top><a href="lib_s_t.htm#split"><b>split</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>split a sequence by a sequence</td></tr>
+
+
+<tr><td valign=top><a href="lib_s_t.htm#split_adv"><b>split_adv</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>advanced split that will allow setting a limit and split type</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#join"><b>join</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>join a sequence by another sequence</td></tr>
 
 
 </table>
@@ -251,6 +340,16 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <tr><td valign=top><a href="lib_e_g.htm#find_from"><b>find_from</b></a></td>
 <td width=10 align=center valign=top>-</td>
 <td>find an object in a sequence - start searching from any element number</td></tr>
+
+
+<tr><td valign=top><a href="lib_e_g.htm#findany"><b>findany</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>find any element in needle in haystack - start searching from element number 1</td></tr>
+
+
+<tr><td valign=top><a href="lib_e_g.htm#findany_from"><b>findany_from</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>find any element in needle in haystack - start searching from any element number</td></tr>
 
 
 <tr><td valign=top><a href="lib_h_o.htm#match"><b>match</b></a></td>
@@ -565,6 +664,16 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <td>unlock a file or device</td></tr>
 
 
+<tr><td valign=top><a href="lib_p_r.htm#readfile"><b>readfile</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>read an entire file from an open file handle or from a given filename</td></tr>
+
+
+<tr><td valign=top><a href="lib_p_r.htm#readlines"><b>readlines</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>read all lines from an open file handle or from a given filename</td></tr>
+
+
 <tr><td valign=top><a href="lib_p_r.htm#print"><b>print</b></a></td>
 <td width=10 align=center valign=top>-</td>
 <td><a name=print></a>print a Euphoria
@@ -660,6 +769,26 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <td>report the current byte position in an open file</td></tr>
 
 
+<tr><td valign=top><a href="lib_p_r.htm#pathinfo"><b>pathinfo</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>return path information about a filename (dir, filename, extension)</td></tr>
+
+
+<tr><td valign=top><a href="lib_c_d.htm#dirname"><b>dirname</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>return the directory name of a fully qualified filename</td></tr>
+
+
+<tr><td valign=top><a href="lib_e_g.htm#filename"><b>filename</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>return the filename of a fully qualified filename</td></tr>
+
+
+<tr><td valign=top><a href="lib_e_g.htm#fileext"><b>fileext</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>return the extension of a filename</td></tr>
+
+
 <tr><td valign=top><a href="lib_c_d.htm#current_dir"><b>current_dir</b></a></td>
 <td width=10 align=center valign=top>-</td>
 <td>return the name of the current directory</td></tr>
@@ -688,6 +817,11 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <tr><td valign=top><a href="lib_c_d.htm#check_break"><b>check_break</b></a></td>
 <td width=10 align=center valign=top>-</td>
 <td>check if user has pressed control-c or control-Break</td></tr>
+
+
+<tr><td valign=top><a href="lib_p_r.htm#PATHSEP"><b>PATHSEP</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>the platform's path separator</td></tr>
 
 
 </table>
@@ -1451,11 +1585,105 @@ in the Properties for the DOS Window.
 <p>
 <hr>
 
+<a name=dyn_call></a>
+<font color="#FF0099" size=+1>
+<br>
+
+2.14 Dynamic Calls
+
+</font>
+<p>
+
+ These routines let you call Euphoria procedures and functions using a
+ unique integer known as a
+ <font color="#993333"><b>routine identifier</b></font>, rather than by
+ specifying the name of the routine.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<tr><td valign=top><a href="lib_p_r.htm#routine_id"><b>routine_id</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>get a unique identifying number for a Euphoria routine</td></tr>
+
+
+<tr><td valign=top><a href="lib_c_d.htm#call_proc"><b>call_proc</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>call a Euphoria procedure using a routine id</td></tr>
+
+
+<tr><td valign=top><a href="lib_c_d.htm#call_func"><b>call_func</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>call a Euphoria function using a routine id</td></tr>
+
+
+</table>
+
+<p>
+<hr>
+
+<a name=map></a>
+<font color="#FF0099" size=+1>
+<br>
+
+2.16 Map
+
+</font>
+<p>
+
+An object that maintains mapping from keys to values. No duplicate keys are allowed,
+so each key can only map to one value.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<tr><td valign=top><a href="lib_h_o.htm#map_new"><b>map_new</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>create a new map</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#map_get"><b>map_get</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>get the value of the specified key from the map</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#map_put"><b>map_put</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>put a new entry into the map</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#map_remove"><b>map_remove</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>remove an entry from the map</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#map_size"><b>map_size</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>get the number of entries in the map</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#map_keys"><b>map_keys</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>return all keys as a sequence</td></tr>
+
+
+<tr><td valign=top><a href="lib_h_o.htm#map_values"><b>map_values</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>return all values as a sequence</td></tr>
+
+
+
+</table>
+
+
+<p>
+<hr>
+
 <a name=tasking></a>
 <font color="#FF0099" size=+1>
 <br>
 
-2.16 Multitasking
+2.17 Multitasking
 </font>
 <p>
 This collection of routines lets you create multiple, independent

@@ -135,6 +135,82 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 </table>
 
+<a name=filename></a><font color="#006633" size=+2><br>
+<center><b>filename</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include file.e<BR>
+s2 = filename(s1)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the file name portion of a fully qualified filename.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The host operating system path separator is used.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">fname = filename(</font><font color="#00A033">"/opt/euphoria/docs/readme.txt"</font><font color="#330033">)</font>
+<font color="#FF0055">-- fname is "readme.txt"</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_p_r.htm#pathinfo">pathinfo</a>,
+<a href="lib_c_d.htm#dirname">dirname</a>,
+<a href="lib_e_g.htm#fileext">fileext</a>
+</td></tr>
+
+</table>
+
+<a name=fileext></a><font color="#006633" size=+2><br>
+<center><b>fileext</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include file.e<BR>
+s2 = fileext(s1)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the file extension of a fully qualified filename.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The host operating system path separator is used.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">fname = filename(</font><font color="#00A033">"/opt/euphoria/docs/readme.txt"</font><font color="#330033">)</font>
+<font color="#FF0055">-- fname is "txt"</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_p_r.htm#pathinfo">pathinfo</a>,
+<a href="lib_c_d.htm#dirname">dirname</a>,
+<a href="lib_e_g.htm#filename">filename</a>
+</td></tr>
+
+</table>
+
 
 <a name=find></a><font color="#006633" size=+2><br>
 <center><b>find</b></center>
@@ -206,7 +282,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">location = </font><font color="#FF00FF">find_from</font><font color="#330033">(11, </font><font color="#993333">{</font><font color="#330033">11, 8, 11, 2, 3</font><font color="#993333">}</font><font color="#330033">, 2)</font>
+<pre><font color="#330033">location = find_from(11, </font><font color="#993333">{</font><font color="#330033">11, 8, 11, 2, 3</font><font color="#993333">}</font><font color="#330033">, 2)</font>
 <font color="#FF0055">-- location is set to 3</font>
 <font color="#330033"></font>
 </pre></td></tr>
@@ -217,7 +293,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 <tr><td></td><td>
 <pre><font color="#330033">names = {</font><font color="#00A033">"mary"</font><font color="#330033">, </font><font color="#00A033">"rob"</font><font color="#330033">, </font><font color="#00A033">"george"</font><font color="#330033">, </font><font color="#00A033">"mary"</font><font color="#330033">, </font><font color="#00A033">""</font><font color="#330033">}</font>
-<font color="#330033">location = </font><font color="#FF00FF">find_from</font><font color="#330033">(</font><font color="#00A033">"mary"</font><font color="#330033">, names, 3)</font>
+<font color="#330033">location = find_from(</font><font color="#00A033">"mary"</font><font color="#330033">, names, 3)</font>
 <font color="#FF0055">-- location is set to 4</font>
 <font color="#330033"></font>
 </pre></td></tr>
@@ -231,12 +307,90 @@ a.brown:hover     {color: red; text-decoration: underline;}
 
 </table>
 
+
+<a name=findany></a><font color="#006633" size=+2><br>
+<center><b>findany</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include sequence.e<BR>
+i = findany(s1, s2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Find any element from s2 in s1 and return it's position or 0 if not found.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to a string sequence or a complex sequence
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">location = findany(</font><font color="#00A033">"John Doe"</font><font color="#330033">, </font><font color="#00A033">"aeiou"</font><font color="#330033">)</font>
+<font color="#FF0055">-- location is 2</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_e_g.htm#findany_from">findany_from</a>
+</td></tr>
+
+</table>
+
+
+<a name=findany_from></a><font color="#006633" size=+2><br>
+<center><b>findany_from</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include sequence.e<BR>
+i1 = findany_from(s1, s2, i2)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Find any element from s2 in s1 starting at position i2 and return it's position or 0 if not found.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to a string sequence or a complex sequence
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">location = findany_from(</font><font color="#00A033">"John Smith"</font><font color="#330033">, </font><font color="#00A033">"aeiou"</font><font color="#330033">, 3)</font>
+<font color="#FF0055">-- location is 8</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_e_g.htm#findany">findany</a>
+</td></tr>
+
+</table>
+
+
+
+
 <a name=float32_to_atom></a><font color="#006633" size=+2><br>
 <center><b>float32_to_atom</b></center>
 </font><p>
 
 <table border=0 cellspacing=2 cellpadding=2>
-
 
  <tr><td valign=top><b>Syntax:</b></td>
 <td><font face = "Arial, Helvetica"> include machine.e<BR>

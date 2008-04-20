@@ -9,10 +9,10 @@
       See relnotes.doc 
 
 
-  
-                         Euphoria Programming Language
-                                version 3.1
-  
+ 
+                        Euphoria Programming Language
+                               version 3.1
+ 
 
 
  Welcome to Euphoria! ... End User Programming with Hierarchical Objects for
@@ -179,7 +179,7 @@
  2.   Have fun running the programs in the demo directory. Feel free to modify
       them, or run them in trace mode by adding:
 
-              with trace
+              with trace
               trace(1)
       
       as the first two lines in the .ex or .exw file.

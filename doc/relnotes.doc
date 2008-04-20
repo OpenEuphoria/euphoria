@@ -62,17 +62,33 @@
         the optimization flag when compiling with LCC, as it has problems
         sometimes. Implemented by Jeremy Cowgar
 
-      * Began standard library:
+
+      * Moved function reverse() from misc.e to sequence.e and
+        functions/constant PI, arccos, arcsin moved from misc.e to math.e.
+
+      * Began library expansion. The vast percentage of these functions have
+        been found in The Archive. Many thanks must go to the original
+        developers who have contributed these functions.
 
         New routines in math.e: ceil(), round_prec(), round(), sign(), abs(),
         sum(), average(), min() and max().
 
-        New routines in sequence.e: left(), mid(), slice(), and right().
+        New routines in sequence.e: insert(), remove(), remove_range(),
+        replace_range(), left(), mid(), slice(), right(), split(), split_adv(),
+        join(), findany(), and findany_from().
 
-        Implemented by Jeremy Cowgar
+        New routines in file.e: readlines(), readfile(), pathinfo(), dirname(),
+        filename(), fileext() and PATHSEP
 
-      * Began unit testing. 84 tests in total. To run, cd tests and exw or exu
-        all.ex ... Implemented by Jeremy Cowgar
+        New routines in ctype.e: isalnum(), isalpha(), isascii(), iscntrl(),
+        isdigit(), isgraph(), islower(), isprint(), ispunct(), isspace(),
+        isupper(), and isxdigit()
+
+        Most functions by various authors. Added, documented and testing by
+        Jeremy Cowgar
+
+      * Began unit testing. 137 library tests in total. To run, cd tests and
+        exw or exu all.ex ... Implemented by Jeremy Cowgar
 
  Version 3.1.1 August 2007:
  ==========================

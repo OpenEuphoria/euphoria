@@ -1557,6 +1557,44 @@ will depend on the returned value being specified as signed or unsigned.
 
 </table>
 
+<a name=dirname></a><font color="#006633" size=+2><br>
+<center><b>dirname</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include file.e<BR>
+s2 = dirname(s1)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the directory name of a fully qualified filename.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The host operating system path separator is used.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">fname = dirname(</font><font color="#00A033">"/opt/euphoria/docs/readme.txt"</font><font color="#330033">)</font>
+<font color="#FF0055">-- fname is "/opt/euphoria/docs"</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_p_r.htm#pathinfo">pathinfo</a>,
+<a href="lib_e_g.htm#filename">filename</a>,
+<a href="lib_e_g.htm#fileext">fileext</a>
+</td></tr>
+
+</table>
+
 
 <a name=dir></a><font color="#006633" size=+2><br>
 <center><b>dir</b></center>
