@@ -16,21 +16,29 @@ end type
 function hashCode(object key)
 integer ret
 	if integer(key) then
-		return and_bits(key, #00FFFFFF)
+		if key > #00FFFFFF then
+			return and_bits(key, #00FFFFFF)
+		else 
+			return key
+		end if
 	elsif atom(key) then
 		ret = 0
 		key = atom_to_float64(key)
 		for i = 1 to 8 do
 			ret *= 15
 			ret += key[i]
-			ret = and_bits(ret, #00FFFFFF)
+			if ret > #00FFFFFF then
+				ret = and_bits(ret, #00FFFFFF)
+			end if
 		end for
 	else
 		ret = length(key)
 		for i = 1 to length(key) do
 			ret *= 15
 			ret += hashCode(key[i])
-			ret = and_bits(ret, #00FFFFFF)
+			if ret > #00FFFFFF then
+				ret = and_bits(ret, #00FFFFFF)
+			end if
 		end for
 	end if
 	return ret
