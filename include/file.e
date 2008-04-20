@@ -30,7 +30,6 @@ type boolean(integer b)
     return b = 0 or b = 1
 end type
 
--- TODO: document
 global integer PATHSEP
 if platform() = LINUX then
     PATHSEP='/'
@@ -266,7 +265,7 @@ global function walk_dir(sequence path_name, integer your_function,
     return 0
 end function
 
-global function readlines(object f)
+global function read_lines(object f)
     object fn, ret, y
 	ret = {}
 	
@@ -288,9 +287,7 @@ global function readlines(object f)
 		if length(y) and y[length(y)] = '\r' then
 			y = y[1..length(y)-1]
 		end if
-		if length(y) then
-			ret = append(ret, y)
-		end if
+        ret = append(ret, y)
 	end while
 	
 	if sequence(f) then
@@ -299,7 +296,7 @@ global function readlines(object f)
 	return ret
 end function
 
-global function readfile(object f)
+global function read_file(object f)
     object fn, ret, y
 	ret = {}
 	
@@ -362,14 +359,12 @@ global function pathinfo(sequence path)
     return {dir_name, file_name, file_ext}
 end function
 
--- TODO: document
 global function dirname(sequence path)
     sequence data
     data = pathinfo(path)
     return data[1]
 end function
 
--- TODO: document
 global function filename(sequence path)
     sequence data
 
@@ -383,7 +378,6 @@ global function filename(sequence path)
     return path
 end function
 
--- TODO: document
 global function fileext(sequence path)
     sequence data
     data = pathinfo(path)

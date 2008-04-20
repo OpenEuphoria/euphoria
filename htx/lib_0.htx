@@ -726,14 +726,14 @@
 >
 
 <_3clist
-  href="lib_p_r.htm#readfile"
-  name="readfile"
+  href="lib_p_r.htm#read_file"
+  name="read_file"
   description="read an entire file from an open file handle or from a given filename"
 >
 
 <_3clist
-  href="lib_p_r.htm#readlines"
-  name="readlines"
+  href="lib_p_r.htm#read_lines"
+  name="read_lines"
   description="read all lines from an open file handle or from a given filename"
 >
 
