@@ -1,65 +1,65 @@
 include sequence.e
 include unittest.e
 
-setTestModuleName("sequence.e")
+set_test_module_name("sequence.e")
 
-testEqual("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
-testEqual("reverse() string", "nhoJ", reverse("John"))
+test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
+test_equal("reverse() string", "nhoJ", reverse("John"))
 
-testEqual("findany_from() string", 7, findany_from("aeiou", "John Doe", 3))
-testEqual("findany_from() integers", 6, findany_from({1,3,5,8}, {2,4,5,6,7,8,9}, 4))
-testEqual("findany_from() floats", 6,
+test_equal("findany_from() string", 7, findany_from("aeiou", "John Doe", 3))
+test_equal("findany_from() integers", 6, findany_from({1,3,5,8}, {2,4,5,6,7,8,9}, 4))
+test_equal("findany_from() floats", 6,
         findany_from({1.3,3.5,5.6,8.3}, {2.1,4.2,5.3,6.4,7.5,8.3,9.1}, 4))
 
-testEqual("findany() string", 2, findany("aeiou", "John Doe"))
-testEqual("findany() integers", 3, findany({1,3,5,7,9}, {2,4,5,6,7,8,9}))
-testEqual("findany() floats", 3, findany({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,6.4,7.5,8.6,9.7}))
+test_equal("findany() string", 2, findany("aeiou", "John Doe"))
+test_equal("findany() integers", 3, findany({1,3,5,7,9}, {2,4,5,6,7,8,9}))
+test_equal("findany() floats", 3, findany({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,6.4,7.5,8.6,9.7}))
 
-testEqual("left() string", "John", left("John Doe", 4))
-testEqual("left() sequence", {1,2,3}, left({1,2,3,4,5,6}, 3))
-testEqual("left() nested sequence", {{1,2}, {3,4}}, left({{1,2},{3,4},{5,6}}, 2))
-testEqual("left() bounds", "Name", left("Name", 50))
+test_equal("left() string", "John", left("John Doe", 4))
+test_equal("left() sequence", {1,2,3}, left({1,2,3,4,5,6}, 3))
+test_equal("left() nested sequence", {{1,2}, {3,4}}, left({{1,2},{3,4},{5,6}}, 2))
+test_equal("left() bounds", "Name", left("Name", 50))
 
-testEqual("mid() string", "Middle", mid("John Middle Doe", 6, 6))
-testEqual("mid() sequence", {2,3,4}, mid({1,2,3,4,5,6}, 2, 3))
-testEqual("mid() nested sequence", {{3,4},{5,6}}, mid({{1,2},{3,4},{5,6},{7,8}}, 2, 2))
-testEqual("mid() bounds", {2,3}, mid({1,2,3}, 2, 50))
+test_equal("mid() string", "Middle", mid("John Middle Doe", 6, 6))
+test_equal("mid() sequence", {2,3,4}, mid({1,2,3,4,5,6}, 2, 3))
+test_equal("mid() nested sequence", {{3,4},{5,6}}, mid({{1,2},{3,4},{5,6},{7,8}}, 2, 2))
+test_equal("mid() bounds", {2,3}, mid({1,2,3}, 2, 50))
 
-testEqual("slice() string", "Middle", slice("John Middle Doe", 6, 11))
-testEqual("slice() string, zero end", "Middle Doe", slice("John Middle Doe", 6, 0))
-testEqual("slice() string, neg end", "Middle", slice("John Middle Doe", 6, -4))
-testEqual("slice() sequence", {2,3}, slice({1,2,3,4}, 2, 3))
-testEqual("slice() nested sequence", {{3,4},{5,6}}, slice({{1,2},{3,4},{5,6},{7,8}}, 2, 3))
-testEqual("slice() bounds", "Middle Doe", slice("John Middle Doe", 6, 50))
+test_equal("slice() string", "Middle", slice("John Middle Doe", 6, 11))
+test_equal("slice() string, zero end", "Middle Doe", slice("John Middle Doe", 6, 0))
+test_equal("slice() string, neg end", "Middle", slice("John Middle Doe", 6, -4))
+test_equal("slice() sequence", {2,3}, slice({1,2,3,4}, 2, 3))
+test_equal("slice() nested sequence", {{3,4},{5,6}}, slice({{1,2},{3,4},{5,6},{7,8}}, 2, 3))
+test_equal("slice() bounds", "Middle Doe", slice("John Middle Doe", 6, 50))
 
-testEqual("right() string", "Doe", right("John Middle Doe", 3))
-testEqual("right() sequence", {3,4}, right({1,2,3,4}, 2))
-testEqual("right() nested sequence", {{3,4},{5,6}}, right({{1,2},{3,4},{5,6}}, 2))
-testEqual("right() bounds", {1,2,3,4}, right({1,2,3,4}, 50))
+test_equal("right() string", "Doe", right("John Middle Doe", 3))
+test_equal("right() sequence", {3,4}, right({1,2,3,4}, 2))
+test_equal("right() nested sequence", {{3,4},{5,6}}, right({{1,2},{3,4},{5,6}}, 2))
+test_equal("right() bounds", {1,2,3,4}, right({1,2,3,4}, 50))
 
-testEqual("split() simple string", {"a","b","c"}, split("a,b,c", ','))
-testEqual("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
-testEqual("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"}, 0))
-testEqual("split_adv() limit set", {"a", "b,c"}, split_adv("a,b,c", ',', 2, 0))
-testEqual("split_adv() any character", {"a", "b", "c"}, split_adv("a,b.c", ",.", 0, 1))
-testEqual("split_adv() limit and any character", {"a", "b", "c|d"},
+test_equal("split() simple string", {"a","b","c"}, split("a,b,c", ','))
+test_equal("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
+test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"}, 0))
+test_equal("split_adv() limit set", {"a", "b,c"}, split_adv("a,b,c", ',', 2, 0))
+test_equal("split_adv() any character", {"a", "b", "c"}, split_adv("a,b.c", ",.", 0, 1))
+test_equal("split_adv() limit and any character", {"a", "b", "c|d"},
     split_adv("a,b.c|d", ",.|", 3, 1))
 
-testEqual("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
-testEqual("join() nested sequence", {"John", 0, "Doe"}, join({{"John"}, {"Doe"}}, 0))
+test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
+test_equal("join() nested sequence", {"John", 0, "Doe"}, join({{"John"}, {"Doe"}}, 0))
 
-testEqual("remove() integer sequence", {1,3}, remove({1,2,3}, 2))
-testEqual("remove() string", "Jon", remove("John", 3))
-testEqual("remove() nested sequence", {{1,2}, {5,6}}, remove({{1,2},{3,4},{5,6}}, 2))
-testEqual("remove() bounds", "John", remove("John", 55))
+test_equal("remove() integer sequence", {1,3}, remove({1,2,3}, 2))
+test_equal("remove() string", "Jon", remove("John", 3))
+test_equal("remove() nested sequence", {{1,2}, {5,6}}, remove({{1,2},{3,4},{5,6}}, 2))
+test_equal("remove() bounds", "John", remove("John", 55))
 
-testEqual("remove_range() integer sequence", {1,5}, remove_range({1,2,3,4,5}, 2, 4))
-testEqual("remove_range() string", "John Doe", remove_range("John M Doe", 5, 6))
-testEqual("remove_range() bounds", "John", remove_range("John Doe", 5, 100))
+test_equal("remove_range() integer sequence", {1,5}, remove_range({1,2,3,4,5}, 2, 4))
+test_equal("remove_range() string", "John Doe", remove_range("John M Doe", 5, 6))
+test_equal("remove_range() bounds", "John", remove_range("John Doe", 5, 100))
 
-testEqual("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
-testEqual("insert() string", "John", insert("Jon", "h", 3))
+test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
+test_equal("insert() string", "John", insert("Jon", "h", 3))
 
-testEqual("replace_range() integer sequence", {1,2,3}, replace_range({1,8,9,3}, 2, 2, 3))
-testEqual("replace_range() integer sequence w/sequence", {1,2,3,4},
+test_equal("replace_range() integer sequence", {1,2,3}, replace_range({1,8,9,3}, 2, 2, 3))
+test_equal("replace_range() integer sequence w/sequence", {1,2,3,4},
     replace_range({1,8,9,4}, {2,3}, 2, 3))
