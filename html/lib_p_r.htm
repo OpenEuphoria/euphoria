@@ -1932,15 +1932,15 @@ contents as 1 sequence.
 
 
 <tr><td valign=top><b>See Also:</b></td>
-<td><a href="lib_p_r.htm#readlines">readlines</a>,
+<td><a href="lib_p_r.htm#read_lines">read_lines</a>,
 <a href="lib_h_o.htm#open">open</a>
 </td></tr>
 
 </table>
 
 
-<a name=readlines></a><font color="#006633" size=+2><br>
-<center><b>readlines</b></center>
+<a name=read_lines></a><font color="#006633" size=+2><br>
+<center><b>read_lines</b></center>
 </font><p>
 
 <table border=0 cellspacing=2 cellpadding=2>
@@ -1948,9 +1948,9 @@ contents as 1 sequence.
 
  <tr><td valign=top><b>Syntax:</b></td>
 <td><font face = "Arial, Helvetica">include file.e<BR>
-s2 = readlines(s1)<BR>
+s2 = read_lines(s1)<BR>
 or<BR>
-s2 = readlines(i1)<BR>
+s2 = read_lines(i1)<BR>
 </font>
 </td></tr>
 
@@ -1965,7 +1965,7 @@ of lines.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">data = readlines(</font><font color="#00A033">"myfile.txt"</font><font color="#330033">)</font>
+<pre><font color="#330033">data = read_lines(</font><font color="#00A033">"myfile.txt"</font><font color="#330033">)</font>
 <font color="#FF0055">-- data contains the entire contents of 'myfile.txt', 1 sequence per line:</font>
 <font color="#FF0055">-- {{"Line 1"}, {"Line 2"}, {"Line 3"}}</font>
 </pre></td></tr>
@@ -1977,7 +1977,7 @@ of lines.
 
 <tr><td></td><td>
 <pre><font color="#330033">fh = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"myfile.txt"</font><font color="#330033">, </font><font color="#00A033">"r"</font><font color="#330033">)</font>
-<font color="#330033">data = readlines(fh)</font>
+<font color="#330033">data = read_lines(fh)</font>
 <font color="#FF00FF">close</font><font color="#330033">(fh)</font>
 <font color="#330033"></font>
 <font color="#FF0055">-- data contains the entire contents of 'myfile.txt', 1 sequence per line:</font>
