@@ -1887,8 +1887,8 @@ Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
 
 </table>
 
-<a name=readfile></a><font color="#006633" size=+2><br>
-<center><b>readfile</b></center>
+<a name=read_file></a><font color="#006633" size=+2><br>
+<center><b>read_file</b></center>
 </font><p>
 
 <table border=0 cellspacing=2 cellpadding=2>
@@ -1896,9 +1896,9 @@ Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
 
  <tr><td valign=top><b>Syntax:</b></td>
 <td><font face = "Arial, Helvetica">include file.e<BR>
-s2 = readfile(s1)<BR>
+s2 = read_file(s1)<BR>
 or<BR>
-s2 = readfile(i1)<BR>
+s2 = read_file(i1)<BR>
 </font>
 </td></tr>
 
@@ -1913,7 +1913,7 @@ contents as 1 sequence.
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">data = readfile(</font><font color="#00A033">"myfile.txt"</font><font color="#330033">)</font>
+<pre><font color="#330033">data = read_file(</font><font color="#00A033">"myfile.txt"</font><font color="#330033">)</font>
 <font color="#FF0055">-- data contains the entire contents of 'myfile.txt'</font>
 </pre></td></tr>
 
@@ -1924,7 +1924,7 @@ contents as 1 sequence.
 
 <tr><td></td><td>
 <pre><font color="#330033">fh = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"myfile.txt"</font><font color="#330033">, </font><font color="#00A033">"r"</font><font color="#330033">)</font>
-<font color="#330033">data = readfile(fh)</font>
+<font color="#330033">data = read_file(fh)</font>
 <font color="#FF00FF">close</font><font color="#330033">(fh)</font>
 <font color="#330033"></font>
 <font color="#FF0055">-- data contains the entire contents of 'myfile.txt'</font>
@@ -1986,7 +1986,7 @@ of lines.
 
 
 <tr><td valign=top><b>See Also:</b></td>
-<td><a href="lib_p_r.htm#readfile">readfile</a>,
+<td><a href="lib_p_r.htm#read_file">read_file</a>,
 <a href="lib_h_o.htm#open">open</a>
 </td></tr>
 
