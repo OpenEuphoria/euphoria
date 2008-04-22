@@ -22,20 +22,11 @@ global function reverse(sequence s)
     return t
 end function
 
--- TODO: benchmark, would using find() be quicker? We would have to find each
---       needle and then take the minimum number
-
 global function findany_from(sequence needles, sequence haystack, integer start)
-    if start > length(haystack) then
-        return 0
-    end if
-
     for i = start to length(haystack) do
-        for j = 1 to length(needles) do
-            if equal(haystack[i], needles[j]) then
-                return i
-            end if
-        end for
+    	if find(haystack[i],needles) then
+    	    return i
+    	end if
     end for
     return 0
 end function
