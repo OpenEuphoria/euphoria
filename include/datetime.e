@@ -13,15 +13,8 @@ constant XLEAP = 1
 constant Gregorian_Reformation = 1752, Gregorian_Reformation00 = 1700,
 DaysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 constant 
-YEAR  = 1, JDAY = 2,
 EPOCH_1970 = 62135856000,
 DayLengthInSeconds = 86400
-
--- Conversions to and from seconds
-
-function hmsToSeconds(object dt) -- returns an atom
-    return (dt[4] * 60 + dt[5]) * 60 + dt[6]
-end function
 
 -- Date Handling ------------------------------------------------------------
 
@@ -118,28 +111,6 @@ function julianDay(object ymd) -- returns an integer
     return j
 end function
 
-
-function julianDateInYear(object yd) -- returns a Date
-    integer year, d
-    year = yd[YEAR]
-    d = yd[JDAY]
-
-    -- guess month
-    if d <= daysInMonth(year, 1) then
-	return {year, 1, d}
-    end if
-    for month = 2 to 12 do
-	d -= daysInMonth(year, month-1)
-	if d <= daysInMonth(year, month) then
-	    return {year, month, d}
-	end if
-    end for
-
-    -- Skip to the next year on overflow
-    -- The alternative is a crash, listed below
-    return {year+1,1,d-31}
-end function
-
 function julianDate(integer j) -- returns a Date
     integer year, doy
 
@@ -184,18 +155,10 @@ function julianDate(integer j) -- returns a Date
     return {year+1, 1, doy-31}
 end function
 
--- Day of week
-
-function clock7(integer number) -- returns an integer (1..7)
-    return remainder(number+4094, 7)+1
-    -- modulo(number-1, 7)+1 would be better. Hence adding a few multiples
-    --   of 7 to the -1 in the remainder() call
-end function
-
 -- Conversions to and from seconds
 
 function datetimeToSeconds(object dt) -- returns an atom
-    return julianDay(dt) * DayLengthInSeconds + hmsToSeconds(dt)
+    return julianDay(dt) * DayLengthInSeconds + (dt[4] * 60 + dt[5]) * 60 + dt[6]
 end function
 
 function secondsToDateTime(atom seconds) -- returns a DateTime
@@ -291,9 +254,8 @@ end function
 -- int 	datetime_get_day(datetime dt)
 -- Answers the gregorian calendar day of the week. 
 global function datetime_get_day(datetime dt)
-    return clock7(julianDay(dt)-1)
+    return remainder(julianDay(dt)-1+4094, 7)+1
 end function
-
 
 
 -- datetime datetime_set_year()
