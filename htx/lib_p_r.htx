@@ -1785,16 +1785,16 @@ x = read_bitmap("c:\\windows\\arcade.bmp")
  >
 </table>
 
-<_routine name="readfile">
+<_routine name="read_file">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include file.e<BR>
-s2 = readfile(s1)<BR>
+s2 = read_file(s1)<BR>
 or<BR>
-s2 = readfile(i1)<BR>
+s2 = read_file(i1)<BR>
 </font>"
  >
  <_2clist
@@ -1809,7 +1809,7 @@ contents as 1 sequence."
   description=""
  >
 <_eucode>
-data = readfile("myfile.txt")
+data = read_file("myfile.txt")
 -- data contains the entire contents of 'myfile.txt'
 </_eucode>
 
@@ -1819,7 +1819,7 @@ data = readfile("myfile.txt")
  >
 <_eucode>
 fh = open("myfile.txt", "r")
-data = readfile(fh)
+data = read_file(fh)
 close(fh)
 
 -- data contains the entire contents of 'myfile.txt'
@@ -1827,22 +1827,22 @@ close(fh)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_p_r.htm#readlines\">readlines</a>,
+  description="<a href=\"lib_p_r.htm#read_lines\">read_lines</a>,
 <a href=\"lib_h_o.htm#open\">open</a>"
  >
 </table>
 
 
-<_routine name="readlines">
+<_routine name="read_lines">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include file.e<BR>
-s2 = readlines(s1)<BR>
+s2 = read_lines(s1)<BR>
 or<BR>
-s2 = readlines(i1)<BR>
+s2 = read_lines(i1)<BR>
 </font>"
  >
  <_2clist
@@ -1857,7 +1857,7 @@ of lines."
   description=""
  >
 <_eucode>
-data = readlines("myfile.txt")
+data = read_lines("myfile.txt")
 -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- {{"Line 1"}, {"Line 2"}, {"Line 3"}}
 </_eucode>
@@ -1868,7 +1868,7 @@ data = readlines("myfile.txt")
  >
 <_eucode>
 fh = open("myfile.txt", "r")
-data = readlines(fh)
+data = read_lines(fh)
 close(fh)
 
 -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
@@ -1877,7 +1877,7 @@ close(fh)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_p_r.htm#readfile\">readfile</a>,
+  description="<a href=\"lib_p_r.htm#read_file\">read_file</a>,
 <a href=\"lib_h_o.htm#open\">open</a>"
  >
 </table>
