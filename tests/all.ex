@@ -27,6 +27,7 @@ include t_map.e
 include t_misc.e
 include t_sequence.e
 include t_sort.e
+include t_string.e
 include t_wildcard.e
 
 test_summary()
