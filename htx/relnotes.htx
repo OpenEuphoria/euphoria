@@ -114,7 +114,8 @@
      <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,
      <b>replace_range()</b>, <b>left()</b>, <b>mid()</b>, <b>slice()</b>,
      <b>right()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
-     <b>findany()</b>, and <b>findany_from()</b>.
+     <b>findany()</b>, and <b>findany_from()</b> (faster, simpler version by
+     Larry Miller, Thanks Larry!).
 	<li>
      New routines in <b>file.e</b>:
      <b>read_lines()</b>, <b>read_file()</b>, <b>pathinfo()</b>,
