@@ -252,3 +252,8 @@ global function log10(object a)
 
     return a
 end function
+
+-- TODO: test, document
+global function exp(atom x)
+    return power(E, x)
+end function
