@@ -301,7 +301,7 @@ global function read_file(object f)
 	ret = {}
 	
 	if sequence(f) then
-		fn = open(f, "r")
+		fn = open(f, "rb")
 	else
 		fn = f
 	end if
