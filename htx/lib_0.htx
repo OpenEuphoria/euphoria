@@ -568,6 +568,12 @@
 >
 
 <_3clist
+  href="lib_e_g.htm#exp"
+  name="exp"
+  description="calculate E to the n'th power"
+>
+
+<_3clist
   href="lib_s_t.htm#sign"
   name="sign"
   description="test an objects signness"
