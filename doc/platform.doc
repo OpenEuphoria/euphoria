@@ -1,6 +1,6 @@
 
- 
-                   Platform-Specific Issues for Euphoria 
+  
+                    Platform-Specific Issues for Euphoria  
 
 
  1. Introduction
@@ -176,10 +176,10 @@
  the world of Euphoria programming for WIN32. A good book is:
 
 
-                    Programming Windows
-                      by Charles Petzold
-                        Microsoft Press
- 
+                     Programming Windows
+                       by Charles Petzold
+                         Microsoft Press
+  
 
  A WIN32 API Windows help file (8 Mb) can be downloaded from Borland's Web
  site:
@@ -282,7 +282,7 @@
 
  Example:
 
-            include dll.e
+            include dll.e
             
             atom user32
             integer LoadIcon, icon
@@ -385,7 +385,7 @@
 
  Example:
 
-            constant RECT_LEFT = 0,
+            constant RECT_LEFT = 0,
                      RECT_TOP  = 4,
                      RECT_RIGHT = 8,
                      RECT_BOTTOM = 12

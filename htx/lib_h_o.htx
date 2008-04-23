@@ -1054,13 +1054,58 @@ a = log(100)
  </_eucode>
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_s_t.htm#sin\">sin</a>,
+  description="<a href=\"lib_h_o.htm#log10\">log10</a>,
+<a href=\"lib_s_t.htm#sin\">sin</a>,
 <a href=\"lib_c_d.htm#cos\">cos</a>,
 <a href=\"lib_s_t.htm#tan\">tan</a>,
 <a href=\"lib_p_r.htm#power\">power</a>,
 <a href=\"lib_s_t.htm#sqrt\">sqrt</a>"
  >
 </table>
+
+<_routine name="log10">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include math.e<BR>
+x2 = log10(x1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the base 10 logarithm of x1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or to all elements
+ of a sequence. Note that log10 is only defined for positive
+ numbers. Your program will abort with a message if you
+ try to take the log of a negative number or zero."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+a = log10(12)
+-- a is 2.48490665
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_h_o.htm#log\">log</a>,
+<a href=\"lib_s_t.htm#sin\">sin</a>,
+<a href=\"lib_c_d.htm#cos\">cos</a>,
+<a href=\"lib_s_t.htm#tan\">tan</a>,
+<a href=\"lib_p_r.htm#power\">power</a>,
+<a href=\"lib_s_t.htm#sqrt\">sqrt</a>"
+ >
+</table>
+
+
 
 
 <_routine name="lower">

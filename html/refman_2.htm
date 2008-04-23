@@ -66,26 +66,26 @@ a.brown:hover     {color: red; text-decoration: underline;}
  the power 300) to +1e300 with 15 decimal digits of accuracy. Here are some
  Euphoria objects:
 
-<pre><font color="#FF0055">        -- examples of atoms:</font>
-<font color="#330033">        0</font>
-<font color="#330033">        1000</font>
-<font color="#330033">        98.6</font>
-<font color="#330033">        -1e6</font>
-<font color="#330033"></font>
-<font color="#FF0055">        -- examples of sequences:</font>
-<font color="#330033">        {2, 3, 5, 7, 11, 13, 17, 19}</font>
-<font color="#330033">        {1, 2, </font><font color="#993333">{</font><font color="#330033">3, 3, 3</font><font color="#993333">}</font><font color="#330033">, 4, </font><font color="#993333">{</font><font color="#330033">5, </font><font color="#0000FF">{</font><font color="#330033">6</font><font color="#0000FF">}</font><font color="#993333">}</font><font color="#330033">}</font>
-<font color="#330033">        {</font><font color="#993333">{</font><font color="#00A033">"jon"</font><font color="#330033">, </font><font color="#00A033">"smith"</font><font color="#993333">}</font><font color="#330033">, 52389, 97.25}</font>
-<font color="#330033">        {}                        </font><font color="#FF0055">-- the 0-element sequence</font>
+<pre><font color="#FF0055">        -- examples of atoms:</font>
+<font color="#330033">        0</font>
+<font color="#330033">        1000</font>
+<font color="#330033">        98.6</font>
+<font color="#330033">        -1e6</font>
+<font color="#330033"></font>
+<font color="#FF0055">        -- examples of sequences:</font>
+<font color="#330033">        {2, 3, 5, 7, 11, 13, 17, 19}</font>
+<font color="#330033">        {1, 2, </font><font color="#993333">{</font><font color="#330033">3, 3, 3</font><font color="#993333">}</font><font color="#330033">, 4, </font><font color="#993333">{</font><font color="#330033">5, </font><font color="#0000FF">{</font><font color="#330033">6</font><font color="#0000FF">}</font><font color="#993333">}</font><font color="#330033">}</font>
+<font color="#330033">        {</font><font color="#993333">{</font><font color="#00A033">"jon"</font><font color="#330033">, </font><font color="#00A033">"smith"</font><font color="#993333">}</font><font color="#330033">, 52389, 97.25}</font>
+<font color="#330033">        {}                        </font><font color="#FF0055">-- the 0-element sequence</font>
 </pre>
 <p>
 
  Numbers can also be entered in hexadecimal. For example:
 
-<pre><font color="#330033">        #FE             </font><font color="#FF0055">-- 254</font>
-<font color="#330033">        #A000           </font><font color="#FF0055">-- 40960</font>
-<font color="#330033">        #FFFF00008      </font><font color="#FF0055">-- 68718428168</font>
-<font color="#330033">        -#10            </font><font color="#FF0055">-- -16</font>
+<pre><font color="#330033">        #FE             </font><font color="#FF0055">-- 254</font>
+<font color="#330033">        #A000           </font><font color="#FF0055">-- 40960</font>
+<font color="#330033">        #FFFF00008      </font><font color="#FF0055">-- 68718428168</font>
+<font color="#330033">        -#10            </font><font color="#FF0055">-- -16</font>
 </pre>
 <p>
 
@@ -102,7 +102,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
  expressions. These expressions can be constant or evaluated at run-time.
  e.g.
 
-<pre><font color="#330033">        {x+6, 9, y*w+2, </font><font color="#FF00FF">sin</font><font color="#993333">(</font><font color="#330033">0.5</font><font color="#993333">)</font><font color="#330033">}</font>
+<pre><font color="#330033">        {x+6, 9, y*w+2, </font><font color="#FF00FF">sin</font><font color="#993333">(</font><font color="#330033">0.5</font><font color="#993333">)</font><font color="#330033">}</font>
 </pre>
 
 <p>
@@ -159,7 +159,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
  <font color="#993333"><b>sequence</b></font> of characters.
  It may be entered using quotes e.g.
 
-<pre><font color="#00A033">        "ABCDEFG"</font>
+<pre><font color="#00A033">        "ABCDEFG"</font>
 </pre>
 
 <p>
@@ -168,7 +168,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
  string is entirely equivalent to the sequence:
 
 
-<pre><font color="#330033">        {65, 66, 67, 68, 69, 70, 71}</font>
+<pre><font color="#330033">        {65, 66, 67, 68, 69, 70, 71}</font>
 </pre>
 
  which contains the corresponding ASCII codes. The Euphoria compiler
@@ -194,8 +194,8 @@ a.brown:hover     {color: red; text-decoration: underline;}
  individual character (which is an atom), and a character string of length-1
  (which is a sequence). e.g.
 
-<pre><font color="#00A033">        'B'   </font><font color="#FF0055">-- equivalent to the atom 66 - the ASCII code for B</font>
-<font color="#00A033">        "B"   </font><font color="#FF0055">-- equivalent to the sequence {66}</font>
+<pre><font color="#00A033">        'B'   </font><font color="#FF0055">-- equivalent to the atom 66 - the ASCII code for B</font>
+<font color="#00A033">        "B"   </font><font color="#FF0055">-- equivalent to the sequence {66}</font>
 </pre>
 
 <p>
@@ -239,7 +239,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
  Comments are started by two dashes and extend to the end of the current line.
  e.g.
 
-<pre><font color="#FF0055">        -- this is a comment</font>
+<pre><font color="#FF0055">        -- this is a comment</font>
 </pre>
 
 <p>
@@ -248,7 +248,7 @@ a.brown:hover     {color: red; text-decoration: underline;}
 <p> 
  On the first line (only) of your program,
  you can use a special comment beginning with #!, e.g.
-<pre><font color="#330033">        #!/home/rob/euphoria/bin/exu  </font>
+<pre><font color="#330033">        #!/home/rob/euphoria/bin/exu  </font>
 </pre>
 This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.
@@ -276,7 +276,7 @@ instead of exu.
  much as you would a single number. It can be copied, passed to a subroutine,
  or calculated upon as a unit. For example,
 
-<pre><font color="#330033">        {1,2,3} + 5</font>
+<pre><font color="#330033">        {1,2,3} + 5</font>
 </pre>
 
  is an expression that adds the sequence {1,2,3} and the atom 5 to get the
@@ -300,12 +300,12 @@ instead of exu.
  >= &nbsp; = &nbsp; != &nbsp;</b></font> each produce a 1 (true) or a
  0 (false) result.
 
-<pre><font color="#330033">        8.8 < 8.7   </font><font color="#FF0055">-- 8.8 less than 8.7 (false)</font>
-<font color="#330033">        -4.4 > -4.3 </font><font color="#FF0055">-- -4.4 greater than -4.3 (false)</font>
-<font color="#330033">        8 <= 7      </font><font color="#FF0055">-- 8 less than or equal to 7 (false)</font>
-<font color="#330033">        4 >= 4      </font><font color="#FF0055">-- 4 greater than or equal to 4 (true)</font>
-<font color="#330033">        1 = 10      </font><font color="#FF0055">-- 1 equal to 10 (false)</font>
-<font color="#330033">        8.7 != 8.8  </font><font color="#FF0055">-- 8.7 not equal to 8.8 (true)</font>
+<pre><font color="#330033">        8.8 < 8.7   </font><font color="#FF0055">-- 8.8 less than 8.7 (false)</font>
+<font color="#330033">        -4.4 > -4.3 </font><font color="#FF0055">-- -4.4 greater than -4.3 (false)</font>
+<font color="#330033">        8 <= 7      </font><font color="#FF0055">-- 8 less than or equal to 7 (false)</font>
+<font color="#330033">        4 >= 4      </font><font color="#FF0055">-- 4 greater than or equal to 4 (true)</font>
+<font color="#330033">        1 = 10      </font><font color="#FF0055">-- 1 equal to 10 (false)</font>
+<font color="#330033">        8.7 != 8.8  </font><font color="#FF0055">-- 8.7 not equal to 8.8 (true)</font>
 </pre>
 
 <p>
@@ -329,31 +329,31 @@ instead of exu.
  are used to determine the
  "truth" of an expression. e.g.
 
-<pre><font color="#330033">        1 </font><font color="#0000FF">and </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#330033">        1 </font><font color="#0000FF">and </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#330033">        0 </font><font color="#0000FF">and </font><font color="#330033">1     </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#330033">        0 </font><font color="#0000FF">and </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#330033"></font>
-<font color="#330033">        1 </font><font color="#0000FF">or  </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#330033">        1 </font><font color="#0000FF">or  </font><font color="#330033">0     </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#330033">        0 </font><font color="#0000FF">or  </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#330033">        0 </font><font color="#0000FF">or  </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#330033"></font>
-<font color="#330033">        1 </font><font color="#0000FF">xor </font><font color="#330033">1     </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#330033">        1 </font><font color="#0000FF">xor </font><font color="#330033">0     </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#330033">        0 </font><font color="#0000FF">xor </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#330033">        0 </font><font color="#0000FF">xor </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#330033"></font>
-<font color="#0000FF">        not </font><font color="#330033">1       </font><font color="#FF0055">-- 0 (false)</font>
-<font color="#0000FF">        not </font><font color="#330033">0       </font><font color="#FF0055">-- 1 (true)</font>
+<pre><font color="#330033">        1 </font><font color="#0000FF">and </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#330033">        1 </font><font color="#0000FF">and </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#330033">        0 </font><font color="#0000FF">and </font><font color="#330033">1     </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#330033">        0 </font><font color="#0000FF">and </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#330033"></font>
+<font color="#330033">        1 </font><font color="#0000FF">or  </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#330033">        1 </font><font color="#0000FF">or  </font><font color="#330033">0     </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#330033">        0 </font><font color="#0000FF">or  </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#330033">        0 </font><font color="#0000FF">or  </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#330033"></font>
+<font color="#330033">        1 </font><font color="#0000FF">xor </font><font color="#330033">1     </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#330033">        1 </font><font color="#0000FF">xor </font><font color="#330033">0     </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#330033">        0 </font><font color="#0000FF">xor </font><font color="#330033">1     </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#330033">        0 </font><font color="#0000FF">xor </font><font color="#330033">0     </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#330033"></font>
+<font color="#0000FF">        not </font><font color="#330033">1       </font><font color="#FF0055">-- 0 (false)</font>
+<font color="#0000FF">        not </font><font color="#330033">0       </font><font color="#FF0055">-- 1 (true)</font>
 </pre>
 
 <p>
  You can also apply these operators to numbers other than 1 or 0. The rule is:
  zero means false and non-zero means true. So for instance:
 
-<pre><font color="#330033">        5 </font><font color="#0000FF">and </font><font color="#330033">-4    </font><font color="#FF0055">-- 1 (true)</font>
-<font color="#0000FF">        not </font><font color="#330033">6       </font><font color="#FF0055">-- 0 (false)</font>
+<pre><font color="#330033">        5 </font><font color="#0000FF">and </font><font color="#330033">-4    </font><font color="#FF0055">-- 1 (true)</font>
+<font color="#0000FF">        not </font><font color="#330033">6       </font><font color="#FF0055">-- 0 (false)</font>
 </pre>
 
 <p>
@@ -379,12 +379,12 @@ instead of exu.
  The usual arithmetic operators are available: add, subtract, multiply,
  divide, unary minus, unary plus.
 
-<pre><font color="#330033">        3.5 + 3  </font><font color="#FF0055">-- 6.5</font>
-<font color="#330033">        3 - 5    </font><font color="#FF0055">-- -2</font>
-<font color="#330033">        6 * 2    </font><font color="#FF0055">-- 12</font>
-<font color="#330033">        7 / 2    </font><font color="#FF0055">-- 3.5</font>
-<font color="#330033">        -8.1     </font><font color="#FF0055">-- -8.1</font>
-<font color="#330033">        +8       </font><font color="#FF0055">-- +8</font>
+<pre><font color="#330033">        3.5 + 3  </font><font color="#FF0055">-- 6.5</font>
+<font color="#330033">        3 - 5    </font><font color="#FF0055">-- -2</font>
+<font color="#330033">        6 * 2    </font><font color="#FF0055">-- 12</font>
+<font color="#330033">        7 / 2    </font><font color="#FF0055">-- 3.5</font>
+<font color="#330033">        -8.1     </font><font color="#FF0055">-- -8.1</font>
+<font color="#330033">        +8       </font><font color="#FF0055">-- +8</font>
 </pre>
 
 <p>
@@ -433,7 +433,7 @@ instead of exu.
  same length. If one of these elements is itself a sequence then the same rule
  is applied again recursively. e.g.
 
-<pre><font color="#330033">        x = -{1, 2, 3, </font><font color="#993333">{</font><font color="#330033">4, 5</font><font color="#993333">}</font><font color="#330033">}   </font><font color="#FF0055">-- x is {-1, -2, -3, {-4, -5}}</font>
+<pre><font color="#330033">        x = -{1, 2, 3, </font><font color="#993333">{</font><font color="#330033">4, 5</font><font color="#993333">}</font><font color="#330033">}   </font><font color="#FF0055">-- x is {-1, -2, -3, {-4, -5}}</font>
 </pre>
 
 <p>
@@ -442,8 +442,8 @@ instead of exu.
  applied to corresponding elements taken from the two sequences to get a
  sequence of results. e.g.
 
-<pre><font color="#330033">        x = {5, 6, 7, 8} + {10, 10, 20, 100}</font>
-<font color="#FF0055">        -- x is {15, 16, 27, 108}</font>
+<pre><font color="#330033">        x = {5, 6, 7, 8} + {10, 10, 20, 100}</font>
+<font color="#FF0055">        -- x is {15, 16, 27, 108}</font>
 </pre>
 
 <p>
@@ -452,35 +452,35 @@ instead of exu.
  form a sequence of equal length to the sequence operand. The rules for
  operating on two sequences then apply. Some examples:
 
-<pre><font color="#330033">        y = {4, 5, 6}</font>
-<font color="#330033"></font>
-<font color="#330033">        w = 5 * y              </font><font color="#FF0055">-- w is {20, 25, 30}</font>
-<font color="#330033"></font>
-<font color="#330033">        x = {1, 2, 3}</font>
-<font color="#330033"></font>
-<font color="#330033">        z = x + y              </font><font color="#FF0055">-- z is {5, 7, 9}</font>
-<font color="#330033"></font>
-<font color="#330033">        z = x < y              </font><font color="#FF0055">-- z is {1, 1, 1}</font>
-<font color="#330033"></font>
-<font color="#330033">        w = {</font><font color="#993333">{</font><font color="#330033">1, 2</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">3, 4</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5</font><font color="#993333">}</font><font color="#330033">}</font>
-<font color="#330033"></font>
-<font color="#330033">        w = w * y              </font><font color="#FF0055">-- w is {{4, 8}, {15, 20}, {30}}</font>
-<font color="#330033"></font>
-<font color="#330033">        w = {1, 0, 0, 1} </font><font color="#0000FF">and </font><font color="#330033">{1, 1, 1, 0}    </font><font color="#FF0055">-- {1, 0, 0, 0}</font>
-<font color="#330033"></font>
-<font color="#330033">        w = </font><font color="#0000FF">not </font><font color="#330033">{1, 5, -2, 0, 0}     </font><font color="#FF0055">-- w is {0, 0, 0, 1, 1}</font>
-<font color="#330033"></font>
-<font color="#330033">        w = {1, 2, 3} = {1, 2, 4}    </font><font color="#FF0055">-- w is {1, 1, 0}</font>
-<font color="#FF0055">        -- note that the first '=' is assignment, and the</font>
-<font color="#FF0055">        -- second '=' is a relational operator that tests</font>
-<font color="#FF0055">        -- equality </font>
+<pre><font color="#330033">        y = {4, 5, 6}</font>
+<font color="#330033"></font>
+<font color="#330033">        w = 5 * y              </font><font color="#FF0055">-- w is {20, 25, 30}</font>
+<font color="#330033"></font>
+<font color="#330033">        x = {1, 2, 3}</font>
+<font color="#330033"></font>
+<font color="#330033">        z = x + y              </font><font color="#FF0055">-- z is {5, 7, 9}</font>
+<font color="#330033"></font>
+<font color="#330033">        z = x < y              </font><font color="#FF0055">-- z is {1, 1, 1}</font>
+<font color="#330033"></font>
+<font color="#330033">        w = {</font><font color="#993333">{</font><font color="#330033">1, 2</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">3, 4</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5</font><font color="#993333">}</font><font color="#330033">}</font>
+<font color="#330033"></font>
+<font color="#330033">        w = w * y              </font><font color="#FF0055">-- w is {{4, 8}, {15, 20}, {30}}</font>
+<font color="#330033"></font>
+<font color="#330033">        w = {1, 0, 0, 1} </font><font color="#0000FF">and </font><font color="#330033">{1, 1, 1, 0}    </font><font color="#FF0055">-- {1, 0, 0, 0}</font>
+<font color="#330033"></font>
+<font color="#330033">        w = </font><font color="#0000FF">not </font><font color="#330033">{1, 5, -2, 0, 0}     </font><font color="#FF0055">-- w is {0, 0, 0, 1, 1}</font>
+<font color="#330033"></font>
+<font color="#330033">        w = {1, 2, 3} = {1, 2, 4}    </font><font color="#FF0055">-- w is {1, 1, 0}</font>
+<font color="#FF0055">        -- note that the first '=' is assignment, and the</font>
+<font color="#FF0055">        -- second '=' is a relational operator that tests</font>
+<font color="#FF0055">        -- equality </font>
 </pre>
 
 <b><font color="#006633">Note:</font></b>
 When you wish to compare two strings (or other sequences), 
 you should <b>not</b> (as in some other languages) use the '=' operator:
 
-<pre><font color="#0000FF">       if </font><font color="#00A033">"APPLE" </font><font color="#330033">= </font><font color="#00A033">"ORANGE" </font><font color="#0000FF">then  </font><font color="#FF0055">-- ERROR! </font>
+<pre><font color="#0000FF">       if </font><font color="#00A033">"APPLE" </font><font color="#330033">= </font><font color="#00A033">"ORANGE" </font><font color="#0000FF">then  </font><font color="#FF0055">-- ERROR! </font>
 </pre>
 
 '=' is treated as an operator, just like '+', '*' etc.,
@@ -491,18 +491,18 @@ the result is an error. Either way you'll get an error, since an
 if-condition must be an atom, not a sequence.
 Instead you should use the equal() built-in routine:
 
-<pre><font color="#0000FF">       if </font><font color="#FF00FF">equal</font><font color="#330033">(</font><font color="#00A033">"APPLE"</font><font color="#330033">, </font><font color="#00A033">"ORANGE"</font><font color="#330033">) </font><font color="#0000FF">then  </font><font color="#FF0055">-- CORRECT</font>
+<pre><font color="#0000FF">       if </font><font color="#FF00FF">equal</font><font color="#330033">(</font><font color="#00A033">"APPLE"</font><font color="#330033">, </font><font color="#00A033">"ORANGE"</font><font color="#330033">) </font><font color="#0000FF">then  </font><font color="#FF0055">-- CORRECT</font>
 </pre>
 
 In general, you can do relational comparisons using the compare() 
 built-in routine:
 
-<pre><font color="#0000FF">       if </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">"APPLE"</font><font color="#330033">, </font><font color="#00A033">"ORANGE"</font><font color="#330033">) = 0 </font><font color="#0000FF">then  </font><font color="#FF0055">-- CORRECT</font>
+<pre><font color="#0000FF">       if </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">"APPLE"</font><font color="#330033">, </font><font color="#00A033">"ORANGE"</font><font color="#330033">) = 0 </font><font color="#0000FF">then  </font><font color="#FF0055">-- CORRECT</font>
 </pre>
 
 You can use compare() for other comparisons as well:
-<pre><font color="#0000FF">       if </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">"APPLE"</font><font color="#330033">, </font><font color="#00A033">"ORANGE"</font><font color="#330033">) < 0 </font><font color="#0000FF">then  </font><font color="#FF0055">-- CORRECT</font>
-<font color="#FF0055">           -- enter here if "APPLE" is less than "ORANGE" (TRUE)</font>
+<pre><font color="#0000FF">       if </font><font color="#FF00FF">compare</font><font color="#330033">(</font><font color="#00A033">"APPLE"</font><font color="#330033">, </font><font color="#00A033">"ORANGE"</font><font color="#330033">) < 0 </font><font color="#0000FF">then  </font><font color="#FF0055">-- CORRECT</font>
+<font color="#FF0055">           -- enter here if "APPLE" is less than "ORANGE" (TRUE)</font>
 </pre>
 
 
@@ -524,7 +524,7 @@ You can use compare() for other comparisons as well:
  For example, if x contains {5, 7.2, 9, 0.5, 13} then x[2] is 7.2. Suppose we
  assign something different to x[2]:
 
-<pre><font color="#330033">        x[2] = {11,22,33}</font>
+<pre><font color="#330033">        x[2] = {11,22,33}</font>
 </pre>
 
 <p>
@@ -538,11 +538,11 @@ You can use compare() for other comparisons as well:
  two dimensional array, common in other languages, can be easily represented
  with a sequence of sequences:
 
-<pre><font color="#330033">        x = {</font>
-<font color="#330033">             {5, 6, 7, 8, 9},      </font><font color="#FF0055">-- x[1]</font>
-<font color="#330033">             {1, 2, 3, 4, 5},      </font><font color="#FF0055">-- x[2]</font>
-<font color="#330033">             {0, 1, 0, 1, 0}       </font><font color="#FF0055">-- x[3]</font>
-<font color="#330033">            }</font>
+<pre><font color="#330033">        x = {</font>
+<font color="#330033">             {5, 6, 7, 8, 9},      </font><font color="#FF0055">-- x[1]</font>
+<font color="#330033">             {1, 2, 3, 4, 5},      </font><font color="#FF0055">-- x[2]</font>
+<font color="#330033">             {0, 1, 0, 1, 0}       </font><font color="#FF0055">-- x[3]</font>
+<font color="#330033">            }</font>
 </pre>
 
  where we have written the numbers in a way that makes the structure
@@ -555,12 +555,12 @@ You can use compare() for other comparisons as well:
  strings, structures, arrays of structures etc. can also be handled easily and
  flexibly:
 
-<pre><font color="#330033"> 3-D array:</font>
-<font color="#330033">        y = {</font>
-<font color="#330033">             {</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">3,3</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5,5</font><font color="#993333">}</font><font color="#330033">},</font>
-<font color="#330033">             {</font><font color="#993333">{</font><font color="#330033">0,0</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">0,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">9,1</font><font color="#993333">}</font><font color="#330033">},</font>
-<font color="#330033">             {</font><font color="#993333">{</font><font color="#330033">-1,9</font><font color="#993333">}</font><font color="#330033">,</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">2,2</font><font color="#993333">}</font><font color="#330033">}</font>
-<font color="#330033">            }</font>
+<pre><font color="#330033"> 3-D array:</font>
+<font color="#330033">        y = {</font>
+<font color="#330033">             {</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">3,3</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5,5</font><font color="#993333">}</font><font color="#330033">},</font>
+<font color="#330033">             {</font><font color="#993333">{</font><font color="#330033">0,0</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">0,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">9,1</font><font color="#993333">}</font><font color="#330033">},</font>
+<font color="#330033">             {</font><font color="#993333">{</font><font color="#330033">-1,9</font><font color="#993333">}</font><font color="#330033">,</font><font color="#993333">{</font><font color="#330033">1,1</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">2,2</font><font color="#993333">}</font><font color="#330033">}</font>
+<font color="#330033">            }</font>
 </pre>
 
 <blockquote>
@@ -570,7 +570,7 @@ You can use compare() for other comparisons as well:
 <p>
  Array of strings:
 
-<pre><font color="#330033">        s = {</font><font color="#00A033">"Hello"</font><font color="#330033">, </font><font color="#00A033">"World"</font><font color="#330033">, </font><font color="#00A033">"Euphoria"</font><font color="#330033">, </font><font color="#00A033">""</font><font color="#330033">, </font><font color="#00A033">"Last One"</font><font color="#330033">}</font>
+<pre><font color="#330033">        s = {</font><font color="#00A033">"Hello"</font><font color="#330033">, </font><font color="#00A033">"World"</font><font color="#330033">, </font><font color="#00A033">"Euphoria"</font><font color="#330033">, </font><font color="#00A033">""</font><font color="#330033">, </font><font color="#00A033">"Last One"</font><font color="#330033">}</font>
 </pre>
 
 <blockquote>
@@ -581,12 +581,12 @@ You can use compare() for other comparisons as well:
 <p>
  A Structure:
 
-<pre><font color="#330033">        employee = {</font>
-<font color="#330033">                    {</font><font color="#00A033">"John"</font><font color="#330033">,</font><font color="#00A033">"Smith"</font><font color="#330033">},</font>
-<font color="#330033">                    45000,</font>
-<font color="#330033">                    27,</font>
-<font color="#330033">                    185.5</font>
-<font color="#330033">                   }</font>
+<pre><font color="#330033">        employee = {</font>
+<font color="#330033">                    {</font><font color="#00A033">"John"</font><font color="#330033">,</font><font color="#00A033">"Smith"</font><font color="#330033">},</font>
+<font color="#330033">                    45000,</font>
+<font color="#330033">                    27,</font>
+<font color="#330033">                    185.5</font>
+<font color="#330033">                   }</font>
 </pre>
 
 <blockquote>
@@ -597,12 +597,12 @@ You can use compare() for other comparisons as well:
 
 </blockquote>
 
-<pre><font color="#0000FF">        constant </font><font color="#330033">NAME = 1</font>
-<font color="#0000FF">        constant </font><font color="#330033">FIRST_NAME = 1, LAST_NAME = 2</font>
-<font color="#330033"></font>
-<font color="#0000FF">        constant </font><font color="#330033">SALARY = 2</font>
-<font color="#0000FF">        constant </font><font color="#330033">AGE = 3</font>
-<font color="#0000FF">        constant </font><font color="#330033">WEIGHT = 4</font>
+<pre><font color="#0000FF">        constant </font><font color="#330033">NAME = 1</font>
+<font color="#0000FF">        constant </font><font color="#330033">FIRST_NAME = 1, LAST_NAME = 2</font>
+<font color="#330033"></font>
+<font color="#0000FF">        constant </font><font color="#330033">SALARY = 2</font>
+<font color="#0000FF">        constant </font><font color="#330033">AGE = 3</font>
+<font color="#0000FF">        constant </font><font color="#330033">WEIGHT = 4</font>
 </pre>
 
 <blockquote>
@@ -613,12 +613,12 @@ You can use compare() for other comparisons as well:
 <p>
  Array of structures:
 
-<pre><font color="#330033">        employees = {</font>
-<font color="#330033">                     {</font><font color="#993333">{</font><font color="#00A033">"John"</font><font color="#330033">,</font><font color="#00A033">"Smith"</font><font color="#993333">}</font><font color="#330033">, 45000, 27, 185.5},   </font><font color="#FF0055">-- a[1]</font>
-<font color="#330033">                     {</font><font color="#993333">{</font><font color="#00A033">"Bill"</font><font color="#330033">,</font><font color="#00A033">"Jones"</font><font color="#993333">}</font><font color="#330033">, 57000, 48, 177.2},   </font><font color="#FF0055">-- a[2]</font>
-<font color="#330033"></font>
-<font color="#FF0055">                     -- .... etc.</font>
-<font color="#330033">                    }</font>
+<pre><font color="#330033">        employees = {</font>
+<font color="#330033">                     {</font><font color="#993333">{</font><font color="#00A033">"John"</font><font color="#330033">,</font><font color="#00A033">"Smith"</font><font color="#993333">}</font><font color="#330033">, 45000, 27, 185.5},   </font><font color="#FF0055">-- a[1]</font>
+<font color="#330033">                     {</font><font color="#993333">{</font><font color="#00A033">"Bill"</font><font color="#330033">,</font><font color="#00A033">"Jones"</font><font color="#993333">}</font><font color="#330033">, 57000, 48, 177.2},   </font><font color="#FF0055">-- a[2]</font>
+<font color="#330033"></font>
+<font color="#FF0055">                     -- .... etc.</font>
+<font color="#330033">                    }</font>
 </pre>
 
 <blockquote>
@@ -627,36 +627,36 @@ You can use compare() for other comparisons as well:
 
 The length() built-in function will tell you the length of a sequence.
 So the last element of a sequence s, is:
-<pre><font color="#330033">        s[</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">s</font><font color="#993333">)</font><font color="#330033">]</font>
+<pre><font color="#330033">        s[</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">s</font><font color="#993333">)</font><font color="#330033">]</font>
 </pre>
 A short-hand for this is:
-<pre><font color="#330033">        s[$]</font>
+<pre><font color="#330033">        s[$]</font>
 </pre>
 Similarly,
-<pre><font color="#330033">        s[</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">s</font><font color="#993333">)</font><font color="#330033">-1]</font>
+<pre><font color="#330033">        s[</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">s</font><font color="#993333">)</font><font color="#330033">-1]</font>
 </pre>
 can be simplified to:
-<pre><font color="#330033">        s[$-1]</font>
+<pre><font color="#330033">        s[$-1]</font>
 </pre>
 
 The $ symbol equals the length of the sequence. $ may only appear
 between square braces. Where there's nesting, e.g.:
-<pre><font color="#330033">        s[$ - t</font><font color="#993333">[</font><font color="#330033">$-1</font><font color="#993333">] </font><font color="#330033">+ 1]</font>
+<pre><font color="#330033">        s[$ - t</font><font color="#993333">[</font><font color="#330033">$-1</font><font color="#993333">] </font><font color="#330033">+ 1]</font>
 </pre>
 The first $ above refers to the length of s, while the second $ 
 refers to the length of t (as you'd probably expect).
 An example where $ can save a lot of typing, make your code clearer,
 and probably even faster is:
-<pre><font color="#330033">        longname[$][$] </font><font color="#FF0055">-- last element of the last element</font>
+<pre><font color="#330033">        longname[$][$] </font><font color="#FF0055">-- last element of the last element</font>
 </pre>
 Compare that with the equivalent:
-<pre><font color="#330033">        longname[</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">longname</font><font color="#993333">)</font><font color="#330033">][</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">longname</font><font color="#0000FF">[</font><font color="#FF00FF">length</font><font color="#5500FF">(</font><font color="#330033">longname</font><font color="#5500FF">)</font><font color="#0000FF">]</font><font color="#993333">)</font><font color="#330033">]</font>
+<pre><font color="#330033">        longname[</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">longname</font><font color="#993333">)</font><font color="#330033">][</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">longname</font><font color="#0000FF">[</font><font color="#FF00FF">length</font><font color="#5500FF">(</font><font color="#330033">longname</font><font color="#5500FF">)</font><font color="#0000FF">]</font><font color="#993333">)</font><font color="#330033">]</font>
 </pre>
 
 <b><font color="#006633">Subscripting and function side-effects:</font></b>
 In an assignment statement, with left-hand-side subscripts:
 
-<pre><font color="#330033">    lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr</font>
+<pre><font color="#330033">    lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr</font>
 </pre>
 
 The expressions are evaluated, and any subscripting is performed, 
@@ -738,10 +738,10 @@ regardless of any side-effects that may have changed lhs_var.
 
 <p>
 We can also use the $ shorthand with slices, e.g.
-<pre><font color="#330033">        s[2..$]</font>
-<font color="#330033">        s[5..$-2]</font>
-<font color="#330033">        s[$-5..$]</font>
-<font color="#330033">        s[$][1..</font><font color="#FF00FF">floor</font><font color="#993333">(</font><font color="#330033">$/2</font><font color="#993333">)</font><font color="#330033">] </font><font color="#FF0055">-- first half of the last element of s</font>
+<pre><font color="#330033">        s[2..$]</font>
+<font color="#330033">        s[5..$-2]</font>
+<font color="#330033">        s[$-5..$]</font>
+<font color="#330033">        s[$][1..</font><font color="#FF00FF">floor</font><font color="#993333">(</font><font color="#330033">$/2</font><font color="#993333">)</font><font color="#330033">] </font><font color="#FF0055">-- first half of the last element of s</font>
 </pre>
 
 
@@ -759,22 +759,22 @@ We can also use the $ shorthand with slices, e.g.
  sequence with a length equal to the sum of the lengths of the concatenated
  objects (where atoms are considered here to have length 1). e.g.
 
-<pre><font color="#330033">        {1, 2, 3} & 4              </font><font color="#FF0055">-- {1, 2, 3, 4}</font>
-<font color="#330033"></font>
-<font color="#330033">        4 & 5                      </font><font color="#FF0055">-- {4, 5}</font>
-<font color="#330033"></font>
-<font color="#330033">        {</font><font color="#993333">{</font><font color="#330033">1, 1</font><font color="#993333">}</font><font color="#330033">, 2, 3} & {4, 5}    </font><font color="#FF0055">-- {{1, 1}, 2, 3, 4, 5}</font>
-<font color="#330033"></font>
-<font color="#330033">        x = {}</font>
-<font color="#330033">        y = {1, 2}</font>
-<font color="#330033">        y = y & x                  </font><font color="#FF0055">-- y is still {1, 2}</font>
+<pre><font color="#330033">        {1, 2, 3} & 4              </font><font color="#FF0055">-- {1, 2, 3, 4}</font>
+<font color="#330033"></font>
+<font color="#330033">        4 & 5                      </font><font color="#FF0055">-- {4, 5}</font>
+<font color="#330033"></font>
+<font color="#330033">        {</font><font color="#993333">{</font><font color="#330033">1, 1</font><font color="#993333">}</font><font color="#330033">, 2, 3} & {4, 5}    </font><font color="#FF0055">-- {{1, 1}, 2, 3, 4, 5}</font>
+<font color="#330033"></font>
+<font color="#330033">        x = {}</font>
+<font color="#330033">        y = {1, 2}</font>
+<font color="#330033">        y = y & x                  </font><font color="#FF0055">-- y is still {1, 2}</font>
 </pre>
 
 <p>
 You can delete element i of any sequence s by concatenating the
 parts of the sequence before and after i:
 
-<pre><font color="#330033">	s = s[1..i-1] & s[i+1..</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">s</font><font color="#993333">)</font><font color="#330033">]</font>
+<pre><font color="#330033">	s = s[1..i-1] & s[i+1..</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">s</font><font color="#993333">)</font><font color="#330033">]</font>
 </pre>
 
 This works even when i is 1 or length(s), since s[1..0] is a legal empty slice,
@@ -793,13 +793,13 @@ and so is s[length(s)+1..length(s)].
 
  Finally, sequence-formation, using braces and commas:
 
-<pre><font color="#330033">        {a, b, c, ... }</font>
+<pre><font color="#330033">        {a, b, c, ... }</font>
 </pre>
 
  is also an operator. It takes n operands, where n is 0 or more, and makes an
  n-element sequence from their values. e.g.
 
-<pre><font color="#330033">        x = {apple, orange*2, </font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 99/4+foobar}</font>
+<pre><font color="#330033">        x = {apple, orange*2, </font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 99/4+foobar}</font>
 </pre>
 <p>
  The sequence-formation operator is listed at the bottom of the
@@ -845,10 +845,10 @@ and so is s[length(s)+1..length(s)].
  of their own, but length just gives you the "top-level" count. You'll get an
  error if you ask for the length of an atom. e.g.
 
-<pre><font color="#FF00FF">        length</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">5,6,7</font><font color="#993333">}</font><font color="#330033">)             </font><font color="#FF0055">-- 3</font>
-<font color="#FF00FF">        length</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1, </font><font color="#0000FF">{</font><font color="#330033">5,5,5</font><font color="#0000FF">}</font><font color="#330033">, 2, 3</font><font color="#993333">}</font><font color="#330033">)  </font><font color="#FF0055">-- 4 (not 6!)</font>
-<font color="#FF00FF">        length</font><font color="#330033">(</font><font color="#993333">{}</font><font color="#330033">)                  </font><font color="#FF0055">-- 0</font>
-<font color="#FF00FF">        length</font><font color="#330033">(5)                   </font><font color="#FF0055">-- error!</font>
+<pre><font color="#FF00FF">        length</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">5,6,7</font><font color="#993333">}</font><font color="#330033">)             </font><font color="#FF0055">-- 3</font>
+<font color="#FF00FF">        length</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1, </font><font color="#0000FF">{</font><font color="#330033">5,5,5</font><font color="#0000FF">}</font><font color="#330033">, 2, 3</font><font color="#993333">}</font><font color="#330033">)  </font><font color="#FF0055">-- 4 (not 6!)</font>
+<font color="#FF00FF">        length</font><font color="#330033">(</font><font color="#993333">{}</font><font color="#330033">)                  </font><font color="#FF0055">-- 0</font>
+<font color="#FF00FF">        length</font><font color="#330033">(5)                   </font><font color="#FF0055">-- error!</font>
 </pre>
 
 <a name=292></a>
@@ -861,9 +861,9 @@ and so is s[length(s)+1..length(s)].
 
  <a class="brown" href="lib_p_r.htm#repeat"><b>repeat()</b></a>
  makes a sequence that consists of an item repeated count times. e.g.
-<pre><font color="#FF00FF">        repeat</font><font color="#330033">(0, 100)         </font><font color="#FF0055">-- {0,0,0,...,0}   i.e. 100 zeros</font>
-<font color="#FF00FF">        repeat</font><font color="#330033">(</font><font color="#00A033">"Hello"</font><font color="#330033">, 3)     </font><font color="#FF0055">-- {"Hello", "Hello", "Hello"}</font>
-<font color="#FF00FF">        repeat</font><font color="#330033">(99,0)           </font><font color="#FF0055">-- {}</font>
+<pre><font color="#FF00FF">        repeat</font><font color="#330033">(0, 100)         </font><font color="#FF0055">-- {0,0,0,...,0}   i.e. 100 zeros</font>
+<font color="#FF00FF">        repeat</font><font color="#330033">(</font><font color="#00A033">"Hello"</font><font color="#330033">, 3)     </font><font color="#FF0055">-- {"Hello", "Hello", "Hello"}</font>
+<font color="#FF00FF">        repeat</font><font color="#330033">(99,0)           </font><font color="#FF0055">-- {}</font>
 </pre>
 
 <p>
@@ -887,12 +887,12 @@ and so is s[length(s)+1..length(s)].
  creates a new sequence by adding an element to the beginning of a
  sequence s. e.g.
 
-<pre><font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 4)         </font><font color="#FF0055">-- {1,2,3,4}</font>
-<font color="#FF00FF">        prepend</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 4)        </font><font color="#FF0055">-- {4,1,2,3}</font>
-<font color="#330033"></font>
-<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5,5,5</font><font color="#993333">}</font><font color="#330033">)   </font><font color="#FF0055">-- {1,2,3,{5,5,5}}</font>
-<font color="#FF00FF">        prepend</font><font color="#330033">(</font><font color="#993333">{}</font><font color="#330033">, 9)             </font><font color="#FF0055">-- {9}</font>
-<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{}</font><font color="#330033">, 9)              </font><font color="#FF0055">-- {9}</font>
+<pre><font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 4)         </font><font color="#FF0055">-- {1,2,3,4}</font>
+<font color="#FF00FF">        prepend</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 4)        </font><font color="#FF0055">-- {4,1,2,3}</font>
+<font color="#330033"></font>
+<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5,5,5</font><font color="#993333">}</font><font color="#330033">)   </font><font color="#FF0055">-- {1,2,3,{5,5,5}}</font>
+<font color="#FF00FF">        prepend</font><font color="#330033">(</font><font color="#993333">{}</font><font color="#330033">, 9)             </font><font color="#FF0055">-- {9}</font>
+<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{}</font><font color="#330033">, 9)              </font><font color="#FF0055">-- {9}</font>
 </pre>
 
 <p>
@@ -906,13 +906,13 @@ and so is s[length(s)+1..length(s)].
  to the concatenate operator, <font color="#993333"><b>&</b></font>,
  but there are clear differences. e.g.
 
-<pre><font color="#FF0055">        -- appending a sequence is different</font>
-<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5,5,5</font><font color="#993333">}</font><font color="#330033">)   </font><font color="#FF0055">-- {1,2,3,{5,5,5}}</font>
-<font color="#330033">        {1,2,3} & {5,5,5}          </font><font color="#FF0055">-- {1,2,3,5,5,5}</font>
-<font color="#330033"></font>
-<font color="#FF0055">        -- appending an atom is the same</font>
-<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 5)         </font><font color="#FF0055">-- {1,2,3,5}</font>
-<font color="#330033">        {1,2,3} & 5                </font><font color="#FF0055">-- {1,2,3,5}</font>
+<pre><font color="#FF0055">        -- appending a sequence is different</font>
+<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, </font><font color="#993333">{</font><font color="#330033">5,5,5</font><font color="#993333">}</font><font color="#330033">)   </font><font color="#FF0055">-- {1,2,3,{5,5,5}}</font>
+<font color="#330033">        {1,2,3} & {5,5,5}          </font><font color="#FF0055">-- {1,2,3,5,5,5}</font>
+<font color="#330033"></font>
+<font color="#FF0055">        -- appending an atom is the same</font>
+<font color="#FF00FF">        append</font><font color="#330033">(</font><font color="#993333">{</font><font color="#330033">1,2,3</font><font color="#993333">}</font><font color="#330033">, 5)         </font><font color="#FF0055">-- {1,2,3,5}</font>
+<font color="#330033">        {1,2,3} & 5                </font><font color="#FF0055">-- {1,2,3,5}</font>
 </pre>
 
 <a name=2A></a>
@@ -1074,12 +1074,12 @@ and so is s[length(s)+1..length(s)].
  <font color="#993333"><b>reserved words</b></font>
  have special meaning in Euphoria and may not be used as identifiers:
 
-<b><pre><font color="#0000FF">    and            end             include          to</font>
-<font color="#0000FF">    by             exit            not              type</font>
-<font color="#0000FF">    constant       for             or               while</font>
-<font color="#0000FF">    do             function        procedure        with</font>
-<font color="#0000FF">    else           global          return           without</font>
-<font color="#0000FF">    elsif          if              then             xor</font>
+<b><pre><font color="#0000FF">    and            end             include          to</font>
+<font color="#0000FF">    by             exit            not              type</font>
+<font color="#0000FF">    constant       for             or               while</font>
+<font color="#0000FF">    do             function        procedure        with</font>
+<font color="#0000FF">    else           global          return           without</font>
+<font color="#0000FF">    elsif          if              then             xor</font>
 </pre></b>
 
 <p>
@@ -1108,13 +1108,13 @@ procedures
  These perform some computation and may have a list of parameters,
  e.g.
 
-<pre><font color="#0000FF">        procedure </font><font color="#330033">empty()</font>
-<font color="#0000FF">        end procedure</font>
-<font color="#330033"></font>
-<font color="#0000FF">        procedure </font><font color="#330033">plot(</font><font color="#FF00FF">integer </font><font color="#330033">x, </font><font color="#FF00FF">integer </font><font color="#330033">y)</font>
-<font color="#FF00FF">            position</font><font color="#330033">(x, y)</font>
-<font color="#FF00FF">            puts</font><font color="#330033">(1, </font><font color="#00A033">'*'</font><font color="#330033">)</font>
-<font color="#0000FF">        end procedure</font>
+<pre><font color="#0000FF">        procedure </font><font color="#330033">empty()</font>
+<font color="#0000FF">        end procedure</font>
+<font color="#330033"></font>
+<font color="#0000FF">        procedure </font><font color="#330033">plot(</font><font color="#FF00FF">integer </font><font color="#330033">x, </font><font color="#FF00FF">integer </font><font color="#330033">y)</font>
+<font color="#FF00FF">            position</font><font color="#330033">(x, y)</font>
+<font color="#FF00FF">            puts</font><font color="#330033">(1, </font><font color="#00A033">'*'</font><font color="#330033">)</font>
+<font color="#0000FF">        end procedure</font>
 </pre>
 
 <p>
@@ -1136,8 +1136,8 @@ procedures
 <dd>
  The interpreter does not actually copy sequences or
  floating-point numbers unless it becomes necessary. For example,
-<pre><font color="#330033">            y = {1,2,3,4,5,6,7,8.5,</font><font color="#00A033">"ABC"</font><font color="#330033">}</font>
-<font color="#330033">            x = y</font>
+<pre><font color="#330033">            y = {1,2,3,4,5,6,7,8.5,</font><font color="#00A033">"ABC"</font><font color="#330033">}</font>
+<font color="#330033">            x = y</font>
 </pre>
  The statement x = y does not actually cause a new copy of y to be
  created. Both x and y will simply "point" to the same sequence. If we
@@ -1159,20 +1159,20 @@ functions
  These are just like procedures, but they return a value, and can be
  used in an expression, e.g.
 
-<pre><font color="#0000FF">        function </font><font color="#330033">max(</font><font color="#FF00FF">atom </font><font color="#330033">a, </font><font color="#FF00FF">atom </font><font color="#330033">b)</font>
-<font color="#0000FF">            if </font><font color="#330033">a >= b </font><font color="#0000FF">then</font>
-<font color="#0000FF">                return </font><font color="#330033">a</font>
-<font color="#0000FF">            else</font>
-<font color="#0000FF">                return </font><font color="#330033">b</font>
-<font color="#0000FF">            end if</font>
-<font color="#0000FF">        end function</font>
+<pre><font color="#0000FF">        function </font><font color="#330033">max(</font><font color="#FF00FF">atom </font><font color="#330033">a, </font><font color="#FF00FF">atom </font><font color="#330033">b)</font>
+<font color="#0000FF">            if </font><font color="#330033">a >= b </font><font color="#0000FF">then</font>
+<font color="#0000FF">                return </font><font color="#330033">a</font>
+<font color="#0000FF">            else</font>
+<font color="#0000FF">                return </font><font color="#330033">b</font>
+<font color="#0000FF">            end if</font>
+<font color="#0000FF">        end function</font>
 </pre>
 
 <p>
  Any Euphoria object can be returned. You can, in effect, have
  multiple return values, by returning a sequence of objects. e.g.
 
-<pre><font color="#0000FF">        return </font><font color="#330033">{x_pos, y_pos}</font>
+<pre><font color="#0000FF">        return </font><font color="#330033">{x_pos, y_pos}</font>
 </pre>
 
 <p>
@@ -1207,15 +1207,15 @@ variables
 
  These may be assigned values during execution e.g.
 
-<pre><font color="#FF0055">        -- x may only be assigned integer values</font>
-<font color="#FF00FF">        integer </font><font color="#330033">x</font>
-<font color="#330033">        x = 25</font>
-<font color="#330033"></font>
-<font color="#FF0055">        -- a, b and c may be assigned *any* value</font>
-<font color="#FF00FF">        object </font><font color="#330033">a, b, c</font>
-<font color="#330033">        a = {}</font>
-<font color="#330033">        b = a</font>
-<font color="#330033">        c = 0</font>
+<pre><font color="#FF0055">        -- x may only be assigned integer values</font>
+<font color="#FF00FF">        integer </font><font color="#330033">x</font>
+<font color="#330033">        x = 25</font>
+<font color="#330033"></font>
+<font color="#FF0055">        -- a, b and c may be assigned *any* value</font>
+<font color="#FF00FF">        object </font><font color="#330033">a, b, c</font>
+<font color="#330033">        a = {}</font>
+<font color="#330033">        b = a</font>
+<font color="#330033">        c = 0</font>
 </pre>
 
 <p>
@@ -1237,9 +1237,9 @@ constants
  These are variables that are assigned an initial value that can
  never change e.g.
 
-<pre><font color="#0000FF">        constant </font><font color="#330033">MAX = 100</font>
-<font color="#0000FF">        constant </font><font color="#330033">Upper = MAX - 10, Lower = 5</font>
-<font color="#0000FF">        constant </font><font color="#330033">name_list = {</font><font color="#00A033">"Fred"</font><font color="#330033">, </font><font color="#00A033">"George"</font><font color="#330033">, </font><font color="#00A033">"Larry"</font><font color="#330033">}</font>
+<pre><font color="#0000FF">        constant </font><font color="#330033">MAX = 100</font>
+<font color="#0000FF">        constant </font><font color="#330033">Upper = MAX - 10, Lower = 5</font>
+<font color="#0000FF">        constant </font><font color="#330033">name_list = {</font><font color="#00A033">"Fred"</font><font color="#330033">, </font><font color="#00A033">"George"</font><font color="#330033">, </font><font color="#00A033">"Larry"</font><font color="#330033">}</font>
 </pre>
 
 <p>
@@ -1331,11 +1331,11 @@ you'd have repeat this process whenever a new version of the include
 file was released. Euphoria has a simpler way to solve this. Using
 an extension to the include statement, you can say for example:
 
-<pre><font color="#0000FF">     include </font><font color="#330033">johns_file.e as john</font>
-<font color="#0000FF">     include </font><font color="#330033">bills_file.e as bill</font>
-<font color="#330033"></font>
-<font color="#330033">     john:x += 1</font>
-<font color="#330033">     bill:x += 2</font>
+<pre><font color="#0000FF">     include </font><font color="#330033">johns_file.e as john</font>
+<font color="#0000FF">     include </font><font color="#330033">bills_file.e as bill</font>
+<font color="#330033"></font>
+<font color="#330033">     john:x += 1</font>
+<font color="#330033">     bill:x += 2</font>
 </pre>
 
 In this case, the variable x was declared in two different files,
@@ -1443,11 +1443,11 @@ file of the library.
 <p>
  Variable declarations have a type name followed by a list of the variables
  being declared. For example,
-<pre><font color="#FF00FF">        object </font><font color="#330033">a</font>
-<font color="#330033"></font>
-<font color="#0000FF">        global </font><font color="#FF00FF">integer </font><font color="#330033">x, y, z</font>
-<font color="#330033"></font>
-<font color="#0000FF">        procedure </font><font color="#330033">fred(</font><font color="#FF00FF">sequence </font><font color="#330033">q, </font><font color="#FF00FF">sequence </font><font color="#330033">r)</font>
+<pre><font color="#FF00FF">        object </font><font color="#330033">a</font>
+<font color="#330033"></font>
+<font color="#0000FF">        global </font><font color="#FF00FF">integer </font><font color="#330033">x, y, z</font>
+<font color="#330033"></font>
+<font color="#0000FF">        procedure </font><font color="#330033">fred(</font><font color="#FF00FF">sequence </font><font color="#330033">q, </font><font color="#FF00FF">sequence </font><font color="#330033">r)</font>
 </pre>
 
 <p>
@@ -1510,14 +1510,14 @@ file of the library.
  <font color="#993333"><b>function ... end function</b></font>.
  For example,
 
-<pre><font color="#0000FF">        type </font><font color="#330033">hour(</font><font color="#FF00FF">integer </font><font color="#330033">x)</font>
-<font color="#0000FF">            return </font><font color="#330033">x >= 0 </font><font color="#0000FF">and </font><font color="#330033">x <= 23</font>
-<font color="#0000FF">        end type</font>
-<font color="#330033"></font>
-<font color="#330033">        hour h1, h2</font>
-<font color="#330033"></font>
-<font color="#330033">        h1 = 10      </font><font color="#FF0055">-- ok</font>
-<font color="#330033">        h2 = 25      </font><font color="#FF0055">-- error! program aborts with a message</font>
+<pre><font color="#0000FF">        type </font><font color="#330033">hour(</font><font color="#FF00FF">integer </font><font color="#330033">x)</font>
+<font color="#0000FF">            return </font><font color="#330033">x >= 0 </font><font color="#0000FF">and </font><font color="#330033">x <= 23</font>
+<font color="#0000FF">        end type</font>
+<font color="#330033"></font>
+<font color="#330033">        hour h1, h2</font>
+<font color="#330033"></font>
+<font color="#330033">        h1 = 10      </font><font color="#FF0055">-- ok</font>
+<font color="#330033">        h2 = 25      </font><font color="#FF0055">-- error! program aborts with a message</font>
 </pre>
 
 <p>
@@ -1532,7 +1532,7 @@ file of the library.
 <p>
  "hour" can be used to declare subroutine parameters as well:
 
-<pre><font color="#0000FF">        procedure </font><font color="#330033">set_time(hour h)</font>
+<pre><font color="#0000FF">        procedure </font><font color="#330033">set_time(hour h)</font>
 </pre>
 
 <p>
@@ -1716,11 +1716,11 @@ file of the library.
  the value of an expression to a simple
  variable, or to a subscript or slice of a variable. e.g.
 
-<pre><font color="#330033">        x = a + b</font>
-<font color="#330033"></font>
-<font color="#330033">        y[i] = y[i] + 1</font>
-<font color="#330033"></font>
-<font color="#330033">        y[i..j] = {1, 2, 3}</font>
+<pre><font color="#330033">        x = a + b</font>
+<font color="#330033"></font>
+<font color="#330033">        y[i] = y[i] + 1</font>
+<font color="#330033"></font>
+<font color="#330033">        y[i..j] = {1, 2, 3}</font>
 </pre>
 
 <p>
@@ -1728,14 +1728,14 @@ file of the library.
  sliced variable are discarded. For example, suppose x was a 1000-element
  sequence that we had initialized with:
 
-<pre><font color="#FF00FF">        object </font><font color="#330033">x</font>
-<font color="#330033"></font>
-<font color="#330033">        x = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 1000)  </font><font color="#FF0055">-- a sequence of 1000 zeros</font>
+<pre><font color="#FF00FF">        object </font><font color="#330033">x</font>
+<font color="#330033"></font>
+<font color="#330033">        x = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 1000)  </font><font color="#FF0055">-- a sequence of 1000 zeros</font>
 </pre>
 
  and then later we assigned an atom to x with:
 
-<pre><font color="#330033">        x = 7</font>
+<pre><font color="#330033">        x = 7</font>
 </pre>
 
  This is perfectly legal since x is declared as an
@@ -1769,23 +1769,23 @@ Assignment with Operator
 
 <p> For example, instead of saying:
 
-<pre><font color="#330033">      mylongvarname = mylongvarname + 1</font>
+<pre><font color="#330033">      mylongvarname = mylongvarname + 1</font>
 </pre>
 You can say:
-<pre><font color="#330033">      mylongvarname += 1</font>
+<pre><font color="#330033">      mylongvarname += 1</font>
 </pre>
 
 Instead of saying:
-<pre><font color="#330033">      galaxy[q_row][q_col][q_size] = galaxy[q_row][q_col][q_size] * 10</font>
+<pre><font color="#330033">      galaxy[q_row][q_col][q_size] = galaxy[q_row][q_col][q_size] * 10</font>
 </pre>
 You can say:
-<pre><font color="#330033">      galaxy[q_row][q_col][q_size] *= 10</font>
+<pre><font color="#330033">      galaxy[q_row][q_col][q_size] *= 10</font>
 </pre>
 and instead of saying:
-<pre><font color="#330033">      accounts[start..finish] = accounts[start..finish] / 10</font>
+<pre><font color="#330033">      accounts[start..finish] = accounts[start..finish] / 10</font>
 </pre>
 You can say:
-<pre><font color="#330033">      accounts[start..finish] /= 10</font>
+<pre><font color="#330033">      accounts[start..finish] /= 10</font>
 </pre>
 
 <p>
@@ -1820,7 +1820,7 @@ on the right side.
  A <font color="#993333"><b>procedure call</b></font> starts execution
  of a procedure, passing it an optional list of argument values. e.g.
 
-<pre><font color="#330033">        plot(x, 23)</font>
+<pre><font color="#330033">        plot(x, 23)</font>
 </pre>
 
 <a name=if></a>
@@ -1837,28 +1837,28 @@ on the right side.
  be optional <font color="#993333"><b>elsif</b></font> and
  <font color="#993333"><b>else</b></font> clauses. e.g.
 
-<pre><font color="#0000FF">        if </font><font color="#330033">a < b </font><font color="#0000FF">then</font>
-<font color="#330033">            x = 1</font>
-<font color="#0000FF">        end if</font>
-<font color="#330033"></font>
-<font color="#330033"></font>
-<font color="#0000FF">        if </font><font color="#330033">a = 9 </font><font color="#0000FF">and </font><font color="#FF00FF">find</font><font color="#330033">(0, s) </font><font color="#0000FF">then</font>
-<font color="#330033">            x = 4</font>
-<font color="#330033">            y = 5</font>
-<font color="#0000FF">        else</font>
-<font color="#330033">            z = 8</font>
-<font color="#0000FF">        end if</font>
-<font color="#330033"></font>
-<font color="#330033"></font>
-<font color="#0000FF">        if </font><font color="#330033">char = </font><font color="#00A033">'a' </font><font color="#0000FF">then</font>
-<font color="#330033">            x = 1</font>
-<font color="#0000FF">        elsif </font><font color="#330033">char = </font><font color="#00A033">'b' </font><font color="#0000FF">or </font><font color="#330033">char = </font><font color="#00A033">'B' </font><font color="#0000FF">then</font>
-<font color="#330033">            x = 2</font>
-<font color="#0000FF">        elsif </font><font color="#330033">char = </font><font color="#00A033">'c' </font><font color="#0000FF">then</font>
-<font color="#330033">            x = 3</font>
-<font color="#0000FF">        else</font>
-<font color="#330033">            x = -1</font>
-<font color="#0000FF">        end if</font>
+<pre><font color="#0000FF">        if </font><font color="#330033">a < b </font><font color="#0000FF">then</font>
+<font color="#330033">            x = 1</font>
+<font color="#0000FF">        end if</font>
+<font color="#330033"></font>
+<font color="#330033"></font>
+<font color="#0000FF">        if </font><font color="#330033">a = 9 </font><font color="#0000FF">and </font><font color="#FF00FF">find</font><font color="#330033">(0, s) </font><font color="#0000FF">then</font>
+<font color="#330033">            x = 4</font>
+<font color="#330033">            y = 5</font>
+<font color="#0000FF">        else</font>
+<font color="#330033">            z = 8</font>
+<font color="#0000FF">        end if</font>
+<font color="#330033"></font>
+<font color="#330033"></font>
+<font color="#0000FF">        if </font><font color="#330033">char = </font><font color="#00A033">'a' </font><font color="#0000FF">then</font>
+<font color="#330033">            x = 1</font>
+<font color="#0000FF">        elsif </font><font color="#330033">char = </font><font color="#00A033">'b' </font><font color="#0000FF">or </font><font color="#330033">char = </font><font color="#00A033">'B' </font><font color="#0000FF">then</font>
+<font color="#330033">            x = 2</font>
+<font color="#0000FF">        elsif </font><font color="#330033">char = </font><font color="#00A033">'c' </font><font color="#0000FF">then</font>
+<font color="#330033">            x = 3</font>
+<font color="#0000FF">        else</font>
+<font color="#330033">            x = -1</font>
+<font color="#0000FF">        end if</font>
 </pre>
 
 <p>
@@ -1884,10 +1884,10 @@ The <font color="#993333"><b>if</b></font> and
  A <font color="#993333"><b>while statement</b></font> tests a condition
  to see if it is non-zero (true), and while it is true a loop is executed. e.g.
 
-<pre><font color="#0000FF">        while </font><font color="#330033">x > 0 </font><font color="#0000FF">do</font>
-<font color="#330033">            a = a * 2</font>
-<font color="#330033">            x = x - 1</font>
-<font color="#0000FF">        end while</font>
+<pre><font color="#0000FF">        while </font><font color="#330033">x > 0 </font><font color="#0000FF">do</font>
+<font color="#330033">            a = a * 2</font>
+<font color="#330033">            x = x - 1</font>
+<font color="#0000FF">        end while</font>
 </pre>
 
 <a name=shortcir></a>
@@ -1907,13 +1907,13 @@ Short-Circuit Evaluation
  will be used.
  For example,
 
- <pre><font color="#0000FF">        if </font><font color="#330033">a < 0 </font><font color="#0000FF">and </font><font color="#330033">b > 0 </font><font color="#0000FF">then </font><font color="#330033">...</font>
+ <pre><font color="#0000FF">        if </font><font color="#330033">a < 0 </font><font color="#0000FF">and </font><font color="#330033">b > 0 </font><font color="#0000FF">then </font><font color="#330033">...</font>
 </pre>
 
  If a < 0 is false, then Euphoria will not bother to test if b is greater
  than 0. It will assume that the overall result is false. Similarly,
 
- <pre><font color="#0000FF">        if </font><font color="#330033">a < 0 </font><font color="#0000FF">or </font><font color="#330033">b > 0 </font><font color="#0000FF">then </font><font color="#330033">...</font>
+ <pre><font color="#0000FF">        if </font><font color="#330033">a < 0 </font><font color="#0000FF">or </font><font color="#330033">b > 0 </font><font color="#0000FF">then </font><font color="#330033">...</font>
 </pre>
 
  if a < 0 is true, then Euphoria will immediately decide that the result true,
@@ -1921,7 +1921,7 @@ Short-Circuit Evaluation
 
 <p>
  In general, whenever we have a condition of the form:
-<pre><font color="#330033">        A </font><font color="#0000FF">and </font><font color="#330033">B</font>
+<pre><font color="#330033">        A </font><font color="#0000FF">and </font><font color="#330033">B</font>
 </pre>
  where A and B can be any two expressions,
  Euphoria will take a short-cut when A is false and immediately
@@ -1929,7 +1929,7 @@ Short-Circuit Evaluation
 
 <p>
  Similarly, with:
-<pre><font color="#330033">        A </font><font color="#0000FF">or </font><font color="#330033">B</font>
+<pre><font color="#330033">        A </font><font color="#0000FF">or </font><font color="#330033">B</font>
 </pre>
  when A is true, Euphoria will skip the evaluation of expression B,
  and declare the result to be true.
@@ -1948,9 +1948,9 @@ Short-Circuit Evaluation
  a run-time error. If Euphoria skips the evaluation of B, the error will not
  be discovered. For instance:
 
- <pre><font color="#0000FF">        if </font><font color="#330033">x != 0 </font><font color="#0000FF">and </font><font color="#330033">1/x > 10 </font><font color="#0000FF">then  </font><font color="#FF0055">-- divide by zero error avoided</font>
-<font color="#330033"></font>
-<font color="#0000FF">        while </font><font color="#330033">1 </font><font color="#0000FF">or </font><font color="#330033">{1,2,3,4,5} </font><font color="#0000FF">do    </font><font color="#FF0055">-- illegal sequence result avoided</font>
+ <pre><font color="#0000FF">        if </font><font color="#330033">x != 0 </font><font color="#0000FF">and </font><font color="#330033">1/x > 10 </font><font color="#0000FF">then  </font><font color="#FF0055">-- divide by zero error avoided</font>
+<font color="#330033"></font>
+<font color="#0000FF">        while </font><font color="#330033">1 </font><font color="#0000FF">or </font><font color="#330033">{1,2,3,4,5} </font><font color="#0000FF">do    </font><font color="#FF0055">-- illegal sequence result avoided</font>
 </pre>
 
  B could even contain uninitialized variables, out-of-bounds subscripts etc.
@@ -1958,18 +1958,18 @@ Short-Circuit Evaluation
 <p>
  This may look like sloppy coding, but in fact it often allows you to
  write something in a simpler and more readable way. For instance:
- <pre><font color="#0000FF">        if </font><font color="#FF00FF">atom</font><font color="#330033">(x) </font><font color="#0000FF">or </font><font color="#FF00FF">length</font><font color="#330033">(x)=1 </font><font color="#0000FF">then</font>
+ <pre><font color="#0000FF">        if </font><font color="#FF00FF">atom</font><font color="#330033">(x) </font><font color="#0000FF">or </font><font color="#FF00FF">length</font><font color="#330033">(x)=1 </font><font color="#0000FF">then</font>
 </pre>
 
  Without short-circuiting, you would have a problem when x was an atom,
  since length is not defined for atoms. With short-circuiting, length(x)
  will only be checked when x is a sequence. Similarly:
 
- <pre><font color="#FF0055">        -- find 'a' or 'A' in s</font>
-<font color="#330033">        i = 1</font>
-<font color="#0000FF">        while </font><font color="#330033">i <= </font><font color="#FF00FF">length</font><font color="#330033">(s) </font><font color="#0000FF">and </font><font color="#330033">s[i] != </font><font color="#00A033">'a' </font><font color="#0000FF">and </font><font color="#330033">s[i] != </font><font color="#00A033">'A' </font><font color="#0000FF">do</font>
-<font color="#330033">             i += 1</font>
-<font color="#0000FF">        end while</font>
+ <pre><font color="#FF0055">        -- find 'a' or 'A' in s</font>
+<font color="#330033">        i = 1</font>
+<font color="#0000FF">        while </font><font color="#330033">i <= </font><font color="#FF00FF">length</font><font color="#330033">(s) </font><font color="#0000FF">and </font><font color="#330033">s[i] != </font><font color="#00A033">'a' </font><font color="#0000FF">and </font><font color="#330033">s[i] != </font><font color="#00A033">'A' </font><font color="#0000FF">do</font>
+<font color="#330033">             i += 1</font>
+<font color="#0000FF">        end while</font>
 </pre>
 
  In this loop the variable i might eventually become
@@ -1988,7 +1988,7 @@ Short-Circuit Evaluation
  <font color="#993333"><b>while</b></font> conditions only.
  It is not used in other contexts. For example, the assignment statement:
 
- <pre><font color="#330033">        x = 1 </font><font color="#0000FF">or </font><font color="#330033">{1,2,3,4,5}  </font><font color="#FF0055">-- x should be set to {1,1,1,1,1}</font>
+ <pre><font color="#330033">        x = 1 </font><font color="#0000FF">or </font><font color="#330033">{1,2,3,4,5}  </font><font color="#FF0055">-- x should be set to {1,1,1,1,1}</font>
 </pre>
 
  If short-circuiting were used here, we would set x to 1, and not even
@@ -2009,16 +2009,16 @@ Short-Circuit Evaluation
  loop with a controlling <font color="#993333"><b>loop variable</b></font>
  that runs from an initial value up or down to some final value. e.g.
 
-<pre><font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
-<font color="#330033">            ? i   </font><font color="#FF0055">-- ? is a short form for print()</font>
-<font color="#0000FF">        end for</font>
-<font color="#330033"></font>
-<font color="#FF0055">        -- fractional numbers allowed too</font>
-<font color="#0000FF">        for </font><font color="#330033">i = 10.0 </font><font color="#0000FF">to </font><font color="#330033">20.5 </font><font color="#0000FF">by </font><font color="#330033">0.3 </font><font color="#0000FF">do</font>
-<font color="#0000FF">            for </font><font color="#330033">j = 20 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">by </font><font color="#330033">-2 </font><font color="#0000FF">do    </font><font color="#FF0055">-- counting down</font>
-<font color="#330033">                ? {i, j}</font>
-<font color="#0000FF">            end for</font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">do</font>
+<font color="#330033">            ? i   </font><font color="#FF0055">-- ? is a short form for print()</font>
+<font color="#0000FF">        end for</font>
+<font color="#330033"></font>
+<font color="#FF0055">        -- fractional numbers allowed too</font>
+<font color="#0000FF">        for </font><font color="#330033">i = 10.0 </font><font color="#0000FF">to </font><font color="#330033">20.5 </font><font color="#0000FF">by </font><font color="#330033">0.3 </font><font color="#0000FF">do</font>
+<font color="#0000FF">            for </font><font color="#330033">j = 20 </font><font color="#0000FF">to </font><font color="#330033">10 </font><font color="#0000FF">by </font><font color="#330033">-2 </font><font color="#0000FF">do    </font><font color="#FF0055">-- counting down</font>
+<font color="#330033">                ? {i, j}</font>
+<font color="#0000FF">            end for</font>
+<font color="#0000FF">        end for</font>
 </pre>
 
 <p>
@@ -2047,9 +2047,9 @@ Short-Circuit Evaluation
  from a subroutine. If the subroutine is a function
  or type then a value must also be returned. e.g.
 
-<pre><font color="#0000FF">        return</font>
-<font color="#330033"></font>
-<font color="#0000FF">        return </font><font color="#330033">{50, </font><font color="#00A033">"FRED"</font><font color="#330033">, </font><font color="#993333">{}</font><font color="#330033">}</font>
+<pre><font color="#0000FF">        return</font>
+<font color="#330033"></font>
+<font color="#0000FF">        return </font><font color="#330033">{50, </font><font color="#00A033">"FRED"</font><font color="#330033">, </font><font color="#993333">{}</font><font color="#330033">}</font>
 </pre>
 
 <a name=exit></a>
@@ -2065,26 +2065,26 @@ Short-Circuit Evaluation
  <a href="refman_2.htm#for">for-loop</a>. It causes immediate termination of
  the loop, with control passing to the first statement after the loop. e.g.
 
-<pre><font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">100 </font><font color="#0000FF">do</font>
-<font color="#0000FF">            if </font><font color="#330033">a[i] = x </font><font color="#0000FF">then</font>
-<font color="#330033">                location = i</font>
-<font color="#0000FF">                exit</font>
-<font color="#0000FF">            end if</font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">100 </font><font color="#0000FF">do</font>
+<font color="#0000FF">            if </font><font color="#330033">a[i] = x </font><font color="#0000FF">then</font>
+<font color="#330033">                location = i</font>
+<font color="#0000FF">                exit</font>
+<font color="#0000FF">            end if</font>
+<font color="#0000FF">        end for</font>
 </pre>
 
 <p>
  It is also quite common to see something like this:
 
-<pre><font color="#0000FF">        constant </font><font color="#330033">TRUE = 1</font>
-<font color="#330033"></font>
-<font color="#0000FF">        while </font><font color="#330033">TRUE </font><font color="#0000FF">do</font>
-<font color="#330033">            ...</font>
-<font color="#0000FF">            if </font><font color="#330033">some_condition </font><font color="#0000FF">then</font>
-<font color="#0000FF">                exit</font>
-<font color="#0000FF">            end if</font>
-<font color="#330033">            ...</font>
-<font color="#0000FF">        end while</font>
+<pre><font color="#0000FF">        constant </font><font color="#330033">TRUE = 1</font>
+<font color="#330033"></font>
+<font color="#0000FF">        while </font><font color="#330033">TRUE </font><font color="#0000FF">do</font>
+<font color="#330033">            ...</font>
+<font color="#0000FF">            if </font><font color="#330033">some_condition </font><font color="#0000FF">then</font>
+<font color="#0000FF">                exit</font>
+<font color="#0000FF">            end if</font>
+<font color="#330033">            ...</font>
+<font color="#0000FF">        end while</font>
 </pre>
 
  i.e. an "infinite" while-loop that actually terminates via an
@@ -2194,9 +2194,9 @@ containing the code. The first form of the include statement is:
 
 <p>
  Some Examples:<br>
-<pre><font color="#0000FF">                   include </font><font color="#330033">graphics.e</font>
+<pre><font color="#0000FF">                   include </font><font color="#330033">graphics.e</font>
 </pre>
-<pre><font color="#0000FF">                   include </font><font color="#330033">\mylib\myroutines.e</font>
+<pre><font color="#0000FF">                   include </font><font color="#330033">\mylib\myroutines.e</font>
 </pre>
 <p>
 		 Any top-level code in the included file will be executed.
@@ -2273,7 +2273,7 @@ containing the code. The first form of the include statement is:
  enclose it in double-quotes, otherwise quotes are optional.
  Also, be sure to double-up your backslashes.
  For example:<br>
-<pre><font color="#0000FF">                   include </font><font color="#00A033">"c:\\program files\\myfile.e"</font>
+<pre><font color="#0000FF">                   include </font><font color="#00A033">"c:\\program files\\myfile.e"</font>
 </pre>
 <p>
  Other than possibly defining a new namespace identifier

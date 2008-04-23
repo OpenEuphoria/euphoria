@@ -50,3 +50,20 @@ test_equal("min() sequence", 3, min({5,8,3,100,32}))
 
 test_equal("max() integer", 5, max(5))
 test_equal("max() integer", 109, max({5,4,3,109,108,35}))
+
+test_equal("log() #1", 2.302585093, log(10))
+test_equal("log() #2", 2.48490665, log(12))
+test_equal("log() #3", 6.843749949, log(938))
+test_equal("log() #4", {2.302585093, 6.843749949}, log({12, 938}))
+
+test_equal("log10() #1", 3.0, log10(1000.0))
+test_equal("log10() #2", 1.919078092, log10(83))
+test_equal("log10() #3", {3.0, 1.919078092}, log10({1000.0, 83}))
+
+test_equal("deg2rad() #1", 0.01745329252, deg2rad(1))
+test_equal("deg2rad() #2", 3.385938749, deg2rad(194))
+test_equal("deg2rad() #3", {0.01745329252, 3.385938749}, deg2rad({1,194}))
+
+test_equal("rad2deg() #1", 0.9998113525, rad2deg(0.01745))
+test_equal("rad2deg() #2", 28.64788976, rad2deg(0.5))
+test_equal("rad2deg() #3", {0.9998113525, 28.64788976}, rad2deg({0.01745,0.5}))

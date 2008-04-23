@@ -86,17 +86,17 @@ end procedure
 global procedure test_equal(sequence name, object a, object b)
 	testCount += 1
 
-    if equal(a, b) = 0 then
-	    test_failed(name, a, b)
-    else
+    if equal(a, b) then
 	    test_passed(name)
+    else
+	    test_failed(name, a, b)
     end if
 end procedure
 
 global procedure test_not_equal(sequence name, object a, object b)
 	testCount += 1
 	
-	if equal(a,b) then
+	if equal(a, b) then
 		test_failed(name, a, b)
 	else
 		test_passed(name)

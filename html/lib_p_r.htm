@@ -610,7 +610,7 @@ Remember that peek4u() takes just one argument, which in the
 </td></tr>
 
  <tr><td valign=top><b>Description:</b></td>
-<td>PI (3.14159...) has been defined as a global constant.
+<td>PI (3.141592653589793238) has been defined as a global constant.
 </td></tr>
 
 <tr><td valign=top><b>Comments:</b></td>
@@ -623,7 +623,7 @@ Remember that peek4u() takes just one argument, which in the
 </td></tr>
 
 <tr><td></td><td>
-<pre><font color="#330033">x = PI  </font><font color="#FF0055">-- x is 3.14159...</font>
+<pre><font color="#330033">x = PI  </font><font color="#FF0055">-- x is 3.141592653589793238</font>
 <font color="#330033"></font>
 </pre></td></tr>
 
@@ -1777,6 +1777,44 @@ information controlling how the character is displayed on the screen.
 <td><a href="lib_p_r.htm#printf">printf</a>,
 <a href="lib_e_g.htm#gets">gets</a>,
 <a href="lib_h_o.htm#open">open</a>
+</td></tr>
+
+</table>
+
+
+<a name=rad2deg></a><font color="#006633" size=+2><br>
+<center><b>rad2deg</b></center>
+</font><p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include math.e<BR>
+x2 = rad2deg(x1)
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Convert an angle measured in radians to an angle measured in degrees
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>This function may be applied to an atom or sequence.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">x = rad2deg(3.385938749)</font>
+<font color="#FF0055">-- x is 194</font>
+</pre></td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="lib_c_d.htm#deg2rad">deg2rad</a>
 </td></tr>
 
 </table>

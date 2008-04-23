@@ -107,8 +107,9 @@
 	<li>
      New routines in <b>math.e</b>:
      <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
-     <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b> and
-     <b>max()</b>.
+     <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b>,
+     <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b> and
+     constant <b>E</b>.
 	<li>
      New routines in <b>sequence.e</b>:
      <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,

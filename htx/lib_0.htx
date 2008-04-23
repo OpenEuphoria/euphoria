@@ -508,9 +508,27 @@
 >
 
 <_3clist
+  href="lib_c_d.htm#deg2rad"
+  name="deg2rad"
+  description="convert angle as degrees to an angle as radians"
+>
+
+<_3clist
+  href="lib_p_r.htm#rad2deg"
+  name="rad2deg"
+  description="convert angle as radians to an angle as degrees"
+>
+
+<_3clist
   href="lib_h_o.htm#log"
   name="log"
   description="calculate the natural logarithm"
+>
+
+<_3clist
+  href="lib_h_o.htm#log10"
+  name="log10"
+  description="calculate the base 10 logarithm"
 >
 
 <_3clist
@@ -588,7 +606,13 @@
 <_3clist
   href="lib_p_r.htm#PI"
   name="PI"
-  description="the mathematical value PI (3.14159...)"
+  description="the mathematical value PI (3.141592653589793238)"
+>
+
+<_3clist
+  href="lib_e_g.htm#E"
+  name="E"
+  description="base of the natural logarithm (2.718281828459045235)"
 >
 
 </table>

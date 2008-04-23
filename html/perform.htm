@@ -54,7 +54,7 @@ General Tips
  The easiest way to gain a bit of speed is to turn off run-time 
  type-checking. Insert the line:
 
-<pre><font color="#0000FF">           without </font><font color="#330033">type_check</font>
+<pre><font color="#0000FF">           without </font><font color="#330033">type_check</font>
 </pre>
  at the top of your main <b>.ex</b> file, ahead of any include statements.
  You'll typically gain between 0 and 20 percent depending on the
@@ -65,9 +65,9 @@ General Tips
  <p>
  Also, be <font color="#CC0099"><b><i>sure</i></b></font> to remove,
  or comment-out, any
-<pre><font color="#0000FF">           with </font><font color="#FF00FF">trace</font>
-<font color="#0000FF">           with </font><font color="#FF00FF">profile</font>
-<font color="#0000FF">           with </font><font color="#330033">profile_time</font>
+<pre><font color="#0000FF">           with </font><font color="#FF00FF">trace</font>
+<font color="#0000FF">           with </font><font color="#FF00FF">profile</font>
+<font color="#0000FF">           with </font><font color="#330033">profile_time</font>
 </pre>
  statements. <font color="#993333"><b>with trace</b></font> (even without
  any calls to <font color="#006699">trace()</font>), and
@@ -90,10 +90,10 @@ General Tips
  to write constant numbers in floating point form, e.g. when x has a
  floating-point value, say, x = 9.9<br><br>
  change:
-<pre><font color="#330033">           x = x * 5</font>
+<pre><font color="#330033">           x = x * 5</font>
 </pre>
  to:
-<pre><font color="#330033">           x = x * 5.0</font>
+<pre><font color="#330033">           x = x * 5.0</font>
 </pre>
  This saves the interpreter from having to convert integer 5 to
  floating-point 5.0 each time.
@@ -107,9 +107,9 @@ General Tips
  <font color="#993333"><b>or</b></font>. Euphoria will stop evaluating
  any condition once it determines if the condition is true or not.
  For instance in the <font color="#006699">if-statement</font>:
-<pre><font color="#0000FF">        if </font><font color="#330033">x > 20 </font><font color="#0000FF">and </font><font color="#330033">y = 0 </font><font color="#0000FF">then</font>
-<font color="#330033">            ...</font>
-<font color="#0000FF">        end if</font>
+<pre><font color="#0000FF">        if </font><font color="#330033">x > 20 </font><font color="#0000FF">and </font><font color="#330033">y = 0 </font><font color="#0000FF">then</font>
+<font color="#330033">            ...</font>
+<font color="#0000FF">        end if</font>
 </pre>
  The "y = 0" test will only be made when "x > 20" is true.
  <p>
@@ -124,11 +124,11 @@ General Tips
  With the current version of the interpreter, 
  nested simple if's that compare integers are usually a bit faster 
  than a single short-circuit if-statement e.g.:
-<pre><font color="#0000FF">       if </font><font color="#330033">x > 20 </font><font color="#0000FF">then</font>
-<font color="#0000FF">           if </font><font color="#330033">y = 0 </font><font color="#0000FF">then</font>
-<font color="#330033">               ...</font>
-<font color="#0000FF">           end if</font>
-<font color="#0000FF">       end if</font>
+<pre><font color="#0000FF">       if </font><font color="#330033">x > 20 </font><font color="#0000FF">then</font>
+<font color="#0000FF">           if </font><font color="#330033">y = 0 </font><font color="#0000FF">then</font>
+<font color="#330033">               ...</font>
+<font color="#0000FF">           end if</font>
+<font color="#0000FF">       end if</font>
 </pre>
 
 <p>
@@ -139,13 +139,13 @@ General Tips
 <li>
  There is no performance penalty for defining constants versus plugging
  in hard-coded literal numbers. The speed of:
-<pre><font color="#330033">           y = x * MAX</font>
+<pre><font color="#330033">           y = x * MAX</font>
 </pre>
  is exactly the same as:
-<pre><font color="#330033">           y = x * 1000</font>
+<pre><font color="#330033">           y = x * 1000</font>
 </pre>
  where you've previously defined:
-<pre><font color="#0000FF">           constant </font><font color="#330033">MAX = 1000</font>
+<pre><font color="#0000FF">           constant </font><font color="#330033">MAX = 1000</font>
 </pre>
 
 <li>
@@ -186,12 +186,12 @@ Measuring Performance
 <p>
  You can also measure the speed of code by using the
  <font color="#006699"><b>time()</b></font> function. e.g.
-<pre><font color="#FF00FF">        atom </font><font color="#330033">t</font>
-<font color="#330033">        t = </font><font color="#FF00FF">time</font><font color="#330033">()</font>
-<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10000 </font><font color="#0000FF">do</font>
-<font color="#FF0055">            -- small chunk of code here</font>
-<font color="#0000FF">        end for</font>
-<font color="#330033">        ? </font><font color="#FF00FF">time</font><font color="#330033">() - t</font>
+<pre><font color="#FF00FF">        atom </font><font color="#330033">t</font>
+<font color="#330033">        t = </font><font color="#FF00FF">time</font><font color="#330033">()</font>
+<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">10000 </font><font color="#0000FF">do</font>
+<font color="#FF0055">            -- small chunk of code here</font>
+<font color="#0000FF">        end for</font>
+<font color="#330033">        ? </font><font color="#FF00FF">time</font><font color="#330033">() - t</font>
 </pre>
 <p>
  You might rewrite the small chunk of code in different ways to see which way 
@@ -223,17 +223,17 @@ Converting Multiplies to Adds in a Loop
 <p>
  Addition is faster than multiplication. Sometimes you can replace a
  multiplication by the loop variable, with an addition. Something like:
-<pre><font color="#0000FF">        for </font><font color="#330033">i = 0 </font><font color="#0000FF">to </font><font color="#330033">199 </font><font color="#0000FF">do</font>
-<font color="#FF00FF">            poke</font><font color="#330033">(screen_memory+i*320, 0)</font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#0000FF">        for </font><font color="#330033">i = 0 </font><font color="#0000FF">to </font><font color="#330033">199 </font><font color="#0000FF">do</font>
+<font color="#FF00FF">            poke</font><font color="#330033">(screen_memory+i*320, 0)</font>
+<font color="#0000FF">        end for</font>
 </pre>
  
  becomes:
-<pre><font color="#330033">        x = screen_memory</font>
-<font color="#0000FF">        for </font><font color="#330033">i = 0 </font><font color="#0000FF">to </font><font color="#330033">199 </font><font color="#0000FF">do</font>
-<font color="#FF00FF">            poke</font><font color="#330033">(x, 0)</font>
-<font color="#330033">            x = x + 320 </font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#330033">        x = screen_memory</font>
+<font color="#0000FF">        for </font><font color="#330033">i = 0 </font><font color="#0000FF">to </font><font color="#330033">199 </font><font color="#0000FF">do</font>
+<font color="#FF00FF">            poke</font><font color="#330033">(x, 0)</font>
+<font color="#330033">            x = x + 320 </font>
+<font color="#0000FF">        end for</font>
 </pre>
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
@@ -251,17 +251,17 @@ Saving Results in Variables
 <li>
  When you have a sequence with multiple levels of subscripting,
  it is faster to change code like:
-<pre><font color="#0000FF">           for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">1000 </font><font color="#0000FF">do</font>
-<font color="#330033">               y[a][i] = y[a][i]+1</font>
-<font color="#0000FF">           end for</font>
+<pre><font color="#0000FF">           for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">1000 </font><font color="#0000FF">do</font>
+<font color="#330033">               y[a][i] = y[a][i]+1</font>
+<font color="#0000FF">           end for</font>
 </pre>
 
  to:
-<pre><font color="#330033">           ya = y[a]</font>
-<font color="#0000FF">           for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">1000 </font><font color="#0000FF">do</font>
-<font color="#330033">               ya[i] = ya[i] + 1</font>
-<font color="#0000FF">           end for</font>
-<font color="#330033">           y[a] = ya</font>
+<pre><font color="#330033">           ya = y[a]</font>
+<font color="#0000FF">           for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">1000 </font><font color="#0000FF">do</font>
+<font color="#330033">               ya[i] = ya[i] + 1</font>
+<font color="#0000FF">           end for</font>
+<font color="#330033">           y[a] = ya</font>
 </pre>
 
  So you are doing 2 subscript operations per iteration of the loop, rather 
@@ -304,17 +304,17 @@ Operations on Sequences
  Euphoria lets you operate on a large sequence of data using a single
  statement. This saves you from writing a loop where you process one element
  at-a-time. e.g.
-<pre><font color="#330033">        x = {1,3,5,7,9}</font>
-<font color="#330033">        y = {2,4,6,8,10}</font>
-<font color="#330033"></font>
-<font color="#330033">        z = x + y</font>
+<pre><font color="#330033">        x = {1,3,5,7,9}</font>
+<font color="#330033">        y = {2,4,6,8,10}</font>
+<font color="#330033"></font>
+<font color="#330033">        z = x + y</font>
 </pre>
 
  versus:
-<pre><font color="#330033">        z = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 5)  </font><font color="#FF0055">-- if necessary</font>
-<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">5 </font><font color="#0000FF">do</font>
-<font color="#330033">            z[i] = x[i] + y[i]</font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#330033">        z = </font><font color="#FF00FF">repeat</font><font color="#330033">(0, 5)  </font><font color="#FF0055">-- if necessary</font>
+<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">5 </font><font color="#0000FF">do</font>
+<font color="#330033">            z[i] = x[i] + y[i]</font>
+<font color="#0000FF">        end for</font>
 </pre>
 <p>
  In most interpreted languages, it is much faster to process a whole sequence 
@@ -339,21 +339,21 @@ Some Special Case Optimizations
 <p>
  Euphoria automatically optimizes certain special cases. x and y below could 
  be variables or arbitrary expressions.
-<pre><font color="#330033">        x + 1      </font><font color="#FF0055">-- faster than general x + y</font>
-<font color="#330033">        1 + x      </font><font color="#FF0055">-- faster than general y + x</font>
-<font color="#330033">        x * 2      </font><font color="#FF0055">-- faster than general x * y</font>
-<font color="#330033">        2 * x      </font><font color="#FF0055">-- faster than general y * x</font>
-<font color="#330033">        x / 2      </font><font color="#FF0055">-- faster than general x / y</font>
-<font color="#FF00FF">        floor</font><font color="#330033">(x/y) </font><font color="#FF0055">-- where x and y are integers, is faster than x/y</font>
-<font color="#FF00FF">        floor</font><font color="#330033">(x/2) </font><font color="#FF0055">-- faster than floor(x/y)</font>
+<pre><font color="#330033">        x + 1      </font><font color="#FF0055">-- faster than general x + y</font>
+<font color="#330033">        1 + x      </font><font color="#FF0055">-- faster than general y + x</font>
+<font color="#330033">        x * 2      </font><font color="#FF0055">-- faster than general x * y</font>
+<font color="#330033">        2 * x      </font><font color="#FF0055">-- faster than general y * x</font>
+<font color="#330033">        x / 2      </font><font color="#FF0055">-- faster than general x / y</font>
+<font color="#FF00FF">        floor</font><font color="#330033">(x/y) </font><font color="#FF0055">-- where x and y are integers, is faster than x/y</font>
+<font color="#FF00FF">        floor</font><font color="#330033">(x/2) </font><font color="#FF0055">-- faster than floor(x/y)</font>
 </pre>
 <p>
  x below is a simple variable, y is any variable or expression: 
-<pre><font color="#330033">        x = </font><font color="#FF00FF">append</font><font color="#330033">(x, y)   </font><font color="#FF0055">-- faster than general z = append(x, y)</font>
-<font color="#330033">        x = </font><font color="#FF00FF">prepend</font><font color="#330033">(x, y)  </font><font color="#FF0055">-- faster than general z = prepend(x, y)</font>
-<font color="#330033"></font>
-<font color="#330033">        x = x & y          </font><font color="#FF0055">-- where x is much larger than y,</font>
-<font color="#FF0055">                           -- is faster than general z = x & y</font>
+<pre><font color="#330033">        x = </font><font color="#FF00FF">append</font><font color="#330033">(x, y)   </font><font color="#FF0055">-- faster than general z = append(x, y)</font>
+<font color="#330033">        x = </font><font color="#FF00FF">prepend</font><font color="#330033">(x, y)  </font><font color="#FF0055">-- faster than general z = prepend(x, y)</font>
+<font color="#330033"></font>
+<font color="#330033">        x = x & y          </font><font color="#FF0055">-- where x is much larger than y,</font>
+<font color="#FF0055">                           -- is faster than general z = x & y</font>
 </pre>
 
 When you write a loop that "grows" a sequence, by appending or
@@ -466,17 +466,17 @@ Library Routines
 <p>
  Other routines are reasonably fast, but you might be able
  to do the job faster in some cases if speed was crucial.
-<pre><font color="#330033">        x = </font><font color="#FF00FF">repeat</font><font color="#330033">(0,100)</font>
-<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">100 </font><font color="#0000FF">do</font>
-<font color="#330033">            x[i] = i</font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#330033">        x = </font><font color="#FF00FF">repeat</font><font color="#330033">(0,100)</font>
+<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">100 </font><font color="#0000FF">do</font>
+<font color="#330033">            x[i] = i</font>
+<font color="#0000FF">        end for</font>
 </pre>
  
  is somewhat faster than:
-<pre><font color="#330033">        x = {}</font>
-<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">100 </font><font color="#0000FF">do</font>
-<font color="#330033">            x = </font><font color="#FF00FF">append</font><font color="#330033">(x, i)</font>
-<font color="#0000FF">        end for</font>
+<pre><font color="#330033">        x = {}</font>
+<font color="#0000FF">        for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">100 </font><font color="#0000FF">do</font>
+<font color="#330033">            x = </font><font color="#FF00FF">append</font><font color="#330033">(x, i)</font>
+<font color="#0000FF">        end for</font>
 </pre>
 
  because <font color="#006699">append()</font> has to allocate and reallocate
@@ -487,11 +487,11 @@ Library Routines
  reallocations.)
 <p>
  You can replace:
-<pre><font color="#FF00FF">        remainder</font><font color="#330033">(x, p)</font>
+<pre><font color="#FF00FF">        remainder</font><font color="#330033">(x, p)</font>
 </pre>
  
  with:
-<pre><font color="#FF00FF">        and_bits</font><font color="#330033">(x, p-1)</font>
+<pre><font color="#FF00FF">        and_bits</font><font color="#330033">(x, p-1)</font>
 </pre>
 
  for greater speed when p is a positive power of 2. x must be a non-negative

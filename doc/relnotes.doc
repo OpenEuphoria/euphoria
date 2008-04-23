@@ -1,7 +1,7 @@
 
- 
-                            Euphoria Release Notes
- 
+  
+                             Euphoria Release Notes
+  
 
 
  Version 3.2 ??? ????:
@@ -70,11 +70,13 @@
         been found in The Archive. Many thanks must go to the original
         developers who have contributed these functions.
              * New routines in math.e: ceil(), round_prec(), round(), sign(),
-               abs(), sum(), average(), min() and max().
+               abs(), sum(), average(), min(), max(), deg2rad(), rad2deg(),
+               log10() and constant E.
              * New routines in sequence.e: insert(), remove(), remove_range(),
                replace_range(), left(), mid(), slice(), right(), split(),
-               split_adv(), join(), findany(), and findany_from().
-             * New routines in file.e: readlines(), readfile(), pathinfo(),
+               split_adv(), join(), findany(), and findany_from() (faster,
+               simpler version by Larry Miller, Thanks Larry!).
+             * New routines in file.e: read_lines(), read_file(), pathinfo(),
                dirname(), filename(), fileext() and PATHSEP
              * New routines in ctype.e: isalnum(), isalpha(), isascii(),
                iscntrl(), isdigit(), isgraph(), islower(), isprint(),
@@ -2569,9 +2571,9 @@
 
 
 
- 
-                       Highlights of Older Releases:
- 
+  
+                        Highlights of Older Releases:
+  
 
 
  Version 1.5a June 13, 1997:

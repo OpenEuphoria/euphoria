@@ -127,49 +127,49 @@ a.brown:hover     {color: red; text-decoration: underline;}
  The following is an example of a complete Euphoria program.
 
 <p>
-<pre><font color="#330033">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</font>
-<font color="#330033"></font>
-<font color="#FF00FF"> sequence </font><font color="#330033">list, sorted_list</font>
-<font color="#330033"></font>
-<font color="#0000FF"> function </font><font color="#330033">merge_sort(</font><font color="#FF00FF">sequence </font><font color="#330033">x)</font>
-<font color="#FF0055"> -- put x into ascending order using a recursive merge sort</font>
-<font color="#FF00FF">     integer </font><font color="#330033">n, mid</font>
-<font color="#FF00FF">     sequence </font><font color="#330033">merged, a, b</font>
-<font color="#330033"></font>
-<font color="#330033">     n = </font><font color="#FF00FF">length</font><font color="#330033">(x)</font>
-<font color="#0000FF">     if </font><font color="#330033">n = 0 </font><font color="#0000FF">or </font><font color="#330033">n = 1 </font><font color="#0000FF">then</font>
-<font color="#0000FF">         return </font><font color="#330033">x  </font><font color="#FF0055">-- trivial case</font>
-<font color="#0000FF">     end if</font>
-<font color="#330033"></font>
-<font color="#330033">     mid = </font><font color="#FF00FF">floor</font><font color="#330033">(n/2)</font>
-<font color="#330033">     a = merge_sort(x</font><font color="#993333">[</font><font color="#330033">1..mid</font><font color="#993333">]</font><font color="#330033">)       </font><font color="#FF0055">-- sort first half of x</font>
-<font color="#330033">     b = merge_sort(x</font><font color="#993333">[</font><font color="#330033">mid+1..n</font><font color="#993333">]</font><font color="#330033">)     </font><font color="#FF0055">-- sort second half of x</font>
-<font color="#330033"></font>
-<font color="#FF0055">     -- merge the two sorted halves into one</font>
-<font color="#330033">     merged = {}</font>
-<font color="#0000FF">     while </font><font color="#FF00FF">length</font><font color="#330033">(a) > 0 </font><font color="#0000FF">and </font><font color="#FF00FF">length</font><font color="#330033">(b) > 0 </font><font color="#0000FF">do</font>
-<font color="#0000FF">         if </font><font color="#FF00FF">compare</font><font color="#330033">(a</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">, b</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">) < 0 </font><font color="#0000FF">then</font>
-<font color="#330033">             merged = </font><font color="#FF00FF">append</font><font color="#330033">(merged, a</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">)</font>
-<font color="#330033">             a = a[2..</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">a</font><font color="#993333">)</font><font color="#330033">]</font>
-<font color="#0000FF">         else</font>
-<font color="#330033">             merged = </font><font color="#FF00FF">append</font><font color="#330033">(merged, b</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">)</font>
-<font color="#330033">             b = b[2..</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">b</font><font color="#993333">)</font><font color="#330033">]</font>
-<font color="#0000FF">         end if</font>
-<font color="#0000FF">     end while</font>
-<font color="#0000FF">     return </font><font color="#330033">merged & a & b  </font><font color="#FF0055">-- merged data plus leftovers</font>
-<font color="#0000FF"> end function</font>
-<font color="#330033"></font>
-<font color="#0000FF"> procedure </font><font color="#330033">print_sorted_list()</font>
-<font color="#FF0055"> -- generate sorted_list from list</font>
-<font color="#330033">     list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}</font>
-<font color="#330033">     sorted_list = merge_sort(list)</font>
-<font color="#330033">     ? sorted_list</font>
-<font color="#0000FF"> end procedure</font>
-<font color="#330033"></font>
-<font color="#330033"> print_sorted_list()     </font><font color="#FF0055">-- this command starts the program</font>
-<font color="#330033"></font>
-<font color="#330033"></font>
-<font color="#330033">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</font>
+<pre><font color="#330033">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</font>
+<font color="#330033"></font>
+<font color="#FF00FF"> sequence </font><font color="#330033">list, sorted_list</font>
+<font color="#330033"></font>
+<font color="#0000FF"> function </font><font color="#330033">merge_sort(</font><font color="#FF00FF">sequence </font><font color="#330033">x)</font>
+<font color="#FF0055"> -- put x into ascending order using a recursive merge sort</font>
+<font color="#FF00FF">     integer </font><font color="#330033">n, mid</font>
+<font color="#FF00FF">     sequence </font><font color="#330033">merged, a, b</font>
+<font color="#330033"></font>
+<font color="#330033">     n = </font><font color="#FF00FF">length</font><font color="#330033">(x)</font>
+<font color="#0000FF">     if </font><font color="#330033">n = 0 </font><font color="#0000FF">or </font><font color="#330033">n = 1 </font><font color="#0000FF">then</font>
+<font color="#0000FF">         return </font><font color="#330033">x  </font><font color="#FF0055">-- trivial case</font>
+<font color="#0000FF">     end if</font>
+<font color="#330033"></font>
+<font color="#330033">     mid = </font><font color="#FF00FF">floor</font><font color="#330033">(n/2)</font>
+<font color="#330033">     a = merge_sort(x</font><font color="#993333">[</font><font color="#330033">1..mid</font><font color="#993333">]</font><font color="#330033">)       </font><font color="#FF0055">-- sort first half of x</font>
+<font color="#330033">     b = merge_sort(x</font><font color="#993333">[</font><font color="#330033">mid+1..n</font><font color="#993333">]</font><font color="#330033">)     </font><font color="#FF0055">-- sort second half of x</font>
+<font color="#330033"></font>
+<font color="#FF0055">     -- merge the two sorted halves into one</font>
+<font color="#330033">     merged = {}</font>
+<font color="#0000FF">     while </font><font color="#FF00FF">length</font><font color="#330033">(a) > 0 </font><font color="#0000FF">and </font><font color="#FF00FF">length</font><font color="#330033">(b) > 0 </font><font color="#0000FF">do</font>
+<font color="#0000FF">         if </font><font color="#FF00FF">compare</font><font color="#330033">(a</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">, b</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">) < 0 </font><font color="#0000FF">then</font>
+<font color="#330033">             merged = </font><font color="#FF00FF">append</font><font color="#330033">(merged, a</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">)</font>
+<font color="#330033">             a = a[2..</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">a</font><font color="#993333">)</font><font color="#330033">]</font>
+<font color="#0000FF">         else</font>
+<font color="#330033">             merged = </font><font color="#FF00FF">append</font><font color="#330033">(merged, b</font><font color="#993333">[</font><font color="#330033">1</font><font color="#993333">]</font><font color="#330033">)</font>
+<font color="#330033">             b = b[2..</font><font color="#FF00FF">length</font><font color="#993333">(</font><font color="#330033">b</font><font color="#993333">)</font><font color="#330033">]</font>
+<font color="#0000FF">         end if</font>
+<font color="#0000FF">     end while</font>
+<font color="#0000FF">     return </font><font color="#330033">merged & a & b  </font><font color="#FF0055">-- merged data plus leftovers</font>
+<font color="#0000FF"> end function</font>
+<font color="#330033"></font>
+<font color="#0000FF"> procedure </font><font color="#330033">print_sorted_list()</font>
+<font color="#FF0055"> -- generate sorted_list from list</font>
+<font color="#330033">     list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}</font>
+<font color="#330033">     sorted_list = merge_sort(list)</font>
+<font color="#330033">     ? sorted_list</font>
+<font color="#0000FF"> end procedure</font>
+<font color="#330033"></font>
+<font color="#330033"> print_sorted_list()     </font><font color="#FF0055">-- this command starts the program</font>
+<font color="#330033"></font>
+<font color="#330033"></font>
+<font color="#330033">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</font>
 </pre>
 <p>
 

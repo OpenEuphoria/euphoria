@@ -1,6 +1,6 @@
 
- 
-                     Euphoria Trouble-Shooting Guide 
+  
+                      Euphoria Trouble-Shooting Guide  
 
 
  If you get stuck, here are some things you can do:
@@ -19,7 +19,7 @@
 
  4.    - Try running your program with the statements:
 
-                 with trace
+                 with trace
                  trace(1)
          
          at the top of your main .ex file so you can see what's going on.
@@ -42,7 +42,7 @@
       immediately when your program finishes execution. Perhaps you should code
       something like:
 
-              puts(1, "\nPress Enter\n")
+              puts(1, "\nPress Enter\n")
               if getc(0) then
               end if
       
@@ -54,7 +54,7 @@
 
  S:   Call free_console() just before your program terminates.
 
-              include dll.e
+              include dll.e
               
               free_console()
       
@@ -73,13 +73,13 @@
       Alt-Enter. It will stay small after that. Your Euphoria program can keep
       the window small by executing:
 
-              if graphics_mode(-1) then
+              if graphics_mode(-1) then
               end if
       
       at the start of execution. This may cause some brief screen flicker. Your
       program can force a text window to be full-screen by executing:
 
-              if graphics_mode(3) then
+              if graphics_mode(3) then
               end if
       
 
@@ -168,7 +168,7 @@
  S:   When your program is finished, it should call the function
       graphics_mode(-1) to set the DOS window back to normal. e.g.
 
-              if graphics_mode(-1) then
+              if graphics_mode(-1) then
               end if
       
 
@@ -211,7 +211,7 @@
       which is normally the keyboard. The line will always have \n on the end.
       To remove the trailing \n character do:
 
-              line = line[1..length(line)-1]
+              line = line[1..length(line)-1]
       
       Also see prompt_string() in get.e.
 
@@ -246,7 +246,7 @@
 
  S:   Use sprintf() in library.doc. e.g.
 
-              string = sprintf("%d", number)
+              string = sprintf("%d", number)
       
       Besides %d, you can also try other formats, such as %x (Hex) or %f
       (floating-point).
@@ -292,11 +292,11 @@
       around your string so it is seen as a single value to be printed, e.g.
       you wrote:
 
-              printf(1, "Hello %s", mystring)
+              printf(1, "Hello %s", mystring)
       
       where you should have said:
 
-              printf(1, "Hello %s", {mystring})
+              printf(1, "Hello %s", {mystring})
       
 
  P:   When I print numbers using print() or ?, only 10 significant digits are
@@ -306,7 +306,7 @@
       calculations are performed using at least 15 significant digits. To see
       more digits you have to use printf(). For example,
 
-              printf(1, "%.15f", 1/3)
+              printf(1, "%.15f", 1/3)
       
       This will display 15 digits.
 
@@ -317,12 +317,12 @@
  S:   When declaring subroutine parameters, Euphoria requires you to provide an
       explicit type for each individual parameter. e.g.
 
-              procedure foo(integer x, y)         -- WRONG
+              procedure foo(integer x, y)         -- WRONG
               procedure foo(integer x, integer y) -- RIGHT
       
       In all other contexts it is ok to make a list:
 
-              atom a, b, c, d, e
+              atom a, b, c, d, e
       
 
  P:   I'm declaring some variables in the middle of a routine and it gives me a

@@ -564,7 +564,7 @@ s = peek_string(100)
  <_2clist
   name="Description:"
   description=
-"PI (3.14159...) has been defined as a global constant."
+"PI (3.141592653589793238) has been defined as a global constant."
  >
 <_2clist
   name="Comments:"
@@ -577,7 +577,7 @@ s = peek_string(100)
   description=""
  >
 <_eucode>
-x = PI  -- x is 3.14159...
+x = PI  -- x is 3.141592653589793238
 
  </_eucode>
 <_2clist
@@ -1681,6 +1681,42 @@ puts(output, 'A')  -- the single byte 65 will be sent to output
   description="<a href=\"lib_p_r.htm#printf\">printf</a>,
 <a href=\"lib_e_g.htm#gets\">gets</a>,
 <a href=\"lib_h_o.htm#open\">open</a>"
+ >
+</table>
+
+
+<_routine name="rad2deg">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include math.e<BR>
+x2 = rad2deg(x1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Convert an angle measured in radians to an angle measured in degrees"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or sequence."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+x = rad2deg(3.385938749)
+-- x is 194
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c_d.htm#deg2rad\">deg2rad</a>"
  >
 </table>
 

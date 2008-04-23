@@ -5,12 +5,19 @@
 
 -- trig formulas provided by Larry Gregg
 
-global constant PI = 3.141592653589793238
+global constant
+    PI = 3.141592653589793238,
+    E  = 2.718281828459045235
+
+-- TODO: atan2, exp
 
 constant
-    PI_HALF =  PI / 2.0,  -- PI / 2
-    PINF = 1E308 * 1000,  -- Plus infinity (used in several routines)
-    MINF = - PINF         -- Minus infinity (used in several routines)
+    PI_HALF  =  PI / 2.0,          -- PI / 2
+    PINF     = 1E308 * 1000,       -- Plus infinity (used in several routines)
+    MINF     = - PINF,             -- Minus infinity (used in several routines)
+    INVLOG10 = 1 / log(10),        -- for log10() routine
+    RADIANS_TO_DEGREES = 180.0/PI, -- for radians_to_degrees()
+    DEGREES_TO_RADIANS = PI/180.0  -- for degrees_to_radians()
 
 type trig_range(object x)
 --  values passed to arccos and arcsin must be [-1,+1]
@@ -217,4 +224,31 @@ global function min(object a)
     	end if
     end for
     return b
+end function
+
+global function rad2deg (object x)
+   return x * RADIANS_TO_DEGREES
+end function
+
+global function deg2rad (object x)
+   return x * DEGREES_TO_RADIANS
+end function
+
+global function log10(object a)
+    object t
+
+    if atom(a) then
+        return log(a) * INVLOG10
+    end if
+
+    for i = 1 to length(a) do
+        t = a[i]
+        if atom(t) then
+            a[i] = log(t) * INVLOG10
+        else
+            a[i] = log10(t)
+        end if
+    end for
+
+    return a
 end function

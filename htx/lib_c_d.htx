@@ -1488,6 +1488,44 @@ end if
  >
 </table>
 
+<_routine name="deg2rad">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include math.e<BR>
+x2 = deg2rad(x1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Convert an angle measured in degrees to an angle measured in radians"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to an atom or sequence."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+x = deg2rad(194)
+-- x is 3.385938749
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#rad2deg\">rad2deg</a>"
+ >
+</table>
+
+
+
+
 <_routine name="dirname">
 <table border=0 cellspacing=2 cellpadding=2>
 
