@@ -268,13 +268,3 @@ global procedure pretty_print(integer fn, object x, sequence options)
     rPrint(x)
     puts(pretty_file, pretty_line)
 end procedure
-
--- PI, arccos, arcsin were defined here but have been moved to math.
--- TODO: 3.3 or 3.4 this include should be removed
-
-include math.e
-
--- reverse was defined here but has been moved to sequence.e
--- TODO: 3.3 or 3.4 this include should be removed
-
-include sequence.e
