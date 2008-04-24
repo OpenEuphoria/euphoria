@@ -1,25 +1,24 @@
 -- Date and Time functions
 -- 2008
 
--- note 2008-04-23: ONLY CONTAINS FUNCTION PROTOTYPES
-
 -- No timezone offset.
-
 
 -- Engine created by CyrekSoft --
 
 -- Change this to 1 for extended leap year rules
-constant XLEAP = 1
-constant Gregorian_Reformation = 1752, Gregorian_Reformation00 = 1700,
-DaysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
-constant 
-EPOCH_1970 = 62135856000,
-DayLengthInSeconds = 86400
+constant
+    XLEAP = 1,
+    Gregorian_Reformation = 1752,
+    Gregorian_Reformation00 = 1700,
+    DaysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+    EPOCH_1970 = 62135856000,
+    DayLengthInSeconds = 86400
 
 -- Date Handling ------------------------------------------------------------
 
 function isLeap(integer year) -- returns integer (0 or 1)
-sequence ly
+    sequence ly
+
 	ly = (remainder(year, {4, 100, 400, 3200, 80000})=0)
 	
 	if not ly[1] then return 0 end if
@@ -176,139 +175,61 @@ atom secs
     return julianDate(days) & {hours, minutes, seconds}
 end function
 
-
 -- ================= START newstdlib
 
 include string.e
 
+global constant
+    DT_YEAR   = 1,
+    DT_MONTH  = 2,
+    DT_DAY    = 3,
+    DT_HOUR   = 4,
+    DT_MINUTE = 5,
+    DT_SECOND = 6
 
 global type datetime(object o)
 	return sequence(o) and length(o) = 6
-	and integer(o[1]) and integer(o[2]) and integer(o[3]) 
-	and integer(o[4]) and integer(o[5]) and atom(o[6]) 
+	    and integer(o[DT_YEAR]) and integer(o[DT_MONTH]) and integer(o[DT_DAY])
+	    and integer(o[DT_HOUR]) and integer(o[DT_MINUTE]) and atom(o[DT_SECOND])
 end type
 
--- datetime datetime_new(int year, int month, int date, int hour, int minute, int second)
 -- Creates the datetime object for the specified parameters
-global function datetime_new(integer year, integer month, integer date, integer hour, integer minute, atom second)
-	return {year, month, date, hour, minute, second}
+global function datetime_new(integer year, integer month, integer day, integer hour, integer minute, atom second)
+	return {year, month, day, hour, minute, second}
 end function
 
-
--- int datetime_compare(datetime dt1, datetime dt2)
 -- Compare the receiver to the specified Date to determine the relative ordering. 
 -- returns -1 or 0 or 1
 global function datetime_compare(datetime dt1, datetime dt2)
-    return compare(datetimeToSeconds(dt2) - datetimeToSeconds(dt1), 0)
+    return compare(datetimeToSeconds(dt1) - datetimeToSeconds(dt2), 0)
 end function
-	
--- datetime datetime_from_date(object date)
+
+-- TODO: document
 -- Converts the built-in date() format to datetime format
-global function datetime_from_date(object src)
-	return {src[1]+1900, src[2], src[3], src[4], src[5], src[6]}
+global function datetime_from_date(sequence src)
+	return {src[DT_YEAR]+1900, src[DT_MONTH], src[DT_DAY], src[DT_HOUR], src[DT_MINUTE], src[DT_SECOND]}
 end function
-	
--- datetime datetime_now()
+
+-- TODO: document
 -- Returns the datetime object for now. No timezones!
 global function datetime_now()
 	return datetime_from_date(date())
 end function
 
-
--- int 	datetime_get_year()
--- Answers the gregorian calendar year since 1900. 
-global function datetime_get_year(datetime dt)
-	return dt[1]
-end function
-
--- int 	datetime_get_month(datetime dt)
--- Answers the gregorian calendar month. 
-global function datetime_get_month(datetime dt)
-	return dt[2]
-end function
-
--- int datetime_get_date(datetime dt)
--- Answers the gregorian calendar day of the month. 
-global function datetime_get_date(datetime dt)
-	return dt[3]
-end function
-
--- int 	datetime_get_hour(datetime dt)
--- Answers the gregorian calendar hour of the day. 
-global function datetime_get_hour(datetime dt)
-	return dt[4]
-end function
-
--- int 	datetime_get_minute(datetime dt)
--- Answers the gregorian calendar minute of the hour. 
-global function datetime_get_minute(datetime dt)
-	return dt[5]
-end function
-
--- atom datetime_get_second(datetime dt)
--- Answers the gregorian calendar second of the minute. 
-global function datetime_get_second(datetime dt)
-	return dt[6]
-end function
-
--- int 	datetime_get_day(datetime dt)
+-- TODO: document
 -- Answers the gregorian calendar day of the week. 
-global function datetime_get_day(datetime dt)
-    return remainder(julianDay(dt)-1+4094, 7)+1
+global function datetime_dow(datetime dt)
+    return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
-
--- datetime datetime_set_year()
--- Sets the gregorian calendar year. 
-global function datetime_set_year(datetime dt, integer n)
-	dt[1] = n
-	return dt
-end function
-
--- datetime datetime_set_month(datetime dt)
--- Sets the gregorian calendar month. 
-global function datetime_set_month(datetime dt, integer n)
-	dt[2] = n
-	return dt
-end function
-
--- datetime datetime_set_date(datetime dt)
--- Sets the gregorian calendar day of the month. 
-global function datetime_set_date(datetime dt, integer n)
-	dt[3] = n
-	return dt
-end function
-
--- datetime datetime_set_hour(integer dt)
--- Sets the gregorian calendar hour of the day. 
-global function datetime_set_hour(datetime dt, integer n)
-	dt[4] = n
-	return dt
-end function
-
--- datetime datetime_set_minute(int dt)
--- Sets the gregorian calendar minute of the hour. 
-global function datetime_set_minute(datetime dt, integer n)
-	dt[5] = n
-	return dt
-end function
-
--- datetime datetime_set_second(int dt)
--- Sets the gregorian calendar second of the minute. 
-global function datetime_set_second(datetime dt, atom n)
-	dt[6] = n
-	return dt
-end function
-
-
-
+-- TODO: create, test, document
 -- datetime datetime_parse(ustring string)
 -- parse the string and returns the datetime
 global function datetime_parse(ustring string)
-	return 0 --TODO
+	return 0
 end function
 
-
+-- TODO: create, document, test
 -- ustring datetime_format(ustring format)
 -- format the date according to the format string
 -- format string some taken from date(1)
@@ -336,46 +257,41 @@ end function
 -- %y  last two digits of year (00..99)
 -- %Y  year
 global function datetime_format(ustring format)
-	return 0 --TODO
+	return 0
 end function
 
-
--- atom datetime_to_unix(datetime dt)
+-- TODO: document
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
 global function datetime_to_unix(datetime dt)
 	return datetimeToSeconds(dt) - EPOCH_1970
 end function
 
-
--- datetime datetime_from_unix(atom unix)
+-- TODO: document
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
 global function datetime_from_unix(atom unix)
 	return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
-
-
--- datetime datetime_add_second(datetime dt, atom seconds)
+-- TODO: document
 -- adds the date with specified number of seconds
-global function datetime_add_second(datetime dt, atom seconds)
+global function datetime_add_seconds(datetime dt, atom seconds)
 	return secondsToDateTime(datetimeToSeconds(dt) + seconds)
 end function
 
--- datetime datetime_add_day(datetime dt, integer days)
+-- TODO: document
 -- adds the date with specified number of days
-global function datetime_add_day(datetime dt, integer days)
+global function datetime_add_days(datetime dt, integer days)
 	return secondsToDateTime(datetimeToSeconds(dt) + days * DayLengthInSeconds)
 end function
 
--- atom datetime_diff_second(datetime dt1, datetime dt2)
+-- TODO: document
 -- returns the number of seconds between two datetimes
-global function datetime_diff_second(datetime dt1, datetime dt2)
+global function datetime_diff_seconds(datetime dt1, datetime dt2)
 	return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function
 
--- atom datetime_diff_day(datetime dt1, datetime dt2)
+-- TODO: document
 -- returns the number of days between two datetimes
-global function datetime_diff_day(datetime dt1, datetime dt2)
+global function datetime_diff_days(datetime dt1, datetime dt2)
 	return julianDay(dt2) - julianDay(dt1)
 end function
-

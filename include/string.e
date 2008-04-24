@@ -11,11 +11,13 @@ global type ustring(object s)
 	if not sequence(s) then 
 		return 0
 	end if
+
 	for i = 1 to length(s) do
 		if not integer(s[i]) or s[i] < 0 or s[i] > 65535 then
 			return 0
 		end if
 	end for
+
 	return 1
 end type
 
@@ -24,21 +26,24 @@ global type astring(object s)
 	if not sequence(s) then 
 		return 0
 	end if
+
 	for i = 1 to length(s) do
 		if not integer(s[i]) or s[i] < 0 or s[i] > 255 then
 			return 0
 		end if
 	end for
+
 	return 1
 end type
 
 
 -- encode ustring to astring using utf-8
 global function utf8_encode(ustring src)
-sequence tmp
-integer pos
-integer c
-	tmp = repeat(0, length(src)*3) -- max length 3 times
+    sequence tmp
+    integer pos
+    integer c
+
+    tmp = repeat(0, length(src)*3) -- max length 3 times
 	pos = 1
 	
 	for i = 1 to length(src) do
@@ -66,9 +71,10 @@ end function
 
 -- decode astring in utf-8 to ustring
 global function utf8_decode(astring src)
-sequence tmp
-integer pos, spos
-integer c
+    sequence tmp
+    integer pos, spos
+    integer c
+
 	tmp = repeat(0, length(src)) -- max length is the same as source length
 	pos = 1
 	spos = 1
@@ -92,6 +98,7 @@ integer c
 		
 		pos += 1
 		spos += 1
+
 		if spos > length(src) then
 			exit
 		end if
@@ -99,4 +106,3 @@ integer c
 	
 	return tmp[1..pos-1]
 end function
-

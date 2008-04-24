@@ -15,9 +15,9 @@ global function reverse(sequence s)
     t = repeat(0, n)
     lower = 1
     for upper = n to n2 by -1 do
-	t[upper] = s[lower]
-	t[lower] = s[upper]
-	lower += 1
+	    t[upper] = s[lower]
+	    t[lower] = s[upper]
+	    lower += 1
     end for
     return t
 end function
@@ -164,4 +164,98 @@ global function join(sequence s, object delim)
 	ret &= s[length(s)]
 
 	return ret
+end function
+
+-- TODO: document
+global function trim_head(sequence str, object what)
+    integer cut
+    cut = 1
+
+    if integer(what) then
+        if what = 0 then
+            what = " \t\r\n"
+        else
+            what = {what}
+        end if
+    end if
+
+    for i = 1 to length(str) do
+        if find(str[i], what) = 0 then
+            cut = i
+            exit
+        end if
+    end for
+
+    return str[cut..$]
+end function
+
+-- TODO: document
+global function trim_tail(sequence str, object what)
+    integer cut
+    cut = length(str)
+
+    if integer(what) then
+        if what = 0 then
+            what = " \t\r\n"
+        else
+            what = {what}
+        end if
+    end if
+
+    for i = length(str) to 1 by -1 do
+        if find(str[i], what) = 0 then
+            cut = i
+            exit
+        end if
+    end for
+
+    return str[1..cut]
+end function
+
+-- TODO: document
+global function trim(sequence str, object what)
+    return trim_tail(trim_head(str, what), what)
+end function
+
+-- TODO: document
+global function truncate(sequence s, integer size)
+    if size < length(s) then
+        return s[1..size]
+    end if
+    return s
+end function
+
+-- TODO: document
+global function pad_head(sequence str, integer size)
+    if size <= length(str) then
+        return str
+    end if
+    return repeat(' ', size - length(str)) & str
+end function
+
+-- TODO: document
+global function pad_tail(sequence str, integer size)
+    if size <= length(str) then
+        return str
+    end if
+    return str & repeat(' ', size - length(str))
+end function
+
+-- TODO: document
+global function chunk(sequence s, integer size)
+    sequence ns
+    integer stop
+
+    ns = {}
+
+    for i = 1 to length(s) by size do
+        stop = i + size - 1
+        if stop > length(s) then
+            stop = length(s)
+        end if
+
+        ns = append(ns, s[i..stop])
+    end for
+
+    return ns
 end function

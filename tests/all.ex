@@ -19,6 +19,7 @@ if length(cmd) > 2 then
 end if
 
 -- Tests
+include t_datetime.e
 include t_ctype.e
 include t_file.e
 include t_get.e

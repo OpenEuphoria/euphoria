@@ -79,7 +79,7 @@
 <_3clist
   name="m"
   pos=10
-  description="a <a href=\"#map\">Map</a> created using <a href=\"lib_h_o.htm#map_new\">map_new()</a>"
+  description="a <a href=\"#map\">map</a> created using <a href=\"lib_h_o.htm#map_new\">map_new()</a>"
 >
 
 </table></center>

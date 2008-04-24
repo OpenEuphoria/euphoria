@@ -63,3 +63,30 @@ test_equal("insert() string", "John", insert("Jon", "h", 3))
 test_equal("replace_range() integer sequence", {1,2,3}, replace_range({1,8,9,3}, 2, 2, 3))
 test_equal("replace_range() integer sequence w/sequence", {1,2,3,4},
     replace_range({1,8,9,4}, {2,3}, 2, 3))
+
+test_equal("trim_head() default", "John", trim_head(" \r\n\t John", 0))
+test_equal("trim_head() specified", "Doe", trim_head("John Doe", " hoJn"))
+test_equal("trim_head() integer", "John", trim_head("\nJohn", 10))
+
+test_equal("trim_tail() defaults", "John", trim_tail("John\r \n\t", 0))
+test_equal("trim_tail() specified", "John", trim_tail("John Doe", " eDo"))
+test_equal("trim_tail() integer", "John", trim_tail("John\n", 10))
+
+test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t", 0))
+test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
+test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
+
+test_equal("truncate() #1", "ABC", truncate("ABCDEFG", 3))
+test_equal("truncate() #2", "ABC", truncate("ABC", 15))
+
+test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
+test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))
+test_equal("pad_head() #3", "ABC", pad_head("ABC", 1))
+
+test_equal("pad_tail() #1", "ABC   ", pad_tail("ABC", 6))
+test_equal("pad_tail() #2", "ABC", pad_tail("ABC", 3))
+test_equal("pad_tail() #3", "ABC", pad_tail("ABC", 1))
+
+test_equal("chunk() sequence", {{1,2,3}, {4,5,6}}, chunk({1,2,3,4,5,6}, 3))
+test_equal("chunk() string", {"AB", "CD", "EF"}, chunk("ABCDEF", 2))
+test_equal("chunk() odd size", {"AB", "CD", "E"}, chunk("ABCDE", 2))
