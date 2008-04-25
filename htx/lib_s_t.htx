@@ -848,9 +848,10 @@ s2 = slice({1,2,3,4,5}, 2, 0)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_p_r.htm#right\">right</a>,
+  description="
+<a href=\"lib_h_o.htm#head\">head</a>,
 <a href=\"lib_h_o.htm#mid\">mid</a>,
-<a href=\"lib_h_o.htm#left\">left</a>"
+<a href=\"lib_s_t.htm#tail\">tail</a>"
  >
 </table>
 
@@ -1412,6 +1413,53 @@ end if
 <a href=\"lib_a_b.htm#abort\">abort</a>"
  >
 </table>
+
+<_routine name="tail">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = tail(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the last i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = tail("John Doe", 3)
+-- s2 is Doe
+
+s2 = tail("John Doe", 50)
+-- s2 is John Doe
+
+s2 = tail({1, 5.4, "John", 30}, 3)
+-- s2 is {5.4, "John", 30}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_h_o.htm#head\">head</a>,
+<a href=\"lib_h_o.htm#mid\">mid</a>,
+<a href=\"lib_s_t.htm#slice\">slice</a>"
+ >
+</table>
+
 
 
 <_routine name="tan">

@@ -2297,54 +2297,6 @@ reverse({})                 -- {}
  >
 </table>
 
-
-<_routine name="right">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
-s2 = right(s1, i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Return the last i items of s1. If i is greater than the length of s1, then the entire
-s1 will be returned."
- >
-<_2clist
-  name="Comments:"
-  description=
-"A new sequence is created.
-
-s1 can be any type of sequence, including nested sequences."
->
-<_2clist
-  name="Example:"
-  description=""
- >
-<_eucode>
-s2 = right("John Doe", 3)
--- s2 is Doe
-
-s2 = right("John Doe", 50)
--- s2 is John Doe
-
-s2 = right({1, 5.4, "John", 30}, 3)
--- s2 is {5.4, "John", 30}
- </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_h_o.htm#left\">left</a>,
-<a href=\"lib_h_o.htm#mid\">mid</a>,
-<a href=\"lib_s_t.htm#slice\">slice</a>"
- >
-</table>
-
-
 <_routine name="round">
 <table border=0 cellspacing=2 cellpadding=2>
 

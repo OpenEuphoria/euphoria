@@ -35,7 +35,7 @@ global function findany(sequence needles, sequence haystack)
     return findany_from(needles, haystack, 1)
 end function
 
-global function left(sequence st, atom n)
+global function head(sequence st, atom n)
 	if n >= length(st) then
 		return st
 	else
@@ -70,7 +70,7 @@ global function slice(sequence st, atom start, atom stop)
 	return st[start..stop]
 end function
 
-global function right(sequence st, atom n)
+global function tail(sequence st, atom n)
 	if n >= length(st) then
 		return st
 	else

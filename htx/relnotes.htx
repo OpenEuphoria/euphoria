@@ -113,8 +113,8 @@
 	<li>
      New routines in <b>sequence.e</b>:
      <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,
-     <b>replace_range()</b>, <b>left()</b>, <b>mid()</b>, <b>slice()</b>,
-     <b>right()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
+     <b>replace_range()</b>, <b>head()</b>, <b>mid()</b>, <b>slice()</b>,
+     <b>tail()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
      <b>findany()</b>, <b>findany_from()</b> (faster, simpler version by
      Larry Miller, Thanks Larry!), <b>trim()</b>, <b>trim_head()</b>,
      <b>trim_tail()</b>, <b>truncate()</b>, <b>pad_head()</b>,
@@ -131,21 +131,21 @@
      <b>isxdigit()</b>
     <li>
      New routines in <b>datetime.e</b>:
-     <b>datetime_new()</b>, <b>datetime_compare()</b>, <b>datetime_from_date()</b>,
-     <b>datetime_now()</b>, <b>datetime_dow()</b>, <b>datetime_to_unix()</b>,
-     <b>datetime_from_unix()</b>, <b>datetime_add_seconds()</b>,
-     <b>datetime_add_days()</b>, <b>datetime_diff_seconds()</b>,
-     <b>datetime_diff_days()</b>. Global constants: <b>DT_YEAR</b>, <b>DT_MONTH</b>,
-     <b>DT_DAY</b>, <b>DT_HOUR</b>, <b>DT_MINUTE</b>, <b>DT_SECOND</b>.
+     <b>new()</b>, <b>from_date()</b>,
+     <b>now()</b>, <b>dow()</b>, <b>to_unix()</b>,
+     <b>from_unix()</b>, <b>add_seconds()</b>,
+     <b>add()</b>, <b>diff()</b>. Global constants: <b>DT_YEAR</b>, <b>DT_MONTH</b>,
+     <b>DT_DAY</b>, <b>DT_HOUR</b>, <b>DT_MINUTE</b>, <b>DT_SECOND</b>, <b>SECONDS</b>,
+     <b>MINUTES</b>, <b>HOURS</b>, <b>DAYS</b>, <b>WEEKS</b>, <b>MONTHS</b>, <b>YEARS</b>.
 	<li>
      New map routines in <b>map.e</b>:
-     <b>map_new()</b>,
-     <b>map_get()</b>,
-     <b>map_put()</b>,
-     <b>map_remove()</b>,
-     <b>map_size()</b>,
-     <b>map_keys()</b>,
-     <b>map_values()</b>. 
+     <b>new()</b>,
+     <b>get()</b>,
+     <b>put()</b>,
+     <b>remove()</b>,
+     <b>size()</b>,
+     <b>keys()</b>,
+     <b>values()</b>.
      Implemented and tested by Yuku Sugianto
 </ul>
 <p>

@@ -6,6 +6,55 @@
 <body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
 <br>
 
+<_routine name="head">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = head(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the first i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = head("John Doe", 4)
+-- s2 is John
+
+s2 = head("John Doe", 50)
+-- s2 is John Doe
+
+s2 = head({1, 5.4, "John", 30}, 3)
+-- s2 is {1, 5.4, "John"}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#tail\">tail</a>,
+<a href=\"lib_h_o.htm#mid\">mid</a>,
+<a href=\"lib_s_t.htm#slice\">slice</a>"
+ >
+</table>
+
+
+
+
 <_routine name="insert">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -768,58 +817,6 @@ result = join({"John", "Middle", "Doe"}, " ")
 <a href=\"lib_s_t.htm#split_adv\">split_adv</a>"
  >
 </table>
-
-
-
-
-<_routine name="left">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
-s2 = left(s1, i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Return the first i items of s1. If i is greater than the length of s1, then the entire
-s1 will be returned."
- >
-<_2clist
-  name="Comments:"
-  description=
-"A new sequence is created.
-
-s1 can be any type of sequence, including nested sequences."
->
-<_2clist
-  name="Example:"
-  description=""
- >
-<_eucode>
-s2 = left("John Doe", 4)
--- s2 is John
-
-s2 = left("John Doe", 50)
--- s2 is John Doe
-
-s2 = left({1, 5.4, "John", 30}, 3)
--- s2 is {1, 5.4, "John"}
- </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_p_r.htm#right\">right</a>,
-<a href=\"lib_h_o.htm#mid\">mid</a>,
-<a href=\"lib_s_t.htm#slice\">slice</a>"
- >
-</table>
-
-
-
 
 
 <_routine name="length">

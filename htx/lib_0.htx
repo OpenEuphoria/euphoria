@@ -79,7 +79,7 @@
 <_3clist
   name="m"
   pos=10
-  description="a <a href=\"#map\">map</a> created using <a href=\"lib_h_o.htm#map_new\">map_new()</a>"
+  description="a <a href=\"#map\">map</a> for key/value pairs</a>"
 >
 
 </table></center>
@@ -282,8 +282,8 @@
 >
 
 <_3clist
-  href="lib_h_o.htm#left"
-  name="left"
+  href="lib_h_o.htm#head"
+  name="head"
   description="return the first n items of st with bounds checking"
 >
 
@@ -300,8 +300,8 @@
 >
 
 <_3clist
-  href="lib_p_r.htm#right"
-  name="right"
+  href="lib_s_t.htm#tail"
+  name="tail"
   description="return the last n items of st with bounds checking"
 >
 

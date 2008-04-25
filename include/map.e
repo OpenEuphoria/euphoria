@@ -14,7 +14,8 @@ end type
 
 -- return 0 to #00FFFFFF (prevent conversion to atom)
 function hashCode(object key)
-integer ret
+    integer ret
+
 	if integer(key) then
 		if key > #00FFFFFF then
 			return and_bits(key, #00FFFFFF)
@@ -41,13 +42,15 @@ integer ret
 			end if
 		end for
 	end if
+
 	return ret
 end function
 
 function rehash(map m)
-integer size, index2
-sequence oldBuckets, newBuckets
-object key, value
+    integer size, index2
+    sequence oldBuckets, newBuckets
+    object key, value
+
 	-- make bucket size 4 times original. max #1000000)
 	size = length(m[1])
 	size *= 4
@@ -68,16 +71,18 @@ object key, value
 	end for
 	
 	m[1] = newBuckets
+
 	return m
 end function
 
-global function map_new()
+global function new()
 	return {repeat({}, 16), 0}
 end function
 
-global function map_get(map m, object key, object defaultValue)
-integer hash, index
-object bucket
+global function get(map m, object key, object defaultValue)
+    integer hash, index
+    object bucket
+
 	hash = hashCode(key)
 	index = and_bits(hash, length(m[1])-1) + 1 -- 1-based
 	
@@ -92,10 +97,11 @@ object bucket
 	return defaultValue
 end function
 
-global function map_put(map m, object key, object value) 
-integer hash, index
-integer found
-object bucket
+global function put(map m, object key, object value) 
+    integer hash, index
+    integer found
+    object bucket
+
 	hash = hashCode(key)
 	index = and_bits(hash, length(m[1])-1) + 1 -- 1-based
 	found = 0
@@ -125,9 +131,10 @@ object bucket
 	return m
 end function
 
-global function map_remove(map m, object key)
-integer hash, index
-object bucket
+global function remove(map m, object key)
+    integer hash, index
+    object bucket
+
 	hash = hashCode(key)
 	index = and_bits(hash, length(m[1])-1) + 1 -- 1-based
 	
@@ -144,15 +151,15 @@ object bucket
 	return m
 end function
 
-global function map_size(map m)
+global function size(map m)
 	return m[2]
 end function
 
+global function keys(map m)
+    sequence buckets, bucket
+    sequence ret
+    integer pos
 
-global function map_keys(map m)
-sequence buckets, bucket
-sequence ret
-integer pos
 	ret = repeat(0, m[2])
 	pos = 1
 	
@@ -168,11 +175,11 @@ integer pos
 	return ret
 end function
 
+global function values(map m)
+    sequence buckets, bucket
+    sequence ret
+    integer pos
 
-global function map_values(map m)
-sequence buckets, bucket
-sequence ret
-integer pos
 	ret = repeat(0, m[2])
 	pos = 1
 	
@@ -187,7 +194,3 @@ integer pos
 	
 	return ret
 end function
-
-
-
-
