@@ -185,7 +185,14 @@ global constant
     DT_DAY    = 3,
     DT_HOUR   = 4,
     DT_MINUTE = 5,
-    DT_SECOND = 6
+    DT_SECOND = 6,
+    SECONDS   = 1,
+    MINUTES   = 2,
+    HOURS     = 3,
+    DAYS      = 4,
+    WEEKS     = 5,
+    MONTHS    = 6,
+    YEARS     = 7
 
 global type datetime(object o)
 	return sequence(o) and length(o) = 6
@@ -194,43 +201,37 @@ global type datetime(object o)
 end type
 
 -- Creates the datetime object for the specified parameters
-global function datetime_new(integer year, integer month, integer day, integer hour, integer minute, atom second)
+global function new(integer year, integer month, integer day, integer hour, integer minute, atom second)
 	return {year, month, day, hour, minute, second}
-end function
-
--- Compare the receiver to the specified Date to determine the relative ordering. 
--- returns -1 or 0 or 1
-global function datetime_compare(datetime dt1, datetime dt2)
-    return compare(datetimeToSeconds(dt1) - datetimeToSeconds(dt2), 0)
 end function
 
 -- TODO: document
 -- Converts the built-in date() format to datetime format
-global function datetime_from_date(sequence src)
+global function from_date(sequence src)
 	return {src[DT_YEAR]+1900, src[DT_MONTH], src[DT_DAY], src[DT_HOUR], src[DT_MINUTE], src[DT_SECOND]}
 end function
 
 -- TODO: document
 -- Returns the datetime object for now. No timezones!
-global function datetime_now()
-	return datetime_from_date(date())
+global function now()
+	return from_date(date())
 end function
 
 -- TODO: document
 -- Answers the gregorian calendar day of the week. 
-global function datetime_dow(datetime dt)
+global function dow(datetime dt)
     return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
 -- TODO: create, test, document
--- datetime datetime_parse(ustring string)
+-- datetime parse(ustring string)
 -- parse the string and returns the datetime
-global function datetime_parse(ustring string)
+global function parse(ustring string)
 	return 0
 end function
 
 -- TODO: create, document, test
--- ustring datetime_format(ustring format)
+-- ustring format(ustring format)
 -- format the date according to the format string
 -- format string some taken from date(1)
 -- %%  a literal %
@@ -256,42 +257,49 @@ end function
 -- %w  day of week (0..6); 0 is Sunday
 -- %y  last two digits of year (00..99)
 -- %Y  year
-global function datetime_format(ustring format)
+global function format(ustring format)
 	return 0
 end function
 
 -- TODO: document
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
-global function datetime_to_unix(datetime dt)
+global function to_unix(datetime dt)
 	return datetimeToSeconds(dt) - EPOCH_1970
 end function
 
 -- TODO: document
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
-global function datetime_from_unix(atom unix)
+global function from_unix(atom unix)
 	return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
--- TODO: document
--- adds the date with specified number of seconds
-global function datetime_add_seconds(datetime dt, atom seconds)
-	return secondsToDateTime(datetimeToSeconds(dt) + seconds)
+-- TODO: test, document
+global function add(datetime dt, atom qty, integer interval)
+    if interval = SECONDS then
+    elsif interval = MINUTES then
+        qty *= 60
+    elsif interval = HOURS then
+        qty *= 3600
+    elsif interval = DAYS then
+        qty *= 86400
+    elsif interval = WEEKS then
+        qty *= 604800
+    elsif interval = MONTHS then
+        -- TODO
+    elsif interval = YEARS then
+        -- TODO
+    end if
+
+	return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
 
--- TODO: document
--- adds the date with specified number of days
-global function datetime_add_days(datetime dt, integer days)
-	return secondsToDateTime(datetimeToSeconds(dt) + days * DayLengthInSeconds)
+-- TODO: test, document
+global function subtract(datetime dt, atom qty, integer interval)
+    return add(dt, -(qty), interval)
 end function
 
--- TODO: document
+-- TODO: test, document
 -- returns the number of seconds between two datetimes
-global function datetime_diff_seconds(datetime dt1, datetime dt2)
+global function diff(datetime dt1, datetime dt2)
 	return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
-end function
-
--- TODO: document
--- returns the number of days between two datetimes
-global function datetime_diff_days(datetime dt1, datetime dt2)
-	return julianDay(dt2) - julianDay(dt1)
 end function
