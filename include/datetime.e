@@ -167,12 +167,13 @@ atom secs
     days = floor(seconds / DayLengthInSeconds)
     seconds = remainder(seconds, DayLengthInSeconds)
 
-    secs = remainder(seconds, 60)
-    seconds = floor(seconds / 60)
-    minutes = remainder(seconds, 60)
-    hours = remainder(floor(seconds / 60), 24)
-    
+	hours = floor( seconds / 3600 )
+	seconds -= hours * 3600
+	
+	minutes = floor( seconds / 60 )
+	seconds -= minutes* 60
     return julianDate(days) & {hours, minutes, seconds}
+end function
 end function
 
 -- ================= START newstdlib
