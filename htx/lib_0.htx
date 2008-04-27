@@ -77,9 +77,9 @@
 >
 
 <_3clist
-  name="m"
+  name="dt"
   pos=10
-  description="a <a href=\"#map\">map</a> for key/value pairs</a>"
+  description="a datetime sequence"
 >
 
 </table></center>
@@ -1882,7 +1882,18 @@ in the Properties for the DOS Window.
 <p>
 
 An object that maintains mapping from keys to values. No duplicate keys are allowed,
-so each key can only map to one value.
+so each key can only map to one value. When including map.e, a new type is available,
+map. It will be used throughout the documentation.
+<p>
+<center>
+<table border=0 cellspacing=2 cellpadding=2>
+<_3clist
+  name="m"
+  pos=10
+  description="a <a href=\"#map\">map</a> for key/value pairs</a>"
+>
+</table>
+</center>
 
 <p>
 <table border=0 cellspacing=2 cellpadding=2>

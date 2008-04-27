@@ -133,19 +133,19 @@
      New routines in <b>datetime.e</b>:
      <b>new()</b>, <b>from_date()</b>,
      <b>now()</b>, <b>dow()</b>, <b>to_unix()</b>,
-     <b>from_unix()</b>, <b>add_seconds()</b>,
+     <b>from_unix()</b>, <b>add()</b>, <b>subtract()</b>,
      <b>add()</b>, <b>diff()</b>. Global constants: <b>DT_YEAR</b>, <b>DT_MONTH</b>,
      <b>DT_DAY</b>, <b>DT_HOUR</b>, <b>DT_MINUTE</b>, <b>DT_SECOND</b>, <b>SECONDS</b>,
      <b>MINUTES</b>, <b>HOURS</b>, <b>DAYS</b>, <b>WEEKS</b>, <b>MONTHS</b>, <b>YEARS</b>.
 	<li>
      New map routines in <b>map.e</b>:
-     <b>new()</b>,
-     <b>get()</b>,
-     <b>put()</b>,
-     <b>remove()</b>,
-     <b>size()</b>,
-     <b>keys()</b>,
-     <b>values()</b>.
+     <b>map_new()</b>,
+     <b>map_get()</b>,
+     <b>map_put()</b>,
+     <b>map_remove()</b>,
+     <b>map_size()</b>,
+     <b>map_keys()</b>,
+     <b>map_values()</b>.
      Implemented and tested by Yuku Sugianto
 </ul>
 <p>
@@ -153,7 +153,7 @@
      Jeremy Cowgar.
 <p>
 <li>
-     Began <b>unit testing</b>. over 330 library tests in total. To run, cd tests
+     Began <b>unit testing</b>. over 350 library tests in total. To run, cd tests
      and exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
 </ul>
 

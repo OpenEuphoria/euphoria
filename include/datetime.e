@@ -161,8 +161,7 @@ function datetimeToSeconds(object dt) -- returns an atom
 end function
 
 function secondsToDateTime(atom seconds) -- returns a DateTime
-integer days, minutes, hours
-atom secs
+    integer days, minutes, hours
 
     days = floor(seconds / DayLengthInSeconds)
     seconds = remainder(seconds, DayLengthInSeconds)
@@ -173,7 +172,6 @@ atom secs
 	minutes = floor( seconds / 60 )
 	seconds -= minutes* 60
     return julianDate(days) & {hours, minutes, seconds}
-end function
 end function
 
 -- ================= START newstdlib
@@ -274,7 +272,7 @@ global function from_unix(atom unix)
 	return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
--- TODO: test, document
+-- TODO: document
 global function add(datetime dt, atom qty, integer interval)
     if interval = SECONDS then
     elsif interval = MINUTES then
@@ -294,12 +292,12 @@ global function add(datetime dt, atom qty, integer interval)
 	return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
 
--- TODO: test, document
+-- TODO: document
 global function subtract(datetime dt, atom qty, integer interval)
     return add(dt, -(qty), interval)
 end function
 
--- TODO: test, document
+-- TODO: document
 -- returns the number of seconds between two datetimes
 global function diff(datetime dt1, datetime dt2)
 	return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
