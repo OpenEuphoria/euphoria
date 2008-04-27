@@ -61,9 +61,9 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 // the offsets changed from 3.x to 4.x
 #define __GNUC_VERSION_NUM__ __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__
 
-#if (__GNUC_VERSION_NUM__ <= 101 || __GNUC_VERSION_NUM__ >= 300)
+#if (__GNUC_VERSION_NUM__ <= 101 || __GNUC_VERSION_NUM__ >= 203)
 
-// < 4.1.1 and >= 4.3.0
+// < 4.1.1 and >= 4.2.3
 
 #define push() asm("pushl -20(%ebp)")
 #define  pop() asm( "addl -24(%ebp), %esp")

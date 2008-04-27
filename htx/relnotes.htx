@@ -32,6 +32,12 @@
       ending with .abcd. <b>dir()</b> also now supports wildcard
       characters (* and ?) on all platforms. Fixed by Jeremy Cowgar
 
+<li>
+     <b><font color="#009999">bug fixed: </font></b> gcc stack
+     offset changed back to -20,-24 in at least v4.2.3 and
+     later. No previous versions could be tested.
+     Fixed by Jeremy Cowgar
+
 </ul>
 
 <p>
