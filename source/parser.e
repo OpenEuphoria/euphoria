@@ -1433,8 +1433,8 @@ procedure SubProg(integer prog_type, integer is_global)
     if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL}) then
 	-- redefine by creating new symbol table entry 
 	if SymTab[p][S_SCOPE] = SC_PREDEF then  -- only warn about overriding predefined
-	    Warning(sprintf("built-in routine %s() redefined", 
-			    {SymTab[p][S_NAME]}))
+	    Warning(sprintf("built-in routine %s() redefined in %s",
+			    {SymTab[p][S_NAME], file_name[current_file_no]}))
 	end if
 	h = SymTab[p][S_HASHVAL]
 	sym = buckets[h]
