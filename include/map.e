@@ -97,6 +97,25 @@ global function get(map m, object key, object defaultValue)
 	return defaultValue
 end function
 
+-- TODO: document
+global function has(map m, object key)
+    integer hash, index
+    object bucket
+
+	hash = hashCode(key)
+	index = and_bits(hash, length(m[1])-1) + 1 -- 1-based
+	
+	-- find prev entry
+	bucket = m[1][index]
+	for i = 1 to length(bucket) do
+		if equal(bucket[i][1], key) then
+			return 1
+		end if
+	end for
+
+    return 0
+end function
+
 global function put(map m, object key, object value) 
     integer hash, index
     integer found

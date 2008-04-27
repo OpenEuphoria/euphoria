@@ -81,5 +81,11 @@ m3 = m:put(m3, 2, 22)
 m3 = m:put(m3, 3, 33)
 m3 = m:remove(m3, 2)
 
-
 test_equal("map m3 size#1", 2, m:size(m3))
+
+map m4
+m4 = m:new()
+m4 = m:put(m4, 1, 11)
+
+test_equal("map m4 has -- yes", 1, m:has(m4, 1))
+test_equal("map m4 has -- no", 0, m:has(m4, 2))

@@ -256,3 +256,13 @@ end function
 global function exp(atom x)
     return power(E, x)
 end function
+
+global function atan2(atom dy, atom dx)
+    if dx > 0 then
+        return arctan(dy/dx)
+    elsif dx < 0 then
+        return arctan(dy/dx) + PI
+    else
+        return PI_HALF * sign(dy)
+    end if
+end function

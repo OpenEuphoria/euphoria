@@ -508,6 +508,12 @@
 >
 
 <_3clist
+  href="lib_a_b.htm#atan2"
+  name="atan2"
+  description="calculate the arctangent of y/x"
+>
+
+<_3clist
   href="lib_c_d.htm#deg2rad"
   name="deg2rad"
   description="convert angle as degrees to an angle as radians"
@@ -1899,44 +1905,51 @@ map. It will be used throughout the documentation.
 <table border=0 cellspacing=2 cellpadding=2>
 
 <_3clist
-  href="lib_h_o.htm#map_new"
-  name="map_new"
+  href="lib_h_o.htm#new"
+  name="new"
   description="create a new map"
 >
 
 <_3clist
-  href="lib_h_o.htm#map_get"
-  name="map_get"
+  href="lib_h_o.htm#has"
+  name="has"
+  description="does the map contain a certain key?"
+>
+
+
+<_3clist
+  href="lib_h_o.htm#get"
+  name="get"
   description="get the value of the specified key from the map"
 >
 
 <_3clist
-  href="lib_h_o.htm#map_put"
-  name="map_put"
+  href="lib_h_o.htm#put"
+  name="put"
   description="put a new entry into the map"
 >
 
 <_3clist
-  href="lib_h_o.htm#map_remove"
-  name="map_remove"
+  href="lib_h_o.htm#remove"
+  name="remove"
   description="remove an entry from the map"
 >
 
 <_3clist
-  href="lib_h_o.htm#map_size"
-  name="map_size"
+  href="lib_h_o.htm#size"
+  name="size"
   description="get the number of entries in the map"
 >
 
 <_3clist
-  href="lib_h_o.htm#map_keys"
-  name="map_keys"
+  href="lib_h_o.htm#keys"
+  name="keys"
   description="return all keys as a sequence"
 >
 
 <_3clist
-  href="lib_h_o.htm#map_values"
-  name="map_values"
+  href="lib_h_o.htm#values"
+  name="values"
   description="return all values as a sequence"
 >
 

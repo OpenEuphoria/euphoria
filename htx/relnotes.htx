@@ -38,6 +38,12 @@
      later. No previous versions could be tested.
      Fixed by Jeremy Cowgar
 
+<p>
+<li>
+     <b><font color="#009999">bug fix</font></b> gcc stack offset was
+     changed between 4.1.2 and 4.3.0. Stack offset is corrected
+     for gcc version 4.3.0 and greater.
+
 </ul>
 
 <p>
@@ -114,8 +120,9 @@
      New routines in <b>math.e</b>:
      <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
      <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b>,
-     <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b> and
-     constant <b>E</b>.
+     <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b>,
+     <b>atan2()</b>.
+     Constant <b>E</b>.
 	<li>
      New routines in <b>sequence.e</b>:
      <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,

@@ -654,6 +654,36 @@ s = arctan({1,2,3})
  >
 </table>
 
+<_routine name="atan2">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include math.e<BR>
+a3 = atan2(a1, a2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"calculate the arctangent of y/x"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+a = atan2(10.5, 3.1)
+-- a is 1.283713958
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_a_b.htm#arctan\">arctan</a>"
+ >
+</table>
+
 
 <_routine name="atom">
 <table border=0 cellspacing=2 cellpadding=2>

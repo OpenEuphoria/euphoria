@@ -72,3 +72,10 @@ test_equal("rad2deg() #3", {0.99981135250328678765185941301751881837844848632812
 
 test_equal("exp() #1", 7.389056, round_prec(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round_prec(exp(2.3), 100000))
+
+test_equal("atan2() #1", 1.283713958, atan2(10.5, 3.1))
+test_equal("atan2() #2", 0.09275632019, atan2(0.4, 4.3))
+test_equal("atan2() #3", 1.074373573, atan2(1.2, 0.65))
+test_equal("atan2() #4", -2.76973658, atan2(-3.12, -8))
+test_equal("atan2() #5", -0.7853981634, atan2(-3.12, 3.12))
+test_equal("atan2() #6", -0.2606023917, atan2(-0.032, 0.12))
