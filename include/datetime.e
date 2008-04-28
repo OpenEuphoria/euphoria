@@ -1,11 +1,11 @@
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+-- Euphoria 3.2
 -- Date and Time functions
--- 2008
 
 -- No timezone offset.
-
 -- Engine created by CyrekSoft --
 
--- Change this to 1 for extended leap year rules
 constant
     XLEAP = 1,
     Gregorian_Reformation = 1752,
@@ -270,8 +270,6 @@ end function
 -- %B  locale's full month name (e.g., January)
 -- %C  century; like %Y, except omit last two digits (e.g., 21)
 -- %d  day of month (e.g, 01)
--- %g  last two digits of year of ISO week number (see %G)
--- %G  year of ISO week number
 -- %H  hour (00..23)
 -- %I  hour (01..12)
 -- %j  day of year (001..366)
@@ -314,10 +312,6 @@ global function format(datetime d, ustring format)
                 res &= sprintf("%02d", d[DT_YEAR] / 100)
             elsif ch = 'd' then
                 res &= sprintf("%02d", d[DT_DAY])
-            elsif ch = 'g' then
-                -- TODO
-            elsif ch = 'G' then
-                -- TODO
             elsif ch = 'H' then
                 res &= sprintf("%02d", d[DT_HOUR])
             elsif ch = 'I' then

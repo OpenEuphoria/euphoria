@@ -67,7 +67,21 @@ global function slice(sequence st, atom start, atom stop)
 	if start < 1 then start = 1 end if
 	if stop > length(st) then stop = length(st) end if
 	if start > stop then return "" end if
+
 	return st[start..stop]
+end function
+
+-- TODO: document, test
+global function vslice(sequence s, atom colno)
+    sequence ret
+
+	ret = {}
+
+	for i = 1 to length(s) do
+		ret = append(ret, s[i][colno])
+	end for
+
+	return ret
 end function
 
 global function tail(sequence st, atom n)

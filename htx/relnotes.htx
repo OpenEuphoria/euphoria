@@ -31,18 +31,12 @@
       <b>dir()</b> now handles *.abc correctly, not showing a file
       ending with .abcd. <b>dir()</b> also now supports wildcard
       characters (* and ?) on all platforms. Fixed by Jeremy Cowgar
-
-<li>
-     <b><font color="#009999">bug fixed: </font></b> gcc stack
-     offset changed back to -20,-24 in at least v4.2.3 and
-     later. No previous versions could be tested.
-     Fixed by Jeremy Cowgar
-
 <p>
 <li>
-     <b><font color="#009999">bug fix</font></b> gcc stack offset was
-     changed between 4.1.2 and 4.3.0. Stack offset is corrected
-     for gcc version 4.3.0 and greater.
+     <b><font color="#009999">bug fixed: </font></b> gcc stack
+     offset changed to -20,-24 in GCC v4.2.3 and
+     later. if/else updated. Works on GCC 3.x and 4.x.
+     Fixed by Jeremy Cowgar
 
 </ul>
 
@@ -132,7 +126,7 @@
      Larry Miller, Thanks Larry!), <b>trim()</b>, <b>trim_head()</b>,
      <b>trim_tail()</b>, <b>truncate()</b>, <b>pad_head()</b>,
      <b>pad_tail()</b>, <b>chunk()</b>, <b>flatten()</b>, <b>find_all()</b>,
-     <b>match_all()</b>, <b>find_replace()</b>.
+     <b>match_all()</b>, <b>find_replace()</b>, <b>vslice()</b>.
 	<li>
      New routines in <b>file.e</b>:
      <b>read_lines()</b>, <b>read_file()</b>, <b>pathinfo()</b>,
@@ -155,13 +149,14 @@
      <b>day_abbrs</b>, <b>ampm</b>. Note: These were made global for localization.
 	<li>
      New map routines in <b>map.e</b>:
-     <b>map_new()</b>,
-     <b>map_get()</b>,
-     <b>map_put()</b>,
-     <b>map_remove()</b>,
-     <b>map_size()</b>,
-     <b>map_keys()</b>,
-     <b>map_values()</b>.
+     <b>new()</b>,
+     <b>has()</b>,
+     <b>get()</b>,
+     <b>put()</b>,
+     <b>remove()</b>,
+     <b>size()</b>,
+     <b>keys()</b>,
+     <b>values()</b>.
      Implemented and tested by Yuku Sugianto
     <li>
      New unit testing library: <b>unittest.e</b>: see tests/all.ex for examples
@@ -172,8 +167,8 @@
      Jeremy Cowgar.
 <p>
 <li>
-     <b>Unit testing added to Euphoria</b>. To run, cd tests and exw or exu
-     all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
+     <b>Unit testing added to Euphoria</b>. Over 500 tests. To run, cd tests and
+     exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
 </ul>
 
 <p>
