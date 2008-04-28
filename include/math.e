@@ -257,12 +257,27 @@ global function exp(atom x)
     return power(E, x)
 end function
 
-global function atan2(atom dy, atom dx)
-    if dx > 0 then
-        return arctan(dy/dx)
-    elsif dx < 0 then
-        return arctan(dy/dx) + PI
+global function atan2(atom y, atom x)
+    if x > 0 then
+        return arctan(y/x)
+    elsif x < 0 then
+        if y < 0 then
+            return arctan(y/x) - PI
+        else
+            return arctan(y/x) + PI
+        end if
+    elsif y > 0 then
+        return PI_HALF
+    elsif y < 0 then
+        return -(PI_HALF)
     else
-        return PI_HALF * sign(dy)
+        return 0
     end if
+end function
+
+global function rand_range(integer lo, integer hi)
+   lo -= 1
+   hi -= lo
+
+   return lo + rand(hi)
 end function

@@ -1,3 +1,4 @@
+include machine.e
 include math.e
 include unittest.e
 
@@ -60,22 +61,31 @@ test_equal("log10() #1", 3.0, round_prec(log10(1000.0), 100000))
 test_equal("log10() #2", 1.91908, round_prec(log10(83), 100000))
 test_equal("log10() #3", {3.0, 1.91908}, round_prec(log10({1000.0, 83}), 100000))
 
-test_equal("deg2rad() #1", 0.01745329251994329547437168059786927187815308570862, deg2rad(1))
-test_equal("deg2rad() #2", 3.490658503988659067118760503944940865039825439453125, deg2rad(200))
-test_equal("deg2rad() #3", {0.01745329251994329547437168059786927187815308570862,
-                            3.38593874886899914855575843830592930316925048828125}, deg2rad({1,194}))
+test_equal("deg2rad() #1", "0.0174532925", sprintf("%.10f", deg2rad(1)))
+test_equal("deg2rad() #2", "3.4906585040", sprintf("%.10f", deg2rad(200)))
+test_equal("deg2rad() #3", "0.0174532925,3.3859387489", sprintf("%.10f,%.10f", deg2rad({1,194})))
 
-test_equal("rad2deg() #1", 0.999811352503286787651859413017518818378448486328125, rad2deg(0.01745))
-test_equal("rad2deg() #2", 28.647889756541161432323860935866832733154296875, rad2deg(0.5))
-test_equal("rad2deg() #3", {0.999811352503286787651859413017518818378448486328125,
-                            28.647889756541161432323860935866832733154296875}, rad2deg({0.01745,0.5}))
+test_equal("rad2deg() #1", "0.9998113525", sprintf("%.10f", rad2deg(0.01745)))
+test_equal("rad2deg() #2", "28.6478897565", sprintf("%.10f", rad2deg(0.5)))
+test_equal("rad2deg() #3", "0.9998113525,28.6478897565", sprintf("%.10f,%.10f", rad2deg({0.01745,0.5})))
 
 test_equal("exp() #1", 7.389056, round_prec(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round_prec(exp(2.3), 100000))
 
-test_equal("atan2() #1", 1.283713958, atan2(10.5, 3.1))
-test_equal("atan2() #2", 0.09275632019, atan2(0.4, 4.3))
-test_equal("atan2() #3", 1.074373573, atan2(1.2, 0.65))
-test_equal("atan2() #4", -2.76973658, atan2(-3.12, -8))
-test_equal("atan2() #5", -0.7853981634, atan2(-3.12, 3.12))
-test_equal("atan2() #6", -0.2606023917, atan2(-0.032, 0.12))
+test_equal("atan2() #1", "1.2837139576", sprintf("%.10f", atan2(10.5, 3.1)))
+test_equal("atan2() #2", "-0.0927563202", sprintf("%.10f", atan2(-0.4, 4.3)))
+test_equal("atan2() #3", "2.0672190802", sprintf("%.10f", atan2(1.2, -0.65)))
+test_equal("atan2() #4", "-2.7697365797", sprintf("%.10f", atan2(-3.12, -8)))
+test_equal("atan2() #5", 0, atan2(0,0))
+
+object n
+for i = 1 to 10 do
+    n = rand_range(1, 5)
+    test_true("rand_range(1,5)", n >= 1 and n <= 5)
+
+    n = rand_range(100, 300)
+    test_true("rand_range(100,300)", n >= 100 and n <= 300)
+
+    n = rand_range(-100, -10)
+    test_true("rand_range(-100,-10)", n >= -100 and n <= -10)
+end for

@@ -102,3 +102,24 @@ global procedure test_not_equal(sequence name, object a, object b)
 		test_passed(name)
 	end if
 end procedure
+
+global procedure test_true(sequence name, object a)
+	testCount += 1
+
+    if a = 1 then
+	    test_passed(name)
+    else
+	    test_failed(name, a, 1)
+    end if
+end procedure
+
+global procedure test_false(sequence name, object a)
+    testCount += 1
+
+    if a = 0 then
+        test_passed(name)
+    else
+        test_failed(name, a, 0)
+    end if
+end procedure
+

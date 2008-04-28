@@ -471,6 +471,13 @@
   description="generate random numbers"
 >
 
+
+<_3clist
+  href="lib_p_r.htm#"
+  name="rand_range"
+  description="generate a random number within a given range"
+>
+
 <_3clist
   href="lib_s_t.htm#sin"
   name="sin"

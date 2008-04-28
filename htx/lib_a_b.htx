@@ -649,6 +649,7 @@ s = arctan({1,2,3})
 <_2clist
   name="See Also:"
   description="<a href=\"lib_s_t.htm#tan\">tan</a>,
+<a href=\"lib_a_b.htm#atan2\">atan2</a>,
 <a href=\"lib_a_b.htm#arcsin\">arcsin</a>,
 <a href=\"lib_a_b.htm#arccos\">arccos</a>"
  >
@@ -680,7 +681,10 @@ a = atan2(10.5, 3.1)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_a_b.htm#arctan\">arctan</a>"
+  description="<a href=\"lib_a_b.htm#arctan\">arctan</a>,
+<a href=\"lib_s_t.htm#tan\">tan</a>,
+<a href=\"lib_a_b.htm#arcsin\">arcsin</a>,
+<a href=\"lib_a_b.htm#arccos\">arccos</a>"
  >
 </table>
 

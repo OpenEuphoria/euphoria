@@ -1757,6 +1757,36 @@ s = rand({10, 20, 30})
  >
 </table>
 
+<_routine name="rand_range">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include math.e<BR>
+i3 = rand_range(i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a random integer from i1 to i2, where i1 may be from 1 to
+ the largest positive value of type integer (1073741823)."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = rand_range(18, 24)
+-- s might be: 18, 19, 20, 21, 22, 23 or 24
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_s_t.htm#set_rand\">set_rand</a>,
+<a href=\"lib_p_r.htm#rand\">rand</a>"
+ >
+</table>
 
 <_routine name="read_bitmap">
 <table border=0 cellspacing=2 cellpadding=2>

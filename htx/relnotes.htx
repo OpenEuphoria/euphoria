@@ -121,7 +121,7 @@
      <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,
      <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b>,
      <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b>,
-     <b>atan2()</b>.
+     <b>atan2()</b>, <b>rand_range()</b>.
      Constant <b>E</b>.
 	<li>
      New routines in <b>sequence.e</b>:
@@ -160,14 +160,17 @@
      <b>map_keys()</b>,
      <b>map_values()</b>.
      Implemented and tested by Yuku Sugianto
+    <li>
+     New unit testing library: <b>unittest.e</b>: see tests/all.ex for examples
+     on how to use with your own libraries. Implemented by Jeremy Cowgar.
 </ul>
 <p>
      Most functions by various authors. Added, documented and testing by
      Jeremy Cowgar.
 <p>
 <li>
-     Began <b>unit testing</b>. over 350 library tests in total. To run, cd tests
-     and exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
+     <b>Unit testing added to Euphoria</b>. To run, cd tests and exw or exu
+     all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto
 </ul>
 
 <p>
