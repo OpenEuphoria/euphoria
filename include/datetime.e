@@ -14,6 +14,24 @@ constant
     EPOCH_1970 = 62135856000,
     DayLengthInSeconds = 86400
 
+global sequence month_names, month_abbrs, day_names, day_abbrs, ampm
+
+month_names = { "January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December" }
+month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+    "Aug", "Sep", "Oct", "Nov", "Dec" }
+day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+    "Saturday" }
+day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+ampm = { "AM", "PM" }
+
+
+-- Helpers ------------------------------------------------------------------
+
+function tolower(object x)
+    return x + (x >= 'A' and x <= 'Z') * ('a' - 'A')
+end function
+
 -- Date Handling ------------------------------------------------------------
 
 function isLeap(integer year) -- returns integer (0 or 1)
@@ -222,6 +240,18 @@ global function dow(datetime dt)
     return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
+-- TODO: document
+-- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
+global function to_unix(datetime dt)
+	return datetimeToSeconds(dt) - EPOCH_1970
+end function
+
+-- TODO: document
+-- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
+global function from_unix(atom unix)
+	return secondsToDateTime(EPOCH_1970 + unix)
+end function
+
 -- TODO: create, test, document
 -- datetime parse(ustring string)
 -- parse the string and returns the datetime
@@ -241,6 +271,7 @@ end function
 -- %C  century; like %Y, except omit last two digits (e.g., 21)
 -- %d  day of month (e.g, 01)
 -- %g  last two digits of year of ISO week number (see %G)
+-- %G  year of ISO week number
 -- %H  hour (00..23)
 -- %I  hour (01..12)
 -- %j  day of year (001..366)
@@ -256,20 +287,104 @@ end function
 -- %w  day of week (0..6); 0 is Sunday
 -- %y  last two digits of year (00..99)
 -- %Y  year
-global function format(ustring format)
-	return 0
-end function
+global function format(datetime d, ustring format)
+    integer in_fmt, ch, tmp
+    sequence res
 
--- TODO: document
--- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
-global function to_unix(datetime dt)
-	return datetimeToSeconds(dt) - EPOCH_1970
-end function
+    in_fmt = 0
+    res = ""
 
--- TODO: document
--- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
-global function from_unix(atom unix)
-	return secondsToDateTime(EPOCH_1970 + unix)
+    for i = 1 to length(format) do
+        ch = format[i]
+
+        if in_fmt then
+            in_fmt = 0
+
+            if ch = '%' then
+                res &= '%'
+            elsif ch = 'a' then
+                res &= day_abbrs[dow(d)]
+            elsif ch = 'A' then
+                res &= day_names[dow(d)]
+            elsif ch = 'b' then
+                res &= month_abbrs[d[DT_MONTH]]
+            elsif ch = 'B' then
+                res &= month_names[d[DT_MONTH]]
+            elsif ch = 'C' then
+                res &= sprintf("%02d", d[DT_YEAR] / 100)
+            elsif ch = 'd' then
+                res &= sprintf("%02d", d[DT_DAY])
+            elsif ch = 'g' then
+                -- TODO
+            elsif ch = 'G' then
+                -- TODO
+            elsif ch = 'H' then
+                res &= sprintf("%02d", d[DT_HOUR])
+            elsif ch = 'I' then
+                tmp = d[DT_HOUR]
+                if tmp > 12 then
+                    tmp -= 12
+                elsif tmp = 0 then
+                    tmp = 12
+                end if
+                res &= sprintf("%02d", tmp)
+            elsif ch = 'j' then
+                res &= sprintf("%d", julianDayOfYear(d))
+            elsif ch = 'k' then
+                res &= sprintf("%d", d[DT_HOUR])
+            elsif ch = 'l' then
+                tmp = d[DT_HOUR]
+                if tmp > 12 then
+                    tmp -= 12
+                elsif tmp = 0 then
+                    tmp = 12
+                end if
+                res &= sprintf("%d", tmp)
+            elsif ch = 'm' then
+                res &= sprintf("%02d", d[DT_MONTH])
+            elsif ch = 'M' then
+                res &= sprintf("%02d", d[DT_MINUTE])
+            elsif ch = 'p' then
+                if d[DT_HOUR] <= 12 then
+                    res &= ampm[1]
+                else
+                    res &= ampm[2]
+                end if
+            elsif ch = 'P' then
+                if d[DT_HOUR] <= 12 then
+                    res &= tolower(ampm[1])
+                else
+                    res &= tolower(ampm[2])
+                end if
+            elsif ch = 's' then
+                res &= sprintf("%d", to_unix(d))
+            elsif ch = 'S' then
+                res &= sprintf("%02d", d[DT_SECOND])
+            elsif ch = 'u' then
+                tmp = dow(d)
+                if tmp = 1 then
+                    res &= "7" -- Sunday
+                else
+                    res &= sprintf("%d", dow(d) - 1)
+                end if
+            elsif ch = 'w' then
+                res &= sprintf("%d", dow(d) - 1)
+            elsif ch = 'y' then
+               tmp = floor(d[DT_YEAR] / 100)
+               res &= sprintf("%02d", d[DT_YEAR] - (tmp * 100))
+            elsif ch = 'Y' then
+                res &= sprintf("%04d", d[DT_YEAR])
+            else
+                -- TODO: error or just add?
+            end if
+        elsif ch = '%' then
+            in_fmt = 1
+        else
+            res &= ch
+        end if
+    end for
+
+	return res
 end function
 
 -- TODO: document

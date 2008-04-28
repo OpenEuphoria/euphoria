@@ -259,3 +259,80 @@ global function chunk(sequence s, integer size)
 
     return ns
 end function
+
+-- TODO: document
+global function flatten(sequence s)
+   sequence ret
+   object x
+
+   ret = {}
+   for i = 1 to length(s) do
+      x = s[i]
+      if atom(x) then
+         ret &= x
+      else
+         ret &= flatten(x)
+      end if
+   end for
+
+   return ret
+end function
+
+-- TODO: document
+global function find_all(object x, sequence source, integer from)
+    sequence ret
+
+    ret = {}
+
+    while 1 do
+        from = find_from(x, source, from)
+        if from = 0 then
+            exit
+        end if
+
+        ret &= from
+
+        from += 1
+    end while
+
+    return ret
+end function
+
+-- TODO: document
+global function match_all(object x, sequence source, integer from)
+    sequence ret
+
+    ret = {}
+
+    while 1 do
+        from = match_from(x, source, from)
+        if from = 0 then
+            exit
+        end if
+
+        ret &= from
+
+        from += length(x)
+    end while
+
+    return ret
+end function
+
+-- TODO: document
+global function find_replace(sequence source, sequence what, sequence repl_with, integer max)
+    integer posn
+    
+    if length(what) then
+        posn = match(what, source)
+        while posn do
+            source = source[1..posn-1] & repl_with & source[posn+length(what)..length(source)]
+            posn = match_from(what, source, posn+length(repl_with))
+            max -= 1
+            if max = 0 then
+                exit
+            end if
+        end while
+    end if
+
+    return source
+end function

@@ -90,3 +90,19 @@ test_equal("pad_tail() #3", "ABC", pad_tail("ABC", 1))
 test_equal("chunk() sequence", {{1,2,3}, {4,5,6}}, chunk({1,2,3,4,5,6}, 3))
 test_equal("chunk() string", {"AB", "CD", "EF"}, chunk("ABCDEF", 2))
 test_equal("chunk() odd size", {"AB", "CD", "E"}, chunk("ABCDE", 2))
+
+test_equal("flatten() nested", {1,2,3}, flatten({{1}, {2}, {3}}))
+test_equal("flatten() deeply nested", {1,2,3}, flatten({{{{1}}}, 2, {{{{{3}}}}}}))
+test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
+
+test_equal("find_all() atom", {1,3}, find_all(65, "ABACDE", 1))
+test_equal("find_all() atom from", {3}, find_all(65, "ABACDE", 2))
+test_equal("find_all() sequence", {3,4}, find_all("Doe", {"John", "Middle", "Doe", "Doe"}, 1))
+
+test_equal("match_all() string", {1,5}, match_all("AB", "ABDCABDEF", 1))
+test_equal("match_all() string from", {5}, match_all("AB", "ABDCABDEF", 2))
+test_equal("match_all() sequence", {1,5}, match_all({1,2}, {1,2,3,4,1,2,4,3}, 1))
+
+test_equal("find_replace() string", "John Smith", find_replace("John Doe", "Doe", "Smith", 0))
+test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({1,5,2,5,2}, {5,2}, {1,1}, 0))
+test_equal("find_replace() max set", "BBBAAA", find_replace("AAAAAA", "A", "B", 3))

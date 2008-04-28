@@ -125,3 +125,50 @@ test_equal("from_unix() (Apr 2008 date) day",    23, dt2[DT_DAY])
 test_equal("from_unix() (Apr 2008 date) hour",   15, dt2[DT_HOUR])
 test_equal("from_unix() (Apr 2008 date) minute", 38, dt2[DT_MINUTE])
 test_equal("from_unix() (Apr 2008 date) second",  0, dt2[DT_SECOND])
+
+dt1 = d:new(2008, 4, 23, 15, 38, 00)
+test_equal("format() simple m/d/Y H:M:S", "04/23/2008 15:38:00pm", d:format(dt1, "%m/%d/%Y %H:%M:%S%P"))
+test_equal("format() %%", "%", d:format(dt1, "%%"))
+test_equal("format() %a", "Wed", d:format(dt1, "%a"))
+test_equal("format() %A", "Wednesday", d:format(dt1, "%A"))
+test_equal("format() %b", "Apr", d:format(dt1, "%b"))
+test_equal("format() %B", "April", d:format(dt1, "%B"))
+test_equal("format() %C", "20", d:format(dt1, "%C"))
+test_equal("format() %d", "23", d:format(dt1, "%d"))
+test_equal("format() %g", "????", d:format(dt1, "%g"))
+test_equal("format() %G", "????", d:format(dt1, "%G"))
+test_equal("format() %H", "15", d:format(dt1, "%H"))
+test_equal("format() %I", "03", d:format(dt1, "%I"))
+test_equal("format() %j", "114", d:format(dt1, "%j"))
+test_equal("format() %k", "15", d:format(dt1, "%k"))
+test_equal("format() %l", "3", d:format(dt1, "%l"))
+test_equal("format() %m", "04", d:format(dt1, "%m"))
+test_equal("format() %M", "38", d:format(dt1, "%M"))
+test_equal("format() %p", "PM", d:format(dt1, "%p"))
+test_equal("format() %P", "pm", d:format(dt1, "%P"))
+test_equal("format() %s", "1208965080", d:format(dt1, "%s"))
+test_equal("format() %S", "00", d:format(dt1, "%S"))
+test_equal("format() %u", "3", d:format(dt1, "%u"))
+test_equal("format() %w", "3", d:format(dt1, "%w"))
+test_equal("format() %y", "08", d:format(dt1, "%y"))
+test_equal("format() %Y", "2008", d:format(dt1, "%Y"))
+
+for i = 1 to 7 do
+    dt1[DT_DAY] = i + 19
+    test_equal("format() dow loop #1", day_abbrs[i], d:format(dt1, "%a"))
+    test_equal("format() dow loop #2", day_names[i], d:format(dt1, "%A"))
+end for
+
+for i = 1 to 12 do
+    dt1[DT_MONTH] = i
+    dt1[DT_HOUR] = i
+    test_equal("format() month loop #1", month_abbrs[i], d:format(dt1, "%b"))
+    test_equal("format() month loop #2", month_names[i], d:format(dt1, "%B"))
+
+    test_equal("format() hour loop #1", sprintf("%02d", i), d:format(dt1, "%H"))
+    test_equal("format() hour loop #2", sprintf("%02damAM", i), d:format(dt1, "%I%P%p"))
+
+    dt1[DT_HOUR] = i + 12
+    test_equal("format() hour loop #3", sprintf("%02d", i + 12), d:format(dt1, "%H"))
+    test_equal("format() hour loop #4", sprintf("%dpmPM", i), d:format(dt1, "%l%P%p"))
+end for
