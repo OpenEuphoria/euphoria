@@ -14,18 +14,6 @@ constant
     EPOCH_1970 = 62135856000,
     DayLengthInSeconds = 86400
 
-global sequence month_names, month_abbrs, day_names, day_abbrs, ampm
-
-month_names = { "January", "February", "March", "April", "May", "June", "July",
-    "August", "September", "October", "November", "December" }
-month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-    "Aug", "Sep", "Oct", "Nov", "Dec" }
-day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-    "Saturday" }
-day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
-ampm = { "AM", "PM" }
-
-
 -- Helpers ------------------------------------------------------------------
 
 function tolower(object x)
@@ -196,6 +184,17 @@ end function
 
 include string.e
 
+global sequence month_names, month_abbrs, day_names, day_abbrs, ampm
+
+month_names = { "January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December" }
+month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+    "Aug", "Sep", "Oct", "Nov", "Dec" }
+day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+    "Saturday" }
+day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+ampm = { "AM", "PM" }
+
 global constant
     DT_YEAR   = 1,
     DT_MONTH  = 2,
@@ -214,7 +213,12 @@ global constant
 global type datetime(object o)
 	return sequence(o) and length(o) = 6
 	    and integer(o[DT_YEAR]) and integer(o[DT_MONTH]) and integer(o[DT_DAY])
-	    and integer(o[DT_HOUR]) and integer(o[DT_MINUTE]) and atom(o[DT_SECOND])
+	    and integer(o[DT_HOUR]) and integer(o[DT_MINUTE]) and atom(o[DT_SECOND]
+        and o[DT_MONTH] >= 1 and o[DT_MONTH] <= 12
+        and o[DT_DAY] >= 1 and o[DT_DAY] <= daysInMonth(o[DT_YEAR], o[DT_MONTH])
+        and o[DT_HOUR] >= 0 and o[DT_HOUR] <= 23
+        and o[DT_MINUTE] >= 0 and o[DT_MINUTE] <= 59
+        and o[DT_SECOND] >= 0 and o[DT_SECOND] <= 59)
 end type
 
 -- Creates the datetime object for the specified parameters
@@ -383,6 +387,8 @@ end function
 
 -- TODO: document
 global function add(datetime dt, atom qty, integer interval)
+    integer inc
+
     if interval = SECONDS then
     elsif interval = MINUTES then
         qty *= 60
@@ -393,9 +399,34 @@ global function add(datetime dt, atom qty, integer interval)
     elsif interval = WEEKS then
         qty *= 604800
     elsif interval = MONTHS then
-        -- TODO
+        if qty > 0 then
+            inc = 1
+        else
+            inc = -1
+            qty = -(qty)
+        end if
+
+        for i = 1 to qty do
+            if inc = 1 and dt[DT_MONTH] = 12 then
+                dt[DT_MONTH] = 1
+                dt[DT_YEAR] += 1
+            elsif inc = -1 and dt[DT_MONTH] = 1 then
+                dt[DT_MONTH] = 12
+                dt[DT_YEAR] -= 1
+            else
+                dt[DT_MONTH] += inc
+            end if
+        end for
+
+        return dt
     elsif interval = YEARS then
-        -- TODO
+        dt[DT_YEAR] += qty
+        if isLeap(dt[DT_YEAR]) = 0 and dt[DT_MONTH] = 2 and dt[DT_DAY] = 29 then
+            dt[DT_MONTH] = 3
+            dt[DT_DAY] = 1
+        end if
+
+        return dt
     end if
 
 	return secondsToDateTime(datetimeToSeconds(dt) + qty)
