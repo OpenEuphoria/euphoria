@@ -431,14 +431,14 @@
 >
 
 <_3clist
-  href="lib_e_g.htm#findany"
-  name="findany"
+  href="lib_e_g.htm#find_any"
+  name="find_any"
   description="find any element in needle in haystack - start searching from element number 1"
 >
 
 <_3clist
-  href="lib_e_g.htm#findany_from"
-  name="findany_from"
+  href="lib_e_g.htm#find_any_from"
+  name="find_any_from"
   description="find any element in needle in haystack - start searching from any element number"
 >
 

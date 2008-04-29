@@ -332,20 +332,20 @@ location = find_from("mary", names, 3)
 </table>
 
 
-<_routine name="findany">
+<_routine name="find_any">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-i = findany(s1, s2)
+i = find_any(s1, s2)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-"Find any element from s2 in s1 and return it's position or 0 if not found."
+"Find any element from s1 in s2 and return it's position or 0 if not found."
  >
 <_2clist
   name="Comments:"
@@ -357,31 +357,31 @@ i = findany(s1, s2)
   description=""
  >
 <_eucode>
-location = findany("John Doe", "aeiou")
+location = find_any("aeiou", "John Doe")
 -- location is 2
 </_eucode>
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_e_g.htm#findany_from\">findany_from</a>"
+  description="<a href=\"lib_e_g.htm#find_any_from\">find_any_from</a>"
  >
 </table>
 
 
-<_routine name="findany_from">
+<_routine name="find_any_from">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-i1 = findany_from(s1, s2, i2)
+i2 = find_any_from(s1, s2, i1)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-"Find any element from s2 in s1 starting at position i2 and return it's position or 0 if not found."
+"Find any element from s1 in s2 starting at position i2 and return it's position or 0 if not found."
  >
 <_2clist
   name="Comments:"
@@ -393,13 +393,13 @@ i1 = findany_from(s1, s2, i2)
   description=""
  >
 <_eucode>
-location = findany_from("John Smith", "aeiou", 3)
+location = find_any_from("aeiou", "John Smith", 3)
 -- location is 8
 </_eucode>
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_e_g.htm#findany\">findany</a>"
+  description="<a href=\"lib_e_g.htm#find_any\">find_any</a>"
  >
 </table>
 

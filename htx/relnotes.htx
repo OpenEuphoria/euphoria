@@ -125,7 +125,7 @@
      <b>insert()</b>, <b>remove()</b>, <b>remove_range()</b>,
      <b>replace_range()</b>, <b>head()</b>, <b>mid()</b>, <b>slice()</b>,
      <b>tail()</b>, <b>split()</b>, <b>split_adv()</b>, <b>join()</b>,
-     <b>findany()</b>, <b>findany_from()</b> (faster, simpler version by
+     <b>find_any()</b>, <b>find_any_from()</b> (faster, simpler version by
      Larry Miller, Thanks Larry!), <b>trim()</b>, <b>trim_head()</b>,
      <b>trim_tail()</b>, <b>truncate()</b>, <b>pad_head()</b>,
      <b>pad_tail()</b>, <b>chunk()</b>, <b>flatten()</b>, <b>find_all()</b>,

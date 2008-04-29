@@ -24,7 +24,7 @@ global function reverse(sequence s)
     return t
 end function
 
-global function findany_from(sequence needles, sequence haystack, integer start)
+global function find_any_from(sequence needles, sequence haystack, integer start)
     for i = start to length(haystack) do
     	if find(haystack[i],needles) then
     	    return i
@@ -33,8 +33,8 @@ global function findany_from(sequence needles, sequence haystack, integer start)
     return 0
 end function
 
-global function findany(sequence needles, sequence haystack)
-    return findany_from(needles, haystack, 1)
+global function find_any(sequence needles, sequence haystack)
+    return find_any_from(needles, haystack, 1)
 end function
 
 global function head(sequence st, atom n)
@@ -128,7 +128,7 @@ global function replace_range(sequence st, object what, integer start, integer s
 end function
 
 -- TODO: instead of reassigning st all the time, use the new _from variants of
---       findany and match.
+--       find_any and match.
 
 global function split_adv(sequence st, object delim, integer limit, integer any)
 	sequence ret
@@ -141,7 +141,7 @@ global function split_adv(sequence st, object delim, integer limit, integer any)
 
 	while 1 do
         if any then
-            pos = findany(delim, st)
+            pos = find_any(delim, st)
         else
     		pos = match(delim, st)
         end if

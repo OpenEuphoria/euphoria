@@ -6,14 +6,15 @@ set_test_module_name("sequence.e")
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
 test_equal("reverse() string", "nhoJ", reverse("John"))
 
-test_equal("findany_from() string", 7, findany_from("aeiou", "John Doe", 3))
-test_equal("findany_from() integers", 6, findany_from({1,3,5,8}, {2,4,5,6,7,8,9}, 4))
-test_equal("findany_from() floats", 6,
-        findany_from({1.3,3.5,5.6,8.3}, {2.1,4.2,5.3,6.4,7.5,8.3,9.1}, 4))
+test_equal("find_any_from() string", 7, find_any_from("aeiou", "John Doe", 3))
+test_equal("find_any_from() integers", 6, find_any_from({1,3,5,8}, {2,4,5,6,7,8,9}, 4))
+test_equal("find_any_from() floats", 6,
+        find_any_from({1.3,3.5,5.6,8.3}, {2.1,4.2,5.3,6.4,7.5,8.3,9.1}, 4))
 
-test_equal("findany() string", 2, findany("aeiou", "John Doe"))
-test_equal("findany() integers", 3, findany({1,3,5,7,9}, {2,4,5,6,7,8,9}))
-test_equal("findany() floats", 3, findany({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,6.4,7.5,8.6,9.7}))
+test_equal("find_any() string #1", 2, find_any("aeiou", "John Doe"))
+test_equal("find_any() string #2", 3, find_any("Dh", "John Doe"))
+test_equal("find_any() integers", 3, find_any({1,3,5,7,9}, {2,4,5,6,7,8,9}))
+test_equal("find_any() floats", 3, find_any({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,6.4,7.5,8.6,9.7}))
 
 test_equal("head() string", "John", head("John Doe", 4))
 test_equal("head() sequence", {1,2,3}, head({1,2,3,4,5,6}, 3))
