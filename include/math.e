@@ -235,22 +235,7 @@ global function deg2rad (object x)
 end function
 
 global function log10(object a)
-    object t
-
-    if atom(a) then
-        return log(a) * INVLOG10
-    end if
-
-    for i = 1 to length(a) do
-        t = a[i]
-        if atom(t) then
-            a[i] = log(t) * INVLOG10
-        else
-            a[i] = log10(t)
-        end if
-    end for
-
-    return a
+    return log(a) * INVLOG10
 end function
 
 global function exp(atom x)

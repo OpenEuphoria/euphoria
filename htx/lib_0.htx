@@ -82,6 +82,12 @@
   description="a datetime sequence"
 >
 
+<_3clist
+  name="m"
+  pos=10
+  description="a <a href=\"#map\">map</a> for key/value pairs</a>"
+>
+
 </table></center>
 
 <p>
@@ -323,6 +329,68 @@
   description="join a sequence by another sequence"
 >
 
+<_3clist
+  href="lib_.htm#trim"
+  name="trim"
+  description="remove a set of atoms from the beginning and end of a sequence"
+>
+
+<_3clist
+  href="lib_.htm#trim_head"
+  name="trim_head"
+  description="remove a set of atoms from the beginning of a sequence"
+>
+
+<_3clist
+  href="lib_.htm#trim_tail"
+  name="trim_tail"
+  description="remove a set of atoms from the end of a sequence"
+>
+
+
+<_3clist
+  href="lib_.htm#truncate"
+  name="truncate"
+  description="truncate a squence at a given index"
+>
+
+<_3clist
+  href="lib_.htm#pad_head"
+  name="pad_head"
+  description="pad the beginning of a sequence with an atom up to x in overall length"
+>
+
+<_3clist
+  href="lib_.htm#pad_tail"
+  name="pad_tail"
+  description="pad the end of a sequence with an atom up to x in overall length"
+>
+
+<_3clist
+  href="lib_.htm#chunk"
+  name="chunk"
+  description="split a sequence into smaller sequences of x size"
+>
+
+<_3clist
+  href="lib_.htm#flatten"
+  name="flatten"
+  description="remove all nesting from a sequence"
+>
+
+<_3clist
+  href="lib_.htm#find_replace"
+  name="find_replace"
+  description="find and replace needle in haystack with the given sequence"
+>
+
+<_3clist
+  href="lib_.htm#vslice"
+  name="vslice"
+  description="perform a vertical slice on a sequence"
+>
+
+
 </table>
 
 <p>
@@ -375,6 +443,12 @@
 >
 
 <_3clist
+  href="lib_.htm#find_all"
+  name="find_all"
+  description="return a sequence of positions where the given atom exists in the given sequence"
+>
+
+<_3clist
   href="lib_h_o.htm#match"
   name="match"
   description="find a sequence as a slice of another sequence - start searching from element number 1"
@@ -385,6 +459,13 @@
   name="match_from"
   description="find a sequence as a slice of another sequence - start searching from any element number"
 >
+
+<_3clist
+  href="lib_.htm#match_all"
+  name="match_all"
+  description="return a sequence of positions where the given needle starts in the given haystack"
+>
+
 
 <_3clist
   href="lib_s_t.htm#sort"
@@ -1897,16 +1978,6 @@ in the Properties for the DOS Window.
 An object that maintains mapping from keys to values. No duplicate keys are allowed,
 so each key can only map to one value. When including map.e, a new type is available,
 map. It will be used throughout the documentation.
-<p>
-<center>
-<table border=0 cellspacing=2 cellpadding=2>
-<_3clist
-  name="m"
-  pos=10
-  description="a <a href=\"#map\">map</a> for key/value pairs</a>"
->
-</table>
-</center>
 
 <p>
 <table border=0 cellspacing=2 cellpadding=2>
@@ -1967,11 +2038,161 @@ map. It will be used throughout the documentation.
 <p>
 <hr>
 
+<a name=datetime></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.17 Datetime</_dul>
+</font>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_.htm#dt:new"
+  name="new"
+  description="Create a new datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:now"
+  name="now"
+  description="Create a new datetime value populated with the current date and time"
+>
+
+<_3clist
+  href="lib_.htm#dt:from_date"
+  name="from_date"
+  description="Create a new datetime value a date() value"
+>
+
+<_3clist
+  href="lib_.htm#dt:dow"
+  name="dow"
+  description="Return the day of week for a give datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:to_unix"
+  name="to_unix"
+  description="Convert a datetime value to the unix numeric format (seconds since EPOCH)"
+>
+
+<_3clist
+  href="lib_.htm#dt:from_unix"
+  name="from_unix"
+  description="Create a new datetime value from the unix numeric format (seconds since EPOCH)"
+>
+
+<_3clist
+  href="lib_.htm#dt:add"
+  name="add"
+  description="Add an interval to a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:subtract"
+  name="subtract"
+  description="Subtract an intervalue from a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:diff"
+  name="diff"
+  description="Caluclate the seconds different between two dates"
+>
+
+</table>
+
+<p>
+<_sul><font color="#006633"><b>Constants to aid in accessing datetime value
+contents and working with the add and subtract functions:</b></font></_sul>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_.htm#dt:DT_YEAR"
+  name="DT_YEAR"
+  description="Constant for accessing the Year of a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:DT_MONTH"
+  name="DT_MONTH"
+  description="Constant for accessing the Month of a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:DT_DAY"
+  name="DT_DAY"
+  description="Constant for accessing the Day of a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:DT_HOUR"
+  name="DT_HOUR"
+  description="Constant for accessing the Hour of a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:DT_MINUTE"
+  name="DT_MINUTE"
+  description="Constant for accessing the Minute of a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:DT_SECOND"
+  name="DT_SECOND"
+  description="Constant for accessing the Second of a datetime value"
+>
+
+<_3clist
+  href="lib_.htm#dt:SECONDS"
+  name="SECONDS"
+  description="Interval key for adding seconds to a datetime value"
+>
+<_3clist
+  href="lib_.htm#dt:MINUTES"
+  name="MINUTES"
+  description="Interval key for adding minutes to a datetime value"
+>
+<_3clist
+  href="lib_.htm#dt:HOURS"
+  name="HOURS"
+  description="Interval key for adding hours to a datetime value"
+>
+<_3clist
+  href="lib_.htm#dt:DAYS"
+  name="DAYS"
+  description="Interval key for adding days to a datetime value"
+>
+<_3clist
+  href="lib_.htm#dt:WEEKS"
+  name="WEEKS"
+  description="Interval key for adding weeks to a datetime value"
+>
+<_3clist
+  href="lib_.htm#dt:MONTHS"
+  name="MONTHS"
+  description="Interval key for adding months to a datetime value"
+>
+<_3clist
+  href="lib_.htm#dt:YEARS"
+  name="YEARS"
+  description="Interval key for adding years to a datetime value"
+>
+
+</table>
+
+<p>
+<hr>
+
 <a name=tasking></a>
 <font color="#FF0099" size=+1>
 <br>
 
-<_dul>2.17 Multitasking</_dul>
+<_dul>2.18 Multitasking</_dul>
 </font>
 <p>
 This collection of routines lets you create multiple, independent

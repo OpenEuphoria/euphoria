@@ -109,3 +109,15 @@ test_equal("find_replace() max set", "BBBAAA", find_replace("AAAAAA", "A", "B", 
 
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
+
+test_equal("rfind() #1", 5, rfind('E', "EEEDEFG"))
+test_equal("rfind() #2", 0, rfind('E', "ABC"))
+
+test_equal("rfind_from() #1", 3, rfind_from('E', "EEEDEFG", 4))
+test_equal("rfind_from() #2", 0, rfind_from('E', "ABC", 2))
+
+test_equal("rmatch() #1", 5, rmatch("ABC", "ABCDABC"))
+test_equal("rmatch() #2", 0, rmatch("ABC", "DEFBCA"))
+
+test_equal("rmatch_from() #1", 8, rmatch_from("ABC", "ABCDABCABC", 9))
+test_equal("rmatch_from() #2", 0, rmatch_from("ABC", "EEEDDDABC", 5))

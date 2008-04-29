@@ -126,7 +126,9 @@
      Larry Miller, Thanks Larry!), <b>trim()</b>, <b>trim_head()</b>,
      <b>trim_tail()</b>, <b>truncate()</b>, <b>pad_head()</b>,
      <b>pad_tail()</b>, <b>chunk()</b>, <b>flatten()</b>, <b>find_all()</b>,
-     <b>match_all()</b>, <b>find_replace()</b>, <b>vslice()</b>.
+     <b>match_all()</b>, <b>find_replace()</b>, <b>vslice()</b>,
+     <b>rfind()</b>, <b>rfind_from()</b>, <b>rmatch()</b>,
+     <b>rmatch_from()</b>.
 	<li>
      New routines in <b>file.e</b>:
      <b>read_lines()</b>, <b>read_file()</b>, <b>pathinfo()</b>,
