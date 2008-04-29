@@ -228,9 +228,9 @@ end procedure
 -- Crash handling routines:
 
 global procedure crash(sequence fmt, object data)
-    object ign
-    ign = sprintf(fmt, data)
-    ign = machine_func(M_CRASH, ign)
+    object msg
+    msg = sprintf(fmt, data)
+    machine_proc(M_CRASH, msg)
 end procedure
 
 global procedure crash_message(sequence msg)
