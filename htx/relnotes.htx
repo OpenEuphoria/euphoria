@@ -110,6 +110,9 @@
      have been found in The Archive. Many thanks must go to the original
      developers who have contributed these functions.
 <ul>
+    <li>
+     New routines in <b>machine.e</b>:
+     <b>crash()</b>.
 	<li>
      New routines in <b>math.e</b>:
      <b>ceil()</b>, <b>round_prec()</b>, <b>round()</b>, <b>sign()</b>,

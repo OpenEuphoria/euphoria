@@ -46,7 +46,8 @@ constant M_ALLOC = 16,
 	 M_A_TO_F32 = 48,
 	 M_F32_TO_A = 49,
 	 M_CRASH_FILE = 57,
-	 M_CRASH_ROUTINE = 66
+	 M_CRASH_ROUTINE = 66,
+	 M_CRASH = 67
 	 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -225,6 +226,12 @@ global procedure use_vesa(integer code)
 end procedure
 
 -- Crash handling routines:
+
+global procedure crash(sequence fmt, object data)
+    object ign
+    ign = sprintf(fmt, data)
+    ign = machine_func(M_CRASH, ign)
+end procedure
 
 global procedure crash_message(sequence msg)
 -- Specify a final message to display for your user, in the event 

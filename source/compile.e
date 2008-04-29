@@ -88,7 +88,9 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 	M_UNLOCK_FILE  = 62,
 	M_CHDIR        = 63,
 	M_SLEEP        = 64,
-	M_BACKEND      = 65
+	M_BACKEND      = 65,
+	M_CRASH        = 67
+
 
 constant INIT_CHUNK = 2500 -- maximum number of literals to 
 			   -- initialize in one init-*.c file (one routine)
@@ -980,7 +982,11 @@ function machine_func_type(integer x)
 		elsif func_num = M_CHDIR then
 		    range = {0, 1}
 		    return {TYPE_INTEGER, range}
-		    
+
+		elsif func_num = M_CRASH then
+		    range = {0, 1}
+		    return {TYPE_INTEGER, range}
+
 		elsif func_num = M_CHECK_BREAK then
 		    range = {0, MAXINT-1000}
 		    return {TYPE_INTEGER, range}

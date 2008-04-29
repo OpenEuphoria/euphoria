@@ -3670,6 +3670,18 @@ static object crash_file(object x)
     return ATOM_1;
 }
 
+static object crash(object x)
+{
+    char *message;
+    int r;
+
+    message = malloc(SEQ_PTR(x)->length + 1);
+    MakeCString(message, x);
+    RTFatal(message);
+    free(message);
+    return ATOM_1;
+}
+
 static object change_dir(object x)
 /* change to a new current directory */
 /* assume x is a sequence */
@@ -4872,8 +4884,8 @@ object machine(object opcode, object x)
 		break;
 
 	    case M_CRASH_FILE:
-		return crash_file(x);
-		break;
+	    return crash_file(x);
+	    break;
 	    
 	    case M_FLUSH:
 		return flush_file(x);
@@ -4885,6 +4897,10 @@ object machine(object opcode, object x)
 
 	    case M_UNLOCK_FILE:
 		return unlock_file(x);
+		break;
+
+	    case M_CRASH:
+		return crash(x);
 		break;
 
 	    case M_CHDIR:

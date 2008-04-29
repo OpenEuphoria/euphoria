@@ -752,6 +752,51 @@ x = cos({.5, .6, .7})
  >
 </table>
 
+<_routine name="crash">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include machine.e<BR>
+crash(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Cause Euphoria to crash with a sprintf type error message as supplied in s1 and s2."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This should only be used for exceptional errors as an application cannot recover
+from a crash state. General errors, such as item not found, or could not open file
+should not cause a crash. Those functions should return general error codes.
+<p>
+See <a href=\"lib_s_t.htm#sprintf\">sprintf</a> for formatting codes and examples."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+if start > length(s) then
+    crash("third argument to myfunc() is out of bounds (%d)", {start})
+end if
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c_d.htm#crash_file\">crash_file</a>,
+<a href=\"lib_c_d.htm#crash_message\">crash_message</a>,
+<a href=\"lib_c_d.htm#crash_routine\">crash_routine</a>,
+<a href=\"lib_s_t.htm#sprintf\">sprintf</a>"
+ >
+</table>
+
+
+
 
 <_routine name="crash_file">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -803,6 +848,7 @@ crash_file("\\tmp\\mybug")
 <_2clist
   name="See Also:"
   description="<a href=\"lib_a_b.htm#abort\">abort</a>,
+               <a href=\"lib_c_d.htm#crash\">crash</a>,
                <a href=\"lib_c_d.htm#crash_message\">crash_message</a>,
                <a href=\"lib_c_d.htm#crash_routine\">crash_routine</a>,
                <a href=\"refman_3.htm\">debugging and profiling</a>"
@@ -861,6 +907,7 @@ crash_message("An unexpected error has occurred!\n" &
 <_2clist
   name="See Also:"
   description="<a href=\"lib_a_b.htm#abort\">abort</a>,
+               <a href=\"lib_c_d.htm#crash\">crash</a>,
                <a href=\"lib_c_d.htm#crash_file\">crash_file</a>,
                <a href=\"lib_c_d.htm#crash_routine\">crash_routine</a>,
                <a href=\"refman_3.htm\">debugging and profiling</a>"
@@ -952,6 +999,7 @@ crash_routine(routine_id("crash"))
 <_2clist
   name="See Also:"
   description="<a href=\"lib_a_b.htm#abort\">abort</a>,
+               <a href=\"lib_c_d.htm#crash\">crash</a>,
                <a href=\"lib_c_d.htm#crash_file\">crash_file</a>,
                <a href=\"lib_c_d.htm#crash_message\">crash_message</a>,
                <a href=\"refman_3.htm\">debugging and profiling</a>"

@@ -3,6 +3,8 @@
 -- Euphoria 3.2
 -- Sequence routines
 
+include machine.e
+
 -- moved from misc.e
 global function reverse(sequence s)
 -- reverse the top-level elements of a sequence.
@@ -355,20 +357,24 @@ end function
 --Find x as an element of s starting from index start going down to 1
 --If start<1 then it is an offset from the end of s
 global function rfind_from(object x, sequence s, integer start)
-integer len
+    integer len
+
 	len=length(s)
+
 	if (start > len) or (len + start < 1) then
-		printf(1,"third argument of rfind_from() is out of bounds (%d)",start)
-		?1/0
+        crash("third argument of rfind_from() is out of bounds (%d)", {start})
 	end if
+
 	if start < 1 then
 		start = len + start
 	end if
+
 	for i = start to 1 by -1 do
 		if equal(s[i], x) then
 			return i
 		end if
 	end for
+
 	return 0
 end function
 
@@ -381,36 +387,41 @@ end function
 --Try to match x against some slice of s, starting from index start and going down to 1
 --if start<0 then it is an offset from the end of s
 global function rmatch_from(sequence x, sequence s, integer start)
-integer len,lenx
+    integer len,lenx
+
 	len = length(s)
 	lenx = length(x)
+
 	if lenx = 0 then
-		puts(1, "first argument of rmatch_from() must be a non-empty sequence")
-		?1/0
+        crash("first argument of rmatch_from() must be a non-empty sequence", {})
 	elsif (start > len) or  (len + start < 1) then
-		printf(1, "third argument of rmatch_from is out of bounds (%d)",start)
-		?1/0
+        crash("third argument of rmatch_from is out of bounds (%d)", {start})
 	end if
+
 	if start < 1 then
 		start = len + start
 	end if
+
 	if start + lenx - 1 > len then
 		start = len - lenx + 1
 	end if
+
 	lenx-= 1
+
 	for i=start to 1 by -1 do
 		if equal(x, s[i..i + lenx]) then
 			return i
 		end if
 	end for
+
 	return 0
 end function
 
 -- TODO: document
 global function rmatch(sequence x, sequence s)
 	if length(x)=0 then
-		puts(1,"first argument of rmatch_from() must be a non-empty string")
-		?1/0
+        crash("first argument of rmatch_from() must be a non-empty string", {})
 	end if
+
 	return rmatch_from(x, s, length(s))
 end function

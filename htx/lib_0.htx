@@ -1774,6 +1774,12 @@ in the Properties for the DOS Window.
 >
 
 <_3clist
+  href="lib_c_d.htm#crash"
+  name="crash"
+  description="cause a crash with a given message"
+>
+
+<_3clist
   href="lib_c_d.htm#crash_file"
   name="crash_file"
   description="specify the file for writing error diagnostics 

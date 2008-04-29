@@ -382,4 +382,4 @@ struct char_cell {
 #define M_SLEEP        64
 #define M_BACKEND      65
 #define M_CRASH_ROUTINE 66
-
+#define M_CRASH        67
