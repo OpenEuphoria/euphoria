@@ -218,12 +218,14 @@ global type datetime(object o)
         and o[DT_DAY] >= 1 and o[DT_DAY] <= daysInMonth(o[DT_YEAR], o[DT_MONTH])
         and o[DT_HOUR] >= 0 and o[DT_HOUR] <= 23
         and o[DT_MINUTE] >= 0 and o[DT_MINUTE] <= 59
-        and o[DT_SECOND] >= 0 and o[DT_SECOND] <= 59)
+        and o[DT_SECOND] >= 0 and o[DT_SECOND] < 60)
 end type
 
 -- Creates the datetime object for the specified parameters
 global function new(integer year, integer month, integer day, integer hour, integer minute, atom second)
-	return {year, month, day, hour, minute, second}
+    datetime d
+    d = {year, month, day, hour, minute, second}
+    return d
 end function
 
 -- TODO: document
