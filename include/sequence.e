@@ -94,15 +94,25 @@ global function tail(sequence st, atom n)
 	end if
 end function
 
-global function remove(sequence st, integer index)
-    if index > length(st) or index < 1 then
-        return st
+global function remove(sequence st, object index)
+    integer start, stop
+
+    if atom(index) then
+        if index > length(st) or index < 1 then
+            return st
+        end if
+
+        return st[1..index-1] & st[index+1..$]
     end if
 
-    return st[1..index-1] & st[index+1..$]
-end function
+    if length(index) != 2 then
+        crash("second parameter to remove(), when a sequence must be a length of 2, " &
+              "representing start and to indexes.", {})
+    end if
 
-global function remove_range(sequence st, integer start, integer stop)
+    start = index[1]
+    stop = index[2]
+
     if start > length(st) then
         return st
     elsif stop >= length(st) then
@@ -123,7 +133,7 @@ global function insert(sequence st, object what, integer index)
 end function
 
 global function replace_range(sequence st, object what, integer start, integer stop)
-    st = remove_range(st, start, stop)
+    st = remove(st, {start, stop})
     return insert(st, what, start)
 end function
 

@@ -19,59 +19,6 @@
 </font>
 <p>
 
-<_routine name="length">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> i = length(s)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"  Return the length of s. s must be a sequence. An error will
- occur if s is an atom. "
- >
-<_2clist
-  name="Comments:"
-  description=
-" The length of each sequence is stored internally by the
- interpreter for quick access. (In other languages this
- operation requires a search through memory for an end marker.)
- "
- >
-<_2clist
-  name="Example 1:"
-  description=""
- >
-<_eucode>
-length({{1,2}, {3,4}, {5,6}})   -- 3
-
- </_eucode>
-<_2clist
-  name="Example 2:"
-  description=""
- >
-<_eucode>
-length("")    -- 0
-
- </_eucode>
-<_2clist
-  name="Example 3:"
-  description=""
- >
-<_eucode>
-length({})    -- 0
-
- </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_type.htm#sequence\">sequence</a>"
- >
-</table>
-
 <_routine name="append">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -261,6 +208,59 @@ result = join({"John", "Middle", "Doe"}, " ")
   name="See Also:"
   description="<a href=\"lib_seq.htm#split\">split</a>,
 <a href=\"lib_seq.htm#split_adv\">split_adv</a>"
+ >
+</table>
+
+<_routine name="length">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = length(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Return the length of s. s must be a sequence. An error will
+ occur if s is an atom. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" The length of each sequence is stored internally by the
+ interpreter for quick access. (In other languages this
+ operation requires a search through memory for an end marker.)
+ "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+length({{1,2}, {3,4}, {5,6}})   -- 3
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+length("")    -- 0
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+length({})    -- 0
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_type.htm#sequence\">sequence</a>"
  >
 </table>
 
@@ -485,13 +485,14 @@ end for
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-s2 = remove(s1, i)
+s2 = remove(s1, x1)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-"Remove an item from a sequence"
+"Remove an item or a range of items from s1. If x1 is an integer, then only that index will be removed.
+If x2 is a sequence, it must be a sequence of two integers representing start and stop index."
  >
 <_2clist
   name="Comments:"
@@ -500,7 +501,7 @@ s2 = remove(s1, i)
 >
 
 <_2clist
-  name="Example 1:"
+  name="Example 1 (Single Item):"
   description=""
  >
 <_eucode>
@@ -509,66 +510,31 @@ s = remove("Johnn Doe", 4)
 </_eucode>
 
 <_2clist
-  name="Example 2:"
+  name="Example 2 (Single Item):"
   description=""
  >
 <_eucode>
 s = remove({1,2,3,3,4}, 4)
 -- s is {1,2,3,4}
 </_eucode>
-
 <_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#remove_range\">remove_range</a>"
- >
-</table>
-
-<_routine name="remove_range">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-s2 = remove_range(s1, i1, i2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Remove items starting at index i1 thru i2 in s1."
- >
-<_2clist
-  name="Comments:"
-  description=
-"A new sequence is created. s1 can be a string or complex sequence."
->
-
-<_2clist
-  name="Example 1:"
+  name="Example 3 (Range):"
   description=""
  >
 <_eucode>
-s = remove_range("John Middle Doe", 6, 12)
+s = remove("John Middle Doe", {6, 12})
 -- s is "John Doe"
 </_eucode>
 
 <_2clist
-  name="Example 2:"
+  name="Example 4 (Range):"
   description=""
  >
 <_eucode>
-s = remove_range({1,2,3,3,4,4}, 4, 5)
+s = remove({1,2,3,3,4,4}, {4, 5})
 -- s is {1,2,3,4}
 </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#remove\">remove</a>"
- >
 </table>
-
-
 
 
 <_routine name="repeat">

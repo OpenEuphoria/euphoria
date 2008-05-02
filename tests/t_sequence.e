@@ -54,9 +54,9 @@ test_equal("remove() string", "Jon", remove("John", 3))
 test_equal("remove() nested sequence", {{1,2}, {5,6}}, remove({{1,2},{3,4},{5,6}}, 2))
 test_equal("remove() bounds", "John", remove("John", 55))
 
-test_equal("remove_range() integer sequence", {1,5}, remove_range({1,2,3,4,5}, 2, 4))
-test_equal("remove_range() string", "John Doe", remove_range("John M Doe", 5, 6))
-test_equal("remove_range() bounds", "John", remove_range("John Doe", 5, 100))
+test_equal("remove() range integer sequence", {1,5}, remove({1,2,3,4,5}, {2, 4}))
+test_equal("remove() range string", "John Doe", remove("John M Doe", {5, 6}))
+test_equal("remove() range bounds", "John", remove("John Doe", {5, 100}))
 
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", "John", insert("Jon", "h", 3))
