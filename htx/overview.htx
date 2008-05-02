@@ -177,10 +177,12 @@
  Most subdirectories under <font color="#5500FF"><b>\euphoria</b></font> have
  a <b>.doc</b> file that describes the files in that subdirectory. 
  
+</_width>
+
 <_continueAll
   libDoc="overview.htm"
 >
-</_width>
+
 </body>
 </html>
 

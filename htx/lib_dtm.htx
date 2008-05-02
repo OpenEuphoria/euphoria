@@ -19,6 +19,308 @@
 </font>
 <p>
 
+<p>
+<_sul><font color="#006633"><b>Constants to aid in accessing datetime value
+contents and working with the add and subtract functions:</b></font></_sul>
+
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="#YEAR"
+  name="YEAR"
+  description="Constant for accessing the Year of a datetime value"
+>
+
+<_3clist
+  href="#MONTH"
+  name="MONTH"
+  description="Constant for accessing the Month of a datetime value"
+>
+
+<_3clist
+  href="#DAY"
+  name="DAY"
+  description="Constant for accessing the Day of a datetime value"
+>
+
+<_3clist
+  href="#HOUR"
+  name="HOUR"
+  description="Constant for accessing the Hour of a datetime value"
+>
+
+<_3clist
+  href="#MINUTE"
+  name="MINUTE"
+  description="Constant for accessing the Minute of a datetime value"
+>
+
+<_3clist
+  href="#SECOND"
+  name="SECOND"
+  description="Constant for accessing the Second of a datetime value"
+>
+
+<_3clist
+  href="#SECONDS"
+  name="SECONDS"
+  description="Interval key for adding seconds to a datetime value"
+>
+<_3clist
+  href="#MINUTES"
+  name="MINUTES"
+  description="Interval key for adding minutes to a datetime value"
+>
+<_3clist
+  href="#HOURS"
+  name="HOURS"
+  description="Interval key for adding hours to a datetime value"
+>
+<_3clist
+  href="#DAYS"
+  name="DAYS"
+  description="Interval key for adding days to a datetime value"
+>
+<_3clist
+  href="#WEEKS"
+  name="WEEKS"
+  description="Interval key for adding weeks to a datetime value"
+>
+<_3clist
+  href="#MONTHS"
+  name="MONTHS"
+  description="Interval key for adding months to a datetime value"
+>
+<_3clist
+  href="#YEARS"
+  name="YEARS"
+  description="Interval key for adding years to a datetime value"
+>
+</table>
+
+<p>
+<_sul><font color="#006633"><b>Function Reference:</b></font></_sul>
+
+<_routine name="add">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+<_routine name="diff">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+<_routine name="dow">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+<_routine name="from_date">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+<_routine name="from_unix">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+
+<_routine name="new">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+
+<_routine name="now">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+
+<_routine name="subtract">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
+<_routine name="to_unix">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e as dt<BR>
+
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+</_eucode>
+</table>
+
 <_continueAll
   libDoc="lib_dtm.htm"
 >

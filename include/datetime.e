@@ -196,29 +196,29 @@ day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 ampm = { "AM", "PM" }
 
 global constant
-    DT_YEAR   = 1,
-    DT_MONTH  = 2,
-    DT_DAY    = 3,
-    DT_HOUR   = 4,
-    DT_MINUTE = 5,
-    DT_SECOND = 6,
-    SECONDS   = 1,
-    MINUTES   = 2,
-    HOURS     = 3,
-    DAYS      = 4,
-    WEEKS     = 5,
-    MONTHS    = 6,
-    YEARS     = 7
+    YEAR    = 1,
+    MONTH   = 2,
+    DAY     = 3,
+    HOUR    = 4,
+    MINUTE  = 5,
+    SECOND  = 6,
+    YEARS   = 1,
+    MONTHS  = 2,
+    DAYS    = 3,
+    HOURS   = 4,
+    MINUTES = 5,
+    SECONDS = 6,
+    WEEKS   = 7
 
 global type datetime(object o)
 	return sequence(o) and length(o) = 6
-	    and integer(o[DT_YEAR]) and integer(o[DT_MONTH]) and integer(o[DT_DAY])
-	    and integer(o[DT_HOUR]) and integer(o[DT_MINUTE]) and atom(o[DT_SECOND]
-        and o[DT_MONTH] >= 1 and o[DT_MONTH] <= 12
-        and o[DT_DAY] >= 1 and o[DT_DAY] <= daysInMonth(o[DT_YEAR], o[DT_MONTH])
-        and o[DT_HOUR] >= 0 and o[DT_HOUR] <= 23
-        and o[DT_MINUTE] >= 0 and o[DT_MINUTE] <= 59
-        and o[DT_SECOND] >= 0 and o[DT_SECOND] < 60)
+	    and integer(o[YEAR]) and integer(o[MONTH]) and integer(o[DAY])
+	    and integer(o[HOUR]) and integer(o[MINUTE]) and atom(o[SECOND]
+        and o[MONTH] >= 1 and o[MONTH] <= 12
+        and o[DAY] >= 1 and o[DAY] <= daysInMonth(o[YEAR], o[MONTH])
+        and o[HOUR] >= 0 and o[HOUR] <= 23
+        and o[MINUTE] >= 0 and o[MINUTE] <= 59
+        and o[SECOND] >= 0 and o[SECOND] < 60)
 end type
 
 -- Creates the datetime object for the specified parameters
@@ -231,7 +231,7 @@ end function
 -- TODO: document
 -- Converts the built-in date() format to datetime format
 global function from_date(sequence src)
-	return {src[DT_YEAR]+1900, src[DT_MONTH], src[DT_DAY], src[DT_HOUR], src[DT_MINUTE], src[DT_SECOND]}
+	return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
 
 -- TODO: document
@@ -311,17 +311,17 @@ global function format(datetime d, ustring format)
             elsif ch = 'A' then
                 res &= day_names[dow(d)]
             elsif ch = 'b' then
-                res &= month_abbrs[d[DT_MONTH]]
+                res &= month_abbrs[d[MONTH]]
             elsif ch = 'B' then
-                res &= month_names[d[DT_MONTH]]
+                res &= month_names[d[MONTH]]
             elsif ch = 'C' then
-                res &= sprintf("%02d", d[DT_YEAR] / 100)
+                res &= sprintf("%02d", d[YEAR] / 100)
             elsif ch = 'd' then
-                res &= sprintf("%02d", d[DT_DAY])
+                res &= sprintf("%02d", d[DAY])
             elsif ch = 'H' then
-                res &= sprintf("%02d", d[DT_HOUR])
+                res &= sprintf("%02d", d[HOUR])
             elsif ch = 'I' then
-                tmp = d[DT_HOUR]
+                tmp = d[HOUR]
                 if tmp > 12 then
                     tmp -= 12
                 elsif tmp = 0 then
@@ -331,9 +331,9 @@ global function format(datetime d, ustring format)
             elsif ch = 'j' then
                 res &= sprintf("%d", julianDayOfYear(d))
             elsif ch = 'k' then
-                res &= sprintf("%d", d[DT_HOUR])
+                res &= sprintf("%d", d[HOUR])
             elsif ch = 'l' then
-                tmp = d[DT_HOUR]
+                tmp = d[HOUR]
                 if tmp > 12 then
                     tmp -= 12
                 elsif tmp = 0 then
@@ -341,17 +341,17 @@ global function format(datetime d, ustring format)
                 end if
                 res &= sprintf("%d", tmp)
             elsif ch = 'm' then
-                res &= sprintf("%02d", d[DT_MONTH])
+                res &= sprintf("%02d", d[MONTH])
             elsif ch = 'M' then
-                res &= sprintf("%02d", d[DT_MINUTE])
+                res &= sprintf("%02d", d[MINUTE])
             elsif ch = 'p' then
-                if d[DT_HOUR] <= 12 then
+                if d[HOUR] <= 12 then
                     res &= ampm[1]
                 else
                     res &= ampm[2]
                 end if
             elsif ch = 'P' then
-                if d[DT_HOUR] <= 12 then
+                if d[HOUR] <= 12 then
                     res &= tolower(ampm[1])
                 else
                     res &= tolower(ampm[2])
@@ -359,7 +359,7 @@ global function format(datetime d, ustring format)
             elsif ch = 's' then
                 res &= sprintf("%d", to_unix(d))
             elsif ch = 'S' then
-                res &= sprintf("%02d", d[DT_SECOND])
+                res &= sprintf("%02d", d[SECOND])
             elsif ch = 'u' then
                 tmp = dow(d)
                 if tmp = 1 then
@@ -370,10 +370,10 @@ global function format(datetime d, ustring format)
             elsif ch = 'w' then
                 res &= sprintf("%d", dow(d) - 1)
             elsif ch = 'y' then
-               tmp = floor(d[DT_YEAR] / 100)
-               res &= sprintf("%02d", d[DT_YEAR] - (tmp * 100))
+               tmp = floor(d[YEAR] / 100)
+               res &= sprintf("%02d", d[YEAR] - (tmp * 100))
             elsif ch = 'Y' then
-                res &= sprintf("%04d", d[DT_YEAR])
+                res &= sprintf("%04d", d[YEAR])
             else
                 -- TODO: error or just add?
             end if
@@ -409,23 +409,23 @@ global function add(datetime dt, atom qty, integer interval)
         end if
 
         for i = 1 to qty do
-            if inc = 1 and dt[DT_MONTH] = 12 then
-                dt[DT_MONTH] = 1
-                dt[DT_YEAR] += 1
-            elsif inc = -1 and dt[DT_MONTH] = 1 then
-                dt[DT_MONTH] = 12
-                dt[DT_YEAR] -= 1
+            if inc = 1 and dt[MONTH] = 12 then
+                dt[MONTH] = 1
+                dt[YEAR] += 1
+            elsif inc = -1 and dt[MONTH] = 1 then
+                dt[MONTH] = 12
+                dt[YEAR] -= 1
             else
-                dt[DT_MONTH] += inc
+                dt[MONTH] += inc
             end if
         end for
 
         return dt
     elsif interval = YEARS then
-        dt[DT_YEAR] += qty
-        if isLeap(dt[DT_YEAR]) = 0 and dt[DT_MONTH] = 2 and dt[DT_DAY] = 29 then
-            dt[DT_MONTH] = 3
-            dt[DT_DAY] = 1
+        dt[YEAR] += qty
+        if isLeap(dt[YEAR]) = 0 and dt[MONTH] = 2 and dt[DAY] = 29 then
+            dt[MONTH] = 3
+            dt[DAY] = 1
         end if
 
         return dt

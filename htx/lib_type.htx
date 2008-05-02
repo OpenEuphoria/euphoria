@@ -707,11 +707,11 @@ i = isxdigit('i')
  >
 </table>
 
+</_width>
+
 <_continueAll
   libDoc="lib_type.htm"
 >
-
-</_width>
 
 </body>
 </html>

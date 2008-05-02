@@ -10,6 +10,8 @@
 >
 
 
+<_width>
+
 <font color="#FF0099" size=+1>
 <br>
 
@@ -364,6 +366,8 @@ a = xor_bits(#0110, #1010)
  >
 
 </table>
+
+</_width>
 
 <_continueAll
   libDoc="lib_bitw.htm"
