@@ -61,9 +61,9 @@ test_equal("remove() range bounds", "John", remove("John Doe", {5, 100}))
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", "John", insert("Jon", "h", 3))
 
-test_equal("replace_range() integer sequence", {1,2,3}, replace_range({1,8,9,3}, 2, 2, 3))
-test_equal("replace_range() integer sequence w/sequence", {1,2,3,4},
-    replace_range({1,8,9,4}, {2,3}, 2, 3))
+test_equal("replace() integer sequence", {1,2,3}, replace({1,8,9,3}, 2, 2, 3))
+test_equal("replace() integer sequence w/sequence", {1,2,3,4},
+    replace({1,8,9,4}, {2,3}, 2, 3))
 
 test_equal("trim_head() default", "John", trim_head(" \r\n\t John", 0))
 test_equal("trim_head() specified", "Doe", trim_head("John Doe", " hoJn"))

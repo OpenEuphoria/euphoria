@@ -132,7 +132,7 @@ global function insert(sequence st, object what, integer index)
     return st[1..index-1] & what & st[index..$]
 end function
 
-global function replace_range(sequence st, object what, integer start, integer stop)
+global function replace(sequence st, object what, integer start, integer stop)
     st = remove(st, {start, stop})
     return insert(st, what, start)
 end function

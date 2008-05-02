@@ -586,14 +586,14 @@ repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
 </table>
 
 
-<_routine name="replace_range">
+<_routine name="replace">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-s2 = replace_range(s1, x, i1, i2)
+s2 = replace(s1, x, i1, i2)
 </font>"
  >
  <_2clist
@@ -613,7 +613,7 @@ To replace just one element, simply: s[index] = new_item"
   description=""
  >
 <_eucode>
-s = replace_range("John Middle Doe", "Smith", 6, 11)
+s = replace("John Middle Doe", "Smith", 6, 11)
 -- s is "John Smith Doe"
 </_eucode>
 
@@ -622,7 +622,7 @@ s = replace_range("John Middle Doe", "Smith", 6, 11)
   description=""
  >
 <_eucode>
-s = replace_range({45.3, "John", 5, {10, 20}}, 25, 2, 3)
+s = replace({45.3, "John", 5, {10, 20}}, 25, 2, 3)
 -- s is {45.3, 25, {10, 20}}
 </_eucode>
 

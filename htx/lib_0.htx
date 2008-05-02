@@ -397,8 +397,8 @@
 >
 
 <_3clist
-  href="lib_seq.htm#replace_range"
-  name="replace_range"
+  href="lib_seq.htm#replace"
+  name="replace"
   description="replace a range of items with a new item or sequence"
 >
 
