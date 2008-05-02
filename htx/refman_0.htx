@@ -273,6 +273,9 @@
 <dt>
            2.16 <a href="library.htm#tasking"> Multitasking</a>
 <dd>
+<dt>
+           2.17 <a href="library.htm#eds"> Euphoria Database System (EDS) </a>
+<dd>
 </dl>
 <p>
 <dt>
@@ -328,6 +331,9 @@
 <dd>
 <dt>
            3.16 <a href="lib_task.htm"> Multitasking </a>
+<dd>
+<dt>
+           3.17 <a href="lib_eds.htm"> Euphoria Database System (EDS) </a>
 <dd>
 
 </dl>

@@ -33,6 +33,7 @@ constant files = {
     "lib_map.htx",
     "lib_dtm.htx",
     "lib_task.htx",
+    "lib_eds.htx",
     "readme.htx",
     "install.htx", 
     "ed.htx",

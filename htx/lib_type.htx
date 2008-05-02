@@ -9,6 +9,7 @@
   libDoc="lib_type.htm"
 >
 
+<_width>
 
 <a name=seq_manip></a>
 <font color="#FF0099" size=+1>
@@ -709,6 +710,8 @@ i = isxdigit('i')
 <_continueAll
   libDoc="lib_type.htm"
 >
+
+</_width>
 
 </body>
 </html>

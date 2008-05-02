@@ -104,17 +104,17 @@
 >
 
 <_4clist
-  href="e2c.htm"
-  name="e2c.doc"
-  pos=18
-  description="The Euphoria To C Translator"
->
-
-<_4clist
   href="tasking.htm"
   name="tasking.doc"
   pos=18
   description="Multitasking in Euphoria"
+>
+
+<_4clist
+  href="e2c.htm"
+  name="e2c.doc"
+  pos=18
+  description="The Euphoria To C Translator"
 >
 
 <_4clist

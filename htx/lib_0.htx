@@ -219,6 +219,12 @@
   description="Create multiple, independent tasks"
 >
 
+<_3clist
+  href="#eds"
+  name="EDS (Euphoria Database)"
+  description="Flexible Euphoria-oriented database for storing data"
+>
+
 </table>
 
 <p>
@@ -2307,6 +2313,135 @@ Windows demo program, and the news.exu demo for Linux and FreeBSD.
 >
 
 </table>
+
+<a name=eds></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.17 EDS Database Routines</_dul>
+</font>
+
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_eds.htm#create"
+  name="db_create"
+  description="create a new database"
+>
+
+<_3clist
+  href="lib_file.htm#open"
+  name="db_open"
+  description="open an existing database"
+>
+
+<_3clist
+  href="lib_eds.htm#select"
+  name="db_select"
+  description="select a database to be the current one"
+>
+
+<_3clist
+  href="lib_file.htm#close"
+  name="db_close"
+  description="close a database"
+>
+
+<_3clist
+  href="lib_eds.htm#create_table"
+  name="db_create_table"
+  description="create a new table within a database"
+>
+
+<_3clist
+  href="lib_eds.htm#select_table"
+  name="db_select_table"
+  description="select a table to be the current one"
+>
+
+<_3clist
+  href="lib_eds.htm#rename_table"
+  name="db_rename_table"
+  description="rename a table"
+>
+
+<_3clist
+  href="lib_eds.htm#delete_table"
+  name="db_delete_table"
+  description="delete a table"
+>
+
+<_3clist
+  href="lib_eds.htm#table_list"
+  name="db_table_list"
+  description="get a list of all the table names in a database"
+>
+
+<_3clist
+  href="lib_eds.htm#table_size"
+  name="db_table_size"
+  description="get the number of records in the current table"
+>
+
+<_3clist
+  href="lib_eds.htm#find_key"
+  name="db_find_key"
+  description="quickly find the record with a certain key value"
+>
+
+<_3clist
+  href="lib_eds.htm#record_key"
+  name="db_record_key"
+  description="get the key portion of a record"
+>
+
+<_3clist
+  href="lib_eds.htm#record_data"
+  name="db_record_data"
+  description="get the data portion of a record"
+>
+
+<_3clist
+  href="lib_seq.htm#insert"
+  name="db_insert"
+  description="insert a new record into the current table"
+>
+
+<_3clist
+  href="lib_eds.htm#delete_record"
+  name="db_delete_record"
+  description="delete a record from the current table"
+>
+
+<_3clist
+  href="lib_eds.htm#replace_data"
+  name="db_replace_data"
+  description="replace the data portion of a record"
+>
+
+<_3clist
+  href="lib_eds.htm#compress"
+  name="db_compress"
+  description="compress a database"
+>
+
+<_3clist
+  href="lib_eds.htm#dump"
+  name="db_dump"
+  description="print the contents of a database"
+>
+
+<_3clist
+  href="lib_eds.htm#fatal_id"
+  name="db_fatal_id"
+  description="handle fatal database errors"
+>
+
+</table>
+
+
 
 <_continueAll
   libDoc="library.htm"

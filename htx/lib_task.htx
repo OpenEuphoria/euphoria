@@ -9,13 +9,16 @@
   libDoc="lib_task.htm"
 >
 
-
 <font color="#FF0099" size=+1>
 <br>
 
 <_dul>3.16 - Multitasking</_dul>
 
 </font>
+<p>
+
+For a general overview of Multitasking in Euphoria, please refer to the
+document <a href="tasking.htm">Multitasking in Euphoria</a>.
 <p>
 
 <_routine name="task_clock_start">

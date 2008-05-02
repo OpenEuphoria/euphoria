@@ -319,24 +319,27 @@ procedure tag_continue(sequence raw_text, sequence plist)
 end procedure
 
 constant LIB_ID = {
-    {"overview.htm", "Overview", ""},
-    {"library.htm", "Library Index", ""},
-    {"lib_type.htm", "Type Checking", "type_checking"},
-    {"lib_seq.htm", "Sequence Manipulation", "seq_manip"},
-    {"lib_srch.htm", "Searching and Sorting", "srch_srt"},
-    {"lib_math.htm", "Math", "math"},
-    {"lib_bitw.htm", "Bitwise Logic", "bitw_logic"},
-    {"lib_file.htm", "I/O", "i_o"},
-    {"lib_mous.htm", "Mouse", "mouse_spt"},
-    {"lib_os.htm", "O/S", "op_sys"},
-    {"lib_dbg.htm", "Debugging", "debugging"},
-    {"lib_grap.htm", "Graphics", "gr_sound"},
-    {"lib_mach.htm", "Machine Level", "m_level_i"},
-    {"lib_dyn.htm", "Dynamic Calls", "dyn_call"},
-    {"lib_c.htm", "C Interface", "call_c_func"},
-    {"lib_map.htm", "Map", "map"},
-    {"lib_dtm.htm", "Date/Time", "datetime"},
-    {"lib_task.htm", "Multitasking", "tasking"}}
+        {"overview.htm", "Overview", ""},
+        {"refman.htm", "Reference Manual", ""},
+        {"library.htm", "Library Index", ""},
+        {"lib_type.htm", "Type Checking", "type_checking"},
+        {"lib_seq.htm", "Sequence Manipulation", "seq_manip"},
+        {"lib_srch.htm", "Searching and Sorting", "srch_srt"},
+        {"lib_math.htm", "Math", "math"},
+        {"lib_bitw.htm", "Bitwise Logic", "bitw_logic"},
+        {"lib_file.htm", "I/O", "i_o"},
+        {"lib_mous.htm", "Mouse", "mouse_spt"},
+        {"lib_os.htm", "O/S", "op_sys"},
+        {"lib_dbg.htm", "Debugging", "debugging"},
+        {"lib_grap.htm", "Graphics", "gr_sound"},
+        {"lib_mach.htm", "Machine Level", "m_level_i"},
+        {"lib_dyn.htm", "Dynamic Calls", "dyn_call"},
+        {"lib_c.htm", "C Interface", "call_c_func"},
+        {"lib_map.htm", "Map", "map"},
+        {"lib_dtm.htm", "Date/Time", "datetime"},
+        {"lib_task.htm", "Multitasking", "tasking"},
+        {"lib_eds.htm", "EDS", "eds"}
+    }
 
 procedure tag_continueall(sequence raw_text, sequence plist, integer top)
 -- special handler for braching to all the pages in the same category
@@ -365,7 +368,7 @@ procedure tag_continueall(sequence raw_text, sequence plist, integer top)
         if not equal(temp, LIB_ID[length(LIB_ID)][1]) then
             write("<a href=\"" & LIB_ID[length(LIB_ID)][1] & "\">" &
               LIB_ID[length(LIB_ID)][2] &
-              "</a></font></center>\n")
+              "</a>\n")
         else
             write(LIB_ID[length(LIB_ID)][2] & "\n")
         end if
@@ -376,6 +379,7 @@ procedure tag_continueall(sequence raw_text, sequence plist, integer top)
     if top then
         write("<hr>\n")
     end if
+    write("</font></center>\n")
 end procedure
 
 procedure tag_continuealltop(sequence raw_text, sequence plist)

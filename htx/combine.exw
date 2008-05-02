@@ -33,7 +33,8 @@ lib_files = {
   "lib_c.htx",
   "lib_map.htx",
   "lib_dtm.htx",
-  "lib_task.htx"
+  "lib_task.htx",
+  "lib_eds.htx"
 }
 
 procedure quit(sequence msg)
