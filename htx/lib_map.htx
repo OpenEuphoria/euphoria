@@ -43,16 +43,6 @@ map m
 m = new()
 -- m is now an empty map (size = 0)
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#get\">get</a>,
-  <a href=\"lib_map.htm#put\">put</a>,
-  <a href=\"lib_map.htm#size\">size</a>,
-  <a href=\"lib_map.htm#remove\">remove</a>,
-  <a href=\"lib_map.htm#keys\">keys</a>,
-  <a href=\"lib_map.htm#values\">values</a>"
->
 </table>
 
 <_routine name="get">
@@ -84,16 +74,6 @@ else
 	printf(1, "The age is %d", age)
 end if
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#new\">new</a>,
-  <a href=\"lib_map.htm#put\">put</a>,
-  <a href=\"lib_map.htm#size\">size</a>,
-  <a href=\"lib_map.htm#remove\">remove</a>,
-  <a href=\"lib_map.htm#keys\">keys</a>,
-  <a href=\"lib_map.htm#values\">values</a>"
->
 </table>
 
 <_routine name="put">
@@ -124,16 +104,6 @@ ages = put(ages, "Budi", 13)
 ages = put(ages, "Budi", 14)
 -- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#new\">new</a>,
-  <a href=\"lib_map.htm#get\">get</a>,
-  <a href=\"lib_map.htm#size\">size</a>,
-  <a href=\"lib_map.htm#remove\">remove</a>,
-  <a href=\"lib_map.htm#keys\">keys</a>,
-  <a href=\"lib_map.htm#values\">values</a>"
->
 </table>
 
 <_routine name="size">
@@ -162,16 +132,6 @@ m = put(m, 1, "a")
 m = put(m, 2, "b")
 ? size(m) -- outputs 2
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#new\">new</a>,
-  <a href=\"lib_map.htm#get\">get</a>,
-  <a href=\"lib_map.htm#put\">put</a>,
-  <a href=\"lib_map.htm#remove\">remove</a>,
-  <a href=\"lib_map.htm#keys\">keys</a>,
-  <a href=\"lib_map.htm#values\">values</a>"
->
 </table>
 
 <_routine name="remove">
@@ -201,16 +161,37 @@ m = put(m, "Amy", 66.9)
 m = remove(m, "Amy")
 -- m is now an empty map again
 </_eucode>
+</table>
+
+<_routine name="has">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include map.e<BR>
+i = has(m, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Check if map m has key x"
+ >
 <_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#new\">new</a>,
-  <a href=\"lib_map.htm#get\">get</a>,
-  <a href=\"lib_map.htm#put\">put</a>,
-  <a href=\"lib_map.htm#size\">size</a>,
-  <a href=\"lib_map.htm#keys\">keys</a>,
-  <a href=\"lib_map.htm#values\">values</a>"
->
+  name="Example:"
+  description=""
+ >
+<_eucode>
+map m
+m = new()
+m = put(m, "name", "John")
+i = has(m, "name)
+-- i is 1
+
+i = has(m, "age")
+-- i is 0
+</_eucode>
 </table>
 
 <_routine name="keys">
@@ -243,16 +224,6 @@ m = put(m, 40, "forty")
 sequence keys
 keys = keys(m) -- keys might be {20,40,10,30} or some other orders
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#new\">new</a>,
-  <a href=\"lib_map.htm#get\">get</a>,
-  <a href=\"lib_map.htm#put\">put</a>,
-  <a href=\"lib_map.htm#size\">size</a>,
-  <a href=\"lib_map.htm#remove\">remove</a>,
-  <a href=\"lib_map.htm#values\">values</a>"
->
 </table>
 
 <_routine name="values">
@@ -285,16 +256,6 @@ m = put(m, 40, "forty")
 sequence values
 values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_map.htm#new\">new</a>,
-  <a href=\"lib_map.htm#get\">get</a>,
-  <a href=\"lib_map.htm#put\">put</a>,
-  <a href=\"lib_map.htm#size\">size</a>,
-  <a href=\"lib_map.htm#remove\">remove</a>,
-  <a href=\"lib_map.htm#keys\">keys</a>"
->
 </table>
 
 

@@ -208,7 +208,8 @@ global constant
     HOURS   = 4,
     MINUTES = 5,
     SECONDS = 6,
-    WEEKS   = 7
+    WEEKS   = 7,
+    DATE    = 8
 
 global type datetime(object o)
 	return sequence(o) and length(o) = 6
@@ -228,31 +229,26 @@ global function new(integer year, integer month, integer day, integer hour, inte
     return d
 end function
 
--- TODO: document
 -- Converts the built-in date() format to datetime format
 global function from_date(sequence src)
 	return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
 
--- TODO: document
 -- Returns the datetime object for now. No timezones!
 global function now()
 	return from_date(date())
 end function
 
--- TODO: document
--- Answers the gregorian calendar day of the week. 
+-- Answers the gregorian calendar day of the week.
 global function dow(datetime dt)
     return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
--- TODO: document
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
 global function to_unix(datetime dt)
 	return datetimeToSeconds(dt) - EPOCH_1970
 end function
 
--- TODO: document
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
 global function from_unix(atom unix)
 	return secondsToDateTime(EPOCH_1970 + unix)
@@ -265,7 +261,6 @@ global function parse(ustring string)
 	return 0
 end function
 
--- TODO: create, document, test
 -- ustring format(ustring format)
 -- format the date according to the format string
 -- format string some taken from date(1)
@@ -387,8 +382,7 @@ global function format(datetime d, ustring format)
 	return res
 end function
 
--- TODO: document
-global function add(datetime dt, atom qty, integer interval)
+global function add(datetime dt, object qty, integer interval)
     integer inc
 
     if interval = SECONDS then
@@ -429,17 +423,17 @@ global function add(datetime dt, atom qty, integer interval)
         end if
 
         return dt
+    elsif interval = DATE then
+        qty = datetimeToSeconds(qty)
     end if
 
 	return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
 
--- TODO: document
 global function subtract(datetime dt, atom qty, integer interval)
     return add(dt, -(qty), interval)
 end function
 
--- TODO: document
 -- returns the number of seconds between two datetimes
 global function diff(datetime dt1, datetime dt2)
 	return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)

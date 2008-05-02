@@ -2109,6 +2109,12 @@ map. It will be used throughout the documentation.
 >
 
 <_3clist
+  href="lib_dtm.htm#format"
+  name="format"
+  description="Format a date according to a format string"
+>
+
+<_3clist
   href="lib_dtm.htm#from_date"
   name="from_date"
   description="Create a new datetime value a date() value"
@@ -2160,77 +2166,76 @@ contents and working with the add and subtract functions:</b></font></_sul>
 <table border=0 cellspacing=2 cellpadding=2>
 
 <_3clist
-  href="lib_dtm.htm#dt:DT_YEAR"
-  name="DT_YEAR"
+  href="lib_dtm.htm#YEAR"
+  name="YEAR"
   description="Constant for accessing the Year of a datetime value"
 >
 
 <_3clist
-  href="lib_dtm.htm#dt:DT_MONTH"
-  name="DT_MONTH"
+  href="lib_dtm.htm#MONTH"
+  name="MONTH"
   description="Constant for accessing the Month of a datetime value"
 >
 
 <_3clist
-  href="lib_dtm.htm#dt:DT_DAY"
-  name="DT_DAY"
+  href="lib_dtm.htm#DAY"
+  name="DAY"
   description="Constant for accessing the Day of a datetime value"
 >
 
 <_3clist
-  href="lib_dtm.htm#dt:DT_HOUR"
-  name="DT_HOUR"
+  href="lib_dtm.htm#HOUR"
+  name="HOUR"
   description="Constant for accessing the Hour of a datetime value"
 >
 
 <_3clist
-  href="lib_dtm.htm#dt:DT_MINUTE"
-  name="DT_MINUTE"
+  href="lib_dtm.htm#MINUTE"
+  name="MINUTE"
   description="Constant for accessing the Minute of a datetime value"
 >
 
 <_3clist
-  href="lib_dtm.htm#dt:DT_SECOND"
-  name="DT_SECOND"
+  href="lib_dtm.htm#SECOND"
+  name="SECOND"
   description="Constant for accessing the Second of a datetime value"
 >
 
 <_3clist
-  href="lib_dtm.htm#dt:SECONDS"
+  href="lib_dtm.htm#SECONDS"
   name="SECONDS"
   description="Interval key for adding seconds to a datetime value"
 >
 <_3clist
-  href="lib_dtm.htm#dt:MINUTES"
+  href="lib_dtm.htm#MINUTES"
   name="MINUTES"
   description="Interval key for adding minutes to a datetime value"
 >
 <_3clist
-  href="lib_dtm.htm#dt:HOURS"
+  href="lib_dtm.htm#HOURS"
   name="HOURS"
   description="Interval key for adding hours to a datetime value"
 >
 <_3clist
-  href="lib_dtm.htm#dt:DAYS"
+  href="lib_dtm.htm#DAYS"
   name="DAYS"
   description="Interval key for adding days to a datetime value"
 >
 <_3clist
-  href="lib_dtm.htm#dt:WEEKS"
+  href="lib_dtm.htm#WEEKS"
   name="WEEKS"
   description="Interval key for adding weeks to a datetime value"
 >
 <_3clist
-  href="lib_dtm.htm#dt:MONTHS"
+  href="lib_dtm.htm#MONTHS"
   name="MONTHS"
   description="Interval key for adding months to a datetime value"
 >
 <_3clist
-  href="lib_dtm.htm#dt:YEARS"
+  href="lib_dtm.htm#YEARS"
   name="YEARS"
   description="Interval key for adding years to a datetime value"
 >
-
 </table>
 
 <p>

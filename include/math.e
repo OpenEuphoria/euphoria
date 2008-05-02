@@ -9,8 +9,6 @@ global constant
     PI = 3.141592653589793238,
     E  = 2.718281828459045235
 
--- TODO: atan2, exp
-
 constant
     PI_HALF  =  PI / 2.0,          -- PI / 2
     PINF     = 1E308 * 1000,       -- Plus infinity (used in several routines)

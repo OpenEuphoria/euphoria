@@ -258,13 +258,47 @@ location = find_from("mary", names, 3)
 </table>
 
 
+<_routine name="find_all">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Comments:"
+  description=
+" "
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#\"></a>"
+ >
+</table>
+
+
+
 <_routine name="find_any">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
 i = find_any(s1, s2)
 </font>"
  >
@@ -300,7 +334,7 @@ location = find_any("aeiou", "John Doe")
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
 i2 = find_any_from(s1, s2, i1)
 </font>"
  >
@@ -328,6 +362,240 @@ location = find_any_from("aeiou", "John Smith", 3)
   description="<a href=\"lib_srch.htm#find_any\">find_any</a>"
  >
 </table>
+
+<_routine name="match">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = match(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Try to match s1 against some slice of s2. If successful, return
+ the element number of s2 where the (first) matching slice begins,
+ else return 0. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = match("pho", "Euphoria")
+-- location is set to 3
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find\">find</a>,
+  <a href=\"lib_srch.htm#find\">find_from</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>,
+<a href=\"lib_srch.htm#match_from\">match_from</a>,
+<a href=\"lib_pat.htm#wildcard_match\">wildcard_match</a>"
+ >
+</table>
+
+<_routine name="match_all">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Comments:"
+  description=
+" "
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#\"></a>"
+ >
+</table>
+
+
+<_routine name="match_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i1 = match_from(s1, s2, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Try to match s1 against some slice of s2, starting from index i2. 
+ If successful, return the element number of s2 where the (first) 
+ matching slice begins, else return 0. i2 may have any value from
+ 1 to the length of s plus 1. (Just like the first index of a slice
+ of s.)"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = match_from("pho", "phoEuphoria", 4)
+-- location is set to 6
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find\">find</a>,
+  <a href=\"lib_srch.htm#find_from\">find_from</a>,
+  <a href=\"lib_srch.htm#match\">match</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>,
+<a href=\"lib_pat.htm#wildcard_match\">wildcard_match</a>"
+ >
+</table>
+
+<_routine name="rfind">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Comments:"
+  description=
+" "
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#\"></a>"
+ >
+</table>
+
+<_routine name="rfind_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Comments:"
+  description=
+" "
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#\"></a>"
+ >
+</table>
+
+<_routine name="rmatch">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Comments:"
+  description=
+" "
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#\"></a>"
+ >
+</table>
+
+<_routine name="rmatch_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+<_2clist
+  name="Comments:"
+  description=
+" "
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#\"></a>"
+ >
+</table>
+
 
 <_routine name="sort">
 <table border=0 cellspacing=2 cellpadding=2>

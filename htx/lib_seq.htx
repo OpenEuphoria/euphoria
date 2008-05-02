@@ -84,6 +84,85 @@ z = append(append(y, "betty"), {"bam", "bam"})
  >
 </table>
 
+
+<_routine name="chunk">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = chunk(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Split s1 into multiple sequences of i size"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The very last sequence may not have i items if the length of s1 is not evenly divisible by i"
+>
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = chunk("5545112133234454", 4)
+-- s is {"5545", "1121", "3323", "4454"}
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = chunk("12345", 2)
+-- s is {"12", "34", "5"}
+</_eucode>
+
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+s = chunk({1,2,3,4,5,6}, 3)
+-- s is {{1,2,3}, {4,5,6}}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#split\">split</a>,
+<a href=\"lib_seq.htm#split_adv\">split_adv</a>"
+ >
+</table>
+
+<_routine name="flatten">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = flatten(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Remove all nesting from a sequence"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = flatten({{18, 19}, 45, {18.4, 29.3}})
+-- s is {18, 19, 45, 18.4, 29.3}
+</_eucode>
+</table>
+
+
 <_routine name="head">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -302,78 +381,6 @@ s = lower({"Euphoria", "Programming"})
 </table>
 
 
-<_routine name="match">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> i = match(s1, s2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"  Try to match s1 against some slice of s2. If successful, return
- the element number of s2 where the (first) matching slice begins,
- else return 0. "
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<_eucode>
-location = match("pho", "Euphoria")
--- location is set to 3
-
- </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_srch.htm#find\">find</a>,
-  <a href=\"lib_srch.htm#find\">find_from</a>,
-<a href=\"lib_srch.htm#compare\">compare</a>,
-<a href=\"lib_srch.htm#match_from\">match_from</a>,
-<a href=\"lib_pat.htm#wildcard_match\">wildcard_match</a>"
- >
-</table>
-
-<_routine name="match_from">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> i1 = match_from(s1, s2, i2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Try to match s1 against some slice of s2, starting from index i2. 
- If successful, return the element number of s2 where the (first) 
- matching slice begins, else return 0. i2 may have any value from
- 1 to the length of s plus 1. (Just like the first index of a slice
- of s.)"
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<_eucode>
-location = match_from("pho", "phoEuphoria", 4)
--- location is set to 6
-
- </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_srch.htm#find\">find</a>,
-  <a href=\"lib_srch.htm#find_from\">find_from</a>,
-  <a href=\"lib_srch.htm#match\">match</a>,
-<a href=\"lib_srch.htm#compare\">compare</a>,
-<a href=\"lib_pat.htm#wildcard_match\">wildcard_match</a>"
- >
-</table>
-
 <_routine name="mid">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -420,6 +427,96 @@ s2 = left({1, 5.4, "John", 30}, 2, 2)
  >
 </table>
 
+
+<_routine name="pad_head">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = pad_head(s1, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Pad the beginning of a sequence with spaces up to x in length or optionally x can
+be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with"
+ >
+<_2clist
+  name="Comments:"
+  description="pad_head() will not remove characters. If s1 is longer than x, this
+function simply returns s1. See <a href=\"lib_seq.htm#truncate\">truncate()</a>
+if you wish to also truncate long sequences."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = pad_head("ABC", 6)
+-- s is "   ABC"
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = pad_head("ABC", {6, '-'})
+-- s is "---ABC"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#pad_tail\">pad_tail</a>,
+<a href=\"lib_seq.htm#truncate\">truncate</a>"
+ >
+</table>
+
+<_routine name="pad_tail">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = pad_tail(s1, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Pad the end of a sequence with spaces up to x in length or optionally x can be a
+sequence {i1, i2} with i1 representing length and i2 the atom to pad with"
+ >
+<_2clist
+  name="Comments:"
+  description="pad_tail() will not remove characters. If s1 is longer than x, this
+function simply returns s1. See <a href=\"lib_seq.htm#truncate\">truncate()</a>
+if you wish to also truncate long sequences."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = pad_tail("ABC", 6)
+-- s is "ABC   "
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = pad_tail("ABC", {6, '-'})
+-- s is "ABC---"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#pad_head\">pad_head</a>,
+<a href=\"lib_seq.htm#truncate\">truncate</a>"
+ >
+</table>
 
 
 <_routine name="prepend">
@@ -740,7 +837,8 @@ s2 = slice({1,2,3,4,5}, 2, 0)
   description="
 <a href=\"lib_seq.htm#head\">head</a>,
 <a href=\"lib_seq.htm#mid\">mid</a>,
-<a href=\"lib_seq.htm#tail\">tail</a>"
+<a href=\"lib_seq.htm#tail\">tail</a>,
+<a href=\"lib_seq.htm#vslice\">vslice</a>"
  >
 </table>
 
@@ -877,6 +975,145 @@ s2 = tail({1, 5.4, "John", 30}, 3)
  >
 </table>
 
+<_routine name="trim">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s3 = trim(s1, s2)"
+</font>
+ <_2clist
+  name="Description:"
+  description=
+"Trim any item in s2 from the head (start) and tail (end) of s1"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = trim("\r\nSentence read from a file\r\n", "\r\n")
+-- s is "Sentence read from a file"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#trim_head\">trim_head</a>,
+<a href=\"lib_seq.htm#trim_tail\">trim_tail</a>"
+ >
+</table>
+
+
+<_routine name="trim_head">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s3 = trim_head(s1, s2)"
+</font>
+ <_2clist
+  name="Description:"
+  description=
+"Trim any item in s2 from the head (start) of s1"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
+-- s is "Sentence read from a file\r\n"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#trim\">trim</a>,
+<a href=\"lib_seq.htm#trim_tail\">trim_tail</a>"
+ >
+</table>
+
+<_routine name="trim_tail">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s3 = trim_tail(s1, s2)"
+</font>
+ <_2clist
+  name="Description:"
+  description=
+"Trim any item in s2 from the tail (end) of s1"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
+-- s is "\r\nSentence read from a file"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#trim\">trim</a>,
+<a href=\"lib_seq.htm#trim\">trim_head</a>"
+ >
+</table>
+
+<_routine name="truncate">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = truncate(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Truncate s1 to a maximum length of i"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Truncate does not example s1 to a length of i, it only ensures that s1 is not larger than i."
+>
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = truncate({10, 20, 30, 40, 50}, 3)
+-- s is {10, 20, 30}
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = truncate("Long sentence that you only want a part of.", 10)
+-- s is "Long sente"
+</_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+s = truncate("John Doe", 50)
+-- s is "John Doe"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#pad_head\">pad_head</a>,
+<a href=\"lib_seq.htm#pad_tail\">pad_tail</a>"
+ >
+</table>
+
 <_routine name="upper">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -910,6 +1147,48 @@ s = upper({"Euphoria", "Programming"})
   name="See Also:"
   description="<a href=\"lib_seq.htm#lower\">lower</a>"
  >
+</table>
+
+<_routine name="vslice">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = vslice(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Perform a vertical slice on a nested sequence"
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = vsplice({5,1}, {5,2}, {5,3}}, 2)
+-- s is {1,2,3}
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = vsplice({5,1}, {5,2}, {5,3}}, 1)
+-- s is {5,5,5}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#head\">head</a>,
+<a href=\"lib_seq.htm#tail\">tail</a>,
+<a href=\"lib_seq.htm#mid\">mid</a>,
+<a href=\"lib_seq.htm#slice\">slice</a>"
+ >
+
 </table>
 
 

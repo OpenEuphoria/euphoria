@@ -97,7 +97,6 @@ global function get(map m, object key, object defaultValue)
 	return defaultValue
 end function
 
--- TODO: document
 global function has(map m, object key)
     integer hash, index
     object bucket
