@@ -47,7 +47,7 @@ global function ceil(object a)
     return -floor(-a)
 end function
 
-global function round_prec(object a, object cent)
+global function round_to(object a, object cent)
     integer len
     sequence s
     object t, u
@@ -62,7 +62,7 @@ global function round_prec(object a, object cent)
             if atom (t) then
                 s[i] = floor(a * t + 0.5) / t
             else
-                s[i] = round_prec(a, t)
+                s[i] = round_to(a, t)
             end if
         end for
         return s
@@ -74,7 +74,7 @@ global function round_prec(object a, object cent)
             if atom(t) then
                 s[i] = floor(t * cent + 0.5) / cent
             else
-                s[i] = round_prec(t, cent)
+                s[i] = round_to(t, cent)
             end if
         end for
         return s
@@ -91,10 +91,10 @@ global function round_prec(object a, object cent)
             if atom(u) then
                 s[i] = floor(u * t + 0.5) / t
             else
-                s[i] = round_prec(u, t)
+                s[i] = round_to(u, t)
             end if
         else
-            s[i] = round_prec(a[i], t)
+            s[i] = round_to(a[i], t)
         end if
     end for
     return s

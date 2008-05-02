@@ -743,8 +743,8 @@
 >
 
 <_3clist
-  href="lib_math.htm#round_prec"
-  name="round_prec"
+  href="lib_math.htm#round_to"
+  name="round_to"
   description="rounds's elements to the given precision"
 >
 
