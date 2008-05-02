@@ -1,0 +1,547 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.3 - Searching and Sorting</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_srch.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.3 Searching and Sorting</_dul>
+
+</font>
+<p>
+
+<_routine name="compare">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = compare(x1, x2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Return 0 if objects x1 and x2 are identical, 1 if x1 is greater
+ than x2, -1 if x1 is less than x2. Atoms are considered to be
+ less than sequences. Sequences are compared \"alphabetically\"
+ starting with the first element until a difference is found. "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+x = compare({1,2,{3,{4}},5}, {2-1,1+1,{3,{4}},6-1})
+-- identical, x is 0
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+if compare("ABC", "ABCD") < 0 then   -- -1
+    -- will be true: ABC is "less" because it is shorter
+end if
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+x = compare({12345, 99999, -1, 700, 2},
+            {12345, 99999, -1, 699, 3, 0})
+-- x will be 1 because 700 > 699
+
+ </_eucode>
+<_2clist
+  name="Example 4:"
+  description=""
+ >
+<_eucode>
+x = compare('a', "a")
+-- x will be -1 because 'a' is an atom
+-- while "a" is a sequence
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#equal\">equal</a>, 
+               <a href=\"refman_2.htm#23\">relational operators</a>,
+               <a href=\"refman_2.htm#26\">operations on sequences</a>"
+ >
+</table>
+
+<_routine name="custom_sort">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sort.e<BR>
+ s2 = custom_sort(i, s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Sort the elements of sequence s1, using a compare function with
+ <font color=\"#993333\"><b>routine id</b></font> i. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" Your compare function must be a function of two arguments
+ similar to Euphoria's compare(). It will compare two objects
+ and return -1, 0 or +1.
+ "
+ >
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\csort.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#sort\">sort</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>,
+<a href=\"lib_dyn.htm#routine_id\">routine_id</a>"
+ >
+</table>
+
+<_routine name="equal">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = equal(x1, x2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Compare two Euphoria objects to see if they are the same.
+ Return 1 (true) if they are the same. Return 0 (false) if
+ they are different. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" This is equivalent to the expression: <b>compare(x1, x2) = 0</b>
+ <p>This routine, like most other built-in routines, is very fast. 
+ It does not have any subroutine call overhead."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+if equal(PI, 3.14) then
+    puts(1, "give me a better value for PI!\n")
+end if
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+if equal(name, "George") or equal(name, "GEORGE") then
+    puts(1, "name is George\n")
+end if
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#compare\">compare</a>,
+               <a href=\"refman_2.htm#23\">equals operator (=)</a>"
+ >
+</table>
+
+
+<_routine name="find">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = find(x, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Find x as an element of s. If successful, return the index
+ of the first element of s that matches. If unsuccessful
+ return 0. "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+location = find(11, {5, 8, 11, 2, 3})
+-- location is set to 3
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+names = {"fred", "rob", "george", "mary", ""}
+location = find("mary", names)
+-- location is set to 4
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find_from\">find_from</a>,
+  <a href=\"lib_srch.htm#match\">match</a>,
+  <a href=\"lib_srch.htm#match_from\">match_from</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>"
+ >
+</table>
+
+<_routine name="find_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i1 = find_from(x, s, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Find x as an element of s. Start the search at index i2. If successful, 
+ return the index of the first element of s that matches. If unsuccessful
+ return 0. i2 may have any value from 1 to the length of s plus 1. 
+ (Analogous to the first index of a slice of s)."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+location = find_from(11, {11, 8, 11, 2, 3}, 2)
+-- location is set to 3
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+names = {"mary", "rob", "george", "mary", ""}
+location = find_from("mary", names, 3)
+-- location is set to 4
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find\">find</a>,
+  <a href=\"lib_srch.htm#match\">match</a>,
+  <a href=\"lib_srch.htm#match_from\">match_from</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>"
+ >
+</table>
+
+
+<_routine name="find_any">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+i = find_any(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Find any element from s1 in s2 and return it's position or 0 if not found."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = find_any("aeiou", "John Doe")
+-- location is 2
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find_any_from\">find_any_from</a>"
+ >
+</table>
+
+
+<_routine name="find_any_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+i2 = find_any_from(s1, s2, i1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Find any element from s1 in s2 starting at position i2 and return it's position or 0 if not found."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = find_any_from("aeiou", "John Smith", 3)
+-- location is 8
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find_any\">find_any</a>"
+ >
+</table>
+
+<_routine name="sort">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sort.e<BR>
+ s2 = sort(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Sort s1 into ascending order using a fast sorting algorithm. The
+ elements of s1 can be any mix of atoms or sequences. Atoms come
+ before sequences, and sequences are sorted \"alphabetically\" where
+ the first elements are more significant than the later elements."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+x = 0 & sort({7,5,3,8}) & 0
+-- x is set to {0, 3, 5, 7, 8, 0}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+y = sort({"Smith", "Jones", "Doe", 5.5, 4, 6})
+-- y is {4, 5.5, 6, "Doe", "Jones", "Smith"}
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+database = sort({{"Smith",   95.0, 29},
+                 {"Jones",   77.2, 31},
+                 {"Clinton", 88.7, 44}})
+
+-- The 3 database "records" will be sorted by the first "field"
+-- i.e. by name. Where the first field (element) is equal it
+-- will be sorted by the second field etc.
+
+-- after sorting, database is:
+               {{"Clinton", 88.7, 44},
+                {"Jones",   77.2, 31},
+                {"Smith",   95.0, 29}}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#custom_sort\">custom_sort</a>,
+    <a href=\"lib_srch.htm#compare\">compare</a>,
+    <a href=\"lib_srch.htm#match\">match</a>,
+    <a href=\"lib_srch.htm#find\">find</a>"
+ >
+</table>
+
+
+<_routine name="wildcard_file">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include wildcard.e<BR>
+ i = wildcard_file(st1, st2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return 1 (true) if the filename st2 matches the wild card pattern
+ st1. Return 0 (false) otherwise. This is similar to DOS wildcard
+ matching, but better in some cases. * matches any 0 or more
+ characters, ? matches any single character. On Linux and FreeBSD
+ the character comparisons are case sensitive. On DOS and Windows
+ they are not."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"You might use this function to check the output of the dir()
+ routine for file names that match a pattern supplied by the
+ user of your program.
+<P>
+In DOS \"*ABC.*\" will match <b><i>all</i></b> files.
+ wildcard_file(\"*ABC.*\", s) will only match when the file name part
+ has \"ABC\" at the end (as you would expect)."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = wildcard_file("AB*CD.?", "aB123cD.e")
+-- i is set to 1 on DOS or Windows, 0 on Linux or FreeBSD
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = wildcard_file("AB*CD.?", "abcd.ex")
+-- i is set to 0 on all systems, 
+-- because the file type has 2 letters not 1
+
+ </_eucode>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>bin\search.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#wildcard_match\">wildcard_match</a>,
+<a href=\"lib_file.htm#dir\">dir</a>"
+ >
+</table>
+
+
+<_routine name="wildcard_match">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include wildcard.e<BR>
+ i = wildcard_match(st1, st2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"This function performs a general matching of a string against a
+ pattern containing * and ? wildcards. It returns 1 (true) if
+ string st2 matches pattern st1. It returns 0 (false) otherwise.
+ * matches any 0 or more characters. ? matches any
+ single character. Character comparisons are case sensitive."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"If you want case insensitive comparisons, pass both st1 and st2
+ through upper(), or both through lower() before calling
+ wildcard_match().
+<P>
+If you want to detect a pattern anywhere within a string,
+ add * to each end of the pattern:"
+ >
+<_eucode>
+i = wildcard_match('*' & pattern & '*', string)
+</_eucode>
+
+<_2clist
+  name=""
+  description=
+"There is currently no way to treat * or ? literally in a pattern."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+i = wildcard_match("A?B*", "AQBXXYY")
+-- i is 1 (TRUE)
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+i = wildcard_match("*xyz*", "AAAbbbxyz")
+-- i is 1 (TRUE)
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+i = wildcard_match("A*B*C", "a111b222c")
+-- i is 0 (FALSE) because upper/lower case doesn't match
+
+ </_eucode>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>bin\search.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#wildcard_file\">wildcard_file</a>,
+<a href=\"lib_srch.htm#match\">match</a>,
+<a href=\"lib_seq.htm#upper\">upper</a>,
+<a href=\"lib_seq.htm#lower\">lower</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>"
+ >
+</table>
+
+<_continueAll
+  libDoc="lib_srch.htm"
+>
+
+
+</body>
+</html>
+

@@ -1,0 +1,957 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.2 - Sequence Manipulation</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_seq.htm"
+>
+
+
+<a name=seq_manip></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.2 Sequence Manipulation</_dul>
+
+</font>
+<p>
+
+<_routine name="length">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = length(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Return the length of s. s must be a sequence. An error will
+ occur if s is an atom. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" The length of each sequence is stored internally by the
+ interpreter for quick access. (In other languages this
+ operation requires a search through memory for an end marker.)
+ "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+length({{1,2}, {3,4}, {5,6}})   -- 3
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+length("")    -- 0
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+length({})    -- 0
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_type.htm#sequence\">sequence</a>"
+ >
+</table>
+
+<_routine name="append">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> s2 = append(s1, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Create a new sequence identical to s1 but with x added on the end
+ as the last element. The length of s2 will be
+ <a href=\"lib_seq.htm#length\">length(s1)</a> + 1. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" If x is an atom this is equivalent to <b>s2 = s1 & x</b>. If x is a
+ sequence it is not equivalent.
+<P>
+The extra storage is allocated automatically and very
+ efficiently with Euphoria's dynamic storage allocation.
+ The case where s1 and s2 are actually the same variable
+ (as in Example 1 below) is highly optimized.
+ "
+ >
+<_2clist
+  name="Example 1:"
+  description=" You can use append() to dynamically grow a sequence, e.g."
+ >
+<_eucode>
+sequence x
+
+x = {}
+for i = 1 to 10 do
+    x = append(x, i)
+end for
+-- x is now {1,2,3,4,5,6,7,8,9,10}
+
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=" Any kind of Euphoria object can be appended to a sequence, e.g."
+ >
+<_eucode>
+sequence x, y, z
+
+x = {"fred", "barney"}
+y = append(x, "wilma")
+-- y is now {"fred", "barney", "wilma"}
+
+z = append(append(y, "betty"), {"bam", "bam"})
+-- z is now {"fred", "barney", "wilma", "betty", {"bam", "bam"}}
+
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#prepend\">prepend</a>,
+  <a href=\"refman_2.htm#27\">concatenation operator &</a>,
+  <a href=\"refman_2.htm#28\">sequence-formation operator</a>"
+ >
+</table>
+
+<_routine name="head">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = head(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the first i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = head("John Doe", 4)
+-- s2 is John
+
+s2 = head("John Doe", 50)
+-- s2 is John Doe
+
+s2 = head({1, 5.4, "John", 30}, 3)
+-- s2 is {1, 5.4, "John"}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#tail\">tail</a>,
+<a href=\"lib_seq.htm#mid\">mid</a>,
+<a href=\"lib_seq.htm#slice\">slice</a>"
+ >
+</table>
+
+
+
+
+<_routine name="insert">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = insert(s1, x, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Insert x into s1 at index i. The item is inserted before i, not after."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 and x can be any type of sequence, including nested sequences."
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = insert("John Doe", " Middle", 5)
+-- s is "John Middle Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = insert({10,30,40}, 20, 2)
+-- s is {10,20,30,40}
+</_eucode>
+
+</table>
+
+
+<_routine name="join">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s3 = join(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Join s1 by s2"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+result = join({"John", "Middle", "Doe"}, " ")
+-- result is "John Middle Doe"
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#split\">split</a>,
+<a href=\"lib_seq.htm#split_adv\">split_adv</a>"
+ >
+</table>
+
+
+<_routine name="lower">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include wildcard.e<BR>
+ x2 = lower(x1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Convert an atom or sequence to lower case."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = lower("Euphoria")
+-- s is "euphoria"
+
+a = lower('B')
+-- a is 'b'
+
+s = lower({"Euphoria", "Programming"})
+-- s is {"euphoria", "programming"}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#upper\">upper</a>"
+ >
+</table>
+
+
+<_routine name="match">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = match(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Try to match s1 against some slice of s2. If successful, return
+ the element number of s2 where the (first) matching slice begins,
+ else return 0. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = match("pho", "Euphoria")
+-- location is set to 3
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find\">find</a>,
+  <a href=\"lib_srch.htm#find\">find_from</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>,
+<a href=\"lib_srch.htm#match_from\">match_from</a>,
+<a href=\"lib_pat.htm#wildcard_match\">wildcard_match</a>"
+ >
+</table>
+
+<_routine name="match_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i1 = match_from(s1, s2, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Try to match s1 against some slice of s2, starting from index i2. 
+ If successful, return the element number of s2 where the (first) 
+ matching slice begins, else return 0. i2 may have any value from
+ 1 to the length of s plus 1. (Just like the first index of a slice
+ of s.)"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+location = match_from("pho", "phoEuphoria", 4)
+-- location is set to 6
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_srch.htm#find\">find</a>,
+  <a href=\"lib_srch.htm#find_from\">find_from</a>,
+  <a href=\"lib_srch.htm#match\">match</a>,
+<a href=\"lib_srch.htm#compare\">compare</a>,
+<a href=\"lib_pat.htm#wildcard_match\">wildcard_match</a>"
+ >
+</table>
+
+<_routine name="mid">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = mid(s1, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return i2 items starting at i1. If i1 + i2 is greater than the length of s1, then everything
+in s1 starting at i1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = mid("John Middle Doe", 6, 6)
+-- s2 is Middle
+
+s2 = left("John Middle Doe", 6, 50)
+-- s2 is Middle Doe
+
+s2 = left({1, 5.4, "John", 30}, 2, 2)
+-- s2 is {5.4, "John"}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_p_r.htm#right\">right</a>,
+<a href=\"lib_h_o.htm#left\">left</a>,
+<a href=\"lib_seq.htm#slice\">slice</a>"
+ >
+</table>
+
+
+
+<_routine name="prepend">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> s2 = prepend(s1, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Prepend x to the start of sequence s1. The length of s2 will be
+ <a href=\"lib_seq.htm#length\">length(s1)</a> + 1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"If x is an atom this is the same as <b>s2 = x & s1</b>. If x is a
+ sequence it is definitely not the same.
+<P>
+The case where s1 and s2 are the same variable is handled
+ very efficiently."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+prepend({1,2,3}, {0,0})   -- {{0,0}, 1, 2, 3}
+
+-- Compare with concatenation:
+
+{0,0} & {1,2,3}           -- {0, 0, 1, 2, 3}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = {}
+for i = 1 to 10 do
+    s = prepend(s, i)
+end for
+-- s is {10,9,8,7,6,5,4,3,2,1}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#append\">append</a>,
+               <a href=\"refman_2.htm#27\">concatenation operator &</a>,
+               <a href=\"refman_2.htm#28\">sequence-formation operator</a>"
+ >
+</table>
+
+<_routine name="remove">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = remove(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Remove an item from a sequence"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 can be a string or complex sequence."
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = remove("Johnn Doe", 4)
+-- s is "John Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = remove({1,2,3,3,4}, 4)
+-- s is {1,2,3,4}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#remove_range\">remove_range</a>"
+ >
+</table>
+
+<_routine name="remove_range">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = remove_range(s1, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Remove items starting at index i1 thru i2 in s1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 can be a string or complex sequence."
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = remove_range("John Middle Doe", 6, 12)
+-- s is "John Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = remove_range({1,2,3,3,4,4}, 4, 5)
+-- s is {1,2,3,4}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#remove\">remove</a>"
+ >
+</table>
+
+
+
+
+<_routine name="repeat">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> s = repeat(x, a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Create a sequence of length a where each element is x. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" When you repeat a sequence or a floating-point number the
+ interpreter does not actually make multiple copies in memory.
+ Rather, a single copy is \"pointed to\" a number of times.
+ "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+repeat(0, 10)      -- {0,0,0,0,0,0,0,0,0,0}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
+-- The interpreter will create only one copy of "JOHN"
+-- in memory
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#append\">append</a>,
+               <a href=\"lib_seq.htm#prepend\">prepend</a>,
+               <a href=\"refman_2.htm#28\">sequence-formation operator</a>"
+ >
+</table>
+
+
+<_routine name="replace_range">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
+s2 = replace_range(s1, x, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Replace from index i1 to i2 of s1 with object x. x can be any object."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created. s1 can be a string or complex sequence.
+
+To replace just one element, simply: s[index] = new_item"
+>
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = replace_range("John Middle Doe", "Smith", 6, 11)
+-- s is "John Smith Doe"
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = replace_range({45.3, "John", 5, {10, 20}}, 25, 2, 3)
+-- s is {45.3, 25, {10, 20}}
+</_eucode>
+
+</table>
+
+<_routine name="reverse">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+ s2 = reverse(s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Reverse the order of elements in a sequence. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" A new sequence is created where the top-level elements appear
+ in reverse order compared to the original sequence.
+ "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+reverse({1,3,5,7})          -- {7,5,3,1}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
+
+ </_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+reverse({99})               -- {99}
+
+ </_eucode>
+<_2clist
+  name="Example 4:"
+  description=""
+ >
+<_eucode>
+reverse({})                 -- {}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#append\">append</a>,
+<a href=\"lib_seq.htm#prepend\">prepend</a>,
+<a href=\"lib_seq.htm#repeat\">repeat</a>"
+ >
+</table>
+
+<_routine name="slice">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = slice(s1, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return items i1 to i2 from s1. If i2 is greater than the length of s1, then from i1 to the
+end of s1 will be returned. If i2 is zero, it will be treated as the end of s1. If i2 is a
+negative value, then it will be treated as i2 positions from the end of s1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = slice("John Doe", 6, 8)
+-- s2 is Doe
+
+s2 = slice("John Doe", 6, 50)
+-- s2 is Doe
+
+s2 = slice({1, 5.4, "John", 30}, 2, 3)
+-- s2 is {5.4, "John"}
+
+s2 = slice({1,2,3,4,5}, 2, -1)
+-- s2 is {2,3,4}
+
+s2 = slice({1,2,3,4,5}, 2, 0)
+-- s2 is {2,3,4,5}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_seq.htm#head\">head</a>,
+<a href=\"lib_seq.htm#mid\">mid</a>,
+<a href=\"lib_seq.htm#tail\">tail</a>"
+ >
+</table>
+
+<_routine name="split">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s3 = split(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"split s1 by s2"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+result = split("John,Middle,Doe", ",")
+-- result is {"John", "Middle", "Doe"}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#split_adv\">split_adv</a>,
+<a href=\"lib_seq.htm#join\">join</a>"
+ >
+</table>
+
+<_routine name="split_adv">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s3 = split_adv(s1, s2, i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"split s1 by s2.
+
+If i1 is > 0 then limit the number of tokens that will be split to i1.
+
+If i2 is 1 then split by any one item in s2 not s2 as a whole. If i2 is 0 then split
+by s2 as a whole."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function may be applied to a string sequence or a complex sequence"
+>
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+result = split_adv("John,Middle,Doe", ",", 2, 0)
+-- result is {"John", "Middle,Doe"}
+</_eucode>
+
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+result = split_adv("One,Two|Three.Four", ".,|", 0, 1)
+-- result is {"One", "Two", "Three", "Four"}
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#split\">split</a>,
+<a href=\"lib_seq.htm#join\">join</a>"
+ >
+</table>
+
+<_routine name="tail">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
+s2 = tail(s1, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the last i items of s1. If i is greater than the length of s1, then the entire
+s1 will be returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A new sequence is created.
+
+s1 can be any type of sequence, including nested sequences."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s2 = tail("John Doe", 3)
+-- s2 is Doe
+
+s2 = tail("John Doe", 50)
+-- s2 is John Doe
+
+s2 = tail({1, 5.4, "John", 30}, 3)
+-- s2 is {5.4, "John", 30}
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#head\">head</a>,
+<a href=\"lib_seq.htm#mid\">mid</a>,
+<a href=\"lib_seq.htm#slice\">slice</a>"
+ >
+</table>
+
+<_routine name="upper">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include wildcard.e<BR>
+ x2 = upper(x1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Convert an atom or sequence to upper case. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = upper("Euphoria")
+-- s is "EUPHORIA"
+
+a = upper('g')
+-- a is 'G'
+
+s = upper({"Euphoria", "Programming"})
+-- s is {"EUPHORIA", "PROGRAMMING"}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_seq.htm#lower\">lower</a>"
+ >
+</table>
+
+
+<_continueAll
+  libDoc="lib_seq.htm"
+>
+
+
+</body>
+</html>
+

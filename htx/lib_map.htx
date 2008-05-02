@@ -1,0 +1,307 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.14 - Map</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_map.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.14 - Map</_dul>
+
+</font>
+<p>
+
+<_routine name="new">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR> 
+  m = new() </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Create a new map data structure."
+>
+<_2clist
+  name="Comments:"
+  description="A new object of type map is created. type_check should be turned off for better performance."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map m
+m = new()
+-- m is now an empty map (size = 0)
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#get\">get</a>,
+  <a href=\"lib_map.htm#put\">put</a>,
+  <a href=\"lib_map.htm#size\">size</a>,
+  <a href=\"lib_map.htm#remove\">remove</a>,
+  <a href=\"lib_map.htm#keys\">keys</a>,
+  <a href=\"lib_map.htm#values\">values</a>"
+>
+</table>
+
+<_routine name="get">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR> 
+  x1 = get(m, x2, x3) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return the value that corresponds to the key x2 in the map m. If the key is not in the map, the default value x3 is returned instead."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map ages
+ages = new()
+ages = put(ages, "Andy", 12)
+ages = put(ages, "Budi", 13)
+integer age
+age = get(ages, "Budi", -1)
+if age = -1 then
+	puts(1, "Age unknown")
+else
+	printf(1, "The age is %d", age)
+end if
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#new\">new</a>,
+  <a href=\"lib_map.htm#put\">put</a>,
+  <a href=\"lib_map.htm#size\">size</a>,
+  <a href=\"lib_map.htm#remove\">remove</a>,
+  <a href=\"lib_map.htm#keys\">keys</a>,
+  <a href=\"lib_map.htm#values\">values</a>"
+>
+</table>
+
+<_routine name="put">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  m1 = put(m1, x1, x2) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Put an entry on the map m1 with key x1 and value x2. The modified map is returned."
+>
+<_2clist
+  name="Comments:"
+  description="If existing entry with the same key is already in the map, the value of the entry is updated."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map ages
+ages = new()
+ages = put(ages, "Andy", 12)
+ages = put(ages, "Budi", 13)
+ages = put(ages, "Budi", 14)
+-- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#new\">new</a>,
+  <a href=\"lib_map.htm#get\">get</a>,
+  <a href=\"lib_map.htm#size\">size</a>,
+  <a href=\"lib_map.htm#remove\">remove</a>,
+  <a href=\"lib_map.htm#keys\">keys</a>,
+  <a href=\"lib_map.htm#values\">values</a>"
+>
+</table>
+
+<_routine name="size">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  i = size(m) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return the number of entries in the map m."
+>
+<_2clist
+  name="Comments:"
+  description="For an empty map, it will return 0"
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map m
+m = put(m, 1, "a")
+m = put(m, 2, "b")
+? size(m) -- outputs 2
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#new\">new</a>,
+  <a href=\"lib_map.htm#get\">get</a>,
+  <a href=\"lib_map.htm#put\">put</a>,
+  <a href=\"lib_map.htm#remove\">remove</a>,
+  <a href=\"lib_map.htm#keys\">keys</a>,
+  <a href=\"lib_map.htm#values\">values</a>"
+>
+</table>
+
+<_routine name="remove">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  m1 = remove(m2, x) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Remove an entry with key x from the map m2. The modified map is returned"
+>
+<_2clist
+  name="Comments:"
+  description="If the map has no entry with the specified key, the original map is returned."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map m
+m = new()
+m = put(m, "Amy", 66.9)
+m = remove(m, "Amy")
+-- m is now an empty map again
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#new\">new</a>,
+  <a href=\"lib_map.htm#get\">get</a>,
+  <a href=\"lib_map.htm#put\">put</a>,
+  <a href=\"lib_map.htm#size\">size</a>,
+  <a href=\"lib_map.htm#keys\">keys</a>,
+  <a href=\"lib_map.htm#values\">values</a>"
+>
+</table>
+
+<_routine name="keys">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  s = keys(m) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return all keys in the map as a sequence."
+>
+<_2clist
+  name="Comments:"
+  description="The order of the keys returned may not be the same as the putting order."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map m
+m = new()
+m = put(m, 10, "ten")
+m = put(m, 20, "twenty")
+m = put(m, 30, "thirty")
+m = put(m, 40, "forty")
+sequence keys
+keys = keys(m) -- keys might be {20,40,10,30} or some other orders
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#new\">new</a>,
+  <a href=\"lib_map.htm#get\">get</a>,
+  <a href=\"lib_map.htm#put\">put</a>,
+  <a href=\"lib_map.htm#size\">size</a>,
+  <a href=\"lib_map.htm#remove\">remove</a>,
+  <a href=\"lib_map.htm#values\">values</a>"
+>
+</table>
+
+<_routine name="values">
+<table border=0 cellspacing=2 cellpadding=2>
+<_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include map.e<BR>
+  s = values(m) </font>"
+>
+ <_2clist
+  name="Description:"
+  description=
+  "Return all values in the map as a sequence."
+>
+<_2clist
+  name="Comments:"
+  description="The order of the values returned may not be the same as the putting order. Duplicate values are not removed."
+>
+<_2clist
+  name="Example:"
+  description=""
+>
+<_eucode>
+map m
+m = new()
+m = put(m, 10, "ten")
+m = put(m, 20, "twenty")
+m = put(m, 30, "thirty")
+m = put(m, 40, "forty")
+sequence values
+values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_map.htm#new\">new</a>,
+  <a href=\"lib_map.htm#get\">get</a>,
+  <a href=\"lib_map.htm#put\">put</a>,
+  <a href=\"lib_map.htm#size\">size</a>,
+  <a href=\"lib_map.htm#remove\">remove</a>,
+  <a href=\"lib_map.htm#keys\">keys</a>"
+>
+</table>
+
+
+<_continueAll
+  libDoc="lib_map.htm"
+>
+
+</body>
+</html>
+

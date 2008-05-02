@@ -1,0 +1,137 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.9 - Debugging</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+
+<_continueAllTop
+  libDoc="lib_dbg.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.9 - Debugging</_dul>
+
+</font>
+<p>
+
+<_routine name="profile">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> profile(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Enable or disable profiling at run-time. This works for both
+ <font color=\"#993333\"><b>execution-count</b></font> and 
+ <font color=\"#993333\"><b>time-profiling</b></font>.
+ If i is 1 then profiling will be enabled, and samples/counts will be
+ recorded. If i is 0 then profiling will be disabled and
+ samples/counts will not be recorded."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"After a \"<b>with profile</b>\" or \"<b>with profile_time</b>\" statement,
+ profiling is turned on automatically. Use profile(0) to
+ turn it off. Use profile(1) to turn it back on when
+ execution reaches the code that you wish to focus the
+ profile on."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+with profile_time
+profile(0)
+  ...
+procedure slow_routine()
+profile(1)
+  ...
+profile(0)
+end procedure
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_dbg.htm#trace\">trace</a>,
+               <a href=\"refman_3.htm#2\">profiling</a>,
+               <a href=\"refman_2.htm#6\">special top-level statements</a>"
+ >
+</table>
+
+
+
+<_routine name="trace">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> with trace<BR>
+ trace(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"If i is 1 or 2, turn on full-screen interactive statement tracing/debugging. 
+ If i is 3, turn on tracing of statements to a file called <b>ctrace.out</b>.
+ If i is 0, turn off tracing. When i is 1 a color display appears.
+ When i is 2 a monochrome trace display appears. 
+ Tracing can only occur in routines that were
+ compiled \"<b>with trace</b>\", and trace() has no effect unless it is
+ executed in a \"<b>with trace</b>\" <b>section</b> of your program. 
+ <p>
+ See
+ <a href=\"refman_3.htm#1\">Part I - 3.1 Debugging</a> for a full discussion
+  of tracing / debugging."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Use trace(2) if the color display is hard to view on your system.
+<p>
+All forms of trace() are supported by the Interpreter.
+<p> 
+Only trace(3) is supported by the Euphoria To C Translator."
+ >
+
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+if x < 0 then
+    -- ok, here is the case I want to debug...
+    trace(1)
+    -- etc.
+    ...
+end if
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_dbg.htm#profile\">profile</a>,
+               <a href=\"refman_3.htm\">debugging and profiling</a>"
+ >
+</table>
+
+<_continueAll
+  libDoc="lib_dbg.htm"
+>
+
+
+</body>
+</html>
+

@@ -856,7 +856,7 @@ and so is s[length(s)+1..length(s)].
 </font>
 <p>
 
- <a class="brown" href="lib_h_o.htm#length"><b>length()</b></a>
+ <a class="brown" href="lib_seq.htm#length"><b>length()</b></a>
  tells you the length of a sequence s. This is the number of
  elements in s. Some of these elements may be sequences that contain elements
  of their own, but length just gives you the "top-level" count. You'll get an
@@ -877,7 +877,7 @@ and so is s[length(s)+1..length(s)].
 </font>
 <p>
 
- <a class="brown" href="lib_p_r.htm#repeat"><b>repeat()</b></a>
+ <a class="brown" href="lib_seq.htm#repeat"><b>repeat()</b></a>
  makes a sequence that consists of an item repeated count times. e.g.
 <_eucode>
         repeat(0, 100)         -- {0,0,0,...,0}   i.e. 100 zeros
@@ -900,9 +900,9 @@ and so is s[length(s)+1..length(s)].
 </font>
 <p>
 
- <a class="brown" href="lib_a_b.htm#append"><b>append()</b></a>
+ <a class="brown" href="lib_seq.htm#append"><b>append()</b></a>
  creates a new sequence by adding an item to the end of a sequence s.
- <a class="brown" href="lib_p_r.htm#prepend"><b>prepend()</b></a>
+ <a class="brown" href="lib_seq.htm#prepend"><b>prepend()</b></a>
  creates a new sequence by adding an element to the beginning of a
  sequence s. e.g.
 
@@ -1313,7 +1313,7 @@ and so is s[length(s)+1..length(s)].
 <p>
  Procedures, functions and types can call themselves <i>recursively</i>. Mutual
  recursion, where routine A calls routine B which directly or indirectly calls
- routine A, requires the <a class="brown" href="lib_p_r.htm#routine_id">
+ routine A, requires the <a class="brown" href="lib_dyn.htm#routine_id">
  <b>routine_id()</b></a> mechanism.
 
 <p>
@@ -1616,7 +1616,7 @@ file of the library.
  on or off, you will never get a <b><i>machine-level</i></b> exception.
  <font color="#CC0099"><b>You will always get a
  meaningful message from Euphoria when something goes wrong.</b></font>
- (<i>This might not be the case when you <a href="lib_p_r.htm#poke">poke</a>
+ (<i>This might not be the case when you <a href="lib_mach.htm#poke">poke</a>
  directly into memory, or call routines written in C or machine code.</i>)
 </dl>
 
@@ -2165,7 +2165,7 @@ The <font color="#993333"><b>if</b></font> and
  DOS prompt session. If the program had files open for writing, it would be
  advisable to run <b>scandisk</b> to check your file system integrity.
  Only when your program is waiting for keyboard input, will control-c abort
- the program (unless <a href="lib_a_b.htm#allow_break">allow_break(0)</a>
+ the program (unless <a href="lib_file.htm#allow_break">allow_break(0)</a>
  was used).
 
 <p>
@@ -2202,8 +2202,8 @@ The <font color="#993333"><b>if</b></font> and
  It's quite possible to have a program with nothing but
  top-level executable statements and no routines. For example you might 
  want to use Euphoria as a simple calculator, typing just a few
- <a href="lib_p_r.htm#print">print</a>
- (or <a href="lib_a_b.htm#?">?</a>) statements into a file, and
+ <a href="lib_file.htm#print">print</a>
+ (or <a href="lib_file.htm#?">?</a>) statements into a file, and
  then executing it. 
 
 <p>
@@ -2383,7 +2383,7 @@ See <a href=refman_2.htm#42>Scope Rules</a> for more.
        <b>
        <a class="brown" href="refman_3.htm#2">profile</a>,
        <a class="brown" href="refman_3.htm#2">profile_time</a>,
-       <a class="brown" href="refman_3.htm#trace">trace</a>,
+       <a class="brown" href="lib_dbg.htm#trace">trace</a>,
        <font color="#993333">warning</font></b> or
        <a class="brown" href="refman_2.htm#typechk"><b>type_check</b>
        </a>.

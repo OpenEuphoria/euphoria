@@ -452,7 +452,7 @@
   name="<font color=\"#FF0099\">S:</font>"
   pos=7
   description="See <font color=\"#006699\"><b>gets()</b></font> in
-   <a class=\"blue\" href=\"lib_e_g.htm#gets\"><b>library.doc</b></a>.
+   <a class=\"blue\" href=\"lib_file.htm#gets\"><b>library.doc</b></a>.
    <font color=\"#006699\">gets(0)</font> will read a line from <b>standard
    input</b>, which is normally the <b>keyboard</b>. The line will always
    have <b>\n</b> on the end. To remove the trailing \n character do:"

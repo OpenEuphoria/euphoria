@@ -4,6 +4,10 @@
 <_css>
 </head>
 <body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_continueAllTop
+  libDoc="overview.htm"
+>
+
 <_width>
 <_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
 <br>
@@ -173,8 +177,9 @@
  Most subdirectories under <font color="#5500FF"><b>\euphoria</b></font> have
  a <b>.doc</b> file that describes the files in that subdirectory. 
  
-<p>&nbsp;
-
+<_continueAll
+  libDoc="overview.htm"
+>
 </_width>
 </body>
 </html>

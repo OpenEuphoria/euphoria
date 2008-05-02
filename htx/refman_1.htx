@@ -301,7 +301,7 @@ distribution. In this manual, directory names are shown using backslash
  words (known as <font color="#993333"><b>arguments</b></font>) on this line,
  known as the <font color="#993333"><b>command-line</b></font>.
  Your program can call the built-in function
- <a href="lib_c_d.htm#command_line">command_line()</a> to read the
+ <a href="lib_os.htm#command_line">command_line()</a> to read the
  command-line.
  The DOS32 version of the
  Euphoria interpreter is called
@@ -350,7 +350,7 @@ will be prompted for it.
 </pre>
  The first statement turns off echoing of commands to the screen. The second
  runs <b>ex myprog.ex</b> with up to 3 command-line arguments.
- See <a href="lib_c_d.htm#command_line">command_line()</a> for an example of
+ See <a href="lib_os.htm#command_line">command_line()</a> for an example of
  how to read these arguments. If your program takes more arguments, you
  should add %4 %5 etc. Having a .bat file will save you the minor
  inconvenience of typing <font color="#993333"><_bq>ex</_bq></font>

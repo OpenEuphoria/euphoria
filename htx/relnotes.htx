@@ -147,7 +147,7 @@
      <b>new()</b>, <b>from_date()</b>,
      <b>now()</b>, <b>dow()</b>, <b>to_unix()</b>,
      <b>from_unix()</b>, <b>add()</b>, <b>subtract()</b>,
-     <b>add()</b>, <b>diff()</b>. Global constants: <b>DT_YEAR</b>, <b>DT_MONTH</b>,
+     <b>diff()</b>. Global constants: <b>DT_YEAR</b>, <b>DT_MONTH</b>,
      <b>DT_DAY</b>, <b>DT_HOUR</b>, <b>DT_MINUTE</b>, <b>DT_SECOND</b>, <b>SECONDS</b>,
      <b>MINUTES</b>, <b>HOURS</b>, <b>DAYS</b>, <b>WEEKS</b>, <b>MONTHS</b>, <b>YEARS</b>.
      Global sequences: <b>month_names</b>, <b>month_abbrs</b>, <b>day_names</b>,

@@ -318,43 +318,72 @@ procedure tag_continue(sequence raw_text, sequence plist)
     end if
 end procedure
 
-constant LIB_ID = {{"lib_a_b.htm", "from A to B"},
-		   {"lib_c_d.htm", "from C to D"},
-		   {"lib_e_g.htm", "from E to G"},
-		   {"lib_h_o.htm", "from H to O"},
-		   {"lib_p_r.htm", "from P to R"},
-		   {"lib_s_t.htm", "from S to T"},
-		   {"lib_u_z.htm", "from U to Z"}}
-		   
-procedure tag_continueall(sequence raw_text, sequence plist)
+constant LIB_ID = {
+    {"overview.htm", "Overview", ""},
+    {"library.htm", "Library Index", ""},
+    {"lib_type.htm", "Type Checking", "type_checking"},
+    {"lib_seq.htm", "Sequence Manipulation", "seq_manip"},
+    {"lib_srch.htm", "Searching and Sorting", "srch_srt"},
+    {"lib_math.htm", "Math", "math"},
+    {"lib_bitw.htm", "Bitwise Logic", "bitw_logic"},
+    {"lib_file.htm", "I/O", "i_o"},
+    {"lib_mous.htm", "Mouse", "mouse_spt"},
+    {"lib_os.htm", "O/S", "op_sys"},
+    {"lib_dbg.htm", "Debugging", "debugging"},
+    {"lib_grap.htm", "Graphics", "gr_sound"},
+    {"lib_mach.htm", "Machine Level", "m_level_i"},
+    {"lib_dyn.htm", "Dynamic Calls", "dyn_call"},
+    {"lib_c.htm", "C Interface", "call_c_func"},
+    {"lib_map.htm", "Map", "map"},
+    {"lib_dtm.htm", "Date/Time", "datetime"},
+    {"lib_task.htm", "Multitasking", "tasking"}}
+
+procedure tag_continueall(sequence raw_text, sequence plist, integer top)
 -- special handler for braching to all the pages in the same category
     object  temp
-    
-    write("<p>&nbsp;<p><center>\n")
-    write("<font color=\"#006633\" face=\"Arial, Helvetica\" size=+1>" &
-	  "... continue</font><br>&nbsp;<br>\n")
+
+    if top then
+        write("<center>\n")
+    else
+        write("<p>&nbsp;<p><center>\n")
+        write("<hr>\n")
+    end if
+
     write("<font face=\"Arial, Helvetica\" size=-1>\n")
     
     temp = pval("libDoc", plist)
     if sequence(temp) and not equal(temp, "") then
-	for i = 1 to length(LIB_ID) - 1 do
-	    if not equal(temp, LIB_ID[i][1]) then
-		write("<a href=\"" & LIB_ID[i][1] & "\">" & LIB_ID[i][2] &
-		      "</a> &nbsp; | &nbsp;\n")
-	    else
-		write(LIB_ID[i][2] & " &nbsp; | &nbsp;\n")
-	    end if
-	end for
-	if not equal(temp, LIB_ID[length(LIB_ID)][1]) then
-	    write("<a href=\"" & LIB_ID[length(LIB_ID)][1] & "\">" &
-		  LIB_ID[length(LIB_ID)][2] &
-		  "</a></font></center><p>&nbsp;\n")
-	else
-	    write(LIB_ID[length(LIB_ID)][2] & "\n")
-	end if
+        for i = 1 to length(LIB_ID) - 1 do
+            if not equal(temp, LIB_ID[i][1]) then
+            write("<a href=\"" & LIB_ID[i][1] & "\">" & LIB_ID[i][2] &
+                  "</a> &nbsp; | &nbsp;\n")
+            else
+                write(LIB_ID[i][2] & " &nbsp; | &nbsp;\n")
+            end if
+        end for
+
+        if not equal(temp, LIB_ID[length(LIB_ID)][1]) then
+            write("<a href=\"" & LIB_ID[length(LIB_ID)][1] & "\">" &
+              LIB_ID[length(LIB_ID)][2] &
+              "</a></font></center>\n")
+        else
+            write(LIB_ID[length(LIB_ID)][2] & "\n")
+        end if
     else
-	quit("no identification of \"lib_\" given in <_continueAll> tag")
+        quit("no identification of \"lib_\" given in <_continueAll> tag")
     end if
+
+    if top then
+        write("<hr>\n")
+    end if
+end procedure
+
+procedure tag_continuealltop(sequence raw_text, sequence plist)
+    tag_continueall(raw_text, plist, 1)
+end procedure
+
+procedure tag_continueallbottom(sequence raw_text, sequence plist)
+    tag_continueall(raw_text, plist, 0)
 end procedure
 
 global procedure html_init()
@@ -363,7 +392,8 @@ global procedure html_init()
     add_handler("_width",   routine_id("tag_width"))
     add_handler("/_width",  routine_id("tag_end_width"))
     add_handler("_continue",routine_id("tag_continue"))
-    add_handler("_continueAll",routine_id("tag_continueall"))
+    add_handler("_continueAll",routine_id("tag_continueallbottom"))
+    add_handler("_continueAllTop",routine_id("tag_continuealltop"))
     add_handler("_bsq",     routine_id("tag_bsq"))
     add_handler("/_bsq",    routine_id("tag_end_bsq"))
     add_handler("!--",      routine_id("tag_comment"))

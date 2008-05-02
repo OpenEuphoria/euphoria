@@ -1,0 +1,549 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.16 - Multitasking</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_task.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.16 - Multitasking</_dul>
+
+</font>
+<p>
+
+<_routine name="task_clock_start">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">task_clock_start()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+ "Restart the clock used for scheduling real-time tasks. Call this routine,
+  some time after calling task_clock_stop(), when you want scheduling 
+  of real-time tasks to continue."
+ >
+<_2clist
+  name="Comments:"
+  description="task_clock_stop() and task_clock_start() can be used to freeze
+  the scheduling of real-time tasks. 
+  <p>
+  task_clock_start() causes the scheduled times of all real-time tasks to be
+  incremented by the amount of time since task_clock_stop() was called. 
+  This allows a game, simulation, or other program to continue smoothly.
+  <p>
+  Time-shared tasks are not affected.
+  "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+-- freeze the game while the player answers the phone
+task_clock_stop()
+while get_key() = -1 do
+end while
+task_clock_start()
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_task.htm#task_clock_stop\">task_clock_stop</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>"
+ >
+</table>
+
+
+<_routine name="task_clock_stop">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">task_clock_stop()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Stop the scheduling of real-time tasks. Scheduling will resume when
+task_clock_start() is called. Time-shared tasks can continue. The current
+task can also continue, unless it's a real-time task and it yields."
+ >
+<_2clist
+  name="Comments:"
+  description="Call task_clock_stop() when you want to take time out
+  from scheduling real-time tasks. For instance, you want to temporarily
+  suspend a game or simulation for a period of time.
+  <p>
+  The time() function is not affected by this."
+ >
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_task.htm#task_clock_start\">task_clock_start</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>"
+ >
+</table>
+
+
+<_routine name="task_create">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">a2 = task_create(i1, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Create a new task. i1 is the routine id of a user-defined Euphoria procedure. 
+ s is the list of arguments that will be passed to this procedure 
+  when the task starts executing. The result, a2, is a task identifier,
+  created by the system. It can be used to identify this task to 
+  the other Euphoria multitasking routines."
+ >
+<_2clist
+  name="Comments:"
+  description="task_create() creates a new task, 
+  but does not start it executing.
+  <p>Each task has its own set of private variables and its own call stack.
+  Global and local variables are shared between all tasks. 
+  <p>
+  If a run-time error is detected, the traceback will include information on
+  all tasks, with the offending task listed first.
+  <p>Many tasks can be created that all run the same procedure, possibly
+  with different parameters.
+  <p>A task cannot be based on a function, since there would be no 
+  way of using the function result.
+  <p>
+  Each task id is unique. task_create() never returns the same task id
+  as it did before. Task id's are integer-valued atoms and can be as 
+  large as the largest integer-valued atom (15 digits)."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+mytask = task_create(routine_id("myproc"), {5, 9, "ABC"})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>,
+<a href=\"lib_task.htm#task_self\">task_self</a>"
+ >
+</table>
+
+
+<_routine name="task_list">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">s = task_list()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Get a sequence containing the task id's for all active or suspended tasks."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This function lets you find out which tasks currently exist. Tasks that
+ have terminated are not included. You can
+ pass a task id to task_status() to find out more about a particular task.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+sequence tasks
+     
+tasks = task_list()
+for i = 1 to length(tasks) do
+    if task_status(tasks[i]) > 0 then
+        printf(1, "task %d is active\n", tasks[i])
+    end if
+end for
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_task.htm#task_status\">task_status</a>,
+<a href=\"lib_task.htm#task_create\">task_create</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>
+"
+ >
+</table>
+
+
+<_routine name="task_schedule">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">task_schedule(a, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Schedule task a to run using scheduling parameter x. a must be a task 
+identifier returned by task_create(). If x is a positive atom, then x tells the
+task scheduler how many times it should run time-shared task a in one 
+burst before it considers running other tasks. If x is a sequence, it 
+must be a 2-element sequence {min, max}, both values greater than or 
+equal to 0, where min and max indicate the minimum and maximum times, 
+in seconds, to wait before running 
+real-time task a. min and max also set the time interval for 
+subsequent runs of task a, unless overridden by another call 
+to task_schedule() or task_suspend().
+"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The task scheduler, which is built-in to the Euphoria run-time system, will use the
+scheduling parameter x as a guide when scheduling this task. It may not 
+always be possible to achieve the desired number of consecutive runs, 
+or the desired time frame. For instance, a task might take so long before
+yielding control, that another task misses it's desired time window. 
+
+<p>
+Real-time tasks have a higher priority. Time-shared tasks are run when
+no real-time task is ready to execute. A task can switch back and forth
+between real-time and time-shared. It all depends on the last call to
+task_schedule() for that task. The scheduler never runs a real-time
+task before the start of its time frame (min value), and it tries to
+avoid missing the task's deadline (max value).
+
+<p>
+For precise timing, you can specify the same value for min and max.
+However, by specifying a range of times, you give the scheduler 
+some flexibility. This allows it to schedule tasks more efficiently, 
+and avoid non-productive delays. When the scheduler must delay, 
+it calls sleep(), unless the required delay is very short. 
+sleep() lets the operating system run other programs.
+
+<p>
+The min and max values can be fractional. If the min value is smaller than
+the resolution of the scheduler's clock (currently 0.01 seconds on Windows
+and Linux/FreeBSD, and 0.55 seconds on DOS unless tick_rate() is called) then
+accurate time scheduling cannot be performed, but the scheduler will
+try to run the task several times in a row to approximate what is desired.
+For example, if you ask for a min time of 0.002 seconds, then the scheduler
+will try to run your task .01/.002 = 5 times in a row before waiting for the
+clock to \"click\" ahead by .01. During the next 0.01 seconds it will
+run your task (up to) another 5 times etc. provided your task can 
+be completed 5 times in one clock period.
+
+<p>
+For time-shared tasks, increasing parameter x 
+will increase the percentage of CPU time given to the selected task,
+while decreasing the percentage given to other time-shared tasks.
+It will also increase the efficiency of the program, since each actual task
+switch wastes a bit of time. A task_yield() where the same task continues
+executing takes less time. However it may not be desirable to block other
+time-shared tasks from running for long periods of time. Note that 
+real-time tasks are always given priority at any task_yield(), once 
+their activation time has been reached.
+</ul>
+
+<p>
+At program start-up there is a single task running. Its task id is 0,
+and initially it's a time-shared task allowed 1 run per task_yield(). 
+No other task can run until task 0 executes a task_yield().
+
+<p>
+If task 0 (top-level) runs off the end of the main file,
+the whole program terminates, regardless of what other tasks 
+may still be active.
+
+<p>
+If the scheduler finds that no task is active, i.e. no task will ever
+run again (not even task 0), it terminates the program with a 0
+exit code code, similar to abort(0)."
+>
+
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+
+-- Task t1 will be executed up to 10 times in a row before
+-- other time-shared tasks are given control. If a real-time
+-- task needs control, t1 will lose control to the real-time task.
+task_schedule(t1, 10) 
+
+-- Task t2 will be scheduled to run some time between 4 and 5 seconds
+-- from now. Barring any rescheduling of t2, it will continue to
+-- execute every 4 to 5 seconds thereafter.
+task_schedule(t2, {4, 5})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_task.htm#task_create\">task_create</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>,
+<a href=\"lib_task.htm#task_self\">task_suspend</a>"
+ >
+</table>
+
+
+<_routine name="task_self">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">a = task_self()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the task id of the current task."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This value may be needed, if a task wants to schedule, kill or suspend 
+itself."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+-- schedule self
+task_schedule(task_self(), {5.9, 6.0})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_task.htm#task_create\">task_create</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>
+"
+ >
+</table>
+
+
+<_routine name="task_status">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">i2 = task_status(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the status of a task. Status values are 1 (active), 0 (suspended), 
+and -1 (task does not exist)"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"A task might want to know the status of one or more other tasks when 
+deciding whether to proceed with some processing.
+<p>
+A -1 value could indicate a task that never existed, or a task that
+terminated naturally or was killed."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+integer s
+     
+s = task_status(tid)
+if s = 1 then
+    puts(1, "ACTIVE\n")
+elsif s = 0 then
+    puts(1, "SUSPENDED\n")
+else
+    puts(1, "DOESN'T EXIST\n")
+end if
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="
+<a href=\"lib_task.htm#task_list\">task_list</a>,
+<a href=\"lib_task.htm#task_create\">task_create</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>
+"
+ >
+</table>
+
+
+<_routine name="task_suspend">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">task_suspend(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Suspend execution of task a."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This causes task a to be suspended. Task a will not be executed again unless
+ there is a call to task_schedule() for task a. a is a task id
+ returned from task_create().<p>
+ Any task can suspend any other task. If a task suspends itself,
+ the suspension will start as soon as the task calls task_yield().
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+-- suspend task 15
+task_suspend(15)
+
+-- suspend current task
+task_suspend(task_self())
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_task.htm#task_create\">task_create</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_self\">task_self</a>,
+<a href=\"lib_task.htm#task_yield\">task_yield</a>"
+ >
+</table>
+
+
+<_routine name="task_yield">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">task_yield()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Yield control to the scheduler. The scheduler can then choose another task 
+to run, or perhaps let the current task continue running."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Tasks should call task_yield() periodically so other tasks will
+have a chance to run. Only when task_yield() is called, is there
+a way for the scheduler to take back control from a task. 
+This is what's known as cooperative multitasking.<p>
+A task can have calls to task_yield() in many different places in it's code,
+and at any depth of subroutine call.
+<p>
+The scheduler will use the current value of {min, max} or the current
+number of consecutive runs remaining, in determining when to return to
+the current task.
+<p>
+When control returns, execution will continue with the statement that
+follows task_yield(). The call-stack and all private variables will remain
+as they were when task_yield() was called. Global and local variables may
+have changed, due to the execution of other tasks.<p>
+Tasks should try to call task_yield() often enough to avoid causing
+real-time tasks to miss their time window, and to avoid blocking time-shared
+tasks for an excessive period of time. On the other hand, there is a
+bit of overhead in calling task_yield(), and this overhead is slightly
+larger when an actual switch to a different task takes place.<p>
+A task should avoid calling task_yield() when it is in the middle
+of a delicate operation that requires exclusive access to some data. 
+Otherwise a race-condition could occur, where one task might interfere
+with an operation being carried out by another task. In some cases
+a task might need to mark some data as \"locked\" or \"unlocked\" 
+in order to prevent this possibility.
+With cooperative multitasking, these concurrency issues are much less 
+of a problem than with the preemptive multitasking that other 
+languages support.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+-- From Language war game.
+-- This small task deducts life support energy from either the 
+-- large Euphoria ship or the small shuttle.
+-- It seems to run "forever" in an infinite loop, 
+-- but it's actually a real-time task that is called
+-- every 1.7 to 1.8 seconds throughout the game.
+-- It deducts either 3 units or 13 units of life support energy each time.
+
+global procedure task_life()
+-- independent task: subtract life support energy 
+    while TRUE do
+        if shuttle then
+            p_energy(-3)
+        else
+            p_energy(-13)
+        end if
+        task_yield()
+    end while
+end procedure
+ 
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_task.htm#task_create\">task_create</a>,
+<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
+<a href=\"lib_task.htm#task_suspend\">task_suspend</a>
+<a href=\"lib_task.htm#task_self\">task_suspend</a>
+"
+ >
+</table>
+
+
+<_continueAll
+  libDoc="lib_task.htm"
+>
+
+
+
+</body>
+</html>
+

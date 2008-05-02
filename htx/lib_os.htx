@@ -1,0 +1,735 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.8 - Operating System</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_os.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.8 - Operating System</_dul>
+
+</font>
+<p>
+
+<_routine name="abort">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> abort(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Abort execution of the program. The argument i is a small integer
+ status value to be returned to the operating system. A value of 0
+ generally indicates successful completion of the program. Other
+ values can indicate various kinds of errors. DOS batch (.bat)
+ programs can read this value using the errorlevel feature.
+ A Euphoria program can read this value using system_exec()."
+ >
+<_2clist
+  name="Comments:"
+  description=
+" abort() is useful when a program is many levels deep in
+ subroutine calls, and execution must end immediately, perhaps
+ due to a severe error that has been detected.
+<P>
+If you don't use abort(), <font color=\"#993333\"><b>ex.exe/exw.exe/exu</b></font>
+ will normally return
+ an exit status code of 0. If your program fails with a
+ Euphoria-detected compile-time or run-time error then a
+ code of 1 is returned.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+if x = 0 then
+    puts(ERR, "can't divide by 0 !!!\n")
+    abort(1)
+else
+    z = y / x
+end if
+
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_mach.htm#crash_message\">crash_message</a>,
+<a href=\"lib_os.htm#system_exec\">system_exec</a>"
+ >
+</table>
+
+
+<_routine name="command_line">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> s = command_line()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a sequence of strings, where each string is a word from
+ the <a href=\"refman_1.htm#3\">command-line</a> that started
+ your program. The first word will be the path to either the Euphoria
+ executable, <b><font color=\"#993333\">ex.exe</font>,
+ <font color=\"#993333\">exw.exe</font> </b>or<b>
+  <font color=\"#993333\">exu</font></b>,
+  or to
+ your <font color=\"#993333\"><b>bound executable</b></font> file. 
+ The next word
+ is either the name of your Euphoria main file, or (again) the path
+ to your bound executable file. After
+ that will come any extra words typed by the user. You can use
+ these words in your program."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The Euphoria interpreter itself does not use any
+ command-line options. You are free to use any options for your own program.
+<p>
+The user can put quotes around a series of words to
+make them into a single argument.
+<P>
+If you convert your program into an executable file, either by 
+ <font color=\"#993333\"><b>binding</b></font> it, or
+ <font color=\"#993333\"><b>translating</b></font> it to C,
+ you will find that all command-line arguments remain the same, 
+ except for the first two, even though your user no longer types \"ex\" on the
+ command-line (see examples below).
+  "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+-- The user types:  ex myprog myfile.dat 12345 "the end"
+
+cmd = command_line()
+
+-- cmd will be:
+      {"C:\EUPHORIA\BIN\EX.EXE",
+       "myprog",
+       "myfile.dat",
+       "12345",
+       "the end"}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+-- Your program is bound with the name "myprog.exe"
+-- and is stored in the directory c:\myfiles
+-- The user types:  myprog myfile.dat 12345 "the end"
+
+cmd = command_line()
+
+-- cmd will be:
+       {"C:\MYFILES\MYPROG.EXE",
+        "C:\MYFILES\MYPROG.EXE", -- place holder
+        "myfile.dat",
+        "12345",
+        "the end"
+        }
+
+-- Note that all arguments remain the same as example 1
+-- except for the first two. The second argument is always
+-- the same as the first and is inserted to keep the numbering
+-- of the subsequent arguments the same, whether your program
+-- is bound or translated as a .exe, or not.
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#getenv\">getenv</a>"
+ >
+</table>
+
+
+
+
+<_routine name="date">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> s = date()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a sequence with the following information:"
+ >
+<_eucode>
+             { year,  -- since 1900
+              month,  -- January = 1
+                day,  -- day of month, starting at 1
+               hour,  -- 0 to 23
+             minute,  -- 0 to 59
+             second,  -- 0 to 59
+    day of the week,  -- Sunday = 1
+    day of the year}  -- January 1st = 1
+</_eucode>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+now = date()
+-- now has: {95,3,24,23,47,38,6,83}
+-- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
+
+ </_eucode>
+<_2clist
+  name="Comments:"
+  description=
+"The value returned for the year is actually the number of years since 1900
+ (<font color=\"#CC0099\"><b><i>not</i></b></font> the last 2 digits of the
+ year). In the year 2000 this value will be 100. In 2001 it will be 101, etc."
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#time\">time</a>"
+ >
+</table>
+
+<_routine name="getenv">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x = getenv(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the value of an environment variable. If the variable
+ is undefined, return -1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+" Because either a sequence or an atom (-1) might be returned, you
+ should probably assign the result to a variable declared as
+ object.
+ <p>
+ Both the argument and the return value, may, or may not be, case sensitive.
+ You might need to test this on your system.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+e = getenv("EUDIR")
+-- e will be "C:\EUPHORIA" -- or perhaps D:, E: etc.
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#command_line\">command_line</a>"
+ >
+</table>
+
+<_routine name="platform">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">
+ i = platform()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"platform() is a function built-in to the interpreter. It indicates
+ the platform that the program is being executed on:
+ <font color=\"#CC3366\"><b>DOS32</b></font>,
+ <font color=\"#CC3366\"><b>WIN32</b></font>,
+ <font color=\"#CC3366\"><b>Linux</b></font> or
+ <font color=\"#CC3366\"><b>FreeBSD</b></font>."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"When <font color=\"#993333\"><b>ex.exe</b></font> is running, the platform
+ is DOS32. When <font color=\"#993333\"><b>exw.exe</b></font>
+ is running the platform is WIN32. When 
+ <font color=\"#993333\"><b>exu</b></font> is running the platform is LINUX
+ (or FREEBSD).
+<P>
+The include file <font color=\"#5500FF\"><b>misc.e</b></font> contains the
+ following constants:"
+ >
+<_eucode>
+    global constant DOS32 = 1,
+                    WIN32 = 2,
+                    LINUX = 3,
+                    FREEBSD = 3
+</_eucode>
+<_2clist
+  name=""
+  description=
+"Use platform() when you want to execute different code depending
+ on which platform the program is running on.
+
+<P>
+ Additional platforms will be added as Euphoria is ported to new
+ machines and operating environments.
+
+<P>
+ The call to platform() costs nothing. It is optimized
+ at compile-time into the appropriate integer value: 1, 2 or 3."
+
+ >
+
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+if platform() = WIN32 then
+    -- call system Beep routine
+    err = c_func(Beep, {0,0})
+elsif platform() = DOS32 then
+    -- make beep
+    sound(500)
+    t = time()
+    while time() < t + 0.5 do
+    end while
+    sound(0)
+else
+    -- do nothing (Linux/FreeBSD)
+end if
+
+ </_eucode>
+
+<_2clist
+  name="See Also:"
+  description="
+ <a class=\"blue\" href=\"platform.htm\"><b>platform.doc</b>
+ </a>"
+>
+</table>
+
+<_routine name="sleep">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include misc.e<BR>
+  sleep(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Suspend execution for i seconds." 
+ >
+<_2clist
+  name="Comments:"
+  description=
+"On WIN32 and Linux/FreeBSD, the operating
+ system will suspend your process and schedule other processes. 
+ On DOS32, your program will go into a busy loop
+  for i seconds, during which time other processes may run, but 
+  they will compete with your process for the CPU.
+  <p>
+  With multiple tasks, the whole program sleeps, not just 
+  the current task. To make just the current task sleep, you can
+  call task_schedule(task_self(), {i, i}) and then execute task_yield()."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+puts(1, "Waiting 15 seconds...\n")
+sleep(15)
+puts(1, "Done.\n")
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_file.htm#lock_file\">lock_file</a>,
+<a href=\"lib_os.htm#abort\">abort</a>,
+<a href=\"lib_os.htm#time\">time</a>"
+ >
+</table>
+
+
+<_routine name="system">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> system(st, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Pass a command string st to the operating system command interpreter.
+ The argument i indicates the manner in which to
+ return from the call to system():<P>
+When i is 0, the previous graphics mode is restored and the
+ screen is cleared.
+<P>
+When i is 1, a beep sound will be made and the program will wait
+ for the user to press a key before the previous graphics mode
+ is restored.
+<P>
+When i is 2, the graphics mode is not restored and the screen
+ is not cleared."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"i = 2 should only be used when it is known that the command executed by
+ system() will not change the graphics mode.
+<P>
+You can use Euphoria as a sophisticated \"batch\" (.bat) language
+ by making calls to system() and system_exec().
+<P>
+system() will start a new DOS or Linux/FreeBSD shell.
+<P>
+system() allows you to use command-line redirection of standard
+ input and output in the command string st.
+<P>
+Under <font color=\"#CC3366\"><b>DOS32</b></font>, a Euphoria program
+ will start off using extended
+ memory. If extended memory runs out the program will consume
+ conventional memory. If conventional memory runs out it will use
+ virtual memory, i.e. swap space on disk. The DOS command run by
+ system() will fail if there is not enough conventional memory
+ available. To avoid this situation you can reserve some
+ conventional (low) memory by typing:"
+ >
+<_eucode>
+    SET CAUSEWAY=LOWMEM:xxx
+</_eucode>
+
+<_2clist
+  name=""
+  description=
+"where xxx is the number of K of conventional memory to reserve. Type this
+ before running your program. You can also put this in <b>autoexec.bat</b>,
+ or in a <b>.bat</b> file that runs your program. For example:"
+ >
+ 
+<_eucode>
+    SET CAUSEWAY=LOWMEM:80
+    ex myprog.ex
+</_eucode>
+
+<_2clist
+  name=""
+  description=
+"This will reserve 80K of conventional memory, which should be
+ enough to run simple DOS commands like COPY, MOVE, MKDIR etc."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+system("copy temp.txt a:\\temp.bak", 2)
+-- note use of double backslash in literal string to get
+-- single backslash
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+system("ex \\test\\myprog.ex < indata > outdata", 2)
+-- executes myprog by redirecting standard input and
+-- standard output
+
+ </_eucode>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#system_exec\">system_exec</a>,
+<a href=\"lib_file.htm#dir\">dir</a>,
+<a href=\"lib_file.htm#current_dir\">current_dir</a>,
+<a href=\"lib_os.htm#getenv\">getenv</a>,
+<a href=\"lib_os.htm#command_line\">command_line</a>"
+ >
+</table>
+
+
+<_routine name="system_exec">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i1 = system_exec(st, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Try to run the command given by st. st must be a command to run an
+ executable program, 
+ possibly with some command-line arguments.
+ If the program can be run, i1 will be the exit code from the
+ program. If it is not possible to run the program, system_exec()
+ might return -1, or perhaps (on Linux/FreeBSD) some other non-zero error code. 
+ i2 is a code that indicates what to do about the
+ graphics mode when system_exec() is finished. These codes are
+ the same as for system():<P>
+When i2 is 0, the previous graphics mode is restored and the
+ screen is cleared.
+<P>
+When i2 is 1, a beep sound will be made and the program will wait
+ for the user to press a key before the previous graphics mode
+ is restored.
+<P>
+When i2 is 2, the graphics mode is not restored and the screen
+ is not cleared."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"On DOS32 or WIN32, system_exec() will only run <b>.exe</b> and <b>.com</b> 
+ programs. To run
+ <b>.bat</b> files, or built-in DOS commands, you need system().
+ Some commands, such as DEL, are not programs, they are
+ actually built-in to the command interpreter.
+<P>
+ On DOS32 and WIN32, system_exec() does not allow the use of 
+ command-line redirection in the command string st, nor does it
+ allow you to quote strings that contain blanks, such as file names.
+<P>
+exit codes from DOS or Windows programs are normally in the
+ range 0 to 255, with 0 indicating \"success\".
+<P>
+You can run a Euphoria program using system_exec(). A Euphoria
+ program can return an exit code using abort().
+<P>
+system_exec() does not start a new DOS shell."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+integer exit_code
+exit_code = system_exec("xcopy temp1.dat temp2.dat", 2)
+
+if exit_code = -1 then
+    puts(2, "\n couldn't run xcopy.exe\n")
+elsif exit_code = 0 then
+    puts(2, "\n xcopy succeeded\n")
+else
+    printf(2, "\n xcopy failed with code %d\n", exit_code)
+end if
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+-- executes myprog with two file names as arguments
+if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
+    puts(2, "failure!\n")
+end if
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#system\">system</a>,
+<a href=\"lib_os.htm#abort\">abort</a>"
+ >
+</table>
+
+
+<_routine name="tick_rate">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include machine.e<BR>
+ tick_rate(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Specify the number of clock-tick interrupts per second.
+ This determines the precision of the time() library
+ routine. It also affects the sampling rate for time
+ profiling."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"tick_rate() is ignored on 
+   <font color=\"#CC3366\"><b>WIN32</b></font> and
+   <font color=\"#CC3366\"><b>Linux/FreeBSD</b></font>.
+ The time resolution on WIN32 is always 100 ticks/second.
+<P>
+On a PC the clock-tick interrupt normally occurs at 18.2
+ interrupts per second. tick_rate() lets you increase
+ that rate, but not decrease it.
+<P>
+tick_rate(0) will restore the rate to the normal 18.2 rate.
+ Euphoria will also restore the rate automatically when it exits,
+ even when it finds an error in your program.
+<P>
+If a program runs in a DOS window with a tick rate other
+ than 18.2, the time() function will not advance unless the
+ window is the active window.
+<p>
+With a tick rate other than 18.2, the time() function on DOS
+takes about 1/100 the usual time that it needs to execute.
+On Windows and FreeBSD, time() normally executes very quickly.
+<P>
+While <font color=\"#993333\"><b>ex.exe</b></font> is running,
+ the system will maintain the correct time of day. However if
+ <font color=\"#993333\"><b>ex.exe</b></font> should crash (e.g. you see
+ a \"CauseWay...\" error) while the tick rate is high, you (or
+ your user) may need to reboot the machine to restore the
+ proper rate. If you don't, the system time may advance too
+ quickly. This problem does not occur on
+ <font color=\"#CC3366\"><b>Windows 95/98/NT</b></font>, only on
+ <font color=\"#CC3366\"><b>DOS</b></font> or
+ <font color=\"#CC3366\"><b>Windows 3.1</b></font>. You will always get
+ back the correct time of day from the battery-operated clock in your
+ system when you boot up again."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+tick_rate(100)
+-- time() will now advance in steps of .01 seconds
+-- instead of the usual .055 seconds
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#time\">time</a>,
+<a href=\"refman_3.htm#21\">time profiling</a>"
+ >
+</table>
+
+
+<_routine name="time">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> a = time()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the number of seconds since some fixed point in the past."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Take the difference between two readings of time(), to
+ measure, for example, how long a section of code takes to
+ execute.
+<P>
+The resolution with <font color=\"#CC3366\"><b>DOS32</b></font> is normally
+ about 0.05 seconds. On <font color=\"#CC3366\"><b>WIN32 and Linux/FreeBSD</b></font> 
+ it's about 0.01 seconds.
+<P>
+Under <font color=\"#CC3366\"><b>DOS32</b></font> you can improve
+ the resolution by calling tick_rate().
+<P>
+Under <font color=\"#CC3366\"><b>DOS32</b></font> the period of time that 
+you can normally measure is limited to 24 hours. After that, the 
+value returned by time() will reset and start over. If however,
+you have called tick_rate(), and clock ticks are happening at a rate
+that is higher than the usual 18.2/sec, time() will continue much longer,
+since in that case, Euphoria handles the clock-tick interrupt directly, 
+and accumulates the ticks in a larger, 32-bit variable.
+
+<p> 
+DOS emulation under Windows XP is not perfect. When you do time profiling,
+(with profile_time) the time() function might be off by several percent. 
+This problem does not occur on Windows ME/98/95."
+ 
+<p>
+On some machines, time() can return a negative number.
+However, you can still use the difference in calls to time() to measure
+elapsed time.
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+constant ITERATIONS = 1000000
+integer p
+atom t0, loop_overhead
+
+t0 = time()
+for i = 1 to ITERATIONS do
+    -- time an empty loop
+end for
+loop_overhead = time() - t0
+
+t0 = time()
+for i = 1 to ITERATIONS do
+    p = power(2, 20)
+end for
+? (time() - t0 - loop_overhead)/ITERATIONS
+-- calculates time (in seconds) for one call to power
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_os.htm#date\">date</a>,
+<a href=\"lib_os.htm#tick_rate\">tick_rate</a>"
+ >
+</table>
+
+<_continueAll
+  libDoc="lib_os.htm"
+>
+
+</body>
+</html>
+

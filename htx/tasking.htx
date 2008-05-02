@@ -285,7 +285,7 @@ it's not necessary to include any library file.
 <table border=0 cellspacing=2 cellpadding=2>
 
 <_3clist
-  href="lib_s_t.htm#task_create"
+  href="lib_task.htm#task_create"
   name="task_create"
   description="Call this to create a new task. You need to pass the routine id
   of a Euphoria procedure, as well as a list of initial arguments to pass to the
@@ -299,7 +299,7 @@ it's not necessary to include any library file.
 >
 
 <_3clist
-  href="lib_s_t.htm#task_yield"
+  href="lib_task.htm#task_yield"
   name="task_yield"
   description="A task calls this to yield control, 
   so the Euphoria scheduler can pick a new task to run. A task should
@@ -312,7 +312,7 @@ it's not necessary to include any library file.
 >
 
 <_3clist
-  href="lib_s_t.htm#task_schedule"
+  href="lib_task.htm#task_schedule"
   name="task_schedule"
   description="Schedule a task for execution. After a task is created, it
   is necessary to schedule it, otherwise it will never run. There are two
@@ -329,38 +329,38 @@ it's not necessary to include any library file.
 >
 
 <_3clist
-  href="lib_s_t.htm#task_list"
+  href="lib_task.htm#task_list"
   name="task_list"
   description="Get a list of all tasks"
 >
 
 <_3clist
-  href="lib_s_t.htm#task_self"
+  href="lib_task.htm#task_self"
   name="task_self"
   description="Return the task id of the current task"
 >
 
 <_3clist
-  href="lib_s_t.htm#task_status"
+  href="lib_task.htm#task_status"
   name="task_status"
   description="Get the current status (active, suspended, terminated) of a task"
 >
 
 <_3clist
-  href="lib_s_t.htm#task_suspend"
+  href="lib_task.htm#task_suspend"
   name="task_suspend"
   description="Suspend a task until further notice."
 >
 
 <_3clist
-  href="lib_s_t.htm#task_clock_start"
+  href="lib_task.htm#task_clock_start"
   name="task_clock_start"
   description="Restart the scheduler's clock. Used in games where the
   real time clock must be preserved during a stoppage."
 >
 
 <_3clist
-  href="lib_s_t.htm#task_clock_stop"
+  href="lib_task.htm#task_clock_stop"
   name="task_clock_stop"
   description="stop the scheduler's clock"
 >

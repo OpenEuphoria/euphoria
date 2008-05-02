@@ -123,9 +123,9 @@
  <font color="#CC3366">pixel graphics mode</font>, and Euphoria provides
  you with library routines for both modes.
  There is rarely any need to call DOS directly, but you can do 
- this using the <a href="lib_c_d.htm#dos_interrupt">dos_interrupt()</a>
- routine. You can also <a href="lib_p_r.htm#peek">peek</a> and
- <a href="lib_p_r.htm#poke">poke</a> into 
+ this using the <a href="lib_mach.htm#dos_interrupt">dos_interrupt()</a>
+ routine. You can also <a href="lib_mach.htm#peek">peek</a> and
+ <a href="lib_mach.htm#poke">poke</a> into 
  special memory locations to achieve high-speed graphics and get access 
  to low-level details of the system.
  
@@ -202,7 +202,7 @@
  You will also see a console window when you read standard input or write to 
  standard output, even when these have been redirected to files. The console
  will disappear when your program finishes execution, or via a call to 
- <a href="lib_e_g.htm#free_console">free_console()</a>.
+ <a href="lib_c.htm#free_console">free_console()</a>.
  If there is something on the console that you want your
  user to read, you should prompt him and wait for his input before terminating.
  To prevent the console from quickly disappearing you might include a statement
@@ -386,7 +386,7 @@ see <a href=e2c.htm> the Translator</a>.
   name="1."
   pos=5
   description="Open the <b>.</b>dll or <b>.</b>so file that contains the C function by
-     calling <a href=\"lib_h_o.htm#open_dll\">open_dll()</a> contained in
+     calling <a href=\"lib_c.htm#open_dll\">open_dll()</a> contained in
      <font color=\"#5500FF\"><b>euphoria\include\dll.e</b></font>."
  >
 
@@ -394,8 +394,8 @@ see <a href=e2c.htm> the Translator</a>.
   name="2."
   pos=5
   description="Define the C function, by calling
-      <a href=\"lib_c_d.htm#define_c_func\">define_c_func()</a> or
-      <a href=\"lib_c_d.htm#define_c_proc\">define_c_proc()</a> in
+      <a href=\"lib_c.htm#define_c_func\">define_c_func()</a> or
+      <a href=\"lib_c.htm#define_c_proc\">define_c_proc()</a> in
       <font color=\"#5500FF\"><b>dll.e</b></font>. This tells Euphoria the
       number and type of the arguments as well as the type of value returned. 
       <p>
@@ -417,8 +417,8 @@ see <a href=e2c.htm> the Translator</a>.
   name="3."
   pos=5
   description="Call the C function by calling
-      <a href=\"lib_c_d.htm#c_func\">c_func()</a> or
-      <a href=\"lib_c_d.htm#c_proc\">c_proc()</a>."
+      <a href=\"lib_c.htm#c_func\">c_func()</a> or
+      <a href=\"lib_c.htm#c_proc\">c_proc()</a>."
 >
 
 </table>
@@ -489,7 +489,7 @@ example above, you would have "+LoadIconA", instead of "LoadIconA".
 </font>
 <p>
 You can get the address of a C variable using 
-<a href="lib_c_d.htm#define_c_var">define_c_var()</a>.
+<a href="lib_c.htm#define_c_var">define_c_var()</a>.
 You can then use poke() and peek() to access the value of the variable.
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
@@ -503,14 +503,14 @@ You can then use poke() and peek() to access the value of the variable.
 <p>
  Many C routines require that you pass pointers to structures. You can
  simulate C structures using allocated blocks of memory. The address
- returned by <a href="lib_a_b.htm#allocate">allocate()</a> can be passed
+ returned by <a href="lib_mach.htm#allocate">allocate()</a> can be passed
  as if it were a C pointer.
 <p>
  You can read and write members of C structures using peek() and poke(), or
- <a href="lib_p_r.htm#peek4u">peek4u()</a>,
- <a href="lib_p_r.htm#peek4s">peek4s()</a>, and
- <a href="lib_p_r.htm#poke4">poke4()</a>. You can allocate space for
- structures using <a href="lib_a_b.htm#allocate">allocate()</a>.
+ <a href="lib_mach.htm#peek4u">peek4u()</a>,
+ <a href="lib_mach.htm#peek4s">peek4s()</a>, and
+ <a href="lib_mach.htm#poke4">poke4()</a>. You can allocate space for
+ structures using <a href="lib_mach.htm#allocate">allocate()</a>.
  You must calculate the offset of a member of a C structure. This is usually
  easy, because anything in C that needs 4 bytes will be assigned 4 
  bytes in the structure. Thus C int's, char's, unsigned int's, pointers to 
@@ -629,10 +629,10 @@ which will give you a big advantage over those forced to code in C.
         WndProcAddress = call_back(id)
 </_eucode>
 
- <a href="lib_p_r.htm#routine_id">routine_id()</a> uniquely identifies a
+ <a href="lib_dyn.htm#routine_id">routine_id()</a> uniquely identifies a
  Euphoria procedure or function by returning a small integer value. This
  value can be used later to call the routine. You can also use it as an
- argument to the <a href="lib_c_d.htm#call_back">call_back()</a>
+ argument to the <a href="lib_c.htm#call_back">call_back()</a>
  function.
 
 <p>
@@ -668,7 +668,7 @@ which will give you a big advantage over those forced to code in C.
 </dl>
 
  You can create as many call-back addresses as you like, but you should
- not call <a href="lib_c_d.htm#call_back">call_back()</a> for the same
+ not call <a href="lib_c.htm#call_back">call_back()</a> for the same
  Euphoria routine multiple times - each call-back address that
  you create requires a small block of memory.
 

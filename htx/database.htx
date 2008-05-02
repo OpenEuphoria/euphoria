@@ -237,13 +237,13 @@
 <_3clist
   name="i"
   pos=10
-  description="an <a href=\"refman_2.htm#integer\">integer</a>"
+  description="an <a href=\"lib_type.htm#integer\">integer</a>"
 >
 
 <_3clist
   name="fn"
   pos=10
-  description="an <a href=\"refman_2.htm#integer\">integer</a> used
+  description="an <a href=\"lib_type.htm#integer\">integer</a> used
      as a file number"
 >
 
@@ -267,7 +267,7 @@
 >
 
 <_3clist
-  href="database.htm#open"
+  href="lib_file.htm#open"
   name="db_open"
   description="open an existing database"
 >
@@ -279,7 +279,7 @@
 >
 
 <_3clist
-  href="database.htm#close"
+  href="lib_file.htm#close"
   name="db_close"
   description="close a database"
 >
@@ -339,7 +339,7 @@
 >
 
 <_3clist
-  href="database.htm#insert"
+  href="lib_seq.htm#insert"
   name="db_insert"
   description="insert a new record into the current table"
 >

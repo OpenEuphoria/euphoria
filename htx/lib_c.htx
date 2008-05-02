@@ -1,0 +1,841 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.13 - Calling C Functions</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_c.htm"
+>
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.13 - Calling C Functions (WIN32 and Linux)</_dul>
+
+</font>
+<p>
+
+
+<_routine name="call_back">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, Linux, FreeBSD</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include dll.e<br>
+ a = call_back(i)<br>
+ or<br>
+ a = call_back({i1, i})<br>
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Get a machine address for the Euphoria routine with
+ <font color=\"#993333\"><b>routine id</b></font> i.
+ This address can be
+ used by Windows, or an external C routine in a Windows <b>.</b>dll
+ or Linux/FreeBSD shared library (.so), as a
+ 32-bit \"call-back\" address for calling your Euphoria routine. On Windows,
+ you can specify i1, which determines the C calling convention that can
+ be used to call your routine. If i1 is '+', then your routine will
+  work with the <b>cdecl</b> calling convention. By default it will work with the
+  <b>stdcall</b> convention. On Linux and FreeBSD you should only use 
+  the first form, as there is just one standard calling convention"
+ >
+<_2clist
+  name="Comments:"
+  description=
+"You can set up as many call-back functions as you like, but they
+ must all be Euphoria functions (or types) with 0 to 9 arguments.
+ If your routine has nothing to return (it should really be a procedure), 
+ just return 0 (say), and the calling C routine can ignore the result.
+<P>
+When your routine is called, the argument values will all be
+ 32-bit unsigned (positive) values. You should declare each
+ parameter of your routine as <font color=\"#993333\"><b>atom</b></font>,
+ unless you want to impose
+ tighter checking. Your routine must return a 32-bit integer
+ value.
+ <p> You can also use a call-back address to specify a Euphoria routine 
+ as an exception handler in the Linux/FreeBSD signal() function. For example,
+ you might want to catch the SIGTERM signal, and do a graceful shutdown.
+ Some Web hosts send a SIGTERM to a CGI process that has used too much
+ CPU time.
+ <p> A call-back routine that uses the cdecl convention and returns 
+ a floating-point result, might not work with exw. This is because
+ the Watcom C compiler (used to build exw) has a non-standard way 
+ of handling cdecl floating-point return values."
+ >
+
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\win32\window.exw,
+  demo\linux\qsort.exu</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_dyn.htm#routine_id\">routine_id</a>,
+ <a class=\"blue\" href=\"platform.htm#callback\"><b>platform.doc</b>
+ </a>"
+ >
+</table>
+
+
+<_routine name="c_func">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, Linux, FreeBSD</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x = c_func(i, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Call the C function, or machine code function, or translated/compiled 
+Euphoria function with <font color=\"#993333\"><b>routine id</b></font> i.
+ i must be a valid routine
+ id returned by define_c_func(). s is a sequence of argument
+ values of length n, where n is the number of arguments required
+ by the function. x will be the result returned by the function."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"If the function does not take any arguments then s should
+ be {}.
+ <p>
+ If you pass an argument value which contains a fractional part, 
+ where the C function expects a C integer type, the argument will
+  be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be passed
+   as -5.
+   <p>
+   The function could be part of a .dll or .so created by the Euphoria To 
+   C Translator. In this case, a Euphoria atom or sequence could be
+   returned. C and machine code functions can only return integers,
+   or more generally, atoms (IEEE floating-point numbers)."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+atom user32, hwnd, ps, hdc
+integer BeginPaint
+
+-- open user32.dll - it contains the BeginPaint C function
+user32 = open_dll("user32.dll")
+
+-- the C function BeginPaint takes a C int argument and
+-- a C pointer, and returns a C int as a result:
+BeginPaint = define_c_func(user32, "BeginPaint",
+                           {C_INT, C_POINTER}, C_INT)
+
+-- call BeginPaint, passing hwnd and ps as the arguments,
+-- hdc is assigned the result:
+hdc = c_func(BeginPaint, {hwnd, ps})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c.htm#c_proc\">c_proc</a>,
+<a href=\"lib_c.htm#define_c_func\">define_c_func</a>,
+<a href=\"lib_c.htm#open_dll\">open_dll</a>,
+<a class=\"blue\" href=\"platform.htm#call_cfunc\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+
+<_routine name="c_proc">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, Linux, FreeBSD</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> c_proc(i, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Call the C function, or machine code routine, with 
+ <font color=\"#993333\"><b>routine id</b></font> i.
+ i must be a valid routine
+ id returned by define_c_proc(). s is a sequence of argument
+ values of length n, where n is the number of arguments required
+ by the function."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"If the C function does not take any arguments then s should
+ be {}.
+ <p>
+ If you pass an argument value which contains a fractional part, 
+ where the C function expects a C integer type, the argument will
+ be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be passed
+   as -5.
+   <p>
+   The C function could be part of a .dll created by the Euphoria To 
+   C Translator."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+atom user32, hwnd, rect
+integer GetClientRect
+
+-- open user32.dll - it contains the GetClientRect C function
+user32 = open_dll("user32.dll")
+
+-- GetClientRect is a VOID C function that takes a C int
+-- and a C pointer as its arguments:
+GetClientRect = define_c_proc(user32, "GetClientRect",
+                              {C_INT, C_POINTER})
+
+-- pass hwnd and rect as the arguments
+c_proc(GetClientRect, {hwnd, rect})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c.htm#c_func\">c_func</a>,
+  <a href=\"lib_mach.htm#call\">call</a>,
+<a href=\"lib_c.htm#define_c_proc\">define_c_proc</a>,
+<a href=\"lib_c.htm#open_dll\">open_dll</a>,
+<a class=\"blue\" href=\"platform.htm#call_cfunc\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+<_routine name="define_c_func">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include dll.e<BR>
+ i1 = define_c_func(x1, x2, s1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+ "Define the characteristics of either a C function, or a machine-code 
+ routine that returns a value. A small integer, i1, 
+ known as a <font color=\"#993333\"><b>routine id</b></font>, will be
+ returned. Use this routine id as the first argument to c_func() when
+ you wish to call the function from Euphoria.
+ 
+ <p>
+ When defining a C function, x1 is the address of the library containing
+ the C function, while x2 is the name of the C function. 
+ x1 is a value returned by open_dll(). If the C function can't be found,
+ -1 will be returned as the routine id. On Windows,
+ you can add a '+' character as a prefix to the function name. 
+ This indicates to Euphoria that
+ the function uses the <b>cdecl</b> calling convention. By default, Euphoria
+ assumes that C routines accept the <b>stdcall</b> convention. 
+ 
+ <p>
+ When defining a machine code routine, x1 must be the empty sequence,
+ \"\" or {}, and x2 indicates the address of the machine code routine.
+ You can poke the bytes of machine code into a block of 
+ memory reserved using allocate(). On Windows, the machine code routine 
+ is normally expected to follow the <b>stdcall</b> calling convention, 
+ but if you wish to use the <b>cdecl</b> convention instead, 
+ you can code <b>{'+', address}</b> instead of <b>address</b> for x2. 
+ 
+ <p>
+ s1 is a list of the parameter types for the function. i2 is the return
+ type of the function. A list of C types is contained in
+ <font color=\"#5500FF\"><b>dll.e</b></font>, and these can be used to define
+ machine code parameters as well:"
+ >
+
+<_eucode>
+    global constant C_CHAR = #01000001,
+                   C_UCHAR = #02000001,
+                   C_SHORT = #01000002,
+                  C_USHORT = #02000002,
+                     C_INT = #01000004,
+                    C_UINT = #02000004,
+                    C_LONG = C_INT,
+                   C_ULONG = C_UINT,
+                 C_POINTER = C_ULONG,
+                   C_FLOAT = #03000004,
+                  C_DOUBLE = #03000008
+</_eucode>
+ 
+ <_2clist
+  name=""
+  description=
+"The C function that you define could be one created by the
+Euphoria To C Translator, in which case you can pass Euphoria data
+to it, and receive Euphoria data back.
+A list of Euphoria types is contained in
+ <font color=\"#5500FF\"><b>dll.e</b></font>:"
+ >
+<_eucode>
+    global constant
+		 E_INTEGER = #06000004,
+		 E_ATOM    = #07000004,
+		 E_SEQUENCE= #08000004,
+		 E_OBJECT  = #09000004
+</_eucode>
+
+<_2clist
+  name="Comments:"
+  description=
+"You can pass or return any C integer type or pointer type.
+ You can also pass a Euphoria atom as a C double or float, and get
+ a C double or float returned to you as a Euphoria atom.
+<P>
+ Parameter types which use 4 bytes 
+ or less are all passed the same way, so it is not necessary to be 
+ exact when choosing a 4-byte parameter type. However the
+ distinction between signed and unsigned may be important when
+ you specify the return type of a function.
+<P>
+Currently, there is no way to pass a C structure by value or
+ get a C structure as a return result. You can only pass a pointer
+ to a structure and get a pointer to a structure as a result.
+<P>
+If you are not interested in using the value returned by the
+ C function, you should instead define it with define_c_proc()
+ and call it with c_proc().
+<p>
+Some routines in shared libraries - there are cases in the Windows API - expect a 64 bit integer
+ to be passed to them as one of its arguments. There is no such data type in Euphoria, even though
+ it exists in C. However, there is a workaround:
+<ul>
+<li>represent your 64 bit parameter as two consecutive C_LONG parameters. As mentioned above, this
+will work whether the integer is specified as signed or unsigned.
+<li>when calling the routine, the first C_LONG parameter must contain the lower 32 bits of
+ the actual 64 bit parameter, and the second parameter must hold the upper 32 bits.
+<li>do not store the 64 bit integer you supply as an atom, because it would be encoded in a
+way the routine you are calling will not understand. Further, an atom cannot hold more than 53
+bits of information, which is too short for 64 bit data.
+</ul>
+<p>
+If an external routine returns a 64 bit integer, changing the return type like shown above
+will not work. You must design a machine code wrapper that will call the routine (check its call
+convention under Windows) and retrieve the integer returned in edx:eax. Then code an Euphoria function
+that will call() your machine code and retrieve the two parts as two atoms, returning them as
+appropriate, typically in a {lower 32 bits, upper 32 bits} sequence. How you reassemble the two parts
+will depend on the returned value being specified as signed or unsigned.
+
+<p>
+If you use exw to call a cdecl C routine that returns
+ a floating-point value, it might not work. This is because
+ the Watcom C compiler (used to build exw) has a non-standard
+ way of handling cdecl floating-point return values.
+ 
+ <p> Passing floating-point values to a machine code routine will be
+   faster if you use c_func()  rather than call() to call the routine, 
+   since you won't have to use atom_to_float64() and poke() to get the 
+   floating-point values into memory.
+ 
+ <p> ex.exe (DOS) uses calls to WATCOM floating-point routines (which then
+   use hardware floating-point instructions if available),
+   so floating-point values are generally passed and returned in
+   integer register-pairs rather than floating-point registers. 
+   You'll have to disassemble some Watcom code to see how it works."
+ >
+
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+atom user32
+integer LoadIcon
+
+-- open user32.dll - it contains the LoadIconA C function
+user32 = open_dll("user32.dll")
+
+-- It takes a C pointer and a C int as parameters.
+-- It returns a C int as a result.
+LoadIcon = define_c_func(user32, "LoadIconA",
+                         {C_POINTER, C_INT}, C_INT)
+-- We use "LoadIconA" here because we know that LoadIconA
+-- needs the stdcall convention, as do
+-- all standard .dll routines in the WIN32 API. 
+-- To specify the cdecl convention, we would have used "+LoadIconA".
+
+if LoadIcon = -1 then
+    puts(1, "LoadIconA could not be found!\n")
+end if
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="euphoria\demo\callmach.ex,
+  <a href=\"lib_c.htm#c_func\">c_func</a>,
+<a href=\"lib_c.htm#define_c_proc\">define_c_proc</a>,
+<a href=\"lib_c.htm#c_proc\">c_proc</a>,
+<a href=\"lib_c.htm#open_dll\">open_dll</a>,
+<a class=\"blue\" href=\"platform.htm#call_cfunc\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+
+<_routine name="define_c_proc">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include dll.e<BR>
+ i1 = define_c_proc(x1, x2, s1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Define the characteristics of either a C function, or a machine-code routine
+ that you wish to call as a procedure from your Euphoria program. 
+ A small integer, known as
+ a <font color=\"#993333\"><b>routine id</b></font>,
+ will be returned. Use this routine id as the first argument to
+ c_proc() when you wish to call the routine from Euphoria.
+ 
+ <p>
+ When defining a C function, x1 is the address of the library containing
+ the C function, while x2 is the name of the C function. x1 is a value
+ returned by open_dll(). If the C function can't be found, -1 will be returned
+ as the routine id.
+ On Windows, you can add a '+' character as a prefix to the function name. 
+ This tells Euphoria that
+ the function uses the <b>cdecl</b> calling convention. By default, Euphoria
+ assumes that C routines accept the <b>stdcall</b> convention. 
+ <p>
+ When defining a machine code routine, x1 must be the empty sequence,
+ \"\" or {}, and x2 indicates the address of the machine code routine.
+ You can poke the bytes of machine code into a block of 
+ memory reserved using allocate(). On Windows, the machine code routine 
+ is normally expected to follow the <b>stdcall</b> calling convention, 
+ but if you wish to use the <b>cdecl</b> convention instead, 
+ you can code <b>{'+', address}</b> instead of <b>address</b>. 
+ 
+ <p>
+ s1 is a list of the parameter types for the function. A list of
+ C types is contained in <font color=\"#5500FF\"><b>dll.e</b></font>,
+ and <a href=\"lib_c_d.htm#param_types\">shown above</a>. These can be
+ used to define machine code parameters as well."
+ >
+
+ <_2clist
+  name=""
+  description=
+"The C function that you define could be one created by the
+Euphoria To C Translator, in which case you can pass Euphoria data
+to it, and receive Euphoria data back.
+A list of Euphoria types is contained in
+ <font color=\"#5500FF\"><b>dll.e</b></font>, and 
+ <a href=\"lib_c_d.htm#param_types\">shown above.</a>"
+ >
+
+<_2clist
+  name="Comments:"
+  description=
+"You can pass any C integer type or pointer type.
+ You can also pass a Euphoria atom as a C double or float.
+<P>
+ Parameter types which use 4 bytes or less are 
+ all passed the same way, so it is not necessary to be exact.
+<P>
+Currently, there is no way to pass a C structure by value.
+ You can only pass a pointer to a structure.
+<P>
+The C function can return a value but it will be ignored.
+ If you want to use the value returned by the C function,
+ you must instead define it with define_c_func() and call it
+ with c_func().
+<p>
+Some routines in shared libraries - there are cases in the Windows API - expect a 64 bit integer
+ to be passed to them as one of its arguments. There is no such data type in Euphoria, even though
+ it exists in C. However, there is a workaround:
+<ul>
+<li>represent your 64 bit parameter as two consecutive C_LONG parameters. As mentioned above, this
+will work whether the integer is specified as signed or unsigned.
+<li>when calling the routine, the first C_LONG parameter must contain the lower 32 bits of
+ the actual 64 bit parameter, and the second parameter must hold the upper 32 bits.
+<li>do not store the 64 bit integer you supply as an atom, because it would be encoded in a
+way the routine you are calling will not understand. Further, an atom cannot hold more than 53
+bits of information, which is too short for 64 bit data.
+</ul>
+<p>
+If an external routine returns a 64 bit integer, changing the return type like shown above
+will not work. You must design a machine code wrapper that will call the routine (check its call
+convention under Windows) and retrieve the integer returned in edx:eax. Then code an Euphoria function
+that will call() your machine code and retrieve the two parts as two atoms, returning them as
+appropriate, typically in a {lower 32 bits, upper 32 bits} sequence. How you reassemble the two parts
+will depend on the returned value being specified as signed or unsigned."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+atom user32
+integer ShowWindow
+
+-- open user32.dll - it contains the ShowWindow C function
+user32 = open_dll("user32.dll")
+
+-- It has 2 parameters that are both C int.
+ShowWindow = define_c_proc(user32, "ShowWindow", {C_INT, C_INT})
+-- If ShowWindow used the cdecl convention, 
+-- we would have coded "+ShowWindow" here
+
+if ShowWindow = -1 then
+    puts(1, "ShowWindow not found!\n")
+end if
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c.htm#c_proc\">c_proc</a>,
+<a href=\"lib_c.htm#define_c_func\">define_c_func</a>,
+<a href=\"lib_c.htm#c_func\">c_func</a>,
+<a href=\"lib_c.htm#open_dll\">open_dll</a>,
+<a class=\"blue\" href=\"platform.htm#call_cfunc\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+<_routine name="define_c_var">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, Linux, FreeBSD</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include dll.e<BR>
+ a1 = define_c_var(a2, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"a2 is the address of a Linux or FreeBSD shared
+ library, or Windows .dll, as returned by open_dll(). 
+ s is the name of a global C variable defined within the library.
+ a1 will be the memory address of variable s."
+ >
+<_2clist
+  name="Comments:"
+  description="Once you have the address of a C variable, and you know
+  its type, you can use peek() and poke() to read or write the value 
+  of the variable."
+ >
+<_2clist
+  name="Example Program:"
+  description="euphoria/demo/linux/mylib.exu"
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c.htm#c_proc\">c_proc</a>,
+<a href=\"lib_c.htm#define_c_func\">define_c_func</a>,
+<a href=\"lib_c.htm#c_func\">c_func</a>,
+<a href=\"lib_c.htm#open_dll\">open_dll</a>,
+<a class=\"blue\" href=\"platform.htm#call_cfunc\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+
+<_routine name="free">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include machine.e<BR>
+ free(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Free up a previously allocated block of memory by specifying the
+ address of the start of the block, i.e. the address that was
+ returned by allocate(). "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" Use free() to recycle blocks of memory during execution. This
+ will reduce the chance of running out of memory or getting into
+ excessive virtual memory swapping to disk. Do not reference
+ a block of memory that has been freed. When your program
+ terminates, all allocated memory will be returned to the system.
+<P>
+Do not use free() to deallocate memory that was allocated using
+ <a href=\"lib_mach.htm#allocate_low\">allocate_low()</a>.
+ Use free_low() for this purpose."
+ >
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\callmach.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_mach.htm#allocate\">allocate</a>,
+<a href=\"lib_mach.htm#free_low\">free_low</a>"
+ >
+</table>
+
+<_routine name="free_console">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, Linux, FreeBSD</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include dll.e<BR>
+ free_console()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Free (delete) any console window associated with your program."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Euphoria will create a console <font color=\"CC3366\">text</font> window
+ for your program the first time that your program prints something to the
+ screen, reads something from the keyboard, or in some way needs a
+ console (similar to a DOS-prompt window). On WIN32 this window will
+ automatically disappear when your program terminates, but you
+ can call free_console() to make it disappear sooner. On Linux or FreeBSD, 
+ the text mode console is always there, but an xterm window will disappear
+ after Euphoria issues a \"Press Enter\" prompt at the end of execution.
+
+<p>
+ On Linux or FreeBSD, free_console()
+ will set the terminal parameters back to normal, undoing the effect
+ that curses has on the screen.
+<p>
+In a Linux or FreeBSD xterm window, a call to free_console(), without any
+further printing to the screen or reading from the keyboard, will eliminate
+the \"Press Enter\" prompt that Euphoria normally issues at 
+the end of execution.
+<P>
+After freeing the console window, you can create a new console
+ window by printing something to the screen, or simply calling
+ clear_screen(), <a href=\"lib_grap.htm#position\">position()</a> or any
+ other routine that needs a console.
+<P>
+When you use the <font color=\"#993333\"><b>trace</b></font> facility,
+ or when your program has an
+ error, Euphoria will automatically create a console window
+ to display trace information, error messages etc.
+<P>
+There's a WIN32 API routine, FreeConsole() that does something
+ similar to free_console(). You should use free_console(),
+ because it lets the interpreter know that there is no longer
+ a console."
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#clear_screen\">clear_screen</a>,
+ <a class=\"blue\" href=\"platform.htm#win32plat\"><b>platform.doc</b>
+ </a>"
+ >
+</table>
+
+<_routine name="instance">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include misc.e<BR>
+ i = instance()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a handle to the current program."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This handle value can be passed to various Windows routines
+ to get information about the current program that is running,
+ i.e. your program. Each time a user starts up your program,
+ a different instance will be created.
+<p>
+In C, this is the first parameter to WinMain().
+<P>
+On <font color=\"#CC3366\"><b>DOS32 and Linux/FreeBSD</b></font>, instance() always returns 0."
+ >
+<_2clist
+  name="See Also:"
+  description="
+ <a class=\"blue\" href=\"platform.htm#win32plat\"><b>platform.doc</b>
+ </a>"
+ >
+</table>
+
+
+<_routine name="message_box">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include msgbox.e<BR>
+ i = message_box(s1, s2, x)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Display a window with title s2, containing the message string s1.
+ x determines the combination of buttons that will be available
+ for the user to press, plus some other characteristics. x can be
+ an atom or a sequence. A return value of 0 indicates a failure to set up
+ the window."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"See <font color=\"#5500FF\"><b>msgbox.e</b></font> for a complete list
+ of possible values for x and i."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+response = message_box("Do you wish to proceed?",
+                       "My Application",
+                       MB_YESNOCANCEL)
+if response = IDCANCEL or response = IDNO then
+    abort(1)
+end if
+
+ </_eucode>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\win32\email.exw</b></font>"
+ >
+
+</table>
+
+<_routine name="open_dll">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, Linux, FreeBSD</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include dll.e<BR>
+ a = open_dll(st)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Open a Windows dynamic link library (<b>.</b>dll) file, or a Linux or FreeBSD
+shared library (<b>.</b>so) file. A 32-bit address will
+ be returned, or 0 if the <b>.</b>dll can't be found. st can be a relative
+ or an absolute file name. Windows will use the normal search
+ path for locating <b>.</b>dll files."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The value returned by open_dll() can be passed to define_c_proc(),
+ define_c_func(), or define_c_var().
+<P>
+You can open the same <b>.</b>dll or <b>.</b>so file multiple times.
+ No extra memory is used and you'll get the same number returned
+ each time.
+<p>
+ Euphoria will close the .dll for you automatically at the end of
+ execution."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+atom user32
+user32 = open_dll("user32.dll")
+if user32 = 0 then
+    puts(1, "Couldn't open user32.dll!\n")
+end if
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_c.htm#define_c_func\">define_c_func</a>,
+<a href=\"lib_c.htm#define_c_proc\">define_c_proc</a>,
+<a href=\"lib_c.htm#define_c_var\">define_c_var</a>,
+<a href=\"lib_c.htm#c_func\">c_func</a>,
+<a href=\"lib_c.htm#c_proc\">c_proc</a>,
+<a class=\"blue\" href=\"platform.htm#call_cfunc\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+
+<_continueAll
+  libDoc="lib_c.htm"
+>
+
+</body>
+</html>
+

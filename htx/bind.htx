@@ -243,7 +243,7 @@ Euphoria file.
  The first two arguments returned by the
  <font color="#006699"><b>command_line()</b></font> library routine will be
  slightly different when your program is bound. See
- <a class="blue" href="lib_c_d.htm#command_line"><b>library.doc</b></a>
+ <a class="blue" href="lib_os.htm#command_line"><b>library.doc</b></a>
  for the details.
 
 <p>

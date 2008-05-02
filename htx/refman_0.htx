@@ -226,7 +226,7 @@
 <dd>
 <dl>
 <dt>
-           2.1 <a href="library.htm#predefined"> Predefined Types</a>
+           2.1 <a href="library.htm#type_checking"> Type Checking</a>
 <dd>
 <dt>
            2.2 <a href="library.htm#seq_manip"> Sequence Manipulation</a>
@@ -235,41 +235,40 @@
            2.3 <a href="library.htm#srch_srt"> Searching and Sorting</a>
 <dd>
 <dt>
-           2.4 <a href="library.htm#pattern_m"> Pattern Matching</a>
+           2.4 <a href="library.htm#math"> Math</a>
 <dd>
 <dt>
-           2.5 <a href="library.htm#math"> Math</a>
+           2.5 <a href="library.htm#bitw_logic"> Bitwise Logical Operations</a>
 <dd>
 <dt>
-           2.6 <a href="library.htm#bitw_logic"> Bitwise Logical Operations</a>
+           2.6 <a href="library.htm#i_o"> File and Device I/O</a>
 <dd>
 <dt>
-           2.7 <a href="library.htm#i_o"> File and Device I/O</a>
+           2.7 <a href="library.htm#mouse_spt"> Mouse Support</a>
 <dd>
 <dt>
-           2.8 <a href="library.htm#mouse_spt"> Mouse Support (DOS32)</a>
+           2.8 <a href="library.htm#op_sys"> Operating System</a>
 <dd>
 <dt>
-           2.9 <a href="library.htm#op_sys"> Operating System</a>
+           2.9 <a href="library.htm#debugging"> Debugging</a>
 <dd>
 <dt>
-           2.10 <a href="library.htm#machine_dep"> Special Machine-Dependent
-               Routines</a>
+           2.10 <a href="library.htm#gr_sound"> Graphics & Sound</a>
 <dd>
 <dt>
-           2.11 <a href="library.htm#debugging"> Debugging</a>
+           2.11 <a href="library.htm#m_level_i"> Machine Level Interface</a>
 <dd>
 <dt>
-           2.12 <a href="library.htm#gr_sound"> Graphics & Sound</a>
+           2.12 <a href="library.htm#dyn_call"> Dynamic Calls</a>
 <dd>
 <dt>
-           2.13 <a href="library.htm#m_level_i"> Machine Level Interface</a>
+           2.13 <a href="library.htm#call_c_func"> Calling C Functions</a>
 <dd>
 <dt>
-           2.14 <a href="library.htm#dyn_call"> Dynamic Calls</a>
+           2.14 <a href="library.htm#map"> Map (hash table)</a>
 <dd>
 <dt>
-           2.15 <a href="library.htm#call_c_func"> Calling C Functions</a>
+           2.15 <a href="library.htm#datetime"> Date/Time</a>
 <dd>
 <dt>
            2.16 <a href="library.htm#tasking"> Multitasking</a>
@@ -277,31 +276,58 @@
 </dl>
 <p>
 <dt>
-        3. Alphabetical Listing of all Routines
+        3. Functional Grouping Detail
 
 <dd>
 
 <dl>
 <dt>
-           <a href="lib_a_b.htm"> From A to B </a>
+           3.1 <a href="lib_type.htm"> Type Checking </a>
 <dd>
 <dt>
-           <a href="lib_c_d.htm"> From C to D </a>
+           3.2 <a href="lib_seq.htm"> Sequence Manipulation </a>
 <dd>
 <dt>
-           <a href="lib_e_g.htm"> From E to G </a>
+           3.3 <a href="lib_srch.htm"> Searching and Sorting </a>
 <dd>
 <dt>
-           <a href="lib_h_o.htm"> From H to O </a>
+           3.4 <a href="lib_math.htm"> Math </a>
 <dd>
 <dt>
-           <a href="lib_p_r.htm"> From P to R </a>
+           3.5 <a href="lib_bitw.htm"> Bitwise Logic </a>
 <dd>
 <dt>
-           <a href="lib_s_t.htm"> From S to T </a>
+           3.6 <a href="lib_file.htm"> File and Device I/O </a>
 <dd>
 <dt>
-           <a href="lib_u_z.htm"> From U to Z </a>
+           3.7 <a href="lib_mous.htm"> Mouse Support </a>
+<dd>
+<dt>
+           3.8 <a href="lib_os.htm"> Operating System </a>
+<dd>
+<dt>
+           3.9 <a href="lib_dbg.htm"> Debugging </a>
+<dd>
+<dt>
+           3.10 <a href="lib_grap.htm"> Graphics and Sound </a>
+<dd>
+<dt>
+           3.11 <a href="lib_mach.htm"> Machine Level Interface </a>
+<dd>
+<dt>
+           3.12 <a href="lib_dyn.htm"> Dynamic Calls </a>
+<dd>
+<dt>
+           3.13 <a href="lib_c.htm"> C Interface </a>
+<dd>
+<dt>
+           3.14 <a href="lib_map.htm"> Map (hash table) </a>
+<dd>
+<dt>
+           3.15 <a href="lib_dtm.htm"> Date/Time </a>
+<dd>
+<dt>
+           3.16 <a href="lib_task.htm"> Multitasking </a>
 <dd>
 
 </dl>

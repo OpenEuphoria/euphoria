@@ -1,0 +1,375 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.5 - Bitwise Logical Operators</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+<_continueAllTop
+  libDoc="lib_bitw.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.5 - Bitwise Logical Operators</_dul>
+
+</font>
+<p>
+
+<_routine name="and_bits">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x3 = and_bits(x1, x2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Perform the logical AND operation on corresponding bits in
+ x1 and x2. A bit in x3 will be 1 only if the corresponding
+ bits in x1 and x2 are both 1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The arguments to this function may be atoms or sequences. The
+ rules for <a href=\"refman_2.htm#26\">operations on sequences</a> apply.
+<P>
+The arguments must be representable as 32-bit numbers,
+ either signed or unsigned.
+<P>
+If you intend to manipulate full 32-bit values, you should declare your
+ variables as <font color=\"#993333\"><b>atom</b></font>, rather than
+ integer. Euphoria's integer type is limited to 31-bits.
+<P>
+Results are treated as signed numbers. They will be
+ negative when the highest-order bit is 1.
+<P>
+To understand the binary representation of a number you
+ should display it in hexadecimal notation. Use the %x format
+ of <a href=\"lib_file.htm#printf\">printf()</a>.
+ "
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+a = and_bits(#0F0F0000, #12345678)
+-- a is #02040000
+
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+a = and_bits(#FF, {#123456, #876543, #2211})
+-- a is {#56, #43, #11}
+
+</_eucode>
+<_2clist
+  name="Example 3:"
+  description=""
+ >
+<_eucode>
+a = and_bits(#FFFFFFFF, #FFFFFFFF)
+-- a is -1
+-- Note that #FFFFFFFF is a positive number,
+-- but the result of a bitwise logical operation is interpreted
+-- as a signed 32-bit number, so it's negative.
+
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_bitw.htm#or_bits\">or_bits</a>,
+<a href=\"lib_bitw.htm#xor_bits\">xor_bits</a>,
+<a href=\"lib_bitw.htm#not_bits\">not_bits</a>,
+<a href=\"lib_mach.htm#int_to_bits\">int_to_bits</a>"
+ >
+</table>
+
+<_routine name="int_to_bits">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include machine.e<BR>
+ s = int_to_bits(a, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the low-order i bits of a, as a sequence of 1's and 0's.
+ The least significant bits come first. For negative numbers
+ the two's complement bit pattern is returned."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"You can use <a href=\"refman_2.htm#21\">subscripting</a>,
+ <a href=\"refman_2.htm#22\">slicing</a>,
+ <a href=\"refman_2.htm#24\">and/or/xor/not</a> of entire
+ sequences etc. to manipulate sequences of bits. Shifting
+ of bits and rotating of bits are easy to perform."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = int_to_bits(177, 8)
+-- s is {1,0,0,0,1,1,0,1} -- "reverse" order
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_mach.htm#bits_to_int\">bits_to_int</a>,
+<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,
+<a href=\"lib_bitw.htm#or_bits\">or_bits</a>,
+<a href=\"lib_bitw.htm#xor_bits\">xor_bits</a>,
+<a href=\"lib_bitw.htm#not_bits\">not_bits</a>,
+<a href=\"refman_2.htm#26\">operations on sequences</a>"
+ >
+</table>
+
+
+<_routine name="int_to_bytes">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include machine.e<BR>
+ s = int_to_bytes(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Convert an integer into a sequence of 4 bytes. These bytes are in
+ the order expected on the 386+, i.e. least-significant byte
+ first. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" You might use this routine prior to poking the 4 bytes into
+ memory for use by a machine language program.
+<P>
+The integer can be negative. Negative byte-values will be
+ returned, but after poking them into memory you will have
+ the correct (two's complement) representation for the 386+.
+<P>
+This function will correctly convert integer values up to 32-bits. For
+ larger values, only the low-order 32-bits are converted. Euphoria's
+ integer type only allows values up to 31-bits, so declare your variables as
+ <font color=\"#993333\"><b>atom</b></font> if you need a larger range."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = int_to_bytes(999)
+-- s is {231, 3, 0, 0}
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = int_to_bytes(-999)
+-- s is {-231, -4, -1, -1}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_mach.htm#bytes_to_int\">bytes_to_int</a>,
+<a href=\"lib_mach.htm#int_to_bits\">int_to_bits</a>,
+<a href=\"lib_mach.htm#bits_to_int\">bits_to_int</a>,
+<a href=\"lib_mach.htm#peek\">peek</a>,
+<a href=\"lib_mach.htm#poke\">poke</a>,
+<a href=\"lib_mach.htm#poke4\">poke4</a>"
+ >
+</table>
+
+<_routine name="not_bits">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x2 = not_bits(x1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Perform the logical NOT operation on each bit in x1.
+ A bit in x2 will be 1 when the corresponding bit in x1
+ is 0, and will be 0 when the corresponding bit in x1 is 1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The argument to this function may be an atom or a sequence.
+ The rules for <a href=\"refman_2.htm#26\">operations on sequences</a> apply.
+<P>
+The argument must be representable as a 32-bit number,
+ either signed or unsigned.
+<P>
+If you intend to manipulate full 32-bit values, you should
+ declare your variables as <font color=\"#993333\"><b>atom</b></font>,
+ rather than integer. Euphoria's integer type is limited to 31-bits.
+<P>
+Results are treated as signed numbers. They will be
+ negative when the highest-order bit is 1."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+a = not_bits(#000000F7)
+-- a is -248 (i.e. FFFFFF08 interpreted as a negative number)
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,
+<a href=\"lib_bitw.htm#or_bits\">or_bits</a>,
+<a href=\"lib_bitw.htm#xor_bits\">xor_bits</a>,
+<a href=\"lib_mach.htm#int_to_bits\">int_to_bits</a>"
+ >
+</table>
+
+<_routine name="or_bits">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x3 = or_bits(x1, x2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Perform the logical OR operation on corresponding bits in
+ x1 and x2. A bit in x3 will be 1 when a corresponding
+ bit in either x1 or x2 is 1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The arguments to this function may be atoms or sequences. The
+ rules for <a href=\"refman_2.htm#26\">operations on sequences</a> apply.
+<P>
+The arguments must be representable as 32-bit numbers,
+ either signed or unsigned.
+<P>
+If you intend to manipulate full 32-bit values, you should declare your
+ variables as <font color=\"#993333\"><b>atom</b></font>, rather than
+ integer. Euphoria's integer type is limited to 31-bits.
+<P>
+Results are treated as signed numbers. They will be
+ negative when the highest-order bit is 1."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+a = or_bits(#0F0F0000, #12345678)
+-- a is #1F3F5678
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+a = or_bits(#FF, {#123456, #876543, #2211})
+-- a is {#1234FF, #8765FF, #22FF}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,
+<a href=\"lib_bitw.htm#xor_bits\">xor_bits</a>,
+<a href=\"lib_bitw.htm#not_bits\">not_bits</a>,
+<a href=\"lib_mach.htm#int_to_bits\">int_to_bits</a>"
+ >
+</table>
+
+<_routine name="xor_bits">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x3 = xor_bits(x1, x2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Perform the logical XOR (exclusive OR) operation on
+ corresponding bits in x1 and x2. A bit in x3 will be 1
+ when one of the two corresponding bits in x1 or x2 is 1,
+ and the other is 0."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The arguments to this function may be atoms or sequences. The
+ rules for <a href=\"refman_2.htm#26\">operations on sequences</a> apply.
+<P>
+The arguments must be representable as 32-bit numbers,
+ either signed or unsigned.
+<P>
+If you intend to manipulate full 32-bit values, you should
+ declare your variables as
+ <font color=\"#993333\"><b>atom</b></font>, rather than integer. Euphoria's
+ integer type is limited to 31-bits.
+<P>
+Results are treated as signed numbers. They will be
+ negative when the highest-order bit is 1."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+a = xor_bits(#0110, #1010)
+-- a is #1100
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,
+<a href=\"lib_bitw.htm#or_bits\">or_bits</a>,
+<a href=\"lib_bitw.htm#not_bits\">not_bits</a>,
+<a href=\"lib_mach.htm#int_to_bits\">int_to_bits</a>,
+<a href=\"lib_mach.htm#int_to_bytes\">int_to_bytes</a>"
+ >
+
+</table>
+
+<_continueAll
+  libDoc="lib_bitw.htm"
+>
+
+
+</body>
+</html>
+

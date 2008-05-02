@@ -31,7 +31,7 @@
  the most recently executed statements. For extremely large sequences, 
  only a partial dump is shown. If <font color="#993333"><b>ex.err</b></font> 
  is not convenient, you can choose another file name, anywhere on your system, 
- by calling <a href="lib_c_d.htm#crash_file">crash_file</a>().
+ by calling <a href="lib_mach.htm#crash_file">crash_file</a>().
 
 <p>
  In addition, you are able to create
@@ -90,7 +90,7 @@
 <p>
  After you have predetermined the lines that are traceable, your program must
  then dynamically cause the trace facility to be activated by executing a
- <a href="lib_s_t.htm#trace">trace()</a> statement.
+ <a href="lib_dbg.htm#trace">trace()</a> statement.
  You could simply say:
 
 <_eucode>
@@ -110,7 +110,7 @@
 
 <p>
  You can turn off tracing by executing a
- <a href="lib_s_t.htm#trace">trace(0)</a> statement. You can also
+ <a href="lib_dbg.htm#trace">trace(0)</a> statement. You can also
  turn it off interactively by typing 'q' to quit tracing. Remember that
  <font color="#993333"><_bq>with trace</_bq></font> must appear
  <b><i>outside</i></b> of any routine, whereas
@@ -158,7 +158,7 @@
 </font>
 <p>
 
- When a <a href="lib_s_t.htm#trace">trace(1)</a> or trace(2) 
+ When a <a href="lib_dbg.htm#trace">trace(1)</a> or trace(2) 
  statement is executed by the interpreter,
  your main output screen is saved and
  a <font color="#993333"><b>trace screen</b></font> appears.
@@ -271,8 +271,8 @@
 <p>
  When a traced program requests keyboard input, the main output screen will
  appear, to let you type your input as you normally would. This works fine for
- <a href="lib_e_g.htm#gets">gets()</a> (read one line) input.
- When <a href="lib_e_g.htm#get_key">get_key()</a> (quickly sample the
+ <a href="lib_file.htm#gets">gets()</a> (read one line) input.
+ When <a href="lib_file.htm#get_key">get_key()</a> (quickly sample the
  keyboard) is
  called you will be given 8 seconds to type a character, otherwise it is
  assumed that there is no input for this call to get_key(). This allows you to
@@ -408,7 +408,7 @@ that you see in <b>ctrace.out</b>.
  in general was fast enough, but when a planet exploded, shooting 2500
  pixels off in all directions, the game slowed down. We wanted to speed
  up the explosion routine. We didn't care about the rest of the code. The
- solution was to call <a href="lib_p_r.htm#profile">profile(0)</a>
+ solution was to call <a href="lib_dbg.htm#profile">profile(0)</a>
  at the beginning of Language War, just after
  <font color="#993333"><_bq>with profile_time</_bq></font>,
  to turn off profiling, and then to call
@@ -441,7 +441,7 @@ that you see in <b>ctrace.out</b>.
 
 <p>
  These interrupts normally occur 18.2 times per second, but if you call
- <a href="lib_s_t.htm#tick_rate">tick_rate()</a> you can choose a much higher
+ <a href="lib_os.htm#tick_rate">tick_rate()</a> you can choose a much higher
  rate and thus get a more accurate
  time profile, since it will be based on more samples. By default, if you
  haven't called tick_rate(), then tick_rate(100) will be called automatically
@@ -481,7 +481,7 @@ that you see in <b>ctrace.out</b>.
 <p>
  By taking more samples you can get more accurate results. However, one
  situation to watch out for is the case where a program synchronizes itself
- to the clock interrupt, by waiting for <a href="lib_s_t.htm#time">time()</a>
+ to the clock interrupt, by waiting for <a href="lib_os.htm#time">time()</a>
  to advance. The statements executed just after the point where the clock
  advances might <font color="#CC0099"><_ba><i>never</i></_ba></font> be
  sampled, which could give you a very distorted picture. e.g.

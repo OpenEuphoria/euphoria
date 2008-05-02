@@ -18,13 +18,22 @@ ref_files = {
 
 lib_files = {
   "lib_0.doc",
-  "lib_a_b.doc",
-  "lib_c_d.doc",
-  "lib_e_g.doc",
-  "lib_h_o.doc",
-  "lib_p_r.doc",
-  "lib_s_t.doc",
-  "lib_u_z.doc"
+  "lib_type.htx",
+  "lib_seq.htx",
+  "lib_srch.htx",
+  "lib_math.htx",
+  "lib_bitw.htx",
+  "lib_file.htx",
+  "lib_mous.htx",
+  "lib_os.htx",
+  "lib_dbg.htx",
+  "lib_grap.htx",
+  "lib_mach.htx",
+  "lib_dyn.htx",
+  "lib_c.htx",
+  "lib_map.htx",
+  "lib_dtm.htx",
+  "lib_task.htx"
 }
 
 procedure quit(sequence msg)

@@ -1,0 +1,219 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.12 - Dynamic Calls</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+
+<_continueAllTop
+  libDoc="lib_dyn.htm"
+>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.12 - Dynamic Calls</_dul>
+
+</font>
+<p>
+
+<_routine name="call_func">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x = call_func(i, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Call the user-defined Euphoria function with
+ <font color=\"#993333\"><b>routine id</b></font> i.
+ i must be a valid routine id returned by routine_id(). s must
+ be a sequence of argument values of length n, where n is the
+ number of arguments required by function i. x will be the
+ result returned by function i. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" If function i does not take any arguments then s should be {}.
+ "
+ >
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\csort.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_dyn.htm#call_proc\">call_proc</a>,
+<a href=\"lib_dyn.htm#routine_id\">routine_id</a>"
+ >
+</table>
+
+
+<_routine name="call_proc">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> call_proc(i, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Call the user-defined Euphoria procedure with
+ <font color=\"#993333\"><b>routine id</b></font> i.
+ i must be a valid routine id returned by routine_id(). s must be
+ a sequence of argument values of length n, where n is the number
+ of arguments required by procedure i. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" If procedure i does not take any arguments then s should be {}.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+global integer foo_id
+
+procedure x()
+    call_proc(foo_id, {1, "Hello World\n"})
+end procedure
+
+procedure foo(integer a, sequence s)
+    puts(a, s)
+end procedure
+
+foo_id = routine_id("foo")
+
+x()
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_dyn.htm#call_func\">call_func</a>,
+<a href=\"lib_dyn.htm#routine_id\">routine_id</a>"
+ >
+</table>
+
+<_routine name="routine_id">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> i = routine_id(st)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return an integer id number, known as a
+ <font color=\"#993333\"><b>routine id</b></font>, for a user-defined Euphoria
+ procedure or function. The name of the procedure or function
+ is given by the string sequence st. -1 is returned if the named
+ routine can't be found."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The id number can be passed to call_proc() or call_func(), to indirectly
+ call the routine named by st.
+<P>
+ The routine named by st must be visible, i.e. callable, at the
+ place where routine_id() is used to get the id number. Indirect calls to the
+ routine can appear earlier in the program than the definition
+ of the routine, but the id number can only be obtained in code that 
+ comes <i>after</i> the definition of the routine - see example 2 below.
+
+<P> 
+ Once obtained, a valid <font color=\"#993333\"><b>routine id</b></font>
+ can be used at <font color=\"#CC0099\"><b><i>any</i></b></font> place 
+ in the program to call a routine indirectly via call_proc()/call_func().
+<p>
+ Some typical uses of routine_id() are:<p>
+ 1. <a href=\"refman_2.htm#42\">Calling a routine that is defined later in
+  a program.</a><br>
+ 2. Creating a subroutine that takes another routine as a parameter. (See
+  Example 2 below)<br>
+ 3. Using a sequence of <font color=\"#993333\"><b>routine id's</b></font>
+  to make a case (switch) statement.<br>
+ 4. Setting up an Object-Oriented system.<br>
+ 5. Getting a <font color=\"#993333\"><b>routine id</b></font> so you
+  can pass it to call_back(). (See
+ <a class=\"blue\" href=\"platform.htm#callback\"><b>platform.doc</b></a>)
+ <p>
+ Note that C routines, callable by Euphoria, also have routine id's.
+ See define_c_proc() and define_c_func()."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+procedure foo()
+    puts(1, "Hello World\n")
+end procedure
+
+integer foo_num
+foo_num = routine_id("foo")
+
+call_proc(foo_num, {})  -- same as calling foo()
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+function apply_to_all(sequence s, integer f)
+    -- apply a function to all elements of a sequence
+    sequence result
+    result = {}
+    for i = 1 to length(s) do
+        -- we can call add1() here although it comes later in the program
+        result = append(result, call_func(f, {s[i]}))
+    end for
+    return result
+end function
+
+function add1(atom x)
+    return x + 1
+end function
+
+-- add1() is visible here, so we can ask for its routine id
+? apply_to_all({1, 2, 3}, routine_id("add1"))
+-- displays {2,3,4}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_dyn.htm#call_proc\">call_proc</a>,
+<a href=\"lib_dyn.htm#call_func\">call_func</a>,
+<a href=\"lib_c.htm#call_back\">call_back</a>,
+<a href=\"lib_c.htm#define_c_func\">define_c_func</a>,
+<a href=\"lib_c.htm#define_c_proc\">define_c_proc</a>,
+<a class=\"blue\" href=\"platform.htm#callback\"><b>platform.doc</b>
+</a>"
+ >
+</table>
+
+<_continueAll
+  libDoc="lib_dyn.htm"
+>
+
+</body>
+</html>
+

@@ -1,0 +1,1733 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.10 - Graphics and Sound</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+
+
+<_continueAllTop
+  libDoc="lib_grap.htm"
+>
+
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.10 - Graphics and Sound</_dul>
+
+</font>
+<p>
+
+
+<_routine name="all_palette">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b> DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ all_palette(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Specify new color intensities for the entire set of colors in the
+ current graphics mode. s is a sequence of the form:<P>
+{{r,g,b}, {r,g,b}, ..., {r,g,b}}
+<P>
+Each element specifies a new color intensity {red, green, blue}
+ for the corresponding color number, starting with color number 0.
+ The values for red, green and blue must be in the range 0 to 63."
+ >
+<_2clist
+  name="Comments:"
+  description=
+" This executes much faster than if you were to use palette() to
+ set the new color intensities one by one. This procedure can
+ be used with read_bitmap() to quickly display a picture on the
+ screen.
+ "
+ >
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\dos32\bitmap.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#get_all_palette\">get_all_palette</a>,
+<a href=\"lib_grap.htm#palette\">palette</a>,
+<a href=\"lib_grap.htm#read_bitmap\">read_bitmap</a>,
+<a href=\"lib_grap.htm#video_config\">video_config</a>,
+<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
+ >
+</table>
+
+<_routine name="bk_color">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ bk_color(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Set the background color to one of the 16 standard colors. In
+ <font color=\"#CC3366\">pixel-graphics modes</font> the whole
+ screen is affected immediately. In 
+ <font color=\"#CC3366\">text modes</font> any new characters
+ that you print will have the new background color. In some text modes
+ there might only be 8 distinct background colors available."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The 16 standard colors are defined as constants in
+ <font color=\"#5500FF\"><b>graphics.e</b></font>
+<P>
+In <font color=\"#CC3366\">pixel-graphics modes</font>, color 0 which is
+ normally BLACK, will be set to the same {r,g,b} palette value as
+ color number i.
+<p>
+In some <font color=\"#CC3366\">pixel-graphics modes</font>, there is a
+ <i>border</i> color that appears at the edges of the screen. In 256-color
+ modes, this is the 17th color in the palette. You can control it as you
+ would any other color.
+<P>
+In <font color=\"#CC3366\">text modes</font>, to restore the original
+ background color when
+ your program finishes, e.g. 0 - BLACK, you must call bk_color(0).
+ If the cursor is at the bottom line of the screen, you may have
+ to actually print something before terminating your program.
+ Printing '\n' may be enough."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+bk_color(BLACK)
+
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="
+  <a href=\"lib_grap.htm#text_color\">text_color</a>,
+  <a href=\"lib_grap.htm#palette\">palette</a>"
+ >
+</table>
+
+<_routine name="clear_screen">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> clear_screen()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Clear the screen using the current background color (may be set
+ by bk_color())."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"This works in all <font color=\"#CC3366\">text and pixel-graphics
+ modes</font>."
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#bk_color\">bk_color</a>,
+<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
+ >
+</table>
+
+<_routine name="cursor">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>WIN32, DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ cursor(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Select a style of cursor. <font color=\"#5500FF\"><b>graphics.e</b></font>
+ contains:"
+ >
+<_eucode>
+    global constant NO_CURSOR = #2000,
+             UNDERLINE_CURSOR = #0607,
+       THICK_UNDERLINE_CURSOR = #0507,
+            HALF_BLOCK_CURSOR = #0407,
+                 BLOCK_CURSOR = #0007
+</_eucode> 
+ <_2clist
+  name=""
+  description=
+"The second and fourth hex digits (from the left) determine the
+ top and bottom rows of pixels in the cursor. The first digit
+ controls whether the cursor will be visible or not. For example,
+ #0407 turns on the 4th through 7th rows."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"In <font color=\"#CC3366\">pixel-graphics modes</font> no cursor is
+ displayed.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+cursor(BLOCK_CURSOR)
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>,
+<a href=\"lib_grap.htm#text_rows\">text_rows</a>"
+ >
+</table>
+
+<_routine name="display_image">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ display_image(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Display at point s1 on a <font color=\"#CC3366\">pixel-graphics</font>
+ screen the 2-d sequence
+ of pixels contained in s2. s1 is a two-element sequence {x, y}.
+ s2 is a sequence of sequences, where each sequence is one
+ horizontal row of pixel colors to be displayed. The first pixel
+ of the first sequence is displayed at s1. It is the top-left
+ pixel. All other pixels appear to the right or below of this
+ point. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+" s2 might be the result of a previous call to save_image(), or
+ read_bitmap(), or it could be something you have created.
+<P>
+The sequences (rows) of the image do not have to all be the
+ same length.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+display_image({20,30}, {{7,5,9,4,8},
+                        {2,4,1,2},
+                        {1,0,1,0,4,6,1},
+                        {5,5,5,5,5,5}})
+-- This will display a small image containing 4 rows of
+-- pixels. The first pixel (7) of the top row will be at
+-- {20,30}. The top row contains 5 pixels. The last row
+-- contains 6 pixels ending at {25,33}.
+
+ </_eucode>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\dos32\bitmap.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#save_image\">save_image</a>,
+<a href=\"lib_grap.htm#read_bitmap\">read_bitmap</a>,
+<a href=\"lib_grap.htm#display_text_image\">display_text_image</a>"
+ >
+</table>
+
+
+<_routine name="display_text_image">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ display_text_image(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Display the 2-d sequence of characters and attributes contained
+ in s2 at line s1[1], column s1[2]. s2 is a sequence of sequences,
+ where each sequence is a string of characters and attributes to
+ be displayed. The top-left character is displayed at s1. Other
+ characters appear to the right or below this position. The
+ attributes indicate the foreground and background color of the
+ preceding character. On DOS32, the attribute should consist of the 
+ foreground color plus 16 times the background color."
+ >
+<_2clist
+  name="Comments:"
+  description=
+" s2 would normally be the result of a previous call to
+ save_text_image(), although you could construct it yourself.
+<P>
+This routine only works in <font color=\"#CC3366\">text modes</font>.
+<P>
+You might use save_text_image()/display_text_image() in a text-mode
+ graphical user interface, to allow \"pop-up\" dialog boxes, and
+ drop-down menus to appear and disappear without losing what was
+ previously on the screen.
+<P>
+The sequences of the text image do not have to all be the same
+ length.
+ "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+clear_screen()
+display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
+                           {'C', RED+16*WHITE},
+                           {'D', BLUE}})
+-- displays:
+     AB
+     C
+     D
+-- at the top left corner of the screen.
+-- 'A' will be white with black (0) background color,
+-- 'B' will be green on black, 
+-- 'C' will be red on white, and
+-- 'D' will be blue on black.
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#save_text_image\">save_text_image</a>,
+<a href=\"lib_grap.htm#display_image\">display_image</a>,
+<a href=\"lib_grap.htm#put_screen_char\">put_screen_char</a>"
+ >
+</table>
+
+
+<_routine name="draw_line">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ draw_line(i, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Draw a line on a <font color=\"#CC3366\">pixel-graphics</font> screen
+ connecting two or more points in s, using color i. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+draw_line(WHITE, {{100, 100}, {200, 200}, {900, 700}})
+
+-- This would connect the three points in the sequence using
+-- a white line, i.e. a line would be drawn from {100, 100} to
+-- {200, 200} and another line would be drawn from {200, 200} to
+-- {900, 700}.
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#polygon\">polygon</a>,
+<a href=\"lib_grap.htm#ellipse\">ellipse</a>,
+<a href=\"lib_grap.htm#pixel\">pixel</a>"
+ >
+</table>
+
+<_routine name="ellipse">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ ellipse(i1, i2, s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Draw an ellipse with color i1 on a
+ <font color=\"#CC3366\">pixel-graphics</font> screen. The
+ ellipse will neatly fit inside the rectangle defined by diagonal
+ points s1 {x1, y1} and s2 {x2, y2}. If the rectangle is a square
+ then the ellipse will be a circle. Fill the ellipse when i2 is 1.
+ Don't fill when i2 is 0. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+ellipse(MAGENTA, 0, {10, 10}, {20, 20})
+
+-- This would make a magenta colored circle just fitting
+-- inside the square: 
+--        {10, 10}, {10, 20}, {20, 20}, {20, 10}.
+
+ </_eucode>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\dos32\sb.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#polygon\">polygon</a>,
+<a href=\"lib_grap.htm#draw_line\">draw_line</a>"
+ >
+</table>
+
+<_routine name="get_active_page">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ i = get_active_page()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Some graphics modes on most video cards have
+ multiple pages of memory. This lets you write screen output to one page
+ while displaying a different page. get_active_page() returns
+ the current page number that screen output is being sent to."
+ >
+<_2clist
+  name="Comments:"
+  description=
+" The active and display pages are both 0 by default.
+<P>
+video_config() will tell you how many pages are available in
+ the current graphics mode."
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#set_active_page\">set_active_page</a>,
+<a href=\"lib_grap.htm#get_display_page\">get_display_page</a>,
+<a href=\"lib_grap.htm#video_config\">video_config</a>"
+ >
+</table>
+
+
+<_routine name="get_all_palette">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ s = get_all_palette()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Retrieve color intensities for the entire set of colors in the current
+ graphics mode. s is a sequence of the form:<p>
+ {{r,g,b}, {r,g,b}, ..., {r,g,b}}
+<p>
+Each element specifies a color intensity {red, green, blue}
+ for the corresponding color number, starting with color
+ number 0. The values for red, green and blue will be in the
+ range 0 to 63."
+ >
+<_2clist
+  name="Comments:"
+  description=
+" This function might be used to get the palette values needed
+ by save_bitmap(). Remember to multiply these values by 4 before
+ calling save_bitmap(), since save_bitmap() expects values in the
+ range 0 to 255.
+ "
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#palette\">palette</a>,
+<a href=\"lib_grap.htm#all_palette\">all_palette</a>,
+<a href=\"lib_grap.htm#read_bitmap\">read_bitmap</a>,
+<a href=\"lib_grap.htm#save_bitmap\">save_bitmap</a>,
+<a href=\"lib_grap.htm#save_screen\">save_screen</a>"
+ >
+</table>
+
+<_routine name="get_display_page">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ i = get_display_page()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Some graphics modes on most video cards
+ have multiple pages of memory. This lets you write screen output to one page
+ while displaying another. get_display_page() returns the current
+ page number that is being displayed on the monitor."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The active and display pages are both 0 by default.
+<P>
+video_config() will tell you how many pages are available in
+ the current graphics mode."
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#set_display_page\">set_display_page</a>,
+<a href=\"lib_grap.htm#get_active_page\">get_active_page</a>,
+<a href=\"lib_grap.htm#video_config\">video_config</a>"
+ >
+</table>
+
+<_routine name="get_pixel">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> x = get_pixel(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"When s is a 2-element screen coordinate {x, y}, get_pixel()
+ returns the color (a small integer) of the pixel on the
+ <font color=\"#CC3366\">pixel-graphics</font> screen
+ at that point.<P>
+When s is a 3-element sequence of the form: {x, y, n}
+ get_pixel() returns a sequence of n colors for the
+ points starting at {x, y} and moving to the right {x+1, y},
+ {x+2, y} etc.
+<P>
+Points off the screen have unpredictable color values."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"When n is specified, a very fast algorithm is used to read the
+ pixel colors on the screen. It is much faster to call get_pixel()
+ once, specifying a large value of n, than it is to call it many
+ times, reading one pixel color at a time."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+object x
+
+x = get_pixel({30,40})
+-- x is set to the color value of point x=30, y=40
+
+x = get_pixel({30,40,100})
+-- x is set to a sequence of 100 integer values, representing
+-- the colors starting at {30,40} and going to the right
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#pixel\">pixel</a>,
+<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>,
+<a href=\"lib_grap.htm#get_position\">get_position</a>"
+ >
+</table>
+
+
+<_routine name="get_position">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ s = get_position()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return the current line and column position of the cursor as a
+ 2-element sequence <b>{line, column}</b>. "
+ >
+<_2clist
+  name="Comments:"
+  description=
+"get_position() works in both <font color=\"#CC3366\">text and
+ pixel-graphics modes</font>.
+ In <font color=\"#CC3366\">pixel-graphics modes</font> no cursor will be
+ displayed, but get_position() will return the line and column where the
+ next character will be displayed.
+<P>
+The coordinate system for displaying text is different from the
+ one for displaying pixels. Pixels are displayed such that the
+ top-left is (x=0,y=0) and the first coordinate controls the
+ horizontal, left-right location. In pixel-graphics modes
+ you can display both text and pixels. get_position() returns the
+ current line and column for the text that you are displaying,
+ not the pixels that you may be plotting. There is no
+ corresponding routine for getting the current pixel position.
+ "
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#position\">position</a>,
+<a href=\"lib_grap.htm#get_pixel\">get_pixel</a>"
+ >
+</table>
+
+
+<_routine name="get_screen_char">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ s = get_screen_char(i1, i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a 2-element sequence s, of the form
+  <b>{ascii-code, attributes}</b> for
+ the character on the screen at line i1, column i2. s consists of
+ two atoms. The first is the ASCII code for the character. The second
+ is an atom that contains the foreground and background color of the character,
+ and possibly other information describing the appearance of the character
+ on the screen."
+ >
+<_2clist
+  name="Comments:"
+  description="With get_screen_char() and put_screen_char() you can
+   save and restore a character on the screen along with its attributes."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+-- read character and attributes at top left corner
+s = get_screen_char(1,1) 
+-- store character and attributes at line 25, column 10
+put_screen_char(25, 10, s)
+</_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#put_screen_char\">put_screen_char</a>,
+<a href=\"lib_grap.htm#save_text_image\">save_text_image</a>"
+ >
+</table>
+
+<_routine name="graphics_mode">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ i1 = graphics_mode(i2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Select graphics mode i2. See <font color=\"#5500FF\"><b>graphics.e</b></font>
+ for a list of valid graphics modes. If successful, i1 is set to 0,
+ otherwise i1 is set to 1."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Some modes are referred to as <font color=\"#CC3366\">text modes</font>
+ because they only let you display text. Other modes are referred to as
+ <font color=\"#CC3366\">pixel-graphics modes</font> because you can
+ display pixels, lines, ellipses etc., as well as text.
+<P>
+As a convenience to your users, it is usually a good idea to
+ switch back from a pixel-graphics mode to the standard text
+ mode before your program terminates. You can do this with
+ graphics_mode(-1). If a pixel-graphics program leaves your screen
+ in a mess, you can clear it up with the DOS CLS command, or
+ by running <font color=\"#993333\"><b>ex</b></font> or
+ <font color=\"#993333\"><b>ed</b></font>.
+<P>
+Some graphics cards will be unable to enter some SVGA modes,
+ under some conditions. You can't always tell from the i1 value,
+ whether the graphics mode was set up successfully.
+<P>
+On the <font color=\"#CC3366\"><b>WIN32</b></font> and 
+<font color=\"#CC3366\"><b>Linux/FreeBSD</b></font>
+platforms, graphics_mode() will allocate a plain, text mode console if one
+does not exist yet. It will then return 0, no matter what value is 
+passed as i2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+if graphics_mode(18) then
+    puts(SCREEN, "need VGA graphics!\n")
+    abort(1)
+end if
+draw_line(BLUE, {{0,0}, {50,50}})
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#text_rows\">text_rows</a>,
+<a href=\"lib_grap.htm#video_config\">video_config</a>"
+ >
+</table>
+
+
+<_routine name="palette">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ x = palette(i, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"  Change the color for color number i to s, where s is a sequence
+ of color intensities: {red, green, blue}. Each value in s can be
+ from 0 to 63. If successful, a 3-element sequence containing the
+ previous color for i will be returned, and all pixels on the
+ screen with value i will be set to the new color. If
+ unsuccessful, the atom -1 will be returned. "
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+x = palette(0, {15, 40, 10})
+-- color number 0 (normally black) is changed to a shade
+-- of mainly green.
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#all_palette\">all_palette</a>"
+ >
+</table>
+
+<_routine name="pixel">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> pixel(x1, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Set one or more pixels on a <font color=\"#CC3366\">pixel-graphics</font>
+ screen starting at point s, where s is a 2-element screen coordinate {x, y}.
+ If x1 is an atom, one pixel will be set to the color indicated by x1.
+ If x1 is a sequence then a number of pixels will be set, starting
+ at s and moving to the right (increasing x value, same y value)."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"When x1 is a sequence, a very fast algorithm is used to put the
+ pixels on the screen. It is much faster to call pixel() once,
+ with a sequence of pixel colors, than it is to call it many
+ times, plotting one pixel color at a time.
+<P>
+In graphics mode 19, pixel() is highly optimized.
+<p>
+Any off-screen pixels will be safely clipped."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+pixel(BLUE, {50, 60})
+-- the point {50,60} is set to the color BLUE
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+pixel({BLUE, GREEN, WHITE, RED}, {50,60})
+-- {50,60} set to BLUE
+-- {51,60} set to GREEN
+-- {52,60} set to WHITE
+-- {53,60} set to RED
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#get_pixel\">get_pixel</a>,
+<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
+ >
+</table>
+
+
+
+<_routine name="polygon">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ polygon(i1, i2, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Draw a polygon with 3 or more vertices given in s, on a
+ <font color=\"#CC3366\">pixel-graphics</font> screen using a certain
+ color i1. Fill the area if i2 is 1. Don't fill if i2 is 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+polygon(GREEN, 1, {{100, 100}, {200, 200}, {900, 700}})
+-- makes a solid green triangle.
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#draw_line\">draw_line</a>,
+<a href=\"lib_grap.htm#ellipse\">ellipse</a>"
+ >
+</table>
+
+<_routine name="put_screen_char">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+  put_screen_char(i1, i2, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Write zero or more characters onto the screen along with their attributes.
+i1 specifies the line, and i2 specifies the column where the first
+character should be written. The sequence s looks
+like: {ascii-code1, attribute1, ascii-code2, attribute2, ...}.
+Each pair of elements in s describes one character. The ascii-code
+atom contains the ASCII code of the character. The attributes atom contains
+the foreground color, background color, and possibly other platform-dependent
+information controlling how the character is displayed on the screen."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"The length of s must be a multiple of 2. If s has 0 length, nothing
+ will be written to the screen.<p>
+ It's faster to write several characters to the screen with a single
+ call to put_screen_char() than it is to write one character at a time."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+-- write AZ to the top left of the screen
+-- (attributes are platform-dependent)
+put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#get_screen_char\">get_screen_char</a>,
+<a href=\"lib_grap.htm#display_text_image\">display_text_image</a>"
+ >
+</table>
+
+
+<_routine name="read_bitmap">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face =\"Arial, Helvetica\"> include image.e<BR>
+ x = read_bitmap(st)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"st is the name of a .bmp \"bitmap\" file. The file should be in
+ the bitmap format. The most common variations of the format
+ are supported. If the file is read successfully the result will
+ be a 2-element sequence. The first element is the palette,
+ containing intensity values in the range 0 to 255. The
+ second element is a 2-d sequence of sequences containing a
+ pixel-graphics image. You can pass the palette to all_palette()
+ (after dividing it by 4 to scale it). The image can be passed
+ to display_image().<P>
+Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
+ not in a good format, an error code (atom) is returned instead:"
+ >
+
+<_eucode>
+    global constant BMP_OPEN_FAILED = 1,
+                 BMP_UNEXPECTED_EOF = 2,
+             BMP_UNSUPPORTED_FORMAT = 3
+</_eucode>
+
+<_2clist
+  name="Comments:"
+  description=
+"You can create your own bitmap picture files using Windows
+ Paintbrush and many other graphics programs. You can then
+ incorporate these pictures into your Euphoria programs."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+x = read_bitmap("c:\\windows\\arcade.bmp")
+-- note: double backslash needed to get single backslash in
+-- a string
+
+ </_eucode>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\dos32\bitmap.ex</b></font>"
+ >
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#palette\">palette</a>,
+<a href=\"lib_grap.htm#all_palette\">all_palette</a>,
+<a href=\"lib_grap.htm#display_image\">display_image</a>,
+<a href=\"lib_grap.htm#save_bitmap\">save_bitmap</a>"
+ >
+</table>
+
+
+<_routine name="save_bitmap">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ i = save_bitmap(s, st)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Create a bitmap (.bmp) file from a 2-element sequence s.
+ st is the name of a .bmp \"bitmap\" file. s[1] is the palette:<P>
+{{r,g,b}, {r,g,b}, ..., {r,g,b}}
+<P>
+Each red, green, or blue value is in the range 0 to 255. s[2]
+ is a 2-d sequence of sequences containing a pixel-graphics image.
+ The sequences contained in s[2] must all have the same length.
+ s is in the same format as the value returned by read_bitmap().
+<P>
+The result will be one of the following codes:"
+ >
+<_eucode>
+    global constant BMP_SUCCESS = 0,
+                BMP_OPEN_FAILED = 1,
+               BMP_INVALID_MODE = 4 -- invalid graphics mode
+                                    -- or invalid argument
+</_eucode>
+ 
+<_2clist
+  name="Comments:"
+  description=
+"If you use get_all_palette() to get the palette before calling
+ this function, you must multiply the returned intensity values
+ by 4 before calling save_bitmap().
+<p>
+You might use save_image() to get the 2-d image for s[2].
+<P>
+save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and
+ these can all be read with read_bitmap(). Windows Paintbrush
+ and some other tools do not support 4-color bitmaps."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+paletteData = get_all_palette() * 4
+code = save_bitmap({paletteData, imageData},
+                   "c:\\example\\a1.bmp")
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#save_image\">save_image</a>,
+<a href=\"lib_grap.htm#read_bitmap\">read_bitmap</a>,
+<a href=\"lib_grap.htm#save_screen\">save_screen</a>,
+<a href=\"lib_grap.htm#get_all_palette\">get_all_palette</a>"
+ >
+</table>
+
+
+<_routine name="save_image">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ s3 = save_image(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Save a rectangular image from a <font color=\"CC3366\">pixel-graphics</font>
+ screen. The result is a 2-d sequence of sequences containing all the pixels
+ in the image. You can redisplay the image using display_image().
+ s1 is a 2-element sequence {x1,y1} specifying the top-left
+ pixel in the image. s2 is a sequence {x2,y2} specifying the
+ bottom-right pixel."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+s = save_image({0,0}, {50,50})
+display_image({100,200}, s)
+display_image({300,400}, s)
+-- saves a 51x51 square image, then redisplays it at {100,200}
+-- and at {300,400}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#display_image\">display_image</a>,
+<a href=\"lib_grap.htm#save_text_image\">save_text_image</a>"
+ >
+</table>
+
+
+<_routine name="save_screen">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ i = save_screen(x1, st)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Save the whole screen or a rectangular region of the screen as
+ a Windows bitmap (.bmp) file. To save the whole screen, pass the
+ integer 0 for x1. To save a rectangular region of the screen,
+ x1 should be a sequence of 2 sequences:
+ {{topLeftXPixel, topLeftYPixel}, 
+ {bottomRightXPixel, bottomRightYPixel}}<P>
+st is the name of a .bmp \"bitmap\" file.
+<P>
+The result will be one of the following codes:"
+ >
+
+<_eucode>
+    global constant BMP_SUCCESS = 0,
+                BMP_OPEN_FAILED = 1,
+               BMP_INVALID_MODE = 4 -- invalid graphics mode
+                                    -- or invalid argument
+</_eucode>
+
+<_2clist
+  name="Comments:"
+  description=
+"save_screen() produces bitmaps of 2, 4, 16, or 256 colors and
+ these can all be read with read_bitmap(). Windows Paintbrush
+ and some other tools do not support 4-color bitmaps.
+<P>
+save_screen() only works in
+ <font color=\"#CC3366\">pixel-graphics modes</font>, not text modes."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+-- save whole screen:
+code = save_screen(0, "c:\\example\\a1.bmp")
+
+ </_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+-- save part of screen:
+err = save_screen({{0,0},{200, 15}}, "b1.bmp")
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#save_image\">save_image</a>,
+<a href=\"lib_grap.htm#read_bitmap\">read_bitmap</a>,
+<a href=\"lib_grap.htm#save_bitmap\">save_bitmap</a>"
+ >
+</table>
+
+
+<_routine name="save_text_image">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ s3 = save_text_image(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Save a rectangular region of text from a
+ <font color=\"#CC3366\">text-mode</font> screen.
+ The result is a sequence of sequences containing ASCII characters
+ and attributes from the screen. You can redisplay this text using
+ display_text_image(). s1 is a 2-element sequence {line1, column1}
+ specifying the top-left character. s2 is a sequence
+ {line2, column2} specifying the bottom right character."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Because the character attributes are also saved, you will get
+ the correct foreground color, background color and other properties
+ for each character when you redisplay the text.
+<P>
+On DOS32, an attribute byte is made up of two 4-bit fields that
+ encode the foreground and background color of a character.
+ The high-order 4 bits determine the background color, while
+ the low-order 4 bits determine the foreground color.
+<P>
+This routine only works in <font color=\"#CC3366\">text modes</font>.
+<P>
+You might use this function in a text-mode graphical user
+ interface to save a portion of the screen before displaying a
+ drop-down menu, dialog box, alert box etc.
+<P>
+On DOS32, if you are flipping video pages, note that this function reads
+ from the current active page."
+ >
+<_2clist
+  name="Example:"
+  description=" If the top 2 lines of the screen have:"
+ >
+<_eucode>
+   Hello
+   World
+</_eucode>
+
+<_2clist
+  name=""
+  description=
+"And you execute:"
+>
+<_eucode>
+s = save_text_image({1,1}, {2,5})
+</_eucode>
+
+<_2clist
+  name=""
+  description=
+"Then s is something like:"
+>
+<_eucode>
+    {"H-e-l-l-o-",
+     "W-o-r-l-d-"}
+where '-' indicates the attribute bytes
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description=
+"<a href=\"lib_grap.htm#display_text_image\">display_text_image</a>,
+<a href=\"lib_grap.htm#save_image\">save_image</a>,
+<a href=\"lib_grap.htm#set_active_page\">set_active_page</a>,
+<a href=\"lib_grap.htm#get_screen_char\">get_screen_char</a>"
+ >
+</table>
+
+
+<_routine name="scroll">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ scroll(i1, i2, i3)
+</font>"
+ >
+ 
+<_2clist
+  name="Description:"
+  description=
+"Scroll a region of text on the screen either up (i1 positive) or
+ down (i1 negative) by i1 lines. The region is the series of lines
+ on the screen from i2 (top line) to i3 (bottom line), inclusive.
+ New blank lines will appear at the top or bottom."
+>
+
+<_2clist
+  name="Comments:"
+  description=
+"You could perform the scrolling operation using a series
+of calls to puts(), but scroll() is much faster.
+<p>
+The position of the cursor after scrolling is not defined."
+>
+
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>bin\ed.ex</b></font>"
+>
+
+ <_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#clear_screen\">clear_screen</a>,
+<a href=\"lib_grap.htm#text_rows\">text_rows</a>"
+ >
+</table>
+
+
+<_routine name="set_active_page">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ set_active_page(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Select video page i to send all screen output to."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"With multiple pages you can instantaneously change the entire
+ screen without causing any visible \"flicker\". You can also
+ save the screen and bring it back quickly.
+<P>
+video_config() will tell you how many pages are available in
+ the current graphics mode.
+<P>
+By default, the active page and the display page are both 0.
+<P>
+This works under DOS, or in a full-screen DOS window. In a
+ partial-screen window you cannot change the active page."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+include image.e
+
+-- active & display pages are initially both 0
+puts(1, "\nThis is page 0\n")
+set_active_page(1)     -- screen output will now go to page 1
+clear_screen()
+puts(1, "\nNow we've flipped to page 1\n")
+if getc(0) then        -- wait for key-press
+end if
+set_display_page(1)    -- "Now we've ..." becomes visible
+if getc(0) then        -- wait for key-press
+end if
+set_display_page(0)    -- "This is ..." becomes visible again
+set_active_page(0)
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#get_active_page\">get_active_page</a>,
+<a href=\"lib_grap.htm#set_display_page\">set_display_page</a>,
+<a href=\"lib_grap.htm#video_config\">video_config</a>"
+ >
+</table>
+
+
+<_routine name="set_display_page">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include image.e<BR>
+ set_display_page(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Set video page i to be mapped to the visible screen."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"With multiple pages you can instantaneously change the entire
+ screen without causing any visible \"flicker\". You can also
+ save the screen and bring it back quickly.
+<P>
+video_config() will tell you how many pages are available in
+ the current graphics mode.
+<P>
+By default, the active page and the display page are both 0.
+<P>
+This works under DOS, or in a full-screen DOS window. In a
+ partial-screen window you cannot change the active page."
+ >
+<_2clist
+  name="Example:"
+  description="See set_active_page() example."
+ >
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#get_display_page\">get_display_page</a>,
+<a href=\"lib_grap.htm#set_active_page\">set_active_page</a>,
+<a href=\"lib_grap.htm#video_config\">video_config</a>"
+ >
+</table>
+
+<_routine name="sound">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ sound(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Turn on the PC speaker at frequency i. If i is 0 the speaker
+ will be turned off."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"On <font color=\"#CC3366\"><b>WIN32</b></font> and 
+     <font color=\"#CC3366\"><b>Linux/FreeBSD</b></font> 
+no sound will be made."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+sound(1000) -- starts a fairly high pitched sound
+
+</_eucode>
+</table>
+
+<_routine name="text_color">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ text_color(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Set the foreground text color. Add 16 to get blinking text in some modes.
+ See <font color=\"#5500FF\"><b>graphics.e</b></font> for a list
+ of possible colors."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Text that you print <b><i>after</i></b> calling text_color() will have the
+ desired color.
+<P>
+When your program terminates, the last color that you selected
+ and actually printed on the screen will remain in effect.
+ Thus you may have to print something, maybe just '\n', in
+ WHITE to restore white text, especially if you are at the
+ bottom line of the screen, ready to scroll up."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+text_color(BRIGHT_BLUE)
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#bk_color\">bk_color</a>"
+ >
+</table>
+
+
+<_routine name="text_rows">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32, WIN32</b></font>"
+ >
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ i2 = text_rows(i1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Set the number of lines on a <font color=\"#CC3366\">text-mode</font> screen
+ to i1 if possible. i2 will be set to the actual new number of lines."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Values of 25, 28, 43 and 50 lines are supported by most video
+ cards."
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
+ >
+</table>
+
+<_routine name="use_vesa">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Platform:"
+  description="<font color=\"#CC3366\"><b>DOS32</b></font>"
+ >
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include machine.e<BR>
+ use_vesa(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"use_vesa(1) will force Euphoria to use the VESA graphics
+ standard. This may cause Euphoria programs to work better
+ in SVGA graphics modes with certain video cards.
+ use_vesa(0) will restore Euphoria's original method of
+ using the video card."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Most people can ignore this. However if you experience
+ difficulty in SVGA graphics modes you should try calling
+ use_vesa(1) at the start of your program before any calls
+ to graphics_mode().
+<P>
+Arguments to use_vesa() other than 0 or 1 should not be used."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+use_vesa(1)
+fail = graphics_mode(261)
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
+ >
+</table>
+
+
+<_routine name="video_config">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ s = video_config()
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Return a sequence of values describing the current video
+ configuration:<br>
+ {color monitor?, graphics mode, text rows, text columns,
+ xpixels, ypixels, number of colors, number of pages}<P>
+The following constants are defined in
+ <font color=\"#5500FF\"><b>graphics.e</b></font>:"
+ >
+<_eucode>
+    global constant VC_COLOR   = 1,
+                    VC_MODE    = 2,
+                    VC_LINES   = 3,
+                    VC_COLUMNS = 4,
+                    VC_XPIXELS = 5,
+                    VC_YPIXELS = 6,
+                    VC_NCOLORS = 7,
+                    VC_PAGES   = 8
+</_eucode> 
+
+<_2clist
+  name="Comments:"
+  description=
+"This routine makes it easy for you to parameterize a program
+ so it will work in many different graphics modes.
+<P>
+On the PC there are two types of graphics mode. The first type,
+ <font color=\"#CC3366\">text mode</font>, lets you print text only.
+ The second type, <font color=\"#CC3366\">pixel-graphics mode</font>,
+ lets you plot pixels, or points, in various colors, as well as text.
+ You can tell that you are in a <font color=\"#CC3366\">text mode</font>,
+ because the VC_XPIXELS and VC_YPIXELS fields will be 0. Library routines
+ such as <a href=\"lib_grap.htm#polygon\">polygon()</a>,
+ <a href=\"lib_grap.htm#draw_line\">draw_line()</a>, and
+ <a href=\"lib_grap.htm#ellipse\">ellipse()</a>
+ only work in a <font color=\"#CC3366\">pixel-graphics mode</font>."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+vc = video_config()  -- in mode 3 with 25-lines of text:
+-- vc is {1, 3, 25, 80, 0, 0, 32, 8}
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
+ >
+</table>
+
+<_routine name="wrap">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\"> include graphics.e<BR>
+ wrap(i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Allow text to wrap at the right margin (i = 1) or get truncated
+ (i = 0)."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"By default text will wrap.
+<P>
+Use wrap() in <font color=\"#CC3366\">text modes</font> or
+ <font color=\"#CC3366\">pixel-graphics modes</font> when you
+ are displaying long lines of text."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+puts(1, repeat('x', 100) & "\n\n")
+-- now have a line of 80 'x' followed a line of 20 more 'x'
+wrap(0)
+puts(1, repeat('x', 100) & "\n\n")
+-- creates just one line of 80 'x'
+
+ </_eucode>
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_file.htm#puts\">puts</a>,
+<a href=\"lib_grap.htm#position\">position</a>"
+ >
+</table>
+
+
+<_continueAll
+  libDoc="lib_grap.htm"
+>
+
+
+</body>
+</html>
+
