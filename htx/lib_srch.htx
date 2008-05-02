@@ -264,33 +264,23 @@ location = find_from("mary", names, 3)
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include search.e<BR>
+s2 = find_all(x, s1)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-""
+"Find all matches of x in s1 returning a sequence of starting index positions"
  >
-<_2clist
-  name="Comments:"
-  description=
-" "
->
 <_2clist
   name="Example:"
   description=""
  >
 <_eucode>
-
- </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#\"></a>"
- >
+s = find_all('A', "ABCABAB")
+-- s is {1,4,6}
+</_eucode>
 </table>
-
-
 
 <_routine name="find_any">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -363,6 +353,39 @@ location = find_any_from("aeiou", "John Smith", 3)
  >
 </table>
 
+<_routine name="find_replace">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include search.e<BR>
+s4 = find_replace(s1, s2, s3, i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Find s1 in up to i slices of s3 and replace with s2. i can be zero to mean find/replace all matches."
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<_eucode>
+s = find_replace("the", "THE", "the cat ate the food under the table", 0)
+-- s is "THE cat ate THE food under THE table"
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+s = find_replace("the", "THE", "the cat ate the food under the table", 2)
+-- s is "THE cat ate THE food under the table"
+</_eucode>
+</table>
+
+
 <_routine name="match">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -404,30 +427,22 @@ location = match("pho", "Euphoria")
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include search.e<BR>
+s2 = match_all(x, s1)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-""
+"Match all items of x in s1 returning a sequence of starting index positions"
  >
-<_2clist
-  name="Comments:"
-  description=
-" "
->
 <_2clist
   name="Example:"
   description=""
  >
 <_eucode>
-
- </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#\"></a>"
- >
+s = find_all("the", "the dog chased the cat under the table.")
+-- s is {1,16,30}
+</_eucode>
 </table>
 
 
@@ -474,30 +489,32 @@ location = match_from("pho", "phoEuphoria", 4)
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include search.e<BR>
+i = rfind(x, s)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-""
+"Find x in s in reverse order. If successful, return the index of
+the first element of s that matches. If unsuccessful return 0."
  >
 <_2clist
-  name="Comments:"
-  description=
-" "
->
-<_2clist
-  name="Example:"
+  name="Example 1:"
   description=""
  >
 <_eucode>
-
- </_eucode>
-
+location = rfind(11, {5, 8, 11, 2, 11, 3})
+-- location is set to 5
+</_eucode>
 <_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#\"></a>"
+  name="Example 2:"
+  description=""
  >
+<_eucode>
+names = {"fred", "rob", "rob", "george", "mary"}
+location = rfind("rob", names)
+-- location is set to 3
+</_eucode>
 </table>
 
 <_routine name="rfind_from">
@@ -506,25 +523,33 @@ location = match_from("pho", "phoEuphoria", 4)
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include search.e<BR>
+i1 = rfind_from(x, s, i2)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-""
+"Find x as an element of s in reverse order. Start the search backward at index i2.
+If successful, return the index of the first element of s that matches. If unsuccessful
+return 0. i2 may have any value from 1 to the length of s plus 1."
  >
 <_2clist
-  name="Comments:"
-  description=
-" "
->
-<_2clist
-  name="Example:"
+  name="Example 1:"
   description=""
  >
 <_eucode>
-
- </_eucode>
+location = rfind_from(11, {11, 8, 11, 12, 11}, 4)
+-- location is set to 3
+</_eucode>
+<_2clist
+  name="Example 2:"
+  description=""
+ >
+<_eucode>
+names = {"fred", "rob", "rob", "george", "mary", "rob"}
+location = rfind_from("rob", names, 5)
+-- location is set to 3
+</_eucode>
 
 <_2clist
   name="See Also:"
@@ -538,25 +563,23 @@ location = match_from("pho", "phoEuphoria", 4)
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include search.e<BR>
+i = match(s1, s2)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-""
+"Try to match s1 against some slice of s2 in reverse order. If successful, return
+the element number of s2 where the matching slice begins, otherwise return 0."
  >
-<_2clist
-  name="Comments:"
-  description=
-" "
->
 <_2clist
   name="Example:"
   description=""
  >
 <_eucode>
-
- </_eucode>
+location = rmatch("the", "the dog ate the steak from the table.")
+-- location is set to 28 (3rd the)
+</_eucode>
 
 <_2clist
   name="See Also:"
@@ -570,30 +593,24 @@ location = match_from("pho", "phoEuphoria", 4)
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include search.e<BR>
+i1 = rmatch_from(s1, s2, i2)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-""
+"Try to match s1 against some slice of s2 in reverse order, starting from index i2.
+If successful, return the element number of s2 where the matching slice begins,
+otherwise return 0. i2 may have any value from 1 to the length of s2 plus 1."
  >
-<_2clist
-  name="Comments:"
-  description=
-" "
->
 <_2clist
   name="Example:"
   description=""
  >
 <_eucode>
-
- </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#\"></a>"
- >
+location = rmatch_from("the", "the dog ate the steak from the table.", 25)
+-- location is set to 13 (2rd the)
+</_eucode>
 </table>
 
 

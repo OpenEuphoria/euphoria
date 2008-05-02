@@ -86,10 +86,6 @@ test_equal("flatten() nested", {1,2,3}, flatten({{1}, {2}, {3}}))
 test_equal("flatten() deeply nested", {1,2,3}, flatten({{{{1}}}, 2, {{{{{3}}}}}}))
 test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
 
-test_equal("find_replace() string", "John Smith", find_replace("John Doe", "Doe", "Smith", 0))
-test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({1,5,2,5,2}, {5,2}, {1,1}, 0))
-test_equal("find_replace() max set", "BBBAAA", find_replace("AAAAAA", "A", "B", 3))
-
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
 

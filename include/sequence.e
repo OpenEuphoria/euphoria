@@ -24,6 +24,7 @@ global function reverse(sequence s)
     end for
     return t
 end function
+
 global function head(sequence st, atom n)
 	if n >= length(st) then
 		return st
@@ -291,23 +292,4 @@ global function flatten(sequence s)
    end for
 
    return ret
-end function
-
--- TODO: document
-global function find_replace(sequence source, sequence what, sequence repl_with, integer max)
-    integer posn
-    
-    if length(what) then
-        posn = match(what, source)
-        while posn do
-            source = source[1..posn-1] & repl_with & source[posn+length(what)..length(source)]
-            posn = match_from(what, source, posn+length(repl_with))
-            max -= 1
-            if max = 0 then
-                exit
-            end if
-        end while
-    end if
-
-    return source
 end function

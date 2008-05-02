@@ -18,7 +18,6 @@ global function find_any(sequence needles, sequence haystack)
     return find_any_from(needles, haystack, 1)
 end function
 
--- TODO: document
 global function find_all(object x, sequence source, integer from)
     sequence ret
 
@@ -38,7 +37,6 @@ global function find_all(object x, sequence source, integer from)
     return ret
 end function
 
--- TODO: document
 global function match_all(object x, sequence source, integer from)
     sequence ret
 
@@ -58,7 +56,6 @@ global function match_all(object x, sequence source, integer from)
     return ret
 end function
 
--- TODO: document
 --Find x as an element of s starting from index start going down to 1
 --If start<1 then it is an offset from the end of s
 global function rfind_from(object x, sequence s, integer start)
@@ -83,12 +80,10 @@ global function rfind_from(object x, sequence s, integer start)
 	return 0
 end function
 
--- TODO: document
 global function rfind(object x, sequence s)
 	return rfind_from(x, s, length(s))
 end function
 
--- TODO: document
 --Try to match x against some slice of s, starting from index start and going down to 1
 --if start<0 then it is an offset from the end of s
 global function rmatch_from(sequence x, sequence s, integer start)
@@ -122,11 +117,28 @@ global function rmatch_from(sequence x, sequence s, integer start)
 	return 0
 end function
 
--- TODO: document
 global function rmatch(sequence x, sequence s)
 	if length(x)=0 then
         crash("first argument of rmatch_from() must be a non-empty string", {})
 	end if
 
 	return rmatch_from(x, s, length(s))
+end function
+
+global function find_replace(sequence what, sequence repl_with, sequence source, integer max)
+    integer posn
+    
+    if length(what) then
+        posn = match(what, source)
+        while posn do
+            source = source[1..posn-1] & repl_with & source[posn+length(what)..length(source)]
+            posn = match_from(what, source, posn+length(repl_with))
+            max -= 1
+            if max = 0 then
+                exit
+            end if
+        end while
+    end if
+
+    return source
 end function

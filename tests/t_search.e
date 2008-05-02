@@ -32,3 +32,7 @@ test_equal("rmatch() #2", 0, rmatch("ABC", "DEFBCA"))
 
 test_equal("rmatch_from() #1", 8, rmatch_from("ABC", "ABCDABCABC", 9))
 test_equal("rmatch_from() #2", 0, rmatch_from("ABC", "EEEDDDABC", 5))
+
+test_equal("find_replace() string", "John Smith", find_replace("Doe", "Smith", "John Doe", 0))
+test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({5,2}, {1,1}, {1,5,2,5,2}, 0))
+test_equal("find_replace() max set", "BBBAAA", find_replace("A", "B", "AAAAAA", 3))
