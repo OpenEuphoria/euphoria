@@ -464,12 +464,6 @@
 
 
 <_3clist
-  href="lib_seq.htm#truncate"
-  name="truncate"
-  description="truncate a squence at a given index"
->
-
-<_3clist
   href="lib_seq.htm#pad_head"
   name="pad_head"
   description="pad the beginning of a sequence with an atom up to x in overall length"

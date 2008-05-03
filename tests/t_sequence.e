@@ -67,9 +67,6 @@ test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t", 0))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
 test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
 
-test_equal("truncate() #1", "ABC", truncate("ABCDEFG", 3))
-test_equal("truncate() #2", "ABC", truncate("ABC", 15))
-
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))
 test_equal("pad_head() #3", "ABC", pad_head("ABC", 1))
@@ -88,4 +85,3 @@ test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
 
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
-

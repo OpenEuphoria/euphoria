@@ -25,12 +25,12 @@ global function reverse(sequence s)
     return t
 end function
 
-global function head(sequence st, atom n)
-	if n >= length(st) then
-		return st
-	else
-		return st[1..n]
+global function head(sequence st, integer size)
+	if size < length(st) then
+		return st[1..size]
 	end if
+
+    return st
 end function
 
 global function mid(sequence st, atom start, atom len)
@@ -225,13 +225,6 @@ end function
 
 global function trim(sequence str, object what)
     return trim_tail(trim_head(str, what), what)
-end function
-
-global function truncate(sequence s, integer size)
-    if size < length(s) then
-        return s[1..size]
-    end if
-    return s
 end function
 
 global function pad_head(sequence str, object params)

@@ -186,7 +186,7 @@ i = has(m, x)
 map m
 m = new()
 m = put(m, "name", "John")
-i = has(m, "name)
+i = has(m, "name")
 -- i is 1
 
 i = has(m, "age")

@@ -446,7 +446,7 @@ be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with"
 <_2clist
   name="Comments:"
   description="pad_head() will not remove characters. If s1 is longer than x, this
-function simply returns s1. See <a href=\"lib_seq.htm#truncate\">truncate()</a>
+function simply returns s1. See <a href=\"lib_seq.htm#head\">head()</a>
 if you wish to also truncate long sequences."
  >
 <_2clist
@@ -469,7 +469,7 @@ s = pad_head("ABC", {6, '-'})
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#pad_tail\">pad_tail</a>,
-<a href=\"lib_seq.htm#truncate\">truncate</a>"
+<a href=\"lib_seq.htm#head\">head</a>"
  >
 </table>
 
@@ -491,7 +491,7 @@ sequence {i1, i2} with i1 representing length and i2 the atom to pad with"
 <_2clist
   name="Comments:"
   description="pad_tail() will not remove characters. If s1 is longer than x, this
-function simply returns s1. See <a href=\"lib_seq.htm#truncate\">truncate()</a>
+function simply returns s1. See <a href=\"lib_seq.htm#head\">head()</a>
 if you wish to also truncate long sequences."
  >
 <_2clist
@@ -514,7 +514,7 @@ s = pad_tail("ABC", {6, '-'})
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#pad_head\">pad_head</a>,
-<a href=\"lib_seq.htm#truncate\">truncate</a>"
+<a href=\"lib_seq.htm#head\">head</a>"
  >
 </table>
 
@@ -1060,57 +1060,6 @@ s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
   name="See Also:"
   description="<a href=\"lib_seq.htm#trim\">trim</a>,
 <a href=\"lib_seq.htm#trim\">trim_head</a>"
- >
-</table>
-
-<_routine name="truncate">
-<table border=0 cellspacing=2 cellpadding=2>
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-s2 = truncate(s1, i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Truncate s1 to a maximum length of i"
- >
-<_2clist
-  name="Comments:"
-  description=
-"Truncate does not example s1 to a length of i, it only ensures that s1 is not larger than i."
->
-<_2clist
-  name="Example 1:"
-  description=""
- >
-<_eucode>
-s = truncate({10, 20, 30, 40, 50}, 3)
--- s is {10, 20, 30}
-</_eucode>
-<_2clist
-  name="Example 2:"
-  description=""
- >
-<_eucode>
-s = truncate("Long sentence that you only want a part of.", 10)
--- s is "Long sente"
-</_eucode>
-<_2clist
-  name="Example 3:"
-  description=""
- >
-<_eucode>
-s = truncate("John Doe", 50)
--- s is "John Doe"
-</_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_seq.htm#pad_head\">pad_head</a>,
-<a href=\"lib_seq.htm#pad_tail\">pad_tail</a>"
  >
 </table>
 
