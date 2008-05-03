@@ -740,7 +740,7 @@ global function Scanner()
 		    ch = getch()
 		end while
 			
-		if ch = ':' then -- TODO: Support . namespace delimiter? or ch = '.' then
+		if ch = ':' then
 		    -- skip whitespace
 		    ch = getch()
 		    while ch = ' ' or ch = '\t' do
