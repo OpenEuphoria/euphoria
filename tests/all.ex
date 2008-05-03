@@ -29,6 +29,7 @@ include t_misc.e
 include t_search.e
 include t_sequence.e
 include t_sort.e
+include t_stack.e
 include t_string.e
 include t_wildcard.e
 
