@@ -21,6 +21,15 @@ sk = s:push(sk, 30)
 test_equal("FIFO push() #1", {FIFO,30,20,10}, sk)
 test_equal("FIFO top()", 10, s:top(sk))
 
+sk = s:swap(sk)
+test_equal("FIFO swap() #1", {FIFO,30,10,20}, sk)
+sk = s:swap(sk)
+test_equal("FIFO swap() #1", {FIFO,30,20,10}, sk)
+
+sk = s:dup(sk)
+test_equal("FIFO dup()", {FIFO,30,20,10,10}, sk)
+sk = s:pop(sk)
+
 sk = s:pop(sk)
 test_equal("FIFO pop() #1", {FIFO,30,20}, sk)
 

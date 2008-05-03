@@ -49,6 +49,30 @@ global function pop(stack sk)
     return sk[1..$-1]
 end function
 
+global function swap(stack sk)
+    object a, b
+
+    if length(sk) < 3 then
+        crash("stack underflow in swap()", {})
+    end if
+
+    a = sk[$]
+    b = sk[$-1]
+
+    sk[$] = b
+    sk[$-1] = a
+
+    return sk
+end function
+
+global function dup(stack sk)
+    if length(sk) = 1 then
+        crash("stack underflow in dup()", {})
+    end if
+
+    return sk & sk[$]
+end function
+
 global function clear(stack sk)
     return {sk[1]}
 end function
