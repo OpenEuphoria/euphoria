@@ -24,12 +24,12 @@ end function
 global function push(stack sk, object value)
     if sk[1] = FIFO then
         if length(sk) = 1 then
-            return sk & value
+            return sk & {value}
         end if
 
-        return FIFO & value & sk[2..$]
+        return FIFO & {value} & sk[2..$]
     else
-        return sk[1..$] & value
+        return sk[1..$] & {value}
     end if
 end function
 
@@ -70,7 +70,7 @@ global function dup(stack sk)
         crash("stack underflow in dup()", {})
     end if
 
-    return sk & sk[$]
+    return sk & {sk[$]}
 end function
 
 global function clear(stack sk)
