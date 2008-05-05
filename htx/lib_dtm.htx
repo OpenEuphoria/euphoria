@@ -216,6 +216,30 @@ day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
 </_eucode>
 </table>
 
+<_routine name="doy">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include datetime.e<BR>
+i = doy(dt)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Get the Julian day of year of the date dt1."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+d = new(2008, 5, 2, 0, 0, 0)
+day = doy(d) -- day is 123
+</_eucode>
+</table>
+
 <_routine name="format">
 <table border=0 cellspacing=2 cellpadding=2>
 

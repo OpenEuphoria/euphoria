@@ -244,6 +244,11 @@ global function dow(datetime dt)
     return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
+-- TODO: document, test
+global function doy(datetime dt)
+    return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
+end function
+
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
 global function to_unix(datetime dt)
 	return datetimeToSeconds(dt) - EPOCH_1970

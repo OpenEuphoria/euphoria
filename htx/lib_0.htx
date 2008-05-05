@@ -2122,6 +2122,12 @@ map. It will be used throughout the documentation.
 >
 
 <_3clist
+  href="lib_dtm.htm#doy"
+  name="doy"
+  description="Return the Julian day of year for a give datetime value"
+>
+
+<_3clist
   href="lib_dtm.htm#to_unix"
   name="to_unix"
   description="Convert a datetime value to the unix numeric format (seconds since EPOCH)"

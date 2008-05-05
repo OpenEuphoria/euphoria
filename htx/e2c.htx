@@ -174,8 +174,8 @@
  The <font color="#0066CC"><b>Translator</b></font> uses
  Lcc's -O optimization flag in <font color="#5500FF"><b>emake.bat</b></font>.
  This flag can sometimes add to Lcc's unreliability.
- If your program doesn't work, try removing this flag from 
- all compile commands in emake.bat.
+ If your program doesn't work, try passing -lccopt-off to the command line
+ of ecu/ecw. This will disable the use of the lcc optimization flag.
  <p>
  <li>
  Warnings are turned off when compiling with

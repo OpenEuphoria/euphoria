@@ -822,7 +822,45 @@ a = float64_to_atom(f)
  >
 </table>
 
+<_routine name="free">
+<table border=0 cellspacing=2 cellpadding=2>
 
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include machine.e<BR>
+free(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Free up a previously allocated block of memory by specifying the
+address of the start of the block, i.e. the address that was returned
+by allocate()."
+>
+<_2clist
+  name="Comments:"
+  description=
+"Use free() to recycle blocks of memory during execution. This will
+reduce the chance of running out of memory or getting into excessive
+virtual memory swapping to disk. Do not reference a block of memory
+that has been freed. When your program terminates, all allocated memory
+will be returned to the system.
+<P>
+Do not use free() to deallocate memory that was allocated using
+allocate_low(). Use free_low() for this purpose."
+>
+<_2clist
+  name="Example Program:"
+  description="<font color=\"#5500FF\"><b>demo\dos32\dosint.ex</b></font>"
+ >
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_mach.htm#allocate\">allocate</a>,
+<a href=\"lib_mach.htm#free_low\">free_low</a>"
+ >
+</table>
 
 <_routine name="free_low">
 <table border=0 cellspacing=2 cellpadding=2>

@@ -16,8 +16,10 @@ test_equal("new() hour",   15, dt1[HOUR])
 test_equal("new() minute", 38, dt1[MINUTE])
 test_equal("new() second",  0, dt1[SECOND])
 
-test_equal("dow() #1",     4, d:dow(dt1))
-test_equal("dow() #2",     1, d:dow(dt2))
+test_equal("dow() #1", 4, d:dow(dt1))
+test_equal("dow() #2", 1, d:dow(dt2))
+
+test_equal("doy() #1", 114, d:doy(dt1))
 
 test_equal("diff_seconds() #1", 883065, d:diff(dt2, dt1))
 

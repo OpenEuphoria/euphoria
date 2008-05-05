@@ -23,6 +23,7 @@ include t_datetime.e
 include t_ctype.e
 include t_file.e
 include t_get.e
+include t_locale.e
 include t_math.e
 include t_map.e
 include t_misc.e
