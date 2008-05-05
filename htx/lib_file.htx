@@ -18,6 +18,28 @@
 
 </font>
 <p>
+<_sul><font color="#006633"><b>Constants:</b></font></_sul>
+
+
+<a name=constants></a>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_file.htm#PATHSEP"
+  name="PATHSEP"
+  description="Current platforms path separator character"
+>
+
+<_3clist
+  href="lib_file.htm#NL"
+  name="NL"
+  description="Current platforms newline character(s)"
+>
+</table>
+
+<p>
+<_sul><font color="#006633"><b>Function Reference:</b></font></_sul>
+
 
 <_routine name="?">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -1170,7 +1192,7 @@ s2 = pathinfo(s1)
   name="Description:"
   description=
 "Parse the fully qualified pathname (s1) and return a sequence containing directory name,
-file name and file extension."
+file name + file extension, file name and file extension."
  >
 <_2clist
   name="Comments:"
@@ -1184,7 +1206,7 @@ file name and file extension."
  >
 <_eucode>
 info = pathinfo("C:\\euphoria\\docs\\readme.txt")
--- info is {"C:\\euphoria\\docs", "readme", "txt"}
+-- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt"}
 </_eucode>
 
 <_2clist
@@ -1193,7 +1215,7 @@ info = pathinfo("C:\\euphoria\\docs\\readme.txt")
  >
 <_eucode>
 info = pathinfo("/opt/euphoria/docs/readme.txt")
--- info is {"/opt/euphoria/docs", "readme", "txt"}
+-- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
 </_eucode>
 
 <_2clist
@@ -1755,7 +1777,8 @@ close(fh)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_file.htm#read_lines\">read_lines</a>,
+  description="<a href=\"lib_file.htm#write_file\">write_file</a>,
+<a href=\"lib_file.htm#read_lines\">read_lines</a>,
 <a href=\"lib_file.htm#open\">open</a>"
  >
 </table>
@@ -1805,7 +1828,8 @@ close(fh)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_file.htm#read_file\">read_file</a>,
+  description="<a href=\"lib_file.htm#write_lines\">write_lines</a>,
+<a href=\"lib_file.htm#read_file\">read_file</a>,
 <a href=\"lib_file.htm#open\">open</a>"
  >
 </table>
@@ -2318,6 +2342,87 @@ exit_code = walk_dir("C:\\MYFILES", routine_id("look_at"), TRUE)
 <a href=\"lib_file.htm#open\">open</a>"
  >
 </table>
+
+<_routine name="write_file">
+<table border=0 cellspacing=2 cellpadding=2>
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+i = write_file(x, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Write s to file named x or file handle x. Returns 1 on success, 0 on failure."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is assumed
+to be a filename.<P>
+When x is a file handle, the file is not closed after writing is finished. When x is a
+file name, it is opened, written to and then closed."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+if write_file("data.txt", "This is important data\nGoodybe") = 0 then
+    puts(1, "Failed to write data\n")
+end if
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_file.htm#read_file\">read_file</a>,
+<a href=\"lib_file.htm#read_lines\">read_lines</a>,
+<a href=\"lib_file.htm#write_lines\">write_lines</a>"
+ >
+</table>
+
+
+<_routine name="write_lines">
+<table border=0 cellspacing=2 cellpadding=2>
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+i = write_lines(x, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Write lines contained in s to file named x or file handle x. Returns 1 on success, 0 on failure."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is assumed
+to be a filename.<P>
+When x is a file handle, the file is not closed after writing is finished. When x is a
+file name, it is opened, written to and then closed."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+if write_lines("data.txt", {"This is important data", "Goodybe"}, NL) = 0 then
+    puts(1, "Failed to write data\n")
+end if
+</_eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_file.htm#read_file\">read_file</a>,
+<a href=\"lib_file.htm#read_lines\">read_lines</a>,
+<a href=\"lib_file.htm#write_file\">write_file</a>,
+<a href=\"lib_file.htm#NL\">NL</a>"
+ >
+</table>
+
 
 <_continueAll
   libDoc="lib_file.htm"

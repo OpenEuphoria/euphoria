@@ -85,3 +85,10 @@ test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
 
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
+
+test_equal("lower() atom", 'a', lower('A'))
+test_equal("lower() letters only", "john", lower("JoHN"))
+test_equal("lower() mixed text", "john 55 &%.", lower("JoHN 55 &%."))
+test_equal("upper() atom", 'A', upper('a'))
+test_equal("upper() letters only", "JOHN", upper("joHn"))
+test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))

@@ -962,6 +962,18 @@
 >
 
 <_3clist
+  href="lib_file.htm#write_file"
+  name="write_file"
+  description="write sequence to a named file or file handle"
+>
+
+<_3clist
+  href="lib_file.htm#write_lines"
+  name="write_lines"
+  description="write all lines from a sequence to a named file or file handle"
+>
+
+<_3clist
   href="lib_file.htm#print"
   name="print"
   description="<a name=print></a>print a Euphoria
@@ -1138,6 +1150,12 @@
   href="lib_file.htm#PATHSEP"
   name="PATHSEP"
   description="the platform's path separator"
+>
+
+<_3clist
+  href="lib_file.htm#NL"
+  name="NL"
+  description="the platform's newline terminator (\n, \r\n)"
 >
 
 </table>

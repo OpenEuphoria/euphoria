@@ -101,8 +101,9 @@
 <p>
 <p>
 <li>
-    <b>Moved</b> function <b>reverse()</b> from <b>misc.e</b> to <b>sequence.e</b>
-    and functions/constant <b>PI</b>, <b>arccos</b>, <b>arcsin</b> moved from
+    <b>Moved</b> function <b>reverse()</b> from <b>misc.e</b>, <b>lower()</b>
+    and <b>upper()</b> from <b>wildcard.e</b> to <b>sequence.e</b>,
+    functions/constant <b>PI</b>, <b>arccos</b>, <b>arcsin</b> moved from
     <b>misc.e</b> to <b>math.e</b>.
 <p>
 <li>
@@ -119,7 +120,7 @@
      <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b>,
      <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b>,
      <b>atan2()</b>, <b>rand_range()</b>.
-     Constant <b>E</b>.
+     Global Constant <b>E</b>.
 	<li>
      New routines in <b>sequence.e</b>:
      <b>insert()</b>, <b>remove()</b>, <b>replace()</b>, <b>head()</b>,
@@ -133,8 +134,9 @@
      <b>rmatch_from()</b>.
 	<li>
      New routines in <b>file.e</b>:
-     <b>read_lines()</b>, <b>read_file()</b>, <b>pathinfo()</b>,
-     <b>dirname()</b>, <b>filename()</b>, <b>fileext()</b> and <b>PATHSEP</b>
+     <b>read_lines()</b>, <b>read_file()</b>, <b>write_lines()</b>,
+     <b>write_file()</b>, <b>pathinfo()</b>, <b>dirname()</b>, <b>filename()</b>,
+     <b>fileext()</b> and Global Constants <b>PATHSEP</b> and <b>NL</b>.
 	<li>
      New routines in <b>ctype.e</b>:
      <b>isalnum()</b>, <b>isalpha()</b>, <b>isascii()</b>, <b>iscntrl()</b>,

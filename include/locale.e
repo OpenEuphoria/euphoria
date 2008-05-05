@@ -26,7 +26,7 @@ integer LC_ALL, f_strfmon, f_strfnum
 atom lib, lib2
 
 if platform() = WIN32 then
-    lib = open_dll("MSVCRT.DLL") -- TODO
+    lib = open_dll("MSVCRT.DLL")
     lib2 = open_dll("KERNEL32.DLL")
     f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I)
     f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I)
@@ -37,9 +37,7 @@ elsif platform() = LINUX or platform() = FREEBSD then
     f_strfnum = -1
     LC_ALL = 6
 else
-    puts(2, "IupEu requires Windows, Linux or FreeBSD\n" &
-            "It does not and will not run in DOS\n")
-    abort(1)
+    crash("locale.e requires Windows, Linux or FreeBSD", {})
 end if
 
 ------------------------------------------------------------------------------------------

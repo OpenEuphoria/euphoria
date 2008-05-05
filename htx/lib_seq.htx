@@ -350,7 +350,7 @@ length({})    -- 0
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include wildcard.e<BR>
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
  x2 = lower(x1)
 </font>"
  >
@@ -1068,7 +1068,7 @@ s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include wildcard.e<BR>
+  description="<font face = \"Arial, Helvetica\"> include sequence.e<BR>
  x2 = upper(x1)
 </font>"
  >

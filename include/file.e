@@ -31,10 +31,14 @@ type boolean(integer b)
 end type
 
 global integer PATHSEP
+global sequence NL
+
 if platform() = LINUX then
     PATHSEP='/'
+    NL = "\n"
 else
     PATHSEP='\\'
+    NL = "\r\n"
 end if
 
 global function seek(file_number fn, file_position pos)
@@ -296,6 +300,29 @@ global function read_lines(object f)
 	return ret
 end function
 
+global function write_lines(object f, sequence lines, sequence nl)
+    object fn
+
+    if atom(f) then
+        fn = f
+    else
+        fn = open(f, "wb")
+        if fn = -1 then
+            return 0
+        end if
+    end if
+
+    for i = 1 to length(lines) do
+        puts(fn, lines[i] & nl)
+    end for
+
+    if sequence(f) then
+        close(fn)
+    end if
+
+    return 1
+end function
+
 global function read_file(object f)
     object fn, ret, y
 	ret = {}
@@ -323,13 +350,35 @@ global function read_file(object f)
 	return ret
 end function
 
+global function write_file(object f, sequence data)
+    integer fn
+
+    if atom(f) then
+        fn = f
+    else
+        fn = open(f, "wb")
+        if fn = -1 then
+            return 0
+        end if
+    end if
+    
+    puts(fn, data)
+
+    if sequence(f) then
+        close(fn)
+    end if
+
+    return 1
+end function
+
 global function pathinfo(sequence path)
     integer slash, period, ch
-    sequence dir_name, file_name, file_ext
+    sequence dir_name, file_name, file_ext, file_full
 
     dir_name  = ""
     file_name = ""
     file_ext  = ""
+    file_full = ""
 
     slash = 0
     period = 0
@@ -352,11 +401,13 @@ global function pathinfo(sequence path)
     if period > 0 then
         file_name = path[slash+1..period-1]
         file_ext = path[period+1..$]
+        file_full = file_name & '.' & file_ext
     else
         file_name = path[slash+1..$]
+        file_full = file_name
     end if
 
-    return {dir_name, file_name, file_ext}
+    return {dir_name, file_full, file_name, file_ext}
 end function
 
 global function dirname(sequence path)
@@ -369,17 +420,12 @@ global function filename(sequence path)
     sequence data
 
     data = pathinfo(path)
-    path = data[2]
 
-    if length(data[3]) then
-        path &= "." & data[3]
-    end if
-
-    return path
+    return data[2]
 end function
 
 global function fileext(sequence path)
     sequence data
     data = pathinfo(path)
-    return data[3]
+    return data[4]
 end function

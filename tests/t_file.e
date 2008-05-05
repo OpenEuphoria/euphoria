@@ -33,6 +33,22 @@ test_equal("read_file() #2", "alter this file", data[51..65])
 test_equal("where() #2", 253, where(tmp))
 close(tmp)
 
+test_true("write_file() filename", write_file("fileb.txt", "Hello World"))
+test_equal("write_file() read back", "Hello World", read_file("fileb.txt"))
+
+test_true("write_lines() filename", write_lines("fileb.txt", {"Goodbye", "World"}, NL))
+test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
+
+tmp = open("fileb.txt", "wb")
+test_true("write_file() file handle", write_file(tmp, "Hello World"))
+close(tmp)
+test_equal("write_file() read back", "Hello World", read_file("fileb.txt"))
+
+tmp = open("fileb.txt", "wb")
+test_true("write_lines() file handle", write_lines(tmp, {"Goodbye", "World"}, NL))
+close(tmp)
+test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
+
 sequence fullname, pname, fname, fext
 integer sep
 
@@ -49,12 +65,12 @@ end if
 fname = "readme"
 fext = "txt"
 
-test_equal("pathinfo() fully qualified path", {pname, fname, fext},
+test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext},
     pathinfo(fullname))
-test_equal("pathinfo() no extension", {pname, fname, ""},
+test_equal("pathinfo() no extension", {pname, fname, fname, ""},
     pathinfo(pname & PATHSEP & fname))
-test_equal("pathinfo() no dir", {"", fname, fext}, pathinfo(fname & "." & fext))
-test_equal("pathinfo() no dir, no extension", {"", fname, ""}, pathinfo("readme"))
+test_equal("pathinfo() no dir", {"", fname & '.' & fext, fname, fext}, pathinfo(fname & "." & fext))
+test_equal("pathinfo() no dir, no extension", {"", fname, fname, ""}, pathinfo("readme"))
 
 test_equal("dirname() full path", pname, dirname(fullname))
 test_equal("dirname() filename only", "", dirname(fname & "." & fext))

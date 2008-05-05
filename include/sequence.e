@@ -286,3 +286,15 @@ global function flatten(sequence s)
 
    return ret
 end function
+
+constant TO_LOWER = 'a' - 'A'
+
+global function lower(object x)
+-- convert atom or sequence to lower case
+    return x + (x >= 'A' and x <= 'Z') * TO_LOWER
+end function
+
+global function upper(object x)
+-- convert atom or sequence to upper case
+    return x - (x >= 'a' and x <= 'z') * TO_LOWER
+end function

@@ -4,18 +4,7 @@
 -- wild card matching for strings and file names
 
 include misc.e
-
-constant TO_LOWER = 'a' - 'A' 
-
-global function lower(object x)
--- convert atom or sequence to lower case
-    return x + (x >= 'A' and x <= 'Z') * TO_LOWER
-end function
-
-global function upper(object x)
--- convert atom or sequence to upper case
-    return x - (x >= 'a' and x <= 'z') * TO_LOWER
-end function
+include sequence.e as seq -- upper/lower
 
 function qmatch(sequence p, sequence s)
 -- find pattern p in string s
@@ -100,8 +89,8 @@ global function wildcard_file(sequence pattern, sequence filename)
 -- only match when the file name part has "ABC" at the end.
     
     if platform() != LINUX then
-	pattern = upper(pattern)
-	filename = upper(filename)
+	pattern = seq:upper(pattern)
+	filename = seq:upper(filename)
     end if
     if not find('.', pattern) then
 	pattern = pattern & '.'
