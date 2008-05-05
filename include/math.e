@@ -264,3 +264,8 @@ global function rand_range(integer lo, integer hi)
 
    return lo + rand(hi)
 end function
+
+-- TODO: document
+global function mod(atom x, atom y)
+    return x - y * floor(x / y)
+end function

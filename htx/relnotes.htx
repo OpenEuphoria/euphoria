@@ -119,7 +119,7 @@
      <b>ceil()</b>, <b>round_to()</b>, <b>round()</b>, <b>sign()</b>,
      <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b>,
      <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b>,
-     <b>atan2()</b>, <b>rand_range()</b>.
+     <b>atan2()</b>, <b>rand_range()</b>, <b>mod()</b>.
      Global Constant <b>E</b>.
 	<li>
      New routines in <b>sequence.e</b>:
