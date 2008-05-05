@@ -90,7 +90,8 @@ for i = 1 to 10 do
     test_true("rand_range(-100,-10)", n >= -100 and n <= -10)
 end for
 
-test_equal("mod() #1", 3573, mod(-27, 3600))
-test_equal("mod() #2", 3573, mod(-3627, 3600))
-test_equal("mod() #3", -27, mod(-3627, -3600))
+test_equal("mod() #1",  3573, mod(-27, 3600))
+test_equal("mod() #2",  3573, mod(-3627, 3600))
+test_equal("mod() #3",   -27, mod(-3627, -3600))
 test_equal("mod() #4", -3573, mod(27, -3600))
+test_equal("mod() #5",     0, mod(10, 2))
