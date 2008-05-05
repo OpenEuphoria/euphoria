@@ -1219,6 +1219,14 @@ info = pathinfo("/opt/euphoria/docs/readme.txt")
 </_eucode>
 
 <_2clist
+  name="Example 3:"
+  description="No extension"
+ >
+<_eucode>
+info = pathinfo("/opt/euphoria/docs/readme")
+-- info is {"/opt/euphoria/docs", "readme", "readme", ""}
+</_eucode>
+<_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#dirname\">dirname</a>,
 <a href=\"lib_file.htm#filename\">filename</a>,

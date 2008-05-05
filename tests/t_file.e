@@ -49,17 +49,19 @@ test_true("write_lines() file handle", write_lines(tmp, {"Goodbye", "World"}, NL
 close(tmp)
 test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
 
-sequence fullname, pname, fname, fext
+sequence fullname, pname, fname, fext, nl
 integer sep
 
 if platform() = DOS32 or platform() = WIN32 then
     fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
     pname = "C:\\EUPHORIA\\DOCS"
     sep = '\\'
+    nl = "\r\n"
 else
     fullname = "/opt/euphoria/docs/readme.txt"
     pname = "/opt/euphoria/docs"
     sep = '/'
+    nl = "\n"
 end if
 
 fname = "readme"
@@ -84,3 +86,4 @@ test_equal("fileext() filename only", fext, fileext(fullname))
 test_equal("fileext() filename no extension", "", fileext(fname))
 
 test_equal("PATHSEP", sep, PATHSEP)
+test_equal("NL", nl, NL)
