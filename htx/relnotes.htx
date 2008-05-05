@@ -1,6 +1,6 @@
 <_init_comment>
 <html>
-<head><title>Euphoria v3.2 Release Notes</title>
+<head><title>Euphoria v4.0 Release Notes</title>
 <_css>
 </head>
 <body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
@@ -14,7 +14,7 @@
 <p>&nbsp;<br>
 
 <font face="Arial, Helvetica" color="#003366">
-<b><_dul>Version 3.2 ??? ????:</_dul></b></font>
+<b><_dul>Version 4.0 ??? ????:</_dul></b></font>
 <p>
 <font color="#993333"><_sul><b>Bug Fixes</b></_sul></font>
 <ul>
@@ -174,7 +174,8 @@
      Implemented by Jeremy Cowgar.
     <li>
      New locale routines in <b>locale.e</b>:
-      <b>set()</b>, <b>get()</b>, <b>number()</b>, <b>money()</b>, <b>datetime()</b>.
+      <b>set()</b>, <b>get()</b>, <b>number()</b>, <b>money()</b>, <b>datetime()</b>,
+      <b>set_po_path()</b>, <b>get_po_path()</b>, <b>po_load()</b>, <b>w()</b>.
       Implemented by Jeremy Cowgar.
 </ul>
 <p>

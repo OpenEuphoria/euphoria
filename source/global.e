@@ -7,9 +7,9 @@ include mode.e as mode
 include misc.e
 include common.e
 
-global constant MAJ_VER = 3, MIN_VER = 2, PAT_VER = 0
-global constant INTERPRETER_VERSION = "3.2 (development)"
-global constant  TRANSLATOR_VERSION = "3.2 (development)"
+global constant MAJ_VER = 4, MIN_VER = 0, PAT_VER = 0
+global constant INTERPRETER_VERSION = "4.0 (development)"
+global constant  TRANSLATOR_VERSION = "4.0 (development)"
 
 global constant INTERPRET = mode:get_interpret(),
 		TRANSLATE = mode:get_translate(),
