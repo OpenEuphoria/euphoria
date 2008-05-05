@@ -7,6 +7,9 @@ include misc.e
 include dll.e
 include machine.e
 include datetime.e as dt
+include sequence.e
+include file.e
+include map.e as m
 
 ------------------------------------------------------------------------------------------
 --
@@ -15,6 +18,69 @@ include datetime.e as dt
 ------------------------------------------------------------------------------------------
 
 constant P = C_POINTER, I = C_INT, D = C_DOUBLE
+
+------------------------------------------------------------------------------------------
+--
+-- Local Variables
+--
+------------------------------------------------------------------------------------------
+
+m:map po
+po = m:new()
+
+object po_path
+po_path = 0
+
+------------------------------------------------------------------------------------------
+--
+-- Message translation functions
+--
+------------------------------------------------------------------------------------------
+
+-- TODO: document
+global procedure set_po_path(object pp)
+    po_path = pp
+end procedure
+
+-- TODO: document
+global function get_po_path()
+    return po_path
+end function
+
+-- TODO: document
+global function po_load(sequence filename)
+    object lines
+    sequence line
+    integer sp
+
+    filename &= ".po"
+
+    lines = read_lines(filename)
+    if atom(lines) then
+        return 0  -- TODO: default to English?
+    end if
+
+    po = m:new() -- clear any old data
+
+    for i = 1 to length(lines) do
+        line = trim(lines[i], " \r\n")
+        if length(line) > 0 and line[1] != '#' then
+            sp = find(32, line)
+            if sp then
+                po = m:put(po, line[1..sp-1], line[sp+1..$])
+            else
+                crash("Malformed PO line #%d in file %s", {i, filename})
+            end if
+        end if
+    end for
+
+    return 1
+end function
+
+-- TODO: document
+global function w(sequence word)
+    return m:get(po, word, "")
+end function
 
 ------------------------------------------------------------------------------------------
 --
@@ -51,13 +117,19 @@ constant
     f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I)
 
 -- TODO: document
-global procedure set(sequence new_locale)
+global function set(sequence new_locale)
     atom pLocale, ign
 
     pLocale = allocate_string(new_locale)
     ign = c_func(f_setlocale, {LC_ALL, pLocale})
     free(pLocale)
-end procedure
+
+    if sequence(po_path) then
+        return po_load(new_locale)
+    end if
+
+    return 1
+end function
 
 -- TODO: document
 global function get()

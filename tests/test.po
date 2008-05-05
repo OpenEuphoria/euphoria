@@ -1,0 +1,9 @@
+# Example PO translation file
+#
+
+
+hello Hello
+world World
+greeting %s, %s!
+
+# End of example PO
