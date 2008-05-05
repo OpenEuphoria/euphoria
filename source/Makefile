@@ -20,7 +20,7 @@
 #   Backend         (backendu):  make backendu
 
 include Makefile.eu
-EU_VERSION = 3.2
+EU_VERSION = 4.0
 
 ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME

@@ -76,7 +76,9 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
-	.\$(OBJDIR)\wildcard.obj
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\search.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
@@ -85,7 +87,8 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\wildcard.obj
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\sequence.obj
 
 	
 EU_CORE_OBJECTS = &
@@ -150,7 +153,7 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\0ackend.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\backend.obj &
-	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\compress.obj
 
 EU_DOS_OBJECTS = &
@@ -205,6 +208,11 @@ winall : .SYMBOLIC
 dosall : .SYMBOLIC
 	wmake -f makefile.wat dos $(VARS)
 	wmake -f makefile.wat library OS=DOS $(VARS)
+
+BUILD_DIRS=intobj transobj libobj backobj
+
+distclean : .SYMBOLIC
+	-rmdir /Q/S $(BUILD_DIRS)
 
 clean : .SYMBOLIC
 	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h
@@ -490,6 +498,12 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\wildcard.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\sequence.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\search.obj :  .\$(OBJDIR)\main-.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c
