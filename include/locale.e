@@ -25,11 +25,11 @@ constant P = C_POINTER, I = C_INT, D = C_DOUBLE
 --
 ------------------------------------------------------------------------------------------
 
-m:map po
-po = m:new()
+m:map lang
+lang = m:new()
 
-object po_path
-po_path = 0
+object lang_path
+lang_path = 0
 
 ------------------------------------------------------------------------------------------
 --
@@ -38,40 +38,55 @@ po_path = 0
 ------------------------------------------------------------------------------------------
 
 -- TODO: document
-global procedure set_po_path(object pp)
-    po_path = pp
+global procedure set_lang_path(object pp)
+    lang_path = pp
 end procedure
 
 -- TODO: document
-global function get_po_path()
-    return po_path
+global function get_lang_path()
+    return lang_path
 end function
 
 -- TODO: document
-global function po_load(sequence filename)
+global function lang_load(sequence filename)
     object lines
-    sequence line
-    integer sp
+    sequence line, key, msg
+    integer sp, cont -- continuation
 
-    filename &= ".po"
+    cont = 0
+    filename &= ".lng"
 
     lines = read_lines(filename)
     if atom(lines) then
-        return 0  -- TODO: default to English?
+	return 0  -- TODO: default to English?
     end if
 
-    po = m:new() -- clear any old data
+    lang = m:new() -- clear any old data
 
     for i = 1 to length(lines) do
-        line = trim(lines[i], " \r\n")
-        if length(line) > 0 and line[1] != '#' then
-            sp = find(32, line)
-            if sp then
-                po = m:put(po, line[1..sp-1], line[sp+1..$])
-            else
-                crash("Malformed PO line #%d in file %s", {i, filename})
-            end if
-        end if
+	line = trim(lines[i], " \r\n")
+	if cont then
+	    msg &= trim_tail(line, " &")
+	    if line[$] != '&' then
+		cont = 0
+		lang = m:put(lang, key, msg)
+	    else
+		msg &= '\n'
+	    end if
+	elsif length(line) > 0 and line[1] != '#' then
+	    sp = find(32, line)
+	    if sp then 
+		if line[$] = '&' then
+		    cont = 1
+		    key = line[1..sp-1]
+		    msg = trim_tail(line[sp+1..$], " &") & '\n'
+		else
+		    lang = m:put(lang, line[1..sp-1], line[sp+1..$])
+		end if
+	    else
+		crash("Malformed Language file %s on line %d", {filename, i})
+	    end if
+	end if
     end for
 
     return 1
@@ -79,7 +94,7 @@ end function
 
 -- TODO: document
 global function w(sequence word)
-    return m:get(po, word, "")
+    return m:get(lang, word, "")
 end function
 
 ------------------------------------------------------------------------------------------
@@ -124,8 +139,8 @@ global function set(sequence new_locale)
     ign = c_func(f_setlocale, {LC_ALL, pLocale})
     free(pLocale)
 
-    if sequence(po_path) then
-        return po_load(new_locale)
+    if sequence(lang_path) then
+	return lang_load(new_locale)
     end if
 
     return 1
@@ -138,7 +153,7 @@ global function get()
 
     p = c_func(f_setlocale, {LC_ALL, NULL})
     if p = NULL then
-        return ""
+	return ""
     end if
 
     r = peek_string(p)
@@ -181,9 +196,9 @@ end function
 -- TODO: document
 global function money(atom amount)
     if platform() = WIN32 then
-        return money_win32(amount)
+	return money_win32(amount)
     else
-        return money_unix(amount)
+	return money_unix(amount)
     end if
 end function
 
@@ -221,9 +236,9 @@ end function
 -- TODO: document
 global function number(atom num)
     if platform() = WIN32 then
-        return number_win32(num)
+	return number_win32(num)
     else
-        return number_unix(num)
+	return number_unix(num)
     end if
 end function
 

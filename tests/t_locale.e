@@ -24,23 +24,26 @@ test_equal("datetime", "Sunday, May 04, 2008",
 
 ------------------------------------------------------------------------------------------
 --
--- Test PO translation
+-- Test Language Translation
 --
 ------------------------------------------------------------------------------------------
 
-l:set_po_path("") -- current director
-test_equal("set_po_path/get_po_path", "", l:get_po_path())
+l:set_lang_path("") -- current director
+test_equal("set_lang_path/get_lang_path", "", l:get_lang_path())
 
-test_true("po_load() #1", l:po_load("test"))
+test_true("lang_load() #1", l:lang_load("test"))
 test_equal("w() #1", "Hello", l:w("hello"))
 test_equal("w() #2", "World", l:w("world"))
 test_equal("w() #3", "%s, %s!", l:w("greeting"))
 test_equal("w() sprintf() #1", "Hello, World!",
     sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
+test_equal("w() long message #1", "Hello %s,\nI hope you enjoy this email!",
+    l:w("long_message"))
 
-test_true("po_load() #2", l:po_load("test2"))
+test_true("lang_load() #2", l:lang_load("test2"))
 test_equal("w() #4", "Hola", l:w("hello"))
 test_equal("w() #5", "Mundo", l:w("world"))
 test_equal("w() #6", "%s, %s!", l:w("greeting"))
 test_equal("w() sprintf() #2", "Hola, Mundo!",
     sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
+

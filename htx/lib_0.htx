@@ -491,13 +491,13 @@
 >
 
 <_3clist
-  href="lib_pat.htm#lower"
+  href="lib_seq.htm#lower"
   name="lower"
   description="convert an atom or sequence to lower case"
 >
 
 <_3clist
-  href="lib_pat.htm#upper"
+  href="lib_seq.htm#upper"
   name="upper"
   description="convert an atom or sequence to upper case"
 >
@@ -585,13 +585,13 @@
 >
 
 <_3clist
-  href="lib_pat.htm#wildcard_match"
+  href="lib_srch.htm#wildcard_match"
   name="wildcard_match"
   description="match a pattern containing ? and * wildcards"
 >
 
 <_3clist
-  href="lib_pat.htm#wildcard_file"
+  href="lib_srch.htm#wildcard_file"
   name="wildcard_file"
   description="match a file name against a wildcard specification"
 >
