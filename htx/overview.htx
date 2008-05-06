@@ -13,18 +13,18 @@
 <p>&nbsp;<br>
 
  The Euphoria documentation is spread over several plain text files in the
- <font color="#5500FF"><b>euphoria\doc</b></font> directory. For each
- <b>.doc</b> file in the <font color="#5500FF"><b>euphoria\doc</b></font>
+ <filepath>euphoria\doc</filepath> directory. For each
+ <b>.doc</b> file in the <filepath>euphoria\doc</filepath>
  directory, there is a corresponding <b>.htm</b> file in the
- <font color="#5500FF"><b>euphoria\html</b></font> directory. You can also
+ <filepath>euphoria\html</filepath> directory. You can also
  type <font color="#993333"><b>guru</b></font> to quickly search for relevant
  information from all directories under
- <font color="#5500FF"><b>\euphoria</b></font>. 
+ <filepath>\euphoria</filepath>. 
 
 <p>
  Everyone should start with 
- <font color="#5500FF"><b>euphoria\readme.doc</b></font>
- (<font color="#5500FF"><b>euphoria\readme.htm</b></font>).
+ <filepath>euphoria\readme.doc</filepath>
+ (<filepath>euphoria\readme.htm</filepath>).
 <p> 
  <_sul>If you are having trouble installing Euphoria read:</_sul>
 <p>
@@ -171,7 +171,7 @@
 </table>
 
 <p>
- Most subdirectories under <font color="#5500FF"><b>\euphoria</b></font> have
+ Most subdirectories under <filepath>\euphoria</filepath> have
  a <b>.doc</b> file that describes the files in that subdirectory. 
  
 </_width>

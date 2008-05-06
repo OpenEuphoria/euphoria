@@ -286,7 +286,8 @@ procedure tag_continue(sequence raw_text, sequence plist)
 -- special handler for a title to continue to the next page
     object temp
     
-    write("<p>&nbsp;<p><center>\n")
+    write("<p>&nbsp;<p>\n")
+    write("<div class=\"tag_continue\">\n")
     write("<font color=\"#006633\" face=\"Arial, Helvetica\" size=+1>" &
 	  "... continue \n")
     
@@ -371,6 +372,14 @@ procedure tag_continueallbottom(sequence raw_text, sequence plist)
     tag_continueall(raw_text, plist, 0)
 end procedure
 
+procedure file_path(sequence raw_text, sequence plist)
+	write("<span class=\"file_path\">" & raw_text )
+end procedure
+
+procedure file_path_close(sequence raw_text, sequence plist)
+	write("</span>")
+end procedure
+
 global procedure html_init()
 -- set up handlers for html output
     add_handler("_init_comment", routine_id("tag_init_comment"))
@@ -405,6 +414,10 @@ global procedure html_init()
     add_handler("_default", routine_id("tag_default"))
     add_handler("_literal", routine_id("tag_literal"))
     add_handler("_css",     routine_id("tag_css"))
+    
+    add_handler("filepath",routine_id("file_path"))
+    add_handler("/filepath",routine_id("file_path_close"))
+    
     out_type = "htm"
 
     init_class()     -- defined in syncolor.e
