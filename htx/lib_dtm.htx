@@ -3,12 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.15 - Date and Time</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-
-
-<_continueAllTop
-  libDoc="lib_dtm.htm"
->
+<body>
 
 
 <font color="#FF0099" size=+1>
@@ -509,10 +504,6 @@ secs_since_epoch = to_unix(now())
 <a href=\"#format\">format</a>"
  >
 </table>
-
-<_continueAll
-  libDoc="lib_dtm.htm"
->
 
 </body>
 </html>

@@ -3,10 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 1 and 2</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-<_continueAllTop
-  libDoc="library.htm"
->
+<body>
 
 <_width>
 <_center><font color="#006633" size=+2><b>
@@ -2467,10 +2464,6 @@ Windows demo program, and the news.exu demo for Linux and FreeBSD.
 
 
 </_width>
-
-<_continueAll
-  libDoc="library.htm"
->
 
 </body>
 </html>

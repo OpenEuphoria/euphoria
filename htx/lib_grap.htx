@@ -3,13 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.10 - Graphics and Sound</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-
-
-<_continueAllTop
-  libDoc="lib_grap.htm"
->
-
+<body>
 
 
 <font color="#FF0099" size=+1>
@@ -1721,12 +1715,6 @@ puts(1, repeat('x', 100) & "\n\n")
 <a href=\"lib_grap.htm#position\">position</a>"
  >
 </table>
-
-
-<_continueAll
-  libDoc="lib_grap.htm"
->
-
 
 </body>
 </html>

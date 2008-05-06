@@ -3,13 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.9 - Debugging</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-
-
-<_continueAllTop
-  libDoc="lib_dbg.htm"
->
-
+<body>
 
 <font color="#FF0099" size=+1>
 <br>
@@ -126,11 +120,6 @@ end if
                <a href=\"refman_3.htm\">debugging and profiling</a>"
  >
 </table>
-
-<_continueAll
-  libDoc="lib_dbg.htm"
->
-
 
 </body>
 </html>

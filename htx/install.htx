@@ -3,7 +3,7 @@
 <head><title>How to Install Euphoria</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<body>
 <_width>
 <_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
 <br>
@@ -134,38 +134,31 @@ Windows system from Windows 95 up.
    <font color="#5500FF"><b>C:\EUPHORIA\BIN</b></font>.
 
 <p>
-   There is another, optional, environment variable used by some 
-   experienced users of Euphoria. It is called EUINC (see
-   http://www.rapideuphoria.com/cgi-bin/guru.exu?refDoc=on&libDoc=on&otherDoc=on&keywords=euinc
-   ).  It determines 
-   the search path for included files. You might want to add it,
-   or change it, when you install a new version of Euphoria.
+There is another, optional, environment variable used by some 
+experienced users of Euphoria. It is called EUINC (see
+<a href="http://www.rapideuphoria.com/cgi-bin/guru.exu?refDoc=on&libDoc=on&otherDoc=on&keywords=euinc"
+>Guru Search</a>).  It determines the search path for included files.
+You might want to add it, or change it, when you install a new version
+of Euphoria.
 
 <p>
 
 
 <_dul><b>How to Uninstall Euphoria</b></_dul>
 
-<pre>
-     1. If you wish to recover your previous version of Euphoria, or parts
-        of it, the "backup" subdirectory contains a backup copy of each 
-        of your previous standard Euphoria subdirectories, plus any files
-        that you may have added. However it does not contain any additional 
-        subdirectories that you may have created on your own.
-     
-     2. If there are no files that you need, you can delete the EUPHORIA 
-        directory that you installed into.
-     
-     3. Delete the EUDIR environment variable, and remove the EUPHORIA 
-        directory from your PATH, either in C:\AUTOEXEC.BAT, or in 
-        Control Panel/System/Advanced.
-
-     4. Delete the references to EUPHORIA in your Start Menu.
-
-</pre>
-
-
-<p>&nbsp;
+<ul>
+<li>If you wish to recover your previous version of Euphoria, or parts
+of it, the "backup" subdirectory contains a backup copy of each of your
+previous standard Euphoria subdirectories, plus any files that you may
+have added. However it does not contain any additional  subdirectories
+that you may have created on your own.</li>
+<li>If there are no files that you need, you can delete the EUPHORIA
+directory that you installed into.</li>
+<li>Delete the EUDIR environment variable, and remove the
+EUPHORIA directory from your PATH, either in C:\AUTOEXEC.BAT, or in 
+Control Panel/System/Advanced.</li>
+<li>Delete the references to EUPHORIA in your Start Menu.</li>
+</ul>
 
 </_width>
 </body>

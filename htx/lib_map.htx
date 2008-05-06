@@ -3,12 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.14 - Map</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-
-<_continueAllTop
-  libDoc="lib_map.htm"
->
-
+<body>
 
 <font color="#FF0099" size=+1>
 <br>
@@ -257,11 +252,6 @@ sequence values
 values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
 </_eucode>
 </table>
-
-
-<_continueAll
-  libDoc="lib_map.htm"
->
 
 </body>
 </html>

@@ -3,13 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.6 - File and Device I/O</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-
-
-<_continueAllTop
-  libDoc="lib_file.htm"
->
-
+<body>
 
 <font color="#FF0099" size=+1>
 <br>
@@ -2430,11 +2424,6 @@ end if
 <a href=\"lib_file.htm#NL\">NL</a>"
  >
 </table>
-
-
-<_continueAll
-  libDoc="lib_file.htm"
->
 
 
 </body>

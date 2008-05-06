@@ -3,12 +3,8 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.12 - Dynamic Calls</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<body>
 
-
-<_continueAllTop
-  libDoc="lib_dyn.htm"
->
 
 
 <font color="#FF0099" size=+1>
@@ -209,10 +205,6 @@ end function
 </a>"
  >
 </table>
-
-<_continueAll
-  libDoc="lib_dyn.htm"
->
 
 </body>
 </html>

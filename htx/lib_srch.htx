@@ -3,12 +3,7 @@
 <head><title>Euphoria Reference Manual Part II - Section 3.3 - Searching and Sorting</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-
-<_continueAllTop
-  libDoc="lib_srch.htm"
->
-
+<body>
 
 <font color="#FF0099" size=+1>
 <br>
@@ -821,11 +816,6 @@ i = wildcard_match("A*B*C", "a111b222c")
 <a href=\"lib_srch.htm#compare\">compare</a>"
  >
 </table>
-
-<_continueAll
-  libDoc="lib_srch.htm"
->
-
 
 </body>
 </html>

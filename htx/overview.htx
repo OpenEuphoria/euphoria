@@ -3,10 +3,7 @@
 <head><title>Guide to Documentation Files</title>
 <_css>
 </head>
-<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
-<_continueAllTop
-  libDoc="overview.htm"
->
+<body>
 
 <_width>
 <_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
@@ -178,10 +175,6 @@
  a <b>.doc</b> file that describes the files in that subdirectory. 
  
 </_width>
-
-<_continueAll
-  libDoc="overview.htm"
->
 
 </body>
 </html>
