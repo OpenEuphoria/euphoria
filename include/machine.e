@@ -323,4 +323,54 @@ global procedure check_all_blocks()
 end procedure
 with warning
 
+include string.e
+
+-- Function: allocate_ustring
+--
+-- Create a C-style null-terminated wchar_t string in memory
+--
+-- Parameters:
+--   s - a unicode (utf16) string
+--
+-- Returns:
+--   The address of the allocated string
+global function allocate_ustring(ustring s)
+	atom mem
+
+	mem = machine_func(M_ALLOC, length(s)*2 + 2)
+	if mem then
+		poke2(mem, s)
+		poke2(mem + length(s)*2, 0)
+	end if
+	
+	return mem
+end function
+
+
+-- Function: peek_ustring
+--
+-- Return a unicode (utf16) string that are stored at machine address a.
+--
+-- Parameters:
+--   a - address of the string in memory
+--
+-- Returns:
+--   The string at the memory position
+global function peek_ustring(atom a)
+	sequence s
+	integer c
+	
+	s = ""
+	while 1 do
+		c = peek2u(a)
+		if c != 0 then
+			s &= c
+		else
+			exit
+		end if
+		a += 1
+	end while
+	
+	return s
+end function
 
