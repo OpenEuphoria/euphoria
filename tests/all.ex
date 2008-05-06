@@ -25,6 +25,7 @@ include t_file.e
 include t_get.e
 include t_locale.e
 include t_math.e
+include t_machine.e
 include t_map.e
 include t_misc.e
 include t_search.e

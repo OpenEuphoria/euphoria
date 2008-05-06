@@ -368,7 +368,7 @@ global function peek_ustring(atom a)
 		else
 			exit
 		end if
-		a += 1
+		a += 2
 	end while
 	
 	return s
