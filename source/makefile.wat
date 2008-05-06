@@ -182,6 +182,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\wildcard.obj &
+        .\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj 
 	
