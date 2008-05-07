@@ -1,4 +1,5 @@
 include regex.e as regex
+include sequence.e
 include unittest.e
 
 set_test_module_name("regex.e")
@@ -17,5 +18,17 @@ test_equal("search_from() #2", {{5,7}}, regex:search_from(re, "the dog is happy"
 test_equal("search_from() #3", {{9,10}}, regex:search_from(re, "the dog is happy", regex:DEFAULT, 8))
 
 re = regex:new("[A-Z]+")
-test_equal("search_all() #1", {{{5,7}}, {{13,14}}}, regex:search_all(re, "the DOG ran UP", regex:DEFAULT))
+test_equal("search_all() #1", {{{5,7}}, {{13,14}}}, 
+    regex:search_all(re, "the DOG ran UP", regex:DEFAULT))
+
+test_equal("search_replace() #1", "the ABC ran ABC", 
+    regex:search_replace(re, "the DOG ran UP", "ABC", regex:DEFAULT))
+
+function repl(sequence data)
+    return lower(data[1])
+end function
+
+test_equal("search_replace_user() #1", "the dog ran up",
+    regex:search_replace_user(re, "the DOG ran UP", routine_id("repl"), 
+    regex:DEFAULT))
 

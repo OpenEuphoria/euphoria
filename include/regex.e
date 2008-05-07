@@ -1,7 +1,8 @@
 -- regular expressions
 
+include sequence.e
+
 -- TODO:
---   Create a search_all() function
 --   Create a search/replace() function
 --   Wrap pcre_free()
 
@@ -117,5 +118,37 @@ global function search_all(regex re, sequence text, atom options)
     end while
     
     return results
+end function
+
+-- TODO: document
+global function search_replace(regex re, sequence text, sequence replacement, 
+			       atom options)
+    sequence matches
+    
+    matches = search_all(re, text, options)
+    for i = length(matches) to 1 by -1 do
+	text = replace(text, replacement, matches[i][1][1], matches[i][1][2])
+    end for
+    
+    return text
+end function
+
+-- TODO: document
+global function search_replace_user(regex re, sequence text, integer rid, 
+				    atom options)
+    sequence matches, m
+    
+    matches = search_all(re, text, options)
+    for i = length(matches) to 1 by -1 do
+	m = matches[i]
+	for a = 1 to length(m)  do
+	    m[a] = text[m[a][1]..m[a][2]]
+	end for
+	
+	text = replace(text, call_func(rid, {m}), matches[i][1][1], 
+		       matches[i][1][2])
+    end for
+    
+    return text
 end function
 
