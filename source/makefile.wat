@@ -77,7 +77,6 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\traninit.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\string.obj &
 	.\$(OBJDIR)\search.obj
 
 EU_INTERPRETER_OBJECTS =  &

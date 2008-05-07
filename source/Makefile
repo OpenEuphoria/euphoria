@@ -160,7 +160,6 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/traninit.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/search.o \
-	./$(OBJDIR)/string.o \
 	./$(OBJDIR)/wildcard.o 
 	
 EU_INTERPRETER_OBJECTS =  \
