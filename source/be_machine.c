@@ -492,7 +492,7 @@ char *name_ext(char *s)
 	return s;
 }
 
-static long get_int(object x)
+extern long get_int(object x)
 /* return an integer value if possible */
 /* Note: uses (long) conversion of doubles 
    - NOT CORRECT for 32-bit addresses */

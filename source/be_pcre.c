@@ -1,10 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef EWINDOWS
+#include <windows.h>
+extern int default_heap;
+#endif
+		
 #include <string.h>
 #include "alldefs.h"
 #include "alloc.h"
 #include <pcre.h>
 
+long get_int();
 
 object compile_pcre(object pattern){
 /*	 pcre *pcre_compile(const char *pattern, int options,
@@ -46,21 +53,31 @@ object exec_pcre(object x ){
 	s1_ptr sub;
 	int i, j;
 	object pcre_ptr;
+	int options;
+	int start_from;
 	
 	// x[1] = pcre ptr
 	// x[2] = string to search
+	// x[3] = options
+	// x[4] = start_from
+	
 	pcre_ptr = SEQ_PTR(x)->base[1];
+	
 	if( IS_ATOM_INT( pcre_ptr ) )
 		re = (pcre*) pcre_ptr;
 	else
-		re = (pcre*) (int) DBL_PTR( pcre_ptr )->dbl;
+		re = (pcre*) (unsigned int) DBL_PTR( pcre_ptr )->dbl;
 	
 	sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	str = EMalloc(sub->length+1);
 	MakeCString( str, SEQ_PTR(x)->base[2] );
 	
+	options    = get_int( SEQ_PTR(x)->base[3] );
+	start_from = get_int( SEQ_PTR(x)->base[4] );
+	
+	
 	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
-		0, 0, ovector, 30 );
+		start_from, options, ovector, 30 );
 	EFree( str );
 	if( rc <= 0 ) return rc;
 	
