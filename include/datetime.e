@@ -182,8 +182,6 @@ end function
 
 -- ================= START newstdlib
 
-include string.e
-
 global sequence month_names, month_abbrs, day_names, day_abbrs, ampm
 
 month_names = { "January", "February", "March", "April", "May", "June", "July",
@@ -215,11 +213,11 @@ global type datetime(object o)
 	return sequence(o) and length(o) = 6
 	    and integer(o[YEAR]) and integer(o[MONTH]) and integer(o[DAY])
 	    and integer(o[HOUR]) and integer(o[MINUTE]) and atom(o[SECOND]
-        and o[MONTH] >= 1 and o[MONTH] <= 12
-        and o[DAY] >= 1 and o[DAY] <= daysInMonth(o[YEAR], o[MONTH])
-        and o[HOUR] >= 0 and o[HOUR] <= 23
-        and o[MINUTE] >= 0 and o[MINUTE] <= 59
-        and o[SECOND] >= 0 and o[SECOND] < 60)
+	and o[MONTH] >= 1 and o[MONTH] <= 12
+	and o[DAY] >= 1 and o[DAY] <= daysInMonth(o[YEAR], o[MONTH])
+	and o[HOUR] >= 0 and o[HOUR] <= 23
+	and o[MINUTE] >= 0 and o[MINUTE] <= 59
+	and o[SECOND] >= 0 and o[SECOND] < 60)
 end type
 
 -- Creates the datetime object for the specified parameters
@@ -262,7 +260,7 @@ end function
 -- TODO: create, test, document
 -- datetime parse(ustring string)
 -- parse the string and returns the datetime
-global function parse(ustring string)
+global function parse(sequence string)
 	return 0
 end function
 
@@ -291,7 +289,7 @@ end function
 -- %w  day of week (0..6); 0 is Sunday
 -- %y  last two digits of year (00..99)
 -- %Y  year
-global function format(datetime d, ustring format)
+global function format(datetime d, sequence format)
     integer in_fmt, ch, tmp
     sequence res
 
@@ -299,89 +297,89 @@ global function format(datetime d, ustring format)
     res = ""
 
     for i = 1 to length(format) do
-        ch = format[i]
+	ch = format[i]
 
-        if in_fmt then
-            in_fmt = 0
+	if in_fmt then
+	    in_fmt = 0
 
-            if ch = '%' then
-                res &= '%'
-            elsif ch = 'a' then
-                res &= day_abbrs[dow(d)]
-            elsif ch = 'A' then
-                res &= day_names[dow(d)]
-            elsif ch = 'b' then
-                res &= month_abbrs[d[MONTH]]
-            elsif ch = 'B' then
-                res &= month_names[d[MONTH]]
-            elsif ch = 'C' then
-                res &= sprintf("%02d", d[YEAR] / 100)
-            elsif ch = 'd' then
-                res &= sprintf("%02d", d[DAY])
-            elsif ch = 'H' then
-                res &= sprintf("%02d", d[HOUR])
-            elsif ch = 'I' then
-                tmp = d[HOUR]
-                if tmp > 12 then
-                    tmp -= 12
-                elsif tmp = 0 then
-                    tmp = 12
-                end if
-                res &= sprintf("%02d", tmp)
-            elsif ch = 'j' then
-                res &= sprintf("%d", julianDayOfYear(d))
-            elsif ch = 'k' then
-                res &= sprintf("%d", d[HOUR])
-            elsif ch = 'l' then
-                tmp = d[HOUR]
-                if tmp > 12 then
-                    tmp -= 12
-                elsif tmp = 0 then
-                    tmp = 12
-                end if
-                res &= sprintf("%d", tmp)
-            elsif ch = 'm' then
-                res &= sprintf("%02d", d[MONTH])
-            elsif ch = 'M' then
-                res &= sprintf("%02d", d[MINUTE])
-            elsif ch = 'p' then
-                if d[HOUR] <= 12 then
-                    res &= ampm[1]
-                else
-                    res &= ampm[2]
-                end if
-            elsif ch = 'P' then
-                if d[HOUR] <= 12 then
-                    res &= tolower(ampm[1])
-                else
-                    res &= tolower(ampm[2])
-                end if
-            elsif ch = 's' then
-                res &= sprintf("%d", to_unix(d))
-            elsif ch = 'S' then
-                res &= sprintf("%02d", d[SECOND])
-            elsif ch = 'u' then
-                tmp = dow(d)
-                if tmp = 1 then
-                    res &= "7" -- Sunday
-                else
-                    res &= sprintf("%d", dow(d) - 1)
-                end if
-            elsif ch = 'w' then
-                res &= sprintf("%d", dow(d) - 1)
-            elsif ch = 'y' then
-               tmp = floor(d[YEAR] / 100)
-               res &= sprintf("%02d", d[YEAR] - (tmp * 100))
-            elsif ch = 'Y' then
-                res &= sprintf("%04d", d[YEAR])
-            else
-                -- TODO: error or just add?
-            end if
-        elsif ch = '%' then
-            in_fmt = 1
-        else
-            res &= ch
-        end if
+	    if ch = '%' then
+		res &= '%'
+	    elsif ch = 'a' then
+		res &= day_abbrs[dow(d)]
+	    elsif ch = 'A' then
+		res &= day_names[dow(d)]
+	    elsif ch = 'b' then
+		res &= month_abbrs[d[MONTH]]
+	    elsif ch = 'B' then
+		res &= month_names[d[MONTH]]
+	    elsif ch = 'C' then
+		res &= sprintf("%02d", d[YEAR] / 100)
+	    elsif ch = 'd' then
+		res &= sprintf("%02d", d[DAY])
+	    elsif ch = 'H' then
+		res &= sprintf("%02d", d[HOUR])
+	    elsif ch = 'I' then
+		tmp = d[HOUR]
+		if tmp > 12 then
+		    tmp -= 12
+		elsif tmp = 0 then
+		    tmp = 12
+		end if
+		res &= sprintf("%02d", tmp)
+	    elsif ch = 'j' then
+		res &= sprintf("%d", julianDayOfYear(d))
+	    elsif ch = 'k' then
+		res &= sprintf("%d", d[HOUR])
+	    elsif ch = 'l' then
+		tmp = d[HOUR]
+		if tmp > 12 then
+		    tmp -= 12
+		elsif tmp = 0 then
+		    tmp = 12
+		end if
+		res &= sprintf("%d", tmp)
+	    elsif ch = 'm' then
+		res &= sprintf("%02d", d[MONTH])
+	    elsif ch = 'M' then
+		res &= sprintf("%02d", d[MINUTE])
+	    elsif ch = 'p' then
+		if d[HOUR] <= 12 then
+		    res &= ampm[1]
+		else
+		    res &= ampm[2]
+		end if
+	    elsif ch = 'P' then
+		if d[HOUR] <= 12 then
+		    res &= tolower(ampm[1])
+		else
+		    res &= tolower(ampm[2])
+		end if
+	    elsif ch = 's' then
+		res &= sprintf("%d", to_unix(d))
+	    elsif ch = 'S' then
+		res &= sprintf("%02d", d[SECOND])
+	    elsif ch = 'u' then
+		tmp = dow(d)
+		if tmp = 1 then
+		    res &= "7" -- Sunday
+		else
+		    res &= sprintf("%d", dow(d) - 1)
+		end if
+	    elsif ch = 'w' then
+		res &= sprintf("%d", dow(d) - 1)
+	    elsif ch = 'y' then
+	       tmp = floor(d[YEAR] / 100)
+	       res &= sprintf("%02d", d[YEAR] - (tmp * 100))
+	    elsif ch = 'Y' then
+		res &= sprintf("%04d", d[YEAR])
+	    else
+		-- TODO: error or just add?
+	    end if
+	elsif ch = '%' then
+	    in_fmt = 1
+	else
+	    res &= ch
+	end if
     end for
 
 	return res
@@ -392,44 +390,44 @@ global function add(datetime dt, object qty, integer interval)
 
     if interval = SECONDS then
     elsif interval = MINUTES then
-        qty *= 60
+	qty *= 60
     elsif interval = HOURS then
-        qty *= 3600
+	qty *= 3600
     elsif interval = DAYS then
-        qty *= 86400
+	qty *= 86400
     elsif interval = WEEKS then
-        qty *= 604800
+	qty *= 604800
     elsif interval = MONTHS then
-        if qty > 0 then
-            inc = 1
-        else
-            inc = -1
-            qty = -(qty)
-        end if
+	if qty > 0 then
+	    inc = 1
+	else
+	    inc = -1
+	    qty = -(qty)
+	end if
 
-        for i = 1 to qty do
-            if inc = 1 and dt[MONTH] = 12 then
-                dt[MONTH] = 1
-                dt[YEAR] += 1
-            elsif inc = -1 and dt[MONTH] = 1 then
-                dt[MONTH] = 12
-                dt[YEAR] -= 1
-            else
-                dt[MONTH] += inc
-            end if
-        end for
+	for i = 1 to qty do
+	    if inc = 1 and dt[MONTH] = 12 then
+		dt[MONTH] = 1
+		dt[YEAR] += 1
+	    elsif inc = -1 and dt[MONTH] = 1 then
+		dt[MONTH] = 12
+		dt[YEAR] -= 1
+	    else
+		dt[MONTH] += inc
+	    end if
+	end for
 
-        return dt
+	return dt
     elsif interval = YEARS then
-        dt[YEAR] += qty
-        if isLeap(dt[YEAR]) = 0 and dt[MONTH] = 2 and dt[DAY] = 29 then
-            dt[MONTH] = 3
-            dt[DAY] = 1
-        end if
+	dt[YEAR] += qty
+	if isLeap(dt[YEAR]) = 0 and dt[MONTH] = 2 and dt[DAY] = 29 then
+	    dt[MONTH] = 3
+	    dt[DAY] = 1
+	end if
 
-        return dt
+	return dt
     elsif interval = DATE then
-        qty = datetimeToSeconds(qty)
+	qty = datetimeToSeconds(qty)
     end if
 
 	return secondsToDateTime(datetimeToSeconds(dt) + qty)

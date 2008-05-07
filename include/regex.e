@@ -1,10 +1,16 @@
 -- regular expressions
 
+-- TODO:
+--   Create a search_all() function
+--   Create a search/replace() function
+--   Wrap pcre_free()
+
 constant
 	M_COMPILE_PCRE = 68,
 	M_EXEC_PCRE    = 69
 -- Options:
 global constant 
+	DEFAULT            = #00000000,
 	CASELESS           = #00000001,
 	MULTILINE          = #00000002,
 	DOTALL             = #00000004,
@@ -66,8 +72,9 @@ end type
 
 -- Compiles the pattern and returns an atom that represents the regular expression
 -- to be used elsewhere.
-global function new( sequence pattern )
-	return machine_func( M_COMPILE_PCRE, pattern )
+-- TODO: document
+global function new(sequence pattern)
+	return machine_func(M_COMPILE_PCRE, pattern)
 end function
 
 -- Searches text using the regular expression, re, which was returned from new(), and returns:
@@ -77,10 +84,38 @@ end function
 --                and end of the substring.  The first element is the 
 --                entire match, and subsequent elements are the captured
 --                substrings, if any.  An empty substring will be {1,0}.
-global function search( regex re, sequence text, atom options )
-	return machine_func( M_EXEC_PCRE, { re, text, options, 0 } )
+-- TODO: document
+global function search(regex re, sequence text, atom options)
+	return machine_func(M_EXEC_PCRE, { re, text, options, 0 })
 end function
 
-global function search_from( regex re, sequence text, atom options, integer from )
-	return machine_func( M_EXEC_PCRE, { re, text, options, from - 1 } )
+-- TODO: document
+global function search_from(regex re, sequence text, atom options, integer from)
+	return machine_func(M_EXEC_PCRE, { re, text, options, from - 1 })
 end function
+
+-- TODO: document
+global function search_all(regex re, sequence text, atom options)
+    object result
+    sequence results
+    integer from
+    
+    from = 1
+    results = {}
+    
+    while 1 do
+	result = search_from(re, text, options, from)
+	if atom(result) then
+	    exit
+	end if
+	
+	results = append(results, result)
+	from = result[1][2] + 1
+	if from > length(text) then
+	    exit
+	end if
+    end while
+    
+    return results
+end function
+

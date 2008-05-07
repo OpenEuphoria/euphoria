@@ -78,7 +78,6 @@ object exec_pcre(object x ){
 	options    = get_int( SEQ_PTR(x)->base[3] );
 	start_from = get_int( SEQ_PTR(x)->base[4] );
 	
-	
 	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
 		start_from, options, ovector, 30 );
 	EFree( str );
