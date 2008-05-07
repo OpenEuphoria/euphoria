@@ -70,7 +70,7 @@ object exec_pcre(object x ){
 	for( i = 1, j=0; i <= rc; i++ ){
 		sub = NewS1( 2 );
 		sub->base[1] = ovector[j++] + 1;
-		sub->base[2] = ovector[j] > 0 ? ovector[j] - 1 : 0;
+		sub->base[2] = ovector[j] > 0 ? ovector[j] : 0;
 		j++;
 		s->base[i] = MAKE_SEQ( sub );
 	}
