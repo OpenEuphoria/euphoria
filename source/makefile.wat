@@ -210,11 +210,11 @@ PCRE_OBJECTS = &
 
 	
 !ifneq MANAGED_MEM 1
-MEMFLAG = -DESIMPLE_MALLOC
+MEMFLAG = /dESIMPLE_MALLOC
 !endif
 
 !ifeq DEBUG 1
-DEBUGFLAG = /d2 -DEDEBUG
+DEBUGFLAG = /d2 /dDEBUG
 DEBUGLINK = debug all
 !endif
 
@@ -237,8 +237,8 @@ BUILD_DIRS=intobj transobj libobj backobj
 
 distclean : .SYMBOLIC
 	-rmdir /Q/S $(BUILD_DIRS)
-	-del /Q .\pcre\*.obj
-	-del /Q .\pcre\config.h
+	-del /Q .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
+	    .\pcre\pcre_chartables.c
 
 clean : .SYMBOLIC
 	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h
@@ -255,7 +255,7 @@ LIBTARGET=ecw.lib
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG)
 BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
-PCRE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s -DHAVE_CONFIG_H=1
+PCRE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /dHAVE_CONFIG_H
 
 builddirs : .SYMBOLIC
 	if not exist intobj mkdir intobj
@@ -285,8 +285,9 @@ ecw.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 
 ec.lib : runtime $(EU_LIB_OBJECTS)
 	
+pcre : .SYMBOLIC .\pcre\pcre.h .\pcre\config.h $(PCRE_OBJECTS)
 
-interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\int.lbc
 	@%append .\$(OBJDIR)\int.lbc option quiet
 	@%append .\$(OBJDIR)\int.lbc option caseexact
@@ -314,7 +315,7 @@ install : .SYMBOLIC
 	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
 	@for %i in (*.ex) do @copy %i $(%EUDIR)\source\
 	
-ecw.exe : $(OBJDIR)\ec.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+ecw.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
@@ -326,7 +327,7 @@ ecw.exe : $(OBJDIR)\ec.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU
 translator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-backendw.exe : backendflag $(OBJDIR)\backend.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendw.exe : backendflag $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
 	@%append .\$(OBJDIR)\exwb.lbc option caseexact
@@ -343,7 +344,7 @@ backend : .SYMBOLIC builddirs
 dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-ex.exe : $(OBJDIR)\int.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ex.lbc
 	@%append .\$(OBJDIR)\ex.lbc option quiet
 	@%append .\$(OBJDIR)\ex.lbc option caseexact
@@ -564,7 +565,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
 .\$(OBJDIR)\back\be_pcre.obj : ./be_pcre.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) /I.\pcre $^&.c -fo=$^@
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $(PCRE_FLAGS) /I.\pcre $^&.c -fo=$^@
 
 .\$(OBJDIR)\back\be_runtime.obj : ./be_runtime.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
@@ -574,9 +575,6 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 
 .\$(OBJDIR)\back\be_w.obj : ./be_w.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
-
-.\pcre\config.h : .\pcre\config.h.win
-	-copy .\pcre\config.h.win .\pcre\config.h
 
 .\pcre\pcre_chartables.obj : .\pcre\pcre_chartables.c.win
 	-copy .\pcre\pcre_chartables.c.win .\pcre\pcre_chartables.c
@@ -641,3 +639,7 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 
 .\pcre\pcre.h : .\pcre\pcre.h.win
 	-copy .\pcre\pcre.h.win .\pcre\pcre.h
+
+.\pcre\config.h : .\pcre\config.h.win
+	-copy .\pcre\config.h.win .\pcre\config.h
+

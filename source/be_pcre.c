@@ -5,7 +5,10 @@
 #include <windows.h>
 extern int default_heap;
 #endif
-		
+#if defined(EWINDOWS) || defined(EDOS)
+#include "pcre/config.h" /* cannot make it link w/o it */
+#endif
+
 #include <string.h>
 #include "alldefs.h"
 #include "alloc.h"
@@ -14,9 +17,9 @@ extern int default_heap;
 long get_int();
 
 object compile_pcre(object pattern){
-/*	 pcre *pcre_compile(const char *pattern, int options,
-            const char **errptr, int *erroffset,
-            const unsigned char *tableptr);
+/*       pcre *pcre_compile(const char *pattern, int options,
+	    const char **errptr, int *erroffset,
+	    const unsigned char *tableptr);
 */
 	pcre *re;
 	const char *error;
