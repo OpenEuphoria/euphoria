@@ -189,17 +189,6 @@ procedure tag_end_dul(sequence raw_text, sequence param_list)
     dulEnd   = column - 1
 end procedure
 
-procedure tag_h3(sequence raw_text, sequence param_list)
-    writeText("\n\n")
-    dulFound = TRUE
-    dulStart = column
-end procedure
-
-procedure tag_end_h3(sequence raw_text, sequence param_list)
-    writeText("")
-    dulEnd   = column - 1
-end procedure
-
 procedure tag_sul(sequence raw_text, sequence param_list)
     sulFound = TRUE
     sulStart = column
@@ -391,10 +380,6 @@ procedure tag_p(sequence raw_text, sequence param_list)
 	writeText("\n\n")
     end if
 end procedure
-
-procedure tag_p_close(sequence raw_text, sequence param_list)
-	writeText("\n\n")
-end procedure
     
 procedure tag_br(sequence raw_text, sequence param_list)
 -- start new line after flushing out the existing line
@@ -548,14 +533,6 @@ procedure tag_end_blockquote(sequence raw_text, sequence param_list)
     getReadyNewLine()
 end procedure
 
-procedure section_header(sequence raw_text,sequence param_list)
-	write(repeat('-',50) & "\n")
-end procedure
-
-procedure section_header_close(sequence raw_text,sequence param_list)
-	write(repeat('-',50))
-end procedure
-
 global procedure text_init()
 -- set up handlers for text output
     add_handler("!--",      routine_id("tag_comment"))
@@ -596,15 +573,6 @@ global procedure text_init()
     add_handler("p",        routine_id("tag_p"))
     add_handler("_default", routine_id("tag_default"))
     add_handler("_literal", routine_id("tag_literal"))
-
-    -- i was hoping to put the section header between thick lines above and below
-    -- obviously, i don't know how to do that... maybe you do? -c.k.lester    
-	add_handler("section_header",routine_id("section_header"))
-    add_handler("/section_header",routine_id("section_header_close"))
-    add_handler("/p",        routine_id("tag_p_close"))
-    add_handler("h3",     routine_id("tag_h3"))
-    add_handler("/h3",    routine_id("tag_end_h3"))
-    
     out_type = "doc"
     
     in_ampersand  = FALSE

@@ -268,7 +268,7 @@ EU_BACKEND_RUNNER_FILES = \
 
 all : interpreter translator library backend
 
-BUILD_DIRS=intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
+BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
 
 distclean : 
 	-rm -r $(BUILD_DIRS)

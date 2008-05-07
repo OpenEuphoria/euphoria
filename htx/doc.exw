@@ -3,7 +3,9 @@
 -- Documentation Generator
 -- written by: Junko C. Miura of Rapid Deployment Software 
 -- (JCMiura@RapidEuphoria.com)
+
 include misc.e
+
 integer SLASH
 if platform() = LINUX then
     SLASH = '/'
@@ -12,44 +14,27 @@ else
 end if
 
 constant files = {
-    "refman_0.htx",
-    "refman_1.htx",
-    "refman_2.htx",
-    "refman_3.htx",
-    "lib_0.htx",
-    "lib_type.htx",
-    "lib_seq.htx",
-    "lib_srch.htx",
-    "lib_math.htx",
-    "lib_bitw.htx",
-    "lib_file.htx",
-    "lib_mous.htx",
-    "lib_os.htx",
-    "lib_dbg.htx",
-    "lib_grap.htx",
-    "lib_mach.htx",
-    "lib_dyn.htx",
-    "lib_c.htx",
-    "lib_map.htx",
-    "lib_dtm.htx",
-    "lib_task.htx",
-    "lib_eds.htx",
-    "readme.htx",
-    "install.htx", 
-    "ed.htx",
-    "c.htx",
-    "cgi.htx",
-    "relnotes.htx",
-    "perform.htx",
-    "bind.htx",
-    "trouble.htx",
-    "platform.htx",
-    "overview.htx",
-    "what2do.htx",
-    "database.htx",
-    "tasking.htx",
-    "e2c.htx"
+    "install.htx"
 }
+
+include stack.e as stk
+stk:stack format_stack
+format_stack = stk:new(FILO)
+
+global function in_tag(sequence tag)
+    integer nesting_count
+    
+    nesting_count = 0
+    for i = stk:size(format_stack) to 1 by -1 do
+	nesting_count += equal(tag, stk:at(format_stack, i))
+    end for
+    
+    return nesting_count
+end function
+
+global function is_tag(sequence tag)
+    return equal(tag, stk:top(format_stack))
+end function
 
 without warning
 include docgen.e   -- common include file for RTF, HTML, and plain text
@@ -134,6 +119,20 @@ procedure tag(sequence name, object param, object raw)
 -- process a tag (or literal text)
     integer r
     
+    -- handle format stack
+    if equal(name, "_literal") then
+	-- do nothing
+    elsif name[1] = '/' then
+	if is_tag(name[2..$]) = 0 then
+	    quit(sprintf("Document malformed. Found %s when expecting /%s",
+		{name, stk:at(format_stack, 0)}))
+	end if
+	
+	format_stack = stk:pop(format_stack)
+    else
+	format_stack = stk:push(format_stack, name)
+    end if
+    
     r = find(name, handler_name)
     if r = 0 then
 	r = find("_default", handler_name)
@@ -141,6 +140,9 @@ procedure tag(sequence name, object param, object raw)
 	    quit("Need a default handler")
 	end if
     end if
+
+    
+
     if equal(name, "!--") then
 	call_proc(handler_id[r], {raw, ""})
     else
@@ -257,7 +259,7 @@ else
 end if
 
 app_dir &= SLASH
-app_dir = lower(app_dir)
+app_dir = app_dir
 
 procedure main(sequence in_name, sequence format, sequence dest)
     sequence out_name
@@ -277,17 +279,18 @@ procedure main(sequence in_name, sequence format, sequence dest)
     
     out_name = in_name[1..p] & out_type
     if find('_', out_name) and equal(format, "PLAIN") then
-	out_file = open(out_name, "w") -- place in current dir
     elsif match("readme.", out_name) then
-	out_file = open(app_dir & SLASH & out_name, "w")
+	out_name = app_dir & SLASH & out_name
     elsif equal("lib_0.htm", out_name) then
-	out_file = open(app_dir & SLASH & "html" & SLASH & "library.htm", "w")
+	out_name = app_dir & SLASH & "html" & SLASH & "library.htm"
     elsif equal("refman_0.htm", out_name) then
-	out_file = open(app_dir & SLASH & "html" & SLASH & "refman.htm", "w")
+	out_name = app_dir & SLASH & "html" & SLASH & "refman.htm"
     else    
-	out_file = open(app_dir & dest & SLASH & out_name, "w")
+	out_name = app_dir & dest & SLASH & out_name
     end if
     
+    puts(1, "Opening '" & out_name & "' for writing...\n")
+    out_file = open(out_name, "w")
     if out_file = -1 then
 	quit("couldn't open " & out_name & " for writing")
     end if
@@ -305,7 +308,7 @@ end procedure
 
 if equal(format, "HTML") then
     for f = 1 to length(files) do
-	main(files[f], "HTML", SLASH & "html")
+	main(files[f], "HTML", "html")
     end for
 else    
     for f = 1 to length(files) do

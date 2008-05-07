@@ -1,6 +1,7 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 
 -- written by: Junko C. Miura of Rapid Deployment Software (JCMiura@aol.com)
+include machine.e
 include get.e
 include wildcard.e
 global sequence current_file
@@ -18,12 +19,8 @@ inTable  = FALSE   -- used for inEuCode
 global integer in_file, out_file
 
 global procedure quit(sequence msg)
-    puts(SCREEN, "DOC GEN ABORTED: " & msg & '\n')
-    printf(SCREEN, "Inside file: %s:%d\n", {current_file, current_line})
-    puts(SCREEN, "Contact Rapid Deployment Software - rds@RapidEuphoria.com\n")
-    if getc(0) then
-    end if
-    abort(1/0)
+    crash("DOC GEN ABORTED: %s\n" &
+	  "Inside file: %s:%d\n", {msg, current_file, current_line})
 end procedure
 
 global function whitespace(integer c)

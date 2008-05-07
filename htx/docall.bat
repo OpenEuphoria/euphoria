@@ -6,9 +6,9 @@ set TEMP_EUINC=%EUINC%
 SET EUINC=..\bin;..\include
 
 exwc doc.exw HTML ..
-exwc doc.exw TEXT ..
+rem exwc doc.exw TEXT ..
 
-exwc combine.exw ..
+rem exwc combine.exw ..
 
 rem these files are only needed to update RDS Web site
 del ..\doc\refman_?.doc
