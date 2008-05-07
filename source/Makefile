@@ -158,12 +158,16 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/misc.o \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/traninit.o \
+	./$(OBJDIR)/sequence.o \
+	./$(OBJDIR)/search.o \
+	./$(OBJDIR)/string.o \
 	./$(OBJDIR)/wildcard.o 
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
-	./$(OBJDIR)/compress.o\
+	./$(OBJDIR)/compress.o \
+	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o 
 
 EU_CORE_OBJECTS = \
@@ -249,7 +253,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/mode.o \
-	./$(OBJDIR)/wildcard.o 
+	./$(OBJDIR)/sequence.o
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \
