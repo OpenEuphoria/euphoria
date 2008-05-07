@@ -5,10 +5,10 @@
 </head>
 <body>
 <_width>
-<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
-<br>
-                          The Euphoria Editor
-</font></_center>
+
+<section_header>The Euphoria Editor</section_header>
+
+<h3>Introduction</h3>
 
 <p>
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
@@ -17,11 +17,8 @@
 <_sul>Introduction</_sul>
 </font>
 
-<p>
-The Euphoria download package includes a handy, text-mode editor, ed,
-that's written completely in Euphoria. Many people find ed convenient
-for editing Euphoria programs and other files,
-but there is no requirement that you use it.
+<p>The Euphoria download package includes a handy, text-mode editor, ed, that's written completely in Euphoria. Many people find ed convenient for editing Euphoria programs and other files, but there is no requirement that you use it.</p>
+
 <p>
 If you don't like <b>ed</b>, you have many alternatives. David Cuny's
 <b>EE editor</b> is a DOS-based editor for Euphoria that's also 

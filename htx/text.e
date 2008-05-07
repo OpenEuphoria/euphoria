@@ -189,6 +189,17 @@ procedure tag_end_dul(sequence raw_text, sequence param_list)
     dulEnd   = column - 1
 end procedure
 
+procedure tag_h3(sequence raw_text, sequence param_list)
+    writeText("\n\n")
+    dulFound = TRUE
+    dulStart = column
+end procedure
+
+procedure tag_end_h3(sequence raw_text, sequence param_list)
+    writeText("")
+    dulEnd   = column - 1
+end procedure
+
 procedure tag_sul(sequence raw_text, sequence param_list)
     sulFound = TRUE
     sulStart = column
@@ -591,6 +602,8 @@ global procedure text_init()
 	add_handler("section_header",routine_id("section_header"))
     add_handler("/section_header",routine_id("section_header_close"))
     add_handler("/p",        routine_id("tag_p_close"))
+    add_handler("h3",     routine_id("tag_h3"))
+    add_handler("/h3",    routine_id("tag_end_h3"))
     
     out_type = "doc"
     
