@@ -36,3 +36,5 @@ case "${UNAME_SYSTEM}:${ECONFIG}" in
 		# do nothing
 		;;
 esac
+
+cd pcre && ./configure --enable-utf8 --disable-cpp --disable-shared

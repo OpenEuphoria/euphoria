@@ -31,10 +31,10 @@ BACKEND_FLAGS = -DBACKEND
 endif
 
 ifdef EDEBUG
-DEBUG_FLAGS=-g3
+DEBUG_FLAGS=-g3 -O0
 CALLC_DEBUG=-g3
 else
-DEBUG_FLAGS=-fomit-frame-pointer
+DEBUG_FLAGS=-fomit-frame-pointer -O2
 endif
 
 ifeq  "$(EBSD)" "1"
@@ -49,7 +49,9 @@ endif
 
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
-BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -O2 -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+
+PCRE=./pcre/.libs/libpcre.a
 
 EU_ALL_FILES = \
 	be_alloc.c \
@@ -58,6 +60,7 @@ EU_ALL_FILES = \
 	be_inline.c \
 	be_machine.c \
 	be_main.c \
+	be_pcre.c \
 	be_rterror.c \
 	be_runtime.c \
 	be_symtab.c \
@@ -155,16 +158,13 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/misc.o \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/traninit.o \
-	./$(OBJDIR)/wildcard.o \
-	./$(OBJDIR)/sequence.o \
-	./$(OBJDIR)/search.o
-
+	./$(OBJDIR)/wildcard.o 
+	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
-	./$(OBJDIR)/wildcard.o \
-	./$(OBJDIR)/sequence.o \
-	./$(OBJDIR)/compress.o
+	./$(OBJDIR)/compress.o\
+	./$(OBJDIR)/wildcard.o 
 
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \
@@ -220,6 +220,7 @@ EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_callc.o \
 	./$(OBJDIR)/back/be_inline.o \
 	./$(OBJDIR)/back/be_machine.o \
+	./$(OBJDIR)/back/be_pcre.o \
 	./$(OBJDIR)/back/be_rterror.o \
 	./$(OBJDIR)/back/be_syncolor.o \
 	./$(OBJDIR)/back/be_runtime.o \
@@ -248,7 +249,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/mode.o \
-	./$(OBJDIR)/sequence.o
+	./$(OBJDIR)/wildcard.o 
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \
@@ -278,13 +279,13 @@ clean :
 
 .PHONY : clean distclean all
 
-library : builddirs 
+library : builddirs
 	$(MAKE) ecu.a OBJDIR=libobj ERUNTIME=1
 ecu.a : $(EU_LIB_OBJECTS)
-	ar -rc ecu.a $(EU_LIB_OBJECTS)
+	ar -rc ecu.a $(PCRE) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
-builddirs : $(BUILD_DIRS)
+builddirs : $(BUILD_DIRS) $(PCRE)
 
 interpreter : builddirs
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
@@ -318,7 +319,7 @@ exu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJEC
 exu :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making exu
 	@echo $(OS)
-	$(CC) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oexu
+	$(CC) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -oexu
 
 ecu :  OBJDIR = transobj
 ecu :  EU_TARGET = ec.ex
@@ -326,7 +327,7 @@ ecu :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 ecu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making ecu
-	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oecu
+	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -oecu
 
 backend : builddirs
 	$(MAKE) eubackend EBACKEND=1 OBJDIR=backobj
@@ -337,7 +338,7 @@ eubackend : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 eubackend : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
-	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -oeubackend
+	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -oeubackend
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include
@@ -422,3 +423,6 @@ $(OBJDIR)/back/be_callc.o : ./be_callc.c
 $(OBJDIR)/back/be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(RUNTIME_FLAGS) be_inline.c -o$*.o
 
+
+$(PCRE) : 
+	cd pcre && $(MAKE)

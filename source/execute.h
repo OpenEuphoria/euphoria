@@ -383,3 +383,7 @@ struct char_cell {
 #define M_BACKEND      65
 #define M_CRASH_ROUTINE 66
 #define M_CRASH        67
+
+#define M_COMPILE_PCRE 68
+#define M_EXEC_PCRE    69
+
