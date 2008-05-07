@@ -285,16 +285,11 @@ end procedure
 procedure tag_continue(sequence raw_text, sequence plist)
 -- special handler for a title to continue to the next page
     object temp
-    
-    write("<p>&nbsp;<p>\n")
-    write("<div class=\"tag_continue\">\n")
-    write("<font color=\"#006633\" face=\"Arial, Helvetica\" size=+1>" &
-	  "... continue \n")
-    
+    write("<div class=\"tag_continue\">... continue to \n")
     temp = pval("href", plist)
     if sequence(temp) and not equal(temp, "") then
 	write("<a href=\"" & temp & "\">" &
-	      pval("name", plist) & "</a></font>\n</center>\n<p>&nbsp;\n")
+	      pval("name", plist) & "</a></div>\n")
     else
 	quit("no href data given in <_continue> tag")
     end if
@@ -373,10 +368,26 @@ procedure tag_continueallbottom(sequence raw_text, sequence plist)
 end procedure
 
 procedure file_path(sequence raw_text, sequence plist)
-	write("<span class=\"file_path\">" & raw_text )
+	write("<span class=\"file_path\">")
 end procedure
 
 procedure file_path_close(sequence raw_text, sequence plist)
+	write("</span>")
+end procedure
+
+procedure section_header(sequence raw_text, sequence plist)
+	write("<div class=\"section_header\">")
+end procedure
+
+procedure section_header_close(sequence raw_text, sequence plist)
+	write("</div>")
+end procedure
+
+procedure platform_reference(sequence raw_text, sequence plist)
+	write("<span class=\"platform_reference\">")
+end procedure
+
+procedure platform_reference_close(sequence raw_text, sequence plist)
 	write("</span>")
 end procedure
 
@@ -417,6 +428,10 @@ global procedure html_init()
     
     add_handler("filepath",routine_id("file_path"))
     add_handler("/filepath",routine_id("file_path_close"))
+	add_handler("section_header",routine_id("section_header"))
+    add_handler("/section_header",routine_id("section_header_close"))
+	add_handler("platform_reference",routine_id("platform_reference"))
+    add_handler("/platform_reference",routine_id("platform_reference_close"))
     
     out_type = "htm"
 
