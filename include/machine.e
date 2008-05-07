@@ -346,7 +346,6 @@ global function allocate_ustring(ustring s)
 	return mem
 end function
 
-
 -- Function: peek_ustring
 --
 -- Return a unicode (utf16) string that are stored at machine address a.
@@ -356,21 +355,13 @@ end function
 --
 -- Returns:
 --   The string at the memory position
-global function peek_ustring(atom a)
-	sequence s
-	integer c
+global function peek_ustring(atom addr)
+	atom ptr
 	
-	s = ""
-	while 1 do
-		c = peek2u(a)
-		if c != 0 then
-			s &= c
-		else
-			exit
-		end if
-		a += 2
+	ptr = addr
+	while peek2u(ptr) do
+		ptr += 2
 	end while
 	
-	return s
+	return peek2u({addr, (ptr - addr) / 2})
 end function
-
