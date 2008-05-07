@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef EWINDOWS
+#include <windows.h>
+extern int default_heap;
+#endif
 #include "alldefs.h"
 #include "alloc.h"
-#include <pcre.h>
-
+#include "pcre/config.h"
+#include "pcre/pcre.h"
 
 object compile_pcre(object pattern){
-/*	 pcre *pcre_compile(const char *pattern, int options,
-            const char **errptr, int *erroffset,
-            const unsigned char *tableptr);
+/*       pcre *pcre_compile(const char *pattern, int options,
+	    const char **errptr, int *erroffset,
+	    const unsigned char *tableptr);
 */
 	pcre *re;
 	const char *error;
@@ -76,3 +80,4 @@ object exec_pcre(object x ){
 	}
 	return MAKE_SEQ( s );
 }
+

@@ -50,7 +50,6 @@ EU_TRANSLATOR_FILES = &
 	cominit.e &
 	traninit.e 
 	
-
 EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\ec.obj &
 	.\$(OBJDIR)\c_decl.obj &
@@ -78,6 +77,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\traninit.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\string.obj &
 	.\$(OBJDIR)\search.obj
 
 EU_INTERPRETER_OBJECTS =  &
@@ -112,7 +112,6 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\parser_0.obj &
 	.\$(OBJDIR)\parser_1.obj 
 	
-
 EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_execute.obj &
 	.\$(OBJDIR)\back\be_task.obj &
@@ -121,6 +120,7 @@ EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_callc.obj &
 	.\$(OBJDIR)\back\be_inline.obj &
 	.\$(OBJDIR)\back\be_machine.obj &
+	.\$(OBJDIR)\back\be_pcre.obj &
 	.\$(OBJDIR)\back\be_rterror.obj &
 	.\$(OBJDIR)\back\be_syncolor.obj &
 	.\$(OBJDIR)\back\be_runtime.obj &
@@ -185,6 +185,29 @@ EU_DOS_OBJECTS = &
         .\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj 
+
+PCRE_OBJECTS = &
+	.\pcre\pcre_chartables.obj &
+	.\pcre\pcre_compile.obj &
+	.\pcre\pcre_config.obj &
+	.\pcre\pcre_dfa_exec.obj &
+	.\pcre\pcre_exec.obj &
+	.\pcre\pcre_fullinfo.obj &
+	.\pcre\pcre_get.obj &
+	.\pcre\pcre_globals.obj &
+	.\pcre\pcre_info.obj &
+	.\pcre\pcre_maketables.obj &
+	.\pcre\pcre_newline.obj &
+	.\pcre\pcre_ord2utf8.obj &
+	.\pcre\pcre_refcount.obj &
+	.\pcre\pcre_study.obj &
+	.\pcre\pcre_tables.obj &
+	.\pcre\pcre_try_flipped.obj &
+	.\pcre\pcre_ucp_searchfuncs.obj &
+	.\pcre\pcre_valid_utf8.obj &
+	.\pcre\pcre_version.obj &
+        .\pcre\pcre_xclass.obj
+
 	
 !ifneq MANAGED_MEM 1
 MEMFLAG = -DESIMPLE_MALLOC
@@ -214,6 +237,8 @@ BUILD_DIRS=intobj transobj libobj backobj
 
 distclean : .SYMBOLIC
 	-rmdir /Q/S $(BUILD_DIRS)
+	-del /Q .\pcre\*.obj
+	-del /Q .\pcre\config.h
 
 clean : .SYMBOLIC
 	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h
@@ -230,6 +255,7 @@ LIBTARGET=ecw.lib
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG)
 BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
+PCRE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s -DHAVE_CONFIG_H=1
 
 builddirs : .SYMBOLIC
 	if not exist intobj mkdir intobj
@@ -254,17 +280,17 @@ runtime: .SYMBOLIC
 backendflag: .SYMBOLIC
 	set EBACKEND=/dBACKEND
 
-ecw.lib : runtime $(EU_LIB_OBJECTS)
-	wlib -q ecw.lib $(EU_LIB_OBJECTS)
+ecw.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
+	wlib -q ecw.lib $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 
 ec.lib : runtime $(EU_LIB_OBJECTS)
 	
 
-interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\int.lbc
 	@%append .\$(OBJDIR)\int.lbc option quiet
 	@%append .\$(OBJDIR)\int.lbc option caseexact
-	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
+	@for %i in ($(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
 exw.exe : interpreter_objects 
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
@@ -288,11 +314,11 @@ install : .SYMBOLIC
 	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
 	@for %i in (*.ex) do @copy %i $(%EUDIR)\source\
 	
-ecw.exe : $(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+ecw.exe : $(OBJDIR)\ec.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
-	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	@for %i in ($(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\ec.lbc name ecw.exe
 	wrc -q -ad exw.res ecw.exe
 
@@ -300,11 +326,11 @@ ecw.exe : $(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEN
 translator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-backendw.exe : backendflag $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendw.exe : backendflag $(OBJDIR)\backend.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
 	@%append .\$(OBJDIR)\exwb.lbc option caseexact
-	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exwb.lbc file %i
+	@for %i in ($(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exwb.lbc file %i
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendw.exe
 	wrc -q -ad exw.res backendw.exe
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendc.exe
@@ -317,7 +343,7 @@ backend : .SYMBOLIC builddirs
 dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ex.exe : $(OBJDIR)\int.c .\pcre\config.h $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ex.lbc
 	@%append .\$(OBJDIR)\ex.lbc option quiet
 	@%append .\$(OBJDIR)\ex.lbc option caseexact
@@ -330,7 +356,7 @@ ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%append .\$(OBJDIR)\ex.lbc OPTION QUIET
 	@%append .\$(OBJDIR)\ex.lbc OPTION ELIMINATE
 	@%append .\$(OBJDIR)\ex.lbc OPTION CASEEXACT
-	@for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
+	@for %i in ($(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
 	wlink  $(DEBUGLINK) @.\$(OBJDIR)\ex.lbc name ex.exe
 	le23p ex.exe
 	cwc ex.exe
@@ -507,6 +533,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\search.obj :  .\$(OBJDIR)\main-.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
+.\$(OBJDIR)\string.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS)  $^&.c -fo=.\$(OBJDIR)\back\$^.
 
@@ -534,6 +563,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\back\be_syncolor.obj : ./be_syncolor.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
+.\$(OBJDIR)\back\be_pcre.obj : ./be_pcre.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) /I.\pcre $^&.c -fo=$^@
+
 .\$(OBJDIR)\back\be_runtime.obj : ./be_runtime.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
@@ -542,3 +574,67 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 
 .\$(OBJDIR)\back\be_w.obj : ./be_w.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
+
+.\pcre\config.h : .\pcre\config.h.win
+	-copy .\pcre\config.h.win .\pcre\config.h
+
+.\pcre\pcre_chartables.obj : .\pcre\pcre_chartables.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_compile.obj : .\pcre\pcre_compile.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_config.obj : .\pcre\pcre_config.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_dfa_exec.obj : .\pcre\pcre_dfa_exec.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_exec.obj : .\pcre\pcre_exec.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_fullinfo.obj : .\pcre\pcre_fullinfo.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_get.obj : .\pcre\pcre_get.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_globals.obj : .\pcre\pcre_globals.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_info.obj : .\pcre\pcre_info.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_maketables.obj : .\pcre\pcre_maketables.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_newline.obj : .\pcre\pcre_newline.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_ord2utf8.obj : .\pcre\pcre_ord2utf8.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_refcount.obj : .\pcre\pcre_refcount.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_study.obj : .\pcre\pcre_study.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_tables.obj : .\pcre\pcre_tables.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_try_flipped.obj : .\pcre\pcre_try_flipped.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_ucp_searchfuncs.obj : .\pcre\pcre_ucp_searchfuncs.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_valid_utf8.obj : .\pcre\pcre_valid_utf8.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_version.obj : .\pcre\pcre_version.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
+.\pcre\pcre_xclass.obj : .\pcre\pcre_xclass.c
+	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+
