@@ -578,7 +578,8 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\pcre\config.h : .\pcre\config.h.win
 	-copy .\pcre\config.h.win .\pcre\config.h
 
-.\pcre\pcre_chartables.obj : .\pcre\pcre_chartables.c
+.\pcre\pcre_chartables.obj : .\pcre\pcre_chartables.c.win
+	-copy .\pcre\pcre_chartables.c.win .\pcre\pcre_chartables.c
 	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
 
 .\pcre\pcre_compile.obj : .\pcre\pcre_compile.c
@@ -638,3 +639,5 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\pcre\pcre_xclass.obj : .\pcre\pcre_xclass.c
 	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
 
+.\pcre\pcre.h : .\pcre\pcre.h.win
+	-copy .\pcre\pcre.h.win .\pcre\pcre.h

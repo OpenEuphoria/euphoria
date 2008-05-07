@@ -425,4 +425,4 @@ $(OBJDIR)/back/be_inline.o : ./be_inline.c
 
 
 $(PCRE) : 
-	cd pcre && $(MAKE)
+	cd pcre && $(MAKE) libpcre.la
