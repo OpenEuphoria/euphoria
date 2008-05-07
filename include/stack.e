@@ -21,21 +21,38 @@ global function is_empty(stack sk)
     return length(sk) = 1
 end function
 
+-- TODO: test
+global function size(stack sk)
+    return length(sk) - 1
+end function
+
+-- TODO: test
+global function at(stack sk, integer idx)
+    if idx <= 0 then
+	-- number from top
+	idx = length(sk) + idx
+    else
+	idx += 1
+    end if
+    
+    return sk[idx]
+end function
+
 global function push(stack sk, object value)
     if sk[1] = FIFO then
-        if length(sk) = 1 then
-            return sk & {value}
-        end if
+	if length(sk) = 1 then
+	    return sk & {value}
+	end if
 
-        return FIFO & {value} & sk[2..$]
+	return FIFO & {value} & sk[2..$]
     else
-        return sk[1..$] & {value}
+	return sk[1..$] & {value}
     end if
 end function
 
 global function top(stack sk)
     if length(sk) = 1 then
-        crash("stack underflow in top()", {})
+	crash("stack underflow in top()", {})
     end if
 
     return sk[$]
@@ -43,7 +60,7 @@ end function
 
 global function pop(stack sk)
     if length(sk) = 1 then
-        crash("stack underflow in pop()", {})
+	crash("stack underflow in pop()", {})
     end if
 
     return sk[1..$-1]
@@ -53,7 +70,7 @@ global function swap(stack sk)
     object a, b
 
     if length(sk) < 3 then
-        crash("stack underflow in swap()", {})
+	crash("stack underflow in swap()", {})
     end if
 
     a = sk[$]
@@ -67,7 +84,7 @@ end function
 
 global function dup(stack sk)
     if length(sk) = 1 then
-        crash("stack underflow in dup()", {})
+	crash("stack underflow in dup()", {})
     end if
 
     return sk & {sk[$]}
