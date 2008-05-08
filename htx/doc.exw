@@ -29,17 +29,21 @@ format_stack = stk:new(FILO)
 
 global function in_tag(sequence tag)
     integer nesting_count
+    sequence top_tag
     
     nesting_count = 0
     for i = stk:size(format_stack) to 1 by -1 do
-	nesting_count += equal(tag, stk:at(format_stack, i))
+	top_tag = stk:at(format_stack, i)
+	nesting_count += equal(tag, top_tag[1])
     end for
     
     return nesting_count
 end function
 
 global function is_tag(sequence tag)
-    return equal(tag, stk:top(format_stack))
+    sequence top_tag
+    top_tag = stk:top(format_stack)
+    return equal(tag, top_tag[1])
 end function
 
 without warning
@@ -124,19 +128,21 @@ end function
 procedure tag(sequence name, object param, object raw)
 -- process a tag (or literal text)
     integer r
+    sequence top_tag
     
     -- handle format stack
     if equal(name, "_literal") then
 	-- do nothing
     elsif name[1] = '/' then
 	if is_tag(name[2..$]) = 0 then
-	    quit(sprintf("Document malformed. Found %s when expecting /%s",
-		{name, stk:at(format_stack, 0)}))
+	    top_tag = stk:top(format_stack)
+	    quit(sprintf("Document malformed. Found %s when expecting /%s (began at %d)",
+		{name, top_tag[1], top_tag[2]}))
 	end if
 	
 	format_stack = stk:pop(format_stack)
     else
-	format_stack = stk:push(format_stack, name)
+	format_stack = stk:push(format_stack, {name, current_line})
     end if
     
     r = find(name, handler_name)
