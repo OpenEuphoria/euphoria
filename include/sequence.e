@@ -85,7 +85,7 @@ global function tail(sequence st, atom n)
 end function
 
 global function remove(sequence st, object index)
-    integer start, stop
+    atom start, stop
 
     if atom(index) then
         if index > length(st) or index < 1 then
@@ -144,7 +144,7 @@ end function
 
 global function replace(sequence st, object what, integer start, integer stop)
     st = remove(st, {start, stop})
-    return insert(st, what, start)
+    return insert_slice(st, what, start)
 end function
 
 global function split_adv(sequence st, object delim, integer limit, integer any)

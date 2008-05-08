@@ -38,7 +38,7 @@ test_equal("split_adv() any character", {"a", "b", "c"}, split_adv("a,b.c", ",."
 test_equal("split_adv() limit and any character", {"a", "b", "c|d"},
     split_adv("a,b.c|d", ",.|", 3, 1))
 test_equal("split_adv() single sequence delimiter",{"while 1 "," end while ",""},
-    split_adv("while 1 do end while do","do",0,1))
+    split_adv("while 1 do end while do","do",0,0))
 
 test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
 test_equal("join() nested sequence", {"John", 0, "Doe"}, join({{"John"}, {"Doe"}}, 0))
@@ -58,8 +58,8 @@ test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", {1.5
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
-test_equal("insert_slice() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
-test_equal("insert_slice() string", "John", insert("Jon", "h", 3))
+test_equal("insert_slice() integer sequence", {1,2,3}, insert_slice({1,3}, 2, 2))
+test_equal("insert_slice() string", "John", insert_slice("Jon", "h", 3))
 
 test_equal("replace() integer sequence", {1,2,3}, replace({1,8,9,3}, 2, 2, 3))
 test_equal("replace() integer sequence w/sequence", {1,2,3,4},
@@ -73,7 +73,7 @@ test_equal("trim_head() floating number", {-1,{}} , trim_head({0.5,1/2,-1,{}},0.
 test_equal("trim_tail() defaults", "John", trim_tail("John\r \n\t", 0))
 test_equal("trim_tail() specified", "John", trim_tail("John Doe", " eDo"))
 test_equal("trim_tail() integer", "John", trim_tail("John\n", 10))
-test_equal("trim_tail() floating number", {-1,{}} , trim_head({-1,{},0.5,1/2},0.5))
+test_equal("trim_tail() floating number", {-1,{}} , trim_tail({-1,{},0.5,1/2},0.5))
 
 test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t", 0))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
