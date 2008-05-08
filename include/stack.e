@@ -92,13 +92,7 @@ global function dup(stack sk)
 	crash("stack underflow in dup()", {})
     end if
 
-    if sk[1] = FIFO then
-        sk = prepend(sk, FIFO)
-        sk[2] = sk[3]
-        return sk
-    else
-        return sk & {sk[$]}
-    end if
+    return sk & {sk[$]}
 end function
 
 global function clear(stack sk)
