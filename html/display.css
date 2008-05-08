@@ -19,17 +19,41 @@ a.brown:hover    {color: red; text-decoration: underline;}
 
 .tag_continue{
 	text-align:center;
-	font-family:Arial,Helvetica,sans-serif;
+	font-family:sans-serif;
 	color:#FF0099;
 	font-size:1.2em;
 }
 
-.path {
+.path{
 	color:#5500FF;
+	font-family:sans-serif;
+}
+
+h1, h2, h3{
+	color:#FF0099;
+	font-family:sans-serif;
 }
 
 h1{
-	color:#FF0099;
-	text-align:center;
-	font-family:Arial,Helvetica,sans-serif;
+    text-align:center;
+}
+
+.platform{
+	font-weight:bold;
+	color:#CC3366;
+}
+
+.command{
+	font-family:monospace;
+	font-weight:bold;
+	margin-left:20px;
+}
+
+.scommand{
+	font-family:monospace;
+	font-weight:bold;
+}
+
+.libfunc{
+	color:#006699;
 }
