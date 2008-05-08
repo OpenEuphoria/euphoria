@@ -13,15 +13,16 @@ else
     SLASH = '\\'
 end if
 
+constant single_tags = { "br" }
+
 constant files = {
-     "install.htx"
-    ,"overview.htx"
-    ,"bind.htx"
-    ,"c.htx"
-    ,"cgi.htx"
-    ,"database.htx"
-    ,"e2c.htx"
-    ,"ed.htx"
+    "install.htx",
+    "overview.htx",
+    "bind.htx",
+    "c.htx",
+    "cgi.htx",
+    "database.htx",
+    "e2c.htx"
 }
 
 include stack.e as stk
@@ -137,12 +138,17 @@ procedure tag(sequence name, object param, object raw)
     elsif name[1] = '/' then
 	if is_tag(name[2..$]) = 0 then
 	    top_tag = stk:top(format_stack)
-	    quit(sprintf("Document malformed. Found %s when expecting /%s (began at %d)",
-		{name, top_tag[1], top_tag[2]}))
+	    
+	    printf(1, "Document error on line %d. Found %s when expecting /%s (began at %d)\n",
+		{current_line, name, top_tag[1], top_tag[2]})
+	    abort(1)
 	end if
 	
 	format_stack = stk:pop(format_stack)
+    elsif find(name, single_tags) then
+	-- neither push nor pop, this is <br /> or something to that effect
     else
+	
 	format_stack = stk:push(format_stack, {name, current_line})
     end if
     
