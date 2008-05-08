@@ -34,18 +34,21 @@ global function head(sequence st, integer size)
 end function
 
 global function mid(sequence st, atom start, atom len)
-	if start > length(st) then
+	
+        if len<0 then
+	    len += length(st)
+            if len<0 then
+                crash("mid(): len was %d and should be greater than %d.",{len-length(st),-length(st)})
+            end if
+        end if
+        if start > length(st) or len=0 then
 		return ""
-	elsif len = 0 or len <= -2 then
-		return ""
-	elsif start+len-1 > length(st) then
+        end if
+        if start<1 then
+            start=1
+        end if
+	if start+len-1 >= length(st) then
 		return st[start..$]
-	elsif len = -1 then
-		return st[start..$]
-	elsif len+start-1 < 0 then
-		return ""
-	elsif start < 1 then
-		return st[1..len+start-1]
 	else
 		return st[start..len+start-1]
 	end if
@@ -100,9 +103,9 @@ global function remove(sequence st, object index)
     start = index[1]
     stop = index[2]
 
-    if start > length(st) then
+    if start > length(st) or start > stop or stop < 0 then
         return st
-    elsif start<=1 then
+    elsif start<2 then
         if stop>=length(st) then
             return ""
         else
@@ -115,7 +118,21 @@ global function remove(sequence st, object index)
     return st[1..start-1] & st[stop+1..$]
 end function
 
+constant dummy = 0
 global function insert(sequence st, object what, integer index)
+    if index > length(st) then
+        return append(st, what)
+    elsif index <= 1 then
+        return prepend(what, st)
+    end if
+
+    st &= dummy -- avoids creating/destroying a temp on each invocation
+    st[index+1..$] = st[index..$-1]
+    st[index] = what
+    return st
+end function
+
+global function insert_slice(sequence st, object what, integer index)
     if index > length(st) then
         return st & what
     elsif index <= 1 then
@@ -132,9 +149,9 @@ end function
 
 global function split_adv(sequence st, object delim, integer limit, integer any)
 	sequence ret
-	integer pos,last_pos
+	integer pos,start,next_pos
 	ret={}
-	last_pos=1
+	start=1
 
     if atom(delim) then
         delim = {delim}
@@ -142,14 +159,16 @@ global function split_adv(sequence st, object delim, integer limit, integer any)
 
     while 1 do
         if any then
-            pos = find_any_from(delim, st, last_pos)
+            pos = find_any_from(delim, st, start)
+            next_pos = pos+1
         else
-	    pos = match_from(delim, st, last_pos)
+	    pos = match_from(delim, st, start)
+            next_pos = pos+length(delim)
         end if
 
         if pos then
-            ret = append(ret, st[last_pos..pos-1])
-            last_pos = pos+1
+            ret = append(ret, st[start..pos-1])
+            start = next_pos
             if limit = 2 then
                 exit
             end if
@@ -159,8 +178,8 @@ global function split_adv(sequence st, object delim, integer limit, integer any)
         end if
     end while
 
-	ret = append(ret, st[last_pos..$])
-	
+	ret = append(ret, st[start..$])
+
 	return ret
 end function
 

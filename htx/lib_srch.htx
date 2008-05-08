@@ -290,7 +290,7 @@ i = find_any(s1, s2)
  <_2clist
   name="Description:"
   description=
-"Find any element from s1 in s2 and return it's position or 0 if not found."
+"Find any element from s1 in s2 and return the smallest position in s2 at which anything is found, or 0 if nothing is found."
  >
 <_2clist
   name="Comments:"
