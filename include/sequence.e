@@ -12,7 +12,7 @@ global function reverse(sequence s)
 -- Thanks to Hawke' for helping to make this run faster.
     integer lower, n, n2
     sequence t
-    
+
     n = length(s)
     n2 = floor(n/2)+1
     t = repeat(0, n)
@@ -64,10 +64,10 @@ end function
 global function vslice(sequence s, atom colno)
     sequence ret
 
-	ret = {}
+        ret = s
 
 	for i = 1 to length(s) do
-		ret = append(ret, s[i][colno])
+		ret[i] = s[i][colno]
 	end for
 
 	return ret
@@ -93,7 +93,7 @@ global function remove(sequence st, object index)
     end if
 
     if length(index) != 2 then
-        crash("second parameter to remove(), when a sequence must be a length of 2, " &
+        crash("second parameter to remove(), when a sequence, must be a length of 2, " &
               "representing start and to indexes.", {})
     end if
 
@@ -102,6 +102,12 @@ global function remove(sequence st, object index)
 
     if start > length(st) then
         return st
+    elsif start<=1 then
+        if stop>=length(st) then
+            return ""
+        else
+            return st[stop+1..$]
+        end if
     elsif stop >= length(st) then
         return st[1..start-1]
     end if
@@ -112,7 +118,7 @@ end function
 global function insert(sequence st, object what, integer index)
     if index > length(st) then
         return st & what
-    elsif index = 1 then
+    elsif index <= 1 then
         return what & st
     end if
 
@@ -124,38 +130,36 @@ global function replace(sequence st, object what, integer start, integer stop)
     return insert(st, what, start)
 end function
 
--- TODO: instead of reassigning st all the time, use the new _from variants of
---       find_any and match.
-
 global function split_adv(sequence st, object delim, integer limit, integer any)
 	sequence ret
-	object pos
+	integer pos,last_pos
 	ret={}
+	last_pos=1
 
     if atom(delim) then
         delim = {delim}
     end if
 
-	while 1 do
+    while 1 do
         if any then
-            pos = find_any(delim, st)
+            pos = find_any_from(delim, st, last_pos)
         else
-    		pos = match(delim, st)
+	    pos = match_from(delim, st, last_pos)
         end if
 
-		if pos then
-			ret = append(ret, st[1..pos-1])
-			st = st[pos+1..length(st)]
-            limit -= 1
-            if limit = 1 then
+        if pos then
+            ret = append(ret, st[last_pos..pos-1])
+            last_pos = pos+1
+            if limit = 2 then
                 exit
             end if
-		else
-			exit
-		end if
-	end while
+            limit -= 1
+        else
+            exit
+        end if
+    end while
 
-	ret = append(ret, st)
+	ret = append(ret, st[last_pos..$])
 	
 	return ret
 end function
@@ -180,11 +184,8 @@ global function join(sequence s, object delim)
 end function
 
 global function trim_head(sequence str, object what)
-    integer cut
-    cut = 1
-
-    if integer(what) then
-        if what = 0 then
+    if atom(what) then
+        if what = 0.0 then
             what = " \t\r\n"
         else
             what = {what}
@@ -193,20 +194,16 @@ global function trim_head(sequence str, object what)
 
     for i = 1 to length(str) do
         if find(str[i], what) = 0 then
-            cut = i
-            exit
+            return str[i..$]
         end if
     end for
 
-    return str[cut..$]
+    return str
 end function
 
 global function trim_tail(sequence str, object what)
-    integer cut
-    cut = length(str)
-
-    if integer(what) then
-        if what = 0 then
+    if atom(what) then
+        if what = 0.0 then
             what = " \t\r\n"
         else
             what = {what}
@@ -215,12 +212,11 @@ global function trim_tail(sequence str, object what)
 
     for i = length(str) to 1 by -1 do
         if find(str[i], what) = 0 then
-            cut = i
-            exit
+            return str[1..i]
         end if
     end for
 
-    return str[1..cut]
+    return str
 end function
 
 global function trim(sequence str, object what)
@@ -245,11 +241,21 @@ global function pad_head(sequence str, object params)
     return repeat(ch, size - length(str)) & str
 end function
 
-global function pad_tail(sequence str, integer size)
+global function pad_tail(sequence str, object params)
+    integer size, ch
+
+    if sequence(params) then
+        size = params[1]
+        ch = params[2]
+    else
+        size = params
+        ch = ' '
+    end if
+
     if size <= length(str) then
         return str
     end if
-    return str & repeat(' ', size - length(str))
+    return str & repeat(ch, size - length(str))
 end function
 
 global function chunk(sequence s, integer size)
