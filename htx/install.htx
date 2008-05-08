@@ -1,131 +1,48 @@
 <doc title="How to Install Euphoria">
 
-<h2>How to install Euphoria on Windows</h2>
+<h1>How to install Euphoria on Windows</h1>
 
-<p>
-Download and run the latest Euphoria setup program. It will install
-Euphoria on any Windows system from Windows 95 up.
-</p>
+<p>Download and run the latest Euphoria setup program. It will install Euphoria on any Windows system from Windows 95 up.</p>
 
-<p>
- After installing, 
- see <path>doc\what2do.doc</path>
- (or <a href="what2do.htm">html\what2do.htm</a>) for ideas on 
- how to use this package. You should also read
- <path>readme.doc</path> (or
- <a href="readme.htm">readme.htm</a>) if you have not done so
- already.
-</p>
+<p>After installing, see <path>doc\what2do.doc</path> (or <a href="what2do.htm">html\what2do.htm</a>) for ideas on how to use this package. You should also read <path>readme.doc</path> (or <a href="readme.htm">readme.htm</a>) if you have not done so already.</p>
 
 <h3>Possible Problems</h3>
 
 <ul>
-<li>
-If the install appeared to run ok, but example programs are not working,
-did you remember to shut down and restart your computer?
-</li>
-<li>
-On Windows XP/2000, be careful that your <env>PATH</env> and <env>EUDIR</env> do not conflict with
-<path>autoexec.nt</path>, which can also be used to set environment variables.
-</li>
-<li>
-On WinME/98/95 if the <program>install</program> fails to edit
-your <path>autoexec.bat</path> file, you will have to
-do it yourself. Follow the manual procedure described below.
-</li>
-<li>
-Euphoria can be run under DOS on older Win 3.1 systems, but we
-no longer maintain an install program for this. You'll have to 
-install Euphoria on a newer system and then copy your EUPHORIA 
-directory to the old system. Set up <path>AUTOEXEC.BAT</path> 
-manually on the old system  as described below.
-</li>
+	<li>If the install appeared to run ok, but example programs are not working, did you remember to shut down and restart your computer?</li>
+	<li>On Windows XP/2000, be careful that your <env>PATH</env> and <env>EUDIR</env> do not conflict with <path>autoexec.nt</path>, which can also be used to set environment variables.</li>
+	<li>On WinME/98/95 if the <program>install</program> fails to edit your <path>autoexec.bat</path> file, you will have to do it yourself. Follow the manual procedure described below.</li>
+	<li>Euphoria can be run under DOS on older Win 3.1 systems, but we no longer maintain an install program for this. You'll have to install Euphoria on a newer system and then copy your EUPHORIA directory to the old system. Set up <path>AUTOEXEC.BAT</path> manually on the old system  as described below.</li>
 </ul>
 
-<h3>Manually editing <path>AUTOEXEC.BAT</path></h3>
+<h3>Manually editing <strong>AUTOEXEC.BAT</strong></h3>
 
 <ol>
-<li>
-<p>
-In the file <path>c:\autoexec.bat</path> add
-<path>C:\EUPHORIA\BIN</path> to the list of directories in 
-your <env>PATH</env> command. You might use the MS-DOS Edit command, 
-Windows Notepad or any other text editor to do this. 
-</p>
-<p>
-You can also go to the Start Menu, select Run, type in <program>sysedit</program>
-and press Enter. <path>autoexec.bat</path> should appear as one 
-of the system files that you can edit and save.
-</p>
-</li>
-<li>
-In the same <path>autoexec.bat</path> file add a new line:
-<_eucode>
-SET EUDIR=C:\EUPHORIA
-</_eucode>
-</li>
-<li>
-The <env>EUDIR</env> environment variable indicates the full path to
-the main Euphoria directory.
-</li>
-<li>
-Reboot (restart) your machine. This will define your new <env>PATH</env> and 
-<env>EUDIR</env> environment variables.
-</li>
+	<li><p>In the file <path>c:\autoexec.bat</path> add <path>C:\EUPHORIA\BIN</path> to the list of directories in your <env>PATH</env> command. You might use the MS-DOS Edit command, Windows Notepad or any other text editor to do this.</p>
+		<p>You can also go to the Start Menu, select Run, type in <program>sysedit</program> and press Enter. <path>autoexec.bat</path> should appear as one of the system files that you can edit and save.</p></li>
+	<li>In the same <path>autoexec.bat</path> file add a new line:
+		<_eucode>
+			SET EUDIR=C:\EUPHORIA
+		</_eucode></li>
+	<li>The <env>EUDIR</env> environment variable indicates the full path to the main Euphoria directory.</li>
+	<li>Reboot (restart) your machine. This will define your new <env>PATH</env> and <env>EUDIR</env> environment variables.</li>
 </ol>
 
-<p>
-   On WinNT/2000/XP and higher, if for some reason 
-   your <env>EUDIR</env> and <env>PATH</env> variables 
-   are not set correctly, then set them in whatever
-   way your system allows. For example on Windows XP select: 
-     <gui>Start Menu -> Control Panel -> Performance&Maintenance -> System -> Advanced</gui>
-   then click the <gui>Environment Variables</gui> button.
-   Click the top <gui>New...</gui> button then enter <env>EUDIR</env> as the 
-   Variable Name and <path>c:\euphoria</path> (or whatever is correct) for 
-   the value, then click <gui>OK</gui>.
-   Find <env>PATH</env> in the list of your variables, select it, 
-   then click <gui>Edit...</gui>. Add <path>;c:\euphoria\bin</path> at 
-   the end  and click <gui>OK</gui>.
-</p>
+<p>On WinNT/2000/XP and higher, if for some reason your <env>EUDIR</env> and <env>PATH</env> variables are not set correctly, then set them in whatever way your system allows. For example on Windows XP select: <gui>Start Menu -> Control Panel -> Performance&Maintenance -> System -> Advanced</gui> then click the <gui>Environment Variables</gui> button. Click the top <gui>New...</gui> button then enter <env>EUDIR</env> as the Variable Name and <path>c:\euphoria</path> (or whatever is correct) for the value, then click <gui>OK</gui>. Find <env>PATH</env> in the list of your variables, select it, then click <gui>Edit...</gui>. Add <path>;c:\euphoria\bin</path> at the end  and click <gui>OK</gui>.</p>
 
-<p>
-   Some systems, such as Windows ME, have an <path>AUTOEXEC.BAT</path> file,
-   but it's a hidden file that might not show up in a directory listing.
-   Nevertheless it's there, and you can view it and edit it if necessary
-   by typing, for example: <fixed>notepad c:\autoexec.bat</fixed> in a DOS window.
-</p>
+<p>Some systems, such as Windows ME, have an <path>AUTOEXEC.BAT</path> file, but it's a hidden file that might not show up in a directory listing. Nevertheless it's there, and you can view it and edit it if necessary by typing, for example: <fixed>notepad c:\autoexec.bat</fixed> in a DOS window.</p>
 
-<p>
-   If you have an <path>autoexec.bat</path> file, but it
-   doesn't contain a <env>PATH</env> command, you will have to create one 
-   that includes <path>C:\EUPHORIA\BIN</path>.
-</p>
+<p>If you have an <path>autoexec.bat</path> file, but it doesn't contain a <env>PATH</env> command, you will have to create one that includes <path>C:\EUPHORIA\BIN</path>.</p>
 
-<p>
-There is another, optional, environment variable used by some 
-experienced users of Euphoria. It is called <env>EUINC</env> (see
-<a href="http://www.rapideuphoria.com/cgi-bin/guru.exu?refDoc=on&libDoc=on&otherDoc=on&keywords=euinc"
->Guru Search</a>).  It determines the search path for included files.
-You might want to add it, or change it, when you install a new version
-of Euphoria.
-</p>
+<p>There is another, optional, environment variable used by some experienced users of Euphoria. It is called <env>EUINC</env> (see <a href="http://www.rapideuphoria.com/cgi-bin/guru.exu?refDoc=on&libDoc=on&otherDoc=on&keywords=euinc">Guru Search</a>).  It determines the search path for included files. You might want to add it, or change it, when you install a new version of Euphoria.</p>
 
 <h3>How to Uninstall Euphoria</h3>
 
 <ol>
-<li>If you wish to recover your previous version of Euphoria, or parts
-of it, the "backup" subdirectory contains a backup copy of each of your
-previous standard Euphoria subdirectories, plus any files that you may
-have added. However it does not contain any additional  subdirectories
-that you may have created on your own.</li>
-<li>If there are no files that you need, you can delete the <path>EUPHORIA</path>
-directory that you installed into.</li>
-<li>Delete the <env>EUDIR</env> environment variable, and remove the
-<path>EUPHORIA</path> directory from your <env>PATH</env>, either 
-in <path>C:\AUTOEXEC.BAT</path>, or in 
-<gui>Control Panel/System/Advanced</gui>.</li>
-<li>Delete the references to EUPHORIA in your <gui>Start Menu</gui>.</li>
+	<li>If you wish to recover your previous version of Euphoria, or parts of it, the "backup" subdirectory contains a backup copy of each of your previous standard Euphoria subdirectories, plus any files that you may have added. However it does not contain any additional subdirectories that you may have created on your own.</li>
+	<li>If there are no files that you need, you can delete the <path>EUPHORIA</path> directory that you installed into.</li>
+	<li>Delete the <env>EUDIR</env> environment variable, and remove the <path>EUPHORIA</path> directory from your <env>PATH</env>, either in <path>C:\AUTOEXEC.BAT</path>, or in <gui>Control Panel/System/Advanced</gui>.</li>
+	<li>Delete the references to EUPHORIA in your <gui>Start Menu</gui>.</li>
 </ol>
 
 </doc>

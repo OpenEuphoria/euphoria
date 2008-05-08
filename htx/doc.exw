@@ -14,7 +14,9 @@ else
 end if
 
 constant files = {
-    "install.htx"
+     "install.htx"
+    ,"overview.htx"
+    ,"bind.htx"
 }
 
 include stack.e as stk

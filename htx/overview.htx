@@ -1,28 +1,14 @@
-<_init_comment>
-<html>
-<head><title>Guide to Documentation Files</title>
-<_css>
-</head>
-<body>
+<doc title="Guide to Documentation Files">
 
-<_width>
+<h1>Guide to Documentation Files</h1>
 
-<section_header>Guide to Documentation Files</section_header>
+<p>The Euphoria documentation is spread over several plain text files in the <path>euphoria\doc</path> directory. For each <strong>.doc</strong> file in the <path>euphoria\doc</path> directory, there is a corresponding <strong>.htm</strong> file in the <path>euphoria\html</path> directory. You can also type <platform_reference>guru</platform_reference> to quickly search for relevant information from all directories under <path>\euphoria</path>.</p>
 
-<p>&nbsp;<br>
+<p>Everyone should start with <path>euphoria\readme.doc</path> (<path>euphoria\readme.htm</path>).</p>
 
- The Euphoria documentation is spread over several plain text files in the
- <filepath>euphoria\doc</filepath> directory. For each
- <b>.doc</b> file in the <filepath>euphoria\doc</filepath>
- directory, there is a corresponding <b>.htm</b> file in the
- <filepath>euphoria\html</filepath> directory. You can also
- type <platform_reference>guru</platform_reference> to quickly search for relevant
- information from all directories under
- <filepath>\euphoria</filepath>. 
+<h3>Trouble Shooting the Installation</h3>
 
-<p>Everyone should start with <filepath>euphoria\readme.doc</filepath> (<filepath>euphoria\readme.htm</filepath>).</p>
-
-<p><_sul>If you are having trouble installing Euphoria read:</_sul></p>
+<p>If you are having trouble installing Euphoria read:</p>
 
 <div class="table_format">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -35,7 +21,9 @@
 </table>
 </div>
 
-<p><_sul>Read the following files first, if you want to learn to program in Euphoria:</_sul></p>
+<h3>Learning Euphoria</h3>
+
+<p>Read the following files first, if you want to learn to program in Euphoria:</p>
 
 <div class="table_format">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -64,100 +52,90 @@
 		<td style="width:24;"></td>
 		<td><a href="platform.htm">platform.doc</a></td>
 		<td width=10 align=center valign=top>-</td>
-		<td>A discussion of the differences between the four <font color="#993333"><b><i>platforms</i></b></font> that Euphoria runs on, i.e. <font color="#CC3366"><b>DOS32</b></font> (<font color="#993333"><b>ex.exe</b></font>)  vs. <font color="#CC3366"><b>WIN32</b></font> (<font color="#993333"><b>exw.exe</b></font>) vs. <font color="#CC3366"><b>Linux</b></font> (<font color="#993333"><b>exu</b></font>) vs. <font color="#CC3366"><b>FreeBSD</b></font> (<font color="#993333"><b>exu</b></font>). Also included is a discussion of how to interface Euphoria programs with C libraries.</td>
+		<td>A discussion of the differences between the four <span style="color:#993333;font-weight:bold;font-style:italic;">platforms</span> that Euphoria runs on, i.e. <span class="platform">DOS32</span> (<span style="color:#993333;font-weight:bold;">ex.exe</span>)  vs. <span class="platform">WIN32</span> (<span style="color:#993333;font-weight:bold;">exw.exe</span>) vs. <span class="platform">Linux</span> (<span style="color:#993333;font-weight:bold;">exu</span>) vs. <span class="platform">FreeBSD</span> (<span style="color:#993333;font-weight:bold;">exu</span>). Also included is a discussion of how to interface Euphoria programs with C libraries.</td>
 	</tr>
 	
 </table>
 </div>
 
-<p>
- <_sul>The rest of the files can be read any time, as needed:</_sul>
-<p>
+<h3>Other Documentation</h3>
+
+<p>These files can be read any time, as needed:</p>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
-<_4clist
-  href="database.htm"
-  name="database.doc"
-  pos=18
-  description="The Euphoria Database System (EDS)"
->
+<tr>
+	<td width=24></td>
+	<td><a href="database.htm">database.doc</a></td>
+	<td>-</td>
+	<td>The Euphoria Database System (EDS)</td>
+</tr>
 
-<_4clist
-  href="tasking.htm"
-  name="tasking.doc"
-  pos=18
-  description="Multitasking in Euphoria"
->
+<tr>
+	<td width=24></td>
+	<td><a href="tasking.htm">tasking.doc</a></td>
+	<td>-</td>
+	<td>Multitasking in Euphoria</td>
+</tr>
 
-<_4clist
-  href="e2c.htm"
-  name="e2c.doc"
-  pos=18
-  description="The Euphoria To C Translator"
->
+<tr>
+	<td width=24></td>
+	<td><a href="e2c.htm">e2c.doc</a></td>
+	<td>-</td>
+	<td>The Euphoria To C Translator</td>
+</tr>
 
-<_4clist
-  href="ed.htm"
-  name="ed.doc"
-  pos=18
-  description="Documentation for the standard Euphoria editor,
-   <font color=\"#993333\"><b>ed</b></font>"
->
+<tr>
+	<td width=24></td>
+	<td><a href="ed.htm">ed.doc</a></td>
+	<td>-</td>
+	<td>Documentation for the standard Euphoria editor, <font color="#993333"><b>ed</b></font></td>
+</tr>
 
-<_4clist
-  href="trouble.htm"
-  name="trouble.doc"
-  pos=18
-  description="A list of the most common problems and their solutions"
->
+<tr>
+	<td width=24></td>
+	<td><a href="trouble.htm">trouble.doc</a></td>
+	<td>-</td>
+	<td>A list of the most common problems and their solutions</td>
+</tr>
 
-<_4clist
-  href="bind.htm"
-  name="bind.doc"
-  pos=18
-  description="Describes <font color=\"#5500FF\"><b>bind.bat</b></font> and
-   <font color=\"#5500FF\"><b>shroud.bat</b></font> options for
-   <font color=\"#993333\"><b>binding</b></font> and
-   <font color=\"#993333\"><b>shrouding</b></font>"
->
+<tr>
+	<td width=24></td>
+	<td><a href="bind.htm">bind.doc</a></td>
+	<td>-</td>
+	<td>Describes <font color="#5500FF"><b>bind.bat</b></font> and <font color="#5500FF"><b>shroud.bat</b></font> options for <font color="#993333"><b>binding</b></font> and <font color="#993333"><b>shrouding</b></font></td>
+</tr>
 
-<_4clist
-  href="perform.htm"
-  name="perform.doc"
-  pos=18
-  description="Performance tips"
->
+<tr>
+	<td width=24></td>
+	<td><a href="perform.htm">perform.doc</a></td>
+	<td>-</td>
+	<td>Performance tips</td>
+</tr>
 
-<_4clist
-  href="relnotes.htm"
-  name="relnotes.doc"
-  pos=18
-  description="A description of what's new in the current release and
-   a summary of previous releases of Euphoria"
->
+<tr>
+	<td width=24></td>
+	<td><a href="relnotes.htm">relnotes.doc</a></td>
+	<td>-</td>
+	<td>A description of what's new in the current release and a summary of previous releases of Euphoria</td>
+</tr>
 
-<_4clist
-  href="cgi.htm"
-  name="cgi.doc"
-  pos=18
-  description="Web-based Programming using CGI and Euphoria"
->
+<tr>
+	<td width=24></td>
+	<td><a href="cgi.htm">cgi.doc</a></td>
+	<td>-</td>
+	<td>Web-based Programming using CGI and Euphoria</td>
+</tr>
 
-<_4clist
-  href="c.htm"
-  name="c.doc"
-  pos=18
-  description="Propaganda aimed at C/C++ programmers"
->
+<tr>
+	<td width=24></td>
+	<td><a href="c.htm">c.doc</a></td>
+	<td>-</td>
+	<td>Propaganda aimed at C/C++ programmers</td>
+</tr>
 
 </table>
 
-<p>
- Most subdirectories under <filepath>\euphoria</filepath> have
- a <b>.doc</b> file that describes the files in that subdirectory. 
- 
-</_width>
+<p>Most subdirectories under <path>\euphoria</path> have a <strong>.doc</strong> file that describes the files in that subdirectory. </p>
 
-</body>
-</html>
-
+</doc>
