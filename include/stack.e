@@ -31,22 +31,27 @@ global function at(stack sk, integer idx)
     if idx <= 0 then
 	-- number from top
 	idx = length(sk) + idx
+	if idx<=1 then
+	    crash("stack underflow in at()", {})
+	end if
     else
 	idx += 1
+	if idx>length(sk) then
+	    crash("stack overflow in at()", {})
+	end if
     end if
     
     return sk[idx]
 end function
 
 global function push(stack sk, object value)
-    if sk[1] = FIFO then
-	if length(sk) = 1 then
-	    return sk & {value}
-	end if
 
-	return FIFO & {value} & sk[2..$]
+    if sk[1] = FIFO then
+	sk = prepend(sk, FIFO)
+	sk[2] = value
+	return sk
     else
-	return sk[1..$] & {value}
+	return append(sk, value)
     end if
 end function
 
@@ -87,7 +92,13 @@ global function dup(stack sk)
 	crash("stack underflow in dup()", {})
     end if
 
-    return sk & {sk[$]}
+    if sk[1] = FIFO then
+        sk = prepend(sk, FIFO)
+        sk[2] = sk[3]
+        return sk
+    else
+        return sk & {sk[$]}
+    end if
 end function
 
 global function clear(stack sk)
