@@ -101,7 +101,7 @@
 <h3>Note to Borland and Lcc users:</h3>
 
 <p>For Borland and Lcc there is no standard environment variable, so the <font color="#0066CC"><b>Translator</b></font> will search your <b>PATH</b> variable looking for a likely
-  compiler directory. It looks in standard places such as: ..\LCC, ..\BCC.., ..\Borland.. etc. If you've installed in a nonstandard place you might have to rename your installation directory. To edit your PATH variable on Windows XP, click: Start Menu / Control Panel / Performance and Maintenance / System / Advanced / Environment Variables / User variables for ... Then Select PATH and edit its value. Insert somewhere: C:\BORLAND\BCC55\BIN; or C:\LCC\BIN; Then click OK a couple of times to close the windows. The next DOS window you open should have the new value.<p>
+  compiler directory. It looks in standard places such as: ..\LCC, ..\BCC.., ..\Borland.. etc. If you've installed in a nonstandard place you might have to rename your installation directory. To edit your PATH variable on Windows XP, click: Start Menu / Control Panel / Performance and Maintenance / System / Advanced / Environment Variables / User variables for ... Then Select PATH and edit its value. Insert somewhere: C:\BORLAND\BCC55\BIN; or C:\LCC\BIN; Then click OK a couple of times to close the windows. The next DOS window you open should have the new value.</p>
      
 <h2>Command-Line Options</h2>
 
