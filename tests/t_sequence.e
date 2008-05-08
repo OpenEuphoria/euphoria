@@ -58,8 +58,8 @@ test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", {1.5
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
-test_equal("insert_slice() integer sequence", {1,2,3}, insert_slice({1,3}, 2, 2))
-test_equal("insert_slice() string", "John", insert_slice("Jon", "h", 3))
+test_equal("splice() integer sequence", {1,2,3}, splice({1,3}, 2, 2))
+test_equal("splice() string", "John", splice("Jon", "h", 3))
 
 test_equal("replace() integer sequence", {1,2,3}, replace({1,8,9,3}, 2, 2, 3))
 test_equal("replace() integer sequence w/sequence", {1,2,3,4},

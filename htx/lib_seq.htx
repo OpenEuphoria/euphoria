@@ -246,31 +246,31 @@ s = insert({10,30,40}, 20, 2)
 
 <_2clist
   name="See Also:"
-  description="<a href=\"lib_seq.htm#insert_slice\">insert_slice</a>"
+  description="<a href=\"lib_seq.htm#splice\">splice</a>"
  >
 </table>
 
 
 
-<_routine name="insert_slice">
+<_routine name="splice">
 <table border=0 cellspacing=2 cellpadding=2>
 
 
  <_2clist
   name="Syntax:"
   description="<font face = \"Arial, Helvetica\">include sequence.e<BR>
-s2 = insert_slice(s1, x, i)
+s2 = splice(s1, x, i)
 </font>"
  >
  <_2clist
   name="Description:"
   description=
-"Insert x into s1 at index i. The item is inserted before i, not after. x is inserted as a subsequence. insert_slice()ing a string into another yields a new string."
+"Insert x into s1 at index i. The item is inserted before i, not after. x is inserted as a subsequence. splicing a string into another yields a new string."
  >
 <_2clist
   name="Comments:"
   description=
-"A new sequence is created. s1 and x can be any type of sequence, including nested sequences. The length of this new sequence is the sum of the lengths of x and s1 (atoms are of length 1 for this purpose). insert_slice() is equivalent to insert() when x is an atom."
+"A new sequence is created. s1 and x can be any type of sequence, including nested sequences. The length of this new sequence is the sum of the lengths of x and s1 (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is an atom."
 >
 
 <_2clist
@@ -278,7 +278,7 @@ s2 = insert_slice(s1, x, i)
   description=""
  >
 <_eucode>
-s = insert_slice("John Doe", " Middle", 5)
+s = splice("John Doe", " Middle", 5)
 -- s is "John Middle Doe"
 </_eucode>
 
@@ -287,7 +287,7 @@ s = insert_slice("John Doe", " Middle", 5)
   description=""
  >
 <_eucode>
-s = insert_slice({10,30,40}, 20, 2)
+s = splice({10,30,40}, 20, 2)
 -- s is {10,20,30,40}
 </_eucode>
 

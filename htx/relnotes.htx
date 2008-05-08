@@ -102,10 +102,9 @@
      Global Constant <b>E</b>.</li>
 	<li>
      New routines in <b>sequence.e</b>:
-     <b>insert()</b>, <b>remove()</b>, <b>replace()</b>, <b>head()</b>,
+     <b>insert()</b>, <b>splice()</b>, <b>remove()</b>, <b>replace()</b>, <b>head()</b>,
      <b>mid()</b>, <b>slice()</b>, <b>tail()</b>, <b>split()</b>, <b>split_adv()</b>,
-     <b>join()</b>, <b>find_any()</b>, <b>find_any_from()</b> (faster, simpler
-     version by Larry Miller), <b>trim()</b>, <b>trim_head()</b>,
+     <b>join()</b>, <b>find_any()</b>, <b>find_any_from()</b>, <b>trim()</b>, <b>trim_head()</b>,
      <b>trim_tail()</b>, <b>truncate()</b>, <b>pad_head()</b>,
      <b>pad_tail()</b>, <b>chunk()</b>, <b>flatten()</b>, <b>find_all()</b>,
      <b>match_all()</b>, <b>find_replace()</b>, <b>vslice()</b>,
