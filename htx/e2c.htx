@@ -1,291 +1,108 @@
-<_init_comment>
-<html>
-<head><title>Euphoria To C Translator</title>
-<_css>
-</head>
-<body>
-<_width>
-<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
-<br>
-	                      Euphoria To C Translator
-</font></_center>
-<p>
-<hr>
-<p>
+<doc title="Euphoria To C Translator">
 
-<dl>
-<dt>
-        1. <a href="e2c.htm#intro"> Introduction</a>
-<dd>
-<dt>
-        2. <a href="e2c.htm#compsupp">C Compilers Supported</a>
-<dd>
-<dt>
-        3. <a href="e2c.htm#howtorun">How to Run the Translator</a>
-<dd>
-<dt>
-        4. <a href="e2c.htm#dynamic">Dynamic Link Libraries 
-           (Shared Libraries)</a>
-<dd>
-<dt>
-        5. <a href="e2c.htm#size">Executable Size and Compression</a>
-<dd>
-<dt>
-        6. <a href="e2c.htm#invstr">Interpreter vs. Translator</a>
-<dd>
-<dt>
-        7. <a href="e2c.htm#legal">Legal Restrictions</a>
-<dd>
-<dt>
-        9. <a href="e2c.htm#faq">Frequently Asked Questions</a>
-<dd>
-<dt>
-        10. <a href="e2c.htm#common">Common Problems</a>
-<dd>
-</dl>
+<h1>Euphoria To C Translator</h1>
 
-<p>
-<hr>
+<ol>
+	<li><a href="e2c.htm#intro"> Introduction</a></li>
+    <li><a href="e2c.htm#compsupp">C Compilers Supported</a></li>
+	<li><a href="e2c.htm#howtorun">How to Run the Translator</a></li>
+	<li><a href="e2c.htm#dynamic">Dynamic Link Libraries (Shared Libraries)</a></li>
+	<li><a href="e2c.htm#size">Executable Size and Compression</a></li>
+	<li><a href="e2c.htm#invstr">Interpreter vs. Translator</a></li>
+	<li><a href="e2c.htm#legal">Legal Restrictions</a></li>
+	<li><a href="e2c.htm#faq">Frequently Asked Questions</a></li>
+	<li><a href="e2c.htm#common">Common Problems</a></li>
+</ol>
 
-<a name="intro"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
+<h2>1. Introduction</h2>
 
-<_dul>1. Introduction</_dul>
-
-</font>
-
- <p>
- <font color="#006633"><b>The Euphoria to C Translator
- will translate any Euphoria program 
- into equivalent C source code.</b></font>
- <p>
- There are versions of
- the translator for <font color="#CC3366"><b>Windows</b></font>,
- <font color="#CC3366"><b>DOS</b></font>,
- <font color="#CC3366"><b>Linux</b></font>
- and <font color="#CC3366"><b>FreeBSD</b></font>. 
- After translating a Euphoria program to C, you can compile and 
- link using one of the supported C compilers. This will give you 
- an executable file that will typically run much faster than 
- if you used the Euphoria interpreter. 
- <p>
- The translator can translate/compile *itself* into 
- an executable file for each platform. The translator is also used in
- translating/compiling the front-end portion of the interpreter.
- The source code for the Translator is in euphoria\source. 
- It's written 100% in Euphoria.
+ <p><font color="#006633"><b>The Euphoria to C Translator will translate any Euphoria program into equivalent C source code.</b></font></p>
+ <p>There are versions of the translator for <font color="#CC3366"><b>Windows</b></font>, <font color="#CC3366"><b>DOS</b></font>, <font color="#CC3366"><b>Linux</b></font> and <font color="#CC3366"><b>FreeBSD</b></font>. After translating a Euphoria program to C, you can compile and link using one of the supported C compilers. This will give you an executable file that will typically run much faster than if you used the Euphoria interpreter.</p>
  
-
-<p>
-<a name="compsupp"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>2. C Compilers Supported</_dul>
-
-</font>
-<p>
-
- The <font color="#0066CC"><b>Translator</b></font> currently works with GNU C
- on <font color="#CC3366"><b>Linux</b></font> or
- <font color="#CC3366"><b>FreeBSD</b></font>, 
- with either 
-     <a href="http://www.openwatcom.org">Watcom C</a>
- or 
-     <a href="http://www.delorie.com/djgpp/">DJGPP C</a> 
- on 
- <font color="#CC3366"><b>DOS</b></font>,
- and with either Watcom C, 
- <a href="http://www.cs.virginia.edu/~lcc-win32/">Lcc</a> 
- or 
- <a href="http://www.borland.com/products/downloads/download_cbuilder.html">
- Borland 5.5</a>
- on <font color="#CC3366"><b>Windows</b></font>. These are all <b>free</b> 
- compilers.
- GNU C will exist already on your Linux or FreeBSD system.
- The others can be downloaded from their respective Web sites.
- For Windows, we strongly recommend Watcom or Borland over Lcc. Lcc is still actively
- being developed and is getting better, but has some bugs that will
- make it difficult for you to compile a large Windows program correctly.
- Watcom and Borland are both rock solid. Watcom usually produces 
- slightly smaller, slightly faster executables, but Borland compiles
- much faster. 
+ <p>The translator can translate/compile *itself* into an executable file for each platform. The translator is also used in translating/compiling the front-end portion of the interpreter. The source code for the Translator is in <path>euphoria\source</path>. It's written 100% in Euphoria.</p>
  
- <p>
- The Watcom DOS32 package includes the CauseWay DOS extender and file 
- compressor. CauseWay is now open source and free. You can find out more 
- about it at:
- 
-    <a href="http://www.devoresoftware.com">http://www.devoresoftware.com</a>
- <p>   
- <font color="#5500FF"><b>emake.bat</b></font> and
- <font color="#5500FF"><b>objfiles.lnk</b></font> will link in the
- CauseWay extender automatically.
- Other DOS extenders, such as DOS4GW, do not work well with the
- <font color="#0066CC"><b>Translator</b></font>.
- 
- <p>
- The <font color="#0066CC"><b>Translator</b></font> looks for "WATCOM",
- "LCC", "BORLAND" or "DJGPP" as
- either environment variables or directories on your <b>PATH</b>. It will 
- generate an <font color="#5500FF"><b>emake.bat</b></font> file that invokes
- the appropriate compiler and linker. 
- 
- <p>
- <font color="#008080"><b>Notes:</b></font>
- <ul>
- <li>Unlike Watcom, DJGPP does not map DOS low memory into the same segment 
- as other memory. Machine code routines written for the Watcom-based
- <font color="#0066CC"><b>Euphoria Interpreter</b></font> or
- <font color="#0066CC"><b>Translator</b></font> will not work with DJGPP,
- and will likely crash if they try to access low memory, such as video memory.
- Euphoria's <font color="#006699"><b>peek()</b></font>, 
- <font color="#006699"><b>poke()</b></font>,
- <font color="#006699"><b>mem_copy()</b></font>,
- <font color="#006699"><b>mem_set()</b></font> etc. <i><_ba>will</_ba></i>
- work correctly, as the <font color="#0066CC"><b>Translator</b></font> uses
- a special DJGPP macro to access low memory. You can port
- these machine code routines to DJGPP, but you'll need to consult the
- DJGPP docs for the possible ways of accessing low memory.
- <p>
- <li>
- DJGPP fully supports long filenames for reading, writing and creation.
- Watcom doesn't support creation.
- <p>
- <li>
- The Translator with DJGPP does not support use of the mouse.
- <p>
- <li>
- The Allegro graphics library, that we use with DJGPP, seems to be
- much faster than the Watcom graphics library in many cases.
- <p>
- <li>
- DJGPP supports a few more text modes, e.g. 35-line mode.
- <p>
- <li>
- DJGPP lets the user abort a program at any time, by typing control-c.
- <p>
- <li>
- The Lcc implementation ignores <font color="#006699"><b>lock_file()</b></font>
- and <font color="#006699"><b>unlock_file()</b></font>. 
- They do nothing.
- <p>
- <li>
- The <font color="#0066CC"><b>Translator</b></font> uses
- Lcc's -O optimization flag in <font color="#5500FF"><b>emake.bat</b></font>.
- This flag can sometimes add to Lcc's unreliability.
- If your program doesn't work, try passing -lccopt-off to the command line
- of ecu/ecw. This will disable the use of the lcc optimization flag.
- <p>
- <li>
- Warnings are turned off when compiling with
- <font color="#5500FF"><b>emake.bat</b></font>. If you turn them on, 
- you may see some harmless messages about variables declared but not used, 
- labels defined but not used, function prototypes not declared etc.
- <p>
- <li>
- On Windows, the Watcom linker might issue a warning that it can't 
- open graph.lib. You can ignore this. graph.lib is not used. There doesn't 
- seem to be an easy way to suppress this message. The latest version of
- Open Watcom seems to have corrected this.
- <p>
- <li>
- With Borland and Lcc, Windows console (text-mode) programs cannot 
- read the F-keys or arrow keys, and you may have to hit the Enter
- key twice. There is no problem with GUI programs.
-  
- <p>
- <li>
- The Microsoft C++ compiler for Windows is not yet supported.
- However you can probably import the C files generated by
- <font color="#993333"><b>ecw.exe</b></font>, 
- and the run-time library file for Borland, Lcc or Watcom 
- into a Microsoft project, and compile/link with only minor glitches. 
- </ul>
+<h2>2. C Compilers Supported</h2>
 
-<p>
-<a name="howtorun"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>3. How to Run the Translator</_dul>
+<p>The <font color="#0066CC"><b>Translator</b></font> currently works with GNU C on <font color="#CC3366"><b>Linux</b></font> or <font color="#CC3366"><b>FreeBSD</b></font>, with either <a href="http://www.openwatcom.org">Watcom C</a> or      <a href="http://www.delorie.com/djgpp/">DJGPP C</a> on <font color="#CC3366"><b>DOS</b></font>, and with either Watcom C, <a href="http://www.cs.virginia.edu/~lcc-win32/">Lcc</a> or <a href="http://www.borland.com/products/downloads/download_cbuilder.html">Borland 5.5</a> on <font color="#CC3366"><b>Windows</b></font>. These are all <b>free</b>  compilers.</p>
 
-</font>
-<p>
+<p>GNU C will exist already on your Linux or FreeBSD system. The others can be downloaded from their respective Web sites. For Windows, we strongly recommend Watcom or Borland over Lcc. Lcc is still actively being developed and is getting better, but has some bugs that will make it difficult for you to compile a large Windows program correctly. Watcom and Borland are both rock solid. Watcom usually produces slightly smaller, slightly faster executables, but Borland compiles much faster.</p>
+ 
+<p>The Watcom DOS32 package includes the CauseWay DOS extender and file compressor. CauseWay is now open source and free. You can find out more about it at:</p>
+ 
+<p><a href="http://www.devoresoftware.com">http://www.devoresoftware.com</a></p>
 
- Running the <font color="#0066CC"><b>Translator</b></font> is similar to
- running the <font color="#0066CC"><b>Interpreter</b></font>.
- On DOS you would type:
+<p><font color="#5500FF"><b>emake.bat</b></font> and <font color="#5500FF"><b>objfiles.lnk</b></font> will link in the CauseWay extender automatically. Other DOS extenders, such as DOS4GW, do not work well with the <font color="#0066CC"><b>Translator</b></font>.</p>
+ 
+ <p>The <font color="#0066CC"><b>Translator</b></font> looks for "WATCOM", "LCC", "BORLAND" or "DJGPP" as either environment variables or directories on your <b>PATH</b>. It will generate an <font color="#5500FF"><b>emake.bat</b></font> file that invokes the appropriate compiler and linker.</p>
+ 
+<h3>Notes:</h3>
+ 
+<ul>
+	<li>Unlike Watcom, DJGPP does not map DOS low memory into the same segment as other memory. Machine code routines written for the Watcom-based <font color="#0066CC"><b>Euphoria Interpreter</b></font> or <font color="#0066CC"><b>Translator</b></font> will not work with DJGPP, and will likely crash if they try to access low memory, such as video memory. Euphoria's <font color="#006699"><b>peek()</b></font>, <font color="#006699"><b>poke()</b></font>, <font color="#006699"><b>mem_copy()</b></font>, <font color="#006699"><b>mem_set()</b></font> etc. <i><_ba>will</_ba></i> work correctly, as the <font color="#0066CC"><b>Translator</b></font> uses a special DJGPP macro to access low memory. You can port these machine code routines to DJGPP, but you'll need to consult the DJGPP docs for the possible ways of accessing low memory.</li>
+	<li>DJGPP fully supports long filenames for reading, writing and creation. Watcom doesn't support creation.</li>
+	<li>The Translator with DJGPP does not support use of the mouse.</li>
+	<li>The Allegro graphics library, that we use with DJGPP, seems to be much faster than the Watcom graphics library in many cases.</li>
+	<li>DJGPP supports a few more text modes, e.g. 35-line mode.</li>
+	<li>DJGPP lets the user abort a program at any time, by typing control-c.</li>
+	<li>The Lcc implementation ignores <font color="#006699"><b>lock_file()</b></font> and <font color="#006699"><b>unlock_file()</b></font>. They do nothing.</li>
+	<li>The <font color="#0066CC"><b>Translator</b></font> uses Lcc's -O optimization flag in <font color="#5500FF"><b>emake.bat</b></font>. This flag can sometimes add to Lcc's unreliability. If your program doesn't work, try passing -lccopt-off to the command line of ecu/ecw. This will disable the use of the lcc optimization flag.</li>
+	<li>Warnings are turned off when compiling with <font color="#5500FF"><b>emake.bat</b></font>. If you turn them on,  you may see some harmless messages about variables declared but not used, labels defined but not used, function prototypes not declared etc.</li>
+	<li>On Windows, the Watcom linker might issue a warning that it can't open graph.lib. You can ignore this. graph.lib is not used. There doesn't seem to be an easy way to suppress this message. The latest version of Open Watcom seems to have corrected this.</li>
+	<li>With Borland and Lcc, Windows console (text-mode) programs cannot read the F-keys or arrow keys, and you may have to hit the Enter key twice. There is no problem with GUI programs.</li>
+	<li>The Microsoft C++ compiler for Windows is not yet supported. However you can probably import the C files generated by <font color="#993333"><b>ecw.exe</b></font>, and the run-time library file for Borland, Lcc or Watcom into a Microsoft project, and compile/link with only minor glitches.</li>
+</ul>
+
+<h2>3. How to Run the Translator</h2>
+
+<p>Running the <font color="#0066CC"><b>Translator</b></font> is similar to running the <font color="#0066CC"><b>Interpreter</b></font>. On DOS you would type:</p>
+ 
  <pre>       <b>ec allsorts.ex</b>
     or 
        <b>ec allsorts</b>
  </pre>
- On Windows you would type:
+ 
+<p>On Windows you would type:</p>
+
  <pre>       <b>ecw taskwire.exw</b>
     or 
        <b>ecw taskwire</b>
  </pre>
- On Linux/FreeBSD you would type:
- <pre>       <b>ecu qsort.exu</b>
+ 
+<p>On Linux/FreeBSD you would type:</p>
+
+<pre>       <b>ecu qsort.exu</b>
     or 
        <b>ecu qsort</b>
- </pre>
- but instead of running the allsorts.ex program, the
- <font color="#0066CC"><b>Translator</b></font> will
- create several C source files. Anyone can run the 
- <font color="#0066CC"><b>Translator</b></font>.
- It's included in euphoria\bin along with the interpreter.
- To compile and link the C files, you need to install one of the 
- supported C compilers. The <font color="#0066CC"><b>Translator</b></font> 
- creates a batch file called <font color="#5500FF"><b>emake.bat</b></font> 
- that does all the compiling and linking steps for you, so you don't 
- actually have to know anything about C or C compilers. Just type:
- <pre>
+</pre>
+
+<p>but instead of running the allsorts.ex program, the <font color="#0066CC"><b>Translator</b></font> will create several C source files. Anyone can run the <font color="#0066CC"><b>Translator</b></font>. It's included in euphoria\bin along with the interpreter. To compile and link the C files, you need to install one of the supported C compilers. The <font color="#0066CC"><b>Translator</b></font> creates a batch file called <font color="#5500FF"><b>emake.bat</b></font>  that does all the compiling and linking steps for you, so you don't actually have to know anything about C or C compilers. Just type:</p>
+ 
+<pre>
        <b>emake</b>
- </pre>
- When the C compiling and linking is finished, you will have a file
- called:
-        <b>allsorts.exe</b>
+</pre>
  
- and the C source files will have been removed to avoid clutter.
- <p>
- When you run allsorts.exe, it should run the same as if you had typed:
+<p>When the C compiling and linking is finished, you will have a file called:</p>
  
-        <b>ex allsorts</b>
+<p><b>allsorts.exe</b></p>
  
- <br>
- to run it with the <font color="#0066CC"><b>Interpreter</b></font>,
- except that it should run faster, showing reduced times for the
- various sorting algorithms in euphoria\demo\allsorts.ex.
+<p>and the C source files will have been removed to avoid clutter.</p>
 
- <p>
-  After creating your executable file, emake removes all the C files that 
-  were created. If you want to look at these files, run the translator again
-  and look at the files before running emake.
+<p>When you run allsorts.exe, it should run the same as if you had typed:</p>
  
- <p>
- <font color="#008080"><b>Note to Linux and FreeBSD users:</b></font>
+<p><b>ex allsorts</b></p>
+ 
+<p>to run it with the <font color="#0066CC"><b>Interpreter</b></font>, except that it should run faster, showing reduced times for the various sorting algorithms in euphoria\demo\allsorts.ex.</p>
 
-<table border=0 cellspacing=2 cellpadding=2>
-<_4clist
-  col3=""
-  name=""
-  pos=7
-  description="The files will be called <font color=\"#5500FF\"><b>emake</b>
-  </font> and <b>shell</b>, and you type <b>./emake</b> to perform the
-  compiles and link, and <b>./shell</b> to run the shell sort program."
->
-</table>
+<p>After creating your executable file, emake removes all the C files that were created. If you want to look at these files, run the translator again and look at the files before running emake.</p>
+ 
+<h3>Note to Linux and FreeBSD users:</h3>
 
-<p>
-<font color="#008080"><b>Note to Borland and Lcc users:</b></font>
+<p>The files will be called <font color="#5500FF"><b>emake</b> </font> and <b>shell</b>, and you type <b>./emake</b> to perform the compiles and link, and <b>./shell</b> to run the shell sort program.</p>
+  
+<h3>Note to Borland and Lcc users:</h3>
 
-<table border=0 cellspacing=2 cellpadding=2>
-<_4clist
-  col3=""
-  name=""
-  pos=7
-  description="For Borland and Lcc there is no standard environment variable, 
-  so the <font color=\"#0066CC\"><b>Translator</b></font> will search your
+<p>For Borland and Lcc there is no standard environment variable, 
+  so the <font color="#0066CC"><b>Translator</b></font> will search your
   <b>PATH</b> variable looking for a likely
   compiler directory. It looks in standard places such as:
   ..\LCC, ..\BCC.., ..\Borland.. etc. If you've installed in a nonstandard
@@ -296,69 +113,52 @@
      Then Select PATH and edit its value. Insert somewhere: 
      C:\BORLAND\BCC55\BIN; or C:\LCC\BIN; Then
      click OK a couple of times to close the windows. The next DOS window
-     you open should have the new value."
->
-</table>
- 
-
- <p>
- <font face="Arial, Helvetica" color="#339900"><b>
- <_sul>Command-Line Options</_sul>
- </b></font>
- 
+     you open should have the new value."<p>
+     
+<h2>Command-Line Options</h2>
  <p>
  If you happen to have more than one C compiler for a given platform,
- you can select the one you want to use with a command-line option:
-<table border=0 cellspacing=2 cellpadding=2>
-<_4clist
-  col3=""
-  name=""
-  pos=10
-  description="<font face=\"verdana, arial, geneva\" size=-1><b>-bor<br>
-        -lcc<br>
-        -wat<br>
-        -djg</b></font>"
->
-</table>
- on the command line to <font color="#993333"><b>ec</b></font> or
- <font color="#993333"><b>ecw</b></font>. e.g.
- <pre>
-      <b>ecw -bor pretend.exw</b>
- </pre>
+ you can select the one you want to use with a command-line option:</p>
+ 
+<console>-bor</console>
+<console>-lcc</console>
+<console>-wat</console>
+<console>-djg</console>
+	
+<p> on the command line to <font color="#993333"><b>ec</b></font> or
+ <font color="#993333"><b>ecw</b></font>. e.g.</p>
+ 
+      <console>ecw -bor pretend.exw</console>
 
  <p>
  Normally, after building your .exe file, the <b>emake</b> batch file will delete
  all C files and object files produced by the Translator. If you want
  <b>emake</b> to keep these files, add the <b>-keep</b> option to the
- Translator command-line. e.g.
- <pre>
-      <b>ec -wat -keep sanity.ex</b>
- </pre>
+ Translator command-line. e.g.</p>
  
+<console>ec -wat -keep sanity.ex</console>
+
  <p>
  To make a <font color="#CC3366"><b>Windows</b></font> .dll file, or
  <font color="#CC3366"><b>Linux</b></font> or
  <font color="#CC3366"><b>FreeBSD</b></font> .so file, just add <_bq>-dll</_bq>
- to the command line. e.g.
- <pre>
-      <b>ecw -bor -dll mylib.ew</b>
- </pre>
+ to the command line. e.g.</p>
  
- To make a <font color="#CC3366"><b>Windows</b></font> <b>console</b> program
+<console>ecw -bor -dll mylib.ew</console>
+
+<p> To make a <font color="#CC3366"><b>Windows</b></font> <b>console</b> program
  instead of a Windows GUI program, add <_bq>-con</_bq> to the command line. 
- e.g.
- <pre>
-      <b>ecw -bor -con myprog.exw</b>
- </pre>
+ e.g.</p>
+
+ <console>ecw -bor -con myprog.exw</console>
  
- To increase or decrease the total amount of stack space 
+<p> To increase or decrease the total amount of stack space 
  reserved for your program, add <_bq>-stack nnnn</_bq> to 
- the command line. e.g.
- <pre>
-      <b>ec -stack 100000 myprog.ex</b>
- </pre>
+ the command line. e.g.</p>
+
+ <console>ec -stack 100000 myprog.ex</console>
  
- The total stack space (in bytes) that you specify will be divided 
+<p> The total stack space (in bytes) that you specify will be divided 
  up among all the 
  tasks that you have running (assuming you have more than one).
  Each task has it's own private stack space. If it exceeds its
@@ -368,25 +168,23 @@
  allow more than this. A deeply-recursive task could use a great deal of space.
  It all depends on the maximum levels of calls that a task might need.
  At run-time, as your program creates more simultaneously-active tasks, 
- the stack space allotted to each task will tend to decrease.
+ the stack space allotted to each task will tend to decrease.</p>
 
  <p>
  When using LCC, sometimes the default optimization causes problems. You
  can disable this optimization by adding <_bq>-lccopt-off</_bq> to the
- command line.
- <pre>
-      <b>ecw -lcc -lccopt-off myprog.exw</b>
- </pre>
+ command line.</p>
+ 
+<console>ecw -lcc -lccopt-off myprog.exw</console>
 
  <p>
  To make a <font color="#CC3366"><b>DOS</b></font> program, 
  compiled by WATCOM, that uses fast hardware floating-point instructions,
  add <_bq>-fastfp</_bq> to the command line. 
- e.g.
- <pre>
-      <b>ec -wat -fastfp crunch.ex</b>
- </pre>
- By default, Euphoria for DOS calls routines to test if 
+ e.g.</p>
+<console>ec -wat -fastfp crunch.ex</console>
+
+<p> By default, Euphoria for DOS calls routines to test if 
  hardware floating-point instructions are available. If they are not, 
  then slower software emulation code is used.
  When <b>-fastfp</b> is specified, the compiled code will assume the existence
@@ -395,16 +193,18 @@
  on old 486's and 386's that are lacking hardware floating-point support.
  With <_bq>-fastfp</_bq>, emake.bat chooses faster WATCOM C compiler options,
  and emake.bat must also link in <b>ecfastfp.lib</b> instead
- of ec.lib.  
+ of ec.lib.  </p>
+ 
  <p>
  On all other platforms, Euphoria uses fast hardware floating-point instructions,
- and the operating system handles the case where hardware f.p. is missing.
+ and the operating system handles the case where hardware f.p. is missing.</p>
+ 
  <p>
  To compile your program with debugging information, usable with a debugger
- compatible with your compiler, use the <b>-debug</b> option:
- <pre>
-     <b>ecu -debug myapp.exu</b>
- </pre>
+ compatible with your compiler, use the <b>-debug</b> option:</p>
+ 
+<console>ecu -debug myapp.exu</console>
+
  <p>
  It is sometimes useful to link your translated code to a Euphoria runtime 
  library other than the default supplied library.  This ability is probably
@@ -412,25 +212,18 @@
  to give additional debugging information when debugging translated Euphoria
  code.  Note that only the default library is supplied.  The custom library 
  must be put into your EUDIR/bin directory along with the default library.
- Use the <b>-lib {library}</b> option:
- <pre>
-    <b>ecu -lib decu.a myapp.exu</b>
- </pre>
+ Use the <b>-lib {library}</b> option:</p>
  
-<p>
-<a name="dynamic"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>4. Dynamic Link Libraries (Shared Libraries)</_dul>
-
-</font>
+<console>ecu -lib decu.a myapp.exu</console>
+ 
+<h2>Dynamic Link Libraries (Shared Libraries)</h2>
 
 <p>
 Simply by adding <_bq>-dll</_bq> to the command line,
 the <font color="#0066CC"><b>Translator</b></font>
 will build a <font color="#CC3366"><b>Windows</b></font> .dll
 (<font color="#CC3366"><b>Linux</b></font>/<font color="#CC3366"><b>FreeBSD</b>
-</font> .so) file instead of an executable program. 
+</font> .so) file instead of an executable program. </p>
 
 <p>
 You can translate and compile a set of useful Euphoria
@@ -438,12 +231,12 @@ routines, and share them with other people, without giving
 them your source. Furthermore, your routines will likely
 run much faster when translated and compiled. Both
 translated/compiled and interpreted programs will be able to
-use your library.
+use your library.</p>
 
 <p>
 Only the global Euphoria procedures and functions,
 i.e. those declared with the "global" keyword, will be
-exported from the .dll (.so).
+exported from the .dll (.so).</p>
 
 <p>
 Any Euphoria program, whether translated/compiled or interpreted, 
@@ -456,42 +249,42 @@ that it wants to call. It calls these routines using
 <font color="#006699"><b>c_func()</b></font> and
 <font color="#006699"><b>c_proc()</b></font>. See
 <a class="blue" href="library.htm#call_c_func"><b>library.doc</b></a> for
-the details.
+the details.</p>
 
 <p>
 The routine names exported from a Euphoria .dll will vary depending
-on which C compiler you use. 
+on which C compiler you use. </p>
 
 <p>
 GNU C on Linux or FreeBSD exports the names exactly as they appear in the C
 code produced by the <font color="#0066CC"><b>Translator</b></font>, e.g. a
-Euphoria routine 
-<pre>
-      <b>global procedure foo(integer x, integer y)</b>
-</pre>
-would be exported as "_0foo" or maybe "_1foo" etc. 
+Euphoria routine </p>
+
+<console>global procedure foo(integer x, integer y)</console>
+
+<p>would be exported as "_0foo" or maybe "_1foo" etc. 
 The underscore and digit are added to prevent naming conflicts.
 The digit refers to the Euphoria file where the symbol is defined.
 The main file is numbered as 0. The include files are numbered 
 in the order they are encountered by the compiler. You should 
-check the C source to be sure.
+check the C source to be sure.</p>
 <p>
 Lcc would export foo() as "__0foo@8", where 8 is 
 the number of parameters (2) times 4. You can check the .def file
 created by the <font color="#0066CC"><b>Translator</b></font> to see
-all the exported names.
+all the exported names.</p>
 
 <p>
 For Borland the <font color="#0066CC"><b>Translator</b></font> also creates
 a .def file, but this 
 .def file renames the exported symbols back into the same names 
 that you used in your Euphoria source, so
-foo() would be exported as "foo". 
+foo() would be exported as "foo". </p>
 <p>
 For Watcom the same renaming as with Borland occurs, but instead of a 
 .def file, an EXPORT command is added to
 <font color="#5500FF"><b>objfiles.lnk</b></font> for each 
-exported symbol. 
+exported symbol. </p>
 
 <p>
 With Borland and Watcom you can edit the .def 
@@ -499,7 +292,7 @@ or <font color="#5500FF"><b>objfiles.lnk</b></font> file, and rerun
 <font color="#5500FF"><b>emake.bat</b></font>, 
 to rename the exported symbols, or remove 
 ones that you don't want to export. With Lcc you can
-remove symbols but you can't rename them.
+remove symbols but you can't rename them.</p>
 
 <p>
 Having nice exported names is not critical, since
@@ -512,7 +305,7 @@ a Euphoria include file containing the necessary
 <font color="#006699"><b>define_c_func()</b></font>
 and <font color="#006699"><b>define_c_proc()</b></font> statements, and he
 might even provide a set of Euphoria "wrapper" routines to call the
-routines in the .dll.
+routines in the .dll.</p>
 
 <p>
 When you call <font color="#006699"><b>open_dll()</b></font>, any top-level
@@ -521,12 +314,12 @@ Euphoria statements in the
 This gives the library 
 a chance to initialize its data structures prior to the first 
 call to a library routine. For many libraries no initialization is
-required.
+required.</p>
 
 <p>
 To pass Euphoria data (atoms and sequences) as arguments, or to receive a
 Euphoria object as a result, you will need to use the following 
-constants in <font color="#5500FF"><b>euphoria\include\dll.e</b></font>:
+constants in <font color="#5500FF"><b>euphoria\include\dll.e</b></font>:</p>
 
 <_eucode>
       -- Euphoria types for .dll (.so) arguments and return values:
@@ -537,9 +330,9 @@ constants in <font color="#5500FF"><b>euphoria\include\dll.e</b></font>:
 		      E_OBJECT  = #09000004
 </_eucode>
 
-Use these in <font color="#006699"><b>define_c_proc()</b></font> and
+<p>Use these in <font color="#006699"><b>define_c_proc()</b></font> and
 <font color="#006699"><b>define_c_func()</b></font> just as 
-you currently use C_INT, C_UINT etc. to call C .dll's and .so's.
+you currently use C_INT, C_UINT etc. to call C .dll's and .so's.</p>
 
 <p>
 Currently, file numbers returned by <font color="#006699"><b>open()</b></font>, 
@@ -549,11 +342,11 @@ but the library and the main program each have their own separate
 ideas of what these numbers mean. Instead of passing the file number 
 of an open file, you could instead pass the file name and let the 
 .dll (.so) open it. Unfortunately there is no simple solution for 
-passing routine id's. This might be fixed in the future.
+passing routine id's. This might be fixed in the future.</p>
 
 <p>
 A Euphoria .dll or .so currently may not execute any multitasking
-operations. The Translator will give you an error message about this.
+operations. The Translator will give you an error message about this.</p>
 
 <p>
 Euphoria .dlls (.so's) can also be used by 
@@ -561,15 +354,9 @@ C programs as long as only 31-bit integer values are exchanged.
 If a 32-bit pointer or integer must be passed, and you have the source
 to the C program, you could pass the value in two separate 
 16-bit integer arguments (upper 16 bits and lower 16 bits), and then combine 
-the values in the Euphoria routine into the desired 32-bit atom.
+the values in the Euphoria routine into the desired 32-bit atom.</p>
 
-<p>
-<a name="size"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>5. Executable Size and Compression</_dul>
-
-</font>
+<h2>Executable Size and Compression</h2>
 
 <p>
  On DOS32 with Watcom, if the <font color="#0066CC"><b>Translator</b></font>
@@ -578,19 +365,19 @@ the values in the Euphoria routine into the desired 32-bit atom.
  will add commands to <font color="#5500FF"><b>emake.bat</b></font> 
  that will compress your executable file. If you don't want compression,
  you can edit <font color="#5500FF"><b>emake.bat</b></font>, or remove or
- rename cwc.exe and/or le23p.exe.
+ rename cwc.exe and/or le23p.exe.</p>
  
  <p>
  On Linux, FreeBSD, Windows, and DOS32 with DJGPP,
  <font color="#5500FF"><b>emake</b></font> does not include a command 
  to compress your executable file. If you want to do this we suggest you 
- try the free UPX compressor. You can get UPX from:
+ try the free UPX compressor. You can get UPX from:</p>
               
-              <a href=http://upx.sourceforge.net>http://upx.sourceforge.net</a>
+<p><a href=http://upx.sourceforge.net>http://upx.sourceforge.net</a></p>
  
- Large Win32Lib-based .exe's produced by the Translator can be compressed 
+<p> Large Win32Lib-based .exe's produced by the Translator can be compressed 
  by UPX to about 15% of their original size, and you won't notice any
- difference in start-up time.
+ difference in start-up time.</p>
  
  <p>
  The <font color="#0066CC"><b>Translator</b></font> deletes routines that are
@@ -599,7 +386,7 @@ the values in the Euphoria routine into the desired 32-bit atom.
  checks again for more routines that have now become unused, and so on. 
  This can make a big difference, especially with Win32Lib-based programs 
  where a large file is included, but many of the included routines are not 
- used in a given program. 
+ used in a given program. </p>
  
  <p>
  Nevertheless, your compiled executable file will likely be larger than the
@@ -610,26 +397,20 @@ the values in the Euphoria routine into the desired 32-bit atom.
  are extremely compact when stored in a bound file. They need more space 
  after being translated to C, and compiled into machine code. Future 
  versions of the <font color="#0066CC"><b>Translator</b></font> will produce
- faster and smaller executables.
+ faster and smaller executables.</p>
 
-<p>
-<a name="invstr"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>6. Interpreter vs. Translator</_dul>
+<h2><a name="invstr"></a>Interpreter vs. Translator</h2>
 
-</font>
- 
 <p>
  All Euphoria programs can be translated to C, and with just a few exceptions
  noted below, will run the same as with the
- <font color="#0066CC"><b>Interpreter</b></font> (but hopefully faster).
+ <font color="#0066CC"><b>Interpreter</b></font> (but hopefully faster).</p>
  
  <p>
  The <font color="#0066CC"><b>Interpreter</b></font> and
  <font color="#0066CC"><b>Translator</b></font> share the same parser, so
  you will get the same syntax errors, variable not declared errors etc. with
- either one. 
+ either one. </p>
  
  <p>
  The <font color="#0066CC"><b>Interpreter</b></font> automatically expands
@@ -640,24 +421,16 @@ the values in the Euphoria routine into the desired 32-bit atom.
  increase the limit, for example if you have a recursive routine that
  might need thousands of levels of recursion. Modify the 
  link command in emake.bat. For Watcom C, use 
- <b>OPTION STACK=nnnn</b>, where nnnn is the number of bytes of stack space.
+ <b>OPTION STACK=nnnn</b>, where nnnn is the number of bytes of stack space.</p>
   
- <p>
- <font color="#008080"><b>Note:</b></font>
+ <h3>Note:</h3>
 
-<table border=0 cellspacing=2 cellpadding=2>
-<_4clist
-  col3=""
-  name=""
-  pos=7
-  description="The <font color=\"#0066CC\"><b>Translator</b></font> assumes
+ <p>The <font color="#0066CC"><b>Translator</b></font> assumes
   that your program has no run-time errors in it that would be caught by the
- <font color=\"#0066CC\"><b>Interpreter</b></font>.
- The <font color=\"#0066CC\"><b>Translator</b></font> does not check for:
+ <font color="#0066CC"><b>Interpreter</b></font>.
+ The <font color="#0066CC"><b>Translator</b></font> does not check for:
  subscript out of bounds, variable not initialized, 
- assigning the wrong type of data to a variable, etc."
->
-</table>
+ assigning the wrong type of data to a variable, etc.</p>
  
  <p>
  You should <b>debug</b> your program with the
@@ -676,32 +449,26 @@ the values in the Euphoria routine into the desired 32-bit atom.
  you will also see the offending line of Euphoria source whenever <b>with trace</b> 
  is in effect. 
  <b>with trace</b> will slow your program down, and the slowdown can be 
- extreme when <b>trace(3)</b> is also in effect.
+ extreme when <b>trace(3)</b> is also in effect.</p>
   
-<p>
-<a name="legal"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>7. Legal Restrictions</_dul>
-
-</font>
+<h2><a name="legal"></a>Legal Restrictions</h2>
 
  <p>
  As far as RDS is concerned, any executable programs or .dll's that you create 
  with this <font color="#0066CC"><b>Translator</b></font> without modifying
  an RDS translator library file,  
  may be distributed royalty-free. You are free to incorporate any 
- Euphoria files provided by RDS into your application. 
+ Euphoria files provided by RDS into your application. </p>
   
  <p>
  In January 2000, the CauseWay DOS extender was donated to the public domain 
  by Michael Devore. He has surrendered his copyright, and encourages anyone 
- to use it freely, including for commercial use.
+ to use it freely, including for commercial use.</p>
  
  <p>
  In general, if you wish to use Euphoria code written by 3rd parties, 
  you had better honor any restrictions that apply. If in doubt, you should 
- ask for permission.
+ ask for permission.</p>
  
  <p>
  On Linux, FreeBSD and DJGPP for DOS32, the GNU Library licence will normally 
@@ -712,98 +479,50 @@ the values in the Euphoria routine into the desired 32-bit atom.
  subject to their Library licence, but the standard compile/link procedure 
  in <font color="#5500FF"><b>emake</b></font> does not statically link any
  FSF libraries, so there should be no 
- problem.  
+ problem.  </p>
  
  <p>
  The Allegro graphics library, used by DJGPP, is referred to as "Giftware"
  in their documentation, and they allow you to redistribute it as part
- of your program. They ask for, but do not require, some acknowledgement.
+ of your program. They ask for, but do not require, some acknowledgement.</p>
  
- <p>
- <font color="#008080"><b>Disclaimer:</b></font>
+ <h2>Disclaimer:</h2>
 
-<table border=0 cellspacing=2 cellpadding=2>
-<_4clist
-  col3=""
-  name=""
-  pos=7
-  description="This is what we believe to be the case. We are not lawyers.
+<p>This is what we believe to be the case. We are not lawyers.
  If it's important to you, you should read the GNU Library licence, 
  the legal comments in DJGPP, Lcc and Borland, and 
- Michael Devore's read.me file on his site, to form your own judgement."
->
-</table>
+ Michael Devore's read.me file on his site, to form your own judgement.</p>
  
-<p>
-<a name="completee"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
+<h2><a name="faq"></a>Frequently Asked Questions</h2>
 
-<p>
-<a name="faq"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-<_dul>9. Frequently Asked Questions</_dul>
+<h3>How much of a speed-up should I expect?</h3>
 
-</font>
-
-<p>
-<table border=0 cellspacing=2 cellpadding=2>
-
-<_3clist
-  name="<b>Q</b>"
-  pos=6
-  description="<i><b>How much of a speed-up should I expect?</b></i>"
->
-<_3clist
-  name="<b>A</b>"
-  pos=6
-  description="It all depends on what your program spends its time doing.
+<p>It all depends on what your program spends its time doing.
    Programs that use mainly integer calculations, don't call
    run-time routines very often, and don't do much I/O will
    see the greatest improvement, currently up to about 5x faster.
-   Other programs may see only a few percent improvement.
+   Other programs may see only a few percent improvement.</p>
  <p>
    The various C compilers are not equal in optimization ability.
    Watcom, GNU C and DJGPP produce the fastest code. Borland is fairly good. 
-   Lcc lags slightly behind the others, even when its -O flag is used.
+   Lcc lags slightly behind the others, even when its -O flag is used.</p>
  <p>
-   Borland compiles the fastest. Watcom compiles the slowest."
->
-</table>
-<p>
-
-<table border=0 cellspacing=2 cellpadding=2>
-<_3clist
-  name="<b>Q</b>"
-  pos=6
-  description="<i><b>What if I want to change the compile or link options
-   in emake.bat?</b></i>"
->
-<_3clist
-  name="<b>A</b>"
-  pos=6
-  description="Feel free to do so, however you should copy
-   <font color=\"#5500FF\"><b>emake.bat</b></font> to your own
+   Borland compiles the fastest. Watcom compiles the slowest.</p>
+   
+<h3>What if I want to change the compile or link options
+   in emake.bat?</h3>
+   
+<p>Feel free to do so, however you should copy
+   <font color="#5500FF"><b>emake.bat</b></font> to your own
    file called (say) mymake.bat, then run mymake.bat after running the 
    Translator. Occasionally the number of .c files produced by the 
-   Translator could change."
->
-</table>
-<p>
+   Translator could change.</p>
 
-<table border=0 cellspacing=2 cellpadding=2>
-<_3clist
-  name="<b>Q</b>"
-  pos=6
-  description="<i><b>How can I make my program run even faster?</i></b>"
->
-<_3clist
-  name="<b>A</b>"
-  pos=6
-  description="It's important to declare variables as integer where possible.
+<h3>How can I make my program run even faster?</h3>
+
+<p>It's important to declare variables as integer where possible.
    In general, it helps if you choose the most restrictive type possible
-   when declaring a variable.
+   when declaring a variable.</p>
    <p>
    Typical user-defined types will not slow you down. Since your program
    is supposed to be free of type_check errors, types are ignored by 
@@ -811,16 +530,16 @@ the values in the Euphoria routine into the desired 32-bit atom.
    function calls. The one exception is when a 
    user-defined type routine has side-effects (i.e. it sets a global variable,
    performs pokes into memory, I/O etc.). In that case, if
-   <font color=\"#993333\"><b>with type_check</b></font> is in effect, the
+   <font color="#993333"><b>with type_check</b></font> is in effect, the
    Translator will issue code to
-   call the type routine and report any type_check failure that results.
+   call the type routine and report any type_check failure that results.</p>
    <p>
    On Windows and DOS we have left out the /ol loop optimization
    for Watcom's wcc386. We found in a couple of rare cases that this option
    led to incorrect machine code being emitted by the Watcom C compiler.
    If you add it back in to your own version of <b>emake.bat</b> you might
    get a slight improvement in speed, with a slight risk of buggy code.
-   For DJGPP you might try -O6 instead of -O2.
+   For DJGPP you might try -O6 instead of -O2.</p>
    <p>
    For DOS we use the Watcom /fpc option which generates calls to run-time
    routines to perform floating-point operations. If the machine has
@@ -829,53 +548,34 @@ the values in the Euphoria routine into the desired 32-bit atom.
    and isn't needed on Pentiums, but it guarantees that your program 
    will run on all 386 and 486 machines, even if they lack floating-point 
    hardware. The DOS run-time library,
-   <font color=\"#5500FF\"><b>ec.lib</b></font>, was built this way, so 
-   you can't simply remove this option. 
+   <font color="#5500FF"><b>ec.lib</b></font>, was built this way, so 
+   you can't simply remove this option. </p>
    <p>
    On Linux or FreeBSD you could try the O3 option of gcc instead of O2. 
-   It will 
-   \"in-line\" small routines, improving speed slightly, but creating a 
+   It will "in-line" small routines, improving speed slightly, but creating a 
    larger executable. You could also try the 
     <a href=http://www.intel.com/cd/software/products/asmo-na/eng/compilers/clin/index.htm>
     Intel C++ Compiler for Linux</a>. It's compatible with GNU C, but 
-    some adjustments to <b>emake</b> might be required."
->
-</table>
+    some adjustments to <b>emake</b> might be required.</p>
 
-<p>
-<a name="common"></a>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-
-<_dul>10. Common Problems</_dul>
-
-</font>
-</font>
+<h2><a name="common"></a>Common Problems</h2>
 
  <p>
  Many large programs have been successfully translated and compiled using
  each of the supported C compilers, and the Translator is now quite
- stable.
+ stable.</p>
 
- <p>
- <font color="#008080"><b>Note:</b></font>
-
-<table border=0 cellspacing=2 cellpadding=2>
-<_4clist
-  col3=""
-  name=""
-  pos=7
-  description="On Windows, if you call a C routine that uses
+ <h3>Note:</h3>
+ 
+<p>On Windows, if you call a C routine that uses
   the cdecl calling convention (instead of stdcall), you must 
   specify a '+' character at the start of the routine's name in
-  <font color=\"#006699\"><b>define_c_proc()</b></font> and
-  <font color=\"#006699\"><b>define_c_func()</b></font>. 
+  <font color="#006699"><b>define_c_proc()</b></font> and
+  <font color="#006699"><b>define_c_func()</b></font>. 
   If you don't, the call may work when running the
-  <font color=\"#993333\"><b>exw</b></font> Interpreter, but will probably
-  fail (crash) when you translate and compile with Borland or Lcc."
->
-</table>
-
+  <font color="#993333"><b>exw</b></font> Interpreter, but will probably
+  fail (crash) when you translate and compile with Borland or Lcc.</p>
+  
  <p>
  In some cases a huge Euphoria routine is translated to C, and it proves 
  to be too large for the C compiler to process. If you run into this problem, 
@@ -887,16 +587,12 @@ the values in the Euphoria routine into the desired 32-bit atom.
  has no limits on the size of a routine, or the size of a file, but most 
  C compilers do. The Translator will automatically produce multiple small 
  .c files from a large Euphoria file to avoid stressing the C compiler. 
- It won't however, break a large routine into smaller routines.
+ It won't however, break a large routine into smaller routines.</p>
   
  <p>
- Post bug reports on EUforum.<br>
+ Post bug reports on EUforum.</p>
+ <p>
  In particular, report any program that does not run
- the same when compiled as it does when interpreted.
+ the same when compiled as it does when interpreted.</p>
  
-<p>&nbsp;
-
-</_width>
-</body>
-</html>
-
+</doc>

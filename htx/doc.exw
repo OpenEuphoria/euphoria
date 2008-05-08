@@ -17,6 +17,10 @@ constant files = {
      "install.htx"
     ,"overview.htx"
     ,"bind.htx"
+    ,"c.htx"
+    ,"cgi.htx"
+    ,"database.htx"
+    ,"e2c.htx"
 }
 
 include stack.e as stk

@@ -1,19 +1,8 @@
-<_init_comment>
-<html>
-<head><title>Euphoria Database System</title>
-<_css>
-</head>
-<body>
-<_width>
-<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
-<br>
-	                  Euphoria Database System (EDS)
-</font></_center>
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul> Introduction </_dul> 
-</font>
+<doc title="Euphoria Database System">
+
+<h1>Euphoria Database System (EDS)</h1>
+
+<h2>Introduction </h2> 
 
  <p>
  Many people have expressed an interest in accessing databases using 
@@ -22,13 +11,10 @@
  wanted a simple, easy-to-use, Euphoria-oriented database for storing data. 
  EDS is the latter. <font color="#006633"><b>It provides a simple,
  extremely flexible, database system 
- for use by Euphoria programs.</b></font>
+ for use by Euphoria programs.</b></font></p>
  
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Structure of an EDS database</_dul>
-</font> 
+<h2>Structure of an EDS database</h2>
+
  <p>
  In EDS, a <font color="#993333"><b>database</b></font> is a single file
  with <_bq>.edb</_bq> file type.
@@ -44,7 +30,7 @@
  There are <font color="#CC0099"><b>no</b></font> constraints on the 
  size or structure of the key or data. Within a given table, the keys 
  are all unique. That is, no two records in the same table can have 
- the same key part.
+ the same key part.</p>
  
  <p>
  The records of a table are stored in ascending order of key value.
@@ -55,13 +41,13 @@
  integers from 1 to the length (current number of records) of the table. 
  By incrementing the record number, you can efficiently step through all 
  the records, in order of key. Note however that a record's number can 
- change whenever a new record is inserted, or an existing record is deleted.
+ change whenever a new record is inserted, or an existing record is deleted.</p>
  
  <p>
  The keys and data parts are stored in a compact form, but
  <font color="#CC0099"><b>no</b></font> accuracy is 
  lost when saving or restoring floating-point numbers or
- <font color="#CC0099"><b>any</b></font> other Euphoria data.
+ <font color="#CC0099"><b>any</b></font> other Euphoria data.</p>
  
  <p>
  <font color="#5500FF"><b>database.e</b></font> will work as is,
@@ -73,7 +59,7 @@
  between programs running on Linux/FreeBSD and DOS/Windows.</b></font>
  Be sure to make an exact byte for byte copy 
  using "binary" mode copying, rather than "text" or "ASCII" mode which
- could change the line terminators.
+ could change the line terminators.</p>
  
 <_eucode> 
  Example:
@@ -88,25 +74,23 @@
                record #3:  key: 134530    data: {"screw driver", 5.50, 1500}
         
 </_eucode>
+
+<p>
  It's up to you to interpret the meaning of the key and data.
  <font color="#006633"><b>In keeping with the spirit of Euphoria, you have
  total flexibility.</b></font> 
  Unlike most other database systems, an EDS record is
  <font color="#CC0099"><_ba><i>not</i></_ba></font> required to 
- have either a fixed number of fields, or fields with a preset maximum length.
+ have either a fixed number of fields, or fields with a preset maximum length.</p>
  
  <p>
  In many cases there will not be any natural key value for your records.
  In those cases you should simply create a meaningless, but unique, 
  integer to be the key. Remember that you can always access the data 
  by record number. It's easy to loop through the records looking for 
- a particular field value.
+ a particular field value.</p>
 
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>How to access the data</_dul>
-</font> 
+<h2>How to access the data</h2>
 
  <p>
  To reduce the number of parameters that you have to pass,
@@ -114,7 +98,7 @@
  and <font color="#993333"><b>current table</b></font>.
  Most routines use these <_bq>current</_bq> values automatically.
  You normally start by opening (or creating) a database file, then
- selecting the table that you want to work with.
+ selecting the table that you want to work with.</p>
  
  <p>
  You can map a key to a record number using
@@ -123,13 +107,9 @@
  expect the record number as an argument. You can very quickly access 
  any record, given it's number. You can access all the records by 
  starting at record number 1 and looping through to the record number 
- returned by <a href="database.htm#table_size"><b>db_table_size()</b></a>.
+ returned by <a href="database.htm#table_size"><b>db_table_size()</b></a>.</p>
  
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>How does storage get recycled?</_dul>
-</font> 
+<h2>How does storage get recycled?</h2>
 
 <p>
  When you delete something, such as a record, the space for that item
@@ -138,58 +118,45 @@
  suitable space is found on the free list, the file will grow in size.
  Currently there is no automatic way that a file will shrink in size, 
  but you can use <a href="database.htm#compress"><b>db_compress()</b></a> to
- completely rewrite a database, removing the unused spaces.
+ completely rewrite a database, removing the unused spaces.</p>
 
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Security / Multi-user Access</_dul>
-</font> 
+<h2>Security / Multi-user Access</h2>
 
 <p>
  This release provides a simple way to lock an entire database to prevent
- unsafe access by other processes.
+ unsafe access by other processes.</p>
 
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Scalability</_dul>
-</font> 
+<h2>Scalability</h2>
 
 <p>
  Internal pointers are 4 bytes. In theory that limits the size of a 
  database file to 4 Gb. In practice, the limit is 2 Gb because of
  limitations in various C file functions used by Euphoria.
  Given enough user demand, EDS databases could be expanded well beyond
- 2 Gb in the future.
+ 2 Gb in the future.</p>
  
 <p> 
  The current algorithm allocates 4 bytes of memory per record in the 
  current table. So you'll need at least 4Mb RAM per million records
- on disk.
+ on disk.</p>
+ 
 <p> 
- The binary search for keys should work reasonably well for large tables. 
+ The binary search for keys should work reasonably well for large tables. </p>
+ 
 <p> 
- Inserts and deletes take slightly longer as a table gets larger. 
+ Inserts and deletes take slightly longer as a table gets larger. </p>
+ 
 <p> 
  At the low end of the scale, it's possible to create extremely small
- databases without incurring much disk space overhead.
+ databases without incurring much disk space overhead.</p>
 
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Disclaimer</_dul>
-</font> 
+<h2>Disclaimer</h2>
 
  <p>
  Do not store valuable data without a backup. 
- RDS will not be responsible for any damage or data loss.
+ RDS will not be responsible for any damage or data loss.</p>
 
-<p>
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Warning</_dul>
-</font> 
+<h2>Warning</h2>
 
  <p>
  .edb files are binary files, not text files. 
@@ -200,13 +167,6 @@
  which is not recommended, you must use binary mode, not text mode. 
  Failure to follow these rules could result in 10 (line-feed) 
  and 13 (carriage-return) bytes being changed, leading to subtle 
- and not-so-subtle forms of corruption in your database.
+ and not-so-subtle forms of corruption in your database.</p>
  
-<p>
-<hr>
-
-<p>&nbsp;
-
-</_width>
-</body>
-</html>
+</doc>
