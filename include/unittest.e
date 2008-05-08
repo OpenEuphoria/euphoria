@@ -106,7 +106,7 @@ end procedure
 global procedure test_true(sequence name, object a)
 	testCount += 1
 
-    if a = 1 then
+    if equal(a,1) then
 	    test_passed(name)
     else
 	    test_failed(name, a, 1)
@@ -116,7 +116,7 @@ end procedure
 global procedure test_false(sequence name, object a)
     testCount += 1
 
-    if a = 0 then
+    if equal(a,0) then
         test_passed(name)
     else
         test_failed(name, a, 0)
