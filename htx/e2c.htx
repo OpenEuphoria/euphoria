@@ -17,6 +17,7 @@
 <h2>1. Introduction</h2>
 
  <p><font color="#006633"><b>The Euphoria to C Translator will translate any Euphoria program into equivalent C source code.</b></font></p>
+ 
  <p>There are versions of the translator for <font color="#CC3366"><b>Windows</b></font>, <font color="#CC3366"><b>DOS</b></font>, <font color="#CC3366"><b>Linux</b></font> and <font color="#CC3366"><b>FreeBSD</b></font>. After translating a Euphoria program to C, you can compile and link using one of the supported C compilers. This will give you an executable file that will typically run much faster than if you used the Euphoria interpreter.</p>
  
  <p>The translator can translate/compile *itself* into an executable file for each platform. The translator is also used in translating/compiling the front-end portion of the interpreter. The source code for the Translator is in <path>euphoria\source</path>. It's written 100% in Euphoria.</p>
@@ -77,10 +78,8 @@
 
 <p>but instead of running the allsorts.ex program, the <font color="#0066CC"><b>Translator</b></font> will create several C source files. Anyone can run the <font color="#0066CC"><b>Translator</b></font>. It's included in euphoria\bin along with the interpreter. To compile and link the C files, you need to install one of the supported C compilers. The <font color="#0066CC"><b>Translator</b></font> creates a batch file called <font color="#5500FF"><b>emake.bat</b></font>  that does all the compiling and linking steps for you, so you don't actually have to know anything about C or C compilers. Just type:</p>
  
-<pre>
-       <b>emake</b>
-</pre>
- 
+<console>emake</console>
+
 <p>When the C compiling and linking is finished, you will have a file called:</p>
  
 <p><b>allsorts.exe</b></p>
@@ -101,198 +100,85 @@
   
 <h3>Note to Borland and Lcc users:</h3>
 
-<p>For Borland and Lcc there is no standard environment variable, 
-  so the <font color="#0066CC"><b>Translator</b></font> will search your
-  <b>PATH</b> variable looking for a likely
-  compiler directory. It looks in standard places such as:
-  ..\LCC, ..\BCC.., ..\Borland.. etc. If you've installed in a nonstandard
-  place you might have to rename your installation directory. To edit
-  your PATH variable on Windows XP, click: Start Menu /
-     Control Panel / Performance and Maintenance / System /
-     Advanced / Environment Variables / User variables for ... 
-     Then Select PATH and edit its value. Insert somewhere: 
-     C:\BORLAND\BCC55\BIN; or C:\LCC\BIN; Then
-     click OK a couple of times to close the windows. The next DOS window
-     you open should have the new value."<p>
+<p>For Borland and Lcc there is no standard environment variable, so the <font color="#0066CC"><b>Translator</b></font> will search your <b>PATH</b> variable looking for a likely
+  compiler directory. It looks in standard places such as: ..\LCC, ..\BCC.., ..\Borland.. etc. If you've installed in a nonstandard place you might have to rename your installation directory. To edit your PATH variable on Windows XP, click: Start Menu / Control Panel / Performance and Maintenance / System / Advanced / Environment Variables / User variables for ... Then Select PATH and edit its value. Insert somewhere: C:\BORLAND\BCC55\BIN; or C:\LCC\BIN; Then click OK a couple of times to close the windows. The next DOS window you open should have the new value.<p>
      
 <h2>Command-Line Options</h2>
- <p>
- If you happen to have more than one C compiler for a given platform,
- you can select the one you want to use with a command-line option:</p>
+
+<p>If you happen to have more than one C compiler for a given platform, you can select the one you want to use with a command-line option:</p>
  
-<console>-bor</console>
-<console>-lcc</console>
-<console>-wat</console>
-<console>-djg</console>
+	<console>-bor</console>
+	<console>-lcc</console>
+	<console>-wat</console>
+	<console>-djg</console>
 	
-<p> on the command line to <font color="#993333"><b>ec</b></font> or
- <font color="#993333"><b>ecw</b></font>. e.g.</p>
+<p>on the command line to <font color="#993333"><b>ec</b></font> or <font color="#993333"><b>ecw</b></font>. e.g.</p>
  
-      <console>ecw -bor pretend.exw</console>
+	<console>ecw -bor pretend.exw</console>
 
- <p>
- Normally, after building your .exe file, the <b>emake</b> batch file will delete
- all C files and object files produced by the Translator. If you want
- <b>emake</b> to keep these files, add the <b>-keep</b> option to the
- Translator command-line. e.g.</p>
+<p>Normally, after building your .exe file, the <b>emake</b> batch file will delete all C files and object files produced by the Translator. If you want <b>emake</b> to keep these files, add the <b>-keep</b> option to the Translator command-line. e.g.</p>
  
-<console>ec -wat -keep sanity.ex</console>
+	<console>ec -wat -keep sanity.ex</console>
 
- <p>
- To make a <font color="#CC3366"><b>Windows</b></font> .dll file, or
- <font color="#CC3366"><b>Linux</b></font> or
- <font color="#CC3366"><b>FreeBSD</b></font> .so file, just add <_bq>-dll</_bq>
- to the command line. e.g.</p>
+<p>To make a <font color="#CC3366"><b>Windows</b></font> .dll file, or <font color="#CC3366"><b>Linux</b></font> or <font color="#CC3366"><b>FreeBSD</b></font> .so file, just add <_bq>-dll</_bq> to the command line. e.g.</p>
  
-<console>ecw -bor -dll mylib.ew</console>
+	<console>ecw -bor -dll mylib.ew</console>
 
-<p> To make a <font color="#CC3366"><b>Windows</b></font> <b>console</b> program
- instead of a Windows GUI program, add <_bq>-con</_bq> to the command line. 
- e.g.</p>
+<p>To make a <font color="#CC3366"><b>Windows</b></font> <b>console</b> program instead of a Windows GUI program, add <_bq>-con</_bq> to the command line. e.g.</p>
 
- <console>ecw -bor -con myprog.exw</console>
+	<console>ecw -bor -con myprog.exw</console>
  
-<p> To increase or decrease the total amount of stack space 
- reserved for your program, add <_bq>-stack nnnn</_bq> to 
- the command line. e.g.</p>
+<p>To increase or decrease the total amount of stack space reserved for your program, add <_bq>-stack nnnn</_bq> to the command line. e.g.</p>
 
- <console>ec -stack 100000 myprog.ex</console>
+	<console>ec -stack 100000 myprog.ex</console>
  
-<p> The total stack space (in bytes) that you specify will be divided 
- up among all the 
- tasks that you have running (assuming you have more than one).
- Each task has it's own private stack space. If it exceeds its
- allotment, you'll get a run-time error message identifying the task
- and giving the size of its stack space. Most non-recursive tasks
- can run with call stacks as small as 2000 bytes, but to be safe, you should
- allow more than this. A deeply-recursive task could use a great deal of space.
- It all depends on the maximum levels of calls that a task might need.
- At run-time, as your program creates more simultaneously-active tasks, 
- the stack space allotted to each task will tend to decrease.</p>
+<p>The total stack space (in bytes) that you specify will be divided up among all the tasks that you have running (assuming you have more than one). Each task has it's own private stack space. If it exceeds its allotment, you'll get a run-time error message identifying the task and giving the size of its stack space. Most non-recursive tasks can run with call stacks as small as 2000 bytes, but to be safe, you should allow more than this. A deeply-recursive task could use a great deal of space. It all depends on the maximum levels of calls that a task might need. At run-time, as your program creates more simultaneously-active tasks, the stack space allotted to each task will tend to decrease.</p>
 
- <p>
- When using LCC, sometimes the default optimization causes problems. You
- can disable this optimization by adding <_bq>-lccopt-off</_bq> to the
- command line.</p>
+<p>When using LCC, sometimes the default optimization causes problems. You can disable this optimization by adding <_bq>-lccopt-off</_bq> to the command line.</p>
  
-<console>ecw -lcc -lccopt-off myprog.exw</console>
+	<console>ecw -lcc -lccopt-off myprog.exw</console>
 
- <p>
- To make a <font color="#CC3366"><b>DOS</b></font> program, 
- compiled by WATCOM, that uses fast hardware floating-point instructions,
- add <_bq>-fastfp</_bq> to the command line. 
- e.g.</p>
-<console>ec -wat -fastfp crunch.ex</console>
+<p>To make a <font color="#CC3366"><b>DOS</b></font> program, compiled by WATCOM, that uses fast hardware floating-point instructions, add <_bq>-fastfp</_bq> to the command line. e.g.</p>
 
-<p> By default, Euphoria for DOS calls routines to test if 
- hardware floating-point instructions are available. If they are not, 
- then slower software emulation code is used.
- When <b>-fastfp</b> is specified, the compiled code will assume the existence
- of hardware floating-point. This can cause floating-point intensive
- programs to run about twice as fast, but they will fail to run at all
- on old 486's and 386's that are lacking hardware floating-point support.
- With <_bq>-fastfp</_bq>, emake.bat chooses faster WATCOM C compiler options,
- and emake.bat must also link in <b>ecfastfp.lib</b> instead
- of ec.lib.  </p>
- 
- <p>
- On all other platforms, Euphoria uses fast hardware floating-point instructions,
- and the operating system handles the case where hardware f.p. is missing.</p>
- 
- <p>
- To compile your program with debugging information, usable with a debugger
- compatible with your compiler, use the <b>-debug</b> option:</p>
- 
-<console>ecu -debug myapp.exu</console>
+	<console>ec -wat -fastfp crunch.ex</console>
 
- <p>
- It is sometimes useful to link your translated code to a Euphoria runtime 
- library other than the default supplied library.  This ability is probably
- mostly useful for testing and debugging the runtime library itself, or
- to give additional debugging information when debugging translated Euphoria
- code.  Note that only the default library is supplied.  The custom library 
- must be put into your EUDIR/bin directory along with the default library.
- Use the <b>-lib {library}</b> option:</p>
+<p>By default, Euphoria for DOS calls routines to test if hardware floating-point instructions are available. If they are not, then slower software emulation code is used. When <b>-fastfp</b> is specified, the compiled code will assume the existence of hardware floating-point. This can cause floating-point intensive programs to run about twice as fast, but they will fail to run at all on old 486's and 386's that are lacking hardware floating-point support. With <_bq>-fastfp</_bq>, emake.bat chooses faster WATCOM C compiler options, and emake.bat must also link in <b>ecfastfp.lib</b> instead of ec.lib.</p>
  
-<console>ecu -lib decu.a myapp.exu</console>
+<p>On all other platforms, Euphoria uses fast hardware floating-point instructions, and the operating system handles the case where hardware f.p. is missing.</p>
+ 
+<p>To compile your program with debugging information, usable with a debugger compatible with your compiler, use the <b>-debug</b> option:</p>
+ 
+	<console>ecu -debug myapp.exu</console>
+
+<p>It is sometimes useful to link your translated code to a Euphoria runtime library other than the default supplied library.  This ability is probably mostly useful for testing and debugging the runtime library itself, or to give additional debugging information when debugging translated Euphoria code.  Note that only the default library is supplied.  The custom library must be put into your EUDIR/bin directory along with the default library. Use the <b>-lib {library}</b> option:</p>
+ 
+	<console>ecu -lib decu.a myapp.exu</console>
  
 <h2>Dynamic Link Libraries (Shared Libraries)</h2>
 
-<p>
-Simply by adding <_bq>-dll</_bq> to the command line,
-the <font color="#0066CC"><b>Translator</b></font>
-will build a <font color="#CC3366"><b>Windows</b></font> .dll
-(<font color="#CC3366"><b>Linux</b></font>/<font color="#CC3366"><b>FreeBSD</b>
-</font> .so) file instead of an executable program. </p>
+<p>Simply by adding <_bq>-dll</_bq> to the command line, the <font color="#0066CC"><b>Translator</b></font> will build a <font color="#CC3366"><b>Windows</b></font> .dll (<font color="#CC3366"><b>Linux</b></font>/<font color="#CC3366"><b>FreeBSD</b> </font> .so) file instead of an executable program.</p>
 
-<p>
-You can translate and compile a set of useful Euphoria
-routines, and share them with other people, without giving
-them your source. Furthermore, your routines will likely
-run much faster when translated and compiled. Both
-translated/compiled and interpreted programs will be able to
-use your library.</p>
+<p>You can translate and compile a set of useful Euphoria routines, and share them with other people, without giving them your source. Furthermore, your routines will likely run much faster when translated and compiled. Both translated/compiled and interpreted programs will be able to use your library.</p>
 
-<p>
-Only the global Euphoria procedures and functions,
-i.e. those declared with the "global" keyword, will be
-exported from the .dll (.so).</p>
+<p>Only the global Euphoria procedures and functions, i.e. those declared with the "global" keyword, will be exported from the .dll (.so).</p>
 
-<p>
-Any Euphoria program, whether translated/compiled or interpreted, 
-can link with a Euphoria .dll (.so) using the same mechanism that
-lets you link with a .dll (.so) written in C. The program
-first calls <font color="#006699"><b>open_dll()</b></font> to open the .dll
-or .so file, then it calls <font color="#006699"><b>define_c_func()</b></font>
-or <font color="#006699"><b>define_c_proc()</b></font> for any routines
-that it wants to call. It calls these routines using
-<font color="#006699"><b>c_func()</b></font> and
-<font color="#006699"><b>c_proc()</b></font>. See
-<a class="blue" href="library.htm#call_c_func"><b>library.doc</b></a> for
-the details.</p>
+<p>Any Euphoria program, whether translated/compiled or interpreted, can link with a Euphoria .dll (.so) using the same mechanism that lets you link with a .dll (.so) written in C. The program first calls <font color="#006699"><b>open_dll()</b></font> to open the .dll or .so file, then it calls <font color="#006699"><b>define_c_func()</b></font> or <font color="#006699"><b>define_c_proc()</b></font> for any routines that it wants to call. It calls these routines using <font color="#006699"><b>c_func()</b></font> and <font color="#006699"><b>c_proc()</b></font>. See <a class="blue" href="library.htm#call_c_func"><b>library.doc</b></a> for the details.</p>
 
-<p>
-The routine names exported from a Euphoria .dll will vary depending
-on which C compiler you use. </p>
+<p>The routine names exported from a Euphoria .dll will vary depending on which C compiler you use.</p>
 
-<p>
-GNU C on Linux or FreeBSD exports the names exactly as they appear in the C
-code produced by the <font color="#0066CC"><b>Translator</b></font>, e.g. a
-Euphoria routine </p>
+<p>GNU C on Linux or FreeBSD exports the names exactly as they appear in the C code produced by the <font color="#0066CC"><b>Translator</b></font>, e.g. a Euphoria routine</p>
 
-<console>global procedure foo(integer x, integer y)</console>
+	<console>global procedure foo(integer x, integer y)</console>
 
-<p>would be exported as "_0foo" or maybe "_1foo" etc. 
-The underscore and digit are added to prevent naming conflicts.
-The digit refers to the Euphoria file where the symbol is defined.
-The main file is numbered as 0. The include files are numbered 
-in the order they are encountered by the compiler. You should 
-check the C source to be sure.</p>
-<p>
-Lcc would export foo() as "__0foo@8", where 8 is 
-the number of parameters (2) times 4. You can check the .def file
-created by the <font color="#0066CC"><b>Translator</b></font> to see
-all the exported names.</p>
+<p>would be exported as "_0foo" or maybe "_1foo" etc. The underscore and digit are added to prevent naming conflicts. The digit refers to the Euphoria file where the symbol is defined. The main file is numbered as 0. The include files are numbered in the order they are encountered by the compiler. You should check the C source to be sure.</p>
 
-<p>
-For Borland the <font color="#0066CC"><b>Translator</b></font> also creates
-a .def file, but this 
-.def file renames the exported symbols back into the same names 
-that you used in your Euphoria source, so
-foo() would be exported as "foo". </p>
-<p>
-For Watcom the same renaming as with Borland occurs, but instead of a 
-.def file, an EXPORT command is added to
-<font color="#5500FF"><b>objfiles.lnk</b></font> for each 
-exported symbol. </p>
+<p>Lcc would export foo() as "__0foo@8", where 8 is the number of parameters (2) times 4. You can check the .def file created by the <font color="#0066CC"><b>Translator</b></font> to see all the exported names.</p>
 
-<p>
-With Borland and Watcom you can edit the .def 
-or <font color="#5500FF"><b>objfiles.lnk</b></font> file, and rerun
-<font color="#5500FF"><b>emake.bat</b></font>, 
-to rename the exported symbols, or remove 
-ones that you don't want to export. With Lcc you can
-remove symbols but you can't rename them.</p>
+<p>For Borland the <font color="#0066CC"><b>Translator</b></font> also creates a .def file, but this .def file renames the exported symbols back into the same names that you used in your Euphoria source, so foo() would be exported as "foo". </p>
+
+<p>For Watcom the same renaming as with Borland occurs, but instead of a .def file, an EXPORT command is added to <font color="#5500FF"><b>objfiles.lnk</b></font> for each exported symbol.</p>
+
+<p>With Borland and Watcom you can edit the .def or <font color="#5500FF"><b>objfiles.lnk</b></font> file, and rerun <font color="#5500FF"><b>emake.bat</b></font>, to rename the exported symbols, or remove ones that you don't want to export. With Lcc you can remove symbols but you can't rename them.</p>
 
 <p>
 Having nice exported names is not critical, since
