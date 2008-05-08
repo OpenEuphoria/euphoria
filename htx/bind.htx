@@ -6,25 +6,40 @@
 
 <h4>Synopsis</h4>
 
-<p class="command">shroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]</p>
+<console>shroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]</console>
 
-<p>The <span class="scommand">shroud</span> command converts a Euphoria program, typically consisting of a main file plus many include files, into a single, compact file. A single file is not only convenient, it allows you to give people your program to use, without giving them your source code.</p>
+<p>The <program>shroud</program> command converts a Euphoria program, typically consisting of a main 
+file plus many include files, into a single, compact file. A single file is not only convenient, 
+it allows you to give people your program to use, without giving them your source code.</p>
  
-<p>A shrouded file does not contain any Euphoria source code statements. Rather, it contains a low-level intermediate language (IL) that is executed by the back-end of the interpreter. A shrouded file does not require any parsing. It starts running immediately, and with large programs you will see a quicker start-up time. Shrouded files must be run using the interpreter back-end: backend.exe (<span class="platform">DOS</span>), backendw.exe (<span class="platform">Windows</span>) or backendu (<span class="platform">Linux/FreeBSD</span>). This backend is freely available, and you can give it to any of your users who need it. It's stored in <path>euphoria\bin</path> in the Euphoria interpreter package. On <span class="platform">DOS</span> you can run your .il file with:</p>
+<p>A shrouded file does not contain any Euphoria source code statements. Rather, it contains a 
+low-level intermediate language (IL) that is executed by the back-end of the interpreter. A 
+shrouded file does not require any parsing. It starts running immediately, and with large programs 
+you will see a quicker start-up time. Shrouded files must be run using the interpreter back-end: 
+<program>backend.exe</program> (<platform>DOS</platform>), <program>backendw.exe</program> 
+(<platform>Windows</platform>) or <program>backendu</program> (<platform>Linux/FreeBSD</platform>). 
+This backend is freely available, and you can give it to any of your users who need it. It's stored 
+in <path>euphoria\bin</path> in the Euphoria interpreter package. On <platform>DOS</platform> you can 
+run your .il file with:</p>
 
-<p class="command">backend myprog.il</p>
+<console>backend myprog.il</console>
  
- <p>On Windows use:</p>
+ <p>On <platform>Windows</platform> use:</p>
 
- <p class="command">backendw myprog.il</p>
+ <console>backendw myprog.il</console>
  
- <p>On Linux or FreeBSD use:</p>
+ <p>On <platform>Linux</platform> or <platform>FreeBSD</platform> use:</p>
 
-  <p class="command">backendu myprog.il</p>
+  <console>backendu myprog.il</console>
  
-<p>Although it does not contain any source statements, a .il file will generate a useful ex.err dump in case of a run-time error.</p>
+<p>Although it does not contain any source statements, a .il file will generate a useful 
+<path>ex.err</path> dump in case of a run-time error.</p>
  
-<p>The shrouder will remove any routines and variables that your program doesn't use. This will give you a smaller .il file. There are often a great number of unused routines and unused variables. For example your program might include several 3rd party include files, plus some standard files from euphoria\include, but only use a few items from each file. The unused items will be deleted.</p>
+<p>The shrouder will remove any routines and variables that your program doesn't use. 
+This will give you a smaller .il file. There are often a great number of unused routines 
+and unused variables. For example your program might include several 3rd party include 
+files, plus some standard files from <path>euphoria\include</path>, but only use a few 
+items from each file. The unused items will be deleted.</p>
 
 <p><font color="#006633"><b><i>options</i> can be:</b></font></p>
 
@@ -33,8 +48,14 @@
 <tr valign="top">
 	<td width=24></td>
 	<td width=150>-full_debug</td>
-	<td><p>Make a somewhat larger .il file that contains enough debug information to provide a full ex.err dump when a crash occurs.</p>
-	<p>Normally, variable names and line-number information is stripped out of the .il file, so the ex.err will simply have "no-name" where each variable name should be, and line numbers will only be accurate to the start of a routine or the start of a file. Only the private variable values are shown, not the global or local values. In addition to saving space, some people might prefer that the shrouded file, and any ex.err file, not expose as much information.</p></td>
+	<td><p>Make a somewhat larger .il file that contains enough debug information to 
+	provide a full <path>ex.err</path> dump when a crash occurs.</p>
+	<p>Normally, variable names and line-number information is stripped out of the .il file, 
+	so the <path>ex.err</path> will simply have "no-name" where each variable name should be, 
+	and line numbers will only be accurate to the start of a routine or the start of a file. 
+	Only the private variable values are shown, not the global or local values. In addition 
+	to saving space, some people might prefer that the shrouded file, and any <path>ex.err</path> 
+	file, not expose as much information.</p></td>
 </tr>
 
 <tr valign="top">
@@ -59,7 +80,10 @@
 
 <p>The Euphoria interpreter will not perform tracing on a shrouded file. You must trace your original source.</p>
 
-<p>On Linux/FreeBSD, the shrouder will make your shrouded file executable, and will add a #! line at the top, that will run backendu. You can override this #! line by specifying your own #! line at the top of your main Euphoria file.</p>
+<p>On <platform>Linux</platform>/<platform>FreeBSD</platform>, the shrouder will make your shrouded 
+file executable, and will add a <code>#!</code> line at the top, that will run <program>backendu.</program>
+You can override this <code>#!</code> line by specifying your own <code>#!</code> line at the top of your main 
+Euphoria file.</p>
 
 <p>Always keep a copy of your original source. There's no way to recover it from a shrouded file.</p>
 
@@ -67,72 +91,108 @@
 
 <h4>Synopsis:</h4>
 
-<p class="command">
-	bind  [-full_debug] [-list] [-quiet] [-out executable_file] [filename.ex]<br></br>
-	bindu [-full_debug] [-list] [-quiet] [-out executable_file] [filename.exu]<br></br>
-	bindw [-full_debug] [-list] [-quiet] [-out executable_file] [-con] [-icon filename.ico] [filename.exw]
-</p>
+<console>
+bind  [-full_debug] [-list] [-quiet] [-out executable_file] [filename.ex]
+bindu [-full_debug] [-list] [-quiet] [-out executable_file] [filename.exu]
+bindw [-full_debug] [-list] [-quiet] [-out executable_file] [-con] [-icon filename.ico] [filename.exw]
+</console>
 
 <p>
- <b>bind</b> (<b>bindw</b> or <b>bindu</b>) does the same thing as <b>shroud</b>, and includes the same options. It then combines your shrouded .il file with the interpreter backend (backend.exe, backendw.exe or backendu) to make a <font color="#CC0099"><b>single, stand-alone executable</b></font> file that you can conveniently use and distribute. Your users need not have Euphoria installed. Each time your executable file is run, a quick integrity check is performed to detect any tampering or corruption. Your program will start up very quickly since no parsing is needed.</p>
+<program>bind</program> (<program>bindw</program> or <program>bindu</program>) does the same thing 
+as <program>shroud</program>, and includes the same options. It then combines your shrouded .il file 
+with the interpreter backend (<program>backend.exe</program>, <program>backendw.exe</program> or 
+<program>backendu</program>) to make a <b>single, stand-alone executable</b> 
+file that you can conveniently use and distribute. Your users need not have Euphoria installed. 
+Each time your executable file is run, a quick integrity check is performed to detect any 
+tampering or corruption. Your program will start up very quickly since no parsing is needed.</p>
 
-<p>The Euphoria interpreter will not perform tracing on a bound file since the source statements are not there.</p>
+<p>The Euphoria interpreter will not perform tracing on a bound file since the source statements 
+are not there.</p>
 
-<p><font color="#006633"><b><i>options</i> can be:</b></font></p>
+<h4>options can be:</h4>
 
 <table border=0 cellspacing=2 cellpadding=2>
 
 <tr valign="top">
 	<td></td>
 	<td width=150>-full_debug</td>
-	<td>Same as <b>shroud</b> above. If Euphoria detects an error, your executable will generate either a partial, or a full, ex.err dump, according to this option.</td>
+	<td>Same as <program>shroud</program> above. If Euphoria detects an error, your 
+	executable will generate either a partial, or a full, <path>ex.err</path> dump, according 
+	to this option.</td>
 </tr>
 
 <tr valign="top">
 	<td width=24></td>
 	<td width=150>-list</td>
-	<td>Same as <b>shroud</b> above.</td>
+	<td>Same as <program>shroud</program> above.</td>
 </tr>
 
 <tr valign="top">
 	<td width=24></td>
 	<td width=150>-quiet</td>
-	<td>Same as <b>shroud</b> above.</td>
+	<td>Same as <program>shroud</program> above.</td>
 </tr>
 
 <tr valign="top">
 	<td width=24></td>
 	<td width=150>-out <i>executable_file</i></td>
-	<td>This option lets you choose the name of the executable file created by the binder. Without this option, bind will choose a name based on the name of the main Euphoria source file.</td>
+	<td>This option lets you choose the name of the executable file created by the binder. 
+	Without this option, <program>bind</program> will choose a name based on the name of 
+	the main Euphoria source file.</td>
 </tr>
 
 <tr valign="top">
 	<td width=24></td>
 	<td width=150>-con</td>
-	<td><b>(bindw only)</b> This option will create a Windows console program instead of a Windows GUI program. Console programs can access standard input and output,
-  and they work within the current console window, rather than popping up a new one.</td>
+	<td><b>(<program>bindw</program> only)</b> This option will create a <platform>Windows</platform> console 
+	program instead of a <platform>Windows GUI</platform> program. Console programs can access standard 
+	input and output, and they work within the current console window, rather than popping up a new one.</td>
 </tr>
 
 <tr valign="top">
 	<td width=24></td>
 	<td width=150>-icon <i>filename[.ico]</i></td>
-	<td><b>(bindw only)</b> When you bind a program, you can patch in your own customized icon, overwriting the one in <b>exw.exe</b>. <b>exw.exe</b> contains a 32x32 icon using 256 colors. It resembles an <b>E)</b> shape. Windows will display this shape beside exw.exe, and beside your bound program, in file listings. You can also   load this icon as a resource, using the name \"exw\" (see euphoria\demo\win32\window.exw for an example). When you bind your program, you can substitute your own 32x32 256-color icon file of size 2238 bytes or less. Other dimensions may also work as long as the file is 2238 bytes or less. The file must contain a single icon image (Windows will create a smaller or larger image as necessary). The default <b>E)</b> icon file, euphoria.ico, is included in the euphoria\bin directory.</td>
+	<td><b>(<program>bindw</program> only)</b> When you bind a program, you can patch in your own 
+	customized icon, overwriting the one in <program>exw.exe</program>. <program>exw.exe</program> 
+	contains a 32x32 icon using 256 colors. It resembles an <b>E)</b> shape. 
+	<platform>Windows</platform> will display this shape beside <program>exw.exe</program>, and 
+	beside your bound program, in file listings. You can also load this icon as a resource, 
+	using the name \"exw\" (see <path>euphoria\demo\win32\window.exw</path> for an example). When 
+	you bind your program, you can substitute your own 32x32 256-color icon file of size 2238 bytes 
+	or less. Other dimensions may also work as long as the file is 2238 bytes or less. The file 
+	must contain a single icon image (<platform>Windows</platform> will create a smaller or larger 
+	image as necessary). The default <b>E)</b> icon file, <path>euphoria.ico</path>, is included in 
+	the <path>euphoria\bin</path> directory.</td>
 </tr>
 	
 </table>
 
-<p>A one-line Euphoria program will result in an executable file as large as the back-end you are binding with, but the size increases very slowly as you add to your program. <font color="#006633"><b>When bound, the entire Euphoria editor, ed.ex, adds only 27K to the size of the back-end.</b></font> <b>backendw.exe</b> and <b>backendu</b> (Linux) are compressed using <a href=http://upx.sourceforge.net>UPX</a>). <b>backend.exe</b> is compressed using a tool that comes with the CauseWay DOS extender. <b>backend.exe</b> is the largest of the three since it includes a lot of pixel graphics routines, not part of <b>backendw.exe</b> or <b>backendu</b>. Note: In some very rare cases, a compressed executable may trigger a warning message from a virus scanner. This is simply because the executable file looks abnormal to the virus scanner.</p>
+<p>A one-line Euphoria program will result in an executable file as large as the back-end you are binding 
+with, but the size increases very slowly as you add to your program. <font color="#006633"><b>When bound, 
+the entire Euphoria editor, <path>ed.ex</path>, adds only 27K to the size of the back-end.</b></font> 
+<program>backendw.exe</program> and <program>backendu</program> (<platform>Linux</platform>) are compressed 
+using <a href=http://upx.sourceforge.net>UPX</a>). <program>backend.exe</program> is compressed using a 
+tool that comes with the CauseWay DOS extender. <program>backend.exe</program> is the largest of the three 
+since it includes a lot of pixel graphics routines, not part of <program>backendw.exe</program> or 
+<program>backendu</program>. Note: In some very rare cases, a compressed executable may trigger a 
+warning message from a virus scanner. This is simply because the executable file looks abnormal to the 
+virus scanner.</p>
 
-<p>The first two arguments returned by the <libfunc>command_line()</libfunc> library routine will be slightly different when your program is bound. See <a href="lib_os.htm#command_line">library.doc</a> for the details.</p>
+<p>The first two arguments returned by the <libfunc>command_line()</libfunc> library routine will be 
+slightly different when your program is bound. See <a href="lib_os.htm#command_line">library.doc</a> for 
+the details.</p>
 
-<p>A <b><font color="#993333">bound</font> executable</b> file <font color="#CC0099"><b><i>can</i></b></font> handle standard input and output redirection. e.g.</p>
+<p>A <b>bound executable</b> file <i>can</i> handle standard input and output redirection. e.g.</p>
 
-<p class="command">myprog.exe < file.in > file.out</p>
+<console>myprog.exe &lt; file.in &gt; file.out</console>
 
-<p>If you were to write a small DOS <b>.bat</b> file <_bq>myprog.bat</_bq> that contained the line "<b>ex myprog.ex</b>" you would <i>not</i> be able to redirect input and output in the following manner:</p>
+<p>If you were to write a small DOS <path>.bat</path> file <program>myprog.bat</program> that 
+contained the line "<program>ex myprog.ex</program>" you would <i>not</i> be able to redirect input 
+and output in the following manner does not work in <platform>DOS</platform>!</p>
 
-<p class="command">myprog.bat < file.in > file.out <font color="#FF0000">(doesn't work in DOS!)</font></p>
+<console>myprog.bat &lt; file.in &gt; file.out</console>
 
-<p>You <i>could</i> however use redirection on individual lines <i>within</i> the <b>.bat</b> file.</p>
+<p>You <i>could</i> however use redirection on individual lines <i>within</i> the <path>.bat</path> file.</p>
 
 </doc>
+

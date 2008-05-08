@@ -136,6 +136,22 @@ procedure tag_end_funcref(sequence raw_text, sequence plist)
     ediv()
 end procedure
 
+procedure tag_gpre(sequence raw_text, sequence plist)
+    write(sprintf("<pre class=\"%s\">", {trim(raw_text, "<>\\")}))
+end procedure
+
+procedure tag_end_gpre(sequence raw_text, sequence plist)
+    write("</pre>")
+end procedure
+
+procedure tag_gdiv(sequence raw_text, sequence plist)
+    sdiv(trim(raw_text, "<>\\"))
+end procedure
+
+procedure tag_end_gdiv(sequence raw_text, sequence plist)
+    ediv()
+end procedure
+
 procedure tag_gspan(sequence raw_text, sequence plist)
 -- being a generic span
     sspan(trim(raw_text, "<>\\"))
@@ -161,6 +177,8 @@ global procedure html_init()
     add_handler("/env",      routine_id("tag_end_gspan"))
     add_handler("program",   routine_id("tag_gspan"))
     add_handler("/program",  routine_id("tag_end_gspan"))
+    add_handler("console",   routine_id("tag_gpre"))
+    add_handler("/console",  routine_id("tag_end_gpre"))
     add_handler("gui",       routine_id("tag_gspan"))
     add_handler("/gui",      routine_id("tag_end_gspan"))
     
