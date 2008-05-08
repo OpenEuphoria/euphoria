@@ -291,7 +291,6 @@ procedure main(sequence in_name, sequence format, sequence dest)
 	out_name = app_dir & dest & SLASH & out_name
     end if
     
-    puts(1, "Opening '" & out_name & "' for writing...\n")
     out_file = open(out_name, "w")
     if out_file = -1 then
 	quit("couldn't open " & out_name & " for writing")

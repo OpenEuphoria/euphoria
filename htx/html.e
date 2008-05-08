@@ -32,8 +32,8 @@ include syncolor.e
 constant YEAR_DELIMITER = 90, SINCE_YEAR = 1900
 integer blank
 blank = FALSE
-sequence line, colorLine                -- both for <_eucode>... </_eucode>
-integer firstLine, in2clist, in3clist   -- both for <_eucode>... </_eucode>
+sequence line, colorLine -- <_eucode>... </_eucode>
+integer firstLine        -- <_eucode>... </_eucode>
 
 -- helper functions
 
@@ -59,7 +59,28 @@ end procedure
 
 procedure tag_default(object raw_text, object param_list)
 -- default handler - let most html pass through unchanged
-    write(raw_text)
+    if in_tag("eucode") then
+	line = line & raw_text
+	if raw_text = '\n' then
+	    if firstLine = TRUE then
+		firstLine = FALSE
+		write("<pre>")
+		if all_white(line) then
+		    line = ""
+		    return
+		end if
+	    end if
+	    colorLine = SyntaxColor(line)
+	    for i = 1 to length(colorLine) do
+		write(sprintf("<font color=\"#%06x\">%s</font>", {
+		    colorLine[i][1], colorLine[i][2]}))
+	    end for
+	    write("\n")
+	    line = ""
+	end if
+    else
+	write(raw_text)
+    end if
 end procedure
 
 procedure tag_eucode(sequence raw_text, sequence plist)
@@ -75,13 +96,11 @@ procedure tag_eucode(sequence raw_text, sequence plist)
     inEuCode = TRUE
     firstLine = TRUE
     line = ""
-    -- note: write("<pre>") must be delayed until just before actual first line
 end procedure
 
 procedure tag_end_eucode(sequence raw_text, sequence plist)
-    inEuCode = FALSE
-    blank = FALSE
     write("</pre>")
+    inEuCode = FALSE
 end procedure
 
 procedure tag_doc(sequence raw_text, sequence plist)
@@ -165,8 +184,8 @@ end procedure
 global procedure html_init()
 -- set up handlers for html output
     add_handler("_default",  routine_id("tag_default"))
-    add_handler("_eucode",   routine_id("tag_eucode"))
-    add_handler("/_eucode",  routine_id("tag_end_eucode"))
+    add_handler("eucode",    routine_id("tag_eucode"))
+    add_handler("/eucode",   routine_id("tag_end_eucode"))
     add_handler("doc",       routine_id("tag_doc"))
     add_handler("/doc",      routine_id("tag_end_doc"))
     add_handler("funcref",   routine_id("tag_funcref"))
