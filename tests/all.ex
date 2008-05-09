@@ -20,7 +20,6 @@ end if
 
 -- Tests
 include t_datetime.e
-include t_ctype.e
 include t_file.e
 include t_get.e
 include t_locale.e
@@ -32,6 +31,7 @@ include t_search.e
 include t_sequence.e
 include t_sort.e
 include t_stack.e
+include t_types.e
 include t_unicode.e
 include t_wildcard.e
 

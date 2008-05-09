@@ -5,8 +5,6 @@
 </head>
 <body>
 
-<_width>
-
 <a name=seq_manip></a>
 <font color="#FF0099" size=+1>
 <br>
@@ -15,6 +13,8 @@
 
 </font>
 <p>
+
+<h2>Built-in types</h2>
 
 <_routine name="atom">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -58,15 +58,7 @@ line = gets(0)
 if atom(line) then
     puts(SCREEN, "end of file\n")
 end if
-
 </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_type.htm#sequence\">sequence</a>,
-               <a href=\"lib_type.htm#object\">object</a>,
-               <a href=\"lib_type.htm#integer\">integer</a>,
-               <a href=\"refman_2.htm#1\">atoms and sequences</a>"
- >
 </table>
 
 <_routine name="integer">
@@ -111,12 +103,6 @@ if integer(y/x) then
 end if
 
  </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_type.htm#atom\">atom</a>,
-<a href=\"lib_type.htm#sequence\">sequence</a>,
-<a href=\"lib_math.htm#floor\">floor</a>"
- >
 </table>
 
 <_routine name="object">
@@ -150,12 +136,6 @@ end if
 ? object({1,2,3})  -- always prints 1
 
  </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_type.htm#integer\">integer</a>,
-<a href=\"lib_type.htm#atom\">atom</a>,
-<a href=\"lib_type.htm#sequence\">sequence</a>"
- >
 </table>
 
 
@@ -207,24 +187,48 @@ else
 end if
 
  </_eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_type.htm#atom\">atom</a>,
-               <a href=\"lib_type.htm#object\">object</a>,
-               <a href=\"lib_type.htm#integer\">integer</a>,
-               <a href=\"refman_2.htm#1\">atoms and sequences</a>"
- >
 </table>
 
 
+<h2>Types defined in types.e</h2>
 
-<_routine name="isalnum">
+<_routine name="bool">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = bool(a)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Test if a is a boolean type. Returns 1 if true or 0 if false."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"Global constants are define for assigning and checking boolean values: TRUE, FALSE, YES, NO, ON and OFF."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<_eucode>
+i = bool(a)
+</_eucode>
+
+</table>
+
+<_routine name="t_alnum">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isalnum(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_alnum(a)
 </font>"
  >
  <_2clist
@@ -237,7 +241,7 @@ i = isalnum(a)
   description=""
  >
 <_eucode>
-i = isalnum('a')
+i = t_alnum('a')
 -- i is 1
 </_eucode>
 
@@ -246,24 +250,20 @@ i = isalnum('a')
   description=""
  >
 <_eucode>
-i = isalnum('?')
+i = t_alnum('?')
 -- i is 0
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isalpha">
+<_routine name="t_alpha">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isalpha(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_alpha(a)
 </font>"
  >
  <_2clist
@@ -276,7 +276,7 @@ i = isalpha(a)
   description=""
  >
 <_eucode>
-i = isalpha('a')
+i = t_alpha('a')
 -- i is 1
 </_eucode>
 
@@ -285,24 +285,19 @@ i = isalpha('a')
   description=""
  >
 <_eucode>
-i = isalpha('6')
+i = t_alpha('6')
 -- i is 0
 </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isascii">
+<_routine name="t_ascii">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isascii(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_ascii(a)
 </font>"
  >
  <_2clist
@@ -315,7 +310,7 @@ i = isascii(a)
   description=""
  >
 <_eucode>
-i = isascii('z')
+i = t_ascii('z')
 -- i is 1
 </_eucode>
 
@@ -324,24 +319,20 @@ i = isascii('z')
   description=""
  >
 <_eucode>
-i = isascii(2)
+i = t_ascii(2)
 -- i is 0
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="iscntrl">
+<_routine name="t_cntrl">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = iscntrl(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_cntrl(a)
 </font>"
  >
  <_2clist
@@ -354,7 +345,7 @@ i = iscntrl(a)
   description=""
  >
 <_eucode>
-i = iscntrl('a')
+i = t_cntrl('a')
 -- i is 0
 </_eucode>
 
@@ -363,24 +354,19 @@ i = iscntrl('a')
   description=""
  >
 <_eucode>
-i = iscntrl(7)
+i = t_cntrl(7)
 -- i is 0
 </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isdigit">
+<_routine name="t_digit">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isdigit(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_digit(a)
 </font>"
  >
  <_2clist
@@ -393,7 +379,7 @@ i = isdigit(a)
   description=""
  >
 <_eucode>
-i = isdigit('3')
+i = t_digit('3')
 -- i is 1
 </_eucode>
 
@@ -402,24 +388,20 @@ i = isdigit('3')
   description=""
  >
 <_eucode>
-i = isdigit('?')
+i = t_digit('?')
 -- i is 0
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isgraph">
+<_routine name="t_graph">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isgraph(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_graph(a)
 </font>"
  >
  <_2clist
@@ -432,7 +414,7 @@ i = isgraph(a)
   description=""
  >
 <_eucode>
-i = isgraph('a')
+i = t_graph('a')
 -- i is 1
 </_eucode>
 
@@ -441,24 +423,20 @@ i = isgraph('a')
   description=""
  >
 <_eucode>
-i = isgraph(2)
+i = t_graph(2)
 -- i is 0
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="islower">
+<_routine name="t_lower">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = islower(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_lower(a)
 </font>"
  >
  <_2clist
@@ -471,7 +449,7 @@ i = islower(a)
   description=""
  >
 <_eucode>
-i = islower('a')
+i = t_lower('a')
 -- i is 1
 </_eucode>
 
@@ -480,24 +458,19 @@ i = islower('a')
   description=""
  >
 <_eucode>
-i = islower('A')
+i = t_lower('A')
 -- i is 0
 </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isprint">
+<_routine name="t_print">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isprint(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_print(a)
 </font>"
  >
  <_2clist
@@ -510,7 +483,7 @@ i = isprint(a)
   description=""
  >
 <_eucode>
-i = isprint('a')
+i = t_print('a')
 -- i is 1
 </_eucode>
 
@@ -519,24 +492,20 @@ i = isprint('a')
   description=""
  >
 <_eucode>
-i = isprint(127)
+i = t_print(127)
 -- i is 0
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="ispunct">
+<_routine name="t_punct">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = ispunct(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_punct(a)
 </font>"
  >
  <_2clist
@@ -549,7 +518,7 @@ i = ispunct(a)
   description=""
  >
 <_eucode>
-i = ispunct('a')
+i = t_punct('a')
 -- i is 0
 </_eucode>
 
@@ -558,24 +527,20 @@ i = ispunct('a')
   description=""
  >
 <_eucode>
-i = ispunct('?')
+i = t_punct('?')
 -- i is 1
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isspace">
+<_routine name="t_space">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isspace(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_space(a)
 </font>"
  >
  <_2clist
@@ -588,7 +553,7 @@ i = isspace(a)
   description=""
  >
 <_eucode>
-i = isspace(' ')
+i = t_space(' ')
 -- i is 1
 </_eucode>
 
@@ -597,24 +562,20 @@ i = isspace(' ')
   description=""
  >
 <_eucode>
-i = isspace('a')
+i = t_space('a')
 -- i is 0
 </_eucode>
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isupper">
+<_routine name="t_upper">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isupper(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_upper(a)
 </font>"
  >
  <_2clist
@@ -627,7 +588,7 @@ i = isupper(a)
   description=""
  >
 <_eucode>
-i = isupper('A')
+i = t_upper('A')
 -- i is 1
 </_eucode>
 
@@ -636,24 +597,19 @@ i = isupper('A')
   description=""
  >
 <_eucode>
-i = isupper('a')
+i = t_upper('a')
 -- i is 0
 </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
 
 
-<_routine name="isxdigit">
+<_routine name="t_xdigit">
 <table border=0 cellspacing=2 cellpadding=2>
 
  <_2clist
   name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include ctype.e<BR>
-i = isxdigit(a)
+  description="<font face = \"Arial, Helvetica\">include types.e<BR>
+i = t_xdigit(a)
 </font>"
  >
  <_2clist
@@ -666,7 +622,7 @@ i = isxdigit(a)
   description=""
  >
 <_eucode>
-i = isxdigit('a')
+i = t_xdigit('a')
 -- i is 1
 </_eucode>
 
@@ -675,7 +631,7 @@ i = isxdigit('a')
   description=""
  >
 <_eucode>
-i = isxdigit('F')
+i = t_xdigit('F')
 -- i is 1
 </_eucode>
 
@@ -684,7 +640,7 @@ i = isxdigit('F')
   description=""
  >
 <_eucode>
-i = isxdigit('3')
+i = t_xdigit('3')
 -- i is 1
 </_eucode>
 
@@ -693,17 +649,10 @@ i = isxdigit('3')
   description=""
  >
 <_eucode>
-i = isxdigit('i')
+i = t_xdigit('i')
 -- i is 0
 </_eucode>
-
-<_2clist
-  name="See Also:"
-  description="<a href=\"library.htm#type_checking\">Type Checking</a>"
- >
 </table>
-
-</_width>
 
 </body>
 </html>
