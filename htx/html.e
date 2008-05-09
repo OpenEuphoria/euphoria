@@ -34,6 +34,8 @@ integer blank
 blank = FALSE
 sequence line, colorLine -- <_eucode>... </_eucode>
 integer firstLine        -- <_eucode>... </_eucode>
+sequence sec_nums
+sec_nums = {0,0,0,0,0,0} -- h1-h6
 
 -- helper functions
 
@@ -55,6 +57,58 @@ end procedure
 procedure espan()
 -- end a span tag
     write("</span>")
+end procedure
+
+procedure write_sec_num()
+    for i = 1 to 6 do
+	if sec_nums[i] > 0 then
+	    if i > 1 then
+		write(".")
+	    end if
+	    write(sprint(sec_nums[i]))
+	end if
+    end for
+    write(". ")
+end procedure
+
+procedure tag_h1(object raw_text, object param_list)
+    sec_nums = (sec_nums[1] + 1) & {0,0,0,0,0}
+    write(raw_text)
+    write_sec_num()
+end procedure
+
+procedure tag_h2(object raw_text, object param_list)
+    sec_nums = sec_nums[1] & (sec_nums[2] + 1) & {0,0,0,0}
+    write(raw_text)
+    write_sec_num()
+end procedure
+
+procedure tag_h3(object raw_text, object param_list)
+    sec_nums = sec_nums[1..2] & (sec_nums[3] + 1) & {0,0,0}
+    write(raw_text)
+    write_sec_num()
+end procedure
+
+procedure tag_h4(object raw_text, object param_list)
+    sec_nums = sec_nums[1..3] & (sec_nums[4] + 1) & {0,0}
+    write(raw_text)
+    write_sec_num()
+end procedure
+
+procedure tag_h5(object raw_text, object param_list)
+    sec_nums = sec_nums[1..4] & (sec_nums[5] + 1) & 0
+    write(raw_text)
+    write_sec_num()
+end procedure
+
+procedure tag_h6(object raw_text, object param_list)
+    sec_nums = sec_nums[1..5] & sec_nums[6] + 1
+    write(raw_text)
+    write_sec_num()
+end procedure
+
+procedure tag_end_header(object raw_text, object param_list)
+    write(raw_text)
 end procedure
 
 procedure tag_default(object raw_text, object param_list)
@@ -200,7 +254,18 @@ global procedure html_init()
     add_handler("/console",  routine_id("tag_end_gpre"))
     add_handler("gui",       routine_id("tag_gspan"))
     add_handler("/gui",      routine_id("tag_end_gspan"))
-    
+    add_handler("h1",        routine_id("tag_h1"))
+    add_handler("/h1",       routine_id("tag_end_header"))
+    add_handler("h2",        routine_id("tag_h2"))
+    add_handler("/h2",       routine_id("tag_end_header"))
+    add_handler("h3",        routine_id("tag_h3"))
+    add_handler("/h3",       routine_id("tag_end_header"))
+    add_handler("h4",        routine_id("tag_h4"))
+    add_handler("/h4",       routine_id("tag_end_header"))
+    add_handler("h5",        routine_id("tag_h5"))
+    add_handler("/h5",       routine_id("tag_end_header"))
+    add_handler("h6",        routine_id("tag_h6"))
+    add_handler("/h6",       routine_id("tag_end_header"))
     out_type = "htm"
 
     init_class()     -- defined in syncolor.e
