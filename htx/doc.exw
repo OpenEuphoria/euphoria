@@ -22,7 +22,9 @@ constant files = {
     "c.htx",
     "cgi.htx",
     "database.htx",
-    "e2c.htx"
+    "e2c.htx",
+    "what2do.htx",
+    "trouble.htx"
 }
 
 include stack.e as stk
