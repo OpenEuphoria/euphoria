@@ -155,9 +155,13 @@
       <b>set()</b>, <b>get()</b>, <b>number()</b>, <b>money()</b>, <b>datetime()</b>,
       <b>set_po_path()</b>, <b>get_po_path()</b>, <b>po_load()</b>, <b>w()</b>.
       Implemented by Jeremy Cowgar.</li>
+    <li>
+     New os routines in <b>os.e</b>:
+       <b>cmd_parse()</b>.
+       Implemented by Jeremy Cowgar
 </ul>
 <li>
-     <b>Unit testing added to Euphoria</b>. Over 500 tests. To run, cd tests and
+     <b>Unit testing added to Euphoria</b>. Over 600 tests. To run, cd tests and
      exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto</li>
 
 <li>

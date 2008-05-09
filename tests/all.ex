@@ -26,6 +26,7 @@ include t_locale.e
 include t_map.e
 include t_math.e
 include t_misc.e
+include t_os.e
 include t_regex.e
 include t_search.e
 include t_sequence.e
