@@ -24,17 +24,16 @@
 	<li>Post a message on the mailing list.</li>
 </ol>
 
-<div><a name=commonp></a></div>
+<h2><a name=commonp></a>Common Problems + Solutions</h2>
 
-<p>Here are some commonly reported problems (<font face="Arial, Helvetica" color="#009999">P:</font> <font face="Arial, Helvetica" color="#003366">) and their solutions (</font> <font face="Arial, Helvetica" color="#FF0099">S:</font>
- <font face="Arial, Helvetica" color="#003366">).</p>
+<p>Here are some commonly reported problems (<strong>P:</strong>) and their solutions (<strong>S:</strong>).</p>
 
 <table border=0 cellspacing=2 cellpadding=2>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I ran my program with <font color="#993333"><b>exw</b></font> and the console window disappeared before I could read the output.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>The console window will only appear if required, and will disappear immediately when your program finishes execution. Perhaps you should code something like:</p>
 		<eucode>
@@ -46,11 +45,11 @@
 	</td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>At the end of execution of my program, I see "Press Enter" and I have to hit the Enter key. How do I get rid of that?</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>Call free_console() just before your program terminates.</p>
 		<eucode>
@@ -60,21 +59,21 @@
 		</eucode>
 	</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I would like to change the properties of the console window.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Right click on <b>c:\windows\system\conagent.exe</b> and
    select "properties". You can change the font and several other items.</td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>When I run <font color="#993333"><b>ex.exe</b></font> in a DOS Window, it makes my small DOS window go to full screen.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>This will only happen the first time you run
    <font color="#993333"><b>ex.exe</b></font> after creating a new small
@@ -95,11 +94,11 @@
       </td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>My Euphoria CGI program hangs or has no output</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Look for an ex.err file in your cgi-bin directory. 
   Turn on <b>with trace</b> / <b>trace(3)</b> to see what statements
@@ -118,22 +117,22 @@
    <a href=cgi.htm>cgi.htm</a> for more.</td>
 </tr>
    
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>How do I read/write ports?</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Get <b>Jacques Deschenes</b>' collection of machine-level and
    DOS system routines from the
    <a href="http://www.RapidEuphoria.com">Euphoria Web page</a>. See his
    file <b>ports.e</b>.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I'm having trouble running a <font color="#CC3366"><b>DOS32</b></font> graphics program. I hit control-Break and now my system seems to be dead.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>
 	<p>Some graphics programs will not run unless you start them from
@@ -172,12 +171,12 @@
         </td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>When I run Euphoria programs in SVGA, the output on the screen
    is crammed into the top part of the screen.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>Try: <font color="#006699"><b>use_vesa(1)</b></font> in
    <font color="#5500FF"><b>machine.e</b></font>.</p>
@@ -190,11 +189,11 @@
    Others have had their video problems clear up after installing the latest
    version of DirectX.</p></td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>My program leaves the DOS window in a messy state. I want it to leave me with a normal text window.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>When your program is finished, it should call the function
   graphics_mode(-1) to set the DOS window back to normal. e.g.
@@ -204,31 +203,31 @@
 </eucode>
   </td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>When I run my program from the editor and I hit control-c,
    the program dies with an operating system error.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>This is a known problem. Run your program from the command-line,
    outside the editor, if you might have to hit control-c or control-Break.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>When I run my program there are no errors but nothing happens.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>You probably forgot to call your main procedure. You need
    a top-level statement that comes after your main procedure to call the
    main procedure and start execution.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I'm trying to call a routine documented in <path>library.doc</path>, but it keeps saying the routine has not been declared.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Did you remember to include the necessary <b>.e</b> file from
    the <font color="#5500FF"><b>euphoria\include</b></font> directory? If
@@ -237,23 +236,23 @@
    before the place where you first call the routine.</td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I have an include file with a routine in it that I want to
    call, but when I try to call the routine it says the routine has not been
    declared. But it <b><i>has</i></b> been declared.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Did you remember to define the routine with
    "<b>global</b>" in front of it in the include file? Without "global"
    the routine is not visible <i><b>outside</b></i> of its own file.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>How do I input a line of text from the user?</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>See <font color="#006699"><b>gets()</b></font> in
    <a class="blue" href="lib_file.htm#gets"><b>library.doc</b></a>.
@@ -267,23 +266,23 @@
    in <font color="#5500FF"><b>get.e</b></font>.</p>   </td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>After inputting a string from the user with
    <font color="#006699"><b>gets()</b></font>, the next line that comes
    out on the screen does not start at the left margin.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Your program should output a <i>new-line</i> character e.g.
    <font color="#006699"><b>puts(SCREEN, '\n')</b></font> after you do a
    <font color="#006699">gets()</font>. It does not happen automatically.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>Why aren't my floating-point calculations coming out exact?</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Intel CPU's, and most other CPU's, use binary numbers
   to represent fractions. Decimal fractions such as 0.1, 0.01 and 
@@ -302,11 +301,11 @@
   (or similar currency) will help, but some calculations could still 
   cause problems.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>How do I convert a number to a string?</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>Use <font color="#006699"><b>sprintf()</b></font> in
    <font color="#5500FF"><b>library.doc</b></font>. e.g.</p>
@@ -317,46 +316,46 @@
    <b>%x</b> (Hex) or <b>%f</b> (floating-point).</p>
 	</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>How do I convert a string to a number?</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Use <font color="#006699"><b>value()</b></font> in <font color="#5500FF"><b>library.doc</b></font>, or, if you are reading from a file or the keyboard, use <font color="#006699"><b>get()</b></font>.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>It says I'm attempting to redefine my for-loop variable.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>For-loop variables are declared automatically. Apparently you already have a declaration with the same name earlier in
    your routine or your program. Remove that earlier declaration or change the name of your loop variable.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I get the message "unknown escape character" on a line where I am trying to specify a file name.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><b><i>Do not</i></b> say "C:\TMP\MYFILE". You need to say <b>"C:\\TMP\\MYFILE"</b>. Backslash is used for escape characters such as <b>\n</b> or <b>\t</b>. To specify a single backslash in a string you need to type <b>\\</b>.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I'm trying to use mouse input in a SVGA graphics mode but it just doesn't work.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><font color="#CC3366"><b>DOS</b></font> does not support mouse input in modes beyond graphics mode 18 (640x480 16 color). <font color="#CC3366"><b>DOS 7.0 (part of Windows 95/98)</b></font> does seem to let you at least read the x-y coordinate and the buttons in high resolution modes, but you may have to draw your own mouse pointer in the high-res modes. <b>Graeme Burke</b>, <b>Peter Blue</b> and others have good solutions to this problem. See their files on the <a href="http://www.RapidEuphoria.com/archive.htm">Euphoria Archive Web page</a>.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I'm trying to print a string using
    <font color="#006699"><b>printf()</b></font> but only the first character
    comes out.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>See the <font color="#006699"><b>printf()</b></font>
    description in <font color="#5500FF"><b>library.doc</b></font>. You may
@@ -372,14 +371,14 @@
 </eucode>
 	</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>When I print numbers using
    <font color="#006699"><b>print()</b></font> or
    <font color="#006699"><b>?</b></font>, only 10 significant digits are
    displayed.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>Euphoria normally only shows about 10 digits. Internally, all
    calculations are performed using at least 15 significant digits. To see
@@ -391,11 +390,11 @@
 <p>This will display 15 digits.</p>
    </td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>It complains about my routine declaration, saying, "a type is expected here."</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><p>When declaring subroutine parameters, Euphoria requires you to
    provide an explicit type for each individual parameter. e.g.</p>
@@ -410,37 +409,37 @@
    </td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I'm declaring some variables in the middle of a routine and it gives me a syntax error.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>All of your <i>private</i> variable declarations must come at the beginning of your <b>subroutine</b>, before any executable statements. (At the top-level of a program, <b>outside of any routine</b>, it is ok to declare variables anywhere.)</td>
 </tr>
 
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>It says:<br>Syntax Error - expected to see possibly 'xxx', not 'yyy'</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>At this point in your program you have typed a variable, keyword, number or punctuation symbol, yyy, that does not fit syntactically with what has come before it. The compiler is offering you one example, xxx, of something that would be accepted at this point in place of yyy. Note that there may be many other legal (and much better) possibilities at this point than xxx, but xxx might at least give you a clue as to what the compiler is "thinking."</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I'm having problems running Euphoria with DR-DOS.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td>Your <b>config.sys</b> should have just HIMEM.SYS but not EMM386.EXE in it.</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>P:</td>
 	<td>I try to run a program with
    <font color="#993333"><b>exw</b></font> and it says "this is a Windows NT character-mode executable."</td>
 </tr>
-<tr>
+<tr valign="top">
 	<td>S:</td>
 	<td><font color="#993333"><b>exw.exe</b></font> is a
    <font color="#CC3366"><b>32-bit Windows program</b></font>. It must be

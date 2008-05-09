@@ -12,7 +12,7 @@
 
 	<p>will run the file <font color="#5500FF"><b>buzz.ex</b></font>. Depending on your graphics card you may have to edit a line in some of the <b>.ex</b> files to select a different graphics mode. Some demos try to use <b>SVGA</b> modes, which might not work with your video card. You need DOS mouse support to run <font color="#5500FF"><b>mouse.ex</b></font> and <font color="#5500FF"><b>ttt.ex</b></font>).</p>
 	
-	<p>You can also double-click on a <b>.ex</b> (<b>.exw</b>) file from <font color="#CC3366"><b>Windows</b></font>, but you will have to "associate" <b>.ex</b> files with <font color="#993333"><b>ex.exe</b></font> and <b>.exw</b> files with <font color="#993333"><b>exw.exe</b></font>. A few of the demos are meant to be run from the command line, but most will look ok from Windows.</p>
+	<p>You can also double-click on a <b>.ex</b> (<b>.exw</b>) file from <font color="#CC3366"><b>Windows</b></font>, but you will have to "associate" <b>.ex</b> files with <font color="#993333"><b>ex.exe</b></font> and <b>.exw</b> files with <font color="#993333"><b>exw.exe</b></font>. A few of the demos are meant to be run from the command line, but most will look ok from Windows.</p></li>
 
 <li>Use the Euphoria editor, <font color="#993333"><b>ed</b></font>, to edit a Euphoria file. Notice the use of colors. <b><font color="#006633">You can adjust these colors along with the cursor size and many other "user-modifiable" parameters by editing constant declarations in</font> <font color="#5500FF">ed.ex</font><font color="#006633">.</font></b> Use <b>Esc q</b> to quit the editor or <b>Esc h</b> for help. There are several, even better, Euphoria-oriented editors in the Archive.</li>
 
@@ -28,7 +28,7 @@
 		trace(1)
 	</eucode>
 
-	<p>at the beginning of any <b>.ex</b> or <b>.exw</b> file.</p>
+	<p>at the beginning of any <b>.ex</b> or <b>.exw</b> file.</p></li>
 	
 <li>Run some of the tutorial programs in <font color="#5500FF"><b>euphoria\tutorial</b></font>.</li>
 <li>Try modifying some of the demo programs.</li>
@@ -64,16 +64,12 @@
 		? 2+2
 	</eucode>
 
-<p>   <font color="#006633"><b>Remember that after any error you can simply
+<p><font color="#006633"><b>Remember that after any error you can simply
    type</b></font> <font color="#993333">ed</font>
    <font color="#006633"><b>to jump into the editor at the offending file
    and line.</b></font></p>
-<p>
-   Once you get used to it, you'll be developing programs
-   <font color="#CC0099"><b><i>much</i></b></font> faster in
-   Euphoria than you could in Perl, Java, C/C++ or any other
-   language that we are aware of.</p>
-
+		<p>Once you get used to it, you'll be developing programs <font color="#CC0099"><b><i>much</i></b></font> faster in Euphoria than you could in Perl, Java, C/C++ or any other language that we are aware of.</p>
+   </li>
 </ul>
 
 </doc>
