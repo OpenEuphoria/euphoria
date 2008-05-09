@@ -4,6 +4,7 @@
 -- written by: Junko C. Miura of Rapid Deployment Software 
 -- (JCMiura@RapidEuphoria.com)
 
+include get.e
 include misc.e
 
 integer SLASH
@@ -143,6 +144,10 @@ procedure tag(sequence name, object param, object raw)
 	    
 	    printf(1, "Document error on line %d. Found %s when expecting /%s (began at %d)\n",
 		{current_line, name, top_tag[1], top_tag[2]})
+	    if platform() = WIN32 then
+		puts(1, "Press any key to continue...\n")
+		r = wait_key()
+	    end if
 	    abort(1)
 	end if
 	
