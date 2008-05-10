@@ -1343,8 +1343,8 @@ global procedure finish_emake()
 	end if
 	if length(user_library) then
 	    printf(doit, 
-		  "gcc %s %s.o %s %s/bin/%s -lm ",
-		  {dll_flag, file0, link_line, eudir, user_library})
+		  "gcc %s %s.o %s %s -lm ",
+		  {dll_flag, file0, link_line, user_library})
 	else
 	    -- need to check to see if euphoria is installed into
 	    -- the system:

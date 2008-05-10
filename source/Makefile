@@ -158,15 +158,12 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/misc.o \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/traninit.o \
-	./$(OBJDIR)/sequence.o \
-	./$(OBJDIR)/search.o \
 	./$(OBJDIR)/wildcard.o 
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
 	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o 
 
 EU_CORE_OBJECTS = \
@@ -237,6 +234,7 @@ EU_LIB_OBJECTS = \
 	./$(OBJDIR)/back/be_inline.o \
 	./$(OBJDIR)/back/be_runtime.o \
 	./$(OBJDIR)/back/be_task.o \
+	./$(OBJDIR)/back/be_pcre.o \
 	./$(OBJDIR)/back/be_callc.o
 
 EU_BACKEND_RUNNER_OBJECTS = \
@@ -252,7 +250,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/mode.o \
-	./$(OBJDIR)/sequence.o
+	./$(OBJDIR)/wildcard.o
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \
@@ -265,7 +263,8 @@ EU_BACKEND_RUNNER_FILES = \
 	error.e \
 	mode.e
 
-
+PCRE_OBJECTS = \
+	./pcre/*.o
 all : interpreter translator library backend
 
 BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
@@ -285,7 +284,7 @@ clean :
 library : builddirs
 	$(MAKE) ecu.a OBJDIR=libobj ERUNTIME=1
 ecu.a : $(EU_LIB_OBJECTS)
-	ar -rc ecu.a $(PCRE) $(EU_LIB_OBJECTS)
+	ar -rc ecu.a $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS) $(PCRE)
