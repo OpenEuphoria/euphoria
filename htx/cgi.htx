@@ -1,8 +1,8 @@
 <doc title="CGI (Web) Applications in Euphoria">
 
-<h1>CGI (Web) Applications in Euphoria</h1>
+<h2>CGI (Web) Applications in Euphoria</h2>
 
-<h2>Introduction </h2>
+<h3>Introduction </h3>
 
 <p>
 If you have a Web site, you may be able to set up programs on your server that
@@ -25,7 +25,7 @@ effort to develop, and are easier to change and debug. Euphoria also
 has much easier string handling, which is often important in CGI programming.</p>
  
  
-<h2>CGI (Common Gateway Interface)</h2>
+<h3>CGI (Common Gateway Interface)</h3>
 
  <p>
  CGI is a fancy acronym for a very simple protocol.
@@ -33,7 +33,7 @@ has much easier string handling, which is often important in CGI programming.</p
  to a program running on a Web server, and how that program
  passes information back to the Web browser.</p>
  
- <h2>Web Hosts</h2>
+ <h3>Web Hosts</h3>
  <p>
  If you have the necessary Web server software, and the approval of your
  Internet service provider, you can probably run Euphoria CGI programs 
@@ -58,7 +58,7 @@ has much easier string handling, which is often important in CGI programming.</p
  of space, and 5 GB of bandwidth. Until recently, it cost $18/month,
  so hosting prices seem to be headed down.</p>
  
-<h3>Installing Euphoria for CGI</h3>
+<h4>Installing Euphoria for CGI</h4>
  <p> Installing Euphoria on a host is fairly simple. You just have to
  upload the euphoria directory for the operating system that the host 
  is running. 
@@ -120,7 +120,7 @@ has much easier string handling, which is often important in CGI programming.</p
  variables (PATH, EUDIR) as you do, and not being able to find your
  Euphoria files.</p>
  
-<h2>HTML Forms</h2>
+<h3>HTML Forms</h3>
 
 
 <p>
@@ -230,7 +230,7 @@ form at:</p>
  has to break out this information using parse_input() or some equivalent
  code. You can even let the user upload large files.</p>
 
-<h2>The Output from Your CGI Program</h2>
+<h3>The Output from Your CGI Program</h3>
 
 <p>
 After examining the query string, your program must generate a reply
@@ -247,18 +247,18 @@ a complete HTML page.
 For example, the MicroEconomy program starts off by calling
 procedure print_HTMLheader() which does:</p>
 
-<_eucode>
+<eucode>
  puts(1, "Content-type: text/html\n\n")
  puts(1, "&lt;html>&lt;head>&lt;title>Thank You&lt;/title>&lt;/head>\n")
  puts(1, "&lt;body bgcolor=\"#FFFFFF\">\n")
-</_eucode>        
+</eucode>        
 
 <p>Much later, when it's all finished, it writes out the last line of output 
 which contains &lt;/body>&lt;/html> to complete the page. If the program
 fails to complete the HTML page, the user's browser might not 
 display the page properly, if at all.</p>
 
-<h2>Debugging CGI programs</h2>
+<h3>Debugging CGI programs</h3>
    <p>
 The first time you run a new CGI program, the chances are quite
 high that it will fail in some way. You are likely to see an 
@@ -285,7 +285,7 @@ routine that will send ex.err to you via e-mail. You may discover that
 your users are trying to do weird things that you never do, and 
 are encountering crashes.</p>
 
-<h2>Speeding up CGI programs</h2>
+<h3>Speeding up CGI programs</h3>
 
    <p>
 Most CGI programs require little CPU time,

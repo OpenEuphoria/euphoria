@@ -308,10 +308,10 @@ and binder is included in the download package.
    adding:"
  >
 
-<_eucode>
+<eucode>
         with trace
         trace(1)
-</_eucode>
+</eucode>
 
 <_2clist
   name=""

@@ -48,13 +48,13 @@ document <a href="tasking.htm">Multitasking in Euphoria</a>.
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 -- freeze the game while the player answers the phone
 task_clock_stop()
 while get_key() = -1 do
 end while
 task_clock_start()
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="
@@ -139,10 +139,10 @@ task can also continue, unless it's a real-time task and it yields."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 mytask = task_create(routine_id("myproc"), {5, 9, "ABC"})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_task.htm#task_schedule\">task_schedule</a>,
@@ -178,7 +178,7 @@ mytask = task_create(routine_id("myproc"), {5, 9, "ABC"})
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 sequence tasks
      
 tasks = task_list()
@@ -187,7 +187,7 @@ for i = 1 to length(tasks) do
         printf(1, "task %d is active\n", tasks[i])
     end if
 end for
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="
@@ -293,7 +293,7 @@ exit code code, similar to abort(0)."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 
 -- Task t1 will be executed up to 10 times in a row before
 -- other time-shared tasks are given control. If a real-time
@@ -305,7 +305,7 @@ task_schedule(t1, 10)
 -- execute every 4 to 5 seconds thereafter.
 task_schedule(t2, {4, 5})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_task.htm#task_create\">task_create</a>,
@@ -339,11 +339,11 @@ itself."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 -- schedule self
 task_schedule(task_self(), {5.9, 6.0})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_task.htm#task_create\">task_create</a>,
@@ -382,7 +382,7 @@ terminated naturally or was killed."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 integer s
      
 s = task_status(tid)
@@ -393,7 +393,7 @@ elsif s = 0 then
 else
     puts(1, "DOESN'T EXIST\n")
 end if
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="
@@ -434,14 +434,14 @@ end if
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 -- suspend task 15
 task_suspend(15)
 
 -- suspend current task
 task_suspend(task_self())
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_task.htm#task_create\">task_create</a>,
@@ -504,7 +504,7 @@ languages support.
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 -- From Language war game.
 -- This small task deducts life support energy from either the 
 -- large Euphoria ship or the small shuttle.
@@ -525,7 +525,7 @@ global procedure task_life()
     end while
 end procedure
  
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_task.htm#task_create\">task_create</a>,

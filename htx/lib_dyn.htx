@@ -81,7 +81,7 @@
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 global integer foo_id
 
 procedure x()
@@ -96,7 +96,7 @@ foo_id = routine_id("foo")
 
 x()
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_dyn.htm#call_func\">call_func</a>,
@@ -158,7 +158,7 @@ x()
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 procedure foo()
     puts(1, "Hello World\n")
 end procedure
@@ -168,12 +168,12 @@ foo_num = routine_id("foo")
 
 call_proc(foo_num, {})  -- same as calling foo()
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 function apply_to_all(sequence s, integer f)
     -- apply a function to all elements of a sequence
     sequence result
@@ -193,7 +193,7 @@ end function
 ? apply_to_all({1, 2, 3}, routine_id("add1"))
 -- displays {2,3,4}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_dyn.htm#call_proc\">call_proc</a>,

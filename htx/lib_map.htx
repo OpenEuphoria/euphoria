@@ -33,11 +33,11 @@
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map m
 m = new()
 -- m is now an empty map (size = 0)
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="get">
@@ -56,7 +56,7 @@ m = new()
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map ages
 ages = new()
 ages = put(ages, "Andy", 12)
@@ -68,7 +68,7 @@ if age = -1 then
 else
 	printf(1, "The age is %d", age)
 end if
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="put">
@@ -91,14 +91,14 @@ end if
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map ages
 ages = new()
 ages = put(ages, "Andy", 12)
 ages = put(ages, "Budi", 13)
 ages = put(ages, "Budi", 14)
 -- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="size">
@@ -121,12 +121,12 @@ ages = put(ages, "Budi", 14)
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map m
 m = put(m, 1, "a")
 m = put(m, 2, "b")
 ? size(m) -- outputs 2
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="remove">
@@ -149,13 +149,13 @@ m = put(m, 2, "b")
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map m
 m = new()
 m = put(m, "Amy", 66.9)
 m = remove(m, "Amy")
 -- m is now an empty map again
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="has">
@@ -177,7 +177,7 @@ i = has(m, x)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 map m
 m = new()
 m = put(m, "name", "John")
@@ -186,7 +186,7 @@ i = has(m, "name")
 
 i = has(m, "age")
 -- i is 0
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="keys">
@@ -209,7 +209,7 @@ i = has(m, "age")
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map m
 m = new()
 m = put(m, 10, "ten")
@@ -218,7 +218,7 @@ m = put(m, 30, "thirty")
 m = put(m, 40, "forty")
 sequence keys
 keys = keys(m) -- keys might be {20,40,10,30} or some other orders
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="values">
@@ -241,7 +241,7 @@ keys = keys(m) -- keys might be {20,40,10,30} or some other orders
   name="Example:"
   description=""
 >
-<_eucode>
+<eucode>
 map m
 m = new()
 m = put(m, 10, "ten")
@@ -250,7 +250,7 @@ m = put(m, 30, "thirty")
 m = put(m, 40, "forty")
 sequence values
 values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
-</_eucode>
+</eucode>
 </table>
 
 </body>

@@ -1332,20 +1332,20 @@ initial message and delay on compiled programs.
  <font color="#0066CC"><b>Translator</b></font>: 
  Some new optimizations will speed things up, and also reduce 
   the size of the C code. For example the code block:<br>
-  <_eucode>        if <i>expression</i> then
+  <eucode>        if <i>expression</i> then
            ...
            <i>many statements of Euphoria code</i>
            ...
         end if
-  </_eucode>
+  </eucode>
   will be completely deleted if the 
   <font color="#0066CC"><b>Translator</b></font> can tell that <i>expression</i>
   will always be false. This can lead to further optimizations, such as
   a whole routine being deleted because there are no more calls to it.
   An example where this is useful is when there is different code 
   for different platforms, e.g.<br> 
-  <_eucode>        if platform() = DOS then ...
-  </_eucode>
+  <eucode>        if platform() = DOS then ...
+  </eucode>
   <font color="#993333"><b>while</b></font> <i>expression</i> and
   <font color="#993333"><b>elsif</b></font> <i>expression</i> can also be 
   optimized in the same way. When the expression is always true, the 
@@ -1519,8 +1519,8 @@ initial message and delay on compiled programs.
   happening was about 1 in 1000. Any change to the program 
   that shifted the offending statement's position in memory 
   would cause the bug to go away.  For example,<br>
-  <_eucode>        x[i] -= y
-  </_eucode>
+  <eucode>        x[i] -= y
+  </eucode>
   This bug has been lurking since January 1999 (version 2.1 alpha).
   The Translator was not affected. Thanks to Pete Lomax.
 
@@ -3437,31 +3437,31 @@ in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>.
  Short-form assignment operators <font color="#993333"><b>&nbsp; += &nbsp;
  -= &nbsp; *= &nbsp; /= &nbsp; &= &nbsp;</b></font> have been added. 
  For example, instead of saying:
-<_eucode>
+<eucode>
            count = count + 1
-</_eucode>
+</eucode>
  You can now say:
-<_eucode>
+<eucode>
            count += 1
-</_eucode>
+</eucode>
 
  Instead of saying:
-<_eucode>
+<eucode>
            matrix[row][column] = matrix[row][column] * 5.0
-</_eucode>
+</eucode>
  You can say:
-<_eucode>
+<eucode>
            matrix[row][column] *= 5.0
-</_eucode>
+</eucode>
 
  Instead of saying:
-<_eucode>
+<eucode>
            test_scores[start..finish] = test_scores[start..finish] / 100
-</_eucode>
+</eucode>
  You can say:
-<_eucode>
+<eucode>
            test_scores[start..finish] /= 100
-</_eucode>
+</eucode>
  See <a class="blue" href="refman_2.htm#assignop">
  <b>refman.doc</b></a> for the details.
 
@@ -3472,15 +3472,15 @@ in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>.
  <font color="#993333"><_bq>or</_bq></font> expressions in
  <font color="#993333"><b>if/elsif/while</b></font> conditions.
  e.g. in an <font color="#993333"><_bq>and</_bq></font> condition:
-<_eucode>
+<eucode>
            if A and B then ...
-</_eucode>
+</eucode>
    the interpreter will skip the evaluation of expression B whenever 
    expression A is 0 (false), since it knows that the overall result
    must be false. In an <font color="#993333"><_bq>or</_bq></font> condition:
-<_eucode>
+<eucode>
            while A or B do ...
-</_eucode>
+</eucode>
    the interpreter will skip the evaluation of expression B whenever
    expression A is non-zero (true), since it knows that the overall result
    must be true.
@@ -3493,9 +3493,9 @@ in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>.
 <p>
    By skipping the evaluation of B, short-circuit evaluation is typically
    faster, and will allow you to write statements such as:
-<_eucode>
+<eucode>
            if atom(x) or length(x)=1 then ...
-</_eucode>
+</eucode>
    that would generate an error on older versions of Euphoria whenever x
    was an <font color="#993333"><b>atom</b></font>, since
    <font color="#006699">length()</font> is not defined for atoms.
@@ -3656,9 +3656,9 @@ in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>.
  The <font color="#993333"><_bq>xor</_bq></font> keyword has been added to
   complement: <font color="#993333"><b>and/or/not</b></font> and
   <font color="#006699"><b>xor_bits()</b></font> e.g.
-<_eucode>
+<eucode>
            if a xor b then...
-</_eucode>
+</eucode>
    <font color="#993333"><_bq>xor</_bq></font> works on sequences too.
    It's similar to <font color="#993333"><_bq>or</_bq></font>.
 
@@ -3668,9 +3668,9 @@ in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>.
  officially supports the use of <b>wildcards *</b> and <b>?</b> in the path
  that you supply. This feature was always available, but wasn't
  documented until now. e.g.
-<_eucode>
+<eucode>
            info = dir("mydata\\*.d?t")
-</_eucode>
+</eucode>
 
 <li>
  <font color="#CC3366"><b>optimization:</b></font>
@@ -3968,11 +3968,11 @@ in Version 2.2 for <font color="#CC3366"><b>WIN32 + DOS32</b></font></i>.
 <li>
  Some <font color="#CC3366"><b>optimizations</b></font> were added. The
  following general forms of expression are now faster:
-<_eucode>
+<eucode>
            2 * x 
            x * 2 
            1 + x 
-</_eucode>
+</eucode>
      where x can be any expression, and have type atom or sequence.
 
 <p>

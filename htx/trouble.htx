@@ -1,6 +1,6 @@
 <doc title="Euphoria Trouble-Shooting Guide">
 
-<h1>Euphoria Trouble-Shooting Guide</h1>
+<h2>Euphoria Trouble-Shooting Guide</h2>
 
 <p>If you get stuck, here are some things you can do:</p>
 
@@ -14,17 +14,17 @@
 	<li>Read the relevant parts of the documentation, i.e. <a class="blue" href="refman.htm"><b>refman.doc</b></a> or <a class="blue" href="library.htm"><b>library.doc</b></a>.</li>
 	<li>
 		<p>Try running your program with the statements:</p>
-			<eucode>
-				with trace
-				trace(1)
-			</eucode>
+<eucode>
+with trace
+trace(1)
+</eucode>
 		<p>at the top of your main <b>.ex</b> file so you can see what's going on.</p>
 	</li>
 	<li>The <a href=http://www.RapidEuphoria.com/listserv.htm> <b>Euphoria mailing list</b></a> has a search facility. You can search the archive of all previous messages. There's a good chance that your question has already been discussed.</li>
 	<li>Post a message on the mailing list.</li>
 </ol>
 
-<h2><a name=commonp></a>Common Problems + Solutions</h2>
+<h3><a name=commonp></a>Common Problems + Solutions</h3>
 
 <p>Here are some commonly reported problems (<strong>P:</strong>) and their solutions (<strong>S:</strong>).</p>
 
@@ -36,11 +36,11 @@
 <tr valign="top">
 	<td>S:</td>
 	<td><p>The console window will only appear if required, and will disappear immediately when your program finishes execution. Perhaps you should code something like:</p>
-		<eucode>
-		        puts(1, "\nPress Enter\n")
-		        if getc(0) then
-		        end if
-		</eucode>
+<eucode>
+puts(1, "\nPress Enter\n")
+if getc(0) then
+end if
+</eucode>
 		<p>at the end of your program.</p>
 	</td>
 </tr>
@@ -52,11 +52,11 @@
 <tr valign="top">
 	<td>S:</td>
 	<td><p>Call free_console() just before your program terminates.</p>
-		<eucode>
-	        include dll.e
-	        
-	        free_console()
-		</eucode>
+<eucode>
+include dll.e
+
+free_console()
+</eucode>
 	</td>
 </tr>
 <tr valign="top">
@@ -81,15 +81,15 @@
    <b>Alt-Enter</b>. It will stay small after that. Your Euphoria program
    can keep the window small by executing:</p>
 <eucode>
-        if graphics_mode(-1) then
-        end if
+if graphics_mode(-1) then
+end if
 </eucode>
 <p>at the start of execution. This may cause some brief screen
    flicker. Your program can force a text window to be full-screen 
    by executing:</p>
 <eucode>
-        if graphics_mode(3) then
-        end if
+if graphics_mode(3) then
+end if
 </eucode>
       </td>
 </tr>
@@ -198,8 +198,8 @@
 	<td>When your program is finished, it should call the function
   graphics_mode(-1) to set the DOS window back to normal. e.g.
 <eucode>
-        if graphics_mode(-1) then
-        end if
+if graphics_mode(-1) then
+end if
 </eucode>
   </td>
 </tr>
@@ -260,7 +260,7 @@
    input</b>, which is normally the <b>keyboard</b>. The line will always
    have <b>\n</b> on the end. To remove the trailing \n character do:</p>
 <eucode>
-        line = line[1..length(line)-1]
+line = line[1..length(line)-1]
 </eucode>
 <p>Also see <font color="#006699"><b>prompt_string()</b></font>
    in <font color="#5500FF"><b>get.e</b></font>.</p>   </td>
@@ -310,7 +310,7 @@
 	<td><p>Use <font color="#006699"><b>sprintf()</b></font> in
    <font color="#5500FF"><b>library.doc</b></font>. e.g.</p>
 <eucode>
-        string = sprintf("%d", number)
+string = sprintf("%d", number)
 </eucode>
 <p>Besides <b>%d</b>, you can also try other formats, such as
    <b>%x</b> (Hex) or <b>%f</b> (floating-point).</p>
@@ -362,12 +362,12 @@
    need to put braces around your string so it is seen as a single value to
    be printed, e.g. you wrote:</p>
 
-	<eucode>
-	        printf(1, "Hello %s", mystring)
-	</eucode>
+<eucode>
+printf(1, "Hello %s", mystring)
+</eucode>
 	<p>where you should have said:</p>
 <eucode>
-        printf(1, "Hello %s", {mystring})
+printf(1, "Hello %s", {mystring})
 </eucode>
 	</td>
 </tr>
@@ -385,7 +385,7 @@
    more digits you have to use <font color="#006699"><b>printf()</b></font>.
    For example,</p>
 <eucode>
-        printf(1, "%.15f", 1/3)
+printf(1, "%.15f", 1/3)
 </eucode>
 <p>This will display 15 digits.</p>
    </td>
@@ -399,12 +399,12 @@
 	<td><p>When declaring subroutine parameters, Euphoria requires you to
    provide an explicit type for each individual parameter. e.g.</p>
 <eucode>
-        procedure foo(integer x, y)         -- WRONG
-        procedure foo(integer x, integer y) -- RIGHT
+procedure foo(integer x, y)         -- WRONG
+procedure foo(integer x, integer y) -- RIGHT
 </eucode>
 <p>In all other contexts it is ok to make a list:</p>
 <eucode>
-        atom a, b, c, d, e
+atom a, b, c, d, e
 </eucode>
    </td>
 </tr>

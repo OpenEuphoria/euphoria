@@ -34,41 +34,41 @@
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 x = compare({1,2,{3,{4}},5}, {2-1,1+1,{3,{4}},6-1})
 -- identical, x is 0
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 if compare("ABC", "ABCD") < 0 then   -- -1
     -- will be true: ABC is "less" because it is shorter
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 x = compare({12345, 99999, -1, 700, 2},
             {12345, 99999, -1, 699, 3, 0})
 -- x will be 1 because 700 > 699
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 4:"
   description=""
  >
-<_eucode>
+<eucode>
 x = compare('a', "a")
 -- x will be -1 because 'a' is an atom
 -- while "a" is a sequence
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#equal\">equal</a>, 
@@ -141,22 +141,22 @@ x = compare('a', "a")
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 if equal(PI, 3.14) then
     puts(1, "give me a better value for PI!\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 if equal(name, "George") or equal(name, "GEORGE") then
     puts(1, "name is George\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#compare\">compare</a>,
@@ -184,21 +184,21 @@ end if
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 location = find(11, {5, 8, 11, 2, 3})
 -- location is set to 3
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 names = {"fred", "rob", "george", "mary", ""}
 location = find("mary", names)
 -- location is set to 4
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#find_from\">find_from</a>,
@@ -228,21 +228,21 @@ location = find("mary", names)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 location = find_from(11, {11, 8, 11, 2, 3}, 2)
 -- location is set to 3
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 names = {"mary", "rob", "george", "mary", ""}
 location = find_from("mary", names, 3)
 -- location is set to 4
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#find\">find</a>,
@@ -271,10 +271,10 @@ s2 = find_all(x, s1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = find_all('A', "ABCABAB")
 -- s is {1,4,6}
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="find_any">
@@ -301,10 +301,10 @@ i = find_any(s1, s2)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 location = find_any("aeiou", "John Doe")
 -- location is 2
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -337,10 +337,10 @@ i2 = find_any_from(s1, s2, i1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 location = find_any_from("aeiou", "John Smith", 3)
 -- location is 8
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -366,18 +366,18 @@ s4 = find_replace(s1, s2, s3, i)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = find_replace("the", "THE", "the cat ate the food under the table", 0)
 -- s is "THE cat ate THE food under THE table"
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = find_replace("the", "THE", "the cat ate the food under the table", 2)
 -- s is "THE cat ate THE food under the table"
-</_eucode>
+</eucode>
 </table>
 
 
@@ -401,11 +401,11 @@ s = find_replace("the", "THE", "the cat ate the food under the table", 2)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 location = match("pho", "Euphoria")
 -- location is set to 3
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#find\">find</a>,
@@ -434,10 +434,10 @@ s2 = match_all(x, s1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = find_all("the", "the dog chased the cat under the table.")
 -- s is {1,16,30}
-</_eucode>
+</eucode>
 </table>
 
 
@@ -463,11 +463,11 @@ s = find_all("the", "the dog chased the cat under the table.")
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 location = match_from("pho", "phoEuphoria", 4)
 -- location is set to 6
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#find\">find</a>,
@@ -497,19 +497,19 @@ the first element of s that matches. If unsuccessful return 0."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 location = rfind(11, {5, 8, 11, 2, 11, 3})
 -- location is set to 5
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 names = {"fred", "rob", "rob", "george", "mary"}
 location = rfind("rob", names)
 -- location is set to 3
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="rfind_from">
@@ -532,19 +532,19 @@ return 0. i2 may have any value from 1 to the length of s plus 1."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 location = rfind_from(11, {11, 8, 11, 12, 11}, 4)
 -- location is set to 3
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 names = {"fred", "rob", "rob", "george", "mary", "rob"}
 location = rfind_from("rob", names, 5)
 -- location is set to 3
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -571,10 +571,10 @@ the element number of s2 where the matching slice begins, otherwise return 0."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 location = rmatch("the", "the dog ate the steak from the table.")
 -- location is set to 28 (3rd the)
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -602,10 +602,10 @@ otherwise return 0. i2 may have any value from 1 to the length of s2 plus 1."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 location = rmatch_from("the", "the dog ate the steak from the table.", 25)
 -- location is set to 13 (2rd the)
-</_eucode>
+</eucode>
 </table>
 
 
@@ -631,25 +631,25 @@ location = rmatch_from("the", "the dog ate the steak from the table.", 25)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 x = 0 & sort({7,5,3,8}) & 0
 -- x is set to {0, 3, 5, 7, 8, 0}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 y = sort({"Smith", "Jones", "Doe", 5.5, 4, 6})
 -- y is {4, 5.5, 6, "Doe", "Jones", "Smith"}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 database = sort({{"Smith",   95.0, 29},
                  {"Jones",   77.2, 31},
                  {"Clinton", 88.7, 44}})
@@ -663,7 +663,7 @@ database = sort({{"Smith",   95.0, 29},
                 {"Jones",   77.2, 31},
                 {"Smith",   95.0, 29}}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_srch.htm#custom_sort\">custom_sort</a>,
@@ -709,21 +709,21 @@ In DOS \"*ABC.*\" will match <b><i>all</i></b> files.
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = wildcard_file("AB*CD.?", "aB123cD.e")
 -- i is set to 1 on DOS or Windows, 0 on Linux or FreeBSD
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = wildcard_file("AB*CD.?", "abcd.ex")
 -- i is set to 0 on all systems, 
 -- because the file type has 2 letters not 1
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>bin\search.ex</b></font>"
@@ -766,9 +766,9 @@ i = wildcard_file("AB*CD.?", "abcd.ex")
 If you want to detect a pattern anywhere within a string,
  add * to each end of the pattern:"
  >
-<_eucode>
+<eucode>
 i = wildcard_match('*' & pattern & '*', string)
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
@@ -779,29 +779,29 @@ i = wildcard_match('*' & pattern & '*', string)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = wildcard_match("A?B*", "AQBXXYY")
 -- i is 1 (TRUE)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = wildcard_match("*xyz*", "AAAbbbxyz")
 -- i is 1 (TRUE)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 i = wildcard_match("A*B*C", "a111b222c")
 -- i is 0 (FALSE) because upper/lower case doesn't match
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>bin\search.ex</b></font>"

@@ -93,20 +93,20 @@
  <a href="lib_dbg.htm#trace">trace()</a> statement.
  You could simply say:
 
-<_eucode>
+<eucode>
         with trace
         trace(1)
-</_eucode>
+</eucode>
 
  at the top of your program, so you can start tracing from the beginning of
  execution. More commonly, you will want to trigger tracing when a certain
  routine is entered, or when some condition arises. e.g.
 
-<_eucode>
+<eucode>
         if x < 0 then
             trace(1)
         end if
-</_eucode>
+</eucode>
 
 <p>
  You can turn off tracing by executing a
@@ -127,7 +127,7 @@
  assigned to the variable is the strange one that you are interested in.
  e.g.
 
-<_eucode>
+<eucode>
         type positive_int(integer x)
             if x = 99 then
                 trace(1) -- how can this be???
@@ -136,7 +136,7 @@
                 return x > 0
             end if
         end type
-</_eucode>
+</eucode>
 
 <p>
  When positive_int() returns,
@@ -452,9 +452,9 @@ that you see in <b>ctrace.out</b>.
  Each sample requires 4 bytes of memory and buffer space is normally reserved
  for 25000 samples. If you need more than 25000 samples you can request it:
 
-<_eucode>
+<eucode>
         with profile_time 100000
-</_eucode>
+</eucode>
 
  will reserve space for 100000 samples (for example). If the buffer overflows
  you'll see a warning at the top of <font color="#993333"><b>ex.pro</b></font>.
@@ -485,11 +485,11 @@ that you see in <b>ctrace.out</b>.
  to advance. The statements executed just after the point where the clock
  advances might <font color="#CC0099"><_ba><i>never</i></_ba></font> be
  sampled, which could give you a very distorted picture. e.g.
-<_eucode>
+<eucode>
         while time() < LIMIT do
         end while
         x += 1 -- This statement will never be sampled
-</_eucode>
+</eucode>
 
 <p>
  Sometimes you will see a significant percentage beside a return statement.

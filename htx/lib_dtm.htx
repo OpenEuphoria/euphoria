@@ -131,11 +131,11 @@ a date may result in a different day of month number due to leap year."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d2 = add(d1, 35, SECONDS) -- add 35 seconds to d1
 d2 = add(d1, 7, WEEKS)    -- add 7 weeks to d1
 d2 = add(d1, 19, YEARS)   -- add 19 years to d1
-</_eucode>
+</eucode>
 
  <_2clist
    name = "See Also:"
@@ -168,13 +168,13 @@ i = diff(dt1, dt2)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d1 = now()
 sleep(15)  -- sleep for 15 seconds
 d2 = now()
 
 i = diff(d1, d2) -- i is 15
-</_eucode>
+</eucode>
  <_2clist
    name = "See Also:"
    description="<a href=\"#add\">add</a>,
@@ -205,10 +205,10 @@ i = dow(dt)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d = new(2008, 5, 2, 0, 0, 0)
 day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="doy">
@@ -229,10 +229,10 @@ i = doy(dt)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d = new(2008, 5, 2, 0, 0, 0)
 day = doy(d) -- day is 123
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="format">
@@ -282,21 +282,21 @@ s2 = format(dt, s1)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 d = new(2008, 5, 2, 12, 58, 32)
 s = format(d, "%Y-%m-%d %H:%M:%S")
 -- s is "2008-05-02 12:58:32"
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 d = new(2008, 5, 2, 12, 58, 32)
 s = format(d, "%A, %B %d '%y %H:%M%p")
 -- s is "Friday, May 2 '08 12:58PM"
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"#to_unix\">to_unix</a>"
@@ -324,10 +324,10 @@ dt = from_date(s)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d = from_date(date())
 -- d is the current date and time
-</_eucode>
+</eucode>
 <_2clist
  name="See Also:"
  description="<a href=\"lib_os.htm#date\">date</a>,
@@ -356,10 +356,10 @@ dt = from_unix(i)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d = from_unix(0)
 -- d is 1970-01-01 00:00:00  (zero seconds since EPOCH)
-</_eucode>
+</eucode>
 <_2clist
  name="See Also:"
  description="<a href=\"#to_unix\">to_unix</a>,
@@ -394,10 +394,10 @@ i6 is the second (0-59)"
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 dt = new(2010, 1, 1, 0, 0, 0)
 -- dt is Jan 1st, 2010
-</_eucode>
+</eucode>
 <_2clist
  name="See Also:"
  description="<a href=\"#from_date\">from_date</a>,
@@ -425,10 +425,10 @@ dt = now()
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 dt = now()
 -- dt is the current date and time
-</_eucode>
+</eucode>
 <_2clist
  name="See Also:"
  description="<a href=\"#from_date\">from_date</a>,
@@ -463,11 +463,11 @@ adding and subtracting date intervals"
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 dt2 = subtract(dt1, 18, MINUTES) -- subtract 18 minutes from dt1
 dt2 = subtract(dt1, 7, MONTHS)   -- subtract 7 months from dt1
 dt2 = subtract(dt1, 12, HOURS)   -- subtract 12 hours from dt1
-</_eucode>
+</eucode>
  <_2clist
    name = "See Also:"
    description="<a href=\"#add\">add</a>,
@@ -494,10 +494,10 @@ i = to_unix(dt)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 secs_since_epoch = to_unix(now())
 -- secs_since_epoch is equal to the current seconds since epoch
-</_eucode>
+</eucode>
 <_2clist
  name="See Also:"
  description="<a href=\"#from_unix\">from_unix</a>,

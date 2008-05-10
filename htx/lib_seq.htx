@@ -46,7 +46,7 @@ The extra storage is allocated automatically and very
   name="Example 1:"
   description=" You can use append() to dynamically grow a sequence, e.g."
  >
-<_eucode>
+<eucode>
 sequence x
 
 x = {}
@@ -55,12 +55,12 @@ for i = 1 to 10 do
 end for
 -- x is now {1,2,3,4,5,6,7,8,9,10}
 
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=" Any kind of Euphoria object can be appended to a sequence, e.g."
  >
-<_eucode>
+<eucode>
 sequence x, y, z
 
 x = {"fred", "barney"}
@@ -70,7 +70,7 @@ y = append(x, "wilma")
 z = append(append(y, "betty"), {"bam", "bam"})
 -- z is now {"fred", "barney", "wilma", "betty", {"bam", "bam"}}
 
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#prepend\">prepend</a>,
@@ -103,28 +103,28 @@ s2 = chunk(s1, i)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = chunk("5545112133234454", 4)
 -- s is {"5545", "1121", "3323", "4454"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = chunk("12345", 2)
 -- s is {"12", "34", "5"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 s = chunk({1,2,3,4,5,6}, 3)
 -- s is {{1,2,3}, {4,5,6}}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -151,10 +151,10 @@ s2 = flatten(s1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = flatten({{18, 19}, 45, {18.4, 29.3}})
 -- s is {18, 19, 45, 18.4, 29.3}
-</_eucode>
+</eucode>
 </table>
 
 
@@ -185,7 +185,7 @@ s1 can be any type of sequence, including nested sequences."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s2 = head("John Doe", 4)
 -- s2 is John
 
@@ -194,7 +194,7 @@ s2 = head("John Doe", 50)
 
 s2 = head({1, 5.4, "John", 30}, 3)
 -- s2 is {1, 5.4, "John"}
- </_eucode>
+ </eucode>
 
 <_2clist
   name="See Also:"
@@ -230,19 +230,19 @@ x is inserted as a new element in s1, so that the length of the new sequence is 
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = insert("John Doe", " Middle", 5)
 -- s is {'J','o','h','n'," Middle ",'D','o','e'}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = insert({10,30,40}, 20, 2)
 -- s is {10,20,30,40}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -277,19 +277,19 @@ s2 = splice(s1, x, i)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = splice("John Doe", " Middle", 5)
 -- s is "John Middle Doe"
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = splice({10,30,40}, 20, 2)
 -- s is {10,20,30,40}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -322,10 +322,10 @@ s3 = join(s1, s2)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 result = join({"John", "Middle", "Doe"}, " ")
 -- result is "John Middle Doe"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -361,26 +361,26 @@ result = join({"John", "Middle", "Doe"}, " ")
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 length({{1,2}, {3,4}, {5,6}})   -- 3
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 length("")    -- 0
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 length({})    -- 0
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_type.htm#sequence\">sequence</a>"
@@ -407,7 +407,7 @@ length({})    -- 0
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = lower("Euphoria")
 -- s is "euphoria"
 
@@ -417,7 +417,7 @@ a = lower('B')
 s = lower({"Euphoria", "Programming"})
 -- s is {"euphoria", "programming"}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#upper\">upper</a>"
@@ -452,7 +452,7 @@ s1 can be any type of sequence, including nested sequences."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s2 = mid("John Middle Doe", 6, 6)
 -- s2 is Middle
 
@@ -461,7 +461,7 @@ s2 = left("John Middle Doe", 6, 50)
 
 s2 = left({1, 5.4, "John", 30}, 2, 2)
 -- s2 is {5.4, "John"}
- </_eucode>
+ </eucode>
 
 <_2clist
   name="See Also:"
@@ -497,18 +497,18 @@ if you wish to also truncate long sequences."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = pad_head("ABC", 6)
 -- s is "   ABC"
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = pad_head("ABC", {6, '-'})
 -- s is "---ABC"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -542,18 +542,18 @@ if you wish to also truncate long sequences."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = pad_tail("ABC", 6)
 -- s is "ABC   "
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = pad_tail("ABC", {6, '-'})
 -- s is "ABC---"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -591,26 +591,26 @@ The case where s1 and s2 are the same variable is handled
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 prepend({1,2,3}, {0,0})   -- {{0,0}, 1, 2, 3}
 
 -- Compare with concatenation:
 
 {0,0} & {1,2,3}           -- {0, 0, 1, 2, 3}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = {}
 for i = 1 to 10 do
     s = prepend(s, i)
 end for
 -- s is {10,9,8,7,6,5,4,3,2,1}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#append\">append</a>,
@@ -645,36 +645,36 @@ If x2 is a sequence, it must be a sequence of two integers representing start an
   name="Example 1 (Single Item):"
   description=""
  >
-<_eucode>
+<eucode>
 s = remove("Johnn Doe", 4)
 -- s is "John Doe"
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2 (Single Item):"
   description=""
  >
-<_eucode>
+<eucode>
 s = remove({1,2,3,3,4}, 4)
 -- s is {1,2,3,4}
-</_eucode>
+</eucode>
 <_2clist
   name="Example 3 (Range):"
   description=""
  >
-<_eucode>
+<eucode>
 s = remove("John Middle Doe", {6, 12})
 -- s is "John Doe"
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 4 (Range):"
   description=""
  >
-<_eucode>
+<eucode>
 s = remove({1,2,3,3,4,4}, {4, 5})
 -- s is {1,2,3,4}
-</_eucode>
+</eucode>
 </table>
 
 
@@ -704,20 +704,20 @@ s = remove({1,2,3,3,4,4}, {4, 5})
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 repeat(0, 10)      -- {0,0,0,0,0,0,0,0,0,0}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
 -- The interpreter will create only one copy of "JOHN"
 -- in memory
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#append\">append</a>,
@@ -753,19 +753,19 @@ To replace just one element, simply: s[index] = new_item"
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = replace("John Middle Doe", "Smith", 6, 11)
 -- s is "John Smith Doe"
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = replace({45.3, "John", 5, {10, 20}}, 25, 2, 3)
 -- s is {45.3, 25, {10, 20}}
-</_eucode>
+</eucode>
 
 </table>
 
@@ -795,34 +795,34 @@ s = replace({45.3, "John", 5, {10, 20}}, 25, 2, 3)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 reverse({1,3,5,7})          -- {7,5,3,1}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 reverse({99})               -- {99}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 4:"
   description=""
  >
-<_eucode>
+<eucode>
 reverse({})                 -- {}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#append\">append</a>,
@@ -859,7 +859,7 @@ s1 can be any type of sequence, including nested sequences."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s2 = slice("John Doe", 6, 8)
 -- s2 is Doe
 
@@ -874,7 +874,7 @@ s2 = slice({1,2,3,4,5}, 2, -1)
 
 s2 = slice({1,2,3,4,5}, 2, 0)
 -- s2 is {2,3,4,5}
- </_eucode>
+ </eucode>
 
 <_2clist
   name="See Also:"
@@ -910,10 +910,10 @@ s3 = split(s1, s2)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 result = split("John,Middle,Doe", ",")
 -- result is {"John", "Middle", "Doe"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -952,19 +952,19 @@ by s2 as a whole."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 result = split_adv("John,Middle,Doe", ",", 2, 0)
 -- result is {"John", "Middle,Doe"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 result = split_adv("One,Two|Three.Four", ".,|", 0, 1)
 -- result is {"One", "Two", "Three", "Four"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1000,7 +1000,7 @@ s1 can be any type of sequence, including nested sequences."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s2 = tail("John Doe", 3)
 -- s2 is Doe
 
@@ -1009,7 +1009,7 @@ s2 = tail("John Doe", 50)
 
 s2 = tail({1, 5.4, "John", 30}, 3)
 -- s2 is {5.4, "John", 30}
- </_eucode>
+ </eucode>
 
 <_2clist
   name="See Also:"
@@ -1036,10 +1036,10 @@ s3 = trim(s1, s2)"
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = trim("\r\nSentence read from a file\r\n", "\r\n")
 -- s is "Sentence read from a file"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1066,10 +1066,10 @@ s3 = trim_head(s1, s2)"
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
 -- s is "Sentence read from a file\r\n"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1095,10 +1095,10 @@ s3 = trim_tail(s1, s2)"
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
 -- s is "\r\nSentence read from a file"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1125,7 +1125,7 @@ s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = upper("Euphoria")
 -- s is "EUPHORIA"
 
@@ -1135,7 +1135,7 @@ a = upper('g')
 s = upper({"Euphoria", "Programming"})
 -- s is {"EUPHORIA", "PROGRAMMING"}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_seq.htm#lower\">lower</a>"
@@ -1160,19 +1160,19 @@ s2 = vslice(s1, i)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = vsplice({5,1}, {5,2}, {5,3}}, 2)
 -- s is {1,2,3}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = vsplice({5,1}, {5,2}, {5,3}}, 1)
 -- s is {5,5,5}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"

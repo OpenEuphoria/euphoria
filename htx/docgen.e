@@ -4,24 +4,54 @@
 include machine.e
 include get.e
 include wildcard.e
+
 global sequence current_file
 current_file = ""
+
 global integer current_line
 current_line = 0
+
 global constant SCREEN = 1
 global constant TRUE = 1, FALSE = 0, EOF = -1
 global sequence out_type
-global integer inPre, inEuCode, inTable
-inPre    = FALSE
-inEuCode = FALSE
-inTable  = FALSE   -- used for inEuCode
+global integer in_file, out_file, combined_file, file_header
+file_header = 0
 
-global integer in_file, out_file
+global constant FILE_NAME = 1, SECT_NUM = 2, SECTION_NAME = 3
+global sequence sec_nums, sections
+
+sec_nums = {0,0,0,0,0,0} -- h1-h6
+sections = {}
 
 global procedure quit(sequence msg)
     crash("DOC GEN ABORTED: %s\n" &
 	  "Inside file: %s:%d\n", {msg, current_file, current_line})
 end procedure
+
+global function secnum_seq(sequence sec_nums)
+    sequence result
+
+    result = ""
+    
+    for i = 6 to 1 by -1 do
+	if sec_nums[i] > 0 then
+	    for b = 1 to i  do
+		result = append(result, sprintf("%d", {sec_nums[b]}))
+	    end for
+	    return result
+	end if
+    end for
+    
+    return {}
+end function
+
+global function secnum_tag()
+    return join(secnum_seq(sec_nums), "_")
+end function
+
+global function secnum_text()
+    return join(secnum_seq(sec_nums), ".") & ". "
+end function
 
 global function whitespace(integer c)
 -- is c a whitespace character?
@@ -70,6 +100,8 @@ end procedure
 global procedure write(object text)
 -- write a series of characters to the output file
     puts(out_file, text)
+    if file_header = 0 then
+	puts(combined_file, text)
+    end if
 end procedure
-
 

@@ -43,7 +43,7 @@
  the power 300) to +1e300 with 15 decimal digits of accuracy. Here are some
  Euphoria objects:
 
-<_eucode>
+<eucode>
         -- examples of atoms:
         0
         1000
@@ -55,17 +55,17 @@
         {1, 2, {3, 3, 3}, 4, {5, {6}}}
         {{"jon", "smith"}, 52389, 97.25}
         {}                        -- the 0-element sequence
-</_eucode>
+</eucode>
 <p>
 
  Numbers can also be entered in hexadecimal. For example:
 
-<_eucode>
+<eucode>
         #FE             -- 254
         #A000           -- 40960
         #FFFF00008      -- 68718428168
         -#10            -- -16
-</_eucode>
+</eucode>
 <p>
 
  Only the capital letters A, B, C, D, E, F are allowed in hex numbers.
@@ -81,9 +81,9 @@
  expressions.  These expressions can be constant or evaluated at run-time.
  e.g.
 
-<_eucode>
+<eucode>
         {x+6, 9, y*w+2, sin(0.5)}
-</_eucode>
+</eucode>
 
 <p>
  The <font color="#CC0099"><b>"Hierarchical Objects"</b></font> part
@@ -139,9 +139,9 @@
  <font color="#993333"><b>sequence</b></font> of characters.
  It may be entered using quotes e.g.
 
-<_eucode>
+<eucode>
         "ABCDEFG"
-</_eucode>
+</eucode>
 
 <p>
  Character strings may be manipulated and
@@ -149,9 +149,9 @@
  string is entirely equivalent to the sequence:
 
 
-<_eucode>
+<eucode>
         {65, 66, 67, 68, 69, 70, 71}
-</_eucode>
+</eucode>
 
  which contains the corresponding ASCII codes. The Euphoria compiler
  will immediately convert "ABCDEFG" to the above sequence of numbers.
@@ -176,10 +176,10 @@
  individual character (which is an atom), and a character string of length-1
  (which is a sequence). e.g.
 
-<_eucode>
+<eucode>
         'B'   -- equivalent to the atom 66 - the ASCII code for B
         "B"   -- equivalent to the sequence {66}
-</_eucode>
+</eucode>
 
 <p>
  Again, 'B' is just a notation that is equivalent to typing 66. There aren't
@@ -222,9 +222,9 @@
  Comments are started by two dashes and extend to the end of the current line.
  e.g.
 
-<_eucode>
+<eucode>
         -- this is a comment
-</_eucode>
+</eucode>
 
 <p>
  Comments are ignored by the compiler and have no effect on execution speed.
@@ -232,9 +232,9 @@
 <p> 
  On the first line (only) of your program,
  you can use a special comment beginning with #!, e.g.
-<_eucode>
+<eucode>
         #!/home/rob/euphoria/bin/exu  
-</_eucode>
+</eucode>
 This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.
 If you make your file executable, you can run it, just by typing its name,
@@ -261,9 +261,9 @@ instead of exu.
  much as you would a single number. It can be copied, passed to a subroutine,
  or calculated upon as a unit. For example,
 
-<_eucode>
+<eucode>
         {1,2,3} + 5
-</_eucode>
+</eucode>
 
  is an expression that adds the sequence {1,2,3} and the atom 5 to get the
  resulting sequence {6,7,8}.
@@ -286,14 +286,14 @@ instead of exu.
  >= &nbsp; = &nbsp; != &nbsp;</b></font> each produce a 1 (true) or a
  0 (false) result.
 
-<_eucode>
+<eucode>
         8.8 < 8.7   -- 8.8 less than 8.7 (false)
         -4.4 > -4.3 -- -4.4 greater than -4.3 (false)
         8 <= 7      -- 8 less than or equal to 7 (false)
         4 >= 4      -- 4 greater than or equal to 4 (true)
         1 = 10      -- 1 equal to 10 (false)
         8.7 != 8.8  -- 8.7 not equal to 8.8 (true)
-</_eucode>
+</eucode>
 
 <p>
  As we will soon see you can also apply these operators to sequences.
@@ -316,7 +316,7 @@ instead of exu.
  are used to determine the
  "truth" of an expression. e.g.
 
-<_eucode>
+<eucode>
         1 and 1     -- 1 (true)
         1 and 0     -- 0 (false)
         0 and 1     -- 0 (false)
@@ -334,16 +334,16 @@ instead of exu.
 
         not 1       -- 0 (false)
         not 0       -- 1 (true)
-</_eucode>
+</eucode>
 
 <p>
  You can also apply these operators to numbers other than 1 or 0. The rule is:
  zero means false and non-zero means true. So for instance:
 
-<_eucode>
+<eucode>
         5 and -4    -- 1 (true)
         not 6       -- 0 (false)
-</_eucode>
+</eucode>
 
 <p>
  These operators can also be applied to sequences. See below.
@@ -368,14 +368,14 @@ instead of exu.
  The usual arithmetic operators are available: add, subtract, multiply,
  divide, unary minus, unary plus.
 
-<_eucode>
+<eucode>
         3.5 + 3  -- 6.5
         3 - 5    -- -2
         6 * 2    -- 12
         7 / 2    -- 3.5
         -8.1     -- -8.1
         +8       -- +8
-</_eucode>
+</eucode>
 
 <p>
  <a name=inf_nan></a>
@@ -423,9 +423,9 @@ instead of exu.
  same length. If one of these elements is itself a sequence then the same rule
  is applied again recursively. e.g.
 
-<_eucode>
+<eucode>
         x = -{1, 2, 3, {4, 5}}   -- x is {-1, -2, -3, {-4, -5}}
-</_eucode>
+</eucode>
 
 <p>
  If a binary (two-operand) operator has operands which are both sequences then
@@ -433,10 +433,10 @@ instead of exu.
  applied to corresponding elements taken from the two sequences to get a
  sequence of results. e.g.
 
-<_eucode>
+<eucode>
         x = {5, 6, 7, 8} + {10, 10, 20, 100}
         -- x is {15, 16, 27, 108}
-</_eucode>
+</eucode>
 
 <p>
  If a binary operator has one operand which is a sequence while the other is a
@@ -444,7 +444,7 @@ instead of exu.
  form a sequence of equal length to the sequence operand. The rules for
  operating on two sequences then apply. Some examples:
 
-<_eucode>
+<eucode>
         y = {4, 5, 6}
 
         w = 5 * y              -- w is {20, 25, 30}
@@ -467,15 +467,15 @@ instead of exu.
         -- note that the first '=' is assignment, and the
         -- second '=' is a relational operator that tests
         -- equality 
-</_eucode>
+</eucode>
 
 <b><font color="#006633"><_sul>Note:</_sul></font></b>
 When you wish to compare two strings (or other sequences), 
 you should <b>not</b> (as in some other languages) use the '=' operator:
 
-<_eucode>
+<eucode>
        if "APPLE" = "ORANGE" then  -- ERROR! 
-</_eucode>
+</eucode>
 
 '=' is treated as an operator, just like '+', '*' etc.,
 so it is applied to corresponding sequence elements, 
@@ -485,22 +485,22 @@ the result is an error. Either way you'll get an error, since an
 if-condition must be an atom, not a sequence.
 Instead you should use the equal() built-in routine:
 
-<_eucode>
+<eucode>
        if equal("APPLE", "ORANGE") then  -- CORRECT
-</_eucode>
+</eucode>
 
 In general, you can do relational comparisons using the compare() 
 built-in routine:
 
-<_eucode>
+<eucode>
        if compare("APPLE", "ORANGE") = 0 then  -- CORRECT
-</_eucode>
+</eucode>
 
 You can use compare() for other comparisons as well:
-<_eucode>
+<eucode>
        if compare("APPLE", "ORANGE") < 0 then  -- CORRECT
            -- enter here if "APPLE" is less than "ORANGE" (TRUE)
-</_eucode>
+</eucode>
 
 
 <p>
@@ -521,9 +521,9 @@ You can use compare() for other comparisons as well:
  For example, if x contains {5, 7.2, 9, 0.5, 13} then x[2] is 7.2. Suppose we
  assign something different to x[2]:
 
-<_eucode>
+<eucode>
         x[2] = {11,22,33}
-</_eucode>
+</eucode>
 
 <p>
  Then x becomes: {5, {11,22,33}, 9, 0.5, 13}. Now if we ask for x[2] we get
@@ -536,13 +536,13 @@ You can use compare() for other comparisons as well:
  two dimensional array, common in other languages, can be easily represented
  with a sequence of sequences:
 
-<_eucode>
+<eucode>
         x = {
              {5, 6, 7, 8, 9},      -- x[1]
              {1, 2, 3, 4, 5},      -- x[2]
              {0, 1, 0, 1, 0}       -- x[3]
             }
-</_eucode>
+</eucode>
 
  where we have written the numbers in a way that makes the structure
  clearer. An expression of the form x[i][j] can be used to access any element.
@@ -554,14 +554,14 @@ You can use compare() for other comparisons as well:
  strings, structures, arrays of structures etc. can also be handled easily and
  flexibly:
 
-<_eucode>
+<eucode>
  3-D array:
         y = {
              {{1,1}, {3,3}, {5,5}},
              {{0,0}, {0,1}, {9,1}},
              {{-1,9},{1,1}, {2,2}}
             }
-</_eucode>
+</eucode>
 
 <blockquote>
      y[2][3][1] is 9
@@ -570,9 +570,9 @@ You can use compare() for other comparisons as well:
 <p>
  Array of strings:
 
-<_eucode>
+<eucode>
         s = {"Hello", "World", "Euphoria", "", "Last One"}
-</_eucode>
+</eucode>
 
 <blockquote>
      s[3] is "Euphoria" <br>
@@ -582,14 +582,14 @@ You can use compare() for other comparisons as well:
 <p>
  A Structure:
 
-<_eucode>
+<eucode>
         employee = {
                     {"John","Smith"},
                     45000,
                     27,
                     185.5
                    }
-</_eucode>
+</eucode>
 
 <blockquote>
      To access "fields" or elements within a structure it is good
@@ -599,14 +599,14 @@ You can use compare() for other comparisons as well:
 
 </blockquote>
 
-<_eucode>
+<eucode>
         constant NAME = 1
         constant FIRST_NAME = 1, LAST_NAME = 2
 
         constant SALARY = 2
         constant AGE = 3
         constant WEIGHT = 4
-</_eucode>
+</eucode>
 
 <blockquote>
      You could then access the person's name with employee[NAME], or if you
@@ -616,14 +616,14 @@ You can use compare() for other comparisons as well:
 <p>
  Array of structures:
 
-<_eucode>
+<eucode>
         employees = {
                      {{"John","Smith"}, 45000, 27, 185.5},   -- a[1]
                      {{"Bill","Jones"}, 57000, 48, 177.2},   -- a[2]
 
                      -- .... etc.
                     }
-</_eucode>
+</eucode>
 
 <blockquote>
      employees[2][SALARY] would be 57000.
@@ -631,45 +631,45 @@ You can use compare() for other comparisons as well:
 
 The length() built-in function will tell you the length of a sequence.
 So the last element of a sequence s, is:
-<_eucode>
+<eucode>
         s[length(s)]
-</_eucode>
+</eucode>
 A short-hand for this is:
-<_eucode>
+<eucode>
         s[$]
-</_eucode>
+</eucode>
 Similarly,
-<_eucode>
+<eucode>
         s[length(s)-1]
-</_eucode>
+</eucode>
 can be simplified to:
-<_eucode>
+<eucode>
         s[$-1]
-</_eucode>
+</eucode>
 
 The $ symbol equals the length of the sequence. $ may only appear
 between square braces. Where there's nesting, e.g.:
-<_eucode>
+<eucode>
         s[$ - t[$-1] + 1]
-</_eucode>
+</eucode>
 The first $ above refers to the length of s, while the second $ 
 refers to the length of t (as you'd probably expect).
 An example where $ can save a lot of typing, make your code clearer,
 and probably even faster is:
-<_eucode>
+<eucode>
         longname[$][$] -- last element of the last element
-</_eucode>
+</eucode>
 Compare that with the equivalent:
-<_eucode>
+<eucode>
         longname[length(longname)][length(longname[length(longname)])]
-</_eucode>
+</eucode>
 
 <b><font color="#006633"><_sul>Subscripting and function side-effects:</_sul></font></b>
 In an assignment statement, with left-hand-side subscripts:
 
-<_eucode>
+<eucode>
     lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr
-</_eucode>
+</eucode>
 
 The expressions are evaluated, and any subscripting is performed, 
 from left to right. It is possible to have function calls 
@@ -750,12 +750,12 @@ regardless of any side-effects that may have changed lhs_var.
 
 <p>
 We can also use the $ shorthand with slices, e.g.
-<_eucode>
+<eucode>
         s[2..$]
         s[5..$-2]
         s[$-5..$]
         s[$][1..floor($/2)] -- first half of the last element of s
-</_eucode>
+</eucode>
 
 
 <a name=27></a>
@@ -772,7 +772,7 @@ We can also use the $ shorthand with slices, e.g.
  sequence with a length equal to the sum of the lengths of the concatenated
  objects (where atoms are considered here to have length 1). e.g.
 
-<_eucode>
+<eucode>
         {1, 2, 3} & 4              -- {1, 2, 3, 4}
 
         4 & 5                      -- {4, 5}
@@ -782,15 +782,15 @@ We can also use the $ shorthand with slices, e.g.
         x = {}
         y = {1, 2}
         y = y & x                  -- y is still {1, 2}
-</_eucode>
+</eucode>
 
 <p>
 You can delete element i of any sequence s by concatenating the
 parts of the sequence before and after i:
 
-<_eucode>
+<eucode>
 	s = s[1..i-1] & s[i+1..length(s)]
-</_eucode>
+</eucode>
 
 This works even when i is 1 or length(s), since s[1..0] is a legal empty slice,
 and so is s[length(s)+1..length(s)].
@@ -808,16 +808,16 @@ and so is s[length(s)+1..length(s)].
 
  Finally, sequence-formation, using braces and commas:
 
-<_eucode>
+<eucode>
         {a, b, c, ... }
-</_eucode>
+</eucode>
 
  is also an operator. It takes n operands, where n is 0 or more, and makes an
  n-element sequence from their values. e.g.
 
-<_eucode>
+<eucode>
         x = {apple, orange*2, {1,2,3}, 99/4+foobar}
-</_eucode>
+</eucode>
 <p>
  The sequence-formation operator is listed at the bottom of the
  <a href="refman_2.htm#2A">precedence chart</a>.
@@ -862,12 +862,12 @@ and so is s[length(s)+1..length(s)].
  of their own, but length just gives you the "top-level" count. You'll get an
  error if you ask for the length of an atom. e.g.
 
-<_eucode>
+<eucode>
         length({5,6,7})             -- 3
         length({1, {5,5,5}, 2, 3})  -- 4 (not 6!)
         length({})                  -- 0
         length(5)                   -- error!
-</_eucode>
+</eucode>
 
 <a name=292></a>
 <br>
@@ -879,11 +879,11 @@ and so is s[length(s)+1..length(s)].
 
  <a class="brown" href="lib_seq.htm#repeat"><b>repeat()</b></a>
  makes a sequence that consists of an item repeated count times. e.g.
-<_eucode>
+<eucode>
         repeat(0, 100)         -- {0,0,0,...,0}   i.e. 100 zeros
         repeat("Hello", 3)     -- {"Hello", "Hello", "Hello"}
         repeat(99,0)           -- {}
-</_eucode>
+</eucode>
 
 <p>
  The item to be repeated can be any atom or sequence.
@@ -906,14 +906,14 @@ and so is s[length(s)+1..length(s)].
  creates a new sequence by adding an element to the beginning of a
  sequence s. e.g.
 
-<_eucode>
+<eucode>
         append({1,2,3}, 4)         -- {1,2,3,4}
         prepend({1,2,3}, 4)        -- {4,1,2,3}
 
         append({1,2,3}, {5,5,5})   -- {1,2,3,{5,5,5}}
         prepend({}, 9)             -- {9}
         append({}, 9)              -- {9}
-</_eucode>
+</eucode>
 
 <p>
  The length of the new sequence is always 1 greater than the length of the
@@ -926,7 +926,7 @@ and so is s[length(s)+1..length(s)].
  to the concatenate operator, <font color="#993333"><b>&</b></font>,
  but there are clear differences. e.g.
 
-<_eucode>
+<eucode>
         -- appending a sequence is different
         append({1,2,3}, {5,5,5})   -- {1,2,3,{5,5,5}}
         {1,2,3} & {5,5,5}          -- {1,2,3,5,5,5}
@@ -934,7 +934,7 @@ and so is s[length(s)+1..length(s)].
         -- appending an atom is the same
         append({1,2,3}, 5)         -- {1,2,3,5}
         {1,2,3} & 5                -- {1,2,3,5}
-</_eucode>
+</eucode>
 
 <a name=2A></a>
 <font color="#FF0099" size=+1>
@@ -1095,14 +1095,14 @@ and so is s[length(s)+1..length(s)].
  <font color="#993333"><b>reserved words</b></font>
  have special meaning in Euphoria and may not be used as identifiers:
 
-<b><_eucode>
+<b><eucode>
     and            end             include          to
     by             exit            not              type
     constant       for             or               while
     do             function        procedure        with
     else           global          return           without
     elsif          if              then             xor
-</_eucode></b>
+</eucode></b>
 
 <p>
  The Euphoria editor displays these words in blue.
@@ -1130,7 +1130,7 @@ and so is s[length(s)+1..length(s)].
         These perform some computation and may have a list of parameters,
         e.g.
 
-<_eucode>
+<eucode>
         procedure empty()
         end procedure
 
@@ -1138,7 +1138,7 @@ and so is s[length(s)+1..length(s)].
             position(x, y)
             puts(1, '*')
         end procedure
-</_eucode>
+</eucode>
 
 <p>
         There are a fixed number of named parameters, but this is not
@@ -1159,10 +1159,10 @@ and so is s[length(s)+1..length(s)].
 <dd>
         The interpreter does not actually copy sequences or
         floating-point numbers unless it becomes necessary. For example,
-<_eucode>
+<eucode>
             y = {1,2,3,4,5,6,7,8.5,"ABC"}
             x = y
-</_eucode>
+</eucode>
         The statement x = y does not actually cause a new copy of y to be
         created. Both x and y will simply "point" to the same sequence. If we
         later perform x[3] = 9, then a separate sequence will be created for x
@@ -1183,7 +1183,7 @@ and so is s[length(s)+1..length(s)].
         These are just like procedures, but they return a value, and can be
         used in an expression, e.g.
 
-<_eucode>
+<eucode>
         function max(atom a, atom b)
             if a >= b then
                 return a
@@ -1191,15 +1191,15 @@ and so is s[length(s)+1..length(s)].
                 return b
             end if
         end function
-</_eucode>
+</eucode>
 
 <p>
         Any Euphoria object can be returned.  You can, in effect, have
         multiple return values, by returning a sequence of objects. e.g.
 
-<_eucode>
+<eucode>
         return {x_pos, y_pos}
-</_eucode>
+</eucode>
 
 <p>
         We will use the general term "subroutine", or simply "routine" when a
@@ -1233,7 +1233,7 @@ and so is s[length(s)+1..length(s)].
 
         These may be assigned values during execution e.g.
 
-<_eucode>
+<eucode>
         -- x may only be assigned integer values
         integer x
         x = 25
@@ -1243,7 +1243,7 @@ and so is s[length(s)+1..length(s)].
         a = {}
         b = a
         c = 0
-</_eucode>
+</eucode>
 
 <p>
         When you declare a variable you name the variable (which protects you
@@ -1264,11 +1264,11 @@ and so is s[length(s)+1..length(s)].
         These are variables that are assigned an initial value that can
         never change e.g.
 
-<_eucode>
+<eucode>
         constant MAX = 100
         constant Upper = MAX - 10, Lower = 5
         constant name_list = {"Fred", "George", "Larry"}
-</_eucode>
+</eucode>
 
 <p>
         The result of any expression can be assigned to a constant, even one
@@ -1359,13 +1359,13 @@ you'd have repeat this process whenever a new version of the include
 file was released. Euphoria has a simpler way to solve this. Using
 an extension to the include statement, you can say for example:
 
-<_eucode>
+<eucode>
      include johns_file.e as john
      include bills_file.e as bill
 
      john:x += 1
      bill:x += 2
-</_eucode>
+</eucode>
 
 In this case, the variable x was declared in two different files,
 and you want to refer to both variables in your file.
@@ -1472,13 +1472,13 @@ file of the library.
 <p>
  Variable declarations have a type name followed by a list of the variables
  being declared. For example,
-<_eucode>
+<eucode>
         object a
 
         global integer x, y, z
 
         procedure fred(sequence q, sequence r)
-</_eucode>
+</eucode>
 
 <p>
  The types:
@@ -1540,7 +1540,7 @@ file of the library.
  <font color="#993333"><b>function ... end function</b></font>.
  For example,
 
-<_eucode>
+<eucode>
         type hour(integer x)
             return x >= 0 and x <= 23
         end type
@@ -1549,7 +1549,7 @@ file of the library.
 
         h1 = 10      -- ok
         h2 = 25      -- error! program aborts with a message
-</_eucode>
+</eucode>
 
 <p>
  Variables h1 and h2 can only be assigned integer values in the range 0 to 23
@@ -1563,9 +1563,9 @@ file of the library.
 <p>
  "hour" can be used to declare subroutine parameters as well:
 
-<_eucode>
+<eucode>
         procedure set_time(hour h)
-</_eucode>
+</eucode>
 
 <p>
  set_time() can only be called with a reasonable value for parameter h,
@@ -1748,30 +1748,30 @@ file of the library.
  the value of an expression to a simple
  variable, or to a subscript or slice of a variable. e.g.
 
-<_eucode>
+<eucode>
         x = a + b
 
         y[i] = y[i] + 1
 
         y[i..j] = {1, 2, 3}
-</_eucode>
+</eucode>
 
 <p>
  The previous value of the variable, or element(s) of the subscripted or
  sliced variable are discarded.  For example, suppose x was a 1000-element
  sequence that we had initialized with:
 
-<_eucode>
+<eucode>
         object x
 
         x = repeat(0, 1000)  -- a sequence of 1000 zeros
-</_eucode>
+</eucode>
 
  and then later we assigned an atom to x with:
 
-<_eucode>
+<eucode>
         x = 7
-</_eucode>
+</eucode>
 
  This is perfectly legal since x is declared as an
  <font color="#993333"><b>object</b></font>. The previous value
@@ -1804,30 +1804,30 @@ file of the library.
 
 <p> For example, instead of saying:
 
-<_eucode>
+<eucode>
       mylongvarname = mylongvarname + 1
-</_eucode>
+</eucode>
 You can say:
-<_eucode>
+<eucode>
       mylongvarname += 1
-</_eucode>
+</eucode>
 
 Instead of saying:
-<_eucode>
+<eucode>
       galaxy[q_row][q_col][q_size] = galaxy[q_row][q_col][q_size] * 10
-</_eucode>
+</eucode>
 You can say:
-<_eucode>
+<eucode>
       galaxy[q_row][q_col][q_size] *= 10
-</_eucode>
+</eucode>
 and instead of saying:
-<_eucode>
+<eucode>
       accounts[start..finish] = accounts[start..finish] / 10
-</_eucode>
+</eucode>
 You can say:
-<_eucode>
+<eucode>
       accounts[start..finish] /= 10
-</_eucode>
+</eucode>
 
 <p>
 In general, whenever you have an assignment of the form:
@@ -1861,9 +1861,9 @@ on the right side.
  A <font color="#993333"><b>procedure call</b></font> starts execution
  of a procedure, passing it an optional list of argument values. e.g.
 
-<_eucode>
+<eucode>
         plot(x, 23)
-</_eucode>
+</eucode>
 
 <a name=if></a>
 <font color="#FF0099" size=+1>
@@ -1879,7 +1879,7 @@ on the right side.
  be optional <font color="#993333"><b>elsif</b></font> and
  <font color="#993333"><b>else</b></font> clauses. e.g.
 
-<_eucode>
+<eucode>
         if a < b then
             x = 1
         end if
@@ -1902,7 +1902,7 @@ on the right side.
         else
             x = -1
         end if
-</_eucode>
+</eucode>
 
 <p>
  Notice that <font color="#993333"><_bq>elsif</_bq></font> is a contraction
@@ -1927,12 +1927,12 @@ The <font color="#993333"><b>if</b></font> and
  A <font color="#993333"><b>while statement</b></font> tests a condition
  to see if it is non-zero (true), and while it is true a loop is executed. e.g.
 
-<_eucode>
+<eucode>
         while x > 0 do
             a = a * 2
             x = x - 1
         end while
-</_eucode>
+</eucode>
 
 <a name=shortcir></a>
 <font color="#CC3366" size=+1>
@@ -1951,34 +1951,34 @@ The <font color="#993333"><b>if</b></font> and
  will be used.
  For example,
 
- <_eucode>
+ <eucode>
         if a < 0 and b > 0 then ...
- </_eucode>
+ </eucode>
 
  If a < 0 is false, then Euphoria will not bother to test if b is greater
  than 0. It will assume that the overall result is false. Similarly,
 
- <_eucode>
+ <eucode>
         if a < 0 or b > 0 then ...
- </_eucode>
+ </eucode>
 
  if a < 0 is true, then Euphoria will immediately decide that the result true,
  without testing the value of b.
 
 <p>
  In general, whenever we have a condition of the form:
-<_eucode>
+<eucode>
         A and B
-</_eucode>
+</eucode>
  where A and B can be any two expressions,
  Euphoria will take a short-cut when A is false and immediately
  make the overall result false, without even looking at expression B.
 
 <p>
  Similarly, with:
-<_eucode>
+<eucode>
         A or B
-</_eucode>
+</eucode>
  when A is true, Euphoria will skip the evaluation of expression B,
  and declare the result to be true.
 
@@ -1996,32 +1996,32 @@ The <font color="#993333"><b>if</b></font> and
  a run-time error. If Euphoria skips the evaluation of B, the error will not
  be discovered. For instance:
 
- <_eucode>
+ <eucode>
         if x != 0 and 1/x > 10 then  -- divide by zero error avoided
 
         while 1 or {1,2,3,4,5} do    -- illegal sequence result avoided
- </_eucode>
+ </eucode>
 
  B could even contain uninitialized variables, out-of-bounds subscripts etc.
 
 <p>
  This may look like sloppy coding, but in fact it often allows you to
  write something in a simpler and more readable way. For instance:
- <_eucode>
+ <eucode>
         if atom(x) or length(x)=1 then
- </_eucode>
+ </eucode>
 
  Without short-circuiting, you would have a problem when x was an atom,
  since length is not defined for atoms. With short-circuiting, length(x)
  will only be checked when x is a sequence. Similarly:
 
- <_eucode>
+ <eucode>
         -- find 'a' or 'A' in s
         i = 1
         while i <= length(s) and s[i] != 'a' and s[i] != 'A' do
              i += 1
         end while
- </_eucode>
+ </eucode>
 
  In this loop the variable i might eventually become
  greater than length(s). Without short-circuit evaluation, a subscript
@@ -2039,9 +2039,9 @@ The <font color="#993333"><b>if</b></font> and
  <font color="#993333"><_bq>while</_bq></font> conditions only.
  It is not used in other contexts. For example, the assignment statement:
 
- <_eucode>
+ <eucode>
         x = 1 or {1,2,3,4,5}  -- x should be set to {1,1,1,1,1}
- </_eucode>
+ </eucode>
 
  If short-circuiting were used here, we would set x to 1, and not even
  look at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used
@@ -2061,7 +2061,7 @@ The <font color="#993333"><b>if</b></font> and
  loop with a controlling <font color="#993333"><b>loop variable</b></font>
  that runs from an initial value up or down to some final value. e.g.
 
-<_eucode>
+<eucode>
         for i = 1 to 10 do
             ? i   -- ? is a short form for print()
         end for
@@ -2072,7 +2072,7 @@ The <font color="#993333"><b>if</b></font> and
                 ? {i, j}
             end for
         end for
-</_eucode>
+</eucode>
 
 <p>
  The <font color="#993333"><b>loop variable</b></font> is
@@ -2100,11 +2100,11 @@ The <font color="#993333"><b>if</b></font> and
  from a subroutine. If the subroutine is a function
  or type then a value must also be returned. e.g.
 
-<_eucode>
+<eucode>
         return
 
         return {50, "FRED", {}}
-</_eucode>
+</eucode>
 
 <a name=exit></a>
 <font color="#FF0099" size=+1>
@@ -2119,19 +2119,19 @@ The <font color="#993333"><b>if</b></font> and
  <a href="refman_2.htm#for">for-loop</a>. It causes immediate termination of
  the loop, with control passing to the first statement after the loop. e.g.
 
-<_eucode>
+<eucode>
         for i = 1 to 100 do
             if a[i] = x then
                 location = i
                 exit
             end if
         end for
-</_eucode>
+</eucode>
 
 <p>
  It is also quite common to see something like this:
 
-<_eucode>
+<eucode>
         constant TRUE = 1
 
         while TRUE do
@@ -2141,7 +2141,7 @@ The <font color="#993333"><b>if</b></font> and
             end if
             ...
         end while
-</_eucode>
+</eucode>
 
  i.e. an "infinite" while-loop that actually terminates via an
  <font color="#993333"><b>exit statement</b></font> at some arbitrary
@@ -2250,12 +2250,12 @@ containing the code. The first form of the include statement is:
 
 <p>
                    Some Examples:<br>
-<_eucode>
+<eucode>
                    include graphics.e
-</_eucode>
-<_eucode>
+</eucode>
+<eucode>
                    include \mylib\myroutines.e
-</_eucode>
+</eucode>
 <p>
 		   Any top-level code in the included file will be executed.
 <p>
@@ -2331,9 +2331,9 @@ containing the code. The first form of the include statement is:
                    enclose it in double-quotes, otherwise quotes are optional.
                    Also, be sure to double-up your backslashes.
                    For example:<br>
-<_eucode>
+<eucode>
                    include "c:\\program files\\myfile.e"
-</_eucode>
+</eucode>
 <p>
                    Other than possibly defining a new namespace identifier
                    (see below), an include statement will be quietly ignored 

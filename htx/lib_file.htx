@@ -55,10 +55,10 @@
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 ? {1, 2} + {3, 4}  -- will display {4, 6}
 
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -108,10 +108,10 @@ You can find out if the user has pressed control-c or
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 allow_break(0)  -- don't let the user kill me!
 
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#check_break\">check_break</a>"
@@ -152,13 +152,13 @@ affect the current directory of its parent process."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 if chdir("c:\\euphoria") then
     f = open("readme.doc", "r")
 else
     puts(1, "Error: No euphoria directory?\n")
 end if
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#current_dir\">current_dir</a>"
@@ -200,7 +200,7 @@ Neither control-c nor control-Break will be returned as input
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 k = get_key()
 if check_break() then
     temp = graphics_mode(-1)
@@ -209,7 +209,7 @@ if check_break() then
     abort(1)
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#allow_break\">allow_break</a>,
@@ -277,12 +277,12 @@ current directory, except under DOS/Windows, at the top-level of
   description=""
  >
 
-<_eucode>
+<eucode>
 sequence s
 s = current_dir()
 -- s would have "C:\EUPHORIA\DOC" if you were in that directory
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#dir\">dir</a>,
@@ -316,10 +316,10 @@ s2 = dirname(s1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 fname = dirname("/opt/euphoria/docs/readme.txt")
 -- fname is "/opt/euphoria/docs"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -364,7 +364,7 @@ Each entry contains the name, attributes and file size as well as
  You can refer to the elements of an entry with the following constants
  defined in <font color=\"#5500FF\"><b>file.e</b></font>:"
  >
-<_eucode>
+<eucode>
     global constant D_NAME = 1,
               D_ATTRIBUTES = 2,
                     D_SIZE = 3,
@@ -376,7 +376,7 @@ Each entry contains the name, attributes and file size as well as
                     D_HOUR = 7,
                   D_MINUTE = 8,
                   D_SECOND = 9
-</_eucode>
+</eucode>
 
 <_2clist
  name=""
@@ -384,14 +384,14 @@ Each entry contains the name, attributes and file size as well as
 "The attributes element is a string sequence containing
  characters chosen from:"
  >
-<_eucode>
+<eucode>
     'd' -- directory
     'r' -- read only file
     'h' -- hidden file
     's' -- system file
     'v' -- volume-id entry
     'a' -- archive file
-</_eucode>
+</eucode>
 
 <_2clist
  name=""
@@ -427,7 +427,7 @@ Under <font color=\"#CC3366\"><b>Linux/FreeBSD</b></font>, the only attribute
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 d = dir(current_dir())
 
 -- d might have:
@@ -440,7 +440,7 @@ d = dir(current_dir())
 
 d[3][D_NAME] would be "fred"
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>bin\search.ex</b></font>
@@ -479,10 +479,10 @@ s2 = filename(s1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 fname = filename("/opt/euphoria/docs/readme.txt")
 -- fname is "readme.txt"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -515,10 +515,10 @@ s2 = fileext(s1)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 fname = filename("/opt/euphoria/docs/readme.txt")
 -- fname is "txt"
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -561,7 +561,7 @@ where fn is the file number of a file open for writing or appending."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 f = open("logfile", "w")
 puts(f, "Record#1\n")
 puts(1, "Press Enter when ready\n")
@@ -572,7 +572,7 @@ flush(f)  -- This forces "Record #1" into "logfile" on disk.
 
 s = gets(0) -- wait for keyboard input
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#close\">close</a>,
@@ -598,12 +598,12 @@ s = gets(0) -- wait for keyboard input
  numeric value of that object. s will be a 2-element sequence:
  <b>{error status, value}</b>. Error status codes are:"
  >
-<_eucode>
+<eucode>
     GET_SUCCESS -- object was read successfully
     GET_EOF     -- end of file before object was read completely
     GET_FAIL    -- object is not syntactically correct
     GET_NOTHING -- nothing was read, even a partial object string, before end of input
-</_eucode>
+</eucode>
  
  <_2clist
   name=""
@@ -668,7 +668,7 @@ The value returned is not meaningful unless you have a
   description="Suppose your program asks the user to enter a number from the
   keyboard."
  >
-<_eucode>
+<eucode>
 -- If he types 77.5, get(0) would return:
 
 {GET_SUCCESS, 77.5}
@@ -677,7 +677,7 @@ The value returned is not meaningful unless you have a
 
 "77.5\n"
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>demo\mydata.ex</b></font>"
@@ -730,7 +730,7 @@ The value returned is not meaningful unless you have a
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 include get.e
 
 integer fn
@@ -752,7 +752,7 @@ end while
 close(fn)
 ? length(whole_file)  -- should match DIR size of "temp"
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#getc\">getc</a>,
@@ -882,7 +882,7 @@ In SVGA modes, DOS might set the wrong cursor position, after a call to
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 sequence buffer
 object line
 integer fn
@@ -903,12 +903,12 @@ while 1 do
     buffer = append(buffer, line)
 end while
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 object line
 
 puts(1, "What is your name?\n")
@@ -917,7 +917,7 @@ line = line[1..length(line)-1] -- get rid of \n character at end
 puts(1, '\n')   -- necessary
 puts(1, line & " is a nice name.\n")
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#getc\">getc</a>,
@@ -957,10 +957,10 @@ can have an exclusive lock, and that can happen only when no other
 process has any kind of lock on the file. file.e contains the following
 declaration:"
 >
-<_eucode>
+<eucode>
 global constant LOCK_SHARED = 1, 
 		LOCK_EXCLUSIVE = 2
-</_eucode>
+</eucode>
 
 <_2clist
  name=""
@@ -997,7 +997,7 @@ it repeatedly, before the lock request is granted."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 include misc.e
 include file.e
 integer v
@@ -1014,7 +1014,7 @@ end while
 puts(v, "Yet another visitor\n")
 unlock_file(v, {})
 close(v)
- </_eucode>
+ </eucode>
 
  <_2clist
   name="See Also:"
@@ -1104,7 +1104,7 @@ be increased in the future.
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 integer file_num, file_num95
 sequence first_line
 constant ERROR = 2
@@ -1125,7 +1125,7 @@ if file_num95 != -1 then
     puts(1, "it worked!\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#close\">close</a>,
@@ -1157,10 +1157,10 @@ PATHSEP
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 x = PATHSEP
 -- x is '/' or '\\' depending on platform
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1198,28 +1198,28 @@ file name + file extension, file name and file extension."
   name="Example 1:"
   description="DOS32/WIN32"
  >
-<_eucode>
+<eucode>
 info = pathinfo("C:\\euphoria\\docs\\readme.txt")
 -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description="Linux/FreeBSD"
  >
-<_eucode>
+<eucode>
 info = pathinfo("/opt/euphoria/docs/readme.txt")
 -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 3:"
   description="No extension"
  >
-<_eucode>
+<eucode>
 info = pathinfo("/opt/euphoria/docs/readme")
 -- info is {"/opt/euphoria/docs", "readme", "readme", ""}
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#dirname\">dirname</a>,
@@ -1267,12 +1267,12 @@ The coordinate system for displaying text is different from the one for
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 position(2,1)
 -- the cursor moves to the beginning of the second line from
 -- the top
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#get_position\">get_position</a>,
@@ -1340,30 +1340,30 @@ you can add some decoration, e.g. \"(%d)\" or \"$ %.2f\""
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 pretty_print(1, "ABC", {})    
 
 {65'A',66'B',67'C'}
- </_eucode>
+ </eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 pretty_print(1, {{1,2,3}, {4,5,6}}, {})  
           
 {
   {1,2,3},
   {4,5,6}
 }
- </_eucode>
+ </eucode>
 
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 pretty_print(1, {"Euphoria", "Programming", "Language"}, {2})  
 
 {
@@ -1372,13 +1372,13 @@ pretty_print(1, {"Euphoria", "Programming", "Language"}, {2})
   "Language"
 }
  
- </_eucode>
+ </eucode>
 
 <_2clist
   name="Example 4:"
   description=""
  >
-<_eucode>
+<eucode>
 puts(1, "word_list = ") -- moves cursor to column 13
 pretty_print(1, 
              {{"Euphoria", 8, 5.3}, 
@@ -1404,7 +1404,7 @@ word_list = {
                 }
             }
 
-</_eucode>
+</eucode>
 
 
 <_2clist
@@ -1436,20 +1436,20 @@ word_list = {
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 print(1, "ABC")  -- output is:  {65, 66, 67}
 puts(1, "ABC")   -- output is:  ABC
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 print(1, repeat({10,20}, 3))
 -- output is: {{10,20},{10,20},{10,20}}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#?\">?</a>,
@@ -1514,10 +1514,10 @@ If the field width is negative, e.g. %-5d then the value will be
   description=
 "Watch out for the following common mistake:"
 >
-<_eucode>
+<eucode>
     name="John Smith"
     printf(1, "%s", name)     -- error!
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
@@ -1526,10 +1526,10 @@ If the field width is negative, e.g. %-5d then the value will be
  of name is taken to be a separate value to be formatted. You must
  say this instead:"
  >
-<_eucode>
+<eucode>
     name="John Smith"
     printf(1, "%s", {name})   -- correct
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
@@ -1541,47 +1541,47 @@ If the field width is negative, e.g. %-5d then the value will be
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 rate = 7.875
 printf(myfile, "The interest rate is: %8.2f\n", rate)
 
       The interest rate is:     7.88
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 name="John Smith"
 score=97
 printf(1, "%15s, %5d\n", {name, score})
 
       John Smith,    97
 
- </_eucode>
+ </eucode>
 
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 printf(1, "%-10.4s $ %s", {"ABCDEFGHIJKLMNOP", "XXX"})
 
       ABCD       $ XXX
 
- </_eucode>
+ </eucode>
 
 <_2clist
   name="Example 4:"
   description=""
  >
-<_eucode>
+<eucode>
 printf(1, "%d  %e  %f  %g", 7.75) -- same value in different formats
 
       7  7.750000e+000  7.750000  7.75
 
- </_eucode>
+ </eucode>
 
 <_2clist
   name="See Also:"
@@ -1622,18 +1622,18 @@ printf(1, "%d  %e  %f  %g", 7.75) -- same value in different formats
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 age = prompt_number("What is your age? ", {0, 150})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 t = prompt_number("Enter a temperature in Celcius:\n", {})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#get\">get</a>,
@@ -1670,10 +1670,10 @@ t = prompt_number("Enter a temperature in Celcius:\n", {})
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 name = prompt_string("What is your name? ")
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#gets\">gets</a>,
@@ -1717,18 +1717,18 @@ name = prompt_string("What is your name? ")
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 puts(SCREEN, "Enter your first name: ")
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 puts(output, 'A')  -- the single byte 65 will be sent to output
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#printf\">printf</a>,
@@ -1760,22 +1760,22 @@ contents as 1 sequence."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 data = read_file("myfile.txt")
 -- data contains the entire contents of 'myfile.txt'
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 fh = open("myfile.txt", "r")
 data = read_file(fh)
 close(fh)
 
 -- data contains the entire contents of 'myfile.txt'
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1809,24 +1809,24 @@ of lines."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 data = read_lines("myfile.txt")
 -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- {"Line 1", "Line 2", "Line 3"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 fh = open("myfile.txt", "r")
 data = read_lines(fh)
 close(fh)
 
 -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- {"Line 1", "Line 2", "Line 3"}
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -1879,7 +1879,7 @@ close(fh)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 include file.e
 
 integer fn
@@ -1892,7 +1892,7 @@ for i = 1 to 3 do
     end if
 end for
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#where\">where</a>,
@@ -1928,20 +1928,20 @@ end for
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = sprint(12345)
 -- s is "12345"
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = sprint({10,20,30}+5)
 -- s is "{15,25,35}"
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#print\">print</a>,
@@ -1984,11 +1984,11 @@ s = sprint({10,20,30}+5)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = sprintf("%08d", 12345)
 -- s is "00012345"
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#printf\">printf</a>,
@@ -2059,12 +2059,12 @@ s = sprintf("%08d", 12345)
  <b>{error_status, value}</b> is
   actually returned, where error_status can be one of:"
  >
-<_eucode>
+<eucode>
     GET_SUCCESS -- a valid object representation was found
     GET_EOF     -- end of string reached too soon
     GET_FAIL    -- syntax is wrong
     GET_NOTHING -- end of string reached without any value being even partially read
-</_eucode>
+</eucode>
 
 <_2clist
   name="Comments:"
@@ -2081,29 +2081,29 @@ s = sprintf("%08d", 12345)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = value("12345"}
 -- s is {GET_SUCCESS, 12345}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = value("{0, 1, -99.9}")
 -- s is {GET_SUCCESS, {0, 1, -99.9}}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 s = value("+++")
 -- s is {GET_FAIL, 0} -- '+' is correct, but "++" is not
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#get\">get</a>,
@@ -2132,12 +2132,12 @@ s = value("+++")
  <b>{error_status, value, total characters read, number of leading whitespace}</b> is
   actually returned, where error_status can be one of:"
  >
-<_eucode>
+<eucode>
     GET_SUCCESS -- a valid object representation was found
     GET_EOF     -- end of string reached too soon
     GET_FAIL    -- syntax is wrong
     GET_NOTHING -- end of string reached without any value being even partially read
-</_eucode>
+</eucode>
 
 <_2clist
   name="Comments:"
@@ -2163,29 +2163,29 @@ string. You can always pass value() a slice to achieve a similar effect.
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = value_from("  12345"} -- notice the two leading spaces
 -- s is {GET_SUCCESS, 12345, 7, 2}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = value_from("{0, 1, -99.9}")
 -- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 s = value_from("+++")
 -- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#get\">get</a>,
@@ -2216,14 +2216,14 @@ s = value_from("+++")
   description=
 "You could achieve the same result using <b>get_key()</b> as follows:"
 >
-<_eucode>
+<eucode>
     while 1 do
         k = get_key()
         if k != -1 then
             exit
         end if
     end while
-</_eucode>
+</eucode>
 <_2clist
   name=""
   description=
@@ -2296,7 +2296,7 @@ By default, the files and subdirectories will be visited in
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 function look_at(sequence path_name, sequence entry)
 -- this function accepts two sequences as arguments
     printf(1, "%s\\%s: %d\n",
@@ -2306,7 +2306,7 @@ end function
 
 exit_code = walk_dir("C:\\MYFILES", routine_id("look_at"), TRUE)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>euphoria\bin\search.ex</b></font>"
@@ -2370,11 +2370,11 @@ file name, it is opened, written to and then closed."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 if write_file("data.txt", "This is important data\nGoodybe") = 0 then
     puts(1, "Failed to write data\n")
 end if
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"
@@ -2410,11 +2410,11 @@ file name, it is opened, written to and then closed."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 if write_lines("data.txt", {"This is important data", "Goodybe"}, NL) = 0 then
     puts(1, "Failed to write data\n")
 end if
-</_eucode>
+</eucode>
 
 <_2clist
   name="See Also:"

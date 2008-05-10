@@ -1,8 +1,8 @@
 <doc title="Euphoria Database System">
 
-<h1>Euphoria Database System (EDS)</h1>
+<h2>Euphoria Database System (EDS)</h2>
 
-<h2>Introduction </h2> 
+<h3>Introduction </h3> 
 
  <p>
  Many people have expressed an interest in accessing databases using 
@@ -13,7 +13,7 @@
  extremely flexible, database system 
  for use by Euphoria programs.</b></font></p>
  
-<h2>Structure of an EDS database</h2>
+<h3>Structure of an EDS database</h3>
 
  <p>
  In EDS, a <font color="#993333"><b>database</b></font> is a single file
@@ -61,7 +61,7 @@
  using "binary" mode copying, rather than "text" or "ASCII" mode which
  could change the line terminators.</p>
  
-<_eucode> 
+<eucode> 
  Example:
     database: "mydata.edb"
           first table: "passwords"
@@ -73,7 +73,7 @@
                record #2:  key: 134526    data: {"saw", 25.95, 100}
                record #3:  key: 134530    data: {"screw driver", 5.50, 1500}
         
-</_eucode>
+</eucode>
 
 <p>
  It's up to you to interpret the meaning of the key and data.
@@ -90,7 +90,7 @@
  by record number. It's easy to loop through the records looking for 
  a particular field value.</p>
 
-<h2>How to access the data</h2>
+<h3>How to access the data</h3>
 
  <p>
  To reduce the number of parameters that you have to pass,
@@ -109,7 +109,7 @@
  starting at record number 1 and looping through to the record number 
  returned by <a href="database.htm#table_size"><b>db_table_size()</b></a>.</p>
  
-<h2>How does storage get recycled?</h2>
+<h3>How does storage get recycled?</h3>
 
 <p>
  When you delete something, such as a record, the space for that item
@@ -120,13 +120,13 @@
  but you can use <a href="database.htm#compress"><b>db_compress()</b></a> to
  completely rewrite a database, removing the unused spaces.</p>
 
-<h2>Security / Multi-user Access</h2>
+<h3>Security / Multi-user Access</h3>
 
 <p>
  This release provides a simple way to lock an entire database to prevent
  unsafe access by other processes.</p>
 
-<h2>Scalability</h2>
+<h3>Scalability</h3>
 
 <p>
  Internal pointers are 4 bytes. In theory that limits the size of a 
@@ -150,13 +150,13 @@
  At the low end of the scale, it's possible to create extremely small
  databases without incurring much disk space overhead.</p>
 
-<h2>Disclaimer</h2>
+<h3>Disclaimer</h3>
 
  <p>
  Do not store valuable data without a backup. 
  RDS will not be responsible for any damage or data loss.</p>
 
-<h2>Warning</h2>
+<h3>Warning</h3>
 
  <p>
  .edb files are binary files, not text files. 

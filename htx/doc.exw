@@ -54,7 +54,6 @@ end function
 without warning
 include docgen.e   -- common include file for RTF, HTML, and plain text
 include html.e     -- output format: HTML
-include text.e     -- output format: plain text
 
 -- EUDIR might not be set, shroud should be ok
 include wildcard.e  
@@ -167,8 +166,6 @@ procedure tag(sequence name, object param, object raw)
 	end if
     end if
 
-    
-
     if equal(name, "!--") then
 	call_proc(handler_id[r], {raw, ""})
     else
@@ -251,23 +248,12 @@ integer param
 
 cmd_line = command_line()
 
--- check command line...
--- for i = 1 to length(cmd_line) do
---    printf(1, "\"%s\"\n", {cmd_line[i]})
--- end for
--- ?getc(0)
-
 if length(cmd_line) < 3 then
     quit("no dir was passed to doc2")
 end if
 
-if equal(cmd_line[3], "HTML") then
-    format = "HTML"
-    html_init()
-else
-    format = "PLAIN"
-    text_init()
-end if
+format = "HTML"
+html_init()
 
 cmd_line = cmd_line[1..2] & cmd_line[4..length(cmd_line)]
 
@@ -279,7 +265,6 @@ if length(cmd_line) >= 4 then
 	app_dir = app_dir & " " & cmd_line[param]
 	param += 1
     end while
-
 else
     app_dir = cmd_line[3] 
 end if
@@ -324,21 +309,47 @@ procedure main(sequence in_name, sequence format, sequence dest)
 
     scan()
     
-    if equal(format, "PLAIN") then
-	text_end()
-    end if
     close(in_file)
     close(out_file)
 end procedure
 
-if equal(format, "HTML") then
-    for f = 1 to length(files) do
-	main(files[f], "HTML", "html")
-    end for
-else    
-    for f = 1 to length(files) do
-	main(files[f], "PLAIN", SLASH & "doc")
-    end for
-end if
+combined_file = open("../html/combined.htm", "w")
+for f = 1 to length(files) do
+    main(files[f], "HTML", "html")
+end for
+close(combined_file)
 
--- here we need to output the display.css file to HTML
+-- Output Table of Contents
+
+sequence s
+integer toc_file
+toc_file = open("../html/toc.htm", "w")
+
+puts(toc_file, "<html><body><h1>Table of Contents</h1>\n")
+
+for i = 1 to length(sections) do
+    s = secnum_seq(sections[i][2])
+    
+    -- Only output top 3 levels for TOC
+    if length(s) <= 3 then
+	if length(s) = 1 then
+	    puts(toc_file, "<strong><font size=+1>")
+	elsif length(s) = 2 then
+	    puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;")
+	elsif length(s) = 3 then
+	    puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>")
+	end if
+	printf(toc_file, "<a href=\"%s\">%s</a><br />", 
+	    {sections[i][1], join(s, ".") & ". " & sections[i][3]})
+	if length(s) = 1 then
+	    puts(toc_file, "</font></strong>")
+	elsif length(s) = 3 then
+	    puts(toc_file, "</i>")
+	end if
+    end if
+end for
+
+puts(toc_file, "</body></html>\n")
+
+close(toc_file)
+

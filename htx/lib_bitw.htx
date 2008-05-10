@@ -56,32 +56,32 @@ To understand the binary representation of a number you
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 a = and_bits(#0F0F0000, #12345678)
 -- a is #02040000
 
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 a = and_bits(#FF, {#123456, #876543, #2211})
 -- a is {#56, #43, #11}
 
-</_eucode>
+</eucode>
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 a = and_bits(#FFFFFFFF, #FFFFFFFF)
 -- a is -1
 -- Note that #FFFFFFFF is a positive number,
 -- but the result of a bitwise logical operation is interpreted
 -- as a signed 32-bit number, so it's negative.
 
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_bitw.htm#or_bits\">or_bits</a>,
@@ -121,11 +121,11 @@ a = and_bits(#FFFFFFFF, #FFFFFFFF)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = int_to_bits(177, 8)
 -- s is {1,0,0,0,1,1,0,1} -- "reverse" order
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_mach.htm#bits_to_int\">bits_to_int</a>,
@@ -174,20 +174,20 @@ This function will correctly convert integer values up to 32-bits. For
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 s = int_to_bytes(999)
 -- s is {231, 3, 0, 0}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 s = int_to_bytes(-999)
 -- s is {-231, -4, -1, -1}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_mach.htm#bytes_to_int\">bytes_to_int</a>,
@@ -235,11 +235,11 @@ Results are treated as signed numbers. They will be
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 a = not_bits(#000000F7)
 -- a is -248 (i.e. FFFFFF08 interpreted as a negative number)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,
@@ -285,20 +285,20 @@ Results are treated as signed numbers. They will be
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 a = or_bits(#0F0F0000, #12345678)
 -- a is #1F3F5678
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 a = or_bits(#FF, {#123456, #876543, #2211})
 -- a is {#1234FF, #8765FF, #22FF}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,
@@ -346,11 +346,11 @@ Results are treated as signed numbers. They will be
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 a = xor_bits(#0110, #1010)
 -- a is #1100
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_bitw.htm#and_bits\">and_bits</a>,

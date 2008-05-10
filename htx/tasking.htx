@@ -122,7 +122,7 @@ while task 2 gets control every 5 to 5.1 seconds.
 In between, the main task (task 0), has control as it
 checks for a 'q' character to abort execution.
 
-<_eucode>
+<eucode>
 constant TRUE = 1, FALSE = 0
 
 type boolean(integer x)
@@ -170,7 +170,7 @@ end while
 puts(1, "main task: stop\n")
 -- program ends when main task is finished
 
-</_eucode>
+</eucode>
  
  
 <p>

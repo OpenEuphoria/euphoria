@@ -111,10 +111,10 @@ In <font color=\"#CC3366\">text modes</font>, to restore the original
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 bk_color(BLACK)
 
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="
@@ -171,13 +171,13 @@ bk_color(BLACK)
 "Select a style of cursor. <font color=\"#5500FF\"><b>graphics.e</b></font>
  contains:"
  >
-<_eucode>
+<eucode>
     global constant NO_CURSOR = #2000,
              UNDERLINE_CURSOR = #0607,
        THICK_UNDERLINE_CURSOR = #0507,
             HALF_BLOCK_CURSOR = #0407,
                  BLOCK_CURSOR = #0007
-</_eucode> 
+</eucode> 
  <_2clist
   name=""
   description=
@@ -197,10 +197,10 @@ bk_color(BLACK)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 cursor(BLOCK_CURSOR)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>,
@@ -249,7 +249,7 @@ The sequences (rows) of the image do not have to all be the
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 display_image({20,30}, {{7,5,9,4,8},
                         {2,4,1,2},
                         {1,0,1,0,4,6,1},
@@ -259,7 +259,7 @@ display_image({20,30}, {{7,5,9,4,8},
 -- {20,30}. The top row contains 5 pixels. The last row
 -- contains 6 pixels ending at {25,33}.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>demo\dos32\bitmap.ex</b></font>"
@@ -317,7 +317,7 @@ The sequences of the text image do not have to all be the same
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 clear_screen()
 display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
                            {'C', RED+16*WHITE},
@@ -332,7 +332,7 @@ display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
 -- 'C' will be red on white, and
 -- 'D' will be blue on black.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#save_text_image\">save_text_image</a>,
@@ -367,7 +367,7 @@ display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 draw_line(WHITE, {{100, 100}, {200, 200}, {900, 700}})
 
 -- This would connect the three points in the sequence using
@@ -375,7 +375,7 @@ draw_line(WHITE, {{100, 100}, {200, 200}, {900, 700}})
 -- {200, 200} and another line would be drawn from {200, 200} to
 -- {900, 700}.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#polygon\">polygon</a>,
@@ -413,14 +413,14 @@ draw_line(WHITE, {{100, 100}, {200, 200}, {900, 700}})
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 ellipse(MAGENTA, 0, {10, 10}, {20, 20})
 
 -- This would make a magenta colored circle just fitting
 -- inside the square: 
 --        {10, 10}, {10, 20}, {20, 20}, {20, 10}.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>demo\dos32\sb.ex</b></font>"
@@ -598,7 +598,7 @@ Points off the screen have unpredictable color values."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 object x
 
 x = get_pixel({30,40})
@@ -608,7 +608,7 @@ x = get_pixel({30,40,100})
 -- x is set to a sequence of 100 integer values, representing
 -- the colors starting at {30,40} and going to the right
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#pixel\">pixel</a>,
@@ -690,12 +690,12 @@ The coordinate system for displaying text is different from the
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 -- read character and attributes at top left corner
 s = get_screen_char(1,1) 
 -- store character and attributes at line 25, column 10
 put_screen_char(25, 10, s)
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#put_screen_char\">put_screen_char</a>,
@@ -755,14 +755,14 @@ passed as i2."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 if graphics_mode(18) then
     puts(SCREEN, "need VGA graphics!\n")
     abort(1)
 end if
 draw_line(BLUE, {{0,0}, {50,50}})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#text_rows\">text_rows</a>,
@@ -800,12 +800,12 @@ draw_line(BLUE, {{0,0}, {50,50}})
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 x = palette(0, {15, 40, 10})
 -- color number 0 (normally black) is changed to a shade
 -- of mainly green.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#all_palette\">all_palette</a>"
@@ -851,23 +851,23 @@ Any off-screen pixels will be safely clipped."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 pixel(BLUE, {50, 60})
 -- the point {50,60} is set to the color BLUE
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 pixel({BLUE, GREEN, WHITE, RED}, {50,60})
 -- {50,60} set to BLUE
 -- {51,60} set to GREEN
 -- {52,60} set to WHITE
 -- {53,60} set to RED
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#get_pixel\">get_pixel</a>,
@@ -903,11 +903,11 @@ pixel({BLUE, GREEN, WHITE, RED}, {50,60})
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 polygon(GREEN, 1, {{100, 100}, {200, 200}, {900, 700}})
 -- makes a solid green triangle.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#draw_line\">draw_line</a>,
@@ -949,11 +949,11 @@ information controlling how the character is displayed on the screen."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 -- write AZ to the top left of the screen
 -- (attributes are platform-dependent)
 put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#get_screen_char\">get_screen_char</a>,
@@ -988,11 +988,11 @@ Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
  not in a good format, an error code (atom) is returned instead:"
  >
 
-<_eucode>
+<eucode>
     global constant BMP_OPEN_FAILED = 1,
                  BMP_UNEXPECTED_EOF = 2,
              BMP_UNSUPPORTED_FORMAT = 3
-</_eucode>
+</eucode>
 
 <_2clist
   name="Comments:"
@@ -1005,12 +1005,12 @@ Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 x = read_bitmap("c:\\windows\\arcade.bmp")
 -- note: double backslash needed to get single backslash in
 -- a string
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>demo\dos32\bitmap.ex</b></font>"
@@ -1050,12 +1050,12 @@ Each red, green, or blue value is in the range 0 to 255. s[2]
 <P>
 The result will be one of the following codes:"
  >
-<_eucode>
+<eucode>
     global constant BMP_SUCCESS = 0,
                 BMP_OPEN_FAILED = 1,
                BMP_INVALID_MODE = 4 -- invalid graphics mode
                                     -- or invalid argument
-</_eucode>
+</eucode>
  
 <_2clist
   name="Comments:"
@@ -1074,12 +1074,12 @@ save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 paletteData = get_all_palette() * 4
 code = save_bitmap({paletteData, imageData},
                    "c:\\example\\a1.bmp")
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#save_image\">save_image</a>,
@@ -1119,14 +1119,14 @@ code = save_bitmap({paletteData, imageData},
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 s = save_image({0,0}, {50,50})
 display_image({100,200}, s)
 display_image({300,400}, s)
 -- saves a 51x51 square image, then redisplays it at {100,200}
 -- and at {300,400}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#display_image\">display_image</a>,
@@ -1164,12 +1164,12 @@ st is the name of a .bmp \"bitmap\" file.
 The result will be one of the following codes:"
  >
 
-<_eucode>
+<eucode>
     global constant BMP_SUCCESS = 0,
                 BMP_OPEN_FAILED = 1,
                BMP_INVALID_MODE = 4 -- invalid graphics mode
                                     -- or invalid argument
-</_eucode>
+</eucode>
 
 <_2clist
   name="Comments:"
@@ -1185,20 +1185,20 @@ save_screen() only works in
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 -- save whole screen:
 code = save_screen(0, "c:\\example\\a1.bmp")
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 -- save part of screen:
 err = save_screen({{0,0},{200, 15}}, "b1.bmp")
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#save_image\">save_image</a>,
@@ -1254,31 +1254,31 @@ On DOS32, if you are flipping video pages, note that this function reads
   name="Example:"
   description=" If the top 2 lines of the screen have:"
  >
-<_eucode>
+<eucode>
    Hello
    World
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
   description=
 "And you execute:"
 >
-<_eucode>
+<eucode>
 s = save_text_image({1,1}, {2,5})
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
   description=
 "Then s is something like:"
 >
-<_eucode>
+<eucode>
     {"H-e-l-l-o-",
      "W-o-r-l-d-"}
 where '-' indicates the attribute bytes
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description=
@@ -1371,7 +1371,7 @@ This works under DOS, or in a full-screen DOS window. In a
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 include image.e
 
 -- active & display pages are initially both 0
@@ -1387,7 +1387,7 @@ end if
 set_display_page(0)    -- "This is ..." becomes visible again
 set_active_page(0)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#get_active_page\">get_active_page</a>,
@@ -1477,10 +1477,10 @@ no sound will be made."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 sound(1000) -- starts a fairly high pitched sound
 
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="text_color">
@@ -1516,10 +1516,10 @@ When your program terminates, the last color that you selected
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 text_color(BRIGHT_BLUE)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#bk_color\">bk_color</a>"
@@ -1597,11 +1597,11 @@ Arguments to use_vesa() other than 0 or 1 should not be used."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 use_vesa(1)
 fail = graphics_mode(261)
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
@@ -1629,7 +1629,7 @@ fail = graphics_mode(261)
 The following constants are defined in
  <font color=\"#5500FF\"><b>graphics.e</b></font>:"
  >
-<_eucode>
+<eucode>
     global constant VC_COLOR   = 1,
                     VC_MODE    = 2,
                     VC_LINES   = 3,
@@ -1638,7 +1638,7 @@ The following constants are defined in
                     VC_YPIXELS = 6,
                     VC_NCOLORS = 7,
                     VC_PAGES   = 8
-</_eucode> 
+</eucode> 
 
 <_2clist
   name="Comments:"
@@ -1661,11 +1661,11 @@ On the PC there are two types of graphics mode. The first type,
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 vc = video_config()  -- in mode 3 with 25-lines of text:
 -- vc is {1, 3, 25, 80, 0, 0, 32, 8}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_grap.htm#graphics_mode\">graphics_mode</a>"
@@ -1701,14 +1701,14 @@ Use wrap() in <font color=\"#CC3366\">text modes</font> or
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 puts(1, repeat('x', 100) & "\n\n")
 -- now have a line of 80 'x' followed a line of 20 more 'x'
 wrap(0)
 puts(1, repeat('x', 100) & "\n\n")
 -- creates just one line of 80 'x'
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#puts\">puts</a>,

@@ -1,6 +1,6 @@
 <doc title="How to Install Euphoria">
 
-<h1>How to install Euphoria on Windows</h1>
+<h2>How to install Euphoria on Windows</h2>
 
 <p>Download and run the latest Euphoria setup program. It will install Euphoria on any Windows system from Windows 95 up.</p>
 
@@ -21,9 +21,9 @@
 	<li><p>In the file <path>c:\autoexec.bat</path> add <path>C:\EUPHORIA\BIN</path> to the list of directories in your <env>PATH</env> command. You might use the MS-DOS Edit command, Windows Notepad or any other text editor to do this.</p>
 		<p>You can also go to the Start Menu, select Run, type in <program>sysedit</program> and press Enter. <path>autoexec.bat</path> should appear as one of the system files that you can edit and save.</p></li>
 	<li>In the same <path>autoexec.bat</path> file add a new line:
-		<_eucode>
+		<eucode>
 			SET EUDIR=C:\EUPHORIA
-		</_eucode></li>
+		</eucode></li>
 	<li>The <env>EUDIR</env> environment variable indicates the full path to the main Euphoria directory.</li>
 	<li>Reboot (restart) your machine. This will define your new <env>PATH</env> and <env>EUDIR</env> environment variables.</li>
 </ol>

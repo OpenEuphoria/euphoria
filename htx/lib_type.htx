@@ -14,7 +14,7 @@
 </font>
 <p>
 
-<h2>Built-in types</h2>
+<h3>Built-in types</h3>
 
 <_routine name="atom">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -42,23 +42,23 @@
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 atom a
 a = 5.99
 
-</_eucode>
+</eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 object line
 
 line = gets(0)
 if atom(line) then
     puts(SCREEN, "end of file\n")
 end if
-</_eucode>
+</eucode>
 </table>
 
 <_routine name="integer">
@@ -88,21 +88,21 @@ end if
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 integer z
 z = -1
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 if integer(y/x) then
     puts(SCREEN, "y is an exact multiple of x")
 end if
 
- </_eucode>
+ </eucode>
 </table>
 
 <_routine name="object">
@@ -132,10 +132,10 @@ end if
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 ? object({1,2,3})  -- always prints 1
 
- </_eucode>
+ </eucode>
 </table>
 
 
@@ -166,16 +166,16 @@ end if
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 sequence s
 s = {1,2,3}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 if sequence(x) then
     sum = 0
     for i = 1 to length(x) do
@@ -186,11 +186,11 @@ else
     sum = x
 end if
 
- </_eucode>
+ </eucode>
 </table>
 
 
-<h2>Types defined in types.e</h2>
+<h3>Types defined in types.e</h3>
 
 <_routine name="bool">
 <table border=0 cellspacing=2 cellpadding=2>
@@ -216,9 +216,9 @@ i = bool(a)
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 i = bool(a)
-</_eucode>
+</eucode>
 
 </table>
 
@@ -240,19 +240,19 @@ i = t_alnum(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_alnum('a')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_alnum('?')
 -- i is 0
-</_eucode>
+</eucode>
 
 </table>
 
@@ -275,19 +275,19 @@ i = t_alpha(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_alpha('a')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_alpha('6')
 -- i is 0
-</_eucode>
+</eucode>
 </table>
 
 
@@ -309,19 +309,19 @@ i = t_ascii(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_ascii('z')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_ascii(2)
 -- i is 0
-</_eucode>
+</eucode>
 
 </table>
 
@@ -344,19 +344,19 @@ i = t_cntrl(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_cntrl('a')
 -- i is 0
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_cntrl(7)
 -- i is 0
-</_eucode>
+</eucode>
 </table>
 
 
@@ -378,19 +378,19 @@ i = t_digit(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_digit('3')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_digit('?')
 -- i is 0
-</_eucode>
+</eucode>
 
 </table>
 
@@ -413,19 +413,19 @@ i = t_graph(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_graph('a')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_graph(2)
 -- i is 0
-</_eucode>
+</eucode>
 
 </table>
 
@@ -448,19 +448,19 @@ i = t_lower(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_lower('a')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_lower('A')
 -- i is 0
-</_eucode>
+</eucode>
 </table>
 
 
@@ -482,19 +482,19 @@ i = t_print(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_print('a')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_print(127)
 -- i is 0
-</_eucode>
+</eucode>
 
 </table>
 
@@ -517,19 +517,19 @@ i = t_punct(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_punct('a')
 -- i is 0
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_punct('?')
 -- i is 1
-</_eucode>
+</eucode>
 
 </table>
 
@@ -552,19 +552,19 @@ i = t_space(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_space(' ')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_space('a')
 -- i is 0
-</_eucode>
+</eucode>
 
 </table>
 
@@ -587,19 +587,19 @@ i = t_upper(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_upper('A')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_upper('a')
 -- i is 0
-</_eucode>
+</eucode>
 </table>
 
 
@@ -621,37 +621,37 @@ i = t_xdigit(a)
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_xdigit('a')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_xdigit('F')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 3:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_xdigit('3')
 -- i is 1
-</_eucode>
+</eucode>
 
 <_2clist
   name="Example 4:"
   description=""
  >
-<_eucode>
+<eucode>
 i = t_xdigit('i')
 -- i is 0
-</_eucode>
+</eucode>
 </table>
 
 </body>

@@ -151,16 +151,16 @@
  You can force it to be created in a particular directory by setting the
  CAUSEWAY environment variable as follows:
  	
-<_eucode>
+<eucode>
         SET CAUSEWAY=SWAP:path
-</_eucode>
+</eucode>
  
  where &nbsp; <b>path</b> &nbsp; is the full path to the directory. You can
  prevent the creation of a DOS swap file with:
 
-<_eucode>
+<eucode>
         SET CAUSEWAY=NOVM
-</_eucode>
+</eucode>
 
 <p>
  When disk swapping activity occurs, your program will run correctly but will 
@@ -208,10 +208,10 @@
  To prevent the console from quickly disappearing you might include a statement
  such as:
 
-<_eucode>
+<eucode>
         if getc(0) then
         end if
-</_eucode>
+</eucode>
  which will wait for the user enter something.
 
 <p>
@@ -431,7 +431,7 @@ see <a href=e2c.htm> the Translator</a>.
   pos=13
   description=""
 >
-<_eucode>
+<eucode>
 include dll.e
 
 atom user32
@@ -446,7 +446,7 @@ LoadIcon = define_c_func(user32, "LoadIconA",
                          {C_POINTER, C_INT}, C_INT)
 
 icon = c_func(LoadIcon, {NULL, IDI_APPLICATION})
-</_eucode>
+</eucode>
 
 </table>
  
@@ -528,11 +528,11 @@ You can then use poke() and peek() to access the value of the variable.
 
 <p>
  To allocate space for "struct example" you would need:
-<_eucode>
+<eucode>
         atom p
 
         p = allocate(16) -- size of "struct example"
-</_eucode>
+</eucode>
  
 <p>
  The address that you get from allocate() is always at least 4-byte aligned.
@@ -545,17 +545,17 @@ You can then use poke() and peek() to access the value of the variable.
 
 <p>
  You can set the fields using something like:
-<_eucode>
+<eucode>
         poke4(p + 0, a)
         poke4(p + 4, b)
         poke4(p + 8, c)
         poke4(p +12, d)
-</_eucode>
+</eucode>
 
  You can read a field with something like:
-<_eucode>
+<eucode>
         d = peek4(p+12)
-</_eucode>
+</eucode>
 
 <dl>
 <dt>
@@ -574,7 +574,7 @@ You can then use poke() and peek() to access the value of the variable.
   pos=13
   description=""
 >
-<_eucode>
+<eucode>
 constant RECT_LEFT = 0,
          RECT_TOP  = 4,
          RECT_RIGHT = 8,
@@ -593,7 +593,7 @@ poke4(rect + RECT_BOTTOM, 100)
 if not c_func(InvalidateRect, {hWnd, rect, 1}) then
     puts(2, "InvalidateRect failed\n")
 end if
-</_eucode>
+</eucode>
 
 </table>
 
@@ -620,14 +620,14 @@ which will give you a big advantage over those forced to code in C.
  To set this up, you must get a 32-bit "call-back" 
  address for your routine and give it to Windows. For example (taken from 
  <font color="#5500FF"><b>demo\win32\window.exw</b></font>):
-<_eucode>
+<eucode>
         integer id
         atom WndProcAddress
         
         id = routine_id("WndProc") 
 
         WndProcAddress = call_back(id)
-</_eucode>
+</eucode>
 
  <a href="lib_dyn.htm#routine_id">routine_id()</a> uniquely identifies a
  Euphoria procedure or function by returning a small integer value. This
@@ -724,9 +724,9 @@ which will give you a big advantage over those forced to code in C.
  If you need your Euphoria routine to be called using the __cdecl
  convention, you must code the call to call_back() as:
  
-<_eucode>
+<eucode>
         myroutineaddr = call_back({'+', id})
-</_eucode>
+</eucode>
 
 The plus sign and braces indicate the __cdecl convention. The simple case,
 with no braces, is __stdcall.

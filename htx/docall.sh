@@ -9,9 +9,6 @@ export TEMP_EUINC=${EUINC}
 export EUINC=${EUDIR}/bin
 
 exu doc.exw HTML ${EUDIR}
-#exu doc.exw TEXT ${EUDIR}
-
-#exu combine.exw ${EUDIR}
 
 # these files are only needed to update RDS Web site
 rm -f ${EUDIR}/htx/refman_?.doc

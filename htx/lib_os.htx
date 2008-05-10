@@ -50,7 +50,7 @@ If you don't use abort(), <font color=\"#993333\"><b>ex.exe/exw.exe/exu</b></fon
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 if x = 0 then
     puts(ERR, "can't divide by 0 !!!\n")
     abort(1)
@@ -58,7 +58,7 @@ else
     z = y / x
 end if
 
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_mach.htm#crash_message\">crash_message</a>,
@@ -114,7 +114,7 @@ If you convert your program into an executable file, either by
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 -- The user types:  ex myprog myfile.dat 12345 "the end"
 
 cmd = command_line()
@@ -126,12 +126,12 @@ cmd = command_line()
        "12345",
        "the end"}
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 -- Your program is bound with the name "myprog.exe"
 -- and is stored in the directory c:\myfiles
 -- The user types:  myprog myfile.dat 12345 "the end"
@@ -152,7 +152,7 @@ cmd = command_line()
 -- of the subsequent arguments the same, whether your program
 -- is bound or translated as a .exe, or not.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_os.htm#getenv\">getenv</a>"
@@ -176,7 +176,7 @@ cmd = command_line()
   description=
 "Return a sequence with the following information:"
  >
-<_eucode>
+<eucode>
              { year,  -- since 1900
               month,  -- January = 1
                 day,  -- day of month, starting at 1
@@ -185,17 +185,17 @@ cmd = command_line()
              second,  -- 0 to 59
     day of the week,  -- Sunday = 1
     day of the year}  -- January 1st = 1
-</_eucode>
+</eucode>
 <_2clist
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 now = date()
 -- now has: {95,3,24,23,47,38,6,83}
 -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Comments:"
   description=
@@ -239,11 +239,11 @@ now = date()
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 e = getenv("EUDIR")
 -- e will be "C:\EUPHORIA" -- or perhaps D:, E: etc.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_os.htm#command_line\">command_line</a>"
@@ -282,12 +282,12 @@ e = getenv("EUDIR")
 The include file <font color=\"#5500FF\"><b>misc.e</b></font> contains the
  following constants:"
  >
-<_eucode>
+<eucode>
     global constant DOS32 = 1,
                     WIN32 = 2,
                     LINUX = 3,
                     FREEBSD = 3
-</_eucode>
+</eucode>
 <_2clist
   name=""
   description=
@@ -308,7 +308,7 @@ The include file <font color=\"#5500FF\"><b>misc.e</b></font> contains the
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 if platform() = WIN32 then
     -- call system Beep routine
     err = c_func(Beep, {0,0})
@@ -323,7 +323,7 @@ else
     -- do nothing (Linux/FreeBSD)
 end if
 
- </_eucode>
+ </eucode>
 
 <_2clist
   name="See Also:"
@@ -364,11 +364,11 @@ end if
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 puts(1, "Waiting 15 seconds...\n")
 sleep(15)
 puts(1, "Done.\n")
-</_eucode>
+</eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#lock_file\">lock_file</a>,
@@ -426,9 +426,9 @@ Under <font color=\"#CC3366\"><b>DOS32</b></font>, a Euphoria program
  available. To avoid this situation you can reserve some
  conventional (low) memory by typing:"
  >
-<_eucode>
+<eucode>
     SET CAUSEWAY=LOWMEM:xxx
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
@@ -438,10 +438,10 @@ Under <font color=\"#CC3366\"><b>DOS32</b></font>, a Euphoria program
  or in a <b>.bat</b> file that runs your program. For example:"
  >
  
-<_eucode>
+<eucode>
     SET CAUSEWAY=LOWMEM:80
     ex myprog.ex
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
@@ -453,22 +453,22 @@ Under <font color=\"#CC3366\"><b>DOS32</b></font>, a Euphoria program
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 system("copy temp.txt a:\\temp.bak", 2)
 -- note use of double backslash in literal string to get
 -- single backslash
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 system("ex \\test\\myprog.ex < indata > outdata", 2)
 -- executes myprog by redirecting standard input and
 -- standard output
 
- </_eucode>
+ </eucode>
 
  <_2clist
   name="See Also:"
@@ -536,7 +536,7 @@ system_exec() does not start a new DOS shell."
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 integer exit_code
 exit_code = system_exec("xcopy temp1.dat temp2.dat", 2)
 
@@ -548,18 +548,18 @@ else
     printf(2, "\n xcopy failed with code %d\n", exit_code)
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example 2:"
   description=""
  >
-<_eucode>
+<eucode>
 -- executes myprog with two file names as arguments
 if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
     puts(2, "failure!\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_os.htm#system\">system</a>,
@@ -631,12 +631,12 @@ While <font color=\"#993333\"><b>ex.exe</b></font> is running,
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 tick_rate(100)
 -- time() will now advance in steps of .01 seconds
 -- instead of the usual .055 seconds
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_os.htm#time\">time</a>,
@@ -695,7 +695,7 @@ elapsed time.
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 constant ITERATIONS = 1000000
 integer p
 atom t0, loop_overhead
@@ -713,7 +713,7 @@ end for
 ? (time() - t0 - loop_overhead)/ITERATIONS
 -- calculates time (in seconds) for one call to power
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_os.htm#date\">date</a>,

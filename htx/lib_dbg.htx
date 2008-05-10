@@ -45,7 +45,7 @@
   name="Example 1:"
   description=""
  >
-<_eucode>
+<eucode>
 with profile_time
 profile(0)
   ...
@@ -55,7 +55,7 @@ profile(1)
 profile(0)
 end procedure
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_dbg.htm#trace\">trace</a>,
@@ -105,7 +105,7 @@ Only trace(3) is supported by the Euphoria To C Translator."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 if x < 0 then
     -- ok, here is the case I want to debug...
     trace(1)
@@ -113,7 +113,7 @@ if x < 0 then
     ...
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_dbg.htm#profile\">profile</a>,

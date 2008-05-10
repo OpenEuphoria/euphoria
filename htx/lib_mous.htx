@@ -39,7 +39,7 @@ Constants have been defined in
  <font color=\"#5500FF\"><b>mouse.e</b></font> for the possible mouse
  events:"
  >
-<_eucode>
+<eucode>
     global constant MOVE = 1,
                LEFT_DOWN = 2,
                  LEFT_UP = 4,
@@ -47,7 +47,7 @@ Constants have been defined in
                 RIGHT_UP = 16,
              MIDDLE_DOWN = 32,
                MIDDLE_UP = 64
-</_eucode>
+</eucode>
 
  <_2clist
   name=""
@@ -115,9 +115,9 @@ The x,y coordinate returned could be that of the very tip of the
   description=" a return value of:"
  >
 
-<_eucode>
+<eucode>
 {2, 100, 50}
-</_eucode>
+</eucode>
 
 <_2clist
   name=""
@@ -130,7 +130,7 @@ The x,y coordinate returned could be that of the very tip of the
   description=" To test for LEFT_DOWN, write something like the following:"
  >
 
-<_eucode>
+<eucode>
 object event
 
 while 1 do
@@ -143,7 +143,7 @@ while 1 do
     end if
 end while
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_mous.htm#mouse_events\">mouse_events</a>,
@@ -190,13 +190,13 @@ The first call that you make to mouse_events() will turn on a
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 mouse_events(LEFT_DOWN + LEFT_UP + RIGHT_DOWN)
 -- will restrict get_mouse() to reporting the left button
 -- being pressed down or released, and the right button
 -- being pressed down. All other events will be ignored.
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_mous.htm#get_mouse\">get_mouse</a>,

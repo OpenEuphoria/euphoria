@@ -104,7 +104,7 @@
  The following is an example of a complete Euphoria program.
 
 <p>
-<_eucode>
+<eucode>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  sequence list, sorted_list
@@ -148,7 +148,7 @@
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-</_eucode>
+</eucode>
 <p>
 
  The above example contains 4 separate commands that are processed in order.

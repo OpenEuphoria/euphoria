@@ -130,7 +130,7 @@ Euphoria function with <font color=\"#993333\"><b>routine id</b></font> i.
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 atom user32, hwnd, ps, hdc
 integer BeginPaint
 
@@ -146,7 +146,7 @@ BeginPaint = define_c_func(user32, "BeginPaint",
 -- hdc is assigned the result:
 hdc = c_func(BeginPaint, {hwnd, ps})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_c.htm#c_proc\">c_proc</a>,
@@ -200,7 +200,7 @@ hdc = c_func(BeginPaint, {hwnd, ps})
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 atom user32, hwnd, rect
 integer GetClientRect
 
@@ -215,7 +215,7 @@ GetClientRect = define_c_proc(user32, "GetClientRect",
 -- pass hwnd and rect as the arguments
 c_proc(GetClientRect, {hwnd, rect})
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_c.htm#c_func\">c_func</a>,
@@ -271,7 +271,7 @@ c_proc(GetClientRect, {hwnd, rect})
  machine code parameters as well:"
  >
 
-<_eucode>
+<eucode>
     global constant C_CHAR = #01000001,
                    C_UCHAR = #02000001,
                    C_SHORT = #01000002,
@@ -283,7 +283,7 @@ c_proc(GetClientRect, {hwnd, rect})
                  C_POINTER = C_ULONG,
                    C_FLOAT = #03000004,
                   C_DOUBLE = #03000008
-</_eucode>
+</eucode>
  
  <_2clist
   name=""
@@ -294,13 +294,13 @@ to it, and receive Euphoria data back.
 A list of Euphoria types is contained in
  <font color=\"#5500FF\"><b>dll.e</b></font>:"
  >
-<_eucode>
+<eucode>
     global constant
 		 E_INTEGER = #06000004,
 		 E_ATOM    = #07000004,
 		 E_SEQUENCE= #08000004,
 		 E_OBJECT  = #09000004
-</_eucode>
+</eucode>
 
 <_2clist
   name="Comments:"
@@ -365,7 +365,7 @@ If you use exw to call a cdecl C routine that returns
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 atom user32
 integer LoadIcon
 
@@ -385,7 +385,7 @@ if LoadIcon = -1 then
     puts(1, "LoadIconA could not be found!\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="euphoria\demo\callmach.ex,
@@ -495,7 +495,7 @@ will depend on the returned value being specified as signed or unsigned."
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 atom user32
 integer ShowWindow
 
@@ -511,7 +511,7 @@ if ShowWindow = -1 then
     puts(1, "ShowWindow not found!\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_c.htm#c_proc\">c_proc</a>,
@@ -750,7 +750,7 @@ On <font color=\"#CC3366\"><b>DOS32 and Linux/FreeBSD</b></font>, instance() alw
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 response = message_box("Do you wish to proceed?",
                        "My Application",
                        MB_YESNOCANCEL)
@@ -758,7 +758,7 @@ if response = IDCANCEL or response = IDNO then
     abort(1)
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="Example Program:"
   description="<font color=\"#5500FF\"><b>demo\win32\email.exw</b></font>"
@@ -807,14 +807,14 @@ You can open the same <b>.</b>dll or <b>.</b>so file multiple times.
   name="Example:"
   description=""
  >
-<_eucode>
+<eucode>
 atom user32
 user32 = open_dll("user32.dll")
 if user32 = 0 then
     puts(1, "Couldn't open user32.dll!\n")
 end if
 
- </_eucode>
+ </eucode>
 <_2clist
   name="See Also:"
   description="<a href=\"lib_c.htm#define_c_func\">define_c_func</a>,

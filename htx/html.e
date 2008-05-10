@@ -15,6 +15,7 @@
 
 include wildcard.e
 include sequence.e
+include docgen.e
 
 -- constants for colors necessary for syncolor.e
 global constant NORMAL_COLOR  = #330033,
@@ -34,8 +35,6 @@ integer blank
 blank = FALSE
 sequence line, colorLine -- <_eucode>... </_eucode>
 integer firstLine        -- <_eucode>... </_eucode>
-sequence sec_nums
-sec_nums = {0,0,0,0,0,0} -- h1-h6
 
 -- helper functions
 
@@ -59,56 +58,70 @@ procedure espan()
     write("</span>")
 end procedure
 
-procedure write_sec_num()
-    for i = 1 to 6 do
-	if sec_nums[i] > 0 then
-	    if i > 1 then
-		write(".")
-	    end if
-	    write(sprint(sec_nums[i]))
-	end if
-    end for
-    write(". ")
+procedure write_secnum_a()
+    write(sprintf("<a name=\"#%s\"></a>", {secnum_tag()}))
 end procedure
 
 procedure tag_h1(object raw_text, object param_list)
+    line = ""
+    
     sec_nums = (sec_nums[1] + 1) & {0,0,0,0,0}
+    write_secnum_a()
     write(raw_text)
-    write_sec_num()
+    write(secnum_text())
 end procedure
 
 procedure tag_h2(object raw_text, object param_list)
+    line = ""
+    
     sec_nums = sec_nums[1] & (sec_nums[2] + 1) & {0,0,0,0}
+    write_secnum_a()
     write(raw_text)
-    write_sec_num()
+    write(secnum_text())
 end procedure
 
 procedure tag_h3(object raw_text, object param_list)
+    line = ""
+    
     sec_nums = sec_nums[1..2] & (sec_nums[3] + 1) & {0,0,0}
+    write_secnum_a()
     write(raw_text)
-    write_sec_num()
+    write(secnum_text())
 end procedure
 
 procedure tag_h4(object raw_text, object param_list)
+    line = ""
+    
     sec_nums = sec_nums[1..3] & (sec_nums[4] + 1) & {0,0}
+    write_secnum_a()
     write(raw_text)
-    write_sec_num()
+    write(secnum_text())
 end procedure
 
 procedure tag_h5(object raw_text, object param_list)
+    line = ""
+    
     sec_nums = sec_nums[1..4] & (sec_nums[5] + 1) & 0
+    write_secnum_a()
     write(raw_text)
-    write_sec_num()
+    write(secnum_text())
 end procedure
 
 procedure tag_h6(object raw_text, object param_list)
+    line = ""
+    
     sec_nums = sec_nums[1..5] & sec_nums[6] + 1
+    write_secnum_a()
     write(raw_text)
-    write_sec_num()
+    write(secnum_text())
 end procedure
 
 procedure tag_end_header(object raw_text, object param_list)
+    sections = append(sections, {current_file, sec_nums, line})
+    write(line)
     write(raw_text)
+
+    line = ""
 end procedure
 
 procedure tag_default(object raw_text, object param_list)
@@ -132,6 +145,8 @@ procedure tag_default(object raw_text, object param_list)
 	    write("\n")
 	    line = ""
 	end if
+    elsif in_tag("h1") or in_tag("h2") or in_tag("h3") or in_tag("h4") or in_tag("h5") or in_tag("h6") then
+	line &= raw_text
     else
 	write(raw_text)
     end if
@@ -147,34 +162,36 @@ procedure tag_eucode(sequence raw_text, sequence plist)
 	ediv()
     end if
     
-    inEuCode = TRUE
     firstLine = TRUE
     line = ""
 end procedure
 
 procedure tag_end_eucode(sequence raw_text, sequence plist)
     write("</pre>")
-    inEuCode = FALSE
 end procedure
 
 procedure tag_doc(sequence raw_text, sequence plist)
-    object title
+    object title, sect
     
     title = pval("title", plist)
     if atom(title) then
 	quit("doc tag must have a title attribute")
     end if
-    
+
+    file_header = 1
     write("<html>\n")
     write("<head>\n")
     write(sprintf("<title>%s</title>\n", {title}))
     write("<link rel=\"stylesheet\" media=\"screen\" href=\"display.css\">")
     write("</head>\n")
     write("<body>\n")
+    file_header = 0
 end procedure
 
 procedure tag_end_doc(sequence raw_text, sequence plist)
+    file_header = 1
     write("</body></html>\n")
+    file_header = 0
 end procedure
 
 procedure tag_funcref(sequence raw_text, sequence plist)

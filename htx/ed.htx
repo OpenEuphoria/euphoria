@@ -1,14 +1,14 @@
 <doc title="The Euphoria Editor">
 
-<h1>The Euphoria Editor</h1>
+<h2>The Euphoria Editor</h2>
 
-<h2>Introduction</h2>
+<h3>Introduction</h3>
 
 <p>The Euphoria download package includes a handy, text-mode editor, ed, that's written completely in Euphoria. Many people find ed convenient for editing Euphoria programs and other files, but there is no requirement that you use it.</p>
 
 <p>If you don't like <b>ed</b>, you have many alternatives. David Cuny's <b>EE editor</b> is a DOS-based editor for Euphoria that's also written in Euphoria. It has a friendly mouse-based user interface with drop down menus etc. It's available from the RDS Web site. There are several other Euphoria-oriented editors that run on DOS, Windows, Linux and FreeBSD. Check the <b>Editors</b> section of our Archive. In fact, <i>any</i> text editor can be used to edit a Euphoria program, including DOS Edit or Windows NotePad.</p>
 
-<h2>Summary</h2>
+<h3>Summary</h3>
 
 <p>usage 1: <console>ed filename</console></p>
 <p>usage 2: <console>ed</console></p>
@@ -37,7 +37,7 @@
  simultaneously, with cutting and pasting between them. You can also use
  multiple edit windows to view and edit different parts of a single file. </p>
 
-<h2>Special Keys</h2>
+<h3>Special Keys</h3>
 
 <P>Some PC keys do not work in a Linux or FreeBSD text console, or in Telnet, 
 and some keys do not work in an xterm under X windows. Alternate keys 
@@ -108,7 +108,7 @@ edit ed.ex to map the desired key to the desired function.</p>
 </tr>
 </table>
 
-<h2>Escape Commands</h2>
+<h3>Escape Commands</h3>
 
 <p>Press and release the <font color="#006699"><b>Esc</b></font> key, then press one of the following keys:</p>
 
@@ -173,11 +173,11 @@ edit ed.ex to map the desired key to the desired function.</p>
 
 </table>
 
-<h2>Recalling Previous Strings</h2>
+<h3>Recalling Previous Strings</h3>
 
 <p>The <b>Esc n</b>, <b>Esc d</b>, <b>Esc r</b> and <b>Esc f</b> commands prompt you to enter a string. You can recall and edit these strings just as you would at the DOS or Linux/FreeBSD command line. Type up-arrow or down-arrow to cycle through strings that you previously entered for a given command, then use left-arrow, right-arrow and the delete key to edit the strings. Press Enter to submit the string.</p>
 
-<h2>Cutting and Pasting</h2>
+<h3>Cutting and Pasting</h3>
 
 <p>When you <font color="#006699"><b>control-Delete</b></font> (or <font color="#006699"><b>control-D</b></font>) a series of consecutive lines, or <font color="#006699"><b>Delete</b></font> a series of consecutive characters, you create a "kill-buffer" containing what you just deleted. This kill-buffer can be re-inserted by moving the cursor and then pressing <font color="#006699"><b>Insert</b></font>.</p>
 
@@ -204,7 +204,7 @@ edit ed.ex to map the desired key to the desired function.</p>
  press an <font color="#006699"><b>F-key</b></font> to select a new edit
  window. You can then insert your kill-buffer.</p>
 
-<h2>Use of Tabs</h2>
+<h3>Use of Tabs</h3>
 
 <p>
  The standard <i>tab</i> width is 8 spaces. The editor assumes
@@ -219,7 +219,7 @@ edit ed.ex to map the desired key to the desired function.</p>
  at the top of <font color="#5500FF"><b>ed.ex</b></font> that says "constant
  PROG_INDENT = 4".</p>
 
-<h2>Long Lines</h2>
+<h3>Long Lines</h3>
 
 <p>
  Lines that extend beyond the right edge of the screen are marked with an 
@@ -228,14 +228,14 @@ edit ed.ex to map the desired key to the desired function.</p>
  beyond the 80th column. The screen will scroll left or right so the cursor
  position is always visible.</p>
 
-<h2>Maximum File Size</h2>
+<h3>Maximum File Size</h3>
 
 <p>
  Like any Euphoria program, <font color="#993333"><b>ed</b></font> can access
  all the memory on your machine. It can edit huge files, and unless 
  disk swapping occurs, most operations will be very fast.</p>
 
-<h2>Non-text Files</h2>
+<h3>Non-text Files</h3>
 
 <p>
  <font color="#993333"><b>ed</b></font> is designed for editing pure text
@@ -248,7 +248,7 @@ edit ed.ex to map the desired key to the desired function.</p>
  a <b>control-z</b> character (26) embedded in a file will appear to ed to be 
  the <i>end of the file</i>.</p>
 
-<h2>Long Filenames</h2>
+<h3>Long Filenames</h3>
 
 <p>
  Although <b>ed</b> is a DOS editor, you can edit 
@@ -258,7 +258,7 @@ edit ed.ex to map the desired key to the desired function.</p>
  <_ba><i>new</i></_ba> files with long names. The name will be
  truncated to the standard DOS 8.3 length. (but see Platform below)</p>
 
-<h2>Line Terminator</h2>
+<h3>Line Terminator</h3>
 
 <p>
  The end-of-line terminator on Linux/FreeBSD is simply <b>\n</b>. On DOS
@@ -267,11 +267,11 @@ edit ed.ex to map the desired key to the desired function.</p>
  <b>ed</b> will give you a choice of either keeping the <b>\r\n</b> terminators,
  or saving the file with <b>\n</b> terminators.</p>
 
-<h2>Source Code</h2>
+<h3>Source Code</h3>
 
 <p>The complete source code to this editor is in <font color="#5500FF"><b>bin\ed.ex</b></font> and <font color="#5500FF"><b>bin\syncolor.e</b></font>. You are welcome to make improvements. There is a section at the top of <font color="#5500FF"><b>ed.ex</b></font> containing "user-modifiable" configuration parameters that you can adjust. The colors and the cursor size may need adjusting for some operating environments.</p>
 
-<h2>Platform</h2>
+<h3>Platform</h3>
 
 <p><font color="#993333"><b>euphoria\bin\ed.bat</b></font> can be set up to run ed.ex using <font color="#993333"><b>exwc.exe</b></font> or <font color="#993333"><b>ex.exe</b></font>. You are better off running ed with <font color="#993333"><b>ex.exe</b></font> on Windows 95/98/ME. You'll get much quicker screen updates than with <font color="#993333"><b>exwc.exe</b></font>. On Windows XP you'll be a bit better off using <font color="#993333"><b>exwc.exe</b></font>. You'll get slightly quicker screen updates, and you'll be able to create files with long names, not just open existing ones. However some special keys won't work with <font color="#993333"><b>exwc.exe</b></font>, e.g. you'll have to use control-t and control-b instead of control-Home and control-End. On Linux and FreeBSD there are no problems with long filenames, and the keyboard response is always fast.</p>
 
