@@ -2,18 +2,6 @@
 
 <h2>Euphoria To C Translator</h2>
 
-<ol>
-	<li><a href="e2c.htm#intro"> Introduction</a></li>
-    <li><a href="e2c.htm#compsupp">C Compilers Supported</a></li>
-	<li><a href="e2c.htm#howtorun">How to Run the Translator</a></li>
-	<li><a href="e2c.htm#dynamic">Dynamic Link Libraries (Shared Libraries)</a></li>
-	<li><a href="e2c.htm#size">Executable Size and Compression</a></li>
-	<li><a href="e2c.htm#invstr">Interpreter vs. Translator</a></li>
-	<li><a href="e2c.htm#legal">Legal Restrictions</a></li>
-	<li><a href="e2c.htm#faq">Frequently Asked Questions</a></li>
-	<li><a href="e2c.htm#common">Common Problems</a></li>
-</ol>
-
 <h3>Introduction</h3>
 
  <p><font color="#006633"><b>The Euphoria to C Translator will translate any Euphoria program into equivalent C source code.</b></font></p>
@@ -284,7 +272,7 @@ the values in the Euphoria routine into the desired 32-bit atom.</p>
  versions of the <font color="#0066CC"><b>Translator</b></font> will produce
  faster and smaller executables.</p>
 
-<h3><a name="invstr"></a>Interpreter vs. Translator</h3>
+<h3>Interpreter vs. Translator</h3>
 
 <p>
  All Euphoria programs can be translated to C, and with just a few exceptions
@@ -336,7 +324,7 @@ the values in the Euphoria routine into the desired 32-bit atom.</p>
  <b>with trace</b> will slow your program down, and the slowdown can be 
  extreme when <b>trace(3)</b> is also in effect.</p>
   
-<h3><a name="legal"></a>Legal Restrictions</h3>
+<h3>Legal Restrictions</h3>
 
  <p>
  As far as RDS is concerned, any executable programs or .dll's that you create 
@@ -378,7 +366,7 @@ the values in the Euphoria routine into the desired 32-bit atom.</p>
  the legal comments in DJGPP, Lcc and Borland, and 
  Michael Devore's read.me file on his site, to form your own judgement.</p>
  
-<h3><a name="faq"></a>Frequently Asked Questions</h3>
+<h3>Frequently Asked Questions</h3>
 
 <h4>How much of a speed-up should I expect?</h4>
 
@@ -443,7 +431,7 @@ the values in the Euphoria routine into the desired 32-bit atom.</p>
     Intel C++ Compiler for Linux</a>. It's compatible with GNU C, but 
     some adjustments to <b>emake</b> might be required.</p>
 
-<h3><a name="common"></a>Common Problems</h3>
+<h3>Common Problems</h3>
 
  <p>
  Many large programs have been successfully translated and compiled using

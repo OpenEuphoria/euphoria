@@ -1,6 +1,6 @@
-<doc title="Guide to Documentation Files">
+<doc title="Guide to Documentation">
 
-<h1>Guide to Documentation Files</h1>
+<h2>Guide to Documentation</h2>
 
 <p>The Euphoria documentation is spread over several plain text files in the <path>euphoria\doc</path> directory. For each <strong>.doc</strong> file in the <path>euphoria\doc</path> directory, there is a corresponding <strong>.htm</strong> file in the <path>euphoria\html</path> directory. You can also type <platform_reference>guru</platform_reference> to quickly search for relevant information from all directories under <path>\euphoria</path>.</p>
 
