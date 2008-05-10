@@ -96,7 +96,7 @@ EU_ALL_FILES = \
 	symtab.e \
 	traninit.e \
 	../include/machine.e \
-	../include/wildcard.e \
+	../include/search.e \
 	../include/misc.e \
 	../include/file.e \
 	../include/get.e
@@ -157,14 +157,17 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/global.o \
 	./$(OBJDIR)/misc.o \
 	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/traninit.o \
-	./$(OBJDIR)/wildcard.o 
+	./$(OBJDIR)/sequence.o \
+	./$(OBJDIR)/wildcard.o \
+	./$(OBJDIR)/search.o \
+	./$(OBJDIR)/traninit.o
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
-	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/wildcard.o 
+	./$(OBJDIR)/sequence.o \
+	./$(OBJDIR)/wildcard.o \
+	./$(OBJDIR)/compress.o 
 
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \
@@ -249,8 +252,8 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/error.o \
-	./$(OBJDIR)/mode.o \
-	./$(OBJDIR)/wildcard.o
+	./$(OBJDIR)/sequence.o \
+	./$(OBJDIR)/mode.o 
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \
@@ -413,7 +416,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 #./$(OBJDIR)/main-.c
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	echo Translating $(EU_TARGET) to create $(EU_MAIN)
-	-cd ./$(OBJDIR) && exu ../ec.ex ../$(EU_TARGET)
+	-cd ./$(OBJDIR) && exu -i ../../include ../ec.ex -I ../../include ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $*.c -o./$(OBJDIR)/back/$*.o

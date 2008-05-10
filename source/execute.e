@@ -33,7 +33,7 @@ include opnames.e
 include global.e
 include reswords.e
 include symtab.e
-include wildcard.e
+include sequence.e
 include scanner.e
 include mode.e as mode
 

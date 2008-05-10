@@ -13,7 +13,7 @@ include compress.e
 include backend.e
 include reswords.e
 include scanner.e
-include wildcard.e
+include sequence.e
 include cominit.e
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con

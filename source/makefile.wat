@@ -369,7 +369,7 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 
 .\$(OBJDIR)\main-.c : .\$(OBJDIR)\$(EU_TARGET)c
 	cd .\$(OBJDIR)
-	$(EX) ..\ec.ex ..\$(EU_TARGET)ex
+	$(EX) -i ..\..\include ..\ec.ex -i ..\..\include ..\$(EU_TARGET)ex
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex

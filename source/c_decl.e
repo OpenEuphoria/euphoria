@@ -6,7 +6,7 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
-include wildcard.e
+include sequence.e
 
 include global.e
 include reswords.e
