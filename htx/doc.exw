@@ -38,20 +38,20 @@ format_stack = stk:new(FILO)
 global function in_tag(sequence tag)
     integer nesting_count
     sequence top_tag
-    
-    nesting_count = 0
-    for i = stk:size(format_stack) to 1 by -1 do
-	top_tag = stk:at(format_stack, i)
-	nesting_count += equal(tag, top_tag[1])
-    end for
-    
-    return nesting_count
+
+	nesting_count = 0
+	for i = stk:size(format_stack) to 1 by -1 do
+		top_tag = stk:at(format_stack, i)
+		nesting_count += equal(tag, top_tag[1])
+	end for
+	
+	return nesting_count
 end function
 
 global function is_tag(sequence tag)
-    sequence top_tag
-    top_tag = stk:top(format_stack)
-    return equal(tag, top_tag[1])
+	sequence top_tag
+	top_tag = stk:top(format_stack)
+	return equal(tag, top_tag[1])
 end function
 
 without warning
@@ -68,312 +68,320 @@ function param_list(object text)
 -- format of text, before '>', when it is not an atom, should be:  
 --           name1(=value1) name2(=value2) ...
 --        where () means optional
-    integer i, value_part
-    sequence word, list
-    
-    if atom(text) then
+	integer i, value_part
+	sequence word, list
+	
+	if atom(text) then
 	return {}
-    end if
-    
-    list = {}
-    i = 1
-    value_part = FALSE
-    while TRUE do
-	while whitespace(text[i]) do
-	    i = i + 1
-	end while
-	if text[i] = '>' then
-	    exit
-	end if
-	if text[i] = '=' then
-	    i = i + 1   
-	    value_part = TRUE
-	    while whitespace(text[i]) do
-		i = i + 1
-	    end while
 	end if
 	
-	if text[i] = '"' then
-	    -- read quoted-string parameter
-	    word = ""
-	    i = i + 1
-	    while text[i] != '"' and i < length(text) do
-		if text[i] = '\\' then
-		    if text[i + 1] = '"' then
-			word = word & text[i + 1]
-		    else
-			word = word & text[i] & text[i + 1]
-		    end if
-		    i = i + 2
-		else
-		    word = word & text[i]
-		    i = i + 1
+	list = {}
+	i = 1
+	value_part = FALSE
+	while TRUE do
+		while whitespace(text[i]) do
+			i = i + 1
+		end while
+		if text[i] = '>' then
+			exit
 		end if
-	    end while
-	    if text[i] = '"' then
-		i = i + 1
-	    end if
-	else 
-	    word = ""
-	    while not whitespace(text[i]) and text[i] != '=' and 
-		  text[i] != '>' do
-		word = word & text[i]
-		i = i + 1
-	    end while
-	end if
-	if value_part then
-	    -- make a pair
-	    list[length(list)] = {list[length(list)], word}
-	    value_part = FALSE
-	else
-	    list = append(list, word)
-	end if
-    end while
-    return list
+		if text[i] = '=' then
+			i = i + 1   
+			value_part = TRUE
+			while whitespace(text[i]) do
+			i = i + 1
+			end while
+		end if
+	
+		if text[i] = '"' then
+			-- read quoted-string parameter
+			word = ""
+			i = i + 1
+			while text[i] != '"' and i < length(text) do
+			if text[i] = '\\' then
+				if text[i + 1] = '"' then
+				word = word & text[i + 1]
+				else
+				word = word & text[i] & text[i + 1]
+				end if
+				i = i + 2
+			else
+				word = word & text[i]
+				i = i + 1
+			end if
+			end while
+			if text[i] = '"' then
+			i = i + 1
+			end if
+		else 
+			word = ""
+			while not whitespace(text[i]) and text[i] != '=' and 
+				text[i] != '>' do
+			word = word & text[i]
+			i = i + 1
+			end while
+		end if
+		if value_part then
+			-- make a pair
+			list[length(list)] = {list[length(list)], word}
+			value_part = FALSE
+		else
+			list = append(list, word)
+		end if
+	end while
+	return list
 end function
 
 procedure tag(sequence name, object param, object raw)
 -- process a tag (or literal text)
-    integer r
-    sequence top_tag
-    
-    -- handle format stack
-    if equal(name, "_literal") then
-	-- do nothing
-    elsif name[1] = '/' then
-	if is_tag(name[2..$]) = 0 then
-	    top_tag = stk:top(format_stack)
-	    
-	    printf(1, "Document error on line %d. Found %s when expecting /%s (began at %d)\n",
-		{current_line, name, top_tag[1], top_tag[2]})
-	    if platform() = WIN32 then
-		puts(1, "Press any key to continue...\n")
-		r = wait_key()
-	    end if
-	    abort(1)
-	end if
+	integer r
+	sequence top_tag
 	
-	format_stack = stk:pop(format_stack)
-    elsif find(name, single_tags) then
+	-- handle format stack
+	if equal(name, "_literal") then
+		-- do nothing
+	elsif name[1] = '/' then
+		if is_tag(name[2..$]) = 0 then
+			top_tag = stk:top(format_stack)
+			
+			printf(1, "Document error on line %d. Found %s when expecting /%s (began at %d)\n",
+			{current_line, name, top_tag[1], top_tag[2]})
+			if platform() = WIN32 then
+			puts(1, "Press any key to continue...\n")
+			r = wait_key()
+			end if
+			abort(1)
+		end if
+	
+		format_stack = stk:pop(format_stack)
+	elsif find(name, single_tags) then
 	-- neither push nor pop, this is <br /> or something to that effect
-    else
+	else
 	
 	format_stack = stk:push(format_stack, {name, current_line})
-    end if
-    
-    r = find(name, handler_name)
-    if r = 0 then
-	r = find("_default", handler_name)
-	if r = 0 then
-	    quit("Need a default handler")
 	end if
-    end if
-
-    if equal(name, "!--") then
-	call_proc(handler_id[r], {raw, ""})
-    else
-	call_proc(handler_id[r], {raw, param_list(param)})
-    end if
+	
+	r = find(name, handler_name)
+	if r = 0 then
+		r = find("_default", handler_name)
+		if r = 0 then
+			quit("Need a default handler")
+		end if
+	end if
+	
+	if equal(name, "!--") then
+		call_proc(handler_id[r], {raw, ""})
+	else
+		call_proc(handler_id[r], {raw, param_list(param)})
+	end if
 end procedure
 
 procedure scan()
-    integer c, inDQuote
-    sequence raw, name, param
-    
-    while TRUE do
-	c = getc(in_file)
+	integer c, inDQuote
+	sequence raw, name, param
 	
-	if c = '\n' then current_line += 1 end if
-      
-	if c = EOF then
-	    exit
-	elsif c = '<' then
-	    -- an htmX tag?
-	    c = getc(in_file)
-	    if whitespace(c) or c = '=' then
-		tag("_literal", '<', '<')
-		tag("_literal", c, c)
-	    else
-		raw = "<"
+	while TRUE do
+		c = getc(in_file)
 		
-		-- read the name
-		name = ""
-		while not whitespace(c) and c != '>' and c != EOF do
-		    name = name & c
-		    c = getc(in_file)
-		end while
-		name = lower(name)
-		raw = raw & name
-	    
-		-- read the parameter list (if any)
-		param = ""
-		inDQuote = FALSE
-		while not inDQuote and c != '>' and c != EOF do
-		    if c = '"' then
-			inDQuote = TRUE
-			param = param & c
+		if c = '\n' then current_line += 1 end if
+		
+		if c = EOF then
+			exit
+		elsif c = '<' then
+			-- an htmX tag?
 			c = getc(in_file)
-			while inDQuote and c != EOF do
-			    if c = '"' then
+			if whitespace(c) or c = '=' then
+				tag("_literal", '<', '<')
+				tag("_literal", c, c)
+			else
+				raw = "<"
+				
+				-- read the name
+				name = ""
+				while not whitespace(c) and c != '>' and c != EOF do
+					name = name & c
+					c = getc(in_file)
+				end while
+				name = lower(name)
+				raw = raw & name
+			
+				-- read the parameter list (if any)
+				param = ""
 				inDQuote = FALSE
-			    elsif c = '\\' then  
-				-- control char. Just read in the next char.
-				param = param & c
-				c = getc(in_file) -- c might be EOF, watch...  
-			    end if
-			    param = param & c   -- so, c may be EOF, but ok
-			    c = getc(in_file)   --   because it will be caught.
-			end while
-		    else
-			param = param & c
-			c = getc(in_file)
-		    end if
-		end while
-	    
-		if inDQuote then       -- checking inDQuote first makes sense
-		    quit("double quote never closed") 
-		elsif c = '>' then
-		    param = param & '>'
-		    raw = raw & param 
-		    tag(name, param, raw)
-		elsif c = EOF then
-		    quit("premature EOF")
+				while not inDQuote and c != '>' and c != EOF do
+					if c = '"' then
+					inDQuote = TRUE
+					param = param & c
+					c = getc(in_file)
+					while inDQuote and c != EOF do
+						if c = '"' then
+						inDQuote = FALSE
+						elsif c = '\\' then  
+						-- control char. Just read in the next char.
+						param = param & c
+						c = getc(in_file) -- c might be EOF, watch...  
+						end if
+						param = param & c   -- so, c may be EOF, but ok
+						c = getc(in_file)   --   because it will be caught.
+					end while
+					else
+					param = param & c
+					c = getc(in_file)
+					end if
+				end while
+			
+				if inDQuote then       -- checking inDQuote first makes sense
+					quit("double quote never closed") 
+				elsif c = '>' then
+					param = param & '>'
+					raw = raw & param 
+					tag(name, param, raw)
+				elsif c = EOF then
+					quit("premature EOF")
+				end if
+			end if
+		else
+			tag("_literal", c, c)
 		end if
-	    end if
+	end while
+end procedure
+
+sequence app_dir
+
+procedure init_dir()
+	sequence cmd_line, format
+	integer param
+	cmd_line = command_line()
+	
+	format = "HTML"
+	html_init()
+	
+	cmd_line = cmd_line[1..2] & cmd_line[4..length(cmd_line)]
+	
+	if length(cmd_line) >= 4 then
+		-- space in path and forgot quotes
+		app_dir = cmd_line[3]
+		param = 4
+		while param <= length(cmd_line) do
+			app_dir = app_dir & " " & cmd_line[param]
+			param += 1
+		end while
+	elsif length(cmd_line) = 3 then
+		app_dir = cmd_line[3]
 	else
-	    tag("_literal", c, c)
+		-- If not passed, then assume normal source directory structure
+		app_dir = ".."
 	end if
-    end while
+	
+	app_dir &= SLASH
+	app_dir = app_dir
 end procedure
 
-sequence app_dir, cmd_line, format
-integer param
-
-cmd_line = command_line()
-
-if length(cmd_line) < 3 then
-    quit("no dir was passed to doc2")
-end if
-
-format = "HTML"
-html_init()
-
-cmd_line = cmd_line[1..2] & cmd_line[4..length(cmd_line)]
-
-if length(cmd_line) >= 4 then
-    -- space in path and forgot quotes
-    app_dir = cmd_line[3]
-    param = 4
-    while param <= length(cmd_line) do
-	app_dir = app_dir & " " & cmd_line[param]
-	param += 1
-    end while
-else
-    app_dir = cmd_line[3] 
-end if
-
-app_dir &= SLASH
-app_dir = app_dir
-
-procedure main(sequence in_name, sequence format, sequence dest)
-    sequence out_name
-    integer p
-    
-    if not match(".htx", in_name) then
-	quit("must be a .htx file")
-    end if
-    in_file = open(in_name, "r")
-    if in_file = -1 then
-	quit("couldn't open " & in_name & " for reading")
-    end if
-    
-    current_file = in_name
-    current_line = 0
-    p = find('.', in_name)
-    
-    out_name = in_name[1..p] & out_type
-    if find('_', out_name) and equal(format, "PLAIN") then
-    elsif match("readme.", out_name) then
-	out_name = app_dir & SLASH & out_name
-    elsif equal("lib_0.htm", out_name) then
-	out_name = app_dir & SLASH & "html" & SLASH & "library.htm"
-    elsif equal("refman_0.htm", out_name) then
-	out_name = app_dir & SLASH & "html" & SLASH & "refman.htm"
-    else    
-	out_name = app_dir & dest & SLASH & out_name
-    end if
-    
-    out_file = open(out_name, "w")
-    if out_file = -1 then
-	quit("couldn't open " & out_name & " for writing")
-    end if
-    
-    printf(1,"Processing %s\n", {in_name})
-
-    scan()
-    
-    close(in_file)
-    close(out_file)
+procedure generate(sequence in_name, sequence format, sequence dest)
+	sequence out_name
+	integer p
+	if not match(".htx", in_name) then
+		quit("must be a .htx file")
+	end if
+	in_file = open(in_name, "r")
+	if in_file = -1 then
+		quit("couldn't open " & in_name & " for reading")
+	end if
+	
+	current_file = in_name
+	current_line = 0
+	p = find('.', in_name)
+	
+	out_name = in_name[1..p] & out_type
+	if find('_', out_name) and equal(format, "PLAIN") then
+	
+	elsif match("readme.", out_name) then
+		out_name = app_dir & SLASH & out_name
+	elsif equal("lib_0.htm", out_name) then
+		out_name = app_dir & SLASH & "html" & SLASH & "library.htm"
+	elsif equal("refman_0.htm", out_name) then
+		out_name = app_dir & SLASH & "html" & SLASH & "refman.htm"
+	else    
+		out_name = app_dir & dest & SLASH & out_name
+	end if
+	
+	out_file = open(out_name, "w")
+	if out_file = -1 then
+		quit("couldn't open " & out_name & " for writing")
+	end if
+	
+	printf(1,"Processing %s\n", {in_name})
+	scan()
+	
+	close(in_file)
+close(out_file)
 end procedure
 
-combined_file = open("../html/combined.htm", "w")
-for f = 1 to length(files) do
-    main(files[f], "HTML", "html")
-end for
-close(combined_file)
 
--- Output Table of Contents and Menu
-sequence s
-integer toc_file, menu_file, ign
-toc_file = open("../html/toc.htm", "w")
-menu_file = open("../html/menu.htm", "w")
-puts(toc_file, "<html><body><h1>Table of Contents</h1>\n")
-ign = write_lines(menu_file,
-    {"<html><head><style>",
-     "body { background-color: #efefef; }",
-     "h2 { margin-bottom: 0px; padding-bottom: 0px; border-bottom: 2px solid black; }",
-     "a, a:visited { color: #555; text-decoration: none; }",
-     "div.menu { font-size: small; }",
-     "div.title { font-weight: bold; padding-top: 15px; padding-bottom: 2px; }",
-     "div.one { margin-top: 2px; padding-top: 2px; padding-left: 10px; }",
-     "div.two { margin-top: 2px; padding-top: 2px; padding-left: 20px; }",
-     "</style></head>",
-     "<body>",
-     "<h2 align=\"center\">Euphoria v4.0</h2>"}, NL)
-
-for i = 1 to length(sections) do
-    s = secnum_seq(sections[i][2])
-    
-    -- Only output top 3 levels for TOC
-    if length(s) <= 3 then
-	if length(s) = 1 then
-	    puts(toc_file, "<strong><font size=+1>")
-	    puts(menu_file, "<div class=\"title\">")
-	elsif length(s) = 2 then
-	    puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;")
-	    puts(menu_file, "<div class=\"one\">&#187; ")
-	elsif length(s) = 3 then
-	    puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>")
+procedure toc_and_menu()
+	-- Output Table of Contents and Menu
+	sequence s
+	integer toc_file, menu_file, ign
+	toc_file = open("../html/toc.htm", "w")
+	menu_file = open("../html/menu.htm", "w")
+	puts(toc_file, "<html><body><h1>Table of Contents</h1>\n")
+	ign = write_lines(menu_file,
+	{"<html><head><style>",
+	"body { background-color: #efefef; }",
+	"h2 { margin-bottom: 0px; padding-bottom: 0px; border-bottom: 2px solid black; }",
+	"a, a:visited { color: #555; text-decoration: none; }",
+	"div.menu { font-size: small; }",
+	"div.title { font-weight: bold; padding-top: 15px; padding-bottom: 2px; }",
+	"div.one { margin-top: 2px; padding-top: 2px; padding-left: 10px; }",
+	"div.two { margin-top: 2px; padding-top: 2px; padding-left: 20px; }",
+	"</style></head>",
+	"<body>",
+	"<h2 align=\"center\">Euphoria v4.0</h2>"}, NL)
+	
+	for i = 1 to length(sections) do
+	s = secnum_seq(sections[i][2])
+	
+	-- Only output top 3 levels for TOC
+	if length(s) <= 3 then
+		if length(s) = 1 then
+		puts(toc_file, "<strong><font size=+1>")
+		puts(menu_file, "<div class=\"title\">")
+		elsif length(s) = 2 then
+		puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;")
+		puts(menu_file, "<div class=\"one\">&#187; ")
+		elsif length(s) = 3 then
+		puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>")
+		end if
+		printf(toc_file, "<a href=\"%s\">%s</a><br />", 
+		{sections[i][1][1..$-3] & "htm", join(s, ".") & ". " & sections[i][3]})
+		if length(s) <= 2 then
+		printf(menu_file, "<a target=\"page\" href=\"%s\">%s</a><br />", 
+			{sections[i][1][1..$-3] & "htm", sections[i][3]})
+		end if
+		if length(s) = 1 then
+		puts(toc_file, "</font></strong>")
+		puts(menu_file, "</div>")
+		elsif length(s) = 2 then
+		puts(menu_file, "</div>")
+		elsif length(s) = 3 then
+		puts(toc_file, "</i>")
+		end if
 	end if
-	printf(toc_file, "<a href=\"%s\">%s</a><br />", 
-	    {sections[i][1][1..$-3] & "htm", join(s, ".") & ". " & sections[i][3]})
-	if length(s) <= 2 then
-	    printf(menu_file, "<a target=\"page\" href=\"%s\">%s</a><br />", 
-		{sections[i][1][1..$-3] & "htm", sections[i][3]})
-	end if
-	if length(s) = 1 then
-	    puts(toc_file, "</font></strong>")
-	    puts(menu_file, "</div>")
-	elsif length(s) = 2 then
-	    puts(menu_file, "</div>")
-	elsif length(s) = 3 then
-	    puts(toc_file, "</i>")
-	end if
-    end if
-end for
+	end for
+	
+	puts(toc_file, "</body></html>\n")
+	puts(menu_file, "</body></html>\n")
+	close(toc_file)
+	close(menu_file)
+end procedure
 
-puts(toc_file, "</body></html>\n")
-puts(menu_file, "</body></html>\n")
-close(toc_file)
-close(menu_file)
-
+procedure main()
+	init_dir()
+	combined_file = open("../html/combined.htm", "w")
+	for f = 1 to length(files) do
+		generate(files[f], "HTML", "html")
+	end for
+	close(combined_file)
+	toc_and_menu()
+end procedure
+main()
