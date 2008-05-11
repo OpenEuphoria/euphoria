@@ -105,21 +105,22 @@ constant token_name =
     {WITH, "'with'"},
     {WITHOUT, "'without'"},
     {WHILE, "'while'"},
+    {CONTINUE, "'continue'"},
     {'?', "'?'"}
 } 
 
 
-procedure Push(symtab_index x) 
+global procedure Push(symtab_index x)
 -- Push element onto code gen stack 
     cg_stack = append(cg_stack, x)
 end procedure
 
-function Top() 
+global function Top()
 -- return top element on code gen stack 
     return cg_stack[$]
 end function
 
-function Pop()
+global function Pop()
 -- Pop top element from code gen stack 
     symtab_index t
 
@@ -491,7 +492,7 @@ global procedure emit_op(integer op)
 
     -- 0 inputs, 0 outputs - note: parser may emit an extra word 
     elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
-		STARTLINE, CLEAR_SCREEN, EXIT, ENDWHILE, ELSE, 
+		STARTLINE, CLEAR_SCREEN, EXIT, CONTINUE, ENDWHILE, ELSE,
 		ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS, 
 		DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK, 
 		TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP}) then

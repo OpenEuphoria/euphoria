@@ -16,6 +16,22 @@ include cominit.e
 
 integer np, pc
 
+-- Trickery for continue and end for. on continue, end for is emitted but
+-- we cannot really end for because, it's just a continue. So, when a
+-- CONTINUE is emitted, pop_loop_stack changes to 0 which tells
+-- opENDFOR_GENERAL not to pop the stack information off of the loop
+-- stack. It also causes opENDFOR_GENERAL to slightly change it's output.
+-- opENDFOR_GENERAL then changes pop_loop_stack to 2. and another CONTINUE
+-- is emitted. When opCONTINUE sees pop_loop_stack is 2, it issues a Goto
+-- statement and resets pop_loop_stack back to 1, it's normal value for
+-- all other loops. The WHILE op does not have those problems.
+--
+-- TODO: I (Jeremy) will come back and clean this up.
+constant PS_NO_POP = 0, PS_POP = 1, PS_ALT = 2
+
+integer pop_loop_stack
+pop_loop_stack = PS_POP
+
 constant MAXLEN = MAXINT - 1000000  -- assumed maximum length of a sequence
 
 constant INT16 = #00007FFF,
@@ -98,7 +114,8 @@ constant INIT_CHUNK = 2500 -- maximum number of literals to
 global sequence target   -- struct minmax
 target = {0, 0}
 
-sequence in_loop
+constant LOOP_VAR = 1, LOOP_TYPE = 2, LOOP_LABEL = 3
+sequence loop_stack
 
 function min(atom a, atom b) 
     if a < b then 
@@ -126,7 +143,7 @@ end function
 
 function savespace() 
 -- should try to save space and reduce complexity
-   return length(in_loop) = 0 and (CurrentSub = TopLevelSub or
+   return length(loop_stack) = 0 and (CurrentSub = TopLevelSub or
 	  length(SymTab[CurrentSub][S_CODE]) > (MAX_CFILE_SIZE/2))
 end function
 
@@ -2142,7 +2159,7 @@ procedure opNOP1()
 -- NOP1 / NOPWHILE
 -- no-op - one word in translator, emit a label, not used in interpreter
     if opcode = NOPWHILE then
-	in_loop = append(in_loop, 0)
+        loop_stack &= {{0, WHILE, pc+1}}
     end if
     Label(pc+1)
     pc += 1
@@ -2374,12 +2391,28 @@ end procedure
 procedure opEXIT()
 -- EXIT / ELSE / ENDWHILE
     if opcode = ENDWHILE then
-	in_loop = in_loop[1..length(in_loop)-1]
+        loop_stack = loop_stack[1..$-1]
     end if
     Goto(Code[pc+1])               
     pc += 2
 end procedure
-	    
+
+procedure opCONTINUE()
+    if loop_stack[$][LOOP_TYPE] = FOR then
+        if pop_loop_stack = PS_ALT then
+            Goto(loop_stack[$][LOOP_LABEL])
+            pc += 1
+            pop_loop_stack = PS_POP
+        else
+            pop_loop_stack = PS_NO_POP
+        end if
+        pc += 1
+    else
+        Goto(loop_stack[$][LOOP_LABEL])
+        pc += 2
+    end if
+end procedure
+
 procedure opRIGHT_BRACE_N()
 -- form a sequence of any length 
     len = Code[pc+1]+2
@@ -3412,14 +3445,14 @@ procedure opFOR()
 -- generate code for FOR, FOR_I 
     sequence range1, range2, inc
     
-    in_loop = append(in_loop, Code[pc+5]) -- loop var
+    loop_stack &= {{Code[pc+5], FOR, pc+7}} -- loop var, type, Label
     c_stmt("{ int @;\n", Code[pc+5])
 		
     CRef(Code[pc+3])
     c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
 		
     Label(pc+7)
-		
+
     inc = ObjMinMax(Code[pc+1])
     if TypeIs(Code[pc+1], TYPE_INTEGER) then 
 	-- increment is an integer
@@ -3530,8 +3563,11 @@ procedure opENDFOR_GENERAL()
 -- ENDFOR_INT_DOWN / ENDFOR_DOWN / ENDFOR_GENERAL
     boolean close_brace
     sequence gencode, intcode
-    
-    in_loop = in_loop[1..length(in_loop)-1]
+
+    if pop_loop_stack = PS_POP then
+        loop_stack = loop_stack[1..$-1]
+    end if
+
     CSaveStr("_0", Code[pc+3], Code[pc+3], Code[pc+4], 0)
     -- always delay the DeRef
 		
@@ -3585,19 +3621,26 @@ procedure opENDFOR_GENERAL()
     if close_brace then
 	c_stmt0("}\n")
     end if
-		
+
     CDeRefStr("_0")
 
-    Goto(Code[pc+1])
-    Label(pc+5)
-    c_stmt0(";\n")
-		
-    CDeRef(Code[pc+3])
-    c_stmt0("}\n")
-    -- no SetBB needed here - it's a loop variable 
-    -- (and it's in a local block)
-	    
+    if pop_loop_stack = PS_POP then
+        Goto(Code[pc+1])
+
+        Label(pc+5)
+        c_stmt0(";\n")
+
+        CDeRef(Code[pc+3])
+        c_stmt0("}\n")
+
+         -- no SetBB needed here - it's a loop variable 
+         -- (and it's in a local block)
+    else
+        pop_loop_stack = PS_ALT
+    end if
+
     pc += 5
+
 end procedure
 
 procedure opCALL_PROC()
@@ -3746,13 +3789,13 @@ procedure opRETURNF()
     doref = TRUE
     
     -- deref any active for-loop vars
-    for i = 1 to length(in_loop) do
-	if in_loop[i] != 0 then
+    for i = 1 to length(loop_stack) do
+	if loop_stack[i][LOOP_VAR] != 0 then
 	    -- active for-loop var
-	    if in_loop[i] = Code[pc+2] then
+	    if loop_stack[i][LOOP_VAR] = Code[pc+2] then
 		doref = FALSE
 	    else
-		CDeRef(in_loop[i])
+		CDeRef(loop_stack[i][LOOP_VAR])
 	    end if
 	end if
     end for
@@ -3827,10 +3870,10 @@ end procedure
 procedure opRETURNP()
 -- return from procedure
     -- deref any active for-loop vars
-    for i = 1 to length(in_loop) do
-	if in_loop[i] != 0 then
+    for i = 1 to length(loop_stack) do
+	if loop_stack[i][LOOP_VAR] != 0 then
 	    -- active for-loop var
-	    CDeRef(in_loop[i])
+	    CDeRef(loop_stack[i][LOOP_VAR])
 	end if
     end for
 	    
@@ -5071,7 +5114,7 @@ end procedure
 procedure do_exec(integer start_pc)
 -- generate code, starting at pc 
     pc = start_pc
-    in_loop = {}
+    loop_stack = {}
     label_map = {}
     all_done = FALSE
     while not all_done do 

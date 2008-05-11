@@ -79,7 +79,7 @@ procedure showCode(integer flist, sequence Code)
 	    -- 0 operands follow
 	    i += 1
 
-	elsif find(word, {ENDWHILE, ELSE, EXIT, NOP2, TASK_SELF, TASK_SUSPEND,
+	elsif find(word, {CONTINUE, ENDWHILE, ELSE, EXIT, NOP2, TASK_SELF, TASK_SUSPEND,
 			  TASK_LIST, GLOBAL_INIT_CHECK, PRIVATE_INIT_CHECK,
 			  INTEGER_CHECK, ATOM_CHECK, SEQUENCE_CHECK,
 			  RETURNP, DATE, TIME, SPACE_USED, CALL, CLOSE,

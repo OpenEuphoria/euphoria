@@ -1014,7 +1014,7 @@ void code_set_pointers(int **code)
 
 	    case ENDWHILE:
 	    case ELSE:
-	    case EXIT: 
+        case EXIT:
 		code[i+1] = SET_JUMP(code[i+1]);
 		i += 2;
 		break;
@@ -1078,7 +1078,11 @@ void code_set_pointers(int **code)
 		code[i+1] = SET_OPERAND(code[i+1]);
 		code[i+2] = SET_JUMP(code[i+2]);
 		i += 3;
-		break;
+        break;
+
+        case CONTINUE:
+        printf("case CONTINUE\n");
+        break;
 
 	    case LESS:
 	    case GREATEREQ:
@@ -1698,7 +1702,7 @@ void do_exec(int *start_pc)
   &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, 
 /* 178 */ &&L_TASK_CLOCK_START, &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
-  &&L_OPTION_SWITCHES
+  &&L_OPTION_SWITCHES, &&L_CONTINUE
   };
 #endif
 #endif
@@ -1964,10 +1968,11 @@ void do_exec(int *start_pc)
 
 	    case L_EXIT:
 	    case L_ENDWHILE:
-	    case L_ELSE:
+        case L_ELSE:
+        case L_CONTINUE:
 		pc = (int *)pc[1];
 		thread();
-		BREAK;
+        BREAK;
 
 	    case L_PLUS1:
 		a = (object)pc[3];

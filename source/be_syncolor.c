@@ -99,6 +99,7 @@ static char *keyword[] = {
     "with",
     "without",
     "xor",
+    "continue",
     NULL
 };
 

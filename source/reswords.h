@@ -200,8 +200,9 @@
 #define PEEK_STRING 184
 
 #define OPTION_SWITCHES 185
+#define CONTINUE 186
 
-#define MAX_OPCODE 185  /* remember to update reswords.e, opnames.e,
+#define MAX_OPCODE 186  /* remember to update reswords.e, opnames.e,
 			   opnames.h, optable[], localjumptab[]
 			   in be_execute.c, be_runtime.c. redef.h, 
 			   emit.e, keylist.e, compile.e, be_syncolor.c

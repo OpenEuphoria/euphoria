@@ -37,6 +37,11 @@ integer loop_nest     -- current number of nested loops
 integer stmt_nest     -- nesting level of statement lists 
 sequence init_stack   -- var init stack 
 
+constant LOOP_TYPE = 1, -- track loop data for continue like statements
+    LOOP_SYM = 2,
+    LOOP_BP = 3
+sequence loop_stack
+
 -- Expression statistics:
 integer side_effect_calls -- number of calls to functions with side-effects
 side_effect_calls = 0     -- on local/global variables
@@ -100,6 +105,7 @@ global procedure InitParser()
     CreateTopLevel()
     EnterTopLevel()
     backed_up_tok = UNDEFINED
+    loop_stack = {}
     loop_nest = 0
     stmt_nest = 0
 end procedure
@@ -906,7 +912,53 @@ procedure Exit_statement()
     NotReached(tok[T_ID], "exit")
 end procedure
 
-integer forward_Statement_list 
+procedure Continue_statement()
+    token tok
+    integer bp1, op
+    sequence s
+
+    if loop_nest = 0 then
+        CompileErr("continue must be inside of loop")
+
+    elsif loop_stack[$][LOOP_TYPE] = FOR then
+        if TRANSLATE then
+            emit_op(CONTINUE)
+        end if
+
+        op_info1 = loop_stack[$][LOOP_SYM]
+        op_info2 = loop_stack[$][LOOP_BP] + 1
+        s = Pop() & Pop()
+        Push(s[2])
+        Push(s[1])
+        emit_op(ENDFOR_GENERAL)
+        Push(s[2])
+        Push(s[1])
+        if TRANSLATE then
+            emit_op(CONTINUE)
+        else
+            emit_op(EXIT)
+        end if
+        AppendXList(length(Code)+1)
+        emit_forward_addr()
+        putback(next_token())
+
+    elsif loop_stack[$][LOOP_TYPE] = WHILE then
+        if TRANSLATE then
+            emit_op(CONTINUE)
+            AppendXList(length(Code)+1)
+            emit_forward_addr()     -- to be back-patched
+            tok = next_token()
+            putback(tok)
+            NotReached(tok[T_ID], "continue")
+        else
+            bp1 = loop_stack[$][LOOP_BP]
+            emit_op(ENDWHILE)
+            emit_addr(bp1)
+        end if
+    end if
+end procedure
+
+integer forward_Statement_list
 
 procedure If_statement()
 -- parse an if statement with optional elsif's and optional else 
@@ -1037,7 +1089,10 @@ procedure While_statement()
     else -- WHILE TRUE was optimized to nothing 
 	bp2 = 0
     end if
+
+    loop_stack &= {{WHILE, 0, bp1}}
     loop_nest += 1
+
     exit_base = length(exit_list)
     if SC1_type = OR then
 	backpatch(SC1_patch-3, SC1_OR_IF)
@@ -1054,6 +1109,7 @@ procedure While_statement()
     tok_match(WHILE)
     StartSourceLine(TRUE)
     emit_op(ENDWHILE)
+    loop_stack = loop_stack[1..$-1]
     loop_nest -= 1
     emit_addr(bp1)
     if TRANSLATE then
@@ -1148,7 +1204,10 @@ procedure For_statement()
     emit_addr(loop_var_sym)
     tok_match(DO)
     bp1 = length(Code)+1
-    emit_addr(0) -- will be patched - don't straighten 
+    emit_addr(0) -- will be patched - don't straighten
+
+    loop_stack &= {{FOR, loop_var_sym, bp1}}
+
     if not TRANSLATE then
 	if OpTrace then
 	    emit_op(DISPLAY_VAR)
@@ -1169,6 +1228,7 @@ procedure For_statement()
     backpatch(bp1, length(Code)+1)
     PatchXList(exit_base)
     loop_nest -= 1
+    loop_stack = loop_stack[1..$-1]
     if not TRANSLATE then
 	if OpTrace then
 	    emit_op(ERASE_SYMBOL)
@@ -1380,7 +1440,7 @@ procedure Statement_list()
 	elsif id = RETURN then
 	    StartSourceLine(TRUE)
 	    Return_statement()
-	    
+
 	elsif id = EXIT then
 	    StartSourceLine(TRUE)
 	    Exit_statement()
@@ -1392,6 +1452,10 @@ procedure Statement_list()
 	elsif id = QUESTION_MARK then
 	    StartSourceLine(TRUE)
 	    Print_statement()
+
+        elsif id = CONTINUE then
+            StartSourceLine(TRUE)
+            Continue_statement()
 
 	else 
 	    putback(tok)
@@ -1781,6 +1845,9 @@ global procedure parser()
 	    StartSourceLine(TRUE)
 	    Print_statement()
 	    ExecCommand()
+
+        elsif id = CONTINUE then
+            CompileErr("continue must be inside a loop")
 	    
 	elsif id = ILLEGAL_CHAR then
 	    CompileErr("illegal character")

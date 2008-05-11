@@ -348,6 +348,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
+{x, x},
 {x, x}
 };
 
