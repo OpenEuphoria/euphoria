@@ -3,7 +3,7 @@ include unittest.e
 set_test_module_name("internal-loops")
 
 sequence a
-integer idx
+integer idx, idx2
 
 a = {}
 for i = 1 to 5 do
@@ -38,20 +38,40 @@ end for
 test_equal("for continue", {1,5}, a)
 
 a = {}
+for b = 1 to 2 do
+    for c = 1 to 5 do
+        if c > 1 and c < 5 then continue end if
+        a &= {{b,c}}
+    end for
+end for
+test_equal("for nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
+
+a = {}
 idx = 0
-while 1 do
+while idx < 5 do
     idx += 1
     a &= idx
-    if idx = 5 then exit end if
 end while
 test_equal("while #1", {1,2,3,4,5}, a)
 
 a = {}
 idx = 0
-while 1 do
+while idx < 5 do
     idx += 1
     if idx > 1 and idx < 5 then continue end if
     a &= idx
-    if idx = 5 then exit end if
 end while
 test_equal("while continue", {1,5}, a)
+
+a = {}
+idx = 0
+while idx < 2 do
+    idx += 1
+    idx2 = 0
+    while idx2 < 5 do
+        idx2 += 1
+        if idx2 > 1 and idx2 < 5 then continue end if
+        a &= {{idx,idx2}}
+    end while
+end while
+test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
