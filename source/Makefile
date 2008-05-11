@@ -272,8 +272,9 @@ all : interpreter translator library backend
 
 BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
 
-distclean : 
+distclean : clean
 	-rm -r $(BUILD_DIRS)
+	cd pcre && $(MAKE) clean
 
 clean : 
 	@-for d in $(BUILD_DIRS); \
@@ -281,6 +282,7 @@ clean :
 	    rm "$$d"*.o; \
 	done
 	-rm exu ecu ecu.a backendu $(DEB_SOURCE_DIR).tar.gz
+	cd pcre && $(MAKE) clean
 
 .PHONY : clean distclean all
 
