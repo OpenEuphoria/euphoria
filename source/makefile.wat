@@ -1,4 +1,11 @@
 # OpenWatcom makefile for Euphoria (Win32)
+#
+# You must first run configure.bat, supplying any options you might need:
+#     --with-eu3      Use this option if you are building Euphoria with only 
+#                     a version of Euphoria less than 4.  It will use the EUINC
+#                     variable instead of passing the include directory on the
+#                     command line.
+#
 # Syntax:
 #   Interpreter(exw.exe, exwc.exe):  wmake -f makefile.wat interpreter
 #   Translator           (ecw.exe):  wmake -f makefile.wat translator
@@ -17,6 +24,8 @@
 #
 #                          DEBUG:  Set this to 1 to build debug versions of the targets.  ex:
 #                                      wmake -f makefile.wat interpreter DEBUG=1
+
+!include config.wat
 
 EU_CORE_FILES = &
 	main.e &
@@ -217,6 +226,14 @@ DEBUGFLAG = /d2 /dDEBUG
 DEBUGLINK = debug all
 !endif
 
+!ifeq EU3 1
+EXE=set EUINC=$(PWD)\..\include && $(EX)
+INCDIR=
+!else
+EXE=$(EX)
+INCDIR=..\..\include
+!endif
+
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 all :  .SYMBOLIC
 	wmake -f makefile.wat winall $(VARS)
@@ -236,12 +253,13 @@ BUILD_DIRS=intobj transobj libobj backobj
 
 distclean : .SYMBOLIC
 	-rmdir /Q/S $(BUILD_DIRS)
-	-del /Q .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
-	    .\pcre\pcre_chartables.c
+	-del /Q config.wat
 
 clean : .SYMBOLIC
-	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h
+	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h 
 	-del /Q /S intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
+	-del /Q .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
+	    .\pcre\pcre_chartables.c 
 
 !ifeq OS DOS
 OSFLAG=EDOS
@@ -369,12 +387,12 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 
 .\$(OBJDIR)\main-.c : .\$(OBJDIR)\$(EU_TARGET)c
 	cd .\$(OBJDIR)
-	$(EX) -i ..\..\include ..\ec.ex -i ..\..\include ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
-	$(EX) ..\ec.ex ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 
 .\$(OBJDIR)\int.obj :  .\$(OBJDIR)\int.c

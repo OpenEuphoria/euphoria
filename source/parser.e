@@ -1,6 +1,6 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
+-- Euphoria 4.0
 -- Parser
 include global.e
 include emit.e
@@ -914,7 +914,7 @@ end procedure
 
 procedure Continue_statement()
     token tok
-    integer bp1, op
+    integer bp1
     sequence s
 
     if loop_nest = 0 then
