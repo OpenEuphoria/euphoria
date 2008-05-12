@@ -29,7 +29,6 @@ constant files = {
     "database.htx",
     "e2c.htx",
     "trouble.htx",
-    "relnotes.htx",
     "relnotes40.htx"
 }
 
