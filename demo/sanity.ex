@@ -20,6 +20,7 @@ include image.e
 include misc.e
 include dll.e
 include msgbox.e
+include math.e
 
 integer SLASH
 if platform() = LINUX then
