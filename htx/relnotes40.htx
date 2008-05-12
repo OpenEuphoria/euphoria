@@ -1,0 +1,148 @@
+<doc title="Euphoria v4.0 Release Notes">
+
+<h1>Euphoria v4 Release Notes</h1>
+
+<h2>Version 4.0:</h2>
+
+<h3>Bug Fixes</h3>
+
+<ul>
+<li><b><font color="#009999">bug fixed:</font></b> 1855414. <b>open()</b>'s max path length is now determined by the underlying operating system and not a generic default. open() also now returns -1 when the filename is too long instead of causing a fatal error.  Fixed by Jeremy Cowgar</li>
+<li><b><font color="#009999">bug fixed:</font></b> 1608870. <b>dir()</b> now handles *.abc correctly, not showing a file ending with .abcd. <b>dir()</b> also now supports wildcard characters (* and ?) on all platforms. Fixed by Jeremy Cowgar</li>
+<li><b><font color="#009999">bug fixed: </font></b> gcc stack offset changed to -20,-24 in GCC v4.2.3 and later. if/else updated . Works on GCC 3.x and 4.x. Fixed by Jeremy Cowgar</li>
+</ul>
+
+<h3>New Features</h3>
+
+<ul>
+<li>Include file names with accent characters now supported. Implemented by C. Cuvier</li>
+<li>Comments may now be embedded in data passed to <b>value()</b> in <b>get.e</b>.  Implemented by C. Cuvier</li>
+<li>Enhanced symbol resolution to take into account information regarding which files were included by which files. Implemented by Matthew Lewis</li>
+<li>
+     Namespaces for a source file now can be used for symbols in the
+     specified file and for global symbols in all files included by
+     the specified file.
+     Implemented by Matthew Lewis</li>
+<li>
+     Added <b>value_from()</b> in <b>get.e</b> to return additional
+     information about the parsing activity.
+     Implemented by C. Cuvier</li>
+<li>
+     Command line arguments for the translator allow for creating
+     binaries with debugging symbols, and to specify a different
+     runtime library.
+     Implemented by C. Cuvier</li>
+<li>
+     In trace mode, '?' will show the last defined variable of the requested
+     name.
+     Implemented by C. Cuvier</li>
+<li>
+     New builtin routines: <b>peeks()</b>, <b>peek2s()</b>, <b>peek2u()</b>,
+     <b>peek_string()</b>, <b>poke2()</b>
+     Implemented by Matthew Lewis</li>
+<li>
+     Include directories can now be specified based on command line arguments
+     and config files in addition to environment variables.
+     Implemented by Matthew Lewis</li>
+<li>
+     Improved accuracy in scanning numbers in scientific notation.  Scanned
+     numbers are accurate to the full precision of the IEEE 754 floating
+     point standard.  Implemented by Matthew Lewis</li>
+<li>
+     <b>Translator:</b> Added <b>-lccopt-off</b> option for translator to
+     disable using the optimization flag when compiling with LCC, as it has
+     problems sometimes.  Implemented by Jeremy Cowgar</li>
+<li>
+    <b>Moved</b> function <b>reverse()</b> from <b>misc.e</b>, <b>lower()</b>
+    and <b>upper()</b> from <b>wildcard.e</b> to <b>sequence.e</b>,
+    functions/constant <b>PI</b>, <b>arccos</b>, <b>arcsin</b> moved from
+    <b>misc.e</b> to <b>math.e</b>.</li>
+<li>
+     Began <b>library expansion</b>. The vast percentage of these functions
+     have been found in The Archive. Many thanks must go to the original
+     developers who have contributed these functions.</li>
+<ul>
+    <li>
+     New routines in <b>machine.e</b>:
+     <b>crash()</b>.</li>
+	<li>
+     New routines in <b>math.e</b>:
+     <b>ceil()</b>, <b>round_to()</b>, <b>round()</b>, <b>sign()</b>,
+     <b>abs()</b>, <b>sum()</b>, <b>average()</b>, <b>min()</b>,
+     <b>max()</b>, <b>deg2rad()</b>, <b>rad2deg()</b>, <b>log10()</b>,
+     <b>atan2()</b>, <b>rand_range()</b>, <b>mod()</b>.
+     Global Constant <b>E</b>.</li>
+	<li>
+     New routines in <b>sequence.e</b>:
+     <b>insert()</b>, <b>splice()</b>, <b>remove()</b>, <b>replace()</b>, <b>head()</b>,
+     <b>mid()</b>, <b>slice()</b>, <b>tail()</b>, <b>split()</b>, <b>split_adv()</b>,
+     <b>join()</b>, <b>find_any()</b>, <b>find_any_from()</b>, <b>trim()</b>, <b>trim_head()</b>,
+     <b>trim_tail()</b>, <b>truncate()</b>, <b>pad_head()</b>,
+     <b>pad_tail()</b>, <b>chunk()</b>, <b>flatten()</b>, <b>find_all()</b>,
+     <b>match_all()</b>, <b>find_replace()</b>, <b>vslice()</b>,
+     <b>rfind()</b>, <b>rfind_from()</b>, <b>rmatch()</b>,
+     <b>rmatch_from()</b>.</li>
+	<li>
+     New routines in <b>file.e</b>:
+     <b>read_lines()</b>, <b>read_file()</b>, <b>write_lines()</b>,
+     <b>write_file()</b>, <b>pathinfo()</b>, <b>dirname()</b>, <b>filename()</b>,
+     <b>fileext()</b> and Global Constants <b>PATHSEP</b> and <b>NL</b>.</li>
+	<li>
+     New routines in <b>ctype.e</b>:
+     <b>isalnum()</b>, <b>isalpha()</b>, <b>isascii()</b>, <b>iscntrl()</b>,
+     <b>isdigit()</b>, <b>isgraph()</b>, <b>islower()</b>, <b>isprint()</b>,
+     <b>ispunct()</b>, <b>isspace()</b>, <b>isupper()</b>, and
+     <b>isxdigit()</b></li>
+    <li>
+     New routines in <b>datetime.e</b>:
+     <b>new()</b>, <b>from_date()</b>,
+     <b>now()</b>, <b>dow()</b>, <b>doy()</b>, <b>to_unix()</b>,
+     <b>from_unix()</b>, <b>add()</b>, <b>subtract()</b>,
+     <b>diff()</b>. Global constants: <b>DT_YEAR</b>, <b>DT_MONTH</b>,
+     <b>DT_DAY</b>, <b>DT_HOUR</b>, <b>DT_MINUTE</b>, <b>DT_SECOND</b>, <b>SECONDS</b>,
+     <b>MINUTES</b>, <b>HOURS</b>, <b>DAYS</b>, <b>WEEKS</b>, <b>MONTHS</b>, <b>YEARS</b>.
+     Global sequences: <b>month_names</b>, <b>month_abbrs</b>, <b>day_names</b>,
+     <b>day_abbrs</b>, <b>ampm</b>. Note: These were made global for localization.</li>
+	<li>
+     New map routines in <b>map.e</b>:
+     <b>new()</b>,
+     <b>has()</b>,
+     <b>get()</b>,
+     <b>put()</b>,
+     <b>remove()</b>,
+     <b>size()</b>,
+     <b>keys()</b>,
+     <b>values()</b>.
+     Implemented and tested by Yuku Sugianto</li>
+    <li>
+     New unit testing library: <b>unittest.e</b>: see tests/all.ex for examples
+     on how to use with your own libraries. Implemented by Jeremy Cowgar.</li>
+    <li>
+     New stack routines in <b>stack.e</b>:
+     <b>new()</b>, <b>is_empty()</b>, <b>push()</b>, <b>top()</b>, <b>pop()</b>,
+     <b>clear()</b>, <b>swap()</b>, <b>dup()</b>. Global constants: <b>FIFO</b>, <b>FILO</b>.
+     Implemented by Jeremy Cowgar.</li>
+    <li>
+     New locale routines in <b>locale.e</b>:
+      <b>set()</b>, <b>get()</b>, <b>number()</b>, <b>money()</b>, <b>datetime()</b>,
+      <b>set_po_path()</b>, <b>get_po_path()</b>, <b>po_load()</b>, <b>w()</b>.
+      Implemented by Jeremy Cowgar.</li>
+    <li>
+     New os routines in <b>os.e</b>:
+       <b>cmd_parse()</b>.
+       Implemented by Jeremy Cowgar</li>
+	</ul>
+
+<li>
+     <b>Unit testing added to Euphoria</b>. Over 600 tests. To run, cd tests and
+     exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto</li>
+
+<li>
+     Updated the documentation to make it a little more user friendly.
+     Jeremy Cowgar</li>
+     
+     <li>Started work on converting documentation generator to output CSS-based XHTML compliant docs.
+     c.k.lester</li>
+</ul>
+
+</doc>
