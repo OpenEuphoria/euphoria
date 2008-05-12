@@ -231,7 +231,7 @@ EXE=set EUINC=$(PWD)\..\include && $(EX)
 INCDIR=
 !else
 EXE=$(EX)
-INCDIR=..\..\include
+INCDIR=-i ..\..\include
 !endif
 
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
