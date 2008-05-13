@@ -1,716 +1,926 @@
-<_init_comment>
-<html>
-<head><title>Euphoria Reference Manual Part II - Section 3.17 - EDS</title>
-<_css>
-</head>
-<body>
+<doc title="Euphoria Reference Manual Part II - Section 3.17 - EDS">
 
-<font color="#FF0099" size=+1>
-<br>
+<h1>3.17 - Euphoria Database System (EDS)</h1>
 
-<_dul>3.17 - Euphoria Database System (EDS)</_dul>
+<p>For a general overview of the Euphoria Database System, please refer to the document:
+<a href="database.htm">The Euphoria Database System (EDS)</a>.</p>
 
-</font>
-<p>
+<h3>Database Routines</h3>
 
-For a general overview of the Euphoria Database System, please refer to the document:
-<a href="database.htm">The Euphoria Database System (EDS)</a>.
-<p>
+<p>In the descriptions below, to indicate what kind of <font color="#993333"><b>object</b></font> may be passed in and returned, the following prefixes are used:</p>
 
-<a name=create></a>
-<_routine name="db_create">
 <table border=0 cellspacing=2 cellpadding=2>
 
+<tr>
+	<td valign=top><b>x</b></td>
+	<td width=10 align=center valign=top>-</td>
+	<td>a general <a href="refman_2.htm#1">object</a> (atom or sequence)</td>
+</tr>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+<tr>
+	<td valign=top><b>s</b></td>
+	<td width=10 align=center valign=top>-</td>
+	<td>a <a href="refman_2.htm#1">sequence</a></td>
+</tr>
+
+<tr><td valign=top><b>a</b></td>
+<td width=10 align=center valign=top>-</td>
+
+<td>an <a href="refman_2.htm#1">atom</a></td></tr>
+
+
+<tr><td valign=top><b>i</b></td>
+<td width=10 align=center valign=top>-</td>
+<td>an <a href="refman_2.htm#integer">integer</a></td></tr>
+
+
+<tr><td valign=top><b>fn</b></td>
+<td width=10 align=center valign=top>-</td>
+
+<td>an <a href="refman_2.htm#integer">integer</a> used
+     as a file number</td></tr>
+
+
+<tr><td valign=top><b>st</b></td>
+<td width=10 align=center valign=top>-</td>
+<td>a <a href="refman_2.htm#11">string sequence</a>,
+     or <a href="refman_2.htm#char">single-character atom</a></td></tr>
+
+</table>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<tr><td valign=top><a href="#db_create"><b>db_create</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>create a new database</td></tr>
+
+
+<tr><td valign=top><a href="#db_open"><b>db_open</b></a></td>
+
+<td width=10 align=center valign=top>-</td>
+<td>open an existing database</td></tr>
+
+
+<tr><td valign=top><a href="#select"><b>db_select</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>select a database to be the current one</td></tr>
+
+
+<tr><td valign=top><a href="#close"><b>db_close</b></a></td>
+<td width=10 align=center valign=top>-</td>
+
+<td>close a database</td></tr>
+
+
+<tr><td valign=top><a href="#create_table"><b>db_create_table</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>create a new table within a database</td></tr>
+
+
+<tr><td valign=top><a href="#select_table"><b>db_select_table</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>select a table to be the current one</td></tr>
+
+
+<tr><td valign=top><a href="#rename_table"><b>db_rename_table</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>rename a table</td></tr>
+
+
+<tr><td valign=top><a href="#delete_table"><b>db_delete_table</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>delete a table</td></tr>
+
+<tr><td valign=top><a href="#table_list"><b>db_table_list</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>get a list of all the table names in a database</td></tr>
+
+
+<tr><td valign=top><a href="#table_size"><b>db_table_size</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>get the number of records in the current table</td></tr>
+
+
+<tr><td valign=top><a href="#find_key"><b>db_find_key</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>quickly find the record with a certain key value</td></tr>
+
+
+<tr><td valign=top><a href="#record_key"><b>db_record_key</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>get the key portion of a record</td></tr>
+
+
+<tr><td valign=top><a href="#record_data"><b>db_record_data</b></a></td>
+
+<td width=10 align=center valign=top>-</td>
+<td>get the data portion of a record</td></tr>
+
+
+<tr><td valign=top><a href="#insert"><b>db_insert</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>insert a new record into the current table</td></tr>
+
+
+<tr><td valign=top><a href="#delete_record"><b>db_delete_record</b></a></td>
+<td width=10 align=center valign=top>-</td>
+
+<td>delete a record from the current table</td></tr>
+
+
+<tr><td valign=top><a href="#replace_data"><b>db_replace_data</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>replace the data portion of a record</td></tr>
+
+
+<tr><td valign=top><a href="#compress"><b>db_compress</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>compress a database</td></tr>
+
+
+<tr><td valign=top><a href="#dump"><b>db_dump</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>print the contents of a database</td></tr>
+
+
+<tr><td valign=top><a href="#fatal_id"><b>db_fatal_id</b></a></td>
+<td width=10 align=center valign=top>-</td>
+<td>handle fatal database errors</td></tr>
+
+</table>
+
+<hr></hr>
+
+<a name=db_create></a>
+<font color="#006633" size=+2><br>
+<center><b>db_create</b></center>
+</font>
+
+<table border=0 cellspacing=2 cellpadding=2>
+ <tr><td valign=top><b>Syntax:</b></td>
+
+<td><font face = "Arial, Helvetica">include database.e<BR>
  i1 = db_create(s, i2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Create a new database. A new database will be created in the file with path
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Create a new database. A new database will be created in the file with path
  given by s. i2 indicates the type of lock that will be applied to the file
  as it is created. i1 is an error code that indicates success or failure.
  The values for i2 can be either DB_LOCK_NO (no lock) or 
  DB_LOCK_EXCLUSIVE (exclusive lock). i1
  is DB_OK if the new database is successfully created. This database
- becomes the <font color=\"#993333\"><b>current database</b></font> to which
- all other database operations will apply."
- >
-<_2clist
-  name="Comments:"
-  description=
-"If the path, s, does not end in .edb, it will be added automatically.
+ becomes the <font color="#993333"><b>current database</b></font> to which
+ all other database operations will apply.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+
+<td>If the path, s, does not end in .edb, it will be added automatically.
  <p>If the database already exists, it will not be overwritten.
  db_create() will return DB_EXISTS_ALREADY.
- <p>A version number is stored in the database file so future
+ A version number is stored in the database file so future
  versions of the database software can recognize the format, and
-  possibly read it and deal with it in some way."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_create("mydata", DB_LOCK_NO) != DB_OK then
-    puts(2, "Couldn't create the database!\n")
-    abort(1)
-end if
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_open\">db_open</a>,
-               <a href=\"lib_eds.htm#db_close\">db_close</a>"
- >
+  possibly read it and deal with it in some way.</p>
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_create(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_NO) != DB_OK </font><font color="#0000FF">then</font>
+
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't create the database!\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_open">db_open</a>,
+               <a href="#db_close">db_close</a>
+
+</td></tr>
+
 </table>
 
 
-<a name=open></a>
-<_routine name="db_open">
+<a name=db_open></a><font color="#006633" size=+2><br>
+<center><b>db_open</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+
+<td><font face = "Arial, Helvetica"> include database.e<BR>
  i1 = db_open(s, i2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Open an existing Euphoria database. The file containing the database is
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Open an existing Euphoria database. The file containing the database is
  given by s. i1 is a return code indicating success or failure.
  i2 indicates the type of lock that you want to place on the database
  file while you have it open. This database
- becomes the <font color=\"#993333\"><b>current database</b></font> to
+ becomes the <font color="#993333"><b>current database</b></font> to
  which all other database operations will apply.
- <p>The return codes are:"
- >
+ The return codes are:
+</td></tr>
 
-<eucode>
-    global constant DB_OK = 0   -- success
-             DB_OPEN_FAIL = -1  -- couldn't open the file 
-             DB_LOCK_FAIL = -3  -- couldn't lock the file in the
-                                --     manner requested
-</eucode>
 
-<_2clist
-  name="Comments:"
-  description=
-"The types of lock that you can use are: DB_LOCK_NO (no lock), 
+<tr><td></td><td>
+<pre><font color="#0000FF">    global constant </font><font color="#330033">DB_OK = 0   </font><font color="#FF0055">-- success</font>
+<font color="#330033">             DB_OPEN_FAIL = -1  </font><font color="#FF0055">-- couldn't open the file </font>
+<font color="#330033">             DB_LOCK_FAIL = -3  </font><font color="#FF0055">-- couldn't lock the file in the</font>
+<font color="#FF0055">                                --     manner requested</font>
+
+</pre></td></tr>
+
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The types of lock that you can use are: DB_LOCK_NO (no lock), 
  DB_LOCK_SHARED (shared lock for read-only access) and
  DB_LOCK_EXCLUSIVE (for read/write access). DB_LOCK_SHARED is only supported on
- <font color=\"#CC3366\"><b>Linux</b></font>/<font color=\"#CC3366\"><b>FreeBSD</b></font>.
+ <font color="#CC3366"><b>Linux</b></font>/<font color="#CC3366"><b>FreeBSD</b></font>.
  It allows you to read the database, but not write anything to it. If you
- request DB_LOCK_SHARED on <font color=\"#CC3366\"><b>WIN32</b></font> or
- <font color=\"#CC3366\"><b>DOS32</b></font> it will be treated as if you had
- asked for DB_LOCK_EXCLUSIVE.<P>
+ request DB_LOCK_SHARED on <font color="#CC3366"><b>WIN32</b></font> or
+ <font color="#CC3366"><b>DOS32</b></font> it will be treated as if you had
+ asked for DB_LOCK_EXCLUSIVE.
+
   If the lock fails, your program should wait a few seconds and try again.
-  Another process might be currently accessing the database.<P>
-  DOS programs will typically get a \"critical error\" message if they
-  try to access a database that is currently locked."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-tries = 0
-while 1 do
-    err = db_open("mydata", DB_LOCK_SHARED) 
-    if err = DB_OK then
-        exit
-    elsif err = DB_LOCK_FAIL then
-    	tries += 1
-    	if tries > 10 then
-            puts(2, "too many tries, giving up\n")
-            abort(1)
-    	else    
-    	    sleep(5)
-    	end if
-    else
-    	puts(2, "Couldn't open the database!\n")
-    	abort(1)
-    end if
-end while
+  Another process might be currently accessing the database.
+  DOS programs will typically get a "critical error" message if they
+  try to access a database that is currently locked.
+</td></tr>
 
-</eucode>
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
 
- <_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_create\">db_create</a>,
-               <a href=\"lib_eds.htm#db_close\">db_close</a>"
- >
+<tr><td></td><td>
+<pre><font color="#330033">tries = 0</font>
+<font color="#0000FF">while </font><font color="#330033">1 </font><font color="#0000FF">do</font>
+
+<font color="#330033">    err = db_open(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_SHARED) </font>
+<font color="#0000FF">    if </font><font color="#330033">err = DB_OK </font><font color="#0000FF">then</font>
+<font color="#0000FF">        exit</font>
+<font color="#0000FF">    elsif </font><font color="#330033">err = DB_LOCK_FAIL </font><font color="#0000FF">then</font>
+
+<font color="#330033">    	tries += 1</font>
+<font color="#0000FF">    	if </font><font color="#330033">tries > 10 </font><font color="#0000FF">then</font>
+<font color="#FF00FF">            puts</font><font color="#330033">(2, </font><font color="#00A033">"too many tries, giving up\n"</font><font color="#330033">)</font>
+<font color="#FF00FF">            abort</font><font color="#330033">(1)</font>
+
+<font color="#0000FF">    	else    </font>
+<font color="#330033">    	    sleep(5)</font>
+<font color="#0000FF">    	end if</font>
+<font color="#0000FF">    else</font>
+<font color="#FF00FF">    	puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't open the database!\n"</font><font color="#330033">)</font>
+
+<font color="#FF00FF">    	abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">    end if</font>
+<font color="#0000FF">end while</font>
+<font color="#330033"></font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_create">db_create</a>,
+               <a href="#db_close">db_close</a>
+
+</td></tr>
+
 </table>
 
 
 <a name=select></a>
-<_routine name="db_select">
+<a name=db_select></a><font color="#006633" size=+2><br>
+<center><b>db_select</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\"> include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+
+<td><font face = "Arial, Helvetica"> include database.e<BR>
  i = db_select(s)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Choose a new, already open, database to be the
- <font color=\"#993333\"><b>current database</b></font>.
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Choose a new, already open, database to be the
+ <font color="#993333"><b>current database</b></font>.
  Subsequent database operations will apply to this database. s is the
  path of the database file as it was originally opened with db_open() or
- db_create(). i is a return code indicating success (DB_OK) or failure."
- >
-<_2clist
-  name="Comments:"
-  description="When you create (db_create) or open (db_open)
+ db_create(). i is a return code indicating success (DB_OK) or failure.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+
+<td>When you create (db_create) or open (db_open)
   a database, it automatically becomes the current database.
   Use db_select() when you want to switch back and forth between
   open databases, perhaps to copy records 
-  from one to the other.<p>
+  from one to the other.
   After selecting a new database, you should select a table
-  within that database using db_select_table()."
- >
+  within that database using db_select_table().
+</td></tr>
 
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_select("employees") != DB_OK then
-    puts(2, "Couldn't select employees database\n")
-end if
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_open\">db_open</a>"
- >
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_select(</font><font color="#00A033">"employees"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't select employees database\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_open">db_open</a>
+</td></tr>
+
 </table>
 
 
 <a name=close></a>
-<_routine name="db_close">
+<a name=db_close></a><font color="#006633" size=+2><br>
+<center><b>db_close</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
  db_close()
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Unlock and close the <font color=\"#993333\"><b>current database</b></font>."
- >
-<_2clist
-  name="Comments:"
-  description=
-"Call this procedure when you are finished with the current database.
- Any lock will be removed, allowing other processes to access 
- the database file."
- >
 
- <_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_open\">db_open</a>"
- >
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Unlock and close the <font color="#993333"><b>current database</b></font>.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>Call this procedure when you are finished with the current database.
+ Any lock will be removed, allowing other processes to access 
+ the database file.
+</td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_open">db_open</a>
+</td></tr>
+
 </table>
 
 <a name=create_table></a>
-<_routine name="db_create_table">
+<a name=db_create_table></a><font color="#006633" size=+2><br>
+<center><b>db_create_table</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
  i = db_create_table(s)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Create a new table within the
- <font color=\"#993333\"><b>current database</b></font>. The name of the
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Create a new table within the
+ <font color="#993333"><b>current database</b></font>. The name of the
  table is given by the sequence of characters, s, and may not be the same
- as any existing table in the current database."
- >
-<_2clist
-  name="Comments:"
-  description=
-"The table that you create will initially have 0 records.
- It becomes the <font color=\"#993333\"><b>current table</b></font>."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_create_table("my_new_table") != DB_OK then
-    puts(2, "Couldn't create my_new_table!\n")
-end if
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_delete_table\">db_delete_table</a>"
- >
+ as any existing table in the current database.
+
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The table that you create will initially have 0 records.
+ It becomes the <font color="#993333"><b>current table</b></font>.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_create_table(</font><font color="#00A033">"my_new_table"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't create my_new_table!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_delete_table">db_delete_table</a>
+</td></tr>
+
 </table>
 
 <a name=select_table></a>
-<_routine name="db_select_table">
+<a name=db_select_table></a><font color="#006633" size=+2><br>
+<center><b>db_select_table</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
  i = db_select_table(s)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"The table with name given by s,
- becomes the <font color=\"#993333\"><b>current table</b></font>.
+
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>The table with name given by s,
+ becomes the <font color="#993333"><b>current table</b></font>.
  The return code, i, will be DB_OK if the table exists in the 
- <font color=\"#993333\"><b>current database</b></font>, otherwise you'll
- get DB_OPEN_FAIL."
- >
+ <font color="#993333"><b>current database</b></font>, otherwise you'll
+ get DB_OPEN_FAIL.
+</td></tr>
 
-<_2clist
-  name="Comments:"
-  description="All record-level database operations apply automatically 
-  to the current table."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_select_table("salary") != DB_OK then
-    puts(2, "Couldn't find salary table!\n")
-    abort(1)
-end if
-</eucode>
 
- <_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_eds.htm#db_create_table\">db_create_table</a>,
-  <a href=\"lib_eds.htm#db_delete_table\">db_delete_table</a>"
- >
+<tr><td valign=top><b>Comments:</b></td>
+<td>All record-level database operations apply automatically 
+  to the current table.
+
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_select_table(</font><font color="#00A033">"salary"</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't find salary table!\n"</font><font color="#330033">)</font>
+
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+
+ <tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="#db_create_table">db_create_table</a>,
+  <a href="#db_delete_table">db_delete_table</a>
+
+</td></tr>
+
 </table>
 
 <a name=rename_table></a>
-<_routine name="db_rename_table">
+<a name=db_rename_table></a><font color="#006633" size=+2><br>
+<center><b>db_rename_table</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<br>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<br>
+
   db_rename_table(s1, s2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Rename a table in the <font color=\"#993333\"><b>current database</b></font>.
-The current name of the table is given by s1. The new name of the table is s2."
- >
-<_2clist
-  name="Comments:"
-  description=
-"The table to be renamed can be the 
- <font color=\"#993333\"><b>current table</b></font>, 
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Rename a table in the <font color="#993333"><b>current database</b></font>.
+The current name of the table is given by s1. The new name of the table is s2.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The table to be renamed can be the 
+ <font color="#993333"><b>current table</b></font>, 
  or some other table in the current database.
  An error will occur if s1 is not the name of a table in the current database,
- or if s2 <b>is</b> the name of an existing table in the current database."
- >
+ or if s2 <b>is</b> the name of an existing table in the current database.
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_create_table\">db_create_table</a>
-               <a href=\"lib_eds.htm#db_select_table\">db_select_table</a>
-               <a href=\"lib_eds.htm#db_delete_table\">db_delete_table</a>"
- >
+</td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_create_table">db_create_table</a>
+               <a href="#db_select_table">db_select_table</a>
+               <a href="#db_delete_table">db_delete_table</a>
+</td></tr>
+
 </table>
 
-
 <a name=delete_table></a>
-<_routine name="db_delete_table">
+<a name=db_delete_table></a><font color="#006633" size=+2><br>
+<center><b>db_delete_table</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<br>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<br>
   db_delete_table(s)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Delete a table in the <font color=\"#993333\"><b>current database</b></font>.
-The name of the table is given by s."
- >
-<_2clist
-  name="Comments:"
-  description=
-"All records are deleted and all space used by the table is freed up.
- If the table is the <font color=\"#993333\"><b>current table</b></font>,
- the <font color=\"#993333\"><b>current table</b></font> becomes undefined.<p>
- If there is no table with the name given by s, then nothing happens."
- >
 
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_create_table\">db_create_table</a>
-               <a href=\"lib_eds.htm#db_select_table\">db_select_table</a>"
- >
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Delete a table in the <font color="#993333"><b>current database</b></font>.
+The name of the table is given by s.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>All records are deleted and all space used by the table is freed up.
+ If the table is the <font color="#993333"><b>current table</b></font>,
+ the <font color="#993333"><b>current table</b></font> becomes undefined.
+
+ If there is no table with the name given by s, then nothing happens.
+</td></tr>
+
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_create_table">db_create_table</a>
+               <a href="#db_select_table">db_select_table</a>
+</td></tr>
+
 </table>
 
 
 <a name=table_list></a>
-<_routine name="db_table_list">
+<a name=db_table_list></a><font color="#006633" size=+2><br>
+<center><b>db_table_list</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
-s = db_table_list()
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Return a sequence of all the table names in the
-<font color=\"#993333\"><b>current database</b></font>. Each
-element of s is a sequence of characters containing the name of a table."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-sequence names
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">s = db_table_list()
+</font>
+</td></tr>
 
-names = db_table_list()
-for i = 1 to length(names) do
-    puts(1, names[i] & '\n')
-end for
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_create_table\">db_create_table</a>"
- >
+ <tr><td valign=top><b>Description:</b></td>
+
+<td>Return a sequence of all the table names in the
+<font color="#993333"><b>current database</b></font>. Each
+element of s is a sequence of characters containing the name of a table.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#FF00FF">sequence </font><font color="#330033">names</font>
+<font color="#330033"></font>
+<font color="#330033">names = db_table_list()</font>
+
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#FF00FF">length</font><font color="#330033">(names) </font><font color="#0000FF">do</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(1, names</font><font color="#993333">[</font><font color="#330033">i</font><font color="#993333">] </font><font color="#330033">& </font><font color="#00A033">'\n'</font><font color="#330033">)</font>
+
+<font color="#0000FF">end for</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_create_table">db_create_table</a>
+</td></tr>
+
 </table>
 
 <a name=table_size></a>
-<_routine name="db_table_size">
+<a name=db_table_size></a><font color="#006633" size=+2><br>
+<center><b>db_table_size</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
  i = db_table_size()
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Return the current number of records in the
- <font color=\"#993333\"><b>current table</b></font>."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
--- look at all records in the current table
-for i = 1 to db_table_size() do
-    if db_record_key(i) = 0 then
-    	puts(1, "0 key found\n")
-    	exit
-    end if
-end for
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_select_table\">db_select_table</a>"
- >
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the current number of records in the
+ <font color="#993333"><b>current table</b></font>.
+
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#FF0055">-- look at all records in the current table</font>
+<font color="#0000FF">for </font><font color="#330033">i = 1 </font><font color="#0000FF">to </font><font color="#330033">db_table_size() </font><font color="#0000FF">do</font>
+<font color="#0000FF">    if </font><font color="#330033">db_record_key(i) = 0 </font><font color="#0000FF">then</font>
+
+<font color="#FF00FF">    	puts</font><font color="#330033">(1, </font><font color="#00A033">"0 key found\n"</font><font color="#330033">)</font>
+<font color="#0000FF">    	exit</font>
+<font color="#0000FF">    end if</font>
+<font color="#0000FF">end for</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+
+<td><a href="#db_select_table">db_select_table</a>
+</td></tr>
+
 </table>
 
 <a name=find_key></a>
-<_routine name="db_find_key">
+<a name=db_find_key></a><font color="#006633" size=+2><br>
+<center><b>db_find_key</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+
+<td><font face = "Arial, Helvetica">include database.e<BR>
   i = db_find_key(x)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Find the record in the <font color=\"#993333\"><b>current table</b></font>
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Find the record in the <font color="#993333"><b>current table</b></font>
  with key value x. If found,
  the record number will be returned. If not found, the record number
- that key would occupy, if inserted, is returned as a negative number."
- >
+ that key would occupy, if inserted, is returned as a negative number.
+</td></tr>
 
-<_2clist
-  name="Comments:"
-  description="A fast binary search is used to find the key in the
+<tr><td valign=top><b>Comments:</b></td>
+<td>A fast binary search is used to find the key in the
   current table. The number of comparisons is proportional
   to the log of the number of records in the table.
-  <p>
+
   You can select a range of records by searching for the first and
   last key values in the range. If those key values don't exist,
   you'll at least get a negative value showing where they would be, 
   if they existed.
-  e.g. Suppose you want to know which records have keys greater than \"GGG\"
-  and less than \"MMM\". If -5 is returned for key \"GGG\", it means 
-  a record with \"GGG\" as a key would be inserted as record number 5. 
-  -27 for \"MMM\" means a record with \"MMM\" as its key would 
+  e.g. Suppose you want to know which records have keys greater than "GGG"
+  and less than "MMM". If -5 is returned for key "GGG", it means 
+  a record with "GGG" as a key would be inserted as record number 5. 
+  -27 for "MMM" means a record with "MMM" as its key would 
   be inserted as record number 27. This quickly tells you that
-  all records, >= 5 and < 27 qualify."
- >
+  all records, >= 5 and < 27 qualify.
+</td></tr>
 
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-rec_num = db_find_key("Millennium")
-if rec_num > 0 then
-    ? db_record_key(rec_num)
-    ? db_record_data(rec_num)
-else
-    puts(2, "Not found, but if you insert it,\n")
-    printf(2, "it will be #%d\n", -rec_num)
-end if
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_record_key\">db_record_key</a>,
-               <a href=\"lib_eds.htm#db_record_data\">db_record_data</a>,
-               <a href=\"lib_eds.htm#db_insert\">db_insert</a>"
- >
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+
+<pre><font color="#330033">rec_num = db_find_key(</font><font color="#00A033">"Millennium"</font><font color="#330033">)</font>
+<font color="#0000FF">if </font><font color="#330033">rec_num > 0 </font><font color="#0000FF">then</font>
+<font color="#330033">    ? db_record_key(rec_num)</font>
+<font color="#330033">    ? db_record_data(rec_num)</font>
+<font color="#0000FF">else</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Not found, but if you insert it,\n"</font><font color="#330033">)</font>
+
+<font color="#FF00FF">    printf</font><font color="#330033">(2, </font><font color="#00A033">"it will be #%d\n"</font><font color="#330033">, -rec_num)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_record_key">db_record_key</a>,
+               <a href="#db_record_data">db_record_data</a>,
+               <a href="#db_insert">db_insert</a>
+
+</td></tr>
+
 </table>
 
 <a name=record_key></a>
-<_routine name="db_record_key">
+<a name=db_record_key></a><font color="#006633" size=+2><br>
+<center><b>db_record_key</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
+
  x = db_record_key(i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Return the key portion of record number i in the
- <font color=\"#993333\"><b>current table</b></font>."
- >
-<_2clist
-  name="Comments:"
-  description=
-"Each record in a Euphoria database consists of a key portion and
-a data portion. Each of these can be any Euphoria atom or sequence."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-puts(1, "The 6th record has key value: ")
-? db_record_key(6)
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_record_data\">db_record_data</a>"
- >
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the key portion of record number i in the
+ <font color="#993333"><b>current table</b></font>.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>Each record in a Euphoria database consists of a key portion and
+a data portion. Each of these can be any Euphoria atom or sequence.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"The 6th record has key value: "</font><font color="#330033">)</font>
+<font color="#330033">? db_record_key(6)</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+
+<td><a href="#db_record_data">db_record_data</a>
+</td></tr>
+
 </table>
 
 <a name=record_data></a>
-<_routine name="db_record_data">
+<a name=db_record_data></a><font color="#006633" size=+2><br>
+<center><b>db_record_data</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+
+<td><font face = "Arial, Helvetica">include database.e<BR>
  x = db_record_data(i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Return the data portion of record number i in the
- <font color=\"#993333\"><b>current table</b></font>."
- >
-<_2clist
-  name="Comments:"
-  description=
-"Each record in a Euphoria database consists of a key portion and
-a data portion. Each of these can be any Euphoria atom or sequence."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-puts(1, "The 6th record has data value: ")
-? db_record_data(6)
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_record_key\">db_record_key</a>"
- >
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Return the data portion of record number i in the
+ <font color="#993333"><b>current table</b></font>.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+
+<td>Each record in a Euphoria database consists of a key portion and
+a data portion. Each of these can be any Euphoria atom or sequence.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#FF00FF">puts</font><font color="#330033">(1, </font><font color="#00A033">"The 6th record has data value: "</font><font color="#330033">)</font>
+<font color="#330033">? db_record_data(6)</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_record_key">db_record_key</a>
+</td></tr>
+
 </table>
 
 <a name=insert></a>
-<_routine name="db_insert">
+<a name=db_insert></a><font color="#006633" size=+2><br>
+<center><b>db_insert</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
   i = db_insert(x1, x2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Insert a new record into the
- <font color=\"#993333\"><b>current table</b></font>. The record
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Insert a new record into the
+ <font color="#993333"><b>current table</b></font>. The record
 key is x1 and the record data is x2. Both x1 and x2 can be any Euphoria
 data objects, atoms or sequences. The return code i1 is DB_OK if the record
-is inserted."
- >
-<_2clist
-  name="Comments:"
-  description=
-"Within a table, all keys must be unique. db_insert() will fail with
-  DB_EXISTS_ALREADY if a record already exists with the same key value."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
-    puts(2, "insert failed!\n")
-end if
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_find_key\">db_find_key</a>,
-               <a href=\"lib_eds.htm#db_record_key\">db_record_key</a>,
-               <a href=\"lib_eds.htm#db_record_data\">db_record_data</a>"
- >
+is inserted.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>Within a table, all keys must be unique. db_insert() will fail with
+  DB_EXISTS_ALREADY if a record already exists with the same key value.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_insert(</font><font color="#00A033">"Smith"</font><font color="#330033">, </font><font color="#993333">{</font><font color="#00A033">"Peter"</font><font color="#330033">, 100, 34.5</font><font color="#993333">}</font><font color="#330033">) != DB_OK </font><font color="#0000FF">then</font>
+
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"insert failed!\n"</font><font color="#330033">)</font>
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_find_key">db_find_key</a>,
+               <a href="#db_record_key">db_record_key</a>,
+               <a href="#db_record_data">db_record_data</a>
+
+</td></tr>
+
 </table>
 
 <a name=delete_record></a>
-<_routine name="db_delete_record">
+<a name=db_delete_record></a><font color="#006633" size=+2><br>
+<center><b>db_delete_record</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<br>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<br>
+
   db_delete_record(i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Delete record number i from the
- <font color=\"#993333\"><b>current table</b></font>."
- >
-<_2clist
-  name="Comments:"
-  description=
-"The record number, i, must be an integer from 1 to the number 
-of records in the current table."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-db_delete_record(55)
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_insert\">db_insert</a>,
-               <a href=\"lib_eds.htm#db_table_size\">db_table_size</a>"
- >
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Delete record number i from the
+ <font color="#993333"><b>current table</b></font>.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The record number, i, must be an integer from 1 to the number 
+of records in the current table.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">db_delete_record(55)</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_insert">db_insert</a>,
+               <a href="#db_table_size">db_table_size</a>
+
+</td></tr>
+
 </table>
 
 <a name=replace_data></a>
-<_routine name="db_replace_data">
+<a name=db_replace_data></a><font color="#006633" size=+2><br>
+<center><b>db_replace_data</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<br>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<br>
+
   db_replace_data(i, x)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"In the <font color=\"#993333\"><b>current table</b></font>, replace the
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>In the <font color="#993333"><b>current table</b></font>, replace the
  data portion of record number i, with x.
- x can be any Euphoria atom or sequence."
- >
-<_2clist
-  name="Comments:"
-  description=
-"The record number, i, must be from 1 to the number of records in the 
-  current table."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-db_replace_data(67, {"Peter", 150, 34.5})
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_delete_record\">db_delete_record</a>"
- >
+ x can be any Euphoria atom or sequence.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+<td>The record number, i, must be from 1 to the number of records in the 
+  current table.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#330033">db_replace_data(67, </font><font color="#993333">{</font><font color="#00A033">"Peter"</font><font color="#330033">, 150, 34.5</font><font color="#993333">}</font><font color="#330033">)</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+
+<td><a href="#db_delete_record">db_delete_record</a>
+</td></tr>
+
 </table>
 
 <a name=compress></a>
-<_routine name="db_compress">
+<a name=db_compress></a><font color="#006633" size=+2><br>
+<center><b>db_compress</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+
+<td><font face = "Arial, Helvetica">include database.e<BR>
  i = db_compress()
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Compress the <font color=\"#993333\"><b>current database</b></font>.
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>Compress the <font color="#993333"><b>current database</b></font>.
  The current database is copied
 to a new file such that any blocks of unused space are eliminated. 
 If successful, i will be set to DB_OK, and the new compressed database 
@@ -718,114 +928,125 @@ file will retain the same name. The current table will be undefined.
 As a backup, the original, uncompressed
 file will be renamed with an extension of .t0 (or .t1, .t2 ,..., .t99). 
 In the highly unusual case that the compression is unsuccessful, 
-the database will be left unchanged, and no backup will be made."
->
-<_2clist
-  name="Comments:"
-  description=
-"When you delete items from a database, you create blocks of free
+the database will be left unchanged, and no backup will be made.
+</td></tr>
+
+<tr><td valign=top><b>Comments:</b></td>
+
+<td>When you delete items from a database, you create blocks of free
 space within the database file. The system keeps track of these blocks and
 tries to use them for storing new data that you insert. db_compress() will
 copy the current database without copying these free areas. The size of the 
 database file may therefore be reduced.
-<p>
-If the backup filenames reach .t99 you will have to delete some of them."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_compress() != DB_OK then
-    puts(2, "compress failed!\n")
-end if
-</eucode>
-<_2clist
-  name="See Also:"
-  description="
-  <a href=\"lib_eds.htm#db_create\">db_create</a>"
- >
+
+If the backup filenames reach .t99 you will have to delete some of them.
+</td></tr>
+
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_compress() != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"compress failed!\n"</font><font color="#330033">)</font>
+
+<font color="#0000FF">end if</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td>
+  <a href="#db_create">db_create</a>
+</td></tr>
+
 </table>
 
 <a name=dump></a>
-<_routine name="db_dump">
+<a name=db_dump></a><font color="#006633" size=+2><br>
+<center><b>db_dump</b></center>
+
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
  db_dump(fn, i)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Print the contents of an already-open Euphoria database.
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+
+<td>Print the contents of an already-open Euphoria database.
  The contents are printed to file or device fn.
  All records in all tables are shown. If i is non-zero, 
  then a low-level byte-by-byte dump is also shown. The low-level
  dump will only be meaningful to someone who is familiar
- with the internal format of a Euphoria database."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-if db_open("mydata", DB_LOCK_SHARED) != DB_OK then
-    puts(2, "Couldn't open the database!\n")
-    abort(1)
-end if
-fn = open("db.txt", "w")
-db_dump(fn, 0)
+ with the internal format of a Euphoria database.
+</td></tr>
 
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_open\">db_open</a>"
- >
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">if </font><font color="#330033">db_open(</font><font color="#00A033">"mydata"</font><font color="#330033">, DB_LOCK_SHARED) != DB_OK </font><font color="#0000FF">then</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"Couldn't open the database!\n"</font><font color="#330033">)</font>
+
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end if</font>
+<font color="#330033">fn = </font><font color="#FF00FF">open</font><font color="#330033">(</font><font color="#00A033">"db.txt"</font><font color="#330033">, </font><font color="#00A033">"w"</font><font color="#330033">)</font>
+<font color="#330033">db_dump(fn, 0)</font>
+<font color="#330033"></font>
+
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+<td><a href="#db_open">db_open</a>
+</td></tr>
+
 </table>
 
 <a name=fatal_id></a>
-<_routine name="db_fatal_id">
+<a name=db_fatal_id></a><font color="#006633" size=+2><br>
+<center><b>db_fatal_id</b></center>
+</font>
+
 <table border=0 cellspacing=2 cellpadding=2>
 
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include database.e<BR>
+ <tr><td valign=top><b>Syntax:</b></td>
+<td><font face = "Arial, Helvetica">include database.e<BR>
  db_fatal_id = i
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"You can catch certain fatal database errors by installing your own fatal error
+</font>
+</td></tr>
+
+ <tr><td valign=top><b>Description:</b></td>
+<td>You can catch certain fatal database errors by installing your own fatal error
 handler. Simply overwrite the global variable db_fatal_id with the
 routine id of one of your own procedures. The procedure must take
 a single argument which is a sequence. When certain errors occur your
 procedure will be called with an error message string as the argument. 
-Your procedure should end by calling abort()."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-procedure my_fatal(sequence msg)
-    puts(2, "A fatal error occurred - " & msg & '\n')
-    abort(1)
-end procedure
+Your procedure should end by calling abort().
+</td></tr>
 
-db_fatal_id = routine_id("my_fatal")
-</eucode>
-<_2clist
-  name="See Also:"
-  description="<a href=\"lib_eds.htm#db_close\">db_close</a>"
- >
+<tr><td valign=top><b>Example:</b></td>
+<td>
+</td></tr>
+
+<tr><td></td><td>
+<pre><font color="#0000FF">procedure </font><font color="#330033">my_fatal(</font><font color="#FF00FF">sequence </font><font color="#330033">msg)</font>
+<font color="#FF00FF">    puts</font><font color="#330033">(2, </font><font color="#00A033">"A fatal error occurred - " </font><font color="#330033">& msg & </font><font color="#00A033">'\n'</font><font color="#330033">)</font>
+
+<font color="#FF00FF">    abort</font><font color="#330033">(1)</font>
+<font color="#0000FF">end procedure</font>
+<font color="#330033"></font>
+<font color="#330033">db_fatal_id = </font><font color="#FF00FF">routine_id</font><font color="#330033">(</font><font color="#00A033">"my_fatal"</font><font color="#330033">)</font>
+</pre></td></tr>
+
+<tr><td valign=top><b>See Also:</b></td>
+
+<td><a href="#db_close">db_close</a>
+</td></tr>
+
 </table>
-
-
-</body>
-</html>
-
+</doc>

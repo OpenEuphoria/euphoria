@@ -27,6 +27,7 @@ constant files = {
     "c.htx",
     "cgi.htx",
     "database.htx",
+    "lib_eds.htx",
     "e2c.htx",
     "trouble.htx",
     "relnotes40.htx"
