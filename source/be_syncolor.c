@@ -100,6 +100,8 @@ static char *keyword[] = {
     "without",
     "xor",
     "continue",
+    "ifdef",
+    "elsifdef",
     NULL
 };
 

@@ -333,6 +333,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},     // 168: SEQUENCE_COPY
 {x, x},
+/* 170 */{x, x},
 {x, x},
 {x, x},
 {x, x},
@@ -341,8 +342,8 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-{x, x},
-{x, x},  // 179
+{x, x}, 
+/* 180 */{x, x},
 {x, x},
 {x, x},
 {x, x},

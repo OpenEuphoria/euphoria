@@ -201,12 +201,14 @@
 
 #define OPTION_SWITCHES 185
 #define CONTINUE 186
-
-#define MAX_OPCODE 186  /* remember to update reswords.e, opnames.e,
-			   opnames.h, optable[], localjumptab[]
-			   in be_execute.c, be_runtime.c. redef.h, 
-			   emit.e, keylist.e, compile.e, be_syncolor.c
-			 */
+#define IFDEF 187
+#define ELSIFDEF 188
+#define MAX_OPCODE 188
+/* remember to update reswords.e, opnames.e,
+   opnames.h, optable[], localjumptab[]
+   in be_execute.c, be_runtime.c. redef.h,
+   emit.e, keylist.e, compile.e, be_syncolor.c
+*/
 
 #define END_OF_FILE_CHAR 26    
 #define VARIABLE     -100

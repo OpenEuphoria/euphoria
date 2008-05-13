@@ -54,7 +54,8 @@ constant FILE_NO = 1,           -- file number
 	 OP_TRACE = 6,         
 	 OP_TYPE_CHECK = 7,
 	 OP_PROFILE_TIME = 8,
-	 OP_PROFILE_STATEMENT = 9
+	 OP_PROFILE_STATEMENT = 9,
+         OP_DEFINES = 10        -- ifdef defines
 
 -- list of source lines & execution counts 
 
@@ -507,7 +508,8 @@ procedure IncludePush()
 			       OpTrace,
 			       OpTypeCheck,
 			       OpProfileTime,
-			       OpProfileStatement})
+			       OpProfileStatement,
+                               OpDefines})
 			       
     file_include = append( file_include, {} )
     file_include[current_file_no] &= length( file_include )
@@ -550,6 +552,7 @@ global function IncludePop()
     OpTypeCheck        = top[OP_TYPE_CHECK]
     OpProfileTime      = top[OP_PROFILE_TIME]
     OpProfileStatement = top[OP_PROFILE_STATEMENT]
+    OpDefines          = top[OP_DEFINES]
 
     IncludeStk = IncludeStk[1..$-1]
     return TRUE

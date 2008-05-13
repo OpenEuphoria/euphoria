@@ -141,8 +141,13 @@
      Updated the documentation to make it a little more user friendly.
      Jeremy Cowgar</li>
      
-     <li>Started work on converting documentation generator to output CSS-based XHTML compliant docs.
-     c.k.lester</li>
+<li>
+    Started work on converting documentation generator to output CSS-based XHTML compliant docs.
+    c.k.lester</li>
+
+<li>
+    Condition compiling keywords (ifdef, end ifdef) and with define=xyz to insert/omit code in interpreter IL code and
+    in translated C code. Implemented by Jeremy Cowgar.</li>
 </ul>
 
 </doc>

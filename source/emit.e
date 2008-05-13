@@ -106,6 +106,7 @@ constant token_name =
     {WITHOUT, "'without'"},
     {WHILE, "'while'"},
     {CONTINUE, "'continue'"},
+    {IFDEF, "'ifdef'"},
     {'?', "'?'"}
 } 
 

@@ -265,6 +265,9 @@ global integer OpTrace              -- trace option
 global integer OpTypeCheck          -- type check option 
 global integer OpProfileStatement   -- statement profile option currently on 
 global integer OpProfileTime        -- time profile option currently on 
+global sequence OpDefines           -- defines
+OpDefines = {}                      -- initialized here so command line
+                                    -- options can add to it as well
 
 -- COMPILE only
 global object dj_path, wat_path, bor_path

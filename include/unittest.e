@@ -123,3 +123,14 @@ global procedure test_false(sequence name, object a)
     end if
 end procedure
 
+global procedure test_fail(sequence name)
+    testCount += 1
+
+    test_failed(name, 1, 0)
+end procedure
+
+global procedure test_pass(sequence name)
+    testCount += 1
+
+    test_passed(name)
+end procedure

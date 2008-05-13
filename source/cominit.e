@@ -12,10 +12,12 @@ switch_cache = {}
 -- These flags are available for both the interpreter and translator
 global constant COMMON_OPTIONS = {
 	"-C",  -- specify a euinc.conf file
-	"-I"      -- specify a directory to search for include files
+	"-I",  -- specify a directory to search for include files
+        "-D"  -- define a word
 	},
     EUINC_OPTION = 1,   -- -conf
-    INCDIR_OPTION = 2   -- -i
+    INCDIR_OPTION = 2,   -- -i
+    DEFINE_OPTION = 3
 
 global procedure add_switch( sequence s, integer deferred )
     if deferred then
@@ -58,6 +60,12 @@ global procedure common_options( integer option, integer ix )
 	    add_switch( Argv[ix+1], 1 )
 	    args += 1
 	end if
+
+    elsif option = DEFINE_OPTION then
+        if ix < Argc then
+            OpDefines &= {Argv[ix+1]}
+            args += 1
+        end if
     end if
 
     move_args( ix+1, args )

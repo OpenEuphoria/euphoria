@@ -52,10 +52,10 @@ function ProcessOptions()
 	    end if
 	end if
 
-	screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2007 \n")
+	screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2008\n")
 
 	screen_output(STDERR, 
-	    "See http://www.RapidEuphoria.com/License.txt \n")
+	    "See http://www.RapidEuphoria.com/License.txt\n")
 
 	if BIND then
 	    screen_output(STDERR, "\nfile name to bind/shroud? ")

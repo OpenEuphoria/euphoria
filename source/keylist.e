@@ -43,6 +43,8 @@ keylist =
     {"without",   SC_KEYWORD, WITHOUT, 0, 0, 0},
     {"xor",       SC_KEYWORD, XOR, 0, 0, 0},
     {"continue",  SC_KEYWORD, CONTINUE, 0, 0, 0},
+    {"ifdef",     SC_KEYWORD, IFDEF, 0, 0, 0},
+    {"elsifdef",  SC_KEYWORD, ELSIFDEF, 0, 0, 0},
     -- new ones must go at end to maintain compatibility with old shrouded code
 
     -- PREDEFINED SUBPROGRAMS and TYPEs 

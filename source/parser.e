@@ -1121,6 +1121,55 @@ procedure While_statement()
     PatchXList(exit_base)
 end procedure
 
+integer top_level_parser
+
+procedure Ifdef_statement()
+    sequence option
+    integer matched, continue_top, nested_count
+    token tok
+
+    matched = 0
+    continue_top = 1
+    nested_count = 0
+
+    while continue_top do
+        if matched = 0 then
+            option = StringToken()
+            tok_match(THEN)
+            if find(option, OpDefines) then
+                matched = 1
+                --call_proc(forward_Statement_list, {})
+                call_proc(top_level_parser, {})
+            end if
+        end if
+
+        -- Read to END IFDEF or to the next ELSIFDEF which sets the loop
+        -- up for another comparison.
+        while TRUE do
+            tok = next_token()
+            if tok[T_ID] = END then
+                tok = next_token()
+                if tok[T_ID] = IFDEF then
+                    continue_top = 0
+                    exit
+                elsif nested_count and tok[T_ID] = IF then
+                    nested_count -= 1
+                end if
+            elsif tok[T_ID] = ELSIFDEF then
+                exit
+            elsif tok[T_ID] = ELSE and matched = 0 and nested_count = 0 then
+                --call_proc(forward_Statement_list, {})
+                call_proc(top_level_parser, {})
+                tok_match(END)
+                tok_match(IFDEF)
+                return
+            elsif tok[T_ID] = IF then
+                nested_count += 1
+            end if
+        end while
+    end while
+end procedure
+
 function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 -- establish private scope for variable s in SymTab 
 -- (index may be changed - new value is returned) 
@@ -1457,7 +1506,11 @@ procedure Statement_list()
             StartSourceLine(TRUE)
             Continue_statement()
 
-	else 
+        elsif id = IFDEF then
+            StartSourceLine(TRUE)
+            Ifdef_statement()
+
+	else
 	    putback(tok)
 	    stmt_nest -= 1
 	    InitDelete()
@@ -1652,10 +1705,17 @@ procedure SubProg(integer prog_type, integer is_global)
 end procedure
 
 global procedure InitGlobals()
--- initialize global variables 
+-- initialize global variables
     ResetTP()
     OpTypeCheck = TRUE
     OpWarning = TRUE
+    if EWINDOWS then
+        OpDefines &= {"EU400", "WIN32"}
+    elsif ELINUX then
+        OpDefines &= {"EU400", "LINUX", "FREEBSD"}
+    elsif EDOS then
+        OpDefines &= {"EU400", "DOS32"}
+    end if
 end procedure
 
 procedure not_supported_compile(sequence feature)
@@ -1670,6 +1730,7 @@ mix_msg = "can't mix profile and profile_time"
 procedure SetWith(integer on_off)
 -- set a with/without option 
     sequence option
+    integer idx
     token tok
     
     option = StringToken()
@@ -1732,6 +1793,16 @@ procedure SetWith(integer on_off)
     
     elsif equal(option, "warning") then
 	OpWarning = on_off
+
+    elsif match("define=", option) = 1 and length(option) > 8 then
+        if on_off = 0 then
+            idx = find(option[8..$], OpDefines)
+            if idx then
+                OpDefines = remove(OpDefines, idx)
+            end if
+        else
+            OpDefines &= {option[8..$]}
+        end if
     
     elsif on_off and option[1] >= '0' and option[1] <= '9' then
 	-- Ignore numeric stamp - not supported anymore
@@ -1750,7 +1821,7 @@ procedure ExecCommand()
     StraightenBranches()  -- straighten top-level
 end procedure
 
-global procedure parser()
+global procedure real_parser(integer nested)
 -- top level of the parser - command level 
     token tok
     integer id
@@ -1848,12 +1919,23 @@ global procedure parser()
 
         elsif id = CONTINUE then
             CompileErr("continue must be inside a loop")
-	    
+
+        elsif id = IFDEF then
+            StartSourceLine(TRUE)
+            Ifdef_statement()
+
 	elsif id = ILLEGAL_CHAR then
 	    CompileErr("illegal character")
 	
-	else 
-	    CompileErr("unknown command")
+	else
+            if nested then
+                putback(tok)
+                stmt_nest -= 1
+                InitDelete()
+                return
+            else
+	        CompileErr("unknown command")
+            end if
 
 	end if
 	
@@ -1867,3 +1949,12 @@ global procedure parser()
     SymTab[TopLevelSub][S_LINETAB] = LineTable
 end procedure
 
+global procedure parser()
+    real_parser(0)
+end procedure
+
+global procedure nested_parser()
+    real_parser(1)
+end procedure
+
+top_level_parser = routine_id("nested_parser")
