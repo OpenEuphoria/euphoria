@@ -1434,7 +1434,7 @@ function update_history(sequence history, sequence string)
     return append(history, string)
 end function
 
-function search(boolean continue)
+function search(boolean cont)
 -- find a string from here to the end of the file
 -- return TRUE if string is found
     natural col
@@ -1446,7 +1446,7 @@ function search(boolean continue)
 	return FALSE
     end if
     puts(SCREEN, "searching for: ")
-    if continue then
+    if cont then
 	puts(SCREEN, find_string)
     else
 	pos = get_position()
