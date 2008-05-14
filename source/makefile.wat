@@ -310,6 +310,17 @@ interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INT
 	@%append .\$(OBJDIR)\int.lbc option caseexact
 	@for %i in ($(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
+exwsource : .SYMBOLIC $(OBJDIR)/main-.c
+ecwsource : .SYMBOLIC $(OBJDIR)/main-.c
+backendsource : .SYMBOLIC $(OBJDIR)/main-.c
+ecsource : .SYMBOLIC $(OBJDIR)/main-.c
+
+source : builddirs
+	wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f makefile.wat ecwsource EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f makefile.wat backendsource EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f makefile.wat exsource EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	
 exw.exe : interpreter_objects 
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
 	wrc -q -ad exw.res exw.exe
@@ -385,7 +396,7 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 .\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 
 
-.\$(OBJDIR)\main-.c : .\$(OBJDIR)\$(EU_TARGET)c
+$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	$(EXE) $(INCDIR) ..\ec.ex $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
