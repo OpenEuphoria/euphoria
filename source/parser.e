@@ -1136,9 +1136,12 @@ procedure Ifdef_statement()
         if matched = 0 then
             option = StringToken()
             tok_match(THEN)
-            if find(option, OpDefines) then
-                matched = 1
-                --call_proc(forward_Statement_list, {})
+            if option[1] = '!' then
+                matched = find(option[2..$], OpDefines) = 0
+            else
+                matched = find(option, OpDefines)
+            end if
+            if matched then
                 call_proc(top_level_parser, {})
             end if
         end if
