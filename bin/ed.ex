@@ -149,7 +149,7 @@ constant CUSTOM_KEYSTROKES = HOME & "-- " & ARROW_DOWN
 constant PROG_INDENT = 4  -- tab width for editing program source files
 			  -- (tab width is 8 for other files)
 -- Euphoria files:
-constant E_FILES = {".e", ".ex", ".ew", ".exw", ".eu", ".exu", ".pro", ".cgi"}  
+constant E_FILES = {".e", ".ex", ".ew", ".exw", ".eu", ".exu", ".pro", ".cgi", ".esp"}  
 -- program indent files:
 constant PROG_FILES = E_FILES & {".c", ".h", ".bas"} 
 
