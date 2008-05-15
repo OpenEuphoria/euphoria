@@ -32,7 +32,7 @@ end procedure
 
 global function extract_options(sequence s)
 -- dummy routine    
-    return s
+	return s
 end function
 
 -- main program:

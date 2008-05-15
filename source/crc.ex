@@ -65,27 +65,27 @@ global_sum = 0
 integer fn
 
 for i = 1 to length(src_files) do
-    fn = open(src_files[i], "r")
-    if fn = -1 then
-	puts(2, "can't open " & src_files[i] & '\n')
-	abort(1)
-    end if
-    local_sum = 0
-    count = 1
-    while 1 do
-	c = getc(fn)
-	if c = -1 then
-	    exit
+	fn = open(src_files[i], "r")
+	if fn = -1 then
+		puts(2, "can't open " & src_files[i] & '\n')
+		abort(1)
 	end if
-	if c != '\n' and c != '\r' then
-	    local_sum = remainder(local_sum + c * count, 100000000)
-	    count += 1
-	end if
-    end while
-    close(fn)
-    
-    global_sum = remainder(global_sum + local_sum, 100000000)
-    printf(1, "%s: %x\n", {src_files[i], global_sum})
+	local_sum = 0
+	count = 1
+	while 1 do
+		c = getc(fn)
+		if c = -1 then
+			exit
+		end if
+		if c != '\n' and c != '\r' then
+			local_sum = remainder(local_sum + c * count, 100000000)
+			count += 1
+		end if
+	end while
+	close(fn)
+	
+	global_sum = remainder(global_sum + local_sum, 100000000)
+	printf(1, "%s: %x\n", {src_files[i], global_sum})
 end for
 
 printf(1, "\n%d files. Total: %x\n", {length(src_files), global_sum})

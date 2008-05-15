@@ -28,53 +28,53 @@ typedef int object;
 typedef int *object_ptr;
 
 struct s1 {
-    object_ptr base;
-    long length;
-    long ref;
-    long postfill;
+	object_ptr base;
+	long length;
+	long ref;
+	long postfill;
 };
 
 struct d {
-    double dbl;
-    long ref;
+	double dbl;
+	long ref;
 };
 
 struct routine_list {
-    char *name;
-    int (*addr)();
-    int seq_num;
-    int file_num;
-    short int num_args;
-    short int convention;
+	char *name;
+	int (*addr)();
+	int seq_num;
+	int file_num;
+	short int num_args;
+	short int convention;
 };
 
 struct ns_list {
-    char *name;
-    int ns_num;
-    int seq_num;
-    int file_num;
+	char *name;
+	int ns_num;
+	int seq_num;
+	int file_num;
 };
 
 struct tcb {
-    int rid;
-    double tid;
-    int type;
-    int status;
-    double start;
-    double min_inc;
-    double max_inc;
-    double min_time;
-    double max_time;
-    int runs_left;
-    int runs_max;
-    int next;
-    object args;
-    int *pc;
-    object_ptr expr_stack;
-    object_ptr expr_max;
-    object_ptr expr_limit;
-    object_ptr expr_top;
-    int stack_size;
+	int rid;
+	double tid;
+	int type;
+	int status;
+	double start;
+	double min_inc;
+	double max_inc;
+	double min_time;
+	double max_time;
+	int runs_left;
+	int runs_max;
+	int next;
+	object args;
+	int *pc;
+	object_ptr expr_stack;
+	object_ptr expr_max;
+	object_ptr expr_limit;
+	object_ptr expr_top;
+	int stack_size;
 };
 
 typedef struct d  *d_ptr;

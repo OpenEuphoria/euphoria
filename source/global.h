@@ -21,10 +21,10 @@
 #endif
 
 struct time_info {
-    char *name;
-    long start_ticks;
-    long num_events;
-    long tot_ticks;
+	char *name;
+	long start_ticks;
+	long num_events;
+	long tot_ticks;
 };
 
 #if defined(ELINUX) || defined(EDJGPP) || defined(ELCC) || defined(EBORLAND)
@@ -49,21 +49,21 @@ typedef int (*FARPROC)();
 #define HINSTANCE int
 #endif
 struct videoconfig {
-    int monitor;
+	int monitor;
 #define _MONO 1
 #define _ANALOGMONO 2
 #define _COLOR 3
-    int mode;
-    int numcolors;
-    int numxpixels;
-    int numypixels;
-    int numtextrows;
-    int numtextcols;
-    int numvideopages;
+	int mode;
+	int numcolors;
+	int numxpixels;
+	int numypixels;
+	int numtextrows;
+	int numtextcols;
+	int numvideopages;
 #ifdef EDJGPP
-    int mask; // mask pixel values for compatibility
-    int x;    // pixel coordinate for text in graphics modes
-    int y;    // pixel coordinate for text in graphics modes
+	int mask; // mask pixel values for compatibility
+	int x;    // pixel coordinate for text in graphics modes
+	int y;    // pixel coordinate for text in graphics modes
 #endif
 };
 #define _WHITE 7
@@ -73,8 +73,8 @@ struct videoconfig {
 #define _CYAN 6
 #define _YELLOW 11
 struct rccoord {
-    int row;
-    int col;
+	int row;
+	int col;
 };
 #endif
 

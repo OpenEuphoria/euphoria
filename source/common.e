@@ -9,21 +9,21 @@ global constant TRUE = 1, FALSE = 0
 
 -- operating system:
 global constant ELINUX = platform() = LINUX,
-		EWINDOWS = platform() = WIN32,
-		EDOS = platform() = DOS32,
-		EBSD = FALSE -- set manually - see also backend.ex
+				EWINDOWS = platform() = WIN32,
+				EDOS = platform() = DOS32,
+				EBSD = FALSE -- set manually - see also backend.ex
 
 
 global integer PATH_SEPARATOR, SLASH
 global sequence SLASH_CHARS
 if ELINUX then
-    PATH_SEPARATOR = ':' -- in PATH environment variable
-    SLASH = '/'          -- preferred on Linux/FreeBSD
-    SLASH_CHARS =  "/"   -- special chars allowed in a path
+	PATH_SEPARATOR = ':' -- in PATH environment variable
+	SLASH = '/'          -- preferred on Linux/FreeBSD
+	SLASH_CHARS =  "/"   -- special chars allowed in a path
 else
-    PATH_SEPARATOR = ';'
-    SLASH = '\\'
-    SLASH_CHARS = "\\/:"
+	PATH_SEPARATOR = ';'
+	SLASH = '\\'
+	SLASH_CHARS = "\\/:"
 end if
 
 

@@ -4,25 +4,25 @@
 /*                                                                           */
 /*****************************************************************************/
 
-	  /* Euphoria object format v1.2 and later */
+		  /* Euphoria object format v1.2 and later */
 
 /* an object is represented as a 32-bit value as follows:
 
-	unused  : 011xxxxx xxxxxxxx xxxxxxxx xxxxxxxx 
-	unused  : 010xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+		unused  : 011xxxxx xxxxxxxx xxxxxxxx xxxxxxxx 
+		unused  : 010xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 
-	TOO_BIG:  01000000 00000000 00000000 00000000   (just too big for INT)
-	
-       +ATOM-INT: 001vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
-       +ATOM-INT: 000vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
-       -ATOM-INT: 111vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
-       -ATOM-INT: 110vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+		TOO_BIG:  01000000 00000000 00000000 00000000   (just too big for INT)
+		
+	   +ATOM-INT: 001vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+	   +ATOM-INT: 000vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+	   -ATOM-INT: 111vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+	   -ATOM-INT: 110vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
 
-	NO VALUE: 10111111 11111111 11111111 11111111   (undefined object)
+		NO VALUE: 10111111 11111111 11111111 11111111   (undefined object)
 
-	ATOM-DBL: 101ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
+		ATOM-DBL: 101ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
 
-	SEQUENCE: 100ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
+		SEQUENCE: 100ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
 
    We ensure 8-byte alignment for s1 and dbl blocks - lower 3 bits 
    aren't needed - only 29 bits are stored.
@@ -70,41 +70,41 @@ typedef long object;
 typedef object *object_ptr;
 
 struct s1 {                        /* a sequence header block */
-    object_ptr base;               /* pointer to (non-existent) 0th element */
-    long length;                   /* number of elements */
-    long ref;                      /* reference count */
-    long postfill;                 /* number of post-fill objects */
+	object_ptr base;               /* pointer to (non-existent) 0th element */
+	long length;                   /* number of elements */
+	long ref;                      /* reference count */
+	long postfill;                 /* number of post-fill objects */
 }; /* total 16 bytes */
 
 struct d {                         /* a double precision number */
-    double dbl;                    /* double precision value */
-    long ref;                      /* reference count */
+	double dbl;                    /* double precision value */
+	long ref;                      /* reference count */
 }; /* total 12 bytes */
 
 #define D_SIZE (sizeof(struct d))  
 
 struct free_block {                /* a free storage block */
-    struct free_block *next;       /* pointer to next free block */
-    long filler;
-    long ref;                      /* reference count */
+	struct free_block *next;       /* pointer to next free block */
+	long filler;
+	long ref;                      /* reference count */
 }; /* 12 bytes */
 
 struct symtab_entry;
 
 struct routine_list {   // sync with euphoria\include\euphoria.h
-    char *name;
-    int (*addr)();
-    int seq_num;
-    int file_num;
-    short int num_args;
-    short int convention;
+	char *name;
+	int (*addr)();
+	int seq_num;
+	int file_num;
+	short int num_args;
+	short int convention;
 };
 
 struct ns_list {
-    char *name;
-    int ns_num;
-    int seq_num;
-    int file_num;
+	char *name;
+	int ns_num;
+	int seq_num;
+	int file_num;
 };
 
 typedef struct d  *d_ptr;
@@ -112,19 +112,19 @@ typedef struct s1 *s1_ptr;
 typedef struct free_block *free_block_ptr;
 
 struct sline {      /* source line table entry */
-    char *src;               /* text of line, 
-				first 4 bytes used for count when profiling */
-    unsigned short line;     /* line number within file */
-    unsigned char file_no;   /* file number */
-    unsigned char options;   /* options in effect: */
+	char *src;               /* text of line, 
+								first 4 bytes used for count when profiling */
+	unsigned short line;     /* line number within file */
+	unsigned char file_no;   /* file number */
+	unsigned char options;   /* options in effect: */
 #define OP_TRACE   0x01      /* statement trace */
 #define OP_PROFILE_STATEMENT 0x04  /* statement profile */
 #define OP_PROFILE_TIME 0x02       /* time profile */
 }; /* 8 bytes */
 
 struct op_info {
-    object (*intfn)();
-    object (*dblfn)();
+	object (*intfn)();
+	object (*dblfn)();
 };
 
 #ifdef INT_CODES
@@ -143,7 +143,7 @@ typedef int *opcode_type;
 #define MAX_CACHED_SIZE 0        /* don't use storage cache at all */
 #else
 #define MAX_CACHED_SIZE 1024     /* this size (in bytes) or less are cached 
-				    Note: other vars must change if this does */
+									Note: other vars must change if this does */
 #endif
 
 /* MACROS */
@@ -181,59 +181,59 @@ typedef int *opcode_type;
 #define EF_APPEND 4
 
 struct file_info {
-    FILE *fptr;  // C FILE pointer
-    int mode;    // file mode
+	FILE *fptr;  // C FILE pointer
+	int mode;    // file mode
 }; 
 
 struct arg_info {
-    int (*address)();     // pointer to C function
-    s1_ptr name;          // name of routine (for diagnostics)
-    s1_ptr arg_size;      // s1_ptr of sequence of argument sizes
-    object return_size;   // atom or sequence for return value size
-    int convention;       // calling convention
+	int (*address)();     // pointer to C function
+	s1_ptr name;          // name of routine (for diagnostics)
+	s1_ptr arg_size;      // s1_ptr of sequence of argument sizes
+	object return_size;   // atom or sequence for return value size
+	int convention;       // calling convention
 };
 
 struct include_node {
-	int size;
-	int * file_no;
+		int size;
+		int * file_no;
 };
 
 struct include_info {
-	int size;
-	struct include_node * nodes;
+		int size;
+		struct include_node * nodes;
 };
 
 struct IL {
-    struct symtab_entry *st;
-    struct sline *sl;
-    int *misc;
-    char *lit;
-    struct include_info * includes;
-    object switches;
+	struct symtab_entry *st;
+	struct sline *sl;
+	int *misc;
+	char *lit;
+	struct include_info * includes;
+	object switches;
 };
 
 // Task Control Block - sync with euphoria\include\euphoria.h
 struct tcb {
-    int rid;         // routine id
-    double tid;      // external task id
-    int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
-    int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
-    double start;    // start time of current run
-    double min_inc;  // time increment for min
-    double max_inc;  // time increment for max 
-    double min_time; // minimum activation time
-		     // or number of executions remaining before sharing
-    double max_time; // maximum activation time (determines task order)
-    int runs_left;   // number of executions left in this burst
-    int runs_max;    // maximum number of executions in one burst
-    int next;        // index of next task of the same kind
-    object args;     // args to call task procedure with at startup
-    int *pc;         // program counter for this task
-    object_ptr expr_stack; // call stack for this task
-    object_ptr expr_max;   // current top limit of stack
-    object_ptr expr_limit; // don't start a new routine above this
-    object_ptr expr_top;   // stack pointer
-    int stack_size;        // current size of stack
+	int rid;         // routine id
+	double tid;      // external task id
+	int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
+	int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
+	double start;    // start time of current run
+	double min_inc;  // time increment for min
+	double max_inc;  // time increment for max 
+	double min_time; // minimum activation time
+					 // or number of executions remaining before sharing
+	double max_time; // maximum activation time (determines task order)
+	int runs_left;   // number of executions left in this burst
+	int runs_max;    // maximum number of executions in one burst
+	int next;        // index of next task of the same kind
+	object args;     // args to call task procedure with at startup
+	int *pc;         // program counter for this task
+	object_ptr expr_stack; // call stack for this task
+	object_ptr expr_max;   // current top limit of stack
+	object_ptr expr_limit; // don't start a new routine above this
+	object_ptr expr_top;   // stack pointer
+	int stack_size;        // current size of stack
 };
 
 // saved private blocks
@@ -247,9 +247,9 @@ struct private_block {
 #define MAX_LINES 100
 #define MAX_COLS 200
 struct char_cell {
-    char ascii;
-    char fg_color;
-    char bg_color;
+	char ascii;
+	char fg_color;
+	char bg_color;
 };
 #endif
 
@@ -272,8 +272,8 @@ struct char_cell {
 #define CONTROL_C 3
 
 #define COLOR_DISPLAY   (config.monitor != _MONO &&         \
-			 config.monitor != _ANALOGMONO &&   \
-			 config.mode != 7 && config.numcolors >= 16)
+						 config.monitor != _ANALOGMONO &&   \
+						 config.mode != 7 && config.numcolors >= 16)
 
 #define TEXT_MODE (config.numxpixels <= 80 || config.numypixels <= 80)
 

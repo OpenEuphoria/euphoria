@@ -72,8 +72,8 @@ int align4 = 0;
 int low_on_space = FALSE;  // are we almost out of memory?
 unsigned cache_size = 0;
 symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3, call_back_arg4,
-	   call_back_arg5, call_back_arg6, call_back_arg7, call_back_arg8,
-	   call_back_arg9, call_back_result;
+		   call_back_arg5, call_back_arg6, call_back_arg7, call_back_arg8,
+		   call_back_arg9, call_back_result;
 
 #ifdef EXTRA_STATS
 unsigned recycles = 0;          /* calls to Recycle() */
@@ -91,14 +91,14 @@ long max_bytes_allocated = 0;   /* high water mark */
 
 s1_ptr d_list = NULL;
 struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired 
-							  to appropriate list */
+														  to appropriate list */
 
 
 /*******************/
 /* Local variables */
 /*******************/
 static struct block_list pool[NUMBER_OF_SIZES]; /* pool of free blocks */
-			 /* elements not power of 2 - but not used much */
+						 /* elements not power of 2 - but not used much */
 
 static char *str_free_ptr;
 static unsigned int chars_remaining = 0;
@@ -136,124 +136,124 @@ size_t _msize();
 void RTInternal(char *msg)
 // Internal error
 {
-    RTFatal(msg);
+	RTFatal(msg);
 }
 
 
 void check_pool()
 {
-	int i;
+		int i;
 
-	for (i = 0; i < MAX_CACHED_SIZE/RESOLUTION; i++) {
-	    if (pool_map[i] < pool || pool_map[i] > pool+NUMBER_OF_SIZES-1)
-		RTInternal("Corrupt pool_map!");
-	}
+		for (i = 0; i < MAX_CACHED_SIZE/RESOLUTION; i++) {
+			if (pool_map[i] < pool || pool_map[i] > pool+NUMBER_OF_SIZES-1)
+				RTInternal("Corrupt pool_map!");
+		}
 }
 #endif
 
 symtab_ptr tmp_alloc()
 /* return pointer to space for a temporary var/literal constant */
 {
-    return (symtab_ptr)EMalloc(sizeof(struct temp_entry));
+	return (symtab_ptr)EMalloc(sizeof(struct temp_entry));
 }
 
 void InitEMalloc()
 /* initialize storage allocator */
 {
-    int i, j, p;
+	int i, j, p;
 #ifdef ELINUX
-    pagesize = getpagesize();
+	pagesize = getpagesize();
 #else
-    eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
-    pool[0].size = 8;
-    pool[0].first = NULL;
-    p = RESOLUTION * 2;
-    for (i = 1; i < NUMBER_OF_SIZES; i = i + 2) {
-	pool[i].size = p;
-	pool[i].first = NULL;
-	if (i+1 < NUMBER_OF_SIZES) {
-	    pool[i+1].size = 3 * p / 2;
-	    pool[i+1].first = NULL;
-	    p = p * 2;
+	eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
+	pool[0].size = 8;
+	pool[0].first = NULL;
+	p = RESOLUTION * 2;
+	for (i = 1; i < NUMBER_OF_SIZES; i = i + 2) {
+		pool[i].size = p;
+		pool[i].first = NULL;
+		if (i+1 < NUMBER_OF_SIZES) {
+			pool[i+1].size = 3 * p / 2;
+			pool[i+1].first = NULL;
+			p = p * 2;
+		}
 	}
-    }
-    j = 0;
-    for (i = 0; i <= MAX_CACHED_SIZE / RESOLUTION; i++) {
-	if (pool[j].size < i * RESOLUTION)
-	    j++;
-	pool_map[i] = &pool[j];
-    }
+	j = 0;
+	for (i = 0; i <= MAX_CACHED_SIZE / RESOLUTION; i++) {
+		if (pool[j].size < i * RESOLUTION)
+			j++;
+		pool_map[i] = &pool[j];
+	}
 #endif
-    call_back_arg1 = tmp_alloc();
-    call_back_arg1->mode = M_TEMP;
-    call_back_arg1->obj = NOVALUE;
+	call_back_arg1 = tmp_alloc();
+	call_back_arg1->mode = M_TEMP;
+	call_back_arg1->obj = NOVALUE;
 
-    call_back_arg2 = tmp_alloc();
-    call_back_arg2->mode = M_TEMP;
-    call_back_arg2->obj = NOVALUE;
-    
-    call_back_arg3 = tmp_alloc();
-    call_back_arg3->mode = M_TEMP;
-    call_back_arg3->obj = NOVALUE;
-    
-    call_back_arg4 = tmp_alloc();
-    call_back_arg4->mode = M_TEMP;
-    call_back_arg4->obj = NOVALUE;
-    
-    call_back_arg5 = tmp_alloc();
-    call_back_arg5->mode = M_TEMP;
-    call_back_arg5->obj = NOVALUE;
-    
-    call_back_arg6 = tmp_alloc();
-    call_back_arg6->mode = M_TEMP;
-    call_back_arg6->obj = NOVALUE;
-    
-    call_back_arg7 = tmp_alloc();
-    call_back_arg7->mode = M_TEMP;
-    call_back_arg7->obj = NOVALUE;
-    
-    call_back_arg8 = tmp_alloc();
-    call_back_arg8->mode = M_TEMP;
-    call_back_arg8->obj = NOVALUE;
-    
-    call_back_arg9 = tmp_alloc();
-    call_back_arg9->mode = M_TEMP;
-    call_back_arg9->obj = NOVALUE;
-    
-    call_back_result = tmp_alloc();
-    call_back_result->mode = M_TEMP;
-    call_back_result->obj = NOVALUE;
+	call_back_arg2 = tmp_alloc();
+	call_back_arg2->mode = M_TEMP;
+	call_back_arg2->obj = NOVALUE;
+	
+	call_back_arg3 = tmp_alloc();
+	call_back_arg3->mode = M_TEMP;
+	call_back_arg3->obj = NOVALUE;
+	
+	call_back_arg4 = tmp_alloc();
+	call_back_arg4->mode = M_TEMP;
+	call_back_arg4->obj = NOVALUE;
+	
+	call_back_arg5 = tmp_alloc();
+	call_back_arg5->mode = M_TEMP;
+	call_back_arg5->obj = NOVALUE;
+	
+	call_back_arg6 = tmp_alloc();
+	call_back_arg6->mode = M_TEMP;
+	call_back_arg6->obj = NOVALUE;
+	
+	call_back_arg7 = tmp_alloc();
+	call_back_arg7->mode = M_TEMP;
+	call_back_arg7->obj = NOVALUE;
+	
+	call_back_arg8 = tmp_alloc();
+	call_back_arg8->mode = M_TEMP;
+	call_back_arg8->obj = NOVALUE;
+	
+	call_back_arg9 = tmp_alloc();
+	call_back_arg9->mode = M_TEMP;
+	call_back_arg9->obj = NOVALUE;
+	
+	call_back_result = tmp_alloc();
+	call_back_result->mode = M_TEMP;
+	call_back_result->obj = NOVALUE;
 }
 
 #ifdef EXTRA_STATS
 void StorageStats()
 {
-    int i;
-    long n;
-    free_block_ptr p;
-    s1_ptr s;
+	int i;
+	long n;
+	free_block_ptr p;
+	s1_ptr s;
 
-    s = d_list;
-    n = 0;
-    while (s != NULL) {
-	n++;
-	s = (s1_ptr)((free_block_ptr)s)->next;
-	if ((long)s % 8 != 0)
-	    fprintf(stderr, "misaligned s1d pointer!\n");
-    }
-    printf("\nd_list: %ld   ", n);
-    
-    for (i = 0; i < NUMBER_OF_SIZES; i++) {
-	printf("%d:", pool[i].size);
+	s = d_list;
 	n = 0;
-	p = pool[i].first;
-	while (p != NULL) {
-	    n++;
-	    p = p->next;
+	while (s != NULL) {
+		n++;
+		s = (s1_ptr)((free_block_ptr)s)->next;
+		if ((long)s % 8 != 0)
+			fprintf(stderr, "misaligned s1d pointer!\n");
 	}
-	printf("%ld   ", n);
-    }
-    printf("cache_size: %d\n\n", cache_size);
+	printf("\nd_list: %ld   ", n);
+	
+	for (i = 0; i < NUMBER_OF_SIZES; i++) {
+		printf("%d:", pool[i].size);
+		n = 0;
+		p = pool[i].first;
+		while (p != NULL) {
+			n++;
+			p = p->next;
+		}
+		printf("%ld   ", n);
+	}
+	printf("cache_size: %d\n\n", cache_size);
 }
 #endif
 
@@ -261,73 +261,73 @@ void StorageStats()
 void Allocated(long n)
 /* record that n bytes were allocated */
 {
-    char buff[80];
+	char buff[80];
 
-    if (n < 0 || n >= 40000000L) {
-	sprintf(buff, "bad value passed to Allocated (%d)", n);
-	RTInternal(buff); 
-    }
-    bytes_allocated += n;
-    if (bytes_allocated > max_bytes_allocated)
-	max_bytes_allocated = bytes_allocated;
+	if (n < 0 || n >= 40000000L) {
+		sprintf(buff, "bad value passed to Allocated (%d)", n);
+		RTInternal(buff); 
+	}
+	bytes_allocated += n;
+	if (bytes_allocated > max_bytes_allocated)
+		max_bytes_allocated = bytes_allocated;
 }
 
 static DeAllocated(long n)
 /* record that n bytes were freed */
 {
-    char buff[100];
-     
-    bytes_allocated -= n;
-    if (n < 0 || n >= 40000000L)
-	RTInternal("bad value passed to DeAllocated");
+	char buff[100];
+	 
+	bytes_allocated -= n;
+	if (n < 0 || n >= 40000000L)
+		RTInternal("bad value passed to DeAllocated");
 #ifdef FIX  
-    if (bytes_allocated < 0 || bytes_allocated >= 140000000L) {
-	sprintf(buff, "DeAllocated: bytes_allocated is %d, n is %d\n",
-		bytes_allocated, n);
-	RTInternal(buff);
-    }
+	if (bytes_allocated < 0 || bytes_allocated >= 140000000L) {
+		sprintf(buff, "DeAllocated: bytes_allocated is %d, n is %d\n",
+				bytes_allocated, n);
+		RTInternal(buff);
+	}
 #endif
 }
 
 void Trash(char *p, long nbytes)
 /* write garbage into freed storage block to prevent accidental reuse */
 {
-    while (nbytes-- > 0)
-	*p++ = (char)0x11;  
+	while (nbytes-- > 0)
+		*p++ = (char)0x11;  
 }
 #endif // HEAP_CHECK
 
 static void Free_All()
 /* free the entire storage cache back to the malloc arena */
 {
-    int i, alignment;
-    struct block_list *list;
-    s1_ptr s;
-    unsigned char *p;
+	int i, alignment;
+	struct block_list *list;
+	s1_ptr s;
+	unsigned char *p;
 
-    for (i = 0; i < NUMBER_OF_SIZES; i++) {
-	list = &pool[i];
-	s = (s1_ptr)list->first;
-	while (s != NULL) {
-	    p = (unsigned char *)s;
-	    s = (s1_ptr)((free_block_ptr)s)->next; 
-	    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-		p = p - 4;
-	    free(p);
+	for (i = 0; i < NUMBER_OF_SIZES; i++) {
+		list = &pool[i];
+		s = (s1_ptr)list->first;
+		while (s != NULL) {
+			p = (unsigned char *)s;
+			s = (s1_ptr)((free_block_ptr)s)->next; 
+			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+				p = p - 4;
+			free(p);
+		}
+		list->first = NULL;
 	}
-	list->first = NULL;
-    }
-    /* now do the S1D list */
-    s = d_list;
-    while (s != NULL) {
-	p = (unsigned char *)s;
-	s = (s1_ptr)((free_block_ptr)s)->next;
-	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-	    p = p - 4;
-	free(p);
-    }
-    d_list = NULL;
-    cache_size = 0;
+	/* now do the S1D list */
+	s = d_list;
+	while (s != NULL) {
+		p = (unsigned char *)s;
+		s = (s1_ptr)((free_block_ptr)s)->next;
+		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+			p = p - 4;
+		free(p);
+	}
+	d_list = NULL;
+	cache_size = 0;
 }
 
 static void Recycle()
@@ -336,63 +336,63 @@ static void Recycle()
    to free an older block on the list, not the most-recently freed,
    but we only have a singly-linked list */
 {
-    register struct block_list *list;
-    unsigned char *p;
-    int i;
+	register struct block_list *list;
+	unsigned char *p;
+	int i;
 
 #ifdef EXTRA_STATS
-    recycles++;
+	recycles++;
 #endif
-    /* try to take one from D list */
-    if (d_list != NULL) {
-	p = (unsigned char *)d_list;
-	d_list = (s1_ptr)((free_block_ptr)d_list)->next;
-	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-	    p = p - 4;
-	free(p); /* give it back to malloc arena */
-	cache_size -= 1;
-    }
-    
-    /* try to take one from each other list */
-    for (i = 0; i < NUMBER_OF_SIZES; i++) {
-	list = &pool[i];
-	if (list->first != NULL) {
-	    p = (char *)list->first;
-	    list->first = ((free_block_ptr)p)->next;
-	    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-		p = p - 4;
-	    free(p); /* give it back to malloc arena */
-	    cache_size -= 2;
+	/* try to take one from D list */
+	if (d_list != NULL) {
+		p = (unsigned char *)d_list;
+		d_list = (s1_ptr)((free_block_ptr)d_list)->next;
+		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+			p = p - 4;
+		free(p); /* give it back to malloc arena */
+		cache_size -= 1;
 	}
-    }
+	
+	/* try to take one from each other list */
+	for (i = 0; i < NUMBER_OF_SIZES; i++) {
+		list = &pool[i];
+		if (list->first != NULL) {
+			p = (char *)list->first;
+			list->first = ((free_block_ptr)p)->next;
+			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+				p = p - 4;
+			free(p); /* give it back to malloc arena */
+			cache_size -= 2;
+		}
+	}
 }
 
 static void SpaceMessage()
 {
-    /* should we free up something first, to ensure fprintf's work? */
-    
-    RTFatal("Your program has run out of memory.\nOne moment please...");
+	/* should we free up something first, to ensure fprintf's work? */
+	
+	RTFatal("Your program has run out of memory.\nOne moment please...");
 }
 
 static char *Out_Of_Space(long nbytes)
 /* malloc failed - make one last attempt */
 {
-    long *p;
+	long *p;
 
-    Free_All();
-    p = (long *)malloc(nbytes);
-    if (p == NULL) {
-	low_on_space = TRUE;
-	SpaceMessage();
-	return NULL; /* shouldn't need this */
-    }
-    else {
-	return (char *)p;
-    }
+	Free_All();
+	p = (long *)malloc(nbytes);
+	if (p == NULL) {
+		low_on_space = TRUE;
+		SpaceMessage();
+		return NULL; /* shouldn't need this */
+	}
+	else {
+		return (char *)p;
+	}
 }
 
 #ifdef HEAP_CHECK
-    char msg[80];
+	char msg[80];
 #endif
 
 #ifndef ESIMPLE_MALLOC
@@ -401,108 +401,108 @@ char *EMalloc(unsigned long nbytes)
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
 {
-    unsigned char *p;
-    unsigned char *temp;
-    register struct block_list *list;
-    int alignment;
-    int min_align;
+	unsigned char *p;
+	unsigned char *temp;
+	register struct block_list *list;
+	int alignment;
+	int min_align;
 
 #if defined(ELINUX) || defined(ESIMPLE_MALLOC)
 
-	return malloc(nbytes);
+		return malloc(nbytes);
 #else
 #ifdef HEAP_CHECK
-    long size;
+	long size;
 
-    check_pool();
+	check_pool();
 #endif
-    nbytes += align4; // allow for possible 4-aligned malloc pointers
+	nbytes += align4; // allow for possible 4-aligned malloc pointers
 
-    if (nbytes <= MAX_CACHED_SIZE) {
-	/* See if we have a block of this size in our cache.
-	   Every block in the cache is 8-aligned. */
-	
-	list = pool_map[(nbytes + (RESOLUTION - 1)) >> LOG_RESOLUTION];
+	if (nbytes <= MAX_CACHED_SIZE) {
+		/* See if we have a block of this size in our cache.
+		   Every block in the cache is 8-aligned. */
+		
+		list = pool_map[(nbytes + (RESOLUTION - 1)) >> LOG_RESOLUTION];
 #ifdef HEAP_CHECK
-	if (list->size < nbytes || list->size > nbytes * 2) {
-	    sprintf(msg, "Alloc - size is %d, nbytes is %d", list->size, nbytes);
-	    RTInternal(msg);
-	}
+		if (list->size < nbytes || list->size > nbytes * 2) {
+			sprintf(msg, "Alloc - size is %d, nbytes is %d", list->size, nbytes);
+			RTInternal(msg);
+		}
 #endif
-	temp = (char *)list->first;
-	
-	if (temp != NULL) {
-	    /* a cache hit */
+		temp = (char *)list->first;
+		
+		if (temp != NULL) {
+			/* a cache hit */
 
 #ifdef EXTRA_STATS
-	    a_hit++;
+			a_hit++;
 #endif
-	    list->first = ((free_block_ptr)temp)->next;
-	    cache_size -= 2;
+			list->first = ((free_block_ptr)temp)->next;
+			cache_size -= 2;
 
 #ifdef HEAP_CHECK
-	    if (cache_size > 100000000)
-		RTInternal("cache size is bad");
-	    p = temp;
-	    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-		p = p - 4;
-	    if (((unsigned long)temp) & 3)
-		RTInternal("unaligned address in storage cache");
-	    Allocated(block_size(p));
+			if (cache_size > 100000000)
+				RTInternal("cache size is bad");
+			p = temp;
+			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+				p = p - 4;
+			if (((unsigned long)temp) & 3)
+				RTInternal("unaligned address in storage cache");
+			Allocated(block_size(p));
 #endif          
-	    return temp; /* will be 8-aligned */
-	}
-	else {
-	    nbytes = list->size; /* better to grab bigger size
-				    so it can be reused for same purpose */
+			return temp; /* will be 8-aligned */
+		}
+		else {
+			nbytes = list->size; /* better to grab bigger size
+									so it can be reused for same purpose */
 #ifdef EXTRA_STATS
-	    a_miss++;
+			a_miss++;
 #endif
+		}
 	}
-    }
 #ifdef EXTRA_STATS
-    else
-	a_too_big++;
+	else
+		a_too_big++;
 #endif
 
-    if (cache_size > CACHE_LIMIT) {
-	// cache is not helping, free some blocks back to general heap
-	Recycle();
-    }   
-    
-    do {
-	p = malloc(nbytes);
+	if (cache_size > CACHE_LIMIT) {
+		// cache is not helping, free some blocks back to general heap
+		Recycle();
+	}   
+	
+	do {
+		p = malloc(nbytes);
 
-	if (p == NULL) {
-	    p = Out_Of_Space(nbytes);
-	}
+		if (p == NULL) {
+			p = Out_Of_Space(nbytes);
+		}
 
 #ifdef HEAP_CHECK
-	Allocated(block_size(p));
+		Allocated(block_size(p));
 #endif
-	/* get 8-byte alignment */
-	alignment = ((unsigned long)p) & 7;
-	
-	if (alignment == 0) { 
-	    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-		// don't free. grab a new one.
-		continue;  // magic is there by chance! 
-			   // (this case is remotely possible on Win95 only)
-	    return p;   // already 8-aligned, should happen most of the time
-	}
-	if (alignment != 4) 
-	    RTFatal("malloc block NOT 4-byte aligned!\n");
-	
-	if (align4) {
-	    *(int *)p = MAGIC_FILLER;
-	    return p+4;
-	}
-	
-	/* first occurrence of a 4-aligned block */
-	free(p);
-	align4 = 4;  // start handling 4-aligned blocks
-	nbytes += align4;
-    } while (TRUE);
+		/* get 8-byte alignment */
+		alignment = ((unsigned long)p) & 7;
+		
+		if (alignment == 0) { 
+			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+				// don't free. grab a new one.
+				continue;  // magic is there by chance! 
+						   // (this case is remotely possible on Win95 only)
+			return p;   // already 8-aligned, should happen most of the time
+		}
+		if (alignment != 4) 
+			RTFatal("malloc block NOT 4-byte aligned!\n");
+		
+		if (align4) {
+			*(int *)p = MAGIC_FILLER;
+			return p+4;
+		}
+		
+		/* first occurrence of a 4-aligned block */
+		free(p);
+		align4 = 4;  // start handling 4-aligned blocks
+		nbytes += align4;
+	} while (TRUE);
 #endif
 // !ELINUX
 }
@@ -510,61 +510,61 @@ char *EMalloc(unsigned long nbytes)
 void EFree(unsigned char *p)
 /* free storage pointed to by p. p is an 8-byte aligned pointer */
 {
-    char *q;
-    register long nbytes;
-    register struct block_list *list;
-    int align;
+	char *q;
+	register long nbytes;
+	register struct block_list *list;
+	int align;
 #ifdef HEAP_CHECK
-    char msg[80];
+	char msg[80];
 #endif
 
 #if defined(ELINUX) || defined(ESIMPLE_MALLOC)
-	free(p);
-	return;
+		free(p);
+		return;
 #else
 
 #ifdef HEAP_CHECK
-    check_pool();
+	check_pool();
 
-    if (((long)p & 7) != 0)
-	RTInternal("EFree: badly aligned pointer");
+	if (((long)p & 7) != 0)
+		RTInternal("EFree: badly aligned pointer");
 #endif  
-    q = p;
-    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-	q = q - 4;
-    nbytes = block_size(q);
+	q = p;
+	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+		q = q - 4;
+	nbytes = block_size(q);
 #ifdef HEAP_CHECK
-    if ((nbytes & 1) != 0)
-	RTInternal("EFree: already free?");
-    DeAllocated(nbytes);
-    if (nbytes < RESOLUTION || nbytes > 40000000L || (nbytes % 4 != 0)) {
-	sprintf(msg, "Free - bad nbytes: %d\n", nbytes);
-	RTInternal(msg); /* what if compile time? */
-    }
-    Trash(p, nbytes - ((char *)p - q));
+	if ((nbytes & 1) != 0)
+		RTInternal("EFree: already free?");
+	DeAllocated(nbytes);
+	if (nbytes < RESOLUTION || nbytes > 40000000L || (nbytes % 4 != 0)) {
+		sprintf(msg, "Free - bad nbytes: %d\n", nbytes);
+		RTInternal(msg); /* what if compile time? */
+	}
+	Trash(p, nbytes - ((char *)p - q));
 #endif
 
-    if (nbytes > MAX_CACHED_SIZE || (eu_dll_exists && cache_size > CACHE_LIMIT)) { 
-	free(q); /* too big to cache, or cache is full */
-    }
-    else {
-	list = pool_map[nbytes >> LOG_RESOLUTION];
-	if (list->size > nbytes) {
-	    /* only happens with non-standard size (from realloc maybe) */
-	    list--;
+	if (nbytes > MAX_CACHED_SIZE || (eu_dll_exists && cache_size > CACHE_LIMIT)) { 
+		free(q); /* too big to cache, or cache is full */
 	}
+	else {
+		list = pool_map[nbytes >> LOG_RESOLUTION];
+		if (list->size > nbytes) {
+			/* only happens with non-standard size (from realloc maybe) */
+			list--;
+		}
 #ifdef HEAP_CHECK
-	if (list->size > nbytes) 
-	    RTInternal("Free - list size greater than nbytes");
-	if (list->size * 3 / 2 < nbytes - 2)
-	    RTInternal("Free - list size is small");
-    
-	AlreadyFree(list->first, (free_block_ptr)p);  /* can be very slow */
+		if (list->size > nbytes) 
+			RTInternal("Free - list size greater than nbytes");
+		if (list->size * 3 / 2 < nbytes - 2)
+			RTInternal("Free - list size is small");
+	
+		AlreadyFree(list->first, (free_block_ptr)p);  /* can be very slow */
 #endif
-	((free_block_ptr)p)->next = list->first;
-	list->first = (free_block_ptr)p;
-	cache_size += 2;
-    }
+		((free_block_ptr)p)->next = list->first;
+		list->first = (free_block_ptr)p;
+		cache_size += 2;
+	}
 #endif // linux
 }
 #endif // !ESIMPLE_MALLOC
@@ -578,39 +578,39 @@ void EFree(unsigned char *p)
 
 int heap_dump(char *ptr)
 {
-    struct _heapinfo h_info;
-    int heap_status, found;
-    
-    found = FALSE;
-    h_info._pentry = NULL;
-    for (;;) {
-	heap_status = _heapwalk(&h_info);
-	if (heap_status != _HEAPOK)
-	    break;
-	//printf("  %s block at %Fp of size %4.4X\n",
-	//       (h_info._useflag == _USEDENTRY ? "USED" : "FREE"),
-	//       h_info._pentry, h_info._size);
-	if ((long)h_info._pentry == (long)(ptr-4))
-	    found = TRUE;
-    }
-    switch (heap_status) {
-	case _HEAPEND:
-	    //printf("OK - end of heap\n");
-	    break;
-	case _HEAPEMPTY:
-	    //printf("OK - heap is empty\n");
-	    break;
-	case _HEAPBADBEGIN:
-	    printf("ERROR - heap is damaged\n");
-	    break;
-	case _HEAPBADPTR:
-	    printf("ERROR - bad pointer to heap\n");
-	    break;
-	case _HEAPBADNODE:
-	    printf("ERROR - bad node in heap\n");
-	    break;
-    }
-    return found;
+	struct _heapinfo h_info;
+	int heap_status, found;
+	
+	found = FALSE;
+	h_info._pentry = NULL;
+	for (;;) {
+		heap_status = _heapwalk(&h_info);
+		if (heap_status != _HEAPOK)
+			break;
+		//printf("  %s block at %Fp of size %4.4X\n",
+		//       (h_info._useflag == _USEDENTRY ? "USED" : "FREE"),
+		//       h_info._pentry, h_info._size);
+		if ((long)h_info._pentry == (long)(ptr-4))
+			found = TRUE;
+	}
+	switch (heap_status) {
+		case _HEAPEND:
+			//printf("OK - end of heap\n");
+			break;
+		case _HEAPEMPTY:
+			//printf("OK - heap is empty\n");
+			break;
+		case _HEAPBADBEGIN:
+			printf("ERROR - heap is damaged\n");
+			break;
+		case _HEAPBADPTR:
+			printf("ERROR - bad pointer to heap\n");
+			break;
+		case _HEAPBADNODE:
+			printf("ERROR - bad node in heap\n");
+			break;
+	}
+	return found;
 }
 #endif
 #endif
@@ -626,73 +626,73 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
    I don't think a shrink could ever become an expansion + copy
    by accident, but newsize might be less than the current size! */
 {
-    char *p;
-    char *q;
-    unsigned long oldsize;
+	char *p;
+	char *q;
+	unsigned long oldsize;
 
 #if defined(ELINUX) || defined(ESIMPLE_MALLOC)
 
-    // we always have 8-alignment
-    return realloc(orig, newsize);  // should do bookkeeping on block size?
+	// we always have 8-alignment
+	return realloc(orig, newsize);  // should do bookkeeping on block size?
 #else
-    p = orig;
-    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-	p = p - 4;
-    oldsize = block_size(p);
-    newsize += 8;
+	p = orig;
+	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+		p = p - 4;
+	oldsize = block_size(p);
+	newsize += 8;
 
 #if defined(EWATCOM) && defined(EDOS)
-    // only available with WATCOM on DOS
-    q = _expand(p, newsize);    
+	// only available with WATCOM on DOS
+	q = _expand(p, newsize);    
 
 #else
-    if (newsize <= oldsize) {
-	// make a smaller block
-	q = realloc(p, newsize);  // no _expand() available
-				  // Borland has it, but it sometimes fails
-    }
-    else {
-	q = NULL;
-    }
+	if (newsize <= oldsize) {
+		// make a smaller block
+		q = realloc(p, newsize);  // no _expand() available
+								  // Borland has it, but it sometimes fails
+	}
+	else {
+		q = NULL;
+	}
 #endif
 
-    if (q == NULL) {
-	/*
-	 * p only partially expanded, drop through
-	 */
-    }
-    else if (q == p) {
-	/* p was successfully expanded in-place */   
+	if (q == NULL) {
+		/*
+		 * p only partially expanded, drop through
+		 */
+	}
+	else if (q == p) {
+		/* p was successfully expanded in-place */   
 #ifdef HEAP_CHECK      
-	if (newsize > oldsize)
-	    Allocated(block_size(p) - oldsize);
-	else
-	    DeAllocated(oldsize - block_size(p));
+		if (newsize > oldsize)
+			Allocated(block_size(p) - oldsize);
+		else
+			DeAllocated(oldsize - block_size(p));
 #endif      
-	return orig;
-    }
-    else if (((long)q & 0x07) == ((long)p & 0x07)) {
-	/* q is aligned the same way as p modulo 8 (almost always I think) */
-	orig = orig + (q - p);
-	return orig;
-    }
-    else {
-	/* q is not aligned right (rare) - get rid of it */
-	/* I've never seen this. */
-	orig = orig + (q - p);
-	p = q;
-    }
+		return orig;
+	}
+	else if (((long)q & 0x07) == ((long)p & 0x07)) {
+		/* q is aligned the same way as p modulo 8 (almost always I think) */
+		orig = orig + (q - p);
+		return orig;
+	}
+	else {
+		/* q is not aligned right (rare) - get rid of it */
+		/* I've never seen this. */
+		orig = orig + (q - p);
+		p = q;
+	}
 
 #ifdef HEAP_CHECK    
-    Allocated(block_size(p) - oldsize);
+	Allocated(block_size(p) - oldsize);
 #endif    
-    /* failed to expand in-place, malloc a new space */
-    q = EMalloc(newsize);
-    /* copy the data to it's new location */
-    /* OPTIMIZE? we may be copying more than the actual live data */
-    memcpy(q, orig, oldsize - (orig - (unsigned char *)p));
-    EFree(orig);
-    return q;
+	/* failed to expand in-place, malloc a new space */
+	q = EMalloc(newsize);
+	/* copy the data to it's new location */
+	/* OPTIMIZE? we may be copying more than the actual live data */
+	memcpy(q, orig, oldsize - (orig - (unsigned char *)p));
+	EFree(orig);
+	return q;
 #endif
 }
 #endif // !ESIMPLE_MALLOC
@@ -701,11 +701,11 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 static void AlreadyFree(free_block_ptr q, free_block_ptr p)
 /* see if p is already on the free list */
 {
-    while (q != NULL) {
-	if (q == p) 
-	    RTInternal("attempt to free again");
-	q = q->next;
-    }
+	while (q != NULL) {
+		if (q == p) 
+			RTInternal("attempt to free again");
+		q = q->next;
+	}
 }
 #endif
 
@@ -714,31 +714,31 @@ void freeD(p)
 /* free double storage block */
 unsigned char *p;
 {
-    long nbytes;
-    char *q;
-    int alignment;
-    
-    q = p;
-    if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-	q = q - 4;
-    nbytes = block_size(q);
-    DeAllocated(nbytes);
-    if ((long)p % 8 != 0)
-	RTInternal("freeS1: misaligned pointer returned");
-    if (nbytes < D_SIZE 
+	long nbytes;
+	char *q;
+	int alignment;
+	
+	q = p;
+	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+		q = q - 4;
+	nbytes = block_size(q);
+	DeAllocated(nbytes);
+	if ((long)p % 8 != 0)
+		RTInternal("freeS1: misaligned pointer returned");
+	if (nbytes < D_SIZE 
 #ifdef EDJGPP
-    - 8
+	- 8
 #endif
-    || nbytes > 1024)
-	RTInternal("FreeD - bad nbytes "); 
-    Trash(p, D_SIZE); 
-    AlreadyFree((free_block_ptr)d_list, (free_block_ptr)p);
-    
-    ((d_ptr)p)->dbl = 1e300;  // ->next overlaps with this anyway
-    
-    ((free_block_ptr)p)->next = (free_block_ptr)d_list;
-    d_list = (s1_ptr)p;
-    cache_size += 1;
+	|| nbytes > 1024)
+		RTInternal("FreeD - bad nbytes "); 
+	Trash(p, D_SIZE); 
+	AlreadyFree((free_block_ptr)d_list, (free_block_ptr)p);
+	
+	((d_ptr)p)->dbl = 1e300;  // ->next overlaps with this anyway
+	
+	((free_block_ptr)p)->next = (free_block_ptr)d_list;
+	d_list = (s1_ptr)p;
+	cache_size += 1;
 }
 #endif
 
@@ -746,64 +746,64 @@ s1_ptr NewS1(long size)
 /* make a new s1 sequence block with a single reference count */
 /* size is number of elements, NOVALUE is added as an end marker */
 {
-    register s1_ptr s1;
+	register s1_ptr s1;
 
-    if (size > 1073741800) {
-	// multiply by 4 could overflow 32 bits
-	SpaceMessage();
-    }
-    s1 = (s1_ptr)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object));
-    s1->ref = 1;
-    s1->base = (object_ptr)(s1 + 1);
-    s1->length = size;
-    s1->postfill = 0; /* there may be some available but don't waste time */
-		      /* prepend assumes this is set to 0 */
-    s1->base[size] = NOVALUE;
-    s1->base--;  // point to "0th" element
-    return(s1);
+	if (size > 1073741800) {
+		// multiply by 4 could overflow 32 bits
+		SpaceMessage();
+	}
+	s1 = (s1_ptr)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object));
+	s1->ref = 1;
+	s1->base = (object_ptr)(s1 + 1);
+	s1->length = size;
+	s1->postfill = 0; /* there may be some available but don't waste time */
+					  /* prepend assumes this is set to 0 */
+	s1->base[size] = NOVALUE;
+	s1->base--;  // point to "0th" element
+	return(s1);
 }
 
 object NewString(unsigned char *s)
 /* create a new string sequence */
 {
-    int len;
-    object_ptr obj_ptr;
-    s1_ptr c1;
+	int len;
+	object_ptr obj_ptr;
+	s1_ptr c1;
 
-    len = strlen(s);
-    c1 = NewS1((long)len);
-    obj_ptr = (object_ptr)c1->base;
-    if (len > 0) {
-	do {
-	    *(++obj_ptr) = (unsigned char)*s++;
-	} while (--len > 0);
-    }
-    return MAKE_SEQ(c1);
+	len = strlen(s);
+	c1 = NewS1((long)len);
+	obj_ptr = (object_ptr)c1->base;
+	if (len > 0) {
+		do {
+			*(++obj_ptr) = (unsigned char)*s++;
+		} while (--len > 0);
+	}
+	return MAKE_SEQ(c1);
 }
 
 s1_ptr SequenceCopy(register s1_ptr a)
 /* take a single-ref copy of sequence 'a' */
 {
-    s1_ptr c;
-    register object_ptr cp, ap;
-    register long length;
-    register object temp_ap;
+	s1_ptr c;
+	register object_ptr cp, ap;
+	register long length;
+	register object temp_ap;
 
-    /* a is a SEQ_PTR */
-    length = a->length;
-    c = NewS1(length);
-    cp = c->base;
-    ap = a->base;
-    while (TRUE) {  // NOVALUE will be copied
-	temp_ap = *(++ap);
-	*(++cp) = temp_ap;
-	if (!IS_ATOM_INT(temp_ap)) {
-	    if (temp_ap == NOVALUE)
-		break;
-	    RefDS(temp_ap);
-	}
-    } 
-    DeRefSP(a);
-    return c;
+	/* a is a SEQ_PTR */
+	length = a->length;
+	c = NewS1(length);
+	cp = c->base;
+	ap = a->base;
+	while (TRUE) {  // NOVALUE will be copied
+		temp_ap = *(++ap);
+		*(++cp) = temp_ap;
+		if (!IS_ATOM_INT(temp_ap)) {
+			if (temp_ap == NOVALUE)
+				break;
+			RefDS(temp_ap);
+		}
+	} 
+	DeRefSP(a);
+	return c;
 }
 

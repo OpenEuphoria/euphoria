@@ -16,69 +16,69 @@ integer backend
 target_plat = platform()
 
 global procedure set_mode( sequence mode, integer extra_check )
-    interpret = equal( mode, "interpret" )
-    translate = equal( mode, "translate" )
-    bind      = equal( mode, "bind" )
-    backend   = equal( mode, "backend" )
-    do_extra_check = extra_check
+	interpret = equal( mode, "interpret" )
+	translate = equal( mode, "translate" )
+	bind      = equal( mode, "bind" )
+	backend   = equal( mode, "backend" )
+	do_extra_check = extra_check
 end procedure
 
 global procedure set_backend( integer rid )
-    backend_rid = rid
+	backend_rid = rid
 end procedure
 
 global procedure set_init_backend( integer rid )
-    init_backend_rid = rid
+	init_backend_rid = rid
 end procedure
 
 global procedure InitBackEnd( integer x )
-    call_proc( init_backend_rid, {x} )
+	call_proc( init_backend_rid, {x} )
 end procedure
 
 global procedure BackEnd( atom x )
-    call_proc( backend_rid, {x} )
+	call_proc( backend_rid, {x} )
 end procedure
 
 global function get_interpret()
-	return interpret
+		return interpret
 end function
 
 global function get_translate()
-    return translate
+	return translate
 end function
 
 global function get_bind()
-    return bind
+	return bind
 end function
 
 global function get_backend()
-    return backend
+	return backend
 end function
 
 global function get_extra_check()
-    return do_extra_check
+	return do_extra_check
 end function
 
 global procedure set_extract_options( integer rid )
-    extract_options_rid = rid
+	extract_options_rid = rid
 end procedure
 
 global function extract_options( sequence s )
-    return call_func( extract_options_rid, {s} )
+	return call_func( extract_options_rid, {s} )
 end function
 
 global procedure set_output_il( integer rid )
-    output_il_rid = rid
+	output_il_rid = rid
 end procedure
 
 global procedure OutputIL()
-    call_proc( output_il_rid, {} )
+	call_proc( output_il_rid, {} )
 end procedure
 
 global procedure set_target_platform( integer target )
-    target_plat = target
+	target_plat = target
 end procedure
 
 global function target_platform()
-    return target_plat
+	return target_plat
 end function
