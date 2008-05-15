@@ -107,6 +107,8 @@ constant token_name =
     {WHILE, "'while'"},
     {CONTINUE, "'continue'"},
     {IFDEF, "'ifdef'"},
+	{ELSIFDEF, "'elsifdef'"},
+    {ENUM, "'enum'"},
     {'?', "'?'"}
 } 
 

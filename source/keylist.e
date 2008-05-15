@@ -45,6 +45,7 @@ keylist =
     {"continue",  SC_KEYWORD, CONTINUE, 0, 0, 0},
     {"ifdef",     SC_KEYWORD, IFDEF, 0, 0, 0},
     {"elsifdef",  SC_KEYWORD, ELSIFDEF, 0, 0, 0},
+    {"enum",      SC_KEYWORD, ENUM, 0, 0, 0},
     -- new ones must go at end to maintain compatibility with old shrouded code
 
     -- PREDEFINED SUBPROGRAMS and TYPEs 

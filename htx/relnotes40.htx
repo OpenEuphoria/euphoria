@@ -148,6 +148,9 @@
 <li>
     Condition compiling keywords (ifdef, end ifdef) and with define=xyz to insert/omit code in interpreter IL code and
     in translated C code. Implemented by Jeremy Cowgar.</li>
+
+<li>
+	New enum keyword that allows for parse time sequential constant creation. Implemented by Jeremy Cowgar.</li>
 </ul>
 
 </doc>

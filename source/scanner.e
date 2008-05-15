@@ -5,6 +5,7 @@
 
 include machine.e
 include file.e
+include get.e
 
 include global.e
 include reswords.e
@@ -1116,6 +1117,32 @@ global function StringToken()
 	end if
     end if
     return gtext
+end function
+
+global function IntegerToken()
+    integer ch
+    sequence gtext
+    
+    -- skip leading whitespace  
+    ch = getch()
+    while ch = ' ' or ch = '\t' do
+	ch = getch()
+    end while
+
+    gtext = ""
+    while find(ch,  "0123456789") do
+	gtext &= ch
+	ch = getch()
+    end while
+    ungetch()
+
+    gtext = value(gtext)
+
+    if gtext[1] != GET_SUCCESS then
+        CompileErr("Integer expected")
+    end if
+
+    return gtext[2]
 end function
 
 global procedure IncludeScan()

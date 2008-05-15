@@ -167,6 +167,7 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/intinit.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o \
+	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/compress.o 
 
 EU_CORE_OBJECTS = \

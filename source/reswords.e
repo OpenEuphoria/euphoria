@@ -258,7 +258,8 @@ CONSTANT  = 416,
 INCLUDE   = 417,
 
 WITH      = 419,
-WITHOUT   = 420
+WITHOUT   = 420,
+ENUM      = 421
 
 global constant 
 FUNC          = 501,

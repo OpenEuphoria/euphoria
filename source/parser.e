@@ -1329,7 +1329,8 @@ procedure Global_declaration(symtab_index type_ptr, integer is_global)
 -- type_ptr is NULL if constant 
     token tok
     symtab_index sym
-    integer h
+    integer h, val
+    val = 1
 
     while TRUE do 
 	tok = next_token()
@@ -1359,6 +1360,34 @@ procedure Global_declaration(symtab_index type_ptr, integer is_global)
 	    StartSourceLine(FALSE)
 	    emit_opnd(sym)
 	    Expr()  -- no new symbols can be defined in here 
+	    buckets[SymTab[sym][S_HASHVAL]] = sym
+	    SymTab[sym][S_USAGE] = U_WRITTEN     
+	   
+	    if TRANSLATE then
+		SymTab[sym][S_GTYPE] = TYPE_OBJECT 
+		SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
+	    end if
+	   
+	    emit_op(ASSIGN)
+        elsif type_ptr = -1 then
+	    -- ENUM
+	    SymTab[sym][S_MODE] = M_CONSTANT 
+	    -- temporarily hide sym so it can't be used in defining itself 
+	    buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH]
+            tok = next_token()
+
+	    StartSourceLine(FALSE)
+	    emit_opnd(sym)
+
+            if tok[T_ID] = EQUALS then
+                val = IntegerToken()
+                Push(NewIntSym(val))
+                val += 1
+            else
+                putback(tok)
+                Push(NewIntSym(val))
+                val += 1
+            end if
 	    buckets[SymTab[sym][S_HASHVAL]] = sym
 	    SymTab[sym][S_USAGE] = U_WRITTEN     
 	   
@@ -1846,11 +1875,18 @@ global procedure real_parser(integer nested)
 	    id = tok[T_ID]
 	    if id = TYPE then
 		Global_declaration(tok[T_SYM], 1)
+
 	    elsif id = CONSTANT then
 		Global_declaration(0, 1)
 		ExecCommand()
+
+	    elsif id = ENUM then
+		Global_declaration(-1, 1)
+		ExecCommand()
+
 	    elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 		SubProg(id, 1)
+
 	    else 
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 		    UndefinedVar(tok[T_SYM])
@@ -1864,6 +1900,10 @@ global procedure real_parser(integer nested)
 
 	elsif id = CONSTANT then
 	    Global_declaration(0, 0)
+	    ExecCommand()
+
+	elsif id = ENUM then
+	    Global_declaration(-1, 0)
 	    ExecCommand()
 
 	elsif id = IF then
