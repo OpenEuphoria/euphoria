@@ -282,6 +282,20 @@ procedure tok_match(integer tok)
     end if
 end procedure
 
+procedure tok_optional(integer tok)
+-- match token or else syntax error 
+	token t
+	sequence expected, actual
+	
+	t = next_token()
+	if t[T_ID] != tok then
+		expected = LexName(tok)
+		actual = LexName(t[T_ID])
+		-- Warning(sprintf("Optional token %s, but got %s", {expected, actual}))
+		putback(t)
+	end if
+end procedure
+
 procedure UndefinedVar(symtab_index s)
 -- report a possibly undefined or multiply-defined symbol 
     symtab_index dup
@@ -987,7 +1001,7 @@ procedure If_statement()
 	prev_false2 = SC1_patch
     end if
     short_circuit -= 1
-    tok_match(THEN)
+    tok_optional(THEN)
     call_proc(forward_Statement_list, {})
     tok = next_token()
 
@@ -1022,7 +1036,7 @@ procedure If_statement()
 	    prev_false2 = SC1_patch
 	end if
 	short_circuit -= 1
-	tok_match(THEN)
+	tok_optional(THEN)
 	call_proc(forward_Statement_list, {})
 	tok = next_token()
     end while
@@ -1078,7 +1092,7 @@ procedure While_statement()
     short_circuit_B = FALSE
     SC1_type = 0
     Expr()
-    tok_match(DO)
+    tok_optional(DO)
     optimized_while = FALSE
     emit_op(WHILE)
     short_circuit -= 1
@@ -1135,7 +1149,7 @@ procedure Ifdef_statement()
     while continue_top do
         if matched = 0 then
             option = StringToken()
-            tok_match(THEN)
+            tok_optional(THEN)
             if option[1] = '!' then
                 matched = find(option[2..$], OpDefines) = 0
             else
@@ -1254,7 +1268,7 @@ procedure For_statement()
     op_info1 = loop_var_sym
     emit_op(FOR)
     emit_addr(loop_var_sym)
-    tok_match(DO)
+    tok_optional(DO)
     bp1 = length(Code)+1
     emit_addr(0) -- will be patched - don't straighten
 
