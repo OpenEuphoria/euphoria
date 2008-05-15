@@ -285,12 +285,12 @@ end procedure
 procedure tok_optional(integer tok)
 -- match token or else syntax error 
 	token t
-	sequence expected, actual
+	--sequence expected, actual
 	
 	t = next_token()
 	if t[T_ID] != tok then
-		expected = LexName(tok)
-		actual = LexName(t[T_ID])
+		--expected = LexName(tok)
+		--actual = LexName(t[T_ID])
 		-- Warning(sprintf("Optional token %s, but got %s", {expected, actual}))
 		putback(t)
 	end if
