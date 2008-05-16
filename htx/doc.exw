@@ -15,7 +15,7 @@ else
     SLASH = '\\'
 end if
 
-constant single_tags = { "br" }
+constant single_tags = { "br", "hr" }
 
 constant files = {
     "welcome.htx",
@@ -30,7 +30,8 @@ constant files = {
     "lib_eds.htx",
     "e2c.htx",
     "trouble.htx",
-    "relnotes40.htx"
+    "relnotes40.htx",
+    "refman_1.htx"
 }
 
 include stack.e as stk
