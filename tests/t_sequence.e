@@ -69,15 +69,18 @@ test_equal("trim_head() default", "John", trim_head(" \r\n\t John", 0))
 test_equal("trim_head() specified", "Doe", trim_head("John Doe", " hoJn"))
 test_equal("trim_head() integer", "John", trim_head("\nJohn", 10))
 test_equal("trim_head() floating number", {-1,{}} , trim_head({0.5,1/2,-1,{}},0.5))
+test_equal("trim_head() to empty", "", trim_head("  ", 32))
 
 test_equal("trim_tail() defaults", "John", trim_tail("John\r \n\t", 0))
 test_equal("trim_tail() specified", "John", trim_tail("John Doe", " eDo"))
 test_equal("trim_tail() integer", "John", trim_tail("John\n", 10))
 test_equal("trim_tail() floating number", {-1,{}} , trim_tail({-1,{},0.5,1/2},0.5))
+test_equal("trim_tail() to empty", "", trim_tail(" ", 32))
 
 test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t", 0))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
 test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
+test_equal("trim() to empty", "", trim("  ", 32))
 
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))

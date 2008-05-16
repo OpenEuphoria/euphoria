@@ -1,25 +1,25 @@
 constant TRUE = 1, FALSE = 0
 
 type boolean(integer x)
-    return x = 0 or x = 1
+	return x = 0 or x = 1
 end type
 
 boolean t1_running, t2_running
 
 procedure task1(sequence message)
-    for i = 1 to 10 do
-	printf(1, "task1 (%d) %s\n", {i, message})
-	task_yield()
-    end for
-    t1_running = FALSE
+	for i = 1 to 10 do
+		printf(1, "task1 (%d) %s\n", {i, message})
+		task_yield()
+	end for
+	t1_running = FALSE
 end procedure
 
 procedure task2(sequence message)
-    for i = 1 to 10 do
-	printf(1, "task2 (%d) %s\n", {i, message})
-	task_yield()
-    end for
-    t2_running = FALSE
+	for i = 1 to 10 do
+		printf(1, "task2 (%d) %s\n", {i, message})
+		task_yield()
+	end for
+	t2_running = FALSE
 end procedure
 
 puts(1, "main task: start\n")
@@ -36,10 +36,10 @@ t1_running = TRUE
 t2_running = TRUE
 
 while t1_running or t2_running do
-    if get_key() = 'q' then
-	exit
-    end if  
-    task_yield()
+	if get_key() = 'q' then
+		exit
+	end if  
+	task_yield()
 end while
 
 puts(1, "main task: stop\n")

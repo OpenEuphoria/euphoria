@@ -24,8 +24,8 @@ sequence files, data
 files = dir("*.htx")
 
 for i = 1 to length(files) do
-    data = read_file(files[i][1])
-    data = find_replace("_eucode>", "eucode>", data, 0)
-    ign = write_file(files[i][1], data)
+	data = read_file(files[i][1])
+	data = find_replace("_eucode>", "eucode>", data, 0)
+	ign = write_file(files[i][1], data)
 end for
 

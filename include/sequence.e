@@ -216,7 +216,7 @@ global function trim_head(sequence str, object what)
 		end if
 	end for
 
-	return str
+	return ""
 end function
 
 global function trim_tail(sequence str, object what)
@@ -234,7 +234,7 @@ global function trim_tail(sequence str, object what)
 		end if
 	end for
 
-	return str
+	return ""
 end function
 
 global function trim(sequence str, object what)
