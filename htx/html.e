@@ -128,7 +128,7 @@ procedure tag_default(object raw_text, object param_list)
 -- default handler - let most html pass through unchanged
 	if in_tag("eucode") then
 		line = line & raw_text
-		if raw_text = '\n' then
+		if atom(raw_text) and raw_text = '\n' then
 			if firstLine = TRUE then
 				firstLine = FALSE
 				write("<pre>")

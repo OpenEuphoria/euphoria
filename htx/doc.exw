@@ -15,7 +15,7 @@ else
     SLASH = '\\'
 end if
 
-constant single_tags = { "br", "hr" }
+constant single_tags = { "br", "hr", "br/", "hr/" }
 
 constant files = {
     "welcome.htx",

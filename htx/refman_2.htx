@@ -239,7 +239,7 @@ instead of exu.</p>
 
  The relational operators  <font color="#993333"><b>< &nbsp; > &nbsp; <= &nbsp;
  >= &nbsp; = &nbsp; != &nbsp;</b></font> each produce a 1 (true) or a
- 0 (false) result.
+ 0 (false) result.</p>
 
 <eucode>
         8.8 < 8.7   -- 8.8 less than 8.7 (false)
@@ -251,9 +251,7 @@ instead of exu.</p>
 </eucode>
 
 <p>
- As we will soon see you can also apply these operators to sequences.
-
-<p>
+ As we will soon see you can also apply these operators to sequences.</p>
 
 <h4>2.2.2 Logical Operators</h4>
 
@@ -749,7 +747,7 @@ and so is s[length(s)+1..length(s)].</p>
  proceeding. You call these operations as if they were subroutines, although
  they are actually implemented much more efficiently than that.</p>
 
-<funcref name="length" params="s1" ret="i1">
+<funcref name="length" params="s1" ret="i1"></funcref>
 
 <description>Returns the length of a sequence s1.</description>
 
@@ -765,7 +763,7 @@ and so is s[length(s)+1..length(s)].</p>
         length(5)                   -- error!
 </eucode>
 
-<funcref name="repeat" params="a1,a2" ret="s1">
+<funcref name="repeat" params="a1,a2" ret="s1"></funcref>
 
 <description>Returns a sequence that consists of an item repeated count times. e.g.</description>
 
@@ -778,7 +776,7 @@ and so is s[length(s)+1..length(s)].</p>
 <comment>
  The item to be repeated can be any atom or sequence.</comment>
 
-<funcref name="append" params="s1,o1" ret="s2">
+<funcref name="append" params="s1,o1" ret="s2"></funcref>
 
 <description>Returns a sequence by adding an object o1 to the end of a sequence s1.</description>
 
@@ -790,7 +788,7 @@ and so is s[length(s)+1..length(s)].</p>
 
 <comment>The length of the new sequence is always 1 greater than the length of the original sequence. The item to be added to the sequence can be any atom or sequence.</comment>
 
-<funcref name="prepend" params="s1,o1" ret="s2">
+<funcref name="prepend" params="s1,o1" ret="s2"></funcref>
 
 <description>Returns a new sequence by adding an element to the beginning of a sequence s. e.g.</description>
 
@@ -843,6 +841,7 @@ and so is s[length(s)+1..length(s)].</p>
                                 <  >  <=  >=  =  !=
 
                                 and  or  xor
+</pre>
 
 <p><strong>lowest precedence</strong></p>
 <pre>
@@ -2007,7 +2006,7 @@ containing the code. The first form of the include statement is:</p>
                    include \mylib\myroutines.e
 </eucode>
 <p>
-		   Any top-level code in the included file will be executed.
+		   Any top-level code in the included file will be executed.</p>
 <p>
                    Any <a href="refman_2.htm#scope">global symbols</a>
                    that have already been defined in the main file will
@@ -2045,7 +2044,7 @@ containing the code. The first form of the include statement is:</p>
                    or DOS / Windows environment  variables. 
                    (Via Control Panel / Performance & Maintenance 
                    / System / Advanced on XP, or AUTOEXEC.BAT on older versions of Windows).
-                   e.g.<br>
+                   e.g.<br/>
                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB<br/>
                    
                    <b>EUINC</b> lets you organize your include files according
@@ -2060,7 +2059,7 @@ containing the code. The first form of the include statement is:</p>
                    Euphoria include files. The environment variable <b>EUDIR</b> tells
                    Euphoria
                    where to find your
-                   <font color="#993333"><b>euphoria</b></font> directory.
+                   <font color="#993333"><b>euphoria</b></font> directory.</li>
                    </ol>
 
 <p>
@@ -2139,7 +2138,7 @@ See <a href=refman_2.htm#42>Scope Rules</a> for more.</p>
         <p>
         Any warnings that are issued will appear on your screen after your
         program has finished execution. Warnings indicate very minor problems.
-        A warning will never stop your program from executing.</dd>
+        A warning will never stop your program from executing.</p></dd>
 <dt>
  <font color="#993333"><b>without</b></font></dt>
 
