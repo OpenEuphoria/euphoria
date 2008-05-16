@@ -18,9 +18,9 @@ global function reverse(sequence s)
 	t = repeat(0, n)
 	lower = 1
 	for upper = n to n2 by -1 do
-			t[upper] = s[lower]
-			t[lower] = s[upper]
-			lower += 1
+		t[upper] = s[lower]
+		t[lower] = s[upper]
+		lower += 1
 	end for
 	return t
 end function
@@ -41,7 +41,7 @@ global function mid(sequence st, atom start, atom len)
 		end if
 	end if
 	if start > length(st) or len=0 then
-			return ""
+		return ""
 	end if
 	if start<1 then
 		start=1
@@ -55,32 +55,32 @@ end function
 
 global function slice(sequence st, atom start, atom stop)
 	if stop < 0 then stop = length(st) + stop end if
-		if stop = 0 then stop = length(st) end if
-		if start < 1 then start = 1 end if
-		if stop > length(st) then stop = length(st) end if
-		if start > stop then return "" end if
+	if stop = 0 then stop = length(st) end if
+	if start < 1 then start = 1 end if
+	if stop > length(st) then stop = length(st) end if
+	if start > stop then return "" end if
 
-		return st[start..stop]
+	return st[start..stop]
 end function
 
 global function vslice(sequence s, atom colno)
 	sequence ret
 
-		ret = s
+	ret = s
 
-		for i = 1 to length(s) do
-				ret[i] = s[i][colno]
-		end for
+	for i = 1 to length(s) do
+		ret[i] = s[i][colno]
+	end for
 
-		return ret
+	return ret
 end function
 
 global function tail(sequence st, atom n)
-		if n >= length(st) then
-				return st
-		else
-				return st[$-n+1..$]
-		end if
+	if n >= length(st) then
+		return st
+	else
+		return st[$-n+1..$]
+	end if
 end function
 
 global function remove(sequence st, object index)
@@ -147,10 +147,10 @@ global function replace(sequence st, object what, integer start, integer stop)
 end function
 
 global function split_adv(sequence st, object delim, integer limit, integer any)
-		sequence ret
-		integer pos,start,next_pos
-		ret={}
-		start=1
+	sequence ret
+	integer pos,start,next_pos
+	ret={}
+	start=1
 
 	if atom(delim) then
 		delim = {delim}
@@ -177,9 +177,9 @@ global function split_adv(sequence st, object delim, integer limit, integer any)
 		end if
 	end while
 
-		ret = append(ret, st[start..$])
+	ret = append(ret, st[start..$])
 
-		return ret
+	return ret
 end function
 
 global function split(sequence st, object delim)
@@ -189,16 +189,16 @@ end function
 global function join(sequence s, object delim)
 	object ret
 
-		if not length(s) then return {} end if
+	if not length(s) then return {} end if
 
-		ret = {}
-		for i=1 to length(s)-1 do
-				ret &= s[i] & delim
-		end for
+	ret = {}
+	for i=1 to length(s)-1 do
+		ret &= s[i] & delim
+	end for
 
-		ret &= s[length(s)]
+	ret &= s[length(s)]
 
-		return ret
+	return ret
 end function
 
 global function trim_head(sequence str, object what)
@@ -295,20 +295,20 @@ global function chunk(sequence s, integer size)
 end function
 
 global function flatten(sequence s)
-   sequence ret
-   object x
+	sequence ret
+	object x
 
-   ret = {}
-   for i = 1 to length(s) do
-	  x = s[i]
-	  if atom(x) then
-		 ret &= x
-	  else
-		 ret &= flatten(x)
-	  end if
-   end for
+	ret = {}
+	for i = 1 to length(s) do
+		x = s[i]
+		if atom(x) then
+			ret &= x
+		else
+			ret &= flatten(x)
+		end if
+	end for
 
-   return ret
+	return ret
 end function
 
 constant TO_LOWER = 'a' - 'A'
@@ -322,3 +322,4 @@ global function upper(object x)
 -- convert atom or sequence to upper case
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
+

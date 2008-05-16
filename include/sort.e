@@ -1,15 +1,8 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Sorting
 
----------- CHANGE HISTORY ------------
--- 16-May-2008, Derek Parnell, Added sort_reverse()
---                             Added sort_user()
---------------------------------------
-
 -- Sort the elements of a sequence into ascending order, using "Shell" sort.
-
 global function sort(sequence x)
 -- Sort a sequence into ascending order. The elements can be atoms or 
 -- sequences. The standard compare() routine is used to compare elements.
@@ -84,15 +77,17 @@ end function
 
 -- Local function used by sort_reverse()
 function reverse_comp(object a, object b)
-    return -(compare(a,b))
+	return -(compare(a,b))
 end function
 
+-- TODO: Document
 global function sort_reverse(sequence x)
 -- Sort a sequence into descending order. The elements can be atoms or 
 -- sequences.
-    return custom_sort(routine_id("reverse_comp"), x)
+	return custom_sort(routine_id("reverse_comp"), x)
 end function
 
+-- TODO: Document
 global function sort_user(integer custom_compare, sequence x, object user_data)
 -- Sort a sequence. A user-supplied comparison function is used 
 -- to compare elements. That function is passed the supplied user_data.

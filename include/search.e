@@ -79,27 +79,27 @@ end function
 global function rfind_from(object x, sequence s, integer start)
 	integer len
 
-		len=length(s)
+	len=length(s)
 
-		if (start > len) or (len + start < 1) then
+	if (start > len) or (len + start < 1) then
 		crash("third argument of rfind_from() is out of bounds (%d)", {start})
+	end if
+
+	if start < 1 then
+		start = len + start
+	end if
+
+	for i = start to 1 by -1 do
+		if equal(s[i], x) then
+			return i
 		end if
+	end for
 
-		if start < 1 then
-				start = len + start
-		end if
-
-		for i = start to 1 by -1 do
-				if equal(s[i], x) then
-						return i
-				end if
-		end for
-
-		return 0
+	return 0
 end function
 
 global function rfind(object x, sequence s)
-		return rfind_from(x, s, length(s))
+	return rfind_from(x, s, length(s))
 end function
 
 --Try to match x against some slice of s, starting from index start and going down to 1
@@ -107,40 +107,40 @@ end function
 global function rmatch_from(sequence x, sequence s, integer start)
 	integer len,lenx
 
-		len = length(s)
-		lenx = length(x)
+	len = length(s)
+	lenx = length(x)
 
-		if lenx = 0 then
+	if lenx = 0 then
 		crash("first argument of rmatch_from() must be a non-empty sequence", {})
-		elsif (start > len) or  (len + start < 1) then
+	elsif (start > len) or  (len + start < 1) then
 		crash("third argument of rmatch_from is out of bounds (%d)", {start})
+	end if
+
+	if start < 1 then
+		start = len + start
+	end if
+
+	if start + lenx - 1 > len then
+		start = len - lenx + 1
+	end if
+
+	lenx-= 1
+
+	for i=start to 1 by -1 do
+		if equal(x, s[i..i + lenx]) then
+			return i
 		end if
+	end for
 
-		if start < 1 then
-				start = len + start
-		end if
-
-		if start + lenx - 1 > len then
-				start = len - lenx + 1
-		end if
-
-		lenx-= 1
-
-		for i=start to 1 by -1 do
-				if equal(x, s[i..i + lenx]) then
-						return i
-				end if
-		end for
-
-		return 0
+	return 0
 end function
 
 global function rmatch(sequence x, sequence s)
-		if length(x)=0 then
+	if length(x)=0 then
 		crash("first argument of rmatch_from() must be a non-empty string", {})
-		end if
+	end if
 
-		return rmatch_from(x, s, length(s))
+	return rmatch_from(x, s, length(s))
 end function
 
 global function find_replace(sequence what, sequence repl_with, sequence source, integer max)
