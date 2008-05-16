@@ -31,7 +31,8 @@ constant files = {
     "e2c.htx",
     "trouble.htx",
     "relnotes40.htx",
-    "refman_1.htx"
+    "refman_1.htx",
+    "refman_2.htx"
 }
 
 include stack.e as stk

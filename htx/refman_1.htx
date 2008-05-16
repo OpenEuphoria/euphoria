@@ -4,7 +4,7 @@
 
 <h2>Introduction</h2>
 
-<p><b>Euphoria</b> is a programming language with the following advantages over conventional languages:</p>
+<p><strong>Euphoria</strong> is a programming language with the following advantages over conventional languages:</p>
 
 <ul type=circle>
 <li>
@@ -559,6 +559,6 @@ program.</p>
  Some additional 3rd-party legal restrictions might apply when you use the
  <a href=e2c.htm#legal>Euphoria To C Translator</a>.</p>
  
-<p>continue to <a href="refman_2.htm">Language Definition</a></p>
+<p style="text-align:center;">continue to <a href="refman_2.htm">Language Definition</a></p>
 
 </doc>
