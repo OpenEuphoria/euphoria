@@ -3,6 +3,11 @@
 -- Euphoria 3.2
 -- Unit testing framework
 
+---------- CHANGE HISTORY ------------
+-- 16-May-2008, Derek Parnell, Added support for --EUUNITTEST=VERBOSE on cmdline
+--                             Now shows which modules were tested in the summary
+--------------------------------------
+
 include misc.e
 
 --
@@ -24,11 +29,12 @@ integer modShown
 modShown = 0
 
 atom verbose
-verbose = 0
+verbose = (find("--EUUNITTEST=VERBOSE", command_line()) != 0)
 
 sequence currentMod
 currentMod = ""
-
+sequence modulesTested
+modulesTested = {}
 --
 -- Private utility functions
 --
@@ -70,12 +76,19 @@ global procedure set_test_verbosity(atom verbosity)
 end procedure
 
 global procedure set_test_module_name(sequence name)
+        modulesTested = append(modulesTested, name)
 		currentMod = name
 	modShown = 0
 end procedure
 
 global procedure test_summary()
 		if verbose > 0 then
+		        if length(modulesTested) > 0 then
+		            puts(2, "\nModules tested...\n")
+		            for i = 1 to length(modulesTested) do
+		                printf(2, "  %s\n", {modulesTested[i]})
+		            end for
+		        end if
 				printf(2, "\n%d tests run, %d passed, %d failed, %d%% success\n",
 						{testCount, testsPassed, testsFailed, (testsPassed / testCount) * 100})
 		end if

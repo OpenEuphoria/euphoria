@@ -3,6 +3,11 @@
 -- Euphoria 3.1
 -- Sorting
 
+---------- CHANGE HISTORY ------------
+-- 16-May-2008, Derek Parnell, Added sort_reverse()
+--                             Added sort_user()
+--------------------------------------
+
 -- Sort the elements of a sequence into ascending order, using "Shell" sort.
 
 global function sort(sequence x)
@@ -77,4 +82,52 @@ global function custom_sort(integer custom_compare, sequence x)
 	end while
 end function
 
+-- Local function used by sort_reverse()
+function reverse_comp(object a, object b)
+    return -(compare(a,b))
+end function
+
+global function sort_reverse(sequence x)
+-- Sort a sequence into descending order. The elements can be atoms or 
+-- sequences.
+    return custom_sort(routine_id("reverse_comp"), x)
+end function
+
+global function sort_user(integer custom_compare, sequence x, object user_data)
+-- Sort a sequence. A user-supplied comparison function is used 
+-- to compare elements. That function is passed the supplied user_data.
+-- Note that this sort is not "stable", i.e.
+-- elements that are considered equal might change position relative
+-- to each other.
+	integer gap, j, first, last
+	object tempi, tempj
+
+	last = length(x)
+	gap = floor(last / 10) + 1
+	while 1 do
+		first = gap + 1
+		for i = first to last do
+			tempi = x[i]
+			j = i - gap
+			while 1 do
+				tempj = x[j]
+				if call_func(custom_compare, {tempi, tempj, user_data}) >= 0 then
+					j += gap
+					exit
+				end if
+				x[j+gap] = tempj
+				if j <= gap then
+					exit
+				end if
+				j -= gap
+			end while
+			x[j] = tempi
+		end for
+		if gap = 1 then
+			return x
+		else
+			gap = floor(gap / 3.5) + 1
+		end if
+	end while
+end function
 
