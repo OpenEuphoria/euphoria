@@ -1130,6 +1130,11 @@ global function IntegerToken()
 	end while
 
 	gtext = ""
+	-- 1st ch can have #, + or -
+	if find(ch, "#+-0123456789") then
+		gtext &= ch
+		ch = getch()
+	end if
 	while find(ch,  "0123456789") do
 		gtext &= ch
 		ch = getch()

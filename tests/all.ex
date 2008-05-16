@@ -15,12 +15,15 @@ if length(cmd) > 2 then
 	set_test_verbosity(TEST_SHOW_ALL)
     elsif equal(cmd[3], "-failed") then
 	set_test_verbosity(TEST_SHOW_FAILED_ONLY)
+    elsif equal(cmd[3], "-mods") then
+        set_test_verbosity(TEST_SHOW_MODULES)
     end if
 end if
 
 -- Tests
 include t_condcmp.e
 include t_datetime.e
+include t_enum.e
 include t_file.e
 include t_get.e
 include t_locale.e
