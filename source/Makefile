@@ -53,55 +53,6 @@ BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcr
 
 PCRE=./pcre/.libs/libpcre.a
 
-EU_ALL_FILES = \
-	be_alloc.c \
-	be_callc.c \
-	be_execute.c \
-	be_inline.c \
-	be_machine.c \
-	be_main.c \
-	be_pcre.c \
-	be_rterror.c \
-	be_runtime.c \
-	be_symtab.c \
-	be_syncolor.c \
-	be_task.c \
-	be_w.c \
-	int.ex \
-	ec.ex \
-	backend.ex \
-	bind.ex \
-	backend.e \
-	c_decl.e \
-	cominit.e \
-	common.e \
-	compile.e \
-	compress.e \
-	c_out.e \
-	emit.e \
-	error.e \
-	execute.e \
-	global.e \
-	il.e \
-	intinit.e \
-	keylist.e \
-	main.e \
-	mode.e \
-	opnames.e \
-	parser.e \
-	pathopen.e \
-	reswords.e \
-	scanner.e \
-	scientific.e \
-	symtab.e \
-	traninit.e \
-	../include/machine.e \
-	../include/search.e \
-	../include/misc.e \
-	../include/file.e \
-	../include/get.e
-
-
 EU_CORE_FILES = \
 	common.e \
 	main.e \
@@ -168,6 +119,7 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o \
 	./$(OBJDIR)/get.o \
+	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/compress.o 
 
 EU_CORE_OBJECTS = \
@@ -254,6 +206,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/sequence.o \
+	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/mode.o 
 
 EU_BACKEND_RUNNER_FILES = \
