@@ -96,6 +96,7 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\get.obj &
+        .\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj
 
@@ -163,6 +164,7 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\sequence.obj &
+        .\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\compress.obj
 
 EU_DOS_OBJECTS = &
