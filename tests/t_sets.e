@@ -1,7 +1,7 @@
 include unittest.e
 include sets.e
 
-set_test_module_name("test.e")
+set_test_module_name("t_sets.e")
 
 set s,s1,s1a
 s={-1,3,5,17,"abc","abcd","acb"}
@@ -129,7 +129,7 @@ s0={0,1,2,3,4}
 s00=s0   
 for i=1 to 5 do s00[i]=remainder(s0[i]*s0,5)+1 s00[i]&={5,5} end for
 
-test_equal("define_operation')",mul5,define_operation(s00))
+test_equal("define_operation()",mul5,define_operation(s00))
 
 test_equal("is_associative()",1,is_associative(mul5))
 
@@ -161,13 +161,3 @@ test_equal("distributes_right()",1,distributes_right(product,sum,0))
 
 test_equal("distributes_over()",3,distributes_over(product,sum,0))
 
-
-
-
-
-
-
-
-
-
-?machine_func(26,0)
