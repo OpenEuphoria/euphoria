@@ -1,0 +1,1988 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part II - Section 3.21 - Sets and Maps</title>
+<_css>
+</head>
+<body>
+
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>3.21 - Sets and Maps</_dul>
+
+</font>
+<p>
+Special types for arguments and returned values:
+<ul>
+<li>S: a set, ie a strictly increasing sequence
+<li>f: a set_map, which is a sequence of small integers with a specific layout.
+<li>F: a set_operation, which is a sequence of small integers with a specific layout.
+
+<p>
+<_sul><font color="#006633"><b>Function Reference:</b></font></_sul>
+
+
+<_routine name="add_to">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S2 = add_to(x, S1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Creates a new set s2, by adding x to s1 if x wasn't in it already.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If x was in s1, s2 is the same as s1."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+s0=add_to(2,s)   -- s0 is now {1,2,3,5,7}
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#belongs_to\">belongs_to</a>,
+<a href=\"#remove_from\">remove_from</a>,
+<a href=\"#union\">union</a>"
+ >
+</table>
+
+<_routine name="all_left_units">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s = all_left_units(F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the sequence of all left units for F.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"A left unit for f(x,y) is an x0 such that f(x0,.) is the identity."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+sequence s s=all_left_units(f)  --   s is now {1,2}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#all_right_units\">all_right_units</a>,
+<a href=\"#is_left_unit\">is_left_unit</a>,
+<a href=\"#has_left_unit\">has_left_unit</a>"
+ >
+</table>
+
+<_routine name="all_right_units">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s = all_right_units(F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the sequence of all right units for F.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"A right unit for f(x,y) is an y0 such that f(.,y0) is the identity."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+sequence s s=all_left_units(f)  --   s is now {}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#all_left_units\">all_left_units</a>,
+<a href=\"#is_right_unit\">is_right_unit</a>,
+<a href=\"#has_right_unit\">has_right_unit</a>"
+ >
+</table>
+
+<_routine name="amalgamated_sum">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S4 = amalgamated_sum(S1,S2,S3,f1,f2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set made of all pairs {f1(x),f2(x)} in S1 X S2, for all x in S3."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"This construct is the dual of a fiber_product()."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s0={1,2,3} s1={5,7,9,11} s2={13,17,19}
+set_map f01,f02
+f01={2,4,1,3,4} f02={2,2,1,3,3}
+set s s=amalgamated_product(s1,s2,s0,f01,f02)
+--   s is now {{7,17},{11,17},{5,13}}.
+-- See also: 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#product\">product</a>,
+<a href=\"#product_map\">product_map</a>,
+<a href=\"#fiber_product\">fiber_product</a>"
+ >
+</table>
+
+<_routine name="belongs_to">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = belongs_to(x, s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if x is in s, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+?belongs_to(2,s)   -- prints out 0
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#intersection\">intersection</a>,
+<a href=\"#difference\">difference</a>"
+ >
+</table>
+
+<_routine name="bfind">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = bfind(x1, S, x2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Finds x1 in S limited by bounds specified in x2, using a binary search algorithm.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"Returns either:
+<ul>
+<li>a positive integer, the index of x1 in S, like find_from() would;
+<li>0 if onvalid arguments were provided;
+<li>the opposite of the index that x1 would have if inserted in S1 (which is ordered).
+</ul>
+If x2 is an integer, it is a starting point for the search. Otherwise, it is a sequence {startpoint,endpoint}.<BR>
+Type checking S may be expensive, so turning type check off will boost performance. However, in that case, results are undefined if S is not strictly increasing.<BR>
+bfind() is faster than find() to find something in large sets (>50 elements, the exact limit depending on hardware and memory usage).
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+?bfind(3,{1,2,5},1)   -- prints out -3
+?bfind(3,{1,2,5},{3,1})   -- prints out 0
+?bfind(5,{1,2,3,4,5,6,7,8},6)  -- prints out -6
+?bfind(5,{1,2,3,4,5,6,7,8},2)  -- prints out 5
+?bfind(5,{1,2,3,4,5,6,7,8},{1,3})  -- prints out -4
+?bfind(5,{1,2,3,4,5,6,7,8},{1,6})  -- prints out 5
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"library_e_f.htm#find_from\">find_from</a>"
+ >
+</table>
+
+<_routine name="cardinal">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = cardinal(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns how many elements s has."
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"Since sets are implemented as sequences, their cardinal cannot go beyond 1,073,741,823."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+?cardinal(s)   -- prints out 4
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#set\">set</a>"
+ >
+</table>
+
+<_routine name="change_target">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f2 = change_target(f1, s1,s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Converts f from a set_map to s1 into a set_map to s2.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If range(f1) is a subset of both s1 and s2, this function changes f1 from a set_map to s1 into a set_map to s2. The actual elements being mapped to do not change. If range(f1) is not inside s2, {} is returned instead."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s1,s2
+s1={1,3,5,7,9,11} s2={1,3,7,11,17,19,23}
+set_map f f={2,1,4,6,2,6,6,6}
+set_map f0 f0=change_target(f,s1,s2)
+--   f0 is now: {2,1,3,4,2,4,6,7}
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#restrict\">restrict</a>,
+<a href=\"#direct_map\">direct_map</a>"
+ >
+</table>
+
+<_routine name="combine_maps">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f3 = combine_maps(s1,s2,f1,f2,s3,s4)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Combines f1 and f2 into a set_map defined from the union of s1 and s2 to the union
+of s3 nd s4."
+>
+ <_2clist
+  name="Comments:"
+  description=
+"The returned set_map agrees with f1 and f2. If it is not possible to build it, {} is returned."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s11,s12,s21,s22
+s11={2,3,5,7,11,13,17,19} s21={7,13,19,23,29}
+s12={-1,0,1,4} s22={-2,0,1,2,6}
+set_map f1,f2
+f1={2,1,3,3,2,3,1,2,8,4} f2={3,3,2,4,5,5,5}
+set_map f f=combine_maps(f1,s11,s12,f2,s21,s22)
+--   f is now: {3,2,4,4,3,4,2,3,5,7,10,7}.
+-- See also: , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#restrict\">restrict</a>,
+<a href=\"#direct_map\"></a>"
+ >
+</table>
+
+<_routine name="compose_maps">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f3 = compose_maps(f1, f2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Computes the compound set_map f2 o f1."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"f2 must be defined on the whole range of f1. Otherwise, a runtime error will take place."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f1,f2,f
+f1={2,3,1,1,2,5,3}
+f2={4,8,1,2,6,7,6,9}
+f=compose_map(f2,f1)
+f is now: {8,1,4,4,8,5,9}
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#diagram_commutes\">diagram_commutes</a>"
+ >
+</table>
+
+<_routine name="define_map">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f = define_map(s, S)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns a set_map which sends each element of its source set to the corresponding one in S."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"s must be made of elements of S. Otherwise, a runtime error will take place."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+sequence s0 s0={2,3,4,1,4,2}
+set s1 s1={-1,1,2,3,4}
+set_map f f=define_map(s0,s1)
+--     As a sequence, f is {3,4,5,2,5,3,6,5}
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#set_map\">set_map</a>,
+<a href=\"#sequences_to_map\">sequences_to_map</a>,
+<a href=\"#direct_map\">direct_map</a>"
+ >
+</table>
+
+<_routine name="define_operation">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+F = define_operation(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns a set_operation that splits by left action into the sequence of mappings smappings."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"s must be a rectangular matrix. Each element represents the action of an element of the source set on the target set. The result set is built with as small a cardinal as possible.
+If s is not a rectangular matrix, {} is returned."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+sequence s s={{2,3,2,3},{3,1,2,5},{1,2,2,2},{2,3,2,4},{3,1,2,3}}
+set_operation F F=define_operation(s)
+-- F is now {{{2,3},{3,1},{1,2},{2,3},{3,1}},{5,2,3}
+?set_operation(F)   -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#set_operation\">set_operation</a>
+ >
+</table>
+
+<_routine name="delta">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s3 = delta(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of elements belonging to either s1 or s2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s1={1,3,5,7} s2={-1,2,3,7,11}
+s0=delta(s1,s2)   -- s0 is now {-1,1,2,5,11}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#intersection\">intersection</a>,
+<a href=\"#union\">union</a>,
+<a href=\"#difference\">difference</a>"
+ >
+</table>
+
+<_routine name="diagram_vommutes">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = diagram_commutes(f1,f2,f3,f4)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if f3 o f1 = f4 o f2, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f1_2a,f1_2b,f2a_3,f2b_3
+f1_2a={2,3,1,1,2,5,3}
+f2a_3={4,8,1,2,6,7,6,9}
+f1_2b={2,4,2,3,1,5,4}
+f2b_3={8,8,4,1,3,5,8}
+?diagram_commutes(f1_2a,f1_2b,f2a_3,f2b_3)   -- prints out 0
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#compose_map\">compose_map</a>"
+ >
+</table>
+
+<_routine name="difference">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S3 = difference(S1, S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of elements belonging to S1 and not to S2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s1={1,3,5,7} s2={-1,2,3,7,11}
+s0=difference(s1,s2)   -- s0 is now {1,5}.
+-- See also:  , , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#remove_from\">remove_from</a>,
+<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#delta\">delta</a>"
+ >
+</table>
+
+<_routine name="direct_map">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s2 = direct_map(f,S1,s1,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns f(s1), with s1 made from elements of S1 and being mapped into S2."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If f cannot map S1 to S2, a runtime error will take place. Elements of s1 not in S1 are simply ignored, and s2 will be shorter than s1 if there is any."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+sequence s0 s0={2,3,4,1,4}
+set t1,t2
+t1={1,2,2.5,3,4} t2={11,13,17,19,23,29}
+set_map f f={3,1,4,5,3,5,5}
+sequence s2 s2=direct_map(f,t1,s0,t2)
+--   s2 is now {11,29,17,17,17}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#reverse_map\">reverse_map</a>"
+ >
+</table>
+
+<_routine name="distributes_left">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i2 = distributes_left(F1,F2,i1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if F1 (the "product") is left distributive over F2 (the "sum"), else 0."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"F1, the product is a set_operation of a set on another. If it is presented as a left set_operation, i1 must be 0; otherwise, it must be nonzero. If the product is a symmetric law, the value of i1 is irrelevant.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+set_operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
+?distributes_left(product,sum,0)  -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#distributes_right\">distributes_right</a>,
+<a href=\"#distributes_over\">distributes_over</a>"
+ >
+</table>
+
+<_routine name="distributes_over">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i2 = distributes_over(F1,F2,i1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns a value between 0 and 3 which says how F1 (the "product") is distributive over F2 (the "sum")."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"F1, the product is a set_operation of a set on another. If it is presented as a left set_operation, i1 must be 0; otherwise, it must be nonzero. If the product is a symmetric law, the value of i1 is irrelevant.<BR>
+The returned value is either:
+<ul>
+<li> 0 if F1 isn't either left or right distributive over F2;
+<li> 1 if on the left only;
+<li> 2 on the right only;
+<li> 3 if F1 is distributive (on both sides) over F2.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+operatiion sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+set_operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
+?distributes_over(product,sum,0)  -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#distributes_over\">distributes_left</a>,
+<a href=\"#distributes_right\">distributes_right</a>"
+ >
+</table>
+
+<_routine name="distributes_right">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i2 = distributes_right(F1,F2,i1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if F1 (the "product") is right distributive over F2 (the "sum"), else 0."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"F1, the product is a set_operation of a set on another. If it is presented as a left set_operation, i1 must be 0; otherwise, it must be nonzero. If the product is a symmetric law, the value of i1 is irrelevant.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+operatiion sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+set_operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
+?distributes_right(product,sum,0)  -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#distributes_left\">distributes_right</a>,
+<a href=\"#distributes_over\">distributes_over</a>"
+ >
+</table>
+
+<_routine name="embed_union">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s = embed_union(S1, S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of the indexes of the elements of S1 in S1 U S2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s1 s1 = {1,3,4,6}
+set s2 s2 = {2,3,6,7}
+sequence s s=embed_union(s1,s2)
+-- s is now {1,3,4,5}
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#embedding\">embedding</a>"
+ >
+</table>
+
+<_routine name="embedding">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s = diff(S1, S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of indexes of the elements of S1 in S2, or 0 if S1 is not inside S2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+sequence s s=embedding({3,5},s0)   -- s is now {2,3}
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#subsets\">subsets</a>,
+<a href=\"#belongs_to\">belongs_to</a>,
+<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#embed_union\">embed_union</a>"
+ >
+</table>
+
+<_routine name="fiber_over">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s = fiber_over(f, S1, S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the pair {nonempty reverse images of elements of S2 by f, range(f)}."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"A pair made of a sequence and a set, of the same length. The set is made of all elements of S2 hit by f from S1. For each of them, the corresponding element in the sequence is the list of its antecedents by f.<BR>
+These lists are called fibers of f over the points, especially if they are isomorphic to one another in some way.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s1,s2
+s1={5,7,9,11} s2={13,17,19,23,29}
+set_map f f={2,1,4,1,4,5}
+sequence s s=fiber_over(f,s1,s2)
+--   s is now {{{7,11},{5},{9}},{13,17,23}}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#reverse_map\">reverse_map</a>,
+<a href=\"#fiber_product\">fiber_product</a>"
+ >
+</table>
+
+<_routine name="fiber_product">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = fiber_product(S1, S2, S3, f1, f2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of pairs in S1 X S2 whose coordinates are mapped consistently into the base set S3 by f1 and f2 respectively.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"This construct is the dual of an amalgamated sum."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s0={1,2,3} s1={5,7,9,11} s2={13,17,19,23,29}
+set_map f10,f20
+f10={2,1,2,1,4,3} f20={1,3,3,2,3,5,3}
+set s s=fiber_product(s1,s2,s0,f10,f20)
+--   s is now {{5,23},{7,13},{9,23},{11,13}}.
+-- See also: ,,
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#amalgamated_sum\">amalgamated_sum</a>,
+<a href=\"#fiber_over\">fiber_over</a>,
+<a href=\"#reverse_map\">reverse_map</a>"
+ >
+</table>
+
+<_routine name="has_inverse">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+x2 = diff(x1, F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the bilateral inverse of x1 by F if it exists and F has a unit."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If no inverse is found, 0 is returned.<BR>
+Remember that set_opertions operate on indexes, so any inverse is an index as well."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+?has_inverse(3,f)  -- prints out 2.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#has_unit\">has_unit</a>"
+ >
+</table>
+
+<_routine name="has_left_unit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = has_left_unit(F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 0 if F has no left unit, else a left unit for F.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If there are more than one left unit, whichever is returned is implementation dependent.<BR>
+Remember that set_opertions operate on indexes, so any unit is an index as well."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+-- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
+?has_left_unitf()   -- prints out 1.
+-- See also: ,,,
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#all_left_unitz\">all_left_unitz</a>,
+<a href=\"#is_left_unit\">is_left_unit</a>,
+<a href=\"#has_right_unit\">has_right_unit</a>,
+<a href=\"#has_unit\">has_unit</a>"
+ >
+</table>
+
+<_routine name="has_right_unit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = has_right_unit(F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 0 if F has no right unit, else a right unit for F.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If there are more than one right unit, whichever is returned is implementation dependent.<BR>
+Remember that set_opertions operate on indexes, so any unit is an index as well."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+-- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
+?has_right_unit(f)   -- prints out 1.
+-- See also: ,,,
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#all_right_unitz\">all_right_unitz</a>,
+<a href=\"#is_right_unit\">is_right_unit</a>,
+<a href=\"#has_left_unit\">has_left_unit</a>,
+<a href=\"#has_unit\">has_unit</a>"
+ >
+</table>
+
+<_routine name="has_unit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = has_unit(F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the bilateral unit of f if there is any, else 0.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"Remember that set_opertions operate on indexes, so any unit is an index as well."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+?has_unit(f)  -- prints out 1.
+-- See also: ,
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#has_left_unit\">has_left_unit</a>,
+<a href=\"#has_right_unit\">has_right_unit</a>"
+ >
+</table>
+
+<_routine name="image">
+<table border=0 cellspacing=2 cellpadding=2>
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+x2 = image(f,x1,S1,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"If x1 is in S1, returns f(x1), else errors out."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"x1 must belong to S1 for f(x1) to be computed.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f f={3,1,2,2,4,3}
+set s1,s2
+s1={"Albert","Beatrix","Conrad","Doris"} s2={13,17,19}
+object x x=image(f,"Conrad",s1,s2}
+--   x is now 17.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#direct_map\">direct_map</a>"
+ >
+</table>
+
+<_routine name="intersection">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S3 = intersection(S1, S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of elements belonging to both S1 and S2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s1={1,3,5,7} s2={-1,2,3,7,11}
+s0=intersection(s1,s2)   -- s0 is now {3,7}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#belongs_to\">belongs_to</a>"
+ >
+</table>
+
+<_routine name="is_associative">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = is_associative(F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if the identity f(f(x,y),z)=f(x,f(y,z)) always makes sense and holds, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+-- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
+?is_symmetric(f)   -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#set_operation\">set_operation</a>,
+<a href=\"#has_left_unit\">has_left_unit</a>,
+<a href=\"#has_right_unit\">has_right_unit</a>,
+<a href=\"#has_unit\">has_unit</a>"
+ >
+</table>
+
+<_routine name="is_bijective">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = is_bijective(f)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if F is one-to-one, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f f={2,3,1,1,2,5,3}
+?is_surjective(f)  -- prints out 0
+-- See also: ,, , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_surjective\">is_surjective</a>,
+<a href=\"#is_injective\">is_injective</a>,
+<a href=\"#direct_map\">direct_map</a>,
+<a href=\"#section\">section</a>"
+ >
+</table>
+
+<_routine name="is_injective">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = is_injective(f)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if no image point is hit twice or more by f, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f f={2,3,1,1,2,5,3}
+?is_injective(f)  -- prints out 0
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_surjective\">is_surjective</a>,
+<a href=\"#is_bijective\">is_bijective</a>,
+<a href=\"#reverse_map\">reverse_map</a>,
+<a href=\"#fiber_over\">fiber_over</a>"
+ >
+</table>
+
+<_routine name="is_inside">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = inside(S1,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Checks whether S1 is a subset of S2. Returns 1 if it is, else 0.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+?is_inside({3,5},s0)   -- peinrs out 1
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#subsets\">subsets</a>,
+<a href=\"#belongs_to\">belongs_to</a>,
+<a href=\"#difference\">difference</a>,
+<a href=\"#embedding\">embedding</a>,
+<a href=\"#embed_union\">embed_union</a>"
+ >
+</table>
+
+<_routine name="is_left_unit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i2 = is_left_unit(i1,F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if x acts by the identity through F, else 0."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"The function returns 1 if and only if F(x,.) is the identity.<BR>
+Remember that set_opertions operate on indexes, so any unit is an index as well.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+?is_left_unit(3,f)   -- prints out 0.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#all_left_unitz\">all_left_unitz</a>,
+<a href=\"#is_right_unit\">is_right_unit</a>,
+<a href=\"#has_unit\">has_unit</a>,
+<a href=\"#has_left_unit\">has_left_unit</a>"
+ >
+</table>
+
+<_routine name="is_right_unit">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i2 = is_right_unit(i1,F)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if x acts by the identity through F, else 0."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"The function returns 1 if and only if F(.,x) is the identity.<BR>
+Remember that set_opertions operate on indexes, so any unit is an index as well.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+?is_right_unit(3,f)   -- prints out 0.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#all_right_unitz\">all_right_unitz</a>,
+<a href=\"#is_left_unit\">is_left_unit</a>,
+<a href=\"#has_unit\">has_unit</a>,
+<a href=\"#has_right_unit\">has_right_unit</a>"
+ >
+</table>
+
+<_routine name="is_surjective">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = is_surjective(f)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if f hits every point in the target set, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f f={2,3,1,1,2,5,3}
+?is_surjective(f)  -- prints out 1
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_injective\">is_injective</a>,
+<a href=\"#is_bijective\">is_bijective</a>,
+<a href=\"#direct_map\">direct_map</a>,
+<a href=\"#section\">section</a>"
+ >
+</table>
+
+<_routine name="is_symmetric">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = is_symmetric(f)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if, for each x and y, f(y,x) is defined and equals f(x,y), else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_operatiion f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
+-- f is the addition from {0,1,2}x{0,1,2} to {0,1,2,3,4}.
+?is_symmetric(f)   -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#set_operation\">set_operation</a>,
+<a href=\"#has_left_unit\">has_left_unit</a>,
+<a href=\"#has_right_unit\">has_right_unit</a>,
+<a href=\"#has_unit\">has_unit</a>"
+ >
+</table>
+
+<_routine name="multiplex">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s3 = multiplex(s1,s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Extracts several sets of fixed indexes from a set of sequences, returns the list thus formed."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"Although the expected use is to split sequences into distinct coordinale sets, any combination is allowable. However, if some index is not valid on some element of s1, a runime error will take place."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+sequence s s s={{3,2,9,15},{3,1,9,-1},{4,2,0,7},{3,5,5,5}}
+s=multiplex(s,{1,3},{1,4,2},{2,3})
+--   s is now {
+--             {{3,5},{3,5,5},{5,5}},
+--             {{3,9},{3,-1,1},{1,9}},
+--             {{3,9},{3,15,2},{2,9}},
+--             {{4,0},{4,7,2},{2,0}}
+--            }.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#product\">product</a>,
+<a href=\"#project\">project</a>"
+ >
+</table>
+
+<_routine name="product">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S3 = product(S1,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of all pairs made of an element of S1 and an element of S2.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s1={1,3,5,7} s2={-1,3}
+s0=product(s1,s2)   -- s0 is now {{1,-1},{1,3},{3,-1},{3,3},{5,-1},{5,3},{7,-1},{7,3}}
+-- See also: , , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#product_map\">product_map</a>,
+<a href=\"#amalgamated_sum\">amalgamated_sum</a>,
+<a href=\"#fiber_product\">fiber_product</a>"
+ >
+</table>
+
+<_routine name="product_map">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f3 = product_map(f1,f2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"The set_map f3 defined by f3(x,y)={f1(x),f2(y)}."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+-- Example:
+set s s={1,3,5,7}
+set_map f f={3,1,4,1,4,4}
+set_map f1 f1=product(f,f)
+--   f1 is {11,9,12,9,3,1,4,1,15,13,16,13,3,1,4,1,16,16}.
+-- See also: ,,
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#product\">product</a>,
+<a href=\"#amalgamated_sum\">amalgamated_sum</a>,
+<a href=\"#fiber_product\">fiber_product</a>"
+ >
+</table>
+
+<_routine name="project">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s3 = project(s1,s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Extracts fixed indexes from a list of sequences, returns the list thus formed.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If any coordinate index is not valid on a sequence in s1, a runtime error will take place."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s s={{3,2,9,15},{3,1,9,-1},{4,2,0,7},{3,5,5,5}}
+s=project(s,{1,3})
+--   s is now {{3,5},{3,9},{4,0}}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#product\">product</a>,
+<a href=\"#multiplex\">multiplex</a>"
+ >
+</table>
+
+<_routine name="range">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S2 = range(f,S1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of all values taken by f over S1."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f f={3,2,5,2,4,6}
+set s={"Albert","Beatrix","Conrad","Doris","Eugene","Fabiola"}
+set s1 s1=range(f,s)
+--   s1 is now {"Beatrix",,"Conrad","Fabiola"}
+-- See also: , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#direct_map\">direct_map</a>,
+<a href=\"#image\">image</a>"
+ >
+</table>
+
+<_routine name="remove_from">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S2 = remove_from(x,S1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Forms S2 from S1 by removing x from S1 if x was in it."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+s0=remove_from(3,s)   -- s0 is now {1,5,7}
+-- See also: , ,
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#add_to\">add_to</a>,
+<a href=\"#belongs_to\">belongs_to</a>,
+<a href=\"#difference\">difference</a>"
+ >
+</table>
+
+<_routine name="restrict">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f2 = restrict(f1,S1,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Restricts f1 to the intersection of S1 and S2.
+"
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"f1 is assumed to be defined on S1."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s1 s1={1,3,5,7,9,11,13,17,19,23}}
+set_map f f=[3,7,1,4,5,2,7,1,6,2,10,7}
+set s0 s0={3,11,13,19,29}
+set_map f0 f0=restrict(f,s1,s0)
+--   f0 is now: {7,2,7,6,4,7}
+-- See also: , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#direct_map\">direct_map</a>"
+ >
+</table>
+
+<_routine name="reverse_map">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S3 = reverse_map(f,S1,s,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the smallest subset of S1 whose image by f contains the set of the elements of s that are on S2.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s1,s2
+s1={5,7,9,11} s2={13,17,19,23,29}
+sequence s0 s0={23,13,17,23}
+set_map f f={5,3,1,3,4,5}
+set s s=reverse_map(f,s1,s0,s2)
+--   s is now {9}.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#direct_map\">direct_map</a>,
+<a href=\"#fiber_over\">fiber_over</a>"
+ >
+</table>
+
+<_routine name="section">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+f2 = section(f1)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns a right, and left if possible, inverse of f1 over its range."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"f2 is such that f1(f2(y)) is y whenever y is hit by f1, and f2(f1(x))=x  always if f1 is injective."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set_map f,g f={2,3,1,1,2,5,3}
+g=section(f)
+--  g is now {3,1,2,3,5}.
+-- See also: , 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"reverse_map#\">reverse_map</a>,
+<a href=\"#is_injective\">is_injective</a>"
+ >
+</table>
+
+<_routine name="sequence_to_set">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S = sequence_to_set(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Makes a set out of a sequence by sorting  itand removing duplicate elements.
+"
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+sequence s0 s0={1,3,7,5,7,4,1}
+set s1 s1=sequence_to_set(s0)   -- s1 is now {1,3,4,5,7}
+-- See also: 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#set\">set</a>"
+ >
+</table>
+
+<_routine name="sequences_to_map">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s3 = sequences_to_map(s1,s2,i)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns a set_map which sends each element of s1 to the corresponding one in s2."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"If i is 0, a set_map which maps s1 to s2, between the smallest possible sets.
+If i is not zero, also returns the sets derived from the input sequences.<BR>
+Elements in excess in s1 or s2 are discarded. If an element is repeated in s1, the mapping of the last occurrence is retained.
+"
+ >
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<eucode>
+sequence s0,s1
+s0={2,3,4,1,4} s1={"aba","aac",3,"def"}
+set_map f f=sequences_to_map(s0,s1,0)
+--     As a sequence, f is {3,2,1,4,4,4}
+</eucode>
+<_2clist
+  name="Example 1:"
+  description=""
+ >
+<eucode>
+sequence s0,s1
+s0={2,3,4,1,4} s1={"aba","aac",3,"def"}
+sequence s f=sequences_to_map(s0,s1,1)
+-- s is {{3,2,1,4,4,4},{1,2,3,4},{3,"aac","aba","def"}}
+</eucode>
+-- See also: , , 
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#define_map\">define_map</a>,
+<a href=\"#sequence_to_set\">sequence_to_set</a>,
+<a href=\"#direct_map\">direct_map</a>"
+ >
+</table>
+
+<_routine name="set">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = set(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Tests whether s is strictly increasing, in which case it's deemed a set. This is a global type."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"The phrase &dquot;strictly increasing&dquot; refers to the ordering internally used by Euphoria: atoms ae compared as reals; sequences are compared lexicographically; atoms are always less than sequences."
+ >
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#sequence_to_set\">sequence_to_set</a>"
+ >
+</table>
+
+<_routine name="set_map">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = set_map(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if s is a valid set_map descriptor, else 0."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"s is a valid set_map descriptor if and only if s[$-1]=length(s)-2 and s[1..$-2] is made of integers between 1 and s[$].<BR>
+Actually, what this library calls a set_map is a class of maps, as the elements of the input
+sequence, except for the last two, are ordinals rather than set elements."
+ >
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#define_map\">define_map</a>"
+ >
+</table>
+
+<_routine name="is_surjective">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = is_surjective(f)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+""
+ >
+ <_2clist
+  name="Comments:"
+  description=
+""
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#\"></a>,
+<a href=\"#\"></a>,
+<a href=\"#\"></a>,
+<a href=\"#\"></a>"
+ >
+</table>
+
+<_routine name="set_operation">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+i = set_operation(s)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns 1 if the data represents a set_map from the product of two sets to a third one."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"A set_operation from E x G to H is defined as a sequence of cardinal(E) mappings from G to H, plus the cardinals of the three sets. If the input data is consistent with this description,
+1 is returned, else 0."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+sequence s
+s={{{2,3},{3,1},{1,2},{2,3},{3,1}},{5,2,3}
+--  s represents the addition modulo 3 from {0,1,2,3,4} x {1,2} to {0,1,2}
+?set_operation(s)   -- prints out 1.
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_associative\">is_associative</a>,
+<a href=\"#is_symmetric\">is_symmetric</a>,
+<a href=\"#has_unit\">has_unit</a>,
+<a href=\"#distributes_over\">distributes_over</a>"
+ >
+</table>
+
+<_routine name="subsets">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+s = subsets(S)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the list of all subsets of the input set."
+ >
+ <_2clist
+  name="Comments:"
+  description=
+"S must not have more than 29 elements, as the length of the output sequence is
+power(2,length(S)), which rapidly grows out of integer range. The order in which the subsets are returned is implementation dependent."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0 s0={1,3,5,7}
+s0=subsets(s0)   -- s0 is now:
+--   {{},{1},{3},{5},{7},{1,3},{1,5},{1,7},{3,5},{3,7},{5,7},{1,3,5},{1,3,7},{1,5,7},{3,5,7},{1,3,5,7}}
+-- See also: 
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_inside\">is_inside</a>"
+ >
+</table>
+
+<_routine name="union">
+<table border=0 cellspacing=2 cellpadding=2>
+
+
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
+S3 = union(S1,S2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Returns the set of elements belonging to s1 or s2."
+ >
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+set s0,s1,s2
+s1={1,3,5,7} s2={-1,2,3,7,11}
+s0=union(s1,s2)   -- s0 is now {-1,1,2,3,5,7,11}.
+-- See also: , , belongs_to
+</eucode>
+ <_2clist
+   name = "See Also:"
+   description="<a href=\"#is_inside\">is_inside</a>,
+<a href=\"#subsets\">subsets</a>,
+<a href=\"#belongs_to\">belongs_to</a>"
+ >
+</table>
+
+</body>
+</html>

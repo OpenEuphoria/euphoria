@@ -2,7 +2,6 @@
 --
 -- Euphoria 3.2
 -- Test functions and procedures shipped with Euphoria
-
 include unittest.e
 
 set_test_verbosity(TEST_SHOW_FAILED_ONLY)
@@ -35,11 +34,12 @@ include t_os.e
 include t_regex.e
 include t_search.e
 include t_sequence.e
+include t_sets.e
 include t_sort.e
-include t_stack.e
+include t_stack.e  
 include t_types.e
 include t_unicode.e
 include t_wildcard.e
-
+           
 test_summary()
 

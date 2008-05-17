@@ -54,7 +54,7 @@ procedure test_failed(sequence name, object a, object b)
 		pretty_print(2, b, {2})
 		puts(2, "\n")
 	end if
-		
+
 	testsFailed += 1
 end procedure
 
