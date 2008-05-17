@@ -8,13 +8,6 @@ include get.e
 include misc.e
 include file.e
 
-integer SLASH
-if platform() = LINUX then
-    SLASH = '/'
-else
-    SLASH = '\\'
-end if
-
 constant single_tags = { "br", "hr", "br/", "hr/" }
 
 constant files = {
@@ -27,7 +20,6 @@ constant files = {
     "c.htx",
     "cgi.htx",
     "database.htx",
-    "lib_eds.htx",
     "e2c.htx",
     "trouble.htx",
     "relnotes40.htx",
@@ -277,7 +269,7 @@ procedure init_dir()
 		app_dir = ".."
 	end if
 	
-	app_dir &= SLASH
+	app_dir &= PATHSEP
 	app_dir = app_dir
 end procedure
 
@@ -300,13 +292,13 @@ procedure generate(sequence in_name, sequence format, sequence dest)
 	if find('_', out_name) and equal(format, "PLAIN") then
 	
 	elsif match("readme.", out_name) then
-		out_name = app_dir & SLASH & out_name
+		out_name = app_dir & PATHSEP & out_name
 	elsif equal("lib_0.htm", out_name) then
-		out_name = app_dir & SLASH & "html" & SLASH & "library.htm"
+		out_name = app_dir & PATHSEP & "html" & PATHSEP & "library.htm"
 	elsif equal("refman_0.htm", out_name) then
-		out_name = app_dir & SLASH & "html" & SLASH & "refman.htm"
+		out_name = app_dir & PATHSEP & "html" & PATHSEP & "refman.htm"
 	else    
-		out_name = app_dir & dest & SLASH & out_name
+		out_name = app_dir & dest & PATHSEP & out_name
 	end if
 	
 	out_file = open(out_name, "w")
@@ -343,34 +335,34 @@ procedure toc_and_menu()
 	"<h2 align=\"center\">Euphoria v4.0</h2>"}, NL)
 	
 	for i = 1 to length(sections) do
-	s = secnum_seq(sections[i][2])
-	
-	-- Only output top 3 levels for TOC
-	if length(s) <= 3 then
-		if length(s) = 1 then
-		puts(toc_file, "<strong><font size=+1>")
-		puts(menu_file, "<div class=\"title\">")
-		elsif length(s) = 2 then
-		puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;")
-		puts(menu_file, "<div class=\"one\">&#187; ")
-		elsif length(s) = 3 then
-		puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>")
+		s = secnum_seq(sections[i][2])
+		
+		-- Only output top 3 levels for TOC
+		if length(s) <= 3 then
+			if length(s) = 1 then
+				puts(toc_file, "<strong><font size=+1>")
+				puts(menu_file, "<div class=\"title\">")
+			elsif length(s) = 2 then
+				puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;")
+				puts(menu_file, "<div class=\"one\">&#187; ")
+			elsif length(s) = 3 then
+				puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>")
+			end if
+			printf(toc_file, "<a href=\"%s\">%s</a><br />", 
+				{sections[i][1][1..$-3] & "htm", join(s, ".") & ". " & sections[i][3]})
+			if length(s) <= 2 then
+				printf(menu_file, "<a target=\"page\" href=\"%s\">%s</a><br />", 
+					{sections[i][1][1..$-3] & "htm", sections[i][3]})
+			end if
+			if length(s) = 1 then
+				puts(toc_file, "</font></strong>")
+				puts(menu_file, "</div>")
+			elsif length(s) = 2 then
+				puts(menu_file, "</div>")
+			elsif length(s) = 3 then
+				puts(toc_file, "</i>")
+			end if
 		end if
-		printf(toc_file, "<a href=\"%s\">%s</a><br />", 
-		{sections[i][1][1..$-3] & "htm", join(s, ".") & ". " & sections[i][3]})
-		if length(s) <= 2 then
-		printf(menu_file, "<a target=\"page\" href=\"%s\">%s</a><br />", 
-			{sections[i][1][1..$-3] & "htm", sections[i][3]})
-		end if
-		if length(s) = 1 then
-		puts(toc_file, "</font></strong>")
-		puts(menu_file, "</div>")
-		elsif length(s) = 2 then
-		puts(menu_file, "</div>")
-		elsif length(s) = 3 then
-		puts(toc_file, "</i>")
-		end if
-	end if
 	end for
 	
 	puts(toc_file, "</body></html>\n")
@@ -379,8 +371,18 @@ procedure toc_and_menu()
 	close(menu_file)
 end procedure
 
+procedure scan_includes()
+	sequence files
+
+	files = dir("../include/*.e")
+	for a = 1 to length(files) do
+		process_include("../include/" & files[a][1])
+	end for
+end procedure
+
 procedure main()
 	init_dir()
+	scan_includes()
 	combined_file = open("../html/combined.htm", "w")
 	for f = 1 to length(files) do
 		generate(files[f], "HTML", "html")
@@ -388,4 +390,6 @@ procedure main()
 	close(combined_file)
 	toc_and_menu()
 end procedure
+
 main()
+

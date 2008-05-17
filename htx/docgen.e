@@ -4,11 +4,11 @@
 include machine.e
 include get.e
 include wildcard.e
+include map.e as m
 
 global sequence current_file
-current_file = ""
-
 global integer current_line
+current_file = ""
 current_line = 0
 
 global constant SCREEN = 1
@@ -17,9 +17,13 @@ global sequence out_type
 global integer in_file, out_file, combined_file, file_header
 file_header = 0
 
+-- .htx and .e files are pre-processed and read into this global
+-- functions sequence. There, they are sorted and categorized.
+global sequence functions
+functions = {}
+
 global constant FILE_NAME = 1, SECT_NUM = 2, SECTION_NAME = 3
 global sequence sec_nums, sections
-
 sec_nums = {0,0,0,0,0,0} -- h1-h6
 sections = {}
 
@@ -103,5 +107,90 @@ global procedure write(object text)
 	if file_header = 0 then
 		puts(combined_file, text)
 	end if
+end procedure
+
+global procedure process_include(sequence filename)
+	sequence lines, line
+	object cat_name, sec_name, sec_data, func
+	integer parse
+
+	parse = 0 -- Are we reading a comment that should be parsed?
+	cat_name = 0
+	sec_name = 0
+	sec_data = ""
+	func = 0
+
+	lines = read_lines(filename)
+	for i = 1 to length(lines) do
+		line = lines[i]
+		if match("--**", line) then
+			if parse then 
+				parse = 0 
+				if sequence(sec_name) and length(sec_data) > 0 then
+					func = m:put(func, sec_name, sec_data)
+					if equal(sec_name, "category") then
+						cat_name = sec_data
+					end if
+				end if
+				if map(func) and m:has(func, "signature") then
+					functions = append(functions, func)
+					func = 0
+				end if
+			else
+				parse = 1
+				func = m:new()
+				sec_name = "description"
+				sec_data = ""
+				if sequence(cat_name) then
+					func = m:put(func, "category", cat_name)
+				end if
+			end if
+		elsif parse and match("--", line) then
+			-- Trim in two calls in order to keep comments w/in examples
+			-- contained in the comments. i.e.
+			-- Example:
+			--   a = 10 * 2
+			--   -- a is 20
+
+			line = trim(line, "-")
+			line = trim(line, " \t")
+
+			if length(line) = 0 then
+				sec_data &= "\n"
+			elsif line[$] = ':' then
+				-- a new section
+				if sequence(sec_name) and length(sec_data) > 0 then
+					if equal(sec_name, "category") then
+						cat_name = sec_data
+					end if
+					-- save old section
+					func = m:put(func, sec_name, sec_data)
+				end if
+
+				sec_name = lower(line[1..$-1])
+				sec_data = ""
+			else
+				sec_data &= line
+			end if
+		elsif parse and (match("global function", line) 
+			             or match("global procedure", line))
+		then
+			sec_name = "signature"
+			sec_data = trim(line, 0)
+			if sec_data[$] = ')' then
+				func = m:put(func, sec_name, sec_data)
+				sec_name = 0
+				sec_data = ""
+			end if
+		elsif parse and equal(sec_name, "signature") then
+			-- Function signature did not fit on one line, append
+			sec_data &= ' ' & trim(line, 0)
+			if sec_data[$] = ')' then
+				func = m:put(func, sec_name, sec_data)
+				sec_name = 0
+				sec_data = ""
+			end if
+		end if
+	end for
 end procedure
 

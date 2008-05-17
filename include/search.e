@@ -3,10 +3,64 @@
 -- Sequence routines
 --
 --****
--- Category: search
+-- Category: 
+--   search
+--
+-- File:
+--   lib_srch
+--
+-- Title:
+--   Searching and Sorting 
 --****
 
 include machine.e
+
+--
+-- Internal Function Documentation
+--
+
+--**
+-- Signature:
+--   global function compare(object x1, object x2)
+--
+-- Description:
+--   Returns 0 if objects are identical, 1 if x1 is greater, -1 if x1 is 
+--   less than.
+--
+-- Comments:
+--   Atoms are considered to be less than sequences. Sequences are compared
+--   alphabetically starting with the first element until a difference is
+--   found.
+--
+-- Example 1:
+--   x = compare({1,2,{3,{4}},5}, {2-1,1+1,{3,{4}},6-1})
+--   -- identical, x is 0
+-- 
+-- Example 2:
+--   if compare("ABC", "ABCD") < 0 then   -- -1
+--       -- will be true: ABC is "less" because it is shorter
+--   end if
+--
+-- Example 3:
+--   x = compare('a', "a")
+--   -- x will be -1 because 'a' is an atom
+--   -- while "a" is a sequence
+--
+-- Example 4:
+--   x = compare('a', "a")
+--   -- x will be -1 because 'a' is an atom
+--   -- while "a" is a sequence
+--
+-- See Also:
+--   search:equal, 
+--   <a href="refman_2.htm#23">relational operators</a>,
+--   <a href="refman_2.htm#26">operations on sequences</a>
+--
+--**
+
+--
+-- Functions
+--
 
 --**
 -- Find any element from s1 in s2 starting at position i2 and return
@@ -20,10 +74,11 @@ include machine.e
 --   location = find_any_from("aeiou", "John Smith", 3)
 --   -- location is 8
 --
--- See Also: search:find_any
---**
+-- See Also: 
+--   search:find_any
 
-global function find_any_from(sequence needles, sequence haystack, integer start)
+global function find_any_from(sequence needles, sequence haystack, 
+	integer start)
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
 			return i
@@ -32,9 +87,28 @@ global function find_any_from(sequence needles, sequence haystack, integer start
 	return 0
 end function
 
+--**
+
+--**
+-- Find any element from needles in haystack and return the smallest position of
+-- haystack at which anything is found or 0 if nothing is found.
+--
+-- Comments:
+--    This function may be applied to a string sequence or a complex sequence.
+--
+-- Example 1:
+--   location = find_any("aeiou", "John Doe")
+--   -- location is 2
+--
+-- See Also:
+--   search:find_any_from
+--
+
 global function find_any(sequence needles, sequence haystack)
 	return find_any_from(needles, haystack, 1)
 end function
+
+--**
 
 global function find_all(object x, sequence source, integer from)
 	sequence ret
