@@ -368,7 +368,7 @@ global function write_file(object f, sequence data)
 	integer fn
 
 	if sequence(f) then
-		fn = open(f, "rb")
+		fn = open(f, "wb")
 	else
 		fn = f
 	end if

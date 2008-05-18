@@ -36,7 +36,7 @@ close(tmp)
 test_true("write_file() filename", write_file("fileb.txt", "Hello World"))
 test_equal("write_file() read back", "Hello World", read_file("fileb.txt"))
 
-test_true("write_lines() filename", write_lines("fileb.txt", {"Goodbye", "World"}, NL))
+test_true("write_lines() filename", write_lines("fileb.txt", {"Goodbye", "World"}, 0))
 test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
 
 tmp = open("fileb.txt", "wb")
@@ -45,34 +45,36 @@ close(tmp)
 test_equal("write_file() read back", "Hello World", read_file("fileb.txt"))
 
 tmp = open("fileb.txt", "wb")
-test_true("write_lines() file handle", write_lines(tmp, {"Goodbye", "World"}, NL))
+test_true("write_lines() file handle", write_lines(tmp, {"Goodbye", "World"}, 0))
 close(tmp)
 test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
 
-sequence fullname, pname, fname, fext, nl
+sequence fullname, pname, fname, fext, nl, driveid
 integer sep
 
 if platform() = DOS32 or platform() = WIN32 then
     fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
-    pname = "C:\\EUPHORIA\\DOCS"
+    pname = "\\EUPHORIA\\DOCS"
     sep = '\\'
     nl = "\r\n"
+    driveid = "C"
 else
     fullname = "/opt/euphoria/docs/readme.txt"
     pname = "/opt/euphoria/docs"
     sep = '/'
     nl = "\n"
+    driveid = ""
 end if
 
 fname = "readme"
 fext = "txt"
 
-test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext},
+test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext, driveid},
     pathinfo(fullname))
-test_equal("pathinfo() no extension", {pname, fname, fname, ""},
+test_equal("pathinfo() no extension", {pname, fname, fname, "", ""},
     pathinfo(pname & PATHSEP & fname))
-test_equal("pathinfo() no dir", {"", fname & '.' & fext, fname, fext}, pathinfo(fname & "." & fext))
-test_equal("pathinfo() no dir, no extension", {"", fname, fname, ""}, pathinfo("readme"))
+test_equal("pathinfo() no dir", {"", fname & '.' & fext, fname, fext, ""}, pathinfo(fname & "." & fext))
+test_equal("pathinfo() no dir, no extension", {"", fname, fname, "", ""}, pathinfo("readme"))
 
 test_equal("dirname() full path", pname, dirname(fullname))
 test_equal("dirname() filename only", "", dirname(fname & "." & fext))
