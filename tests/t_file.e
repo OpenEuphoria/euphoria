@@ -2,7 +2,6 @@ include file.e
 include unittest.e
 
 set_test_module_name("file.e")
-set_test_verbosity(3)
 -- TODO: add more tests
 
 object data, tmp
