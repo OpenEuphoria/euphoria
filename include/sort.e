@@ -1,6 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Sorting
+include wildcard.e
 
 --**
 -- Sort the elements of a sequence into ascending order.

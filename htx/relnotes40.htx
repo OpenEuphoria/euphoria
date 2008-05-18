@@ -82,6 +82,13 @@
      <b>match_all()</b>, <b>find_replace()</b>, <b>vslice()</b>,
      <b>rfind()</b>, <b>rfind_from()</b>, <b>rmatch()</b>,
      <b>rmatch_from()</b>.</li>
+    <li>
+     <i>by Derek Parnell</i>, New routines in <b>sort.e</b>:
+     <b>sort_reverse()</b>, <b>sort_user</b>, <b>sort_columns</b>.
+     </li>
+    <li>
+     <i>by Derek Parnell</i>, Performance improvement when sorting large sequences.
+     </li>
 	<li>
      New routines in <b>file.e</b>:
      <b>read_lines()</b>, <b>read_file()</b>, <b>write_lines()</b>,
@@ -146,11 +153,11 @@
     c.k.lester</li>
 
 <li>
-    Condition compiling keywords (ifdef, end ifdef) and with define=xyz to insert/omit code in interpreter IL code and
-    in translated C code. Implemented by Jeremy Cowgar.</li>
+    Condition compiling keywords (<b>ifdef</b>, <b>end ifdef</b>) and with <b>define=xyz</b>
+    to insert/omit code in interpreter IL code and in translated C code. Implemented by Jeremy Cowgar.</li>
 
 <li>
-	New enum keyword that allows for parse time sequential constant creation. Implemented by Jeremy Cowgar.</li>
+	New enum keyword that allows for <i>parse time</i> sequential constant creation. Implemented by Jeremy Cowgar.</li>
 </ul>
 
 </doc>

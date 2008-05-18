@@ -9,7 +9,7 @@ include wildcard.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
-		 M_DIR   = 22,
+		 M_DIR	 = 22,
 		 M_CURRENT_DIR = 23,
 		 M_ALLOW_BREAK = 42,
 		 M_CHECK_BREAK = 43,
@@ -110,8 +110,8 @@ global function dir(sequence name)
 -- returns directory information, given the name
 -- of a file or directory. Format returned is:
 -- {
---  {"name1", attributes, size, year, month, day, hour, minute, second},
---  {"name2", ...                                                     },
+--	{"name1", attributes, size, year, month, day, hour, minute, second},
+--	{"name2", ...													  },
 -- }
 	object dir_data, data, the_name, the_dir
 	integer idx
@@ -211,7 +211,7 @@ global integer my_dir
 my_dir = DEFAULT  -- it's better not to use routine_id() here,
 				  -- or else users will have to bind with clear routine names
 
-global function walk_dir(sequence path_name, integer your_function, 
+global function walk_dir(sequence path_name, object your_function, 
 						 integer scan_subdirs)
 -- Generalized Directory Walker
 -- Walk through a directory and (optionally) its subdirectories,
@@ -222,7 +222,14 @@ global function walk_dir(sequence path_name, integer your_function,
 -- or an error code (greater than 0) to quit, or it can return
 -- any sequence or atom other than 0 as a useful diagnostic value.
 	object d, abort_now
+	object orig_func
+	object user_data
 	
+	orig_func = your_function
+	if sequence(your_function) then
+		user_data = your_function[2]
+		your_function = your_function[1]
+	end if
 	-- get the full directory information
 	if my_dir = DEFAULT then
 		d = default_dir(path_name)
@@ -243,13 +250,17 @@ global function walk_dir(sequence path_name, integer your_function,
 		if find('d', d[i][D_ATTRIBUTES]) then
 			-- a directory
 			if not find(d[i][D_NAME], {".", ".."}) then
-				abort_now = call_func(your_function, {path_name, d[i]})
+				if atom(orig_func) then
+					abort_now = call_func(your_function, {path_name, d[i]})
+				else
+					abort_now = call_func(your_function, {path_name, d[i], user_data})
+				end if
 				if not equal(abort_now, 0) then
 					return abort_now
 				end if
 				if scan_subdirs then
 					abort_now = walk_dir(path_name & PATHSEP & d[i][D_NAME],
-										 your_function, scan_subdirs)
+										 orig_func, scan_subdirs)
 					
 					if not equal(abort_now, 0) and 
 					   not equal(abort_now, W_BAD_PATH) then
@@ -260,7 +271,11 @@ global function walk_dir(sequence path_name, integer your_function,
 			end if
 		else
 			-- a file
-			abort_now = call_func(your_function, {path_name, d[i]})
+			if atom(orig_func) then
+				abort_now = call_func(your_function, {path_name, d[i]})
+			else
+				abort_now = call_func(your_function, {path_name, d[i], user_data})
+			end if
 			if not equal(abort_now, 0) then
 				return abort_now
 			end if
@@ -271,49 +286,46 @@ end function
 
 global function read_lines(object f)
 	object fn, ret, y
-		ret = {}
-		
-		if sequence(f) then
-				fn = open(f, "r")
-		else
-				fn = f
+	if sequence(f) then
+			fn = open(f, "r")
+	else
+			fn = f
+	end if
+	if fn < 0 then return -1 end if
+	
+	ret = {}
+	y = gets(fn)
+	while sequence(y) do
+		if y[$] = '\n' then
+			y = y[1..$-1]
 		end if
-		if fn < 0 then return -1 end if
-		
-		while 1 do
-				y = gets(fn)
-				if atom(y) then
-						exit
-				end if
-				if length(y) and y[length(y)] = '\n' then
-						y = y[1..length(y)-1]
-				end if
-				if length(y) and y[length(y)] = '\r' then
-						y = y[1..length(y)-1]
-				end if
 		ret = append(ret, y)
-		end while
-		
-		if sequence(f) then
-				close(fn)
-		end if
-		return ret
+		y = gets(fn)
+	end while
+	
+	if sequence(f) then
+			close(fn)
+	end if
+	return ret
 end function
 
-global function write_lines(object f, sequence lines, sequence nl)
+global function write_lines(object f, sequence lines, integer add)
 	object fn
 
-	if atom(f) then
-		fn = f
-	else
-		fn = open(f, "wb")
-		if fn = -1 then
-			return 0
+	if sequence(f) then
+		if add != 0 then
+			fn = open(f, "a")			
+		else
+			fn = open(f, "w")
 		end if
+	else
+		fn = f
 	end if
+	if fn < 0 then return -1 end if
 
 	for i = 1 to length(lines) do
-		puts(fn, lines[i] & nl)
+		puts(fn, lines[i])
+		puts(fn, '\n')
 	end for
 
 	if sequence(f) then
@@ -324,43 +336,43 @@ global function write_lines(object f, sequence lines, sequence nl)
 end function
 
 global function read_file(object f)
-	object fn, ret, y
-		ret = {}
-		
-		if sequence(f) then
-				fn = open(f, "rb")
-		else
-				fn = f
-		end if
-		if fn < 0 then return -1 end if
-		
-		while 1 do
-				y = gets(fn)
-				if atom(y) then
-						exit
-				end if
+	integer fn
+	integer len
+	sequence ret
+	integer temp
 
-				ret &= y
-		end while
-		
-		if sequence(f) then
-				close(fn)
-		end if
+	if sequence(f) then
+		fn = open(f, "rb")
+	else
+		fn = f
+	end if
+	if fn < 0 then return -1 end if
+	
+	temp = seek(fn, -1) 	
+	len = where(fn)
+	temp = seek(fn, 0)
 
-		return ret
+	ret = repeat(0, len)	
+	for i = 1 to len do
+		ret[i] = getc(fn)
+	end for
+		
+	if sequence(f) then
+			close(fn)
+	end if
+
+	return ret
 end function
 
 global function write_file(object f, sequence data)
 	integer fn
 
-	if atom(f) then
-		fn = f
+	if sequence(f) then
+		fn = open(f, "rb")
 	else
-		fn = open(f, "wb")
-		if fn = -1 then
-			return 0
-		end if
+		fn = f
 	end if
+	if fn < 0 then return -1 end if
 	
 	puts(fn, data)
 
@@ -373,12 +385,13 @@ end function
 
 global function pathinfo(sequence path)
 	integer slash, period, ch
-	sequence dir_name, file_name, file_ext, file_full
+	sequence dir_name, file_name, file_ext, file_full, drive_id
 
 	dir_name  = ""
 	file_name = ""
 	file_ext  = ""
 	file_full = ""
+	drive_id  = ""
 
 	slash = 0
 	period = 0
@@ -395,6 +408,13 @@ global function pathinfo(sequence path)
 
 	if slash > 0 then
 		dir_name = path[1..slash-1]
+		if platform() != LINUX then
+			ch = find(':', dir_name)
+			if ch != 0 then
+				drive_id = dir_name[1..ch-1]
+				dir_name = dir_name[ch+1..$]
+			end if
+		end if
 	else
 		slash = 0
 	end if
@@ -407,7 +427,7 @@ global function pathinfo(sequence path)
 		file_full = file_name
 	end if
 
-	return {dir_name, file_full, file_name, file_ext}
+	return {dir_name, file_full, file_name, file_ext, drive_id}
 end function
 
 global function dirname(sequence path)
@@ -424,8 +444,22 @@ global function filename(sequence path)
 	return data[2]
 end function
 
+global function filebase(sequence path)
+	sequence data
+
+	data = pathinfo(path)
+
+	return data[3]
+end function
+
 global function fileext(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[4]
+end function
+
+global function driveid(sequence path)
+	sequence data
+	data = pathinfo(path)
+	return data[5]
 end function
