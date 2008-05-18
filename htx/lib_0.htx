@@ -971,6 +971,12 @@
 >
 
 <_3clist
+  href="lib_file.htm#append_lines"
+  name="write_lines"
+  description="apend all lines from a sequence to a named file"
+>
+
+<_3clist
   href="lib_file.htm#print"
   name="print"
   description="<a name=print></a>print a Euphoria

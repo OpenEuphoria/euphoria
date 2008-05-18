@@ -1831,6 +1831,7 @@ close(fh)
 <_2clist
   name="See Also:"
   description="<a href=\"lib_file.htm#write_lines\">write_lines</a>,
+<a href=\"lib_file.htm#append_lines\">append_lines</a>,
 <a href=\"lib_file.htm#read_file\">read_file</a>,
 <a href=\"lib_file.htm#open\">open</a>"
  >
@@ -2381,6 +2382,7 @@ end if
   description="<a href=\"lib_file.htm#read_file\">read_file</a>,
 <a href=\"lib_file.htm#read_lines\">read_lines</a>,
 <a href=\"lib_file.htm#write_lines\">write_lines</a>"
+<a href=\"lib_file.htm#append_lines\">append_lines</a>"
  >
 </table>
 
@@ -2396,7 +2398,7 @@ i = write_lines(x, s)
  <_2clist
   name="Description:"
   description=
-"Write lines contained in s to file named x or file handle x. Returns 1 on success, 0 on failure."
+"Write lines contained in s to file named x or file handle x. Returns 1 on success, -1 on failure."
  >
 <_2clist
   name="Comments:"
@@ -2411,7 +2413,7 @@ file name, it is opened, written to and then closed."
   description=""
  >
 <eucode>
-if write_lines("data.txt", {"This is important data", "Goodybe"}, NL) = 0 then
+if write_lines("data.txt", {"This is important data", "Goodybe"}) != -1 then
     puts(1, "Failed to write data\n")
 end if
 </eucode>
@@ -2425,6 +2427,43 @@ end if
  >
 </table>
 
+<_routine name="append_lines">
+<table border=0 cellspacing=2 cellpadding=2>
+ <_2clist
+  name="Syntax:"
+  description="<font face = \"Arial, Helvetica\">include file.e<BR>
+i = append_lines(s1, s2)
+</font>"
+ >
+ <_2clist
+  name="Description:"
+  description=
+"Append lines contained in s2 to file named s1. Returns 1 on success, -1 on failure."
+ >
+<_2clist
+  name="Comments:"
+  description=
+"s1 is a filename.<P>
+It is opened, written to and then closed."
+>
+<_2clist
+  name="Example:"
+  description=""
+ >
+<eucode>
+if append_lines("data.txt", {"This is important data", "Goodybe"}) != -1 then
+    puts(1, "Failed to append data\n")
+end if
+</eucode>
+
+<_2clist
+  name="See Also:"
+  description="<a href=\"lib_file.htm#read_file\">read_file</a>,
+<a href=\"lib_file.htm#read_lines\">read_lines</a>,
+<a href=\"lib_file.htm#write_file\">write_file</a>,
+<a href=\"lib_file.htm#NL\">NL</a>"
+ >
+</table>
 
 </body>
 </html>

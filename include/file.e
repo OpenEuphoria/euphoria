@@ -309,15 +309,11 @@ global function read_lines(object f)
 	return ret
 end function
 
-global function write_lines(object f, sequence lines, integer add)
+global function write_lines(object f, sequence lines)
 	object fn
 
 	if sequence(f) then
-		if add != 0 then
-			fn = open(f, "a")			
-		else
-			fn = open(f, "w")
-		end if
+    	fn = open(f, "w")
 	else
 		fn = f
 	end if
@@ -331,6 +327,22 @@ global function write_lines(object f, sequence lines, integer add)
 	if sequence(f) then
 		close(fn)
 	end if
+
+	return 1
+end function
+
+global function append_lines(sequence f, sequence lines)
+	object fn
+
+  	fn = open(f, "a")
+	if fn < 0 then return -1 end if
+
+	for i = 1 to length(lines) do
+		puts(fn, lines[i])
+		puts(fn, '\n')
+	end for
+
+	close(fn)
 
 	return 1
 end function

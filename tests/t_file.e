@@ -2,7 +2,7 @@ include file.e
 include unittest.e
 
 set_test_module_name("file.e")
-
+set_test_verbosity(3)
 -- TODO: add more tests
 
 object data, tmp
@@ -33,21 +33,26 @@ test_equal("read_file() #2", "alter this file", data[51..65])
 test_equal("where() #2", 253, where(tmp))
 close(tmp)
 
-test_true("write_file() filename", write_file("fileb.txt", "Hello World"))
+test_equal("write_file() filename", 1, write_file("fileb.txt", "Hello World"))
 test_equal("write_file() read back", "Hello World", read_file("fileb.txt"))
 
-test_true("write_lines() filename", write_lines("fileb.txt", {"Goodbye", "World"}, 0))
+test_equal("write_lines() filename", 1, write_lines("fileb.txt", {"Goodbye", "World"}))
 test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
 
 tmp = open("fileb.txt", "wb")
-test_true("write_file() file handle", write_file(tmp, "Hello World"))
+test_equal("write_file() file handle", 1, write_file(tmp, "Hello World"))
 close(tmp)
 test_equal("write_file() read back", "Hello World", read_file("fileb.txt"))
 
 tmp = open("fileb.txt", "wb")
-test_true("write_lines() file handle", write_lines(tmp, {"Goodbye", "World"}, 0))
+test_equal("write_lines() file handle", 1, write_lines(tmp, {"Goodbye", "World"}))
 close(tmp)
 test_equal("write_file() read back", {"Goodbye", "World"}, read_lines("fileb.txt"))
+
+test_equal("write_lines() filename #2", 1, write_lines("fileb.txt", {"Hello World"}))
+test_equal("append_lines() ", 1, append_lines("fileb.txt", {"I'm back"}))
+test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("fileb.txt"))
+
 
 sequence fullname, pname, fname, fext, nl, driveid
 integer sep

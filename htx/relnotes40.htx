@@ -91,7 +91,7 @@
      </li>
 	<li>
      New routines in <b>file.e</b>:
-     <b>read_lines()</b>, <b>read_file()</b>, <b>write_lines()</b>,
+     <b>read_lines()</b>, <b>read_file()</b>, <b>write_lines()</b>, <b>append_lines</b>,
      <b>write_file()</b>, <b>pathinfo()</b>, <b>dirname()</b>, <b>filename()</b>,
      <b>fileext()</b> and Global Constants <b>PATHSEP</b> and <b>NL</b>.</li>
 	<li>

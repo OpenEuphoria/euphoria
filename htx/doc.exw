@@ -332,7 +332,7 @@ procedure toc_and_menu()
 	"div.two { margin-top: 2px; padding-top: 2px; padding-left: 20px; }",
 	"</style></head>",
 	"<body>",
-	"<h2 align=\"center\">Euphoria v4.0</h2>"}, NL)
+	"<h2 align=\"center\">Euphoria v4.0</h2>"})
 	
 	for i = 1 to length(sections) do
 		s = secnum_seq(sections[i][2])
