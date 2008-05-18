@@ -174,3 +174,18 @@ test_equal("sort_user() mixed",
                     sort_user( routine_id("rsu"), {"ABa",3, "", 2.477, {-5}, {1,{2,3},4.5}}, 1)
           )
 
+-----  sort_columns() ------
+test_equal("sort_columns() empty sequence",
+                    {},
+                    sort_columns({}, {})
+           )
+           
+test_equal("sort_columns() single item sequence",
+                    {{1,2,3}},
+                    sort_columns({{1,2,3}}, {2,-3})
+           )           
+           
+test_equal("sort_columns() single item sequence",
+                    {{1,2,4}, {1,2,3}, {1,2,1}, {5,3,4}, {1,3,3}},
+                    sort_columns({{1,2,3}, {1,2,4}, {1,2,1}, {1,3,3}, {5,3,4}}, {2,-3})
+           )                      
