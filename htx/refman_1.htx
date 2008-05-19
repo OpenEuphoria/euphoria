@@ -1,8 +1,10 @@
 <doc title="Euphoria Reference Manual Part I - Section 1">
 
-<h1>Core Language</h1>
+<h1>Euphoria Reference Manual Part I - Section 1</h1>
 
-<h2>Introduction</h2>
+<h2>Core Language</h2>
+
+<h3>Introduction</h3>
 
 <p><strong>Euphoria</strong> is a programming language with the following advantages over conventional languages:</p>
 
@@ -79,7 +81,7 @@
 
 
 
-<h2>Example Program</h2>
+<h3>Example Program</h3>
 
 <p>The following is an example of a complete Euphoria program.</p>
 
@@ -159,7 +161,7 @@
 
 
 
-<h2>Installation</h2>
+<h3>Installation</h3>
 
 <p>
  To install Euphoria on your machine, first read the file
@@ -377,7 +379,7 @@ program.</p>
  search path. The environment variable EUDIR should be set to the main
  Euphoria directory, e.g. <path>c:\euphoria</path>.</p>
 
-<h2>Running under Windows</h2>
+<h3>Running under Windows</h3>
 
 <p>You can run Euphoria programs directly from the Windows environment, or from
  a DOS shell that you have opened from Windows. By "associating" <b>.ex</b>
@@ -389,7 +391,7 @@ program.</p>
  Euphoria programs active in different windows. If you turn your program
  into a <b>.exe</b> file, you can simply double-click on it to run it.</p>
 
-<h2>Use of a Swap File</h2>
+<h3>Use of a Swap File</h3>
 
 <p>
  If you run a Euphoria program under Linux/FreeBSD or Windows (or in a DOS shell under
@@ -410,7 +412,7 @@ program.</p>
 
 
 
-<h2>Editing a Program</h2>
+<h3>Editing a Program</h3>
 
 <p>
  You can use any text editor to edit a Euphoria program. However, Euphoria
@@ -475,7 +477,7 @@ program.</p>
  There are also some Windows editors oriented to Euphoria.
  These are also on <a href="http://www.RapidEuphoria.com">the Web site</a>.</p>
 
-<h2>Distributing a Program</h2>
+<h3>Distributing a Program</h3>
 
 <p>Euphoria provides you with 4 distinct ways of distributing a program.</p>
 
@@ -511,7 +513,7 @@ program.</p>
  an executable (.exe) file. </p>
 
 
-<h2>Licensing</h2>
+<h3>Licensing</h3>
 
 <p>
  This product is free and open source, and has benefited from the contributions

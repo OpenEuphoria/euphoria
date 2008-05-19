@@ -1,8 +1,10 @@
 <doc title="Euphoria Reference Manual Part I - Section 3">
 
-<h1>Debugging and Profiling</h1>
+<h1>Euphoria Reference Manual Part I - Section 3</h1>
 
-<h2>Debugging</h2>
+<h2>Debugging and Profiling</h2>
+
+<h3>Debugging</h3>
 
 <p>
 
@@ -152,45 +154,45 @@
 
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">F1</font></td>
+	<td><font color="#993333">F1</font></td>
 	<td>display main output screen - take a look at your program's output so far</td>
 </tr>
 
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">F2</font></td>
+	<td><font color="#993333">F2</font></td>
 	<td>redisplay trace screen. Press this key while viewing the main output screen to return to the trace display.</td>
 </tr>
 
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">Enter</font></td>
+	<td><font color="#993333">Enter</font></td>
 	<td>execute the currently-highlighted statement only</td>
 </tr>
 
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">down-arrow</font></td>
-	<td>continue execution and break when any statement coming after this one in the source listing is about to be executed. This lets you skip over subroutine calls. It also lets you stop on the first statement following the end of a <a href=\"refman_2.htm#for\">for-loop</a> or <a href=\"refman_2.htm#while\">while-loop</a> without having to witness all iterations of the loop.</td>
+	<td><font color="#993333">down-arrow</font></td>
+	<td>continue execution and break when any statement coming after this one in the source listing is about to be executed. This lets you skip over subroutine calls. It also lets you stop on the first statement following the end of a <a href="refman_2.htm#for">for-loop</a> or <a href="refman_2.htm#while">while-loop</a> without having to witness all iterations of the loop.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">?</font></td>
-	<td>display the value of a variable. After hitting <font color=\"#993333\"><b>?</b></font> you will be prompted for the name of the variable. Many variables are displayed for you automatically as they are assigned a value. If a variable is not currently being displayed, or is only partially displayed, you can ask for it. Large sequences are limited to one line on the trace screen, but when you ask for the value of a variable that contains a large sequence, the screen will clear, and you can scroll through a pretty-printed display of the sequence. You will then be returned to the trace screen, where only one line of the variable is displayed. Variables that are not defined at this point in the program cannot be shown. Variables that have not yet been initialized will have \"< NO VALUE >\" beside their name. Only variables, not general expressions, can be displayed. As you step through execution of the program, the system will update any values showing on the screen. Occasionally it will remove variables that are no longer in scope, or that haven't been updated in a long time compared with newer, recently-updated variables.</td>
+	<td><font color="#993333">?</font></td>
+	<td>display the value of a variable. After hitting <font color="#993333"><b>?</b></font> you will be prompted for the name of the variable. Many variables are displayed for you automatically as they are assigned a value. If a variable is not currently being displayed, or is only partially displayed, you can ask for it. Large sequences are limited to one line on the trace screen, but when you ask for the value of a variable that contains a large sequence, the screen will clear, and you can scroll through a pretty-printed display of the sequence. You will then be returned to the trace screen, where only one line of the variable is displayed. Variables that are not defined at this point in the program cannot be shown. Variables that have not yet been initialized will have "< NO VALUE >" beside their name. Only variables, not general expressions, can be displayed. As you step through execution of the program, the system will update any values showing on the screen. Occasionally it will remove variables that are no longer in scope, or that haven't been updated in a long time compared with newer, recently-updated variables.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">q</font></td>
+	<td><font color="#993333">q</font></td>
 	<td>quit tracing and resume normal execution. Tracing will start again when the next trace(1) is executed.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">Q</font></td>
+	<td><font color="#993333">Q</font></td>
 	<td>quit tracing and let the program run freely to its normal completion. trace() statements will be ignored.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color=\"#993333\">!</font></td>
+	<td><font color="#993333">!</font></td>
 	<td>this will abort execution of your program. A traceback and dump of variable values will go to <path>ex.err</path>.</td>
 </tr>
 </table>
@@ -260,7 +262,7 @@ just <i>before</i> the statement is performed, so the crash will
 likely have happened <i>during</i> execution of the final statement
 that you see in <b>ctrace.out</b>.</p>
 
-<h2>Profiling</h2> 
+<h3>Profiling</h3> 
 
 <p>
 
