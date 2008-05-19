@@ -37,4 +37,14 @@ case "${UNAME_SYSTEM}:${ECONFIG}" in
 		;;
 esac
 
+# parameters
+while [ "$1" != "" ]; do
+    case $1 in
+        --with-eu3 )   
+                       echo EU3=1 >> "$PREFIX"Makefile.eu
+                       echo PWD=`pwd` >> "$PREFIX"Makefile.eu
+    esac
+    shift
+done
+
 cd pcre && ./configure --enable-utf8 --disable-cpp --disable-shared

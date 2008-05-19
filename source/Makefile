@@ -10,6 +10,10 @@
 #   You must run configure
 #   before building
 #
+#  Configue options:
+#                    --with-eu3  If you have only a euphoria v3.x interpreter installed,
+#                                put this option on the command line
+#
 #   Clean up binary files     :  make clean
 #   Clean up binary and       :  make distclean
 #        translated files
@@ -45,6 +49,14 @@ else
 LDLFLAG=-ldl
 PREREGEX=$(FROMBSDREGEX)
 SEDFLAG=-ri
+endif
+
+ifeq "$(EU3)" "1"
+EXE=export EUINC=$(PWD)/../include && exu
+INCDIR=
+else
+EXE=exu
+INCDIR=-i ../../include
 endif
 
 CC = gcc
@@ -372,7 +384,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 #./$(OBJDIR)/main-.c
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	echo Translating $(EU_TARGET) to create $(EU_MAIN)
-	-cd ./$(OBJDIR) && exu -i ../../include ../ec.ex -I ../../include ../$(EU_TARGET)
+	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $*.c -o./$(OBJDIR)/back/$*.o

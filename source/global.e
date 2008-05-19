@@ -21,6 +21,7 @@ global type boolean(integer x)
 end type
 
 global boolean mybsd -- set to true if very little RAM available (build fails)
+mybsd = FALSE  -- default to false
 
 -- specific C compiler used (one may be TRUE)
 global constant EWATCOM = TRUE,
