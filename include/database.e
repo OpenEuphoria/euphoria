@@ -1,7 +1,22 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Euphoria 3.1
 -- Euphoria Database System (EDS)
+--
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+-- Euphoria Database System routines
+--
+--****
+-- Category: 
+--   database
+--
+-- File:
+--   lib_edb
+--
+-- Title:
+--   Euphoria Database System
+--****
 --
 -- Database File Format
 -- Header
@@ -312,6 +327,25 @@ procedure safe_seek(atom pos)
 	end if
 end procedure
 
+--**
+-- print an open database in readable form to file fn
+--
+-- Comments:
+--   Print the contents of an already-open Euphoria database.
+--   The contents are printed to file or device fn.
+--   All records in all tables are shown. If low_level_too is non-zero, 
+--   then a low-level byte-by-byte dump is also shown. The low-level
+--   dump will only be meaningful to someone who is familiar
+--   with the internal format of a Euphoria database.
+--
+-- Example 1:
+-- if db_open("mydata", DB_LOCK_SHARED) != DB_OK then
+--     puts(2, "Couldn't open the database!\n")
+--     abort(1)
+-- end if
+-- fn = open("db.txt", "w")
+-- db_dump(fn, 0)-- 
+
 global procedure db_dump(integer fn, integer low_level_too)
 -- print an open database in readable form to file fn
 -- (Note: If you turn database.e into a .dll or .so, you will
@@ -407,6 +441,7 @@ global procedure db_dump(integer fn, integer low_level_too)
 		printf(fn, "%d: %d bytes\n", {addr, size})
 	end for
 end procedure
+--**
 
 global procedure check_free_list()
 -- This is a debug routine used by RDS to detect corruption of the free list.
@@ -588,10 +623,35 @@ procedure db_free(atom p)
 	end if
 end procedure
 
+--**
+-- Create a new database in the file with path
+-- given by s and return an error code indicating success or failure.
+-- i2 indicates the type of lock that will be applied to the file
+-- as it is created.
+-- The values for i2 can be either DB_LOCK_NO (no lock) or 
+-- DB_LOCK_EXCLUSIVE (exclusive lock). i1
+-- is DB_OK if the new database is successfully created. This database
+-- becomes the <font color="#993333"><b>current database</b></font> to which
+-- all other database operations will apply.
+--
+-- Returns:
+-- integer - an error code that indicates success or failure
+--
+-- Comments:
+-- If the path, s, does not end in .edb, it will be added automatically.
+-- <p>If the database already exists, it will not be overwritten.
+-- db_create() will return DB_EXISTS_ALREADY.
+-- A version number is stored in the database file so future
+-- versions of the database software can recognize the format, and
+-- possibly read it and deal with it in some way.
+--
+-- Example 1:
+-- if db_create("mydata", DB_LOCK_NO) != DB_OK then
+--     puts(2, "Couldn't create the database!\n")
+--     abort(1)
+-- end if
+
 global function db_create(sequence path, integer lock_method)
--- Create a new database in the file given by path.
--- It becomes the current database.
-	
 	integer db
 	
 	if not find('.', path) then
@@ -655,12 +715,65 @@ global function db_create(sequence path, integer lock_method)
 	putn(repeat(0, INIT_FREE * 8))
 	return DB_OK
 end function
+--**
 
+--**
+-- Open an existing Euphoria database. The file containing the database is
+-- given by path. Returns a code indicating success or failure.
+-- lock_method indicates the type of lock that you want to place on the database
+-- file while you have it open. This database
+-- becomes the current database to which all other database operations will apply.
+-- The return codes are:
+--
+-- global constant
+--              DB_OK = 0   -- success
+--              DB_OPEN_FAIL = -1  -- couldn't open the file 
+--              DB_LOCK_FAIL = -3  -- couldn't lock the file in the
+--                                 --     manner requested
+--
+-- Returns:
+-- integer - an error code that indicates success or failure
+--
+-- Comments:
+-- The types of lock that you can use are: DB_LOCK_NO (no lock), 
+-- DB_LOCK_SHARED (shared lock for read-only access) and
+-- DB_LOCK_EXCLUSIVE (for read/write access). DB_LOCK_SHARED is only supported on
+-- <platform>Linux</platform>/<platform>FreeBSD</platform>.
+-- It allows you to read the database, but not write anything to it. If you
+-- request DB_LOCK_SHARED on <platform>WIN32</platform> or
+-- <platform>DOS32</platform> it will be treated as if you had
+-- asked for DB_LOCK_EXCLUSIVE.
+--
+-- If the lock fails, your program should wait a few seconds and try again.
+-- Another process might be currently accessing the database.
+-- DOS programs will typically get a "critical error" message if they
+-- try to access a database that is currently locked.
+
+-- Example 1:
+-- tries = 0
+-- while 1 do
+--
+--     err = db_open("mydata", DB_LOCK_SHARED) 
+--     if err = DB_OK then
+--         exit
+--     elsif err = DB_LOCK_FAIL then
+--
+--     	tries += 1
+--     	if tries > 10 then
+--             puts(2, "too many tries, giving up\n")
+--             abort(1)
+--
+--     	else    
+--     	    sleep(5)
+--     	end if
+--     else
+--     	puts(2, "Couldn't open the database!\n")
+--
+--     	abort(1)
+--     end if
+-- end while
+  
 global function db_open(sequence path, integer lock_method)
--- Open an existing database file.
--- It becomes the current database.
--- If the lock fails, the caller should wait a few seconds 
--- and then call again. 
 	integer db, magic
 	
 	if not find('.', path) then
@@ -702,9 +815,23 @@ global function db_open(sequence path, integer lock_method)
 	db_file_nums = append(db_file_nums, db)
 	return DB_OK
 end function
+--**
+
+--**
+-- Choose a new, already open, database to be the current database. Subsequent database operations will apply to this database. path is the path of the database file as it was originally opened with db_open() or db_create().
+--
+-- Returns:
+-- integer - an error code that indicates success (DB_OK) or failure
+--
+-- Comments:
+-- When you create (db_create) or open (db_open) a database, it automatically becomes the current database. Use db_select() when you want to switch back and forth between open databases, perhaps to copy records from one to the other. After selecting a new database, you should select a table within that database using db_select_table().
+--
+-- Example 1:
+-- if db_select("employees") != DB_OK then
+--     puts(2, "Couldn't select employees database\n")
+-- end if
 
 global function db_select(sequence path)
--- Choose a new, already open, database to be the current database. 
 	integer index
 	
 	if not find('.', path) then
@@ -720,6 +847,13 @@ global function db_select(sequence path)
 	current_table = -1
 	return DB_OK
 end function
+--**
+
+--**
+-- Unlock and close the current database.
+--
+-- Comments:
+-- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file.
 
 global procedure db_close()
 -- close the current database
@@ -740,6 +874,7 @@ global procedure db_close()
 	db_lock_methods = db_lock_methods[1..index-1] & db_lock_methods[index+1..$]
 	current_db = -1 
 end procedure
+--**
 
 function table_find(sequence name)
 -- find a table, given its name 
@@ -765,6 +900,21 @@ function table_find(sequence name)
 	end for
 	return -1
 end function
+
+--**
+-- The table with name given by name, becomes the current table. The return code will be DB_OK if the table exists in the current database, otherwise you'll get DB_OPEN_FAIL.
+--
+-- Returns:
+-- integer - an error code that indicates success (DB_OK) or failure
+--
+-- Comments:
+-- All record-level database operations apply automatically to the current table.
+--
+-- Example 1:
+-- if db_select_table("salary") != DB_OK then
+--     puts(2, "Couldn't find salary table!\n")
+--     abort(1)
+-- end if
 
 global function db_select_table(sequence name)
 -- let table with the given name be the current table
@@ -800,6 +950,21 @@ global function db_select_table(sequence name)
 	end for
 	return DB_OK
 end function
+--**
+
+--**
+-- Create a new table within the current database. The name of the table is given by the sequence of characters, name, and may not be the same as any existing table in the current database.
+--
+-- Returns:
+-- integer - an error code that indicates success (DB_OK) or failure
+--
+-- Comments:
+-- The table that you create will initially have 0 records. It becomes the current table.
+--
+-- Example 1:
+-- if db_create_table("my_new_table") != DB_OK then
+--     puts(2, "Couldn't create my_new_table!\n")
+-- end if
 
 global function db_create_table(sequence name)
 -- create a new table in the current database file
@@ -862,6 +1027,13 @@ global function db_create_table(sequence name)
 	end if
 	return DB_OK
 end function
+--**
+
+--**
+-- Delete a table in the current database. The name of the table is given by name.
+--
+-- Comments:
+-- All records are deleted and all space used by the table is freed up. If the table is the current table, the current table becomes undefined. If there is no table with the name given by name, then nothing happens.
 
 global procedure db_delete_table(sequence name)
 -- delete an existing table and all of its records
@@ -928,6 +1100,13 @@ global procedure db_delete_table(sequence name)
 		current_table -= SIZEOF_TABLE_HEADER
 	end if
 end procedure
+--**
+
+--**
+-- Rename a table in the current database. The current name of the table is given by name. The new name of the table is new_name.
+--
+-- Comments:
+-- The table to be renamed can be the current table, or some other table in the current database. An error will occur if name is not the name of a table in the current database, or if new_name is the name of an existing table in the current database.
 
 global procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
@@ -951,9 +1130,22 @@ global procedure db_rename_table(sequence name, sequence new_name)
 	safe_seek(table)
 	put4(table_ptr)
 end procedure
+--**
+
+--**
+-- Return a sequence of all the table names in the current database. Each element of s is a sequence of characters containing the name of a table.
+--
+-- Example 1:
+-- sequence names
+--
+-- names = db_table_list()
+--
+-- for i = 1 to length(names) do
+--     puts(1, names[i] & '\n')
+--
+-- end for
 
 global function db_table_list()
--- return a sequence of all the table names in the current database
 	sequence table_names
 	atom tables, nt, name
 	
@@ -970,6 +1162,7 @@ global function db_table_list()
 	end for
 	return table_names
 end function
+--**
 
 function key_value(atom ptr)
 -- return the value of a key, 
@@ -978,11 +1171,24 @@ function key_value(atom ptr)
 	return decompress(0)
 end function
 
+--**
+-- Find the record in the current table with key value key. If found, the record number will be returned. If not found, the record number that key would occupy, if inserted, is returned as a negative number.
+--
+-- Comments:
+-- A fast binary search is used to find the key in the current table. The number of comparisons is proportional to the log of the number of records in the table. You can select a range of records by searching for the first and last key values in the range. If those key values don't exist, you'll at least get a negative value showing where they would be, if they existed. e.g. Suppose you want to know which records have keys greater than "GGG" and less than "MMM". If -5 is returned for key "GGG", it means a record with "GGG" as a key would be inserted as record number 5. -27 for "MMM" means a record with "MMM" as its key would be inserted as record number 27. This quickly tells you that all records, >= 5 and < 27 qualify.
+--
+-- Example 1:
+-- rec_num = db_find_key("Millennium")
+-- if rec_num > 0 then
+--     ? db_record_key(rec_num)
+--     ? db_record_data(rec_num)
+-- else
+--     puts(2, "Not found, but if you insert it,\n")
+--
+--     printf(2, "it will be #%d\n", -rec_num)
+-- end if
+
 global function db_find_key(object key)
--- Find the record in the current table that contains the given key.
--- If the key is not found, the place in the table where the key would go 
--- if it were inserted is returned as a negative record number.
--- A binary search is used.
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
 	if current_table = -1 then
@@ -1009,11 +1215,23 @@ global function db_find_key(object key)
 	end if
 	return -mid
 end function
+--**
+
+--**
+-- Insert a new record into the current table. The record key is key and the record data is data. Both key and data can be any Euphoria data objects, atoms or sequences.
+--
+-- Returns:
+-- integer - an error code that indicates success (DB_OK) or failure
+--
+-- Comments:
+-- Within a table, all keys must be unique. db_insert() will fail with DB_EXISTS_ALREADY if a record already exists with the same key value.
+--
+-- Example 1:
+-- if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
+--     puts(2, "insert failed!\n")
+-- end if
 
 global function db_insert(object key, object data)
--- insert a new record into the current table 
--- of the current database file
-	
 	sequence key_string, data_string, last_part, remaining
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size
 	atom key_location, new_block, index_ptr, new_index_ptr, total_recs
@@ -1142,9 +1360,18 @@ global function db_insert(object key, object data)
 	end if
 	return DB_OK
 end function
+--**
+
+--**
+-- Delete record number key_location from the current table.
+--
+-- Comments:
+-- The record number, key_location, must be an integer from 1 to the number of records in the current table.
+-- 
+-- Example 1:
+-- db_delete_record(55)
 
 global procedure db_delete_record(integer key_location)
--- delete record number rn in the current table
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
 	sequence remaining
@@ -1217,10 +1444,18 @@ global procedure db_delete_record(integer key_location)
 		end for
 	end if
 end procedure
+--**
+
+--**
+-- In the current table, replace the data portion of record number rn, with data. data can be any Euphoria atom or sequence.
+--
+-- Comments:
+-- The record number, rn, must be from 1 to the number of records in the current table.
+--
+-- Example 1:
+-- db_replace_data(67, {"Peter", 150, 34.5})
 
 global procedure db_replace_data(integer rn, object data) 
--- replace the data for a record
--- faster than delete + insert
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 	
@@ -1252,18 +1487,39 @@ global procedure db_replace_data(integer rn, object data)
 	end if
 	putn(data_string)
 end procedure
+--**
+
+--**
+-- Return the current number of records in the current table.
+--
+-- Example 1:
+-- look at all records in the current table
+-- for i = 1 to db_table_size() do
+--     if db_record_key(i) = 0 then
+--     	puts(1, "0 key found\n")
+--     	exit
+--     end if
+-- end for
 
 global function db_table_size()
--- return the number of records in the current table
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
 	return length(key_pointers)
 end function
+--**
+
+--**
+-- Return the data portion of record number rn in the current table.
+--
+-- Comments:
+-- Each record in a Euphoria database consists of a key portion and a data portion. Each of these can be any Euphoria atom or sequence.
+--
+-- Example 1:
+-- puts(1, "The 6th record has data value: ")
+-- ? db_record_data(6)
 
 global function db_record_data(integer rn) 
--- return data value for record number rn
--- records are numbered 1..db_table_size
 	atom data_ptr
 	object data_value
 	
@@ -1279,10 +1535,19 @@ global function db_record_data(integer rn)
 	data_value = decompress(0)
 	return data_value
 end function
+--**
+
+--**
+-- Return the key portion of record number rn in the current table.
+--
+-- Comments:
+-- Each record in a Euphoria database consists of a key portion and a data portion. Each of these can be any Euphoria atom or sequence.
+--
+-- Example 1:
+-- puts(1, "The 6th record has key value: ")
+-- ? db_record_key(6)
 
 global function db_record_key(integer rn) 
--- return key value for record number i 
--- records are numbered 1..db_table_size
 	object key_value
 	
 	if current_table = -1 then
@@ -1295,6 +1560,7 @@ global function db_record_key(integer rn)
 	key_value = decompress(0)
 	return key_value
 end function
+--**
 
 function name_only(sequence s)
 -- return the file name only, without the path
@@ -1321,11 +1587,20 @@ function delete_whitespace(sequence text)
 	return text
 end function
 
+--**
+-- Compress the current database. The current database is copied to a new file such that any blocks of unused space are eliminated. If successful, the return value will be set to DB_OK, and the new compressed database file will retain the same name. The current table will be undefined. As a backup, the original, uncompressed file will be renamed with an extension of .t0 (or .t1, .t2 ,..., .t99). In the highly unusual case that the compression is unsuccessful, the database will be left unchanged, and no backup will be made.
+--
+-- Comments:
+-- When you delete items from a database, you create blocks of free space within the database file. The system keeps track of these blocks and tries to use them for storing new data that you insert. db_compress() will copy the current database without copying these free areas. The size of the database file may therefore be reduced. If the backup filenames reach .t99 you will have to delete some of them.
+--
+-- Thanks to Mike Nelson!
+--
+-- Example 1:
+-- if db_compress() != DB_OK then
+--     puts(2, "compress failed!\n")
+-- end if
+
 global function db_compress()
--- Copy the current database to a new file, 
--- thereby eliminating any patches of unused space.
--- Thanks to Mike Nelson
-   
 	integer index, chunk_size, nrecs, r, fn
 	sequence new_path, old_path, table_list, record, chunk
    
@@ -1420,4 +1695,5 @@ global function db_compress()
 	index = db_select(new_path)
 	return DB_OK
 end function
+--**
 

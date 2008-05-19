@@ -64,7 +64,7 @@ include machine.e
 
 --**
 -- Find any element from s1 in s2 starting at position i2 and return
--- it's position or 0 if not found.
+-- its position or 0 if not found.
 --
 -- Comments:
 --   This function may be applied to a string sequence or a complex
