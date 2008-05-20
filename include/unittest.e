@@ -3,10 +3,6 @@
 -- Euphoria 3.2
 -- Unit testing framework
 
----------- CHANGE HISTORY ------------
--- 16-May-2008, Derek Parnell, Added support for --EUUNITTEST=VERBOSE on cmdline
---                             Now shows which modules were tested in the summary
---------------------------------------
 
 include misc.e
 
@@ -21,7 +17,7 @@ global constant
 	TEST_SHOW_ALL = 3
 global integer testCount, testsPassed, testsFailed
 
-testCount   = 0
+testCount	= 0
 testsPassed = 0
 testsFailed = 0
 
@@ -48,10 +44,10 @@ procedure test_failed(sequence name, object a, object b)
 			printf(2, "%s:\n", {currentMod})
 			modShown = 1
 		end if
-		printf(2, "  failed: %s. expected: ", {name})
-		pretty_print(2, a, {2})
+		printf(2, "  failed: %s, expected: ", {name})
+		pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
 		puts(2, " but got: ")
-		pretty_print(2, b, {2})
+		pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
 		puts(2, "\n")
 	end if
 
@@ -79,19 +75,19 @@ global procedure set_test_verbosity(atom verbosity)
 end procedure
 
 global procedure set_test_module_name(sequence name)
-        modulesTested = append(modulesTested, name)
+	modulesTested = append(modulesTested, name)
 	currentMod = name
 	modShown = 0
 end procedure
 
 global procedure test_summary()
 	if verbose > TEST_QUIET then
-	        if verbose >= TEST_SHOW_MODULES and length(modulesTested) > 0 then
-	            puts(2, "\nModules tested...\n")
-	            for i = 1 to length(modulesTested) do
-	                printf(2, "  %s\n", {modulesTested[i]})
-	            end for
-	        end if
+		if verbose >= TEST_SHOW_MODULES and length(modulesTested) > 0 then
+			puts(2, "\nModules tested...\n")
+			for i = 1 to length(modulesTested) do
+				printf(2, "  %s\n", {modulesTested[i]})
+			end for
+		end if
 		printf(2, "\n%d tests run, %d passed, %d failed, %d%% success\n",
 				{testCount, testsPassed, testsFailed, (testsPassed / testCount) * 100})
 	end if
@@ -99,55 +95,69 @@ global procedure test_summary()
 	abort(testsFailed > 0)
 end procedure
 
-global procedure test_equal(sequence name, object a, object b)
+procedure record_result(integer success, sequence name, object a, object b)
 	testCount += 1
 
-	if equal(a, b) then
+	if success then
 		test_passed(name)
 	else
 		test_failed(name, a, b)
 	end if
+end procedure
+
+global procedure test_equal(sequence name, object a, object b)
+	integer success
+	if sequence(a) or sequence(b) then
+		success = equal(a,b)
+	else
+		if a > b then
+			success = ((a-b) < 1e-9)
+		else
+			success = ((b-a) < 1e-9)
+		end if
+	end if
+	record_result(success, name, a, b)
 end procedure
 
 global procedure test_not_equal(sequence name, object a, object b)
-	testCount += 1
-		
-	if equal(a, b) then
-		test_failed(name, a, b)
+	integer success
+	if sequence(a) or sequence(b) then
+		success = not equal(a,b)
 	else
-		test_passed(name)
+		if a > b then
+			success = ((a-b) >= 1e-9)
+		else
+			success = ((b-a) >= 1e-9)
+		end if
 	end if
+	record_result(success, name, a, b)
 end procedure
 
 global procedure test_true(sequence name, object a)
-	testCount += 1
-
-	if equal(a,1) then
-		test_passed(name)
+	integer success
+	if sequence(a) then
+		success = 0
 	else
-		test_failed(name, a, 1)
+		success = (a != 0)
 	end if
+	record_result(success, name, a, 1)
 end procedure
 
 global procedure test_false(sequence name, object a)
-	testCount += 1
-
-	if equal(a,0) then
-		test_passed(name)
+	integer success
+	if not integer(a) then
+		success = 0
 	else
-		test_failed(name, a, 0)
+		success = (a = 0)
 	end if
+	record_result(success, name, a, 0)
 end procedure
 
 global procedure test_fail(sequence name)
-	testCount += 1
-
-	test_failed(name, 1, 0)
+	record_result(0, name, 1, 0)
 end procedure
 
 global procedure test_pass(sequence name)
-	testCount += 1
-
-	test_passed(name)
+	record_result(1, name, 1, 1)
 end procedure
 
