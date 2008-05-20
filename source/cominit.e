@@ -64,6 +64,7 @@ global procedure common_options( integer option, integer ix )
 	elsif option = DEFINE_OPTION then
 		if ix < Argc then
 			OpDefines &= {Argv[ix+1]}
+			add_switch(Argv[ix+1], 1)
 			args += 1
 		end if
 	end if

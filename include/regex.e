@@ -152,3 +152,8 @@ global function search_replace_user(regex re, sequence text, integer rid,
 	return text
 end function
 
+-- TODO: document
+global function matches(regex re, sequence text, atom options)
+	return sequence(search(re, text, options))
+end function
+

@@ -41,7 +41,7 @@ object compile_pcre(object pattern){
 		else
 				ret = (unsigned long)re;
 		
-		return re;
+		return ret;
 }
 
 object exec_pcre(object x ){
