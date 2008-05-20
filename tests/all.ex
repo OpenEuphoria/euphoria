@@ -23,6 +23,7 @@ end if
 include t_condcmp.e
 include t_datetime.e
 include t_enum.e
+include t_euns.e
 include t_file.e
 include t_get.e
 include t_locale.e
