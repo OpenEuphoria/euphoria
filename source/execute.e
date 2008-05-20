@@ -2289,7 +2289,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 			ns = ns[2..$]
 		end while
 		
-		if length(ns) = 0 then
+		if length(ns) = 0 or equal( ns, "eu") then
 			return 0 -- bad syntax
 		end if
 

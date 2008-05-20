@@ -3587,6 +3587,9 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 		}
 	
 		/* step 1: look up NAMESPACE symbol */
+		if( strcmp( ns, "eu") == 0 )
+			// Predefined routines don't have routine_ids
+			return ATOM_M1;
 		i = 0;
 		while (TRUE) {
 			if (rt01[i].seq_num > seq_num)
@@ -3599,7 +3602,8 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			}
 			i++;
 		}
-
+		
+		
 		/* step 2: look up global symbol in the chosen namespace */
 		simple_name = colon + 1;
 		

@@ -234,7 +234,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		while (*ns == ' ' || *ns == '\t')
 			ns++;
 		
-		if (*ns == 0) {
+		if (*ns == 0 || !strcmp( ns, "eu")) {
 			return NULL;
 		}
 
