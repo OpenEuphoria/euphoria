@@ -29,7 +29,8 @@
  program. The editor displays in magenta those routines that are built into
  the interpreter, and require no include file. You can override the definition
  of these built-in routines by defining your own routine with the same name.
- You will get a suppressible warning if you do this.
+ You will get a suppressible warning if you do this.  Note that you can still refer
+ to the built-in routine by prefixing it with the 'eu' namespace.
 
 <p>
  To indicate what kind of <font color="#993333"><b>object</b></font> may

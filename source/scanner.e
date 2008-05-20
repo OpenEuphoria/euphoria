@@ -1089,6 +1089,17 @@ function NameSpace_declaration(symtab_index sym)
 	return sym
 end function
 
+global procedure eu_namespace()
+-- add the "eu" namespace
+	token eu_tok
+	symtab_index eu_ns
+	
+	eu_tok = keyfind("eu", -1)
+	eu_ns  = NameSpace_declaration(eu_tok[T_SYM])
+	SymTab[eu_ns][S_OBJ] = 0
+	SymTab[eu_ns][S_SCOPE] = SC_GLOBAL
+end procedure
+
 global function StringToken()
 -- scans until blank, tab, end of line, or end of file. 
 -- returns a raw string - leading whitespace ignored, 

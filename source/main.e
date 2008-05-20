@@ -159,6 +159,7 @@ function full_path(sequence filename)
 	return '.' & SLASH  
 end function
 
+
 procedure main()
 -- Main routine 
 	integer argc
@@ -228,6 +229,9 @@ procedure main()
 	InitEmit()
 	InitParser()
 	InitLex()
+	
+	eu_namespace()	
+	
 	read_line()
 	parser()
 

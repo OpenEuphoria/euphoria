@@ -158,6 +158,8 @@
 
 <li>
 	New enum keyword that allows for <i>parse time</i> sequential constant creation. Implemented by Jeremy Cowgar.</li>
+<li>
+	The namespace <b>eu</b> is predefined, and can be used to fully qualify built-in routines.</li>
 </ul>
 
 </doc>

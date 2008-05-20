@@ -1210,6 +1210,16 @@ i.e. the file that contains the include statement. Different files
 might define different namespace identifiers to refer to the same 
 included file.</p>
 
+<p>
+ There is a special, reserved namespace, "eu" for referring to built-in euphoria routines.
+ This can be useful when a built-in routine has been overridden:
+<eucode>
+    procedure puts( integer fn, object text )
+        eu:puts(fn, "Overloaded puts says: "& text )
+    end procedure
+    puts(1, "Hello, world!\n")
+    eu:puts(1, "Hello, world!\n")
+</eucode>
 
 
 <p> 

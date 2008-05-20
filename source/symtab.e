@@ -581,7 +581,16 @@ global function keyfind(sequence word, integer file_no)
 			
 			else 
 				-- qualified - must match global symbol in specified file (or be in the file's include path)
-				if (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
+				if not file_no then
+					-- internal eu namespace was used
+					if SymTab[tok[T_SYM]][S_SCOPE] = SC_PREDEF then
+						if BIND then
+							add_ref( tok )
+						end if
+						return tok
+					end if
+				
+				elsif (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
 					SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL then
 					   
 
