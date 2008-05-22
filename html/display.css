@@ -56,3 +56,6 @@ h1{
 .libfunc{
 	color:#006699;
 }
+
+table.func th { text-align: right; vertical-align: top; }
+

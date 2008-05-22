@@ -5,6 +5,7 @@ include machine.e
 include get.e
 include wildcard.e
 include map.e as m
+include regex.e as re
 
 global sequence current_file
 global integer current_line
@@ -19,8 +20,9 @@ file_header = 0
 
 -- .htx and .e files are pre-processed and read into this global
 -- functions sequence. There, they are sorted and categorized.
-global sequence functions
+global sequence functions, categories
 functions = {}
+categories = {}
 
 global constant FILE_NAME = 1, SECT_NUM = 2, SECTION_NAME = 3
 global sequence sec_nums, sections
@@ -109,6 +111,39 @@ global procedure write(object text)
 	end if
 end procedure
 
+constant re_sig = re:new("(global )*(procedure|function) ([A-Za-z0-9_]+)( )*\\((.*)\\)")
+
+procedure add_function(sequence filename, m:map func)
+	integer idx
+	sequence cat_name, signature
+	sequence result
+
+	idx = 0
+	func      = m:put(func, "include", filename)
+	cat_name  = m:get(func, "category", "")
+	signature = m:get(func, "signature", "")
+
+	-- TODO: check for search error
+	result = re:search(re_sig, signature, re:DEFAULT)
+	func   = m:put(func, "type",   signature[result[3][1]..result[3][2]])
+	func   = m:put(func, "name",   signature[result[4][1]..result[4][2]])
+	func   = m:put(func, "params", signature[result[6][1]..result[6][2]])
+
+	for a = 1 to length(functions) do
+		if equal(cat_name, functions[a][1]) then
+			idx = a
+			exit
+		end if
+	end for
+
+	if idx = 0 then
+		functions &= {{cat_name, {}}}
+		idx = length(functions)
+	end if
+
+	functions[idx][2] &= {func}
+end procedure
+
 global procedure process_include(sequence filename)
 	sequence lines, line
 	object cat_name, sec_name, sec_data, func
@@ -122,18 +157,18 @@ global procedure process_include(sequence filename)
 
 	lines = read_lines(filename)
 	for i = 1 to length(lines) do
-		line = lines[i]
+		line = trim_tail(lines[i], " \t\r\n")
 		if match("--**", line) then
 			if parse then 
 				parse = 0 
 				if sequence(sec_name) and length(sec_data) > 0 then
 					func = m:put(func, sec_name, sec_data)
 					if equal(sec_name, "category") then
-						cat_name = sec_data
+						cat_name = trim_tail(sec_data, " \t\r\n")
 					end if
 				end if
 				if map(func) and m:has(func, "signature") then
-					functions = append(functions, func)
+					add_function(filename, func)
 					func = 0
 				end if
 			else
@@ -153,7 +188,9 @@ global procedure process_include(sequence filename)
 			--   -- a is 20
 
 			line = trim(line, "-")
-			line = trim(line, " \t")
+			if sequence(sec_name) and not match("example", sec_name) then
+				line = trim(line, " \t")
+			end if
 
 			if length(line) = 0 then
 				sec_data &= "\n"
@@ -161,7 +198,7 @@ global procedure process_include(sequence filename)
 				-- a new section
 				if sequence(sec_name) and length(sec_data) > 0 then
 					if equal(sec_name, "category") then
-						cat_name = sec_data
+						cat_name = trim_tail(sec_data, " \t\r\n")
 					end if
 					-- save old section
 					func = m:put(func, sec_name, sec_data)
@@ -170,7 +207,7 @@ global procedure process_include(sequence filename)
 				sec_name = lower(line[1..$-1])
 				sec_data = ""
 			else
-				sec_data &= line
+				sec_data &= line & '\n'
 			end if
 		elsif parse and (match("global function", line) 
 			             or match("global procedure", line))

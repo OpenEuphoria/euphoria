@@ -1,7 +1,5 @@
 <doc title="Euphoria Reference Manual Part I - Section 2">
 
-<h1>Euphoria Reference Manual Part I - Section 2</h1>
-
 <h2>Language Definition</h2>
 
 <h3>Objects</h3>
@@ -1213,6 +1211,7 @@ included file.</p>
 <p>
  There is a special, reserved namespace, "eu" for referring to built-in euphoria routines.
  This can be useful when a built-in routine has been overridden:
+</p>
 <eucode>
     procedure puts( integer fn, object text )
         eu:puts(fn, "Overloaded puts says: "& text )

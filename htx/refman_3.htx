@@ -1,7 +1,5 @@
 <doc title="Euphoria Reference Manual Part I - Section 3">
 
-<h1>Euphoria Reference Manual Part I - Section 3</h1>
-
 <h2>Debugging and Profiling</h2>
 
 <h3>Debugging</h3>
@@ -431,5 +429,7 @@ that you see in <b>ctrace.out</b>.</p>
  that access elements of a large swapped-out sequence.</p>
 
 <p style="text-align:center;">continue to <a href="library.htm">Part II - Library Routines</a></p>
+
+<h1>Standard Libary Refrence</h1>
 
 </doc>

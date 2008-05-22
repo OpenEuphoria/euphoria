@@ -628,6 +628,7 @@ end procedure
 -- given by s and return an error code indicating success or failure.
 -- i2 indicates the type of lock that will be applied to the file
 -- as it is created.
+--
 -- The values for i2 can be either DB_LOCK_NO (no lock) or 
 -- DB_LOCK_EXCLUSIVE (exclusive lock). i1
 -- is DB_OK if the new database is successfully created. This database
@@ -639,7 +640,8 @@ end procedure
 --
 -- Comments:
 -- If the path, s, does not end in .edb, it will be added automatically.
--- <p>If the database already exists, it will not be overwritten.
+--
+-- If the database already exists, it will not be overwritten.
 -- db_create() will return DB_EXISTS_ALREADY.
 -- A version number is stored in the database file so future
 -- versions of the database software can recognize the format, and

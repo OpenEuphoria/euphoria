@@ -7,6 +7,7 @@
 include get.e
 include misc.e
 include file.e
+include map.e as m
 
 constant single_tags = { "br", "hr", "br/", "hr/" }
 
@@ -25,7 +26,10 @@ constant files = {
     "relnotes40.htx",
     "refman_1.htx",
     "refman_2.htx",
-    "refman_3.htx"
+    "refman_3.htx",
+	"lib_database.htx",
+	"lib_search.htx",
+	"lib_sort.htx"
 }
 
 include stack.e as stk
@@ -332,7 +336,7 @@ procedure toc_and_menu()
 	"div.one { margin-top: 2px; padding-top: 2px; padding-left: 10px; }",
 	"div.two { margin-top: 2px; padding-top: 2px; padding-left: 20px; }",
 	"</style></head>",
-	"<body>",
+	"<body><div class=\"menu\">",
 	"<h2 align=\"center\">Euphoria v4.0</h2>"})
 	
 	for i = 1 to length(sections) do
@@ -367,7 +371,7 @@ procedure toc_and_menu()
 	end for
 	
 	puts(toc_file, "</body></html>\n")
-	puts(menu_file, "</body></html>\n")
+	puts(menu_file, "</div></body></html>\n")
 	close(toc_file)
 	close(menu_file)
 end procedure
@@ -381,9 +385,80 @@ procedure scan_includes()
 	end for
 end procedure
 
+function compare_func(object a, object b)
+	return compare(m:get(a, "name", ""), m:get(b, "name", ""))
+end function
+
+procedure sort_includes()
+	integer rid
+	
+	rid = routine_id("compare_func")
+	functions = sort(functions)
+
+	for a = 1 to length(functions) do
+		functions[a][2] = custom_sort(rid, functions[a][2])
+	end for
+end procedure
+
+function add_section(m:map func, sequence sec_name)
+	if m:has(func, sec_name) then
+		return sprintf("<%s>\n%s</%s>\n", {sec_name, m:get(func, sec_name, ""), sec_name})
+	end if
+	return ""
+end function
+
+procedure write_includes()
+	object ign
+	sequence cat_name, content, api_content
+	m:map func
+
+	for a = 1 to length(functions) do
+		cat_name = functions[a][1]
+		content = read_file("t_lib_" & cat_name & ".htx")
+		api_content = ""
+		for b = 1 to length(functions[a][2]) do
+			func = functions[a][2][b]
+			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\"", {
+				m:get(func, "name", ""),
+				m:get(func, "type", ""),
+				m:get(func, "params", "") })
+			api_content &= ">\n"
+			if m:has(func, "returns") then
+				api_content &= sprintf("<funcreturns>%s</funcreturns>\n", {
+					find_replace("\n", "<br/>\n", m:get(func, "returns", ""), 0)})
+			end if
+			if m:has(func, "description") then
+				api_content &= sprintf("<funcdescr>%s</funcdescr>\n", {
+					find_replace("\n", "<br />\n", m:get(func, "description", ""), 0)})
+			end if
+			if m:has(func, "comments") then
+				api_content &= sprintf("<funccomments>%s</funccomments>\n", {
+					find_replace("\n", "<br />\n", m:get(func, "comments", ""), 0)})
+			end if
+			if m:has(func, "see also") then
+				api_content &= sprintf("<funcseealso>%s</funcseealso>\n", {m:get(func, "see also", "")})
+			end if
+			for c = 1 to 10 do
+				if m:has(func, "example " & sprint(c)) then
+					api_content &= sprintf("<eucode title=\"Example %d\">\n%s\n</eucode>\n",
+						{c, m:get(func, "example " & sprint(c), "")})
+				end if
+			end for
+			api_content &= add_section(func, "funcseealso")
+			api_content &= "</funcref>\n"
+		end for
+		
+		content = find_replace("$(API)", api_content, content, 1)
+		ign = write_file("lib_" & cat_name & ".htx", content)
+
+	end for
+end procedure
+
 procedure main()
 	init_dir()
 	scan_includes()
+	sort_includes()
+	write_includes()
 	combined_file = open("../html/combined.htm", "w")
 	for f = 1 to length(files) do
 		generate(files[f], "HTML", "html")

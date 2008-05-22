@@ -157,17 +157,24 @@ procedure tag_eucode(sequence raw_text, sequence plist)
 	title = pval("title", plist)
 	
 	if sequence(title) then
-		sdiv("example-title")
-		write(title)
-		ediv()
+		if in_tag("funcref") then
+			write(sprintf("<tr><th>%s:</th><td>", {title}))
+		else
+			sdiv("example-title")
+			write(title)
+			ediv()
+		end if
 	end if
-	
+
 	firstLine = TRUE
 	line = ""
 end procedure
 
 procedure tag_end_eucode(sequence raw_text, sequence plist)
-	write("</pre>")
+	write("</pre>\n")
+	if in_tag("funcref") then
+		write("</td></tr>\n")
+	end if 
 end procedure
 
 procedure tag_doc(sequence raw_text, sequence plist)
@@ -195,35 +202,54 @@ procedure tag_end_doc(sequence raw_text, sequence plist)
 end procedure
 
 procedure tag_funcref(sequence raw_text, sequence plist)
-	object name, inc, params, ret
+	object name, inc, params, ret, typ
 	name   = pval("name", plist)
 	inc    = pval("inc", plist)
 	params = pval("params", plist)
-	ret    = pval("ret", plist)
-	
-	sdiv("funcref")
+	typ    = pval("type", plist)
+
 	write(sprintf("<a name=\"%s\"></a>", {name}))
-	write(sprintf("<div><strong>Function:</strong> %s(%s)</div>\n", {name, params}))
-	write("<div><strong>Location:</strong> ")
-	if atom(inc) then
-		write("internal")
-	else
-		write(inc)
-	end if
-	ediv()
-	write("<div><strong>Usage:</strong></div>")
-	write("<pre>\n")
-	if atom(inc) then
-		write(sprintf("%s = %s(%s)", {ret, name, params}))
-	else
-		write(sprintf("include %s\n%s = %s(%s)", {inc, ret, name, params}))
-	end if
-	write("</pre>\n")
-	ediv()
+	write(sprintf("<h3 class=\"funcref\">%s</h3>", {name}))
+
+	write("<table class=\"func\">\n")
+	write(sprintf("<tr><th>Type:</th><td>%s</td></tr>\n", {typ}))
+	write(sprintf("<tr><th>Parameters:</th><td>%s</td></tr>\n", {params}))
 end procedure
 
 procedure tag_end_funcref(sequence raw_text, sequence plist)
-	ediv()
+	write("</table>")
+end procedure
+
+procedure tag_funcdescr(sequence raw_text, sequence plist)
+	write("<tr><th>Description:</th>\n<td>\n")
+end procedure
+
+procedure tag_end_funcdescr(sequence raw_text, sequence plist)
+	write("</td>\n</tr>\n")
+end procedure
+
+procedure tag_funccomments(sequence raw_text, sequence plist)
+	write("<tr><th>Comments:</th>\n<td>\n")
+end procedure
+
+procedure tag_end_funccomments(sequence raw_text, sequence plist)
+	write("</td>\n</tr>\n")
+end procedure
+
+procedure tag_funcseealso(sequence raw_text, sequence plist)
+	write("<tr><th>See Also:</th>\n<td>\n")
+end procedure
+
+procedure tag_end_funcseealso(sequence raw_text, sequence plist)
+	write("</td>\n</tr>\n")
+end procedure
+
+procedure tag_funcreturns(sequence raw_text, sequence plist)
+	write("<tr><th>Returns:</th>\n<td>\n")
+end procedure
+
+procedure tag_end_funcreturns(sequence raw_text, sequence plist)
+	write("</td>\n</tr>\n")
 end procedure
 
 procedure tag_gpre(sequence raw_text, sequence plist)
@@ -261,6 +287,14 @@ global procedure html_init()
 	add_handler("/doc",      routine_id("tag_end_doc"))
 	add_handler("funcref",   routine_id("tag_funcref"))
 	add_handler("/funcref",  routine_id("tag_end_funcref"))
+	add_handler("funcdescr", routine_id("tag_funcdescr"))
+	add_handler("/funcdescr",routine_id("tag_end_funcdescr"))
+	add_handler("funccomments", routine_id("tag_funccomments"))
+	add_handler("/funccomments",routine_id("tag_end_funccomments"))
+	add_handler("funcseealso", routine_id("tag_funcseealso"))
+	add_handler("/funcseealso",routine_id("tag_end_funcseealso"))
+	add_handler("funcreturns", routine_id("tag_funcreturns"))
+	add_handler("/funcreturns",routine_id("tag_end_funcreturns"))
 	add_handler("path",      routine_id("tag_gspan"))
 	add_handler("/path",     routine_id("tag_end_gspan"))
 	add_handler("env",       routine_id("tag_gspan"))

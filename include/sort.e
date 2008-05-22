@@ -1,6 +1,10 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Sorting
+--****
+-- Category:
+--    sort
+--****
+
 include wildcard.e
 
 --**
@@ -367,11 +371,11 @@ end function
 -- change position relative to each other.
 --
 -- Example 1:
---	sequence dirlist
---	dirlist = dir("c:\\temp")
---	sequence sorted
---	-- Order is Size:descending, Name
---	sorted = sort_columns( dirlist, {-D_SIZE, D_NAME} )
+--   sequence dirlist
+--   dirlist = dir("c:\\temp")
+--   sequence sorted
+---   -- Order is Size:descending, Name
+--   sorted = sort_columns( dirlist, {-D_SIZE, D_NAME} )
 --
 -- See Also:
 --	 compare
@@ -379,9 +383,8 @@ end function
 --	 sort_reverse
 --	 sort_user
 
-
-
 global function sort_columns(sequence x, sequence column_list)
 	return sort_user(routine_id("column_compare"), x, column_list)
 end function
 --**
+
