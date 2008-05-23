@@ -51,38 +51,8 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 /*******************/
 
 #ifdef ELINUX
-#ifdef EBSD
-// FreeBSD (also Red Hat 5.2 Linux)
-#define push() asm("pushl -4(%ebp)")
-#define  pop() asm( "addl -8(%ebp), %esp")
-#else
-
-#if (__GNUC__ == 4)
-// the offsets changed from 3.x to 4.x
-#define __GNUC_VERSION_NUM__ __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__
-
-#if (__GNUC_VERSION_NUM__ <= 101 || __GNUC_VERSION_NUM__ > 203)
-
-// < 4.1.1 and > 4.2.3
-
-#define push() asm("pushl -20(%ebp)")
-#define  pop() asm( "addl -24(%ebp), %esp")
-
-#else // (__GNUC_VERSION_NUM__ <= 101)
-// and they changed again from 4.1.1 to 4.1.2
-
-#define push() asm("pushl -124(%ebp)")
-#define  pop() asm( "addl -128(%ebp), %esp")
-
-#endif // (__GNUC_VERSION_NUM__ <= 101)
-
-#else  // (__GNUC__ == 4)
-// RH Linux - ListFilter
-#define push() asm("pushl -28(%ebp)")
-#define  pop() asm( "addl -32(%ebp), %esp")
-
-#endif  // (__GNUC__ == 4)
-#endif  // EBSD
+#define push() asm("movl %0,%%ecx; pushl (%%ecx);" : /* no out */ : "r"(last_offset) : "%ecx" )
+#define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
 #endif  // ELINUX
 
 #ifdef ELCC
@@ -340,6 +310,14 @@ object call_c(int func, object proc_ad, object arg_list)
 	int (*int_proc_address)();
 	unsigned return_type;
 	char NameBuff[100];
+	unsigned long as_offset;
+	unsigned long last_offset;
+
+	// this code relies on arg always being the first variable and last_offset 
+	// always being the last variable
+	last_offset = (unsigned long)&arg;
+	as_offset = (unsigned long)&argsize;
+	// as_offset = last_offset - 4;
 
 	// Setup and Check for Errors
 	

@@ -59,7 +59,7 @@ EXE=exu
 INCDIR=-i ../../include
 endif
 
-CC = gcc
+CC = gcc-3.3
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
 BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
@@ -247,7 +247,7 @@ clean :
 	do \
 	    rm "$$d"*.o; \
 	done
-	-rm exu ecu ecu.a backendu $(DEB_SOURCE_DIR).tar.gz
+	-rm exu ecu ecu.a eubackend $(DEB_SOURCE_DIR).tar.gz
 	cd pcre && $(MAKE) clean
 
 .PHONY : clean distclean all
