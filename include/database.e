@@ -632,7 +632,7 @@ end procedure
 -- The values for i2 can be either DB_LOCK_NO (no lock) or 
 -- DB_LOCK_EXCLUSIVE (exclusive lock). i1
 -- is DB_OK if the new database is successfully created. This database
--- becomes the <font color="#993333"><b>current database</b></font> to which
+-- becomes the <b>current database</b> to which
 -- all other database operations will apply.
 --
 -- Returns:
@@ -728,10 +728,10 @@ end function
 -- The return codes are:
 --
 -- global constant
---              DB_OK = 0   -- success
---              DB_OPEN_FAIL = -1  -- couldn't open the file 
---              DB_LOCK_FAIL = -3  -- couldn't lock the file in the
---                                 --     manner requested
+--     DB_OK = 0   -- success
+--     DB_OPEN_FAIL = -1  -- couldn't open the file 
+--     DB_LOCK_FAIL = -3  -- couldn't lock the file in the
+--                        --     manner requested
 --
 -- Returns:
 -- integer - an error code that indicates success or failure
@@ -754,7 +754,6 @@ end function
 -- Example 1:
 -- tries = 0
 -- while 1 do
---
 --     err = db_open("mydata", DB_LOCK_SHARED) 
 --     if err = DB_OK then
 --         exit
@@ -1035,7 +1034,9 @@ end function
 -- Delete a table in the current database. The name of the table is given by name.
 --
 -- Comments:
--- All records are deleted and all space used by the table is freed up. If the table is the current table, the current table becomes undefined. If there is no table with the name given by name, then nothing happens.
+-- All records are deleted and all space used by the table is freed up. If the 
+-- table is the current table, the current table becomes undefined. If there is
+-- no table with the name given by name, then nothing happens.
 
 global procedure db_delete_table(sequence name)
 -- delete an existing table and all of its records
@@ -1105,10 +1106,14 @@ end procedure
 --**
 
 --**
--- Rename a table in the current database. The current name of the table is given by name. The new name of the table is new_name.
+-- Rename a table in the current database. The current name of the table 
+-- is given by name. The new name of the table is new_name.
 --
 -- Comments:
--- The table to be renamed can be the current table, or some other table in the current database. An error will occur if name is not the name of a table in the current database, or if new_name is the name of an existing table in the current database.
+-- The table to be renamed can be the current table, or some other table 
+-- in the current database. An error will occur if name is not the name 
+-- of a table in the current database, or if new_name is the name of an 
+-- existing table in the current database.
 
 global procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
@@ -1135,7 +1140,8 @@ end procedure
 --**
 
 --**
--- Return a sequence of all the table names in the current database. Each element of s is a sequence of characters containing the name of a table.
+-- Return a sequence of all the table names in the current database. 
+-- Each element of s is a sequence of characters containing the name of a table.
 --
 -- Example 1:
 -- sequence names
@@ -1174,10 +1180,21 @@ function key_value(atom ptr)
 end function
 
 --**
--- Find the record in the current table with key value key. If found, the record number will be returned. If not found, the record number that key would occupy, if inserted, is returned as a negative number.
+-- Find the record in the current table with key value key. If found, 
+-- the record number will be returned. If not found, the record number 
+-- that key would occupy, if inserted, is returned as a negative number.
 --
 -- Comments:
--- A fast binary search is used to find the key in the current table. The number of comparisons is proportional to the log of the number of records in the table. You can select a range of records by searching for the first and last key values in the range. If those key values don't exist, you'll at least get a negative value showing where they would be, if they existed. e.g. Suppose you want to know which records have keys greater than "GGG" and less than "MMM". If -5 is returned for key "GGG", it means a record with "GGG" as a key would be inserted as record number 5. -27 for "MMM" means a record with "MMM" as its key would be inserted as record number 27. This quickly tells you that all records, >= 5 and < 27 qualify.
+-- A fast binary search is used to find the key in the current table. 
+-- The number of comparisons is proportional to the log of the number of 
+-- records in the table. You can select a range of records by searching 
+-- for the first and last key values in the range. If those key values don't 
+-- exist, you'll at least get a negative value showing where they would be, 
+-- if they existed. e.g. Suppose you want to know which records have keys 
+-- greater than "GGG" and less than "MMM". If -5 is returned for key "GGG", 
+-- it means a record with "GGG" as a key would be inserted as record number 5. 
+-- -27 for "MMM" means a record with "MMM" as its key would be inserted as record 
+-- number 27. This quickly tells you that all records, >= 5 and < 27 qualify.
 --
 -- Example 1:
 -- rec_num = db_find_key("Millennium")
@@ -1220,13 +1237,16 @@ end function
 --**
 
 --**
--- Insert a new record into the current table. The record key is key and the record data is data. Both key and data can be any Euphoria data objects, atoms or sequences.
+-- Insert a new record into the current table. The record key is key and the 
+-- record data is data. Both key and data can be any Euphoria data objects, 
+-- atoms or sequences.
 --
 -- Returns:
 -- integer - an error code that indicates success (DB_OK) or failure
 --
 -- Comments:
--- Within a table, all keys must be unique. db_insert() will fail with DB_EXISTS_ALREADY if a record already exists with the same key value.
+-- Within a table, all keys must be unique. db_insert() will fail with 
+-- DB_EXISTS_ALREADY if a record already exists with the same key value.
 --
 -- Example 1:
 -- if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
@@ -1368,7 +1388,8 @@ end function
 -- Delete record number key_location from the current table.
 --
 -- Comments:
--- The record number, key_location, must be an integer from 1 to the number of records in the current table.
+-- The record number, key_location, must be an integer from 1 to the number
+-- of records in the current table.
 -- 
 -- Example 1:
 -- db_delete_record(55)
@@ -1449,10 +1470,12 @@ end procedure
 --**
 
 --**
--- In the current table, replace the data portion of record number rn, with data. data can be any Euphoria atom or sequence.
+-- In the current table, replace the data portion of record number rn, with 
+-- data. data can be any Euphoria atom or sequence.
 --
 -- Comments:
--- The record number, rn, must be from 1 to the number of records in the current table.
+-- The record number, rn, must be from 1 to the number of records in the 
+-- current table.
 --
 -- Example 1:
 -- db_replace_data(67, {"Peter", 150, 34.5})
@@ -1515,7 +1538,8 @@ end function
 -- Return the data portion of record number rn in the current table.
 --
 -- Comments:
--- Each record in a Euphoria database consists of a key portion and a data portion. Each of these can be any Euphoria atom or sequence.
+-- Each record in a Euphoria database consists of a key portion and a data 
+-- portion. Each of these can be any Euphoria atom or sequence.
 --
 -- Example 1:
 -- puts(1, "The 6th record has data value: ")
@@ -1543,7 +1567,8 @@ end function
 -- Return the key portion of record number rn in the current table.
 --
 -- Comments:
--- Each record in a Euphoria database consists of a key portion and a data portion. Each of these can be any Euphoria atom or sequence.
+-- Each record in a Euphoria database consists of a key portion and a 
+-- data portion. Each of these can be any Euphoria atom or sequence.
 --
 -- Example 1:
 -- puts(1, "The 6th record has key value: ")
@@ -1590,10 +1615,22 @@ function delete_whitespace(sequence text)
 end function
 
 --**
--- Compress the current database. The current database is copied to a new file such that any blocks of unused space are eliminated. If successful, the return value will be set to DB_OK, and the new compressed database file will retain the same name. The current table will be undefined. As a backup, the original, uncompressed file will be renamed with an extension of .t0 (or .t1, .t2 ,..., .t99). In the highly unusual case that the compression is unsuccessful, the database will be left unchanged, and no backup will be made.
+-- Compress the current database. The current database is copied to a new 
+-- file such that any blocks of unused space are eliminated. If successful, 
+-- the return value will be set to DB_OK, and the new compressed database 
+-- file will retain the same name. The current table will be undefined. As 
+-- a backup, the original, uncompressed file will be renamed with an extension 
+-- of .t0 (or .t1, .t2 ,..., .t99). In the highly unusual case that the 
+-- compression is unsuccessful, the database will be left unchanged, and no 
+-- backup will be made.
 --
 -- Comments:
--- When you delete items from a database, you create blocks of free space within the database file. The system keeps track of these blocks and tries to use them for storing new data that you insert. db_compress() will copy the current database without copying these free areas. The size of the database file may therefore be reduced. If the backup filenames reach .t99 you will have to delete some of them.
+-- When you delete items from a database, you create blocks of free space within 
+-- the database file. The system keeps track of these blocks and tries to use them 
+-- for storing new data that you insert. db_compress() will copy the current 
+-- database without copying these free areas. The size of the database file may 
+-- therefore be reduced. If the backup filenames reach .t99 you will have to 
+-- delete some of them.
 --
 -- Thanks to Mike Nelson!
 --
@@ -1630,6 +1667,8 @@ global function db_compress()
 		return DB_EXISTS_ALREADY -- you better delete some temp files
 	end if
 	
+	-- TODO: replace with shell commands from shell.e
+	--       move_file, copy_file, etc...
 	-- rename database as .tmp
 	if platform() = LINUX then
 		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)

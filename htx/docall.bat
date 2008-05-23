@@ -1,4 +1,5 @@
-@echo creating DOCUMENTATION FILES
+@echo off
+echo creating DOCUMENTATION FILES
 
 rem need syncolor.e and keywords.e - EUINC will be changed temporarily
 
@@ -8,8 +9,6 @@ SET EUINC=..\bin;..\include
 exwc doc.exw HTML ..
 
 rem these files are only needed to update RDS Web site
-del ..\doc\refman_?.doc
-del ..\doc\lib_*.doc
 
 SET EUINC=%TEMP_EUINC%
 

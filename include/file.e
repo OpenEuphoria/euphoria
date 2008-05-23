@@ -125,7 +125,7 @@ global function dir(sequence name)
 	end if
 
 	-- Is there a path involved?
-	if find(PATHSEP, name) = 0 then
+	if find('/', name) = 0 and find('\\', name) = 0 then
 		the_dir = "."
 		the_name = name
 	else
@@ -133,7 +133,7 @@ global function dir(sequence name)
 		-- a directory and file name.
 		idx = length(name)
 		while idx > 0 do
-			if name[idx] = PATHSEP then
+			if name[idx] = '/' or name[idx] = '\\' then
 				exit
 			end if
 			idx -= 1
