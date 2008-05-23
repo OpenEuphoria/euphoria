@@ -400,16 +400,35 @@ procedure sort_includes()
 	end for
 end procedure
 
-function add_section(m:map func, sequence sec_name)
-	if m:has(func, sec_name) then
-		return sprintf("<%s>\n%s</%s>\n", {sec_name, m:get(func, sec_name, ""), sec_name})
+function format_para(sequence p)
+	p = trim(p, " \r\n\t")
+	if match("\n\n", p) then
+		p = "<p>" & find_replace("\n\n", "</p>\n<p>", p, 0) & "</p>"
 	end if
-	return ""
+	return p & '\n'
+end function
+
+function get_section(m:map func, sequence section, sequence tag, integer wrap, integer say_none)
+	sequence val
+	val = m:get(func, section, "")
+	if length(val) = 0 then
+		if say_none then
+			val = "none"
+		else
+			return ""
+		end if
+	end if
+	
+	if wrap then
+		val = format_para(val)
+	end if
+
+	return sprintf("<%s>%s</%s>\n", {tag, val, tag})
 end function
 
 procedure write_includes()
 	object ign
-	sequence cat_name, content, api_content
+	sequence cat_name, content, api_content, typ
 	m:map func
 
 	for a = 1 to length(functions) do
@@ -418,33 +437,23 @@ procedure write_includes()
 		api_content = ""
 		for b = 1 to length(functions[a][2]) do
 			func = functions[a][2][b]
+			typ = m:get(func, "type", "")
+
 			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\"", {
-				m:get(func, "name", ""),
-				m:get(func, "type", ""),
-				m:get(func, "params", "") })
+				m:get(func, "name", ""), typ, m:get(func, "params", "none") })
 			api_content &= ">\n"
-			if m:has(func, "returns") then
-				api_content &= sprintf("<funcreturns>%s</funcreturns>\n", {
-					find_replace("\n", "<br/>\n", m:get(func, "returns", ""), 0)})
+			if equal(typ, "function") then
+				api_content &= get_section(func, "returns", "funcreturns", 1, 1)
 			end if
-			if m:has(func, "description") then
-				api_content &= sprintf("<funcdescr>%s</funcdescr>\n", {
-					find_replace("\n", "<br />\n", m:get(func, "description", ""), 0)})
-			end if
-			if m:has(func, "comments") then
-				api_content &= sprintf("<funccomments>%s</funccomments>\n", {
-					find_replace("\n", "<br />\n", m:get(func, "comments", ""), 0)})
-			end if
-			if m:has(func, "see also") then
-				api_content &= sprintf("<funcseealso>%s</funcseealso>\n", {m:get(func, "see also", "")})
-			end if
+			api_content &= get_section(func, "description", "funcdescr", 1, 0)
+			api_content &= get_section(func, "comments", "funccomments", 1, 0)
+			api_content &= get_section(func, "see also", "funcseealso", 1, 0)
 			for c = 1 to 10 do
 				if m:has(func, "example " & sprint(c)) then
 					api_content &= sprintf("<eucode title=\"Example %d\">\n%s\n</eucode>\n",
 						{c, m:get(func, "example " & sprint(c), "")})
 				end if
 			end for
-			api_content &= add_section(func, "funcseealso")
 			api_content &= "</funcref>\n"
 		end for
 		

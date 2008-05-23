@@ -127,7 +127,9 @@ procedure add_function(sequence filename, m:map func)
 	result = re:search(re_sig, signature, re:DEFAULT)
 	func   = m:put(func, "type",   signature[result[3][1]..result[3][2]])
 	func   = m:put(func, "name",   signature[result[4][1]..result[4][2]])
-	func   = m:put(func, "params", signature[result[6][1]..result[6][2]])
+	if (result[6][2] - result[6][1]) > 1 then
+		func   = m:put(func, "params", signature[result[6][1]..result[6][2]])
+	end if
 
 	for a = 1 to length(functions) do
 		if equal(cat_name, functions[a][1]) then
