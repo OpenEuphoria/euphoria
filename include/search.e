@@ -10,7 +10,7 @@
 --   lib_srch
 --
 -- Title:
---   Searching and Sorting 
+--   Searching
 --****
 
 include machine.e

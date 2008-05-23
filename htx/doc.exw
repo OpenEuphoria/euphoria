@@ -379,9 +379,9 @@ end procedure
 procedure scan_includes()
 	sequence files
 
-	files = dir("../include/*.e")
+	files = dir("..\\include\\*.e")
 	for a = 1 to length(files) do
-		process_include("../include/" & files[a][1])
+		process_include("..\\include\\" & files[a][1])
 	end for
 end procedure
 
