@@ -103,22 +103,49 @@ end function
 --
 ------------------------------------------------------------------------------------------
 
-integer LC_ALL, f_strfmon, f_strfnum
 atom lib, lib2
+integer LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC,
+	LC_TIME, LC_MESSAGES, f_strfmon, f_strfnum
 
 if platform() = WIN32 then
 	lib = open_dll("MSVCRT.DLL")
 	lib2 = open_dll("KERNEL32.DLL")
 	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I)
 	f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I)
-	LC_ALL = 0
-elsif platform() = LINUX or platform() = FREEBSD then
+	LC_ALL      = 0
+	LC_COLLATE  = 1
+	LC_CTYPE    = 2
+	LC_MONETARY = 3
+	LC_NUMERIC  = 4
+	LC_TIME     = 5
+	LC_MESSAGES = 6
+
+elsif platform() = FREEBSD then
+
+	lib = open_dll("libc.so")
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
+	f_strfnum = -1
+
+	LC_ALL      = 0
+	LC_COLLATE  = 1
+	LC_CTYPE    = 2
+	LC_MONETARY = 3
+	LC_NUMERIC  = 4
+	LC_TIME     = 5
+	LC_MESSAGES = 6
+
+  
+elsif platform() = LINUX then
+
 	lib = open_dll("")
 	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
 	f_strfnum = -1
 	LC_ALL = 6
+
 else
+
 	crash("locale.e requires Windows, Linux or FreeBSD", {})
+
 end if
 
 ------------------------------------------------------------------------------------------
@@ -137,7 +164,6 @@ global function set(sequence new_locale)
 
 	pLocale = allocate_string(new_locale)
 	ign = c_func(f_setlocale, {LC_ALL, pLocale})
-	free(pLocale)
 
 	if sequence(lang_path) then
 		return lang_load(new_locale)
@@ -157,7 +183,6 @@ global function get()
 	end if
 
 	r = peek_string(p)
-	free(p)
 
 	return r
 end function

@@ -375,7 +375,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	mkdir -p $@
 	
 ./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
-	$(CC) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
+	$(CC) $(EBSDFLAG) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
 
 #./$(OBJDIR)/main-.c : $(EU_MAIN)
 #	echo Translating $(EU_TARGET) to create $(EU_MAIN)
@@ -387,14 +387,14 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
-	$(CC) $(BE_FLAGS) $*.c -o./$(OBJDIR)/back/$*.o
+	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o
 
 $(OBJDIR)/back/be_callc.o : ./be_callc.c
-	$(CC) -c -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.o
-	$(CC) -S -w -DELINUX -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.s
+	$(CC) -c -w -DELINUX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.o
+	$(CC) -S -w -DELINUX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.s
 
 $(OBJDIR)/back/be_inline.o : ./be_inline.c
-	$(CC) -finline-functions $(BE_FLAGS) $(RUNTIME_FLAGS) be_inline.c -o$*.o
+	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
 
 
 $(PCRE) : 
