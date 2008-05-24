@@ -7,6 +7,10 @@ set_test_module_name("file.e")
 object data, tmp
 
 data = read_lines("file.txt")
+tmp = set_test_abort(1)
+test_equal("read file.txt", 1, sequence(data))
+tmp = set_test_abort(tmp)
+
 test_equal("read_lines() #1", 9, length(data))
 test_equal("read_lines() #2", 42, length(data[1]))
 test_equal("read_lines() #3", "This is a file used for unit tests. Please", data[1])

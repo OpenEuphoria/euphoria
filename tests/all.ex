@@ -3,10 +3,12 @@
 -- Euphoria 3.2
 -- Test functions and procedures shipped with Euphoria
 include unittest.e
+include file.e
 
 set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 
 sequence cmd
+object pwd, oldpwd
 cmd = command_line()
 
 if length(cmd) > 2 then
@@ -18,6 +20,13 @@ if length(cmd) > 2 then
         set_test_verbosity(TEST_SHOW_MODULES)
     end if
 end if
+
+
+-- Ensure we are in correct directory first.
+pwd = dirname(cmd[2])
+oldpwd = current_dir()
+pwd = chdir(pwd)
+
 
 -- Tests
 include t_condcmp.e
@@ -44,3 +53,4 @@ include t_wildcard.e
            
 test_summary()
 
+oldpwd = chdir(oldpwd)

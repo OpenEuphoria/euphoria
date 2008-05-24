@@ -34,6 +34,9 @@ sequence currentMod
 currentMod = ""
 sequence modulesTested
 modulesTested = {}
+
+integer abort_on_fail
+abort_on_fail = 0
 --
 -- Private utility functions
 --
@@ -52,6 +55,10 @@ procedure test_failed(sequence name, object a, object b)
 	end if
 
 	testsFailed += 1
+	if abort_on_fail then
+		puts(2, "Abort On Fail set.\n")
+		abort(2)
+	end if
 end procedure
 
 procedure test_passed(sequence name)
@@ -73,6 +80,13 @@ end procedure
 global procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
+
+global function set_test_abort(integer pValue)
+	integer lTmp
+	lTmp = abort_on_fail
+	abort_on_fail = pValue
+	return lTmp
+end function
 
 global procedure set_test_module_name(sequence name)
 	modulesTested = append(modulesTested, name)
