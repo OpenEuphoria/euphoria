@@ -120,7 +120,8 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\emit_1.obj &
 	.\$(OBJDIR)\parser.obj &
 	.\$(OBJDIR)\parser_0.obj &
-	.\$(OBJDIR)\parser_1.obj 
+	.\$(OBJDIR)\parser_1.obj &
+	.\$(OBJDIR)\parser_2.obj
 	
 EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_execute.obj &
@@ -188,6 +189,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\parser.obj &
 	.\$(OBJDIR)\parser_0.obj &
 	.\$(OBJDIR)\parser_1.obj &
+	.\$(OBJDIR)\parser_2.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\cominit.obj &
@@ -484,6 +486,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\parser_1.obj :  .MULTIPLE ./$(OBJDIR)\parser_1.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\parser_2.obj :  .MULTIPLE ./$(OBJDIR)\parser_2.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\0ackend.obj :  .MULTIPLE ./$(OBJDIR)\0ackend.c
