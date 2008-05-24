@@ -53,6 +53,3 @@ t = time() - t -- end timer
 
 printf(1, "time: %.2f\n", t)
 
-if getc(0) then  -- wait for key press
-end if
-

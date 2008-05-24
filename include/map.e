@@ -62,9 +62,9 @@ function rehash(map m)
 		newBuckets = repeat({}, size)
 		
 		for index = 1 to length(oldBuckets) do
-				for entry = 1 to length(oldBuckets[index]) do
-						key = oldBuckets[index][entry][1]
-						value = oldBuckets[index][entry][2]
+				for entry_idx = 1 to length(oldBuckets[index]) do
+						key = oldBuckets[index][entry_idx][1]
+						value = oldBuckets[index][entry_idx][2]
 						index2 = and_bits(hashCode(key), size-1) + 1
 						newBuckets[index2] &= {{key, value}}
 				end for
@@ -184,8 +184,8 @@ global function keys(map m)
 		buckets = m[1]
 		for index = 1 to length(buckets) do
 				bucket = buckets[index]
-				for entry = 1 to length(bucket) do
-						ret[pos] = bucket[entry][1]
+				for entry_idx = 1 to length(bucket) do
+						ret[pos] = bucket[entry_idx][1]
 						pos += 1
 				end for
 		end for
@@ -204,11 +204,12 @@ global function values(map m)
 		buckets = m[1]
 		for index = 1 to length(buckets) do
 				bucket = buckets[index]
-				for entry = 1 to length(bucket) do
-						ret[pos] = bucket[entry][2]
+				for entry_idx = 1 to length(bucket) do
+						ret[pos] = bucket[entry_idx][2]
 						pos += 1
 				end for
 		end for
 		
 		return ret
 end function
+
