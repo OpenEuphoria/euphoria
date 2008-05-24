@@ -243,43 +243,43 @@ end procedure
 procedure showSymTab(integer f, integer flist)
 -- read the symbol table
 -- display it in flist and keep it in memory for use by showCode
-	object entry
+	object eentry
 	
 	current_db = f
 	SymTab = fdecompress(0)
 	for i = 1 to length(SymTab) do
-		entry = SymTab[i]
+		eentry = SymTab[i]
 		printf(flist, "%3d. ", i)
-		if atom(entry) then
+		if atom(eentry) then
 			puts(flist, "*DELETED*     ")
 			
-		elsif length(entry) >= NAME then
-			printf(flist, "%s", {entry[NAME]})
-			if find(entry[TOKEN], {PROC, FUNC, TYPE}) then
+		elsif length(eentry) >= NAME then
+			printf(flist, "%s", {eentry[NAME]})
+			if find(eentry[TOKEN], {PROC, FUNC, TYPE}) then
 				puts(flist, "()\n     ")
-				if entry[TOKEN] = PROC then
+				if eentry[TOKEN] = PROC then
 					puts(flist, "procedure\n     ")
-				elsif entry[TOKEN] = FUNC then
+				elsif eentry[TOKEN] = FUNC then
 					puts(flist, "function\n     ")
-				elsif entry[TOKEN] = TYPE then
+				elsif eentry[TOKEN] = TYPE then
 					puts(flist, "type\n     ")
 				end if
-				printf(flist, "number of args: %d", entry[NUM_ARGS])
-				if sequence(entry[CODE]) then
-					showCode(flist, entry[CODE])
+				printf(flist, "number of args: %d", eentry[NUM_ARGS])
+				if sequence(eentry[CODE]) then
+					showCode(flist, eentry[CODE])
 				end if
 
 				puts(flist, "\n LINETAB: ")
-				print(flist, entry[LINETAB])
+				print(flist, eentry[LINETAB])
 				
 				puts(flist, "\n   TEMPS: ")
-				print(flist, entry[TEMPS])
+				print(flist, eentry[TEMPS])
 				
 				puts(flist, "\nFIRSTLINE: ")
-				print(flist, entry[FIRSTLINE])
+				print(flist, eentry[FIRSTLINE])
 				
 				puts(flist, "\n   STACK_SPACE: ")
-				print(flist, entry[STACK_SPACE])
+				print(flist, eentry[STACK_SPACE])
 				
 			end if
 			
@@ -287,26 +287,26 @@ procedure showSymTab(integer f, integer flist)
 			puts(flist, "<TEMP>     ")
 		end if
 		
-		if sequence(entry) then
+		if sequence(eentry) then
 			
 			puts(flist, "\n     OBJ: ")
-			print(flist, entry[OBJ])
+			print(flist, eentry[OBJ])
 			
 			puts(flist, "\n    NEXT: ")
-			print(flist, entry[NEXT])
+			print(flist, eentry[NEXT])
 			
 			puts(flist, "\n    MODE: ")
-			print(flist, entry[MODE])
+			print(flist, eentry[MODE])
 			
 			puts(flist, "\n   SCOPE: ")
-			print(flist, entry[SCOPE])
+			print(flist, eentry[SCOPE])
 		
-			if length(entry) > 4 then
+			if length(eentry) > 4 then
 				puts(flist, "\n FILE_NO: ")
-				print(flist, entry[FILE_NO])
+				print(flist, eentry[FILE_NO])
 				
 				puts(flist, "\n   TOKEN: ")
-				print(flist, entry[TOKEN])
+				print(flist, eentry[TOKEN])
 				
 			end if
 		

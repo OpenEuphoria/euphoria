@@ -228,18 +228,18 @@ procedure save_private_block(symtab_index routine, sequence block)
 -- reuse any empty spot 
 -- save in last-in, first-out order
 -- We use a linked list to mirror the C-coded backend
-	sequence saved, saved_list, entry
+	sequence saved, saved_list, eentry
 	integer task, spot, tn
 	
 	task = SymTab[routine][S_RESIDENT_TASK]
 	-- save it
-	entry = {task, tcb[task][TASK_TID], block, 0}
+	eentry = {task, tcb[task][TASK_TID], block, 0}
 	saved = SymTab[routine][S_SAVED_PRIVATES]
 	
 	if length(saved) = 0 then
 		-- first time set up
 		saved = {1, -- index of first item
-				 {entry}} -- list of items
+				 {eentry}} -- list of items
 	else
 		-- look for a free spot to put it
 		saved_list = saved[2]
@@ -254,13 +254,13 @@ procedure save_private_block(symtab_index routine, sequence block)
 			end if
 		end for
 		
-		entry[SP_NEXT] = saved[1] -- new entry points to previous first
+		eentry[SP_NEXT] = saved[1] -- new eentry points to previous first
 		if spot = 0 then
 			-- no unused spots, must grow
-			saved_list = append(saved_list, entry)
+			saved_list = append(saved_list, eentry)
 			spot = length(saved_list)
 		else
-			saved_list[spot] = entry
+			saved_list[spot] = eentry
 		end if
 		
 		saved[1] = spot -- it becomes the first on the list
@@ -3219,7 +3219,7 @@ procedure InitBackEnd(integer ignore)
 			name = "ASSIGN_SUBS"
 		elsif equal(name, "ASSIGN_I") then
 			name = "ASSIGN"
-		elsif find(name, {"EXIT", "ENDWHILE"}) then
+		elsif find(name, {"EXIT", "ENDWHILE", "RETRY"}) then
 			name = "ELSE"
 		elsif equal(name, "PLUS1_I") then
 			name = "PLUS1"      

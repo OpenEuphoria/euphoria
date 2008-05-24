@@ -696,7 +696,7 @@ function my_sscanf(sequence yytext)
 	end if
 	return mantissa
 end function
-
+			
 global function Scanner()
 -- The scanner main routine: returns a lexical token  
 	integer ch, i, sp
@@ -778,7 +778,7 @@ global function Scanner()
 				else
 					ungetch()
 				end if
-			end if
+			end if    
 			return tok
 			
 		elsif class <= ILLEGAL_CHAR then
@@ -894,7 +894,7 @@ global function Scanner()
 				return {MINUS, 0}
 			end if
 			
-		elsif class = DOUBLE_QUOTE then
+		elsif class = DOUBLE_QUOTE then  
 			ch = ThisLine[bp]  -- getch
 			bp += 1
 			yytext = ""
@@ -917,7 +917,7 @@ global function Scanner()
 				CompileErr("end of line reached with no closing \"")
 			end if
 			return {STRING, NewStringSym(yytext)}
-
+				  
 		elsif class = PLUS then
 			ch = getch()
 			if ch = '=' then
@@ -1075,7 +1075,7 @@ function NameSpace_declaration(symtab_index sym)
 	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF}) then
 		-- override the global or predefined symbol 
 		h = SymTab[sym][S_HASHVAL]
-		-- create a new entry at beginning of this hash chain 
+		-- create a new entry at beginning of this hash chain
 		sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0) 
 		buckets[h] = sym
 	end if

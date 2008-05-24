@@ -102,6 +102,13 @@ static char *keyword[] = {
 	"continue",
 	"ifdef",
 	"elsifdef",
+	"retry",
+	"break",
+	"label",
+	"enum",
+	"loop",
+	"until",
+	"entry",	
 	NULL
 };
 

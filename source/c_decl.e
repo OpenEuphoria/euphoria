@@ -579,23 +579,23 @@ end procedure
 global procedure DeclareFileVars()
 -- emit C declaration for each local and global constant and var 
 	symtab_index s
-	symtab_entry entry
+	symtab_entry eentry
 	
 	c_puts("\n")
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
-		entry = SymTab[s]
-		if entry[S_SCOPE] >= SC_LOCAL and entry[S_SCOPE] <= SC_GLOBAL and
-			entry[S_USAGE] != U_UNUSED and entry[S_USAGE] != U_DELETED and
-			not find(entry[S_TOKEN], {PROC, FUNC, TYPE}) then
+		eentry = SymTab[s]
+		if eentry[S_SCOPE] >= SC_LOCAL and eentry[S_SCOPE] <= SC_GLOBAL and
+			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
+			not find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
 			c_puts("int ")
-			c_printf("_%d", entry[S_FILE_NO])
-			c_puts(entry[S_NAME])
+			c_printf("_%d", eentry[S_FILE_NO])
+			c_puts(eentry[S_NAME])
 			c_puts(";\n")
 			
 			c_hputs("extern int ")
-			c_hprintf("_%d", entry[S_FILE_NO])
-			c_hputs(entry[S_NAME])
+			c_hprintf("_%d", eentry[S_FILE_NO])
+			c_hputs(eentry[S_NAME])
 			c_hputs(";\n")
 		end if
 		s = SymTab[s][S_NEXT]

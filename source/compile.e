@@ -16,22 +16,6 @@ include cominit.e
 
 integer np, pc
 
--- Trickery for continue and end for. on continue, end for is emitted but
--- we cannot really end for because, it's just a continue. So, when a
--- CONTINUE is emitted, pop_loop_stack changes to 0 which tells
--- opENDFOR_GENERAL not to pop the stack information off of the loop
--- stack. It also causes opENDFOR_GENERAL to slightly change it's output.
--- opENDFOR_GENERAL then changes pop_loop_stack to 2. and another CONTINUE
--- is emitted. When opCONTINUE sees pop_loop_stack is 2, it issues a Goto
--- statement and resets pop_loop_stack back to 1, it's normal value for
--- all other loops. The WHILE op does not have those problems.
---
--- TODO: I (Jeremy) will come back and clean this up.
-constant PS_NO_POP = 0, PS_POP = 1, PS_ALT = 2
-
-integer pop_loop_stack
-pop_loop_stack = PS_POP
-
 constant MAXLEN = MAXINT - 1000000  -- assumed maximum length of a sequence
 
 constant INT16 = #00007FFF,
@@ -337,7 +321,7 @@ function find_label(integer addr)
 		return m
 	end if
 	
-	label_map = append(label_map, addr)
+	label_map = append(label_map, addr) 
 	return length(label_map)
 end function
 
@@ -363,6 +347,15 @@ procedure Label(integer addr)
 	c_printf("L%x:\n", label_index)
 end procedure               
 
+procedure RLabel(integer addr)
+-- emit a label, and start a new basic block
+	integer label_index
+
+	NewBB(0, E_ALL_EFFECT, 0)
+	label_index = find_label(addr)
+	c_printf("R%x:\n", label_index)
+end procedure
+
 procedure Goto(integer addr)
 -- emits a C goto statement.
 -- does branch straightening
@@ -371,7 +364,7 @@ procedure Goto(integer addr)
 	while TRUE do
 		new_addr = addr
 		br = Code[new_addr]
-		while (br = NOP1 or br = STARTLINE) and new_addr < length(Code)-2 do
+		while (br = NOP1 or br = STARTLINE or br = NOP2) and new_addr < length(Code)-2 do
 			-- skip no-ops
 			if br = NOP1 then
 				new_addr += 1
@@ -401,6 +394,13 @@ procedure Goto(integer addr)
 	label_index = find_label(addr)
 	c_stmt0("goto ")
 	c_printf("L%x;\n", label_index)
+end procedure
+
+procedure RGoto(integer addr)
+-- emits a C goto statement.
+-- does not do branch straightening
+	c_stmt0("goto ")
+	c_printf("R%x;\n", find_label(addr))
 end procedure
 
 function BB_exist(integer var)
@@ -2403,24 +2403,12 @@ procedure opEXIT()
 	if opcode = ENDWHILE then
 		loop_stack = loop_stack[1..$-1]
 	end if
-	Goto(Code[pc+1])               
-	pc += 2
-end procedure
-
-procedure opCONTINUE()
-	if loop_stack[$][LOOP_TYPE] = FOR then
-		if pop_loop_stack = PS_ALT then
-			Goto(loop_stack[$][LOOP_LABEL])
-			pc += 1
-			pop_loop_stack = PS_POP
-		else
-			pop_loop_stack = PS_NO_POP
-		end if
-		pc += 1
+	if opcode = RETRY then
+		RGoto(Code[pc+1]) 
 	else
-		Goto(loop_stack[$][LOOP_LABEL])
-		pc += 2
+		Goto(Code[pc+1])
 	end if
+	pc += 2
 end procedure
 
 procedure opRIGHT_BRACE_N()
@@ -3566,6 +3554,8 @@ procedure opFOR()
 	end if
 
 	pc += 7
+	RLabel(pc)
+	
 end procedure
 
 procedure opENDFOR_GENERAL()
@@ -3574,10 +3564,8 @@ procedure opENDFOR_GENERAL()
 	boolean close_brace
 	sequence gencode, intcode
 
-	if pop_loop_stack = PS_POP then
-		loop_stack = loop_stack[1..$-1]
-	end if
-
+	loop_stack = loop_stack[1..$-1]
+	Label(pc) -- for continue to work
 	CSaveStr("_0", Code[pc+3], Code[pc+3], Code[pc+4], 0)
 	-- always delay the DeRef
 				
@@ -3634,20 +3622,16 @@ procedure opENDFOR_GENERAL()
 
 	CDeRefStr("_0")
 
-	if pop_loop_stack = PS_POP then
-		Goto(Code[pc+1])
+	Goto(Code[pc+1])
 
-		Label(pc+5)
-		c_stmt0(";\n")
+	Label(pc+5)
+	c_stmt0(";\n")
 
-		CDeRef(Code[pc+3])
-		c_stmt0("}\n")
+	CDeRef(Code[pc+3])
+	c_stmt0("}\n")
 
-		 -- no SetBB needed here - it's a loop variable 
-		 -- (and it's in a local block)
-	else
-		pop_loop_stack = PS_ALT
-	end if
+	 -- no SetBB needed here - it's a loop variable
+	 -- (and it's in a local block)
 
 	pc += 5
 
@@ -4957,7 +4941,7 @@ end procedure
 			
 		-- other tracing/profiling ops - ignored by compiler 
 procedure opPROFILE()
--- PROFILE / DISPLAY_VAR / ERASE_PRIVATE_NAMES / ERASE_SYMBOL
+-- PROFILE / DISPLAY_VAR / ERASE_PRIVATE_NAMES / ERASE_SYMBOL / NOP2
 	pc += 2
 end procedure
 			
@@ -5018,7 +5002,7 @@ procedure opTASK_LIST()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = task_list();\n", {Code[pc+1]})
 	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_DOUBLE)
-	pc += 2 
+	pc += 2
 end procedure
 
 procedure opTASK_STATUS()
@@ -5066,7 +5050,7 @@ global procedure init_opcodes()
 			name = "ASSIGN_SUBS"
 		elsif equal(name, "PLENGTH") then
 			name = "LENGTH"
-		elsif find(name, {"ELSE", "ENDWHILE"}) then
+		elsif find(name, {"ELSE", "ENDWHILE", "RETRY"}) then
 			name = "EXIT"
 		elsif equal(name, "PLUS1_I") then
 			name = "PLUS1"
@@ -5104,12 +5088,12 @@ global procedure init_opcodes()
 		elsif equal(name, "QPRINT") then
 			name = "PRINT"
 		elsif find(name, {"DISPLAY_VAR", "ERASE_PRIVATE_NAMES", 
-						  "ERASE_SYMBOL"}) then
+						  "ERASE_SYMBOL", "NOP2"}) then
 			name = "PROFILE"
 		elsif find(name, {"ENDFOR_INT_UP", "ENDFOR_UP", "SC2_NULL", 
 						  "ENDFOR_DOWN", "ENDFOR_INT_DOWN1", "ASSIGN_SUBS2", "PLATFORM",
 						  "ENDFOR_INT_DOWN",
-						  "END_PARAM_CHECK", "NOP2"}) then 
+						  "END_PARAM_CHECK"}) then 
 			-- never emitted
 			name = "INTERNAL_ERROR" 
 		end if
@@ -5138,7 +5122,7 @@ procedure do_exec(integer start_pc)
 		atom_type = TYPE_ATOM
 		intcode2 = ""
 		dblfn = ""
-		intcode_extra = ""
+		intcode_extra = ""     
 		call_proc(operation[opcode], {})
 	end while
 end procedure       
@@ -5613,3 +5597,4 @@ procedure OutputIL()
 -- not used
 end procedure
 set_output_il( routine_id("OutputIL" ))
+

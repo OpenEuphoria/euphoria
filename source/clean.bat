@@ -18,6 +18,7 @@ del EMIT_1.C
 del PARSER.C
 del ERROR.C
 del PARSER_1.C
+del PARSER_2.C
 del MAIN.C
 del INT.C
 del MAIN-0.C
@@ -39,3 +40,8 @@ del INIT-.C
 del MODE.C
 del C_OUT.C
 del SYMTAB_0.c
+del COMINIT.c
+del GET.c
+del SCIENTIFIC.c
+del SEQUENCE.c
+del SORT.c	

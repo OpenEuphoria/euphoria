@@ -189,6 +189,5 @@ global constant opnames = {
 "PEEKS",
 "PEEK_STRING",
 "OPTION_SWITCHES",
-"CONTINUE",
-"IFDEF"
+"RETRY"
 }

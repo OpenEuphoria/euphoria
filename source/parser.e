@@ -16,13 +16,13 @@ constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 sequence branch_list
 branch_list = {}
 
-integer short_circuit     -- are we doing short-circuit code? 
+integer short_circuit     -- are we doing short-circuit code?
 						  -- > 0 means yes - if/elsif/while but not
 						  -- in args, subscripts, slices, {,,}. 
 short_circuit = 0
 boolean short_circuit_B   -- are we in the skippable part of a short
 short_circuit_B = FALSE   -- circuit expression? given short_circuit is TRUE.
-						   
+
 integer SC1_patch        -- place to patch jump address for SC1 ops 
 integer SC1_type         -- OR or AND 
 integer start_index      -- start of current top level command 
@@ -31,15 +31,24 @@ object backed_up_tok  -- place to back up a token
 integer FuncReturn    -- TRUE if a function return appeared 
 integer param_num     -- number of parameters and private variables
 					  -- in current procedure 
-sequence elist        -- back-patch list for end if label 
-sequence exit_list    -- stack of exits to back-patch 
-integer loop_nest     -- current number of nested loops 
-integer stmt_nest     -- nesting level of statement lists 
+sequence break_list        -- back-patch list for end if label
+sequence break_delay        -- delay list for end if label
+sequence exit_list    -- stack of exits to back-patch
+sequence exit_delay    -- delay list for end for/while/until
+sequence continue_list    -- stack of exits to back-patch
+sequence continue_delay    -- stack of exits to back-patch
+sequence loop_labels  -- sequence of loop labels, 0 for unlabelled loops
+sequence if_labels    -- sequence of if block labels, 0 for unlabelled blocks
+sequence for_vars, for_where -- list of loop var s.t. indexes and for-loop nesting level
+sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
+sequence block_list -- list of opcodes for currently active blocks. This list never shrinks
+integer block_index -- index of currently active block
+
+integer loop_nest     -- current number of nested loops
+integer stmt_nest     -- nesting level of statement lists
+
 sequence init_stack   -- var init stack 
 
-constant LOOP_TYPE = 1, -- track loop data for continue like statements
-	LOOP_SYM = 2,
-	LOOP_BP = 3
 sequence loop_stack
 
 -- Expression statistics:
@@ -98,8 +107,12 @@ procedure LeaveTopLevel()
 end procedure
 
 global procedure InitParser()
-	elist = {}
+	break_list = {}
+	break_delay = {}
 	exit_list = {}
+	exit_delay = {}
+	continue_list = {}
+	continue_delay = {}
 	init_stack = {}
 	CurrentSub = 0
 	CreateTopLevel()
@@ -107,7 +120,16 @@ global procedure InitParser()
 	backed_up_tok = UNDEFINED
 	loop_stack = {}
 	loop_nest = 0
-	stmt_nest = 0
+    stmt_nest = 0
+    loop_labels = {}
+    if_labels = {}
+    for_vars = {}
+    for_where = {}
+    continue_addr = {}
+    retry_addr = {}
+    entry_addr = {}
+    block_list = {}
+    block_index = 0
 end procedure
 
 procedure NotReached(integer tok, sequence keyword)
@@ -126,7 +148,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 	   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
 		if (SymTab[sym][S_SCOPE] != SC_PRIVATE and 
 		   equal(SymTab[sym][S_OBJ], NOVALUE)) or 
-		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and 
+		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS]) then
 			if SymTab[sym][S_INITLEVEL] = -1 then
 				if ref then
@@ -143,7 +165,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 					SymTab[sym][S_INITLEVEL] = stmt_nest
 				end if
 			end if
-			-- else we know that it must be initialized at this point 
+			-- else we know that it must be initialized at this point
 		end if
 		-- else ignore parameters, already initialized global/locals 
 	end if
@@ -188,45 +210,107 @@ procedure StraightenBranches()
 end procedure
 
 procedure AppendEList(integer addr)
--- add address to list requiring back-patch at end of if statement 
-	elist = append(elist, addr)
+-- add address to list requiring back-patch at end of if statement
+	break_list = append(break_list, addr)
 end procedure
 
 procedure AppendXList(integer addr)
--- add exit location to list requiring back-patch at end of loop 
+-- add exit location to list requiring back-patch at end of loop
 	exit_list = append(exit_list, addr)
 end procedure
 
+procedure AppendNList(integer addr)
+-- add exit location to list requiring back-patch at end of loop
+	continue_list = append(continue_list, addr)
+end procedure
+
 procedure PatchEList(integer base)
--- back-patch jump offsets for jumps to end of if-statement 
-	integer elist_top
-	
-	elist_top = length(elist)
-	while elist_top > base do
-		backpatch(elist[elist_top], length(Code)+1)
-		elist_top -= 1
-	end while
-	elist = elist[1..base]
+-- back-patch jump offsets for jumps to end of if block
+    integer break_top,n
+
+	if not length(break_list) then
+		return
+	end if
+    break_top = 0
+    for i=length(break_list) to base+1 by -1 do
+        n=break_delay[i]
+        break_delay[i] -= (n>0)
+        if n>1 then
+            if break_top = 0 then
+                break_top = i
+            end if
+        elsif n=1 then
+            backpatch(break_list[i],length(Code)+1)
+        end if
+    end for
+    if break_top=0 then
+	    break_top=base
+    end if   
+    break_delay = break_delay[1..break_top]
+    break_list = break_list[1..break_top]
+
+end procedure
+
+procedure PatchNList(integer base)
+-- back-patch jump offsets for jumps to end of iteration in loops
+    integer next_top,n
+
+	if not length(continue_list) then
+		return
+	end if
+    next_top = 0   
+    for i=length(continue_list) to base+1 by -1 do
+        n=continue_delay[i]
+        continue_delay[i] -= (n>0)
+        if n>1 then
+            if next_top = 0 then
+                next_top = i
+            end if
+        elsif n=1 then
+            backpatch(continue_list[i],length(Code)+1)
+        end if
+    end for
+    if next_top=0 then
+	    next_top=base
+    end if
+    continue_delay =continue_delay[1..next_top]
+    continue_list = continue_list[1..next_top]
+				
 end procedure
 
 procedure PatchXList(integer base)
--- back-patch jump offsets for jumps to end of loop 
-	integer exit_top
-	
-	exit_top = length(exit_list)
-	while exit_top > base do
-		backpatch(exit_list[exit_top], length(Code)+1)
-		exit_top -= 1
-	end while
-	exit_list = exit_list[1..base] 
+-- back-patch jump offsets for jumps to end of loop
+    integer exit_top,n
+
+	if not length(exit_list) then
+		return
+	end if
+    exit_top = 0
+    for i=length(exit_list) to base+1 by -1 do
+        n=exit_delay[i]
+        exit_delay[i] -= (n>0)
+        if n>1 then
+            if exit_top = 0 then
+                exit_top = i
+            end if
+        elsif n=1 then
+            backpatch(exit_list[i],length(Code)+1)
+        end if
+    end for 
+    if exit_top=0 then
+	    exit_top=base
+    end if
+    exit_delay = exit_delay [1..exit_top]
+    exit_list = exit_list [1..exit_top]
+			
 end procedure
 
-procedure putback(token t) 
+procedure putback(token t)
 -- push a scanner token back onto the input stream    
 	backed_up_tok = t
 end procedure
 
-function next_token() 
+function next_token()
 -- read next scanner token
 	token t
 	
@@ -286,7 +370,7 @@ procedure tok_optional(integer tok)
 -- match token or else syntax error 
 		token t
 		--sequence expected, actual
-		
+
 		t = next_token()
 		if t[T_ID] != tok then
 				--expected = LexName(tok)
@@ -477,7 +561,7 @@ procedure Factor()
 		else 
 			op_info1 = tok[T_SYM]
 			emit_op(PROC)
-			if not TRANSLATE then 
+			if not TRANSLATE then
 				if OpTrace then
 					emit_op(UPDATE_GLOBALS)
 				end if
@@ -501,7 +585,7 @@ procedure UFactor()
 	if tok[T_ID] = MINUS then
 		Factor()
 		emit_op(UMINUS)
-	
+
 	elsif tok[T_ID] = NOT then
 		Factor()
 		emit_op(NOT)
@@ -525,7 +609,7 @@ function term()
 	while tok[T_ID] = MULTIPLY or tok[T_ID] = DIVIDE do
 		UFactor() 
 		emit_op(tok[T_ID]) 
-		tok = next_token() 
+		tok = next_token()
 	end while
 	return tok
 end function
@@ -669,7 +753,7 @@ procedure TypeCheck(symtab_index var)
 					emit_op(ATOM_CHECK)
 				
 				else 
-					-- user-defined 
+					-- user-defined
 					if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = 
 					   integer_type then
 						op_info1 = var
@@ -693,7 +777,7 @@ procedure TypeCheck(symtab_index var)
 			
 		elsif which_type = integer_type or
 				 SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = integer_type then
-				 -- check integers too 
+				 -- check integers too
 			emit_op(INTEGER_CHECK)
 		end if
 	end if
@@ -813,7 +897,7 @@ procedure Assignment(token left_var)
 				-- must avoid a possible circular reference
 				dangerous = TRUE  
 			end if
-			
+
 			if dangerous then
 				-- Patch earlier op so it will copy lhs var to 
 				-- a temp to avoid any problem.
@@ -911,77 +995,180 @@ procedure Return_statement()
 	NotReached(tok[T_ID], "return")
 end procedure
 
+function exit_level(token tok,integer flag)
+-- determines optional parameter for continue/exit/retry
+    atom arg
+    integer n
+    integer num_labels
+    sequence labels
+
+    if flag then
+	    labels = if_labels
+    else
+		labels = loop_labels
+    end if
+    num_labels = length(labels) 
+    
+	if tok[T_ID]=ATOM then
+        arg = SymTab[tok[T_SYM]][S_OBJ]
+        n = floor(arg)
+        if arg<=0 then
+            n += num_labels
+		end if
+        if n<=0 or n>num_labels then
+            CompileErr("exit/break argument out of range")
+        end if  
+        return {n, next_token()}
+    elsif tok[T_ID]=STRING then
+        n = find(SymTab[tok[T_SYM]][S_OBJ],labels)
+        if n = 0 then
+            CompileErr("Unknown block label")
+        end if 
+        return {num_labels+1-n, next_token()}
+    elsif tok[T_ID]=VARIABLE then
+        if flag=1 then
+            CompileErr("Use of a for loop index with the break statement is not supported.")
+		end if
+		n = SymTab[tok[T_SYM]][S_SCOPE]
+        if (n = SC_GLOOP_VAR) != (CurrentSub = TopLevelSub) then
+            CompileErr("Attempting to exit a block which is out of reach")
+        end if
+        n = find(tok[T_SYM],for_vars)
+        if n=0 then
+            CompileErr("Optional argument to exit/break is either a numerical constant, label string or for loop index name")
+        end if
+        return {num_labels+1-for_where[n], next_token()}
+    else
+		return {1, tok} -- no parameters
+    end if
+end function
+
 procedure Exit_statement()
--- Parse an exit statement 
-	token tok
-	
-	if loop_nest = 0 then
-		CompileErr("exit statement must be inside a loop")
-	end if
-	emit_op(EXIT)
-	AppendXList(length(Code)+1)
-	emit_forward_addr()     -- to be back-patched 
-	tok = next_token()
-	putback(tok)
-	NotReached(tok[T_ID], "exit")
+-- Parse an exit statement
+    token tok
+    sequence by_ref
+
+    if not length(loop_labels) then
+    	CompileErr("exit statement must be inside a loop")
+    end if
+    by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+    emit_op(EXIT)  
+    AppendXList(length(Code)+1)
+    exit_delay &= by_ref[1]
+    emit_forward_addr()    -- to be back-patched
+    tok = by_ref[2]
+    putback(tok)
+    NotReached(tok[T_ID], "exit")
 end procedure
 
 procedure Continue_statement()
-	token tok
-	integer bp1
-	sequence s
+-- Parse a continue statement
+    token tok
+    sequence by_ref
+    integer loop_level
 
-	if loop_nest = 0 then
-		CompileErr("continue must be inside of loop")
+    if not length(loop_labels) then
+		CompileErr("continue statement must be inside a loop")
+    end if
+    emit_op(ELSE)
+    by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+    loop_level = by_ref[1]
+    if continue_addr[$+1-loop_level] then -- address is known for while loops
+        emit_addr(continue_addr[loop_level])
+    else  -- for loop increment code/repeat loop end of loop test
+        AppendNList(length(Code)+1)
+        continue_delay &= loop_level
+        emit_forward_addr()    -- to be back-patched
+    end if
+    tok = by_ref[2]
+    putback(tok)
+    NotReached(tok[T_ID], "continue")
+end procedure
 
-	elsif loop_stack[$][LOOP_TYPE] = FOR then
-		if TRANSLATE then
-			emit_op(CONTINUE)
-		end if
+procedure Retry_statement()
+-- Parse a retry statement
+-- no backpatching here, since top of loop is always known
+    sequence by_ref
+    token tok
 
-		op_info1 = loop_stack[$][LOOP_SYM]
-		op_info2 = loop_stack[$][LOOP_BP] + 1
-		s = Pop() & Pop()
-		Push(s[2])
-		Push(s[1])
-		emit_op(ENDFOR_GENERAL)
-		Push(s[2])
-		Push(s[1])
-		if TRANSLATE then
-			emit_op(CONTINUE)
-		else
-			emit_op(EXIT)
-		end if
-		AppendXList(length(Code)+1)
-		emit_forward_addr()
-		putback(next_token())
-
-	elsif loop_stack[$][LOOP_TYPE] = WHILE then
-		if TRANSLATE then
-			emit_op(CONTINUE)
-			AppendXList(length(Code)+1)
-			emit_forward_addr()     -- to be back-patched
-			tok = next_token()
-			putback(tok)
-			NotReached(tok[T_ID], "continue")
-		else
-			bp1 = loop_stack[$][LOOP_BP]
-			emit_op(ENDWHILE)
-			emit_addr(bp1)
-		end if
+    if not length(loop_labels) then
+	    CompileErr("retry statement must be inside a loop")
+    end if
+    by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+    if loop_stack[$+1-by_ref[1]][1]=FOR then
+		emit_op(RETRY) -- for Translator to emit a label at the right place
+	else
+		emit_op(ELSE)
 	end if
+    emit_addr(retry_addr[$+1-by_ref[1]])
+    tok = by_ref[2]
+    putback(tok)
+    NotReached(tok[T_ID], "retry")
+end procedure
+
+procedure Break_statement()
+-- Parse an break statement
+    token tok
+    sequence by_ref
+
+    if not length(if_labels) then
+    	CompileErr("break statement must be inside a if block")
+    end if
+    by_ref = exit_level(next_token(),1)
+    emit_op(ELSE)
+    AppendEList(length(Code)+1)
+    break_delay &= by_ref[1]
+    emit_forward_addr()    -- to be back-patched
+    tok = by_ref[2]
+    putback(tok)
+    NotReached(tok[T_ID], "break")
 end procedure
 
 integer forward_Statement_list
 
+procedure finish_block_header(integer opcode)
+    token tok
+    object labbel
+
+    tok = next_token()
+    labbel=0
+    if tok[T_ID]=LABEL then
+        tok = next_token()
+        if tok[T_ID] != STRING then
+			CompileErr("A label clause must be followed by a constant string")
+		end if
+		labbel=SymTab[tok[T_SYM]][S_OBJ]
+    else
+		putback(tok)
+    end if
+    if opcode=IF then
+        if_labels = append(if_labels,labbel)
+    else
+        loop_labels = append(loop_labels,labbel)
+    end if
+	if block_index=length(block_list) then
+	    block_list &= opcode
+	    block_index += 1
+	else
+	    block_index += 1
+	    block_list[block_index] = opcode
+	end if
+	if opcode = IF then
+		opcode = THEN
+	else
+		opcode = DO
+	end if
+    tok_match(opcode)
+end procedure
+
 procedure If_statement()
--- parse an if statement with optional elsif's and optional else 
+-- parse an if statement with optional elsif's and optional else
 	token tok
-	integer prev_false 
+	integer prev_false
 	integer prev_false2
 	integer elist_base
 
-	elist_base = length(elist)
+	elist_base = length(break_list)
 	short_circuit += 1
 	short_circuit_B = FALSE
 	SC1_type = 0
@@ -989,7 +1176,8 @@ procedure If_statement()
 	emit_op(IF)
 	prev_false = length(Code)+1
 	prev_false2 = 0
-	emit_forward_addr() -- to be patched 
+	emit_forward_addr() -- to be patched
+	finish_block_header(IF)
 	if SC1_type = OR then
 		backpatch(SC1_patch-3, SC1_OR_IF)
 		if TRANSLATE then
@@ -1001,13 +1189,13 @@ procedure If_statement()
 		prev_false2 = SC1_patch
 	end if
 	short_circuit -= 1
-	tok_match(THEN)
 	call_proc(forward_Statement_list, {})
 	tok = next_token()
 
 	while tok[T_ID] = ELSIF do
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
+		break_delay &= 1
 		emit_forward_addr()  -- to be patched 
 		if TRANSLATE then
 			emit_op(NOP1)
@@ -1045,7 +1233,8 @@ procedure If_statement()
 		StartSourceLine(FALSE)
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
-		emit_forward_addr() -- to be patched 
+		break_delay &= 1
+		emit_forward_addr() -- to be patched
 		if TRANSLATE then
 			emit_op(NOP1)
 		end if
@@ -1066,33 +1255,47 @@ procedure If_statement()
 		end if
 	end if
    
-	tok_match(END) 
+	tok_match(END)
 	tok_match(IF)
 	
 	if TRANSLATE then
-		if length(elist) > elist_base then
+		if length(break_list) > elist_base then
 			emit_op(NOP1)  -- to emit label here
 		end if
 	end if
 	PatchEList(elist_base)
+    if_labels = if_labels[1..$-1]
+    block_index -= 1
 end procedure
 
+procedure exit_loop(integer exit_base)
+	PatchXList(exit_base)
+    loop_labels = loop_labels[1..$-1]
+    continue_addr = continue_addr[1..$-1]
+    retry_addr = retry_addr[1..$-1]
+    entry_addr = entry_addr[1..$-1]
+    block_index -= 1
+end procedure
 
 procedure While_statement()
--- Parse a while loop 
-	integer bp1 
+-- Parse a while loop
+	integer bp1
 	integer bp2
 	integer exit_base
 
+    exit_base = length(exit_list)
+    entry_addr &= length(Code)+1
+    emit_op(NOP2) -- Entry_statement may patch this later
+    emit_addr(0)
 	if TRANSLATE then
 		emit_op(NOPWHILE)
 	end if
 	bp1 = length(Code)+1
+    continue_addr &= bp1
 	short_circuit += 1
 	short_circuit_B = FALSE
 	SC1_type = 0
 	Expr()
-	tok_match(DO)
 	optimized_while = FALSE
 	emit_op(WHILE)
 	short_circuit -= 1
@@ -1103,6 +1306,7 @@ procedure While_statement()
 	else -- WHILE TRUE was optimized to nothing 
 		bp2 = 0
 	end if
+    finish_block_header(WHILE)
 
 	loop_stack &= {{WHILE, 0, bp1}}
 	loop_nest += 1
@@ -1117,7 +1321,9 @@ procedure While_statement()
 	elsif SC1_type = AND then
 		backpatch(SC1_patch-3, SC1_AND_IF)
 		AppendXList(SC1_patch)
+		exit_delay &= 1
 	end if
+    retry_addr &= length(Code)+1  
 	call_proc(forward_Statement_list, {})
 	tok_match(END)
 	tok_match(WHILE)
@@ -1132,7 +1338,47 @@ procedure While_statement()
 	if bp2 != 0 then
 		backpatch(bp2, length(Code)+1)
 	end if
-	PatchXList(exit_base)
+	exit_loop(exit_base) 
+end procedure
+
+procedure Loop_statement()
+-- Parse a loop-until loop
+    integer bp1
+    integer exit_base,next_base
+
+    exit_base = length(exit_list)
+    next_base = length(continue_list)
+    bp1 = length(Code)+4
+    entry_addr &= length(Code)+1
+    emit_op(NOP2) -- Entry_statement() may patch this
+    emit_addr(0)
+    finish_block_header(LOOP)
+    -- do ... until <expr> is implemented as:
+    -- while 1 do ... if not (<expr>) then exit end if end while
+    emit_op(NOP1)
+	retry_addr &= length(Code)
+    continue_addr &= 0
+    call_proc(forward_Statement_list, {})
+    tok_match(UNTIL)
+    PatchNList(next_base)
+    StartSourceLine(TRUE)
+    short_circuit += 1
+    short_circuit_B = FALSE
+    SC1_type = 0
+    Expr()
+    if SC1_type = OR then
+    	backpatch(SC1_patch-3, SC1_OR_IF)
+    	if TRANSLATE then
+    	    emit_op(NOP1)  -- to get label here
+    	end if
+    	backpatch(SC1_patch, length(Code)+1)
+    elsif SC1_type = AND then
+    	backpatch(SC1_patch-3, SC1_AND_IF)
+    end if
+    short_circuit -= 1
+    emit_op(IF)
+    emit_addr(bp1)
+    exit_loop(exit_base)
 end procedure
 
 integer top_level_parser
@@ -1220,13 +1466,12 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 end function
 
 procedure For_statement()
--- Parse a for statement 
+-- Parse a for statement
 	integer bp1
-	integer exit_base
+    integer exit_base,next_base,end_op
 	token tok, loop_var
 	symtab_index loop_var_sym
-	boolean def1
-	
+
 	loop_var = next_token()
 	if not find(loop_var[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 		CompileErr("a loop variable name is expected here")
@@ -1237,6 +1482,8 @@ procedure For_statement()
 	end if
    
 	tok_match(EQUALS)
+    exit_base = length(exit_list)
+    next_base = length(continue_list)
 	Expr()
 	tok_match(TO)
 	loop_nest += 1
@@ -1245,11 +1492,12 @@ procedure For_statement()
 	tok = next_token()
 	if tok[T_ID] = BY then
 		Expr()
-		def1 = FALSE
-	else 
+    	end_op = ENDFOR_GENERAL -- will be set at runtime by FOR op
+								-- loop var might not be integer
+	else
 		emit_opnd(NewIntSym(1))
 		putback(tok)
-		def1 = TRUE
+    	end_op = ENDFOR_INT_UP1 
 	end if
 
 	loop_var_sym = loop_var[T_SYM]
@@ -1268,9 +1516,14 @@ procedure For_statement()
 	op_info1 = loop_var_sym
 	emit_op(FOR)
 	emit_addr(loop_var_sym)
-	tok_match(DO)
+    finish_block_header(FOR)
+    for_vars &= loop_var_sym
+    for_where &= length(loop_labels)
+    entry_addr &= 0
 	bp1 = length(Code)+1
 	emit_addr(0) -- will be patched - don't straighten
+    retry_addr &= bp1+1
+    continue_addr &= 0
 
 	loop_stack &= {{FOR, loop_var_sym, bp1}}
 
@@ -1286,13 +1539,9 @@ procedure For_statement()
 	StartSourceLine(TRUE)
 	op_info1 = loop_var_sym
 	op_info2 = bp1 + 1
-	if def1 then
-		emit_op(ENDFOR_INT_UP1) -- (loop var might not be integer)
-	else
-		emit_op(ENDFOR_GENERAL) -- will be set at runtime by FOR op 
-	end if
+    PatchNList(next_base)
+	emit_op(end_op)
 	backpatch(bp1, length(Code)+1)
-	PatchXList(exit_base)
 	loop_nest -= 1
 	loop_stack = loop_stack[1..$-1]
 	if not TRANSLATE then
@@ -1302,12 +1551,15 @@ procedure For_statement()
 		end if
 	end if  
 	Hide(loop_var_sym)
+    for_vars = for_vars[1..$-1]
+    for_where = for_where[1..$-1]
+    exit_loop(exit_base) 
 end procedure
 
 function CompileType(symtab_index type_ptr)
 -- Translator only: set the compile type for a variable 
 	integer t
-	
+
 	if SymTab[type_ptr][S_TOKEN] = OBJECT then
 		return TYPE_OBJECT 
 	  
@@ -1331,7 +1583,7 @@ function CompileType(symtab_index type_ptr)
 		elsif t = atom_type then
 			return TYPE_ATOM
 		elsif t = sequence_type then
-			return TYPE_SEQUENCE 
+			return TYPE_SEQUENCE
 		else    
 			return TYPE_OBJECT
 		end if
@@ -1355,7 +1607,7 @@ procedure Global_declaration(symtab_index type_ptr, integer is_global)
 		DefinedYet(sym)
 		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF}) then
 			h = SymTab[sym][S_HASHVAL]
-			-- create a new entry at beginning of this hash chain 
+			-- create a new entry at beginning of this hash chain
 			sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0) 
 			buckets[h] = sym
 			-- more fields set below: 
@@ -1403,7 +1655,7 @@ procedure Global_declaration(symtab_index type_ptr, integer is_global)
 				val += 1
 			end if
 			buckets[SymTab[sym][S_HASHVAL]] = sym
-			SymTab[sym][S_USAGE] = U_WRITTEN     
+			SymTab[sym][S_USAGE] = U_WRITTEN
 		   
 			if TRANSLATE then
 				SymTab[sym][S_GTYPE] = TYPE_OBJECT 
@@ -1494,13 +1746,38 @@ procedure Procedure_call(token tok)
 end procedure
 
 procedure Print_statement()
--- parse a '?' print statement 
-	emit_opnd(NewIntSym(1)) -- stdout 
+-- parse a '?' print statement
+	emit_opnd(NewIntSym(1)) -- stdout
 	Expr()
 	emit_op(QPRINT)
 	SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
 										   E_OTHER_EFFECT)
 end procedure
+
+procedure Entry_statement()
+-- defines an entry statement
+-- must check that it is not in the moddle of an if block
+    if not length(loop_labels) or block_index=0 then
+        CompileErr("the entry statement must appear inside a loop")
+    end if
+	if block_list[block_index]=IF then
+        CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
+	end if
+    if not entry_addr[$] then
+        if length(loop_labels) = for_where[$] then  -- not allowed in an innermost for loop
+            CompileErr("the entry statement must apply to a while or loop block")
+        else -- loop already has an entry point
+            CompileErr("the entry statement must appear at most once inside a loop")
+        end if
+    end if
+    backpatch(entry_addr[$],ELSE)
+    backpatch(entry_addr[$]+1,length(Code)+1+(TRANSLATE>0))
+    entry_addr[$] = 0
+	if TRANSLATE then
+	    emit_op(NOP1)
+	end if
+end procedure
+
 
 procedure Statement_list()
 -- Parse a list of statements 
@@ -1540,10 +1817,22 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Exit_statement()
 			
+		elsif id = BREAK then
+			StartSourceLine(TRUE)
+			Break_statement()
+			
 		elsif id = WHILE then
 			StartSourceLine(TRUE)
 			While_statement()
 			
+		elsif id = LOOP then
+		    StartSourceLine(TRUE)
+	        Loop_statement()
+		    
+		elsif id = ENTRY then
+		    StartSourceLine(TRUE)
+		    Entry_statement()
+
 		elsif id = QUESTION_MARK then
 			StartSourceLine(TRUE)
 			Print_statement()
@@ -1551,6 +1840,10 @@ procedure Statement_list()
 		elsif id = CONTINUE then
 			StartSourceLine(TRUE)
 			Continue_statement()
+
+		elsif id = RETRY then
+			StartSourceLine(TRUE)
+			Retry_statement()
 
 		elsif id = IFDEF then
 			StartSourceLine(TRUE)
@@ -1581,7 +1874,7 @@ procedure SubProg(integer prog_type, integer is_global)
 	if not find(prog_name[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 		CompileErr("a name is expected here")
 	end if
-	p = prog_name[T_SYM] 
+	p = prog_name[T_SYM]
 
 	DefinedYet(p)
 
@@ -1629,7 +1922,7 @@ procedure SubProg(integer prog_type, integer is_global)
 	SymTab[p][S_TEMPS] = 0
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
-	
+
 	StartSourceLine(FALSE)  
 	tok_match(LEFT_ROUND)
 	tok = next_token()
@@ -1653,7 +1946,7 @@ procedure SubProg(integer prog_type, integer is_global)
 		if TRANSLATE then
 			SymTab[sym][S_GTYPE] = CompileType(type_sym)
 		end if
-	   
+
 		SymTab[sym][S_USAGE] = U_WRITTEN     
 		tok = next_token()
 		if tok[T_ID] = COMMA then
@@ -1677,7 +1970,7 @@ procedure SubProg(integer prog_type, integer is_global)
 		CompileErr("types must have exactly one parameter")
 	end if
 	tok = next_token()
-	-- parameters are numbered: 0, 1, ... num_args-1 
+	-- parameters are numbered: 0, 1, ... num_args-1
 	-- other privates are numbered: num_args, num_args+1, ... 
 	while tok[T_ID] = TYPE or tok[T_ID] = QUALIFIED_TYPE do
 		-- parse the next private variable declaration
@@ -1725,7 +2018,7 @@ procedure SubProg(integer prog_type, integer is_global)
 				CompileErr("type must return true / false value")
 			end if
 		end if
-		emit_op(BADRETURNF) -- function/type shouldn't reach here 
+		emit_op(BADRETURNF) -- function/type shouldn't reach here
 	
 	else 
 		StartSourceLine(TRUE)
@@ -1772,7 +2065,7 @@ end procedure
 
 sequence mix_msg
 mix_msg = "can't mix profile and profile_time"
-
+	 include sequence.e
 procedure SetWith(integer on_off)
 -- set a with/without option 
 	sequence option
@@ -1935,6 +2228,11 @@ global procedure real_parser(integer nested)
 			While_statement()
 			ExecCommand()
 
+		elsif id = LOOP then
+		    StartSourceLine(TRUE)
+		    Loop_statement()
+		    ExecCommand()
+	
 		elsif id = PROC or id = QUALIFIED_PROC then
 			StartSourceLine(TRUE)
 			if id = PROC then
@@ -1998,7 +2296,7 @@ global procedure real_parser(integer nested)
 		
 		tok = next_token()
 	end while 
-	
+
 	emit_op(RETURNT)
 	StraightenBranches()
 	SymTab[TopLevelSub][S_CODE] = Code

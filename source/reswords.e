@@ -113,7 +113,7 @@ LESSEQ_IFW     = 106,
 GREATER_IFW    = 107,
 NOT_IFW        = 108,
 GLOBAL_INIT_CHECK = 109,
-NOP2           = 110,   -- Interpreter only
+NOP2           = 110,   
 MACHINE_FUNC   = 111,
 MACHINE_PROC   = 112,
 ASSIGN_I       = 113,   -- keep these _I's together ... 
@@ -189,10 +189,8 @@ PEEK2U = 182,
 PEEKS = 183,
 PEEK_STRING = 184,
 OPTION_SWITCHES = 185,
-CONTINUE = 186,
-IFDEF = 187,
-ELSIFDEF = 188,
-MAX_OPCODE = 188
+RETRY = 186,
+MAX_OPCODE = 186
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])
@@ -246,6 +244,8 @@ BY        = 404,
 PROCEDURE = 405,
 FUNCTION  = 406,
 
+IFDEF     = 407,
+ELSIFDEF  = 408,
 
 THEN      = 409,
 DO        = 410,
@@ -256,16 +256,23 @@ OBJECT    = 414,
 TYPE_DECL = 415,
 CONSTANT  = 416,
 INCLUDE   = 417,
-
+LABEL	  = 418,
 WITH      = 419,
 WITHOUT   = 420,
-ENUM      = 421
+LOOP	  = 421,
+UNTIL     = 422,
+ENTRY     = 423,
+BREAK     = 424,
+CONTINUE  = 425,
+
+ENUM      = 427
 
 global constant 
 FUNC          = 501,
 ATOM          = 502,
 STRING        = 503,
 TYPE          = 504,
+
 QUALIFIED_VARIABLE = 515,
 SLICE         = 516,
 VARIABLE_DECL = 517,

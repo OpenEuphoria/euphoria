@@ -200,10 +200,9 @@
 #define PEEK_STRING 184
 
 #define OPTION_SWITCHES 185
-#define CONTINUE 186
-#define IFDEF 187
-#define ELSIFDEF 188
-#define MAX_OPCODE 188
+
+#define RETRY 186
+#define MAX_OPCODE 186
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]
    in be_execute.c, be_runtime.c. redef.h,

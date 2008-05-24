@@ -28,7 +28,7 @@ procedure BackEnd(integer il_file)
 	atom e_addr, l_addr, no_name, sli, include_info, include_node, include_array
 	integer string_size, short, size, repcount
 	sequence lit_string, other_strings
-	object entry
+	object eentry
 	
 	-- create a smaller back-end version of symbol table 
 	
@@ -45,62 +45,62 @@ procedure BackEnd(integer il_file)
 	
 	addr = st + ST_ENTRY_SIZE
 	for i = 1 to length(SymTab) do
-		entry = SymTab[i]
+		eentry = SymTab[i]
 		-- common to temps, vars, routines
 		-- +0 (OBJ) is set to literal value by back-end
 		-- "constant" variables are initialized with executable code
-		if atom(entry) then
+		if atom(eentry) then
 			-- deleted
-			poke4(addr+4, entry) -- NEXT
+			poke4(addr+4, eentry) -- NEXT
 			poke(addr+8, M_TEMP) -- MODE
 			poke(addr+9, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
 		
 		else
-			poke4(addr+4, entry[S_NEXT])
-			poke(addr+8, entry[S_MODE])
-			poke(addr+9, entry[S_SCOPE])
+			poke4(addr+4, eentry[S_NEXT])
+			poke(addr+8, eentry[S_MODE])
+			poke(addr+9, eentry[S_SCOPE])
 
-			if length(entry) >= S_NAME and sequence(entry[S_NAME]) then
+			if length(eentry) >= S_NAME and sequence(eentry[S_NAME]) then
 				-- temps and literals have no NAME field
-				poke(addr+10, entry[S_FILE_NO])
-				poke4(addr+16, entry[S_TOKEN])
-				string_size += length(entry[S_NAME])+1
+				poke(addr+10, eentry[S_FILE_NO])
+				poke4(addr+16, eentry[S_TOKEN])
+				string_size += length(eentry[S_NAME])+1
 			end if
 		
-			if entry[S_MODE] = M_NORMAL then
+			if eentry[S_MODE] = M_NORMAL then
 				-- vars and routines
 				
-				if find(entry[S_TOKEN], {PROC, FUNC, TYPE}) then
+				if find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
 					-- routines only
-					if sequence(entry[S_CODE]) then
+					if sequence(eentry[S_CODE]) then
 						-- routines with code
-						e_addr = allocate(4+4*length(entry[S_CODE])) -- IL code
-						poke4(e_addr, length(entry[S_CODE]))
-						poke4(e_addr+4, entry[S_CODE])
+						e_addr = allocate(4+4*length(eentry[S_CODE])) -- IL code
+						poke4(e_addr, length(eentry[S_CODE]))
+						poke4(e_addr+4, eentry[S_CODE])
 						poke4(addr+20, e_addr)
 					
-						if sequence(entry[S_LINETAB]) then
+						if sequence(eentry[S_LINETAB]) then
 							-- line table
-							l_addr = allocate(4*length(entry[S_LINETAB])) 
-							poke4(l_addr, entry[S_LINETAB])
+							l_addr = allocate(4*length(eentry[S_LINETAB])) 
+							poke4(l_addr, eentry[S_LINETAB])
 							poke4(addr+24, l_addr)
 						else
 							-- pointer to linetable will be NULL
 						end if
 					end if
-					poke4(addr+28, entry[S_FIRSTLINE])
-					poke4(addr+32, entry[S_TEMPS])
-					poke4(addr+36, entry[S_NUM_ARGS])
+					poke4(addr+28, eentry[S_FIRSTLINE])
+					poke4(addr+32, eentry[S_TEMPS])
+					poke4(addr+36, eentry[S_NUM_ARGS])
 					--
 					--
-					poke4(addr+48, entry[S_STACK_SPACE])
+					poke4(addr+48, eentry[S_STACK_SPACE])
 				end if
 			
-			elsif (length(entry) >= S_TOKEN and entry[S_TOKEN] = NAMESPACE) or 
-				  (length(entry) < S_NAME and entry[S_MODE] = M_CONSTANT) then
+			elsif (length(eentry) >= S_TOKEN and eentry[S_TOKEN] = NAMESPACE) or 
+				  (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) then
 				-- compress literal values in memory
 				poke4(addr, length(lit_string))  -- record the current offset
-				lit_string &= compress(entry[S_OBJ])
+				lit_string &= compress(eentry[S_OBJ])
 		
 			end if
 
@@ -122,20 +122,20 @@ procedure BackEnd(integer il_file)
 	entry_addr = st
 	no_name = allocate_string("<no-name>")
 	for i = 1 to length(SymTab) do
-		entry = SymTab[i]
+		eentry = SymTab[i]
 		entry_addr += ST_ENTRY_SIZE
-		if sequence(entry) then 
-			if length(entry) >= S_NAME then
-				if sequence(entry[S_NAME]) then
+		if sequence(eentry) then 
+			if length(eentry) >= S_NAME then
+				if sequence(eentry[S_NAME]) then
 					-- record the address of the name string
 					poke4(entry_addr+12, addr) 
 					-- store the name string
-					poke(addr, entry[S_NAME])
-					addr += length(entry[S_NAME])
+					poke(addr, eentry[S_NAME])
+					addr += length(eentry[S_NAME])
 					poke(addr, 0)  -- 0-delimited string
 					addr += 1
 				
-					if entry[S_TOKEN] = NAMESPACE then
+					if eentry[S_TOKEN] = NAMESPACE then
 						-- convert offset to address
 						poke4(entry_addr, peek4u(entry_addr)+lit) 
 					end if
@@ -144,7 +144,7 @@ procedure BackEnd(integer il_file)
 					poke4(entry_addr+12, no_name)
 				end if  
 			
-			elsif entry[S_MODE] = M_CONSTANT then
+			elsif eentry[S_MODE] = M_CONSTANT then
 				-- literals - convert offset of literal value to address
 				poke4(entry_addr, peek4u(entry_addr)+lit) 
 			
@@ -176,32 +176,32 @@ procedure BackEnd(integer il_file)
 	
 	for i = 1 to length(slist) do
 		if sequence(slist[i]) then
-			entry = slist[i]
+			eentry = slist[i]
 			repcount = 1
 		else
-			entry = slist[i-1]
-			if length(entry) < 4 then
-				entry[1] += 1
+			eentry = slist[i-1]
+			if length(eentry) < 4 then
+				eentry[1] += 1
 			else
-				entry[LINE] += 1
+				eentry[LINE] += 1
 			end if
 			repcount = slist[i]
 		end if
 		
-		short = length(entry) < 4
+		short = length(eentry) < 4
 		for j = 1 to repcount do
-			poke4(addr+4, entry[LINE-short])  -- hits 4,5,6,7 
+			poke4(addr+4, eentry[LINE-short])  -- hits 4,5,6,7 
 											  -- 7 should be 0 unless 16 million
-			poke(addr+6, entry[LOCAL_FILE_NO-short])
+			poke(addr+6, eentry[LOCAL_FILE_NO-short])
 			if not short then
-				if entry[SRC] then
-					poke4(addr, all_source[1+floor(entry[SRC]/SOURCE_CHUNK)]
-					+remainder(entry[SRC], SOURCE_CHUNK)) -- store actual address
+				if eentry[SRC] then
+					poke4(addr, all_source[1+floor(eentry[SRC]/SOURCE_CHUNK)]
+					+remainder(eentry[SRC], SOURCE_CHUNK)) -- store actual address
 				end if
-				poke(addr+7, entry[OPTIONS]) -- else leave it 0
+				poke(addr+7, eentry[OPTIONS]) -- else leave it 0
 			end if
 			addr += 8
-			entry[LINE-short] += 1
+			eentry[LINE-short] += 1
 		end for
 	end for
 

@@ -383,7 +383,7 @@ static object do_peek2(object a, int b, int *pc)
 			while (--i >= 0) {
 #ifdef EDJGPP                       
 				if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
+					top = _farpeekl(_go32_info_block.selector_for_linear_memory,
 									   (unsigned)peek4_addr++);
 				else    
 #endif                      
@@ -1014,6 +1014,7 @@ void code_set_pointers(int **code)
 
 			case ENDWHILE:
 			case ELSE:
+			case RETRY:
 		case EXIT:
 				code[i+1] = SET_JUMP(code[i+1]);
 				i += 2;
@@ -1080,15 +1081,11 @@ void code_set_pointers(int **code)
 				i += 3;
 		break;
 
-		case CONTINUE:
-		printf("case CONTINUE\n");
-		break;
-
 			case LESS:
 			case GREATEREQ:
 			case EQUALS:
 			case NOTEQ:
-			case LESSEQ: 
+			case LESSEQ:
 			case GREATER:
 			case AND: 
 			case OR: 
@@ -1692,17 +1689,21 @@ void do_exec(int *start_pc)
   NULL /* END_PARAM_CHECK not emitted */, 
   &&L_CONCAT_N, 
   NULL, /* L_NOPWHILE not emitted */
+/* 160 */
   NULL, /* L_NOP1 not emitted */
   &&L_PLENGTH,
   &&L_LHS_SUBS1,
   &&L_PASSIGN_SUBS, &&L_PASSIGN_SLICE, &&L_PASSIGN_OP_SUBS, 
   &&L_PASSIGN_OP_SLICE,
-  &&L_LHS_SUBS1_COPY, &&L_TASK_CREATE, &&L_TASK_SCHEDULE, &&L_TASK_YIELD,
+  &&L_LHS_SUBS1_COPY,
+/* 169 */
+  &&L_TASK_CREATE, &&L_TASK_SCHEDULE, &&L_TASK_YIELD,
   &&L_TASK_SELF, &&L_TASK_SUSPEND, &&L_TASK_LIST,
-  &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, 
-/* 178 */ &&L_TASK_CLOCK_START, &&L_FIND_FROM, &&L_MATCH_FROM,
+  &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, L_TASK_CLOCK_START,
+/* 177 */ 
+  && &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
-  &&L_OPTION_SWITCHES, &&L_CONTINUE
+  &&L_OPTION_SWITCHES
   };
 #endif
 #endif
@@ -1968,11 +1969,11 @@ void do_exec(int *start_pc)
 
 			case L_EXIT:
 			case L_ENDWHILE:
-		case L_ELSE:
-		case L_CONTINUE:
+			case L_ELSE:
+			case L_RETRY:
 				pc = (int *)pc[1];
 				thread();
-		BREAK;
+				BREAK;
 
 			case L_PLUS1:
 				a = (object)pc[3];
