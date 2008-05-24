@@ -1703,7 +1703,7 @@ void do_exec(int *start_pc)
 /* 177 */ 
   &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
-  &&L_OPTION_SWITCHES
+  &&L_OPTION_SWITCHES, &&L_RETRY
   };
 #endif
 #endif

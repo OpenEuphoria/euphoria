@@ -75,3 +75,4 @@ while idx < 2 do
     end while
 end while
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
+
