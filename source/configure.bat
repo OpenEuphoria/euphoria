@@ -1,3 +1,4 @@
+@echo off
 echo # Configuration for Watcom > config.wat
 
 :Loop

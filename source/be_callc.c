@@ -260,34 +260,13 @@ void PatchCallc()
 #endif // EBORLAND
 
 #ifdef EWATCOM
-void push(void);
+void wcpush(long X);
+#define push() wcpush(last_offset);
 #define pop()
-
-// The magic number below is the stack offset of the "arg" variable.
-// With WATCOM use:
-// wdisasm be_callc.obj > be_callc.asm
-// then check the instructions just before the PUSH xxH[EBP] instructions
-// that are used to push the arg variable. They should use the same offset
-// for "arg" as the PUSH that comes right after them. If not, change 
-// the value below. The stack offset value can change whenever be_callc.c 
-// changes. Also see readme.txt
-#ifdef EDOS
-#pragma aux push = \
-		"PUSH  +56H[EBP]" \
-		modify [ESP];
-#else
-// EWINDOWS
-// For OW, needs to be 62
-#ifdef EOW
-#pragma aux push = \
-		"PUSH  +62H[EBP]" \
-		modify [ESP];
-#else
-#pragma aux push = \
-		"PUSH  +5AH[EBP]" \
-		modify [ESP];
-#endif // EOW
-#endif
+#pragma aux wcpush = \
+                "PUSH [EAX]" \
+                modify [ESP] \
+                parm [EAX];
 #endif // EWATCOM
 
 
