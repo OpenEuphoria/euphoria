@@ -46,6 +46,29 @@ function hashfn(sequence name)
 	return remainder(val, NBUCKETS) + 1
 end function
 
+-- take a symbol out of the chain of hashes, which effectively hides it from
+-- ever being found
+global procedure remove_symbol( symtab_index sym )
+	integer hash
+	integer st_ptr
+
+	
+	hash = hashfn( SymTab[sym][S_NAME] )
+	st_ptr = buckets[hash]
+	while st_ptr != sym do
+		st_ptr = SymTab[st_ptr][S_SAMEHASH]
+	end while
+	
+	if st_ptr = buckets[hash] then
+		-- it was the last one, and in the bucket
+		buckets[hash] = SymTab[st_ptr][S_SAMEHASH]
+		
+	else
+		-- we're somewhere in the chain
+		SymTab[st_ptr][S_SAMEHASH] = SymTab[sym][S_SAMEHASH]
+	end if
+end procedure
+
 global function NewEntry(sequence name, integer varnum, integer scope, 
 				  integer token, integer hashval, symtab_index samehash, 
 				  symtab_index type_sym)
@@ -501,7 +524,7 @@ function symbol_in_include_path( symtab_index sym, integer check_file, sequence 
 		end if
 		return 0
 end function
-with trace
+
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 

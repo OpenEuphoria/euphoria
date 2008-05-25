@@ -403,7 +403,7 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 .\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 
 
-$(OBJDIR)\main-.c : $(EU_TARGET)ex
+.\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	$(EXE) $(INCDIR) ..\ec.ex $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..

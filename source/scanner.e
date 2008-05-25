@@ -41,6 +41,8 @@ LastLineNumber = -1
 global object shebang              -- #! line (if any) for Linux/FreeBSD
 shebang = 0
 
+sequence default_namespaces
+
 -- Local variables
 sequence char_class  -- character classes, some are negative
 sequence id_char     -- char that could be in an identifier
@@ -111,6 +113,8 @@ global procedure InitLex()
 			id_char[i] = TRUE
 		end if
 	end for
+	
+	default_namespaces = {0}
 end procedure
 
 global procedure ResetTP()
@@ -465,16 +469,92 @@ function same_name(sequence a, sequence b)
 	end if
 end function
 
+function NameSpace_declaration(symtab_index sym)
+-- add a new namespace symbol to the symbol table.
+-- Similar to adding a local constant. 
+	integer h
+	
+	DefinedYet(sym)
+	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF}) then
+		-- override the global or predefined symbol 
+		h = SymTab[sym][S_HASHVAL]
+		-- create a new entry at beginning of this hash chain 
+		sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0) 
+		buckets[h] = sym
+	end if
+	SymTab[sym][S_SCOPE] = SC_LOCAL
+	SymTab[sym][S_MODE] = M_CONSTANT
+	SymTab[sym][S_TOKEN] = NAMESPACE -- [S_OBJ] will get the file number referred-to
+	if TRANSLATE then
+		num_routines += 1 -- order of ns declaration relative to routines 
+						  -- is important
+	end if
+	return sym
+end function
+
+integer scanner_rid
+
+procedure default_namespace( integer file_no, integer use )
+	token tok
+	symtab_index sym
+	
+	tok = call_func( scanner_rid, {} )
+	if tok[T_ID] = VARIABLE and equal( SymTab[tok[T_SYM]][S_NAME], "namespace" ) then
+		-- add the default namespace
+		tok = call_func( scanner_rid, {} )
+		if tok[T_ID] != VARIABLE then
+			CompileErr("missing default namespace qualifier")
+		end if
+		
+		sym = tok[T_SYM]
+		
+		-- if it's the main file, file_no will be zero, because
+		-- there is no using file		
+		if file_no and use then
+			
+			SymTab[sym][S_FILE_NO] = file_no
+			sym  = NameSpace_declaration( sym )
+			SymTab[sym][S_OBJ] = current_file_no
+		else
+			remove_symbol( sym )
+		end if
+		
+		default_namespaces[current_file_no] = SymTab[sym][S_NAME]
+		
+	else
+		-- start over from the beginning of the line
+		bp = 1
+	end if
+	
+end procedure
+
+
+procedure declare_default_namespace( integer namespace_file )
+	token s
+	
+	s = keyfind(default_namespaces[namespace_file], -1)
+	if not find(s[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+		CompileErr(sprintf("default namespace identifier '%s' for %s already defined",
+			{default_namespaces[namespace_file], file_name[namespace_file]}))
+	end if
+	printf(1, "Declaring default namespace '%s' for file '%s' in including file '%s'\n",
+		{default_namespaces[namespace_file], file_name[namespace_file], file_name[current_file_no]})
+	new_include_space = NameSpace_declaration(s[T_SYM])
+	SymTab[new_include_space][S_OBJ] = namespace_file
+	SymTab[new_include_space][S_FILE_NO] = current_file_no
+end procedure
+
 procedure IncludePush()
 -- start reading from new source file with given name  
-	integer new_file
+	integer new_file, old_file_no
 	sequence new_name
 
 	start_include = FALSE
 
 	new_file = path_open() -- sets new_include_name to full path 
-	
+
 	new_name = name_ext(new_include_name)
+	
 	for i = length(file_name) to 1 by -1 do
 		-- compare file names first to reduce calls to dir() 
 		if same_name(new_name, name_ext(file_name[i])) and
@@ -486,12 +566,20 @@ procedure IncludePush()
 			--  same name, size and time-stamp down to the second)
 			if new_include_space != 0 then
 				SymTab[new_include_space][S_OBJ] = i -- but note any namespace
+				
+			elsif sequence( default_namespaces[i] ) then
+				-- no namespace declared, but there is a default namespace
+				declare_default_namespace( i )
 			end if
 			close(new_file)
+			
 			if not find( i, file_include[current_file_no] ) then
 				-- don't reparse the file, but note that it was included here
 				file_include[current_file_no] &= i
+				
 			end if
+			
+			read_line() -- we can't return without reading a line first
 			return -- ignore it  
 		end if
 	end for
@@ -521,11 +609,24 @@ procedure IncludePush()
 		CompileErr("program includes too many files")
 	end if
 	file_name = append(file_name, new_include_name)
+	default_namespaces &= 0
+	
+	old_file_no = current_file_no
 	current_file_no = length(file_name)
+	line_number = 0
+	read_line()	
+	
 	if new_include_space != 0 then
 		SymTab[new_include_space][S_OBJ] = current_file_no
+		default_namespace( old_file_no, 0 )
+	
+	else
+		-- look for a default namespace
+		default_namespace( old_file_no, 1 )
 	end if
-	line_number = 0
+	
+	
+	
 end procedure
 
 
@@ -787,9 +888,11 @@ global function Scanner()
 		elsif class = NEWLINE then
 			if start_include then
 				IncludePush()
+			else
+				read_line()
 			end if
-			read_line()
 			
+
 		elsif class = EQUALS then
 			return {class, 0}  
 
@@ -885,8 +988,10 @@ global function Scanner()
 				-- comment
 				if start_include then
 					IncludePush()
+				else
+					read_line()
 				end if
-				read_line()
+				
 			elsif ch = '=' then
 				return {MINUS_EQUALS, 0}
 			else 
@@ -1065,29 +1170,7 @@ global function Scanner()
 		end if
    end while
 end function
-
-function NameSpace_declaration(symtab_index sym)
--- add a new namespace symbol to the symbol table.
--- Similar to adding a local constant. 
-	integer h
-	
-	DefinedYet(sym)
-	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF}) then
-		-- override the global or predefined symbol 
-		h = SymTab[sym][S_HASHVAL]
-		-- create a new entry at beginning of this hash chain
-		sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0) 
-		buckets[h] = sym
-	end if
-	SymTab[sym][S_SCOPE] = SC_LOCAL
-	SymTab[sym][S_MODE] = M_CONSTANT
-	SymTab[sym][S_TOKEN] = NAMESPACE -- [S_OBJ] will get the file number referred-to
-	if TRANSLATE then
-		num_routines += 1 -- order of ns declaration relative to routines 
-						  -- is important
-	end if
-	return sym
-end function
+scanner_rid = routine_id("Scanner")
 
 global procedure eu_namespace()
 -- add the "eu" namespace
@@ -1095,6 +1178,7 @@ global procedure eu_namespace()
 	symtab_index eu_ns
 	
 	eu_tok = keyfind("eu", -1)
+	-- create a new entry at beginning of this hash chain
 	eu_ns  = NameSpace_declaration(eu_tok[T_SYM])
 	SymTab[eu_ns][S_OBJ] = 0
 	SymTab[eu_ns][S_SCOPE] = SC_GLOBAL
@@ -1213,7 +1297,7 @@ global procedure IncludeScan()
 	
 	-- record the new filename  
 	new_include_name = gtext  
-	
+
 	-- skip whitespace  
 	ch = getch()
 	while ch = ' ' or ch = '\t' do
@@ -1266,6 +1350,12 @@ global procedure IncludeScan()
 	end if
 	
 	start_include = TRUE -- let scanner know
+	
 end procedure
 
 
+-- start parsing the main file
+global procedure main_file()
+	read_line()
+	default_namespace( 0, 0 )
+end procedure

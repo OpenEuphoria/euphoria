@@ -229,10 +229,13 @@ procedure main()
 	InitEmit()
 	InitParser()
 	InitLex()
-
+	
+	-- sets up the internal namespace
 	eu_namespace()
-
-	read_line()
+	
+	-- starts reading and checks for a default namespace
+	main_file()
+	
 	parser()
 
 	-- we've parsed successfully

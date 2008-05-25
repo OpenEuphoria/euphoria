@@ -1220,6 +1220,25 @@ included file.</p>
     eu:puts(1, "Hello, world!\n")
 </eucode>
 
+<p>
+ Files can also declare a default namespace to be used with the file.  When a file with a 
+ default namespace is included, if the include statement did not specify a namespace, then
+ the default namespace will be automatically declared in that file.  If the include
+ statement declares a namespace for the newly included file, then the specified namespace
+ will be available instead of the default.  No two files can use the same namespace 
+ identifier.  If two files with the same default namespaces are included, at least one
+ will be required to have a different namespace to be specified.
+</p>
+
+<p>
+ To declare a default namespace in a file, the first token (whitespace and comments are
+ ignored) should be 'namespace' followed by the desired name:
+</p>
+<eucode>
+  -- foo.e :  this file does some stuff
+  namespace foo
+  
+</eucode>
 
 <p> 
  Euphoria encourages you to restrict the scope of symbols. If all symbols were
