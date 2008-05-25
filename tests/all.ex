@@ -36,7 +36,6 @@ include t_euns.e
 include t_file.e
 include t_flow.e
 include t_get.e
-include t_locale.e
 include t_loop.e
 include t_map.e
 include t_math.e
@@ -51,7 +50,13 @@ include t_stack.e
 include t_types.e
 include t_unicode.e
 include t_wildcard.e
-           
+
+-- Locale does not work on DOS
+ifdef !DOS32 then
+	include t_locale.e
+end ifdef
+
 test_summary()
 
 oldpwd = chdir(oldpwd)
+
