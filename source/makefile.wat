@@ -145,6 +145,7 @@ EU_LIB_OBJECTS = &
 	.\$(OBJDIR)\back\be_inline.obj &
 	.\$(OBJDIR)\back\be_runtime.obj &
 	.\$(OBJDIR)\back\be_task.obj &
+	.\$(OBJDIR)\back\be_pcre.obj &
 	.\$(OBJDIR)\back\be_callc.obj
 
 EU_BACKEND_RUNNER_FILES = &
@@ -307,7 +308,7 @@ backendflag: .SYMBOLIC
 ecw.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	wlib -q ecw.lib $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 
-ec.lib : runtime $(EU_LIB_OBJECTS)
+ec.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	
 pcre : .SYMBOLIC .\pcre\pcre.h .\pcre\config.h $(PCRE_OBJECTS)
 
