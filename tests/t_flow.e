@@ -59,4 +59,20 @@ test_equal("Labelled exit",1,total_exit)
 test_equal("Loop with entry",{{4,1},{7,2},{10,3},{13,4}},loops)
 test_equal("Break with backward index",0,p)
 
+sequence a
+integer idx,idx2
+
+a = {}
+idx = 0
+while idx < 2 do
+    idx += 1
+    idx2 = 0
+    while idx2 < 5 do
+        idx2 += 1
+        if idx2 > 1 and idx2 < 5 then continue end if
+        a &= {{idx,idx2}}
+    end while
+end while
+
+test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 

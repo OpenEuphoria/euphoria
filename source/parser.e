@@ -1074,7 +1074,7 @@ procedure Continue_statement()
     by_ref = exit_level(next_token(),0) -- can't pass tok by reference
     loop_level = by_ref[1]
     if continue_addr[$+1-loop_level] then -- address is known for while loops
-        emit_addr(continue_addr[loop_level])
+        emit_addr(continue_addr[$+1-loop_level])
     else  -- for loop increment code/repeat loop end of loop test
         AppendNList(length(Code)+1)
         continue_delay &= loop_level
