@@ -6,6 +6,10 @@
 include sort.e
 include misc.e
 include wildcard.e
+ifdef LINUX then
+else
+with define=NOTLINIX
+end ifdef
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -31,15 +35,18 @@ type boolean(integer b)
 end type
 
 global integer PATHSEP
+global sequence PATHSEPS
 global sequence NL
 
-if platform() = LINUX then
+ifdef LINUX then
 	PATHSEP='/'
+	PATHSEPS = "/"
 	NL = "\n"
 else
 	PATHSEP='\\'
+	PATHSEPS = ":\\/"
 	NL = "\r\n"
-end if
+end ifdef
 
 global function seek(file_number fn, file_position pos)
 -- Seeks to a byte position in the file, 
@@ -65,11 +72,11 @@ global constant LOCK_SHARED = 1,
 				LOCK_EXCLUSIVE = 2
 		 
 type lock_type(integer t)
-	if platform() = LINUX then
+	ifdef LINUX then
 		return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
 	else
 		return 1
-	end if
+	end ifdef
 end type
 
 type byte_range(sequence r)
@@ -133,7 +140,12 @@ global function dir(sequence name)
 		-- a directory and file name.
 		idx = length(name)
 		while idx > 0 do
-			if name[idx] = '/' or name[idx] = '\\' then
+			ifdef WIN32 then
+				if name[idx] = '\\' then
+					exit
+				end if
+			end ifdef
+			if name[idx] = '/' then
 				exit
 			end if
 			idx -= 1
@@ -294,12 +306,12 @@ global function read_lines(object f)
 	if fn < 0 then return -1 end if
 	
 	ret = {}
-	y = gets(fn)
 	while sequence(y) do
 		if y[$] = '\n' then
 			y = y[1..$-1]
 		end if
 		ret = append(ret, y)
+	entry
 		y = gets(fn)
 	end while
 	
@@ -370,7 +382,7 @@ global function read_file(object f)
 	end for
 		
 	if sequence(f) then
-			close(fn)
+		close(fn)
 	end if
 
 	return ret
@@ -408,27 +420,26 @@ global function pathinfo(sequence path)
 	slash = 0
 	period = 0
 
-	for i = 1 to length(path) do
+	for i = length(path) to 1 by -1 do
 		ch = path[i]
-		if ch = '.' then
+		if period = 0 and ch = '.' then
 			period = i
-		elsif ch = PATHSEP then
+		elsif find(ch, PATHSEPS) then
 			slash = i
-			period = -1  -- extension has to be part of the filename
+			exit
 		end if
 	end for
 
 	if slash > 0 then
 		dir_name = path[1..slash-1]
-		if platform() != LINUX then
+		
+		ifdef NOTLINIX then
 			ch = find(':', dir_name)
 			if ch != 0 then
 				drive_id = dir_name[1..ch-1]
 				dir_name = dir_name[ch+1..$]
 			end if
-		end if
-	else
-		slash = 0
+		end ifdef
 	end if
 	if period > 0 then
 		file_name = path[slash+1..period-1]

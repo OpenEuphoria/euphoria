@@ -114,18 +114,12 @@ global function find_all(object x, sequence source, integer from)
 	sequence ret
 
 	ret = {}
-
-	while 1 do
-		from = find_from(x, source, from)
-		if from = 0 then
-			exit
-		end if
-
+	while from > 0 do
 		ret &= from
-
 		from += 1
+	entry
+		from = find_from(x, source, from)
 	end while
-
 	return ret
 end function
 
@@ -133,16 +127,11 @@ global function match_all(object x, sequence source, integer from)
 	sequence ret
 
 	ret = {}
-
-	while 1 do
-		from = match_from(x, source, from)
-		if from = 0 then
-			exit
-		end if
-
+	while from > 0 do
 		ret &= from
-
 		from += length(x)
+	entry
+		from = match_from(x, source, from)
 	end while
 
 	return ret

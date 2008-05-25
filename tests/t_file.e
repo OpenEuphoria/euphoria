@@ -60,19 +60,19 @@ test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("
 sequence fullname, pname, fname, fext, nl, driveid
 integer sep
 
-if platform() = DOS32 or platform() = WIN32 then
-    fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
-    pname = "\\EUPHORIA\\DOCS"
-    sep = '\\'
-    nl = "\r\n"
-    driveid = "C"
-else
+ifdef LINUX then
     fullname = "/opt/euphoria/docs/readme.txt"
     pname = "/opt/euphoria/docs"
     sep = '/'
     nl = "\n"
     driveid = ""
-end if
+else
+    fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
+    pname = "\\EUPHORIA\\DOCS"
+    sep = '\\'
+    nl = "\r\n"
+    driveid = "C"
+end ifdef
 
 fname = "readme"
 fext = "txt"
