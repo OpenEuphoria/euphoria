@@ -106,6 +106,7 @@ global procedure test_summary()
 				{testCount, testsPassed, testsFailed, (testsPassed / testCount) * 100})
 	end if
 		
+	if getc(0) then end if
 	abort(testsFailed > 0)
 end procedure
 

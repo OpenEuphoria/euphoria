@@ -8,8 +8,8 @@
 #
 # Syntax:
 #   Interpreter(exw.exe, exwc.exe):  wmake -f makefile.wat interpreter
-#   Translator           (ecw.exe):  wmake -f makefile.wat translator
-#   Translator Library   (ecw.lib):  wmake -f makefile.wat library
+#   Translator     ec.exe ecw.exe):  wmake -f makefile.wat translator
+#   Translator Library   (ec.lib ecw.lib):  wmake -f makefile.wat library
 #   Backend         (backendw.exe):  wmake -f makefile.wat backend 
 #                   (backendc.exe)
 #                 Make all targets:  wmake -f makefile.wat
@@ -202,6 +202,55 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj 
 
+EU_TRANSDOS_OBJECTS = &
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\main-0.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\file.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\machine.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\symtab.obj &
+	.\$(OBJDIR)\scanner.obj &
+	.\$(OBJDIR)\scientif.obj &
+	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\main.obj &
+	.\$(OBJDIR)\emit.obj &
+	.\$(OBJDIR)\emit_0.obj &
+	.\$(OBJDIR)\emit_1.obj &
+	.\$(OBJDIR)\parser.obj &
+	.\$(OBJDIR)\parser_0.obj &
+	.\$(OBJDIR)\parser_1.obj &
+	.\$(OBJDIR)\parser_2.obj &
+	.\$(OBJDIR)\ec.obj &
+	.\$(OBJDIR)\c_decl.obj &
+	.\$(OBJDIR)\c_dec0.obj &
+	.\$(OBJDIR)\c_dec1.obj &
+	.\$(OBJDIR)\c_out.obj &
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\compile.obj &
+	.\$(OBJDIR)\compil_0.obj &
+	.\$(OBJDIR)\compil_1.obj &
+	.\$(OBJDIR)\compil_2.obj &
+	.\$(OBJDIR)\compil_3.obj &
+	.\$(OBJDIR)\compil_4.obj &
+	.\$(OBJDIR)\compil_5.obj &
+	.\$(OBJDIR)\compil_6.obj &
+	.\$(OBJDIR)\compil_7.obj &
+	.\$(OBJDIR)\compil_8.obj &
+	.\$(OBJDIR)\compil_9.obj &
+	.\$(OBJDIR)\compil_A.obj &
+	.\$(OBJDIR)\get.obj &
+	.\$(OBJDIR)\global.obj &
+	.\$(OBJDIR)\misc.obj &
+	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\traninit.obj &
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\search.obj
+
 PCRE_OBJECTS = &
 	.\pcre\pcre_chartables.obj &
 	.\pcre\pcre_compile.obj &
@@ -229,13 +278,20 @@ PCRE_OBJECTS = &
 MEMFLAG = /dESIMPLE_MALLOC
 !endif
 
+!ifeq INT_CODES 1
+#TODO hack
+MEMFLAG = $(MEMFLAG) /dINT_CODES
+!endif
+
 !ifeq DEBUG 1
 DEBUGFLAG = /d2 /dDEBUG
 DEBUGLINK = debug all
 !endif
 
 !ifeq EU3 1
+#TODO figure out how to fix this on windows 98 where command.com doesnt support &&
 EXE=set EUINC=$(PWD)\..\include && $(EX)
+#EXE=$(EX)
 INCDIR=
 !else
 EXE=$(EX)
@@ -256,17 +312,26 @@ winall : .SYMBOLIC
 dosall : .SYMBOLIC
 	wmake -f makefile.wat dos $(VARS)
 	wmake -f makefile.wat library OS=DOS $(VARS)
+	wmake -f makefile.wat dostranslator OS=DOS $(VARS)
 
 BUILD_DIRS=intobj transobj libobj backobj
 
+#TODO make this smarter
 distclean : .SYMBOLIC
 	-rmdir /Q/S $(BUILD_DIRS)
-	-del /Q config.wat
+        -del /Q config.wat
+	-deltree /y $(BUILD_DIRS)
+        -deltree /y config.wat
 
+#TODO make this smarter
 clean : .SYMBOLIC
 	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h 
 	-del /Q /S intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-del /Q .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
+	    .\pcre\pcre_chartables.c 
+	-deltree /y exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h
+	-deltree /y intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
+	-deltree /y .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
 	    .\pcre\pcre_chartables.c 
 
 !ifeq OS DOS
@@ -295,6 +360,8 @@ builddirs : .SYMBOLIC
 	if not exist dosobj\back mkdir dosobj\back
 	if not exist doslibobj mkdir doslibobj
 	if not exist doslibobj\back mkdir doslibobj\back
+	if not exist dostrobj mkdir dostrobj
+	if not exist dostrobj\back mkdir dostrobj\back
 	
 library : .SYMBOLIC builddirs
 	wmake -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -309,6 +376,7 @@ ecw.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	wlib -q ecw.lib $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 
 ec.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
+	wlib -q ec.lib $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	
 pcre : .SYMBOLIC .\pcre\pcre.h .\pcre\config.h $(PCRE_OBJECTS)
 
@@ -322,6 +390,7 @@ exwsource : .SYMBOLIC $(OBJDIR)/main-.c
 ecwsource : .SYMBOLIC $(OBJDIR)/main-.c
 backendsource : .SYMBOLIC $(OBJDIR)/main-.c
 ecsource : .SYMBOLIC $(OBJDIR)/main-.c
+exsource : .SYMBOLIC $(OBJDIR)/main-.c
 
 source : builddirs
 	wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -342,11 +411,13 @@ interpreter : .SYMBOLIC builddirs
 	wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
+	@copy ec.exe $(%EUDIR)\bin\
 	@copy ecw.exe $(%EUDIR)\bin\
 	@copy exw.exe $(%EUDIR)\bin\
 	@copy exwc.exe $(%EUDIR)\bin\
 	@copy backendw.exe $(%EUDIR)\bin\
 	@copy backendc.exe $(%EUDIR)\bin\
+	@copy ec.lib $(%EUDIR)\bin\
 	@copy ecw.lib $(%EUDIR)\bin\
 	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
 	@for %i in (*.ex) do @copy %i $(%EUDIR)\source\
@@ -362,6 +433,9 @@ ecw.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR
 
 translator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+
+dostranslator : .SYMBOLIC builddirs
+	wmake -f makefile.wat ec.exe EX=ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 backendw.exe : backendflag $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exwb.lbc
@@ -397,6 +471,24 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 	wlink  $(DEBUGLINK) @.\$(OBJDIR)\ex.lbc name ex.exe
 	le23p ex.exe
 	cwc ex.exe
+
+ec.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+       @%create .\$(OBJDIR)\ec.lbc
+       @%append .\$(OBJDIR)\ec.lbc option quiet
+       @%append .\$(OBJDIR)\ec.lbc option caseexact
+        @%append .\$(OBJDIR)\ec.lbc option osname='CauseWay'
+        @%append .\$(OBJDIR)\ec.lbc libpath C:\WATCOM\lib386
+        @%append .\$(OBJDIR)\ec.lbc libpath C:\WATCOM\lib386\dos
+        @%append .\$(OBJDIR)\ec.lbc OPTION stub=C:\euphoria\bin\cwstub.exe
+        @%append .\$(OBJDIR)\ec.lbc format os2 le ^
+        @%append .\$(OBJDIR)\ec.lbc OPTION STACK=262144
+        @%append .\$(OBJDIR)\ec.lbc OPTION QUIET
+        @%append .\$(OBJDIR)\ec.lbc OPTION ELIMINATE
+        @%append .\$(OBJDIR)\ec.lbc OPTION CASEEXACT
+       @for %i in ($(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+       wlink $(DEBUGLINK) @.\$(OBJDIR)\ec.lbc name ec.exe
+        le23p ec.exe
+        cwc ec.exe
 
 .\intobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 .\transobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
