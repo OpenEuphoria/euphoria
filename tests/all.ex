@@ -12,12 +12,24 @@ object pwd, oldpwd
 cmd = command_line()
 
 if length(cmd) > 2 then
+    if equal(cmd[3], "-wait") then
+	set_wait_on_summary(1)
+	cmd = cmd[1..2] & cmd[4..length(cmd)]
+    end if
+end if
+
+if length(cmd) > 2 then
     if equal(cmd[3], "-all") then
 	set_test_verbosity(TEST_SHOW_ALL)
     elsif equal(cmd[3], "-failed") then
 	set_test_verbosity(TEST_SHOW_FAILED_ONLY)
     elsif equal(cmd[3], "-mods") then
         set_test_verbosity(TEST_SHOW_MODULES)
+    end if
+    if length(cmd) > 3 then
+	if equal(cmd[4], "-wait") then
+		set_wait_on_summary(1)
+	end if
     end if
 end if
 

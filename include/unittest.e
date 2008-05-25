@@ -37,6 +37,8 @@ modulesTested = {}
 
 integer abort_on_fail
 abort_on_fail = 0
+integer wait_on_summary
+wait_on_summary = 0
 --
 -- Private utility functions
 --
@@ -81,6 +83,10 @@ global procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
 
+global procedure set_wait_on_summary(integer toWait)
+	wait_on_summary = toWait
+end procedure
+
 global function set_test_abort(integer pValue)
 	integer lTmp
 	lTmp = abort_on_fail
@@ -106,7 +112,9 @@ global procedure test_summary()
 				{testCount, testsPassed, testsFailed, (testsPassed / testCount) * 100})
 	end if
 		
-	if getc(0) then end if
+	if wait_on_summary then
+		wait_on_summary = getc(0)
+	end if
 	abort(testsFailed > 0)
 end procedure
 
