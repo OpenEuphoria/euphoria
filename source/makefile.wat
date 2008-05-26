@@ -318,20 +318,26 @@ BUILD_DIRS=intobj transobj libobj backobj
 
 #TODO make this smarter
 distclean : .SYMBOLIC
-	-rmdir /Q/S $(BUILD_DIRS)
-        -del /Q config.wat
-	-deltree /y $(BUILD_DIRS)
-        -deltree /y config.wat
+	-if not exist $(%WINDIR)\command\deltree.exe rmdir /Q/S $(BUILD_DIRS)
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q config.wat
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y $(BUILD_DIRS)
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y config.wat
 
 #TODO make this smarter
 clean : .SYMBOLIC
-	-del /Q exw.exe exwc.exe ecw.lib backendw.exe main-.h 
-	-del /Q /S intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
-	-del /Q .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
+		exw.exe exwc.exe ecw.lib backendw.exe main-.h 
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q /S &
+		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
+		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
 	    .\pcre\pcre_chartables.c 
-	-deltree /y exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h
-	-deltree /y intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
-	-deltree /y .\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
+		exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
+		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
+		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
 	    .\pcre\pcre_chartables.c 
 
 !ifeq OS DOS
