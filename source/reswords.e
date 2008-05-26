@@ -273,6 +273,7 @@ ATOM          = 502,
 STRING        = 503,
 TYPE          = 504,
 
+RECORDED	  = 514,
 QUALIFIED_VARIABLE = 515,
 SLICE         = 516,
 VARIABLE_DECL = 517,

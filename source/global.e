@@ -66,18 +66,18 @@ global constant
 		 S_NAME = 7 - get_backend(),      -- name string
 		 S_SAMEHASH = 8,  -- index of next symbol with same hash value
 		 S_TOKEN = 9 - get_backend()*2,     -- token number to return to parser
-		 S_HASHVAL = 10,  -- hash value 
-		 S_NREFS = 11     -- number of references to this symbol 
+		 S_HASHVAL = 10,  -- hash value
+		 S_NREFS = 11,    -- number of references to this symbol
+		 S_CODE = 12 - get_backend()*4      -- IL code for proc/func/type
+											-- canned tokens for defaulted routine parameters
 
-		 -- for vars only:  
-global constant 
-		 S_VARNUM = 12,   -- local variable number 
+		 -- for vars only:
+global constant
+		 S_VARNUM = 15,   -- local variable number
 		 S_INITLEVEL = 13,-- nesting level where initialized or -1 
-		 S_VTYPE = 14     -- variable type or NULL 
-
+		 S_VTYPE = 14     -- variable type or NULL
 		 -- for routines only: 
 global constant 
-		 S_CODE = 15 - get_backend()*7,     -- IL code for proc/func/type 
 		 S_LINETAB = 16 - get_backend()*7,  -- Line table for traceback
 		 S_FIRSTLINE = 17 - get_backend()*5,-- global line number of start of routine
 		 S_TEMPS = 18 - get_backend()*8,    -- pointer to linked list of temps, or 0
@@ -89,25 +89,24 @@ global constant
 							   -- (at run-time) or 0 if none
 		 S_SAVED_PRIVATES = 24,-- private data of any suspended tasks 
 							   -- executing this routine
-		 S_STACK_SPACE = 25 - get_backend()*12 -- amount of stack space needed by this routine
+		 S_STACK_SPACE = 25 - get_backend()*12, -- amount of stack space needed by this routine
 							-- (for private data)
-		 
+		 S_FIRST_DEF_ARG = 26 -- index of first defaulted arg in a routine, or 0 if none
+
 -- extra fields for TRANSLATOR (for temps and vars/routines)
 global constant 
-		 S_GTYPE = 26,    -- current global idea of what the worst-case type is
 		 S_OBJ_MIN = 27,  -- minimum integer value
 		 S_OBJ_MAX = 28,  -- maximum integer value
 		 S_SEQ_LEN = 29,  -- length of a sequence 
 		 S_SEQ_ELEM = 30, -- type of all elements of a sequence, or 
 						  -- type returned by a function/type 
 		 S_TEMP_NAME = 31,-- for temps: number to use in the outputted C name
-		 S_ONE_REF = 32   -- TRUE if we see that a variable can only ever have 
+		 S_ONE_REF = 32,  -- TRUE if we see that a variable can only ever have
 						  -- 1 reference count
+		 S_GTYPE = 33     -- current global idea of what the worst-case type is
 
 -- extra fields for TRANSLATOR (for vars/routines only) 
 global constant   
-		 S_RI_TARGET = 33,   -- > 0 if targeted by a routine_id call or other
-							 -- external call, e.g. call to a DLL
 		 S_LHS_SUBS2 = 34,   -- routine does double or more LHS subscripting
 		 S_GTYPE_NEW = 35,   -- new idea being formed of global type
 		 S_SEQ_LEN_NEW = 36, -- new idea being formed of length of a sequence
@@ -128,11 +127,13 @@ global constant
 		 S_ARG_MAX_NEW = 47,
 	
 		 S_ARG_SEQ_LEN = 48,
-		 S_ARG_SEQ_LEN_NEW = 49
+		 S_ARG_SEQ_LEN_NEW = 49,
+		 S_RI_TARGET = 50    -- > 0 if targeted by a routine_id call or other
+							 -- external call, e.g. call to a DLL
 
-global constant SIZEOF_ROUTINE_ENTRY = 25 + 24 * TRANSLATE,
-				SIZEOF_VAR_ENTRY     = 14 + 35 * TRANSLATE,
-				SIZEOF_TEMP_ENTRY    =  5 + 27 * TRANSLATE
+global constant SIZEOF_ROUTINE_ENTRY = 26 + 24 * TRANSLATE,
+				SIZEOF_VAR_ENTRY     = 15 + 35 * TRANSLATE,
+				SIZEOF_TEMP_ENTRY    =  5 + 28 * TRANSLATE
 		 
 -- Permitted values for various symbol table fields
 
@@ -313,3 +314,15 @@ sample_size = 0
 max_stack_per_call = 1
 
 global sequence symbol_resolution_warning
+
+-- token recording
+global constant  -- values for Parser_mode
+	PAM_NORMAL=0,
+	PAM_RECORD=1,
+	PAM_PLAYBACK=-1
+global integer Parser_mode
+Parser_mode = PAM_NORMAL
+
+global sequence Recorded, Ns_recorded -- lists of identifiers and namespaces to be parsed later
+Recorded={}
+Ns_recorded={}

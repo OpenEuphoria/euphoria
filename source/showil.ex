@@ -18,10 +18,9 @@ include reswords.e
 include misc.e
 include file.e
 
-global constant TRUE=1, FALSE=0
--- works as a pseudo INTERPRETER 
-global constant TRANSLATE=FALSE, INTERPRET=TRUE, BIND=FALSE
-
+-- works as a pseudo INTERPRETER
+include mode.e
+set_mode("interpret",0)
 include global.e
 include compress.e
 
@@ -452,5 +451,5 @@ slist = fdecompress(0)
 slist = s_expand(slist)
 puts(flist, "Line Table: {line number within file, file number}\n\n")
 pretty_print(flist, slist, {})
-	
+?machine_func(26,0)
 

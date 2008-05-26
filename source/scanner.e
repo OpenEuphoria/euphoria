@@ -801,7 +801,7 @@ end function
 global function Scanner()
 -- The scanner main routine: returns a lexical token  
 	integer ch, i, sp
-	sequence yytext  -- temporary buffer for a token  
+	sequence yytext, namespaces  -- temporary buffer for a token
 	atom d
 	token tok
 	integer is_int, class
@@ -840,6 +840,7 @@ global function Scanner()
 			tok = keyfind(yytext, -1)
 			if tok[T_ID] = NAMESPACE then
 				-- skip whitespace
+				namespaces = yytext
 				ch = getch()
 				while ch = ' ' or ch = '\t' do
 					ch = getch()
@@ -865,19 +866,32 @@ global function Scanner()
 					-- must look in chosen file.
 					-- can't create a new variable in s.t.
 						
-					tok = keyfind(yytext, SymTab[tok[T_SYM]][S_OBJ]) 
-
-					if tok[T_ID] = VARIABLE then
-						tok[T_ID] = QUALIFIED_VARIABLE
-					elsif tok[T_ID] = FUNC then
-						tok[T_ID] = QUALIFIED_FUNC
-					elsif tok[T_ID] = PROC then
-						tok[T_ID] = QUALIFIED_PROC
-					elsif tok[T_ID] = TYPE then
-						tok[T_ID] = QUALIFIED_TYPE
+				    if Parser_mode = PAM_RECORD then
+		                Recorded = append(Recorded,yytext)
+		                Ns_recorded = append(Ns_recorded,namespaces)
+		                return {RECORDED,length(Recorded)}
+				    else
+						tok = keyfind(yytext, SymTab[tok[T_SYM]][S_OBJ])
+	
+						if tok[T_ID] = VARIABLE then
+							tok[T_ID] = QUALIFIED_VARIABLE
+						elsif tok[T_ID] = FUNC then
+							tok[T_ID] = QUALIFIED_FUNC
+						elsif tok[T_ID] = PROC then
+							tok[T_ID] = QUALIFIED_PROC
+						elsif tok[T_ID] = TYPE then
+							tok[T_ID] = QUALIFIED_TYPE
+						end if
 					end if
 				else
 					ungetch()
+				    if Parser_mode = PAM_RECORD then
+		                Recorded = append(Recorded,yytext)
+		                Ns_recorded &= 0
+		                tok = {RECORDED,length(Recorded)}
+		    		else
+		                tok=keyfind(yytext,-1)
+		            end if
 				end if
 			end if    
 			return tok

@@ -9,9 +9,9 @@ include scanner.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
-
+with trace
 --*****************
--- Local variables 
+-- Local variables
 --*****************
 sequence branch_list
 branch_list = {}
@@ -63,6 +63,12 @@ lhs_subs_level = -1
 
 symtab_index left_sym  -- var used on LHS of assignment
 left_sym = 0
+
+sequence canned_tokens -- recording stack when parser is in recording mode
+					   -- this sequence will be saved and the tape played back whenever needed
+canned_tokens={}
+integer canned_index   -- previous playback position
+canned_index=0
 
 procedure EndLineTable()
 -- put marker at end of current line number table 
@@ -182,7 +188,7 @@ procedure InitDelete()
 	end while
 end procedure
 
-procedure emit_forward_addr() 
+procedure emit_forward_addr()
 -- emit blank forward address and add this branch point to the list 
 -- for later straightening 
 	emit_addr(0)
@@ -302,24 +308,107 @@ procedure PatchXList(integer base)
     end if
     exit_delay = exit_delay [1..exit_top]
     exit_list = exit_list [1..exit_top]
-			
+
 end procedure
 
 procedure putback(token t)
--- push a scanner token back onto the input stream    
+-- push a scanner token back onto the input stream
 	backed_up_tok = t
 end procedure
+
+procedure set_parser_mode(integer new_mode)
+    if new_mode != PAM_NORMAL and Parser_mode != PAM_NORMAL then
+        set_parser_mode(PAM_NORMAL)
+        set_parser_mode(new_mode)
+    end if
+    if new_mode = PAM_PLAYBACK then
+        canned_index = 1
+        if sequence(backed_up_tok) then
+            canned_tokens = prepend(canned_tokens,backed_up_tok)
+        end if
+        --save_parser_state()
+    elsif new_mode = PAM_RECORD then
+          if sequence(backed_up_tok) then
+	          canned_tokens = {backed_up_tok}
+          else
+			  canned_tokens = {}
+		  end if
+    elsif Parser_mode = PAM_RECORD then
+        if sequence(backed_up_tok) then
+            canned_tokens=canned_tokens[1..$-1]
+        end if
+	-- elsif Parser_mode = PAM_PLAYBACK then
+        --restore_parser_state()
+    end if
+    Parser_mode = new_mode
+end procedure
+
+sequence private_list,private_sym
+integer use_private_list
+use_private_list=0
+
+function read_recorded_token(integer n)
+    token t
+	symtab_index s
+	integer p
+	
+    if atom(Ns_recorded[n]) then
+        if use_private_list then
+            p=find(Recorded[n],private_list)
+            if p then -- found reference to arg name
+                return {VARIABLE,private_sym[p]}
+            end if
+        end if
+        s = keyfind(Recorded[n],-1)
+        t={SymTab[s][S_TOKEN],s}
+    else
+        s = keyfind(Ns_recorded[n],-1)
+        if SymTab[s][S_TOKEN] != NAMESPACE then
+            CompileErr("Unknown namespace in replayed token")
+        end if
+        s=keyfind(Recorded[n],SymTab[s][S_OBJ])
+        n = SymTab[s][S_TOKEN]
+        if n = VARIABLE then
+            n = QUALIFIED_VARIABLE
+        elsif n = FUNC then
+            n = QUALIFIED_FUNC
+        elsif n = PROC then
+            n = QUALIFIED_PROC
+        elsif n = TYPE then
+            n = QUALIFIED_TYPE
+        end if
+        t={n,s}
+    end if
+    if SymTab[s][S_SCOPE] = SC_UNDEFINED then
+        CompileErr("Unknown symbol in replayed token")
+    end if
+  	return t
+end function
 
 function next_token()
 -- read next scanner token
 	token t
 	
-	if atom(backed_up_tok) then
-		 t = Scanner() 
-	else     
-		 t = backed_up_tok 
-		 backed_up_tok = UNDEFINED 
-	end if 
+	if sequence(backed_up_tok) then
+		t = backed_up_tok
+		backed_up_tok = UNDEFINED
+    elsif Parser_mode=PAM_PLAYBACK then
+        if canned_index <= length(canned_tokens) then
+            t = canned_tokens[canned_index]
+			canned_index += 1
+        else -- tape ended
+            set_parser_mode(PAM_NORMAL)
+            t = Scanner()
+        end if  
+        if t[T_ID]=RECORDED then
+            t=read_recorded_token(t[T_SYM])
+        end if
+    else
+	    t = Scanner()
+	    if Parser_mode = PAM_RECORD then
+	        canned_tokens = append(canned_tokens,t)
+	    end if
+    end if
 	return t
 end function
 
@@ -352,7 +441,7 @@ function Expr_list()
 end function
 
 procedure tok_match(integer tok)
--- match token or else syntax error 
+-- match token or else syntax error
 	token t
 	sequence expected, actual
 
@@ -381,7 +470,7 @@ procedure tok_optional(integer tok)
 end procedure
 
 procedure UndefinedVar(symtab_index s)
--- report a possibly undefined or multiply-defined symbol 
+-- report a possibly undefined or multiply-defined symbol
 	symtab_index dup
 	sequence errmsg
 	
@@ -417,22 +506,76 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 			   {SymTab[subsym][S_NAME], only, 
 				SymTab[subsym][S_NUM_ARGS], plural}))
 end procedure
-
+			
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call 
-	integer n
+	integer n, fda
 	token tok
+    symtab_index s,arg
 
 	n = SymTab[subsym][S_NUM_ARGS]
+    s = subsym
+    arg=0
+
 	short_circuit -= 1
 	for i = 1 to n do
+      	s = SymTab[s][S_NEXT]
+    	tok = next_token()   
+    	if tok[T_ID] = COMMA then trace(1) -- defaulted arg
+            if atom(SymTab[s][S_CODE]) then  -- but no default set
+                CompileErr(sprintf("Argument %d is defaulted, but has no default vlue",i))
+            end if
+			if arg=0 then -- build private symbol list for this routine
+                use_private_list=1
+                private_list=repeat(0,n)
+                private_sym=repeat(0,n)
+                arg=subsym
+                for j=1 to n do
+                    arg=SymTab[arg][S_NEXT]
+                    private_sym[i] = arg
+                    private_list[i] = SymTab[arg][S_NAME]
+                end for
+            end if
+            canned_tokens = SymTab[s][S_CODE]
+            set_parser_mode(PAM_PLAYBACK)
+    	else -- something to read
+        	putback(tok)
+    	end if
 		call_proc(forward_expr, {})
-		if i != n then 
-			tok = next_token()
+		if i != n then
+			tok = next_token()  
 			if tok[T_ID] != COMMA then
-				if tok[T_ID] = RIGHT_ROUND then
-					WrongNumberArgs(subsym, "")
-				else 
+          		if tok[T_ID] = RIGHT_ROUND then -- not as mmany actual args as formal args
+                    fda = SymTab[subsym][S_FIRST_DEF_ARG]
+                    if fda=0 or i<fda-1 then
+                        WrongNumberArgs(subsym, "")
+                    end if
+                    for j = i+1 to n do
+                    	s = SymTab[s][S_NEXT]
+                        if sequence(SymTab[s][S_CODE]) then -- some defaulted arg follows with a default value
+                            if arg=0 then
+                                use_private_list=1
+                                private_list=repeat(0,n)
+                                private_sym=repeat(0,n)
+                                arg=subsym
+                                for k=1 to n do
+                                    arg=SymTab[arg][S_NEXT]
+                                    private_sym[k] = arg
+                                    private_list[k] = SymTab[arg][S_NAME]
+                                end for
+                            end if
+                            canned_tokens = SymTab[s][S_CODE]
+                            set_parser_mode(PAM_PLAYBACK)               
+                            call_proc(forward_expr, {})
+                        else -- just not enough args
+                            CompileErr(sprintf("Argument %d is defaulted, but has no default vlue",j))
+                        end if
+          		    end for
+                    -- all missing args had default values
+                    short_circuit += 1
+					use_private_list=0  
+                    return
+				else
 					putback(tok)
 					tok_match(COMMA)
 				end if
@@ -449,6 +592,7 @@ procedure ParseArgs(symtab_index subsym)
 			tok_match(RIGHT_ROUND)
 		end if
 	end if
+	use_private_list=0
 end procedure
 
 procedure Factor()
@@ -558,7 +702,7 @@ procedure Factor()
 		ParseArgs(tok[T_SYM])
 		if scope = SC_PREDEF then
 			emit_op(opcode)
-		else 
+		else
 			op_info1 = tok[T_SYM]
 			emit_op(PROC)
 			if not TRANSLATE then
@@ -655,7 +799,7 @@ end function
 function rexpr()   
 	token tok
 	integer id
-	
+
 	tok = cexpr()
 	while tok[T_ID] <= GREATER and tok[T_ID] >= LESS do
 		id = tok[T_ID]
@@ -666,15 +810,15 @@ function rexpr()
 end function
 
 procedure Expr()
--- Parse a general expression 
--- Use either short circuit or full evaluation. 
+-- Parse a general expression
+-- Use either short circuit or full evaluation.
 	token tok
 	integer id
 	integer patch
-	
+
 	id = -1
 	patch = 0
-	while TRUE do 
+	while TRUE do
 		if id != -1 and id != XOR and short_circuit > 0 then
 			if id = OR then
 				emit_op(SC1_OR)
@@ -685,9 +829,9 @@ procedure Expr()
 			emit_forward_addr()
 			short_circuit_B = TRUE
 		end if
-		
+
 		tok = rexpr()
-		
+
 		if id != -1 then
 			if id != XOR and short_circuit > 0 then
 				if tok[T_ID] != THEN and tok[T_ID] != DO then
@@ -1715,10 +1859,11 @@ procedure Procedure_call(token tok)
 -- parse a procedure call statement 
 	integer n, scope, opcode
 	token temp_tok
-	symtab_index s
-	
+	symtab_index s, sub
+
 	tok_match(LEFT_ROUND)
-	s = tok[T_SYM] 
+	s = tok[T_SYM]
+	sub=s
 	n = SymTab[s][S_NUM_ARGS]
 	scope = SymTab[s][S_SCOPE]
 	opcode = SymTab[s][S_OPCODE]
@@ -1726,7 +1871,20 @@ procedure Procedure_call(token tok)
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
 											   SymTab[s][S_EFFECT])
 	end if
-	ParseArgs(s)
+	ParseArgs(s) 
+    -- check for any initialisation code for variables
+    for i=1 to n do
+        s = SymTab[s][S_NEXT]
+    end for
+    while s and SymTab[s][S_SCOPE]=SC_PRIVATE do
+        if sequence(SymTab[s][S_CODE]) then
+            canned_tokens = SymTab[s][S_CODE]
+            set_parser_mode(PAM_PLAYBACK)
+            Assignment(s)
+        end if
+        s = SymTab[s][S_NEXT]
+    end while
+    s = sub	
 	if scope = SC_PREDEF then
 		emit_op(opcode)
 		if opcode = ABORT then
@@ -1735,13 +1893,13 @@ procedure Procedure_call(token tok)
 			NotReached(temp_tok[T_ID], "abort()")
 		end if
 	else 
-		op_info1 = s
+		op_info1 = s  
 		emit_op(PROC)
 		if not TRANSLATE then
 			if OpTrace then
 				emit_op(UPDATE_GLOBALS)
 			end if
-		end if  
+		end if
 	end if
 end procedure
 
@@ -1780,7 +1938,7 @@ end procedure
 
 
 procedure Statement_list()
--- Parse a list of statements 
+-- Parse a list of statements
 	token tok
 	integer id
 	
@@ -1800,11 +1958,11 @@ procedure Statement_list()
 			end if
 			StartSourceLine(TRUE)
 			Procedure_call(tok)
-			
+
 		elsif id = IF then
 			StartSourceLine(TRUE)
 			If_statement()
-			
+
 		elsif id = FOR then
 			StartSourceLine(TRUE)
 			For_statement()
@@ -1828,7 +1986,7 @@ procedure Statement_list()
 		elsif id = LOOP then
 		    StartSourceLine(TRUE)
 	        Loop_statement()
-		    
+
 		elsif id = ENTRY then
 		    StartSourceLine(TRUE)
 		    Entry_statement()
@@ -1867,6 +2025,7 @@ procedure SubProg(integer prog_type, integer is_global)
 	integer h, pt
 	symtab_index p, type_sym, sym
 	token tok, prog_name
+	integer first_def_arg
 
 	LeaveTopLevel()
 
@@ -1898,6 +2057,7 @@ procedure SubProg(integer prog_type, integer is_global)
 		buckets[h] = p
 	end if
 	CurrentSub = p
+	first_def_arg = 0
 	temps_allocated = 0
 	
 	if is_global then
@@ -1949,6 +2109,16 @@ procedure SubProg(integer prog_type, integer is_global)
 
 		SymTab[sym][S_USAGE] = U_WRITTEN     
 		tok = next_token()
+    	if tok[T_ID] = EQUALS then
+    	    set_parser_mode(PAM_RECORD)
+    	    Expr()
+    	    set_parser_mode(PAM_NORMAL)
+    	    SymTab[sym][S_CODE] = canned_tokens 
+            tok = next_token()
+            if first_def_arg = 0 then
+                first_def_arg = param_num
+            end if
+    	end if
 		if tok[T_ID] = COMMA then
 			tok = next_token()
 			if tok[T_ID] = RIGHT_ROUND then
@@ -1960,6 +2130,7 @@ procedure SubProg(integer prog_type, integer is_global)
 	end while
 
 	SymTab[p][S_NUM_ARGS] = param_num
+    SymTab[p][S_FIRST_DEF_ARG] = first_def_arg
 	if TRANSLATE then
 		if param_num > max_params then
 			max_params = param_num

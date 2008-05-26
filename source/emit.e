@@ -50,17 +50,22 @@ constant token_name =
 	{AND, "'and'"},
 	{ATOM, "a number"},
 	{BANG, "'!'"},
+	{BREAK, "'break'"},
 	{BY, "'by'"},
 	{COLON, "':'"},
 	{COMMA, "','"},
 	{CONCAT, "'&'"},
 	{CONSTANT, "'constant'"},
+	{CONTINUE, "'continue'"},
 	{DIVIDE, "'/'"},
 	{DO, "'do'"},
 	{ELSE, "'else'"},
 	{ELSIF, "'elsif'"},
+	{ELSIFDEF, "'elsifdef'"},
 	{END, "'end'"},
 	{END_OF_FILE, "the end of file"},
+	{ENTRY, "'entry'"},
+	{ENUM, "'enum'"},
 	{EQUALS, "'='"},
 	{EXIT, "'exit'"},
 	{FOR, "'for'"},
@@ -70,6 +75,7 @@ constant token_name =
 	{GREATER, "'>'"},
 	{GREATEREQ, "'>='"},
 	{IF,  "'if'"},
+	{IFDEF, "'ifdef'"},
 	{ILLEGAL_CHAR, "an illegal character"},
 	{INCLUDE, "'include'"},
 	{LEFT_BRACE, "'{'"},
@@ -77,6 +83,7 @@ constant token_name =
 	{LEFT_SQUARE, "'['"},
 	{LESS, "'<'"},
 	{LESSEQ, "'<='"},
+	{LOOP, "'loop'"},
 	{MINUS, "'-'"},
 	{MULTIPLY, "'*'"},
 	{NAMESPACE, "a namespace qualifier"},
@@ -91,24 +98,22 @@ constant token_name =
 	{QUALIFIED_FUNC, "a function"},
 	{QUALIFIED_PROC, "a procedure"},
 	{QUALIFIED_TYPE, "a type"},
+	{RETRY, "'retry'"},
+	{RETURN, "'return'"},
 	{RIGHT_BRACE, "'}'"},
 	{RIGHT_ROUND, "')'"},
 	{RIGHT_SQUARE, "']'"},
-	{RETURN, "'return'"},
 	{SLICE, "a slice"},
 	{STRING, "a character string"},
 	{TO, "'to'"},
 	{THEN, "'then'"},
 	{TYPE, "a type"},
+	{UNTIL, "'until'"},
 	{TYPE_DECL, "'type'"},
 	{VARIABLE, "a variable"},
 	{WITH, "'with'"},
 	{WITHOUT, "'without'"},
 	{WHILE, "'while'"},
-	{RETRY, "'retry'"},
-	{IFDEF, "'ifdef'"},
-		{ELSIFDEF, "'elsifdef'"},
-	{ENUM, "'enum'"},
 	{'?', "'?'"}
 } 
 
@@ -227,8 +232,10 @@ end procedure
 
 global procedure emit_opnd(symtab_index opnd)
 -- emit an operand into the IL  
-	Push(opnd)
-	previous_op = -1  -- N.B.
+	if Parser_mode != PAM_RECORD then
+		Push(opnd)
+		previous_op = -1  -- N.B.
+	end if
 end procedure
 
 global procedure emit_addr(atom x)
@@ -378,6 +385,7 @@ global procedure emit_op(integer op)
 	sequence elements
 	object element_vals
 	
+	if Parser_mode != PAM_RECORD then
 	-- 1 input, 0 outputs, can combine with previous op 
 	if op = ASSIGN then
 		source = Pop()
@@ -1188,6 +1196,8 @@ global procedure emit_op(integer op)
 	end if
 	
 	previous_op = op
+	end if
+
 end procedure
 
 global procedure emit_assign_op(integer op)
