@@ -459,9 +459,9 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 	@%append .\$(OBJDIR)\ex.lbc option quiet
 	@%append .\$(OBJDIR)\ex.lbc option caseexact
 	@%append .\$(OBJDIR)\ex.lbc option osname='CauseWay'
-	@%append .\$(OBJDIR)\ex.lbc libpath C:\WATCOM\lib386
-	@%append .\$(OBJDIR)\ex.lbc libpath C:\WATCOM\lib386\dos
-	@%append .\$(OBJDIR)\ex.lbc OPTION stub=C:\euphoria\bin\cwstub.exe
+	@%append .\$(OBJDIR)\ex.lbc libpath $(%WATCOM)\lib386
+	@%append .\$(OBJDIR)\ex.lbc libpath $(%WATCOM)\lib386\dos
+	@%append .\$(OBJDIR)\ex.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
 	@%append .\$(OBJDIR)\ex.lbc format os2 le ^
 	@%append .\$(OBJDIR)\ex.lbc OPTION STACK=262144
 	@%append .\$(OBJDIR)\ex.lbc OPTION QUIET
@@ -473,22 +473,22 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 	cwc ex.exe
 
 ec.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
-       @%create .\$(OBJDIR)\ec.lbc
-       @%append .\$(OBJDIR)\ec.lbc option quiet
-       @%append .\$(OBJDIR)\ec.lbc option caseexact
-        @%append .\$(OBJDIR)\ec.lbc option osname='CauseWay'
-        @%append .\$(OBJDIR)\ec.lbc libpath C:\WATCOM\lib386
-        @%append .\$(OBJDIR)\ec.lbc libpath C:\WATCOM\lib386\dos
-        @%append .\$(OBJDIR)\ec.lbc OPTION stub=C:\euphoria\bin\cwstub.exe
-        @%append .\$(OBJDIR)\ec.lbc format os2 le ^
-        @%append .\$(OBJDIR)\ec.lbc OPTION STACK=262144
-        @%append .\$(OBJDIR)\ec.lbc OPTION QUIET
-        @%append .\$(OBJDIR)\ec.lbc OPTION ELIMINATE
-        @%append .\$(OBJDIR)\ec.lbc OPTION CASEEXACT
-       @for %i in ($(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
-       wlink $(DEBUGLINK) @.\$(OBJDIR)\ec.lbc name ec.exe
-        le23p ec.exe
-        cwc ec.exe
+	@%create .\$(OBJDIR)\ec.lbc
+	@%append .\$(OBJDIR)\ec.lbc option quiet
+	@%append .\$(OBJDIR)\ec.lbc option caseexact
+	@%append .\$(OBJDIR)\ec.lbc option osname='CauseWay'
+	@%append .\$(OBJDIR)\ec.lbc libpath $(%WATCOM)\lib386
+	@%append .\$(OBJDIR)\ec.lbc libpath $(%WATCOM)\lib386\dos
+	@%append .\$(OBJDIR)\ec.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
+	@%append .\$(OBJDIR)\ec.lbc format os2 le ^
+	@%append .\$(OBJDIR)\ec.lbc OPTION STACK=262144
+	@%append .\$(OBJDIR)\ec.lbc OPTION QUIET
+	@%append .\$(OBJDIR)\ec.lbc OPTION ELIMINATE
+	@%append .\$(OBJDIR)\ec.lbc OPTION CASEEXACT
+	@for %i in ($(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	wlink $(DEBUGLINK) @.\$(OBJDIR)\ec.lbc name ec.exe
+	le23p ec.exe
+	cwc ec.exe
 
 .\intobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 .\transobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
