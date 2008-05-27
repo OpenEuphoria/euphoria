@@ -3723,6 +3723,10 @@ void do_exec(int *start_pc)
 						poke_addr = (unsigned char *)(unsigned long)
 								(DBL_PTR(a)->dbl);
 				}
+				else { /* sequence */
+						RTFatal(
+				  "argument to peek_string() must be an atom");
+				}
 				top = NewString(poke_addr);
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
