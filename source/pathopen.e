@@ -150,7 +150,7 @@ global function get_conf_dirs()
 	integer delimiter
 	sequence dirs
 	
-	if ELINUX then
+	if EUNIX then
 		delimiter = ':'
 	else
 		delimiter = ';'
@@ -183,7 +183,7 @@ function expand_path( sequence path, sequence prefix )
 		return pwd
 	end if
 	
-	if ELINUX and length(path) and path[1] = '~' then
+	if EUNIX and length(path) and path[1] = '~' then
 		home = getenv("HOME")
 		if sequence(home) and length(home) then
 			path = home & path[2..$]
@@ -191,7 +191,7 @@ function expand_path( sequence path, sequence prefix )
 	end if
 	
 	absolute = find(path[1], SLASH_CHARS) or
-		(not ELINUX and find(':', path))
+		(not EUNIX and find(':', path))
 	if not absolute then
 		path = prefix & SLASH & path
 	end if
@@ -242,7 +242,7 @@ global procedure load_euinc_conf( sequence file )
 		if length(in) and match( "--", in ) != 1 then
 			in = expand_path( in, conf_path )  -- allow ~ to refer to $HOME in *nix
 			absolute = find(in[1], SLASH_CHARS) or
-			   (not ELINUX and find(':', in))
+			   (not EUNIX and find(':', in))
 			
 
 			config_inc_paths = append( config_inc_paths, in )
@@ -266,7 +266,7 @@ global procedure load_platform_inc_paths()
 	load_euinc_conf( env & "euinc.conf" )
 	
 	-- platform specific
-	if ELINUX then
+	if EUNIX then
 		env = getenv( "HOME" )
 		if sequence(env) then
 			load_euinc_conf( env & "/.euinc.conf" )

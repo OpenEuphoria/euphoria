@@ -137,7 +137,7 @@ sequence cl, filename
 cl = command_line()
 
 -- open our own .exe file
-if ELINUX then
+if EUNIX then
 	current_db = e_path_open(cl[1], "rb")
 else
 	current_db = open(cl[1], "rb") 
@@ -153,7 +153,7 @@ integer OUR_SIZE -- Must be less than or equal to actual backend size.
 if platform() = DOS32 then
 	OUR_SIZE = 170000 -- backend.exe (Causeway compression)
 
-elsif ELINUX then
+elsif EUNIX then
 	if EBSD then
 		-- set EBSD manually above on FreeBSD
 		OUR_SIZE = 150000  -- backendu for FreeBSD (not compressed)

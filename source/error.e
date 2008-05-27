@@ -66,7 +66,7 @@ global procedure Cleanup(integer status)
 	w = ShowWarnings(0) 
 	
 	if not TRANSLATE and 
-	   (BIND or EWINDOWS or ELINUX) and 
+	   (BIND or EWINDOWS or EUNIX) and 
 	   (w or Errors) then
 		screen_output(STDERR, "\nPress Enter\n")
 		if getc(0) then -- prompt

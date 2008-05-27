@@ -31,7 +31,7 @@ function ProcessOptions()
 								  INTERPRETER_VERSION & " ")
 		end if
 
-		if ELINUX then
+		if EUNIX then
 			if BIND then
 				screen_output(STDERR, "for Linux/FreeBSD.\n")
 			else
@@ -109,7 +109,7 @@ function ProcessOptions()
 	if not dot_found then
 		-- no dot found --
 		-- N.B. The list of default extentions must always end with the first one again.
-		if ELINUX then
+		if EUNIX then
 			exts = { ".exu", ".exw", ".ex", "", ".exu" }
 
 		elsif BIND then
@@ -174,7 +174,7 @@ procedure main()
 
 	eudir = getenv("EUDIR")
 	if atom(eudir) then
-		if ELINUX then
+		if EUNIX then
 			-- should check search PATH for euphoria/bin ?
 			eudir = getenv("HOME")
 			if atom(eudir) then
@@ -209,7 +209,7 @@ procedure main()
 	if src_file = -1 then
 		-- too early for normal error processing
 		screen_output(STDERR, sprintf("Can't open %s\n", {file_name[$]}))
-		if BIND or EWINDOWS or ELINUX then
+		if BIND or EWINDOWS or EUNIX then
 			screen_output(STDERR, "\nPress Enter\n")
 			if getc(0) then
 			end if

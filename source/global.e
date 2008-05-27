@@ -45,6 +45,10 @@ elsif EWINDOWS then
 	version_name = "WIN32"
 elsif ELINUX then 
 	version_name = "Linux"
+elsif EBSD then 
+	version_name = "BSD"
+elsif EUNIX then  --should never happen
+	version_name = "UNIX"
 end if
 
 -- common fields for all symbols, literal constants and temporaries 

@@ -63,7 +63,7 @@ extern unsigned default_heap;
 char *malloc_options="A"; // abort
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 int pagesize;  // needed for Linux only, not FreeBSD
 #endif
 
@@ -161,7 +161,7 @@ void InitEMalloc()
 /* initialize storage allocator */
 {
 	int i, j, p;
-#ifdef ELINUX
+#ifdef EUNIX
 	pagesize = getpagesize();
 #else
 	eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
@@ -407,7 +407,7 @@ char *EMalloc(unsigned long nbytes)
 	int alignment;
 	int min_align;
 
-#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
+#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
 
 		return malloc(nbytes);
 #else
@@ -504,7 +504,7 @@ char *EMalloc(unsigned long nbytes)
 		nbytes += align4;
 	} while (TRUE);
 #endif
-// !ELINUX
+// !EUNIX
 }
 
 void EFree(unsigned char *p)
@@ -518,7 +518,7 @@ void EFree(unsigned char *p)
 	char msg[80];
 #endif
 
-#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
+#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
 		free(p);
 		return;
 #else
@@ -570,7 +570,7 @@ void EFree(unsigned char *p)
 #endif // !ESIMPLE_MALLOC
 
 #ifndef EDJGPP
-#ifndef ELINUX
+#ifndef EUNIX
 #ifndef ELCC
 #ifndef EWINDOWS
 #ifdef EXTRA_CHECK
@@ -630,7 +630,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	char *q;
 	unsigned long oldsize;
 
-#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
+#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
 
 	// we always have 8-alignment
 	return realloc(orig, newsize);  // should do bookkeeping on block size?

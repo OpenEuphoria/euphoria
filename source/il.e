@@ -33,7 +33,7 @@ del_vars = 0
 procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
-	if not ELINUX then
+	if not EUNIX then
 		-- we run bind and bindw using backendw.exe, so this is needed
 		puts(2, "\nPress Enter\n")
 		if getc(0) then
@@ -193,7 +193,7 @@ procedure OutputHeader(file f)
 			puts(f, shebang)
 		else
 			puts(f, "#!" & eudir & SLASH & "bin" & SLASH)
-			if ELINUX then
+			if EUNIX then
 				puts(f, "backendu\n")
 			else
 				puts(f, "backendw.exe\n") -- assume Apache CGI
@@ -369,7 +369,7 @@ procedure OutputIL()
 	
 		if shroud_only then
 			out_name &= ".il"
-		elsif not ELINUX then
+		elsif not EUNIX then
 			out_name &= ".exe"
 		end if
 	end if
@@ -392,7 +392,7 @@ procedure OutputIL()
 		be = -1
 		if w32 then
 			backend_name &= "backendw.exe"
-		elsif ELINUX then
+		elsif EUNIX then
 			backend_name &= "backendu"
 			-- try to get the installed eubackend, if it exists:
 			be = open( "/usr/bin/eubackend", "r" )
@@ -491,12 +491,12 @@ procedure OutputIL()
 	if not quiet then
 		printf(1, "deleted %d unused routines and %d unused variables.\n",
 				{del_routines, del_vars})
-		if ELINUX then
+		if EUNIX then
 			system("chmod +x " & out_name, 2)
 		end if
 		if shroud_only then
 			puts(1, "You may now use backend")
-			if ELINUX then
+			if EUNIX then
 				puts(1, "u")
 			elsif w32 then
 				puts(1, "w.exe")
@@ -505,7 +505,7 @@ procedure OutputIL()
 			end if
 			printf(1, " to run %s\n", {out_name})        
 		else
-			if ELINUX then
+			if EUNIX then
 				out_name = "./" & out_name
 			end if
 			puts(1, "You may now run " & out_name & '\n')

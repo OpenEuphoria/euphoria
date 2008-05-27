@@ -51,6 +51,10 @@ PREREGEX=$(FROMBSDREGEX)
 SEDFLAG=-ri
 endif
 
+ifeq  "$(ELINUX)" "1"
+EBSDFLAG=$(EBSDFLAG) -DELINUX
+endif
+
 ifeq "$(EU3)" "1"
 EXE=export EUINC=$(PWD)/../include && exu
 INCDIR=
@@ -61,7 +65,7 @@ endif
 
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
-BE_FLAGS =  -c -w -DELINUX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+BE_FLAGS =  -c -w -DEUNIX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
 PCRE=./pcre/.libs/libpcre.a
 
@@ -247,7 +251,7 @@ distclean : clean
 clean : 
 	@-for d in $(BUILD_DIRS); \
 	do \
-	    rm "$$d"*.o; \
+	    rm "$$d"/*.o; \
 	done
 	-rm exu ecu ecu.a eubackend $(DEB_SOURCE_DIR).tar.gz
 	cd pcre && $(MAKE) clean
@@ -260,7 +264,11 @@ ecu.a : $(EU_LIB_OBJECTS)
 	ar -rc ecu.a $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
-builddirs : $(BUILD_DIRS) $(PCRE)
+builddirs : $(PCRE)
+	@-for d in $(BUILD_DIRS); \
+	do \
+		mkdir -p "$$d"; \
+	done
 
 interpreter : builddirs
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
@@ -392,8 +400,8 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o
 
 $(OBJDIR)/back/be_callc.o : ./be_callc.c
-	$(CC) -c -w -DELINUX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.o
-	$(CC) -S -w -DELINUX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.s
+	$(CC) -c -w -DEUNIX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.o
+	$(CC) -S -w -DEUNIX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.s
 
 $(OBJDIR)/back/be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o

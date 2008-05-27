@@ -8,15 +8,17 @@ include misc.e
 global constant TRUE = 1, FALSE = 0
 
 -- operating system:
-global constant ELINUX = platform() = LINUX,
+global constant EUNIX = (platform() = LINUX or platform() = FREEBSD),
 				EWINDOWS = platform() = WIN32,
 				EDOS = platform() = DOS32,
 				EBSD = FALSE -- set manually - see also backend.ex
+global constant -- TODO make this cleaner
+				ELINUX = not EBSD
 
 
 global integer PATH_SEPARATOR, SLASH
 global sequence SLASH_CHARS
-if ELINUX then
+if EUNIX then
 	PATH_SEPARATOR = ':' -- in PATH environment variable
 	SLASH = '/'          -- preferred on Linux/FreeBSD
 	SLASH_CHARS =  "/"   -- special chars allowed in a path

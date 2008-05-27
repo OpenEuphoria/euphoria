@@ -20,7 +20,7 @@ struct block_list {
 #ifdef HEAP_CHECK 
 #define FreeD(p) freeD(p)
 #else
-#if defined(ELINUX) || defined(ESIMPLE_MALLOC)
+#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
 #define FreeD(p) free(p);
 #else
 #define FreeD(p){ if (eu_dll_exists && cache_size > CACHE_LIMIT) { \
@@ -38,7 +38,7 @@ struct block_list {
 #endif
 
 // Size of the usable space in an allocated block
-#ifdef ELINUX 
+#ifdef EUNIX 
 #ifdef EBSD
 #define block_size(p) 1    // length is not stored with the block
 #else

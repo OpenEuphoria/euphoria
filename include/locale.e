@@ -169,7 +169,7 @@ global function set(sequence new_locale)
 		return lang_load(new_locale)
 	end if
 
-	return 1
+	return (ign != NULL)
 end function
 
 -- TODO: document

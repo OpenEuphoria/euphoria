@@ -44,7 +44,7 @@ global procedure transoptions()
 		if Argv[i][1] = '-' then
 			uparg = upper(Argv[i])
 				
-			if (ELINUX or EWINDOWS) and
+			if (EUNIX or EWINDOWS) and
 			   (match("-DLL", uparg) or match("-SO", uparg))
 			then
 				dll_option = TRUE
@@ -192,7 +192,7 @@ procedure OpenCFiles()
 	emit_c_output = TRUE
 
 	c_puts("#include \"")
-	if not ELINUX then
+	if not EUNIX then
 		c_puts(eudir & SLASH)
 	end if
 	c_puts("include" & SLASH & "euphoria.h\"\n")

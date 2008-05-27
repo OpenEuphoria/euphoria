@@ -60,7 +60,7 @@ test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("
 sequence fullname, pname, fname, fext, nl, driveid
 integer sep
 
-ifdef LINUX then
+ifdef UNIX then
     fullname = "/opt/euphoria/docs/readme.txt"
     pname = "/opt/euphoria/docs"
     sep = '/'

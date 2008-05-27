@@ -205,7 +205,7 @@ global procedure AppendSourceLine()
 		-- record the options and maybe keep the source line too
 		src = ThisLine
 
-		if ELINUX and TRANSLATE and mybsd then
+		if EUNIX and TRANSLATE and mybsd then
 			src = ""  -- save space, only 8Mb available!
 		end if
 
@@ -337,7 +337,7 @@ function path_open()
 	
 	-- check for leading backslash
 	absolute = find(new_include_name[1], SLASH_CHARS) or
-			   (not ELINUX and find(':', new_include_name))
+			   (not EUNIX and find(':', new_include_name))
 	
 	if absolute then
 		-- open new_include_name exactly as it is
@@ -456,7 +456,7 @@ end function
 
 function same_name(sequence a, sequence b)
 -- return TRUE if two file names (or paths) are equal
-	if ELINUX then
+	if EUNIX then
 		return equal(a, b) -- case sensitive
 	end if
 	-- DOS/Windows

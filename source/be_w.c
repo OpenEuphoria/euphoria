@@ -11,7 +11,7 @@
 /******************/
 #include <stdio.h>
 #include <time.h>
-#ifdef ELINUX
+#ifdef EUNIX
 #include <sys/stat.h>
 #include <unistd.h>
 #else
@@ -86,7 +86,7 @@ static char *expanded_ptr = expanded_string;
 static int must_flush = TRUE; /* flush output to screen or not */
 static int collect_next;   /* place to store next collect output */
 static int collect_free;   /* number of chars of empty space remaining */
-#ifdef ELINUX
+#ifdef EUNIX
 // we need to record everything written to the screen
 struct char_cell screen_image[MAX_LINES][MAX_COLS]; 
 // plus have two alternate screens for interactive trace
@@ -113,7 +113,7 @@ void RTInternal();
 /*********************/
 /* Defined functions */
 /*********************/
-#ifdef ELINUX
+#ifdef EUNIX
 struct rccoord _gettextposition()
 {
 		struct rccoord p;
@@ -175,7 +175,7 @@ void InitInOut()
 	buff_start.X = 0;
 	buff_start.Y = 0;
 #else
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 	position.col = 1;
 	position.row = 1;
 	in_from_keyb  = isatty(0);
@@ -183,7 +183,7 @@ void InitInOut()
 	err_to_screen = isatty(2);
 	screen_line = position.row;
 	screen_col = position.col; 
-#ifdef ELINUX
+#ifdef EUNIX
 	for (i = 0; i < line_max; i++) {
 		for (j = 0; j < col_max; j++) {
 			screen_image[i][j].ascii = ' ';
@@ -230,7 +230,7 @@ void show_console()
 #endif
 	if (!have_console) {
 		have_console = TRUE;
-#ifdef ELINUX
+#ifdef EUNIX
 		initscr();  // maybe use newterm() to avoid screen clearing
 		ESCDELAY=0;
 		if (has_colors())
@@ -481,7 +481,7 @@ mem_cputs(char *text)
 }
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 void update_screen_string(char *s)
 // record that a string of characters was written to the screen
 {
@@ -534,7 +534,7 @@ static void expand_tabs(char *raw_string)
 							   expanded_ptr - expanded_string);
 				end_of_line('\n');
 #else
-#ifdef ELINUX
+#ifdef EUNIX
 				fputs(expanded_string, stdout);
 				fflush(stdout);
 				update_screen_string(expanded_string);
@@ -545,7 +545,7 @@ static void expand_tabs(char *raw_string)
 #else
 				_outtext(expanded_string); //critical function
 #endif
-#endif // ELINUX
+#endif // EUNIX
 
 #endif // EWINDOWS
 				screen_col = 1;
@@ -575,7 +575,7 @@ static void expand_tabs(char *raw_string)
 			end_of_line(c);
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 			// curses advances to next line if given \r or \n beyond 80
 			*expanded_ptr = '\0'; 
 			fputs(expanded_string, stdout);
@@ -618,7 +618,7 @@ static void expand_tabs(char *raw_string)
 #ifdef EWINDOWS
 		MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
 #else
-#ifdef ELINUX
+#ifdef EUNIX
 		fputs(expanded_string, stdout);
 		fflush(stdout);
 		update_screen_string(expanded_string);
@@ -671,7 +671,7 @@ void screen_output(FILE *f, char *out_string)
 	}
 	
 	else {
-#ifdef ELINUX
+#ifdef EUNIX
 		if ((f == stdout && out_to_screen) ||
 			(f == stderr && err_to_screen && (!low_on_space || have_console))) {
 			if (current_screen != MAIN_SCREEN)
@@ -728,7 +728,7 @@ void ClearScreen()
 	SetPosition(1,1);
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	// ANSI code
 	fputs("\033[2J", stdout);  // clear screen
 	SetPosition(1,1);
@@ -751,7 +751,7 @@ void ClearScreen()
 
 void SetPosition(int line, int col)
 {
-#ifdef ELINUX
+#ifdef EUNIX
 	char lbuff[20];
 	char cbuff[20];
 #endif
@@ -770,7 +770,7 @@ void SetPosition(int line, int col)
 #endif
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	sprintf(lbuff, "%d", line);
 	sprintf(cbuff, "%d", col);
 	// ANSI code

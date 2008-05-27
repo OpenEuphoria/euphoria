@@ -60,7 +60,7 @@ procedure delete_files(integer doit)
 -- output commands to delete .c and .h files
 	if not keep then
 		for i = 1 to length(files_to_delete) do
-			if ELINUX then
+			if EUNIX then
 				puts(doit, "rm ")
 			else
 				puts(doit, "del ")
@@ -919,13 +919,13 @@ global procedure new_c_file(sequence name)
 		c_puts("#include <go32.h>\n")
 	end if
 	c_puts("#include \"")
-	if not ELINUX then
+	if not EUNIX then
 		c_puts(eudir & SLASH )
 	end if
 	c_puts( "include" & SLASH & "euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 
-	if not ELINUX then
+	if not EUNIX then
 		name = lower(name)  -- for faster compare later
 	end if
 	files_to_delete = append(files_to_delete, name & ".c")
@@ -943,7 +943,7 @@ function unique_c_name(sequence name)
 	integer next_fc 
 	
 	compare_name = name & ".c"
-	if not ELINUX then
+	if not EUNIX then
 		compare_name = lower(compare_name)
 		-- .c's on files_to_delete are already lower
 	end if
@@ -958,7 +958,7 @@ function unique_c_name(sequence name)
 			end if
 			name[1] = file_chars[next_fc]
 			compare_name = name & ".c"
-			if not ELINUX then
+			if not EUNIX then
 				compare_name = lower(compare_name)
 			end if
 			next_fc += 1
@@ -975,7 +975,7 @@ integer link_file
 
 procedure add_file(sequence filename)
 -- add a file to the list of files to be linked 
-	if ELINUX then
+	if EUNIX then
 		link_line &= filename & ".o "
 	
 	elsif EDOS then
@@ -1022,7 +1022,7 @@ global procedure start_emake()
 	sequence debug_flag
 	debug_flag = ""
 	
-	if ELINUX then      
+	if EUNIX then      
 		doit = open("emake", "w")
 	else       
 		doit = open("emake.bat", "w")
@@ -1032,7 +1032,7 @@ global procedure start_emake()
 		CompileErr("Couldn't create batch file for compile.\n")
 	end if
 		
-	if not ELINUX then
+	if not EUNIX then
 		puts(doit, "@echo off\n")
 		puts(doit, "if not exist main-.c goto nofiles\n")
 	end if
@@ -1108,7 +1108,7 @@ global procedure start_emake()
 		end if
 	end if
 	
-	if ELINUX then
+	if EUNIX then
 		puts(doit, "echo compiling with GNU C\n")
 		cc_name = "gcc"
 		echo = "echo"
@@ -1333,7 +1333,7 @@ global procedure finish_emake()
 		close(link_file)
 	end if
 
-	if ELINUX then
+	if EUNIX then
 		if dll_option then
 			dll_flag = "-shared -nostartfiles"
 			exe_suffix = ".so" 
@@ -1393,7 +1393,7 @@ global procedure finish_emake()
 	end if
 		
 	close(doit)
-	if ELINUX then
+	if EUNIX then
 		system("chmod +x emake", 2)
 	end if
 end procedure

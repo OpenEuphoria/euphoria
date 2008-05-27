@@ -39,7 +39,7 @@
 /******************/
 #include <stdio.h>
 #include <time.h>
-#ifdef ELINUX
+#ifdef EUNIX
 #include <sys/times.h>
 #else
 #ifdef EDJGPP
@@ -79,7 +79,7 @@
 		: ((fp)->_cnt--,*(fp)->_ptr++))
 #endif
 
-#if defined(EWATCOM) || defined(ELINUX)
+#if defined(EWATCOM) || defined(EUNIX)
 // a bit faster:
 #define mygetc(fp) \
 		((fp)->_cnt<=0 \
@@ -794,7 +794,7 @@ void thread5(void);
 #include "redef.h"
 #endif
 
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
@@ -913,7 +913,7 @@ void InitExecute()
 void Execute(int *);
 
 #ifndef INT_CODES
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 int **jumptab; // initialized in do_exec() 
 #else
 /* Important! The offset below is based on the object code WATCOM 
@@ -1589,7 +1589,7 @@ void Execute(int *start_index)
 }
 
 #ifndef INT_CODES
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 // don't use switch/case - use special jump to label feature
 #define case
 #endif 
@@ -1629,7 +1629,7 @@ void do_exec(int *start_pc)
 	s1_ptr s1;
 	object *block;
 	
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
   &&L_LESS, &&L_GREATEREQ, &&L_EQUALS, &&L_NOTEQ, &&L_LESSEQ, &&L_GREATER,
@@ -1708,7 +1708,7 @@ void do_exec(int *start_pc)
 #endif
 #endif
 	if (start_pc == NULL) {
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 #ifndef INT_CODES
 		jumptab = (int **)localjumptab;
 #endif
@@ -1744,7 +1744,7 @@ void do_exec(int *start_pc)
 #else
 // threaded code
 		thread();
-#if !defined(ELINUX) && !defined(EDJGPP)
+#if !defined(EUNIX) && !defined(EDJGPP)
 		switch((int)pc) {                                       
 #endif
 
@@ -3712,7 +3712,18 @@ void do_exec(int *start_pc)
 			case L_PEEK_STRING:
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
-				top = NewString(a);
+				if (IS_ATOM_INT(a)) {
+					poke_addr = (unsigned char *)INT_VAL(a);
+				}
+				else if (IS_ATOM(a)) {
+					if( b )
+						poke_addr = (signed char *)(unsigned long)
+								(DBL_PTR(a)->dbl);
+					else
+						poke_addr = (unsigned char *)(unsigned long)
+								(DBL_PTR(a)->dbl);
+				}
+				top = NewString(poke_addr);
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -4018,7 +4029,7 @@ void do_exec(int *start_pc)
 					show_console();  
 #endif
 					if (in_from_keyb) {
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM
 						b = mgetch(TRUE); // echo the character
 #else
@@ -4030,7 +4041,7 @@ void do_exec(int *start_pc)
 #endif                  
 					}
 					else {
-#ifdef ELINUX                       
+#ifdef EUNIX                       
 						b = getc(last_r_file_ptr);
 #else                   
 						b = mygetc(last_r_file_ptr); 
@@ -4039,7 +4050,7 @@ void do_exec(int *start_pc)
 				}
 				else
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 					b = getc(last_r_file_ptr);
 #else
 					b = mygetc(last_r_file_ptr); /* don't use <a> ! */
@@ -4061,8 +4072,8 @@ void do_exec(int *start_pc)
 
 			case L_PLATFORM: // only shrouded code needs this (for portability)
 				DeRef(*(object_ptr)pc[1]);
-#ifdef ELINUX
-				top = 3;  // Linux
+#ifdef EUNIX
+				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32
@@ -4087,7 +4098,7 @@ void do_exec(int *start_pc)
 				}
 				top = MAKE_INT(get_key(FALSE));
 				if (top == ATOM_M1 && TraceOn) {
-#ifdef ELINUX
+#ifdef EUNIX
 					struct tms buf;
 					c0 = times(&buf) + 8 * clk_tck; // wait 8 real seconds
 					while (times(&buf)
@@ -4457,7 +4468,7 @@ void do_exec(int *start_pc)
 #ifdef INT_CODES
 		}
 #else
-#if !defined(ELINUX) && !defined(EDJGPP)
+#if !defined(EUNIX) && !defined(EDJGPP)
 		}
 #endif
 #endif

@@ -1057,7 +1057,7 @@ trace_line = 0
 
 procedure one_trace_line(sequence line)
 -- write one fixed-width 79-char line to ctrace.out
-	if ELINUX then
+	if EUNIX then
 		printf(trace_file, "%-78.78s\n", {line})
 	else
 		printf(trace_file, "%-77.77s\r\n", {line})

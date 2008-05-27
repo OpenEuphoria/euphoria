@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EBSD
 #define NAME_MAX 255
 #else
@@ -91,7 +91,7 @@ END_COLOR_DEPTH_LIST
 #include <dos.h>
 #endif
 
-#endif  //ELINUX
+#endif  //EUNIX
 
 #include <time.h>
 #include <string.h>
@@ -159,7 +159,7 @@ unsigned current_bg_color = 0;
 /**********************/
 /* Imported variables */
 /**********************/
-#ifdef ELINUX
+#ifdef EUNIX
 extern int pagesize;
 extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
 #endif
@@ -246,7 +246,7 @@ char *version_name =
 "WIN32";
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 "Linux";
 #endif
 
@@ -509,7 +509,7 @@ extern long get_int(object x)
 /* Warning: side effects could happen from double eval of x */
 #define Get_Int(x) (IS_ATOM_INT(x) ? INT_VAL(x) : get_int(x))
 
-#ifdef ELINUX
+#ifdef EUNIX
 struct termios savetty; // initial tty state for STDIN
 struct termios newtty;  // current tty state for STDIN
 
@@ -554,7 +554,7 @@ void InitGraphics()
 #endif
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	// save initial tty state
 	tcgetattr(STDIN_FILENO, &savetty);
 
@@ -624,7 +624,7 @@ void EndGraphics()
 	SetConsoleMode(console_output,
 					ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT); // back to normal
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
 #endif
 #ifdef EDOS
@@ -1429,7 +1429,7 @@ void NewConfig()
 	config.numvideopages = 1;
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	char *env_lines;
 	char *env_cols;
 	int x;
@@ -1670,7 +1670,7 @@ static object Cursor(object x)
 	_settextcursor(style);
 #endif
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 	// leaveok(stdscr, style != 0x02000); doesn't work very well
 #endif
 	return ATOM_1;
@@ -1718,7 +1718,7 @@ object Wrap(object x)
 	return ATOM_1;
 }
 
-#ifdef ELINUX
+#ifdef EUNIX
 static char *bl20 = "                    ";
 
 void blank_lines(int line, int n)
@@ -1812,7 +1812,7 @@ void do_scroll(int top, int bottom, int amount)
 	}
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	// save the current position
 	r1 = screen_line;
 	c1 = screen_col;
@@ -1962,7 +1962,7 @@ object SetTColor(object x)
 	attribute = (c & 0x0f) | (con_info.wAttributes & 0xf0);
 	SetConsoleTextAttribute(console_output, attribute);
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 	current_fg_color = c & 15;
 	if (current_fg_color > 7)
 		fputs("\033[1m", stdout); // BOLD ON (BRIGHT)
@@ -1988,7 +1988,7 @@ object SetTColor(object x)
 static long colors[16];
 #endif
 
-#if !defined(ELINUX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND)
 static long colors[16] = {
 	_BLACK, _BLUE, _GREEN, _CYAN, 
 	_RED, _MAGENTA, _BROWN, _WHITE,
@@ -2015,7 +2015,7 @@ object SetBColor(object x)
 	attribute = ((c & 0x0f) << 4) | (con_info.wAttributes & 0x0f);
 	SetConsoleTextAttribute(console_output, attribute);
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 	current_bg_color = c & 7;
 	// ANSI code
 	fputs("\033[4", stdout);
@@ -2278,7 +2278,7 @@ static object MousePointer(object x)
 #endif
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM  // if GPM package is desired, - not available on FreeBSD
 /* Text Mode Mouse in Linux
  Codes:
@@ -2522,13 +2522,13 @@ static object user_allocate(object x)
 {
 	int nbytes;
 	char *addr;
-#ifdef ELINUX   
+#ifdef EUNIX   
 	unsigned first, last, gp1;
 #endif
 	
 	nbytes = get_int(x);
 	addr = malloc(nbytes);
-#ifdef ELINUX
+#ifdef EUNIX
 #ifndef EBSD
 	// make it executable
 	gp1 = pagesize-1;
@@ -3210,7 +3210,7 @@ unsigned short _djstat_flags =
 					_STAT_DIRSIZE | _STAT_ROOT_TIME | _STAT_WRITEBIT;
 #endif       
 
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 	// 3 of 3: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
@@ -3336,7 +3336,7 @@ static object PutScreenChar(object x)
 	unsigned cur_line, cur_column, line, column;
 	s1_ptr args;
 	object_ptr p;
-#ifdef ELINUX
+#ifdef EUNIX
 	char s1[2];
 	int save_line, save_col;
 #endif
@@ -3363,7 +3363,7 @@ static object PutScreenChar(object x)
 		RTFatal("third argument to put_screen_char() must be a sequence of even length");
 	p = args->base+1;
 
-#ifdef ELINUX   
+#ifdef EUNIX   
 	save_line = screen_line;
 	save_col = screen_col;
 	SetPosition(line, column);
@@ -3447,7 +3447,7 @@ static object GetScreenChar(object x)
 		
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	if (line >= 1 && line <= line_max &&
 		column >= 1 && column <= col_max) {
 		obj_ptr[1] = screen_image[line-1][column-1].ascii;
@@ -3530,7 +3530,7 @@ static object lock_file(object x)
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = fileno(f); 
 	
-#ifdef ELINUX
+#ifdef EUNIX
 	// get 2nd element of x - lock type
 	t = get_int(*(((s1_ptr)x)->base+2));  
 	if (t == 1)
@@ -3579,7 +3579,7 @@ static object unlock_file(object x)
 	fn = *(((s1_ptr)x)->base+1);
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = fileno(f); 
-#ifdef ELINUX   
+#ifdef EUNIX   
 	flock(fd, LOCK_UN);
 #else
 	// get 2nd element of x - range - assume it's a sequence
@@ -3720,13 +3720,13 @@ static object e_sleep(object x)
 double current_time()
 /* return value for time() function */
 {
-#ifdef ELINUX   
+#ifdef EUNIX   
 	struct tms buf;
 #endif  
 	if (clock_frequency == 0.0) {
 		/* no handler */
 		return (double)
-#ifdef ELINUX
+#ifdef EUNIX
 		times(&buf) / clk_tck
 #else
 		clock() / (double)clocks_per_sec
@@ -3850,7 +3850,7 @@ object tick_rate(object x)
 		if (clock_frequency != 0.0) {
 			CleanUpTimer(); 
 			clock_adjust = (double)
-#ifdef ELINUX           
+#ifdef EUNIX           
 			times(&buf) / CLK_TCK;  //N.B. DOS-only section right now
 #else           
 			clock()/clocks_per_sec;
@@ -4306,7 +4306,7 @@ object DefineC(object x)
 		if (proc_address == NULL)
 			return ATOM_M1;
 #else
-#ifdef ELINUX
+#ifdef EUNIX
 		proc_address = (int (*)())dlsym((void *)lib, routine_string);   
 		if (dlerror() != NULL)
 			return ATOM_M1;
@@ -4454,7 +4454,7 @@ object CallBack(object x)
 	}
 	
 	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#ifdef ELINUX   
+#ifdef EUNIX   
 #ifndef EBSD    
 	mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
 			 pagesize,  // one page
@@ -4563,7 +4563,7 @@ object start_backend(object x)
 	fe.includes = (struct include_info *) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
 
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 	do_exec(NULL);  // init jumptable
 #endif  
 
@@ -4676,7 +4676,7 @@ object machine(object opcode, object x)
 			case M_GET_MOUSE:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM              
 				return GetMouse();
 #else               
@@ -4846,8 +4846,8 @@ object machine(object opcode, object x)
 			
 			case M_PLATFORM:
 				/* obsolete, but keep it */
-#ifdef ELINUX
-				return 3;  // Linux
+#ifdef EUNIX
+				return 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
 #ifdef EWINDOWS
 				return 2;  // WIN32
@@ -4873,7 +4873,7 @@ object machine(object opcode, object x)
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				if (have_console) {
-#ifndef ELINUX
+#ifndef EUNIX
 					FreeConsole();
 #endif                  
 					have_console = FALSE;              

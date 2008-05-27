@@ -15,7 +15,7 @@
 #include <windows.h>
 #include <limits.h>
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 #include <unistd.h>
 #ifdef EBSD
 #include <limits.h>
@@ -204,7 +204,7 @@ void be_init()
 	
 	eudir = getenv("EUDIR");
 	if (eudir == NULL) {
-#ifdef ELINUX
+#ifdef EUNIX
 		// should check search PATH for euphoria/bin ?
 		eudir = getenv("HOME");
 		if (eudir == NULL) {
@@ -221,7 +221,7 @@ void be_init()
 #endif
 	}
 	
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 	strcpy(main_path, file_name[1]); // FOR NOW!
 #else
 	(void)_fullpath(main_path, file_name[1], PATH_MAX+1); 

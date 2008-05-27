@@ -243,7 +243,7 @@ struct private_block {
    object block[1];            // variable-length array of saved private data
 };
 
-#ifdef ELINUX
+#ifdef EUNIX
 #define MAX_LINES 100
 #define MAX_COLS 200
 struct char_cell {
@@ -253,7 +253,7 @@ struct char_cell {
 };
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EBSD
 #include <limits.h>
 #else

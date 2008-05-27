@@ -50,10 +50,10 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 /* Local variables */
 /*******************/
 
-#ifdef ELINUX
+#ifdef EUNIX
 #define push() asm("movl %0,%%ecx; pushl (%%ecx);" : /* no out */ : "r"(last_offset) : "%ecx" )
 #define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
-#endif  // ELINUX
+#endif  // EUNIX
 
 #ifdef ELCC
 #define push() _asm("pushl -8(%ebp)")
@@ -446,7 +446,7 @@ object call_c(int func, object proc_ad, object arg_list)
 #endif          
 			dresult = (*((double (__stdcall *)())int_proc_address))();
 
-#ifdef ELINUX       
+#ifdef EUNIX       
 		pop();
 #endif      
 		return NewDouble(dresult);
@@ -463,7 +463,7 @@ object call_c(int func, object proc_ad, object arg_list)
 #endif          
 			fresult = (*((float (__stdcall *)())int_proc_address))();
 
-#ifdef ELINUX       
+#ifdef EUNIX       
 		pop();
 #endif      
 		return NewDouble((double)fresult);
@@ -479,7 +479,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		else
 #endif          
 			iresult = (*((int (__stdcall *)())int_proc_address))();
-#ifdef ELINUX       
+#ifdef EUNIX       
 		pop();
 #endif      
 		if ((return_type & 0x000000FF) == 04) {

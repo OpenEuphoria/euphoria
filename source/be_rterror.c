@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 
-#ifndef ELINUX
+#ifndef EUNIX
 #if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP)
 #include <graph.h>
 #include <bios.h>
@@ -36,7 +36,7 @@
 #define MAX_VAR_LINES 7
 #define MAX_VARS_PER_LINE 6
 #define MAX_TRACEBACK 100 /* maximum number of levels of traceback to show */
-#ifdef ELINUX
+#ifdef EUNIX
 #define FLIP_TO_MAIN 265  /* F1 */
 #define FLIP_TO_DEBUG 266 /* F2 */
 #define DOWN_ARROW 258
@@ -69,7 +69,7 @@ extern int gameover;
 extern int current_screen;
 extern int allow_break;
 extern int control_c_count; 
-#ifdef ELINUX
+#ifdef EUNIX
 extern unsigned current_fg_color, current_bg_color;
 #endif
 extern int bound;
@@ -111,7 +111,7 @@ extern HANDLE console_save;
 extern unsigned default_heap;
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
 extern struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
 extern struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
@@ -136,7 +136,7 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 static char FErrBuff[300];
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
-//#ifdef ELINUX
+//#ifdef EUNIX
 //static WINDOW *var_scr = NULL;      // variable display screen
 //static WINDOW *debug_scr = NULL;    // debug screen
 //static WINDOW *main_scr  = NULL;    // main screen
@@ -257,7 +257,7 @@ static void set_bk_color(int c)
 		col = 7;
 	else if (col == _BLACK)
 		col = 0; 
-#ifdef ELINUX
+#ifdef EUNIX
 	else if (col == _BLUE)
 		col = 4;
 	else if (col == _YELLOW)
@@ -324,7 +324,7 @@ static void DisplayLine(long n, int highlight)
 	if (slist[n].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME))
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
-#ifdef ELINUX
+#ifdef EUNIX
 		strcat(TempBuff, "\376\n");
 #else
 		strcat(TempBuff, "\021\n");
@@ -377,7 +377,7 @@ static void Refresh(long line_num, int vars_too)
 		EClearLines(2+num_trace_lines, line_max, col_max, bottom_attrib); 
 #endif
 
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 	if (vars_too && !(TEXT_MODE)) {
 		ClearScreen();
 	}
@@ -512,7 +512,7 @@ void MainScreen()
 		console_output = console_save;
 		SetConsoleActiveScreenBuffer(console_output);
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 		screen_copy(screen_image, alt_image_debug); // save debug screen
 		screen_copy(alt_image_main, screen_image); // restore main screen
 		screen_show();
@@ -545,7 +545,7 @@ void MainScreen()
 	_setbkcolor(MainBkCol);
 #endif
 #endif
-#ifdef ELINUX
+#ifdef EUNIX
 	SetTColor(MainCol);
 	SetBColor(MainBkCol);
 #endif
@@ -718,7 +718,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			SetConsoleActiveScreenBuffer(console_var_display);
 			console_output = console_var_display;
 #else
-#ifdef ELINUX
+#ifdef EUNIX
 			screen_copy(screen_image, alt_image_debug);
 			blank_lines(0, line_max-1);
 #else
@@ -739,7 +739,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			SetConsoleActiveScreenBuffer(console_trace);
 			console_output = console_trace;
 #else
-#ifdef ELINUX
+#ifdef EUNIX
 			screen_copy(alt_image_debug, screen_image);
 			screen_show();
 #else           
@@ -820,7 +820,7 @@ void ShowDebug()
 	console_output = console_trace;
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	MainCol = current_fg_color;
 	MainBkCol = current_bg_color;
 	screen_copy(screen_image, alt_image_main);
@@ -871,7 +871,7 @@ void ShowDebug()
 		for (i = 0; i < display_size; i++) 
 			ClearSlot(i);
 		init_class();
-#ifndef ELINUX
+#ifndef EUNIX
 		conin = fopen("CON", "r");
 		if (conin == NULL)
 #endif
@@ -925,7 +925,7 @@ static void SaveDebugImage()
 #ifndef EDJGPP  // for now  
 	DebugCol = _gettextcolor();
 	DebugBkCol = _getbkcolor();
-	DebugPos = _gettextposition();  //ELINUX too?
+	DebugPos = _gettextposition();  //EUNIX too?
 #endif
 #endif
 }
@@ -972,7 +972,7 @@ static void DebugCommand()
 
 	while (TRUE) {
 		c = get_key(TRUE);
-#ifdef ELINUX
+#ifdef EUNIX
 		// must handle ANSI codes
 		if (c == 27) {
 			c = get_key();

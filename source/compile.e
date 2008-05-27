@@ -4768,7 +4768,7 @@ procedure opGETC()
 			c_stmt0("show_console();\n")
 		end if              
 		c_stmt0("if (in_from_keyb) {\n")
-		if ELINUX then
+		if EUNIX then
 			if EGPM then
 				c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
 			else               
@@ -5206,7 +5206,7 @@ procedure BackEnd(atom ignore)
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"")
 	
-	if ELINUX then
+	if EUNIX then
 		c_puts("include/euphoria.h\"\n")
 		c_puts("#include <unistd.h>\n")
 	else
@@ -5291,7 +5291,7 @@ procedure BackEnd(atom ignore)
 			end if
 		end if
 	
-	elsif ELINUX then
+	elsif EUNIX then
 		if dll_option then
 			c_stmt0("\nvoid _init()\n")
 		else
@@ -5337,7 +5337,7 @@ procedure BackEnd(atom ignore)
 			c_stmt0("winInstance = hInstance;\n")
 		end if
 	
-	elsif ELINUX then
+	elsif EUNIX then
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 		else   
@@ -5576,7 +5576,7 @@ procedure BackEnd(atom ignore)
 	finish_emake()
 	
 	screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
-	if ELINUX then
+	if EUNIX then
 		if dll_option then
 			screen_output(STDERR, "To build your shared library, type: ./emake\n")
 		else    

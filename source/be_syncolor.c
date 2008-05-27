@@ -27,7 +27,7 @@
 /* colors of various syntax classes */
 #define NORMAL_COLOR 0
 #define BUILTIN_COLOR 5
-#ifdef ELINUX
+#ifdef EUNIX
 #define YELLOW 11
 #define BRIGHT_CYAN 14
 #define BRIGHT_BLUE 12

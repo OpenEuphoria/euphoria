@@ -46,7 +46,7 @@ object NewDouble(double d)
 {
 	register d_ptr new;
 
-#ifdef ELINUX
+#ifdef EUNIX
 
    new = EMalloc((long)D_SIZE);
 #else

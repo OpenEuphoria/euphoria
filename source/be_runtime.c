@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#ifdef ELINUX
+#ifdef EUNIX
 #include <unistd.h>
 #include <termios.h>
 #include <time.h>
@@ -66,7 +66,7 @@
 
 #define NAG_DELAY 7
 
-#ifdef ELINUX
+#ifdef EUNIX
 #define LEFT_ARROW 260
 #define BS 263
 #else
@@ -373,7 +373,7 @@ static int user_abort = FALSE; /* TRUE if abort() was called by user program */
 /**********************/
 /* Declared functions */
 /**********************/
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM
 int Mouse_Handler(Gpm_Event *, void *);
 #endif
@@ -450,7 +450,7 @@ extern int color_trace;
 
 #if !defined(EDJGPP) && !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
-#if (defined(ELCC) || defined(EWATCOM) || defined(ELINUX)) && !defined(EOW)
+#if (defined(ELCC) || defined(EWATCOM) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
 #else
 int matherr(struct _exception *err)  // OW wants this
@@ -2611,7 +2611,7 @@ object EGets(object file_no)
 		show_console();
 #endif
 		if (in_from_keyb) {
-#ifdef ELINUX
+#ifdef EUNIX
 			echo_wait();
 #ifdef EGPM
 			c = mgetch(TRUE);
@@ -2620,7 +2620,7 @@ object EGets(object file_no)
 #endif
 #else
 			c = wingetch();
-#endif //ELINUX
+#endif //EUNIX
 		}
 		else {
 			c = getc(f);
@@ -2658,7 +2658,7 @@ object EGets(object file_no)
 #ifndef EDOS
 				// show_console(); assume done already above
 				if (in_from_keyb)
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM
 					c = mgetch(TRUE);
 #else
@@ -2711,7 +2711,7 @@ object EGets(object file_no)
 				if (f == stdin) {
 					// show_console(); assume done already above
 					if (in_from_keyb)
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM
 						c = mgetch(TRUE);
 #else
@@ -2898,7 +2898,7 @@ static void rPrint(object a)
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' && 
-#ifdef ELINUX
+#ifdef EUNIX
 				a <= 126)  // DEL is a problem with ANSI code display
 #else
 				a <= 127) 
@@ -3348,7 +3348,7 @@ object EPrintf(int file_no, object format_obj, object values)
 		return ATOM_0;
 }
 
-#ifdef ELINUX
+#ifdef EUNIX
 int nodelaych(int wait)
 // returns a character, or -1 if no character is there and wait is FALSE
 {
@@ -3437,7 +3437,7 @@ int get_key(int wait)
 		}   
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM
 		a = mgetch(wait);
 		if (a == ERR) {
@@ -3447,7 +3447,7 @@ int get_key(int wait)
 		a = nodelaych(wait); // no delay, no echo
 #endif      
 		return a;   
-#endif // ELINUX
+#endif // EUNIX
 }
 
 char *last_traced_line = NULL;
@@ -3457,7 +3457,7 @@ static FILE *trace_file;
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
 {
-#ifdef ELINUX   
+#ifdef EUNIX   
 	fprintf(trace_file, "%-78.78s\n", line);
 #else   
 	fprintf(trace_file, "%-77.77s\r\n", line);
@@ -3850,7 +3850,7 @@ object system_exec_call(object command, object wait)
 
 	exit_code = 0;
 
-#ifdef ELINUX
+#ifdef EUNIX
 	// this runs the shell - not really supposed to, but it gets exit code
 	exit_code = system(string_ptr);
 #else
@@ -4345,7 +4345,7 @@ object Command_Line()
 	char **argv;
 	s1_ptr result;
 	int switch_len;
-#ifdef ELINUX
+#ifdef EUNIX
 	char * buff;
 	ssize_t len;
 #endif
@@ -4360,7 +4360,7 @@ object Command_Line()
 		switch_len = SEQ_PTR(fe.switches)->length;
 		result = NewS1(Argc - (*file_name_entered == 0) - switch_len); 
 		obj_ptr = result->base;
-#ifdef ELINUX
+#ifdef EUNIX
 		// We try to get the actual path of the executable on *nix 
 		// systems using readlink()
 		buff = malloc( 2049 );
@@ -4375,7 +4375,7 @@ object Command_Line()
 				// not LINUX, or readlink failed, so we'll just report the actual cmd line
 				*(++obj_ptr) = NewString(*Argv);  
 		}
-#ifdef ELINUX
+#ifdef EUNIX
 		free(buff);
 #endif
 		for(i=0; i <= switch_len; i++){
@@ -4424,7 +4424,7 @@ void Cleanup(int status)
 		MainScreen();
 
 	if (!first_mouse) {
-#ifdef ELINUX
+#ifdef EUNIX
 #ifdef EGPM
 		Gpm_Close();
 #endif
@@ -4457,7 +4457,7 @@ void Cleanup(int status)
 #endif
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 	if (have_console && (
 		config.numtextrows < 24 ||
 		config.numtextrows > 25 || 
@@ -4607,7 +4607,7 @@ void key_gets(char *input_string)
 			break;
 			
 		else if (c == BS || c == LEFT_ARROW
-#ifdef ELINUX   //FOR NOW - must decide what to do about different key codes
+#ifdef EUNIX   //FOR NOW - must decide what to do about different key codes
 		|| c == 263
 #endif
 ) {
@@ -4634,7 +4634,7 @@ void key_gets(char *input_string)
 	}
 }
 
-#ifdef ELINUX
+#ifdef EUNIX
 // Circular buffer of keystrokes picked up by get_mouse().
 // It's empty when key_write equals key_read.
 char key_buff[KEYBUFF_SIZE];

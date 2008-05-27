@@ -1149,7 +1149,7 @@ global procedure emit_op(integer op)
 		
 		else    
 			-- front end knows platform
-			if ELINUX then
+			if EUNIX then
 				n = 3
 		
 			elsif BIND then

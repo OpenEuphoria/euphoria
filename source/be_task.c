@@ -78,7 +78,7 @@
 
 // Note: after a PUSH or POP, the stack pointer ESP points at the top element
 
-#ifdef ELINUX
+#ifdef EUNIX
 #define push_regs() asm("pushal")
 #define pop_regs() asm("popal")
 #ifdef EBSD
@@ -225,7 +225,7 @@ extern struct routine_list _00[];
 /* Defined functions */
 /*********************/
 #ifdef ERUNTIME
-#ifdef ELINUX
+#ifdef EUNIX
 #ifndef EBSD
 static void grow_stack(int x)
 // we need this because there seems to be no way to commit stack space
@@ -269,7 +269,7 @@ void InitTask()
 	tcb[0].expr_max = NULL;
 	tcb[0].expr_limit = NULL;
 #ifdef ERUNTIME 
-#ifdef ELINUX   
+#ifdef EUNIX   
 #ifndef EBSD    
 	grow_stack(total_stack_size / 1024);
 #endif

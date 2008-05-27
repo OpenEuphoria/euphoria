@@ -27,7 +27,7 @@ struct time_info {
 	long tot_ticks;
 };
 
-#if defined(ELINUX) || defined(EDJGPP) || defined(ELCC) || defined(EBORLAND)
+#if defined(EUNIX) || defined(EDJGPP) || defined(ELCC) || defined(EBORLAND)
 #define KEYBUFF_SIZE 50
 #define __far
 #ifndef EBORLAND
@@ -78,7 +78,7 @@ struct rccoord {
 };
 #endif
 
-#ifdef ELINUX
+#ifdef EUNIX
 #define PATH_SEPARATOR ':'
 #define SLASH '/'
 #else
@@ -86,7 +86,7 @@ struct rccoord {
 #define SLASH '\\'
 #endif
 
-#if defined(ELINUX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP)
 #define WORD unsigned short
 #define __stdcall
 #define __cdecl

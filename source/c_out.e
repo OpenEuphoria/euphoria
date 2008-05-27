@@ -91,7 +91,7 @@ global procedure c_printf8(atom value)
 				
 				elsif buff[p] = 'n' or buff[p] = 'N' then
 					-- NaN - not needed currently 
-					if ELINUX then
+					if EUNIX then
 						buff = CREATE_NAN1
 						if neg then
 							buff = prepend(buff, '-')

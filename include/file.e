@@ -6,9 +6,9 @@
 include sort.e
 include misc.e
 include wildcard.e
-ifdef LINUX then
+ifdef UNIX then
 else
-with define=NOTLINIX
+with define=NOTUNIX
 end ifdef
 
 constant M_SEEK  = 19,
@@ -38,7 +38,7 @@ global integer PATHSEP
 global sequence PATHSEPS
 global sequence NL
 
-ifdef LINUX then
+ifdef UNIX then
 	PATHSEP='/'
 	PATHSEPS = "/"
 	NL = "\n"
@@ -72,7 +72,7 @@ global constant LOCK_SHARED = 1,
 				LOCK_EXCLUSIVE = 2
 		 
 type lock_type(integer t)
-	ifdef LINUX then
+	ifdef UNIX then
 		return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
 	else
 		return 1
@@ -433,7 +433,7 @@ global function pathinfo(sequence path)
 	if slash > 0 then
 		dir_name = path[1..slash-1]
 		
-		ifdef NOTLINIX then
+		ifdef NOTUNIX then
 			ch = find(':', dir_name)
 			if ch != 0 then
 				drive_id = dir_name[1..ch-1]

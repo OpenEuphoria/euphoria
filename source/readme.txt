@@ -284,9 +284,9 @@ GNU C
 		Meanings of the various compile options for (-D):
 Platforms:
    EDOS
-   ELINUX
+   EUNIX
    EWINDOWS
-   EBSD  (ELINUX must also be defined)
+   EBSD  (EUNIX must also be defined)
    
 Compilers:
    EWATCOM

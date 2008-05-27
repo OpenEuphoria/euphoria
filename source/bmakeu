@@ -13,18 +13,18 @@ gcc -c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer compress.c
 gcc -c -w -fsigned-char -O2 -ffast-math -fomit-frame-pointer mode.c
 
 #back-end files - for FreeBSD add -DEBSD
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_execute.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_runtime.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_w.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_main.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_alloc.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_symtab.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -finline-functions -ffast-math -fomit-frame-pointer be_inline.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_machine.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_task.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer be_rterror.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer be_syncolor.c
-gcc -c -w -DELINUX -DBACKEND -fsigned-char -O2 -ffast-math -fno-defer-pop be_callc.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_execute.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_runtime.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_w.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_main.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_alloc.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_symtab.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -finline-functions -ffast-math -fomit-frame-pointer be_inline.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_machine.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fomit-frame-pointer be_task.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer be_rterror.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O -Os -fno-inline-functions -ffast-math -fomit-frame-pointer be_syncolor.c
+gcc -c -w -DEUNIX -DBACKEND -fsigned-char -O2 -ffast-math -fno-defer-pop be_callc.c
 
 echo linking - for FreeBSD omit -ldl
 gcc main-.o 0ackend.o backend.o init-.o file.o machine.o compress.o pathopen.o mode.o be_callc.o be_execute.o be_runtime.o be_w.o be_main.o be_alloc.o be_rterror.o be_symtab.o be_inline.o be_machine.o be_task.o be_syncolor.o -lm -ldl -obackendu

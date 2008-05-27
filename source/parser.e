@@ -2222,7 +2222,11 @@ global procedure InitGlobals()
 	if EWINDOWS then
 		OpDefines &= {"EU400", "WIN32"}
 	elsif ELINUX then
-		OpDefines &= {"EU400", "LINUX", "FREEBSD"}
+		OpDefines &= {"EU400", "LINUX", "UNIX"}
+	elsif EBSD then
+		OpDefines &= {"EU400", "UNIX", "FREEBSD"}
+	elsif EUNIX then --right now this can never happen
+		OpDefines &= {"EU400", "UNIX"}
 	elsif EDOS then
 		OpDefines &= {"EU400", "DOS32"}
 	end if
