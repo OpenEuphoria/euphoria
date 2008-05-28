@@ -1524,7 +1524,6 @@ procedure Loop_statement()
 
     exit_base = length(exit_list)
     next_base = length(continue_list)
-    bp1 = length(Code)+4
     entry_addr &= length(Code)+1
     emit_op(NOP2) -- Entry_statement() may patch this
     emit_addr(0)
@@ -1534,7 +1533,8 @@ procedure Loop_statement()
     if TRANSLATE then
 		emit_op(NOP1)
 	end if
-	retry_addr &= length(Code)
+    bp1 = length(Code)+1
+	retry_addr &= length(Code)+1
     continue_addr &= 0
     call_proc(forward_Statement_list, {})
     tok_match(UNTIL)
@@ -1556,7 +1556,7 @@ procedure Loop_statement()
     short_circuit -= 1
     emit_op(IF)
     emit_addr(bp1)
-    exit_loop(exit_base)  ?Code
+    exit_loop(exit_base) 
 end procedure
 
 integer top_level_parser
@@ -1966,7 +1966,7 @@ procedure Entry_statement()
     entry_addr[$] = 0
 	if TRANSLATE then
 	    emit_op(NOP1)
-	end if
+	end if 
 end procedure
 
 

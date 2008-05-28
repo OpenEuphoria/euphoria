@@ -23,7 +23,7 @@ function mul2(integer x,integer y)
 return x*y
 end function
 
-function mul3(integer p=n0,object x,object y=mul2(x,3))
+function mul3(integer p=n0,object x,object y=incr(s))
 return x*y+p
 end function
 
