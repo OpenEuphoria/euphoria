@@ -429,13 +429,18 @@ function get_section(m:map func, sequence section, sequence tag, integer wrap, i
 end function
 
 procedure write_includes()
-	object ign
-	sequence cat_name, content, api_content, typ
+	object ign, content
+	sequence cat_name, api_content, typ
 	m:map func
 
 	for a = 1 to length(functions) do
 		cat_name = functions[a][1]
 		content = read_file("t_lib_" & cat_name & ".htx")
+		if atom(content) then
+			printf(1, "Could not open template file %s for reading\n", {
+				"t_lib_" & cat_name & ".htx"})
+			abort(1)
+		end if
 		api_content = ""
 		for b = 1 to length(functions[a][2]) do
 			func = functions[a][2][b]
