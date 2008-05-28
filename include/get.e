@@ -8,7 +8,7 @@
 
 --****
 -- Category: 
---   input
+--   get
 --
 -- File:
 --   lib_get

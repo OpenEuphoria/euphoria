@@ -5,7 +5,7 @@
 
 --****
 -- Category: 
---   file operations
+--   file
 --
 -- File:
 --   lib_file
