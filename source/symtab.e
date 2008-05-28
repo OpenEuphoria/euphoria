@@ -540,6 +540,8 @@ global function keyfind(sequence word, integer file_no)
 	hashval = hashfn(word)
 	st_ptr = buckets[hashval] 
 
+	--printf(1, "%d: %s\n", {file_no, word})
+
 	while st_ptr do
 		if equal(word, SymTab[st_ptr][S_NAME]) then
 			-- name matches 
@@ -553,7 +555,14 @@ global function keyfind(sequence word, integer file_no)
 				
 				scope = SymTab[st_ptr][S_SCOPE]
 				
-				if scope = SC_GLOBAL then
+				if scope = SC_PREDEF then
+					if BIND then
+						add_ref(tok)
+					end if
+					   
+					return tok
+					-- else a global has overridden this symbol 
+				elsif scope = SC_GLOBAL then
 					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file 
 					   
@@ -580,17 +589,6 @@ global function keyfind(sequence word, integer file_no)
 					  
 						return tok
 					end if
-				
-				elsif scope = SC_PREDEF then
-					if length(dup_globals) = 0 then
-					   
-						if BIND then
-							add_ref(tok)
-						end if
-					   
-						return tok
-					end if
-					-- else a global has overridden this symbol 
 				
 				else 
 					   
@@ -638,7 +636,7 @@ global function keyfind(sequence word, integer file_no)
 		
 		st_ptr = SymTab[st_ptr][S_SAMEHASH]
 	end while
-	
+
 	if length(dup_globals) > 1 and find( 1, in_include_path ) then
 		-- filter out based on include path
 		ix = 1
