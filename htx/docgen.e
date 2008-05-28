@@ -111,12 +111,14 @@ global procedure write(object text)
 	end if
 end procedure
 
-constant re_sig = re:new("(global )*(procedure|function) ([A-Za-z0-9_]+)( )*\\((.*)\\)")
+constant 
+	re_sig = re:new("(global )*(procedure|function|type) ([A-Za-z0-9_]+)( )*\\((.*)\\)"),
+	re_const_sig = re:new("(global )*(constant|enum) ([A-Za-z0-9_]+)")
 
 procedure add_function(sequence filename, m:map func)
 	integer idx
 	sequence cat_name, signature
-	sequence result
+	object result
 
 	idx = 0
 	func      = m:put(func, "include", filename)
@@ -125,6 +127,9 @@ procedure add_function(sequence filename, m:map func)
 
 	-- TODO: check for search error
 	result = re:search(re_sig, signature, re:DEFAULT)
+	if atom(result) then
+		return
+	end if
 	func   = m:put(func, "type",   signature[result[3][1]..result[3][2]])
 	func   = m:put(func, "name",   signature[result[4][1]..result[4][2]])
 	if (result[6][2] - result[6][1]) > 1 then

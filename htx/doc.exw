@@ -295,6 +295,7 @@ procedure generate(sequence in_name, sequence format, sequence dest)
 	
 	out_name = in_name[1..p] & out_type
 	if find('_', out_name) and equal(format, "PLAIN") then
+
 	
 	elsif match("readme.", out_name) then
 		out_name = app_dir & PATHSEP & out_name
