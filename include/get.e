@@ -6,6 +6,17 @@
 -- value()
 -- wait_key()
 
+--****
+-- Category: 
+--   input
+--
+-- File:
+--   lib_get
+--
+-- Title:
+--   Euphoria Standard Library Input Routines
+--****
+
 -- error status values returned from get() and value():
 global constant GET_SUCCESS = 0,
 				GET_EOF = -1,
@@ -35,11 +46,108 @@ natural string_next
 
 char ch  -- the current character
 
+--**
+-- Signature:
+-- global function get_key()
+--
+-- Description:
+-- Return the key that was pressed by the user, without waiting. Return -1 if no key was pressed. Special codes are returned for the function keys, arrow keys etc.
+--
+-- Comments:
+-- he operating system can hold a small number of key-hits in its keyboard buffer. get_key() will return the next one from the buffer, or -1 if the buffer is empty.
+--
+-- Run the key.bat program to see what key code is generated for each key on your keyboard. 
+--
+-- Example 1:
+-- 
+--**
+
+--**
+-- Signature:
+-- global function getc(integer fn)
+--
+-- Description:
+-- Get the next character (byte) from file or device fn. The character will have a value from 0 to 255. -1 is returned at end of file.
+--
+-- Comments:
+-- File input using getc() is buffered, i.e. getc() does not actually go out to the disk for each character. Instead, a large block of characters will be read in at one time and returned to you one by one from a memory buffer.
+--
+-- When getc() reads from the keyboard, it will not see any characters until the user presses Enter. Note that the user can type control-Z, which the operating system treats as "end of file". -1 will be returned. 
+--**
+
+--**
+-- Signature:
+-- global function gets(integer fn)
+--
+-- Description:
+-- Get the next sequence (one line, including '\n') of characters from file or device fn. The characters will have values from 0 to 255. The atom -1 is returned on end of file.
+--
+-- Comments:
+-- Because either a sequence or an atom (-1) might be returned, you should probably assign the result to a variable declared as object.
+--
+-- After reading a line of text from the keyboard, you should normally output a \n character, e.g. puts(1, '\n'), before printing something. Only on the last line of the screen does the operating system automatically scroll the screen and advance to the next line.
+--
+-- The last line in a file might not end with a new-line '\n' character.
+--
+-- When your program reads from the keyboard, the user can type control-Z, which the operating system treats as "end of file". -1 will be returned.
+--
+-- In SVGA modes, DOS might set the wrong cursor position, after a call to gets(0) to read the keyboard. You should set it yourself using <strong>position()</strong>. <-- this needs to point to position()!!!
+--
+-- Example 1:
+-- sequence buffer
+-- object line
+-- integer fn
+--
+-- -- read a text file into a sequence
+-- fn = open("myfile.txt", "r")
+-- if fn = -1 then
+--     puts(1, "Couldn't open myfile.txt\n")
+--     abort(1)
+-- end if
+--
+-- buffer = {}
+-- while 1 do
+--     line = gets(fn)
+--     if atom(line) then
+--         exit   -- -1 is returned at end of file
+--     end if
+--     buffer = append(buffer, line)
+-- end while
+--
+-- Example 2:
+-- object line
+--
+-- puts(1, "What is your name?\n")
+-- line = gets(0)  -- read standard input (keyboard)
+-- line = line[1..length(line)-1] -- get rid of \n character at end
+-- puts(1, '\n')   -- necessary
+-- puts(1, line & " is a nice name.\n")
+--**
+
+--**
+-- Return the next key pressed by the user. Don't return until a key is pressed.
+--
+-- Comments:
+-- You could achieve the same result using get_key() as follows:
+-- <eucode>
+--     while 1 do
+--         k = get_key()
+--         if k != -1 then
+--             exit
+--         end if
+--     end while
+-- </eucode>
+--
+-- 	However, on multi-tasking systems like Windows or Linux/FreeBSD, this "busy waiting" would tend to slow the system down. wait_key() lets the operating system do other useful work while your program is waiting for the user to press a key.
+--
+-- You could also use getc(0), assuming file number 0 was input from the keyboard, except that you wouldn't pick up the special codes for function keys, arrow keys etc. 
+
 global function wait_key()
 -- Get the next key pressed by the user.
 -- Wait until a key is pressed.
 	return machine_func(M_WAIT_KEY, 0)
 end function
+--**
 
 procedure get_ch()
 -- set ch to the next character in the input stream (either string or file)
@@ -451,6 +559,77 @@ function Get2(natural offset)
 
 end function
 
+--**
+-- Input, from file fn, a human-readable string of characters representing a Euphoria object. Convert the string into the numeric value of that object. s will be a 2-element sequence: <strong>{error status, value}</strong>. Error status codes are:
+--
+-- <eucode>
+--     GET_SUCCESS -- object was read successfully
+--     GET_EOF     -- end of file before object was read completely
+--     GET_FAIL    -- object is not syntactically correct
+--     GET_NOTHING -- nothing was read, even a partial object string, before end of input
+-- </eucode>
+--
+-- get() can read arbitrarily complicated Euphoria objects. You
+--  could have a long sequence of values in braces and separated by
+--  commas and comments, e.g. {23, {49, 57}, 0.5, -1, 99, 'A', "john"}.
+--  A single call to get() will read in this
+--  entire sequence and return its value as a result, as well as complementary information.
+-- 
+-- get() returns a 2 element sequence, like value() does:
+-- <ul>
+-- <li> a status code (success/error/end of file/no value at all)</li>
+-- <li> the value just read (meaningful only when the status code is GET_SUCCESS)</li>
+-- </ul>
+-- Each call to get() picks up where the previous call left off. For instance, a series of 5 calls to get() would be needed to read in:
+-- 
+-- <console>"99 5.2 {1,2,3} \"Hello\" -1"</console>
+-- 
+-- On the sixth and any subsequent call to get() you would see a GET_EOF status. If you had something like:
+-- 
+-- <console>{1, 2, xxx}</console>
+-- 
+-- in the input stream you would see a GET_FAIL error status because xxx is not a Euphoria object. And seeing
+-- 
+--    -- something\nBut no value
+-- 
+-- and the input stream stops right there, you'll  receive a status code of GET_NOTHING, because nothing but whitespace or comments was read.
+-- 
+-- Multiple "top-level" objects in the input stream must be
+--  separated from each other with one or more "whitespace"
+--  characters (blank, tab, \r or \n). At the very least, a top
+--  level number must be followed by a white space from the following object.
+--  Whitespace is not necessary <b><i>within</i></b> a top-level object. Comments, terminated by either '\n' or '\r',
+--  are allowed anywhere inside sequences, and ignored if at the top level.
+--  A call to get() will read one entire top-level object, plus possibly one additional
+--  (whitespace) character, after a top level number, even though the next object may have an identifiable starting pont.
+--
+-- Comments:
+-- The combination of print() and get() can be used to save a
+--  Euphoria object to disk and later read it back. This technique
+--  could be used to implement a database as one or more large
+--  Euphoria sequences stored in disk files. The sequences could be
+--  read into memory, updated and then written back to disk after
+--  each series of transactions is complete. Remember to write out
+--  a whitespace character (using puts()) after each call to print(),
+--  at least when a top level number was just printed.
+-- 
+-- The value returned is not meaningful unless you have a GET_SUCCESS status.
+--
+-- Example 1:
+-- <eucode>
+-- If he types 77.5, get(0) would return:
+--
+-- {GET_SUCCESS, 77.5}
+--
+-- -- whereas gets(0) would return:
+--
+-- "77.5\n"
+--
+-- </eucode>
+--
+-- Example 2:
+-- See <path>bin\mydata.ex</path>
+
 global function get(integer file)
 -- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
@@ -462,6 +641,33 @@ global function get(integer file)
 	get_ch() 
 	return Get()
 end function
+--**
+
+--**
+-- Read the string representation of a Euphoria object, and compute the value of that object. A 2-element sequence, {error_status, value} is actually returned, where error_status can be one of:
+--
+--	<eucode>
+--     GET_SUCCESS -- a valid object representation was found
+--     GET_EOF     -- end of string reached too soon
+--     GET_FAIL    -- syntax is wrong
+--	</eucode>
+--
+-- Comments:
+-- This works the same as get(), but it reads from a string that you supply, rather than from a file or device.
+--
+-- After reading one valid representation of a Euphoria object, value() will stop reading and ignore any additional characters in the string. For example, "36" and "36P" will both give you {GET_SUCCESS, 36}. 
+--
+-- Example 1:
+-- s = value("12345"}
+-- s is {GET_SUCCESS, 12345}
+--
+-- Example 2: 	
+-- s = value("{0, 1, -99.9}")
+-- -- s is {GET_SUCCESS, {0, 1, -99.9}}
+--
+-- Example 3: 	
+-- s = value("+++")
+-- -- s is {GET_FAIL, 0}
 
 global function value(sequence string)
 -- Read the representation of a Euphoria object
@@ -474,6 +680,50 @@ global function value(sequence string)
 	get_ch() 
 	return Get()
 end function
+--**
+
+--**
+-- Read the string representation of a Euphoria object, and computes
+--  the value of that object. The string which is read is the tail of st which starts at index i.
+--  A 4-element sequence,
+--  <b>{error_status, value, total characters read, number of leading whitespace}</b> is
+--   actually returned, where error_status can be one of:
+--  
+-- <eucode>
+--     GET_SUCCESS -- a valid object representation was found
+--     GET_EOF     -- end of string reached too soon
+--     GET_FAIL    -- syntax is wrong
+--     GET_NOTHING -- end of string reached without any value being even partially read
+-- </eucode>
+--
+-- Comments:
+-- This works the same as <b>value()</b>, but
+-- <ul>
+-- <li> reading starts where you instruct the routine to, instead of starting from the beginning of the string. You can always pass value() a slice to achieve a similar effect.</li>
+-- <li> it returns extra information value() doesn't.</li>
+-- </ul>
+--  
+--  After reading one valid representation of a Euphoria object, value_from() will
+--  stop reading and ignore any additional characters in the string. For
+--  example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
+--  invalid representation, the value field is undefined (usually 0), and the third field is the
+--  1 based index of the character the reading of which caused an error.
+--  
+--  If the representation was valid, you can use the third returned element to pick up where you 
+--  left, like get() does in a file. There is no corresponding get_from(), at least because 
+--  calling where() before and after get() will tell you how many characters were read.
+--
+-- Example 1:
+-- s = value_from("  12345"} -- notice the two leading spaces
+-- -- s is {GET_SUCCESS, 12345, 7, 2}
+--
+-- Example 2:
+-- s = value_from("{0, 1, -99.9}")
+-- -- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
+--
+-- Example 3:
+-- s = value_from("+++")
+-- -- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
 
 global function value_from(sequence string, natural starting_point)
 -- Read the representation of a Euphoria object
@@ -487,6 +737,19 @@ global function value_from(sequence string, natural starting_point)
 	string_next = starting_point
 	return Get2(starting_point-1)
 end function
+--**
+
+--**
+-- Prompt the user to enter a number. st is a string of text that will be displayed on the screen. s is a sequence of two values {lower, upper} which determine the range of values that the user may enter. If the user enters a number that is less than lower or greater than upper, he will be prompted again. s can be empty, {}, if there are no restrictions.
+--
+-- Comments:
+-- If this routine is too simple for your needs, feel free to copy it and make your own more specialized version.
+--
+-- Example 1:
+-- age = prompt_number("What is your age? ", {0, 150})
+--
+-- Example 2: 	
+-- t = prompt_number("Enter a temperature in Celcius:\n", {})
 
 global function prompt_number(sequence prompt, sequence range)
 -- Prompt the user to enter a number.
@@ -516,6 +779,16 @@ global function prompt_number(sequence prompt, sequence range)
 		 end if
 	end while
 end function
+--**
+
+--**
+-- Prompt the user to enter a string of text. st is a string that will be displayed on the screen. The string that the user types will be returned as a sequence, minus any new-line character.
+--
+-- Comments:
+-- If the user happens to type control-Z (indicates end-of-file), "" will be returned.
+--
+-- Example 1:
+-- name = prompt_string("What is your name? ")
 
 global function prompt_string(sequence prompt)
 -- Prompt the user to enter a string
@@ -530,8 +803,46 @@ global function prompt_string(sequence prompt)
 		return ""
 	end if
 end function
+--**
 
 constant CHUNK = 100
+
+--**
+-- Read the next n bytes from file number fn. Return the bytes
+--  as a sequence. The sequence will be of length n, except
+--  when there are fewer than n bytes remaining to be read in the
+--  file.
+--
+-- Comments:
+-- When i > 0 and <a href=\"lib_seq.htm#length\">length(s)</a> < i you know
+--  you've reached the end of file. Eventually, an
+--  <a href=\"refman_2.htm#empty_seq\">empty sequence</a> will be returned
+--  for s.
+--  
+--  This function is normally used with files opened in binary mode, \"rb\".
+--  This avoids the confusing situation in text mode where DOS will convert CR LF pairs to LF.
+--
+-- Example 1:
+-- include get.e
+--
+-- integer fn
+-- fn = open("temp", "rb")  -- an existing file
+--
+-- sequence whole_file
+-- whole_file = {}
+--
+-- sequence chunk
+--
+-- while 1 do
+--     chunk = get_bytes(fn, 100) -- read 100 bytes at a time
+--     whole_file &= chunk        -- chunk might be empty, that's ok
+--     if length(chunk) < 100 then
+--         exit
+--     end if
+-- end while
+--
+-- close(fn)
+-- ? length(whole_file)  -- should match DIR size of "temp"
 
 global function get_bytes(integer fn, integer n)
 -- Return a sequence of n bytes (maximum) from an open file.
@@ -574,4 +885,4 @@ global function get_bytes(integer fn, integer n)
 	end while   
 	return s
 end function
-
+--**

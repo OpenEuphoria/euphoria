@@ -3,6 +3,17 @@
 -- Euphoria 3.1
 -- Graphics & Sound Routines
 
+--****
+-- Category: 
+--   graphics
+--
+-- File:
+--   lib_graphics
+--
+-- Title:
+--   Euphoria Standard Library Graphics Routines
+--****
+
 --    GRAPHICS MODES --  argument to graphics_mode()
 
 -- mode  description
@@ -108,6 +119,23 @@ end type
 type point_sequence(sequence x)
 	return length(x) >= 2
 end type
+
+--**
+-- Signature:
+-- global procedure position(integer i1, integer i2)
+--
+-- Description:
+-- Set the cursor to line i1, column i2, where the top left corner of the screen is line 1, column 1. The next character displayed on the screen will be printed at this location. position() will report an error if the location is off the screen.
+--
+-- Comments:
+-- position() works in both text and pixel-graphics modes.
+--
+-- The coordinate system for displaying text is different from the one for displaying pixels. Pixels are displayed such that the top-left is (x=0,y=0) and the first coordinate controls the horizontal, left-right location. In pixel-graphics modes you can display both text and pixels. position() only sets the line and column for the text that you display, not the pixels that you plot. There is no corresponding routine for setting the next pixel position. 
+--
+-- Example 1:
+-- position(2,1)
+-- -- the cursor moves to the beginning of the second line from the top
+--**
 
 global procedure draw_line(color c, point_sequence xyarray)
 -- draw a line connecting the 2 or more points

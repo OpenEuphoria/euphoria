@@ -29,7 +29,8 @@ constant files = {
     "refman_3.htx",
 	"lib_database.htx",
 	"lib_search.htx",
-	"lib_sort.htx"
+	"lib_sort.htx",
+	"lib_math.htx"
 }
 
 include stack.e as stk
