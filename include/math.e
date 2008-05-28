@@ -126,7 +126,7 @@ end type
 -- Compute the remainder after dividing x1 by x2. The result will have the same sign as x1, and the magnitude of the result will be less than the magnitude of x2.
 --
 -- Comments:
--- The arguments to this function may be atoms or sequences. The rules for <a href=\"refman_2.htm#26\">operations on sequences</a> apply.
+-- The arguments to this function may be atoms or sequences. The rules for <a href="refman_2.htm#26">operations on sequences</a> apply.
 --
 -- Example 1:
 -- a = remainder(9, 4)
@@ -216,7 +216,7 @@ end type
 -- Raise x1 to the power x2
 --
 -- Comments:
--- The arguments to this function may be atoms or sequences. The rules for <a href=\"refman_2.htm#26\">operations on sequences</a> apply.
+-- The arguments to this function may be atoms or sequences. The rules for <a href="refman_2.htm#26">operations on sequences</a> apply.
 --
 -- Powers of 2 are calculated very efficiently.
 --
@@ -287,7 +287,7 @@ end type
 -- Comments:
 -- The argument, x1, must be in the range -1 to +1 inclusive.
 --
--- A value between 0 and <a href=\"lib_math.htm#PI\">PI</a> radians will be returned.
+-- A value between 0 and <a href="lib_math.htm#PI">PI</a> radians will be returned.
 --
 -- This function may be applied to an atom or to all elements of a sequence.
 --
