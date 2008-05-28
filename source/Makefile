@@ -258,22 +258,22 @@ clean :
 
 .PHONY : clean distclean all
 
-library : builddirs
+library : builddirs $(PCRE)
 	$(MAKE) ecu.a OBJDIR=libobj ERUNTIME=1
 ecu.a : $(EU_LIB_OBJECTS)
 	ar -rc ecu.a $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
-builddirs : $(PCRE)
+builddirs : 
 	@-for d in $(BUILD_DIRS); \
 	do \
 		mkdir -p "$$d"; \
 	done
 
-interpreter : builddirs
+interpreter : builddirs $(PCRE)
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
 
-translator : builddirs 
+translator : builddirs $(PCRE)
 	$(MAKE) ecu OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
@@ -291,6 +291,26 @@ source : builddirs
 	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD)
 
+SVN_REV=xxx
+SOURCEDIR=euphoria-r$(SVN_REV)
+source-tarball : source
+	rm -rf $(SOURCEDIR)
+	mkdir -p $(SOURCEDIR)
+	cp -r intobj   $(SOURCEDIR)
+	cp -r transobj $(SOURCEDIR)
+	cp -r backobj  $(SOURCEDIR)
+	cp -r libobj   $(SOURCEDIR)
+	cp be_*.c      $(SOURCEDIR)
+	cp int.ex      $(SOURCEDIR)
+	cp ec.ex       $(SOURCEDIR)
+	cp backend.ex  $(SOURCEDIR)
+	cp *.e         $(SOURCEDIR)
+	cp -r pcre     $(SOURCEDIR)
+	cp Makefile    $(SOURCEDIR)
+	cp configure   $(SOURCEDIR)
+	cp ../include/euphoria.h $(SOURCEDIR)
+	cp *.h         $(SOURCEDIR)
+	
 .PHONY : exusource
 .PHONY : ecusource
 .PHONY : backendsource

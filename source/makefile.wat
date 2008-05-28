@@ -1,4 +1,4 @@
-# OpenWatcom makefile for Euphoria (Win32)
+# OpenWatcom makefile for Euphoria (Win32/DOS32)
 #
 # You must first run configure.bat, supplying any options you might need:
 #     --with-eu3      Use this option if you are building Euphoria with only 
@@ -16,6 +16,15 @@
 #                                    wmake -f makefile.wat all
 #          Make all Win32 Binaries:  wmake -f makefile.wat winall
 #          Make all Dos32 Binaries:  wmake -f makefile.wat dosall
+#
+#    Make a source zip that can be   wmake -f makefile.wat source [SVN_REV=r]
+#       built with just a compiler   wmake -f makefile.wat source-win [SVN_REV=r]
+#     Note that source builds both   wmake -f makefile.wat source-dos [SVN_REV=r]
+#        source-win and source-dos.
+#
+# The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
+# The default for SVN_REV is 'xxx'.
+#  
 #
 #   Options:
 #                    MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
@@ -392,18 +401,60 @@ interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INT
 	@%append .\$(OBJDIR)\int.lbc option caseexact
 	@for %i in ($(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
-exwsource : .SYMBOLIC $(OBJDIR)/main-.c
-ecwsource : .SYMBOLIC $(OBJDIR)/main-.c
-backendsource : .SYMBOLIC $(OBJDIR)/main-.c
-ecsource : .SYMBOLIC $(OBJDIR)/main-.c
+exwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+ecwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+backendsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+ecsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+exsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 exsource : .SYMBOLIC $(OBJDIR)/main-.c
 
-source : builddirs
+translate-win : .SYMBOLIC  builddirs
 	wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -f makefile.wat ecwsource EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -f makefile.wat backendsource EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	
+translate-dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat exsource EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	
+translate : .SYMBOLIC translate-win translate-dos
+	
+SVN_REV=xxx
+SOURCEDIR= euphoria-r$(SVN_REV)
+
+common-source : .SYMBOLIC
+	if exist $(SOURCEDIR) rmdir /Q /S $(SOURCEDIR)
+	mkdir $(SOURCEDIR)
+	mkdir $(SOURCEDIR)\pcre
+	copy configure.bat $(SOURCEDIR)
+	copy makefile.wat $(SOURCEDIR)
+	copy pcre\* $(SOURCEDIR)\pcre
+	copy int.ex $(SOURCEDIR)
+	copy ec.ex $(SOURCEDIR)
+	copy backend.ex $(SOURCEDIR)
+	copy *.e $(SOURCEDIR)
+	copy *res $(SOURCEDIR)
+	copy be_*.c $(SOURCEDIR)
+	copy *.h $(SOURCEDIR)
+	copy ..\include\euphoria.h $(SOURCEDIR)
+
+source-win : .SYMBOLIC translate-win common-source
+	mkdir $(SOURCEDIR)\intobj
+	mkdir $(SOURCEDIR)\transobj
+	mkdir $(SOURCEDIR)\backobj
+	copy intobj\* $(SOURCEDIR)\intobj
+	copy transobj\* $(SOURCEDIR)\transobj
+	copy backobj\* $(SOURCEDIR)\backobj
+	
+source-dos : .SYMBOLIC translate-dos common-source
+	mkdir $(SOURCEDIR)\dosobj
+	mkdir $(SOURCEDIR)\doslibobj
+	copy dosobj\* $(SOURCEDIR)
+	copy doslibobj\* $(SOURCEDIR)
+	
+source : .SYMBOLIC common-source source-win source-dos
+
+	
+
 exw.exe : interpreter_objects 
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
 	wrc -q -ad exw.res exw.exe
