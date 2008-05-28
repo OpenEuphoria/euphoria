@@ -30,12 +30,6 @@ end function
 test_equal("2nd arg defaulted to function", 13, incr(4))
 test_equal("No defaults", 7, incr(2,5))
 test_equal("2nd arg defaulted to builtin", 1, incr2(-2))
-
--- bad IL generated, must investigate
--- ?mul3(2,3,4)
--- ?mul3(2,3)
--- also, must provision for recursive playback
--- ?mul3(,2,3)
--- ?mul3(,2)
-
-
+test_equal("1st arg defaulted, but explicit",14,mul3(2,3,4))
+test_equal("1st arg defaulted,functional defaulted arg explicit",9,mul3(,2,3))
+test_equal("Recursive defaulting",{32,35,38},mul3(2,3))

@@ -44,4 +44,5 @@ del COMINIT.c
 del GET.c
 del SCIENTIFIC.c
 del SEQUENCE.c
-del SORT.c	
+del SORT.c
+del INTINIT.c

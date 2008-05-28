@@ -451,5 +451,4 @@ slist = fdecompress(0)
 slist = s_expand(slist)
 puts(flist, "Line Table: {line number within file, file number}\n\n")
 pretty_print(flist, slist, {})
-?machine_func(26,0)
 

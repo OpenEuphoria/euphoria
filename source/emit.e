@@ -240,7 +240,9 @@ end procedure
 
 global procedure emit_addr(atom x)
 -- emit a long integer or an operand address into the IL
-	Code = append(Code, x)
+	if Parser_mode != PAM_RECORD then
+		Code = append(Code, x)
+	end if
 end procedure
 
 procedure emit_opcode(integer op)
@@ -250,7 +252,9 @@ end procedure
 
 global procedure backpatch(integer index, integer val)
 -- back patch a word of code 
-	Code[index] = val
+	if Parser_mode != PAM_RECORD then
+		Code[index] = val
+	end if
 end procedure
 
 sequence op_result  -- result types of operators
@@ -384,7 +388,7 @@ global procedure emit_op(integer op)
 	object obj
 	sequence elements
 	object element_vals
-	
+
 	if Parser_mode != PAM_RECORD then
 	-- 1 input, 0 outputs, can combine with previous op 
 	if op = ASSIGN then
@@ -433,7 +437,7 @@ global procedure emit_op(integer op)
 				-- for interpreter
 				SymTab[target][S_OBJ] = SymTab[source][S_OBJ]
 			end if          
-			
+
 			emit_opcode(op)
 			emit_addr(source)
 		
@@ -505,7 +509,7 @@ global procedure emit_op(integer op)
 	elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
 				STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE,
 				ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS, 
-				DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK, 
+				DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
 				TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP}) then
 		emit_opcode(op)
 		assignable = FALSE
@@ -556,7 +560,7 @@ global procedure emit_op(integer op)
 			  op_result[previous_op] != T_INTEGER then  -- includes ASSIGN_I
 			emit_opcode(op)
 			emit_addr(op_info1)
-		end if
+		end if  
 
 	elsif op = SEQUENCE_CHECK then
 		assignable = FALSE
@@ -577,7 +581,7 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
-			if (SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ])) 
+			if (SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ]))
 			   and not IsInteger(c) then
 				emit_opcode(op)
 				emit_addr(op_info1)
@@ -601,7 +605,7 @@ global procedure emit_op(integer op)
 		if sequence(element_vals) then
 			c = NewStringSym(element_vals)  -- make a string literal
 			assignable = FALSE
-		else 
+		else
 			if n = 2 then
 				emit_opcode(RIGHT_BRACE_2) -- faster op for two items
 			else 
@@ -625,7 +629,7 @@ global procedure emit_op(integer op)
 		  op = PASSIGN_SUBS then  -- can't change the op
 		b = Pop() -- rhs value 
 		a = Pop() -- subscript
-		c = Pop() -- sequence 
+		c = Pop() -- sequence
 		if op = ASSIGN_SUBS then
 			-- maybe change the op
 			if (previous_op != LHS_SUBS) and 
@@ -646,7 +650,7 @@ global procedure emit_op(integer op)
 			
 		else 
 			emit_opcode(ASSIGN_SUBS) -- always
-		
+
 		end if
 		
 		emit_addr(c) -- sequence
@@ -718,7 +722,7 @@ global procedure emit_op(integer op)
 					LENGTH, GETC, SQRT, SIN, COS, TAN, ARCTAN, LOG, GETS, 
 					GET_PIXEL, GETENV}) then
 		cont11ii(op, FALSE)   
-		
+
 	-- special 1 input, 1 output - also emits CurrentSub 
 	elsif op = ROUTINE_ID then
 		emit_opcode(op)
@@ -817,7 +821,7 @@ global procedure emit_op(integer op)
 			emit_addr(b)
 			cont21d(op, a, b, FALSE)
 			
-		else 
+		else
 			Push(a)
 			Push(b)
 			cont21ii(op, FALSE)
@@ -862,7 +866,7 @@ global procedure emit_op(integer op)
 					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
 					OPEN, SPRINTF, TASK_CREATE}) then
 		cont21ii(op, FALSE)
-		
+
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
 		c = Pop()
 		TempKeep(c)
@@ -934,7 +938,7 @@ global procedure emit_op(integer op)
 		TempKeep(b)
 		ib = IsInteger(b)
 		if SymTab[b][S_MODE] = M_NORMAL and 
-			SymTab[b][S_SCOPE] != SC_LOOP_VAR and 
+			SymTab[b][S_SCOPE] != SC_LOOP_VAR and
 			SymTab[b][S_SCOPE] != SC_GLOOP_VAR then
 			-- must make a copy in case var is modified 
 			emit_opcode(ASSIGN)
@@ -982,7 +986,7 @@ global procedure emit_op(integer op)
 		TempKeep(c)
 		
 		emit_opcode(op)
-		emit_addr(c)  
+		emit_addr(c)
 		emit_addr(a)    
 		
 		d = NewTempSym()
@@ -1006,7 +1010,7 @@ global procedure emit_op(integer op)
 		emit_addr(b)
 		assignable = FALSE
 
-	-- 4 inputs, 1 output 
+	-- 4 inputs, 1 output
 	elsif op = ASSIGN_OP_SLICE or op = PASSIGN_OP_SLICE then  
 		-- for x[i..j] op= expr 
 		emit_opcode(op)
@@ -1126,7 +1130,7 @@ global procedure emit_op(integer op)
 		Push(c)
 		emit_addr(c)
 		assignable = FALSE -- it wouldn't be assigned anyway
-	
+
 	-- 0 inputs, 1 output   
 	elsif op = TASK_SELF then
 		c = NewTempSym()
@@ -1174,7 +1178,7 @@ global procedure emit_op(integer op)
 		emit_opcode(op)
 		emit_addr(a)       
 		assignable = FALSE
-		
+
 	elsif op = TRACE then
 		a = Pop()
 		if OpTrace then
@@ -1189,13 +1193,13 @@ global procedure emit_op(integer op)
 			end if          
 		end if
 		assignable = FALSE
-		
+
 	else
 		InternalErr(sprintf("unknown opcode: %d", op))
 
 	end if
-	
-	previous_op = op
+
+	previous_op = op 
 	end if
 
 end procedure
@@ -1217,10 +1221,10 @@ end procedure
 
 global procedure StartSourceLine(integer sl)
 -- record code offset at start of new source statement, 
--- optionally emit start of line op 
--- sl is true if we want a STARTLINE emitted as well 
+-- optionally emit start of line op
+-- sl is true if we want a STARTLINE emitted as well
 	integer line_span
-	
+
 	if gline_number = LastLineNumber then
 		if length(LineTable) then
 			return -- ignore duplicates 
