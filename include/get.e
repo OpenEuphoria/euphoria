@@ -54,7 +54,7 @@ char ch  -- the current character
 -- Return the key that was pressed by the user, without waiting. Return -1 if no key was pressed. Special codes are returned for the function keys, arrow keys etc.
 --
 -- Comments:
--- he operating system can hold a small number of key-hits in its keyboard buffer. get_key() will return the next one from the buffer, or -1 if the buffer is empty.
+-- The operating system can hold a small number of key-hits in its keyboard buffer. get_key() will return the next one from the buffer, or -1 if the buffer is empty.
 --
 -- Run the key.bat program to see what key code is generated for each key on your keyboard. 
 --
@@ -72,7 +72,7 @@ char ch  -- the current character
 -- Comments:
 -- File input using getc() is buffered, i.e. getc() does not actually go out to the disk for each character. Instead, a large block of characters will be read in at one time and returned to you one by one from a memory buffer.
 --
--- When getc() reads from the keyboard, it will not see any characters until the user presses Enter. Note that the user can type control-Z, which the operating system treats as "end of file". -1 will be returned. 
+-- When getc() reads from the keyboard, it will not see any characters until the user presses Enter. Note that the user can type CTRL+Z, which the operating system treats as "end of file". -1 will be returned. 
 --**
 
 --**
@@ -91,7 +91,8 @@ char ch  -- the current character
 --
 -- When your program reads from the keyboard, the user can type control-Z, which the operating system treats as "end of file". -1 will be returned.
 --
--- In SVGA modes, DOS might set the wrong cursor position, after a call to gets(0) to read the keyboard. You should set it yourself using <strong>position()</strong>. <-- this needs to point to position()!!!
+-- In SVGA modes, DOS might set the wrong cursor position, after a call to gets(0) to read the keyboard.
+-- You should set it yourself using <strong>position()</strong>.
 --
 -- Example 1:
 -- sequence buffer
@@ -582,7 +583,7 @@ end function
 -- </ul>
 -- Each call to get() picks up where the previous call left off. For instance, a series of 5 calls to get() would be needed to read in:
 -- 
--- <console>"99 5.2 {1,2,3} \"Hello\" -1"</console>
+-- <console>"99 5.2 {1,2,3} "Hello" -1"</console>
 -- 
 -- On the sixth and any subsequent call to get() you would see a GET_EOF status. If you had something like:
 -- 
@@ -616,7 +617,6 @@ end function
 -- The value returned is not meaningful unless you have a GET_SUCCESS status.
 --
 -- Example 1:
--- <eucode>
 -- If he types 77.5, get(0) would return:
 --
 -- {GET_SUCCESS, 77.5}
@@ -624,8 +624,6 @@ end function
 -- -- whereas gets(0) would return:
 --
 -- "77.5\n"
---
--- </eucode>
 --
 -- Example 2:
 -- See <path>bin\mydata.ex</path>
@@ -705,7 +703,7 @@ end function
 --  
 --  After reading one valid representation of a Euphoria object, value_from() will
 --  stop reading and ignore any additional characters in the string. For
---  example, \"36\" and \"36P\" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
+--  example, "36" and "36P" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
 --  invalid representation, the value field is undefined (usually 0), and the third field is the
 --  1 based index of the character the reading of which caused an error.
 --  
@@ -814,12 +812,12 @@ constant CHUNK = 100
 --  file.
 --
 -- Comments:
--- When i > 0 and <a href=\"lib_seq.htm#length\">length(s)</a> < i you know
+-- When i > 0 and <a href="lib_seq.htm#length">length(s)</a> < i you know
 --  you've reached the end of file. Eventually, an
---  <a href=\"refman_2.htm#empty_seq\">empty sequence</a> will be returned
+--  <a href="refman_2.htm#empty_seq">empty sequence</a> will be returned
 --  for s.
 --  
---  This function is normally used with files opened in binary mode, \"rb\".
+--  This function is normally used with files opened in binary mode, "rb".
 --  This avoids the confusing situation in text mode where DOS will convert CR LF pairs to LF.
 --
 -- Example 1:

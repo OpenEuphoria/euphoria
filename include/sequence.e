@@ -602,7 +602,7 @@ end function
 --
 -- Comments:
 -- pad_head() will not remove characters. If length(str) is greater than params, this
--- function simply returns str. See <a href=\"lib_seq.htm#head\">head()</a>
+-- function simply returns str. See <a href="lib_seq.htm#head">head()</a>
 -- if you wish to truncate long sequences.
 --
 -- Example:
@@ -637,7 +637,7 @@ end function
 --
 -- Comments:
 -- pad_tail() will not remove characters. If length(str) is greater than params, this
--- function simply returns str. See <a href=\"lib_seq.htm#head\">head()</a>
+-- function simply returns str. See <a href="lib_seq.htm#head">head()</a>
 -- if you wish to truncate long sequences.
 --
 -- Example:

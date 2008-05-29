@@ -219,7 +219,7 @@ end function
 -- Comments:
 -- When a file is closed, (see close()), all buffered data is flushed out. 
 --  When a program terminates, all open files are flushed and closed 
---  automatically. <P>Use flush() when another process may need to
+--  automatically. Use flush() when another process may need to
 --  see all of the data written so far, but you aren't ready
 --   to close the file yet.
 --
@@ -271,7 +271,7 @@ end type
 -- or writing it. Under Linux/FreeBSD, there are two types of locks that 
 -- you can request using the i2 parameter. (Under DOS32 and WIN32 the i2 parameter
 -- is ignored, but should be an integer.)
--- Ask for a <b><i>shared</b></i> lock when you intend to read a file, and you want to 
+-- Ask for a <b><i>shared</i></b> lock when you intend to read a file, and you want to 
 -- temporarily block other processes from writing it. Ask for an 
 -- <b><i>exclusive</i></b> lock 
 -- when you intend to write to a file and you want to temporarily block other 
@@ -367,7 +367,7 @@ global constant
 -- 
 -- If st names a <b>directory</b> you may have entries for "." and "..,"
 --  just as with the DOS DIR command. If st names a <b>file</b> then x will
---  have just one entry, i.e. <a href=\"lib_seq.htm#length\">length(x)</a> will
+--  have just one entry, i.e. <a href="lib_seq.htm#length">length(x)</a> will
 --  be 1. If st contains wildcards you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
@@ -402,7 +402,7 @@ global constant
 --
 -- A normal file without special attributes would just have an empty string, "", in this field.
 --
--- The top level directory, e.g. c:\ does not have \".\" or \"..\" entries.
+-- The top level directory, e.g. c:\ does not have "." or ".." entries.
 -- 
 -- This function is often used just to test if a file or
 --  directory exists.
@@ -412,7 +412,7 @@ global constant
 -- Under <platform>Linux/FreeBSD</platform>, the only attribute currently available is 'd'.
 -- 
 -- <platform>DOS32</platform>: The file name returned in D_NAME will be a standard DOS 8.3 name. (See
---  <a href=\"http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir\">Archive
+--  <a href="http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir">Archive
 --  Web page</a> for a better solution).
 -- 
 -- <platform>WIN32</platform>: The file name returned in D_NAME will be a long file name.

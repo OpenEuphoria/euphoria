@@ -28,10 +28,15 @@ constant files = {
     "refman_2.htx",
     "refman_3.htx",
 	"lib_database.htx",
+	"lib_file.htx",
+	"lib_get.htx",
+	"lib_graphics.htx",
 	"lib_search.htx",
 	"lib_sort.htx",
 	"lib_math.htx",
-	"lib_regex.htx"
+	"lib_misc.htx",
+	"lib_regex.htx",
+	"lib_sequences.htx"
 }
 
 include stack.e as stk
