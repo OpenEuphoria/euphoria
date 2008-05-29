@@ -1,3 +1,4 @@
+include localeconv.e as lcc
 include locale.e as l
 include datetime.e as d
 include unittest.e
@@ -5,14 +6,10 @@ include unittest.e
 set_test_module_name("locale.e")
 sequence locale
 
-if platform() = LINUX or platform() = FREEBSD then
-    locale = "en_US"
-elsif platform() = WIN32 then
-    locale = "English_United States.1252"
-end if
+locale = "en_US"
 
 test_true("set()", l:set(locale))
-test_equal("set/get", locale, l:get())
+test_equal("set/get", lcc:canonical(locale), lcc:decanonical(l:get()))
 test_equal("money", "$1,020.50", l:money(1020.50))
 test_equal("number", "1,020.50", l:number(1020.5))
 
