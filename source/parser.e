@@ -2600,6 +2600,31 @@ global procedure real_parser(integer nested)
 			CompileErr("continue must be inside a loop")
 			end if
 
+		elsif id = RETRY then
+			if nested then
+			StartSourceLine(TRUE)
+			Retry_statement()
+			else
+			CompileErr("retry must be inside a loop")
+			end if
+
+		elsif id = BREAK then
+			if nested then
+			StartSourceLine(TRUE)
+			Break_statement()
+			else
+			CompileErr("break must be inside an if block ")
+			end if
+			
+		elsif id = ENTRY then
+			if nested then
+		    StartSourceLine(TRUE)
+		    Entry_statement()
+			else
+			CompileErr("entry must be inside a loop")
+			end if
+
+
 		elsif id = IFDEF then
 			StartSourceLine(TRUE)
 			Ifdef_statement()
