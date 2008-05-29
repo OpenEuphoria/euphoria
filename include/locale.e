@@ -10,6 +10,7 @@ include datetime.e as dt
 include sequence.e
 include file.e
 include map.e as m
+include localeconv.e as lcc
 
 ------------------------------------------------------------------------------------------
 --
@@ -162,6 +163,7 @@ constant
 global function set(sequence new_locale)
 	atom pLocale, ign
 
+	new_locale = lcc:decanonical(new_locale)
 	pLocale = allocate_string(new_locale)
 	ign = c_func(f_setlocale, {LC_ALL, pLocale})
 
@@ -183,6 +185,7 @@ global function get()
 	end if
 
 	r = peek_string(p)
+	r = lcc:canonical(r)
 
 	return r
 end function
