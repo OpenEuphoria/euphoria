@@ -544,11 +544,12 @@ procedure ParseArgs(symtab_index subsym)
     arg = 0
     tok2 = UNDEFINED
 	
-	on_arg = 1
+	on_arg = 0
 	
 	short_circuit -= 1
 	for i = 1 to n do
-      	s = SymTab[s][S_NEXT]
+      	
+      	
     	if atom(tok2) then
 			tok = next_token()
 		else
@@ -556,6 +557,7 @@ procedure ParseArgs(symtab_index subsym)
 			tok2=UNDEFINED
 		end if
     	if tok[T_ID] = COMMA then  -- defaulted arg
+    		s = SymTab[s][S_NEXT]
             if atom(SymTab[s][S_CODE]) then  -- but no default set
                 CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
             end if
@@ -576,15 +578,15 @@ procedure ParseArgs(symtab_index subsym)
 			on_arg += 1
 			tok2 = backed_up_tok
 			putback(tok)
-			trace( i = n - 1 )
-		elsif tok[T_ID] != RIGHT_ROUND then
 
+		elsif tok[T_ID] != RIGHT_ROUND then
+			s = SymTab[s][S_NEXT]
         	putback(tok) 
 			call_proc(forward_expr, {})
 			on_arg += 1
     	end if
     	
-		if i != n then
+		if on_arg != n then
 			if tok[T_ID] = RIGHT_ROUND then
 				putback( tok )
 			end if
@@ -595,10 +597,8 @@ procedure ParseArgs(symtab_index subsym)
                     if fda=0 or i<fda-1 then
                         WrongNumberArgs(subsym, "")
                     end if
-                    for j = on_arg to n do
-                    	if on_arg != i then
-                    		s = SymTab[s][S_NEXT]
-                    	end if
+                    for j = on_arg + 1 to n do
+                    	s = SymTab[s][S_NEXT]
                     	
                         if sequence(SymTab[s][S_CODE]) then -- some defaulted arg follows with a default value
                             if arg=0 then
@@ -2085,7 +2085,6 @@ procedure SubProg(integer prog_type, integer is_global)
 		CompileErr("a name is expected here")
 	end if
 	p = prog_name[T_SYM]
-
 	DefinedYet(p)
 
 	if prog_type = PROCEDURE then
