@@ -31,10 +31,6 @@ object backed_up_tok  -- place to back up a token
 integer FuncReturn    -- TRUE if a function return appeared 
 integer param_num     -- number of parameters and private variables
 					  -- in current procedure 
---sequence goto_list        -- back-patch list for end if label
---sequence goto_delay        -- delay list for end if label
-sequence goto_labels    -- sequence of if block labels, 0 for unlabelled blocks
-sequence goto_addr
 sequence break_list        -- back-patch list for end if label
 sequence break_delay        -- delay list for end if label
 sequence exit_list    -- stack of exits to back-patch
@@ -140,10 +136,6 @@ global procedure InitParser()
     entry_addr = {}
     block_list = {}
     block_index = 0
-    --goto_list = {}
-    --goto_delay = {}
-    goto_labels = {}
-    goto_addr = {}
 end procedure
 
 procedure NotReached(integer tok, sequence keyword)
@@ -1245,73 +1237,6 @@ function exit_level(token tok,integer flag)
     end if
 end function
 
-procedure GLabel_statement()
-    token tok
-    object labbel
-    object laddr
-    integer n
-    tok = next_token()
-
-    if tok[T_ID] != STRING then
-	CompileErr("A label clause must be followed by a constant string")
-    end if
-    labbel=SymTab[tok[T_SYM]][S_OBJ]
-    laddr = length(Code)+1
-    if find(labbel,goto_labels) then
-	CompileErr("Duplicate label name")
-    end if
-    goto_labels = append(goto_labels,labbel)
-    goto_addr = append(goto_addr,laddr)
-    if TRANSLATE then
-    --handle backpatching in the back-end
-    goto_delay &= {labbel}
-    goto_list &= length(Code)+2 --not 1???
-    emit_op(GLABEL)  
-    else
-    n = find(labbel,goto_delay)
-    while n do
-	backpatch(goto_list[n],laddr)
-	goto_delay[n] = "" --clear it
-	n = find(labbel,goto_delay)
-    end while
-    end if
-end procedure
-procedure Goto_statement()
--- Parse an exit statement
-    token tok
-    atom arg
-    integer n
-    integer num_labels
-
-    tok = next_token()
-    num_labels = length(goto_labels) 
-    
-    if tok[T_ID]=STRING then
-        n = find(SymTab[tok[T_SYM]][S_OBJ],goto_labels)
-        if n = 0 then
-	    goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
-	    goto_list &= length(Code)+2 --not 1???
-	elsif TRANSLATE then
-		--help the back-end figure out what the label is
-	    goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
-	    goto_list &= -1
-        end if 
-	tok = next_token()
-    else
-            CompileErr("Goto statement without a string label.")
-            --CompileErr("Goto statement without a string label is not supported.")
-    end if
-
-    emit_op(GOTO)  
-    if n = 0 then
-    emit_addr(0) -- to be back-patched
-    else
-    emit_addr(goto_addr[n])
-    end if
-    putback(tok)
-    NotReached(tok[T_ID], "goto")
-end procedure
-
 procedure Exit_statement()
 -- Parse an exit statement
     token tok
@@ -2097,14 +2022,6 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Return_statement()
 
-		elsif id = GLABEL then
-			StartSourceLine(TRUE)
-			GLabel_statement()
-			
-		elsif id = GOTO then
-			StartSourceLine(TRUE)
-			Goto_statement()
-			
 		elsif id = EXIT then
 			StartSourceLine(TRUE)
 			Exit_statement()
@@ -2583,14 +2500,6 @@ global procedure real_parser(integer nested)
 			StartSourceLine(TRUE)
 			Print_statement()
 			ExecCommand()
-
-		elsif id = GLABEL then
-			StartSourceLine(TRUE)
-			GLabel_statement()
-
-		elsif id = GOTO then
-			StartSourceLine(TRUE)
-			Goto_statement()
 
 		elsif id = CONTINUE then
 			if nested then
