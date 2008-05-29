@@ -47,7 +47,7 @@ opts = {
 -- Parse command line
 
 cmd_line = {"exu", "app.ex", "-v", "-c", "50", "--style", "file.css", "input.txt", "output.txt"}
-extras = cmd_parse(opts, routine_id("opt_help"))
+extras = cmd_parse(opts, routine_id("opt_help"), cmd_line )
 test_equal("cmd_parse() #1", 1, verbose)
 test_equal("cmd_parse() #2", "50", count)
 test_equal("cmd_parse() #3", "file.css", style_file)

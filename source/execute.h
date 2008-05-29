@@ -386,4 +386,6 @@ struct char_cell {
 
 #define M_COMPILE_PCRE 68
 #define M_EXEC_PCRE    69
+#define M_FREE_PCRE    70
+
 

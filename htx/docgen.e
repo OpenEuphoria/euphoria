@@ -119,14 +119,14 @@ procedure add_function(sequence filename, m:map func)
 	integer idx
 	sequence cat_name, signature
 	object result
-
+	
 	idx = 0
 	func      = m:put(func, "include", filename)
 	cat_name  = m:get(func, "category", "")
 	signature = m:get(func, "signature", "")
 
 	-- TODO: check for search error
-	result = re:search(re_sig, signature, re:DEFAULT)
+	result = re:search(re_sig, signature, 1 )
 	if atom(result) then
 		return
 	end if
@@ -163,6 +163,7 @@ global procedure process_include(sequence filename)
 	func = 0
 
 	lines = read_lines(filename)
+	printf(1, "read %s: %d lines\n", {filename,length(lines)})
 	for i = 1 to length(lines) do
 		line = trim_tail(lines[i], " \t\r\n")
 		if match("--**", line) then

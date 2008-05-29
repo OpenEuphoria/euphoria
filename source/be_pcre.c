@@ -95,3 +95,10 @@ object exec_pcre(object x ){
 		}
 		return MAKE_SEQ( s );
 }
+
+void free_regex( object x ){
+	if( IS_ATOM_INT( x ) )
+				(*pcre_free)( x );
+		else
+				(*pcre_free)( (unsigned int) DBL_PTR( x )->dbl );
+}

@@ -4929,6 +4929,11 @@ object machine(object opcode, object x)
 			case M_EXEC_PCRE:
 				return exec_pcre(x);
 				break;
+			case M_FREE_PCRE:
+				free_regex(x);
+				return 1;
+				break;
+				
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

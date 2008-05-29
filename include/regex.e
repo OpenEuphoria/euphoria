@@ -1,14 +1,26 @@
--- regular expressions
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+-- Regular expression routines
+
+--****
+-- Category: 
+--   regex
+--
+-- File:
+--   lib_regex
+--
+-- Title:
+--   Euphoria Standard Library Regular Expressions
+--****
+
 
 include sequence.e
 
--- TODO:
---   Create a search/replace() function
---   Wrap pcre_free()
 
 constant
 		M_COMPILE_PCRE = 68,
-		M_EXEC_PCRE    = 69
+		M_EXEC_PCRE    = 69,
+		M_FREE_PCRE    = 70
 -- Options:
 global constant 
 		DEFAULT            = #00000000,
@@ -71,41 +83,135 @@ global type regex(object o)
 	return atom(o)
 end type
 
+--**
+-- Signature:
+--   global function new(sequence pattern)
+--
+-- Description:
+--   Return an allocated regular expression, which must be freed using free() when done.
+--
+-- Comments:
+-- 
 -- Compiles the pattern and returns an atom that represents the regular expression
 -- to be used elsewhere.
--- TODO: document
+--
+-- See the pcre manpages for more details on regular expressions: http://www.pcre.org/pcre.txt
+--
+-- Example:
+-- re = new("foo")
+--
+--**
 global function new(sequence pattern)
 		return machine_func(M_COMPILE_PCRE, pattern)
 end function
 
--- Searches text using the regular expression, re, which was returned from new(), and returns:
---  * No matches:  an atom representing the PCRE error condition
---  * N matches:  an N+1 length sequence.  Each element of the sequence
---                is a pair of indices into text representing the start
---                and end of the substring.  The first element is the 
---                entire match, and subsequent elements are the captured
---                substrings, if any.  An empty substring will be {1,0}.
--- TODO: document
-global function search(regex re, sequence text, atom options)
-		return machine_func(M_EXEC_PCRE, { re, text, options, 0 })
+--**
+-- Signature:
+--   global function search(regex re, sequence text, integer from=1, atom options=0)
+--
+-- Description:
+--   Returns the first match in text
+--
+-- Comments:
+--   Searches text using the regular expression, re, which was returned from new(), and returns:
+--     * No matches:  an atom representing the PCRE error condition
+--     * N matches:   an N+1 length sequence.  Each element of the sequence
+--                    is a pair of indices into text representing the start
+--                    and end of the substring.  The first element is the 
+--                    entire match, and subsequent elements are the captured
+--                    substrings, if any.  An empty substring will be {1,0}.--
+--
+-- Example:
+-- re = new("foo(bar)")
+-- text = "this is foobar"
+-- substrings = search( re, text )
+-- for i = 1 to length( substrings ) do
+--     printf(1, "substring #%d: %s\n", {i, text[substrings[i][1]..substrings[i][2]] } )
+-- end for
+--
+-- This example would print:
+--    substring #1: foobar
+--    substring #2: bar
+--
+-- Options:
+--		DEFAULT            = #00000000,
+--		CASELESS           = #00000001,
+--		MULTILINE          = #00000002,
+--		DOTALL             = #00000004,
+--		EXTENDED           = #00000008,
+--		ANCHORED           = #00000010,
+--		DOLLAR_ENDONLY     = #00000020,
+--		EXTRA              = #00000040,
+--		NOTBOL             = #00000080,
+--		NOTEOL             = #00000100,
+--		UNGREEDY           = #00000200,
+--		NOTEMPTY           = #00000400,
+--		UTF8               = #00000800,
+--		NO_AUTO_CAPTURE    = #00001000,
+--		NO_UTF8_CHECK      = #00002000,
+--		AUTO_CALLOUT       = #00004000,
+--		PARTIAL            = #00008000,
+--		DFA_SHORTEST       = #00010000,
+--		DFA_RESTART        = #00020000,
+--		FIRSTLINE          = #00040000,
+--		DUPNAMES           = #00080000,
+--		NEWLINE_CR         = #00100000,
+--		NEWLINE_LF         = #00200000,
+--		NEWLINE_CRLF       = #00300000,
+--		NEWLINE_ANY        = #00400000,
+--		NEWLINE_ANYCRLF    = #00500000,
+--		BSR_ANYCRLF        = #00800000,
+--		BSR_UNICODE        = #01000000
+--
+-- Error Codes:
+--		ERROR_NOMATCH        =  (-1),
+--		ERROR_NULL           =  (-2),
+--		ERROR_BADOPTION      =  (-3),
+--		ERROR_BADMAGIC       =  (-4),
+--		ERROR_UNKNOWN_OPCODE =  (-5),
+--		ERROR_UNKNOWN_NODE   =  (-5), -- /* For backward compatibility */
+--		ERROR_NOMEMORY       =  (-6),
+--		ERROR_NOSUBSTRING    =  (-7),
+--		ERROR_MATCHLIMIT     =  (-8),
+--		ERROR_CALLOUT        =  (-9), -- /* Never used by PCRE itself */
+--		ERROR_BADUTF8        = (-10),
+--		ERROR_BADUTF8_OFFSET = (-11),
+--		ERROR_PARTIAL        = (-12),
+--		ERROR_BADPARTIAL     = (-13),
+--		ERROR_INTERNAL       = (-14),
+--		ERROR_BADCOUNT       = (-15),
+--		ERROR_DFA_UITEM      = (-16),
+--		ERROR_DFA_UCOND      = (-17),
+--		ERROR_DFA_UMLIMIT    = (-18),
+--		ERROR_DFA_WSSIZE     = (-19),
+--		ERROR_DFA_RECURSE    = (-20),
+--		ERROR_RECURSIONLIMIT = (-21),
+--		ERROR_NULLWSLIMIT    = (-22), -- /* No longer actually used */
+--		ERROR_BADNEWLINE     = (-23)
+--**
+global function search(regex re, sequence text, integer from=1, atom options=0)
+		return machine_func(M_EXEC_PCRE, { re, text, options, from-1 })
 end function
 
--- TODO: document
-global function search_from(regex re, sequence text, atom options, integer from)
-		return machine_func(M_EXEC_PCRE, { re, text, options, from - 1 })
-end function
 
--- TODO: document
-global function search_all(regex re, sequence text, atom options)
+--**
+-- Signature:
+--    global function search_all(regex re, sequence text, integer from=1, atom options=0)
+--
+-- Description:
+--    Returns all matches in text
+--
+-- Comments:
+--     This function returns a sequence of results in the same format as search().
+--**
+global function search_all(regex re, sequence text, integer from=1, atom options=0)
 	object result
 	sequence results
-	integer from
 	
-	from = 1
 	results = {}
 	
 	while 1 do
-		result = search_from(re, text, options, from)
+		result = search(re, text, from, options)
 		if atom(result) then
 			exit
 		end if
@@ -157,3 +263,17 @@ global function matches(regex re, sequence text, atom options)
 	return sequence(search(re, text, options))
 end function
 
+
+-- Frees the memory used by regex re, which must have been previously returned by regex:new.
+-- TODO: document
+global procedure free( regex re )
+	machine_proc( M_FREE_PCRE, re )
+end procedure
+
+-- Returns 1 if the regex matches the entire text, 0 otherwise
+-- TODO: document
+global function full_match( regex re, sequence text, atom options=0 )
+	object matches
+	matches = search( re, text, 1, options )
+	return sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text)
+end function

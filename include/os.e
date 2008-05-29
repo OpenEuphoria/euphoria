@@ -82,14 +82,13 @@ function find_opt(sequence opts, integer typ, object name)
 end function
 
 -- TODO: document
-global function cmd_parse(sequence opts, integer add_help_rid)
+global function cmd_parse(sequence opts, integer add_help_rid, sequence cmds = command_line())
 	integer idx, cmd_idx, opts_done
-	sequence cmd, cmds, extras, param
+	sequence cmd, extras, param
 
 	extras = {}
 	idx = 3
 	opts_done = 0
-	cmds = command_line()
 
 	--trace(1)
 	while idx <= length(cmds) do

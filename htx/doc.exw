@@ -30,7 +30,8 @@ constant files = {
 	"lib_database.htx",
 	"lib_search.htx",
 	"lib_sort.htx",
-	"lib_math.htx"
+	"lib_math.htx",
+	"lib_regex.htx"
 }
 
 include stack.e as stk
@@ -482,5 +483,6 @@ procedure main()
 	toc_and_menu()
 end procedure
 
+pretty_print(1, functions, {})
 main()
 

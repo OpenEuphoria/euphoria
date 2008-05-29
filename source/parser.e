@@ -339,12 +339,12 @@ function restore_parser()
 
     x=canned_tokens
     n=Parser_mode
-	canned_tokens=can_stack[$]
-	can_stack=can_stack[1..$-1]
-	canned_index=idx_stack[$]
-	idx_stack[$]=idx_stack[1..$-1]
-	Parser_mode=psm_stack[$]
-	psm_stack=psm_stack[1..$-1]
+	canned_tokens = can_stack[$]
+	can_stack     = can_stack[1..$-1]
+	canned_index  = idx_stack[$]
+	idx_stack     = idx_stack[1..$-1]
+	Parser_mode   = psm_stack[$]
+	psm_stack     = psm_stack[1..$-1]
     if n=PAM_PLAYBACK then
 	    return {}
     end if
@@ -361,7 +361,8 @@ procedure start_playback(sequence s)
 	canned_index = 1
     canned_tokens = s
     if sequence(backed_up_tok) then
-        canned_tokens = prepend(canned_tokens,backed_up_tok)
+        canned_tokens = append(canned_tokens,backed_up_tok) 
+        backed_up_tok = UNDEFINED
     end if
     Parser_mode = PAM_PLAYBACK
 end procedure
@@ -533,16 +534,18 @@ end procedure
 
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call 
-	integer n, fda
+	integer n, fda, on_arg
 	token tok
     symtab_index s,arg
     object tok2
 
 	n = SymTab[subsym][S_NUM_ARGS]
     s = subsym
-    arg=0
-    tok2=UNDEFINED
-
+    arg = 0
+    tok2 = UNDEFINED
+	
+	on_arg = 1
+	
 	short_circuit -= 1
 	for i = 1 to n do
       	s = SymTab[s][S_NEXT]
@@ -554,53 +557,66 @@ procedure ParseArgs(symtab_index subsym)
 		end if
     	if tok[T_ID] = COMMA then  -- defaulted arg
             if atom(SymTab[s][S_CODE]) then  -- but no default set
-                CompileErr(sprintf("Argument %d is defaulted, but has no default vlue",i))
+                CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
             end if
 			if arg=0 then -- build private symbol list for this routine
                 use_private_list=1
-                private_list=repeat(0,n)
-                private_sym=repeat(0,n)
-                arg=subsym
+                private_list = repeat(0,n)
+                private_sym = repeat(0,n)
+                arg = subsym
                 for j=1 to n do
-                    arg=SymTab[arg][S_NEXT]
+                    arg = SymTab[arg][S_NEXT]
                     private_sym[i] = arg
                     private_list[i] = SymTab[arg][S_NAME]
                 end for
             end if
+            
             start_playback(SymTab[s][S_CODE])
 			call_proc(forward_expr, {})
-			tok2=backed_up_tok
+			on_arg += 1
+			tok2 = backed_up_tok
 			putback(tok)
-    	else -- something to read
+			trace( i = n - 1 )
+		elsif tok[T_ID] != RIGHT_ROUND then
+
         	putback(tok) 
 			call_proc(forward_expr, {})
+			on_arg += 1
     	end if
+    	
 		if i != n then
+			if tok[T_ID] = RIGHT_ROUND then
+				putback( tok )
+			end if
 			tok = next_token()
 			if tok[T_ID] != COMMA then
-          		if tok[T_ID] = RIGHT_ROUND then -- not as mmany actual args as formal args
+          		if tok[T_ID] = RIGHT_ROUND then -- not as many actual args as formal args
                     fda = SymTab[subsym][S_FIRST_DEF_ARG]
                     if fda=0 or i<fda-1 then
                         WrongNumberArgs(subsym, "")
                     end if
-                    for j = i+1 to n do
-                    	s = SymTab[s][S_NEXT]
+                    for j = on_arg to n do
+                    	if on_arg != i then
+                    		s = SymTab[s][S_NEXT]
+                    	end if
+                    	
                         if sequence(SymTab[s][S_CODE]) then -- some defaulted arg follows with a default value
                             if arg=0 then
                                 use_private_list=1
-                                private_list=repeat(0,n)
-                                private_sym=repeat(0,n)
-                                arg=subsym
+                                private_list = repeat(0,n)
+                                private_sym  = repeat(0,n)
+                                arg = subsym
                                 for k=1 to n do
-                                    arg=SymTab[arg][S_NEXT]
+                                    arg = SymTab[arg][S_NEXT]
                                     private_sym[k] = arg
                                     private_list[k] = SymTab[arg][S_NAME]
                                 end for
                             end if
-                            start_playback(SymTab[s][S_CODE])
-                            call_proc(forward_expr, {})
+							start_playback(SymTab[s][S_CODE] )
+							call_proc(forward_expr, {})
+							on_arg += 1
                         else -- just not enough args
-                            CompileErr(sprintf("Argument %d is defaulted, but has no default vlue",j))
+                            CompileErr(sprintf("Argument %d is defaulted, but has no default value",j))
                         end if
           		    end for
                     -- all missing args had default values
@@ -613,7 +629,9 @@ procedure ParseArgs(symtab_index subsym)
 				end if
 			end if
 		end if
+		
 	end for
+	
 	tok = next_token()
 	short_circuit += 1
 	if tok[T_ID] != RIGHT_ROUND then
