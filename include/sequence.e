@@ -5,7 +5,7 @@
 
 --****
 -- Category: 
---   sequences
+--   sequence
 --
 -- File:
 --   lib_sequence
