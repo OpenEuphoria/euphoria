@@ -9,7 +9,7 @@ sequence locale
 locale = "en_US"
 
 test_true("set()", l:set(locale))
-test_equal("set/get", lcc:canonical(locale), lcc:decanonical(l:get()))
+test_equal("set/get", lcc:decanonical(locale), lcc:decanonical(l:get()))
 test_equal("money", "$1,020.50", l:money(1020.50))
 test_equal("number", "1,020.50", l:number(1020.5))
 
