@@ -126,7 +126,7 @@ procedure add_function(sequence filename, m:map func)
 	signature = m:get(func, "signature", "")
 
 	-- TODO: check for search error
-	result = re:search(re_sig, signature, 1 )
+	result = re:search(re_sig, signature )
 	if atom(result) then
 		return
 	end if

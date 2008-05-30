@@ -31,12 +31,13 @@ constant files = {
 	"lib_file.htx",
 	"lib_get.htx",
 	"lib_graphics.htx",
-	"lib_search.htx",
-	"lib_sort.htx",
 	"lib_math.htx",
 	"lib_misc.htx",
 	"lib_regex.htx",
-	"lib_sequence.htx"
+	"lib_search.htx",
+	"lib_sequence.htx",
+	"lib_sort.htx"
+	
 }
 
 include stack.e as stk
@@ -449,9 +450,12 @@ procedure write_includes()
 		end if
 		api_content = ""
 		for b = 1 to length(functions[a][2]) do
+			
 			func = functions[a][2][b]
 			typ = m:get(func, "type", "")
-
+			
+			api_content &= "<hr>\n"
+			
 			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\"", {
 				m:get(func, "name", ""), typ, m:get(func, "params", "none") })
 			api_content &= ">\n"
@@ -468,6 +472,8 @@ procedure write_includes()
 				end if
 			end for
 			api_content &= "</funcref>\n"
+			
+			
 		end for
 		
 		content = find_replace("$(API)", api_content, content, 1)
