@@ -1,4 +1,5 @@
 include unittest.e
+set_test_module_name("t_flow.e")
 
 integer n,total_exit
 sequence printed_i,printed_n2,loops
@@ -19,16 +20,16 @@ while n=0 label "top" do
 		end if
 	end for
 	if n=n then
-	    for i=1 to 4 do
+		for i=1 to 4 do
 			if i=4 then
-	            exit "top"
-	        elsif i=2 then
-	            continue
-	        else
-		        n+=10
-	        end if
-		    printed_n2[i]=n
-	    end for
+				exit "top"
+			elsif i=2 then
+				continue
+			else
+				n+=10
+			end if
+			printed_n2[i]=n
+		end for
 	end if
 	total_exit=0
 end while
@@ -44,9 +45,9 @@ loop do
 	loops=append(loops,{n,p})
 until n>10
 if n>0 then
-    if p=1 then
-        p=-1
-    else
+	if p=1 then
+		p=-1
+	else
 		p=0
 		break 0 -- topmost if/select
 	end if
@@ -65,14 +66,49 @@ integer idx,idx2
 a = {}
 idx = 0
 while idx < 2 do
-    idx += 1
-    idx2 = 0
-    while idx2 < 5 do
-        idx2 += 1
-        if idx2 > 1 and idx2 < 5 then continue end if
-        a &= {{idx,idx2}}
-    end while
+	idx += 1
+	idx2 = 0
+	while idx2 < 5 do
+		idx2 += 1
+		if idx2 > 1 and idx2 < 5 then continue end if
+		a &= {{idx,idx2}}
+	end while
 end while
 
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 
+idx = 1
+idx2 = -1
+loop do
+	idx += 1
+	if idx > 10 then exit end if
+	idx2 = idx
+until 0
+test_equal("until 0", {11,10}, {idx,idx2})
+
+idx = 1
+idx2 = -1
+loop do
+	idx += 1
+	if idx > 10 then exit end if
+	idx2 = idx
+until 1
+test_equal("until 1", {2,2}, {idx,idx2})
+
+idx = 1
+idx2 = -1
+while 0 do
+	idx += 1
+	if idx > 10 then exit end if
+	idx2 = idx
+end while
+test_equal("while 0", {1,-1}, {idx,idx2})
+
+idx = 1
+idx2 = -1
+while 1 do
+	idx += 1
+	if idx > 10 then exit end if
+	idx2 = idx
+end while
+test_equal("while 1", {11,10}, {idx,idx2})
