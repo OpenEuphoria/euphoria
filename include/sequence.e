@@ -532,6 +532,24 @@ global function join(sequence s, object delim)
 end function
 --**
 
+-- In Unicode (Unicode Character Database) the following codepoints are defined as whitespace:
+--    U0009-U000D (Control characters, containing TAB, CR and LF)
+--    U0020 SPACE
+--    U0085 NEL
+--    U00A0 NBSP
+--    U1680 OGHAM SPACE MARK
+--    U180E MONGOLIAN VOWEL SEPARATOR
+--    U2000-U200A (different sorts of spaces)
+--    U2028 LSP
+--    U2029 PSP
+--    U202F NARROW NBSP
+--    U205F MEDIUM MATHEMATICAL SPACE
+--    U3000 IDEOGRAPHIC SPACE
+
+constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
+	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A, 
+	#2028, #2029, #202F, #205F, #3000}
+
 --**
 -- Trim any item in what from the head (start) of str
 --
@@ -542,7 +560,7 @@ end function
 global function trim_head(sequence str, object what)
 	if atom(what) then
 		if what = 0.0 then
-			what = " \t\r\n"
+			what = TRIM_WHITESPACES
 		else
 			what = {what}
 		end if
@@ -568,7 +586,7 @@ end function
 global function trim_tail(sequence str, object what)
 	if atom(what) then
 		if what = 0.0 then
-			what = " \t\r\n"
+			what = TRIM_WHITESPACES
 		else
 			what = {what}
 		end if

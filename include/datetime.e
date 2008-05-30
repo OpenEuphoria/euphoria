@@ -1,10 +1,10 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
--- Euphoria 3.2
+-- Euphoria 4.0
 -- Date and Time functions
 
 -- No timezone offset.
 -- Engine created by CyrekSoft --
+
+include unicode.e -- needed for parse() and format()
 
 constant
 	XLEAP = 1,
@@ -260,8 +260,8 @@ end function
 -- TODO: create, test, document
 -- datetime parse(wstring string)
 -- parse the string and returns the datetime
-global function parse(sequence string)
-		return 0
+global function parse(wstring string)
+	return 0
 end function
 
 -- wstring format(wstring format)
@@ -289,7 +289,7 @@ end function
 -- %w  day of week (0..6); 0 is Sunday
 -- %y  last two digits of year (00..99)
 -- %Y  year
-global function format(datetime d, sequence format)
+global function format(datetime d, wstring format)
 	integer in_fmt, ch, tmp
 	sequence res
 

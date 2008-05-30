@@ -81,6 +81,9 @@ test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t", 0))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
 test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
 test_equal("trim() to empty", "", trim("  ", 32))
+test_equal("trim() with unicode whitespaces", "John", trim(" \r\n\t John" & {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
+	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A, 
+	#2028, #2029, #202F, #205F, #3000}, 0))
 
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))
