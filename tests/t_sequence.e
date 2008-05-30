@@ -1,4 +1,4 @@
-include sequence.e
+include sequence.e as seq
 include unittest.e
 
 set_test_module_name("sequence.e")
@@ -110,3 +110,30 @@ test_equal("lower() mixed text", "john 55 &%.", lower("JoHN 55 &%."))
 test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
 test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
+   trace(1)
+test_equal("can_add #1",0,can_add({{1,2},{3,4}},{5,6,7}))
+test_equal("can_add #2",1,can_add({{1,2},{3,4}},{{5,6},7}))
+
+test_equal("linear",{{1,5},{4,8},{7,11},{10,14}},linear({1,5},3,4))
+
+sequence s
+s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
+test_equal("fetch",{2},fetch(s,{5,2,3}))
+test_equal("store",{0,1,2,3,{"aaa",{{3},{1},{98,98,98}},"ccc"},4},store(s,{5,2,3},"bbb"))
+
+test_equal("repeat_pattern",{1,2,1,2,1,2,1,2},repeat_pattern({1,2},4))
+sequence vect,coords
+vect={{21,22,23},{4,5,6,7},{8,9,0},{10,-1,-2,-3}}
+coords={{2,1},{1,3},{2}}
+test_equal("project",{{{22,21},{21,23},{22}},{{5,4},{4,6},{5}},{{9,8},{8,0},{9}},{{-1,10},{10,-2},{-1}}},seq:project(vect,coords))
+
+sequence S1
+S1={{2,3,5,7,11,13},{17,19,23,29,31,37},{41,43,47,53,59,61}}
+
+test_equal("project()",
+{{{3,5,11},{2,7,13}},{{19,23,31},{17,29,37}},{{43,47,59},{41,53,61}}},
+project(S1,{{2,3,5},{1,4,6}}))
+
+test_equal("extract",{11,17,13},extract({13,11,9,17},{2,4,1}))
+test_equal("valid_index",1,valid_index({1,2,3},3.5))
+

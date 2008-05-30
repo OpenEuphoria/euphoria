@@ -787,48 +787,6 @@ global function reverse_map(set_map f,set s1,sequence s0,set s2)
     return result
 end function
 
-global function project(sequence s,sequence coords)
-    sequence result
-    integer ls
-    ls=length(s)
-    result=repeat(coords,ls)
-    for i=1 to ls do
-        for j=1 to length(coords) do
-            if i=1 and not bounded_integer(coords[j],1,length(s[i])) then
-                report_error({"project",
-                  "Coordinate index does not exist on the projected set."})
-            end if
-            result[i][j]=s[i][coords[j]]
-        end for
-    end for
-    return result
-end function
-
-global function multiplex(sequence s,sequence coords)
-    sequence result,lengths
-    integer lc,ls
-
-    ls=length(s)
-    lc=length(coords)
-    lengths=coords
-    for i=1 to lc do
-        lengths[i]=length(coords[i])
-    end for
-    result=repeat(coords,ls)
-    for i=1 to ls do
-        for j=1 to lc do
-            for k=1 to lengths[j] do
-                if i=1 and not bounded_integer(coords[j][k],1,length(s[i])) then
-                    report_error({"project",
-                      "Coordinate index does not exist on the projected set."})
-                end if
-                result[i][j][k]=s[i][coords[j][k]]
-            end for
-        end for
-    end for
-    return result
-end function
-
 global function restrict(set_map f,set s1,set s0)
     sequence result
     integer p,k

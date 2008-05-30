@@ -73,3 +73,4 @@ test_summary()
 
 oldpwd = chdir(oldpwd)
 
+?machine_func(26,0)

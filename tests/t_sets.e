@@ -83,15 +83,6 @@ test_equal("fiber_product()",
   {3,6},  {5,1},  {5,6},  {7,1},  {7,6},  {9,1},  {9,6}}
 ,fiber_product(S,S,S0,r2,r5))
 
-set S1
-S1={{2,3,5,7,11,13},{17,19,23,29,31,37},{41,43,47,53,59,61}}
-
-test_equal("project()",{{3,5,11},{19,23,31},{43,47,59}},project(S1,{2,3,5}))
-
-test_equal("multiplex()",
-{{{3,5,11},{2,7,13}},{{19,23,31},{17,29,37}},{{43,47,59},{41,53,61}}},
-multiplex(S1,{{2,3,5},{1,4,6}}))
-
 test_equal("reverse_map()",{1,3,5,7,9},reverse_map(r2,S,{1},S0) )
 
 set_map r25
@@ -114,7 +105,7 @@ test_equal("compose_maps()",{1,2,1,2,1,5,5},compose_map(r25,r5))
 
 test_equal("diagram_commutes()",0,diagram_commutes(r2,r5,r5,r25))
 
-test_equal("isèsurjective()",0,is_surjective(f))
+test_equal("is_surjective()",0,is_surjective(f))
 
 test_equal("is_surjective()",0,is_injective(f))
 

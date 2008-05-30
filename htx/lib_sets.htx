@@ -1378,47 +1378,6 @@ set_operatiion f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
  >
 </table>
 
-<_routine name="multiplex">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
-s3 = multiplex(s1,s2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Extracts several sets of fixed indexes from a set of sequences, returns the list thus formed."
- >
- <_2clist
-  name="Comments:"
-  description=
-"Although the expected use is to split sequences into distinct coordinale sets, any combination is allowable. However, if some index is not valid on some element of s1, a runime error will take place."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-sequence s s s={{3,2,9,15},{3,1,9,-1},{4,2,0,7},{3,5,5,5}}
-s=multiplex(s,{1,3},{1,4,2},{2,3})
---   s is now {
---             {{3,5},{3,5,5},{5,5}},
---             {{3,9},{3,-1,1},{1,9}},
---             {{3,9},{3,15,2},{2,9}},
---             {{4,0},{4,7,2},{2,0}}
---            }.
-</eucode>
- <_2clist
-   name = "See Also:"
-   description="<a href=\"#product\">product</a>,
-<a href=\"#project\">project</a>"
- >
-</table>
-
 <_routine name="product">
 <table border=0 cellspacing=2 cellpadding=2>
 
@@ -1488,42 +1447,6 @@ set_map f1 f1=product(f,f)
  >
 </table>
 
-<_routine name="project">
-<table border=0 cellspacing=2 cellpadding=2>
-
-
- <_2clist
-  name="Syntax:"
-  description="<font face = \"Arial, Helvetica\">include sets.e<BR>
-s3 = project(s1,s2)
-</font>"
- >
- <_2clist
-  name="Description:"
-  description=
-"Extracts fixed indexes from a list of sequences, returns the list thus formed.
-"
- >
- <_2clist
-  name="Comments:"
-  description=
-"If any coordinate index is not valid on a sequence in s1, a runtime error will take place."
- >
-<_2clist
-  name="Example:"
-  description=""
- >
-<eucode>
-set s s={{3,2,9,15},{3,1,9,-1},{4,2,0,7},{3,5,5,5}}
-s=project(s,{1,3})
---   s is now {{3,5},{3,9},{4,0}}.
-</eucode>
- <_2clist
-   name = "See Also:"
-   description="<a href=\"#product\">product</a>,
-<a href=\"#multiplex\">multiplex</a>"
- >
-</table>
 
 <_routine name="range">
 <table border=0 cellspacing=2 cellpadding=2>

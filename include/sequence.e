@@ -50,6 +50,9 @@ include search.e
 --
 -- z = append(append(y, "betty"), {"bam", "bam"})
 -- -- z is now {"fred", "barney", "wilma", "betty", {"bam", "bam"}}
+--
+-- See Also:
+-- prepend, &
 --**
 
 --**
@@ -75,6 +78,9 @@ include search.e
 --     s = prepend(s, i)
 -- end for
 -- -- s is {10,9,8,7,6,5,4,3,2,1}
+--
+-- See Also:
+-- append, &
 --**
 
 --**
@@ -95,6 +101,9 @@ include search.e
 -- repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
 -- -- The interpreter will create only one copy of "JOHN"
 -- -- in memory
+--
+-- See also:
+-- repeat_pattern, linear
 --**
 
 --**
@@ -115,6 +124,9 @@ include search.e
 -- length("")    -- 0
 --
 -- length({})    -- 0
+--
+-- See also:
+-- append, prepend, &
 --**
 
 --**
@@ -168,7 +180,9 @@ end function
 --
 -- s2 = head({1, 5.4, "John", 30}, 3)
 -- -- s2 is {1, 5.4, "John"}
-
+--
+-- See Also:
+-- tail, mid, slice
 global function head(sequence st, integer size)
 	if size < length(st) then
 		return st[1..size]
@@ -190,11 +204,14 @@ end function
 -- s2 = mid("John Middle Doe", 6, 6)
 -- -- s2 is Middle
 
--- s2 = left("John Middle Doe", 6, 50)
+-- s2 = mid("John Middle Doe", 6, 50)
 -- -- s2 is Middle Doe
 
--- s2 = left({1, 5.4, "John", 30}, 2, 2)
+-- s2 = mid({1, 5.4, "John", 30}, 2, 2)
 -- -- s2 is {5.4, "John"}
+--
+-- See Also:
+-- head, tail, slice
 
 global function mid(sequence st, atom start, atom len)
 	if len<0 then
@@ -242,7 +259,8 @@ end function
 --
 -- s2 = slice({1,2,3,4,5}, 2, 0)
 -- -- s2 is {2,3,4,5}
-
+-- See Also:
+-- head, mid, tail
 global function slice(sequence st, atom start, atom stop)
 	if stop < 0 then stop = length(st) + stop end if
 	if stop = 0 then stop = length(st) end if
@@ -263,13 +281,22 @@ end function
 
 -- s = vsplice({5,1}, {5,2}, {5,3}}, 1)
 -- -- s is {5,5,5}
-
+--
+-- See also:
+-- slice, project
 global function vslice(sequence s, atom colno)
 	sequence ret
+
+	if colno<1 then
+	    crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
+	end if
 
 	ret = s
 
 	for i = 1 to length(s) do
+		if colno >= 1+length(s[i]) then
+            crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d",{i,colno})
+		end if
 		ret[i] = s[i][colno]
 	end for
 
@@ -294,7 +321,9 @@ end function
 
 -- s2 = tail({1, 5.4, "John", 30}, 3)
 -- -- s2 is {5.4, "John", 30}
-
+--
+-- See Also:
+-- head, mid, slice
 global function tail(sequence st, atom n)
 	if n >= length(st) then
 		return st
@@ -323,7 +352,8 @@ end function
 --
 -- s = remove({1,2,3,3,4,4}, {4, 5})
 -- -- s is {1,2,3,4}
-
+-- See also
+-- replace, insert, splice
 global function remove(sequence st, object index)
 	atom start, stop
 
@@ -375,7 +405,9 @@ constant dummy = 0
 -- Example 2:
 -- s = insert({10,30,40}, 20, 2)
 -- -- s is {10,20,30,40}
-
+--
+-- See also:
+-- remove, splice
 global function insert(sequence st, object what, integer index)
 	if index > length(st) then
 		return append(st, what)
@@ -403,7 +435,9 @@ end function
 -- Example 2:
 -- s = splice({10,30,40}, 20, 2)
 -- -- s is {10,20,30,40}
-
+--
+-- See also:
+-- insert, remove, replace
 global function splice(sequence st, object what, integer index)
 	if index > length(st) then
 		return st & what
@@ -429,7 +463,9 @@ end function
 
 -- s = replace({45.3, "John", 5, {10, 20}}, 25, 2, 3)
 -- -- s is {45.3, 25, {10, 20}}
-
+--
+-- See also:
+-- splice, remove
 global function replace(sequence st, object what, integer start, integer stop)
 	st = remove(st, {start, stop})
 	return splice(st, what, start)
@@ -453,7 +489,8 @@ end function
 
 -- result = split_adv("One,Two|Three.Four", ".,|", 0, 1)
 -- -- result is {"One", "Two", "Three", "Four"}
-
+-- See also:
+-- chunk
 global function split_adv(sequence st, object delim, integer limit, integer any)
 	sequence ret
 	integer pos,start,next_pos
@@ -500,7 +537,9 @@ end function
 -- Example:
 -- result = split("John,Middle,Doe", ",")
 -- -- result is {"John", "Middle", "Doe"}
-
+--
+-- See also:
+-- join
 global function split(sequence st, object delim)
 	return split_adv(st, delim, 0, 0)
 end function
@@ -515,7 +554,9 @@ end function
 -- Example:
 -- result = join({"John", "Middle", "Doe"}, " ")
 -- -- result is "John Middle Doe"
-
+--
+-- See also:
+-- split
 global function join(sequence s, object delim)
 	object ret
 
@@ -556,7 +597,9 @@ constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
 -- Example:
 -- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file\r\n"
-
+--
+-- See also:
+-- trim_tail, trim, pad_head
 global function trim_head(sequence str, object what)
 	if atom(what) then
 		if what = 0.0 then
@@ -582,7 +625,8 @@ end function
 -- Example:
 -- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "\r\nSentence read from a file"
-
+-- See Also:
+-- trim_head, trim, pad_tail
 global function trim_tail(sequence str, object what)
 	if atom(what) then
 		if what = 0.0 then
@@ -608,7 +652,8 @@ end function
 -- Example:
 -- s = trim("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file"
-
+-- See also:
+-- trim_head, trim_tail
 global function trim(sequence str, object what)
 	return trim_tail(trim_head(str, what), what)
 end function
@@ -629,7 +674,8 @@ end function
 --
 -- s = pad_head("ABC", {6, '-'})
 -- -- s is "---ABC"
-
+-- See also:
+-- trim_head, pad_tail
 global function pad_head(sequence str, object params)
 	integer size, ch
 
@@ -664,6 +710,9 @@ end function
 --
 -- s = pad_tail("ABC", {6, '-'})
 -- -- s is "ABC---"
+--
+-- See Also:
+-- trim_tail, pad_head
 global function pad_tail(sequence str, object params)
 	integer size, ch
 
@@ -699,7 +748,9 @@ end function
 -- Example 2:
 -- s = chunk({1,2,3,4,5,6}, 3)
 -- -- s is {{1,2,3}, {4,5,6}}
-
+--
+-- See also:
+-- split
 global function chunk(sequence s, integer size)
 	sequence ns
 	integer stop
@@ -747,7 +798,7 @@ end function
 constant TO_LOWER = 'a' - 'A'
 
 --**
--- Convert an atom or sequence to lower case.
+-- Convert an atom or sequence to lower case. Only alters characters in the 'A'..'Z' range.
 -- 
 -- Example:
 -- s = lower("Euphoria")
@@ -758,7 +809,9 @@ constant TO_LOWER = 'a' - 'A'
 --
 -- s = lower({"Euphoria", "Programming"})
 -- -- s is {"euphoria", "programming"}
-
+--
+-- See Also:
+-- upper
 global function lower(object x)
 -- convert atom or sequence to lower case
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
@@ -766,7 +819,7 @@ end function
 --**
 
 --**
--- Convert an atom or sequence to upper case.
+-- Convert an atom or sequence to upper case. Only alters characters in the 'a'..'z' range.
 -- 
 -- Example:
 -- s = upper("Euphoria")
@@ -777,9 +830,223 @@ end function
 --
 -- s = upper({"Euphoria", "Programming"})
 -- -- s is {"EUPHORIA", "PROGRAMMING"}
-
+--
+-- See also:
+-- lower
 global function upper(object x)
 -- convert atom or sequence to upper case
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
+
 --**
+-- Checks whether two objects can be legally added together. Returns 1 if so, else 0.
+-- 
+-- Example:
+-- i = can_add({1,2,3},{4,5})
+-- -- i is 0
+--
+-- i = can_add({1,2,3},4)
+-- -- i is 1
+--
+-- i = can_add({1,2,3},{4,{5,6},7})
+-- -- i is 1
+--
+-- See also:
+-- linear
+global function can_add(object a,object b)
+	if atom(a) or atom(b) then
+		return 1
+	end if
+	if length(a)!=length(b) then
+		return 0
+	end if
+	for i=1 to length(a) do
+		if not can_add(a[i],b[i]) then
+			return 0
+		end if
+	end for
+	return 1
+end function
+--**
+
+--**
+-- Returns a sequence {start, start+increment,...,start+(count-1)*increment, or 0 on failure.
+-- 
+-- Example:
+-- s = linear({1,2,3},4,3)
+-- -- s is {{1,2,3},{5,6,7},{9,10,11}}
+--
+-- See Also:
+-- repeat_pattern
+global function linear(object start,object increment,integer count)
+	sequence result
+
+	if count<0 or not can_add(start,increment) then
+		return 0
+	end if
+	result=repeat(start,count)
+	for i=2 to count do
+		start+=increment
+		result[i]=start
+	end for
+	return result
+end function
+--**
+
+--**
+-- Returns a sequence whose n first elements are those of s, as well a the n that follow, and so on for count copies.
+-- 
+-- Example:
+-- s = repeat_pattern({1,2,5},3)
+-- -- s is {1,2,5,1,2,5,1,2,5}
+--
+-- See Also:
+-- repeat, linear
+global function repeat_pattern(sequence s,integer count)
+	integer ls
+	sequence result
+	
+	if count<=0 then
+		return {}
+	end if
+	ls=length(s)
+	count *= ls
+	result=repeat(0,count)
+	for i=1 to count by ls do
+		result[i..i+ls-1]=s
+	end for
+	return result
+end function
+--**
+
+--**
+-- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
+--
+-- vectors is a rectangular matrix, ie a sequence of sequences of objects.
+-- coords is a list of coordinate index lists, ie a sequence of sequences of small positive integers.
+--
+-- Returns a sequence the length of vectors. Each of its elements is a sequence,
+-- the length of coords, of sequences. Each innermost sequence is made of the
+-- coordinates of the vector whose indexes are on the given coordinate list.
+--
+-- Example:
+-- s = project({{1,-1,-1,0},{2,1,9}},{{1,2},{3,1},{2}})
+-- -- s is {{{2,-1},{-1,2},{-1}},{{2,1},{9,2},{1}}}
+--
+-- See Also:
+-- vslice
+global function project(sequence vectors,sequence coords) -- currently in sets.e
+	sequence result,current_vector,coord_set,result_item,projection
+	integer current_index
+	
+	result=vectors
+	for i=1 to length(vectors) do
+		current_vector=vectors[i] 
+		result_item=coords
+		for j=1 to length(coords) do
+			coord_set=coords[j]
+			projection=coord_set
+			for k=1 to length(coord_set) do
+				current_index=coord_set[k]
+				if current_index<1 or current_index>length(current_vector) then
+					crash("Invalid coordinate %d in set #%d for vector #%d",
+					  {coord_set[k],j,i})
+				end if
+				projection[k]=current_vector[current_index]
+			end for
+			result_item[j]=projection
+		end for
+		result[i]=result_item
+	end for
+	return result
+end function
+--**
+
+--**
+-- Retrieves an element nested arbitrarily deep into a sequence.
+--
+-- Example:
+-- x = fetch({0,1,2,3,{"abc","def","ghi"},6},{5,2,3})
+-- -- x is 'f', or 102.
+--
+-- See also:
+-- store, Sequence Assignments
+global function fetch(sequence s,sequence indexes)
+	for i=1 to length(indexes)-1 do
+		s=s[indexes[i]]
+	end for
+	return s[indexes[$]] 
+end function
+--**
+
+--**
+-- Stores something at a location nested arbitrarily deep into a sequence.
+--
+-- Example:
+-- s = store({0,1,2,3,{"abc","def","ghi"},6},{5,2,3},108)
+-- -- s is {0,1,2,3,{"abc","del","ghi"},6}
+-- 
+-- See also:
+-- fetch, Sequence Assignments
+global function store(sequence s,sequence indexes,object x)
+	sequence partials,result,branch
+
+	partials=repeat(s,length(indexes)-1)
+	branch=s
+	for i=1 to length(indexes)-1 do
+		branch=branch[indexes[i]]
+		partials[i]=branch
+	end for
+	branch[indexes[$]]=x
+	partials=prepend(partials,0) -- avoids computing temp=i+1 a few times
+	for i=length(indexes)-1 to 2 by -1 do
+	    result=partials[i]
+	    result[indexes[i]]=branch
+	    branch=result
+	end for
+    s[indexes[1]]=branch
+	return s
+end function
+--**
+
+--**
+-- Checks whether s[x] makes sense. Returns 1 if so, else 0.
+--
+-- Example:
+-- i = valid_index({51,27,33,14},2)
+-- -- i is 1
+-- 
+-- See also:
+-- Sequence Assignments
+global function valid_index(sequence s,object x)
+	if sequence(x) or x<1 then
+		return 0
+	else
+		return x<length(s)+1
+	end if
+end function
+--**
+
+--**
+-- Turbs a sequences of indexes into the sequence of elements in source that have such indexes.
+--
+-- Example:
+-- s = extract({11,13,15,17},{3,1,2,1,4})
+-- -- s is {15,11,13,11,17}
+--
+-- See also:
+-- slice
+global function extract(sequence source,sequence indexes)
+	object p
+
+	for i=1 to length(indexes) do
+		p=indexes[i]
+		if not valid_index(source,p) then
+			crash("%s is not a valid index on the input sequence",{sprint(p)})
+		end if
+		indexes[i]=source[p]
+	end for
+	return indexes
+end function
+--**
+
