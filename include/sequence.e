@@ -16,6 +16,7 @@
 
 include machine.e
 include search.e
+include misc.e
 
 --**
 -- Signature:
