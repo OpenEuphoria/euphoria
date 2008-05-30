@@ -3,14 +3,14 @@ include unicode.e
 
 set_test_module_name("unicode.e")
 
-ustring s1, s2, s3
+wstring s1, s2, s3
 s1 = "abcd"
 s2 = ""
 s3 = {#FFFF, #0001, #1000, #8080}
 
-test_equal("peek_ustring and allocate_ustring#1", s1, peek_ustring(allocate_ustring(s1)))
-test_equal("peek_ustring and allocate_ustring#2", s2, peek_ustring(allocate_ustring(s2)))
-test_equal("peek_ustring and allocate_ustring#3", s3, peek_ustring(allocate_ustring(s3)))
+test_equal("peek_wstring and allocate_wstring#1", s1, peek_wstring(allocate_wstring(s1)))
+test_equal("peek_wstring and allocate_wstring#2", s2, peek_wstring(allocate_wstring(s2)))
+test_equal("peek_wstring and allocate_wstring#3", s3, peek_wstring(allocate_wstring(s3)))
 
 
 -- type tests
@@ -29,18 +29,18 @@ test_equal("astring type#3", 0, astring(a3))
 test_equal("astring type#4", 0, astring(a4))
 test_equal("astring type#5", 0, astring(a5))
 
-test_equal("ustring type#1", 1, ustring(a1))
-test_equal("ustring type#2", 0, ustring(a2))
-test_equal("ustring type#3", 0, ustring(a3))
-test_equal("ustring type#4", 1, ustring(a4))
-test_equal("ustring type#5", 1, ustring(a5))
-test_equal("ustring type#6", 0, ustring(a6))
-test_equal("ustring type#7", 0, ustring(a7))
+test_equal("wstring type#1", 1, wstring(a1))
+test_equal("wstring type#2", 0, wstring(a2))
+test_equal("wstring type#3", 0, wstring(a3))
+test_equal("wstring type#4", 1, wstring(a4))
+test_equal("wstring type#5", 1, wstring(a5))
+test_equal("wstring type#6", 0, wstring(a6))
+test_equal("wstring type#7", 0, wstring(a7))
 
 
 -- utf8 tests -- taken from rfc 2279
 
-ustring e1, e2, e3
+wstring e1, e2, e3
 astring f1, f2, f3
 
 e1 = {#0041, #2262, #0391, #002E} -- "A<NOT IDENTICAL TO><ALPHA>."

@@ -7,7 +7,7 @@
 constant M_ALLOC = 16
 
 -- UCS-2 string (0-65535). In C known as wchar_t* (but \0's are allowed)
-global type ustring(object s)
+global type wstring(object s)
 		if not sequence(s) then 
 				return 0
 		end if
@@ -37,8 +37,8 @@ global type astring(object s)
 end type
 
 
--- encode ustring to astring using utf-8
-global function utf8_encode(ustring src)
+-- encode wstring to astring using utf-8
+global function utf8_encode(wstring src)
 	sequence tmp
 	integer pos
 	integer c
@@ -69,7 +69,7 @@ global function utf8_encode(ustring src)
 		return tmp[1..pos-1]
 end function
 
--- decode astring in utf-8 to ustring
+-- decode astring in utf-8 to wstring
 global function utf8_decode(astring src)
 	sequence tmp
 	integer pos, spos
@@ -107,7 +107,7 @@ global function utf8_decode(astring src)
 		return tmp[1..pos-1]
 end function
 
--- Function: allocate_ustring
+-- Function: allocate_wstring
 --
 -- Create a C-style null-terminated wchar_t string in memory
 --
@@ -116,7 +116,7 @@ end function
 --
 -- Returns:
 --   The address of the allocated string
-global function allocate_ustring(ustring s)
+global function allocate_wstring(wstring s)
 		atom mem
 
 		mem = machine_func(M_ALLOC, length(s)*2 + 2)
@@ -128,7 +128,7 @@ global function allocate_ustring(ustring s)
 		return mem
 end function
 
--- Function: peek_ustring
+-- Function: peek_wstring
 --
 -- Return a unicode (utf16) string that are stored at machine address a.
 --
@@ -137,7 +137,7 @@ end function
 --
 -- Returns:
 --   The string at the memory position
-global function peek_ustring(atom addr)
+global function peek_wstring(atom addr)
 		atom ptr
 		
 		ptr = addr

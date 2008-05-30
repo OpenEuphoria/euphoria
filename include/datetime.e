@@ -258,13 +258,13 @@ global function from_unix(atom unix)
 end function
 
 -- TODO: create, test, document
--- datetime parse(ustring string)
+-- datetime parse(wstring string)
 -- parse the string and returns the datetime
 global function parse(sequence string)
 		return 0
 end function
 
--- ustring format(ustring format)
+-- wstring format(wstring format)
 -- format the date according to the format string
 -- format string some taken from date(1)
 -- %%  a literal %
