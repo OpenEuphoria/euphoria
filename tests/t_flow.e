@@ -37,7 +37,7 @@ n=2
 integer p
 p=0
 loops={}
-loop do
+loop entry do
 	n+=1
 	entry
 	n+=2

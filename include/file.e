@@ -741,7 +741,7 @@ global function read_lines(object f)
 	if fn < 0 then return -1 end if
 	
 	ret = {}
-	while sequence(y) do
+	while sequence(y) entry do
 		if y[$] = '\n' then
 			y = y[1..$-1]
 		end if

@@ -1320,11 +1320,17 @@ end procedure
 
 integer forward_Statement_list
 
-procedure finish_block_header(integer opcode)
+function finish_block_header(integer opcode)
     token tok
     object labbel
+    integer has_entry
 
-    tok = next_token()
+    tok = next_token() 
+    has_entry=0
+    if tok[T_ID]=ENTRY then
+		has_entry=1
+		tok = next_token() 
+	end if
     labbel=0
     if tok[T_ID]=LABEL then
         tok = next_token()
@@ -1332,8 +1338,7 @@ procedure finish_block_header(integer opcode)
 			CompileErr("A label clause must be followed by a constant string")
 		end if
 		labbel=SymTab[tok[T_SYM]][S_OBJ]
-    else
-		putback(tok)
+		tok = next_token()
     end if
     if opcode=IF then
         if_labels = append(if_labels,labbel)
@@ -1347,13 +1352,25 @@ procedure finish_block_header(integer opcode)
 	    block_index += 1
 	    block_list[block_index] = opcode
 	end if
+	if tok[T_ID]=ENTRY then
+	    if has_entry then
+	        CompileErr("duplicate entry clause in a loop header")
+	    end if
+	    has_entry=1
+	    tok=next_token()
+	end if
+    if has_entry and opcode=IF then
+        CompileErr("entry keyword is not supported inside an if block header")
+	end if
 	if opcode = IF then
 		opcode = THEN
 	else
 		opcode = DO
-	end if
+	end if  
+	putback(tok)
     tok_match(opcode)
-end procedure
+    return has_entry
+end function
 
 procedure If_statement()
 -- parse an if statement with optional elsif's and optional else
@@ -1369,9 +1386,8 @@ procedure If_statement()
 	Expr()
 	emit_op(IF)
 	prev_false = length(Code)+1
-	prev_false2 = 0
 	emit_forward_addr() -- to be patched
-	finish_block_header(IF)
+	prev_false2=finish_block_header(IF)  -- 0
 	if SC1_type = OR then
 		backpatch(SC1_patch-3, SC1_OR_IF)
 		if TRANSLATE then
@@ -1489,7 +1505,7 @@ procedure While_statement()
 	short_circuit += 1
 	short_circuit_B = FALSE
 	SC1_type = 0
-	Expr()
+	Expr()  
 	optimized_while = FALSE
 	emit_op(WHILE)
 	short_circuit -= 1
@@ -1500,7 +1516,9 @@ procedure While_statement()
 	else -- WHILE TRUE was optimized to nothing 
 		bp2 = 0
 	end if
-    finish_block_header(WHILE)
+    if finish_block_header(WHILE)=0 then
+        entry_addr[$]=-1
+    end if
 
 	loop_stack &= {{WHILE, 0, bp1}}
 	loop_nest += 1
@@ -1542,10 +1560,13 @@ procedure Loop_statement()
 
     exit_base = length(exit_list)
     next_base = length(continue_list)
-    entry_addr &= length(Code)+1
     emit_op(NOP2) -- Entry_statement() may patch this
     emit_addr(0)
-    finish_block_header(LOOP)
+    if finish_block_header(LOOP) then
+	    entry_addr &= length(Code)-1
+    else
+        entry_addr &= -1
+    end if
     -- do ... until <expr> is implemented as:
     -- while 1 do ... if not (<expr>) then exit end if end while
     if TRANSLATE then
@@ -1712,7 +1733,9 @@ procedure For_statement()
 	op_info1 = loop_var_sym
 	emit_op(FOR)
 	emit_addr(loop_var_sym)
-    finish_block_header(FOR)
+    if finish_block_header(FOR) then
+        CompileErr("entry is not supported in for loops")
+    end if
     for_vars &= loop_var_sym
     for_where &= length(loop_labels)
     entry_addr &= 0
@@ -1966,21 +1989,26 @@ end procedure
 procedure Entry_statement()
 -- defines an entry statement
 -- must check that it is not in the moddle of an if block
-    if not length(loop_labels) or block_index=0 then
+    integer addr
+
+	if not length(loop_labels) or block_index=0 then
         CompileErr("the entry statement must appear inside a loop")
     end if
 	if block_list[block_index]=IF then
         CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
 	end if
-    if not entry_addr[$] then
+	addr = entry_addr[$]
+    if addr=0  then
         if length(loop_labels) = for_where[$] then  -- not allowed in an innermost for loop
             CompileErr("the entry statement must apply to a while or loop block")
         else -- loop already has an entry point
             CompileErr("the entry statement must appear at most once inside a loop")
         end if
-    end if
-    backpatch(entry_addr[$],ELSE)
-    backpatch(entry_addr[$]+1,length(Code)+1+(TRANSLATE>0))
+    elsif addr<0 then
+		CompileErr("entry statement is being used without a corresponding entry clause in the loop header")
+	end if
+    backpatch(addr,ELSE)
+    backpatch(addr+1,length(Code)+1+(TRANSLATE>0))
     entry_addr[$] = 0
 	if TRANSLATE then
 	    emit_op(NOP1)

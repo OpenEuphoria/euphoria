@@ -114,7 +114,7 @@ global function find_all(object x, sequence source, integer from)
 	sequence ret
 
 	ret = {}
-	while from > 0 do
+	while from > 0 entry do
 		ret &= from
 		from += 1
 	entry
@@ -127,7 +127,7 @@ global function match_all(object x, sequence source, integer from)
 	sequence ret
 
 	ret = {}
-	while from > 0 do
+	while from > 0 entry do
 		ret &= from
 		from += length(x)
 	entry
