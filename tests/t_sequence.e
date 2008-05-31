@@ -6,6 +6,7 @@ set_test_module_name("sequence.e")
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
 test_equal("reverse() string", "nhoJ", reverse("John"))
 
+test_equal("head() string default", "J", head("John Doe"))
 test_equal("head() string", "John", head("John Doe", 4))
 test_equal("head() sequence", {1,2,3}, head({1,2,3,4,5,6}, 3))
 test_equal("head() nested sequence", {{1,2}, {3,4}}, head({{1,2},{3,4},{5,6}}, 2))
@@ -25,21 +26,23 @@ test_equal("slice() sequence", {2,3}, slice({1,2,3,4}, 2, 3))
 test_equal("slice() nested sequence", {{3,4},{5,6}}, slice({{1,2},{3,4},{5,6},{7,8}}, 2, 3))
 test_equal("slice() bounds", "Middle Doe", slice("John Middle Doe", 6, 50))
 
+test_equal("tail() string default", "ohn Middle Doe", tail("John Middle Doe"))
 test_equal("tail() string", "Doe", tail("John Middle Doe", 3))
 test_equal("tail() sequence", {3,4}, tail({1,2,3,4}, 2))
 test_equal("tail() nested sequence", {{3,4},{5,6}}, tail({{1,2},{3,4},{5,6}}, 2))
 test_equal("tail() bounds", {1,2,3,4}, tail({1,2,3,4}, 50))
 
-test_equal("split() simple string", {"a","b","c"}, split("a,b,c", ','))
+test_equal("split() simple string", {"a","b","c"}, split("a,b,c", ","))
 test_equal("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
 test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"}, 0))
-test_equal("split_adv() limit set", {"a", "b,c"}, split_adv("a,b,c", ',', 2, 0))
-test_equal("split_adv() any character", {"a", "b", "c"}, split_adv("a,b.c", ",.", 0, 1))
-test_equal("split_adv() limit and any character", {"a", "b", "c|d"},
-    split_adv("a,b.c|d", ",.|", 3, 1))
-test_equal("split_adv() single sequence delimiter",{"while 1 "," end while ",""},
-    split_adv("while 1 do end while do","do",0,0))
+test_equal("split() limit set", {"a", "b,c"}, split("a,b,c", ',', 2))
+test_equal("split() any character", {"a", "b", "c"}, split("a,b.c", ",.", 0, 1))
+test_equal("split() limit and any character", {"a", "b", "c|d"},
+    split("a,b.c|d", ",.|", 3, 1))
+test_equal("split() single sequence delimiter",{"while 1 "," end while ",""},
+    split("while 1 do end while do","do"))
 
+test_equal("join() simple string default", "a b c", join({"a", "b", "c"}))
 test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
 test_equal("join() nested sequence", {"John", 0, "Doe"}, join({{"John"}, {"Doe"}}, 0))
 
@@ -65,33 +68,36 @@ test_equal("replace() integer sequence", {1,2,3}, replace({1,8,9,3}, 2, 2, 3))
 test_equal("replace() integer sequence w/sequence", {1,2,3,4},
     replace({1,8,9,4}, {2,3}, 2, 3))
 
-test_equal("trim_head() default", "John", trim_head(" \r\n\t John", 0))
+test_equal("trim_head() default", "John", trim_head(" \r\n\t John"))
 test_equal("trim_head() specified", "Doe", trim_head("John Doe", " hoJn"))
 test_equal("trim_head() integer", "John", trim_head("\nJohn", 10))
 test_equal("trim_head() floating number", {-1,{}} , trim_head({0.5,1/2,-1,{}},0.5))
 test_equal("trim_head() to empty", "", trim_head("  ", 32))
 
-test_equal("trim_tail() defaults", "John", trim_tail("John\r \n\t", 0))
+test_equal("trim_tail() defaults", "John", trim_tail("John\r \n\t"))
 test_equal("trim_tail() specified", "John", trim_tail("John Doe", " eDo"))
 test_equal("trim_tail() integer", "John", trim_tail("John\n", 10))
 test_equal("trim_tail() floating number", {-1,{}} , trim_tail({-1,{},0.5,1/2},0.5))
 test_equal("trim_tail() to empty", "", trim_tail(" ", 32))
 
-test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t", 0))
+test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t"))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
 test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
 test_equal("trim() to empty", "", trim("  ", 32))
-test_equal("trim() with unicode whitespaces", "John", trim(" \r\n\t John" & {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
+test_equal("trim() with unicode whitespaces", "John", trim(" \r\n\t John" & 
+	{9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
 	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A, 
-	#2028, #2029, #202F, #205F, #3000}, 0))
+	#2028, #2029, #202F, #205F, #3000}))
 
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))
 test_equal("pad_head() #3", "ABC", pad_head("ABC", 1))
+test_equal("pad_head() #4", "...ABC", pad_head("ABC", 6, '.'))
 
 test_equal("pad_tail() #1", "ABC   ", pad_tail("ABC", 6))
 test_equal("pad_tail() #2", "ABC", pad_tail("ABC", 3))
 test_equal("pad_tail() #3", "ABC", pad_tail("ABC", 1))
+test_equal("pad_tail() #4", "ABC...", pad_tail("ABC", 6, '.'))
 
 test_equal("chunk() sequence", {{1,2,3}, {4,5,6}}, chunk({1,2,3,4,5,6}, 3))
 test_equal("chunk() string", {"AB", "CD", "EF"}, chunk("ABCDEF", 2))

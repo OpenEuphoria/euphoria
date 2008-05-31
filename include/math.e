@@ -96,10 +96,15 @@ end type
 -- global function set_rand(integer i1)
 --
 -- Description:
--- Set the random number generator to a certain state, i1, so that you will get a known series of random numbers on subsequent calls to rand().
+-- Set the random number generator to a certain state, i1, so that you will get a known 
+-- series of random numbers on subsequent calls to rand().
 --
 -- Comments:
--- Normally the numbers returned by the rand() function are totally unpredictable, and will be different each time you run your program. Sometimes however you may wish to repeat the same series of numbers, perhaps because you are trying to debug your program, or maybe you want the ability to generate the same output (e.g. a random picture) for your user upon request.
+-- Normally the numbers returned by the rand() function are totally unpredictable, and 
+-- will be different each time you run your program. Sometimes however you may wish to 
+-- repeat the same series of numbers, perhaps because you are trying to debug your program, 
+-- or maybe you want the ability to generate the same output (e.g. a random picture) for 
+-- your user upon request.
 --
 -- Example 1:
 -- sequence s, t
@@ -123,10 +128,12 @@ end type
 --   global function remainder(object x1, object x2)
 --
 -- Description:
--- Compute the remainder after dividing x1 by x2. The result will have the same sign as x1, and the magnitude of the result will be less than the magnitude of x2.
+-- Compute the remainder after dividing x1 by x2. The result will have the same sign as x1, 
+-- and the magnitude of the result will be less than the magnitude of x2.
 --
 -- Comments:
--- The arguments to this function may be atoms or sequences. The rules for <a href="refman_2.htm#26">operations on sequences</a> apply.
+-- The arguments to this function may be atoms or sequences. The rules for 
+-- <a href="refman_2.htm#26">operations on sequences</a> apply.
 --
 -- Example 1:
 -- a = remainder(9, 4)
@@ -216,7 +223,8 @@ end type
 -- Raise x1 to the power x2
 --
 -- Comments:
--- The arguments to this function may be atoms or sequences. The rules for <a href="refman_2.htm#26">operations on sequences</a> apply.
+-- The arguments to this function may be atoms or sequences. The rules for 
+-- <a href="refman_2.htm#26">operations on sequences</a> apply.
 --
 -- Powers of 2 are calculated very efficiently.
 --
@@ -326,7 +334,8 @@ end function
 --**
 
 --**
--- Computes next higher argument's integers. Returns the integers that are greater or equal to each element in the argument.
+-- Computes next higher argument's integers. Returns the integers that are greater or 
+-- equal to each element in the argument.
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence
@@ -342,96 +351,69 @@ end function
 --**
 
 --**
--- Return the argument's elements rounded to i precision
+-- Return the argument's elements rounded to `precision` precision
 --
 -- Comments:
+-- `precision` is optional and defaults to 1.
+--
 -- This function may be applied to an atom or to all elements of a sequence.
 --
 -- Example 1:
--- round_to({4.12, 4.67, -5.8, -5.21}, 10) -- {4.1, 4.7, -5.8, -5.2}
--- round_to(12.2512, 100) -- 12.25
+-- round(5.2) -- 5
+-- round({4.12, 4.67, -5.8, -5.21}, 10) -- {4.1, 4.7, -5.8, -5.2}
+-- round(12.2512, 100) -- 12.25
 
-global function round_to(object a, object cent)
+global function round(object a, object precision=1)
 	integer len
 	sequence s
 	object t, u
 	if atom(a) then
-		if atom(cent) then
-			return floor(a * cent + 0.5) / cent
+		if atom(precision) then
+			return floor(a * precision + 0.5) / precision
 		end if
-		len = length(cent)
+		len = length(precision)
 		s = repeat(0, len)
 		for i = 1 to len do
-			t = cent[i]
+			t = precision[i]
 			if atom (t) then
 				s[i] = floor(a * t + 0.5) / t
 			else
-				s[i] = round_to(a, t)
+				s[i] = round(a, t)
 			end if
 		end for
 		return s
-	elsif atom(cent) then
+	elsif atom(precision) then
 		len = length(a)
 		s = repeat(0, len)
 		for i = 1 to len do
 			t = a[i]
 			if atom(t) then
-				s[i] = floor(t * cent + 0.5) / cent
+				s[i] = floor(t * precision + 0.5) / precision
 			else
-				s[i] = round_to(t, cent)
+				s[i] = round(t, precision)
 			end if
 		end for
 		return s
 	end if
 	len = length(a)
-	if len != length(cent) then
+	if len != length(precision) then
 			abort(1)
 	end if
 	s = repeat(0, len)
 	for i = 1 to len do
-		t = cent[i]
+		t = precision[i]
 		if atom(t) then
 			u = a[i]
 			if atom(u) then
 				s[i] = floor(u * t + 0.5) / t
 			else
-				s[i] = round_to(u, t)
+				s[i] = round(u, t)
 			end if
 		else
-			s[i] = round_to(a[i], t)
+			s[i] = round(a[i], t)
 		end if
 	end for
 	return s
-end function
---**
-
---**
--- Return the argument's elements rounded to the nearest integer
---
--- Comments:
--- This function may be applied to an atom or to all elements of a sequence.
---
--- Example 1:
--- round({4.12, 4.67, -5.8, -5.21}) -- {4, 5, -6, -5}
--- round(12.2) -- 12
-
-global function round(object a)
-	object t
-	if integer(a) then
-		return a
-	elsif atom(a) then
-			return floor(a + 0.5)
-	end if
-	for i = 1 to length(a) do
-		t = a[i]
-			if integer(t) then
-		elsif atom(t) then
-				a[i] = floor(t + 0.5)
-		else
-				a[i] = round(t)
-		end if
-	end for
-	return a
 end function
 --**
 
@@ -663,8 +645,8 @@ end function
 -- a = log10(12)
 -- -- a is 2.48490665
 
-global function log10(object a)
-	return log(a) * INVLOG10
+global function log10(object x1)
+	return log(x1) * INVLOG10
 end function
 --**
 
@@ -707,7 +689,8 @@ end function
 --**
 
 --**
--- Return a random integer from i1 to i2, where i1 may be from 1 to the largest positive value of type integer (1073741823).
+-- Return a random integer from i1 to i2, where i1 may be from 1 to the largest 
+-- positive value of type integer (1073741823).
 --
 -- Example 1:
 -- s = rand_range(18, 24)
@@ -725,3 +708,4 @@ end function
 global function mod(atom x, atom y)
 	return x - y * floor(x / y)
 end function
+

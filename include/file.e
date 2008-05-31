@@ -17,10 +17,6 @@
 include sort.e
 include misc.e
 include wildcard.e
-ifdef UNIX then
-else
-with define=NOTUNIX
-end ifdef
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -949,7 +945,7 @@ global function pathinfo(sequence path)
 	if slash > 0 then
 		dir_name = path[1..slash-1]
 		
-		ifdef NOTUNIX then
+		ifdef !UNIX then
 			ch = find(':', dir_name)
 			if ch != 0 then
 				drive_id = dir_name[1..ch-1]

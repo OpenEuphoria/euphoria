@@ -1634,76 +1634,77 @@ void do_exec(int *start_pc)
 	static void *localjumptab[MAX_OPCODE] = {
   &&L_LESS, &&L_GREATEREQ, &&L_EQUALS, &&L_NOTEQ, &&L_LESSEQ, &&L_GREATER,
   &&L_NOT, &&L_AND, &&L_OR, &&L_MINUS, 
-/* 10 */  
+/* 10 (previous is 10 (L_MINUS)) */  
   &&L_PLUS, &&L_UMINUS, &&L_MULTIPLY, &&L_DIVIDE, &&L_CONCAT, &&L_ASSIGN_SUBS,
   &&L_GETS, &&L_ASSIGN, &&L_PRINT, &&L_IF, 
-/* 20 */  
+/* 20 (previous) */  
   &&L_FOR, &&L_ENDWHILE, &&L_ELSE, &&L_OR_BITS, &&L_RHS_SUBS, &&L_XOR_BITS, 
   &&L_PROC, &&L_RETURNF, &&L_RETURNP, &&L_PRIVATE_INIT_CHECK, 
-/* 30 */  
+/* <- 30 (previous) */  
   &&L_RIGHT_BRACE_N, &&L_REPEAT, &&L_GETC, &&L_RETURNT, &&L_APPEND,
   &&L_QPRINT, &&L_OPEN, &&L_PRINTF, &&L_ENDFOR_GENERAL, &&L_IS_AN_OBJECT, 
-/* 40 */  
+/* <- 40 (previous) */  
   &&L_SQRT, &&L_LENGTH, &&L_BADRETURNF, &&L_PUTS, &&L_ASSIGN_SLICE,
   &&L_RHS_SLICE, &&L_WHILE, &&L_ENDFOR_INT_UP, &&L_ENDFOR_UP, &&L_ENDFOR_DOWN,
-/* 50 */  
+/* <- 50 (previous) */  
   &&L_NOT_BITS, &&L_ENDFOR_INT_DOWN, &&L_SPRINTF, &&L_ENDFOR_INT_UP1,
   &&L_ENDFOR_INT_DOWN1, &&L_AND_BITS, &&L_PREPEND, &&L_STARTLINE,
   &&L_CLEAR_SCREEN, &&L_POSITION,
-/* 60 */  
+/* 60 (previous) */  
   &&L_EXIT, &&L_RAND, &&L_FLOOR_DIV, &&L_TRACE, &&L_TYPE_CHECK,
   &&L_FLOOR_DIV2, &&L_IS_AN_ATOM, &&L_IS_A_SEQUENCE, &&L_DATE, &&L_TIME,
-/* 70 */  
+/* 70 (previous) */  
   &&L_REMAINDER, &&L_POWER, &&L_ARCTAN, &&L_LOG, NULL, &&L_COMPARE,
   &&L_FIND, &&L_MATCH, &&L_GET_KEY, &&L_SIN, 
-/* 80 */  
+/* 80 (previous) */  
   &&L_COS, &&L_TAN, &&L_FLOOR, &&L_ASSIGN_SUBS_CHECK, &&L_RIGHT_BRACE_2,
   &&L_CLOSE, &&L_DISPLAY_VAR, &&L_ERASE_PRIVATE_NAMES, &&L_UPDATE_GLOBALS,
   &&L_ERASE_SYMBOL, 
-/* 90 */  
+/* 90 (previous) */  
   &&L_GETENV, &&L_RHS_SUBS_CHECK, &&L_PLUS1, &&L_IS_AN_INTEGER,
   &&L_LHS_SUBS, &&L_INTEGER_CHECK, &&L_SEQUENCE_CHECK, &&L_DIV2,
   &&L_SYSTEM, &&L_COMMAND_LINE,
-/* 100 */  
+/* 100 (previous) */  
   &&L_ATOM_CHECK, &&L_LESS_IFW, &&L_GREATEREQ_IFW, &&L_EQUALS_IFW,
   &&L_NOTEQ_IFW, &&L_LESSEQ_IFW, &&L_GREATER_IFW, &&L_NOT_IFW, 
   &&L_GLOBAL_INIT_CHECK, &&L_NOP2,
-/* 110 */  
+/* 110 (previous) */  
   &&L_MACHINE_FUNC, &&L_MACHINE_PROC, &&L_ASSIGN_I, &&L_RHS_SUBS_I,
   &&L_PLUS_I, &&L_MINUS_I, &&L_PLUS1_I, &&L_ASSIGN_SUBS_I, &&L_LESS_IFW_I,
   &&L_GREATEREQ_IFW_I, 
-/* 120 */  
+/* 120 (previous) */  
   &&L_EQUALS_IFW_I, &&L_NOTEQ_IFW_I, &&L_LESSEQ_IFW_I, &&L_GREATER_IFW_I,
   &&L_FOR_I, &&L_ABORT, &&L_PEEK, &&L_POKE, &&L_CALL, &&L_PIXEL,
-/* 130 */  
+/* 130 (previous) */  
   &&L_GET_PIXEL, &&L_MEM_COPY, &&L_MEM_SET, &&L_C_PROC, &&L_C_FUNC,
   &&L_ROUTINE_ID, &&L_CALL_BACK_RETURN, &&L_CALL_PROC, &&L_CALL_FUNC,
   &&L_POKE4,
-/* 140 */  
+/* 140 (previous) */  
   &&L_PEEK4S, &&L_PEEK4U, &&L_SC1_AND, &&L_SC2_AND, &&L_SC1_OR,
   &&L_SC2_OR, NULL, &&L_SC1_AND_IF, &&L_SC1_OR_IF, NULL,
-/* 150 */  
+/* 150 (previous) */  
   &&L_ASSIGN_OP_SUBS, &&L_ASSIGN_OP_SLICE, &&L_PROFILE, &&L_XOR, &&L_EQUAL,
   &&L_SYSTEM_EXEC, 
   &&L_PLATFORM /* PLATFORM not always emitted*/, 
   NULL /* END_PARAM_CHECK not emitted */, 
   &&L_CONCAT_N, 
   NULL, /* L_NOPWHILE not emitted */
-/* 160 */
+/* 160 (previous) */
   NULL, /* L_NOP1 not emitted */
   &&L_PLENGTH,
   &&L_LHS_SUBS1,
   &&L_PASSIGN_SUBS, &&L_PASSIGN_SLICE, &&L_PASSIGN_OP_SUBS, 
   &&L_PASSIGN_OP_SLICE,
   &&L_LHS_SUBS1_COPY,
-/* 169 */
+/* 168 (previous) */
   &&L_TASK_CREATE, &&L_TASK_SCHEDULE, &&L_TASK_YIELD,
   &&L_TASK_SELF, &&L_TASK_SUSPEND, &&L_TASK_LIST,
   &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, &&L_TASK_CLOCK_START,
-/* 177 */ 
+/* 177 (previous) */ 
   &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
   &&L_OPTION_SWITCHES, &&L_RETRY
+/* 186 (previous) */
   };
 #endif
 #endif

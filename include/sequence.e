@@ -184,7 +184,8 @@ end function
 --
 -- See Also:
 -- tail, mid, slice
-global function head(sequence st, integer size)
+
+global function head(sequence st, integer size=1)
 	if size < length(st) then
 		return st[1..size]
 	end if
@@ -218,7 +219,8 @@ global function mid(sequence st, atom start, atom len)
 	if len<0 then
 		len += length(st)
 		if len<0 then
-			crash("mid(): len was %d and should be greater than %d.",{len-length(st),-length(st)})
+			crash("mid(): len was %d and should be greater than %d.",
+				{len-length(st),-length(st)})
 		end if
 	end if
 	if start > length(st) or len=0 then
@@ -305,6 +307,8 @@ global function vslice(sequence s, atom colno)
 end function
 --**
 
+-- TODO: document default parameter usage
+-- TODO: =0.03... Yuk! We need NULL :-)
 --**
 -- Return the last n items of st. If n is greater than the length of st, then the entire st will be returned.
 --
@@ -325,7 +329,11 @@ end function
 --
 -- See Also:
 -- head, mid, slice
-global function tail(sequence st, atom n)
+
+global function tail(sequence st, atom n=0.03)
+	if n = 0.03 then
+		n = length(st) - 1
+	end if
 	if n >= length(st) then
 		return st
 	else
@@ -335,8 +343,9 @@ end function
 --**
 
 --**
--- Remove an item or a range of items from st. If index is an integer, then only that element will be removed.
--- If index is a sequence, it must be a sequence of two integers representing start and stop index.
+-- Remove an item or a range of items from st. If index is an integer, then only that 
+-- element will be removed. If index is a sequence, it must be a sequence of two 
+-- integers representing start and stop index.
 --
 -- Comments:
 -- A new sequence is created. st can be a string or complex sequence.
@@ -355,6 +364,7 @@ end function
 -- -- s is {1,2,3,4}
 -- See also
 -- replace, insert, splice
+
 global function remove(sequence st, object index)
 	atom start, stop
 
@@ -492,9 +502,11 @@ end function
 -- -- result is {"One", "Two", "Three", "Four"}
 -- See also:
 -- chunk
-global function split_adv(sequence st, object delim, integer limit, integer any)
+-- TODO: document default parameters
+global function split(sequence st, object delim=" ", integer limit=0, integer any=0)
 	sequence ret
-	integer pos,start,next_pos
+	integer pos, start, next_pos
+
 	ret={}
 	start=1
 
@@ -530,23 +542,6 @@ end function
 --**
 
 --**
--- split st by delim
---
--- Comments:
--- This function may be applied to a string sequence or a complex sequence
---
--- Example:
--- result = split("John,Middle,Doe", ",")
--- -- result is {"John", "Middle", "Doe"}
---
--- See also:
--- join
-global function split(sequence st, object delim)
-	return split_adv(st, delim, 0, 0)
-end function
---**
-
---**
 -- Join s by delim
 --
 -- Comments:
@@ -558,7 +553,9 @@ end function
 --
 -- See also:
 -- split
-global function join(sequence s, object delim)
+
+-- TODO: document default param change
+global function join(sequence s, object delim=" ")
 	object ret
 
 	if not length(s) then return {} end if
@@ -601,13 +598,11 @@ constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
 --
 -- See also:
 -- trim_tail, trim, pad_head
-global function trim_head(sequence str, object what)
+
+-- TODO: document default param change
+global function trim_head(sequence str, object what=TRIM_WHITESPACES)
 	if atom(what) then
-		if what = 0.0 then
-			what = TRIM_WHITESPACES
-		else
-			what = {what}
-		end if
+		what = {what}
 	end if
 
 	for i = 1 to length(str) do
@@ -628,13 +623,11 @@ end function
 -- -- s is "\r\nSentence read from a file"
 -- See Also:
 -- trim_head, trim, pad_tail
-global function trim_tail(sequence str, object what)
+
+-- TODO: document default param change
+global function trim_tail(sequence str, object what=TRIM_WHITESPACES)
 	if atom(what) then
-		if what = 0.0 then
-			what = TRIM_WHITESPACES
-		else
-			what = {what}
-		end if
+		what = {what}
 	end if
 
 	for i = length(str) to 1 by -1 do
@@ -655,7 +648,9 @@ end function
 -- -- s is "Sentence read from a file"
 -- See also:
 -- trim_head, trim_tail
-global function trim(sequence str, object what)
+
+-- TODO: document default param change
+global function trim(sequence str, object what=TRIM_WHITESPACES)
 	return trim_tail(trim_head(str, what), what)
 end function
 --**
@@ -677,17 +672,9 @@ end function
 -- -- s is "---ABC"
 -- See also:
 -- trim_head, pad_tail
-global function pad_head(sequence str, object params)
-	integer size, ch
 
-	if sequence(params) then
-		size = params[1]
-		ch = params[2]
-	else
-		size = params
-		ch = ' '
-	end if
-
+-- TODO: document default param change
+global function pad_head(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
 		return str
 	end if
@@ -714,20 +701,13 @@ end function
 --
 -- See Also:
 -- trim_tail, pad_head
-global function pad_tail(sequence str, object params)
-	integer size, ch
 
-	if sequence(params) then
-		size = params[1]
-		ch = params[2]
-	else
-		size = params
-		ch = ' '
-	end if
-
+-- TODO: document default param change
+global function pad_tail(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
 		return str
 	end if
+
 	return str & repeat(ch, size - length(str))
 end function
 --**

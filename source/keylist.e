@@ -45,12 +45,12 @@ keylist =
 	{"continue",  SC_KEYWORD, CONTINUE, 0, 0, 0},
 	{"ifdef",     SC_KEYWORD, IFDEF, 0, 0, 0},
 	{"elsifdef",  SC_KEYWORD, ELSIFDEF, 0, 0, 0},
-	{"label",      SC_KEYWORD, LABEL, 0, 0, 0},
+	{"label",     SC_KEYWORD, LABEL, 0, 0, 0},
 	{"loop",      SC_KEYWORD, LOOP, 0, 0, 0},
-	{"until",      SC_KEYWORD, UNTIL, 0, 0, 0},
-	{"entry",      SC_KEYWORD, ENTRY, 0, 0, 0},
-	{"break",      SC_KEYWORD, BREAK, 0, 0, 0},
-	{"retry",      SC_KEYWORD, RETRY, 0, 0, 0},
+	{"until",     SC_KEYWORD, UNTIL, 0, 0, 0},
+	{"entry",     SC_KEYWORD, ENTRY, 0, 0, 0},
+	{"break",     SC_KEYWORD, BREAK, 0, 0, 0},
+	{"retry",     SC_KEYWORD, RETRY, 0, 0, 0},
 	{"enum",      SC_KEYWORD, ENUM, 0, 0, 0},
 	-- new ones must go at end to maintain compatibility with old shrouded code
 
