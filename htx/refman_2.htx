@@ -1773,7 +1773,7 @@ called an iteration of the loop.</p>
 <p>
 Euphoria has three flavours of loops. They all may harbor a <a href="refman_2.htm#labhdr">
 labelled block header</a>, in order to make exiting them more flexible.
-
+</p>
 <h5>while statement</h5>
 
 <p>
@@ -1911,7 +1911,7 @@ The <font color="#993333"><_bq>entry</_bq></font> keyword will be described in t
 <a href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will need an
 <font color="#993333"><_bq>entry</_bq></font> tag in the loop header, as a clue to any reader
 that the first iteration of the loop willn not start right after the closing <font color="#993333"><_bq>do</_bq></font>.
-
+</p>
 <h5>The loop ... until statement.</h5>
 <p>
  A <font color="#993333"><b>loop ... until statement</b></font> tests a condition
@@ -1926,9 +1926,9 @@ that the first iteration of the loop willn not start right after the closing <fo
 
 This differs from a <font color="#993333"><b>while</b></font> loop in more than one way:
 <ul>
-<li> The body of the loop is executed at least once, since testing takes place AFTER it completes. In a <font color="#993333"><b>while</b></font>, the test is taken BEFORE execution.
-<li> The header contains only optional <font color="#993333"><b>label</b></font> and <font color="#993333"><b>while</b></font>entry</b></font> tags.
-<li> The footer of the block, instead of being "end loop", has a distinctive form and holds the termination test.
+<li> The body of the loop is executed at least once, since testing takes place AFTER it completes.  In a <font color="#993333"><b>while</b></font>, the test is taken BEFORE execution.</li>
+<li> The header contains only optional <font color="#993333"><b>label</b></font> and <font color="#993333"><b>while entry</b></font> tags.</li>
+<li> The footer of the block, instead of being "end loop", has a distinctive form and holds the termination test.</li>
 </ul>
 
 <h2>Short-Circuit Evaluation</h2>
@@ -2056,7 +2056,7 @@ The <font color="#993333"><_bq>entry</_bq></font> keyword will be described in t
 <a href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will need an
 <font color="#993333"><_bq>entry</_bq></font> tag in the loop header, as a clue to any reader
 that the first iteration of the loop will not start right after the closing <font color="#993333"><_bq>do</_bq></font>.
-
+</p>
 <h5>for statement</h5>
 
 <p>
@@ -2103,12 +2103,13 @@ you need to act on a block above the current one, like exiting three levels of l
 
 <p>
 By using an optional parameter right after the control flow keyword. The parameter may take the following form:
+</p>
 <ul>
-<li> A label string, like in <eucode>break "this_block"</eucode>
-<li> A positive constant integer, the number of levels to act upon, like in "exit 2" to exit the loop right above the current one
-<li> A nonposiive integer, which counts he levels backwaeds, like in "continue -1" to start 
-the next iteration of the second topmost loop (compare with s[$-1])
-<li> A for loop index variable name, like in "retry i",which restarts the current iteration of the active for loop which has i as loop variable.
+<li> A label string, like in <eucode>break "this_block"</eucode></li>
+<li> A positive constant integer, the number of levels to act upon, like in "exit 2" to exit the loop right above the current one</li>
+<li> A nonpositive integer, which counts he levels backwards, like in "continue -1" to start 
+the next iteration of the second topmost loop (compare with s[$-1])</li>
+<li> A for loop index variable name, like in "retry i",which restarts the current iteration of the active for loop which has i as loop variable.</li>
 </ul>
 
 <p>
@@ -2116,7 +2117,7 @@ For easier and safer program maintainance, the explicit label form is to be pref
 
 <p>
 For information on how to associate a string o a block of code, see the section on <a href="labelhdr">labelled headers</a>.
-
+</p>
 <p>
 The following flow control keywords are available.
  </p>
@@ -2171,6 +2172,7 @@ The following flow control keywords are available.
 
 <p>
 Works exactly like the <font color="#993333"><b>exit statement</b></font>, but applies to <font color="#993333"><b>if statements</b></font> rather than to loop statments of any kind. Example:
+</p>
 <eucode>
       if s[1]='E' then
           a = 3
@@ -2190,10 +2192,10 @@ Works exactly like the <font color="#993333"><b>exit statement</b></font>, but a
 </eucode>
 This code resuls in:
 <ul>
-<li> "Dur" -> a=0 b=0
-<li> "Exe" -> a=3 b=4
-<li> "Eux" -> a=2 b=1
-<li> "Eup" -> a=3 b=1
+<li> "Dur" -> a=0 b=0</li>
+<li> "Exe" -> a=3 b=4</li>
+<li> "Eux" -> a=2 b=1</li>
+<li> "Eup" -> a=3 b=1</li>
 </ul>
 
 <h5>The continue statement</h5>
@@ -2201,7 +2203,7 @@ This code resuls in:
 <p>
 The <font color="#993333"><b>continue statements</b></font> continues execution of the loop it applies to by going to the next iteration now. Going to the next iteration means testing a condition (for <font color="#993333"><b>while</b></font> and
 <font color="#993333"><b>loop ... until loops</b></font>, or changing the for loop variable index and checking whether it is still within bounds.
-
+</p>
 <eucode>
      for i=3 to 6 do
          ?i
@@ -2224,7 +2226,7 @@ iteration of the loop it applies to. The statement branches to the first stateme
 <p>
 Normally, a sub-block which contains a <font color="#993333"><b>retry statements</b></font>
 also contains another flow control keyword, since otherwise the iteration would be endlessly executed.
-
+</p>
 <eucode>
     errors = 0
 	for i=1 to length(files_to_open) do
@@ -2251,7 +2253,7 @@ to be done before the loop starts - they are done before the statement starting 
 Now, the problem is that, just as often, some things do not need, or should not, be done at 
 this intialisation stage. The <font color="#993333"><b>entry keyword</b></font> is an alternative to setting flags relentlessly 
 and forgetting to update them. Just add the <font color="#993333"><b>entry</b></font> kyword at the point you wish the first iteration starts.
-
+</p>
 <eucode>
 global function find_all(object x, sequence source, integer from)
 	sequence ret
@@ -2271,7 +2273,7 @@ Instead of performing an initial test, which may crash because from has not been
 
 <p>
 The entry statement is not supported for for loops, because they have a more rigid natire than while or loop constructs.
-
+</p>
 <h2>Note on infinite loops.</h2>
 <p>
  With <font color="#993333"><b>ex.exe</b></font>, if you happen to create
@@ -2294,7 +2296,7 @@ The entry statement is not supported for for loops, because they have a more rig
 
  <p>
  As shown in the above section on control flow statements, most of them may take a string referencing a block of code. In order to do so, it is enough t do this:
- 
+ </p> 
  <eucode>
 	  if n=0 label "an_if_block" then
 	  ...
@@ -2305,7 +2307,7 @@ The entry statement is not supported for for loops, because they have a more rig
  
  <p>
  If a header has both an entry clause and a label clause, they have to be both before the closing keyword, in any order:
- 
+ </p> 
  <eucode>
          while 1 label "top" entry do
           -- or
