@@ -70,7 +70,7 @@ include html.e     -- output format: HTML
 -- EUDIR might not be set, shroud should be ok
 include wildcard.e  
 with warning
-
+with trace
 function param_list(object text)
 -- read an HTMX tag and extract all the parameters and their values.
 -- text must contain a '>' at the end, or text may be an atom.
@@ -83,7 +83,7 @@ function param_list(object text)
 	if atom(text) then
 	return {}
 	end if
-	
+
 	list = {}
 	i = 1
 	value_part = FALSE

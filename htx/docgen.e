@@ -115,6 +115,19 @@ constant
 	re_sig = re:new("(global )*(procedure|function|type) ([A-Za-z0-9_]+)( )*\\((.*)\\)"),
 	re_const_sig = re:new("(global )*(constant|enum) ([A-Za-z0-9_]+)")
 
+function escape( sequence text )
+	integer tx
+	tx = 1
+	while tx <= length(text) do
+		if find( text[tx], "\"\\" ) then
+			text = text[1..tx-1] & '\\' & text[tx..$]
+			tx += 1 
+		end if
+		tx += 1
+	end while
+	return text
+end function
+
 procedure add_function(sequence filename, m:map func)
 	integer idx
 	sequence cat_name, signature
@@ -133,7 +146,9 @@ procedure add_function(sequence filename, m:map func)
 	func   = m:put(func, "type",   signature[result[3][1]..result[3][2]])
 	func   = m:put(func, "name",   signature[result[4][1]..result[4][2]])
 	if (result[6][2] - result[6][1]) > 1 then
-		func   = m:put(func, "params", signature[result[6][1]..result[6][2]])
+		-- need to escape in case a default has quotes
+		
+		func   = m:put(func, "params", escape( signature[result[6][1]..result[6][2]] ) )
 	end if
 
 	for a = 1 to length(functions) do
