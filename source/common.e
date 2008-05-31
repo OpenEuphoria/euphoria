@@ -34,8 +34,10 @@ SymTab = {}
 
 global sequence file_name
 global sequence file_include  -- remember which files were included where
+global sequence file_export   -- also remember which files are exported
 file_name = {} -- declared in common.e
 file_include = {{}}
+file_export = {{}}
 
 global integer AnyTimeProfile      -- time profile option was ever selected 
 global integer AnyStatementProfile -- statement profile option was ever selected 

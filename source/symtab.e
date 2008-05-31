@@ -447,6 +447,17 @@ global procedure add_ref(token tok)
 	end if  
 end procedure
 
+function is_direct_include( symtab_index sym, integer check_file )
+		integer file_no
+		file_no = SymTab[sym][S_FILE_NO]
+		
+		if file_no = check_file then
+			return 1
+		end if
+		
+		return find( file_no, file_include[check_file] ) != 0
+end function
+
 global procedure MarkTargets(symtab_index s, integer attribute)
 -- Note the possible targets of a routine id call 
 	symtab_index p
@@ -492,7 +503,8 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 		p = SymTab[TopLevelSub][S_NEXT]
 		while p != 0 do
 			if SymTab[p][S_FILE_NO] = current_file_no or
-			   SymTab[p][S_SCOPE] = SC_GLOBAL then
+			   SymTab[p][S_SCOPE] = SC_GLOBAL or
+			   (SymTab[p][S_SCOPE] = SC_EXPORT and is_direct_include( p, current_file_no )) then
 				SymTab[p][attribute] += 1
 			end if
 			p = SymTab[p][S_NEXT]
@@ -540,8 +552,6 @@ global function keyfind(sequence word, integer file_no)
 	hashval = hashfn(word)
 	st_ptr = buckets[hashval] 
 
-	--printf(1, "%d: %s\n", {file_no, word})
-
 	while st_ptr do
 		if equal(word, SymTab[st_ptr][S_NAME]) then
 			-- name matches 
@@ -579,6 +589,23 @@ global function keyfind(sequence word, integer file_no)
 					
 					-- continue looking for more globals with same name 
 				
+				elsif scope = SC_EXPORT then
+					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
+						-- found export in current file 
+						if BIND then
+							add_ref(tok)
+						end if
+					   
+						return tok
+					end if
+					
+					if is_direct_include( st_ptr, current_file_no ) then
+						-- found export in another file 
+						gtok = tok
+						dup_globals &= st_ptr
+						in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
+					end if
+					
 				elsif scope = SC_LOCAL then 
 					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
 						-- found local in current file 
@@ -595,7 +622,7 @@ global function keyfind(sequence word, integer file_no)
 					if BIND then
 						add_ref(tok)
 					end if
-					   
+
 					return tok -- keyword, private
 				
 				end if
@@ -611,8 +638,10 @@ global function keyfind(sequence word, integer file_no)
 						return tok
 					end if
 				
-				elsif (file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
-					SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL then
+				elsif ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
+					SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL)
+					or ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or is_direct_include(tok[T_SYM], file_no )) and
+					SymTab[tok[T_SYM]][S_SCOPE] = SC_EXPORT) then
 					   
 
 					
@@ -675,6 +704,7 @@ global function keyfind(sequence word, integer file_no)
 	else
 		defined = SC_MULTIPLY_DEFINED
 	end if
+
 	tok = {VARIABLE, NewEntry(word, 0, defined, 
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]

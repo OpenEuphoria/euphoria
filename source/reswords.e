@@ -263,8 +263,8 @@ global constant
 	ENTRY     = 423,
 	BREAK     = 424,
 	CONTINUE  = 425,
-
-	ENUM      = 427
+	ENUM      = 427,
+	EXPORT    = 428
 
 global constant 
 	FUNC               = 501,

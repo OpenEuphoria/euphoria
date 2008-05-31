@@ -35,6 +35,8 @@ global symtab_index new_include_space -- new namespace qualifier or NULL
 boolean start_include   -- TRUE if we should start a new file at end of line
 start_include = FALSE
 
+boolean export_include -- TRUE if we should pass along exported includes
+
 global integer LastLineNumber  -- last global line number (avoid dups in line tab)
 LastLineNumber = -1     
 
@@ -544,6 +546,34 @@ procedure declare_default_namespace( integer namespace_file )
 	SymTab[new_include_space][S_FILE_NO] = current_file_no
 end procedure
 
+procedure add_exports( integer from_file, integer to_file )
+	sequence exports
+	sequence direct
+	direct = file_include[to_file]
+	exports = file_export[from_file]
+	for i = 1 to length(exports) do
+		if not find( exports[i], direct ) then
+			direct &= exports[i]
+		end if
+	end for
+	file_include[to_file] = direct
+end procedure
+
+procedure patch_exports( integer for_file )
+	integer export_len
+	
+	for i = 1 to length(file_include) do
+		if find( for_file, file_include[i] ) then
+			export_len = length( file_export[i] )
+			add_exports( for_file, i )
+			if length( file_export[i] ) != export_len then	
+				-- propagate the export up the include stack
+				patch_exports( i )
+			end if
+		end if
+	end for
+end procedure
+
 procedure IncludePush()
 -- start reading from new source file with given name  
 	integer new_file, old_file_no
@@ -577,6 +607,15 @@ procedure IncludePush()
 				-- don't reparse the file, but note that it was included here
 				file_include[current_file_no] &= i
 				
+				-- also add anything that file exports
+				add_exports( i, current_file_no )
+				
+				if export_include then
+					export_include = FALSE
+					if not find( i, file_export[current_file_no] ) then
+						file_export[current_file_no] &= i
+					end if
+				end if
 			end if
 			
 			read_line() -- we can't return without reading a line first
@@ -601,7 +640,13 @@ procedure IncludePush()
 							   OpDefines})
 							   
 	file_include = append( file_include, {} )
+	file_export  = append( file_export, {} )
 	file_include[current_file_no] &= length( file_include )
+	if export_include then
+		file_export[current_file_no] &= length( file_export )
+		export_include = FALSE
+		patch_exports( current_file_no )
+	end if
 	
 	src_file = new_file
 	file_start_sym = last_sym
@@ -1259,7 +1304,7 @@ global function IntegerToken()
 	return gtext[2]
 end function
 
-global procedure IncludeScan()
+global procedure IncludeScan( integer exported )
 -- Special scan for an include statement:
 -- include filename as namespace
    
@@ -1364,7 +1409,7 @@ global procedure IncludeScan()
 	end if
 	
 	start_include = TRUE -- let scanner know
-	
+	export_include = exported
 end procedure
 
 

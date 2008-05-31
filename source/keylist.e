@@ -52,6 +52,7 @@ keylist =
 	{"break",     SC_KEYWORD, BREAK, 0, 0, 0},
 	{"retry",     SC_KEYWORD, RETRY, 0, 0, 0},
 	{"enum",      SC_KEYWORD, ENUM, 0, 0, 0},
+	{"export",    SC_KEYWORD, EXPORT, 0, 0, 0 },
 	-- new ones must go at end to maintain compatibility with old shrouded code
 
 	-- PREDEFINED SUBPROGRAMS and TYPEs 

@@ -776,7 +776,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", seq_num)
 				
-				if SymTab[s][S_SCOPE] = SC_GLOBAL then
+				if SymTab[s][S_SCOPE] = SC_GLOBAL or SymTab[s][S_SCOPE] = SC_EXPORT then
 					c_printf(", %d", - SymTab[s][S_FILE_NO])
 				else
 					c_printf(", %d", SymTab[s][S_FILE_NO])
@@ -789,6 +789,8 @@ global procedure DeclareRoutineList()
 				else
 					c_puts(", 0")  -- default: call with normal or __cdecl convention
 				end if
+				
+				c_printf(", %d", SymTab[s][S_SCOPE] )
 				
 				c_puts("}")
 				

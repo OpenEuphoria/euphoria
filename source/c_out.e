@@ -121,9 +121,9 @@ end procedure
 
 
 global integer indent       -- long term indent with braces
-indent = 0
 global integer temp_indent  -- just for next statement
 temp_indent = 0
+indent = 0
 
 global procedure adjust_indent_before(sequence stmt)
 -- adjust indent before a statement 

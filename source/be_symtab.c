@@ -31,7 +31,7 @@ extern int gline_number;
 extern struct IL fe;
 extern int SymTabLen; // avoid > 3 args
 extern unsigned default_heap;
-
+extern char **file_name;
 /**********************/
 /* Exported variables */
 /**********************/
@@ -186,6 +186,25 @@ int symbol_in_include_path( symtab_ptr sym, int check_file, char * checked_file 
 	return 0;
 }
 
+int is_direct_include( symtab_ptr sym, int check_file )
+/* Determines if sym is in the include path of file #check_file */
+{
+	int i;
+	int file_no = sym->file_no;
+	struct include_node * node;
+	
+	if( file_no == check_file ) return 1;
+	
+	node = fe.includes->nodes + check_file;
+	for( i = 0; i < node->size; i++ ){
+	
+		if( file_no == node->file_no[i] ){
+			return 1;
+		}
+	}
+	return 0;
+}
+
 symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen)
 /* Look up a name (routine or var) in the symbol table at runtime.
    The name must have been defined earlier in the source than
@@ -203,7 +222,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	int found_in_path;
 	int found_outside_path;
 	int s_in_include_path;
-
+	
 	if (pc == NULL) {
 		proc = routine;
 	}
@@ -269,7 +288,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	
 	else {
 		/* look up simple unqualified name */
-		
+				
 		if (proc != TopLevelSub) {  
 			/* inside a routine - check PRIVATEs and LOOP_VARs */
 			for (s = proc->next; 
@@ -280,11 +299,12 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 					return s;           
 			}    
 		}
-
-		/* try to match a LOCAL or GLOBAL symbol in the same source file */
+		
+		/* try to match a LOCAL, EXPORT or GLOBAL symbol in the same source file */
 		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
 			if (s->file_no == file && 
-				(s->scope == S_LOCAL || s->scope == S_GLOBAL || 
+				(s->scope == S_LOCAL || s->scope == S_GLOBAL ||
+				s->scope == S_EXPORT || 
 				(proc == TopLevelSub && s->scope == S_GLOOP_VAR)) &&
 				strcmp(name, s->name) == 0) {  
 				// shouldn't really be able to see GLOOP_VARs unless we are
@@ -292,15 +312,15 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 				return s;
 			}
 		} 
-
-		/* try to match a single earlier GLOBAL symbol */
+				
+		/* try to match a single earlier GLOBAL or EXPORT symbol */
 		global_found = NULL;
 		found_in_path = 0;
 		found_outside_path = 0;
 		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
-			if (s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {  
-				
-				s_in_include_path = symbol_in_include_path( s, routine->file_no, NULL );
+			if (s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {
+			
+				s_in_include_path = symbol_in_include_path( s, file, NULL );
 				if ( s_in_include_path){
 					global_found = s;
 					found_in_path++;
@@ -310,7 +330,15 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 					found_outside_path;
 				}
 			}
+			else if( s->scope == S_EXPORT && strcmp(name, s->name) == 0){
+				if( is_direct_include( s, file ) ){
+					global_found = s;
+					found_in_path++;
+				}
+			}
+
 		} 
+		
 		if(found_in_path != 1 && ((found_in_path + found_outside_path) != 1) ){
 				return NULL;
 		}

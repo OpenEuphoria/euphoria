@@ -158,7 +158,8 @@ procedure InitCheck(symtab_index sym, integer ref)
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS]) then
 			if SymTab[sym][S_INITLEVEL] = -1 then
 				if ref then
-					if SymTab[sym][S_SCOPE] = SC_GLOBAL or 
+					if SymTab[sym][S_SCOPE] = SC_GLOBAL or
+					   SymTab[sym][S_SCOPE] = SC_EXPORT or
 					   SymTab[sym][S_SCOPE] = SC_LOCAL then
 						emit_op(GLOBAL_INIT_CHECK) -- will become NOP2
 					else
@@ -995,7 +996,8 @@ procedure Assignment(token left_var)
 		CompileErr("may not change the value of a constant")
 	
 	elsif SymTab[left_sym][S_SCOPE] = SC_LOCAL or 
-		  SymTab[left_sym][S_SCOPE] = SC_GLOBAL then
+		  SymTab[left_sym][S_SCOPE] = SC_GLOBAL or
+		  SymTab[left_sym][S_SCOPE] = SC_EXPORT then
 		-- this helps us to optimize things below
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
 										 power(2, remainder(left_sym, E_SIZE)))
@@ -1668,7 +1670,7 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 		SymTab[s][S_VTYPE] = type_sym
 		return s
 
-	elsif find(scope, {SC_LOCAL, SC_GLOBAL, SC_PREDEF}) then
+	elsif find(scope, {SC_LOCAL, SC_GLOBAL, SC_PREDEF, SC_EXPORT}) then
 		hashval = SymTab[s][S_HASHVAL]
 		t = buckets[hashval]
 		buckets[hashval] = NewEntry(SymTab[s][S_NAME], n, SC_PRIVATE, 
@@ -1808,15 +1810,15 @@ function CompileType(symtab_index type_ptr)
 		end if
 	end if    
 end function
-
-procedure Global_declaration(symtab_index type_ptr, integer is_global)
+with trace
+procedure Global_declaration(symtab_index type_ptr, integer scope)
 -- parse a command-level variable or constant declaration 
 -- type_ptr is NULL if constant 
 	token tok
 	symtab_index sym
 	integer h, val
 	val = 1
-
+	
 	while TRUE do 
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
@@ -1824,18 +1826,15 @@ procedure Global_declaration(symtab_index type_ptr, integer is_global)
 		end if
 		sym = tok[T_SYM]
 		DefinedYet(sym)
-		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF}) then
+		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF, SC_EXPORT}) then
 			h = SymTab[sym][S_HASHVAL]
 			-- create a new entry at beginning of this hash chain
 			sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0) 
 			buckets[h] = sym
 			-- more fields set below: 
 		end if
-		if is_global then
-			SymTab[sym][S_SCOPE] = SC_GLOBAL 
-		else    
-			SymTab[sym][S_SCOPE] = SC_LOCAL
-		end if
+		SymTab[sym][S_SCOPE] = scope
+		
 		if type_ptr = 0 then
 			-- CONSTANT 
 			SymTab[sym][S_MODE] = M_CONSTANT 
@@ -2098,7 +2097,7 @@ end procedure
 
 forward_Statement_list = routine_id("Statement_list")
 
-procedure SubProg(integer prog_type, integer is_global)
+procedure SubProg(integer prog_type, integer scope)
 -- parse a function, type or procedure 
 -- global is 1 if it's global 
 	integer h, pt
@@ -2123,7 +2122,7 @@ procedure SubProg(integer prog_type, integer is_global)
 		pt = TYPE
 	end if
 	
-	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL}) then
+	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT}) then
 		-- redefine by creating new symbol table entry 
 		if SymTab[p][S_SCOPE] = SC_PREDEF then  -- only warn about overriding predefined
 			Warning(sprintf("built-in routine %s() redefined in %s",
@@ -2138,11 +2137,7 @@ procedure SubProg(integer prog_type, integer is_global)
 	first_def_arg = 0
 	temps_allocated = 0
 	
-	if is_global then
-		SymTab[p][S_SCOPE] = SC_GLOBAL
-	else
-		SymTab[p][S_SCOPE] = SC_LOCAL
-	end if
+	SymTab[p][S_SCOPE] = scope
 	
 	SymTab[p][S_TOKEN] = pt
 	
@@ -2416,6 +2411,7 @@ global procedure real_parser(integer nested)
 -- top level of the parser - command level 
 	token tok
 	integer id
+	integer scope
 	
 	tok = next_token()
 	while TRUE do  -- infinite loop until scanner aborts
@@ -2427,42 +2423,57 @@ global procedure real_parser(integer nested)
 			ExecCommand()
 
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
-			SubProg(tok[T_ID], 0)
+			SubProg(tok[T_ID], SC_LOCAL)
 
-		elsif id = GLOBAL then
+		elsif id = GLOBAL or id = EXPORT then
+			if id = GLOBAL then
+				scope = SC_GLOBAL
+			else
+				scope = SC_EXPORT
+			end if
 			tok = next_token()
 			id = tok[T_ID]
+			
 			if id = TYPE then
-				Global_declaration(tok[T_SYM], 1)
+				Global_declaration(tok[T_SYM], scope )
 
 			elsif id = CONSTANT then
-				Global_declaration(0, 1)
+				Global_declaration(0, scope )
 				ExecCommand()
 
 			elsif id = ENUM then
-				Global_declaration(-1, 1)
+				Global_declaration(-1, scope )
 				ExecCommand()
 
 			elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
-				SubProg(id, 1)
+				SubProg(id, scope )
 
+			elsif scope = SC_EXPORT and id = INCLUDE then
+				IncludeScan( 1 )
 			else 
 				if id = VARIABLE or id = QUALIFIED_VARIABLE then
 					UndefinedVar(tok[T_SYM])
 				end if
-				CompileErr(
-"'global' must be followed by:\n     <a type>, 'constant', 'procedure', 'type' or 'function'")
+				if scope = SC_GLOBAL then
+					CompileErr( "'global' must be followed by:\n" &
+								"<a type>, 'constant', 'procedure', 'type' or 'function'")
+
+				else
+					CompileErr( "'export' must be followed by:\n" &
+								"<a type>, 'constant', 'procedure', 'type' or 'function'")
+
+				end if
 			end if
-				
+			
 		elsif id = TYPE or id = QUALIFIED_TYPE then
-			Global_declaration(tok[T_SYM], 0)
+			Global_declaration(tok[T_SYM], SC_LOCAL)
 
 		elsif id = CONSTANT then
-			Global_declaration(0, 0)
+			Global_declaration(0, SC_LOCAL)
 			ExecCommand()
 
 		elsif id = ENUM then
-			Global_declaration(-1, 0)
+			Global_declaration(-1, SC_LOCAL)
 			ExecCommand()
 
 		elsif id = IF then
@@ -2491,6 +2502,7 @@ global procedure real_parser(integer nested)
 				-- to check for warning if proc not in include tree
 				UndefinedVar( tok[T_SYM] )
 			end if
+
 			Procedure_call(tok)
 			ExecCommand()
 			
@@ -2509,7 +2521,7 @@ global procedure real_parser(integer nested)
 			end if
 
 		elsif id = INCLUDE then
-			IncludeScan()
+			IncludeScan( 0 )
 
 		elsif id = WITH then
 			SetWith(TRUE)
@@ -2531,34 +2543,34 @@ global procedure real_parser(integer nested)
 
 		elsif id = CONTINUE then
 			if nested then
-			StartSourceLine(TRUE)
-			Continue_statement()
+				StartSourceLine(TRUE)
+				Continue_statement()
 			else
-			CompileErr("continue must be inside a loop")
+				CompileErr("continue must be inside a loop")
 			end if
 
 		elsif id = RETRY then
 			if nested then
-			StartSourceLine(TRUE)
-			Retry_statement()
+				StartSourceLine(TRUE)
+				Retry_statement()
 			else
-			CompileErr("retry must be inside a loop")
+				CompileErr("retry must be inside a loop")
 			end if
 
 		elsif id = BREAK then
 			if nested then
-			StartSourceLine(TRUE)
-			Break_statement()
+				StartSourceLine(TRUE)
+				Break_statement()
 			else
-			CompileErr("break must be inside an if block ")
+				CompileErr("break must be inside an if block ")
 			end if
 			
 		elsif id = ENTRY then
 			if nested then
-		    StartSourceLine(TRUE)
-		    Entry_statement()
+			    StartSourceLine(TRUE)
+			    Entry_statement()
 			else
-			CompileErr("entry must be inside a loop")
+				CompileErr("entry must be inside a loop")
 			end if
 
 

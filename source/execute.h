@@ -98,6 +98,7 @@ struct routine_list {   // sync with euphoria\include\euphoria.h
 	int file_num;
 	short int num_args;
 	short int convention;
+	char scope;
 };
 
 struct ns_list {

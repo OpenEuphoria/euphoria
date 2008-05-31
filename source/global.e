@@ -157,7 +157,8 @@ global constant
 		 SC_PREDEF   = 7,    -- predefined symbol - could be overriden
 		 SC_KEYWORD  = 8,    -- a keyword
 		 SC_UNDEFINED = 9,   -- new undefined symbol 
-		 SC_MULTIPLY_DEFINED = 10  -- global symbol defined in 2 or more files
+		 SC_MULTIPLY_DEFINED = 10,  -- global symbol defined in 2 or more files
+		 SC_EXPORT    = 11   -- visible to anyone that includes the file
 
 -- USAGE values          -- how symbol has been used (1,2 can be OR'd) 
 global constant 

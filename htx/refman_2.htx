@@ -1162,8 +1162,9 @@ and so is s[length(s)+1..length(s)].</p>
  When you <b>include</b> a Euphoria file in a main file (see
  <a href="refman_2.htm#6">2.6 Special Top-Level Statements</a>),
  only the variables and routines declared using the
- <font color="#993333"><_bq>global</_bq></font> keyword are
- accessible or even visible to the main file. The other, non-global,
+ <font color="#993333"><_bq>global</_bq></font> or <font color="#993333">
+ <_bq>export</_bq></font>  keywords are accessible or even visible to 
+ the main file. The other, non-global, non-exported
  declarations in the included file are forgotten at the end of
  the included file, and you will get an error message, "not declared", if you
  try to use them in the main file.</p>
@@ -1176,6 +1177,13 @@ and so is s[length(s)+1..length(s)].</p>
  can make changes to the internal routines and variables, without
  having to examine other files, or notify other users of the 
  include file.</p>
+ 
+ <p>
+ Symbols marked as <font color="#993333"><_bq>export</_bq></font> are
+ similar to <font color="#993333"><_bq>global</_bq></font> symbols,
+ except that they are only visible to files that directly include
+ their file, or directly include a file that includes the file through
+ the <font color="#993333"><_bq>export include</_bq></font> statement. </p>
  
 <p>
 Sometimes, when using include files
@@ -2385,6 +2393,8 @@ containing the code. The first form of the include statement is:</p>
 </eucode>
 <eucode>
                    include \mylib\myroutines.e
+                   
+                   export include library.e
 </eucode>
 <p>
 		   Any top-level code in the included file will be executed.</p>
@@ -2396,9 +2406,14 @@ containing the code. The first form of the include statement is:</p>
 <p>
                    <b><font color="#006633">N.B.</font></b> Only those
                    symbols defined as
-                   <a href="refman_2.htm#scope"><_bq>global</_bq></a>
+                   <a href="refman_2.htm#scope"><_bq>global or export</_bq></a>
                    in the included file will be visible (accessible) in the
-                   remainder of the program.</p>
+                   remainder of the program.  </p>
+
+<p>
+                   If export precedes the include statement, then all exported symbols
+                   from the included file will also be exported from the current file, and
+                   visible to any file that includes the current file. </p>
 
 <p>
                    If an absolute <i>filename</i> is given,

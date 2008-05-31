@@ -17,3 +17,10 @@ include foo_default.e
 include bar_default.e as bar
 test_equal( "default namespace", "foo", foo:test() )
 test_equal( "override default namespace", "bar", bar:test() )
+
+include foo_export.e
+test_equal( "export function", "foo", export_test() )
+test_equal( "export constant", "foo", EXPORT_CONSTANT )
+test_not_equal( "export routine id", -1, routine_id("export_test"))
+test_equal( "export include",  "baz", baz() )
+

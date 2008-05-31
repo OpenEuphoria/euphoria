@@ -3536,6 +3536,21 @@ int file_in_include_path( int using, int target, char * checked_files )
 	return 0;
 }
 
+int file_is_direct_include( int using, int target )
+/* Checks to see if the target file is in the include path for using */
+{
+	int i;
+	int node_file;
+	
+	if( using == target ) return 1;
+	for( i = 1; i <= rt02[using][0]; i++ ){   
+	
+		if( target == rt02[using][i] ){
+			return 1;
+		}
+	}
+	return 0;
+}
 int CRoutineId(int seq_num, int current_file_no, object name)
 /* Routine_id for compiled code. 
    (Similar to RTLookup() for interpreter, but here we only find routines,
@@ -3637,7 +3652,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			i++;
 		}
 		
-		/* then look for unique global symbol */
+		/* then look for unique global or export symbol */
 		i = 0;
 		found = ATOM_M1;
 		out_of_path_found = 0;
@@ -3646,14 +3661,23 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			
 			if (rt00[i].file_num < 0 &&
 				strcmp(routine_string, rt00[i].name) == 0) {
-				in_include_path = file_in_include_path( current_file_no, -rt00[i].file_num, NULL );
-				if (in_include_path) {
-					found = i;
-					in_path_found++;
+				if(rt00[i].scope == S_GLOBAL ){
+					in_include_path = file_in_include_path( current_file_no, -rt00[i].file_num, NULL );
+					if (in_include_path) {
+						found = i;
+						in_path_found++;
+					}
+					else{
+						out_of_path_found++;
+						if(!in_path_found) found = i;
+					}
 				}
-				else{
-					out_of_path_found++;
-					if(!in_path_found) found = i;
+				else if(rt00[i].scope == S_EXPORT) {
+
+					if( file_is_direct_include( current_file_no, -rt00[i].file_num ) ){
+						found = i;
+						in_path_found++;
+					}
 				}
 			}
 			i++;

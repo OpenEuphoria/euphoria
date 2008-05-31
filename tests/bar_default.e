@@ -5,3 +5,5 @@ namespace foo
 global function test()
 	return "bar"
 end function
+
+
