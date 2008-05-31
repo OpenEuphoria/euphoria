@@ -141,7 +141,13 @@ elsif platform() = LINUX then
 	lib = open_dll("")
 	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
 	f_strfnum = -1
-	LC_ALL = 6
+	LC_ALL      = 6
+	LC_CTYPE    = 0
+	LC_NUMERIC  = 1
+	LC_TIME     = 2
+	LC_COLLATE  = 3
+	LC_MONETARY = 4
+	LC_MESSAGES = 6
 
 else
 
@@ -165,6 +171,8 @@ global function set(sequence new_locale)
 
 	new_locale = lcc:decanonical(new_locale)
 	pLocale = allocate_string(new_locale)
+	ign = c_func(f_setlocale, {LC_MONETARY, pLocale})
+	ign = c_func(f_setlocale, {LC_NUMERIC, pLocale})
 	ign = c_func(f_setlocale, {LC_ALL, pLocale})
 
 	if sequence(lang_path) then
