@@ -954,15 +954,16 @@ and so is s[length(s)+1..length(s)].</p>
  letter and then be followed by letters, digits or underscores. The following
  <font color="#993333"><b>reserved words</b></font>
  have special meaning in Euphoria and may not be used as identifiers:</p>
-
-<eucode>
-    and            end             include          to
-    by             exit            not              type
-    constant       for             or               while
-    do             function        procedure        with
-    else           global          return           without
-    elsif          if              then             xor
-</eucode>
+                                   
+<eucode>                          
+    and            elsif        function      not           type
+    break          elsifdef     global        or            until          
+    by             end          if            procedure     while        
+    constant       entry        ifdef         retry         with
+    continue       enum         include       return        without
+    do             exit         label         then          xor
+    else           for          loop          to
+</eucode>                                         
 
 <p>
  The Euphoria editor displays these words in blue.</p>
@@ -1240,7 +1241,7 @@ included file.</p>
   
 </eucode>
 
-<p> 
+<p>
  Euphoria encourages you to restrict the scope of symbols. If all symbols were
  automatically global to the whole program, you might have a lot of
  naming conflicts, especially in a large program consisting of files
@@ -1266,7 +1267,7 @@ included file.</p>
     third party libraries can be used in the same application, even
     if they have conflicting symbols.  The application code that uses
     the libraries will have to use explicit namespaces to deconflict
-    the symbols, but the libraries themselves will not need to be 
+    the symbols, but the libraries themselves will not need to be
     edited.</p>
 
 <p>
@@ -1561,11 +1562,19 @@ file of the library.</p>
 <li>
         <a href="refman_2.htm#while">while statement</a></li>
 <li>
+        <a href="refman_2.htm#while">loop ... until statement</a></li>
+<li>
         <a href="refman_2.htm#for">for statement</a></li>
 <li>
         <a href="refman_2.htm#return">return statement</a></li>
 <li>
         <a href="refman_2.htm#exit">exit statement</a></li>
+<li>
+        <a href="refman_2.htm#break">break statement</a></li>
+<li>
+        <a href="refman_2.htm#continue">continue statement</a></li>
+<li>
+        <a href="refman_2.htm#retry">retry statement</a></li>
 </ul>
 
 <p>
@@ -1689,7 +1698,20 @@ on the right side.</p>
         plot(x, 23)
 </eucode>
 
-<h4>2.5.3 if statement</h4>
+<h4>return statement</h4>
+
+<p>
+ A <font color="#993333"><b>return statement</b></font> returns immediately
+ from a subroutine. If the subroutine is a function
+ or type then a value must also be returned. e.g.</p>
+
+<eucode>
+        return
+
+        return {50, "FRED", {}}
+</eucode>
+
+<h4>if statement</h4>
 
 <p>
  An <font color="#993333"><b>if statement</b></font> tests a condition
@@ -1734,8 +1756,25 @@ on the right side.</p>
 The <font color="#993333"><b>if</b></font> and
 <font color="#993333"><b>elsif</b></font> conditions are tested using
 <a href="refman_2.htm#shortcir">short-circuit evaluation</a>. </p>
+<p>
+<font color="#993333"><b>If</b></font> statement headers can have a <font color="#993333"><b>label</b></font> clause right before the <font color="#993333"><b>then</b></font>
+closing keyword. See the section on <a href="refman_2.htm#labhdr">labelled block headers
+</a>. This feature does not apply to <font color="#993333"><b>elsif</b></font> conditional 
+statements, as they are not standalone, just optionally sectioning an if block.</p>
 
-<h4>while statement</h4>
+<h4>Iterative code blocks, aka loops.</h4>
+
+<p>
+An iterative code block repeats its own execution zero, one or more times. There are several 
+ways to specify for how long the process should go on, and how to stop or otherwise alter it.
+An iterative block may be informally called a loop, and each execution of code in a loop is 
+called an iteration of the loop.</p>
+
+<p>
+Euphoria has three flavours of loops. They all may harbor a <a href="refman_2.htm#labhdr">
+labelled block header</a>, in order to make exiting them more flexible.
+
+<h5>while statement</h5>
 
 <p>
  A <font color="#993333"><b>while statement</b></font> tests a condition
@@ -1752,7 +1791,8 @@ The <font color="#993333"><b>if</b></font> and
 
 <p>
  When the condition tested by <font color="#993333"><_bq>if</_bq></font>,
- <font color="#993333"><_bq>elsif</_bq></font>, or
+ <font color="#993333"><_bq>elsif</_bq></font>, 
+ <font color="#993333"><_bq>until</_bq></font>, or
  <font color="#993333"><_bq>while</_bq></font> contains
  <font color="#993333"><_bq>and</_bq></font> or
  <font color="#993333"><_bq>or</_bq></font> operators,
@@ -1854,10 +1894,170 @@ The <font color="#993333"><b>if</b></font> and
 
  <p>If short-circuiting were used here, we would set x to 1, and not even
  look at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used
- in if/elsif/while conditions because we only care if the result is true
+ in if/elsif/until/while conditions because we only care if the result is true
  or false, and conditions are required to produce an atom as a result.</p>
 
-<h4>for statement</h4>
+ <p>
+The first iteration of a <font color="#993333"><_bq>while</_bq></font> loop is often special, because some work still doesn't need to 
+be done. As a result, ou have to keep track of whether you are in the initialisation stage or 
+not, and usually test a flag on every iteration of the loop, while this will be useful only 
+once. Not needed, and another cause of programming errors.
+In addition, and also because repetition of code often takes place as a result of the flag 
+weving method, Euphoria provides a special <font color="#993333"><_bq>entry</_bq></font> 
+keyword to better handle this situation.</p>
+
+<p>
+The <font color="#993333"><_bq>entry</_bq></font> keyword will be described in the section on 
+<a href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will need an
+<font color="#993333"><_bq>entry</_bq></font> tag in the loop header, as a clue to any reader
+that the first iteration of the loop willn not start right after the closing <font color="#993333"><_bq>do</_bq></font>.
+
+<h5>The loop ... until statement.</h5>
+<p>
+ A <font color="#993333"><b>loop ... until statement</b></font> tests a condition
+ to see if it is non-zero (true), and until it is true a loop is executed. e.g.</p>
+
+<eucode>
+        loop do
+            a = a * 2
+            x = x - 1
+        until x<=0
+</eucode>
+
+This differs from a <font color="#993333"><b>while</b></font> loop in more than one way:
+<ul>
+<li> The body of the loop is executed at least once, since testing takes place AFTER it completes. In a <font color="#993333"><b>while</b></font>, the test is taken BEFORE execution.
+<li> The header contains only optional <font color="#993333"><b>label</b></font> and <font color="#993333"><b>while</b></font>entry</b></font> tags.
+<li> The footer of the block, instead of being "end loop", has a distinctive form and holds the termination test.
+</ul>
+
+<h2>Short-Circuit Evaluation</h2>
+
+<p>
+ When the condition tested by <font color="#993333"><_bq>if</_bq></font>,
+ <font color="#993333"><_bq>elsif</_bq></font>,
+ <font color="#993333"><_bq>until</_bq></font>, or
+ <font color="#993333"><_bq>while</_bq></font> contains
+ <font color="#993333"><_bq>and</_bq></font> or
+ <font color="#993333"><_bq>or</_bq></font> operators,
+ <font color="#993333"><_ba><i>short-circuit</i></_ba></font> evaluation
+ will be used.
+ For example,</p>
+
+ <eucode>
+        if a < 0 and b > 0 then ...
+ </eucode>
+
+<p> If a < 0 is false, then Euphoria will not bother to test if b is greater
+ than 0. It will assume that the overall result is false. Similarly,</p>
+
+ <eucode>
+        if a < 0 or b > 0 then ...
+ </eucode>
+
+<p> if a < 0 is true, then Euphoria will immediately decide that the result true,
+ without testing the value of b.</p>
+
+<p>
+ In general, whenever we have a condition of the form:</p>
+<eucode>
+        A and B
+</eucode>
+<p> where A and B can be any two expressions,
+ Euphoria will take a short-cut when A is false and immediately
+ make the overall result false, without even looking at expression B.</p>
+
+<p>
+ Similarly, with:</p>
+<eucode>
+        A or B
+</eucode>
+<p> when A is true, Euphoria will skip the evaluation of expression B,
+ and declare the result to be true.</p>
+
+<p>
+ If the expression B contains a call to a function, and that function has
+ possible <b>side-effects</b>, i.e. it might do more than just return a value,
+ you will get a compile-time warning. Older versions (pre-2.1) of Euphoria
+ did not use <font color="#993333"><b>short-circuit</b></font> evaluation,
+ and it's possible that some old code will no longer work correctly,
+ although a search of the Euphoria archives did not turn up any programs
+ that depend on side-effects in this way.</p>
+
+<p>
+ The expression, B, could contain something that would normally cause
+ a run-time error. If Euphoria skips the evaluation of B, the error will not
+ be discovered. For instance:</p>
+
+ <eucode>
+        if x != 0 and 1/x > 10 then  -- divide by zero error avoided
+
+        while 1 or {1,2,3,4,5} do    -- illegal sequence result avoided
+ </eucode>
+
+<p> B could even contain uninitialized variables, out-of-bounds subscripts etc.</p>
+
+<p>
+ This may look like sloppy coding, but in fact it often allows you to
+ write something in a simpler and more readable way. For instance:</p>
+ <eucode>
+        if atom(x) or length(x)=1 then
+ </eucode>
+
+ <p>Without short-circuiting, you would have a problem when x was an atom,
+ since length is not defined for atoms. With short-circuiting, length(x)
+ will only be checked when x is a sequence. Similarly:</p>
+
+ <eucode>
+        -- find 'a' or 'A' in s
+        i = 1
+        while i <= length(s) and s[i] != 'a' and s[i] != 'A' do
+             i += 1
+        end while
+ </eucode>
+
+ <p>In this loop the variable i might eventually become
+ greater than length(s). Without short-circuit evaluation, a subscript
+ out-of-bounds error will occur when s[i] is evaluated on the final
+ iteration. With short-circuiting, the loop will terminate immediately when
+ i <= length(s) becomes false. Euphoria will not evaluate s[i] != 'a'
+ and will not evaluate s[i] != 'A'. No subscript error will occur.</p>
+
+<p>
+ <font color="#993333"><b>Short-circuit</b></font> evaluation of
+ <font color="#993333"><_bq>and</_bq></font>
+ and <font color="#993333"><_bq>or</_bq></font> takes place for
+ <font color="#993333"><_bq>if</_bq></font>,
+ <font color="#993333"><_bq>elsif</_bq></font>,
+ <font color="#993333"><_bq>until</_bq></font> and
+ <font color="#993333"><_bq>while</_bq></font> conditions only.
+ It is not used in other contexts. For example, the assignment statement:</p>
+
+ <eucode>
+        x = 1 or {1,2,3,4,5}  -- x should be set to {1,1,1,1,1}
+ </eucode>
+
+ <p>If short-circuiting were used here, we would set x to 1, and not even
+ look at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used
+ in if/elsif/while/until conditions because we only care if the result is true
+ or false, and conditions are required to produce an atom as a result.</p>
+
+ <p>
+The first iteration of a <font color="#993333"><_bq>while</_bq></font> loop is often special, because some work still doesn't need to 
+be done. As a result, ou have to keep track of whether you are in the initialisation stage or 
+not, and usually test a flag on every iteration of the loop, while this will be useful only 
+once. Not needed, and another cause of programming errors.
+In addition, and also because repetition of code often takes place as a result of the flag 
+weving method, Euphoria provides a special <font color="#993333"><_bq>entry</_bq></font> 
+keyword to better handle this situation.</p>
+
+<p>
+The <font color="#993333"><_bq>entry</_bq></font> keyword will be described in the section on 
+<a href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will need an
+<font color="#993333"><_bq>entry</_bq></font> tag in the loop header, as a clue to any reader
+that the first iteration of the loop will not start right after the closing <font color="#993333"><_bq>do</_bq></font>.
+
+<h5>for statement</h5>
 
 <p>
  A <font color="#993333"><b>for statement</b></font> sets up a special
@@ -1890,20 +2090,38 @@ The <font color="#993333"><b>if</b></font> and
  <a href="refman_2.htm#loop_scope">scope of the loop variable in 2.4.2
  Scope</a>.</p>
 
-<h4>return statement</h4>
+ <a name="labelhdr"></a>
+<h4>Flow control statements.</h4>
+
+ <p>
+ Blocks are good ways toorganise code in easily identifiable chunks. However, for efficiency, it is often desirable to exi them early or slightly alter their default course of execution.
+ </p>
+
+ <p>
+ Exiting a single block of code is done with a single keyword, like <font color="#993333"><b>exit</b></font>. Likwise, kipping the rest of an iteration in a single code block is done using a single keyword, like <font color="#993333"><b>continue</b></font>. But sometimes 
+you need to act on a block above the current one, like exiting three levels of loop, or restarting the iteration of the third loop above. How to do that?</p>
 
 <p>
- A <font color="#993333"><b>return statement</b></font> returns immediately
- from a subroutine. If the subroutine is a function
- or type then a value must also be returned. e.g.</p>
+By using an optional parameter right after the control flow keyword. The parameter may take the following form:
+<ul>
+<li> A label string, like in <eucode>break "this_block"</eucode>
+<li> A positive constant integer, the number of levels to act upon, like in "exit 2" to exit the loop right above the current one
+<li> A nonposiive integer, which counts he levels backwaeds, like in "continue -1" to start 
+the next iteration of the second topmost loop (compare with s[$-1])
+<li> A for loop index variable name, like in "retry i",which restarts the current iteration of the active for loop which has i as loop variable.
+</ul>
 
-<eucode>
-        return
+<p>
+For easier and safer program maintainance, the explicit label form is to be preferred. Other forms are variously sensitive to changes in the program organisation. Yet, they may prove more convenient in short, short lived programs, an d are provided moostly for this purose.</p>
 
-        return {50, "FRED", {}}
-</eucode>
+<p>
+For information on how to associate a string o a block of code, see the section on <a href="labelhdr">labelled headers</a>.
 
-<h4>2.5.7 exit statement</h4>
+<p>
+The following flow control keywords are available.
+ </p>
+
+<h5>2.5.7 exit statement</h5>
 
 <p>
  An <font color="#993333"><b>exit statement</b></font> may appear inside a
@@ -1948,7 +2166,113 @@ The <font color="#993333"><b>if</b></font> and
  just a simple unconditional jump from <b>end while</b> back to 
  the first statement inside the loop.</dd>
 </dl>
- 
+
+<h5>The break statement</h5>
+
+<p>
+Works exactly like the <font color="#993333"><b>exit statement</b></font>, but applies to <font color="#993333"><b>if statements</b></font> rather than to loop statments of any kind. Example:
+<eucode>
+      if s[1]='E' then
+          a = 3
+          if s[2] = 'u' then
+              b = 1
+              if s[3] = 'p' then
+                  break 0 -- leave topmost if block
+			  end if
+			  a=2
+		  else
+			  b=4
+		  end if
+		else
+			a=0
+			b=0
+		end if
+</eucode>
+This code resuls in:
+<ul>
+<li> "Dur" -> a=0 b=0
+<li> "Exe" -> a=3 b=4
+<li> "Eux" -> a=2 b=1
+<li> "Eup" -> a=3 b=1
+</ul>
+
+<h5>The continue statement</h5>
+
+<p>
+The <font color="#993333"><b>continue statements</b></font> continues execution of the loop it applies to by going to the next iteration now. Going to the next iteration means testing a condition (for <font color="#993333"><b>while</b></font> and
+<font color="#993333"><b>loop ... until loops</b></font>, or changing the for loop variable index and checking whether it is still within bounds.
+
+<eucode>
+     for i=3 to 6 do
+         ?i
+         if i = 4 then
+             puts(1,"(2)"&'\n')
+             continue
+        end if
+        ? i*i
+    end for
+</eucode>
+
+This will print 3, 9, 4, (2), 5 25, 6 36.
+
+<h5>The retry statement</h5>
+
+<p>
+The <font color="#993333"><b>retry statements</b></font> retries executing the current
+iteration of the loop it applies to. The statement branches to the first statement of the designated loop, without testing anything nor incrementing the for loop index.</p>
+
+<p>
+Normally, a sub-block which contains a <font color="#993333"><b>retry statements</b></font>
+also contains another flow control keyword, since otherwise the iteration would be endlessly executed.
+
+<eucode>
+    errors = 0
+	for i=1 to length(files_to_open) do
+         fh = open(files_to_open[i],"rb")
+         if fh=-1 then
+             if errors>5 then
+                 exit
+             else
+                 errors+=1
+                 retry
+			 end if
+		 end if
+		 file_handles[i]=fh
+	end for
+</eucode>
+
+Since <font color="#993333"><b>retry</b></font> does not change the value of i and tries agan opening the same file, there has to be a way to break from the loop, which the <font color="#993333"><b>exit statement</b></font> provides.
+
+<h5>The entry statement</h5>
+
+<p>
+It is often the case that the first iteration of a loop is somehow special. Some things have 
+to be done before the loop starts - they are done before the statement starting the loop -.
+Now, the problem is that, just as often, some things do not need, or should not, be done at 
+this intialisation stage. The <font color="#993333"><b>entry keyword</b></font> is an alternative to setting flags relentlessly 
+and forgetting to update them. Just add the <font color="#993333"><b>entry</b></font> kyword at the point you wish the first iteration starts.
+
+<eucode>
+global function find_all(object x, sequence source, integer from)
+	sequence ret
+
+	ret = {}
+	while from > 0 entry do
+		ret &= from
+		from += 1
+	entry
+		from = find_from(x, source, from)
+	end while
+	return ret
+end function
+</eucode>
+
+Instead of performing an initial test, which may crash because from has not been assigned a value yet, the first iteration jumps at the point where from is being computed. The following iterations are normal. To emphasize the fat that the first iteration is not normal, the entry clause must be addedto the loop header, after the condition.
+
+<p>
+The entry statement is not supported for for loops, because they have a more rigid natire than while or loop constructs.
+
+<h2>Note on infinite loops.</h2>
 <p>
  With <font color="#993333"><b>ex.exe</b></font>, if you happen to create
  a real infinite loop, with no
@@ -1964,6 +2288,31 @@ The <font color="#993333"><b>if</b></font> and
  With <font color="#993333"><b>exw.exe</b></font> or 
       <font color="#993333"><b>exu</b></font>, control-c will
  always stop your program immediately.</p>
+
+ <a name="flowctrl"></a>
+<h4>Labelled headers.</h4>
+
+ <p>
+ As shown in the above section on control flow statements, most of them may take a string referencing a block of code. In order to do so, it is enough t do this:
+ 
+ <eucode>
+	  if n=0 label "an_if_block" then
+	  ...
+	  end if
+ </eucode>
+
+ The label clause precedes the closing then keyword.
+ 
+ <p>
+ If a header has both an entry clause and a label clause, they have to be both before the closing keyword, in any order:
+ 
+ <eucode>
+         while 1 label "top" entry do
+          -- or
+         while 1 entry label "top" do
+ </eucode>
+ 
+ are both correct and equivalent.
 
 <h2>Special Top-Level Statements</h2>
 
