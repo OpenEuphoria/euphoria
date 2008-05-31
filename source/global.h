@@ -48,6 +48,8 @@ long long llseek(int,long long,int);
 #define iwrite fwrite
 #define iseek fseek
 #define itell ftell
+#define iiseek fseek
+#define iitell ftell
 #define iflush fflush
 #define iclose fclose
 #define ifileno fileno
