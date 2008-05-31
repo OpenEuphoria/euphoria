@@ -29,6 +29,8 @@
 long long llseek(int,long long,int);
 #define iseek(f,o,w) llseek(fileno(f),(o),(w))
 #define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
+#define iiseek fseek
+#define iitell ftell
 #define iflush fflush
 #define iclose fclose
 #define ifileno fileno
