@@ -4,6 +4,54 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#if defined(EUNIX) || defined(DJGPP)
+/* use glibc 64bit variants */
+#define _LARGEFILE_SOURCE
+#define _LARGEFILE64_SOURCE
+#include <sys/types.h>
+#include <unistd.h>
+#include <errno.h>
+#define IFILE FILE*
+#define IOFF long long
+#define iopen fopen64
+#define igets fgets
+#define igetc fgetc
+#define iputs fputs
+#define iputc fputc
+#define iread fread64
+#define iwrite fwrite
+// these don't seem to exist???
+//#define iseek fseek64
+//#define itell ftell64
+// these seem to be only 32 bit???
+//#define iseek(f,o,w) lseek64(fileno(f),(o),(w))
+//#define itell(f) lseek64(fileno(f), (long long)0, SEEK_CUR)
+long long llseek(int,long long,int);
+#define iseek(f,o,w) llseek(fileno(f),(o),(w))
+#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
+#define iflush fflush
+#define iclose fclose
+#define ifileno fileno
+#define iprintf fprintf
+#else
+/* no 64bit support */
+#define IFILE FILE*
+#define IOFF long
+#define iopen fopen
+#define igets fgets
+#define igetc fgetc
+#define iputs fputs
+#define iputc fputc
+#define iread fread
+#define iwrite fwrite
+#define iseek fseek
+#define itell ftell
+#define iflush fflush
+#define iclose fclose
+#define ifileno fileno
+#define iprintf fprintf
+#endif
+
 #undef TRUE
 #undef FALSE
 #define TRUE  1

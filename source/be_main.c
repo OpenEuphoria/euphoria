@@ -247,7 +247,7 @@ void Stats()
 /* print execution statistics */
 {
 	int i;
-	FILE *opfile;
+	IFILE opfile;
 
 	StorageStats(); 
 	printf("bytes of extra storage allocated\n");

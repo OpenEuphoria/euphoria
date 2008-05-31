@@ -49,7 +49,7 @@
 extern int Executing;
 extern symtab_ptr CurrentSub;
 extern int temps_allocated;
-extern FILE *obj_file;
+extern IFILE obj_file;
 extern unsigned char *src_buf;
 extern int Argc;
 #ifdef EWINDOWS
@@ -239,7 +239,7 @@ void StorageStats()
 		n++;
 		s = (s1_ptr)((free_block_ptr)s)->next;
 		if ((long)s % 8 != 0)
-			fprintf(stderr, "misaligned s1d pointer!\n");
+			iprintf(stderr, "misaligned s1d pointer!\n");
 	}
 	printf("\nd_list: %ld   ", n);
 	
@@ -369,7 +369,7 @@ static void Recycle()
 
 static void SpaceMessage()
 {
-	/* should we free up something first, to ensure fprintf's work? */
+	/* should we free up something first, to ensure iprintf's work? */
 	
 	RTFatal("Your program has run out of memory.\nOne moment please...");
 }

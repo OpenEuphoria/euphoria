@@ -198,7 +198,7 @@ extern short _SVGAType;
 #endif
 extern symtab_ptr cb_routine[];
 extern object last_w_file_no;
-extern FILE *last_w_file_ptr;
+extern IFILE last_w_file_ptr;
 
 /********************/
 /* Local variables */
@@ -256,7 +256,7 @@ char *version_name =
 #ifndef ESIMPLE_MALLOC
 char *EMalloc();
 #endif
-FILE *which_file();
+IFILE which_file();
 void NewConfig();
 s1_ptr NewS1();
 char *getcwd();
@@ -305,6 +305,20 @@ unsigned long get_pos_int(char *where, object x)
 	}
 }
 
+unsigned IOFF get_pos_off(char *where, object x)
+/* return a positive integer value if possible */
+{
+	if (IS_ATOM_INT(x))
+		return (unsigned IOFF) INT_VAL(x);
+	else if (IS_ATOM(x))
+		return (unsigned IOFF)(DBL_PTR(x)->dbl);
+	else {
+		sprintf(TempBuff, 
+		"%s: an integer was expected, not a sequence", where);
+		RTFatal(TempBuff);
+	}
+}
+
 #ifdef EDOS
 
 // OBSOLETE, FOLD some of this into long_to_short() below
@@ -316,7 +330,7 @@ int IsWin95()
 	char *wd;
 	char path[260];
 	union REGS regs;
-	FILE *f;
+	IFILE f;
 
 	// Look for windir
 	wd = getenv("windir");     // can't get "windir" var on XP
@@ -326,10 +340,10 @@ int IsWin95()
 	// Look for explorer.exe
 	strcpy(path, wd);
 	strcat(path, "\\explorer.exe");
-	f = fopen(path, "r");
+	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
-	fclose(f);
+	iclose(f);
 
 	// check DOS version >= 5  -was: >= 7
 	regs.h.ah=0x30;  
@@ -457,13 +471,13 @@ char *long_to_short(char *long_name)
 }
 #endif
 
-FILE *long_fopen(char *name, char *mode)
-/* fopen a file. Has support for Windows 95 long filenames */
+IFILE long_iopen(char *name, char *mode)
+/* iopen a file. Has support for Windows 95 long filenames */
 {
 #if defined(EDOS) && !defined(EDJGPP)    
-	return fopen(long_to_short(name), mode);
+	return iopen(long_to_short(name), mode);
 #endif   
-	return fopen(name, mode);
+	return iopen(name, mode);
 }
 
 int long_open(char *name, int mode)
@@ -596,7 +610,7 @@ void InitGraphics()
 			// confusion, but the screen must clear.
 
 #ifdef EXTRA_CHECK
-			fprintf(stdout, 
+			iprintf(stdout, 
 			"\n\nlooks like Causeway/NT bug: abs_rows=%d, seg_rows=%d\n\n");
 #endif
 
@@ -1732,20 +1746,20 @@ void blank_lines(int line, int n)
 		b = config.numtextcols;
 		SetPosition(++line, 1); 
 		while (b >= 20) {
-			fputs(bl20, stdout); // 20 blanks
+			iputs(bl20, stdout); // 20 blanks
 			update_screen_string(bl20);
 			screen_col += 20;
 			b -= 20;
 		}
 		while (b >= 1) {
-			fputs(" ", stdout); // 1 blank
+			iputs(" ", stdout); // 1 blank
 			update_screen_string(" ");
 			screen_col += 1;
 			b -= 1;
 		}
 	}
 	if (n)
-	  fflush(stdout);
+	  iflush(stdout);
 }
 #endif
 
@@ -1840,14 +1854,14 @@ void do_scroll(int top, int bottom, int amount)
 					SetBColor(b);
 					prev_b = b;
 				}
-				fputc(screen_image[i+amount-1][j].ascii, stdout);
+				iputc(screen_image[i+amount-1][j].ascii, stdout);
 			}
 			//screen_line++;
 		}
 		// put blank lines at bottom
 		SetBColor(bg);
 		blank_lines(bottom-amount, amount);  
-		fflush(stdout);
+		iflush(stdout);
 	}
 	else if (amount < 0) {
 		// copy some lines down
@@ -1865,14 +1879,14 @@ void do_scroll(int top, int bottom, int amount)
 					SetBColor(b);
 					prev_b = b;
 				}
-				fputc(screen_image[i+amount-1][j].ascii, stdout);
+				iputc(screen_image[i+amount-1][j].ascii, stdout);
 			}   
 			//screen_line--;
 		}
 		// put blanks lines at top
 		SetBColor(bg);
 		blank_lines(top-1, -amount);  
-		fflush(stdout);
+		iflush(stdout);
 	}
 	// restore the current position
 	SetPosition(r1, c1);
@@ -1965,12 +1979,12 @@ object SetTColor(object x)
 #ifdef EUNIX
 	current_fg_color = c & 15;
 	if (current_fg_color > 7)
-		fputs("\033[1m", stdout); // BOLD ON (BRIGHT)
+		iputs("\033[1m", stdout); // BOLD ON (BRIGHT)
 	else
-		fputs("\033[22m", stdout); // BOLD OFF
-	fputs("\033[3", stdout);
-	fputc('0' + (current_fg_color & 7), stdout);
-	fputc('m', stdout);
+		iputs("\033[22m", stdout); // BOLD OFF
+	iputs("\033[3", stdout);
+	iputc('0' + (current_fg_color & 7), stdout);
+	iputc('m', stdout);
 #endif
 
 #ifdef EDOS
@@ -2018,9 +2032,9 @@ object SetBColor(object x)
 #ifdef EUNIX
 	current_bg_color = c & 7;
 	// ANSI code
-	fputs("\033[4", stdout);
-	fputc('0' + current_bg_color, stdout);
-	fputc('m', stdout);
+	iputs("\033[4", stdout);
+	iputc('0' + current_bg_color, stdout);
+	iputc('m', stdout);
 #endif
 
 #ifdef EDOS
@@ -2739,7 +2753,7 @@ static object user_allocate_low(object x)
 	selector = regs.w.dx;
 #endif
 #ifdef EXTRA_CHECK
-	//fprintf(stderr, "selector allocated is %x\n", selector);
+	//iprintf(stderr, "selector allocated is %x\n", selector);
 #endif
 	save_selector(segment, selector);
 	wider = (unsigned int)segment;
@@ -2777,8 +2791,8 @@ static object user_free_low(object x)
 	regs.w.ax = 0x0ff23;
 	regs.w.dx = selector;
 #ifdef EXTRA_CHECK
-	//fprintf(stderr, "selector to free is %x\n", regs.w.dx);
-	//fflush(stderr);
+	//iprintf(stderr, "selector to free is %x\n", regs.w.dx);
+	//iflush(stderr);
 #endif
 	int386(0x31, &regs, &regs);
 #ifdef EXTRA_CHECK
@@ -2912,8 +2926,9 @@ static object dos_interrupt(object x)
 static object Where(object x)
 /* x is the file number. return current byte position */
 {
-	int file_no, result;
-	FILE *f;
+	int file_no;
+	IOFF result;
+	IFILE f;
 
 	file_no = CheckFileNumber(x);
 	if (user_file[file_no].mode == EF_CLOSED)
@@ -2921,12 +2936,14 @@ static object Where(object x)
 	f = user_file[file_no].fptr;
 #ifdef EWATCOM  
 	if (user_file[file_no].mode & EF_APPEND)
-		fflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
-#endif  
-	result = ftell(f);
-	if (result == -1)
+		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
+#endif
+	result = itell(f);
+	if (result == (IOFF)-1)
+	{
 		RTFatal("where() failed on this file");
-	if (result > MAXINT || result < MININT)
+	}
+	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
 		result = NewDouble((double)result);  // maximum 2 billion
 	return result;
 }
@@ -2934,9 +2951,9 @@ static object Where(object x)
 static object Seek(object x)
 /* x is {file number, new position} */
 {
-	int file_no, result;
-	long pos;
-	FILE *f;
+	int file_no;
+	IOFF pos, result;
+	IFILE f;
 	object x1, x2;
 
 	x = (object)SEQ_PTR(x);
@@ -2946,12 +2963,16 @@ static object Seek(object x)
 	if (user_file[file_no].mode == EF_CLOSED)
 		RTFatal("file must be open for seek()");
 	f = user_file[file_no].fptr;
-	pos = get_pos_int("seek", x2); 
+	pos = get_pos_off("seek", x2); 
 	if (pos == -1)
-		result = fseek(f, 0L, SEEK_END);
+		result = iseek(f, 0L, SEEK_END);
 	else
-		result = fseek(f, pos, SEEK_SET);
-	return MAKE_INT(result);
+		result = iseek(f, pos, SEEK_SET);
+	if (result > (IOFF)MAXINT || result < (IOFF)MININT) {
+		result = NewDouble((double)result);  // maximum 2 billion
+		return result;
+	} else
+		return MAKE_INT(result);
 }
 
 // 3 implementations of dir()
@@ -3372,7 +3393,7 @@ static object PutScreenChar(object x)
 		attr = get_pos_int("put_screen_char()", *(p+1));
 		SetTColor(attr & 15);
 		SetBColor(attr >> 4);
-		fputc(c, stdout);
+		iputc(c, stdout);
 		s1[0] = c;
 		s1[1] = 0;
 		update_screen_string(s1);
@@ -3381,7 +3402,7 @@ static object PutScreenChar(object x)
 		len -= 2;
 	} 
 	SetPosition(save_line, save_col); // restore cursor location
-	fflush(stdout);
+	iflush(stdout);
 #endif
 
 #ifdef EWINDOWS
@@ -3511,14 +3532,14 @@ static object flush_file(object x)
 		else
 			last_w_file_no = NOVALUE;
 	}
-	fflush(last_w_file_ptr);
+	iflush(last_w_file_ptr);
 	return ATOM_1;
 }
 
 static object lock_file(object x)
 /* lock a file. x is {fn, t, {first-byte, last-byte}} */
 {
-	FILE *f;
+	IFILE f;
 	int fd;
 	int r, t;
 	unsigned long first, last;
@@ -3528,7 +3549,7 @@ static object lock_file(object x)
 	x = (object)SEQ_PTR(x);
 	fn = *(((s1_ptr)x)->base+1);
 	f = which_file(fn, EF_READ | EF_WRITE);
-	fd = fileno(f); 
+	fd = ifileno(f); 
 	
 #ifdef EUNIX
 	// get 2nd element of x - lock type
@@ -3569,7 +3590,7 @@ static object lock_file(object x)
 static object unlock_file(object x)
 /* unlock a file */
 {
-	FILE *f;
+	IFILE f;
 	int fd;
 	unsigned long first, last;
 	object fn, s;
@@ -3578,7 +3599,7 @@ static object unlock_file(object x)
 	x = (object)SEQ_PTR(x);
 	fn = *(((s1_ptr)x)->base+1);
 	f = which_file(fn, EF_READ | EF_WRITE);
-	fd = fileno(f); 
+	fd = ifileno(f); 
 #ifdef EUNIX   
 	flock(fd, LOCK_UN);
 #else

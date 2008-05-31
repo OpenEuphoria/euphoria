@@ -114,7 +114,7 @@ extern d_ptr d_list;
 extern struct videoconfig config;
 extern int il_file;
 extern struct IL fe;
-FILE *TempErrFile;
+IFILE TempErrFile;
 char *TempErrName; // "ex.err" - but must be malloc'd
 extern int Executing;
 
@@ -356,9 +356,9 @@ int TraceOn = FALSE;
 object *rhs_slice_target;
 s1_ptr *assign_slice_seq;
 object last_w_file_no = NOVALUE;
-FILE *last_w_file_ptr;
+IFILE last_w_file_ptr;
 object last_r_file_no = NOVALUE;
-FILE *last_r_file_ptr;
+IFILE last_r_file_ptr;
 struct file_info user_file[MAX_USER_FILE];
 long seed1, seed2;  /* current value of first and second random generators */
 int rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
@@ -390,7 +390,7 @@ char *EMalloc();
 char *ERealloc();
 #endif
 char *getenv();
-FILE *long_fopen();
+IFILE long_iopen();
 void Cleanup();
 void UserCleanup();
 void RTFatal();
@@ -404,20 +404,20 @@ int wingetch();
 
 /* essential primitive debug code - might as well leave it in */
 
-FILE *debug_log = NULL;    /* DEBUG log messages */
+IFILE debug_log = NULL;    /* DEBUG log messages */
 
 void debug_msg(char *msg)
 // send debug message to debug.log
 {
 	if (debug_log == NULL) {
-		debug_log = fopen("debug.log", "w");
+		debug_log = iopen("debug.log", "w");
 		if (debug_log == NULL) {
-			fprintf(stderr, "Couldn't open debug.log\n");
+			iprintf(stderr, "Couldn't open debug.log\n");
 			exit(1);
 		}
 	}
-	fprintf(debug_log, "%s\n", msg);
-	fflush(debug_log);
+	iprintf(debug_log, "%s\n", msg);
+	iflush(debug_log);
 }
 
 void debug_int(int num)
@@ -553,17 +553,17 @@ static void SimpleRTFatal(char *msg)
 	else {
 		screen_output(stderr, crash_msg);
 	}
-	TempErrFile = fopen(TempErrName, "w");
+	TempErrFile = iopen(TempErrName, "w");
 	if (TempErrFile != NULL) {
-		fprintf(TempErrFile, "Fatal run-time error:\n");
-		fprintf(TempErrFile, "%s\n", msg);
+		iprintf(TempErrFile, "Fatal run-time error:\n");
+		iprintf(TempErrFile, "%s\n", msg);
 		
 		if (last_traced_line != NULL) {
 			if (crash_msg == NULL || crash_count > 0)
-				fprintf(stderr, "%s\n", last_traced_line);
-			fprintf(TempErrFile, "%s\n", last_traced_line);
+				iprintf(stderr, "%s\n", last_traced_line);
+			iprintf(TempErrFile, "%s\n", last_traced_line);
 		}
-		fclose(TempErrFile);
+		iclose(TempErrFile);
 	}
 
 	call_crash_routines();
@@ -2430,7 +2430,7 @@ int CheckFileNumber(object a)
 }
 
 
-FILE *which_file(object a, int mode)
+IFILE which_file(object a, int mode)
 /* return FILE pointer, given the file number */
 {
 	int file_no;
@@ -2473,7 +2473,7 @@ object mode_obj;
 {
 	char cname[MAX_FILE_NAME+1];
 	char cmode[8];
-	FILE *fp;
+	IFILE fp;
 	long length;
 	int i;
 	long mode, text_mode;
@@ -2548,7 +2548,7 @@ object mode_obj;
 #endif
 			con_was_opened = TRUE;
 		}
-		fp = long_fopen(cname, cmode);
+		fp = long_iopen(cname, cmode);
 		if (fp == NULL)
 			return ATOM_M1;
 		else {
@@ -2572,7 +2572,7 @@ void EClose(object a)
 	last_r_file_no = NOVALUE;
 	file_no = CheckFileNumber(a);
 	if (user_file[file_no].mode != EF_CLOSED) {
-		fclose(user_file[file_no].fptr);
+		iclose(user_file[file_no].fptr);
 		user_file[file_no].mode = EF_CLOSED;
 	}
 }
@@ -2581,7 +2581,7 @@ object EGets(object file_no)
 /* reads a line from a file for the user (GETS) */
 {
 	int i, c;
-	FILE *f;
+	IFILE f;
 	char *line_ptr;
 	object_ptr obj_ptr;
 	int len;
@@ -2778,10 +2778,10 @@ static int print_width;
 static int print_start;
 static int print_pretty;
 static int print_level;
-static FILE *print_file;
+static IFILE print_file;
 static int show_ascii;
 
-int show_ascii_char(FILE *print_file, int iv)
+int show_ascii_char(IFILE print_file, int iv)
 /* display corresponding ascii char */
 {
 	char sbuff[4];
@@ -2968,7 +2968,7 @@ static void rPrint(object a)
 	}
 }
 
-void Print(FILE *f, object a, int lines, int width, int init_chars, int pretty)
+void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 /* print an object */
 {
 	print_lines = lines;
@@ -3029,7 +3029,7 @@ void EPuts(object file_no, object obj)
 	long n;
 	int c, size;
 	long len;
-	FILE *f;
+	IFILE f;
 
 	if (file_no == last_w_file_no)
 		f = last_w_file_ptr;
@@ -3053,7 +3053,7 @@ void EPuts(object file_no, object obj)
 			/* might be binary mode, must allow for 0's */
 			if (current_screen != MAIN_SCREEN && might_go_screen(file_no))
 				MainScreen();
-			fputc(c, f);
+			iputc(c, f);
 		}
 	}
 	else {
@@ -3078,7 +3078,7 @@ void EPuts(object file_no, object obj)
 			else {
 				if (current_screen != MAIN_SCREEN && might_go_screen(file_no))
 					MainScreen();
-				fwrite(TempBuff, size, 1, f);  /* allow for 0's */
+				iwrite(TempBuff, size, 1, f);  /* allow for 0's */
 			}
 		}
 	}
@@ -3087,7 +3087,7 @@ void EPuts(object file_no, object obj)
 
 static object_ptr FormatItem(f, cstring, f_elem, f_last, v_elem)
 /* print one format item from printf */
-FILE *f;
+IFILE f;
 char *cstring;
 object_ptr f_elem;
 object_ptr f_last;
@@ -3234,13 +3234,13 @@ object EPrintf(int file_no, object format_obj, object values)
 	char out_string[LOCAL_SPACE];
 	long flen;
 	int s;
-	FILE *f;
+	IFILE f;
 	object result;
 	s1_ptr format;
 	
 	if (file_no == DOING_SPRINTF) {
 		/* sprintf */
-		f = (FILE *)DOING_SPRINTF;
+		f = (IFILE )DOING_SPRINTF;
 	}
 	else {
 		/* printf */
@@ -3452,15 +3452,15 @@ int get_key(int wait)
 
 char *last_traced_line = NULL;
 static int trace_line = 0;
-static FILE *trace_file;
+static IFILE trace_file;
 
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
 {
 #ifdef EUNIX   
-	fprintf(trace_file, "%-78.78s\n", line);
+	iprintf(trace_file, "%-78.78s\n", line);
 #else   
-	fprintf(trace_file, "%-77.77s\r\n", line);
+	iprintf(trace_file, "%-77.77s\r\n", line);
 #endif  
 }
 
@@ -3472,9 +3472,9 @@ void ctrace(char *line)
 	if (TraceOn) {
 		if (trace_file == NULL) {
 			if (Argc == 0)
-				trace_file = fopen("ctrace-d.out", "wb");
+				trace_file = iopen("ctrace-d.out", "wb");
 			else
-				trace_file = fopen("ctrace.out", "wb");
+				trace_file = iopen("ctrace.out", "wb");
 		}
 		if (trace_file != NULL) {
 			trace_line++;
@@ -3482,8 +3482,8 @@ void ctrace(char *line)
 				one_trace_line("");
 				one_trace_line("               "); // erase THE END
 				trace_line = 0;
-				fflush(trace_file);
-				fseek(trace_file, 0, SEEK_SET);
+				iflush(trace_file);
+				iseek(trace_file, 0, SEEK_SET);
 			}
 			one_trace_line(line);
 			one_trace_line("");
@@ -3491,8 +3491,8 @@ void ctrace(char *line)
 			one_trace_line("");
 			one_trace_line("");
 			one_trace_line("");
-			fflush(trace_file);
-			fseek(trace_file, -79*5, SEEK_CUR);
+			iflush(trace_file);
+			iseek(trace_file, -79*5, SEEK_CUR);
 		}   
 	}
 }
@@ -3500,7 +3500,7 @@ void ctrace(char *line)
 #ifdef EXTRA_CHECK
 void RTInternal(char *msg)
 {
-	fprintf(stderr, msg);
+	iprintf(stderr, msg);
 	exit(1);
 }
 #endif
@@ -3940,7 +3940,7 @@ void match_samples()
 	total_samples -= bad_samples;
 }
 
-static void show_prof_line(FILE *f, long i)
+static void show_prof_line(IFILE f, long i)
 /* display one line of profile output */
 {
 	char buff[20];
@@ -3971,9 +3971,9 @@ void ProfileCommand()
 /* display the execution profile */
 {
 	long i;
-	FILE *f;
+	IFILE f;
 
-	f = fopen("ex.pro", "w");
+	f = iopen("ex.pro", "w");
 	if (f == NULL) {
 		/* don't use RTFatal - will get recursive calls */
 		screen_output(stderr, "can't open ex.pro\n");
@@ -3983,20 +3983,20 @@ void ProfileCommand()
 	
 	if (AnyTimeProfile) {
 		match_samples();
-		fprintf(f, "-- Time profile based on %d samples.\n", total_samples);
+		iprintf(f, "-- Time profile based on %d samples.\n", total_samples);
 		if (sample_overflow)
-			fprintf(f, "-- Sample buffer overflowed - increase size!\n");
-		fprintf(f,
+			iprintf(f, "-- Sample buffer overflowed - increase size!\n");
+		iprintf(f,
 			   "-- Left margin shows the percentage of total execution time\n");
-		fprintf(f, "-- consumed by the statement(s) on that line.\n\n");
+		iprintf(f, "-- consumed by the statement(s) on that line.\n\n");
 #ifdef EXTRA_CHECK  
-		//fprintf(f, "%d BAD SAMPLES!\n", bad_samples);  //DEBUG!
+		//iprintf(f, "%d BAD SAMPLES!\n", bad_samples);  //DEBUG!
 #endif  
 	}
 	else {
-		fprintf(f, "-- Execution-count profile.\n");
-		fprintf(f, "-- Left margin shows the exact number of times that\n");
-		fprintf(f, "-- the statement(s) on that line were executed.\n\n");
+		iprintf(f, "-- Execution-count profile.\n");
+		iprintf(f, "-- Left margin shows the exact number of times that\n");
+		iprintf(f, "-- the statement(s) on that line were executed.\n\n");
 	}
 	for (i = 1; i < gline_number; i++) {
 		if (slist[i].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME)) {
@@ -4004,7 +4004,7 @@ void ProfileCommand()
 		}
 	}
 	screen_output(f, "\n");
-	fclose(f);
+	iclose(f);
 }
 #endif // not BACKEND
 

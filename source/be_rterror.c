@@ -96,7 +96,7 @@ extern int TraceBeyond;
 extern int TraceStack;
 extern symtab_ptr TopLevelSub;
 extern int TraceOn;
-extern FILE *TempErrFile;
+extern IFILE TempErrFile;
 extern char *TempErrName;
 extern struct videoconfig config;
 extern int wrap_around;
@@ -168,7 +168,7 @@ static int display_size;   /* number of slots for variables */
 static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
 								/* list of display slots */
 static long tstamp = 1; /* time stamp for deleting vars on display */
-static FILE *conin; 
+static IFILE conin; 
 
 /**********************/
 /* Declared functions */
@@ -201,7 +201,7 @@ void OpenErrFile()
 	char buff[40];
 	int n;
 	
-	TempErrFile = fopen(TempErrName, "w");
+	TempErrFile = iopen(TempErrName, "w");
 	if (TempErrFile == NULL) {
 		if (strlen(TempErrName) > 0) {
 			screen_output(stderr, "Can't create error message file: ");
@@ -571,7 +571,7 @@ static void ClearSlot(int i)
 }
 
 
-static void screen_blank(FILE *f, int nblanks)
+static void screen_blank(IFILE f, int nblanks)
 /* output a string of blanks */
 {
 	while (nblanks >= BLANK_SIZE) {
@@ -872,7 +872,7 @@ void ShowDebug()
 			ClearSlot(i);
 		init_class();
 #ifndef EUNIX
-		conin = fopen("CON", "r");
+		conin = iopen("CON", "r");
 		if (conin == NULL)
 #endif
 			conin = stdin;
@@ -1151,7 +1151,7 @@ static void ListTraceLine(int gline)
 		return;
 	line_info = &slist[gline];
 	name = file_name[line_info->file_no];
-	fprintf(TempErrFile, "%s:%u\t%s\n", 
+	iprintf(TempErrFile, "%s:%u\t%s\n", 
 			name, 
 			line_info->line, 
 			line_info->src + 4 * 
@@ -1165,37 +1165,37 @@ static void RecentLines()
 	int i;
 
 	if (traced_lines) {
-		fprintf(TempErrFile, "\nTraced lines leading up to the failure:\n\n");
+		iprintf(TempErrFile, "\nTraced lines leading up to the failure:\n\n");
 		for (i = TraceLineNext; i < TraceLineSize; i++)
 			ListTraceLine(TraceLineBuff[i]);
 		for (i = 0; i < TraceLineNext; i++)
 			ListTraceLine(TraceLineBuff[i]);
-		fprintf(TempErrFile, "\n");
+		iprintf(TempErrFile, "\n");
 	}
 }
 
-static void DumpPrivates(FILE *f, symtab_ptr proc)
+static void DumpPrivates(IFILE f, symtab_ptr proc)
 /* display the local variables and their values for a subprogram */
 {
 	symtab_ptr sym;
 
-	/* fprintf(f, " %s()\n", proc->name);*/
+	/* iprintf(f, " %s()\n", proc->name);*/
 	sym = proc->next; 
 	while (sym != NULL && 
 		   (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR)) {
 		if (sym->obj == NOVALUE) {
-			fprintf(f, "    %s = <no value>\n", sym->name);
+			iprintf(f, "    %s = <no value>\n", sym->name);
 		}
 		else {
-			fprintf(f, "    %s = ", sym->name);
+			iprintf(f, "    %s = ", sym->name);
 			Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
-			fprintf(f, "\n");
+			iprintf(f, "\n");
 		}
 		sym = sym->next;
 	}
 }
 
-static void DumpGlobals(FILE *f)
+static void DumpGlobals(IFILE f)
 /* display the global and local variable values */
 {
 	symtab_ptr sym;
@@ -1203,7 +1203,7 @@ static void DumpGlobals(FILE *f)
 
 	prev_file_no = -1;
 	sym = TopLevelSub->next;
-	fprintf(f, "\n\nGlobal & Local Variables\n");
+	iprintf(f, "\n\nGlobal & Local Variables\n");
 	while (sym != NULL) {
 		if (sym->token == VARIABLE && 
 			sym->mode == M_NORMAL &&
@@ -1211,18 +1211,18 @@ static void DumpGlobals(FILE *f)
 			 sym->scope == S_GLOOP_VAR)) {
 			if (sym->file_no != prev_file_no) {
 				prev_file_no = sym->file_no;
-				fprintf(f, "\n %s:\n", file_name[prev_file_no]);
+				iprintf(f, "\n %s:\n", file_name[prev_file_no]);
 			}
-			fprintf(f, "    %s = ", sym->name);
+			iprintf(f, "    %s = ", sym->name);
 			if (sym->obj == NOVALUE)
-				fprintf(f, "<no value>");
+				iprintf(f, "<no value>");
 			else 
 				Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
-			fprintf(f, "\n");
+			iprintf(f, "\n");
 		}
 		sym = sym->next;
 	}
-	fprintf(f, "\n");
+	iprintf(f, "\n");
 }
 
 static int screen_err_out;
@@ -1232,7 +1232,7 @@ static char TPTempBuff[400]; // TempBuff might contain the error message
 static sf_output(char *string)
 // output error info to ex.err and optionally to the screen
 {
-	fprintf(TempErrFile, "%s", string);
+	iprintf(TempErrFile, "%s", string);
 	if (screen_err_out) {
 		screen_output(stderr, string);
 	}
@@ -1346,11 +1346,11 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 		}
 		sf_output(" \n");
 		
-		fflush(TempErrFile); // in case we crash later
+		iflush(TempErrFile); // in case we crash later
 		
 		DumpPrivates(TempErrFile, current_proc);
 	
-		fflush(TempErrFile); // in case we crash later
+		iflush(TempErrFile); // in case we crash later
 			
 		levels = 0;
 		skipping = 0;
@@ -1407,7 +1407,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			sf_output(TempBuff);
 		}   
 	
-		fflush(TempErrFile); // in case we crash later
+		iflush(TempErrFile); // in case we crash later
 	
 		tcb[current_task].status = ST_DEAD;  // mark as "deleted"
 		
@@ -1432,7 +1432,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 	
 	DumpGlobals(TempErrFile);
 	
-	fflush(TempErrFile); // in case we crash later
+	iflush(TempErrFile); // in case we crash later
 	
 	RecentLines();
 }
@@ -1455,7 +1455,7 @@ void RTInternal(char *msg)
 
 	TraceBack(RTImsg, NULL);
 	
-	fflush(TempErrFile);
+	iflush(TempErrFile);
 	Cleanup(1);
 }
 #endif
@@ -1477,13 +1477,13 @@ void CleanUpError(char *msg, symtab_ptr s_ptr)
 	OpenErrFile();
 	TraceBack(msg, s_ptr);
 	
-	fprintf(TempErrFile, "\n");
+	iprintf(TempErrFile, "\n");
 	
 	// store all warnings at end of ex.err
 	for (i = 0; i < warning_count; i++)
-		fprintf(TempErrFile, "%s", warning_list[i]);
+		iprintf(TempErrFile, "%s", warning_list[i]);
 	
-	fclose(TempErrFile);
+	iclose(TempErrFile);
 	
 	if (crash_msg == NULL) {
 		screen_output(stderr, "\n--> See ");

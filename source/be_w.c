@@ -146,10 +146,10 @@ void screen_show()
 		for (j = 0; j < col_max; j++) {
 			SetTColor(screen_image[i][j].fg_color);
 			SetBColor(screen_image[i][j].bg_color);
-			fputc(screen_image[i][j].ascii, stdout);
+			iputc(screen_image[i][j].ascii, stdout);
 		}
 	}
-	fflush(stdout);
+	iflush(stdout);
 }
 #endif
 
@@ -535,8 +535,8 @@ static void expand_tabs(char *raw_string)
 				end_of_line('\n');
 #else
 #ifdef EUNIX
-				fputs(expanded_string, stdout);
-				fflush(stdout);
+				iputs(expanded_string, stdout);
+				iflush(stdout);
 				update_screen_string(expanded_string);
 #else
 //DOS
@@ -578,11 +578,11 @@ static void expand_tabs(char *raw_string)
 #ifdef EUNIX
 			// curses advances to next line if given \r or \n beyond 80
 			*expanded_ptr = '\0'; 
-			fputs(expanded_string, stdout);
-			fflush(stdout);
+			iputs(expanded_string, stdout);
+			iflush(stdout);
 			update_screen_string(expanded_string);
-			fputc(c, stdout);
-			fflush(stdout);
+			iputc(c, stdout);
+			iflush(stdout);
 #endif
 
 #ifdef EDOS
@@ -619,8 +619,8 @@ static void expand_tabs(char *raw_string)
 		MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
 #else
 #ifdef EUNIX
-		fputs(expanded_string, stdout);
-		fflush(stdout);
+		iputs(expanded_string, stdout);
+		iflush(stdout);
 		update_screen_string(expanded_string);
 #else
 // DOS
@@ -636,7 +636,7 @@ static void expand_tabs(char *raw_string)
 	}
 }
 
-void screen_output(FILE *f, char *out_string)
+void screen_output(IFILE f, char *out_string)
 /* All output from the compiler, interpreter or user program
    comes here (except for some EPuts() output). It is then directed to the 
    appropriate window or passed to a file. */
@@ -698,7 +698,7 @@ void screen_output(FILE *f, char *out_string)
 				MainScreen();
 		}
 
-		fputs(out_string, f);
+		iputs(out_string, f);
 	}
 }
 
@@ -730,7 +730,7 @@ void ClearScreen()
 
 #ifdef EUNIX
 	// ANSI code
-	fputs("\033[2J", stdout);  // clear screen
+	iputs("\033[2J", stdout);  // clear screen
 	SetPosition(1,1);
 #endif
 
@@ -774,12 +774,12 @@ void SetPosition(int line, int col)
 	sprintf(lbuff, "%d", line);
 	sprintf(cbuff, "%d", col);
 	// ANSI code
-	fputs("\033[", stdout);
-	fputs(lbuff, stdout);
-	fputc(';', stdout);
-	fputs(cbuff, stdout);
-	fputc('H', stdout);
-	fflush(stdout);
+	iputs("\033[", stdout);
+	iputs(lbuff, stdout);
+	iputc(';', stdout);
+	iputs(cbuff, stdout);
+	iputc('H', stdout);
+	iflush(stdout);
 #endif
 
 #ifdef EWINDOWS

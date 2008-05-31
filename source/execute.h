@@ -181,7 +181,7 @@ typedef int *opcode_type;
 #define EF_APPEND 4
 
 struct file_info {
-	FILE *fptr;  // C FILE pointer
+	IFILE fptr;  // C FILE pointer
 	int mode;    // file mode
 }; 
 

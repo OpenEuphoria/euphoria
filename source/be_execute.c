@@ -75,7 +75,7 @@
 		|| (fp)->_flag&_UNGET \
 		|| (*(fp)->_ptr)=='\x0d' \
 		|| (*(fp)->_ptr)=='\x1a' \
-		? fgetc(fp) \
+		? igetc(fp) \
 		: ((fp)->_cnt--,*(fp)->_ptr++))
 #endif
 
@@ -85,7 +85,7 @@
 		((fp)->_cnt<=0 \
 		|| (*(fp)->_ptr)=='\x0d' \
 		|| (*(fp)->_ptr)=='\x1a' \
-		? (tpc = pc , fgetc(fp)) \
+		? (tpc = pc , igetc(fp)) \
 		: ((fp)->_cnt--,*(fp)->_ptr++))
 #else
 #define mygetc(fp) getc(fp)
@@ -192,9 +192,9 @@ extern int TraceLineSize;
 extern int TraceLineNext;
 extern symtab_ptr TopLevelSub;
 extern object last_w_file_no;
-extern FILE *last_w_file_ptr;
+extern IFILE last_w_file_ptr;
 extern object last_r_file_no;
-extern FILE *last_r_file_ptr;
+extern IFILE last_r_file_ptr;
 extern long bytes_allocated;
 extern int current_screen;
 extern d_ptr d_list;
@@ -236,7 +236,7 @@ object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide()
 object x(); /* error */
 symtab_ptr PrivateVar();
 long find(), e_match();
-FILE *which_file();
+IFILE which_file();
 #ifndef ESIMPLE_MALLOC
 char *EMalloc();
 #endif
