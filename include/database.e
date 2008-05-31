@@ -1738,3 +1738,19 @@ global function db_compress()
 end function
 --**
 
+--**
+-- Returns the name of the current database, or an empty string.
+--
+-- Thanks to Tone Škoda!
+
+global function db_current ()
+    integer index
+
+    index = find (current_db, db_file_nums)
+    if index != 0 then
+        return db_names [index]
+    else
+        return ""
+    end if
+end function
+--**
