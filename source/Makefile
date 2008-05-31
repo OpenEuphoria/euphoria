@@ -41,6 +41,10 @@ else
 DEBUG_FLAGS=-fomit-frame-pointer -O2
 endif
 
+ifeq  "$(ELINUX)" "1"
+EBSDFLAG=-DELINUX
+endif
+
 ifeq  "$(EBSD)" "1"
 LDLFLAG=
 EBSDFLAG=-DEBSD -DEBSD62
@@ -49,10 +53,6 @@ else
 LDLFLAG=-ldl
 PREREGEX=$(FROMBSDREGEX)
 SEDFLAG=-ri
-endif
-
-ifeq  "$(ELINUX)" "1"
-EBSDFLAG=$(EBSDFLAG) -DELINUX
 endif
 
 ifeq "$(EU3)" "1"

@@ -2945,8 +2945,10 @@ static object Where(object x)
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
 		result = NewDouble((double)result);  // maximum 2 billion
+#ifdef ELINUX
 	else
 		result = iitell(f); // for better accuracy
+#endif
 	return result;
 }
 
@@ -2967,11 +2969,13 @@ static object Seek(object x)
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2); 
 	if (pos == -1)
-		result = iiseek(f, 0L, SEEK_END);
-	else if (pos > (IOFF)MAXINT || pos < (IOFF)MININT)
-		result = iseek(f, pos, SEEK_SET);
-	else
+		result = iseek(f, 0L, SEEK_END);
+#ifdef ELINUX
+	else if (!(pos > (IOFF)MAXINT || pos < (IOFF)MININT))
 		result = iiseek(f, pos, SEEK_SET);
+#endif
+	else
+		result = iseek(f, pos, SEEK_SET);
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT) {
 		result = NewDouble((double)result);  // maximum 2 billion
 		return result;
