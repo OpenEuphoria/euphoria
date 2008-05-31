@@ -46,6 +46,7 @@ struct routine_list {
 	int file_num;
 	short int num_args;
 	short int convention;
+	char scope;
 };
 
 struct ns_list {

@@ -816,7 +816,7 @@ global procedure DeclareRoutineList()
 	if not first then
 		c_puts(",\n")
 	end if
-	c_puts("  {\"\", 0, 999999999, 0, 0, 0}\n};\n\n")  -- end marker
+	c_puts("  {\"\", 0, 999999999, 0, 0, 0, 0}\n};\n\n")  -- end marker
 
 	c_hputs("extern int ** _02;\n")
 	c_puts("int ** _02;\n")
