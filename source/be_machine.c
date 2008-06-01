@@ -2946,7 +2946,7 @@ static object Where(object x)
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
 		result = NewDouble((double)result);  // maximum 2 billion
-#if defined(EUNIX) | defined(EWATCOM)
+#if defined(ELINUX) | defined(EWATCOM)
 	else
 		result = iitell(f); // for better accuracy
 #endif
@@ -2971,7 +2971,7 @@ static object Seek(object x)
 	pos = get_pos_off("seek", x2); 
 	if (pos == -1)
 		result = iiseek(f, 0L, SEEK_END);
-#if defined(EUNIX) | defined(EWATCOM)
+#if defined(ELINUX) | defined(EWATCOM)
 	else if (!(pos > (IOFF)MAXINT || pos < (IOFF)MININT))
 		result = iiseek(f, pos, SEEK_SET);
 #endif
