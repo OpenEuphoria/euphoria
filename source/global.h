@@ -36,6 +36,24 @@ long long llseek(int,long long,int);
 #define iclose fclose
 #define ifileno fileno
 #define iprintf fprintf
+#elif defined(EWATCOM)
+#define IFILE FILE*
+#define IOFF __int64
+#define iopen fopen
+#define igets fgets
+#define igetc fgetc
+#define iputs fputs
+#define iputc fputc
+#define iread fread
+#define iwrite fwrite
+#define iseek(f,o,w) _lseeki64(fileno(f),(o),(w))
+#define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
+#define iiseek fseek
+#define iitell ftell
+#define iflush fflush
+#define iclose fclose
+#define ifileno fileno
+#define iprintf fprintf
 #elif defined(EBSD)
 /* 64bit support is automatic */
 #define IFILE FILE*
