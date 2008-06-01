@@ -267,9 +267,9 @@ global function statistics(map m)
 			end if
 			lLengths &= lLength
 		end if
-		lStats[6] = stats:average(lLengths)
-		lStats[7] = stdev(lLengths)
 	end for
+	lStats[6] = stats:average(lLengths)
+	lStats[7] = stdev(lLengths)
 	return lStats
 end function
 
