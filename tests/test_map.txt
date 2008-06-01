@@ -1,0 +1,19 @@
+This is a map file for testing the load_map function.
+
+-- A comment with '=' in it.
+foo = bar
+bar = foo
+
+trail=comment -- trailing comment
+
+int = 10
+
+atom = 3.4
+
+seq = {"one", 2, 3.4}
+
+equal = =
+
+padding = " padded "
+
+embed = \-\- -- Value contains a comment marker.

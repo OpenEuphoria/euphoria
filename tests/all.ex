@@ -54,12 +54,14 @@ include t_map.e
 include t_math.e
 include t_misc.e
 include t_os.e
+include t_primes.e
 include t_regex.e
 include t_search.e
 include t_sequence.e
 include t_sets.e
 include t_sort.e
 include t_stack.e  
+include t_stats.e
 include t_types.e
 include t_unicode.e
 include t_wildcard.e
