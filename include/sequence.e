@@ -4,14 +4,14 @@
 -- Sequence routines
 
 --****
--- Category: 
---   sequence
+-- Category:
+--	 sequence
 --
 -- File:
---   lib_sequence
+--	 lib_sequence
 --
 -- Title:
---   Euphoria Database System
+--	 Euphoria Database System
 --****
 
 include machine.e
@@ -28,20 +28,20 @@ include misc.e
 -- Comments:
 -- If x is an atom this is equivalent to <strong>s2 = s1 & x</strong>. If x is a sequence it is not equivalent.
 --
--- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic storage allocation. The case where s1 and s2 are actually the same variable (as in Example 1 below) is highly optimized. 
+-- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic storage allocation. The case where s1 and s2 are actually the same variable (as in Example 1 below) is highly optimized.
 --
 -- Example 1:
 -- You can use append() to dynamically grow a sequence, e.g.
--- 
+--
 -- sequence x
 --
 -- x = {}
 -- for i = 1 to 10 do
---     x = append(x, i)
+--	   x = append(x, i)
 -- end for
 -- -- x is now {1,2,3,4,5,6,7,8,9,10}
 --
--- Example 2: 	Any kind of Euphoria object can be appended to a sequence, e.g.
+-- Example 2:	Any kind of Euphoria object can be appended to a sequence, e.g.
 --
 -- sequence x, y, z
 --
@@ -68,15 +68,15 @@ include misc.e
 --
 -- The case where s1 and s2 are the same variable is handled very efficiently.
 --
--- Example 1: 	
--- prepend({1,2,3}, {0,0})   -- {{0,0}, 1, 2, 3}
+-- Example 1:
+-- prepend({1,2,3}, {0,0})	 -- {{0,0}, 1, 2, 3}
 -- -- Compare with concatenation:
--- {0,0} & {1,2,3}           -- {0, 0, 1, 2, 3}
--- 	
--- Example 2: 	
+-- {0,0} & {1,2,3}			 -- {0, 0, 1, 2, 3}
+--
+-- Example 2:
 -- s = {}
 -- for i = 1 to 10 do
---     s = prepend(s, i)
+--	   s = prepend(s, i)
 -- end for
 -- -- s is {10,9,8,7,6,5,4,3,2,1}
 --
@@ -93,11 +93,11 @@ include misc.e
 --
 -- Comments:
 -- When you repeat a sequence or a floating-point number the
---  interpreter does not actually make multiple copies in memory.
---  Rather, a single copy is "pointed to" a number of times.
+--	interpreter does not actually make multiple copies in memory.
+--	Rather, a single copy is "pointed to" a number of times.
 --
--- Example: 	
--- repeat(0, 10)      -- {0,0,0,0,0,0,0,0,0,0}
+-- Example:
+-- repeat(0, 10)	  -- {0,0,0,0,0,0,0,0,0,0}
 --
 -- repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
 -- -- The interpreter will create only one copy of "JOHN"
@@ -116,15 +116,15 @@ include misc.e
 --
 -- Comments:
 -- The length of each sequence is stored internally by the
---  interpreter for quick access. (In other languages this
---  operation requires a search through memory for an end marker.)
+--	interpreter for quick access. (In other languages this
+--	operation requires a search through memory for an end marker.)
 --
 -- Example 1:
 -- length({{1,2}, {3,4}, {5,6}})   -- 3
 --
--- length("")    -- 0
+-- length("")	 -- 0
 --
--- length({})    -- 0
+-- length({})	 -- 0
 --
 -- See also:
 -- append, prepend, &
@@ -137,13 +137,13 @@ include misc.e
 -- A new sequence is created where the top-level elements appear in reverse order compared to the original sequence.
 --
 -- Example:
--- reverse({1,3,5,7})          -- {7,5,3,1}
+-- reverse({1,3,5,7})		   -- {7,5,3,1}
 --
 -- reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
 --
--- reverse({99})               -- {99}
+-- reverse({99})			   -- {99}
 --
--- reverse({})                 -- {}
+-- reverse({})				   -- {}
 
 global function reverse(sequence s)
 -- moved from misc.e
@@ -196,7 +196,7 @@ end function
 
 --**
 -- Return len items starting at start. If start + len is greater than the length of st, then everything in st starting at start will be returned.
--- 
+--
 -- Comments:
 -- A new sequence is created.
 --
@@ -291,14 +291,14 @@ global function vslice(sequence s, atom colno)
 	sequence ret
 
 	if colno<1 then
-	    crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
+		crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
 	end if
 
 	ret = s
 
 	for i = 1 to length(s) do
 		if colno >= 1+length(s[i]) then
-            crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d",{i,colno})
+			crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d",{i,colno})
 		end if
 		ret[i] = s[i][colno]
 	end for
@@ -343,8 +343,8 @@ end function
 --**
 
 --**
--- Remove an item or a range of items from st. If index is an integer, then only that 
--- element will be removed. If index is a sequence, it must be a sequence of two 
+-- Remove an item or a range of items from st. If index is an integer, then only that
+-- element will be removed. If index is a sequence, it must be a sequence of two
 -- integers representing start and stop index.
 --
 -- Comments:
@@ -572,21 +572,21 @@ end function
 --**
 
 -- In Unicode (Unicode Character Database) the following codepoints are defined as whitespace:
---    U0009-U000D (Control characters, containing TAB, CR and LF)
---    U0020 SPACE
---    U0085 NEL
---    U00A0 NBSP
---    U1680 OGHAM SPACE MARK
---    U180E MONGOLIAN VOWEL SEPARATOR
---    U2000-U200A (different sorts of spaces)
---    U2028 LSP
---    U2029 PSP
---    U202F NARROW NBSP
---    U205F MEDIUM MATHEMATICAL SPACE
---    U3000 IDEOGRAPHIC SPACE
+--	  U0009-U000D (Control characters, containing TAB, CR and LF)
+--	  U0020 SPACE
+--	  U0085 NEL
+--	  U00A0 NBSP
+--	  U1680 OGHAM SPACE MARK
+--	  U180E MONGOLIAN VOWEL SEPARATOR
+--	  U2000-U200A (different sorts of spaces)
+--	  U2028 LSP
+--	  U2029 PSP
+--	  U202F NARROW NBSP
+--	  U205F MEDIUM MATHEMATICAL SPACE
+--	  U3000 IDEOGRAPHIC SPACE
 
 constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
-	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A, 
+	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A,
 	#2028, #2029, #202F, #205F, #3000}
 
 --**
@@ -753,7 +753,7 @@ end function
 
 --**
 -- Remove all nesting from a sequence
--- 
+--
 -- Example 1:
 -- s = flatten({{18, 19}, 45, {18.4, 29.3}})
 -- -- s is {18, 19, 45, 18.4, 29.3}
@@ -780,7 +780,7 @@ constant TO_LOWER = 'a' - 'A'
 
 --**
 -- Convert an atom or sequence to lower case. Only alters characters in the 'A'..'Z' range.
--- 
+--
 -- Example:
 -- s = lower("Euphoria")
 -- -- s is "euphoria"
@@ -801,7 +801,7 @@ end function
 
 --**
 -- Convert an atom or sequence to upper case. Only alters characters in the 'a'..'z' range.
--- 
+--
 -- Example:
 -- s = upper("Euphoria")
 -- -- s is "EUPHORIA"
@@ -821,7 +821,7 @@ end function
 
 --**
 -- Checks whether two objects can be legally added together. Returns 1 if so, else 0.
--- 
+--
 -- Example:
 -- i = can_add({1,2,3},{4,5})
 -- -- i is 0
@@ -852,7 +852,7 @@ end function
 
 --**
 -- Returns a sequence {start, start+increment,...,start+(count-1)*increment, or 0 on failure.
--- 
+--
 -- Example:
 -- s = linear({1,2,3},4,3)
 -- -- s is {{1,2,3},{5,6,7},{9,10,11}}
@@ -876,7 +876,7 @@ end function
 
 --**
 -- Returns a sequence whose n first elements are those of s, as well a the n that follow, and so on for count copies.
--- 
+--
 -- Example:
 -- s = repeat_pattern({1,2,5},3)
 -- -- s is {1,2,5,1,2,5,1,2,5}
@@ -886,7 +886,7 @@ end function
 global function repeat_pattern(sequence s,integer count)
 	integer ls
 	sequence result
-	
+
 	if count<=0 then
 		return {}
 	end if
@@ -919,10 +919,10 @@ end function
 global function project(sequence vectors,sequence coords) -- currently in sets.e
 	sequence result,current_vector,coord_set,result_item,projection
 	integer current_index
-	
+
 	result=vectors
 	for i=1 to length(vectors) do
-		current_vector=vectors[i] 
+		current_vector=vectors[i]
 		result_item=coords
 		for j=1 to length(coords) do
 			coord_set=coords[j]
@@ -956,7 +956,7 @@ global function fetch(sequence s,sequence indexes)
 	for i=1 to length(indexes)-1 do
 		s=s[indexes[i]]
 	end for
-	return s[indexes[$]] 
+	return s[indexes[$]]
 end function
 --**
 
@@ -966,7 +966,7 @@ end function
 -- Example:
 -- s = store({0,1,2,3,{"abc","def","ghi"},6},{5,2,3},108)
 -- -- s is {0,1,2,3,{"abc","del","ghi"},6}
--- 
+--
 -- See also:
 -- fetch, Sequence Assignments
 global function store(sequence s,sequence indexes,object x)
@@ -981,11 +981,11 @@ global function store(sequence s,sequence indexes,object x)
 	branch[indexes[$]]=x
 	partials=prepend(partials,0) -- avoids computing temp=i+1 a few times
 	for i=length(indexes)-1 to 2 by -1 do
-	    result=partials[i]
-	    result[indexes[i]]=branch
-	    branch=result
+		result=partials[i]
+		result[indexes[i]]=branch
+		branch=result
 	end for
-    s[indexes[1]]=branch
+	s[indexes[1]]=branch
 	return s
 end function
 --**
@@ -996,7 +996,7 @@ end function
 -- Example:
 -- i = valid_index({51,27,33,14},2)
 -- -- i is 1
--- 
+--
 -- See also:
 -- Sequence Assignments
 global function valid_index(sequence s,object x)

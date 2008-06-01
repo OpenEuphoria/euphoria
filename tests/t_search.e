@@ -39,3 +39,21 @@ test_equal("rmatch_from() #2", 0, rmatch_from("ABC", "EEEDDDABC", 5))
 test_equal("find_replace() string", "John Smith", find_replace("Doe", "Smith", "John Doe", 0))
 test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({5,2}, {1,1}, {1,5,2,5,2}, 0))
 test_equal("find_replace() max set", "BBBAAA", find_replace("A", "B", "AAAAAA", 3))
+
+constant haystack = "012345678ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+test_equal("binary_search missing #1", -10, binary_search('9',haystack))
+test_equal("binary_search missing #2", -1, binary_search(0,haystack))
+test_equal("binary_search missing #3", -62, binary_search("rubbish",haystack))
+test_equal("binary_search found first", 1, binary_search('0',haystack))
+test_equal("binary_search found last", 61, binary_search('z',haystack))
+test_equal("binary_search found middle#1", 30, binary_search('U',haystack))
+test_equal("binary_search found middle#2", 31, binary_search('V',haystack))
+
+test_equal("binary_search found subset #1", 10, binary_search('A',haystack, 5, 17))
+test_equal("binary_search found subset #2", -17, binary_search('A',haystack, 17))
+test_equal("binary_search found subset #3", -8, binary_search('A',haystack, 1, 7))
+test_equal("binary_search found subset #4", -17, binary_search('A',haystack, 17, 1))
+
+test_equal("binary_search empty input", -1, binary_search('A',{}))
+
+test_equal("binary_search strings", 5, binary_search("cat",{"apple", "bat", "car", "cast", "cat", "category", "dog"}))

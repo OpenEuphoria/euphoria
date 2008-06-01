@@ -206,9 +206,15 @@ global function rmatch(sequence x, sequence s)
 	return rmatch_from(x, s, length(s))
 end function
 
-global function find_replace(sequence what, sequence repl_with, sequence source, integer max)
+global function find_replace(object what, object repl_with, sequence source, integer max=0)
 	integer posn
 	
+	if atom(what) then
+		what = {what}
+	end if
+	if atom(repl_with) then
+		repl_with = {repl_with}
+	end if
 	if length(what) then
 		posn = match(what, source)
 		while posn do
@@ -222,4 +228,37 @@ global function find_replace(sequence what, sequence repl_with, sequence source,
 	end if
 
 	return source
+end function
+
+-- assumes haystack is already sorted into ascending order.
+global function binary_search(object needle, sequence haystack, integer startpoint = 1, integer endpoint = 0)
+	integer lo, hi, mid, c  -- works up to 1.07 billion records
+	
+	lo = startpoint
+	if endpoint <= 0 then
+		hi = length(haystack) - endpoint
+	else
+		hi = endpoint
+	end if
+	if lo > hi and length(haystack) > 0 then
+		hi = length(haystack)
+	end if
+	mid = startpoint
+	c = 0
+	while lo <= hi do
+		mid = floor((lo + hi) / 2)
+		c = compare(needle, haystack[mid])
+		if c < 0 then
+			hi = mid - 1
+		elsif c > 0 then
+			lo = mid + 1
+		else
+			return mid
+		end if
+	end while
+	-- return the position it would have, if inserted now
+	if c > 0 then
+		mid += 1
+	end if
+	return -mid
 end function

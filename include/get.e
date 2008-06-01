@@ -723,7 +723,7 @@ end function
 -- s = value_from("+++")
 -- -- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
 
-global function value_from(sequence string, natural starting_point)
+global function value_from(sequence string, natural starting_point = 1)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
 -- Trailing whitespace or comment are not considered.
