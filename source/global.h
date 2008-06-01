@@ -5,7 +5,7 @@
 /*****************************************************************************/
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
-#if defined(ELINUX)
+#if defined(EUNIX)
 /* use glibc 64bit variants */
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
