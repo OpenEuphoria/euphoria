@@ -113,6 +113,7 @@ global procedure test_summary()
 	end if
 		
 	if wait_on_summary then
+		puts(2, "\nSummary complete, press RETURN ...")
 		wait_on_summary = getc(0)
 	end if
 	abort(testsFailed > 0)

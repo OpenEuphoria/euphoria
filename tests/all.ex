@@ -5,6 +5,7 @@
 
 include unittest.e
 include file.e
+include misc.e
 
 set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 
@@ -12,27 +13,17 @@ sequence cmd
 object pwd, oldpwd
 cmd = command_line()
 
-if length(cmd) > 2 then
-	if equal(cmd[3], "-wait") then
-		set_wait_on_summary(1)
-		cmd = cmd[1..2] & cmd[4..length(cmd)]
-	end if
-end if
-
-if length(cmd) > 2 then
-	if equal(cmd[3], "-all") then
+for i = 3 to length(cmd) do
+	if equal(cmd[i], "-all") then
 		set_test_verbosity(TEST_SHOW_ALL)
-	elsif equal(cmd[3], "-failed") then
+	elsif equal(cmd[i], "-failed") then
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
-	elsif equal(cmd[3], "-mods") then
+	elsif equal(cmd[i], "-mods") then
 		set_test_verbosity(TEST_SHOW_MODULES)
+	elsif equal(cmd[i], "-wait") then
+		set_wait_on_summary(1)
     end if
-	if length(cmd) > 3 then
-		if equal(cmd[4], "-wait") then
-			set_wait_on_summary(1)
-		end if
-    end if
-end if
+end for
 
 
 -- Ensure we are in correct directory first.
