@@ -1363,6 +1363,33 @@ procedure opWHILE()
 	end if
 end procedure
 
+procedure opSELECT()
+-- pc+1: select value
+-- pc+2: case values
+-- pc+3: jump_table
+-- pc+4: else jump
+
+	a = find( val[Code[pc+1]], val[Code[pc+2]] )
+	if a then
+		pc += val[Code[pc+3]][a]
+	else
+		b = Code[pc + 4]
+		if b then
+			pc += b
+		else
+			RTFatal( "select has no matching case and no 'case else'" )
+		end if
+	end if
+end procedure
+
+procedure opCASE()
+
+end procedure
+
+procedure opNOPSELECT()
+
+end procedure
+
 function var_subs(object x, sequence subs)
 -- subscript x with the list of subscripts in subs
 	object si
@@ -3266,10 +3293,14 @@ procedure InitBackEnd(integer ignore)
 		end if
 	end for
 end procedure
-mode:set_init_backend( routine_id("InitBackEnd") )
+
+procedure fake_init( integer ignore )
+end procedure
+mode:set_init_backend( routine_id("fake_init") )
 
 global procedure Execute(symtab_index proc, integer start_index)
 -- top level executor 
+	InitBackEnd( 0 )
 	current_task = 1
 	call_stack = {proc}
 	pc = start_index

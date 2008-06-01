@@ -186,5 +186,7 @@ static char *opnames[] = {
 	"PEEKS",
 	"PEEK_STRING",
 	"OPTION_SWITCHES",
-	"RETRY"
+	"RETRY",
+	"SWITCH",
+	"CASE"
 };

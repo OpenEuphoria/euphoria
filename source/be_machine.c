@@ -291,6 +291,7 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned, unsigned);
 #endif
 
+
 unsigned long get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {

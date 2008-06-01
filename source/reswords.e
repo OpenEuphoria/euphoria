@@ -189,7 +189,10 @@ global constant
 	PEEK_STRING         = 184,
 	OPTION_SWITCHES     = 185,
 	RETRY               = 186,
-	MAX_OPCODE          = 186
+	SWITCH              = 187,
+	CASE                = 188,
+	NOPSWITCH           = 189,  -- Translator only
+	MAX_OPCODE          = 189
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])

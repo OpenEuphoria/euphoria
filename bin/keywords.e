@@ -7,7 +7,8 @@ global constant keywords = {
     "if", "end", "then", "procedure", "else", "for", "return",
     "do", "elsif", "while", "type", "constant", "to", "and", "or",
     "exit", "function", "global", "by", "not", "include",
-    "with", "without", "xor", "continue", "as", "ifdef", "elsifdef", "enum" }
+    "with", "without", "xor", "continue", "as", "ifdef", "elsifdef", "enum", 
+    "export", "switch", "case" }
 
 global constant builtins = {
     "length", "puts", "integer", "sequence", "position", "object",

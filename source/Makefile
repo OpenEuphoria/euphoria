@@ -95,6 +95,7 @@ EU_INTERPRETER_FILES = \
 
 EU_TRANSLATOR_FILES = \
 	compile.e \
+	compress.e \
 	global.e \
 	ec.ex \
 	c_decl.e \
@@ -120,6 +121,7 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/compil_8.o \
 	./$(OBJDIR)/compil_9.o \
 	./$(OBJDIR)/compil_A.o \
+	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/global.o \
 	./$(OBJDIR)/misc.o \

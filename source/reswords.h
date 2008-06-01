@@ -197,7 +197,10 @@
 #define PEEK_STRING         184
 #define OPTION_SWITCHES     185
 #define RETRY               186
-#define MAX_OPCODE          186
+#define SWITCH              187
+#define CASE                188
+#define NOPSELECT           189
+#define MAX_OPCODE          189
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

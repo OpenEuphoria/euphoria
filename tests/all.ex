@@ -62,6 +62,7 @@ include t_sets.e
 include t_sort.e
 include t_stack.e  
 include t_stats.e
+include t_switch.e
 include t_types.e
 include t_unicode.e
 include t_wildcard.e

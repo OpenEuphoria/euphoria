@@ -442,6 +442,7 @@ procedure write_includes()
 
 	for a = 1 to length(functions) do
 		cat_name = functions[a][1]
+printf(1,"read_file: %s\n", {"t_lib_" & cat_name & ".htx"})
 		content = read_file("t_lib_" & cat_name & ".htx")
 		if atom(content) then
 			printf(1, "Could not open template file %s for reading\n", {

@@ -1583,6 +1583,10 @@ file of the library.</p>
         <a href="refman_2.htm#continue">continue statement</a></li>
 <li>
         <a href="refman_2.htm#retry">retry statement</a></li>
+
+<li>
+        <a href="refman_2.htm#switch">switch statement</a></li>
+            
 </ul>
 
 <p>
@@ -2324,6 +2328,42 @@ The entry statement is not supported for for loops, because they have a more rig
  
  are both correct and equivalent.
 
+<a name="switch"><h5>The switch statement</h5>
+
+<p>
+	The switch statement is often used in place  or in similar ways as an if-elsif code block.  There are
+	some key differences, however.  A switch statement operates upon the value of a single expression, and
+	the program flow continues based upon defined cases.  The syntax of a switch statement:
+</p>
+<eucode>
+    switch <expr> [label "<label name>"] do
+    	case <val>:
+    		[code block]
+    	
+    	[case else]
+    		[code block]
+    end switch
+</eucode>
+<p>
+	The <val> in a case must be either an atom or a literal string.  One important difference between a switch
+	block and an if block is that control does not automatically go to the end of the block when the next
+	case statement is encountered.  This is referred to as fall-through, and allows the same code to be used
+	for multiple values.  'exit' can be used to redirect program flow to the end of the block.  Fall-through
+	can also be used when different cases require most of the same code, but one might require extra processing:
+</p>
+<eucoce>
+	switch length(x) do
+		case 1:
+		case 2:
+			-- do something
+		case 3:
+			-- do something
+			exit
+		case else
+			-- do something
+	end switch
+</eucode>
+	
 <h2>Special Top-Level Statements</h2>
 
 <p>

@@ -138,6 +138,18 @@ global procedure InitParser()
     block_index = 0
 end procedure
 
+sequence switch_stack
+switch_stack = {}
+
+constant 
+	SWITCH_CASES      = 1,
+	SWITCH_JUMP_TABLE = 2,
+	SWITCH_ELSE       = 3
+
+function in_switch()
+	return length(loop_stack) and loop_stack[$][1] = SWITCH
+end function
+
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed 
 	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE}) then
@@ -1254,7 +1266,10 @@ procedure Exit_statement()
     emit_forward_addr()    -- to be back-patched
     tok = by_ref[2]
     putback(tok)
-    NotReached(tok[T_ID], "exit")
+    if not in_switch() then
+    	NotReached(tok[T_ID], "exit")
+    end if
+    
 end procedure
 
 procedure Continue_statement()
@@ -1361,8 +1376,8 @@ function finish_block_header(integer opcode)
 	    has_entry=1
 	    tok=next_token()
 	end if
-    if has_entry and opcode=IF then
-        CompileErr("entry keyword is not supported inside an if block header")
+    if has_entry and (opcode = IF or opcode = SWITCH) then
+        CompileErr("entry keyword is not supported inside an if or switch block header")
 	end if
 	if opcode = IF then
 		opcode = THEN
@@ -1488,6 +1503,132 @@ procedure exit_loop(integer exit_base)
     entry_addr = entry_addr[1..$-1]
     block_index -= 1
 end procedure
+
+procedure push_switch()
+	loop_stack &= {{SWITCH, 0, 0}}
+	loop_nest += 1
+	switch_stack = append( switch_stack, { {}, {}, 0 })
+	
+end procedure
+
+procedure pop_switch( integer exit_base )
+	loop_stack    = loop_stack[1..$-1]
+	loop_nest    -= 1
+	switch_stack  = switch_stack[1..$-1]
+	PatchXList( exit_base )
+	block_index -= 1
+end procedure
+
+procedure add_case( symtab_index sym )
+	switch_stack[$][SWITCH_CASES]      &= sym
+	switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+	if TRANSLATE then
+		emit_addr( CASE )
+		emit_addr( length( switch_stack[$][SWITCH_CASES] ) )
+	end if
+end procedure
+
+function else_case()
+	
+	return switch_stack[$][SWITCH_ELSE]
+end function
+
+procedure case_else()
+	if TRANSLATE then
+		emit_addr( CASE )
+		emit_addr( 0 )
+	end if
+	switch_stack[$][SWITCH_ELSE] = length(Code) + 1
+end procedure
+
+procedure Case_statement()
+	token tok
+	symtab_index condition
+	
+	if not in_switch() then
+		CompileErr( "a case must be inside a switch" )
+
+	elsif else_case() then
+		CompileErr( "a case block cannot follow a case else block" )
+		
+	end if
+	
+	tok = next_token()
+	if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
+		CompileErr( "expected an atom or a string" )
+	end if
+	
+	if tok[T_ID] = ELSE then
+		case_else()
+		
+	else
+		condition = tok[T_SYM]	
+		tok_match( COLON )
+		add_case( condition )	
+	end if
+	
+	StartSourceLine( TRUE )
+end procedure
+
+procedure Switch_statement()
+	integer exit_base
+	symtab_index cases, jump_table
+	integer else_bp
+	sequence values
+	integer switch_pc
+	
+	push_switch()
+	exit_base = length(exit_list)
+	
+	Expr()
+	
+	cases = NewStringSym( {-1, - length(loop_stack) } )
+	emit_opnd( cases )
+	   
+	jump_table = NewStringSym( {-2, - length(loop_stack) } )
+	emit_opnd( jump_table )
+	
+	if finish_block_header(SWITCH) then end if
+	
+	switch_pc = length(Code) + 1
+	emit_op(SWITCH)
+	else_bp = length( Code )
+
+	exit_base = length(exit_list)
+	
+	tok_match(CASE)
+	Case_statement()
+	
+	call_proc(forward_Statement_list, {})
+	
+	-- fix up the case values
+	values = switch_stack[$][SWITCH_CASES]
+	for i = 1 to length( values ) do
+		values[i] = SymTab[values[i]][S_OBJ]
+	end for
+	SymTab[cases][S_OBJ] = values
+	
+	-- convert to relative offsets
+	SymTab[jump_table][S_OBJ] = switch_stack[$][SWITCH_JUMP_TABLE] - switch_pc
+	
+	if TRANSLATE then
+		-- translator doesn't use the else jump
+		Code[else_bp] = length( Code ) + 2
+	else
+		if switch_stack[$][SWITCH_ELSE] then
+			Code[else_bp] = switch_stack[$][SWITCH_ELSE] - switch_pc
+		end if
+	end if
+	
+	tok_match(END)
+	tok_match(SWITCH)
+	if TRANSLATE then
+		emit_op(NOPSWITCH)
+	end if
+	pop_switch( exit_base )
+end procedure
+
+
 
 procedure While_statement()
 -- Parse a while loop
@@ -1810,7 +1951,7 @@ function CompileType(symtab_index type_ptr)
 		end if
 	end if    
 end function
-with trace
+
 procedure Global_declaration(symtab_index type_ptr, integer scope)
 -- parse a command-level variable or constant declaration 
 -- type_ptr is NULL if constant 
@@ -2084,6 +2225,14 @@ procedure Statement_list()
 		elsif id = IFDEF then
 			StartSourceLine(TRUE)
 			Ifdef_statement()
+			
+		elsif id = CASE then
+			StartSourceLine(TRUE)
+			Case_statement()
+			
+		elsif id = SWITCH then
+			StartSourceLine(TRUE)
+			Switch_statement()
 
 		else
 			putback(tok)
@@ -2578,6 +2727,14 @@ global procedure real_parser(integer nested)
 			StartSourceLine(TRUE)
 			Ifdef_statement()
 
+		elsif id = CASE then
+			StartSourceLine(TRUE)
+			Case_statement()
+			
+		elsif id = SWITCH then
+			StartSourceLine(TRUE)
+			Switch_statement()
+		
 		elsif id = ILLEGAL_CHAR then
 			CompileErr("illegal character")
 		

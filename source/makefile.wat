@@ -66,7 +66,8 @@ EU_TRANSLATOR_FILES = &
 	c_decl.e &
 	c_out.e &
 	cominit.e &
-	traninit.e 
+	traninit.e &
+	compress.e
 	
 EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\ec.obj &
@@ -87,6 +88,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compil_8.obj &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
+	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\misc.obj &
@@ -134,6 +136,7 @@ EU_CORE_OBJECTS = &
 	
 EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_execute.obj &
+	.\$(OBJDIR)\back\be_decompress.obj &
 	.\$(OBJDIR)\back\be_task.obj &
 	.\$(OBJDIR)\back\be_main.obj &
 	.\$(OBJDIR)\back\be_alloc.obj &
@@ -148,6 +151,7 @@ EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_w.obj
 
 EU_LIB_OBJECTS = &
+	.\$(OBJDIR)\back\be_decompress.obj &
 	.\$(OBJDIR)\back\be_machine.obj &
 	.\$(OBJDIR)\back\be_w.obj &
 	.\$(OBJDIR)\back\be_alloc.obj &
@@ -764,6 +768,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\back\be_w.obj : ./be_w.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
+.\$(OBJDIR)\back\be_decompress.obj : ./be_decompress.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
+	
 .\pcre\pcre_chartables.obj : .\pcre\pcre_chartables.c.win
 	-copy .\pcre\pcre_chartables.c.win .\pcre\pcre_chartables.c
 	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@

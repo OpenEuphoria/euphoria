@@ -1,7 +1,7 @@
 include unittest.e
 
 set_test_module_name("eu-internal")
-
+set_test_verbosity(TEST_SHOW_ALL)
 without warning
 function append(object a, object b)
 	return {}

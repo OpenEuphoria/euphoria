@@ -200,7 +200,7 @@ procedure main()
 	end if
 	TempErrName = "ex.err"
 
-	if TRANSLATE or INTERPRET or BIND then
+	if TRANSLATE or BIND or INTERPRET then
 		InitBackEnd(0)
 	end if
 

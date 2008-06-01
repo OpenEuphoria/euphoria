@@ -510,7 +510,7 @@ global procedure emit_op(integer op)
 				STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE,
 				ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS, 
 				DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
-				TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP}) then
+				TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH}) then
 		emit_opcode(op)
 		assignable = FALSE
 	
@@ -1139,6 +1139,24 @@ global procedure emit_op(integer op)
 		emit_opcode(op)
 		emit_addr(c)
 		assignable = TRUE
+	
+	elsif op = SWITCH then
+		emit_opcode( op )
+		c = Pop() -- Case values
+		b = Pop() -- Jump table
+		a = Pop() -- Switch Expr
+		emit_addr( a )
+		emit_addr( b )
+		emit_addr( c )
+		emit_addr( 0 )  -- case else address: may be backpatched
+		assignable = FALSE
+	
+	elsif op = CASE then
+		-- only for translator
+		emit_opcode( op )
+		emit( cg_stack[$] )  -- the case index
+		printf(1,"emiting case %d\n", cg_stack[$] )
+		cg_stack = cg_stack[1..$-1]
 		
 	-- 0 inputs, 1 output 
 	elsif op = PLATFORM then

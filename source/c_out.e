@@ -1,7 +1,6 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Translator Routines for outputting C code
-
 include global.e
 
 -- gtype values, TRANSLATOR:

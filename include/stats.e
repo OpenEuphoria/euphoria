@@ -1,4 +1,16 @@
 -- stats.e
+
+--****
+-- Category: 
+--   stats
+--
+-- File:
+--   lib_stats
+--
+-- Title:
+--   Euphoria Standard Library List Statistics Routines
+--****
+
 include unittest.e
 include math.e
 include sort.e
