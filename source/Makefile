@@ -189,6 +189,7 @@ EU_CORE_C_FILES = \
 	./$(OBJDIR)/parser_2.c 
 	
 EU_BACKEND_OBJECTS = \
+	./$(OBJDIR)/back/be_decompress.o \
 	./$(OBJDIR)/back/be_execute.o \
 	./$(OBJDIR)/back/be_task.o \
 	./$(OBJDIR)/back/be_main.o \
