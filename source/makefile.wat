@@ -236,6 +236,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\parser_0.obj &
 	.\$(OBJDIR)\parser_1.obj &
 	.\$(OBJDIR)\parser_2.obj &
+	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\ec.obj &
 	.\$(OBJDIR)\c_decl.obj &
 	.\$(OBJDIR)\c_dec0.obj &
