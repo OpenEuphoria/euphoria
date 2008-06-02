@@ -73,7 +73,9 @@ global type map(object o)
 end type
 
 constant maxInt = #3FFFFFFF
-with trace
+sequence lPrimes
+lPrimes = calc_primes(1000)
+
 --**
 -- Calculate a Hashing value from the supplied data.
 --
@@ -89,12 +91,10 @@ with trace
 -- Example 1:
 --	  integer h1
 --	  h1 = calc_hash( symbol_name )
-sequence lPrimes
-lPrimes = calc_primes(1000)
+
 global function calc_hash(object pData, integer pMaxHash = 0)
 	integer lResult
 	integer j
-	atom lInit
 	atom lTemp
 
 	if integer(pData) then
@@ -103,40 +103,22 @@ global function calc_hash(object pData, integer pMaxHash = 0)
 		pData = atom_to_float64(pData)
 	end if
 
-	j = length(lPrimes) - length(pData)
-	if j < 1 then
-		j = remainder(length(pData), length(lPrimes)) + 1
-	end if
-	if length(pData) < 17 then
-		lInit = power(3, length(pData))
-	else
-		lInit = power(length(pData), 3)
-	end if
-	while lInit > maxInt do
-		lInit = lInit / 2.1
-	end while
-	lResult = floor(lInit)
+	j = 1
+	lResult = (length(pData) + 1) * (length(pData) + 1) + pMaxHash
 	for i = 1 to length(pData) do
-		lResult = xor_bits(lResult, and_bits(lResult,#FC8F) * #1000)
-		j += 1
-		if j > length(lPrimes) then
-			j = 1
+		j -= 1
+		if j < 1 then 
+			j = length(lPrimes)
 		end if
 
-		lInit = length(pData) - i + 1
-		if sequence(pData[lInit]) then
-			lTemp = lResult + calc_hash(pData[lInit])
+		if sequence(pData[i]) then
+			lTemp = lResult + calc_hash(pData[i])
 
-		elsif not integer(pData[lInit]) then
-			lTemp = lResult + calc_hash(atom_to_float64(pData[lInit]))
+		elsif not integer(pData[i]) then
+			lTemp = lResult + calc_hash(atom_to_float64(pData[i]))
 
 		else
-			lTemp = lResult + (lInit + lPrimes[j]) * pData[lInit]
-			if integer(pData[i]) then
-				lTemp *= (2.5 + and_bits(pData[i], #F)/ 8)
-			else
-				lTemp += calc_hash(pData[i])
-			end if
+			lTemp = lResult +  pData[i] - lPrimes[j]
 		end if
 
 		if lTemp > maxInt then
@@ -236,7 +218,7 @@ global function get(map m, object key, object defaultValue, integer pSimple = 1)
 end function
 
 
-global function put(map m, object key, object value, integer pTrigger = 10, integer pSimple = 1)
+global function put(map m, object key, object value, integer pTrigger = 100, integer pSimple = 1)
 	integer index
 	integer lOffset
 	object bucket
