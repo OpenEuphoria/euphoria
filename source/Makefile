@@ -163,7 +163,7 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/parser.o \
 	./$(OBJDIR)/parser_0.o \
 	./$(OBJDIR)/parser_1.o \
-	./$(OBJDIR)/parser_2.o 
+	./$(OBJDIR)/parser_2.o
 
 EU_CORE_C_FILES = \
 	./$(OBJDIR)/main-.c \
@@ -185,8 +185,9 @@ EU_CORE_C_FILES = \
 	./$(OBJDIR)/emit_1.c \
 	./$(OBJDIR)/parser.c \
 	./$(OBJDIR)/parser_0.c \
-	./$(OBJDIR)/parser_1.o \
-	./$(OBJDIR)/parser_2.c 
+	./$(OBJDIR)/parser_1.c \
+	./$(OBJDIR)/parser_2.c \
+	./$(OBJDIR)/parser_3.c
 	
 EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_decompress.o \

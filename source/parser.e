@@ -152,7 +152,7 @@ end function
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed 
-	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE}) then
+	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE}) then
 		Warning(sprintf("%s:%d - statement after %s will never be executed", 
 				{name_ext(file_name[current_file_no]), line_number, keyword}))
 	end if
@@ -1204,51 +1204,51 @@ procedure Return_statement()
 end procedure
 
 function exit_level(token tok,integer flag)
--- determines optional parameter for continue/exit/retry
+-- determines optional parameter for continue/exit/retry/switch
     atom arg
     integer n
     integer num_labels
     sequence labels
 
-    if flag then
-	    labels = if_labels
-    else
+	if flag then
+		labels = if_labels
+	else
 		labels = loop_labels
-    end if
-    num_labels = length(labels) 
-    
+	end if
+	num_labels = length(labels) 
+
 	if tok[T_ID]=ATOM then
-        arg = SymTab[tok[T_SYM]][S_OBJ]
-        n = floor(arg)
-        if arg<=0 then
-            n += num_labels
+		arg = SymTab[tok[T_SYM]][S_OBJ]
+		n = floor(arg)
+		if arg<=0 then
+			n += num_labels
 		end if
-        if n<=0 or n>num_labels then
-            CompileErr("exit/break argument out of range")
-        end if  
-        return {n, next_token()}
-    elsif tok[T_ID]=STRING then
-        n = find(SymTab[tok[T_SYM]][S_OBJ],labels)
-        if n = 0 then
-            CompileErr("Unknown block label")
-        end if 
-        return {num_labels+1-n, next_token()}
-    elsif tok[T_ID]=VARIABLE then
-        if flag=1 then
-            CompileErr("Use of a for loop index with the break statement is not supported.")
+		if n<=0 or n>num_labels then
+			CompileErr("exit/break argument out of range")
+		end if  
+		return {n, next_token()}
+	elsif tok[T_ID]=STRING then
+		n = find(SymTab[tok[T_SYM]][S_OBJ],labels)
+		if n = 0 then
+			CompileErr("Unknown block label")
+		end if 
+		return {num_labels+1-n, next_token()}
+	elsif tok[T_ID]=VARIABLE then
+		if flag=1 then
+			CompileErr("Use of a for loop index with the break statement is not supported.")
 		end if
 		n = SymTab[tok[T_SYM]][S_SCOPE]
-        if (n = SC_GLOOP_VAR) != (CurrentSub = TopLevelSub) then
-            CompileErr("Attempting to exit a block which is out of reach")
-        end if
-        n = find(tok[T_SYM],for_vars)
-        if n=0 then
-            CompileErr("Optional argument to exit/break is either a numerical constant, label string or for loop index name")
-        end if
-        return {num_labels+1-for_where[n], next_token()}
-    else
+		if (n = SC_GLOOP_VAR) != (CurrentSub = TopLevelSub) then
+			CompileErr("Attempting to exit a block which is out of reach")
+		end if
+		n = find(tok[T_SYM],for_vars)
+		if n=0 then
+			CompileErr("Optional argument to exit/break is either a numerical constant, label string or for loop index name")
+		end if
+		return {num_labels+1-for_where[n], next_token()}
+	else
 		return {1, tok} -- no parameters
-    end if
+	end if
 end function
 
 procedure Exit_statement()
@@ -1278,22 +1278,28 @@ procedure Continue_statement()
     sequence by_ref
     integer loop_level
 
-    if not length(loop_labels) then
+	if not length(loop_labels) then
 		CompileErr("continue statement must be inside a loop")
-    end if
-    emit_op(ELSE)
-    by_ref = exit_level(next_token(),0) -- can't pass tok by reference
-    loop_level = by_ref[1]
-    if continue_addr[$+1-loop_level] then -- address is known for while loops
-        emit_addr(continue_addr[$+1-loop_level])
-    else  -- for loop increment code/repeat loop end of loop test
-        AppendNList(length(Code)+1)
-        continue_delay &= loop_level
-        emit_forward_addr()    -- to be back-patched
-    end if
-    tok = by_ref[2]
-    putback(tok)
-    NotReached(tok[T_ID], "continue")
+	end if
+	emit_op(ELSE)
+	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+	loop_level = by_ref[1]
+	-- num_labels+1-n
+	if continue_addr[$+1-loop_level] then -- address is known for while loops
+		if continue_addr[$+1-loop_level] < 0 then
+			-- it's in a switch statement
+			CompileErr("continue statement must be inside a loop")
+		end if
+		emit_addr(continue_addr[$+1-loop_level])
+	else  -- for loop increment code/repeat loop end of loop test
+		AppendNList(length(Code)+1)
+		continue_delay &= loop_level
+		emit_forward_addr()    -- to be back-patched
+	end if
+	tok = by_ref[2]
+	putback(tok)
+	
+	NotReached(tok[T_ID], "continue")
 end procedure
 
 procedure Retry_statement()
@@ -1302,19 +1308,23 @@ procedure Retry_statement()
     sequence by_ref
     token tok
 
-    if not length(loop_labels) then
-	    CompileErr("retry statement must be inside a loop")
-    end if
-    by_ref = exit_level(next_token(),0) -- can't pass tok by reference
-    if loop_stack[$+1-by_ref[1]][1]=FOR then
+	if not length(loop_labels) then
+		CompileErr("retry statement must be inside a loop")
+	end if
+	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+	if loop_stack[$+1-by_ref[1]][1]=FOR then
 		emit_op(RETRY) -- for Translator to emit a label at the right place
 	else
+		if retry_addr[$+1-by_ref[1]] < 0 then
+			-- it's in a switch statement
+			CompileErr("retry statement must be inside a loop")
+		end if
 		emit_op(ELSE)
 	end if
-    emit_addr(retry_addr[$+1-by_ref[1]])
-    tok = by_ref[2]
-    putback(tok)
-    NotReached(tok[T_ID], "retry")
+	emit_addr(retry_addr[$+1-by_ref[1]])
+	tok = by_ref[2]
+	putback(tok)
+	NotReached(tok[T_ID], "retry")
 end procedure
 
 procedure Break_statement()
@@ -1508,15 +1518,33 @@ procedure push_switch()
 	loop_stack &= {{SWITCH, 0, 0}}
 	loop_nest += 1
 	switch_stack = append( switch_stack, { {}, {}, 0 })
-	
+	if length(continue_addr) then
+		continue_addr &= continue_addr[$]
+	else
+		continue_addr &= 0
+	end if
+	if length(retry_addr) then
+		retry_addr &= retry_addr[$]
+	else
+		retry_addr &= 0
+	end if
+	if length(entry_addr) then
+		entry_addr &= entry_addr[$]
+	else
+		entry_addr &= 0
+	end if
 end procedure
 
 procedure pop_switch( integer exit_base )
 	loop_stack    = loop_stack[1..$-1]
+	loop_labels   = loop_labels[1..$-1]
 	loop_nest    -= 1
 	switch_stack  = switch_stack[1..$-1]
 	PatchXList( exit_base )
 	block_index -= 1
+	continue_addr = continue_addr[1..$-1]
+	retry_addr    = retry_addr[1..$-1]
+	entry_addr    = entry_addr[1..$-1]
 end procedure
 
 procedure add_case( symtab_index sym )
@@ -1555,7 +1583,15 @@ procedure Case_statement()
 	
 	tok = next_token()
 	if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
-		CompileErr( "expected an atom or a string" )
+		if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
+			if SymTab[tok[T_SYM]][S_CODE] then
+				tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
+			else
+				CompileErr( "case constants must be assigned a string or an atom" )
+			end if
+		else
+			CompileErr( "expected else, an atom, string or a constant assigned an atom or a string" )
+		end if
 	end if
 	
 	if tok[T_ID] = ELSE then
@@ -1952,11 +1988,22 @@ function CompileType(symtab_index type_ptr)
 	end if    
 end function
 
+function get_assigned_sym()
+-- call right after an assignment to get the sym that was assigned
+-- 	a = Code[pc+1]
+-- 	target = Code[pc+2]
+-- 	val[target] = val[a]
+	if not find( Code[$-2], {ASSIGN, ASSIGN_I}) then
+		return 0
+	end if
+	return Code[$-1]
+end function
+
 procedure Global_declaration(symtab_index type_ptr, integer scope)
 -- parse a command-level variable or constant declaration 
 -- type_ptr is NULL if constant 
 	token tok
-	symtab_index sym
+	symtab_index sym, valsym
 	integer h, val
 	val = 1
 	
@@ -1987,13 +2034,19 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			Expr()  -- no new symbols can be defined in here 
 			buckets[SymTab[sym][S_HASHVAL]] = sym
 			SymTab[sym][S_USAGE] = U_WRITTEN     
-		   
 			if TRANSLATE then
 				SymTab[sym][S_GTYPE] = TYPE_OBJECT 
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
 		   
 			emit_op(ASSIGN)
+			
+			valsym = get_assigned_sym()
+			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				-- need to remember this for select/case statements
+				SymTab[sym][S_CODE] = valsym
+			end if
+			
 		elsif type_ptr = -1 then
 			-- ENUM
 			SymTab[sym][S_MODE] = M_CONSTANT 
@@ -2132,10 +2185,10 @@ procedure Entry_statement()
     integer addr
 
 	if not length(loop_labels) or block_index=0 then
-        CompileErr("the entry statement must appear inside a loop")
-    end if
+		CompileErr("the entry statement must appear inside a loop")
+	end if
 	if block_list[block_index]=IF then
-        CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
+		CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
 	end if
 	addr = entry_addr[$]
     if addr=0  then
@@ -2154,7 +2207,6 @@ procedure Entry_statement()
 	    emit_op(NOP1)
 	end if 
 end procedure
-
 
 procedure Statement_list()
 -- Parse a list of statements
@@ -2243,7 +2295,6 @@ procedure Statement_list()
 		end if
 	end while
 end procedure
-
 forward_Statement_list = routine_id("Statement_list")
 
 procedure SubProg(integer prog_type, integer scope)

@@ -2199,7 +2199,7 @@ procedure opCASE()
 end procedure
 
 procedure opNOPSWITCH()
-	c_stmt0( "}" )
+	c_stmt0( ";}" )
 	Label( pc + 1 )
 	pc += 1
 end procedure
