@@ -1,7 +1,23 @@
+-- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 -- map.e
 -- Euphoria hash map
 --
 -- yuku 2008
+--
+-- Euphoria 4.0
+-- File System Operations --
+
+--****
+-- Category:
+--	 map
+--
+-- File:
+--	 lib_map
+--
+-- Title:
+--	 Euphoria Standard Library Map (hash table) Routines
+--****
+
 
 include get.e
 include primes.e
@@ -16,6 +32,21 @@ constant iInUse = 2 -- ==> count of non-empty buckets
 constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
 constant iKeys = 1
 constant iVals = 2
+
+--**
+-- Signature:
+-- global type map
+--
+-- Description:
+-- Defines the datatype 'map'
+--
+-- Comments:
+-- Used when declaring a map variable.
+--
+-- Example:
+-- map SymbolTable
+-- SymbolTable = new() -- Create a new map to hold the symbol table.
+--**
 global type map(object o)
 		if not sequence(o) then
 			return 0
@@ -41,13 +72,30 @@ global type map(object o)
 		return 1
 end type
 
-constant maxInt = #03FFFFFF
-
-
-global function calcHash(object pData, integer pMaxHash = 0)
+constant maxInt = #3FFFFFFF
+with trace
+--**
+-- Calculate a Hashing value from the supplied data.
+--
+-- This is used whenever you need to a single number to represent the data you supply.
+-- It can calculate the number based on all the data you give it, which can be
+-- an atom or sequence of any value.
+--
+-- Parameters:
+--	 pData = The data for which you want a hash value calculated.
+--	 pMaxHash = (default = 0) The returned value will be no larger than this value.
+--				However, a value of 0 or lower menas that it can as large as the maximum integer value.
+--
+-- Example 1:
+--	  integer h1
+--	  h1 = calc_hash( symbol_name )
+sequence lPrimes
+lPrimes = calc_primes(1000)
+global function calc_hash(object pData, integer pMaxHash = 0)
 	integer lResult
 	integer j
 	atom lInit
+	atom lTemp
 
 	if integer(pData) then
 		pData = {pData}
@@ -55,9 +103,9 @@ global function calcHash(object pData, integer pMaxHash = 0)
 		pData = atom_to_float64(pData)
 	end if
 
-	j = length(gPrimes) - length(pData)
+	j = length(lPrimes) - length(pData)
 	if j < 1 then
-		j = remainder(length(pData), length(gPrimes)) + 1
+		j = remainder(length(pData), length(lPrimes)) + 1
 	end if
 	if length(pData) < 17 then
 		lInit = power(3, length(pData))
@@ -69,23 +117,36 @@ global function calcHash(object pData, integer pMaxHash = 0)
 	end while
 	lResult = floor(lInit)
 	for i = 1 to length(pData) do
+		lResult = xor_bits(lResult, and_bits(lResult,#FC8F) * #1000)
 		j += 1
-		if j > length(gPrimes) then
+		if j > length(lPrimes) then
 			j = 1
 		end if
 
-		lResult = xor_bits(and_bits(#07FFFFFF, lResult) * 4, floor(lResult / 4))
 		lInit = length(pData) - i + 1
 		if sequence(pData[lInit]) then
-			lResult += calcHash(pData[lInit])
+			lTemp = lResult + calc_hash(pData[lInit])
+
 		elsif not integer(pData[lInit]) then
-			lResult += calcHash(atom_to_float64(pData[lInit]))
+			lTemp = lResult + calc_hash(atom_to_float64(pData[lInit]))
+
 		else
-			lResult += (length(pData) - i + 1 + gPrimes[j]) * pData[lInit]
+			lTemp = lResult + (lInit + lPrimes[j]) * pData[lInit]
+			if integer(pData[i]) then
+				lTemp *= (2.5 + and_bits(pData[i], #F)/ 8)
+			else
+				lTemp += calc_hash(pData[i])
+			end if
 		end if
-		lResult = and_bits(#1FFFFFFF, lResult)
+
+		if lTemp > maxInt then
+			lResult = remainder(floor(lTemp), maxInt)
+		else
+			lResult = floor(lTemp)
+		end if
 
 	end for
+	lResult = and_bits(maxInt, lResult)
 
 	if pMaxHash <= 0 then
 		return lResult
@@ -93,7 +154,7 @@ global function calcHash(object pData, integer pMaxHash = 0)
 		return remainder(lResult, pMaxHash) + 1 -- 1-based
 	end if
 end function
-
+--**
 
 global function rehash(map m, integer pRequestedSize = 0)
 	integer size, index2
@@ -119,7 +180,7 @@ global function rehash(map m, integer pRequestedSize = 0)
 				for entry_idx = 1 to length(oldBuckets[index][iKeys]) do
 						key = oldBuckets[index][iKeys][entry_idx]
 						value = oldBuckets[index][iVals][entry_idx]
-						index2 = calcHash(key, size)
+						index2 = calc_hash(key, size)
 						newBuckets[index2][iKeys] = append(newBuckets[index2][iKeys],key)
 						newBuckets[index2][iVals] = append(newBuckets[index2][iVals],value)
 						if length(newBuckets[index2][iVals]) = 1 then
@@ -144,7 +205,7 @@ global function has(map m, object key, integer pSimple = 1)
 	integer index
 	integer lOffset
 
-		index = calcHash(key, length(m[iBuckets]))
+		index = calc_hash(key, length(m[iBuckets]))
 
 		lOffset = find(key, m[iBuckets][index][iKeys])
 		if pSimple != 0 then
@@ -200,12 +261,12 @@ global function put(map m, object key, object value, integer pTrigger = 10, inte
 		if pTrigger > 0 then
 			if m[iCnt] >= length(m[iBuckets]) * pTrigger then
 				m = rehash(m)
-				index = calcHash(key, length(m[iBuckets]))
+				index = calc_hash(key, length(m[iBuckets]))
 			else
 				lAvgLength = (m[iCnt] / max({1,  m[iInUse]}))
 				if (lAvgLength >= pTrigger) and (length(bucket[iVals]) >= (lAvgLength * 2)) then
 					m = rehash(m)
-					index = calcHash(key, length(m[iBuckets]))
+					index = calc_hash(key, length(m[iBuckets]))
 				end if
 			end if
 		end if
@@ -225,7 +286,7 @@ global function remove(map m, object key)
 	object bucket
 
 
-		index = calcHash(key, length(m[iBuckets]))
+		index = calc_hash(key, length(m[iBuckets]))
 
 		-- find prev entry
 		bucket = m[iBuckets][index]
