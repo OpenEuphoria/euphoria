@@ -2613,9 +2613,9 @@ global procedure real_parser(integer nested)
 	integer id
 	integer scope
 	
-	tok = next_token()
 	while TRUE do  -- infinite loop until scanner aborts
 		start_index = length(Code)+1
+		tok = next_token()
 		id = tok[T_ID]
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			StartSourceLine(TRUE)
@@ -2801,7 +2801,6 @@ global procedure real_parser(integer nested)
 
 		end if
 		
-		tok = next_token()
 	end while 
 
 	emit_op(RETURNT)
