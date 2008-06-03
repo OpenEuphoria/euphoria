@@ -1824,6 +1824,7 @@ procedure Ifdef_statement()
 				return
 			elsif tok[T_ID] = IF then
 				nested_count += 1
+			else read_line()
 			end if
 		end while
 	end while
