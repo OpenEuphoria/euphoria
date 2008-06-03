@@ -32,7 +32,7 @@ constant iInUse = 2 -- ==> count of non-empty buckets
 constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
 constant iKeys = 1
 constant iVals = 2
-
+--with trace
 --**
 -- Signature:
 -- global type map
@@ -73,9 +73,6 @@ global type map(object o)
 end type
 
 constant maxInt = #3FFFFFFF
-sequence lPrimes
-lPrimes = calc_primes(1000)
-
 --**
 -- Calculate a Hashing value from the supplied data.
 --
@@ -91,89 +88,80 @@ lPrimes = calc_primes(1000)
 -- Example 1:
 --	  integer h1
 --	  h1 = calc_hash( symbol_name )
+function calc_hash(object key, integer pMaxHash = 0)
+	integer ret
+	integer temp
 
-global function calc_hash(object pData, integer pMaxHash = 0)
-	integer lResult
-	integer j
-	atom lTemp
+	if integer(key) then
+		ret = key
+	else
+		if atom(key) then
+			key = atom_to_float64(key)
+		end if
+		ret = length(key)
+		for i = length(key) to 1 by -1 do
+			temp = ret * 2
+			ret = temp + temp + temp + temp + temp + temp + temp + ret
+			if integer(key[i]) then
+				ret += key[i]
+			elsif atom(key[i]) then
+				ret += calc_hash(atom_to_float64(key[i]))
+			else
+				ret += calc_hash(key[i])
+			end if
+			ret = and_bits(ret, #03FFFFFF)
+		end for
 
-	if integer(pData) then
-		pData = {pData}
-	elsif atom(pData) then
-		pData = atom_to_float64(pData)
 	end if
-
-	j = 1
-	lResult = (length(pData) + 1) * (length(pData) + 1) + pMaxHash
-	for i = 1 to length(pData) do
-		j -= 1
-		if j < 1 then 
-			j = length(lPrimes)
-		end if
-
-		if sequence(pData[i]) then
-			lTemp = lResult + calc_hash(pData[i])
-
-		elsif not integer(pData[i]) then
-			lTemp = lResult + calc_hash(atom_to_float64(pData[i]))
-
-		else
-			lTemp = lResult +  pData[i] - lPrimes[j]
-		end if
-
-		if lTemp > maxInt then
-			lResult = remainder(floor(lTemp), maxInt)
-		else
-			lResult = floor(lTemp)
-		end if
-
-	end for
-	lResult = and_bits(maxInt, lResult)
 
 	if pMaxHash <= 0 then
-		return lResult
-	else
-		return remainder(lResult, pMaxHash) + 1 -- 1-based
+		return ret
 	end if
+
+	return remainder(ret, pMaxHash) + 1 -- 1-based
+
 end function
 --**
 
-global function rehash(map m, integer pRequestedSize = 0)
+global function rehash(map m1, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
 	object key, value
 	atom newsize
+	sequence m
 
-		if pRequestedSize <= 0 then
-			-- grow bucket size
-			newsize = floor(length(m[iBuckets]) * 3.5) + 1
-			if newsize > maxInt then
-					return m -- dont do anything. already too large
-			end if
-			size = newsize
-		else
-			size = pRequestedSize
+	m = m1
+
+	if pRequestedSize <= 0 then
+		-- grow bucket size
+		newsize = floor(length(m[iBuckets]) * 3.5) + 1
+		if newsize > maxInt then
+				return m -- dont do anything. already too large
 		end if
-		size = next_prime(size)
-		oldBuckets = m[iBuckets]
-		newBuckets = repeat({{},{}}, size)
-		m[iInUse] = 0
-		for index = 1 to length(oldBuckets) do
-				for entry_idx = 1 to length(oldBuckets[index][iKeys]) do
-						key = oldBuckets[index][iKeys][entry_idx]
-						value = oldBuckets[index][iVals][entry_idx]
-						index2 = calc_hash(key, size)
-						newBuckets[index2][iKeys] = append(newBuckets[index2][iKeys],key)
-						newBuckets[index2][iVals] = append(newBuckets[index2][iVals],value)
-						if length(newBuckets[index2][iVals]) = 1 then
-							m[iInUse] += 1
-						end if
-				end for
+		size = newsize
+	else
+		size = pRequestedSize
+	end if
+	size = next_prime(size)
+	oldBuckets = m[iBuckets]
+	newBuckets = repeat({{},{}}, size)
+	m[iInUse] = 0
+	for index = 1 to length(oldBuckets) do
+		for entry_idx = 1 to length(oldBuckets[index][iKeys]) do
+			key = oldBuckets[index][iKeys][entry_idx]
+			value = oldBuckets[index][iVals][entry_idx]
+			index2 = calc_hash(key, size)
+			newBuckets[index2][iKeys] = append(newBuckets[index2][iKeys],key)
+			newBuckets[index2][iVals] = append(newBuckets[index2][iVals],value)
+			if length(newBuckets[index2][iVals]) = 1 then
+				m[iInUse] += 1
+			end if
 		end for
+	end for
 
-		m[iBuckets] = newBuckets
+	m[iBuckets] = newBuckets
 
-		return m
+	return m
 end function
 
 global function new(integer initSize = 66)
@@ -183,34 +171,21 @@ global function new(integer initSize = 66)
 	return {0, 0, repeat({{},{}}, lBuckets ) }
 end function
 
-global function has(map m, object key, integer pSimple = 1)
-	integer index
-	integer lOffset
+global function has(map m, object key)
+	integer lIndex
 
-		index = calc_hash(key, length(m[iBuckets]))
-
-		lOffset = find(key, m[iBuckets][index][iKeys])
-		if pSimple != 0 then
-			if lOffset != 0 then
-				return 1
-			else
-				return 0
-			end if
-		else
-			return {index, lOffset}
-		end if
+	lIndex = calc_hash(key, length(m[iBuckets]))
+	return (find(key, m[iBuckets][lIndex][iKeys]) != 0)
 end function
 
-global function get(map m, object key, object defaultValue, integer pSimple = 1)
-	sequence lLocn
+global function get(map m, object key, object defaultValue)
+	integer lIndex
+	integer lOffset
 
-	if pSimple != 0 then
-		lLocn = has(m, key, 0)
-	else
-		lLocn = key
-	end if
-	if lLocn[2] != 0 then
-		return m[iBuckets][lLocn[1]][iVals][lLocn[2]]
+	lIndex = calc_hash(key, length(m[iBuckets]))
+	lOffset = find(key, m[iBuckets][lIndex][iKeys])
+	if lOffset != 0 then
+		return m[iBuckets][lIndex][iVals][lOffset]
 	else
 		return defaultValue
 	end if
@@ -218,56 +193,52 @@ global function get(map m, object key, object defaultValue, integer pSimple = 1)
 end function
 
 
-global function put(map m, object key, object value, integer pTrigger = 100, integer pSimple = 1)
+global function put(map m1, object key, object value, integer pTrigger = 100)
 	integer index
+	integer hashval
 	integer lOffset
 	object bucket
 	atom lAvgLength
-	sequence lLocn
+	sequence m
+	integer bl
 
-	if pSimple != 0 then
-		lLocn = has(m, key, 0)
-		index = lLocn[1]
-		lOffset = lLocn[2]
-	else
-		index = key[1]
-		lOffset = key[2]
-	end if
-
+	m = m1
+	hashval = calc_hash(key, 0)
+	index = remainder(hashval, length(m[iBuckets])) + 1
 	bucket = m[iBuckets][index]
+	bl = length(bucket[iVals])
+	lOffset = find(key, bucket[iKeys])
+
 	if lOffset != 0 then
 		bucket[iVals][lOffset] = value
 		m[iBuckets][index] = bucket
-	else
-		m[iCnt] += 1 -- elementCount
-		if pTrigger > 0 then
-			if m[iCnt] >= length(m[iBuckets]) * pTrigger then
-				m = rehash(m)
-				index = calc_hash(key, length(m[iBuckets]))
-			else
-				lAvgLength = (m[iCnt] / max({1,  m[iInUse]}))
-				if (lAvgLength >= pTrigger) and (length(bucket[iVals]) >= (lAvgLength * 2)) then
-					m = rehash(m)
-					index = calc_hash(key, length(m[iBuckets]))
-				end if
-			end if
-		end if
-		-- write new entry
-		m[iBuckets][index][iKeys] = append(m[iBuckets][index][iKeys], key)
-		m[iBuckets][index][iVals] = append(m[iBuckets][index][iVals], value)
-		if length(m[iBuckets][index][iVals]) = 1 then
-			m[iInUse] += 1
+		return m
+	end if
+	if bl = 0 then
+		m[iInUse] += 1
+	end if
+
+	m[iCnt] += 1 -- elementCount
+	if pTrigger > 0 then
+		lAvgLength = m[iCnt] / m[iInUse]
+		if (lAvgLength >= pTrigger) then
+			m = rehash(m)
+			index = remainder(hashval, length(m[iBuckets])) + 1
 		end if
 	end if
+	-- write new entry
+	m[iBuckets][index][iKeys] = append(m[iBuckets][index][iKeys], key)
+	m[iBuckets][index][iVals] = append(m[iBuckets][index][iVals], value)
 
 	return m
 end function
 
-global function remove(map m, object key)
+global function remove(map m1, object key)
 	integer hash, index
 	object bucket
+	sequence m
 
-
+	m = m1
 		index = calc_hash(key, length(m[iBuckets]))
 
 		-- find prev entry
@@ -357,9 +328,11 @@ global function values(map m)
 end function
 
 
-global function optimize(map m, atom pAvg = 10)
+global function optimize(map m1, atom pAvg = 10)
 	sequence op
+	sequence m
 
+	m = m1
 	op = statistics(m)
 	m = rehash(m, floor(op[1] / pAvg))
 	op = statistics(m)
@@ -379,7 +352,7 @@ global function load_map(sequence pFileName)
 	object lValue
 	sequence lKey
 	sequence lConvRes
-	map m
+	sequence m
 
 	fh = open(pFileName, "r")
 	if fh = -1 then
