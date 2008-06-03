@@ -147,7 +147,7 @@ elsif platform() = LINUX then
 	LC_TIME     = 2
 	LC_COLLATE  = 3
 	LC_MONETARY = 4
-	LC_MESSAGES = 6
+	LC_MESSAGES = 5
 
 else
 
@@ -168,7 +168,7 @@ constant
 -- TODO: document
 global function set(sequence new_locale)
 	atom pLocale, ign
-
+	
 	new_locale = lcc:decanonical(new_locale)
 	pLocale = allocate_string(new_locale)
 	ign = c_func(f_setlocale, {LC_MONETARY, pLocale})

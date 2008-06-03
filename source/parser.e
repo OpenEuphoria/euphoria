@@ -551,7 +551,7 @@ procedure ParseArgs(symtab_index subsym)
 	token tok
     symtab_index s,arg
     object tok2
-
+    
 	n = SymTab[subsym][S_NUM_ARGS]
     s = subsym
     arg = 0
@@ -591,7 +591,6 @@ procedure ParseArgs(symtab_index subsym)
 			on_arg += 1
 			tok2 = backed_up_tok
 			putback(tok)
-
 		elsif tok[T_ID] != RIGHT_ROUND then
 			s = SymTab[s][S_NEXT]
         	putback(tok) 
@@ -625,8 +624,11 @@ procedure ParseArgs(symtab_index subsym)
                                     private_list[k] = SymTab[arg][S_NAME]
                                 end for
                             end if
+
+							putback( tok )
 							start_playback(SymTab[s][S_CODE] )
 							call_proc(forward_expr, {})
+
 							on_arg += 1
                         else -- just not enough args
                             CompileErr(sprintf("Argument %d is defaulted, but has no default value",j))
@@ -635,7 +637,11 @@ procedure ParseArgs(symtab_index subsym)
                     -- all missing args had default values
                     short_circuit += 1
 					use_private_list=0
+					if equal(backed_up_tok, {-27,0}) then 
+						backed_up_tok = UNDEFINED 
+					end if
                     return
+				
 				else
 					putback(tok)
 					tok_match(COMMA)
@@ -644,7 +650,6 @@ procedure ParseArgs(symtab_index subsym)
 		end if
 		
 	end for
-	
 	tok = next_token()
 	short_circuit += 1
 	if tok[T_ID] != RIGHT_ROUND then
@@ -849,7 +854,7 @@ function cexpr()
 	
 	if concat_count = 1 then
 		emit_op(CONCAT)
-	
+		
 	elsif concat_count > 1 then
 		op_info1 = concat_count+1 
 		emit_op(CONCAT_N) 

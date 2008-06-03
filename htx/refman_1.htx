@@ -163,6 +163,7 @@
 
 <h3>Installation</h3>
 
+<_dul>1.2.1 DOS / Windows</dul>
 <p>
  To install Euphoria on your machine, first read the file
  <path>install.doc</path>.
@@ -245,8 +246,18 @@
 </dl>
 </dl>
 </dl>
-
+<_dul>1.2.2 Linux and FreeBSD</dul>
 <p>
+Linux may be installed using either the gzipped tarball, or from a distribution specific
+package, if available.  The gzipped tarball is laid out similarly to the windows
+directory structure.  You'll need to set up PATH manually, and either create a euinc.conf file
+or set up EUDIR and EUINC manually.
+
+The packaged version installs Euphoria in a more Unix-like way, putting the executables
+into /usr/bin, /usr/share/euphoria and /usr/share/doc/euphoria.  Man pages for exu,
+ecu, eubackend, eushroud and eubind are also installed.  It will also create /etc/euphoria/euinc.conf,
+which will point to the standard euphoria include directory in /usr/share/euphoria/include.
+
 The Linux subdirectory is not included in the DOS/Windows distribution,
 and the dos32 and win32 subdirectories are not included in the Linux/FreeBSD
 distribution. In this manual, directory names are shown using backslash

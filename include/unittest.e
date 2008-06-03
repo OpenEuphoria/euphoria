@@ -164,7 +164,7 @@ global procedure test_true(sequence name, object a)
 	else
 		success = (a != 0)
 	end if
-	record_result(success, name, a, 1)
+	record_result(success, name, 1, a )
 end procedure
 
 global procedure test_false(sequence name, object a)
@@ -174,7 +174,7 @@ global procedure test_false(sequence name, object a)
 	else
 		success = (a = 0)
 	end if
-	record_result(success, name, a, 0)
+	record_result(success, name, 0, a)
 end procedure
 
 global procedure test_fail(sequence name)

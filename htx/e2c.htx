@@ -137,10 +137,10 @@ ecu qsort.exu
  
 	<console>ecu -debug myapp.exu</console>
 
-<p>It is sometimes useful to link your translated code to a Euphoria runtime library other than the default supplied library.  This ability is probably mostly useful for testing and debugging the runtime library itself, or to give additional debugging information when debugging translated Euphoria code.  Note that only the default library is supplied.  The custom library must be put into your EUDIR/bin directory along with the default library. Use the <b>-lib {library}</b> option:</p>
+<p>It is sometimes useful to link your translated code to a Euphoria runtime library other than the default supplied library.  This ability is probably mostly useful for testing and debugging the runtime library itself, or to give additional debugging information when debugging translated Euphoria code.  Note that only the default library is supplied.  Use the <b>-lib {library}</b> option:</p>
  
 	<console>ecu -lib decu.a myapp.exu</console>
- 
+
 <h3>Dynamic Link Libraries (Shared Libraries)</h3>
 
 <p>Simply by adding <_bq>-dll</_bq> to the command line, the <font color="#0066CC"><b>Translator</b></font> will build a <font color="#CC3366"><b>Windows</b></font> .dll (<font color="#CC3366"><b>Linux</b></font>/<font color="#CC3366"><b>FreeBSD</b> </font> .so) file instead of an executable program.</p>
