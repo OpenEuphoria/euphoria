@@ -93,7 +93,11 @@ function calc_hash(object key, integer pMaxHash = 0)
 	integer temp
 
 	if integer(key) then
-		ret = key
+		if key < 0 then
+			ret = -key
+		else
+			ret = key
+		end if
 	else
 		if atom(key) then
 			key = atom_to_float64(key)
