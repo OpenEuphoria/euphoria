@@ -206,6 +206,7 @@ EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_w.o
 
 EU_LIB_OBJECTS = \
+	./$(OBJDIR)/back/be_decompress.o \
 	./$(OBJDIR)/back/be_machine.o \
 	./$(OBJDIR)/back/be_w.o \
 	./$(OBJDIR)/back/be_alloc.o \
