@@ -665,7 +665,7 @@ end procedure
 
 procedure Factor()
 -- parse a factor in an expression 
-	token tok
+       token tok, tok2, tok3
 	integer id, n, scope, opcode, e
 	integer save_factors, save_lhs_subs_level
 	symtab_index sym
@@ -767,7 +767,84 @@ procedure Factor()
 		tok_match(LEFT_ROUND)
 		scope = SymTab[tok[T_SYM]][S_SCOPE]
 		opcode = SymTab[tok[T_SYM]][S_OPCODE]
-		ParseArgs(tok[T_SYM])
+		--if equal(SymTab[tok[T_SYM]][S_NAME],"object") then
+		if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
+			tok2 = next_token()
+			if tok2[T_ID] = VARIABLE or tok2[T_ID] = QUALIFIED_VARIABLE then
+				tok3 = next_token()
+				if tok3[T_ID] = RIGHT_ROUND then
+					-- what we are looking for
+					sym = tok2[T_SYM]
+					UndefinedVar(sym)
+
+					SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
+
+					-- don't emit an INIT_CHECK, so object() can see if it is NOVALUE or not
+					emit_opnd(sym)
+				elsif tok3[T_ID] = COMMA then
+					-- give a sane error message
+					WrongNumberArgs(tok[T_SYM], "")
+				else
+					-- since we can only put back
+					-- one token, and we already took
+					-- two, we need to manually do the
+					-- parse args ourselves.
+					-- The only possible valid case is
+					-- a variable followed by a slice
+					sym = tok2[T_SYM]
+					UndefinedVar(sym)
+
+					SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
+
+					InitCheck(sym, TRUE)
+					emit_opnd(sym)
+
+					if sym = left_sym then
+						lhs_subs_level = 0
+						-- start counting subscripts
+					end if
+
+					--short_circuit -= 1
+					tok2 = tok3
+					current_sequence = append(current_sequence, sym)
+					while tok2[T_ID] = LEFT_SQUARE do
+				       		if lhs_subs_level >= 0 then
+							lhs_subs_level += 1
+						end if
+						save_factors = factors
+						save_lhs_subs_level = lhs_subs_level
+						call_proc(forward_expr, {})
+						tok2 = next_token()
+						if tok2[T_ID] = SLICE then
+							call_proc(forward_expr, {})
+							emit_op(RHS_SLICE)
+							tok_match(RIGHT_SQUARE)
+							tok2 = next_token()
+							exit
+						else
+							putback(tok2)
+							tok_match(RIGHT_SQUARE)
+							current_sequence = current_sequence[1..$-1]
+							emit_op(RHS_SUBS)
+							-- current_sequence will be updated
+						end if
+						factors = save_factors
+						lhs_subs_level = save_lhs_subs_level
+				       		tok2 = next_token()
+					end while
+					current_sequence = current_sequence[1..$-1]
+					putback(tok2)
+					--short_circuit += 1
+					tok_match(RIGHT_ROUND)
+
+				end if
+			else
+				putback(tok2)
+				ParseArgs(tok[T_SYM])
+			end if
+		else
+			ParseArgs(tok[T_SYM])
+		end if
 		if scope = SC_PREDEF then
 			emit_op(opcode)
 		else

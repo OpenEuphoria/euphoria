@@ -2293,8 +2293,13 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_IS_AN_OBJECT:
+				top = *(object_ptr)pc[1];
+				if (top != NOVALUE) 
+					top = ATOM_1;
+				else 
+					top = ATOM_0;
 				DeRefx(*(object_ptr)pc[2]);
-				*(object_ptr)pc[2] = ATOM_1;
+				*(object_ptr)pc[2] = top;
 				inc3pc();
 				BREAK;
 
