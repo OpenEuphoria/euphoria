@@ -18,9 +18,11 @@ fi
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
+	echo ELINUX=1 >> "$PREFIX"Makefile.eu
 else
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo ELINUX= >> "$PREFIX"Makefile.eu
 fi
 
 case "${UNAME_SYSTEM}:${ECONFIG}" in
