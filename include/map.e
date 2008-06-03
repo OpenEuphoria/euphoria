@@ -32,7 +32,7 @@ constant iInUse = 2 -- ==> count of non-empty buckets
 constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
 constant iKeys = 1
 constant iVals = 2
---with trace
+
 --**
 -- Signature:
 -- global type map
@@ -88,16 +88,12 @@ constant maxInt = #3FFFFFFF
 -- Example 1:
 --	  integer h1
 --	  h1 = calc_hash( symbol_name )
-function calc_hash(object key, integer pMaxHash = 0)
+global function calc_hash(object key, integer pMaxHash = 0)
 	integer ret
 	integer temp
 
-	if integer(key) then
-		if key < 0 then
-			ret = -key
-		else
-			ret = key
-		end if
+	if integer(key) then	
+		ret = key
 	else
 		if atom(key) then
 			key = atom_to_float64(key)
@@ -105,7 +101,10 @@ function calc_hash(object key, integer pMaxHash = 0)
 		ret = length(key)
 		for i = length(key) to 1 by -1 do
 			temp = ret * 2
-			ret = temp + temp + temp + temp + temp + temp + temp + ret
+			temp *= 2
+			temp *= 2
+			temp *= 2
+			ret = temp - ret			
 			if integer(key[i]) then
 				ret += key[i]
 			elsif atom(key[i]) then
@@ -115,9 +114,12 @@ function calc_hash(object key, integer pMaxHash = 0)
 			end if
 			ret = and_bits(ret, #03FFFFFF)
 		end for
-
 	end if
-
+	
+	if ret < 0 then
+		ret = -ret
+	end if
+	
 	if pMaxHash <= 0 then
 		return ret
 	end if
