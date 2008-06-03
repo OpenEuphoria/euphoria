@@ -2076,6 +2076,11 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			end if
 		   
 			emit_op(ASSIGN)
+			valsym = get_assigned_sym()
+			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				-- need to remember this for select/case statements
+				SymTab[sym][S_CODE] = valsym
+			end if
 		else 
 			-- variable 
 			SymTab[sym][S_MODE] = M_NORMAL
