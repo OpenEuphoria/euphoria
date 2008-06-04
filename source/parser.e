@@ -1899,14 +1899,15 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = ELSIFDEF then
 				exit
 			elsif tok[T_ID] = ELSE and matched = 0 and nested_count = 0 then
-				--call_proc(forward_Statement_list, {})
 				call_proc(top_level_parser, {})
 				tok_match(END)
 				tok_match(IFDEF)
 				return
 			elsif tok[T_ID] = IF then
 				nested_count += 1
-			else read_line()
+			else
+				-- BOL token was nothing of value to us, just eat the rest of the line
+				read_line()
 			end if
 		end while
 	end while
