@@ -82,7 +82,8 @@ global procedure NewBB(integer a_call, integer mask, symtab_index sub)
 			s = BB_info[i][BB_VAR]
 			if SymTab[s][S_MODE] = M_NORMAL and
 				(SymTab[s][S_SCOPE] = SC_GLOBAL or
-				 SymTab[s][S_SCOPE] = SC_LOCAL) then
+				 SymTab[s][S_SCOPE] = SC_LOCAL  or
+				 SymTab[s][S_SCOPE] = SC_EXPORT ) then
 				  if and_bits(mask, power(2, remainder(s, E_SIZE))) then
 					  if mask = E_ALL_EFFECT or s < sub then
 						  BB_info[i][BB_TYPE..BB_OBJ] = 
@@ -585,7 +586,7 @@ global procedure DeclareFileVars()
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		eentry = SymTab[s]
-		if eentry[S_SCOPE] >= SC_LOCAL and eentry[S_SCOPE] <= SC_GLOBAL and
+		if eentry[S_SCOPE] >= SC_LOCAL and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT) and
 			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
 			not find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
 			c_puts("int ")
@@ -723,7 +724,7 @@ global procedure DeclareRoutineList()
 	while s do
 		if SymTab[s][S_USAGE] != U_DELETED and
 			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
-			if SymTab[s][S_SCOPE] = SC_GLOBAL and dll_option then
+			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT } ) and dll_option then
 				-- declare the global routine as an exported DLL function
 				if EWINDOWS then            
 				 -- c_hputs("int __declspec (dllexport) __stdcall\n")
@@ -776,7 +777,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", seq_num)
 				
-				if SymTab[s][S_SCOPE] = SC_GLOBAL or SymTab[s][S_SCOPE] = SC_EXPORT then
+				if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT } ) then
 					c_printf(", %d", - SymTab[s][S_FILE_NO])
 				else
 					c_printf(", %d", SymTab[s][S_FILE_NO])
@@ -784,7 +785,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", SymTab[s][S_NUM_ARGS])
 				
-				if EWINDOWS and dll_option and SymTab[s][S_SCOPE] = SC_GLOBAL then
+				if EWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT} ) then
 					c_puts(", 1")  -- must call with __stdcall convention
 				else
 					c_puts(", 0")  -- default: call with normal or __cdecl convention
@@ -876,7 +877,7 @@ procedure Write_def_file(integer def_file)
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
-			if SymTab[s][S_SCOPE] = SC_GLOBAL then
+			if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT}) then
 				if sequence(bor_path) then             
 					printf(def_file, "%s=_%d%s\n", 
 						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
@@ -1509,7 +1510,7 @@ global procedure GenerateUserRoutines()
 						add_file(c_file)
 					end if
 				
-					if SymTab[s][S_SCOPE] = SC_GLOBAL and dll_option then
+					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT} ) and dll_option then
 						-- declare the global routine as an exported DLL function
 						if EWINDOWS then      
 							-- c_stmt0("int __declspec (dllexport) __stdcall\n")

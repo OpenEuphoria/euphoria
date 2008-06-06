@@ -2020,8 +2020,7 @@ procedure opPROC()
 
 	if SymTab[sub][S_TOKEN] != PROC then
 		p = Code[pc+n-1]
-		if SymTab[p][S_MODE] = M_NORMAL and (SymTab[p][S_SCOPE] = SC_GLOBAL or
-		   SymTab[p][S_SCOPE] = SC_LOCAL) then
+		if SymTab[p][S_MODE] = M_NORMAL and find(SymTab[p][S_SCOPE], { SC_GLOBAL, SC_LOCAL, SC_EXPORT }) then
 			-- global/local might be modified during the call,
 			-- so complete the call before setting DeRef value
 			c_stmt("_0 = ", p)
@@ -2048,8 +2047,7 @@ procedure opPROC()
 				
 	if SymTab[sub][S_TOKEN] != PROC then
 		if SymTab[p][S_MODE] = M_NORMAL and
-			(SymTab[p][S_SCOPE] = SC_GLOBAL or
-				SymTab[p][S_SCOPE] = SC_LOCAL) then
+			find(SymTab[p][S_SCOPE], { SC_GLOBAL, SC_LOCAL, SC_EXPORT} ) then
 			CDeRef(p)  -- DeRef latest value, not old one
 			c_stmt("@ = _0;\n", p)
 		else 
