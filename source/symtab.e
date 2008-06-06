@@ -537,6 +537,10 @@ function symbol_in_include_path( symtab_index sym, integer check_file, sequence 
 		return 0
 end function
 
+-- remember which files have gotten warnings already to avoid issuing too many
+sequence include_warnings
+include_warnings = {}
+
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 
@@ -690,7 +694,8 @@ global function keyfind(sequence word, integer file_no)
 		if BIND then
 			add_ref(gtok)
 		end if
-		if not in_include_path[1] then
+		if not in_include_path[1] and not find( {current_file_no,SymTab[gtok[T_SYM]][S_FILE_NO]}, include_warnings )  then
+			include_warnings = prepend( include_warnings, {current_file_no,SymTab[gtok[T_SYM]][S_FILE_NO]})
 			symbol_resolution_warning = sprintf("%s:%d - identifier '%s' in '%s' is not included", 
 				{name_ext(file_name[current_file_no]), line_number, word, 
 				name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]) })
