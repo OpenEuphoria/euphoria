@@ -58,6 +58,9 @@ test_equal("remove() range bounds #2", "John Doe", remove("John Doe", {3, 1}))
 test_equal("remove() range bounds #3", "John Doe", remove("John Doe", {-3, -1}))
 test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", {1.5, 3}))
 
+test_equal("remove_element() 1", {2,3,4,3,2}, remove_element(1,{1,2,3,1,4,3,1,2,1}))
+test_equal("remove_element() 2", "Ask what you can do for your country.", remove_element("x","xAxsk whxat you caxn do for yoxur countryx.x"))
+
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 

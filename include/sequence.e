@@ -363,7 +363,7 @@ end function
 -- s = remove({1,2,3,3,4,4}, {4, 5})
 -- -- s is {1,2,3,4}
 -- See also
--- replace, insert, splice
+-- replace, insert, splice, remove_element
 
 global function remove(sequence st, object index)
 	atom start, stop
@@ -400,6 +400,72 @@ global function remove(sequence st, object index)
 end function
 --**
 
+--**
+-- Removes all ocurrences of needle from haystack
+--
+-- Example:
+-- s = remove_element( 1, {1,2,4,1,3,2,4,1,2,3} )
+-- -- s is {2,4,3,2,4,2,3}
+--
+-- s = remove_element("x", "I'm toox secxksy for my shixrt.")
+-- -- s is "I'm too secksy for my shirt."
+--
+-- See also:
+-- remove
+--
+global function remove_element(object needle, sequence haystack)
+    integer ts,te,ss,se
+
+    -- See if we have to anything at all.    
+    se = find(needle, haystack)
+    if se = 0 then
+        return haystack
+    end if
+    
+    -- Now we know there is at least one occurance and because
+    -- it's the first one, we don't have to move anything yet.
+    -- So pretend we have and set up the 'end' variables
+    -- as if we had moved stuff.
+    se -= 1
+    te = se
+
+    while se > 0 entry do
+        -- Shift elements down the sequence.
+        haystack[ts .. te] = haystack[ss .. se]
+        
+      entry  ----- The loop starts here <<<<-----------
+      	-- Calc where the next target start is (1 after the previous end)
+        ts = te + 1
+        
+        -- Calc where to start the next search (2 after the previous end)
+        ss = se + 2
+        
+        -- See if we got another one.
+        se = find_from(needle, haystack, ss)
+        
+    	-- We have another one, so calculate the source end(1 before the needle)
+        se = se - 1
+        
+        -- Calc the target end (start + length of what we are moving)
+        te = ts + se - ss 
+        
+    end while
+    
+    -- Check to see if there is anything after the final needle
+    -- and move it.
+    if ss <= length(haystack) then
+        te = ts + length(haystack) - ss
+        haystack[ts .. te] = haystack[ss .. $]
+    else
+    	-- Need to backtrack one needle.
+    	te = ts - 1
+    end if
+    
+    -- Return only the stuff we moved.
+    return haystack[1 .. te]
+end function
+--**
+
 constant dummy = 0
 
 --**
@@ -418,7 +484,7 @@ constant dummy = 0
 -- -- s is {10,20,30,40}
 --
 -- See also:
--- remove, splice
+-- remove, splice, remove_element
 global function insert(sequence st, object what, integer index)
 	if index > length(st) then
 		return append(st, what)
@@ -448,7 +514,7 @@ end function
 -- -- s is {10,20,30,40}
 --
 -- See also:
--- insert, remove, replace
+-- insert, remove, replace, remove_element
 global function splice(sequence st, object what, integer index)
 	if index > length(st) then
 		return st & what
@@ -476,7 +542,7 @@ end function
 -- -- s is {45.3, 25, {10, 20}}
 --
 -- See also:
--- splice, remove
+-- splice, remove, remove_element
 global function replace(sequence st, object what, integer start, integer stop)
 	st = remove(st, {start, stop})
 	return splice(st, what, start)
