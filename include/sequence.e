@@ -363,7 +363,7 @@ end function
 -- s = remove({1,2,3,3,4,4}, {4, 5})
 -- -- s is {1,2,3,4}
 -- See also
--- replace, insert, splice, remove_element
+-- replace, insert, splice, remove_all
 
 global function remove(sequence st, object index)
 	atom start, stop
@@ -404,10 +404,10 @@ end function
 -- Removes all ocurrences of needle from haystack
 --
 -- Example:
--- s = remove_element( 1, {1,2,4,1,3,2,4,1,2,3} )
+-- s = remove_all( 1, {1,2,4,1,3,2,4,1,2,3} )
 -- -- s is {2,4,3,2,4,2,3}
 --
--- s = remove_element("x", "I'm toox secxksy for my shixrt.")
+-- s = remove_all("x", "I'm toox secxksy for my shixrt.")
 -- -- s is "I'm too secksy for my shirt."
 --
 -- See also:
@@ -483,7 +483,7 @@ constant dummy = 0
 -- -- s is {10,20,30,40}
 --
 -- See also:
--- remove, splice, remove_element
+-- remove, splice, remove_all
 global function insert(sequence st, object what, integer index)
 	if index > length(st) then
 		return append(st, what)
@@ -513,7 +513,7 @@ end function
 -- -- s is {10,20,30,40}
 --
 -- See also:
--- insert, remove, replace, remove_element
+-- insert, remove, replace, remove_all
 global function splice(sequence st, object what, integer index)
 	if index > length(st) then
 		return st & what
@@ -541,7 +541,7 @@ end function
 -- -- s is {45.3, 25, {10, 20}}
 --
 -- See also:
--- splice, remove, remove_element
+-- splice, remove, remove_all
 global function replace(sequence st, object what, integer start, integer stop)
 	st = remove(st, {start, stop})
 	return splice(st, what, start)
@@ -1096,3 +1096,38 @@ global function extract(sequence source,sequence indexes)
 end function
 --**
 
+--**
+-- Rotates a slice of a sequence to the left.
+--
+-- If the shift is negative, a rotation to the right will be performed instead.
+--
+-- Example:
+-- s = rotate_left({11,13,15,17,19,23},2,5,1)
+-- -- s is {11,15,17,19,13,23}
+--
+-- s = rotate_left({11,13,15,17,19,23},2,5,-1)
+-- -- s is {11,19,13,15,17,23}
+--
+-- See also:
+-- slice
+global function rotate_left(sequence source,integer start,integer stop,integer left_shift)
+	sequence shifted
+	integer len
+
+	if start >= stop or length(source)=0 then
+		return source
+	end if
+	if not valid_index(source,start) or not valid_index(source,stop) then
+		crash("sequence:rotate_left(): invalid slice specification",0)
+	end if
+	len = stop - start + 1
+	left_shift = remainder(left_shift, len)
+	if left_shift<0 then -- convert right shift to left shift
+		left_shift += len
+	end if
+	shifted = source[start..start+left_shift-1]
+	source[start..stop-left_shift] = source[start+left_shift..stop]
+	source[stop-left_shift+1..stop] = shifted
+	return source
+end function
+--**

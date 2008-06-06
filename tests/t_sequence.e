@@ -58,8 +58,8 @@ test_equal("remove() range bounds #2", "John Doe", remove("John Doe", {3, 1}))
 test_equal("remove() range bounds #3", "John Doe", remove("John Doe", {-3, -1}))
 test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", {1.5, 3}))
 
-test_equal("remove_element() 1", {2,3,4,3,2}, remove_element(1,{1,2,3,1,4,3,1,2,1}))
-test_equal("remove_element() 2", "Ask what you can do for your country.", remove_element("x","xAxsk whxat you caxn do for yoxur countryx.x"))
+test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
+test_equal("remove_all() 2", "Ask what you can do for your country.", remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
 
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
@@ -145,4 +145,10 @@ project(S1,{{2,3,5},{1,4,6}}))
 
 test_equal("extract",{11,17,13},extract({13,11,9,17},{2,4,1}))
 test_equal("valid_index",1,valid_index({1,2,3},3.5))
+
+test_equal("rotate_left: left",{1,4,5,6,2,3,7},rotate_left({1,2,3,4,5,6,7},2,6,2))
+test_equal("rotate_left: right",{1,5,6,2,3,4,7},rotate_left({1,2,3,4,5,6,7},2,6,-2))
+
+
+
 
