@@ -56,6 +56,20 @@ user_library = ""
 global integer total_stack_size  -- default size for OPTION STACK
 total_stack_size = -1  -- (for now) 
 
+-- first check EUCOMPILEDIR, to allow the user to override and use a different
+-- directory than EUDIR. THen use EUDIR, then default to /usr/share/euphoria
+function get_eudir()
+	object x
+	x = getenv("EUCOMPILEDIR")
+	if equal(x, -1) then
+		x = getenv("EUDIR")
+	end if
+	if equal(x, -1) then
+		x = "/usr/share/euphoria"
+	end if
+	return x
+end function
+
 procedure delete_files(integer doit)
 -- output commands to delete .c and .h files
 	if not keep then
@@ -1121,9 +1135,9 @@ global procedure start_emake()
 			debug_flag = " -fomit-frame-pointer"
 		end if
 		if dll_option then
-			c_opts = "-c -w -fPIC -fsigned-char -O2 -I/usr/share/euphoria -ffast-math" & debug_flag
+			c_opts = "-c -w -fPIC -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
 		else 
-			c_opts = "-c -w -fsigned-char -O2 -I/usr/share/euphoria -ffast-math" & debug_flag
+			c_opts = "-c -w -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
 		end if
 		link_line = ""
 	else       
