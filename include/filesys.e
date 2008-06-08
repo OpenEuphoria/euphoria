@@ -1,6 +1,12 @@
 -- cross platform file operations for Euphoria
+--****
+-- Category:
+--    filesys
+-- Name:
+--    File System
+--****
 
--- TODO:UNITTESTS
+-- TODO: Add unit tests
 
 include dll.e
 include file.e
@@ -12,22 +18,26 @@ slash = '\\' -- for Windows/DOS. For Linux is defined below.
 
 object xCopyFile, xMoveFile, xDeleteFile, xCreateDirectory, xRemoveDirectory
 if platform() = WIN32 then
-	xCopyFile         = define_c_func(open_dll("kernel32"), "CopyFileA", {C_POINTER, C_POINTER, C_LONG}, C_LONG)
-	xMoveFile         = define_c_func(open_dll("kernel32"), "MoveFileA", {C_POINTER, C_POINTER}, C_LONG)
+	xCopyFile         = define_c_func(open_dll("kernel32"), "CopyFileA", 
+		{C_POINTER, C_POINTER, C_LONG}, C_LONG)
+	xMoveFile         = define_c_func(open_dll("kernel32"), "MoveFileA", 
+		{C_POINTER, C_POINTER}, C_LONG)
 	xDeleteFile       = define_c_func(open_dll("kernel32"), "DeleteFileA", {C_POINTER}, C_LONG)
-	xCreateDirectory  = define_c_func(open_dll("kernel32"), "CreateDirectoryA", {C_POINTER, C_POINTER}, C_LONG)
-	xRemoveDirectory  = define_c_func(open_dll("kernel32"), "RemoveDirectoryA", {C_POINTER}, C_LONG)
+	xCreateDirectory  = define_c_func(open_dll("kernel32"), "CreateDirectoryA", 
+		{C_POINTER, C_POINTER}, C_LONG)
+	xRemoveDirectory  = define_c_func(open_dll("kernel32"), "RemoveDirectoryA", 
+		{C_POINTER}, C_LONG)
 elsif platform() = LINUX then
 	slash = '/'
-	xMoveFile         = define_c_func(open_dll(""), "rename", {C_POINTER, C_POINTER}, C_LONG)
-	xDeleteFile       = define_c_func(open_dll(""), "remove", {C_POINTER}, C_LONG)
+	xMoveFile   = define_c_func(open_dll(""), "rename", {C_POINTER, C_POINTER}, C_LONG)
+	xDeleteFile = define_c_func(open_dll(""), "remove", {C_POINTER}, C_LONG)
 end if
 
 ---------------------------------------------------------------------
 --# File Operations
 ---------------------------------------------------------------------
 
---*
+--**
 -- copy a file from src to dest.
 --
 -- Comments:
@@ -44,7 +54,7 @@ global function copy_file(sequence src, sequence dest, atom overwrite)
 	free(psrc)
 	return ret
 end function
---*
+--**
 
 --**
 -- move/rename a file from src to dest.
@@ -152,3 +162,4 @@ object dirfil
 	end if
 end function
 --**
+

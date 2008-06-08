@@ -11,9 +11,6 @@
 -- Category:
 --	 map
 --
--- File:
---	 lib_map
---
 -- Title:
 --	 Euphoria Standard Library Map (hash table) Routines
 --****

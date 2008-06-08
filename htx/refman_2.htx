@@ -2303,8 +2303,8 @@ The entry statement is not supported for for loops, because they have a more rig
       <font color="#993333"><b>exu</b></font>, control-c will
  always stop your program immediately.</p>
 
- <a name="flowctrl"></a>
-<h4>Labelled headers.</h4>
+<a name="flowctrl"></a>
+<h3>Labelled headers.</h3>
 
  <p>
  As shown in the above section on control flow statements, most of them may take a string referencing a block of code. In order to do so, it is enough t do this:
@@ -2328,7 +2328,7 @@ The entry statement is not supported for for loops, because they have a more rig
  
  are both correct and equivalent.
 
-<a name="switch"><h5>The switch statement</h5>
+<a name="switch"><h3>The switch statement</h3></a>
 
 <p>
 	The switch statement is often used in place  or in similar ways as an if-elsif code block.  There are
@@ -2336,8 +2336,8 @@ The entry statement is not supported for for loops, because they have a more rig
 	the program flow continues based upon defined cases.  The syntax of a switch statement:
 </p>
 <eucode>
-    switch <expr> [label "<label name>"] do
-    	case <val>:
+    switch &lt;expr&gt; [label "&lt;label name&gt;"] do
+    	case &lt;val&gt;:
     		[code block]
     	
     	[case else]
@@ -2345,13 +2345,13 @@ The entry statement is not supported for for loops, because they have a more rig
     end switch
 </eucode>
 <p>
-	The <val> in a case must be either an atom or a literal string.  One important difference between a switch
+	The &lt;val&gt; in a case must be either an atom or a literal string.  One important difference between a switch
 	block and an if block is that control does not automatically go to the end of the block when the next
 	case statement is encountered.  This is referred to as fall-through, and allows the same code to be used
 	for multiple values.  'exit' can be used to redirect program flow to the end of the block.  Fall-through
 	can also be used when different cases require most of the same code, but one might require extra processing:
 </p>
-<eucoce>
+<eucode>
 	switch length(x) do
 		case 1:
 		case 2:
@@ -2542,7 +2542,7 @@ See <a href=refman_2.htm#42>Scope Rules</a> for more.</p>
 </dd>
 </dl>
 
-<h3>2.6.2 with / without</h3>
+<h3>with / without</h3>
 
 <p>
     These special statements affect the way that Euphoria

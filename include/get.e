@@ -10,9 +10,6 @@
 -- Category: 
 --   get
 --
--- File:
---   lib_get
---
 -- Title:
 --   Euphoria Standard Library Input Routines
 --****

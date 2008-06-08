@@ -11,9 +11,6 @@
 -- Category: 
 --   database
 --
--- File:
---   lib_edb
---
 -- Title:
 --   Euphoria Database System
 --****

@@ -1,14 +1,10 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Graphics & Sound Routines
 
 --****
 -- Category: 
 --   graphics
---
--- File:
---   lib_graphics
 --
 -- Title:
 --   Euphoria Standard Library Graphics Routines

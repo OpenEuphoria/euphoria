@@ -7,9 +7,6 @@
 -- Category: 
 --   misc
 --
--- File:
---   lib_misc
---
 -- Title:
 --   Euphoria Standard Library Miscellaneous Routines
 --****

@@ -4,9 +4,6 @@ include machine.e
 -- Category: 
 --   primes
 --
--- File:
---   lib_primes
---
 -- Title:
 --   Euphoria Standard Library List of prime numbers less than 10,000
 --****

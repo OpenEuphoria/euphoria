@@ -6,9 +6,6 @@
 -- Category: 
 --   search
 --
--- File:
---   lib_srch
---
 -- Title:
 --   Searching
 --****

@@ -439,10 +439,9 @@ procedure write_includes()
 	object ign, content
 	sequence cat_name, api_content, typ
 	m:map func
-
+	pretty_print(1, functions, {3})
 	for a = 1 to length(functions) do
 		cat_name = functions[a][1]
-printf(1,"read_file: %s\n", {"t_lib_" & cat_name & ".htx"})
 		content = read_file("t_lib_" & cat_name & ".htx")
 		if atom(content) then
 			printf(1, "Could not open template file %s for reading\n", {
@@ -451,7 +450,6 @@ printf(1,"read_file: %s\n", {"t_lib_" & cat_name & ".htx"})
 		end if
 		api_content = ""
 		for b = 1 to length(functions[a][2]) do
-			
 			func = functions[a][2][b]
 			typ = m:get(func, "type", "")
 			
@@ -474,7 +472,6 @@ printf(1,"read_file: %s\n", {"t_lib_" & cat_name & ".htx"})
 			end for
 			api_content &= "</funcref>\n"
 			
-			
 		end for
 		
 		content = find_replace("$(API)", api_content, content, 1)
@@ -495,6 +492,5 @@ procedure main()
 	toc_and_menu()
 end procedure
 
-pretty_print(1, functions, {})
 main()
 

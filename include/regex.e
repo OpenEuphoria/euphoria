@@ -6,9 +6,6 @@
 -- Category: 
 --   regex
 --
--- File:
---   lib_regex
---
 -- Title:
 --   Euphoria Standard Library Regular Expressions
 --****

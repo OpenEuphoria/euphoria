@@ -126,8 +126,6 @@
  end procedure
 
  print_sorted_list()     -- this command starts the program
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 </eucode>
 <p>
 
@@ -163,7 +161,7 @@
 
 <h3>Installation</h3>
 
-<_dul>1.2.1 DOS / Windows</dul>
+<h4>DOS / Windows</h4>
 <p>
  To install Euphoria on your machine, first read the file
  <path>install.doc</path>.
@@ -246,7 +244,7 @@
 </dl>
 </dl>
 </dl>
-<_dul>1.2.2 Linux and FreeBSD</dul>
+<h4>Linux and FreeBSD</h4>
 <p>
 Linux may be installed using either the gzipped tarball, or from a distribution specific
 package, if available.  The gzipped tarball is laid out similarly to the windows

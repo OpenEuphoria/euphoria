@@ -7,9 +7,6 @@
 -- Category: 
 --   file
 --
--- File:
---   lib_file
---
 -- Title:
 --   Euphoria Standard Library File System Routines
 --****

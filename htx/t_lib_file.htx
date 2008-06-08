@@ -1,6 +1,6 @@
-<doc title="File System Routines">
+<doc title="File/Device IO">
 
-<h2>File System</h2>
+<h2>File/Device IO</h2>
 
 $(API)
 

@@ -1,14 +1,10 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 4.0
 -- Sequence routines
 
 --****
 -- Category:
 --	 sequence
---
--- File:
---	 lib_sequence
 --
 -- Title:
 --	 Euphoria Database System
@@ -433,7 +429,7 @@ global function remove_all(object needle, sequence haystack)
 		-- Shift elements down the sequence.
 		haystack[ts .. te] = haystack[ss .. se]
 		
-		entry  ----- The loop starts here <<<<-----------
+	entry
 		-- Calc where the next target start is (1 after the previous end)
 		ts = te + 1
 		

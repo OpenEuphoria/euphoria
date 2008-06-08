@@ -1,6 +1,5 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Keywords and routines built in to ex, exw and exu
 
 global constant keywords = {
@@ -8,7 +7,8 @@ global constant keywords = {
     "do", "elsif", "while", "type", "constant", "to", "and", "or",
     "exit", "function", "global", "by", "not", "include",
     "with", "without", "xor", "continue", "as", "ifdef", "elsifdef", "enum", 
-    "export", "switch", "case" }
+	"export", "switch", "case", "break", "entry", "label", "loop", "retry",
+	"until" }
 
 global constant builtins = {
     "length", "puts", "integer", "sequence", "position", "object",
@@ -26,5 +26,4 @@ global constant builtins = {
     "task_self", "task_suspend", "task_list",
     "task_status", "task_clock_stop", "task_clock_start","find_from",
     "match_from"}
-
 

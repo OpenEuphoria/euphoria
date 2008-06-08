@@ -9,9 +9,6 @@
 -- Category: 
 --   math
 --
--- File:
---   lib_math
---
 -- Title:
 --   Euphoria Standard Library Math Routines
 --****

@@ -4,9 +4,6 @@
 -- Category: 
 --   stats
 --
--- File:
---   lib_stats
---
 -- Title:
 --   Euphoria Standard Library List Statistics Routines
 --****
