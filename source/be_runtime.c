@@ -402,6 +402,28 @@ int wingetch();
 /* Defined functions */
 /*********************/
 
+#ifdef ELINUX
+// for largefile support on 32bit
+// int _llseek(unsigned int,unsigned long, unsigned long,long long *, unsigned int);
+// used instead of llseek() to avoid the warning
+#include <sys/types.h>
+#include <linux/unistd.h>
+#include <errno.h>
+_syscall5(int,  _llseek,  unsigned int, fd, unsigned long, hi, unsigned
+long, lo, loff_t *, res, unsigned int, wh)
+
+long long iseek(FILE *f, long long o, int w)
+{
+	unsigned long ohi;
+	unsigned long olow;
+	long long res = 0;
+	ohi = (unsigned long)((o >> 32) & (long long)0xFFFFFFFF);
+	olow = (unsigned long)(o & (long long)0xFFFFFFFF);
+	int ret = _llseek(fileno(f), ohi, olow, &res, w);
+	return ((!ret) ? res : -1);
+}
+#endif
+
 /* essential primitive debug code - might as well leave it in */
 
 IFILE debug_log = NULL;    /* DEBUG log messages */

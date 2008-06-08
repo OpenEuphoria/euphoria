@@ -27,9 +27,13 @@
 // these seem to be only 32 bit???
 //#define iseek(f,o,w) lseek64(fileno(f),(o),(w))
 //#define itell(f) lseek64(fileno(f), (long long)0, SEEK_CUR)
-long long llseek(int,long long,int);
-#define iseek(f,o,w) llseek(fileno(f),(o),(w))
-#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
+// this works, but has the undesirable side-effect of an unsuppressable warning from glibc 2.1.3 on
+//long long llseek(int,long long,int);
+//#define iseek(f,o,w) llseek(fileno(f),(o),(w))
+//#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
+// define iseek() in be_runtime.c - uses the llseek() syscall directly
+long long iseek(FILE *, long long, int);
+#define itell(f) iseek(f, (long long)0, SEEK_CUR)
 #define iiseek fseek
 #define iitell ftell
 #define iflush fflush
