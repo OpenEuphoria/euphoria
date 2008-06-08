@@ -407,10 +407,9 @@ int wingetch();
 // int _llseek(unsigned int,unsigned long, unsigned long,long long *, unsigned int);
 // used instead of llseek() to avoid the warning
 #include <sys/types.h>
-#include <linux/unistd.h>
-#include <errno.h>
-_syscall5(int,  _llseek,  unsigned int, fd, unsigned long, hi, unsigned
-long, lo, loff_t *, res, unsigned int, wh)
+#include <sys/syscall.h>
+#define _llseek(fd, offset_high, offset_low, result, origin) \
+	syscall(SYS__llseek, fd, offset_high, offset_low, result, origin)
 
 long long iseek(FILE *f, long long o, int w)
 {
