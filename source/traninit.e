@@ -10,12 +10,16 @@ include c_decl.e
 include error.e
 include compile.e
 include cominit.e
+include tranplat.e
 
 global boolean wat_option, djg_option, bor_option, lcc_option
 wat_option = FALSE
 djg_option = FALSE
 bor_option = FALSE
 lcc_option = FALSE 
+
+sequence compile_dir
+compile_dir = ""
 
 function extract_options(sequence s)
 -- dummy    
@@ -32,6 +36,7 @@ function upper(sequence s)
 	return s
 end function
 
+
 global procedure transoptions()
 -- set translator command-line options  
 	integer i, option
@@ -43,37 +48,32 @@ global procedure transoptions()
 	while i <= Argc do
 		if Argv[i][1] = '-' then
 			uparg = upper(Argv[i])
-				
-			if (EUNIX or EWINDOWS) and
-			   (match("-DLL", uparg) or match("-SO", uparg))
-			then
+			
+			if (match("-DLL", uparg) or match("-SO", uparg)) then
 				dll_option = TRUE
 				
-			elsif EWINDOWS and match("-DLL", uparg) then
-				dll_option = TRUE
-					
-			elsif EWINDOWS and match("-CON", uparg) then
+			elsif match("-CON", uparg) then
 				con_option = TRUE
 				
-			elsif (EWINDOWS or EDOS) and match("-WAT", uparg) then
+			elsif match("-WAT", uparg) then
 				wat_option = TRUE
 				
 			elsif match("-KEEP", uparg) then
 				keep = TRUE
 				
-			elsif EDOS and match("-DJG", uparg) then
+			elsif match("-DJG", uparg) then
 				djg_option = TRUE
 				
-			elsif EDOS and match("-FASTFP", uparg) then
+			elsif match("-FASTFP", uparg) then
 				fastfp = TRUE
 				
-			elsif EWINDOWS and match("-LCCOPT-OFF", uparg) then
+			elsif match("-LCCOPT-OFF", uparg) then
 				lccopt_option = FALSE
 				
-			elsif EWINDOWS and match("-LCC", uparg) then
+			elsif match("-LCC", uparg) then
 				lcc_option = TRUE
 
-			elsif EWINDOWS and match("-BOR", uparg) then
+			elsif match("-BOR", uparg) then
 				bor_option = TRUE
 				
 			elsif match("-STACK", uparg) then
@@ -85,10 +85,7 @@ global procedure transoptions()
 							total_stack_size = floor(s[2] / 4) * 4
 						end if
 					end if
-					Argc -= 1
-					for j = i to Argc do
-						Argv[j] = Argv[j+1]
-					end for
+					move_args( i+1, 1 )
 				end if
 				
 			elsif match("-DEBUG", uparg) then
@@ -98,13 +95,36 @@ global procedure transoptions()
 				if i < Argc then
 					user_library = Argv[i+1]
 					add_switch( user_library, 1 )
-					Argc -= 1
-					for j = i to Argc do
-						Argv[j] = Argv[j+1]
-					end for
+					move_args( i+1, 1 )
 				else
 					OpWarning = TRUE
 					Warning("-lib option missing library name")
+				end if
+			
+			elsif match("-PLAT", uparg ) then
+				if i < Argc then
+					s = upper(Argv[i+1])
+					add_switch( Argv[i+1], 1 )
+					move_args( i+1, 1 )
+					if equal( s, "WIN" ) then
+						set_platform( WIN32 )
+					elsif equal( s, "DOS" ) then
+						set_platform( DOS32 )
+					elsif equal( s, "LINUX" ) then
+						set_platform( LINUX )
+					elsif equal( s, "FREEBSD" ) then
+						set_platform( FREEBSD )
+					else
+						OpWarning = TRUE
+						Warning("unknown platform: " & Argv[i] )
+					end if
+				end if
+			
+			elsif match("-COM", uparg ) then
+				if i < Argc then
+					compile_dir = Argv[i+1]
+					add_switch( compile_dir, 1 )
+					move_args( i+1, 1 )
 				end if
 			else
 				option = find( uparg, COMMON_OPTIONS )
@@ -118,14 +138,61 @@ global procedure transoptions()
 			end if
 			-- delete "-" option from the list of args */
 			add_switch( Argv[i], 0 )
-			Argc -= 1
-			for j = i to Argc do
-				Argv[j] = Argv[j+1]
-			end for
+			move_args( i, 1 )
 		else 
 			i += 1 -- ignore non "-" items
 		end if      
 	end while
+	
+	-- The platform might have changed, so clean up in case of inconsistent options
+	if dll_option and not (TDOS) then
+		dll_option = FALSE
+		OpWarning = TRUE
+		Warning( "cannot build a dll for DOS" )
+	end if
+	
+	if con_option and not TWINDOWS then
+		con_option = FALSE
+		OpWarning = TRUE
+		Warning( "console option only available for Windows" )
+	end if
+	
+	if wat_option and not (TWINDOWS or TDOS) then
+		wat_option = FALSE
+		OpWarning = TRUE
+		Warning( "Watcom option only available for Windows or DOS" )
+	end if
+	
+	if djg_option and not TDOS then
+		djg_option = FALSE
+		OpWarning = TRUE
+		Warning( "DJGPP option only available for DOS" )
+	end if
+	
+	if bor_option and not TWINDOWS then
+		bor_option = FALSE
+		OpWarning  = TRUE
+		Warning( "Borland option only available for Windows" )
+	end if
+	
+	if lcc_option and not TWINDOWS then
+		lcc_option = FALSE
+		OpWarning = TRUE
+		Warning( "LCC option only available for Windows" )
+	end if
+	
+	if not lccopt_option and not TWINDOWS then
+		lccopt_option = FALSE
+		OpWarning = TRUE
+		Warning( "LCC Opt-Off only available for Windows" )
+	end if
+	
+	if fastfp and not TDOS then
+		fastfp = FALSE
+		OpWarning = TRUE
+		Warning( "Fast FP option only available for DOS" )
+	end if
+	
 end procedure
 				
 function get_bor_path()
@@ -216,8 +283,17 @@ procedure InitBackEnd(integer c)
 	
 	transoptions()
 	
-	if EDOS then
+	if TDOS then
 		wat_path = 0
+		if compile_dir then
+			if djg_option then
+				dj_path  = compile_dir
+			else
+				wat_path = compile_dir
+			end if
+			return
+		end if
+			
 		dj_path = getenv("DJGPP")
 		if atom(dj_path) or wat_option then
 			wat_path = getenv("WATCOM")
@@ -234,19 +310,25 @@ procedure InitBackEnd(integer c)
 		end if
 	end if
 
-	if EWINDOWS then
+	if TWINDOWS then
 		bor_path = 0
 		wat_path = 0
 		if not lcc_option then
 			if not bor_option then
-				wat_path = getenv("WATCOM")
-			end if
-			bor_path = get_bor_path()
-			if sequence(wat_path) then
-				bor_path = 0
-			end if
-			if sequence(bor_path) then
-				wat_path = 0
+				if length(compile_dir) then
+					wat_path = compile_dir
+					return
+				else
+					wat_path = getenv("WATCOM")
+				end if
+			else
+				bor_path = get_bor_path()
+				if sequence(wat_path) then
+					bor_path = 0
+				end if
+				if sequence(bor_path) then
+					wat_path = 0
+				end if
 			end if
 		end if
 	
@@ -259,3 +341,26 @@ procedure InitBackEnd(integer c)
 	end if
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
+
+procedure CheckPlatform()
+-- make sure the defines reflect the target platform
+	
+	if TLINUX or TBSD then
+		OpDefines = OpDefines[1..$-1]
+	else
+		OpDefines = OpDefines[1..$-1]
+	end if
+	
+	if TWINDOWS then
+		OpDefines &= {"WIN32"}
+	elsif TLINUX then
+		OpDefines &= {"LINUX", "UNIX"}
+	elsif TBSD then
+		OpDefines &= {"UNIX", "FREEBSD"}
+	elsif TUNIX then --right now this can never happen
+		OpDefines &= {"UNIX"}
+	elsif TDOS then
+		OpDefines &= {"DOS32"}
+	end if
+end procedure
+mode:set_check_platform( routine_id("CheckPlatform") )

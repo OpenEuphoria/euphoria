@@ -19,6 +19,10 @@ global constant COMMON_OPTIONS = {
 	INCDIR_OPTION = 2,   -- -i
 	DEFINE_OPTION = 3
 
+-- s = the text of the switch
+-- deferred:  1 = it's an argument for the switch, and won't be added
+--                to the list of switches until the next non-deferred
+--                switch is passed
 global procedure add_switch( sequence s, integer deferred )
 	if deferred then
 		switch_cache = append( switch_cache, s )
@@ -33,7 +37,7 @@ global function get_switches()
 	return switches
 end function
 
-procedure move_args( integer start, integer args )
+global procedure move_args( integer start, integer args )
 	Argc -= args
 	for j = start to Argc do
 		Argv[j] = Argv[j+args]

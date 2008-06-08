@@ -224,7 +224,8 @@ procedure main()
 	end if
 
 	InitGlobals()
-
+	CheckPlatform()
+	
 	InitSymTab()
 	InitEmit()
 	InitParser()

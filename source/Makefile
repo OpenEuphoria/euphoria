@@ -63,6 +63,10 @@ EXE=exu
 INCDIR=-i ../../include
 endif
 
+ifdef PLAT
+TARGETPLAT=-plat $(PLAT)
+endif
+
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
 BE_FLAGS =  -c -w -DEUNIX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
@@ -102,7 +106,8 @@ EU_TRANSLATOR_FILES = \
 	c_out.e \
 	global.e \
 	cominit.e \
-	traninit.e
+	traninit.e \
+	tranplat.e
 
 EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/ec.o \
@@ -129,7 +134,8 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o \
 	./$(OBJDIR)/search.o \
-	./$(OBJDIR)/traninit.o
+	./$(OBJDIR)/traninit.o \
+	./$(OBJDIR)/tranplat.o
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
@@ -418,7 +424,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 #./$(OBJDIR)/main-.c
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	echo Translating $(EU_TARGET) to create $(EU_MAIN)
-	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) ../$(EU_TARGET)
+	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o

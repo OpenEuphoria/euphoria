@@ -67,6 +67,7 @@ EU_TRANSLATOR_FILES = &
 	c_out.e &
 	cominit.e &
 	traninit.e &
+	tranplat.e &
 	compress.e
 	
 EU_TRANSLATOR_OBJECTS = &
@@ -95,6 +96,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
+	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\search.obj
@@ -707,6 +709,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\traninit.obj :  ./$(OBJDIR)\traninit.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\tranplat.obj :  ./$(OBJDIR)\tranplat.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\misc.obj : .\$(OBJDIR)\main-.c 

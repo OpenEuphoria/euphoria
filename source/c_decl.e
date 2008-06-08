@@ -11,6 +11,7 @@ include sequence.e
 include global.e
 include reswords.e
 include symtab.e
+include tranplat.e
 
 -- Translator
 global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
@@ -74,7 +75,7 @@ procedure delete_files(integer doit)
 -- output commands to delete .c and .h files
 	if not keep then
 		for i = 1 to length(files_to_delete) do
-			if EUNIX then
+			if TUNIX then
 				puts(doit, "rm ")
 			else
 				puts(doit, "del ")
@@ -740,7 +741,7 @@ global procedure DeclareRoutineList()
 			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
 			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT } ) and dll_option then
 				-- declare the global routine as an exported DLL function
-				if EWINDOWS then            
+				if TWINDOWS then            
 				 -- c_hputs("int __declspec (dllexport) __stdcall\n")
 					c_hputs("int __stdcall\n")
 				end if
@@ -799,7 +800,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", SymTab[s][S_NUM_ARGS])
 				
-				if EWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT} ) then
+				if TWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT} ) then
 					c_puts(", 1")  -- must call with __stdcall convention
 				else
 					c_puts(", 0")  -- default: call with normal or __cdecl convention
@@ -932,17 +933,17 @@ global procedure new_c_file(sequence name)
 	end if  
 	cfile_count += 1
 	version()
-	if EDOS and sequence(dj_path) then
+	if TDOS and sequence(dj_path) then
 		c_puts("#include <go32.h>\n")
 	end if
 	c_puts("#include \"")
-	if not EUNIX then
+	if not TUNIX then
 		c_puts(eudir & SLASH )
 	end if
 	c_puts( "include" & SLASH & "euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 
-	if not EUNIX then
+	if not TUNIX then
 		name = lower(name)  -- for faster compare later
 	end if
 	files_to_delete = append(files_to_delete, name & ".c")
@@ -960,7 +961,7 @@ function unique_c_name(sequence name)
 	integer next_fc 
 	
 	compare_name = name & ".c"
-	if not EUNIX then
+	if not TUNIX then
 		compare_name = lower(compare_name)
 		-- .c's on files_to_delete are already lower
 	end if
@@ -975,7 +976,7 @@ function unique_c_name(sequence name)
 			end if
 			name[1] = file_chars[next_fc]
 			compare_name = name & ".c"
-			if not EUNIX then
+			if not TUNIX then
 				compare_name = lower(compare_name)
 			end if
 			next_fc += 1
@@ -992,10 +993,10 @@ integer link_file
 
 procedure add_file(sequence filename)
 -- add a file to the list of files to be linked 
-	if EUNIX then
+	if TUNIX then
 		link_line &= filename & ".o "
 	
-	elsif EDOS then
+	elsif TDOS then
 		if atom(dj_path) then
 			printf(link_file, "FILE %s.obj\n", {filename})
 		else
@@ -1039,7 +1040,7 @@ global procedure start_emake()
 	sequence debug_flag
 	debug_flag = ""
 	
-	if EUNIX then      
+	if TUNIX then      
 		doit = open("emake", "w")
 	else       
 		doit = open("emake.bat", "w")
@@ -1049,12 +1050,12 @@ global procedure start_emake()
 		CompileErr("Couldn't create batch file for compile.\n")
 	end if
 		
-	if not EUNIX then
+	if not TUNIX then
 		puts(doit, "@echo off\n")
 		puts(doit, "if not exist main-.c goto nofiles\n")
 	end if
 		
-	if EDOS then
+	if TDOS then
 		if debug_option then
 			debug_flag = " /g3"
 		end if
@@ -1081,7 +1082,7 @@ global procedure start_emake()
 		end if
 	end if
 
-	if EWINDOWS then
+	if TWINDOWS then
 		if sequence(wat_path) then
 			puts(doit, "echo compiling with WATCOM\n")
 			if debug_option then
@@ -1125,7 +1126,7 @@ global procedure start_emake()
 		end if
 	end if
 	
-	if EUNIX then
+	if TUNIX then
 		puts(doit, "echo compiling with GNU C\n")
 		cc_name = "gcc"
 		echo = "echo"
@@ -1149,7 +1150,7 @@ global procedure start_emake()
 		end if
 	end if
 
-	if EDOS then
+	if TDOS then
 		if atom(dj_path) then  
 			cc_name = "wcc386"
 			puts(link_file, "option osname='CauseWay'\n")
@@ -1166,7 +1167,7 @@ global procedure start_emake()
 		end if
 	end if      
 
-	if EWINDOWS then    
+	if TWINDOWS then    
 		if sequence(wat_path) then
 			cc_name = "wcc386"
 			if dll_option then    
@@ -1219,7 +1220,7 @@ global procedure finish_emake()
 		printf(doit, "%s linking\n", {echo})
 	end if
 		
-	if EDOS then    
+	if TDOS then    
 		if atom(dj_path) then
 			printf(doit, "wlink FILE %s.obj @objfiles.lnk\n", {file0})
 			printf(link_file, "FILE %s\\bin\\", {eudir})
@@ -1266,7 +1267,7 @@ global procedure finish_emake()
 		end if
 	end if      
 
-	if EWINDOWS then
+	if TWINDOWS then
 		if sequence(wat_path) then     
 			printf(doit, "wlink FILE %s.obj @objfiles.lnk\n", {file0})
 			if length(user_library) then
@@ -1350,7 +1351,7 @@ global procedure finish_emake()
 		close(link_file)
 	end if
 
-	if EUNIX then
+	if TUNIX then
 		if dll_option then
 			dll_flag = "-shared -nostartfiles"
 			exe_suffix = ".so" 
@@ -1379,7 +1380,7 @@ global procedure finish_emake()
 			
 		end if
 		
-		if not EBSD then
+		if not TBSD then
 			puts(doit, " -ldl")
 		end if      
 		printf(doit, " -o%s%s\n", {file0, exe_suffix})
@@ -1410,7 +1411,7 @@ global procedure finish_emake()
 	end if
 		
 	close(doit)
-	if EUNIX then
+	if TUNIX then
 		system("chmod +x emake", 2)
 	end if
 end procedure
@@ -1526,7 +1527,7 @@ global procedure GenerateUserRoutines()
 				
 					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT} ) and dll_option then
 						-- declare the global routine as an exported DLL function
-						if EWINDOWS then      
+						if TWINDOWS then      
 							-- c_stmt0("int __declspec (dllexport) __stdcall\n")
 							c_stmt0("int __stdcall\n")
 						end if                  

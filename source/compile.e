@@ -14,6 +14,7 @@ include mode.e as mode
 include c_decl.e
 include cominit.e
 include compress.e
+include tranplat.e
 
 integer np, pc
 
@@ -864,7 +865,7 @@ procedure seg_poke1(integer source, boolean dbl)
 	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
-			if EWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(bor_path) and atom(wat_path) then
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (signed char)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke_addr = _1;\n")
@@ -899,7 +900,7 @@ procedure seg_poke2(integer source, boolean dbl)
 	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
-			if EWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(bor_path) and atom(wat_path) then
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (signed short)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke2_addr = _1;\n")
@@ -934,7 +935,7 @@ procedure seg_poke4(integer source, boolean dbl)
 	if atom(dj_path) then
 		-- WATCOM etc. 
 		if dbl then
-			if EWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(bor_path) and atom(wat_path) then
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (unsigned long)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke4_addr = (unsigned long)_1;\n")
@@ -3711,7 +3712,7 @@ procedure opCALL_PROC()
 					c_printf("%d));\n", k * 4)
 				end for
 						
-				if EWINDOWS and dll_option then
+				if TWINDOWS and dll_option then
 					c_stmt("if (_00[@].convention) {\n", Code[pc+1])
 					if Code[pc] = CALL_FUNC then 
 						c_stmt0("_1 = (*(int (__stdcall *)())_0)(\n")
@@ -4641,7 +4642,7 @@ procedure opPOKE()
 		c_stmt0("break;\n")
 		c_stmt0("else {\n")
 		if Code[pc] = POKE4 then
-			if EWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(bor_path) and atom(wat_path) then
 				-- work around an Lcc bug
 				c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*(int *)poke4_addr++ = (unsigned long)_0;\n")
@@ -4649,7 +4650,7 @@ procedure opPOKE()
 				c_stmt0("*(int *)poke4_addr++ = (unsigned long)DBL_PTR(_2)->dbl;\n")
 			end if
 		elsif Code[pc] = POKE2 then
-			if EWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(bor_path) and atom(wat_path) then
 				-- work around an Lcc bug
 				c_stmt0("_0 = (unsigned short)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*poke2_addr++ = (unsigned short)_0;\n")
@@ -4657,7 +4658,7 @@ procedure opPOKE()
 				c_stmt0("*poke2_addr++ = (unsigned short)DBL_PTR(_2)->dbl;\n")
 			end if	
 		else    
-			if EWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(bor_path) and atom(wat_path) then
 				-- work around an Lcc bug
 				c_stmt0("_0 = (signed char)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*poke_addr++ = (signed char)_0;\n")
@@ -4795,13 +4796,13 @@ procedure opGETC()
 	end if
 			
 	c_stmt0("}\n")
-	if not EDOS then
+	if not TDOS then
 		c_stmt0("if (last_r_file_ptr == xstdin) {\n")
-		if EWINDOWS then
+		if TWINDOWS then
 			c_stmt0("show_console();\n")
 		end if              
 		c_stmt0("if (in_from_keyb) {\n")
-		if EUNIX then
+		if TUNIX then
 			if EGPM then
 				c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
 			else               
@@ -4840,7 +4841,7 @@ end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1 
-	if not EDOS and EWINDOWS then
+	if not TDOS and TWINDOWS then
 		c_stmt0("show_console();\n")
 	end if
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
@@ -4945,7 +4946,7 @@ procedure opC_FUNC()
 end procedure
 			
 procedure opC_PROC()
-	if not EDOS then             
+	if not TDOS then             
 		c_stmt("call_c(0, @, @);\n", {Code[pc+1], Code[pc+2]})
 	end if              
 	-- [3] not used
@@ -5303,7 +5304,7 @@ end if
 
 version()
 
-if EDOS then
+if TDOS then
 if sequence(dj_path) then
 	c_puts("#include <go32.h>\n")
 end if
@@ -5311,7 +5312,7 @@ end if
 c_puts("#include <time.h>\n")
 c_puts("#include \"")
 
-if EUNIX then
+if TUNIX then
 c_puts("include/euphoria.h\"\n")
 c_puts("#include <unistd.h>\n")
 else
@@ -5328,7 +5329,7 @@ c_hputs("extern int Argc;\n")
 c_puts("char **Argv;\n")
 c_hputs("extern char **Argv;\n")
 
-if EWINDOWS then
+if TWINDOWS then
 c_puts("unsigned default_heap;\n")
 if sequence(wat_path) or sequence(bor_path) then
 	c_puts("__declspec(dllimport) unsigned __stdcall GetProcessHeap(void);\n")
@@ -5370,7 +5371,7 @@ else
 	total_stack_size = (248 + 8) * 1024
 end if
 end if
-if EDOS and sequence(dj_path) then
+if TDOS and sequence(dj_path) then
 c_printf("unsigned _stklen=%d;\n", total_stack_size)
 end if
 c_printf("int total_stack_size = %d;\n", total_stack_size)
@@ -5380,7 +5381,7 @@ if EXTRA_CHECK then
 c_hputs("extern long bytes_allocated;\n")
 end if
 
-if EWINDOWS then
+if TWINDOWS then
 if dll_option then
 	if sequence(wat_path) then
 		c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
@@ -5396,7 +5397,7 @@ else
 	end if
 end if
 
-elsif EUNIX then
+elsif TUNIX then
 if dll_option then
 	c_stmt0("\nvoid _init()\n")
 else
@@ -5404,7 +5405,7 @@ else
 end if
 
 else   
--- EDOS
+-- TDOS
 c_stmt0("\nvoid main(int argc, char *argv[])\n")
 
 end if  
@@ -5414,7 +5415,7 @@ c_stmt0("s1_ptr _0switch_ptr;\n")
 
 main_temps()
 
-if EWINDOWS then
+if TWINDOWS then
 if dll_option then
 	c_stmt0("\nArgc = 0;\n")
 	c_stmt0("default_heap = GetProcessHeap();\n")
@@ -5442,7 +5443,7 @@ else
 	c_stmt0("winInstance = hInstance;\n")
 end if
 
-elsif EUNIX then
+elsif TUNIX then
 if dll_option then
 	c_stmt0("\nArgc = 0;\n")
 else   
@@ -5451,7 +5452,7 @@ else
 end if
 
 else   
--- EDOS
+-- TDOS
 c_stmt0("Argc = argc;\n")
 c_stmt0("Argv = argv;\n")
 end if
@@ -5485,7 +5486,7 @@ c_puts("\n")
 
 -- fail safe mechanism in case 
 -- Complete Edition library gets out by mistake
-if EWINDOWS then
+if TWINDOWS then
 if atom(wat_path) then
 	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
 else
@@ -5544,7 +5545,7 @@ end if
 
 c_stmt0("}\n")
 
-if EWINDOWS then
+if TWINDOWS then
 if dll_option then
 	c_stmt0("\n")
 	if atom(bor_path) then
@@ -5633,7 +5634,7 @@ end if
 	c_hputs("extern void *xstdin;\n")
 	c_hputs("extern struct tcb *tcb;\n")
 	c_hputs("extern int current_task;\n")
-	if EWINDOWS then
+	if TWINDOWS then
 		c_hputs("extern void *winInstance;\n\n")
 	end if  
 	
@@ -5643,7 +5644,7 @@ end if
 	finish_emake()
 	
 	screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
-	if EUNIX then
+	if TUNIX then
 		if dll_option then
 			screen_output(STDERR, "To build your shared library, type: ./emake\n")
 		else    

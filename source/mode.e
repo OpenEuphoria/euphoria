@@ -13,7 +13,9 @@ integer extract_options_rid
 integer output_il_rid
 integer target_plat
 integer backend
+integer check_platform_rid
 target_plat = platform()
+check_platform_rid = -1
 
 global procedure set_mode( sequence mode, integer extra_check )
 	interpret = equal( mode, "interpret" )
@@ -37,6 +39,16 @@ end procedure
 
 global procedure BackEnd( atom x )
 	call_proc( backend_rid, {x} )
+end procedure
+
+global procedure CheckPlatform()
+	if check_platform_rid != -1 then
+		call_proc( check_platform_rid, {} )
+	end if
+end procedure
+
+global procedure set_check_platform( integer rid )
+	check_platform_rid = rid
 end procedure
 
 global function get_interpret()
