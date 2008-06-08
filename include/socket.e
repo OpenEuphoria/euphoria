@@ -1,7 +1,5 @@
 -- socket.e
 -- 
--- Licensed under LGPL any version (http://www.opensource.org/licenses/lgpl-license.html)
---
 -- Based on EuNet project, version 1.3.2, at SourceForge.
 -- For updates, visit http://www.sourceforge.net/projects/eunet.
 --
