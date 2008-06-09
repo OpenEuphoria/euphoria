@@ -3,6 +3,7 @@
 -- Euphoria 3.1
 -- Front End - main routine
 
+include rev.e
 include file.e
 include get.e
 include pathopen.e
@@ -52,6 +53,7 @@ function ProcessOptions()
 			end if
 		end if
 
+		screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
 		screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2008\n")
 
 		screen_output(STDERR,
