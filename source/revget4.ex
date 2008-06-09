@@ -25,6 +25,19 @@ while not atom(x) do
 end while
 close(h)
 
+function is_numeric(sequence s)
+	for i = 1 to length(s) do
+		if atom(s[i]) then
+			if not find(s[i], "0123456789") then
+				return 0
+			end if
+		else
+			return 0
+		end if
+	end for
+	return 1
+end function
+
 sequence g
 g = {}
 for i = 1 to length(f) do
@@ -34,7 +47,8 @@ for i = 1 to length(f) do
 	while length(f[i]) and f[i][length(f[i])] = '\r' do
 		f[i] = f[i][1..length(f[i])-1]
 	end while
-	if length(f[i]) = 3 then
+	--if length(f[i]) = 3 then
+	if is_numeric(f[i]) then
 		g &= {f[i]}
 	end if
 end for
