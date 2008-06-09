@@ -285,9 +285,11 @@ builddirs :
 	done
 
 interpreter : builddirs $(PCRE)
+	-rm rev.e
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs $(PCRE)
+	-rm rev.e
 	$(MAKE) ecu OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
@@ -347,6 +349,7 @@ ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -oecu
 
 backend : builddirs
+	-rm rev.e
 	$(MAKE) eubackend EBACKEND=1 OBJDIR=backobj
 
 eubackend : OBJDIR = backobj
