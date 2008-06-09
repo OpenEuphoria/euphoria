@@ -274,6 +274,7 @@ global constant
 	ATOM               = 502,
 	STRING             = 503,
 	TYPE               = 504,
+	PLAYBACK_ENDS      = 505,
 
 	RECORDED           = 514,
 	QUALIFIED_VARIABLE = 515,

@@ -193,7 +193,8 @@ EU_CORE_C_FILES = \
 	./$(OBJDIR)/parser.c \
 	./$(OBJDIR)/parser_0.c \
 	./$(OBJDIR)/parser_1.c \
-	./$(OBJDIR)/parser_2.c
+	./$(OBJDIR)/parser_2.c \
+	./$(OBJDIR)/parser_3.c
 	
 EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_decompress.o \

@@ -34,7 +34,7 @@ pwd = chdir(pwd)
 -- Tests
 include t_condcmp.e
 include t_datetime.e
---include t_defparms.e
+include t_defparms.e
 include t_enum.e
 include t_euns.e
 include t_file.e
