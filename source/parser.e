@@ -557,8 +557,8 @@ procedure collect_privates(symtab_index arg)
     private_sym = repeat(0,n)
     for j=1 to n do
         arg = SymTab[arg][S_NEXT]
-        private_sym[i] = arg
-        private_list[i] = SymTab[arg][S_NAME]
+        private_sym[j] = arg
+        private_list[j] = SymTab[arg][S_NAME]
     end for
 end procedure
 
@@ -572,7 +572,6 @@ procedure ParseArgs(symtab_index subsym)
     
 	n = SymTab[subsym][S_NUM_ARGS]
     s = subsym
-    arg = 0
     tok2 = UNDEFINED
 	
 	on_arg = 0
@@ -594,7 +593,7 @@ procedure ParseArgs(symtab_index subsym)
             end if
 			if use_private_list=0 then 
 			-- build private symbol list for this routine
-                collect_rivates(subsym)
+                collect_privates(subsym)
             end if
             
             start_playback(SymTab[s][S_CODE])
@@ -628,7 +627,7 @@ procedure ParseArgs(symtab_index subsym)
 						-- some defaulted arg follows with a default value
 							if use_private_list=0 then 
 							-- build private symbol list for this routine
-				                collect_rivates(subsym)
+				                collect_privates(subsym)
 				            end if
 
 							putback( tok )
