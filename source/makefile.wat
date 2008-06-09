@@ -569,7 +569,7 @@ ec.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND
 .\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 
 rev.e :
-	$(EXE) revget.ex .svn/entries
+	$(EXE) revget.ex svn~1\entries
 
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
