@@ -74,7 +74,6 @@ BE_FLAGS =  -c -w -DEUNIX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre
 PCRE=./pcre/.libs/libpcre.a
 
 EU_CORE_FILES = \
-	rev.e \
 	common.e \
 	main.e \
 	mode.e \
@@ -256,7 +255,6 @@ all : interpreter translator library backend
 BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
 
 distclean : clean
-	-rm rev.e
 	-rm -r $(BUILD_DIRS)
 	cd pcre && $(MAKE) clean
 
@@ -265,7 +263,6 @@ clean :
 	do \
 	    rm "$$d"/*.o; \
 	done
-	-rm rev.e
 	-rm exu ecu ecu.a eubackend $(DEB_SOURCE_DIR).tar.gz
 	cd pcre && $(MAKE) clean
 
@@ -419,9 +416,6 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	
 ./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
-
-rev.e :
-	$(EXE) revget.ex .svn/entries
 
 #./$(OBJDIR)/main-.c : $(EU_MAIN)
 #	echo Translating $(EU_TARGET) to create $(EU_MAIN)

@@ -37,7 +37,6 @@
 !include config.wat
 
 EU_CORE_FILES = &
-	rev.e &
 	main.e &
 	global.e &
 	common.e &
@@ -336,21 +335,21 @@ BUILD_DIRS=intobj transobj libobj backobj
 #TODO make this smarter
 distclean : .SYMBOLIC
 	-if not exist $(%WINDIR)\command\deltree.exe rmdir /Q/S $(BUILD_DIRS)
-	-if not exist $(%WINDIR)\command\deltree.exe del /Q config.wat rev.e
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q config.wat
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y $(BUILD_DIRS)
-	-if exist $(%WINDIR)\command\deltree.exe deltree /y config.wat rev.e
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y config.wat
 
 #TODO make this smarter
 clean : .SYMBOLIC
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
-		exw.exe exwc.exe ecw.lib backendw.exe main-.h rev.e
+		exw.exe exwc.exe ecw.lib backendw.exe main-.h 
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q /S &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
 		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
 	    .\pcre\pcre_chartables.c 
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
-		exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h rev.e
+		exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
@@ -560,8 +559,6 @@ ec.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND
 .\backobj\main-.c: $(EU_CORE_FILES) backend.ex
 .\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 
-rev.e :
-	$(EXE) revget.ex .svn/entries
 
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
