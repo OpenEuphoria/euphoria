@@ -10,7 +10,7 @@
 #   You must run configure
 #   before building
 #
-#  Configue options:
+# Configue options:
 #                    --with-eu3  If you have only a euphoria v3.x interpreter installed,
 #                                put this option on the command line
 #
