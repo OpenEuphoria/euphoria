@@ -1974,10 +1974,11 @@ void do_exec(int *start_pc)
 		  		}
 		  		else{
 		  			// no match:  check for else
-		  			pc += pc[4];
-		  			if( !pc ){
+		  			
+		  			if( !pc[4] ){
 		  				RTFatal("select has no matching case and no 'case else'");
 		  			}
+					pc += pc[4];
 		  		}
 		  		
 		  		thread();
