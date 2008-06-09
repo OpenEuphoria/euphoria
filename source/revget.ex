@@ -34,6 +34,10 @@ for i = 1 to length(f) do
 end for
 
 if not length(f) or not atom(f[1]) then
+	-- newer subversion 1.4 client wc isn't in xml format
+	-- use different parser to guess
+	c[2] = "revget4.ex"
+	system("\""&c[1]&"\" \""&c[2]&"\" \""&c[3]&"\"", 2)
 	abort(0)
 end if
 
