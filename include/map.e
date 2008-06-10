@@ -1,18 +1,14 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
--- map.e
--- Euphoria hash map
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- yuku 2008
+-- Hash map
 --
--- Euphoria 4.0
--- File System Operations --
 
 --****
 -- Category:
 --	 map
 --
 -- Title:
---	 Euphoria Standard Library Map (hash table) Routines
+--	 Map (hash table)
 --****
 
 

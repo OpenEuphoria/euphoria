@@ -4,6 +4,9 @@
 -- written by: Junko C. Miura of Rapid Deployment Software 
 -- (JCMiura@RapidEuphoria.com)
 
+-- TODO: fix output of all sections (example 2, 3, 4, etc...)
+-- TODO: add docs on how to document euphoria to wiki?
+
 include get.e
 include misc.e
 include file.e
@@ -11,7 +14,8 @@ include map.e as m
 
 constant single_tags = { "br", "hr", "br/", "hr/" }
 
-constant files = {
+sequence files 
+files = {
     "welcome.htx",
     "overview.htx",
     "install.htx",
@@ -26,18 +30,7 @@ constant files = {
     "relnotes40.htx",
     "refman_1.htx",
     "refman_2.htx",
-    "refman_3.htx",
-	"lib_database.htx",
-	"lib_file.htx",
-	"lib_get.htx",
-	"lib_graphics.htx",
-	"lib_math.htx",
-	"lib_misc.htx",
-	"lib_regex.htx",
-	"lib_search.htx",
-	"lib_sequence.htx",
-	"lib_sort.htx"
-	
+    "refman_3.htx"
 }
 
 include stack.e as stk
@@ -438,38 +431,41 @@ end function
 procedure write_includes()
 	object ign, content
 	sequence cat_name, api_content, typ
-	m:map func
-	pretty_print(1, functions, {3})
+	m:map func, cat
+
 	for a = 1 to length(functions) do
 		cat_name = functions[a][1]
+		if length(cat_name) = 0 then continue end if
+
+		cat = m:get(categories, cat_name, m:new())
+		files &= {"lib_" & cat_name & ".htx"}
+
 		content = read_file("t_lib_" & cat_name & ".htx")
 		if atom(content) then
-			printf(1, "Could not open template file %s for reading\n", {
-				"t_lib_" & cat_name & ".htx"})
-			abort(1)
+			content = sprintf("<doc title=\"%s\">\n\n<h2>%s</h2>\n\n$(API)\n\n</doc>", {
+					m:get(cat, "title", sprintf("%s needs title assigned", {cat_name})),
+					m:get(cat, "title", sprintf("%s needs title assigned", {cat_name}))
+				})
 		end if
 		api_content = ""
 		for b = 1 to length(functions[a][2]) do
 			func = functions[a][2][b]
 			typ = m:get(func, "type", "")
 			
-			api_content &= "<hr>\n"
-			
-			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\"", {
+			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\">\n", {
 				m:get(func, "name", ""), typ, m:get(func, "params", "none") })
-			api_content &= ">\n"
 			if equal(typ, "function") then
 				api_content &= get_section(func, "returns", "funcreturns", 1, 1)
 			end if
 			api_content &= get_section(func, "description", "funcdescr", 1, 0)
 			api_content &= get_section(func, "comments", "funccomments", 1, 0)
-			api_content &= get_section(func, "see also", "funcseealso", 1, 0)
 			for c = 1 to 10 do
 				if m:has(func, "example " & sprint(c)) then
 					api_content &= sprintf("<eucode title=\"Example %d\">\n%s\n</eucode>\n",
 						{c, m:get(func, "example " & sprint(c), "")})
 				end if
 			end for
+			api_content &= get_section(func, "see also", "funcseealso", 1, 0)
 			api_content &= "</funcref>\n"
 			
 		end for

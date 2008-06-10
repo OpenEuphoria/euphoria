@@ -7,7 +7,7 @@
 --   graphics
 --
 -- Title:
---   Euphoria Standard Library Graphics Routines
+--   Graphics and Sound
 --****
 
 --    GRAPHICS MODES --  argument to graphics_mode()

@@ -1,6 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.2
 -- Math routines
 
 -- trig formulas provided by Larry Gregg
@@ -10,7 +9,7 @@
 --   math
 --
 -- Title:
---   Euphoria Standard Library Math Routines
+--   Math
 --****
 
 global constant

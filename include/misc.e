@@ -1,6 +1,5 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 4.0
 -- Miscellaneous routines and constants
 
 --****
@@ -8,7 +7,7 @@
 --   misc
 --
 -- Title:
---   Euphoria Standard Library Miscellaneous Routines
+--   Miscellaneous Routines
 --****
 
 -- platform() values:

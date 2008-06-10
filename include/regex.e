@@ -7,7 +7,7 @@
 --   regex
 --
 -- Title:
---   Euphoria Standard Library Regular Expressions
+--   Regular Expressions
 --****
 
 

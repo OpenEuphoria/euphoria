@@ -1,8 +1,11 @@
+--
 -- cross platform file operations for Euphoria
+--
 --****
 -- Category:
 --    filesys
--- Name:
+--
+-- Title:
 --    File System
 --****
 

@@ -8,7 +8,7 @@
 --   socket
 --
 -- Title:
---   Euphoria Sockets Library
+--   Internet Sockets
 --****
  
 include dll.e
@@ -2713,17 +2713,19 @@ end function
 
 --**
 -- Works the same as get_url, but maintains an internal
--- state register based on cookies received.  As of Euphoria 4.0, only
--- the internal state is maintained.  Future versions of this library
--- will expand state functionality.
+-- state register based on cookies received. 
+--
+-- Note: 
+--   As of Euphoria 4.0, only the internal state is maintained. Future versions of this 
+--   library will expand state functionality.
 --
 -- Returns:	
 --   A sequence {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:
 -- 	addrinfo = getaddrinfo("www.yahoo.com","http",0)
---	if atom(addrinfo) or length(addrinfo)<1 or
---		length(addrinfo[1])<5 then
+--	if atom(addrinfo) or length(addrinfo) < 1 or
+--		length(addrinfo[1]) < 5 then
 --		puts(1,"Uh, oh")
 --		return {}
 --	else

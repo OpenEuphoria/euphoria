@@ -1,6 +1,5 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Input and Conversion Routines:
 -- get()
 -- value()
@@ -11,7 +10,7 @@
 --   get
 --
 -- Title:
---   Euphoria Standard Library Input Routines
+--   Input Routines
 --****
 
 -- error status values returned from get() and value():

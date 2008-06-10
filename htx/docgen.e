@@ -1,4 +1,3 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 
 -- written by: Junko C. Miura of Rapid Deployment Software (JCMiura@aol.com)
 include machine.e
@@ -22,7 +21,7 @@ file_header = 0
 -- functions sequence. There, they are sorted and categorized.
 global sequence functions, categories
 functions = {}
-categories = {}
+categories = m:new()
 
 global constant FILE_NAME = 1, SECT_NUM = 2, SECTION_NAME = 3
 global sequence sec_nums, sections
@@ -178,17 +177,33 @@ global procedure process_include(sequence filename)
 	func = 0
 
 	lines = read_lines(filename)
-	printf(1, "read %s: %d lines\n", {filename,length(lines)})
+
+	ifdef DEBUG then
+		printf(1, "read %s: %d lines\n", {filename,length(lines)})
+	end ifdef
+
 	for i = 1 to length(lines) do
 		line = trim_tail(lines[i], " \t\r\n")
-		if match("--**", line) then
-			if parse then 
-				parse = 0 
+		if match("--****", line) then
+			if parse then
+				parse = 0
 				if sequence(sec_name) and length(sec_data) > 0 then
 					func = m:put(func, sec_name, sec_data)
 					if equal(sec_name, "category") then
 						cat_name = trim_tail(sec_data, " \t\r\n")
 					end if
+				end if
+				categories = m:put(categories, sec_name, func)
+				func = 0
+			else
+				parse = 1
+				func = m:new()
+			end if
+		elsif match("--**", line) then
+			if parse then 
+				parse = 0 
+				if sequence(sec_name) and length(sec_data) > 0 then
+					func = m:put(func, sec_name, sec_data)
 				end if
 				if map(func) and m:has(func, "signature") then
 					add_function(filename, func)
@@ -227,7 +242,7 @@ global procedure process_include(sequence filename)
 					func = m:put(func, sec_name, sec_data)
 				end if
 
-				sec_name = lower(line[1..$-1])
+				sec_name = lower(trim(line[1..$-1]))
 				sec_data = ""
 			else
 				sec_data &= line & '\n'

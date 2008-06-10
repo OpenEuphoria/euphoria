@@ -7,7 +7,7 @@
 --	 sequence
 --
 -- Title:
---	 Euphoria Database System
+--	 Sequence Manipulation
 --****
 
 include machine.e
@@ -19,25 +19,27 @@ include misc.e
 -- global procedure append(sequence s1, object x)
 --
 -- Description:
--- Create a new sequence (s2) identical to s1 but with x added on the end as the last element. The length of s2 will be length(s1) + 1.
+-- Create a new sequence (s2) identical to s1 but with x added on the end as the last element. 
+-- The length of s2 will be length(s1) + 1.
 --
 -- Comments:
--- If x is an atom this is equivalent to <strong>s2 = s1 & x</strong>. If x is a sequence it is not equivalent.
+-- If x is an atom this is equivalent to <strong>s2 = s1 & x</strong>. If x is a sequence it is
+-- not equivalent.
 --
--- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic storage allocation. The case where s1 and s2 are actually the same variable (as in Example 1 below) is highly optimized.
+-- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic 
+-- storage allocation. The case where s1 and s2 are actually the same variable (as in 
+-- Example 1 below) is highly optimized.
 --
 -- Example 1:
--- You can use append() to dynamically grow a sequence, e.g.
+--   sequence x
 --
--- sequence x
+--   x = {}
+--   for i = 1 to 10 do
+--	     x = append(x, i)
+--   end for
+--   -- x is now {1,2,3,4,5,6,7,8,9,10}
 --
--- x = {}
--- for i = 1 to 10 do
---	   x = append(x, i)
--- end for
--- -- x is now {1,2,3,4,5,6,7,8,9,10}
---
--- Example 2:	Any kind of Euphoria object can be appended to a sequence, e.g.
+-- Example 2:
 --
 -- sequence x, y, z
 --

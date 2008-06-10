@@ -1,11 +1,9 @@
--- stats.e
-
 --****
 -- Category: 
 --   stats
 --
 -- Title:
---   Euphoria Standard Library List Statistics Routines
+--   Statistics Routines
 --****
 
 include unittest.e

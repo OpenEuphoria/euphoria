@@ -1,14 +1,14 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 4.0
--- File System Operations --
+-- File System Operations 
+--
 
 --****
 -- Category: 
 --   file
 --
 -- Title:
---   Euphoria Standard Library File System Routines
+--   File/Device I/O
 --****
 
 include sort.e

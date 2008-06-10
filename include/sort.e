@@ -3,6 +3,9 @@
 --****
 -- Category:
 --    sort
+--
+-- Title:
+--    Sorting
 --****
 
 include wildcard.e
