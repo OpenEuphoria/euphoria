@@ -147,7 +147,11 @@ constant
 	SWITCH_ELSE       = 3
 
 function in_switch()
-	return length(loop_stack) and loop_stack[$][1] = SWITCH
+	if length(loop_stack) then
+		return (loop_stack[$][1] = SWITCH)
+	else
+		return 0
+	end if
 end function
 
 procedure NotReached(integer tok, sequence keyword)
