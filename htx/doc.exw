@@ -5,7 +5,6 @@
 -- (JCMiura@RapidEuphoria.com)
 
 -- TODO: add docs on how to document euphoria to wiki?
--- TODO: make see also link
 
 include get.e
 include misc.e
@@ -355,11 +354,14 @@ procedure toc_and_menu()
 			elsif length(s) = 3 then
 				puts(toc_file, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>")
 			end if
-			printf(toc_file, "<a href=\"%s\">%s</a><br />", 
-				{sections[i][1][1..$-3] & "htm", join(s, ".") & ". " & sections[i][3]})
+
+			printf(toc_file, "<a href=\"%s#%s\">%s</a><br />", 
+				{sections[i][1][1..$-3] & "htm", join(s, "_"), 
+				 join(s, ".") & ". " & sections[i][3]})
+
 			if length(s) <= 2 then
-				printf(menu_file, "<a target=\"page\" href=\"%s\">%s</a><br />", 
-					{sections[i][1][1..$-3] & "htm", sections[i][3]})
+				printf(menu_file, "<a target=\"page\" href=\"%s#%s\">%s</a><br />", 
+					{sections[i][1][1..$-3] & "htm", join(s, "_"), sections[i][3]})
 			end if
 			if length(s) = 1 then
 				puts(toc_file, "</font></strong>")
@@ -428,6 +430,57 @@ function get_section(m:map func, sequence section, sequence tag, integer wrap, i
 	return sprintf("<%s>%s</%s>\n", {tag, val, tag})
 end function
 
+function find_function(sequence category, sequence name)
+	for a = 1 to length(functions) do
+		if equal(functions[a][1], category) then
+			for b = 1 to length(functions[a][2]) do
+				if equal(m:get(functions[a][2][b], "name", ""), name) then
+					return functions[a][2][b]
+				end if
+			end for
+		end if
+	end for
+
+	return 0
+end function
+
+function format_seealso(sequence current_category, sequence seealso)
+	object func
+	sequence link, cat, links
+	
+	links = {}
+	seealso = split(seealso, ",\n", 0, 1)
+	for i = 1 to length(seealso) do
+		link = trim(seealso[i])
+		if length(link) = 0 then
+			continue
+		end if
+		if link[1] = '<' then
+			-- html link
+			links &= {link}
+			continue
+		elsif find(':', link) then
+			link = split(link, ":", 0, 0)
+			cat = link[1]
+			link = link[2]
+		else
+			cat = current_category
+		end if
+		func = find_function(cat, link)
+		if map(func) then
+			links &= {sprintf("<a href=\"lib_%s.htm#%s\">%s</a>", {cat, link, link})}
+		else
+			puts(1, "Error link not found " & cat & ":" & link & "\n")
+		end if
+	end for
+
+	if length(links) = 0 then
+		return ""
+	end if
+
+	return "<funcseealso>" & join(links, ", ") & "</funcseealso>"
+end function
+
 procedure write_includes()
 	object ign, content
 	sequence cat_name, api_content, typ
@@ -452,8 +505,13 @@ procedure write_includes()
 			func = functions[a][2][b]
 			typ = m:get(func, "type", "")
 			
-			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\">\n", {
+			api_content &= sprintf("<funcref name=\"%s\" type=\"%s\" params=\"%s\"", {
 				m:get(func, "name", ""), typ, m:get(func, "params", "none") })
+			if m:has(func, "include") then
+				api_content &= sprintf(" include=\"%s\"", {m:get(func, "include", "")})
+			end if
+			api_content &= ">\n"
+
 			if equal(typ, "function") then
 				api_content &= get_section(func, "returns", "funcreturns", 1, 1)
 			end if
@@ -465,7 +523,7 @@ procedure write_includes()
 						{c, m:get(func, "example " & sprint(c), "")})
 				end if
 			end for
-			api_content &= get_section(func, "see also", "funcseealso", 1, 0)
+			api_content &= format_seealso(cat_name, m:get(func, "see also", ""))
 			api_content &= "</funcref>\n"
 			
 		end for

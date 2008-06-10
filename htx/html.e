@@ -59,7 +59,7 @@ procedure espan()
 end procedure
 
 procedure write_secnum_a()
-	write(sprintf("<a name=\"#%s\"></a>", {secnum_tag()}))
+	write(sprintf("<a name=\"%s\"></a>", {secnum_tag()}))
 end procedure
 
 procedure tag_h1(object raw_text, object param_list)
@@ -204,7 +204,7 @@ end procedure
 procedure tag_funcref(sequence raw_text, sequence plist)
 	object name, inc, params, ret, typ
 	name   = pval("name", plist)
-	inc    = pval("inc", plist)
+	inc    = pval("include", plist)
 	params = pval("params", plist)
 	typ    = pval("type", plist)
 
@@ -212,6 +212,9 @@ procedure tag_funcref(sequence raw_text, sequence plist)
 	write(sprintf("<h3 class=\"funcref\">%s</h3>", {name}))
 
 	write("<table class=\"func\">\n")
+	if sequence(inc) and length(inc) > 0 then
+		write(sprintf("<tr><th>Include:</th><td>%s</td></tr>\n", {inc}))
+	end if
 	write(sprintf("<tr><th>Signature:</th><td>%s %s(%s)</td></tr>\n", {typ,name,params}))
 	--write(sprintf("<tr><th>Type:</th><td>%s</td></tr>\n", {typ}))
 	--write(sprintf("<tr><th>Parameters:</th><td>%s</td></tr>\n", {params}))
@@ -250,6 +253,14 @@ procedure tag_funcreturns(sequence raw_text, sequence plist)
 end procedure
 
 procedure tag_end_funcreturns(sequence raw_text, sequence plist)
+	write("</td>\n</tr>\n")
+end procedure
+
+procedure tag_funcinc(sequence raw_text, sequence plist)
+	write("<tr><th>Include:</th>\n<td>\n")
+end procedure
+
+procedure tag_end_funcinc(sequence raw_text, sequence plist)
 	write("</td>\n</tr>\n")
 end procedure
 
@@ -296,6 +307,8 @@ global procedure html_init()
 	add_handler("/funcseealso",routine_id("tag_end_funcseealso"))
 	add_handler("funcreturns", routine_id("tag_funcreturns"))
 	add_handler("/funcreturns",routine_id("tag_end_funcreturns"))
+	add_handler("funcinc",   routine_id("tag_funcinc"))
+	add_handler("/funcinc",  routine_id("tag_end_funcinc"))
 	add_handler("path",      routine_id("tag_gspan"))
 	add_handler("/path",     routine_id("tag_end_gspan"))
 	add_handler("env",       routine_id("tag_gspan"))

@@ -307,6 +307,7 @@ end function
 
 -- TODO: document default parameter usage
 -- TODO: =0.03... Yuk! We need NULL :-)
+
 --**
 -- Return the last n items of st. If n is greater than the length of st, then the entire st will be returned.
 --
@@ -546,6 +547,7 @@ global function replace(sequence st, object what, integer start, integer stop)
 end function
 --**
 
+-- TODO: document default parameters
 --**
 -- split st by delim.
 --
@@ -563,9 +565,10 @@ end function
 
 -- result = split_adv("One,Two|Three.Four", ".,|", 0, 1)
 -- -- result is {"One", "Two", "Three", "Four"}
+--
 -- See also:
 -- chunk
--- TODO: document default parameters
+
 global function split(sequence st, object delim=" ", integer limit=0, integer any=0)
 	sequence ret
 	integer pos, start, next_pos
@@ -604,6 +607,7 @@ global function split(sequence st, object delim=" ", integer limit=0, integer an
 end function
 --**
 
+-- TODO: document default param change
 --**
 -- Join s by delim
 --
@@ -617,7 +621,6 @@ end function
 -- See also:
 -- split
 
--- TODO: document default param change
 global function join(sequence s, object delim=" ")
 	object ret
 
@@ -652,6 +655,7 @@ constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
 	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A,
 	#2028, #2029, #202F, #205F, #3000}
 
+-- TODO: document default param change
 --**
 -- Trim any item in what from the head (start) of str
 --
@@ -662,7 +666,6 @@ constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
 -- See also:
 -- trim_tail, trim, pad_head
 
--- TODO: document default param change
 global function trim_head(sequence str, object what=TRIM_WHITESPACES)
 	if atom(what) then
 		what = {what}
@@ -678,6 +681,7 @@ global function trim_head(sequence str, object what=TRIM_WHITESPACES)
 end function
 --**
 
+-- TODO: document default param change
 --**
 -- Trim any item in what from the end (tail) of str
 --
@@ -687,7 +691,6 @@ end function
 -- See Also:
 -- trim_head, trim, pad_tail
 
--- TODO: document default param change
 global function trim_tail(sequence str, object what=TRIM_WHITESPACES)
 	if atom(what) then
 		what = {what}
@@ -703,6 +706,7 @@ global function trim_tail(sequence str, object what=TRIM_WHITESPACES)
 end function
 --**
 
+-- TODO: document default param change
 --**
 -- Trim any item in what from the head (start) and tail (end) of str
 --
@@ -712,12 +716,12 @@ end function
 -- See also:
 -- trim_head, trim_tail
 
--- TODO: document default param change
 global function trim(sequence str, object what=TRIM_WHITESPACES)
 	return trim_tail(trim_head(str, what), what)
 end function
 --**
 
+-- TODO: document default param change
 --**
 -- Pad the beginning of a sequence with spaces up to params in length or optionally params can
 -- be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with
@@ -736,7 +740,6 @@ end function
 -- See also:
 -- trim_head, pad_tail
 
--- TODO: document default param change
 global function pad_head(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
 		return str
@@ -746,6 +749,7 @@ global function pad_head(sequence str, integer size, object ch=' ')
 end function
 --**
 
+-- TODO: document default param change
 --**
 -- Pad the end of a sequence with spaces up to params in length or optionally params can
 -- be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with
@@ -765,7 +769,6 @@ end function
 -- See Also:
 -- trim_tail, pad_head
 
--- TODO: document default param change
 global function pad_tail(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
 		return str

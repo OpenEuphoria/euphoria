@@ -5,6 +5,7 @@ include get.e
 include wildcard.e
 include map.e as m
 include regex.e as re
+include file.e
 
 global sequence current_file
 global integer current_line
@@ -127,13 +128,13 @@ function escape( sequence text )
 	return text
 end function
 
-procedure add_function(sequence filename, m:map func)
+procedure add_function(sequence fname, m:map func)
 	integer idx
 	sequence cat_name, signature
 	object result
 	
 	idx = 0
-	func      = m:put(func, "include", filename)
+	--func      = m:put(func, "include", fname)
 	cat_name  = m:get(func, "category", "")
 	signature = m:get(func, "signature", "")
 
@@ -165,7 +166,7 @@ procedure add_function(sequence filename, m:map func)
 	functions[idx][2] &= {func}
 end procedure
 
-global procedure process_include(sequence filename)
+global procedure process_include(sequence fname)
 	sequence lines, line
 	object cat_name, sec_name, sec_data, func
 	integer parse
@@ -176,10 +177,10 @@ global procedure process_include(sequence filename)
 	sec_data = ""
 	func = 0
 
-	lines = read_lines(filename)
+	lines = read_lines(fname)
 
 	ifdef DEBUG then
-		printf(1, "read %s: %d lines\n", {filename,length(lines)})
+		printf(1, "read %s: %d lines\n", {fname,length(lines)})
 	end ifdef
 
 	for i = 1 to length(lines) do
@@ -206,7 +207,7 @@ global procedure process_include(sequence filename)
 					func = m:put(func, sec_name, trim_tail(sec_data))
 				end if
 				if map(func) and m:has(func, "signature") then
-					add_function(filename, func)
+					add_function(fname, func)
 					func = 0
 				end if
 			else
@@ -254,6 +255,7 @@ global procedure process_include(sequence filename)
 				if equal(sec_name, "category") then
 					cat_name = trim_tail(sec_data, " \t\r\n")
 				end if
+
 				-- save old section
 				func = m:put(func, sec_name, trim_tail(sec_data))
 			end if
@@ -265,6 +267,9 @@ global procedure process_include(sequence filename)
 				sec_name = 0
 				sec_data = ""
 			end if
+
+			-- This function was specified in this include file
+			func = m:put(func, "include", filename(fname))
 		elsif parse and equal(sec_name, "signature") then
 			-- Function signature did not fit on one line, append
 			sec_data &= ' ' & trim(line, 0)
