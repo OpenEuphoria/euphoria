@@ -403,7 +403,7 @@ ec.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	
 pcre : .SYMBOLIC .\pcre\pcre.h .\pcre\config.h $(PCRE_OBJECTS)
 
-interpreter_objects : .SYMBOLIC $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+interpreter_objects : .SYMBOLIC rev.e $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\int.lbc
 	@%append .\$(OBJDIR)\int.lbc option quiet
 	@%append .\$(OBJDIR)\int.lbc option caseexact
@@ -417,9 +417,9 @@ exsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 exsource : .SYMBOLIC $(OBJDIR)/main-.c
 
 translate-win : .SYMBOLIC  builddirs
-	wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -f makefile.wat ecwsource EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -f makefile.wat backendsource EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat exwsource EX=exw.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat ecwsource EX=exw.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat backendsource EX=exw.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	
 translate-dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat exsource EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
@@ -473,8 +473,8 @@ exwc.exe : interpreter_objects
 
 interpreter : .SYMBOLIC builddirs 
 	del rev.e
-	wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat exw.exe EX=exw.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat exwc.exe EX=exw.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
 	@copy ec.exe $(%EUDIR)\bin\
@@ -488,7 +488,7 @@ install : .SYMBOLIC
 	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
 	@for %i in (*.ex) do @copy %i $(%EUDIR)\source\
 	
-ecw.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+ecw.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
@@ -499,13 +499,13 @@ ecw.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR
 
 translator : .SYMBOLIC builddirs
 	del rev.e
-	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat ecw.exe EX=exw.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dostranslator : .SYMBOLIC builddirs
 	del rev.e
 	wmake -f makefile.wat ec.exe EX=ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-backendw.exe : backendflag $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
 	@%append .\$(OBJDIR)\exwb.lbc option caseexact
@@ -518,13 +518,13 @@ backendw.exe : backendflag $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND
 
 backend : .SYMBOLIC builddirs
 	del rev.e
-	wmake -f makefile.wat backendw.exe EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat backendw.exe EX=exw.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dos : .SYMBOLIC builddirs
 	del rev.e
 	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ex.exe : rev.e $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ex.lbc
 	@%append .\$(OBJDIR)\ex.lbc option quiet
 	@%append .\$(OBJDIR)\ex.lbc option caseexact
@@ -542,7 +542,7 @@ ex.exe : $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJ
 	le23p ex.exe
 	cwc ex.exe
 
-ec.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ec.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
@@ -566,7 +566,7 @@ ec.exe : $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND
 .\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 
 rev.e :
-	$(EXE) revget.ex svn~1\entries
+	$(EX) revget.ex svn~1\entries
 
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
