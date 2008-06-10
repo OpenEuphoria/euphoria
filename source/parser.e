@@ -1749,6 +1749,9 @@ procedure Switch_statement()
 	else
 		if switch_stack[$][SWITCH_ELSE] then
 			Code[else_bp] = switch_stack[$][SWITCH_ELSE] - switch_pc
+		else
+			-- just go to the end
+			Code[else_bp] = length(Code) - switch_pc + 1
 		end if
 	end if
 	

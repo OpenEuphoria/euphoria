@@ -34,8 +34,15 @@ for i = 1 to length( SWITCH ) label "top" do
 	end switch
 end for
 
+integer zero
+zero = 0
+switch 1 do
+	case 0:
+		zero = 1
+end switch
 constant 
 	CORRECT = { 1, 2, 2, "a", 3, "what?" }
 
 test_equal( "switch", CORRECT, s )
+test_false( "no matching case", zero )
 

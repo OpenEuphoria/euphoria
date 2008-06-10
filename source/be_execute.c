@@ -1973,11 +1973,7 @@ void do_exec(int *start_pc)
 		  			pc += a;
 		  		}
 		  		else{
-		  			// no match:  check for else
-		  			
-		  			if( !pc[4] ){
-		  				RTFatal("select has no matching case and no 'case else'");
-		  			}
+		  			// no match:  goto else or skip the switch
 					pc += pc[4];
 		  		}
 		  		
