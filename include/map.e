@@ -66,6 +66,7 @@ global type map(object o)
 end type
 
 constant maxInt = #3FFFFFFF
+
 --**
 -- Calculate a Hashing value from the supplied data.
 --
@@ -79,8 +80,8 @@ constant maxInt = #3FFFFFFF
 --				However, a value of 0 or lower menas that it can as large as the maximum integer value.
 --
 -- Example 1:
---	  integer h1
---	  h1 = calc_hash( symbol_name )
+-- integer h1
+-- h1 = calc_hash( symbol_name )
 global function calc_hash(object key, integer pMaxHash = 0)
 	integer ret
 	integer temp
@@ -122,6 +123,9 @@ global function calc_hash(object key, integer pMaxHash = 0)
 end function
 --**
 
+--**
+-- TODO: document
+
 global function rehash(map m1, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
@@ -162,6 +166,18 @@ global function rehash(map m1, integer pRequestedSize = 0)
 
 	return m
 end function
+--**
+
+--**
+-- Create a new map data structure
+--
+-- Comments:
+--     A new object of type map is created. type_check should be turned off for better performance.
+--
+-- Example 1:
+-- map m
+-- m = new()
+-- -- m is now an empty map (size = 0)
 
 global function new(integer initSize = 66)
 	integer lBuckets
@@ -169,6 +185,17 @@ global function new(integer initSize = 66)
 
 	return {0, 0, repeat({{},{}}, lBuckets ) }
 end function
+--**
+
+--**
+-- Check if map has a given key.
+--
+-- Example 1:
+-- map m
+-- m = new()
+-- m = put(m, "name", "John")
+-- ? has(m, "name") -- 1
+-- ? has(m, "age")  -- 0
 
 global function has(map m, object key)
 	integer lIndex
@@ -176,6 +203,25 @@ global function has(map m, object key)
 	lIndex = calc_hash(key, length(m[iBuckets]))
 	return (find(key, m[iBuckets][lIndex][iKeys]) != 0)
 end function
+--**
+
+--**
+-- Return the value that corresponds to the key x2 in the map m. If the key is not in the map, 
+-- the default value x3 is returned instead.
+--
+-- Example 1:
+-- map ages
+-- ages = new()
+-- ages = put(ages, "Andy", 12)
+-- ages = put(ages, "Budi", 13)
+--
+-- integer age
+-- age = get(ages, "Budi", -1)
+-- if age = -1 then
+--     puts(1, "Age unknown")
+-- else
+--     printf(1, "The age is %d", age)
+-- end if
 
 global function get(map m, object key, object defaultValue)
 	integer lIndex
@@ -190,7 +236,21 @@ global function get(map m, object key, object defaultValue)
 	end if
 
 end function
+--**
 
+--**
+-- Put an entry on the map m1 with key x1 and value x2. The modified map is returned.
+--
+-- Comments:
+--     If existing entry with the same key is already in the map, the value of the entry is updated.
+--
+-- Example 1:
+-- map ages
+-- ages = new()
+-- ages = put(ages, "Andy", 12)
+-- ages = put(ages, "Budi", 13)
+-- ages = put(ages, "Budi", 14)
+-- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
 
 global function put(map m1, object key, object value, integer pTrigger = 100)
 	integer index
@@ -231,6 +291,20 @@ global function put(map m1, object key, object value, integer pTrigger = 100)
 
 	return m
 end function
+--**
+
+--**
+-- Remove an entry with key x from the map m2. The modified map is returned.
+--
+-- Comments:
+--     If the map has no entry with the specified key, the original map is returned.
+--
+-- Example 1:
+-- map m
+-- m = new()
+-- m = put(m, "Amy", 66.9)
+-- m = remove(m, "Amy")
+-- -- m is now an empty map again
 
 global function remove(map m1, object key)
 	integer hash, index
@@ -257,10 +331,24 @@ global function remove(map m1, object key)
 
 		return m
 end function
+--**
+
+--**
+-- Return the number of entries in the map m.
+--
+-- Comments:
+--     For an empty map, size will be zero
+--
+-- Example 1:
+-- map m
+-- m = put(m, 1, "a")
+-- m = put(m, 2, "b")
+-- ? size(m) -- outputs 2
 
 global function size(map m)
 	return m[iCnt]
 end function
+--**
 
 global function statistics(map m)
 	sequence lStats
@@ -286,6 +374,23 @@ global function statistics(map m)
 	return lStats
 end function
 
+--**
+-- Return all keys in the map as a sequence.
+--
+-- Comments:
+--     The order of the keys returned may not be the same as the putting order.
+--
+-- Example 1:
+-- map m
+-- m = new()
+-- m = put(m, 10, "ten")
+-- m = put(m, 20, "twenty")
+-- m = put(m, 30, "thirty")
+-- m = put(m, 40, "forty")
+--
+-- sequence keys
+-- keys = keys(m) -- keys might be {20,40,10,30} or some other orders
+
 global function keys(map m)
 	sequence buckets, bucket
 	sequence ret
@@ -305,6 +410,25 @@ global function keys(map m)
 
 		return ret
 end function
+--**
+
+--**
+-- Return all values in the map as a sequence.
+--
+-- Comments:
+--     The order of the values returned may not be the same as the putting order. 
+--     Duplicate values are not removed.
+--
+-- Example 1:
+-- map m
+-- m = new()
+-- m = put(m, 10, "ten")
+-- m = put(m, 20, "twenty")
+-- m = put(m, 30, "thirty")
+-- m = put(m, 40, "forty")
+--
+-- sequence values
+-- values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
 
 global function values(map m)
 	sequence buckets, bucket
@@ -325,7 +449,10 @@ global function values(map m)
 
 		return ret
 end function
+--**
 
+--**
+-- TODO: document
 
 global function optimize(map m1, atom pAvg = 10)
 	sequence op
@@ -342,6 +469,10 @@ global function optimize(map m1, atom pAvg = 10)
 	end while
 	return m
 end function
+--**
+
+--**
+-- TODO: document
 
 global function load_map(sequence pFileName)
 	integer fh
@@ -386,4 +517,5 @@ global function load_map(sequence pFileName)
 	close(fh)
 	return optimize(m)
 end function
+--**
 
