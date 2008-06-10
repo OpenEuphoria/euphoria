@@ -156,7 +156,7 @@ end function
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed 
-	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE}) then
+	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE}) then  
 		Warning(sprintf("%s:%d - statement after %s will never be executed", 
 				{name_ext(file_name[current_file_no]), line_number, keyword}))
 	end if
@@ -164,7 +164,7 @@ end procedure
 
 procedure InitCheck(symtab_index sym, integer ref)
 -- emit INIT_CHECK opcode if we aren't sure if a var has been
--- initialized yet. ref is TRUE if this is a read of this var 
+-- initialized yet. ref is TRUE if this is a read of this var
 	if SymTab[sym][S_MODE] = M_NORMAL and 
 	   SymTab[sym][S_SCOPE] != SC_LOOP_VAR and 
 	   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
@@ -638,7 +638,7 @@ procedure ParseArgs(symtab_index subsym)
 							start_playback(SymTab[s][S_CODE] )
 							call_proc(forward_expr, {})
 							if sequence(backed_up_tok) and 
-								backed_up_tok[T_ID]!=PLAYBACK_ENDS 
+								backed_up_tok[T_ID]!=PLAYBACK_ENDS
 							then
 								backed_up_toks = append(backed_up_toks,backed_up_tok)
 							end if
@@ -1364,12 +1364,12 @@ procedure Exit_statement()
     AppendXList(length(Code)+1)
     exit_delay &= by_ref[1]
     emit_forward_addr()    -- to be back-patched
-    tok = by_ref[2]
-    putback(tok)
+    tok = by_ref[2] 
+    putback(tok) 
     if not in_switch() then
     	NotReached(tok[T_ID], "exit")
     end if
-    
+
 end procedure
 
 procedure Continue_statement()
@@ -1839,7 +1839,7 @@ procedure Loop_statement()
 -- Parse a loop-until loop
     integer bp1
     integer exit_base,next_base
-
+						  
     exit_base = length(exit_list)
     next_base = length(continue_list)
     emit_op(NOP2) -- Entry_statement() may patch this
@@ -1856,15 +1856,15 @@ procedure Loop_statement()
 	end if
     bp1 = length(Code)+1
 	retry_addr &= length(Code)+1
-    continue_addr &= 0
-    call_proc(forward_Statement_list, {})
-    tok_match(UNTIL)
+    continue_addr &= 0  
+    call_proc(forward_Statement_list, {}) 
+    tok_match(UNTIL)  
     PatchNList(next_base)
     StartSourceLine(TRUE)
     short_circuit += 1
     short_circuit_B = FALSE
     SC1_type = 0
-    Expr()
+    Expr()       
     if SC1_type = OR then
     	backpatch(SC1_patch-3, SC1_OR_IF)
     	if TRANSLATE then
@@ -1877,7 +1877,7 @@ procedure Loop_statement()
     short_circuit -= 1
     emit_op(IF)
     emit_addr(bp1)
-    exit_loop(exit_base) 
+    exit_loop(exit_base)  
 end procedure
 
 integer top_level_parser
@@ -2327,7 +2327,7 @@ procedure Statement_list()
 	while TRUE do 
 		tok = next_token()
 		id = tok[T_ID]
-		
+		        
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			StartSourceLine(TRUE)
 			Assignment(tok)

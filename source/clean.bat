@@ -17,9 +17,9 @@ del EMIT_0.C
 del EMIT_1.C
 del PARSER.C
 del ERROR.C
+del PARSER_0.C
 del PARSER_1.C
 del PARSER_2.C
-del PARSER_3.C
 del MAIN.C
 del INT.C
 del MAIN-0.C
