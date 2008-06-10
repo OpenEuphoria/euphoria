@@ -417,9 +417,9 @@ exsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 exsource : .SYMBOLIC $(OBJDIR)/main-.c
 
 translate-win : .SYMBOLIC  builddirs
-        wmake -f makefile.wat exwsource EX=exw.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-        wmake -f makefile.wat ecwsource EX=exw.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-        wmake -f makefile.wat backendsource EX=exw.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat ecwsource EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat backendsource EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	
 translate-dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat exsource EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
@@ -473,8 +473,8 @@ exwc.exe : interpreter_objects
 
 interpreter : .SYMBOLIC builddirs 
 	del rev.e
-        wmake -f makefile.wat exw.exe EX=exw.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-        wmake -f makefile.wat exwc.exe EX=exw.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
 	@copy ec.exe $(%EUDIR)\bin\
@@ -499,7 +499,7 @@ ecw.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRAN
 
 translator : .SYMBOLIC builddirs
 	del rev.e
-        wmake -f makefile.wat ecw.exe EX=exw.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dostranslator : .SYMBOLIC builddirs
 	del rev.e
@@ -518,7 +518,7 @@ backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_B
 
 backend : .SYMBOLIC builddirs
 	del rev.e
-        wmake -f makefile.wat backendw.exe EX=exw.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -f makefile.wat backendw.exe EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dos : .SYMBOLIC builddirs
 	del rev.e
