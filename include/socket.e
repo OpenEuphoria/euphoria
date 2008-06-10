@@ -17,6 +17,8 @@ include machine.e
 include get.e
 include wildcard.e
 
+global enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
+
 global constant AF_INET = 2, SOCK_STREAM=1, SOCK_DGRAM = 2, SOCK_RAW = 3,
 	SOCK_RDM = 4, SOCK_SEQPACKET = 5
 global constant    -- RFC 1700
@@ -562,23 +564,26 @@ end function
 -- error code and error string. If errormode is EUNET_ERRORMODE_EUNET,
 -- the error codes will be one of . . .
 --
--- EUNET_ERROR_NOERROR = 0
--- EUNET_ERROR_WRONGMODE = -998
--- EUNET_ERROR_NODATA = -1001
--- EUNET_ERROR_LINUXONLY = -1002
--- EUNET_ERROR_WINDOWSONLY = -1003
--- EUNET_ERROR_NODNSRECORDS = -1501
--- EUNET_ERROR_UNKNOWN = -1999
+-- <ul>
+-- <li>EUNET_ERROR_NOERROR = 0</li>
+-- <li>EUNET_ERROR_WRONGMODE = -998</li>
+-- <li>EUNET_ERROR_NODATA = -1001</li>
+-- <li>EUNET_ERROR_LINUXONLY = -1002</li>
+-- <li>EUNET_ERROR_WINDOWSONLY = -1003</li>
+-- <li>EUNET_ERROR_NODNSRECORDS = -1501</li>
+-- <li>EUNET_ERROR_UNKNOWN = -1999</li>
+-- </ul>
 --
 -- If errormode is EUNET_ERRORMODE_OS, the error returned will be
 -- what the OS kernel returns.  Unless otherwise set, errormode is
 -- EUNET_ERRORMODE_EUNET by default.
 --
 -- Example:
--- 	s = get_error()
--- 	printf(1,"Error %d: %s\n",s)
+-- s = get_error()
+-- printf(1,"Error %d: %s\n",s)
 --
--- See also:	set_errormode, get_errormode
+-- See also:
+--     set_errormode, get_errormode
 
 global function get_error()
 	-- returns a 2-element sequence {ERROR_CODE,ERROR_STRING}
@@ -628,15 +633,15 @@ end function
 -- Returns:     The packet block size in bytes.
 --
 -- Example:
--- 	success = 1
--- 	while success > 0 do
--- 		data = data & recv(socket,0)
--- 		success = length(data)-last_data_len
--- 		last_data_len = length(data)
--- 		if success < get_blocksize() then
--- 			exit
--- 		end if
--- 	end while
+-- success = 1
+-- while success > 0 do
+--     data = data & recv(socket,0)
+--     success = length(data)-last_data_len
+--     last_data_len = length(data)
+--     if success < get_blocksize() then
+--         exit
+--     end if
+-- end while
 
 global function get_blocksize()
 	return BLOCK_SIZE
@@ -651,12 +656,12 @@ end function
 -- Returns:     0 for success, -1 for error.
 --
 -- Example:
--- 	error = delay(250)
--- 	if error then
--- 		puts(1,"Uh, oh.")
--- 	else
--- 		puts(1,"Get back to work!")
--- 	end if
+-- error = delay(250)
+-- if error then
+--    puts(1,"Uh, oh.")
+-- else
+--    puts(1,"Get back to work!")
+-- end if
 
 global function delay(atom millisec)
 	-- Delays nicely for a set number of milliseconds (or a few more)
@@ -1032,8 +1037,8 @@ end function
 -- success and -1 on failure.
 --
 -- Example 1:
---    success = bind(socket, "0.0.0.0:8080")
---    -- Look for connections on port 8080 for any interface.
+-- success = bind(socket, "0.0.0.0:8080")
+-- -- Look for connections on port 8080 for any interface.
 
 global function bind(atom socket, sequence inet_addr)
 	if platform()=WIN32 then
@@ -1176,7 +1181,7 @@ end function
 -- a string.  Returns 0 for success and -1 on failure.
 --
 -- Example 1:
---     success = connect(socket, "11.1.1.1:80")
+-- success = connect(socket, "11.1.1.1:80")
 
 global function connect(atom socket, sequence inet_addr)
 	if platform()=WIN32 then
@@ -1211,7 +1216,7 @@ end function
 -- Returns a handle to a newly created socket.
 --
 -- Example 1:
---    socket = new_socket(AF_INET, SOCK_STREAM, 0)
+-- socket = new_socket(AF_INET, SOCK_STREAM, 0)
 
 global function new_socket(integer family, integer sock_type, integer protocol)
 	
@@ -1450,36 +1455,36 @@ end function
 -- a single call.
 --
 -- Example 1:
---	rtn = poll( {{socket1,POLLIN+POLLOUT+POLLERR},
---			{socket2,POLLIN+POLLERR},
---			{socket3,POLLOUT+POLLERR}}, 500)
+-- rtn = poll( {{socket1,POLLIN+POLLOUT+POLLERR},
+--             {socket2,POLLIN+POLLERR},
+--             {socket3,POLLOUT+POLLERR}}, 500)
 --
---	if atom(rtn) then
---		puts(1,"No traffic yet.\n")
---	else
---		puts(1,"The following events have occured:\n")
---		printf(1,"Socket1: %d, Socket2: %d, Socket3: %d\n",rtn)
---		-- Cancel polling events
---		rtn = poll( {{socket1,0},{socket2,0},{socket3,0}}, 0)
---	end if
+-- if atom(rtn) then
+--     puts(1,"No traffic yet.\n")
+-- else
+--     puts(1,"The following events have occured:\n")
+--     printf(1,"Socket1: %d, Socket2: %d, Socket3: %d\n",rtn)
+--     -- Cancel polling events
+--     rtn = poll( {{socket1,0},{socket2,0},{socket3,0}}, 0)
+-- end if
 --
 -- Example 2:     
---	bytes_tx = 0
---	sock_data = ""
+-- bytes_tx = 0
+-- sock_data = ""
 --
---	while 1 do
---		ignore = poll({{sock,POLLIN}},250)
---		-- Give the server time to respond, but the value can be adjusted.
---		if sequence(ignore) then
---			sock_data = sock_data & recv(sock,0)
---		elsif bytes_tx > 0 then
---			exit
---			-- We've received some data, and there's
---			-- nothing left on the socket.
---		end if
---		bytes_tx = length(sock_data)
---	end while
---	puts(1, sock_data)
+-- while 1 do
+--     ignore = poll({{sock,POLLIN}},250)
+--     -- Give the server time to respond, but the value can be adjusted.
+--     if sequence(ignore) then
+--         sock_data = sock_data & recv(sock,0)
+--     elsif bytes_tx > 0 then
+--        exit
+--        -- We've received some data, and there's
+--        -- nothing left on the socket.
+--     end if
+--     bytes_tx = length(sock_data)
+-- end while
+-- puts(1, sock_data)
 
 global function poll(sequence socket_list, atom timeout)
 	if platform()=WIN32 then
@@ -1672,21 +1677,21 @@ end function
 -- sendto().
 --
 -- Example 1:
--- 	t1 = time()
--- 	t2 = t1
--- 	while t2 < t1+15 and recvdata[2][1]=EAGAIN do
--- 		recvdata = recvfrom(socket,MSG_DONTWAIT)
--- 		if length(recvdata[1])>0 then
--- 			msg = msg & recvdata[1]
--- 			lastpeer = recvdata[3]
--- 			t1 = t1 - 60
--- 			recvdata = {"",{EAGAIN,""},""}
--- 		elsif recvdata[2][1] != EAGAIN then
--- 			puts(1,"Error: "&recvdata[2][2]&"\n")
--- 		end if
--- 		t2 = time()
--- 	end while
--- 	puts(1,sprintf("%d: ",cycle)&lastpeer&":  "&msg&'\n')
+-- t1 = time()
+-- t2 = t1
+-- while t2 < t1+15 and recvdata[2][1]=EAGAIN do
+--     recvdata = recvfrom(socket,MSG_DONTWAIT)
+--     if length(recvdata[1])>0 then
+--         msg = msg & recvdata[1]
+--         lastpeer = recvdata[3]
+--         t1 = t1 - 60
+--         recvdata = {"",{EAGAIN,""},""}
+--     elsif recvdata[2][1] != EAGAIN then
+--         puts(1,"Error: "&recvdata[2][2]&"\n")
+--     end if
+--     t2 = time()
+-- end while
+-- puts(1,sprintf("%d: ",cycle)&lastpeer&":  "&msg&'\n')
 
 global function recvfrom(atom socket, atom flags)
 	if platform()=LINUX then
@@ -2035,14 +2040,14 @@ end function
 --     a negative integer on error.
 --
 -- Example 1:
---	result = dnsquery("yahoo.com",NS_T_MX,0)
---	if atom(result) then
---		puts(1,"Uh, oh!")
---	else
---		for ctr = 1 to length(result) do
---			printf(1,"%s\t%d\t%d\n",result[ctr])
---		end for
---	end if
+-- result = dnsquery("yahoo.com",NS_T_MX,0)
+-- if atom(result) then
+--     puts(1,"Uh, oh!")
+-- else
+--     for ctr = 1 to length(result) do
+--         printf(1,"%s\t%d\t%d\n",result[ctr])
+--     end for
+-- end if
 --
 -- See also:
 --     getaddrinfo, gethostbyname, getmxrr, getnsrr
@@ -2312,15 +2317,15 @@ end function
 -- Returns a sequence of sequences containing information about
 -- a given server name and named service.
 --
--- <eucode>
--- s = {{
--- 	atom flags,
--- 	atom family,
--- 	atom socket_type,
--- 	atom protocol,
--- 	sequence inet_address
--- }}
--- </eucode>
+-- These can be accessed with global constants
+--
+-- <ul>
+-- <li>ADDR_FLAGS</li>
+-- <li>ADDR_FAMILY</li>
+-- <li>ADDR_TYPE</li>
+-- <li>ADDR_PROTOCOL</li>
+-- <li>ADDR_ADDRESS</li>
+-- </ul>
 --
 -- Different DNS servers may return conflicting information about a
 -- name, but getaddrinfo will only return the first.  Future
@@ -2332,8 +2337,8 @@ end function
 -- port number between 0 and 65535.
 --
 -- Example 1:
---	puts(1,"The IP address and port for http://www.yahoo.com is "&
---	getaddrinfo("www.yahoo.com","http",0)&"\n")
+-- puts(1,"The IP address and port for http://www.yahoo.com is "&
+-- getaddrinfo("www.yahoo.com","http",0)&"\n")
 
 global function getaddrinfo(object node, object service, object hints)
 	if platform()=WIN32 then
@@ -2354,14 +2359,21 @@ end function
 --URL-encoding
 -----------------------------------------------------------------------------------
 --HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
---   1. Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable characters, and any others you want to encode-- there's no danger in encoding too many characters. For simplicity, you might encode all non-alphanumeric characters.
+--   1. Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii 
+--      value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable 
+--      characters, and any others you want to encode-- there's no danger in encoding too many 
+--      characters. For simplicity, you might encode all non-alphanumeric characters.
 --   2. Change all spaces to plusses.
 --   3. String the names and values together with = and &, like
 --          name1=value1&name2=value2&name3=value3
 --   4. This string is your message body for POST submissions, or the query string for GET submissions.
---For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors" that's set to "Fred & Ethel", the URL-encoded form data would be
+--
+-- For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors" 
+-- that's set to "Fred & Ethel", the URL-encoded form data would be:
+--
 --    name=Lucy&neighbors=Fred+%26+Ethel <<== note no \n or \r
---with a length of 34.
+--
+-- with a length of 34.
 
 --**
 -- Converts all non-alphanumeric characters in a string to their
@@ -2369,8 +2381,8 @@ end function
 -- spaces.
 --
 -- Example 1:
---     puts(1,urlencode("Fred & Ethel"))
---     -- Prints "Fred+%26+Ethel"
+-- puts(1,urlencode("Fred & Ethel"))
+-- -- Prints "Fred+%26+Ethel"
 
 global function urlencode(sequence what)
 	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
@@ -2497,7 +2509,7 @@ end procedure --defaultsetsendheaderline()
 -- increase the length of the header overall.  
 --
 -- Example 1:
---    set_sendheader("Referer","search.yahoo.com")
+-- set_sendheader("Referer","search.yahoo.com")
 --
 -- See also:
 --     get_sendheader
@@ -2723,15 +2735,15 @@ end function
 --   A sequence {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:
--- 	addrinfo = getaddrinfo("www.yahoo.com","http",0)
---	if atom(addrinfo) or length(addrinfo) < 1 or
---		length(addrinfo[1]) < 5 then
---		puts(1,"Uh, oh")
---		return {}
---	else
---		inet_addr = addrinfo[1][5]
---	end if
---	data = get_http_use_cookie(inet_addr,"www.yahoo.com","")
+-- addrinfo = getaddrinfo("www.yahoo.com","http",0)
+-- if atom(addrinfo) or length(addrinfo) < 1 or
+--    length(addrinfo[1]) < 5 then
+--    puts(1,"Uh, oh")
+--    return {}
+-- else
+--     inet_addr = addrinfo[1][5]
+-- end if
+-- data = get_http_use_cookie(inet_addr,"www.yahoo.com","")
 --
 -- See also:
 --     get_url
@@ -2928,15 +2940,15 @@ end function
 -- {sequence header, sequence data}.
 --
 -- Example 1:
---	url = "http://banners.wunderground.com/weathersticker/mini"&
---	"Weather2_metric_cond/language/www/US/PA/Philadelphia.gif"
+-- url = "http://banners.wunderground.com/weathersticker/mini"&
+-- "Weather2_metric_cond/language/www/US/PA/Philadelphia.gif"
 --
---	temp = get_url(url)
---	if length(temp)>=2 and length(temp[2])>0 then
---		tempfp = open(TEMPDIR&"current_weather.gif","wb")
---		puts(tempfp,temp[2])
---		close(tempfp)
---	end if
+-- temp = get_url(url)
+-- if length(temp)>=2 and length(temp[2])>0 then
+--     tempfp = open(TEMPDIR&"current_weather.gif","wb")
+--     puts(tempfp,temp[2])
+--     close(tempfp)
+-- end if
 
 global function get_url(sequence url)
 	sequence node, hostname, protocol, port, file, inet_addr
