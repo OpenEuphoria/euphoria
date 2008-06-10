@@ -388,6 +388,11 @@ procedure scan(sequence file_name)
     object word
     atom chunk_total, line_total
     boolean doc_file, matched, first_match
+
+	-- SKIP .svn dir
+	if match(".svn", file_name) then
+		return
+	end if
     
     fileNum = open(file_name, "rb")   
     if fileNum = -1 then
@@ -516,14 +521,14 @@ procedure scan(sequence file_name)
     return 
 end procedure
 
-function look_at(sequence path_name, sequence entry)
+function look_at(sequence path_name, sequence direntry)
 -- see if a file name qualifies for searching
     sequence file_name
-    
-    if find('d', entry[D_ATTRIBUTES]) then
+
+    if find('d', direntry[D_ATTRIBUTES]) then
 	return 0 -- a directory
     end if
-    file_name = entry[D_NAME]
+    file_name = direntry[D_NAME]
     if equal(file_name, log_name) then
 	return 0 -- avoid circularity
     end if
