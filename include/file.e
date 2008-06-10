@@ -80,7 +80,8 @@ end ifdef
 -- global function ? object x1
 --
 -- Description:
--- Shorthand way of saying: <b>pretty_print(1, x, {})</b> - i.e. printing the value of an expression to the standard output, with braces and indentation to show the structure.
+-- Shorthand way of saying: <b>pretty_print(1, x, {})</b> - i.e. printing the value of an 
+-- expression to the standard output, with braces and indentation to show the structure.
 --
 -- Example 1:
 -- ? {1, 2} + {3, 4}  -- will display {4, 6}
@@ -101,7 +102,10 @@ end ifdef
 -- Signature:
 -- global function open(atom st1, sequence st2)
 --
---Open a file or device, to get the file number. -1 is returned if the open fails. st1 is the path name of the file or device. st2 is the mode in which the file is to be opened. Possible modes are:
+-- Description:
+-- Open a file or device, to get the file number. -1 is returned if the open fails. st1 is 
+-- the path name of the file or device. st2 is the mode in which the file is to be opened. 
+-- Possible modes are:
 --
 -- "r" - open text file for reading
 -- "rb" - open binary file for reading
@@ -112,11 +116,19 @@ end ifdef
 -- "a" - open text file for appending
 -- "ab" - open binary file for appending
 --
--- Files opened for read or update must already exist. Files opened for write or append will be created if necessary. A file opened for write will be set to 0 bytes. Output to a file opened for append will start at the end of file.
+-- Files opened for read or update must already exist. Files opened for write or append will 
+-- be created if necessary. A file opened for write will be set to 0 bytes. Output to a 
+-- file opened for append will start at the end of file.
 --
--- On DOS or Windows, output to text files will have carriage-return characters automatically added before linefeed characters. On input, these carriage-return characters are removed. A control-Z character (ASCII 26) will signal an immediate end of file. Note: on some versions of DOS, a control-Z typed by the user might cause standard input to permanently appear to be at the end-of-file, until the DOS window is closed.
+-- On DOS or Windows, output to text files will have carriage-return characters automatically 
+-- added before linefeed characters. On input, these carriage-return characters are removed. 
+-- A control-Z character (ASCII 26) will signal an immediate end of file. Note: on some 
+-- versions of DOS, a control-Z typed by the user might cause standard input to permanently 
+-- appear to be at the end-of-file, until the DOS window is closed.
 --
--- I/O to binary files is not modified in any way. Any byte values from 0 to 255 can be read or written. On Linux and FreeBSD, all files are binary files, so "r" mode and "rb" mode are equivalent, as are "w" and "wb", "u" and "ub", and "a" and "ab".
+-- I/O to binary files is not modified in any way. Any byte values from 0 to 255 can be 
+-- read or written. On Linux and FreeBSD, all files are binary files, so "r" mode and "rb" 
+-- mode are equivalent, as are "w" and "wb", "u" and "ub", and "a" and "ab".
 --
 -- Some typical devices that you can open on DOS or Windows are:
 --
@@ -127,16 +139,24 @@ end ifdef
 -- "PRN" - the printer on the parallel port
 -- "NUL" - a non-existent device that accepts and discards output
 --
--- Currently, files up to 2 Gb in size can be handled. Beyond that, some file operations may not work correctly. This limit will likely be increased in the future. 
--- Description:
+-- Currently, files up to 2 Gb in size can be handled. Beyond that, some file operations may 
+-- not work correctly. This limit will likely be increased in the future. 
+--
 -- Close a file or device and flush out any still-buffered characters.
 --
 -- Comments:
--- DOS32:  When running under Windows 95 or later, you can open any existing file that has a long file or directory name in its path (i.e. greater than the standard DOS 8.3 format) using any open mode - read, write etc. However, if you try to create a new file (open with "w" or "a" and the file does not already exist) then the name will be truncated if necessary to an 8.3 style name. We hope to support creation of new long-filename files in a future release.
+-- DOS32:  When running under Windows 95 or later, you can open any existing file that has a 
+-- long file or directory name in its path (i.e. greater than the standard DOS 8.3 format) 
+-- using any open mode - read, write etc. However, if you try to create a new file (open 
+-- with "w" or "a" and the file does not already exist) then the name will be truncated if 
+-- necessary to an 8.3 style name. We hope to support creation of new long-filename files in 
+-- a future release.
 --
--- WIN32, Linux and FreeBSD: Long filenames are fully supported for reading and writing and creating.
+-- WIN32, Linux and FreeBSD: Long filenames are fully supported for reading and writing and 
+-- creating.
 --
--- DOS32: Be careful not to use the special device names in a file name, even if you add an extension. e.g. CON.TXT, CON.DAT, CON.JPG etc. all refer to the CON device, not a file.
+-- DOS32: Be careful not to use the special device names in a file name, even if you add an 
+-- extension. e.g. CON.TXT, CON.DAT, CON.JPG etc. all refer to the CON device, not a file.
 --
 -- Example:
 -- integer file_num, file_num95
@@ -161,12 +181,23 @@ end ifdef
 --**
 
 --**
--- Seek (move) to any byte position in the file fn or to the end of file if a1 is -1. For each open file there is a current byte position that is updated as a result of I/O operations on the file. The initial file position is 0 for files opened for read, write or update. The initial position is the end of file for files opened for append. The value returned by seek() is 0 if the seek was successful, and non-zero if it was unsuccessful. It is possible to seek past the end of a file. If you seek past the end of the file, and write some data, undefined bytes will be inserted into the gap between the original end of file and your new data.
+-- Seek (move) to any byte position in the file fn or to the end of file if a1 is -1. For 
+-- each open file there is a current byte position that is updated as a result of I/O 
+-- operations on the file. The initial file position is 0 for files opened for read, write 
+-- or update. The initial position is the end of file for files opened for append. The value 
+-- returned by seek() is 0 if the seek was successful, and non-zero if it was unsuccessful. 
+-- It is possible to seek past the end of a file. If you seek past the end of the file, and 
+-- write some data, undefined bytes will be inserted into the gap between the original end 
+-- of file and your new data.
 --
 -- Comments:
--- After seeking and reading (writing) a series of bytes, you may need to call seek() explicitly before you switch to writing (reading) bytes, even though the file position should already be what you want.
+-- After seeking and reading (writing) a series of bytes, you may need to call seek() 
+-- explicitly before you switch to writing (reading) bytes, even though the file position 
+-- should already be what you want.
 --
--- This function is normally used with files opened in binary mode. In text mode, DOS converts CR LF to LF on input, and LF to CR LF on output, which can cause great confusion when you are trying to count bytes. 
+-- This function is normally used with files opened in binary mode. In text mode, DOS 
+-- converts CR LF to LF on input, and LF to CR LF on output, which can cause great confusion 
+-- when you are trying to count bytes. 
 --
 -- Example 1:
 -- include file.e
@@ -191,7 +222,9 @@ end function
 --**
 
 --**
--- This function returns the current byte position in the file fn. This position is updated by reads, writes and seeks on the file. It is the place in the file where the next byte will be read from, or written to.
+-- This function returns the current byte position in the file fn. This position is updated 
+-- by reads, writes and seeks on the file. It is the place in the file where the next byte 
+-- will be read from, or written to.
 
 global function where(file_number fn)
 -- Returns the current byte position in the file.
@@ -279,18 +312,26 @@ end type
 -- 		LOCK_EXCLUSIVE = 2
 -- </eucode>
 --
--- On DOS32 and WIN32 you can lock a specified portion of a file using the s parameter. s is a sequence of the 
---  form: {first_byte, last_byte}. It indicates the first byte and last byte in the file, that the lock applies to. Specify the empty sequence {}, 
---  if you want to lock the whole file. In the current release for Linux/FreeBSD, locks always apply to the whole file, and you should specify {}
---  for this parameter.
+-- On DOS32 and WIN32 you can lock a specified portion of a file using the s parameter. 
+-- s is a sequence of the form: {first_byte, last_byte}. It indicates the first byte and 
+-- last byte in the file,  that the lock applies to. Specify the empty sequence {}, 
+-- if you want to lock the whole file. In the current release for Linux/FreeBSD, locks 
+-- always apply to the whole file, and you should specify {}
+-- for this parameter.
 -- 
--- If it is successful in obtaining the desired lock, lock_file() will return 1. If unsuccessful, it will return 0. lock_file() does not wait
--- for other processes to relinquish their locks. You may have to call it repeatedly, before the lock request is granted.
+-- If it is successful in obtaining the desired lock, lock_file() will return 1. If 
+-- unsuccessful, it will return 0. lock_file() does not wait
+-- for other processes to relinquish their locks. You may have to call it repeatedly, 
+-- before the lock request is granted.
 --
 -- Comments:
--- On Linux/FreeBSD, these locks are called advisory locks, which means they aren't enforced by the operating system. It is up to the processes that use a particular file to cooperate with each other. A process can access a file without first obtaining a lock on it. On WIN32 and DOS32, locks are enforced by the operating system.
+-- On Linux/FreeBSD, these locks are called advisory locks, which means they aren't enforced 
+-- by the operating system. It is up to the processes that use a particular file to cooperate 
+-- with each other. A process can access a file without first obtaining a lock on it. On 
+-- WIN32 and DOS32, locks are enforced by the operating system.
 --
--- 	On DOS32, lock_file() is more useful when file sharing is enabled. It will typically return 0 (unsuccessful) under plain MS-DOS, outside of Windows.
+-- 	On DOS32, lock_file() is more useful when file sharing is enabled. It will typically 
+-- return 0 (unsuccessful) under plain MS-DOS, outside of Windows.
 --
 -- Example 1:
 -- include misc.e
@@ -318,17 +359,21 @@ end function
 --**
 
 --**
--- Unlock an open file fn, or a portion of file fn. You must have previously locked the file using lock_file(). On DOS32 and WIN32 you can unlock a range of bytes within a file by specifying the s parameter as {first_byte, last_byte}. The same range of bytes must have been locked by a previous call to lock_file(). On Linux/FreeBSD you can currently only lock or unlock an entire file. The s parameter should be {} when you want to unlock an entire file. On Linux/FreeBSD, s must always be {}.
+-- Unlock an open file fn, or a portion of file fn. You must have previously locked the 
+-- file using lock_file(). On DOS32 and WIN32 you can unlock a range of bytes within a 
+-- file by specifying the s parameter as {first_byte, last_byte}. The same range of bytes 
+-- must have been locked by a previous call to lock_file(). On Linux/FreeBSD you can 
+-- currently only lock or unlock an entire file. The s parameter should be {} when you 
+-- want to unlock an entire file. On Linux/FreeBSD, s must always be {}.
 --
 -- Comments:
 --  You should unlock a file as soon as possible so other processes can use it.
 --
--- 	Any files that you have locked, will automatically be unlocked when your program terminates.
+-- 	Any files that you have locked, will automatically be unlocked when your program 
+--  terminates.
 --
 -- 	See lock_file() for further comments and an example.
 --
--- Example 1:
--- 
 
 global procedure unlock_file(file_number fn, byte_range r) 
 -- The byte range can be {} if you want to unlock the whole file.
@@ -356,7 +401,8 @@ global constant
 --  files.
 --
 -- Comments:
--- This information is similar to what you would get from the DOS DIR command. A sequence is returned where each element is a sequence that describes one file or subdirectory.
+-- This information is similar to what you would get from the DOS DIR command. A sequence 
+-- is returned where each element is a sequence that describes one file or subdirectory.
 -- 
 -- If st names a <b>directory</b> you may have entries for "." and "..,"
 --  just as with the DOS DIR command. If st names a <b>file</b> then x will
@@ -366,7 +412,7 @@ global constant
 -- Each entry contains the name, attributes and file size as well as
 --  the year, month, day, hour, minute and second of the last modification.
 --  You can refer to the elements of an entry with the following constants
---  defined in <path>file.e</path>:"
+--  defined in <path>file.e</path>:
 --  
 -- <eucode>
 --     global constant D_NAME = 1,
@@ -400,12 +446,14 @@ global constant
 -- This function is often used just to test if a file or
 --  directory exists.
 -- 
--- Under <platform>WIN32</platform>, st can have a long file or directory name anywhere in the path.
+-- Under <platform>WIN32</platform>, st can have a long file or directory name anywhere in 
+-- the path.
 -- 
 -- Under <platform>Linux/FreeBSD</platform>, the only attribute currently available is 'd'.
 -- 
--- <platform>DOS32</platform>: The file name returned in D_NAME will be a standard DOS 8.3 name. (See
---  <a href="http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir">Archive
+-- <platform>DOS32</platform>: The file name returned in D_NAME will be a standard DOS 8.3 
+-- name. (See 
+-- <a href="http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir">Archive
 --  Web page</a> for a better solution).
 -- 
 -- <platform>WIN32</platform>: The file name returned in D_NAME will be a long file name.
@@ -488,7 +536,8 @@ end function
 -- Return the name of the current working directory
 --
 -- Comments:
--- There will be no slash or backslash on the end of the current directory, except under DOS/Windows, at the top-level of a drive, e.g. C:\
+-- There will be no slash or backslash on the end of the current directory, except under
+-- DOS/Windows, at the top-level of a drive, e.g. C:\
 --
 -- Example 1:
 -- sequence s
@@ -507,7 +556,8 @@ end function
 --  If unsuccessful, chdir() returns 0.
 --
 -- Comments:
--- By setting the current directory, you can refer to files in that directory using just the file name.
+-- By setting the current directory, you can refer to files in that directory using just 
+-- the file name.
 -- 
 -- The function current_dir() will return the name of the current directory.
 -- 
@@ -547,7 +597,8 @@ end function
 --  things in a messy state and might result in loss of data.
 --  allow_break(0) lets you avoid this situation.
 -- 
--- You can find out if the user has pressed control-c or control-Break by calling check_break().
+-- You can find out if the user has pressed control-c or control-Break by calling 
+-- check_break().
 --
 -- Example 1:
 -- allow_break(0)  -- don't let the user kill the program!
@@ -619,16 +670,25 @@ my_dir = DEFAULT  -- it's better not to use routine_id() here,
 
 --**
 -- Generalized Directory Walker
--- This routine will "walk" through a directory with path name given by st. i2 is the routine id of a routine that you supply. walk_dir() will call your routine once for each file and subdirectory in st. If i3 is non-zero (TRUE), then the subdirectories in st will be walked through recursively.
+-- This routine will "walk" through a directory with path name given by st. i2 is the 
+-- routine id of a routine that you supply. walk_dir() will call your routine once for 
+-- each file and subdirectory in st. If i3 is non-zero (TRUE), then the subdirectories in 
+-- st will be walked through recursively.
 --
--- The routine that you supply should accept the path name and dir() entry for each file and subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
+-- The routine that you supply should accept the path name and dir() entry for each file and 
+-- subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
 --
 -- Comments:
--- This mechanism allows you to write a simple function that handles one file at a time, while walk_dir() handles the process of walking through all the files and subdirectories.
+-- This mechanism allows you to write a simple function that handles one file at a time, 
+-- while walk_dir() handles the process of walking through all the files and subdirectories.
 
--- By default, the files and subdirectories will be visited in alphabetical order. To use a different order, set the global integer my_dir to the routine id of your own modified dir() function that sorts the directory entries differently. See the default dir() function in file.e.
+-- By default, the files and subdirectories will be visited in alphabetical order. To use 
+-- a different order, set the global integer my_dir to the routine id of your own modified 
+-- dir() function that sorts the directory entries differently. See the default dir() 
+-- function in file.e.
 
--- The path that you supply to walk_dir() must not contain wildcards (* or ?). Only a single directory (and its subdirectories) can be searched at one time. --
+-- The path that you supply to walk_dir() must not contain wildcards (* or ?). Only a 
+-- single directory (and its subdirectories) can be searched at one time. --
 --
 -- Example 1:
 -- function look_at(sequence path_name, sequence entry)
@@ -751,7 +811,8 @@ end function
 --**
 
 --**
--- Write lines contained in s to file named x or file handle x. Returns 1 on success, -1 on failure.
+-- Write lines contained in s to file named x or file handle x. Returns 1 on success, -1 
+-- on failure.
 --
 -- Comments:
 -- If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is assumed
@@ -819,7 +880,8 @@ end function
 --**
 
 --**
--- Read the contents of either file named s1 or an open file handle i1. Returns the contents as 1 sequence.
+-- Read the contents of either file named s1 or an open file handle i1. Returns the contents 
+-- as 1 sequence.
 --
 -- Example 1:
 -- data = read_file("myfile.txt")
@@ -866,9 +928,11 @@ end function
 -- Write data to file named f or file handle f. Returns 1 on success, 0 on failure.
 --
 -- Comments:
--- If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is assumed to be a filename.
+-- If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is 
+-- assumed to be a filename.
 --
--- When x is a file handle, the file is not closed after writing is finished. When x is a file name, it is opened, written to and then closed.
+-- When x is a file handle, the file is not closed after writing is finished. When x is a 
+-- file name, it is opened, written to and then closed.
 --
 -- Example 1:
 -- if write_file("data.txt", "This is important data\nGoodybe") = 0 then
@@ -896,7 +960,8 @@ end function
 --**
 
 --**
--- Parse the fully qualified pathname (s1) and return a sequence containing directory name, file name + file extension, file name and file extension.
+-- Parse the fully qualified pathname (s1) and return a sequence containing directory name, 
+-- file name + file extension, file name and file extension.
 --
 -- Comments:
 -- The host operating system path separator is used.
@@ -999,6 +1064,7 @@ global function filename(sequence path)
 end function
 --**
 
+-- TODO: test, document
 global function filebase(sequence path)
 	sequence data
 
@@ -1014,7 +1080,7 @@ end function
 -- The host operating system path separator is used.
 --
 -- Example 1:
--- fname = filename("/opt/euphoria/docs/readme.txt")
+-- fname = fileext("/opt/euphoria/docs/readme.txt")
 -- -- fname is "txt"
 
 global function fileext(sequence path)
@@ -1024,8 +1090,10 @@ global function fileext(sequence path)
 end function
 --**
 
+-- TODO: document, test
 global function driveid(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[5]
 end function
+

@@ -29,16 +29,16 @@ include wildcard.e
 -- change position relative to each other.
 --
 -- Example 1:
---	constant student_ages = {18,21,16,23,17,16,20,20,19}
---	sequence sorted_ages
---	sorted_ages = sort( student_ages )
---	-- result is {16,16,17,18,19,20,20,21,23}
+--   constant student_ages = {18,21,16,23,17,16,20,20,19}
+--   sequence sorted_ages
+--   sorted_ages = sort( student_ages )
+--   -- result is {16,16,17,18,19,20,20,21,23}
 --
 -- See Also:
---	 compare
---	 sort_reverse
---	 sort_user
---	 custom_sort
+-- compare
+-- sort_reverse
+-- sort_user
+-- custom_sort
 
 global function sort(sequence x)
 	integer gap, j, first, last
@@ -104,31 +104,28 @@ end function
 -- change position relative to each other.
 --
 -- Example 1:
---	constant students = {{"Anne",18}, {"Bob",21},
---						 {"Chris",16},{"Diane",23},
---						 {"Eddy",17},{"Freya",16},
---						 {"George",20},{"Heidi",20},
---						 {"Ian",19}}
---	sequence sorted_byage
---	function byage(object a, object b)
---		  if equal(a[2], b[2]) then
---			  return compare(upper(a[1]), upper(b[1]))
---		  end if
---		  return compare(a[2], b[2])
---	end function
+-- constant students = {{"Anne",18},   {"Bob",21},
+--                      {"Chris",16},  {"Diane",23},
+--                      {"Eddy",17},   {"Freya",16},
+--                      {"George",20}, {"Heidi",20},
+--                      {"Ian",19}}
+-- sequence sorted_byage
+-- function byage(object a, object b)
+--     if equal(a[2], b[2]) then
+--         return compare(upper(a[1]), upper(b[1]))
+--     end if
+--     return compare(a[2], b[2])
+--  end function
 --
---	sorted_byage = custom_sort( routine_id("byage"), students )
---	-- result is {{"Chris",16},{"Freya",16},
---				  {"Eddy",17},{"Anne",18},
---				  {"Ian",19},{"George",20},
---				  {"Heidi",20},{"Bob",21},
---				  {"Diane",23}}
+-- sorted_byage = custom_sort( routine_id("byage"), students )
+-- -- result is {{"Chris",16}, {"Freya",16},
+-- --            {"Eddy",17},  {"Anne",18},
+-- --            {"Ian",19},   {"George",20},
+-- --            {"Heidi",20}, {"Bob",21},
+-- --            {"Diane",23}}
 --
 -- See Also:
---	 compare
---	 sort
---	 sort_reverse
---	 sort_user
+--   compare, sort, sort_reverse, sort_user
 
 global function custom_sort(integer custom_compare, sequence x)
 	integer gap, j, first, last
@@ -189,7 +186,7 @@ end function
 -- change position relative to each other.
 --
 -- Example 1:
---	constnat student_ages = {18,21,16,23,17,16,20,20,19}
+--	constant student_ages = {18,21,16,23,17,16,20,20,19}
 --	sequence sorted_ages
 --	sorted_ages = sort( student_ages )
 --	-- result is {23,21,20,20,19,18,17,16,16}
