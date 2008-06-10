@@ -1,44 +1,44 @@
-<_init_comment>
+
 <html>
 <head><title>Euphoria Programming Language Reference Manual - Head</title>
-<_css>
+
 </head>
 <body>
 
-<_center><font color="#006633" size=+2>
+
 <br>
                    Euphoria Programming Language<br><br>
                             version 4.0<br><br>
                          Reference Manual<br>
-</font></_center>
+
 <p>&nbsp;
 <p>
 
-<_center><font color="#FF0099" face="Arial, Helvetica" size=+1>
+
                  (c) 2007 Rapid Deployment Software<br>
-</font></_center>
+
 
 <p>&nbsp;
 <p>
 
-<_center><font size=+1>
+
                Permission is freely granted to anyone<br>
                         to copy this manual.<br>
-</font></_center>
+
 
 <p>&nbsp;
 <p>
 <hr>
 <p>
 
-<_center><font face="Arial, Helvetica" color="#006633" size=+2>
+
                          TABLE OF CONTENTS
-</font></_center>
+
 
 <p>
-<_center><font size=+1>
+
                        <a href="refman_1.htm">Part I - Core Language</a>
-</font></_center>
+
 
 <dl>
 <dt>
@@ -211,9 +211,9 @@
 <p>&nbsp;
 <p>
 
-<_center><font size=+1>
+
                      <a href="library.htm">Part II - Library Routines</a>
-</font></_center>
+
 
 <dl>
 <dt>
@@ -338,11 +338,6 @@
 
 </dl>
 </dl>
-
-<_continue
-  href="refman_1.htm"
-  name="Part I - Core Language"
->
 
 </body>
 </html>

@@ -17,6 +17,12 @@ a.brown:visited  {color: "#993333"; text-decoration: underline;}
 a.brown:active   {color: red; text-decoration: underline;}
 a.brown:hover    {color: red; text-decoration: underline;}
 
+pre {
+	padding: 5px 5px 5px 5px;
+	background: #fffff0;
+	border: 1px solid #a0a0a0;
+}
+
 .tag_continue{
 	text-align:center;
 	font-family:sans-serif;
@@ -25,8 +31,8 @@ a.brown:hover    {color: red; text-decoration: underline;}
 }
 
 .path{
-	color:#5500FF;
-	font-family:sans-serif;
+	/*color:#5500FF;*/
+	font-family:monospace;
 }
 
 h1, h2, h3{
@@ -38,8 +44,11 @@ h1{
 }
 
 .platform{
-	font-weight:bold;
-	color:#CC3366;
+	font-style: italic;
+}
+
+.program{
+	font-family:monospace;
 }
 
 .command{

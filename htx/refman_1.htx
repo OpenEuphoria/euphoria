@@ -58,8 +58,8 @@
       modify it, add features, and redistribute it as you wish.</li>
 
 <li>
-      Euphoria programs run under Linux, FreeBSD, 32-bit Windows, and any
-      DOS environment, and are not subject to any 640K memory
+      Euphoria programs run under Linux, FreeBSD, 32-bit <platform>Windows</platform>, and any
+      <platform>DOS</platform> environment, and are not subject to any 640K memory
       limitations. You can create programs that use the full multi-megabyte
       memory of your computer, and a swap file is automatically used when a
       program needs more memory than exists on your machine.</li>
@@ -86,8 +86,6 @@
 <p>The following is an example of a complete Euphoria program.</p>
 
 <eucode>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
  sequence list, sorted_list
 
  function merge_sort(sequence x)
@@ -127,8 +125,8 @@
 
  print_sorted_list()     -- this command starts the program
 </eucode>
-<p>
 
+<p>
  The above example contains 4 separate commands that are processed in order.
  The first declares two variables: list and sorted_list to be
  <a href="refman_2.htm#1">sequences</a>
@@ -143,8 +141,10 @@
 <console>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.</console>
 
 <p><libref>merge_sort()</libref> will just as easily sort</p>
-<console>{1.5, -9, 1e6, 100}</console>
-<console>{"oranges", "apples", "bananas"}</console>
+<console>
+{1.5, -9, 1e6, 100}
+{"oranges", "apples", "bananas"}
+</console>
 
 <p>
  This example is stored as <path>euphoria\tutorial\example.ex</path>. This is not the fastest
@@ -161,7 +161,7 @@
 
 <h3>Installation</h3>
 
-<h4>DOS / Windows</h4>
+<h4><platform>DOS</platform> / <platform>Windows</platform></h4>
 <p>
  To install Euphoria on your machine, first read the file
  <path>install.doc</path>.
@@ -181,395 +181,313 @@
         <path>\euphoria</path></dt>
         
 <dl>
-<dt>
-                readme.doc</dt>
-<dt>
-                readme.htm</dt>
-<dt>
-                License.txt</dt>
-<dt>
-                <path>\bin</path></dt>
+<dt>readme.doc</dt>
+<dt>readme.htm</dt>
+<dt>License.txt</dt>
+<dt><path>\bin</path></dt>
 <dd>
-                        Interpreters ex.exe and exw.exe. Translators ec.exe and ecw.exe. 
-                        Or on Linux/FreeBSD, Interpreter exu and Translator ecu.
-                        There are also utility programs such as ed.bat, guru.bat etc.</dd>
-<dt>
-                <path>\include</path></dt>
+	Interpreters <program>ex.exe</program> and <program>exw.exe</program>. Translators 
+    <program>ec.exe</program> and <program>ecw.exe</program>. Or on <platform>Linux/FreeBSD</platform>, 
+    Interpreter <program>exu</program> and Translator <program>ecu</program>. There are also utility 
+    programs such as <program>ed.bat</program>, <program>guru.bat</program>, etc.
+</dd>
+<dt><path>\include</path></dt>
+<dd>standard include files, e.g. <path>graphics.e</path></dd>
+<dt><path>\source</path></dt>
+<dd>the complete source code (interpreter, translator, binder)</dd>
+<dt><path>\doc</path></dt>
 <dd>
-                        standard include files, e.g. graphics.e</dd>
-<dt>
-                <path>\source</path></dt>
-<dd>
-                        the complete source code (interpreter, translator, binder)</dd>
-<dt>
-                <path>\doc</path></dt>
-<dd>
-                        refman.doc, library.doc, and several other plain-text
-                        documentation files</dd>
-<dt>
-                <path>\html</path></dt>
-<dd>
-                        HTML files corresponding to each of the .doc files
-                        in the doc directory</dd>
-<dt>
-                <path>\tutorial</path></dt>
-<dd>
-                        small tutorial programs to help you learn Euphoria</dd>
-<dt>
-                <path>\demo</path></dt>
+	<path>refman.doc</path>, <path>library.doc</path>, and several other plain-text
+    documentation files
+</dd>
+<dt><path>\html</path></dt>
+<dd>HTML files corresponding to each of the .doc files in the doc directory</dd>
+<dt><path>\tutorial</path></dt>
+<dd>small tutorial programs to help you learn Euphoria</dd>
+<dt><path>\demo</path></dt>
 <dl>
-<dt>
-                        generic demo programs that run on all platforms</dt>
-<dt>
-                        <path>\dos32</path></dt>
+<dt>generic demo programs that run on all platforms</dt>
+<dt><path>\dos32</path></dt>
+<dd><platform>DOS32</platform>-specific demo programs (optional)</dd>
+<dt><path>\win32</path></dt>
+<dd><platform>WIN32</platform>-specific demo programs (optional)</dd>
+<dt><path>\linux</path></dt>
+<dd><platform>Linux/FreeBSD</platform>-specific demo programs (optional)</dd>
+<dt><path>\langwar</path></dt>
 <dd>
-                                DOS32-specific demo programs (optional)</dd>
-<dt>
-                        <path>\win32</path></dt>
-<dd>
-                                WIN32-specific demo programs (optional)</dd>
-<dt>
-                        <path>\linux</path></dt>
-<dd>
-                                Linux/FreeBSD-specific demo programs (optional)</dd>
-<dt>
-                        <path>\langwar</path></dt>
-<dd>
-                                language war game (pixel-graphics version for DOS,
-                                or text version for Linux/FreeBSD)</dd>
-<dt>
-                        <path>\bench</path></dt>
-<dd>
-                                benchmark programs</dd>
+	language war game (pixel-graphics version for <platform>DOS</platform>,
+    or text version for <platform>Linux/FreeBSD</platform>)
+</dd>
+<dt><path>\bench</path></dt>
+<dd>benchmark programs</dd>
 </dl>
 </dl>
 </dl>
 <h4>Linux and FreeBSD</h4>
+
 <p>
-Linux may be installed using either the gzipped tarball, or from a distribution specific
+<platform>Linux</platform> may be installed using either the gzipped tarball, or from a distribution specific
 package, if available.  The gzipped tarball is laid out similarly to the windows
-directory structure.  You'll need to set up PATH manually, and either create a euinc.conf file
-or set up EUDIR and EUINC manually.
+directory structure.  You'll need to set up <env>PATH</env> manually, and either create a <path>euinc.conf</path> file
+or set up <env>EUDIR</env> and <env>EUINC</env> manually.
 
-The packaged version installs Euphoria in a more Unix-like way, putting the executables
-into /usr/bin, /usr/share/euphoria and /usr/share/doc/euphoria.  Man pages for exu,
-ecu, eubackend, eushroud and eubind are also installed.  It will also create /etc/euphoria/euinc.conf,
-which will point to the standard euphoria include directory in /usr/share/euphoria/include.
+The packaged version installs Euphoria in a more <platform>Unix</platform>-like way, putting the executables
+into <path>/usr/bin</path>, <path>/usr/share/euphoria</path> and <path>/usr/share/doc/euphoria</path>.  Man pages 
+for <program>exu</program>, <program>ecu</program>, <program>eubackend</program>, <program>eushroud</program> 
+and <program>eubind</program> are also installed.  It will also create <path>/etc/euphoria/euinc.conf</path>,
+which will point to the standard euphoria include directory in <path>/usr/share/euphoria/include</path>.
 
-The Linux subdirectory is not included in the DOS/Windows distribution,
-and the dos32 and win32 subdirectories are not included in the Linux/FreeBSD
+The <platform>Linux</platform> subdirectory is not included in the <platform>DOS</platform>/<platform>Windows</platform> distribution,
+and the <path>dos32</path> and <path>win32</path> subdirectories are not included in the <platform>Linux/FreeBSD</platform>
 distribution. In this manual, directory names are shown using backslash
-(<strong>\</strong>). Linux/FreeBSD users should substitute forward slash (<strong>/</strong>).</p>
-
-
+(<strong>\</strong>). <platform>Linux/FreeBSD</platform> users should substitute forward slash (<strong>/</strong>).
+</p>
 
 <h2>Running a Program</h2>
 
 <p>
 
  Euphoria programs are executed by typing one of the following:</p>
- 
- <console>ex</console>
- <console>exw</console>
- <console>exu</console>
+
+<ol>
+<li><program>ex</program></li>
+<li><program>exw</program></li>
+<li><program>exwc</program></li>
+<li><program>exu</program></li>
+</ol>
  
 <p>followed by the name of the main Euphoria file. You can type additional words (known as <em>arguments</em>) on this line, known as the <em>command-line</em>.</p>
 
 <p>Your program can call the built-in function <libref>command_line()</libref> to read the command-line.</p>
 
-<p>The DOS32 version of the Euphoria interpreter is called <path>ex.exe</path>. The WIN32 version is called <path>exw.exe</path>. The Linux/FreeBSD version is called <path>exu</path>. By convention, main Euphoria files have an extension of .ex, .exw, or .exu.  Other Euphoria files, that are meant to be included in a larger program, end in .e or sometimes .ew or .eu. To save typing, you can leave off the ".ex", and the <path>ex</path> command will supply it for you automatically. <path>exw.exe</path> will supply ".exw", and <path>exu</path> will supply ".exu". Each will try the other possible extensions as well if the default fails. If the file can't be found in the current directory, your PATH will be searched (using the most likely extension, then the others). You can redirect standard input and standard output when you run a Euphoria program, for example:</p>
+<p>The <platform>DOS32</platform> version of the Euphoria interpreter is called <path>ex.exe</path>. The 
+<platform>WIN32</platform> version is called <program>exw.exe</program>. The <platform>Linux/FreeBSD</platform> version is called 
+<program>exu</program>. By convention, main Euphoria files have an extension of <path>.ex</path>, <path>.exw</path>, or <path>.exu</path>.  
+Other Euphoria files, that are meant to be included in a larger program, end in <path>.e</path> or sometimes <path>.ew</path> or 
+<path>.eu</path>. To save typing, you can leave off the "<path>.ex</path>", and the <path>ex</path> command will supply it for you automatically. 
+<program>exw.exe</program> will supply "<path>.exw</path>", and <program>exu</program> will supply "<path>.exu</path>". Each will try the other possible 
+extensions as well if the default fails. If the file can't be found in the current directory, your <env>PATH</env> will be searched 
+(using the most likely extension, then the others). You can redirect standard input and standard output when you run a Euphoria program, 
+for example:</p>
 
 <console>ex filesort.ex < raw.txt > sorted.txt</console>
 
 <p>or simply,</p>
 
 <console>
-        ex filesort < raw.txt > sorted.txt
+ex filesort < raw.txt > sorted.txt
 </console>
 
 <p>
-Unlike many other compilers and interpreters, there are no special
-command-line options for <program>ex</program>,
-<program>exw</program> or
-<program>exu</program>. Only the name of your
-Euphoria file is expected, and if you don't supply it, you
-will be prompted for it.</p>
+Unlike many other compilers and interpreters, there are no special command-line options for <program>ex</program>, 
+<program>exw</program> or <program>exu</program>. Only the name of you Euphoria file is expected, and if you don't 
+supply it, you will be prompted for it.</p>
 
 <p>
- For frequently-used programs under DOS/Windows you might want to make a small 
- <b>.bat</b> (batch) file, perhaps called <b>myprog.bat</b>, 
- containing two statements like:</p>
+For frequently-used programs under <platform>DOS</platform>/<platform>Windows</platform> you might want to make a small <path>.bat</path> (batch) file, 
+perhaps called <program>myprog.bat</program>, containing two statements like:</p>
  
 <console>
-        @echo off
-        ex myprog.ex %1 %2 %3
+@echo off
+ex myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 </console>
 
-<p>The first statement turns off echoing of commands to the screen. The second
- runs <b>ex myprog.ex</b> with up to 3 command-line arguments.
- See <libref>command_line()</libref> for an example of
- how to read these arguments. If your program takes more arguments, you
- should add %4 %5 etc. Having a .bat file will save you the minor
- inconvenience of typing <program>ex</program>
- (or <program>exw</program>) all the time; i.e., you can just type:</p>
+<p>The first statement turns off echoing of commands to the screen. The second runs <program>ex myprog.ex</program>
+with up to 9 command-line arguments. See <libref>command_line()</libref> for an example of how to read these arguments. 
+Having a .bat file will save you the minor inconvenience of typing <program>ex</program> (or <program>exw</program>) all 
+the time; i.e., you can just type:</p>
  
 <console>
-        myprog
+myprog
 </console>
 
 <p>instead of:</p>
 
 <console>
-        ex myprog
+ex myprog
 </console>
+
 <p>
- Unfortunately DOS will not allow redirection of standard input and output
- when you use a <path>.bat</path> file.</p>
+Unfortunately <platform>DOS</platform> will not allow redirection of standard input and output when you use 
+a <path>.bat</path> file.</p>
  
 <p>
-Under Linux/FreeBSD, you can type the path to the Euphoria interpreter
-on the first line of your main file, e.g. if your
-program is called foo.exu:</p>
+Under <platform>Linux/FreeBSD</platform>, you can type the path to the Euphoria interpreter on the first line of your main 
+file, e.g. if your program is called <path>foo.exu</path>:</p>
 
 <eucode>
-        #!/home/rob/euphoria/bin/exu
+#!/home/rob/euphoria/bin/exu
         
-        procedure foo()
-            ? 2+2
-        end procedure
+procedure foo()
+   ? 2+2
+end procedure
 
-        foo()
+foo()
 </eucode>
 
 <p>Then if you make your file executable:</p>
 
 <console>
-        chmod +x foo.exu
+chmod +x foo.exu
 </console>
 
 <p>You can just type: </p>
 
 <console>
-        foo.exu 
+foo.exu 
 </console>
 
-<p>to run your program. You could even shorten the name to simply "foo".
-Euphoria ignores the first line when it starts with <b>#!</b>. 
-Be careful though that your first line ends with the Linux/FreeBSD-style \n,
-and not the DOS/Windows-style \r\n, or the Linux/FreeBSD shell might get confused. 
-If your file is shrouded, you must give the path to backendu, not exu.</p>
+<p>to run your program. You could even shorten the name to simply "foo". Euphoria ignores the first line when it starts 
+with <b>#!</b>.  Be careful though that your first line ends with the <platform>Linux/FreeBSD</platform>-style <code>\n</code>,
+and not the <platform>DOS</platform>/<platform>Windows</platform>-style <code>\r\n</code>, or the <platform>Linux/FreeBSD</platform> shell might 
+get confused. If your file is shrouded, you must give the path to <program>backendu</program>, not <program>exu</program>.</p>
 
 <p>
- You can also run <path>bind.bat</path> (DOS32),
- or <path>bindw.bat</path> (WIN32)
- or <path>bindu</path> (Linux/FreeBSD) to
- combine your Euphoria program with <program>ex.exe</program>,
- <program>exw.exe</program> or
- <program>exu</program>,
- to make a stand-alone executable file (<b>.exe</b> file on DOS/Windows).
- With a stand-alone <b>.exe</b> file you
- <em>can</em> redirect standard
- input and output. Binding is discussed further in
- <a href="refman_1.htm#5">Distributing a Program</a>.</p>
+You can also run <path>bind.bat</path> (<platform>DOS32</platform>), or <path>bindw.bat</path> (<platform>WIN32</platform>) 
+or <path>bindu</path> (<platform>Linux/FreeBSD</platform>) to combine your Euphoria program with <program>ex.exe</program>,
+<program>exw.exe</program> or <program>exu</program>, to make a stand-alone executable file (<path>.exe</path> file on 
+<platform>DOS</platform>/<platform>Windows</platform>). With a stand-alone <path>.exe</path> file you <em>can</em> redirect standard input and 
+output. Binding is discussed further in <a href="refman_1.htm#5">Distributing a Program</a>.</p>
 
 <p>
 Using the <a href="e2c.htm">Euphoria to C Translator</a>, you can also make 
-a stand-alone .exe file, and it will normally run much faster than a bound
+a stand-alone <path>.exe</path> file, and it will normally run much faster than a bound
 program.</p>
 
 <p>
-  
- <program>exu</program> or 
- <program>ex.exe</program> and
- <program>exw.exe</program>  
- will be in the
- <path>euphoria\bin</path>
- directory which must be on your
- search path. The environment variable EUDIR should be set to the main
- Euphoria directory, e.g. <path>c:\euphoria</path>.</p>
+<program>exu</program>, <program>ex.exe</program>, <program>exw.exe</program>  and <program>exwc</program>
+will be in the <path>euphoria\bin</path> directory which must be on your search path. The environment variable 
+<env>EUDIR</env> should be set to the main Euphoria directory, e.g. <path>c:\euphoria</path>.</p>
 
-<h3>Running under Windows</h3>
+<h3>Running under <platform>Windows</platform></h3>
 
-<p>You can run Euphoria programs directly from the Windows environment, or from
- a DOS shell that you have opened from Windows. By "associating" <b>.ex</b>
- files with <program>ex.exe</program>, and <b>.exw</b> files
- with <program>exw.exe</program> you can simply double-click
- on a <b>.ex</b> or <b>.exw</b> file to run it. Under Windows you
- would define a new file type for <b>.ex</b>, by clicking on
- My Computer / view / options / file types. It is possible to have several
- Euphoria programs active in different windows. If you turn your program
- into a <b>.exe</b> file, you can simply double-click on it to run it.</p>
+<p>You can run Euphoria programs directly from the <platform>Windows</platform> environment, or from
+a <platform>DOS</platform> shell that you have opened from <platform>Windows</platform>. By "associating" 
+<path>.ex</path> files with <program>ex.exe</program>, and <path>.exw</path> files with 
+<program>exw.exe</program> you can simply double-click on a <path>.ex</path> or <path>.exw</path> file to 
+run it. Under <platform>Windows</platform> you would define a new file type for <path>.ex</path>, by clicking 
+on <gui>My Computer / view / options / file types</gui>. It is possible to have several Euphoria programs active 
+in different windows. If you turn your program into a <path>.exe</path> file, you can simply double-click on it 
+to run it.</p>
 
 <h3>Use of a Swap File</h3>
 
 <p>
- If you run a Euphoria program under Linux/FreeBSD or Windows (or in a DOS shell under
- Windows), and the program runs out of physical memory, it will start using
- "virtual memory". The operating system provides this virtual memory 
- automatically by swapping out the least-recently-used code and data 
- to a system swap file.
- To change the size of the Windows swap file, click on Control Panel / 386
- Enhanced / "virtual memory...". Under OS/2 you can adjust the
- "DPMI_MEMORY_LIMIT" by clicking the Virtual DOS machine icon / "DOS Settings"
- to allocate more extended memory for your program.</p>
+If you run a Euphoria program under <platform>Linux/FreeBSD</platform> or <platform>Windows</platform> (or in a <platform>DOS</platform> shell under
+<platform>Windows</platform>), and the program runs out of physical memory, it will start using "virtual memory". The operating system provides this virtual memory 
+automatically by swapping out the least-recently-used code and data to a system swap file. To 
+change the size of the <platform>Windows</platform> swap file, click on 
+<gui>Control Panel / 386 Enhanced / "virtual memory..."</gui>. Under OS/2 you can adjust the "DPMI_MEMORY_LIMIT" 
+by clicking the <gui>Virtual <platform>DOS</platform> machine icon / "<platform>DOS</platform> Settings"</gui>
+to allocate more extended memory for your program.</p>
 
 <p>
- Under pure DOS, outside of Windows, there is no system swap file so the
- DOS-extender built in to <program>ex.exe</program> (DOS32)
- will create one for possible use by your program.
- See <a href="platform.htm#swapfile"><b>platform.doc</b></a>.</p>
-
-
+Under pure <platform>DOS</platform>, outside of <platform>Windows</platform>, there is no system swap file so the 
+<platform>DOS</platform>-extender built in to <program>ex.exe</program> (<platform>DOS</platform>32) 
+will create one for possible use by your program. See <a href="platform.htm#swapfile"><b>platform.doc</b></a>.</p>
 
 <h3>Editing a Program</h3>
 
 <p>
- You can use any text editor to edit a Euphoria program. However, Euphoria
- comes with its own special editor that is written entirely in Euphoria.
- Type: <program>ed</program>
- followed by the complete name of the file you wish to edit
- (the .ex/.exw/.exu extension is not assumed). You can use this editor to edit any
- kind of
- text file. When you edit a Euphoria file, some extra features such as
- color syntax highlighting and auto-completion of certain statements, are
- available to make your job easier.</p>
+You can use any text editor to edit a Euphoria program. However, Euphoria
+comes with its own special editor that is written entirely in Euphoria.
+Type: <program>ed</program> followed by the complete name of the file you wish to edit
+(the <path>.ex</path>/<path>.exw</path>/<path>.exu</path> extension is not assumed). You can use this 
+editor to edit any kind of text file. When you edit a Euphoria file, some extra features such as
+color syntax highlighting and auto-completion of certain statements, are available to make your job easier.</p>
 
 <p>
- Whenever you run a Euphoria program and get an error message, during
- compilation or execution, you can simply type
- <program>ed</program>
- with no file name and you
- will be automatically positioned in the file containing the error, at
- the correct line and column, and with the error message displayed at the
- top of the screen.</p>
+Whenever you run a Euphoria program and get an error message, during compilation or execution, you can simply type
+<program>ed</program> with no file name and you will be automatically positioned in the file containing the error, at
+the correct line and column, and with the error message displayed at the top of the screen.</p>
 
 <p>
- Under Windows you can associate <path>ed.bat</path>
- with various kinds of text
- files that you want to edit. Color syntax highlighting is provided for
- <b>.ex</b>, <b>.exw</b>, <b>.exu</b>, <b>.e</b>, <b>.ew</b>, <b>.eu</b>, 
- and <b>.pro</b>
- (<a href="refman_3.htm#2">profile</a>) files.</p>
+Under <platform>Windows</platform> you can associate <path>ed.bat</path> with various kinds of text
+files that you want to edit. Color syntax highlighting is provided for <path>.ex</path>, 
+<path>.exw</path>, <path>.exu</path>, <path>.e</path>, <path>.ew</path>, <path>.eu</path>, 
+and <path>.pro</path> (<a href="refman_3.htm#2">profile</a>) files.</p>
 
 <p>
- Most keys that you type are inserted into the file at the cursor position.
- Hit the <b>Esc</b> key once to get a menu bar of special commands. The arrow
- keys, and the Insert/Delete/Home/End/PageUp/PageDown keys are also active.
- Under Linux/FreeBSD some keys may not be available, and alternate keys are
- provided.
- See the file <path>euphoria\doc\ed.doc</path>
- (<a href="ed.htm">euphoria\html\ed.htm</a>)
- for a complete description of the editing commands. <b>Esc h</b> (help) will
- let you view <path>ed.doc</path> from your editing
- session.</p>
+Most keys that you type are inserted into the file at the cursor position. Hit the <gui>Esc</gui> 
+key once to get a menu bar of special commands. The arrow keys, and the <gui>Insert/Delete/Home/End/PageUp/PageDown</gui> 
+keys are also active. Under <platform>Linux/FreeBSD</platform> some keys may not be available, and alternate keys are
+provided. See the file <path>euphoria\doc\ed.doc</path> (<a href="ed.htm">euphoria\html\ed.htm</a>) for a complete 
+description of the editing commands. <gui>Esc h</gui> (help) will let you view <path>ed.doc</path> from your editing 
+session.</p>
 
 <p>
- If you need to understand or modify any detail of the editor's operation,
- you can edit the file <path>ed.ex</path>
- in <path>euphoria\bin</path>
- (be sure to make a backup
- copy so you don't lose your ability to edit).  If the name
- <program>ed</program> conflicts
- with some other command on your system, simply rename the file
- <path>euphoria\bin\ed.bat</path> to something else.
- Because this editor is written
- in Euphoria, it is remarkably concise and easy to understand. The same
- functionality implemented in a language like C, would take far more
- lines of code.</p>
+If you need to understand or modify any detail of the editor's operation, you can edit the file <path>ed.ex</path>
+in <path>euphoria\bin</path> (be sure to make a backup copy so you don't lose your ability to edit).  If the name
+<program>ed</program> conflicts with some other command on your system, simply rename the file
+<path>euphoria\bin\ed.bat</path> to something else. Because this editor is written in Euphoria, it is remarkably 
+concise and easy to understand. The same functionality implemented in a language like C, would take far more lines of code.</p>
 
 <p>
- <b>ed</b> is a simple text-mode editor that runs on DOS, Linux, FreeBSD 
- and the Windows console.
- See also <b>David Cuny</b>'s excellent <b>ee.ex</b> editor for
- DOS and Linux/FreeBSD. You can download
- <b>ee.ex</b> from the <a href="http://www.RapidEuphoria.com">Euphoria Web site</a>.
- There are also some Windows editors oriented to Euphoria.
- These are also on <a href="http://www.RapidEuphoria.com">the Web site</a>.</p>
+<program>ed</program> is a simple text-mode editor that runs on <platform>DOS</platform>, <platform>Linux</platform>, 
+<platform>FreeBSD</platform> and the <platform>Windows</platform> console. See also <person>David Cuny</person>'s 
+excellent <path>ee.ex</path> editor for <platform>DOS</platform> and <platform>Linux/FreeBSD</platform>. You can 
+download <path>ee.ex</path> from the <a href="http://www.RapidEuphoria.com">Euphoria Web site</a>. There are also 
+some <platform>Windows</platform> editors oriented to Euphoria. These are also on 
+<a href="http://www.RapidEuphoria.com">the Web site</a>.</p>
 
 <h3>Distributing a Program</h3>
 
 <p>Euphoria provides you with 4 distinct ways of distributing a program.</p>
 
-<p>In the first method you simply ship your users the
- <program>ex.exe</program> or
- <program>exw.exe</program> or
- <program>exu</program>
- file, along with your main
- Euphoria .ex, .exw, or .exu file and any .e
- include files that are needed (including any of the standard ones from
- <path>euphoria\include</path>).
- If the Euphoria source files are placed together in one
- directory and ex.exe, exw.exe or exu is placed in the same directory 
- or somewhere on the search path, then your user can run your program by typing
- <program>ex</program>
- (<program>exw</program>) or
- (<program>exu</program>)
- followed
- by the path of your main .ex, .exw, or .exu file.
- You might also provide a small <b>.bat</b> file so people won't actually
- have to type <program>ex</program>
- (<program>exw</program>). This
- method assumes that you are willing to share your Euphoria source code with
- your users.</p>
+<p>In the first method you simply ship your users the <program>ex.exe</program> or <program>exw.exe</program> or
+<program>exu</program> file, along with your main Euphoria <path>.ex</path>, <path>.exw</path>, or <path>.exu</path>
+file and any <path>.e</path> include files that are needed (including any of the standard ones from 
+<path>euphoria\include</path>). If the Euphoria source files are placed together in one directory and 
+<program>ex.exe</program>, <program>exw.exe</program>, <program>exwc.exe</program> or <program>exu</program>
+is placed in the same directory or somewhere on the search path, then your user can run your program by typing
+<program>ex</program> (<program>exw</program>), <program>exwc</program> or (<program>exu</program>) followed
+by the path of your main <path>.ex</path>, <path>.exw</path>, or <path>.exu</path> file. You might also provide 
+a small <path>.bat</path> file so people won't actually have to type <program>ex</program> (<program>exw</program>). This
+method assumes that you are willing to share your Euphoria source code with your users.</p>
 
-<p>The Binder gives you two more methods of distribution. You can <program>shroud</program> your program, or you can <program>bind</program> your program. <strong>Shrouding</strong> combines all of the .e files that your program needs, along with your main file to create a single .il file. <strong>Binding</strong> combines your shrouded program with backend.exe, backendw.exe or backendu to create a single, stand-alone executable (.exe) file. For example, if your program is called "myprog.ex" you can create "myprog.exe" which will run identically. For more information about shrouding and binding, see <a href="bind.htm">bind.doc</a>.</p>
+<p>The Binder gives you two more methods of distribution. You can <program>shroud</program> your program, or you can 
+<program>bind</program> your program. <strong>Shrouding</strong> combines all of the <path>.e</path> files that your 
+program needs, along with your main file to create a single <path>.il</path> file. <strong>Binding</strong> combines 
+your shrouded program with <program>backend.exe</program>, <program>backendw.exe</program> or <program>backendu</program>
+to create a single, stand-alone executable (<path>.exe</path>) file. For example, if your program is called 
+"<path>myprog.ex</path>" you can create "<path>myprog.exe</path>" which will run identically. For more information 
+about shrouding and binding, see <a href="bind.htm">bind.doc</a>.</p>
 
 <p>
- Finally, with the <a href="e2c.htm">Euphoria To C Translator</a>,
- you can 
- <program>translate</program> your Euphoria
- program into C and then compile it with a C compiler to get
- an executable (.exe) file. </p>
+Finally, with the <a href="e2c.htm">Euphoria To C Translator</a>, you can translate your Euphoria program into C and 
+then compile it with a C compiler to get an executable (<path>.exe</path>) file. </p>
 
 
 <h3>Licensing</h3>
 
 <p>
- This product is free and open source, and has benefited from the contributions
- of many people.
- You have complete royalty-free rights to distribute any Euphoria programs
- that you develop. You are also free to distribute 
- <program>ex.exe</program>,
- <program>exw.exe</program> and 
- <program>exu</program> files
- so anyone can run your program. You can also distribute the interpreter
- backend: <program>backend.exe</program>, 
- <program>backendw.exe</program> and 
- <program>backendu</program>. You can
- can <program>shroud</program> or
- <program>bind</program> your program and distribute
- the resulting files royalty-free.</p>
+This product is free and open source, and has benefited from the contributions of many people. You have complete 
+royalty-free rights to distribute any Euphoria programs that you develop. You are also free to distribute 
+<program>ex.exe</program>, <program>exw.exe</program>, <program>exwc.exe</program> and <program>exu</program> files
+so anyone can run your program. You can also distribute the interpreter backend: <program>backend.exe</program>, 
+<program>backendw.exe</program> and  <program>backendu</program>. You can can <program>shroud</program> or
+<program>bind</program> your program and distribute the resulting files royalty-free.</p>
 
 <p>
- You may incorporate any Euphoria source  
- files from this package into 
- your program, either "as is" or with your modifications. 
- (You will probably need at least a few of the standard <path>euphoria\include</path> files 
- in any large program).</p>
+You may incorporate any Euphoria source files from this package into your program, either "as is" or with your modifications. 
+(You will probably need at least a few of the standard <path>euphoria\include</path> files  in any large program).</p>
 
 <p>
- We would appreciate it if you told people that your program was developed
- using Euphoria, and gave them the address:
+We would appreciate it if you told people that your program was developed using Euphoria, and gave them the address:
  <a href="http://www.RapidEuphoria.com">http://www.RapidEuphoria.com</a> of our Web page, but we do not require any such acknowledgment.</p>
 
  <p>
- Icon files, such as <b>euphoria.ico</b> in euphoria\bin,
- may be distributed with or without your changes. </p>
+Icon files, such as <path>euphoria.ico</path> in <path>euphoria\bin</path>, may be distributed with or without your changes. </p>
 
 <p>
- The high-speed version of the Euphoria Interpreter back-end is written 
- in ANSI C,  and can be compiled
- with many different C compilers. The complete source code is in
- euphoria\source, along with execute.e, the alternate, Euphoria-coded back-end. 
- The generous
- <a href=License.txt>open source License</a>
- allows both personal and commercial use, and unlike many other
- open source licenses, your changes do not have to be made open source.</p>
+The high-speed version of the Euphoria Interpreter back-end is written in ANSI C,  and can be compiled
+with many different C compilers. The complete source code is in <path>euphoria\source</path>, along with 
+<path>execute.e</path>, the alternate, Euphoria-coded back-end. The generous <a href=License.txt>open source License</a>
+allows both personal and commercial use, and unlike many other open source licenses, your changes do not have to be made 
+open source.</p>
  
- <p>
- Some additional 3rd-party legal restrictions might apply when you use the
- <a href=e2c.htm#legal>Euphoria To C Translator</a>.</p>
+<p>
+Some additional 3rd-party legal restrictions might apply when you use the <a href=e2c.htm#legal>Euphoria To C 
+Translator</a>.</p>
  
-<p style="text-align:center;">continue to <a href="refman_2.htm">Language Definition</a></p>
-
 </doc>

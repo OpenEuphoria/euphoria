@@ -11,12 +11,12 @@
  catches many bugs that in other languages might take hours of
  your time to track down. When the interpreter catches an error, you will always get
  a brief report on your screen, and a detailed report in a file called
- <font color="#993333"><_bq>ex.err</_bq></font>. These reports 
+ ex.err. These reports 
  include a full English description of what happened, along with a
- call-stack traceback. The file <font color="#993333"><b>ex.err</b></font>
+ call-stack traceback. The file <b>ex.err</b>
  will also have a dump of all variable values, and optionally a list of 
  the most recently executed statements. For extremely large sequences, 
- only a partial dump is shown. If <font color="#993333"><b>ex.err</b></font> 
+ only a partial dump is shown. If <b>ex.err</b> 
  is not convenient, you can choose another file name, anywhere on your system, 
  by calling <a href="lib_mach.htm#crash_file">crash_file</a>().</p>
 
@@ -38,7 +38,7 @@
 <p>
  <a name=trace></a>
  The interpreter provides you with additional powerful tools for debugging. 
- Using trace(1) you can <font color="#993333"><b><i>trace</i></b></font>
+ Using trace(1) you can <b><i>trace</i></b>
  the execution of your program on one screen while
  you witness the output of your program on another. 
  trace(2) is the same as trace(1) but the trace screen will be 
@@ -50,10 +50,10 @@
  <a class="brown" href="refman_2.htm#62">without trace</a></b>
  special statements select the
  parts of your program that are available for tracing. Often you
- will simply insert a <font color="#993333"><_bq>with trace</_bq></font>
+ will simply insert a with trace
  statement at the very beginning of
  your source code to make it all traceable. Sometimes it is better to place
- the first <font color="#993333"><_bq>with trace</_bq></font>
+ the first with trace
  after all of your <a href="refman_2.htm#type">user-defined types</a>, so
  you don't trace into these routines after each assignment to a variable.
  At other times, you may know exactly which routine or routines you are
@@ -63,15 +63,15 @@
  on the keyboard rather than Enter.</p>
 
 <p>
- Only traceable lines can appear in <font color="#993333">
- <b>ctrace.out</b></font> or in
- <font color="#993333"><b>ex.err</b></font>
+ Only traceable lines can appear in 
+ <b>ctrace.out</b> or in
+ <b>ex.err</b>
  as "Traced lines leading up to the failure" should a run-time error occur.
  If you want this information and didn't get it, you should insert a
- <font color="#993333"><_bq>with trace</_bq></font>
+ with trace
  and then rerun your program.
  Execution will be slower when lines compiled
- <font color="#993333"><_bq>with trace</_bq></font> are executed, especially
+ with trace are executed, especially
  when trace(3) is used.</p>
 
 <p>
@@ -99,18 +99,18 @@
  You can turn off tracing by executing a
  <a href="lib_dbg.htm#trace">trace(0)</a> statement. You can also
  turn it off interactively by typing 'q' to quit tracing. Remember that
- <font color="#993333"><_bq>with trace</_bq></font> must appear
+ with trace must appear
  <b><i>outside</i></b> of any routine, whereas
  trace() can appear <b><i>inside</i></b> a routine <b><i>or outside</i></b>.</p>
 
 <p>
  You might want to turn on tracing from within a
  <a href="refman_2.htm#413">type</a>. Suppose you run your
- program and it fails, with the <font color="#993333"><b>ex.err</b></font>
+ program and it fails, with the <b>ex.err</b>
  file showing that one of your variables has been set to a strange,
  although not illegal value, and you wonder how it could have happened. Simply
  <a href="refman_2.htm#type">create a type</a> for that variable
- that executes <font color="#006699">trace(1)</font> if the value being
+ that executes trace(1) if the value being
  assigned to the variable is the strange one that you are interested in.
  e.g.</p>
 
@@ -132,7 +132,7 @@
  You will also be able to check the output screen to
  see what has happened up to this precise moment. If you define
  positive_int() so it returns 0 for the strange value (99) instead of 1, you
- can force a diagnostic dump into <font color="#993333"><b>ex.err</b></font>.</p>
+ can force a diagnostic dump into <b>ex.err</b>.</p>
 
 <h3>The Trace Screen</h3>
 
@@ -141,7 +141,7 @@
  When a <a href="lib_dbg.htm#trace">trace(1)</a> or trace(2) 
  statement is executed by the interpreter,
  your main output screen is saved and
- a <font color="#993333"><b>trace screen</b></font> appears.
+ a <b>trace screen</b> appears.
  It shows a view of your program with the statement
  that will be executed next highlighted, and several statements before and
  after showing as well. Several lines at the bottom of the screen are
@@ -152,45 +152,45 @@
 
 <tr>
 	<td></td>
-	<td><font color="#993333">F1</font></td>
+	<td>F1</td>
 	<td>display main output screen - take a look at your program's output so far</td>
 </tr>
 
 <tr>
 	<td></td>
-	<td><font color="#993333">F2</font></td>
+	<td>F2</td>
 	<td>redisplay trace screen. Press this key while viewing the main output screen to return to the trace display.</td>
 </tr>
 
 <tr>
 	<td></td>
-	<td><font color="#993333">Enter</font></td>
+	<td>Enter</td>
 	<td>execute the currently-highlighted statement only</td>
 </tr>
 
 <tr>
 	<td></td>
-	<td><font color="#993333">down-arrow</font></td>
+	<td>down-arrow</td>
 	<td>continue execution and break when any statement coming after this one in the source listing is about to be executed. This lets you skip over subroutine calls. It also lets you stop on the first statement following the end of a <a href="refman_2.htm#for">for-loop</a> or <a href="refman_2.htm#while">while-loop</a> without having to witness all iterations of the loop.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color="#993333">?</font></td>
-	<td>display the value of a variable. After hitting <font color="#993333"><b>?</b></font> you will be prompted for the name of the variable. Many variables are displayed for you automatically as they are assigned a value. If a variable is not currently being displayed, or is only partially displayed, you can ask for it. Large sequences are limited to one line on the trace screen, but when you ask for the value of a variable that contains a large sequence, the screen will clear, and you can scroll through a pretty-printed display of the sequence. You will then be returned to the trace screen, where only one line of the variable is displayed. Variables that are not defined at this point in the program cannot be shown. Variables that have not yet been initialized will have "< NO VALUE >" beside their name. Only variables, not general expressions, can be displayed. As you step through execution of the program, the system will update any values showing on the screen. Occasionally it will remove variables that are no longer in scope, or that haven't been updated in a long time compared with newer, recently-updated variables.</td>
+	<td>?</td>
+	<td>display the value of a variable. After hitting <b>?</b> you will be prompted for the name of the variable. Many variables are displayed for you automatically as they are assigned a value. If a variable is not currently being displayed, or is only partially displayed, you can ask for it. Large sequences are limited to one line on the trace screen, but when you ask for the value of a variable that contains a large sequence, the screen will clear, and you can scroll through a pretty-printed display of the sequence. You will then be returned to the trace screen, where only one line of the variable is displayed. Variables that are not defined at this point in the program cannot be shown. Variables that have not yet been initialized will have "< NO VALUE >" beside their name. Only variables, not general expressions, can be displayed. As you step through execution of the program, the system will update any values showing on the screen. Occasionally it will remove variables that are no longer in scope, or that haven't been updated in a long time compared with newer, recently-updated variables.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color="#993333">q</font></td>
+	<td>q</td>
 	<td>quit tracing and resume normal execution. Tracing will start again when the next trace(1) is executed.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color="#993333">Q</font></td>
+	<td>Q</td>
 	<td>quit tracing and let the program run freely to its normal completion. trace() statements will be ignored.</td>
 </tr>
 <tr>
 	<td></td>
-	<td><font color="#993333">!</font></td>
+	<td>!</td>
 	<td>this will abort execution of your program. A traceback and dump of variable values will go to <path>ex.err</path>.</td>
 </tr>
 </table>
@@ -212,7 +212,7 @@
  This is done for all variables, since Euphoria does not know in general
  whether you are thinking of a number as an ASCII character or not. You will
  also see ASCII characters (in quotes) in
- <font color="#993333"><b>ex.err</b></font>. This can make for a rather
+ <b>ex.err</b>. This can make for a rather
  "busy" display, but the ASCII information is often very useful.</p>
 
 <p>
@@ -265,33 +265,33 @@ that you see in <b>ctrace.out</b>.</p>
 <p>
 
  If you specify <a class="brown" href="refman_2.htm#62">
- <_bq>with profile</_bq></a> (DOS32, WIN32, Linux, FreeBSD), or
+ with profile</a> (DOS32, WIN32, Linux, FreeBSD), or
  <a class="brown" href="refman_2.htm#62">
- <_bq>with profile_time</_bq></a>
+ with profile_time</a>
  (DOS32 only) then a special listing of your program, called
- a <font color="#993333"><_bq><i>profile</i></_bq></font>,
+ a <i>profile</i>,
  will be produced by the interpreter when your program finishes execution. 
  This listing is
- written to the file <font color="#993333"><_bq>ex.pro</_bq></font> in
+ written to the file ex.pro in
  the current directory.</p>
 
 <p>
  There are two types of profiling available:
- <font color="#993333"><b>execution-count profiling</b></font>,
- and <font color="#993333"><b>time profiling</b></font>.
+ <b>execution-count profiling</b>,
+ and <b>time profiling</b>.
  You get execution-count profiling when you specify
- <font color="#993333"><_bq>with profile</_bq></font>. You get time
+ with profile. You get time
  profiling when you specify
- <font color="#993333"><_bq>with profile_time</_bq></font>.
+ with profile_time.
  You can't mix the two types of profiling in a single run of your program.
  You need to make two separate runs.</p>
 
 <p>
- We ran the <font color="#5500FF"><b>sieve8k.ex</b></font> benchmark program in
- <font color="#5500FF"><b>demo\bench</b></font> under both types of
+ We ran the <b>sieve8k.ex</b> benchmark program in
+ <b>demo\bench</b> under both types of
  profiling. The results are in
- <font color="#5500FF"><b>sieve8k.pro</b></font> (execution-count profiling)
- and <font color="#5500FF"><b>sieve8k.pro2</b></font> (time profiling).</p>
+ <b>sieve8k.pro</b> (execution-count profiling)
+ and <b>sieve8k.pro2</b> (time profiling).</p>
 
 <p>
  Execution-count profiling shows precisely how many times each statement
@@ -306,11 +306,11 @@ that you see in <b>ctrace.out</b>.</p>
  statement was sampled, but not enough to get a score of 0.01.</p>
 
 <p>
- Only statements compiled <font color="#993333"><_bq>with profile</_bq></font>
- or <font color="#993333"><_bq>with profile_time</_bq></font> are shown in
+ Only statements compiled with profile
+ or with profile_time are shown in
  the listing. Normally you will specify either
- <font color="#993333"><_bq>with profile</_bq></font>
- or <font color="#993333"><_bq>with profile_time</_bq></font> at the top
+ with profile
+ or with profile_time at the top
  of your main <b>.ex</b> file, so you can get a complete listing.
  View this file with the Euphoria editor to see a color display.</p>
 
@@ -337,16 +337,16 @@ that you see in <b>ctrace.out</b>.</p>
 <p>
  Sometimes you will want to focus on a particular action performed by your
  program. For example, in the
- <font color="#5500FF"><b>Language War</b></font> game, we found that the game
+ <b>Language War</b> game, we found that the game
  in general was fast enough, but when a planet exploded, shooting 2500
  pixels off in all directions, the game slowed down. We wanted to speed
  up the explosion routine. We didn't care about the rest of the code. The
  solution was to call <a href="lib_dbg.htm#profile">profile(0)</a>
  at the beginning of Language War, just after
- <font color="#993333"><_bq>with profile_time</_bq></font>,
+ with profile_time,
  to turn off profiling, and then to call
- <font color="#006699">profile(1)</font> at the beginning of the
- explosion routine and <font color="#006699">profile(0)</font>
+ profile(1) at the beginning of the
+ explosion routine and profile(0)
  at the end of the routine. In this way
  we could run the game, creating numerous explosions, and logging a lot
  of samples, just for the explosion effect. If samples were charged against
@@ -361,7 +361,7 @@ that you see in <b>ctrace.out</b>.</p>
 <p>
 
  With each click of the system clock, an interrupt is generated. When you
- specify <font color="#993333"><_bq>with profile_time</_bq></font> Euphoria
+ specify with profile_time Euphoria
  will sample your program to see which
  statement is being executed at the exact moment that each interrupt occurs.</p>
 
@@ -383,7 +383,7 @@ that you see in <b>ctrace.out</b>.</p>
 </eucode>
 
  <p>will reserve space for 100000 samples (for example). If the buffer overflows
- you'll see a warning at the top of <font color="#993333"><b>ex.pro</b></font>.
+ you'll see a warning at the top of <b>ex.pro</b>.
  At 100 samples per second your
  program can run for 250 seconds before using up the default 25000 samples.
  It's not feasible for Euphoria to dynamically enlarge the sample buffer
@@ -395,7 +395,7 @@ that you see in <b>ctrace.out</b>.</p>
 
 <p>
  The percentages shown in the left margin of
- <font color="#993333"><b>ex.pro</b></font>,
+ <b>ex.pro</b>,
  are calculated by dividing
  the number of times that a particular statement was sampled, by the total
  number of samples taken. e.g. if a statement were sampled 50 times out of a
@@ -409,7 +409,7 @@ that you see in <b>ctrace.out</b>.</p>
  situation to watch out for is the case where a program synchronizes itself
  to the clock interrupt, by waiting for <a href="lib_os.htm#time">time()</a>
  to advance. The statements executed just after the point where the clock
- advances might <font color="#CC0099"><_ba><i>never</i></_ba></font> be
+ advances might <i>never</i> be
  sampled, which could give you a very distorted picture. e.g.</p>
 <eucode>
         while time() < LIMIT do
@@ -427,9 +427,5 @@ that you see in <b>ctrace.out</b>.</p>
  If disk swapping starts to happen, you may see large times attributed to
  statements that need to access the swap file, such as statements
  that access elements of a large swapped-out sequence.</p>
-
-<p style="text-align:center;">continue to <a href="library.htm">Part II - Library Routines</a></p>
-
-<h1>Standard Libary Refrence</h1>
 
 </doc>

@@ -29,7 +29,8 @@ files = {
     "relnotes40.htx",
     "refman_1.htx",
     "refman_2.htx",
-    "refman_3.htx"
+    "refman_3.htx",
+    "refman_4.htx"
 }
 
 include stack.e as stk

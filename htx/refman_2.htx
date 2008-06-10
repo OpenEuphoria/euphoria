@@ -8,15 +8,15 @@
 
 <p>
 
- All data <font color="#993333"><b>objects</b></font> in Euphoria are either
- <font color="#993333"><b>atoms</b></font> or
- <font color="#993333"><b>sequences</b></font>.
- An <font color="#993333"><b>atom</b></font> is a single numeric value.
- A <font color="#993333"><b>sequence</b></font> is a collection of numeric
+ All data <strong>objects</strong> in Euphoria are either
+ <strong>atoms</strong> or
+ <strong>sequences</strong>.
+ An <strong>atom</strong> is a single numeric value.
+ A <strong>sequence</strong> is a collection of numeric
  values.</p>
 
 <p>
- The <font color="#993333"><b>objects</b></font> contained in a
+ The <strong>objects</strong> contained in a
  sequence can be an arbitrary mix of atoms or
  sequences. A sequence is represented by a list of objects in brace brackets,
  separated by commas. Atoms can have any integer or double-precision floating
@@ -25,79 +25,80 @@
  Euphoria objects:</p>
 
 <eucode>
-        -- examples of atoms:
-        0
-        1000
-        98.6
-        -1e6
+-- examples of atoms:
+0
+1000
+98.6
+-1e6
 
-        -- examples of sequences:
-        {2, 3, 5, 7, 11, 13, 17, 19}
-        {1, 2, {3, 3, 3}, 4, {5, {6}}}
-        {{"jon", "smith"}, 52389, 97.25}
-        {}                        -- the 0-element sequence
+-- examples of sequences:
+{2, 3, 5, 7, 11, 13, 17, 19}
+{1, 2, {3, 3, 3}, 4, {5, {6}}}
+{{"jon", "smith"}, 52389, 97.25}
+{}                        -- the 0-element sequence
 </eucode>
-<p>
 
- Numbers can also be entered in hexadecimal. For example:</p>
+<p>
+Numbers can also be entered in hexadecimal. For example:
+</p>
 
 <eucode>
-        #FE             -- 254
-        #A000           -- 40960
-        #FFFF00008      -- 68718428168
-        -#10            -- -16
+#FE             -- 254
+#A000           -- 40960
+#FFFF00008      -- 68718428168
+-#10            -- -16
 </eucode>
-<p>
 
- Only the capital letters A, B, C, D, E, F are allowed in hex numbers.
- Hex numbers are always positive, unless you add a minus
- sign in front of the # character. So for instance #FFFFFFFF is a huge 
- positive number (4294967295), *not* -1, as some machine-language programmers 
- might expect.</p>
+<p>
+Only the capital letters A, B, C, D, E, F are allowed in hex numbers.
+Hex numbers are always positive, unless you add a minus
+sign in front of the # character. So for instance #FFFFFFFF is a huge 
+positive number (4294967295), *not* -1, as some machine-language programmers 
+might expect.</p>
  
 <p>
- Sequences can be nested to any depth, i.e. you can have sequences within
- sequences within sequences and so on to any depth (until you run out of
- memory). Brace brackets are used to construct sequences out of a list of
- expressions.  These expressions can be constant or evaluated at run-time.
- e.g.</p>
+Sequences can be nested to any depth, i.e. you can have sequences within
+sequences within sequences and so on to any depth (until you run out of
+memory). Brace brackets are used to construct sequences out of a list of
+expressions.  These expressions can be constant or evaluated at run-time.
+e.g.</p>
 
 <eucode>
-        {x+6, 9, y*w+2, sin(0.5)}
+{x+6, 9, y*w+2, sin(0.5)}
 </eucode>
 
 <p>
- The <font color="#CC0099"><b>"Hierarchical Objects"</b></font> part
- of the Euphoria acronym comes from the
- hierarchical nature of nested sequences. This should not be confused with
- the class hierarchies of certain object-oriented languages.</p>
+The <b>"Hierarchical Objects"</b> part
+of the Euphoria acronym comes from the
+hierarchical nature of nested sequences. This should not be confused with
+the class hierarchies of certain object-oriented languages.</p>
 
 <p>
- Why do we call them <font color="#993333"><_bq>atoms</_bq></font>?
- Why not just "numbers"? Well, an atom
- <font color="#CC0099"><_ba><i>is</i></_ba></font> just a
- number, but we wanted to have a distinctive term that emphasizes that they are
- indivisible. Of course in the world of physics, atoms were split into smaller
- parts many years ago, but in Euphoria you can't split them. They are the basic
- building blocks of all the data that a Euphoria program can manipulate. With
- this analogy, <font color="#993333"><b>sequences</b></font>
- might be thought of as "molecules", made from atoms
- and other molecules. A better analogy would be that sequences are like
- directories, and atoms are like files. Just as a directory on your computer
- can contain both files and other directories, a sequence can contain both
- atoms and other sequences (and
- <font color="#CC0099"><_ba><i>those</i></_ba></font> sequences can contain
- atoms and sequences and so on).</p>
+Why do we call them atoms?
+Why not just "numbers"? Well, an atom
+<i>is</i> just a
+number, but we wanted to have a distinctive term that emphasizes that they are
+indivisible. Of course in the world of physics, atoms were split into smaller
+parts many years ago, but in Euphoria you can't split them. They are the basic
+building blocks of all the data that a Euphoria program can manipulate. With
+this analogy, <strong>sequence</strong>s
+might be thought of as "molecules", made from atoms
+and other molecules. A better analogy would be that sequences are like
+directories, and atoms are like files. Just as a directory on your computer
+can contain both files and other directories, a sequence can contain both
+atoms and other sequences (and
+<i>those</i> sequences can contain
+atoms and sequences and so on).</p>
 
 <p>
- As you will soon discover, sequences make Euphoria very simple
- <font color="#CC0099"><_ba><i>and</i></_ba></font> very powerful.
- <font color="#CC0099"><b>Understanding atoms and sequences is the key to
- understanding Euphoria.</b></font></p>
+As you will soon discover, sequences make Euphoria very simple
+<i>and</i> very powerful.
+<b>Understanding atoms and sequences is the key to
+understanding Euphoria.</b></p>
 
 <dl>
 <dt>
- <b><font color="#006633"><_sul>Performance Note:</_sul></font></b></dt>
+ <b>Performance Note:</b></dt>
 <dd>
  Does this mean that
  all atoms are stored in memory as
@@ -111,12 +112,12 @@
 
 <p>
 
- A <font color="#993333"><b>character string</b></font> is just a
- <font color="#993333"><b>sequence</b></font> of characters.
+ A <strong>character string</strong> is just a
+ <strong>sequence</strong> of characters.
  It may be entered using quotes e.g.</p>
 
 <eucode>
-        "ABCDEFG"
+"ABCDEFG"
 </eucode>
 
 <p>
@@ -126,7 +127,7 @@
 
 
 <eucode>
-        {65, 66, 67, 68, 69, 70, 71}
+{65, 66, 67, 68, 69, 70, 71}
 </eucode>
 
 <p> which contains the corresponding ASCII codes. The Euphoria compiler
@@ -139,22 +140,22 @@
  <a name=empty_seq></a>
  It follows that "" is equivalent to {}. Both represent the sequence of
  length-0, also known as the
- <font color="#993333"><b>empty sequence</b></font>. As a matter of
+ <strong>empty sequence</strong>. As a matter of
  programming style, it is natural to use "" to
  suggest a length-0 sequence of characters, and {} to suggest some other
  kind of sequence.</p>
 
 <p>
  <a name=char></a>
- An <font color="#993333"><b>individual character</b></font> is an
- <font color="#993333"><b>atom</b></font>.
+ An <strong>individual character</strong> is an
+ <strong>atom</strong>.
  It must be entered using single quotes. There is a difference between an
  individual character (which is an atom), and a character string of length-1
  (which is a sequence). e.g.</p>
 
 <eucode>
-        'B'   -- equivalent to the atom 66 - the ASCII code for B
-        "B"   -- equivalent to the sequence {66}
+'B'   -- equivalent to the atom 66 - the ASCII code for B
+"B"   -- equivalent to the sequence {66}
 </eucode>
 
 <p>
@@ -163,7 +164,7 @@
 
 <p>
  Keep in mind that an atom is
- <font color="#CC0099"><_ba><i>not</i></_ba></font> equivalent to a
+ <i>not</i> equivalent to a
  one-element sequence containing
  the same value, although there are a few built-in routines that choose
  to treat them similarly.</p>
@@ -237,8 +238,8 @@ instead of exu.</p>
 
 <p>
 
- The relational operators  <font color="#993333"><b>< &nbsp; > &nbsp; <= &nbsp;
- >= &nbsp; = &nbsp; != &nbsp;</b></font> each produce a 1 (true) or a
+ The relational operators  <strong>< &nbsp; > &nbsp; <= &nbsp;
+ >= &nbsp; = &nbsp; != &nbsp;</strong> each produce a 1 (true) or a
  0 (false) result.</p>
 
 <eucode>
@@ -257,10 +258,10 @@ instead of exu.</p>
 
 <p>
 
- The logical operators <font color="#993333"><_bsq>and</_bsq></font>,
- <font color="#993333"><_bsq>or</_bsq></font>,
- <font color="#993333"><_bsq>xor</_bsq></font>,
- and <font color="#993333"><_bsq>not</_bsq></font>
+ The logical operators and,
+ or,
+ xor,
+ and not
  are used to determine the
  "truth" of an expression. e.g.</p>
 
@@ -297,10 +298,10 @@ instead of exu.</p>
  These operators can also be applied to sequences. See below.</p>
 
 <p>
- In some cases <a href="refman_2.htm#shortcir"><_bq>short-circuit</_bq></a>
+ In some cases <a href="refman_2.htm#shortcir">short-circuit</a>
  evaluation will be used for expressions containing
- <font color="#993333"><_bq>and</_bq></font> or
- <font color="#993333"><_bq>or</_bq></font>.</p>
+ and or
+ or.</p>
 
 <h4>2.2.3 Arithmetic Operators</h4>
 
@@ -322,8 +323,8 @@ instead of exu.</p>
  <a name=inf_nan></a>
  Computing a result that is too big (i.e. outside of -1e300 to +1e300) will
  result in one of the special atoms <b>+infinity</b> or <b>-infinity</b>.
- These appear as <_bq>inf</_bq> or <_bq>-inf</_bq> when you print them out.
- It is also possible to generate <_bq>nan</_bq> or <_bq>-nan</_bq>.
+ These appear as inf or -inf when you print them out.
+ It is also possible to generate nan or -nan.
  "nan" means "not a number", i.e. an undefined value (such as inf
  divided by inf). These values are defined in the IEEE
  floating-point standard. If
@@ -403,7 +404,7 @@ instead of exu.</p>
         -- equality 
 </eucode>
 
-<p><b><font color="#006633"><_sul>Note:</_sul></font></b>
+<p><b>Note:</b>
 When you wish to compare two strings (or other sequences), 
 you should <b>not</b> (as in some other languages) use the '=' operator:</p>
 
@@ -592,7 +593,7 @@ and probably even faster is:</p>
         longname[length(longname)][length(longname[length(longname)])]
 </eucode>
 
-<p><b><font color="#006633"><_sul>Subscripting and function side-effects:</_sul></font></b>
+<p><b>Subscripting and function side-effects:</b>
 In an assignment statement, with left-hand-side subscripts:</p>
 
 <eucode>
@@ -613,8 +614,8 @@ that the final value of the lhs_var will be the value of rhs_expr,
 regardless of any side-effects that may have changed lhs_var.</p>
 
 <p>
- <font color="#CC0099"><b>Euphoria data structures are
- almost infinitely flexible.</b></font>
+ <b>Euphoria data structures are
+ almost infinitely flexible.</b>
  Arrays in other languages are constrained to have a fixed number of elements,
  and those elements must all be of the same type. Euphoria eliminates both
  of those restrictions.
@@ -632,7 +633,7 @@ regardless of any side-effects that may have changed lhs_var.</p>
 <p>
  Note that expressions in general may not be subscripted, just variables. For
  example: {5+2,6-1,7*8,8+1}[3] is
- <font color="#CC0099"><_ba><i>not</i></_ba></font> supported,
+ <i>not</i> supported,
  nor is something like: date()[MONTH]. You have to assign the sequence
  returned by date() to a variable, then subscript the variable to
  get the month.</p>
@@ -661,11 +662,11 @@ regardless of any side-effects that may have changed lhs_var.</p>
 
 <p>
  We need to be a bit more precise in defining the rules for
- <font color="#993333"><b>empty slices</b></font>. Consider a slice s[i..j]
+ <strong>empty slices</strong>. Consider a slice s[i..j]
  where s is of length n. A slice from i to j, where  j = i-1  and i >= 1
  produces the <a href="refman_2.htm#empty_seq">empty sequence</a>, even if
  i = n+1. Thus 1..0  and n+1..n and everything in between are legal <b>
- <font color="#993333">(empty) slices</font></b>.
+ (empty) slices</b>.
  Empty slices are quite useful in many algorithms. A slice from i to j where
  j < i - 1 is illegal , i.e. "reverse" slices such as s[5..3] are not allowed.</p>
 
@@ -684,7 +685,7 @@ We can also use the $ shorthand with slices, e.g.</p>
 <p>
 
  Any two objects may be concatenated using the
- <font color="#993333"><b>&</b></font> operator. The result is a
+ <strong>&</strong> operator. The result is a
  sequence with a length equal to the sum of the lengths of the concatenated
  objects (where atoms are considered here to have length 1). e.g.</p>
 
@@ -738,7 +739,7 @@ and so is s[length(s)+1..length(s)].</p>
  Some other important operations that you can perform on sequences have
  English names, rather than special characters.
  These operations are built-in to 
- <font color="#993333"><b>ex.exe</b></font>/<font color="#993333"><b>exw.exe</b></font>/<font color="#993333"><b>exu</b></font>
+ <strong>ex.exe</strong>/<strong>exw.exe</strong>/<strong>ex</strong>u
  , so
  they'll always be there, and
  so they'll be fast. They are described in detail in
@@ -804,9 +805,9 @@ and so is s[length(s)+1..length(s)].</p>
 <comment>The length of the new sequence is always 1 greater than the length of the original sequence. The item to be added to the sequence can be any atom or sequence.</comment>
 
 <p>
- These two built-in functions, <font color="#993333"><b>append()</b></font>
- and <font color="#993333"><b>prepend()</b></font>, have some similarities
- to the concatenate operator, <font color="#993333"><b>&</b></font>,
+ These two built-in functions, <strong>append(</strong>)
+ and <strong>prepend()</strong>, have some similarities
+ to the concatenate operator, <strong>&</strong>,
  but there are clear differences. e.g.</p>
 
 <eucode>
@@ -888,9 +889,9 @@ and so is s[length(s)+1..length(s)].</p>
 <p>
  Programming in Euphoria is based entirely on creating and manipulating
  flexible, dynamic sequences of data. Sequences are
- <font color="#CC0099"><_ba><i>it</i></_ba></font> - there are no
+ <i>it</i> - there are no
  other data structures to learn. You operate in a simple, safe, elastic world
- of <font color="#CC0099"><_ba><i>values</i></_ba></font>, that is far
+ of <i>values</i>, that is far
  removed from the rigid, tedious, dangerous world
  of bits, bytes, pointers and machine crashes.</p>
 
@@ -948,11 +949,11 @@ and so is s[length(s)+1..length(s)].</p>
 
 <p>
 
- <font color="#993333"><b>Identifiers</b></font>, which consist of
+ <strong>Identifiers</strong>, which consist of
  variable names and other user-defined symbols, may be of any
  length. Upper and lower case are distinct. Identifiers must start with a
  letter and then be followed by letters, digits or underscores. The following
- <font color="#993333"><b>reserved words</b></font>
+ <strong>reserved word</strong>s
  have special meaning in Euphoria and may not be used as identifiers:</p>
                                    
 <eucode>                          
@@ -1010,7 +1011,7 @@ and so is s[length(s)+1..length(s)].</p>
 
 <dl>
 <dt>
-        <b><font color="#006633"><_sul>Performance Note:</_sul></font></b></dt>
+        <b>Performance Note:</b></dt>
 <dd>
         The interpreter does not actually copy sequences or
         floating-point numbers unless it becomes necessary. For example,
@@ -1132,9 +1133,9 @@ and so is s[length(s)+1..length(s)].</p>
  or routines that
  haven't been defined yet. It is possible to call a routine that comes later
  in the source, but you must use the special functions,
- <font color="#993333"><b>routine_id()</b></font>,
- and either <font color="#993333"><b>call_func()</b></font> or
- <font color="#993333"><b>call_proc()</b></font> to do it.
+ <strong>routine_id()</strong>,
+ and either <strong>call_func()</strong> or
+ <strong>call_proc()</strong> to do it.
  See <a href="library.htm#dyn_call">Part II -
  Library Routines - Dynamic Calls</a>.</p>
 
@@ -1147,30 +1148,30 @@ and so is s[length(s)+1..length(s)].</p>
 <p>
  <a name=scope></a>
  A symbol is defined from the point where it is declared to the end of its
- <font color="#993333"><_bq>scope</_bq></font>.
+ scope.
  The scope of a variable declared inside a procedure or function (a
- <font color="#993333"><_bq>private</_bq></font> variable) ends
+ private variable) ends
  at the end of the procedure or function.  The scope
  of all other variables, constants, procedures, functions and types ends at
  the end of the source file in which they are declared and they are referred
- to as <font color="#993333"><_bq>local</_bq></font>,
+ to as local,
  unless the keyword
- <font color="#993333"><_bq>global</_bq></font> precedes
+ global precedes
  their declaration, in which case their scope extends indefinitely.</p>
 
 <p>
  When you <b>include</b> a Euphoria file in a main file (see
  <a href="refman_2.htm#6">2.6 Special Top-Level Statements</a>),
  only the variables and routines declared using the
- <font color="#993333"><_bq>global</_bq></font> or <font color="#993333">
- <_bq>export</_bq></font>  keywords are accessible or even visible to 
+ global or 
+ export  keywords are accessible or even visible to 
  the main file. The other, non-global, non-exported
  declarations in the included file are forgotten at the end of
  the included file, and you will get an error message, "not declared", if you
  try to use them in the main file.</p>
 
 <p>
- Symbols marked as <font color="#993333"><_bq>global</_bq></font> 
+ Symbols marked as global 
  can be used externally. All other symbols can only be used internally 
  within their own file. This information is helpful when maintaining 
  or enhancing the file, or when learning how to use the file. You 
@@ -1179,11 +1180,11 @@ and so is s[length(s)+1..length(s)].</p>
  include file.</p>
  
  <p>
- Symbols marked as <font color="#993333"><_bq>export</_bq></font> are
- similar to <font color="#993333"><_bq>global</_bq></font> symbols,
+ Symbols marked as export are
+ similar to global symbols,
  except that they are only visible to files that directly include
  their file, or directly include a file that includes the file through
- the <font color="#993333"><_bq>export include</_bq></font> statement. </p>
+ the export include statement. </p>
  
 <p>
 Sometimes, when using include files
@@ -1258,10 +1259,10 @@ included file.</p>
  different parts of a program accidentally modify the same variable without
  being aware of it.
  Try to use the most restrictive scope that you can. Make variables
- <font color="#993333"><b>private</b></font> to
+ <strong>private</strong> to
  one routine where possible, and where that isn't possible, make them
- <font color="#993333"><b>local</b></font> to a file, rather than
- <font color="#993333"><b>global</b></font> to the whole program.</p>
+ <strong>local</strong> to a file, rather than
+ <strong>global</strong> to the whole program.</p>
 
 <p> When Euphoria looks up the declaration of a symbol, 
     it first checks the current routine, then the current file, 
@@ -1291,9 +1292,9 @@ able to deconflict those symbols with the namespace associated with the main
 file of the library.</p>
 
 <p>
- <font color="#993333"><b>Constant</b></font> declarations must be
+ <strong>Constant</strong> declarations must be
  outside of any subroutine. Constants can be global or local, but 
- not <font color="#993333"><b>private</b></font>.</p>
+ not <strong>private</strong>.</p>
 
 <p>
  Variable declarations inside a subroutine must all appear at the beginning,
@@ -1309,12 +1310,12 @@ file of the library.</p>
  <a href="refman_2.htm#for">for-loop</a> is special. It is automatically
  declared at the beginning of the loop, and its scope ends at the end of the
  for-loop. If the loop is inside a function or procedure, the loop variable is
- a <font color="#993333"><b>private</b></font> variable and may not have the
- same name as any other <font color="#993333"><b>private</b></font>
+ a <strong>private</strong> variable and may not have the
+ same name as any other <strong>privat</strong>e
  variable. When the loop is at the top level, outside of any function or
- procedure, the loop variable is a <font color="#993333"><b>local</b></font>
+ procedure, the loop variable is a <strong>loca</strong>l
  variable and may not have the same name as any other
- <font color="#993333"><b>local</b></font> variable in that file. You can
+ <strong>local</strong> variable in that file. You can
  use the same name in many different for-loops as long as the loops aren't
  nested. You do not
  declare loop variables as you would other variables. The range of values
@@ -1343,31 +1344,31 @@ file of the library.</p>
  The types:
  <a href="refman_2.htm#1"><b>object</b>,
  <b>sequence</b>, <b>atom</b></a>
- and <font color="#993333"><b>integer</b></font> are <b>predefined</b>.
- Variables of type <font color="#993333"><b>object</b></font> may
- take on <font color="#CC0099"><_ba><i>any</i></_ba></font> value.
- Those declared with type <font color="#993333"><b>sequence</b></font>
+ and <strong>integer</strong> are <b>predefined</b>.
+ Variables of type <strong>object</strong> may
+ take on <i>any</i> value.
+ Those declared with type <strong>sequenc</strong>e
  must always be sequences.
- Those declared with type <font color="#993333"><b>atom</b></font> must
+ Those declared with type <strong>atom</strong> must
  always be atoms.</p>
 
 <p> <a name=integer></a>
- Those declared with type <font color="#993333"><b>integer</b></font> must
+ Those declared with type <strong>integer</strong> must
  be atoms with integer values from -1073741824
  to +1073741823 inclusive. You can perform exact calculations on larger integer
  values, up to about 15 decimal digits, but declare them as
- <font color="#993333"><b>atom</b></font>, rather than integer.</p>
+ <strong>atom</strong>, rather than integer.</p>
 
 <dl>
 <dt>
-<b><font color="#006633"><_sul>Note:</_sul></font></b></dt>
+<b>Note:</b></dt>
 
 <dd>
  In a procedure or function parameter list like the one for fred() above,
  a type name may only be followed by a single parameter name.</dd>
 
 <dt>
-<b><font color="#006633"><_sul>Performance Note:</_sul></font></b></dt>
+<b>Performance Note:</b></dt>
 
 <dd>
  Calculations using variables declared as integer will
@@ -1376,7 +1377,7 @@ file of the library.</p>
  manipulate atoms that aren't representable as integers. If your machine
  doesn't have floating-point hardware, Euphoria will call software
  floating-point arithmetic routines contained in
- <font color="#993333"><b>ex.exe</b></font> (or in Windows).
+ <strong>ex.exe</strong> (or in Windows).
  You can force ex.exe to bypass any floating-point hardware, by setting an
  environment variable:
 
@@ -1392,10 +1393,10 @@ file of the library.</p>
 <p>
  <a name=type></a>
  To augment the <a href="refman_2.htm#43">predefined types</a>, you can create
- <font color="#993333"><b>user-defined types</b></font>. All you have to
+ <strong>user-defined types</strong>. All you have to
  do is define a single-parameter function, but declare it with
- <font color="#993333"><b>type ... end type</b></font> instead of
- <font color="#993333"><b>function ... end function</b></font>.
+ <strong>type ... end type</strong> instead of
+ <strong>function ... end function</strong>.
  For example,</p>
 
 <eucode>
@@ -1450,30 +1451,30 @@ file of the library.</p>
 
 <p>
  Type checking can be turned off or on between subroutines using the
- <font color="#993333"><_bq>with type_check</_bq></font> or
- <font color="#993333"><_bq>without type_check</_bq></font>
+ with type_check or
+ without type_check
  <a href="refman_2.htm#62">special statements</a>.
  It is initially on by default.</p>
 
  
 <dl>
 <dt>
-<b><font color="#006633"><_sul>Note to Benchmarkers:</_sul></font></b></dt>
+<b>Note to Benchmarkers:</b></dt>
 <dd>
  When comparing the speed of Euphoria programs against
  programs written in other languages, you should specify
- <font color="#993333"><b>without type_check</b></font> at the top of the file.
+ <strong>without type_check</strong> at the top of the file.
  This gives Euphoria permission to skip run-time
  type checks, thereby saving some execution time. All other checks are still
  performed, e.g. subscript checking, uninitialized variable checking etc.
  Even when you turn off type checking, Euphoria reserves the right to make
  checks at strategic places, since this can actually allow it to run your
- program <font color="#CC0099"><_ba><i>faster</i></_ba></font> in many cases.
+ program <i>faster</i> in many cases.
  So you may still get a type check failure
  even when you have turned off type checking. Whether type checking is
  on or off, you will never get a <b><i>machine-level</i></b> exception.
- <font color="#CC0099"><b>You will always get a
- meaningful message from Euphoria when something goes wrong.</b></font>
+ <strong>You will always get a
+ meaningful message from Euphoria when something goes wrong</strong>.
  (<i>This might not be the case when you <a href="lib_mach.htm#poke">poke</a>
  directly into memory, or call routines written in C or machine code.</i>)</dd>
 </dl>
@@ -1481,11 +1482,11 @@ file of the library.</p>
 <p>
  Euphoria's method of defining types is simpler than what you will find
  in other languages, yet Euphoria provides the programmer with
- <font color="#CC0099"><_ba><i>greater</i></_ba></font> flexibility in
+ <i>greater</i> flexibility in
  defining the legal values for a type of data. Any algorithm
  can be used to include or exclude values. You can even declare a variable
- to be of type <font color="#993333"><_bq>object</_bq></font> which
- will allow it to take on <font color="#CC0099"><_ba><i>any</i></_ba></font>
+ to be of type object which
+ will allow it to take on <i>any</i>
  value. Routines can
  be written to work with very specific types, or very general types.</p>
 
@@ -1518,7 +1519,7 @@ file of the library.</p>
 
 <dl>
 <dt>
-<b><font color="#006633"><_sul>Anecdote 1:</_sul></font></b></dt>
+<b>Anecdote 1:</b></dt>
 <dd>
  In porting a large C program to Euphoria, a number
  of latent bugs were discovered. Although this C program was believed to be
@@ -1529,7 +1530,7 @@ file of the library.</p>
  casual observer, so they had survived testing of the C code.</dd>
 
 <dt>
-<b><font color="#006633"><_sul>Anecdote 2:</_sul></font></b></dt>
+<b>Anecdote 2:</b></dt>
 <dd>
  The Quick Sort algorithm presented on page 117 of <i>Writing Efficient
  Programs</i> by Jon Bentley has a subscript error! The algorithm will
@@ -1540,11 +1541,11 @@ file of the library.</p>
  why the bug was never caught. But what if there isn't any (virtual) memory
  just before or just after the array? Bentley later modifies the algorithm
  such that this bug goes away -- but he presented this version as being
- correct. <b><i><font color="#006633">Even the experts need subscript
- checking!</font></i></b></dd>
+ correct. <b><i>Even the experts need subscript
+ checking!</i></b></dd>
 
 <dt>
-<b><font color="#006633"><_sul>Performance Note:</_sul></font></b></dt>
+<b>Performance Note:</b></dt>
 
 <dd>
  When typical user-defined types are used extensively, type
@@ -1599,7 +1600,7 @@ file of the library.</p>
 
 <p>
 
- An <font color="#993333"><b>assignment statement</b></font> assigns
+ An <strong>assignment statement</strong> assigns
  the value of an expression to a simple
  variable, or to a subscript or slice of a variable. e.g.</p>
 
@@ -1629,7 +1630,7 @@ file of the library.</p>
 </eucode>
 
 <p> This is perfectly legal since x is declared as an
- <font color="#993333"><b>object</b></font>. The previous value
+ <strong>object</strong>. The previous value
  of x, namely the 1000-element sequence, would simply disappear. Actually,
  the space consumed by the 1000-element sequence will be automatically
  recycled due to Euphoria's dynamic storage allocation.</p>
@@ -1693,9 +1694,9 @@ In general, whenever you have an assignment of the form:</p>
 
 <p>
 When the left-hand-side contains multiple subscripts/slices, the
-<font color="#993333"><_bq><i>op=</i></_bq></font>
+<i>op=</i>
 form will usually execute faster than the longer form. When you get used
-to it, you may find the <font color="#993333"><_bq><i>op=</i></_bq></font>
+to it, you may find the <i>op=</i>
 form to be slightly more readable than the long form, since you don't
 have to visually compare the left-hand-side against the copy of itself
 on the right side.</p>
@@ -1703,7 +1704,7 @@ on the right side.</p>
 <h4>procedure call</h4>
 
 <p>
- A <font color="#993333"><b>procedure call</b></font> starts execution
+ A <strong>procedure call</strong> starts execution
  of a procedure, passing it an optional list of argument values. e.g.</p>
 
 <eucode>
@@ -1713,7 +1714,7 @@ on the right side.</p>
 <h4>return statement</h4>
 
 <p>
- A <font color="#993333"><b>return statement</b></font> returns immediately
+ A <strong>return statement</strong> returns immediately
  from a subroutine. If the subroutine is a function
  or type then a value must also be returned. e.g.</p>
 
@@ -1726,52 +1727,50 @@ on the right side.</p>
 <h4>if statement</h4>
 
 <p>
- An <font color="#993333"><b>if statement</b></font> tests a condition
+ An <strong>if statement</strong> tests a condition
  to see if it is 0 (false) or non-zero (true) and then executes the
  appropriate series of statements. There may
- be optional <font color="#993333"><b>elsif</b></font> and
- <font color="#993333"><b>else</b></font> clauses. e.g.</p>
+ be optional <strong>elsif</strong> and
+ <strong>else</strong> clauses. e.g.</p>
 
 <eucode>
-        if a < b then
-            x = 1
-        end if
+if a < b then
+    x = 1
+end if
 
+if a = 9 and find(0, s) then
+    x = 4
+    y = 5
+else
+    z = 8
+end if
 
-        if a = 9 and find(0, s) then
-            x = 4
-            y = 5
-        else
-            z = 8
-        end if
-
-
-        if char = 'a' then
-            x = 1
-        elsif char = 'b' or char = 'B' then
-            x = 2
-        elsif char = 'c' then
-            x = 3
-        else
-            x = -1
-        end if
+if char = 'a' then
+    x = 1
+elsif char = 'b' or char = 'B' then
+    x = 2
+elsif char = 'c' then
+    x = 3
+else
+    x = -1
+end if
 </eucode>
 
 <p>
- Notice that <font color="#993333"><_bq>elsif</_bq></font> is a contraction
- of <font color="#993333"><_bq>else if</_bq></font>, but it's cleaner because
- it doesn't require an <font color="#993333"><_bq>end if</_bq></font> to go
- with it. There is just one <font color="#993333"><_bq>end if</_bq></font> for
- the entire <font color="#993333"><b>if</b></font> statement, even when
- there are many <b><font color="#993333">elsif's</font></b> contained in it.</p>
+ Notice that elsif is a contraction
+ of else if, but it's cleaner because
+ it doesn't require an end if to go
+ with it. There is just one end if for
+ the entire <strong>if</strong> statement, even when
+ there are many <b>elsif's</b> contained in it.</p>
 <p>
-The <font color="#993333"><b>if</b></font> and
-<font color="#993333"><b>elsif</b></font> conditions are tested using
+The <strong>if</strong> and
+<strong>elsif</strong> conditions are tested using
 <a href="refman_2.htm#shortcir">short-circuit evaluation</a>. </p>
 <p>
-<font color="#993333"><b>If</b></font> statement headers can have a <font color="#993333"><b>label</b></font> clause right before the <font color="#993333"><b>then</b></font>
+<strong>If</strong> statement headers can have a <strong>label</strong> clause right before the <strong>the</strong>n
 closing keyword. See the section on <a href="refman_2.htm#labhdr">labelled block headers
-</a>. This feature does not apply to <font color="#993333"><b>elsif</b></font> conditional 
+</a>. This feature does not apply to <strong>elsif</strong> conditional 
 statements, as they are not standalone, just optionally sectioning an if block.</p>
 
 <h4>Iterative code blocks, aka loops.</h4>
@@ -1789,7 +1788,7 @@ labelled block header</a>, in order to make exiting them more flexible.
 <h5>while statement</h5>
 
 <p>
- A <font color="#993333"><b>while statement</b></font> tests a condition
+ A <strong>while statement</strong> tests a condition
  to see if it is non-zero (true), and while it is true a loop is executed. e.g.</p>
 
 <eucode>
@@ -1802,13 +1801,13 @@ labelled block header</a>, in order to make exiting them more flexible.
 <h2>Short-Circuit Evaluation</h2>
 
 <p>
- When the condition tested by <font color="#993333"><_bq>if</_bq></font>,
- <font color="#993333"><_bq>elsif</_bq></font>, 
- <font color="#993333"><_bq>until</_bq></font>, or
- <font color="#993333"><_bq>while</_bq></font> contains
- <font color="#993333"><_bq>and</_bq></font> or
- <font color="#993333"><_bq>or</_bq></font> operators,
- <font color="#993333"><_ba><i>short-circuit</i></_ba></font> evaluation
+ When the condition tested by if,
+ elsif, 
+ until, or
+ while contains
+ and or
+ or operators,
+ <i>short-circuit</i> evaluation
  will be used.
  For example,</p>
 
@@ -1847,7 +1846,7 @@ labelled block header</a>, in order to make exiting them more flexible.
  If the expression B contains a call to a function, and that function has
  possible <b>side-effects</b>, i.e. it might do more than just return a value,
  you will get a compile-time warning. Older versions (pre-2.1) of Euphoria
- did not use <font color="#993333"><b>short-circuit</b></font> evaluation,
+ did not use <strong>short-circuit</strong> evaluation,
  and it's possible that some old code will no longer work correctly,
  although a search of the Euphoria archives did not turn up any programs
  that depend on side-effects in this way.</p>
@@ -1892,12 +1891,12 @@ labelled block header</a>, in order to make exiting them more flexible.
  and will not evaluate s[i] != 'A'. No subscript error will occur.</p>
 
 <p>
- <font color="#993333"><b>Short-circuit</b></font> evaluation of
- <font color="#993333"><_bq>and</_bq></font>
- and <font color="#993333"><_bq>or</_bq></font> takes place for
- <font color="#993333"><_bq>if</_bq></font>,
- <font color="#993333"><_bq>elsif</_bq></font> and
- <font color="#993333"><_bq>while</_bq></font> conditions only.
+ <strong>Short-circuit</strong> evaluation of
+ and
+ and or takes place for
+ if,
+ elsif and
+ while conditions only.
  It is not used in other contexts. For example, the assignment statement:</p>
 
  <eucode>
@@ -1910,23 +1909,23 @@ labelled block header</a>, in order to make exiting them more flexible.
  or false, and conditions are required to produce an atom as a result.</p>
 
  <p>
-The first iteration of a <font color="#993333"><_bq>while</_bq></font> loop is often special, because some work still doesn't need to 
+The first iteration of a while loop is often special, because some work still doesn't need to 
 be done. As a result, ou have to keep track of whether you are in the initialisation stage or 
 not, and usually test a flag on every iteration of the loop, while this will be useful only 
 once. Not needed, and another cause of programming errors.
 In addition, and also because repetition of code often takes place as a result of the flag 
-weving method, Euphoria provides a special <font color="#993333"><_bq>entry</_bq></font> 
+weving method, Euphoria provides a special entry 
 keyword to better handle this situation.</p>
 
 <p>
-The <font color="#993333"><_bq>entry</_bq></font> keyword will be described in the section on 
+The entry keyword will be described in the section on 
 <a href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will need an
-<font color="#993333"><_bq>entry</_bq></font> tag in the loop header, as a clue to any reader
-that the first iteration of the loop willn not start right after the closing <font color="#993333"><_bq>do</_bq></font>.
+entry tag in the loop header, as a clue to any reader
+that the first iteration of the loop willn not start right after the closing do.
 </p>
 <h5>The loop ... until statement.</h5>
 <p>
- A <font color="#993333"><b>loop ... until statement</b></font> tests a condition
+ A <strong>loop ... until statement</strong> tests a condition
  to see if it is non-zero (true), and until it is true a loop is executed. e.g.</p>
 
 <eucode>
@@ -1936,23 +1935,23 @@ that the first iteration of the loop willn not start right after the closing <fo
         until x<=0
 </eucode>
 
-This differs from a <font color="#993333"><b>while</b></font> loop in more than one way:
+This differs from a <strong>while</strong> loop in more than one way:
 <ul>
-<li> The body of the loop is executed at least once, since testing takes place AFTER it completes.  In a <font color="#993333"><b>while</b></font>, the test is taken BEFORE execution.</li>
-<li> The header contains only optional <font color="#993333"><b>label</b></font> and <font color="#993333"><b>while entry</b></font> tags.</li>
+<li> The body of the loop is executed at least once, since testing takes place AFTER it completes.  In a <strong>while</strong>, the test is taken BEFORE execution.</li>
+<li> The header contains only optional <strong>label</strong> and <strong>while entry</strong> tags.</li>
 <li> The footer of the block, instead of being "end loop", has a distinctive form and holds the termination test.</li>
 </ul>
 
 <h2>Short-Circuit Evaluation</h2>
 
 <p>
- When the condition tested by <font color="#993333"><_bq>if</_bq></font>,
- <font color="#993333"><_bq>elsif</_bq></font>,
- <font color="#993333"><_bq>until</_bq></font>, or
- <font color="#993333"><_bq>while</_bq></font> contains
- <font color="#993333"><_bq>and</_bq></font> or
- <font color="#993333"><_bq>or</_bq></font> operators,
- <font color="#993333"><_ba><i>short-circuit</i></_ba></font> evaluation
+ When the condition tested by if,
+ elsif,
+ until, or
+ while contains
+ and or
+ or operators,
+ <i>short-circuit</i> evaluation
  will be used.
  For example,</p>
 
@@ -1991,7 +1990,7 @@ This differs from a <font color="#993333"><b>while</b></font> loop in more than 
  If the expression B contains a call to a function, and that function has
  possible <b>side-effects</b>, i.e. it might do more than just return a value,
  you will get a compile-time warning. Older versions (pre-2.1) of Euphoria
- did not use <font color="#993333"><b>short-circuit</b></font> evaluation,
+ did not use <strong>short-circuit</strong> evaluation,
  and it's possible that some old code will no longer work correctly,
  although a search of the Euphoria archives did not turn up any programs
  that depend on side-effects in this way.</p>
@@ -2036,13 +2035,13 @@ This differs from a <font color="#993333"><b>while</b></font> loop in more than 
  and will not evaluate s[i] != 'A'. No subscript error will occur.</p>
 
 <p>
- <font color="#993333"><b>Short-circuit</b></font> evaluation of
- <font color="#993333"><_bq>and</_bq></font>
- and <font color="#993333"><_bq>or</_bq></font> takes place for
- <font color="#993333"><_bq>if</_bq></font>,
- <font color="#993333"><_bq>elsif</_bq></font>,
- <font color="#993333"><_bq>until</_bq></font> and
- <font color="#993333"><_bq>while</_bq></font> conditions only.
+ <strong>Short-circuit</strong> evaluation of
+ and
+ and or takes place for
+ if,
+ elsif,
+ until and
+ while conditions only.
  It is not used in other contexts. For example, the assignment statement:</p>
 
  <eucode>
@@ -2055,25 +2054,25 @@ This differs from a <font color="#993333"><b>while</b></font> loop in more than 
  or false, and conditions are required to produce an atom as a result.</p>
 
  <p>
-The first iteration of a <font color="#993333"><_bq>while</_bq></font> loop is often special, because some work still doesn't need to 
+The first iteration of a while loop is often special, because some work still doesn't need to 
 be done. As a result, ou have to keep track of whether you are in the initialisation stage or 
 not, and usually test a flag on every iteration of the loop, while this will be useful only 
 once. Not needed, and another cause of programming errors.
 In addition, and also because repetition of code often takes place as a result of the flag 
-weving method, Euphoria provides a special <font color="#993333"><_bq>entry</_bq></font> 
+weving method, Euphoria provides a special entry 
 keyword to better handle this situation.</p>
 
 <p>
-The <font color="#993333"><_bq>entry</_bq></font> keyword will be described in the section on 
+The entry keyword will be described in the section on 
 <a href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will need an
-<font color="#993333"><_bq>entry</_bq></font> tag in the loop header, as a clue to any reader
-that the first iteration of the loop will not start right after the closing <font color="#993333"><_bq>do</_bq></font>.
+entry tag in the loop header, as a clue to any reader
+that the first iteration of the loop will not start right after the closing do.
 </p>
 <h5>for statement</h5>
 
 <p>
- A <font color="#993333"><b>for statement</b></font> sets up a special
- loop with a controlling <font color="#993333"><b>loop variable</b></font>
+ A <strong>for statement</strong> sets up a special
+ loop with a controlling <strong>loop variabl</strong>e
  that runs from an initial value up or down to some final value. e.g.</p>
 
 <eucode>
@@ -2090,7 +2089,7 @@ that the first iteration of the loop will not start right after the closing <fon
 </eucode>
 
 <p>
- The <font color="#993333"><b>loop variable</b></font> is
+ The <strong>loop variable</strong> is
  declared automatically and exists until the end of the
  loop. Outside of the loop the variable has no value and is not even declared.
  If you need its final value, copy it into another variable before leaving
@@ -2110,7 +2109,7 @@ that the first iteration of the loop will not start right after the closing <fon
  </p>
 
  <p>
- Exiting a single block of code is done with a single keyword, like <font color="#993333"><b>exit</b></font>. Likwise, kipping the rest of an iteration in a single code block is done using a single keyword, like <font color="#993333"><b>continue</b></font>. But sometimes 
+ Exiting a single block of code is done with a single keyword, like <strong>exit</strong>. Likwise, kipping the rest of an iteration in a single code block is done using a single keyword, like <strong>continue</strong>. But sometimes 
 you need to act on a block above the current one, like exiting three levels of loop, or restarting the iteration of the third loop above. How to do that?</p>
 
 <p>
@@ -2137,7 +2136,7 @@ The following flow control keywords are available.
 <h5>2.5.7 exit statement</h5>
 
 <p>
- An <font color="#993333"><b>exit statement</b></font> may appear inside a
+ An <strong>exit statement</strong> may appear inside a
  <a href="refman_2.htm#while">while-loop</a> or a
  <a href="refman_2.htm#for">for-loop</a>. It causes immediate termination of
  the loop, with control passing to the first statement after the loop. e.g.</p>
@@ -2167,12 +2166,12 @@ The following flow control keywords are available.
 </eucode>
 
 <p> i.e. an "infinite" while-loop that actually terminates via an
- <font color="#993333"><b>exit statement</b></font> at some arbitrary
+ <strong>exit statement</strong> at some arbitrary
  point in the body of the loop. </p>
  
 <dl>
 <dt>
- <b><font color="#006633"><_sul>Performance Note:</_sul></font></b></dt>
+ <b>Performance Note:</b></dt>
 <dd>
  Euphoria optimizes this type of loop.
  At run-time, no test is performed at the top of the loop. There's 
@@ -2183,7 +2182,7 @@ The following flow control keywords are available.
 <h5>The break statement</h5>
 
 <p>
-Works exactly like the <font color="#993333"><b>exit statement</b></font>, but applies to <font color="#993333"><b>if statements</b></font> rather than to loop statments of any kind. Example:
+Works exactly like the <strong>exit statement</strong>, but applies to <strong>if statements</strong> rather than to loop statments of any kind. Example:
 </p>
 <eucode>
       if s[1]='E' then
@@ -2213,8 +2212,8 @@ This code resuls in:
 <h5>The continue statement</h5>
 
 <p>
-The <font color="#993333"><b>continue statements</b></font> continues execution of the loop it applies to by going to the next iteration now. Going to the next iteration means testing a condition (for <font color="#993333"><b>while</b></font> and
-<font color="#993333"><b>loop ... until loops</b></font>, or changing the for loop variable index and checking whether it is still within bounds.
+The <strong>continue statements</strong> continues execution of the loop it applies to by going to the next iteration now. Going to the next iteration means testing a condition (for <strong>while</strong> and
+<strong>loop ... until loops</strong>, or changing the for loop variable index and checking whether it is still within bounds.
 </p>
 <eucode>
      for i=3 to 6 do
@@ -2232,11 +2231,11 @@ This will print 3, 9, 4, (2), 5 25, 6 36.
 <h5>The retry statement</h5>
 
 <p>
-The <font color="#993333"><b>retry statements</b></font> retries executing the current
+The <strong>retry statements</strong> retries executing the current
 iteration of the loop it applies to. The statement branches to the first statement of the designated loop, without testing anything nor incrementing the for loop index.</p>
 
 <p>
-Normally, a sub-block which contains a <font color="#993333"><b>retry statements</b></font>
+Normally, a sub-block which contains a <strong>retry statement</strong>s
 also contains another flow control keyword, since otherwise the iteration would be endlessly executed.
 </p>
 <eucode>
@@ -2255,7 +2254,7 @@ also contains another flow control keyword, since otherwise the iteration would 
 	end for
 </eucode>
 
-Since <font color="#993333"><b>retry</b></font> does not change the value of i and tries agan opening the same file, there has to be a way to break from the loop, which the <font color="#993333"><b>exit statement</b></font> provides.
+Since <strong>retry</strong> does not change the value of i and tries agan opening the same file, there has to be a way to break from the loop, which the <strong>exit statement</strong> provides.
 
 <h5>The entry statement</h5>
 
@@ -2263,8 +2262,8 @@ Since <font color="#993333"><b>retry</b></font> does not change the value of i a
 It is often the case that the first iteration of a loop is somehow special. Some things have 
 to be done before the loop starts - they are done before the statement starting the loop -.
 Now, the problem is that, just as often, some things do not need, or should not, be done at 
-this intialisation stage. The <font color="#993333"><b>entry keyword</b></font> is an alternative to setting flags relentlessly 
-and forgetting to update them. Just add the <font color="#993333"><b>entry</b></font> kyword at the point you wish the first iteration starts.
+this intialisation stage. The <strong>entry keyword</strong> is an alternative to setting flags relentlessly 
+and forgetting to update them. Just add the <strong>entry</strong> kyword at the point you wish the first iteration starts.
 </p>
 <eucode>
 global function find_all(object x, sequence source, integer from)
@@ -2288,7 +2287,7 @@ The entry statement is not supported for for loops, because they have a more rig
 </p>
 <h2>Note on infinite loops.</h2>
 <p>
- With <font color="#993333"><b>ex.exe</b></font>, if you happen to create
+ With <strong>ex.exe</strong>, if you happen to create
  a real infinite loop, with no
  input/output taking place, there is no easy way to stop it. You will have to
  type Control-Alt-Delete to either reboot, or (under Windows) terminate your
@@ -2299,8 +2298,8 @@ The entry statement is not supported for for loops, because they have a more rig
  was used).</p>
 
 <p>
- With <font color="#993333"><b>exw.exe</b></font> or 
-      <font color="#993333"><b>exu</b></font>, control-c will
+ With <strong>exw.exe</strong> or 
+      <strong>exu</strong>, control-c will
  always stop your program immediately.</p>
 
 <a name="flowctrl"></a>
@@ -2396,11 +2395,11 @@ The entry statement is not supported for for loops, because they have a more rig
  <a href="refman_2.htm#while">while-loops</a>,
  <a href="refman_2.htm#if">if</a> statements etc. (but not
  <a href="refman_2.htm#return">return</a>), at the top level i.e.
- <_ba><i>outside</i></_ba> of any
+ <i>outside</i> of any
  <a href="refman_2.htm#412">function</a> or
  <a href="refman_2.htm#411">procedure</a>.
  In addition, the following special statements may
- <font color="#CC0099"><_ba><i>only</i></_ba></font> appear at the top level:</p>
+ <i>only</i> appear at the top level:</p>
 <ul>
 <li> include</li>
 <li> with / without</li>
@@ -2411,16 +2410,16 @@ The entry statement is not supported for for loops, because they have a more rig
 <p>
 When you write a large program it is often helpful
 to break it up into logically separate files, by using
-<font color="#993333"><b>include statements</b></font>.
+<strong>include statements</strong>.
 Sometimes you will want to reuse some code that you have previously
 written, or that someone else has written. Rather than copy this code into
 your main program, you can use an
-<font color="#993333"><b>include statement</b></font> to refer to the file
+<strong>include statement</strong> to refer to the file
 containing the code. The first form of the include statement is:</p>
 
 <dl>
 <dt>
- <font color="#993333"><b>include</b></font> <b><i>filename</i></b></dt>
+ <strong>include</strong> <b><i>filename</i></b></dt>
 
 <dd>
                    <p>This reads in (compiles) a Euphoria source file.</p>
@@ -2444,9 +2443,9 @@ containing the code. The first form of the include statement is:</p>
                    be visible in the included file.</p>
 
 <p>
-                   <b><font color="#006633">N.B.</font></b> Only those
+                   <b>N.B.</b> Only those
                    symbols defined as
-                   <a href="refman_2.htm#scope"><_bq>global or export</_bq></a>
+                   <a href="refman_2.htm#scope">global or export</a>
                    in the included file will be visible (accessible) in the
                    remainder of the program.  </p>
 
@@ -2490,12 +2489,12 @@ containing the code. The first form of the include statement is:</p>
                    <li> 
                    Finally, if it still hasn't found the file,
                    it will look in        
-                   <font color="#5500FF"><b>euphoria\include</b></font>.
+                   <path>euphoria\include</path>.
                    This directory contains the standard
-                   Euphoria include files. The environment variable <b>EUDIR</b> tells
+                   Euphoria include files. The environment variable <env>EUDIR</env> tells
                    Euphoria
                    where to find your
-                   <font color="#993333"><b>euphoria</b></font> directory.</li>
+                   <path>euphoria</path> directory.</li>
                    </ol>
 
 <p>
@@ -2529,7 +2528,7 @@ containing the code. The first form of the include statement is:</p>
 
 <dl>
 <dt>
- <font color="#993333"><b>include</b></font> <b><i>filename</i> as <i>namespace_identifier</i></b></dt>
+ <strong>include</strong> <b><i>filename</i> as <i>namespace_identifier</i></b></dt>
 
 <dd>
 <p>
@@ -2554,7 +2553,7 @@ See <a href=refman_2.htm#42>Scope Rules</a> for more.</p>
 
 <dl>
 <dt>
- <font color="#993333"><b>with</b></font></dt>
+ <strong>with</strong></dt>
 
 <dd>
        This turns <b>on</b> one of the options:
@@ -2562,21 +2561,21 @@ See <a href=refman_2.htm#42>Scope Rules</a> for more.</p>
        <a class="brown" href="refman_3.htm#2">profile</a>,
        <a class="brown" href="refman_3.htm#2">profile_time</a>,
        <a class="brown" href="lib_dbg.htm#trace">trace</a>,
-       <font color="#993333">warning</font></b> or
+       warning</b> or
        <a class="brown" href="refman_2.htm#typechk"><b>type_check</b>
        </a>.
-        Options <font color="#993333"><b>warning</b></font> and
-        <font color="#993333"><b>type_check</b></font> are
+        Options <strong>warning</strong> and
+        <strong>type_check</strong> are
         initially on, while
-        <font color="#993333"><b>profile</b></font>,
-        <font color="#993333"><b>profile_time</b></font> and
-        <font color="#993333"><b>trace</b></font> are initially off.
+        <strong>profile</strong>,
+        <strong>profile_time</strong> and
+        <strong>trace</strong> are initially off.
         <p>
         Any warnings that are issued will appear on your screen after your
         program has finished execution. Warnings indicate very minor problems.
         A warning will never stop your program from executing.</p></dd>
 <dt>
- <font color="#993333"><b>without</b></font></dt>
+ <strong>without</strong></dt>
 
 <dd>
     This turns <b>off</b> one of the above options.</dd>
@@ -2584,29 +2583,27 @@ See <a href=refman_2.htm#42>Scope Rules</a> for more.</p>
 </dl>
 
 <p>
-There is also a rarely-used special <font color="#993333"><b>with</b></font> 
+There is also a rarely-used special <strong>with</strong> 
 option where a code number appears after 
-<font color="#993333"><b>with</b></font>.
+<strong>with</strong>.
 In previous releases this code was used by RDS to make a file exempt 
 from adding to the statement count in the old "Public Domain" Edition.</p>
 
 <p>
 You can select any combination of settings, and you can change the settings,
 but the changes must occur
-<_ba><i>between</i></_ba> subroutines, not
+<i>between</i> subroutines, not
 within a subroutine. The only exception is that you can only turn on one
 type of profiling for a given run of your program.</p>
 
 <p>
 An <b>included file</b> inherits the
-<font color="#993333"><b>with/without</b></font> settings in
+<strong>with/without</strong> settings in
 effect at the point where it is included.
 An included file can change these settings, but they will revert back
 to their original state at the end of the included file.
 For instance, an included file might turn off
 warnings for itself and (initially) for any files that it includes,
 but this will not turn off warnings for the main file.</p>
-
-<p style="text-align:center;">continue to <a href="refman_3.htm">Debugging and Profiling</a></p>
 
 </doc>
