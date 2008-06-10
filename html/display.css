@@ -1,6 +1,6 @@
 /* Cascading Style Sheet for Euphoria Documentation */
 
-body             {background-color: #FFFFF5;}
+body             {/*background-color: #FFFFF5;*/}
 a                {color: #0000ff;}
 a:visited        {color: #0000ff; }
 a:active         {color: red; }
@@ -57,4 +57,12 @@ h1{
 	color:#006699;
 }
 
-table.func th { text-align: right; vertical-align: top; }
+table.func th { padding-bottom: 5px; text-align: right; vertical-align: top; }
+table.func td { padding-bottom: 5px; vertical-align: bottom;}
+h3.funcref {
+	background: #f5f5f5;
+	border-bottom: 1px solid black;
+	border-top: 1px solid black;
+	padding: 3px;
+}
+

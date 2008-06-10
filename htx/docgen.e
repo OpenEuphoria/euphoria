@@ -193,7 +193,7 @@ global procedure process_include(sequence filename)
 						cat_name = trim_tail(sec_data, " \t\r\n")
 					end if
 				end if
-				categories = m:put(categories, sec_name, func)
+				categories = m:put(categories, cat_name, func)
 				func = 0
 			else
 				parse = 1
@@ -203,7 +203,7 @@ global procedure process_include(sequence filename)
 			if parse then 
 				parse = 0 
 				if sequence(sec_name) and length(sec_data) > 0 then
-					func = m:put(func, sec_name, sec_data)
+					func = m:put(func, sec_name, trim_tail(sec_data))
 				end if
 				if map(func) and m:has(func, "signature") then
 					add_function(filename, func)
@@ -239,7 +239,7 @@ global procedure process_include(sequence filename)
 						cat_name = trim_tail(sec_data, " \t\r\n")
 					end if
 					-- save old section
-					func = m:put(func, sec_name, sec_data)
+					func = m:put(func, sec_name, trim_tail(sec_data))
 				end if
 
 				sec_name = lower(trim(line[1..$-1]))
@@ -250,10 +250,18 @@ global procedure process_include(sequence filename)
 		elsif parse and (match("global function", line) 
 			             or match("global procedure", line))
 		then
+			if sequence(sec_name) and length(sec_data) > 0 then
+				if equal(sec_name, "category") then
+					cat_name = trim_tail(sec_data, " \t\r\n")
+				end if
+				-- save old section
+				func = m:put(func, sec_name, trim_tail(sec_data))
+			end if
+
 			sec_name = "signature"
 			sec_data = trim(line, 0)
 			if sec_data[$] = ')' then
-				func = m:put(func, sec_name, sec_data)
+				func = m:put(func, sec_name, trim_tail(sec_data))
 				sec_name = 0
 				sec_data = ""
 			end if
@@ -261,7 +269,7 @@ global procedure process_include(sequence filename)
 			-- Function signature did not fit on one line, append
 			sec_data &= ' ' & trim(line, 0)
 			if sec_data[$] = ')' then
-				func = m:put(func, sec_name, sec_data)
+				func = m:put(func, sec_name, trim_tail(sec_data))
 				sec_name = 0
 				sec_data = ""
 			end if

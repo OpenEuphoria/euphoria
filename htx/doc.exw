@@ -4,8 +4,8 @@
 -- written by: Junko C. Miura of Rapid Deployment Software 
 -- (JCMiura@RapidEuphoria.com)
 
--- TODO: fix output of all sections (example 2, 3, 4, etc...)
 -- TODO: add docs on how to document euphoria to wiki?
+-- TODO: make see also link
 
 include get.e
 include misc.e

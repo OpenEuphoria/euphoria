@@ -212,8 +212,9 @@ procedure tag_funcref(sequence raw_text, sequence plist)
 	write(sprintf("<h3 class=\"funcref\">%s</h3>", {name}))
 
 	write("<table class=\"func\">\n")
-	write(sprintf("<tr><th>Type:</th><td>%s</td></tr>\n", {typ}))
-	write(sprintf("<tr><th>Parameters:</th><td>%s</td></tr>\n", {params}))
+	write(sprintf("<tr><th>Signature:</th><td>%s %s(%s)</td></tr>\n", {typ,name,params}))
+	--write(sprintf("<tr><th>Type:</th><td>%s</td></tr>\n", {typ}))
+	--write(sprintf("<tr><th>Parameters:</th><td>%s</td></tr>\n", {params}))
 end procedure
 
 procedure tag_end_funcref(sequence raw_text, sequence plist)

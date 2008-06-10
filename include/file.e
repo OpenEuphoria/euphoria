@@ -158,7 +158,7 @@ end ifdef
 -- DOS32: Be careful not to use the special device names in a file name, even if you add an 
 -- extension. e.g. CON.TXT, CON.DAT, CON.JPG etc. all refer to the CON device, not a file.
 --
--- Example:
+-- Example 1:
 -- integer file_num, file_num95
 -- sequence first_line
 -- constant ERROR = 2
@@ -776,6 +776,7 @@ end function
 -- data = read_lines("myfile.txt")
 -- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
+--
 -- Example 2:
 -- fh = open("myfile.txt", "r")
 -- data = read_lines(fh)
@@ -825,6 +826,9 @@ end function
 -- if write_lines("data.txt", {"This is important data", "Goodybe"}) != -1 then
 --     puts(1, "Failed to write data\n")
 -- end if
+--
+-- See Also:
+--     read_lines, write_file
 
 global function write_lines(object f, sequence lines)
 	object fn
@@ -861,6 +865,9 @@ end function
 -- if append_lines("data.txt", {"This is important data", "Goodbye"}) != -1 then
 --     puts(1, "Failed to append data\n")
 -- end if
+--
+-- See Also:
+--     write_lines
 
 global function append_lines(sequence f, sequence lines)
 	object fn
@@ -893,6 +900,9 @@ end function
 -- close(fh)
 --
 -- -- data contains the entire contents of 'myfile.txt'
+--
+-- See Also:
+--     write_file, read_lines
 
 global function read_file(object f)
 	integer fn
@@ -938,6 +948,9 @@ end function
 -- if write_file("data.txt", "This is important data\nGoodybe") = 0 then
 --     puts(1, "Failed to write data\n")
 -- end if
+--
+-- See Also:
+--    read_file, write_lines
 
 global function write_file(object f, sequence data)
 	integer fn
@@ -980,6 +993,9 @@ end function
 -- -- no extension
 -- info = pathinfo("/opt/euphoria/docs/readme")
 -- -- info is {"/opt/euphoria/docs", "readme", "readme", ""}
+--
+-- See Also:
+--   driveid, dirname, filename, fileext
 
 global function pathinfo(sequence path)
 	integer slash, period, ch
@@ -1037,6 +1053,9 @@ end function
 -- Example 1:
 -- fname = dirname("/opt/euphoria/docs/readme.txt")
 -- -- fname is "/opt/euphoria/docs"
+--
+-- See Also:
+--   driveid, filename, fileext
 
 global function dirname(sequence path)
 	sequence data
@@ -1054,7 +1073,10 @@ end function
 -- Example 1:
 -- fname = filename("/opt/euphoria/docs/readme.txt")
 -- -- fname is "readme.txt"
-
+--
+-- See Also:
+--   driveid, dirname, fileext
+  
 global function filename(sequence path)
 	sequence data
 
@@ -1082,6 +1104,9 @@ end function
 -- Example 1:
 -- fname = fileext("/opt/euphoria/docs/readme.txt")
 -- -- fname is "txt"
+--
+-- See Also:
+--     driveid, dirname, filename, filebase
 
 global function fileext(sequence path)
 	sequence data
