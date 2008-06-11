@@ -68,7 +68,7 @@ TARGETPLAT=-plat $(PLAT)
 endif
 
 CC = gcc
-FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../
+FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../ -I../../include/
 BE_FLAGS =  -c -w -DEUNIX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
 PCRE=./pcre/.libs/libpcre.a

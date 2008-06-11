@@ -5258,322 +5258,318 @@ end procedure
 without warning
 procedure BackEnd(atom ignore)
 -- Translate the IL into C 
-integer w
-symtab_index tp
-sequence string, init_name, switches, cmd_switch
-integer c, tp_count, slash_ix
-object xterm
-boolean use_hex
-integer max_len
-
-close(c_code)
-emit_c_output = FALSE
-
-slist = s_expand(slist)
-
--- Perform Multiple Passes through the IL
-
-Pass = 1
-while Pass < LAST_PASS do
--- no output to .c files 
-main_temps()
-
--- walk through top-level, gathering type info
-Execute(TopLevelSub)
-
--- walk through user-defined routines, gathering type info
-GenerateUserRoutines()
-
-DeclareRoutineList() -- forces routine_id target 
-					 -- parameter type info to TYPE_OBJECT
-
-PromoteTypeInfo()    -- at very end after each FULL pass: 
-					  -- promotes seq_elem_new, arg_type_new 
-					  -- for all symbols
-					  -- sets U_DELETED, resets nrefs
-Pass += 1
-end while
-
--- Now, actually emit the C code */
-emit_c_output = TRUE
-
-c_code = open("main-.c", "w")
-if c_code = -1 then
-CompileErr("Can't open main-.c for output\n")
-end if
-
-version()
-
-if TDOS then
-if sequence(dj_path) then
-	c_puts("#include <go32.h>\n")
-end if
-end if
-c_puts("#include <time.h>\n")
-c_puts("#include \"")
-
-if TUNIX then
-c_puts("include/euphoria.h\"\n")
-c_puts("#include <unistd.h>\n")
-else
-c_puts(eudir)
-c_puts("\\include\\euphoria.h\"\n")
-end if  
-if sequence(bor_path) then
-c_puts("#include <float.h>\n")
-end if  
-c_puts("#include \"main-.h\"\n\n")
-c_puts("int Argc;\n")
-c_hputs("extern int Argc;\n")
-
-c_puts("char **Argv;\n")
-c_hputs("extern char **Argv;\n")
-
-if TWINDOWS then
-c_puts("unsigned default_heap;\n")
-if sequence(wat_path) or sequence(bor_path) then
-	c_puts("__declspec(dllimport) unsigned __stdcall GetProcessHeap(void);\n")
-else
-	c_puts("unsigned __stdcall GetProcessHeap(void);\n")
-end if
-end if  
-
-if EDJGPP then
-c_hputs("extern __Go32_Info_Block _go32_info_block;\n")
-end if
-
-c_puts("unsigned long *peek4_addr;\n")
-c_hputs("extern unsigned long *peek4_addr;\n")
-
-c_puts("unsigned char *poke_addr;\n")
-c_hputs("extern unsigned char *poke_addr;\n")
-
-c_puts("unsigned short *poke2_addr;\n")
-c_hputs("extern unsigned short *poke2_addr;\n")
-
-c_puts("unsigned long *poke4_addr;\n")
-c_hputs("extern unsigned long *poke4_addr;\n")
-
-c_puts("struct d temp_d;\n")
-c_hputs("extern struct d temp_d;\n")
-
-c_puts("double temp_dbl;\n")
-c_hputs("extern double temp_dbl;\n")
-
-c_puts("char *stack_base;\n")
-c_hputs("extern char *stack_base;\n")
-
-if total_stack_size = -1 then
--- user didn't set the option
-if tasks_created then
-	total_stack_size = (1016 + 8) * 1024 
-else
-	total_stack_size = (248 + 8) * 1024
-end if
-end if
-if TDOS and sequence(dj_path) then
-c_printf("unsigned _stklen=%d;\n", total_stack_size)
-end if
-c_printf("int total_stack_size = %d;\n", total_stack_size)
-c_hputs("extern int total_stack_size;\n")
-
-if EXTRA_CHECK then
-c_hputs("extern long bytes_allocated;\n")
-end if
-
-if TWINDOWS then
-if dll_option then
-	if sequence(wat_path) then
-		c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
-		c_stmt0("\n")
-	end if
-	c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall 
-else 
-	if sequence(bor_path) and con_option then
-		c_stmt0("\nvoid main(int argc, char *argv[])\n")
-	else
-		c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
+	integer w
+	symtab_index tp
+	sequence string, init_name, switches, cmd_switch
+	integer c, tp_count, slash_ix
+	object xterm
+	boolean use_hex
+	integer max_len
 	
+	close(c_code)
+	emit_c_output = FALSE
+	
+	slist = s_expand(slist)
+	
+	-- Perform Multiple Passes through the IL
+	
+	Pass = 1
+	while Pass < LAST_PASS do
+		-- no output to .c files 
+		main_temps()
+		
+		-- walk through top-level, gathering type info
+		Execute(TopLevelSub)
+		
+		-- walk through user-defined routines, gathering type info
+		GenerateUserRoutines()
+		
+		DeclareRoutineList() -- forces routine_id target 
+							-- parameter type info to TYPE_OBJECT
+		
+		PromoteTypeInfo()    -- at very end after each FULL pass: 
+							-- promotes seq_elem_new, arg_type_new 
+							-- for all symbols
+							-- sets U_DELETED, resets nrefs
+		Pass += 1
+	end while
+	
+	-- Now, actually emit the C code */
+	emit_c_output = TRUE
+	
+	c_code = open("main-.c", "w")
+	if c_code = -1 then
+		CompileErr("Can't open main-.c for output\n")
 	end if
-end if
-
-elsif TUNIX then
-if dll_option then
-	c_stmt0("\nvoid _init()\n")
-else
-	c_stmt0("\nvoid main(int argc, char *argv[])\n")
-end if
-
-else   
--- TDOS
-c_stmt0("\nvoid main(int argc, char *argv[])\n")
-
-end if  
-c_stmt0("{\n")
-
-c_stmt0("s1_ptr _0switch_ptr;\n")
-
-main_temps()
-
-if TWINDOWS then
-if dll_option then
-	c_stmt0("\nArgc = 0;\n")
-	c_stmt0("default_heap = GetProcessHeap();\n")
-	--c_stmt0("Backlink = bl;\n")
-else 
-	if sequence(bor_path) and con_option then
-		c_stmt0("void *hInstance;\n\n")
-		c_stmt0("hInstance = 0;\n")
-	else    
-		c_stmt0("int argc;\n")
-		c_stmt0("char **argv;\n\n")
+	
+	version()
+	
+	if TDOS then
+		if sequence(dj_path) then
+			c_puts("#include <go32.h>\n")
+		end if
 	end if
+	c_puts("#include <time.h>\n")
+	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
+	
+	if TUNIX then
+		c_puts("#include <unistd.h>\n")
+	end if  
 	if sequence(bor_path) then
-		c_stmt0("_control87(MCW_EM,MCW_EM);\n")
+		c_puts("#include <float.h>\n")
+	end if  
+	c_puts("#include \"main-.h\"\n\n")
+	c_puts("int Argc;\n")
+	c_hputs("extern int Argc;\n")
+	
+	c_puts("char **Argv;\n")
+	c_hputs("extern char **Argv;\n")
+	
+	if TWINDOWS then
+		c_puts("unsigned default_heap;\n")
+		if sequence(wat_path) or sequence(bor_path) then
+			c_puts("__declspec(dllimport) unsigned __stdcall GetProcessHeap(void);\n")
+		else
+		c_puts("unsigned __stdcall GetProcessHeap(void);\n")
 	end if
-	c_stmt0("default_heap = GetProcessHeap();\n")
-	if sequence(bor_path) and con_option then
+	end if  
+	
+	if EDJGPP then
+		c_hputs("extern __Go32_Info_Block _go32_info_block;\n")
+	end if
+	
+	c_puts("unsigned long *peek4_addr;\n")
+	c_hputs("extern unsigned long *peek4_addr;\n")
+	
+	c_puts("unsigned char *poke_addr;\n")
+	c_hputs("extern unsigned char *poke_addr;\n")
+	
+	c_puts("unsigned short *poke2_addr;\n")
+	c_hputs("extern unsigned short *poke2_addr;\n")
+	
+	c_puts("unsigned long *poke4_addr;\n")
+	c_hputs("extern unsigned long *poke4_addr;\n")
+	
+	c_puts("struct d temp_d;\n")
+	c_hputs("extern struct d temp_d;\n")
+	
+	c_puts("double temp_dbl;\n")
+	c_hputs("extern double temp_dbl;\n")
+	
+	c_puts("char *stack_base;\n")
+	c_hputs("extern char *stack_base;\n")
+	
+	if total_stack_size = -1 then
+		-- user didn't set the option
+		if tasks_created then
+			total_stack_size = (1016 + 8) * 1024 
+		else
+			total_stack_size = (248 + 8) * 1024
+		end if
+	end if
+	if TDOS and sequence(dj_path) then
+		c_printf("unsigned _stklen=%d;\n", total_stack_size)
+	end if
+	c_printf("int total_stack_size = %d;\n", total_stack_size)
+	c_hputs("extern int total_stack_size;\n")
+	
+	if EXTRA_CHECK then
+		c_hputs("extern long bytes_allocated;\n")
+	end if
+	
+	if TWINDOWS then
+	if dll_option then
+		if sequence(wat_path) then
+			c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
+			c_stmt0("\n")
+		end if
+		c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall 
+	else 
+		if sequence(bor_path) and con_option then
+			c_stmt0("\nvoid main(int argc, char *argv[])\n")
+		else
+			c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
+		
+		end if
+	end if
+	
+	elsif TUNIX then
+	if dll_option then
+		c_stmt0("\nvoid _init()\n")
+	else
+		c_stmt0("\nvoid main(int argc, char *argv[])\n")
+	end if
+	
+	else   
+	-- TDOS
+	c_stmt0("\nvoid main(int argc, char *argv[])\n")
+	
+	end if  
+	c_stmt0("{\n")
+	
+	c_stmt0("s1_ptr _0switch_ptr;\n")
+	
+	main_temps()
+	
+	if TWINDOWS then
+	if dll_option then
+		c_stmt0("\nArgc = 0;\n")
+		c_stmt0("default_heap = GetProcessHeap();\n")
+		--c_stmt0("Backlink = bl;\n")
+	else 
+		if sequence(bor_path) and con_option then
+			c_stmt0("void *hInstance;\n\n")
+			c_stmt0("hInstance = 0;\n")
+		else    
+			c_stmt0("int argc;\n")
+			c_stmt0("char **argv;\n\n")
+		end if
+		if sequence(bor_path) then
+			c_stmt0("_control87(MCW_EM,MCW_EM);\n")
+		end if
+		c_stmt0("default_heap = GetProcessHeap();\n")
+		if sequence(bor_path) and con_option then
+			c_stmt0("Argc = argc;\n")
+			c_stmt0("Argv = argv;\n")
+		else    
+			c_stmt0("argc = 1;\n")
+			c_stmt0("Argc = 1;\n")
+			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
+		end if
+		c_stmt0("winInstance = hInstance;\n")
+	end if
+	
+	elsif TUNIX then
+		if dll_option then
+			c_stmt0("\nArgc = 0;\n")
+		else   
+			c_stmt0("Argc = argc;\n")
+			c_stmt0("Argv = argv;\n")
+		end if
+	
+	else   
+		-- TDOS
 		c_stmt0("Argc = argc;\n")
 		c_stmt0("Argv = argv;\n")
-	else    
-		c_stmt0("argc = 1;\n")
-		c_stmt0("Argc = 1;\n")
-		c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
 	end if
-	c_stmt0("winInstance = hInstance;\n")
-end if
-
-elsif TUNIX then
-if dll_option then
-	c_stmt0("\nArgc = 0;\n")
-else   
-	c_stmt0("Argc = argc;\n")
-	c_stmt0("Argv = argv;\n")
-end if
-
-else   
--- TDOS
-c_stmt0("Argc = argc;\n")
-c_stmt0("Argv = argv;\n")
-end if
-
-if not dll_option then
-c_stmt0("stack_base = (char *)&_0;\n")
-end if
-
--- include path initialization
-c_puts("\n")
-max_len = 0
-for i = 1 to length(file_include) do
-if length(file_include[i]) > max_len then
-	max_len = length(file_include[i])
-end if
-end for
-c_stmt0(sprintf("_02 = (int**) malloc( 4 * %d );\n", length(file_include) + 1 ))
-c_stmt0("_02[0] = (int*) malloc( 4 );\n" )
-c_stmt0(sprintf("_02[0][0] = %d;\n", length(file_include) ))
-
-for i = 1 to length(file_include) do
-c_stmt0(sprintf("_02[%d] = (int*) malloc( 4 * %d );\n", {i, length(file_include[i]) + 1} ))
-c_stmt0(sprintf("_02[%d][0] = %d;\n", {i, length(file_include[i])}))
-
-for j = 1 to length(file_include[i]) do
-	c_stmt0(sprintf("_02[%d][%d] = %d;\n", {i,j, file_include[i][j]}) )
-end for
-
-end for
-c_puts("\n")
-
--- fail safe mechanism in case 
--- Complete Edition library gets out by mistake
-if TWINDOWS then
-if atom(wat_path) then
-	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
-else
-	c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
-end if
-else
-c_puts("#ifdef CLK_TCK\n")
-c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
-c_puts("#else\n")
-c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
-c_puts("#endif\n")
-end if
-
--- options_switch initialization
-switches = get_switches()
-c_stmt0(sprintf("_0switch_ptr = NewS1( %d );\n", length(switches) ))
-for i = 1 to length(switches) do
-cmd_switch = switches[i]
-slash_ix = 1
-if find('\\', cmd_switch) then
-	while slash_ix <= length(cmd_switch) do
-		if cmd_switch[slash_ix] = '\\' then
-			if slash_ix = length(cmd_switch) then
-				cmd_switch &= '\\'
-			elsif cmd_switch[slash_ix+1] != '\\' then
-				cmd_switch = cmd_switch[1..slash_ix] & '\\' & cmd_switch[slash_ix+1..$]
-			end if
-			slash_ix += 1
+	
+	if not dll_option then
+	c_stmt0("stack_base = (char *)&_0;\n")
+	end if
+	
+	-- include path initialization
+	c_puts("\n")
+	max_len = 0
+	for i = 1 to length(file_include) do
+		if length(file_include[i]) > max_len then
+			max_len = length(file_include[i])
 		end if
-		slash_ix += 1
-	end while
-end if
-c_stmt0(sprintf("_0switch_ptr->base[%d] = NewString(\"%s\");\n", {i, cmd_switch}))
-end for
-c_stmt0( "_0switches = MAKE_SEQ( _0switch_ptr );\n")
-c_puts("\n")
-
-c_stmt0("init_literal();\n")
-
-if not dll_option then
-c_stmt0("shift_args(argc, argv);\n")
-end if
-
--- Final walk through top-level code, constant and var initializations,
--- outputing code
-
-Execute(TopLevelSub)
-
-indent = 4
-
-if dll_option then
-c_stmt0(";\n")
-else
-c_stmt0("Cleanup(0);\n")
-end if
-
-c_stmt0("}\n")
-
-if TWINDOWS then
-if dll_option then
-	c_stmt0("\n")
-	if atom(bor_path) then
-		-- Lcc and WATCOM seem to need this instead 
-		-- (Lcc had __declspec(dllexport))
-		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
-	else 
-		c_stmt0("int __declspec (dllexport) __stdcall DllMain(int hDLL, int Reason, void *Reserved)\n")
+	end for
+	c_stmt0(sprintf("_02 = (int**) malloc( 4 * %d );\n", length(file_include) + 1 ))
+	c_stmt0("_02[0] = (int*) malloc( 4 );\n" )
+	c_stmt0(sprintf("_02[0][0] = %d;\n", length(file_include) ))
+	
+	for i = 1 to length(file_include) do
+		c_stmt0(sprintf("_02[%d] = (int*) malloc( 4 * %d );\n", {i, length(file_include[i]) + 1} ))
+		c_stmt0(sprintf("_02[%d][0] = %d;\n", {i, length(file_include[i])}))
+		
+		for j = 1 to length(file_include[i]) do
+			c_stmt0(sprintf("_02[%d][%d] = %d;\n", {i,j, file_include[i][j]}) )
+		end for
+	
+	end for
+	c_puts("\n")
+	
+	-- fail safe mechanism in case 
+	-- Complete Edition library gets out by mistake
+	if TWINDOWS then
+		if atom(wat_path) then
+			c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
+		else
+			c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")  
+		end if
+	else
+		c_puts("#ifdef CLK_TCK\n")
+		c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+		c_puts("#else\n")
+		c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
+		c_puts("#endif\n")
 	end if
-	c_stmt0("{\n")
-	c_stmt0("if (Reason == 1)\n")
-	c_stmt0("EuInit();\n")
-	c_stmt0("return 1;\n")
+	
+	-- options_switch initialization
+	switches = get_switches()
+	c_stmt0(sprintf("_0switch_ptr = NewS1( %d );\n", length(switches) ))
+	for i = 1 to length(switches) do
+		cmd_switch = switches[i]
+		slash_ix = 1
+		if find('\\', cmd_switch) then
+			while slash_ix <= length(cmd_switch) do
+				if cmd_switch[slash_ix] = '\\' then
+					if slash_ix = length(cmd_switch) then
+						cmd_switch &= '\\'
+					elsif cmd_switch[slash_ix+1] != '\\' then
+						cmd_switch = cmd_switch[1..slash_ix] & '\\' & cmd_switch[slash_ix+1..$]
+					end if
+					slash_ix += 1
+				end if
+				slash_ix += 1
+			end while
+		end if
+		c_stmt0(sprintf("_0switch_ptr->base[%d] = NewString(\"%s\");\n", {i, cmd_switch}))
+	end for
+	c_stmt0( "_0switches = MAKE_SEQ( _0switch_ptr );\n")
+	c_puts("\n")
+	
+	c_stmt0("init_literal();\n")
+	
+	if not dll_option then
+		c_stmt0("shift_args(argc, argv);\n")
+	end if
+	
+	-- Final walk through top-level code, constant and var initializations,
+	-- outputing code
+	
+	Execute(TopLevelSub)
+	
+	indent = 4
+	
+	if dll_option then
+		c_stmt0(";\n")
+	else
+		c_stmt0("Cleanup(0);\n")
+	end if
+	
 	c_stmt0("}\n")
-end if
-end if
-
--- Final walk through user-defined routines, generating C code
-start_emake()
-
-GenerateUserRoutines()  -- needs init_name_num
-
-close(c_code)
-
-c_code = open("init-.c", "a")
-if c_code = -1 then
-CompileErr("Can't open init-.c for append\n")
-end if
+	
+	if TWINDOWS then
+	if dll_option then
+		c_stmt0("\n")
+		if atom(bor_path) then
+			-- Lcc and WATCOM seem to need this instead 
+			-- (Lcc had __declspec(dllexport))
+			c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
+		else 
+			c_stmt0("int __declspec (dllexport) __stdcall DllMain(int hDLL, int Reason, void *Reserved)\n")
+		end if
+		c_stmt0("{\n")
+		c_stmt0("if (Reason == 1)\n")
+		c_stmt0("EuInit();\n")
+		c_stmt0("return 1;\n")
+		c_stmt0("}\n")
+	end if
+	end if
+	
+	-- Final walk through user-defined routines, generating C code
+	start_emake()
+	
+	GenerateUserRoutines()  -- needs init_name_num
+	
+	close(c_code)
+	
+	c_code = open("init-.c", "a")
+	if c_code = -1 then
+		CompileErr("Can't open init-.c for append\n")
+	end if
 
 -- declare all *used* constants, and local and global variables as ints
 

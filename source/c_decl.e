@@ -936,11 +936,8 @@ global procedure new_c_file(sequence name)
 	if TDOS and sequence(dj_path) then
 		c_puts("#include <go32.h>\n")
 	end if
-	c_puts("#include \"")
-	if not TUNIX then
-		c_puts(eudir & SLASH )
-	end if
-	c_puts( "include" & SLASH & "euphoria.h\"\n")
+	c_puts("#include \"include/euphoria.h\"\n")
+	
 	c_puts("#include \"main-.h\"\n\n")
 
 	if not TUNIX then
@@ -1124,6 +1121,8 @@ global procedure start_emake()
 				c_opts &= " -O"
 			end if
 		end if
+		
+		c_opts &= sprintf( " -I%s", {get_eudir()})
 	end if
 	
 	if TUNIX then
@@ -1149,7 +1148,7 @@ global procedure start_emake()
 			CompileErr("Couldn't open objfiles.lnk for output")
 		end if
 	end if
-
+	
 	if TDOS then
 		if atom(dj_path) then  
 			cc_name = "wcc386"
