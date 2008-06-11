@@ -366,11 +366,10 @@ function restore_parser()
     if n=PAM_PLAYBACK then
 		return {}
     end if
-    if atom(backed_up_tok) then
-		return append(x,{PLAYBACK_ENDS,0})
+    if sequence(backed_up_tok) then
+		return x[1..$-1]
 	else
-		x[$]={PLAYBACK_ENDS,0}
-	    return x
+		return x
 	end if
 end function
 
@@ -428,6 +427,9 @@ function read_recorded_token(integer n)
   	return t
 end function
 
+integer lock_scanner
+lock_scanner=0
+
 function next_token()
 -- read next scanner token
 	token t
@@ -448,7 +450,9 @@ function next_token()
         if t[T_ID]=RECORDED then
             t=read_recorded_token(t[T_SYM])
         end if
-    else
+    elsif lock_scanner then
+		return {PLAYBACK_ENDS,0}
+	else
 	    t = Scanner()
 	    if Parser_mode = PAM_RECORD then
 	        canned_tokens = append(canned_tokens,t)
@@ -571,9 +575,8 @@ procedure ParseArgs(symtab_index subsym)
 	integer n, fda, on_arg
 	token tok
     symtab_index s
-    object tok2
-    sequence backed_up_toks
-    
+    object tok2    
+
 	n = SymTab[subsym][S_NUM_ARGS]
     s = subsym
     tok2 = UNDEFINED
@@ -623,25 +626,20 @@ procedure ParseArgs(symtab_index subsym)
                     if fda=0 or i<fda-1 then
                         WrongNumberArgs(subsym, "")
                     end if
-				    backed_up_toks = {}
+--				    backed_up_toks = {}
+					lock_scanner = 1
                     for j = on_arg + 1 to n do
                     	s = SymTab[s][S_NEXT]
                     	
                         if sequence(SymTab[s][S_CODE]) then 
 						-- some defaulted arg follows with a default value
 							if use_private_list=0 then 
-							-- build private symbol list for this routine
 				                collect_privates(subsym)
 				            end if
 
 							putback( tok )
 							start_playback(SymTab[s][S_CODE] )
 							call_proc(forward_expr, {})
-							if sequence(backed_up_tok) and 
-								backed_up_tok[T_ID]!=PLAYBACK_ENDS
-							then
-								backed_up_toks = append(backed_up_toks,backed_up_tok)
-							end if
 							on_arg += 1
                         else -- just not enough args
                             CompileErr(sprintf("Argument %d is defaulted, but has no default value",j))
@@ -650,10 +648,7 @@ procedure ParseArgs(symtab_index subsym)
                     -- all missing args had default values
                     short_circuit += 1
 					use_private_list=0
-					if length(backed_up_toks)>1 then
-					    backed_up_tok = UNDEFINED
-						start_playback(backed_up_toks)
-					end if
+					lock_scanner = 0
                     return
 
 				else
@@ -1858,7 +1853,7 @@ procedure Loop_statement()
 	retry_addr &= length(Code)+1
     continue_addr &= 0  
     call_proc(forward_Statement_list, {}) 
-    tok_match(UNTIL)  
+    tok_match(UNTIL)
     PatchNList(next_base)
     StartSourceLine(TRUE)
     short_circuit += 1
@@ -1877,6 +1872,9 @@ procedure Loop_statement()
     short_circuit -= 1
     emit_op(IF)
     emit_addr(bp1)
+    if TRANSLATE then
+		emit_op(NOP1)
+	end if
     exit_loop(exit_base)  
 end procedure
 

@@ -2236,9 +2236,13 @@ procedure opIF()
 		Goto(Code[pc+2])
 		pc += 3
 				
-	else -- it's 0
+	elsif pc < Code[pc+2] then  -- it's 0, and this is a forward IF
 		pc = Code[pc+2]  -- if/while FALSE - skip the whole block
 						 -- (no branch into from short-circuit)
+	else  -- it's 0, and this is a backward IF, ie an until statement
+		Goto(Code[pc+2]) -- branch to top of loop
+		pc += 3
+
 	end if
 end procedure               
 
@@ -2432,7 +2436,7 @@ procedure opASSIGN_I()
 	pc += 3
 end procedure
 				
-procedure opEXIT()
+procedure opEXIT() 
 -- EXIT / ELSE / ENDWHILE
 	if opcode = ENDWHILE then
 		loop_stack = loop_stack[1..$-1]
@@ -5156,10 +5160,10 @@ procedure do_exec(integer start_pc)
 		atom_type = TYPE_ATOM
 		intcode2 = ""
 		dblfn = ""
-		intcode_extra = ""     
+		intcode_extra = ""  
 		call_proc(operation[opcode], {})
 	end while
-end procedure       
+end procedure
 
 global procedure Execute(symtab_index proc)
 -- top level executor 

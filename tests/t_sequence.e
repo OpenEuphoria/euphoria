@@ -119,7 +119,7 @@ test_equal("lower() mixed text", "john 55 &%.", lower("JoHN 55 &%."))
 test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
 test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
-   trace(1)
+
 test_equal("can_add #1",0,can_add({{1,2},{3,4}},{5,6,7}))
 test_equal("can_add #2",1,can_add({{1,2},{3,4}},{{5,6},7}))
 
@@ -149,6 +149,12 @@ test_equal("valid_index",1,valid_index({1,2,3},3.5))
 test_equal("rotate_left: left",{1,4,5,6,2,3,7},rotate_left({1,2,3,4,5,6,7},2,6,2))
 test_equal("rotate_left: right",{1,5,6,2,3,4,7},rotate_left({1,2,3,4,5,6,7},2,6,-2))
 
+sequence a, b, c
+a = split("John Doe", " ")
+b = a[1]
+c = a[2]
+test_equal("More defaulted params and tokens",{"John","Doe"},{b,c})
+					
 test_equal("sprint() integer", "10", sprint(10))
 test_equal("sprint() float", "5.5", sprint(5.5))
 test_equal("sprint() sequence", "{1,2,3}", sprint({1,2,3}))

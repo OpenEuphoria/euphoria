@@ -78,7 +78,7 @@ end while
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 
 idx = 1
-idx2 = -1
+idx2 = -1 
 loop do
 	idx += 1
 	if idx > 10 then exit end if
