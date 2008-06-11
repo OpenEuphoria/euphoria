@@ -53,7 +53,7 @@
      disable using the optimization flag when compiling with LCC, as it has
      problems sometimes.  Implemented by Jeremy Cowgar</li>
 <li>
-    <b>Moved</b> function <b>reverse()</b> from <b>misc.e</b>, <b>lower()</b>
+    <b>Moved</b> function <b>reverse()</b>, <b>sprint()</b> from <b>misc.e</b>, <b>lower()</b>
     and <b>upper()</b> from <b>wildcard.e</b> to <b>sequence.e</b>,
     functions/constant <b>PI</b>, <b>arccos</b>, <b>arcsin</b> moved from
     <b>misc.e</b> to <b>math.e</b>.</li>
@@ -141,7 +141,7 @@
 	</ul>
 
 <li>
-     <b>Unit testing added to Euphoria</b>. Over 600 tests. To run, cd tests and
+     <b>Unit testing added to Euphoria</b>. Over 900 tests. To run, cd tests and
      exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto</li>
 
 <li>

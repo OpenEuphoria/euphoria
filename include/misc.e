@@ -38,59 +38,81 @@ constant M_INSTANCE = 55, M_SLEEP = 64
 -- global procedure printf(integer fn, sequence st, sequence x)
 --
 -- Description:
--- Print x, to file or device fn, using format string st. If x is a sequence, then format specifiers from st are matched with corresponding elements of x. If x is an atom, then normally st will contain just one format specifier and it will be applied to x, however if st contains multiple format specifiers, each one will be applied to the same value x. Thus printf() always takes exactly 3 arguments. Only the length of the last argument, containing the values to be printed, will vary. The basic format specifiers are:
+-- Print x, to file or device fn, using format string st. If x is a sequence, 
+-- then format specifiers from st are matched with corresponding elements of 
+-- x. If x is an atom, then normally st will contain just one format specifier 
+-- and it will be applied to x, however if st contains multiple format specifiers, 
+-- each one will be applied to the same value x. Thus printf() always takes 
+-- exactly 3 arguments. Only the length of the last argument, containing the 
+-- values to be printed, will vary. The basic format specifiers are...
 --
--- %d - print an atom as a decimal integer
--- %x - print an atom as a hexadecimal integer. Negative numbers are printed in two's complement, so -1 will print as FFFFFFFF
--- %o - print an atom as an octal integer
--- %s - print a sequence as a string of characters, or print an atom as a single character
--- %e - print an atom as a floating-point number with exponential notation
--- %f - print an atom as a floating-point number with a decimal point but no exponent
--- %g - print an atom as a floating-point number using whichever format seems appropriate, given the magnitude of the number
--- %% - print the '%' character itself
+-- <ul>
+-- <li><b>%d</b> - print an atom as a decimal integer</li>
+-- <li><b>%x</b> - print an atom as a hexadecimal integer. Negative numbers are printed
+--                 in two's complement, so -1 will print as FFFFFFFF</li>
+-- <li><b>%o</b> - print an atom as an octal integer</li>
+-- <li><b>%s</b> - print a sequence as a string of characters, or print an atom as a single 
+--                 character</li>
+-- <li><b>%e</b> - print an atom as a floating-point number with exponential notation</li>
+-- <li><b>%f</b> - print an atom as a floating-point number with a decimal point but no 
+--                 exponent</li>
+-- <li><b>%g</b> - print an atom as a floating-point number using whichever format seems 
+--                 appropriate, given the magnitude of the number</li>
+-- <li><b>%%</b> - print the '%' character itself</li>
+-- </ul>
 --
--- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number before the decimal point is the minimum field width to be used. The number after the decimal point is the precision to be used.
+-- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number 
+-- before the decimal point is the minimum field width to be used. The number after 
+-- the decimal point is the precision to be used.
 --
--- If the field width is negative, e.g. %-5d then the value will be left-justified within the field. Normally it will be right-justified. If the field width starts with a leading 0, e.g. %08d then leading zeros will be supplied to fill up the field. If the field width starts with a '+' e.g. %+7d then a plus sign will be printed for positive values. 
+-- If the field width is negative, e.g. %-5d then the value will be left-justified 
+-- within the field. Normally it will be right-justified. If the field width 
+-- starts with a leading 0, e.g. %08d then leading zeros will be supplied to fill up 
+-- the field. If the field width starts with a '+' e.g. %+7d then a plus sign will 
+-- be printed for positive values. 
 --
 -- Comments:
 -- Watch out for the following common mistake:
 --
 -- <eucode>
---     name="John Smith"
---     printf(1, "%s", name)     -- error!
+-- name="John Smith"
+-- printf(1, "%s", name)     -- error!
 -- </eucode>
 --
--- 	This will print only the first character, J, of name, as each element of name is taken to be a separate value to be formatted. You must say this instead:
+-- This will print only the first character, J, of name, as each element of 
+-- name is taken to be a separate value to be formatted. You must say this instead:
 -- 	
 -- <eucode>
---     name="John Smith"
---     printf(1, "%s", {name})   -- correct
+-- name="John Smith"
+-- printf(1, "%s", {name})   -- correct
 -- </eucode>
 --
--- Now, the third argument of printf() is a one-element sequence containing the item to be formatted.
+-- Now, the third argument of printf() is a one-element sequence containing the 
+-- item to be formatted.
 --
 -- Example 1: 	
 -- rate = 7.875
 -- printf(myfile, "The interest rate is: %8.2f\n", rate)
 --
---       The interest rate is:     7.88
+-- --      The interest rate is:     7.88
 --
 -- Example 2:
 -- name="John Smith"
 -- score=97
 -- printf(1, "%15s, %5d\n", {name, score})
 
---       John Smith,    97
-
+-- --      John Smith,    97
 -- Example 3: 	
 -- printf(1, "%-10.4s $ %s", {"ABCDEFGHIJKLMNOP", "XXX"})
---       ABCD       $ XXX
+-- --      ABCD       $ XXX
 --
 -- Example 4:
 -- printf(1, "%d  %e  %f  %g", 7.75) -- same value in different formats
 --
---       7  7.750000e+000  7.750000  7.75
+-- --      7  7.750000e+000  7.750000  7.75
+--
+-- See Also:
+--     sequence:sprintf, sequence:sprint
 --**
 
 --**
@@ -98,41 +120,25 @@ constant M_INSTANCE = 55, M_SLEEP = 64
 -- global procedure puts(integer fn, sequence x)
 --
 -- Description:
--- Output, to file or device fn, a single byte (atom) or sequence of bytes. The low order 8-bits of each value is actually sent out. If fn is the screen you will see text characters displayed.
+-- Output, to file or device fn, a single byte (atom) or sequence of bytes. The low order 
+-- 8-bits of each value is actually sent out. If fn is the screen you will see text 
+-- characters displayed.
 --
 -- Comments:
--- When you output a sequence of bytes it must not have any (sub)sequences within it. It must be a sequence of atoms only. (Typically a string of ASCII codes).
+-- When you output a sequence of bytes it must not have any (sub)sequences within it. It 
+-- must be a sequence of atoms only. (Typically a string of ASCII codes).
 --
 -- Avoid outputting 0's to the screen or to standard output. Your output might get truncated.
 --
--- Remember that if the output file was opened in text mode, DOS and Windows will change \n (10) to \r\n (13 10). Open the file in binary mode if this is not what you want. 
+-- Remember that if the output file was opened in text mode, <platform>DOS</platform> and 
+-- <platform>Windows</platform> will change <code>\n</code> (10) to <code>\r\n</code> 
+-- (13 10). Open the file in binary mode if this is not what you want. 
 --
 -- Example 1: 	
 -- puts(SCREEN, "Enter your first name: ")
 --
 -- Example 2: 	
 -- puts(output, 'A')  -- the single byte 65 will be sent to output
---**
-
---**
--- Signature:
--- global function sprintf(sequence st, object x)
---
--- Description:
--- This is exactly the same as printf(), except that the output is returned as a sequence of characters, rather than being sent to a file or device. st is a format string, x is the value or sequence of values to be formatted. printf(fn, st, x)  is equivalent to puts(fn, sprintf(st, x)).
---
--- Comments:
--- Some typical uses of sprintf() are:
---
--- <ol>
--- <li>Converting numbers to strings.</li>
--- <li>Creating strings to pass to system().</li>
--- <li>Creating formatted error messages that can be passed to a common error message handler. </li>
--- </ol>
---
--- Example 1: 	
--- s = sprintf("%08d", 12345)
--- -- s is "00012345"
 --**
 
 global function instance()
@@ -148,42 +154,6 @@ global procedure sleep(integer t)
 		machine_proc(M_SLEEP, t)
 	end if
 end procedure
-
---**
--- The representation of x as a string of characters is returned. This is exactly the same as print(fn, x), except that the output is returned as a sequence of characters, rather than being sent to a file or device. x can be any Euphoria object.
---
--- Comments:
--- The atoms contained within x will be displayed to a maximum of 10 significant digits, just as with print().
---
--- Example 1:
--- s = sprint(12345)
--- -- s is "12345"
---
--- Example 2: 	
--- s = sprint({10,20,30}+5)
--- -- s is "{15,25,35}"
-
-global function sprint(object x)
--- Return the string representation of any Euphoria data object. 
--- This is the same as the output from print(1, x) or '?', but it's
--- returned as a string sequence rather than printed.
-	sequence s
-								 
-	if atom(x) then
-		return sprintf("%.10g", x)
-	else
-		s = "{"
-		for i = 1 to length(x) do
-			s &= sprint(x[i])  
-			if i < length(x) then
-				s &= ','
-			end if
-		end for
-		s &= "}"
-		return s
-	end if
-end function
---**
 
 -- pretty print variables
 integer pretty_end_col, pretty_chars, pretty_start_col, pretty_level, 
@@ -355,31 +325,36 @@ end procedure
 -- plus 5-character indentation, with defaults for everything else  
 --
 -- Comments:
--- The display will start at the current cursor position. Normally you will want to call pretty_print() when the cursor is in column 1 (after printing a \n character). If you want to start in a different column, you should call position() and specify a value for option [3]. This will ensure that the first and last braces in a sequence line up vertically.
+-- The display will start at the current cursor position. Normally you will want to call 
+-- pretty_print() when the cursor is in column 1 (after printing a <code>\n</code> character). 
+-- If you want to start in a different column, you should call position() and specify a value 
+-- for option [3]. This will ensure that the first and last braces in a sequence line up 
+-- vertically.
 --
--- When specifying the format to use for integers and floating-point numbers, you can add some decoration, e.g. "(%d)" or "$ %.2f" 
+-- When specifying the format to use for integers and floating-point numbers, you can add 
+-- some decoration, e.g. "(%d)" or "$ %.2f" 
 --
 -- Example 1:
 -- pretty_print(1, "ABC", {})    
 --
--- <console>{65'A',66'B',67'C'}</console>
+-- {65'A',66'B',67'C'}
 --
 -- Example 2:
 -- pretty_print(1, {{1,2,3}, {4,5,6}}, {})  
 -- 
--- <console>{
+-- {
 --   {1,2,3},
 --   {4,5,6}
--- }</console>
+-- }
 --
 -- Example 3:
 -- pretty_print(1, {"Euphoria", "Programming", "Language"}, {2})  
 --
--- <console>{
+-- {
 --   "Euphoria",
 --   "Programming",
 --   "Language"
--- }</console>
+-- }
 --
 -- Example 4:
 -- puts(1, "word_list = ") -- moves cursor to column 13
@@ -461,3 +436,4 @@ global procedure pretty_print(integer fn, object x, sequence options)
 	puts(pretty_file, pretty_line)
 end procedure
 --**
+

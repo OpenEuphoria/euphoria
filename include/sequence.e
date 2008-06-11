@@ -59,7 +59,8 @@ include misc.e
 -- global procedure prepend(sequence s1, object x)
 --
 -- Description:
--- Create a new sequence (s2) identical to s1 but with x added onto the start of s1 as the first element. The length of s2 will be length(s1) + 1.
+-- Create a new sequence (s2) identical to s1 but with x added onto the start of s1 as the 
+-- first element. The length of s2 will be length(s1) + 1.
 --
 -- Comments:
 -- If x is an atom this is the same as s2 = x & s1. If x is a sequence it is not the same.
@@ -91,8 +92,8 @@ include misc.e
 --
 -- Comments:
 -- When you repeat a sequence or a floating-point number the
---	interpreter does not actually make multiple copies in memory.
---	Rather, a single copy is "pointed to" a number of times.
+-- interpreter does not actually make multiple copies in memory.
+-- Rather, a single copy is "pointed to" a number of times.
 --
 -- Example:
 -- repeat(0, 10)	  -- {0,0,0,0,0,0,0,0,0,0}
@@ -114,14 +115,12 @@ include misc.e
 --
 -- Comments:
 -- The length of each sequence is stored internally by the
---	interpreter for quick access. (In other languages this
---	operation requires a search through memory for an end marker.)
+-- interpreter for quick access. (In other languages this
+-- operation requires a search through memory for an end marker.)
 --
 -- Example 1:
 -- length({{1,2}, {3,4}, {5,6}})   -- 3
---
 -- length("")	 -- 0
---
 -- length({})	 -- 0
 --
 -- See also:
@@ -129,23 +128,89 @@ include misc.e
 --**
 
 --**
+-- Signature:
+-- global function sprintf(sequence st, object x)
+--
+-- Description:
+-- This is exactly the same as printf(), except that the output is returned as a sequence 
+-- of characters, rather than being sent to a file or device. st is a format string, x 
+-- is the value or sequence of values to be formatted. printf(fn, st, x)  is equivalent 
+-- to puts(fn, sprintf(st, x)).
+--
+-- Comments:
+-- Some typical uses of sprintf() are:
+--
+-- <ol>
+-- <li>Converting numbers to strings.</li>
+-- <li>Creating strings to pass to system().</li>
+-- <li>Creating formatted error messages that can be passed to a common error message 
+--     handler. </li>
+-- </ol>
+--
+-- Example 1: 	
+-- s = sprintf("%08d", 12345)
+-- -- s is "00012345"
+--
+-- See Also:
+--     misc:printf, sprint
+--**
+
+--**
+-- The representation of x as a string of characters is returned. This is exactly the same 
+-- as print(fn, x), except that the output is returned as a sequence of characters, rather 
+-- than being sent to a file or device. x can be any Euphoria object.
+--
+-- Comments:
+-- The atoms contained within x will be displayed to a maximum of 10 significant digits, 
+-- just as with print().
+--
+-- Example 1:
+-- s = sprint(12345)
+-- -- s is "12345"
+--
+-- Example 2: 	
+-- s = sprint({10,20,30}+5)
+-- -- s is "{15,25,35}"
+--
+-- See Also:
+--    sprintf, misc:printf
+
+global function sprint(object x)
+-- Return the string representation of any Euphoria data object. 
+-- This is the same as the output from print(1, x) or '?', but it's
+-- returned as a string sequence rather than printed.
+	sequence s
+								 
+	if atom(x) then
+		return sprintf("%.10g", x)
+	else
+		s = "{"
+		for i = 1 to length(x) do
+			s &= sprint(x[i])  
+			if i < length(x) then
+				s &= ','
+			end if
+		end for
+		s &= "}"
+		return s
+	end if
+end function
+--**
+
+--**
 -- Reverse the order of elements in a sequence.
 --
 -- Comments:
--- A new sequence is created where the top-level elements appear in reverse order compared to the original sequence.
+-- A new sequence is created where the top-level elements appear in reverse order compared 
+-- to the original sequence.
 --
 -- Example:
 -- reverse({1,3,5,7})		   -- {7,5,3,1}
---
 -- reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
---
 -- reverse({99})			   -- {99}
---
 -- reverse({})				   -- {}
 
 global function reverse(sequence s)
--- moved from misc.e
--- Thanks to Hawke' for helping to make this run faster.
 	integer lower, n, n2
 	sequence t
 
@@ -163,7 +228,8 @@ end function
 --**
 
 --**
--- Return the first size items of st. If size is greater than the length of st, then the entire st will be returned.
+-- Return the first size items of st. If size is greater than the length of st, then the 
+-- entire st will be returned.
 --
 -- Comments:
 -- A new sequence is created.
@@ -193,7 +259,8 @@ end function
 --**
 
 --**
--- Return len items starting at start. If start + len is greater than the length of st, then everything in st starting at start will be returned.
+-- Return len items starting at start. If start + len is greater than the length of st, 
+-- then everything in st starting at start will be returned.
 --
 -- Comments:
 -- A new sequence is created.
@@ -236,9 +303,10 @@ end function
 --**
 
 --**
--- Return items start to stop from st. If stop is greater than the length of st, then from start to the
--- end of st will be returned. If stop is zero, it will be treated as the end of st. If stop is a
--- negative value, then it will be treated as stop positions from the end of st.
+-- Return items start to stop from st. If stop is greater than the length of st, then from 
+-- start to the end of st will be returned. If stop is zero, it will be treated as the end 
+-- of st. If stop is a negative value, then it will be treated as stop positions from the 
+-- end of st.
 --
 -- Comments:
 -- A new sequence is created.
@@ -296,7 +364,8 @@ global function vslice(sequence s, atom colno)
 
 	for i = 1 to length(s) do
 		if colno >= 1+length(s[i]) then
-			crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d",{i,colno})
+			crash("sequence:vslice(): colno should be a valid index on the %d-th element, " &
+			      "but was %d", {i,colno})
 		end if
 		ret[i] = s[i][colno]
 	end for
@@ -309,7 +378,8 @@ end function
 -- TODO: =0.03... Yuk! We need NULL :-)
 
 --**
--- Return the last n items of st. If n is greater than the length of st, then the entire st will be returned.
+-- Return the last n items of st. If n is greater than the length of st, then the entire st 
+-- will be returned.
 --
 -- Comments:
 -- A new sequence is created.
@@ -467,11 +537,15 @@ end function
 constant dummy = 0
 
 --**
--- Insert what into st at index index as a new element. The item is inserted before index, not after. insert()ing a sequence into a string returns a sequence which is no longer a string.
+-- Insert what into st at index index as a new element. The item is inserted before index, 
+-- not after. 
 --
 -- Comments:
--- A new sequence is created. st and what can be any type of sequence, including nested sequences.
--- what is inserted as a new element in st, so that the length of the new sequence is always length(st)+1.
+-- A new sequence is created. st and what can be any type of sequence, including nested 
+-- sequences. What is inserted as a new element in st, so that the length of the new 
+-- sequence is always length(st)+1.
+--
+-- insert()ing a sequence into a string returns a sequence which is no longer a string.
 --
 -- Example 1:
 -- s = insert("John Doe", " Middle", 5)
@@ -482,7 +556,8 @@ constant dummy = 0
 -- -- s is {10,20,30,40}
 --
 -- See also:
--- remove, splice, remove_all
+--     remove, splice, remove_all
+
 global function insert(sequence st, object what, integer index)
 	if index > length(st) then
 		return append(st, what)
@@ -498,10 +573,14 @@ end function
 --**
 
 --**
--- Insert what into st at index index. The item is inserted before index, not after. what is inserted as a subsequence. splicing a string into another yields a new string.
+-- Insert what into st at index index. The item is inserted before index, not after. 
+-- What is inserted as a subsequence. splicing a string into another yields a new string.
 --
 -- Comments:
--- A new sequence is created. st and what can be any type of sequence, including nested sequences. The length of this new sequence is the sum of the lengths of st and what (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is an atom.
+-- A new sequence is created. st and what can be any type of sequence, including nested 
+-- sequences. The length of this new sequence is the sum of the lengths of st and what 
+-- (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is 
+-- an atom.
 --
 -- Example 1:
 -- s = splice("John Doe", " Middle", 5)
@@ -513,6 +592,7 @@ end function
 --
 -- See also:
 -- insert, remove, replace, remove_all
+
 global function splice(sequence st, object what, integer index)
 	if index > length(st) then
 		return st & what
@@ -553,8 +633,8 @@ end function
 --
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
--- If any is 1 then split by any one item in delim not delim as a whole. If any is 0 then split
--- by delim as a whole.
+-- If any is 1 then split by any one item in delim not delim as a whole. If any is 0 then 
+-- split by delim as a whole.
 --
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence
@@ -666,7 +746,7 @@ constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
 -- See also:
 -- trim_tail, trim, pad_head
 
-global function trim_head(sequence str, object what=TRIM_WHITESPACES)
+global function trim_head(sequence str, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
@@ -681,9 +761,10 @@ global function trim_head(sequence str, object what=TRIM_WHITESPACES)
 end function
 --**
 
--- TODO: document default param change
 --**
 -- Trim any item in what from the end (tail) of str
+--
+-- TODO: document default param change
 --
 -- Example:
 -- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
@@ -706,13 +787,15 @@ global function trim_tail(sequence str, object what=TRIM_WHITESPACES)
 end function
 --**
 
--- TODO: document default param change
 --**
 -- Trim any item in what from the head (start) and tail (end) of str
+--
+-- TODO: document default param change
 --
 -- Example:
 -- s = trim("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file"
+--
 -- See also:
 -- trim_head, trim_tail
 
@@ -721,10 +804,11 @@ global function trim(sequence str, object what=TRIM_WHITESPACES)
 end function
 --**
 
--- TODO: document default param change
 --**
 -- Pad the beginning of a sequence with spaces up to params in length or optionally params can
 -- be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with
+--
+-- TODO: document default param change
 --
 -- Comments:
 -- pad_head() will not remove characters. If length(str) is greater than params, this
@@ -749,11 +833,12 @@ global function pad_head(sequence str, integer size, object ch=' ')
 end function
 --**
 
--- TODO: document default param change
 --**
 -- Pad the end of a sequence with spaces up to params in length or optionally params can
 -- be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with
 --
+-- TODO: document default param change
+-- 
 -- Comments:
 -- pad_tail() will not remove characters. If length(str) is greater than params, this
 -- function simply returns str. See <a href="lib_seq.htm#head">head()</a>
@@ -782,7 +867,8 @@ end function
 -- Split s1 into multiple sequences of length size
 --
 -- Comments:
--- The very last sequence might not have i items if the length of s1 is not evenly divisible by i
+-- The very last sequence might not have i items if the length of s1 is not evenly 
+-- divisible by i
 --
 -- Example 1:
 -- s = chunk("5545112133234454", 4)
@@ -798,6 +884,7 @@ end function
 --
 -- See also:
 -- split
+
 global function chunk(sequence s, integer size)
 	sequence ns
 	integer stop
@@ -900,6 +987,7 @@ end function
 --
 -- See also:
 -- linear
+
 global function can_add(object a,object b)
 	if atom(a) or atom(b) then
 		return 1
@@ -925,6 +1013,7 @@ end function
 --
 -- See Also:
 -- repeat_pattern
+
 global function linear(object start,object increment,integer count)
 	sequence result
 
@@ -941,7 +1030,8 @@ end function
 --**
 
 --**
--- Returns a sequence whose n first elements are those of s, as well a the n that follow, and so on for count copies.
+-- Returns a sequence whose n first elements are those of s, as well a the n that follow, 
+-- and so on for count copies.
 --
 -- Example:
 -- s = repeat_pattern({1,2,5},3)
@@ -949,6 +1039,7 @@ end function
 --
 -- See Also:
 -- repeat, linear
+
 global function repeat_pattern(sequence s,integer count)
 	integer ls
 	sequence result
@@ -970,7 +1061,8 @@ end function
 -- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
 --
 -- vectors is a rectangular matrix, ie a sequence of sequences of objects.
--- coords is a list of coordinate index lists, ie a sequence of sequences of small positive integers.
+-- coords is a list of coordinate index lists, ie a sequence of sequences of small positive 
+-- integers.
 --
 -- Returns a sequence the length of vectors. Each of its elements is a sequence,
 -- the length of coords, of sequences. Each innermost sequence is made of the
@@ -982,6 +1074,7 @@ end function
 --
 -- See Also:
 -- vslice
+
 global function project(sequence vectors,sequence coords) -- currently in sets.e
 	sequence result,current_vector,coord_set,result_item,projection
 	integer current_index
@@ -1018,6 +1111,7 @@ end function
 --
 -- See also:
 -- store, Sequence Assignments
+
 global function fetch(sequence s,sequence indexes)
 	for i=1 to length(indexes)-1 do
 		s=s[indexes[i]]
@@ -1035,6 +1129,7 @@ end function
 --
 -- See also:
 -- fetch, Sequence Assignments
+
 global function store(sequence s,sequence indexes,object x)
 	sequence partials,result,branch
 
@@ -1065,6 +1160,7 @@ end function
 --
 -- See also:
 -- Sequence Assignments
+
 global function valid_index(sequence s,object x)
 	if sequence(x) or x<1 then
 		return 0
@@ -1083,6 +1179,7 @@ end function
 --
 -- See also:
 -- slice
+
 global function extract(sequence source,sequence indexes)
 	object p
 
@@ -1111,6 +1208,7 @@ end function
 --
 -- See also:
 -- slice
+
 global function rotate_left(sequence source,integer start,integer stop,integer left_shift)
 	sequence shifted
 	integer len
@@ -1132,3 +1230,4 @@ global function rotate_left(sequence source,integer start,integer stop,integer l
 	return source
 end function
 --**
+
