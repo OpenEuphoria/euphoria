@@ -149,6 +149,10 @@ test_equal("valid_index",1,valid_index({1,2,3},3.5))
 test_equal("rotate_left: left",{1,4,5,6,2,3,7},rotate_left({1,2,3,4,5,6,7},2,6,2))
 test_equal("rotate_left: right",{1,5,6,2,3,4,7},rotate_left({1,2,3,4,5,6,7},2,6,-2))
 
-
-
+test_equal("sprint() integer", "10", sprint(10))
+test_equal("sprint() float", "5.5", sprint(5.5))
+test_equal("sprint() sequence", "{1,2,3}", sprint({1,2,3}))
+test_equal("sprintf() integer", "i=1", sprintf("i=%d", {1}))
+test_equal("sprintf() float", "i=5.5", sprintf("i=%.1f", {5.5}))
+test_equal("sprintf() percent", "%", sprintf("%%", {}))
 
