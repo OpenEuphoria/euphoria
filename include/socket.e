@@ -1,15 +1,14 @@
 -- socket.e
--- Euphoria 4.0
 -- 
 -- Based on EuNet project, version 1.3.2, at SourceForge.
 -- For updates, visit http://www.sourceforge.net/projects/eunet.
 --
 --****
 -- Category:
---   Networking
+--   socket
 --
 -- Title:
---   Euphoria Sockets Library
+--   Internet Sockets
 --****
  
 include dll.e
@@ -17,6 +16,8 @@ include misc.e
 include machine.e
 include get.e
 include wildcard.e
+
+global enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
 
 global constant AF_INET = 2, SOCK_STREAM=1, SOCK_DGRAM = 2, SOCK_RAW = 3,
 	SOCK_RDM = 4, SOCK_SEQPACKET = 5
@@ -390,6 +391,8 @@ function trim_(sequence s)
 	return rs
 end function
 
+-------------------------------------------------------------------------------
+
 function get_string(atom lpsz)
 	
 	atom ptr, c
@@ -408,6 +411,8 @@ function get_string(atom lpsz)
 	return s
 	
 end function
+
+-------------------------------------------------------------------------------
 
 function get_sockaddr(atom lpsz)
 	
@@ -431,6 +436,8 @@ function get_sockaddr(atom lpsz)
 	return s
 	
 end function
+
+-------------------------------------------------------------------------------
 
 function make_sockaddr(sequence inet_addr)
 	
@@ -493,7 +500,8 @@ end function
 --**
 -- Checks if x is an IP address in the form (#.#.#.#[:#])
 --
--- Returns:     1 if x is an inetaddr, 0 if it isn't
+-- Returns:
+--   1 if x is an inetaddr, 0 if it isn't
 
 global function is_inetaddr(object s)
 	
@@ -523,15 +531,18 @@ global function is_inetaddr(object s)
 	
 end function
 --**
+
 --**
 -- Returns the current error mode.
 --
--- See also:	set_errormode, get_error
+-- See also:	
+--     set_errormode, get_error
 
 global function get_errormode()
 	return error_mode
 end function
 --**
+
 --**
 -- Sets the error mode to either EUNET_ERRORMODE_EUNET or
 -- EUNET_ERRORMODE_OS.  The errors returned will either be generated
@@ -547,28 +558,32 @@ global function set_errormode(integer mode)
 	end if
 end function
 --**
+
 --**
 -- Returns a 2-element sequence s, indicating the last
 -- error code and error string. If errormode is EUNET_ERRORMODE_EUNET,
 -- the error codes will be one of . . .
 --
--- EUNET_ERROR_NOERROR = 0
--- EUNET_ERROR_WRONGMODE = -998
--- EUNET_ERROR_NODATA = -1001
--- EUNET_ERROR_LINUXONLY = -1002
--- EUNET_ERROR_WINDOWSONLY = -1003
--- EUNET_ERROR_NODNSRECORDS = -1501
--- EUNET_ERROR_UNKNOWN = -1999
+-- <ul>
+-- <li>EUNET_ERROR_NOERROR = 0</li>
+-- <li>EUNET_ERROR_WRONGMODE = -998</li>
+-- <li>EUNET_ERROR_NODATA = -1001</li>
+-- <li>EUNET_ERROR_LINUXONLY = -1002</li>
+-- <li>EUNET_ERROR_WINDOWSONLY = -1003</li>
+-- <li>EUNET_ERROR_NODNSRECORDS = -1501</li>
+-- <li>EUNET_ERROR_UNKNOWN = -1999</li>
+-- </ul>
 --
 -- If errormode is EUNET_ERRORMODE_OS, the error returned will be
 -- what the OS kernel returns.  Unless otherwise set, errormode is
 -- EUNET_ERRORMODE_EUNET by default.
 --
 -- Example:
--- 	s = get_error()
--- 	printf(1,"Error %d: %s\n",s)
+-- s = get_error()
+-- printf(1,"Error %d: %s\n",s)
 --
--- See also:	set_errormode, get_errormode
+-- See also:
+--     set_errormode, get_errormode
 
 global function get_error()
 	-- returns a 2-element sequence {ERROR_CODE,ERROR_STRING}
@@ -610,6 +625,7 @@ global function get_error()
 	
 end function
 --**
+
 --**
 -- Use this function to determine whether another socket read is
 -- appropriate.
@@ -617,20 +633,21 @@ end function
 -- Returns:     The packet block size in bytes.
 --
 -- Example:
--- 	success = 1
--- 	while success > 0 do
--- 		data = data & recv(socket,0)
--- 		success = length(data)-last_data_len
--- 		last_data_len = length(data)
--- 		if success < get_blocksize() then
--- 			exit
--- 		end if
--- 	end while
+-- success = 1
+-- while success > 0 do
+--     data = data & recv(socket,0)
+--     success = length(data)-last_data_len
+--     last_data_len = length(data)
+--     if success < get_blocksize() then
+--         exit
+--     end if
+-- end while
 
 global function get_blocksize()
 	return BLOCK_SIZE
 end function
 --**
+
 --**
 -- Delays for millisec * 1/1000 seconds.  Since this function
 -- implements kernel routines on each platform, the delay is not
@@ -639,12 +656,12 @@ end function
 -- Returns:     0 for success, -1 for error.
 --
 -- Example:
--- 	error = delay(250)
--- 	if error then
--- 		puts(1,"Uh, oh.")
--- 	else
--- 		puts(1,"Get back to work!")
--- 	end if
+-- error = delay(250)
+-- if error then
+--    puts(1,"Uh, oh.")
+-- else
+--    puts(1,"Get back to work!")
+-- end if
 
 global function delay(atom millisec)
 	-- Delays nicely for a set number of milliseconds (or a few more)
@@ -671,6 +688,12 @@ global function delay(atom millisec)
 	
 end function
 --**
+
+--Andy Serpas Turbo version
+-- c = "object" by Kat ; modded and used in strtok.e
+-- c can now be a list {'z','\n','etc'} and s will be parsed by all those in list
+-- made case insensitive by Kat
+-- mod'd again for eunet
 function eunet_parse(sequence s, object c)
 	
 	integer slen, spt, flag
@@ -759,6 +782,7 @@ function windows_get_adapters_table()
 	
 end function
 
+-------------------------------------------------------------------------------
 -- Returns sequence of interface names
 function linux_get_iface_list()
 	sequence ifaces
@@ -812,6 +836,7 @@ global function get_iface_list()
 	end if
 end function
 --**
+
 -------------------------------------------------------------------------------
 -- Get networking interface details
 -------------------------------------------------------------------------------
@@ -946,8 +971,9 @@ end function
 --**
 -- Given a network interface name returned by get_iface_list(),
 -- returns a sequence of details about that interface.  The returned
--- sequence is as follows: s = {
---
+-- sequence is as follows: 
+-- <eucode>
+-- s = {
 -- sequence InterfaceName,
 -- integer index,
 -- integer flags,
@@ -963,9 +989,11 @@ end function
 -- sequence IP_broadcast_address,
 -- sequence IP_Netmask,
 -- sequence stats }
+-- </eucode>
 --
--- Note:        If PPP_Dest_IP_addr = IP_addr, serial_keepalive will be the
---              up/down status of the address.
+-- Note:
+--    If PPP_Dest_IP_addr = IP_addr, serial_keepalive will be the
+--    up/down status of the address.
 
 global function get_iface_details(sequence iface_name)
 	if platform()=WIN32 then
@@ -977,6 +1005,16 @@ global function get_iface_details(sequence iface_name)
 	end if
 end function
 --**
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Server-side sockets (bind, listeners, signal hooks, accepters)
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-- Bind
+-------------------------------------------------------------------------------
 -- Bind is typically used in TCP and SOCK_STREAM connections.
 -- It returns 0 on success and -1 on failure.
 function linux_bind(atom socket, sequence inet_addr)
@@ -998,8 +1036,9 @@ end function
 -- later calls only need to provide the socket.  Returns a 0 on
 -- success and -1 on failure.
 --
--- Example:     success = bind(socket, "0.0.0.0:8080")
---              -- Look for connections on port 8080 for any interface.
+-- Example 1:
+-- success = bind(socket, "0.0.0.0:8080")
+-- -- Look for connections on port 8080 for any interface.
 
 global function bind(atom socket, sequence inet_addr)
 	if platform()=WIN32 then
@@ -1010,6 +1049,10 @@ global function bind(atom socket, sequence inet_addr)
 	return -1
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- Listen
+-------------------------------------------------------------------------------
 -- Listen is typically used in TCP and SOCK_STREAM connections.
 -- It returns 0 on success and error_code on failure.
 function linux_listen(atom socket, integer pending_conn_len)
@@ -1030,7 +1073,8 @@ end function
 -- amount of time it takes the program to process each connection
 -- request. This function must be executed after bind().
 --
--- Returns:     0 on success and an error code on failure.
+-- Returns:
+--    0 on success and an error code on failure.
 
 global function listen(atom socket, integer pending_conn_len)
 	if platform()=WIN32 then
@@ -1041,6 +1085,7 @@ global function listen(atom socket, integer pending_conn_len)
 	return -1
 end function
 --**
+
 -- Accept: Returns {atom new_socket, sequence peer_ip_addres} on success, or
 -- -1 on error.
 
@@ -1092,9 +1137,10 @@ end function
 -- socket remains available for new connections.  accept() must
 -- be called after bind() and listen().
 --
--- Returns:     A sequence {atom new_socket, sequence peer_ip_address} on success,
---              or -1 on failure.  Use get_error to determine the cause
---              of the failure.
+-- Returns:
+--     A sequence {atom new_socket, sequence peer_ip_address} on success,
+--     or -1 on failure.  Use get_error to determine the cause
+--     of the failure.
 
 global function accept(atom socket)
 	if platform()=WIN32 then
@@ -1105,6 +1151,12 @@ global function accept(atom socket)
 	return -1
 end function
 --**
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Client-side sockets (connect)
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Returns 0 on success and -1 on failure
 
 function linux_connect(atom socket, sequence inet_addr)
@@ -1115,6 +1167,7 @@ function linux_connect(atom socket, sequence inet_addr)
 	end if
 	return c_func(connect_,{socket,sockaddr,16})
 end function
+
 
 function windows_connect(atom socket, sequence inet_addr)
 	-- Windows connect works the same as Linux
@@ -1127,7 +1180,8 @@ end function
 -- both the IP address and port of the remote listening socket as
 -- a string.  Returns 0 for success and -1 on failure.
 --
--- Example:     success = connect(socket, "11.1.1.1:80")
+-- Example 1:
+-- success = connect(socket, "11.1.1.1:80")
 
 global function connect(atom socket, sequence inet_addr)
 	if platform()=WIN32 then
@@ -1138,6 +1192,16 @@ global function connect(atom socket, sequence inet_addr)
 	return -1
 end function
 --**
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Routines for both server & client (socket, read, write, select)
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-- New socket
+-------------------------------------------------------------------------------
 
 function linux_new_socket(integer family, integer sock_type, integer protocol)
 	return c_func(socket_,{family,sock_type,protocol})
@@ -1151,7 +1215,8 @@ end function
 --**
 -- Returns a handle to a newly created socket.
 --
--- Example:     socket = new_socket(AF_INET, SOCK_STREAM, 0)
+-- Example 1:
+-- socket = new_socket(AF_INET, SOCK_STREAM, 0)
 
 global function new_socket(integer family, integer sock_type, integer protocol)
 	
@@ -1164,6 +1229,10 @@ global function new_socket(integer family, integer sock_type, integer protocol)
 	
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- Close socket
+-------------------------------------------------------------------------------
 
 function linux_close_socket(atom socket)
 	return c_func(close_,{socket})
@@ -1187,6 +1256,10 @@ global function close_socket(atom socket)
 	return -1
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- Shutdown socket
+-------------------------------------------------------------------------------
 
 function linux_shutdown_socket(atom socket, atom method)
 	return c_func(shutdown_,{socket,method})
@@ -1212,6 +1285,17 @@ global function shutdown_socket(atom socket, atom method)
 	return -1
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- poll
+-- select() is not supported
+-------------------------------------------------------------------------------
+-- socket list is a sequence of 2-element sequences.  Each sequence contains
+-- the socket number, and the flags of what to check for.  Timeout is the
+-- number of milliseconds before returning.  0 returns immediately, -1 returns
+-- only when an event occurs.
+-- poll may return an atom on no event or error, and a sequence of
+-- return event flags (matching socket_list) when an event has occurred.
 
 function linux_poll(sequence socket_list, atom timeout)
 	
@@ -1370,37 +1454,37 @@ end function
 -- calls from cancellation calls, even though both may be done in
 -- a single call.
 --
--- Example:
---	rtn = poll( {{socket1,POLLIN+POLLOUT+POLLERR},
---			{socket2,POLLIN+POLLERR},
---			{socket3,POLLOUT+POLLERR}}, 500)
+-- Example 1:
+-- rtn = poll( {{socket1,POLLIN+POLLOUT+POLLERR},
+--             {socket2,POLLIN+POLLERR},
+--             {socket3,POLLOUT+POLLERR}}, 500)
 --
---	if atom(rtn) then
---		puts(1,"No traffic yet.\n")
---	else
---		puts(1,"The following events have occured:\n")
---		printf(1,"Socket1: %d, Socket2: %d, Socket3: %d\n",rtn)
---		-- Cancel polling events
---		rtn = poll( {{socket1,0},{socket2,0},{socket3,0}}, 0)
---	end if
+-- if atom(rtn) then
+--     puts(1,"No traffic yet.\n")
+-- else
+--     puts(1,"The following events have occured:\n")
+--     printf(1,"Socket1: %d, Socket2: %d, Socket3: %d\n",rtn)
+--     -- Cancel polling events
+--     rtn = poll( {{socket1,0},{socket2,0},{socket3,0}}, 0)
+-- end if
 --
--- Example:     
---	bytes_tx = 0
---	sock_data = ""
+-- Example 2:     
+-- bytes_tx = 0
+-- sock_data = ""
 --
---	while 1 do
---		ignore = poll({{sock,POLLIN}},250)
---		-- Give the server time to respond, but the value can be adjusted.
---		if sequence(ignore) then
---			sock_data = sock_data & recv(sock,0)
---		elsif bytes_tx > 0 then
---			exit
---			-- We've received some data, and there's
---			-- nothing left on the socket.
---		end if
---		bytes_tx = length(sock_data)
---	end while
---	puts(1, sock_data)
+-- while 1 do
+--     ignore = poll({{sock,POLLIN}},250)
+--     -- Give the server time to respond, but the value can be adjusted.
+--     if sequence(ignore) then
+--         sock_data = sock_data & recv(sock,0)
+--     elsif bytes_tx > 0 then
+--        exit
+--        -- We've received some data, and there's
+--        -- nothing left on the socket.
+--     end if
+--     bytes_tx = length(sock_data)
+-- end while
+-- puts(1, sock_data)
 
 global function poll(sequence socket_list, atom timeout)
 	if platform()=WIN32 then
@@ -1413,6 +1497,9 @@ global function poll(sequence socket_list, atom timeout)
 end function
 --**
 
+-------------------------------------------------------------------------------
+-- Send (requires bound/connected socket)
+-------------------------------------------------------------------------------
 -- Returns the # of chars sent, or -1 for error
 function linux_send(atom socket, sequence data, atom flags)
 	atom datalen, dataptr, status
@@ -1445,6 +1532,11 @@ global function send(atom socket, sequence data, atom flags)
 	end if
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- Sendto (good for stateless / broadcast datagrams)
+-------------------------------------------------------------------------------
+-- Returns the # of chars sent, or -1 for error
 
 function linux_sendto(atom socket, sequence data, atom flags, sequence inet_addr)
 	atom dataptr, datalen, sockaddr
@@ -1479,6 +1571,10 @@ global function sendto(atom socket, sequence data, atom flags, sequence inet_add
 end function
 --**
 
+-------------------------------------------------------------------------------
+-- recv (for connected sockets)
+-------------------------------------------------------------------------------
+-- Returns either a sequence of data, or a 2-element sequence {ERROR_CODE,ERROR_STRING}.
 function linux_recv(atom socket, atom flags)
 	atom buf, buflen, rtnlen
 	sequence rtndata
@@ -1529,6 +1625,10 @@ global function recv(atom socket, atom flags)
 end function
 --**
 
+-------------------------------------------------------------------------------
+-- recvfrom (for unconnected sockets)
+-------------------------------------------------------------------------------
+-- Returns a sequence {sequence data, {atom error_number, sequence error_string}, string peer_address}
 function linux_recvfrom(atom socket, atom flags)
 	atom buf, buflen, rtnlen, sockaddr
 	sequence rtndata, peer_addr, errno
@@ -1576,22 +1676,22 @@ end function
 -- internet address to a function, and can be used as is in
 -- sendto().
 --
--- Example:
--- 	t1 = time()
--- 	t2 = t1
--- 	while t2 < t1+15 and recvdata[2][1]=EAGAIN do
--- 		recvdata = recvfrom(socket,MSG_DONTWAIT)
--- 		if length(recvdata[1])>0 then
--- 			msg = msg & recvdata[1]
--- 			lastpeer = recvdata[3]
--- 			t1 = t1 - 60
--- 			recvdata = {"",{EAGAIN,""},""}
--- 		elsif recvdata[2][1] != EAGAIN then
--- 			puts(1,"Error: "&recvdata[2][2]&"\n")
--- 		end if
--- 		t2 = time()
--- 	end while
--- 	puts(1,sprintf("%d: ",cycle)&lastpeer&":  "&msg&'\n')
+-- Example 1:
+-- t1 = time()
+-- t2 = t1
+-- while t2 < t1+15 and recvdata[2][1]=EAGAIN do
+--     recvdata = recvfrom(socket,MSG_DONTWAIT)
+--     if length(recvdata[1])>0 then
+--         msg = msg & recvdata[1]
+--         lastpeer = recvdata[3]
+--         t1 = t1 - 60
+--         recvdata = {"",{EAGAIN,""},""}
+--     elsif recvdata[2][1] != EAGAIN then
+--         puts(1,"Error: "&recvdata[2][2]&"\n")
+--     end if
+--     t2 = time()
+-- end while
+-- puts(1,sprintf("%d: ",cycle)&lastpeer&":  "&msg&'\n')
 
 global function recvfrom(atom socket, atom flags)
 	if platform()=LINUX then
@@ -1603,6 +1703,12 @@ global function recvfrom(atom socket, atom flags)
 	end if
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- Socket options
+-------------------------------------------------------------------------------
+-- Get_socket_options returns an OBJECT containing the option value, or {"ERROR",errcode} on error.
+-- Set_socket_options returns 0 on success and -1 on error.
 
 function linux_getsockopts(atom socket, integer level, integer optname)
 	object rtn
@@ -1640,10 +1746,12 @@ end function
 -- option for which values are being sought. Level is usually
 -- SOL_SOCKET (#FFFF).
 --
--- Returns:     On error, {"ERROR",error_code}.  On success, either an atom or
---              a sequence containing the option value.
+-- Returns:
+--    On error, {"ERROR",error_code}.  On success, either an atom or
+--    a sequence containing the option value.
 --
--- See also:    set_socket_options
+-- See also:
+--     set_socket_options
 
 global function get_socket_options(atom socket, integer level, integer optname)
 	if platform()=WIN32 then
@@ -1683,9 +1791,11 @@ end function
 -- option for which values are being set.  Level is usually
 -- SOL_SOCKET (#FFFF).
 --
--- Returns:     0 on success, -1 on error.
+-- Returns:
+--     0 on success, -1 on error.
 --
--- See also:    get_socket_options
+-- See also:
+--    get_socket_options
 
 global function set_socket_options(atom socket, integer level, integer optname, object val)
 	if platform()=WIN32 then
@@ -1696,6 +1806,20 @@ global function set_socket_options(atom socket, integer level, integer optname, 
 	return -999
 end function
 --**
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Getters
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-- DnsQuery
+-------------------------------------------------------------------------------
+-- Returns a set of sequences of {ip_addr, q_type, order} resolving the IP address for
+-- the given domain name and/or host.
+-- At present, only A,MX,and NS queries are supported.
+-- Error 9501 = No record found
 
 function linux_dnsquery(sequence dname, integer q_type)
 	
@@ -1832,7 +1956,6 @@ function linux_dnsquery(sequence dname, integer q_type)
 end function
 
 function windows_dnsquery(sequence dname, integer q_type, atom options)
-	
 	-- NOTE: This function does not work on Windows versions below Windows 2000.
 	
 	atom success,nameptr, rtnptr, recptr, seq
@@ -1911,22 +2034,23 @@ end function
 -- this routine will support all types of DNS lookups.  In Euphoria
 -- 4.0, only NS, MX, and A lookups are accepted.
 --
--- Returns:     A sequence of sequences in the form
---              {{string ip_address, integer query_type, integer priority},...}, or
---              a negative integer on error.
+-- Returns:
+--     A sequence of sequences in the form
+--     {{string ip_address, integer query_type, integer priority},...}, or
+--     a negative integer on error.
 --
--- Example:
---	result = dnsquery("yahoo.com",NS_T_MX,0)
---	if atom(result) then
---		puts(1,"Uh, oh!")
---	else
---		for ctr = 1 to length(result) do
---			printf(1,"%s\t%d\t%d\n",result[ctr])
---		end for
---	end if
+-- Example 1:
+-- result = dnsquery("yahoo.com",NS_T_MX,0)
+-- if atom(result) then
+--     puts(1,"Uh, oh!")
+-- else
+--     for ctr = 1 to length(result) do
+--         printf(1,"%s\t%d\t%d\n",result[ctr])
+--     end for
+-- end if
 --
--- See also:    getaddrinfo, gethostbyname, getmxrr,
---              getnsrr
+-- See also:
+--     getaddrinfo, gethostbyname, getmxrr, getnsrr
 
 global function dnsquery(sequence dname, integer q_type, atom options)
 	if platform()=LINUX then
@@ -1936,17 +2060,24 @@ global function dnsquery(sequence dname, integer q_type, atom options)
 	end if
 	return -999
 end function
+--**
+
+-------------------------------------------------------------------------------
+-- getmxrr
+-------------------------------------------------------------------------------
 
 --**
 -- Find a mail server for a given domain.  If none can be found,
 -- attempt a smart query by looking up common variations on
 -- domain_name.
 --
--- Returns:     A sequence of sequences in the form
---              {{string ip_address, integer query_type, integer priority},...}, or
---              a negative integer on error.
+-- Returns:
+--     A sequence of sequences in the form
+--     {{string ip_address, integer query_type, integer priority},...}, or
+--     a negative integer on error.
 --
--- See also:    dnsquery
+-- See also:
+--     dnsquery
 
 global function getmxrr(sequence dname, atom options)
 	object rtn
@@ -1967,6 +2098,9 @@ global function getmxrr(sequence dname, atom options)
 end function
 --**
 
+-------------------------------------------------------------------------------
+-- getnsrr
+-------------------------------------------------------------------------------
 --**
 -- Find a name server for a given domain.  If none can be found,
 -- attempt a smart query by looking up common variations on
@@ -1982,6 +2116,10 @@ global function getnsrr(sequence dname, atom options)
 	return dnsquery(dname,NS_T_NS,options)
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- GetHostByName (deprecated - replaced by GetAddrInfo)
+-------------------------------------------------------------------------------
 
 function linux_gethostbyname(sequence name)
 	
@@ -2041,8 +2179,13 @@ global function gethostbyname(sequence name)
 	end if
 end function
 
-function linux_getservbyname(sequence name)
+-------------------------------------------------------------------------------
+-- GetServByName (deprecated - replaced by GetAddrInfo)
+-------------------------------------------------------------------------------
+-- Returns the (integer) port number of the service
 
+function linux_getservbyname(sequence name)
+	-- Based on SOCKS.EXU demo from Irv Mullins.
 	atom name_ptr,port_ptr,port
 	
 	name_ptr = allocate_string(name)
@@ -2070,6 +2213,27 @@ function getservbyname(sequence name)
 		return -999
 	end if
 end function
+
+-------------------------------------------------------------------------------
+-- GetAddrInfo
+-------------------------------------------------------------------------------
+-- Returns a sequence of sequences {atom flags, atom family, atom socktype, atom protocol, sequence inet_addr}
+-- on success or an error code on failure
+
+--memset(&hints, 0, sizeof(hints));
+--hints.ai_flags = AI_NUMERICHOST;
+--hints.ai_family = PF_UNSPEC;
+--hints.ai_socktype = 0;
+--hints.ai_protocol = 0;
+--hints.ai_addrlen = 0;
+--hints.ai_canonname = NULL;
+--hints.ai_addr = NULL;
+--hints.ai_next = NULL;
+--getaddrinfo(ip, port, &hints, &aiList)
+--nodename A pointer to a NULL-terminated ANSI string that contains a host (node) name or a numeric host address string. For the Internet protocol, the numeric host address string is a dotted-decimal IPv4 address or an IPv6 hex address.
+--servname A pointer to a NULL-terminated ANSI string that contains either a service name or port number represented as a string.
+--hints A pointer to an addrinfo structure that provides hints about the type of socket the caller supports. See Remarks.
+--res A pointer to a linked list of one or more addrinfo structures that contains response information about the host.
 
 function linux_getaddrinfo(object node, object service, object hints)
 	atom addrinfo, success, node_ptr, service_ptr, hints_ptr, addrinfo_ptr, svcport
@@ -2108,6 +2272,8 @@ function linux_getaddrinfo(object node, object service, object hints)
 	rtn = {}
 	-- addrinfo is a pointer to a pointer to a structure in Linux.
 	addrinfo_ptr = peek4u(addrinfo)
+	-- 27 Nov 2007: Only one addrinfo structure is supported
+	--  while addrinfo_ptr != 0 do
 	rtn = append(rtn,{
 	peek4u(addrinfo_ptr),
 		peek4u(addrinfo_ptr+4),
@@ -2151,13 +2317,15 @@ end function
 -- Returns a sequence of sequences containing information about
 -- a given server name and named service.
 --
--- s = {{
--- 	atom flags,
--- 	atom family,
--- 	atom socket_type,
--- 	atom protocol,
--- 	sequence inet_address
--- }}
+-- These can be accessed with global constants
+--
+-- <ul>
+-- <li>ADDR_FLAGS</li>
+-- <li>ADDR_FAMILY</li>
+-- <li>ADDR_TYPE</li>
+-- <li>ADDR_PROTOCOL</li>
+-- <li>ADDR_ADDRESS</li>
+-- </ul>
 --
 -- Different DNS servers may return conflicting information about a
 -- name, but getaddrinfo will only return the first.  Future
@@ -2168,9 +2336,9 @@ end function
 -- service name, a string containing the port number, or an integer
 -- port number between 0 and 65535.
 --
--- Example:
---	puts(1,"The IP address and port for http://www.yahoo.com is "&
---	getaddrinfo("www.yahoo.com","http",0)&"\n")
+-- Example 1:
+-- puts(1,"The IP address and port for http://www.yahoo.com is "&
+-- getaddrinfo("www.yahoo.com","http",0)&"\n")
 
 global function getaddrinfo(object node, object service, object hints)
 	if platform()=WIN32 then
@@ -2183,19 +2351,40 @@ end function
 --**
 
 global function get_addrinfo(object node, object service, object hints)
+	-- Added version 1.3.1 for consistency.
 	return getaddrinfo(node,service,hints)
 end function
+
+-----------------------------------------------------------------------------------
+--URL-encoding
+-----------------------------------------------------------------------------------
+--HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
+--   1. Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii 
+--      value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable 
+--      characters, and any others you want to encode-- there's no danger in encoding too many 
+--      characters. For simplicity, you might encode all non-alphanumeric characters.
+--   2. Change all spaces to plusses.
+--   3. String the names and values together with = and &, like
+--          name1=value1&name2=value2&name3=value3
+--   4. This string is your message body for POST submissions, or the query string for GET submissions.
+--
+-- For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors" 
+-- that's set to "Fred & Ethel", the URL-encoded form data would be:
+--
+--    name=Lucy&neighbors=Fred+%26+Ethel <<== note no \n or \r
+--
+-- with a length of 34.
 
 --**
 -- Converts all non-alphanumeric characters in a string to their
 -- percent-sign hexadecimal representation, or plus sign for
 -- spaces.
 --
--- Example:     puts(1,urlencode("Fred & Ethel"))
---             -- Prints "Fred+%26+Ethel"
+-- Example 1:
+-- puts(1,urlencode("Fred & Ethel"))
+-- -- Prints "Fred+%26+Ethel"
 
 global function urlencode(sequence what)
-	
 	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
 	sequence encoded, alphanum, hexnums
 	object junk, junk1, junk2
@@ -2221,6 +2410,10 @@ global function urlencode(sequence what)
 end function -- urlencode(sequence what)
 --**
 
+-------------------------------------------------------------------------------
+-- sendheader manipulation
+-------------------------------------------------------------------------------
+
 --**
 -- Retrieve either the whole sendheader sequence, or just a single
 -- field.  Field can be either an HTTP_HEADER_xxx access constant,
@@ -2235,14 +2428,18 @@ end function -- urlencode(sequence what)
 -- is selected.
 
 global function get_sendheader(object field)
-	
 	-- if field is 0, return the whole sequence.
 	-- if field is 1..length(sendheader), return just that field
 	-- if field is invalid, return -1.
 	-- if field is a sequence, try to match it to sendheader[x][1].
 	
+	-- Kat: should i return [1] & [2] as well? Mike: yes
+	-- most server interfaces return the only value, saves parsing
+	-- we'll return a {"Name","spacer","value"} format
+	
 	sequence upperfield
 	
+	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
 	if sequence(field) then
 		upperfield = upper(field)
 		for loop = 1 to length(sendheader) do
@@ -2266,8 +2463,8 @@ end function
 -- is Opera (currently the most standards compliant).  Before setting
 -- any header option individually, programs must call this procedure.
 --
--- See also:    get_sendheader, set_sendheader, 
---             set_sendheader_useragent_msie
+-- See also:
+--     get_sendheader, set_sendheader, set_sendheader_useragent_msie
 
 global procedure set_sendheader_default()
 	-- sets some defaults
@@ -2277,6 +2474,7 @@ global procedure set_sendheader_default()
 	-- Referer is often used by sites to be sure your fetch was from one of their own pages
 	-- headers with [3] = "" won't be sent
 	
+	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
 	sendheader = { -- you can add more [1], and modify [3], [2] is the ' ' or ": " (GET has no ": ")
 	{"httpversion","","HTTP/1.0"}, -- not a legal http headerline, but to append to GET later
 		{"GET"," ",""}, -- [3] = the filename you want
@@ -2310,9 +2508,11 @@ end procedure --defaultsetsendheaderline()
 -- default header fields, the field MUST be set by string.  This will
 -- increase the length of the header overall.  
 --
--- Example:	set_sendheader("Referer","search.yahoo.com")
+-- Example 1:
+-- set_sendheader("Referer","search.yahoo.com")
 --
--- See also:	get_sendheader
+-- See also:
+--     get_sendheader
 
 global procedure set_sendheader(object whatheader, sequence whatdata)
 	
@@ -2349,6 +2549,8 @@ global procedure set_sendheader_useragent_msie()
 end procedure
 --**
 
+--------------------------------------------------------------------------------
+-- this can also be used to flatten the sendheader record, for printing, etc
 function eunet_format_sendheader()
 	
 	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
@@ -2387,10 +2589,10 @@ end function -- formatsendheader()
 --**
 -- Populates the internal sequence recvheader from the flat string header.
 --
--- Notes:       This must be called prior to calling get_recvheader().
+-- Notes:
+--     This must be called prior to calling get_recvheader().
 
 global procedure parse_recvheader(sequence header)
-	
 	sequence junk
 	atom place
 	
@@ -2432,6 +2634,8 @@ global function get_recvheader(object field)
 	-- because that leads to using a junk seq to get the [2] from
 	-- --> And yet, that's exactly what we're doing.  -- Mike.
 	
+	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.1
+	
 	if sequence(field) and equal(field,"") then return -1 end if
 	if atom(field) then
 		if ( field <= 0 ) or ( field > length(recvheader) ) then return -1 end if
@@ -2449,6 +2653,10 @@ global function get_recvheader(object field)
 	
 end function
 --**
+
+-------------------------------------------------------------------------------
+-- get_http
+-------------------------------------------------------------------------------
 
 --**
 -- Returns data from an http internet site.
@@ -2471,12 +2679,14 @@ global function get_http(sequence inet_addr, sequence hostname, sequence file)
 		return {"",""}
 	end if
 	
+	-- Modification added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0 {
 	if equal(sendheader,"") then
 		set_sendheader_default() -- it really should be set to something! But isn't **required**
 	end if
 	
 	if length(file)=0 or file[1]!='/' then file = '/'&file end if
 	set_sendheader("GET",file)
+	-- TO DO: Allow transmission of POST data by using set_sendheader("POST",data)
 	set_sendheader("HOST",hostname)
 	hline = get_sendheader("Referer")
 	if equal(hline[3],"") then
@@ -2487,7 +2697,10 @@ global function get_http(sequence inet_addr, sequence hostname, sequence file)
 	socket = new_socket(AF_INET,SOCK_STREAM,0)
 	success = connect(socket,inet_addr)
 	if success = 0 then
+		--    success = send(socket,
+			--                  sprintf("GET /%s HTTP/1.0\nHost: %s\n\n",{file,hostname}),0)
 		success = send(socket,eunet_format_sendheader(),0)
+		-- } end version 1.3.0 mod
 		while success > 0 do
 			data = data & recv(socket,0)
 			success = length(data)-last_data_len
@@ -2512,29 +2725,31 @@ end function
 
 --**
 -- Works the same as get_url, but maintains an internal
--- state register based on cookies received.  As of Euphoria 4.0, only
--- the internal state is maintained.  Future versions of this library
--- will expand state functionality.
+-- state register based on cookies received. 
 --
--- Returns:	A sequence {header, body} on success, or an empty sequence on
--- error.
+-- Note: 
+--   As of Euphoria 4.0, only the internal state is maintained. Future versions of this 
+--   library will expand state functionality.
 --
--- Example:
--- 	addrinfo = getaddrinfo("www.yahoo.com","http",0)
---	if atom(addrinfo) or length(addrinfo)<1 or
---		length(addrinfo[1])<5 then
---		puts(1,"Uh, oh")
---		return {}
---	else
---		inet_addr = addrinfo[1][5]
---	end if
---	data = get_http_use_cookie(inet_addr,"www.yahoo.com","")
+-- Returns:	
+--   A sequence {header, body} on success, or an empty sequence on error.
 --
--- See also:	get_url
+-- Example 1:
+-- addrinfo = getaddrinfo("www.yahoo.com","http",0)
+-- if atom(addrinfo) or length(addrinfo) < 1 or
+--    length(addrinfo[1]) < 5 then
+--    puts(1,"Uh, oh")
+--    return {}
+-- else
+--     inet_addr = addrinfo[1][5]
+-- end if
+-- data = get_http_use_cookie(inet_addr,"www.yahoo.com","")
+--
+-- See also:
+--     get_url
 
 global function get_http_use_cookie(sequence inet_addr, sequence hostname,
                                           sequence file)
-	
 	atom socket, success, last_data_len, cpos, offset
 	sequence header, header2, body, data, updata, hline
 	sequence cookielist, request, cookie
@@ -2545,6 +2760,7 @@ global function get_http_use_cookie(sequence inet_addr, sequence hostname,
 	if length(inet_addr)=0 then
 		return {"",""}
 	end if
+	-- Modification added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0 {
 	if equal(sendheader,"") then
 		set_sendheader_default() -- it really should be set to something! But isn't **required**
 	end if
@@ -2566,15 +2782,26 @@ global function get_http_use_cookie(sequence inet_addr, sequence hostname,
 		end if
 	end for
 	
+	-- TO DO: Sort cookielist by domain, path (longer path before shorter path)
+	--  request = sprintf("GET /%s HTTP/1.0\nHost: %s\n",{file,hostname})
 	for idx = 1 to length(cookielist) do
+		--    if idx = 1 then
+		--      request = request & "Cookie: "&cookielist[idx][1]
+		--    else
+		--      request = request & "        "&cookielist[idx][1]
+		--    end if
 		request = request & cookielist[idx][1]
 		if length(cookielist[idx][3])>0 then
 			request = request & "; $Path=" & cookielist[idx][3]
 		end if
 		if idx < length(cookielist) then
+			--request = request & ";\n"
 			request = request & ";"
+		else
+			--request = request & "\n"
 		end if
 	end for
+	--  request = request & "\n"
 	set_sendheader("Cookie",request)
 	
 	data = {}
@@ -2582,7 +2809,9 @@ global function get_http_use_cookie(sequence inet_addr, sequence hostname,
 	socket = new_socket(AF_INET,SOCK_STREAM,0)
 	success = connect(socket,inet_addr)
 	if success = 0 then
+		--    success = send(socket,request,0)
 		success = send(socket,eunet_format_sendheader(),0)
+		-- } end version 1.3.0 modification
 		while success > 0 do
 			data = data & recv(socket,0)
 			success = length(data)-last_data_len
@@ -2642,6 +2871,13 @@ global function get_http_use_cookie(sequence inet_addr, sequence hostname,
 			cpos = find(';',data[offset..length(data)])
 			if cpos = 0 then cpos = length(data)-offset+2 end if
 			cookie[2] = data[offset+7..offset+cpos-2]
+			-- Offset is base 1.  If the semicolon is in the first position, cpos
+			-- is also 1.  Since we don't want to include the semicolon, we need
+			-- to subtract 1 for offset's base and 1 to go to the char before
+			-- cpos, thus the subtracting of two.  In the case of end of string
+			-- (cpos = 0), we need to add those two back to compensate for the
+			-- different scenario (+offset-offset = 0 and +2-2 = 0, therefore
+			-- cpos = length(data), which is what we want).
 		end if
 		offset = match("EXPIRES=",updata)
 		if offset > 0 then
@@ -2693,30 +2929,35 @@ global function get_http_use_cookie(sequence inet_addr, sequence hostname,
 end function
 --**
 
+-------------------------------------------------------------------------------
+-- get_url
+-------------------------------------------------------------------------------
+
 --**
 -- Returns data from an http internet site.  Other common
 -- protocols will be added in future versions.  This function
 -- returns either an empty sequence or a 2-element sequence of
 -- {sequence header, sequence data}.
 --
--- Example:
---	url = "http://banners.wunderground.com/weathersticker/mini"&
---	"Weather2_metric_cond/language/www/US/PA/Philadelphia.gif"
+-- Example 1:
+-- url = "http://banners.wunderground.com/weathersticker/mini"&
+-- "Weather2_metric_cond/language/www/US/PA/Philadelphia.gif"
 --
---	temp = get_url(url)
---	if length(temp)>=2 and length(temp[2])>0 then
---		tempfp = open(TEMPDIR&"current_weather.gif","wb")
---		puts(tempfp,temp[2])
---		close(tempfp)
---	end if
+-- temp = get_url(url)
+-- if length(temp)>=2 and length(temp[2])>0 then
+--     tempfp = open(TEMPDIR&"current_weather.gif","wb")
+--     puts(tempfp,temp[2])
+--     close(tempfp)
+-- end if
 
 global function get_url(sequence url)
-	
 	sequence node, hostname, protocol, port, file, inet_addr
 	sequence data
 	atom cpos
 	object addrinfo
 	
+	-- TO DO: If the changes in version 1.2.2 prove stable, remove redundant
+	-- code under the search for '?'.
 	cpos = match("://",url)
 	if cpos > 0 then
 		protocol = url[1..cpos-1]
@@ -2752,6 +2993,8 @@ global function get_url(sequence url)
 				hostname = node
 				url = ""
 			else
+				-- hostname = node&url
+				-- file = ""
 				hostname = node
 				file = url
 				port = ""
@@ -2784,6 +3027,8 @@ global function get_url(sequence url)
 				file = url
 				url = ""
 			else
+				--hostname = node & url
+				-- file = ""
 				hostname = node
 				file = url
 				url = ""
@@ -2794,6 +3039,7 @@ global function get_url(sequence url)
 	if length(file)>0 and file[1]='/' then file = file[2..length(file)] end if
 	addrinfo = getaddrinfo(node,protocol,0)
 	if atom(addrinfo) or length(addrinfo)<1 or length(addrinfo[1])<5 then
+		-- attempt to use deprecated methods
 		return {} -- failed
 	else
 		inet_addr = addrinfo[1][5]
@@ -2807,3 +3053,4 @@ global function get_url(sequence url)
 	
 end function
 --**
+
