@@ -343,14 +343,14 @@ distclean : .SYMBOLIC
 #TODO make this smarter
 clean : .SYMBOLIC
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
-		exw.exe exwc.exe ecw.lib backendw.exe main-.h rev.e
+		exw.exe exwc.exe ecw.lib backendw.exe main-.h
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q /S &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
 		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
 	    .\pcre\pcre_chartables.c 
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
-		exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h rev.e
+		exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
@@ -471,8 +471,10 @@ exwc.exe : interpreter_objects
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exwc.exe
 	wrc -q -ad exw.res exwc.exe
 
+svn_rev : .SYMBOLIC
+	$(EX) revget.ex svn~1\entries
+
 interpreter : .SYMBOLIC builddirs 
-	del rev.e
         wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
         wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
@@ -498,11 +500,9 @@ ecw.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRAN
 
 
 translator : .SYMBOLIC builddirs
-	del rev.e
-        wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f makefile.wat ecw.exe EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dostranslator : .SYMBOLIC builddirs
-	del rev.e
 	wmake -f makefile.wat ec.exe EX=ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
@@ -517,11 +517,9 @@ backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_B
 
 
 backend : .SYMBOLIC builddirs
-	del rev.e
         wmake -f makefile.wat backendw.exe EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dos : .SYMBOLIC builddirs
-	del rev.e
 	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 ex.exe : rev.e $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)

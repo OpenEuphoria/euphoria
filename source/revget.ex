@@ -1,4 +1,5 @@
 include get.e 
+
 constant rev = "revision=\""
 
 function is_numeric(sequence s)
@@ -12,6 +13,42 @@ function is_numeric(sequence s)
 		end if
 	end for
 	return 1
+end function
+
+function is_current( object rev )
+	integer fn
+	integer current
+	integer ix, jx
+	object line
+	fn = open( "rev.e", "r" )
+	if fn = -1 then
+		return 0
+	end if
+	
+	if sequence( rev ) then
+		rev = value( rev )
+		rev = rev[2]
+	end if
+	
+	
+	current = 0
+	while sequence( line ) entry do
+		ix = match( "SVN_REVISION = \"", line )
+		if ix then
+			jx = find_from( '"', line, ix + 17 )
+			if jx then
+				line = value( line[ix+16..jx-1] )
+				if line[2] >= rev then
+					current = 1
+				end if
+				exit
+			end if
+		end if
+	entry
+		line = gets( fn )
+	end while
+	
+	return current
 end function
 
 procedure rev_1_4()
@@ -74,10 +111,11 @@ for i = 2 to length(f) do
 		n = f[i]
 	end if
 end for
-
-h = open("rev.e", "w")
-printf(h, "global constant SVN_REVISION = \"%d\"\n", {n})
-close(h)
+if not is_current( n ) then
+	h = open("rev.e", "w")
+	printf(h, "global constant SVN_REVISION = \"%d\"\n", {n})
+	close(h)
+end if
 end procedure
 
 procedure rev_1_3()
@@ -122,12 +160,15 @@ if not length(f) or not atom(f[1]) then
 	return
 end if
 
+
 f = f[1..find('"', f)-1]
 --puts(1, f)
-
-h = open("rev.e", "w")
-printf(h, "global constant SVN_REVISION = \"%s\"\n", {f})
-close(h)
+if not is_current( f ) then
+puts(1,"updating rev.e\n")
+	h = open("rev.e", "w")
+	printf(h, "global constant SVN_REVISION = \"%s\"\n", {f})
+	close(h)
+end if
 end procedure
 
 rev_1_3()

@@ -266,7 +266,6 @@ clean :
 	do \
 	    rm "$$d"/*.o; \
 	done
-	-rm rev.e
 	-rm exu ecu ecu.a eubackend $(DEB_SOURCE_DIR).tar.gz
 	cd pcre && $(MAKE) clean
 
@@ -278,14 +277,16 @@ ecu.a : $(EU_LIB_OBJECTS)
 	ar -rc ecu.a $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
-builddirs : 
+builddirs : svn_rev
 	@-for d in $(BUILD_DIRS); \
 	do \
 		mkdir -p "$$d"; \
 	done
 
+svn_rev : 
+	-$(EXE) revget.ex .svn/entries
+
 interpreter : builddirs $(PCRE)
-	-rm rev.e
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs $(PCRE)
@@ -295,6 +296,7 @@ translator : builddirs $(PCRE)
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
+.PHONY : svn_rev
 
 exusource : intobj/main-.c
 exusource :  EU_TARGET = int.ex
@@ -349,7 +351,6 @@ ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -oecu
 
 backend : builddirs
-	-rm rev.e
 	$(MAKE) eubackend EBACKEND=1 OBJDIR=backobj
 
 eubackend : OBJDIR = backobj
