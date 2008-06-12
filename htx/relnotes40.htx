@@ -60,7 +60,7 @@
 <li>
      Began <b>library expansion</b>. The vast percentage of these functions
      have been found in The Archive. Many thanks must go to the original
-     developers who have contributed these functions.</li>
+     developers who have contributed these functions.
 <ul>
     <li>
      New routines in <b>machine.e</b>:
@@ -84,7 +84,7 @@
      <b>rmatch_from()</b>.</li>
     <li>
      <i>by Derek Parnell</i>, New routines in <b>sort.e</b>:
-     <b>sort_reverse()</b>, <b>sort_user</b>, <b>sort_columns</b>.
+     <b>sort_reverse()</b>, <b>sort_user()</b>, <b>sort_columns()</b>.
      </li>
     <li>
      <i>by Derek Parnell</i>, Performance improvement when sorting large sequences.
@@ -139,27 +139,37 @@
        <b>cmd_parse()</b>.
        Implemented by Jeremy Cowgar</li>
 	</ul>
+</li>
 
 <li>
      <b>Unit testing added to Euphoria</b>. Over 900 tests. To run, cd tests and
-     exw or exu all.ex ... Implemented by Jeremy Cowgar and Yuku Sugianto</li>
+     exw or exu all.ex</li>
 
 <li>
-     Updated the documentation to make it a little more user friendly.
-     Jeremy Cowgar</li>
-     
-<li>
-    Started work on converting documentation generator to output CSS-based XHTML compliant docs.
-    c.k.lester</li>
+    Documentation moved to a new format. Jeremy Cowgar and CK Lester</li>
 
 <li>
-    Condition compiling keywords (<b>ifdef</b>, <b>end ifdef</b>) and with <b>define=xyz</b>
-    to insert/omit code in interpreter IL code and in translated C code. Implemented by Jeremy Cowgar.</li>
+    Condition compiling keywords (<b>ifdef</b>, <b>elsifdef</b>, <b>end ifdef</b>) and <b>with 
+    define=xyz</b> or command line <b>-D XYZ</b> to insert/omit code in interpreter IL code and 
+    in translated C code. Implemented by Jeremy Cowgar.</li>
 
 <li>
-	New enum keyword that allows for <i>parse time</i> sequential constant creation. Implemented by Jeremy Cowgar.</li>
+	New enum keyword that allows for <i>parse time</i> sequential constant creation. 
+    Implemented by Jeremy Cowgar.</li>
+
 <li>
 	The namespace <b>eu</b> is predefined, and can be used to fully qualify built-in routines.</li>
+
+<li>
+    Routine resolution changes<ol>
+    <li>Routines the same name as an internal no longer override the internal by default. You
+        must use the keyword <b>override</b>.</li>
+    <li>An unqualified call to routine that exists as an internal calls the internal unless 
+        overridden with the override keyword. global and export functions are not called. A
+        namespace must be used.</li>
+    </ol>
+    Implemented by Jeremy Cowgar.</li>
+
 </ul>
 
 </doc>

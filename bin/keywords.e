@@ -8,7 +8,8 @@ global constant keywords = {
     "exit", "function", "global", "by", "not", "include",
     "with", "without", "xor", "continue", "as", "ifdef", "elsifdef", "enum", 
 	"export", "switch", "case", "break", "entry", "label", "loop", "retry",
-	"until" }
+	"until", "override"
+}
 
 global constant builtins = {
     "length", "puts", "integer", "sequence", "position", "object",
@@ -25,5 +26,6 @@ global constant builtins = {
     "platform", "task_create", "task_schedule", "task_yield",
     "task_self", "task_suspend", "task_list",
     "task_status", "task_clock_stop", "task_clock_start","find_from",
-    "match_from"}
+    "match_from"
+}
 

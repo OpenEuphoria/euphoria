@@ -512,7 +512,7 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 	end if
 end procedure
 
-global sequence dup_globals, in_include_path
+global sequence dup_globals, dup_overrides, in_include_path
 
 function symbol_in_include_path( symtab_index sym, integer check_file, sequence path_checked  )
 		integer file_no
@@ -546,12 +546,14 @@ global function keyfind(sequence word, integer file_no)
 -- table. If not found, 'word' must be a new user-defined identifier. 
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL. 
 	integer hashval, scope, defined, ix
-	symtab_index st_ptr
+	symtab_index st_ptr, st_builtin
 	token tok, gtok
 
 	dup_globals = {}
+	dup_overrides = {}
 	in_include_path = {}
 	symbol_resolution_warning = ""
+	st_builtin = 0
 	
 	hashval = hashfn(word)
 	st_ptr = buckets[hashval] 
@@ -569,13 +571,12 @@ global function keyfind(sequence word, integer file_no)
 				
 				scope = SymTab[st_ptr][S_SCOPE]
 				
-				if scope = SC_PREDEF then
-					if BIND then
-						add_ref(tok)
-					end if
-					   
-					return tok
-					-- else a global has overridden this symbol 
+				if scope = SC_OVERRIDE then
+					dup_overrides &= st_ptr
+
+				elsif scope = SC_PREDEF then
+					st_builtin = st_ptr
+
 				elsif scope = SC_GLOBAL then
 					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file 
@@ -586,6 +587,7 @@ global function keyfind(sequence word, integer file_no)
 					   
 						return tok
 					end if
+
 					-- found global in another file 
 					gtok = tok
 					dup_globals &= st_ptr
@@ -632,7 +634,9 @@ global function keyfind(sequence word, integer file_no)
 				end if
 			
 			else 
-				-- qualified - must match global symbol in specified file (or be in the file's include path)
+				-- qualified - must match global symbol in specified file (or be in the file's 
+				-- include path)
+
 				if not file_no then
 					-- internal eu namespace was used
 					if SymTab[tok[T_SYM]][S_SCOPE] = SC_PREDEF then
@@ -642,13 +646,13 @@ global function keyfind(sequence word, integer file_no)
 						return tok
 					end if
 				
-				elsif ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or symbol_in_include_path(tok[T_SYM], file_no, {})) and
-					SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL)
-					or ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or is_direct_include(tok[T_SYM], file_no )) and
-					SymTab[tok[T_SYM]][S_SCOPE] = SC_EXPORT) then
-					   
-
-					
+				elsif ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or 
+						symbol_in_include_path(tok[T_SYM], file_no, {})) and
+						SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL) or
+						((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or 
+							is_direct_include(tok[T_SYM], file_no )) and
+						SymTab[tok[T_SYM]][S_SCOPE] = SC_EXPORT) 
+				then
 					if file_no = SymTab[tok[T_SYM]][S_FILE_NO] then
 						if BIND then
 							add_ref(tok)
@@ -656,11 +660,9 @@ global function keyfind(sequence word, integer file_no)
 						return tok 
 					end if
 					
-
 					gtok = tok
 					dup_globals &= st_ptr
 					in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
-					
 				end if
 			end if
 			
@@ -669,6 +671,29 @@ global function keyfind(sequence word, integer file_no)
 		
 		st_ptr = SymTab[st_ptr][S_SAMEHASH]
 	end while
+
+	if length(dup_overrides) then
+		st_ptr = dup_overrides[1]
+		tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
+
+		if length(dup_overrides) = 1 then
+			if BIND then
+				add_ref(tok)
+			end if
+
+			return tok
+		end if
+
+	elsif st_builtin != 0 then
+		-- TODO: Check to see if globals are defined w/o namespace
+		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
+
+		if BIND then
+			add_ref(tok)
+		end if
+
+		return tok
+	end if
 
 	if length(dup_globals) > 1 and find( 1, in_include_path ) then
 		-- filter out based on include path
@@ -694,10 +719,13 @@ global function keyfind(sequence word, integer file_no)
 		if BIND then
 			add_ref(gtok)
 		end if
-		if not in_include_path[1] and not find( {current_file_no,SymTab[gtok[T_SYM]][S_FILE_NO]}, include_warnings )  then
-			include_warnings = prepend( include_warnings, {current_file_no,SymTab[gtok[T_SYM]][S_FILE_NO]})
+		if not in_include_path[1] and 
+				not find( {current_file_no,SymTab[gtok[T_SYM]][S_FILE_NO]}, include_warnings )
+		then
+			include_warnings = prepend( include_warnings, 
+				{ current_file_no, SymTab[gtok[T_SYM]][S_FILE_NO] })
 			symbol_resolution_warning = sprintf("%s:%d - identifier '%s' in '%s' is not included", 
-				{name_ext(file_name[current_file_no]), line_number, word, 
+				{ name_ext(file_name[current_file_no]), line_number, word, 
 				name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]) })
 		end if	
 		return gtok
@@ -706,13 +734,14 @@ global function keyfind(sequence word, integer file_no)
 	-- couldn't find unique one 
 	if length(dup_globals) = 0 then
 		defined = SC_UNDEFINED
-	else
+	elsif length(dup_globals) or length(dup_overrides) then
 		defined = SC_MULTIPLY_DEFINED
 	end if
 
 	tok = {VARIABLE, NewEntry(word, 0, defined, 
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
+
 	return tok  -- no ref on newly declared symbol
 end function
 

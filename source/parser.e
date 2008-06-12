@@ -16,38 +16,38 @@ without trace
 sequence branch_list
 branch_list = {}
 
-integer short_circuit     -- are we doing short-circuit code?
-						  -- > 0 means yes - if/elsif/while but not
-						  -- in args, subscripts, slices, {,,}. 
+integer short_circuit      -- are we doing short-circuit code?
+						   -- > 0 means yes - if/elsif/while but not
+						   -- in args, subscripts, slices, {,,}. 
 short_circuit = 0
-boolean short_circuit_B   -- are we in the skippable part of a short
-short_circuit_B = FALSE   -- circuit expression? given short_circuit is TRUE.
+boolean short_circuit_B    -- are we in the skippable part of a short
+short_circuit_B = FALSE    -- circuit expression? given short_circuit is TRUE.
 
-integer SC1_patch        -- place to patch jump address for SC1 ops 
-integer SC1_type         -- OR or AND 
-integer start_index      -- start of current top level command 
+integer SC1_patch          -- place to patch jump address for SC1 ops 
+integer SC1_type           -- OR or AND 
+integer start_index        -- start of current top level command 
 
-object backed_up_tok  -- place to back up a token
-integer FuncReturn    -- TRUE if a function return appeared 
-integer param_num     -- number of parameters and private variables
-					  -- in current procedure
+object backed_up_tok       -- place to back up a token
+integer FuncReturn         -- TRUE if a function return appeared 
+integer param_num          -- number of parameters and private variables
+					       -- in current procedure
 sequence break_list        -- back-patch list for end if label
-sequence break_delay        -- delay list for end if label
-sequence exit_list    -- stack of exits to back-patch
-sequence exit_delay    -- delay list for end for/while/until
-sequence continue_list    -- stack of exits to back-patch
+sequence break_delay       -- delay list for end if label
+sequence exit_list         -- stack of exits to back-patch
+sequence exit_delay        -- delay list for end for/while/until
+sequence continue_list     -- stack of exits to back-patch
 sequence continue_delay    -- stack of exits to back-patch
-sequence loop_labels  -- sequence of loop labels, 0 for unlabelled loops
-sequence if_labels    -- sequence of if block labels, 0 for unlabelled blocks
+sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
+sequence if_labels         -- sequence of if block labels, 0 for unlabelled blocks
 sequence for_vars, for_where -- list of loop var s.t. indexes and for-loop nesting level
 sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
-sequence block_list -- list of opcodes for currently active blocks. This list never shrinks
-integer block_index -- index of currently active block
+sequence block_list        -- list of opcodes for currently active blocks. This list never shrinks
+integer block_index        -- index of currently active block
 
-integer loop_nest     -- current number of nested loops
-integer stmt_nest     -- nesting level of statement lists
+integer loop_nest          -- current number of nested loops
+integer stmt_nest          -- nesting level of statement lists
 
-sequence init_stack   -- var init stack 
+sequence init_stack        -- var init stack 
 
 sequence loop_stack
 
@@ -61,13 +61,13 @@ factors = 0
 integer lhs_subs_level    -- number of levels of subscripting of lhs var on RHS
 lhs_subs_level = -1
 
-symtab_index left_sym  -- var used on LHS of assignment
+symtab_index left_sym     -- var used on LHS of assignment
 left_sym = 0
 
-sequence canned_tokens -- recording stack when parser is in recording mode
-					   -- this sequence will be saved and the tape played back whenever needed
+sequence canned_tokens    -- recording stack when parser is in recording mode
+					      -- this sequence will be saved and the tape played back whenever needed
 canned_tokens={}
-integer canned_index   -- previous playback position
+integer canned_index      -- previous playback position
 canned_index=0
 
 procedure EndLineTable()
@@ -141,10 +141,10 @@ end procedure
 sequence switch_stack
 switch_stack = {}
 
-constant 
-	SWITCH_CASES      = 1,
-	SWITCH_JUMP_TABLE = 2,
-	SWITCH_ELSE       = 3
+enum 
+	SWITCH_CASES,
+	SWITCH_JUMP_TABLE,
+	SWITCH_ELSE
 
 function in_switch()
 	if length(loop_stack) then
@@ -254,7 +254,9 @@ procedure PatchEList(integer base)
 	if not length(break_list) then
 		return
 	end if
+
     break_top = 0
+
     for i=length(break_list) to base+1 by -1 do
         n=break_delay[i]
         break_delay[i] -= (n>0)
@@ -266,12 +268,13 @@ procedure PatchEList(integer base)
             backpatch(break_list[i],length(Code)+1)
         end if
     end for
+
     if break_top=0 then
 	    break_top=base
     end if   
+
     break_delay = break_delay[1..break_top]
     break_list = break_list[1..break_top]
-
 end procedure
 
 procedure PatchNList(integer base)
@@ -281,7 +284,9 @@ procedure PatchNList(integer base)
 	if not length(continue_list) then
 		return
 	end if
+
     next_top = 0   
+
     for i=length(continue_list) to base+1 by -1 do
         n=continue_delay[i]
         continue_delay[i] -= (n>0)
@@ -293,12 +298,13 @@ procedure PatchNList(integer base)
             backpatch(continue_list[i],length(Code)+1)
         end if
     end for
+
     if next_top=0 then
 	    next_top=base
     end if
+
     continue_delay =continue_delay[1..next_top]
     continue_list = continue_list[1..next_top]
-				
 end procedure
 
 procedure PatchXList(integer base)
@@ -308,7 +314,9 @@ procedure PatchXList(integer base)
 	if not length(exit_list) then
 		return
 	end if
+
     exit_top = 0
+
     for i=length(exit_list) to base+1 by -1 do
         n=exit_delay[i]
         exit_delay[i] -= (n>0)
@@ -320,12 +328,13 @@ procedure PatchXList(integer base)
             backpatch(exit_list[i],length(Code)+1)
         end if
     end for 
+
     if exit_top=0 then
 	    exit_top=base
     end if
+
     exit_delay = exit_delay [1..exit_top]
     exit_list = exit_list [1..exit_top]
-
 end procedure
 
 procedure putback(token t)
@@ -506,16 +515,16 @@ end procedure
 
 procedure tok_optional(integer tok)
 -- match token or else syntax error 
-		token t
-		--sequence expected, actual
+	token t
+	--sequence expected, actual
 
-		t = next_token()
-		if t[T_ID] != tok then
-				--expected = LexName(tok)
-				--actual = LexName(t[T_ID])
-				-- Warning(sprintf("Optional token %s, but got %s", {expected, actual}))
-				putback(t)
-		end if
+	t = next_token()
+	if t[T_ID] != tok then
+		--expected = LexName(tok)
+		--actual = LexName(t[T_ID])
+		-- Warning(sprintf("Optional token %s, but got %s", {expected, actual}))
+		putback(t)
+	end if
 end procedure
 
 procedure UndefinedVar(symtab_index s)
@@ -1354,6 +1363,7 @@ procedure Exit_statement()
     if not length(loop_labels) then
     	CompileErr("exit statement must be inside a loop")
     end if
+
     by_ref = exit_level(next_token(),0) -- can't pass tok by reference
     emit_op(EXIT)  
     AppendXList(length(Code)+1)
@@ -1361,10 +1371,10 @@ procedure Exit_statement()
     emit_forward_addr()    -- to be back-patched
     tok = by_ref[2] 
     putback(tok) 
+
     if not in_switch() then
     	NotReached(tok[T_ID], "exit")
     end if
-
 end procedure
 
 procedure Continue_statement()
@@ -1376,9 +1386,11 @@ procedure Continue_statement()
 	if not length(loop_labels) then
 		CompileErr("continue statement must be inside a loop")
 	end if
+
 	emit_op(ELSE)
 	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
 	loop_level = by_ref[1]
+
 	-- num_labels+1-n
 	if continue_addr[$+1-loop_level] then -- address is known for while loops
 		if continue_addr[$+1-loop_level] < 0 then
@@ -1391,6 +1403,7 @@ procedure Continue_statement()
 		continue_delay &= loop_level
 		emit_forward_addr()    -- to be back-patched
 	end if
+
 	tok = by_ref[2]
 	putback(tok)
 	
@@ -1406,7 +1419,9 @@ procedure Retry_statement()
 	if not length(loop_labels) then
 		CompileErr("retry statement must be inside a loop")
 	end if
+
 	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+
 	if loop_stack[$+1-by_ref[1]][1]=FOR then
 		emit_op(RETRY) -- for Translator to emit a label at the right place
 	else
@@ -1416,6 +1431,7 @@ procedure Retry_statement()
 		end if
 		emit_op(ELSE)
 	end if
+
 	emit_addr(retry_addr[$+1-by_ref[1]])
 	tok = by_ref[2]
 	putback(tok)
@@ -1430,6 +1446,7 @@ procedure Break_statement()
     if not length(if_labels) then
     	CompileErr("break statement must be inside a if block")
     end if
+
     by_ref = exit_level(next_token(),1)
     emit_op(ELSE)
     AppendEList(length(Code)+1)
@@ -1652,7 +1669,6 @@ procedure add_case( symtab_index sym )
 end procedure
 
 function else_case()
-	
 	return switch_stack[$][SWITCH_ELSE]
 end function
 
@@ -1761,8 +1777,6 @@ procedure Switch_statement()
 	end if
 	pop_switch( exit_base )
 end procedure
-
-
 
 procedure While_statement()
 -- Parse a while loop
@@ -2430,17 +2444,27 @@ procedure SubProg(integer prog_type, integer scope)
 		pt = TYPE
 	end if
 	
-	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT}) then
+	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry 
-		if SymTab[p][S_SCOPE] = SC_PREDEF then  -- only warn about overriding predefined
-			Warning(sprintf("built-in routine %s() redefined in %s",
-							{SymTab[p][S_NAME], file_name[current_file_no]}))
+		if scope = SC_OVERRIDE then
+			switch SymTab[p][S_SCOPE] do
+				case SC_PREDEF:
+					Warning(sprintf("built-in routine %s() overridden in %s",
+									{SymTab[p][S_NAME], file_name[current_file_no]}))
+					exit
+				case SC_OVERRIDE:
+					CompileErr(sprintf("built-in routine %s() is overridden already in: %s", 
+						 {SymTab[p][S_NAME], file_name[SymTab[p][S_FILE_NO]]}))
+					exit
+			end switch
 		end if
+
 		h = SymTab[p][S_HASHVAL]
 		sym = buckets[h]
 		p = NewEntry(SymTab[p][S_NAME], 0, 0, pt, h, sym, 0) 
 		buckets[h] = p
 	end if
+
 	CurrentSub = p
 	first_def_arg = 0
 	temps_allocated = 0
@@ -2602,11 +2626,9 @@ global procedure InitGlobals()
 	if EWINDOWS then
 		OpDefines &= {"EU400", "WIN32"}
 	elsif ELINUX then
-		OpDefines &= {"EU400", "LINUX", "UNIX"}
+		OpDefines &= {"EU400", "UNIX", "LINUX"}
 	elsif EBSD then
 		OpDefines &= {"EU400", "UNIX", "FREEBSD"}
-	elsif EUNIX then --right now this can never happen
-		OpDefines &= {"EU400", "UNIX"}
 	elsif EDOS then
 		OpDefines &= {"EU400", "DOS32"}
 	end if
@@ -2620,7 +2642,7 @@ end procedure
 
 sequence mix_msg
 mix_msg = "can't mix profile and profile_time"
-	 include sequence.e
+include sequence.e -- TODO: why is this here?
 procedure SetWith(integer on_off)
 -- set a with/without option 
 	sequence option
@@ -2733,12 +2755,19 @@ global procedure real_parser(integer nested)
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 			SubProg(tok[T_ID], SC_LOCAL)
 
-		elsif id = GLOBAL or id = EXPORT then
-			if id = GLOBAL then
-				scope = SC_GLOBAL
-			else
-				scope = SC_EXPORT
-			end if
+		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE then
+			switch id do
+				case GLOBAL:
+				    scope = SC_GLOBAL
+					exit
+				case EXPORT:
+					scope = SC_EXPORT
+					exit
+				case OVERRIDE:
+					scope = SC_OVERRIDE
+					exit
+			end switch
+
 			tok = next_token()
 			id = tok[T_ID]
 			
@@ -2765,11 +2794,9 @@ global procedure real_parser(integer nested)
 				if scope = SC_GLOBAL then
 					CompileErr( "'global' must be followed by:\n" &
 								"<a type>, 'constant', 'procedure', 'type' or 'function'")
-
 				else
 					CompileErr( "'export' must be followed by:\n" &
 								"<a type>, 'constant', 'procedure', 'type' or 'function'")
-
 				end if
 			end if
 			
@@ -2881,7 +2908,6 @@ global procedure real_parser(integer nested)
 				CompileErr("entry must be inside a loop")
 			end if
 
-
 		elsif id = IFDEF then
 			StartSourceLine(TRUE)
 			Ifdef_statement()
@@ -2927,3 +2953,4 @@ global procedure nested_parser()
 end procedure
 
 top_level_parser = routine_id("nested_parser")
+

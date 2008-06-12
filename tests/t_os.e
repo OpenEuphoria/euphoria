@@ -1,11 +1,11 @@
-without warning
-
 include unittest.e
 
+without warning
 sequence cmd_line
-global function command_line()
+override function command_line()
     return cmd_line
 end function
+with warning
 
 include os.e
 
@@ -52,3 +52,4 @@ test_equal("cmd_parse() #1", 1, verbose)
 test_equal("cmd_parse() #2", "50", count)
 test_equal("cmd_parse() #3", "file.css", style_file)
 test_equal("cmd_parse() #4", {"input.txt", "output.txt"}, extras)
+
