@@ -1,5 +1,4 @@
---
--- cross platform file operations for Euphoria
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
 -- Category:
@@ -8,6 +7,8 @@
 -- Title:
 --    File System
 --****
+--
+-- cross platform file operations for Euphoria
 
 -- TODO: Add unit tests
 

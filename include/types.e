@@ -1,6 +1,13 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Character type testing routines
+--****
+-- Category: 
+--   type
+--
+-- Title:
+--   Character Type Testing
+--****
+--
 
 global constant
 	FALSE = 0,

@@ -1,9 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Math routines
-
--- trig formulas provided by Larry Gregg
-
 --****
 -- Category: 
 --   math
@@ -11,6 +7,9 @@
 -- Title:
 --   Math
 --****
+--
+-- Math routines
+-- trig formulas provided by Larry Gregg
 
 global constant
 	PI = 3.141592653589793238,

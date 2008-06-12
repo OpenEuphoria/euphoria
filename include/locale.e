@@ -1,7 +1,13 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.2
--- Locale routines
+--****
+-- Category: 
+--   locale
+--
+-- Title:
+--   Locale Routines
+--****
+-- 
 
 include misc.e
 include dll.e
@@ -38,17 +44,19 @@ lang_path = 0
 --
 ------------------------------------------------------------------------------------------
 
--- TODO: document
+--**
 global procedure set_lang_path(object pp)
 	lang_path = pp
 end procedure
+--**
 
--- TODO: document
+--**
 global function get_lang_path()
 	return lang_path
 end function
+--**
 
--- TODO: document
+--**
 global function lang_load(sequence filename)
 	object lines
 	sequence line, key, msg
@@ -92,11 +100,13 @@ global function lang_load(sequence filename)
 
 	return 1
 end function
+--**
 
--- TODO: document
+--**
 global function w(sequence word)
 	return m:get(lang, word, "")
 end function
+--**
 
 ------------------------------------------------------------------------------------------
 --
@@ -165,7 +175,7 @@ constant
 	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
 	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I)
 
--- TODO: document
+--**
 global function set(sequence new_locale)
 	atom pLocale, ign
 	
@@ -181,8 +191,9 @@ global function set(sequence new_locale)
 
 	return (ign != NULL)
 end function
+--**
 
--- TODO: document
+--**
 global function get()
 	sequence r
 	atom p
@@ -197,6 +208,7 @@ global function get()
 
 	return r
 end function
+--**
 
 function money_unix(atom amount)
 	atom pResult, pFmt
@@ -229,7 +241,7 @@ function money_win32(atom amount)
 	return result
 end function
 
--- TODO: document
+--**
 global function money(atom amount)
 	if platform() = WIN32 then
 		return money_win32(amount)
@@ -237,6 +249,7 @@ global function money(atom amount)
 		return money_unix(amount)
 	end if
 end function
+--**
 
 function number_unix(atom num)
 	atom pResult, pFmt
@@ -269,7 +282,7 @@ function number_win32(atom num)
 	return result
 end function
 
--- TODO: document
+--**
 global function number(atom num)
 	if platform() = WIN32 then
 		return number_win32(num)
@@ -277,6 +290,7 @@ global function number(atom num)
 		return number_unix(num)
 	end if
 end function
+--**
 
 function mk_tm_struct(dt:datetime dtm)
 	atom pDtm
@@ -295,7 +309,7 @@ function mk_tm_struct(dt:datetime dtm)
 	return pDtm
 end function
 
--- TODO: document
+--**
 global function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
 	integer size
@@ -312,3 +326,5 @@ global function datetime(sequence fmt, dt:datetime dtm)
 
 	return res
 end function
+--**
+

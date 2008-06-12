@@ -1,7 +1,13 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
--- wild card matching for strings and file names
+--****
+-- Category: 
+--   wildcard
+--
+-- Title:
+--   Wildcard Matching
+--****
+--
 
 include misc.e
 include sequence.e as seq -- upper/lower
@@ -33,9 +39,12 @@ end function
 
 constant END_MARKER = -1
 
-global function wildcard_match(sequence pattern, sequence string)
+--**
 -- returns TRUE if string matches pattern
+--
+-- Comments:
 -- pattern can include '*' and '?' "wildcard" characters
+global function wildcard_match(sequence pattern, sequence string)
 	integer p, f, t 
 	sequence match_string
 	
@@ -81,13 +90,16 @@ global function wildcard_match(sequence pattern, sequence string)
 	end while
 	return 0
 end function
+--**
 
-global function wildcard_file(sequence pattern, sequence filename)
+--**
 -- Return 1 (TRUE) if filename matches the wild card pattern.
+--
+-- Comments:
 -- Similar to DOS wild card matching but better. For example, 
 -- "*ABC.*" in DOS will match *all* files, where this function will 
 -- only match when the file name part has "ABC" at the end.
-	
+global function wildcard_file(sequence pattern, sequence filename)
 	if platform() != LINUX then
 		pattern = seq:upper(pattern)
 		filename = seq:upper(filename)
@@ -100,5 +112,4 @@ global function wildcard_file(sequence pattern, sequence filename)
 	end if
 	return wildcard_match(pattern, filename)
 end function
-
-
+--**

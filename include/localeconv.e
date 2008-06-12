@@ -1,3 +1,14 @@
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+--****
+-- Category: 
+--   locale
+--
+-- Title:
+--   Locale Constants
+--****
+--
+
 global constant w32_names = {
 "af-ZA",
 "sq-AL",
@@ -638,6 +649,7 @@ else
 global constant platform_locale = w32_name_canonical
 end ifdef
 
+--**
 global function canonical(sequence new_locale)
 	integer w, ws, p, n
 	p = find(new_locale, posix_names)
@@ -655,7 +667,9 @@ global function canonical(sequence new_locale)
 	end if
 	return locale_canonical[n]
 end function
+--**
 
+--**
 global function decanonical(sequence new_locale)
 	integer w, ws, p, n
 	p = find(new_locale, posix_names)
@@ -673,4 +687,5 @@ global function decanonical(sequence new_locale)
 	end if
 	return platform_locale[n]
 end function
+--**
 

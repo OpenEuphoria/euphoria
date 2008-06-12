@@ -1,7 +1,4 @@
--- socket.e
--- 
--- Based on EuNet project, version 1.3.2, at SourceForge.
--- For updates, visit http://www.sourceforge.net/projects/eunet.
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
 -- Category:
@@ -10,6 +7,10 @@
 -- Title:
 --   Internet Sockets
 --****
+--
+-- Based on EuNet project, version 1.3.2, at SourceForge.
+-- For updates, visit http://www.sourceforge.net/projects/eunet.
+--
  
 include dll.e
 include misc.e

@@ -1,7 +1,5 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Graphics & Sound Routines
-
 --****
 -- Category: 
 --   graphics
@@ -9,6 +7,7 @@
 -- Title:
 --   Graphics and Sound
 --****
+--
 
 --    GRAPHICS MODES --  argument to graphics_mode()
 

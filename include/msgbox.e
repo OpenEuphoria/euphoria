@@ -1,7 +1,13 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
--- Windows message_box() function
+--****
+-- Category: 
+--   messaging
+--
+-- Title:
+--   Windows Message Box
+--****
+--
 
 include dll.e
 include machine.e
@@ -68,6 +74,15 @@ if platform() = WIN32 then
 	end if
 end if
 
+--**
+-- Display a window with title, containing the message string text.
+--  style determines the combination of buttons that will be available
+--  for the user to press, plus some other characteristics. style can be
+--  an atom or a sequence. A return value of 0 indicates a failure to set up
+--  the window.
+--
+-- Comments:
+-- See msgbox.e for a complete list of possible values for x and i.
 global function message_box(sequence text, sequence title, object style)
 	integer or_style
 	atom text_ptr, title_ptr, ret
@@ -95,5 +110,5 @@ global function message_box(sequence text, sequence title, object style)
 	free(title_ptr)
 	return ret
 end function
-
+--**
 

@@ -1,13 +1,11 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Miscellaneous routines and constants
-
 --****
 -- Category: 
 --   misc
 --
 -- Title:
---   Miscellaneous Routines
+--   Miscellaneous Routines and Constants
 --****
 
 -- platform() values:

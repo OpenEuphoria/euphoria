@@ -1,13 +1,15 @@
-include search.e
-include machine.e
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
 --****
 -- Category: 
 --   primes
 --
 -- Title:
---   Euphoria Standard Library List of prime numbers less than 10,000
+--   Prime Numbers
 --****
 
+include search.e
+include machine.e
 
 global sequence gPrimes 
 gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
@@ -77,7 +79,7 @@ global function calc_primes(integer pMax, atom pTimeLimit = 10)
 	return lResult[1..lPos]
 end function
 
--- TODO: document
+--**
 -- Returns the next prime number on or after 'n'
 global function next_prime(integer n, integer pDefault = 1)
 	integer i
@@ -101,4 +103,5 @@ global function next_prime(integer n, integer pDefault = 1)
 	return gPrimes[i]
 
 end function
+--**
 

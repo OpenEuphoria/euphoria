@@ -1,8 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Hash map
---
-
 --****
 -- Category:
 --	 map
@@ -10,7 +7,8 @@
 -- Title:
 --	 Map (hash table)
 --****
-
+--
+-- Hash map
 
 include get.e
 include primes.e

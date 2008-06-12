@@ -1,7 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Sequence routines
---
 --****
 -- Category: 
 --   search

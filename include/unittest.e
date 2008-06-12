@@ -1,8 +1,13 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.2
--- Unit testing framework
-
+--****
+-- Category: 
+--   unittest
+--
+-- Title:
+--   Unit Testing Framework
+--****
+--
 
 include misc.e
 
@@ -79,27 +84,36 @@ end procedure
 -- Global Testing Functions
 --
 
+--**
 global procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
+--**
 
+--**
 global procedure set_wait_on_summary(integer toWait)
 	wait_on_summary = toWait
 end procedure
+--**
 
+--**
 global function set_test_abort(integer pValue)
 	integer lTmp
 	lTmp = abort_on_fail
 	abort_on_fail = pValue
 	return lTmp
 end function
+--**
 
+--**
 global procedure set_test_module_name(sequence name)
 	modulesTested = append(modulesTested, name)
 	currentMod = name
 	modShown = 0
 end procedure
+--**
 
+--**
 global procedure test_summary()
 	if verbose > TEST_QUIET then
 		if verbose >= TEST_SHOW_MODULES and length(modulesTested) > 0 then
@@ -118,7 +132,9 @@ global procedure test_summary()
 	end if
 	abort(testsFailed > 0)
 end procedure
+--**
 
+--**
 procedure record_result(integer success, sequence name, object a, object b)
 	testCount += 1
 
@@ -128,7 +144,9 @@ procedure record_result(integer success, sequence name, object a, object b)
 		test_failed(name, a, b)
 	end if
 end procedure
+--**
 
+--**
 global procedure test_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
@@ -142,7 +160,9 @@ global procedure test_equal(sequence name, object a, object b)
 	end if
 	record_result(success, name, a, b)
 end procedure
+--**
 
+--**
 global procedure test_not_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
@@ -156,7 +176,9 @@ global procedure test_not_equal(sequence name, object a, object b)
 	end if
 	record_result(success, name, a, b)
 end procedure
+--**
 
+--**
 global procedure test_true(sequence name, object a)
 	integer success
 	if sequence(a) then
@@ -166,7 +188,9 @@ global procedure test_true(sequence name, object a)
 	end if
 	record_result(success, name, 1, a )
 end procedure
+--**
 
+--**
 global procedure test_false(sequence name, object a)
 	integer success
 	if not integer(a) then
@@ -176,12 +200,17 @@ global procedure test_false(sequence name, object a)
 	end if
 	record_result(success, name, 0, a)
 end procedure
+--**
 
+--**
 global procedure test_fail(sequence name)
 	record_result(0, name, 1, 0)
 end procedure
+--**
 
+--**
 global procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
+--**
 

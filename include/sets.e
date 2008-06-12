@@ -1,3 +1,13 @@
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+--****
+-- Category: 
+--   sets
+--
+-- Title:
+--   Sets
+--****
+
 -- Author: Christian Cuvier <oedoc@free.fr>
 -- Intro: The sets.e module defines a type for sets and provides basic tools for handling them.
 -- Other modules may be built upon them, for instance graph handling or simplicial topology, finite groups etc...
@@ -17,6 +27,9 @@ procedure report_error(sequence s)
     crash("Error in routine %s in module %s: %s",{s[1],"sets.e",s[2]})
 end procedure
 
+--**
+-- A set is...
+--
 global type set(sequence s)
     object x,y
 
@@ -33,6 +46,7 @@ global type set(sequence s)
     end for
     return 1
 end type
+--**
 
 function bfind_(object x,sequence s,integer startpoint,integer endpoint)
     integer r,c
@@ -71,6 +85,8 @@ function bfind_(object x,sequence s,integer startpoint,integer endpoint)
     end if
 end function
 
+--**
+-- What does bfind() do?
 global function bfind(object x,set s,object bounds)
     integer startpoint,endpoint
 
@@ -91,10 +107,13 @@ global function bfind(object x,set s,object bounds)
     end if
     return bfind_(x,s,startpoint,endpoint)
 end function
+--**
 
 include sort.e
 include sequence.e
 
+--**
+-- convert a sequence into a set
 global function sequence_to_set(sequence s)
     sequence result
     integer k,ls
@@ -122,14 +141,21 @@ global function sequence_to_set(sequence s)
     end for
     return result[1..k]
 end function
+--**
 
+--**
+-- Return the cardinal of a set
 global function cardinal(set s)
     return length(s)
 end function
+--**
 
+--**
+-- return which set x belongs to
 global function belongs_to(object x,set s)
     return bfind_(x,s,1,length(s))>0
 end function
+--**
 
 function add_to_(object x,sequence s)
     integer p
@@ -144,9 +170,12 @@ function add_to_(object x,sequence s)
     return s
 end function
 
+--**
+-- Add x to the set s
 global function add_to(object x,set s)
     return add_to_(x,s)
 end function
+--**
 
 function remove_from_(object x,sequence s)
     integer p
@@ -159,9 +188,12 @@ function remove_from_(object x,sequence s)
     end if
 end function
 
+--**
+-- Remove x from set s
 global function remove_from(object x,set s)
     return remove_from_(x,s)
 end function
+--**
 
 function iota(integer count)
 -- Returns: {1,2,...,count}, or "" if count is not greater than 0.
@@ -326,10 +358,13 @@ function embed_union_(sequence s1,sequence s2)
     end if
 end function
 
+--**
 global function embed_union(set s1,set s2)
     return embed_union_(s1,s2)
 end function
+--**
 
+--**
 global function subsets(set s)
     integer p,k,L
     sequence result,s1,s2,x
@@ -361,6 +396,7 @@ global function subsets(set s)
         return result
     end if
 end function
+--**
 
 -- Basic set-theoretic operations.
 
@@ -417,9 +453,11 @@ function intersection_(sequence s1,sequence s2)
     return result[1..k-1]
 end function
 
+--**
 global function intersection(set s1,set s2)
     return intersection_(s1,s2)
 end function
+--**
 
 function union_(sequence s1,sequence s2,integer ls1,integer ls2,integer mode)
 -- Description: Wrapped by union() and delta() to avoid type checking.
@@ -496,10 +534,13 @@ function union1(sequence s1,sequence s2)
     return union_(s1,s2,ls1,ls2,1)
 end function
 
+--**
 global function union(set s1,set s2)
     return union1(s1,s2)
 end function
+--**
 
+--**
 global function delta(set s1,set s2)
     integer ls1,ls2
 
@@ -516,7 +557,9 @@ global function delta(set s1,set s2)
     end if
     return union_(s1,s2,ls1,ls2,0)
 end function
+--**
 
+--**
 global function difference(set s1,set s2)
     integer k1,k2,k,c,ls1,ls2,k0
     sequence result
@@ -577,6 +620,7 @@ global function difference(set s1,set s2)
         return result
     end if
 end function
+--**
 
 function product_(sequence s1,sequence s2)
 -- Description: Wrapped by product() to skip type checking
@@ -602,9 +646,11 @@ function product_(sequence s1,sequence s2)
     return result
 end function
 
+--**
 global function product(set s1,set s2)
     return product_(s1,s2)
 end function
+--**
 
 function bounded_integer(object x,integer lbound,integer ubound)
 -- Description: Returns 0 for a non integer or an out of bounds integer, else 1.
@@ -618,6 +664,7 @@ function bounded_integer(object x,integer lbound,integer ubound)
     end if
 end function
 
+--**
 global type set_map(sequence s)
     object p,q
 
@@ -636,7 +683,9 @@ global type set_map(sequence s)
     end if
     return 1
 end type
+--**
 
+--**
 global function define_map(sequence mapping,set target)
     sequence result
     integer lt
@@ -648,7 +697,9 @@ global function define_map(sequence mapping,set target)
     end for
     return result
 end function
+--**
 
+--**
 global function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
     sequence result
     set sorted,sorted_to
@@ -672,7 +723,9 @@ global function sequences_to_map(sequence mapped,sequence mapped_to,integer mode
         return result
     end if
 end function
+--**
 
+--**
 global function image(set_map f,object x,set s1,set s2)
     integer p
     if f[$]>length(s2) then
@@ -685,7 +738,9 @@ global function image(set_map f,object x,set s1,set s2)
         return s2[f[p]]
     end if
 end function
+--**
 
+--**
 global function range(set_map f,set s)
     sequence result
 
@@ -695,7 +750,9 @@ global function range(set_map f,set s)
     end for
     return result
 end function
+--**
 
+--**
 global function direct_map(set_map f,set s1,sequence s0,set s2)
     sequence result
     integer k,p,ls1
@@ -715,7 +772,9 @@ global function direct_map(set_map f,set s1,sequence s0,set s2)
     end for
     return result[1..k-1]
 end function
+--**
 
+--**
 global function product_map(set_map f1,set_map f2)
     sequence result,s
     integer k ,p
@@ -729,7 +788,9 @@ global function product_map(set_map f1,set_map f2)
     end for
     return result
 end function
+--**
 
+--**
 global function amalgamated_sum(set s1,set s2,set s0,set_map f01,set_map f02)
     sequence result
 
@@ -739,6 +800,7 @@ global function amalgamated_sum(set s1,set s2,set s0,set_map f01,set_map f02)
     end for
     return sequence_to_set(result)
 end function
+--**
 
 function fiber_over_(sequence f,sequence s1,sequence s2)
     sequence fibers,result
@@ -755,10 +817,13 @@ function fiber_over_(sequence f,sequence s1,sequence s2)
     return {result,fibers}
 end function
 
+--**
 global function fiber_over(set_map f,set s1,set s2)
     return fiber_over_(f,s1,s2)
 end function
+--**
 
+--**
 global function fiber_product(set s1,set s2,set s0,set_map f10,set_map f20)
     sequence result,x1,x2,x0
     x1=fiber_over_(f10,s1,s0)
@@ -770,7 +835,9 @@ global function fiber_product(set s1,set s2,set s0,set_map f10,set_map f20)
     end for
     return result
 end function
+--**
 
+--**
 global function reverse_map(set_map f,set s1,sequence s0,set s2)
     sequence x,done,result
     integer p
@@ -786,7 +853,9 @@ global function reverse_map(set_map f,set s1,sequence s0,set s2)
     end for
     return result
 end function
+--**
 
+--**
 global function restrict(set_map f,set s1,set s0)
     sequence result
     integer p,k
@@ -802,6 +871,7 @@ global function restrict(set_map f,set s1,set s0)
     end for
     return result[1..k]&k&f[$]
 end function
+--**
 
 function change_target_(sequence f,sequence s1,sequence s2)
 -- Description: Wrapped by change_target() to avoid some type checks.
@@ -828,10 +898,13 @@ function change_target_(sequence f,sequence s1,sequence s2)
     return result
 end function
 
+--**
 global function change_target(set_map f,set s1,set s2)
     return change_target_(f,s1,s2)
 end function
+--**
 
+--**
 global function combine_maps(set_map f1,set s11,set s12,set_map f2,set s21,set s22)
     integer len_result,p
     set s
@@ -862,6 +935,7 @@ global function combine_maps(set_map f1,set s11,set s12,set_map f2,set s21,set s
     end for
     return result[1..len_result]&len_result&f1[$]
 end function
+--**
 
 function compose_map_(sequence f2,sequence f1)
 -- Description: Wrapped by compose_map(), so as to avoid some type checks.
@@ -877,14 +951,19 @@ function compose_map_(sequence f2,sequence f1)
     return result
 end function
 
+--**
 global function compose_map(set_map f2,set_map f1)
     return compose_map_(f1,f2)
 end function
+--**
 
+--**
 global function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
     return not compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
 end function
+--**
 
+--**
 global function is_injective(set_map f)
     sequence s
     integer p
@@ -905,6 +984,7 @@ global function is_injective(set_map f)
     end for
     return 1
 end function
+--**
 
 function is_surjective_(sequence f)
     if f[$-1]<f[$] then
@@ -914,10 +994,13 @@ function is_surjective_(sequence f)
     end if
 end function
 
+--**
 global function is_surjective(set_map f)
     return is_surjective_(f)
 end function
+--**
 
+--**
 global function is_bijective(set_map f)
     if f[$]!=f[$-1] then
         return 0
@@ -925,7 +1008,9 @@ global function is_bijective(set_map f)
         return is_surjective_(f)
     end if
 end function
+--**
 
+--**
 global function section(set_map f)
     sequence result
     integer k,p
@@ -952,7 +1037,9 @@ global function section(set_map f)
     end if
     return result
 end function
+--**
 
+--**
 global type set_operation(sequence s)
     sequence u
     if length(s)!=2 or length(s[2])!=3 or length(s[1])!=s[2][1] then
@@ -967,7 +1054,9 @@ global type set_operation(sequence s)
         return 1
     end if
 end type
+--**
 
+--**
 global function define_operation(sequence left_actions)
     integer size_left,size_right
     set_map f
@@ -988,7 +1077,9 @@ global function define_operation(sequence left_actions)
     end for
     return {left_actions,{size_left,length(left_actions),size_right}}
 end function
+--**
 
+--**
 global function is_symmetric(set_operation f)
     sequence s
     integer n
@@ -1006,7 +1097,9 @@ global function is_symmetric(set_operation f)
     end for
     return 1
 end function
+--**
 
+--**
 global function is_associative(set_operation f)
     sequence s
     integer n
@@ -1028,7 +1121,9 @@ global function is_associative(set_operation f)
     end for
     return 1
 end function
+--**
 
+--**
 global function has_left_unit(set_operation f)
     if f[2][2]!=f[2][3] then
         return 0
@@ -1036,6 +1131,7 @@ global function has_left_unit(set_operation f)
         return find(iota(f[2][2]),f[1])
     end if
 end function
+--**
 
 function all_left_units_(sequence f)
     sequence result,s
@@ -1053,10 +1149,13 @@ function all_left_units_(sequence f)
     end if
 end function
 
+--**
 global function all_left_units(set_operation f)
     return all_left_units_(f)
 end function
+--**
 
+--**
 global function is_left_unit(integer x,set_operation f)
     if f[2][2]!=f[2][3] or not bounded_integer(x,1,f[2][1]) then
         return 0
@@ -1064,7 +1163,9 @@ global function is_left_unit(integer x,set_operation f)
         return equal(f[1][x],iota(f[2][2]))
     end if
 end function
+--**
 
+--**
 global function has_right_unit(set_operation f)
     integer p
     if f[2][3]!=f[2][1] then
@@ -1085,7 +1186,9 @@ global function has_right_unit(set_operation f)
         return 0
     end if
 end function
+--**
 
+--**
 global function all_right_units(set_operation f)
     integer p
     sequence result
@@ -1109,6 +1212,7 @@ global function all_right_units(set_operation f)
         return result
     end if
 end function
+--**
 
 function is_right_unit_(integer x,sequence f)
 -- Description: Wrapped by is_right_unit() so as to avoid some type checks.
@@ -1124,9 +1228,11 @@ function is_right_unit_(integer x,sequence f)
     end if
 end function
 
+--**
 global function is_right_unit(integer x,set_operation f)
     return is_right_unit_(x,f)
 end function
+--**
 
 function has_unit_(sequence f)
     sequence s
@@ -1140,13 +1246,17 @@ function has_unit_(sequence f)
     end if
 end function
 
+--**
 global function has_unit(set_operation f)
     return has_unit_(f)
 end function
+--**
 
+--**
 global function has_inverse(integer x,set_operation f)
     return find(has_unit_(f),f[1][x])
 end function
+--**
 
 function distributes_left_(sequence product,sequence sum,integer transpose)
 -- Description: Wrapped by distributes_left(), so as to avoid some type checks.
@@ -1189,9 +1299,11 @@ function distributes_left_(sequence product,sequence sum,integer transpose)
     end if
 end function
 
+--**
 global function distributes_left(set_operation product,set_operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)
 end function
+--**
 
 function distributes_right_(sequence product,sequence sum,integer transpose)
     integer p,q,p1
@@ -1233,11 +1345,15 @@ function distributes_right_(sequence product,sequence sum,integer transpose)
     end if
 end function
 
+--**
 global function distributes_right(set_operation product,set_operation sum,integer transpose)
     return distributes_right_(product,sum,transpose)
 end function
+--**
 
+--**
 global function distributes_over(set_operation product,set_operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)+2*distributes_right_(product,sum,not transpose)
 end function
+--**
 

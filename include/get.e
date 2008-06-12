@@ -1,10 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Input and Conversion Routines:
--- get()
--- value()
--- wait_key()
-
 --****
 -- Category: 
 --   get
@@ -12,6 +7,11 @@
 -- Title:
 --   Input Routines
 --****
+--
+-- Input and Conversion Routines:
+-- get()
+-- value()
+-- wait_key()
 
 -- error status values returned from get() and value():
 global constant GET_SUCCESS = 0,

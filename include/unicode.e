@@ -1,4 +1,12 @@
--- Routines that deal with (unicode) strings in Euphoria
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+--****
+-- Category: 
+--   unicode
+--
+-- Title:
+--   Unicode Routines
+--****
 -- 
 -- By default, strings are stored in UCS2. 
 -- Actually Eu can store integers up to 0x3fffffff, but I think it is not so efficient for further conversion.

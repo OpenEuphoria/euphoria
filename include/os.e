@@ -1,5 +1,12 @@
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Operating system helpers
+--****
+-- Category: 
+--   OS
+--
+-- Title:
+--   Operating System Helpers
+--****
 --
 
 include misc.e
@@ -81,7 +88,7 @@ function find_opt(sequence opts, integer typ, object name)
 	return 0
 end function
 
--- TODO: document
+--**
 global function cmd_parse(sequence opts, integer add_help_rid, sequence cmds = command_line())
 	integer idx, cmd_idx, opts_done
 	sequence cmd, extras, param
@@ -130,3 +137,4 @@ global function cmd_parse(sequence opts, integer add_help_rid, sequence cmds = c
 
 	return extras
 end function
+--**
