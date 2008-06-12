@@ -1,3 +1,5 @@
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
 --****
 -- Category: 
 --   stats

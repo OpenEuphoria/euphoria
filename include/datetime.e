@@ -1,5 +1,13 @@
--- Euphoria 4.0
--- Date and Time functions
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+--****
+-- Category: 
+--   datetime
+--
+-- Title:
+--   Euphoria Date/Time Functionality
+--****
+--
 
 -- No timezone offset.
 -- Engine created by CyrekSoft --
@@ -209,6 +217,12 @@ global constant
 	WEEKS   = 7,
 	DATE    = 8
 
+--**
+-- the datetime type
+--
+-- Comments:
+-- A datetime type consists of a sequence of length 6
+
 global type datetime(object o)
 		return sequence(o) and length(o) = 6
 			and integer(o[YEAR]) and integer(o[MONTH]) and integer(o[DAY])
@@ -219,43 +233,63 @@ global type datetime(object o)
 		and o[MINUTE] >= 0 and o[MINUTE] <= 59
 		and o[SECOND] >= 0 and o[SECOND] < 60)
 end type
+--**
 
--- Creates the datetime object for the specified parameters
+--**
+-- Create a datetime object for the specified parameters
+--
 global function new(integer year, integer month, integer day, integer hour, integer minute, atom second)
 	datetime d
 	d = {year, month, day, hour, minute, second}
 	return d
 end function
+--**
 
--- Converts the built-in date() format to datetime format
+--**
+-- Convert the built-in date() format to datetime format
+--
 global function from_date(sequence src)
 		return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
+--**
 
--- Returns the datetime object for now. No timezones!
+--**
+-- Returns the datetime object for the immediate moment (right now). Timezone is not considered.
 global function now()
 		return from_date(date())
 end function
+--**
 
--- Answers the gregorian calendar day of the week.
+--**
+-- Returns the gregorian calendar day of the week.
+--
 global function dow(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
+--**
 
--- TODO: document, test
+--**
+-- Returns the gregorian calendar day of the year.
+--
 global function doy(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
 end function
+--**
 
+--**
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
+--
 global function to_unix(datetime dt)
 		return datetimeToSeconds(dt) - EPOCH_1970
 end function
+--**
 
+--**
 -- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
 global function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
 end function
+--**
 
 -- TODO: create, test, document
 -- datetime parse(wstring string)
@@ -264,9 +298,11 @@ global function parse(wstring string)
 	return 0
 end function
 
--- wstring format(wstring format)
+--**
 -- format the date according to the format string
--- format string some taken from date(1)
+--
+-- Comments:
+-- Format string can include the following:
 -- %%  a literal %
 -- %a  locale's abbreviated weekday name (e.g., Sun)
 -- %A  locale's full weekday name (e.g., Sunday)
@@ -381,10 +417,15 @@ global function format(datetime d, wstring format)
 			res &= ch
 		end if
 	end for
-
-		return res
+	return res
 end function
+--**
 
+--**
+--Add a unit of time to the given unit of time.
+--
+-- Example:
+-- dt = add( My_Date, 5, DAYS )
 global function add(datetime dt, object qty, integer interval)
 	integer inc
 
@@ -432,12 +473,21 @@ global function add(datetime dt, object qty, integer interval)
 
 		return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
+--**
 
+--**
+--Subtract a unit of time from the given unit of time.
+--
+-- Example:
+-- dt = subtract( My_Date, 3, MONTHS )
 global function subtract(datetime dt, atom qty, integer interval)
 	return add(dt, -(qty), interval)
 end function
+--**
 
--- returns the number of seconds between two datetimes
+--**
+-- Return the number of seconds between two datetimes
 global function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function
+--**
