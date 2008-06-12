@@ -51,15 +51,16 @@ test_equal("remove() string", "Jon", remove("John", 3))
 test_equal("remove() nested sequence", {{1,2}, {5,6}}, remove({{1,2},{3,4},{5,6}}, 2))
 test_equal("remove() bounds", "John", remove("John", 55))
 
-test_equal("remove() range integer sequence", {1,5}, remove({1,2,3,4,5}, {2, 4}))
-test_equal("remove() range string", "John Doe", remove("John M Doe", {5, 6}))
-test_equal("remove() range bounds #1", "John", remove("John Doe", {5, 100}))
-test_equal("remove() range bounds #2", "John Doe", remove("John Doe", {3, 1}))
-test_equal("remove() range bounds #3", "John Doe", remove("John Doe", {-3, -1}))
-test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", {1.5, 3}))
+test_equal("remove() range integer sequence", {1,5}, remove({1,2,3,4,5}, 2, 4))
+test_equal("remove() range string", "John Doe", remove("John M Doe", 5, 6))
+test_equal("remove() range bounds #1", "John", remove("John Doe", 5, 100))
+test_equal("remove() range bounds #2", "John Doe", remove("John Doe", 3, 1))
+test_equal("remove() range bounds #3", "John Doe", remove("John Doe", -3, -1))
+test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", 1.5, 3))
 
 test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
-test_equal("remove_all() 2", "Ask what you can do for your country.", remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
+test_equal("remove_all() 2", "Ask what you can do for your country.", 
+           remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
 
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
@@ -87,10 +88,6 @@ test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t"))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
 test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
 test_equal("trim() to empty", "", trim("  ", 32))
-test_equal("trim() with unicode whitespaces", "John", trim(" \r\n\t John" & 
-	{9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
-	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A, 
-	#2028, #2029, #202F, #205F, #3000}))
 
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))
@@ -150,7 +147,7 @@ test_equal("rotate_left: left",{1,4,5,6,2,3,7},rotate_left({1,2,3,4,5,6,7},2,6,2
 test_equal("rotate_left: right",{1,5,6,2,3,4,7},rotate_left({1,2,3,4,5,6,7},2,6,-2))
 
 sequence a, b, c
-a = split("John Doe", " ")
+a = split("John Doe")
 b = a[1]
 c = a[2]
 test_equal("More defaulted params and tokens",{"John","Doe"},{b,c})

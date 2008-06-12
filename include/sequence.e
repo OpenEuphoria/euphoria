@@ -16,7 +16,7 @@ include misc.e
 
 --**
 -- Signature:
--- global procedure append(sequence s1, object x)
+-- global function append(sequence s1, object x)
 --
 -- Description:
 -- Create a new sequence (s2) identical to s1 but with x added on the end as the last element. 
@@ -51,12 +51,12 @@ include misc.e
 -- -- z is now {"fred", "barney", "wilma", "betty", {"bam", "bam"}}
 --
 -- See Also:
--- prepend, &
+--     prepend, &
 --**
 
 --**
 -- Signature:
--- global procedure prepend(sequence s1, object x)
+-- global function prepend(sequence s1, object x)
 --
 -- Description:
 -- Create a new sequence (s2) identical to s1 but with x added onto the start of s1 as the 
@@ -80,12 +80,12 @@ include misc.e
 -- -- s is {10,9,8,7,6,5,4,3,2,1}
 --
 -- See Also:
--- append, &
+--     append, &
 --**
 
 --**
 -- Signature:
--- global procedure repeat(sequence x, atom a)
+-- global function repeat(sequence x, atom a)
 --
 -- Description:
 -- Create a sequence of length a where each element is x.
@@ -95,20 +95,20 @@ include misc.e
 -- interpreter does not actually make multiple copies in memory.
 -- Rather, a single copy is "pointed to" a number of times.
 --
--- Example:
+-- Example 1:
 -- repeat(0, 10)	  -- {0,0,0,0,0,0,0,0,0,0}
 --
 -- repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
 -- -- The interpreter will create only one copy of "JOHN"
 -- -- in memory
 --
--- See also:
--- repeat_pattern, linear
+-- See Also:
+--     repeat_pattern, linear
 --**
 
 --**
 -- Signature:
--- global procedure length(sequence s)
+-- global function length(sequence s)
 --
 -- Description:
 -- Return the length of a sequence s. An error will occur if s is an atom.
@@ -123,8 +123,8 @@ include misc.e
 -- length("")	 -- 0
 -- length({})	 -- 0
 --
--- See also:
--- append, prepend, &
+-- See Also:
+--     append, prepend, &
 --**
 
 --**
@@ -144,7 +144,7 @@ include misc.e
 -- <li>Converting numbers to strings.</li>
 -- <li>Creating strings to pass to system().</li>
 -- <li>Creating formatted error messages that can be passed to a common error message 
---     handler. </li>
+--     handler.</li>
 -- </ol>
 --
 -- Example 1: 	
@@ -204,7 +204,7 @@ end function
 -- A new sequence is created where the top-level elements appear in reverse order compared 
 -- to the original sequence.
 --
--- Example:
+-- Example 1:
 -- reverse({1,3,5,7})		   -- {7,5,3,1}
 -- reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
 -- reverse({99})			   -- {99}
@@ -231,23 +231,20 @@ end function
 -- Return the first size items of st. If size is greater than the length of st, then the 
 -- entire st will be returned.
 --
--- Comments:
--- A new sequence is created.
---
--- st can be any type of sequence, including nested sequences.
---
--- Example:
+-- Example 1:
 -- s2 = head("John Doe", 4)
 -- -- s2 is John
 --
+-- Example 2:
 -- s2 = head("John Doe", 50)
 -- -- s2 is John Doe
 --
+-- Example 3:
 -- s2 = head({1, 5.4, "John", 30}, 3)
 -- -- s2 is {1, 5.4, "John"}
 --
 -- See Also:
--- tail, mid, slice
+--     tail, mid, slice
 
 global function head(sequence st, integer size=1)
 	if size < length(st) then
@@ -262,23 +259,20 @@ end function
 -- Return len items starting at start. If start + len is greater than the length of st, 
 -- then everything in st starting at start will be returned.
 --
--- Comments:
--- A new sequence is created.
---
--- st can be any type of sequence, including nested sequences.
---
--- Example:
+-- Example 1:
 -- s2 = mid("John Middle Doe", 6, 6)
 -- -- s2 is Middle
-
+--
+-- Example 2:
 -- s2 = mid("John Middle Doe", 6, 50)
 -- -- s2 is Middle Doe
-
+--
+-- Example 3:
 -- s2 = mid({1, 5.4, "John", 30}, 2, 2)
 -- -- s2 is {5.4, "John"}
 --
 -- See Also:
--- head, tail, slice
+--     head, tail, slice
 
 global function mid(sequence st, atom start, atom len)
 	if len<0 then
@@ -308,28 +302,29 @@ end function
 -- of st. If stop is a negative value, then it will be treated as stop positions from the 
 -- end of st.
 --
--- Comments:
--- A new sequence is created.
---
--- st can be any type of sequence, including nested sequences.
---
--- Example:
+-- Example 1:
 -- s2 = slice("John Doe", 6, 8)
 -- -- s2 is Doe
 --
+-- Example 2:
 -- s2 = slice("John Doe", 6, 50)
 -- -- s2 is Doe
 --
+-- Example 3:
 -- s2 = slice({1, 5.4, "John", 30}, 2, 3)
 -- -- s2 is {5.4, "John"}
 --
+-- Example 4:
 -- s2 = slice({1,2,3,4,5}, 2, -1)
 -- -- s2 is {2,3,4}
 --
+-- Example 5:
 -- s2 = slice({1,2,3,4,5}, 2, 0)
 -- -- s2 is {2,3,4,5}
+--
 -- See Also:
--- head, mid, tail
+--     head, mid, tail
+
 global function slice(sequence st, atom start, atom stop)
 	if stop < 0 then stop = length(st) + stop end if
 	if stop = 0 then stop = length(st) end if
@@ -344,15 +339,15 @@ end function
 --**
 -- Perform a vertical slice on a nested sequence
 --
--- Example:
+-- Example 1:
 -- s = vsplice({5,1}, {5,2}, {5,3}}, 2)
 -- -- s is {1,2,3}
 
 -- s = vsplice({5,1}, {5,2}, {5,3}}, 1)
 -- -- s is {5,5,5}
 --
--- See also:
--- slice, project
+-- See Also:
+--     slice, project
 global function vslice(sequence s, atom colno)
 	sequence ret
 
@@ -381,23 +376,29 @@ end function
 -- Return the last n items of st. If n is greater than the length of st, then the entire st 
 -- will be returned.
 --
+-- Parameters:
+--     st - sequence to get tail of.
+--     n - number of items to return. (defaults to length(st) - 1)
+--
 -- Comments:
--- A new sequence is created.
+--     A new sequence is created.
 --
--- st can be any type of sequence, including nested sequences.
+--     st can be any type of sequence, including nested sequences.
 --
--- Example:
+-- Example 1:
 -- s2 = tail("John Doe", 3)
 -- -- s2 is Doe
-
+--
+-- Example 2:
 -- s2 = tail("John Doe", 50)
 -- -- s2 is John Doe
-
+--
+-- Example 3:
 -- s2 = tail({1, 5.4, "John", 30}, 3)
 -- -- s2 is {5.4, "John", 30}
 --
 -- See Also:
--- head, mid, slice
+--     head, mid, slice
 
 global function tail(sequence st, atom n=0.03)
 	if n = 0.03 then
@@ -416,42 +417,41 @@ end function
 -- element will be removed. If index is a sequence, it must be a sequence of two
 -- integers representing start and stop index.
 --
+-- Parameters:
+--     st - sequence in which to remove from.
+--     start - index at which to remove (or starting index to remove)
+--     stop - index at which to stop remove (defaults to start)
+--
 -- Comments:
 -- A new sequence is created. st can be a string or complex sequence.
 --
--- Example:
+-- Example 1:
 -- s = remove("Johnn Doe", 4)
 -- -- s is "John Doe"
 --
+-- Example 2:
 -- s = remove({1,2,3,3,4}, 4)
 -- -- s is {1,2,3,4}
 --
--- s = remove("John Middle Doe", {6, 12})
+-- Example 3:
+-- s = remove("John Middle Doe", 6, 12)
 -- -- s is "John Doe"
 --
--- s = remove({1,2,3,3,4,4}, {4, 5})
+-- Example 4:
+-- s = remove({1,2,3,3,4,4}, 4, 5)
 -- -- s is {1,2,3,4}
--- See also
--- replace, insert, splice, remove_all
+--
+-- See Also:
+--     replace, insert, splice, remove_all
 
-global function remove(sequence st, object index)
-	atom start, stop
-
-	if atom(index) then
-		if index > length(st) or index < 1 then
-			return st
-		end if
-
-		return st[1..index-1] & st[index+1..$]
+global function remove(sequence st, atom start, atom stop=0.003)
+	if stop = 0.003 then
+		stop = start
 	end if
 
-	if length(index) != 2 then
-		crash("second parameter to remove(), when a sequence, must be a length of 2, " &
-			  "representing start and to indexes.", {})
+	if stop > length(st) then
+		stop = length(st)
 	end if
-
-	start = index[1]
-	stop = index[2]
 
 	if start > length(st) or start > stop or stop < 0 then
 		return st
@@ -472,16 +472,21 @@ end function
 --**
 -- Removes all ocurrences of needle from haystack
 --
--- Example:
+-- Parameters:
+--     needle - object to remove.
+--     haystack - sequence in which to remove from.
+--
+-- Example 1:
 -- s = remove_all( 1, {1,2,4,1,3,2,4,1,2,3} )
 -- -- s is {2,4,3,2,4,2,3}
 --
+-- Example 2:
 -- s = remove_all("x", "I'm toox secxksy for my shixrt.")
 -- -- s is "I'm too secksy for my shirt."
 --
--- See also:
--- remove
---
+-- See Also:
+--     remove
+
 global function remove_all(object needle, sequence haystack)
 	integer ts,te,ss,se
 	
@@ -541,11 +546,11 @@ constant dummy = 0
 -- not after. 
 --
 -- Comments:
--- A new sequence is created. st and what can be any type of sequence, including nested 
--- sequences. What is inserted as a new element in st, so that the length of the new 
--- sequence is always length(st)+1.
+--     A new sequence is created. st and what can be any type of sequence, including nested 
+--     sequences. What is inserted as a new element in st, so that the length of the new 
+--     sequence is always length(st)+1.
 --
--- insert()ing a sequence into a string returns a sequence which is no longer a string.
+--     insert()ing a sequence into a string returns a sequence which is no longer a string.
 --
 -- Example 1:
 -- s = insert("John Doe", " Middle", 5)
@@ -555,7 +560,7 @@ constant dummy = 0
 -- s = insert({10,30,40}, 20, 2)
 -- -- s is {10,20,30,40}
 --
--- See also:
+-- See Also:
 --     remove, splice, remove_all
 
 global function insert(sequence st, object what, integer index)
@@ -573,14 +578,19 @@ end function
 --**
 
 --**
--- Insert what into st at index index. The item is inserted before index, not after. 
+-- Insert what into st at index. The item is inserted before index, not after. 
 -- What is inserted as a subsequence. splicing a string into another yields a new string.
 --
+-- Parameters:
+--     st - sequence to splice into.
+--     what - what to split into st.
+--     index - index position at which to splice.
+--
 -- Comments:
--- A new sequence is created. st and what can be any type of sequence, including nested 
--- sequences. The length of this new sequence is the sum of the lengths of st and what 
--- (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is 
--- an atom.
+--     A new sequence is created. st and what can be any type of sequence, including nested 
+--     sequences. The length of this new sequence is the sum of the lengths of st and what 
+--     (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is 
+--     an atom.
 --
 -- Example 1:
 -- s = splice("John Doe", " Middle", 5)
@@ -590,8 +600,8 @@ end function
 -- s = splice({10,30,40}, 20, 2)
 -- -- s is {10,20,30,40}
 --
--- See also:
--- insert, remove, replace, remove_all
+-- See Also:
+--     insert, remove, replace, remove_all
 
 global function splice(sequence st, object what, integer index)
 	if index > length(st) then
@@ -607,10 +617,16 @@ end function
 --**
 -- Replace from index start to stop of st with object what. what can be any object.
 --
--- Comments:
--- A new sequence is created. st can be a string or complex sequence.
+-- Parameters:
+--     st - sequence in which replacement will be done.
+--     replacement - item to replace with.
+--     start - starting index.
+--     stop - stopping index.
 --
--- To replace just one element, simply: s[index] = new_item
+-- Comments:
+--   A new sequence is created. st can be a string or complex sequence.
+--
+--   To replace just one element, simply: s[index] = new_item
 --
 -- Example 1:
 -- s = replace("John Middle Doe", "Smith", 6, 11)
@@ -619,35 +635,48 @@ end function
 -- s = replace({45.3, "John", 5, {10, 20}}, 25, 2, 3)
 -- -- s is {45.3, 25, {10, 20}}
 --
--- See also:
--- splice, remove, remove_all
-global function replace(sequence st, object what, integer start, integer stop)
-	st = remove(st, {start, stop})
-	return splice(st, what, start)
+-- See Also:
+--     splice, remove, remove_all
+
+global function replace(sequence st, object replacement, integer start, integer stop)
+	st = remove(st, start, stop)
+	return splice(st, replacement, start)
 end function
 --**
 
--- TODO: document default parameters
 --**
--- split st by delim.
+-- TODO: Limit seems wrong, 1 should split off one item, returning 2 items total.
+--
+-- Split the sequence st by delim creating a new sequence. 
 --
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
 -- If any is 1 then split by any one item in delim not delim as a whole. If any is 0 then 
 -- split by delim as a whole.
 --
+-- Paramters:
+--     st - sequence to split.
+--     delim - delimiter to split by.
+--     limit - maximum number of items to split.
+--     any - split by any atom in delim (1) or delim as a whole (0).
+--
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence
 --
--- Example:
--- result = split_adv("John,Middle,Doe", ",", 2, 0)
+-- Example 1:
+-- result = split("John Middle Doe")
+-- -- result is {"John", "Middle", "Doe"}
+--
+-- Example 2:
+-- result = split("John,Middle,Doe", ",", 2)
 -- -- result is {"John", "Middle,Doe"}
-
--- result = split_adv("One,Two|Three.Four", ".,|", 0, 1)
+--
+-- Example 3:
+-- result = split("One,Two|Three.Four", ".,|", 0, 1)
 -- -- result is {"One", "Two", "Three", "Four"}
 --
--- See also:
--- chunk
+-- See Also:
+--     chunk
 
 global function split(sequence st, object delim=" ", integer limit=0, integer any=0)
 	sequence ret
@@ -687,19 +716,26 @@ global function split(sequence st, object delim=" ", integer limit=0, integer an
 end function
 --**
 
--- TODO: document default param change
 --**
 -- Join s by delim
 --
--- Comments:
--- This function may be applied to a string sequence or a complex sequence
+-- Parameters:
+--     s - sequence of items to join.
+--     delim - delimiter to join by.
 --
--- Example:
--- result = join({"John", "Middle", "Doe"}, " ")
+-- Comments:
+--     This function may be applied to a string sequence or a complex sequence
+--
+-- Example 1:
+-- result = join({"John", "Middle", "Doe"})
 -- -- result is "John Middle Doe"
 --
--- See also:
--- split
+-- Example 2:
+-- result = join({"John", "Middle", "Doe"}, ",")
+-- -- result is "John,Middle,Doe"
+--
+-- See Also:
+--     split
 
 global function join(sequence s, object delim=" ")
 	object ret
@@ -717,33 +753,18 @@ global function join(sequence s, object delim=" ")
 end function
 --**
 
--- In Unicode (Unicode Character Database) the following codepoints are defined as whitespace:
---	  U0009-U000D (Control characters, containing TAB, CR and LF)
---	  U0020 SPACE
---	  U0085 NEL
---	  U00A0 NBSP
---	  U1680 OGHAM SPACE MARK
---	  U180E MONGOLIAN VOWEL SEPARATOR
---	  U2000-U200A (different sorts of spaces)
---	  U2028 LSP
---	  U2029 PSP
---	  U202F NARROW NBSP
---	  U205F MEDIUM MATHEMATICAL SPACE
---	  U3000 IDEOGRAPHIC SPACE
-
-constant TRIM_WHITESPACES = {9, 10, 11, 12, 13, ' ', #85, #A0, #1680, #180E,
-	#2000, #2001, #2002, #2003, #2004, #2005, #2006, #2007, #2008, #2009, #200A,
-	#2028, #2029, #202F, #205F, #3000}
-
--- TODO: document default param change
 --**
 -- Trim any item in what from the head (start) of str
 --
--- Example:
+-- Parameters:
+--     str - string to trim.
+--     what - what to trim (defaults to " \t\r\n").
+--
+-- Example 1:
 -- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file\r\n"
 --
--- See also:
+-- See Also:
 -- trim_tail, trim, pad_head
 
 global function trim_head(sequence str, object what=" \t\r\n")
@@ -764,15 +785,18 @@ end function
 --**
 -- Trim any item in what from the end (tail) of str
 --
--- TODO: document default param change
+-- Parameters:
+--     str - string to trim.
+--     what - what to trim (defaults to " \t\r\n").
 --
--- Example:
+-- Example 1:
 -- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "\r\nSentence read from a file"
+--
 -- See Also:
--- trim_head, trim, pad_tail
+--     trim_head, trim, pad_tail
 
-global function trim_tail(sequence str, object what=TRIM_WHITESPACES)
+global function trim_tail(sequence str, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
@@ -790,39 +814,43 @@ end function
 --**
 -- Trim any item in what from the head (start) and tail (end) of str
 --
--- TODO: document default param change
+-- Parameters:
+--     str - string to trim.
+--     what - what to trim (defaults to " \t\r\n").
 --
--- Example:
+-- Example 1:
 -- s = trim("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file"
 --
--- See also:
--- trim_head, trim_tail
+-- See Also:
+--     trim_head, trim_tail
 
-global function trim(sequence str, object what=TRIM_WHITESPACES)
+global function trim(sequence str, object what=" \t\r\n")
 	return trim_tail(trim_head(str, what), what)
 end function
 --**
 
 --**
--- Pad the beginning of a sequence with spaces up to params in length or optionally params can
--- be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with
+-- Pad the beginning of a sequence with ch up to size in length.
 --
--- TODO: document default param change
+-- Parameters:
+--     str - string to pad.
+--     size - size to pad str to.
+--     ch - character to pad to (defaults to ' ').
 --
 -- Comments:
 -- pad_head() will not remove characters. If length(str) is greater than params, this
--- function simply returns str. See <a href="lib_seq.htm#head">head()</a>
--- if you wish to truncate long sequences.
+-- function simply returns str. See head() if you wish to truncate long sequences.
 --
--- Example:
+-- Example 1:
 -- s = pad_head("ABC", 6)
 -- -- s is "   ABC"
 --
 -- s = pad_head("ABC", {6, '-'})
 -- -- s is "---ABC"
--- See also:
--- trim_head, pad_tail
+--
+-- See Also:
+--     trim_head, pad_tail, head
 
 global function pad_head(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
@@ -834,17 +862,18 @@ end function
 --**
 
 --**
--- Pad the end of a sequence with spaces up to params in length or optionally params can
--- be a sequence {i1, i2} with i1 representing length and i2 the atom to pad with
+-- Pad the end of a sequence with ch up to size in length.
 --
--- TODO: document default param change
--- 
+-- Parameters:
+--     str - string to pad.
+--     size - size to pad 'str' to.
+--     ch - character to pad to (defaults to ' ').
+--
 -- Comments:
--- pad_tail() will not remove characters. If length(str) is greater than params, this
--- function simply returns str. See <a href="lib_seq.htm#head">head()</a>
--- if you wish to truncate long sequences.
+--   pad_tail() will not remove characters. If length(str) is greater than params, this
+--   function simply returns str. see tail() if you wish to truncate long sequences.
 --
--- Example:
+-- Example 1:
 -- s = pad_tail("ABC", 6)
 -- -- s is "ABC   "
 --
@@ -852,7 +881,7 @@ end function
 -- -- s is "ABC---"
 --
 -- See Also:
--- trim_tail, pad_head
+--     trim_tail, pad_head, tail
 
 global function pad_tail(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
@@ -882,8 +911,8 @@ end function
 -- s = chunk({1,2,3,4,5,6}, 3)
 -- -- s is {{1,2,3}, {4,5,6}}
 --
--- See also:
--- split
+-- See Also:
+--     split
 
 global function chunk(sequence s, integer size)
 	sequence ns
@@ -934,7 +963,7 @@ constant TO_LOWER = 'a' - 'A'
 --**
 -- Convert an atom or sequence to lower case. Only alters characters in the 'A'..'Z' range.
 --
--- Example:
+-- Example 1:
 -- s = lower("Euphoria")
 -- -- s is "euphoria"
 --
@@ -945,7 +974,8 @@ constant TO_LOWER = 'a' - 'A'
 -- -- s is {"euphoria", "programming"}
 --
 -- See Also:
--- upper
+--     upper
+
 global function lower(object x)
 -- convert atom or sequence to lower case
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
@@ -955,7 +985,7 @@ end function
 --**
 -- Convert an atom or sequence to upper case. Only alters characters in the 'a'..'z' range.
 --
--- Example:
+-- Example 1:
 -- s = upper("Euphoria")
 -- -- s is "EUPHORIA"
 --
@@ -965,8 +995,9 @@ end function
 -- s = upper({"Euphoria", "Programming"})
 -- -- s is {"EUPHORIA", "PROGRAMMING"}
 --
--- See also:
--- lower
+-- See Also:
+--     lower
+
 global function upper(object x)
 -- convert atom or sequence to upper case
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
@@ -975,7 +1006,7 @@ end function
 --**
 -- Checks whether two objects can be legally added together. Returns 1 if so, else 0.
 --
--- Example:
+-- Example 1:
 -- i = can_add({1,2,3},{4,5})
 -- -- i is 0
 --
@@ -985,10 +1016,10 @@ end function
 -- i = can_add({1,2,3},{4,{5,6},7})
 -- -- i is 1
 --
--- See also:
--- linear
+-- See Also:
+--     linear
 
-global function can_add(object a,object b)
+global function can_add(object a, object b)
 	if atom(a) or atom(b) then
 		return 1
 	end if
@@ -1007,14 +1038,14 @@ end function
 --**
 -- Returns a sequence {start, start+increment,...,start+(count-1)*increment, or 0 on failure.
 --
--- Example:
+-- Example 1:
 -- s = linear({1,2,3},4,3)
 -- -- s is {{1,2,3},{5,6,7},{9,10,11}}
 --
 -- See Also:
--- repeat_pattern
+--     repeat_pattern
 
-global function linear(object start,object increment,integer count)
+global function linear(object start, object increment, integer count)
 	sequence result
 
 	if count<0 or not can_add(start,increment) then
@@ -1033,14 +1064,14 @@ end function
 -- Returns a sequence whose n first elements are those of s, as well a the n that follow, 
 -- and so on for count copies.
 --
--- Example:
+-- Example 1:
 -- s = repeat_pattern({1,2,5},3)
 -- -- s is {1,2,5,1,2,5,1,2,5}
 --
 -- See Also:
--- repeat, linear
+--     repeat, linear
 
-global function repeat_pattern(sequence s,integer count)
+global function repeat_pattern(sequence s, integer count)
 	integer ls
 	sequence result
 
@@ -1068,14 +1099,14 @@ end function
 -- the length of coords, of sequences. Each innermost sequence is made of the
 -- coordinates of the vector whose indexes are on the given coordinate list.
 --
--- Example:
+-- Example 1:
 -- s = project({{1,-1,-1,0},{2,1,9}},{{1,2},{3,1},{2}})
 -- -- s is {{{2,-1},{-1,2},{-1}},{{2,1},{9,2},{1}}}
 --
 -- See Also:
--- vslice
+--     vslice
 
-global function project(sequence vectors,sequence coords) -- currently in sets.e
+global function project(sequence vectors, sequence coords) -- currently in sets.e
 	sequence result,current_vector,coord_set,result_item,projection
 	integer current_index
 
@@ -1105,14 +1136,14 @@ end function
 --**
 -- Retrieves an element nested arbitrarily deep into a sequence.
 --
--- Example:
+-- Example 1:
 -- x = fetch({0,1,2,3,{"abc","def","ghi"},6},{5,2,3})
 -- -- x is 'f', or 102.
 --
--- See also:
--- store, Sequence Assignments
+-- See Also:
+--     store, Sequence Assignments
 
-global function fetch(sequence s,sequence indexes)
+global function fetch(sequence s, sequence indexes)
 	for i=1 to length(indexes)-1 do
 		s=s[indexes[i]]
 	end for
@@ -1123,14 +1154,14 @@ end function
 --**
 -- Stores something at a location nested arbitrarily deep into a sequence.
 --
--- Example:
+-- Example 1:
 -- s = store({0,1,2,3,{"abc","def","ghi"},6},{5,2,3},108)
 -- -- s is {0,1,2,3,{"abc","del","ghi"},6}
 --
--- See also:
--- fetch, Sequence Assignments
+-- See Also:
+--     fetch, Sequence Assignments
 
-global function store(sequence s,sequence indexes,object x)
+global function store(sequence s, sequence indexes, object x)
 	sequence partials,result,branch
 
 	partials=repeat(s,length(indexes)-1)
@@ -1154,14 +1185,14 @@ end function
 --**
 -- Checks whether s[x] makes sense. Returns 1 if so, else 0.
 --
--- Example:
+-- Example 1:
 -- i = valid_index({51,27,33,14},2)
 -- -- i is 1
 --
--- See also:
--- Sequence Assignments
+-- See Also:
+--     Sequence Assignments
 
-global function valid_index(sequence s,object x)
+global function valid_index(sequence s, object x)
 	if sequence(x) or x<1 then
 		return 0
 	else
@@ -1173,14 +1204,14 @@ end function
 --**
 -- Turbs a sequences of indexes into the sequence of elements in source that have such indexes.
 --
--- Example:
+-- Example 1:
 -- s = extract({11,13,15,17},{3,1,2,1,4})
 -- -- s is {15,11,13,11,17}
 --
--- See also:
--- slice
+-- See Also:
+--     slice
 
-global function extract(sequence source,sequence indexes)
+global function extract(sequence source, sequence indexes)
 	object p
 
 	for i=1 to length(indexes) do
@@ -1199,17 +1230,17 @@ end function
 --
 -- If the shift is negative, a rotation to the right will be performed instead.
 --
--- Example:
+-- Example 1:
 -- s = rotate_left({11,13,15,17,19,23},2,5,1)
 -- -- s is {11,15,17,19,13,23}
 --
 -- s = rotate_left({11,13,15,17,19,23},2,5,-1)
 -- -- s is {11,19,13,15,17,23}
 --
--- See also:
--- slice
+-- See Also:
+--     slice
 
-global function rotate_left(sequence source,integer start,integer stop,integer left_shift)
+global function rotate_left(sequence source, integer start, integer stop, integer left_shift)
 	sequence shifted
 	integer len
 
