@@ -45,7 +45,7 @@ for i = 1 to total do
 	if match("t_c_", filename) = 1 then
 		status = not status
 	end if
-	failed += status
+	failed += status > 0
 end for
 
 if total = 0 then
