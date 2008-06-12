@@ -5,7 +5,7 @@
 --   stats
 --
 -- Title:
---   Statistics Routines
+--   Statistics
 --****
 
 include unittest.e

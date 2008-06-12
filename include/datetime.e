@@ -236,9 +236,27 @@ end type
 --**
 
 --**
--- Create a datetime object for the specified parameters
+-- Create a new datetime value.
+-- 
+-- TODO: test default parameter usage
 --
-global function new(integer year, integer month, integer day, integer hour, integer minute, atom second)
+-- Parameters
+--     year is the full year.
+--     month is the month (1-12).
+--     day is the day of the month (1-31).
+--     hour is the hour (0-23) (defaults to 0)
+--     minute is the minute (0-59) (defaults to 0)
+--     second is the second (0-59) (defaults to 0)
+--
+-- Example 1:
+-- dt = new(2010, 1, 1, 0, 0, 0)
+-- -- dt is Jan 1st, 2010
+--
+-- See Also:
+--     from_date, from_unix, now, new_time
+
+global function new(integer year, integer month, integer day, 
+	                integer hour=0, integer minute=0, atom second=0)
 	datetime d
 	d = {year, month, day, hour, minute, second}
 	return d
@@ -246,46 +264,110 @@ end function
 --**
 
 --**
--- Convert the built-in date() format to datetime format
+-- Create a new time value with a date of zeros.
 --
+-- TODO: test
+--
+-- Paramters
+--     hour is the hour (0-23)
+--     minute is the minute (0-59)
+--     second is the second (0-59)
+--
+-- Example 1:
+-- dt = new_time(10, 30, 55)
+-- dt is 10:30:55 AM
+--
+-- See Also:
+--     from_date, from_unix, now, new
+
+global function new_time(integer hour, integer minute, integer second)
+	return new(0, 0, 0, hour, minute, second)
+end function
+--**
+
+--**
+-- Convert a sequence formatted according to the built-in date() function to a valid datetime 
+-- sequence.
+--
+-- Example 1:
+-- d = from_date(date())
+-- -- d is the current date and time
+--
+-- See Also:
+--     date, from_unix, now, new
+
 global function from_date(sequence src)
 		return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
 --**
 
 --**
--- Returns the datetime object for the immediate moment (right now). Timezone is not considered.
+-- Create a new datetime value initialized with the current date and time
+--
+-- Example 1:
+-- dt = now()
+-- -- dt is the current date and time
+--
+-- See Also:
+--     from_date, from_unix, new, new_time
+
 global function now()
 		return from_date(date())
 end function
 --**
 
 --**
--- Returns the gregorian calendar day of the week.
+-- Get the day of week of the date dt1.
 --
+-- Comments:
+--     1=Sunday, 2=Monday, ... 7=Saturday
+--
+-- Example 1:
+-- d = new(2008, 5, 2, 0, 0, 0)
+-- day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
+
 global function dow(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 --**
 
 --**
--- Returns the gregorian calendar day of the year.
+-- Get the Julian day of year of the date dt1.
 --
+-- Example 1:
+-- d = new(2008, 5, 2, 0, 0, 0)
+-- day = doy(d) -- day is 123
+
 global function doy(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
 end function
 --**
 
 --**
--- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
+-- Convert a datetime value to the unix numeric format (seconds since EPOCH)
 --
+-- Example 1:
+-- secs_since_epoch = to_unix(now())
+-- -- secs_since_epoch is equal to the current seconds since epoch
+--
+-- See Also:
+--     from_unix, format
+
 global function to_unix(datetime dt)
 		return datetimeToSeconds(dt) - EPOCH_1970
 end function
 --**
 
 --**
--- returns the number of seconds since 1970-1-1 0:0 (no timezone!)
+-- Create a datetime value from the unix numeric format (seconds since EPOCH)
+
+-- Example 1:
+-- d = from_unix(0)
+-- -- d is 1970-01-01 00:00:00  (zero seconds since EPOCH)
+--
+-- See Also:
+--     to_unix, from_date, now, new
+
 global function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
 end function
@@ -299,32 +381,49 @@ global function parse(wstring string)
 end function
 
 --**
--- format the date according to the format string
+-- Format the date according to the format string
 --
 -- Comments:
 -- Format string can include the following:
--- %%  a literal %
--- %a  locale's abbreviated weekday name (e.g., Sun)
--- %A  locale's full weekday name (e.g., Sunday)
--- %b  locale's abbreviated month name (e.g., Jan)
--- %B  locale's full month name (e.g., January)
--- %C  century; like %Y, except omit last two digits (e.g., 21)
--- %d  day of month (e.g, 01)
--- %H  hour (00..23)
--- %I  hour (01..12)
--- %j  day of year (001..366)
--- %k  hour ( 0..23)
--- %l  hour ( 1..12)
--- %m  month (01..12)
--- %M  minute (00..59)
--- %p  locale's equivalent of either AM or PM; blank if not known
--- %P  like %p, but lower case
--- %s  seconds since 1970-01-01 00:00:00 UTC
--- %S  second (00..60)
--- %u  day of week (1..7); 1 is Monday
--- %w  day of week (0..6); 0 is Sunday
--- %y  last two digits of year (00..99)
--- %Y  year
+-- 
+-- <ul>
+-- <li>%%  a literal %</li>
+-- <li>%a  locale's abbreviated weekday name (e.g., Sun)</li>
+-- <li>%A  locale's full weekday name (e.g., Sunday)</li>
+-- <li>%b  locale's abbreviated month name (e.g., Jan)</li>
+-- <li>%B  locale's full month name (e.g., January)</li>
+-- <li>%C  century; like %Y, except omit last two digits (e.g., 21)</li>
+-- <li>%d  day of month (e.g, 01)</li>
+-- <li>%H  hour (00..23)</li>
+-- <li>%I  hour (01..12)</li>
+-- <li>%j  day of year (001..366)</li>
+-- <li>%k  hour ( 0..23)</li>
+-- <li>%l  hour ( 1..12)</li>
+-- <li>%m  month (01..12)</li>
+-- <li>%M  minute (00..59)</li>
+-- <li>%p  locale's equivalent of either AM or PM; blank if not known</li>
+-- <li>%P  like %p, but lower case</li>
+-- <li>%s  seconds since 1970-01-01 00:00:00 UTC</li>
+-- <li>%S  second (00..60)</li>
+-- <li>%u  day of week (1..7); 1 is Monday</li>
+-- <li>%w  day of week (0..6); 0 is Sunday</li>
+-- <li>%y  last two digits of year (00..99)</li>
+-- <li>%Y  year</li>
+-- </ul>
+--
+-- Example 1:
+-- d = new(2008, 5, 2, 12, 58, 32)
+-- s = format(d, "%Y-%m-%d %H:%M:%S")
+-- -- s is "2008-05-02 12:58:32"
+--
+-- Example 2:
+-- d = new(2008, 5, 2, 12, 58, 32)
+-- s = format(d, "%A, %B %d '%y %H:%M%p")
+-- -- s is "Friday, May 2 '08 12:58PM"
+--
+-- See Also:
+--     to_unix
+
 global function format(datetime d, wstring format)
 	integer in_fmt, ch, tmp
 	sequence res
@@ -422,10 +521,29 @@ end function
 --**
 
 --**
---Add a unit of time to the given unit of time.
+-- Add a number of i's to dt1. i is an interval constant and a is the quantity.
 --
--- Example:
--- dt = add( My_Date, 5, DAYS )
+-- Comments:
+--     Please see Constants for Date/Time for a reference of valid intervals.
+--
+--     Do not confuse the item access constants such as YEAR, MONTH, DAY, etc... with the 
+--     interval constants YEARS, MONTHS, DAYS, etc...
+--
+--     When adding MONTHS, it is a calendar based addition. For instance, a date of 
+--     5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number 
+--     of days per each month and the average number of days per month.
+--
+--     When adding YEARS, leap year is taken into account. Adding 4 YEARS to a date may result
+--     in a different day of month number due to leap year.
+--
+-- Example 1:
+-- d2 = add(d1, 35, SECONDS) -- add 35 seconds to d1
+-- d2 = add(d1, 7, WEEKS)    -- add 7 weeks to d1
+-- d2 = add(d1, 19, YEARS)   -- add 19 years to d1
+--
+-- See Also:
+--     subtract, diff
+
 global function add(datetime dt, object qty, integer interval)
 	integer inc
 
@@ -476,18 +594,44 @@ end function
 --**
 
 --**
---Subtract a unit of time from the given unit of time.
+-- Subtract a number of i's to dt1. i is an interval constant and a is the quantity.
 --
--- Example:
--- dt = subtract( My_Date, 3, MONTHS )
+-- Comments:
+--     Please see Constants for Date/Time for a reference of valid intervals.
+-- 
+--     See the function add() for more information on adding and subtracting date intervals
+-- 
+-- Example 1:
+-- dt2 = subtract(dt1, 18, MINUTES) -- subtract 18 minutes from dt1
+-- dt2 = subtract(dt1, 7, MONTHS)   -- subtract 7 months from dt1
+-- dt2 = subtract(dt1, 12, HOURS)   -- subtract 12 hours from dt1
+--
+-- See Also:
+--     add, diff
+
 global function subtract(datetime dt, atom qty, integer interval)
 	return add(dt, -(qty), interval)
 end function
 --**
 
 --**
--- Return the number of seconds between two datetimes
+-- Compute the number of seconds different between dt1 and dt2.
+--
+-- Comments:
+--     dt2 is subtracted from dt1, therefore, you can come up with a negative value.
+--
+-- Example 1:
+-- d1 = now()
+-- sleep(15)  -- sleep for 15 seconds
+-- d2 = now()
+--
+-- i = diff(d1, d2) -- i is 15
+--
+-- See Also:
+--    add, subtract
+
 global function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function
 --**
+

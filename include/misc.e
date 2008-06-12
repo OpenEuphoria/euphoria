@@ -5,7 +5,7 @@
 --   misc
 --
 -- Title:
---   Miscellaneous Routines and Constants
+--   Misc Routines and Constants
 --****
 
 -- platform() values:
