@@ -7,7 +7,6 @@
 -- Title:
 --   Unit Testing Framework
 --****
---
 
 include misc.e
 
@@ -15,12 +14,11 @@ include misc.e
 -- Public Variables
 --
 
-global constant 
+global enum 
 	TEST_QUIET = 0, 
-	TEST_SHOW_FAILED_ONLY = 1, 
-	TEST_SHOW_MODULES = 2,
-	TEST_SHOW_ALL = 3
-global integer testCount, testsPassed, testsFailed
+	TEST_SHOW_FAILED_ONLY, 
+	TEST_SHOW_ALL
+integer testCount, testsPassed, testsFailed
 
 testCount	= 0
 testsPassed = 0
@@ -30,30 +28,21 @@ testsFailed = 0
 -- Private variables
 --
 
-integer modShown
-modShown = 0
-
+sequence filename
 integer verbose
-verbose = 0
-sequence currentMod
-currentMod = ""
-sequence modulesTested
-modulesTested = {}
+verbose = TEST_SHOW_FAILED_ONLY
 
 integer abort_on_fail
 abort_on_fail = 0
 integer wait_on_summary
 wait_on_summary = 0
+
 --
 -- Private utility functions
 --
 
 procedure test_failed(sequence name, object a, object b)
 	if verbose >= TEST_SHOW_FAILED_ONLY then
-		if modShown = 0 then
-			printf(2, "%s:\n", {currentMod})
-			modShown = 1
-		end if
 		printf(2, "  failed: %s, expected: ", {name})
 		pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
 		puts(2, " but got: ")
@@ -70,10 +59,6 @@ end procedure
 
 procedure test_passed(sequence name)
 	if verbose >= TEST_SHOW_ALL then
-		if modShown = 0 then
-			printf(2, "%s:\n", {currentMod})
-			modShown = 1
-		end if
 		printf(2, "  passed: %s\n", {name})
 	end if
 		
@@ -106,31 +91,26 @@ end function
 --**
 
 --**
-global procedure set_test_module_name(sequence name)
-	modulesTested = append(modulesTested, name)
-	currentMod = name
-	modShown = 0
-end procedure
---**
+global procedure test_embedded_report()
+	atom score
 
---**
-global procedure test_summary()
-	if verbose > TEST_QUIET then
-		if verbose >= TEST_SHOW_MODULES and length(modulesTested) > 0 then
-			puts(2, "\nModules tested...\n")
-			for i = 1 to length(modulesTested) do
-				printf(2, "  %s\n", {modulesTested[i]})
-			end for
+	if testsFailed > 0 or verbose = TEST_SHOW_ALL then
+		if testCount = 0 then
+			score = 100
+		else
+			score = (testsPassed / testCount) * 100
 		end if
-		printf(2, "\n%d tests run, %d passed, %d failed, %d%% success\n",
-				{testCount, testsPassed, testsFailed, (testsPassed / testCount) * 100})
+
+	    printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
+       		{testCount, testsPassed, testsFailed, score})
 	end if
 		
-	if wait_on_summary then
-		puts(2, "\nSummary complete, press RETURN ...")
-		wait_on_summary = getc(0)
+	if match("t_c_", filename) = 1 then	
+		puts(2, "  test should have failed but was a success\n")
+		abort(0)
+	else
+		abort(testsFailed > 0)
 	end if
-	abort(testsFailed > 0)
 end procedure
 --**
 
@@ -213,4 +193,18 @@ global procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
 --**
+
+sequence cmd
+cmd = command_line()
+filename = cmd[2]
+
+for i = 3 to length(cmd) do
+	if equal(cmd[i], "-all") then
+		set_test_verbosity(TEST_SHOW_ALL)
+	elsif equal(cmd[i], "-failed") then
+		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
+	elsif equal(cmd[i], "-wait") then
+		set_wait_on_summary(1)
+    end if
+end for
 

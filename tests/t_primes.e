@@ -3,8 +3,6 @@ include primes.e
 
 integer s
 
-
-set_test_module_name("primes.e")
 gPrimes = {2,3,5,7,11,13}
 s = length(gPrimes)
 test_equal("primes found #1" , 541, next_prime(540))
@@ -20,3 +18,6 @@ test_true("primes growth #3", s < length(gPrimes))
 s = length(gPrimes)
 test_equal("primes missing #2" , 2, next_prime(-1))
 test_true("primes growth #4", s = length(gPrimes))
+
+test_embedded_report()
+

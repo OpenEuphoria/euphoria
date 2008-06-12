@@ -1,7 +1,5 @@
 include unittest.e
 
-set_test_module_name("eu-switch")
-
 constant SWITCH = { 1, 2, "a", 3, "sdflkjasdfglkj" }
 
 sequence s
@@ -45,4 +43,6 @@ constant
 
 test_equal( "switch", CORRECT, s )
 test_false( "no matching case", zero )
+
+test_embedded_report()
 

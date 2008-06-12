@@ -1,7 +1,6 @@
 include file.e
 include unittest.e
 
-set_test_module_name("file.e")
 -- TODO: add more tests
 
 object data, tmp
@@ -97,3 +96,6 @@ test_equal("fileext() filename no extension", "", fileext(fname))
 
 test_equal("PATHSEP", sep, PATHSEP)
 test_equal("NL", nl, NL)
+
+test_embedded_report()
+

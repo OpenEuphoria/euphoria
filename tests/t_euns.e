@@ -1,7 +1,5 @@
 include unittest.e
 
-set_test_module_name("eu-internal")
-
 without warning
 function append(object a, object b)
 	return {}
@@ -23,4 +21,6 @@ test_equal( "export function", "foo", export_test() )
 test_equal( "export constant", "foo", EXPORT_CONSTANT )
 test_not_equal( "export routine id", -1, routine_id("export_test"))
 test_equal( "export include",  "baz", baz() )
+
+test_embedded_report()
 

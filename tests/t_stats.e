@@ -1,6 +1,5 @@
--- stats.e
+include unittest.e
 include stats.e
-set_test_module_name("stats.e")
 include sort.e
 
 test_equal("small list", 4, small( {4,5,6,1,7,5,4,3,"text"}, 3 ))
@@ -32,4 +31,6 @@ test_equal("stdevpa empty", {}, stdevpa( {} ))
 test_equal("avedev list", 1.85777777777778, avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ))
 test_equal("avedev text", {}, avedev( {"text"} ))
 test_equal("avedev empty", {}, avedev( {} ))
+
+test_embedded_report()
 

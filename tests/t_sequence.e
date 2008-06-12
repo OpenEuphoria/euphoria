@@ -1,8 +1,6 @@
 include sequence.e as seq
 include unittest.e
 
-set_test_module_name("sequence.e")
-
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
 test_equal("reverse() string", "nhoJ", reverse("John"))
 
@@ -158,4 +156,6 @@ test_equal("sprint() sequence", "{1,2,3}", sprint({1,2,3}))
 test_equal("sprintf() integer", "i=1", sprintf("i=%d", {1}))
 test_equal("sprintf() float", "i=5.5", sprintf("i=%.1f", {5.5}))
 test_equal("sprintf() percent", "%", sprintf("%%", {}))
+
+test_embedded_report()
 

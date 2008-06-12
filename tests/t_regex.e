@@ -2,8 +2,6 @@ include regex.e as regex
 include sequence.e
 include unittest.e
 
-set_test_module_name("regex.e")
-
 regex:regex re
 re = regex:new("[A-Z][a-z]+")
 test_true("new()", re > 0)
@@ -31,5 +29,7 @@ end function
 test_equal("search_replace_user() #1", "the dog ran up",
     regex:search_replace_user(re, "the DOG ran UP", routine_id("repl"), regex:DEFAULT))
 
-
 regex:free( re )
+
+test_embedded_report()
+

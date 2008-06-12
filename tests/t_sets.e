@@ -1,8 +1,6 @@
 include unittest.e
 include sets.e
 
-set_test_module_name("t_sets.e")
-
 set s,s1,s1a
 s={-1,3,5,17,"abc","abcd","acb"}
 sequence seq
@@ -151,4 +149,6 @@ test_equal("distributes_left()",1,distributes_left(product,sum,0))
 test_equal("distributes_right()",1,distributes_right(product,sum,0))
 
 test_equal("distributes_over()",3,distributes_over(product,sum,0))
+
+test_embedded_report()
 

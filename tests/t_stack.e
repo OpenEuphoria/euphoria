@@ -1,8 +1,6 @@
 include stack.e as s
 include unittest.e
 
-set_test_module_name("stack.e")
-
 stack sk
 
 --
@@ -90,3 +88,6 @@ sk = s:push(sk, {30,40})
 test_equal("FIFO push sequence #3", {FILO, {10,20},{30,40}}, sk)
 sk = s:dup(sk)
 test_equal("FIFO dup sequence", {FILO, {10,20},{30,40},{30,40}}, sk)
+
+test_embedded_report()
+

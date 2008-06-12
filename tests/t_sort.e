@@ -1,12 +1,6 @@
----------- CHANGE HISTORY ------------
--- 16-May-2008, Derek Parnell, Added tests for sort_reverse() and sort_user()
---                             Added border-case tests, etc ...
---------------------------------------
 include sort.e
 include unittest.e
 include wildcard.e
-
-set_test_module_name("sort.e")
 
 -----  sort() ------
 test_equal("sort() empty sequence",         
@@ -189,3 +183,6 @@ test_equal("sort_columns() single item sequence",
                     {{1,2,4}, {1,2,3}, {1,2,1}, {5,3,4}, {1,3,3}},
                     sort_columns({{1,2,3}, {1,2,4}, {1,2,1}, {1,3,3}, {5,3,4}}, {2,-3})
            )                      
+
+test_embedded_report()
+

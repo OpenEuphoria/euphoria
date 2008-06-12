@@ -3,7 +3,6 @@ include locale.e as l
 include datetime.e as d
 include unittest.e
 
-set_test_module_name("locale.e")
 sequence locale
 
 locale = "en_US"
@@ -43,4 +42,6 @@ test_equal("w() #5", "Mundo", l:w("world"))
 test_equal("w() #6", "%s, %s!", l:w("greeting"))
 test_equal("w() sprintf() #2", "Hola, Mundo!",
     sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
+
+test_embedded_report()
 

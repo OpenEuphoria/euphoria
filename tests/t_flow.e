@@ -1,5 +1,4 @@
 include unittest.e
-set_test_module_name("t_flow.e")
 
 integer n,total_exit
 sequence printed_i,printed_n2,loops
@@ -112,3 +111,6 @@ while 1 do
 	idx2 = idx
 end while
 test_equal("while 1", {11,10}, {idx,idx2})
+
+test_embedded_report()
+

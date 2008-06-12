@@ -2,8 +2,6 @@ include unittest.e
 include map.e as m
 include sort.e
 
-set_test_module_name("map.e")
-
 map m1
 m1 = m:new()
 
@@ -118,3 +116,6 @@ test_equal("map load #7", -1, m:get(m1, "missing",-1))
 test_equal("map load equal", "=", m:get(m1, "equal",-1))
 test_equal("map load padding", " padded ", m:get(m1, "padding",-1))
 test_equal("map load embed", "--", m:get(m1, "embed",-1))
+
+test_embedded_report()
+

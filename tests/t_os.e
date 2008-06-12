@@ -9,8 +9,6 @@ with warning
 
 include os.e
 
-set_test_module_name("os.e")
-
 integer verbose, help_called
 sequence style_file, count, extras
 
@@ -52,4 +50,6 @@ test_equal("cmd_parse() #1", 1, verbose)
 test_equal("cmd_parse() #2", "50", count)
 test_equal("cmd_parse() #3", "file.css", style_file)
 test_equal("cmd_parse() #4", {"input.txt", "output.txt"}, extras)
+
+test_embedded_report()
 

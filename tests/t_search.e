@@ -1,8 +1,6 @@
 include search.e
 include unittest.e
 
-set_test_module_name("search.e")
-
 test_equal("find_all() empty", {}, find_all('Z', "ABACDE", 1))
 test_equal("find_all() atom", {1,3}, find_all('A', "ABACDE", 1))
 test_equal("find_all() atom from", {3}, find_all('A', "ABACDE", 2))
@@ -57,3 +55,6 @@ test_equal("binary_search found subset #4", -17, binary_search('A',haystack, 17,
 test_equal("binary_search empty input", -1, binary_search('A',{}))
 
 test_equal("binary_search strings", 5, binary_search("cat",{"apple", "bat", "car", "cast", "cat", "category", "dog"}))
+
+test_embedded_report()
+

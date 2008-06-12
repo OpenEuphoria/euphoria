@@ -1,8 +1,6 @@
 include types.e
 include unittest.e
 
-set_test_module_name("types.e")
-
 test_true("bool() #1", bool(1))
 test_true("bool() #2", bool(TRUE))
 test_true("bool() #5", bool(0))
@@ -93,3 +91,6 @@ test_equal("t_xdigit() #6", 1, t_xdigit('f'))
 test_equal("t_xdigit() #7", 0, t_xdigit('h'))
 test_equal("t_xdigit() #8", 0, t_xdigit('z'))
 test_equal("t_xdigit() #9", {1,1,0,0}, t_xdigit({'0', 'F', '?', 't'}))
+
+test_embedded_report()
+

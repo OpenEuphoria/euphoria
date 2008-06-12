@@ -1,8 +1,6 @@
 include misc.e
 include unittest.e
 
-set_test_module_name("t_condcmp.e")
-
 ifdef hello then
     test_fail("not defined #1")
 end ifdef
@@ -64,3 +62,6 @@ ifdef EU400 then
 else
     test_fail("EU400")
 end ifdef
+
+test_embedded_report()
+

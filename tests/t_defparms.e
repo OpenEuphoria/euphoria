@@ -1,5 +1,4 @@
 include unittest.e
-set_test_module_name("default parameters")
 
 sequence s s={1,2,3}
 
@@ -47,3 +46,6 @@ test_equal("1 1 1 1", {1,1,1,1}, foo(1,1,1,1) )
 test_equal(", , , ,", {0,0,0,0}, foo(,,,) )
 test_equal("1 , , ,", {1,0,0,0}, foo(1,,,) )
 test_equal("default call as part of compound expression", 2, mul2(1,1) + mul2(1,1) )
+
+test_embedded_report()
+

@@ -1,8 +1,6 @@
 include get.e
 include unittest.e
 
-set_test_module_name("get.e")
-
 -- TODO: Many more functions to test
 
 test_equal("value() no data supplied", {GET_EOF, 0}, value(""))
@@ -13,4 +11,6 @@ test_equal("value() sequence", {GET_SUCCESS, {1,2}}, value("{1,2}"))
 test_equal("value_from() integer", {GET_SUCCESS, 10, 2, 0}, value_from("Data: 10", 7))
 test_equal("value_from() integer with leading whitespace",
     {GET_SUCCESS, 10, 3, 1}, value_from("Data: 10", 6))
+
+test_embedded_report()
 
