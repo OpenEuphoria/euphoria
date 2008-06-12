@@ -6,10 +6,19 @@ include sequence.e
 
 atom score
 integer failed, total, status
-sequence files, filename, cmd, cmds, cmd_opts
+sequence files, filename, executable, cmd, cmds, cmd_opts
 files = {}
 failed = 0
 cmd_opts = ""
+
+ifdef UNIX then
+	executable = "exu"
+elsifdef WIN32 then
+	executable = "exwc"
+else
+	executable = "ex"
+end ifdef
+
 cmds = command_line()
 
 if length(cmds) > 2 then
@@ -31,7 +40,7 @@ total = length(files)
 for i = 1 to total do
 	filename = files[i][D_NAME]
 	printf(1, "%s:\n", {filename})
-	cmd = sprintf("exwc -D UNITTEST %s %s", {filename, cmd_opts})
+	cmd = sprintf("%s -D UNITTEST %s %s", {executable, filename, cmd_opts})
 	status = system_exec(cmd, 2)
 	if match("t_c_", filename) = 1 then
 		status = not status
