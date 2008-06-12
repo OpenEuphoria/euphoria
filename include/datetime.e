@@ -5,7 +5,7 @@
 --   datetime
 --
 -- Title:
---   Euphoria Date/Time Functionality
+--     Date/Time
 --****
 --
 

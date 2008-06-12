@@ -2,10 +2,10 @@
 --
 --****
 -- Category: 
---   C
+--   c
 --
 -- Title:
---   Routines and Constants for Dynamic Linking to C Functions
+--   Dynamic Linking to C
 --****
 
 -- C types for .dll arguments and return value:
