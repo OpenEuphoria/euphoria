@@ -74,80 +74,80 @@ include machine.e
 --   -- location is 2
 
 global function find_any(sequence needles, sequence haystack, integer start=1)
-	for i = start to length(haystack) do
-		if find(haystack[i],needles) then
-			return i
-		end if
-	end for
-	return 0
+for i = start to length(haystack) do
+if find(haystack[i],needles) then
+	return i
+end if
+end for
+return 0
 end function
 --**
 
 --**
 global function find_all(object x, sequence source, integer from=1)
-	sequence ret
+sequence ret
 
-	ret = {}
-	while from > 0 entry do
-		ret &= from
-		from += 1
-	entry
-		from = find_from(x, source, from)
-	end while
-	return ret
+ret = {}
+while from > 0 entry do
+ret &= from
+from += 1
+entry
+from = find_from(x, source, from)
+end while
+return ret
 end function
 --**
 
 --**
 global function match_all(object x, sequence source, integer from=1)
-	sequence ret
+sequence ret
 
-	ret = {}
-	while from > 0 entry do
-		ret &= from
-		from += length(x)
-	entry
-		from = match_from(x, source, from)
-	end while
+ret = {}
+while from > 0 entry do
+ret &= from
+from += length(x)
+entry
+from = match_from(x, source, from)
+end while
 
-	return ret
+return ret
 end function
 --**
 
 --**
 -- Find x as an element of s starting from index start going down to 1
--- If start<1 then it is an offset from the end of s
+-- If start < 1 then it is an offset from the end of s
 
 global function rfind(object x, sequence s, integer start=-1)
-	integer len
+integer len
 
-	if start = -1 then
-		start = length(s)
+if start = -1 then
+	start = length(s)
+end if
+
+len=length(s)
+
+if (start > len) or (len + start < 1) then
+	crash("third argument of rfind_from() is out of bounds (%d)", {start})
+end if
+
+if start < 1 then
+	start = len + start
+end if
+
+for i = start to 1 by -1 do
+	if equal(s[i], x) then
+		return i
 	end if
+end for
 
-	len=length(s)
-
-	if (start > len) or (len + start < 1) then
-		crash("third argument of rfind_from() is out of bounds (%d)", {start})
-	end if
-
-	if start < 1 then
-		start = len + start
-	end if
-
-	for i = start to 1 by -1 do
-		if equal(s[i], x) then
-			return i
-		end if
-	end for
-
-	return 0
+return 0
 end function
 --**
 
 --**
 -- Try to match x against some slice of s, starting from index start and going down to 1
--- if start<0 then it is an offset from the end of s
+-- if start < 0 then it is an offset from the end of s
 
 global function rmatch(sequence x, sequence s, integer start=-1)
 	integer len,lenx
