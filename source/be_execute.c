@@ -1235,6 +1235,7 @@ void code_set_pointers(int **code)
 				code[i+1] = SET_OPERAND(code[i+1]); // select val
 				code[i+2] = SET_OPERAND(code[i+2]); // cases
 				code[i+3] = SET_OPERAND(code[i+3]); // jump table
+				code[i+4] = SET_JUMP(code[i+4]);    // else or end switch
 				i += 5;
 				break;
 
@@ -1974,7 +1975,7 @@ void do_exec(int *start_pc)
 		  		}
 		  		else{
 		  			// no match:  goto else or skip the switch
-					pc += pc[4];
+					pc = (int *) pc[4];
 		  		}
 		  		
 		  		thread();

@@ -10,22 +10,22 @@ for i = 1 to length( SWITCH ) label "top" do
 			s = append( s, SWITCH[1] )
 		case 2:
 			s = append( s, SWITCH[2] )
-			exit
+			break
 			
 		case 3:
 			switch i - 3 do
 				case 1:
 					s &= 3
-					exit
+					break
 					
 				case else
 					exit "top"
 			end switch
-			exit
+			break
 			
 		case "a":
 			s = append( s, SWITCH[i] )
-			exit
+			break
 			
 		case else
 			s = append( s, "what?" )

@@ -1363,8 +1363,8 @@ procedure opWHILE()
 	end if
 end procedure
 
-procedure opSELECT()
--- pc+1: select value
+procedure opSWITCH()
+-- pc+1: switch value
 -- pc+2: case values
 -- pc+3: jump_table
 -- pc+4: else jump
@@ -1373,12 +1373,7 @@ procedure opSELECT()
 	if a then
 		pc += val[Code[pc+3]][a]
 	else
-		b = Code[pc + 4]
-		if b then
-			pc += b
-		else
-			RTFatal( "select has no matching case and no 'case else'" )
-		end if
+		pc = Code[pc + 4]
 	end if
 end procedure
 
@@ -1386,7 +1381,7 @@ procedure opCASE()
 
 end procedure
 
-procedure opNOPSELECT()
+procedure opNOPSWITCH()
 
 end procedure
 

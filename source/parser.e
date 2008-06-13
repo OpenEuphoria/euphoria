@@ -50,6 +50,7 @@ integer stmt_nest          -- nesting level of statement lists
 sequence init_stack        -- var init stack 
 
 sequence loop_stack
+sequence if_stack
 
 -- Expression statistics:
 integer side_effect_calls -- number of calls to functions with side-effects
@@ -129,6 +130,7 @@ global procedure InitParser()
     stmt_nest = 0
     loop_labels = {}
     if_labels = {}
+    if_stack = {}
     for_vars = {}
     for_where = {}
     continue_addr = {}
@@ -145,14 +147,6 @@ enum
 	SWITCH_CASES,
 	SWITCH_JUMP_TABLE,
 	SWITCH_ELSE
-
-function in_switch()
-	if length(loop_stack) then
-		return (loop_stack[$][1] = SWITCH)
-	else
-		return 0
-	end if
-end function
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed 
@@ -257,7 +251,7 @@ procedure PatchEList(integer base)
 
     break_top = 0
 
-    for i=length(break_list) to base+1 by -1 do
+	for i=length(break_list) to base+1 by -1 do
         n=break_delay[i]
         break_delay[i] -= (n>0)
         if n>1 then
@@ -1372,9 +1366,6 @@ procedure Exit_statement()
     tok = by_ref[2] 
     putback(tok) 
 
-    if not in_switch() then
-    	NotReached(tok[T_ID], "exit")
-    end if
 end procedure
 
 procedure Continue_statement()
@@ -1438,18 +1429,28 @@ procedure Retry_statement()
 	NotReached(tok[T_ID], "retry")
 end procedure
 
+function in_switch()
+	if length( if_stack ) and if_stack[$] = SWITCH then
+		return 1
+	else
+		return 0
+	end if
+end function
+
 procedure Break_statement()
 -- Parse an break statement
     token tok
     sequence by_ref
 
     if not length(if_labels) then
-    	CompileErr("break statement must be inside a if block")
+    	CompileErr("break statement must be inside a if or a switch block")
     end if
 
     by_ref = exit_level(next_token(),1)
-    emit_op(ELSE)
+
+   	emit_op(ELSE)
     AppendEList(length(Code)+1)
+
     break_delay &= by_ref[1]
     emit_forward_addr()    -- to be back-patched
     tok = by_ref[2]
@@ -1479,7 +1480,7 @@ function finish_block_header(integer opcode)
 		labbel=SymTab[tok[T_SYM]][S_OBJ]
 		tok = next_token()
     end if
-    if opcode=IF then
+    if opcode = IF or opcode = SWITCH then
         if_labels = append(if_labels,labbel)
     else
         loop_labels = append(loop_labels,labbel)
@@ -1517,7 +1518,9 @@ procedure If_statement()
 	integer prev_false
 	integer prev_false2
 	integer elist_base
-
+	
+	if_stack &= IF
+	
 	elist_base = length(break_list)
 	short_circuit += 1
 	short_circuit_B = FALSE
@@ -1615,6 +1618,7 @@ procedure If_statement()
 	PatchEList(elist_base)
     if_labels = if_labels[1..$-1]
     block_index -= 1
+    if_stack = if_stack[1..$-1]
 end procedure
 
 procedure exit_loop(integer exit_base)
@@ -1627,36 +1631,36 @@ procedure exit_loop(integer exit_base)
 end procedure
 
 procedure push_switch()
-	loop_stack &= {{SWITCH, 0, 0}}
-	loop_nest += 1
+--	loop_stack &= {{SWITCH, 0, 0}}
+--	loop_nest += 1
+	if_stack &= SWITCH
 	switch_stack = append( switch_stack, { {}, {}, 0 })
-	if length(continue_addr) then
-		continue_addr &= continue_addr[$]
-	else
-		continue_addr &= 0
-	end if
-	if length(retry_addr) then
-		retry_addr &= retry_addr[$]
-	else
-		retry_addr &= 0
-	end if
-	if length(entry_addr) then
-		entry_addr &= entry_addr[$]
-	else
-		entry_addr &= 0
-	end if
+--	if length(continue_addr) then
+--		continue_addr &= continue_addr[$]
+--	else
+--		continue_addr &= 0
+--	end if
+--	if length(retry_addr) then
+--		retry_addr &= retry_addr[$]
+--	else
+--		retry_addr &= 0
+--	end if
+--	if length(entry_addr) then
+--		entry_addr &= entry_addr[$]
+--	else
+--		entry_addr &= 0
+--	end if
 end procedure
 
-procedure pop_switch( integer exit_base )
-	loop_stack    = loop_stack[1..$-1]
-	loop_labels   = loop_labels[1..$-1]
-	loop_nest    -= 1
-	switch_stack  = switch_stack[1..$-1]
-	PatchXList( exit_base )
+procedure pop_switch( integer break_base )
+--	loop_stack    = loop_stack[1..$-1]
+--	loop_labels   = loop_labels[1..$-1]
+--	loop_nest    -= 1
+	PatchEList( break_base )
 	block_index -= 1
-	continue_addr = continue_addr[1..$-1]
-	retry_addr    = retry_addr[1..$-1]
-	entry_addr    = entry_addr[1..$-1]
+	if_labels = if_labels[1..$-1]
+	if_stack  = if_stack[1..$-1]
+	switch_stack  = switch_stack[1..$-1]	
 end procedure
 
 procedure add_case( symtab_index sym )
@@ -1718,14 +1722,14 @@ procedure Case_statement()
 end procedure
 
 procedure Switch_statement()
-	integer exit_base
+	integer break_base
 	symtab_index cases, jump_table
 	integer else_bp
 	sequence values
 	integer switch_pc
 	
 	push_switch()
-	exit_base = length(exit_list)
+	break_base = length(break_list)
 	
 	Expr()
 	
@@ -1739,9 +1743,8 @@ procedure Switch_statement()
 	
 	switch_pc = length(Code) + 1
 	emit_op(SWITCH)
+	emit_forward_addr()  -- the else
 	else_bp = length( Code )
-
-	exit_base = length(exit_list)
 	
 	tok_match(CASE)
 	Case_statement()
@@ -1763,10 +1766,10 @@ procedure Switch_statement()
 		Code[else_bp] = length( Code ) + 2
 	else
 		if switch_stack[$][SWITCH_ELSE] then
-			Code[else_bp] = switch_stack[$][SWITCH_ELSE] - switch_pc
+			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
 		else
 			-- just go to the end
-			Code[else_bp] = length(Code) - switch_pc + 1
+			Code[else_bp] = length(Code) + 1
 		end if
 	end if
 	
@@ -1775,7 +1778,7 @@ procedure Switch_statement()
 	if TRANSLATE then
 		emit_op(NOPSWITCH)
 	end if
-	pop_switch( exit_base )
+	pop_switch( break_base )
 end procedure
 
 procedure While_statement()
@@ -2447,16 +2450,18 @@ procedure SubProg(integer prog_type, integer scope)
 	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry 
 		if scope = SC_OVERRIDE then
+				
 			switch SymTab[p][S_SCOPE] do
 				case SC_PREDEF:
 					Warning(sprintf("built-in routine %s() overridden in %s",
 									{SymTab[p][S_NAME], file_name[current_file_no]}))
-					exit
+					break
 				case SC_OVERRIDE:
 					CompileErr(sprintf("built-in routine %s() is overridden already in: %s", 
 						 {SymTab[p][S_NAME], file_name[SymTab[p][S_FILE_NO]]}))
-					exit
+					break
 			end switch
+
 		end if
 
 		h = SymTab[p][S_HASHVAL]
@@ -2756,13 +2761,14 @@ global procedure real_parser(integer nested)
 			SubProg(tok[T_ID], SC_LOCAL)
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE then
+
 			switch id do
 				case GLOBAL:
 				    scope = SC_GLOBAL
-					exit
+					break
 				case EXPORT:
 					scope = SC_EXPORT
-					exit
+					
 				case OVERRIDE:
 					scope = SC_OVERRIDE
 					exit

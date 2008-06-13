@@ -1148,7 +1148,7 @@ global procedure emit_op(integer op)
 		emit_addr( a )
 		emit_addr( b )
 		emit_addr( c )
-		emit_addr( 0 )  -- case else address: may be backpatched
+--		emit_addr( 0 )
 		assignable = FALSE
 	
 	elsif op = CASE then
