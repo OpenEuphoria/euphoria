@@ -2,7 +2,7 @@
 --
 --****
 -- Category: 
---   OS
+--   os
 --
 -- Title:
 --   Operating System Helpers

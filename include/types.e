@@ -5,7 +5,7 @@
 --   type
 --
 -- Title:
---   Character Type Testing
+--   Extended Types
 --****
 --
 
