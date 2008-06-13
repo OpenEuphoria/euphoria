@@ -139,7 +139,8 @@ keylist =
 	{"peek2u",           SC_PREDEF, FUNC, PEEK2U,           1, E_PURE},
 	{"peeks",            SC_PREDEF, FUNC, PEEKS,            1, E_PURE},
 	{"peek_string",      SC_PREDEF, FUNC, PEEK_STRING,      1, E_PURE},
-	{"option_switches",  SC_PREDEF, FUNC, OPTION_SWITCHES,  0, E_PURE}
+	{"option_switches",  SC_PREDEF, FUNC, OPTION_SWITCHES,  0, E_PURE},
+	{"warning",  		SC_PREDEF, 	PROC, WARNING,  		1, E_OTHER_EFFECT}
 }
 	-- new words must go at end to maintain compatibility 
 

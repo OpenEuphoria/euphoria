@@ -149,7 +149,7 @@ enum
 	SWITCH_ELSE
 
 procedure NotReached(integer tok, sequence keyword)
--- Issue warning about code that can't be executed 
+-- Issue warning about code that can't be executed
 	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE}) then  
 		Warning(sprintf("%s:%d - statement after %s will never be executed", 
 				{name_ext(file_name[current_file_no]), line_number, keyword}))
@@ -1876,7 +1876,7 @@ procedure Loop_statement()
     short_circuit += 1
     short_circuit_B = FALSE
     SC1_type = 0
-    Expr()       
+    Expr()
     if SC1_type = OR then
     	backpatch(SC1_patch-3, SC1_OR_IF)
     	if TRANSLATE then
@@ -2277,7 +2277,7 @@ procedure Procedure_call(token tok)
 --         s = SymTab[s][S_NEXT]
 --     end while
 --    s = sub
-	if scope = SC_PREDEF then
+	if scope = SC_PREDEF then 
 		emit_op(opcode)
 		if opcode = ABORT then
 			temp_tok = next_token()

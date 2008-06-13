@@ -46,7 +46,7 @@ constant LEX_NAME = 2
 
 -- descriptive names for scanner tokens - keep up-to-date 
 constant token_name = 
-{ 
+{
 	{AND, "'and'"},
 	{ATOM, "a number"},
 	{BANG, "'!'"},
@@ -501,11 +501,16 @@ global procedure emit_op(integer op)
 			assignable = TRUE
 			c = NewTempSym() -- put final result in temp 
 			Push(c)
-			-- emit location to assign result to 
+			-- emit location to assign result to
 			emit_addr(c)
 		end if
 
-	-- 0 inputs, 0 outputs - note: parser may emit an extra word 
+	elsif op = WARNING then
+		assignable = FALSE  
+	    a = Pop()
+		Warning(SymTab[a][S_OBJ])
+
+	-- 0 inputs, 0 outputs - note: parser may emit an extra word
 	elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
 				STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE,
 				ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS, 

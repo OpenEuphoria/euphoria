@@ -2277,6 +2277,38 @@ used).</p>
 With <strong>exw.exe</strong> or <strong>exu</strong>, control-c will always
 stop your program immediately.</p>
 
+<h2>Miscellaneous statements</h2>
+<h3>The warning() statement</h3>
+<p>
+ Writing a library has specific requirements, since the code you write will be mainly used 
+ inside code you didn't write. It may be desirable then to influence, from inside the library, 
+ that code you didn't write.
+ <p>
+ This is what warning(), in a limited way, does. It enables to generate custom warnings in  
+ code that will include yours. Of course, you can also geenrate warnings in your own code, for
+ instance as a kind of memo. The without warning top level statement disables such warnings.
+ <p>
+ Example:
+ <eucode>
+ -- mylib.e
+ procedure foo(integer n)
+ warning("The foo() procedure is obsolete, use bar() instead.")
+ ?n
+ end procedure
+ 
+ -- some_app.exw
+ include mylib.e
+ foo(123)
+ </euxode>
+ will result, when some_app.exw is run with warning, in the following text being displayed in the console window:
+ <pre>
+ 123
+ Warning: The foo() procedure is obsolete, use bar() instead.
+
+ Press Enter...
+ </pre>
+<p>
+<b>N.B.: </b>the argument to warning() is a single literal constant enclosed in double quotes, like above. Using any kind of variable or expression will result in a blank warning.
 
 
 <h2>Special Top-Level Statements</h2>
