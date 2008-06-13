@@ -66,14 +66,14 @@ include machine.e
 --   sequence.
 --
 -- Example 1:
---   location = find_any_from("aeiou", "John Smith", 3)
+--   location = find_any("aeiou", "John Smith", 3)
 --   -- location is 8
 --
--- See Also: 
---   search:find_any
+-- Example 2:
+--   location = find_any("aeiou", "John Doe")
+--   -- location is 2
 
-global function find_any_from(sequence needles, sequence haystack, 
-	integer start)
+global function find_any(sequence needles, sequence haystack, integer start=1)
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
 			return i
@@ -81,31 +81,10 @@ global function find_any_from(sequence needles, sequence haystack,
 	end for
 	return 0
 end function
-
 --**
 
 --**
--- Find any element from needles in haystack and return the smallest position of
--- haystack at which anything is found or 0 if nothing is found.
---
--- Comments:
---    This function may be applied to a string sequence or a complex sequence.
---
--- Example 1:
---   location = find_any("aeiou", "John Doe")
---   -- location is 2
---
--- See Also:
---   search:find_any_from
---
-
-global function find_any(sequence needles, sequence haystack)
-	return find_any_from(needles, haystack, 1)
-end function
-
---**
-
-global function find_all(object x, sequence source, integer from)
+global function find_all(object x, sequence source, integer from=1)
 	sequence ret
 
 	ret = {}
@@ -117,8 +96,10 @@ global function find_all(object x, sequence source, integer from)
 	end while
 	return ret
 end function
+--**
 
-global function match_all(object x, sequence source, integer from)
+--**
+global function match_all(object x, sequence source, integer from=1)
 	sequence ret
 
 	ret = {}
@@ -131,11 +112,18 @@ global function match_all(object x, sequence source, integer from)
 
 	return ret
 end function
+--**
 
---Find x as an element of s starting from index start going down to 1
---If start<1 then it is an offset from the end of s
-global function rfind_from(object x, sequence s, integer start)
+--**
+-- Find x as an element of s starting from index start going down to 1
+-- If start<1 then it is an offset from the end of s
+
+global function rfind(object x, sequence s, integer start=-1)
 	integer len
+
+	if start = -1 then
+		start = length(s)
+	end if
 
 	len=length(s)
 
@@ -155,23 +143,26 @@ global function rfind_from(object x, sequence s, integer start)
 
 	return 0
 end function
+--**
 
-global function rfind(object x, sequence s)
-	return rfind_from(x, s, length(s))
-end function
+--**
+-- Try to match x against some slice of s, starting from index start and going down to 1
+-- if start<0 then it is an offset from the end of s
 
---Try to match x against some slice of s, starting from index start and going down to 1
---if start<0 then it is an offset from the end of s
-global function rmatch_from(sequence x, sequence s, integer start)
+global function rmatch(sequence x, sequence s, integer start=-1)
 	integer len,lenx
+
+	if start = -1 then
+		start = length(s)
+	end if
 
 	len = length(s)
 	lenx = length(x)
 
 	if lenx = 0 then
-		crash("first argument of rmatch_from() must be a non-empty sequence", {})
+		crash("first argument of rmatch() must be a non-empty sequence", {})
 	elsif (start > len) or  (len + start < 1) then
-		crash("third argument of rmatch_from is out of bounds (%d)", {start})
+		crash("third argument of rmatch() is out of bounds (%d)", {start})
 	end if
 
 	if start < 1 then
@@ -192,15 +183,9 @@ global function rmatch_from(sequence x, sequence s, integer start)
 
 	return 0
 end function
+--**
 
-global function rmatch(sequence x, sequence s)
-	if length(x)=0 then
-		crash("first argument of rmatch_from() must be a non-empty string", {})
-	end if
-
-	return rmatch_from(x, s, length(s))
-end function
-
+--**
 global function find_replace(object what, object repl_with, sequence source, integer max=0)
 	integer posn
 	
@@ -224,9 +209,13 @@ global function find_replace(object what, object repl_with, sequence source, int
 
 	return source
 end function
+--**
 
--- assumes haystack is already sorted into ascending order.
-global function binary_search(object needle, sequence haystack, integer startpoint = 1, integer endpoint = 0)
+--**
+-- Assumes haystack is already sorted into ascending order.
+
+global function binary_search(object needle, sequence haystack, integer startpoint = 1, 
+			integer endpoint = 0)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
 	lo = startpoint
@@ -257,3 +246,5 @@ global function binary_search(object needle, sequence haystack, integer startpoi
 	end if
 	return -mid
 end function
+--**
+

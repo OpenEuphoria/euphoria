@@ -689,7 +689,7 @@ global function split(sequence st, object delim=" ", integer limit=0, integer an
 
 	while 1 do
 		if any then
-			pos = find_any_from(delim, st, start)
+			pos = find_any(delim, st, start)
 			next_pos = pos+1
 		else
 			pos = match_from(delim, st, start)
