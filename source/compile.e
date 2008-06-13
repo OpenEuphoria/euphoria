@@ -2194,6 +2194,7 @@ end procedure
 
 procedure opCASE()
 	c_stmt0( sprintf("case %d:\n", Code[pc+1]) )
+	NewBB(0, E_ALL_EFFECT, 0)
 	pc += 2
 end procedure
 
