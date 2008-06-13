@@ -2450,7 +2450,6 @@ procedure SubProg(integer prog_type, integer scope)
 	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry 
 		if scope = SC_OVERRIDE then
-				
 			switch SymTab[p][S_SCOPE] do
 				case SC_PREDEF:
 					Warning(sprintf("built-in routine %s() overridden in %s",
@@ -2461,7 +2460,6 @@ procedure SubProg(integer prog_type, integer scope)
 						 {SymTab[p][S_NAME], file_name[SymTab[p][S_FILE_NO]]}))
 					break
 			end switch
-
 		end if
 
 		h = SymTab[p][S_HASHVAL]
@@ -2761,17 +2759,16 @@ global procedure real_parser(integer nested)
 			SubProg(tok[T_ID], SC_LOCAL)
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE then
-
 			switch id do
 				case GLOBAL:
 				    scope = SC_GLOBAL
 					break
 				case EXPORT:
 					scope = SC_EXPORT
-					
+					break
 				case OVERRIDE:
 					scope = SC_OVERRIDE
-					exit
+					break
 			end switch
 
 			tok = next_token()
