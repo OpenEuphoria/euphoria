@@ -541,10 +541,15 @@ end function
 sequence include_warnings
 include_warnings = {}
 
+-- remember which built-ins chosen warnings have already been issued to avoid too many
+sequence builtin_warnings
+builtin_warnings = {}
+
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL. 
+	sequence msg
 	integer hashval, scope, defined, ix
 	symtab_index st_ptr, st_builtin
 	token tok, gtok
@@ -685,7 +690,25 @@ global function keyfind(sequence word, integer file_no)
 		end if
 
 	elsif st_builtin != 0 then
-		-- TODO: Check to see if globals are defined w/o namespace
+		if length(dup_globals) and find(SymTab[st_builtin][S_NAME], builtin_warnings) = 0 then
+			builtin_warnings &= {SymTab[st_builtin][S_NAME]}
+
+			if length(dup_globals) > 1 then
+				msg = sprintf("built-in %s() chosen over global/export function(s) in:\n",
+					{SymTab[st_builtin][S_NAME]})
+				
+				-- extended warning message  
+				for i = length(dup_globals) to 1 by -1 do
+					msg &= "    " & file_name[SymTab[dup_globals[i]][S_FILE_NO]] & "\n"
+				end for
+			else
+				msg = sprintf("built-in %s() chosen over global/export function in: %s",
+					{SymTab[st_builtin][S_NAME], file_name[SymTab[dup_globals[1]][S_FILE_NO]]})
+			end if
+
+			Warning(msg)
+		end if
+
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
 
 		if BIND then
@@ -713,7 +736,7 @@ global function keyfind(sequence word, integer file_no)
 		end if
 	end if
 	
-	if length(dup_globals) = 1 then
+	if length(dup_globals) = 1 and st_builtin = 0 then
 		-- matched exactly one global
 					   
 		if BIND then
