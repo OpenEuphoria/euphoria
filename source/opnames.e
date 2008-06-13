@@ -192,5 +192,7 @@ global constant opnames = {
 	"RETRY",
 	"SWITCH",
 	"CASE",
-	"NOPSWITCH"
+	"NOPSWITCH",
+	"GOTO",
+	"GLABEL"
 }

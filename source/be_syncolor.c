@@ -103,6 +103,7 @@ static char *keyword[] = {
 	"ifdef",
 	"elsifdef",
 	"retry",
+	"goto",
 	"break",
 	"label",
 	"enum",

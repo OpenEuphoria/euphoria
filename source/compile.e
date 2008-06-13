@@ -2436,7 +2436,27 @@ procedure opASSIGN_I()
 	SetBBType(Code[pc+2], TYPE_INTEGER, ObjMinMax(Code[pc+1]), TYPE_OBJECT)
 	pc += 3
 end procedure
-				
+
+procedure opGLABEL()
+	integer label_index
+	integer addr
+
+	NewBB(0, E_ALL_EFFECT, 0)
+	addr = Code[pc+1]
+	label_index = find_label(addr)
+	c_printf("G%x:\n", label_index)
+	pc += 2
+end procedure
+
+procedure opGOTO()
+	integer addr
+
+	addr = Code[pc+1]
+	c_stmt0("goto ")
+	c_printf("G%x;\n", find_label(addr))
+	pc += 2
+end procedure
+
 procedure opEXIT() 
 -- EXIT / ELSE / ENDWHILE
 	if opcode = ENDWHILE then

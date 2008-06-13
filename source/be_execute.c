@@ -1025,6 +1025,12 @@ void code_set_pointers(int **code)
 				code[i+1] = SET_JUMP(code[i+1]);
 				i += 2;
 				break;
+
+			case GLABEL:
+			case GOTO:
+				code[i+1] = SET_JUMP(code[i+1]);
+				i += 2;
+				break;
 				
 			case NOT:
 			case IS_AN_ATOM:
@@ -1624,7 +1630,8 @@ void do_exec(int *start_pc)
   &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
   &&L_OPTION_SWITCHES, &&L_RETRY, &&L_SWITCH,
-  NULL /* L_CASE not emitted*/
+  NULL, /* L_CASE not emitted*/
+  &&L_GOTO, &&L_GLABEL
 /* 188 (previous) */
   };
 #endif
@@ -1893,6 +1900,16 @@ void do_exec(int *start_pc)
 			case L_ENDWHILE:
 			case L_ELSE:
 			case L_RETRY:
+				pc = (int *)pc[1];
+				thread();
+				BREAK;
+
+			case L_GOTO:
+				pc = (int *)pc[1];
+				thread();
+				BREAK;
+
+			case L_GLABEL:
 				pc = (int *)pc[1];
 				thread();
 				BREAK;

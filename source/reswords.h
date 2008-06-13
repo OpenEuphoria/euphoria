@@ -200,7 +200,9 @@
 #define SWITCH              187
 #define CASE                188
 #define NOPSELECT           189
-#define MAX_OPCODE          189
+#define GOTO 190
+#define GLABEL 191
+#define MAX_OPCODE          191
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

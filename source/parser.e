@@ -31,6 +31,12 @@ object backed_up_tok       -- place to back up a token
 integer FuncReturn         -- TRUE if a function return appeared 
 integer param_num          -- number of parameters and private variables
 					       -- in current procedure
+--sequence goto_list        -- back-patch list for end if label
+--sequence goto_delay        -- delay list for end if label
+sequence goto_line        -- back-patch list for end if label
+sequence goto_labels    -- sequence of if block labels, 0 for unlabelled blocks
+sequence goto_addr
+sequence goto_stack
 sequence break_list        -- back-patch list for end if label
 sequence break_delay       -- delay list for end if label
 sequence exit_list         -- stack of exits to back-patch
@@ -90,12 +96,46 @@ procedure CreateTopLevel()
 	SymTab[TopLevelSub][S_SAVED_PRIVATES] = {}
 end procedure
 
+procedure CheckForUndefinedGotoLabels()
+	for i = 1 to length(goto_delay) do
+		if not equal(goto_delay[i],"") then
+			line_number = goto_line[i][1] -- tell compiler the correct line number
+			gline_number = goto_line[i][1] -- tell compiler the correct line number
+			ThisLine = goto_line[i][2] -- tell compiler the correct line number
+			bp = length(ThisLine)
+        		CompileErr("Unknown label "&goto_delay[i])
+		end if
+	end for
+end procedure
+
+procedure PushGoto()
+	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line})
+	goto_addr = {}
+	goto_list = {}
+	goto_labels = {}
+	goto_delay = {}
+	goto_line = {}
+end procedure
+
+procedure PopGoto()
+	CheckForUndefinedGotoLabels()
+	goto_addr = goto_stack[length(goto_stack)][1]
+	goto_list = goto_stack[length(goto_stack)][2]
+	goto_labels = goto_stack[length(goto_stack)][3]
+	goto_delay = goto_stack[length(goto_stack)][4]
+	goto_line = goto_stack[length(goto_stack)][5]
+	goto_stack = goto_stack[1..length(goto_stack)-1]
+end procedure
+
 procedure EnterTopLevel()
 -- prepare to put code into the top level procedure 
 	if CurrentSub then
 		EndLineTable()
 		SymTab[CurrentSub][S_LINETAB] = LineTable
 		SymTab[CurrentSub][S_CODE] = Code
+	end if
+	if length(goto_stack) then
+		PopGoto()
 	end if
 	LineTable = SymTab[TopLevelSub][S_LINETAB]
 	Code = SymTab[TopLevelSub][S_CODE]
@@ -105,6 +145,7 @@ end procedure
 
 procedure LeaveTopLevel()
 -- prepare to resume compiling normal subprograms 
+	PushGoto()
 	LastLineNumber = -1
 	SymTab[TopLevelSub][S_LINETAB] = LineTable
 	SymTab[TopLevelSub][S_CODE] = Code
@@ -114,6 +155,12 @@ procedure LeaveTopLevel()
 end procedure
 
 global procedure InitParser()
+	goto_stack = {}
+    --goto_list = {}
+    --goto_delay = {}
+    goto_labels = {}
+    goto_addr = {}
+    goto_line = {}
 	break_list = {}
 	break_delay = {}
 	exit_list = {}
@@ -159,14 +206,14 @@ end procedure
 procedure InitCheck(symtab_index sym, integer ref)
 -- emit INIT_CHECK opcode if we aren't sure if a var has been
 -- initialized yet. ref is TRUE if this is a read of this var
-	if SymTab[sym][S_MODE] = M_NORMAL and 
-	   SymTab[sym][S_SCOPE] != SC_LOOP_VAR and 
-	   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
+	if SymTab[sym][S_MODE] = M_NORMAL and
+	    SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
+	    SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
 		if (SymTab[sym][S_SCOPE] != SC_PRIVATE and 
 		   equal(SymTab[sym][S_OBJ], NOVALUE)) or 
 		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS]) then
-			if SymTab[sym][S_INITLEVEL] = -1 then
+			if SymTab[sym][S_INITLEVEL] = -1 then 
 				if ref then
 					if SymTab[sym][S_SCOPE] = SC_GLOBAL or
 					   SymTab[sym][S_SCOPE] = SC_EXPORT or
@@ -1349,6 +1396,72 @@ function exit_level(token tok,integer flag)
 	end if
 end function
 
+procedure GLabel_statement()
+    token tok
+    object labbel
+    object laddr
+    integer n
+    tok = next_token()
+
+    if tok[T_ID] != STRING then
+	CompileErr("A label clause must be followed by a constant string")
+    end if
+    labbel=SymTab[tok[T_SYM]][S_OBJ]
+    laddr = length(Code)+1
+    if find(labbel,goto_labels) then
+	CompileErr("Duplicate label name")
+    end if
+    goto_labels = append(goto_labels,labbel)
+    goto_addr = append(goto_addr,laddr)
+    n = find(labbel,goto_delay)
+    while n do
+	backpatch(goto_list[n],laddr)
+	goto_delay[n] = "" --clear it
+	goto_line[n] = {-1,""} --clear it
+	n = find(labbel,goto_delay)
+    end while
+    if TRANSLATE then
+    	emit_op(GLABEL)  
+	emit_addr(laddr)
+    end if
+end procedure
+procedure Goto_statement()
+-- Parse an exit statement
+    token tok
+    integer n
+    integer num_labels
+
+    tok = next_token()
+    num_labels = length(goto_labels) 
+    
+    if tok[T_ID]=STRING then
+        n = find(SymTab[tok[T_SYM]][S_OBJ],goto_labels)
+        if n = 0 then
+	    goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
+	    goto_list &= length(Code)+2 --not 1???
+	    goto_line &= {{line_number,ThisLine}}
+	--elsif TRANSLATE then
+		--help the back-end figure out what the label is
+	    --goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
+	    --goto_list &= -1
+	    --goto_line &= {{line_number,ThisLine}}
+        end if 
+	tok = next_token()
+    else
+            CompileErr("Goto statement without a string label.")
+            --CompileErr("Goto statement without a string label is not supported.")
+    end if
+
+    emit_op(GOTO)  
+    if n = 0 then
+    emit_addr(0) -- to be back-patched
+    else
+    emit_addr(goto_addr[n])
+    end if
+    putback(tok)
+    NotReached(tok[T_ID], "goto")
+end procedure
+
 procedure Exit_statement()
 -- Parse an exit statement
     token tok
@@ -2367,6 +2480,14 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Return_statement()
 
+		elsif id = LABEL then
+			StartSourceLine(TRUE)
+			GLabel_statement()
+			
+		elsif id = GOTO then
+			StartSourceLine(TRUE)
+			Goto_statement()
+			
 		elsif id = EXIT then
 			StartSourceLine(TRUE)
 			Exit_statement()
@@ -2450,16 +2571,13 @@ procedure SubProg(integer prog_type, integer scope)
 	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry 
 		if scope = SC_OVERRIDE then
-			switch SymTab[p][S_SCOPE] do
-				case SC_PREDEF:
+			if SymTab[p][S_SCOPE] = SC_PREDEF then
 					Warning(sprintf("built-in routine %s() overridden in %s",
 									{SymTab[p][S_NAME], file_name[current_file_no]}))
-					break
-				case SC_OVERRIDE:
+			elsif SymTab[p][S_SCOPE] = SC_OVERRIDE then
 					CompileErr(sprintf("built-in routine %s() is overridden already in: %s", 
 						 {SymTab[p][S_NAME], file_name[SymTab[p][S_FILE_NO]]}))
-					break
-			end switch
+			end if
 		end if
 
 		h = SymTab[p][S_HASHVAL]
@@ -2759,17 +2877,14 @@ global procedure real_parser(integer nested)
 			SubProg(tok[T_ID], SC_LOCAL)
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE then
-			switch id do
-				case GLOBAL:
+				if id = GLOBAL then
 				    scope = SC_GLOBAL
-					break
-				case EXPORT:
+				elsif id = EXPORT then
 					scope = SC_EXPORT
-					break
-				case OVERRIDE:
+					
+				elsif OVERRIDE then
 					scope = SC_OVERRIDE
-					break
-			end switch
+					end if
 
 			tok = next_token()
 			id = tok[T_ID]
@@ -2790,6 +2905,7 @@ global procedure real_parser(integer nested)
 
 			elsif scope = SC_EXPORT and id = INCLUDE then
 				IncludeScan( 1 )
+				PushGoto()
 			else 
 				if id = VARIABLE or id = QUALIFIED_VARIABLE then
 					UndefinedVar(tok[T_SYM])
@@ -2860,6 +2976,7 @@ global procedure real_parser(integer nested)
 
 		elsif id = INCLUDE then
 			IncludeScan( 0 )
+			PushGoto()
 
 		elsif id = WITH then
 			SetWith(TRUE)
@@ -2869,8 +2986,10 @@ global procedure real_parser(integer nested)
 
 		elsif id = END_OF_FILE then
 			if IncludePop() then
+				PopGoto()
 				read_line()
 			else
+				CheckForUndefinedGotoLabels()
 				exit -- all finished
 			end if
 		
@@ -2878,6 +2997,14 @@ global procedure real_parser(integer nested)
 			StartSourceLine(TRUE)
 			Print_statement()
 			ExecCommand()
+
+		elsif id = LABEL then
+			StartSourceLine(TRUE)
+			GLabel_statement()
+
+		elsif id = GOTO then
+			StartSourceLine(TRUE)
+			Goto_statement()
 
 		elsif id = CONTINUE then
 			if nested then

@@ -1772,8 +1772,9 @@ procedure opIS_A_SEQUENCE()
 end procedure
 			
 procedure opIS_AN_OBJECT()
+	a = Code[pc+1]
 	target = Code[pc+2]
-	val[target] = 1
+	val[target] = (val[a] != NOVALUE)
 	pc += 3
 end procedure
 				

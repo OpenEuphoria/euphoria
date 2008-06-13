@@ -188,5 +188,7 @@ static char *opnames[] = {
 	"OPTION_SWITCHES",
 	"RETRY",
 	"SWITCH",
-	"CASE"
+	"CASE",
+	"GOTO",
+	"GLABEL"
 };

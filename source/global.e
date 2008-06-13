@@ -344,3 +344,8 @@ global sequence Recorded, Ns_recorded -- lists of identifiers and namespaces to 
 Recorded={}
 Ns_recorded={}
 
+global sequence goto_delay
+global sequence goto_list
+goto_delay={}
+goto_list={}
+
