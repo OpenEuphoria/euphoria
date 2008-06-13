@@ -197,10 +197,10 @@ Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; Va
 Root: HKCR; Subkey: "EUWinApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\BIN\EXW.EXE"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist
 
 ;associate .ex files to be called by EX.exe
-Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUDOSApp"; Flags: uninsdeletevalue createvalueifdoesntexist
-Root: HKCR; Subkey: "EUDOSApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria DOS App"; Flags: uninsdeletekey createvalueifdoesntexist
-Root: HKCR; Subkey: "EUDOSApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\BIN\EXW.EXE,0"; Flags: uninsdeletekey createvalueifdoesntexist
-Root: HKCR; Subkey: "EUDOSApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\BIN\EX.EXE"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist
+Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: uninsdeletevalue createvalueifdoesntexist
+Root: HKCR; Subkey: "EUConsoleApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist
+Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\BIN\EXW.EXE,0"; Flags: uninsdeletekey createvalueifdoesntexist
+Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\BIN\EXWC.EXE"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist
 
 ;associate .e, .ew files to be called by ED.bat
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUCodeFile"; Flags: uninsdeletevalue createvalueifdoesntexist
@@ -215,8 +215,6 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 [Run]
 ;Generate DOCS, and update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
 Filename: "{tmp}\exw.exe"; Description: "Generate Documentation Files as HTML"; Parameters: """{tmp}\doc.exw"" HTML ""{app}"""; StatusMsg: "Generating HTML documentation files ...";
-Filename: "{tmp}\exw.exe"; Description: "Generate Documentation Files as plain text"; Parameters: """{tmp}\doc.exw"" TEXT ""{app}"""; StatusMsg: "Generating plain text documentation files ...";
-Filename: "{tmp}\exw.exe"; Description: "Combine Documentation Files"; Parameters: """{tmp}\combine.exw"" ""{app}"""; StatusMsg: "Combining documentation files ...";
 Filename: "{tmp}\exw.exe"; Description: "Create exwc.exe"; Parameters: """{tmp}\makecon.exw"" ""{app}"""; StatusMsg: "Making exwc.exe ...";
 Filename: "{tmp}\exw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
 
