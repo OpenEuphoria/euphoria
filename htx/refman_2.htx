@@ -1009,6 +1009,29 @@ c = 0
 When you declare a variable you name the variable (which protects you against
 making spelling mistakes later on) and you specify the values that may legally
 be assigned to the variable during execution of your program.</p>
+<p>
+The simple act of declaring a variable does not assign any value to it. If you attempt to read it before assigning any value to it, Euphoria will issue a run-time error as "variable xyz has never been assigned a value".
+<p>
+To guard against forgetting to initialise a variable, and also because it may make the code clearer to read, you can combine declaration and assignment:
+<eucode>
+integer n = 5
+</eucode>
+This is equivalent to
+<eucode>
+integer n
+n = 5
+</eucode>
+<p>
+It is not unfrequent that one defines a private variable that bears the same name as one already in scope. You can reuse the value of that variable when performing an initialisation on declare:
+<eucode>
+integer n
+n=5
+procedure foo()
+integer n = n + 2
+?n
+end procedure
+foo() -- prints out 7
+</eucode>
 
 <a name="constants"></a>
 <h4>constants</h4>

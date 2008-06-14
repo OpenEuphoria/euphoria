@@ -699,6 +699,9 @@ procedure ParseArgs(symtab_index subsym)
                     short_circuit += 1
 					use_private_list=0
 					lock_scanner = 0
+					if backed_up_tok[T_ID] = PLAYBACK_ENDS then
+						backed_up_tok = UNDEFINED
+					end if
                     return
 
 				else
@@ -2326,6 +2329,11 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				SymTab[sym][S_GTYPE] = CompileType(type_ptr)
 			end if
 	   
+	   		tok = next_token()
+   			putback(tok)
+	   		if tok[T_ID] = EQUALS then -- assign on declare
+	   			Assignment({VARIABLE,sym})
+			end if
 		end if
 		tok = next_token()
 		if tok[T_ID] != COMMA then
@@ -2352,24 +2360,31 @@ procedure Private_declaration(symtab_index type_sym)
 			SymTab[sym][S_GTYPE] = CompileType(type_sym)
 		end if
 	   
-		tok = next_token()
+   		tok = next_token()
+   		if tok[T_ID] = EQUALS then -- assign on declare
+		    putback(tok)
+			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH] -- recover any shadowed var
+		    Assignment({VARIABLE,sym})
+			buckets[SymTab[sym][S_HASHVAL]] = sym  -- put new var back in place
+	   		tok = next_token()
+		end if
+
 		if tok[T_ID] != COMMA then
 			exit
 		end if
-	end while 
+	end while
 	putback(tok)
 end procedure
-
 
 procedure Procedure_call(token tok)
 -- parse a procedure call statement 
 	integer n, scope, opcode
 	token temp_tok
-	symtab_index s--, sub
+	symtab_index s, sub
 
 	tok_match(LEFT_ROUND)
 	s = tok[T_SYM]
---	sub=s
+	sub=s
 	n = SymTab[s][S_NUM_ARGS]
 	scope = SymTab[s][S_SCOPE]
 	opcode = SymTab[s][S_OPCODE]
@@ -2378,19 +2393,21 @@ procedure Procedure_call(token tok)
 											   SymTab[s][S_EFFECT])
 	end if
 	ParseArgs(s)
-    -- check for any initialisation code for variables  - not in Eu's specs
---     for i=1 to n do
---         s = SymTab[s][S_NEXT]
---     end for
---     while s and SymTab[s][S_SCOPE]=SC_PRIVATE do
---         if sequence(SymTab[s][S_CODE]) then
---             start_playback(prepend(SymTab[s][S_CODE],{EQUAL,0}))
---             Assignment(s)
---         end if
---         s = SymTab[s][S_NEXT]
---     end while
---    s = sub
-	if scope = SC_PREDEF then 
+
+    -- check for any initialisation code for variables
+    for i=1 to n+1 do
+        s = SymTab[s][S_NEXT]
+    end for
+    while s and SymTab[s][S_SCOPE]=SC_PRIVATE do
+        if sequence(SymTab[s][S_CODE]) then
+            start_playback(SymTab[s][S_CODE]) 
+            Assignment({VARIABLE,s})
+        end if
+        s = SymTab[s][S_NEXT]
+    end while
+
+	s = sub
+	if scope = SC_PREDEF then
 		emit_op(opcode)
 		if opcode = ABORT then
 			temp_tok = next_token()

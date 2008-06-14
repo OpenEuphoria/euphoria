@@ -575,7 +575,7 @@ global function keyfind(sequence word, integer file_no)
 				-- Consider: S_PREDEF 
 				
 				scope = SymTab[st_ptr][S_SCOPE]
-				
+
 				if scope = SC_OVERRIDE then
 					dup_overrides &= st_ptr
 
@@ -585,7 +585,7 @@ global function keyfind(sequence word, integer file_no)
 				elsif scope = SC_GLOBAL then
 					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file 
-					   
+
 						if BIND then
 							add_ref(tok)
 						end if
@@ -597,7 +597,7 @@ global function keyfind(sequence word, integer file_no)
 					gtok = tok
 					dup_globals &= st_ptr
 					in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
-					
+
 					-- continue looking for more globals with same name 
 				
 				elsif scope = SC_EXPORT then
@@ -717,7 +717,7 @@ global function keyfind(sequence word, integer file_no)
 
 		return tok
 	end if
-
+			   
 	if length(dup_globals) > 1 and find( 1, in_include_path ) then
 		-- filter out based on include path
 		ix = 1
@@ -738,7 +738,7 @@ global function keyfind(sequence word, integer file_no)
 	
 	if length(dup_globals) = 1 and st_builtin = 0 then
 		-- matched exactly one global
-					   
+
 		if BIND then
 			add_ref(gtok)
 		end if
@@ -753,7 +753,7 @@ global function keyfind(sequence word, integer file_no)
 		end if	
 		return gtok
 	end if
-	
+	            
 	-- couldn't find unique one 
 	if length(dup_globals) = 0 then
 		defined = SC_UNDEFINED

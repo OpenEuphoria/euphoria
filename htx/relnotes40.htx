@@ -86,6 +86,10 @@
 		efficiently a seqience of <b>elsif</b>, using the more compact <b>cse</b>
 		statement.
 	</li>
+	<li>
+		Now variables can be initialised right on the spot at which they are declared, just 	
+		like constants.
+	</li>
 <li>
      Began <b>library expansion</b>. The vast percentage of these functions
      have been found in The Archive. Many thanks must go to the original
