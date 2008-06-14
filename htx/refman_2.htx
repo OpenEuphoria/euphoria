@@ -2299,7 +2299,7 @@ stop your program immediately.</p>
  -- some_app.exw
  include mylib.e
  foo(123)
- </euxode>
+ </eucode>
  will result, when some_app.exw is run with warning, in the following text being displayed in the console window:
  <pre>
  123
