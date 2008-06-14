@@ -8,7 +8,7 @@
 --    Sorting
 --****
 
-include wildcard.e
+include sequence.e -- upper/lower
 
 --**
 -- Sort the elements of a sequence into ascending order.
@@ -35,10 +35,7 @@ include wildcard.e
 --   -- result is {16,16,17,18,19,20,20,21,23}
 --
 -- See Also:
--- compare
--- sort_reverse
--- sort_user
--- custom_sort
+--     search:compare, sort_reverse, sort_user, custom_sort
 
 global function sort(sequence x)
 	integer gap, j, first, last
@@ -74,7 +71,6 @@ global function sort(sequence x)
 end function
 --**
 
-
 --**
 -- Sort the elements of a sequence according to a user-defined 
 -- order.
@@ -84,24 +80,24 @@ end function
 -- the user-defined function to determine the order. 
 --
 -- Parameters:
---	custom_compare = A routine-id of the user defined routine that compares
--- two items in x.
+--     custom_compare = A routine-id of the user defined routine that compares
+--     two items in x.
 --
---	The user defined routine must accept two objects (A and B) and return
---	an integer. It returns -1 if object A must appear before object B,
---	1 if object B must appear before object A, and 0 if the order
---	doesn't matter.
+--	   The user defined routine must accept two objects (A and B) and return
+--	   an integer. It returns -1 if object A must appear before object B,
+--	   1 if object B must appear before object A, and 0 if the order
+--	   doesn't matter.
 --
---	x = The sequence of items to be sorted.
+--	   x = The sequence of items to be sorted.
 --
 -- Returns:
---	 sequence - The original sequence in sorted order
+--     sequence - The original sequence in sorted order
 --
 -- Comments:
---	This uses the "Shell" sort algorithm.
+--     This uses the "Shell" sort algorithm.
 --
--- This sort is not "stable", i.e. elements that are considered equal might
--- change position relative to each other.
+--     This sort is not "stable", i.e. elements that are considered equal might
+--     change position relative to each other.
 --
 -- Example 1:
 -- constant students = {{"Anne",18},   {"Bob",21},
@@ -125,7 +121,7 @@ end function
 -- --            {"Diane",23}}
 --
 -- See Also:
---   compare, sort, sort_reverse, sort_user
+--   search:compare, sort, sort_reverse, sort_user
 
 global function custom_sort(integer custom_compare, sequence x)
 	integer gap, j, first, last
@@ -192,11 +188,7 @@ end function
 --	-- result is {23,21,20,20,19,18,17,16,16}
 --
 -- See Also:
---	 compare
---	 sort
---	 sort_user
---	 custom_sort
-
+--	 search:compare, sort, sort_user, custom_sort
 
 global function sort_reverse(sequence x)
 	return custom_sort(routine_id("reverse_comp"), x)
@@ -272,10 +264,7 @@ end function
 --		}
 --
 -- See Also:
---	 compare
---	 sort
---	 sort_reverse
---	 sort_user
+--	 search:compare, sort, sort_reverse, sort_user
 
 global function sort_user(integer custom_compare, sequence x, object user_data)
 	integer gap, j, first, last
@@ -310,7 +299,6 @@ global function sort_user(integer custom_compare, sequence x, object user_data)
 	end while
 end function
 --**
-
 
 function column_compare(object a, object b, object cols)
 -- Local function used by sort_columns()
@@ -378,10 +366,7 @@ end function
 --   sorted = sort_columns( dirlist, {-D_SIZE, D_NAME} )
 --
 -- See Also:
---	 compare
---	 sort
---	 sort_reverse
---	 sort_user
+--	 search:compare, sort, sort_reverse, sort_user
 
 global function sort_columns(sequence x, sequence column_list)
 	return sort_user(routine_id("column_compare"), x, column_list)

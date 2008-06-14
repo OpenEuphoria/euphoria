@@ -1072,7 +1072,7 @@ end function
 -- -- fname is "readme.txt"
 --
 -- See Also:
---   driveid, dirname, fileext
+--   pathinfo, driveid, dirname, filebase, fileext
   
 global function filename(sequence path)
 	sequence data
@@ -1083,7 +1083,18 @@ global function filename(sequence path)
 end function
 --**
 
--- TODO: test, document
+--**
+-- Return the base filename of path.
+-- 
+-- TODO: Test
+--
+-- Example 1:
+-- base = filebase("/opt/euphoria/readme.txt")
+-- -- base is "readme"
+--
+-- See Also:
+--     pathinfo, driveid, dirname, filename, fileext
+
 global function filebase(sequence path)
 	sequence data
 
@@ -1091,6 +1102,7 @@ global function filebase(sequence path)
 
 	return data[3]
 end function
+--**
 
 --**
 -- Return the file extension of a fully qualified filename
@@ -1103,7 +1115,7 @@ end function
 -- -- fname is "txt"
 --
 -- See Also:
---     driveid, dirname, filename, filebase
+--     pathinfo, driveid, dirname, filename, filebase
 
 global function fileext(sequence path)
 	sequence data
@@ -1112,10 +1124,22 @@ global function fileext(sequence path)
 end function
 --**
 
--- TODO: document, test
+--**
+-- Return the drive letter of the path on DOS32 and WIN32 platforms.
+--
+-- TODO: Test
+--
+-- Example:
+-- letter = driveid("C:\\EUPHORIA\\Readme.txt")
+-- -- letter is "C"
+--
+-- See Also:
+--     pathinfo, dirname, filename, filebase, fileext
+
 global function driveid(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[5]
 end function
+--**
 
