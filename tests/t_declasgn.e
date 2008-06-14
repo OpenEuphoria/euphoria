@@ -15,3 +15,4 @@ test_equal("Assign on declare 1",n,3)
 test_equal("Use default params in initial value",7,foo())
 warning("Useless code")
 
+test_embedded_report()

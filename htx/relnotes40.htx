@@ -87,8 +87,13 @@
 		statement.
 	</li>
 	<li>
-		Now variables can be initialised right on the spot at which they are declared, just 	
+		Now variables can be initialised right on the spot at which they are declared, just
 		like constants.
+	</li>
+	<li>
+		Any routine parameter can be defaulted, i.e. given a default value that is plugged in 
+		if omitted on a call. Any expression can be used, and parameters of the same call can 
+		even be used.
 	</li>
 <li>
      Began <b>library expansion</b>. The vast percentage of these functions

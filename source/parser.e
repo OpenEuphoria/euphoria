@@ -37,20 +37,26 @@ sequence goto_line        -- back-patch list for end if label
 sequence goto_labels    -- sequence of if block labels, 0 for unlabelled blocks
 sequence goto_addr
 sequence goto_stack
+
+-- flow control management
 sequence break_list        -- back-patch list for end if label
 sequence break_delay       -- delay list for end if label
 sequence exit_list         -- stack of exits to back-patch
 sequence exit_delay        -- delay list for end for/while/until
 sequence continue_list     -- stack of exits to back-patch
 sequence continue_delay    -- stack of exits to back-patch
+sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
+
+-- block headers
 sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
 sequence if_labels         -- sequence of if block labels, 0 for unlabelled blocks
+
 sequence for_vars, for_where -- list of loop var s.t. indexes and for-loop nesting level
-sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
+
+-- general structure control
 sequence block_list        -- list of opcodes for currently active blocks. This list never shrinks
 integer block_index        -- index of currently active block
 
-integer loop_nest          -- current number of nested loops
 integer stmt_nest          -- nesting level of statement lists
 
 sequence init_stack        -- var init stack 
@@ -173,7 +179,6 @@ global procedure InitParser()
 	EnterTopLevel()
 	backed_up_tok = UNDEFINED
 	loop_stack = {}
-	loop_nest = 0
     stmt_nest = 0
     loop_labels = {}
     if_labels = {}
@@ -433,33 +438,52 @@ procedure start_playback(sequence s)
     backed_up_tok = UNDEFINED
     Parser_mode = PAM_PLAYBACK
 end procedure
-
+            
+sequence parseargs_states
+parseargs_states={}
 sequence private_list,private_sym
+private_list={}
+private_sym={}
+integer lock_scanner
+lock_scanner=0
 integer use_private_list
-use_private_list=0
+use_private_list = 0
+integer on_arg
+on_arg = 0
+
+procedure restore_parseargs_states()
+	sequence s
+	integer n
+
+	s = parseargs_states[$]
+    parseargs_states = parseargs_states[1..$-1]
+    n=s[1]
+	private_list = private_list[1..n]
+    private_sym = private_sym[1..n]
+    lock_scanner = s[2]
+    use_private_list = s[3]
+    on_arg = s[4]
+end procedure
 
 function read_recorded_token(integer n)
     token t
-	symtab_index s
 	integer p
-	
-    if atom(Ns_recorded[n]) then
+
+    if atom(Ns_recorded[n]) then  
         if use_private_list then
             p=find(Recorded[n],private_list)
-            if p then -- found reference to arg name
-                CompileErr("Use of a parameter of the calling function in the default of another of its parameters is not currently supported")
-				--return {VARIABLE,private_sym[p]}
+			if p>0 then -- the value of this parameter is known, use it
+				return {VARIABLE,private_sym[p]}
             end if
         end if
-        s = keyfind(Recorded[n],-1)
-        t={SymTab[s][S_TOKEN],s}
+        t = keyfind(Recorded[n],-1)
     else
-        s = keyfind(Ns_recorded[n],-1)
-        if SymTab[s][S_TOKEN] != NAMESPACE then
+        t = keyfind(Ns_recorded[n],-1)
+        if t[T_ID] != NAMESPACE then
             CompileErr("Unknown namespace in replayed token")
         end if
-        s=keyfind(Recorded[n],SymTab[s][S_OBJ])
-        n = SymTab[s][S_TOKEN]
+        t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
+        n = t[T_ID]
         if n = VARIABLE then
             n = QUALIFIED_VARIABLE
         elsif n = FUNC then
@@ -469,16 +493,14 @@ function read_recorded_token(integer n)
         elsif n = TYPE then
             n = QUALIFIED_TYPE
         end if
-        t={n,s}
-    end if
-    if SymTab[s][S_SCOPE] = SC_UNDEFINED then
+        t[T_ID]=n
+    end if 
+    if SymTab[t[T_SYM]][S_SCOPE] = SC_UNDEFINED then
         CompileErr("Unknown symbol in replayed token")
     end if
   	return t
 end function
 
-integer lock_scanner
-lock_scanner=0
 
 function next_token()
 -- read next scanner token
@@ -606,36 +628,25 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 				SymTab[subsym][S_NUM_ARGS], plural}))
 end procedure
 
-procedure collect_privates(symtab_index arg)
-	integer n
-
-	n = SymTab[arg][S_NUM_ARGS]
-	use_private_list=1
-    private_list = repeat(0,n)
-    private_sym = repeat(0,n)
-    for j=1 to n do
-        arg = SymTab[arg][S_NEXT]
-        private_sym[j] = arg
-        private_list[j] = SymTab[arg][S_NAME]
-    end for
-end procedure
-
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call 
-	integer n, fda, on_arg
+	integer n, fda
 	token tok
     symtab_index s
     object tok2    
 
 	n = SymTab[subsym][S_NUM_ARGS]
+    fda = SymTab[subsym][S_FIRST_DEF_ARG]
     s = subsym
-    tok2 = UNDEFINED
-	
+
+	parseargs_states = append(parseargs_states,
+				{length(private_list),lock_scanner,use_private_list,on_arg})
+	lock_scanner = 0
 	on_arg = 0
-	
+    tok2 = UNDEFINED
+
 	short_circuit -= 1
 	for i = 1 to n do
-      	
       	
     	if atom(tok2) then
 			tok = next_token()
@@ -644,52 +655,53 @@ procedure ParseArgs(symtab_index subsym)
 			tok2=UNDEFINED
 		end if
     	if tok[T_ID] = COMMA then  -- defaulted arg
-    		s = SymTab[s][S_NEXT]
+			s = SymTab[s][S_NEXT]  
             if atom(SymTab[s][S_CODE]) then  -- but no default set
                 CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
             end if
-			if use_private_list=0 then 
-			-- build private symbol list for this routine
-                collect_privates(subsym)
-            end if
-            
-            start_playback(SymTab[s][S_CODE])
+            use_private_list = 1
+			start_playback(SymTab[s][S_CODE])
 			call_proc(forward_expr, {})
 			on_arg += 1
+			private_list = append(private_list,SymTab[s][S_NAME])
+			private_sym &= Top()
 			tok2 = backed_up_tok
 			putback(tok)
 		elsif tok[T_ID] != RIGHT_ROUND then
 			s = SymTab[s][S_NEXT]
-        	putback(tok) 
+			use_private_list = 0
+        	putback(tok)
 			call_proc(forward_expr, {})
 			on_arg += 1
+			private_list = append(private_list,SymTab[s][S_NAME])
+			private_sym &= Top()
     	end if
-    	
-		if on_arg != n then
+
+		if on_arg != n then 
 			if tok[T_ID] = RIGHT_ROUND then
 				putback( tok )
 			end if
 			tok = next_token()
 			if tok[T_ID] != COMMA then
           		if tok[T_ID] = RIGHT_ROUND then -- not as many actual args as formal args
-                    fda = SymTab[subsym][S_FIRST_DEF_ARG]
                     if fda=0 or i<fda-1 then
                         WrongNumberArgs(subsym, "")
                     end if
---				    backed_up_toks = {}
 					lock_scanner = 1
+					use_private_list = 1
                     for j = on_arg + 1 to n do
+
                     	s = SymTab[s][S_NEXT]
-                    	
-                        if sequence(SymTab[s][S_CODE]) then 
+                        if sequence(SymTab[s][S_CODE]) then
 						-- some defaulted arg follows with a default value
-							if use_private_list=0 then 
-				                collect_privates(subsym)
-				            end if
 
 							putback( tok )
 							start_playback(SymTab[s][S_CODE] )
 							call_proc(forward_expr, {})
+							if j<n then
+								private_list = append(private_list,SymTab[s][S_NAME])  
+								private_sym &= Top()  
+							end if
 							on_arg += 1
                         else -- just not enough args
                             CompileErr(sprintf("Argument %d is defaulted, but has no default value",j))
@@ -697,13 +709,11 @@ procedure ParseArgs(symtab_index subsym)
           		    end for
                     -- all missing args had default values
                     short_circuit += 1
-					use_private_list=0
-					lock_scanner = 0
 					if backed_up_tok[T_ID] = PLAYBACK_ENDS then
 						backed_up_tok = UNDEFINED
 					end if
+					restore_parseargs_states()
                     return
-
 				else
 					putback(tok)
 					tok_match(COMMA)
@@ -722,11 +732,12 @@ procedure ParseArgs(symtab_index subsym)
 			tok_match(RIGHT_ROUND)
 		end if
 	end if
-	use_private_list=0
+	
+	restore_parseargs_states()
 end procedure
 
 procedure Factor()
--- parse a factor in an expression 
+-- parse a factor in an expression
        token tok, tok2, tok3
 	integer id, n, scope, opcode, e
 	integer save_factors, save_lhs_subs_level
@@ -735,6 +746,10 @@ procedure Factor()
 	factors += 1
 	tok = next_token()
 	id = tok[T_ID]
+	if id = RECORDED then
+	    tok = read_recorded_token(tok[T_SYM])
+		id = tok[T_ID]
+	end if
 	if id = VARIABLE or id = QUALIFIED_VARIABLE then
 		sym = tok[T_SYM]
 		UndefinedVar(sym)
@@ -1470,7 +1485,7 @@ procedure Exit_statement()
     token tok
     sequence by_ref
 
-    if not length(loop_labels) then
+    if not length(loop_stack) then
     	CompileErr("exit statement must be inside a loop")
     end if
 
@@ -1490,7 +1505,7 @@ procedure Continue_statement()
     sequence by_ref
     integer loop_level
 
-	if not length(loop_labels) then
+	if not length(loop_stack) then
 		CompileErr("continue statement must be inside a loop")
 	end if
 
@@ -1523,13 +1538,13 @@ procedure Retry_statement()
     sequence by_ref
     token tok
 
-	if not length(loop_labels) then
+	if not length(loop_stack) then
 		CompileErr("retry statement must be inside a loop")
 	end if
 
 	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
 
-	if loop_stack[$+1-by_ref[1]][1]=FOR then
+	if loop_stack[$+1-by_ref[1]]=FOR then
 		emit_op(RETRY) -- for Translator to emit a label at the right place
 	else
 		if retry_addr[$+1-by_ref[1]] < 0 then
@@ -1740,6 +1755,7 @@ end procedure
 procedure exit_loop(integer exit_base)
 	PatchXList(exit_base)
     loop_labels = loop_labels[1..$-1]
+    loop_stack = loop_stack[1..$-1]
     continue_addr = continue_addr[1..$-1]
     retry_addr = retry_addr[1..$-1]
     entry_addr = entry_addr[1..$-1]
@@ -1771,7 +1787,6 @@ end procedure
 procedure pop_switch( integer break_base )
 --	loop_stack    = loop_stack[1..$-1]
 --	loop_labels   = loop_labels[1..$-1]
---	loop_nest    -= 1
 	PatchEList( break_base )
 	block_index -= 1
 	if_labels = if_labels[1..$-1]
@@ -1930,8 +1945,7 @@ procedure While_statement()
         entry_addr[$]=-1
     end if
 
-	loop_stack &= {{WHILE, 0, bp1}}
-	loop_nest += 1
+	loop_stack &= WHILE
 
 	exit_base = length(exit_list)
 	if SC1_type = OR then
@@ -1951,8 +1965,6 @@ procedure While_statement()
 	tok_match(WHILE)
 	StartSourceLine(TRUE)
 	emit_op(ENDWHILE)
-	loop_stack = loop_stack[1..$-1]
-	loop_nest -= 1
 	emit_addr(bp1)
 	if TRANSLATE then
 		emit_op(NOP1)
@@ -1984,8 +1996,10 @@ procedure Loop_statement()
 	end if
     bp1 = length(Code)+1
 	retry_addr &= length(Code)+1
-    continue_addr &= 0  
-    call_proc(forward_Statement_list, {}) 
+    continue_addr &= 0
+	loop_stack &= LOOP
+
+    call_proc(forward_Statement_list, {})
     tok_match(UNTIL)
     PatchNList(next_base)
     StartSourceLine(TRUE)
@@ -2118,8 +2132,7 @@ procedure For_statement()
     next_base = length(continue_list)
 	Expr()
 	tok_match(TO)
-	loop_nest += 1
-	exit_base = length(exit_list)    
+	exit_base = length(exit_list)
 	Expr()
 	tok = next_token()
 	if tok[T_ID] = BY then
@@ -2159,7 +2172,7 @@ procedure For_statement()
     retry_addr &= bp1+1
     continue_addr &= 0
 
-	loop_stack &= {{FOR, loop_var_sym, bp1}}
+	loop_stack &= FOR
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -2176,8 +2189,6 @@ procedure For_statement()
     PatchNList(next_base)
 	emit_op(end_op)
 	backpatch(bp1, length(Code)+1)
-	loop_nest -= 1
-	loop_stack = loop_stack[1..$-1]
 	if not TRANSLATE then
 		if OpTrace then
 			emit_op(ERASE_SYMBOL)
@@ -2439,19 +2450,17 @@ procedure Entry_statement()
 -- must check that it is not in the moddle of an if block
     integer addr
 
-	if not length(loop_labels) or block_index=0 then
+	if not length(loop_stack) or block_index=0 then
 		CompileErr("the entry statement must appear inside a loop")
 	end if
-	if block_list[block_index]=IF then
+	if block_list[block_index]=IF or block_list[block_index]=SWITCH then
 		CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
+	elsif loop_stack[$] = FOR then  -- not allowed in an innermost for loop
+        CompileErr("the entry statement must apply to a while or loop block")
 	end if
 	addr = entry_addr[$]
     if addr=0  then
-        if length(loop_labels) = for_where[$] then  -- not allowed in an innermost for loop
-            CompileErr("the entry statement must apply to a while or loop block")
-        else -- loop already has an entry point
-            CompileErr("the entry statement must appear at most once inside a loop")
-        end if
+        CompileErr("the entry statement must appear at most once inside a loop")
     elsif addr<0 then
 		CompileErr("entry statement is being used without a corresponding entry clause in the loop header")
 	end if
@@ -2668,7 +2677,7 @@ procedure SubProg(integer prog_type, integer scope)
 			end if
 		elsif tok[T_ID] != RIGHT_ROUND then
 			CompileErr("badly-formed list of parameters - expected ',' or ')'")
-		end if
+		end if 
 	end while
 
 	SymTab[p][S_NUM_ARGS] = param_num
@@ -2780,7 +2789,7 @@ end procedure
 
 sequence mix_msg
 mix_msg = "can't mix profile and profile_time"
-include sequence.e -- TODO: why is this here?
+include sequence.e -- TODO: why is this here? <cchris>because of remove() on line 2865
 procedure SetWith(integer on_off)
 -- set a with/without option 
 	sequence option

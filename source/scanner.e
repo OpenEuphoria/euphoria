@@ -934,11 +934,15 @@ global function Scanner()
 		                Recorded = append(Recorded,yytext)
 		                Ns_recorded &= 0
 		                tok = {RECORDED,length(Recorded)}
-		    		else
-		                tok=keyfind(yytext,-1)
 		            end if
 				end if
-			end if    
+			else
+			    if Parser_mode = PAM_RECORD then
+	                Recorded = append(Recorded,yytext)
+	                Ns_recorded &= 0
+	                tok = {RECORDED,length(Recorded)}
+	            end if
+			end if
 			return tok
 			
 		elsif class <= ILLEGAL_CHAR then

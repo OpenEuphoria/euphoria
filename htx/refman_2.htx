@@ -949,6 +949,38 @@ will be created for x in memory (although there will still be just one shared co
 "ABC"). The same thing applies to "copies" of arguments passed in to subroutines.</p></dd>
 
 </dl>
+<p>
+For a number of procedures or functions - see below -, some parameters may have the same value
+in many cases. The most expected value for any parameter may be given a default value. Omitting the value of such a parameter on a given call will cause its default value to be passed.
+<eucode>
+procedure foo(sequence s,integer n=1)
+?n+length(s)
+end procedure
+
+foo("abc") -- prints out 4 = 3+1. n was not specified, so was set to 1.
+foo("abc",3) -- prints out 6 = 3+3
+</eucode>
+<p>
+This is not limited to the last parameter(s):
+<eucode>
+procedure bar(sequence s="abc",integer n,integer p=1)
+?length(s)+n+p
+end procedure
+bar(,2) -- prints out 6 = 3 + 2 + 1
+bar(2)  -- errors out, as 2 is not a sequence
+bar(,2,) -- same as bar(,2)
+bar(,2,3) -- prints out 8 = 3 + 22 + 3
+bar({},2,) -- prints out 3 = 0 + 2 + 1
+bar()      -- errors out, second parameter is omitted, but doesn't have a defailt value
+</eucode>
+<p>
+Any expression may be used in a default value. Parameters that have been already mentioned may even be part of the expression:
+<eucode>
+procedure baz(sequence s,integer n=length(s))
+?n
+end procedure
+baz("abcd") -- prints out 4
+</eucode>
 
 <h4>functions</h4>
 
@@ -977,6 +1009,8 @@ return {x_pos, y_pos}
 <p>
 We will use the general term "subroutine", or simply "routine" when a remark is
 applicable to both procedures and functions.</p>
+<p>
+Defaulted parameters can be used in functions exactly as they are in procedures. See the section above for a few examples.
 
 <a name="types"></a>
 <h4>types</h4>
@@ -987,6 +1021,8 @@ for a variable. A type must have exactly one parameter and should return an
 atom that is either true (non-zero) or false (zero).  Types can also be called
 just like other functions. See <a href="refman_2.htm#43">2.4.3 Specifying the
 Type of a Variable</a>.</p>
+<p>
+Although there are no restrictions to using defaulted parameters with types, their use is so much constrained by a type having excatly one argument that they are of little practical help there.
 
 <a name="variables"></a>
 <h4>variables</h4>

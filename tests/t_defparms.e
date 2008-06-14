@@ -47,5 +47,26 @@ test_equal(", , , ,", {0,0,0,0}, foo(,,,) )
 test_equal("1 , , ,", {1,0,0,0}, foo(1,,,) )
 test_equal("default call as part of compound expression", 2, mul2(1,1) + mul2(1,1) )
 
+include sequence.e
+function find2(object x,sequence s,integer from=1,integer upto=length(s))
+	s=head(s,upto)
+	if from=1 then
+		return find(x,s)
+	else
+		return upto
+	end if
+end function
+test_equal("Use parameters of function to set default values #1",3,find2('h',"John Doe"))
+test_equal("Use parameters of function to set default values #2",8,find2('h',"John Doe",2))
+
+function f1(sequence s0=s)
+	return length(s0)
+end function
+
+function f2(sequence s,integer n=f1())
+	return n
+end function
+test_equal("Indirect reference to parameter",5,f2("abcde"))
+
 test_embedded_report()
 
