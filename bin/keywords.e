@@ -8,7 +8,7 @@ global constant keywords = {
     "exit", "function", "global", "by", "not", "include",
     "with", "without", "xor", "continue", "as", "ifdef", "elsifdef", "enum", 
 	"export", "switch", "case", "break", "entry", "label", "loop", "retry",
-	"until", "override"
+	"until", "override", "goto"
 }
 
 global constant builtins = {
