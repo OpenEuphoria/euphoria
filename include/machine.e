@@ -233,7 +233,7 @@ end procedure
 
 -- Crash handling routines:
 
-global procedure crash(sequence fmt, object data)
+global procedure crash(sequence fmt, object data={})
 	object msg
 	msg = sprintf(fmt, data)
 	machine_proc(M_CRASH, msg)

@@ -2395,11 +2395,11 @@ global function urlencode(sequence what)
 	alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890/" -- encode all else
 	hexnums = "0123456789ABCDEF"
 	
-	for loop = 1 to length(what) do
-		if find(what[loop],alphanum) then
-			encoded &= what[loop]
+	for idx = 1 to length(what) do
+		if find(what[idx],alphanum) then
+			encoded &= what[idx]
 		else
-			junk = what[loop]
+			junk = what[idx]
 			junk1 = floor(junk / 16)
 			junk2 = floor(junk - (junk1 * 16))
 			encoded &= "%" & hexnums[junk1+1] & hexnums[junk2+1]
@@ -2443,9 +2443,9 @@ global function get_sendheader(object field)
 	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
 	if sequence(field) then
 		upperfield = upper(field)
-		for loop = 1 to length(sendheader) do
-			if equal(upperfield,upper(sendheader[loop][1])) then
-				return sendheader[loop]
+		for idx = 1 to length(sendheader) do
+			if equal(upperfield,upper(sendheader[idx][1])) then
+				return sendheader[idx]
 			end if
 		end for
 		return -1
@@ -2525,9 +2525,9 @@ global procedure set_sendheader(object whatheader, sequence whatdata)
 	end if
 	
 	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
-	for loop = 1 to length(sendheader) do
-		if match(upper(whatheader),upper(sendheader[loop][1])) then
-			sendheader[loop][3] = whatdata
+	for idx = 1 to length(sendheader) do
+		if match(upper(whatheader),upper(sendheader[idx][1])) then
+			sendheader[idx][3] = whatdata
 			return
 		end if
 	end for
@@ -2559,22 +2559,22 @@ function eunet_format_sendheader()
 	tempheader = ""
 	temppostdata = ""
 	httpversion = ""
-	for loop = 1 to length(sendheader) do
-		if not equal("",sendheader[loop][3]) and
-				not equal("httpversion",sendheader[loop][1]) and
-				not equal("POSTDATA",sendheader[loop][1]) then
-			if equal("GET",sendheader[loop][1])
-					then tempheader &= sendheader[loop][1] & sendheader[loop][2] & sendheader[loop][3] & " " & httpversion & "\n"
-				else tempheader &= sendheader[loop][1] & sendheader[loop][2] & sendheader[loop][3] & "\r\n"
+	for idx = 1 to length(sendheader) do
+		if not equal("",sendheader[idx][3]) and
+				not equal("httpversion",sendheader[idx][1]) and
+				not equal("POSTDATA",sendheader[idx][1]) then
+			if equal("GET",sendheader[idx][1])
+					then tempheader &= sendheader[idx][1] & sendheader[idx][2] & sendheader[idx][3] & " " & httpversion & "\n"
+				else tempheader &= sendheader[idx][1] & sendheader[idx][2] & sendheader[idx][3] & "\r\n"
 			end if
 		end if
-		if equal("POSTDATA",sendheader[loop][1]) and not equal("",sendheader[loop][3]) then
-			--temppostdata = urlencode(sendheader[loop][3])
-			temppostdata = sendheader[loop][3]
+		if equal("POSTDATA",sendheader[idx][1]) and not equal("",sendheader[idx][3]) then
+			--temppostdata = urlencode(sendheader[idx][3])
+			temppostdata = sendheader[idx][3]
 			set_sendheader("Content-Length",sprintf("%d",length(temppostdata)))
 		end if
-		if equal("httpversion",sendheader[loop][1]) and not equal("",sendheader[loop][3]) then
-			httpversion = sendheader[loop][3]
+		if equal("httpversion",sendheader[idx][1]) and not equal("",sendheader[idx][3]) then
+			httpversion = sendheader[idx][3]
 		end if
 	end for
 	
@@ -2599,15 +2599,15 @@ global procedure parse_recvheader(sequence header)
 	
 	junk = {"",""} -- init it, it looks like this
 	recvheader = eunet_parse(header,{10,13}) -- could be \n or \r or both
-	for loop = 1 to length(recvheader) do
-		place = match(": ",recvheader[loop])
+	for idx = 1 to length(recvheader) do
+		place = match(": ",recvheader[idx])
 		if place then
-			junk[1] = recvheader[loop][1..place-1]
-			junk[2] = recvheader[loop][place+2..length(recvheader[loop])]
-			recvheader[loop] = junk
+			junk[1] = recvheader[idx][1..place-1]
+			junk[2] = recvheader[idx][place+2..length(recvheader[idx])]
+			recvheader[idx] = junk
 		else
-			if match("HTTP/",upper(recvheader[loop])) then
-				recvheader[loop] = {"httpversion",recvheader[loop]} -- what else to call that line?
+			if match("HTTP/",upper(recvheader[idx])) then
+				recvheader[idx] = {"httpversion",recvheader[idx]} -- what else to call that line?
 			end if
 		end if
 	end for
@@ -2644,9 +2644,9 @@ global function get_recvheader(object field)
 	end if
 	
 	upperfield = upper(field)
-	for loop = 1 to length(recvheader) do
-		if equal(upperfield,upper(recvheader[loop][1])) then
-			return recvheader[loop] -- {"header_name","value"}
+	for idx = 1 to length(recvheader) do
+		if equal(upperfield,upper(recvheader[idx][1])) then
+			return recvheader[idx] -- {"header_name","value"}
 		end if
 	end for
 	

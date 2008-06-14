@@ -809,8 +809,11 @@ end function
 --**
 
 --**
--- Write lines contained in s to file named x or file handle x. Returns 1 on success, -1 
--- on failure.
+-- Write lines contained in s to file named x or file handle x. 
+--
+-- Returns:
+--     1 on success
+--     -1 on failure.
 --
 -- Comments:
 -- If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is assumed

@@ -42,7 +42,7 @@ end if
 ---------------------------------------------------------------------
 
 --**
--- copy a file from src to dest.
+-- Copy a file from src to dest.
 --
 -- Comments:
 -- If overwrite is true, if dest file already exists, 
