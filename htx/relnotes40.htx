@@ -63,7 +63,7 @@
 	 than at the start
 </li>
 <li>
-    	New keywords to give greater control over the instryction flow:
+    	New keywords to give greater control over the instruction flow:
 	<ul>
 		<li><b>continue</b>: start next iteration of a loop;</li>
 		<li><b>retry</b>   : restarts the current iteration of a loop</li>
@@ -194,7 +194,14 @@
 	displayed at compile time, for instance to mark a routine as obsolete. The text of the 
 	warning must be a litteral constant.
 </li>
-
+<li>
+	New scope: <b>export</b>.  Symbols with the export scope can only be seen from files that:
+	<ol>
+		<li> directly include the file where the symbols reside </li>
+		<li> directly include a file that uses the "export include file.e" construct to
+			pass export symbols </li>
+	</ol>
+</li>
 <li>
     Routine resolution changes<ol>
     <li>Routines the same name as an internal no longer override the internal by default. You
