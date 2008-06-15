@@ -3,7 +3,7 @@
 include misc.e
 include file.e
 include sequence.e
-
+include sort.e
 atom score
 integer failed, total, status
 sequence files, filename, executable, cmd, cmds, cmd_opts, options, switches
@@ -32,7 +32,7 @@ for i = 3 to length(cmds) do
 end for
 
 if length(files) = 0 then
-	files = dir("t_*.e")
+	files = sort( dir("t_*.e") )
 end if
 
 total = length(files)
