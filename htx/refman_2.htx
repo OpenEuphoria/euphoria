@@ -2071,7 +2071,7 @@ The &lt;val&gt; in a case must be either an atom or a literal string.  One
 important difference between a switch block and an if block is that control
 does not automatically go to the end of the block when the next case statement
 is encountered.  This is referred to as fall-through, and allows the same code
-to be used for multiple values.  'exit' can be used to redirect program flow to
+to be used for multiple values.  'break' can be used to redirect program flow to
 the end of the block.  Fall-through can also be used when different cases
 require most of the same code, but one might require extra processing: </p>
 
@@ -2082,7 +2082,7 @@ switch length(x) do
         -- do something
     case 3:
         -- do something
-        exit
+        break
     case else
         -- do something
 end switch
