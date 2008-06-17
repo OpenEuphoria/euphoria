@@ -225,9 +225,8 @@ end function
 --     find, match, match_all
 
 global function find_all(object needle, sequence haystack, integer start=1)
-	sequence ret
+	sequence ret = {}
 
-	ret = {}
 	while start > 0 entry do
 		ret &= start
 		start += 1
@@ -253,9 +252,8 @@ end function
 --     match, find, find_all
 
 global function match_all(object needle, sequence haystack, integer start=1)
-	sequence ret
+	sequence ret = {}
 
-	ret = {}
 	while start > 0 entry do
 		ret &= start
 		start += length(needle)
@@ -294,14 +292,8 @@ end function
 -- See Also:
 --     find
 
-global function rfind(object needle, sequence haystack, integer start=-1)
-	integer len
-
-	if start = -1 then
-		start = length(haystack)
-	end if
-
-	len = length(haystack)
+global function rfind(object needle, sequence haystack, integer start=length(haystack))
+	integer len = length(haystack)
 
 	if (start > len) or (len + start < 1) then
 		crash("third argument of rfind_from() is out of bounds (%d)", {start})
@@ -343,12 +335,8 @@ end function
 -- See Also:
 --     rfind, match
 
-global function rmatch(sequence needle, sequence haystack, integer start=-1)
+global function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
 	integer len, lenx
-
-	if start = -1 then
-		start = length(haystack)
-	end if
 
 	len = length(haystack)
 	lenx = length(needle)
@@ -367,7 +355,7 @@ global function rmatch(sequence needle, sequence haystack, integer start=-1)
 		start = len - lenx + 1
 	end if
 
-	lenx-= 1
+	lenx -= 1
 
 	for i=start to 1 by -1 do
 		if equal(needle, haystack[i..i + lenx]) then

@@ -13,7 +13,6 @@ include misc.e
 include sequence.e
 include math.e
 
--- TODO: document
 global constant
 	NO_PARAMETER = 0,
 	HAS_PARAMETER = 1
@@ -25,7 +24,7 @@ constant
 	PARAM  = 4,
 	RID    = 5
 
-procedure show_help(sequence opts, integer add_help_rid)
+procedure show_help(sequence opts, integer add_help_rid=-1)
 	integer pad_size, this_size
 	sequence cmds, cmd
 
@@ -89,7 +88,8 @@ function find_opt(sequence opts, integer typ, object name)
 end function
 
 --**
-global function cmd_parse(sequence opts, integer add_help_rid, sequence cmds = command_line())
+global function cmd_parse(sequence opts, integer add_help_rid=-1, 
+			sequence cmds = command_line())
 	integer idx, cmd_idx, opts_done
 	sequence cmd, extras, param
 
@@ -138,3 +138,4 @@ global function cmd_parse(sequence opts, integer add_help_rid, sequence cmds = c
 	return extras
 end function
 --**
+

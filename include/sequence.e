@@ -367,9 +367,6 @@ global function vslice(sequence s, atom colno)
 end function
 --**
 
--- TODO: document default parameter usage
--- TODO: =0.03... Yuk! We need NULL :-)
-
 --**
 -- Return the last n items of st. If n is greater than the length of st, then the entire st 
 -- will be returned.
@@ -398,10 +395,7 @@ end function
 -- See Also:
 --     head, mid, slice
 
-global function tail(sequence st, atom n=0.03)
-	if n = 0.03 then
-		n = length(st) - 1
-	end if
+global function tail(sequence st, atom n=length(st)-1)
 	if n >= length(st) then
 		return st
 	else
@@ -442,11 +436,7 @@ end function
 -- See Also:
 --     replace, insert, splice, remove_all
 
-global function remove(sequence st, atom start, atom stop=0.003)
-	if stop = 0.003 then
-		stop = start
-	end if
-
+global function remove(sequence st, atom start, atom stop=start)
 	if stop > length(st) then
 		stop = length(st)
 	end if

@@ -18,6 +18,7 @@ constant
 		M_COMPILE_PCRE = 68,
 		M_EXEC_PCRE    = 69,
 		M_FREE_PCRE    = 70
+
 -- Options:
 global constant 
 		DEFAULT            = #00000000,
@@ -103,10 +104,11 @@ end function
 --**
 
 --**
---   Returns the first match in text
+-- Returns the first match in text
 --
 -- Comments:
--- Searches text using the regular expression, re, which was returned from new(), and returns the following	
+-- Searches text using the regular expression, re, which was returned from new(), and 
+-- returns the following	
 -- <li>No matches:  an atom representing the PCRE error condition</li>
 -- <li> N matches:   an N+1 length sequence.  Each element of the sequence
 --                is a pair of indices into text representing the start
@@ -121,19 +123,16 @@ end function
 -- for i = 1 to length( substrings ) do
 --     printf(1, "substring #%d: %s\n", {i, text[substrings[i][1]..substrings[i][2]] } )
 -- end for
---
--- This example would print
---<ul>
--- <li>   substring #1: foobar</li>
--- <li>   substring #2: bar</li>
---</ul>
+-- -- substring #1: foobar
+-- -- substring #2: bar
+
 global function search(regex re, sequence text, integer from=1, atom options=0)
 		return machine_func(M_EXEC_PCRE, { re, text, options, from-1 })
 end function
 --**
 
 --**
---    Returns all matches in text
+-- Returns all matches in text
 --
 -- Comments:
 --     This function returns a sequence of results in the same format as search().
@@ -163,6 +162,7 @@ end function
 
 --**
 --  Replaces all matches of the regex with the replacement text.
+
 global function search_replace(regex re, sequence text, sequence replacement, 
 							   atom options = 0)
 	sequence matches
@@ -197,13 +197,17 @@ end function
 
 --**
 -- Returns 1 if the regex matches anywhere in the text, 0 otherwise.
+
 global function matches(regex re, sequence text, atom options)
 	return sequence(search(re, text, options))
 end function
 --**
 
 --**
--- Frees the memory used by regex re, which must have been previously returned by regex:new.
+-- Frees the memory used by regex re, which must have been previously returned by new()
+--
+-- See Also:
+--     new
 
 global procedure free( regex re )
 	machine_proc( M_FREE_PCRE, re )
@@ -212,9 +216,11 @@ end procedure
 
 --**
 -- Returns 1 if the regex matches the entire text, 0 otherwise
-global function full_match( regex re, sequence text, atom options = 0 )
+
+global function full_match(regex re, sequence text, atom options = 0)
 	object matches
 	matches = search( re, text, 1, options )
 	return sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text)
 end function
 --**
+

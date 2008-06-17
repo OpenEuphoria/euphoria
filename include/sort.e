@@ -196,31 +196,29 @@ end function
 --**
 
 --**
--- Sort the elements of a sequence according to a user-defined 
--- order.
+-- Sort the elements of a sequence according to a user-defined order.
 --
--- The elements can be atoms or sequences. Each time that the
--- sort needs to compare two items in the sequence, it calls
--- the user-defined function to determine the order. 
+-- The elements can be atoms or sequences. Each time that the sort needs to compare two 
+-- items in the sequence, it calls the user-defined function to determine the order. 
 --
 -- Parameters:
---	custom_compare = A routine-id of the user defined routine that compares
+-- custom_compare = A routine-id of the user defined routine that compares
 -- two items in x.
 --
---	The user defined routine must accept two objects (A and B) and return
---	an integer. It returns -1 if object A must appear before object B,
---	1 if object B must appear before object A, and 0 if the order
---	doesn't matter.
+-- The user defined routine must accept two objects (A and B) and return
+-- an integer. It returns -1 if object A must appear before object B,
+-- 1 if object B must appear before object A, and 0 if the order
+-- doesn't matter.
 --
---	x = The sequence of items to be sorted.
+-- x = The sequence of items to be sorted.
 --
--- user_data = Anything that is needed by the user defined routine.
+-- user_data = Anything that is needed by the user defined routine. (defaults to 0)
 --
 -- Returns:
---	 sequence - The original sequence in sorted order
+-- sequence - The original sequence in sorted order
 --
 -- Comments:
---	This uses the "Shell" sort algorithm.
+-- This uses the "Shell" sort algorithm.
 --
 -- This sort is not "stable", i.e. elements that are considered equal might
 -- change position relative to each other.
@@ -266,7 +264,7 @@ end function
 -- See Also:
 --	 search:compare, sort, sort_reverse, sort_user
 
-global function sort_user(integer custom_compare, sequence x, object user_data)
+global function sort_user(integer custom_compare, sequence x, object user_data=0)
 	integer gap, j, first, last
 	object tempi, tempj
 
