@@ -1266,6 +1266,13 @@ procedure opRHS_SUBS()
 	pc += 4
 end procedure
 		
+procedure opGOTO()
+	pc = Code[pc+1]
+end procedure
+procedure opGLABEL()
+	pc = Code[pc+1]
+end procedure
+
 procedure opIF()
 	a = Code[pc+1]
 	if val[a] = 0 then
