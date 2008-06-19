@@ -204,8 +204,8 @@ end function
 --**
 
 --**
--- Return the value that corresponds to the key x2 in the map m. If the key is not in the map, 
--- the default value x3 is returned instead.
+-- Return the value that corresponds to the object key in the map m. If the key is not in the map, 
+-- the object defaultValue is returned instead.
 --
 -- Example 1:
 -- map ages
@@ -237,7 +237,7 @@ end function
 --**
 
 --**
--- Put an entry on the map m1 with key x1 and value x2. The modified map is returned.
+-- Put an entry on the map m1 with given key and value. The modified map is returned.
 --
 -- Comments:
 --     If existing entry with the same key is already in the map, the value of the entry is updated.
@@ -292,7 +292,7 @@ end function
 --**
 
 --**
--- Remove an entry with key x from the map m2. The modified map is returned.
+-- Remove an entry with given key from the map m1. The modified map is returned.
 --
 -- Comments:
 --     If the map has no entry with the specified key, the original map is returned.
@@ -373,7 +373,7 @@ global function statistics(map m)
 end function
 
 --**
--- Return all keys in the map as a sequence.
+-- Return all keys in map m as a sequence.
 --
 -- Comments:
 --     The order of the keys returned may not be the same as the putting order.
@@ -411,7 +411,7 @@ end function
 --**
 
 --**
--- Return all values in the map as a sequence.
+-- Return all values in map m as a sequence.
 --
 -- Comments:
 --     The order of the values returned may not be the same as the putting order. 
