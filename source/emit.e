@@ -234,17 +234,13 @@ end procedure
 
 global procedure emit_opnd(symtab_index opnd)
 -- emit an operand into the IL  
-	if Parser_mode != PAM_RECORD then
 		Push(opnd)
 		previous_op = -1  -- N.B.
-	end if
 end procedure
 
 global procedure emit_addr(atom x)
--- emit a long integer or an operand address into the IL
-	if Parser_mode != PAM_RECORD then
+	--if Parser_mode != PAM_RECORD then
 		Code = append(Code, x)
-	end if
 end procedure
 
 procedure emit_opcode(integer op)
@@ -254,9 +250,7 @@ end procedure
 
 global procedure backpatch(integer index, integer val)
 -- back patch a word of code 
-	if Parser_mode != PAM_RECORD then
 		Code[index] = val
-	end if
 end procedure
 
 sequence op_result  -- result types of operators
@@ -391,7 +385,6 @@ global procedure emit_op(integer op)
 	sequence elements
 	object element_vals
 
-	if Parser_mode != PAM_RECORD then
 	-- 1 input, 0 outputs, can combine with previous op 
 	if op = ASSIGN then
 		source = Pop()
@@ -1225,7 +1218,6 @@ global procedure emit_op(integer op)
 	end if
 
 	previous_op = op 
-	end if
 
 end procedure
 
