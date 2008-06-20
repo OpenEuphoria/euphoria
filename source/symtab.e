@@ -706,7 +706,7 @@ global function keyfind(sequence word, integer file_no)
 					{SymTab[st_builtin][S_NAME], file_name[SymTab[dup_globals[1]][S_FILE_NO]]})
 			end if
 
-			Warning(msg)
+			Warning(msg, builtin_chosen_warning_flag)
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -792,7 +792,7 @@ end procedure
 
 procedure LintCheck(symtab_index s)
 -- do some lint-like checks on s 
-	integer u, n
+	integer u, n, warn_level
 	sequence vtype, place, problem, file
 	
 	u = SymTab[s][S_USAGE]
@@ -825,22 +825,23 @@ procedure LintCheck(symtab_index s)
 --               or equal(vtype, "parameter") -- this is rarely a real problem
 				 ))
 				 then
-			problem = "not used" 
+			problem = "not used"
+			warn_level = not_used_warning_flag
 		
 		elsif u = U_READ then
 			problem = "never assigned a value"
-		
+		    warn_level = no_value_warning_flag
 		end if
 		
 		if length(problem) then
 			if length(place) then
 				Warning(sprintf("%s %s in %s() in %s is %s", 
 								   {vtype, SymTab[s][S_NAME], 
-								   place, file, problem}))
+								   place, file, problem}), warn_level)
 			else
 				Warning(sprintf("%s %s in %s is %s", 
 								   {vtype, SymTab[s][S_NAME], 
-								   file, problem}))
+								   file, problem}), warn_level)
 			end if
 		end if
 	end if

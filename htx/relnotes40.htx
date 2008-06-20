@@ -199,9 +199,15 @@
 	The namespace <b>eu</b> is predefined, and can be used to fully qualify built-in routines.</li>
 
 <li>
-	New procedure <b>warning(constant_string)</b> enables to specify custom warnings to be 
-	displayed at compile time, for instance to mark a routine as obsolete. The text of the 
+	New procedure <b>warning(constant_string)</b> enables to specify custom warnings to be
+	displayed at compile time, for instance to mark a routine as obsolete. The text of the
 	warning must be a litteral constant.
+</li>
+<li>
+	Warnings now split between maskable and non maskable warnings. <strong>without warning</strong>
+	now only suppresses maskable warnings and saves the current mask, which <strong>with 	
+	warning</strong> restores. <strong>with warning</strong> has been enhanced in order to 
+	individually turn maskable warnings on or off.
 </li>
 <li>
 	New scope: <b>export</b>.  Symbols with the export scope can only be seen from files that:

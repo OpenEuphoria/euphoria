@@ -276,7 +276,45 @@ global integer Argc             -- (our) number of args to main
 global sequence Argv            -- (our) arguments to main 
 
 -- With/Without Options
-global integer OpWarning            -- compile-time warnings option 
+global constant -- maskable warning flags
+	no_warning_flag				= 0,
+	resolution_warning_flag		= 1,
+	sc_warning_flag				= 2,
+	override_warning_flag		= 4,
+	builtin_chosen_warning_flag	= 8,
+	not_used_warning_flag		= 16,
+	no_value_warning_flag		= 32,
+	custom_warning_flag			= 64,
+	lint_warning_flag			= 127
+constant default_maskable_warnings = 
+			resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag
+global constant
+	warning_flags = {
+			no_warning_flag,
+			resolution_warning_flag,
+			sc_warning_flag,
+			override_warning_flag,
+			builtin_chosen_warning_flag,
+			not_used_warning_flag,
+			no_value_warning_flag,
+			custom_warning_flag,
+			lint_warning_flag },
+	warning_names = {
+			"no_warning",
+			"resolution_warning",
+			"sc_warning",
+			"override_warning",
+			"builtin_chosen_warning",
+			"not_used_warning",
+			"no_value_warning",
+			"custom_warning",
+			"lint_warning"}
+
+
+global integer OpWarning            -- compile-time warnings option
+OpWarning = default_maskable_warnings -- may be changed on the command line
+global integer prev_OpWarning
+prev_OpWarning = OpWarning
 global integer OpTrace              -- trace option 
 global integer OpTypeCheck          -- type check option 
 global integer OpProfileStatement   -- statement profile option currently on 

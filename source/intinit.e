@@ -19,8 +19,7 @@ global procedure intoptions()
 			if option then
 				common_options( option, i )
 			else
-				OpWarning = TRUE
-				Warning("unknown option: " & Argv[i])
+				Warning("unknown option: " & Argv[i],0)
 			end if
 			add_switch( Argv[i], 0 )
 			-- delete "-" option from the list of args */

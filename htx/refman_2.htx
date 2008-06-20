@@ -951,7 +951,7 @@ will be created for x in memory (although there will still be just one shared co
 </dl>
 <p>
 For a number of procedures or functions - see below -, some parameters may have the same value
-in many cases. The most expected value for any parameter may be given a default value. Omitting the value of such a parameter on a given call will cause its default value to be passed.
+in many cases. The most expected value for any parameter may be given a default value. Omitting the value of such a parameter on a given call will cause its default value to be passed.</p>
 <eucode>
 procedure foo(sequence s,integer n=1)
 ?n+length(s)
@@ -961,7 +961,7 @@ foo("abc") -- prints out 4 = 3+1. n was not specified, so was set to 1.
 foo("abc",3) -- prints out 6 = 3+3
 </eucode>
 <p>
-This is not limited to the last parameter(s):
+This is not limited to the last parameter(s):</p>
 <eucode>
 procedure bar(sequence s="abc",integer n,integer p=1)
 ?length(s)+n+p
@@ -974,7 +974,7 @@ bar({},2,) -- prints out 3 = 0 + 2 + 1
 bar()      -- errors out, second parameter is omitted, but doesn't have a defailt value
 </eucode>
 <p>
-Any expression may be used in a default value. Parameters that have been already mentioned may even be part of the expression:
+Any expression may be used in a default value. Parameters that have been already mentioned may even be part of the expression:</p>
 <eucode>
 procedure baz(sequence s,integer n=length(s))
 ?n
@@ -1010,7 +1010,7 @@ return {x_pos, y_pos}
 We will use the general term "subroutine", or simply "routine" when a remark is
 applicable to both procedures and functions.</p>
 <p>
-Defaulted parameters can be used in functions exactly as they are in procedures. See the section above for a few examples.
+Defaulted parameters can be used in functions exactly as they are in procedures. See the section above for a few examples.</p>
 
 <a name="types"></a>
 <h4>types</h4>
@@ -1022,7 +1022,7 @@ atom that is either true (non-zero) or false (zero).  Types can also be called
 just like other functions. See <a href="refman_2.htm#43">2.4.3 Specifying the
 Type of a Variable</a>.</p>
 <p>
-Although there are no restrictions to using defaulted parameters with types, their use is so much constrained by a type having excatly one argument that they are of little practical help there.
+Although there are no restrictions to using defaulted parameters with types, their use is so much constrained by a type having excatly one argument that they are of little practical help there.</p>
 
 <a name="variables"></a>
 <h4>variables</h4>
@@ -1046,9 +1046,9 @@ When you declare a variable you name the variable (which protects you against
 making spelling mistakes later on) and you specify the values that may legally
 be assigned to the variable during execution of your program.</p>
 <p>
-The simple act of declaring a variable does not assign any value to it. If you attempt to read it before assigning any value to it, Euphoria will issue a run-time error as "variable xyz has never been assigned a value".
+The simple act of declaring a variable does not assign any value to it. If you attempt to read it before assigning any value to it, Euphoria will issue a run-time error as "variable xyz has never been assigned a value".</p>
 <p>
-To guard against forgetting to initialise a variable, and also because it may make the code clearer to read, you can combine declaration and assignment:
+To guard against forgetting to initialise a variable, and also because it may make the code clearer to read, you can combine declaration and assignment:</p>
 <eucode>
 integer n = 5
 </eucode>
@@ -1058,7 +1058,7 @@ integer n
 n = 5
 </eucode>
 <p>
-It is not unfrequent that one defines a private variable that bears the same name as one already in scope. You can reuse the value of that variable when performing an initialisation on declare:
+It is not unfrequent that one defines a private variable that bears the same name as one already in scope. You can reuse the value of that variable when performing an initialisation on declare:</p>
 <eucode>
 integer n
 n=5
@@ -1528,7 +1528,7 @@ with this decision.</p></dd>
 <li><a href="refman_2.htm#break">break statement</a></li>
 <li><a href="refman_2.htm#continue">continue statement</a></li>
 <li><a href="refman_2.htm#retry">retry statement</a></li>
-<li><a href="refman_2.htm#switch">switch statement</a></li>            
+<li><a href="refman_2.htm#switch">switch statement</a></li>
 <li><a href="#ifdef">ifdef statement</a></li>
 </ul>
 
@@ -2563,7 +2563,7 @@ while <strong>profile</strong>, <strong>profile_time</strong> and
 <p>
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate very minor problems.  A warning will
-never stop your program from executing.</p></dd>
+never stop your program from executing. You will simply have to hit the Enter key to keep going.</p></dd>
 
 <dt><strong>without</strong></dt>
 
@@ -2590,5 +2590,117 @@ included file.  For instance, an included file might turn off warnings for
 itself and (initially) for any files that it includes, but this will not turn
 off warnings for the main file.</p>
 
-</doc>
+<p>
+Actually, there are two sorts of warnings: maskable and not maskable ones. The not maskable ones are not supposed to occur in production code. As a result, they are not suppressed by the
+<strong>without warning</strong> directive. Maskable warnings can be turned on and off individually.</p>
+<p>
+<strong>without warning</strong> not only turns off maskable warnings, it saves the current state of the warning mask. <strong>with warning</strong> simply restores that mask. Initially,
+onlly the warnings concerning non explicitly included symbols, overriding a builtin routine and choosing a builtin routine over another global symbol. This can be changed using -W command line switches.</p>
+<p>
+The <strong>with warning</strong> has optional extensions in order to customise maskable warnings:
+<ul>
+<li><strong>with warning</strong>=<em>warning names</em> enables only these warnings, and disable all other;</li>
+<li><strong>with warning</strong>+=<em>warning names</em> enables listed warnings in addition to whichever are enabled already;</li>
+<li><strong>with warning</strong>-=<em>warning names</em> disables listed warnings and leaves anyone not listed in its current state.</li>
+</ul></p>
+<p>
+The following names are known:
+<dl>
+<dt>"no_warning"</dt>
+<dd>suppresses all maskable warnings, without saving the earlier state
+</dd>
+<dt>"resolution_warning"</dt>
+<dd>a symbol was used in a file, but was defined in a file this file doesn't include
+</dd>
+<dt>"sc_warning"</dt>
+<dd>a routine call may not take place because of short circuit evaluation in a conditional clause
+</dd>
+<dt>"override_warning"</dt>
+<dd>a builtin is being overridden
+</dd>
+<dt>"builtin_chosen_warning"</dt>
+<dd>an unqualified call caused Eupjoria to choose between a builtin and another gobal which 
+does not override it. Euphoria chooses the builtin.
+</dd>
+<dt>"not_used_warning"</dt>
+<dd>A variable has not been used and is going out of scope
+</dd>
+<dt>"no_value_warning"</dt>
+<dd>A variable never got assigned a value and is going out of scope
+</dd>
+<dt>"custom_warning"</dt>
+<dd>Any warning that was defined using this special level in the warning() procedure.
+</dd>
+<dt>"lint_warning"</dt>
+<dd>Turns all maskable warnings on.
+</dd>
+</dl>
+They must always appear between double quotes, except when used in a -W command line switch.
+</p>
+
+<h2>Command line switches</h2>
+
+<p>
+You can launch Euphoria with some extra command line switches, in order to add or change configuration elements. When running a GUI, there is always some way to open a prompt and enter any text with options, arguments and whatever the program being launched may need for proper, expectd operation. Under <platform>Windows</platform>, this s achieved by clicking the Run... start menu entry, or hitting Windows-R.</p>
+
+<p>
+The following items may be changed or added, one at a time:</p>
+<dl>
+<dt>-C cofig_file</dt>
+<dd>Specifies the path for a file called euinc.conf, which holds a set of include paths, one on each line.</dd>
+<dt>-I include_path</dt>
+<dd>Specifies an extra include path.</dd>
+<dt>-D tag</dt>
+<dd>Defines a tag as being set. Tags are processed by <strong>ifdef</strong> blocks.</dd>
+<dt>-W warning_name</dt>
+<dd>Resets, or adds to, the current list of maskable wrnings that will be emitted. The list of known names is to be found in the subsection describing <strong>with warning</strong>. A name should appear without quotes. The first -W switch resets the list to the warning being introduced, and each subsequent -> switch adds to the list.</dd>
+</dl>
+<p>The case of the switches is ignored, so -I and -i are equivalent, and so on.</p>
+<p>
+Further notes:
+<ul>
+<li>
+Included files are searched for in all included paths, in the following order:
+<ol>
+<li>The current path</li>
+<li>Paths specified in a -I command line switch</li>
+<li>Paths specified in euinc.conf</li>
+<li>Paths listed in the EUINC environment variable, in the order in which they appear</li>
+<li>Paths listed in the EUDIR environment variable, in the order in which they appear</li>
+<li>The interpreter's path</li>
+</ol>
+</li>
+<li>The euinc.conf (Windows) / .euinc.conf (Linux/FreeBSD) file, if not specified using the -C command line switch, is searched for in:</li>
+<ol>
+<li>The interpreter's path</li>
+<li>
+<ul>
+<li>Linux/FreeBSD: The directory specified in the HOME  environment variable</li>
+<li>Windows: The "euphoria" subfolder of the directory specified in the APPDATA environment variable</li>
+</ul></li>
+<li> 
+<ul>
+<li>Linux/FreeBSD: The /etc/euphoria path</li>
+<li>Windows: The "euphoria" subfolder of the directory specified in the ALLUSERSPROFILE environment variable</li>
+</ul></li>
+</ol>
+euinc.conf is not supported under DOS, except through the -C command line switch.
+</li>
+<li>
+The initial list of maskable, unmasked warnings is:
+<ul>
+<li>resolution_warning</li>
+<li>override_warning</li>
+<li>builtin_chosen_warning</li>
+</ul></li>
+<li>Any number of any switch many appear in any order on the command line. However, only the euinc.conf file specified last will be inspected.</li>
+</ul>
+</p></doc>
+
+
+
+
+
+
+
 

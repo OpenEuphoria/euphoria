@@ -204,7 +204,7 @@ procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
 	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE}) then  
 		Warning(sprintf("%s:%d - statement after %s will never be executed", 
-				{name_ext(file_name[current_file_no]), line_number, keyword}))
+				{name_ext(file_name[current_file_no]), line_number, keyword}),0)
 	end if
 end procedure
 
@@ -610,7 +610,7 @@ procedure UndefinedVar(symtab_index s)
 		CompileErr(errmsg)
 
 	elsif length(symbol_resolution_warning) then
-		Warning( symbol_resolution_warning )
+		Warning( symbol_resolution_warning, resolution_warning_flag )
 	end if
 end procedure
 
@@ -838,7 +838,7 @@ procedure Factor()
 				Warning(sprintf(
 				"%.99s:%d - call to %s() might be short-circuited", 
 				{file_name[current_file_no], line_number, 
-				 SymTab[tok[T_SYM]][S_NAME]}))
+				 SymTab[tok[T_SYM]][S_NAME]}),sc_warning_flag)
 			end if
 		end if
 		tok_match(LEFT_ROUND)
@@ -2599,7 +2599,7 @@ procedure SubProg(integer prog_type, integer scope)
 		if scope = SC_OVERRIDE then
 			if SymTab[p][S_SCOPE] = SC_PREDEF then
 					Warning(sprintf("built-in routine %s() overridden in %s",
-									{SymTab[p][S_NAME], file_name[current_file_no]}))
+									{SymTab[p][S_NAME], file_name[current_file_no]}),override_warning_flag)
 			elsif SymTab[p][S_SCOPE] = SC_OVERRIDE then
 					CompileErr(sprintf("built-in routine %s() is overridden already in: %s", 
 						 {SymTab[p][S_NAME], file_name[SymTab[p][S_FILE_NO]]}))
@@ -2769,7 +2769,6 @@ global procedure InitGlobals()
 -- initialize global variables
 	ResetTP()
 	OpTypeCheck = TRUE
-	OpWarning = TRUE
 	if EWINDOWS then
 		OpDefines &= {"EU400", "WIN32"}
 	elsif ELINUX then
@@ -2793,7 +2792,7 @@ include sequence.e -- TODO: why is this here? <cchris>because of remove() on lin
 procedure SetWith(integer on_off)
 -- set a with/without option 
 	sequence option
-	integer idx
+	integer idx, idx2
 	token tok
 	
 	option = StringToken()
@@ -2806,7 +2805,7 @@ procedure SetWith(integer on_off)
 			OpProfileStatement = on_off
 			if OpProfileStatement then
 				if AnyTimeProfile then
-					Warning(mix_msg)
+					Warning(mix_msg, 0)
 					OpProfileStatement = FALSE
 				else
 					AnyStatementProfile = TRUE
@@ -2824,7 +2823,7 @@ procedure SetWith(integer on_off)
 			OpProfileTime = on_off
 			if OpProfileTime then
 				if AnyStatementProfile then
-					Warning(mix_msg)
+					Warning(mix_msg,0)
 					OpProfileTime = FALSE
 				end if
 				tok = next_token()
@@ -2855,7 +2854,39 @@ procedure SetWith(integer on_off)
 		end if
 	
 	elsif equal(option, "warning") then
-		OpWarning = on_off
+		if on_off = 0 then
+			prev_OpWarning = OpWarning
+			OpWarning = 0
+		else
+			tok = next_token()
+			idx2 = find(tok[T_ID], {EQUALS,PLUS_EQUALS,MINUS_EQUALS})
+			if idx2=0 then
+				putback(tok)
+				OpWarning = prev_OpWarning
+			else
+				if idx2=1 then
+					OpWarning = 0
+				end if
+				while 1 do
+					tok = next_token()
+					if tok[T_ID] != STRING then
+						putback(tok)
+						exit
+					end if
+					option = SymTab[tok[T_SYM]][S_OBJ]
+					idx = find(option,warning_names)
+					if idx = 0 then
+						putback(tok)
+						exit
+					end if
+					if idx2<3 then
+						OpWarning = or_bits(OpWarning,warning_flags[idx])
+					else
+					    OpWarning = and_bits(OpWarning,not_bits(warning_flags[idx]))
+					end if
+				end while
+			end if
+		end if
 
 	elsif match("define=", option) = 1 and length(option) > 8 then
 		if on_off = 0 then

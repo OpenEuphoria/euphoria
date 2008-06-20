@@ -60,7 +60,8 @@ constant FILE_NO = 1,           -- file number
 		 OP_TYPE_CHECK = 7,
 		 OP_PROFILE_TIME = 8,
 		 OP_PROFILE_STATEMENT = 9,
-		 OP_DEFINES = 10        -- ifdef defines
+		 OP_DEFINES = 10,        -- ifdef defines
+		 PREV_OP_WARNING = 11
 
 -- list of source lines & execution counts 
 
@@ -637,7 +638,8 @@ procedure IncludePush()
 							   OpTypeCheck,
 							   OpProfileTime,
 							   OpProfileStatement,
-							   OpDefines})
+							   OpDefines,
+							   prev_OpWarning})
 							   
 	file_include = append( file_include, {} )
 	file_export  = append( file_export, {} )
@@ -700,6 +702,7 @@ global function IncludePop()
 	OpProfileTime      = top[OP_PROFILE_TIME]
 	OpProfileStatement = top[OP_PROFILE_STATEMENT]
 	OpDefines          = top[OP_DEFINES]
+	prev_OpWarning		= top[PREV_OP_WARNING]
 
 	IncludeStk = IncludeStk[1..$-1]
 	return TRUE

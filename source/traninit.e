@@ -97,8 +97,7 @@ global procedure transoptions()
 					add_switch( user_library, 1 )
 					move_args( i+1, 1 )
 				else
-					OpWarning = TRUE
-					Warning("-lib option missing library name")
+					Warning("-lib option missing library name",0)
 				end if
 			
 			elsif match("-PLAT", uparg ) then
@@ -115,8 +114,7 @@ global procedure transoptions()
 					elsif equal( s, "FREEBSD" ) then
 						set_platform( FREEBSD )
 					else
-						OpWarning = TRUE
-						Warning("unknown platform: " & Argv[i] )
+						Warning("unknown platform: " & Argv[i], 0 )
 					end if
 				end if
 			
@@ -131,10 +129,9 @@ global procedure transoptions()
 				if option then
 					common_options( option, i )
 				else
-					OpWarning = TRUE
-					Warning("unknown option: " & Argv[i])
+					Warning("unknown option: " & Argv[i],0)
 				end if
-				
+
 			end if
 			-- delete "-" option from the list of args */
 			add_switch( Argv[i], 0 )
@@ -147,50 +144,42 @@ global procedure transoptions()
 	-- The platform might have changed, so clean up in case of inconsistent options
 	if dll_option and not (TDOS) then
 		dll_option = FALSE
-		OpWarning = TRUE
-		Warning( "cannot build a dll for DOS" )
+		Warning( "cannot build a dll for DOS",0 )
 	end if
 	
 	if con_option and not TWINDOWS then
 		con_option = FALSE
-		OpWarning = TRUE
-		Warning( "console option only available for Windows" )
+		Warning( "console option only available for Windows",0 )
 	end if
 	
 	if wat_option and not (TWINDOWS or TDOS) then
 		wat_option = FALSE
-		OpWarning = TRUE
-		Warning( "Watcom option only available for Windows or DOS" )
+		Warning( "Watcom option only available for Windows or DOS",0 )
 	end if
 	
 	if djg_option and not TDOS then
 		djg_option = FALSE
-		OpWarning = TRUE
-		Warning( "DJGPP option only available for DOS" )
+		Warning( "DJGPP option only available for DOS",0 )
 	end if
 	
 	if bor_option and not TWINDOWS then
 		bor_option = FALSE
-		OpWarning  = TRUE
-		Warning( "Borland option only available for Windows" )
+		Warning( "Borland option only available for Windows",0 )
 	end if
 	
 	if lcc_option and not TWINDOWS then
 		lcc_option = FALSE
-		OpWarning = TRUE
-		Warning( "LCC option only available for Windows" )
+		Warning( "LCC option only available for Windows",0 )
 	end if
 	
 	if not lccopt_option and not TWINDOWS then
 		lccopt_option = FALSE
-		OpWarning = TRUE
-		Warning( "LCC Opt-Off only available for Windows" )
+		Warning( "LCC Opt-Off only available for Windows" ,0)
 	end if
 	
 	if fastfp and not TDOS then
 		fastfp = FALSE
-		OpWarning = TRUE
-		Warning( "Fast FP option only available for DOS" )
+		Warning( "Fast FP option only available for DOS",0 )
 	end if
 	
 end procedure

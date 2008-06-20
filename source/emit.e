@@ -385,7 +385,7 @@ global procedure emit_op(integer op)
 	sequence elements
 	object element_vals
 
-	-- 1 input, 0 outputs, can combine with previous op 
+	-- 1 input, 0 outputs, can combine with previous op
 	if op = ASSIGN then
 		source = Pop()
 		target = Pop()
@@ -503,12 +503,13 @@ global procedure emit_op(integer op)
 	elsif op = WARNING then
 		assignable = FALSE  
 	    a = Pop()
-		Warning(SymTab[a][S_OBJ])
+	    b = Pop()
+		Warning(SymTab[b][S_OBJ],SymTab[a][S_OBJ])
 
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
 	elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
 				STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE, GOTO, GLABEL,
-				ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS, 
+				ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS,
 				DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
 				TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH}) then
 		emit_opcode(op)
@@ -1205,7 +1206,7 @@ global procedure emit_op(integer op)
 			emit_addr(a)       
 			if TRANSLATE then
 				if not trace_called then
-					Warning("Statements have been inserted to trace execution of your program.")
+					Warning("Statements have been inserted to trace execution of your program.",0)
 				end if
 				trace_called = TRUE
 			end if          

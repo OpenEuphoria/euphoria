@@ -17,33 +17,76 @@ global sequence TempErrName
 global object ThisLine        -- current line of source (or -1)
 global integer bp             -- input line index of next character 
 
-global sequence warning_list
+global sequence warning_list,warning_target
 warning_list = {}
+warning_target = {STDERR}
 
 global procedure screen_output(integer f, sequence msg)
 -- output messages to the screen or a file    
 	puts(f, msg)
 end procedure
 
-global procedure Warning(sequence msg)
+integer disable_all_warnings
+disable_all_warnings = 0
+
+global procedure Warning(sequence msg,integer mask)
 -- add a warning message to the list
 	sequence p
 	
-	if OpWarning then
+	if disable_all_warnings then
+		return
+	end if
+	if mask=0 or and_bits(OpWarning,mask) then
 		p = sprintf("Warning: %s\n", {msg})
 		if find(p, warning_list) then
 			return -- duplicate
 		end if
-		warning_list = append(warning_list, p)          
+		warning_list = append(warning_list, p)
+		warning_target &= 0
 	end if
+end procedure
+
+global procedure Log_warnings(object policy)
+	disable_all_warnings = 0
+	if sequence(policy) then
+		if length(policy)=0 then
+			policy = STDERR
+		end if
+	else
+		if policy >= 0 and policy < STDERR+1 then
+			policy  = STDERR
+		elsif policy < 0 then
+			disable_all_warnings = 1
+			return
+		end if
+	end if
+	warning_target[$] = floor(policy)
 end procedure
 
 global function ShowWarnings(integer errfile)
 -- print the warnings to the screen (or ex.err)
-	integer c
-	
+	integer c,last_change, fn
+
+	if errfile=0 then
+		errfile = STDERR
+	end if
+
 	for i = 1 to length(warning_list) do
-		if errfile = 0 then
+		if sequence(warning_target[i]) then
+			fn = open(warning_target[i],"w")
+			if fn>-1 then
+				if last_change=1 then
+					close(errfile)
+				else
+					last_change = 1
+				end if
+				errfile = fn
+			end if
+		elsif warning_target[i] then
+			last_change = warning_target[i]
+		end if
+
+		if errfile = STDERR then
 			screen_output(STDERR, warning_list[i])
 			if remainder(i, 20) = 0 then
 				puts(STDERR, "\nPress Enter to continue, q to quit\n\n")
@@ -63,9 +106,9 @@ global procedure Cleanup(integer status)
 -- clean things up before quitting
 	integer w
 	
-	w = ShowWarnings(0) 
+	w = ShowWarnings(0)
 	
-	if not TRANSLATE and 
+	if not TRANSLATE and
 	   (BIND or EWINDOWS or EUNIX) and 
 	   (w or Errors) then
 		screen_output(STDERR, "\nPress Enter\n")
