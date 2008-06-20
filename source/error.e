@@ -17,7 +17,7 @@ global sequence TempErrName
 global object ThisLine        -- current line of source (or -1)
 global integer bp             -- input line index of next character 
 
-global sequence warning_list,warning_target
+global sequence warning_list, warning_target
 warning_list = {}
 warning_target = {STDERR}
 
@@ -29,14 +29,15 @@ end procedure
 integer disable_all_warnings
 disable_all_warnings = 0
 
-global procedure Warning(sequence msg,integer mask)
+global procedure Warning(sequence msg, integer mask)
 -- add a warning message to the list
 	sequence p
 	
 	if disable_all_warnings then
 		return
 	end if
-	if mask=0 or and_bits(OpWarning,mask) then
+
+	if lint_warning or ((mask = 0 and OpWarning != 0) or and_bits(OpWarning, mask)) then
 		p = sprintf("Warning: %s\n", {msg})
 		if find(p, warning_list) then
 			return -- duplicate

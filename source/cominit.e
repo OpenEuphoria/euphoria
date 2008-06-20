@@ -11,15 +11,19 @@ switch_cache = {}
 
 -- These flags are available for both the interpreter and translator
 global constant COMMON_OPTIONS = {
-		"-C",  -- specify a euinc.conf file
-		"-I",  -- specify a directory to search for include files
-		"-D",  -- define a word
-		"-W"	-- defines warning level
-		},
-	EUINC_OPTION 	= 1,   	-- -conf
-	INCDIR_OPTION 	= 2,   	-- -include dirs
-	DEFINE_OPTION   = 3,    -- ifdef defineds
-	WARNING_OPTION	= 4		-- startup warning level
+	"-C",    -- specify a euinc.conf file
+	"-I",    -- specify a directory to search for include files
+	"-D",    -- define a word
+	"-LINT", -- enable all warnings
+	"-W"     -- defines warning level
+}
+
+global enum
+	EUINC_OPTION,  -- -conf
+	INCDIR_OPTION, -- -include dirs
+	DEFINE_OPTION, -- ifdef defines
+	LINT_OPTION,   -- enable all warnings
+	WARNING_OPTION -- startup warning level
 
 
 -- s = the text of the switch
@@ -91,6 +95,9 @@ global procedure common_options( integer option, integer ix )
 			add_switch(Argv[ix+1], 1)
 			args += 1
 		end if
+
+	elsif option = LINT_OPTION then
+		lint_warning = 1
 
 	end if
 

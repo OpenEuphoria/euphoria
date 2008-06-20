@@ -27,14 +27,14 @@ mybsd = FALSE  -- default to false
 
 -- specific C compiler used (one may be TRUE)
 global constant 
-	EWATCOM = TRUE,
+	EWATCOM  = TRUE,
 	EBORLAND = FALSE,
-	ELCC = FALSE,
-	EDJGPP = FALSE 
+	ELCC     = FALSE,
+	EDJGPP   = FALSE 
 	-- (assume GNU C for LINUX/FreeBSD)
 
 global constant EGPM = 0     -- GPM mouse support on Linux
-				
+
 global boolean w32 -- Windows option for BIND
 				
 global sequence version_name
@@ -258,22 +258,19 @@ end type
 
 ---------------- Global Variables ----------------------
 
-global object eudir           -- path to Euphoria directory 
-global sequence file_name_entered -- interactively entered file name
-file_name_entered = ""
-global integer shroud_only   -- making an unbound .il file
-shroud_only = FALSE
-global integer current_file_no    -- current file number 
-current_file_no = 1
-global integer line_number  -- source line number within current file (16 bits)  
-global integer gline_number  -- overall line number (32 bits) 
+global object eudir                     -- path to Euphoria directory 
+global sequence file_name_entered = ""  -- interactively entered file name
+global integer shroud_only = FALSE      -- making an unbound .il file
+global integer current_file_no = 1      -- current file number 
+global integer line_number              -- source line number within current file (16 bits)  
+global integer gline_number             -- overall line number (32 bits) 
 global symtab_index file_start_sym
-global symtab_index TopLevelSub       -- s.t. index of top level procedure 
-global symtab_index CurrentSub        -- s.t. index of current routine 
-global integer num_routines      -- sequence number for routine_id lookups 
-num_routines = 0
-global integer Argc             -- (our) number of args to main 
-global sequence Argv            -- (our) arguments to main 
+global symtab_index TopLevelSub         -- s.t. index of top level procedure 
+global symtab_index CurrentSub          -- s.t. index of current routine 
+global integer num_routines = 0         -- sequence number for routine_id lookups 
+global integer Argc                     -- (our) number of args to main 
+global sequence Argv                    -- (our) arguments to main 
+global integer lint_warning = 0
 
 -- With/Without Options
 global constant -- maskable warning flags
@@ -286,66 +283,59 @@ global constant -- maskable warning flags
 	no_value_warning_flag		= 32,
 	custom_warning_flag			= 64,
 	lint_warning_flag			= 127
+
 constant default_maskable_warnings = 
-			resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag
-global constant
-	warning_flags = {
-			no_warning_flag,
-			resolution_warning_flag,
-			sc_warning_flag,
-			override_warning_flag,
-			builtin_chosen_warning_flag,
-			not_used_warning_flag,
-			no_value_warning_flag,
-			custom_warning_flag,
-			lint_warning_flag },
-	warning_names = {
-			"no_warning",
-			"resolution_warning",
-			"sc_warning",
-			"override_warning",
-			"builtin_chosen_warning",
-			"not_used_warning",
-			"no_value_warning",
-			"custom_warning",
-			"lint_warning"}
+	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag
+
+global constant warning_flags = {
+	no_warning_flag,
+	resolution_warning_flag,
+	sc_warning_flag,
+	override_warning_flag,
+	builtin_chosen_warning_flag,
+	not_used_warning_flag,
+	no_value_warning_flag,
+	custom_warning_flag,
+	lint_warning_flag 
+}
+
+global constant warning_names = {
+	"no_warning",
+	"resolution_warning",
+	"sc_warning",
+	"override_warning",
+	"builtin_chosen_warning",
+	"not_used_warning",
+	"no_value_warning",
+	"custom_warning",
+	"lint_warning"
+}
 
 
-global integer OpWarning            -- compile-time warnings option
-OpWarning = default_maskable_warnings -- may be changed on the command line
-global integer prev_OpWarning
-prev_OpWarning = OpWarning
+global integer OpWarning = default_maskable_warnings -- compile-time warnings option
+global integer prev_OpWarning = OpWarning 
 global integer OpTrace              -- trace option 
 global integer OpTypeCheck          -- type check option 
 global integer OpProfileStatement   -- statement profile option currently on 
 global integer OpProfileTime        -- time profile option currently on 
-global sequence OpDefines           -- defines
-OpDefines = {}                      -- initialized here so command line
-									-- options can add to it as well
+global sequence OpDefines = {}      -- defines
 
 -- COMPILE only
-global object dj_path, wat_path, bor_path
-dj_path = 0         -- DJGPP directory or 0
-wat_path = 0        -- WATCOM directory or 0
-bor_path = 0        -- BORLAND directory or 0
-global integer cfile_count, cfile_size 
-cfile_count = 0
-cfile_size = 0
-global integer Initializing 
-Initializing = FALSE
+global object dj_path = 0, wat_path = 0, bor_path = 0
+global integer cfile_count = 0, cfile_size = 0
+global integer Initializing = FALSE
 
-global sequence temp_name_type
-temp_name_type = repeat({0, 0}, 4)  -- skip 1..4
-global constant T_GTYPE = 1,
-				T_GTYPE_NEW = 2
+global sequence temp_name_type = repeat({0, 0}, 4)  -- skip 1..4
+global enum 
+	T_GTYPE,
+	T_GTYPE_NEW
 
 global integer Execute_id
 
 global sequence Code       -- The IL Code we are currently working with
 global sequence LineTable  -- the line table we are currently building
 
-global sequence slist 
-slist = {}
+global sequence slist = {}
 global enum 
 	SRC,            -- line of source code
 	LINE,           -- line number within file
@@ -354,18 +344,15 @@ global enum
 
 -- option bits:
 global constant 
-	SOP_TRACE = #01,      -- statement trace
+	SOP_TRACE = #01,             -- statement trace
 	SOP_PROFILE_STATEMENT = #04, -- statement profile
 	SOP_PROFILE_TIME = #02       -- time profile
 
 
 global integer previous_op  -- the previous opcode emitted
 
-global integer max_stack_per_call  -- max stack required per (recursive) call 
-global integer sample_size         -- profile_time sample size 
-sample_size = 0
-
-max_stack_per_call = 1
+global integer max_stack_per_call = 1 -- max stack required per (recursive) call 
+global integer sample_size = 0        -- profile_time sample size 
 
 global sequence symbol_resolution_warning
 
@@ -375,15 +362,10 @@ global enum  -- values for Parser_mode
 	PAM_NORMAL,
 	PAM_RECORD
 
-global integer Parser_mode
-Parser_mode = PAM_NORMAL
+global integer Parser_mode = PAM_NORMAL
 
-global sequence Recorded, Ns_recorded -- lists of identifiers and namespaces to be parsed later
-Recorded={}
-Ns_recorded={}
+-- lists of identifiers and namespaces to be parsed later
+global sequence Recorded = {}, Ns_recorded = {}
 
-global sequence goto_delay
-global sequence goto_list
-goto_delay={}
-goto_list={}
+global sequence goto_delay = {}, goto_list = {}
 

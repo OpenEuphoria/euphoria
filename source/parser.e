@@ -7,6 +7,8 @@ include emit.e
 include symtab.e
 include scanner.e
 
+include sequence.e
+
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 without trace
@@ -2788,7 +2790,7 @@ end procedure
 
 sequence mix_msg
 mix_msg = "can't mix profile and profile_time"
-include sequence.e -- TODO: why is this here? <cchris>because of remove() on line 2865
+
 procedure SetWith(integer on_off)
 -- set a with/without option 
 	sequence option
@@ -2856,17 +2858,18 @@ procedure SetWith(integer on_off)
 	elsif equal(option, "warning") then
 		if on_off = 0 then
 			prev_OpWarning = OpWarning
-			OpWarning = 0
+			OpWarning = no_warning_flag
 		else
 			tok = next_token()
-			idx2 = find(tok[T_ID], {EQUALS,PLUS_EQUALS,MINUS_EQUALS})
-			if idx2=0 then
+			idx2 = find(tok[T_ID], {EQUALS, PLUS_EQUALS, MINUS_EQUALS})
+			if idx2 = 0 then
 				putback(tok)
-				OpWarning = prev_OpWarning
+				OpWarning = lint_warning_flag
 			else
-				if idx2=1 then
+				if idx2 = 1 then
 					OpWarning = 0
 				end if
+
 				while 1 do
 					tok = next_token()
 					if tok[T_ID] != STRING then
@@ -2874,15 +2877,15 @@ procedure SetWith(integer on_off)
 						exit
 					end if
 					option = SymTab[tok[T_SYM]][S_OBJ]
-					idx = find(option,warning_names)
+					idx = find(option, warning_names)
 					if idx = 0 then
 						putback(tok)
 						exit
 					end if
-					if idx2<3 then
-						OpWarning = or_bits(OpWarning,warning_flags[idx])
+					if idx2 < 3 then
+						OpWarning = or_bits(OpWarning, warning_flags[idx])
 					else
-					    OpWarning = and_bits(OpWarning,not_bits(warning_flags[idx]))
+					    OpWarning = and_bits(OpWarning, not_bits(warning_flags[idx]))
 					end if
 				end while
 			end if
