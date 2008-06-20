@@ -117,5 +117,31 @@ test_equal("map load equal", "=", m:get(m1, "equal",-1))
 test_equal("map load padding", " padded ", m:get(m1, "padding",-1))
 test_equal("map load embed", "--", m:get(m1, "embed",-1))
 
+map m5
+m5 = m:new()
+m5 = m:put( m5, ADD, 1 )
+m5 = m:put( m5, ADD, 1, , ADD ) -- 2
+test_equal( "put ADD", 2, m:get( m5, ADD, "" ) )
+
+m5 = m:put( m5, MULTIPLY, 2 )
+m5 = m:put( m5, MULTIPLY, 3, , MULTIPLY ) -- 6
+test_equal( "put MULTIPLY", 6, m:get( m5, MULTIPLY, "" ) )
+
+m5 = m:put( m5, DIVIDE, 6 )
+m5 = m:put( m5, DIVIDE, 2, , DIVIDE ) -- 3
+test_equal( "put DIVIDE", 3, m:get( m5, DIVIDE, "" ) )
+
+m5 = m:put( m5, SUBTRACT, 3 )
+m5 = m:put( m5, 3, 3, ,SUBTRACT )
+test_equal( "put SUBTRACT", 0, m:get( m5, SUBTRACT, "" ) )
+
+m5 = m:put( m5, CONCAT, "foo" )
+m5 = m:put( m5, CONCAT, "bar", , CONCAT )
+test_equal( "put CONCAT", "foobar", m:get( m5, CONCAT, "" ) )
+
+m5 = m:put( m5, APPEND, {"foo"} )
+m5 = m:put( m5, APPEND, "bar", , APPEND )
+test_equal( "put APPEND", {"foo","bar"}, m:get( m5, APPEND, "" ) )
+
 test_embedded_report()
 

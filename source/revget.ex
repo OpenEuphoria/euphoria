@@ -51,6 +51,17 @@ function is_current( object rev )
 	return current
 end function
 
+procedure unknown_rev()
+	integer fn
+	fn = open( "rev.e", "r" )
+	if fn != -1 then
+		return
+	end if
+	fn = open( "rev.e", "w" )
+	puts(fn, "global constant SVN_REVISION = \"???\"\n")
+	close(fn)
+end procedure
+
 procedure rev_1_4()
 
 sequence c
@@ -69,7 +80,8 @@ end if
 h = open(c[3], "r")
 if h = -1 then
 	puts(2, "Unable to open.\n")
-	abort(1)
+	unknown_rev()
+	abort(0)
 end if
 
 x = gets(h)
@@ -133,7 +145,8 @@ end if
 h = open(c[3], "r")
 if h = -1 then
 	puts(2, "Unable to open.\n")
-	abort(1)
+	unknown_rev()
+	abort(0)
 end if
 
 x = gets(h)

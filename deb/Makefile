@@ -1,14 +1,16 @@
 
-EU_VERSION =3.2
-EU_BASE_DIR =../rds
+EU_VERSION =4.0
+EU_BASE_DIR =..
 DEBIAN_VERSION =1
 EU_ALL_FILES = \
 	source/be_alloc.c \
 	source/be_callc.c \
+	source/be_decompress.c \
 	source/be_execute.c \
 	source/be_inline.c \
 	source/be_machine.c \
 	source/be_main.c \
+	source/be_pcre.c \
 	source/be_rterror.c \
 	source/be_runtime.c \
 	source/be_symtab.c \
@@ -39,10 +41,13 @@ EU_ALL_FILES = \
 	source/parser.e \
 	source/pathopen.e \
 	source/reswords.e \
+	source/rev.e \
+	source/revget.ex \
 	source/scanner.e \
 	source/scientific.e \
 	source/symtab.e \
 	source/traninit.e \
+	source/tranplat.e \
 	source/alldefs.h \
 	source/execute.h  \
 	source/opnames.h  \
@@ -53,7 +58,8 @@ EU_ALL_FILES = \
 	source/symtab.h \
 	source/Makefile \
 	source/eushroud \
-	source/eubind
+	source/eubind \
+	source/configure
 
 EU_DIRS = include html doc demo tutorial demo/bench demo/linux demo/langwar demo/langwar/Linux
 EU_BIN_FILES = ed.ex ascii.ex eprint.ex guru.ex key.ex keywords.e \
@@ -77,11 +83,13 @@ clean :
 DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
 
 update :
-	-mkdir -p $(DEB_SOURCE_DIR)/source
+	cd $(EU_BASE_DIR)/source && ./configure && make distclean && ./configure && make svn_rev
+	-mkdir -p $(DEB_SOURCE_DIR)/source/pcre
 	for file in $(EU_ALL_FILES); \
 	do \
 	    cp $(EU_BASE_DIR)/"$$file" $(DEB_SOURCE_DIR)/"$$file"; \
 	done
+	cp -r $(EU_BASE_DIR)/source/pcre/* $(DEB_SOURCE_DIR)/source/pcre/
 	-for dir in $(EU_DIRS); \
 	do \
 	    mkdir -p $(DEB_SOURCE_DIR)/"$$dir"; \
@@ -93,7 +101,7 @@ update :
 	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
 	done
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
-	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  distclean
+	cd $(DEB_SOURCE_DIR)/source && ./configure
 	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  source
 	-rm *.gz
 	-rm -r $(DEB_SOURCE_DIR)/debian
@@ -101,7 +109,7 @@ update :
 	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
-	-cp *.1 $(DEB_SOURCE_DIR)/debian
+	-cp $(EU_BASE_DIR)/htx/*.1 $(DEB_SOURCE_DIR)/debian
 	-cp control $(DEB_SOURCE_DIR)/debian
 	-cp changelog $(DEB_SOURCE_DIR)/debian
 	-cp copyright $(DEB_SOURCE_DIR)/debian
@@ -112,7 +120,7 @@ dh-make : update
 	@-rm $(DEB_SOURCE_DIR)/debian/emacsen*
 	@cp rules $(DEB_SOURCE_DIR)/debian
 	@cp postinst $(DEB_SOURCE_DIR)/debian;
-	@cp *.1 $(DEB_SOURCE_DIR)/debian;
+	@cp ../htx/*.1 $(DEB_SOURCE_DIR)/debian;
 	@cp control $(DEB_SOURCE_DIR)/debian;
 
 

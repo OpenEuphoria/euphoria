@@ -24,6 +24,15 @@ constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
 constant iKeys = 1
 constant iVals = 2
 
+global enum
+	PUT,
+	ADD,
+	SUBTRACT,
+	MULTIPLY,
+	DIVIDE,
+	APPEND,
+	CONCAT
+
 --**
 -- Signature:
 -- global type map
@@ -237,10 +246,22 @@ end function
 --**
 
 --**
--- Put an entry on the map m1 with given key and value. The modified map is returned.
+-- Put an entry on the map m1 with key x1 and value x2. 
+-- The operation parameter can be used to modify the existing value.  Valid operations are: <ul>
+-- <li> PUT:  This is the default, and it replaces any value in there already</li>
+-- <li> ADD:  Equivalent to using the += operator </li>
+-- <li> SUBTRACT:  Equivalent to using the -= operator </li>
+-- <li> MULTIPLY:  Equivalent to using the *= operator </li>
+-- <li> DIVIDE: Equivalent to using the /= operator </li>
+-- <li> APPEND: Appends the value to the existing data </li>
+-- <li> CONCAT: Equivalent to using the &= operator</li>
+-- </ul>
+-- Returns:
+--  The modified map.
 --
 -- Comments:
 --     If existing entry with the same key is already in the map, the value of the entry is updated.
+--
 --
 -- Example 1:
 -- map ages
@@ -250,7 +271,7 @@ end function
 -- ages = put(ages, "Budi", 14)
 -- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
 
-global function put(map m1, object key, object value, integer pTrigger = 100)
+global function put(map m1, object key, object value, integer pTrigger = 100, integer operation = PUT )
 	integer index
 	integer hashval
 	integer lOffset
@@ -258,7 +279,8 @@ global function put(map m1, object key, object value, integer pTrigger = 100)
 	atom lAvgLength
 	sequence m
 	integer bl
-
+	object old_value
+	
 	m = m1
 	hashval = calc_hash(key, 0)
 	index = remainder(hashval, length(m[iBuckets])) + 1
@@ -267,7 +289,30 @@ global function put(map m1, object key, object value, integer pTrigger = 100)
 	lOffset = find(key, bucket[iKeys])
 
 	if lOffset != 0 then
-		bucket[iVals][lOffset] = value
+		if operation = PUT then
+			bucket[iVals][lOffset] = value
+		else
+			old_value = bucket[iVals][lOffset]
+			switch operation do
+				case ADD:
+					bucket[iVals][lOffset] += value
+					break
+				case SUBTRACT:
+					bucket[iVals][lOffset] -= value
+					break
+				case MULTIPLY:
+					bucket[iVals][lOffset] *= value
+					break
+				case DIVIDE:
+					bucket[iVals][lOffset] /= value
+					break
+				case APPEND:
+					bucket[iVals][lOffset] = append( bucket[iVals][lOffset], value )
+					break
+				case CONCAT:
+					bucket[iVals][lOffset] &= value
+			end switch
+		end if
 		m[iBuckets][index] = bucket
 		return m
 	end if
@@ -517,3 +562,43 @@ global function load_map(sequence pFileName)
 end function
 --**
 
+
+global function add(map m1, object key, object value, integer pTrigger = 100)
+	integer index
+	integer hashval
+	integer lOffset
+	object bucket
+	atom lAvgLength
+	sequence m
+	integer bl
+
+	m = m1
+	hashval = calc_hash(key, 0)
+	index = remainder(hashval, length(m[iBuckets])) + 1
+	bucket = m[iBuckets][index]
+	bl = length(bucket[iVals])
+	lOffset = find(key, bucket[iKeys])
+
+	if lOffset != 0 then
+		bucket[iVals][lOffset] += value
+		m[iBuckets][index] = bucket
+		return m
+	end if
+	if bl = 0 then
+		m[iInUse] += 1
+	end if
+
+	m[iCnt] += 1 -- elementCount
+	if pTrigger > 0 then
+		lAvgLength = m[iCnt] / m[iInUse]
+		if (lAvgLength >= pTrigger) then
+			m = rehash(m)
+			index = remainder(hashval, length(m[iBuckets])) + 1
+		end if
+	end if
+	-- write new entry
+	m[iBuckets][index][iKeys] = append(m[iBuckets][index][iKeys], key)
+	m[iBuckets][index][iVals] = append(m[iBuckets][index][iVals], value)
+
+	return m
+end function
