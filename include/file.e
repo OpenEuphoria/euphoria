@@ -378,18 +378,16 @@ global procedure unlock_file(file_number fn, byte_range r)
 end procedure
 --**
 
-global constant 
-		D_NAME = 1,
-		D_ATTRIBUTES = 2,
-		D_SIZE = 3,
-
-		D_YEAR = 4,
-		D_MONTH = 5,
-		D_DAY = 6,
-
-		D_HOUR = 7,
-		D_MINUTE = 8,
-		D_SECOND = 9
+global enum 
+	D_NAME,
+	D_ATTRIBUTES,
+	D_SIZE,
+	D_YEAR,
+	D_MONTH,
+	D_DAY,
+	D_HOUR,
+	D_MINUTE,
+	D_SECOND
 
 --**
 -- Return directory information for the file or directory named by
@@ -972,9 +970,23 @@ global function write_file(object f, sequence data)
 end function
 --**
 
+global enum
+	PATH_DIR,
+	PATH_FILENAME,
+	PATH_BASENAME,
+	PATH_FILEEXT,
+	PATH_DRIVEID
+
 --**
 -- Parse the fully qualified pathname (s1) and return a sequence containing directory name, 
 -- file name + file extension, file name and file extension.
+--
+-- An enum has been created for ease of use:
+-- * PATH_DIR
+-- * PATH_FILENAME
+-- * PATH_BASENAME
+-- * PATH_FILEEXT
+-- * PATH_DRIVEID
 --
 -- Comments:
 -- The host operating system path separator is used.

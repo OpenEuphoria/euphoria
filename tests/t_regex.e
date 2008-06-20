@@ -29,6 +29,10 @@ end function
 test_equal("search_replace_user() #1", "the dog ran up",
     regex:search_replace_user(re, "the DOG ran UP", routine_id("repl"), regex:DEFAULT))
 
+re = regex:new("[A-Z]+")
+test_equal("full_match() #1", 1, regex:full_match(re, "JOHN"))
+test_equal("full_match() #2", 0, regex:full_match(re, "john is 18 years old"))
+
 regex:free( re )
 
 test_embedded_report()

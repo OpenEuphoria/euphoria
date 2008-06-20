@@ -220,7 +220,11 @@ end procedure
 global function full_match(regex re, sequence text, atom options = 0)
 	object matches
 	matches = search( re, text, 1, options )
-	return sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text)
+	if sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text) then
+		return 1
+	end if
+
+	return 0
 end function
 --**
 
