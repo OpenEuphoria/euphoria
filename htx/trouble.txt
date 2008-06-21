@@ -1,47 +1,47 @@
 <doc title="Euphoria Trouble-Shooting Guide">
 
-<h2>Euphoria Trouble-Shooting Guide</h2>
+== Euphoria Trouble-Shooting Guide
 
-<p>If you get stuck, here are some things you can do:</p>
+If you get stuck, here are some things you can do:
 
 <ol>
 	<li>
-		<p>Type: <font color="#993333"><b>guru</b></font><br> followed by some keywords associated with your problem.</p>
-		<p>For example,</p>
-		<console>guru declare global include</console>
+		Type: <font color="#993333">**guru**</font><br> followed by some keywords associated with your problem.
+		For example,
+		{{{guru declare global include}}}
 	</li>
-	<li>Check the list of common problems (<a href="trouble.htm#commonp">below</a>).</li>
-	<li>Read the relevant parts of the documentation, i.e. <a class="blue" href="refman.htm"><b>refman.doc</b></a> or <a class="blue" href="library.htm"><b>library.doc</b></a>.</li>
+	<li>Check the list of common problems (a href="trouble.htm#commonp">below</a>).</li>
+	<li>Read the relevant parts of the documentation, i.e. a class="blue" href="refman.htm">**refman.doc**</a> or a class="blue" href="library.htm">**library.doc**</a>.</li>
 	<li>
-		<p>Try running your program with the statements:</p>
+		Try running your program with the statements:
 <eucode>
 with trace
 trace(1)
 </eucode>
-		<p>at the top of your main <b>.ex</b> file so you can see what's going on.</p>
+		at the top of your main **.ex** file so you can see what's going on.
 	</li>
-	<li>The <a href=http://www.RapidEuphoria.com/listserv.htm> <b>Euphoria mailing list</b></a> has a search facility. You can search the archive of all previous messages. There's a good chance that your question has already been discussed.</li>
+	<li>The a href=http://www.RapidEuphoria.com/listserv.htm> **Euphoria mailing list**</a> has a search facility. You can search the archive of all previous messages. There's a good chance that your question has already been discussed.</li>
 	<li>Post a message on the mailing list.</li>
 </ol>
 
-<h3>Common Problems + Solutions</h3>
+=== Common Problems + Solutions
 
-<p>Here are some commonly reported problems (<strong>P:</strong>) and their solutions (<strong>S:</strong>).</p>
+Here are some commonly reported problems (**P:**) and their solutions (**S:**).
 
 <table border=0 cellspacing=2 cellpadding=2>
 <tr valign="top">
 	<td>P:</td>
-	<td>I ran my program with <font color="#993333"><b>exw</b></font> and the console window disappeared before I could read the output.</td>
+	<td>I ran my program with <font color="#993333">**exw**</font> and the console window disappeared before I could read the output.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>The console window will only appear if required, and will disappear immediately when your program finishes execution. Perhaps you should code something like:</p>
+	<td>The console window will only appear if required, and will disappear immediately when your program finishes execution. Perhaps you should code something like:
 <eucode>
 puts(1, "\nPress Enter\n")
 if getc(0) then
 end if
 </eucode>
-		<p>at the end of your program.</p>
+		at the end of your program.
 	</td>
 </tr>
 
@@ -51,7 +51,7 @@ end if
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>Call free_console() just before your program terminates.</p>
+	<td>Call free_console() just before your program terminates.
 <eucode>
 include dll.e
 
@@ -65,28 +65,28 @@ free_console()
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>Right click on <b>c:\windows\system\conagent.exe</b> and
+	<td>Right click on **c:\windows\system\conagent.exe** and
    select "properties". You can change the font and several other items.</td>
 </tr>
 
 <tr valign="top">
 	<td>P:</td>
-	<td>When I run <font color="#993333"><b>ex.exe</b></font> in a DOS Window, it makes my small DOS window go to full screen.</td>
+	<td>When I run <font color="#993333">**ex.exe**</font> in a DOS Window, it makes my small DOS window go to full screen.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>This will only happen the first time you run
-   <font color="#993333"><b>ex.exe</b></font> after creating a new small
+	<td>This will only happen the first time you run
+   <font color="#993333">**ex.exe**</font> after creating a new small
    DOS window. You can make the window small again by pressing
-   <b>Alt-Enter</b>. It will stay small after that. Your Euphoria program
-   can keep the window small by executing:</p>
+   **Alt-Enter**. It will stay small after that. Your Euphoria program
+   can keep the window small by executing:
 <eucode>
 if graphics_mode(-1) then
 end if
 </eucode>
-<p>at the start of execution. This may cause some brief screen
+at the start of execution. This may cause some brief screen
    flicker. Your program can force a text window to be full-screen 
-   by executing:</p>
+   by executing:
 <eucode>
 if graphics_mode(3) then
 end if
@@ -101,12 +101,12 @@ end if
 <tr valign="top">
 	<td>S:</td>
 	<td>Look for an ex.err file in your cgi-bin directory. 
-  Turn on <b>with trace</b> / <b>trace(3)</b> to see what statements
+  Turn on **with trace** / **trace(3)** to see what statements
   are executed (see ctrace.out in your cgi-bin). Insert 
-  <b>without warning</b> at the top of your program.
+  **without warning** at the top of your program.
    On Windows, when there are warnings, Euphoria will issue a prompt 
    before terminating, causing your program to hang. On Windows you should 
-   always use <b>exwc.exe</b> to run CGI programs, or you may have problems with
+   always use **exwc.exe** to run CGI programs, or you may have problems with
    standard output. With Apache Web Server, you
    can have a first line in your program of: #!.\exwc.exe to run your program
    using exwc.exe in the current (cgi-bin) directory. On Linux/FreeBSD, 
@@ -114,7 +114,7 @@ end if
    be handled correctly. On Linux you must also set the execute permissions
    on your program correctly, and ex.err and ctrace.out must be 
    writable by the server process or they won't be updated. See
-   <a href=cgi.htm>cgi.htm</a> for more.</td>
+   a href=cgi.htm>cgi.htm</a> for more.</td>
 </tr>
    
 <tr valign="top">
@@ -123,49 +123,49 @@ end if
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>Get <b>Jacques Deschenes</b>' collection of machine-level and
+	<td>Get **Jacques Deschenes**' collection of machine-level and
    DOS system routines from the
-   <a href="http://www.RapidEuphoria.com">Euphoria Web page</a>. See his
-   file <b>ports.e</b>.</td>
+   a href="http://www.RapidEuphoria.com">Euphoria Web page</a>. See his
+   file **ports.e**.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
-	<td>I'm having trouble running a <font color="#CC3366"><b>DOS32</b></font> graphics program. I hit control-Break and now my system seems to be dead.</td>
+	<td>I'm having trouble running a <font color="#CC3366">**DOS32**</font> graphics program. I hit control-Break and now my system seems to be dead.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
 	<td>
-	<p>Some graphics programs will not run unless you start them from
+	Some graphics programs will not run unless you start them from
    DOS or from a full-screen DOS window under Windows. Sometimes you
    have to edit the program source to use a lower resolution graphics mode,
    such as mode 18. Some SVGA graphics modes might not work for you under a
    DOS window, but will work when you restart your machine in
-   MS-DOS mode. A better driver for your video card might fix this.</p>
-   <p>
+   MS-DOS mode. A better driver for your video card might fix this.
+   
    You should stop a program using the method that the program documentation
    recommends. If you abort a program with control-c or control-Break you may
    find that your screen is left in a funny graphics mode using funny colors.
    When you type something, it may be difficult or even impossible to read
-   what you are typing. <i>The system may even appear dead, when in fact it
-   is <b>not</b></i>.</p>
-   <p>
+   what you are typing. //The system may even appear dead, when in fact it
+   is **not**//.
+   
    Try the following DOS commands, in the following order, until you clear
-   things up:</p>
+   things up:
    <ol>
    	<li>type: Alt-Enter to get a normal (non-full-screen) window again.</li>
-      <li>type: <b>cls</b><br>Even when you can't see any keystrokes echoed on the screen
+      <li>type: **cls**<br>Even when you can't see any keystrokes echoed on the screen
          this may clear the screen for you.</li>
-<li>type: <b>ex</b><br>
+<li>type: **ex**<br>
          The Euphoria interpreter will try to restore a normal
          <font color="#CC3366">text mode</font> screen for you.</li>
-<li>type: <b>exit</b><br>
+<li>type: **exit**<br>
          If you are running under Windows, this will terminate the
          DOS session for you.</li>
-<li>type: <b>Control-Alt-Delete</b><br>
+<li>type: **Control-Alt-Delete**<br>
          This will let you kill the current DOS session under Windows,
          or will soft-reboot your computer if you are running under DOS.</li>
 <li>If all else fails, reset or power your computer off and back on.
-         You should immediately run <b>scandisk</b> when the system
+         You should immediately run **scandisk** when the system
          comes back up.</li>
          </ol>
         </td>
@@ -178,16 +178,16 @@ end if
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>Try: <font color="#006699"><b>use_vesa(1)</b></font> in
-   <font color="#5500FF"><b>machine.e</b></font>.</p>
-   <p>
+	<td>Try: <font color="#006699">**use_vesa(1)**</font> in
+   <font color="#5500FF">**machine.e**</font>.
+   
    Try downloading the latest driver for your video card from the Internet.
-   ATI's site is:</p>
-   <p>
-   <a href="http://www.atitech.com">http://www.atitech.com</a></p>
-   <p>
+   ATI's site is:
+   
+   a href="http://www.atitech.com">http://www.atitech.com</a>
+   
    Others have had their video problems clear up after installing the latest
-   version of DirectX.</p></td>
+   version of DirectX.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
@@ -225,14 +225,14 @@ end if
 </tr>
 <tr valign="top">
 	<td>P:</td>
-	<td>I'm trying to call a routine documented in <path>library.doc</path>, but it keeps saying the routine has not been declared.</td>
+	<td>I'm trying to call a routine documented in ##library.doc##, but it keeps saying the routine has not been declared.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>Did you remember to include the necessary <b>.e</b> file from
-   the <font color="#5500FF"><b>euphoria\include</b></font> directory? If
+	<td>Did you remember to include the necessary **.e** file from
+   the <font color="#5500FF">**euphoria\include**</font> directory? If
    the syntax of the routine says for example, "include graphics.e", then
-   your program must have "<b>include graphics.e</b>" (without the quotes)
+   your program must have "**include graphics.e**" (without the quotes)
    before the place where you first call the routine.</td>
 </tr>
 
@@ -240,13 +240,13 @@ end if
 	<td>P:</td>
 	<td>I have an include file with a routine in it that I want to
    call, but when I try to call the routine it says the routine has not been
-   declared. But it <b><i>has</i></b> been declared.</td>
+   declared. But it **//has//** been declared.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
 	<td>Did you remember to define the routine with
-   "<b>global</b>" in front of it in the include file? Without "global"
-   the routine is not visible <i><b>outside</b></i> of its own file.</td>
+   "**global**" in front of it in the include file? Without "global"
+   the routine is not visible //**outside**// of its own file.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
@@ -254,28 +254,28 @@ end if
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>See <font color="#006699"><b>gets()</b></font> in
-   <a class="blue" href="lib_file.htm#gets"><b>library.doc</b></a>.
-   <font color="#006699">gets(0)</font> will read a line from <b>standard
-   input</b>, which is normally the <b>keyboard</b>. The line will always
-   have <b>\n</b> on the end. To remove the trailing \n character do:</p>
+	<td>See <font color="#006699">**gets()**</font> in
+   a class="blue" href="lib_file.htm#gets">**library.doc**</a>.
+   <font color="#006699">gets(0)</font> will read a line from **standard
+   input**, which is normally the **keyboard**. The line will always
+   have **\n** on the end. To remove the trailing \n character do:
 <eucode>
 line = line[1..length(line)-1]
 </eucode>
-<p>Also see <font color="#006699"><b>prompt_string()</b></font>
-   in <font color="#5500FF"><b>get.e</b></font>.</p>   </td>
+Also see <font color="#006699">**prompt_string()**</font>
+   in <font color="#5500FF">**get.e**</font>.   </td>
 </tr>
 
 <tr valign="top">
 	<td>P:</td>
 	<td>After inputting a string from the user with
-   <font color="#006699"><b>gets()</b></font>, the next line that comes
+   <font color="#006699">**gets()**</font>, the next line that comes
    out on the screen does not start at the left margin.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>Your program should output a <i>new-line</i> character e.g.
-   <font color="#006699"><b>puts(SCREEN, '\n')</b></font> after you do a
+	<td>Your program should output a //new-line// character e.g.
+   <font color="#006699">**puts(SCREEN, '\n')**</font> after you do a
    <font color="#006699">gets()</font>. It does not happen automatically.</td>
 </tr>
 <tr valign="top">
@@ -307,13 +307,13 @@ line = line[1..length(line)-1]
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>Use <font color="#006699"><b>sprintf()</b></font> in
-   <font color="#5500FF"><b>library.doc</b></font>. e.g.</p>
+	<td>Use <font color="#006699">**sprintf()**</font> in
+   <font color="#5500FF">**library.doc**</font>. e.g.
 <eucode>
 string = sprintf("%d", number)
 </eucode>
-<p>Besides <b>%d</b>, you can also try other formats, such as
-   <b>%x</b> (Hex) or <b>%f</b> (floating-point).</p>
+Besides **%d**, you can also try other formats, such as
+   **%x** (Hex) or **%f** (floating-point).
 	</td>
 </tr>
 <tr valign="top">
@@ -322,7 +322,7 @@ string = sprintf("%d", number)
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>Use <font color="#006699"><b>value()</b></font> in <font color="#5500FF"><b>library.doc</b></font>, or, if you are reading from a file or the keyboard, use <font color="#006699"><b>get()</b></font>.</td>
+	<td>Use <font color="#006699">**value()**</font> in <font color="#5500FF">**library.doc**</font>, or, if you are reading from a file or the keyboard, use <font color="#006699">**get()**</font>.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
@@ -339,7 +339,7 @@ string = sprintf("%d", number)
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><b><i>Do not</i></b> say "C:\TMP\MYFILE". You need to say <b>"C:\\TMP\\MYFILE"</b>. Backslash is used for escape characters such as <b>\n</b> or <b>\t</b>. To specify a single backslash in a string you need to type <b>\\</b>.</td>
+	<td>**//Do not//** say "C:\TMP\MYFILE". You need to say **"C:\\TMP\\MYFILE"**. Backslash is used for escape characters such as **\n** or **\t**. To specify a single backslash in a string you need to type **\\**.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
@@ -347,25 +347,25 @@ string = sprintf("%d", number)
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><font color="#CC3366"><b>DOS</b></font> does not support mouse input in modes beyond graphics mode 18 (640x480 16 color). <font color="#CC3366"><b>DOS 7.0 (part of Windows 95/98)</b></font> does seem to let you at least read the x-y coordinate and the buttons in high resolution modes, but you may have to draw your own mouse pointer in the high-res modes. <b>Graeme Burke</b>, <b>Peter Blue</b> and others have good solutions to this problem. See their files on the <a href="http://www.RapidEuphoria.com/archive.htm">Euphoria Archive Web page</a>.</td>
+	<td><font color="#CC3366">**DOS**</font> does not support mouse input in modes beyond graphics mode 18 (640x480 16 color). <font color="#CC3366">**DOS 7.0 (part of Windows 95/98)**</font> does seem to let you at least read the x-y coordinate and the buttons in high resolution modes, but you may have to draw your own mouse pointer in the high-res modes. **Graeme Burke**, **Peter Blue** and others have good solutions to this problem. See their files on the a href="http://www.RapidEuphoria.com/archive.htm">Euphoria Archive Web page</a>.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
 	<td>I'm trying to print a string using
-   <font color="#006699"><b>printf()</b></font> but only the first character
+   <font color="#006699">**printf()**</font> but only the first character
    comes out.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>See the <font color="#006699"><b>printf()</b></font>
-   description in <font color="#5500FF"><b>library.doc</b></font>. You may
+	<td>See the <font color="#006699">**printf()**</font>
+   description in <font color="#5500FF">**library.doc**</font>. You may
    need to put braces around your string so it is seen as a single value to
-   be printed, e.g. you wrote:</p>
+   be printed, e.g. you wrote:
 
 <eucode>
 printf(1, "Hello %s", mystring)
 </eucode>
-	<p>where you should have said:</p>
+	where you should have said:
 <eucode>
 printf(1, "Hello %s", {mystring})
 </eucode>
@@ -374,20 +374,20 @@ printf(1, "Hello %s", {mystring})
 <tr valign="top">
 	<td>P:</td>
 	<td>When I print numbers using
-   <font color="#006699"><b>print()</b></font> or
-   <font color="#006699"><b>?</b></font>, only 10 significant digits are
+   <font color="#006699">**print()**</font> or
+   <font color="#006699">**?**</font>, only 10 significant digits are
    displayed.</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>Euphoria normally only shows about 10 digits. Internally, all
+	<td>Euphoria normally only shows about 10 digits. Internally, all
    calculations are performed using at least 15 significant digits. To see
-   more digits you have to use <font color="#006699"><b>printf()</b></font>.
-   For example,</p>
+   more digits you have to use <font color="#006699">**printf()**</font>.
+   For example,
 <eucode>
 printf(1, "%.15f", 1/3)
 </eucode>
-<p>This will display 15 digits.</p>
+This will display 15 digits.
    </td>
 </tr>
 <tr valign="top">
@@ -396,13 +396,13 @@ printf(1, "%.15f", 1/3)
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><p>When declaring subroutine parameters, Euphoria requires you to
-   provide an explicit type for each individual parameter. e.g.</p>
+	<td>When declaring subroutine parameters, Euphoria requires you to
+   provide an explicit type for each individual parameter. e.g.
 <eucode>
 procedure foo(integer x, y)         -- WRONG
 procedure foo(integer x, integer y) -- RIGHT
 </eucode>
-<p>In all other contexts it is ok to make a list:</p>
+In all other contexts it is ok to make a list:
 <eucode>
 atom a, b, c, d, e
 </eucode>
@@ -415,7 +415,7 @@ atom a, b, c, d, e
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>All of your <i>private</i> variable declarations must come at the beginning of your <b>subroutine</b>, before any executable statements. (At the top-level of a program, <b>outside of any routine</b>, it is ok to declare variables anywhere.)</td>
+	<td>All of your //private// variable declarations must come at the beginning of your **subroutine**, before any executable statements. (At the top-level of a program, **outside of any routine**, it is ok to declare variables anywhere.)</td>
 </tr>
 
 <tr valign="top">
@@ -432,21 +432,21 @@ atom a, b, c, d, e
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td>Your <b>config.sys</b> should have just HIMEM.SYS but not EMM386.EXE in it.</td>
+	<td>Your **config.sys** should have just HIMEM.SYS but not EMM386.EXE in it.</td>
 </tr>
 <tr valign="top">
 	<td>P:</td>
 	<td>I try to run a program with
-   <font color="#993333"><b>exw</b></font> and it says "this is a Windows NT character-mode executable."</td>
+   <font color="#993333">**exw**</font> and it says "this is a Windows NT character-mode executable."</td>
 </tr>
 <tr valign="top">
 	<td>S:</td>
-	<td><font color="#993333"><b>exw.exe</b></font> is a
-   <font color="#CC3366"><b>32-bit Windows program</b></font>. It must be
+	<td><font color="#993333">**exw.exe**</font> is a
+   <font color="#CC3366">**32-bit Windows program**</font>. It must be
    run under Windows or in a DOS Window. It will not work under 
    plain DOS in an old system.
-   <font color="#993333"><b>ex.exe</b></font> <b><i>will</i></b> work under
-   <font color="#CC3366"><b>plain DOS</b></font>.</td>
+   <font color="#993333">**ex.exe**</font> **//will//** work under
+   <font color="#CC3366">**plain DOS**</font>.</td>
 </tr>
 </table>
 </doc>

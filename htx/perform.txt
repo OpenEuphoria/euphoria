@@ -9,7 +9,7 @@
 <br>
                        Euphoria Performance Tips
 </font></_center>
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -21,11 +21,11 @@
 <li>
  If your program is fast enough, forget about speeding it up.
    Just make it simple and readable.
-<p>
+
 <li>
  If your program is way too slow, the tips below will probably not solve 
    your problem. You should find a better overall algorithm.
-<p>
+
 <li>
  
  The easiest way to gain a bit of speed is to turn off run-time 
@@ -34,36 +34,36 @@
 <eucode>
            without type_check
 </eucode>
-   at the top of your main <b>.ex</b> file, ahead of any include statements.
+   at the top of your main **.ex** file, ahead of any include statements.
    You'll typically gain between 0 and 20 percent depending on the
    types you have defined, and the files that you are including.
    Most of the standard include files do some user-defined type-checking.
    A program that is completely without user-defined type-checking
    might still be speeded up slightly.
- <p>
-   Also, be <font color="#CC0099"><_ba><i>sure</i></_ba></font> to remove,
+ 
+   Also, be <font color="#CC0099"><_ba>//sure//</_ba></font> to remove,
    or comment-out, any
 <eucode>
            with trace
            with profile
            with profile_time
 </eucode>
-   statements. <font color="#993333"><b>with trace</b></font> (even without
+   statements. <font color="#993333">**with trace**</font> (even without
    any calls to <font color="#006699">trace()</font>), and
-   <font color="#993333"><b>with profile</b></font> can easily slow you down
-   by 10% or more. <font color="#993333"><b>with profile_time</b></font>
+   <font color="#993333">**with profile**</font> can easily slow you down
+   by 10% or more. <font color="#993333">**with profile_time**</font>
    might slow you down by 1%. Each of these options will consume extra
    memory as well.
-<p>
+
 <li>
  Calculations using integer values are faster than calculations using
    floating-point numbers
-<p>
+
 <li>
  Declare variables as integer rather than atom where possible,
    and as sequence rather than object where possible. This usually gains
    you a few percent in speed.
-<p>
+
 <li>
  In an expression involving floating-point calculations it's usually faster
    to write constant numbers in floating point form, e.g. when x has a
@@ -78,9 +78,9 @@
 </eucode>
    This saves the interpreter from having to convert integer 5 to
    floating-point 5.0 each time.
-<p>
+
 <li>
- Euphoria does <_bq><i>short-circuit</i></_bq> evaluation of
+ Euphoria does <_bq>//short-circuit//</_bq> evaluation of
   <font color="#993333"><_bq>if</_bq></font>,
   <font color="#993333"><_bq>elsif</_bq></font>, and
   <font color="#993333"><_bq>while</_bq></font> conditions involving
@@ -94,14 +94,14 @@
         end if
 </eucode>
    The "y = 0" test will only be made when "x > 20" is true.
- <p>
+ 
    For maximum speed, you can order your tests. Do "x > 20" first if it is
    more likely to be false than "y = 0". 
- <p>
+ 
    In general, with a condition "A and B", Euphoria will not evaluate the 
    expression B, when A is false (zero). Similarly, with a condition like 
    "A or B", B will not be evaluated when A is true (non-zero).
- <p>
+ 
    Simple if-statements are highly optimized. 
    With the current version of the interpreter, 
    nested simple if's that compare integers are usually a bit faster 
@@ -114,11 +114,11 @@
        end if
 </eucode>
 
-<p>
+
 <li>
  The speed of access to private variables, local variables and global
    variables is the same.
-<p>
+
 <li>
  There is no performance penalty for defining constants versus plugging
    in hard-coded literal numbers. The speed of:
@@ -139,13 +139,13 @@
    program. Comments are completely ignored. They are not executed in any way.
    It might take a few milliseconds longer for the initial load of your
    program, but that's a very small price to pay for future maintainability,
-   and when you <font color="#993333"><b>bind</b></font> your program, 
-   or <font color="#993333"><b>translate</b></font> your program to C,
+   and when you <font color="#993333">**bind**</font> your program, 
+   or <font color="#993333">**translate**</font> your program to C,
    all comments are stripped out, so the cost becomes absolute zero.
 
 </ul>
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -153,25 +153,25 @@
 <_sul>Measuring Performance</_sul>
 
 </font>
-<p>
+
  In any programming language, and especially in Euphoria,
- <font color="#006633"><b>you really have to make measurements before
- drawing conclusions about performance</b></font>.
-<p>
- Euphoria provides both <font color="#993333"><b>execution-count
- profiling</b></font>, as well as
- <font color="#993333"><b>time profiling</b></font>
- (<font color="#CC3366"><b>DOS32</b></font> only). See
- <a class="blue" href="refman_3.htm#2"><b>refman.doc</b></a>.
+ <font color="#006633">**you really have to make measurements before
+ drawing conclusions about performance**</font>.
+
+ Euphoria provides both <font color="#993333">**execution-count
+ profiling**</font>, as well as
+ <font color="#993333">**time profiling**</font>
+ (<font color="#CC3366">**DOS32**</font> only). See
+ a class="blue" href="refman_3.htm#2">**refman.doc**</a>.
  You will often be surprised by the results of these profiles. Concentrate
  your efforts on the places in your program that are using a high percentage
  of the total time (or at least are executed a large number of times.)
  There's no point to rewriting a section of code that uses 0.01% of the total
  time. Usually there will be one place, or just a few places where code
  tweaking will make a significant difference.
-<p>
+
  You can also measure the speed of code by using the
- <font color="#006699"><b>time()</b></font> function. e.g.
+ <font color="#006699">**time()**</font> function. e.g.
 <eucode>
         atom t
         t = time()
@@ -180,11 +180,11 @@
         end for
         ? time() - t
 </eucode>
-<p>
+
  You might rewrite the small chunk of code in different ways to see which way 
  is faster.
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -192,14 +192,14 @@
 <_sul>How to Speed-Up Loops</_sul>
 
 </font>
-<p>
- <font color="#993333"><b>Profiling</b></font> will show you the
- <font color="#CC0099"><_bq><i>hot spots</i></_bq></font> in your program.
+
+ <font color="#993333">**Profiling**</font> will show you the
+ <font color="#CC0099"><_bq>//hot spots//</_bq></font> in your program.
  These are usually inside loops. Look at each calculation inside the loop
  and ask yourself if it really needs to happen every time through the loop,
  or could it be done just once, prior to the loop.
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -207,7 +207,7 @@
 <_sul>Converting Multiplies to Adds in a Loop</_sul>
 
 </font>
-<p>
+
  Addition is faster than multiplication. Sometimes you can replace a
  multiplication by the loop variable, with an addition. Something like:
 <eucode>
@@ -236,7 +236,7 @@
  It's faster to save the result of a calculation in a variable, than it is to
    recalculate it later. Even something as simple as a subscript operation, 
    or adding 1 to a variable is worth saving.
-<p>
+
 <li>
  When you have a sequence with multiple levels of subscripting,
    it is faster to change code like:
@@ -257,18 +257,18 @@
 
     So you are doing 2 subscript operations per iteration of the loop, rather 
     than 4. The operations, ya = y[a] and y[a] = ya are very cheap.
-    <font color="#006633"><b>They just copy a pointer.</b></font> They
+    <font color="#006633">**They just copy a pointer.**</font> They
     don't copy a whole sequence.
-<p>
+
 <li>
- There is a slight cost when you create a new sequence using <b>{a,b,c}</b>.
+ There is a slight cost when you create a new sequence using **{a,b,c}**.
    If possible, move this operation out of a critical loop by storing it 
    in a variable before the loop, and referencing the variable inside the
    loop.
 
 </ul>
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -276,14 +276,14 @@
 <_sul>In-lining of Routine Calls</_sul>
 
 </font>
-<p>
+
  If you have a routine that is rather small and fast, but is called a huge 
  number of times, you will save time by doing the operation
- <_bq><i>in-line</i></_bq>, rather than calling the routine. Your code may
+ <_bq>//in-line//</_bq>, rather than calling the routine. Your code may
  become less readable, so it might be better to in-line only at places that
  generate a lot of calls to the routine.
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -291,7 +291,7 @@
 <_sul>Operations on Sequences</_sul>
 
 </font>
-<p>
+
  Euphoria lets you operate on a large sequence of data using a single
  statement. This saves you from writing a loop where you process one element
  at-a-time. e.g.
@@ -309,7 +309,7 @@
             z[i] = x[i] + y[i]
         end for
 </eucode>
-<p>
+
  In most interpreted languages, it is much faster to process a whole sequence 
  (array) in one statement, than it is to perform scalar operations
  in a loop. This is because the 
@@ -321,7 +321,7 @@
  associated with allocation and deallocation of sequences that 
  may tip the scale the other way.
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -329,7 +329,7 @@
 <_sul>Some Special Case Optimizations</_sul>
 
 </font>
-<p>
+
  Euphoria automatically optimizes certain special cases. x and y below could 
  be variables or arbitrary expressions.
 <eucode>
@@ -341,7 +341,7 @@
         floor(x/y) -- where x and y are integers, is faster than x/y
         floor(x/2) -- faster than floor(x/y)
 </eucode>
-<p>
+
  x below is a simple variable, y is any variable or expression:  
 <eucode>
         x = append(x, y)   -- faster than general z = append(x, y)
@@ -353,36 +353,36 @@
 
 When you write a loop that "grows" a sequence, by appending or
 concatenating data onto it, the time will, in general, grow in proportion
-to the <b>square</b> of the number (N) of elements you are adding.
+to the **square** of the number (N) of elements you are adding.
 However, if you can use one of the special optimized forms of append(),
 prepend() or concatenation listed above, the time will grow in proportion
-to just N (roughly). This could save you a <b>huge</b> amount of time
+to just N (roughly). This could save you a **huge** amount of time
 when creating an extremely long sequence.
 (You could also use repeat() to establish the maximum size
 of the sequence, and then fill in the elements in a loop, as discussed
 below.)
-<p>
+
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
 
 <_sul>Assignment with Operators</_sul>
 
 </font>
-<p>
+
  For greater speed, convert:
-<pre>
-        <b>left-hand-side = left-hand-side op expression</b>
-</pre>
+{{{
+        **left-hand-side = left-hand-side op expression**
+}}}
  to:
-<pre>
-        <b>left-hand-side op= expression</b>
-</pre>
+{{{
+        **left-hand-side op= expression**
+}}}
  
  whenever left-hand-side contains at least 2 subscripts, or at least
  one subscript and a slice. In all simpler cases the two forms run at 
  the same speed (or very close to the same).
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -393,27 +393,27 @@ below.)
 <ul>
 <li>
  Mode 19 is the fastest mode for
- <font color="#009999"><b>animated graphics</b></font> and
- <font color="#009999"><b>games</b></font>.
-<p>
+ <font color="#009999">**animated graphics**</font> and
+ <font color="#009999">**games**</font>.
+
 <li>
  The video memory (in mode 19) is not cached by the CPU. It usually takes longer
    to read or write data to the screen than to a general area of memory that
    you allocate. This adds to the efficiency of
-   <font color="#CC0099"><_bq><i>virtual</i></_bq> <b>screens</b></font>, where
-   you do all of your image updating in a <b>block of memory</b> that you
-   get from <font color="#006699"><b>allocate()</b></font>, and then you
-   periodically <font color="#006699"><b>mem_copy()</b></font> the resulting
-   image to the real <b>screen memory</b>. In this way you never have to
+   <font color="#CC0099"><_bq>//virtual//</_bq> **screens**</font>, where
+   you do all of your image updating in a **block of memory** that you
+   get from <font color="#006699">**allocate()**</font>, and then you
+   periodically <font color="#006699">**mem_copy()**</font> the resulting
+   image to the real **screen memory**. In this way you never have to
    read the (slow) screen memory.
-<p>
+
 <li>
  When plotting pixels, you may find that modes 257 and higher are fast near
    the top of the screen, but slow near the bottom.
 
 </ul>
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -421,24 +421,24 @@ below.)
 <_sul>Text-Mode Tips</_sul>
 
 </font>
-<p>
- Writing text to the screen using <font color="#006699"><b>puts()</b></font>
- or <font color="#006699"><b>printf()</b></font> is rather slow.
- If necessary, in <font color="#CC3366"><b>DOS32</b></font>, you can do it much faster by poking into the
- <b>video memory</b>, or by using
- <font color="#006699"><b>display_text_image()</b></font>. There is a very
+
+ Writing text to the screen using <font color="#006699">**puts()**</font>
+ or <font color="#006699">**printf()**</font> is rather slow.
+ If necessary, in <font color="#CC3366">**DOS32**</font>, you can do it much faster by poking into the
+ **video memory**, or by using
+ <font color="#006699">**display_text_image()**</font>. There is a very
  large overhead on each puts() to the screen, and a relatively small
  incremental cost per character. The overhead with
- <font color="#993333"><b>exw</b></font> (WIN32) is especially high (on Windows 95/98/ME
+ <font color="#993333">**exw**</font> (WIN32) is especially high (on Windows 95/98/ME
  at least). Linux and FreeBSD are somewhere between DOS32 and WIN32 
  in text output speed. It therefore makes sense
  to build up a long string before calling puts(), rather than calling it 
  for each character. There is no advantage to building up a string 
  longer than one line however. 
- <p>  
+   
  The slowness of text output is mainly due to operating system overhead. 
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -446,19 +446,19 @@ below.)
 <_sul>Library Routines</_sul>
 
 </font>
-<p>
+
  Some common routines are extremely fast. You probably couldn't do the job 
  faster any other way, even if you used C or assembly language. Some of these 
  are:
 <ul>
 <li>
-     <font color="#006699"><b>mem_copy()</b></font>
+     <font color="#006699">**mem_copy()**</font>
 <li>
-     <font color="#006699"><b>mem_set()</b></font>
+     <font color="#006699">**mem_set()**</font>
 <li>
-     <font color="#006699"><b>repeat()</b></font>
+     <font color="#006699">**repeat()**</font>
 </ul>
-<p>
+
  Other routines are reasonably fast, but you might be able
  to do the job faster in some cases if speed was crucial.
 <eucode>
@@ -479,10 +479,10 @@ below.)
  because <font color="#006699">append()</font> has to allocate and reallocate
  space as x grows in size. With <font color="#006699">repeat()</font>, the
  space for x is allocated once at the beginning. (append() is smart enough
- not to allocate space with <_ba><i>every</i></_ba> append to x.
+ not to allocate space with <_ba>//every//</_ba> append to x.
  It will allocate somewhat more than it needs, to reduce the number of
  reallocations.)
-<p>
+
  You can replace:
 <eucode>
         remainder(x, p)
@@ -495,12 +495,12 @@ below.)
 
  for greater speed when p is a positive power of 2. x must be a non-negative
  integer that fits in 32-bits.
-<p>
- <font color="#006699"><b>arctan()</b></font> is faster than
- <font color="#006699"><b>arccos()</b></font> or
- <font color="#006699"><b>arcsin()</b></font>.
 
-<p>
+ <font color="#006699">**arctan()**</font> is faster than
+ <font color="#006699">**arccos()**</font> or
+ <font color="#006699">**arcsin()**</font>.
+
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -508,14 +508,14 @@ below.)
 <_sul>Searching</_sul>
 
 </font>
-<p>
- Euphoria's <font color="#006699"><b>find()</b></font> is the fastest way
- to search for a value in a sequence up to about 50 elements. Beyond that,
- you might consider a <i>hash table</i>
- (<font color="#5500FF"><b>demo\hash.ex</b></font>) or a
- <i>binary tree</i> (<font color="#5500FF"><b>demo\tree.ex</b></font>).
 
-<p>
+ Euphoria's <font color="#006699">**find()**</font> is the fastest way
+ to search for a value in a sequence up to about 50 elements. Beyond that,
+ you might consider a //hash table//
+ (<font color="#5500FF">**demo\hash.ex**</font>) or a
+ //binary tree// (<font color="#5500FF">**demo\tree.ex**</font>).
+
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -523,23 +523,23 @@ below.)
 <_sul>Sorting</_sul>
 
 </font>
-<p>
- In most cases you can just use the <i>shell sort</i> routine in
- <font color="#5500FF"><b>include\sort.e</b></font>. 
-<p>
+
+ In most cases you can just use the //shell sort// routine in
+ <font color="#5500FF">**include\sort.e**</font>. 
+
  If you have a huge amount of data to sort, you might try one of the sorts 
- in <font color="#5500FF"><b>demo\allsorts.e</b></font> (e.g.
- <i><_bq>great</_bq> sort</i>). If your data is too big to fit in 
+ in <font color="#5500FF">**demo\allsorts.e**</font> (e.g.
+ //<_bq>great</_bq> sort//). If your data is too big to fit in 
  memory, don't rely on Euphoria's automatic memory swapping capability. 
  Instead, sort a few thousand records at a time, and write them out to a 
  series of temporary files. Then merge all the sorted temporary files into 
  one big sorted file. 
-<p>
- If your data consists of integers only, and they are all in a fairly 
- narrow range, try the <i>bucket sort</i> in
- <font color="#5500FF"><b>demo\allsorts.e</b></font>.
 
-<p>
+ If your data consists of integers only, and they are all in a fairly 
+ narrow range, try the //bucket sort// in
+ <font color="#5500FF">**demo\allsorts.e**</font>.
+
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -547,14 +547,14 @@ below.)
 <_sul>Taking Advantage of Cache Memory</_sul>
 
 </font>
-<p>
+
  As CPU speeds increase, the gap between the speed of the on-chip cache 
  memory and the speed of the main memory or DRAM (dynamic random access memory)
  becomes ever greater. You might have 256 Mb of DRAM on your computer, but the 
  on-chip cache is likely to be only 8K (data) plus 8K (instructions) on a 
  Pentium, or 16K (data) plus 16K (instructions) on a Pentium with MMX or a
  Pentium II/III. Most machines will also have a "level-2" cache of 256K or 512K.
-<p>
+
  An algorithm that steps through a long sequence of a couple of thousand
  elements or more, many times, from beginning to end, performing one 
  small operation on each element, will not make good use of the on-chip data 
@@ -562,11 +562,11 @@ below.)
  each element, before moving on to the next element. The same argument holds 
  when your program starts swapping, and the least-recently-used data is moved 
  out to disk.
-<p>
+
  These cache effects aren't as noticeable in Euphoria as they are in
  lower-level compiled languages, but they are measurable.
 
-<p>
+
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
@@ -574,45 +574,45 @@ below.)
 <_sul>Using Machine Code and C</_sul>
 
 </font>
-<p>
+
  Euphoria lets you call routines written in 32-bit Intel machine code. On
- <font color="#CC3366"><b>WIN32</b></font> and
- <font color="#CC3366"><b>Linux</b></font> and
- <font color="#CC3366"><b>FreeBSD</b></font> 
+ <font color="#CC3366">**WIN32**</font> and
+ <font color="#CC3366">**Linux**</font> and
+ <font color="#CC3366">**FreeBSD**</font> 
  you can call C routines in
- <b>.</b>dll or <b>.</b>so files, and these C routines can call your Euphoria routines.
+ **.**dll or **.**so files, and these C routines can call your Euphoria routines.
  You might need to call C or machine code because of something that can't be
  done directly in Euphoria, or you might do it for improved speed.
-<p>
+
  To boost speed, the machine code or C routine needs to do a significant 
  amount of work on each call, otherwise the overhead of setting up the 
  arguments and making the call will dominate the time, and it might not 
  gain you much.
-<p>
+
  Many programs have some inner core operation that consumes most of the
  CPU time. If you can code this in C or machine code, while leaving the
  bulk of the program in Euphoria, you might achieve a speed comparable
  to C, without sacrificing Euphoria's safety and flexibility.
 
-<p>&nbsp;
+&nbsp;
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
 <_sul>Using The Euphoria To C Translator</_sul>
 </font>
 
-<p>
+
 In version 3.0, the full 
 Euphoria To C Translator is included in the installation package.
 It will translate any Euphoria program into a set of C source
 files that you can compile using a C compiler. 
-<p>
+
 The executable file that you get using the Translator should run the same,
 but faster than when you use the interpreter. The speed-up can be anywhere
 from a few percent to a factor of 5 or more.
 
 
-<p>&nbsp;
+&nbsp;
 
 </_width>
 </body>

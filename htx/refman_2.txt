@@ -1,23 +1,21 @@
 <doc title="Euphoria Reference Manual Part I - Section 2">
 
-<h2>Language Definition</h2>
+== Language Definition
 
-<h3>Objects</h3>
+=== Objects
 
-<h4>Atoms and Sequences</h4>
+==== Atoms and Sequences
 
-<p>
-All data <strong>objects</strong> in Euphoria are either <strong>atoms</strong>
-or <strong>sequences</strong>.  An <strong>atom</strong> is a single numeric
-value.  A <strong>sequence</strong> is a collection of numeric values.</p>
+All data **objects** in Euphoria are either **atoms**
+or **sequences**.  An **atom** is a single numeric
+value.  A **sequence** is a collection of numeric values.
 
-<p>
-The <strong>objects</strong> contained in a sequence can be an arbitrary mix of
+The **objects** contained in a sequence can be an arbitrary mix of
 atoms or sequences. A sequence is represented by a list of objects in brace
 brackets, separated by commas. Atoms can have any integer or double-precision
 floating point value. They can range from approximately -1e300 (minus one times
 10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
-some Euphoria objects:</p>
+some Euphoria objects:
 
 <eucode>
 -- examples of atoms:
@@ -33,9 +31,7 @@ some Euphoria objects:</p>
 {}                        -- the 0-element sequence
 </eucode>
 
-<p>
 Numbers can also be entered in hexadecimal. For example:
-</p>
 
 <eucode>
 #FE             -- 254
@@ -44,49 +40,44 @@ Numbers can also be entered in hexadecimal. For example:
 -#10            -- -16
 </eucode>
 
-<p>
 Only the capital letters A, B, C, D, E, F are allowed in hex numbers.  Hex
 numbers are always positive, unless you add a minus sign in front of the #
 character. So for instance #FFFFFFFF is a huge positive number (4294967295),
-*not* -1, as some machine-language programmers might expect.</p>
+*not* -1, as some machine-language programmers might expect.
 
-<p>
 Sequences can be nested to any depth, i.e. you can have sequences within
 sequences within sequences and so on to any depth (until you run out of
 memory). Brace brackets are used to construct sequences out of a list of
 expressions.  These expressions can be constant or evaluated at run-time.
-e.g.</p>
+e.g.
 
 <eucode>
 {x+6, 9, y*w+2, sin(0.5)}
 </eucode>
 
-<p>
-The <b>"Hierarchical Objects"</b> part of the Euphoria acronym comes from the
+The **"Hierarchical Objects"** part of the Euphoria acronym comes from the
 hierarchical nature of nested sequences. This should not be confused with the
-class hierarchies of certain object-oriented languages.</p>
+class hierarchies of certain object-oriented languages.
 
-<p>
-Why do we call them atoms?  Why not just "numbers"? Well, an atom <i>is</i>
+Why do we call them atoms?  Why not just "numbers"? Well, an atom //is//
 just a number, but we wanted to have a distinctive term that emphasizes that
 they are indivisible. Of course in the world of physics, atoms were split into
 smaller parts many years ago, but in Euphoria you can't split them. They are
 the basic building blocks of all the data that a Euphoria program can
-manipulate. With this analogy, <strong>sequence</strong>s might be thought of
+manipulate. With this analogy, **sequence**s might be thought of
 as "molecules", made from atoms and other molecules. A better analogy would be
 that sequences are like directories, and atoms are like files. Just as a
 directory on your computer can contain both files and other directories, a
-sequence can contain both atoms and other sequences (and <i>those</i> sequences
-can contain atoms and sequences and so on).</p>
+sequence can contain both atoms and other sequences (and //those// sequences
+can contain atoms and sequences and so on).
 
-<p>
-As you will soon discover, sequences make Euphoria very simple <i>and</i> very
-powerful.  <b>Understanding atoms and sequences is the key to understanding
-Euphoria.</b></p>
+As you will soon discover, sequences make Euphoria very simple //and// very
+powerful.  **Understanding atoms and sequences is the key to understanding
+Euphoria.**
 
 <dl>
 <dt>
-<b>Performance Note:</b></dt>
+**Performance Note:**</dt>
 
 <dd>
 Does this mean that all atoms are stored in memory as 8-byte floating-point
@@ -97,130 +88,113 @@ happens automatically.</dd>
 
 </dl>
 
-<h4>Character Strings and Individual Characters</h4>
+==== Character Strings and Individual Characters
 
-<p>
-A <strong>character string</strong> is just a <strong>sequence</strong> of
-characters.  It may be entered using quotes e.g.</p>
+A **character string** is just a **sequence** of
+characters.  It may be entered using quotes e.g.
 
 <eucode>
 "ABCDEFG"
 </eucode>
 
-<p>
 Character strings may be manipulated and operated upon just like any other
 sequences. For example the above string is entirely equivalent to the
-sequence:</p>
-
+sequence:
 
 <eucode>
 {65, 66, 67, 68, 69, 70, 71}
 </eucode>
 
-<p>
 which contains the corresponding ASCII codes. The Euphoria compiler will
 immediately convert "ABCDEFG" to the above sequence of numbers.  In a sense,
 there are no "strings" in Euphoria, only sequences of numbers.  A quoted string
 is really just a convenient notation that saves you from having to type in all
-the ASCII codes.</p>
+the ASCII codes.
 
-<p>
-<a name=empty_seq></a> It follows that "" is equivalent to {}. Both represent
-the sequence of length-0, also known as the <strong>empty sequence</strong>. As
+a name=empty_seq></a> It follows that "" is equivalent to {}. Both represent
+the sequence of length-0, also known as the **empty sequence**. As
 a matter of programming style, it is natural to use "" to suggest a length-0
-sequence of characters, and {} to suggest some other kind of sequence.</p>
+sequence of characters, and {} to suggest some other kind of sequence.
 
-<p>
-<a name=char></a> An <strong>individual character</strong> is an
-<strong>atom</strong>.  It must be entered using single quotes. There is a
+a name=char></a> An **individual character** is an
+**atom**.  It must be entered using single quotes. There is a
 difference between an individual character (which is an atom), and a character
-string of length-1 (which is a sequence). e.g.</p>
+string of length-1 (which is a sequence). e.g.
 
 <eucode>
 'B'   -- equivalent to the atom 66 - the ASCII code for B
 "B"   -- equivalent to the sequence {66}
 </eucode>
 
-<p>
 Again, 'B' is just a notation that is equivalent to typing 66. There aren't
-really any "characters" in Euphoria, just numbers (atoms).</p>
+really any "characters" in Euphoria, just numbers (atoms).
 
-<p>
-Keep in mind that an atom is <i>not</i> equivalent to a one-element sequence
+Keep in mind that an atom is //not// equivalent to a one-element sequence
 containing the same value, although there are a few built-in routines that
-choose to treat them similarly.</p>
+choose to treat them similarly.
 
-<p>
-Special characters may be entered using a back-slash:</p>
+Special characters may be entered using a back-slash:
 
-<console>
+{{{
 \n        newline
 \r        carriage return
 \t        tab
 \\        backslash
 \"        double quote
 \'        single quote
-</console>
+}}}
 
-<p>
 For example, "Hello, World!\n", or '\\'. The Euphoria editor displays character
-strings in green.</p>
+strings in green.
 
-<h3>Comments</h3>
+=== Comments
 
-<p>
 Comments are started by two dashes and extend to the end of the current line.
-e.g.</p>
+e.g.
 
 <eucode>
 -- this is a comment
 </eucode>
 
-<p>
 Comments are ignored by the compiler and have no effect on execution speed.
-The editor displays comments in red. </p>
-
-<p> 
+The editor displays comments in red. 
+ 
 On the first line (only) of your program, you can use a special comment
-beginning with #!, e.g.</p>
+beginning with #!, e.g.
 
 <eucode>
 #!/home/rob/euphoria/bin/exu  
 </eucode>
 
-<p>This informs the Linux shell that your file should be executed by the
+This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.  If you make
 your file executable, you can run it, just by typing its name, and without the
 need to type "exu". On DOS and Windows this line is just treated as a comment
 (though Apache Web server on Windows does recognize it.). If your file is a
-shrouded .il file, use backendu instead of exu.</p>
+shrouded .il file, use backendu instead of exu.
 
-<h3>Expressions</h3>
+=== Expressions
 
-<p>
 Like other programming languages, Euphoria lets you calculate results by
 forming expressions. However, in Euphoria you can perform calculations on
 entire sequences of data with one expression, where in most other languages you
 would have to construct a loop. In Euphoria you can handle a sequence much as
 you would a single number. It can be copied, passed to a subroutine, or
-calculated upon as a unit. For example,</p>
+calculated upon as a unit. For example,
 
 <eucode>
 {1,2,3} + 5
 </eucode>
 
-<p>
 is an expression that adds the sequence {1,2,3} and the atom 5 to get the
-resulting sequence {6,7,8}.</p>
+resulting sequence {6,7,8}.
 
-<p>
-We will see more examples later.</p>
+We will see more examples later.
 
-<h4>Relational Operators</h4>
+==== Relational Operators
 
-<p>
-The relational operators  <strong>< &nbsp; > &nbsp; <= &nbsp; >= &nbsp; =
-&nbsp; != &nbsp;</strong> each produce a 1 (true) or a 0 (false) result.</p>
+The relational operators  **< &nbsp; > &nbsp; <= &nbsp; >= &nbsp; =
+&nbsp; != &nbsp;** each produce a 1 (true) or a 0 (false) result.
 
 <eucode>
 8.8 < 8.7   -- 8.8 less than 8.7 (false)
@@ -231,14 +205,12 @@ The relational operators  <strong>< &nbsp; > &nbsp; <= &nbsp; >= &nbsp; =
 8.7 != 8.8  -- 8.7 not equal to 8.8 (true)
 </eucode>
 
-<p>
-As we will soon see you can also apply these operators to sequences.</p>
+As we will soon see you can also apply these operators to sequences.
 
-<h4>Logical Operators</h4>
+==== Logical Operators
 
-<p>
 The logical operators and, or, xor, and not are used to determine the "truth"
-of an expression. e.g.</p>
+of an expression. e.g.
 
 <eucode>
 1 and 1     -- 1 (true)
@@ -260,27 +232,23 @@ not 1       -- 0 (false)
 not 0       -- 1 (true)
 </eucode>
 
-<p>
 You can also apply these operators to numbers other than 1 or 0. The rule is:
-zero means false and non-zero means true. So for instance:</p>
+zero means false and non-zero means true. So for instance:
 
 <eucode>
 5 and -4    -- 1 (true)
 not 6       -- 0 (false)
 </eucode>
 
-<p>
-These operators can also be applied to sequences. See below.</p>
+These operators can also be applied to sequences. See below.
 
-<p>
-In some cases <a href="refman_2.htm#shortcir">short-circuit</a> evaluation will
-be used for expressions containing and or or.</p>
+In some cases a href="refman_2.htm#shortcir">short-circuit</a> evaluation will
+be used for expressions containing and or or.
 
-<h4>Arithmetic Operators</h4>
+==== Arithmetic Operators
 
-<p>
 The usual arithmetic operators are available: add, subtract, multiply, divide,
-unary minus, unary plus.</p>
+unary minus, unary plus.
 
 <eucode>
 3.5 + 3  -- 6.5
@@ -291,61 +259,54 @@ unary minus, unary plus.</p>
 +8       -- +8
 </eucode>
 
-<p>
-<a name=inf_nan></a> Computing a result that is too big (i.e. outside of -1e300
-to +1e300) will result in one of the special atoms <b>+infinity</b> or
-<b>-infinity</b>.  These appear as inf or -inf when you print them out.  It is
+a name=inf_nan></a> Computing a result that is too big (i.e. outside of -1e300
+to +1e300) will result in one of the special atoms **+infinity** or
+**-infinity**.  These appear as inf or -inf when you print them out.  It is
 also possible to generate nan or -nan.  "nan" means "not a number", i.e. an
 undefined value (such as inf divided by inf). These values are defined in the
 IEEE floating-point standard. If you see one of these special values in your
 output, it usually indicates an error in your program logic, although
 generating inf as an intermediate result may be acceptable in some cases. For
-instance, 1/inf is 0, which may be the "right" answer for your algorithm.</p>
+instance, 1/inf is 0, which may be the "right" answer for your algorithm.
 
-<p>
 Division by zero, as well as bad arguments to math library routines, e.g.
 square root of a negative number, log of a non-positive number etc. cause an
-immediate error message and your program is aborted.</p>
+immediate error message and your program is aborted.
 
-<p>
 The only reason that you might use unary plus is to emphasize to the reader of
 your program that a number is positive. The interpreter does not actually
-calculate anything for this.</p>
+calculate anything for this.
 
-<h4>Operations on Sequences</h4>
+==== Operations on Sequences
 
-<p>
 All of the relational, logical and arithmetic operators described above, as
-well as the math routines described in <a href="library.htm">Part II - Library
+well as the math routines described in a href="library.htm">Part II - Library
 Routines</a>, can be applied to sequences as well as to single numbers
-(atoms).</p>
+(atoms).
 
-<p>
 When applied to a sequence, a unary (one operand) operator is actually applied
 to each element in the sequence to yield a sequence of results of the same
 length. If one of these elements is itself a sequence then the same rule is
-applied again recursively. e.g.</p>
+applied again recursively. e.g.
 
 <eucode>
 x = -{1, 2, 3, {4, 5}}   -- x is {-1, -2, -3, {-4, -5}}
 </eucode>
 
-<p>
 If a binary (two-operand) operator has operands which are both sequences then
 the two sequences must be of the same length. The binary operation is then
 applied to corresponding elements taken from the two sequences to get a
-sequence of results. e.g.</p>
+sequence of results. e.g.
 
 <eucode>
 x = {5, 6, 7, 8} + {10, 10, 20, 100}
 -- x is {15, 16, 27, 108}
 </eucode>
 
-<p>
 If a binary operator has one operand which is a sequence while the other is a
 single number (atom) then the single number is effectively repeated to form a
 sequence of equal length to the sequence operand. The rules for operating on
-two sequences then apply. Some examples:</p>
+two sequences then apply. Some examples:
 
 <eucode>
 y = {4, 5, 6}
@@ -363,54 +324,51 @@ w = {1, 2, 3} = {1, 2, 4}    -- w is {1, 1, 0}
 -- equality 
 </eucode>
 
-<p><b>Note:</b> When you wish to compare two strings (or other sequences), you
-should <b>not</b> (as in some other languages) use the '=' operator:</p>
+**Note:** When you wish to compare two strings (or other sequences), you
+should **not** (as in some other languages) use the '=' operator:
 
 <eucode>
 if "APPLE" = "ORANGE" then  -- ERROR! 
 </eucode>
 
-<p>'=' is treated as an operator, just like '+', '*' etc., so it is applied to
+'=' is treated as an operator, just like '+', '*' etc., so it is applied to
 corresponding sequence elements, and the sequences must be the same length.
 When they are equal length, the result is a sequence of 1's an 0's. When they
 are not equal length, the result is an error. Either way you'll get an error,
 since an if-condition must be an atom, not a sequence.  Instead you should use
-the equal() built-in routine:</p>
+the equal() built-in routine:
 
 <eucode>
 if equal("APPLE", "ORANGE") then  -- CORRECT
 </eucode>
 
-<p>In general, you can do relational comparisons using the compare() built-in
-routine:</p>
+In general, you can do relational comparisons using the compare() built-in
+routine:
 
 <eucode>
 if compare("APPLE", "ORANGE") = 0 then  -- CORRECT
 </eucode>
 
-<p>You can use compare() for other comparisons as well:</p>
+You can use compare() for other comparisons as well:
 
 <eucode>
 if compare("APPLE", "ORANGE") < 0 then  -- CORRECT
 -- enter here if "APPLE" is less than "ORANGE" (TRUE)
 </eucode>
 
-<h4>Subscripting of Sequences</h4>
+==== Subscripting of Sequences
 
-<p>
 A single element of a sequence may be selected by giving the element number in
 square brackets. Element numbers start at 1. Non-integer subscripts are rounded
-down to an integer.</p>
+down to an integer.
 
-<p>
 For example, if x contains {5, 7.2, 9, 0.5, 13} then x[2] is 7.2. Suppose we
-assign something different to x[2]:</p>
+assign something different to x[2]:
 
 <eucode>
 x[2] = {11,22,33}
 </eucode>
 
-<p>
 Then x becomes: {5, {11,22,33}, 9, 0.5, 13}. Now if we ask for x[2] we get
 {11,22,33} and if we ask for x[2][3] we get the atom 33. If you try to
 subscript with a number that is outside of the range 1 to the number of
@@ -419,7 +377,7 @@ will cause errors. So will x[1][3] since x[1] is not a sequence. There is no
 limit to the number of subscripts that may follow a variable, but the variable
 must contain sequences that are nested deeply enough. The two dimensional
 array, common in other languages, can be easily represented with a sequence of
-sequences:</p>
+sequences:
 
 <eucode>
 x = {
@@ -429,17 +387,16 @@ x = {
 }
 </eucode>
 
-<p> where we have written the numbers in a way that makes the structure
- clearer. An expression of the form x[i][j] can be used to access any element.</p>
+ where we have written the numbers in a way that makes the structure
+ clearer. An expression of the form x[i][j] can be used to access any element.
 
-<p>
 The two dimensions are not symmetric however, since an entire "row" can be
 selected with x[i], but there is no simple expression to select an entire
 column. Other logical structures, such as n-dimensional arrays, arrays of
 strings, structures, arrays of structures etc. can also be handled easily and
-flexibly:</p>
+flexibly:
 
-<p>3-D array:</p>
+3-D array:
 
 <eucode>
 y = {
@@ -451,8 +408,7 @@ y = {
 -- y[2][3][1] is 9
 </eucode>
 
-<p>
-Array of strings:</p>
+Array of strings:
 
 <eucode>
 s = {"Hello", "World", "Euphoria", "", "Last One"}
@@ -461,8 +417,7 @@ s = {"Hello", "World", "Euphoria", "", "Last One"}
 -- s[3][1] is 'E'
 </eucode>
 
-<p>
-A Structure:</p>
+A Structure:
 
 <eucode>
 employee = {
@@ -491,60 +446,60 @@ employees = {
 -- employees[2][SALARY] would be 57000.
 </eucode>
 
-<p>The length() built-in function will tell you the length of a sequence.  So
-the last element of a sequence s, is:</p>
+The length() built-in function will tell you the length of a sequence.  So
+the last element of a sequence s, is:
 
 <eucode>
 s[length(s)]
 </eucode>
 
-<p>A short-hand for this is:</p>
+A short-hand for this is:
 
 <eucode>
 s[$]
 </eucode>
 
-<p>Similarly,</p>
+Similarly,
 
 <eucode>
 s[length(s)-1]
 </eucode>
 
-<p>can be simplified to:</p>
+can be simplified to:
 
 <eucode>
 s[$-1]
 </eucode>
 
-<p>The $ symbol equals the length of the sequence. $ may only appear between
-square braces. Where there's nesting, e.g.:</p>
+The $ symbol equals the length of the sequence. $ may only appear between
+square braces. Where there's nesting, e.g.:
 
 <eucode>
 s[$ - t[$-1] + 1]
 </eucode>
 
-<p>The first $ above refers to the length of s, while the second $ refers to
+The first $ above refers to the length of s, while the second $ refers to
 the length of t (as you'd probably expect).  An example where $ can save a lot
-of typing, make your code clearer, and probably even faster is:</p>
+of typing, make your code clearer, and probably even faster is:
 
 <eucode>
 longname[$][$] -- last element of the last element
 </eucode>
 
-<p>Compare that with the equivalent:</p>
+Compare that with the equivalent:
 
 <eucode>
 longname[length(longname)][length(longname[length(longname)])]
 </eucode>
 
-<p><b>Subscripting and function side-effects:</b> In an assignment statement,
-with left-hand-side subscripts:</p>
+**Subscripting and function side-effects:** In an assignment statement,
+with left-hand-side subscripts:
 
 <eucode>
 lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr
 </eucode>
 
-<p>The expressions are evaluated, and any subscripting is performed, from left
+The expressions are evaluated, and any subscripting is performed, from left
 to right. It is possible to have function calls in the right-hand-side
 expression, or in any of the left-hand-side expressions.  If a function call
 has the side-effect of modifying the lhs_var, it is not defined whether those
@@ -554,61 +509,53 @@ call in a separate statement, i.e. do not try to modify the lhs_var in two
 different ways in the same statement.  Where there are no left-hand-side
 subscripts, you can always assume that the final value of the lhs_var will be
 the value of rhs_expr, regardless of any side-effects that may have changed
-lhs_var.</p>
+lhs_var.
 
-<p>
-<b>Euphoria data structures are almost infinitely flexible.</b> Arrays in other
+**Euphoria data structures are almost infinitely flexible.** Arrays in other
 languages are constrained to have a fixed number of elements, and those
 elements must all be of the same type. Euphoria eliminates both of those
 restrictions.  You can easily add a new structure to the employee sequence
 above, or store an unusually long name in the NAME field and Euphoria will take
 care of it for you. If you wish, you can store a variety of different employee
-"structures", with different sizes, all in one sequence.</p>
+"structures", with different sizes, all in one sequence.
 
-<p>
 Not only can a Euphoria program easily represent all conventional data
 structures but you can create very useful, flexible structures that would be
-extremely hard to declare in a conventional language.  See <a
-href="refman_2.htm#3">Euphoria versus Conventional Languages</a>.</p>
+extremely hard to declare in a conventional language.  See a
+href="refman_2.htm#3">Euphoria versus Conventional Languages</a>.
 
-<p>
 Note that expressions in general may not be subscripted, just variables. For
-example: {5+2,6-1,7*8,8+1}[3] is <i>not</i> supported, nor is something like:
+example: {5+2,6-1,7*8,8+1}[3] is //not// supported, nor is something like:
 date()[MONTH]. You have to assign the sequence returned by date() to a
-variable, then subscript the variable to get the month.</p>
+variable, then subscript the variable to get the month.
 
-<h4>Slicing of Sequences</h4>
+==== Slicing of Sequences
 
-<p>
 A sequence of consecutive elements may be selected by giving the starting and
 ending element numbers. For example if x is {1, 1, 2, 2, 2, 1, 1, 1} then
 x[3..5] is the sequence {2, 2, 2}. x[3..3] is the sequence {2}. x[3..2] is also
 allowed. It evaluates to the length-0 sequence {}.  If y has the value:
-{"fred", "george", "mary"} then y[1..2] is {"fred", "george"}.</p>
+{"fred", "george", "mary"} then y[1..2] is {"fred", "george"}.
 
-<p>
 We can also use slices for overwriting portions of variables. After x[3..5] =
 {9, 9, 9} x would be {1, 1, 9, 9, 9, 1, 1, 1}. We could also have said x[3..5]
 = 9 with the same effect. Suppose y is {0, "Euphoria", 1, 1}.  Then y[2][1..4]
 is "Euph". If we say y[2][1..4]="ABCD" then y will become {0, "ABCDoria", 1,
-1}.</p>
+1}.
 
-<p>
 In general, a variable name can be followed by 0 or more subscripts, followed
 in turn by 0 or 1 slices. Only variables may be subscripted or sliced, not
-expressions.</p>
+expressions.
 
-<p>
-We need to be a bit more precise in defining the rules for <strong>empty
-slices</strong>. Consider a slice s[i..j] where s is of length n. A slice from
-i to j, where  j = i-1  and i >= 1 produces the <a
+We need to be a bit more precise in defining the rules for **empty
+slices**. Consider a slice s[i..j] where s is of length n. A slice from
+i to j, where  j = i-1  and i >= 1 produces the a
 href="refman_2.htm#empty_seq">empty sequence</a>, even if i = n+1. Thus 1..0
-and n+1..n and everything in between are legal <b> (empty) slices</b>.  Empty
+and n+1..n and everything in between are legal **(empty) slices**.  Empty
 slices are quite useful in many algorithms. A slice from i to j where j < i - 1
-is illegal , i.e. "reverse" slices such as s[5..3] are not allowed.</p>
+is illegal , i.e. "reverse" slices such as s[5..3] are not allowed.
 
-<p>
-We can also use the $ shorthand with slices, e.g.</p>
+We can also use the $ shorthand with slices, e.g.
 
 <eucode>
 s[2..$]
@@ -617,13 +564,12 @@ s[$-5..$]
 s[$][1..floor($/2)] -- first half of the last element of s
 </eucode>
 
-<h4>Concatenation of Sequences and Atoms - The '&' Operator</h4>
+==== Concatenation of Sequences and Atoms - The '&' Operator
 
-<p>
-Any two objects may be concatenated using the <strong>&</strong> operator. The
+Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
 concatenated objects (where atoms are considered here to have length 1).
-e.g.</p>
+e.g.
 
 <eucode>
 {1, 2, 3} & 4              -- {1, 2, 3, 4}
@@ -637,59 +583,53 @@ y = {1, 2}
 y = y & x                  -- y is still {1, 2}
 </eucode>
 
-<p>
 You can delete element i of any sequence s by concatenating the parts of the
-sequence before and after i:</p>
+sequence before and after i:
 
 <eucode>
 s = s[1..i-1] & s[i+1..length(s)]
 </eucode>
 
-<p>This works even when i is 1 or length(s), since s[1..0] is a legal empty
-slice, and so is s[length(s)+1..length(s)].</p>
+This works even when i is 1 or length(s), since s[1..0] is a legal empty
+slice, and so is s[length(s)+1..length(s)].
 
-<h4>Sequence-Formation</h4>
+==== Sequence-Formation
 
-<p>
-Finally, sequence-formation, using braces and commas:</p>
+Finally, sequence-formation, using braces and commas:
 
 <eucode>
 {a, b, c, ... }
 </eucode>
 
-<p>
 is also an operator. It takes n operands, where n is 0 or more, and makes an
-n-element sequence from their values. e.g.</p>
+n-element sequence from their values. e.g.
 
 <eucode>
 x = {apple, orange*2, {1,2,3}, 99/4+foobar}
 </eucode>
 
-<p>
-The sequence-formation operator is listed at the bottom of the <a
-href="refman_2.htm#2A">precedence chart</a>.</p>
+The sequence-formation operator is listed at the bottom of the a
+href="refman_2.htm#2A">precedence chart</a>.
 
-<h4>Other Operations on Sequences</h4>
+==== Other Operations on Sequences
 
-<p>
 Some other important operations that you can perform on sequences have English
 names, rather than special characters. These operations are built-in to
-<strong>ex.exe</strong>/<strong>exw.exe</strong>/<strong>exu</strong>, so
+**ex.exe/exw.exe/exu**, so
 they'll always be there, and so they'll be fast. They are described in detail
-in <a href="library.htm">Part II - Library Routines</a>, but are important
+in a href="library.htm">Part II - Library Routines</a>, but are important
 enough to Euphoria programming that we should mention them here before
 proceeding. You call these operations as if they were subroutines, although
-they are actually implemented much more efficiently than that.</p>
+they are actually implemented much more efficiently than that.
 
+===== length(object o)
 
-<h5>length(object o)</h5>
+Returns the length of a sequence s1.
 
-<p>Returns the length of a sequence s1.</p>
-
-<p>This is the number of elements in s1. Some of these elements may be
+This is the number of elements in s1. Some of these elements may be
 sequences that contain elements of their own, but length just gives you the
 "top-level" count. You'll get an error if you ask for the length of an atom.
-e.g.</p>
+e.g.
 
 <eucode>
 length({5,6,7})             -- 3
@@ -698,10 +638,10 @@ length({})                  -- 0
 length(5)                   -- error!
 </eucode>
 
-<h5>repeat(object o1, integer times)</h5>
+===== repeat(object o1, integer times)
 
-<p>Returns a sequence that consists of an item repeated count times.
-e.g.</p>
+Returns a sequence that consists of an item repeated count times.
+e.g.
 
 <eucode>
 repeat(0, 100)         -- {0,0,0,...,0}   i.e. 100 zeros
@@ -709,12 +649,12 @@ repeat("Hello", 3)     -- {"Hello", "Hello", "Hello"}
 repeat(99,0)           -- {}
 </eucode>
 
-<p>The item to be repeated can be any atom or sequence.</p>
+The item to be repeated can be any atom or sequence.
 
-<h5>append(sequence s1, object o1)</h5>
+===== append(sequence s1, object o1)
 
-<p>Returns a sequence by adding an object o1 to the end of a sequence
-s1.</p>
+Returns a sequence by adding an object o1 to the end of a sequence
+s1.
 
 <eucode>
 append({1,2,3}, 4)         -- {1,2,3,4}
@@ -722,14 +662,14 @@ append({1,2,3}, {5,5,5})   -- {1,2,3,{5,5,5}}
 append({}, 9)              -- {9}
 </eucode>
 
-<p>The length of the new sequence is always 1 greater than the length of
+The length of the new sequence is always 1 greater than the length of
 the original sequence. The item to be added to the sequence can be any atom or
-sequence.</p>
+sequence.
 
-<h5>prepend(sequence s1, object o1)</h5>
+===== prepend(sequence s1, object o1)
 
-<p>Returns a new sequence by adding an element to the beginning of a
-sequence s. e.g.</p>
+Returns a new sequence by adding an element to the beginning of a
+sequence s. e.g.
 
 <eucode>
 append({1,2,3}, 4)         -- {1,2,3,4}
@@ -740,14 +680,13 @@ prepend({}, 9)             -- {9}
 append({}, 9)              -- {9}
 </eucode>
 
-<p>The length of the new sequence is always 1 greater than the length of
+The length of the new sequence is always 1 greater than the length of
 the original sequence. The item to be added to the sequence can be any atom or
-sequence.</p>
+sequence.
 
-<p>
-These two built-in functions, <strong>append(</strong>) and
-<strong>prepend()</strong>, have some similarities to the concatenate operator,
-<strong>&</strong>, but there are clear differences. e.g.</p>
+These two built-in functions, **append(**) and
+**prepend()**, have some similarities to the concatenate operator,
+**&**, but there are clear differences. e.g.
 
 <eucode>
 -- appending a sequence is different
@@ -759,14 +698,13 @@ append({1,2,3}, 5)         -- {1,2,3,5}
 {1,2,3} & 5                -- {1,2,3,5}
 </eucode>
 
-<h3>Precedence Chart</h3>
+=== Precedence Chart
 
-<p>
-The precedence of operators in expressions is as follows:</p>
+The precedence of operators in expressions is as follows:
 
-<p><strong>highest precedence</strong></p>
+**highest precedence**
 
-<pre>
+{{{
 function/type calls
 unary-  unary+  not
 *  /
@@ -774,35 +712,31 @@ unary-  unary+  not
 &
 <  >  <=  >=  =  !=
 and  or  xor
-</pre>
+}}}
 
-<p><strong>lowest precedence</strong></p>
-<pre>
+**lowest precedence**
+{{{
 { , , , }
-</pre>
+}}}
 
-<p>
 Thus 2+6*3 means 2+(6*3) rather than (2+6)*3. Operators on the same line
 above have equal precedence and are evaluated left to right. You can force
 any order of operations by placing round brackets ( ) 
-around an expression.</p>
+around an expression.
 
-<p>
-The equals symbol '=' used in an <a href="refman_2.htm#assign">assignment
+The equals symbol '=' used in an a href="refman_2.htm#assign">assignment
 statement</a> is not an operator, it's just part of the syntax of the
-language.</p>
+language.
 
-<h2>Euphoria versus Conventional Languages</h2>
+== Euphoria versus Conventional Languages
 
-<p>
 By basing Euphoria on this one, simple, general, recursive data structure, a
 tremendous amount of the complexity normally found in programming languages has
 been avoided. The arrays, structures, unions, arrays of records,
 multidimensional arrays, etc. of other languages can all be easily represented
 in Euphoria with sequences. So can higher-level structures such as lists,
-stacks, queues, trees etc.</p>
+stacks, queues, trees etc.
 
-<p>
 Furthermore, in Euphoria you can have sequences of mixed type; you can assign
 any object to an element of a sequence; and sequences easily grow or shrink in
 length without your having to worry about storage allocation issues.  The exact
@@ -811,77 +745,67 @@ change dynamically as required. It is easy to write generic code, where, for
 instance, you push or pop a mix of various kinds of data objects using a single
 stack. Making a flexible list that contains a variety of different kinds of
 data objects is trivial in Euphoria, but requires dozens of lines of ugly code
-in other languages.</p>
+in other languages.
 
-<p>
 Data structure manipulations are very efficient since the Euphoria interpreter
-will point to large data objects rather than copy them.</p>
+will point to large data objects rather than copy them.
 
-<p>
 Programming in Euphoria is based entirely on creating and manipulating
-flexible, dynamic sequences of data. Sequences are <i>it</i> - there are no
+flexible, dynamic sequences of data. Sequences are //it// - there are no
 other data structures to learn.  You operate in a simple, safe, elastic world
-of <i>values</i>, that is far removed from the rigid, tedious, dangerous world
-of bits, bytes, pointers and machine crashes.</p>
+of //values//, that is far removed from the rigid, tedious, dangerous world
+of bits, bytes, pointers and machine crashes.
 
-<p>
 Unlike other languages such as LISP and Smalltalk, Euphoria's "garbage
 collection" of unused storage is a continuous process that never causes random
 delays in execution of a program, and does not pre-allocate huge regions of
-memory.</p>
+memory.
 
-<p>
 The language definitions of conventional languages such as C, C++, Ada, etc.
 are very complex. Most programmers become fluent in only a subset of the
 language. The ANSI standards for these languages read like complex legal
-documents.</p>
+documents.
 
-<p>
 You are forced to write different code for different data types simply to copy
 the data, ask for its current length, concatenate it, compare it etc. The
 manuals for those languages are packed with routines such as "strcpy",
 "strncpy", "memcpy", "strcat",  "strlen", "strcmp", "memcmp", etc. that each
-only work on one of the many types of data.</p>
+only work on one of the many types of data.
 
-<p>
 Much of the complexity surrounds issues of data type. How do you define new
 types? Which types of data can be mixed? How do you convert one type into
 another in a way that will keep the compiler happy? When you need to do
 something requiring flexibility at run-time, you frequently find yourself
-trying to fake out the compiler.</p>
+trying to fake out the compiler.
 
-<p>
 In these languages the numeric value 4 (for example) can have a different
 meaning depending on whether it is an int, a char, a short, a double, an int *
 etc. In Euphoria, 4 is the atom 4, period. Euphoria has something called types
-as we shall see later, but it is a much simpler concept.</p>
+as we shall see later, but it is a much simpler concept.
 
-<p>
 Issues of dynamic storage allocation and deallocation consume a great deal of
 programmer coding time and debugging time in these other languages, and make
 the resulting programs much harder to understand. Programs that must run
 continuously often exhibit storage "leaks", since it takes a great deal of
 discipline to safely and properly free all blocks of storage once they are no
-longer needed.</p>
+longer needed.
 
-<p>
 Pointer variables are extensively used. The pointer has been called the "go to"
 of data structures. It forces programmers to think of data as being bound to a
 fixed memory location where it can be manipulated in all sorts of low-level,
 non-portable, tricky ways. A picture of the actual hardware that your program
 will run on is never far from your mind. Euphoria does not have pointers and
-does not need them.</p>
+does not need them.
 
-<h2>Declarations</h2>
+== Declarations
 
-<h3>Identifiers</h3>
+=== Identifiers
 
-<p>
-<strong>Identifiers</strong>, which consist of variable names and other
+**Identifiers**, which consist of variable names and other
 user-defined symbols, may be of any length. Upper and lower case are distinct.
 Identifiers must start with a letter and then be followed by letters, digits or
-underscores. The following <strong>reserved words</strong> have special meaning
-in Euphoria and may not be used as identifiers:</p>
+underscores. The following **reserved words** have special meaning
+in Euphoria and may not be used as identifiers:
                                    
 <eucode>
 and            elsif        function      not           type
@@ -893,21 +817,19 @@ do             exit         label         then          xor
 else           for          loop          to
 </eucode>
 
-<p>The Euphoria editor displays these words in blue.</p>
+The Euphoria editor displays these words in blue.
 
-<p>Identifiers can be used in naming the following:</p>
+Identifiers can be used in naming the following:
 
-<ul>
-<li>procedures</li>
-<li>functions</li>
-<li>types</li>
-<li>variables</li>
-<li>constants</li>
-</ul>
+* procedures
+* functions
+* types
+* variables
+* constants
 
-<h4>procedures</h4>
+==== procedures
 
-<p>These perform some computation and may have a list of parameters, e.g.</p>
+These perform some computation and may have a list of parameters, e.g.
 
 <eucode>
 procedure empty()
@@ -919,20 +841,18 @@ procedure plot(integer x, integer y)
 end procedure
 </eucode>
 
-<p>
 There are a fixed number of named parameters, but this is not restrictive since
 any parameter could be a variable-length sequence of arbitrary objects. In many
 languages variable-length parameter lists are impossible.  In C, you must set
 up strange mechanisms that are complex enough that the average programmer
-cannot do it without consulting a manual or a local guru.</p>
+cannot do it without consulting a manual or a local guru.
 
-<p>
 A copy of the value of each argument is passed in. The formal parameter
 variables may be modified inside the procedure but this does not affect the
-value of the arguments.</p>
+value of the arguments.
 
 <dl>
-<dt><b>Performance Note:</b></dt>
+<dt>**Performance Note:**</dt>
 <dd>
 The interpreter does not actually copy sequences or floating-point numbers
 unless it becomes necessary. For example,
@@ -942,16 +862,18 @@ y = {1,2,3,4,5,6,7,8.5,"ABC"}
 x = y
 </eucode>
 
-<p>
 The statement x = y does not actually cause a new copy of y to be created. Both x and y will 
 simply "point" to the same sequence. If we later perform x[3] = 9, then a separate sequence 
 will be created for x in memory (although there will still be just one shared copy of 8.5 and
-"ABC"). The same thing applies to "copies" of arguments passed in to subroutines.</p></dd>
+"ABC"). The same thing applies to "copies" of arguments passed in to subroutines.</dd>
 
 </dl>
-<p>
-For a number of procedures or functions - see below -, some parameters may have the same value
-in many cases. The most expected value for any parameter may be given a default value. Omitting the value of such a parameter on a given call will cause its default value to be passed.</p>
+
+For a number of procedures or functions - see below -, some parameters may have
+the same value in many cases. The most expected value for any parameter may be
+given a default value. Omitting the value of such a parameter on a given call
+will cause its default value to be passed.
+
 <eucode>
 procedure foo(sequence s,integer n=1)
 ?n+length(s)
@@ -960,8 +882,9 @@ end procedure
 foo("abc") -- prints out 4 = 3+1. n was not specified, so was set to 1.
 foo("abc",3) -- prints out 6 = 3+3
 </eucode>
-<p>
-This is not limited to the last parameter(s):</p>
+
+This is not limited to the last parameter(s):
+
 <eucode>
 procedure bar(sequence s="abc",integer n,integer p=1)
 ?length(s)+n+p
@@ -973,8 +896,10 @@ bar(,2,3) -- prints out 8 = 3 + 22 + 3
 bar({},2,) -- prints out 3 = 0 + 2 + 1
 bar()      -- errors out, second parameter is omitted, but doesn't have a defailt value
 </eucode>
-<p>
-Any expression may be used in a default value. Parameters that have been already mentioned may even be part of the expression:</p>
+
+Any expression may be used in a default value. Parameters that have been
+already mentioned may even be part of the expression:
+
 <eucode>
 procedure baz(sequence s,integer n=length(s))
 ?n
@@ -982,11 +907,10 @@ end procedure
 baz("abcd") -- prints out 4
 </eucode>
 
-<h4>functions</h4>
+==== functions
 
-<p>
 These are just like procedures, but they return a value, and can be used in an
-expression, e.g.</p>
+expression, e.g.
 
 <eucode>
 function max(atom a, atom b)
@@ -998,36 +922,38 @@ function max(atom a, atom b)
 end function
 </eucode>
 
-<p>
 Any Euphoria object can be returned.  You can, in effect, have multiple return
-values, by returning a sequence of objects. e.g.</p>
+values, by returning a sequence of objects. e.g.
 
 <eucode>
 return {x_pos, y_pos}
 </eucode>
 
-<p>
 We will use the general term "subroutine", or simply "routine" when a remark is
-applicable to both procedures and functions.</p>
-<p>
-Defaulted parameters can be used in functions exactly as they are in procedures. See the section above for a few examples.</p>
+applicable to both procedures and functions.
 
-<a name="types"></a>
-<h4>types</h4>
+Defaulted parameters can be used in functions exactly as they are in
+procedures. See the section above for a few examples.
 
-<p>
+a name="types"></a>
+
+==== types
+
 These are special functions that may be used in declaring the allowed values
 for a variable. A type must have exactly one parameter and should return an
 atom that is either true (non-zero) or false (zero).  Types can also be called
-just like other functions. See <a href="refman_2.htm#43">2.4.3 Specifying the
-Type of a Variable</a>.</p>
-<p>
-Although there are no restrictions to using defaulted parameters with types, their use is so much constrained by a type having excatly one argument that they are of little practical help there.</p>
+just like other functions. See a href="refman_2.htm#43">2.4.3 Specifying the
+Type of a Variable</a>.
 
-<a name="variables"></a>
-<h4>variables</h4>
+Although there are no restrictions to using defaulted parameters with types,
+their use is so much constrained by a type having excatly one argument that
+they are of little practical help there.
 
-<p>These may be assigned values during execution e.g.</p>
+a name="variables"></a>
+
+==== variables
+
+These may be assigned values during execution e.g.
 
 <eucode>
 -- x may only be assigned integer values
@@ -1041,40 +967,47 @@ b = a
 c = 0
 </eucode>
 
-<p>
 When you declare a variable you name the variable (which protects you against
 making spelling mistakes later on) and you specify the values that may legally
-be assigned to the variable during execution of your program.</p>
-<p>
-The simple act of declaring a variable does not assign any value to it. If you attempt to read it before assigning any value to it, Euphoria will issue a run-time error as "variable xyz has never been assigned a value".</p>
-<p>
-To guard against forgetting to initialise a variable, and also because it may make the code clearer to read, you can combine declaration and assignment:</p>
+be assigned to the variable during execution of your program.
+
+The simple act of declaring a variable does not assign any value to it. If you
+attempt to read it before assigning any value to it, Euphoria will issue a
+run-time error as "variable xyz has never been assigned a value".
+
+To guard against forgetting to initialise a variable, and also because it may
+make the code clearer to read, you can combine declaration and assignment:
+
 <eucode>
 integer n = 5
 </eucode>
+
 This is equivalent to
+
 <eucode>
 integer n
 n = 5
 </eucode>
-<p>
-It is not unfrequent that one defines a private variable that bears the same name as one already in scope. You can reuse the value of that variable when performing an initialisation on declare:</p>
+
+It is not unfrequent that one defines a private variable that bears the same
+name as one already in scope. You can reuse the value of that variable when
+performing an initialisation on declare:
+
 <eucode>
 integer n
 n=5
 procedure foo()
-integer n = n + 2
-?n
+    integer n = n + 2
+    ? n
 end procedure
 foo() -- prints out 7
 </eucode>
 
-<a name="constants"></a>
-<h4>constants</h4>
+a name="constants"></a>
+==== constants
 
-<p>
 These are variables that are assigned an initial value that can never change
-e.g.</p>
+e.g.
 
 <eucode>
 constant MAX = 100
@@ -1082,19 +1015,17 @@ constant Upper = MAX - 10, Lower = 5
 constant name_list = {"Fred", "George", "Larry"}
 </eucode>
 
-<p>
 The result of any expression can be assigned to a constant, even one involving
 calls to previously defined functions, but once the assignment is made, the
-value of the constant variable is "locked in".</p>
+value of the constant variable is "locked in".
 
-<p>
-Constants may not be declared inside a subroutine.</p>
+Constants may not be declared inside a subroutine.
 
-<a name="enum"></a>
-<h5>enum</h5>
+a name="enum"></a>
+===== enum
 
-<p>
-An enumerated value is a special type of constant where the first value defaults to the number 1 and each item after that is incremented by 1.</p>
+An enumerated value is a special type of constant where the first value
+defaults to the number 1 and each item after that is incremented by 1.
 
 <eucode>
 enum ONE, TWO, THREE, FOUR
@@ -1102,11 +1033,10 @@ enum ONE, TWO, THREE, FOUR
 -- ONE is 1, TWO is 2, THREE is 3, FOUR is 4
 </eucode>
 
-<p>
 You can change the value of any one item by assigning it a numeric value. Enums
 can only take numeric values. You cannot set the starting value to an
 expression or other variable. Subsequent values are always the previous value
-plus one, unless they too are assigned a default value.</p>
+plus one, unless they too are assigned a default value.
 
 <eucode>
 enum ONE, TWO, THREE, ABC=10, DEF, XYZ
@@ -1115,70 +1045,63 @@ enum ONE, TWO, THREE, ABC=10, DEF, XYZ
 -- ABC is 10, DEF is 11, XYZ is 12.
 </eucode>
 
-<a name="scope"></a>
-<h3>Scope</h3>
+a name="scope"></a>
+=== Scope
 
-<p> 
-A symbol's <i>scope</i> is the portion of the program where that symbol's
-declaration is in effect, i.e. where that symbol is <i>visible</i>. </p>
+A symbol's //scope// is the portion of the program where that symbol's
+declaration is in effect, i.e. where that symbol is //visible//. 
 
-<p>
 Euphoria has many pre-defined procedures, functions and types.  These are
 defined automatically at the start of any program.  The Euphoria editor shows
 them in magenta. These pre-defined names are not reserved. You can override
-them with your own variables or routines.</p>
+them with your own variables or routines.
 
-<p>
 Every user-defined symbol must be declared before it is used.  You can read a
 Euphoria program from beginning to end without encountering any user-defined
 variables or routines that haven't been defined yet. It is possible to call a
 routine that comes later in the source, but you must use the special functions,
-<strong>routine_id()</strong>, and either <strong>call_func()</strong> or
-<strong>call_proc()</strong> to do it.  See <a href="library.htm#dyn_call">Part
-II - Library Routines - Dynamic Calls</a>.</p>
+**routine_id()**, and either **call_func()** or
+**call_proc()** to do it.  See a href="library.htm#dyn_call">Part
+II - Library Routines - Dynamic Calls</a>.
 
-<p>
-Procedures, functions and types can call themselves <i>recursively</i>. Mutual
+Procedures, functions and types can call themselves //recursively//. Mutual
 recursion, where routine A calls routine B which directly or indirectly calls
-routine A, requires the <a class="brown" href="lib_dyn.htm#routine_id">
-<b>routine_id()</b></a> mechanism.</p>
+routine A, requires the a class="brown" href="lib_dyn.htm#routine_id">
+**routine_id()**</a> mechanism.
 
-<p>
-<a name=scope></a> A symbol is defined from the point where it is declared to
+a name=scope></a> A symbol is defined from the point where it is declared to
 the end of its scope.  The scope of a variable declared inside a procedure or
 function (a private variable) ends at the end of the procedure or function.
 The scope of all other variables, constants, procedures, functions and types
 ends at the end of the source file in which they are declared and they are
 referred to as local, unless the keyword global precedes their declaration, in
-which case their scope extends indefinitely.</p>
+which case their scope extends indefinitely.
 
-<p>
-When you <b>include</b> a Euphoria file in a main file (see <a
+When you **include** a Euphoria file in a main file (see a
 href="refman_2.htm#6">2.6 Special Top-Level Statements</a>), only the variables
 and routines declared using the global or export  keywords are accessible or
 even visible to the main file. The other, non-global, non-exported declarations
 in the included file are forgotten at the end of the included file, and you
 will get an error message, "not declared", if you try to use them in the main
-file.</p>
+file.
 
-<p>
 Symbols marked as global can be used externally. All other symbols can only be
 used internally within their own file. This information is helpful when
 maintaining or enhancing the file, or when learning how to use the file. You
 can make changes to the internal routines and variables, without having to
-examine other files, or notify other users of the include file.</p>
+examine other files, or notify other users of the include file.
  
-<p>Symbols marked as export are similar to global symbols, except that they
+Symbols marked as export are similar to global symbols, except that they
 are only visible to files that directly include their file, or directly include
-a file that includes the file through the export include statement. </p>
+a file that includes the file through the export include statement. 
  
-<p>Sometimes, when using include files developed by others, you will encounter
+Sometimes, when using include files developed by others, you will encounter
 a naming conflict.  One of the include file authors has used the same name for
 a global symbol as one of the other authors. If you have the source, you can
 simply edit one of the include files to correct the problem, but then you'd
 have repeat this process whenever a new version of the include file was
 released. Euphoria has a simpler way to solve this. Using an extension to the
-include statement, you can say for example:</p>
+include statement, you can say for example:
 
 <eucode>
 include johns_file.e as john
@@ -1188,21 +1111,19 @@ john:x += 1
 bill:x += 2
 </eucode>
 
-<p>In this case, the variable x was declared in two different files, and you
-want to refer to both variables in your file.  Using the <i>namespace
-identifier</i> of either john or bill, you can attach a prefix to x to indicate
-which x you are referring to.  We sometimes say that john refers to one
-<i>namespace</i>, while bill refers to another distinct <i>namespace</i>.  You
-can attach a namespace identifier to any user-defined variable, constant,
-procedure or function. You can do it to solve a conflict, or simply to make
-things clearer. A namespace identifier has local scope. It is known only within
-the file that declares it, i.e. the file that contains the include statement.
-Different files might define different namespace identifiers to refer to the
-same included file.</p>
+In this case, the variable x was declared in two different files, and you want
+to refer to both variables in your file.  Using the //namespace identifier// of
+either john or bill, you can attach a prefix to x to indicate which x you are
+referring to.  We sometimes say that john refers to one //namespace//, while
+bill refers to another distinct //namespace//.  You can attach a namespace
+identifier to any user-defined variable, constant, procedure or function. You
+can do it to solve a conflict, or simply to make things clearer. A namespace
+identifier has local scope. It is known only within the file that declares it,
+i.e. the file that contains the include statement.  Different files might
+define different namespace identifiers to refer to the same included file.
 
-<p>
 There is a special, reserved namespace, "eu" for referring to built-in euphoria
-routines.  This can be useful when a built-in routine has been overridden: </p>
+routines.  This can be useful when a built-in routine has been overridden: 
 
 <eucode>
 procedure puts( integer fn, object text )
@@ -1213,7 +1134,6 @@ puts(1, "Hello, world!\n")
 eu:puts(1, "Hello, world!\n")
 </eucode>
 
-<p>
 Files can also declare a default namespace to be used with the file.  When a
 file with a default namespace is included, if the include statement did not
 specify a namespace, then the default namespace will be automatically declared
@@ -1221,18 +1141,16 @@ in that file.  If the include statement declares a namespace for the newly
 included file, then the specified namespace will be available instead of the
 default.  No two files can use the same namespace identifier.  If two files
 with the same default namespaces are included, at least one will be required to
-have a different namespace to be specified.  </p>
+have a different namespace to be specified.  
 
-<p>
 To declare a default namespace in a file, the first token (whitespace and
-comments are ignored) should be 'namespace' followed by the desired name: </p>
+comments are ignored) should be 'namespace' followed by the desired name: 
 
 <eucode>
 -- foo.e :  this file does some stuff
 namespace foo
 </eucode>
 
-<p>
 Euphoria encourages you to restrict the scope of symbols. If all symbols were
 automatically global to the whole program, you might have a lot of naming
 conflicts, especially in a large program consisting of files written by many
@@ -1240,14 +1158,13 @@ different programmers. A naming conflict might cause a compiler error message,
 or it could lead to a very subtle bug, where different parts of a program
 accidentally modify the same variable without being aware of it.  Try to use
 the most restrictive scope that you can. Make variables
-<strong>private</strong> to one routine where possible, and where that isn't
-possible, make them <strong>local</strong> to a file, rather than
-<strong>global</strong> to the whole program.</p>
+**private** to one routine where possible, and where that isn't
+possible, make them **local** to a file, rather than
+**global** to the whole program.
 
-<p>
 When Euphoria looks up the declaration of a symbol, it first checks the current
 routine, then the current file, then globals in other files. Symbols that are
-more local will <i>override</i> symbols that are more global.  At the end of
+more local will //override// symbols that are more global.  At the end of
 the scope of the local symbol, the more global symbol will be visible again.
 If multiple global symbols are found, Euphoria will look to see if there is
 only one matching symbol that resides in a file that was directly or indirectly
@@ -1255,9 +1172,8 @@ included from the file which is attempting to use the symbol.  This way, third
 party libraries can be used in the same application, even if they have
 conflicting symbols.  The application code that uses the libraries will have to
 use explicit namespaces to deconflict the symbols, but the libraries themselves
-will not need to be edited.</p>
+will not need to be edited.
 
-<p>
 Using a namespace identifier with a symbol name causes Euphoria to resolve the
 symbol as though it were being used from the file associated with the
 namespace.  This means that a namespace could be associated with the main
@@ -1267,44 +1183,38 @@ other symbols in files independent of the library.  Of course, if there are
 conflicting symbols within the library that require the use of namespace
 identifiers from within the library itself, users of the library will not be
 able to deconflict those symbols with the namespace associated with the main
-file of the library.</p>
+file of the library.
 
-<p>
-<strong>Constant</strong> declarations must be outside of any subroutine.
-Constants can be global or local, but not <strong>private</strong>.</p>
+**Constant** declarations must be outside of any subroutine.
+Constants can be global or local, but not **private**.
 
-<p>
 Variable declarations inside a subroutine must all appear at the beginning,
-before the executable statements of the subroutine.</p>
+before the executable statements of the subroutine.
 
-<p>
 Declarations at the top level, outside of any subroutine, must not be nested
-inside a loop or <a href="refman_2.htm#if">if-statement</a>.</p>
+inside a loop or a href="refman_2.htm#if">if-statement</a>.
 
-<p>
-<a name=loop_scope></a> The controlling variable used in a <a
+a name=loop_scope></a> The controlling variable used in a a
 href="refman_2.htm#for">for-loop</a> is special. It is automatically declared
 at the beginning of the loop, and its scope ends at the end of the for-loop. If
 the loop is inside a function or procedure, the loop variable is a
-<strong>private</strong> variable and may not have the same name as any other
-<strong>privat</strong>e variable. When the loop is at the top level, outside
-of any function or procedure, the loop variable is a <strong>loca</strong>l
-variable and may not have the same name as any other <strong>local</strong>
+**private** variable and may not have the same name as any other
+**private** variable. When the loop is at the top level, outside
+of any function or procedure, the loop variable is a **local**
+variable and may not have the same name as any other **local**
 variable in that file. You can use the same name in many different for-loops as
 long as the loops aren't nested. You do not declare loop variables as you would
 other variables. The range of values specified in the for statement defines the
 legal values of the loop variable - specifying a type would be redundant and is
-not allowed.</p>
+not allowed.
 
-<h3>Specifying the Type of a Variable</h3>
+=== Specifying the Type of a Variable
 
-<p>
 So far you've already seen some examples of variable types but now we will
-define types more precisely.</p>
+define types more precisely.
 
-<p>
 Variable declarations have a type name followed by a list of the variables
-being declared. For example,</p>
+being declared. For example,
 
 <eucode>
 object a
@@ -1314,57 +1224,51 @@ global integer x, y, z
 procedure fred(sequence q, sequence r)
 </eucode>
 
-<p>
-The types: <strong>object</strong>, <strong>sequence</strong>, <b>atom</b> and
-<strong>integer</strong> are <strong>predefined</strong>.  Variables of type
-<strong>object</strong> may take on <i>any</i> value.  Those declared with type
-<strong>sequenc</strong>e must always be sequences.  Those declared with type
-<strong>atom</strong> must always be atoms.</p>
+The types: **object**, **sequence**, **atom** and **integer** are
+**predefined**.  Variables of type **object** may take on //any// value.  Those
+declared with type **sequenc**e must always be sequences.  Those declared with
+type **atom** must always be atoms.
 
-<p>
-<a name="integer"></a>
-Those declared with type <strong>integer</strong> must be atoms with integer
-values from -1073741824 to +1073741823 inclusive. You can perform exact
+a name="integer"></a> Those declared with type **integer** must be atoms with
+integer values from -1073741824 to +1073741823 inclusive. You can perform exact
 calculations on larger integer values, up to about 15 decimal digits, but
-declare them as <strong>atom</strong>, rather than integer.</p>
+declare them as **atom**, rather than integer.
 
 <dl>
 <dt>
-<b>Note:</b></dt>
-
+**Note:**</dt>
 <dd>
-<p>
+
 In a procedure or function parameter list like the one for fred() above, a type
-name may only be followed by a single parameter name.</p>
+name may only be followed by a single parameter name.
 </dd>
 
-<dt><b>Performance Note:</b></dt>
+<dt>**Performance Note:**</dt>
 
 <dd>
-<p>
+
 Calculations using variables declared as integer will usually be somewhat
 faster than calculations involving variables declared as atom. If your machine
 has floating-point hardware, Euphoria will use it to manipulate atoms that
 aren't representable as integers. If your machine doesn't have floating-point
 hardware, Euphoria will call software floating-point arithmetic routines
-contained in <strong>ex.exe</strong> (or in Windows).  You can force ex.exe to
+contained in **ex.exe** (or in Windows).  You can force ex.exe to
 bypass any floating-point hardware, by setting an environment variable:
 
-<console>
+{{{
 SET NO87=1
-</console>
+}}}
 
 The slower software routines will be used, but this could be of some advantage
 if you are worried about the floating-point bug in some early Pentium
-chips.</p></dd>
+chips.</dd>
 </dl>
 
-<p>
-<a name=type></a> To augment the <a href="refman_2.htm#43">predefined
-types</a>, you can create <strong>user-defined types</strong>. All you have to
-do is define a single-parameter function, but declare it with <strong>type ...
-end type</strong> instead of <strong>function ... end function</strong>.  For
-example,</p>
+a name=type></a> To augment the a href="refman_2.htm#43">predefined
+types</a>, you can create **user-defined types**. All you have to
+do is define a single-parameter function, but declare it with **type ...
+end type** instead of **function ... end function**.  For
+example,
 
 <eucode>
 type hour(integer x)
@@ -1377,172 +1281,156 @@ h1 = 10      -- ok
 h2 = 25      -- error! program aborts with a message
 </eucode>
 
-<p>
 Variables h1 and h2 can only be assigned integer values in the range 0 to 23
 inclusive. After each assignment to h1 or h2 the interpreter will call hour(),
 passing the new value.  The value will first be checked to see if it is an
 integer (because of "integer x"). If it is, the return statement will be
 executed to test the value of x (i.e. the new value of h1 or h2).  If hour()
 returns true, execution continues normally. If hour() returns false then the
-program is aborted with a suitable diagnostic message.</p>
+program is aborted with a suitable diagnostic message.
 
-<p>
-"hour" can be used to declare subroutine parameters as well:</p>
+"hour" can be used to declare subroutine parameters as well:
 
 <eucode>
 procedure set_time(hour h)
 </eucode>
 
-<p>
 set_time() can only be called with a reasonable value for parameter h,
-otherwise the program will abort with a message.</p>
+otherwise the program will abort with a message.
 
-<p>
 A variable's type will be checked after each assignment to the variable (except
 where the compiler can predetermine that a check will not be necessary), and
 the program will terminate immediately if the type function returns false.
 Subroutine parameter types are checked each time that the subroutine is called.
 This checking guarantees that a variable can never have a value that does not
-belong to the type of that variable.</p>
+belong to the type of that variable.
 
-<p>
-<a name=typechk></a> Unlike other languages, the type of a variable does not
+a name=typechk></a> Unlike other languages, the type of a variable does not
 affect any calculations on the variable. Only the value of the variable matters
 in an expression. The type just serves as an error check to prevent any
-"corruption" of the variable.  </p> <p> User-defined types can catch unexpected
+"corruption" of the variable.    User-defined types can catch unexpected
 logical errors in your program.  They are not designed to catch or correct user
-input errors.</p>
+input errors.
 
-<p>
 Type checking can be turned off or on between subroutines using the with
-type_check or without type_check <a href="refman_2.htm#62">special
-statements</a>.  It is initially on by default.</p>
+type_check or without type_check a href="refman_2.htm#62">special
+statements</a>.  It is initially on by default.
 
- 
 <dl>
 <dt>
-<b>Note to Benchmarkers:</b></dt>
+**Note to Benchmarkers:**</dt>
 <dd>
-<p>
+
 When comparing the speed of Euphoria programs against programs written in other
-languages, you should specify <strong>without type_check</strong> at the top of
+languages, you should specify **without type_check** at the top of
 the file.  This gives Euphoria permission to skip run-time type checks, thereby
 saving some execution time. All other checks are still performed, e.g.
 subscript checking, uninitialized variable checking etc.  Even when you turn
 off type checking, Euphoria reserves the right to make checks at strategic
-places, since this can actually allow it to run your program <i>faster</i> in
+places, since this can actually allow it to run your program //faster// in
 many cases.  So you may still get a type check failure even when you have
 turned off type checking. Whether type checking is on or off, you will never
-get a <b><i>machine-level</i></b> exception.  <strong>You will always get a
-meaningful message from Euphoria when something goes wrong</strong>.  (<i>This
-might not be the case when you <a href="lib_mach.htm#poke">poke</a> directly
-into memory, or call routines written in C or machine code.</i>)</p></dd>
+get a **//machine-level//** exception.  **You will always get a
+meaningful message from Euphoria when something goes wrong**.  (//This
+might not be the case when you a href="lib_mach.htm#poke">poke</a> directly
+into memory, or call routines written in C or machine code.//)</dd>
 </dl>
 
-<p>
 Euphoria's method of defining types is simpler than what you will find in other
-languages, yet Euphoria provides the programmer with <i>greater</i> flexibility
+languages, yet Euphoria provides the programmer with //greater// flexibility
 in defining the legal values for a type of data. Any algorithm can be used to
 include or exclude values. You can even declare a variable to be of type object
-which will allow it to take on <i>any</i> value. Routines can be written to
-work with very specific types, or very general types.</p>
+which will allow it to take on //any// value. Routines can be written to
+work with very specific types, or very general types.
 
-<p>
 For many programs, there is little advantage in defining new types, and you may
-wish to stick with the four <a href="refman_2.htm#43">predefined types</a>.
+wish to stick with the four a href="refman_2.htm#43">predefined types</a>.
 Unlike other languages, Euphoria's type mechanism is optional.  You don't need
-it to create a program. </p>
+it to create a program. 
 
-<p>
 However, for larger programs, strict type definitions can aid the process of
 debugging.  Logic errors are caught close to their source and are not allowed
 to propagate in subtle ways through the rest of the program.  Furthermore, it
 is easier to reason about the misbehavior of a section of code when you are
 guaranteed that the variables involved always had a legal value, if not the
-desired value.</p>
+desired value.
 
-<p>
 Types also provide meaningful, machine-checkable documentation about your
 program, making it easier for you or others to understand your code at a later
-date. Combined with the <a href="refman_2.htm#21">subscript checking</a>,
+date. Combined with the a href="refman_2.htm#21">subscript checking</a>,
 uninitialized variable checking, and other checking that is always present,
 strict run-time type checking makes debugging much easier in Euphoria than in
 most other languages. It also increases the reliability of the final program
 since many latent bugs that would have survived the testing phase in other
-languages will have been caught by Euphoria.</p>
+languages will have been caught by Euphoria.
 
 <dl>
 <dt>
-<b>Anecdote 1:</b></dt>
+**Anecdote 1:**</dt>
 <dd>
-<p>
+
 In porting a large C program to Euphoria, a number of latent bugs were
 discovered. Although this C program was believed to be totally "correct", we
 found: a situation where an uninitialized variable was being read; a place
 where element number "-1" of an array was routinely written and read; and a
 situation where something was written just off the screen. These problems
 resulted in errors that weren't easily visible to a casual observer, so they
-had survived testing of the C code.</p></dd>
+had survived testing of the C code.</dd>
 
 <dt>
-<b>Anecdote 2:</b></dt>
+**Anecdote 2:**</dt>
 <dd>
-<p>
-The Quick Sort algorithm presented on page 117 of <i>Writing Efficient
-Programs</i> by Jon Bentley has a subscript error! The algorithm will sometimes
-read the element just <i>before</i> the beginning of the array to be sorted,
-and will sometimes read the element just <i>after</i> the end of the array.
+
+The Quick Sort algorithm presented on page 117 of //Writing Efficient
+Programs// by Jon Bentley has a subscript error! The algorithm will sometimes
+read the element just //before// the beginning of the array to be sorted,
+and will sometimes read the element just //after// the end of the array.
 Whatever garbage is read, the algorithm will still work - this is probably why
 the bug was never caught. But what if there isn't any (virtual) memory just
 before or just after the array? Bentley later modifies the algorithm such that
 this bug goes away -- but he presented this version as being correct.
-<b><i>Even the experts need subscript checking!</i></b></p></dd>
+**//Even the experts need subscript checking!//**</dd>
 
 <dt>
-<b>Performance Note:</b></dt>
+**Performance Note:**</dt>
 
 <dd>
-<p>
+
 When typical user-defined types are used extensively, type checking adds only
 20 to 40 percent to execution time. Leave it on unless you really need the
 extra speed. You might also consider turning it off for just a few
-heavily-executed routines.  <a href="refman_3.htm#2">Profiling</a> can help
-with this decision.</p></dd>
+heavily-executed routines.  a href="refman_3.htm#2">Profiling</a> can help
+with this decision.</dd>
 
 </dl>
 
-<h2>Statements</h2>
+== Statements
 
-<p>
+The following kinds of executable statements are available:
 
- The following kinds of executable statements are available:</p>
-<ul>
-<li><a href="refman_2.htm#assign">assignment statement</a></li>
-<li><a href="refman_2.htm#proc">procedure call</a></li>
-<li><a href="refman_2.htm#if">if statement</a></li>
-<li><a href="refman_2.htm#while">while statement</a></li>
-<li><a href="refman_2.htm#while">loop ... until statement</a></li>
-<li><a href="refman_2.htm#for">for statement</a></li>
-<li><a href="refman_2.htm#return">return statement</a></li>
-<li><a href="refman_2.htm#exit">exit statement</a></li>
-<li><a href="refman_2.htm#break">break statement</a></li>
-<li><a href="refman_2.htm#continue">continue statement</a></li>
-<li><a href="refman_2.htm#retry">retry statement</a></li>
-<li><a href="refman_2.htm#switch">switch statement</a></li>
-<li><a href="#ifdef">ifdef statement</a></li>
-</ul>
+* a href="refman_2.htm#assign">assignment statement</a>
+* a href="refman_2.htm#proc">procedure call</a>
+* a href="refman_2.htm#if">if statement</a>
+* a href="refman_2.htm#while">while statement</a>
+* a href="refman_2.htm#while">loop ... until statement</a>
+* a href="refman_2.htm#for">for statement</a>
+* a href="refman_2.htm#return">return statement</a>
+* a href="refman_2.htm#exit">exit statement</a>
+* a href="refman_2.htm#break">break statement</a>
+* a href="refman_2.htm#continue">continue statement</a>
+* a href="refman_2.htm#retry">retry statement</a>
+* a href="refman_2.htm#switch">switch statement</a>
+* a href="#ifdef">ifdef statement</a>
 
-<p>
 Semicolons are not used in Euphoria, but you are free to put as many statements
 as you like on one line, or to split a single statement across many lines. You
 may not split a statement in the middle of an identifier, string, number or
-keyword.</p>
+keyword.
 
-<h3>Assignment Statement</h3>
+=== Assignment Statement
 
-<p>
-An <strong>assignment statement</strong> assigns the value of an expression to
-a simple variable, or to a subscript or slice of a variable. e.g.</p>
+An **assignment statement** assigns the value of an expression to
+a simple variable, or to a subscript or slice of a variable. e.g.
 
 <eucode>
 x = a + b
@@ -1550,10 +1438,9 @@ y[i] = y[i] + 1
 y[i..j] = {1, 2, 3}
 </eucode>
 
-<p>
 The previous value of the variable, or element(s) of the subscripted or sliced
 variable are discarded.  For example, suppose x was a 1000-element sequence
-that we had initialized with:</p>
+that we had initialized with:
 
 <eucode>
 object x
@@ -1561,110 +1448,107 @@ object x
 x = repeat(0, 1000)  -- a sequence of 1000 zeros
 </eucode>
 
-<p>and then later we assigned an atom to x with:</p>
+and then later we assigned an atom to x with:
 
 <eucode>
 x = 7
 </eucode>
 
-<p>
-This is perfectly legal since x is declared as an <strong>object</strong>. The
+This is perfectly legal since x is declared as an **object**. The
 previous value of x, namely the 1000-element sequence, would simply disappear.
 Actually, the space consumed by the 1000-element sequence will be automatically
-recycled due to Euphoria's dynamic storage allocation.</p>
+recycled due to Euphoria's dynamic storage allocation.
 
-<p>
-Note that the equals symbol '=' is used for both assignment and for <a
+Note that the equals symbol '=' is used for both assignment and for a
 href="refman_2.htm#23">equality testing</a>.  There is never any confusion
 because an assignment in Euphoria is a statement only, it can't be used as an
-expression (as in C).</p>
+expression (as in C).
 
-<h4>Assignment with Operator</h4>
+==== Assignment with Operator
 
-<p>
-Euphoria also provides some additional forms of the assignment statement.</p>
+Euphoria also provides some additional forms of the assignment statement.
 
-<p>
 To save typing, and to make your code a bit neater, you can combine assignment
-with one of the operators:</p>
+with one of the operators:
  
-<eucode>+ - / * &</eucode>
+<eucode>
++ - / * &
+</eucode>
 
-<p>For example, instead of saying:</p>
+For example, instead of saying:
 
 <eucode>
 mylongvarname = mylongvarname + 1
 </eucode>
 
-<p>You can say:</p>
+You can say:
 
 <eucode>
 mylongvarname += 1
 </eucode>
 
-<p>Instead of saying:</p>
+Instead of saying:
 
 <eucode>
 galaxy[q_row][q_col][q_size] = galaxy[q_row][q_col][q_size] * 10
 </eucode>
 
-<p>You can say:</p>
+You can say:
 
 <eucode>
 galaxy[q_row][q_col][q_size] *= 10
 </eucode>
 
-<p>and instead of saying:</p>
+and instead of saying:
 
 <eucode>
 accounts[start..finish] = accounts[start..finish] / 10
 </eucode>
 
-<p>You can say:</p>
+You can say:
 
 <eucode>
 accounts[start..finish] /= 10
 </eucode>
 
-<p>
-In general, whenever you have an assignment of the form:</p>
-<console>
-<b><i>left-hand-side = left-hand-side op expression</i></b>
-</console>
+In general, whenever you have an assignment of the form:
 
-<p>You can say:</p>
+{{{
+**//left-hand-side = left-hand-side op expression//**
+}}}
 
-<console>
-<b><i>left-hand-side op= expression</i></b>
-</console>
+You can say:
 
-<p>where <b><i>op</i></b> is one of:</p>
+{{{
+**//left-hand-side op= expression//**
+}}}
 
-<eucode>+ - * / &</eucode>
+where **//op//** is one of:
 
-<p>
-When the left-hand-side contains multiple subscripts/slices, the <i>op=</i>
+<eucode>
++ - * / &
+</eucode>
+
+When the left-hand-side contains multiple subscripts/slices, the //op=//
 form will usually execute faster than the longer form. When you get used to it,
-you may find the <i>op=</i> form to be slightly more readable than the long
+you may find the //op=// form to be slightly more readable than the long
 form, since you don't have to visually compare the left-hand-side against the
-copy of itself on the right side.</p>
+copy of itself on the right side.
 
-<h4>procedure call</h4>
+==== procedure call
 
-<p>
-A <strong>procedure call</strong> starts execution of a procedure, passing it
-an optional list of argument values. e.g.</p>
+A **procedure call** starts execution of a procedure, passing it
+an optional list of argument values. e.g.
 
 <eucode>
 plot(x, 23)
 </eucode>
 
-<h4>return statement</h4>
+==== return statement
 
-<p>
-A <strong>return statement</strong> returns immediately from a subroutine. If
+A **return statement** returns immediately from a subroutine. If
 the subroutine is a function or type then a value must also be returned.
-e.g.</p>
+e.g.
 
 <eucode>
 return
@@ -1672,13 +1556,12 @@ return
 return {50, "FRED", {}}
 </eucode>
 
-<h4>if statement</h4>
+==== if statement
 
-<p>
-An <strong>if statement</strong> tests a condition to see if it is 0 (false) or
+An **if statement** tests a condition to see if it is 0 (false) or
 non-zero (true) and then executes the appropriate series of statements. There
-may be optional <strong>elsif</strong> and <strong>else</strong> clauses.
-e.g.</p>
+may be optional **elsif** and **else** clauses.
+e.g.
 
 <eucode>
 if a < b then
@@ -1703,42 +1586,36 @@ else
 end if
 </eucode>
 
-<p>
 Notice that elsif is a contraction of else if, but it's cleaner because it
 doesn't require an end if to go with it. There is just one end if for the
-entire <strong>if</strong> statement, even when there are many <b>elsif's</b>
-contained in it.</p>
+entire **if** statement, even when there are many **elsif's**
+contained in it.
 
-<p>
-The <strong>if</strong> and <strong>elsif</strong> conditions are tested using
-<a href="refman_2.htm#shortcir">short-circuit evaluation</a>. </p>
+The **if** and **elsif** conditions are tested using
+a href="refman_2.htm#shortcir">short-circuit evaluation</a>. 
 
-<p>
-<strong>If</strong> statement headers can have a <strong>label</strong> clause
-right before the <strong>the</strong>n closing keyword. See the section on <a
+**If** statement headers can have a **label** clause
+right before the **the**n closing keyword. See the section on a
 href="refman_2.htm#labhdr">labelled block headers </a>. This feature does not
-apply to <strong>elsif</strong> conditional statements, as they are not
-standalone, just optionally sectioning an if block.</p>
+apply to **elsif** conditional statements, as they are not
+standalone, just optionally sectioning an if block.
 
-<h4>Iterative code blocks, aka loops.</h4>
+==== Iterative code blocks, aka loops.
 
-<p>
 An iterative code block repeats its own execution zero, one or more times.
 There are several ways to specify for how long the process should go on, and
 how to stop or otherwise alter it.  An iterative block may be informally called
 a loop, and each execution of code in a loop is called an iteration of the
-loop.</p>
+loop.
 
-<p>
-Euphoria has three flavours of loops. They all may harbor a <a
+Euphoria has three flavours of loops. They all may harbor a a
 href="refman_2.htm#labhdr"> labelled block header</a>, in order to make exiting
-them more flexible.  </p>
+them more flexible.  
 
-<h5>while statement</h5>
+===== while statement
 
-<p>
-A <strong>while statement</strong> tests a condition to see if it is non-zero
-(true), and while it is true a loop is executed. e.g.</p>
+A **while statement** tests a condition to see if it is non-zero
+(true), and while it is true a loop is executed. e.g.
 
 <eucode>
 while x > 0 do
@@ -1747,11 +1624,10 @@ while x > 0 do
 end while
 </eucode>
 
-<h5>The loop ... until statement.</h5>
+===== The loop ... until statement.
 
-<p>
-A <strong>loop ... until statement</strong> tests a condition to see if it is
-non-zero (true), and until it is true a loop is executed. e.g.</p>
+A **loop ... until statement** tests a condition to see if it is
+non-zero (true), and until it is true a loop is executed. e.g.
 
 <eucode>
 loop do
@@ -1760,16 +1636,16 @@ loop do
 until x<=0
 </eucode>
 
-<p>This differs from a <strong>while</strong> loop in more than one way:</p>
+This differs from a **while** loop in more than one way:
 
 <ul>
 <li>
 The body of the loop is executed at least once, since testing takes place AFTER
-it completes.  In a <strong>while</strong>, the test is taken BEFORE execution.
+it completes.  In a **while**, the test is taken BEFORE execution.
 </li>
 
 <li>
-The header contains only optional <strong>label</strong> and <strong>while entry</strong> 
+The header contains only optional **label** and **while entry** 
 tags.
 </li>
 
@@ -1779,12 +1655,11 @@ termination test.
 </li>
 </ul>
 
-<h5>for statement</h5>
+===== for statement
 
-<p>
-A <strong>for statement</strong> sets up a special loop with a controlling
-<strong>loop variabl</strong>e that runs from an initial value up or down to
-some final value. e.g.</p>
+A **for statement** sets up a special loop with a controlling
+**loop variabl**e that runs from an initial value up or down to
+some final value. e.g.
 
 <eucode>
 for i = 1 to 10 do
@@ -1799,68 +1674,58 @@ for i = 10.0 to 20.5 by 0.3 do
 end for
 </eucode>
 
-<p>
-The <strong>loop variable</strong> is declared automatically and exists until
+The **loop variable** is declared automatically and exists until
 the end of the loop. Outside of the loop the variable has no value and is not
 even declared.  If you need its final value, copy it into another variable
 before leaving the loop. The compiler will not allow any assignments to a loop
 variable. The initial value, loop limit and increment must all be atoms. If no
 increment is specified then +1 is assumed. The limit and increment values are
 established when the loop is entered, and are not affected by anything that
-happens during the execution of the loop. See also the <a
+happens during the execution of the loop. See also the a
 href="refman_2.htm#loop_scope">scope of the loop variable in 2.4.2
-Scope</a>.</p>
+Scope</a>.
 
-<a name="labelhdr"></a>
-<h4>Flow control statements.</h4>
+a name="labelhdr"></a>
+==== Flow control statements
 
-<p>
 Blocks are good ways toorganise code in easily identifiable chunks. However,
 for efficiency, it is often desirable to exi them early or slightly alter their
-default course of execution.  </p>
+default course of execution.  
 
-<p>
 Exiting a single block of code is done with a single keyword, like
-<strong>exit</strong>. Likwise, kipping the rest of an iteration in a single
-code block is done using a single keyword, like <strong>continue</strong>. But
+**exit**. Likwise, kipping the rest of an iteration in a single
+code block is done using a single keyword, like **continue**. But
 sometimes you need to act on a block above the current one, like exiting three
 levels of loop, or restarting the iteration of the third loop above. How to do
-that?</p>
+that?
 
-<p>
 By using an optional parameter right after the control flow keyword. The
-parameter may take the following form: </p>
-<ul>
-<li> A label string, like in
-<eucode>break "this_block"</eucode></li> 
-<li> A positive constant integer, the
-number of levels to act upon, like in "exit 2" to exit the loop right above the
-current one</li> 
-<li> A nonpositive integer, which counts he levels backwards,
-like in "continue -1" to start the next iteration of the second topmost loop
-(compare with s[$-1])</li> 
-</ul>
+parameter may take the following form:  
 
-<p>
+* A label string, like in ##break "this_block"##
+* A positive constant integer, the number of levels to act upon, like in ##exit 2## to exit 
+  the loop right above the current one
+* A nonpositive integer, which counts he levels backwards, like in ##continue -1## to start 
+  the next iteration of the second topmost loop (compare with s[$-1])
+* A for loop index variable name, like in ##retry i##, which restarts the current iteration 
+  of the active for loop which has i as loop variable.
+
 For easier and safer program maintainance, the explicit label form is to be
 preferred. Other forms are variously sensitive to changes in the program
 organisation. Yet, they may prove more convenient in short, short lived
-programs, an d are provided moostly for this purose.</p>
+programs, an d are provided moostly for this purose.
 
-<p>
 For information on how to associate a string o a block of code, see the section
-on <a href="labelhdr">labelled headers</a>.  </p>
+on a href="labelhdr">labelled headers</a>.  
 
-<p>
-The following flow control keywords are available.  </p>
+The following flow control keywords are available.  
 
-<h5>exit statement</h5>
+===== exit statement
 
-<p>
-An <strong>exit statement</strong> may appear inside a <a
-href="refman_2.htm#while">while-loop</a> or a <a
+An **exit statement** may appear inside a a
+href="refman_2.htm#while">while-loop</a> or a a
 href="refman_2.htm#for">for-loop</a>. It causes immediate termination of the
-loop, with control passing to the first statement after the loop. e.g.</p>
+loop, with control passing to the first statement after the loop. e.g.
 
 <eucode>
 for i = 1 to 100 do
@@ -1871,8 +1736,7 @@ for i = 1 to 100 do
 end for
 </eucode>
 
-<p>
-It is also quite common to see something like this:</p>
+It is also quite common to see something like this:
 
 <eucode>
 constant TRUE = 1
@@ -1886,24 +1750,22 @@ while TRUE do
 end while
 </eucode>
 
-<p>
-i.e. an "infinite" while-loop that actually terminates via an <strong>exit
-statement</strong> at some arbitrary point in the body of the loop. </p>
+i.e. an "infinite" while-loop that actually terminates via an **exit
+statement** at some arbitrary point in the body of the loop. 
 
 <dl>
-<dt><b>Performance Note:</b></dt>
+<dt>**Performance Note:**</dt>
 <dd>
 Euphoria optimizes this type of loop.  At run-time, no test is performed at the
-top of the loop. There's just a simple unconditional jump from <b>end while</b>
+top of the loop. There's just a simple unconditional jump from **end while**
 back to the first statement inside the loop.</dd>
 </dl>
 
-<h5>The break statement</h5>
+===== The break statement
 
-<p>
-Works exactly like the <strong>exit statement</strong>, but applies to
-<strong>if statements</strong> rather than to loop statments of any kind.
-Example: </p>
+Works exactly like the **exit statement**, but applies to
+**if statements** rather than to loop statments of any kind.
+Example: 
 
 <eucode>
 if s[1]='E' then
@@ -1923,23 +1785,20 @@ else
 end if
 </eucode>
 
-<p>This code resuls in:</p>
+This code resuls in:
 
-<ul>
-<li>"Dur"-&gt; a=0 b=0</li>
-<li>"Exe"-&gt; a=3 b=4</li>
-<li>"Eux"-&gt; a=2 b=1</li>
-<li>"Eup"-&gt; a=3 b=1</li>
-</ul>
+* "Dur"-&gt; a=0 b=0
+* "Exe"-&gt; a=3 b=4
+* "Eux"-&gt; a=2 b=1
+* "Eup"-&gt; a=3 b=1
 
-<h5>The continue statement</h5>
+===== The continue statement
 
-<p>
-The <strong>continue statements</strong> continues execution of the loop it
+The **continue statements** continues execution of the loop it
 applies to by going to the next iteration now. Going to the next iteration
-means testing a condition (for <strong>while</strong> and <strong>loop ...
-until loops</strong>, or changing the for loop variable index and checking
-whether it is still within bounds.  </p>
+means testing a condition (for **while** and **loop ... until loops**, or changing 
+the **for** loop variable index and checking
+whether it is still within bounds.  
 
 <eucode>
 for i=3 to 6 do
@@ -1952,20 +1811,18 @@ for i=3 to 6 do
 end for
 </eucode>
 
-<p>This will print 3, 9, 4, (2), 5 25, 6 36.</p>
+This will print 3, 9, 4, (2), 5 25, 6 36.
 
-<h5>The retry statement</h5>
+===== The retry statement
 
-<p>
-The <strong>retry statements</strong> retries executing the current iteration
+The **retry statements** retries executing the current iteration
 of the loop it applies to. The statement branches to the first statement of the
 designated loop, without testing anything nor incrementing the for loop
-index.</p>
+index.
 
-<p>
-Normally, a sub-block which contains a <strong>retry statement</strong>s also
+Normally, a sub-block which contains a **retry statement**s also
 contains another flow control keyword, since otherwise the iteration would be
-endlessly executed.  </p>
+endlessly executed.  
 
 <eucode>
 errors = 0
@@ -1983,20 +1840,19 @@ for i=1 to length(files_to_open) do
 end for
 </eucode>
 
-<p>Since <strong>retry</strong> does not change the value of i and tries agan
+Since **retry** does not change the value of i and tries agan
 opening the same file, there has to be a way to break from the loop, which the
-<strong>exit statement</strong> provides.</p>
+**exit statement** provides.
 
-<h5>The entry statement</h5>
+===== The entry statement
 
-<p>
 It is often the case that the first iteration of a loop is somehow special.
 Some things have to be done before the loop starts - they are done before the
 statement starting the loop -.  Now, the problem is that, just as often, some
 things do not need, or should not, be done at this intialisation stage. The
-<strong>entry keyword</strong> is an alternative to setting flags relentlessly
-and forgetting to update them. Just add the <strong>entry</strong> kyword at
-the point you wish the first iteration starts.</p>
+**entry keyword** is an alternative to setting flags relentlessly
+and forgetting to update them. Just add the **entry** kyword at
+the point you wish the first iteration starts.
 
 <eucode>
 global function find_all(object x, sequence source, integer from)
@@ -2013,23 +1869,21 @@ global function find_all(object x, sequence source, integer from)
 end function
 </eucode>
 
-<p>Instead of performing an initial test, which may crash because from has not
+Instead of performing an initial test, which may crash because from has not
 been assigned a value yet, the first iteration jumps at the point where from is
 being computed. The following iterations are normal. To emphasize the fat that
 the first iteration is not normal, the entry clause must be addedto the loop
-header, after the condition.</p>
+header, after the condition.
 
-<p>
 The entry statement is not supported for for loops, because they have a more
-rigid natire than while or loop constructs.  </p>
+rigid natire than while or loop constructs.  
 
-<a name="flowctrl"></a>
-<h3>Labelled headers.</h3>
+a name="flowctrl"></a>
+=== Labeled headers.
 
-<p>
 As shown in the above section on control flow statements, most of them may take
 a string referencing a block of code. In order to do so, it is enough t do
-this: </p> 
+this:  
 
 <eucode>
 if n=0 label "an_if_block" then
@@ -2037,11 +1891,10 @@ if n=0 label "an_if_block" then
 end if
 </eucode>
 
-<p>The label clause precedes the closing then keyword.</p>
+The label clause precedes the closing then keyword.
  
-<p>
 If a header has both an entry clause and a label clause, they have to be both
-before the closing keyword, in any order: </p> 
+before the closing keyword, in any order:  
 
 <eucode>
 while 1 label "top" entry do
@@ -2049,34 +1902,32 @@ while 1 label "top" entry do
 while 1 entry label "top" do
 </eucode>
  
-<p>are both correct and equivalent.</p>
+are both correct and equivalent.
 
-<a name="switch"></a>
-<h3>The switch statement</h3>
+a name="switch"></a>
+=== The switch statement
 
-<p>
 The switch statement is often used in place  or in similar ways as an if-elsif
 code block.  There are some key differences, however.  A switch statement
 operates upon the value of a single expression, and the program flow continues
-based upon defined cases.  The syntax of a switch statement: </p>
+based upon defined cases.  The syntax of a switch statement: 
 
 <eucode>
-switch &lt;expr&gt; [label "&lt;label name&gt;"] do
-    case &lt;val&gt;:
+switch <expr> [label "<label name>"] do
+    case <val>:
         [code block]
     [case else]
         [code block]
 end switch
 </eucode>
 
-<p>
 The &lt;val&gt; in a case must be either an atom or a literal string.  One
 important difference between a switch block and an if block is that control
 does not automatically go to the end of the block when the next case statement
 is encountered.  This is referred to as fall-through, and allows the same code
 to be used for multiple values.  'break' can be used to redirect program flow to
 the end of the block.  Fall-through can also be used when different cases
-require most of the same code, but one might require extra processing: </p>
+require most of the same code, but one might require extra processing: 
 
 <eucode>
 switch length(x) do
@@ -2091,49 +1942,41 @@ switch length(x) do
 end switch
 </eucode>
 
-<a name="ifdef"></a>
-<h3>The ifdef statement</h3>
+a name="ifdef"></a>
+=== The ifdef statement
 
-<p>
 The ifdef statement is unlike all of the other statements in that it is
 executed at parse time not runtime. This allows you to change the way your
 program operates in a very efficient manner. Since the ifdef statement works at
 parse time, runtime values cannot be checked, instead special defintions can be
 set or unset at parse time as well. Euphoria defines some common words itself:
-</p>
 
-<ul>
-<li><strong>EU400</strong> - Version of Euphoria</li>
-<li><strong>DOS32</strong> - Platform is DOS</li>
-<li><strong>WIN32</strong> - Platform is Windows</li>
-<li><strong>LINUX</strong> - Platform is Linux</li>
-<li><strong>FREEBSD</strong> - Platform is FreeBSD</li>
-<li><strong>UNIX</strong> - Platform is any Unix (currently Linux or FreeBSD)</li>
-</ul>
+* **EU400** - Version of Euphoria
+* **DOS32** - Platform is DOS
+* **WIN32** - Platform is Windows
+* **LINUX** - Platform is Linux
+* **FREEBSD** - Platform is FreeBSD
+* **UNIX** - Platform is any Unix (currently Linux or FreeBSD)
 
-<p>
 Further, you can define your own words either in source:
-</p>
 
 <eucode>
 with define=MY_WORD       -- defines
 without define=OTHER_WORD -- undefines
 </eucode>
 
-<p>
 or by command line:
-</p>
 
-<console>
+{{{
 exwc -D MY_WORD myprog.ex
-</console>
+}}}
 
-<p>This can handle many tasks such as change the behavior of your application
+This can handle many tasks such as change the behavior of your application
 when running on Linux vs. Windows, enable or disable debug style code or
 possibly work differently in demo/shareware applications vs. registered
-applications.</p>
+applications.
 
-<p>A few examples:</p>
+A few examples:
 
 <eucode>
 for a = 1 to length(lines) do
@@ -2160,13 +2003,12 @@ end ifdef
 </eucode>
 
 <dl>
-<dt><b>Performance Note:</b></dt>
+<dt>**Performance Note:**</dt>
 <dd>
-<p>
+
 The ifdef statement is very efficient in that it makes the decision only once during parse
 time and only emits the TRUE portions of code to the resulting interpreter. Thus, in loops
 that are iterated many times there is zero performance hit when making the decision. Example:
-</p>
 
 <eucode>
 while 1 do
@@ -2177,9 +2019,7 @@ while 1 do
 end while
 </eucode>
 
-<p>
 If DEBUG is defined, then the interpreter/translator actually sees the code as being:
-</p>
 
 <eucode>
 while 1 do
@@ -2188,9 +2028,7 @@ while 1 do
 end while
 </eucode>
 
-<p>
 Now, if DEBUG is not defined, then the code the interpreter/translator sees is:
-</p>
 
 <eucode>
 while 1 do
@@ -2200,64 +2038,55 @@ end while
 </dd>
 </dl>
 
-<h2>Short-Circuit Evaluation</h2>
+== Short-Circuit Evaluation
 
-<p>
 When the condition tested by if, elsif, until, or while contains and or or
-operators, <i>short-circuit</i> evaluation will be used.  For example,</p>
+operators, //short-circuit// evaluation will be used.  For example,
 
 <eucode>
 if a < 0 and b > 0 then ...
 </eucode>
 
-<p>
 If a < 0 is false, then Euphoria will not bother to test if b is greater
-than 0. It will assume that the overall result is false. Similarly,</p>
+than 0. It will assume that the overall result is false. Similarly,
 
 <eucode>
 if a < 0 or b > 0 then ...
 </eucode>
 
-<p>
 if a < 0 is true, then Euphoria will immediately decide that the result true,
-without testing the value of b.</p>
+without testing the value of b.
 
-<p>
-In general, whenever we have a condition of the form:</p>
+In general, whenever we have a condition of the form:
 
 <eucode>
 A and B
 </eucode>
 
-<p> 
 where A and B can be any two expressions, Euphoria will take a short-cut when A
 is false and immediately make the overall result false, without even looking at
-expression B.</p>
+expression B.
 
-<p>
-Similarly, with:</p>
+Similarly, with:
 
 <eucode>
 A or B
 </eucode>
 
-<p>
 when A is true, Euphoria will skip the evaluation of expression B, and declare
-the result to be true.</p>
+the result to be true.
 
-<p>
 If the expression B contains a call to a function, and that function has
-possible <b>side-effects</b>, i.e. it might do more than just return a value,
+possible **side-effects**, i.e. it might do more than just return a value,
 you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
-not use <strong>short-circuit</strong> evaluation, and it's possible that some
+not use **short-circuit** evaluation, and it's possible that some
 old code will no longer work correctly, although a search of the Euphoria
 archives did not turn up any programs that depend on side-effects in this
-way.</p>
+way.
 
-<p>
 The expression, B, could contain something that would normally cause a run-time
 error. If Euphoria skips the evaluation of B, the error will not be discovered.
-For instance:</p>
+For instance:
 
 <eucode>
 if x != 0 and 1/x > 10 then  -- divide by zero error avoided
@@ -2265,20 +2094,19 @@ if x != 0 and 1/x > 10 then  -- divide by zero error avoided
 while 1 or {1,2,3,4,5} do    -- illegal sequence result avoided
 </eucode>
 
-<p>B could even contain uninitialized variables, out-of-bounds subscripts
-etc.</p>
+B could even contain uninitialized variables, out-of-bounds subscripts
+etc.
 
-<p>
 This may look like sloppy coding, but in fact it often allows you to write
-something in a simpler and more readable way. For instance:</p>
+something in a simpler and more readable way. For instance:
 
 <eucode>
 if atom(x) or length(x)=1 then
 </eucode>
 
-<p>Without short-circuiting, you would have a problem when x was an atom, since
+Without short-circuiting, you would have a problem when x was an atom, since
 length is not defined for atoms. With short-circuiting, length(x) will only be
-checked when x is a sequence. Similarly:</p>
+checked when x is a sequence. Similarly:
 
 <eucode>
 -- find 'a' or 'A' in s
@@ -2288,156 +2116,151 @@ while i <= length(s) and s[i] != 'a' and s[i] != 'A' do
 end while
 </eucode>
 
-<p>In this loop the variable i might eventually become greater than length(s).
+In this loop the variable i might eventually become greater than length(s).
 Without short-circuit evaluation, a subscript out-of-bounds error will occur
 when s[i] is evaluated on the final iteration. With short-circuiting, the loop
 will terminate immediately when i <= length(s) becomes false. Euphoria will not
 evaluate s[i] != 'a' and will not evaluate s[i] != 'A'. No subscript error will
-occur.</p>
+occur.
 
-<p>
-<strong>Short-circuit</strong> evaluation of and and or takes place for if,
+**Short-circuit** evaluation of and and or takes place for if,
 elsif and while conditions only.  It is not used in other contexts. For
-example, the assignment statement:</p>
+example, the assignment statement:
 
 <eucode>
 x = 1 or {1,2,3,4,5}  -- x should be set to {1,1,1,1,1}
 </eucode>
 
-<p>If short-circuiting were used here, we would set x to 1, and not even look
+If short-circuiting were used here, we would set x to 1, and not even look
 at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used in
 if/elsif/until/while conditions because we only care if the result is true or
-false, and conditions are required to produce an atom as a result.</p>
+false, and conditions are required to produce an atom as a result.
 
-<p> The first iteration of a while loop is often special, because some work
-still doesn't need to be done. As a result, ou have to keep track of whether
-you are in the initialisation stage or not, and usually test a flag on every
-iteration of the loop, while this will be useful only once. Not needed, and
-another cause of programming errors.  In addition, and also because repetition
-of code often takes place as a result of the flag weving method, Euphoria
-provides a special entry keyword to better handle this situation.</p>
+The first iteration of a while loop is often special, because some work still
+doesn't need to be done. As a result, ou have to keep track of whether you are
+in the initialisation stage or not, and usually test a flag on every iteration
+of the loop, while this will be useful only once. Not needed, and another cause
+of programming errors.  In addition, and also because repetition of code often
+takes place as a result of the flag weving method, Euphoria provides a special
+entry keyword to better handle this situation.
 
-<p>
-The entry keyword will be described in the section on <a href="refman_2.htm#flowctrl">
- instruction flow control</a>. To use it, you will
+The entry keyword will be described in the section on a
+href="refman_2.htm#flowctrl"> instruction flow control</a>. To use it, you will
 need an entry tag in the loop header, as a clue to any reader that the first
-iteration of the loop willn not start right after the closing do.  </p>
+iteration of the loop willn not start right after the closing do.  
 
-<h2>Note on infinite loops.</h2>
+== Note on infinite loops.
 
-<p>
-With <strong>ex.exe</strong>, if you happen to create a real infinite loop,
+With **ex.exe**, if you happen to create a real infinite loop,
 with no input/output taking place, there is no easy way to stop it. You will
 have to type Control-Alt-Delete to either reboot, or (under Windows) terminate
 your DOS prompt session. If the program had files open for writing, it would be
-advisable to run <b>scandisk</b> to check your file system integrity.  Only
+advisable to run **scandisk** to check your file system integrity.  Only
 when your program is waiting for keyboard input, will control-c abort the
-program (unless <a href="lib_file.htm#allow_break">allow_break(0)</a> was
-used).</p>
+program (unless a href="lib_file.htm#allow_break">allow_break(0)</a> was
+used).
 
-<p>
-With <strong>exw.exe</strong> or <strong>exu</strong>, control-c will always
-stop your program immediately.</p>
+With **exw.exe** or **exu**, control-c will always
+stop your program immediately.
 
-<h2>Miscellaneous statements</h2>
-<h3>The warning() procedure</h3>
-<p>
- Writing a library has specific requirements, since the code you write will be mainly used
- inside code you didn't write. It may be desirable then to influence, from inside the library,
- that code you didn't write.
- </p>
- <p>
- This is what warning(), in a limited way, does. It enables to generate custom warnings in
- code that will include yours. Of course, you can also geenrate warnings in your own code, for
- instance as a kind of memo. The without warning top level statement disables such warnings.
- </p>
- <p>
- Example:</p>
- <eucode>
- -- mylib.e
- procedure foo(integer n)
- warning("The foo() procedure is obsolete, use bar() instead.")
- ?n
- end procedure
+== Miscellaneous statements
 
- -- some_app.exw
- include mylib.e
- foo(123)
- </eucode>
- will result, when some_app.exw is run with warning, in the following text being displayed in the console window:
- <pre>
+=== The warning() procedure
+
+Writing a library has specific requirements, since the code you write will be mainly used 
+inside code you didn't write. It may be desirable then to influence, from inside the library, 
+that code you didn't write.
+ 
+This is what warning(), in a limited way, does. It enables to generate custom warnings in  
+code that will include yours. Of course, you can also geenrate warnings in your own code, for
+instance as a kind of memo. The without warning top level statement disables such warnings.
+ 
+Example:
+
+<eucode>
+-- mylib.e
+procedure foo(integer n)
+    warning("The foo() procedure is obsolete, use bar() instead.")
+    ? n
+end procedure
+ 
+-- some_app.exw
+include mylib.e
+foo(123)
+</eucode>
+
+will result, when some_app.exw is run with warning, in the following text being
+displayed in the console window:
+
+{{{
  123
  Warning: The foo() procedure is obsolete, use bar() instead.
 
  Press Enter...
- </pre>
-<p>
-<b>N.B.: </b>the argument to warning() is a single literal constant enclosed in double quotes, like above. Using any kind of variable or expression will result in a blank warning.
-</p>
+}}}
 
-<h3>The warning_file() proceduure</h3>
-<p>
+**N.B.: **the argument to warning() is a single literal constant enclosed in
+double quotes, like above. Using any kind of variable or expression will result
+in a blank warning.
+
+=== The warning_file() procedure
+
 Just as for the error file, you can redirect any warnings which are not masked - either 
 because they cannot or were not - using warning_file(<em>destination</em>), with an extra 
 twist:
-<ul>
-<li>If <em>destination</em> is a sequence, it is assumed to be a file name, and all warnings will go there instead of the console;</li>
-<li>If <em>destination</em> is a nonnegative atom, the standard error will be used, which is the default behaviour;</li>
-<li>If <em>destination</em> is a negative atom, any warning generation or output will be suppressed, including for otherwise non maskable warnings. This is an extreme measure which should be taken in very rare cases only. Use a warning file as much as possible.</li>
-</ul>
-</p>
 
-<h2>Special Top-Level Statements</h2>
+* If //destination// is a sequence, it is assumed to be a file name, and all warnings will 
+  go there instead of the console;
+* If //destination// is a nonnegative atom, the standard error will be used, which is the 
+  default behaviour;
+* If //destination// is a negative atom, any warning generation or output will be 
+  suppressed, including for otherwise non maskable warnings. This is an extreme measure 
+  which should be taken in very rare cases only. Use a warning file as much as possible.
 
-<p>
+== Special Top-Level Statements
+
 Before any of your statements are executed, the Euphoria front-end quickly
 reads your entire program. All statements are syntax checked and converted to a
 low-level intermediate language (IL).  The interpreter immediately executes the
 IL. The translator  converts the IL to C. The binder/shrouder saves the IL on
 disk for later execution. These three tools all share the same front-end
-(written in Euphoria).</p>
+(written in Euphoria).
 
-<p>
 If your program contains only routine and variable declarations, but no
 top-level executable statements, then nothing will happen when you run it
 (other than syntax checking). You need a top-level statement to call your main
-routine (see <a href="refman_1.htm#1">1.1 Example Program</a>).  It's quite
+routine (see a href="refman_1.htm#1">1.1 Example Program</a>).  It's quite
 possible to have a program with nothing but top-level executable statements and
 no routines. For example you might want to use Euphoria as a simple calculator,
-typing just a few <a href="lib_file.htm#print">print</a> (or <a
+typing just a few a href="lib_file.htm#print">print</a> (or a
 href="lib_file.htm#?">?</a>) statements into a file, and then executing it.
-</p>
 
-<p>
-As we have seen, you can use any Euphoria <a
-href="refman_2.htm#5">statement</a>, including <a
-href="refman_2.htm#for">for-loops</a>, <a
-href="refman_2.htm#while">while-loops</a>, <a href="refman_2.htm#if">if</a>
-statements etc. (but not <a href="refman_2.htm#return">return</a>), at the top
-level i.e.  <i>outside</i> of any <a href="refman_2.htm#412">function</a> or <a
+As we have seen, you can use any Euphoria a
+href="refman_2.htm#5">statement</a>, including a
+href="refman_2.htm#for">for-loops</a>, a
+href="refman_2.htm#while">while-loops</a>, a href="refman_2.htm#if">if</a>
+statements etc. (but not a href="refman_2.htm#return">return</a>), at the top
+level i.e.  //outside// of any a href="refman_2.htm#412">function</a> or a
 href="refman_2.htm#411">procedure</a>.  In addition, the following special
-statements may <i>only</i> appear at the top level:</p>
+statements may //only// appear at the top level:
 
-<ul>
-<li>include</li>
-<li>with / without</li>
-</ul>
+* include
+* with / without
 
-<h3>include</h3>
+=== include
 
-<p>
 When you write a large program it is often helpful to break it up into
-logically separate files, by using <strong>include statements</strong>.
+logically separate files, by using **include statements**.
 Sometimes you will want to reuse some code that you have previously written, or
 that someone else has written. Rather than copy this code into your main
-program, you can use an <strong>include statement</strong> to refer to the file
-containing the code. The first form of the include statement is:</p>
+program, you can use an **include statement** to refer to the file
+containing the code. The first form of the include statement is:
 
 <dl>
-<dt><strong>include <i>filename</i></strong></dt>
+<dt>**include //filename//**</dt>
 <dd>
-<p>This reads in (compiles) a Euphoria source file.</p>
-<p>Some Examples:</p>
+This reads in (compiles) a Euphoria source file.
+Some Examples:
 
 <eucode>
 include graphics.e
@@ -2445,181 +2268,158 @@ include \mylib\myroutines.e
 export include library.e
 </eucode>
 
-<p>Any top-level code in the included file will be executed.</p>
+Any top-level code in the included file will be executed.
 
-<p>
-Any <a href="refman_2.htm#scope">global symbols</a> that have already been
-defined in the main file will be visible in the included file.</p>
+Any a href="refman_2.htm#scope">global symbols</a> that have already been
+defined in the main file will be visible in the included file.
 
-<p>
-<b>N.B.</b> Only those symbols defined as <a href="refman_2.htm#scope">global
+**N.B.** Only those symbols defined as a href="refman_2.htm#scope">global
 or export</a> in the included file will be visible (accessible) in the
-remainder of the program.  </p>
+remainder of the program.  
 
-<p>
 If export precedes the include statement, then all exported symbols from the
 included file will also be exported from the current file, and visible to any
-file that includes the current file. </p>
+file that includes the current file. 
 
-<p>
-If an absolute <i>filename</i> is given, Euphoria will open it and start
-parsing it. When a relative <i>filename</i> is given, Euphoria will try to open
-the file relative to the following directories, in the following order:</p>
+If an absolute //filename// is given, Euphoria will open it and start
+parsing it. When a relative //filename// is given, Euphoria will try to open
+the file relative to the following directories, in the following order:
 
-<ol>
-<li> 
-The directory containing the current source file.  i.e. the source file that
-contains the include statement that is being processed..</li>
-
-<li> 
-The directory containing the main file given on the interpreter, translator or
-binder <a href="refman_1.htm#3">command-line</a>.</li>
-
-<li> 
-If you've defined an environment variable, <env>EUINC</env>, Euphoria will
-check each directory listed in <env>EUINC</env> (from left to right).
-<env>EUINC</env> should be a list of directories, separated by semicolons
-(colons on <platform>Linux</platform> / <platform>FreeBSD</platform>), similar
-in form to your <env>PATH</env> variable. <env>EUINC</env> can be added to your
-set of <platform>Linux</platform> / <platform>FreeBSD</platform> or
-<platform>DOS</platform> / <platform>Windows</platform> environment  variables.
-(Via <gui>Control Panel / Performance & Maintenance / System / Advanced</gui>
-on <platform>XP</platform>, or <path>AUTOEXEC.BAT</path> on older versions of
-<platform>Windows</platform>).  e.g.
-
-<console>
+# The directory containing the current source file.  i.e. the source file that
+  contains the include statement that is being processed.
+# The directory containing the main file given on the interpreter, translator or
+  binder a href="refman_1.htm#3">command-line</a>.
+# If you've defined an environment variable, ##EUINC##, Euphoria will
+  check each directory listed in ##EUINC## (from left to right).
+  ##EUINC## should be a list of directories, separated by semicolons
+  (colons on //Linux// / //FreeBSD//), similar
+  in form to your ##PATH## variable. ##EUINC## can be added to your
+  set of //Linux// / //FreeBSD// or
+  //DOS// / //Windows// environment  variables.
+  (Via ##Control Panel / Performance & Maintenance / System / Advanced##
+  on //XP//, or ##AUTOEXEC.BAT## on older versions of
+  //Windows//).  e.g.
+{{{
 SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB
-</console>
+}}}
+##EUINC## lets you organize your include files according to application
+areas, and avoid adding numerous unrelated files to ##euphoria\include##.</li>
+# Finally, if it still hasn't found the file, it will look in
+  ##euphoria\include##.  This directory contains the standard Euphoria
+  include files. The environment variable ##EUDIR## tells Euphoria where
+  to find your ##euphoria## directory.
 
-<env>EUINC</env> lets you organize your include files according to application
-areas, and avoid adding numerous unrelated files to <path>euphoria\include</path>.</li>
-
-<li> 
-Finally, if it still hasn't found the file, it will look in
-<path>euphoria\include</path>.  This directory contains the standard Euphoria
-include files. The environment variable <env>EUDIR</env> tells Euphoria where
-to find your <path>euphoria</path> directory.</li>
-
-</ol>
-
-<p>
 An included file can include other files. In fact, you can "nest" included
-files up to 30 levels deep.</p>
+files up to 30 levels deep.
 
-<p>
-Include file names typically end in <path>.e</path>, or sometimes
-<path>.ew</path> or <path>.eu</path> (when they are intended for use with
-<platform>Windows</platform> or <platform>Linux</platform>).  This is just a
-convention. It is not required.</p>
+Include file names typically end in ##.e##, or sometimes ##.ew## or ##.eu## (when they are 
+intended for use with //Windows// or //Linux//).  This is just a convention. It is not 
+required.
 
-<p>
-If your filename (or path) contains blanks, you must enclose it in
-double-quotes, otherwise quotes are optional.  Also, be sure to double-up your
-backslashes.  For example:</p>
+If your filename (or path) contains blanks, you must enclose it in double-quotes, otherwise 
+quotes are optional.  Also, be sure to double-up your backslashes.  For example:
 
 <eucode>
 include "c:\\program files\\myfile.e"
 </eucode>
 
-<p>
 Other than possibly defining a new namespace identifier (see below), an include
 statement will be quietly ignored if the same file has already been
-included.</p>
+included.
 
-<p>
 An include statement must be written on a line by itself.  Only a comment can
-appear after it on the same line.</p>
-
+appear after it on the same line.
 </dd>
 </dl>
 
-<p>The second form of the include statement is:</p>
+The second form of the include statement is:
 
 <dl>
 <dt>
-<strong>include</strong> <b><i>filename</i> as <i>namespace_identifier</i></b></dt>
+**include** **//filename// as //namespace_identifier//**</dt>
 
 <dd>
-<p>
-This is just like the simple include, but it also defines a <i>namespace
-identifier</i> that can be attached to global symbols in the included file that
+
+This is just like the simple include, but it also defines a //namespace
+identifier// that can be attached to global symbols in the included file that
 you want to refer to in the main file. This might be necessary to disambiguate
 references to those symbols, or you might feel that it makes your code more
-readable.  See <a href=refman_2.htm#42>Scope Rules</a> for more.</p>
+readable.  See a href=refman_2.htm#42>Scope Rules</a> for more.
 </dd>
 </dl>
 
-<h3>with / without</h3>
+=== with / without
 
-<p>
 These special statements affect the way that Euphoria translates your program
 into internal form. They are not meant to change the logic of your program, but
 they may affect the diagnostic information that you get from running your
-program.  See <a href="refman_3.htm">3. Debugging and Profiling</a> for more
-information.</p>
+program.  See a href="refman_3.htm">3. Debugging and Profiling</a> for more
+information.
 
 <dl>
 <dt>
-<strong>with</strong></dt>
+**with**</dt>
 
 <dd>
-<p>
-This turns <b>on</b> one of the options: <b> 
-<a href="refman_3.htm#2">profile</a>, 
-<a href="refman_3.htm#2">profile_time</a>, 
-<a href="lib_dbg.htm#trace">trace</a>, warning</b>, 
-<a href="refman_2.htm#typechk"><b>type_check</b></a> and
-<a href="#ifdef"><b>define=WORD</b></a>.  
 
-Options <strong>warning</strong> and <strong>type_check</strong> are initially on,
-while <strong>profile</strong>, <strong>profile_time</strong> and
-<strong>trace</strong> are initially off.</p>
+This turns **on** one of the options: ** 
+a href="refman_3.htm#2">profile</a>, 
+a href="refman_3.htm#2">profile_time</a>, 
+a href="lib_dbg.htm#trace">trace</a>, warning**, 
+a href="refman_2.htm#typechk">**type_check**</a> and
+a href="#ifdef">**define=WORD**</a>.  
 
-<p>
+Options **warning** and **type_check** are initially on,
+while **profile**, **profile_time** and
+**trace** are initially off.
+
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate very minor problems.  A warning will
-never stop your program from executing. You will simply have to hit the Enter key to keep going.</p></dd>
+never stop your program from executing. You will simply have to hit the Enter key to keep going.</dd>
 
-<dt><strong>without</strong></dt>
+<dt>**without**</dt>
 
-<dd>This turns <b>off</b> one of the above options.</dd>
+<dd>This turns **off** one of the above options.</dd>
 </dl>
 
-<p>
-There is also a rarely-used special <strong>with</strong> option where a code
-number appears after <strong>with</strong>.  In previous releases this code was
+There is also a rarely-used special **with** option where a code
+number appears after **with**.  In previous releases this code was
 used by RDS to make a file exempt from adding to the statement count in the old
-"Public Domain" Edition.</p>
+"Public Domain" Edition.
 
-<p>
 You can select any combination of settings, and you can change the settings,
-but the changes must occur <i>between</i> subroutines, not within a subroutine.
+but the changes must occur //between// subroutines, not within a subroutine.
 The only exception is that you can only turn on one type of profiling for a
-given run of your program.</p>
+given run of your program.
 
-<p>
-An <b>included file</b> inherits the <strong>with/without</strong> settings in
+An **included file** inherits the **with/without** settings in
 effect at the point where it is included.  An included file can change these
 settings, but they will revert back to their original state at the end of the
 included file.  For instance, an included file might turn off warnings for
 itself and (initially) for any files that it includes, but this will not turn
-off warnings for the main file.</p>
+off warnings for the main file.
 
-<p>
-Actually, there are two sorts of warnings: maskable and not maskable ones. The not maskable ones are not supposed to occur in production code. As a result, they are not suppressed by the
-<strong>without warning</strong> directive. Maskable warnings can be turned on and off individually.</p>
-<p>
-<strong>without warning</strong> not only turns off maskable warnings, it saves the current state of the warning mask. <strong>with warning</strong> simply restores that mask. Initially,
-onlly the warnings concerning non explicitly included symbols, overriding a builtin routine and choosing a builtin routine over another global symbol. This can be changed using -W command line switches.</p>
-<p>
-The <strong>with warning</strong> has optional extensions in order to customise maskable warnings:
-<ul>
-<li><strong>with warning</strong>=<em>warning names</em> enables only these warnings, and disable all other;</li>
-<li><strong>with warning</strong>+=<em>warning names</em> enables listed warnings in addition to whichever are enabled already;</li>
-<li><strong>with warning</strong>-=<em>warning names</em> disables listed warnings and leaves anyone not listed in its current state.</li>
-</ul></p>
-<p>
+Actually, there are two sorts of warnings: maskable and not maskable ones. The
+not maskable ones are not supposed to occur in production code. As a result,
+they are not suppressed by the **without warning** directive. Maskable warnings
+can be turned on and off individually.
+
+**without warning** not only turns off maskable warnings, it saves the current
+state of the warning mask. **with warning** simply restores that mask.
+Initially, onlly the warnings concerning non explicitly included symbols,
+overriding a builtin routine and choosing a builtin routine over another global
+symbol. This can be changed using -W command line switches.
+
+The **with warning** has optional extensions in order to customise maskable warnings:
+
+* **with warning** = //warning names// enables only these warnings, and disable all other;
+* **with warning**+=//warning names// enables listed warnings in addition to whichever are 
+  enabled already;
+* **with warning**-=//warning names// disables listed warnings and leaves anyone not listed 
+  in its current state.
+
 The following names are known:
+
 <dl>
 <dt>"no_warning"</dt>
 <dd>suppresses all maskable warnings, without saving the earlier state
@@ -2651,75 +2451,52 @@ does not override it. Euphoria chooses the builtin.
 </dd>
 </dl>
 They must always appear between double quotes, except when used in a -W command line switch.
-</p>
 
-<h2>Command line switches</h2>
+== Command line switches
 
-<p>
-You can launch Euphoria with some extra command line switches, in order to add or change 
-configuration elements. When running a GUI, there is always some way to open a prompt and 
-enter any text with options, arguments and whatever the program being launched may need for
-proper, expectd operation. Under <platform>Windows</platform>, this s achieved by clicking the 
-Run... start menu entry, or hitting Windows-R.</p>
+You can launch Euphoria with some extra command line switches, in order to add
+or change configuration elements. When running a GUI, there is always some way
+to open a prompt and enter any text with options, arguments and whatever the
+program being launched may need for proper, expectd operation. Under //Windows//, this is 
+achieved by clicking the Run... start menu entry, or hitting Windows-R.
 
-<p>
-The following items may be changed or added, one at a time:</p>
+The following items may be changed or added, one at a time:
+
 <dl>
 <dt>-C cofig_file</dt>
 <dd>Specifies the path for a file called euinc.conf, which holds a set of include paths, one on each line.</dd>
 <dt>-I include_path</dt>
 <dd>Specifies an extra include path.</dd>
 <dt>-D tag</dt>
-<dd>Defines a tag as being set. Tags are processed by <strong>ifdef</strong> blocks.</dd>
+<dd>Defines a tag as being set. Tags are processed by **ifdef** blocks.</dd>
 <dt>-W warning_name</dt>
-<dd>Resets, or adds to, the current list of maskable wrnings that will be emitted. The list of known names is to be found in the subsection describing <strong>with warning</strong>. A name should appear without quotes. The first -W switch resets the list to the warning being introduced, and each subsequent -> switch adds to the list.</dd>
+<dd>Resets, or adds to, the current list of maskable wrnings that will be emitted. The list of known names is to be found in the subsection describing **with warning**. A name should appear without quotes. The first -W switch resets the list to the warning being introduced, and each subsequent -> switch adds to the list.</dd>
 </dl>
-<p>The case of the switches is ignored, so -I and -i are equivalent, and so on.</p>
-<p>
+The case of the switches is ignored, so -I and -i are equivalent, and so on.
+
 Further notes:
-<ul>
-<li>
-Included files are searched for in all included paths, in the following order:
-<ol>
-<li>The current path</li>
-<li>Paths specified in a -I command line switch</li>
-<li>Paths specified in euinc.conf</li>
-<li>Paths listed in the EUINC environment variable, in the order in which they appear</li>
-<li>Paths listed in the EUDIR environment variable, in the order in which they appear</li>
-<li>The interpreter's path</li>
-</ol>
-</li>
-<li>The euinc.conf (Windows) / .euinc.conf (Linux/FreeBSD) file, if not specified using the -C command line switch, is searched for in:</li>
-<ol>
-<li>The interpreter's path</li>
-<li>
-<ul>
-<li>Linux/FreeBSD: The directory specified in the HOME  environment variable</li>
-<li>Windows: The "euphoria" subfolder of the directory specified in the APPDATA environment variable</li>
-</ul></li>
-<li> 
-<ul>
-<li>Linux/FreeBSD: The /etc/euphoria path</li>
-<li>Windows: The "euphoria" subfolder of the directory specified in the ALLUSERSPROFILE environment variable</li>
-</ul></li>
-</ol>
-euinc.conf is not supported under DOS, except through the -C command line switch.
-</li>
-<li>
-The initial list of maskable, unmasked warnings is:
-<ul>
-<li>resolution_warning</li>
-<li>override_warning</li>
-<li>builtin_chosen_warning</li>
-</ul></li>
-<li>Any number of any switch many appear in any order on the command line. However, only the euinc.conf file specified last will be inspected.</li>
-</ul>
-</p></doc>
 
-
-
-
-
-
-
+* Included files are searched for in all included paths, in the following order:
+## The current path
+## Paths specified in a -I command line switch
+## Paths specified in euinc.conf
+## Paths listed in the EUINC environment variable, in the order in which they appear
+## Paths listed in the EUDIR environment variable, in the order in which they appear
+## The interpreter's path
+* The ##euinc.conf## (Windows) / ##.euinc.conf## (Linux/FreeBSD) file, if not specified 
+  using the -C command line switch, is searched for in:
+## The interpreter's path
+*** Linux/FreeBSD: The directory specified in the ##HOME## environment variable
+*** Windows: The "euphoria" subfolder of the directory specified in the ##APPDATA## 
+    environment variable
+## Linux/FreeBSD: The /etc/euphoria path
+## Windows: The "euphoria" subfolder of the directory specified in the ##ALLUSERSPROFILE##
+   environment variable
+* euinc.conf is not supported under DOS, except through the -C command line switch.
+* The initial list of maskable, unmasked warnings is:
+** resolution_warning
+** override_warning
+** builtin_chosen_warning
+* Any number of any switch many appear in any order on the command line. However, only the 
+  euinc.conf file specified last will be inspected.
 

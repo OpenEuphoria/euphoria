@@ -1,0 +1,120 @@
+== Euphoria Database System (EDS)
+
+=== Introduction  
+
+Many people have expressed an interest in accessing databases using Euphoria
+programs. Those people have either wanted to access a name-brand database
+management system from Euphoria, or they've wanted a simple, easy-to-use,
+Euphoria-oriented database for storing data.  EDS is the latter. **It provides
+a simple, extremely flexible, database system for use by Euphoria programs.**
+ 
+=== Structure of an EDS database
+
+In EDS, a **database** is a single file with ##.edb## file type.  An EDS
+database contains 0 or more **tables**. Each table has a **name**, and contains
+0 or more **records**.  Each record consists of a **key** part, and a **data**
+part. The key can be **any** Euphoria object - an atom, a sequence, a
+deeply-nested sequence, whatever. Similarly the data can be **any** Euphoria
+object.  There are **no** constraints on the size or structure of the key or
+data. Within a given table, the keys are all unique. That is, no two records in
+the same table can have the same key part.
+ 
+The records of a table are stored in ascending order of key value.  An
+efficient binary search is used when you refer to a record by key. You can also
+access a record directly, with no search, if you know its current **record number** 
+within the table. Record numbers are integers from 1 to the length (current number of 
+records) of the table.  By incrementing the record number, you can efficiently step through 
+all the records, in order of key. Note however that a record's number can change
+whenever a new record is inserted, or an existing record is deleted.
+
+The keys and data parts are stored in a compact form, but **no** accuracy is lost when 
+saving or restoring floating-point numbers or **any** other Euphoria data.
+
+##database.e## will work as is, on all platforms. EDS database files can be copied and 
+shared between programs running on all platforms as well. Be sure to make an exact byte for
+byte copy using "binary" mode copying, rather than "text" or "ASCII" mode which
+could change the line terminators.
+ 
+Example:
+
+{{{
+database: "mydata.edb"
+    first table: "passwords"
+        record #1:  key: "jones"   data: "euphor123"
+        record #2:  key: "smith"   data: "billgates"
+        
+    second table: "parts"
+        record #1:  key: 134525    data: {"hammer", 15.95, 500}
+        record #2:  key: 134526    data: {"saw", 25.95, 100}
+        record #3:  key: 134530    data: {"screw driver", 5.50, 1500}
+}}}
+
+It's up to you to interpret the meaning of the key and data. **In keeping with
+the spirit of Euphoria, you have total flexibility.** Unlike most other
+database systems, an EDS record is //not// required to have either a fixed number of 
+fields, or fields with a preset maximum length.
+ 
+In many cases there will not be any natural key value for your records.  In
+those cases you should simply create a meaningless, but unique, integer to be
+the key. Remember that you can always access the data by record number. It's
+easy to loop through the records looking for a particular field value.
+
+=== How to access the data
+
+To reduce the number of parameters that you have to pass, there is a notion of
+the **current database**, and **current table**.  Most routines use these
+**current** values automatically.  You normally start by opening (or creating)
+a database file, then selecting the table that you want to work with.
+ 
+You can map a key to a record number using [[db_find_key]]. It uses an
+efficient binary search. Most of the other record-level routines expect the
+record number as an argument. You can very quickly access any record, given
+it's number. You can access all the records by starting at record number 1 and
+looping through to the record number returned by [[db_table_size]].
+ 
+=== How does storage get recycled?
+
+When you delete something, such as a record, the space for that item gets put
+on a free list, for future use. Adjacent free areas are combined into larger
+free areas. When more space is needed, and no suitable space is found on the
+free list, the file will grow in size.  Currently there is no automatic way
+that a file will shrink in size, but you can use a
+[[db_compress]] to completely rewrite a
+database, removing the unused spaces.
+
+=== Security / Multi-user Access
+
+This release provides a simple way to lock an entire database to prevent unsafe
+access by other processes.
+
+=== Scalability
+
+Internal pointers are 4 bytes. In theory that limits the size of a database
+file to 4 Gb. In practice, the limit is 2 Gb because of limitations in various
+C file functions used by Euphoria.  Given enough user demand, EDS databases
+could be expanded well beyond 2 Gb in the future.
+ 
+The current algorithm allocates 4 bytes of memory per record in the current
+table. So you'll need at least 4Mb RAM per million records on disk.
+ 
+The binary search for keys should work reasonably well for large tables. 
+ 
+Inserts and deletes take slightly longer as a table gets larger. 
+ 
+At the low end of the scale, it's possible to create extremely small databases
+without incurring much disk space overhead.
+
+=== Disclaimer
+
+Do not store valuable data without a backup.  RDS will not be responsible for
+any damage or data loss.
+
+=== Warning
+
+.edb files are binary files, not text files.  You **must** use ##BINARY## mode when
+transferring a .edb file via FTP from one machine to another. You must also
+avoid loading a .edb file into an editor and saving it. If you open a .edb file
+directly using Euphoria's open(), which is not recommended, you must use binary
+mode, not text mode.  Failure to follow these rules could result in 10
+(line-feed) and 13 (carriage-return) bytes being changed, leading to subtle and
+not-so-subtle forms of corruption in your database.
