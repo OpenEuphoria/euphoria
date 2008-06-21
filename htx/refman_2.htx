@@ -1829,14 +1829,17 @@ that?</p>
 
 <p>
 By using an optional parameter right after the control flow keyword. The
-parameter may take the following form: </p> <ul> <li> A label string, like in
-<eucode>break "this_block"</eucode></li> <li> A positive constant integer, the
+parameter may take the following form: </p>
+<ul>
+<li> A label string, like in
+<eucode>break "this_block"</eucode></li> 
+<li> A positive constant integer, the
 number of levels to act upon, like in "exit 2" to exit the loop right above the
-current one</li> <li> A nonpositive integer, which counts he levels backwards,
+current one</li> 
+<li> A nonpositive integer, which counts he levels backwards,
 like in "continue -1" to start the next iteration of the second topmost loop
-(compare with s[$-1])</li> <li> A for loop index variable name, like in "retry
-i",which restarts the current iteration of the active for loop which has i as
-loop variable.</li> </ul>
+(compare with s[$-1])</li> 
+</ul>
 
 <p>
 For easier and safer program maintainance, the explicit label form is to be
@@ -2655,7 +2658,7 @@ They must always appear between double quotes, except when used in a -W command 
 <p>
 You can launch Euphoria with some extra command line switches, in order to add or change 
 configuration elements. When running a GUI, there is always some way to open a prompt and 
-enter any text with options, arguments and whatever the program being launched may need for 
+enter any text with options, arguments and whatever the program being launched may need for
 proper, expectd operation. Under <platform>Windows</platform>, this s achieved by clicking the 
 Run... start menu entry, or hitting Windows-R.</p>
 

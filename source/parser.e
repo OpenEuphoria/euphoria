@@ -53,8 +53,6 @@ sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the 
 sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
 sequence if_labels         -- sequence of if block labels, 0 for unlabelled blocks
 
-sequence for_vars, for_where -- list of loop var s.t. indexes and for-loop nesting level
-
 -- general structure control
 sequence block_list        -- list of opcodes for currently active blocks. This list never shrinks
 integer block_index        -- index of currently active block
@@ -185,8 +183,6 @@ global procedure InitParser()
     loop_labels = {}
     if_labels = {}
     if_stack = {}
-    for_vars = {}
-    for_where = {}
     continue_addr = {}
     retry_addr = {}
     entry_addr = {}
@@ -1398,19 +1394,6 @@ function exit_level(token tok,integer flag)
 			CompileErr("Unknown block label")
 		end if 
 		return {num_labels+1-n, next_token()}
-	elsif tok[T_ID]=VARIABLE then
-		if flag=1 then
-			CompileErr("Use of a for loop index with the break statement is not supported.")
-		end if
-		n = SymTab[tok[T_SYM]][S_SCOPE]
-		if (n = SC_GLOOP_VAR) != (CurrentSub = TopLevelSub) then
-			CompileErr("Attempting to exit a block which is out of reach")
-		end if
-		n = find(tok[T_SYM],for_vars)
-		if n=0 then
-			CompileErr("Optional argument to exit/break is either a numerical constant, label string or for loop index name")
-		end if
-		return {num_labels+1-for_where[n], next_token()}
 	else
 		return {1, tok} -- no parameters
 	end if
@@ -2166,8 +2149,6 @@ procedure For_statement()
     if finish_block_header(FOR) then
         CompileErr("entry is not supported in for loops")
     end if
-    for_vars &= loop_var_sym
-    for_where &= length(loop_labels)
     entry_addr &= 0
 	bp1 = length(Code)+1
 	emit_addr(0) -- will be patched - don't straighten
@@ -2198,9 +2179,7 @@ procedure For_statement()
 		end if
 	end if  
 	Hide(loop_var_sym)
-    for_vars = for_vars[1..$-1]
-    for_where = for_where[1..$-1]
-    exit_loop(exit_base) 
+    exit_loop(exit_base)
 end procedure
 
 function CompileType(symtab_index type_ptr)
