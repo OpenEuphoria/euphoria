@@ -1,6 +1,6 @@
 include unittest.e
-
-without warning
+include machine.e
+warning_file(-1)
 
 integer n,m,c
 n = 0

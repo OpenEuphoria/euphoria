@@ -201,6 +201,8 @@ procedure main()
 
 	end if
 	TempErrName = "ex.err"
+	TempWarningName = STDERR
+	display_warnings = 1
 
 	if TRANSLATE or BIND or INTERPRET then
 		InitBackEnd(0)

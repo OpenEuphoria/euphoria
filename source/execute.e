@@ -41,7 +41,8 @@ constant M_CALL_BACK = 52,
 		 M_CRASH_ROUTINE = 66,
 		 M_CRASH_MESSAGE = 37,
 		 M_CRASH_FILE = 57,
-		 M_TICK_RATE = 38
+		 M_TICK_RATE = 38,
+		 M_WARNING_FILE	= 72
 		 
 constant C_MY_ROUTINE = 1,
 		 C_USER_ROUTINE = 2,
@@ -3210,10 +3211,19 @@ procedure opMACHINE_PROC()
 	
 	elsif v = M_CRASH_MESSAGE then
 		crash_msg = val[b]
-		
+
 	elsif v = M_CRASH_FILE and sequence(val[b]) then
 		err_file_name = val[b]  
 	
+	elsif v = M_WARNING_FILE then
+		display_warnings = 1
+		if sequence(val[b]) then
+			TempWarningName = val[b]
+		else
+			TempWarningName = STDERR
+			display_warnings = (val[b] >= 0)
+		end if
+
 	elsif EDOS and v = M_TICK_RATE and val[b] > 18 and val[b] < 10000 then
 		clock_period = 1 / val[b]
 		machine_proc(v, val[b]) 

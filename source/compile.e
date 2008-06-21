@@ -91,10 +91,11 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 		M_CHDIR        = 63,
 		M_SLEEP        = 64,
 		M_BACKEND      = 65,
-		M_CRASH        = 67
+		M_CRASH        = 67,
+		M_WARNING_FILE = 72
 
 
-constant INIT_CHUNK = 2500 -- maximum number of literals to 
+constant INIT_CHUNK = 2500 -- maximum number of literals to
 						   -- initialize in one init-*.c file (one routine)
 
 global sequence target   -- struct minmax

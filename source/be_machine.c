@@ -169,7 +169,9 @@ extern int eu_dll_exists;
 extern struct exe_routines backpointers;
 extern int clocks_per_sec;
 extern int clk_tck;
-extern char *TempErrName; 
+extern char *TempErrName;
+extern char *TempWarningName;
+extern int display_warnings;
 extern int allow_break;
 extern int control_c_count;
 #ifndef ERUNTIME
@@ -484,7 +486,7 @@ IFILE long_iopen(char *name, char *mode)
 int long_open(char *name, int mode)
 /* open a file. Has support for Windows 95 long filenames */
 {
-#if defined(EDOS) && !defined(EDJGPP)    
+#if defined(EDOS) && !defined(EDJGPP)
 	return open(long_to_short(name), mode);
 #else
 	return open(name, mode);
@@ -3704,6 +3706,23 @@ static object crash_file(object x)
 	return ATOM_1;
 }
 
+static object warning_file(object x)
+/* record user's alternate path for a warning file log */
+{   
+	// use malloc/free
+	if (TempWarningName != NULL) free(TempWarningName);
+	if IS_ATOM(x) {
+		TempWarningName = NULL;
+		if (!IS_ATOM_INT(x)) x = (long)(DBL_PTR(x)->dbl);
+		display_warnings = (INT_VAL(x) >= 0)?1:0;
+	}
+	else {
+		TempWarningName = malloc(SEQ_PTR(x)->length + 1);
+		MakeCString(TempWarningName, x);
+	}
+	return ATOM_1;
+}
+
 static object crash(object x)
 {
 	char *message;
@@ -4921,6 +4940,10 @@ object machine(object opcode, object x)
 			return crash_file(x);
 			break;
 			
+			case M_WARNING_FILE:
+			return warning_file(x);
+			break;
+			
 			case M_FLUSH:
 				return flush_file(x);
 				break;
@@ -4945,7 +4968,7 @@ object machine(object opcode, object x)
 				return e_sleep(x);
 				break;
 
-#ifndef ERUNTIME            
+#ifndef ERUNTIME
 			case M_BACKEND:
 				return start_backend(x);
 				break;
@@ -4963,7 +4986,7 @@ object machine(object opcode, object x)
 				free_regex(x);
 				return 1;
 				break;
-				
+
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

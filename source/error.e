@@ -14,26 +14,24 @@ Errors = 0   -- number of errors detected during compile
 
 global integer TempErrFile
 global sequence TempErrName
+global object TempWarningName
+global integer display_warnings
 global object ThisLine        -- current line of source (or -1)
 global integer bp             -- input line index of next character 
 
-global sequence warning_list, warning_target
+global sequence warning_list
 warning_list = {}
-warning_target = {STDERR}
 
 global procedure screen_output(integer f, sequence msg)
 -- output messages to the screen or a file    
 	puts(f, msg)
 end procedure
 
-integer disable_all_warnings
-disable_all_warnings = 0
-
 global procedure Warning(sequence msg, integer mask)
 -- add a warning message to the list
 	sequence p
-	
-	if disable_all_warnings then
+
+	if display_warnings=0 then
 		return
 	end if
 
@@ -43,12 +41,11 @@ global procedure Warning(sequence msg, integer mask)
 			return -- duplicate
 		end if
 		warning_list = append(warning_list, p)
-		warning_target &= 0
 	end if
 end procedure
 
 global procedure Log_warnings(object policy)
-	disable_all_warnings = 0
+	display_warnings = 1
 	if sequence(policy) then
 		if length(policy)=0 then
 			policy = STDERR
@@ -57,11 +54,9 @@ global procedure Log_warnings(object policy)
 		if policy >= 0 and policy < STDERR+1 then
 			policy  = STDERR
 		elsif policy < 0 then
-			disable_all_warnings = 1
-			return
+			display_warnings = 0
 		end if
 	end if
-	warning_target[$] = floor(policy)
 end procedure
 
 global function ShowWarnings(integer errfile)
@@ -69,24 +64,23 @@ global function ShowWarnings(integer errfile)
 	integer c,last_change, fn
 
 	if errfile=0 then
+		if display_warnings = 0 then
+			return length(warning_list)
+		end if
+		if integer(TempWarningName) then
+			errfile = STDERR
+		else
+			errfile = open(TempWarningName,"w")
+			if errfile = -1 then
+				puts(STDERR,"\nUnable to create warning file " & TempWarningName&'\n')
+				return length(warning_list)
+			end if
+		end if
+	else
 		errfile = STDERR
 	end if
 
 	for i = 1 to length(warning_list) do
-		if sequence(warning_target[i]) then
-			fn = open(warning_target[i],"w")
-			if fn>-1 then
-				if last_change=1 then
-					close(errfile)
-				else
-					last_change = 1
-				end if
-				errfile = fn
-			end if
-		elsif warning_target[i] then
-			last_change = warning_target[i]
-		end if
-
 		if errfile = STDERR then
 			screen_output(STDERR, warning_list[i])
 			if remainder(i, 20) = 0 then
@@ -100,6 +94,9 @@ global function ShowWarnings(integer errfile)
 			puts(errfile, warning_list[i])
 		end if
 	end for
+	if errfile > STDERR then
+	    close(errfile)
+	end if
 	return length(warning_list)
 end function
 
@@ -107,7 +104,7 @@ global procedure Cleanup(integer status)
 -- clean things up before quitting
 	integer w
 	
-	w = ShowWarnings(0)
+	w = ShowWarnings(status)
 	
 	if not TRANSLATE and
 	   (BIND or EWINDOWS or EUNIX) and 

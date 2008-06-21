@@ -2337,14 +2337,14 @@ With <strong>exw.exe</strong> or <strong>exu</strong>, control-c will always
 stop your program immediately.</p>
 
 <h2>Miscellaneous statements</h2>
-<h3>The warning() statement</h3>
+<h3>The warning() procedure</h3>
 <p>
- Writing a library has specific requirements, since the code you write will be mainly used 
- inside code you didn't write. It may be desirable then to influence, from inside the library, 
+ Writing a library has specific requirements, since the code you write will be mainly used
+ inside code you didn't write. It may be desirable then to influence, from inside the library,
  that code you didn't write.
  </p>
  <p>
- This is what warning(), in a limited way, does. It enables to generate custom warnings in  
+ This is what warning(), in a limited way, does. It enables to generate custom warnings in
  code that will include yours. Of course, you can also geenrate warnings in your own code, for
  instance as a kind of memo. The without warning top level statement disables such warnings.
  </p>
@@ -2356,7 +2356,7 @@ stop your program immediately.</p>
  warning("The foo() procedure is obsolete, use bar() instead.")
  ?n
  end procedure
- 
+
  -- some_app.exw
  include mylib.e
  foo(123)
@@ -2370,6 +2370,18 @@ stop your program immediately.</p>
  </pre>
 <p>
 <b>N.B.: </b>the argument to warning() is a single literal constant enclosed in double quotes, like above. Using any kind of variable or expression will result in a blank warning.
+</p>
+
+<h3>The warning_file() proceduure</h3>
+<p>
+Just as for the error file, you can redirect any warnings which are not masked - either 
+because they cannot or were not - using warning_file(<em>destination</em>), with an extra 
+twist:
+<ul>
+<li>If <em>destination</em> is a sequence, it is assumed to be a file name, and all warnings will go there instead of the console;</li>
+<li>If <em>destination</em> is a nonnegative atom, the standard error will be used, which is the default behaviour;</li>
+<li>If <em>destination</em> is a negative atom, any warning generation or output will be suppressed, including for otherwise non maskable warnings. This is an extreme measure which should be taken in very rare cases only. Use a warning file as much as possible.</li>
+</ul>
 </p>
 
 <h2>Special Top-Level Statements</h2>
@@ -2641,7 +2653,11 @@ They must always appear between double quotes, except when used in a -W command 
 <h2>Command line switches</h2>
 
 <p>
-You can launch Euphoria with some extra command line switches, in order to add or change configuration elements. When running a GUI, there is always some way to open a prompt and enter any text with options, arguments and whatever the program being launched may need for proper, expectd operation. Under <platform>Windows</platform>, this s achieved by clicking the Run... start menu entry, or hitting Windows-R.</p>
+You can launch Euphoria with some extra command line switches, in order to add or change 
+configuration elements. When running a GUI, there is always some way to open a prompt and 
+enter any text with options, arguments and whatever the program being launched may need for 
+proper, expectd operation. Under <platform>Windows</platform>, this s achieved by clicking the 
+Run... start menu entry, or hitting Windows-R.</p>
 
 <p>
 The following items may be changed or added, one at a time:</p>

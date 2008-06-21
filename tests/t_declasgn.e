@@ -1,4 +1,6 @@
 include unittest.e
+include machine.e
+
 with warning = "sc_warning"
 integer n=3,n0
 sequence s0="Useless code"
@@ -17,5 +19,8 @@ test_equal("Assign on declare 1",s0,"Useless code")
 test_equal("Assign on declare 1",n,3)
 test_equal("Use default params in initial value",7,foo())
 warning("Useless code",64)
+with warning -= "sc_warning"
+if n and f()=7 then end if
+warning_file("warning.lst")
 
 test_embedded_report()

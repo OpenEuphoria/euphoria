@@ -207,7 +207,7 @@
 	Warnings now split between maskable and non maskable warnings. <strong>without warning</strong>
 	now only suppresses maskable warnings and saves the current mask, which <strong>with 	
 	warning</strong> restores. <strong>with warning</strong> has been enhanced in order to 
-	individually turn maskable warnings on or off.
+	individually turn maskable warnings on or off. Warnings also may be redirected or suppressed using warning_file(<em>destination</em>).
 </li>
 <li>
 	New scope: <b>export</b>.  Symbols with the export scope can only be seen from files that:
@@ -221,7 +221,7 @@
     Routine resolution changes<ol>
     <li>Routines the same name as an internal no longer override the internal by default. You
         must use the keyword <b>override</b>.</li>
-    <li>An unqualified call to routine that exists as an internal calls the internal unless 
+    <li>An unqualified call to routine that exists as an internal calls the internal unless
         overridden with the override keyword. global and export functions are not called. A
         namespace must be used.</li>
     </ol>

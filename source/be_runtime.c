@@ -116,6 +116,8 @@ extern int il_file;
 extern struct IL fe;
 IFILE TempErrFile;
 char *TempErrName; // "ex.err" - but must be malloc'd
+char *TempWarningName;
+int display_warnings;
 extern int Executing;
 
 #ifdef EWINDOWS
@@ -524,12 +526,12 @@ void call_crash_routines()
 	if (crash_count > 0) 
 		return;
 	crash_count++;
-	
+
 	free(TempErrName);
 	TempErrName = (char *)malloc(16);
 	strcpy(TempErrName, "ex_crash.err");
 	
-#ifndef ERUNTIME    
+#ifndef ERUNTIME
 	// clear the interpreter call stack
 	expr_stack[1] = 0;
 	expr_top = &expr_stack[2];
@@ -554,7 +556,7 @@ void call_crash_routines()
 				break;
 		}
 		else if (IS_ATOM(quit)) {
-			if (DBL_PTR(quit)->dbl != 0.0) 
+			if (DBL_PTR(quit)->dbl != 0.0)
 				break;
 		}
 		else {
@@ -3730,6 +3732,8 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, int **ip, int code,
 	InitFiles();
 	TempErrName = (char *)malloc(8);  // malloc, not EMalloc
 	strcpy(TempErrName, "ex.err");
+	TempWarningName = NULL;
+	display_warnings = 1;
 #ifdef EBORLAND
 	PatchCallc();
 #endif
@@ -4456,7 +4460,8 @@ void Cleanup(int status)
 	char *xterm;
 	int i;
 	long c;
-	
+	FILE *wrnf = NULL;
+
 	gameover = TRUE;
 
 #ifndef ERUNTIME    
@@ -4481,19 +4486,26 @@ void Cleanup(int status)
 	}
 	/* conin might be closed here, if we were debugging */
 #ifndef ERUNTIME
-	if (warning_count) {
-		screen_output(stderr, "\n");
-		for (i = 0; i < warning_count; i++) {
-			screen_output(stderr, warning_list[i]);
-			if (((i+1) % 20) == 0) {
-				screen_output(stderr, "\nPress Enter to continue, q to quit\n");
-#ifdef EWINDOWS             
-				c = wingetch();
+	if (warning_count && display_warnings) {
+		if (TempWarningName) {
+			wrnf = iopen(TempWarningName,"w");
+			for (i = 0; i < warning_count; i++) iprintf(wrnf,"%s",warning_list[i]);
+			close(wrnf);
+		}
+		else {
+			screen_output(stderr, "\n");
+			for (i = 0; i < warning_count; i++) {
+				screen_output(stderr, warning_list[i]);
+				if (((i+1) % 20) == 0) {
+					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
+#ifdef EWINDOWS
+					c = wingetch();
 #else
-				c = getc(stdin);
-#endif              
-				if (c == 'q') {
-					break;
+					c = getc(stdin);
+#endif
+					if (c == 'q') {
+						break;
+					}
 				}
 			}
 		}
@@ -4517,7 +4529,7 @@ void Cleanup(int status)
 #endif
 
 #ifdef EWINDOWS 
-	if (warning_count || (status && !user_abort)) {
+	if (TempWarningName == NULL && display_warnings && (warning_count || (status && !user_abort))) {
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
 		screen_output(stderr, "\n\nPress Enter...\n");

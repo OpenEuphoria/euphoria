@@ -53,7 +53,8 @@ constant M_ALLOC = 16,
 		 M_F32_TO_A = 49,
 		 M_CRASH_FILE = 57,
 		 M_CRASH_ROUTINE = 66,
-		 M_CRASH = 67
+		 M_CRASH = 67,
+		 M_WARNING_FILE = 72
 		 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -249,6 +250,12 @@ global procedure crash_file(sequence file_path)
 -- Specify a file path name in place of "ex.err" where you want
 -- any diagnostic information to be written.
 	machine_proc(M_CRASH_FILE, file_path)
+end procedure
+
+global procedure warning_file(object file_path)
+-- Specify a file path where to output warnings. Any atom >=0 causes STDERR to be used, and a 
+-- value <0 suppresses output. Use the latter in extreme cases only.
+	machine_proc(M_WARNING_FILE, file_path)
 end procedure
 
 global procedure crash_routine(integer proc)
