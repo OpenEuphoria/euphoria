@@ -14,7 +14,7 @@ Euphoria-related content.  Euphoria has been used in a variety of commercial
 programs.  The //Windows// version has been used to create numerous GUI,
 utility and Internet-related programs. The //DOS// version has been used to
 create many exciting high-speed action games, complete with Sound Blaster sound
-effects.  The //Linux// and FreeBSD// versions have been used to write GUI 
+effects.  The //Linux// and //FreeBSD// versions have been used to write GUI 
 programs, Web-based (CGI, FastCGI and SCGI) programs, and lots of useful tools and utilities.
 
 == Yet Another Programming Language?

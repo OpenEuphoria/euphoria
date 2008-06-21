@@ -1,21 +1,19 @@
-<doc title="Euphoria Reference Manual Part I - Section 2">
-
 == Language Definition
 
 === Objects
 
 ==== Atoms and Sequences
 
-All data **objects** in Euphoria are either **atoms**
-or **sequences**.  An **atom** is a single numeric
-value.  A **sequence** is a collection of numeric values.
+All data **objects** in Euphoria are either **atoms** or **sequences**.  An
+**atom** is a single numeric value.  A **sequence** is a collection of numeric
+values.
 
-The **objects** contained in a sequence can be an arbitrary mix of
-atoms or sequences. A sequence is represented by a list of objects in brace
-brackets, separated by commas. Atoms can have any integer or double-precision
-floating point value. They can range from approximately -1e300 (minus one times
-10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
-some Euphoria objects:
+The **objects** contained in a sequence can be an arbitrary mix of atoms or
+sequences. A sequence is represented by a list of objects in brace brackets,
+separated by commas. Atoms can have any integer or double-precision floating
+point value. They can range from approximately -1e300 (minus one times 10 to
+the power 300) to +1e300 with 15 decimal digits of accuracy. Here are some
+Euphoria objects:
 
 <eucode>
 -- examples of atoms:

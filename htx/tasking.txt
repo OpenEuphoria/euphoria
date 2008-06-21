@@ -1,126 +1,65 @@
-<_init_comment>
-<html>
-<head><title>Multitasking in Euphoria</title>
-<_css>
-</head>
-<body>
-<_width>
-<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
-<br>
-	                  Multitasking in Euphoria
-</font></_center>
+== Multitasking in Euphoria
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul> Introduction </_dul> 
-</font>
+=== Introduction
 
-Euphoria allows you to set up multiple, independent tasks.
-Each task has its own current statement that it is executing,
-its own call stack, and its own set of private variables.
-Tasks run in parallel with each other. That is, before any given
-task completes its work, other tasks can be given a chance to execute.
-Euphoria's task scheduler decides which task should be active at
-any given time.
+Euphoria allows you to set up multiple, independent tasks.  Each task has its
+own current statement that it is executing, its own call stack, and its own set
+of private variables.  Tasks run in parallel with each other. That is, before
+any given task completes its work, other tasks can be given a chance to
+execute.  Euphoria's task scheduler decides which task should be active at any
+given time.
 
+=== Why Multitask?
+ 
+Most programs do not need to use multitasking and would not benefit from it.
+However it is very useful in some cases:
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Why Multitask?</_dul>
-</font> 
- 
- 
- Most programs do not need to use multitasking and would not benefit from it.
- However it is very useful in some cases:
+* Action games where numerous characters, projectiles etc. need to be displayed in a 
+  realistic way, as if they are all independent of one another. Language War is a good example.
+* Situations where your program must sometimes wait for input from a human or other computer. 
+  While one task in your program is waiting, another separate task could be doing some 
+  computation, disk search, etc.
+* Windows, Linux and FreeBSD all have special API routines that let you initiate some I/O, 
+  and then proceed without waiting for it to finish. A task could check periodically to 
+  see if the I/O is finished, while another task is performing some useful computation, or 
+  is perhaps starting another I/O operation.
+* Situations where your program might be called upon to serve many users simultaneously. 
+  With multiple tasks, it's easy to keep track of the state of your interaction with 
+  all these separate users.
+* Perhaps you can divide your program into two logical processes, and have a task for each.
+  One produces data and stores it, while the other reads the data and processes it. Maybe 
+  the first process is time-critical, since it interacts with the user, while the second 
+  process can be executed during lulls in the action, where the user is thinking or doing 
+  something that doesn't require quick response.
 
- <ul>
- <li>
+=== Types of Tasks
  
-     Action games where numerous characters, projectiles etc. need to be
-     displayed in a realistic way, as if they are all independent
-     of one another. Language War is a good example.
- <li>     
- 
-     Situations where your program must sometimes wait for input
-     from a human or other computer. While one task in your program
-     is waiting, another separate task could be doing some 
-     computation, disk search, etc.
- <li>     
- 
-     Windows, Linux and FreeBSD all have special API routines that
-     let you initiate some I/O, and then proceed without waiting for
-     it to finish. A task could check periodically to see if the I/O 
-     is finished, while another task is performing some useful 
-     computation, or is perhaps starting another I/O operation.
-      
- <li>
- 
-     Situations where your program might be called upon to serve
-     many users simultaneously. With multiple tasks, it's easy to
-     keep track of the state of your interaction with all these
-     separate users.
- 
- <li>
- 
-     Perhaps you can divide your program into two logical processes,
-     and have a task for each.
-     One produces data and stores it, while the other reads the data
-     and processes it. Maybe the first process is time-critical,
-     since it interacts with the user, while the second process can
-     be executed during lulls in the action, where the user is
-     thinking or doing something that doesn't require quick response.
- 
- </ul>
-      
+Euphoria supports two types of tasks: real-time tasks, and time-share tasks. 
 
+**Real-time tasks** are scheduled at intervals, specified by a number of
+seconds or fractions of a second. You might schedule one real-time task to be
+activated every 3 seconds, while another is activated every 0.1 seconds.  In
+Language War, when the Euphoria ship moves at warp 4, or a torpedo flies across
+the screen, it's important that they move at a steady, timed pace.
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Types of Tasks</_dul>
-</font> 
- 
+**Time-share tasks** need a share of the CPU but they needn't be rigidly
+scheduled according to any clock. The 4 sorting tasks in the ##demo\dos32\tasksort.ex## 
+demo, share the CPU, but it isn't important that they be scheduled at a particular time. 
 
- Euphoria supports two types of tasks: real-time tasks,
- and time-share tasks. 
- 
- 
- **Real-time tasks** are scheduled at intervals,
- specified by a number of seconds or fractions of a second. You might
- schedule one real-time task to be activated every 3 seconds, while another is
- activated every 0.1 seconds. 
- In Language War, when the Euphoria ship moves at warp 4, or a torpedo 
- flies across the screen, it's important that they move at a 
- steady, timed pace.
- 
- 
- **Time-share tasks** need a share of the CPU
- but they needn't be rigidly scheduled according to any clock. The 4 sorting 
- tasks in the demo\dos32\tasksort.ex demo, share the CPU, but it isn't 
- important that they be scheduled at a particular time. 
+It's possible to reschedule a task at any time, changing its timing or its
+slice of the CPU. You can even convert a task from one type to the other
+dynamically.
 
- 
- It's possible to reschedule a task at any time, changing its timing or its
- slice of the CPU. You can even convert a task from one type to the 
- other dynamically.
-
-
-
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>A Small Example</_dul>
-</font> 
- 
+=== A Small Example
  
 This example shows the main task (which all Euphoria programs start off
 with) creating two additional real-time tasks. We call them real-time because
 they are scheduled to get control every few seconds.
 
-
-You should try copy/pasting and running this example.
-You'll see that task 1 gets control every 2.5 to 3 seconds,
-while task 2 gets control every 5 to 5.1 seconds.
-In between, the main task (task 0), has control as it
-checks for a 'q' character to abort execution.
+You should try copy/pasting and running this example.  You'll see that task 1
+gets control every 2.5 to 3 seconds, while task 2 gets control every 5 to 5.1
+seconds.  In between, the main task (task 0), has control as it checks for a
+'q' character to abort execution.
 
 <eucode>
 constant TRUE = 1, FALSE = 0
@@ -169,116 +108,91 @@ end while
 
 puts(1, "main task: stop\n")
 -- program ends when main task is finished
+</eucode>
 
+=== Comparison with earlier multitasking schemes
+
+In earlier releases of Euphoria, Language War already had a mechanism for
+multitasking, and some people submitted to User Contributions their own
+multitasking schemes. These were all implemented using plain Euphoria code,
+whereas this new multitasking feature is built into the interpreter. Under the
+old Language War tasking scheme a scheduler would *call* a task, which would
+eventually have to *return* to the scheduler, so it could then dispatch the
+next task. 
+
+In the new system, a task can call the built-in procedure task_yield() at any
+point, perhaps many levels deep in subroutine calls, and the scheduler, which
+is now part of the interpreter, will be able to transfer control to any other
+task. When control comes back to the original task, it will resume execution at
+the statement after task_yield(), with its call stack and all private variables
+intact. Each task has its own call stack, program counter (i.e. current
+statement being executed), and private variables.  You might have several tasks
+all executing a routine at the same time, and each task will have its own set
+of private variable values for that routine. Global and local variables are
+shared between tasks.
+
+It's fairly easy to take any piece of code and run it as a task.  Just insert a
+few task_yield() statements so it won't hog the CPU.
+
+=== Comparison with multithreading
+
+When people talk about threads, they are usually referring to a mechanism
+provided by the operating system. That's why we prefer to use the term
+"multitasking".  Threads are generally "pre-emptive", whereas Euphoria
+multitasking is "cooperative". With preemptive threads, the operating system
+can force a switch from one thread to another at virtually any time.  With
+cooperative multitasking, each task decides when to give up the CPU and let
+another task get control. If a task were "greedy" it could keep the CPU for
+itself for long intervals. However since a program is written by one person or
+group that wants the program to behave well, it would be silly for them to
+favor one task like that.  They will try to balance things in a way that works
+well for the user.  An operating system might be running many threads, and many
+programs, that were written by different people, and it would be useful to
+enforce a reasonable degree of sharing on these programs.  Preemption makes
+sense across the whole operating system. It makes far less sense within one
+program.
+
+Furthermore, threading is notorious for causing subtle bugs.  Nasty things can
+happen when a task loses control at just the wrong moment. It may have been
+updating a global variable when it loses control and leaves that variable in an
+inconsistent state.  Something as trivial as incrementing a variable can go
+awry if a thread-switch happens at the wrong moment. e.g. consider two threads.
+One has:
+
+<eucode>
+x = x + 1
+</eucode>
+
+and the other also has:
+
+<eucode>
+x = x + 1
 </eucode>
  
- 
+At the machine level, the first task loads the value of x into a register, then
+loses control to the second task which increments x and stores the result back
+into x in memory. Eventually control goes back to the first task which also
+increments x *using the value of x in the register*, and then stores it into x
+in memory. So x has only been incremented once instead of twice as was
+intended. To avoid this problem, each thread would need something like:
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Comparison with earlier multitasking schemes</_dul>
-</font> 
- 
- 
- In earlier releases of Euphoria, Language War already had a mechanism 
- for multitasking, and some people submitted to User Contributions 
- their own multitasking schemes. These were all implemented using
- plain Euphoria code, whereas this new multitasking feature 
- is built into the interpreter. Under the old Language War tasking
- scheme a scheduler would *call* a task, which would eventually
- have to *return* to the scheduler, so it could then dispatch 
- the next task. 
- 
- 
- In the new system, a task can call the built-in procedure task_yield()
- at any point, perhaps many levels deep in subroutine calls, and 
- the scheduler, which is now part of the interpreter, will be able
- to transfer control to any other task. When control comes back to
- the original task, it will resume execution at the statement
- after task_yield(), with its call stack and all private variables 
- intact. Each task has its own call stack, program counter 
- (i.e. current statement being executed), and private variables. 
- You might have several tasks all executing a routine at the same time, 
- and each task will have its own set of private variable values 
- for that routine. Global and local variables are shared between tasks.
- 
- 
- It's fairly easy to take any piece of code and run it as a task.
- Just insert a few task_yield() statements so it won't hog the CPU.
+<eucode>
+lock x
+x = x + 1
+unlock x
+</eucode>
 
- 
+where lock and unlock would be special primitives that are safe for threading.
+It's often the case that programmers forget to lock data, but their program
+seems to run ok. Then one day, many months after they've written the code, the
+program crashes mysteriously.
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Comparison with multithreading</_dul>
-</font> 
- 
+Cooperative multitasking is much safer, and requires far fewer expensive
+locking operations. Tasks relinquish control at safe points once they have
+completed a logical operation.
 
- When people talk about threads, they are usually referring to 
- a mechanism provided by the operating system. That's why we
- prefer to use the term "multitasking".
- Threads are generally "pre-emptive", whereas Euphoria multitasking
- is "cooperative". With preemptive threads, the operating system
- can force a switch from one thread to another at virtually any time.
- With cooperative multitasking, each task decides when to give up
- the CPU and let another task get control. If a task were "greedy"
- it could keep the CPU for itself for long intervals. However since
- a program is written by one person or group that wants the program
- to behave well, it would be silly for them to favor one task like that. 
- They will try to balance things in a way that works well for the user.
- An operating system might be running many threads, and many
- programs, that were written by different people, and it would be 
- useful to enforce a reasonable degree of sharing on these programs. 
- Preemption makes sense across the whole operating system. It makes 
- far less sense within one program.
+=== Summary 
  
- 
- Furthermore, threading is notorious for causing subtle bugs.
- Nasty things can happen when a task loses control at just the
- wrong moment. It may have been updating a global variable when
- it loses control and leaves that variable in an inconsistent state.
- Something as trivial as incrementing a variable can go awry
- if a thread-switch happens at the wrong moment. e.g. consider
- two threads. One has:
- 
-     &nbsp;&nbsp;&nbsp;&nbsp;x = x + 1
-     
- and the other also has:
-     
-     &nbsp;&nbsp;&nbsp;&nbsp;x = x + 1
- 
- At the machine level, the first task loads the value of x into a register, 
- then loses control to the second task which increments x and stores the
- result back into x in memory. Eventually control goes back to the first task 
- which also increments x *using the value of x in the register*, 
- and then stores it into x in memory. So x has only been incremented once 
- instead of twice as was intended. To avoid this problem, each thread 
- would need something like:
- 
-     &nbsp;&nbsp;&nbsp;&nbsp;lock x<br>
-     
-     &nbsp;&nbsp;&nbsp;&nbsp;x = x + 1<br>
-     
-     &nbsp;&nbsp;&nbsp;&nbsp;unlock x<br>
- 
- 
- where lock and unlock would be special primitives that are safe for
- threading. It's often the case that programmers forget to lock data,
- but their program seems to run ok. Then one day, many months after they've
- written the code, the program crashes mysteriously.
- 
- 
- Cooperative multitasking is much safer, and requires far fewer 
- expensive locking operations. Tasks relinquish control at safe points 
- once they have completed a logical operation.
- 
- 
+For a complete function reference, refer to the Library Documentation
+href="lib_task.htm">Multitasking</a>.
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br> 
- <_dul>Complete Function Reference</_dul>
-</font> 
-
- 
- For a complete function reference, refer to the Library Documentation
- page: a href="lib_task.htm">Multitasking</a>.
