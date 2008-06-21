@@ -342,10 +342,12 @@ procedure CheckPlatform()
 	
 	if TWINDOWS then
 		OpDefines &= {"WIN32"}
-	elsif TLINUX then
-		OpDefines &= {"LINUX", "UNIX"}
+	elsif TOSX then
+		OpDefines &= {"UNIX", "OSX"}
 	elsif TBSD then
 		OpDefines &= {"UNIX", "FREEBSD"}
+	elsif TLINUX then
+		OpDefines &= {"LINUX", "UNIX"}
 	elsif TUNIX then --right now this can never happen
 		OpDefines &= {"UNIX"}
 	elsif TDOS then

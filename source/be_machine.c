@@ -2973,7 +2973,7 @@ static object Seek(object x)
 	pos = get_pos_off("seek", x2); 
 	if (pos == -1)
 		result = iiseek(f, 0L, SEEK_END);
-#if defined(ELINUX) | defined(EWATCOM)
+#if defined(ELINUX) || defined(EWATCOM)
 	else if (!(pos > (IOFF)MAXINT || pos < (IOFF)MININT))
 		result = iiseek(f, pos, SEEK_SET);
 #endif

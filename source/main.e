@@ -34,9 +34,11 @@ function ProcessOptions()
 
 		if EUNIX then
 			if BIND then
-				screen_output(STDERR, "for Linux/FreeBSD.\n")
+				screen_output(STDERR, "for Linux/FreeBSD/OS X.\n")
 			else
-				if EBSD then
+				if EOSX then
+					screen_output(STDERR, "for OS X.\n")
+				elsif EBSD then
 					screen_output(STDERR, "for FreeBSD.\n")
 				else
 					screen_output(STDERR, "for Linux.\n")

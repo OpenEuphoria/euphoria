@@ -46,13 +46,16 @@ EBSDFLAG=-DELINUX
 endif
 
 ifeq  "$(EBSD)" "1"
-LDLFLAG=
-EBSDFLAG=-DEBSD -DEBSD62
-SEDFLAG=-Ei
+  LDLFLAG=
+  EBSDFLAG=-DEBSD -DEBSD62
+  SEDFLAG=-Ei
+  ifeq "$(EOSX)" "1"
+    EBSDFLAG=-DEBSD -DEBSD62 -DEOSX
+  endif
 else
-LDLFLAG=-ldl
-PREREGEX=$(FROMBSDREGEX)
-SEDFLAG=-ri
+  LDLFLAG=-ldl
+  PREREGEX=$(FROMBSDREGEX)
+  SEDFLAG=-ri
 endif
 
 ifeq "$(EU3)" "1"
@@ -341,7 +344,7 @@ exu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJEC
 exu :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making exu
 	@echo $(OS)
-	$(CC) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -oexu
+	$(CC) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o exu
 
 ecu :  OBJDIR = transobj
 ecu :  EU_TARGET = ec.ex
@@ -349,7 +352,7 @@ ecu :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 ecu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making ecu
-	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -oecu
+	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o ecu
 
 backend : builddirs
 	$(MAKE) eubackend EBACKEND=1 OBJDIR=backobj
@@ -360,7 +363,7 @@ eubackend : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 eubackend : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
-	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -oeubackend
+	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o eubackend
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include
@@ -447,7 +450,6 @@ $(OBJDIR)/back/be_callc.o : ./be_callc.c
 
 $(OBJDIR)/back/be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
-
 
 $(PCRE) : 
 	cd pcre && $(MAKE) libpcre.la

@@ -341,8 +341,8 @@ void terminate_task(int task)
 	tcb[task].status = ST_DEAD; // its tcb entry will be recycled later
 }
 
-static double wait(double t)
-// wait for a while 
+static double Wait(double t)
+// Wait for a while 
 {   
 	double t1, t2, now;
 	int it;
@@ -358,7 +358,7 @@ static double wait(double t)
 		t -= t1;
 	}
 	
-	// busy wait for the last bit, < 1 sec
+	// busy Wait for the last bit, < 1 sec
 	now = current_time();
 	t2 = now + t;
 	while (now < t2) {
@@ -1151,8 +1151,8 @@ void scheduler(double now)
 		}
 			
 		if (tcb[earliest_task].type == T_REAL_TIME) {
-			// no time-sharing tasks, wait and run this real-time task
-			now = wait(start_time - now);
+			// no time-sharing tasks, Wait and run this real-time task
+			now = Wait(start_time - now);
 		}
 	}
 

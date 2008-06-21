@@ -6,92 +6,93 @@
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
 #if defined(ELINUX)
-/* use glibc 64bit variants */
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
-#include <sys/types.h>
-#include <unistd.h>
-#include <errno.h>
-#define IFILE FILE*
-#define IOFF long long
-#define iopen fopen64
-#define igets fgets
-#define igetc fgetc
-#define iputs fputs
-#define iputc fputc
-#define iread fread64
-#define iwrite fwrite
-// these don't seem to exist???
-//#define iseek fseek64
-//#define itell ftell64
-// these seem to be only 32 bit???
-//#define iseek(f,o,w) lseek64(fileno(f),(o),(w))
-//#define itell(f) lseek64(fileno(f), (long long)0, SEEK_CUR)
-// this works, but has the undesirable side-effect of an unsuppressable warning from glibc 2.1.3 on
-//long long llseek(int,long long,int);
-//#define iseek(f,o,w) llseek(fileno(f),(o),(w))
-//#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
-// define iseek() in be_runtime.c - uses the llseek() syscall directly
-long long iseek(FILE *, long long, int);
-#define itell(f) iseek(f, (long long)0, SEEK_CUR)
-#define iiseek fseek
-#define iitell ftell
-#define iflush fflush
-#define iclose fclose
-#define ifileno fileno
-#define iprintf fprintf
+	/* use glibc 64bit variants */
+#	define _LARGEFILE_SOURCE
+#	define _LARGEFILE64_SOURCE
+#	include <sys/types.h>
+#	include <unistd.h>
+#	include <errno.h>
+#	define IFILE FILE*
+#	define IOFF long long
+#	define iopen fopen64
+#	define igets fgets
+#	define igetc fgetc
+#	define iputs fputs
+#	define iputc fputc
+#	define iread fread64
+#	define iwrite fwrite
+	// these don't seem to exist???
+	//#define iseek fseek64
+	//#define itell ftell64
+	// these seem to be only 32 bit???
+	//#define iseek(f,o,w) lseek64(fileno(f),(o),(w))
+	//#define itell(f) lseek64(fileno(f), (long long)0, SEEK_CUR)
+	// this works, but has the undesirable side-effect of an unsuppressable warning from glibc 2.1.3 on
+	//long long llseek(int,long long,int);
+	//#define iseek(f,o,w) llseek(fileno(f),(o),(w))
+	//#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
+	// define iseek() in be_runtime.c - uses the llseek() syscall directly
+	long long iseek(FILE *, long long, int);
+#	define itell(f) iseek(f, (long long)0, SEEK_CUR)
+#	define iiseek fseek
+#	define iitell ftell
+#	define iflush fflush
+#	define iclose fclose
+#	define ifileno fileno
+#	define iprintf fprintf
 #elif defined(EWATCOM)
-#define IFILE FILE*
-#define IOFF __int64
-#define iopen fopen
-#define igets fgets
-#define igetc fgetc
-#define iputs fputs
-#define iputc fputc
-#define iread fread
-#define iwrite fwrite
-#define iseek(f,o,w) _lseeki64(fileno(f),(o),(w))
-#define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
-#define iiseek fseek
-#define iitell ftell
-#define iflush fflush
-#define iclose fclose
-#define ifileno fileno
-#define iprintf fprintf
-#elif defined(EBSD)
-/* 64bit support is automatic */
-#define IFILE FILE*
-#define IOFF long long
-#define iopen fopen
-#define igets fgets
-#define igetc fgetc
-#define iputs fputs
-#define iputc fputc
-#define iread fread
-#define iwrite fwrite
-#define iseek fseek
-#define itell ftell
-#define iflush fflush
-#define iclose fclose
-#define ifileno fileno
-#define iprintf fprintf
+#	define IFILE FILE*
+#	define IOFF __int64
+#	define iopen fopen
+#	define igets fgets
+#	define igetc fgetc
+#	define iputs fputs
+#	define iputc fputc
+#	define iread fread
+#	define iwrite fwrite
+#	define iseek(f,o,w) _lseeki64(fileno(f),(o),(w))
+#	define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
+#	define iiseek fseek
+#	define iitell ftell
+#	define iflush fflush
+#	define iclose fclose
+#	define ifileno fileno
+#	define iprintf fprintf
+#elif defined(EBSD) || defined(EOSX)
+	/* 64bit support is automatic */
+#	define IFILE FILE*
+#	define IOFF long long
+#	define iopen fopen
+#	define igets fgets
+#	define igetc fgetc
+#	define iputs fputs
+#	define iputc fputc
+#	define iread fread
+#	define iwrite fwrite
+#	define iseek fseek
+#	define iiseek fseek
+#	define itell ftell
+#	define iflush fflush
+#	define iclose fclose
+#	define ifileno fileno
+#	define iprintf fprintf
 #else
 /* no 64bit support */
-#define IFILE FILE*
-#define IOFF long
-#define iopen fopen
-#define igets fgets
-#define igetc fgetc
-#define iputs fputs
-#define iputc fputc
-#define iread fread
-#define iwrite fwrite
-#define iseek fseek
-#define itell ftell
-#define iflush fflush
-#define iclose fclose
-#define ifileno fileno
-#define iprintf fprintf
+#	define IFILE FILE*
+#	define IOFF long
+#	define iopen fopen
+#	define igets fgets
+#	define igetc fgetc
+#	define iputs fputs
+#	define iputc fputc
+#	define iread fread
+#	define iwrite fwrite
+#	define iseek fseek
+#	define itell ftell
+#	define iflush fflush
+#	define iclose fclose
+#	define ifileno fileno
+#	define iprintf fprintf
 #endif
 
 #undef TRUE
@@ -107,7 +108,7 @@ long long iseek(FILE *, long long, int);
 #define LMAX 200             /* maximum input line length */
 
 #if defined(EBORLAND) || defined(ELCC) || defined(EDJGPP)
-#define PATH_MAX 512
+	#define PATH_MAX 512
 #endif
 
 struct time_info {

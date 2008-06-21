@@ -2775,6 +2775,8 @@ global procedure InitGlobals()
 		OpDefines &= {"EU400", "WIN32"}
 	elsif ELINUX then
 		OpDefines &= {"EU400", "UNIX", "LINUX"}
+	elsif EOSX then
+		OpDefines &= {"EU400", "UNIX", "OSX"}
 	elsif EBSD then
 		OpDefines &= {"EU400", "UNIX", "FREEBSD"}
 	elsif EDOS then

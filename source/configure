@@ -14,25 +14,36 @@ else
 	ECONFIG=LINUX
 fi
 
-
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
+	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
 else
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	if test $UNAME_SYSTEM = "Darwin"; then
+		echo EOSX=1 >> "$PREFIX"Makefile.eu
+	else
+		echo EOSX= >> "$PREFIX"Makefile.eu
+	fi
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 fi
 
 case "${UNAME_SYSTEM}:${ECONFIG}" in
 	Linux:BSD)
-		echo 1
+		echo Linux:BSD
 		sed -ri -e "s/EBSD = TRUE/EBSD = FALSE/" "$PREFIX"common.e
+		sed -ri -e "s/EOSX = TRUE/EOSX = FALSE/" "$PREFIX"common.e
 		;;
 	*BSD:LINUX)
-		echo 2
+		echo BSD:Linux
 		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" "$PREFIX"common.e
+		;;
+	Darwin:LINUX)
+		echo Darwin:Linux
+		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" "$PREFIX"common.e
+		sed -Ei .osx -e "s/EOSX = FALSE/EOSX = TRUE/" "$PREFIX"common.e
 		;;
 	*)
 		# do nothing

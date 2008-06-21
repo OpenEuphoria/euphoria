@@ -23,11 +23,11 @@ include msgbox.e
 include math.e
 
 integer SLASH
-if platform() = LINUX then
+ifdef UNIX then
     SLASH = '/'
 else
     SLASH = '\\'
-end if
+end ifdef
 
 constant msg = 1 -- place to send messages
 atom t
@@ -1241,7 +1241,7 @@ global procedure sanity()
 	if length(dir(".")) < 2 then
 	    abort()
 	end if
-	if vga and platform() != LINUX then 
+	if vga and platform() != LINUX and platform() != OSX then 
 	    testgr()
 	end if
 	make_sound()
@@ -1278,11 +1278,11 @@ global procedure sanity()
 
     end for
     
-    if platform() = LINUX then
-	system("rm sanityio.tst", 2)
+	ifdef UNIX then
+		system("rm sanityio.tst", 2)
     else
-	system("del sanityio.tst", 2)
-    end if  
+		system("del sanityio.tst", 2)
+    end ifdef  
     save_colors = {}
     if platform() = DOS32 then
       for i = 0 to v[VC_NCOLORS]-1 do

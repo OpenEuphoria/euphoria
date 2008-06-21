@@ -1382,7 +1382,7 @@ global procedure finish_emake()
 		if not TBSD then
 			puts(doit, " -ldl")
 		end if      
-		printf(doit, " -o%s%s\n", {file0, exe_suffix})
+		printf(doit, " -o %s%s\n", {file0, exe_suffix})
 		if not keep then
 			puts(doit, "rm -f *.o\n")
 		end if

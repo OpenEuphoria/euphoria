@@ -118,7 +118,7 @@ atom lib, lib2
 integer LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC,
 	LC_TIME, LC_MESSAGES, f_strfmon, f_strfnum
 
-if platform() = WIN32 then
+ifdef WIN32 then
 	lib = open_dll("MSVCRT.DLL")
 	lib2 = open_dll("KERNEL32.DLL")
 	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I)
@@ -131,7 +131,20 @@ if platform() = WIN32 then
 	LC_TIME     = 5
 	LC_MESSAGES = 6
 
-elsif platform() = FREEBSD then
+elsifdef LINUX then
+
+	lib = open_dll("")
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
+	f_strfnum = -1
+	LC_ALL      = 6
+	LC_CTYPE    = 0
+	LC_NUMERIC  = 1
+	LC_TIME     = 2
+	LC_COLLATE  = 3
+	LC_MONETARY = 4
+	LC_MESSAGES = 5
+
+elsifdef FREEBSD then
 
 	lib = open_dll("libc.so")
 	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
@@ -145,25 +158,25 @@ elsif platform() = FREEBSD then
 	LC_TIME     = 5
 	LC_MESSAGES = 6
 
-  
-elsif platform() = LINUX then
+elsifdef OSX then
 
-	lib = open_dll("")
+	lib = open_dll("libc.dylib")
 	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
 	f_strfnum = -1
-	LC_ALL      = 6
-	LC_CTYPE    = 0
-	LC_NUMERIC  = 1
-	LC_TIME     = 2
-	LC_COLLATE  = 3
-	LC_MONETARY = 4
-	LC_MESSAGES = 5
 
+	LC_ALL      = 0
+	LC_COLLATE  = 1
+	LC_CTYPE    = 2
+	LC_MONETARY = 3
+	LC_NUMERIC  = 4
+	LC_TIME     = 5
+	LC_MESSAGES = 6
+  
 else
 
-	crash("locale.e requires Windows, Linux or FreeBSD", {})
+	crash("locale.e requires Windows, Linux, FreeBSD or OS X", {})
 
-end if
+end ifdef
 
 ------------------------------------------------------------------------------------------
 --

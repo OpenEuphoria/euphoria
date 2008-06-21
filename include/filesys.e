@@ -21,21 +21,39 @@ object slash
 slash = '\\' -- for Windows/DOS. For Linux is defined below.
 
 object xCopyFile, xMoveFile, xDeleteFile, xCreateDirectory, xRemoveDirectory
-if platform() = WIN32 then
-	xCopyFile         = define_c_func(open_dll("kernel32"), "CopyFileA", 
+
+ifdef WIN32 then
+	constant lib = open_dll("kernel32")
+	xCopyFile         = define_c_func(lib, "CopyFileA", 
 		{C_POINTER, C_POINTER, C_LONG}, C_LONG)
-	xMoveFile         = define_c_func(open_dll("kernel32"), "MoveFileA", 
+	xMoveFile         = define_c_func(lib, "MoveFileA", 
 		{C_POINTER, C_POINTER}, C_LONG)
-	xDeleteFile       = define_c_func(open_dll("kernel32"), "DeleteFileA", {C_POINTER}, C_LONG)
-	xCreateDirectory  = define_c_func(open_dll("kernel32"), "CreateDirectoryA", 
+	xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
+	xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
 		{C_POINTER, C_POINTER}, C_LONG)
-	xRemoveDirectory  = define_c_func(open_dll("kernel32"), "RemoveDirectoryA", 
+	xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", 
 		{C_POINTER}, C_LONG)
-elsif platform() = LINUX then
+
+elsifdef LINUX then
+	constant lib = open_dll("")
+
+elsifdef FREEBSD then
+	constant lib = open_dll("libc.so")
+	
+elsifdef OSX then
+	constant lib = open_dll("libc.dylib")
+	
+else
+	include machine.e
+	crash("filesys.e requires Windows, Linux, FreeBSD or OS X")
+
+end ifdef
+
+ifdef UNIX then
 	slash = '/'
-	xMoveFile   = define_c_func(open_dll(""), "rename", {C_POINTER, C_POINTER}, C_LONG)
-	xDeleteFile = define_c_func(open_dll(""), "remove", {C_POINTER}, C_LONG)
-end if
+	xMoveFile   = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_LONG)
+	xDeleteFile = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
+end ifdef
 
 ---------------------------------------------------------------------
 --# File Operations
@@ -129,6 +147,7 @@ end function
 --
 -- Comments:
 -- if not found, returns -1
+
 global function file_length(sequence filename)
 	object list
 	list = dir(filename)
@@ -146,6 +165,7 @@ end function
 -- returns 0 if filename does not exist
 -- returns 1 if filename is a file
 -- returns 2 if filename is a directory
+
 global function file_type(sequence filename)
 object dirfil
 	if find('*', filename) or find('*', filename) then return 0 end if

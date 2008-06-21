@@ -1172,7 +1172,10 @@ global procedure emit_op(integer op)
 		
 		else    
 			-- front end knows platform
-			if EUNIX then
+			if EOSX then
+				n = 4
+				
+			elsif EUNIX then
 				n = 3
 		
 			elsif BIND then

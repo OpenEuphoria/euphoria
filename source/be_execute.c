@@ -40,22 +40,22 @@
 #include <stdio.h>
 #include <time.h>
 #ifdef EUNIX
-#include <sys/times.h>
+#	include <sys/times.h>
 #else
-#ifdef EDJGPP
-#include <go32.h>
-#endif
-#ifdef EWATCOM
-#include <graph.h>
-#endif
-#include <conio.h>
+#	ifdef EDJGPP
+#		include <go32.h>
+#	endif
+#	ifdef EWATCOM
+#		include <graph.h>
+#	endif
+#	include <conio.h>
 #endif
 #include <math.h>
 #ifdef EXTRA_CHECK
-#include <malloc.h>
+#	include <malloc.h>
 #endif
 #ifdef EWINDOWS
-#include <windows.h>
+#	include <windows.h>
 #endif
 #include "alldefs.h"
 #include "alloc.h"
@@ -80,15 +80,15 @@
 #endif
 
 #if defined(EWATCOM) || defined(EUNIX)
-// a bit faster:
-#define mygetc(fp) \
+	// a bit faster:
+#	define mygetc(fp) \
 		((fp)->_cnt<=0 \
 		|| (*(fp)->_ptr)=='\x0d' \
 		|| (*(fp)->_ptr)=='\x1a' \
 		? (tpc = pc , igetc(fp)) \
 		: ((fp)->_cnt--,*(fp)->_ptr++))
 #else
-#define mygetc(fp) getc(fp)
+#	define mygetc(fp) getc(fp)
 #endif
 
 #define STORE_TOP_I   a = *obj_ptr;                  \
@@ -4038,8 +4038,12 @@ void do_exec(int *start_pc)
 
 			case L_PLATFORM: // only shrouded code needs this (for portability)
 				DeRef(*(object_ptr)pc[1]);
+#ifdef EOSX
+				top = 4;  // OSX
+#else
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
+#endif
 #endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32

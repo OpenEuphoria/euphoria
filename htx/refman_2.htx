@@ -234,7 +234,7 @@ The relational operators  <strong>< &nbsp; > &nbsp; <= &nbsp; >= &nbsp; =
 <p>
 As we will soon see you can also apply these operators to sequences.</p>
 
-<h4>2.2.2 Logical Operators</h4>
+<h4>Logical Operators</h4>
 
 <p>
 The logical operators and, or, xor, and not are used to determine the "truth"
@@ -276,7 +276,7 @@ These operators can also be applied to sequences. See below.</p>
 In some cases <a href="refman_2.htm#shortcir">short-circuit</a> evaluation will
 be used for expressions containing and or or.</p>
 
-<h4>2.2.3 Arithmetic Operators</h4>
+<h4>Arithmetic Operators</h4>
 
 <p>
 The usual arithmetic operators are available: add, subtract, multiply, divide,
