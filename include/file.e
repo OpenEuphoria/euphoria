@@ -1,12 +1,9 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
---****
--- Category: 
---   file
+--**
+-- !! <<EuDoc category="file">>
+-- == File/Device I/O
 --
--- Title:
---   File/Device I/O
---****
 
 include sort.e
 include misc.e
@@ -36,30 +33,27 @@ type boolean(integer b)
 end type
 
 --**
--- Signature:
--- global constant PATHSEP
+-- === Constants
 --
--- Description:
+
+--**
 -- Current platform's path separator character
 --
 -- Comments:
--- When on DOS32 or WIN32, '\\'. When on LINUX or FREEBSD, '/'.
+-- When on DOS32 or WIN32, '~\\'. When on LINUX or FREEBSD, '/'.
 --
 -- Example:
+-- <eucode>
 -- x = PATHSEP
 -- -- x is '/' or '\\' depending on platform
---**
-
---**
--- Signature:
--- global constant NL
---
--- Description:
--- Current platforms newline character(s)
---**
+-- </eucode>
 
 global integer PATHSEP
 global sequence PATHSEPS
+
+--**
+-- Current platforms newline character(s)
+
 global sequence NL
 
 ifdef UNIX then
@@ -73,16 +67,20 @@ else
 end ifdef
 
 --**
+-- === Procedures and Functions
+
+--**
 -- Signature:
--- global function ? object x1
+-- global procedure ?
 --
 -- Description:
--- Shorthand way of saying: <b>pretty_print(1, x, {})</b> - i.e. printing the value of an 
+-- Shorthand way of saying: **pretty_print(1, x, {})** - i.e. printing the value of an 
 -- expression to the standard output, with braces and indentation to show the structure.
 --
 -- Example 1:
+-- <eucode>
 -- ? {1, 2} + {3, 4}  -- will display {4, 6}
---**
+-- </eucode>
 
 --**
 -- Signature:
@@ -93,7 +91,6 @@ end ifdef
 --
 -- Comments:
 -- Any still-open files will be closed automatically when your program terminates.
---**
 
 --**
 -- Signature:
@@ -104,14 +101,14 @@ end ifdef
 -- the path name of the file or device. st2 is the mode in which the file is to be opened. 
 -- Possible modes are:
 --
--- "r" - open text file for reading
--- "rb" - open binary file for reading
--- "w" - create text file for writing
--- "wb" - create binary file for writing
--- "u" - open text file for update (reading and writing)
--- "ub" - open binary file for update
--- "a" - open text file for appending
--- "ab" - open binary file for appending
+-- * "r" - open text file for reading
+-- * "rb" - open binary file for reading
+-- * "w" - create text file for writing
+-- * "wb" - create binary file for writing
+-- * "u" - open text file for update (reading and writing)
+-- * "ub" - open binary file for update
+-- * "a" - open text file for appending
+-- * "ab" - open binary file for appending
 --
 -- Files opened for read or update must already exist. Files opened for write or append will 
 -- be created if necessary. A file opened for write will be set to 0 bytes. Output to a 
@@ -129,12 +126,12 @@ end ifdef
 --
 -- Some typical devices that you can open on DOS or Windows are:
 --
--- "CON" - the console (screen)
--- "AUX" - the serial auxiliary port
--- "COM1" - serial port 1
--- "COM2" - serial port 2
--- "PRN" - the printer on the parallel port
--- "NUL" - a non-existent device that accepts and discards output
+-- * "CON" - the console (screen)
+-- * "AUX" - the serial auxiliary port
+-- * "COM1" - serial port 1
+-- * "COM2" - serial port 2
+-- * "PRN" - the printer on the parallel port
+-- * "NUL" - a non-existent device that accepts and discards output
 --
 -- Currently, files up to 2 Gb in size can be handled. Beyond that, some file operations may 
 -- not work correctly. This limit will likely be increased in the future. 
@@ -156,6 +153,7 @@ end ifdef
 -- extension. e.g. CON.TXT, CON.DAT, CON.JPG etc. all refer to the CON device, not a file.
 --
 -- Example 1:
+-- <eucode>
 -- integer file_num, file_num95
 -- sequence first_line
 -- constant ERROR = 2
@@ -175,7 +173,7 @@ end ifdef
 -- if file_num95 != -1 then
 --     puts(1, "it worked!\n")
 -- end if
---**
+-- </eucode>
 
 --**
 -- Seek (move) to any byte position in the file fn or to the end of file if a1 is -1. For 
@@ -197,6 +195,7 @@ end ifdef
 -- when you are trying to count bytes. 
 --
 -- Example 1:
+-- <eucode>
 -- include file.e
 --
 -- integer fn
@@ -208,6 +207,7 @@ end ifdef
 --         puts(1, "rewind failed!\n")
 --     end if
 -- end for
+-- </eucode>
 
 global function seek(file_number fn, file_position pos)
 -- Seeks to a byte position in the file, 
@@ -216,7 +216,6 @@ global function seek(file_number fn, file_position pos)
 -- files opened in binary mode.
 	return machine_func(M_SEEK, {fn, pos})
 end function
---**
 
 --**
 -- This function returns the current byte position in the file fn. This position is updated 
@@ -229,7 +228,6 @@ global function where(file_number fn)
 -- files opened in binary mode.
 	return machine_func(M_WHERE, fn)
 end function
---**
 
 --**
 -- When you write data to a file, Euphoria normally stores the data
@@ -247,6 +245,7 @@ end function
 --   to close the file yet.
 --
 -- Example 1:
+-- <eucode>
 -- f = open("logfile", "w")
 -- puts(f, "Record#1\n")
 -- puts(1, "Press Enter when ready\n")
@@ -256,12 +255,12 @@ end function
 --           -- 0 characters when we stop for keyboard input.
 --
 -- s = gets(0) -- wait for keyboard input
+-- </eucode>
 
 global procedure flush(file_number fn)
 -- flush out the buffer associated with file fn
 	machine_proc(M_FLUSH, fn)
 end procedure
---**
 
 global constant LOCK_SHARED = 1, 
 				LOCK_EXCLUSIVE = 2
@@ -294,9 +293,9 @@ end type
 -- or writing it. Under Linux/FreeBSD, there are two types of locks that 
 -- you can request using the i2 parameter. (Under DOS32 and WIN32 the i2 parameter
 -- is ignored, but should be an integer.)
--- Ask for a <b><i>shared</i></b> lock when you intend to read a file, and you want to 
+-- Ask for a **<i>shared</i>** lock when you intend to read a file, and you want to 
 -- temporarily block other processes from writing it. Ask for an 
--- <b><i>exclusive</i></b> lock 
+-- **<i>exclusive</i>** lock 
 -- when you intend to write to a file and you want to temporarily block other 
 -- processes from reading or writing it. It's ok for many processes to 
 -- simultaneously have shared locks on the same file, but only one process 
@@ -331,6 +330,7 @@ end type
 -- return 0 (unsuccessful) under plain MS-DOS, outside of Windows.
 --
 -- Example 1:
+-- <eucode>
 -- include misc.e
 -- include file.e
 -- integer v
@@ -347,13 +347,13 @@ end type
 -- puts(v, "Yet another visitor\n")
 -- unlock_file(v, {})
 -- close(v)
+-- </eucode>
 
 global function lock_file(file_number fn, lock_type t, byte_range r)
 -- Attempt to lock a file so other processes won't interfere with it.
 -- The byte range can be {} if you want to lock the whole file
 	return machine_func(M_LOCK_FILE, {fn, t, r})
 end function
---**
 
 --**
 -- Unlock an open file fn, or a portion of file fn. You must have previously locked the 
@@ -376,7 +376,6 @@ global procedure unlock_file(file_number fn, byte_range r)
 -- The byte range can be {} if you want to unlock the whole file.
 	machine_proc(M_UNLOCK_FILE, {fn, r})
 end procedure
---**
 
 global enum 
 	D_NAME,
@@ -399,60 +398,58 @@ global enum
 -- This information is similar to what you would get from the DOS DIR command. A sequence 
 -- is returned where each element is a sequence that describes one file or subdirectory.
 -- 
--- If st names a <b>directory</b> you may have entries for "." and "..,"
---  just as with the DOS DIR command. If st names a <b>file</b> then x will
---  have just one entry, i.e. <a href="lib_seq.htm#length">length(x)</a> will
+-- If st names a **directory** you may have entries for "." and "..,"
+--  just as with the DOS DIR command. If st names a **file** then x will
+--  have just one entry, i.e. length(x) will
 --  be 1. If st contains wildcards you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
 --  the year, month, day, hour, minute and second of the last modification.
 --  You can refer to the elements of an entry with the following constants
---  defined in <path>file.e</path>:
+--  defined in ##file.e##:
 --  
 -- <eucode>
---     global constant D_NAME = 1,
---               D_ATTRIBUTES = 2,
---                     D_SIZE = 3,
-
---                     D_YEAR = 4,
---                    D_MONTH = 5,
---                      D_DAY = 6,
-
---                     D_HOUR = 7,
---                   D_MINUTE = 8,
---                   D_SECOND = 9
+-- global constant D_NAME = 1,
+--           D_ATTRIBUTES = 2,
+--                 D_SIZE = 3,
+--
+--                 D_YEAR = 4,
+--                D_MONTH = 5,
+--                  D_DAY = 6,
+--
+--                 D_HOUR = 7,
+--               D_MINUTE = 8,
+--               D_SECOND = 9
 -- </eucode>
 --
 -- The attributes element is a string sequence containing characters chosen from:
 --  
 -- <eucode>
---     'd' -- directory
---     'r' -- read only file
---     'h' -- hidden file
---     's' -- system file
---     'v' -- volume-id entry
---     'a' -- archive file
+-- 'd' -- directory
+-- 'r' -- read only file
+-- 'h' -- hidden file
+-- 's' -- system file
+-- 'v' -- volume-id entry
+-- 'a' -- archive file
 -- </eucode>
 --
 -- A normal file without special attributes would just have an empty string, "", in this field.
 --
 -- The top level directory, e.g. c:\ does not have "." or ".." entries.
 -- 
--- This function is often used just to test if a file or
---  directory exists.
+-- This function is often used just to test if a file or directory exists.
 -- 
--- Under <platform>WIN32</platform>, st can have a long file or directory name anywhere in 
+-- Under //WIN32//, st can have a long file or directory name anywhere in 
 -- the path.
 -- 
--- Under <platform>Linux/FreeBSD</platform>, the only attribute currently available is 'd'.
+-- Under //Linux/FreeBSD//, the only attribute currently available is 'd'.
 -- 
--- <platform>DOS32</platform>: The file name returned in D_NAME will be a standard DOS 8.3 
--- name. (See 
--- <a href="http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir">Archive
---  Web page</a> for a better solution).
+-- //DOS32//: The file name returned in D_NAME will be a standard DOS 8.3 
+-- name. (See [[http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir|Archive Web page]] for a better solution).
 -- 
--- <platform>WIN32</platform>: The file name returned in D_NAME will be a long file name.
+-- //WIN32//: The file name returned in D_NAME will be a long file name.
 --
+-- Example 1:
 -- <eucode>
 -- d = dir(current_dir())
 --
@@ -467,7 +464,6 @@ global enum
 -- d[3][D_NAME] would be "fred"
 --  </eucode>
 -- 
--- Example:
 -- See <path>bin\search.ex</path>
 
 global function dir(sequence name)
@@ -525,7 +521,6 @@ global function dir(sequence name)
 
 	return data
 end function
---**
 
 --**
 -- Return the name of the current working directory
@@ -535,15 +530,16 @@ end function
 -- DOS/Windows, at the top-level of a drive, e.g. C:\
 --
 -- Example 1:
+-- <eucode>
 -- sequence s
 -- s = current_dir()
 -- -- s would have "C:\EUPHORIA\DOC" if you were in that directory
+-- </eucode>
 
 global function current_dir()
 -- returns name of current working directory
 	return machine_func(M_CURRENT_DIR, 0)
 end function
---**
 
 --**
 -- Set the current directory to the path given by sequence s. s must name
@@ -562,17 +558,18 @@ end function
 -- affect the current directory of its parent process.
 --
 -- Example 1:
+-- <eucode>
 -- if chdir("c:\\euphoria") then
 --     f = open("readme.doc", "r")
 -- else
 --     puts(1, "Error: No euphoria directory?\n")
 -- end if
+-- </eucode>
 
 global function chdir(sequence newdir)
 -- Changes the current directory. Returns 1 - success, 0 - fail.
 	return machine_func(M_CHDIR, newdir)
 end function
---**
 
 --**
 -- Set behavior of CTRL+C/CTRL+Break
@@ -587,7 +584,7 @@ end function
 -- Initially your program can be terminated at any point where
 --  it tries to read from the keyboard. It could also be terminated
 --  by other input/output operations depending on options the user
---  has set in his <b>config.sys</b> file. (Consult an MS-DOS manual for the BREAK
+--  has set in his **config.sys** file. (Consult an MS-DOS manual for the BREAK
 --  command.) For some types of program this sudden termination could leave
 --  things in a messy state and might result in loss of data.
 --  allow_break(0) lets you avoid this situation.
@@ -596,7 +593,9 @@ end function
 -- check_break().
 --
 -- Example 1:
+-- <eucode>
 -- allow_break(0)  -- don't let the user kill the program!
+-- </eucode>
 
 global procedure allow_break(boolean b)
 -- If b is TRUE then allow control-c/control-break to
@@ -605,7 +604,6 @@ global procedure allow_break(boolean b)
 -- tries to read input from the keyboard.
 	machine_proc(M_ALLOW_BREAK, b)
 end procedure
---**
 
 --**
 -- Return the number of times that CTRL+C or CTRL+Break have
@@ -624,6 +622,7 @@ end procedure
 --  them by calling check_break().
 --
 -- Example 1:
+-- <eucode>
 -- k = get_key()
 -- if check_break() then
 --     temp = graphics_mode(-1)
@@ -631,13 +630,13 @@ end procedure
 --     save_all_user_data()
 --     abort(1)
 -- end if
+-- </eucode>
 
 global function check_break()
 -- returns the number of times that control-c or control-break
 -- were pressed since the last time check_break() was called
 	return machine_func(M_CHECK_BREAK, 0)
 end function
---**
 
 -- Generalized recursive directory walker
 
@@ -686,6 +685,7 @@ my_dir = DEFAULT  -- it's better not to use routine_id() here,
 -- single directory (and its subdirectories) can be searched at one time. --
 --
 -- Example 1:
+-- <eucode>
 -- function look_at(sequence path_name, sequence entry)
 -- -- this function accepts two sequences as arguments
 --     printf(1, "%s\\%s: %d\n",
@@ -694,6 +694,7 @@ my_dir = DEFAULT  -- it's better not to use routine_id() here,
 -- end function
 --
 -- exit_code = walk_dir("C:\\MYFILES", routine_id("look_at"), TRUE)
+-- </eucode>
 --
 -- Example 2:
 -- See <path>bin\search.ex</path>
@@ -762,23 +763,26 @@ global function walk_dir(sequence path_name, object your_function,
 	end for
 	return 0
 end function
---**
 
 --**
 -- Read the contents of either file named s1 or an open file handle i1 as a sequence of lines.
 --
 -- Example 1:
+-- <eucode>
 -- data = read_lines("myfile.txt")
 -- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- fh = open("myfile.txt", "r")
 -- data = read_lines(fh)
 -- close(fh)
 --
 -- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
+-- </eucode>
 
 global function read_lines(object f)
 	object fn, ret, y
@@ -804,7 +808,6 @@ global function read_lines(object f)
 	end if
 	return ret
 end function
---**
 
 --**
 -- Write lines contained in s to file named x or file handle x. 
@@ -821,9 +824,11 @@ end function
 -- file name, it is opened, written to and then closed.
 --
 -- Example 1:
+-- <eucode>
 -- if write_lines("data.txt", {"This is important data", "Goodybe"}) != -1 then
 --     puts(1, "Failed to write data\n")
 -- end if
+-- </eucode>
 --
 -- See Also:
 --     read_lines, write_file
@@ -849,7 +854,6 @@ global function write_lines(object f, sequence lines)
 
 	return 1
 end function
---**
 
 --**
 -- Append lines contained in s2 to file named s1. Returns 1 on success, -1 on failure.
@@ -860,9 +864,11 @@ end function
 -- It is opened, written to and then closed.
 --
 -- Example 1:
+-- <eucode>
 -- if append_lines("data.txt", {"This is important data", "Goodbye"}) != -1 then
 --     puts(1, "Failed to append data\n")
 -- end if
+-- </eucode>
 --
 -- See Also:
 --     write_lines
@@ -882,22 +888,25 @@ global function append_lines(sequence f, sequence lines)
 
 	return 1
 end function
---**
 
 --**
 -- Read the contents of either file named s1 or an open file handle i1. Returns the contents 
 -- as 1 sequence.
 --
 -- Example 1:
+-- <eucode>
 -- data = read_file("myfile.txt")
 -- -- data contains the entire contents of 'myfile.txt'
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- fh = open("myfile.txt", "r")
 -- data = read_file(fh)
 -- close(fh)
 --
 -- -- data contains the entire contents of 'myfile.txt'
+-- </eucode>
 --
 -- See Also:
 --     write_file, read_lines
@@ -930,7 +939,6 @@ global function read_file(object f)
 
 	return ret
 end function
---**
 
 --**
 -- Write data to file named f or file handle f. Returns 1 on success, 0 on failure.
@@ -943,9 +951,11 @@ end function
 -- file name, it is opened, written to and then closed.
 --
 -- Example 1:
+-- <eucode>
 -- if write_file("data.txt", "This is important data\nGoodybe") = 0 then
 --     puts(1, "Failed to write data\n")
 -- end if
+-- </eucode>
 --
 -- See Also:
 --    read_file, write_lines
@@ -968,7 +978,6 @@ global function write_file(object f, sequence data)
 
 	return 1
 end function
---**
 
 global enum
 	PATH_DIR,
@@ -992,19 +1001,25 @@ global enum
 -- The host operating system path separator is used.
 --
 -- Example 1:
+-- <eucode>
 -- -- DOS32/WIN32
 -- info = pathinfo("C:\\euphoria\\docs\\readme.txt")
 -- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt"}
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- -- Linux/FreeBSD
 -- info = pathinfo("/opt/euphoria/docs/readme.txt")
 -- -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
+-- </eucode>
 --
 -- Example 3:
+-- <eucode>
 -- -- no extension
 -- info = pathinfo("/opt/euphoria/docs/readme")
 -- -- info is {"/opt/euphoria/docs", "readme", "readme", ""}
+-- </eucode>
 --
 -- See Also:
 --   driveid, dirname, filename, fileext
@@ -1054,7 +1069,6 @@ global function pathinfo(sequence path)
 
 	return {dir_name, file_full, file_name, file_ext, drive_id}
 end function
---**
 
 --**
 -- Return the directory name of a fully qualified filename
@@ -1063,8 +1077,10 @@ end function
 -- The host operating system path separator is used.
 --
 -- Example 1:
+-- <eucode>
 -- fname = dirname("/opt/euphoria/docs/readme.txt")
 -- -- fname is "/opt/euphoria/docs"
+-- </eucode>
 --
 -- See Also:
 --   driveid, filename, fileext
@@ -1074,7 +1090,6 @@ global function dirname(sequence path)
 	data = pathinfo(path)
 	return data[1]
 end function
---**
 
 --**
 -- Return the file name portion of a fully qualified filename
@@ -1083,8 +1098,10 @@ end function
 -- The host operating system path separator is used.
 --
 -- Example 1:
+-- <eucode>
 -- fname = filename("/opt/euphoria/docs/readme.txt")
 -- -- fname is "readme.txt"
+-- </eucode>
 --
 -- See Also:
 --   pathinfo, driveid, dirname, filebase, fileext
@@ -1096,7 +1113,6 @@ global function filename(sequence path)
 
 	return data[2]
 end function
---**
 
 --**
 -- Return the base filename of path.
@@ -1104,8 +1120,10 @@ end function
 -- TODO: Test
 --
 -- Example 1:
+-- <eucode>
 -- base = filebase("/opt/euphoria/readme.txt")
 -- -- base is "readme"
+-- </eucode>
 --
 -- See Also:
 --     pathinfo, driveid, dirname, filename, fileext
@@ -1117,7 +1135,6 @@ global function filebase(sequence path)
 
 	return data[3]
 end function
---**
 
 --**
 -- Return the file extension of a fully qualified filename
@@ -1126,8 +1143,10 @@ end function
 -- The host operating system path separator is used.
 --
 -- Example 1:
+-- <eucode>
 -- fname = fileext("/opt/euphoria/docs/readme.txt")
 -- -- fname is "txt"
+-- </eucode>
 --
 -- See Also:
 --     pathinfo, driveid, dirname, filename, filebase
@@ -1137,7 +1156,6 @@ global function fileext(sequence path)
 	data = pathinfo(path)
 	return data[4]
 end function
---**
 
 --**
 -- Return the drive letter of the path on DOS32 and WIN32 platforms.
@@ -1145,8 +1163,10 @@ end function
 -- TODO: Test
 --
 -- Example:
+-- <eucode>
 -- letter = driveid("C:\\EUPHORIA\\Readme.txt")
 -- -- letter is "C"
+-- </eucode>
 --
 -- See Also:
 --     pathinfo, dirname, filename, filebase, fileext
@@ -1156,5 +1176,4 @@ global function driveid(sequence path)
 	data = pathinfo(path)
 	return data[5]
 end function
---**
 
