@@ -198,8 +198,8 @@ Content-type: text/html
 That line must then be followed by a bunch of lines that comprise a complete
 HTML page.
 
-For example, the MicroEconomy program starts off by calling procedure
-print_HTMLheader() which does:
+For example, the MicroEconomy program starts off by calling procedure ##print_HTMLheader()## 
+which does:
 
 <eucode>
 puts(1, "Content-type: text/html\n\n")
