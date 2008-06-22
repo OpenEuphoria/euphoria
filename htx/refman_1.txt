@@ -130,54 +130,39 @@ is set to the euphoria directory.
 
 When installed, the ##euphoria## directory will look something like this:
 
-TODO
-
-<dl>
-<dt>
-##\euphoria##</dt>
-<dl>
-<dt>readme.doc</dt>
-<dt>readme.htm</dt>
-<dt>License.txt</dt>
-<dt>##\bin##</dt>
-<dd>
-	Interpreters ##ex.exe## and ##exw.exe##. Translators 
-    ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, 
-    Interpreter ##exu## and Translator ##ecu##. There are also utility 
-    programs such as ##ed.bat##, ##guru.bat##, etc.
-</dd>
-<dt>##\include##</dt>
-<dd>standard include files, e.g. ##graphics.e##</dd>
-<dt>##\source##</dt>
-<dd>the complete source code (interpreter, translator, binder)</dd>
-<dt>##\doc##</dt>
-<dd>
-	##refman.doc##, ##library.doc##, and several other plain-text
+:##\euphoria##
+::readme.doc
+::readme.htm
+::License.txt
+:##\bin##
+::	Interpreters ##ex.exe## and ##exw.exe##. Translators\\ 
+    ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, \\
+    Interpreter ##exu## and Translator ##ecu##. There are also utility \\
+    programs such as ##ed.bat##, ##guru.bat##, etc.\\
+:##\include##
+::standard include files, e.g. ##graphics.e##
+:##\source##
+::the complete source code (interpreter, translator, binder)
+:##\doc##
+::##refman.doc##, ##library.doc##, and several other plain-text\\
     documentation files
-</dd>
-<dt>##\html##</dt>
-<dd>HTML files corresponding to each of the .doc files in the doc directory</dd>
-<dt>##\tutorial##</dt>
-<dd>small tutorial programs to help you learn Euphoria</dd>
-<dt>##\demo##</dt>
-<dl>
-<dt>generic demo programs that run on all platforms</dt>
-<dt>##\dos32##</dt>
-<dd>//DOS32//-specific demo programs (optional)</dd>
-<dt>##\win32##</dt>
-<dd>//WIN32//-specific demo programs (optional)</dd>
-<dt>##\linux##</dt>
-<dd>//Linux/FreeBSD//-specific demo programs (optional)</dd>
-<dt>##\langwar##</dt>
-<dd>
-	language war game (pixel-graphics version for //DOS//,
+:##\html##
+::HTML files corresponding to each of the .doc files in the doc directory
+:##\tutorial##
+::small tutorial programs to help you learn Euphoria
+:##\demo##
+::generic demo programs that run on all platforms
+:##\dos32##
+:://DOS32//-specific demo programs (optional)
+:##\win32##
+:://WIN32//-specific demo programs (optional)
+:##\linux##
+:://Linux/FreeBSD//-specific demo programs (optional)
+:##\langwar##
+::language war game (pixel-graphics version for //DOS//, \\
     or text version for //Linux/FreeBSD//)
-</dd>
-<dt>##\bench##</dt>
-<dd>benchmark programs</dd>
-</dl>
-</dl>
-</dl>
+:##\bench##
+::benchmark programs
 
 ==== Linux and FreeBSD
 
@@ -359,7 +344,7 @@ that you want to edit. Color syntax highlighting is provided for ##.ex, .exw, .e
 
 Most keys that you type are inserted into the file at the cursor position. Hit the ##Esc## 
 key once to get a menu bar of special commands. The arrow keys, and the 
-##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under //Linux/FreeBSD// some 
+##Insert/Delete/Home/End/~PageUp/~PageDown## keys are also active. Under //Linux/FreeBSD// some 
 keys may not be available, and alternate keys are provided. See the file 
 ##euphoria\doc\ed.doc## (a href="ed.htm">euphoria\html\ed.htm</a>) for a complete description 
 of the editing commands. ##Esc h## (help) will let you view ##ed.doc## from your editing 

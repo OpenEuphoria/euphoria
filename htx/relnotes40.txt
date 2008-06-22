@@ -1,119 +1,125 @@
-=== Version 4.0:
+@@(color ``<font color="$(1)">``$(+)``</font>``)@
+@@(bugfix **$$(color #009999 bug fixed:)**)@
+@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
+@@(title $$(product) $$(version) Release Notes)@
 
+= $$(title)
+<<TOC>>
+==Version $$(version):
 ==== Bug Fixes
 
-* **bug fixed:** 1855414. ##open()##'s max path length is now determined by the underlying 
+* $$(bugfix) 1855414. ##open()##'s max path length is now determined by the underlying 
   operating system and not a generic default. ##open()## also now returns -1 when the 
-  filename is too long instead of causing a fatal error.  Fixed by Jeremy Cowgar
-* **bug fixed:** 1608870. ##dir()## now handles *.abc correctly, not showing a file ending 
+  filename is too long instead of causing a fatal error.  $$(doneby Jeremy Cowgar)
+* $$(bugfix) 1608870. ##dir()## now handles *.abc correctly, not showing a file ending 
   with .abcd. ##dir()## also now supports wildcard characters (* and ?) on all platforms. 
-  Fixed by Jeremy Cowgar
+  $$(doneby Jeremy Cowgar)
 
 ==== Changes
 
-* Comments may now be embedded in data passed to **value()** in **get.e**. Change by 
-  C. Cuvier
+* Comments may now be embedded in data passed to **value()** in **get.e**. 
+  $$(doneby C. Cuvier)
 * **Moved** function **reverse()**, **sprint()** from **misc.e**, **lower()** and **upper()** 
-  from **wildcard.e** to **sequence.e**. Change by Ceremy Cowgar.
+  from **wildcard.e** to **sequence.e**. $$(doneby Jeremy Cowgar.)
 * **Moved** functions/constant **PI**, **arccos**, **arcsin** 
-  moved from **misc.e** to **math.e**. Change by Jeremy Cowgar.
-* Documentation moved to a new format. Change by Jeremy Cowgar and CK Lester
+  moved from **misc.e** to **math.e**. $$(doneby Jeremy Cowgar.)
+* Documentation moved to a new format. $$(doneby Jeremy Cowgar and CK Lester)
 
 ==== New Features
 
-* Include file names with accent characters now supported. Implemented by C. Cuvier
+* Include file names with accent characters now supported. $$(doneby C. Cuvier)
 * Enhanced symbol resolution to take into account information regarding which files were 
-  included by which files. Implemented by Matthew Lewis
+  included by which files. $$(doneby Matthew Lewis)
 * Namespaces for a source file now can be used for symbols in the specified file and for 
-  global symbols in all files included by the specified file. Implemented by Matthew Lewis
+  global symbols in all files included by the specified file. $$(doneby Matthew Lewis)
 * Command line arguments for the translator allow for creating binaries with debugging 
-  symbols, and to specify a different runtime library. Implemented by C. Cuvier
+  symbols, and to specify a different runtime library. $$(doneby C. Cuvier)
 * In trace mode, '?' will show the last defined variable of the requested name.
-  Implemented by C. Cuvier
+  $$(doneby C. Cuvier)
 * Include directories can now be specified based on command line arguments and config files 
-  in addition to environment variables. Implemented by Matthew Lewis
+  in addition to environment variables. $$(doneby Matthew Lewis)
 * Improved accuracy in scanning numbers in scientific notation. Scanned numbers are accurate 
-  to the full precision of the IEEE 754 floating point standard. Implemented by Matthew Lewis
+  to the full precision of the IEEE 754 floating point standard. $$(doneby Matthew Lewis)
 * **Translator:** Added **-lccopt-off** option for translator to disable using the 
-  optimization flag when compiling with LCC, as it has problems sometimes.  Implemented by 
-  Jeremy Cowgar
+  optimization flag when compiling with LCC, as it has problems sometimes.  
+  $$(doneby Jeremy Cowgar)
 * New **loop do** ... **until**//condition// loop construct, which differs from a while loop 
-  in that it performs its test at the end of the block, rather than at the start. Implemented
-  by C. Cuvier.
+  in that it performs its test at the end of the block, rather than at the start. 
+  $$(doneby C. Cuvier.)
 * New keywords to give greater control over the instruction flow:
 ** **continue**: start next iteration of a loop;
 ** **retry**: restarts the current iteration of a loop
 ** **entry**: marks the entry point into a loop, skipping initial test
 ** **break**: exit an if block or switch block
 ** **goto**: jump to a label that is in the same scope
-  Implemented by C. Cuvier.
+  $$(doneby C. Cuvier.)
 * The **exit**, **break**, **continue** and **retry** keywords now can take an optional 
   parameter, which enables to xit several blocks at a time, or (re)starting an iteration of 
-  a loop which is not the innermost one. Implemented by C. Cuvier.
+  a loop which is not the innermost one. $$(doneby C. Cuvier.)
 * Block headers now may mention a label. This label can be used as the optional parameter of 
-  flow control keywords. Implemented by C. Cuvier.
+  flow control keywords. $$(doneby C. Cuvier.)
 * Variables can now be initialised right on the spot at which they are declared, just like 
-  constants. Implemented by C. Cuvier.
+  constants. $$(doneby C. Cuvier.)
 * Any routine parameter can be defaulted, i.e. given a default value that is plugged in if 
   omitted on a call. Any expression can be used, and parameters of the same call can even be 
-  used. Implemented by C. Cuvier.
+  used. $$(doneby C. Cuvier.)
 * New **switch** ... **end switch** construct, which implements more efficiently a sequence
-  of **elsif**, using the more compact **cse** statement. Implemented by Matthew Lewis.
+  of **elsif**, using the more compact **cse** statement. $$(doneby Matthew Lewis.)
 * **Unit testing added to Euphoria**. Over 1,000 tests. To run, cd tests and
   type ##eutest##
 * Condition compiling keywords (**ifdef**, **elsifdef**, **end ifdef**) and **with 
   define=xyz** or command line **-D XYZ** to insert/omit code in interpreter IL code and 
-  in translated C code. Implemented by Jeremy Cowgar.
+  in translated C code. $$(doneby Jeremy Cowgar.)
 * New enum keyword that allows for //parse time// sequential constant creation. 
-  Implemented by Jeremy Cowgar.
+  $$(doneby Jeremy Cowgar.)
 * The namespace **eu** is predefined, and can be used to fully qualify built-in routines.
-  Implemented by Matthew Lewis.
+  $$(doneby Matthew Lewis.)
 * Warnings now split between maskable and non maskable warnings.
   ##with warning## has been enhanced in order to individually turn maskable warnings on or 
   off. 
-  Implemented by C. Cuvier
+  $$(doneby C. Cuvier)
 * New scope: **export**.  Symbols with the export scope can only be seen from files that:
 ## directly include the file where the symbols reside 
 ## directly include a file that uses the "export include file.e" construct to pass export 
    symbols 
-  Implemented by Matthew Lewis
+  $$(doneby Matthew Lewis)
 * Routine resolution changes
 ## Routines the same name as an internal no longer override the internal by default. You
    must use the keyword **override**.
 ## An unqualified call to routine that exists as an internal calls the internal unless
    overridden with the override keyword. global and export functions are not called. A
    namespace must be used.
- Implemented by Jeremy Cowgar.
+ $$(doneby Jeremy Cowgar.)
 * ##-lint## option added that will display **all** warnings regardless of the file's
-  ##with/without warning## setting. Implemented by Jeremy Cowgar.
+  ##with/without warning## setting. $$(doneby Jeremy Cowgar.)
 
 ==== New Routines
 
 * Added **value_from()** in **get.e** to return additional information about the parsing 
-  activity. Implemented by C. Cuvier
+  activity. $$(doneby C. Cuvier)
 * New builtin routines: **peeks()**, **peek2s()**, **peek2u()**, **peek_string()**, 
-  **poke2()** Implemented by Matthew Lewis
+  **poke2()** $$(doneby Matthew Lewis)
 * Began **library expansion**. A large percentage of these functions have been found in The 
   Archive. Many thanks must go to the original developers who have contributed these functions.
 * New routines in **machine.e**:
-  **crash()**. Implemented by Jeremy Cowgar.
+  **crash()**. $$(doneby Jeremy Cowgar.)
 * New routines in **math.e**:
   **ceil()**, **round_to()**, **round()**, **sign()**, **abs()**, **sum()**, **average()**, 
   **min()**, **max()**, **deg2rad()**, **rad2deg()**, **log10()**, **atan2()**, 
-  **rand_range()**, **mod()**. Global Constant **E**. Implemented by Jeremy Cowgar.
+  **rand_range()**, **mod()**. Global Constant **E**. $$(doneby Jeremy Cowgar.)
 * New routines in **sequence.e**: 
    **insert()**, **splice()**, **remove()**, **replace()**, **head()**, **mid()**, 
    **slice()**, **tail()**, **split()**, **split_adv()**, **join()**, **find_any()**, 
    **find_any_from()**, **trim()**, **trim_head()**, **trim_tail()**, **truncate()**, 
    **pad_head()**, **pad_tail()**, **chunk()**, **flatten()**, **find_all()**, 
    **match_all()**, **find_replace()**, **vslice()**, **rfind()**, **rfind_from()**, 
-   **rmatch()**, **rmatch_from()**. Implemented by Jeremy Cowgar, Derek Parnell.
+   **rmatch()**, **rmatch_from()**. $$(doneby Jeremy Cowgar, Derek Parnell.)
 * New routines in **sort.e**:
-  **sort_reverse()**, **sort_user()**, **sort_columns()**. Implemented by Derek Parnell.
+  **sort_reverse()**, **sort_user()**, **sort_columns()**. $$(doneby Derek Parnell.)
 * New routines in **file.e**:
   **read_lines()**, **read_file()**, **write_lines()**, **append_lines**,
   **write_file()**, **pathinfo()**, **dirname()**, **filename()**,
-  **fileext()** and Global Constants **PATHSEP** and **NL**. Implemented by Jeremy Cowgar.
+  **fileext()** and Global Constants **PATHSEP** and **NL**. $$(doneby Jeremy Cowgar.)
 * New routines in **datetime.e**:
   **new()**, **from_date()**,
   **now()**, **dow()**, **doy()**, **to_unix()**,
@@ -122,24 +128,24 @@
   **DT_DAY**, **DT_HOUR**, **DT_MINUTE**, **DT_SECOND**, **SECONDS**,
   **MINUTES**, **HOURS**, **DAYS**, **WEEKS**, **MONTHS**, **YEARS**.
   Global sequences: **month_names**, **month_abbrs**, **day_names**,
-  **day_abbrs**, **ampm**. Note: These were made global for localization. Implemented by
-  Yuku Sugianto, Jeremy Cowgar. 
+  **day_abbrs**, **ampm**. Note: These were made global for localization. 
+  $$(doneby Yuku Sugianto, Jeremy Cowgar. )
 * New map routines in **map.e**:
   **new()**, **has()**, **get()**, **put()**, **remove()**, **size()**, **keys()**,
-  **values()**. Implemented by Yuku Sugianto, Derek Parnell.
+  **values()**. $$(doneby Yuku Sugianto, Derek Parnell.)
 * New unit testing library: **unittest.e**: see tests/all.ex for examples
-  on how to use with your own libraries. Implemented by Jeremy Cowgar.
+  on how to use with your own libraries. $$(doneby Jeremy Cowgar.)
 * New stack routines in **stack.e**: 
   **new()**, **is_empty()**, **push()**, **top()**, **pop()**, **clear()**, **swap()**, 
-  **dup()**. Global constants: **FIFO**, **FILO**. Implemented by Jeremy Cowgar.
+  **dup()**. Global constants: **FIFO**, **FILO**. $$(doneby Jeremy Cowgar.)
 * New locale routines in **locale.e**:
   **set()**, **get()**, **number()**, **money()**, **datetime()**, **set_po_path()**, 
-  **get_po_path()**, **po_load()**, **w()**. Implemented by Jeremy Cowgar.
+  **get_po_path()**, **po_load()**, **w()**. $$(doneby Jeremy Cowgar.)
 * New os routines in **os.e**:
-  **cmd_parse()**. Implemented by Jeremy Cowgar
+  **cmd_parse()**. $$(doneby Jeremy Cowgar)
 * New procedure **warning()** enables to specify custom warnings to be
   displayed at compile time, for instance to mark a routine as obsolete. The text of the 
-  warning must be a litteral constant. Implemented by C. Cuvier.
-* Warnings also may be redirected or suppressed using **warning_file()**. Implemented by
-  C. Cuvier.
+  warning must be a litteral constant. $$(doneby C. Cuvier.)
+* Warnings also may be redirected or suppressed using **warning_file()**. 
+  $$(doneby C. Cuvier.)
 

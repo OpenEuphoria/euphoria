@@ -1,0 +1,36 @@
+-v:on
+-o:../html
+
+-m=product Euphoria
+-m=version v4.0
+-m=copyright(
+``<p class="copyright">
+<a href="http://www.rapideuphoria.com">&copy; 2008 RapidEuphoria</a>
+</p>``
+)
+
+
+after.txt
+api.txt
+before.txt
+bind.txt
+c.txt
+cgi.txt
+database.txt
+e2c.txt
+ed.txt
+ewords.txt
+install.txt
+miniguide.txt
+perform.txt
+platform.txt
+refman_1.txt
+refman_2.txt
+refman_3.txt
+relnotes.txt
+relnotes_old.txt
+relnotes40.txt
+tasking.txt
+trouble.txt
+welcome.txt
+what2do.txt
