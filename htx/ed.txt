@@ -16,8 +16,10 @@ Euphoria program, including DOS Edit or Windows NotePad.
 
 === Summary
 
-usage 1: ##ed filename##
-usage 2: ##ed##
+Usage:
+
+# ##ed filename##
+# ##ed##
 
 After any error, just type ##ed##, and
 you'll be placed in the editor, at the line and column where the error was
