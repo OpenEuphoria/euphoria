@@ -146,7 +146,7 @@ global function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
 
-global procedure sleep(integer t)
+global procedure sleep(atom t)
 -- go to sleep for t seconds
 -- allowing (on WIN32 and Linux) other processes to run
 	if t >= 0 then

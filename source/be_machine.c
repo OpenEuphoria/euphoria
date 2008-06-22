@@ -3752,17 +3752,20 @@ static object change_dir(object x)
 		return ATOM_0;
 }
 
+extern double Wait(double);
 static object e_sleep(object x)
 /* sleep for x seconds */
 {
-	int t;
+	double t;
 	
-	t = get_int(x);
-#ifdef ELCC
-	Sleep(1000 * t);
-#else
-	sleep(t);
-#endif  
+	if IS_ATOM(x) {
+		if (IS_ATOM_INT(x)) {
+			t = (double)INT_VAL(x);
+		} else {
+			t = DBL_PTR(x)->dbl;
+		}
+	}
+	Wait(t);
 	return ATOM_1;
 }
 
