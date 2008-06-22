@@ -101,8 +101,11 @@ for i = 1 to length(f) do
 		f[i] = f[i][1..length(f[i])-1]
 	end while
 	--if length(f[i]) = 3 then
+	-- ^L is 12, apparently
 	if is_numeric(f[i]) then
-		g &= {f[i]}
+		if not equal(f[i+1], {12,10}) then
+			g &= {f[i]}
+		end if
 	end if
 end for
 
