@@ -82,6 +82,7 @@ global enum
 	CS_Control,
 	CS_Digit,
 	CS_Graphic,
+	CS_Bytes,
 	CS_LAST
 --** 
 
@@ -109,6 +110,7 @@ global procedure set_default_charsets()
 	Defined_Sets[CS_ASCII 		] = {{0, 127}}
 	Defined_Sets[CS_Digit 		] = {{'0', '9'}}
 	Defined_Sets[CS_Graphic 	] = {{'!', '~'}}
+	Defined_Sets[CS_Bytes	 	] = {{0, 255}}
 end procedure
 --**
 
@@ -349,6 +351,37 @@ end type
 -- t_graph({})            -- FALSE (empty sequence)
 global type t_graph(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Graphic])
+end type
+--**
+
+--** 
+-- Returns TRUE if argument is a byte or if every element of 
+-- the argument is a byte. (Integers from 0 to 255)
+--
+-- Returns FALSE if the argument is an empty sequence, or contains sequences,
+-- or contains non-byte
+--
+-- Example 1:
+-- t_bytearray(-1)            -- FALSE (contains value less than zero)
+-- t_bytearray(0)             -- TRUE
+-- t_bytearray(1)             -- TRUE
+-- t_bytearray(10)            -- TRUE
+-- t_bytearray(100)           -- TRUE
+-- t_bytearray(1000)          -- FALSE (greater than 255)
+-- t_bytearray(1.234)         -- FALSE (contains a floating number)
+-- t_bytearray('A')           -- TRUE
+-- t_bytearray('9')           -- TRUE
+-- t_bytearray('?')           -- TRUE
+-- t_bytearray(' ')           -- TRUE
+-- t_bytearray("abc")         -- TRUE 
+-- t_bytearray("ab3")         -- TRUE
+-- t_bytearray("123")         -- TRUE
+-- t_bytearray({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- t_bytearray({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- t_bytearray({1, 2, 'a')    -- TRUE
+-- t_bytearray({})            -- FALSE (empty sequence)
+global type t_bytearray(object pVal)
+	return char_test(pVal, Defined_Sets[CS_Bytes])
 end type
 --**
 
