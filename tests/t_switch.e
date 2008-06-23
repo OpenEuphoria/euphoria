@@ -49,30 +49,30 @@ integer ns = 0
 enum A,B,C
 procedure nst(object pA, object pB = -1)
 switch pA do
-    case A:
+    case C:
         ns = 1
         break
     case B:
     	switch pB do
-    		case A:
+    		case C:
         		ns = 2
         		break
         		
     		case B:
         		ns = 5
         		break
-    		case C:
+    		case A:
         		ns = 6
         		break
         end switch
         break
-    case C:
+    case A:
         ns = 3
         break
 end switch
 end procedure
 nst(B,A)
-test_equal( "nested switch", 2, ns )
+test_equal( "nested switch", 6, ns )
 
 
 test_embedded_report()
