@@ -1748,25 +1748,8 @@ procedure exit_loop(integer exit_base)
 end procedure
 
 procedure push_switch()
---	loop_stack &= {{SWITCH, 0, 0}}
---	loop_nest += 1
 	if_stack &= SWITCH
 	switch_stack = append( switch_stack, { {}, {}, 0 })
---	if length(continue_addr) then
---		continue_addr &= continue_addr[$]
---	else
---		continue_addr &= 0
---	end if
---	if length(retry_addr) then
---		retry_addr &= retry_addr[$]
---	else
---		retry_addr &= 0
---	end if
---	if length(entry_addr) then
---		entry_addr &= entry_addr[$]
---	else
---		entry_addr &= 0
---	end if
 end procedure
 
 procedure pop_switch( integer break_base )
@@ -1849,10 +1832,10 @@ procedure Switch_statement()
 	
 	Expr()
 	
-	cases = NewStringSym( {-1, - length(loop_stack) } )
+	cases = NewStringSym( {-1, length(SymTab) } )
 	emit_opnd( cases )
 	   
-	jump_table = NewStringSym( {-2, - length(loop_stack) } )
+	jump_table = NewStringSym( {-2, length(SymTab) } )
 	emit_opnd( jump_table )
 	
 	if finish_block_header(SWITCH) then end if
@@ -1894,6 +1877,7 @@ procedure Switch_statement()
 	if TRANSLATE then
 		emit_op(NOPSWITCH)
 	end if
+	
 	pop_switch( break_base )
 end procedure
 
