@@ -1,22 +1,7 @@
-<_init_comment>
-<html>
-<head><title>Euphoria Performance Tips</title>
-<_css>
-</head>
-<body>
-<_width>
-<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
-<br>
-                       Euphoria Performance Tips
-</font></_center>
+== Performance Tips
 
+=== >General Tips
 
-<font face="Arial, Helvetica" color="#FF0099" size=+1>
-<br>
-
-<_sul>General Tips</_sul>
-
-</font>
 <ul>
 <li>
  If your program is fast enough, forget about speeding it up.
@@ -610,10 +595,3 @@ files that you can compile using a C compiler.
 The executable file that you get using the Translator should run the same,
 but faster than when you use the interpreter. The speed-up can be anywhere
 from a few percent to a factor of 5 or more.
-
-
-&nbsp;
-
-</_width>
-</body>
-</html>

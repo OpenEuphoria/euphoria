@@ -1,50 +1,37 @@
-<_init_comment>
-<html>
-<head><title>Platform-Specific Issues for Euphoria</title>
-<_css>
-</head>
-<body>
-<_width>
-<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
-<br>
-                  Platform-Specific Issues for Euphoria
-</font></_center>
-
+== Platform-Specific Issues
 
 <font face="Arial, Helvetica" color="#FF0099" size=+1>
 <br>
 
-<_dul>1. Introduction</_dul>
+=== Introduction
 
-</font>
-
- Rapid Deployment Software currently supports Euphoria on four different
- <font color="#993333"><_bq>//platforms//</_bq></font>. More 
- platforms will be added in the future. 
+Rapid Deployment Software currently supports Euphoria on four different
+<font color="#993333"><_bq>//platforms//</_bq></font>. More platforms will
+be added in the future.
  
 
- The first platform is called
- <font color="#CC3366">**DOS32**</font>, 
- since it depends on the DOS operating system, but with the CPU operating 
- in 32-bit (protected) mode. 
+The first platform is called
+<font color="#CC3366">**DOS32**</font>, 
+since it depends on the DOS operating system, but with the CPU operating 
+in 32-bit (protected) mode. 
  
 
- The second platform is called <font color="#CC3366">**WIN32**</font>,
- since the underlying operating system is Microsoft Windows, in particular,
- the 32-bit version of Windows that is used on Windows 95/98/ME, as well as
- NT/2000/XP and later systems. 
+The second platform is called <font color="#CC3366">**WIN32**</font>,
+since the underlying operating system is Microsoft Windows, in particular,
+the 32-bit version of Windows that is used on Windows 95/98/ME, as well as
+NT/2000/XP and later systems. 
  
 
- The third platform is <font color="#CC3366">**Linux**</font>. Linux is
- based on the UNIX operating system. It has recently become very popular 
- on PCs. There are many distributors of Linux, including Red Hat, Debian,
- Caldera, etc. Linux can be obtained on a CD for a very low price. Linux 
- is an open-source operating system.
+The third platform is <font color="#CC3366">**Linux**</font>. Linux is
+based on the UNIX operating system. It has recently become very popular 
+on PCs. There are many distributors of Linux, including Red Hat, Debian,
+Caldera, etc. Linux can be obtained on a CD for a very low price. Linux 
+is an open-source operating system.
 
 
- The fourth platform is <font color="#CC3366">**FreeBSD**</font>. FreeBSD 
- is also based on the UNIX operating system. It is very popular on 
- Internet server machines. It's also open source.
+The fourth platform is <font color="#CC3366">**FreeBSD**</font>. FreeBSD 
+is also based on the UNIX operating system. It is very popular on 
+Internet server machines. It's also open source.
 
 
  Users who have purchased the Euphoria source code have ported Euphoria
@@ -742,10 +729,3 @@ with no braces, is __stdcall.
 function to specify a Euphoria routine to handle various signals (e.g. SIGTERM).
 It can also be passed to C routines such as qsort(), to specify a Euphoria
 comparison function.
-
-&nbsp;
-
-</_width>
-</body>
-</html>
- 
