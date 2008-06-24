@@ -157,5 +157,43 @@ test_equal("sprintf() integer", "i=1", sprintf("i=%d", {1}))
 test_equal("sprintf() float", "i=5.5", sprintf("i=%.1f", {5.5}))
 test_equal("sprintf() percent", "%", sprintf("%%", {}))
 
+-- keyvalues()
+s = keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+test_equal("keyvalues #1", { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}}, s)
+
+s = keyvalues("abc fgh=ijk def")
+test_equal("keyvalues #2", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"} }, s)
+
+s = keyvalues("abc=`'quoted'`")
+test_equal("keyvalues #3", { {"abc", "'quoted'"} }, s)
+
+s = keyvalues("colors=(a=black, b=blue, c=red)")
+test_equal("keyvalues #4", { {"colors", {{"a", "black"}, {"b", "blue"},{"c", "red"}}  } }, s)
+
+s = keyvalues("colors={a=black, b=blue, c=red}")
+test_equal("keyvalues #4a", { {"colors", {"a=black", "b=blue","c=red"}}  } , s)
+
+s = keyvalues("colors=[a=black, b=blue, c=red]")
+test_equal("keyvalues #4b", { {"colors", {"a=black", "b=blue","c=red"}}  } , s)
+
+s = keyvalues("colors=(black=[0,0,0], blue=[0,0,FF], red=[FF,0,0])")
+test_equal("keyvalues #5", { {"colors", {{"black",{"0", "0", "0"}}, {"blue",{"0", "0", "FF"}},{"red", {"FF","0","0"}}}} }, s)
+
+s = keyvalues("colors=(black=(r=0,g=0,b=0), blue={r=0,g=0,b=FF}, red=['F`F',0,0])")
+test_equal("keyvalues #5a", { {"colors", {{"black",{{"r","0"}, {"g","0"}, {"b","0"}}}, 
+              {"blue",{"r=0", "g=0", "b=FF"}},{"red", {"F`F","0","0"}}}} }, s)
+
+s = keyvalues("colors=[black, blue, red]")
+test_equal("keyvalues #6", { {"colors", { "black", "blue", "red"}  } }, s)
+
+s = keyvalues("colors=~[black, blue, red]")
+test_equal("keyvalues #7", { {"colors", "[black, blue, red]"}  } , s)
+
+s = keyvalues("colors=`~[black, blue, red]`")
+test_equal("keyvalues #8", { {"colors", "[black, blue, red]"}  }, s)
+
+s = keyvalues("colors=`[black, blue, red]")
+test_equal("keyvalues #9", { {"colors", {"black", "blue", "red"}}  }, s)
+
 test_embedded_report()
 
