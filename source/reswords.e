@@ -192,9 +192,11 @@ global constant
 	SWITCH              = 187,
 	CASE                = 188,
 	NOPSWITCH           = 189,  -- Translator only
-	GOTO = 190,
-	GLABEL = 191,
-	MAX_OPCODE          = 191
+	GOTO 				= 190,
+	GLABEL 				= 191,
+	SPLICE				= 192,
+	INSERT				= 193,
+	MAX_OPCODE          = 193
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])

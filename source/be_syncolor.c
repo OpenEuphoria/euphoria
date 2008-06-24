@@ -195,7 +195,13 @@ static char *predefined[] = {
 	"peeks",
 	"peek_string",
 	"option_switches",
-	NULL
+	"retry",
+	"switch",
+	NULL,NULL,
+	"goto",
+	"label",
+	"splice",
+	"insert"
 };
 
 /*********************/

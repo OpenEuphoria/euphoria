@@ -190,7 +190,7 @@ extern unsigned char TempBuff[];
 extern int TraceOn;
 extern int in_from_keyb;
 extern int trace_enabled;
-extern int *TraceLineBuff;      
+extern int *TraceLineBuff;
 extern int TraceLineSize;
 extern int TraceLineNext;
 extern symtab_ptr TopLevelSub;
@@ -212,7 +212,7 @@ extern int *profile_sample;
 #ifdef EWINDOWS
 extern unsigned default_heap;
 #endif
-
+extern void Copy_elements();
 /**********************/
 /* Declared functions */
 /**********************/
@@ -235,7 +235,7 @@ object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide()
 	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
 	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
 	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
-	 Dxor_bits(), Dnot_bits(), Dpower();
+	 Dxor_bits(), Dnot_bits(), Dpower(), Insert();
 
 object x(); /* error */
 symtab_ptr PrivateVar();
@@ -286,7 +286,7 @@ static void trace_command(object x)
 // perform trace(x)
 {
 	int i;              
-				
+
 	if (IS_ATOM_INT(x)) {
 		i = x;
 	}
@@ -366,7 +366,7 @@ static object do_peek2(object a, int b, int *pc)
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
-		s1 = SEQ_PTR(a);                                        
+		s1 = SEQ_PTR(a);
 		i = s1->length;
 		if (i != 2) {
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
@@ -406,7 +406,7 @@ static object do_peek2(object a, int b, int *pc)
 					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
 												(unsigned)peek2_addr++);
 				else    
-#endif                      
+#endif
 					top = (object)(short)*peek2_addr++;
 				if (top < MININT || top > MAXINT)
 					top = NewDouble((double)(long)top);
@@ -454,7 +454,7 @@ static object do_peek4(object a, int b, int *pc)
 	object top;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-				
+
 	/* check address */
 	if (IS_ATOM_INT(a)) {
 		peek4_addr = (unsigned long *)a;
@@ -598,7 +598,7 @@ static void do_poke2(object a, object top)
 					_farpokel(_go32_info_block.selector_for_linear_memory,
 					  (unsigned long)poke2_addr++, (unsigned long)INT_VAL(top));
 				else
-#endif      
+#endif
 					*poke2_addr++ = (unsigned short)INT_VAL(top);
 			}
 			else if (IS_ATOM(top)) {
@@ -694,7 +694,7 @@ static void do_poke4(object a, object top)
 					_farpokel(_go32_info_block.selector_for_linear_memory,
 					  (unsigned long)poke4_addr++, (unsigned long)temp_dbl);
 				else
-#endif      
+#endif
 					*poke4_addr++ = (unsigned long)temp_dbl;
 			}
 			else {
@@ -910,7 +910,7 @@ void InitExecute()
 	
 	// Create Call Stack
 	InitStack(EXPR_SIZE, 1);
-	
+
 	// create first task (task 0)
 	InitTask();
 	TopLevelSub->u.subp.resident_task = current_task;
@@ -934,7 +934,7 @@ int **jumptab = ((int **)Execute)+53;
 int **jumptab = ((int **)Execute)+4; 
 #endif
 
-#endif 
+#endif
 #endif //not INT_CODES
 
 
@@ -958,7 +958,7 @@ void code_set_pointers(int **code)
 		word = (int)code[i];
 		
 		if (word > MAX_OPCODE || word < 1) {
-			sprintf(msg, "BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d", 
+			sprintf(msg, "BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d",
 					i, word, len);
 			RTFatal(msg);
 		}
@@ -1194,6 +1194,8 @@ void code_set_pointers(int **code)
 			case C_FUNC:
 			case FIND_FROM:
 			case MATCH_FROM:
+			case SPLICE:
+			case INSERT:
 				// 4 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1316,7 +1318,7 @@ void symtab_set_pointers()
 			// normal variables, routines
 			s->obj = NOVALUE;
 
-			if (s->token == PROC || 
+			if (s->token == PROC ||
 				s->token == FUNC || 
 				s->token == TYPE) {
 				code = (int **)s->u.subp.code;
@@ -1340,7 +1342,7 @@ void symtab_set_pointers()
 			string_ptr = (unsigned char *)s->obj;
 			s->obj = decompress(0);
 		}
-		
+
 		else {
 			// M_TEMP - temps
 			// leave obj as 0
@@ -1436,7 +1438,7 @@ static load_private_block(symtab_ptr routine, int task)
 			if (prev_p == NULL) {
 				routine->u.subp.saved_privates = p->next;
 			}
-			else {    
+			else {
 				prev_p->next = p->next;
 			}
 
@@ -1495,7 +1497,7 @@ void restore_privates(symtab_ptr this_routine)
 				sym = sym->next;
 			}
 		}
-		
+
 		// restore the current task's private data (will always be there)
 
 		load_private_block(this_routine, current_task);
@@ -1551,8 +1553,8 @@ void do_exec(int *start_pc)
 	opcode_type *patch;
 	object b, c;
 	symtab_ptr sym, sub, caller;
-	int c0;
-	s1_ptr s1;
+	int c0,splins;
+	s1_ptr s1,s2;
 	object *block;
 	
 #if defined(EUNIX) || defined(EDJGPP)
@@ -1630,9 +1632,10 @@ void do_exec(int *start_pc)
   &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
   &&L_OPTION_SWITCHES, &&L_RETRY, &&L_SWITCH,
-  NULL, /* L_CASE not emitted*/
-  &&L_GOTO, &&L_GLABEL
-/* 188 (previous) */
+/* 187 (previous)*/
+  NULL, NULL,/* L_CASE, L_NOPSWITCH not emitted*/
+  &&L_GOTO, &&L_GLABEL, &&L_SPLICE, &&L_INSERT
+/* 193 (previous) */
   };
 #endif
 #endif
@@ -2128,7 +2131,7 @@ void do_exec(int *start_pc)
 				assign_slice_seq = (s1_ptr *)pc[1]; /* extra parameter */
 			  las:  
 				tpc = pc;
-				AssignSlice(*(object_ptr)pc[2], 
+				AssignSlice(*(object_ptr)pc[2],
 							*(object_ptr)pc[3],  /* 3 args max for good code */
 							(s1_ptr)*(object_ptr)pc[4]);
 				thread5();
@@ -3520,6 +3523,50 @@ void do_exec(int *start_pc)
 				pc += 4;  // WATCOM thread() fails
 				BREAK;
 			
+			case L_SPLICE:
+				splins = 1;
+				goto spin;
+			case L_INSERT:
+				splins = 0;
+			spin:
+				tpc = pc;
+				if (!IS_SEQUENCE(*(object_ptr)pc[1]))
+					RTFatal("First argument to splice/insert() must be an atom");
+    			a = *(object_ptr)pc[1]; // the source
+    			i = SEQ_PTR(a)->length;
+				obj_ptr = (object_ptr)pc[3];  
+				if (IS_SEQUENCE(*obj_ptr))
+					RTFatal("Third argument to splice/insert() must be an atom");  
+				nvars = (IS_ATOM_INT(*obj_ptr)) ?
+					*obj_ptr : (long)DBL_PTR(*obj_ptr)->dbl;  //insertion point
+				b = *(object_ptr)pc[2]; //the stuff to insert
+				Ref(b);
+				obj_ptr = (object_ptr)pc[4]; //-> the target
+				// now the variable part
+				if (nvars <= 0) {
+                	if (*pc == L_SPLICE) Concat(obj_ptr,b,a);
+					else Prepend(obj_ptr,a,b);
+    			}
+    			else if (nvars > i) {
+                	if (*pc == L_SPLICE) Concat(obj_ptr,a,b);
+					else Append(obj_ptr,a,b);
+       			}
+				else if (IS_SEQUENCE(b) && splins) {
+				// splice is now just a sequence assign
+					s2 = SEQ_PTR(b);
+					s1 = Add_internal_space(a,nvars,s2->length);
+					*assign_slice_seq = s1;
+					Copy_elements(nvars,s2);
+	       			DeRef(*obj_ptr);
+					*obj_ptr = MAKE_SEQ(s1);
+	   			}
+				else { // inserting is just addig an extra element and assigning it
+	       			DeRef(*(obj_ptr));
+	       			*(obj_ptr) = Insert(a,b,nvars);
+				}
+                thread5();
+                BREAK;
+
 			case L_CONCAT_N:
 				/* concatenate 3 or more items */
 				nvars = pc[1];

@@ -186,3 +186,5 @@
 #define L_SWITCH SWITCH
 #define L_GOTO GOTO
 #define L_GLABEL GLABEL
+#define L_SPLICE SPLICE
+#define L_INSERT INSERT

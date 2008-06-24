@@ -194,5 +194,7 @@ global constant opnames = {
 	"CASE",
 	"NOPSWITCH",
 	"GOTO",
-	"GLABEL"
+	"GLABEL",
+	"SPLICE",
+	"INSERT"
 }

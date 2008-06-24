@@ -2579,7 +2579,6 @@ procedure SubProg(integer prog_type, integer scope)
 
 	CurrentSub = p
 	first_def_arg = 0
-	temps_allocated = 0
 	
 	SymTab[p][S_SCOPE] = scope
 	
@@ -2604,6 +2603,9 @@ procedure SubProg(integer prog_type, integer scope)
 	tok_match(LEFT_ROUND)
 	tok = next_token()
 	param_num = 0
+	
+	-- start of executable code for subprogram:
+
 	while tok[T_ID] != RIGHT_ROUND do
 		-- parse the parameter declarations
 		if tok[T_ID] != TYPE and tok[T_ID] != QUALIFIED_TYPE then
@@ -2624,7 +2626,7 @@ procedure SubProg(integer prog_type, integer scope)
 			SymTab[sym][S_GTYPE] = CompileType(type_sym)
 		end if
 
-		SymTab[sym][S_USAGE] = U_WRITTEN     
+		SymTab[sym][S_USAGE] = U_WRITTEN
 		tok = next_token()
     	if tok[T_ID] = EQUALS then
     	    start_recording()
@@ -2634,6 +2636,7 @@ procedure SubProg(integer prog_type, integer scope)
             if first_def_arg = 0 then
                 first_def_arg = param_num
             end if
+			previous_op = -1 -- no interferences betwen defparms, or them and subsequent code
     	end if
 		if tok[T_ID] = COMMA then
 			tok = next_token()
@@ -2644,7 +2647,8 @@ procedure SubProg(integer prog_type, integer scope)
 			CompileErr("badly-formed list of parameters - expected ',' or ')'")
 		end if 
 	end while
-
+	Code = {} -- removes any spurious code emitted while recording parameters
+			  -- but don't scrub SymTab, because created temps may be referenced somewhere else
 	SymTab[p][S_NUM_ARGS] = param_num
     SymTab[p][S_FIRST_DEF_ARG] = first_def_arg
 	if TRANSLATE then
@@ -2665,9 +2669,8 @@ procedure SubProg(integer prog_type, integer scope)
 		tok = next_token()
 	end while
 
-	-- start of executable code for subprogram: 
-
 	-- code to perform type checks on all the parameters 
+	temps_allocated = 0
 	sym = SymTab[p][S_NEXT]
 	for i = 1 to SymTab[p][S_NUM_ARGS] do
 		TypeCheck(sym) 

@@ -296,6 +296,8 @@ op_result[TASK_SELF] = T_ATOM
 op_result[TASK_CREATE] = T_ATOM
 op_result[TASK_LIST] = T_SEQUENCE
 op_result[PLATFORM] = T_INTEGER
+op_result[SPLICE] = T_SEQUENCE
+op_result[INSERT] = T_SEQUENCE
 
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
@@ -898,7 +900,7 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output 
-	elsif op = RHS_SLICE or op = FIND_FROM or op = MATCH_FROM then 
+	elsif find(op, {RHS_SLICE, FIND_FROM, MATCH_FROM, SPLICE, INSERT}) then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()

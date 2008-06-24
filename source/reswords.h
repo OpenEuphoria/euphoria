@@ -202,7 +202,9 @@
 #define NOPSELECT           189
 #define GOTO 190
 #define GLABEL 191
-#define MAX_OPCODE          191
+#define SPLICE	192
+#define INSERT 193
+#define MAX_OPCODE          193
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

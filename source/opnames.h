@@ -189,6 +189,9 @@ static char *opnames[] = {
 	"RETRY",
 	"SWITCH",
 	"CASE",
+	"NOPSWITCH",
 	"GOTO",
-	"GLABEL"
+	"GLABEL",
+	"SPLICE",
+	"INSERT"
 };

@@ -141,7 +141,7 @@ int crash_count = 0; /* number of crashes so far */
 int clocks_per_sec;
 int clk_tck;
 int gameover = FALSE;           /* Are we shutting down? */
-
+int insert_pos;
 /**********************/
 /* Declared Functions */
 /**********************/
@@ -352,6 +352,10 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
+{x, x},
+{x, x},
+{x, x},
+/* 190 */{x, x},
 {x, x},
 {x, x}
 };
@@ -761,6 +765,68 @@ void Append(object_ptr target, object s1, object a)
 	*target = MAKE_SEQ(new_seq);
 }
 
+s1_ptr Add_internal_space(object a,int at,int len)
+/*Adds some room at at for len in seq*/
+{
+	char *obj_ptr;
+	s1_ptr new_seq;
+	object temp;
+	int i;
+	object_ptr p,q;
+	s1_ptr seq = SEQ_PTR(a);
+	int nseq = seq->length;
+
+	if (seq->ref == 1 && nseq > (len - seq->postfill) <<3) {
+	 /*We can deal with it by a stright mmeomry copy*/
+	 	seq->postfill -= len;
+	 	seq->length += len;
+	 	obj_ptr = (char *)(seq->base+at);
+	 	memcpy(obj_ptr+4*len, obj_ptr, 4*(nseq-at)+8);
+		return seq;
+	}
+	new_seq = NewS1(nseq + len);
+
+	p = new_seq->base;
+	q = seq->base;
+	for (i=1;i<at;i++) {
+		temp = *(++q);
+		*++p = temp;
+		if (!IS_ATOM_INT(temp)) RefDS(temp);
+	}
+	p += len;
+	while (TRUE) {  // NOVALUE will be copied
+		temp = *(++q);
+		*++p = temp;
+		if (!IS_ATOM_INT(temp)) {
+			if (temp == NOVALUE)
+				break;
+			RefDS(temp);
+		}
+	}
+	return new_seq;
+}
+
+void Copy_elements(int start,s1_ptr source) {
+	object_ptr t_elem = (*assign_slice_seq)->base+start;
+	object_ptr s_elem = source->base+1;
+	object temp;
+	int i;
+	
+	for (i=1;i<=source->length;i++) {
+		temp = *s_elem++;
+		*t_elem++ = temp;
+		Ref(temp);
+	}
+}
+
+object Insert(object a,object b,int pos)
+{
+   	s1_ptr s1 = Add_internal_space(a,pos,1);
+    object_ptr result_ptr = s1->base+pos;
+	    
+    *result_ptr = b;
+    return MAKE_SEQ(s1);
+}
 
 void Concat(object_ptr target, object a_obj, s1_ptr b)
 /* concatenate a & b, put result in new object c */
@@ -788,8 +854,8 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 		na = a->length;
 		nb = b->length;
 		
-		if (a_obj == *target && 
-			a->ref == 1 && 
+		if (a_obj == *target &&
+			a->ref == 1 &&
 			na > ((nb - a->postfill) << 3)) {
 			/* try to update in-place */
 			int insert;
@@ -2348,7 +2414,6 @@ void AssignSlice(object start, object end, s1_ptr val)
 		*seq_ptr = (s1_ptr)MAKE_SEQ(sp);
 	}
 	s_elem = sp->base + startval; 
-
 	if (IS_ATOM(val)) {
 		if (!IS_ATOM_INT(val))   
 			(DBL_PTR(val)->ref) += length;
@@ -2366,7 +2431,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 			"lengths do not match on assignment to slice (%ld != %ld)",
 			length, val->length);
 			RTFatal(TempBuff);
-		}
+		}          
 		while (TRUE) {
 			if (!IS_ATOM_INT(*v_elem)) {
 				if (*v_elem == NOVALUE)
@@ -2374,7 +2439,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 				RefDS(*v_elem);
 			}
 			DeRef(*s_elem);
-			*s_elem++ = *v_elem++; 
+			*s_elem++ = *v_elem++;  
 		}
 	}
 }

@@ -447,7 +447,7 @@ end function
 
 procedure CRef(integer v)
 -- Ref a var or temp in the quickest way
-	if TypeIs(v, TYPE_INTEGER) then 
+	if TypeIs(v, TYPE_INTEGER) then
 		return
 	end if
 	if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) then
@@ -2661,7 +2661,7 @@ procedure opGLOBAL_INIT_CHECK()
 	pc += 2
 end procedure
 			
-procedure opLHS_SUBS() 
+procedure opLHS_SUBS()
 -- LHS_SUBS / LHS_SUBS1 / LHS_SUBS1_COPY 
 	SymTab[CurrentSub][S_LHS_SUBS2] = TRUE -- need to declare _3
 			
@@ -2731,7 +2731,7 @@ procedure opASSIGN_OP_SLICE()
 		c_stmt("RHS_Slice((s1_ptr)@, @, @);\n", 
 			   {Code[pc+1], Code[pc+2], Code[pc+3]})
 	end if
-	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, TYPE_OBJECT) 
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, TYPE_OBJECT)
 	--length might be knowable
 	pc += 5
 end procedure
@@ -4133,7 +4133,54 @@ procedure opCONCAT()
 
 	pc += 4
 end procedure
-			
+
+procedure splins()
+-- writes the portion common to splice() and insert()
+	c_stmt0("{\n")
+	c_stmt0("_2 = (object_ptr)pc[3];\n")
+	if not TypeIs(Code[pc+2],TYPE_SEQUENCE) then
+		c_stmt0("if (IS_SEQUENCE(*_2))\n")
+		c_stmt0("RTFatal(\"Third argument to splice/insert() must be an atom\");\n")
+	end if
+	c_stmt0("insert_pos = (IS_ATOM_INT(*_2) ?*_2 : (long)DBL_PTR(*_2)->dbl;\n")
+	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
+	if not TypeIs(Code[pc+2],TYPE_SEQUENCE) then
+		c_stmt("if (IS_SEQUENCE(@)\n",Code[pc+1])
+		c_stmt0("RTFatal(\"First argument to splice/insert() must be an atom\");\n")
+	end if
+end procedure
+
+procedure opSPLICE()
+	splins()
+	c_stmt("if (insert_pos <= 0) Concat(@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
+    c_stmt("else if (insert_pos > (s1_ptr)_1->length) Concat(@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
+	c_stmt0("else if (IS_SEQUENCE(_2)) {\n")
+	c_stmt0("*assign_slice_seq = SEQ_PTR(_1);}\n")
+	c_stmt0("Copy_elements(insert_pos,SEQ_PTR(2));\n")
+	c_stmt("*@ = MAKE_SEQ(*assign_slice_seq);\n",Code[pc+4]})
+	c_stmt0("}\n")
+    c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
+		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
+	elsif TypeIs(Code[pc+2], TYPE_ATOM) then
+		t = or_type(SeqElem(Code[pc+1]),GType(Code[pc+2]))
+	else
+		t = TYPE_OBJECT
+	end if
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, t)
+	pc += 5
+end procedure
+
+procedure opINSERT()
+	splins() -- _0 = obj_ptr
+	c_stmt("_1 = @\n",Code[pc+1])
+	c_stmt0("if (insert_pos <= 0) Prepend(_0,_1,_2);\n")
+    c_stmt0("else if (insert_pos > (s1_ptr)_1->length) Append(_0,_1,_2);\n")
+	c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))
+	pc += 5
+end procedure
+
 procedure opCONCAT_N()
 -- concatenate 3 or more items
 	n = Code[pc+1]
@@ -5656,15 +5703,16 @@ procedure BackEnd(atom ignore)
 	c_hputs("extern void *xstdin;\n")
 	c_hputs("extern struct tcb *tcb;\n")
 	c_hputs("extern int current_task;\n")
+	c_hputs("extern int insert_pos;\n")
 	if TWINDOWS then
 		c_hputs("extern void *winInstance;\n\n")
-	end if  
-	
+	end if
+
 	close(c_code)
 	close(c_h)
 
 	finish_emake()
-	
+
 	screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
 	if TUNIX then
 		if dll_option then
@@ -5687,4 +5735,5 @@ procedure OutputIL()
 -- not used
 end procedure
 set_output_il( routine_id("OutputIL" ))
+
 
