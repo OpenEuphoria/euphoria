@@ -222,6 +222,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	int found_in_path;
 	int found_outside_path;
 	int s_in_include_path;
+	int did_find = 0;
 	
 	if (pc == NULL) {
 		proc = routine;
@@ -261,10 +262,14 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
 			if (file == s->file_no && 
 				s->token == NAMESPACE && strcmp(ns, s->name) == 0) {
+				did_find = 1;
 				break;
 			}
 		}
 		
+		if (!did_find)
+			return NULL;
+
 		if (s == NULL)
 			return NULL;
 
