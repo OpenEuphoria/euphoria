@@ -4157,7 +4157,7 @@ procedure opSPLICE()
 	c_stmt0("else if (IS_SEQUENCE(_2)) {\n")
 	c_stmt0("*assign_slice_seq = SEQ_PTR(_1);}\n")
 	c_stmt0("Copy_elements(insert_pos,SEQ_PTR(2));\n")
-	c_stmt("*@ = MAKE_SEQ(*assign_slice_seq);\n",Code[pc+4]})
+	c_stmt("*@ = MAKE_SEQ(*assign_slice_seq);\n",{Code[pc+4]})
 	c_stmt0("}\n")
     c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
