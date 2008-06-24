@@ -1194,6 +1194,25 @@ global procedure start_emake()
 	end if      
 end procedure       
 
+function pathnames_to_8( sequence s )
+	integer sl, -- slash location
+		osl -- old slash location
+	osl = find( ':', s )
+	if osl = 0 then
+		osl = find( '\\', s )
+	end if
+	sl = osl + find( '\\', s[osl+1..$] ) -- find_from
+	while sl != osl do
+		if find( ' ', s[osl..sl] ) then
+			s = s[1..osl] & s[osl+1..osl+6] & "~1" & s[sl..$]
+			sl = osl+8
+		end if
+		osl = sl
+		sl += find( '\\', s[sl+1..$] )
+	end while	
+	return s
+end function
+
 global procedure finish_emake()
 -- finish emake.bat 
 	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem
@@ -1307,7 +1326,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ecwl.lib\n", {eudir}) 
+				printf(link_file, "%s\\bin\\ecwl.lib\n", {pathnames_to_8(eudir)}) 
 			end if
 			
 		end if

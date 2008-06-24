@@ -112,7 +112,8 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\sequence.obj
+	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\tranplat.obj
 
 	
 EU_CORE_OBJECTS = &

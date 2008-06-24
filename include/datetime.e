@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
---****
--- Category: 
---   datetime
---
--- Title:
---     Date/Time
---****
+--**
+-- === Date/Time
 --
 
 -- No timezone offset.
@@ -190,16 +185,56 @@ end function
 
 -- ================= START newstdlib
 
-global sequence month_names, month_abbrs, day_names, day_abbrs, ampm
+--**
+-- ==== Localized Variables
 
-month_names = { "January", "February", "March", "April", "May", "June", "July",
+--**
+-- Names of the months
+
+global sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
 	"August", "September", "October", "November", "December" }
-month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+
+--**
+-- Abbreviations of month names
+
+global sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
 	"Aug", "Sep", "Oct", "Nov", "Dec" }
-day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+
+--**
+-- Names of the days
+
+global sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 	"Saturday" }
-day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
-ampm = { "AM", "PM" }
+
+--** 
+-- Abbreviations of day names
+
+global sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+
+--**
+-- AM/PM
+
+global sequence ampm = { "AM", "PM" }
+
+--**
+-- ==== Constants
+--
+-- ===== Accessors to datetime type
+-- * YEAR
+-- * MONTH
+-- * DAY 
+-- * HOUR
+-- * MINUTE
+-- * SECOND
+--
+-- ===== Interval types
+-- * YEARS
+-- * MONTHS
+-- * WEEKS
+-- * DAYS
+-- * HOURS
+-- * MINUTES
+-- * SECONDS
 
 global constant
 	YEAR    = 1,
@@ -233,7 +268,6 @@ global type datetime(object o)
 		and o[MINUTE] >= 0 and o[MINUTE] <= 59
 		and o[SECOND] >= 0 and o[SECOND] < 60)
 end type
---**
 
 --**
 -- Create a new datetime value.
@@ -261,7 +295,6 @@ global function new(integer year, integer month, integer day,
 	d = {year, month, day, hour, minute, second}
 	return d
 end function
---**
 
 --**
 -- Create a new time value with a date of zeros.
@@ -283,7 +316,6 @@ end function
 global function new_time(integer hour, integer minute, integer second)
 	return new(0, 0, 0, hour, minute, second)
 end function
---**
 
 --**
 -- Convert a sequence formatted according to the built-in date() function to a valid datetime 
@@ -299,7 +331,6 @@ end function
 global function from_date(sequence src)
 		return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
---**
 
 --**
 -- Create a new datetime value initialized with the current date and time
@@ -314,7 +345,6 @@ end function
 global function now()
 		return from_date(date())
 end function
---**
 
 --**
 -- Get the day of week of the date dt1.
@@ -329,7 +359,6 @@ end function
 global function dow(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
---**
 
 --**
 -- Get the Julian day of year of the date dt1.
@@ -341,7 +370,6 @@ end function
 global function doy(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
 end function
---**
 
 --**
 -- Convert a datetime value to the unix numeric format (seconds since EPOCH)
@@ -356,7 +384,6 @@ end function
 global function to_unix(datetime dt)
 		return datetimeToSeconds(dt) - EPOCH_1970
 end function
---**
 
 --**
 -- Create a datetime value from the unix numeric format (seconds since EPOCH)
@@ -371,7 +398,6 @@ end function
 global function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
 end function
---**
 
 -- TODO: create, test, document
 -- datetime parse(wstring string)
@@ -386,30 +412,28 @@ end function
 -- Comments:
 -- Format string can include the following:
 -- 
--- <ul>
--- <li>%%  a literal %</li>
--- <li>%a  locale's abbreviated weekday name (e.g., Sun)</li>
--- <li>%A  locale's full weekday name (e.g., Sunday)</li>
--- <li>%b  locale's abbreviated month name (e.g., Jan)</li>
--- <li>%B  locale's full month name (e.g., January)</li>
--- <li>%C  century; like %Y, except omit last two digits (e.g., 21)</li>
--- <li>%d  day of month (e.g, 01)</li>
--- <li>%H  hour (00..23)</li>
--- <li>%I  hour (01..12)</li>
--- <li>%j  day of year (001..366)</li>
--- <li>%k  hour ( 0..23)</li>
--- <li>%l  hour ( 1..12)</li>
--- <li>%m  month (01..12)</li>
--- <li>%M  minute (00..59)</li>
--- <li>%p  locale's equivalent of either AM or PM; blank if not known</li>
--- <li>%P  like %p, but lower case</li>
--- <li>%s  seconds since 1970-01-01 00:00:00 UTC</li>
--- <li>%S  second (00..60)</li>
--- <li>%u  day of week (1..7); 1 is Monday</li>
--- <li>%w  day of week (0..6); 0 is Sunday</li>
--- <li>%y  last two digits of year (00..99)</li>
--- <li>%Y  year</li>
--- </ul>
+-- * %%  a literal %
+-- * %a  locale's abbreviated weekday name (e.g., Sun)
+-- * %A  locale's full weekday name (e.g., Sunday)
+-- * %b  locale's abbreviated month name (e.g., Jan)
+-- * %B  locale's full month name (e.g., January)
+-- * %C  century; like %Y, except omit last two digits (e.g., 21)
+-- * %d  day of month (e.g, 01)
+-- * %H  hour (00..23)
+-- * %I  hour (01..12)
+-- * %j  day of year (001..366)
+-- * %k  hour ( 0..23)
+-- * %l  hour ( 1..12)
+-- * %m  month (01..12)
+-- * %M  minute (00..59)
+-- * %p  locale's equivalent of either AM or PM; blank if not known
+-- * %P  like %p, but lower case
+-- * %s  seconds since 1970-01-01 00:00:00 UTC
+-- * %S  second (00..60)
+-- * %u  day of week (1..7); 1 is Monday
+-- * %w  day of week (0..6); 0 is Sunday
+-- * %y  last two digits of year (00..99)
+-- * %Y  year
 --
 -- Example 1:
 -- d = new(2008, 5, 2, 12, 58, 32)
@@ -518,7 +542,6 @@ global function format(datetime d, wstring format)
 	end for
 	return res
 end function
---**
 
 --**
 -- Add a number of i's to dt1. i is an interval constant and a is the quantity.
@@ -591,7 +614,6 @@ global function add(datetime dt, object qty, integer interval)
 
 		return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
---**
 
 --**
 -- Subtract a number of i's to dt1. i is an interval constant and a is the quantity.
@@ -612,7 +634,6 @@ end function
 global function subtract(datetime dt, atom qty, integer interval)
 	return add(dt, -(qty), interval)
 end function
---**
 
 --**
 -- Compute the number of seconds different between dt1 and dt2.
@@ -633,5 +654,4 @@ end function
 global function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function
---**
 

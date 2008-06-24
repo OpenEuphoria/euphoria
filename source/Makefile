@@ -148,7 +148,8 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/wildcard.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/compress.o 
+	./$(OBJDIR)/compress.o \
+	./$(OBJDIR)/tranplat.o
 
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \

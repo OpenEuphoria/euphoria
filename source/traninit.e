@@ -106,13 +106,13 @@ global procedure transoptions()
 					add_switch( Argv[i+1], 1 )
 					move_args( i+1, 1 )
 					if equal( s, "WIN" ) then
-						set_platform( WIN32 )
+						set_host_platform( WIN32 )
 					elsif equal( s, "DOS" ) then
-						set_platform( DOS32 )
+						set_host_platform( DOS32 )
 					elsif equal( s, "LINUX" ) then
-						set_platform( LINUX )
+						set_host_platform( LINUX )
 					elsif equal( s, "FREEBSD" ) then
-						set_platform( FREEBSD )
+						set_host_platform( FREEBSD )
 					else
 						Warning("unknown platform: " & Argv[i], 0 )
 					end if

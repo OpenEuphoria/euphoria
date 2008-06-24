@@ -27,4 +27,5 @@
 # API docs
 ../../htx/api.txt
 ../../include/database.e
+../../include/datetime.e
 ../../include/file.e

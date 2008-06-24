@@ -46,10 +46,11 @@
 --
 -- ==== Block of key pointers
 -- many per table 
---                 -4: allocated size of this block in bytes
---                  0: key pointer 1
---                  4: key pointer 2
---                  8: etc.
+--                 
+-- * -4: allocated size of this block in bytes
+-- * 0: key pointer 1
+-- * 4: key pointer 2
+-- * 8: etc.
 --
 -- ==== Free list
 -- in ascending order of address
@@ -336,7 +337,7 @@ procedure safe_seek(atom pos)
 end procedure
 
 --**
--- ==== Routines
+-- === Routines
 
 --**
 -- print an open database in readable form to file fn
@@ -350,12 +351,14 @@ end procedure
 --   with the internal format of a Euphoria database.
 --
 -- Example 1:
+-- <eucode>
 -- if db_open("mydata", DB_LOCK_SHARED) != DB_OK then
 --     puts(2, "Couldn't open the database!\n")
 --     abort(1)
 -- end if
 -- fn = open("db.txt", "w")
 -- db_dump(fn, 0)
+-- </eucode>
 
 global procedure db_dump(integer fn, integer low_level_too)
 -- print an open database in readable form to file fn
@@ -658,10 +661,12 @@ end procedure
 -- possibly read it and deal with it in some way.
 --
 -- Example 1:
+-- <eucode>
 -- if db_create("mydata", DB_LOCK_NO) != DB_OK then
 --     puts(2, "Couldn't create the database!\n")
 --     abort(1)
 -- end if
+-- </eucode>
 
 global function db_create(sequence path, integer lock_method)
 	integer db
@@ -736,11 +741,13 @@ end function
 -- becomes the current database to which all other database operations will apply.
 -- The return codes are:
 --
+-- <eucode>
 -- global constant
 --     DB_OK = 0   -- success
 --     DB_OPEN_FAIL = -1  -- couldn't open the file 
 --     DB_LOCK_FAIL = -3  -- couldn't lock the file in the
 --                        --     manner requested
+-- </eucode>
 --
 -- Returns:
 -- integer - an error code that indicates success or failure
@@ -761,6 +768,7 @@ end function
 -- try to access a database that is currently locked.
 
 -- Example 1:
+-- <eucode>
 -- tries = 0
 -- while 1 do
 --     err = db_open("mydata", DB_LOCK_SHARED) 
@@ -782,6 +790,7 @@ end function
 --     	abort(1)
 --     end if
 -- end while
+-- </eucode>
   
 global function db_open(sequence path, integer lock_method)
 	integer db, magic
@@ -836,9 +845,11 @@ end function
 -- When you create (db_create) or open (db_open) a database, it automatically becomes the current database. Use db_select() when you want to switch back and forth between open databases, perhaps to copy records from one to the other. After selecting a new database, you should select a table within that database using db_select_table().
 --
 -- Example 1:
+-- <eucode>
 -- if db_select("employees") != DB_OK then
 --     puts(2, "Couldn't select employees database\n")
 -- end if
+-- </eucode>
 
 global function db_select(sequence path)
 	integer index
@@ -918,10 +929,12 @@ end function
 -- All record-level database operations apply automatically to the current table.
 --
 -- Example 1:
+-- <eucode>
 -- if db_select_table("salary") != DB_OK then
 --     puts(2, "Couldn't find salary table!\n")
 --     abort(1)
 -- end if
+-- </eucode>
 
 global function db_select_table(sequence name)
 -- let table with the given name be the current table
@@ -968,9 +981,11 @@ end function
 -- The table that you create will initially have 0 records. It becomes the current table.
 --
 -- Example 1:
+-- <eucode>
 -- if db_create_table("my_new_table") != DB_OK then
 --     puts(2, "Couldn't create my_new_table!\n")
 -- end if
+-- </eucode>
 
 global function db_create_table(sequence name)
 -- create a new table in the current database file
@@ -1146,14 +1161,15 @@ end procedure
 -- Each element of s is a sequence of characters containing the name of a table.
 --
 -- Example 1:
+-- <eucode>
 -- sequence names
 --
 -- names = db_table_list()
 --
 -- for i = 1 to length(names) do
 --     puts(1, names[i] & '\n')
---
 -- end for
+-- </eucode>
 
 global function db_table_list()
 	sequence table_names
@@ -1198,6 +1214,7 @@ end function
 -- number 27. This quickly tells you that all records, >= 5 and < 27 qualify.
 --
 -- Example 1:
+-- <eucode>
 -- rec_num = db_find_key("Millennium")
 -- if rec_num > 0 then
 --     ? db_record_key(rec_num)
@@ -1207,6 +1224,7 @@ end function
 --
 --     printf(2, "it will be #%d\n", -rec_num)
 -- end if
+-- </eucode>
 
 global function db_find_key(object key)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
@@ -1249,9 +1267,11 @@ end function
 -- DB_EXISTS_ALREADY if a record already exists with the same key value.
 --
 -- Example 1:
+-- <eucode>
 -- if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
 --     puts(2, "insert failed!\n")
 -- end if
+-- </eucode>
 
 global function db_insert(object key, object data)
 	sequence key_string, data_string, last_part, remaining
@@ -1391,7 +1411,9 @@ end function
 -- of records in the current table.
 -- 
 -- Example 1:
+-- <eucode>
 -- db_delete_record(55)
+-- </eucode>
 
 global procedure db_delete_record(integer key_location)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
@@ -1476,7 +1498,9 @@ end procedure
 -- current table.
 --
 -- Example 1:
+-- <eucode>
 -- db_replace_data(67, {"Peter", 150, 34.5})
+-- </eucode>
 
 global procedure db_replace_data(integer rn, object data) 
 	atom old_size, new_size, key_ptr, data_ptr
@@ -1515,6 +1539,7 @@ end procedure
 -- Return the current number of records in the current table.
 --
 -- Example 1:
+-- <eucode>
 -- look at all records in the current table
 -- for i = 1 to db_table_size() do
 --     if db_record_key(i) = 0 then
@@ -1522,6 +1547,7 @@ end procedure
 --     	exit
 --     end if
 -- end for
+-- </eucode>
 
 global function db_table_size()
 	if current_table = -1 then
@@ -1538,8 +1564,10 @@ end function
 -- portion. Each of these can be any Euphoria atom or sequence.
 --
 -- Example 1:
+-- <eucode>
 -- puts(1, "The 6th record has data value: ")
 -- ? db_record_data(6)
+-- </eucode>
 
 global function db_record_data(integer rn) 
 	atom data_ptr
@@ -1566,8 +1594,10 @@ end function
 -- data portion. Each of these can be any Euphoria atom or sequence.
 --
 -- Example 1:
+-- <eucode>
 -- puts(1, "The 6th record has key value: ")
 -- ? db_record_key(6)
+-- </eucode>
 
 global function db_record_key(integer rn) 
 	object key_value
@@ -1629,9 +1659,11 @@ end function
 -- Thanks to Mike Nelson!
 --
 -- Example 1:
+-- <eucode>
 -- if db_compress() != DB_OK then
 --     puts(2, "compress failed!\n")
 -- end if
+-- </eucode>
 
 global function db_compress()
 	integer index, chunk_size, nrecs, r, fn

@@ -7,6 +7,7 @@ include reswords.e
 include global.e
 include symtab.e
 include scanner.e
+include tranplat.e
 
 global integer op_info1, op_info2
 global integer optimized_while
@@ -1172,22 +1173,10 @@ global procedure emit_op(integer op)
 		
 		else    
 			-- front end knows platform
-			if EOSX then
-				n = 4
-				
-			elsif EUNIX then
-				n = 3
-		
-			elsif BIND then
+			n = host_platform()
+			if n <= WIN32 and BIND then
 				n = 1 + w32  -- set platform value based on bind option, so
 							 -- backendw.exe bind.il can serve DOS and Windows
-		
-			elsif EDOS then        
-				n = 1
-		
-			elsif EWINDOWS then
-				n = 2 
-		
 			end if
 		
 			Push(NewIntSym(n))
@@ -1268,5 +1257,4 @@ global procedure StartSourceLine(integer sl)
 		emit_addr(gline_number)
 	end if
 end procedure
-
 
