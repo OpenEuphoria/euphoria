@@ -1,82 +1,96 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
---****
--- Category: 
---   database
+--**
+-- == Euphoria Database (EDS)
 --
--- Title:
---   Euphoria Database System
---****
---
--- Database File Format
--- Header
---    byte 0: magic number for this file-type: 77
---    byte 1: version number (major)
---    byte 2: version number (minor)
---    byte 3: 4-byte pointer to block of table headers
---    byte 7: number of free blocks
---    byte 11: 4-byte pointer to block of free blocks
+-- === Database File Format
+-- 
+-- ==== Header
+-- * byte 0: magic number for this file-type: 77
+-- * byte 1: version number (major)
+-- * byte 2: version number (minor)
+-- * byte 3: 4-byte pointer to block of table headers
+-- * byte 7: number of free blocks
+-- * byte 11: 4-byte pointer to block of free blocks
 --    
---    block of table headers: 
---                 -4: allocated size of this block (for possible reallocation) 
---                  0: number of table headers currently in use
---                  4: table header1
---                 16: table header2
---                 28: etc. 
+-- ==== Block of table headers
+-- * -4: allocated size of this block (for possible reallocation) 
+-- *  0: number of table headers currently in use
+-- *  4: table header1
+-- * 16: table header2
+-- * 28: etc. 
 --    
---    table header: 0: pointer to the name of this table
---                  4: total number of records in this table
---                  8: number of blocks of records
---                 12: pointer to the index block for this table
+-- ==== Table header 
+-- * 0: pointer to the name of this table
+-- * 4: total number of records in this table
+-- * 8: number of blocks of records
+-- * 12: pointer to the index block for this table
 --
---    There are two levels of pointers. The logical array of key pointers 
---    is split up across many physical blocks. A single index block 
---    is used to select the correct small block. This allows 
---    inserts and deletes to be made without having to shift a 
---    large number of key pointers. Only one small block needs to 
---    be adjusted. This is particularly helpful when the table contains 
---    many thousands of records.
+-- There are two levels of pointers. The logical array of key pointers 
+-- is split up across many physical blocks. A single index block 
+-- is used to select the correct small block. This allows 
+-- inserts and deletes to be made without having to shift a 
+-- large number of key pointers. Only one small block needs to 
+-- be adjusted. This is particularly helpful when the table contains 
+-- many thousands of records.
 --
---    index block (one per table):
---                 -4: allocated size of index block
---                  0: number of records in 1st block of key pointers
---                  4: pointer to 1st block
---                  8: number of records in 2nd "                   "
---                 12: pointer to 2nd block
---                 16: etc.
+-- ==== Index block
+-- one per table
 --
---    block of key pointers (many per table): 
+-- * -4: allocated size of index block
+-- * 0: number of records in 1st block of key pointers
+-- * 4: pointer to 1st block
+-- * 8: number of records in 2nd "                   "
+-- * 12: pointer to 2nd block
+-- * 16: etc.
+--
+-- ==== Block of key pointers
+-- many per table 
 --                 -4: allocated size of this block in bytes
 --                  0: key pointer 1
 --                  4: key pointer 2
 --                  8: etc.
 --
---    free list - in ascending order of address
---                 -4: allocated size of block of free blocks
---                  0: address of 1st free block
---                  4: size of 1st free block
---                  8: address of 2nd free block
---                 12: size of 2nd free block
---                 16: etc.
+-- ==== Free list
+-- in ascending order of address
+-- 
+-- * -4: allocated size of block of free blocks
+-- * 0: address of 1st free block
+-- * 4: size of 1st free block
+-- * 8: address of 2nd free block
+-- * 12: size of 2nd free block
+-- * 16: etc.
 --
---    The key value and the data value for a record are allocated space
---    as needed. A pointer to the data value is stored just before the 
---    key value. Euphoria objects, key and data, are stored in a compact form.
---    All allocated blocks have the size of the block in bytes, stored just 
---    before the address.
+-- The key value and the data value for a record are allocated space
+-- as needed. A pointer to the data value is stored just before the 
+-- key value. Euphoria objects, key and data, are stored in a compact form.
+-- All allocated blocks have the size of the block in bytes, stored just 
+-- before the address.
 
 include machine.e
 include file.e
 include misc.e
 include get.e
 
--- ERROR STATUS
+--**
+-- === Constants
+-- ==== Error Status
+-- * DB_OK
+-- * DB_OPEN_FAIL
+-- * DB_EXISTS_ALREADY
+-- * DB_LOCK_FAIL
+
 global constant DB_OK = 0,
 				DB_OPEN_FAIL = -1, 
 				DB_EXISTS_ALREADY = -2,
 				DB_LOCK_FAIL = -3
 				
--- LOCK TYPES           
+--**
+-- ==== Lock Types
+-- * DB_LOCK_NO
+-- * DB_LOCK_SHARED
+-- * DB_LOCK_EXCLUSIVE
+
 global constant DB_LOCK_NO = 0,       -- don't bother with file locking 
 				DB_LOCK_SHARED = 1,   -- read the database
 				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
@@ -121,9 +135,13 @@ procedure default_fatal(sequence msg)
 	?1/0 -- to see call stack
 end procedure
 
+--**
+-- ==== Variables
+--
+
+--**
 -- exception handler
-global integer db_fatal_id
-db_fatal_id = routine_id("default_fatal") -- you can set it to your own handler
+global integer db_fatal_id = routine_id("default_fatal")
 
 procedure fatal(sequence msg)
 	call_proc(db_fatal_id, {msg})
@@ -318,6 +336,9 @@ procedure safe_seek(atom pos)
 end procedure
 
 --**
+-- ==== Routines
+
+--**
 -- print an open database in readable form to file fn
 --
 -- Comments:
@@ -334,7 +355,7 @@ end procedure
 --     abort(1)
 -- end if
 -- fn = open("db.txt", "w")
--- db_dump(fn, 0)-- 
+-- db_dump(fn, 0)
 
 global procedure db_dump(integer fn, integer low_level_too)
 -- print an open database in readable form to file fn
@@ -431,7 +452,6 @@ global procedure db_dump(integer fn, integer low_level_too)
 		printf(fn, "%d: %d bytes\n", {addr, size})
 	end for
 end procedure
---**
 
 global procedure check_free_list()
 -- This is a debug routine used by RDS to detect corruption of the free list.
@@ -707,7 +727,6 @@ global function db_create(sequence path, integer lock_method)
 	putn(repeat(0, INIT_FREE * 8))
 	return DB_OK
 end function
---**
 
 --**
 -- Open an existing Euphoria database. The file containing the database is
@@ -806,7 +825,6 @@ global function db_open(sequence path, integer lock_method)
 	db_file_nums = append(db_file_nums, db)
 	return DB_OK
 end function
---**
 
 --**
 -- Choose a new, already open, database to be the current database. Subsequent database operations will apply to this database. path is the path of the database file as it was originally opened with db_open() or db_create().
@@ -838,7 +856,6 @@ global function db_select(sequence path)
 	current_table = -1
 	return DB_OK
 end function
---**
 
 --**
 -- Unlock and close the current database.
@@ -865,7 +882,6 @@ global procedure db_close()
 	db_lock_methods = db_lock_methods[1..index-1] & db_lock_methods[index+1..$]
 	current_db = -1 
 end procedure
---**
 
 function table_find(sequence name)
 -- find a table, given its name 
@@ -941,7 +957,6 @@ global function db_select_table(sequence name)
 	end for
 	return DB_OK
 end function
---**
 
 --**
 -- Create a new table within the current database. The name of the table is given by the sequence of characters, name, and may not be the same as any existing table in the current database.
@@ -1018,7 +1033,6 @@ global function db_create_table(sequence name)
 	end if
 	return DB_OK
 end function
---**
 
 --**
 -- Delete a table in the current database. The name of the table is given by name.
@@ -1093,7 +1107,6 @@ global procedure db_delete_table(sequence name)
 		current_table -= SIZEOF_TABLE_HEADER
 	end if
 end procedure
---**
 
 --**
 -- Rename a table in the current database. The current name of the table 
@@ -1127,7 +1140,6 @@ global procedure db_rename_table(sequence name, sequence new_name)
 	safe_seek(table)
 	put4(table_ptr)
 end procedure
---**
 
 --**
 -- Return a sequence of all the table names in the current database. 
@@ -1160,7 +1172,6 @@ global function db_table_list()
 	end for
 	return table_names
 end function
---**
 
 function key_value(atom ptr)
 -- return the value of a key, 
@@ -1224,7 +1235,6 @@ global function db_find_key(object key)
 	end if
 	return -mid
 end function
---**
 
 --**
 -- Insert a new record into the current table. The record key is key and the 
@@ -1372,7 +1382,6 @@ global function db_insert(object key, object data)
 	end if
 	return DB_OK
 end function
---**
 
 --**
 -- Delete record number key_location from the current table.
@@ -1457,7 +1466,6 @@ global procedure db_delete_record(integer key_location)
 		end for
 	end if
 end procedure
---**
 
 --**
 -- In the current table, replace the data portion of record number rn, with 
@@ -1502,7 +1510,6 @@ global procedure db_replace_data(integer rn, object data)
 	end if
 	putn(data_string)
 end procedure
---**
 
 --**
 -- Return the current number of records in the current table.
@@ -1522,7 +1529,6 @@ global function db_table_size()
 	end if
 	return length(key_pointers)
 end function
---**
 
 --**
 -- Return the data portion of record number rn in the current table.
@@ -1551,7 +1557,6 @@ global function db_record_data(integer rn)
 	data_value = decompress(0)
 	return data_value
 end function
---**
 
 --**
 -- Return the key portion of record number rn in the current table.
@@ -1577,7 +1582,6 @@ global function db_record_key(integer rn)
 	key_value = decompress(0)
 	return key_value
 end function
---**
 
 function name_only(sequence s)
 -- return the file name only, without the path
@@ -1726,7 +1730,6 @@ global function db_compress()
 	index = db_select(new_path)
 	return DB_OK
 end function
---**
 
 --**
 -- Returns the name of the current database, or an empty string.
@@ -1743,4 +1746,3 @@ global function db_current ()
         return ""
     end if
 end function
---**

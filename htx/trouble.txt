@@ -80,7 +80,7 @@ You may also wish to execute your program using ##exwc.exe## instead.
 
 Look for an ex.err file in your cgi-bin directory. Turn on ##with trace## /
 ##trace(3)## to see what statements are executed (see ##ctrace.out## in your
-cgi-bin). Insert ##without warning** at the top of your program. On
+cgi-bin). Insert ##without warning## at the top of your program. On
 //Windows//, when there are warnings, Euphoria will issue a prompt before terminating,
 causing your program to hang. On Windows you should always use ##exwc.exe##
 to run CGI programs, or you may have problems with standard output. With

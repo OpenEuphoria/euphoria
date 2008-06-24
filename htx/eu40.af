@@ -1,36 +1,30 @@
--v:on
--o:../html
+# Front-Matter
+../../htx/welcome.txt
+../../htx/install.txt
+../../htx/what2do.txt
+../../htx/relnotes.txt
+../../htx/relnotes40.txt
+#TODO: other release notes
 
--m=product Euphoria
--m=version v4.0
--m=copyright(
-``<p class="copyright">
-<a href="http://www.rapideuphoria.com">&copy; 2008 RapidEuphoria</a>
-</p>``
-)
+# Language Reference
+../../htx/refman_1.txt
+../../htx/refman_2.txt
+../../htx/refman_3.txt
 
+# Mini-Guides
+../../htx/miniguide.txt
+../../htx/bind.txt
+../../htx/c.txt
+../../htx/cgi.txt
+../../htx/database.txt
+../../htx/tasking.txt
+../../htx/ed.txt
+../../htx/e2c.txt
+../../htx/trouble.txt
+#../../htx/perform.txt
+#../../htx/platform.txt
 
-after.txt
-api.txt
-before.txt
-bind.txt
-c.txt
-cgi.txt
-database.txt
-e2c.txt
-ed.txt
-ewords.txt
-install.txt
-miniguide.txt
-perform.txt
-platform.txt
-refman_1.txt
-refman_2.txt
-refman_3.txt
-relnotes.txt
-relnotes_old.txt
-relnotes40.txt
-tasking.txt
-trouble.txt
-welcome.txt
-what2do.txt
+# API docs
+../../htx/api.txt
+../../include/database.e
+../../include/file.e

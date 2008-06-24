@@ -1,7 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --**
--- !! <<EuDoc category="file">>
 -- == File/Device I/O
 --
 
