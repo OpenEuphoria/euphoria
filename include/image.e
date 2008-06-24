@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   graphics
---
--- Title:
---   Graphical Image Routines
---****
+-- == Graphical Image Routines
 --
 
 include machine.e
@@ -18,11 +13,12 @@ constant OLDHDRSIZE = 12, NEWHDRSIZE = 40
 constant EOF = -1
 
 -- error codes returned by read_bitmap(), save_bitmap() and save_screen()
-global constant BMP_SUCCESS = 0,
-				BMP_OPEN_FAILED = 1,
-				BMP_UNEXPECTED_EOF = 2,
-				BMP_UNSUPPORTED_FORMAT = 3,
-				BMP_INVALID_MODE = 4
+global enum
+	BMP_SUCCESS,
+	BMP_OPEN_FAILED,
+	BMP_UNEXPECTED_EOF,
+	BMP_UNSUPPORTED_FORMAT,
+	BMP_INVALID_MODE
 		 
 integer fn, error_code
 
@@ -146,9 +142,11 @@ function unpack(sequence image, integer BitCount, integer Width, integer Height)
 end function
 
 --**
--- read a bitmap (.BMP) file into a 2-d sequence of sequences (image)
--- Comments:
--- Returns {palette,image}   
+-- Read a bitmap (.BMP) file into a 2-d sequence of sequences (image)
+--
+-- Returns:
+--   ##{palette,image}##
+
 global function read_bitmap(sequence file_name)
 	atom Size 
 	integer Type, Xhot, Yhot, Planes, BitCount
@@ -215,7 +213,6 @@ global function read_bitmap(sequence file_name)
 	end if
 	return {Palette, two_d_bits}
 end function
---**
 
 type graphics_point(sequence p)
 	return length(p) = 2 and p[1] >= 0 and p[2] >= 0
@@ -227,28 +224,27 @@ type text_point(sequence p)
 end type
 
 --**
--- display a 2-d sequence of pixels at location xy
+-- Display a 2-d sequence of pixels at location xy
 --
 -- Comments:
--- N.B. coordinates are {x, y} with {0,0} at top left of screen
--- and x values increasing towards the right, 
--- and y values increasing towards the bottom of the screen
+--   N.B. coordinates are ##{x, y}## with ##{0, 0}## at top left of screen and ##x## values 
+--   increasing towards the right, and ##y## values increasing towards the bottom of the screen
+
 global procedure display_image(graphics_point xy, sequence pixels)
 	for i = 1 to length(pixels) do
 		pixel(pixels[i], xy)
 		xy[2] += 1
 	end for
 end procedure
---**
 
 --**
 -- Save a rectangular region on a graphics screen
 --
 -- Comments:
--- The {x, y} coordinates are for the top-left and bottom-right 
--- corner pixels. The result is a 2-d sequence of pixels suitable 
--- for use in display_image() above.
---
+--   The ##{x, y}## coordinates are for the top-left and bottom-right 
+--   corner pixels. The result is a 2-d sequence of pixels suitable 
+--   for use in ##display_image()## above.
+
 global function save_image(graphics_point top_left, graphics_point bottom_right)
 	integer x, width
 	sequence save
@@ -261,7 +257,6 @@ global function save_image(graphics_point top_left, graphics_point bottom_right)
 	end for
 	return save
 end function
---**
 
 constant COLOR_TEXT_MEMORY = #B8000,
 		  MONO_TEXT_MEMORY = #B0000
@@ -278,32 +273,32 @@ type page_number(integer p)
 end type
 
 --**
--- return current page# mapped to the monitor   
+-- Return current page# mapped to the monitor
+
 global function get_display_page()
 	return machine_func(M_GET_DISPLAY_PAGE, 0)
 end function
---**
 
 --**
--- select a page to be displayed
+-- Select a page to be displayed
+
 global procedure set_display_page(page_number page)
 	machine_proc(M_SET_DISPLAY_PAGE, page)
 end procedure
---**
 
 --**
--- return current page# that screen output is sent to
+-- Return current page# that screen output is sent to
+
 global function get_active_page()
 	return machine_func(M_GET_ACTIVE_PAGE, 0)
 end function
---**
 
 --**
--- select a page for screen output
+-- Select a page for screen output
+
 global procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
 end procedure
---**
 
 constant M_GET_SCREEN_CHAR = 58,
 		 M_PUT_SCREEN_CHAR = 59
@@ -330,8 +325,9 @@ function DOS_scr_addr(sequence vc, text_point xy)
 end function
 
 --**
--- returns {character, attributes} of the single character
+-- Returns ##{character, attributes}## of the single character
 -- at the given (line, column) position on the screen
+
 global function get_screen_char(positive_atom line, positive_atom column)
 	atom scr_addr
 	sequence vc
@@ -349,11 +345,11 @@ global function get_screen_char(positive_atom line, positive_atom column)
 		return machine_func(M_GET_SCREEN_CHAR, {line, column})
 	end if
 end function
---**
 
 --**
--- stores {character, attributes, character, attributes, ...} 
+-- Stores ##{character, attributes, character, attributes, ...}##
 -- of 1 or more characters at position (line, column) on the screen
+
 global procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
 	atom scr_addr
@@ -375,14 +371,14 @@ global procedure put_screen_char(positive_atom line, positive_atom column,
 		machine_proc(M_PUT_SCREEN_CHAR, {line, column, char_attr})
 	end if
 end procedure
---**
 
 --**
 -- Display a text image at line xy[1], column xy[2] in any text mode.
 --
 -- Comments:
--- N.B. coordinates are {line, column} with {1,1} at the top left of screen
--- Displays to the active text page.
+--   N.B. coordinates are ##{line, column}## with ##{1, 1}## at the top left of screen
+--   Displays to the active text page.
+
 global procedure display_text_image(text_point xy, sequence text)
 	atom scr_addr
 	integer screen_width, extra_col2, extra_lines
@@ -420,12 +416,12 @@ global procedure display_text_image(text_point xy, sequence text)
 		end if
 	end for
 end procedure
---**
 
 --**
 -- Copy a rectangular block of text out of screen memory,
 -- given the coordinates of the top-left and bottom-right corners.
 -- Reads from the active text page.
+
 global function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
 	atom scr_addr, screen_memory
@@ -463,7 +459,6 @@ global function save_text_image(text_point top_left, text_point bottom_right)
 	end for
 	return image
 end function
---**
 
 -- save_screen() and related functions were written by 
 -- Junko C. Miura of Rapid Deployment Software.  
@@ -570,9 +565,12 @@ end procedure
 -- Get color intensities for the entire set of colors in the current 
 -- graphics mode.
 --
+-- Returns:
+--   sequence is ##{{r, g, b}, {r, g, b}, ..., {r, g, b}}##
+--
 -- Comments:
--- Returned sequence is {{r,g,b},{r,g,b},...,{r,g,b}}. 
--- Intensity values are in the range 0 to 63.
+--   Intensity values are in the range 0 to 63.
+
 global function get_all_palette()
 	integer mem, numColors
 	sequence vc, reg, colors
@@ -598,7 +596,6 @@ global function get_all_palette()
 		return {} -- unlikely
 	end if
 end function
---**
 
 procedure putColorTable(integer numColors, sequence pal)
 -- Write color table information to the .BMP file. 
@@ -618,10 +615,11 @@ end procedure
 -- bitmap (.BMP) file. 
 --
 -- Comments:
--- The file name is given as a parameter. Region r is
--- either a sequence of 2 sequences: {{topLeftXPixel, topLeftYPixel},
--- {bottomRightXPixel, bottomRightYPixel}} defining a region,
--- or the integer 0 if you want to save the whole screen.
+--   The file name is given as a parameter. Region r is
+--   either a sequence of 2 sequences: 
+--   ##{{topLeftXPixel, topLeftYPixel}, {bottomRightXPixel, bottomRightYPixel}}## 
+--   defining a region, or the integer 0 if you want to save the whole screen.
+
 global function save_screen(region r, sequence file_name)
 	sequence vc
 	integer numColors
@@ -669,7 +667,6 @@ global function save_screen(region r, sequence file_name)
 	close(fn)
 	return error_code
 end function    
---**
 
 procedure putImage1(sequence image)
 -- Write image data packed according to the bitCount information, in the order
@@ -697,7 +694,8 @@ end procedure
 -- Create a .BMP bitmap file, given a palette and a 2-d sequence of sequences.
 --
 -- Comments:
--- The opposite of read_bitmap().
+--   The opposite of read_bitmap().
+
 global function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
 	integer numColors
@@ -723,5 +721,4 @@ global function save_bitmap(two_seq palette_n_image, sequence file_name)
 	close(fn)
 	return error_code
 end function
---**
 

@@ -1,33 +1,28 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   c
---
--- Title:
---   Dynamic Linking to C
---****
+-- == Dynamic Linking to C
 
 -- C types for .dll arguments and return value:
 global constant 
-		 C_CHAR    = #01000001,
-		 C_UCHAR   = #02000001,
-		 C_SHORT   = #01000002,
-		 C_USHORT  = #02000002,
-		 C_INT     = #01000004,
-		 C_UINT    = #02000004,
-		 C_LONG    = C_INT,
-		 C_ULONG   = C_UINT,
-		 C_POINTER = C_ULONG,
-		 C_FLOAT   = #03000004,
-		 C_DOUBLE  = #03000008
+	C_CHAR    = #01000001,
+	C_UCHAR   = #02000001,
+	C_SHORT   = #01000002,
+	C_USHORT  = #02000002,
+	C_INT     = #01000004,
+	C_UINT    = #02000004,
+	C_LONG    = C_INT,
+	C_ULONG   = C_UINT,
+	C_POINTER = C_ULONG,
+	C_FLOAT   = #03000004,
+	C_DOUBLE  = #03000008
 
 -- Euphoria types for .dll arguments and return value:
 global constant
-		 E_INTEGER = #06000004,
-		 E_ATOM    = #07000004,
-		 E_SEQUENCE= #08000004,
-		 E_OBJECT  = #09000004
+	E_INTEGER = #06000004,
+	E_ATOM    = #07000004,
+	E_SEQUENCE= #08000004,
+	E_OBJECT  = #09000004
 
 global constant NULL = 0 -- NULL pointer
 
@@ -53,11 +48,13 @@ constant M_OPEN_DLL  = 50,
 -- Euphoria will close the .dll for you automatically at the end of execution. 
 --
 -- Example 1:
+-- <eucode>
 -- atom user32
 -- user32 = open_dll("user32.dll")
 -- if user32 = 0 then
 --    puts(1, "Couldn't open user32.dll!\n")
 -- end if
+-- </eucode>
 -- 
 -- See Also:
 --     define_c_func, define_c_proc, define_c_var, c_func, c_proc, platform.doc 
@@ -65,7 +62,6 @@ constant M_OPEN_DLL  = 50,
 global function open_dll(sequence file_name)
 	return machine_func(M_OPEN_DLL, file_name)
 end function
---**
 
 --**
 -- a2 is the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by 
@@ -84,7 +80,6 @@ end function
 global function define_c_var(atom lib, sequence variable_name)
 	return machine_func(M_DEFINE_VAR, {lib, variable_name})
 end function
---**
 
 --**
 -- Define the characteristics of either a C function, or a machine-code routine that you 
@@ -127,6 +122,7 @@ end function
 --     with c_func().
 --
 -- Example 1:
+-- <eucode>
 -- atom user32
 -- integer ShowWindow
 -- 
@@ -141,6 +137,7 @@ end function
 -- if ShowWindow = -1 then
 --     puts(1, "ShowWindow not found!\n")
 -- end if
+-- </eucode>
 --
 -- See Also:
 --     c_proc, define_c_func, c_func, open_dll, platform.doc
@@ -149,7 +146,6 @@ global function define_c_proc(object lib, object routine_name,
 							  sequence arg_types)
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, 0})
 end function
---**
 
 --**
 -- Define the characteristics of either a C function, or a machine-code routine that returns 
@@ -173,30 +169,26 @@ end function
 -- function. A list of C types is contained in dll.e, and these can be used to define machine
 -- code parameters as well:
 --	
--- <ul>
--- <li>C_CHAR = #01000001</li>
--- <li>C_UCHAR = #02000001</li>
--- <li>C_SHORT = #01000002</li>
--- <li>C_USHORT = #02000002</li>
--- <li>C_INT = #01000004</li>
--- <li>C_UINT = #02000004</li>
--- <li>C_LONG = C_INT</li>
--- <li>C_ULONG = C_UINT</li>
--- <li>C_POINTER = C_ULONG</li>
--- <li>C_FLOAT = #03000004</li>
--- <li>C_DOUBLE = #0300000</li>
--- </ul>
+-- * C_CHAR = #01000001
+-- * C_UCHAR = #02000001
+-- * C_SHORT = #01000002
+-- * C_USHORT = #02000002
+-- * C_INT = #01000004
+-- * C_UINT = #02000004
+-- * C_LONG = C_INT
+-- * C_ULONG = C_UINT
+-- * C_POINTER = C_ULONG
+-- * C_FLOAT = #03000004
+-- * C_DOUBLE = #0300000
 --
 -- The C function that you define could be one created by the Euphoria To C Translator, in
 -- which case you can pass Euphoria data to it, and receive Euphoria data back. A list of 
 -- Euphoria types is contained in dll.e:
 --
--- <ul>
--- <li>E_INTEGER = #06000004</li>
--- <li>E_ATOM    = #07000004</li>
--- <li>E_SEQUENCE= #08000004</li>
--- <li>E_OBJECT  = #09000004</li>
--- </ul>
+-- * E_INTEGER = #06000004
+-- * E_ATOM    = #07000004
+-- * E_SEQUENCE= #08000004
+-- * E_OBJECT  = #09000004
 --
 -- You can pass or return any C integer type or pointer type. You can also pass a Euphoria 
 -- atom as a C double or float, and get a C double or float returned to you as a Euphoria atom.
@@ -226,6 +218,7 @@ end function
 -- to disassemble some Watcom code to see how it works.
 --
 -- Example 1:
+-- <eucode>
 -- atom user32
 -- integer LoadIcon
 -- 
@@ -244,6 +237,7 @@ end function
 -- if LoadIcon = -1 then
 --     puts(1, "LoadIconA could not be found!\n")
 -- end if
+-- </eucode>
 --
 -- See Also
 --     euphoria\demo\callmach.ex, c_func, define_c_proc, c_proc, open_dll, platform.doc
@@ -252,7 +246,6 @@ global function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
---**
 
 --**
 -- Get a machine address for the Euphoria routine with routine id i. This address can be
@@ -290,7 +283,6 @@ end function
 global function call_back(object id)
 	return machine_func(M_CALL_BACK, id)
 end function
---**
 
 --**
 -- Free (delete) any console window associated with your program.
@@ -328,5 +320,4 @@ end function
 global procedure free_console()
 	machine_proc(M_FREE_CONSOLE, 0)
 end procedure
---**
 

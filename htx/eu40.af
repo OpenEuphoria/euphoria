@@ -28,4 +28,13 @@
 ../../htx/api.txt
 ../../include/database.e
 ../../include/datetime.e
+../../include/dll.e
 ../../include/file.e
+../../include/filesys.e
+../../include/get.e
+../../include/graphics.e
+../../include/image.e
+../../include/locale.e
+../../include/localeconv.e
+../../include/machine.e
+../../include/map.e

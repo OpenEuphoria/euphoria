@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   locale
---
--- Title:
---   Locale Routines
---****
+-- ==  Locale Routines
 -- 
 
 include misc.e
@@ -48,13 +43,11 @@ lang_path = 0
 global procedure set_lang_path(object pp)
 	lang_path = pp
 end procedure
---**
 
 --**
 global function get_lang_path()
 	return lang_path
 end function
---**
 
 --**
 global function lang_load(sequence filename)
@@ -100,13 +93,11 @@ global function lang_load(sequence filename)
 
 	return 1
 end function
---**
 
 --**
 global function w(sequence word)
 	return m:get(lang, word, "")
 end function
---**
 
 ------------------------------------------------------------------------------------------
 --
@@ -204,7 +195,6 @@ global function set(sequence new_locale)
 
 	return (ign != NULL)
 end function
---**
 
 --**
 global function get()
@@ -221,89 +211,77 @@ global function get()
 
 	return r
 end function
---**
 
-function money_unix(atom amount)
-	atom pResult, pFmt
-	sequence result
-	integer size
+ifdef UNIX then
 
-	pResult = allocate(4 * 160)
-	pFmt = allocate_string("%n")
-	size = c_func(f_strfmon, {pResult, 4 * 160, pFmt, amount})
-	free(pFmt)
+	--**
+	global function money(atom amount)
+		atom pResult, pFmt
+		sequence result
+		integer size
 
-	result = peek_string(pResult)
-	free(pResult)
+		pResult = allocate(4 * 160)
+		pFmt = allocate_string("%n")
+		size = c_func(f_strfmon, {pResult, 4 * 160, pFmt, amount})
+		free(pFmt)
 
-	return result
-end function
+		result = peek_string(pResult)
+		free(pResult)
 
-function money_win32(atom amount)
-	atom pAmount, pResult
-	sequence result
-	integer size
+		return result
+	end function
 
-	pAmount = allocate_string(sprintf("%.8f", {amount}))
-	pResult = allocate(4 * 160)
-	size = c_func(f_strfmon, {LC_ALL, 0, pAmount, NULL, pResult, 4 * 160})
-	result = peek_string(pResult)
-	free(pAmount)
-	free(pResult)
+	--**
+	global function number(atom num)
+		atom pResult, pFmt
+		sequence result
+		integer size
 
-	return result
-end function
+		pResult = allocate(4 * 160)
+		pFmt = allocate_string("%!n")
+		size = c_func(f_strfmon, {pResult, 4 * 160, pFmt, num})
+		free(pFmt)
 
---**
-global function money(atom amount)
-	if platform() = WIN32 then
-		return money_win32(amount)
-	else
-		return money_unix(amount)
-	end if
-end function
---**
+		result = peek_string(pResult)
+		free(pResult)
 
-function number_unix(atom num)
-	atom pResult, pFmt
-	sequence result
-	integer size
+		return result
+	end function
 
-	pResult = allocate(4 * 160)
-	pFmt = allocate_string("%!n")
-	size = c_func(f_strfmon, {pResult, 4 * 160, pFmt, num})
-	free(pFmt)
+elsifdef WIN32 then
 
-	result = peek_string(pResult)
-	free(pResult)
+	global function money(atom amount)
+		atom pAmount, pResult
+		sequence result
+		integer size
 
-	return result
-end function
+		pAmount = allocate_string(sprintf("%.8f", {amount}))
+		pResult = allocate(4 * 160)
+		size = c_func(f_strfmon, {LC_ALL, 0, pAmount, NULL, pResult, 4 * 160})
+		result = peek_string(pResult)
+		free(pAmount)
+		free(pResult)
 
-function number_win32(atom num)
-	atom pNum, pResult
-	sequence result
-	integer size
+		return result
+	end function
 
-	pNum = allocate_string(sprintf("%.8f", {num}))
-	pResult = allocate(4 * 160)
-	size = c_func(f_strfnum, {LC_ALL, 0, pNum, NULL, pResult, 4 * 160})
-	result = peek_string(pResult)
-	free(pNum)
-	free(pResult)
+	function number(atom num)
+		atom pNum, pResult
+		sequence result
+		integer size
 
-	return result
-end function
+		pNum = allocate_string(sprintf("%.8f", {num}))
+		pResult = allocate(4 * 160)
+		size = c_func(f_strfnum, {LC_ALL, 0, pNum, NULL, pResult, 4 * 160})
+		result = peek_string(pResult)
+		free(pNum)
+		free(pResult)
 
---**
-global function number(atom num)
-	if platform() = WIN32 then
-		return number_win32(num)
-	else
-		return number_unix(num)
-	end if
-end function
---**
+		return result
+	end function
+	
+end ifdef
+
 
 function mk_tm_struct(dt:datetime dtm)
 	atom pDtm
@@ -339,5 +317,4 @@ global function datetime(sequence fmt, dt:datetime dtm)
 
 	return res
 end function
---**
 

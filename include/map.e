@@ -1,14 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category:
---	 map
---
--- Title:
---	 Map (hash table)
---****
---
--- Hash map
+-- == Map (hash table)
 
 include get.e
 include primes.e
@@ -34,19 +27,17 @@ global enum
 	CONCAT
 
 --**
--- Signature:
--- global type map
---
--- Description:
 -- Defines the datatype 'map'
 --
 -- Comments:
 -- Used when declaring a map variable.
 --
 -- Example:
--- map SymbolTable
--- SymbolTable = new() -- Create a new map to hold the symbol table.
---**
+--   <eucode>
+--   map SymbolTable
+--   SymbolTable = new() -- Create a new map to hold the symbol table.
+--   </eucode>
+
 global type map(object o)
 		if not sequence(o) then
 			return 0
@@ -82,13 +73,16 @@ constant maxInt = #3FFFFFFF
 -- an atom or sequence of any value.
 --
 -- Parameters:
---	 pData = The data for which you want a hash value calculated.
---	 pMaxHash = (default = 0) The returned value will be no larger than this value.
---				However, a value of 0 or lower menas that it can as large as the maximum integer value.
+--   * pData = The data for which you want a hash value calculated.
+--   * pMaxHash = (default = 0) The returned value will be no larger than this value.
+--     However, a value of 0 or lower menas that it can as large as the maximum integer value.
 --
 -- Example 1:
--- integer h1
--- h1 = calc_hash( symbol_name )
+--   <eucode>
+--   integer h1
+--   h1 = calc_hash( symbol_name )
+--   </eucode>
+
 global function calc_hash(object key, integer pMaxHash = 0)
 	integer ret
 	integer temp
@@ -128,11 +122,8 @@ global function calc_hash(object key, integer pMaxHash = 0)
 	return remainder(ret, pMaxHash) + 1 -- 1-based
 
 end function
---**
 
 --**
--- TODO: document
-
 global function rehash(map m1, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
@@ -173,18 +164,19 @@ global function rehash(map m1, integer pRequestedSize = 0)
 
 	return m
 end function
---**
 
 --**
 -- Create a new map data structure
 --
 -- Comments:
---     A new object of type map is created. type_check should be turned off for better performance.
+--   A new object of type map is created. type_check should be turned off for better performance.
 --
 -- Example 1:
--- map m
--- m = new()
--- -- m is now an empty map (size = 0)
+--   <eucode>
+--   map m
+--   m = new()
+--   -- m is now an empty map (size = 0)
+--   </eucode>
 
 global function new(integer initSize = 66)
 	integer lBuckets
@@ -192,17 +184,18 @@ global function new(integer initSize = 66)
 
 	return {0, 0, repeat({{},{}}, lBuckets ) }
 end function
---**
 
 --**
 -- Check if map has a given key.
 --
 -- Example 1:
--- map m
--- m = new()
--- m = put(m, "name", "John")
--- ? has(m, "name") -- 1
--- ? has(m, "age")  -- 0
+--   <eucode>
+--   map m
+--   m = new()
+--   m = put(m, "name", "John")
+--   ? has(m, "name") -- 1
+--   ? has(m, "age")  -- 0
+--   </eucode>
 
 global function has(map m, object key)
 	integer lIndex
@@ -210,25 +203,26 @@ global function has(map m, object key)
 	lIndex = calc_hash(key, length(m[iBuckets]))
 	return (find(key, m[iBuckets][lIndex][iKeys]) != 0)
 end function
---**
 
 --**
 -- Return the value that corresponds to the object key in the map m. If the key is not in the map, 
 -- the object defaultValue is returned instead.
 --
 -- Example 1:
--- map ages
--- ages = new()
--- ages = put(ages, "Andy", 12)
--- ages = put(ages, "Budi", 13)
+--   <eucode>
+--   map ages
+--   ages = new()
+--   ages = put(ages, "Andy", 12)
+--   ages = put(ages, "Budi", 13)
 --
--- integer age
--- age = get(ages, "Budi", -1)
--- if age = -1 then
---     puts(1, "Age unknown")
--- else
---     printf(1, "The age is %d", age)
--- end if
+--   integer age
+--   age = get(ages, "Budi", -1)
+--   if age = -1 then
+--       puts(1, "Age unknown")
+--   else
+--       printf(1, "The age is %d", age)
+--   end if
+--   </eucode>
 
 global function get(map m, object key, object defaultValue)
 	integer lIndex
@@ -243,33 +237,35 @@ global function get(map m, object key, object defaultValue)
 	end if
 
 end function
---**
 
 --**
 -- Put an entry on the map m1 with key x1 and value x2. 
--- The operation parameter can be used to modify the existing value.  Valid operations are: <ul>
--- <li> PUT:  This is the default, and it replaces any value in there already</li>
--- <li> ADD:  Equivalent to using the += operator </li>
--- <li> SUBTRACT:  Equivalent to using the -= operator </li>
--- <li> MULTIPLY:  Equivalent to using the *= operator </li>
--- <li> DIVIDE: Equivalent to using the /= operator </li>
--- <li> APPEND: Appends the value to the existing data </li>
--- <li> CONCAT: Equivalent to using the &= operator</li>
--- </ul>
+-- The operation parameter can be used to modify the existing value.  Valid operations are: 
+-- 
+-- * ##PUT##:  This is the default, and it replaces any value in there already
+-- * ##ADD##:  Equivalent to using the += operator 
+-- * ##SUBTRACT##:  Equivalent to using the -= operator 
+-- * ##MULTIPLY##:  Equivalent to using the *= operator 
+-- * ##DIVIDE##: Equivalent to using the /= operator 
+-- * ##APPEND##: Appends the value to the existing data 
+-- * ##CONCAT##: Equivalent to using the &= operator
+--
 -- Returns:
---  The modified map.
+--   The modified map.
 --
 -- Comments:
---     If existing entry with the same key is already in the map, the value of the entry is updated.
---
+--   If existing entry with the same key is already in the map, the value of the entry is updated.
 --
 -- Example 1:
--- map ages
--- ages = new()
--- ages = put(ages, "Andy", 12)
--- ages = put(ages, "Budi", 13)
--- ages = put(ages, "Budi", 14)
--- ages now contains 2 entries: "Andy"=>12, "Budi"=>14
+--   <eucode>
+--   map ages
+--   ages = new()
+--   ages = put(ages, "Andy", 12)
+--   ages = put(ages, "Budi", 13)
+--   ages = put(ages, "Budi", 14)
+--
+--   -- ages now contains 2 entries: "Andy" => 12, "Budi" => 14
+--   </eucode>
 
 global function put(map m1, object key, object value, integer pTrigger = 100, integer operation = PUT )
 	integer index
@@ -334,20 +330,21 @@ global function put(map m1, object key, object value, integer pTrigger = 100, in
 
 	return m
 end function
---**
 
 --**
 -- Remove an entry with given key from the map m1. The modified map is returned.
 --
 -- Comments:
---     If the map has no entry with the specified key, the original map is returned.
+--   If the map has no entry with the specified key, the original map is returned.
 --
 -- Example 1:
--- map m
--- m = new()
--- m = put(m, "Amy", 66.9)
--- m = remove(m, "Amy")
--- -- m is now an empty map again
+--   <eucode>
+--   map m
+--   m = new()
+--   m = put(m, "Amy", 66.9)
+--   m = remove(m, "Amy")
+--   -- m is now an empty map again
+--   </eucode>
 
 global function remove(map m1, object key)
 	integer hash, index
@@ -374,25 +371,26 @@ global function remove(map m1, object key)
 
 		return m
 end function
---**
 
 --**
 -- Return the number of entries in the map m.
 --
 -- Comments:
---     For an empty map, size will be zero
+--   For an empty map, size will be zero
 --
 -- Example 1:
--- map m
--- m = put(m, 1, "a")
--- m = put(m, 2, "b")
--- ? size(m) -- outputs 2
+--   <eucode>
+--   map m
+--   m = put(m, 1, "a")
+--   m = put(m, 2, "b")
+--   ? size(m) -- outputs 2
+--   </eucode>
 
 global function size(map m)
 	return m[iCnt]
 end function
---**
 
+--**
 global function statistics(map m)
 	sequence lStats
 	sequence lLengths
@@ -421,18 +419,20 @@ end function
 -- Return all keys in map m as a sequence.
 --
 -- Comments:
---     The order of the keys returned may not be the same as the putting order.
+--   The order of the keys returned may not be the same as the putting order.
 --
 -- Example 1:
--- map m
--- m = new()
--- m = put(m, 10, "ten")
--- m = put(m, 20, "twenty")
--- m = put(m, 30, "thirty")
--- m = put(m, 40, "forty")
+--   <eucode>
+--   map m
+--   m = new()
+--   m = put(m, 10, "ten")
+--   m = put(m, 20, "twenty")
+--   m = put(m, 30, "thirty")
+--   m = put(m, 40, "forty")
 --
--- sequence keys
--- keys = keys(m) -- keys might be {20,40,10,30} or some other orders
+--   sequence keys
+--   keys = keys(m) -- keys might be {20,40,10,30} or some other orders
+--   </eucode>
 
 global function keys(map m)
 	sequence buckets, bucket
@@ -453,25 +453,26 @@ global function keys(map m)
 
 		return ret
 end function
---**
 
 --**
 -- Return all values in map m as a sequence.
 --
 -- Comments:
---     The order of the values returned may not be the same as the putting order. 
---     Duplicate values are not removed.
+--   The order of the values returned may not be the same as the putting order. 
+--   Duplicate values are not removed.
 --
 -- Example 1:
--- map m
--- m = new()
--- m = put(m, 10, "ten")
--- m = put(m, 20, "twenty")
--- m = put(m, 30, "thirty")
--- m = put(m, 40, "forty")
+--   <eucode>
+--   map m
+--   m = new()
+--   m = put(m, 10, "ten")
+--   m = put(m, 20, "twenty")
+--   m = put(m, 30, "thirty")
+--   m = put(m, 40, "forty")
 --
--- sequence values
--- values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
+--   sequence values
+--   values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
+--   </eucode>
 
 global function values(map m)
 	sequence buckets, bucket
@@ -492,11 +493,8 @@ global function values(map m)
 
 		return ret
 end function
---**
 
 --**
--- TODO: document
-
 global function optimize(map m1, atom pAvg = 10)
 	sequence op
 	sequence m
@@ -512,11 +510,8 @@ global function optimize(map m1, atom pAvg = 10)
 	end while
 	return m
 end function
---**
 
 --**
--- TODO: document
-
 global function load_map(sequence pFileName)
 	integer fh
 	object lLine
@@ -560,4 +555,3 @@ global function load_map(sequence pFileName)
 	close(fh)
 	return optimize(m)
 end function
---**

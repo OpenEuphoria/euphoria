@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --**
--- === Date/Time
+-- == Date/Time
 --
 
 -- No timezone offset.
@@ -183,10 +183,8 @@ function secondsToDateTime(atom seconds) -- returns a DateTime
 	return julianDate(days) & {hours, minutes, seconds}
 end function
 
--- ================= START newstdlib
-
 --**
--- ==== Localized Variables
+-- === Localized Variables
 
 --**
 -- Names of the months
@@ -217,9 +215,9 @@ global sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 global sequence ampm = { "AM", "PM" }
 
 --**
--- ==== Constants
+-- === Constants
 --
--- ===== Accessors to datetime type
+-- ==== Accessors to datetime type
 -- * YEAR
 -- * MONTH
 -- * DAY 
@@ -227,7 +225,10 @@ global sequence ampm = { "AM", "PM" }
 -- * MINUTE
 -- * SECOND
 --
--- ===== Interval types
+
+global enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
+
+-- ==== Interval types
 -- * YEARS
 -- * MONTHS
 -- * WEEKS
@@ -235,25 +236,15 @@ global sequence ampm = { "AM", "PM" }
 -- * HOURS
 -- * MINUTES
 -- * SECONDS
+-- * DATE
 
-global constant
-	YEAR    = 1,
-	MONTH   = 2,
-	DAY     = 3,
-	HOUR    = 4,
-	MINUTE  = 5,
-	SECOND  = 6,
-	YEARS   = 1,
-	MONTHS  = 2,
-	DAYS    = 3,
-	HOURS   = 4,
-	MINUTES = 5,
-	SECONDS = 6,
-	WEEKS   = 7,
-	DATE    = 8
+global enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 
 --**
--- the datetime type
+-- === Types
+
+--**
+-- datetime type
 --
 -- Comments:
 -- A datetime type consists of a sequence of length 6
@@ -270,21 +261,26 @@ global type datetime(object o)
 end type
 
 --**
+-- === Routines
+
+--**
 -- Create a new datetime value.
 -- 
 -- TODO: test default parameter usage
 --
 -- Parameters
---     year is the full year.
---     month is the month (1-12).
---     day is the day of the month (1-31).
---     hour is the hour (0-23) (defaults to 0)
---     minute is the minute (0-59) (defaults to 0)
---     second is the second (0-59) (defaults to 0)
+--     * year is the full year.
+--     * month is the month (1-12).
+--     * day is the day of the month (1-31).
+--     * hour is the hour (0-23) (defaults to 0)
+--     * minute is the minute (0-59) (defaults to 0)
+--     * second is the second (0-59) (defaults to 0)
 --
 -- Example 1:
+-- <eucode>
 -- dt = new(2010, 1, 1, 0, 0, 0)
 -- -- dt is Jan 1st, 2010
+-- </eucode>
 --
 -- See Also:
 --     from_date, from_unix, now, new_time
@@ -307,8 +303,10 @@ end function
 --     second is the second (0-59)
 --
 -- Example 1:
+-- <eucode>
 -- dt = new_time(10, 30, 55)
 -- dt is 10:30:55 AM
+-- </eucode>
 --
 -- See Also:
 --     from_date, from_unix, now, new
@@ -322,8 +320,10 @@ end function
 -- sequence.
 --
 -- Example 1:
+-- <eucode>
 -- d = from_date(date())
 -- -- d is the current date and time
+-- </eucode>
 --
 -- See Also:
 --     date, from_unix, now, new
@@ -336,8 +336,10 @@ end function
 -- Create a new datetime value initialized with the current date and time
 --
 -- Example 1:
+-- <eucode>
 -- dt = now()
 -- -- dt is the current date and time
+-- </eucode>
 --
 -- See Also:
 --     from_date, from_unix, new, new_time
@@ -353,8 +355,10 @@ end function
 --     1=Sunday, 2=Monday, ... 7=Saturday
 --
 -- Example 1:
+-- <eucode>
 -- d = new(2008, 5, 2, 0, 0, 0)
 -- day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
+-- </eucode>
 
 global function dow(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
@@ -364,8 +368,10 @@ end function
 -- Get the Julian day of year of the date dt1.
 --
 -- Example 1:
+-- <eucode>
 -- d = new(2008, 5, 2, 0, 0, 0)
 -- day = doy(d) -- day is 123
+-- </eucode>
 
 global function doy(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
@@ -375,8 +381,10 @@ end function
 -- Convert a datetime value to the unix numeric format (seconds since EPOCH)
 --
 -- Example 1:
+-- <eucode>
 -- secs_since_epoch = to_unix(now())
 -- -- secs_since_epoch is equal to the current seconds since epoch
+-- </eucode>
 --
 -- See Also:
 --     from_unix, format
@@ -387,10 +395,12 @@ end function
 
 --**
 -- Create a datetime value from the unix numeric format (seconds since EPOCH)
-
+--
 -- Example 1:
+-- <eucode>
 -- d = from_unix(0)
 -- -- d is 1970-01-01 00:00:00  (zero seconds since EPOCH)
+-- </eucode>
 --
 -- See Also:
 --     to_unix, from_date, now, new
@@ -436,14 +446,18 @@ end function
 -- * %Y  year
 --
 -- Example 1:
+-- <eucode>
 -- d = new(2008, 5, 2, 12, 58, 32)
 -- s = format(d, "%Y-%m-%d %H:%M:%S")
 -- -- s is "2008-05-02 12:58:32"
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- d = new(2008, 5, 2, 12, 58, 32)
 -- s = format(d, "%A, %B %d '%y %H:%M%p")
 -- -- s is "Friday, May 2 '08 12:58PM"
+-- </eucode>
 --
 -- See Also:
 --     to_unix
@@ -560,9 +574,11 @@ end function
 --     in a different day of month number due to leap year.
 --
 -- Example 1:
+-- <eucode>
 -- d2 = add(d1, 35, SECONDS) -- add 35 seconds to d1
 -- d2 = add(d1, 7, WEEKS)    -- add 7 weeks to d1
 -- d2 = add(d1, 19, YEARS)   -- add 19 years to d1
+-- </eucode>
 --
 -- See Also:
 --     subtract, diff
@@ -624,9 +640,11 @@ end function
 --     See the function add() for more information on adding and subtracting date intervals
 -- 
 -- Example 1:
+-- <eucode>
 -- dt2 = subtract(dt1, 18, MINUTES) -- subtract 18 minutes from dt1
 -- dt2 = subtract(dt1, 7, MONTHS)   -- subtract 7 months from dt1
 -- dt2 = subtract(dt1, 12, HOURS)   -- subtract 12 hours from dt1
+-- </eucode>
 --
 -- See Also:
 --     add, diff
@@ -642,11 +660,13 @@ end function
 --     dt2 is subtracted from dt1, therefore, you can come up with a negative value.
 --
 -- Example 1:
+-- <eucode>
 -- d1 = now()
 -- sleep(15)  -- sleep for 15 seconds
 -- d2 = now()
 --
 -- i = diff(d1, d2) -- i is 15
+-- </eucode>
 --
 -- See Also:
 --    add, subtract

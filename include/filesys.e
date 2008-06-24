@@ -1,14 +1,9 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category:
---    filesys
+-- == File System
 --
--- Title:
---    File System
---****
---
--- cross platform file operations for Euphoria
+-- Cross platform file operations for Euphoria
 
 -- TODO: Add unit tests
 
@@ -55,18 +50,16 @@ ifdef UNIX then
 	xDeleteFile = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
 end ifdef
 
----------------------------------------------------------------------
---# File Operations
----------------------------------------------------------------------
-
 --**
 -- Copy a file from src to dest.
 --
--- Comments:
--- If overwrite is true, if dest file already exists, 
--- the function overwrites the existing file and succeeds.
--- Returns false if failed, true if succeeded.
+-- Returns:
+--     Returns false if failed, true if succeeded.
 --
+-- Comments:
+--     If overwrite is true, if dest file already exists, 
+--     the function overwrites the existing file and succeeds.
+
 global function copy_file(sequence src, sequence dest, atom overwrite)
 	atom psrc, pdest, ret
 	psrc = allocate_string(src)
@@ -76,13 +69,13 @@ global function copy_file(sequence src, sequence dest, atom overwrite)
 	free(psrc)
 	return ret
 end function
---**
 
 --**
--- move/rename a file from src to dest.
+-- Move/Rename a file from src to dest.
 --
--- Comments:
--- Returns false if failed, true if succeeded.
+-- Returns:
+--     Returns false if failed, true if succeeded.
+
 global function move_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	psrc = allocate_string(src)
@@ -93,13 +86,13 @@ global function move_file(sequence src, sequence dest)
 	free(psrc)
 	return ret
 end function
---**
 
 --**
--- delete a file named filename
+-- Delete a file named filename
 --
--- Comments:
--- Returns false if failed, true if succeeded.
+-- Returns:
+--     Returns false if failed, true if succeeded.
+
 global function delete_file(sequence filename)
 	atom pfilename, ret
 	pfilename = allocate_string(filename)
@@ -108,27 +101,26 @@ global function delete_file(sequence filename)
 	free(pfilename)
 	return ret
 end function
---**
 
 --**
--- create a directory named name
+-- Create a directory named name
 --
--- Comments:
--- Returns false if failed, true if succeeded.
+-- Returns:
+--     Returns false if failed, true if succeeded.
+
 global function create_directory(sequence name)
 	atom pname, ret
 	pname = allocate_string(name)
 	ret = c_func(xCreateDirectory, {pname, 0})
-	free(pname)
 	return ret
 end function
---**
 
 --**
--- remove a directory named name
+-- Remove a directory named name
 --
--- Comments:
--- Returns false if failed, true if succeeded.
+-- Returns:
+--     Returns false if failed, true if succeeded.
+
 global function remove_directory(sequence name)
 	atom pname, ret
 	pname = allocate_string(name)
@@ -136,17 +128,12 @@ global function remove_directory(sequence name)
 	free(pname)
 	return ret
 end function
---**
-
----------------------------------------------------------------------
---# File I/O
----------------------------------------------------------------------
 
 --**
--- return length of file filename.
+-- Return length of file filename.
 --
 -- Comments:
--- if not found, returns -1
+--     if not found, returns -1
 
 global function file_length(sequence filename)
 	object list
@@ -156,15 +143,14 @@ global function file_length(sequence filename)
 	end if
 	return list[1][D_SIZE]
 end function
---**
 
 --**
--- returns the type of the file specified
+-- Returns the type of the file specified
 -- 
--- Comments:
--- returns 0 if filename does not exist
--- returns 1 if filename is a file
--- returns 2 if filename is a directory
+-- Returns:
+--     * 0 if filename does not exist
+--     * 1 if filename is a file
+--     * 2 if filename is a directory
 
 global function file_type(sequence filename)
 object dirfil
@@ -185,5 +171,3 @@ object dirfil
 		return 0
 	end if
 end function
---**
-
