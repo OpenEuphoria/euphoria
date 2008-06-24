@@ -3544,11 +3544,11 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)pc[4]; //-> the target
 				// now the variable part
 				if (nvars <= 0) {
-                	if (*pc == L_SPLICE) Concat(obj_ptr,b,a);
+                	if (splins) Concat(obj_ptr,b,a);
 					else Prepend(obj_ptr,a,b);
     			}
     			else if (nvars > i) {
-                	if (*pc == L_SPLICE) Concat(obj_ptr,a,b);
+                	if (splins) Concat(obj_ptr,a,b);
 					else Append(obj_ptr,a,b);
        			}
 				else if (IS_SEQUENCE(b) && splins) {

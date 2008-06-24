@@ -3198,6 +3198,14 @@ procedure opMACHINE_FUNC()
 	end if
 end procedure
 
+procedure opSPLICE()
+	crash("not implemented")
+end procedure
+
+procedure opINSERT()
+	crash("not implemented")
+end procedure
+
 procedure opMACHINE_PROC()
 	object v
 	
