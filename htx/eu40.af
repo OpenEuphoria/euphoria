@@ -38,3 +38,4 @@
 ../../include/localeconv.e
 ../../include/machine.e
 ../../include/map.e
+../../include/math.e
