@@ -10,7 +10,12 @@ include misc.e
 
 without warning
 
+--****
+-- === Constants
+-- 
 -- Possible style values for message_box() style sequence
+--
+
 global constant 
 	MB_ABORTRETRYIGNORE = #02,        --  Abort, Retry, Ignore
 	MB_APPLMODAL = #00,               -- User must respond before doing something else
@@ -68,6 +73,10 @@ ifdef WIN32 then
 		abort(1)
 	end if
 end ifdef
+
+--****
+-- === Routines
+--
 
 --**
 -- Display a window with title, containing the message string text.

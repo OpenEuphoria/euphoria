@@ -33,11 +33,9 @@ lang = m:new()
 object lang_path
 lang_path = 0
 
-------------------------------------------------------------------------------------------
+--****
+-- === Message translation functions
 --
--- Message translation functions
---
-------------------------------------------------------------------------------------------
 
 --**
 export procedure set_lang_path(object pp)
@@ -169,11 +167,8 @@ else
 
 end ifdef
 
-------------------------------------------------------------------------------------------
---
--- Global Functions/Procedures
---
-------------------------------------------------------------------------------------------
+--****
+-- === Time/Number Translation
 
 constant
 	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
@@ -292,4 +287,3 @@ export function datetime(sequence fmt, dt:datetime dtm)
 
 	return res
 end function
-

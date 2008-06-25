@@ -3,7 +3,9 @@
 --****
 -- == Graphics and Sound
 --
--- GRAPHICS MODES --  argument to graphics_mode()
+-- === Graphics Modes
+-- 
+-- argument to graphics_mode()
 --
 -- | mode |  description |
 -- |  -1  | restore to original default mode |
@@ -29,6 +31,10 @@
 -- | 259  | 800 x 600, 256 color |
 -- | 260  | 1024 x 768, 16 color |
 -- | 261  | 1024 x 768, 256 color |
+
+--****
+-- === Constants
+--
 
 -- COLOR values -- for characters and pixels
 global constant 
@@ -108,6 +114,10 @@ type point_sequence(sequence x)
 	return length(x) >= 2
 end type
 
+--****
+-- === Routines
+--
+
 --**
 -- Signature:
 -- global procedure position(integer i1, integer i2)
@@ -134,7 +144,6 @@ end type
 --- </eucode>
 
 --**
-
 global procedure draw_line(color c, point_sequence xyarray)
 -- draw a line connecting the 2 or more points
 -- in xyarray: {{x1, y1}, {x2, y2}, ...}

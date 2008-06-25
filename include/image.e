@@ -3,6 +3,8 @@
 --****
 -- == Graphical Image Routines
 --
+-- === Constants
+--
 
 include machine.e
 include graphics.e
@@ -140,6 +142,10 @@ function unpack(sequence image, integer BitCount, integer Width, integer Height)
 	end for
 	return pic_2d
 end function
+
+--****
+-- === Routines
+--
 
 --**
 -- Read a bitmap (.BMP) file into a 2-d sequence of sequences (image)

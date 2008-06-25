@@ -75,18 +75,12 @@ As you will soon discover, sequences make Euphoria very simple //and// very
 powerful.  **Understanding atoms and sequences is the key to understanding
 Euphoria.**
 
-<dl>
-<dt>
-**Performance Note:**</dt>
-
-<dd>
-Does this mean that all atoms are stored in memory as 8-byte floating-point
-numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
-machine integers (4 bytes) to save space and improve execution speed. When
-fractional results occur or numbers get too big, conversion to floating-point
-happens automatically.</dd>
-
-</dl>
+; **Performance Note**
+:Does this mean that all atoms are stored in memory as 8-byte floating-point
+:numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
+:machine integers (4 bytes) to save space and improve execution speed. When
+:fractional results occur or numbers get too big, conversion to floating-point
+:happens automatically.
 
 ==== Character Strings and Individual Characters
 
@@ -538,10 +532,10 @@ allowed. It evaluates to the length-0 sequence {}.  If y has the value:
 {"fred", "george", "mary"} then y[1..2] is {"fred", "george"}.
 
 We can also use slices for overwriting portions of variables. After x[3..5] =
-{9, 9, 9} x would be {1, 1, 9, 9, 9, 1, 1, 1}. We could also have said x[3..5]
-= 9 with the same effect. Suppose y is {0, "Euphoria", 1, 1}.  Then y[2][1..4]
-is "Euph". If we say y[2][1..4]="ABCD" then y will become {0, "ABCDoria", 1,
-1}.
+{9, 9, 9} x would be {1, 1, 9, 9, 9, 1, 1, 1}. We could also have said 
+##x[3..5] = 9## with the same effect. Suppose y is {0, "Euphoria", 1, 1}.  
+Then y[2][1..4] is "Euph". If we say y[2][1..4]="ABCD" then y will become 
+##{0, "ABCDoria", 1, 1}##.
 
 In general, a variable name can be followed by 0 or more subscripts, followed
 in turn by 0 or 1 slices. Only variables may be subscripted or sliced, not

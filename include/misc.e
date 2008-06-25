@@ -2,6 +2,7 @@
 --
 --****
 -- == Misc Routines and Constants
+-- === Constants
 
 -- platform() values:
 
@@ -13,6 +14,9 @@ global constant
 	OSX     = 4  -- exu
 
 constant M_INSTANCE = 55, M_SLEEP = 64
+
+--****
+-- === Routines
 
 --**
 -- Signature:

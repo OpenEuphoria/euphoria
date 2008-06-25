@@ -3,6 +3,8 @@
 --****
 -- == Input Routines
 --
+-- === Constants
+--
 
 -- error status values returned from get() and value():
 global constant GET_SUCCESS = 0,
@@ -32,6 +34,10 @@ object input_string -- string to be read from
 natural string_next
 
 char ch  -- the current character
+
+--****
+-- === Routines
+--
 
 --**
 -- Signature:

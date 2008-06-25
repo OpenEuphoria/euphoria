@@ -2,6 +2,7 @@
 --
 --****
 -- == Sets
+--
 -- The sets.e module defines a type for sets and provides basic tools for handling them.
 --
 -- Other modules may be built upon them, for instance graph handling or simplicial topology, finite groups etc...
@@ -24,6 +25,10 @@ procedure report_error(sequence s)
     crash("Error in routine %s in module %s: %s",{s[1],"sets.e",s[2]})
 end procedure
 
+--****
+-- === Types
+--
+
 --**
 -- A set is...
 --
@@ -43,6 +48,10 @@ export type set(sequence s)
     end for
     return 1
 end type
+
+--****
+-- === Routines
+--
 
 function bfind_(object x,sequence s,integer startpoint,integer endpoint)
     integer r,c

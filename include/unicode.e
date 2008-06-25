@@ -12,6 +12,9 @@
 
 constant M_ALLOC = 16
 
+--****
+-- === Types
+
 --**
 -- UCS-2 string (0-65535). In C known as wchar_t* (but \0's are allowed)
 
@@ -44,6 +47,10 @@ export type astring(object s)
 
 	return 1
 end type
+
+--****
+-- === Routines
+--
 
 --**
 -- encode wstring to astring using utf-8

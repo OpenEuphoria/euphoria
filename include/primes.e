@@ -1,13 +1,21 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
---== Prime Numbers
+-- == Prime Numbers
 
 include search.e
 include machine.e
 
+--****
+-- === Variables
+--
+
 --**
 export sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
+
+--***
+-- === Routines
+--
 
 --**
 export function calc_primes(integer pMax, atom pTimeLimit = 10)

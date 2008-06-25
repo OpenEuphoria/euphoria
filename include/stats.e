@@ -2,6 +2,7 @@
 --
 --****
 -- == Statistics
+-- === Routines
 
 include unittest.e
 include math.e

@@ -8,14 +8,26 @@
 
 include machine.e
 
+--****
+-- === Constants
+--
+
 export constant
 	FIFO = 1,
 	FILO = 2
+
+--****
+-- === Types
+--
 
 --**
 export type stack(object o)
 	return sequence(o) and length(o) >= 1
 end type
+
+--****
+-- === Routines
+--
 
 --**
 export function new(integer stack_type)

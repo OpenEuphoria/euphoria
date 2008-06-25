@@ -4,16 +4,15 @@
 -- == File System
 --
 -- Cross platform file operations for Euphoria
+--
+-- === Routines
+--
 
 -- TODO: Add unit tests
 
 include dll.e
 include file.e
 include machine.e
-
-object slash
-
-slash = '\\' -- for Windows/DOS. For Linux is defined below.
 
 object xCopyFile, xMoveFile, xDeleteFile, xCreateDirectory, xRemoveDirectory
 
@@ -45,7 +44,6 @@ else
 end ifdef
 
 ifdef UNIX then
-	slash = '/'
 	xMoveFile   = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_LONG)
 	xDeleteFile = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
 end ifdef
@@ -62,11 +60,13 @@ end ifdef
 
 export function copy_file(sequence src, sequence dest, atom overwrite)
 	atom psrc, pdest, ret
+
 	psrc = allocate_string(src)
 	pdest = allocate_string(dest)
 	ret = c_func(xCopyFile, {psrc, pdest, not overwrite})
 	free(pdest)
 	free(psrc)
+	
 	return ret
 end function
 

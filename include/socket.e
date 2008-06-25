@@ -14,6 +14,10 @@ include get.e
 include wildcard.e
 include sequence.e
 
+--****
+-- === Constants
+--
+
 export enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
 
 export constant AF_INET = 2, SOCK_STREAM=1, SOCK_DGRAM = 2, SOCK_RAW = 3,
@@ -276,9 +280,12 @@ this_cookiejar = {}
 sendheader = {}  -- HTTP header sequence , sent to somewhere (usually the server)
 recvheader = {}  -- HTTP header sequence , recieved from somewhere (usually the server)
 
-atom error_mode   -- This will indicate whether returned errors will be OS numbers (mode 2)
+atom error_mode = 1  -- This will indicate whether returned errors will be OS numbers (mode 2)
 -- or EUNET_ERROR numbers (mode 1).  The default is mode 1.
-error_mode = 1
+
+--****
+-- === Routines
+--
 
 -- select() will not be supported because Euphoria does not support
 -- wrapping of macros.  FD_SET, etc. do not have extern functions

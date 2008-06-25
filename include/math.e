@@ -51,9 +51,13 @@ type trig_range(object x)
 	end if
 end type
 
+--****
+-- === Routines
+--
+
 --**
 -- Signature:
---   global function arctan(object x1)
+-- global function arctan(object x1)
 --
 -- Description:
 --   Return an angle with tangent equal to x1

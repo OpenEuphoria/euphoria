@@ -2,6 +2,9 @@
 --
 --****
 -- == Dynamic Linking to C
+--
+-- === Constants
+--
 
 -- C types for .dll arguments and return value:
 global constant 
@@ -31,6 +34,10 @@ constant M_OPEN_DLL  = 50,
 		 M_CALL_BACK = 52,
 		 M_FREE_CONSOLE = 54,
 		 M_DEFINE_VAR = 56
+
+--****
+-- === Routines
+--
 
 --**
 -- Open a Windows dynamic link library (.dll) file, or a Linux or FreeBSD shared library 

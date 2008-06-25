@@ -2,7 +2,7 @@
 --
 --****
 -- == Wildcard Matching
---
+-- === Routines
 
 include misc.e
 include sequence.e as seq -- upper/lower

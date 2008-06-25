@@ -2,6 +2,7 @@
 --
 --****
 -- == Unit Testing Framework
+-- === Constants
 
 include misc.e
 
@@ -65,6 +66,9 @@ end procedure
 -- Global Testing Functions
 --
 
+--****
+-- === Setup Routines
+
 --**
 export procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
@@ -82,6 +86,9 @@ export function set_test_abort(integer pValue)
 	abort_on_fail = pValue
 	return lTmp
 end function
+
+--****
+-- === Reporting
 
 --**
 export procedure test_embedded_report()
@@ -116,6 +123,10 @@ procedure record_result(integer success, sequence name, object a, object b)
 		test_failed(name, a, b)
 	end if
 end procedure
+
+--****
+-- === Tests
+--
 
 --**
 export procedure test_equal(sequence name, object a, object b)

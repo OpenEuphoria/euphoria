@@ -1,8 +1,10 @@
+%%maxnumlevel=4
+
 = Euphoria Programming Language v4.0
 
 == Table of Contents
 
-<<TOC>>
+<<TOC level=2>>
 
 == Introduction
 

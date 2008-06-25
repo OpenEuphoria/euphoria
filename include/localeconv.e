@@ -3,6 +3,8 @@
 --****
 -- == Locale Constants
 --
+-- === Constants
+--
 
 export constant w32_names = {
 	"af-ZA",
@@ -644,6 +646,10 @@ ifdef UNIX then
 else
 	export constant platform_locale = w32_name_canonical
 end ifdef
+
+--****
+-- === Locale Name Translation
+--
 
 --**
 export function canonical(sequence new_locale)

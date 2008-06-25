@@ -1,11 +1,8 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
---**
+--****
 -- == Date/Time
 --
-
--- No timezone offset.
--- Engine created by CyrekSoft --
 
 include unicode.e -- needed for parse() and format()
 

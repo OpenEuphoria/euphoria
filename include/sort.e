@@ -2,6 +2,9 @@
 --
 --****
 -- == Sorting
+--
+-- === Routines
+--
 
 include sequence.e -- upper/lower
 

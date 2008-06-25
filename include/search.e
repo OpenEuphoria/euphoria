@@ -5,8 +5,8 @@
 
 include machine.e
 
---
--- Internal Function Documentation
+--****
+-- === Routines
 --
 
 --**
@@ -190,10 +190,6 @@ include machine.e
 --
 -- See Also:
 --     find, find_from, match, compare, wildcard:wildcard_match
-
---
--- Functions
---
 
 --**
 -- Find any element from s1 in s2 starting at position i2 and return

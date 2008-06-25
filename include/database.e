@@ -73,7 +73,7 @@ include file.e
 include misc.e
 include get.e
 
---**
+--****
 -- === Constants
 -- ==== Error Status
 -- * DB_OK
@@ -86,7 +86,7 @@ global constant DB_OK = 0,
 				DB_EXISTS_ALREADY = -2,
 				DB_LOCK_FAIL = -3
 				
---**
+--****
 -- ==== Lock Types
 -- * DB_LOCK_NO
 -- * DB_LOCK_SHARED
@@ -136,8 +136,8 @@ procedure default_fatal(sequence msg)
 	?1/0 -- to see call stack
 end procedure
 
---**
--- ==== Variables
+--****
+-- === Variables
 --
 
 --**
@@ -743,30 +743,28 @@ end function
 --
 -- <eucode>
 -- global constant
---     DB_OK = 0   -- success
+--     DB_OK = 0          -- success
 --     DB_OPEN_FAIL = -1  -- couldn't open the file 
 --     DB_LOCK_FAIL = -3  -- couldn't lock the file in the
 --                        --     manner requested
 -- </eucode>
 --
 -- Returns:
--- integer - an error code that indicates success or failure
+--   integer - an error code that indicates success or failure
 --
 -- Comments:
--- The types of lock that you can use are: DB_LOCK_NO (no lock), 
--- DB_LOCK_SHARED (shared lock for read-only access) and
--- DB_LOCK_EXCLUSIVE (for read/write access). DB_LOCK_SHARED is only supported on
--- <platform>Linux</platform>/<platform>FreeBSD</platform>.
--- It allows you to read the database, but not write anything to it. If you
--- request DB_LOCK_SHARED on <platform>WIN32</platform> or
--- <platform>DOS32</platform> it will be treated as if you had
--- asked for DB_LOCK_EXCLUSIVE.
+--   The types of lock that you can use are: ##DB_LOCK_NO## (no lock), 
+--   ##DB_LOCK_SHARED## (shared lock for read-only access) and
+--   ##DB_LOCK_EXCLUSIVE## (for read/write access). ##DB_LOCK_SHARED## is only 
+---  supported on Unix platforms. It allows you to read the database, but not 
+--   write anything to it. If you request ##DB_LOCK_SHARED## on //WIN32// or
+--   //DOS32// it will be treated as if you had asked for DB_LOCK_EXCLUSIVE.
 --
--- If the lock fails, your program should wait a few seconds and try again.
--- Another process might be currently accessing the database.
--- DOS programs will typically get a "critical error" message if they
--- try to access a database that is currently locked.
-
+--   If the lock fails, your program should wait a few seconds and try again.
+--   Another process might be currently accessing the database.
+--   //DOS// programs will typically get a "critical error" message if they
+--   try to access a database that is currently locked.
+--
 -- Example 1:
 -- <eucode>
 -- tries = 0

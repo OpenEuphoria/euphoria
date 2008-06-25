@@ -8,6 +8,10 @@ include misc.e
 include sequence.e
 include math.e
 
+--****
+-- === Constants
+--
+
 export constant
 	NO_PARAMETER = 0,
 	HAS_PARAMETER = 1
@@ -81,6 +85,10 @@ function find_opt(sequence opts, integer typ, object name)
 
 	return 0
 end function
+
+--****
+-- === Routines
+--
 
 --**
 export function cmd_parse(sequence opts, integer add_help_rid=-1, 

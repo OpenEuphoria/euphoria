@@ -7,6 +7,10 @@ include machine.e
 include search.e
 include misc.e
 
+--****
+-- === Routines
+--
+
 --**
 -- Signature:
 -- global function append(sequence s1, object x)
@@ -1151,8 +1155,8 @@ end function
 -- See Also:
 --   vslice
 
-export function project(sequence vectors, sequence coords) -- currently in sets.e
-	sequence result,current_vector,coord_set,result_item,projection
+export function project(sequence vectors, sequence coords)
+	sequence result, current_vector, coord_set, result_item, projection
 	integer current_index
 
 	result=vectors

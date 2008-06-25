@@ -3,9 +3,7 @@
 @@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
 @@(title $$(product) $$(version) Release Notes)@
 
-= $$(title)
-<<TOC>>
-==Version $$(version):
+=== Version 4.0
 ==== Bug Fixes
 
 * $$(bugfix) 1855414. ##open()##'s max path length is now determined by the underlying 

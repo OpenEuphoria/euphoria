@@ -12,7 +12,14 @@ constant
 		M_EXEC_PCRE    = 69,
 		M_FREE_PCRE    = 70
 
--- Options:
+--****
+-- === Constants
+--
+
+--****
+-- ==== Options
+--
+
 export constant 
 	DEFAULT            = #00000000,
 	CASELESS           = #00000001,
@@ -43,7 +50,10 @@ export constant
 	BSR_ANYCRLF        = #00800000,
 	BSR_UNICODE        = #01000000
 
--- Error codes:
+--****
+-- ==== Error Codes
+--
+
 export constant
 	ERROR_NOMATCH        =  (-1),
 	ERROR_NULL           =  (-2),
@@ -70,10 +80,18 @@ export constant
 	ERROR_NULLWSLIMIT    = (-22), -- /* No longer actually used */
 	ERROR_BADNEWLINE     = (-23)
 
+--****
+-- === Types
+--
+
 --**
 export type regex(object o)
 	return atom(o)
 end type
+
+--****
+-- === Routines
+-- 
 
 --**
 -- Return an allocated regular expression, which must be freed using free() when done.

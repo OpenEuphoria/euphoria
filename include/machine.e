@@ -85,6 +85,9 @@ type sequence_4(sequence s)
 	return length(s) = 4
 end type
 
+--****
+-- === Constants
+
 global constant REG_LIST_SIZE = 10
 global constant REG_DI = 1,      
 				REG_SI = 2,
@@ -103,6 +106,9 @@ type register_list(sequence r)
 -- a list of register values
 	return length(r) = REG_LIST_SIZE
 end type
+
+--****
+-- === Routines
 
 --**
 global function allocate(positive_int n)

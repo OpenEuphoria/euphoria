@@ -3,12 +3,18 @@
 --****
 -- == Extended Types
 --
+-- === Constants
+--
 
 --** 
 export constant FALSE = 0
 
 --**
 export constant TRUE = 1
+
+--****
+-- === Support Functions
+--
 
 --** 
 -- Returns TRUE if pVal is a character or sequence of characters in 
@@ -91,7 +97,6 @@ export enum
 --** 
 -- Sets all the defined character sets to their default definitions.
 --
---
 -- Example 1:
 -- <eucode>
 -- set_default_charsets()
@@ -166,6 +171,10 @@ export procedure set_charsets(sequence pSets)
 		end if
 	end for
 end procedure
+
+--***
+-- === Types
+--
 
 --** 
 -- Returns TRUE if argument is an atom or if every element of the argument

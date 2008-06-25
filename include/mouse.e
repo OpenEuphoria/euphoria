@@ -3,10 +3,11 @@
 --****
 -- == Mouse
 --
-
 -- DOS32 - you need a mouse driver
 -- Linux - you need GPM server to be running
 -- WIN32 - not implemented yet for the text console
+--
+-- === Constants
 
 include misc.e
 
@@ -36,6 +37,9 @@ end if
 constant M_GET_MOUSE = 14,
 		 M_MOUSE_EVENTS = 15,
 		 M_MOUSE_POINTER = 24
+
+--****
+-- === Routines
 
 --**
 -- Return the last mouse event in the form: ##{event, x, y}## or return ##-1## if there has not 

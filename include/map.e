@@ -17,6 +17,10 @@ constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
 constant iKeys = 1
 constant iVals = 2
 
+--****
+-- === Constants
+--
+
 export enum
 	PUT,
 	ADD,
@@ -25,6 +29,10 @@ export enum
 	DIVIDE,
 	APPEND,
 	CONCAT
+
+--****
+-- === Types
+--
 
 --**
 -- Defines the datatype 'map'
@@ -64,6 +72,10 @@ export type map(object o)
 end type
 
 constant maxInt = #3FFFFFFF
+
+--****
+-- === Routines
+--
 
 --**
 -- Calculate a Hashing value from the supplied data.
