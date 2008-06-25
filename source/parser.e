@@ -2014,6 +2014,7 @@ procedure Ifdef_statement()
 				matched = find(option, OpDefines)
 			end if
 			if matched then
+        			No_new_entry = not matched
 				call_proc(top_level_parser, {})
 			end if
 		end if
@@ -2225,6 +2226,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	while TRUE do 
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+			? tok[T_ID]
 			CompileErr("a name is expected here")
 		end if
 		sym = tok[T_SYM]

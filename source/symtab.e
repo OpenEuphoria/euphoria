@@ -761,7 +761,7 @@ global function keyfind(sequence word, integer file_no)
 	elsif length(dup_globals) then
 		defined = SC_MULTIPLY_DEFINED
 	elsif length(dup_overrides) then
-		defined = SC_OVERRIDE ?123
+		defined = SC_OVERRIDE
 	end if
 
 	if No_new_entry then
