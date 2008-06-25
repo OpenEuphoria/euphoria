@@ -200,7 +200,7 @@ enum
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
-	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE}) then  
+	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE, IFDEF, ELSIFDEF}) then  
 		Warning(sprintf("%s:%d - statement after %s will never be executed", 
 				{name_ext(file_name[current_file_no]), line_number, keyword}),0)
 	end if
@@ -2020,6 +2020,7 @@ procedure Ifdef_statement()
 
 		-- Read to END IFDEF or to the next ELSIFDEF which sets the loop
 		-- up for another comparison.
+        No_new_entry = not matched
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
@@ -2034,6 +2035,7 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = ELSIFDEF then
 				exit
 			elsif tok[T_ID] = ELSE and matched = 0 and nested_count = 0 then
+			    No_new_entry = 0
 				call_proc(top_level_parser, {})
 				tok_match(END)
 				tok_match(IFDEF)
@@ -2046,6 +2048,7 @@ procedure Ifdef_statement()
 			end if
 		end while
 	end while
+    No_new_entry = 0
 end procedure
 
 function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
@@ -2331,7 +2334,7 @@ procedure Private_declaration(symtab_index type_sym)
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
 		param_num += 1
-	   
+
 		if TRANSLATE then
 			SymTab[sym][S_GTYPE] = CompileType(type_sym)
 		end if
@@ -2541,6 +2544,7 @@ procedure SubProg(integer prog_type, integer scope)
 	symtab_index p, type_sym, sym
 	token tok, prog_name
 	integer first_def_arg
+	sequence again
 
 	LeaveTopLevel()
 
@@ -2562,12 +2566,14 @@ procedure SubProg(integer prog_type, integer scope)
 	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry 
 		if scope = SC_OVERRIDE then
-			if SymTab[p][S_SCOPE] = SC_PREDEF then
-					Warning(sprintf("built-in routine %s() overridden in %s",
-									{SymTab[p][S_NAME], file_name[current_file_no]}),override_warning_flag)
-			elsif SymTab[p][S_SCOPE] = SC_OVERRIDE then
-					CompileErr(sprintf("built-in routine %s() is overridden already in: %s", 
-						 {SymTab[p][S_NAME], file_name[SymTab[p][S_FILE_NO]]}))
+			if SymTab[p][S_SCOPE] = SC_PREDEF or SymTab[p][S_SCOPE] = SC_OVERRIDE then
+					if SymTab[p][S_SCOPE] = SC_OVERRIDE then
+						again = " again"
+					else
+						again = ""
+					end if
+					Warning(sprintf("built-in routine %s() overridden%s in %s",
+									{SymTab[p][S_NAME], again, file_name[current_file_no]}),override_warning_flag)
 			end if
 		end if
 

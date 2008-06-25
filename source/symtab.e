@@ -69,7 +69,7 @@ global procedure remove_symbol( symtab_index sym )
 	end if
 end procedure
 
-global function NewEntry(sequence name, integer varnum, integer scope, 
+global function NewEntry(sequence name, integer varnum, integer scope,
 				  integer token, integer hashval, symtab_index samehash, 
 				  symtab_index type_sym)
 -- Enter a symbol into the table at the next available position 
@@ -545,6 +545,7 @@ include_warnings = {}
 sequence builtin_warnings
 builtin_warnings = {}
 
+global integer No_new_entry = 0
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 
@@ -573,7 +574,7 @@ global function keyfind(sequence word, integer file_no)
 				-- unqualified  
 				
 				-- Consider: S_PREDEF 
-				
+
 				scope = SymTab[st_ptr][S_SCOPE]
 
 				if scope = SC_OVERRIDE then
@@ -681,13 +682,13 @@ global function keyfind(sequence word, integer file_no)
 		st_ptr = dup_overrides[1]
 		tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
 
-		if length(dup_overrides) = 1 then
+		--if length(dup_overrides) = 1 then
 			if BIND then
 				add_ref(tok)
 			end if
 
 			return tok
-		end if
+--		end if
 
 	elsif st_builtin != 0 then
 		if length(dup_globals) and find(SymTab[st_builtin][S_NAME], builtin_warnings) = 0 then
@@ -757,11 +758,16 @@ global function keyfind(sequence word, integer file_no)
 	-- couldn't find unique one 
 	if length(dup_globals) = 0 then
 		defined = SC_UNDEFINED
-	elsif length(dup_globals) or length(dup_overrides) then
+	elsif length(dup_globals) then
 		defined = SC_MULTIPLY_DEFINED
+	elsif length(dup_overrides) then
+		defined = SC_OVERRIDE ?123
 	end if
 
-	tok = {VARIABLE, NewEntry(word, 0, defined, 
+	if No_new_entry then
+		return {IGNORED,0}
+	end if
+	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
 
@@ -871,10 +877,10 @@ global procedure ExitScope()
 
 	s = SymTab[CurrentSub][S_NEXT]
 	while s and SymTab[s][S_SCOPE] = SC_PRIVATE do
-		Hide(s) 
+		Hide(s)
 		LintCheck(s)
 		s = SymTab[s][S_NEXT]
-	end while 
+	end while
 end procedure
 
 
