@@ -1998,14 +1998,13 @@ integer top_level_parser
 
 procedure Ifdef_statement()
 	sequence option
-	integer matched, continue_top, nested_count
+	integer matched, nested_count
 	token tok
 
 	matched = 0
-	continue_top = 1
 	nested_count = 0
 
-	while continue_top do
+	while 1 label "top" do
 		if matched = 0 then
 			option = StringToken()
 			tok_match(THEN)
@@ -2021,13 +2020,14 @@ procedure Ifdef_statement()
 
 		-- Read to END IFDEF or to the next ELSIFDEF which sets the loop
 		-- up for another comparison.
-		while TRUE do
+		while 1 do
 			tok = next_token()
-			if tok[T_ID] = END then
+			if tok[T_ID] = END_OF_FILE then
+				CompileErr("End of file reached while searching for end ifdef")
+			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
-					continue_top = 0
-					exit
+					exit "top"
 				elsif nested_count and tok[T_ID] = IF then
 					nested_count -= 1
 				end if
@@ -2905,14 +2905,13 @@ global procedure real_parser(integer nested)
 			SubProg(tok[T_ID], SC_LOCAL)
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE then
-				if id = GLOBAL then
-				    scope = SC_GLOBAL
-				elsif id = EXPORT then
-					scope = SC_EXPORT
-					
-				elsif OVERRIDE then
-					scope = SC_OVERRIDE
-					end if
+			if id = GLOBAL then
+			    scope = SC_GLOBAL
+			elsif id = EXPORT then
+				scope = SC_EXPORT
+			elsif OVERRIDE then
+				scope = SC_OVERRIDE
+			end if
 
 			tok = next_token()
 			id = tok[T_ID]
