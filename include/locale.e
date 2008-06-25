@@ -212,76 +212,51 @@ export function get()
 	return r
 end function
 
-ifdef UNIX then
+--**
+export function money(atom amount)
+	sequence result
+	integer size
+	atom pResult, pTmp
 
-	--**
-	export function money(atom amount)
-		atom pResult, pFmt
-		sequence result
-		integer size
-
+	ifdef UNIX then
 		pResult = allocate(4 * 160)
-		pFmt = allocate_string("%n")
-		size = c_func(f_strfmon, {pResult, 4 * 160, pFmt, amount})
-		free(pFmt)
-
-		result = peek_string(pResult)
-		free(pResult)
-
-		return result
-	end function
-
-	--**
-	export function number(atom num)
-		atom pResult, pFmt
-		sequence result
-		integer size
-
+		pTmp = allocate_string("%n")
+		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+	else
 		pResult = allocate(4 * 160)
-		pFmt = allocate_string("%!n")
-		size = c_func(f_strfmon, {pResult, 4 * 160, pFmt, num})
-		free(pFmt)
+		pTmp = allocate_string(sprintf("%.8f", {amount}))
+		size = c_func(f_strfmon, {LC_ALL, 0, pTmp, NULL, pResult, 4 * 160})
+	end ifdef
 
-		result = peek_string(pResult)
-		free(pResult)
+	result = peek_string(pResult)
+	free(pResult)
+	free(pTmp)
 
-		return result
-	end function
+	return result
+end function
 
-elsifdef WIN32 then
+--**
+export function number(atom num)
+	sequence result
+	integer size
+	atom pResult, pTmp
 
-	export function money(atom amount)
-		atom pAmount, pResult
-		sequence result
-		integer size
-
-		pAmount = allocate_string(sprintf("%.8f", {amount}))
+	ifdef UNIX then
 		pResult = allocate(4 * 160)
-		size = c_func(f_strfmon, {LC_ALL, 0, pAmount, NULL, pResult, 4 * 160})
-		result = peek_string(pResult)
-		free(pAmount)
-		free(pResult)
-
-		return result
-	end function
-
-	function number(atom num)
-		atom pNum, pResult
-		sequence result
-		integer size
-
-		pNum = allocate_string(sprintf("%.8f", {num}))
+		pTmp = allocate_string("%!n")
+		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+	else
 		pResult = allocate(4 * 160)
-		size = c_func(f_strfnum, {LC_ALL, 0, pNum, NULL, pResult, 4 * 160})
-		result = peek_string(pResult)
-		free(pNum)
-		free(pResult)
+		pTmp = allocate_string(sprintf("%.8f", {num}))
+		size = c_func(f_strfnum, {LC_ALL, 0, pTmp, NULL, pResult, 4 * 160})
+	end ifdef
 
-		return result
-	end function
-	
-end ifdef
+	result = peek_string(pResult)
+	free(pResult)
+	free(pTmp)
 
+	return result
+end function
 
 function mk_tm_struct(dt:datetime dtm)
 	atom pDtm
