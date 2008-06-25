@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   unittest
---
--- Title:
---   Unit Testing Framework
---****
+-- == Unit Testing Framework
 
 include misc.e
 
@@ -18,6 +13,7 @@ export enum
 	TEST_QUIET = 0, 
 	TEST_SHOW_FAILED_ONLY, 
 	TEST_SHOW_ALL
+
 integer testCount, testsPassed, testsFailed
 
 testCount	= 0
@@ -73,13 +69,11 @@ end procedure
 export procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
---**
 
 --**
 export procedure set_wait_on_summary(integer toWait)
 	wait_on_summary = toWait
 end procedure
---**
 
 --**
 export function set_test_abort(integer pValue)
@@ -88,7 +82,6 @@ export function set_test_abort(integer pValue)
 	abort_on_fail = pValue
 	return lTmp
 end function
---**
 
 --**
 export procedure test_embedded_report()
@@ -112,7 +105,6 @@ export procedure test_embedded_report()
 		abort(testsFailed > 0)
 	end if
 end procedure
---**
 
 --**
 procedure record_result(integer success, sequence name, object a, object b)
@@ -124,7 +116,6 @@ procedure record_result(integer success, sequence name, object a, object b)
 		test_failed(name, a, b)
 	end if
 end procedure
---**
 
 --**
 export procedure test_equal(sequence name, object a, object b)
@@ -140,7 +131,6 @@ export procedure test_equal(sequence name, object a, object b)
 	end if
 	record_result(success, name, a, b)
 end procedure
---**
 
 --**
 export procedure test_not_equal(sequence name, object a, object b)
@@ -156,7 +146,6 @@ export procedure test_not_equal(sequence name, object a, object b)
 	end if
 	record_result(success, name, a, b)
 end procedure
---**
 
 --**
 export procedure test_true(sequence name, object a)
@@ -168,7 +157,6 @@ export procedure test_true(sequence name, object a)
 	end if
 	record_result(success, name, 1, a )
 end procedure
---**
 
 --**
 export procedure test_false(sequence name, object a)
@@ -180,19 +168,16 @@ export procedure test_false(sequence name, object a)
 	end if
 	record_result(success, name, 0, a)
 end procedure
---**
 
 --**
 export procedure test_fail(sequence name)
 	record_result(0, name, 1, 0)
 end procedure
---**
 
 --**
 export procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
---**
 
 sequence cmd
 cmd = command_line()
@@ -207,4 +192,3 @@ for i = 3 to length(cmd) do
 		set_wait_on_summary(1)
     end if
 end for
-

@@ -1,15 +1,10 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   stack
+-- == Stack
 --
--- Title:
---   Stack
---****
---
-
--- TODO: testing
+-- TODO: 
+-- documentation
 
 include machine.e
 
@@ -21,25 +16,21 @@ export constant
 export type stack(object o)
 	return sequence(o) and length(o) >= 1
 end type
---**
 
 --**
 export function new(integer stack_type)
 	return {stack_type}
 end function
---**
 
 --**
 export function is_empty(stack sk)
 	return length(sk) = 1
 end function
---**
 
 --**
 export function size(stack sk)
 	return length(sk) - 1
 end function
---**
 
 --**
 export function at(stack sk, integer idx)
@@ -58,7 +49,6 @@ export function at(stack sk, integer idx)
 	
 	return sk[idx]
 end function
---**
 
 --**
 export function push(stack sk, object value)
@@ -71,7 +61,6 @@ export function push(stack sk, object value)
 		return append(sk, value)
 	end if
 end function
---**
 
 --**
 export function top(stack sk)
@@ -90,7 +79,6 @@ export function pop(stack sk)
 
 	return sk[1..$-1]
 end function
---**
 
 --**
 export function swap(stack sk)
@@ -108,7 +96,6 @@ export function swap(stack sk)
 
 	return sk
 end function
---**
 
 --**
 export function dup(stack sk)
@@ -118,10 +105,8 @@ export function dup(stack sk)
 
 	return sk & {sk[$]}
 end function
---**
 
 --**
 export function clear(stack sk)
 	return {sk[1]}
 end function
---**

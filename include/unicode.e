@@ -1,51 +1,53 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   unicode
+-- == Unicode
 --
--- Title:
---   Unicode Routines
---****
--- 
+-- Unicode is not complete. This API will change, even in 4.1 release.
+--
+ 
 -- By default, strings are stored in UCS2. 
 -- Actually Eu can store integers up to 0x3fffffff, but I think it is not so efficient for further conversion.
 -- yuku 2008
 
 constant M_ALLOC = 16
 
+--**
 -- UCS-2 string (0-65535). In C known as wchar_t* (but \0's are allowed)
+
 export type wstring(object s)
-		if not sequence(s) then 
-				return 0
+	if not sequence(s) then 
+		return 0
+	end if
+
+	for i = 1 to length(s) do
+		if not integer(s[i]) or s[i] < 0 or s[i] > 65535 then
+			return 0
 		end if
+	end for
 
-		for i = 1 to length(s) do
-				if not integer(s[i]) or s[i] < 0 or s[i] > 65535 then
-						return 0
-				end if
-		end for
-
-		return 1
+	return 1
 end type
 
+--**
 -- ASCII string (0-255), or UTF-8 string. In C known as char* (but \0's are allowed)
 export type astring(object s)
-		if not sequence(s) then 
-				return 0
+	if not sequence(s) then 
+		return 0
+	end if
+
+	for i = 1 to length(s) do
+		if not integer(s[i]) or s[i] < 0 or s[i] > 255 then
+			return 0
 		end if
+	end for
 
-		for i = 1 to length(s) do
-				if not integer(s[i]) or s[i] < 0 or s[i] > 255 then
-						return 0
-				end if
-		end for
-
-		return 1
+	return 1
 end type
 
-
+--**
 -- encode wstring to astring using utf-8
+
 export function utf8_encode(wstring src)
 	sequence tmp
 	integer pos
@@ -77,7 +79,9 @@ export function utf8_encode(wstring src)
 		return tmp[1..pos-1]
 end function
 
+--**
 -- decode astring in utf-8 to wstring
+
 export function utf8_decode(astring src)
 	sequence tmp
 	integer pos, spos
@@ -115,15 +119,15 @@ export function utf8_decode(astring src)
 		return tmp[1..pos-1]
 end function
 
--- Function: allocate_wstring
---
+--**
 -- Create a C-style null-terminated wchar_t string in memory
 --
 -- Parameters:
---   s - a unicode (utf16) string
+--   * s - a unicode (utf16) string
 --
 -- Returns:
 --   The address of the allocated string
+
 export function allocate_wstring(wstring s)
 		atom mem
 
@@ -136,15 +140,15 @@ export function allocate_wstring(wstring s)
 		return mem
 end function
 
--- Function: peek_wstring
---
+--**
 -- Return a unicode (utf16) string that are stored at machine address a.
 --
 -- Parameters:
---   a - address of the string in memory
+--   * addr - address of the string in memory
 --
 -- Returns:
 --   The string at the memory position
+
 export function peek_wstring(atom addr)
 		atom ptr
 		
@@ -155,5 +159,3 @@ export function peek_wstring(atom addr)
 		
 		return peek2u({addr, (ptr - addr) / 2})
 end function
-
-

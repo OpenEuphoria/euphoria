@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   wildcard
---
--- Title:
---   Wildcard Matching
---****
+-- == Wildcard Matching
 --
 
 include misc.e
@@ -40,10 +35,11 @@ end function
 constant END_MARKER = -1
 
 --**
--- returns TRUE if string matches pattern
+-- Returns TRUE if string matches pattern
 --
 -- Comments:
--- pattern can include '*' and '?' "wildcard" characters
+--   pattern can include '*' and '?' "wildcard" characters
+
 global function wildcard_match(sequence pattern, sequence string)
 	integer p, f, t 
 	sequence match_string
@@ -90,15 +86,15 @@ global function wildcard_match(sequence pattern, sequence string)
 	end while
 	return 0
 end function
---**
 
 --**
 -- Return 1 (TRUE) if filename matches the wild card pattern.
 --
 -- Comments:
--- Similar to DOS wild card matching but better. For example, 
--- "*ABC.*" in DOS will match *all* files, where this function will 
--- only match when the file name part has "ABC" at the end.
+--   Similar to DOS wild card matching but better. For example, 
+--   "*ABC.*" in DOS will match *all* files, where this function will 
+--   only match when the file name part has "ABC" at the end.
+
 global function wildcard_file(sequence pattern, sequence filename)
 	if platform() != LINUX then
 		pattern = seq:upper(pattern)
@@ -112,4 +108,3 @@ global function wildcard_file(sequence pattern, sequence filename)
 	end if
 	return wildcard_match(pattern, filename)
 end function
---**

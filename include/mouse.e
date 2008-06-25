@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   mouse
---
--- Title:
---   Mouse
---****
+-- == Mouse
 --
 
 -- DOS32 - you need a mouse driver
@@ -43,16 +38,21 @@ constant M_GET_MOUSE = 14,
 		 M_MOUSE_POINTER = 24
 
 --**
--- Return the last mouse event in the form: {event, x, y} or return -1 if there has not been a mouse event since the last time get_mouse() was called. 
-
+-- Return the last mouse event in the form: ##{event, x, y}## or return ##-1## if there has not 
+-- been a mouse event since the last time get_mouse() was called. 
+--
 -- Constants have been defined in mouse.e for the possible mouse events: 
--- 	    global constant MOVE = 1,
---                LEFT_DOWN = 2,
---                  LEFT_UP = 4,
---               RIGHT_DOWN = 8,
---                 RIGHT_UP = 16,
---              MIDDLE_DOWN = 32,
---                MIDDLE_UP = 64
+-- <eucode>
+-- global constant 
+--     MOVE = 1,
+--     LEFT_DOWN = 2,
+--     LEFT_UP = 4,
+--     RIGHT_DOWN = 8,
+--     RIGHT_UP = 16,
+--     MIDDLE_DOWN = 32,
+--     MIDDLE_UP = 64
+-- </eucode>
+--
 -- x and y are the coordinates of the mouse pointer at the time that the event occurred.
 -- get_mouse() returns immediately with either a -1 or a mouse event. It does not wait
 -- for an event to occur. You must check it frequently enough to avoid missing an event.
@@ -110,11 +110,12 @@ constant M_GET_MOUSE = 14,
 --             exit
 --         end if
 --     end if
--- end while</eucode>
+-- end while
+-- </eucode>
+
 global function get_mouse()
 	return machine_func(M_GET_MOUSE, 0)
 end function
---**
 
 --**
 -- Use this procedure to select the mouse events that you want get_mouse() to report. By default,
@@ -128,15 +129,18 @@ end function
 --
 -- The first call that you make to mouse_events() will turn on a mouse pointer, or a highlighted character.
 --
--- Example:
+-- Example 1:
+-- <eucode>
 -- mouse_events(LEFT_DOWN + LEFT_UP + RIGHT_DOWN)
+-- </eucode>
+
 -- will restrict get_mouse() to reporting the left button
--- -- being pressed down or released, and the right button
--- -- being pressed down. All other events will be ignored.
+-- being pressed down or released, and the right button
+-- being pressed down. All other events will be ignored.
+
 global procedure mouse_events(integer events)
 	machine_proc(M_MOUSE_EVENTS, events)
 end procedure
---**
 
 --**
 -- If i is 0 hide the mouse pointer, otherwise turn on the mouse pointer. Multiple calls to hide
@@ -148,8 +152,8 @@ end procedure
 -- It may be necessary to hide the mouse pointer temporarily when you update the screen. 
 --
 -- After a call to text_rows() you may have to call mouse_pointer(1) to see the mouse pointer again.
+
 global procedure mouse_pointer(integer show_it)
 	machine_proc(M_MOUSE_POINTER, show_it)
 end procedure
---**
 

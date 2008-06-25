@@ -86,7 +86,6 @@ end procedure
 print_sorted_list()     -- this command starts the program
 </eucode>
 
-
 The above example contains 4 separate commands that are processed in order. The
 first declares two variables: list and sorted_list to be a
 href="refman_2.htm#1">sequences</a> (flexible arrays). The second defines a a
@@ -96,7 +95,9 @@ calls procedure print_sorted_list().
 
 The output from the program will be:
  
-{{{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.}}}
+{{{
+{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+}}}
 
 merge_sort() will just as easily sort
 

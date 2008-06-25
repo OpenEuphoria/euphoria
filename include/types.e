@@ -1,19 +1,14 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   type
---
--- Title:
---   Extended Types
---****
+-- == Extended Types
 --
 
 --** 
-global constant
-	FALSE = 0,
-	TRUE  = 1
---** 
+export constant FALSE = 0
+
+--**
+export constant TRUE = 1
 
 --** 
 -- Returns TRUE if pVal is a character or sequence of characters in 
@@ -24,12 +19,21 @@ global constant
 -- of characters. eg. Alphabetic is defined as {{'a','z'}, {'A', 'Z'}}
 --
 -- Example 1:
--- char_test("ABCD", {{'A', 'D'}})    -- TRUE, every char is in the range 'A' to 'D'
--- char_test("ABCD", {{'A', 'C'}})    -- FALSE, not every char is in the range 'A' to 'C'
--- char_test("Harry", {{'a', 'z'}, {'D', 'J'}}) -- TRUE, every char is either in the range 'a' to 'z', or in the range 'D' to 'J'
--- char_test("Potter", "novel") -- FALSE, not every character is in the set 'n', 'o', 'v', 'e', 'l'
+-- <eucode>
+-- char_test("ABCD", {{'A', 'D'}})    
+-- -- TRUE, every char is in the range 'A' to 'D'
+--
+-- char_test("ABCD", {{'A', 'C'}})
+-- -- FALSE, not every char is in the range 'A' to 'C'
+--
+-- char_test("Harry", {{'a', 'z'}, {'D', 'J'}}) 
+-- -- TRUE, every char is either in the range 'a' to 'z', or in the range 'D' to 'J'
+-- 
+-- char_test("Potter", "novel") 
+-- -- FALSE, not every character is in the set 'n', 'o', 'v', 'e', 'l'
+-- </eucode>
 
-global function char_test(object pVal, sequence pCharSet)
+export function char_test(object pVal, sequence pCharSet)
 	integer lChr
 	
 	if integer(pVal) then
@@ -61,12 +65,10 @@ global function char_test(object pVal, sequence pCharSet)
 		return FALSE
 	end if
 end function
---** 
 
 sequence Defined_Sets
 
---** 
-global enum
+export enum
 	CS_FIRST = 0,
 	CS_Consonant,
 	CS_Vowel,
@@ -84,7 +86,6 @@ global enum
 	CS_Graphic,
 	CS_Bytes,
 	CS_LAST
---** 
 
 
 --** 
@@ -92,9 +93,11 @@ global enum
 --
 --
 -- Example 1:
+-- <eucode>
 -- set_default_charsets()
+-- </eucode>
 
-global procedure set_default_charsets()
+export procedure set_default_charsets()
 	Defined_Sets = repeat(0, CS_LAST - CS_FIRST - 1)
 	Defined_Sets[CS_Alphabetic	] = {{'a', 'z'}, {'A', 'Z'}}
 	Defined_Sets[CS_Alphanumeric] = {{'0', '9'}, {'a', 'z'}, {'A', 'Z'}}
@@ -112,7 +115,6 @@ global procedure set_default_charsets()
 	Defined_Sets[CS_Graphic 	] = {{'!', '~'}}
 	Defined_Sets[CS_Bytes	 	] = {{0, 255}}
 end procedure
---**
 
 --** 
 -- Gets the definition for each of the defined character sets.
@@ -124,9 +126,12 @@ end procedure
 -- This is the same format required for the set_charsets() routine.
 --
 -- Example 1:
+-- <eucode>
 -- sequence sets
 -- sets = get_charsets()
-global function get_charsets()
+-- </eucode>
+
+export function get_charsets()
 	sequence lResult
 	
 	lResult = {}
@@ -136,7 +141,6 @@ global function get_charsets()
 	
 	return lResult
 end function
---**
 
 --** 
 -- Sets the definition for one or more defined character sets.
@@ -148,10 +152,12 @@ end function
 -- This is the same format returned by the get_charsets() routine.
 --
 -- Example 1:
+-- <eucode>
 -- set_charsets({{CS_Whitespace, " \t"}})
 -- t_space('\n') --> FALSE
+-- </eucode>
 
-global procedure set_charsets(sequence pSets)	
+export procedure set_charsets(sequence pSets)	
 	for i = 1 to length(pSets) do
 		if sequence(pSets[i]) and length(pSets[i]) = 2 then
 			if integer(pSets[i][1]) and pSets[i][1] > CS_FIRST and pSets[i][1] < CS_LAST then
@@ -160,7 +166,6 @@ global procedure set_charsets(sequence pSets)
 		end if
 	end for
 end procedure
---**
 
 --** 
 -- Returns TRUE if argument is an atom or if every element of the argument
@@ -169,6 +174,7 @@ end procedure
 -- Returns FALSE if the argument is an empty sequence or contains sequences.
 --
 -- Example 1:
+-- <eucode>
 -- t_bool(-1)            -- TRUE
 -- t_bool(0)             -- TRUE 
 -- t_bool(1)             -- TRUE
@@ -181,8 +187,9 @@ end procedure
 -- t_bool({1,2,"abc"})   -- FALSE (contains a sequence)
 -- t_bool({1, 2, 9.7)    -- TRUE
 -- t_bool({})            -- FALSE (empty sequence)
+-- </eucode>
 	
-global type t_bool(object pVal)
+export type t_bool(object pVal)
 	-- A boolean is a value that is either zero or not zero.
 	if atom(pVal) then
 		return TRUE
@@ -195,7 +202,6 @@ global type t_bool(object pVal)
 	return length(pVal) > 0
 	
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an alphanumic character or if every element of 
@@ -205,6 +211,7 @@ end type
 -- or contains non-alphanumeric elements
 --
 -- Example 1:
+-- <eucode>
 -- t_alnum(-1)            -- FALSE
 -- t_alnum(0)             -- FALSE 
 -- t_alnum(1)             -- FALSE
@@ -217,10 +224,11 @@ end type
 -- t_alnum({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- t_alnum({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_alnum({})            -- FALSE (empty sequence)
-global type t_alnum(object pVal)
+-- </eucode>
+
+export type t_alnum(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Alphanumeric])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an alphabetic character or if every element of 
@@ -230,6 +238,7 @@ end type
 -- or contains non-alphabetic elements
 --
 -- Example 1:
+-- <eucode>
 -- t_alnum(-1)            -- FALSE
 -- t_alpha(0)             -- FALSE 
 -- t_alpha(1)             -- FALSE
@@ -242,10 +251,11 @@ end type
 -- t_alpha({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- t_alpha({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_alpha({})            -- FALSE (empty sequence)
-global type t_alpha(object pVal)
+-- </eucode>
+
+export type t_alpha(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Alphabetic])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an ASCII character or if every element of 
@@ -255,6 +265,7 @@ end type
 -- or contains non-ASCII elements
 --
 -- Example 1:
+-- <eucode>
 -- t_ascii(-1)            -- FALSE
 -- t_ascii(0)             -- TRUE 
 -- t_ascii(1)             -- TRUE
@@ -267,11 +278,11 @@ end type
 -- t_ascii({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- t_ascii({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_ascii({})            -- FALSE (empty sequence)
-global type t_ascii(object pVal)
+-- </eucode>
+
+export type t_ascii(object pVal)
 	return char_test(pVal, Defined_Sets[CS_ASCII])
 end type
-
---**
 
 --** 
 -- Returns TRUE if argument is an Control character or if every element of 
@@ -281,6 +292,7 @@ end type
 -- or contains non-Control elements
 --
 -- Example 1:
+-- <eucode>
 -- t_cntrl(-1)            -- FALSE
 -- t_cntrl(0)             -- TRUE 
 -- t_cntrl(1)             -- TRUE
@@ -294,10 +306,11 @@ end type
 -- t_cntrl({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_cntrl({1, 2, 'a')    -- FALSE (contains a non-control)
 -- t_cntrl({})            -- FALSE (empty sequence)
-global type t_cntrl(object pVal)
+-- </eucode>
+
+export type t_cntrl(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Control])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an digit character or if every element of 
@@ -307,6 +320,7 @@ end type
 -- or contains non-digits
 --
 -- Example 1:
+-- <eucode>
 -- t_digit(-1)            -- FALSE
 -- t_digit(0)             -- FALSE 
 -- t_digit(1)             -- FALSE
@@ -321,10 +335,11 @@ end type
 -- t_digit({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_digit({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_digit({})            -- FALSE (empty sequence)
-global type t_digit(object pVal)
+-- </eucode>
+
+export type t_digit(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Digit])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is a glyph character or if every element of 
@@ -334,6 +349,7 @@ end type
 -- or contains non-gylph
 --
 -- Example 1:
+-- <eucode>
 -- t_graph(-1)            -- FALSE
 -- t_graph(0)             -- FALSE 
 -- t_graph(1)             -- FALSE
@@ -349,10 +365,11 @@ end type
 -- t_graph({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_graph({1, 2, 'a')    -- FALSE (control chars (1,2) don't have glyphs)
 -- t_graph({})            -- FALSE (empty sequence)
-global type t_graph(object pVal)
+-- </eucode>
+
+export type t_graph(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Graphic])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is a byte or if every element of 
@@ -362,6 +379,7 @@ end type
 -- or contains non-byte
 --
 -- Example 1:
+-- <eucode>
 -- t_bytearray(-1)            -- FALSE (contains value less than zero)
 -- t_bytearray(0)             -- TRUE
 -- t_bytearray(1)             -- TRUE
@@ -380,10 +398,11 @@ end type
 -- t_bytearray({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_bytearray({1, 2, 'a')    -- TRUE
 -- t_bytearray({})            -- FALSE (empty sequence)
-global type t_bytearray(object pVal)
+-- </eucode>
+
+export type t_bytearray(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Bytes])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is a lowercase character or if every element of 
@@ -393,6 +412,7 @@ end type
 -- or contains non-lowercase
 --
 -- Example 1:
+-- <eucode>
 -- t_lower(-1)            -- FALSE
 -- t_lower(0)             -- FALSE 
 -- t_lower(1)             -- FALSE
@@ -407,11 +427,11 @@ end type
 -- t_lower({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_lower({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_lower({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_lower(object pVal)
+export type t_lower(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Lowercase])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an displayable character or if every element of 
@@ -421,6 +441,7 @@ end type
 -- or contains non-displayable characters.
 --
 -- Example 1:
+-- <eucode>
 -- t_print(-1)            -- FALSE
 -- t_print(0)             -- FALSE 
 -- t_print(1)             -- FALSE
@@ -435,11 +456,11 @@ end type
 -- t_print({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_print({1, 2, 'a')    -- FALSE
 -- t_print({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_print(object pVal)
+export type t_print(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Printable])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an punctuation character or if every element of 
@@ -449,6 +470,7 @@ end type
 -- or contains non-punctuation symbols.
 --
 -- Example 1:
+-- <eucode>
 -- t_punct(-1)            -- FALSE
 -- t_punct(0)             -- FALSE 
 -- t_punct(1)             -- FALSE
@@ -463,11 +485,11 @@ end type
 -- t_punct({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_punct({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_punct({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_punct(object pVal)
+export type t_punct(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Punctuation])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is a whitespace character or if every element of 
@@ -477,6 +499,7 @@ end type
 -- or contains non-whitespace character.
 --
 -- Example 1:
+-- <eucode>
 -- t_space(-1)            -- FALSE
 -- t_space(0)             -- FALSE 
 -- t_space(1)             -- FALSE
@@ -490,11 +513,11 @@ end type
 -- t_space({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_space({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_space({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_space(object pVal)
+export type t_space(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Whitespace])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an uppercase character or if every element of 
@@ -504,6 +527,7 @@ end type
 -- or contains non-uppercase characters.
 --
 -- Example 1:
+-- <eucode>
 -- t_upper(-1)            -- FALSE
 -- t_upper(0)             -- FALSE 
 -- t_upper(1)             -- FALSE
@@ -518,11 +542,11 @@ end type
 -- t_upper({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_upper({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_upper({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_upper(object pVal)
+export type t_upper(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Uppercase])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is an hexadecimal digit character or if every element of 
@@ -532,6 +556,7 @@ end type
 -- or contains non-hexadecimal character.
 --
 -- Example 1:
+-- <eucode>
 -- t_xdigit(-1)            -- FALSE
 -- t_xdigit(0)             -- FALSE 
 -- t_xdigit(1)             -- FALSE
@@ -546,11 +571,11 @@ end type
 -- t_xdigit({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_xdigit({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_xdigit({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_xdigit(object pVal)
+export type t_xdigit(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Hexadecimal])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is a vowel or if every element of 
@@ -560,6 +585,7 @@ end type
 -- or contains non-vowels
 --
 -- Example 1:
+-- <eucode>
 -- t_vowel(-1)            -- FALSE
 -- t_vowel(0)             -- FALSE 
 -- t_vowel(1)             -- FALSE
@@ -574,11 +600,11 @@ end type
 -- t_vowel({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_vowel({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_vowel({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_vowel(object pVal)
+export type t_vowel(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Vowel])
 end type
---**
 
 --** 
 -- Returns TRUE if argument is a consonant character or if every element of 
@@ -588,6 +614,7 @@ end type
 -- or contains non-consonant character.
 --
 -- Example 1:
+-- <eucode>
 -- t_consonant(-1)            -- FALSE
 -- t_consonant(0)             -- FALSE 
 -- t_consonant(1)             -- FALSE
@@ -602,10 +629,10 @@ end type
 -- t_consonant({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_consonant({1, 2, 'a')    -- FALSE (contains a non-digit)
 -- t_consonant({})            -- FALSE (empty sequence)
+-- </eucode>
 
-global type t_consonant(object pVal)
+export type t_consonant(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Consonant])
 end type
---**
 
 set_default_charsets()

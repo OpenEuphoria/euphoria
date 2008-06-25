@@ -1,6 +1,6 @@
 include unittest.e
 
-ifdef UNIX then
+ifdef NOT_DEFINED then
 	procedure abc()
 		integer a
 		a = 10

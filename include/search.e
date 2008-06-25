@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   search
---
--- Title:
---   Searching
---****
+-- == Searching
 
 include machine.e
 
@@ -29,29 +24,36 @@ include machine.e
 --     starting with the first element until a difference is found.
 --
 -- Example 1:
+-- <eucode>
 -- x = compare({1,2,{3,{4}},5}, {2-1,1+1,{3,{4}},6-1})
 -- -- identical, x is 0
+-- </eucode>
 -- 
 -- Example 2:
+-- <eucode>
 -- if compare("ABC", "ABCD") < 0 then   -- -1
 --     -- will be true: ABC is "less" because it is shorter
 -- end if
+-- </eucode>
 --
 -- Example 3:
+-- <eucode>
 -- x = compare('a', "a")
 -- -- x will be -1 because 'a' is an atom
 -- -- while "a" is a sequence
+-- </eucode>
 --
 -- Example 4:
+-- <eucode>
 -- x = compare('a', "a")
 -- -- x will be -1 because 'a' is an atom
 -- -- while "a" is a sequence
+-- </eucode>
 --
 -- See Also:
 --     search:equal, 
 --     <a href="refman_2.htm#23">relational operators</a>,
 --     <a href="refman_2.htm#26">operations on sequences</a>
---**
 
 --**
 -- Signature:
@@ -61,8 +63,8 @@ include machine.e
 --     Compare two Euphoria objects to see if they are the same. 
 --
 -- Returns:
---     Return 1 (true) if they are the same. 
---     Return 0 (false) if they are different.
+--   * Return 1 (true) if they are the same. 
+--   * Return 0 (false) if they are different.
 --
 -- Comments:
 --     This is equivalent to the expression: compare(x1, x2) = 0
@@ -71,18 +73,21 @@ include machine.e
 --     subroutine call overhead.
 --
 -- Example 1:
+-- <eucode>
 -- if equal(PI, 3.14) then
 --     puts(1, "give me a better value for PI!\n")
 -- end if
+-- </eucode>
 --
--- Example 2: 	
+-- Example 2:
+-- <eucode>
 -- if equal(name, "George") or equal(name, "GEORGE") then
 --    puts(1, "name is George\n")
 -- end if
+-- </eucode>
 -- 
 -- See Also:
 --     compare, equals operator (=)
---**
 
 --**
 -- Signature:
@@ -92,21 +97,24 @@ include machine.e
 --     Find needle as an element of haystack. 
 --
 -- Returns:
---     If successful, return the index of the first element of s that matches. 
---     If unsuccessful return 0.
+--     * If successful, return the index of the first element of s that matches. 
+--     * If unsuccessful return 0.
 --
 -- Example 1:
+-- <eucode>
 -- location = find(11, {5, 8, 11, 2, 3})
 -- -- location is set to 3
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- names = {"fred", "rob", "george", "mary", ""}
 -- location = find("mary", names)
 -- -- location is set to 4
+-- </eucode>
 --
 -- See Also:
 --     find_from, match, match_from, compare
---**
 
 --**
 -- Signature:
@@ -116,25 +124,28 @@ include machine.e
 --     Find needle as an element of haystack. Start the search at start. 
 --
 -- Returns:
---     If successful, return the index of the first element of haystack that matches. 
---     If unsuccessful return 0. 
+--     * If successful, return the index of the first element of haystack that matches. 
+--     * If unsuccessful return 0. 
 --
 -- Comments:
 --     start may have any value from 1 to the length of haystack plus 1. (Analogous to the 
 --     first index of a slice of haystack).
 --
 -- Example 1:
+-- <eucode>
 -- location = find_from(11, {11, 8, 11, 2, 3}, 2)
 -- -- location is set to 3
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- names = {"mary", "rob", "george", "mary", ""}
 -- location = find_from("mary", names, 3)
 -- -- location is set to 4
+-- </eucode>
 --
 -- See Also:
 --     find, match, match_from, compare
---**
 
 --**
 -- Signature:
@@ -148,12 +159,13 @@ include machine.e
 --     begins, else return 0.
 --
 -- Example 1:
+-- <eucode>
 -- location = match("pho", "Euphoria")
 -- -- location is set to 3
+-- </eucode>
 --
 -- See Also:
 --     find, find_from, compare, match_from, wildcard:wildcard_match
---**
 
 --**
 -- Signature:
@@ -171,12 +183,13 @@ include machine.e
 --     index of a slice of haystack.)
 --
 -- Example 1:
+-- <eucode>
 -- location = match_from("pho", "phoEuphoria", 4)
 -- -- location is set to 6
+-- </eucode>
 --
 -- See Also:
 --     find, find_from, match, compare, wildcard:wildcard_match
---**
 
 --
 -- Functions
@@ -191,12 +204,16 @@ include machine.e
 --   sequence.
 --
 -- Example 1:
+--   <eucode>
 --   location = find_any("aeiou", "John Smith", 3)
 --   -- location is 8
+--   </eucode>
 --
 -- Example 2:
+--   <eucode>
 --   location = find_any("aeiou", "John Doe")
 --   -- location is 2
+--   </eucode>
 
 global function find_any(sequence needles, sequence haystack, integer start=1)
 	for i = start to length(haystack) do
@@ -207,19 +224,20 @@ global function find_any(sequence needles, sequence haystack, integer start=1)
 
 	return 0
 end function
---**
 
 --**
 -- Find all needle indexes in haystack optionally starting at start.
 --
 -- Parameters:
---     needle - object to search for
---     haystack - sequence to search in
---     start - starting index position (defaults to 1)
+--     * needle - object to search for
+--     * haystack - sequence to search in
+--     * start - starting index position (defaults to 1)
 --
 -- Example 1:
+-- <eucode>
 -- s = find_all('A', "ABCABAB")
 -- -- s is {1,4,6}
+-- </eucode>
 --
 -- See Also:
 --     find, match, match_all
@@ -236,17 +254,18 @@ global function find_all(object needle, sequence haystack, integer start=1)
 	
 	return ret
 end function
---**
 
 --**
 -- Match all items of haystack in needle.
 --
 -- Returns:
---     sequence of starting index positions.
+--   sequence of starting index positions.
 --
 -- Example 1:
+-- <eucode>
 -- s = match_all("the", "the dog chased the cat under the table.")
 -- -- s is {1,16,30}
+-- </eucode>
 --
 -- See Also:
 --     match, find, find_all
@@ -263,34 +282,37 @@ global function match_all(object needle, sequence haystack, integer start=1)
 
 	return ret
 end function
---**
 
 --**
 -- Find needle in haystack in reverse order. 
 --
 -- Parameters:
---     needle - object to search for
---     haystack - sequence to search in
---     start - starting index position (defaults to -1)
+--   * needle - object to search for
+--   * haystack - sequence to search in
+--   * start - starting index position (defaults to -1)
 --     
 -- Returns:
---     If successful, return the index of the first element of haystack that matches. 
---     If unsuccessful return 0.
+--   * If successful, return the index of the first element of haystack that matches. 
+--   * If unsuccessful return 0.
 --
 -- Notes:
---     When start is -1, it is changed to length(haystack), i.e. the last item in haystack.
+--   When start is -1, it is changed to length(haystack), i.e. the last item in haystack.
 --
 -- Example 1:
+-- <eucode>
 -- location = rfind(11, {5, 8, 11, 2, 11, 3})
 -- -- location is set to 5
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- names = {"fred", "rob", "rob", "george", "mary"}
 -- location = rfind("rob", names)
--- location is set to 3
+-- -- location is set to 3
+-- </eucode>
 --
 -- See Also:
---     find
+--   find
 
 global function rfind(object needle, sequence haystack, integer start=length(haystack))
 	integer len = length(haystack)
@@ -311,26 +333,27 @@ global function rfind(object needle, sequence haystack, integer start=length(hay
 
 	return 0
 end function
---**
 
 --**
 -- Try to match needle against some slice of haystack in reverse order. 
 --
 -- Parameters:
---     needle - object to search for
---     haystack - sequence to search in
---     start - starting index position (defaults to -1)
+--   * needle - object to search for
+--   * haystack - sequence to search in
+--   * start - starting index position (defaults to -1)
 -- 
 -- Returns:
---     If successful, return the element number of haystack where the matching slice begins,
---     otherwise return 0.
+--   If successful, return the element number of haystack where the matching slice begins,
+--   otherwise return 0.
 --
 -- Notes:
---     When start is -1, it is changed to length(haystack), i.e. the last item in haystack.
+--   When start is -1, it is changed to length(haystack), i.e. the last item in haystack.
 --
 -- Example 1:
+-- <eucode>
 -- location = rmatch("the", "the dog ate the steak from the table.")
 -- -- location is set to 28 (3rd the)
+-- </eucode>
 --
 -- See Also:
 --     rfind, match
@@ -365,19 +388,22 @@ global function rmatch(sequence needle, sequence haystack, integer start=length(
 
 	return 0
 end function
---**
 
 --**
 -- Find needle in up to max slices of haystack and replace with replacement. max can be zero 
 -- to mean find/replace all matches.
 --
 -- Example 1:
+-- <eucode>
 -- s = find_replace("the", "THE", "the cat ate the food under the table", 0)
 -- -- s is "THE cat ate THE food under THE table"
+-- </eucode>
 --
 -- Example 2:
+-- <eucode>
 -- s = find_replace("the", "THE", "the cat ate the food under the table", 2)
 -- -- s is "THE cat ate THE food under the table"
+-- </eucode>
 
 global function find_replace(object needle, object replacement, sequence haystack, 
 			integer max=0)
@@ -408,7 +434,6 @@ global function find_replace(object needle, object replacement, sequence haystac
 
 	return haystack
 end function
---**
 
 --**
 -- Assumes haystack is already sorted into ascending order.
@@ -445,5 +470,3 @@ global function binary_search(object needle, sequence haystack, integer startpoi
 	end if
 	return -mid
 end function
---**
-

@@ -1,23 +1,20 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   sets
+-- == Sets
+-- The sets.e module defines a type for sets and provides basic tools for handling them.
 --
--- Title:
---   Sets
---****
-
--- Author: Christian Cuvier <oedoc@free.fr>
--- Intro: The sets.e module defines a type for sets and provides basic tools for handling them.
 -- Other modules may be built upon them, for instance graph handling or simplicial topology, finite groups etc...
--- Platform: GEN
+--
+-- Platform: 
+--   GEN
+--
 -- Notes:
---   A set is an ordered sequence in ascending order, not more, not less
---   A map from s1 to s2 is a sequence the length of s1 whose elements are indexes into s2,
---    followed by {length(s1),length(s2)}.
---   An operation of ExF to G is a two dimensional sequence of elements of G, indexed ny
---    ExF, and the triple {card(E),card(F),card(G)}.
+--   * A set is an ordered sequence in ascending order, not more, not less
+--   * A map from s1 to s2 is a sequence the length of s1 whose elements are indexes into s2,
+--     followed by {length(s1),length(s2)}.
+--   * An operation of ExF to G is a two dimensional sequence of elements of G, indexed ny
+--     ExF, and the triple {card(E),card(F),card(G)}.
 
 include machine.e
 
@@ -46,7 +43,6 @@ export type set(sequence s)
     end for
     return 1
 end type
---**
 
 function bfind_(object x,sequence s,integer startpoint,integer endpoint)
     integer r,c
@@ -87,6 +83,7 @@ end function
 
 --**
 -- What does bfind() do?
+
 export function bfind(object x,set s,object bounds)
     integer startpoint,endpoint
 
@@ -107,13 +104,13 @@ export function bfind(object x,set s,object bounds)
     end if
     return bfind_(x,s,startpoint,endpoint)
 end function
---**
 
 include sort.e
 include sequence.e
 
 --**
 -- convert a sequence into a set
+
 export function sequence_to_set(sequence s)
     sequence result
     integer k,ls
@@ -141,21 +138,20 @@ export function sequence_to_set(sequence s)
     end for
     return result[1..k]
 end function
---**
 
 --**
 -- Return the cardinal of a set
+
 export function cardinal(set s)
     return length(s)
 end function
---**
 
 --**
 -- return which set x belongs to
+
 export function belongs_to(object x,set s)
     return bfind_(x,s,1,length(s))>0
 end function
---**
 
 function add_to_(object x,sequence s)
     integer p
@@ -172,10 +168,10 @@ end function
 
 --**
 -- Add x to the set s
+
 export function add_to(object x,set s)
     return add_to_(x,s)
 end function
---**
 
 function remove_from_(object x,sequence s)
     integer p
@@ -190,10 +186,10 @@ end function
 
 --**
 -- Remove x from set s
+
 export function remove_from(object x,set s)
     return remove_from_(x,s)
 end function
---**
 
 function iota(integer count)
 -- Returns: {1,2,...,count}, or "" if count is not greater than 0.
@@ -271,10 +267,13 @@ function is_inside_(sequence s1,sequence s2,integer mode)
     end if
 end function
 
+--**
+
 export function is_inside(set s1,set s2)
     return is_inside_(s1,s2,0)
 end function
 
+--** 
 export function embedding(set s1,set s2)
     return is_inside_(s1,s2,1)
 end function
@@ -362,7 +361,6 @@ end function
 export function embed_union(set s1,set s2)
     return embed_union_(s1,s2)
 end function
---**
 
 --**
 export function subsets(set s)
@@ -396,7 +394,6 @@ export function subsets(set s)
         return result
     end if
 end function
---**
 
 -- Basic set-theoretic operations.
 
@@ -457,7 +454,6 @@ end function
 export function intersection(set s1,set s2)
     return intersection_(s1,s2)
 end function
---**
 
 function union_(sequence s1,sequence s2,integer ls1,integer ls2,integer mode)
 -- Description: Wrapped by union() and delta() to avoid type checking.
@@ -538,7 +534,6 @@ end function
 export function union(set s1,set s2)
     return union1(s1,s2)
 end function
---**
 
 --**
 export function delta(set s1,set s2)
@@ -557,7 +552,6 @@ export function delta(set s1,set s2)
     end if
     return union_(s1,s2,ls1,ls2,0)
 end function
---**
 
 --**
 export function difference(set s1,set s2)
@@ -650,7 +644,6 @@ end function
 export function product(set s1,set s2)
     return product_(s1,s2)
 end function
---**
 
 function bounded_integer(object x,integer lbound,integer ubound)
 -- Description: Returns 0 for a non integer or an out of bounds integer, else 1.
@@ -681,9 +674,9 @@ export type set_map(sequence s)
             end if
         end for
     end if
+
     return 1
 end type
---**
 
 --**
 export function define_map(sequence mapping,set target)
@@ -695,9 +688,9 @@ export function define_map(sequence mapping,set target)
     for i=1 to length(mapping) do
         result[i]=bfind_(mapping[i],target,1,lt)
     end for
+
     return result
 end function
---**
 
 --**
 export function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
@@ -707,38 +700,43 @@ export function sequences_to_map(sequence mapped,sequence mapped_to,integer mode
 
     lm=length(mapped)
     lm_to=length(mapped_to)
+
     if lm>lm_to then
         mapped=mapped[1..lm_to]
     end if
+
     sorted=sequence_to_set(mapped)
     sorted_to=sequence_to_set(mapped_to)
     ls=length(sorted)
     result=repeat(0,ls)&ls&length(sorted_to)
+
     for i=1 to lm do
         result[find(mapped[i],sorted)]=find(mapped_to[i],sorted_to)
     end for
+
     if mode then
         return {result,sorted,sorted_to}
     else
         return result
     end if
 end function
---**
 
 --**
 export function image(set_map f,object x,set s1,set s2)
     integer p
+
     if f[$]>length(s2) then
         report_error({"image","The set_map range would not fit into the supplied target set."})
     end if
+
     p=bfind_(x,s1,1,length(s1))
+
     if p<0 or p>f[$-1] then
         report_error({"image","The set_map is not defined for the supplied argument."})
     else
         return s2[f[p]]
     end if
 end function
---**
 
 --**
 export function range(set_map f,set s)
@@ -748,9 +746,9 @@ export function range(set_map f,set s)
     for i=1 to length(result) do
         result[i]=s[result[i]]
     end for
+
     return result
 end function
---**
 
 --**
 export function direct_map(set_map f,set s1,sequence s0,set s2)
@@ -761,8 +759,10 @@ export function direct_map(set_map f,set s1,sequence s0,set s2)
     if f[$-1]>ls1 or f[$]>length(s2) then
         report_error({"direct_map","The supplied set_map cannot map the source set intio the target set."})
     end if
+
     k=1
     result=s0
+
     for i=1 to length(s0) do
         p=bfind_(s0[i],s1,1,ls1)
         if p>0 then
@@ -770,9 +770,9 @@ export function direct_map(set_map f,set s1,sequence s0,set s2)
             k+=1
         end if
     end for
+
     return result[1..k-1]
 end function
---**
 
 --**
 export function product_map(set_map f1,set_map f2)
@@ -788,7 +788,6 @@ export function product_map(set_map f1,set_map f2)
     end for
     return result
 end function
---**
 
 --**
 export function amalgamated_sum(set s1,set s2,set s0,set_map f01,set_map f02)
@@ -800,7 +799,6 @@ export function amalgamated_sum(set s1,set s2,set s0,set_map f01,set_map f02)
     end for
     return sequence_to_set(result)
 end function
---**
 
 function fiber_over_(sequence f,sequence s1,sequence s2)
     sequence fibers,result
@@ -821,29 +819,32 @@ end function
 export function fiber_over(set_map f,set s1,set s2)
     return fiber_over_(f,s1,s2)
 end function
---**
 
 --**
 export function fiber_product(set s1,set s2,set s0,set_map f10,set_map f20)
     sequence result,x1,x2,x0
+
     x1=fiber_over_(f10,s1,s0)
     x2=fiber_over_(f20,s2,s0)
     x0=intersection_(x1[2],x2[2])
     result={}
+
     for i=1 to length(x0) do
         result&=product_(x1[1][find(x0[i],x1[2])],x2[1][find(x0[i],x2[2])])
     end for
+
     return result
 end function
---**
 
 --**
 export function reverse_map(set_map f,set s1,sequence s0,set s2)
     sequence x,done,result
     integer p
+
     x=fiber_over_(f,s1,s2)
     result=""
     done=repeat(0,length(x[2]))
+
     for i=1 to length(s0) do
         p=find(bfind_(s0[i],s1,1,length(s1)),x[2])
         if p and not done[p] then
@@ -853,15 +854,12 @@ export function reverse_map(set_map f,set s1,sequence s0,set s2)
     end for
     return result
 end function
---**
 
 --**
 export function restrict(set_map f,set s1,set s0)
-    sequence result
-    integer p,k
-    result=s0
-    p=1
-    k=0
+    sequence result = s0
+    integer p = 1, k = 0
+
     for i=1 to length(s0) do
         p=bfind_(s0[i],s1,p,length(s1))
         if p>0 then
@@ -869,16 +867,18 @@ export function restrict(set_map f,set s1,set s0)
             result[k]=f[p]
         end if
     end for
+
     return result[1..k]&k&f[$]
 end function
---**
 
 function change_target_(sequence f,sequence s1,sequence s2)
 -- Description: Wrapped by change_target() to avoid some type checks.
     sequence result,done
     integer p,fi
+
     result=f
     done=repeat(0,f[$])
+
     for i=1 to f[$-1] do
         fi=f[i]
         p=done[fi]
@@ -895,6 +895,7 @@ function change_target_(sequence f,sequence s1,sequence s2)
         end if
     end for
     result[$]=length(s2)
+
     return result
 end function
 
@@ -902,7 +903,6 @@ end function
 export function change_target(set_map f,set s1,set s2)
     return change_target_(f,s1,s2)
 end function
---**
 
 --**
 export function combine_maps(set_map f1,set s11,set s12,set_map f2,set s21,set s22)
@@ -935,7 +935,6 @@ export function combine_maps(set_map f1,set s11,set s12,set_map f2,set s21,set s
     end for
     return result[1..len_result]&len_result&f1[$]
 end function
---**
 
 function compose_map_(sequence f2,sequence f1)
 -- Description: Wrapped by compose_map(), so as to avoid some type checks.
@@ -955,13 +954,11 @@ end function
 export function compose_map(set_map f2,set_map f1)
     return compose_map_(f1,f2)
 end function
---**
 
 --**
 export function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
     return not compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
 end function
---**
 
 --**
 export function is_injective(set_map f)
@@ -972,9 +969,11 @@ export function is_injective(set_map f)
     if f[$-1]>f[$] then
         return 0
     end if
+
     p=length(f)-2
     s=sort(f[1..p])
     x=s[1]
+
     for i=2 to p do
         y=s[i]
         if y=x then
@@ -982,9 +981,9 @@ export function is_injective(set_map f)
         end if
         x=y
     end for
+
     return 1
 end function
---**
 
 function is_surjective_(sequence f)
     if f[$-1]<f[$] then
@@ -998,7 +997,6 @@ end function
 export function is_surjective(set_map f)
     return is_surjective_(f)
 end function
---**
 
 --**
 export function is_bijective(set_map f)
@@ -1008,18 +1006,16 @@ export function is_bijective(set_map f)
         return is_surjective_(f)
     end if
 end function
---**
 
 --**
 export function section(set_map f)
-    sequence result
-    integer k,p
-    result=f
-    k=0
-    p=f[$-1]
+    sequence result = f
+    integer k = 0, p = f[$-1]
+
     for i=1 to p do
         result[f[i]]=i
     end for
+
     for i=1 to p do
         if result[i] and k then
            result[k]=result[i]
@@ -1028,6 +1024,7 @@ export function section(set_map f)
            k=i
         end if
     end for
+
     if k then
         result[k]=k-1
         result=result[1..k]&p
@@ -1035,13 +1032,14 @@ export function section(set_map f)
         result[$]=p
         result[$-1]=f[$]
     end if
+
     return result
 end function
---**
 
 --**
 export type set_operation(sequence s)
     sequence u
+
     if length(s)!=2 or length(s[2])!=3 or length(s[1])!=s[2][1] then
         return 0
     else
@@ -1054,7 +1052,6 @@ export type set_operation(sequence s)
         return 1
     end if
 end type
---**
 
 --**
 export function define_operation(sequence left_actions)
@@ -1077,7 +1074,6 @@ export function define_operation(sequence left_actions)
     end for
     return {left_actions,{size_left,length(left_actions),size_right}}
 end function
---**
 
 --**
 export function is_symmetric(set_operation f)
@@ -1097,7 +1093,6 @@ export function is_symmetric(set_operation f)
     end for
     return 1
 end function
---**
 
 --**
 export function is_associative(set_operation f)
@@ -1121,7 +1116,6 @@ export function is_associative(set_operation f)
     end for
     return 1
 end function
---**
 
 --**
 export function has_left_unit(set_operation f)
@@ -1131,7 +1125,6 @@ export function has_left_unit(set_operation f)
         return find(iota(f[2][2]),f[1])
     end if
 end function
---**
 
 function all_left_units_(sequence f)
     sequence result,s
@@ -1153,7 +1146,6 @@ end function
 export function all_left_units(set_operation f)
     return all_left_units_(f)
 end function
---**
 
 --**
 export function is_left_unit(integer x,set_operation f)
@@ -1163,7 +1155,6 @@ export function is_left_unit(integer x,set_operation f)
         return equal(f[1][x],iota(f[2][2]))
     end if
 end function
---**
 
 --**
 export function has_right_unit(set_operation f)
@@ -1186,7 +1177,6 @@ export function has_right_unit(set_operation f)
         return 0
     end if
 end function
---**
 
 --**
 export function all_right_units(set_operation f)
@@ -1212,7 +1202,6 @@ export function all_right_units(set_operation f)
         return result
     end if
 end function
---**
 
 function is_right_unit_(integer x,sequence f)
 -- Description: Wrapped by is_right_unit() so as to avoid some type checks.
@@ -1232,7 +1221,6 @@ end function
 export function is_right_unit(integer x,set_operation f)
     return is_right_unit_(x,f)
 end function
---**
 
 function has_unit_(sequence f)
     sequence s
@@ -1250,13 +1238,11 @@ end function
 export function has_unit(set_operation f)
     return has_unit_(f)
 end function
---**
 
 --**
 export function has_inverse(integer x,set_operation f)
     return find(has_unit_(f),f[1][x])
 end function
---**
 
 function distributes_left_(sequence product,sequence sum,integer transpose)
 -- Description: Wrapped by distributes_left(), so as to avoid some type checks.
@@ -1303,7 +1289,6 @@ end function
 export function distributes_left(set_operation product,set_operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)
 end function
---**
 
 function distributes_right_(sequence product,sequence sum,integer transpose)
     integer p,q,p1
@@ -1349,11 +1334,9 @@ end function
 export function distributes_right(set_operation product,set_operation sum,integer transpose)
     return distributes_right_(product,sum,transpose)
 end function
---**
 
 --**
 export function distributes_over(set_operation product,set_operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)+2*distributes_right_(product,sum,not transpose)
 end function
---**
 

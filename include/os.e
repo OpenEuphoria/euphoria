@@ -1,12 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   os
---
--- Title:
---   Operating System Helpers
---****
+-- == Operating System Helpers
 --
 
 include misc.e
@@ -137,5 +132,4 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1,
 
 	return extras
 end function
---**
 

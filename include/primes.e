@@ -1,20 +1,15 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- Category: 
---   primes
---
--- Title:
---   Prime Numbers
---****
+--== Prime Numbers
 
 include search.e
 include machine.e
 
-export sequence gPrimes 
-gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
+--**
+export sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 
--- TODO: document
+--**
 export function calc_primes(integer pMax, atom pTimeLimit = 10)
 	sequence lResult
 	integer lCandidate
@@ -81,6 +76,7 @@ end function
 
 --**
 -- Returns the next prime number on or after 'n'
+
 export function next_prime(integer n, integer pDefault = 1)
 	integer i
 
@@ -103,5 +99,4 @@ export function next_prime(integer n, integer pDefault = 1)
 	return gPrimes[i]
 
 end function
---**
 
