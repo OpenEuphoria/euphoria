@@ -189,30 +189,30 @@ end function
 --**
 -- Names of the months
 
-global sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
+export sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
 	"August", "September", "October", "November", "December" }
 
 --**
 -- Abbreviations of month names
 
-global sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+export sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
 	"Aug", "Sep", "Oct", "Nov", "Dec" }
 
 --**
 -- Names of the days
 
-global sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+export sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 	"Saturday" }
 
 --** 
 -- Abbreviations of day names
 
-global sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+export sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 
 --**
 -- AM/PM
 
-global sequence ampm = { "AM", "PM" }
+export sequence ampm = { "AM", "PM" }
 
 --**
 -- === Constants
@@ -226,7 +226,7 @@ global sequence ampm = { "AM", "PM" }
 -- * SECOND
 --
 
-global enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
+export enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 
 -- ==== Interval types
 -- * YEARS
@@ -238,7 +238,7 @@ global enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 -- * SECONDS
 -- * DATE
 
-global enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
+export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 
 --**
 -- === Types
@@ -249,7 +249,7 @@ global enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- Comments:
 -- A datetime type consists of a sequence of length 6
 
-global type datetime(object o)
+export type datetime(object o)
 		return sequence(o) and length(o) = 6
 			and integer(o[YEAR]) and integer(o[MONTH]) and integer(o[DAY])
 			and integer(o[HOUR]) and integer(o[MINUTE]) and atom(o[SECOND]
@@ -285,7 +285,7 @@ end type
 -- See Also:
 --     from_date, from_unix, now, new_time
 
-global function new(integer year, integer month, integer day, 
+export function new(integer year, integer month, integer day, 
 	                integer hour=0, integer minute=0, atom second=0)
 	datetime d
 	d = {year, month, day, hour, minute, second}
@@ -311,7 +311,7 @@ end function
 -- See Also:
 --     from_date, from_unix, now, new
 
-global function new_time(integer hour, integer minute, integer second)
+export function new_time(integer hour, integer minute, integer second)
 	return new(0, 0, 0, hour, minute, second)
 end function
 
@@ -328,7 +328,7 @@ end function
 -- See Also:
 --     date, from_unix, now, new
 
-global function from_date(sequence src)
+export function from_date(sequence src)
 		return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
 
@@ -344,7 +344,7 @@ end function
 -- See Also:
 --     from_date, from_unix, new, new_time
 
-global function now()
+export function now()
 		return from_date(date())
 end function
 
@@ -360,7 +360,7 @@ end function
 -- day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
 -- </eucode>
 
-global function dow(datetime dt)
+export function dow(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
@@ -373,7 +373,7 @@ end function
 -- day = doy(d) -- day is 123
 -- </eucode>
 
-global function doy(datetime dt)
+export function doy(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
 end function
 
@@ -389,7 +389,7 @@ end function
 -- See Also:
 --     from_unix, format
 
-global function to_unix(datetime dt)
+export function to_unix(datetime dt)
 		return datetimeToSeconds(dt) - EPOCH_1970
 end function
 
@@ -405,14 +405,14 @@ end function
 -- See Also:
 --     to_unix, from_date, now, new
 
-global function from_unix(atom unix)
+export function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
 -- TODO: create, test, document
 -- datetime parse(wstring string)
 -- parse the string and returns the datetime
-global function parse(wstring string)
+export function parse(wstring string)
 	return 0
 end function
 
@@ -462,7 +462,7 @@ end function
 -- See Also:
 --     to_unix
 
-global function format(datetime d, wstring format)
+export function format(datetime d, wstring format)
 	integer in_fmt, ch, tmp
 	sequence res
 
@@ -583,7 +583,7 @@ end function
 -- See Also:
 --     subtract, diff
 
-global function add(datetime dt, object qty, integer interval)
+export function add(datetime dt, object qty, integer interval)
 	integer inc
 
 	if interval = SECONDS then
@@ -649,7 +649,7 @@ end function
 -- See Also:
 --     add, diff
 
-global function subtract(datetime dt, atom qty, integer interval)
+export function subtract(datetime dt, atom qty, integer interval)
 	return add(dt, -(qty), interval)
 end function
 
@@ -671,7 +671,7 @@ end function
 -- See Also:
 --    add, subtract
 
-global function diff(datetime dt1, datetime dt2)
+export function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function
 

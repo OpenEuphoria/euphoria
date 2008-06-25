@@ -1,6 +1,7 @@
 include unittest.e
 include map.e as m
 include sort.e
+include sequence.e
 
 map m1
 m1 = m:new()

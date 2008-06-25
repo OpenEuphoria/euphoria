@@ -40,17 +40,17 @@ lang_path = 0
 ------------------------------------------------------------------------------------------
 
 --**
-global procedure set_lang_path(object pp)
+export procedure set_lang_path(object pp)
 	lang_path = pp
 end procedure
 
 --**
-global function get_lang_path()
+export function get_lang_path()
 	return lang_path
 end function
 
 --**
-global function lang_load(sequence filename)
+export function lang_load(sequence filename)
 	object lines
 	sequence line, key, msg
 	integer sp, cont -- continuation
@@ -95,7 +95,7 @@ global function lang_load(sequence filename)
 end function
 
 --**
-global function w(sequence word)
+export function w(sequence word)
 	return m:get(lang, word, "")
 end function
 
@@ -180,7 +180,7 @@ constant
 	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I)
 
 --**
-global function set(sequence new_locale)
+export function set(sequence new_locale)
 	atom pLocale, ign
 	
 	new_locale = lcc:decanonical(new_locale)
@@ -197,7 +197,7 @@ global function set(sequence new_locale)
 end function
 
 --**
-global function get()
+export function get()
 	sequence r
 	atom p
 
@@ -215,7 +215,7 @@ end function
 ifdef UNIX then
 
 	--**
-	global function money(atom amount)
+	export function money(atom amount)
 		atom pResult, pFmt
 		sequence result
 		integer size
@@ -232,7 +232,7 @@ ifdef UNIX then
 	end function
 
 	--**
-	global function number(atom num)
+	export function number(atom num)
 		atom pResult, pFmt
 		sequence result
 		integer size
@@ -250,7 +250,7 @@ ifdef UNIX then
 
 elsifdef WIN32 then
 
-	global function money(atom amount)
+	export function money(atom amount)
 		atom pAmount, pResult
 		sequence result
 		integer size
@@ -301,7 +301,7 @@ function mk_tm_struct(dt:datetime dtm)
 end function
 
 --**
-global function datetime(sequence fmt, dt:datetime dtm)
+export function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
 	integer size
 	sequence res

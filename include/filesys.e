@@ -60,7 +60,7 @@ end ifdef
 --     If overwrite is true, if dest file already exists, 
 --     the function overwrites the existing file and succeeds.
 
-global function copy_file(sequence src, sequence dest, atom overwrite)
+export function copy_file(sequence src, sequence dest, atom overwrite)
 	atom psrc, pdest, ret
 	psrc = allocate_string(src)
 	pdest = allocate_string(dest)
@@ -76,7 +76,7 @@ end function
 -- Returns:
 --     Returns false if failed, true if succeeded.
 
-global function move_file(sequence src, sequence dest)
+export function move_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	psrc = allocate_string(src)
 	pdest = allocate_string(dest)
@@ -93,7 +93,7 @@ end function
 -- Returns:
 --     Returns false if failed, true if succeeded.
 
-global function delete_file(sequence filename)
+export function delete_file(sequence filename)
 	atom pfilename, ret
 	pfilename = allocate_string(filename)
 	ret = c_func(xDeleteFile, {pfilename})
@@ -108,7 +108,7 @@ end function
 -- Returns:
 --     Returns false if failed, true if succeeded.
 
-global function create_directory(sequence name)
+export function create_directory(sequence name)
 	atom pname, ret
 	pname = allocate_string(name)
 	ret = c_func(xCreateDirectory, {pname, 0})
@@ -121,7 +121,7 @@ end function
 -- Returns:
 --     Returns false if failed, true if succeeded.
 
-global function remove_directory(sequence name)
+export function remove_directory(sequence name)
 	atom pname, ret
 	pname = allocate_string(name)
 	ret = c_func(xRemoveDirectory, {pname})
@@ -135,7 +135,7 @@ end function
 -- Comments:
 --     if not found, returns -1
 
-global function file_length(sequence filename)
+export function file_length(sequence filename)
 	object list
 	list = dir(filename)
 	if atom(list) or length(list) = 0 then
@@ -152,7 +152,7 @@ end function
 --     * 1 if filename is a file
 --     * 2 if filename is a directory
 
-global function file_type(sequence filename)
+export function file_type(sequence filename)
 object dirfil
 	if find('*', filename) or find('*', filename) then return 0 end if
 	

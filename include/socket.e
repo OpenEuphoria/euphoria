@@ -17,12 +17,13 @@ include misc.e
 include machine.e
 include get.e
 include wildcard.e
+include sequence.e
 
-global enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
+export enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
 
-global constant AF_INET = 2, SOCK_STREAM=1, SOCK_DGRAM = 2, SOCK_RAW = 3,
+export constant AF_INET = 2, SOCK_STREAM=1, SOCK_DGRAM = 2, SOCK_RAW = 3,
 	SOCK_RDM = 4, SOCK_SEQPACKET = 5
-global constant    -- RFC 1700
+export constant    -- RFC 1700
 	IPPROTO_IP = 0,
 	IPPROTO_ICMP = 1,
 	IPPROTO_TCP = 6,
@@ -33,7 +34,7 @@ global constant    -- RFC 1700
 	IPPROTO_TP = 29,
 	IPPROTO_EON = 80,
 	IPPROTO_RM = 113
-global constant
+export constant
 	SOL_SOCKET = #FFFF,
 	
 	SO_DEBUG = 1,
@@ -89,7 +90,7 @@ global constant
 	TCP_EXPEDITED_1122 = 2,
 	UDP_NOCHECKSUM = 1
 
-global constant MSG_OOB = #1,
+export constant MSG_OOB = #1,
 	MSG_PEEK = #2,
 	MSG_DONTROUTE = #4,
 	MSG_TRYHARD = #4,
@@ -504,7 +505,7 @@ end function
 -- Returns:
 --   1 if x is an inetaddr, 0 if it isn't
 
-global function is_inetaddr(object s)
+export function is_inetaddr(object s)
 	
 	-- Checks if s is an IP address in the form (#.#.#.#[:#])
 	
@@ -539,7 +540,7 @@ end function
 -- See also:	
 --     set_errormode, get_error
 
-global function get_errormode()
+export function get_errormode()
 	return error_mode
 end function
 --**
@@ -550,7 +551,7 @@ end function
 -- by the kernel (OS) or massaged by the library for cross-platform
 -- compatibility (EUNET).
 
-global function set_errormode(integer mode)
+export function set_errormode(integer mode)
 	if find(mode,{1,2}) = 0 then
 		return EUNET_ERROR_WRONGMODE
 	else
@@ -586,7 +587,7 @@ end function
 -- See also:
 --     set_errormode, get_errormode
 
-global function get_error()
+export function get_error()
 	-- returns a 2-element sequence {ERROR_CODE,ERROR_STRING}
 	sequence rtn
 	rtn = {0,""}
@@ -644,7 +645,7 @@ end function
 --     end if
 -- end while
 
-global function get_blocksize()
+export function get_blocksize()
 	return BLOCK_SIZE
 end function
 --**
@@ -664,7 +665,7 @@ end function
 --    puts(1,"Get back to work!")
 -- end if
 
-global function delay(atom millisec)
+export function delay(atom millisec)
 	-- Delays nicely for a set number of milliseconds (or a few more)
 	-- Returns 0 on success or something else on error.
 	
@@ -827,7 +828,7 @@ end function
 --**
 -- Returns a list of network interface names.
 
-global function get_iface_list()
+export function get_iface_list()
 	if platform()=WIN32 then
 		return windows_get_iface_list()
 	elsif platform()=LINUX then
@@ -996,7 +997,7 @@ end function
 --    If PPP_Dest_IP_addr = IP_addr, serial_keepalive will be the
 --    up/down status of the address.
 
-global function get_iface_details(sequence iface_name)
+export function get_iface_details(sequence iface_name)
 	if platform()=WIN32 then
 		return windows_get_iface_details(iface_name)
 	elsif platform()=LINUX then
@@ -1041,7 +1042,7 @@ end function
 -- success = bind(socket, "0.0.0.0:8080")
 -- -- Look for connections on port 8080 for any interface.
 
-global function bind(atom socket, sequence inet_addr)
+export function bind(atom socket, sequence inet_addr)
 	if platform()=WIN32 then
 		return windows_bind(socket,inet_addr)
 	elsif platform()=LINUX then
@@ -1077,7 +1078,7 @@ end function
 -- Returns:
 --    0 on success and an error code on failure.
 
-global function listen(atom socket, integer pending_conn_len)
+export function listen(atom socket, integer pending_conn_len)
 	if platform()=WIN32 then
 		return windows_listen(socket, pending_conn_len)
 	elsif platform()=LINUX then
@@ -1143,7 +1144,7 @@ end function
 --     or -1 on failure.  Use get_error to determine the cause
 --     of the failure.
 
-global function accept(atom socket)
+export function accept(atom socket)
 	if platform()=WIN32 then
 		return windows_accept(socket)
 	elsif platform()=LINUX then
@@ -1184,7 +1185,7 @@ end function
 -- Example 1:
 -- success = connect(socket, "11.1.1.1:80")
 
-global function connect(atom socket, sequence inet_addr)
+export function connect(atom socket, sequence inet_addr)
 	if platform()=WIN32 then
 		return windows_connect(socket,inet_addr)
 	elsif platform()=LINUX then
@@ -1219,7 +1220,7 @@ end function
 -- Example 1:
 -- socket = new_socket(AF_INET, SOCK_STREAM, 0)
 
-global function new_socket(integer family, integer sock_type, integer protocol)
+export function new_socket(integer family, integer sock_type, integer protocol)
 	
 	if platform()=WIN32 then
 		return windows_new_socket(family,sock_type,protocol)
@@ -1248,7 +1249,7 @@ end function
 -- declare the socket as closed.   Returns 0 on success and -1 on
 -- error.
 
-global function close_socket(atom socket)
+export function close_socket(atom socket)
 	if platform()=WIN32 then
 		return windows_close_socket(socket)
 	elsif platform()=LINUX then
@@ -1277,7 +1278,7 @@ end function
 -- error.  It may take several minutes for the OS to declare the
 -- socket as closed.
 
-global function shutdown_socket(atom socket, atom method)
+export function shutdown_socket(atom socket, atom method)
 	if platform()=WIN32 then
 		return windows_shutdown_socket(socket,method)
 	elsif platform()=LINUX then
@@ -1487,7 +1488,7 @@ end function
 -- end while
 -- puts(1, sock_data)
 
-global function poll(sequence socket_list, atom timeout)
+export function poll(sequence socket_list, atom timeout)
 	if platform()=WIN32 then
 		return windows_poll(socket_list,timeout)
 	elsif platform()=LINUX then
@@ -1523,7 +1524,7 @@ end function
 -- connector. Returns the number of characters sent, or -1 for
 -- an error.
 
-global function send(atom socket, sequence data, atom flags)
+export function send(atom socket, sequence data, atom flags)
 	if platform()=WIN32 then
 		return windows_send(socket,data,flags)
 	elsif platform()=LINUX then
@@ -1561,7 +1562,7 @@ end function
 -- Send data to either a connected or unconnected socket.
 -- Returns the number of characters sent, or -1 for an error.
 
-global function sendto(atom socket, sequence data, atom flags, sequence inet_addr)
+export function sendto(atom socket, sequence data, atom flags, sequence inet_addr)
 	if platform()=WIN32 then
 		return windows_sendto(socket,data,flags,inet_addr)
 	elsif platform()=LINUX then
@@ -1615,7 +1616,7 @@ end function
 -- Returns:     A 2-element sequence on error or no data {error code, error string},
 --              or a full string of data on success.
 
-global function recv(atom socket, atom flags)
+export function recv(atom socket, atom flags)
 	if platform()=LINUX then
 		return linux_recv(socket,flags)
 	elsif platform()=WIN32 then
@@ -1694,7 +1695,7 @@ end function
 -- end while
 -- puts(1,sprintf("%d: ",cycle)&lastpeer&":  "&msg&'\n')
 
-global function recvfrom(atom socket, atom flags)
+export function recvfrom(atom socket, atom flags)
 	if platform()=LINUX then
 		return linux_recvfrom(socket,flags)
 	elsif platform()=WIN32 then
@@ -1754,7 +1755,7 @@ end function
 -- See also:
 --     set_socket_options
 
-global function get_socket_options(atom socket, integer level, integer optname)
+export function get_socket_options(atom socket, integer level, integer optname)
 	if platform()=WIN32 then
 		return windows_getsockopts(socket,level,optname)
 	elsif platform()=LINUX then
@@ -1798,7 +1799,7 @@ end function
 -- See also:
 --    get_socket_options
 
-global function set_socket_options(atom socket, integer level, integer optname, object val)
+export function set_socket_options(atom socket, integer level, integer optname, object val)
 	if platform()=WIN32 then
 		return windows_setsockopts(socket,level,optname,val)
 	elsif platform()=LINUX then
@@ -2053,7 +2054,7 @@ end function
 -- See also:
 --     getaddrinfo, gethostbyname, getmxrr, getnsrr
 
-global function dnsquery(sequence dname, integer q_type, atom options)
+export function dnsquery(sequence dname, integer q_type, atom options)
 	if platform()=LINUX then
 		return linux_dnsquery(dname,q_type)
 	elsif platform()=WIN32 then
@@ -2080,7 +2081,7 @@ end function
 -- See also:
 --     dnsquery
 
-global function getmxrr(sequence dname, atom options)
+export function getmxrr(sequence dname, atom options)
 	object rtn
 	
 	-- Error 9003 = MS: RCODE_NAME_ERROR - Something's there, but it's not exact.
@@ -2113,7 +2114,7 @@ end function
 --
 -- See also:    dnsquery
 
-global function getnsrr(sequence dname, atom options)
+export function getnsrr(sequence dname, atom options)
 	return dnsquery(dname,NS_T_NS,options)
 end function
 --**
@@ -2170,7 +2171,7 @@ function windows_gethostbyname(sequence name)
 	
 end function
 
-global function gethostbyname(sequence name)
+export function gethostbyname(sequence name)
 	if platform()=WIN32 then
 		return windows_gethostbyname(name)
 	elsif platform()=LINUX then
@@ -2318,7 +2319,7 @@ end function
 -- Returns a sequence of sequences containing information about
 -- a given server name and named service.
 --
--- These can be accessed with global constants
+-- These can be accessed with export constants
 --
 -- <ul>
 -- <li>ADDR_FLAGS</li>
@@ -2341,7 +2342,7 @@ end function
 -- puts(1,"The IP address and port for http://www.yahoo.com is "&
 -- getaddrinfo("www.yahoo.com","http",0)&"\n")
 
-global function getaddrinfo(object node, object service, object hints)
+export function getaddrinfo(object node, object service, object hints)
 	if platform()=WIN32 then
 		return windows_getaddrinfo(node,service,hints)
 	elsif platform()=LINUX then
@@ -2351,7 +2352,7 @@ global function getaddrinfo(object node, object service, object hints)
 end function
 --**
 
-global function get_addrinfo(object node, object service, object hints)
+export function get_addrinfo(object node, object service, object hints)
 	-- Added version 1.3.1 for consistency.
 	return getaddrinfo(node,service,hints)
 end function
@@ -2385,7 +2386,7 @@ end function
 -- puts(1,urlencode("Fred & Ethel"))
 -- -- Prints "Fred+%26+Ethel"
 
-global function urlencode(sequence what)
+export function urlencode(sequence what)
 	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
 	sequence encoded, alphanum, hexnums
 	object junk, junk1, junk2
@@ -2428,7 +2429,7 @@ end function -- urlencode(sequence what)
 -- the form {"label","delimiter","value"} when only a single field
 -- is selected.
 
-global function get_sendheader(object field)
+export function get_sendheader(object field)
 	-- if field is 0, return the whole sequence.
 	-- if field is 1..length(sendheader), return just that field
 	-- if field is invalid, return -1.
@@ -2467,7 +2468,7 @@ end function
 -- See also:
 --     get_sendheader, set_sendheader, set_sendheader_useragent_msie
 
-global procedure set_sendheader_default()
+export procedure set_sendheader_default()
 	-- sets some defaults
 	-- httpversion MUST come before GET in this program: some servers default to 1.0, even if you say 1.1
 	-- NO spaces around [3] on httpversion
@@ -2515,7 +2516,7 @@ end procedure --defaultsetsendheaderline()
 -- See also:
 --     get_sendheader
 
-global procedure set_sendheader(object whatheader, sequence whatdata)
+export procedure set_sendheader(object whatheader, sequence whatdata)
 	
 	if atom(whatheader) then
 		if whatheader > 0 and whatheader <= length(sendheader) then
@@ -2545,7 +2546,7 @@ end procedure -- setsendheaderline(sequence whatheader, sequence whatdata)
 -- depending on the browser, this procedure provides a quick means
 -- around that.
 
-global procedure set_sendheader_useragent_msie()
+export procedure set_sendheader_useragent_msie()
 	set_sendheader("UserAgent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)")
 end procedure
 --**
@@ -2593,7 +2594,7 @@ end function -- formatsendheader()
 -- Notes:
 --     This must be called prior to calling get_recvheader().
 
-global procedure parse_recvheader(sequence header)
+export procedure parse_recvheader(sequence header)
 	sequence junk
 	atom place
 	
@@ -2623,7 +2624,7 @@ end procedure
 -- Returns:	-1 on error, a sequence in the form, {field name, field value}
 -- on success.
 
-global function get_recvheader(object field)
+export function get_recvheader(object field)
 	sequence upperfield
 	-- recvheader was parsed out previously in parse_recvheader()
 	-- if field is 0, return the whole sequence.
@@ -2664,7 +2665,7 @@ end function
 -- This function returns either an empty sequence or a 2-element sequence of
 -- {sequence header, sequence data}.
 
-global function get_http(sequence inet_addr, sequence hostname, sequence file)
+export function get_http(sequence inet_addr, sequence hostname, sequence file)
 	
 	atom socket, success, last_data_len
 	sequence header, data, hline
@@ -2749,7 +2750,7 @@ end function
 -- See also:
 --     get_url
 
-global function get_http_use_cookie(sequence inet_addr, sequence hostname,
+export function get_http_use_cookie(sequence inet_addr, sequence hostname,
                                           sequence file)
 	atom socket, success, last_data_len, cpos, offset
 	sequence header, header2, body, data, updata, hline
@@ -2951,7 +2952,7 @@ end function
 --     close(tempfp)
 -- end if
 
-global function get_url(sequence url)
+export function get_url(sequence url)
 	sequence node, hostname, protocol, port, file, inet_addr
 	sequence data
 	atom cpos

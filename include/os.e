@@ -13,7 +13,7 @@ include misc.e
 include sequence.e
 include math.e
 
-global constant
+export constant
 	NO_PARAMETER = 0,
 	HAS_PARAMETER = 1
 
@@ -88,7 +88,7 @@ function find_opt(sequence opts, integer typ, object name)
 end function
 
 --**
-global function cmd_parse(sequence opts, integer add_help_rid=-1, 
+export function cmd_parse(sequence opts, integer add_help_rid=-1, 
 			sequence cmds = command_line())
 	integer idx, cmd_idx, opts_done
 	sequence cmd, extras, param

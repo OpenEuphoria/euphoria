@@ -30,7 +30,7 @@ end procedure
 --**
 -- A set is...
 --
-global type set(sequence s)
+export type set(sequence s)
     object x,y
 
     if length(s)<2 then
@@ -87,7 +87,7 @@ end function
 
 --**
 -- What does bfind() do?
-global function bfind(object x,set s,object bounds)
+export function bfind(object x,set s,object bounds)
     integer startpoint,endpoint
 
     -- extract search bounds
@@ -114,7 +114,7 @@ include sequence.e
 
 --**
 -- convert a sequence into a set
-global function sequence_to_set(sequence s)
+export function sequence_to_set(sequence s)
     sequence result
     integer k,ls
 
@@ -145,14 +145,14 @@ end function
 
 --**
 -- Return the cardinal of a set
-global function cardinal(set s)
+export function cardinal(set s)
     return length(s)
 end function
 --**
 
 --**
 -- return which set x belongs to
-global function belongs_to(object x,set s)
+export function belongs_to(object x,set s)
     return bfind_(x,s,1,length(s))>0
 end function
 --**
@@ -172,7 +172,7 @@ end function
 
 --**
 -- Add x to the set s
-global function add_to(object x,set s)
+export function add_to(object x,set s)
     return add_to_(x,s)
 end function
 --**
@@ -190,7 +190,7 @@ end function
 
 --**
 -- Remove x from set s
-global function remove_from(object x,set s)
+export function remove_from(object x,set s)
     return remove_from_(x,s)
 end function
 --**
@@ -271,11 +271,11 @@ function is_inside_(sequence s1,sequence s2,integer mode)
     end if
 end function
 
-global function is_inside(set s1,set s2)
+export function is_inside(set s1,set s2)
     return is_inside_(s1,s2,0)
 end function
 
-global function embedding(set s1,set s2)
+export function embedding(set s1,set s2)
     return is_inside_(s1,s2,1)
 end function
 
@@ -359,13 +359,13 @@ function embed_union_(sequence s1,sequence s2)
 end function
 
 --**
-global function embed_union(set s1,set s2)
+export function embed_union(set s1,set s2)
     return embed_union_(s1,s2)
 end function
 --**
 
 --**
-global function subsets(set s)
+export function subsets(set s)
     integer p,k,L
     sequence result,s1,s2,x
 
@@ -454,7 +454,7 @@ function intersection_(sequence s1,sequence s2)
 end function
 
 --**
-global function intersection(set s1,set s2)
+export function intersection(set s1,set s2)
     return intersection_(s1,s2)
 end function
 --**
@@ -535,13 +535,13 @@ function union1(sequence s1,sequence s2)
 end function
 
 --**
-global function union(set s1,set s2)
+export function union(set s1,set s2)
     return union1(s1,s2)
 end function
 --**
 
 --**
-global function delta(set s1,set s2)
+export function delta(set s1,set s2)
     integer ls1,ls2
 
     ls1=length(s1)
@@ -560,7 +560,7 @@ end function
 --**
 
 --**
-global function difference(set s1,set s2)
+export function difference(set s1,set s2)
     integer k1,k2,k,c,ls1,ls2,k0
     sequence result
     ls1=length(s1)
@@ -647,7 +647,7 @@ function product_(sequence s1,sequence s2)
 end function
 
 --**
-global function product(set s1,set s2)
+export function product(set s1,set s2)
     return product_(s1,s2)
 end function
 --**
@@ -665,7 +665,7 @@ function bounded_integer(object x,integer lbound,integer ubound)
 end function
 
 --**
-global type set_map(sequence s)
+export type set_map(sequence s)
     object p,q
 
     q=s[$-1]
@@ -686,7 +686,7 @@ end type
 --**
 
 --**
-global function define_map(sequence mapping,set target)
+export function define_map(sequence mapping,set target)
     sequence result
     integer lt
 
@@ -700,7 +700,7 @@ end function
 --**
 
 --**
-global function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
+export function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
     sequence result
     set sorted,sorted_to
     integer ls,lm_to,lm
@@ -726,7 +726,7 @@ end function
 --**
 
 --**
-global function image(set_map f,object x,set s1,set s2)
+export function image(set_map f,object x,set s1,set s2)
     integer p
     if f[$]>length(s2) then
         report_error({"image","The set_map range would not fit into the supplied target set."})
@@ -741,7 +741,7 @@ end function
 --**
 
 --**
-global function range(set_map f,set s)
+export function range(set_map f,set s)
     sequence result
 
     result=sequence_to_set(f[1..$-2])
@@ -753,7 +753,7 @@ end function
 --**
 
 --**
-global function direct_map(set_map f,set s1,sequence s0,set s2)
+export function direct_map(set_map f,set s1,sequence s0,set s2)
     sequence result
     integer k,p,ls1
 
@@ -775,7 +775,7 @@ end function
 --**
 
 --**
-global function product_map(set_map f1,set_map f2)
+export function product_map(set_map f1,set_map f2)
     sequence result,s
     integer k ,p
     k=1
@@ -791,7 +791,7 @@ end function
 --**
 
 --**
-global function amalgamated_sum(set s1,set s2,set s0,set_map f01,set_map f02)
+export function amalgamated_sum(set s1,set s2,set s0,set_map f01,set_map f02)
     sequence result
 
     result=s0
@@ -818,13 +818,13 @@ function fiber_over_(sequence f,sequence s1,sequence s2)
 end function
 
 --**
-global function fiber_over(set_map f,set s1,set s2)
+export function fiber_over(set_map f,set s1,set s2)
     return fiber_over_(f,s1,s2)
 end function
 --**
 
 --**
-global function fiber_product(set s1,set s2,set s0,set_map f10,set_map f20)
+export function fiber_product(set s1,set s2,set s0,set_map f10,set_map f20)
     sequence result,x1,x2,x0
     x1=fiber_over_(f10,s1,s0)
     x2=fiber_over_(f20,s2,s0)
@@ -838,7 +838,7 @@ end function
 --**
 
 --**
-global function reverse_map(set_map f,set s1,sequence s0,set s2)
+export function reverse_map(set_map f,set s1,sequence s0,set s2)
     sequence x,done,result
     integer p
     x=fiber_over_(f,s1,s2)
@@ -856,7 +856,7 @@ end function
 --**
 
 --**
-global function restrict(set_map f,set s1,set s0)
+export function restrict(set_map f,set s1,set s0)
     sequence result
     integer p,k
     result=s0
@@ -899,13 +899,13 @@ function change_target_(sequence f,sequence s1,sequence s2)
 end function
 
 --**
-global function change_target(set_map f,set s1,set s2)
+export function change_target(set_map f,set s1,set s2)
     return change_target_(f,s1,s2)
 end function
 --**
 
 --**
-global function combine_maps(set_map f1,set s11,set s12,set_map f2,set s21,set s22)
+export function combine_maps(set_map f1,set s11,set s12,set_map f2,set s21,set s22)
     integer len_result,p
     set s
     sequence result
@@ -952,19 +952,19 @@ function compose_map_(sequence f2,sequence f1)
 end function
 
 --**
-global function compose_map(set_map f2,set_map f1)
+export function compose_map(set_map f2,set_map f1)
     return compose_map_(f1,f2)
 end function
 --**
 
 --**
-global function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
+export function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
     return not compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
 end function
 --**
 
 --**
-global function is_injective(set_map f)
+export function is_injective(set_map f)
     sequence s
     integer p
     object x,y
@@ -995,13 +995,13 @@ function is_surjective_(sequence f)
 end function
 
 --**
-global function is_surjective(set_map f)
+export function is_surjective(set_map f)
     return is_surjective_(f)
 end function
 --**
 
 --**
-global function is_bijective(set_map f)
+export function is_bijective(set_map f)
     if f[$]!=f[$-1] then
         return 0
     else
@@ -1011,7 +1011,7 @@ end function
 --**
 
 --**
-global function section(set_map f)
+export function section(set_map f)
     sequence result
     integer k,p
     result=f
@@ -1040,7 +1040,7 @@ end function
 --**
 
 --**
-global type set_operation(sequence s)
+export type set_operation(sequence s)
     sequence u
     if length(s)!=2 or length(s[2])!=3 or length(s[1])!=s[2][1] then
         return 0
@@ -1057,7 +1057,7 @@ end type
 --**
 
 --**
-global function define_operation(sequence left_actions)
+export function define_operation(sequence left_actions)
     integer size_left,size_right
     set_map f
 
@@ -1080,7 +1080,7 @@ end function
 --**
 
 --**
-global function is_symmetric(set_operation f)
+export function is_symmetric(set_operation f)
     sequence s
     integer n
     n=f[2][1]
@@ -1100,7 +1100,7 @@ end function
 --**
 
 --**
-global function is_associative(set_operation f)
+export function is_associative(set_operation f)
     sequence s
     integer n
     
@@ -1124,7 +1124,7 @@ end function
 --**
 
 --**
-global function has_left_unit(set_operation f)
+export function has_left_unit(set_operation f)
     if f[2][2]!=f[2][3] then
         return 0
     else
@@ -1150,13 +1150,13 @@ function all_left_units_(sequence f)
 end function
 
 --**
-global function all_left_units(set_operation f)
+export function all_left_units(set_operation f)
     return all_left_units_(f)
 end function
 --**
 
 --**
-global function is_left_unit(integer x,set_operation f)
+export function is_left_unit(integer x,set_operation f)
     if f[2][2]!=f[2][3] or not bounded_integer(x,1,f[2][1]) then
         return 0
     else
@@ -1166,7 +1166,7 @@ end function
 --**
 
 --**
-global function has_right_unit(set_operation f)
+export function has_right_unit(set_operation f)
     integer p
     if f[2][3]!=f[2][1] then
         return ""
@@ -1189,7 +1189,7 @@ end function
 --**
 
 --**
-global function all_right_units(set_operation f)
+export function all_right_units(set_operation f)
     integer p
     sequence result
 
@@ -1229,7 +1229,7 @@ function is_right_unit_(integer x,sequence f)
 end function
 
 --**
-global function is_right_unit(integer x,set_operation f)
+export function is_right_unit(integer x,set_operation f)
     return is_right_unit_(x,f)
 end function
 --**
@@ -1247,13 +1247,13 @@ function has_unit_(sequence f)
 end function
 
 --**
-global function has_unit(set_operation f)
+export function has_unit(set_operation f)
     return has_unit_(f)
 end function
 --**
 
 --**
-global function has_inverse(integer x,set_operation f)
+export function has_inverse(integer x,set_operation f)
     return find(has_unit_(f),f[1][x])
 end function
 --**
@@ -1300,7 +1300,7 @@ function distributes_left_(sequence product,sequence sum,integer transpose)
 end function
 
 --**
-global function distributes_left(set_operation product,set_operation sum,integer transpose)
+export function distributes_left(set_operation product,set_operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)
 end function
 --**
@@ -1346,13 +1346,13 @@ function distributes_right_(sequence product,sequence sum,integer transpose)
 end function
 
 --**
-global function distributes_right(set_operation product,set_operation sum,integer transpose)
+export function distributes_right(set_operation product,set_operation sum,integer transpose)
     return distributes_right_(product,sum,transpose)
 end function
 --**
 
 --**
-global function distributes_over(set_operation product,set_operation sum,integer transpose)
+export function distributes_over(set_operation product,set_operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)+2*distributes_right_(product,sum,not transpose)
 end function
 --**

@@ -20,7 +20,7 @@ constant
 		M_FREE_PCRE    = 70
 
 -- Options:
-global constant 
+export constant 
 		DEFAULT            = #00000000,
 		CASELESS           = #00000001,
 		MULTILINE          = #00000002,
@@ -51,7 +51,7 @@ global constant
 		BSR_UNICODE        = #01000000
 
 -- Error codes:
-global constant
+export constant
 		ERROR_NOMATCH        =  (-1),
 		ERROR_NULL           =  (-2),
 		ERROR_BADOPTION      =  (-3),
@@ -77,7 +77,7 @@ global constant
 		ERROR_NULLWSLIMIT    = (-22), -- /* No longer actually used */
 		ERROR_BADNEWLINE     = (-23)
 
-global type regex(object o)
+export type regex(object o)
 	return atom(o)
 end type
 
@@ -98,7 +98,7 @@ end type
 -- re = new("foo")
 --
 
-global function new(sequence pattern)
+export function new(sequence pattern)
 		return machine_func(M_COMPILE_PCRE, pattern)
 end function
 --**
@@ -126,7 +126,7 @@ end function
 -- -- substring #1: foobar
 -- -- substring #2: bar
 
-global function search(regex re, sequence text, integer from=1, atom options=0)
+export function search(regex re, sequence text, integer from=1, atom options=0)
 		return machine_func(M_EXEC_PCRE, { re, text, options, from-1 })
 end function
 --**
@@ -137,7 +137,7 @@ end function
 -- Comments:
 --     This function returns a sequence of results in the same format as search().
 
-global function search_all(regex re, sequence text, integer from=1, atom options=0)
+export function search_all(regex re, sequence text, integer from=1, atom options=0)
 	object result
 	sequence results
 	
@@ -163,7 +163,7 @@ end function
 --**
 --  Replaces all matches of the regex with the replacement text.
 
-global function search_replace(regex re, sequence text, sequence replacement, 
+export function search_replace(regex re, sequence text, sequence replacement, 
 							   atom options = 0)
 	sequence matches
 	
@@ -177,7 +177,7 @@ end function
 --**
 
 -- TODO: document
-global function search_replace_user(regex re, sequence text, integer rid, 
+export function search_replace_user(regex re, sequence text, integer rid, 
 									atom options = 0)
 	sequence matches, m
 	
@@ -198,7 +198,7 @@ end function
 --**
 -- Returns 1 if the regex matches anywhere in the text, 0 otherwise.
 
-global function matches(regex re, sequence text, atom options)
+export function matches(regex re, sequence text, atom options)
 	return sequence(search(re, text, options))
 end function
 --**
@@ -209,7 +209,7 @@ end function
 -- See Also:
 --     new
 
-global procedure free( regex re )
+export procedure free( regex re )
 	machine_proc( M_FREE_PCRE, re )
 end procedure
 --**
@@ -217,7 +217,7 @@ end procedure
 --**
 -- Returns 1 if the regex matches the entire text, 0 otherwise
 
-global function full_match(regex re, sequence text, atom options = 0)
+export function full_match(regex re, sequence text, atom options = 0)
 	object matches
 	matches = search( re, text, 1, options )
 	if sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text) then

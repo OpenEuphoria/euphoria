@@ -11,11 +11,11 @@
 include search.e
 include machine.e
 
-global sequence gPrimes 
+export sequence gPrimes 
 gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 
 -- TODO: document
-global function calc_primes(integer pMax, atom pTimeLimit = 10)
+export function calc_primes(integer pMax, atom pTimeLimit = 10)
 	sequence lResult
 	integer lCandidate
 	integer lLo
@@ -81,7 +81,7 @@ end function
 
 --**
 -- Returns the next prime number on or after 'n'
-global function next_prime(integer n, integer pDefault = 1)
+export function next_prime(integer n, integer pDefault = 1)
 	integer i
 
 

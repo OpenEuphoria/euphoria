@@ -16,6 +16,7 @@ include compress.e
 include misc.e
 include cominit.e
 include pathopen.e
+include sequence.e
 
 sequence misc
 integer il_file

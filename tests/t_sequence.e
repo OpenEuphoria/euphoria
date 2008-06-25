@@ -60,11 +60,11 @@ test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
 test_equal("remove_all() 2", "Ask what you can do for your country.", 
            remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
 
-test_equal("insert() integer sequence", {1,2,3}, seq:insert({1,3}, 2, 2))
-test_equal("insert() string", {'J','o',"h",'n'}, seq:insert("Jon", "h", 3))
+test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
+test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
-test_equal("splice() integer sequence", {1,2,3}, seq:splice({1,3}, 2, 2))
-test_equal("splice() string", "John", seq:splice("Jon", "h", 3))
+test_equal("splice() integer sequence", {1,2,3}, splice({1,3}, 2, 2))
+test_equal("splice() string", "John", splice("Jon", "h", 3))
 
 test_equal("replace() integer sequence", {1,2,3}, replace({1,8,9,3}, 2, 2, 3))
 test_equal("replace() integer sequence w/sequence", {1,2,3,4},

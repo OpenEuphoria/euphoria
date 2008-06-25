@@ -14,7 +14,7 @@ include misc.e
 -- Public Variables
 --
 
-global enum 
+export enum 
 	TEST_QUIET = 0, 
 	TEST_SHOW_FAILED_ONLY, 
 	TEST_SHOW_ALL
@@ -70,19 +70,19 @@ end procedure
 --
 
 --**
-global procedure set_test_verbosity(atom verbosity)
+export procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
 --**
 
 --**
-global procedure set_wait_on_summary(integer toWait)
+export procedure set_wait_on_summary(integer toWait)
 	wait_on_summary = toWait
 end procedure
 --**
 
 --**
-global function set_test_abort(integer pValue)
+export function set_test_abort(integer pValue)
 	integer lTmp
 	lTmp = abort_on_fail
 	abort_on_fail = pValue
@@ -91,7 +91,7 @@ end function
 --**
 
 --**
-global procedure test_embedded_report()
+export procedure test_embedded_report()
 	atom score
 
 	if testsFailed > 0 or verbose = TEST_SHOW_ALL then
@@ -127,7 +127,7 @@ end procedure
 --**
 
 --**
-global procedure test_equal(sequence name, object a, object b)
+export procedure test_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
 		success = equal(a,b)
@@ -143,7 +143,7 @@ end procedure
 --**
 
 --**
-global procedure test_not_equal(sequence name, object a, object b)
+export procedure test_not_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
 		success = not equal(a,b)
@@ -159,7 +159,7 @@ end procedure
 --**
 
 --**
-global procedure test_true(sequence name, object a)
+export procedure test_true(sequence name, object a)
 	integer success
 	if sequence(a) then
 		success = 0
@@ -171,7 +171,7 @@ end procedure
 --**
 
 --**
-global procedure test_false(sequence name, object a)
+export procedure test_false(sequence name, object a)
 	integer success
 	if not integer(a) then
 		success = 0
@@ -183,13 +183,13 @@ end procedure
 --**
 
 --**
-global procedure test_fail(sequence name)
+export procedure test_fail(sequence name)
 	record_result(0, name, 1, 0)
 end procedure
 --**
 
 --**
-global procedure test_pass(sequence name)
+export procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
 --**

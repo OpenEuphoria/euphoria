@@ -35,7 +35,7 @@ with trace
 -- and empty sequence is returned.
 --
 ------------------------------------
-global function small(sequence pData, integer pIndex)
+export function small(sequence pData, integer pIndex)
 ------------------------------------
 	sequence lSortedData
 	
@@ -76,7 +76,7 @@ end function
 --
 
 ------------------------------------
-global function stdev(sequence pData)
+export function stdev(sequence pData)
 ------------------------------------
 	atom lSum
 	atom lMean
@@ -135,7 +135,7 @@ end function
 --         Note that any sequences elements are assumed to have a value of zero.
 --
 ------------------------------------
-global function stdeva(sequence pData)
+export function stdeva(sequence pData)
 ------------------------------------
 	atom lSum
 	atom lMean
@@ -202,7 +202,7 @@ test_equal("stdeva empty", {}, stdeva( {} ))
 --
 
 ------------------------------------
-global function stdevp(sequence pData)
+export function stdevp(sequence pData)
 ------------------------------------
 	atom lSum
 	atom lMean
@@ -259,7 +259,7 @@ end function
 --         Note that any sequences elements are assumed to have a value of zero.
 --
 ------------------------------------
-global function stdevpa(sequence pData)
+export function stdevpa(sequence pData)
 ------------------------------------
 	atom lSum
 	atom lMean
@@ -317,7 +317,7 @@ end function
 with trace
 
 -----------------------------------------------
-global function avedev(sequence pData)
+export function avedev(sequence pData)
 -----------------------------------------------
 	atom lSum
 	atom lMean
@@ -352,7 +352,7 @@ end function
 
 
 -----------------------------------------------
-global function sum(object pData)
+export function sum(object pData)
 -----------------------------------------------
 	atom pResult
 	if atom(pData) then
@@ -369,7 +369,7 @@ global function sum(object pData)
 end function
 
 -----------------------------------------------
-global function count(object pData)
+export function count(object pData)
 -----------------------------------------------
 	atom pResult
 	if atom(pData) then
@@ -386,7 +386,7 @@ global function count(object pData)
 end function
 
 -----------------------------------------------
-global function counta(object pData)
+export function counta(object pData)
 -----------------------------------------------
 	atom pResult
 	if atom(pData) then
@@ -398,7 +398,7 @@ global function counta(object pData)
 end function
 
 -----------------------------------------------
-global function average(object pData)
+export function average(object pData)
 -----------------------------------------------
 	integer lCount
 	if atom(pData) then
@@ -412,7 +412,7 @@ global function average(object pData)
 end function
 
 -----------------------------------------------
-global function averagea(object pData)
+export function averagea(object pData)
 -----------------------------------------------
 	if atom(pData) or length(pData) = 0 then
 		return pData
@@ -421,7 +421,7 @@ global function averagea(object pData)
 end function
 
 -----------------------------------------------
-global function largest(object pData)
+export function largest(object pData)
 -----------------------------------------------
 	atom pResult, pTemp
 	integer pStarted
@@ -449,7 +449,7 @@ global function largest(object pData)
 end function
 
 -----------------------------------------------
-global function smallest(object pData)
+export function smallest(object pData)
 -----------------------------------------------
 	atom pResult, pTemp
 	integer pStarted

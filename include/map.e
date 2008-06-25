@@ -17,7 +17,7 @@ constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
 constant iKeys = 1
 constant iVals = 2
 
-global enum
+export enum
 	PUT,
 	ADD,
 	SUBTRACT,
@@ -38,7 +38,7 @@ global enum
 --   SymbolTable = new() -- Create a new map to hold the symbol table.
 --   </eucode>
 
-global type map(object o)
+export type map(object o)
 		if not sequence(o) then
 			return 0
 		end if
@@ -83,7 +83,7 @@ constant maxInt = #3FFFFFFF
 --   h1 = calc_hash( symbol_name )
 --   </eucode>
 
-global function calc_hash(object key, integer pMaxHash = 0)
+export function calc_hash(object key, integer pMaxHash = 0)
 	integer ret
 	integer temp
 
@@ -124,7 +124,7 @@ global function calc_hash(object key, integer pMaxHash = 0)
 end function
 
 --**
-global function rehash(map m1, integer pRequestedSize = 0)
+export function rehash(map m1, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
 	object key, value
@@ -178,7 +178,7 @@ end function
 --   -- m is now an empty map (size = 0)
 --   </eucode>
 
-global function new(integer initSize = 66)
+export function new(integer initSize = 66)
 	integer lBuckets
 	lBuckets = next_prime(floor((max({1,initSize - 2}) + 3) / 4))
 
@@ -197,7 +197,7 @@ end function
 --   ? has(m, "age")  -- 0
 --   </eucode>
 
-global function has(map m, object key)
+export function has(map m, object key)
 	integer lIndex
 
 	lIndex = calc_hash(key, length(m[iBuckets]))
@@ -224,7 +224,7 @@ end function
 --   end if
 --   </eucode>
 
-global function get(map m, object key, object defaultValue)
+export function get(map m, object key, object defaultValue)
 	integer lIndex
 	integer lOffset
 
@@ -267,7 +267,7 @@ end function
 --   -- ages now contains 2 entries: "Andy" => 12, "Budi" => 14
 --   </eucode>
 
-global function put(map m1, object key, object value, integer pTrigger = 100, integer operation = PUT )
+export function put(map m1, object key, object value, integer pTrigger = 100, integer operation = PUT )
 	integer index
 	integer hashval
 	integer lOffset
@@ -346,7 +346,7 @@ end function
 --   -- m is now an empty map again
 --   </eucode>
 
-global function remove(map m1, object key)
+export function remove(map m1, object key)
 	integer hash, index
 	object bucket
 	sequence m
@@ -386,12 +386,12 @@ end function
 --   ? size(m) -- outputs 2
 --   </eucode>
 
-global function size(map m)
+export function size(map m)
 	return m[iCnt]
 end function
 
 --**
-global function statistics(map m)
+export function statistics(map m)
 	sequence lStats
 	sequence lLengths
 	integer lLength
@@ -434,7 +434,7 @@ end function
 --   keys = keys(m) -- keys might be {20,40,10,30} or some other orders
 --   </eucode>
 
-global function keys(map m)
+export function keys(map m)
 	sequence buckets, bucket
 	sequence ret
 	integer pos
@@ -474,7 +474,7 @@ end function
 --   values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
 --   </eucode>
 
-global function values(map m)
+export function values(map m)
 	sequence buckets, bucket
 	sequence ret
 	integer pos
@@ -495,7 +495,7 @@ global function values(map m)
 end function
 
 --**
-global function optimize(map m1, atom pAvg = 10)
+export function optimize(map m1, atom pAvg = 10)
 	sequence op
 	sequence m
 
@@ -512,7 +512,7 @@ global function optimize(map m1, atom pAvg = 10)
 end function
 
 --**
-global function load_map(sequence pFileName)
+export function load_map(sequence pFileName)
 	integer fh
 	object lLine
 	integer lComment

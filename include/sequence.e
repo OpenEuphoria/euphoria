@@ -154,6 +154,61 @@ include misc.e
 --**
 
 --**
+-- Signature:
+--   global function insert(sequence st, object what, integer index)
+--
+-- Desiption:
+--   Insert what into st at index index as a new element. The item is inserted before index, 
+--   not after. 
+--
+-- Comments:
+--     A new sequence is created. st and what can be any type of sequence, including nested 
+--     sequences. What is inserted as a new element in st, so that the length of the new 
+--     sequence is always length(st)+1.
+--
+--     insert()ing a sequence into a string returns a sequence which is no longer a string.
+--
+-- Example 1:
+-- s = insert("John Doe", " Middle", 5)
+-- -- s is {'J','o','h','n'," Middle ",'D','o','e'}
+--
+-- Example 2:
+-- s = insert({10,30,40}, 20, 2)
+-- -- s is {10,20,30,40}
+--
+-- See Also:
+--     remove, splice, remove_all
+
+--**
+-- Signature:
+--   global function splice(sequence st, object what, integer index)
+--
+-- Insert what into st at index. The item is inserted before index, not after. 
+-- What is inserted as a subsequence. splicing a string into another yields a new string.
+--
+-- Parameters:
+--     st - sequence to splice into.
+--     what - what to split into st.
+--     index - index position at which to splice.
+--
+-- Comments:
+--     A new sequence is created. st and what can be any type of sequence, including nested 
+--     sequences. The length of this new sequence is the sum of the lengths of st and what 
+--     (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is 
+--     an atom.
+--
+-- Example 1:
+-- s = splice("John Doe", " Middle", 5)
+-- -- s is "John Middle Doe"
+--
+-- Example 2:
+-- s = splice({10,30,40}, 20, 2)
+-- -- s is {10,20,30,40}
+--
+-- See Also:
+--     insert, remove, replace, remove_all
+
+--**
 -- The representation of x as a string of characters is returned. This is exactly the same 
 -- as print(fn, x), except that the output is returned as a sequence of characters, rather 
 -- than being sent to a file or device. x can be any Euphoria object.
@@ -173,7 +228,7 @@ include misc.e
 -- See Also:
 --    sprintf, misc:printf
 
-global function sprint(object x)
+export function sprint(object x)
 -- Return the string representation of any Euphoria data object. 
 -- This is the same as the output from print(1, x) or '?', but it's
 -- returned as a string sequence rather than printed.
@@ -208,7 +263,7 @@ end function
 -- reverse({99})			   -- {99}
 -- reverse({})				   -- {}
 
-global function reverse(sequence s)
+export function reverse(sequence s)
 	integer lower, n, n2
 	sequence t
 
@@ -244,7 +299,7 @@ end function
 -- See Also:
 --     tail, mid, slice
 
-global function head(sequence st, integer size=1)
+export function head(sequence st, integer size=1)
 	if size < length(st) then
 		return st[1..size]
 	end if
@@ -272,7 +327,7 @@ end function
 -- See Also:
 --     head, tail, slice
 
-global function mid(sequence st, atom start, atom len)
+export function mid(sequence st, atom start, atom len)
 	if len<0 then
 		len += length(st)
 		if len<0 then
@@ -323,7 +378,7 @@ end function
 -- See Also:
 --     head, mid, tail
 
-global function slice(sequence st, atom start, atom stop)
+export function slice(sequence st, atom start, atom stop)
 	if stop < 0 then stop = length(st) + stop end if
 	if stop = 0 then stop = length(st) end if
 	if start < 1 then start = 1 end if
@@ -346,7 +401,7 @@ end function
 --
 -- See Also:
 --     slice, project
-global function vslice(sequence s, atom colno)
+export function vslice(sequence s, atom colno)
 	sequence ret
 
 	if colno<1 then
@@ -395,7 +450,7 @@ end function
 -- See Also:
 --     head, mid, slice
 
-global function tail(sequence st, atom n=length(st)-1)
+export function tail(sequence st, atom n=length(st)-1)
 	if n >= length(st) then
 		return st
 	else
@@ -436,7 +491,7 @@ end function
 -- See Also:
 --     replace, insert, splice, remove_all
 
-global function remove(sequence st, atom start, atom stop=start)
+export function remove(sequence st, atom start, atom stop=start)
 	if stop > length(st) then
 		stop = length(st)
 	end if
@@ -475,7 +530,7 @@ end function
 -- See Also:
 --     remove
 
-global function remove_all(object needle, sequence haystack)
+export function remove_all(object needle, sequence haystack)
 	integer ts,te,ss,se
 	
 	-- See if we have to anything at all.    
@@ -527,81 +582,6 @@ global function remove_all(object needle, sequence haystack)
 end function
 --**
 
-constant dummy = 0
-
---**
--- Insert what into st at index index as a new element. The item is inserted before index, 
--- not after. 
---
--- Comments:
---     A new sequence is created. st and what can be any type of sequence, including nested 
---     sequences. What is inserted as a new element in st, so that the length of the new 
---     sequence is always length(st)+1.
---
---     insert()ing a sequence into a string returns a sequence which is no longer a string.
---
--- Example 1:
--- s = insert("John Doe", " Middle", 5)
--- -- s is {'J','o','h','n'," Middle ",'D','o','e'}
---
--- Example 2:
--- s = insert({10,30,40}, 20, 2)
--- -- s is {10,20,30,40}
---
--- See Also:
---     remove, splice, remove_all
-
-global function insert(sequence st, object what, integer index)
-	if index > length(st) then
-		return append(st, what)
-	elsif index <= 1 then
-		return prepend(what, st)
-	end if
-
-	st &= dummy -- avoids creating/destroying a temp on each invocation
-	st[index+1..$] = st[index..$-1]
-	st[index] = what
-	return st
-end function
---**
-
---**
--- Insert what into st at index. The item is inserted before index, not after. 
--- What is inserted as a subsequence. splicing a string into another yields a new string.
---
--- Parameters:
---     st - sequence to splice into.
---     what - what to split into st.
---     index - index position at which to splice.
---
--- Comments:
---     A new sequence is created. st and what can be any type of sequence, including nested 
---     sequences. The length of this new sequence is the sum of the lengths of st and what 
---     (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is 
---     an atom.
---
--- Example 1:
--- s = splice("John Doe", " Middle", 5)
--- -- s is "John Middle Doe"
---
--- Example 2:
--- s = splice({10,30,40}, 20, 2)
--- -- s is {10,20,30,40}
---
--- See Also:
---     insert, remove, replace, remove_all
-
-global function splice(sequence st, object what, integer index)
-	if index > length(st) then
-		return st & what
-	elsif index <= 1 then
-		return what & st
-	end if
-
-	return st[1..index-1] & what & st[index..$]
-end function
---**
-
 --**
 -- Replace from index start to stop of st with object what. what can be any object.
 --
@@ -626,7 +606,7 @@ end function
 -- See Also:
 --     splice, remove, remove_all
 
-global function replace(sequence st, object replacement, integer start, integer stop)
+export function replace(sequence st, object replacement, integer start, integer stop)
 	st = remove(st, start, stop)
 	return splice(st, replacement, start)
 end function
@@ -666,7 +646,7 @@ end function
 -- See Also:
 --     chunk
 
-global function split(sequence st, object delim=" ", integer limit=0, integer any=0)
+export function split(sequence st, object delim=" ", integer limit=0, integer any=0)
 	sequence ret
 	integer pos, start, next_pos
 
@@ -725,7 +705,7 @@ end function
 -- See Also:
 --     split
 
-global function join(sequence s, object delim=" ")
+export function join(sequence s, object delim=" ")
 	object ret
 
 	if not length(s) then return {} end if
@@ -755,7 +735,7 @@ end function
 -- See Also:
 -- trim_tail, trim, pad_head
 
-global function trim_head(sequence str, object what=" \t\r\n")
+export function trim_head(sequence str, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
@@ -784,7 +764,7 @@ end function
 -- See Also:
 --     trim_head, trim, pad_tail
 
-global function trim_tail(sequence str, object what=" \t\r\n")
+export function trim_tail(sequence str, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
@@ -813,7 +793,7 @@ end function
 -- See Also:
 --     trim_head, trim_tail
 
-global function trim(sequence str, object what=" \t\r\n")
+export function trim(sequence str, object what=" \t\r\n")
 	return trim_tail(trim_head(str, what), what)
 end function
 --**
@@ -840,7 +820,7 @@ end function
 -- See Also:
 --     trim_head, pad_tail, head
 
-global function pad_head(sequence str, integer size, object ch=' ')
+export function pad_head(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
 		return str
 	end if
@@ -871,7 +851,7 @@ end function
 -- See Also:
 --     trim_tail, pad_head, tail
 
-global function pad_tail(sequence str, integer size, object ch=' ')
+export function pad_tail(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
 		return str
 	end if
@@ -902,7 +882,7 @@ end function
 -- See Also:
 --     split
 
-global function chunk(sequence s, integer size)
+export function chunk(sequence s, integer size)
 	sequence ns
 	integer stop
 
@@ -928,7 +908,7 @@ end function
 -- s = flatten({{18, 19}, 45, {18.4, 29.3}})
 -- -- s is {18, 19, 45, 18.4, 29.3}
 
-global function flatten(sequence s)
+export function flatten(sequence s)
 	sequence ret
 	object x
 
@@ -964,7 +944,7 @@ constant TO_LOWER = 'a' - 'A'
 -- See Also:
 --     upper
 
-global function lower(object x)
+export function lower(object x)
 -- convert atom or sequence to lower case
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
 end function
@@ -986,7 +966,7 @@ end function
 -- See Also:
 --     lower
 
-global function upper(object x)
+export function upper(object x)
 -- convert atom or sequence to upper case
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
@@ -1007,7 +987,7 @@ end function
 -- See Also:
 --     linear
 
-global function can_add(object a, object b)
+export function can_add(object a, object b)
 	if atom(a) or atom(b) then
 		return 1
 	end if
@@ -1033,7 +1013,7 @@ end function
 -- See Also:
 --     repeat_pattern
 
-global function linear(object start, object increment, integer count)
+export function linear(object start, object increment, integer count)
 	sequence result
 
 	if count<0 or not can_add(start,increment) then
@@ -1059,7 +1039,7 @@ end function
 -- See Also:
 --     repeat, linear
 
-global function repeat_pattern(sequence s, integer count)
+export function repeat_pattern(sequence s, integer count)
 	integer ls
 	sequence result
 
@@ -1094,7 +1074,7 @@ end function
 -- See Also:
 --     vslice
 
-global function project(sequence vectors, sequence coords) -- currently in sets.e
+export function project(sequence vectors, sequence coords) -- currently in sets.e
 	sequence result,current_vector,coord_set,result_item,projection
 	integer current_index
 
@@ -1131,7 +1111,7 @@ end function
 -- See Also:
 --     store, Sequence Assignments
 
-global function fetch(sequence s, sequence indexes)
+export function fetch(sequence s, sequence indexes)
 	for i=1 to length(indexes)-1 do
 		s=s[indexes[i]]
 	end for
@@ -1149,7 +1129,7 @@ end function
 -- See Also:
 --     fetch, Sequence Assignments
 
-global function store(sequence s, sequence indexes, object x)
+export function store(sequence s, sequence indexes, object x)
 	sequence partials,result,branch
 
 	partials=repeat(s,length(indexes)-1)
@@ -1180,7 +1160,7 @@ end function
 -- See Also:
 --     Sequence Assignments
 
-global function valid_index(sequence s, object x)
+export function valid_index(sequence s, object x)
 	if sequence(x) or x<1 then
 		return 0
 	else
@@ -1199,7 +1179,7 @@ end function
 -- See Also:
 --     slice
 
-global function extract(sequence source, sequence indexes)
+export function extract(sequence source, sequence indexes)
 	object p
 
 	for i=1 to length(indexes) do
@@ -1228,7 +1208,7 @@ end function
 -- See Also:
 --     slice
 
-global function rotate_left(sequence source, integer start, integer stop, integer left_shift)
+export function rotate_left(sequence source, integer start, integer stop, integer left_shift)
 	sequence shifted
 	integer len
 
@@ -1304,8 +1284,8 @@ end function
 -- -- The following is another way to do the same.
 -- s = keyvalues("colors=`[black, blue, red]`")
 -- -- s is { {"colors", "[black, blue, red]"}  } }
-with trace
-global function keyvalues(sequence source, object pair_delim = ";,", 
+
+export function keyvalues(sequence source, object pair_delim = ";,", 
                           object kv_delim = ":=", object quotes =  "\"'`", 
                           object whitespace = " \t\n\r", integer haskeys = 1)
                           

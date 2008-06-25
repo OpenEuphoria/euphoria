@@ -4,7 +4,7 @@
 -- == Locale Constants
 --
 
-global constant w32_names = {
+export constant w32_names = {
 	"af-ZA",
 	"sq-AL",
 	"gsw-FR",
@@ -215,7 +215,7 @@ global constant w32_names = {
 	"zu-ZA"
 	}
 	
-global constant w32_name_canonical = {
+export constant w32_name_canonical = {
 	"Afrikaans_South Africa.1252",
 	"Afrikaans_South Africa.1252",
 	"Afrikaans_South Africa.1252",
@@ -426,7 +426,7 @@ global constant w32_name_canonical = {
 	"Ukrainian_Ukraine.1251"
 }
 
-global constant posix_names = {
+export constant posix_names = {
 	"af_ZA",
 	"sq_AL",
 	"gsw_FR",
@@ -637,16 +637,16 @@ global constant posix_names = {
 	"zu_ZA"
 }
 
-global constant locale_canonical = posix_names
+export constant locale_canonical = posix_names
 
 ifdef UNIX then
-	global constant platform_locale = posix_names
+	export constant platform_locale = posix_names
 else
-	global constant platform_locale = w32_name_canonical
+	export constant platform_locale = w32_name_canonical
 end ifdef
 
 --**
-global function canonical(sequence new_locale)
+export function canonical(sequence new_locale)
 	integer w, ws, p, n
 	p = find(new_locale, posix_names)
 	w = find(new_locale, w32_names)
@@ -665,7 +665,7 @@ global function canonical(sequence new_locale)
 end function
 
 --**
-global function decanonical(sequence new_locale)
+export function decanonical(sequence new_locale)
 	integer w, ws, p, n
 	p = find(new_locale, posix_names)
 	w = find(new_locale, w32_names)
