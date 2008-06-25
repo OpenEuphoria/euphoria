@@ -309,13 +309,13 @@ procedure rPrint(object a)
 end procedure
 
 --**
--- Print, to file or device fn, an object x, using braces { , , , }, indentation, and multiple lines to show the structure.
+-- Print, to file or device fn, an object x, using braces { , , , }, indentation, and multiple lines 
+-- to show the structure.
 --
 -- Parameters:
 -- # file number to write to
 -- # the object to display
--- # is an (up to) 8-element options sequence: Pass {} to select the defaults, or set options 
---   as below:
+-- # is an (up to) 8-element options sequence: Pass {} to select the defaults, or set options as below:
 --   ## display ASCII characters:
 --      *** 0: never
 --      *** 1: alongside any integers in printable ASCII range (default)
@@ -324,7 +324,7 @@ end procedure
 --      *** 3: show strings, and quoted characters (only) for any integers 
 --             in ASCII range as well as the characters: \t \r \n
 --   ## amount to indent for each level of sequence nesting - default: 2
---   ##  column we are starting at - default: 1
+--   ## column we are starting at - default: 1
 --   ## approximate column to wrap at - default: 78
 --   ## format to use for integers - default: "%d"
 --   ## format to use for floating-point numbers - default: "%.10g"

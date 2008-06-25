@@ -2226,7 +2226,6 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	while TRUE do 
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-			? tok[T_ID]
 			CompileErr("a name is expected here")
 		end if
 		sym = tok[T_SYM]

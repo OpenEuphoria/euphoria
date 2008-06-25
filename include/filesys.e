@@ -18,15 +18,11 @@ object xCopyFile, xMoveFile, xDeleteFile, xCreateDirectory, xRemoveDirectory
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	xCopyFile         = define_c_func(lib, "CopyFileA", 
-		{C_POINTER, C_POINTER, C_LONG}, C_LONG)
-	xMoveFile         = define_c_func(lib, "MoveFileA", 
-		{C_POINTER, C_POINTER}, C_LONG)
+	xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG}, C_LONG)
+	xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_LONG)
 	xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
-	xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
-		{C_POINTER, C_POINTER}, C_LONG)
-	xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", 
-		{C_POINTER}, C_LONG)
+	xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, C_LONG)
+	xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
 
 elsifdef LINUX then
 	constant lib = open_dll("")
