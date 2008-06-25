@@ -13,6 +13,7 @@
 --		 STRING_COLOR
 --		BRACKET_COLOR  (a sequence of colors)
 
+include sequence.e
 include wildcard.e
 include keywords.e
 integer NORMAL_COLOR,

@@ -11,8 +11,8 @@ global constant TRUE = 1, FALSE = 0
 global constant EUNIX = (platform() = LINUX or platform() = FREEBSD or platform() = OSX),
 				EWINDOWS = platform() = WIN32,
 				EDOS = platform() = DOS32,
-				EBSD = FALSE,
-				EOSX = FALSE,
+				EBSD = TRUE,
+				EOSX = TRUE,
 				ELINUX = not EBSD and not EOSX
 
 global integer PATH_SEPARATOR, SLASH

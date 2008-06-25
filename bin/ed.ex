@@ -38,6 +38,7 @@ include get.e
 include file.e
 include wildcard.e
 include dll.e
+include sequence.e
 
 constant TRUE = 1,
 	 FALSE = 0
@@ -423,7 +424,7 @@ function convert_tabs(natural old_width, natural new_width, sequence line)
 end function
 
 -- color display of lines
-include syncolor.e
+include euphoria/syncolor.e
 
 procedure reverse_video()
 -- start inverse video

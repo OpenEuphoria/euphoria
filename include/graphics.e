@@ -41,7 +41,7 @@ global constant
 		 BRIGHT_MAGENTA = 13,
 		 BRIGHT_WHITE = 15
 		 
-global enum BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
+global integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
 
 include misc.e
 

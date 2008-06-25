@@ -131,39 +131,52 @@ is set to the euphoria directory.
 
 When installed, the ##euphoria## directory will look something like this:
 
-:##\euphoria##
-::readme.doc
-::readme.htm
-::License.txt
-:##\bin##
-::	Interpreters ##ex.exe## and ##exw.exe##. Translators\\ 
-    ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, \\
-    Interpreter ##exu## and Translator ##ecu##. There are also utility \\
-    programs such as ##ed.bat##, ##guru.bat##, etc.\\
-:##\include##
-::standard include files, e.g. ##graphics.e##
-:##\source##
-::the complete source code (interpreter, translator, binder)
-:##\doc##
-::##refman.doc##, ##library.doc##, and several other plain-text\\
+<dl>
+<dt>
+##\euphoria##</dt>
+<dl>
+<dt>readme.doc</dt>
+<dt>readme.htm</dt>
+<dt>License.txt</dt>
+<dt>##\bin##</dt>
+<dd>
+	Interpreters ##ex.exe## and ##exw.exe##. Translators 
+    ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, 
+    Interpreter ##exu## and Translator ##ecu##. There are also utility 
+    programs such as ##ed.bat##, ##guru.bat##, etc.
+</dd>
+<dt>##\include##</dt>
+<dd>standard include files, e.g. ##graphics.e##</dd>
+<dt>##\source##</dt>
+<dd>the complete source code (interpreter, translator, binder)</dd>
+<dt>##\doc##</dt>
+<dd>
+	##refman.doc##, ##library.doc##, and several other plain-text
     documentation files
-:##\html##
-::HTML files corresponding to each of the .doc files in the doc directory
-:##\tutorial##
-::small tutorial programs to help you learn Euphoria
-:##\demo##
-::generic demo programs that run on all platforms
-:##\dos32##
-:://DOS32//-specific demo programs (optional)
-:##\win32##
-:://WIN32//-specific demo programs (optional)
-:##\linux##
-:://Linux/FreeBSD//-specific demo programs (optional)
-:##\langwar##
-::language war game (pixel-graphics version for //DOS//, \\
+</dd>
+<dt>##\html##</dt>
+<dd>HTML files corresponding to each of the .doc files in the doc directory</dd>
+<dt>##\tutorial##</dt>
+<dd>small tutorial programs to help you learn Euphoria</dd>
+<dt>##\demo##</dt>
+<dl>
+<dt>generic demo programs that run on all platforms</dt>
+<dt>##\dos32##</dt>
+<dd>//DOS32//-specific demo programs (optional)</dd>
+<dt>##\win32##</dt>
+<dd>//WIN32//-specific demo programs (optional)</dd>
+<dt>##\linux##</dt>
+<dd>//Linux/FreeBSD//-specific demo programs (optional)</dd>
+<dt>##\langwar##</dt>
+<dd>
+	language war game (pixel-graphics version for //DOS//,
     or text version for //Linux/FreeBSD//)
-:##\bench##
-::benchmark programs
+</dd>
+<dt>##\bench##</dt>
+<dd>benchmark programs</dd>
+</dl>
+</dl>
+</dl>
 
 ==== Linux and FreeBSD
 
@@ -194,7 +207,7 @@ Euphoria programs are executed by typing one of the following:
  
 followed by the name of the main Euphoria file. You can type additional words (known as //arguments//) on this line, known as the //command-line//.
 
-Your program can call the built-in function command_line() to read the command-line.
+Your program can call the built-in function <libref>command_line()</libref> to read the command-line.
 
 The //DOS32// version of the Euphoria interpreter is called ##ex.exe##. The 
 //WIN32// version is called ##exw.exe##. The //Linux/FreeBSD// version is called 
@@ -231,7 +244,7 @@ ex myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 }}}
 
 The first statement turns off echoing of commands to the screen. The second runs ##ex myprog.ex##
-with up to 9 command-line arguments. See command_line() for an example of how to read these arguments. 
+with up to 9 command-line arguments. See <libref>command_line()</libref> for an example of how to read these arguments. 
 Having a .bat file will save you the minor inconvenience of typing ##ex## (or ##exw##) all 
 the time; i.e., you can just type:
  
@@ -276,8 +289,8 @@ foo.exu
 }}}
 
 to run your program. You could even shorten the name to simply "foo". Euphoria ignores the first line when it starts 
-with **#!**.  Be careful though that your first line ends with the //Linux/FreeBSD//-style ##\n##,
-and not the //DOS/Windows//-style ##\r\n##, or the //Linux/FreeBSD// shell might 
+with **#!**.  Be careful though that your first line ends with the //Linux/FreeBSD//-style <code>\n</code>,
+and not the //DOS/Windows//-style <code>\r\n</code>, or the //Linux/FreeBSD// shell might 
 get confused. If your file is shrouded, you must give the path to ##backendu##, not ##exu##.
 
 
@@ -299,14 +312,14 @@ will be in the ##euphoria\bin## directory which must be on your search path. The
 
 === Running under Windows
 
-You can run Euphoria programs directly from the //Windows// }nvironment, or
-from a //DOS// shell that you have opened from //Windows//. By "associating"
-##.ex## files with ##ex.exe##, and ##.exw## files with ##exw.exe## you can
-simply double-click on a ##.ex## or ##.exw## file to run it. Under //Windows//
-you would define a new file type for ##.ex##, by clicking on ##My Computer /
-view / options / file types##. It is possible to have several Euphoria programs
-active in different windows. If you turn your program into a ##.exe## file, you
-can simply double-click on it to run it.
+You can run Euphoria programs directly from the //Windows// environment, or from
+a //DOS// shell that you have opened from //Windows//. By "associating" 
+##.ex## files with ##ex.exe##, and ##.exw## files with 
+##exw.exe## you can simply double-click on a ##.ex## or ##.exw## file to 
+run it. Under //Windows// you would define a new file type for ##.ex##, by clicking 
+on ##My Computer / view / options / file types##. It is possible to have several Euphoria programs active 
+in different windows. If you turn your program into a ##.exe## file, you can simply double-click on it 
+to run it.
 
 === Use of a Swap File
 
@@ -320,7 +333,7 @@ adjust the "DPMI_MEMORY_LIMIT" by clicking the ##Virtual //DOS// machine icon / 
 Settings"## to allocate more extended memory for your program.
 
 Under pure //DOS//, outside of //Windows//, there is no system swap file so the 
-//DOS//-extender built in to ##ex.exe## (//DOS32//) will create one for possible use by your 
+//DOS//-extender built in to ##ex.exe## (//DOS//32) will create one for possible use by your 
 program. See a href="platform.htm#swapfile">**platform.doc**</a>.
 
 === Editing a Program
@@ -328,7 +341,7 @@ program. See a href="platform.htm#swapfile">**platform.doc**</a>.
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
 with its own special editor that is written entirely in Euphoria.  Type: ##ed##
 followed by the complete name of the file you wish to edit (the
-##.ex/.exw/.exu## extension is not assumed). You can use this editor to
+##.ex##/##.exw##/##.exu## extension is not assumed). You can use this editor to
 edit any kind of text file. When you edit a Euphoria file, some extra features
 such as color syntax highlighting and auto-completion of certain statements,
 are available to make your job easier.
@@ -340,12 +353,13 @@ correct line and column, and with the error message displayed at the top of the
 screen.
 
 Under //Windows// you can associate ##ed.bat## with various kinds of text files
-that you want to edit. Color syntax highlighting is provided for ##.ex, .exw, .exu, .e, 
- .ew, .eu, and .pro (a href="refman_3.htm#2">profile</a>) files.
+that you want to edit. Color syntax highlighting is provided for ##.ex##,
+##.exw##, ##.exu##, ##.e##, ##.ew##, ##.eu##, and ##.pro## (a
+href="refman_3.htm#2">profile</a>) files.
 
 Most keys that you type are inserted into the file at the cursor position. Hit the ##Esc## 
 key once to get a menu bar of special commands. The arrow keys, and the 
-##Insert/Delete/Home/End/~PageUp/~PageDown## keys are also active. Under //Linux/FreeBSD// some 
+##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under //Linux/FreeBSD// some 
 keys may not be available, and alternate keys are provided. See the file 
 ##euphoria\doc\ed.doc## (a href="ed.htm">euphoria\html\ed.htm</a>) for a complete description 
 of the editing commands. ##Esc h## (help) will let you view ##ed.doc## from your editing 

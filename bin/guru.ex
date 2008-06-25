@@ -32,7 +32,7 @@ include file.e
 include wildcard.e
 include graphics.e
 include sort.e
-
+include sequence.e
 
 -------- some user-modifiable parameters: 
 

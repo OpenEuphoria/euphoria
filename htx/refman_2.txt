@@ -1,19 +1,21 @@
+<doc title="Euphoria Reference Manual Part I - Section 2">
+
 == Language Definition
 
 === Objects
 
 ==== Atoms and Sequences
 
-All data **objects** in Euphoria are either **atoms** or **sequences**.  An
-**atom** is a single numeric value.  A **sequence** is a collection of numeric
-values.
+All data **objects** in Euphoria are either **atoms**
+or **sequences**.  An **atom** is a single numeric
+value.  A **sequence** is a collection of numeric values.
 
-The **objects** contained in a sequence can be an arbitrary mix of atoms or
-sequences. A sequence is represented by a list of objects in brace brackets,
-separated by commas. Atoms can have any integer or double-precision floating
-point value. They can range from approximately -1e300 (minus one times 10 to
-the power 300) to +1e300 with 15 decimal digits of accuracy. Here are some
-Euphoria objects:
+The **objects** contained in a sequence can be an arbitrary mix of
+atoms or sequences. A sequence is represented by a list of objects in brace
+brackets, separated by commas. Atoms can have any integer or double-precision
+floating point value. They can range from approximately -1e300 (minus one times
+10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
+some Euphoria objects:
 
 <eucode>
 -- examples of atoms:
@@ -2163,7 +2165,7 @@ stop your program immediately.
 
 == Miscellaneous statements
 
-=== The warning() procedure
+=== The warning() statement
 
 Writing a library has specific requirements, since the code you write will be mainly used 
 inside code you didn't write. It may be desirable then to influence, from inside the library, 
@@ -2197,23 +2199,7 @@ displayed in the console window:
  Press Enter...
 }}}
 
-**N.B.: **the argument to warning() is a single literal constant enclosed in
-double quotes, like above. Using any kind of variable or expression will result
-in a blank warning.
-
-=== The warning_file() procedure
-
-Just as for the error file, you can redirect any warnings which are not masked - either 
-because they cannot or were not - using warning_file(<em>destination</em>), with an extra 
-twist:
-
-* If //destination// is a sequence, it is assumed to be a file name, and all warnings will 
-  go there instead of the console;
-* If //destination// is a nonnegative atom, the standard error will be used, which is the 
-  default behaviour;
-* If //destination// is a negative atom, any warning generation or output will be 
-  suppressed, including for otherwise non maskable warnings. This is an extreme measure 
-  which should be taken in very rare cases only. Use a warning file as much as possible.
+**N.B.: **the argument to warning() is a single literal constant enclosed in double quotes, like above. Using any kind of variable or expression will result in a blank warning.
 
 == Special Top-Level Statements
 

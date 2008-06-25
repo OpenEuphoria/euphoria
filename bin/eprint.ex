@@ -74,7 +74,7 @@ global constant  NORMAL_COLOR = 8,
 		 STRING_COLOR = 6,
 		BRACKET_COLOR = {NORMAL_COLOR}
 
-include syncolor.e
+include euphoria/syncolor.e
 
 procedure set_printer_color(integer color)
 -- set the printer color (or mono effect)

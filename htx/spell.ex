@@ -5,8 +5,8 @@ integer status, file_check_id
 
 function file_check(sequence path, sequence dir_entry)
 -- spell check one file
-	if match(".htx", lower(dir_entry[D_NAME])) then
-		system("ex spellchk " & dir_entry[D_NAME], 2)
+	if match(".txt", lower(dir_entry[D_NAME])) then
+		system("exu spellchk " & dir_entry[D_NAME], 2)
 	end if
 	return 0
 end function
