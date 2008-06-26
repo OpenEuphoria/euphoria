@@ -7,10 +7,6 @@ without type_check
 include mode.e
 set_mode("translate", 0 )
 
--- standard Euphoria includes
-include misc.e
-include wildcard.e
-
 -- front-end
 include global.e
 include reswords.e

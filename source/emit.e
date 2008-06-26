@@ -1,7 +1,8 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Routines to emit the IL opcode stream
+
+include os.e
 
 include reswords.e
 include global.e

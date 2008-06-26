@@ -3,7 +3,7 @@
 -- Common definitions for backend.ex and other *.ex.
 -- backend.ex does not include global.e
 
-include misc.e
+include os.e
 
 global constant TRUE = 1, FALSE = 0
 

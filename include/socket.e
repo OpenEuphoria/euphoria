@@ -8,7 +8,6 @@
 --
  
 include dll.e
-include misc.e
 include machine.e
 include get.e
 include wildcard.e
@@ -601,11 +600,11 @@ export function get_error()
 	-- returns a 2-element sequence {ERROR_CODE,ERROR_STRING}
 	sequence rtn
 	rtn = {0,""}
-	if platform()=LINUX then
+	ifdef UNIX then
 		rtn[1]=peek4u(c_func(error_,{}))
-	elsif platform()=WIN32 then
+	elsifdef WIN32 then
 		rtn[1] = c_func(error_,{})
-	end if
+	end ifdef
 	if error_mode = EUNET_ERRORMODE_OS then
 		return rtn
 	end if
@@ -615,13 +614,13 @@ export function get_error()
 		elsif rtn[1] = 9501 or rtn[1] = 9003 then
 			rtn = {EUNET_ERROR_NODNSRECORDS,"DNS could not find an exact match."}
 		elsif rtn[1] = EOPNOTSUPP or rtn[1] = WSAEOPNOTSUPP then
-			if platform() = LINUX then
+			ifdef UNIX then
 				rtn = {EUNET_ERROR_WINDOWSONLY,"This only works on Windows."}
-			elsif platform() = WIN32 then
+			elsifdef WIN32 then
 				rtn = {EUNET_ERROR_LINUXONLY,"This only works on Linux."}
 			else
 				rtn = {EUNET_ERROR_UNKNOWN,"You are not using Windows or Linux."}
-			end if
+			end ifdef
 		elsif rtn[1] = WSAENOTCONN or rtn[1] = ENOTCONN then
 			rtn = {EUNET_ERROR_NOCONNECTION,"This socket is not connected to anything."}
 		elsif rtn[1] = WSAENOTSOCK or rtn[1] = ENOTSOCK then
@@ -685,10 +684,10 @@ export function delay(atom millisec)
 	
 	atom result, timptr
 	
-	if platform()=WIN32 then
+	ifdef WIN32 then
 		c_proc(delay_,{millisec})
 		return 0
-	elsif platform()=LINUX then
+	elsifdef UNIX then
 		timptr = allocate(16) -- Reserved for when OSs start using 64bit time_t
 		if millisec >= 1000 then
 			poke4(timptr,floor(millisec/1000))
@@ -699,9 +698,9 @@ export function delay(atom millisec)
 		result = c_func(delay_,{timptr,0})
 		free(timptr)
 		return result
-	end if
-	return -1
+	end ifdef
 	
+	return -1
 end function
 
 --Andy Serpas Turbo version
@@ -842,13 +841,13 @@ end function
 -- Returns a list of network interface names.
 
 export function get_iface_list()
-	if platform()=WIN32 then
+	ifdef WIN32 then
 		return windows_get_iface_list()
-	elsif platform()=LINUX then
+	elsifdef UNIX then
 		return unix_get_iface_list()
 	else
 		return {}
-	end if
+	end ifdef
 end function
 
 -------------------------------------------------------------------------------

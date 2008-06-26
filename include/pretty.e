@@ -1,177 +1,8 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
 --****
--- == Misc Routines and Constants
--- === Constants
+-- == Pretty Printing
+--
 
--- platform() values:
-
-global constant 
-	DOS32   = 1, -- ex.exe
-	WIN32   = 2, -- exw.exe
-	LINUX   = 3, -- exu
-	FREEBSD = 3, -- exu
-	OSX     = 4  -- exu
-
-constant M_INSTANCE = 55, M_SLEEP = 64
-
---****
--- === Routines
-
---**
--- Signature:
--- global procedure print(integer fn, object x)
---
--- Description:
--- Print, to file or device fn, an object x with braces { , , , } to show the structure.
---
--- Example 1:
--- <eucode>
--- print(1, "ABC")  -- output is:  {65, 66, 67}
--- puts(1, "ABC")   -- output is:  ABC
--- </eucode>
---
--- Example 2:
--- <eucode>
--- print(1, repeat({10,20}, 3)) -- output is: {{10,20},{10,20},{10,20}} 
--- </eucode>
-
---**
--- Signature:
--- global procedure printf(integer fn, sequence st, sequence x)
---
--- Description:
--- Print x, to file or device fn, using format string st. If x is a sequence, 
--- then format specifiers from st are matched with corresponding elements of 
--- x. If x is an atom, then normally st will contain just one format specifier 
--- and it will be applied to x, however if st contains multiple format specifiers, 
--- each one will be applied to the same value x. Thus printf() always takes 
--- exactly 3 arguments. Only the length of the last argument, containing the 
--- values to be printed, will vary. The basic format specifiers are...
---
--- * ##%d## - print an atom as a decimal integer
--- * ##%x## - print an atom as a hexadecimal integer. Negative numbers are printed
---            in two's complement, so -1 will print as FFFFFFFF
--- * ##%o## - print an atom as an octal integer
--- * ##%s## - print a sequence as a string of characters, or print an atom as a single 
---            character
--- * ##%e## - print an atom as a floating-point number with exponential notation
--- * ##%f## - print an atom as a floating-point number with a decimal point but no exponent
--- * ##%g## - print an atom as a floating-point number using whichever format seems 
---            appropriate, given the magnitude of the number
--- * ##%%## - print the '%' character itself</li>
---
--- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number 
--- before the decimal point is the minimum field width to be used. The number after 
--- the decimal point is the precision to be used.
---
--- If the field width is negative, e.g. %-5d then the value will be left-justified 
--- within the field. Normally it will be right-justified. If the field width 
--- starts with a leading 0, e.g. %08d then leading zeros will be supplied to fill up 
--- the field. If the field width starts with a '+' e.g. %+7d then a plus sign will 
--- be printed for positive values. 
---
--- Comments:
--- Watch out for the following common mistake:
---
--- <eucode>
--- name="John Smith"
--- printf(1, "%s", name)     -- error!
--- </eucode>
---
--- This will print only the first character, J, of name, as each element of 
--- name is taken to be a separate value to be formatted. You must say this instead:
--- 	
--- <eucode>
--- name="John Smith"
--- printf(1, "%s", {name})   -- correct
--- </eucode>
---
--- Now, the third argument of printf() is a one-element sequence containing the 
--- item to be formatted.
---
--- Example 1:
--- <eucode>
--- rate = 7.875
--- printf(myfile, "The interest rate is: %8.2f\n", rate)
---
--- --      The interest rate is:     7.88
--- </eucode>
---
--- Example 2:
--- <eucode>
--- name="John Smith"
--- score=97
--- printf(1, "%15s, %5d\n", {name, score})
---
--- --      John Smith,    97
--- </eucode>
---
--- Example 3:
--- <eucode>
--- printf(1, "%-10.4s $ %s", {"ABCDEFGHIJKLMNOP", "XXX"})
--- --      ABCD       $ XXX
---
--- Example 4:
--- printf(1, "%d  %e  %f  %g", 7.75) -- same value in different formats
---
--- --      7  7.750000e+000  7.750000  7.75
--- </eucode>
---
--- See Also:
---     sequence:sprintf, sequence:sprint
---**
-
---**
--- Signature:
--- global procedure puts(integer fn, sequence x)
---
--- Description:
--- Output, to file or device fn, a single byte (atom) or sequence of bytes. The low order 
--- 8-bits of each value is actually sent out. If fn is the screen you will see text 
--- characters displayed.
---
--- Comments:
--- When you output a sequence of bytes it must not have any (sub)sequences within it. It 
--- must be a sequence of atoms only. (Typically a string of ASCII codes).
---
--- Avoid outputting 0's to the screen or to standard output. Your output might get truncated.
---
--- Remember that if the output file was opened in text mode, <platform>DOS</platform> and 
--- <platform>Windows</platform> will change <code>\n</code> (10) to <code>\r\n</code> 
--- (13 10). Open the file in binary mode if this is not what you want. 
---
--- Example 1:
--- <eucode>
--- puts(SCREEN, "Enter your first name: ")
--- </eucode>
---
--- Example 2: 	
--- <eucode>
--- puts(output, 'A')  -- the single byte 65 will be sent to output
--- </eucode>
-
---*
-global procedure sleep(atom t)
--- go to sleep for t seconds
--- allowing (on WIN32 and Linux) other processes to run
-	if t >= 0 then
-		machine_proc(M_SLEEP, t)
-	end if
-end procedure
-
---**
-global procedure task_delay(atom delaytime)
--- akin to sleep, but allows other tasks to run while sleeping
---causes a delay while allowing other tasks to run.
-	atom t
-	t = time()
-
-	while time() - t < delaytime do
-		machine_proc(M_SLEEP, 0.01)
-		task_yield()
-	end while
-end procedure
+include os.e
 
 -- pretty print variables
 integer pretty_end_col, pretty_chars, pretty_start_col, pretty_level, 
@@ -325,8 +156,12 @@ procedure rPrint(object a)
 	end if
 end procedure
 
+--****
+-- === Constants
+--
 
 export constant PRETTY_DEFAULT = {1,2,1,78,"%d","%.10g",32,127 - (platform() = LINUX),1000000000,1}
+
 export enum
 	DISPLAY_ASCII = 1,
 	INDENT,
@@ -339,8 +174,10 @@ export enum
 	MAX_LINES,
 	LINE_BREAKS
 
-procedure pretty( object x, sequence options )
+--****
+-- === Routines
 
+procedure pretty( object x, sequence options )
 	if length(options) < length( PRETTY_DEFAULT ) then
 		options &= PRETTY_DEFAULT[length(options)+1..$]
 	end if
@@ -401,16 +238,17 @@ end procedure
 -- Comments:
 -- The default options can be accessed using the exported constant PRETTY_DEFAULT, and the
 -- elements may be accessed using the enum:
--- ## DISPLAY_ASCII
--- ## INDENT
--- ## START_COLUMN
--- ## WRAP
--- ## INT_FORMAT
--- ## FP_FORMAT
--- ## MIN_ASCII
--- ## MAX_ASCII
--- ## MAX_LINES
--- ## LINE_BREAKS
+--
+-- # DISPLAY_ASCII
+-- # INDENT
+-- # START_COLUMN
+-- # WRAP
+-- # INT_FORMAT
+-- # FP_FORMAT
+-- # MIN_ASCII
+-- # MAX_ASCII
+-- # MAX_LINES
+-- # LINE_BREAKS
 --
 -- The display will start at the current cursor position. Normally you will want to call 
 -- pretty_print() when the cursor is in column 1 (after printing a <code>\n</code> character). 
@@ -476,29 +314,30 @@ end procedure
 --     }
 -- }
 -- </eucode>
+
 global procedure pretty_print(integer fn, object x, sequence options)
 	pretty_printing = 1
 	pretty_file = fn
 	pretty( x, options )
 	puts(pretty_file, pretty_line)
 end procedure
---**
 
 --**
 -- Format an object x, using braces { , , , }, indentation, and multiple lines to show the structure.
+--
 -- Parameters:
--- # file number to write to
--- # the object to display
--- # is an (up to) 10-element options sequence: Pass {} to select the defaults, or set options 
+--   # x - the object to display
+--   # options - is an (up to) 10-element options sequence: Pass {} to select the defaults, or 
+--     set options 
 --
 -- Comments:
--- This function formats objects the same as pretty_print().
+--   This function formats objects the same as pretty_print().
 --
 -- See Also:
---  pretty_print
+--   pretty_print
+
 export function pretty_sprint(object x, sequence options)
 	pretty_printing = 0
 	pretty( x, options )
 	return pretty_line
 end function
---**

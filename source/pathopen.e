@@ -2,22 +2,24 @@
 --
 
 include common.e
-include misc.e
 include machine.e
 include file.e
+include os.e
 
 atom oem2char,convert_buffer
 integer convert_length
 global atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
 sequence regs
-if platform()=WIN32 then
+
+ifdef WIN32 then
 	u32=machine_func(50,"user32.dll")
 	oem2char=machine_func(51,{u32,"OemToCharA",{C_POINTER,C_POINTER},C_POINTER})
 	char_upper=machine_func(51,{u32,"CharUpperA",{C_POINTER},C_POINTER})
 	convert_length=64
 	convert_buffer=allocate(convert_length)
-elsif platform()=DOS32 then
+
+elsifdef DOS32 then
 	regs=repeat(0,10)
 	fc_table=allocate_low(5)
 	-- query filename country dependent capitalisation table pointer
@@ -33,7 +35,7 @@ elsif platform()=DOS32 then
 		free_low(fc_table)
 		fc_table=regs[1]+256*regs[2]+16*regs[3]+4096*regs[4]-126
 	end if
-end if
+end ifdef
 
 function convert_from_OEM(sequence s)
 	integer ls,rc
@@ -63,9 +65,9 @@ cache_starts = {}
 sequence cache_ends
 cache_ends  = {}
 sequence cache_converted
-if platform()=WIN32 then
+ifdef WIN32 then
 	cache_converted = {}
-end if
+end ifdef
 sequence cache_complete
 cache_complete = {}
 sequence cache_delims
@@ -104,9 +106,9 @@ function check_cache(sequence env,sequence inc_path)
 		cache_substrings = append(cache_substrings,{})
 		cache_starts = append(cache_starts,{})
 		cache_ends = append(cache_ends,{})
-		if platform()=WIN32 then
+		ifdef WIN32 then
 			cache_converted = append(cache_converted,{})
-		end if
+		end ifdef
 		num_var = length(cache_vars)
 		cache_complete &= 0
 		cache_delims &= 0
@@ -129,9 +131,9 @@ function check_cache(sequence env,sequence inc_path)
 						cache_substrings[num_var] = cache_substrings[num_var][1..pos]
 						cache_starts[num_var] = cache_starts[num_var][1..pos]
 						cache_ends[num_var] = cache_ends[num_var][1..pos]
-						if platform()=WIN32 then
+						ifdef WIN32 then
 							cache_converted[num_var] = cache_converted[num_var][1..pos]
-						end if
+						end ifdef
 						delim = cache_ends[num_var][$]+1
 						while delim <= length(inc_path) and delim != PATH_SEPARATOR do
 							delim+=1
@@ -150,11 +152,11 @@ global function get_conf_dirs()
 	integer delimiter
 	sequence dirs
 	
-	if EUNIX then
+	ifdef UNIX then
 		delimiter = ':'
 	else
 		delimiter = ';'
-	end if
+	end ifdef
 	
 	dirs = ""
 	for i = 1 to length(config_inc_paths) do
@@ -163,6 +165,7 @@ global function get_conf_dirs()
 			dirs &= delimiter
 		end if
 	end for
+	
 	return dirs
 end function
 
@@ -172,6 +175,7 @@ function strip_file_from_path( sequence full_path )
 			return full_path[1..i]
 		end if
 	end for
+	
 	return ""
 end function
 
@@ -183,12 +187,14 @@ function expand_path( sequence path, sequence prefix )
 		return pwd
 	end if
 	
-	if EUNIX and length(path) and path[1] = '~' then
-		home = getenv("HOME")
-		if sequence(home) and length(home) then
-			path = home & path[2..$]
+	ifdef UNIX then
+		if length(path) and path[1] = '~' then
+			home = getenv("HOME")
+			if sequence(home) and length(home) then
+				path = home & path[2..$]
+			end if
 		end if
-	end if
+	end ifdef
 	
 	absolute = find(path[1], SLASH_CHARS) or
 		(not EUNIX and find(':', path))
@@ -253,8 +259,6 @@ global procedure load_euinc_conf( sequence file )
 	close(fn)
 end procedure
 
-
-
 global procedure load_platform_inc_paths()
 	object env
 	
@@ -266,14 +270,14 @@ global procedure load_platform_inc_paths()
 	load_euinc_conf( env & "euinc.conf" )
 	
 	-- platform specific
-	if EUNIX then
+	ifdef UNIX then
 		env = getenv( "HOME" )
 		if sequence(env) then
 			load_euinc_conf( env & "/.euinc.conf" )
 		end if
 		load_euinc_conf( "/etc/euphoria/euinc.conf" )
 		
-	elsif EWINDOWS then
+	elsifdef WIN32 then
 		env = getenv( "APPDATA" )
 		if sequence(env) then
 			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
@@ -285,7 +289,7 @@ global procedure load_platform_inc_paths()
 		end if
 	else
 		-- none for DOS
-	end if
+	end ifdef
 end procedure
 
 global function ConfPath(sequence file_name)
@@ -337,7 +341,7 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 			try = open(file_path, "r")    
 			if try != -1 then
 				return {file_path,try}
-			elsif platform()=WIN32 and sequence(cache_converted[num_var][i]) then
+			elsif platform() = WIN32 and sequence(cache_converted[num_var][i]) then
 				-- perhaps this path entry, which had never been checked valid, is so after conversion
 				full_path = cache_converted[num_var][i]
 				file_path = full_path & file_name
@@ -377,11 +381,11 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 				file_path = full_path & file_name  
 				try = open(file_path, "r")
 				if try != -1 then -- valid path, no point trying to convert
-					if platform()=WIN32 then  
+					ifdef WIN32 then
 						cache_converted[num_var] &= 0
-					end if
+					end ifdef
 					return {file_path,try}
-				elsif platform()=WIN32 then  
+				elsif platform() = WIN32 then  
 					if find(1,full_path>=128) then
   -- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
@@ -454,14 +458,14 @@ global procedure Include_paths(integer add_converted)
 				cache_substrings[num_var] = append(cache_substrings[num_var],full_path)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
-				if platform()=WIN32 then
+				ifdef WIN32 then
 					if find(1,full_path>=128) then
   -- accented characters, try converting them. There is no guarantee that the conversion is valid
 						cache_converted[num_var] = convert_from_OEM(full_path)
 					else -- nothing to convert anyway
 						cache_converted[num_var] &= 0
 					end if
-				end if
+				end ifdef
 				start_path = 0
 			end if
 		elsif not start_path and (inc_path[p] != ' ' and inc_path[p] != '\t') then
@@ -472,13 +476,15 @@ global procedure Include_paths(integer add_converted)
 	end while
 	include_paths &= cache_substrings[num_var]
 	cache_complete[num_var] = 1
-	if platform()=WIN32 and add_converted then
-	    for i=1 to length(cache_converted[num_var]) do
-	        if sequence(cache_converted[num_var][i]) then
-		        include_paths = append(include_paths,cache_converted[num_var][i])
-	        end if
-		end for
-	end if
+	ifdef WIN32 then
+		if  add_converted then
+	    	for i=1 to length(cache_converted[num_var]) do
+	        	if sequence(cache_converted[num_var][i]) then
+		        	include_paths = append(include_paths,cache_converted[num_var][i])
+		        end if
+			end for
+		end if
+	end ifdef
 end procedure
 
 -- open a file by searching the user's PATH
@@ -510,5 +516,3 @@ global function e_path_open(sequence name, sequence mode)
 	end if
 	
 end function
-
-

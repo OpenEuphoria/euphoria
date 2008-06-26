@@ -1,10 +1,10 @@
 		-- Examples of calling a machine code 
 		-- routine from Euphoria
 
+include os.e
 include machine.e
 include graphics.e
 include dll.e
-include misc.e
 
 sequence vc
 vc = video_config()
@@ -27,7 +27,7 @@ string = {'E', BRIGHT_BLUE, 'u', BRIGHT_GREEN, 'p', BRIGHT_CYAN,
 	  'h', BRIGHT_RED, 'o', BRIGHT_MAGENTA, 'r', YELLOW,
 	  'i', BRIGHT_WHITE, 'a', GREEN, '!', BROWN+128}
 
-if platform() = DOS32 then
+ifdef DOS32 then
     -- The screen is only accessible like this under DOS
     
     string_space = allocate(length(string)+1)
@@ -74,7 +74,7 @@ if platform() = DOS32 then
     free(string_space)
 
     puts(1, "success\n\n")
-end if
+end ifdef
 
 
 -- Example #2 - Any Platform 
@@ -124,8 +124,7 @@ multiply_code = {
 					   -- off the stack
     }
 
-
-if platform() = WIN32 or platform() = LINUX then
+if platform() = WIN32 or platform() = LINUX or platform() = OSX then
     
     code_space = allocate(length(multiply_code))
     
@@ -142,4 +141,3 @@ if platform() = WIN32 or platform() = LINUX then
     if getc(0) then
     end if
 end if
-

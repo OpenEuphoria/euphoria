@@ -1,4 +1,5 @@
 include common.e
+include os.e
 
 -- For cross-translation:
 global integer TWINDOWS

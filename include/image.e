@@ -8,7 +8,6 @@
 
 include machine.e
 include graphics.e
-include misc.e
 
 constant BMPFILEHDRSIZE = 14
 constant OLDHDRSIZE = 12, NEWHDRSIZE = 40
@@ -338,7 +337,7 @@ global function get_screen_char(positive_atom line, positive_atom column)
 	atom scr_addr
 	sequence vc
 	
-	if platform() = DOS32 then
+	ifdef DOS32 then
 		vc = video_config()
 		if line >= 1 and line <= vc[VC_LINES] and
 		   column >= 1 and column <= vc[VC_COLUMNS] then
@@ -349,7 +348,7 @@ global function get_screen_char(positive_atom line, positive_atom column)
 		end if
 	else    
 		return machine_func(M_GET_SCREEN_CHAR, {line, column})
-	end if
+	end ifdef
 end function
 
 --**
@@ -362,7 +361,7 @@ global procedure put_screen_char(positive_atom line, positive_atom column,
 	sequence vc
 	integer overflow
 	
-	if platform() = DOS32 then
+	ifdef DOS32 then
 		vc = video_config()
 		if line <= vc[VC_LINES] and column <= vc[VC_COLUMNS] then
 			scr_addr = DOS_scr_addr(vc, {line, column})
@@ -375,7 +374,7 @@ global procedure put_screen_char(positive_atom line, positive_atom column,
 		end if
 	else    
 		machine_proc(M_PUT_SCREEN_CHAR, {line, column, char_attr})
-	end if
+	end ifdef
 end procedure
 
 --**
@@ -391,10 +390,10 @@ global procedure display_text_image(text_point xy, sequence text)
 	sequence vc, one_row
 	
 	vc = video_config()
-	if platform() = DOS32 then
+	ifdef DOS32 then
 		screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
 		scr_addr = DOS_scr_addr(vc, xy)
-	end if
+	end ifdef
 	if xy[1] < 1 or xy[2] < 1 then
 		return -- bad starting point
 	end if
@@ -414,12 +413,12 @@ global procedure display_text_image(text_point xy, sequence text)
 			end if
 			one_row = one_row[1..extra_col2] -- truncate
 		end if
-		if platform() = DOS32 then
+		ifdef DOS32 then
 			poke(scr_addr, one_row)
 			scr_addr += screen_width
 		else
 			machine_proc(M_PUT_SCREEN_CHAR, {xy[1]+row-1, xy[2], one_row})
-		end if
+		end ifdef
 	end for
 end procedure
 
@@ -436,7 +435,7 @@ global function save_text_image(text_point top_left, text_point bottom_right)
 	
 	vc = video_config()
 	screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
-	if platform() = DOS32 then
+	ifdef DOS32 then
 		if vc[VC_MODE] = 7 then
 			screen_memory = MONO_TEXT_MEMORY
 		else
@@ -448,11 +447,11 @@ global function save_text_image(text_point top_left, text_point bottom_right)
 		scr_addr = screen_memory + 
 				(top_left[1]-1) * screen_width + 
 				(top_left[2]-1) * BYTES_PER_CHAR
-	end if
+	end ifdef
 	image = {}
 	image_width = (bottom_right[2] - top_left[2] + 1) * BYTES_PER_CHAR
 	for row = top_left[1] to bottom_right[1] do
-		if platform() = DOS32 then
+		ifdef DOS32 then
 			row_chars = peek({scr_addr, image_width})
 			scr_addr += screen_width
 		else
@@ -460,7 +459,7 @@ global function save_text_image(text_point top_left, text_point bottom_right)
 			for col = top_left[2] to bottom_right[2] do
 				row_chars &= machine_func(M_GET_SCREEN_CHAR, {row, col})
 			end for
-		end if
+		end ifdef
 		image = append(image, row_chars)
 	end for
 	return image

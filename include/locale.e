@@ -4,7 +4,6 @@
 -- ==  Locale Routines
 -- 
 
-include misc.e
 include dll.e
 include machine.e
 include datetime.e as dt

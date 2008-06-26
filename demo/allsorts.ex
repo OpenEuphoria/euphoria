@@ -14,7 +14,6 @@
 without type_check
 
 include machine.e
-include misc.e
 
 tick_rate(100) -- get better clock resolution on DOS32
 set_rand(9999)

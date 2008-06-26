@@ -27,7 +27,6 @@
 
 without type_check
 
-include misc.e
 include file.e
 include wildcard.e
 include graphics.e
@@ -36,34 +35,31 @@ include sequence.e
 
 -------- some user-modifiable parameters: 
 
-integer SLASH
 sequence log_name, log_path, home
 
 log_name = "guru.out"
 -- place to store results
-if platform() = LINUX then
-    SLASH = '/'
+ifdef UNIX then
     home = getenv("HOME")
     if sequence(home) then
-	log_path = home & '/' & log_name -- put in home dir if possible
+		log_path = home & '/' & log_name -- put in home dir if possible
     else
-	log_path = log_name  
+		log_path = log_name  
     end if
 else
-    SLASH = '\\'
     log_path = getenv("EUDIR")
     if equal(log_path, -1) then
-	log_path = "C:" 
+		log_path = "C:" 
     end if
     log_path &= "\\" & log_name  -- put at top of C drive
-end if
+end ifdef
 
 -- some files to skip:
 sequence skip_list 
-if platform() = LINUX then
+ifdef UNIX then
     skip_list = {
-	"*.so", "*.lib", "*.o", 
-	"*.tar", "*.zip", "*.gz"
+		"*.so", "*.lib", "*.o", 
+		"*.tar", "*.zip", "*.gz", "*.dylib"
     }
 else    
     skip_list = {
@@ -71,7 +67,7 @@ else
 	"*.SWP", "*.PAR", "*.ZIP", "*.BMP", 
 	"*.GIF", "*.JPG", "*.WAV"
     }
-end if
+end ifdef
 
 -- ignore these extremely common words when searching
 sequence noise_words
@@ -538,8 +534,8 @@ function look_at(sequence path_name, sequence direntry)
 	    return 0
 	end if
     end for
-    path_name &= SLASH
-    if equal(path_name[1..2], '.' & SLASH) then
+    path_name &= PATHSEP
+    if equal(path_name[1..2], '.' & PATHSEP) then
 	path_name = path_name[3..length(path_name)]
     end if
     path_name &= file_name
@@ -585,9 +581,9 @@ function blank_delim(sequence s)
     return list
 end function
 
-if platform() != LINUX then
+ifdef !UNIX then
     log_name = upper(log_name)
-end if
+end ifdef
 
 sequence cmd
 cmd = command_line()  -- ex guru.ex words...
@@ -671,20 +667,20 @@ object d
 if euphoria then
     d = getenv("EUDIR")
     if atom(d) then
-	if platform() = LINUX then
-	    puts(ERR, "EUDIR not set\n")
-	    abort(1)
-	else
-	    d = "C:\\EUPHORIA"
-	end if
+	    ifdef UNIX then
+		    puts(ERR, "EUDIR not set\n")
+	    	abort(1)
+		else
+		    d = "C:\\EUPHORIA"
+		end ifdef
     end if
     if sequence(dir(d)) then
 	-- reduce noise in Euphoria Help
 	skip_list &= {"*.HTM", "*.HTX", "*.DAT", "*.BAS", "*.BAT", "*.PRO",
 		      "LW.DOC", "BIND.EX", "EX.ERR"}
-	if platform() = LINUX then
+	ifdef UNIX then
 	    skip_list = lower(skip_list)
-	end if
+	end ifdef
 
 	if walk_dir(d, routine_id("look_at"), TRUE) then
 	end if

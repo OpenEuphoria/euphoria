@@ -1,8 +1,15 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
---**
+--****
 -- == Euphoria Database (EDS)
 --
+
+include machine.e
+include file.e
+include get.e
+include pretty.e
+
+--****
 -- === Database File Format
 -- 
 -- ==== Header
@@ -68,11 +75,6 @@
 -- All allocated blocks have the size of the block in bytes, stored just 
 -- before the address.
 
-include machine.e
-include file.e
-include misc.e
-include get.e
-
 --****
 -- === Constants
 -- ==== Error Status
@@ -110,30 +112,15 @@ constant INIT_FREE = 5,
 
 constant TRUE = 1
 
-integer current_db
-atom current_table
-sequence db_names, db_file_nums, db_lock_methods
+integer current_db = -1
+atom current_table = -1
+sequence db_names = {}, db_file_nums = {}, db_lock_methods = {}
 integer current_lock
-sequence SLASH_CHAR
-if platform() = LINUX then
-	SLASH_CHAR = "/"
-else
-	SLASH_CHAR = "\\/"
-end if
- 
-current_db = -1
-current_table = -1
-
-db_names = {}
-db_file_nums = {}
-db_lock_methods = {}
-
 sequence key_pointers
 
 procedure default_fatal(sequence msg)
 -- default fatal error handler - you can override this
-	puts(SCREEN, "Fatal Database Error: " & msg & '\n')
-	?1/0 -- to see call stack
+	crash("Fatal Database Error: %s", {msg})
 end procedure
 
 --****
@@ -1617,7 +1604,7 @@ function name_only(sequence s)
 	
 	filename = ""
 	for i = length(s) to 1 by -1 do
-		if find(s[i], SLASH_CHAR) then
+		if find(s[i], PATHSEP) then
 			exit
 		end if
 		filename = s[i] & filename
@@ -1694,27 +1681,28 @@ global function db_compress()
 	-- TODO: replace with shell commands from shell.e
 	--       move_file, copy_file, etc...
 	-- rename database as .tmp
-	if platform() = LINUX then
+	ifdef UNIX then
 		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)
-	elsif platform() = WIN32 then
+	elsifdef WIN32 then
 		system("ren \"" & new_path & "\" \"" & name_only(old_path) & '"', 2)
 	else    
 		-- DOS
 		system("ren " & new_path & " " & name_only(old_path), 2)
-	end if
+	end ifdef
 	
 	-- create a new database
 	index = db_create(new_path, DB_LOCK_NO)
 	if index != DB_OK then
 		-- failed, move it back to .edb
-		if platform() = LINUX then
+		ifdef UNIX then
 			system( "mv \"" & old_path & "\" \"" & new_path & '"', 2)
-		elsif platform() = WIN32 then
+		elsifdef WIN32 then
 			system("ren \"" & old_path & "\" \"" & name_only(new_path) & '"', 2)
 		else    
 			-- DOS
 			system("ren " & old_path & " " & name_only(new_path), 2)
-		end if
+		end ifdef
+		
 		return index
 	end if
 	

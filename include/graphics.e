@@ -49,8 +49,6 @@ global constant
 		 
 global integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
 
-include misc.e
-
 ifdef UNIX then
 	BLUE  = 4
 	CYAN =  6

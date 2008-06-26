@@ -4,13 +4,21 @@
 -- == Operating System Helpers
 --
 
-include misc.e
 include sequence.e
 include math.e
+
+constant M_SLEEP = 64
 
 --****
 -- === Constants
 --
+
+export constant 
+	DOS32   = 1, -- ex.exe
+	WIN32   = 2, -- exw.exe
+	LINUX   = 3, -- exu
+	FREEBSD = 3, -- exu
+	OSX     = 4  -- exu
 
 export constant
 	NO_PARAMETER = 0,
@@ -141,12 +149,20 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1,
 	return extras
 end function
 
-constant M_INSTANCE = 55
 --**
+global procedure sleep(atom t)
+-- go to sleep for t seconds
+-- allowing (on WIN32 and Linux) other processes to run
+	if t >= 0 then
+		machine_proc(M_SLEEP, t)
+	end if
+end procedure
+
+constant M_INSTANCE = 55
+
+--**
+-- Return hInstance on Windows, Process ID (pid) on Unix and 0 on DOS
+
 export function instance()
--- WIN32: returns hInstance - handle to this instance of the program
--- UNIX: returns the current process id or pid
--- DOS32: returns 0
 	return machine_func(M_INSTANCE, 0)
 end function
-

@@ -4,7 +4,7 @@
 -- == Unit Testing Framework
 -- === Constants
 
-include misc.e
+include pretty.e
 
 --
 -- Public Variables
@@ -15,24 +15,16 @@ export enum
 	TEST_SHOW_FAILED_ONLY, 
 	TEST_SHOW_ALL
 
-integer testCount, testsPassed, testsFailed
-
-testCount	= 0
-testsPassed = 0
-testsFailed = 0
-
 --
 -- Private variables
 --
 
+integer testCount = 0, testsPassed = 0, testsFailed = 0
 sequence filename
-integer verbose
-verbose = TEST_SHOW_FAILED_ONLY
+integer verbose = TEST_SHOW_FAILED_ONLY
 
-integer abort_on_fail
-abort_on_fail = 0
-integer wait_on_summary
-wait_on_summary = 0
+integer abort_on_fail = 0
+integer wait_on_summary = 0
 
 --
 -- Private utility functions

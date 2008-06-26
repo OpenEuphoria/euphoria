@@ -8,7 +8,6 @@ include mode.e
 set_mode( "interpret", 0 )
 
 -- standard Euphoria includes
-include misc.e
 include wildcard.e
 
 include global.e
@@ -37,4 +36,3 @@ end function
 
 -- main program:
 include main.e
-

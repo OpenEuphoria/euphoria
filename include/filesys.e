@@ -74,12 +74,18 @@ end function
 
 export function move_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
+	
 	psrc = allocate_string(src)
 	pdest = allocate_string(dest)
 	ret = c_func(xMoveFile, {psrc, pdest})
-	if platform() = LINUX then ret = not ret end if
+	
+	ifdef UNIX then
+		ret = not ret 
+	end ifdef
+	
 	free(pdest)
 	free(psrc)
+	
 	return ret
 end function
 
@@ -91,10 +97,16 @@ end function
 
 export function delete_file(sequence filename)
 	atom pfilename, ret
+
 	pfilename = allocate_string(filename)
 	ret = c_func(xDeleteFile, {pfilename})
-	if platform() = LINUX then ret = not ret end if
+	
+	ifdef UNIX then
+		ret = not ret
+	end ifdef
+
 	free(pfilename)
+
 	return ret
 end function
 

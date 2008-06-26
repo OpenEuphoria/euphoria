@@ -13,7 +13,7 @@ include wildcard.e
 include common.e
 include reswords.e
 include compress.e
-include misc.e
+include os.e
 include cominit.e
 include pathopen.e
 include sequence.e
@@ -138,11 +138,11 @@ sequence cl, filename
 cl = command_line()
 
 -- open our own .exe file
-if EUNIX then
+ifdef UNIX then
 	current_db = e_path_open(cl[1], "rb")
 else
 	current_db = open(cl[1], "rb") 
-end if
+end ifdef
 
 if current_db = -1 then
 	fatal("Can't open .exe file")
@@ -150,11 +150,11 @@ end if
 
 integer OUR_SIZE -- Must be less than or equal to actual backend size.
 				 -- We seek to this position and then search for the marker.
-				 
-if platform() = DOS32 then
+		
+ifdef DOS32 then		 
 	OUR_SIZE = 170000 -- backend.exe (Causeway compression)
 
-elsif EUNIX then
+elsifdef UNIX then
 	if EBSD then
 		-- set EBSD manually above on FreeBSD
 		OUR_SIZE = 150000  -- backendu for FreeBSD (not compressed)
@@ -164,7 +164,7 @@ elsif EUNIX then
 
 else
 	OUR_SIZE = 67000  -- backendw.exe (upx compression)
-end if
+end ifdef
 
 if seek(current_db, OUR_SIZE) then
 	fatal("seek failed")

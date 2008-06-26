@@ -9,13 +9,11 @@
 --
 -- === Constants
 
-include misc.e
-
 -- Mouse Events:
 global integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP,
 			   MIDDLE_DOWN, MIDDLE_UP, ANY_UP
 
-if platform() = LINUX then
+ifdef UNIX then
 	MOVE = 0
 	LEFT_DOWN = 4
 	LEFT_UP = 4
@@ -32,7 +30,7 @@ else
 	RIGHT_UP = 16
 	MIDDLE_DOWN = 32
 	MIDDLE_UP = 64
-end if
+end ifdef
 
 constant M_GET_MOUSE = 14,
 		 M_MOUSE_EVENTS = 15,

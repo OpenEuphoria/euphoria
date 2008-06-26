@@ -3,7 +3,6 @@
 -- Global declarations 
 
 include mode.e as mode
-include misc.e
 include common.e
 
 global constant MAJ_VER = 4, MIN_VER = 0, PAT_VER = 0

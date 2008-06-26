@@ -25,7 +25,7 @@ constant MYNAME   = "mydata.edb"
 include database.e  -- Euphoria Database System
 include get.e
 include sort.e
-include wildcard.e
+include sequence.e
 
 constant KEYBOARD = 0,
 	 SCREEN   = 1,

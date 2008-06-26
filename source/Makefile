@@ -132,13 +132,14 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/global.o \
-	./$(OBJDIR)/misc.o \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o \
 	./$(OBJDIR)/search.o \
 	./$(OBJDIR)/traninit.o \
-	./$(OBJDIR)/tranplat.o
+	./$(OBJDIR)/tranplat.o \
+	./$(OBJDIR)/math.o \
+	./$(OBJDIR)/os.o
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \

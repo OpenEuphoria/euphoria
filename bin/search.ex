@@ -27,30 +27,28 @@
 -- when you search "*.*" the following files 
 -- will be skipped (to save time):
 
-include misc.e
-
 sequence skip_list 
-if platform() = LINUX then
+ifdef UNIX then
     skip_list = {
-	"*.so", "*.lib", "*.tar", "*.o", "*.zip", "*.gz"
+		"*.so", "*.lib", "*.tar", "*.o", "*.zip", "*.gz", "*.dylib"
     }
 else
     skip_list = {
-	"*.EXE", "*.ZIP", "*.BMP", "*.GIF", "*.OBJ",
-	"*.DLL", "*.OBJ", "*.SWP", "*.PAR", "*.JPG", 
-	"*.WAV"
+		"*.EXE", "*.ZIP", "*.BMP", "*.GIF", "*.OBJ",
+		"*.DLL", "*.OBJ", "*.SWP", "*.PAR", "*.JPG", 
+		"*.WAV"
     }
-end if
+end ifdef
 
 -------- end of user-modifiable parameters 
 
 without type_check
 
-include misc.e
 include file.e
 include wildcard.e
 include sort.e
 include graphics.e
+include sequence.e
 
 constant KEYB = 0, SCREEN = 1, ERR = 2
 constant TRUE = 1, FALSE = 0
@@ -64,22 +62,23 @@ integer SLASH
 sequence log_name, log_path, home
 
 log_name = "search.out"
-if platform() = LINUX then
+ifdef UNIX then
     SLASH='/'
     home = getenv("HOME")
     if sequence(home) then
-	log_path = home & '/' & log_name -- put in home dir if possible
+		log_path = home & '/' & log_name -- put in home dir if possible
     else
-	log_path = log_name  
+		log_path = log_name  
     end if
 else
     SLASH='\\'
     log_path = getenv("EUDIR")
     if equal(log_path, -1) then
-	log_path = "C:" 
+		log_path = "C:" 
     end if
     log_path &= "\\" & log_name  -- put at top of C drive
-end if
+end ifdef
+
 sequence pos, cmd, string, orig_string, file_spec
 
 boolean match_case, scan_subdirs, wild_string, abort_now
@@ -337,54 +336,54 @@ function scan(sequence file_name, atom file_size, sequence string)
     return found_in_file
 end function
 
-function look_at(sequence path_name, sequence entry)
+function look_at(sequence path_name, sequence dir_entry)
 -- see if a file name qualifies for searching
     boolean matched_one
     sequence file_name
     
-    if find('d', entry[D_ATTRIBUTES]) then
-	return 0 -- a directory
+    if find('d', dir_entry[D_ATTRIBUTES]) then
+		return 0 -- a directory
     end if
-    file_name = entry[D_NAME]
+    file_name = dir_entry[D_NAME]
     
     if equal(file_name, log_name) then
-	return 0 -- avoid circularity
+		return 0 -- avoid circularity
     end if
     if equal(file_spec[1], "*.*") then
-	-- check skip list
-	for i = 1 to length(skip_list) do
-	    if wildcard_file(skip_list[i], file_name) then
-		skipped += 1
-		return get_key() >= ESC
-	    end if
-	end for
+		-- check skip list
+		for i = 1 to length(skip_list) do
+	    	if wildcard_file(skip_list[i], file_name) then
+				skipped += 1
+				return get_key() >= ESC
+		    end if
+		end for
     else
-	-- go through list of file specs
-	matched_one = FALSE
-	for i = 1 to length(file_spec) do
-	    if wildcard_file(file_spec[i], file_name) then
-		matched_one = TRUE
-		exit
-	    end if
-	end for
-	if not matched_one then
-	    skipped += 1
-	    return get_key() >= ESC
-	end if
+		-- go through list of file specs
+		matched_one = FALSE
+		for i = 1 to length(file_spec) do
+		    if wildcard_file(file_spec[i], file_name) then
+				matched_one = TRUE
+				exit
+	    	end if
+		end for
+		if not matched_one then
+	    	skipped += 1
+		    return get_key() >= ESC
+		end if
     end if
 
     path_name &= SLASH
     if equal(path_name[1..2], '.' & SLASH) then
-	path_name = path_name[3..length(path_name)]
+		path_name = path_name[3..length(path_name)]
     end if
     path_name &= file_name
     if length(string) = 0 then
-	-- just looking for file names
-	both_printf("%4d-%02d-%02d %2d:%02d", entry[D_YEAR..D_MINUTE])
-	both_printf(" %7d  %s\n", {entry[D_SIZE], path_name})
-	file_hits += 1
+		-- just looking for file names
+		both_printf("%4d-%02d-%02d %2d:%02d", dir_entry[D_YEAR..D_MINUTE])
+		both_printf(" %7d  %s\n", {dir_entry[D_SIZE], path_name})
+		file_hits += 1
     else
-	file_hits += scan(path_name, entry[D_SIZE], string)
+		file_hits += scan(path_name, dir_entry[D_SIZE], string)
     end if
     return abort_now or get_key() >= ESC
 end function
@@ -396,18 +395,18 @@ function blank_delim(sequence s)
     list = {}
     i = 1
     while i < length(s) do
-	while find(s[i], " \t\r") do
-	    i += 1
-	end while
-	if s[i] = '\n' then
-	    exit
-	end if
-	segment = ""
-	while not find(s[i], " \t\n\r") do
-	    segment &= s[i]
-	    i += 1
-	end while
-	list = append(list, segment)
+		while find(s[i], " \t\r") do
+		    i += 1
+		end while
+		if s[i] = '\n' then
+	    	exit
+		end if
+		segment = ""
+		while not find(s[i], " \t\n\r") do
+		    segment &= s[i]
+	    	i += 1
+		end while
+		list = append(list, segment)
     end while
     return list
 end function
@@ -422,13 +421,15 @@ procedure get_file_spec()
     puts(SCREEN, '\n')
     file_spec = blank_delim(spec)
     if length(file_spec) = 0 then
-	file_spec = {"*.*"}
+		file_spec = {"*.*"}
     end if
 end procedure
 
-if platform() != LINUX then
+ifdef UNIX then
+	-- do nothing
+else
     log_name = upper(log_name)
-end if
+end ifdef
 
 cmd = command_line()   -- ex search.ex [string]
 

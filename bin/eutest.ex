@@ -1,6 +1,5 @@
 #!/usr/bin/exu
 
-include misc.e
 include file.e
 include sequence.e
 include sort.e
@@ -60,4 +59,3 @@ end if
 printf(1, "\n%d file(s) run %d file(s) failed, %.1f%% success\n", {total, failed, score})
 
 abort(failed > 0)
-

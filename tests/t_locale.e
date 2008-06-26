@@ -44,4 +44,3 @@ test_equal("w() sprintf() #2", "Hola, Mundo!",
     sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
 
 test_embedded_report()
-

@@ -6,7 +6,6 @@
 
 include dll.e
 include machine.e
-include misc.e
 
 without warning
 
@@ -113,6 +112,7 @@ global function message_box(sequence text, sequence title, object style)
 							 text_ptr, title_ptr, or_style})
 	free(text_ptr)
 	free(title_ptr)
+
 	return ret
 end function
 

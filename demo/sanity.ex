@@ -17,17 +17,11 @@ include machine.e
 include file.e
 include wildcard.e as wild
 include image.e
-include misc.e
 include dll.e
 include msgbox.e
 include math.e
-
-integer SLASH
-ifdef UNIX then
-    SLASH = '/'
-else
-    SLASH = '\\'
-end ifdef
+include os.e
+include sequence.e
 
 constant msg = 1 -- place to send messages
 atom t
@@ -718,14 +712,16 @@ procedure patterns()
     if wildcard_file("ABC*DEF.*", "XBCDEF.E") then
 	abort()
     end if
-    if platform() != LINUX and not wildcard_file("A?B?C?D", "a1b2C3D") then
-	abort()
-    end if
+    ifdef !UNIX then
+    	if not wildcard_file("A?B?C?D", "a1b2C3D") then
+			abort()
+    	end if
+    end ifdef
     if wildcard_match("AAA", "AAa") then
-	abort()
+		abort()
     end if
     if not wildcard_match("??Z*Z*", "ABZ123Z123") then
-	abort()
+		abort()
     end if
 end procedure
 
@@ -1082,35 +1078,36 @@ procedure corrupt(sequence filename)
     full_name = lower(eudir & filename)
     puts(msg, "\n\n")
     if last_sum = 0 then
-	puts(msg, full_name & " does not exist. \n")
-	puts(msg, "The install is not correct. ")
+		puts(msg, full_name & " does not exist. \n")
+		puts(msg, "The install is not correct. ")
     else
-	printf(msg, "%s seems to be incorrect. \n", {full_name})
-	if    last_sum = SUM_EX then
-	    puts(msg, "It's the Complete Edition ex.exe file. ")
-	elsif last_sum = SUM_EXW then
-	    puts(msg, "It's the Complete Edition exw.exe file. ")
-	elsif last_sum = SUM_EXU then
-	    puts(msg, "It's the Complete Edition exu file. ")
-	else                
-	    printf(msg, "Its check-sum (%d) is wrong. \n", last_sum)
-	    puts(msg, 
-	    "Either it's an old version, or it has been corrupted. \n")
-	    puts(msg, 
-	    "You can download the latest version of Euphoria from: \n")
-	    puts(msg, "    http://www.RapidEuphoria.com/ ")
-	end if
+		printf(msg, "%s seems to be incorrect. \n", {full_name})
+		if    last_sum = SUM_EX then
+	    	puts(msg, "It's the Complete Edition ex.exe file. ")
+		elsif last_sum = SUM_EXW then
+		    puts(msg, "It's the Complete Edition exw.exe file. ")
+		elsif last_sum = SUM_EXU then
+		    puts(msg, "It's the Complete Edition exu file. ")
+		else                
+		    printf(msg, "Its check-sum (%d) is wrong. \n", last_sum)
+	    	puts(msg, 
+			    "Either it's an old version, or it has been corrupted. \n")
+		    puts(msg, 
+			    "You can download the latest version of Euphoria from: \n")
+		    puts(msg, "    http://www.RapidEuphoria.com/ ")
+		end if
     end if
     puts(msg, "\n\n\n")
     the_end()
 end procedure
 
 procedure reboot_msg()
-    if platform() = LINUX then
-	puts(msg, "Did you forget to edit your profile and log in again?\n")
+	ifdef UNIX then
+		puts(msg, "Did you forget to edit your profile and log in again?\n")
     else    
-	puts(msg, "Did you forget to reboot (restart) your machine?\n")
-    end if
+		puts(msg, "Did you forget to reboot (restart) your machine?\n")
+    end ifdef
+    
     puts(msg, "See INSTALL.DOC\n")
     the_end()
 end procedure
@@ -1145,20 +1142,20 @@ procedure check_install(integer doit)
     end if
 	
     temp_eudir = upper(eudir)
-    slash = find(SLASH, temp_eudir)
+    slash = find(PATHSEP, temp_eudir)
     if slash then
 	-- safer to ignore C:\ on WinDOS
 	temp_eudir = temp_eudir[slash+1..$]
     end if
     
-    if not match(temp_eudir & SLASH & "BIN", wild:upper(path)) then
-	puts(msg, "Note: " & eudir & SLASH & "BIN is not on your PATH.\n")
+    if not match(temp_eudir & PATHSEP & "BIN", wild:upper(path)) then
+	puts(msg, "Note: " & eudir & PATHSEP & "BIN is not on your PATH.\n")
 	reboot_msg()
     end if
 
     -- check for corrupted or incorrect files:
-    if platform() = LINUX then
-	return 
+    ifdef UNIX then
+    	return
 --      eudir &= "/bin/"
 --      ex_sum = checksum(eudir & "exu")
 --      if ex_sum = SUM_EXU then
@@ -1171,16 +1168,16 @@ procedure check_install(integer doit)
 --      end if
     else    
 	-- DOS & Windows
-	eudir &= "\\BIN\\"
-	ex_sum = checksum(eudir & "ex.exe")
-	if ex_sum = SUM_EX then
-	    if checksum(eudir & "exw.exe") != SUM_EXW then
-		corrupt("exw.exe")
-	    end if
-	else
-	    corrupt("ex.exe")
-	end if   
-    end if
+		eudir &= "\\BIN\\"
+		ex_sum = checksum(eudir & "ex.exe")
+		if ex_sum = SUM_EX then
+		    if checksum(eudir & "exw.exe") != SUM_EXW then
+				corrupt("exw.exe")
+		    end if
+		else
+		    corrupt("ex.exe")
+		end if   
+    end ifdef
 end procedure
 
 without profile
@@ -1192,42 +1189,42 @@ global procedure sanity()
 
     check_install(FALSE) --TRUE)
 
-    if platform() = WIN32 then
-	vga = FALSE
-	ok = message_box("Run the test?", "Euphoria WIN32 Sanity Test", 
-	{MB_OKCANCEL, MB_SYSTEMMODAL})
-	if ok = IDCANCEL then
-	    return
-	end if
+	ifdef WIN32 then
+		vga = FALSE
+		ok = message_box("Run the test?", "Euphoria WIN32 Sanity Test", 
+			{MB_OKCANCEL, MB_SYSTEMMODAL})
+		if ok = IDCANCEL then
+		    return
+		end if
     else
-	-- some text mode tests
-	clear_screen()
-	position(1,1)
-	puts(1, "ABC")
-	position(2,1)
-	puts(1, "def")
+		-- some text mode tests
+		clear_screen()
+		position(1,1)
+		puts(1, "ABC")
+		position(2,1)
+		puts(1, "def")
 	
-	s1 = save_text_image({1,1}, {2,3})
-	display_text_image({10,20}, s1)
-	s2 = save_text_image({10, 20}, {11, 22})
-	if not equal(s1, s2) then
-	    abort()
-	end if
+		s1 = save_text_image({1,1}, {2,3})
+		display_text_image({10,20}, s1)
+		s2 = save_text_image({10, 20}, {11, 22})
+		if not equal(s1, s2) then
+	    	abort()
+		end if
 
-	-- graphics mode and other tests
-	vga = not graphics_mode(18) 
-	v = video_config()
-	clear_screen()
-	position(12, 20)
-	if compare({12, 20}, get_position()) != 0 then
-	    abort()
-	end if
-	puts(msg, "Euphoria SANITY TEST ... ")
-    end if
+		-- graphics mode and other tests
+		vga = not graphics_mode(18) 
+		v = video_config()
+		clear_screen()
+		position(12, 20)
+		if compare({12, 20}, get_position()) != 0 then
+		    abort()
+		end if
+		puts(msg, "Euphoria SANITY TEST ... ")
+    end ifdef
 
-    if platform() = WIN32 then
-	win32_tests()
-    end if
+	ifdef WIN32 then
+		win32_tests()
+    end ifdef
 
     for j = 0 to 20 by 2 do  
 	cmd_line = command_line()
@@ -1241,8 +1238,10 @@ global procedure sanity()
 	if length(dir(".")) < 2 then
 	    abort()
 	end if
-	if vga and platform() != LINUX and platform() != OSX then 
-	    testgr()
+	if vga then
+		ifdef !UNIX then
+			testgr()
+		end ifdef
 	end if
 	make_sound()
 	same(built_in(), 1)
@@ -1284,7 +1283,7 @@ global procedure sanity()
 		system("del sanityio.tst", 2)
     end ifdef  
     save_colors = {}
-    if platform() = DOS32 then
+    ifdef DOS32 then
       for i = 0 to v[VC_NCOLORS]-1 do
 	  save_colors = append(save_colors, palette(i, {0,0,0}))
       end for
@@ -1294,13 +1293,12 @@ global procedure sanity()
       end for
       sound(0)
       all_palette(save_colors)
-    end if
-    if platform() = WIN32 then
-	ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
+	elsifdef WIN32 then
+		ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
     else
-	puts(msg, "\nPASSED (100%)\n")
-	the_end()    
-    end if
+		puts(msg, "\nPASSED (100%)\n")
+		the_end()    
+    end ifdef
 end procedure
 
 integer z
@@ -1315,5 +1313,3 @@ if z != 55 then
 end if
 
 sanity()
-
-

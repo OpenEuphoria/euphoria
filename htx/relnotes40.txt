@@ -21,6 +21,12 @@
   from **wildcard.e** to **sequence.e**. $$(doneby Jeremy Cowgar.)
 * **Moved** functions/constant **PI**, **arccos**, **arcsin** 
   moved from **misc.e** to **math.e**. $$(doneby Jeremy Cowgar.)
+* **Moved** **pretty_print()** from **misc.e** to **pretty.e** 
+  $$(doneby Jeremy Cowgar)
+* **Moved** **bin/syncolor.e** and **bin/keywords.e** to
+  **include/euphoria**. $$(doneby Jeremy Cowgar)
+* **Moved** **instance()** and **sleep()** from **misc.e** to **os.e**
+  $$(doneby Jeremy Cowgar)
 * Documentation moved to a new format. $$(doneby Jeremy Cowgar and CK Lester)
 
 ==== New Features

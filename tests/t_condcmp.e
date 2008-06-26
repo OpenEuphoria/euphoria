@@ -1,5 +1,5 @@
-include misc.e
 include unittest.e
+include os.e
 
 ifdef hello then
     test_fail("not defined #1")

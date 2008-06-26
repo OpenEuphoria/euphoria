@@ -4,7 +4,6 @@
 -- == Wildcard Matching
 -- === Routines
 
-include misc.e
 include sequence.e as seq -- upper/lower
 
 function qmatch(sequence p, sequence s)
@@ -96,15 +95,20 @@ end function
 --   only match when the file name part has "ABC" at the end.
 
 global function wildcard_file(sequence pattern, sequence filename)
-	if platform() != LINUX then
+	ifdef UNIX then
+		-- Nothing
+	else
 		pattern = seq:upper(pattern)
 		filename = seq:upper(filename)
-	end if
+	end ifdef
+	
 	if not find('.', pattern) then
 		pattern = pattern & '.'
 	end if
+	
 	if not find('.', filename) then
 		filename = filename & '.'
 	end if
+	
 	return wildcard_match(pattern, filename)
 end function
