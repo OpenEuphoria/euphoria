@@ -2,8 +2,8 @@
 @@(bugfix **$$(color #009999 bug fixed:)**)@
 @@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
 
-=== Version 4.0
-==== Bug Fixes
+== Version 4.0
+=== Bug Fixes
 
 * $$(bugfix) 1855414. ##open()##'s max path length is now determined by the underlying 
   operating system and not a generic default. ##open()## also now returns -1 when the 
@@ -12,7 +12,7 @@
   with .abcd. ##dir()## also now supports wildcard characters (* and ?) on all platforms. 
   $$(doneby Jeremy Cowgar)
 
-==== Changes
+=== Changes
 
 * Comments may now be embedded in data passed to **value()** in **get.e**. 
   $$(doneby C. Cuvier)
@@ -28,7 +28,7 @@
   $$(doneby Jeremy Cowgar)
 * Documentation moved to a new format. $$(doneby Jeremy Cowgar and CK Lester)
 
-==== New Features
+=== New Features
 
 * Include file names with accent characters now supported. $$(doneby C. Cuvier)
 * Enhanced symbol resolution to take into account information regarding which files were 
@@ -96,7 +96,7 @@
 * ##-lint## option added that will display **all** warnings regardless of the file's
   ##with/without warning## setting. $$(doneby Jeremy Cowgar.)
 
-==== New Routines
+=== New Routines/Constants
 
 * Added **value_from()** in **get.e** to return additional information about the parsing 
   activity. $$(doneby C. Cuvier)

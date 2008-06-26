@@ -1,0 +1,55 @@
+== Version 3.0.1 November 3, 2006:
+This release cleans up a number of bugs and documentation errors in 3.0.0.
+
+=== Improved Documentation
+<ul>
+<li>
+     A separate new document on a href=tasking.htm>multitasking</a>
+     was added.
+
+<li>
+     Obsolete pre-open-source concepts in the 3.0.0 documentation
+     were deleted or corrected.
+     
+</ul>
+
+=== Bug Fixes
+<ul>
+<li>
+     Euphoria-coded .dll / .so files were not working at all, due to a 
+     multitasking-related glitch. Thanks to Andrea Cini.
+     
+     Note: execution of multitasking built-in routines is currently not 
+     supported inside a Euphoria-coded .dll / .so. 
+     You'll get a compile-time error message from the 
+     Translator if you use the -dll option and your library source code 
+     contains multitasking operations. Other than that, use of 
+     Euphoria-coded .dll / .so files by main programs that do 
+     multitasking is fine.</li>
+    
+<li>
+     A text console bug was fixed.
+     It involved output to the screen involving tabs and/or 
+     wrap-around (at 80 columns). Thanks to 
+     Pete Lomax, Juergen Luethje, Matt Lewis.</li>
+<li>
+     bind.bat, bindw.bat and shroud.bat were changed to use %EUDIR%
+     rather than \EUPHORIA. Thanks to Ray Smith.</li>
+<li>
+     syncolor.e now includes keywords.e (relative to euphoria\bin)
+     rather than \euphoria\bin\keywords.e. Thanks to Rick Bettis.</li>
+    
+</ul>
+
+=== C Source Code Changes
+<ul>
+<li>
+     All of the #ifdef ENCURSES code was stripped out.
+     We don't plan to use ncurses again, and this change
+     makes parts of the source code much more readable.</li>
+<li>
+     A thread5() machine language macro was added to be_execute.c 
+     This helps the interpreter to compile correctly with 
+     Open Watcom, avoiding a C optimizer bug.
+     Thanks to Matt Lewis. </li>
+</ul>  

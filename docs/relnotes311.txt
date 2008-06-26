@@ -1,0 +1,37 @@
+== Version 3.1.1 August 2007:
+
+This release is a minor update to fix some bugs.
+
+=== Bug Fixes
+
+<ul>
+<li>
+     **<font color="#009999">bug fixed: </font>**
+      A storage leak (memory allocated but never freed) 
+      was introduced in version 3.1, on the Linux and FreeBSD platforms.
+      Fixed by Matthew Lewis.</li>
+<li>
+     **<font color="#009999">bug fixed: </font>**
+     When Euphoria failed to open the main program file, the error
+     message would sometimes show the wrong file type.
+     Fixed by Matthew Lewis.</li>
+<li>
+     **<font color="#009999">bug fixed: </font>**
+     Bugs in the new library routines, find_from() and match_from()
+     were corrected. The third argument (the starting index) 
+     is now tightly-checked. Fixed by Matthew Lewis and Rob Craig.</li>
+<li>
+     **<font color="#009999">bug fixed: </font>**
+    The ed script on Linux was changed to allow blanks in the path
+    of the file to be edited. Fixed by Rob Craig.</li>
+<li>
+     **<font color="#009999">bug fixed: </font>**
+    Double-quotes were added to ed.ex so Esc e 
+    will work with paths containing blanks.
+    Reported by Alex Caracatsanis. Fixed by Rob Craig.</li>
+<li>
+     **<font color="#009999">bug fixed: </font>**
+    database.e was fixed so forward slashes are allowed in the 
+    db_compress() file name. Reported by Frank Dowling. 
+    Fixed by Rob Craig.</li>
+</ul>

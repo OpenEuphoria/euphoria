@@ -2,8 +2,6 @@
 ../../docs/welcome.txt
 ../../docs/install.txt
 ../../docs/what2do.txt
-../../docs/relnotes.txt
-../../docs/relnotes40.txt
 #TODO: other release notes
 #TODO: ../License.txt
 
@@ -58,3 +56,7 @@
 ../../include/unicode.e
 ../../include/unittest.e
 ../../include/wildcard.e
+
+# Release Notes
+../../docs/relnotes.txt
+../../docs/relnotes400.txt
