@@ -1160,7 +1160,6 @@ global procedure emit_op(integer op)
 		-- only for translator
 		emit_opcode( op )
 		emit( cg_stack[$] )  -- the case index
-		printf(1,"emiting case %d\n", cg_stack[$] )
 		cg_stack = cg_stack[1..$-1]
 		
 	-- 0 inputs, 1 output 

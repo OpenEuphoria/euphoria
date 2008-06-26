@@ -183,14 +183,15 @@ end procedure
 -- pretty print variables
 integer pretty_end_col, pretty_chars, pretty_start_col, pretty_level, 
 		pretty_file, pretty_ascii, pretty_indent, pretty_ascii_min,
-		pretty_ascii_max, pretty_line_count, pretty_line_max, pretty_dots
+		pretty_ascii_max, pretty_line_count, pretty_line_max, pretty_dots,
+		pretty_line_breaks, pretty_printing
 sequence pretty_fp_format, pretty_int_format, pretty_line
 
 procedure pretty_out(object text)
 -- Output text, keeping track of line length.
 -- Buffering lines speeds up Windows console output.
 	pretty_line &= text
-	if equal(text, '\n') then
+	if equal(text, '\n') and pretty_printing then
 		puts(pretty_file, pretty_line)
 		pretty_line = ""
 		pretty_line_count += 1
@@ -204,6 +205,10 @@ end procedure
 
 procedure cut_line(integer n)
 -- check for time to do line break
+	if not pretty_line_breaks then	
+		pretty_chars = 0
+		return
+	end if
 	if pretty_chars + n > pretty_end_col then
 		pretty_out('\n')
 		pretty_chars = 0
@@ -212,6 +217,10 @@ end procedure
 
 procedure indent()
 -- indent the display of a sequence
+	if not pretty_line_breaks then	
+		pretty_chars = 0
+		return
+	end if
 	if pretty_chars > 0 then
 		pretty_out('\n')
 		pretty_chars = 0
@@ -228,6 +237,8 @@ function show(integer a)
 		return "\\n"
 	elsif a = '\r' then
 		return "\\r"
+	elsif a = '\\' then
+		return "\\\\"
 	else
 		return a
 	end if
@@ -247,13 +258,13 @@ procedure rPrint(object a)
 					if (a >= pretty_ascii_min and a <= pretty_ascii_max) then
 						sbuff = '\'' & a & '\''  -- display char only
 					
-					elsif find(a, "\t\n\r") then
+					elsif find(a, "\t\n\r\\") then
 						sbuff = '\'' & show(a) & '\''  -- display char only
 					
 					end if
 				else -- pretty ascii 1 or 2
 					 -- add display character to number?
-					if (a >= pretty_ascii_min and a <= pretty_ascii_max) then
+					if (a >= pretty_ascii_min and a <= pretty_ascii_max) and pretty_ascii < 2 then
 						sbuff &= '\'' & a & '\'' -- add to numeric display
 					end if
 				end if
@@ -276,7 +287,7 @@ procedure rPrint(object a)
 			end if
 			if not integer(a[i]) or
 			   (a[i] < pretty_ascii_min and 
-				(pretty_ascii < 3 or not find(a[i], "\t\r\n"))) or 
+				(pretty_ascii < 2 or not find(a[i], "\t\r\n\\"))) or 
 				a[i] > pretty_ascii_max then
 				all_ascii = 0
 			end if
@@ -321,6 +332,47 @@ procedure rPrint(object a)
 	end if
 end procedure
 
+
+export constant PRETTY_DEFAULT = {1,2,1,78,"%d","%.10g",32,127 - (platform() = LINUX),1000000000,1}
+export enum
+	DISPLAY_ASCII = 1,
+	INDENT,
+	START_COLUMN,
+	WRAP,
+	INT_FORMAT,
+	FP_FORMAT,
+	MIN_ASCII,
+	MAX_ASCII,
+	MAX_LINES,
+	LINE_BREAKS
+
+procedure pretty( object x, sequence options )
+
+	if length(options) < length( PRETTY_DEFAULT ) then
+		options &= PRETTY_DEFAULT[length(options)+1..$]
+	end if
+	
+	-- set options 
+	pretty_ascii = options[DISPLAY_ASCII] 
+	pretty_indent = options[INDENT]
+	pretty_start_col = options[START_COLUMN]
+	pretty_end_col = options[WRAP]
+	pretty_int_format = options[INT_FORMAT]
+	pretty_fp_format = options[FP_FORMAT]
+	pretty_ascii_min = options[MIN_ASCII]
+	pretty_ascii_max = options[MAX_ASCII]
+	pretty_line_max = options[MAX_LINES]
+	pretty_line_breaks = options[LINE_BREAKS]
+	
+	pretty_chars = pretty_start_col
+	
+	pretty_level = 0 
+	pretty_line = ""
+	pretty_line_count = 0
+	pretty_dots = 0
+	rPrint(x)
+end procedure
+
 --**
 -- Print, to file or device fn, an object x, using braces { , , , }, indentation, and multiple lines 
 -- to show the structure.
@@ -328,6 +380,8 @@ end procedure
 -- Parameters:
 -- # file number to write to
 -- # the object to display
+-- # is an (up to) 10-element options sequence: Pass {} to select the defaults, or set options 
+--   as below:
 -- # is an (up to) 8-element options sequence: Pass {} to select the defaults, or set options as below:
 --   ## display ASCII characters:
 --      *** 0: never
@@ -343,7 +397,8 @@ end procedure
 --   ## format to use for floating-point numbers - default: "%.10g"
 --   ## minimum value for printable ASCII - default 32
 --   ## maximum value for printable ASCII - default 127
---   ## maximum number of lines to output
+--   ## maximum number of lines to output 
+--   ## line breaks between elements   - default 1
 -- 
 -- If the length is less than 8, unspecified options at 
 -- the end of the sequence will keep the default values.    
@@ -351,6 +406,19 @@ end procedure
 -- plus 5-character indentation, with defaults for everything else  
 --
 -- Comments:
+-- The default options can be accessed using the exported constant PRETTY_DEFAULT, and the
+-- elements may be accessed using the enum:
+-- ## DISPLAY_ASCII
+-- ## INDENT
+-- ## START_COLUMN
+-- ## WRAP
+-- ## INT_FORMAT
+-- ## FP_FORMAT
+-- ## MIN_ASCII
+-- ## MAX_ASCII
+-- ## MAX_LINES
+-- ## LINE_BREAKS
+--
 -- The display will start at the current cursor position. Normally you will want to call 
 -- pretty_print() when the cursor is in column 1 (after printing a <code>\n</code> character). 
 -- If you want to start in a different column, you should call position() and specify a value 
@@ -415,59 +483,29 @@ end procedure
 --     }
 -- }
 -- </eucode>
-
 global procedure pretty_print(integer fn, object x, sequence options)
-	integer n
-	
-	-- set option defaults 
-	pretty_ascii = 1             --[1] 
-	pretty_indent = 2            --[2]
-	pretty_start_col = 1         --[3]
-	pretty_end_col = 78          --[4]
-	pretty_int_format = "%d"     --[5]
-	pretty_fp_format = "%.10g"   --[6]
-	pretty_ascii_min = 32        --[7]
-	pretty_ascii_max = 127       --[8] 
-			- (platform() = LINUX) -- DEL is a problem with ANSI code display
-	pretty_line_max = 1000000000 --[9]
-	
-	n = length(options)
-	if n >= 1 then
-		pretty_ascii = options[1] 
-		if n >= 2 then
-			pretty_indent = options[2]
-			if n >= 3 then
-				pretty_start_col = options[3]
-				if n >= 4 then
-					pretty_end_col = options[4]
-					if n >= 5 then
-						pretty_int_format = options[5]
-						if n >= 6 then
-							pretty_fp_format = options[6]
-							if n >= 7 then
-								pretty_ascii_min = options[7]
-								if n >= 8 then
-									pretty_ascii_max = options[8]
-									if n >= 9 then
-										pretty_line_max = options[9]
-									end if
-								end if
-							end if
-						end if
-					end if
-				end if
-			end if
-		end if
-	end if  
-	
-	pretty_chars = pretty_start_col
+	pretty_printing = 1
 	pretty_file = fn
-	pretty_level = 0 
-	pretty_line = ""
-	pretty_line_count = 0
-	pretty_dots = 0
-	rPrint(x)
+	pretty( x, options )
 	puts(pretty_file, pretty_line)
 end procedure
 --**
 
+--**
+-- Format an object x, using braces { , , , }, indentation, and multiple lines to show the structure.
+-- Parameters:
+-- # file number to write to
+-- # the object to display
+-- # is an (up to) 10-element options sequence: Pass {} to select the defaults, or set options 
+--
+-- Comments:
+-- This function formats objects the same as pretty_print().
+--
+-- See Also:
+--  pretty_print
+export function pretty_sprint(object x, sequence options)
+	pretty_printing = 0
+	pretty( x, options )
+	return pretty_line
+end function
+--**
