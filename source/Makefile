@@ -366,7 +366,7 @@ eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o eubackend
 
 install :
-	mkdir -p $(DESTDIR)/usr/share/euphoria/include
+	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/linux
@@ -381,7 +381,8 @@ install :
 	mkdir -p $(DESTDIR)/usr/include/euphoria
 	install exu ecu eubackend eubind eushroud $(DESTDIR)/usr/bin
 	install ecu.a $(DESTDIR)/usr/lib
-	install ../include/*  $(DESTDIR)/usr/share/euphoria/include 
+	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
+	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)/usr/include/euphoria
 	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*

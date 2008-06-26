@@ -109,7 +109,7 @@ update :
 	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
-	-cp $(EU_BASE_DIR)/htx/*.1 $(DEB_SOURCE_DIR)/debian
+	-cp $(EU_BASE_DIR)/doc/*.1 $(DEB_SOURCE_DIR)/debian
 	-cp control $(DEB_SOURCE_DIR)/debian
 	-cp changelog $(DEB_SOURCE_DIR)/debian
 	-cp copyright $(DEB_SOURCE_DIR)/debian
@@ -120,7 +120,7 @@ dh-make : update
 	@-rm $(DEB_SOURCE_DIR)/debian/emacsen*
 	@cp rules $(DEB_SOURCE_DIR)/debian
 	@cp postinst $(DEB_SOURCE_DIR)/debian;
-	@cp ../htx/*.1 $(DEB_SOURCE_DIR)/debian;
+	@cp ../doc/*.1 $(DEB_SOURCE_DIR)/debian;
 	@cp control $(DEB_SOURCE_DIR)/debian;
 
 
