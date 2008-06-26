@@ -24,7 +24,8 @@ set_mode( "interpret", 1 )
 
 
 -- standard Euphoria includes
-include misc.e
+include os.e
+include pretty.e
 include wildcard.e
 
 -- INTERPRETER front-end

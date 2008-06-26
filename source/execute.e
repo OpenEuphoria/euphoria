@@ -14,6 +14,7 @@
 -- than the official RDS interpreter. The official interpreter has a 
 -- carefully hand-coded back-end written in C.
 
+include os.e
 include dll.e
 include file.e
 include global.e
