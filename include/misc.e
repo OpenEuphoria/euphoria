@@ -151,13 +151,6 @@ constant M_INSTANCE = 55, M_SLEEP = 64
 -- puts(output, 'A')  -- the single byte 65 will be sent to output
 -- </eucode>
 
---**
-global function instance()
--- WIN32: returns hInstance - handle to this instance of the program
--- DOS32: returns 0
-	return machine_func(M_INSTANCE, 0)
-end function
-
 --*
 global procedure sleep(atom t)
 -- go to sleep for t seconds

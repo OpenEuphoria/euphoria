@@ -141,3 +141,12 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1,
 	return extras
 end function
 
+constant M_INSTANCE = 55
+--**
+export function instance()
+-- WIN32: returns hInstance - handle to this instance of the program
+-- UNIX: returns the current process id or pid
+-- DOS32: returns 0
+	return machine_func(M_INSTANCE, 0)
+end function
+

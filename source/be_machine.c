@@ -4910,14 +4910,20 @@ object machine(object opcode, object x)
 				break;
 			
 			case M_INSTANCE:
+#ifdef EUNIX
+				if ((unsigned)getpid() <= (unsigned)MAXINT)
+					return (unsigned)getpid();
+				else
+					return NewDouble((double)(unsigned)getpid());
+#else
 #ifdef EWINDOWS             
 				if ((unsigned)winInstance <= (unsigned)MAXINT)
 					return (unsigned)winInstance;
 				else
 					return NewDouble((double)(unsigned)winInstance);
-#else
 				return 0;
-#endif
+#endif //EWINDOWS
+#endif //EUNIX
 				break;
 				
 			case M_FREE_CONSOLE:
