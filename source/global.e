@@ -323,6 +323,7 @@ global constant warning_names = {
 	"lint_warning"
 }
 
+global integer Lint_is_on = 0
 
 global integer OpWarning = default_maskable_warnings -- compile-time warnings option
 global integer prev_OpWarning = OpWarning 

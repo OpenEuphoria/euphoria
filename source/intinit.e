@@ -31,5 +31,9 @@ global procedure intoptions()
 			return -- non "-" items are assumed to be the source file
 		end if      
 	end while
+	if Lint_is_on then -- overrides any -W/-X switches
+		OpWarning = lint_warning_flag
+		prev_OpWarning = OpWarning
+	end if
 end procedure
 

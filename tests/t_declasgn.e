@@ -18,7 +18,7 @@ end function
 test_equal("Assign on declare 1",s0,"Useless code")
 test_equal("Assign on declare 1",n,3)
 test_equal("Use default params in initial value",7,foo())
-warning("Useless code",64,"")
+warning("Useless code")
 without warning &= "short_circuit_warning"
 if n and f()=7 then end if
 warning_file("warning.lst")

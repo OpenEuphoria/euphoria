@@ -36,6 +36,10 @@ global procedure Warning(sequence msg, integer mask, sequence args = {})
 		return
 	end if
 
+	if Lint_is_on then
+		mask = 0
+	end if
+
 	if mask = 0 or and_bits(OpWarning, mask) then
 		p = mask -- =0 for non maskable warnings - none implemented so far
 		if p then

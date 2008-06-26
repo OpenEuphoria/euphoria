@@ -115,8 +115,7 @@ global procedure common_options( integer option, integer ix )
 		end if
 
 	elsif option = LINT_OPTION then
-		OpWarning = lint_warning_flag
-		prev_OpWarning = OpWarning
+		Lint_is_on = 1
 
 	end if
 
