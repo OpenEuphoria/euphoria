@@ -15,7 +15,8 @@ global constant COMMON_OPTIONS = {
 	"-I",    -- specify a directory to search for include files
 	"-D",    -- define a word
 	"-LINT", -- enable all warnings
-	"-W"     -- defines warning level
+	"-W",    -- defines warning level
+	"-X"     -- defines warning level by exclusion
 }
 
 global enum
@@ -23,7 +24,8 @@ global enum
 	INCDIR_OPTION, -- -include dirs
 	DEFINE_OPTION, -- ifdef defines
 	LINT_OPTION,   -- enable all warnings
-	WARNING_OPTION -- startup warning level
+	WARNING_OPTION, -- startup warning level
+	WARNING_EXCLUDE_OPTION -- startup warning level by exclusion
 
 
 -- s = the text of the switch
@@ -84,11 +86,27 @@ global procedure common_options( integer option, integer ix )
 		if ix < Argc then
 			n = find(Argv[ix+1],warning_names)
 			if n>0 then
-				if option_W then
+				if option_W=1 then
 					OpWarning = or_bits(OpWarning, warning_flags[n])
 				else
 					option_W = 1
 					OpWarning = warning_flags[n]
+				end if
+				prev_OpWarning = OpWarning
+			end if
+			add_switch(Argv[ix+1], 1)
+			args += 1
+		end if
+
+	elsif option = WARNING_EXCLUDE_OPTION then
+		if ix < Argc then
+			n = find(Argv[ix+1],warning_names)
+			if n>0 then
+				if option_W=-1 then
+					OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
+				else
+					option_W = -1
+					OpWarning = lint_warning_flag - warning_flags[n]
 				end if
 				prev_OpWarning = OpWarning 
 			end if
@@ -97,7 +115,8 @@ global procedure common_options( integer option, integer ix )
 		end if
 
 	elsif option = LINT_OPTION then
-		lint_warning = 1
+		OpWarning = lint_warning_flag
+		prev_OpWarning = OpWarning
 
 	end if
 

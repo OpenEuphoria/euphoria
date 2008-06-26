@@ -200,9 +200,10 @@ enum
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
-	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE, IFDEF, ELSIFDEF}) then  
-		Warning(sprintf("%s:%d - statement after %s will never be executed", 
-				{name_ext(file_name[current_file_no]), line_number, keyword}),0)
+	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE, IFDEF, ELSIFDEF}) then
+		Warning(sprintf("%s:%d - statement after %%s will never be executed",
+					{name_ext(file_name[current_file_no]), line_number}),
+					not_reached_warning_flag, {keyword})
 	end if
 end procedure
 
@@ -608,7 +609,7 @@ procedure UndefinedVar(symtab_index s)
 		CompileErr(errmsg)
 
 	elsif length(symbol_resolution_warning) then
-		Warning( symbol_resolution_warning, resolution_warning_flag )
+		Warning( symbol_resolution_warning[1], resolution_warning_flag, symbol_resolution_warning[2])
 	end if
 end procedure
 
@@ -833,10 +834,9 @@ procedure Factor()
 			
 			if short_circuit > 0 and short_circuit_B and
 					  find(id, {FUNC, QUALIFIED_FUNC}) then
-				Warning(sprintf(
-				"%.99s:%d - call to %s() might be short-circuited", 
-				{file_name[current_file_no], line_number, 
-				 SymTab[tok[T_SYM]][S_NAME]}),sc_warning_flag)
+				Warning(sprintf("%.99s:%d - call to %%s() might be short-circuited",
+						{file_name[current_file_no], line_number}),
+				 		short_circuit_warning_flag, {SymTab[tok[T_SYM]][S_NAME]})
 			end if
 		end if
 		tok_match(LEFT_ROUND)
@@ -2573,8 +2573,9 @@ procedure SubProg(integer prog_type, integer scope)
 					else
 						again = ""
 					end if
-					Warning(sprintf("built-in routine %s() overridden%s in %s",
-									{SymTab[p][S_NAME], again, file_name[current_file_no]}),override_warning_flag)
+					Warning(sprintf("built-in routine %%s() overridden%s in %s",
+									{ again, file_name[current_file_no]}),
+									override_warning_flag, {SymTab[p][S_NAME]})
 			end if
 		end if
 
@@ -2769,7 +2770,7 @@ mix_msg = "can't mix profile and profile_time"
 procedure SetWith(integer on_off)
 -- set a with/without option 
 	sequence option
-	integer idx, idx2
+	integer idx
 	token tok
 	
 	option = StringToken()
@@ -2782,7 +2783,7 @@ procedure SetWith(integer on_off)
 			OpProfileStatement = on_off
 			if OpProfileStatement then
 				if AnyTimeProfile then
-					Warning(mix_msg, 0)
+					Warning(mix_msg, mixed_profile_warning_flag)
 					OpProfileStatement = FALSE
 				else
 					AnyStatementProfile = TRUE
@@ -2800,7 +2801,7 @@ procedure SetWith(integer on_off)
 			OpProfileTime = on_off
 			if OpProfileTime then
 				if AnyStatementProfile then
-					Warning(mix_msg,0)
+					Warning(mix_msg,mixed_profile_warning_flag)
 					OpProfileTime = FALSE
 				end if
 				tok = next_token()
@@ -2831,40 +2832,35 @@ procedure SetWith(integer on_off)
 		end if
 	
 	elsif equal(option, "warning") then
-		if on_off = 0 then
-			prev_OpWarning = OpWarning
-			OpWarning = no_warning_flag
-		else
+		tok = next_token()
+		if tok[T_ID] = CONCAT_EQUALS then
 			tok = next_token()
-			idx2 = find(tok[T_ID], {EQUALS, PLUS_EQUALS, MINUS_EQUALS})
-			if idx2 = 0 then
-				putback(tok)
-				OpWarning = lint_warning_flag
+			if tok[T_ID] != STRING then
+				CompileErr("One or more warning names is expected here")
+			end if
+		elsif tok[T_ID] != STRING then
+			if on_off = 0 then
+				prev_OpWarning = OpWarning
+				OpWarning = no_warning_flag
 			else
-				if idx2 = 1 then
-					OpWarning = 0
-				end if
-
-				while 1 do
-					tok = next_token()
-					if tok[T_ID] != STRING then
-						putback(tok)
-						exit
-					end if
-					option = SymTab[tok[T_SYM]][S_OBJ]
-					idx = find(option, warning_names)
-					if idx = 0 then
-						putback(tok)
-						exit
-					end if
-					if idx2 < 3 then
-						OpWarning = or_bits(OpWarning, warning_flags[idx])
-					else
-					    OpWarning = and_bits(OpWarning, not_bits(warning_flags[idx]))
-					end if
-				end while
+				OpWarning = prev_OpWarning
 			end if
 		end if
+
+		while tok[T_ID] = STRING do
+			option = SymTab[tok[T_SYM]][S_OBJ]
+			idx = find(option, warning_names)
+			if idx = 0 then
+				exit
+			end if
+			if on_off then
+				OpWarning = or_bits(OpWarning, warning_flags[idx])
+			else
+			    OpWarning = and_bits(OpWarning, not_bits(warning_flags[idx]))
+			end if
+			tok = next_token()
+		end while
+		putback(tok)
 
 	elsif match("define=", option) = 1 and length(option) > 8 then
 		if on_off = 0 then

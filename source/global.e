@@ -270,44 +270,57 @@ global symtab_index CurrentSub          -- s.t. index of current routine
 global integer num_routines = 0         -- sequence number for routine_id lookups 
 global integer Argc                     -- (our) number of args to main 
 global sequence Argv                    -- (our) arguments to main 
-global integer lint_warning = 0
 
 -- With/Without Options
 global constant -- maskable warning flags
 	no_warning_flag				= 0,
 	resolution_warning_flag		= 1,
-	sc_warning_flag				= 2,
+	short_circuit_warning_flag				= 2,
 	override_warning_flag		= 4,
 	builtin_chosen_warning_flag	= 8,
 	not_used_warning_flag		= 16,
 	no_value_warning_flag		= 32,
 	custom_warning_flag			= 64,
-	lint_warning_flag			= 127
+	translator_warning_flag		= 128,
+	cmdline_warning_flag		= 256,
+	not_reached_warning_flag	= 512,
+	mixed_profile_warning_flag	= 1024,
+	lint_warning_flag			= 2047
 
 constant default_maskable_warnings = 
-	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag
+	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
+    translator_warning_flag + cmdline_warning_flag + not_reached_warning_flag +
+    mixed_profile_warning_flag
 
 global constant warning_flags = {
 	no_warning_flag,
 	resolution_warning_flag,
-	sc_warning_flag,
+	short_circuit_warning_flag,
 	override_warning_flag,
 	builtin_chosen_warning_flag,
 	not_used_warning_flag,
 	no_value_warning_flag,
 	custom_warning_flag,
+	translator_warning_flag,
+	cmdline_warning_flag,
+	not_reached_warning_flag,
+	mixed_profile_warning_flag,
 	lint_warning_flag 
 }
 
 global constant warning_names = {
 	"no_warning",
 	"resolution_warning",
-	"sc_warning",
+	"short_circuit_warning",
 	"override_warning",
 	"builtin_chosen_warning",
 	"not_used_warning",
 	"no_value_warning",
 	"custom_warning",
+	"translator_warning",
+	"cmdline_warning",
+	"not_reached_warning",
+	"mixed_profile_warning",
 	"lint_warning"
 }
 

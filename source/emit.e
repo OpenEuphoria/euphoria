@@ -507,7 +507,8 @@ global procedure emit_op(integer op)
 		assignable = FALSE  
 	    a = Pop()
 	    b = Pop()
-		Warning(SymTab[b][S_OBJ],SymTab[a][S_OBJ])
+	    c = Pop()
+		Warning(SymTab[c][S_OBJ],SymTab[b][S_OBJ],SymTab[a][S_OBJ])
 
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
 	elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,

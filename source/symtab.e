@@ -14,7 +14,7 @@ buckets = repeat(0, NBUCKETS)
 
 global symtab_index object_type       -- s.t. index of object type 
 global symtab_index atom_type         -- s.t. index of atom type 
-global symtab_index sequence_type     -- s.t. index of sequence type 
+global symtab_index sequence_type     -- s.t. index of sequence type
 global symtab_index integer_type      -- s.t. index of integer type 
 
 sequence e_routine   -- sequence of symbol table pointers for routine_id
@@ -550,7 +550,7 @@ global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier. 
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL. 
-	sequence msg
+	sequence msg, b_name
 	integer hashval, scope, defined, ix
 	symtab_index st_ptr, st_builtin
 	token tok, gtok
@@ -560,7 +560,7 @@ global function keyfind(sequence word, integer file_no)
 	in_include_path = {}
 	symbol_resolution_warning = ""
 	st_builtin = 0
-	
+
 	hashval = hashfn(word)
 	st_ptr = buckets[hashval] 
 
@@ -694,20 +694,20 @@ global function keyfind(sequence word, integer file_no)
 		if length(dup_globals) and find(SymTab[st_builtin][S_NAME], builtin_warnings) = 0 then
 			builtin_warnings &= {SymTab[st_builtin][S_NAME]}
 
+			b_name = {SymTab[st_builtin][S_NAME]}
 			if length(dup_globals) > 1 then
-				msg = sprintf("built-in %s() chosen over global/export function(s) in:\n",
-					{SymTab[st_builtin][S_NAME]})
+				msg = "built-in %s() chosen over global/export function(s) in:\n"
 				
 				-- extended warning message  
 				for i = length(dup_globals) to 1 by -1 do
 					msg &= "    " & file_name[SymTab[dup_globals[i]][S_FILE_NO]] & "\n"
 				end for
 			else
-				msg = sprintf("built-in %s() chosen over global/export function in: %s",
-					{SymTab[st_builtin][S_NAME], file_name[SymTab[dup_globals[1]][S_FILE_NO]]})
+				msg = sprintf("built-in %%s() chosen over global/export function in: %s",
+					{file_name[SymTab[dup_globals[1]][S_FILE_NO]]})
 			end if
 
-			Warning(msg, builtin_chosen_warning_flag)
+			Warning(msg, builtin_chosen_warning_flag, b_name)
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -748,9 +748,9 @@ global function keyfind(sequence word, integer file_no)
 		then
 			include_warnings = prepend( include_warnings, 
 				{ current_file_no, SymTab[gtok[T_SYM]][S_FILE_NO] })
-			symbol_resolution_warning = sprintf("%s:%d - identifier '%s' in '%s' is not included", 
-				{ name_ext(file_name[current_file_no]), line_number, word, 
-				name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]) })
+			symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included",
+				{ name_ext(file_name[current_file_no]), line_number,
+				name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]) }),{word}}
 		end if	
 		return gtok
 	end if
@@ -841,13 +841,11 @@ procedure LintCheck(symtab_index s)
 		
 		if length(problem) then
 			if length(place) then
-				Warning(sprintf("%s %s in %s() in %s is %s", 
-								   {vtype, SymTab[s][S_NAME], 
-								   place, file, problem}), warn_level)
+				Warning(sprintf("%s %%s in %s() in %s is %s", {vtype, place, file, problem}),
+								warn_level,{SymTab[s][S_NAME]})
 			else
-				Warning(sprintf("%s %s in %s is %s", 
-								   {vtype, SymTab[s][S_NAME], 
-								   file, problem}), warn_level)
+				Warning(sprintf("%s %%s in %s is %s", {vtype, file, problem}),warn_level,
+							 { SymTab[s][S_NAME]})
 			end if
 		end if
 	end if

@@ -9,7 +9,7 @@ include reswords.e
 
 global constant STDIN = 0, STDERR = 2
 
-integer Errors 
+integer Errors
 Errors = 0   -- number of errors detected during compile 
 
 global integer TempErrFile
@@ -27,20 +27,35 @@ global procedure screen_output(integer f, sequence msg)
 	puts(f, msg)
 end procedure
 
-global procedure Warning(sequence msg, integer mask)
+global procedure Warning(sequence msg, integer mask, sequence args = {})
 -- add a warning message to the list
-	sequence p
+	integer p
+	sequence text, w_name
 
 	if display_warnings=0 then
 		return
 	end if
 
-	if lint_warning or ((mask = 0 and OpWarning != 0) or and_bits(OpWarning, mask)) then
-		p = sprintf("Warning: %s\n", {msg})
-		if find(p, warning_list) then
+	if mask = 0 or and_bits(OpWarning, mask) then
+		p = mask -- =0 for non maskable warnings - none implemented so far
+		if p then
+			p = find(mask,warning_flags)
+		end if
+
+		if p then
+			w_name = warning_names[p]
+		else
+			w_name = "< not named >"
+		end if
+		if length(args) then
+			msg = sprintf(msg,args)
+		end if
+
+		text = sprintf("Warning ( %s ):\n\t%s\n", {w_name,msg})
+		if find(text, warning_list) then
 			return -- duplicate
 		end if
-		warning_list = append(warning_list, p)
+		warning_list = append(warning_list, text)
 	end if
 end procedure
 

@@ -19,7 +19,7 @@ global procedure intoptions()
 			if option then
 				common_options( option, i )
 			else
-				Warning("unknown option: " & Argv[i],0)
+				Warning("unknown option: %s" ,cmdline_warning_flag, {Argv[i]})
 			end if
 			add_switch( Argv[i], 0 )
 			-- delete "-" option from the list of args */
@@ -27,7 +27,7 @@ global procedure intoptions()
 			for j = i to Argc do
 				Argv[j] = Argv[j+1]
 			end for
-		else 
+		else
 			return -- non "-" items are assumed to be the source file
 		end if      
 	end while
