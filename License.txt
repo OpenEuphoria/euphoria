@@ -16,5 +16,6 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 RDS requests, but does not require, that you:
-1. acknowledge RDS and others who contribute to this software,
-2. provide a link to www.RapidEuphoria.com, if possible, from your Web site.
+
+* 1. acknowledge RDS and others who contribute to this software,
+* 2. provide a link to www.RapidEuphoria.com, if possible, from your Web site.
