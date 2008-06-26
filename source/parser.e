@@ -2032,6 +2032,9 @@ procedure Ifdef_statement()
 					exit "top"
 				elsif nested_count and tok[T_ID] = IF then
 					nested_count -= 1
+				elsif matched then
+					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
+					CompileErr("unknown command")
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
 				exit
