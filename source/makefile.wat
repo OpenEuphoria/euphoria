@@ -337,6 +337,7 @@ dosall : .SYMBOLIC
 	wmake -f makefile.wat dos $(VARS)
 	wmake -f makefile.wat library OS=DOS $(VARS)
 	wmake -f makefile.wat dostranslator OS=DOS $(VARS)
+	wmake -f makefile.wat dosbackend OS=DOS $(VARS)
 
 BUILD_DIRS=intobj transobj libobj backobj
 
@@ -392,6 +393,8 @@ builddirs : .SYMBOLIC
 	if not exist doslibobj\back mkdir doslibobj\back
 	if not exist dostrobj mkdir dostrobj
 	if not exist dostrobj\back mkdir dostrobj\back
+	if not exist dosbkobj mkdir dosbkobj
+	if not exist dosbkobj\back mkdir dosbkobj\back
 	
 library : .SYMBOLIC builddirs
 	wmake -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -421,7 +424,6 @@ ecwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 backendsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 ecsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 exsource : .SYMBOLIC .\$(OBJDIR)/main-.c
-exsource : .SYMBOLIC $(OBJDIR)/main-.c
 
 translate-win : .SYMBOLIC  builddirs
         wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -430,6 +432,8 @@ translate-win : .SYMBOLIC  builddirs
 	
 translate-dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat exsource EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat exsource EX=ec.exe EU_TARGET=int. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+        wmake -f makefile.wat backendsource EX=ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	
 translate : .SYMBOLIC translate-win translate-dos
 	
@@ -463,8 +467,12 @@ source-win : .SYMBOLIC translate-win common-source
 source-dos : .SYMBOLIC translate-dos common-source
 	mkdir $(SOURCEDIR)\dosobj
 	mkdir $(SOURCEDIR)\doslibobj
+	mkdir $(SOURCEDIR)\dostrobj
+	mkdir $(SOURCEDIR)\dosbkobj
 	copy dosobj\* $(SOURCEDIR)
 	copy doslibobj\* $(SOURCEDIR)
+	copy dostrobj\* $(SOURCEDIR)
+	copy dosbkobj\* $(SOURCEDIR)
 	
 source : .SYMBOLIC common-source source-win source-dos
 
@@ -492,6 +500,7 @@ install : .SYMBOLIC
 	@copy exwc.exe $(%EUDIR)\bin\
 	@copy backendw.exe $(%EUDIR)\bin\
 	@copy backendc.exe $(%EUDIR)\bin\
+	@copy backendd.exe $(%EUDIR)\bin\
 	@copy ec.lib $(%EUDIR)\bin\
 	@copy ecw.lib $(%EUDIR)\bin\
 	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
@@ -526,8 +535,29 @@ backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_B
 backend : .SYMBOLIC builddirs
         wmake -f makefile.wat backendw.exe EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
+dosbackend : .SYMBOLIC builddirs
+        wmake -f makefile.wat backendd.exe EX=ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+
 dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+
+backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\exb.lbc
+	@%append .\$(OBJDIR)\exb.lbc option quiet
+	@%append .\$(OBJDIR)\exb.lbc option caseexact
+	@%append .\$(OBJDIR)\exb.lbc option osname='CauseWay'
+	@%append .\$(OBJDIR)\exb.lbc libpath $(%WATCOM)\lib386
+	@%append .\$(OBJDIR)\exb.lbc libpath $(%WATCOM)\lib386\dos
+	@%append .\$(OBJDIR)\exb.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
+	@%append .\$(OBJDIR)\exb.lbc format os2 le ^
+	@%append .\$(OBJDIR)\exb.lbc OPTION STACK=262144
+	@%append .\$(OBJDIR)\exb.lbc OPTION QUIET
+	@%append .\$(OBJDIR)\exb.lbc OPTION ELIMINATE
+	@%append .\$(OBJDIR)\exb.lbc OPTION CASEEXACT
+	@for %i in ($(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exb.lbc file %i
+	wlink  $(DEBUGLINK) @.\$(OBJDIR)\exb.lbc name backendd.exe
+	le23p backendd.exe
+	cwc backendd.exe
 
 ex.exe : rev.e $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ex.lbc
@@ -569,6 +599,8 @@ ec.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_B
 .\transobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 .\backobj\main-.c: $(EU_CORE_FILES) backend.ex
 .\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+.\dostrobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
+.\dosbkobj\main-.c: $(EU_CORE_FILES) backend.ex
 
 rev.e :
 	$(EX) revget.ex svn~1\entries
