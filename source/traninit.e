@@ -274,7 +274,7 @@ procedure InitBackEnd(integer c)
 	
 	if TDOS then
 		wat_path = 0
-		if compile_dir then
+		if length(compile_dir) then
 			if djg_option then
 				dj_path  = compile_dir
 			else

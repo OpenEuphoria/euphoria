@@ -212,6 +212,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\parser_3.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\wildcard.obj &
@@ -265,8 +266,10 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\misc.obj &
 	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
+	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\search.obj

@@ -15,7 +15,9 @@
 #include <time.h>
 #ifdef ELCC
 #include <io.h>
-#include <windows.h>
+#endif
+#ifdef EWINDOWS
+#include <windows.h> /* for Sleep() */
 #endif
 #if defined(ESIMPLE_MALLOC) && defined(EWINDOWS)
 #include <windows.h>
