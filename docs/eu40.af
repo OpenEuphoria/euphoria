@@ -1,31 +1,31 @@
 # Front-Matter
-../../htx/welcome.txt
-../../htx/install.txt
-../../htx/what2do.txt
-../../htx/relnotes.txt
-../../htx/relnotes40.txt
+../../docs/welcome.txt
+../../docs/install.txt
+../../docs/what2do.txt
+../../docs/relnotes.txt
+../../docs/relnotes40.txt
 #TODO: other release notes
 
 # Language Reference
-../../htx/refman_1.txt
-../../htx/refman_2.txt
-../../htx/refman_3.txt
+../../docs/refman_1.txt
+../../docs/refman_2.txt
+../../docs/refman_3.txt
 
 # Mini-Guides
-../../htx/miniguide.txt
-../../htx/bind.txt
-../../htx/c.txt
-../../htx/cgi.txt
-../../htx/database.txt
-../../htx/tasking.txt
-../../htx/ed.txt
-../../htx/e2c.txt
-../../htx/trouble.txt
-#../../htx/perform.txt
-#../../htx/platform.txt
+../../docs/miniguide.txt
+../../docs/bind.txt
+../../docs/c.txt
+../../docs/cgi.txt
+../../docs/database.txt
+../../docs/tasking.txt
+../../docs/ed.txt
+../../docs/e2c.txt
+../../docs/trouble.txt
+#../../docs/perform.txt
+#../../docs/platform.txt
 
 # API docs
-../../htx/api.txt
+../../docs/api.txt
 ../../include/database.e
 ../../include/datetime.e
 ../../include/dll.e
