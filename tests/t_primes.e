@@ -19,5 +19,5 @@ s = length(gPrimes)
 test_equal("primes missing #2" , 2, next_prime(-1))
 test_true("primes growth #4", s = length(gPrimes))
 
-test_embedded_report()
+test_report()
 

@@ -332,6 +332,6 @@ test_true("Default WS", t_space(" \t\n\r"))
 test_false("Altered WS #3", t_space(5 & "\t "))
 
 
-test_embedded_report()
+test_report()
 
 

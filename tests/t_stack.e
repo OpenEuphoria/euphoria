@@ -89,5 +89,5 @@ test_equal("FIFO push sequence #3", {FILO, {10,20},{30,40}}, sk)
 sk = s:dup(sk)
 test_equal("FIFO dup sequence", {FILO, {10,20},{30,40},{30,40}}, sk)
 
-test_embedded_report()
+test_report()
 

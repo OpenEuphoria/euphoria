@@ -74,5 +74,5 @@ while idx < 2 do
 end while
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 
-test_embedded_report()
+test_report()
 

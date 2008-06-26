@@ -150,5 +150,5 @@ test_equal("distributes_right()",1,distributes_right(product,sum,0))
 
 test_equal("distributes_over()",3,distributes_over(product,sum,0))
 
-test_embedded_report()
+test_report()
 

@@ -5,4 +5,4 @@ include mouse.e
 
 test_pass("mouse.e at least loads")
 
-test_embedded_report()
+test_report()

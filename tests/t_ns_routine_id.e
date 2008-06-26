@@ -20,4 +20,4 @@ m = map:put(m, "a", 1)
 
 test_pass("type check cause machine exception?")
 
-test_embedded_report()
+test_report()

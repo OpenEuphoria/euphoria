@@ -35,5 +35,5 @@ test_equal("full_match() #2", 0, regex:full_match(re, "john is 18 years old"))
 
 regex:free( re )
 
-test_embedded_report()
+test_report()
 

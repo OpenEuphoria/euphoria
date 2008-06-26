@@ -195,5 +195,5 @@ test_equal("keyvalues #8", { {"colors", "[black, blue, red]"}  }, s)
 s = keyvalues("colors=`[black, blue, red]")
 test_equal("keyvalues #9", { {"colors", {"black", "blue", "red"}}  }, s)
 
-test_embedded_report()
+test_report()
 

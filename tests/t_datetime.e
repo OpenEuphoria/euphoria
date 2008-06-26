@@ -203,5 +203,5 @@ for i = 1 to 12 do
     test_equal("format() hour loop #4", sprintf("%dpmPM", i), d:format(dt1, "%l%P%p"))
 end for
 
-test_embedded_report()
+test_report()
 

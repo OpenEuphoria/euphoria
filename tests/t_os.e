@@ -51,5 +51,5 @@ test_equal("cmd_parse() #2", "50", count)
 test_equal("cmd_parse() #3", "file.css", style_file)
 test_equal("cmd_parse() #4", {"input.txt", "output.txt"}, extras)
 
-test_embedded_report()
+test_report()
 

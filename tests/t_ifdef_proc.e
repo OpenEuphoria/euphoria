@@ -22,5 +22,5 @@ else
 	end procedure
 end ifdef
 
-test_embedded_report()
+test_report()
 

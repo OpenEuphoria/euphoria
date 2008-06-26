@@ -48,5 +48,5 @@ end while
 label "f"
 test_pass("Goto jump out of while loop")
 
-test_embedded_report()
+test_report()
 

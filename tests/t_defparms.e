@@ -68,5 +68,5 @@ function f2(sequence s,integer n=f1())
 end function
 test_equal("Indirect reference to parameter",5,f2("abcde"))
 
-test_embedded_report()
+test_report()
 

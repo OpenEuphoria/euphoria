@@ -75,5 +75,5 @@ nst(B,A)
 test_equal( "nested switch", 6, ns )
 
 
-test_embedded_report()
+test_report()
 

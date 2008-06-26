@@ -94,5 +94,5 @@ test_equal("mod() #3",   -27, mod(-3627, -3600))
 test_equal("mod() #4", -3573, mod(27, -3600))
 test_equal("mod() #5",     0, mod(10, 2))
 
-test_embedded_report()
+test_report()
 

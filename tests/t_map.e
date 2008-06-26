@@ -144,5 +144,5 @@ m5 = m:put( m5, APPEND, {"foo"} )
 m5 = m:put( m5, APPEND, "bar", , APPEND )
 test_equal( "put APPEND", {"foo","bar"}, m:get( m5, APPEND, "" ) )
 
-test_embedded_report()
+test_report()
 

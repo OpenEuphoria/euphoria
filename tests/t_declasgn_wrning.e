@@ -15,5 +15,5 @@ test_equal("with warning -=",-1,gets(fn))
 close(fn)
 fn=delete_file("warning.lst")
 
-test_embedded_report()
+test_report()
 

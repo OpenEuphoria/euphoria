@@ -23,4 +23,4 @@ without warning &= "short_circuit_warning"
 if n and f()=7 then end if
 warning_file("warning.lst")
 
-test_embedded_report()
+test_report()

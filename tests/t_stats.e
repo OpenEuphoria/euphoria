@@ -32,5 +32,5 @@ test_equal("avedev list", 1.85777777777778, avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1
 test_equal("avedev text", {}, avedev( {"text"} ))
 test_equal("avedev empty", {}, avedev( {} ))
 
-test_embedded_report()
+test_report()
 

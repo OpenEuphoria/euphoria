@@ -57,5 +57,5 @@ test_equal("utf8_decode#1", e1, utf8_decode({#41, #E2, #89, #A2, #CE, #91, #2E})
 test_equal("utf8_decode#2", e2, utf8_decode({#ED, #95, #9C, #EA, #B5, #AD, #EC, #96, #B4}))
 test_equal("utf8_decode#3", e3, utf8_decode({#E6, #97, #A5, #E6, #9C, #AC, #E8, #AA, #9E}))
 
-test_embedded_report()
+test_report()
 

@@ -61,4 +61,4 @@ constant translator_names =
 
 test_true("Created the Hashes:", 1) 
 
-test_embedded_report()
+test_report()

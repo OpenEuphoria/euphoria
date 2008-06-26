@@ -6,4 +6,4 @@ end ifdef
 
 test_pass("msgbox.e at least loads")
 
-test_embedded_report()
+test_report()

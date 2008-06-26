@@ -13,5 +13,5 @@ test_equal("enum #3", {1,2,20,21,30,31}, {H,I,J,K,L,M})
 test_equal("enum #4", {50,51,0,1,50,51}, {O,P,Q,R,S,T})
 test_equal("enum #5", {#50,#51,#52}, {U,V,W})
 
-test_embedded_report()
+test_report()
 

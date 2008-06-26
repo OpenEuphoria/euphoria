@@ -112,5 +112,5 @@ while 1 do
 end while
 test_equal("while 1", {11,10}, {idx,idx2})
 
-test_embedded_report()
+test_report()
 

@@ -5,4 +5,4 @@ include graphics.e
 
 test_pass("graphics.e at least loads")
 
-test_embedded_report()
+test_report()

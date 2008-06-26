@@ -5,4 +5,4 @@ test_pass("image.e at least loads")
 
 -- TODO: add real tests
 
-test_embedded_report()
+test_report()

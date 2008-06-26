@@ -5,4 +5,4 @@ include database.e
 
 test_pass("database.e at least compiles")
 
-test_embedded_report()
+test_report()

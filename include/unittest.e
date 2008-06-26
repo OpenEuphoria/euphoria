@@ -83,7 +83,7 @@ end function
 -- === Reporting
 
 --**
-export procedure test_embedded_report()
+export procedure test_report()
 	atom score
 
 	if testsFailed > 0 or verbose = TEST_SHOW_ALL then

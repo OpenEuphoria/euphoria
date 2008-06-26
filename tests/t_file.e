@@ -97,5 +97,5 @@ test_equal("fileext() filename no extension", "", fileext(fname))
 test_equal("PATHSEP", sep, PATHSEP)
 test_equal("NL", nl, NL)
 
-test_embedded_report()
+test_report()
 

@@ -20,7 +20,7 @@ test_equal("Standard version used",gets(fn),"This is another test")
 test_equal("Anything else?",gets(fn),-1)
 close(fn)
 fn=delete_file("override.txt")
-test_embedded_report()
+test_report()
 
 
 

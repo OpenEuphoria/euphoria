@@ -51,5 +51,5 @@ else
     test_fail("EU400")
 end ifdef
 
-test_embedded_report()
+test_report()
 

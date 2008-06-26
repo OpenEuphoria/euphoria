@@ -184,5 +184,5 @@ test_equal("sort_columns() single item sequence",
                     sort_columns({{1,2,3}, {1,2,4}, {1,2,1}, {1,3,3}, {5,3,4}}, {2,-3})
            )                      
 
-test_embedded_report()
+test_report()
 

@@ -56,5 +56,5 @@ test_equal("binary_search empty input", -1, binary_search('A',{}))
 
 test_equal("binary_search strings", 5, binary_search("cat",{"apple", "bat", "car", "cast", "cat", "category", "dog"}))
 
-test_embedded_report()
+test_report()
 

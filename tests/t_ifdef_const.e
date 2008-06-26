@@ -17,4 +17,4 @@ end ifdef
 test_equal("ifdef constant a", 1, a)
 test_equal("ifdef constant b", 1, b)
 
-test_embedded_report()
+test_report()
