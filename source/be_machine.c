@@ -4921,6 +4921,7 @@ object machine(object opcode, object x)
 					return (unsigned)winInstance;
 				else
 					return NewDouble((double)(unsigned)winInstance);
+#else
 				return 0;
 #endif //EWINDOWS
 #endif //EUNIX
