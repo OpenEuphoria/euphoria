@@ -167,6 +167,19 @@ global procedure sleep(atom t)
 	end if
 end procedure
 
+--**
+global procedure task_delay(atom delaytime)
+-- akin to sleep, but allows other tasks to run while sleeping
+--causes a delay while allowing other tasks to run.
+	atom t
+	t = time()
+
+	while time() - t < delaytime do
+		machine_proc(M_SLEEP, 0.01)
+		task_yield()
+	end while
+end procedure
+
 -- pretty print variables
 integer pretty_end_col, pretty_chars, pretty_start_col, pretty_level, 
 		pretty_file, pretty_ascii, pretty_indent, pretty_ascii_min,
