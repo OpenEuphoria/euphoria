@@ -25,14 +25,15 @@ sequence BRACKET_COLOR
 
 
 -- character classes
-enum DIGIT,
-	 OTHER,
-	 LETTER,
-	 BRACKET,
-	 QUOTE,
-	 DASH,
-	 WHITE_SPACE,
-	 NEW_LINE
+enum 
+	DIGIT,
+	OTHER,
+	LETTER,
+	BRACKET,
+	QUOTE,
+	DASH,
+	WHITE_SPACE,
+	NEW_LINE
 
 sequence char_class
 
@@ -99,10 +100,9 @@ end procedure
 
 constant DONT_CARE = -1  -- any color is ok - blanks, tabs
 
-sequence line  -- the line being processed
-integer seg_start, seg_end -- start and end of current segment of line
-integer current_color
+sequence line           -- the line being processed
 sequence color_segments -- the value returned
+integer current_color, seg_start, seg_end -- start and end of current segment of line
 
 procedure seg_flush(integer new_color)
 -- if the color must change,
@@ -136,86 +136,89 @@ global function SyntaxColor(sequence pline)
 	color_segments = {}
 
 	while 1 do
-	c = line[seg_end+1]
-	class = char_class[c]
-
-	if class = WHITE_SPACE then
-		seg_end += 1  -- continue with current color
-
-	elsif class = LETTER then
-		last = length(line)-1
-		for j = seg_end + 2 to last do
-		c = line[j]
+		c = line[seg_end+1]
 		class = char_class[c]
-		if class != LETTER then
-			if class != DIGIT then
-			last = j - 1
-			exit
+
+		if class = WHITE_SPACE then
+			seg_end += 1  -- continue with current color
+
+		elsif class = LETTER then
+			last = length(line)-1
+			for j = seg_end + 2 to last do
+				c = line[j]
+				class = char_class[c]
+				if class != LETTER then
+					if class != DIGIT then
+						last = j - 1
+						exit
+					end if
+				end if
+			end for
+			word = line[seg_end+1..last]
+			if find(word, keywords) then
+				seg_flush(KEYWORD_COLOR)
+			elsif find(word, builtins) then
+				seg_flush(BUILTIN_COLOR)
+			else
+				seg_flush(NORMAL_COLOR)
 			end if
-		end if
-		end for
-		word = line[seg_end+1..last]
-		if find(word, keywords) then
-		seg_flush(KEYWORD_COLOR)
-		elsif find(word, builtins) then
-		seg_flush(BUILTIN_COLOR)
-		else
-		seg_flush(NORMAL_COLOR)
-		end if
-		seg_end = last
+			seg_end = last
 
-	elsif class <= OTHER then -- DIGIT too
-		seg_flush(NORMAL_COLOR)
-		seg_end += 1
+		elsif class <= OTHER then -- DIGIT too
+			seg_flush(NORMAL_COLOR)
+			seg_end += 1
 
-	elsif class = BRACKET then
-		if find(c, "([{") then
-		bracket_level += 1
-		end if
-		if bracket_level >= 1 and
-		   bracket_level <= length(BRACKET_COLOR) then
-		seg_flush(BRACKET_COLOR[bracket_level])
-		else
-		seg_flush(NORMAL_COLOR)
-		end if
-		if find(c, ")]}") then
-		bracket_level -= 1
-		end if
-		seg_end += 1
-
-	elsif class = NEW_LINE then
-		exit  -- end of line
-
-	elsif class = DASH then
-		if line[seg_end+2] = '-' then
-		seg_flush(COMMENT_COLOR)
-		seg_end = length(line)-1
-		exit
-		end if
-		seg_flush(NORMAL_COLOR)
-		seg_end += 1
-
-	else  -- QUOTE
-		i = seg_end + 2
-		while i < length(line) do
-		if line[i] = c then
-			i += 1
-			exit
-		elsif line[i] = '\\' then
-			if i < length(line)-1 then
-			i += 1 -- ignore escaped char
+		elsif class = BRACKET then
+			if find(c, "([{") then
+				bracket_level += 1
 			end if
+			if bracket_level >= 1 and
+			   bracket_level <= length(BRACKET_COLOR)
+			then
+				seg_flush(BRACKET_COLOR[bracket_level])
+			else
+				seg_flush(NORMAL_COLOR)
+			end if
+			if find(c, ")]}") then
+				bracket_level -= 1
+			end if
+			seg_end += 1
+
+		elsif class = NEW_LINE then
+			exit  -- end of line
+
+		elsif class = DASH then
+			if line[seg_end+2] = '-' then
+				seg_flush(COMMENT_COLOR)
+				seg_end = length(line)-1
+				exit
+			end if
+			seg_flush(NORMAL_COLOR)
+			seg_end += 1
+
+		else  -- QUOTE
+			i = seg_end + 2
+			while i < length(line) do
+				if line[i] = c then
+					i += 1
+					exit
+				elsif line[i] = '\\' then
+					if i < length(line)-1 then
+						i += 1 -- ignore escaped char
+					end if
+				end if
+				i += 1
+			end while
+			seg_flush(STRING_COLOR)
+			seg_end = i - 1
 		end if
-		i += 1
-		end while
-		seg_flush(STRING_COLOR)
-		seg_end = i - 1
-	end if
 	end while
+	
 	-- add the final piece:
 	if current_color = DONT_CARE then
-	current_color = NORMAL_COLOR
+		current_color = NORMAL_COLOR
 	end if
+	
 	return append(color_segments, {current_color, line[seg_start..seg_end]})
 end function
 

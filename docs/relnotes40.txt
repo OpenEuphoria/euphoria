@@ -1,7 +1,6 @@
 @@(color ``<font color="$(1)">``$(+)``</font>``)@
 @@(bugfix **$$(color #009999 bug fixed:)**)@
 @@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
-@@(title $$(product) $$(version) Release Notes)@
 
 === Version 4.0
 ==== Bug Fixes

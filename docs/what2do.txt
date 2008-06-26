@@ -91,7 +91,7 @@ fields in ##mydata.ex##.
 
 Then a major project (several days or weeks): 
 
-Write a //smarter// 3D TicTacToe algorithm.
+Write a //smarter// 3D ~TicTacToe algorithm.
 
 === Write Your Own
 

@@ -131,52 +131,26 @@ is set to the euphoria directory.
 
 When installed, the ##euphoria## directory will look something like this:
 
-<dl>
-<dt>
-##\euphoria##</dt>
-<dl>
-<dt>readme.doc</dt>
-<dt>readme.htm</dt>
-<dt>License.txt</dt>
-<dt>##\bin##</dt>
-<dd>
-	Interpreters ##ex.exe## and ##exw.exe##. Translators 
+* ##\euphoria##
+** readme.doc
+** readme.htm
+** License.txt
+** ##\bin## - Interpreters ##ex.exe## and ##exw.exe##. Translators 
     ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, 
     Interpreter ##exu## and Translator ##ecu##. There are also utility 
     programs such as ##ed.bat##, ##guru.bat##, etc.
-</dd>
-<dt>##\include##</dt>
-<dd>standard include files, e.g. ##graphics.e##</dd>
-<dt>##\source##</dt>
-<dd>the complete source code (interpreter, translator, binder)</dd>
-<dt>##\doc##</dt>
-<dd>
-	##refman.doc##, ##library.doc##, and several other plain-text
-    documentation files
-</dd>
-<dt>##\html##</dt>
-<dd>HTML files corresponding to each of the .doc files in the doc directory</dd>
-<dt>##\tutorial##</dt>
-<dd>small tutorial programs to help you learn Euphoria</dd>
-<dt>##\demo##</dt>
-<dl>
-<dt>generic demo programs that run on all platforms</dt>
-<dt>##\dos32##</dt>
-<dd>//DOS32//-specific demo programs (optional)</dd>
-<dt>##\win32##</dt>
-<dd>//WIN32//-specific demo programs (optional)</dd>
-<dt>##\linux##</dt>
-<dd>//Linux/FreeBSD//-specific demo programs (optional)</dd>
-<dt>##\langwar##</dt>
-<dd>
-	language war game (pixel-graphics version for //DOS//,
-    or text version for //Linux/FreeBSD//)
-</dd>
-<dt>##\bench##</dt>
-<dd>benchmark programs</dd>
-</dl>
-</dl>
-</dl>
+** ##\include## - standard include files, e.g. ##file.e##, ##sequence.e##
+** ##\source## - the complete source code (interpreter, translator, binder)
+** ##\docs## - plain text, man pages, html documentation files
+** ##\tutorial## - small tutorial programs to help you learn Euphoria
+** ##\demo## - generic demo programs that run on all platforms
+*** ##\dos32## - //DOS32//-specific demo programs (optional)
+*** ##\win32## - //WIN32//-specific demo programs (optional)
+*** ##\unix## - //Linux/FreeBSD/OS X//-specific demo programs (optional)
+*** ##\langwar## - language war game (pixel-graphics version for //DOS//,
+    or text version for //Linux/FreeBSD/OS X//)
+*** ##\bench## - benchmark programs
+
 
 ==== Linux and FreeBSD
 
@@ -373,7 +347,7 @@ is remarkably concise and easy to understand. The same functionality implemented
 like C, would take far more lines of code.
 
 ##ed## is a simple text-mode editor that runs on //DOS//, //Linux//, 
-//FreeBSD// and the //Windows// console. See also <person>David Cuny</person>'s 
+//FreeBSD// and the //Windows// console. See also David Cuny's 
 excellent ##ee.ex## editor for //DOS// and //Linux/FreeBSD//. You can 
 download ##ee.ex## from the [[http://www.RapidEuphoria.com|Euphoria Web site]]. There are also 
 some //Windows// editors oriented to Euphoria. These are also on 

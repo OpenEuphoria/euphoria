@@ -1,7 +1,7 @@
 == Installing Euphoria
 
 Download and run the latest Euphoria setup program. It will install Euphoria on
-any Windows system from Windows 95 up.
+any //Windows// system from //Windows 95// up.
 
 After installing, see ##doc\what2do.doc## (or a
 href="what2do.htm">html\what2do.htm</a>) for ideas on how to use this package.
@@ -12,11 +12,11 @@ you have not done so already.
 
 * If the install appeared to run ok, but example programs are not working, did you remember 
   to shut down and restart your computer?
-* On Windows XP/2000, be careful that your ##PATH## and ##EUDIR## do not conflict with 
+* On //Windows XP/2000//, be careful that your ##PATH## and ##EUDIR## do not conflict with 
   ##autoexec.nt##, which can also be used to set environment variables.
-* On WinME/98/95 if the ##install## fails to edit your ##autoexec.bat## file, you will have 
+* On //WinME/98/95// if the ##install## fails to edit your ##autoexec.bat## file, you will have 
   to do it yourself. Follow the manual procedure described below.
-* Euphoria can be run under DOS on older Win 3.1 systems, but we no longer maintain an install 
+* Euphoria can be run under //DOS// on older //Win 3.1// systems, but we no longer maintain an install 
   program for this. You'll have to install Euphoria on a newer system and then copy your 
   ##EUPHORIA## directory to the old system. Set up ##AUTOEXEC.BAT## manually on the old 
   system  as described below.
@@ -33,19 +33,19 @@ you have not done so already.
 # Reboot (restart) your machine. This will define your new ##PATH## and ##EUDIR## environment 
   variables.
 
-On WinNT/2000/XP and higher, if for some reason your ##EUDIR## and ##PATH##
+On //WinNT/2000/XP// and higher, if for some reason your ##EUDIR## and ##PATH##
 variables are not set correctly, then set them in whatever way your system
-allows. For example on Windows XP select: ##Start Menu -> Control Panel ->
+allows. For example on //Windows XP// select: ##Start Menu -> Control Panel ->
 Performance & Maintenance -> System -> Advanced## then click the ##Environment
 Variables## button. Click the top ##New...## button then enter ##EUDIR## as the
 Variable Name and ##c:\euphoria## (or whatever is correct) for the value, then
 click ##OK##. Find ##PATH## in the list of your variables, select it, then
 click ##Edit...##. Add ##;c:\euphoria\bin## at the end  and click ##OK##.
 
-Some systems, such as Windows ME, have an ##AUTOEXEC.BAT## file, but it's a
+Some systems, such as //Windows ME//, have an ##AUTOEXEC.BAT## file, but it's a
 hidden file that might not show up in a directory listing. Nevertheless it's
 there, and you can view it and edit it if necessary by typing, for example:
-<fixed>notepad c:\autoexec.bat</fixed> in a DOS window.
+##notepad c:\autoexec.bat## in a //DOS// window.
 
 If you have an ##autoexec.bat## file, but it doesn't contain a ##PATH##
 command, you will have to create one that includes ##C:\EUPHORIA\BIN##.

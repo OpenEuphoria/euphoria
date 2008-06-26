@@ -1,3 +1,4 @@
+@@(title Euphoria v4.0)@
 %%maxnumlevel=4
 
 = Euphoria Programming Language v4.0

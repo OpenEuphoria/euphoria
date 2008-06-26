@@ -1,5 +1,3 @@
-<doc title="Euphoria Reference Manual Part I - Section 2">
-
 == Language Definition
 
 === Objects
@@ -43,7 +41,7 @@ Numbers can also be entered in hexadecimal. For example:
 Only the capital letters A, B, C, D, E, F are allowed in hex numbers.  Hex
 numbers are always positive, unless you add a minus sign in front of the #
 character. So for instance #FFFFFFFF is a huge positive number (4294967295),
-*not* -1, as some machine-language programmers might expect.
+**not** -1, as some machine-language programmers might expect.
 
 Sequences can be nested to any depth, i.e. you can have sequences within
 sequences within sequences and so on to any depth (until you run out of
@@ -52,14 +50,14 @@ expressions.  These expressions can be constant or evaluated at run-time.
 e.g.
 
 <eucode>
-{x+6, 9, y*w+2, sin(0.5)}
+{ x+6, 9, y*w+2, sin(0.5) }
 </eucode>
 
 The **"Hierarchical Objects"** part of the Euphoria acronym comes from the
 hierarchical nature of nested sequences. This should not be confused with the
 class hierarchies of certain object-oriented languages.
 
-Why do we call them atoms?  Why not just "numbers"? Well, an atom //is//
+Why do we call them atoms?  Why not just "numbers"? Well, an ##atom## //is//
 just a number, but we wanted to have a distinctive term that emphasizes that
 they are indivisible. Of course in the world of physics, atoms were split into
 smaller parts many years ago, but in Euphoria you can't split them. They are
@@ -75,17 +73,16 @@ As you will soon discover, sequences make Euphoria very simple //and// very
 powerful.  **Understanding atoms and sequences is the key to understanding
 Euphoria.**
 
-; **Performance Note**
-:Does this mean that all atoms are stored in memory as 8-byte floating-point
-:numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
-:machine integers (4 bytes) to save space and improve execution speed. When
-:fractional results occur or numbers get too big, conversion to floating-point
-:happens automatically.
+; **Performance Note**:
+: Does this mean that all atoms are stored in memory as 8-byte floating-point
+numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
+machine integers (4 bytes) to save space and improve execution speed. When
+fractional results occur or numbers get too big, conversion to floating-point
+happens automatically.
 
 ==== Character Strings and Individual Characters
 
-A **character string** is just a **sequence** of
-characters.  It may be entered using quotes e.g.
+A **character string** is just a ##sequence## of characters.  It may be entered using quotes e.g.
 
 <eucode>
 "ABCDEFG"
@@ -110,9 +107,8 @@ the sequence of length-0, also known as the **empty sequence**. As
 a matter of programming style, it is natural to use "" to suggest a length-0
 sequence of characters, and {} to suggest some other kind of sequence.
 
-a name=char></a> An **individual character** is an
-**atom**.  It must be entered using single quotes. There is a
-difference between an individual character (which is an atom), and a character
+An **individual character** is an **atom**. It must be entered using single quotes. 
+There is a difference between an individual character (which is an atom), and a character
 string of length-1 (which is a sequence). e.g.
 
 <eucode>
@@ -129,16 +125,14 @@ choose to treat them similarly.
 
 Special characters may be entered using a back-slash:
 
-{{{
-\n        newline
-\r        carriage return
-\t        tab
-\\        backslash
-\"        double quote
-\'        single quote
-}}}
+| \n | newline |
+| \r | carriage return |
+| \t | tab |
+| \\ | backslash |
+| \" | double quote |
+| \' | single quote |
 
-For example, "Hello, World!\n", or '\\'. The Euphoria editor displays character
+For example, "Hello, World!\n", or '~\~\'. The Euphoria editor displays character
 strings in green.
 
 === Comments
@@ -163,9 +157,9 @@ beginning with #!, e.g.
 This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.  If you make
 your file executable, you can run it, just by typing its name, and without the
-need to type "exu". On DOS and Windows this line is just treated as a comment
-(though Apache Web server on Windows does recognize it.). If your file is a
-shrouded .il file, use backendu instead of exu.
+need to type "##exu##". On //DOS// and //Windows// this line is just treated as 
+a comment (though Apache Web server on //Windows// does recognize it.). If your 
+file is a shrouded ##.il## file, use backendu instead of ##exu##.
 
 === Expressions
 
@@ -180,15 +174,15 @@ calculated upon as a unit. For example,
 {1,2,3} + 5
 </eucode>
 
-is an expression that adds the sequence {1,2,3} and the atom 5 to get the
-resulting sequence {6,7,8}.
+is an expression that adds the sequence ##{1,2,3}## and the ##atom 5## to get the
+resulting sequence ##{6,7,8}##.
 
 We will see more examples later.
 
 ==== Relational Operators
 
-The relational operators  **< &nbsp; > &nbsp; <= &nbsp; >= &nbsp; =
-&nbsp; != &nbsp;** each produce a 1 (true) or a 0 (false) result.
+The relational operators  **< > <= >= = !=** each produce a ##1## (true) or a 
+##0## (false) result.
 
 <eucode>
 8.8 < 8.7   -- 8.8 less than 8.7 (false)
@@ -253,11 +247,10 @@ unary minus, unary plus.
 +8       -- +8
 </eucode>
 
-a name=inf_nan></a> Computing a result that is too big (i.e. outside of -1e300
-to +1e300) will result in one of the special atoms **+infinity** or
-**-infinity**.  These appear as inf or -inf when you print them out.  It is
-also possible to generate nan or -nan.  "nan" means "not a number", i.e. an
-undefined value (such as inf divided by inf). These values are defined in the
+Computing a result that is too big (i.e. outside of -1e300 to +1e300) will result in one 
+of the special atoms **+infinity** or **-infinity**.  These appear as inf or -inf when 
+you print them out. It is also possible to generate nan or -nan.  "nan" means "not a number", 
+i.e. an undefined value (such as inf divided by inf). These values are defined in the
 IEEE floating-point standard. If you see one of these special values in your
 output, it usually indicates an error in your program logic, although
 generating inf as an intermediate result may be acceptable in some cases. For
@@ -325,7 +318,7 @@ should **not** (as in some other languages) use the '=' operator:
 if "APPLE" = "ORANGE" then  -- ERROR! 
 </eucode>
 
-'=' is treated as an operator, just like '+', '*' etc., so it is applied to
+'##=##' is treated as an operator, just like '##+##', '##*##' etc., so it is applied to
 corresponding sequence elements, and the sequences must be the same length.
 When they are equal length, the result is a sequence of 1's an 0's. When they
 are not equal length, the result is an error. Either way you'll get an error,
@@ -356,22 +349,22 @@ A single element of a sequence may be selected by giving the element number in
 square brackets. Element numbers start at 1. Non-integer subscripts are rounded
 down to an integer.
 
-For example, if x contains {5, 7.2, 9, 0.5, 13} then x[2] is 7.2. Suppose we
-assign something different to x[2]:
+For example, if ##x## contains ##{5, 7.2, 9, 0.5, 13}## then ##x[2]## is
+##7.2##. Suppose we assign something different to ##x[2]##:
 
 <eucode>
 x[2] = {11,22,33}
 </eucode>
 
-Then x becomes: {5, {11,22,33}, 9, 0.5, 13}. Now if we ask for x[2] we get
-{11,22,33} and if we ask for x[2][3] we get the atom 33. If you try to
-subscript with a number that is outside of the range 1 to the number of
-elements, you will get a subscript error. For example x[0],  x[-99] or x[6]
-will cause errors. So will x[1][3] since x[1] is not a sequence. There is no
-limit to the number of subscripts that may follow a variable, but the variable
-must contain sequences that are nested deeply enough. The two dimensional
-array, common in other languages, can be easily represented with a sequence of
-sequences:
+Then ##x## becomes: ##{5, {11,22,33}, 9, 0.5, 13}##. Now if we ask for
+##x[2]## we get ##{11,22,33}## and if we ask for ##x[2][3]## we get the ##atom
+##33##. If you try to subscript with a number that is outside of the range
+##1## to the number of elements, you will get a subscript error. For example 
+##x[0]##,  ##x[-99]## or ##x[6]## will cause errors. So will ##x[1][3]## since
+##x[1]## is not a sequence. There is no limit to the number of subscripts that 
+may follow a variable, but the variable must contain sequences that are nested 
+deeply enough. The two dimensional array, common in other languages, can be 
+easily represented with a sequence of sequences:
 
 <eucode>
 x = {
@@ -381,8 +374,8 @@ x = {
 }
 </eucode>
 
- where we have written the numbers in a way that makes the structure
- clearer. An expression of the form x[i][j] can be used to access any element.
+where we have written the numbers in a way that makes the structure
+clearer. An expression of the form x[i][j] can be used to access any element.
 
 The two dimensions are not symmetric however, since an entire "row" can be
 selected with x[i], but there is no simple expression to select an entire
@@ -422,11 +415,9 @@ employee = {
 }
 </eucode>
 
-<blockquote>
 To access "fields" or elements within a structure it is good programming style
 to make up an enum that names the various fields. This will make your program
 easier to read. For the example above you might have:
-</blockquote>
 
 <eucode>
 enum NAME, FIRST_NAME, LAST_NAME, SALARY, AGE, WEIGHT
@@ -519,37 +510,38 @@ extremely hard to declare in a conventional language.  See a
 href="refman_2.htm#3">Euphoria versus Conventional Languages</a>.
 
 Note that expressions in general may not be subscripted, just variables. For
-example: {5+2,6-1,7*8,8+1}[3] is //not// supported, nor is something like:
-date()[MONTH]. You have to assign the sequence returned by date() to a
+example: ##{5+2,6-1,7*8,8+1}[3]## is //not// supported, nor is something like:
+##date()[MONTH]##. You have to assign the sequence returned by date() to a
 variable, then subscript the variable to get the month.
 
 ==== Slicing of Sequences
 
 A sequence of consecutive elements may be selected by giving the starting and
-ending element numbers. For example if x is {1, 1, 2, 2, 2, 1, 1, 1} then
-x[3..5] is the sequence {2, 2, 2}. x[3..3] is the sequence {2}. x[3..2] is also
-allowed. It evaluates to the length-0 sequence {}.  If y has the value:
-{"fred", "george", "mary"} then y[1..2] is {"fred", "george"}.
+ending element numbers. For example if ##x## is ##{1, 1, 2, 2, 2, 1, 1, 1}## then
+##x[3..5]## is the sequence ##{2, 2, 2}##. ##x[3..3]## is the sequence
+##{2}##. ##x[3..2]## is also allowed. It evaluates to the length-0 sequence
+##{}##.  If ##y## has the value: ##{"fred", "george", "mary"}## then
+##y[1..2]## is ##{"fred", "george"}##.
 
-We can also use slices for overwriting portions of variables. After x[3..5] =
-{9, 9, 9} x would be {1, 1, 9, 9, 9, 1, 1, 1}. We could also have said 
-##x[3..5] = 9## with the same effect. Suppose y is {0, "Euphoria", 1, 1}.  
-Then y[2][1..4] is "Euph". If we say y[2][1..4]="ABCD" then y will become 
-##{0, "ABCDoria", 1, 1}##.
+We can also use slices for overwriting portions of variables. After
+##x[3..5] = {9, 9, 9}## ##x## would be ##{1, 1, 9, 9, 9, 1, 1, 1}##. We could also 
+have said ##x[3..5] = 9## with the same effect. Suppose ##y## is 
+##{0, "Euphoria", 1, 1}##. Then ##y[2][1..4]## is ##"Euph"##. If we say 
+##y[2][1..4] = "ABCD"## then ##y## will become  ##{0, "ABCDoria", 1, 1}##.
 
 In general, a variable name can be followed by 0 or more subscripts, followed
 in turn by 0 or 1 slices. Only variables may be subscripted or sliced, not
 expressions.
 
 We need to be a bit more precise in defining the rules for **empty
-slices**. Consider a slice s[i..j] where s is of length n. A slice from
-i to j, where  j = i-1  and i >= 1 produces the a
-href="refman_2.htm#empty_seq">empty sequence</a>, even if i = n+1. Thus 1..0
-and n+1..n and everything in between are legal **(empty) slices**.  Empty
-slices are quite useful in many algorithms. A slice from i to j where j < i - 1
-is illegal , i.e. "reverse" slices such as s[5..3] are not allowed.
+slices**. Consider a slice ##s[i..j]## where ##s## is of length ##n##. A slice from
+##i## to ##j##, where  ##j = i - 1##  and ##i >= 1## produces the a
+href="refman_2.htm#empty_seq">empty sequence</a>, even if ##i = n + 1##. Thus
+##1..0## and ##n + 1..n## and everything in between are legal **(empty) slices**.  Empty
+slices are quite useful in many algorithms. A slice from ##i## to ##j## where
+##j < i - 1## is illegal , i.e. "reverse" slices such as ##s[5..3]## are not allowed.
 
-We can also use the $ shorthand with slices, e.g.
+We can also use the ##$## shorthand with slices, e.g.
 
 <eucode>
 s[2..$]
@@ -577,15 +569,15 @@ y = {1, 2}
 y = y & x                  -- y is still {1, 2}
 </eucode>
 
-You can delete element i of any sequence s by concatenating the parts of the
-sequence before and after i:
+You can delete element ##i## of any sequence s by concatenating the parts of the
+sequence before and after ##i##:
 
 <eucode>
 s = s[1..i-1] & s[i+1..length(s)]
 </eucode>
 
-This works even when i is 1 or length(s), since s[1..0] is a legal empty
-slice, and so is s[length(s)+1..length(s)].
+This works even when ##i## is ##1## or ##length(s)##, since ##s[1..0]## is a legal empty
+slice, and so is ##s[length(s)+1..length(s)]##.
 
 ==== Sequence-Formation
 
@@ -595,7 +587,7 @@ Finally, sequence-formation, using braces and commas:
 {a, b, c, ... }
 </eucode>
 
-is also an operator. It takes n operands, where n is 0 or more, and makes an
+is also an operator. It takes n operands, where ##n## is ##0## or more, and makes an
 n-element sequence from their values. e.g.
 
 <eucode>
@@ -609,10 +601,9 @@ href="refman_2.htm#2A">precedence chart</a>.
 
 Some other important operations that you can perform on sequences have English
 names, rather than special characters. These operations are built-in to
-**ex.exe/exw.exe/exu**, so
-they'll always be there, and so they'll be fast. They are described in detail
-in a href="library.htm">Part II - Library Routines</a>, but are important
-enough to Euphoria programming that we should mention them here before
+**ex.exe/exw.exe/exu**, so they'll always be there, and so they'll be fast. They are 
+described in detail in a href="library.htm">Part II - Library Routines</a>, but are 
+important enough to Euphoria programming that we should mention them here before
 proceeding. You call these operations as if they were subroutines, although
 they are actually implemented much more efficiently than that.
 
@@ -755,7 +746,7 @@ collection" of unused storage is a continuous process that never causes random
 delays in execution of a program, and does not pre-allocate huge regions of
 memory.
 
-The language definitions of conventional languages such as C, C++, Ada, etc.
+The language definitions of conventional languages such as C, C~+~+, Ada, etc.
 are very complex. Most programmers become fluent in only a subset of the
 language. The ANSI standards for these languages read like complex legal
 documents.
@@ -1508,13 +1499,13 @@ accounts[start..finish] /= 10
 In general, whenever you have an assignment of the form:
 
 {{{
-**//left-hand-side = left-hand-side op expression//**
+left-hand-side = left-hand-side op expression
 }}}
 
 You can say:
 
 {{{
-**//left-hand-side op= expression//**
+left-hand-side op= expression
 }}}
 
 where **//op//** is one of:
@@ -1523,9 +1514,9 @@ where **//op//** is one of:
 + - * / &
 </eucode>
 
-When the left-hand-side contains multiple subscripts/slices, the //op=//
+When the left-hand-side contains multiple subscripts/slices, the ##op=##
 form will usually execute faster than the longer form. When you get used to it,
-you may find the //op=// form to be slightly more readable than the long
+you may find the ##op=## form to be slightly more readable than the long
 form, since you don't have to visually compare the left-hand-side against the
 copy of itself on the right side.
 
@@ -1632,22 +1623,11 @@ until x<=0
 
 This differs from a **while** loop in more than one way:
 
-<ul>
-<li>
-The body of the loop is executed at least once, since testing takes place AFTER
-it completes.  In a **while**, the test is taken BEFORE execution.
-</li>
-
-<li>
-The header contains only optional **label** and **while entry** 
-tags.
-</li>
-
-<li>
-The footer of the block, instead of being "end loop", has a distinctive form and holds the 
-termination test.
-</li>
-</ul>
+# The body of the loop is executed at least once, since testing takes place AFTER
+  it completes.  In a **while**, the test is taken BEFORE execution.
+# The header contains only optional **label** and **while entry** tags.
+# The footer of the block, instead of being "end loop", has a distinctive form and holds the 
+  termination test.
 
 ===== for statement
 
@@ -1679,7 +1659,6 @@ happens during the execution of the loop. See also the a
 href="refman_2.htm#loop_scope">scope of the loop variable in 2.4.2
 Scope</a>.
 
-a name="labelhdr"></a>
 ==== Flow control statements
 
 Blocks are good ways toorganise code in easily identifiable chunks. However,
@@ -1747,13 +1726,10 @@ end while
 i.e. an "infinite" while-loop that actually terminates via an **exit
 statement** at some arbitrary point in the body of the loop. 
 
-<dl>
-<dt>**Performance Note:**</dt>
-<dd>
-Euphoria optimizes this type of loop.  At run-time, no test is performed at the
+; **Performance Note**:
+: Euphoria optimizes this type of loop.  At run-time, no test is performed at the
 top of the loop. There's just a simple unconditional jump from **end while**
 back to the first statement inside the loop.</dd>
-</dl>
 
 ===== The break statement
 
@@ -1762,29 +1738,29 @@ Works exactly like the **exit statement**, but applies to
 Example: 
 
 <eucode>
-if s[1]='E' then
+if s[1] = 'E' then
     a = 3
     if s[2] = 'u' then
         b = 1
         if s[3] = 'p' then
             break 0 -- leave topmost if block
         end if
-        a=2
+        a = 2
     else
-	    b=4
+        b = 4
     end if
 else
-    a=0
-    b=0
+    a = 0
+    b = 0
 end if
 </eucode>
 
 This code resuls in:
 
-* "Dur"-&gt; a=0 b=0
-* "Exe"-&gt; a=3 b=4
-* "Eux"-&gt; a=2 b=1
-* "Eup"-&gt; a=3 b=1
+* "Dur" > a=0 b=0
+* "Exe" > a=3 b=4
+* "Eux" >  a=2 b=1
+* "Eup" >  a=3 b=1
 
 ===== The continue statement
 
@@ -1795,13 +1771,13 @@ the **for** loop variable index and checking
 whether it is still within bounds.  
 
 <eucode>
-for i=3 to 6 do
+for i = 3 to 6 do
     ? i
     if i = 4 then
         puts(1,"(2)\n")
         continue
     end if
-    ? i*i
+    ? i * i
 end for
 </eucode>
 
@@ -1809,28 +1785,26 @@ This will print 3, 9, 4, (2), 5 25, 6 36.
 
 ===== The retry statement
 
-The **retry statements** retries executing the current iteration
-of the loop it applies to. The statement branches to the first statement of the
-designated loop, without testing anything nor incrementing the for loop
-index.
+The **retry statements** retries executing the current iteration of the loop it applies to. 
+The statement branches to the first statement of the designated loop, without testing 
+anything nor incrementing the for loop index.
 
-Normally, a sub-block which contains a **retry statement**s also
-contains another flow control keyword, since otherwise the iteration would be
-endlessly executed.  
+Normally, a sub-block which contains a **retry statement**s also contains another flow control 
+keyword, since otherwise the iteration would be endlessly executed.  
 
 <eucode>
 errors = 0
-for i=1 to length(files_to_open) do
-    fh = open(files_to_open[i],"rb")
+for i = 1 to length(files_to_open) do
+    fh = open(files_to_open[i], "rb")
     if fh=-1 then
-        if errors>5 then
+        if errors > 5 then
             exit
         else
-            errors+=1
+            errors += 1
             retry
         end if
     end if
-    file_handles[i]=fh
+    file_handles[i] = fh
 end for
 </eucode>
 
@@ -1850,16 +1824,16 @@ the point you wish the first iteration starts.
 
 <eucode>
 global function find_all(object x, sequence source, integer from)
-	sequence ret
+    sequence ret = {}
 
-	ret = {}
-	while from > 0 entry do
-		ret &= from
-		from += 1
-	entry
-		from = find_from(x, source, from)
-	end while
-	return ret
+    while from > 0 entry do
+        ret &= from
+        from += 1
+    entry
+        from = find_from(x, source, from)
+    end while
+
+    return ret
 end function
 </eucode>
 
@@ -1872,7 +1846,6 @@ header, after the condition.
 The entry statement is not supported for for loops, because they have a more
 rigid natire than while or loop constructs.  
 
-a name="flowctrl"></a>
 === Labeled headers.
 
 As shown in the above section on control flow statements, most of them may take
@@ -1898,7 +1871,6 @@ while 1 entry label "top" do
  
 are both correct and equivalent.
 
-a name="switch"></a>
 === The switch statement
 
 The switch statement is often used in place  or in similar ways as an if-elsif
@@ -1936,12 +1908,11 @@ switch length(x) do
 end switch
 </eucode>
 
-a name="ifdef"></a>
 === The ifdef statement
 
 The ifdef statement is unlike all of the other statements in that it is
 executed at parse time not runtime. This allows you to change the way your
-program operates in a very efficient manner. Since the ifdef statement works at
+program operates in a very efficient manner. Since the ##ifdef## statement works at
 parse time, runtime values cannot be checked, instead special defintions can be
 set or unset at parse time as well. Euphoria defines some common words itself:
 
@@ -1996,11 +1967,7 @@ ifdef SHAREWARE then
 end ifdef
 </eucode>
 
-<dl>
-<dt>**Performance Note:**</dt>
-<dd>
-
-The ifdef statement is very efficient in that it makes the decision only once during parse
+**Performance Note:** The ifdef statement is very efficient in that it makes the decision only once during parse
 time and only emits the TRUE portions of code to the resulting interpreter. Thus, in loops
 that are iterated many times there is zero performance hit when making the decision. Example:
 
@@ -2013,7 +1980,7 @@ while 1 do
 end while
 </eucode>
 
-If DEBUG is defined, then the interpreter/translator actually sees the code as being:
+If ##DEBUG## is defined, then the interpreter/translator actually sees the code as being:
 
 <eucode>
 while 1 do
@@ -2022,15 +1989,14 @@ while 1 do
 end while
 </eucode>
 
-Now, if DEBUG is not defined, then the code the interpreter/translator sees is:
+Now, if ##DEBUG## is not defined, then the code the interpreter/translator sees is:
 
 <eucode>
 while 1 do
     -- more code
 end while
 </eucode>
-</dd>
-</dl>
+
 
 == Short-Circuit Evaluation
 
@@ -2222,8 +2188,8 @@ level i.e.  //outside// of any a href="refman_2.htm#412">function</a> or a
 href="refman_2.htm#411">procedure</a>.  In addition, the following special
 statements may //only// appear at the top level:
 
-* include
-* with / without
+* ##include##
+* ##with## / ##without##
 
 === include
 
@@ -2234,10 +2200,9 @@ that someone else has written. Rather than copy this code into your main
 program, you can use an **include statement** to refer to the file
 containing the code. The first form of the include statement is:
 
-<dl>
-<dt>**include //filename//**</dt>
-<dd>
-This reads in (compiles) a Euphoria source file.
+; ##include //filename//##
+: This reads in (compiles) a Euphoria source file.
+
 Some Examples:
 
 <eucode>
@@ -2276,12 +2241,9 @@ the file relative to the following directories, in the following order:
   //DOS// / //Windows// environment  variables.
   (Via ##Control Panel / Performance & Maintenance / System / Advanced##
   on //XP//, or ##AUTOEXEC.BAT## on older versions of
-  //Windows//).  e.g.
-{{{
-SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB
-}}}
-##EUINC## lets you organize your include files according to application
-areas, and avoid adding numerous unrelated files to ##euphoria\include##.</li>
+  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB##
+  ##EUINC## lets you organize your include files according to application
+  areas, and avoid adding numerous unrelated files to ##euphoria\include##.
 # Finally, if it still hasn't found the file, it will look in
   ##euphoria\include##.  This directory contains the standard Euphoria
   include files. The environment variable ##EUDIR## tells Euphoria where
@@ -2307,24 +2269,15 @@ included.
 
 An include statement must be written on a line by itself.  Only a comment can
 appear after it on the same line.
-</dd>
-</dl>
 
 The second form of the include statement is:
 
-<dl>
-<dt>
-**include** **//filename// as //namespace_identifier//**</dt>
-
-<dd>
-
-This is just like the simple include, but it also defines a //namespace
-identifier// that can be attached to global symbols in the included file that
-you want to refer to in the main file. This might be necessary to disambiguate
-references to those symbols, or you might feel that it makes your code more
-readable.  See a href=refman_2.htm#42>Scope Rules</a> for more.
-</dd>
-</dl>
+; ##include** **//filename// as //namespace_identifier//##
+: This is just like the simple include, but it also defines a //namespace ientifier// 
+  that can be attached to global symbols in the included file that
+  you want to refer to in the main file. This might be necessary to disambiguate
+  references to those symbols, or you might feel that it makes your code more
+  readable.  See a href=refman_2.htm#42>Scope Rules</a> for more.
 
 === with / without
 
@@ -2334,31 +2287,23 @@ they may affect the diagnostic information that you get from running your
 program.  See a href="refman_3.htm">3. Debugging and Profiling</a> for more
 information.
 
-<dl>
-<dt>
-**with**</dt>
+; ##with##
+: This turns **on** one of the options: **
+* a href="refman_3.htm#2">profile</a>, 
+* a href="refman_3.htm#2">profile_time</a>, 
+* a href="lib_dbg.htm#trace">trace</a>, warning**, 
+* a href="refman_2.htm#typechk">**type_check**</a> and
+* a href="#ifdef">**define=WORD**</a>
 
-<dd>
-
-This turns **on** one of the options: ** 
-a href="refman_3.htm#2">profile</a>, 
-a href="refman_3.htm#2">profile_time</a>, 
-a href="lib_dbg.htm#trace">trace</a>, warning**, 
-a href="refman_2.htm#typechk">**type_check**</a> and
-a href="#ifdef">**define=WORD**</a>.  
-
-Options **warning** and **type_check** are initially on,
-while **profile**, **profile_time** and
+Options **warning** and **type_check** are initially on, while **profile**, **profile_time** and
 **trace** are initially off.
 
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate very minor problems.  A warning will
 never stop your program from executing. You will simply have to hit the Enter key to keep going.</dd>
 
-<dt>**without**</dt>
-
-<dd>This turns **off** one of the above options.</dd>
-</dl>
+; ##without##
+: This turns **off** one of the above options.
 
 There is also a rarely-used special **with** option where a code
 number appears after **with**.  In previous releases this code was
@@ -2382,53 +2327,38 @@ not maskable ones are not supposed to occur in production code. As a result,
 they are not suppressed by the **without warning** directive. Maskable warnings
 can be turned on and off individually.
 
-**without warning** not only turns off maskable warnings, it saves the current
-state of the warning mask. **with warning** simply restores that mask.
+##without warning## not only turns off maskable warnings, it saves the current
+state of the warning mask. ##with warning## simply restores that mask.
 Initially, onlly the warnings concerning non explicitly included symbols,
 overriding a builtin routine and choosing a builtin routine over another global
-symbol. This can be changed using -W command line switches.
+symbol. This can be changed using ##-W## command line switches.
 
-The **with warning** has optional extensions in order to customise maskable warnings:
+The ##with warning## has optional extensions in order to customise maskable warnings:
 
-* **with warning** = //warning names// enables only these warnings, and disable all other;
-* **with warning**+=//warning names// enables listed warnings in addition to whichever are 
+* ##with warning = //warning names//## enables only these warnings, and disable all other;
+* ##with warning +=//warning names//## enables listed warnings in addition to whichever are 
   enabled already;
-* **with warning**-=//warning names// disables listed warnings and leaves anyone not listed 
+* ##with warning -=//warning names//## disables listed warnings and leaves anyone not listed 
   in its current state.
 
 The following names are known:
 
-<dl>
-<dt>"no_warning"</dt>
-<dd>suppresses all maskable warnings, without saving the earlier state
-</dd>
-<dt>"resolution_warning"</dt>
-<dd>a symbol was used in a file, but was defined in a file this file doesn't include
-</dd>
-<dt>"sc_warning"</dt>
-<dd>a routine call may not take place because of short circuit evaluation in a conditional clause
-</dd>
-<dt>"override_warning"</dt>
-<dd>a builtin is being overridden
-</dd>
-<dt>"builtin_chosen_warning"</dt>
-<dd>an unqualified call caused Eupjoria to choose between a builtin and another gobal which 
-does not override it. Euphoria chooses the builtin.
-</dd>
-<dt>"not_used_warning"</dt>
-<dd>A variable has not been used and is going out of scope
-</dd>
-<dt>"no_value_warning"</dt>
-<dd>A variable never got assigned a value and is going out of scope
-</dd>
-<dt>"custom_warning"</dt>
-<dd>Any warning that was defined using this special level in the warning() procedure.
-</dd>
-<dt>"lint_warning"</dt>
-<dd>Turns all maskable warnings on.
-</dd>
-</dl>
-They must always appear between double quotes, except when used in a -W command line switch.
+* ##"no_warning"## - suppresses all maskable warnings, without saving the earlier state
+* ##"resolution_warning"## - a symbol was used in a file, but was defined in a file this file 
+  doesn't include
+* ##"sc_warning"## - a routine call may not take place because of short circuit evaluation 
+  in a conditional clause
+* ##"override_warning"## - a builtin is being overridden
+* ##"builtin_chosen_warning"## - an unqualified call caused Eupjoria to choose between a builtin and 
+  another gobal which does not override it. Euphoria chooses the builtin.
+* ##"not_used_warning"## - A variable has not been used and is going out of scope
+* ##"no_value_warning"## - A variable never got assigned a value and is going out of scope
+* ##"custom_warning"## - Any warning that was defined using this special level in the 
+  ##warning()## procedure.
+* ##"lint_warning"## - Turns all maskable warnings on.
+
+
+They must always appear between double quotes, except when used in a ##-W## command line switch.
 
 == Command line switches
 
@@ -2440,37 +2370,39 @@ achieved by clicking the Run... start menu entry, or hitting Windows-R.
 
 The following items may be changed or added, one at a time:
 
-<dl>
-<dt>-C cofig_file</dt>
-<dd>Specifies the path for a file called euinc.conf, which holds a set of include paths, one on each line.</dd>
-<dt>-I include_path</dt>
-<dd>Specifies an extra include path.</dd>
-<dt>-D tag</dt>
-<dd>Defines a tag as being set. Tags are processed by **ifdef** blocks.</dd>
-<dt>-W warning_name</dt>
-<dd>Resets, or adds to, the current list of maskable wrnings that will be emitted. The list of known names is to be found in the subsection describing **with warning**. A name should appear without quotes. The first -W switch resets the list to the warning being introduced, and each subsequent -> switch adds to the list.</dd>
-</dl>
+; ##-C cofig_file##
+: Specifies the path for a file called euinc.conf, which holds a set of include paths, one on each line.
+; ##-I include_path##
+: Specifies an extra include path.
+; ##-D tag##
+: Defines a tag as being set. Tags are processed by **ifdef** blocks.
+; ##-W warning_name##
+: Resets, or adds to, the current list of maskable wrnings that will be emitted. The list of known 
+  names is to be found in the subsection describing ##with warning##. A name should appear without 
+  quotes. The first ##-W## switch resets the list to the warning being introduced, and each 
+  subsequent -> switch adds to the list.
+
 The case of the switches is ignored, so -I and -i are equivalent, and so on.
 
 Further notes:
 
 * Included files are searched for in all included paths, in the following order:
 ## The current path
-## Paths specified in a -I command line switch
-## Paths specified in euinc.conf
-## Paths listed in the EUINC environment variable, in the order in which they appear
-## Paths listed in the EUDIR environment variable, in the order in which they appear
+## Paths specified in a ##-I## command line switch
+## Paths specified in ##euinc.conf##
+## Paths listed in the ##EUINC## environment variable, in the order in which they appear
+## Paths listed in the ##EUDIR## environment variable, in the order in which they appear
 ## The interpreter's path
 * The ##euinc.conf## (Windows) / ##.euinc.conf## (Linux/FreeBSD) file, if not specified 
   using the -C command line switch, is searched for in:
 ## The interpreter's path
-*** Linux/FreeBSD: The directory specified in the ##HOME## environment variable
-*** Windows: The "euphoria" subfolder of the directory specified in the ##APPDATA## 
+*** //Linux/FreeBSD/OS X//: The directory specified in the ##HOME## environment variable
+*** //Windows//: The "euphoria" subfolder of the directory specified in the ##APPDATA## 
     environment variable
-## Linux/FreeBSD: The /etc/euphoria path
-## Windows: The "euphoria" subfolder of the directory specified in the ##ALLUSERSPROFILE##
+## //Linux/FreeBSD/OS X//: The /etc/euphoria path
+## //Windows//: The "euphoria" subfolder of the directory specified in the ##ALLUSERSPROFILE##
    environment variable
-* euinc.conf is not supported under DOS, except through the -C command line switch.
+* ##euinc.conf## is not supported under //DOS//, except through the ##-C## command line switch.
 * The initial list of maskable, unmasked warnings is:
 ** resolution_warning
 ** override_warning
