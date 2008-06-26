@@ -160,7 +160,11 @@ end procedure
 -- === Constants
 --
 
-export constant PRETTY_DEFAULT = {1,2,1,78,"%d","%.10g",32,127 - (platform() = LINUX),1000000000,1}
+ifdef UNIX then
+	export constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 126, 1000000000, 1}
+else
+	export constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 127, 1000000000, 1}
+end ifdef
 
 export enum
 	DISPLAY_ASCII = 1,

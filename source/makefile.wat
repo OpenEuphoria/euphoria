@@ -93,14 +93,15 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
-	.\$(OBJDIR)\misc.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\search.obj
+	.\$(OBJDIR)\search.obj &
+	.\$(OBJDIR)\math.obj &
+	.\$(OBJDIR)\os.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
@@ -264,7 +265,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\compil_A.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
-	.\$(OBJDIR)\misc.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\symtab_0.obj &
@@ -762,9 +762,6 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\tranplat.obj :  ./$(OBJDIR)\tranplat.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\misc.obj : .\$(OBJDIR)\main-.c 
-	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
-
 .\$(OBJDIR)\get.obj :  .\$(OBJDIR)\main-.c 
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
@@ -782,6 +779,12 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 
 .\$(OBJDIR)\string.obj :  .\$(OBJDIR)\main-.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\math.obj : .\$(OBJDIR)\math.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\os.obj : .\$(OBJDIR)\os.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS)  $^&.c -fo=.\$(OBJDIR)\back\$^.
