@@ -15,6 +15,7 @@ include c_decl.e
 include cominit.e
 include compress.e
 include tranplat.e
+include file.e
 
 integer np, pc
 

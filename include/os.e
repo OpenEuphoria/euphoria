@@ -12,6 +12,23 @@ constant M_SLEEP = 64
 --****
 -- === Constants
 --
+-- ==== Operating System Constants
+-- These constants are returned by the [[:platform]] function.
+--
+-- * DOS32 - Host operating system is DOS
+-- * WIN32 - Host operating system is Windows
+-- * LINUX - Host operating system is Linux **or** FreeBSD
+-- * FREEBSD - Host operating system is Linux **or** FreeBSD
+-- * OSX - Host operating system is Mac OS X
+--
+-- Note:
+-- Via the [[:platform]] call, there is no way to determine if you are on Linux
+-- or FreeBSD. This was done to provide a generic UNIX return value for
+-- [[:platform]].
+--
+-- In most situations you are better off to test the host platform by using
+-- the [[:ifdef statement]]. It is both more accurate and faster.
+--
 
 export constant 
 	DOS32   = 1, -- ex.exe
@@ -31,7 +48,10 @@ constant
 	PARAM  = 4,
 	RID    = 5
 
-procedure show_help(sequence opts, integer add_help_rid=-1)
+--**
+-- Show help message for the given opts
+
+export procedure show_help(sequence opts, integer add_help_rid=-1)
 	integer pad_size, this_size
 	sequence cmds, cmd
 
@@ -99,6 +119,33 @@ end function
 --
 
 --**
+-- Parse command line options
+--
+-- Example:
+-- <eucode>
+-- integer verbose = 0
+-- sequence output_filename = ""
+-- 
+-- procedure opt_verbose()
+--     verbose = 1
+-- end procedure
+--
+-- procedure opt_output_filename(object param)
+--     output_filename = param
+-- end procedure
+--
+-- sequence opts = {
+--     { "v", "verbose", "Verbose output",  NO_PARAMETER, routine_id("opt_verbose") },
+--     { "o", "output",  "Output filename", HAS_PARAMETER, routine_id("opt_output_filename") }
+-- }
+--
+-- sequence extras = cmd_parse(opts)
+--
+-- -- When run as: exu/exwc myprog.ex -v -o john.txt input1.txt input2.txt
+-- -- verbose will be 1, output_filename will be "john.txt" and
+-- -- extras = { "input1.txt", "input2.txt" }
+-- </eucode>
+
 export function cmd_parse(sequence opts, integer add_help_rid=-1, 
 			sequence cmds = command_line())
 	integer idx, cmd_idx, opts_done
@@ -108,7 +155,6 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1,
 	idx = 3
 	opts_done = 0
 
-	--trace(1)
 	while idx <= length(cmds) do
 		cmd_idx = -1 -- cause functions not to be called by default
 		cmd = cmds[idx]
@@ -150,6 +196,25 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1,
 end function
 
 --**
+-- Suspend execution for ##t## seconds.
+-- 
+-- Comments:
+-- On //Windows// and //Unix//, the operating system will suspend your process and 
+-- schedule other processes. On //DOS//, your program will go into a busy loop for 
+-- ##t## seconds, during which time other processes may run, but they will compete 
+-- with your process for the CPU.
+--
+-- With multiple tasks, the whole program sleeps, not just the current task. To make 
+-- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
+-- and then execute ##[[:task_yield]]()##.
+--
+-- Example:
+-- <eucode>
+-- puts(1, "Waiting 15 seconds...\n")
+-- sleep(15)
+-- puts(1, "Done.\n")
+-- </eucode>
+
 global procedure sleep(atom t)
 -- go to sleep for t seconds
 -- allowing (on WIN32 and Linux) other processes to run
@@ -161,7 +226,11 @@ end procedure
 constant M_INSTANCE = 55
 
 --**
--- Return hInstance on Windows, Process ID (pid) on Unix and 0 on DOS
+-- Return ##hInstance## on Windows, Process ID (pid) on Unix and 0 on DOS
+--
+-- Comments:
+-- On //Windows// the ##hInstance## can be passed around to various
+-- //Windows// routines.
 
 export function instance()
 	return machine_func(M_INSTANCE, 0)

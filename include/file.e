@@ -1,6 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
---**
+--****
 -- == File/Device I/O
 --
 
@@ -30,41 +30,49 @@ type boolean(integer b)
 	return b = 0 or b = 1
 end type
 
---**
+--****
 -- === Constants
 --
 
 --**
+-- Signature
+-- export constant SLASH
+--
+-- Description:
 -- Current platform's path separator character
 --
 -- Comments:
--- When on DOS32 or WIN32, '~\\'. When on LINUX or FREEBSD, '/'.
+-- When on //DOS// or //Windows//, '~\\'. When on //Unix//, '/'.
 --
--- Example:
--- <eucode>
--- x = PATHSEP
--- -- x is '/' or '\\' depending on platform
--- </eucode>
-
-global integer PATHSEP
-global sequence PATHSEPS
 
 --**
+-- Signature:
+-- export constant SLASHES
+--
+-- Description:
+-- Current platform's possible path separators. This is slightly different
+-- in that on //Windows// and //DOS// the path separators variable contains
+-- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
+-- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
+
+--**
+-- Signature:
+-- export constant CRLF
+--
+-- Description:
 -- Current platforms newline character(s)
 
-global sequence NL
-
 ifdef UNIX then
-	PATHSEP='/'
-	PATHSEPS = "/"
-	NL = "\n"
+	export constant SLASH='/'
+	export constant SLASHES = "/"
+	export constant CRLF = "\n"
 else
-	PATHSEP='\\'
-	PATHSEPS = ":\\/"
-	NL = "\r\n"
+	export constant SLASH='\\'
+	export constant SLASHES = ":\\/"
+	export constant CRLF = "\r\n"
 end ifdef
 
---**
+--****
 -- === Procedures and Functions
 
 --**
@@ -540,29 +548,29 @@ global enum
 --  defined in ##file.e##:
 --  
 -- <eucode>
--- global constant D_NAME = 1,
---           D_ATTRIBUTES = 2,
---                 D_SIZE = 3,
+-- global constant 
+--     D_NAME = 1,
+--     D_ATTRIBUTES = 2,
+--     D_SIZE = 3,
 --
---                 D_YEAR = 4,
---                D_MONTH = 5,
---                  D_DAY = 6,
+--     D_YEAR = 4,
+--     D_MONTH = 5,
+--     D_DAY = 6,
 --
---                 D_HOUR = 7,
---               D_MINUTE = 8,
---               D_SECOND = 9
+--     D_HOUR = 7,
+--     D_MINUTE = 8,
+--     D_SECOND = 9
 -- </eucode>
 --
 -- The attributes element is a string sequence containing characters chosen from:
 --  
--- <eucode>
--- 'd' -- directory
--- 'r' -- read only file
--- 'h' -- hidden file
--- 's' -- system file
--- 'v' -- volume-id entry
--- 'a' -- archive file
--- </eucode>
+-- || Attribute || Description ||
+-- | 'd'         | directory
+-- | 'r'         | read only file
+-- | 'h'         | hidden file
+-- | 's'         | system file
+-- | 'v'         | volume-id entry
+-- | 'a'         | archive file
 --
 -- A normal file without special attributes would just have an empty string, "", in this field.
 --
@@ -576,7 +584,9 @@ global enum
 -- Under //Linux/FreeBSD//, the only attribute currently available is 'd'.
 -- 
 -- //DOS32//: The file name returned in D_NAME will be a standard DOS 8.3 
--- name. (See [[http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir|Archive Web page]] for a better solution).
+-- name. (See 
+-- [[http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir|Archive Web page]]
+-- for a better solution).
 -- 
 -- //WIN32//: The file name returned in D_NAME will be a long file name.
 --
@@ -585,17 +595,19 @@ global enum
 -- d = dir(current_dir())
 --
 -- -- d might have:
---   {
---     {".",    "d",     0  1994, 1, 18,  9, 30, 02},
---     {"..",   "d",     0  1994, 1, 18,  9, 20, 14},
---     {"fred", "ra", 2350, 1994, 1, 22, 17, 22, 40},
---     {"sub",  "d" ,    0, 1993, 9, 20,  8, 50, 12}
---   }
+-- --  {
+-- --    {".",    "d",     0  1994, 1, 18,  9, 30, 02},
+-- --    {"..",   "d",     0  1994, 1, 18,  9, 20, 14},
+-- --    {"fred", "ra", 2350, 1994, 1, 22, 17, 22, 40},
+-- --    {"sub",  "d" ,    0, 1993, 9, 20,  8, 50, 12}
+-- --  }
 --
 -- d[3][D_NAME] would be "fred"
---  </eucode>
+-- </eucode>
 -- 
--- See <path>bin\search.ex</path>
+-- See Also:
+--   ##bin\search.ex##
+--
 
 global function dir(sequence name)
 	object dir_data, data, the_name, the_dir
@@ -614,7 +626,7 @@ global function dir(sequence name)
 		the_dir = "."
 		the_name = name
 	else
-		-- Find a PATHSEP character and break the name there resulting in
+		-- Find a SLASH character and break the name there resulting in
 		-- a directory and file name.
 		idx = length(name)
 		while idx > 0 do
@@ -789,9 +801,10 @@ end function
 
 -- override the dir sorting function with your own routine id
 constant DEFAULT = -2
-global integer my_dir 
-my_dir = DEFAULT  -- it's better not to use routine_id() here,
-				  -- or else users will have to bind with clear routine names
+
+-- it's better not to use routine_id() here,
+-- or else users will have to bind with clear routine names
+global integer my_dir = DEFAULT
 
 --**
 -- Generalized Directory Walker
@@ -827,8 +840,8 @@ my_dir = DEFAULT  -- it's better not to use routine_id() here,
 -- exit_code = walk_dir("C:\\MYFILES", routine_id("look_at"), TRUE)
 -- </eucode>
 --
--- Example 2:
--- See <path>bin\search.ex</path>
+-- See Also:
+--   ##bin\search.ex##
 
 global function walk_dir(sequence path_name, object your_function, 
 						 integer scan_subdirs)
@@ -853,7 +866,7 @@ global function walk_dir(sequence path_name, object your_function,
 	
 	-- trim any trailing blanks or '\' characters from the path
 	while length(path_name) > 0 and 
-		  find(path_name[$], {' ', PATHSEP}) do
+		  find(path_name[$], {' ', SLASH}) do
 		path_name = path_name[1..$-1]
 	end while
 	
@@ -870,7 +883,7 @@ global function walk_dir(sequence path_name, object your_function,
 					return abort_now
 				end if
 				if scan_subdirs then
-					abort_now = walk_dir(path_name & PATHSEP & d[i][D_NAME],
+					abort_now = walk_dir(path_name & SLASH & d[i][D_NAME],
 										 orig_func, scan_subdirs)
 					
 					if not equal(abort_now, 0) and 
@@ -915,7 +928,7 @@ end function
 -- -- {"Line 1", "Line 2", "Line 3"}
 -- </eucode>
 
-global function read_lines(object f)
+export function read_lines(object f)
 	object fn, ret, y
 	if sequence(f) then
 			fn = open(f, "r")
@@ -964,7 +977,7 @@ end function
 -- See Also:
 --     read_lines, write_file
 
-global function write_lines(object f, sequence lines)
+export function write_lines(object f, sequence lines)
 	object fn
 
 	if sequence(f) then
@@ -1004,7 +1017,7 @@ end function
 -- See Also:
 --     write_lines
 
-global function append_lines(sequence f, sequence lines)
+export function append_lines(sequence f, sequence lines)
 	object fn
 
   	fn = open(f, "a")
@@ -1042,7 +1055,7 @@ end function
 -- See Also:
 --     write_file, read_lines
 
-global function read_file(object f)
+export function read_file(object f)
 	integer fn
 	integer len
 	sequence ret
@@ -1091,7 +1104,7 @@ end function
 -- See Also:
 --    read_file, write_lines
 
-global function write_file(object f, sequence data)
+export function write_file(object f, sequence data)
 	integer fn
 
 	if sequence(f) then
@@ -1110,7 +1123,7 @@ global function write_file(object f, sequence data)
 	return 1
 end function
 
-global enum
+export enum
 	PATH_DIR,
 	PATH_FILENAME,
 	PATH_BASENAME,
@@ -1121,7 +1134,8 @@ global enum
 -- Parse the fully qualified pathname (s1) and return a sequence containing directory name, 
 -- file name + file extension, file name and file extension.
 --
--- An enum has been created for ease of use:
+-- An exported enum has been created for ease of use:
+--
 -- * PATH_DIR
 -- * PATH_FILENAME
 -- * PATH_BASENAME
@@ -1155,7 +1169,7 @@ global enum
 -- See Also:
 --   driveid, dirname, filename, fileext
 
-global function pathinfo(sequence path)
+export function pathinfo(sequence path)
 	integer slash, period, ch
 	sequence dir_name, file_name, file_ext, file_full, drive_id
 
@@ -1172,7 +1186,7 @@ global function pathinfo(sequence path)
 		ch = path[i]
 		if period = 0 and ch = '.' then
 			period = i
-		elsif find(ch, PATHSEPS) then
+		elsif find(ch, SLASHES) then
 			slash = i
 			exit
 		end if
@@ -1216,7 +1230,7 @@ end function
 -- See Also:
 --   driveid, filename, fileext
 
-global function dirname(sequence path)
+export function dirname(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[1]
@@ -1237,7 +1251,7 @@ end function
 -- See Also:
 --   pathinfo, driveid, dirname, filebase, fileext
   
-global function filename(sequence path)
+export function filename(sequence path)
 	sequence data
 
 	data = pathinfo(path)
@@ -1259,7 +1273,7 @@ end function
 -- See Also:
 --     pathinfo, driveid, dirname, filename, fileext
 
-global function filebase(sequence path)
+export function filebase(sequence path)
 	sequence data
 
 	data = pathinfo(path)
@@ -1282,7 +1296,7 @@ end function
 -- See Also:
 --     pathinfo, driveid, dirname, filename, filebase
 
-global function fileext(sequence path)
+export function fileext(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[4]
@@ -1302,9 +1316,8 @@ end function
 -- See Also:
 --     pathinfo, dirname, filename, filebase, fileext
 
-global function driveid(sequence path)
+export function driveid(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[5]
 end function
-

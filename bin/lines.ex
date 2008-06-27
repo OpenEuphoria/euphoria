@@ -305,19 +305,19 @@ if fp > 0 then
 end if
 
 --hmm, try eudir/include
-fp = open(EUDIR & PATHSEP & "include" & PATHSEP & file_name, "r")
+fp = open(EUDIR & SLASH & "include" & SLASH & file_name, "r")
 if fp > 0 then
         close(fp)
-        return scan_file_for_includes(EUDIR & PATHSEP & "include" & PATHSEP & file_name)
+        return scan_file_for_includes(EUDIR & SLASH & "include" & SLASH & file_name)
 end if
 
 --hmmm, try EUINC
 if length(EUINC) > 0 then
         for i = 1 to length(EUINC) do
-                fp = open(EUINC[i] & PATHSEP & file_name, "r")
+                fp = open(EUINC[i] & SLASH & file_name, "r")
                 if fp > 0 then
                         close(fp)
-                        return scan_file_for_includes(EUINC[i] & PATHSEP & file_name)
+                        return scan_file_for_includes(EUINC[i] & SLASH & file_name)
                 end if
         end for
 end if
@@ -325,16 +325,16 @@ end if
 --still no joy! - try the path
 if length(PATH) > 0 then
         for i = 1 to length(PATH) do
-                fp = open(PATH[i] & PATHSEP & file_name, "r")
+                fp = open(PATH[i] & SLASH & file_name, "r")
                 if fp > 0 then
                         close(fp)
-                        return scan_file_for_includes(PATH[i] & PATHSEP & file_name)
+                        return scan_file_for_includes(PATH[i] & SLASH & file_name)
                 end if
         end for
 end if
 
 
---puts(1, EUDIR & PATHSEP & "include" & PATHSEP & file_name & "-\n")
+--puts(1, EUDIR & SLASH & "include" & SLASH & file_name & "-\n")
 puts(1, "Warning -  Couldn't find " & file_name & " listed in " & global_program & "\n")
 
 --ok, still not found, where else
@@ -395,10 +395,10 @@ for i = 1 to length(file_names) do
 
         if found_flag = 0 then
                 --hmm, try eudir/include
-                fp = open(EUDIR & PATHSEP & "include" & PATHSEP & file_names[i], "r")
+                fp = open(EUDIR & SLASH & "include" & SLASH & file_names[i], "r")
                 if fp > 0 then
                         close(fp)
-                        file_names[i] = EUDIR & PATHSEP & "include" & PATHSEP & file_names[i]
+                        file_names[i] = EUDIR & SLASH & "include" & SLASH & file_names[i]
                         found_flag = 1
                 end if
         end if
@@ -406,10 +406,10 @@ for i = 1 to length(file_names) do
         if found_flag = 0 and length(EUINC) > 0 then
                 --try EUINC
                 for j = 1 to length(EUINC) do
-                        fp = open(EUINC[j] & PATHSEP & file_names[i], "r")
+                        fp = open(EUINC[j] & SLASH & file_names[i], "r")
                         if fp > 0 then
                                 close(fp)
-                                file_names[i] = EUINC[j] & PATHSEP & file_names[i]
+                                file_names[i] = EUINC[j] & SLASH & file_names[i]
                                 found_flag = 1
                         end if
                 end for
@@ -418,10 +418,10 @@ for i = 1 to length(file_names) do
         if found_flag = 0 and length(PATH) > 0 then
                 --try PATH
                 for j = 1 to length(PATH) do
-                        fp = open(PATH[j] & PATHSEP & file_names[i], "r")
+                        fp = open(PATH[j] & SLASH & file_names[i], "r")
                         if fp > 0 then
                                 close(fp)
-                                file_names[i] = PATH[j] & PATHSEP & file_names[i]
+                                file_names[i] = PATH[j] & SLASH & file_names[i]
                                 found_flag = 1
                         end if
                 end for

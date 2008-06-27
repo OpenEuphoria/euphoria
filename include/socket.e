@@ -17,12 +17,21 @@ include sequence.e
 -- === Constants
 --
 
+--**
+-- getaddrinfo accessors
+
 export enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
+
+--**
+-- Socket types
 
 export constant AF_INET = 2, SOCK_STREAM=1, SOCK_DGRAM = 2, SOCK_RAW = 3,
 	SOCK_RDM = 4, SOCK_SEQPACKET = 5
-	
-export constant    -- RFC 1700
+
+--**
+-- RFC 1700	
+
+export constant
 	IPPROTO_IP = 0,
 	IPPROTO_ICMP = 1,
 	IPPROTO_TCP = 6,

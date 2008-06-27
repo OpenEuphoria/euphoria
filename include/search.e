@@ -435,7 +435,7 @@ end function
 -- Assumes haystack is already sorted into ascending order.
 
 global function binary_search(object needle, sequence haystack, integer startpoint = 1, 
-			integer endpoint = 0)
+		integer endpoint = 0)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
 	lo = startpoint

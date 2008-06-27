@@ -180,13 +180,13 @@ function secondsToDateTime(atom seconds) -- returns a DateTime
 	return julianDate(days) & {hours, minutes, seconds}
 end function
 
---**
+--****
 -- === Localized Variables
 
 --**
 -- Names of the months
 
-export sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
+export sequence month_names = { "January", "February", "March", "April", "May", "June", "July", 
 	"August", "September", "October", "November", "December" }
 
 --**
@@ -211,33 +211,21 @@ export sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 
 export sequence ampm = { "AM", "PM" }
 
---**
+--****
 -- === Constants
 --
--- ==== Accessors to datetime type
--- * YEAR
--- * MONTH
--- * DAY 
--- * HOUR
--- * MINUTE
--- * SECOND
---
+
+--**
+-- Accessors
 
 export enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 
--- ==== Interval types
--- * YEARS
--- * MONTHS
--- * WEEKS
--- * DAYS
--- * HOURS
--- * MINUTES
--- * SECONDS
--- * DATE
+--**
+-- Intervals
 
 export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 
---**
+--****
 -- === Types
 
 --**
@@ -257,7 +245,7 @@ export type datetime(object o)
 		and o[SECOND] >= 0 and o[SECOND] < 60)
 end type
 
---**
+--****
 -- === Routines
 
 --**

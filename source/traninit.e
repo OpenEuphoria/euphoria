@@ -2,6 +2,7 @@
 --
 
 include os.e
+include file.e
 
 -- Translator initialization
 include get.e

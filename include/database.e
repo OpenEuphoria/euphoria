@@ -2,7 +2,7 @@
 --
 --****
 -- == Euphoria Database (EDS)
---
+-- <<LEVELTOC>>
 
 include machine.e
 include file.e
@@ -129,6 +129,7 @@ end procedure
 
 --**
 -- exception handler
+
 global integer db_fatal_id = routine_id("default_fatal")
 
 procedure fatal(sequence msg)
@@ -323,7 +324,7 @@ procedure safe_seek(atom pos)
 	end if
 end procedure
 
---**
+--****
 -- === Routines
 
 --**
@@ -1604,7 +1605,7 @@ function name_only(sequence s)
 	
 	filename = ""
 	for i = length(s) to 1 by -1 do
-		if find(s[i], PATHSEP) then
+		if find(s[i], SLASH) then
 			exit
 		end if
 		filename = s[i] & filename

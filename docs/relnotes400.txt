@@ -130,7 +130,7 @@
 * New routines in **file.e**:
   **read_lines()**, **read_file()**, **write_lines()**, **append_lines**,
   **write_file()**, **pathinfo()**, **dirname()**, **filename()**,
-  **fileext()** and Global Constants **PATHSEP** and **NL**. $$(doneby Jeremy Cowgar.)
+  **fileext()** and Global Constants **SLASH** and **CRLF**. $$(doneby Jeremy Cowgar.)
 * New routines in **datetime.e**:
   **new()**, **from_date()**,
   **now()**, **dow()**, **doy()**, **to_unix()**,

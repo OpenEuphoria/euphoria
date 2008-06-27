@@ -15,6 +15,7 @@
 
 -- Writing characters to screen memory with poke() is much faster than  
 -- using puts(). Address of start of text screen memory:
+--
 -- * mono: #B0000
 -- * color: #B8000
 --
@@ -23,10 +24,10 @@
 --
 -- Some example programs to look at:
 --   * ##demo\callmach.ex##      - calling a machine language routine
---   * demo\dos32\hardint.ex## - setting up a hardware interrupt handler
---   * demo\dos32\dosint.ex##  - calling a DOS software interrupt
+--   * ##demo\dos32\hardint.ex## - setting up a hardware interrupt handler
+--   * ##demo\dos32\dosint.ex##  - calling a DOS software interrupt
 --
--- See also safe.e in this directory. It's a safe, debugging version of this
+-- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
 
 constant M_ALLOC = 16,
@@ -111,6 +112,28 @@ end type
 -- === Routines
 
 --**
+-- Allocate ##n## contiguous bytes of memory. Return the address of the block of memory, or 
+-- return 0 if the memory can't be allocated. The address returned will be at least 
+-- 4-byte aligned.
+--
+-- Comments:
+-- When you are finished using the block, you should pass the address of the block to 
+-- ##[[:free]]()##. This will free the block and make the memory available for other purposes. 
+-- Euphoria will never free or reuse your block until you explicitly call ##[[:free]]()##. When 
+-- your program terminates, the operating system will reclaim all memory for use with other 
+-- programs.
+--
+-- Example:		
+-- <eucode>
+-- buffer = allocate(100)
+-- for i = 0 to 99 do
+--     poke(buffer+i, 0)
+-- end for
+-- </eucode>
+--		    
+-- See Also:
+--     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:call]]
+
 global function allocate(positive_int n)
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
@@ -118,12 +141,45 @@ global function allocate(positive_int n)
 end function
 
 --**
+-- Free up a previously allocated block of memory by specifying the address of the start of the 
+-- block, i.e. the address that was returned by ##[[:allocate]]()##.
+--
+-- Comments:
+--   Use ##free()## to recycle blocks of memory during execution. This will reduce the chance of 
+--   running out of memory or getting into excessive virtual memory swapping to disk. Do not 
+--   reference a block of memory that has been freed. When your program terminates, all 
+--   allocated memory will be returned to the system.
+-- 
+--   Do not use ##free()## to deallocate memory that was allocated using ##[[:allocate_low]]()##. 
+--   Use ##[[:free_low]]()## for this purpose.
+--
+-- Example Program:
+--   ##demo\callmach.ex##
+--
+-- See Also:
+--     [[:allocate]], [[:free_low]]
+
 global procedure free(machine_addr a)
 -- free the memory at address a
 	machine_proc(M_FREE, a)
 end procedure
 
 --**
+-- Allocate ##n## contiguous bytes of low memory, i.e. conventional memory (address below 
+-- 1 megabyte). Return the address of the block of memory, or return 0 if the memory can't 
+-- be allocated.
+--
+-- Comments:
+--   Some //DOS// software interrupts require that you pass one or more addresses in registers. 
+--   These addresses must be conventional memory addresses for DOS to be able to read or write 
+--   to them.
+--
+-- Example Program:
+--   ##demo\dos32\dosint.ex##
+--
+-- See Also:
+--   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]
+
 global function allocate_low(positive_int n)
 -- Allocate n bytes of low memory (address less than 1Mb) 
 -- and return the address. Free this memory using free_low() below.
@@ -132,6 +188,24 @@ global function allocate_low(positive_int n)
 end function
 
 --**
+-- Free up a previously allocated block of conventional memory by specifying the address 
+-- of the start of the block, i.e. the address that was returned by ##[[:allocate_low]]()##.
+--
+-- Comments:
+--   Use ##free_low()## to recycle blocks of conventional memory during execution. This will 
+--   reduce the chance of running out of conventional memory. Do not reference a block of 
+--   memory that has been freed. When your program terminates, all allocated memory will be 
+--   returned to the system.
+--
+--   Do not use ##free_low()## to deallocate memory that was allocated using ##[[:allocate]]()##. 
+--   Use ##[[:free]]()## for this purpose.
+--
+-- Example Program:
+--   ##demo\dos32\dosint.ex##
+--
+-- See Also:
+--   [[:allocate_low]], [[:dos_interrupt]], [[:free]]
+
 global procedure free_low(low_machine_addr a)
 -- free the low memory at address a
 	machine_proc(M_FREE_LOW, a)

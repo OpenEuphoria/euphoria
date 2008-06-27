@@ -43,7 +43,7 @@
 ../../include/os.e
 ../../include/pretty.e
 ../../include/primes.e
-../../include/regex.e
+#../../include/regex.e
 ../../include/search.e
 ../../include/sequence.e
 ../../include/sets.e

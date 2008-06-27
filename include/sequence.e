@@ -2,6 +2,9 @@
 --
 --****
 -- == Sequence Manipulation
+-- **Page Contents**
+--
+-- <<LEVELTOC level=4>>
 
 include machine.e
 include search.e
@@ -15,15 +18,15 @@ include search.e
 -- global function append(sequence s1, object x)
 --
 -- Description:
--- Create a new sequence (s2) identical to s1 but with x added on the end as the last element. 
--- The length of s2 will be length(s1) + 1.
+-- Return a new sequence identical to ##s1## but with ##x## added on the end as the last element. 
+-- The resulting length will be ##length(s1) + 1##.
 --
 -- Comments:
--- If x is an atom this is equivalent to <strong>s2 = s1 & x</strong>. If x is a sequence it is
+-- If ##x## is an atom this is equivalent to ##s2 = s1 & x##. If ##x## is a sequence it is
 -- not equivalent.
 --
 -- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic 
--- storage allocation. The case where s1 and s2 are actually the same variable (as in 
+-- storage allocation. The case where ##s1## and ##s2## are actually the same variable (as in 
 -- Example 1 below) is highly optimized.
 --
 -- Example 1:
@@ -136,12 +139,12 @@ include search.e
 --
 -- Description:
 -- This is exactly the same as printf(), except that the output is returned as a sequence 
--- of characters, rather than being sent to a file or device. st is a format string, x 
--- is the value or sequence of values to be formatted. printf(fn, st, x)  is equivalent 
--- to puts(fn, sprintf(st, x)).
+-- of characters, rather than being sent to a file or device. st is a format string, ##x##
+-- is the value or sequence of values to be formatted. ##printf(fn, st, x)## is equivalent 
+-- to ##puts(fn, sprintf(st, x))##.
 --
 -- Comments:
--- Some typical uses of sprintf() are:
+-- Some typical uses of ##sprintf()## are:
 --
 -- # Converting numbers to strings.
 -- # Creating strings to pass to system().

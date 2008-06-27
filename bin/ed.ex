@@ -39,6 +39,7 @@ include file.e
 include wildcard.e
 include dll.e
 include sequence.e
+include os.e
 
 constant TRUE = 1,
 	 FALSE = 0
@@ -64,11 +65,9 @@ integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 	CONTROL_DELETE  -- key for line-delete 
 			-- (not available on some systems)
 sequence delete_cmd, compare_cmd
-integer SLASH
 integer SAFE_CHAR -- minimum ASCII char that's safe to display
 	 
-if platform() = LINUX then
-    SLASH = '/'
+ifdef UNIX then
     SAFE_CHAR = 32
     delete_cmd = "rm "
     compare_cmd = "diff "
@@ -100,7 +99,6 @@ if platform() = LINUX then
     NUM_PAD_SLASH = -999  -- Please check on console and Xterm
 else
     -- DOS/Windows
-    SLASH = '\\'
     SAFE_CHAR = 14
     delete_cmd = "del "
     compare_cmd = "fc /T "
@@ -124,20 +122,22 @@ else
     ARROW_DOWN = 336
     F1 = 315
     F10 = 324
-    if platform() = WIN32 then
-	F11 = 343
-	F12 = 344
-	NUM_PAD_ENTER = 284
-	NUM_PAD_SLASH = 309
+    
+    if platform() WIN32 then
+		F11 = 343
+		F12 = 344
+		NUM_PAD_ENTER = 284
+		NUM_PAD_SLASH = 309
     else
-	F11 = 389
-	F12 = 390
-	NUM_PAD_ENTER = 13
-	NUM_PAD_SLASH = -999 -- Never needed
+		F11 = 389
+		F12 = 390
+		NUM_PAD_ENTER = 13
+		NUM_PAD_SLASH = -999 -- Never needed
     end if
+    
     CONTROL_DELETE = 403 -- key for line-delete 
 			 -- (not available on some systems)
-end if
+end ifdef
 
 
 

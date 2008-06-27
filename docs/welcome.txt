@@ -1,11 +1,14 @@
 @@(title Euphoria v4.0)@
-%%maxnumlevel=4
+%%maxnumlevel = 4
+%%splitname = eu400
+%%splitlevel = 2
+%%toclevel = 3
 
 = Euphoria Programming Language v4.0
 
 == Table of Contents
-
-<<TOC level=2>>
+<<NAV>>
+<<TOC level=3>>
 
 == Introduction
 

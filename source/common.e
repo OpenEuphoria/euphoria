@@ -15,15 +15,13 @@ global constant EUNIX = (platform() = LINUX or platform() = FREEBSD or platform(
 				EOSX = FALSE,
 				ELINUX = not EBSD and not EOSX
 
-global integer PATH_SEPARATOR, SLASH
+global integer PATH_SEPARATOR
 global sequence SLASH_CHARS
 if EUNIX then
 	PATH_SEPARATOR = ':' -- in PATH environment variable
-	SLASH = '/'          -- preferred on Linux/FreeBSD
 	SLASH_CHARS =  "/"   -- special chars allowed in a path
 else
 	PATH_SEPARATOR = ';'
-	SLASH = '\\'
 	SLASH_CHARS = "\\/:"
 end if
 

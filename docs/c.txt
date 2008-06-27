@@ -50,4 +50,3 @@
   routines for manipulating strings and blocks of memory. How many of these routines does 
   Euphoria need? **Answer: //zero//.** In Euphoria, memory allocation happens automatically 
   and strings are manipulated just like any other sequences.
-

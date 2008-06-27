@@ -6,6 +6,7 @@
 -- === Constants
 --
 
+--**
 -- C types for .dll arguments and return value:
 global constant 
 	C_CHAR    = #01000001,
@@ -20,12 +21,17 @@ global constant
 	C_FLOAT   = #03000004,
 	C_DOUBLE  = #03000008
 
+--**
 -- Euphoria types for .dll arguments and return value:
+
 global constant
 	E_INTEGER = #06000004,
 	E_ATOM    = #07000004,
 	E_SEQUENCE= #08000004,
 	E_OBJECT  = #09000004
+
+--**
+-- C's NULL pointer
 
 global constant NULL = 0 -- NULL pointer
 

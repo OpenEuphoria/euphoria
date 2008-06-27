@@ -3,15 +3,20 @@
 --****
 -- == Mouse
 --
--- DOS32 - you need a mouse driver
--- Linux - you need GPM server to be running
--- WIN32 - not implemented yet for the text console
+-- === Requirements
+--
+-- * //DOS32// - you need a mouse driver
+-- * //Linux// - you need GPM server to be running
+-- * //Windows// - not implemented yet for the text console
+-- * //FreeBSD// - not implemented
+-- * //OS X// - not implemented
 --
 -- === Constants
 
--- Mouse Events:
-global integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP,
-			   MIDDLE_DOWN, MIDDLE_UP, ANY_UP
+--**
+-- Mouse Events
+
+global integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP, MIDDLE_DOWN, MIDDLE_UP, ANY_UP
 
 ifdef UNIX then
 	MOVE = 0
@@ -61,7 +66,7 @@ constant M_GET_MOUSE = 14,
 -- When the next event occurs, the current event will be lost, if you haven't read it.
 -- In practice it is not hard to catch almost all events. Losing a MOVE event is generally
 -- not too serious, as the next MOVE will tell you where the mouse pointer is. 
-
+--
 -- Sometimes multiple events will be reported. For example, if the mouse is moving when the
 -- left button is clicked, get_mouse() will report an event value of LEFT_DOWN+MOVE, i.e.
 -- 2+1 or 3. For this reason you should test for a particular event using and_bits(). See
@@ -135,7 +140,7 @@ end function
 -- <eucode>
 -- mouse_events(LEFT_DOWN + LEFT_UP + RIGHT_DOWN)
 -- </eucode>
-
+--
 -- will restrict get_mouse() to reporting the left button
 -- being pressed down or released, and the right button
 -- being pressed down. All other events will be ignored.
@@ -158,4 +163,3 @@ end procedure
 global procedure mouse_pointer(integer show_it)
 	machine_proc(M_MOUSE_POINTER, show_it)
 end procedure
-
