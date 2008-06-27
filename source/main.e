@@ -1,6 +1,5 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Front End - main routine
 
 include rev.e
@@ -253,7 +252,7 @@ procedure main()
 	elsif BIND then
 		OutputIL()
 
-	elsif INTERPRET then
+	elsif INTERPRET and not test_only then
 		BackEnd(0) -- execute IL using Euphoria-coded back-end
 	end if
 

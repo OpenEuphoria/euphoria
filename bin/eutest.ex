@@ -42,7 +42,7 @@ options = join( switches )
 for i = 1 to total do
 	filename = files[i][D_NAME]
 	printf(1, "%s:\n", {filename})
-	cmd = sprintf("%s %s -D UNITTEST %s %s", {executable, options, filename, cmd_opts})
+	cmd = sprintf("%s %s -D UNITTEST -batch %s %s", {executable, options, filename, cmd_opts})
 	status = system_exec(cmd, 2)
 	if match("t_c_", filename) = 1 then
 		status = not status

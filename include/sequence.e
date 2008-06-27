@@ -143,8 +143,8 @@ include search.e
 -- Comments:
 -- Some typical uses of sprintf() are:
 --
--- # Converting numbers to strings.</li>
--- # Creating strings to pass to system().</li>
+-- # Converting numbers to strings.
+-- # Creating strings to pass to system().
 -- # Creating formatted error messages that can be passed to a common error message handler.
 --
 -- Example 1: 	
@@ -492,7 +492,7 @@ end function
 -- See Also:
 --   head, mid, slice
 
-export function tail(sequence st, atom n=length(st)-1)
+export function tail(sequence st, atom n=length(st) - 1)
 	if n >= length(st) then
 		return st
 	else
@@ -501,9 +501,7 @@ export function tail(sequence st, atom n=length(st)-1)
 end function
 
 --**
--- Remove an item or a range of items from st. If index is an integer, then only that
--- element will be removed. If index is a sequence, it must be a sequence of two
--- integers representing start and stop index.
+-- Remove an item or a range of items from st.
 --
 -- Parameters:
 --   * st - sequence in which to remove from.
@@ -511,7 +509,7 @@ end function
 --   * stop - index at which to stop remove (defaults to start)
 --
 -- Comments:
--- A new sequence is created. st can be a string or complex sequence.
+--   A new sequence is created. st can be a string or complex sequence.
 --
 -- Example 1:
 -- <eucode>
@@ -583,7 +581,7 @@ end function
 --   remove
 
 export function remove_all(object needle, sequence haystack)
-	integer ts,te,ss,se
+	integer ts, te, ss, se
 	
 	-- See if we have to anything at all.    
 	se = find(needle, haystack)
@@ -705,11 +703,8 @@ end function
 --     chunk
 
 export function split(sequence st, object delim=" ", integer limit=0, integer any=0)
-	sequence ret
-	integer pos, start, next_pos
-
-	ret={}
-	start=1
+	sequence ret = {}
+	integer start = 1, pos, next_pos
 
 	if atom(delim) then
 		delim = {delim}

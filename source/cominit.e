@@ -14,6 +14,8 @@ global constant COMMON_OPTIONS = {
 	"-C",    -- specify a euinc.conf file
 	"-I",    -- specify a directory to search for include files
 	"-D",    -- define a word
+	"-BATCH",-- batch processing, do not "Press Enter" on error
+	"-TEST", -- do not execute, only test syntax
 	"-LINT", -- enable all warnings
 	"-W",    -- defines warning level
 	"-X"     -- defines warning level by exclusion
@@ -23,6 +25,8 @@ global enum
 	EUINC_OPTION,  -- -conf
 	INCDIR_OPTION, -- -include dirs
 	DEFINE_OPTION, -- ifdef defines
+	BATCH_OPTION,  -- batch processing, do not "Press Enter" on error
+	TEST_OPTION,   -- do not execute, only test syntax
 	LINT_OPTION,   -- enable all warnings
 	WARNING_OPTION, -- startup warning level
 	WARNING_EXCLUDE_OPTION -- startup warning level by exclusion
@@ -82,6 +86,13 @@ global procedure common_options( integer option, integer ix )
 			args += 1
 		end if
 	
+	elsif option = TEST_OPTION then
+		test_only = 1
+		batch_job = 1
+		
+	elsif option = BATCH_OPTION then
+		batch_job = 1
+	
 	elsif option = WARNING_OPTION then
 		if ix < Argc then
 			n = find(Argv[ix+1],warning_names)
@@ -122,4 +133,3 @@ global procedure common_options( integer option, integer ix )
 	move_args( ix+1, args )
 	
 end procedure
-

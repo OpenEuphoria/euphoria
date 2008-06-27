@@ -1,6 +1,5 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Compile-time Error Handling
 
 include machine.e
@@ -102,7 +101,7 @@ global function ShowWarnings(integer errfile)
 	for i = 1 to length(warning_list) do
 		if errfile = STDERR then
 			screen_output(STDERR, warning_list[i])
-			if remainder(i, 20) = 0 then
+			if remainder(i, 20) = 0 and batch_job = 0 then
 				puts(STDERR, "\nPress Enter to continue, q to quit\n\n")
 				c = getc(0)
 				if c = 'q' then
@@ -125,11 +124,11 @@ global procedure Cleanup(integer status)
 	
 	w = ShowWarnings(status)
 	
-	if not TRANSLATE and
-	   (BIND or EWINDOWS or EUNIX) and 
-	   (w or Errors) then
-		screen_output(STDERR, "\nPress Enter\n")
-		if getc(0) then -- prompt
+	if not TRANSLATE and (BIND or EWINDOWS or EUNIX) and (w or Errors) then
+		if not batch_job then
+			screen_output(STDERR, "\nPress Enter\n")
+			if getc(0) then -- prompt
+			end if
 		end if
 	end if
 	
@@ -214,12 +213,12 @@ global procedure InternalErr(sequence msg)
 		screen_output(STDERR, sprintf("Internal Error at %s:%d - %s\n", 
 		   {file_name[current_file_no], line_number, msg}))
 	end if
-	screen_output(STDERR, "\nPress Enter\n")
-	if getc(0) then
+	
+	if batch_job = 0 then
+		screen_output(STDERR, "\nPress Enter\n")
+		if getc(0) then
+		end if
 	end if
-	?1/0
+	? 1/0
 	--abort(1)
 end procedure
-
-
-

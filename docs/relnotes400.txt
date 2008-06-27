@@ -95,6 +95,14 @@
  $$(doneby Jeremy Cowgar.)
 * ##-lint## option added that will display **all** warnings regardless of the file's
   ##with/without warning## setting. $$(doneby Jeremy Cowgar.)
+* ##-batch## option designed to run in an automated environment. Causes any
+  "Press Enter" type prompt due to error to be suppressed. Exit code will be
+  1 on success, 0 on failure as normal. $$(doneby Jeremy Cowgar)
+* ##-test## option allows for editing/IDE environments to perform a syntax
+  check on the euphoria code in question. Causes euphoria interpreter to do
+  all parsing, syntax checking, etc... but does not execute the code. Exit
+  code will be 1 on success, 0 on failure as normal. Editors/IDE's may need
+  both -test and -batch. $$(doneby Jeremy Cowgar)
 
 === New Routines/Constants
 

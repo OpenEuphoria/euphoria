@@ -278,5 +278,3 @@ global procedure sound(frequency f)
 -- turn off speaker if f is 0
 	machine_proc(M_SOUND, f)
 end procedure
-
-

@@ -269,6 +269,8 @@ global symtab_index CurrentSub          -- s.t. index of current routine
 global integer num_routines = 0         -- sequence number for routine_id lookups 
 global integer Argc                     -- (our) number of args to main 
 global sequence Argv                    -- (our) arguments to main 
+global integer test_only = 0            -- testing code, not executing
+global integer batch_job = 0            -- batch processing, do not "Press Enter" on error
 
 -- With/Without Options
 global constant -- maskable warning flags

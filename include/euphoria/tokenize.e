@@ -5,6 +5,7 @@
 -- mailto:code@creativeportal.ca
 -- http://www.creativeportal.ca                          written by Chris Bensler
 ---------------------------------------------------------------------------------
+include euphoria/keywords.e
 
 integer enum_val,enum_inc
 function Enum_Start(integer start, integer inc)
@@ -25,10 +26,11 @@ global constant
    ,T_NULL        = Enum_Start(0,1)
    ,T_BLANK       = Enum()
    ,T_COMMENT     = Enum()
-   ,T_IDENTIFIER  = Enum()
    ,T_NUMBER      = Enum()
    ,T_CHAR        = Enum() -- quoted character
    ,T_STRING      = Enum() -- string
+   ,T_IDENTIFIER  = Enum()
+   ,T_KEYWORD     = Enum()
 
    ,T_DOUBLE_OPS  = Enum_Start(8,1) -- (should be 8) marks the start of the double-op delimiter codes
    ,T_PLUSEQ      = Enum_Start(8,1)
@@ -87,7 +89,7 @@ integer ERR         ERR       = 0
 integer ERR_LNUM    ERR_LNUM  = 0
 integer ERR_LPOS    ERR_LPOS  = 0
 
-constant
+global constant
       ERR_OPEN = Enum_Start(1,1)
      ,ERR_ESCAPE = Enum()
      ,ERR_EOL_CHAR = Enum()
@@ -308,7 +310,7 @@ end function
 
 integer SUBSCRIPT   SUBSCRIPT = 0
 function scan_integer()
- integer i
+ atom i
   i = 0
   while Digit_Char(ascanLook) do
     i = (i*10) + (ascanLook-'0')
@@ -318,7 +320,7 @@ function scan_integer()
 end function
 
 function scan_fraction(atom v)
- integer d
+ atom d
   if (ascanLook != '.') then return v end if
   scan_char()
 
@@ -379,6 +381,9 @@ function scan_identifier()
     Token[TDATA] &= ascanLook
     scan_char()
   end while
+  if find(Token[TDATA],keywords) then
+    Token[TTYPE] = T_KEYWORD
+  end if
   return 1
 end function
 
