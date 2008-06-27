@@ -369,7 +369,7 @@ install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/linux
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/bench
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/doc
 	mkdir -p $(DESTDIR)/usr/share/euphoria/tutorial 
@@ -389,7 +389,7 @@ install :
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar ../demo/langwar/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo/linux ../demo/linux/*
+	-install -t $(DESTDIR)/usr/share/euphoria/demo/unix ../demo/unix/*
 	install -t $(DESTDIR)/usr/share/doc/euphoria/doc ../doc/*
 	install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
 	install -t $(DESTDIR)/usr/share/euphoria/bin \
@@ -398,10 +398,8 @@ install :
 	           ../bin/eprint.ex \
 	           ../bin/guru.ex \
 	           ../bin/key.ex \
-	           ../bin/keywords.e \
 	           ../bin/lines.ex \
 	           ../bin/search.ex \
-	           ../bin/syncolor.e \
 	           ../bin/where.ex
 	install -t $(DESTDIR)/usr/share/euphoria/source \
 	           *.ex \
