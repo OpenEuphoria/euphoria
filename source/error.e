@@ -13,7 +13,6 @@ Errors = 0   -- number of errors detected during compile
 
 global integer TempErrFile
 global sequence TempErrName
-global object TempWarningName
 global integer display_warnings
 global object ThisLine        -- current line of source (or -1)
 global integer bp             -- input line index of next character 

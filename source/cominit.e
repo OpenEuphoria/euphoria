@@ -18,7 +18,8 @@ global constant COMMON_OPTIONS = {
 	"-TEST", -- do not execute, only test syntax
 	"-LINT", -- enable all warnings
 	"-W",    -- defines warning level
-	"-X"     -- defines warning level by exclusion
+	"-X",    -- defines warning level by exclusion
+	"-WF"   -- definesthe file to which the warnings will go instead of stderr
 }
 
 global enum
@@ -29,7 +30,8 @@ global enum
 	TEST_OPTION,   -- do not execute, only test syntax
 	LINT_OPTION,   -- enable all warnings
 	WARNING_OPTION, -- startup warning level
-	WARNING_EXCLUDE_OPTION -- startup warning level by exclusion
+	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
+	WARNING_FILE_OPTION	-- warning file name
 
 
 -- s = the text of the switch
@@ -55,7 +57,7 @@ global procedure move_args( integer start, integer args )
 	for j = start to Argc do
 		Argv[j] = Argv[j+args]
 	end for
-	
+
 end procedure
 
 integer option_W
@@ -89,10 +91,10 @@ global procedure common_options( integer option, integer ix )
 	elsif option = TEST_OPTION then
 		test_only = 1
 		batch_job = 1
-		
+
 	elsif option = BATCH_OPTION then
 		batch_job = 1
-	
+
 	elsif option = WARNING_OPTION then
 		if ix < Argc then
 			n = find(Argv[ix+1],warning_names)
@@ -127,7 +129,14 @@ global procedure common_options( integer option, integer ix )
 
 	elsif option = LINT_OPTION then
 		Lint_is_on = 1
+		add_switch(Argv[ix+1], 1)
 
+	elsif option = WARNING_FILE_OPTION then
+		if ix < Argc then
+			TempWarningName = Argv[ix+1]
+			add_switch(Argv[ix+1], 1)
+			args += 1
+		end if
 	end if
 
 	move_args( ix+1, args )

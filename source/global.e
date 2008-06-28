@@ -271,8 +271,9 @@ global integer Argc                     -- (our) number of args to main
 global sequence Argv                    -- (our) arguments to main 
 global integer test_only = 0            -- testing code, not executing
 global integer batch_job = 0            -- batch processing, do not "Press Enter" on error
-
+global object TempWarningName
 -- With/Without Options
+
 global constant -- maskable warning flags
 	no_warning_flag				= 0,
 	resolution_warning_flag		= 1,

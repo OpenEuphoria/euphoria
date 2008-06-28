@@ -2843,10 +2843,9 @@ procedure SetWith(integer on_off)
 			end if
 		elsif tok[T_ID] != STRING then
 			if on_off = 0 then
-				prev_OpWarning = OpWarning
 				OpWarning = no_warning_flag
 			else
-				OpWarning = prev_OpWarning
+				OpWarning = lint_warning_flag
 			end if
 		end if
 
@@ -2854,7 +2853,14 @@ procedure SetWith(integer on_off)
 			option = SymTab[tok[T_SYM]][S_OBJ]
 			idx = find(option, warning_names)
 			if idx = 0 then
-				exit
+				idx = find(option,{"save","restore"})
+				if idx=0 then
+					exit
+				elsif idx=1 then
+					prev_OpWarning = OpWarning
+				else
+					OpWarning = prev_OpWarning
+				end if
 			end if
 			if on_off then
 				OpWarning = or_bits(OpWarning, warning_flags[idx])
