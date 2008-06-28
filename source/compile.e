@@ -4138,29 +4138,30 @@ end procedure
 procedure splins()
 -- writes the portion common to splice() and insert()
 	c_stmt0("{\n")
-	c_stmt0("_2 = (object_ptr)pc[3];\n")
+	c_stmt0("s1_ptr assign_space;\n")
+	--c_stmt0("_2 = (object_ptr)pc[3];\n")
+	--c_stmt("_2 = (object_ptr)@;\n",{Code[pc+3]})
 	if not TypeIs(Code[pc+2],TYPE_SEQUENCE) then
-		c_stmt0("if (IS_SEQUENCE(*_2))\n")
+		c_stmt("if (IS_SEQUENCE(@))\n",{Code[pc+3]})
 		c_stmt0("RTFatal(\"Third argument to splice/insert() must be an atom\");\n")
 	end if
-	c_stmt0("insert_pos = (IS_ATOM_INT(*_2) ?*_2 : (long)DBL_PTR(*_2)->dbl;\n")
+	c_stmt("insert_pos = IS_ATOM_INT(@) ? @ : DBL_PTR(@)->dbl;\n",{Code[pc+3],Code[pc+3],Code[pc+3]})
 	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
-	if not TypeIs(Code[pc+2],TYPE_SEQUENCE) then
-		c_stmt("if (IS_SEQUENCE(@)\n",Code[pc+1])
-		c_stmt0("RTFatal(\"First argument to splice/insert() must be an atom\");\n")
-	end if
 end procedure
 
 procedure opSPLICE()
 	splins()
 	c_stmt("if (insert_pos <= 0) Concat(@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
-    c_stmt("else if (insert_pos > (s1_ptr)_1->length) Concat(@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
-	c_stmt0("else if (IS_SEQUENCE(_2)) {\n")
-	c_stmt0("*assign_slice_seq = SEQ_PTR(_1);}\n")
-	c_stmt0("Copy_elements(insert_pos,SEQ_PTR(2));\n")
-	c_stmt("*@ = MAKE_SEQ(*assign_slice_seq);\n",{Code[pc+4]})
+    c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Concat(@,@,@);\n",{Code[pc+1],Code[pc+4],Code[pc+2],Code[pc+1]})
+	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
+	--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
+	c_stmt("assign_space = Add_internal_space(@,insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
+	c_stmt0("assign_slice_seq = &assign_space;\n")
+	c_stmt("Copy_elements(insert_pos,SEQ_PTR(@));\n",{Code[pc+2]})
+	c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n",{Code[pc+4]})
 	c_stmt0("}\n")
     c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0("}\n")
 	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
 		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
 	elsif TypeIs(Code[pc+2], TYPE_ATOM) then
@@ -4174,10 +4175,11 @@ end procedure
 
 procedure opINSERT()
 	splins() -- _0 = obj_ptr
-	c_stmt("_1 = @\n",Code[pc+1])
-	c_stmt0("if (insert_pos <= 0) Prepend(_0,_1,_2);\n")
-    c_stmt0("else if (insert_pos > (s1_ptr)_1->length) Append(_0,_1,_2);\n")
+	c_stmt("if (insert_pos <= 0) Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
+    c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Append(&@,@,@);\n",{Code[pc+1],Code[pc+4],Code[pc+1],Code[pc+2]})
+	--c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 	c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0("}\n")
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))
 	pc += 5
 end procedure
