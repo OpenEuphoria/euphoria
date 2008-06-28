@@ -1,7 +1,7 @@
 -- A Standard Windows Window coded at the primitive API level
 -- Most Euphoria programmers should simply use Win32Lib!
 
-include misc.e
+include os.e
 include machine.e
 include dll.e
 

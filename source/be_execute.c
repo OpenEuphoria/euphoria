@@ -67,6 +67,12 @@
 #define POINT5 0.5
 #define HUGE_LINE 1000000000
 
+#ifdef DEBUG_OPCODE_TRACE
+#define deprintf(s) do { printf(s); printf("\n"); } while (0)
+#else
+#define deprintf(s) do {  } while (0)
+#endif
+
 /* took out:    || (fp)->_flag&_UNGET \  
    added:       tpc = pc */
 #ifdef ORIGINALWATCOM
@@ -728,34 +734,49 @@ static void do_poke4(object a, object top)
 #if defined(EWINDOWS) || (defined(EDOS) && defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
 // #pragma aux thread aborts; does nothing
 
-#pragma aux thread = \
+#define thread() do { wcthread(pc); } while (0)
+void wcthread(long x);
+#pragma aux wcthread = \
 		"jmp [ECX]" \
-		modify [EAX EBX EDX];
+		modify [EAX EBX EDX] \
+		parm [ECX];
 
-void thread2(void);
-#pragma aux thread2 = \
+long wcinc2pc(long x);
+#pragma aux wcinc2pc = \
 		"ADD ECX, 8" \
-		"jmp [ECX]" \
-		modify [EAX EBX EDX];
+		modify [] \
+		value [ECX] \
+		parm [ECX];
 
-void thread4(void);
-#pragma aux thread4 = \
+long wcinc4pc(long x);
+#pragma aux wcinc4pc = \
 		"ADD ECX, 16" \
-		"jmp [ECX]" \
-		modify [EAX EBX EDX];
+		modify [] \
+		value [ECX] \
+		parm [ECX];
 
-void thread5(void);
-#pragma aux thread5 = \
+long wcinc5pc(long x);
+#pragma aux wcinc5pc = \
 		"ADD ECX, 20" \
-		"jmp [ECX]" \
-		modify [EAX EBX EDX];
+		modify [] \
+		value [ECX] \
+		parm [ECX];
+
+#define thread2() do { pc = wcinc2pc(pc); wcthread(pc); } while (0)
+#define thread4() do { pc = wcinc4pc(pc); wcthread(pc); } while (0)
+#define thread5() do { pc = wcinc5pc(pc); wcthread(pc); } while (0)
 
 /* have to hide this from WATCOM or it will generate stupid code
    at the top of the switch */
-#pragma aux inc3pc = \
+#define inc3pc() do { pc = wcinc3pc(pc); } while (0)
+long wcin3pc(long x);
+#pragma aux wcinc3pc = \
 		"ADD ECX, 12" \
-		modify [];
+		modify [] \
+		value [ECX] \
+		parm [ECX];
 
+// not converted because it is not used
 void threadpc3(void);
 #pragma aux threadpc3 = \
 		"MOV ECX, EDI" \
@@ -772,30 +793,48 @@ void threadpc3(void);
 // modify [...] seems to do very little, works no matter what regs are
 // specified or even if modify is removed
 
-void thread(void);
-#pragma aux thread = "jmp [ESI]"  \
-					 modify [EAX EBX EDX];
+#define thread() do { wcthread(pc); } while (0)
+void wcthread(long x);
+#pragma aux wcthread = \
+		"jmp [ESI]" \
+		modify [EAX EBX EDX] \
+		parm [ESI];
 
-void thread2(void);
-#pragma aux thread2 = "ADD ESI, 8" \
-					  "jmp [ESI]" \
-					  modify [EAX EBX EDX];
+long wcinc2pc(long x);
+#pragma aux wcinc2pc = \
+		"ADD ESI, 8" \
+		modify [] \
+		value [ESI] \
+		parm [ESI];
 
-void thread4(void);
-#pragma aux thread4 = "ADD ESI, 16" \
-					  "jmp [ESI]" \
-					  modify [EAX EBX EDX];
+long wcinc4pc(long x);
+#pragma aux wcinc4pc = \
+		"ADD ESI, 16" \
+		modify [] \
+		value [ESI] \
+		parm [ESI];
 
-void thread5(void);
-#pragma aux thread5 = "ADD ESI, 20" \
-					  "jmp [ESI]" \
-					  modify [EAX EBX EDX];
+long wcinc5pc(long x);
+#pragma aux wcinc5pc = \
+		"ADD ESI, 20" \
+		modify [] \
+		value [ESI] \
+		parm [ESI];
+
+#define thread2() do { pc = wcinc2pc(pc); wcthread(pc); } while (0)
+#define thread4() do { pc = wcinc4pc(pc); wcthread(pc); } while (0)
+#define thread5() do { pc = wcinc5pc(pc); wcthread(pc); } while (0)
 
 /* have to hide this from WATCOM or it will generate stupid code
    at the top of the switch */
-#pragma aux inc3pc = \
+#define inc3pc() do { pc = wcinc3pc(pc); } while (0)
+long wcin3pc(long x);
+#pragma aux wcinc3pc = \
 		"ADD ESI, 12" \
-		modify [];
+		modify [] \
+		value [ESI] \
+		parm [ESI];
+
 #define BREAK break
 #include "redef.h"
 #endif
@@ -964,7 +1003,7 @@ void code_set_pointers(int **code)
 		}
 		
 		code[i] = (int *)opcode(word);
-		
+
 		//sprintf(msg, "word is %d", word);
 		//debug_msg(msg);
 		
@@ -1682,11 +1721,13 @@ void do_exec(int *start_pc)
 
 #endif
 			case L_RHS_SUBS_CHECK:
+			deprintf("case L_RHS_SUBS_CHECK:");
 				if (!IS_SEQUENCE(*(object_ptr)pc[1])) {
 					goto subsfail;
 				}
 				/* FALL THROUGH */
 			case L_RHS_SUBS: /* rhs subscript of a sequence */
+			deprintf("case L_RHS_SUBS:");
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
 				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
@@ -1718,6 +1759,7 @@ void do_exec(int *start_pc)
 				}
 
 			case L_RHS_SUBS_I: /* rhs subscript of a known-to-be sequence */
+			deprintf("case L_RHS_SUBS_I:");
 				/* the target is an integer variable - no DeRef, 
 				   TypeCheck failure if assigned non-integer */
 				top = *(object_ptr)pc[2];  /* the subscript */
@@ -1749,11 +1791,13 @@ void do_exec(int *start_pc)
 				}
 		 
 			case L_PASSIGN_OP_SUBS:
+			deprintf("case L_PASSIGN_OP_SUBS:");
 				// temp has pointer to sequence
 				top = **(object_ptr *)pc[1];
 				goto aos;
 								
 			case L_ASSIGN_OP_SUBS:  /* var[subs] op= expr */
+			deprintf("case L_ASSIGN_OP_SUBS:");
 				top = *(object_ptr)pc[1];
 			  aos:  
 				if (!IS_SEQUENCE(top)) {  //optimize better
@@ -1792,6 +1836,7 @@ void do_exec(int *start_pc)
 				}
 				
 			case L_PASSIGN_SUBS:
+			deprintf("case L_PASSIGN_SUBS:");
 				// temp has pointer to sequence
 				top = *(object_ptr)pc[3];  /* the rhs value */ 
 				Ref(top); /* do before UNIQUE check - avoids circularity */
@@ -1806,12 +1851,14 @@ void do_exec(int *start_pc)
 				goto as;
 				
 			case L_ASSIGN_SUBS_CHECK:
+			deprintf("case L_ASSIGN_SUBS_CHECK:");
 				if (!IS_SEQUENCE(*(object_ptr)pc[1])) {
 					goto asubsfail;
 				}
 				/* FALL THROUGH */
 			
 			case L_ASSIGN_SUBS:  /* final subscript and assignment */
+			deprintf("case L_ASSIGN_SUBS:");
 				/* the var sequence */
 				top = *(object_ptr)pc[3];  /* the rhs value */ 
 				Ref(top); /* do before UNIQUE check - avoids circularity */
@@ -1844,6 +1891,7 @@ void do_exec(int *start_pc)
 				}
 
 			case L_ASSIGN_SUBS_I:  /* final subscript and assignment */
+			deprintf("case L_ASSIGN_SUBS_I:");
 				/* we know that the rhs value to be assigned is an integer */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr *)pc[1]);/* the sequence */
 				if (!UNIQUE(obj_ptr)) {
@@ -1873,6 +1921,7 @@ void do_exec(int *start_pc)
 				}
 
 			case L_ENDFOR_INT_UP1:
+			deprintf("case L_ENDFOR_INT_UP1:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr + 1;
 				if (top <= *(object_ptr)pc[2]) {  /* limit */
@@ -1886,6 +1935,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ENDFOR_INT_UP:
+			deprintf("case L_ENDFOR_INT_UP:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr + *(object_ptr)pc[4]; /* increment */
 				if (top <= *(object_ptr)pc[2]) { /* limit */
@@ -1900,24 +1950,31 @@ void do_exec(int *start_pc)
 
 
 			case L_EXIT:
+			deprintf("case L_EXIT:");
 			case L_ENDWHILE:
+			deprintf("case L_ENDWHILE:");
 			case L_ELSE:
+			deprintf("case L_ELSE:");
 			case L_RETRY:
+			deprintf("case L_RETRY:");
 				pc = (int *)pc[1];
 				thread();
 				BREAK;
 
 			case L_GOTO:
+			deprintf("case L_GOTO:");
 				pc = (int *)pc[1];
 				thread();
 				BREAK;
 
 			case L_GLABEL:
+			deprintf("case L_GLABEL:");
 				pc = (int *)pc[1];
 				thread();
 				BREAK;
 
 			case L_PLUS1:
+			deprintf("case L_PLUS1:");
 				a = (object)pc[3];
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
@@ -1941,6 +1998,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PLUS1_I:
+			deprintf("case L_PLUS1_I:");
 				/* target must be integer var - type check */
 				top = *(object_ptr)pc[1];
 				a = (object)pc[3];
@@ -1973,6 +2031,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_WHILE:
+			deprintf("case L_WHILE:");
 				top = *(object_ptr)pc[1];
 				if (top >= ATOM_1) {   /* works with new representation */
 					inc3pc();
@@ -1983,6 +2042,7 @@ void do_exec(int *start_pc)
 				goto if_check;
 				
 			case L_SWITCH:
+			deprintf("case L_SWITCH:");
 			
 				tpc = pc;
 				// find which case is met:
@@ -2001,6 +2061,7 @@ void do_exec(int *start_pc)
 		  		thread();
 		  		BREAK;
 			case L_IF:
+			deprintf("case L_IF:");
 				top = *(object_ptr)pc[1];
 			if_check:
 				if (top == ATOM_0) {
@@ -2028,6 +2089,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ASSIGN_I:
+			deprintf("case L_ASSIGN_I:");
 				/* source & destination are known to be integers */
 				*(object_ptr)pc[2] = *(object_ptr)pc[1];
 				inc3pc();
@@ -2035,6 +2097,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ASSIGN:
+			deprintf("case L_ASSIGN:");
 				obj_ptr = (object_ptr)pc[2];
 				top = *obj_ptr; 
 				*obj_ptr = *(object_ptr)pc[1];
@@ -2052,12 +2115,14 @@ void do_exec(int *start_pc)
 				}
 			  
 			case L_LHS_SUBS:
+			deprintf("case L_LHS_SUBS:");
 				// temp contains a pointer to the sequence
 				obj_ptr = (object_ptr)*(object_ptr)pc[1]; 
 				b = 0;
 				goto ls;
 
 			case L_LHS_SUBS1_COPY:
+			deprintf("case L_LHS_SUBS1_COPY:");
 				// copy base sequence into a temp, then use the temp
 				obj_ptr = (object_ptr)pc[4]; 
 				a = *(object_ptr)pc[1];
@@ -2068,6 +2133,7 @@ void do_exec(int *start_pc)
 				goto ls;
 				
 			case L_LHS_SUBS1:  
+			deprintf("case L_LHS_SUBS1:");
 				/* left hand side, first subscript of multiple lhs subscripts */
 				// sequence var: 
 				obj_ptr = (object_ptr)pc[1]; 
@@ -2105,11 +2171,13 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PASSIGN_OP_SLICE:
+			deprintf("case L_PASSIGN_OP_SLICE:");
 				// temp has pointer to sequence
 				top = *(object_ptr)pc[1];
 				goto aosl;
 				
 			case L_ASSIGN_OP_SLICE:  /* var[i..j] op= expr */
+			deprintf("case L_ASSIGN_OP_SLICE:");
 				top = pc[1];
 			 aosl:  
 				pc[10] = pc[1];
@@ -2122,12 +2190,14 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_PASSIGN_SLICE:
+			deprintf("case L_PASSIGN_SLICE:");
 				// temp contains pointer to sequence
 				assign_slice_seq = (s1_ptr *)*(object_ptr)pc[1];
 				*(object_ptr)pc[1] = 0; // preclude DeRef of C pointer
 				goto las;
 				
 			case L_ASSIGN_SLICE: /* var[i..j] = expr */
+			deprintf("case L_ASSIGN_SLICE:");
 				assign_slice_seq = (s1_ptr *)pc[1]; /* extra parameter */
 			  las:  
 				tpc = pc;
@@ -2138,6 +2208,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_RHS_SLICE: /* rhs slice of a sequence a[i..j] */
+			deprintf("case L_RHS_SLICE:");
 				tpc = pc;
 				rhs_slice_target = (object_ptr)pc[4];
 				RHS_Slice((s1_ptr)*(object_ptr)pc[1], 
@@ -2147,6 +2218,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_RIGHT_BRACE_N: /* form a sequence of any length */
+			deprintf("case L_RIGHT_BRACE_N:");
 				nvars = pc[1];
 				pc += 2;
 				tpc = pc;
@@ -2166,6 +2238,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_RIGHT_BRACE_2: /* form a sequence of length 2 */
+			deprintf("case L_RIGHT_BRACE_2:");
 				tpc = pc;
 				s1 = NewS1((long)2);
 				obj_ptr = s1->base;
@@ -2181,6 +2254,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_TYPE_CHECK: /* top has TRUE/FALSE */
+			deprintf("case L_TYPE_CHECK:");
 				/* type check for a user-defined type */
 				/* this always follows a type-call */
 				top = *(object_ptr)pc[-1];
@@ -2205,10 +2279,12 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_NOP2:
+			deprintf("case L_NOP2:");
 				thread2();
 				BREAK;
 			
 			case L_GLOBAL_INIT_CHECK:
+			deprintf("case L_GLOBAL_INIT_CHECK:");
 				pc += 2;
 				if (*(object_ptr)pc[-1] != NOVALUE) {
 					*(pc - 2) = (int)opcode(NOP2);
@@ -2220,6 +2296,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PRIVATE_INIT_CHECK:
+			deprintf("case L_PRIVATE_INIT_CHECK:");
 				pc += 2;
 				if (*(object_ptr)pc[-1] != NOVALUE) {
 					thread();
@@ -2230,6 +2307,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_INTEGER_CHECK:
+			deprintf("case L_INTEGER_CHECK:");
 				top = *(object_ptr)pc[1];
 				pc += 2;
 				if (IS_ATOM_INT(top)) {
@@ -2249,6 +2327,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ATOM_CHECK:
+			deprintf("case L_ATOM_CHECK:");
 				pc += 2;
 				if (IS_ATOM(*(object_ptr)pc[-1])) {
 					thread();
@@ -2258,6 +2337,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_SEQUENCE_CHECK:
+			deprintf("case L_SEQUENCE_CHECK:");
 				pc += 2;
 				if (IS_SEQUENCE(*(object_ptr)pc[-1])) {
 					thread();
@@ -2267,6 +2347,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_IS_AN_INTEGER:
+			deprintf("case L_IS_AN_INTEGER:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top))
 					top = ATOM_1;
@@ -2288,6 +2369,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_IS_AN_ATOM:
+			deprintf("case L_IS_AN_ATOM:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM(top)) 
 					top = ATOM_1;
@@ -2300,6 +2382,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_IS_A_SEQUENCE:
+			deprintf("case L_IS_A_SEQUENCE:");
 				top = *(object_ptr)pc[1];
 				if (IS_SEQUENCE(top)) 
 					top = ATOM_1;
@@ -2311,6 +2394,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_IS_AN_OBJECT:
+			deprintf("case L_IS_AN_OBJECT:");
 				top = *(object_ptr)pc[1];
 				if (top != NOVALUE) 
 					top = ATOM_1;
@@ -2322,11 +2406,13 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PLENGTH:
+			deprintf("case L_PLENGTH:");
 				/* *pc[1] contains a pointer to the sequence */
 				top = (object)**(object_ptr **)pc[1]; 
 				goto len;
 
 			case L_LENGTH:
+			deprintf("case L_LENGTH:");
 				/* *pc[1] is a sequence */
 				top = *(object_ptr)pc[1];
 			  len:  
@@ -2347,28 +2433,36 @@ void do_exec(int *start_pc)
 				/* ---------- start of unary ops ----------------- */
 
 			case L_SQRT: 
+			deprintf("case L_SQRT:");
 				a = SQRT;
 				goto unary;
 			case L_SIN:
+			deprintf("case L_SIN:");
 				a = SIN;
 				goto unary;
 			case L_COS:
+			deprintf("case L_COS:");
 				a = COS;
 				goto unary;
 			case L_TAN:
+			deprintf("case L_TAN:");
 				a = TAN;
 				goto unary;
 			case L_ARCTAN:
+			deprintf("case L_ARCTAN:");
 				a = ARCTAN;
 				goto unary;
 			case L_LOG:
+			deprintf("case L_LOG:");
 				a = LOG;
 				goto unary;
 			case L_NOT_BITS:
+			deprintf("case L_NOT_BITS:");
 				a = NOT_BITS;
 				goto unary;
 			
 			case L_FLOOR:
+			deprintf("case L_FLOOR:");
 				top = *(object_ptr)pc[1];
 				if (!IS_ATOM_INT(top)) {
 					tpc = pc;
@@ -2394,6 +2488,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_NOT:          
+			deprintf("case L_NOT:");
 				START_UNARY_OP
 				if (top == ATOM_0)
 					top++;
@@ -2404,6 +2499,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_NOT_IFW:
+			deprintf("case L_NOT_IFW:");
 				top = *(object_ptr)pc[1]; 
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
@@ -2426,6 +2522,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_UMINUS:
+			deprintf("case L_UMINUS:");
 				START_UNARY_OP
 				if (top == MININT) {
 					tpc = pc; 
@@ -2438,6 +2535,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_RAND:
+			deprintf("case L_RAND:");
 				START_UNARY_OP
 				tpc = pc; 
 				if (INT_VAL(top) <= 0) {
@@ -2451,6 +2549,7 @@ void do_exec(int *start_pc)
 
 				/* --------- start of binary ops ----------*/
 			case L_PLUS:    
+			deprintf("case L_PLUS:");
 				START_BIN_OP
 					/* INT:INT case */
 					top = INT_VAL(a) + INT_VAL(top);
@@ -2500,6 +2599,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PLUS_I:    
+			deprintf("case L_PLUS_I:");
 				/* we know that the inputs and the output must be integers */
 				START_BIN_OP_I
 				top = INT_VAL(a) + INT_VAL(top);
@@ -2511,6 +2611,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_MINUS:
+			deprintf("case L_MINUS:");
 				START_BIN_OP
 					/* INT:INT case L_*/
 					top = INT_VAL(a) - INT_VAL(top);
@@ -2550,6 +2651,7 @@ void do_exec(int *start_pc)
 
 
 			case L_MINUS_I:
+			deprintf("case L_MINUS_I:");
 				START_BIN_OP_I
 				top = a - top;
 				if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
@@ -2564,6 +2666,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 		   case L_MULTIPLY:
+		   deprintf("case L_MULTIPLY:");
 				START_BIN_OP
 					/* INT:INT case L_*/
 					c = a;
@@ -2620,6 +2723,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_DIVIDE:
+			deprintf("case L_DIVIDE:");
 				START_BIN_OP
 				c = INT_VAL(a);
 				tpc = pc;
@@ -2634,6 +2738,7 @@ void do_exec(int *start_pc)
 
 
 			case L_REMAINDER:
+			deprintf("case L_REMAINDER:");
 				START_BIN_OP
 				if ((b = INT_VAL(top)) == 0) {
 					tpc = pc;
@@ -2646,24 +2751,28 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_AND_BITS:
+			deprintf("case L_AND_BITS:");
 				START_BIN_OP
 				top = MAKE_INT(INT_VAL(a) & INT_VAL(top));
 				END_BIN_OP(AND_BITS)
 				BREAK;
 			
 			case L_OR_BITS:
+			deprintf("case L_OR_BITS:");
 				START_BIN_OP
 				top = MAKE_INT(INT_VAL(a) | INT_VAL(top));
 				END_BIN_OP(OR_BITS)
 				BREAK;
 			
 			case L_XOR_BITS:
+			deprintf("case L_XOR_BITS:");
 				START_BIN_OP
 				top = MAKE_INT(INT_VAL(a) ^ INT_VAL(top));
 				END_BIN_OP(XOR_BITS)
 				BREAK;
 				
 			case L_POWER:
+			deprintf("case L_POWER:");
 				START_BIN_OP
 				tpc = pc;
 				top = power(INT_VAL(a), INT_VAL(top));
@@ -2672,6 +2781,7 @@ void do_exec(int *start_pc)
 
 
 			case L_DIV2:
+			deprintf("case L_DIV2:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					b = top;
@@ -2694,6 +2804,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_FLOOR_DIV2:
+			deprintf("case L_FLOOR_DIV2:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					b = top;
@@ -2711,6 +2822,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_FLOOR_DIV:
+			deprintf("case L_FLOOR_DIV:");
 				a = *(object_ptr)pc[1];   // numerator
 				top = *(object_ptr)pc[2]; // denominator
 				if (IS_ATOM_INT(top) && IS_ATOM_INT(a)) {
@@ -2745,6 +2857,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_EQUALS:
+			deprintf("case L_EQUALS:");
 				START_BIN_OP
 				if (a == top)
 					top = ATOM_1;
@@ -2754,18 +2867,21 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_EQUALS_IFW:
+			deprintf("case L_EQUALS_IFW:");
 				START_BIN_OP
 				if (a == top)
 				END_BIN_OP_IFW(EQUALS)
 				BREAK;
 
 			case L_EQUALS_IFW_I:
+			deprintf("case L_EQUALS_IFW_I:");
 				START_BIN_OP_I
 				if (a == top)
 				END_BIN_OP_IFW_I
 				BREAK;
 
 			case L_LESS:
+			deprintf("case L_LESS:");
 				START_BIN_OP
 				if (a < top)
 					top = ATOM_1;
@@ -2775,18 +2891,21 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_LESS_IFW:
+			deprintf("case L_LESS_IFW:");
 				START_BIN_OP
 				if (a < top)
 				END_BIN_OP_IFW(LESS)
 				BREAK;
 
 			case L_LESS_IFW_I:
+			deprintf("case L_LESS_IFW_I:");
 				START_BIN_OP_I
 				if (a < top)
 				END_BIN_OP_IFW_I
 				BREAK;
 
 			case L_GREATER:
+			deprintf("case L_GREATER:");
 				START_BIN_OP
 				if (a > top)
 					top = ATOM_1;
@@ -2796,18 +2915,21 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_GREATER_IFW:
+			deprintf("case L_GREATER_IFW:");
 				START_BIN_OP
 				if (a > top)
 				END_BIN_OP_IFW(GREATER)
 				BREAK;
 
 			case L_GREATER_IFW_I:
+			deprintf("case L_GREATER_IFW_I:");
 				START_BIN_OP_I
 				if (a > top)
 				END_BIN_OP_IFW_I
 				BREAK;
 
 			case L_NOTEQ:
+			deprintf("case L_NOTEQ:");
 				START_BIN_OP
 				if (a != top)
 					top = ATOM_1;
@@ -2817,18 +2939,21 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_NOTEQ_IFW:
+			deprintf("case L_NOTEQ_IFW:");
 				START_BIN_OP
 				if (a != top)
 				END_BIN_OP_IFW(NOTEQ)
 				BREAK;
 
 			case L_NOTEQ_IFW_I:
+			deprintf("case L_NOTEQ_IFW_I:");
 				START_BIN_OP_I
 				if (a != top)
 				END_BIN_OP_IFW_I
 				BREAK;
 
 			case L_LESSEQ:
+			deprintf("case L_LESSEQ:");
 				START_BIN_OP
 				if (a <= top)
 					top = ATOM_1;
@@ -2838,18 +2963,21 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_LESSEQ_IFW:
+			deprintf("case L_LESSEQ_IFW:");
 				START_BIN_OP
 				if (a <= top)
 				END_BIN_OP_IFW(LESSEQ)
 				BREAK;
 
 			case L_LESSEQ_IFW_I:
+			deprintf("case L_LESSEQ_IFW_I:");
 				START_BIN_OP_I
 				if (a <= top)
 				END_BIN_OP_IFW_I
 				BREAK;
 
 			case L_GREATEREQ:
+			deprintf("case L_GREATEREQ:");
 				START_BIN_OP
 				if (a >= top)
 					top = ATOM_1;
@@ -2859,18 +2987,21 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_GREATEREQ_IFW:
+			deprintf("case L_GREATEREQ_IFW:");
 				START_BIN_OP
 				if (a >= top)
 				END_BIN_OP_IFW(GREATEREQ)
 				BREAK;
 
 			case L_GREATEREQ_IFW_I:
+			deprintf("case L_GREATEREQ_IFW_I:");
 				START_BIN_OP_I
 				if (a >= top)
 				END_BIN_OP_IFW_I
 				BREAK;
 
 			case L_AND:
+			deprintf("case L_AND:");
 				START_BIN_OP
 				if (a != ATOM_0 && top != ATOM_0)
 					top = ATOM_1;
@@ -2880,6 +3011,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_SC1_AND:
+			deprintf("case L_SC1_AND:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
@@ -2907,6 +3039,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_SC1_AND_IF:  // no need to store ATOM_0
+			deprintf("case L_SC1_AND_IF:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
@@ -2930,7 +3063,9 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_SC2_OR:
+			deprintf("case L_SC2_OR:");
 			case L_SC2_AND:
+			deprintf("case L_SC2_AND:");
 				top = *(object_ptr)pc[1];
 				DeRefx(*(object_ptr)pc[2]);
 				if (IS_ATOM_INT(top)) {
@@ -2954,6 +3089,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_XOR:
+			deprintf("case L_XOR:");
 				START_BIN_OP
 				if ((a != ATOM_0) != (top != ATOM_0))
 					top = ATOM_1;
@@ -2963,6 +3099,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_OR:
+			deprintf("case L_OR:");
 				START_BIN_OP
 				if (a != ATOM_0 || top != ATOM_0)
 					top = ATOM_1;
@@ -2972,6 +3109,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_SC1_OR:
+			deprintf("case L_SC1_OR:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top != ATOM_0) {
@@ -2999,6 +3137,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_SC1_OR_IF: // no need to store ATOM_1
+			deprintf("case L_SC1_OR_IF:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top != ATOM_0) {
@@ -3028,6 +3167,7 @@ void do_exec(int *start_pc)
 			/* Note: we *must* always patch the endfor op, because it might
 			   actually be wrong as determined by the front-end */ 
 			case L_FOR:
+			deprintf("case L_FOR:");
 				obj_ptr = (object_ptr)pc[5]; /* loop var */
 				top = *obj_ptr; 
 				c = *(object_ptr)pc[3]; /* initial value */
@@ -3044,6 +3184,7 @@ void do_exec(int *start_pc)
 					goto general;
 
 			case L_FOR_I:
+			deprintf("case L_FOR_I:");
 				/* integer loop */
 				obj_ptr = (object_ptr)pc[5]; /* loop var */
 				c = *(object_ptr)pc[3]; /* initial value */
@@ -3131,6 +3272,7 @@ void do_exec(int *start_pc)
 
 
 			case L_ENDFOR_INT_DOWN1:
+			deprintf("case L_ENDFOR_INT_DOWN1:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr - 1;
 				if (top < *(object_ptr)pc[2]) {  /* limit */
@@ -3144,6 +3286,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ENDFOR_INT_DOWN:
+			deprintf("case L_ENDFOR_INT_DOWN:");
 				obj_ptr = (object_ptr)pc[3];  /* loop var */
 				top = *obj_ptr + *(object_ptr)pc[4]; /* increment */
 				if (top < *(object_ptr)pc[2]) { /* limit */
@@ -3157,6 +3300,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ENDFOR_GENERAL:
+			deprintf("case L_ENDFOR_GENERAL:");
 				/* totally general ENDFOR */
 				top = *(object_ptr)pc[4]; /* increment */
 				if (IS_ATOM_INT(top)) {
@@ -3171,6 +3315,7 @@ void do_exec(int *start_pc)
 				}
 				/* fall-through */
 			case L_ENDFOR_UP:
+			deprintf("case L_ENDFOR_UP:");
 				/* add increment */
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				a = *obj_ptr;
@@ -3190,6 +3335,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ENDFOR_DOWN:
+			deprintf("case L_ENDFOR_DOWN:");
 			  downloop:
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				a = *obj_ptr;
@@ -3210,8 +3356,10 @@ void do_exec(int *start_pc)
 
 			// Call by handle to procedure, function or type
 			case L_CALL_FUNC: 
+			deprintf("case L_CALL_FUNC:");
 				cf = TRUE;
 			case L_CALL_PROC: 
+			deprintf("case L_CALL_PROC:");
 				tpc = pc;
 				if (expr_top >= expr_limit) {
 					expr_max = BiggerStack();
@@ -3327,6 +3475,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PROC:  // Normal subroutine call
+			deprintf("case L_PROC:");
 				/* make a procedure or function/type call */
 				if (expr_top >= expr_limit) {
 					tpc = pc;
@@ -3400,25 +3549,30 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_CALL_BACK_RETURN: /* return from a call-back */
+			deprintf("case L_CALL_BACK_RETURN:");
 				return;
 			
 			case L_RETURNT: /* end of execution - falling off the end */
+			deprintf("case L_RETURNT:");
 				tpc = pc;  /* we need this to be different from CALL_BACK_RETURN */
 				Cleanup(0);
 				return;
 				
 			case L_BADRETURNF:  /* shouldn't reach here */
+			deprintf("case L_BADRETURNF:");
 				tpc = pc;
 				RTFatal("attempt to exit a function without returning a value");
 				BREAK;
 
 			case L_RETURNF: /* return from function */
+			deprintf("case L_RETURNF:");
 				result_val = *(object_ptr)pc[2]; /* the return value */
 				Ref(result_val);
 				// record the place to put the return value 
 				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
 
 			case L_RETURNP: /* return from procedure */
+			deprintf("case L_RETURNP:");
 				sub = ((symtab_ptr)pc[1]);
 				sym = sub->next; /* first private var */
 				
@@ -3467,6 +3621,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ROUTINE_ID:
+			deprintf("case L_ROUTINE_ID:");
 				top = (object)pc[1];    // CurrentSub
 				a = *(object_ptr)pc[3]; // routine name sequence
 				SymTabLen = pc[2]; // avoid > 3 args
@@ -3478,6 +3633,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_APPEND:
+			deprintf("case L_APPEND:");
 				b = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
 				if (!IS_SEQUENCE(b)) {
@@ -3492,6 +3648,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PREPEND:
+			deprintf("case L_PREPEND:");
 				b = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
 				if (!IS_SEQUENCE(b)) {
@@ -3506,6 +3663,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_CONCAT:
+			deprintf("case L_CONCAT:");
 				/* concatenate 2 items */
 				b = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
@@ -3524,9 +3682,11 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_SPLICE:
+			deprintf("case L_SPLICE:");
 				splins = 1;
 				goto spin;
 			case L_INSERT:
+			deprintf("case L_INSERT:");
 				splins = 0;
 			spin:
 				tpc = pc;
@@ -3568,6 +3728,7 @@ void do_exec(int *start_pc)
                 BREAK;
 
 			case L_CONCAT_N:
+			deprintf("case L_CONCAT_N:");
 				/* concatenate 3 or more items */
 				nvars = pc[1];
 				tpc = pc;
@@ -3576,6 +3737,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_REPEAT:
+			deprintf("case L_REPEAT:");
 				tpc = pc;
 				top = Repeat(*(object_ptr)pc[1], *(object_ptr)pc[2]);
 				DeRef(*(object_ptr)pc[3]);
@@ -3585,6 +3747,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_DATE:
+			deprintf("case L_DATE:");
 				tpc = pc;
 				top = Date(); 
 				DeRef(*(object_ptr)pc[1]);
@@ -3593,6 +3756,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_TIME:
+			deprintf("case L_TIME:");
 				tpc = pc;
 				top = NewDouble(current_time());
 				DeRef(*(object_ptr)pc[1]);
@@ -3604,6 +3768,7 @@ void do_exec(int *start_pc)
 
 #ifdef HEAP_CHECK
 			case L_SPACE_USED:
+			deprintf("case L_SPACE_USED:");
 				top = MAKE_INT(bytes_allocated);
 				DeRef(*(object_ptr)pc[1]);
 				*(object_ptr)pc[1] = top;
@@ -3611,6 +3776,7 @@ void do_exec(int *start_pc)
 				BREAK;
 #endif
 			case L_POSITION:
+			deprintf("case L_POSITION:");
 				a = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
 				tpc = pc;
@@ -3628,6 +3794,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_EQUAL:
+			deprintf("case L_EQUAL:");
 				a = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
 				if (a == top) {
@@ -3649,6 +3816,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_COMPARE:
+			deprintf("case L_COMPARE:");
 				a = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
 				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
@@ -3666,6 +3834,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_FIND:
+			deprintf("case L_FIND:");
 				tpc = pc;
 				a = find(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2]);
 				top = MAKE_INT(a);
@@ -3676,6 +3845,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_MATCH:
+			deprintf("case L_MATCH:");
 				tpc = pc;
 				top = MAKE_INT(e_match((s1_ptr)*(object_ptr)pc[1], 
 									 (s1_ptr)*(object_ptr)pc[2]));
@@ -3687,10 +3857,12 @@ void do_exec(int *start_pc)
 
 
 			case L_PEEK4U:
+			deprintf("case L_PEEK4U:");
 				b = 1;
 				goto peek4s1;
 				
 			case L_PEEK4S:
+			deprintf("case L_PEEK4S:");
 				b = 0;
 			 peek4s1:
 				a = *(object_ptr)pc[1]; /* the address */
@@ -3703,10 +3875,12 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PEEK2U:
+			deprintf("case L_PEEK2U:");
 				b = 1;
 				goto peek2s1;
 				
 			case L_PEEK2S:
+			deprintf("case L_PEEK2S:");
 				b = 0;
 			 peek2s1:
 				a = *(object_ptr)pc[1]; /* the address */
@@ -3719,6 +3893,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_PEEK_STRING:
+			deprintf("case L_PEEK_STRING:");
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
 				if (IS_ATOM_INT(a)) {
@@ -3744,9 +3919,11 @@ void do_exec(int *start_pc)
 				BREAK;
 		
 			case L_PEEKS:
+			deprintf("case L_PEEKS:");
 				b = 1;
 				goto peeks1;	
 			case L_PEEK:
+			deprintf("case L_PEEK:");
 				b = 0;
 				
 				peeks1:
@@ -3829,6 +4006,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_POKE4:
+			deprintf("case L_POKE4:");
 				a = *(object_ptr)pc[1];   /* address */
 				top = *(object_ptr)pc[2]; /* byte value */
 				tpc = pc;
@@ -3838,6 +4016,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_POKE2:
+			deprintf("case L_POKE2:");
 				a = *(object_ptr)pc[1];   /* address */
 				top = *(object_ptr)pc[2]; /* byte value */
 				tpc = pc;
@@ -3847,6 +4026,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_POKE:
+			deprintf("case L_POKE:");
 				a = *(object_ptr)pc[1];   /* address */
 				top = *(object_ptr)pc[2]; /* byte value */
 				tpc = pc;  // in case of machine exception
@@ -3927,6 +4107,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_MEM_COPY:
+			deprintf("case L_MEM_COPY:");
 				tpc = pc;
 				memory_copy(*(object_ptr)pc[1], 
 							*(object_ptr)pc[2],
@@ -3936,6 +4117,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_MEM_SET:
+			deprintf("case L_MEM_SET:");
 				tpc = pc;
 				memory_set(*(object_ptr)pc[1], 
 						   *(object_ptr)pc[2],
@@ -3945,6 +4127,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_PIXEL:
+			deprintf("case L_PIXEL:");
 				tpc = pc;
 				Pixel(*(object_ptr)pc[1],
 					  *(object_ptr)pc[2]);
@@ -3953,6 +4136,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_GET_PIXEL:
+			deprintf("case L_GET_PIXEL:");
 				tpc = pc;
 				a = Get_Pixel(*(object_ptr)pc[1]);
 				DeRef(*(object_ptr)pc[2]);
@@ -3962,6 +4146,7 @@ void do_exec(int *start_pc)
 				BREAK;
 		  
 			case L_CALL:
+			deprintf("case L_CALL:");
 				a = *(object_ptr)pc[1];
 				tpc = pc;   // for better profiling and machine exception
 				/* check address */
@@ -3982,6 +4167,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_SYSTEM:
+			deprintf("case L_SYSTEM:");
 				tpc = pc;
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
@@ -3990,6 +4176,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_SYSTEM_EXEC:
+			deprintf("case L_SYSTEM_EXEC:");
 				tpc = pc;
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
@@ -4004,6 +4191,7 @@ void do_exec(int *start_pc)
 				/* start of I/O routines */
 
 			case L_OPEN:
+			deprintf("case L_OPEN:");
 				tpc = pc;
 				top = EOpen(*(object_ptr)pc[1], 
 							*(object_ptr)pc[2]);
@@ -4014,6 +4202,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_CLOSE:
+			deprintf("case L_CLOSE:");
 				tpc = pc;
 				EClose(*(object_ptr)pc[1]);
 				pc += 2;
@@ -4021,6 +4210,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_GETC:  /* read a character from a file */
+			deprintf("case L_GETC:");
 				top = *(object_ptr)pc[1];
 				if (current_screen != MAIN_SCREEN && might_go_screen(top)) {
 					MainScreen(); // no error can happen, tpc needn't be set
@@ -4075,6 +4265,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_GETS:  /* read a line from a file */
+			deprintf("case L_GETS:");
 				tpc = pc;
 				top = EGets(*(object_ptr)pc[1]);
 				DeRef(*(object_ptr)pc[2]);
@@ -4084,6 +4275,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PLATFORM: // only shrouded code needs this (for portability)
+			deprintf("case L_PLATFORM:");
 				DeRef(*(object_ptr)pc[1]);
 #ifdef EOSX
 				top = 4;  // OSX
@@ -4105,6 +4297,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_GET_KEY: /* read an immediate key (if any) from the keyboard 
+			deprintf("case L_GET_KEY:");
 							 or return -1 */
 				tpc = pc;
 #if defined(EWINDOWS)
@@ -4134,6 +4327,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_CLEAR_SCREEN:
+			deprintf("case L_CLEAR_SCREEN:");
 				tpc = pc++;
 				if (current_screen != MAIN_SCREEN) {
 					tpc = pc;
@@ -4143,6 +4337,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PUTS:
+			deprintf("case L_PUTS:");
 				tpc = pc;
 				EPuts(*(object_ptr)pc[1], *(object_ptr)pc[2]);
 				inc3pc();
@@ -4150,9 +4345,11 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_QPRINT:
+			deprintf("case L_QPRINT:");
 				i = 1;
 				goto nextp;
 			case L_PRINT:
+			deprintf("case L_PRINT:");
 				i = 0;
 			nextp:
 				tpc = pc;
@@ -4163,6 +4360,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PRINTF:
+			deprintf("case L_PRINTF:");
 				/* file number, format string, value */
 				tpc = pc;
 				file_no = *(object_ptr)pc[1];
@@ -4173,6 +4371,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_SPRINTF:
+			deprintf("case L_SPRINTF:");
 				/* format string, value */
 				tpc = pc;
 				top = EPrintf(DOING_SPRINTF, 
@@ -4185,6 +4384,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_COMMAND_LINE:
+			deprintf("case L_COMMAND_LINE:");
 				tpc = pc;
 				top = Command_Line();
 				DeRef(*(object_ptr)pc[1]);
@@ -4194,6 +4394,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_OPTION_SWITCHES:
+			deprintf("case L_OPTION_SWITCHES:");
 				tpc = pc;
 				top = fe.switches;
 				RefDS( top );
@@ -4204,6 +4405,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_GETENV:
+			deprintf("case L_GETENV:");
 				tpc = pc;
 				top = EGetEnv((s1_ptr)*(object_ptr)pc[1]);
 				DeRef(*(object_ptr)pc[2]);
@@ -4213,6 +4415,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_MACHINE_FUNC:
+			deprintf("case L_MACHINE_FUNC:");
 				tpc = pc;
 				top = machine(*(object_ptr)pc[1], 
 							  *(object_ptr)pc[2]);
@@ -4223,6 +4426,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_MACHINE_PROC:
+			deprintf("case L_MACHINE_PROC:");
 				tpc = pc;
 				machine(*(object_ptr)pc[1], *(object_ptr)pc[2]);
 				inc3pc();
@@ -4230,6 +4434,7 @@ void do_exec(int *start_pc)
 				BREAK;
 		 
 			case L_C_FUNC:
+			deprintf("case L_C_FUNC:");
 				tpc = pc;
 				top = call_c(1, *(object_ptr)pc[1],
 								*(object_ptr)pc[2]);//callback could happen here
@@ -4241,6 +4446,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_C_PROC:
+			deprintf("case L_C_PROC:");
 				tpc = pc;
 				top = call_c(0, *(object_ptr)pc[1],
 								*(object_ptr)pc[2]);//callback could happen here
@@ -4253,6 +4459,7 @@ void do_exec(int *start_pc)
 			/* Multitasking */
 			
 			case L_TASK_CREATE:
+			deprintf("case L_TASK_CREATE:");
 				tpc = pc;
 				top = task_create(*(object_ptr)pc[1], 
 								  *(object_ptr)pc[2]);
@@ -4264,6 +4471,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_SCHEDULE:
+			deprintf("case L_TASK_SCHEDULE:");
 				tpc = pc;
 				task_schedule(*(object_ptr)pc[1], 
 							  *(object_ptr)pc[2]);
@@ -4272,6 +4480,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_YIELD:
+			deprintf("case L_TASK_YIELD:");
 				tpc = pc;
 				task_yield();
 				pc = tpc;
@@ -4279,6 +4488,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_SELF:
+			deprintf("case L_TASK_SELF:");
 				top = (object)pc[1];
 				DeRef(*(object_ptr)top);
 				*(object_ptr)top = NewDouble(tcb[current_task].tid);
@@ -4287,6 +4497,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_SUSPEND:
+			deprintf("case L_TASK_SUSPEND:");
 				tpc = pc;
 				task_suspend(*(object_ptr)pc[1]);
 				pc += 2;
@@ -4294,6 +4505,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_LIST:
+			deprintf("case L_TASK_LIST:");
 				tpc = pc;
 				top = task_list();
 				a = pc[1];
@@ -4304,6 +4516,7 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_STATUS:
+			deprintf("case L_TASK_STATUS:");
 				tpc = pc;
 				top = task_status(*(object_ptr)pc[1]);
 				a = pc[2];
@@ -4314,12 +4527,14 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_TASK_CLOCK_STOP:
+			deprintf("case L_TASK_CLOCK_STOP:");
 				tpc = pc;
 				task_clock_stop();
 				pc += 1;
 				BREAK;
 			
 			case L_TASK_CLOCK_START:
+			deprintf("case L_TASK_CLOCK_START:");
 				tpc = pc;
 				task_clock_start();
 				pc += 1;
@@ -4329,6 +4544,7 @@ void do_exec(int *start_pc)
 			/* tracing/profiling ops */
 
 			case L_STARTLINE:
+			deprintf("case L_STARTLINE:");
 				top = pc[1];
 				a = slist[top].options;
 #ifndef BACKEND             
@@ -4391,6 +4607,7 @@ void do_exec(int *start_pc)
 				BREAK; 
 
 			case L_TRACE:
+			deprintf("case L_TRACE:");
 				tpc = pc;
 				top = *(object_ptr)pc[1];
 				trace_command(top);
@@ -4398,6 +4615,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_PROFILE:
+			deprintf("case L_PROFILE:");
 				tpc = pc;
 				top = *(object_ptr)pc[1];
 				profile_command(top);
@@ -4405,6 +4623,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_DISPLAY_VAR: /* display variable name and value */
+			deprintf("case L_DISPLAY_VAR:");
 				if (TraceOn) { 
 					tpc = pc;
 #ifndef BACKEND                 
@@ -4416,6 +4635,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ERASE_PRIVATE_NAMES: /* blank private vars on debug screen */
+			deprintf("case L_ERASE_PRIVATE_NAMES:");
 #ifndef BACKEND             
 				if (TraceOn) { 
 					tpc = pc;
@@ -4427,6 +4647,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ERASE_SYMBOL:
+			deprintf("case L_ERASE_SYMBOL:");
 #ifndef BACKEND             
 				if (TraceOn) { 
 					tpc = pc;
@@ -4438,6 +4659,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 			case L_UPDATE_GLOBALS:
+			deprintf("case L_UPDATE_GLOBALS:");
 				if (TraceOn) { 
 					tpc = pc;
 #ifndef BACKEND                 
@@ -4449,6 +4671,7 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			case L_ABORT:
+			deprintf("case L_ABORT:");
 				tpc = pc;
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
@@ -4463,6 +4686,7 @@ void do_exec(int *start_pc)
 				BREAK;
 				
 				case L_FIND_FROM:
+				deprintf("case L_FIND_FROM:");
 						tpc = pc;
 						a = find_from(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2], *(object_ptr)pc[3]);
 						top = MAKE_INT(a);
@@ -4472,6 +4696,7 @@ void do_exec(int *start_pc)
 						BREAK;
 						
 				case L_MATCH_FROM:
+				deprintf("case L_MATCH_FROM:");
 						tpc = pc;
 						a = e_match_from((s1_ptr)*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2],
 								*(object_ptr) pc[3]);
