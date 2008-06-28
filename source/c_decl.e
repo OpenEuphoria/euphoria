@@ -80,7 +80,7 @@ procedure delete_files(integer doit)
 			else
 				puts(doit, "del ")
 			end if
-			puts(doit, files_to_delete[i] & '\n')
+			puts(doit, files_to_delete[i] & HOSTNL)
 		end for 
 	end if
 end procedure
@@ -1038,9 +1038,9 @@ global procedure start_emake()
 	debug_flag = ""
 	
 	if TUNIX then      
-		doit = open("emake", "w")
+		doit = open("emake", "wb")
 	else       
-		doit = open("emake.bat", "w")
+		doit = open("emake.bat", "wb")
 	end if      
 		
 	if doit = -1 then
@@ -1048,8 +1048,8 @@ global procedure start_emake()
 	end if
 		
 	if not TUNIX then
-		puts(doit, "@echo off\n")
-		puts(doit, "if not exist main-.c goto nofiles\n")
+		puts(doit, "@echo off"&HOSTNL)
+		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
 	end if
 		
 	if TDOS then
@@ -1059,7 +1059,7 @@ global procedure start_emake()
 		if atom(dj_path) then
 			-- /ol removed due to bugs with SEQ_PTR() inside a loop
 			-- can remove /fpc and add /fp5 /fpi87 for extra speed
-			puts(doit, "echo compiling with WATCOM\n")
+			puts(doit, "echo compiling with WATCOM"&HOSTNL)
 			if fastfp then
 				-- fast f.p. that assumes f.p. hardware
 				c_opts = "/w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
@@ -1074,14 +1074,14 @@ global procedure start_emake()
 			else
 				debug_flag = " -fomit-frame-pointer -g4"
 			end if
-			puts(doit, "echo compiling with DJGPP\n")
+			puts(doit, "echo compiling with DJGPP"&HOSTNL)
 			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
 		end if
 	end if
 
 	if TWINDOWS then
 		if sequence(wat_path) then
-			puts(doit, "echo compiling with WATCOM\n")
+			puts(doit, "echo compiling with WATCOM"&HOSTNL)
 			if debug_option then
 				debug_flag = " /d3"
 			end if
@@ -1096,7 +1096,7 @@ global procedure start_emake()
 			if debug_option then
 				debug_flag = " -v "
 			end if
-			puts(doit, "echo compiling with BORLAND\n")
+			puts(doit, "echo compiling with BORLAND"&HOSTNL)
 			c_opts = " -q -w- -O2 -5 -a4 -I" & debug_flag
 			if dll_option then
 				c_opts = "-tWD" & c_opts
@@ -1112,7 +1112,7 @@ global procedure start_emake()
 			if debug_option then
 				debug_flag = " -g"
 			end if
-			puts(doit, "echo compiling with LCCWIN\n")
+			puts(doit, "echo compiling with LCCWIN"&HOSTNL)
 			c_opts = "-w -Zp4" & debug_flag
 
 			-- -O causes some problems sometimes. Use -LCCOPT-OFF to
@@ -1126,7 +1126,7 @@ global procedure start_emake()
 	end if
 	
 	if TUNIX then
-		puts(doit, "echo compiling with GNU C\n")
+		puts(doit, "echo compiling with GNU C"&HOSTNL)
 		cc_name = "gcc"
 		echo = "echo"
 		if debug_option then
@@ -1155,7 +1155,7 @@ global procedure start_emake()
 			puts(link_file, "option osname='CauseWay'\n")
 			printf(link_file, "libpath %s\\lib386\n", {wat_path})
 			printf(link_file, "libpath %s\\lib386\\dos\n", {wat_path})
-			printf(link_file, "OPTION stub=%s\\bin\\cwstub.exe\n", {eudir})
+			printf(link_file, "OPTION stub=%s\\bin\\cwstub.exe\n", {get_eudir()})
 			puts(link_file, "format os2 le ^\n")
 			printf(link_file, "OPTION STACK=%d\n", total_stack_size) 
 			puts(link_file, "OPTION QUIET\n") 
@@ -1221,27 +1221,27 @@ global procedure finish_emake()
 	
 	-- init-.c files
 	if atom(bor_path) then
-		printf(doit, "%s init-.c\n", {echo})
-		printf(doit, "%s %s init-.c\n", {cc_name, c_opts})
+		printf(doit, "%s init-.c"&HOSTNL, {echo})
+		printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
 	end if
 	add_file("init-")
 	for i = 0 to init_name_num-1 do -- now that we know init_name_num
 		if atom(bor_path) then
-			printf(doit, "%s init-%d.c\n", {echo, i})
-			printf(doit, "%s %s init-%d.c\n", {cc_name, c_opts, i})
+			printf(doit, "%s init-%d.c"&HOSTNL, {echo, i})
+			printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
 		end if
 		buff = sprintf("init-%d", i)
 		add_file(buff)
 	end for
 		
 	if atom(bor_path) then
-		printf(doit, "%s linking\n", {echo})
+		printf(doit, "%s linking"&HOSTNL, {echo})
 	end if
 		
 	if TDOS then    
 		if atom(dj_path) then
-			printf(doit, "wlink FILE %s.obj @objfiles.lnk\n", {file0})
-			printf(link_file, "FILE %s\\bin\\", {eudir})
+			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {file0})
+			printf(link_file, "FILE %s\\bin\\", {get_eudir()})
 			if fastfp then
 				puts(link_file, "ecfastfp.lib\n") 
 			elsif length(user_library) then
@@ -1250,18 +1250,18 @@ global procedure finish_emake()
 				puts(link_file, "ec.lib\n") 
 			end if
 			if not keep then
-				puts(doit, "del *.obj > NUL\n")
+				puts(doit, "del *.obj > NUL"&HOSTNL)
 			end if
-			path = eudir & "\\bin\\le23p.exe"
+			path = get_eudir() & "\\bin\\le23p.exe"
 			fp = open(path, "rb")
 			if fp != -1 then
 				close(fp)
-				path = eudir & "\\bin\\cwc.exe"
+				path = get_eudir() & "\\bin\\cwc.exe"
 				fp = open(path, "rb")
 				if fp != -1 then
 					close(fp)
-					printf(doit, "le23p %s.exe\n", {file0})
-					printf(doit, "cwc %s.exe\n", {file0})
+					printf(doit, "le23p %s.exe"&HOSTNL, {file0})
+					printf(doit, "cwc %s.exe"&HOSTNL, {file0})
 				end if
 			end if
 			close(link_file)
@@ -1269,49 +1269,49 @@ global procedure finish_emake()
 		else 
 			-- DJGPP 
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
+				printf(link_file, "%s\\bin\\%s\n", {get_eudir(), user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ec.a\n", {eudir}) 
+				printf(link_file, "%s\\bin\\ec.a\n", {get_eudir()}) 
 			end if
 			
-			printf(link_file, "%s\\bin\\liballeg.a\n", {eudir}) 
-			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk\n", {file0, file0})
+			printf(link_file, "%s\\bin\\liballeg.a\n", {get_eudir()}) 
+			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, {file0, file0})
 			if not keep then
-				puts(doit, "del *.o\n")
+				puts(doit, "del *.o"&HOSTNL)
 			end if
-			puts(doit, "set LFN=n\n")
-			printf(doit, "strip %s.exe\n", {file0})
-			puts(doit, "set LFN=\n")
+			puts(doit, "set LFN=n"&HOSTNL)
+			printf(doit, "strip %s.exe"&HOSTNL, {file0})
+			puts(doit, "set LFN="&HOSTNL)
 		end if
 	end if      
 
 	if TWINDOWS then
 		if sequence(wat_path) then     
-			printf(doit, "wlink FILE %s.obj @objfiles.lnk\n", {file0})
+			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {file0})
 			if length(user_library) then
 				printf(link_file, "FILE %s\n", {user_library}) 
 			else
-				printf(link_file, "FILE %s\\bin\\ecw.lib\n", {eudir}) 	
+				printf(link_file, "FILE %s\\bin\\ecw.lib\n", {get_eudir()}) 	
 			end if
 			
 
 		elsif sequence(bor_path) then
-			printf(doit, "bcc32 %s %s.c @objfiles.lnk\n", {c_opts, file0})
+			printf(doit, "bcc32 %s %s.c @objfiles.lnk"&HOSTNL, {c_opts, file0})
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
+				printf(link_file, "%s\\bin\\%s\n", {get_eudir(), user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ecwb.lib\n", {eudir}) 	
+				printf(link_file, "%s\\bin\\ecwb.lib\n", {get_eudir()}) 	
 			end if
 			
 			if not keep then
-				puts(doit, "del *.tds > NUL\n")
+				puts(doit, "del *.tds > NUL"&HOSTNL)
 			end if
 			
 		else 
 			-- Lcc 
 			if dll_option then
 				printf(doit, 
-				"lcclnk -s -dll -subsystem windows %s.obj %s.def @objfiles.lnk\n",
+				"lcclnk -s -dll -subsystem windows %s.obj %s.def @objfiles.lnk"&HOSTNL,
 				{file0, file0})
 			else 
 				if con_option then
@@ -1320,19 +1320,19 @@ global procedure finish_emake()
 					subsystem = "windows"
 				end if
 				printf(doit, 
-				"lcclnk -s -subsystem %s -stack-reserve %d -stack-commit %d %s.obj @objfiles.lnk\n", 
+				"lcclnk -s -subsystem %s -stack-reserve %d -stack-commit %d %s.obj @objfiles.lnk"&HOSTNL, 
 				{subsystem, total_stack_size, total_stack_size, file0})
 			end if
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {eudir, user_library}) 
+				printf(link_file, "%s\\bin\\%s\n", {get_eudir(), user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ecwl.lib\n", {pathnames_to_8(eudir)}) 
+				printf(link_file, "%s\\bin\\ecwl.lib\n", {pathnames_to_8(get_eudir())}) 
 			end if
 			
 		end if
 			
 		if not keep then
-			puts(doit, "del *.obj > NUL\n")
+			puts(doit, "del *.obj > NUL"&HOSTNL)
 		end if
 			
 		def_name = sprintf("%s.def", {file0})
@@ -1388,7 +1388,7 @@ global procedure finish_emake()
 			if lib_dir = -1 then
 				printf(doit, 
 					"gcc %s %s.o %s -I%s %s/bin/ecu.a -lm ",
-					{dll_flag, file0, link_line, eudir, eudir})
+					{dll_flag, file0, link_line, get_eudir(), get_eudir()})
 			else
 				close(lib_dir)
 				printf(doit,
@@ -1401,31 +1401,31 @@ global procedure finish_emake()
 		if not TBSD then
 			puts(doit, " -ldl")
 		end if      
-		printf(doit, " -o %s%s\n", {file0, exe_suffix})
+		printf(doit, " -o %s%s"&HOSTNL, {file0, exe_suffix})
 		if not keep then
-			puts(doit, "rm -f *.o\n")
+			puts(doit, "rm -f *.o"&HOSTNL)
 		end if
 			
 		if dll_option then
-			printf(doit, "echo you can now link with: ./%s.so\n", {file0})
+			printf(doit, "echo you can now link with: ./%s.so"&HOSTNL, {file0})
 		else    
-			printf(doit, "echo you can now execute: ./%s\n", {file0})
+			printf(doit, "echo you can now execute: ./%s"&HOSTNL, {file0})
 		end if
 		delete_files(doit)
 		
 	else
 		if dll_option then
-			printf(doit, "if not exist %s.dll goto done\n", {file0})
-			printf(doit, "echo you can now link with: %s.dll\n", {file0})
+			printf(doit, "if not exist %s.dll goto done"&HOSTNL, {file0})
+			printf(doit, "echo you can now link with: %s.dll"&HOSTNL, {file0})
 		else 
-			printf(doit, "if not exist %s.exe goto done\n", {file0})
-			printf(doit, "echo you can now execute: %s.exe\n", {file0})
+			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
+			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
 		end if
 		delete_files(doit)
-		puts(doit, "goto done\n")
-		puts(doit, ":nofiles\n")
-		puts(doit, "echo Run the translator to create new .c files\n")
-		puts(doit, ":done\n")
+		puts(doit, "goto done"&HOSTNL)
+		puts(doit, ":nofiles"&HOSTNL)
+		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
+		puts(doit, ":done"&HOSTNL)
 	end if
 		
 	close(doit)
@@ -1471,14 +1471,14 @@ global procedure GenerateUserRoutines()
 
 				if Pass = LAST_PASS then
 					if atom(bor_path) then
-						printf(doit, "%s main-.c\n", {echo})                
-						printf(doit, "%s %s main-.c\n", {cc_name, c_opts})
+						printf(doit, "%s main-.c"&HOSTNL, {echo})                
+						printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
 					end if
 					add_file("main-")
 					for i = 0 to main_name_num-1 do
 						if atom(bor_path) then
-							printf(doit, "%s main-%d.c\n", {echo, i})               
-							printf(doit, "%s %s main-%d.c\n", {cc_name, c_opts, i})
+							printf(doit, "%s main-%d.c"&HOSTNL, {echo, i})               
+							printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
 						end if
 						buff = sprintf("main-%d", i)
 						add_file(buff)
@@ -1489,8 +1489,8 @@ global procedure GenerateUserRoutines()
 		
 			if Pass = LAST_PASS then
 				if atom(bor_path) then
-					printf(doit, "%s %s.c\n", {echo, c_file})
-					printf(doit, "%s %s %s.c\n", {cc_name, c_opts, c_file})
+					printf(doit, "%s %s.c"&HOSTNL, {echo, c_file})
+					printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 				end if
 			end if
 		
@@ -1537,8 +1537,8 @@ global procedure GenerateUserRoutines()
 						end if
 						
 						if atom(bor_path) then
-							printf(doit, "%s %s.c\n", {echo, c_file})
-							printf(doit, "%s %s %s.c\n", {cc_name, c_opts, c_file})
+							printf(doit, "%s %s.c"&HOSTNL, {echo, c_file})
+							printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 						end if
 						add_file(c_file)
 					end if
