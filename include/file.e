@@ -662,6 +662,10 @@ global function dir(sequence name)
 		end if
 	end for
 
+	if not length(data) then
+		-- no matches found, act like it doesn't exist
+		return -1
+	end if
 	return data
 end function
 
