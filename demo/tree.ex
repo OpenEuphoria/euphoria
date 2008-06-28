@@ -12,7 +12,7 @@
 --   alphabetically into a Euphoria sequence that is being used
 --   as a "tree". The tree data structure is created by nesting
 --   sequences inside one another to whatever depth is required.
---   Looking up a word in a tree is generally faster than searching 
+--   Looking up a word in a tree is generally faster than searching
 --   through a linear list, since unless the tree is very lop-sided,
 --   we should have fewer comparisons to make.
 
@@ -30,6 +30,7 @@ constant NAME = 1,
 	 LEFT = 3,
 	 RIGHT = 4
 
+integer last_word = 0
 function next_word()
 -- read standard input to get next alphabetic string 
     integer c
@@ -41,12 +42,15 @@ function next_word()
 	if (c >= 'A' and c <= 'Z') or
 	   (c >= 'a' and c <= 'z') then
 	    word &= c
-	elsif length(word) > 0 then
-	    return word
-	elsif c = EOF then
-	    return 0
-	end if
-    end while
+	else
+		last_word = (c = EOF)
+		if length(word) > 0 then
+		    return word
+		elsif c = EOF then
+			return 0
+		end if
+    end if
+	end while
 end function
 
 function insert(sequence node, sequence word)
@@ -91,12 +95,12 @@ procedure word_count()
 -- build a binary tree containing words in standard input
     object word
 
-    while TRUE do 
-	word = next_word() 
-	if atom(word) then
-	    exit
-	end if
-	root = insert(root, word)
+    while not last_word do
+		word = next_word()
+		if atom(word) then
+		    exit
+		end if
+		root = insert(root, word)
     end while
 end procedure
 
@@ -106,7 +110,7 @@ atom t
 t = time()         -- Time the table-building process only
 word_count() 
 t = time() -t      -- Stop timer
-
+puts(STANDARD_OUT,"\n\n")
 printTree(root)
 printf(2, "\n%.2f seconds\n\n", t)
 

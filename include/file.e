@@ -66,10 +66,12 @@ ifdef UNIX then
 	export constant SLASH='/'
 	export constant SLASHES = "/"
 	export constant CRLF = "\n"
+	export constant PATHSEP = ':'
 else
 	export constant SLASH='\\'
 	export constant SLASHES = ":\\/"
 	export constant CRLF = "\r\n"
+	export constant PATHSEP = ';'
 end ifdef
 
 --****
@@ -208,7 +210,7 @@ end ifdef
 --
 -- Avoid outputting 0's to the screen or to standard output. Your output might get truncated.
 --
--- Remember that if the output file was opened in text mode, <platform>DOS</platform> and 
+-- Remember that if the output file was opened in text mode, <platform>DOS</platform> and
 -- <platform>Windows</platform> will change <code>\n</code> (10) to <code>\r\n</code> 
 -- (13 10). Open the file in binary mode if this is not what you want. 
 --

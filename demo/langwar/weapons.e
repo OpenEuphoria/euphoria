@@ -6,6 +6,8 @@ extended_v_coord y0
 atom xinc
 atom yinc
 
+include math.e
+
 function diftype(valid_quadrant_row shooter, valid_quadrant_row victim)
 -- return TRUE if shooter and victim are on opposing sides
 

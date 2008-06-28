@@ -7,18 +7,22 @@
 -- See lw.doc for a complete description of how to play.
 -- See lw.sum for a brief summary of the commands that you can print.
 
--- This is based on a space war game developed in 1979 for the TRS-80 by 
--- David A. Craig with assistance from Robert H. Craig. 
+-- This is based on a space war game developed in 1979 for the TRS-80 by
+-- David A. Craig with assistance from Robert H. Craig.
 
 -- Language War uses graphics mode 18 and PC speaker sound effects.
--- Standard Euphoria routines, such as pixel(), display_image() etc. are used. 
--- There are no calls to low-level routines such as peek(), poke(), or 
+-- Standard Euphoria routines, such as pixel(), display_image() etc. are used.
+-- There are no calls to low-level routines such as peek(), poke(), or
 -- mem_copy(). See the Euphoria Web site for examples of really fast graphics.
 
--- Language War is organized as a loose collection of independent "tasks" 
--- that run in "parallel" with each other. The Euphoria multitasking scheduler 
+-- Language War is organized as a loose collection of independent "tasks"
+-- that run in "parallel" with each other. The Euphoria multitasking scheduler
 -- decides which task to run next. This cooperative, non-preemptive
 -- tasking approach could be applied to other kinds of programs as well.
+
+-- this was a working program, turn all warnings off
+include machine.e
+warning_file(-1)
 
 global constant QUIET = 0  -- set this to 1 to turn off all sounds
 

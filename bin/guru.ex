@@ -327,7 +327,7 @@ procedure print_chunk_list()
     
     for i = 1 to length(chunk_list) - 1 do
 	if i > 1 and display then
-	    text_color(GREEN)
+	    text_color(BRIGHT_GREEN)
 	    puts(SCREEN, "\nPress q to quit, Enter for more:")
 	    text_color(WHITE)
 	    puts(SCREEN, " ")
@@ -656,7 +656,7 @@ end for
 file_spec = {"*.*"}
 
 -- quits after finishing current file
-puts(SCREEN, "Press q to quit\n\n\n") 
+puts(SCREEN, "Press q to quit\n\n\n")
 
 sequence gp
 gp = get_position()

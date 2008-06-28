@@ -88,6 +88,7 @@ procedure hash_add(sequence string)
     hash_table[hash_val] = bucket
 end procedure
 
+integer last_word = 0
 function next_word()
 -- Read standard input to get the next "word".
     integer c
@@ -100,10 +101,13 @@ function next_word()
 	    word &= c
 	elsif (c >= 'A' and c <= 'Z') then
 	    word &= c
-	elsif length(word) > 0 then
-	    return word
-	elsif c = EOF then
-	    return 0
+	else
+		last_word = (c = EOF)
+		if length(word) > 0 then
+		    return word
+		elsif c = EOF then
+		    return 0
+		end if
 	end if
     end while
 end function
@@ -112,13 +116,13 @@ procedure build_table()
 -- build a hash table containing all unique words in standard input
     object word
 
-    while TRUE do 
-	word = next_word() 
-	if atom(word) then
-	    exit
-	else
-	    hash_add(word)
-	end if
+    while not last_word do
+		word = next_word()
+		if atom(word) then
+		    exit
+		else
+		    hash_add(word)
+		end if
     end while
 end procedure
 
@@ -168,7 +172,7 @@ if total_words then
     printf(stats, "compares per lookup              : %.2f\n", 
 	       compares/total_words)
 end if
-
+puts(STANDARD_OUT,"\n\n")
 for i = 1 to length(hash_table) do
     printf(stats, "\nbucket#%d: ", i)
     for j = 1 to length(hash_table[i]) do

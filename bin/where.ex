@@ -3,18 +3,10 @@
 -- (give complete file name including .exe .bat etc.)
 
 include file.e
+include os.e
 
 constant TRUE = 1
 constant SCREEN = 1, ERROR = 2
-
-integer separator, SLASH
-if platform() = LINUX then
-    SLASH='/'
-    separator = ':'
-else
-    SLASH='\\'
-    separator = ';'
-end if
 
 sequence path
 integer p
@@ -28,7 +20,7 @@ function next_dir()
     end if
     dir = ""
     while p <= length(path) do
-	if path[p] = separator then
+	if path[p] = PATHSEP then
 	    p += 1
 	    exit
 	end if
@@ -41,6 +33,13 @@ function next_dir()
     return dir
 end function
 
+ifdef DOS32 then
+   	constant exe_name ="ex"
+elsifdef WIN32 then
+   	constant exe_name ="exwc"
+else
+	constant exe_name ="exu"
+end ifdef
 
 procedure search_path()
 -- main routine
@@ -49,8 +48,8 @@ procedure search_path()
     
     cmd = command_line()
     if length(cmd) < 3 then
-	puts(ERROR, "usage: ex where file\n")
-	abort(1)
+		puts(ERROR, "usage: " & exe_name &"where file\n")
+		abort(1)
     end if
     
     path = getenv("PATH")

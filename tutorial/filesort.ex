@@ -40,7 +40,7 @@ procedure file_sort()   -- this is the main procedure
 				 -- sequence of lines as a result
 
     for i = 1 to length(sorted_buffer) do
-	puts(1, sorted_buffer[i]) -- write out the lines of text to 
+	puts(1, sorted_buffer[i]&'\n') -- write out the lines of text to 
     end for                       -- the standard output
 end procedure
 

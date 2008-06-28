@@ -1,5 +1,5 @@
 	-- Display ASCII / code page chart
-	-- in 50 lines-per-screen mode  
+	-- in 50 lines-per-screen mode
 
 include graphics.e
 
@@ -12,11 +12,14 @@ text_color(WHITE)
 for i = 0 to 255 do
     if remainder(i, 8) = 0 then 
 	puts(SCREEN, '\n')
-	if i = 128 and platform() = LINUX then
+	end if
+	ifdef LINUX then
+	if i = 128 then
 	    if getc(0) then
 	    end if
 	end if
-    end if
+	end if
+    end ifdef
     if remainder(i, 32) = 0 then
 	puts(SCREEN, '\n')
     end if

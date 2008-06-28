@@ -777,7 +777,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	int nseq = seq->length;
 
 	if (seq->ref == 1 && nseq > (len - seq->postfill) <<3) {
-	 /*We can deal with it by a stright mmeomry copy*/
+	 /*We can deal with it by a straight mmeomry copy*/
 	 	seq->postfill -= len;
 	 	seq->length += len;
 	 	obj_ptr = (char *)(seq->base+at);
@@ -3822,7 +3822,10 @@ void Position(object line, object col)
 	else {
 		col_val = (int)(DBL_PTR(col)->dbl);     /* need better check here too */
 	}
-	if (line_val < 1 || line_val > line_max || 
+	if (line_val < 1 || 
+#ifdef EWINDOWS
+	line_val > line_max ||
+#endif
 		 col_val < 1 ||  col_val > col_max) {
 		sprintf(TempBuff, 
 		"attempt to move cursor off the screen to line %d, column %d",
