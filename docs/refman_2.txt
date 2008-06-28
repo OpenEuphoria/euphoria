@@ -1097,7 +1097,7 @@ in the included file are forgotten at the end of the included file, and you
 will get an error message, "not declared", if you try to use them in the main
 file.
 
-Symbols marked as global can be used externally. All other symbols can only be
+Symbols marked as global or export can be used externally. All other symbols can only be
 used internally within their own file. This information is helpful when
 maintaining or enhancing the file, or when learning how to use the file. You
 can make changes to the internal routines and variables, without having to
@@ -1172,7 +1172,36 @@ accidentally modify the same variable without being aware of it.  Try to use
 the most restrictive scope that you can. Make variables
 **private** to one routine where possible, and where that isn't
 possible, make them **local** to a file, rather than
-**global** to the whole program.
+**global** to the whole program. And whenver an identifier needs to be known from
+ a few files only, make it **export** so as to hide it to whoever doesn't need to see it 
+ - and might some day define the same identifier.
+
+For example:
+<eucode>
+-- sublib.e
+export procedure bar()
+?0
+end procedure
+
+-- some_lib.e
+include sublib.e
+export procedure foo()
+?1
+end procedure
+bar() -- ok, declared in sublib.e
+
+-- my_app.exw
+include some_lib.e
+foo() -- ok, declared in some_lib.e
+bar() -- error! bar() is not declared here
+</eucode>
+
+Why not declare foo() as global, as it is meant to be used anywhere? Well, one could, but this 
+will increase the risks of name conflicts without any benefit. This is why, for instance, all 
+public identifiers from the standard library have export scope. **global** should be used 
+parsimoniously, if ever. Because earlier versions of Euphoria didn't have **export**, it has 
+to remain there for a while. One should be very sure of not polluting any foreign file's 
+symbol table before using global scope - which is what a large part of the Euphoria source files do.
 
 When Euphoria looks up the declaration of a symbol, it first checks the current
 routine, then the current file, then globals in other files. Symbols that are
@@ -1198,13 +1227,13 @@ able to deconflict those symbols with the namespace associated with the main
 file of the library.
 
 **Constant** declarations must be outside of any subroutine.
-Constants can be global or local, but not **private**.
+Constants can be global, export or local, but not **private**.
 
 Variable declarations inside a subroutine must all appear at the beginning,
 before the executable statements of the subroutine.
 
 Declarations at the top level, outside of any subroutine, must not be nested
-inside a loop or a href="refman_2.htm#if">if-statement</a>.
+inside a loop or conditional block of any kind.
 
 a name=loop_scope></a> The controlling variable used in a a
 href="refman_2.htm#for">for-loop</a> is special. It is automatically declared
@@ -1219,6 +1248,24 @@ long as the loops aren't nested. You do not declare loop variables as you would
 other variables. The range of values specified in the for statement defines the
 legal values of the loop variable - specifying a type would be redundant and is
 not allowed.
+
+==== The override qualifier
+
+There are times when it is necessary to replace a global or export identifier. Typically, one would do this to extend the capabilities of a routine. 
+
+This can be achieved by declaring the identifier as **override**:
+<eucode>
+override procedure puts(integer channel,sequence text)
+eu:puts(log_file,text)
+eu:puts(channel,text)
+end procedure
+</eucode>
+
+A warning will be issued whever you do this. It would be very confusing, and would probably break code, for the new routine to change the behaviour of the former routine. Code that was calling the former routine expects no difference in service, so there shouldn't be any.
+
+If an identifier is declared global or export, but not override, and there is a builtin of the 
+same name, Euphoria will not assume an override, and will choose the builtin. A warning will 
+be generated whenever this happens.
 
 === Specifying the Type of a Variable
 
