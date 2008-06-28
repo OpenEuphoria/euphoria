@@ -7,7 +7,6 @@
 = Euphoria Programming Language v4.0
 
 == Table of Contents
-<<NAV>>
 <<TOC level=3>>
 
 == Introduction
