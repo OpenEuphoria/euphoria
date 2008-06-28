@@ -267,7 +267,7 @@ global symtab_index file_start_sym
 global symtab_index TopLevelSub         -- s.t. index of top level procedure 
 global symtab_index CurrentSub          -- s.t. index of current routine 
 global integer num_routines = 0         -- sequence number for routine_id lookups 
-global integer Argc                     -- (our) number of args to main 
+global integer Argc                     -- (our) number of args to main
 global sequence Argv                    -- (our) arguments to main 
 global integer test_only = 0            -- testing code, not executing
 global integer batch_job = 0            -- batch processing, do not "Press Enter" on error
@@ -292,7 +292,7 @@ global constant -- maskable warning flags
 constant default_maskable_warnings = 
 	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
     translator_warning_flag + cmdline_warning_flag + not_reached_warning_flag +
-    mixed_profile_warning_flag
+    mixed_profile_warning_flag + custom_warning_flag
 
 global constant warning_flags = {
 	no_warning_flag,
