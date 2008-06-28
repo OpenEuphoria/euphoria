@@ -19,6 +19,12 @@
 eubind \- Creates standalone euphoria executables
 .SH SYNOPSIS
 .B eubind
+.RB [\| \-i
+.IR path ]
+.RB [\| \-c
+.IR conf-file ]
+.RB [\| \-d
+.IR word ]
 .RI " files" ...
 .br
 .SH DESCRIPTION
@@ -29,6 +35,19 @@ programs.  The code is parsed and converted to euphoria IL code, and combined
 with the compiled backend.  The result is a file that can be run on its own,
 without the euphoria interpreter.
 .PP
+.SH OPTIONS
+.TP
+.B \-i path
+Specifies an additional include path to the interpreter.
+.TP
+.B \-c path-to-euinc.conf
+Specifies a configuration file to be read in to specify additional
+include paths for the interpreter.
+.TP
+.B -d tag 
+Defines a tag as being set. Tags are processed by 
+.B ifdef
+blocks.
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
@@ -44,5 +63,4 @@ in /usr/share/euphoria/html
 .SH AUTHOR
 euphoria was written by Robert Craig <rds@rapideuphoria.com>.
 .PP
-This manual page was written by Matt Lewis <matthewwalkerlewis@gmail.com>,
-for the Debian project (but may be used by others).
+This manual page was written by Matt Lewis <matthewwalkerlewis@gmail.com>.

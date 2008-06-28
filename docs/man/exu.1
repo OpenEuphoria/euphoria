@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH EXU 1 "January 6, 2008"
+.TH EXU 1 "June 28, 2008"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -19,14 +19,26 @@
 exu \- Interpreter for the Euphoria programming language
 .SH SYNOPSIS
 .B exu
-.RI [-i path] [-c conf-file] [euphoria-file] ...
+.RB [\| \-i
+.IR path ]
+.RB [\| \-c
+.IR conf-file ]
+.RB [\| \-d
+.IR word ]
+.RB [\| \-w
+.IR warning_name ]
+.RB [\| \-x ]
+.RB [\| \-wf
+.IR warning-file ]
+[
+.IR euphoria-file\ args... ]
 .br
 .SH DESCRIPTION
 This manual page documents briefly the
 .B exu
 command.  The euphoria-file is optional.  If omitted, the interpreter will prompt
 for the file to be executed.  If the file is passed to the command line, any 
-additional command line info is passed to the euphoria program to 
+additional command line info is passed to the euphoria program to be run.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
@@ -40,6 +52,25 @@ Specifies an additional include path to the interpreter.
 .B \-c path-to-euinc.conf
 Specifies a configuration file to be read in to specify additional
 include paths for the interpreter.
+.TP
+.B -d tag 
+Defines a tag as being set. Tags are processed by 
+.B ifdef
+blocks.
+.TP
+.B \-w warning_name
+Resets, or adds to, the current list of wrnings that may be emitted. The list of known 
+names is to be found in the subsection describing 
+.B with\ warning
+. A name should appear without quotes. The first -w switch resets the list to the 
+warning being introduced, and each subsequent -> switch adds to the list.
+.TP
+.B \-x
+Resets, or adds to, the list of warnings that will not be issued. This is symetric of the .B \-w 
+switch.
+.TP
+.B \-wf
+Sets the file where the warnings should go instead of the standard error.
 .SH SEE ALSO
 .BR ecu (1),
 .BR eubackend (1),
@@ -49,7 +80,6 @@ include paths for the interpreter.
 The programs are documented fully
 in /usr/share/euphoria/html
 .SH AUTHOR
-euphoria was written by Robert Craig <rds@rapideuphoria.com>.
+euphoria was originally written by Robert Craig <rds@rapideuphoria.com>.
 .PP
-This manual page was written by Matt Lewis <matthewwalkerlewis@gmail.com>,
-for the Debian project (but may be used by others).
+This manual page was written by Matt Lewis <matthewwalkerlewis@gmail.com>.
