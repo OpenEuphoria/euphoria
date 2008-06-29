@@ -319,7 +319,7 @@ end procedure
 -- }
 -- </eucode>
 
-global procedure pretty_print(integer fn, object x, sequence options)
+global procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 1
 	pretty_file = fn
 	pretty( x, options )
@@ -340,7 +340,7 @@ end procedure
 -- See Also:
 --   pretty_print
 
-export function pretty_sprint(object x, sequence options)
+export function pretty_sprint(object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 0
 	pretty( x, options )
 	return pretty_line
