@@ -776,7 +776,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	s1_ptr seq = SEQ_PTR(a);
 	int nseq = seq->length;
 
-	if (seq->ref == 1 && (nseq + len) < (seq->postfill >> 1)) {
+	if (seq->ref == 1 && len < (seq->postfill >> 1)) {
 	 /*We can deal with it by a straight mmeomry copy*/
 	 	seq->postfill -= len;
 	 	seq->length += len;
