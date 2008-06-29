@@ -4,9 +4,10 @@
 -- == Euphoria Database (EDS)
 -- <<LEVELTOC>>
 
+include error.e
+if not length(date()) then crash("") end if
 include io.e
 include filesys.e
-include error.e
 include get.e
 include pretty.e
 

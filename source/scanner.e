@@ -578,7 +578,7 @@ procedure IncludePush()
 -- start reading from new source file with given name  
 	integer new_file, old_file_no
 	sequence new_name
-
+				
 	start_include = FALSE
 
 	new_file = path_open() -- sets new_include_name to full path 

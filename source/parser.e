@@ -1998,11 +1998,12 @@ integer top_level_parser
 
 procedure Ifdef_statement()
 	sequence option
-	integer matched, nested_count
+	integer matched, nested_count, has_matched
 	token tok
 
 	matched = 0
 	nested_count = 0
+	has_matched = 0
 
 	while 1 label "top" do
 		if matched = 0 then
@@ -2014,7 +2015,7 @@ procedure Ifdef_statement()
 				matched = find(option, OpDefines)
 			end if
 			if matched then
-        			No_new_entry = not matched
+        		No_new_entry = 0
 				call_proc(top_level_parser, {})
 			end if
 		end if
@@ -2022,6 +2023,7 @@ procedure Ifdef_statement()
 		-- Read to END IFDEF or to the next ELSIFDEF which sets the loop
 		-- up for another comparison.
         No_new_entry = not matched
+        has_matched = has_matched or matched
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
@@ -2037,8 +2039,13 @@ procedure Ifdef_statement()
 					CompileErr("unknown command")
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
-				exit
-			elsif tok[T_ID] = ELSE and matched = 0 and nested_count = 0 then
+				if has_matched then
+					No_new_entry = 1
+					read_line()
+				else
+					exit
+				end if
+			elsif tok[T_ID] = ELSE and has_matched = 0 and nested_count = 0 then
 			    No_new_entry = 0
 				call_proc(top_level_parser, {})
 				tok_match(END)

@@ -767,6 +767,7 @@ global function keyfind(sequence word, integer file_no)
 	if No_new_entry then
 		return {IGNORED,0}
 	end if
+	
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
