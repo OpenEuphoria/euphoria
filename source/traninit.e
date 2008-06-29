@@ -338,8 +338,8 @@ mode:set_init_backend( routine_id("InitBackEnd") )
 procedure CheckPlatform()
 -- make sure the defines reflect the target platform
 	
-	if TLINUX or TBSD then
-		OpDefines = OpDefines[1..$-1]
+	if TLINUX or TBSD or TOSX then
+		OpDefines = OpDefines[1..$-2]
 	else
 		OpDefines = OpDefines[1..$-1]
 	end if

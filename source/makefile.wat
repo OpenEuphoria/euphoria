@@ -232,8 +232,8 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\main.obj &
         .\$(OBJDIR)\init-.obj &
-        .\$(OBJDIR)\os.obj &
-        .\$(OBJDIR)\math.obj
+        .\$(OBJDIR)\filesys.obj &
+        .\$(OBJDIR)\types.obj
 
 EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -283,7 +283,14 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
-        .\$(OBJDIR)\search.obj
+        .\$(OBJDIR)\search.obj &
+        .\$(OBJDIR)\dll.obj &
+        .\$(OBJDIR)\io.obj &
+        .\$(OBJDIR)\math.obj &
+        .\$(OBJDIR)\os.obj &
+        .\$(OBJDIR)\0rror.obj &
+        .\$(OBJDIR)\filesys.obj &
+        .\$(OBJDIR)\types.obj
 
 PCRE_OBJECTS = &
 	.\pcre\pcre_chartables.obj &
@@ -307,8 +314,6 @@ PCRE_OBJECTS = &
 	.\pcre\pcre_version.obj &
 	.\pcre\pcre_xclass.obj
 
-
-MANAGED_MEM=0
 
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC

@@ -31,6 +31,7 @@ global procedure set_host_platform( integer plat )
 	TDOS     = plat = DOS32
 	TBSD     = plat = FREEBSD
 	TOSX     = plat = OSX
+	TLINUX   = plat = LINUX
 	if TUNIX then
 		HOSTNL = "\n"
 	else

@@ -35,8 +35,11 @@ elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
 	
 else
-	include machine.e
-	crash("filesys.e requires Windows, Linux, FreeBSD or OS X")
+	constant xCopyFile        = -1
+	constant xMoveFile        = -1
+	constant xDeleteFile      = -1
+	constant xCreateDirectory = -1
+	constant xRemoveDirectory = -1
 
 end ifdef
 
