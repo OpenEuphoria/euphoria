@@ -73,6 +73,7 @@ EU_TRANSLATOR_FILES = &
 	
 EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\ec.obj &
+        .\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\c_decl.obj &
 	.\$(OBJDIR)\c_dec0.obj &
 	.\$(OBJDIR)\c_dec1.obj &
@@ -91,6 +92,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
 	.\$(OBJDIR)\compress.obj &
+        .\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &
@@ -102,7 +104,10 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\search.obj &
 	.\$(OBJDIR)\math.obj &
 	.\$(OBJDIR)\os.obj &
-	.\$(OBJDIR)\types.obj
+        .\$(OBJDIR)\types.obj &
+        .\$(OBJDIR)\dll.obj &
+        .\$(OBJDIR)\filesys.obj &
+        .\$(OBJDIR)\io.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
@@ -113,10 +118,12 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\wildcard.obj &
+        .\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\tranplat.obj
+        .\$(OBJDIR)\tranplat.obj &
+        .\$(OBJDIR)\types.obj &
+        .\$(OBJDIR)\dll.obj &
+        .\$(OBJDIR)\filesys.obj
 
 	
 EU_CORE_OBJECTS = &
@@ -124,8 +131,7 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\main-0.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\file.obj &
-	.\$(OBJDIR)\error.obj &
+        .\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
@@ -180,7 +186,6 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\file.obj &
 	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\0ackend.obj &
@@ -189,7 +194,10 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\compress.obj
+        .\$(OBJDIR)\compress.obj &
+        .\$(OBJDIR)\dll.obj &
+        .\$(OBJDIR)\io.obj &
+        .\$(OBJDIR)\filesys.obj
 
 EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -204,7 +212,6 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scientif.obj &
-	.\$(OBJDIR)\file.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
@@ -224,14 +231,15 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\main.obj &
-	.\$(OBJDIR)\init-.obj 
+        .\$(OBJDIR)\init-.obj &
+        .\$(OBJDIR)\os.obj &
+        .\$(OBJDIR)\math.obj
 
 EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\main-0.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\file.obj &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
@@ -275,7 +283,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\search.obj
+        .\$(OBJDIR)\search.obj
 
 PCRE_OBJECTS = &
 	.\pcre\pcre_chartables.obj &
@@ -299,7 +307,9 @@ PCRE_OBJECTS = &
 	.\pcre\pcre_version.obj &
 	.\pcre\pcre_xclass.obj
 
-	
+
+MANAGED_MEM=0
+
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
 !endif
@@ -645,8 +655,12 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\init-.obj :  .MULTIPLE ./$(OBJDIR)\init-.c 
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\file.obj :  .MULTIPLE ./$(OBJDIR)\file.c
+.\$(OBJDIR)\io.obj :  .MULTIPLE ./$(OBJDIR)\io.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\filesys.obj : .\$(OBJDIR)\filesys.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
 
 .\$(OBJDIR)\error.obj :  .MULTIPLE $(OBJDIR)\error.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
@@ -658,6 +672,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\symtab_0.obj :  .MULTIPLE ./$(OBJDIR)\symtab.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\0rror.obj :  .MULTIPLE ./$(OBJDIR)\0rror.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\scanner.obj :  .MULTIPLE ./$(OBJDIR)\scanner.c
@@ -787,6 +804,12 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\os.obj : .\$(OBJDIR)\os.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\types.obj : .\$(OBJDIR)\types.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\dll.obj : .\$(OBJDIR)\dll.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c
