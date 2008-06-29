@@ -25,14 +25,17 @@
 
 # API docs
 ../../docs/api.txt
+../../include/console.e
 ../../include/database.e
 ../../include/datetime.e
 ../../include/dll.e
-../../include/file.e
+../../include/error.e
+#../../include/file.e
 ../../include/filesys.e
 ../../include/get.e
 ../../include/graphics.e
 ../../include/image.e
+../../include/io.e
 ../../include/locale.e
 ../../include/localeconv.e
 ../../include/machine.e
@@ -43,7 +46,7 @@
 ../../include/os.e
 ../../include/pretty.e
 ../../include/primes.e
-#../../include/regex.e
+../../include/regex.e
 ../../include/search.e
 ../../include/sequence.e
 ../../include/sets.e

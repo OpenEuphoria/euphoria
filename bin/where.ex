@@ -2,7 +2,8 @@
 -- usage:  where filename
 -- (give complete file name including .exe .bat etc.)
 
-include file.e
+include filesys.e
+include os.e
 include os.e
 
 constant TRUE = 1

@@ -35,11 +35,12 @@ without type_check -- makes it a bit faster
 
 include graphics.e
 include get.e
-include file.e
 include wildcard.e
 include dll.e
 include sequence.e
 include os.e
+include console.e
+include filesys.e
 
 constant TRUE = 1,
 	 FALSE = 0

@@ -277,7 +277,7 @@ global object TempWarningName
 global constant -- maskable warning flags
 	no_warning_flag				= 0,
 	resolution_warning_flag		= 1,
-	short_circuit_warning_flag				= 2,
+	short_circuit_warning_flag  = 2,
 	override_warning_flag		= 4,
 	builtin_chosen_warning_flag	= 8,
 	not_used_warning_flag		= 16,

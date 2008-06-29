@@ -15,8 +15,7 @@
 -- carefully hand-coded back-end written in C.
 
 include os.e
-include dll.e
-include file.e
+--include dll.e
 include global.e
 include opnames.e
 

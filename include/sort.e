@@ -35,7 +35,7 @@ include sequence.e -- upper/lower
 --   </eucode>
 --
 -- See Also:
---     search:compare, sort_reverse, sort_user, custom_sort
+--     [[:compare]], [[:sort_reverse]], [[:sort_user]], [[:custom_sort]]
 
 global function sort(sequence x)
 	integer gap, j, first, last
@@ -122,7 +122,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   search:compare, sort, sort_reverse, sort_user
+--   [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
 
 global function custom_sort(integer custom_compare, sequence x)
 	integer gap, j, first, last
@@ -189,7 +189,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---	 search:compare, sort, sort_user, custom_sort
+--	 [[:compare]], [[:sort]], [[:sort_user]], [[:custom_sort]]
 
 global function sort_reverse(sequence x)
 	return custom_sort(routine_id("reverse_comp"), x)
@@ -265,7 +265,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---	 search:compare, sort, sort_reverse, sort_user
+--	 [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
 
 export function sort_user(integer custom_compare, sequence x, object user_data=0)
 	integer gap, j, first, last
@@ -368,7 +368,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---	 search:compare, sort, sort_reverse, sort_user
+--	 [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
 
 export function sort_columns(sequence x, sequence column_list)
 	return sort_user(routine_id("column_compare"), x, column_list)

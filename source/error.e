@@ -2,11 +2,10 @@
 --
 -- Compile-time Error Handling
 
+include io.e
 include machine.e
 include global.e
 include reswords.e
-
-global constant STDIN = 0, STDERR = 2
 
 integer Errors
 Errors = 0   -- number of errors detected during compile 

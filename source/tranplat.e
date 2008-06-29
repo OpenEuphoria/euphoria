@@ -1,5 +1,5 @@
-include common.e
 include os.e
+include common.e
 
 -- For cross-translation:
 global integer TWINDOWS
@@ -26,7 +26,7 @@ end if
 
 global procedure set_host_platform( integer plat )
 	ihost_platform = plat
-	TUNIX    = (plat = LINUX or plat = FREEBSD)
+	TUNIX    = (plat = LINUX or plat = FREEBSD or plat = OSX)
 	TWINDOWS = plat = WIN32
 	TDOS     = plat = DOS32
 	TBSD     = plat = FREEBSD

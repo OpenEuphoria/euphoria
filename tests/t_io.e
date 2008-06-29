@@ -1,4 +1,4 @@
-include file.e
+include io.e
 include unittest.e
 
 -- TODO: add more tests
@@ -55,47 +55,18 @@ test_equal("write_lines() filename #2", 1, write_lines("fileb.txt", {"Hello Worl
 test_equal("append_lines() ", 1, append_lines("fileb.txt", {"I'm back"}))
 test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("fileb.txt"))
 
-
-sequence fullname, pname, fname, fext, crlf, driveid
-integer sep
-
-ifdef UNIX then
-    fullname = "/opt/euphoria/docs/readme.txt"
-    pname = "/opt/euphoria/docs"
-    sep = '/'
-    crlf = "\n"
-    driveid = ""
-else
-    fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
-    pname = "\\EUPHORIA\\DOCS"
-    sep = '\\'
-    crlf = "\r\n"
-    driveid = "C"
-end ifdef
-
-fname = "readme"
-fext = "txt"
-
-test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext, driveid},
-    pathinfo(fullname))
-test_equal("pathinfo() no extension", {pname, fname, fname, "", ""},
-    pathinfo(pname & SLASH & fname))
-test_equal("pathinfo() no dir", {"", fname & '.' & fext, fname, fext, ""}, pathinfo(fname & "." & fext))
-test_equal("pathinfo() no dir, no extension", {"", fname, fname, "", ""}, pathinfo("readme"))
-
-test_equal("dirname() full path", pname, dirname(fullname))
-test_equal("dirname() filename only", "", dirname(fname & "." & fext))
-
-test_equal("filename() full path", fname & "." & fext, filename(fullname))
-test_equal("filename() filename only", fname & "." & fext, filename(fname & "." & fext))
-test_equal("filename() filename no extension", fname, filename(fname))
-
-test_equal("fileext() full path", fext, fileext(fullname))
-test_equal("fileext() filename only", fext, fileext(fullname))
-test_equal("fileext() filename no extension", "", fileext(fname))
-
-test_equal("SLASH", sep, SLASH)
-test_equal("CRLF", crlf, CRLF)
+-- Types
+test_true("file_number #1", file_number(10))
+test_false("file_number #2", file_number(-32))
+test_false("file_number #3", file_number(-1))
+test_true("file_position #1", file_position(0))
+test_true("file_position #2", file_position(20930))
+test_true("file_position #3", file_position(-1))
+test_false("file_position #4", file_position(-203))
+test_false("file_position #5", file_position(-2))
+test_true("lock_type #1", lock_type(LOCK_SHARED))
+test_true("lock_type #2", lock_type(LOCK_EXCLUSIVE))
+test_false("lock_type #3", lock_type(20))
 
 test_report()
 

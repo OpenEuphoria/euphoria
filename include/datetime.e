@@ -268,7 +268,7 @@ end type
 -- </eucode>
 --
 -- See Also:
---     from_date, from_unix, now, new_time
+--     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
 
 export function new(integer year, integer month, integer day, 
 	                integer hour=0, integer minute=0, atom second=0)
@@ -294,7 +294,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     from_date, from_unix, now, new
+--     [[:from_date]], [[:from_unix]], [[:now]], [[:new]]
 
 export function new_time(integer hour, integer minute, integer second)
 	return new(0, 0, 0, hour, minute, second)
@@ -311,7 +311,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     date, from_unix, now, new
+--     [[:date]], [[:from_unix]], [[:now]], [[:new]]
 
 export function from_date(sequence src)
 		return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
@@ -327,7 +327,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     from_date, from_unix, new, new_time
+--     [[:from_date]], [[:from_unix]], [[:new]], [[:new_time]]
 
 export function now()
 		return from_date(date())
@@ -372,7 +372,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     from_unix, format
+--     [[:from_unix]], [[:format]]
 
 export function to_unix(datetime dt)
 		return datetimeToSeconds(dt) - EPOCH_1970
@@ -388,7 +388,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     to_unix, from_date, now, new
+--     [[:to_unix]], [[:from_date]], [[:now]], [[:new]]
 
 export function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
@@ -445,7 +445,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     to_unix
+--     [[:to_unix]]
 
 export function format(datetime d, wstring format)
 	integer in_fmt, ch, tmp
@@ -566,7 +566,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     subtract, diff
+--     [[:subtract]], [[:diff]]
 
 export function add(datetime dt, object qty, integer interval)
 	integer inc
@@ -632,7 +632,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     add, diff
+--     [[:add]], [[:diff]]
 
 export function subtract(datetime dt, atom qty, integer interval)
 	return add(dt, -(qty), interval)
@@ -654,7 +654,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---    add, subtract
+--    [[:add]], [[:subtract]]
 
 export function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)

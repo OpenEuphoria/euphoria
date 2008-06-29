@@ -9,13 +9,15 @@
 -- is more precise and efficient. It doesn't actually emit the C code
 -- until the final pass.
 
+include filesys.e
+include io.e
+
 include global.e
 include mode.e as mode
 include c_decl.e
 include cominit.e
 include compress.e
 include tranplat.e
-include file.e
 
 integer np, pc
 

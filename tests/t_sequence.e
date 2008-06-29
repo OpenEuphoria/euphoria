@@ -69,6 +69,8 @@ test_equal("splice() string", "John", splice("Jon", "h", 3))
 test_equal("replace() integer sequence", {1,2,3}, replace({1,8,9,3}, 2, 2, 3))
 test_equal("replace() integer sequence w/sequence", {1,2,3,4},
     replace({1,8,9,4}, {2,3}, 2, 3))
+test_equal("replace() string sequence", "John", replace("Jahn", 'o', 2))
+test_equal("replace() string sequence 2", "Jane", replace("John", "ane", 2, 4))
 
 test_equal("trim_head() default", "John", trim_head(" \r\n\t John"))
 test_equal("trim_head() specified", "Doe", trim_head("John Doe", " hoJn"))

@@ -44,7 +44,7 @@ end ifdef
 
 without type_check
 
-include file.e
+include filesys.e
 include wildcard.e
 include sort.e
 include graphics.e
@@ -430,6 +430,8 @@ ifdef UNIX then
 else
     log_name = upper(log_name)
 end ifdef
+
+clear_screen()
 
 cmd = command_line()   -- ex search.ex [string]
 

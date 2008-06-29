@@ -2,8 +2,10 @@
 --
 -- Front End - main routine
 
+include filesys.e
+include io.e
+
 include rev.e
-include file.e
 include get.e
 include pathopen.e
 include error.e

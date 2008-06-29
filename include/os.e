@@ -30,7 +30,7 @@ constant M_SLEEP = 64
 -- the [[:ifdef statement]]. It is both more accurate and faster.
 --
 
-export constant 
+global constant 
 	DOS32   = 1, -- ex.exe
 	WIN32   = 2, -- exw.exe
 	LINUX   = 3, -- exu

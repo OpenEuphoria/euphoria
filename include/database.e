@@ -4,8 +4,9 @@
 -- == Euphoria Database (EDS)
 -- <<LEVELTOC>>
 
-include machine.e
-include file.e
+include io.e
+include filesys.e
+include error.e
 include get.e
 include pretty.e
 

@@ -3,7 +3,7 @@
 --****
 -- == Searching
 
-include machine.e
+include error.e
 
 --****
 -- === Routines
@@ -51,9 +51,9 @@ include machine.e
 -- </eucode>
 --
 -- See Also:
---     search:equal, 
---     <a href="refman_2.htm#23">relational operators</a>,
---     <a href="refman_2.htm#26">operations on sequences</a>
+--     [[:equal]], 
+--     [[:relational operators]],
+--     [[:operations on sequences]]
 
 --**
 -- Signature:
@@ -87,7 +87,7 @@ include machine.e
 -- </eucode>
 -- 
 -- See Also:
---     compare, equals operator (=)
+--     [[:compare]], [[:equals operator]]
 
 --**
 -- Signature:
@@ -114,7 +114,7 @@ include machine.e
 -- </eucode>
 --
 -- See Also:
---     find_from, match, match_from, compare
+--     [[:find_from]], [[:match]], [[:match_from]], [[:compare]]
 
 --**
 -- Signature:
@@ -145,7 +145,7 @@ include machine.e
 -- </eucode>
 --
 -- See Also:
---     find, match, match_from, compare
+--     [[:find]], [[:match]], [[:match_from]], [[:compare]]
 
 --**
 -- Signature:
@@ -165,7 +165,7 @@ include machine.e
 -- </eucode>
 --
 -- See Also:
---     find, find_from, compare, match_from, wildcard:wildcard_match
+--     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard_match]]
 
 --**
 -- Signature:
@@ -189,7 +189,7 @@ include machine.e
 -- </eucode>
 --
 -- See Also:
---     find, find_from, match, compare, wildcard:wildcard_match
+--     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]]
 
 --**
 -- Find any element from s1 in s2 starting at position i2 and return
@@ -236,7 +236,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     find, match, match_all
+--     [[:find]], [[:match]], [[:match_all]]
 
 global function find_all(object needle, sequence haystack, integer start=1)
 	sequence ret = {}
@@ -264,7 +264,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     match, find, find_all
+--     [[:match]], [[:find]], [[:find_all]]
 
 global function match_all(object needle, sequence haystack, integer start=1)
 	sequence ret = {}
@@ -308,7 +308,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   find
+--   [[:find]]
 
 global function rfind(object needle, sequence haystack, integer start=length(haystack))
 	integer len = length(haystack)
@@ -352,7 +352,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     rfind, match
+--     [[:rfind]], [[:match]]
 
 global function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
 	integer len, lenx

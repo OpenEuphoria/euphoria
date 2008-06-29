@@ -1,11 +1,13 @@
 #!/usr/bin/exu
 
-include file.e
 include sequence.e
 include sort.e
+include filesys.e
+
 atom score
 integer failed, total, status
 sequence files, filename, executable, cmd, cmds, cmd_opts, options, switches
+
 files = {}
 failed = 0
 cmd_opts = ""

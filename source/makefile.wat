@@ -101,7 +101,8 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\search.obj &
 	.\$(OBJDIR)\math.obj &
-	.\$(OBJDIR)\os.obj
+	.\$(OBJDIR)\os.obj &
+	.\$(OBJDIR)\types.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
@@ -112,6 +113,7 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\tranplat.obj
@@ -186,6 +188,7 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\compress.obj
 
 EU_DOS_OBJECTS = &

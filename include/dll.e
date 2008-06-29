@@ -70,7 +70,7 @@ constant M_OPEN_DLL  = 50,
 -- </eucode>
 -- 
 -- See Also:
---     define_c_func, define_c_proc, define_c_var, c_func, c_proc, platform.doc 
+--     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
 global function open_dll(sequence file_name)
 	return machine_func(M_OPEN_DLL, file_name)
@@ -88,7 +88,7 @@ end function
 --     For an example, see euphoria/demo/linux/mylib.exu
 --
 -- See Also:
---     c_proc, define_c_func, c_func, open_dll, platform.doc
+--     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
 
 global function define_c_var(atom lib, sequence variable_name)
 	return machine_func(M_DEFINE_VAR, {lib, variable_name})
@@ -153,7 +153,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     c_proc, define_c_func, c_func, open_dll, platform.doc
+--     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
 
 global function define_c_proc(object lib, object routine_name, 
 							  sequence arg_types)
@@ -253,7 +253,7 @@ end function
 -- </eucode>
 --
 -- See Also
---     euphoria\demo\callmach.ex, c_func, define_c_proc, c_proc, open_dll, platform.doc
+--     ##demo\callmach.ex##, [[:c_func]], [[:define_c_proc]], [[:c_proc]], [[:open_dll]]
 
 global function define_c_func(object lib, object routine_name, 
 							  sequence arg_types, atom return_type)
@@ -291,7 +291,7 @@ end function
 --     For an example, see: demo\win32\window.exw, demo\linux\qsort.exu
 --
 -- See Also:
---     routine_id, platform.doc
+--     [[:routine_id]]
 
 global function call_back(object id)
 	return machine_func(M_CALL_BACK, id)
@@ -328,7 +328,7 @@ end function
 --     that there is no longer a console.
 --
 -- See Also:
---     clear_screen, platform.doc
+--     [[:clear_screen]]
 
 global procedure free_console()
 	machine_proc(M_FREE_CONSOLE, 0)

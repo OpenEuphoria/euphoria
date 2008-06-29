@@ -7,9 +7,13 @@
 --
 
 --** 
+-- Boolean FALSE value
+
 export constant FALSE = 0
 
 --**
+-- Boolean TRUE value
+
 export constant TRUE = 1
 
 --****
@@ -184,21 +188,21 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- t_bool(-1)            -- TRUE
--- t_bool(0)             -- TRUE 
--- t_bool(1)             -- TRUE
--- t_bool(1.234)         -- TRUE
--- t_bool('A')           -- TRUE
--- t_bool('9')           -- TRUE
--- t_bool('?')           -- TRUE
--- t_bool("abc")         -- TRUE (every element is an atom)
--- t_bool("ab3")         -- TRUE
--- t_bool({1,2,"abc"})   -- FALSE (contains a sequence)
--- t_bool({1, 2, 9.7)    -- TRUE
--- t_bool({})            -- FALSE (empty sequence)
+-- boolean(-1)            -- TRUE
+-- boolean(0)             -- TRUE 
+-- boolean(1)             -- TRUE
+-- boolean(1.234)         -- TRUE
+-- boolean('A')           -- TRUE
+-- boolean('9')           -- TRUE
+-- boolean('?')           -- TRUE
+-- boolean("abc")         -- TRUE (every element is an atom)
+-- boolean("ab3")         -- TRUE
+-- boolean({1,2,"abc"})   -- FALSE (contains a sequence)
+-- boolean({1, 2, 9.7)    -- TRUE
+-- boolean({})            -- FALSE (empty sequence)
 -- </eucode>
 	
-export type t_bool(object pVal)
+export type boolean(object pVal)
 	-- A boolean is a value that is either zero or not zero.
 	if atom(pVal) then
 		return TRUE

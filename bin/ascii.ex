@@ -11,31 +11,40 @@ end if
 text_color(WHITE)
 for i = 0 to 255 do
     if remainder(i, 8) = 0 then 
-	puts(SCREEN, '\n')
+		puts(SCREEN, '\n')
 	end if
 	ifdef LINUX then
-	if i = 128 then
-	    if getc(0) then
-	    end if
-	end if
-	end if
-    end ifdef
+		if i = 128 then
+		    if getc(0) then
+	    	end if
+		end if
+	end ifdef
+
     if remainder(i, 32) = 0 then
-	puts(SCREEN, '\n')
+		puts(SCREEN, '\n')
     end if
     printf(SCREEN, "%3d: ", i)
-    if i = 0 then
-	puts(SCREEN, "NUL ")
-    elsif i = 9 then
-	puts(SCREEN, "TAB ")
-    elsif i = 10 then
-	puts(SCREEN, "LF  ")
-    elsif i = 13 then
-	puts(SCREEN, "CR  ")
-    else
-	puts(SCREEN, i)
-	puts(SCREEN, "   ")
-    end if
+    switch i do
+    	case 0:
+			puts(SCREEN, "NUL ")
+			break
+			
+		case 9:
+			puts(SCREEN, "TAB ")
+			break
+			
+		case 10:
+			puts(SCREEN, "LF  ")
+			break
+			
+		case 13:
+			puts(SCREEN, "CR  ")
+			break
+			
+		case else
+			puts(SCREEN, i)
+			puts(SCREEN, "   ")
+    end switch
 end for
 
 text_color(WHITE)

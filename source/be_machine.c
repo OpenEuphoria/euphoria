@@ -3723,7 +3723,7 @@ static object warning_file(object x)
 	return ATOM_1;
 }
 
-static object crash(object x)
+static object do_crash(object x)
 {
 	char *message;
 	int r;
@@ -4967,7 +4967,7 @@ object machine(object opcode, object x)
 				break;
 
 			case M_CRASH:
-				return crash(x);
+				return do_crash(x);
 				break;
 
 			case M_CHDIR:

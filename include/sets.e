@@ -17,7 +17,7 @@
 --   * An operation of ExF to G is a two dimensional sequence of elements of G, indexed ny
 --     ExF, and the triple {card(E),card(F),card(G)}.
 
-include machine.e
+include error.e
 
 procedure report_error(sequence s)
 -- Description: Prints an error message on stderr and abort(1)s.

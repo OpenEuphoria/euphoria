@@ -130,6 +130,7 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/compil_9.o \
 	./$(OBJDIR)/compil_A.o \
 	./$(OBJDIR)/compress.o \
+	./$(OBJDIR)/0rror.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/global.o \
 	./$(OBJDIR)/sort.o \
@@ -139,17 +140,24 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/traninit.o \
 	./$(OBJDIR)/tranplat.o \
 	./$(OBJDIR)/math.o \
-	./$(OBJDIR)/os.o
+	./$(OBJDIR)/os.o \
+	./$(OBJDIR)/types.o \
+	./$(OBJDIR)/dll.o \
+	./$(OBJDIR)/filesys.o \
+	./$(OBJDIR)/io.o
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
+	./$(OBJDIR)/tranplat.o \
+	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/sort.o \
+	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/tranplat.o
+	./$(OBJDIR)/filesys.o
 
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \
@@ -157,7 +165,6 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/cominit.o \
 	./$(OBJDIR)/pathopen.o \
 	./$(OBJDIR)/init-.o \
-	./$(OBJDIR)/file.o \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/machine.o \
 	./$(OBJDIR)/mode.o \
@@ -182,7 +189,7 @@ EU_CORE_C_FILES = \
 	./$(OBJDIR)/main-0.c \
 	./$(OBJDIR)/pathopen.c \
 	./$(OBJDIR)/init-.c \
-	./$(OBJDIR)/file.c \
+	./$(OBJDIR)/io.c \
 	./$(OBJDIR)/error.c \
 	./$(OBJDIR)/machine.c \
 	./$(OBJDIR)/symtab.c \
@@ -233,7 +240,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/init-.o \
 	./$(OBJDIR)/intinit.o \
 	./$(OBJDIR)/cominit.o \
-	./$(OBJDIR)/file.o \
+	./$(OBJDIR)/io.o \
 	./$(OBJDIR)/machine.o \
 	./$(OBJDIR)/0ackend.o \
 	./$(OBJDIR)/pathopen.o \
@@ -242,7 +249,10 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/mode.o 
+	./$(OBJDIR)/mode.o \
+	./$(OBJDIR)/types.o \
+	./$(OBJDIR)/dll.o \
+	./$(OBJDIR)/filesys.o
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \

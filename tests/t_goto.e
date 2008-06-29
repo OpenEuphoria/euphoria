@@ -1,5 +1,6 @@
 include unittest.e
-include machine.e
+include error.e
+
 warning_file(-1)
 
 integer n,m,c

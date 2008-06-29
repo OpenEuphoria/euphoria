@@ -27,7 +27,7 @@
 
 without type_check
 
-include file.e
+include filesys.e
 include wildcard.e
 include graphics.e
 include sort.e
@@ -534,8 +534,8 @@ function look_at(sequence path_name, sequence direntry)
 	    return 0
 	end if
     end for
-    path_name &= PATHSEP
-    if equal(path_name[1..2], '.' & PATHSEP) then
+    path_name &= SLASH
+    if equal(path_name[1..2], '.' & SLASH) then
 	path_name = path_name[3..length(path_name)]
     end if
     path_name &= file_name
@@ -584,6 +584,8 @@ end function
 ifdef !UNIX then
     log_name = upper(log_name)
 end ifdef
+
+clear_screen()
 
 sequence cmd
 cmd = command_line()  -- ex guru.ex words...

@@ -3,8 +3,8 @@
 -- Scanner (low-level parser)
 
 include machine.e
-include file.e
 include get.e
+include filesys.e
 
 include global.e
 include reswords.e
@@ -588,7 +588,8 @@ procedure IncludePush()
 	for i = length(file_name) to 1 by -1 do
 		-- compare file names first to reduce calls to dir() 
 		if same_name(new_name, name_ext(file_name[i])) and
-		   equal(dir(new_include_name), dir(file_name[i])) then
+			equal(dir(new_include_name), dir(file_name[i])) 
+		then
 			-- can assume we've included this file already
 			-- (Thanks to Vincent Howell.)
 			-- (currently, in a very rare case, it could be a 

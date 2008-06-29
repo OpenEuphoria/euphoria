@@ -37,7 +37,6 @@ constant M_ALLOC = 16,
 		 M_INTERRUPT = 34,
 		 M_SET_RAND = 35,
 		 M_USE_VESA = 36,
-		 M_CRASH_MESSAGE = 37,
 		 M_TICK_RATE = 38,
 		 M_GET_VECTOR = 39,
 		 M_SET_VECTOR = 40,
@@ -45,11 +44,7 @@ constant M_ALLOC = 16,
 		 M_A_TO_F64 = 46,
 		 M_F64_TO_A = 47,
 		 M_A_TO_F32 = 48,
-		 M_F32_TO_A = 49,
-		 M_CRASH_FILE = 57,
-		 M_CRASH_ROUTINE = 66,
-		 M_CRASH = 67,
-		 M_WARNING_FILE = 72
+		 M_F32_TO_A = 49
 		 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -317,42 +312,6 @@ global procedure use_vesa(integer code)
 	machine_proc(M_USE_VESA, code)
 end procedure
 
--- Crash handling routines:
-
---**
-global procedure crash(sequence fmt, object data={})
-	object msg
-	msg = sprintf(fmt, data)
-	machine_proc(M_CRASH, msg)
-end procedure
-
---**
-global procedure crash_message(sequence msg)
--- Specify a final message to display for your user, in the event 
--- that Euphoria has to shut down your program due to an error.
-	machine_proc(M_CRASH_MESSAGE, msg)
-end procedure
-
---**
-global procedure crash_file(sequence file_path)
--- Specify a file path name in place of "ex.err" where you want
--- any diagnostic information to be written.
-	machine_proc(M_CRASH_FILE, file_path)
-end procedure
-
---**
-global procedure warning_file(object file_path)
--- Specify a file path where to output warnings. Any atom >=0 causes STDERR to be used, and a 
--- value <0 suppresses output. Use the latter in extreme cases only.
-	machine_proc(M_WARNING_FILE, file_path)
-end procedure
-
---**
-global procedure crash_routine(integer proc)
--- specify the routine id of a 1-parameter Euphoria function to call in the
--- event that Euphoria must shut down your program due to an error.
-	machine_proc(M_CRASH_ROUTINE, proc)
-end procedure
 
 --**
 global procedure tick_rate(atom rate)

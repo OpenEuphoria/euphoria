@@ -6,7 +6,7 @@
 -- TODO: 
 -- documentation
 
-include machine.e
+include error.e
 
 --****
 -- === Constants

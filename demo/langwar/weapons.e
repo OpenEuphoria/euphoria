@@ -1,6 +1,8 @@
 -- weapons.e
 -- phasors, torpedos, antimatter pods
 
+include math.e
+
 extended_h_coord x0
 extended_v_coord y0
 atom xinc

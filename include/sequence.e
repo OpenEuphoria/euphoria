@@ -6,7 +6,7 @@
 --
 -- <<LEVELTOC level=4>>
 
-include machine.e
+include error.e
 include search.e
 
 --****
@@ -53,7 +53,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     prepend, &
+--     [[:prepend]], [[:&]]
 
 --**
 -- Signature:
@@ -85,7 +85,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     append, &
+--     [[:append]], [[:&]]
 
 --**
 -- Signature:
@@ -109,7 +109,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     repeat_pattern, linear
+--     [[:repeat_pattern]], [[:linear]]
 
 --**
 -- Signature:
@@ -131,7 +131,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     append, prepend, &
+--     [[:append]], [[:prepend]], [[:&]]
 
 --**
 -- Signature:
@@ -157,7 +157,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     misc:printf, sprint
+--   [[:printf]], [[:sprint]]
 
 --**
 -- Signature:
@@ -187,7 +187,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     remove, splice, remove_all
+--     [[:remove]], [[:splice]], [[:remove_all]]
 
 --**
 -- Signature:
@@ -220,7 +220,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---     insert, remove, replace, remove_all
+--     [[:insert]], [[:remove]], [[:replace]], [[:remove_all]]
 
 --**
 -- The representation of x as a string of characters is returned. This is exactly the same 
@@ -244,7 +244,7 @@ include search.e
 -- </eucode>
 --
 -- See Also:
---    sprintf, misc:printf
+--    [[:sprintf]], [[:printf]]
 
 export function sprint(object x)
 -- Return the string representation of any Euphoria data object. 
@@ -321,7 +321,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     tail, mid, slice
+--     [[:tail]], [[:mid]], [[:slice]]
 
 export function head(sequence st, integer size=1)
 	if size < length(st) then
@@ -354,7 +354,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     head, tail, slice
+--     [[:head]], [[:tail]], [[:slice]]
 
 export function mid(sequence st, atom start, atom len)
 	if len<0 then
@@ -414,7 +414,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   head, mid, tail
+--   [[:head]], [[:mid]], [[:tail]]
 
 export function slice(sequence st, atom start, atom stop)
 	if stop < 0 then stop = length(st) + stop end if
@@ -431,20 +431,20 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = vsplice({5,1}, {5,2}, {5,3}}, 2)
+-- s = vslice({5,1}, {5,2}, {5,3}}, 2)
 -- -- s is {1,2,3}
-
--- s = vsplice({5,1}, {5,2}, {5,3}}, 1)
+--
+-- s = vslice({5,1}, {5,2}, {5,3}}, 1)
 -- -- s is {5,5,5}
 -- </eucode>
 --
 -- See Also:
---     slice, project
+--   [[:slice]], [[:project]]
 
 export function vslice(sequence s, atom colno)
 	sequence ret
 
-	if colno<1 then
+	if colno < 1 then
 		crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
 	end if
 
@@ -493,7 +493,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   head, mid, slice
+--   [[:head]], [[:mid]], [[:slice]]
 
 export function tail(sequence st, atom n=length(st) - 1)
 	if n >= length(st) then
@@ -539,7 +539,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   replace, insert, splice, remove_all
+--   [[:replace]], [[:insert]], [[:splice]], [[:remove_all]]
 
 export function remove(sequence st, atom start, atom stop=start)
 	if stop > length(st) then
@@ -581,7 +581,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   remove
+--   [[:remove]]
 
 export function remove_all(object needle, sequence haystack)
 	integer ts, te, ss, se
@@ -658,9 +658,9 @@ end function
 -- </eucode>
 --
 -- See Also:
---     splice, remove, remove_all
+--     [[:splice]], [[:remove]], [[:remove_all]]
 
-export function replace(sequence st, object replacement, integer start, integer stop)
+export function replace(sequence st, object replacement, integer start, integer stop=start)
 	st = remove(st, start, stop)
 	return splice(st, replacement, start)
 end function
@@ -703,7 +703,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     chunk
+--     [[:chunk]]
 
 export function split(sequence st, object delim=" ", integer limit=0, integer any=0)
 	sequence ret = {}
@@ -762,7 +762,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     split
+--     [[:split]]
 
 export function join(sequence s, object delim=" ")
 	object ret
@@ -793,7 +793,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   trim_tail, trim, pad_head
+--   [[:trim_tail]], [[:trim]], [[:pad_head]]
 
 export function trim_head(sequence str, object what=" \t\r\n")
 	if atom(what) then
@@ -823,7 +823,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   trim_head, trim, pad_tail
+--   [[:trim_head]], [[:trim]], [[:pad_tail]]
 
 export function trim_tail(sequence str, object what=" \t\r\n")
 	if atom(what) then
@@ -853,7 +853,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   trim_head, trim_tail
+--   [[:trim_head]], [[:trim_tail]]
 
 export function trim(sequence str, object what=" \t\r\n")
 	return trim_tail(trim_head(str, what), what)
@@ -881,7 +881,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   trim_head, pad_tail, head
+--   [[:trim_head]], [[:pad_tail]], [[:head]]
 
 export function pad_head(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
@@ -913,7 +913,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   trim_tail, pad_head, tail
+--   [[:trim_tail]], [[:pad_head]], [[:tail]]
 
 export function pad_tail(sequence str, integer size, object ch=' ')
 	if size <= length(str) then
@@ -949,7 +949,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   split
+--   [[:split]]
 
 export function chunk(sequence s, integer size)
 	sequence ns
@@ -1013,7 +1013,7 @@ constant TO_LOWER = 'a' - 'A'
 -- </eucode>
 --
 -- See Also:
---   upper
+--   [[:upper]]
 
 export function lower(object x)
 -- convert atom or sequence to lower case
@@ -1036,7 +1036,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     lower
+--     [[:lower]]
 
 export function upper(object x)
 -- convert atom or sequence to upper case
@@ -1059,7 +1059,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     linear
+--     [[:linear]]
 
 export function can_add(object a, object b)
 	if atom(a) or atom(b) then
@@ -1086,7 +1086,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     repeat_pattern
+--     [[:repeat_pattern]]
 
 export function linear(object start, object increment, integer count)
 	sequence result
@@ -1113,7 +1113,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   repeat, linear
+--   [[:repeat]], [[:linear]]
 
 export function repeat_pattern(sequence s, integer count)
 	integer ls
@@ -1130,7 +1130,6 @@ export function repeat_pattern(sequence s, integer count)
 	end for
 	return result
 end function
---**
 
 --**
 -- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
@@ -1150,7 +1149,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   vslice
+--   [[:vslice]]
 
 export function project(sequence vectors, sequence coords)
 	sequence result, current_vector, coord_set, result_item, projection
@@ -1188,7 +1187,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   store, Sequence Assignments
+--   [[:store]], [[:Sequence Assignments]]
 
 export function fetch(sequence s, sequence indexes)
 	for i=1 to length(indexes)-1 do
@@ -1207,7 +1206,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     fetch, Sequence Assignments
+--     [[:fetch]], [[:Sequence Assignments]]
 
 export function store(sequence s, sequence indexes, object x)
 	sequence partials,result,branch
@@ -1239,7 +1238,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     Sequence Assignments
+--     [[:Sequence Assignments]]
 
 export function valid_index(sequence s, object x)
 	if sequence(x) or x<1 then
@@ -1259,7 +1258,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     slice
+--     [[:slice]]
 
 export function extract(sequence source, sequence indexes)
 	object p
@@ -1289,7 +1288,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     slice
+--     [[:slice]]
 
 export function rotate_left(sequence source, integer start, integer stop, integer left_shift)
 	sequence shifted

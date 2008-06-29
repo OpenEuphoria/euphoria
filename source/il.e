@@ -8,7 +8,6 @@
 -- change the format number. (IL_VERSION)
 
 include machine.e
-include file.e
 include compress.e
 include backend.e
 include reswords.e

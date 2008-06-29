@@ -7,7 +7,6 @@ without type_check
 include mode.e
 set_mode("backend", 0 )
 
-include file.e
 include machine.e
 include wildcard.e
 include common.e

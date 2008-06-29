@@ -10,8 +10,8 @@
 without warning
 
 include wildcard.e
-include file.e
 include sequence.e
+include filesys.e
 
 constant SCREEN = 1
 constant TRUE = 1, FALSE = 0

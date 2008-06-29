@@ -3,10 +3,10 @@
 
 include common.e
 include machine.e
-include file.e
 include os.e
+include filesys.e
 
-atom oem2char,convert_buffer
+atom oem2char, convert_buffer
 integer convert_length
 global atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
