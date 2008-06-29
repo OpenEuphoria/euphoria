@@ -71,6 +71,16 @@ test_equal("replace() integer sequence w/sequence", {1,2,3,4},
     replace({1,8,9,4}, {2,3}, 2, 3))
 test_equal("replace() string sequence", "John", replace("Jahn", 'o', 2))
 test_equal("replace() string sequence 2", "Jane", replace("John", "ane", 2, 4))
+test_equal("replace() 2,5 #3a", "/--ething         "
+              , replace("//something         ", "--" , 2, 5))
+
+test_equal("replace() 2,5 #3b", "/--eething         "
+             , replace("//something         ", "--e", 2, 5))
+
+--unittest crashing pretty.e:133 in procedure rPrint()
+--subscript value 34 is out of bounds, reading from a sequence of length 33
+test_equal("replace() 2,5 #3c", " --something         "
+             , replace(" //something         ", "--", 2, 3))
 
 test_equal("trim_head() default", "John", trim_head(" \r\n\t John"))
 test_equal("trim_head() specified", "Doe", trim_head("John Doe", " hoJn"))
