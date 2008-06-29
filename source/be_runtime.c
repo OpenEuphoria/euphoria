@@ -4746,7 +4746,7 @@ void key_gets(char *input_string)
 				input_string[column - init_column] = '\0';
 			}
 		}   
-		else if (c >= CONTROL_Z && c <= 127) {
+		else if (c >= CONTROL_Z && c <= 255) {
 			if (column < 79) {
 				len = strlen(input_string);
 				one_char[0] = c;
