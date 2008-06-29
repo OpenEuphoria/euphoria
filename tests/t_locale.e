@@ -7,8 +7,19 @@ sequence locale
 
 locale = "en_US"
 
-test_true("set()", l:set(locale))
-test_equal("set/get", lcc:decanonical(locale), lcc:decanonical(l:get()))
+-- The OS may use an optional encoding specifier:
+integer ix = set( "" )
+sequence native_locale = l:get()
+ix = find( '.', native_locale )
+sequence encoding
+if ix then
+	encoding = native_locale[ix..$]
+else
+	encoding = ""
+end if
+
+test_true("set()", l:set(locale & encoding))
+test_equal("set/get", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
 test_equal("money", "$1,020.50", l:money(1020.50))
 test_equal("number", "1,020.50", l:number(1020.5))
 

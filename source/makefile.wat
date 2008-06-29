@@ -22,9 +22,14 @@
 #     Note that source builds both   wmake -f makefile.wat source-dos [SVN_REV=r]
 #        source-win and source-dos.
 #
+#                   Run unit tests:
+#                     Win32 and DOS  wmake -f makefile.wat test
+#                        Win32 Only  wmake -f makefile.wat testwin
+#                          DOS Only  wmake -f makefile.wat testdos
+#
 # The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
 # The default for SVN_REV is 'xxx'.
-#  
+#
 #
 #   Options:
 #                    MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
@@ -494,6 +499,17 @@ source-dos : .SYMBOLIC translate-dos common-source
 	
 source : .SYMBOLIC common-source source-win source-dos
 
+testwin : interpreter
+	cd ..\tests
+	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe
+	cd ..\source
+
+testdos : dos
+	cd ..\tests
+	..\source\ex -i ..\include ..\bin\eutest.ex -exe ..\source\ex.exe
+	cd ..\source
+	
+test : .SYMBOLIC testwin testdos
 	
 
 exw.exe : interpreter_objects 

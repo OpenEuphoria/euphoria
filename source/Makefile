@@ -22,6 +22,7 @@
 #   Translator           (ecu):  make translator
 #   Translator Library (ecu.a):  make library
 #   Backend         (backendu):  make backendu
+#   Run Unit Tests            :  make test
 
 include Makefile.eu
 EU_VERSION = 4.0
@@ -374,6 +375,9 @@ eubackend : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
 	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o eubackend
+
+test : interpreter
+	cd ../tests/ && ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria

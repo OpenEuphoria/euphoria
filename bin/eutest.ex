@@ -1,5 +1,7 @@
 #!/usr/bin/exu
 
+-- Specify -exe <path to interpreter> to use a specific interpreter for tests
+
 include sequence.e
 include sort.e
 include filesys.e
@@ -21,6 +23,12 @@ else
 end ifdef
 
 cmds = command_line()
+
+integer ex = find( "-exe", cmds )
+if ex and ex < length( cmds ) then
+	executable = cmds[ex+1]
+	cmds = cmds[1..ex-1] & cmds[ex+2..$]
+end if
 
 if length(cmds) > 2 then
 	cmd_opts = join(cmds[3..$])
