@@ -265,7 +265,7 @@ export constant w32_name_canonical = {
 	"Danish_Denmark.1252",
 	"Danish_Denmark.1252",
 	"Danish_Denmark.1252",
-	"English_United States.1252",
+	"English_Australia.1252",
 	"English_United States.1252",
 	"English_United States.1252",
 	"English_United States.1252",
