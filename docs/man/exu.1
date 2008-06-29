@@ -19,17 +19,20 @@
 exu \- Interpreter for the Euphoria programming language
 .SH SYNOPSIS
 .B exu
-.RB [\| \-i
-.IR path ]
+.RB [\| \-batch ]
 .RB [\| \-c
 .IR conf-file ]
 .RB [\| \-d
 .IR word ]
+.RB [\| \-i
+.IR path ]
+.RB [\| \-strict ]
+.RB [\| \-test ]
 .RB [\| \-w
 .IR warning_name ]
-.RB [\| \-x ]
 .RB [\| \-wf
 .IR warning-file ]
+.RB [\| \-x ]
 [
 .IR euphoria-file\ args... ]
 .br
@@ -46,8 +49,9 @@ additional command line info is passed to the euphoria program to be run.
 \fBeuphoria\fP is an interpreted or compiled programming language.
 .SH OPTIONS
 .TP
-.B \-i path
-Specifies an additional include path to the interpreter.
+.B \-batch
+Executes the program but if any error occurs, the "Press Enter" prompt is
+not presented. The exit code will be set to 1 on error, 0 on success.
 .TP
 .B \-c path-to-euinc.conf
 Specifies a configuration file to be read in to specify additional
@@ -58,19 +62,39 @@ Defines a tag as being set. Tags are processed by
 .B ifdef
 blocks.
 .TP
+.B \-i path
+Specifies an additional include path to the interpreter.
+.TP
+.B \-strict
+This turns on all warnings, overriding any with/without warning statement
+found in the source.
+.TP
+.B \-test
+Parses the code only and issues any warnings or errors to ##STDOUT##. On
+error the exit code will be 1, otherwise 0. If an error was found, the 
+normal "Press Enter" prompt will not be presented when using the ##-TEST##
+parameter which enables many editors/IDEs to test the syntax of your
+Euphoria source in real time.
+.TP
 .B \-w warning_name
 Resets, or adds to, the current list of wrnings that may be emitted. The list of known 
-names is to be found in the subsection describing 
-.B with\ warning
-. A name should appear without quotes. The first -w switch resets the list to the 
-warning being introduced, and each subsequent -> switch adds to the list.
-.TP
-.B \-x
-Resets, or adds to, the list of warnings that will not be issued. This is symetric of the .B \-w 
-switch.
+names is to be found in the detailed documentation subsection describing 
+.B with\ warning. 
+A name should appear without quotes. The first 
+.B -w
+switch resets the list to the  warning being introduced, and each subsequent 
+.B \-w
+switch adds to the list.
 .TP
 .B \-wf
 Sets the file where the warnings should go instead of the standard error.
+.TP
+.B \-x
+Resets, or adds to, the list of warnings that will 
+.B not 
+be issued. This is symetric of the 
+.B \-w
+switch.
 .SH SEE ALSO
 .BR ecu (1),
 .BR eubackend (1),
