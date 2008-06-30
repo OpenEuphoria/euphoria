@@ -7,6 +7,9 @@
 include sequence.e
 include math.e
 
+include dll.e
+include machine.e
+
 constant M_SLEEP = 64
 
 --****
@@ -235,3 +238,125 @@ constant M_INSTANCE = 55
 export function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
+
+ifdef WIN32 then
+	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
+elsifdef LINUX then
+	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
+elsifdef FREEBSD then
+	constant UNAME = define_c_func(open_dll("libc.so"), "uname", {C_POINTER}, C_INT)
+elsifdef OSX then
+	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
+end ifdef
+export function uname()
+	ifdef WIN32 then
+		atom buf
+		sequence sbuf
+		integer maj, mine, build, plat
+		buf = allocate(148)
+		poke4(buf, 148)
+		if c_func(UNAME, {buf}) then
+			maj = peek4u(buf+4)
+			mine = peek4u(buf+8)
+			build = peek4u(buf+12)
+			plat = peek4u(buf+16)
+			sbuf = {}
+			if plat = 0 then
+				sbuf = append(sbuf, "Win32s")
+				sbuf = append(sbuf, sprintf("Windows %d.%d", {maj,mine}))
+			elsif plat = 1 then
+				sbuf = append(sbuf, "Win9x")
+				if mine = 0 then
+					sbuf = append(sbuf, "Win95")
+				elsif mine = 10 then
+					sbuf = append(sbuf, "Win98")
+				elsif mine = 90 then
+					sbuf = append(sbuf, "WinME")
+				else
+					sbuf = append(sbuf, "Unknown")
+				end if
+			elsif plat = 2 then
+				sbuf = append(sbuf, "WinNT")
+				if maj = 6 and mine = 1 then
+					sbuf = append(sbuf, "Windows7")
+				elsif maj = 6 and mine = 0 then
+					sbuf = append(sbuf, "Vista")
+				elsif maj = 5 and mine = 1 or 2 then
+					sbuf = append(sbuf, "WinXP")
+				elsif maj = 5 and mine = 0 then
+					sbuf = append(sbuf, "Win2K")
+				elsif maj = 4 and mine = 0 then
+					sbuf = append(sbuf, "WinNT 4.0")
+				elsif maj = 3 and mine = 51 then
+					sbuf = append(sbuf, "WinNT 3.51")
+				elsif maj = 3 and mine = 50 then --is it 50 or 5?
+					sbuf = append(sbuf, "WinNT 3.5")
+				elsif maj = 3 and mine = 1 then
+					sbuf = append(sbuf, "WinNT 3.1")
+				else
+					sbuf = append(sbuf, sprintf("WinNT %d.%d", {maj,mine}))
+				end if
+			elsif plat = 3 then
+				sbuf = append(sbuf, "WinCE")
+				sbuf = append(sbuf, sprintf("WinCE %d.%d", {maj,mine}))
+			else
+				sbuf = append(sbuf, "Unknown Windows")
+				sbuf = append(sbuf, sprintf("Version %d.%d", {maj,mine}))
+			end if
+			sbuf = append(sbuf, peek_string(buf+20))
+			sbuf &= {plat, build, mine, maj}
+			return sbuf
+		else
+			return {}
+		end if
+	elsifdef UNIX then
+		atom buf, pbuf
+		integer len,i, c, k
+		sequence sbuf, snam
+		buf = allocate(4096) --excessive, but to be safe
+		if c_func(UNAME, {buf}) = 0 then
+			sbuf = {}
+			pbuf = buf
+			snam = ""
+			i = 0
+			k = 0
+			while 1 do
+				c = peek(pbuf)
+				i = i + 1
+				if c = 0 and length(snam) then
+					sbuf = append(sbuf, snam)
+					snam = ""
+					k = k + 1
+					if k > 4 then exit end if
+				elsif c != 0 then
+					snam &= c
+					pbuf = pbuf + 1
+					i = i + 1
+				else
+					pbuf = pbuf + 1
+					i = i + 1
+				end if
+			end while
+			free(buf)
+			return sbuf
+		else
+			free(buf)
+			return ""
+		end if
+	elsifdef DOS32 then
+		return {"DOS"} --TODO
+	else
+		return {"UNKNOWN"} --TODO
+	end ifdef
+end function
+
+export function is_win_nt()
+	ifdef WIN32 then
+		sequence s
+		s = uname()
+		return equal(s[1], "WinNT")
+	else
+		return -1
+	end ifdef
+end function
+
