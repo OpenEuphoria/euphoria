@@ -37,6 +37,9 @@ include sequence.e
 include scanner.e
 include mode.e as mode
 
+include io.e
+include pretty.e
+
 constant M_CALL_BACK = 52,  
 		 M_CRASH_ROUTINE = 66,
 		 M_CRASH_MESSAGE = 37,
@@ -2302,7 +2305,10 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 	sequence ns
 	integer colon
 	integer ns_file
-
+	integer found_in_path
+	integer found_outside_path
+	integer s_in_include_path
+	
 	colon = find(':', name)
 	
 	if colon then
@@ -2376,10 +2382,13 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 
 		-- try to match a LOCAL or GLOBAL routine in the same source file
 		s = SymTab[TopLevelSub][S_NEXT]
+		found_in_path = 0
+		found_outside_path = 0
 		while s != 0 and s <= stlen do
 			if SymTab[s][S_FILE_NO] = file and 
 				(SymTab[s][S_SCOPE] = SC_LOCAL or 
 				 SymTab[s][S_SCOPE] = SC_GLOBAL or 
+				 SymTab[s][S_SCOPE] = SC_EXPORT or
 				(proc = TopLevelSub and SymTab[s][S_SCOPE] = SC_GLOOP_VAR)) and
 				equal(name, SymTab[s][S_NAME]) then  
 				-- shouldn't really be able to see GLOOP_VARs unless we are
@@ -2388,21 +2397,36 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 			end if
 			s = SymTab[s][S_NEXT]
 		end while 
-	
-		-- try to match a single earlier GLOBAL symbol
+
+		-- try to match a single earlier GLOBAL or EXPORT symbol
 		global_found = FALSE
 		s = SymTab[TopLevelSub][S_NEXT]
 		while s != 0 and s <= stlen do
 			if SymTab[s][S_SCOPE] = SC_GLOBAL and 
 			   equal(name, SymTab[s][S_NAME]) then
-				if not global_found then
+			
+				s_in_include_path = symbol_in_include_path( s, file, {} )
+				if s_in_include_path then
 					global_found = s
+					found_in_path += 1
 				else
-					return 0 -- 2nd global with same name
+					if not found_in_path then
+						global_found = s
+					end if
+					found_outside_path += 1
 				end if
+			elsif SymTab[s][S_SCOPE] = SC_EXPORT and equal( name, SymTab[s][S_NAME] ) then
+				if is_direct_include( s, file ) then
+					global_found = s
+				end if
+					found_in_path += 1
 			end if
 			s = SymTab[s][S_NEXT]
 		end while 
+		
+		if found_in_path != 1 and (( found_in_path + found_outside_path ) != 1 ) then
+			return 0
+		end if
 		return global_found
 	
 	end if
@@ -3201,18 +3225,18 @@ end procedure
 procedure opSPLICE()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	v = Code[pc+3]
+	c = Code[pc+3]
 	target = Code[pc+4]
-	val[target] = splice(val[a],val[b],val[v])
+	val[target] = splice(val[a],val[b],val[c])
 	pc += 5
 end procedure
 
 procedure opINSERT()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	v = Code[pc+3]
+	c = Code[pc+3]
 	target = Code[pc+4]
-	val[target] = insert(val[a],val[b],val[v])
+	val[target] = insert(val[a],val[b],val[c])
 	pc += 5
 end procedure
 

@@ -447,7 +447,7 @@ global procedure add_ref(token tok)
 	end if  
 end procedure
 
-function is_direct_include( symtab_index sym, integer check_file )
+export function is_direct_include( symtab_index sym, integer check_file )
 		integer file_no
 		file_no = SymTab[sym][S_FILE_NO]
 		
@@ -514,7 +514,7 @@ end procedure
 
 global sequence dup_globals, dup_overrides, in_include_path
 
-function symbol_in_include_path( symtab_index sym, integer check_file, sequence path_checked  )
+export function symbol_in_include_path( symtab_index sym, integer check_file, sequence path_checked  )
 		integer file_no
 		file_no = SymTab[sym][S_FILE_NO]
 		
