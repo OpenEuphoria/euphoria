@@ -259,9 +259,9 @@ end procedure
 
 procedure StraightenBranches()
 -- Straighten branches within the current subprogram (or top-level)
-	integer br 
+	integer br
 	integer target
-	
+
 	if TRANSLATE then
 		return -- do it in back-end
 	end if
@@ -1998,12 +1998,17 @@ integer top_level_parser
 
 procedure Ifdef_statement()
 	sequence option
-	integer matched, nested_count, has_matched
+	integer matched, nested_count, has_matched,  parser_id
 	token tok
 
 	matched = 0
 	nested_count = 0
 	has_matched = 0
+	if length(if_labels) or length(loop_labels) then
+		parser_id = forward_Statement_list
+	else
+		parser_id = top_level_parser
+	end if
 
 	while 1 label "top" do
 		if matched = 0 then
@@ -2016,7 +2021,7 @@ procedure Ifdef_statement()
 			end if
 			if matched then
         		No_new_entry = 0
-				call_proc(top_level_parser, {})
+				call_proc(parser_id, {})
 			end if
 		end if
 
@@ -2047,7 +2052,7 @@ procedure Ifdef_statement()
 				end if
 			elsif tok[T_ID] = ELSE and has_matched = 0 and nested_count = 0 then
 			    No_new_entry = 0
-				call_proc(top_level_parser, {})
+				call_proc(parser_id, {})
 				tok_match(END)
 				tok_match(IFDEF)
 				return

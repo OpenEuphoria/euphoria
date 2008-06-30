@@ -36,6 +36,8 @@ include symtab.e
 include sequence.e
 include scanner.e
 include mode.e as mode
+include pretty.e
+include io.e
 
 include io.e
 include pretty.e
