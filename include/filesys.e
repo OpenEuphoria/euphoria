@@ -597,18 +597,9 @@ export function move_file(sequence src, sequence dest, atom overwrite=0)
 		stat_buf_size = 88
 		dev_t_size = 8
 	end ifdef
-
-	if overwrite then
-		-- return value is ignored, we don't care if it existed or not
-		ret = delete_file(dest)
-	end if
 	
 	psrc = allocate_string(src)
 	pdest = allocate_string(dest)
-
-	if overwrite then
-		ret = delete_file(dest)
-	end if
 
 	ifdef UNIX then
 		psrcbuf = allocate(stat_buf_size)
@@ -632,6 +623,16 @@ export function move_file(sequence src, sequence dest, atom overwrite=0)
 			goto "out"
 		end if
 	end ifdef
+
+	if overwrite then
+		-- return value is ignored, we don't care if it existed or not
+		ret = open(src, "rb")
+		if ret != -1 then
+			-- check to make sure the source exists before copying
+			close(ret)
+			ret = delete_file(dest)
+		end if
+	end if
 
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
