@@ -332,7 +332,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 				}
 				else{
 					if(!found_in_path) global_found = s;
-					found_outside_path;
+					found_outside_path++;
 				}
 			}
 			else if( s->scope == S_EXPORT && strcmp(name, s->name) == 0){
