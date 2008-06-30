@@ -3199,11 +3199,21 @@ procedure opMACHINE_FUNC()
 end procedure
 
 procedure opSPLICE()
-	crash("not implemented")
+	a = Code[pc+1]
+	b = Code[pc+2]
+	v = Code[pc+3]
+	target = Code[pc+4]
+	val[target] = splice(val[a],val[b],val[v])
+	pc += 5
 end procedure
 
 procedure opINSERT()
-	crash("not implemented")
+	a = Code[pc+1]
+	b = Code[pc+2]
+	v = Code[pc+3]
+	target = Code[pc+4]
+	val[target] = insert(val[a],val[b],val[v])
+	pc += 5
 end procedure
 
 procedure opMACHINE_PROC()
@@ -3216,7 +3226,7 @@ procedure opMACHINE_PROC()
 	if v = M_CRASH_ROUTINE then
 		-- routine id's must be handled at our level
 		do_crash_routine(b) 
-	
+
 	elsif v = M_CRASH_MESSAGE then
 		crash_msg = val[b]
 
