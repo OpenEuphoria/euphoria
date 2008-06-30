@@ -44,11 +44,12 @@ else
 end ifdef
 
 ifdef UNIX then
-	constant xCopyFile        = -1
-	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_LONG)
-	constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
-	constant xCreateDirectory = -1
-	constant xRemoveDirectory = -1
+	constant xStatFile        = define_c_func(lib, "stat", {C_POINTER, C_POINTER}, C_INT)
+	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_INT)
+	--constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
+	constant xDeleteFile      = define_c_func(lib, "unlink", {C_POINTER}, C_INT)
+	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
+	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
 end ifdef
 
 
@@ -114,10 +115,15 @@ end ifdef
 -- Returns:
 --     Returns false if failed, true if succeeded.
 
-export function create_directory(sequence name)
+export function create_directory(sequence name, integer mode=384)
 	atom pname, ret
 	pname = allocate_string(name)
-	ret = c_func(xCreateDirectory, {pname, 0})
+	ifdef UNIX then
+		ret = not c_func(xCreateDirectory, {pname, mode})
+	elsifdef WIN32 then
+		ret = c_func(xCreateDirectory, {pname, 0})
+		mode = mode -- get rid of not used warning
+	end ifdef
 	return ret
 end function
 
@@ -131,6 +137,9 @@ export function remove_directory(sequence name)
 	atom pname, ret
 	pname = allocate_string(name)
 	ret = c_func(xRemoveDirectory, {pname})
+	ifdef UNIX then
+		ret = not ret 
+	end ifdef
 	free(pname)
 	return ret
 end function
@@ -476,6 +485,7 @@ end function
 --     the function overwrites the existing file and succeeds.
 
 export function copy_file(sequence src, sequence dest, atom overwrite)
+	ifdef WIN32 then
 	atom psrc, pdest, ret
 
 	psrc = allocate_string(src)
@@ -483,17 +493,46 @@ export function copy_file(sequence src, sequence dest, atom overwrite)
 	ret = c_func(xCopyFile, {psrc, pdest, not overwrite})
 	free(pdest)
 	free(psrc)
+	else
+		integer f, h, c, ret
+		ret = 0
+		f = open(src, "rb")
+		if f = -1 then
+			return ret
+		end if
+		if not overwrite then
+			h = open(dest, "rb")
+			if h != -1 then
+				goto "cleanupboth"
+			end if
+		end if
+		h = open(dest, "wb")
+		if h = -1 then
+			goto "cleanupf"
+		end if
+		while c != -1 entry do
+			puts(h, c)
+		entry
+			c = getc(f)
+		end while
 	
+		label "cleanupboth"
+		close(h)
+
+		label "cleanupf"
+		close(f)
+	end ifdef
+
 	return ret
+
 end function
 
 --**
--- Move/Rename a file from src to dest.
+-- Rename a file from src to dest.
 --
 -- Returns:
 --     Returns false if failed, true if succeeded.
-
-export function move_file(sequence src, sequence dest)
+export function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	
 	psrc = allocate_string(src)
@@ -528,6 +567,86 @@ export function delete_file(sequence filename)
 
 	free(pfilename)
 
+	return ret
+end function
+
+--**
+-- Move a file from src to dest.
+--
+-- Returns:
+--     Returns false if failed, true if succeeded.
+
+export function move_file(sequence src, sequence dest, atom overwrite=0)
+	atom psrc, pdest, ret
+	ifdef UNIX then
+		atom psrcbuf, pdestbuf
+		integer stat_t_offset, dev_t_size, stat_buf_size
+	end ifdef
+	ifdef LINUX then
+		stat_t_offset = 0
+		stat_buf_size = 88
+		dev_t_size = 8
+	elsifdef OSX then
+		--TODO
+		stat_t_offset = 0
+		stat_buf_size = 88
+		dev_t_size = 8
+	elsifdef FREEBSD then
+		--TODO
+		stat_t_offset = 0
+		stat_buf_size = 88
+		dev_t_size = 8
+	end ifdef
+
+	if overwrite then
+		-- return value is ignored, we don't care if it existed or not
+		ret = delete_file(dest)
+	end if
+	
+	psrc = allocate_string(src)
+	pdest = allocate_string(dest)
+
+	if overwrite then
+		ret = delete_file(dest)
+	end if
+
+	ifdef UNIX then
+		psrcbuf = allocate(stat_buf_size)
+		pdestbuf = allocate(stat_buf_size)
+		ret = c_func(xStatFile, {psrc, psrcbuf})
+		if ret then
+			goto "out"
+		end if
+		ret = c_func(xStatFile, {pdest, pdestbuf})
+		if ret then
+			goto "out"
+		end if
+		if not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
+			-- on different filesystems, can not use rename
+			-- fall back on copy&delete
+			ret = copy_file(src, dest, overwrite)
+			if not ret then
+				goto "out"
+			end if
+			ret = delete_file(src)
+			goto "out"
+		end if
+	end ifdef
+
+	ret = c_func(xMoveFile, {psrc, pdest})
+	
+	ifdef UNIX then
+		ret = not ret 
+	end ifdef
+	
+	ifdef UNIX then
+		label "out"
+		free(psrcbuf)
+		free(pdestbuf)
+	end ifdef
+	free(pdest)
+	free(psrc)
+	
 	return ret
 end function
 

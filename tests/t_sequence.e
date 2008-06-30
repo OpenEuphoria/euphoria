@@ -207,5 +207,15 @@ test_equal("keyvalues #8", { {"colors", "[black, blue, red]"}  }, s)
 s = keyvalues("colors=`[black, blue, red]")
 test_equal("keyvalues #9", { {"colors", {"black", "blue", "red"}}  }, s)
 
+test_equal("replace()  #2,5a", "/--ething", replace("//something", "--", 2, 5))
+
+test_equal("replace() #2,5b ", "/--ething        ", replace("//something        ", "--", 2, 5))
+
+test_not_equal("replace() 2,5 #3a", "/--omeething         ", replace("//something                                        ", "--", 2, 5))
+
+test_not_equal("replace() 2,5 #3b", "/--eething         ", replace("//something                                            ", "--", 2, 5))
+
+test_not_equal("replace() 2,5 #3c", " --someething         ", replace(" //something                                           ", "--", 2, 3))
+
 test_report()
 
