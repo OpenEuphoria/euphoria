@@ -2053,21 +2053,25 @@ procedure Ifdef_statement()
 				else
 					exit
 				end if
-			elsif tok[T_ID] = ELSE and has_matched = 0 and nested_count = 0 then
-			    No_new_entry = 0
-				call_proc(parser_id, {})
-				tok_match(END)
-				tok_match(IFDEF)
-				return
-			elsif tok[T_ID] = ELSE and has_matched != 0 and nested_count = 0 then
-				in_matched = 0
-				No_new_entry = 1
-				read_line()
+			elsif tok[T_ID] = ELSE and nested_count = 0 then
+				No_new_entry = has_matched
+			    if has_matched then
+					in_matched = 0
+					if not (match_from("end",ThisLine,bp) or match_from("idf",ThisLine,bp)) then
+						read_line()
+					end if
+				else
+					call_proc(parser_id, {})
+					tok_match(END)
+					tok_match(IFDEF)
+					return
+				end if
 			elsif tok[T_ID] = IF then
 				nested_count += 1
-			else
+			elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("else",ThisLine,bp)) then
 				-- BOL token was nothing of value to us, just eat the rest of the line
 				read_line()
+--			else read tokens more slowly, because some unusual formatting could be there
 			end if
 		end while
 	end while
