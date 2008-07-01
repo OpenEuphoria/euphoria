@@ -475,8 +475,8 @@ end function
 -- Note that the sub-sequence can also be a single atom.
 --
 -- Returns:
---   1 if the full sequence does begin with the sub-sequence.
---   0 if the full sequence does **not** begin with the sub-sequence.
+--   * 1 if the full sequence does begin with the sub-sequence.
+--   * 0 if the full sequence does **not** begin with the sub-sequence.
 --
 -- Example 1:
 -- <eucode>
@@ -488,6 +488,7 @@ end function
 --
 -- See Also:
 --     [[:ends]]
+
 export function begins(object pSubSeq, sequence pFullSeq)
 	if length(pFullSeq) = 0 then
 		return 0
@@ -511,7 +512,6 @@ export function begins(object pSubSeq, sequence pFullSeq)
 		return 0
 	end if
 end function
---**
 
 --**
 -- Test to see if the full sequence ends with the sub-sequence.
@@ -519,8 +519,8 @@ end function
 -- Note that the sub-sequence can also be a single atom.
 --
 -- Returns:
---   1 if the full sequence does end with the sub-sequence.
---   0 if the full sequence does **not** end with the sub-sequence.
+--   * 1 if the full sequence does end with the sub-sequence.
+--   * 0 if the full sequence does **not** end with the sub-sequence.
 --
 -- Example 1:
 -- <eucode>
@@ -532,6 +532,7 @@ end function
 --
 -- See Also:
 --     [[:begins]]
+
 export function ends(object pSubSeq, sequence pFullSeq)
 	if length(pFullSeq) = 0 then
 		return 0
@@ -555,4 +556,3 @@ export function ends(object pSubSeq, sequence pFullSeq)
 		return 0
 	end if
 end function
---**
