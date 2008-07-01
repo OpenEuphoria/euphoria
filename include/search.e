@@ -466,3 +466,93 @@ global function binary_search(object needle, sequence haystack, integer startpoi
 	end if
 	return -mid
 end function
+--**
+
+
+--**
+-- Test to see if the full sequence begins with the sub-sequence.
+--
+-- Note that the sub-sequence can also be a single atom.
+--
+-- Returns:
+--   1 if the full sequence does begin with the sub-sequence.
+--   0 if the full sequence does **not** begin with the sub-sequence.
+--
+-- Example 1:
+-- <eucode>
+-- s = begins("abc", "abcdef")
+-- -- s is 1
+-- s = begins("bcd", "abcdef")
+-- -- s is 0
+-- </eucode>
+--
+-- See Also:
+--     [[:ends]]
+export function begins(object pSubSeq, sequence pFullSeq)
+	if length(pFullSeq) = 0 then
+		return 0
+	end if
+	
+	if atom(pSubSeq) then
+		if equal(pSubSeq, pFullSeq[1]) then
+			return 1
+		else
+			return 0
+		end if
+	end if
+	
+	if length(pSubSeq) > length(pFullSeq) then
+		return 0
+	end if
+	
+	if equal(pSubSeq, pFullSeq[1.. length(pSubSeq)]) then
+		return 1
+	else
+		return 0
+	end if
+end function
+--**
+
+--**
+-- Test to see if the full sequence ends with the sub-sequence.
+--
+-- Note that the sub-sequence can also be a single atom.
+--
+-- Returns:
+--   1 if the full sequence does end with the sub-sequence.
+--   0 if the full sequence does **not** end with the sub-sequence.
+--
+-- Example 1:
+-- <eucode>
+-- s = ends("def", "abcdef")
+-- -- s is 1
+-- s = begins("bcd", "abcdef")
+-- -- s is 0
+-- </eucode>
+--
+-- See Also:
+--     [[:begins]]
+export function ends(object pSubSeq, sequence pFullSeq)
+	if length(pFullSeq) = 0 then
+		return 0
+	end if
+	
+	if atom(pSubSeq) then
+		if equal(pSubSeq, pFullSeq[$]) then
+			return 1
+		else
+			return 0
+		end if
+	end if
+	
+	if length(pSubSeq) > length(pFullSeq) then
+		return 0
+	end if
+	
+	if equal(pSubSeq, pFullSeq[length(pFullSeq) - length(pSubSeq) + 1 .. $]) then
+		return 1
+	else
+		return 0
+	end if
+end function
+--**
