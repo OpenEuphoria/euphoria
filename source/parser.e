@@ -1998,12 +1998,13 @@ integer top_level_parser
 
 procedure Ifdef_statement()
 	sequence option
-	integer matched, nested_count, has_matched,  parser_id
+	integer matched, nested_count, has_matched,  parser_id, in_matched
 	token tok
 
 	matched = 0
 	nested_count = 0
 	has_matched = 0
+	in_matched = 0
 	if length(if_labels) or length(loop_labels) then
 		parser_id = forward_Statement_list
 	else
@@ -2019,6 +2020,7 @@ procedure Ifdef_statement()
 			else
 				matched = find(option, OpDefines)
 			end if
+			in_matched = matched
 			if matched then
         		No_new_entry = 0
 				call_proc(parser_id, {})
@@ -2039,12 +2041,13 @@ procedure Ifdef_statement()
 					exit "top"
 				elsif nested_count and tok[T_ID] = IF then
 					nested_count -= 1
-				elsif matched then
+				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
 					CompileErr("unknown command")
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
 				if has_matched then
+					in_matched = 0
 					No_new_entry = 1
 					read_line()
 				else
@@ -2056,6 +2059,10 @@ procedure Ifdef_statement()
 				tok_match(END)
 				tok_match(IFDEF)
 				return
+			elsif tok[T_ID] = ELSE and has_matched != 0 and nested_count = 0 then
+				in_matched = 0
+				No_new_entry = 1
+				read_line()
 			elsif tok[T_ID] = IF then
 				nested_count += 1
 			else
