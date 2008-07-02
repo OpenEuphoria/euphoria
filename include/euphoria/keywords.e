@@ -68,8 +68,7 @@ global constant builtins = {
 	"get_pixel", 
 	"getc", 
 	"getenv",
-	"gets",
-	"insert",
+	"gets", 
 	"integer", 
 	"length", 
 	"log", 
@@ -96,8 +95,7 @@ global constant builtins = {
 	"repeat", 
 	"routine_id", 
 	"sequence", 
-	"sin",
-	"splice",
+	"sin", 
 	"sprintf", 
 	"sqrt", 
 	"system", 
@@ -122,6 +120,5 @@ global constant builtins = {
     "task_self", 
     "task_status", 
     "task_suspend", 
-    "task_yield",
-    "warning"
+    "task_yield"
 }

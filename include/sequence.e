@@ -282,18 +282,18 @@ end function
 -- reverse({})				   -- {}
 -- </eucode>
 
-export function reverse(sequence st)
-	integer lowr, n, n2
+export function reverse(sequence s)
+	integer lower, n, n2
 	sequence t
 
-	n = length(st)
+	n = length(s)
 	n2 = floor(n/2)+1
 	t = repeat(0, n)
-	lowr = 1
-	for uppr = n to n2 by -1 do
-		t[uppr] = s[lowr]
-		t[lowr] = s[uppr]
-		lowr += 1
+	lower = 1
+	for upper = n to n2 by -1 do
+		t[upper] = s[lower]
+		t[lower] = s[upper]
+		lower += 1
 	end for
 	return t
 end function
@@ -883,12 +883,12 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:pad_tail]], [[:head]]
 
-export function pad_head(sequence st, integer size, object ch=' ')
-	if size <= length(st) then
-		return st
+export function pad_head(sequence str, integer size, object ch=' ')
+	if size <= length(str) then
+		return str
 	end if
 
-	return repeat(ch, size - length(st)) & st
+	return repeat(ch, size - length(str)) & str
 end function
 
 --**
@@ -915,12 +915,12 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:pad_head]], [[:tail]]
 
-export function pad_tail(sequence st, integer size, object ch=' ')
-	if size <= length(st) then
-		return st
+export function pad_tail(sequence str, integer size, object ch=' ')
+	if size <= length(str) then
+		return str
 	end if
 
-	return st & repeat(ch, size - length(st))
+	return str & repeat(ch, size - length(str))
 end function
 
 --**
@@ -951,7 +951,7 @@ end function
 -- See Also:
 --   [[:split]]
 
-export function chunk(sequence st, integer size)
+export function chunk(sequence s, integer size)
 	sequence ns
 	integer stop
 
@@ -978,13 +978,13 @@ end function
 -- -- s is {18, 19, 45, 18.4, 29.3}
 -- </eucode>
 
-export function flatten(sequence st)
+export function flatten(sequence s)
 	sequence ret
 	object x
 
 	ret = {}
-	for i = 1 to length(st) do
-		x = st[i]
+	for i = 1 to length(s) do
+		x = s[i]
 		if atom(x) then
 			ret &= x
 		else
@@ -1115,18 +1115,18 @@ end function
 -- See Also:
 --   [[:repeat]], [[:linear]]
 
-export function repeat_pattern(sequence st, integer count)
+export function repeat_pattern(sequence s, integer count)
 	integer ls
 	sequence result
 
 	if count<=0 then
 		return {}
 	end if
-	ls=length(st)
+	ls=length(s)
 	count *= ls
 	result=repeat(0,count)
 	for i=1 to count by ls do
-		result[i..i+ls-1]=st
+		result[i..i+ls-1]=s
 	end for
 	return result
 end function
@@ -1189,11 +1189,11 @@ end function
 -- See Also:
 --   [[:store]], [[:Sequence Assignments]]
 
-export function fetch(sequence st, sequence indexes)
+export function fetch(sequence s, sequence indexes)
 	for i=1 to length(indexes)-1 do
-		st=st[indexes[i]]
+		s=s[indexes[i]]
 	end for
-	return st[indexes[$]]
+	return s[indexes[$]]
 end function
 
 --**
@@ -1208,11 +1208,11 @@ end function
 -- See Also:
 --     [[:fetch]], [[:Sequence Assignments]]
 
-export function store(sequence st, sequence indexes, object x)
+export function store(sequence s, sequence indexes, object x)
 	sequence partials,result,branch
 
-	partials=repeat(st,length(indexes)-1)
-	branch=st
+	partials=repeat(s,length(indexes)-1)
+	branch=s
 	for i=1 to length(indexes)-1 do
 		branch=branch[indexes[i]]
 		partials[i]=branch
@@ -1224,8 +1224,8 @@ export function store(sequence st, sequence indexes, object x)
 		result[indexes[i]]=branch
 		branch=result
 	end for
-	st[indexes[1]]=branch
-	return st
+	s[indexes[1]]=branch
+	return s
 end function
 
 --**
@@ -1240,11 +1240,11 @@ end function
 -- See Also:
 --     [[:Sequence Assignments]]
 
-export function valid_index(sequence st, object x)
+export function valid_index(sequence s, object x)
 	if sequence(x) or x<1 then
 		return 0
 	else
-		return x<length(st)+1
+		return x<length(s)+1
 	end if
 end function
 

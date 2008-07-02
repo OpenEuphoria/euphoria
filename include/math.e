@@ -667,8 +667,8 @@ end function
 -- -- a is 2.48490665
 -- </eucode>
 
-global function log10(object x)
-	return log(x) * INVLOG10
+global function log10(object x1)
+	return log(x1) * INVLOG10
 end function
 
 --**

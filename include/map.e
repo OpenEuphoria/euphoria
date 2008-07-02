@@ -136,14 +136,14 @@ export function calc_hash(object key, integer pMaxHash = 0)
 end function
 
 --**
-export function rehash(map m, integer pRequestedSize = 0)
+export function rehash(map m1, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
 	object key, value
 	atom newsize
 	sequence m
 
-	m = m
+	m = m1
 
 	if pRequestedSize <= 0 then
 		-- grow bucket size
@@ -251,7 +251,7 @@ export function get(map m, object key, object defaultValue)
 end function
 
 --**
--- Put an entry on the map m with key x1 and value x2. 
+-- Put an entry on the map m1 with key x1 and value x2. 
 -- The operation parameter can be used to modify the existing value.  Valid operations are: 
 -- 
 -- * ##PUT##:  This is the default, and it replaces any value in there already
@@ -279,7 +279,7 @@ end function
 --   -- ages now contains 2 entries: "Andy" => 12, "Budi" => 14
 --   </eucode>
 
-export function put(map m, object key, object value, integer pTrigger = 100, integer operation = PUT )
+export function put(map m1, object key, object value, integer pTrigger = 100, integer operation = PUT )
 	integer index
 	integer hashval
 	integer lOffset
@@ -289,7 +289,7 @@ export function put(map m, object key, object value, integer pTrigger = 100, int
 	integer bl
 	object old_value
 	
-	m = m
+	m = m1
 	hashval = calc_hash(key, 0)
 	index = remainder(hashval, length(m[iBuckets])) + 1
 	bucket = m[iBuckets][index]
@@ -344,7 +344,7 @@ export function put(map m, object key, object value, integer pTrigger = 100, int
 end function
 
 --**
--- Remove an entry with given key from the map m. The modified map is returned.
+-- Remove an entry with given key from the map m1. The modified map is returned.
 --
 -- Comments:
 --   If the map has no entry with the specified key, the original map is returned.
@@ -358,12 +358,12 @@ end function
 --   -- m is now an empty map again
 --   </eucode>
 
-export function remove(map m, object key)
+export function remove(map m1, object key)
 	integer hash, index
 	object bucket
 	sequence m
 
-	m = m
+	m = m1
 		index = calc_hash(key, length(m[iBuckets]))
 
 		-- find prev entry
@@ -507,11 +507,11 @@ export function values(map m)
 end function
 
 --**
-export function optimize(map m, atom pAvg = 10)
+export function optimize(map m1, atom pAvg = 10)
 	sequence op
 	sequence m
 
-	m = m
+	m = m1
 	op = statistics(m)
 	m = rehash(m, floor(op[1] / pAvg))
 	op = statistics(m)
