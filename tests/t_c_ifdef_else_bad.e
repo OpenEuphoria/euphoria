@@ -1,8 +1,8 @@
 with define=DEFINED
 include unittest.e
 
-ifdef DEFINED then
-elsifdef NOTDEFINED then
+ifdef NOT_DEFINED then
+elsifdef DEFINED then
 	end for
 else
 	end while

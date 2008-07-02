@@ -136,14 +136,14 @@ export function calc_hash(object key, integer pMaxHash = 0)
 end function
 
 --**
-export function rehash(map m1, integer pRequestedSize = 0)
+export function rehash(map m, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
 	object key, value
 	atom newsize
-	sequence m
+	sequence m0
 
-	m = m1
+	m0 = m
 
 	if pRequestedSize <= 0 then
 		-- grow bucket size
@@ -158,7 +158,7 @@ export function rehash(map m1, integer pRequestedSize = 0)
 	size = next_prime(size)
 	oldBuckets = m[iBuckets]
 	newBuckets = repeat({{},{}}, size)
-	m[iInUse] = 0
+	m0[iInUse] = 0
 	for index = 1 to length(oldBuckets) do
 		for entry_idx = 1 to length(oldBuckets[index][iKeys]) do
 			key = oldBuckets[index][iKeys][entry_idx]
@@ -167,14 +167,14 @@ export function rehash(map m1, integer pRequestedSize = 0)
 			newBuckets[index2][iKeys] = append(newBuckets[index2][iKeys],key)
 			newBuckets[index2][iVals] = append(newBuckets[index2][iVals],value)
 			if length(newBuckets[index2][iVals]) = 1 then
-				m[iInUse] += 1
+				m0[iInUse] += 1
 			end if
 		end for
 	end for
 
-	m[iBuckets] = newBuckets
+	m0[iBuckets] = newBuckets
 
-	return m
+	return m0
 end function
 
 --**
@@ -251,7 +251,7 @@ export function get(map m, object key, object defaultValue)
 end function
 
 --**
--- Put an entry on the map m1 with key x1 and value x2. 
+-- Put an entry on the map m with key x1 and value x2. 
 -- The operation parameter can be used to modify the existing value.  Valid operations are: 
 -- 
 -- * ##PUT##:  This is the default, and it replaces any value in there already
@@ -279,17 +279,17 @@ end function
 --   -- ages now contains 2 entries: "Andy" => 12, "Budi" => 14
 --   </eucode>
 
-export function put(map m1, object key, object value, integer pTrigger = 100, integer operation = PUT )
+export function put(map m, object key, object value, integer pTrigger = 100, integer operation = PUT )
 	integer index
 	integer hashval
 	integer lOffset
 	object bucket
 	atom lAvgLength
-	sequence m
+	sequence m0
 	integer bl
 	object old_value
-	
-	m = m1
+
+	m0 = m
 	hashval = calc_hash(key, 0)
 	index = remainder(hashval, length(m[iBuckets])) + 1
 	bucket = m[iBuckets][index]
@@ -321,30 +321,30 @@ export function put(map m1, object key, object value, integer pTrigger = 100, in
 					bucket[iVals][lOffset] &= value
 			end switch
 		end if
-		m[iBuckets][index] = bucket
-		return m
+		m0[iBuckets][index] = bucket
+		return m0
 	end if
 	if bl = 0 then
-		m[iInUse] += 1
+		m0[iInUse] += 1
 	end if
 
-	m[iCnt] += 1 -- elementCount
+	m0[iCnt] += 1 -- elementCount
 	if pTrigger > 0 then
-		lAvgLength = m[iCnt] / m[iInUse]
+		lAvgLength = m0[iCnt] / m0[iInUse]
 		if (lAvgLength >= pTrigger) then
-			m = rehash(m)
-			index = remainder(hashval, length(m[iBuckets])) + 1
+			m0 = rehash(m0)
+			index = remainder(hashval, length(m0[iBuckets])) + 1
 		end if
 	end if
 	-- write new entry
-	m[iBuckets][index][iKeys] = append(m[iBuckets][index][iKeys], key)
-	m[iBuckets][index][iVals] = append(m[iBuckets][index][iVals], value)
+	m0[iBuckets][index][iKeys] = append(m0[iBuckets][index][iKeys], key)
+	m0[iBuckets][index][iVals] = append(m0[iBuckets][index][iVals], value)
 
-	return m
+	return m0
 end function
 
 --**
--- Remove an entry with given key from the map m1. The modified map is returned.
+-- Remove an entry with given key from the map m. The modified map is returned.
 --
 -- Comments:
 --   If the map has no entry with the specified key, the original map is returned.
@@ -358,30 +358,30 @@ end function
 --   -- m is now an empty map again
 --   </eucode>
 
-export function remove(map m1, object key)
+export function remove(map m, object key)
 	integer hash, index
 	object bucket
-	sequence m
+	sequence m0
 
-	m = m1
+	m0 = m
 		index = calc_hash(key, length(m[iBuckets]))
 
 		-- find prev entry
 		bucket = m[iBuckets][index]
 		hash = find(key, bucket[iKeys])
 		if hash != 0 then
-			m[iCnt] -= 1
+			m0[iCnt] -= 1
 			if length(bucket[iVals]) = 1 then
-				m[iInUse] -= 1
+				m0[iInUse] -= 1
 				bucket = {{},{}}
 			else
 				bucket[iVals] = bucket[iVals][1 .. hash-1] & bucket[iVals][hash+1 .. $]
 				bucket[iKeys] = bucket[iKeys][1 .. hash-1] & bucket[iKeys][hash+1 .. $]
 			end if
-			m[iBuckets][index] = bucket
+			m0[iBuckets][index] = bucket
 		end if
 
-		return m
+		return m0
 end function
 
 --**
@@ -507,20 +507,20 @@ export function values(map m)
 end function
 
 --**
-export function optimize(map m1, atom pAvg = 10)
+export function optimize(map m, atom pAvg = 10)
 	sequence op
-	sequence m
+	sequence m0
 
-	m = m1
-	op = statistics(m)
-	m = rehash(m, floor(op[1] / pAvg))
-	op = statistics(m)
+	m0 = m
+	op = statistics(m0)
+	m0 = rehash(m0, floor(op[1] / pAvg))
+	op = statistics(m0)
 
 	while op[4] > pAvg * 1.5 and (op[7]*3 + op[6]) <= op[4] do
-		m = rehash(m, floor(op[3] * 1.333))
-		op = statistics(m)
+		m0 = rehash(m, floor(op[3] * 1.333))
+		op = statistics(m0)
 	end while
-	return m
+	return m0
 end function
 
 --**
@@ -551,7 +551,7 @@ export function load_map(sequence pFileName)
 			if length(lKey) > 0 then
 				lValue = trim(lLine[lDelim+1..$])
 				lValue = find_replace("\\-", "-", lValue)
-				lConvRes = value_from(lValue)
+				lConvRes = value(lValue,,GET_LONG_ANSWER)
 				if lConvRes[1] = GET_SUCCESS then
 					if lConvRes[3] = length(lValue) then
 						lValue = lConvRes[2]

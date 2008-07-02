@@ -282,18 +282,18 @@ end function
 -- reverse({})				   -- {}
 -- </eucode>
 
-export function reverse(sequence s)
-	integer lower, n, n2
+export function reverse(sequence st)
+	integer lowr, n, n2
 	sequence t
 
-	n = length(s)
+	n = length(st)
 	n2 = floor(n/2)+1
 	t = repeat(0, n)
-	lower = 1
-	for upper = n to n2 by -1 do
-		t[upper] = s[lower]
-		t[lower] = s[upper]
-		lower += 1
+	lowr = 1
+	for uppr = n to n2 by -1 do
+		t[uppr] = st[lowr]
+		t[lowr] = st[uppr]
+		lowr += 1
 	end for
 	return t
 end function
@@ -883,12 +883,12 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:pad_tail]], [[:head]]
 
-export function pad_head(sequence str, integer size, object ch=' ')
-	if size <= length(str) then
-		return str
+export function pad_head(sequence st, integer size, object ch=' ')
+	if size <= length(st) then
+		return st
 	end if
 
-	return repeat(ch, size - length(str)) & str
+	return repeat(ch, size - length(st)) & st
 end function
 
 --**
@@ -915,12 +915,12 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:pad_head]], [[:tail]]
 
-export function pad_tail(sequence str, integer size, object ch=' ')
-	if size <= length(str) then
-		return str
+export function pad_tail(sequence st, integer size, object ch=' ')
+	if size <= length(st) then
+		return st
 	end if
 
-	return str & repeat(ch, size - length(str))
+	return st & repeat(ch, size - length(st))
 end function
 
 --**
@@ -951,19 +951,19 @@ end function
 -- See Also:
 --   [[:split]]
 
-export function chunk(sequence s, integer size)
+export function chunk(sequence st, integer size)
 	sequence ns
 	integer stop
 
 	ns = {}
 
-	for i = 1 to length(s) by size do
+	for i = 1 to length(st) by size do
 		stop = i + size - 1
-		if stop > length(s) then
-			stop = length(s)
+		if stop > length(st) then
+			stop = length(st)
 		end if
 
-		ns = append(ns, s[i..stop])
+		ns = append(ns, st[i..stop])
 	end for
 
 	return ns
@@ -978,13 +978,13 @@ end function
 -- -- s is {18, 19, 45, 18.4, 29.3}
 -- </eucode>
 
-export function flatten(sequence s)
+export function flatten(sequence st)
 	sequence ret
 	object x
 
 	ret = {}
-	for i = 1 to length(s) do
-		x = s[i]
+	for i = 1 to length(st) do
+		x = st[i]
 		if atom(x) then
 			ret &= x
 		else
@@ -1115,18 +1115,18 @@ end function
 -- See Also:
 --   [[:repeat]], [[:linear]]
 
-export function repeat_pattern(sequence s, integer count)
+export function repeat_pattern(sequence st, integer count)
 	integer ls
 	sequence result
 
 	if count<=0 then
 		return {}
 	end if
-	ls=length(s)
+	ls=length(st)
 	count *= ls
 	result=repeat(0,count)
 	for i=1 to count by ls do
-		result[i..i+ls-1]=s
+		result[i..i+ls-1]=st
 	end for
 	return result
 end function
@@ -1189,11 +1189,11 @@ end function
 -- See Also:
 --   [[:store]], [[:Sequence Assignments]]
 
-export function fetch(sequence s, sequence indexes)
+export function fetch(sequence st, sequence indexes)
 	for i=1 to length(indexes)-1 do
-		s=s[indexes[i]]
+		st=st[indexes[i]]
 	end for
-	return s[indexes[$]]
+	return st[indexes[$]]
 end function
 
 --**
@@ -1208,11 +1208,11 @@ end function
 -- See Also:
 --     [[:fetch]], [[:Sequence Assignments]]
 
-export function store(sequence s, sequence indexes, object x)
+export function store(sequence st, sequence indexes, object x)
 	sequence partials,result,branch
 
-	partials=repeat(s,length(indexes)-1)
-	branch=s
+	partials=repeat(st,length(indexes)-1)
+	branch=st
 	for i=1 to length(indexes)-1 do
 		branch=branch[indexes[i]]
 		partials[i]=branch
@@ -1224,8 +1224,8 @@ export function store(sequence s, sequence indexes, object x)
 		result[indexes[i]]=branch
 		branch=result
 	end for
-	s[indexes[1]]=branch
-	return s
+	st[indexes[1]]=branch
+	return st
 end function
 
 --**
@@ -1240,11 +1240,11 @@ end function
 -- See Also:
 --     [[:Sequence Assignments]]
 
-export function valid_index(sequence s, object x)
+export function valid_index(sequence st, object x)
 	if sequence(x) or x<1 then
 		return 0
 	else
-		return x<length(s)+1
+		return x<length(st)+1
 	end if
 end function
 
