@@ -1,8 +1,12 @@
+ifdef !DOS32 then
 include localeconv.e as lcc
 include locale.e as l
 include datetime.e as d
+end ifdef
+
 include unittest.e
 
+ifdef !DOS32 then
 sequence locale
 
 locale = "en_US"
@@ -53,5 +57,6 @@ test_equal("w() #5", "Mundo", l:w("world"))
 test_equal("w() #6", "%s, %s!", l:w("greeting"))
 test_equal("w() sprintf() #2", "Hola, Mundo!",
     sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
+end ifdef
 
 test_report()

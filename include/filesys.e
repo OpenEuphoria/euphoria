@@ -558,6 +558,12 @@ end function
 export function delete_file(sequence filename)
 	atom pfilename, ret
 
+	ifdef DOS32 then
+		-- quick hack
+		system("del "&filename&" > NUL", 2)
+		return 1
+	end ifdef
+
 	pfilename = allocate_string(filename)
 	ret = c_func(xDeleteFile, {pfilename})
 	
