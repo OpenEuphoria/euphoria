@@ -7,7 +7,7 @@
 --
 
 -- error status values returned from get() and value():
-global constant GET_SUCCESS = 0,
+export constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
 				GET_NOTHING = -2
@@ -224,7 +224,7 @@ function get_number()
 	end if
 	
 	mantissa = sign * mantissa
-	
+
 	if ch = 'e' or ch = 'E' then
 		-- get exponent sign
 		e_sign = +1
@@ -236,7 +236,7 @@ function get_number()
 		elsif ch = '+' then
 			get_ch()
 		end if
-		-- get exponent magnitude 
+		-- get exponent magnitude
 		if ch >= '0' and ch <= '9' then
 			e_mag = ch - '0'
 			get_ch()
@@ -354,15 +354,17 @@ end function
 
 integer leading_whitespace
 
-function Get2(natural offset)
+function Get2()
 -- read a Euphoria data object as a string of characters
 -- and return {error_flag, value,total number of characters, leading whitespace}
 -- Note: ch is "live" at entry and exit of this routine.
 -- Uses the regular Get() to read esequence elements.
 	sequence s, e
 	integer e1
+    natural offset
 
 	-- init
+	offset = string_next-1
 	get_ch()
 	while find(ch, white_space) do
 		get_ch()
@@ -447,8 +449,30 @@ function Get2(natural offset)
 
 end function
 
+export constant
+	GET_SHORT_ANSWER = routine_id("Get"),
+	GET_LONG_ANSWER  = routine_id("Get2")
+
+function get_value(object target,integer start_point,integer answer_type)
+	if atom(target) then -- get()
+		input_file = file
+		if start_point then
+		    if seek(file,where(target)+start_point) then
+			    crash("Initial seek() for get() failed!")
+		    end if
+		end if
+		string_next = 1
+		input_string = 0
+	else
+		input_string = target
+		string_next = start_point
+	end if
+	get_ch() 
+	return call_func(answer_type,{})
+end function
+
 --**
--- Input, from file fn, a human-readable string of characters representing a Euphoria object. 
+-- Input, from file fn, a human-readable string of characters st representing a Euphoria object. 
 -- Convert the string into the numeric value of that object. s will be a 2-element sequence: 
 -- ##{error status, value}#. Error status codes are:
 --
@@ -463,10 +487,19 @@ end function
 -- A single call to get() will read in this entire sequence and return its value as a result, 
 -- as well as complementary information.
 -- 
--- get() returns a 2 element sequence, like value() does:
+-- If a nonzero offset is supplied, it is interpreted as an offset to the current file
+-- position, and the file will be seek()ed there first.
+--
+-- get() returns a 2 or 4 element sequence, like value() does:
 --
 -- * a status code (success/error/end of file/no value at all)</li>
 -- * the value just read (meaningful only when the status code is GET_SUCCESS)</li>
+-- (optionally)
+-- * the total number of characters read
+-- * the amount of initial whitespace read.
+--
+-- Using the default value for answer, or setting it to GET_SHORT_ANSWER, returns 2 elements.
+-- Setting it to GET_LONG_ANSWER causes 4 elements to be returned.
 --
 -- Each call to get() picks up where the previous call left off. For instance, a series of 5 
 -- calls to get() would be needed to read in:
@@ -527,26 +560,26 @@ end function
 -- Example 2:
 --     See ##bin\mydata.ex##
 
-global function get(integer file)
+global function get(integer file,integer offset=0,integer answer=GET_SHORT_ANSWER)
 -- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
 -- Return {error_status, value}.
 -- Embedded comments inside sequences are now supported.
-	input_file = file
-	string_next = 1
-	input_string = 0
-	get_ch() 
-	return Get()
+	return get_value(file,offset,answer)
 end function
 
 --**
--- Read the string representation of a Euphoria object, and compute the value of that object. 
--- A 2-element sequence, {error_status, value} is actually returned, where error_status can 
+-- Read the string representation of a Euphoria object st, and compute the value of that object. 
+-- A 2 or 4 element sequence, is returned, whose first element, the return status, can
 -- be one of:
 --
 -- * GET_SUCCESS -- a valid object representation was found
 -- * GET_EOF     -- end of string reached too soon
 -- * GET_FAIL    -- syntax is wrong
+-- * GET_NOTHING -- nothing was read, even a partial object string, before end of input
+--
+-- The start_point parameter is the point at which parsing starts. It defaults to 1 (the start 
+-- of the string).
 --
 -- Comments:
 --     This works the same as get(), but it reads from a string that you supply, rather than 
@@ -554,7 +587,12 @@ end function
 --
 --     After reading one valid representation of a Euphoria object, value() will stop reading 
 --     and ignore any additional characters in the string. For example, "36" and "36P" will 
---     both give you {GET_SUCCESS, 36}. 
+--     both give you {GET_SUCCESS, 36}.
+--
+-- The function returns {return_status, value} if the answer type is not passed or set to 
+-- GET_SHORT_ANSWER. If set to GET_LONG_ANSWER, the number of character read and the amount of 
+-- leading whitespace are returned in 3rd and 4th position. The GET_NOTHING return status can 
+-- occur only on a long answer.
 --
 -- Example 1:
 -- <eucode>
@@ -574,74 +612,11 @@ end function
 -- -- s is {GET_FAIL, 0}
 -- </eucode>
 
-global function value(sequence string)
+global function value(sequence st,integer start_point=1,integer answer=GET_SHORT_ANSWER)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
 -- Trailing whitespace or comments are not considered.
 -- Return {error_status, value}.
 -- Embedded comments inside sequence are now supported.
-	input_string = string
-	string_next = 1
-	get_ch() 
-	return Get()
+	return get_value(string,start_point,answer)
 end function
-
---**
--- Read the string representation of a Euphoria object, and computes the value of that object. 
--- The string which is read is the tail of st which starts at index i. A 4-element sequence,
--- ##{error_status, value, total characters read, number of leading whitespace}## is
--- actually returned, where error_status can be one of:
---  
--- * GET_SUCCESS -- a valid object representation was found
--- * GET_EOF     -- end of string reached too soon
--- * GET_FAIL    -- syntax is wrong
--- * GET_NOTHING -- end of string reached without any value being even partially read
---
--- Comments:
---     This works the same as ##value()##, but
-
---     * reading starts where you instruct the routine to, instead of starting from the beginning 
---       of the string. You can always pass value() a slice to achieve a similar effect.
---     * it returns extra information value() doesn't.</li>
---  
---     After reading one valid representation of a Euphoria object, value_from() will
---     stop reading and ignore any additional characters in the string. For
---     example, "36" and "36P" will both give you {GET_SUCCESS, 36, 2, 0}.". After reading an
---     invalid representation, the value field is undefined (usually 0), and the third field is the
---     1 based index of the character the reading of which caused an error.
---  
---     If the representation was valid, you can use the third returned element to pick up where you 
---     left, like get() does in a file. There is no corresponding get_from(), at least because 
---     calling where() before and after get() will tell you how many characters were read.
---
--- Example 1:
---     <eucode>
---     s = value_from("  12345"} -- notice the two leading spaces
---     -- s is {GET_SUCCESS, 12345, 7, 2}
---     </eucode>
---
--- Example 2:
---     <eucode>
---     s = value_from("{0, 1, -99.9}")
---     -- s is {GET_SUCCESS, {0, 1, -99.9}, 13, 0}
---     </eucode>
---
--- Example 3:
---     <eucode>
---     s = value_from("+++")
---     -- s is {GET_FAIL, 0, 2, 0} -- error condition triggered on reading the 2nd character
---     </eucode>
-
-global function value_from(sequence string, natural starting_point = 1)
--- Read the representation of a Euphoria object
--- from a sequence of characters. Convert to the value of the object.
--- Trailing whitespace or comment are not considered.
--- Return {error_status, value,total # of characters,# leading whitespaces).
--- On error, the third element is the index at which the error condition was seen.
--- Embedded comments inside sequences are supported.
-	if string[starting_point] then end if -- checks whether starting_point is valid
-	input_string = string
-	string_next = starting_point
-	return Get2(starting_point-1)
-end function
-

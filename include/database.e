@@ -1478,11 +1478,11 @@ global procedure db_delete_record(integer key_location)
 end procedure
 
 --**
--- In the current table, replace the data portion of record number rn, with 
+-- In the current table, replace the data portion of record number key_location, with 
 -- data. data can be any Euphoria atom or sequence.
 --
 -- Comments:
--- The record number, rn, must be from 1 to the number of records in the 
+-- The record number, key_location, must be from 1 to the number of records in the 
 -- current table.
 --
 -- Example 1:
@@ -1490,17 +1490,17 @@ end procedure
 -- db_replace_data(67, {"Peter", 150, 34.5})
 -- </eucode>
 
-global procedure db_replace_data(integer rn, object data) 
+global procedure db_replace_data(integer key_location, object data) 
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 	
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
-	if rn < 1 or rn > length(key_pointers) then
+	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	key_ptr = key_pointers[rn]
+	key_ptr = key_pointers[key_location]
 	safe_seek(key_ptr)
 	data_ptr = get4()
 	safe_seek(data_ptr-4)
@@ -1545,7 +1545,7 @@ global function db_table_size()
 end function
 
 --**
--- Return the data portion of record number rn in the current table.
+-- Return the data portion of record number key_location in the current table.
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a data 
@@ -1557,17 +1557,17 @@ end function
 -- ? db_record_data(6)
 -- </eucode>
 
-global function db_record_data(integer rn) 
+global function db_record_data(integer key_location) 
 	atom data_ptr
 	object data_value
 	
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
-	if rn < 1 or rn > length(key_pointers) then
+	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	safe_seek(key_pointers[rn])
+	safe_seek(key_pointers[key_location])
 	data_ptr = get4()
 	safe_seek(data_ptr)
 	data_value = decompress(0)
@@ -1575,7 +1575,7 @@ global function db_record_data(integer rn)
 end function
 
 --**
--- Return the key portion of record number rn in the current table.
+-- Return the key portion of record number key_location in the current table.
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a 
@@ -1587,16 +1587,16 @@ end function
 -- ? db_record_key(6)
 -- </eucode>
 
-global function db_record_key(integer rn) 
+global function db_record_key(integer key_location) 
 	object key_value
 	
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
-	if rn < 1 or rn > length(key_pointers) then
+	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	safe_seek(key_pointers[rn]+4)
+	safe_seek(key_pointers[key_location]+4)
 	key_value = decompress(0)
 	return key_value
 end function
