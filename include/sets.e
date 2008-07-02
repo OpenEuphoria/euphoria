@@ -16,6 +16,10 @@
 --     followed by {length(s1),length(s2)}.
 --   * An operation of ExF to G is a two dimensional sequence of elements of G, indexed ny
 --     ExF, and the triple {card(E),card(F),card(G)}.
+--
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include error.e
 

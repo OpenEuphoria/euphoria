@@ -2,7 +2,9 @@
 --
 --****
 -- == Euphoria Database (EDS)
--- <<LEVELTOC>>
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include error.e
 if not length(date()) then crash("") end if

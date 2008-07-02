@@ -2,6 +2,9 @@
 --
 --****
 -- == Mouse
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 -- === Requirements
 --

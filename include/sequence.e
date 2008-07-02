@@ -4,7 +4,7 @@
 -- == Sequence Manipulation
 -- **Page Contents**
 --
--- <<LEVELTOC level=4>>
+-- <<LEVELTOC depth=2>>
 
 include error.e
 include search.e
@@ -1584,3 +1584,4 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 		
 	return lKeyValues
 end function
+

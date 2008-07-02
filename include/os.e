@@ -2,6 +2,9 @@
 --
 --****
 -- == Operating System Helpers
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 
 include sequence.e

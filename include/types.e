@@ -2,6 +2,9 @@
 --
 --****
 -- == Extended Types
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 -- === Constants
 --

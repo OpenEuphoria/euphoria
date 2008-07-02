@@ -2,6 +2,9 @@
 --
 --****
 -- == Console 
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include types.e
 include get.e

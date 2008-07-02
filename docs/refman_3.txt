@@ -1,5 +1,7 @@
 == Debugging and Profiling
 
+<<LEVELTOC depth=2>>
+
 === Debugging
 
 Debugging in Euphoria is much easier than in most other programming languages.

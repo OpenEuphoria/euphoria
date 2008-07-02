@@ -2,6 +2,9 @@
 --
 --****
 -- == Prime Numbers
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include search.e
 include machine.e

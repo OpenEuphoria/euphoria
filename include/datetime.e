@@ -2,6 +2,10 @@
 --
 --****
 -- == Date/Time
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
+
 --
 
 include unicode.e -- needed for parse() and format()

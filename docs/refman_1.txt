@@ -1,6 +1,10 @@
 = Euphoria Reference Manual
 
+<<LEVELTOC depth=2>>
+
 == Core Language
+
+<<LEVELTOC depth=2>>
 
 === Introduction
 
@@ -170,7 +174,7 @@ and the ##dos32## and ##win32## subdirectories are not included in the //Linux/F
 distribution. In this manual, directory names are shown using backslash
 (**\**). //Linux/FreeBSD// users should substitute forward slash (**/**).
 
-== Running a Program
+=== Running a Program
 
 Euphoria programs are executed by typing one of the following:
 

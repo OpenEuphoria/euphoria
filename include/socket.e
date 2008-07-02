@@ -6,6 +6,9 @@
 -- Based on EuNet project, version 1.3.2, at SourceForge.
 -- http://www.sourceforge.net/projects/eunet.
 --
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
  
 include dll.e
 include machine.e

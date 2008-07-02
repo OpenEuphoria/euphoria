@@ -8,7 +8,10 @@
  
 -- By default, strings are stored in UCS2. 
 -- Actually Eu can store integers up to 0x3fffffff, but I think it is not so efficient for further conversion.
--- yuku 2008
+-- 
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 constant M_ALLOC = 16
 

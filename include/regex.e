@@ -4,6 +4,9 @@
 
 --****
 -- == Regular Expressions
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include sequence.e
 
@@ -207,7 +210,7 @@ end function
 --**
 -- Returns 1 if the regex matches anywhere in the text, 0 otherwise.
 
-export function matches(regex re, sequence text, atom options)
+export function matches(regex re, sequence text, atom options = 0)
 	return sequence(search(re, text, options))
 end function
 

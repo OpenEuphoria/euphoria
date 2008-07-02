@@ -2,6 +2,9 @@
 --
 --****
 -- ==  Locale Routines
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 -- 
 
 include dll.e

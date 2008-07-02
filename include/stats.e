@@ -2,6 +2,10 @@
 --
 --****
 -- == Statistics
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
+--
 -- === Routines
 
 include unittest.e

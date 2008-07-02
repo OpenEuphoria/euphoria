@@ -2,6 +2,9 @@
 --
 --****
 -- == Sorting
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 -- === Routines
 --

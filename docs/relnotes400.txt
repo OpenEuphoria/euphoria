@@ -27,6 +27,9 @@
 * **Moved** **instance()** and **sleep()** from **misc.e** to **os.e**
   $$(doneby Jeremy Cowgar)
 * Documentation moved to a new format. $$(doneby Jeremy Cowgar and CK Lester)
+* **file.e** deprecated. **filesys.e**, **io.e** and **console.e** created
+  in it's place. **file.e** still exists and includes the 3 replacements
+  so old apps will still function. $$(doneby Jeremy Cowgar)
 
 === New Features
 

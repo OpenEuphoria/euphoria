@@ -2,6 +2,9 @@
 --
 --****
 -- == Graphics and Sound
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 -- === Graphics Modes
 -- 

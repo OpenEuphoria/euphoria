@@ -2,6 +2,9 @@
 --
 --****
 -- == Dynamic Linking to C
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 -- === Constants
 --

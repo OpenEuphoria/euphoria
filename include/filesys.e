@@ -5,7 +5,9 @@
 --
 -- Cross platform file operations for Euphoria
 --
--- <<LEVELTOC>>
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include dll.e
 include machine.e

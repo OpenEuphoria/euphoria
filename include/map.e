@@ -2,6 +2,9 @@
 --
 --****
 -- == Map (hash table)
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include get.e
 include primes.e

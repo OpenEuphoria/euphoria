@@ -3,8 +3,9 @@
 --****
 -- == Stack
 --
--- TODO: 
--- documentation
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include error.e
 

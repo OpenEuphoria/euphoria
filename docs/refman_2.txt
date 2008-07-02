@@ -1,5 +1,7 @@
 == Language Definition
 
+<<LEVELTOC depth=2>>
+
 === Objects
 
 ==== Atoms and Sequences

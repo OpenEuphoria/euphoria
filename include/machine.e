@@ -29,6 +29,11 @@
 --
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
+--
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
+--
 
 constant M_ALLOC = 16,
 		 M_FREE = 17,

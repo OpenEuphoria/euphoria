@@ -2,6 +2,9 @@
 --
 --****
 -- == I/O
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 
 include sort.e
 include wildcard.e
@@ -374,11 +377,7 @@ end type
 -- Lock Type
 
 export type lock_type(integer t)
-	ifdef UNIX then
-		return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
-	else
-		return 1
-	end ifdef
+	return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
 end type
 
 --**

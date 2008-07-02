@@ -151,6 +151,7 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
 	./$(OBJDIR)/tranplat.o \
+	./$(OBJDIR)/0rror.o \
 	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/wildcard.o \

@@ -2,6 +2,10 @@
 --
 --****
 -- == Wildcard Matching
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
+--
 -- === Routines
 
 include sequence.e as seq -- upper/lower
@@ -95,9 +99,7 @@ end function
 --   only match when the file name part has "ABC" at the end.
 
 global function wildcard_file(sequence pattern, sequence filename)
-	ifdef UNIX then
-		-- Nothing
-	else
+	ifdef !UNIX then
 		pattern = seq:upper(pattern)
 		filename = seq:upper(filename)
 	end ifdef

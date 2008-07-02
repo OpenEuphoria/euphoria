@@ -1,5 +1,8 @@
 --****
 -- == Pretty Printing
+-- **Page Contents**
+--
+-- <<LEVELTOC depth=2>>
 --
 
 include os.e
