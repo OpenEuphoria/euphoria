@@ -106,6 +106,9 @@
   all parsing, syntax checking, etc... but does not execute the code. Exit
   code will be 1 on success, 0 on failure as normal. Editors/IDE's may need
   both -test and -batch. $$(doneby Jeremy Cowgar)
+* dis.ex (in the source directory) will parse a euphoria program and output the symbol table
+  and the IL code in a readible format.
+  $$(doneby Matt Lewis)
 
 === New Routines/Constants
 
