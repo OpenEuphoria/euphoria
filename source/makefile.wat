@@ -97,7 +97,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
 	.\$(OBJDIR)\compress.obj &
-        .\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &
@@ -109,10 +109,10 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\search.obj &
 	.\$(OBJDIR)\math.obj &
 	.\$(OBJDIR)\os.obj &
-        .\$(OBJDIR)\types.obj &
-        .\$(OBJDIR)\dll.obj &
-        .\$(OBJDIR)\filesys.obj &
-        .\$(OBJDIR)\io.obj
+	.\$(OBJDIR)\types.obj &
+	.\$(OBJDIR)\dll.obj &
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\io.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
@@ -121,14 +121,16 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\0rror.obj &
+	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
-        .\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
-        .\$(OBJDIR)\tranplat.obj &
-        .\$(OBJDIR)\types.obj &
-        .\$(OBJDIR)\dll.obj &
-        .\$(OBJDIR)\filesys.obj
+	.\$(OBJDIR)\tranplat.obj &
+	.\$(OBJDIR)\types.obj &
+	.\$(OBJDIR)\dll.obj &
+	.\$(OBJDIR)\filesys.obj
 
 	
 EU_CORE_OBJECTS = &
@@ -136,7 +138,7 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\main-0.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
-        .\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
@@ -289,7 +291,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
         .\$(OBJDIR)\search.obj &
-        .\$(OBJDIR)\dll.obj &
         .\$(OBJDIR)\io.obj &
         .\$(OBJDIR)\math.obj &
         .\$(OBJDIR)\os.obj &
