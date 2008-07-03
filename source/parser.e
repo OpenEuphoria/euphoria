@@ -647,25 +647,21 @@ procedure ParseArgs(symtab_index subsym)
 	short_circuit -= 1
 	for i = 1 to n do
       	
-    	if atom(tok2) then
-			tok = next_token()
-		else
-			tok=tok2
-			tok2=UNDEFINED
-		end if
+      	tok = next_token()
     	if tok[T_ID] = COMMA then  -- defaulted arg
 			s = SymTab[s][S_NEXT]  
             if atom(SymTab[s][S_CODE]) then  -- but no default set
                 CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
             end if
             use_private_list = 1
-			start_playback(SymTab[s][S_CODE])
+			start_playback(SymTab[s][S_CODE]) 
+			lock_scanner=1
 			call_proc(forward_expr, {})
+			lock_scanner=0
 			on_arg += 1
 			private_list = append(private_list,SymTab[s][S_NAME])
 			private_sym &= Top()
-			tok2 = backed_up_tok
-			putback(tok)
+			backed_up_tok = tok
 		elsif tok[T_ID] != RIGHT_ROUND then
 			s = SymTab[s][S_NEXT]
 			use_private_list = 0
@@ -676,7 +672,7 @@ procedure ParseArgs(symtab_index subsym)
 			private_sym &= Top()
     	end if
 
-		if on_arg != n then 
+		if on_arg != n then
 			if tok[T_ID] = RIGHT_ROUND then
 				putback( tok )
 			end if
@@ -698,8 +694,8 @@ procedure ParseArgs(symtab_index subsym)
 							start_playback(SymTab[s][S_CODE] )
 							call_proc(forward_expr, {})
 							if j<n then
-								private_list = append(private_list,SymTab[s][S_NAME])  
-								private_sym &= Top()  
+								private_list = append(private_list,SymTab[s][S_NAME])
+								private_sym &= Top()
 							end if
 							on_arg += 1
                         else -- just not enough args
@@ -931,8 +927,6 @@ procedure Factor()
 				end if
 			end if      
 		end if
-	elsif id = PLAYBACK_ENDS then
-		return
 	else
 		CompileErr(sprintf(
 				   "Syntax error - expected to see an expression, not %s",
@@ -985,13 +979,10 @@ function aexpr()
 	integer id
 	
 	tok = term() 
-	if tok[T_ID] = PLAYBACK_ENDS then
-	    tok = next_token() 
-	end if
 	while tok[T_ID] = PLUS or tok[T_ID] = MINUS do
 		id = tok[T_ID]
 		tok = term()
-		emit_op(id) 
+		emit_op(id)
 	end while
 	return tok
 end function

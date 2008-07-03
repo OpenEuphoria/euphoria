@@ -66,11 +66,7 @@ test_false("file_position #4", file_position(-203))
 test_false("file_position #5", file_position(-2))
 test_true("lock_type #1", lock_type(LOCK_SHARED))
 test_true("lock_type #2", lock_type(LOCK_EXCLUSIVE))
-ifdef UNIX then
-	test_false("lock_type #3", lock_type(20))
-else
-	test_true("lock_type #3", lock_type(20))
-end ifdef
+test_false("lock_type #3", lock_type(20))
 
 test_report()
 
