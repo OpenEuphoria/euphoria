@@ -27,8 +27,16 @@ function mul3(integer p=n0,object x,object y=incr(s))
 return x*y+p
 end function
 
-function foo( object a=0, object b=0, object c=0, object d = 0 )
+function foo( object a=10, object b=20, object c=30, object d = 40 )
 	return a & b & c & d
+end function
+
+function foo2( object a=10, object b=0)
+	return a & b 
+end function
+
+function foo3( object a=10, object b=20)
+	return a & b 
 end function
 
 test_equal("2nd arg defaulted to function", 13, incr(4))
@@ -37,14 +45,21 @@ test_equal("2nd arg defaulted to builtin", 1, incr2(-2))
 test_equal("1st arg defaulted, but explicit",14,mul3(2,3,4))
 test_equal("1st arg defaulted,functional defaulted arg explicit",9,mul3(,2,3))
 test_equal("Recursive defaulting",{32,35,38},mul3(2,3))
-test_equal("- - - -", {0,0,0,0}, foo() )
-test_equal("1 - - -", {1,0,0,0}, foo(1) )
-test_equal("1 - 1 -", {1,0,1,0}, foo(1,,1) )
-test_equal("- - - 1", {0,0,0,1}, foo(,,,1) )
-test_equal("1 - - 1", {1,0,0,1}, foo(1,,,1) )
+test_equal("- - - -", {10,20,30,40}, foo() )
+test_equal("1 - - -", {1,20,30,40}, foo(1) )
+test_equal("1 - 1 -", {1,20,1,40}, foo(1,,1) )
+test_equal("- - - 1", {10,20,30,1}, foo(,,,1) )
+test_equal("1 - - -21", {1,20,30,-21}, foo(1,,,-21) )
 test_equal("1 1 1 1", {1,1,1,1}, foo(1,1,1,1) )
-test_equal(", , , ,", {0,0,0,0}, foo(,,,) )
-test_equal("1 , , ,", {1,0,0,0}, foo(1,,,) )
+test_equal(", , , ,", {10,20,30,40}, foo(,,,) )
+test_equal("1 , , ,", {1,20,30,40}, foo(1,,,) )
+
+test_equal("foo2(, 1)", {10,1}, foo2(,1) )
+test_equal("foo2(, -1)", {10,-1}, foo2(,-1) )
+
+test_equal("foo3(, 1)", {10,1}, foo3(,1) )
+test_equal("foo3(, -1)", {10,-1}, foo3(,-1) )
+
 test_equal("default call as part of compound expression", 2, mul2(1,1) + mul2(1,1) )
 
 include sequence.e

@@ -3,6 +3,17 @@ include unittest.e
 
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
 test_equal("reverse() string", "nhoJ", reverse("John"))
+test_equal("reverse() sub-string 1", "ayxwvutsrqponmlkjihgfedcbz", reverse("abcdefghijklmnopqrstuvwxyz", 2, -1))
+test_equal("reverse() sub-string 2", "azyxwvutsrqponmlkjihgfedcb", reverse("abcdefghijklmnopqrstuvwxyz", 2, 0))
+test_equal("reverse() sub-string 3", "yxwvutsrqponmlkjihgfedcbaz", reverse("abcdefghijklmnopqrstuvwxyz", 1, -1))
+test_equal("reverse() even count", "fedcba", reverse("abcdef"))
+test_equal("reverse() odd count", "edcba", reverse("abcde"))
+test_equal("reverse() 2-elements", "ba", reverse("ab"))
+test_equal("reverse() 1-elements", "a", reverse("a"))
+test_equal("reverse() 0-elements", "", reverse(""))
+test_equal("reverse() atom", 42, reverse(42))
+test_equal("reverse() with sub-seq", {{-10,-200}, {5,6,7}, {1,2}}, reverse({{1,2}, {5,6,7}, {-10, -200}}))
+
 
 test_equal("head() string default", "J", head("John Doe"))
 test_equal("head() string", "John", head("John Doe", 4))

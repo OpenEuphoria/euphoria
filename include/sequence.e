@@ -272,29 +272,58 @@ end function
 --
 -- Comments:
 -- A new sequence is created where the top-level elements appear in reverse order compared 
--- to the original sequence.
+-- to the original sequence. This does not reverse any sub-sequences found in the original
+-- sequence.\\
+-- The {{{pTo}}} parmeter can be negative, which indicates an offset from the last element.
+-- Thus {{{-1}}} means the second-last element and {{{0}}} means the last element.
+--
+-- Parameters:
+--   * st - object to reverse. If this is an atom it is just returned.
+--   * pFrom - The first element. Default is 1.
+--   * pTo - The last element. Default is length(st)
 --
 -- Example 1:
 -- <eucode>
 -- reverse({1,3,5,7})		   -- {7,5,3,1}
+-- reverse({1,3,5,7,9}, 2, -1) -- {1,7,5,3,9}
+-- reverse({1,3,5,7,9}, 2)     -- {1,9,7,5,3}
 -- reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
 -- reverse({99})			   -- {99}
 -- reverse({})				   -- {}
+-- reverse(42)				   -- 42
 -- </eucode>
 
-export function reverse(sequence st)
-	integer lowr, n, n2
+export function reverse(object st, integer pFrom = 1, integer pTo = 0)
+	integer uppr, n, lLimit
 	sequence t
 
+	if atom(st) or length(st) < 2 then
+		return st
+	end if
+	
 	n = length(st)
-	n2 = floor(n/2)+1
+	if pFrom != 1 or pTo != 0 then
+		if pTo < 1 then
+			pTo = n + pTo
+		end if
+		if pTo - pFrom < 0 then
+			return st
+		end if
+		st[pFrom .. pTo] = reverse(st[pFrom .. pTo])
+		return st
+	end if
+	
+	lLimit = floor(n/2)
 	t = repeat(0, n)
-	lowr = 1
-	for uppr = n to n2 by -1 do
+	uppr = n
+	for lowr = 1 to lLimit do
 		t[uppr] = st[lowr]
 		t[lowr] = st[uppr]
-		lowr += 1
+		uppr -= 1
 	end for
+	if uppr > lLimit then
+		t[uppr] = st[uppr]
+	end if
 	return t
 end function
 
