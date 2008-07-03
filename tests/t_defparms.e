@@ -56,9 +56,14 @@ test_equal("1 , , ,", {1,20,30,40}, foo(1,,,) )
 
 test_equal("foo2(, 1)", {10,1}, foo2(,1) )
 test_equal("foo2(, -1)", {10,-1}, foo2(,-1) )
+test_equal("foo2(1,)", {1,0}, foo2(1) )
+test_equal("foo2(-1,)", {-1,0}, foo2(-1) )
 
 test_equal("foo3(, 1)", {10,1}, foo3(,1) )
 test_equal("foo3(, -1)", {10,-1}, foo3(,-1) )
+test_equal("foo3(1,)", {1,20}, foo3(1) )
+test_equal("foo3(-1,)", {-1,20}, foo3(-1) )
+
 
 test_equal("default call as part of compound expression", 2, mul2(1,1) + mul2(1,1) )
 
