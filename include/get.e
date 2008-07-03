@@ -452,7 +452,7 @@ function Get2()
 
 end function
 
-export constant
+global constant
 	GET_SHORT_ANSWER = routine_id("Get"),
 	GET_LONG_ANSWER  = routine_id("Get2")
 
