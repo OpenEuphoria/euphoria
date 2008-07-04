@@ -6,7 +6,7 @@
 -- http://www.creativeportal.ca                          written by Chris Bensler
 ---------------------------------------------------------------------------------
 include keywords.e
-
+		   with trace
 constant FALSE = 0, TRUE = 1
 constant EOF = -1
 object EOL					EOL = '\n'
@@ -476,7 +476,7 @@ procedure next_token()
 			Token[TTYPE] = T_COMMENT
 			Token[TDATA] = "--"
 			scan_char()
-			while (Look != EOL) do
+			while (Look != EOL and Look != EOF) do 
 				Token[TDATA] &= Look
 				scan_char()
 			end while
@@ -493,6 +493,7 @@ procedure next_token()
 		Token[TDATA] = Look
 		if (Look != EOF) then report_error(ERR_UNKNOWN) end if
 	end if
+	if Token[3]=278 then trace(1) end if
 end procedure
 
 ---------------------------------------------------------------------------------
@@ -532,11 +533,11 @@ global function et_tokenize_file(sequence fname)
 	ERR = FALSE
 	ERR_LNUM = 0
 	ERR_LPOS = 0
-	
+
 	tokens = {}
 	open_parse(fname)
 	if not ERR then
-		
+
 		next_token()
 		if not ERR then
 			while Token[TTYPE] != T_EOF do
@@ -546,10 +547,10 @@ global function et_tokenize_file(sequence fname)
 			end while
 			tokens &={ Token }
 		end if
-		
+
 		close_parse()
 	end if
-	
+
 	return {tokens,ERR,ERR_LNUM, ERR_LPOS}
 end function
 
