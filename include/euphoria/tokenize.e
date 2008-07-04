@@ -6,7 +6,7 @@
 -- http://www.creativeportal.ca                          written by Chris Bensler
 ---------------------------------------------------------------------------------
 include keywords.e
-		   with trace
+		   
 constant FALSE = 0, TRUE = 1
 constant EOF = -1
 object EOL					EOL = '\n'
@@ -493,7 +493,7 @@ procedure next_token()
 		Token[TDATA] = Look
 		if (Look != EOF) then report_error(ERR_UNKNOWN) end if
 	end if
-	if Token[3]=278 then trace(1) end if
+	
 end procedure
 
 ---------------------------------------------------------------------------------
