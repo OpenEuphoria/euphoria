@@ -502,12 +502,12 @@ source : .SYMBOLIC common-source source-win source-dos
 
 testwin : interpreter
 	cd ..\tests
-	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe
+	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe --ec ..\source\ecw.exe -lib ..\source\ecw.lib
 	cd ..\source
 
 testdos : dos
 	cd ..\tests
-	..\source\ex -i ..\include ..\bin\eutest.ex -exe ..\source\ex.exe
+	..\source\ex -i ..\include ..\bin\eutest.ex -exe ..\source\ex.exe -ec ..\source\ec.exe -lib ..\source\ec.lib
 	cd ..\source
 	
 test : .SYMBOLIC testwin testdos

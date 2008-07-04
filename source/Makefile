@@ -377,8 +377,8 @@ eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
 	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o eubackend
 
-test : interpreter
-	cd ../tests/ && ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu
+test : interpreter translator
+	cd ../tests/ && ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu -ec ../source/ecu -lib ../source/ecu.a
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
