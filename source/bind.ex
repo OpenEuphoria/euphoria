@@ -6,13 +6,12 @@
 
 without type_check
 
+include filesys.e
 include mode.e
 set_mode( "bind", 0 )
 
 
-
 -- standard Euphoria includes
-include misc.e
 include wildcard.e
 
 -- front-end

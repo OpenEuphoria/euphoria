@@ -14,6 +14,8 @@ include reswords.e
 include scanner.e
 include sequence.e
 include cominit.e
+include filesys.e
+
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con
 integer del_routines, del_vars
