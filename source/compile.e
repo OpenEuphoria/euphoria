@@ -4153,8 +4153,8 @@ end procedure
 
 procedure opSPLICE()
 	splins()
-	c_stmt("if (insert_pos <= 0) Concat(@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
-    c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Concat(@,@,@);\n",{Code[pc+1],Code[pc+4],Code[pc+2],Code[pc+1]})
+	c_stmt("if (insert_pos <= 0) Concat(&@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
+    c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Concat(&@,@,@);\n",{Code[pc+1],Code[pc+4],Code[pc+1],Code[pc+2]})
 	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
 	--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
 	c_stmt("assign_space = Add_internal_space(@,insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
