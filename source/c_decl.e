@@ -1164,6 +1164,7 @@ global procedure start_emake()
 		else 
 			cc_name = "gcc"
 		end if
+		c_opts &= sprintf( " -I%s", {get_eudir()})
 	end if      
 
 	if TWINDOWS then    
