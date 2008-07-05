@@ -323,6 +323,9 @@ end procedure
 
 procedure safe_seek(atom pos)
 -- seek to a position in the current db file    
+	if current_db = -1 then
+		fatal("Illegal operation: no current database defined!\n")
+	end if
 	if seek(current_db, pos) != 0 then
 		fatal(sprintf("seek to position %d failed!\n", pos))
 	end if
@@ -334,10 +337,16 @@ end procedure
 --**
 -- print an open database in readable form to file fn
 --
+-- Parameters:
+--		# ##fn##: the destination file number for printing the current Euphoria database;
+--		# ##low_level_too##: a boolean. If true, a byte-by-byte binary dump is presented as well; otherwise this step is skipped
+--
+-- Errors:
+-- 		If the current database is not defined, an error will occur.
+--
 -- Comments:
---   Print the contents of an already-open Euphoria database.
---   The contents are printed to file or device fn.
---   All records in all tables are shown. If low_level_too is non-zero, 
+--   All records in all tables are shown. 
+--	If low_level_too is non-zero,
 --   then a low-level byte-by-byte dump is also shown. The low-level
 --   dump will only be meaningful to someone who is familiar
 --   with the internal format of a Euphoria database.
@@ -448,9 +457,13 @@ global procedure db_dump(integer fn, integer low_level_too)
 	end for
 end procedure
 
-global procedure check_free_list()
+--**
+-- Detects corruption of the free list in a Euphria database.
+--
+-- Comments:
 -- This is a debug routine used by RDS to detect corruption of the free list.
 -- Users do not normally call this.
+global procedure check_free_list()
 	atom free_count, free_list, addr, size, free_list_space
 	atom max
   
@@ -582,7 +595,7 @@ procedure db_free(atom p)
 		addr = get4()
 		size = get4()
 		if p < addr then
-			exit 
+			exit
 		end if
 		prev_addr = addr
 		prev_size = size
@@ -629,28 +642,33 @@ procedure db_free(atom p)
 end procedure
 
 --**
--- Create a new database in the file with path
--- given by s and return an error code indicating success or failure.
--- i2 indicates the type of lock that will be applied to the file
--- as it is created.
 --
--- The values for i2 can be either DB_LOCK_NO (no lock) or 
--- DB_LOCK_EXCLUSIVE (exclusive lock). i1
--- is DB_OK if the new database is successfully created. This database
--- becomes the <b>current database</b> to which
--- all other database operations will apply.
+-- ==== Managing databases
+--
+-- Create a new database, given a file path and a lock method.
+--
+-- Parameters:
+--		# ##path##: a sequence, the path to the file that will contain the database.
+--		# ##lock_method##, an integer specifying which sort of access can be granted to the database. The value of lock_method can be either DB_LOCK_NO (no lock) or
+-- DB_LOCK_EXCLUSIVE (exclusive lock). 
 --
 -- Returns:
--- integer - an error code that indicates success or failure
+--		An **integer** status code, either DB_OK if creation succesful or anything else on an error.
 --
 -- Comments:
+-- 
+-- On success, the newly created database
+-- becomes the **current database** to which
+-- all other database operations will apply.
+--
 -- If the path, s, does not end in .edb, it will be added automatically.
 --
--- If the database already exists, it will not be overwritten.
--- db_create() will return DB_EXISTS_ALREADY.
 -- A version number is stored in the database file so future
 -- versions of the database software can recognize the format, and
 -- possibly read it and deal with it in some way.
+--
+-- If the database already exists, it will not be overwritten.
+-- db_create() will return DB_EXISTS_ALREADY.
 --
 -- Example 1:
 -- <eucode>
@@ -659,6 +677,9 @@ end procedure
 --     abort(1)
 -- end if
 -- </eucode>
+--
+-- See Also:
+-- 		[[:db_open]], [[:db_select]]
 
 global function db_create(sequence path, integer lock_method)
 	integer db
@@ -726,28 +747,28 @@ global function db_create(sequence path, integer lock_method)
 end function
 
 --**
--- Open an existing Euphoria database. The file containing the database is
--- given by path. Returns a code indicating success or failure.
--- lock_method indicates the type of lock that you want to place on the database
--- file while you have it open. This database
--- becomes the current database to which all other database operations will apply.
+-- Open an existing Euphoria database.
+--
+-- Parameters:
+--		# ##path##: a sequence, the path to the file containing the database
+--		# ##lock_method##, an integer specifying which sort of access can be granted to the database. The types of lock that you can use are: ##DB_LOCK_NO## (no lock),
+--   ##DB_LOCK_SHARED## (shared lock for read-only access) and
+--   ##DB_LOCK_EXCLUSIVE## (for read/write access). 
+--
+-- Returns:
+--		An **integer** status code, either DB_OK if creation succesful or anything else on an error.
+--
 -- The return codes are:
 --
 -- <eucode>
--- global constant
---     DB_OK = 0          -- success
---     DB_OPEN_FAIL = -1  -- couldn't open the file 
---     DB_LOCK_FAIL = -3  -- couldn't lock the file in the
+--    * DB_OK = 0          -- success
+--    * DB_OPEN_FAIL = -1  -- couldn't open the file
+--    * DB_LOCK_FAIL = -3  -- couldn't lock the file in the
 --                        --     manner requested
 -- </eucode>
 --
--- Returns:
---   integer - an error code that indicates success or failure
---
 -- Comments:
---   The types of lock that you can use are: ##DB_LOCK_NO## (no lock), 
---   ##DB_LOCK_SHARED## (shared lock for read-only access) and
---   ##DB_LOCK_EXCLUSIVE## (for read/write access). ##DB_LOCK_SHARED## is only 
+--   ##DB_LOCK_SHARED## is only
 ---  supported on Unix platforms. It allows you to read the database, but not 
 --   write anything to it. If you request ##DB_LOCK_SHARED## on //WIN32// or
 --   //DOS32// it will be treated as if you had asked for DB_LOCK_EXCLUSIVE.
@@ -781,6 +802,8 @@ end function
 --     end if
 -- end while
 -- </eucode>
+--  See Also:
+-- 		[[:db_create]], [[:db_select]]
   
 global function db_open(sequence path, integer lock_method)
 	integer db, magic
@@ -826,12 +849,16 @@ global function db_open(sequence path, integer lock_method)
 end function
 
 --**
--- Choose a new, already open, database to be the current database. Subsequent database operations will apply to this database. path is the path of the database file as it was originally opened with db_open() or db_create().
+-- Choose a new, already open, database to be the current database. 
+--
+-- Parameters:
+--		# ##path##: a sequence, the path to the database to be the new current database.
 --
 -- Returns:
--- integer - an error code that indicates success (DB_OK) or failure
+-- 		An **integer**, DB_OK on success or an error code.
 --
 -- Comments:
+--Subsequent database operations will apply to this database. path is the path of the database file as it was originally opened with db_open() or db_create().
 -- When you create (db_create) or open (db_open) a database, it automatically becomes the current database. Use db_select() when you want to switch back and forth between open databases, perhaps to copy records from one to the other. After selecting a new database, you should select a table within that database using db_select_table().
 --
 -- Example 1:
@@ -840,6 +867,8 @@ end function
 --     puts(2, "Couldn't select employees database\n")
 -- end if
 -- </eucode>
+--  See Also:
+-- 		[[:db_open]], [[:db_select]]
 
 global function db_select(sequence path)
 	integer index
@@ -862,7 +891,7 @@ end function
 -- Unlock and close the current database.
 --
 -- Comments:
--- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file.
+-- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file. The current database becomes undefined.
 
 global procedure db_close()
 -- close the current database
@@ -910,13 +939,21 @@ function table_find(sequence name)
 end function
 
 --**
--- The table with name given by name, becomes the current table. The return code will be DB_OK if the table exists in the current database, otherwise you'll get DB_OPEN_FAIL.
+--==== Managing tables
+-- Parameters:
+-- 		# ##name##: a sequence which defines the name of the new current table.
+--
+-- Description:
+-- 		On success, the table with name given by name becomes the current table.
 --
 -- Returns:
--- integer - an error code that indicates success (DB_OK) or failure
+-- 		An **integer**, either DB_OK on success or DB_OPEN_FAIL otherwise.
+--
+-- Errors:
+-- 		An error occurs if the current database is not defined.
 --
 -- Comments:
--- All record-level database operations apply automatically to the current table.
+-- 		All record-level database operations apply automatically to the current table.
 --
 -- Example 1:
 -- <eucode>
@@ -925,17 +962,20 @@ end function
 --     abort(1)
 -- end if
 -- </eucode>
+--
+-- See Also:
+-- 		[[:db_table_list]]
 
 global function db_select_table(sequence name)
 -- let table with the given name be the current table
 	atom table, nkeys, index
 	atom block_ptr, block_size
 	integer blocks, k
-	
+
 	table = table_find(name)
 	if table = -1 then
 		return DB_OPEN_FAIL
-	end if  
+	end if
 	if current_table = table then
 		return DB_OK -- nothing to do
 	end if
@@ -962,13 +1002,20 @@ global function db_select_table(sequence name)
 end function
 
 --**
--- Create a new table within the current database. The name of the table is given by the sequence of characters, name, and may not be the same as any existing table in the current database.
+-- Create a new table within the current database.
+--
+-- Parameters:
+--		# ##name##: a sequence, the name of the new table.
 --
 -- Returns:
--- integer - an error code that indicates success (DB_OK) or failure
+-- 		An **integer**, either DB_OK on success or DB_EXISTS_ALREADY on failure.
+--
+-- Errors:
+-- 		An error occurs if the current database is not defined.
 --
 -- Comments:
--- The table that you create will initially have 0 records. It becomes the current table.
+-- 		The supplied name must not exist already on the current database. 
+-- 		The table that you create will initially have 0 records. It becomes the current table.
 --
 -- Example 1:
 -- <eucode>
@@ -976,6 +1023,8 @@ end function
 --     puts(2, "Couldn't create my_new_table!\n")
 -- end if
 -- </eucode>
+-- See Also:
+-- 		[[:db_select_table]], [db_table_list]]
 
 global function db_create_table(sequence name)
 -- create a new table in the current database file
@@ -1040,12 +1089,20 @@ global function db_create_table(sequence name)
 end function
 
 --**
--- Delete a table in the current database. The name of the table is given by name.
+-- Delete a table in the current database. 
+--
+-- Parameters:
+-- 		# ##name##: a sequence, he name of the table to delete.
+--
+-- Errors:
+-- 		An error occurs if the current database is not defined.
 --
 -- Comments:
--- All records are deleted and all space used by the table is freed up. If the 
--- table is the current table, the current table becomes undefined. If there is
--- no table with the name given by name, then nothing happens.
+-- 		If there is no table with the name given by name, then nothing happens.
+--		On success, all records are deleted and all space used by the table is freed up. If the table was the current table, the current table becomes undefined.
+--
+-- See Also:
+--		[[:db_table_list]], [[:db_table_select]]
 
 global procedure db_delete_table(sequence name)
 -- delete an existing table and all of its records
@@ -1114,21 +1171,28 @@ global procedure db_delete_table(sequence name)
 end procedure
 
 --**
--- Rename a table in the current database. The current name of the table 
--- is given by name. The new name of the table is new_name.
+-- Rename a table in the current database.
+--
+-- Parameters:
+-- 		# ##name##: a sequence, the name of the table to rename
+-- 		# ##new_name##: a sequence, the new name for the table
+--
+-- Errors:
+-- 		* An error occurs if the current database is not defined.
+-- 		* If ##name## does not exist on the current database, or if ##new_nalme## does exist on the current database, a fatal error will occur.
 --
 -- Comments:
--- The table to be renamed can be the current table, or some other table 
--- in the current database. An error will occur if name is not the name 
--- of a table in the current database, or if new_name is the name of an 
--- existing table in the current database.
+-- 		The table to be renamed can be the current table, or some other table
+-- in the current database. 
+-- See Also:
+--		[[:db_table_list]]
 
 global procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
 	atom table,table_ptr 
 	
 	table = table_find(name)
-	if table = -1 then 
+	if table = -1 then
 		fatal("Source table doesn't exist")
 	end if
 	
@@ -1147,8 +1211,14 @@ global procedure db_rename_table(sequence name, sequence new_name)
 end procedure
 
 --**
--- Return a sequence of all the table names in the current database. 
--- Each element of s is a sequence of characters containing the name of a table.
+-- Lists all tables on the current database.
+--
+-- Returns:
+--		a **sequence** of all the table names in the current database. Each element of this
+-- sequence is a sequence, the name of a table.
+--
+-- Errors:
+-- 		An error occurs if the current database is undefined.
 --
 -- Example 1:
 -- <eucode>
@@ -1160,11 +1230,12 @@ end procedure
 --     puts(1, names[i] & '\n')
 -- end for
 -- </eucode>
-
+-- See Also:
+-- 		[[:db_table_select]], [[:db_table_create]]
 global function db_table_list()
 	sequence table_names
 	atom tables, nt, name
-	
+
 	safe_seek(TABLE_HEADERS)
 	tables = get4()
 	safe_seek(tables)
@@ -1180,21 +1251,34 @@ global function db_table_list()
 end function
 
 function key_value(atom ptr)
--- return the value of a key, 
+-- return the value of a key,
 -- given a pointer to the key in the database
 	safe_seek(ptr+4) -- skip ptr to data
 	return decompress(0)
 end function
 
 --**
--- Find the record in the current table with key value key. If found, 
--- the record number will be returned. If not found, the record number 
--- that key would occupy, if inserted, is returned as a negative number.
+--==== Managing records.
+--
+-- Description:
+-- 		Find the record in the current table with supplied key.
+--
+-- Parameters:
+-- 		# ##key##: the identifier of the record to be looked up.
+--
+-- Returns:
+--		An **integer**, either greater or less than zero:
+-- 		* If above zero, the reord identified by ##key## was found on the current table, and the returned intger is its record number.
+--		* If less than zero, the record was not found. The returned integer is the opposite of what the record number would have been, had the record been found.
+--
+-- Errors:
+-- 		If the current table is not defined, an error is raised.
 --
 -- Comments:
--- A fast binary search is used to find the key in the current table. 
--- The number of comparisons is proportional to the log of the number of 
--- records in the table. You can select a range of records by searching 
+-- 		A fast binary search is used to find the key in the current table.
+-- The number of comparisons is proportional to the log of the number of
+-- records in the table. The key is unique - a table is more like a dictionnary than like a spreadsheet.
+--		You can select a range of records by searching
 -- for the first and last key values in the range. If those key values don't 
 -- exist, you'll at least get a negative value showing where they would be, 
 -- if they existed. e.g. Suppose you want to know which records have keys 
@@ -1215,7 +1299,8 @@ end function
 --     printf(2, "it will be #%d\n", -rec_num)
 -- end if
 -- </eucode>
-
+-- See Also:
+-- 		{{db_insert]], [[:db_replace_data]], [[:db_delete_record]]
 global function db_find_key(object key)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
@@ -1245,23 +1330,30 @@ global function db_find_key(object key)
 end function
 
 --**
--- Insert a new record into the current table. The record key is key and the 
--- record data is data. Both key and data can be any Euphoria data objects, 
--- atoms or sequences.
+-- Insert a new record into the current table. 
+--
+-- Parameters:
+--		# ##key##: an object, the record key, which uniquely identifies it inside the current table
+--		# ##data##: an object, associated to ##key##.
 --
 -- Returns:
--- integer - an error code that indicates success (DB_OK) or failure
+-- 		An **integer**, either DB_OK on success or an error code on failure.
 --
 -- Comments:
--- Within a table, all keys must be unique. db_insert() will fail with 
--- DB_EXISTS_ALREADY if a record already exists with the same key value.
+-- Within a table, all keys must be unique. db_insert() will fail with
+-- DB_EXISTS_ALREADY if a record already exists on current table with the same key value.
 --
+-- Both key and data can be any Euphoria data objects, atoms or sequences.
+
 -- Example 1:
 -- <eucode>
 -- if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
 --     puts(2, "insert failed!\n")
 -- end if
 -- </eucode>
+--
+-- See Also:
+--		{{db_delete_record]]
 
 global function db_insert(object key, object data)
 	sequence key_string, data_string, last_part, remaining
@@ -1334,7 +1426,7 @@ global function db_insert(object key, object data)
 	safe_seek(current_block)
 	nrecs += 1
 	put4(nrecs)
-	
+
 	-- check allocated size for this block
 	safe_seek(records_ptr - 4)
 	size = get4() - 4
@@ -1396,15 +1488,18 @@ end function
 --**
 -- Delete record number key_location from the current table.
 --
--- Comments:
--- The record number, key_location, must be an integer from 1 to the number
--- of records in the current table.
--- 
+-- Parameter:
+-- 		# ##key_location##: a positive integer, designating the record to delete.
+--
+-- Errors:
+-- 	If the current table is not defined, or ##key_location## is not a valid record index, an error will occur. Valid record indexes are between 1 and the number of records in the table.
+--
 -- Example 1:
 -- <eucode>
 -- db_delete_record(55)
 -- </eucode>
-
+-- See Also:
+-- 		[[:db_find_key]]
 global procedure db_delete_record(integer key_location)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
@@ -1480,29 +1575,35 @@ global procedure db_delete_record(integer key_location)
 end procedure
 
 --**
--- In the current table, replace the data portion of record number rn, with 
--- data. data can be any Euphoria atom or sequence.
+-- In the current table, replace the data portion of a record  with new data.
+--
+-- Parameters:
+-- 		# ##key_location##: an integer, the index of the recordthe data is to be altered
+-- 		# ##data##: an object , the new value associated to the key of the record..
 --
 -- Comments:
--- The record number, rn, must be from 1 to the number of records in the 
--- current table.
+	--##key_location## must be from 1 to the number of records in the
+-- current table. 
+-- ##data## is an Euphoria object of any kind, atom or sequence.
 --
 -- Example 1:
 -- <eucode>
 -- db_replace_data(67, {"Peter", 150, 34.5})
 -- </eucode>
+-- See Also:
+-- 		[[:db_find_key]]
 
-global procedure db_replace_data(integer rn, object data) 
+global procedure db_replace_data(integer key_location, object data)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 	
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
-	if rn < 1 or rn > length(key_pointers) then
+	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	key_ptr = key_pointers[rn]
+	key_ptr = key_pointers[key_location]
 	safe_seek(key_ptr)
 	data_ptr = get4()
 	safe_seek(data_ptr-4)
@@ -1526,7 +1627,11 @@ global procedure db_replace_data(integer rn, object data)
 end procedure
 
 --**
--- Return the current number of records in the current table.
+-- Returns
+--		An **integer, the current number of records in the current table.
+--
+-- Errors:
+-- 		If the current table is undefined, an error will occur.
 --
 -- Example 1:
 -- <eucode>
@@ -1538,7 +1643,8 @@ end procedure
 --     end if
 -- end for
 -- </eucode>
-
+-- See Also:
+-- 		[[:db_replace_data]]
 global function db_table_size()
 	if current_table = -1 then
 		fatal("no table selected")
@@ -1547,29 +1653,39 @@ global function db_table_size()
 end function
 
 --**
--- Return the data portion of record number rn in the current table.
+-- Returns the data in a record queried by position.
+--
+-- Parameters:
+-- 		# ##key_location##: the index of the record the data of which is being fetched.
+--
+-- Returns:
+--		An **object**, the data portion of requested record.
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a data 
 -- portion. Each of these can be any Euphoria atom or sequence.
+--
+-- Errors:
+--		If the current table is not defined, or if the record index is invalid, an error will occur.
 --
 -- Example 1:
 -- <eucode>
 -- puts(1, "The 6th record has data value: ")
 -- ? db_record_data(6)
 -- </eucode>
-
-global function db_record_data(integer rn) 
+-- See Also:
+-- 		[[:db_find_key]],[[:db_replace_data]]
+global function db_record_data(integer key_location)
 	atom data_ptr
 	object data_value
 	
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
-	if rn < 1 or rn > length(key_pointers) then
+	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	safe_seek(key_pointers[rn])
+	safe_seek(key_pointers[key_location])
 	data_ptr = get4()
 	safe_seek(data_ptr)
 	data_value = decompress(0)
@@ -1577,7 +1693,14 @@ global function db_record_data(integer rn)
 end function
 
 --**
--- Return the key portion of record number rn in the current table.
+-- Returns
+-- 		An **object**, the key of the record being queried by index.
+--
+-- Parameters:
+-- 		# ##key_location##: an integer, the index of the record the key is being requested.
+--
+-- Errors:
+--		If the current table is not defined, or if the record index is invalid, an error will occur.
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a 
@@ -1588,17 +1711,18 @@ end function
 -- puts(1, "The 6th record has key value: ")
 -- ? db_record_key(6)
 -- </eucode>
-
-global function db_record_key(integer rn) 
+-- See Also:
+-- 		[[:db_record_data]]
+global function db_record_key(integer key_location)
 	object key_value
 	
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
-	if rn < 1 or rn > length(key_pointers) then
+	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	safe_seek(key_pointers[rn]+4)
+	safe_seek(key_pointers[key_location]+4)
 	key_value = decompress(0)
 	return key_value
 end function
@@ -1629,19 +1753,23 @@ function delete_whitespace(sequence text)
 end function
 
 --**
--- Compress the current database. The current database is copied to a new 
--- file such that any blocks of unused space are eliminated. If successful, 
+-- Compresses the current database. 
+--
+-- Returns:
+-- 		An **integer**, either DB_OK on success or an error code on failure.
+--
+-- Comments:
+-- The current database is copied to a new
+-- file such that any blocks of unused space are eliminated. If successful,
 -- the return value will be set to DB_OK, and the new compressed database 
 -- file will retain the same name. The current table will be undefined. As 
 -- a backup, the original, uncompressed file will be renamed with an extension 
--- of .t0 (or .t1, .t2 ,..., .t99). In the highly unusual case that the 
+-- of .t0 (or .t1, .t2 ,..., .t99). In the highly unusual case that the
 -- compression is unsuccessful, the database will be left unchanged, and no 
 -- backup will be made.
---
--- Comments:
--- When you delete items from a database, you create blocks of free space within 
+-- When you delete items from a database, you create blocks of free space within
 -- the database file. The system keeps track of these blocks and tries to use them 
--- for storing new data that you insert. db_compress() will copy the current 
+-- for storing new data that you insert. db_compress() will copy the current
 -- database without copying these free areas. The size of the database file may 
 -- therefore be reduced. If the backup filenames reach .t99 you will have to 
 -- delete some of them.
@@ -1755,7 +1883,8 @@ global function db_compress()
 end function
 
 --**
--- Returns the name of the current database, or an empty string.
+-- Returns:
+--		A **sequence**, "" if the current database is undefined, else its name.
 --
 -- Thanks to Tone Škoda!
 
@@ -1769,3 +1898,4 @@ global function db_current ()
         return ""
     end if
 end function
+

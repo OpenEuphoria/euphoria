@@ -235,8 +235,11 @@ export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 --**
 -- datetime type
 --
+-- Parameters:
+-- 		# ##obj##: any object, so no crash takes place.
+--
 -- Comments:
--- A datetime type consists of a sequence of length 6
+-- A datetime type consists of a sequence of length 6 in the form {year, month,dat_of_month,hour, minute, second}. Checks are made to guarantee those values are in range.
 
 export type datetime(object o)
 		return sequence(o) and length(o) = 6
@@ -257,7 +260,7 @@ end type
 -- 
 -- TODO: test default parameter usage
 --
--- Parameters
+-- Parameters:
 --     * year is the full year.
 --     * month is the month (1-12).
 --     * day is the day of the month (1-31).
@@ -282,11 +285,11 @@ export function new(integer year, integer month, integer day,
 end function
 
 --**
--- Create a new time value with a date of zeros.
+-- Create a new datetime value with a date of zeros.
 --
 -- TODO: test
 --
--- Paramters
+-- Paramters:
 --     hour is the hour (0-23)
 --     minute is the minute (0-59)
 --     second is the second (0-59)
@@ -308,6 +311,12 @@ end function
 -- Convert a sequence formatted according to the built-in date() function to a valid datetime 
 -- sequence.
 --
+-- Parameters:
+--		# ##src##: a sequence which date() might have returned
+--
+-- Returns:
+-- 		A **sequence**, more precisely a **datetime** corresponding to the same moment in time.
+--
 -- Example 1:
 -- <eucode>
 -- d = from_date(date())
@@ -324,6 +333,9 @@ end function
 --**
 -- Create a new datetime value initialized with the current date and time
 --
+-- Returns:
+-- 		A **sequence**, more precisely a **datetime** corresponding to the current moment in time.
+--
 -- Example 1:
 -- <eucode>
 -- dt = now()
@@ -334,14 +346,17 @@ end function
 --     [[:from_date]], [[:from_unix]], [[:new]], [[:new_time]]
 
 export function now()
-		return from_date(date())
+	return from_date(date())
 end function
 
 --**
 -- Get the day of week of the date dt1.
 --
--- Comments:
---     1=Sunday, 2=Monday, ... 7=Saturday
+-- Parameters:
+-- 		# ##dt##: a datetime to be queried.
+--
+-- Returns:
+-- 		An **integer** between 1 (Sunday) and 7 (Saturday).
 --
 -- Example 1:
 -- <eucode>
@@ -354,7 +369,18 @@ export function dow(datetime dt)
 end function
 
 --**
--- Get the Julian day of year of the date dt1.
+-- Get the Julian day of year of the supplied date.
+--
+-- Parameters:
+-- 		# ##dt##: a datetime to be queried.
+--
+-- Returns:
+-- 	An **integer** between 1 and 366.
+--
+-- Comments:
+-- 		For dates earlier than 1800, this routine may give inaccurate results if the date
+-- applies to a country other than United Kingdom or a former colony thereof. The change from 
+-- julian to gregorian calendar took place much earlier in some other european countries.
 --
 -- Example 1:
 -- <eucode>
@@ -368,6 +394,13 @@ end function
 
 --**
 -- Convert a datetime value to the unix numeric format (seconds since EPOCH)
+--
+-- Parameters:
+-- 		# ##dt##: a datetime to be queried.
+--
+-- Returns:
+-- 		An **atom**, so this will not overflow during the winter 2038-2039.
+--
 --
 -- Example 1:
 -- <eucode>
@@ -384,6 +417,12 @@ end function
 
 --**
 -- Create a datetime value from the unix numeric format (seconds since EPOCH)
+--
+-- Parameters:
+-- 		# ##unix##: an atom, counting seconds elapsed since EPOCH.
+--
+-- Returns:
+-- 		A **sequence**, more precisely a **datetime** representing the same moment in time.
 --
 -- Example 1:
 -- <eucode>
@@ -408,8 +447,12 @@ end function
 --**
 -- Format the date according to the format string
 --
+-- Parameters:
+-- 		# ##d##: a datetime which is to be printed out
+-- 		# ##format##: a format string, similar to the ones sprintf() uses, but with sme Unicode encoding.
+--
 -- Comments:
--- Format string can include the following:
+-- Format string can include the following format specifiers:
 -- 
 -- * %%  a literal %
 -- * %a  locale's abbreviated weekday name (e.g., Sun)
@@ -547,7 +590,15 @@ export function format(datetime d, wstring format)
 end function
 
 --**
--- Add a number of i's to dt1. i is an interval constant and a is the quantity.
+-- Add a number of //intervals// to a datetime.
+--
+-- Parameters:
+-- 		# ##dt##: the base datetime
+-- 		# ##qty##: the number of //intervals// to add. It should be positive.
+-- 		# ##interval##: which kind of interval to add.
+--
+-- Returns:
+-- 		A **sequence**, more precisely a **datetime** representing the new moment in time.
 --
 -- Comments:
 --     Please see Constants for Date/Time for a reference of valid intervals.
@@ -621,11 +672,19 @@ export function add(datetime dt, object qty, integer interval)
 end function
 
 --**
--- Subtract a number of i's to dt1. i is an interval constant and a is the quantity.
+-- Subtract a number of //intervals// to a base datetime.
+--
+-- Parameters:
+-- 		# ##dt##: the base datetime
+-- 		# ##qty##: the number of //intervals// to substract. It should be positive.
+-- 		# ##interval##: which kind of interval to substract.
+--
+-- Returns:
+-- 		A **sequence**, more precisely a **datetime** representing the new moment in time.
 --
 -- Comments:
 --     Please see Constants for Date/Time for a reference of valid intervals.
--- 
+--
 --     See the function add() for more information on adding and subtracting date intervals
 -- 
 -- Example 1:
@@ -643,7 +702,14 @@ export function subtract(datetime dt, atom qty, integer interval)
 end function
 
 --**
--- Compute the number of seconds different between dt1 and dt2.
+-- Compute the difference, in seconds, between two dates.
+--
+-- Parameters:
+-- 		# ##dt1##: the end datetime
+-- 		# ##dt2##: the start datetime
+-- 
+-- Returns:
+-- 		An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
 --
 -- Comments:
 --     dt2 is subtracted from dt1, therefore, you can come up with a negative value.

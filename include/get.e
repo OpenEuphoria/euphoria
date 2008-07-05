@@ -10,7 +10,7 @@
 --
 
 -- error status values returned from get() and value():
-export constant GET_SUCCESS = 0,
+global constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
 				GET_NOTHING = -2
@@ -361,7 +361,7 @@ function Get2()
 -- read a Euphoria data object as a string of characters
 -- and return {error_flag, value,total number of characters, leading whitespace}
 -- Note: ch is "live" at entry and exit of this routine.
--- Uses the regular Get() to read esequence elements.
+-- Uses the regular Get() to read sequence elements.
 	sequence s, e
 	integer e1
     natural offset
@@ -479,14 +479,27 @@ function get_value(object target,integer start_point,integer answer_type)
 end function
 
 --**
--- Input, from file fn, a human-readable string of characters st representing a Euphoria object. 
--- Convert the string into the numeric value of that object. s will be a 2-element sequence: 
--- ##{error status, value}#. Error status codes are:
+-- Input, from an open file, a human-readable string of characters representing a Euphoria object. Convert the string into the numeric value of that object. 
 --
--- * GET_SUCCESS -- object was read successfully
--- * GET_EOF     -- end of file before object was read completely
--- * GET_FAIL    -- object is not syntactically correct
--- * GET_NOTHING -- nothing was read, even a partial object string, before end of input
+-- Parameters:
+-- 	# ##file##: an integer, the handle to an open file from which to read
+--  # ##offset##: an integer, an offset to apply to file position before readig. Defaults to 0.
+-- 	# ##answer##: an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
+--
+-- Returns:
+-- 		A **sequence of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of:
+-- * an integer, the return status. This is any of:
+-- ** GET_SUCCESS -- object was read successfully
+-- ** GET_EOF     -- end of file before object was read completely
+-- ** GET_FAIL    -- object is not syntactically correct
+-- ** GET_NOTHING -- nothing was read, even a partial object string, before end of input
+-- * an object, the value that was read. This is valid only if return statys is GET_SUCCESS.
+-- * an integer, the number of characters read. On an error, this is the point at which the error was detected.
+-- * an integer, the amount of initial whitespace read before the firrst active character was found
+-- Comments:
+-- When ##answer## is not specified, or explicitly GET_SHORT_ANSWER, only the first two elements in thr returned sequence are actually returned.
+--
+-- The GET_NOTHING return status will not be returned if ##answer## is GET_SHORT_ANSWER.
 --
 -- get() can read arbitrarily complicated Euphoria objects. You
 -- could have a long sequence of values in braces and separated by
@@ -529,8 +542,8 @@ end function
 -- -- something\nBut no value
 -- }}}
 --
--- and the input stream stops right there, you'll  receive a status code of GET_NOTHING, 
--- because nothing but whitespace or comments was read.
+-- and the input stream stops right there, you'll receive a status code of GET_NOTHING,
+-- because nothing but whitespace or comments was read. If you had opted for a short answer, you'd get GET_EOF instead.
 -- 
 -- Multiple "top-level" objects in the input stream must be
 -- separated from each other with one or more "whitespace"
@@ -541,7 +554,6 @@ end function
 -- A call to get() will read one entire top-level object, plus possibly one additional
 -- (whitespace) character, after a top level number, even though the next object may have an identifiable starting pont.
 --
--- Comments:
 -- The combination of print() and get() can be used to save a
 -- Euphoria object to disk and later read it back. This technique
 -- could be used to implement a database as one or more large
@@ -566,7 +578,8 @@ end function
 --
 -- Example 2:
 --     See ##bin\mydata.ex##
-
+-- See Also:
+-- [[:value]]
 global function get(integer file,integer offset=0,integer answer=GET_SHORT_ANSWER)
 -- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
@@ -576,6 +589,28 @@ global function get(integer file,integer offset=0,integer answer=GET_SHORT_ANSWE
 end function
 
 --**
+-- Read, from a string, a human-readable string of characters representing a Euphoria object. Convert the string into the numeric value of that object.
+--
+-- Parameters:
+-- 	# ##st##: a sequence, from which to read text
+--  # ##offset##: an integer, the position at which to start reading. Defaults to 1.
+-- 	# ##answer##: an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
+--
+-- Returns:
+-- 		A **sequence of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of:
+-- * an integer, the return status. This is any of:
+-- ** GET_SUCCESS -- object was read successfully
+-- ** GET_EOF     -- end of file before object was read completely
+-- ** GET_FAIL    -- object is not syntactically correct
+-- ** GET_NOTHING -- nothing was read, even a partial object string, before end of input
+-- * an object, the value that was read. This is valid only if return statys is GET_SUCCESS.
+-- * an integer, the number of characters read. On an error, this is the point at which the error was detected.
+-- * an integer, the amount of initial whitespace read before the firrst active character was found
+-- Comments:
+-- When ##answer## is not specified, or explicitly GET_SHORT_ANSWER, only the first two elements in thr returned sequence are actually returned.
+--
+-- The GET_NOTHING return status will not be returned if ##answer## is GET_SHORT_ANSWER.
+--
 -- Read the string representation of a Euphoria object st, and compute the value of that object. 
 -- A 2 or 4 element sequence, is returned, whose first element, the return status, can
 -- be one of:
@@ -618,7 +653,8 @@ end function
 -- s = value("+++")
 -- -- s is {GET_FAIL, 0}
 -- </eucode>
-
+-- See Also:
+-- [[:get]]
 global function value(sequence st,integer start_point=1,integer answer=GET_SHORT_ANSWER)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.

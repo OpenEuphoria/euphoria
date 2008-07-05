@@ -11,7 +11,7 @@
 
 --**
 -- C types for .dll arguments and return value:
-global constant 
+global constant
 	C_CHAR    = #01000001,
 	C_UCHAR   = #02000001,
 	C_SHORT   = #01000002,
@@ -50,18 +50,25 @@ constant M_OPEN_DLL  = 50,
 
 --**
 -- Open a Windows dynamic link library (.dll) file, or a Linux or FreeBSD shared library 
--- (.so) file. A 32-bit address will be returned, or 0 if the .dll can't be found. st can 
+-- (.so) file. 
+--
+-- Parameters:
+-- 		# ##file_name##: a sequence, the name of the shared libraru to open.
+--
+-- Returns:
+--		An **atom**, actually a 32-bit address. 0 is returned if the .dll can't be found. 
+-- Comments:
+-- 		##file_name## can
 -- be a relative or an absolute file name. Windows will use the normal search path for 
 -- locating .dll files.
 --
--- Comments:
 -- The value returned by open_dll() can be passed to define_c_proc(), define_c_func(), 
 -- or define_c_var().
 -- 
 -- You can open the same .dll or .so file multiple times. No extra memory is used and you'll 
 -- get the same number returned each time.
 -- 
--- Euphoria will close the .dll for you automatically at the end of execution. 
+-- Euphoria will close the .dll/.so for you automatically at the end of execution.
 --
 -- Example 1:
 -- <eucode>
@@ -80,13 +87,19 @@ global function open_dll(sequence file_name)
 end function
 
 --**
--- a2 is the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by 
--- open_dll(). s is the name of a global C variable defined within the library. a1 will be 
--- the memory address of variable s.
+-- Gets the address of a symbol in a shared library or in RAM.
+--
+-- Parameters:
+-- 		 # ##lib##: an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
+-- 		# ##variable_name##: a sequence, the name of a global C variable defined within the library.
+--
+-- Returns:
+--		An **atom**, the memory address of ##variable_name##.
 --
 -- Comments:
---     Once you have the address of a C variable, and you know its type, you can use peek() 
---     and poke() to read or write the value of the variable.
+--     Once you have the address of a C variable, and you know its type, you can use peek()
+--     and poke() to read or write the value of the variable. You can in the same way obtain 
+-- the address of a C function and pass it to any external routine that requires a callback address.
 -- 
 --     For an example, see euphoria/demo/linux/mylib.exu
 --
@@ -98,44 +111,52 @@ global function define_c_var(atom lib, sequence variable_name)
 end function
 
 --**
--- Define the characteristics of either a C function, or a machine-code routine that you 
--- wish to call as a procedure from your Euphoria program. A small integer, known as a 
--- routine id, will be returned. Use this routine id as the first argument to c_proc() when 
+-- Define the characteristics of either a C function, or a machine-code routine that you
+-- wish to call as a procedure from your Euphoria program. 
+--
+-- Parameters:
+-- 		# ##lib##: an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
+-- 		# ##routine_name##: an object, either the name of a procedure in a shared object or the machine address of the procedure.
+-- 		# ##argtypes##: a sequence of type constants.
+--
+-- Returns:
+-- 		A small **integer**, known as a routine id, will be returned.
+--
+-- Comments:
+-- 		Use the returned routine id as the first argument to [[:c_proc]]() when
 -- you wish to call the routine from Euphoria.
--- 
--- When defining a C function, x1 is the address of the library containing the C function, 
--- while x2 is the name of the C function. x1 is a value returned by open_dll(). If the C 
--- function can't be found, -1 will be returned as the routine id. On Windows, you can add 
--- a '+' character as a prefix to the function name. This tells Euphoria that the function 
+--
+-- 	A returned value of -1 indicates that the procedure could not be found or linked to.
+--
+-- On Windows, you can add
+-- a '+' character as a prefix to the procedure name. This tells Euphoria that the function
 -- uses the cdecl calling convention. By default, Euphoria assumes that C routines accept 
 -- the stdcall convention.
 --
--- When defining a machine code routine, x1 must be the empty sequence, "" or {}, and x2 
--- indicates the address of the machine code routine. You can poke the bytes of machine code 
--- into a block of memory reserved using allocate(). On Windows, the machine code routine is 
--- normally expected to follow the stdcall calling convention, but if you wish to use the 
+-- When defining a machine code routine, ##lib## must be the empty sequence, "" or {}, and ##routine_name##
+-- indicates the address of the machine code routine. You can poke the bytes of machine code
+-- into a block of memory reserved using allocate(). On Windows, the machine code routine is
+-- normally expected to follow the stdcall calling convention, but if you wish to use the
 -- cdecl convention instead, you can code {'+', address} instead of address.
--- 
--- s1 is a list of the parameter types for the function. A list of C types is contained in 
--- dll.e, and shown above. These can be used to define machine code parameters as well.
 --
--- The C function that you define could be one created by the Euphoria To C Translator, in 
+-- ##argtypes## is made of type constants, which describe the C types of arguments to the procedure. Tjey may be used to define machine code parameters as well.
+--
+-- The C function that you define could be one created by the Euphoria To C Translator, in
 -- which case you can pass Euphoria data to it, and receive Euphoria data back. A list of 
--- Euphoria types is contained in dll.e, and shown above.
+-- Euphoria types is shown above.
 --
--- Comments:
---     You can pass any C integer type or pointer type. You can also pass a Euphoria atom as 
+--     You can pass any C integer type or pointer type. You can also pass a Euphoria atom as
 --     a C double or float.
 --
 --     Parameter types which use 4 bytes or less are all passed the same way, so it is not 
 --     necessary to be exact.
 --
 --     Currently, there is no way to pass a C structure by value. You can only pass a pointer
---     to a structure.
+-- to a structure. However, you can pass a 64 bit integer by pretending to pass two C_LONG instead. When calling the routine, pass low doubleword first, then high doubleword.
 --
 --     The C function can return a value but it will be ignored. If you want to use the value
---     returned by the C function, you must instead define it with define_c_func() and call it 
---     with c_func().
+--     returned by the C function, you must instead define it with [[:define_c_func()]] and call it
+--     with [[:c_func]]().
 --
 -- Example 1:
 -- <eucode>
@@ -165,12 +186,24 @@ end function
 
 --**
 -- Define the characteristics of either a C function, or a machine-code routine that returns 
--- a value. A small integer, i1, known as a routine id, will be returned. Use this routine id
--- as the first argument to c_func() when you wish to call the function from Euphoria.
+-- a value. 
 --
--- When defining a C function, x1 is the address of the library containing the C function,
--- while x2 is the name of the C function. x1 is a value returned by open_dll(). If the C
--- function can't be found, -1 will be returned as the routine id. On Windows, you can add a
+-- Parameters:
+-- 		# ##lib##: an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
+-- 		# ##routine_name##: an object, either the name of a procedure in a shared object or the machine address of the procedure.
+-- 		# ##argtypes##: a sequence of type constants.
+-- 		# ##return_type##: an atom, indicating what type the function will return.
+--
+-- Returns:
+-- 		A small **integer**, known as a routine id, will be returned.
+--
+-- Comments:
+-- 		Use the returned routine id as the first argument to [[:c_proc]]() when
+-- you wish to call the routine from Euphoria.
+--
+-- 	A returned value of -1 indicates that the procedure could not be found or linked to.
+--
+-- On Windows, you can add a
 -- '+' character as a prefix to the function name. This indicates to Euphoria that the 
 -- function uses the cdecl calling convention. By default, Euphoria assumes that C routines
 -- accept the stdcall convention.
@@ -181,23 +214,7 @@ end function
 -- normally expected to follow the stdcall calling convention, but if you wish to use the
 -- cdecl convention instead, you can code {'+', address} instead of address for x2.
 --
--- s1 is a list of the parameter types for the function. i2 is the return type of the
--- function. A list of C types is contained in dll.e, and these can be used to define machine
--- code parameters as well:
---	
--- * C_CHAR = #01000001
--- * C_UCHAR = #02000001
--- * C_SHORT = #01000002
--- * C_USHORT = #02000002
--- * C_INT = #01000004
--- * C_UINT = #02000004
--- * C_LONG = C_INT
--- * C_ULONG = C_UINT
--- * C_POINTER = C_ULONG
--- * C_FLOAT = #03000004
--- * C_DOUBLE = #0300000
---
--- The C function that you define could be one created by the Euphoria To C Translator, in
+--The C function that you define could be one created by the Euphoria To C Translator, in
 -- which case you can pass Euphoria data to it, and receive Euphoria data back. A list of 
 -- Euphoria types is contained in dll.e:
 --
@@ -213,12 +230,12 @@ end function
 -- necessary to be exact when choosing a 4-byte parameter type. However the distinction 
 -- between signed and unsigned may be important when you specify the return type of a function.
 -- 
--- Currently, there is no way to pass a C structure by value or get a C structure as a return 
+-- Currently, there is no way to pass a C structure by value or get a C structure as a return
 -- result. You can only pass a pointer to a structure and get a pointer to a structure as a 
--- result.
+-- result. However, you can pass a 64 bit integer as two C_LONG instead. On calling the routine, pass low doubleword first, then high doubleword.
 --
 -- If you are not interested in using the value returned by the C function, you should 
--- instead define it with define_c_proc() and call it with c_proc().
+-- instead define it with [[:define_c_proc]]() and call it with [[:c_proc()]].
 -- 
 -- If you use exw to call a cdecl C routine that returns a floating-point value, it might not 
 -- work. This is because the Watcom C compiler (used to build exw) has a non-standard way of 
@@ -264,16 +281,23 @@ global function define_c_func(object lib, object routine_name,
 end function
 
 --**
--- Get a machine address for the Euphoria routine with routine id i. This address can be
--- used by Windows, or an external C routine in a Windows .dll or Linux/FreeBSD shared
--- library (.so), as a 32-bit "call-back" address for calling your Euphoria routine. On 
--- Windows, you can specify i1, which determines the C calling convention that can be used to 
--- call your routine. If i1 is '+', then your routine will work with the cdecl calling
--- convention. By default it will work with the stdcall convention. On Linux and FreeBSD you 
--- should only use the first form, as there is just one standard calling convention
+-- Get a machine address for an Euphoria routine.
+--
+-- Parameters:
+-- 		# ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+',id}.
+--
+-- Returns:
+-- 		An **atom**, the address of the machine code of the routine. It can be
+-- used by Windows, or an external C routine in a Windows .dll or Unix-like shared
+-- library (.so), as a 32-bit "call-back" address for calling your Euphoria routine. 
 --
 -- Comments:
---     You can set up as many call-back functions as you like, but they must all be Euphoria 
+--      By default, your routine will work with the stdcall convention. On
+-- Windows, you can specify i1s id as {'+',id}, in which case it will work with the cdecl calling
+-- convention instead. On non-Microsoft platforms, you
+-- should only use simple ids, as there is just one standard calling convention, ie stdcall.
+--
+--     You can set up as many call-back functions as you like, but they must all be Euphoria
 --     functions (or types) with 0 to 9 arguments. If your routine has nothing to return
 --     (it should really be a procedure), just return 0 (say), and the calling C routine can
 --     ignore the result.
@@ -312,10 +336,10 @@ end function
 --     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt 
 --     at the end of execution.
 --
---     On Linux or FreeBSD, free_console() will set the terminal parameters back to normal, 
+--     On Unix-style systems, free_console() will set the terminal parameters back to normal,
 --     undoing the effect that curses has on the screen.
 --
---     In a Linux or FreeBSD xterm window, a call to free_console(), without any further 
+--     In an xterm window, a call to free_console(), without any further
 --     printing to the screen or reading from the keyboard, will eliminate the 
 --     "Press Enter" prompt that Euphoria normally issues at the end of execution.
 --
@@ -327,8 +351,8 @@ end function
 --     automatically create a console window to display trace information, error messages etc.
 --
 --     There's a WIN32 API routine, FreeConsole() that does something similar to 
---     free_console(). You should use free_console(), because it lets the interpreter know 
---     that there is no longer a console.
+--     free_console(). You should use free_console() instead, because it lets the interpreter know
+--     that there is no longer a console to write to or read from.
 --
 -- See Also:
 --     [[:clear_screen]]

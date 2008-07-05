@@ -1,4 +1,4 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+	-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
 -- == Console 
@@ -19,21 +19,36 @@ constant
 
 --**
 -- Signature:
--- global function get_key()
+-- 		global function get_key()
+--
+-- Returns:
+--		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
 --
 -- Description:
---     Return the key that was pressed by the user, without waiting. Return -1 if no key was 
---     pressed. Special codes are returned for the function keys, arrow keys etc.
+--     Return the key that was pressed by the user, without waiting. Special codes are returned for the function keys, arrow keys etc.
 --
 -- Comments:
 --     The operating system can hold a small number of key-hits in its keyboard buffer. 
 --     get_key() will return the next one from the buffer, or -1 if the buffer is empty.
 --
 --     Run the key.bat program to see what key code is generated for each key on your 
---     keyboard. 
+--     keyboard.
+--
+-- Example 1:
+-- <eucode>
+-- 	integer n = get_key()
+-- 	if n=-1 then puts(1,"No key waiting.\n") end if
+-- </eucode>
+--
+-- See Also:
+-- 		[[:wait_key]]
 
 --**
 -- Set behavior of CTRL+C/CTRL+Break
+--
+-- Parameters:
+-- 	# ##b##, a boolean: TRUE ( != 0 ) to enable the trapping of
+-- Ctrl-C/Ctrl-Break, FALSE ( 0 ) to disable iy.
 --
 -- Comments:
 -- When i is 1 (true) CTRL+C and CTRL+Break can terminate
@@ -57,17 +72,20 @@ constant
 -- <eucode>
 -- allow_break(0)  -- don't let the user kill the program!
 -- </eucode>
+--
+-- See Also:
+-- 		[[:check_break]]
 
 export procedure allow_break(boolean b)
--- If b is TRUE then allow control-c/control-break to
--- terminate the program. If b is FALSE then don't allow it.
--- Initially they *will* terminate the program, but only when it
--- tries to read input from the keyboard.
 	machine_proc(M_ALLOW_BREAK, b)
 end procedure
 
 --**
--- Return the number of times that CTRL+C or CTRL+Break have
+-- Description:
+-- 		Returns the number of Control-C/Control-BREAK key presses.
+--
+-- Returns:
+-- 		An **integer**, the number of times that CTRL+C or CTRL+Break have
 --  been pressed since the last call to check_break(), or since the
 --  beginning of the program if this is the first call.
 --
@@ -85,28 +103,40 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- k = get_key()
--- if check_break() then
+-- if check_break() then  -- ^C or ^Break was hit once or more
 --     temp = graphics_mode(-1)
 --     puts(STDOUT, "Shutting down...")
 --     save_all_user_data()
 --     abort(1)
 -- end if
 -- </eucode>
+--
+-- See Also:
+-- 		[[:allow_break]]
 
 export function check_break()
--- returns the number of times that control-c or control-break
--- were pressed since the last time check_break() was called
 	return machine_func(M_CHECK_BREAK, 0)
 end function
 
 --**
--- Return the next key pressed by the user. Don't return until a key is pressed.
+-- Description:
+-- 		Waits for user to press a key, unless any is pending, and returns key code.
+--
+-- Returns:
+--		An **integer**, which is a key code. If one is waiting in keyboard bufer, then return it. Otherwise, wait for one to come up.
 --
 -- Comments:
---     You could achieve the same result using get_key() as follows:
+--     You could achieve the same result using get_key() as in the example.
+-- 	   However, on multi-tasking systems like Windows or Linux/FreeBSD/OS X, this "busy waiting"
+--     would tend to slow the system down. wait_key() lets the operating system do other
+--     useful work while your program is waiting for the user to press a key.
 --
+--     You could also use getc(0), assuming file number 0 was input from the keyboard, except 
+-- that you wouldn't pick up the special codes for function keys, arrow keys etc.
+--
+-- Example 1:
 --     <eucode>
---     while 1 do
+--     while 1 do -- do this only under DOS!!
 --         k = get_key()
 --         if k != -1 then
 --             exit
@@ -114,16 +144,10 @@ end function
 --     end while
 --     </eucode>
 --
--- 	   However, on multi-tasking systems like Windows or Linux/FreeBSD, this "busy waiting" 
---     would tend to slow the system down. wait_key() lets the operating system do other 
---     useful work while your program is waiting for the user to press a key.
---
---     You could also use getc(0), assuming file number 0 was input from the keyboard, except 
---     that you wouldn't pick up the special codes for function keys, arrow keys etc. 
+-- See Also:
+-- 		[[:get_key]], [[:getc]]
 
 export function wait_key()
--- Get the next key pressed by the user.
--- Wait until a key is pressed.
 	return machine_func(M_WAIT_KEY, 0)
 end function
 
@@ -142,22 +166,40 @@ end function
 -- <eucode>
 -- any_key("Press Any Key to quit")
 -- </eucode>
-
+--
+-- See Also:
+-- 	[[:wait_key]]
 export procedure any_key(object prompt="Press Any Key to continue...")
 	object ignore
+
 	puts(1, prompt)
 	ignore = wait_key()
 	puts(1, "\n")
 end procedure
 
 --**
--- Prompt the user to enter a number. st is a string of text that will be displayed on the 
--- screen. s is a sequence of two values {lower, upper} which determine the range of values 
--- that the user may enter. If the user enters a number that is less than lower or greater 
--- than upper, he will be prompted again. s can be empty, {}, if there are no restrictions.
+-- Description:
+-- 		Promptz the user to enter a number, and returns only validated input.
+--
+-- Parameters:
+--		# ##st## is a string of text that will be displayed on the screen.
+--		# ##s## is a sequence of two values {lower, upper} which determine the range of values
+-- that the user may enter. s can be empty, {}, if there are no restrictions.
+--
+-- Returns:
+-- 		An **atom** in the assigned range which the user typed in.
+--
+-- Errors:
+-- 		If puts() cnnot display ##st## on standard input, or if the first or second element of
+-- ##s## is a sequence, a runtime error will be raied.
+--		If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well 
+-- on a type check error.
 --
 -- Comments:
---   If this routine is too simple for your needs, feel free to copy it and make your 
+-- 		As long as the user enters a number that is less than lower or greater
+-- than upper, he will be prompted again.
+--
+--   If this routine is too simple for your needs, feel free to copy it and make your
 --   own more specialized version.
 --
 -- Example 1:
@@ -169,10 +211,10 @@ end procedure
 --   <eucode>
 --   t = prompt_number("Enter a temperature in Celcius:\n", {})
 --   </eucode>
-
+--
+-- See Also:
+-- 	[[:puts]], [[:prompt_string]]
 export function prompt_number(sequence prompt, sequence range)
--- Prompt the user to enter a number.
--- A range of allowed values may be specified.
 	object answer
 
 	while 1 do
@@ -200,8 +242,13 @@ export function prompt_number(sequence prompt, sequence range)
 end function
 
 --**
--- Prompt the user to enter a string of text. st is a string that will be displayed on the screen.
--- The string that the user types will be returned as a sequence, minus any new-line character.
+-- Prompt the user to enter a string of text. 
+--
+-- Parameters:
+--		# ##st## is a string that will be displayed on the screen.
+--
+-- Returns:
+-- 		A **sequence**, the string that the user typed in, stripped of any new-line character.
 --
 -- Comments:
 --     If the user happens to type control-Z (indicates end-of-file), "" will be returned.
@@ -210,9 +257,10 @@ end function
 --     <eucode>
 --     name = prompt_string("What is your name? ")
 --     </eucode>
-
+--
+-- See Also:
+-- 	[[:prompt_string]]
 export function prompt_string(sequence prompt)
--- Prompt the user to enter a string
 	object answer
 	
 	puts(1, prompt)

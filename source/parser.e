@@ -1996,7 +1996,8 @@ procedure Ifdef_statement()
 	nested_count = 0
 	has_matched = 0
 	in_matched = 0
-	if length(if_labels) or length(loop_labels) then
+	if --CurrentSub != TopLevelSub or 
+	length(if_labels) or length(loop_labels) then
 		parser_id = forward_Statement_list
 	else
 		parser_id = top_level_parser
@@ -2942,7 +2943,7 @@ global procedure real_parser(integer nested)
 			tok = next_token()
 			id = tok[T_ID]
 			
-			if id = TYPE then
+			if id = TYPE or id = QUALIFIED_TYPE then
 				Global_declaration(tok[T_SYM], scope )
 
 			elsif id = CONSTANT then

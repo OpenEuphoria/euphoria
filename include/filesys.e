@@ -94,7 +94,14 @@ end ifdef
 -- export constant CRLF
 --
 -- Description:
--- Current platforms newline character(s)
+-- Current platform's newline character(s)
+
+--**
+-- Signature:
+-- export constant PATHSEP
+--
+-- Description:
+-- Current platform's path separator character
 
 ifdef UNIX then
 	export constant SLASH='/'
@@ -112,10 +119,26 @@ end ifdef
 -- === Directory Handling
 
 --**
--- Create a directory named name
+-- Create a new directory.
+--
+-- Parameters:
+-- 		# ##name##: a sequence, the name of the new directory to create
+--		# ##mode##: on //Unix// systems, permissions for the new directory.
 --
 -- Returns:
---     Returns false if failed, true if succeeded.
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Comments:
+-- 		##mode## is ignored on non-Unix platforms.
+--
+-- Example 1:
+-- <eucode>
+-- if not create_directory("the_new_folder") then
+--		crash("Filesystem problem - could not create the new folder")
+-- end if
+-- </eucode>
+-- See Also:
+-- 	[[:relove_directory]],[[:chdir]]
 
 export function create_directory(sequence name, integer mode=384)
 	atom pname, ret
@@ -125,15 +148,28 @@ export function create_directory(sequence name, integer mode=384)
 	elsifdef WIN32 then
 		ret = c_func(xCreateDirectory, {pname, 0})
 		mode = mode -- get rid of not used warning
+	-- else TODO: implement for DOS
 	end ifdef
 	return ret
 end function
 
 --**
--- Remove a directory named name
+-- Remove a directory.
+--
+-- Parameters:
+--		# ##name##: a sequence, the name of the directory to remove.
 --
 -- Returns:
---     Returns false if failed, true if succeeded.
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Example 1:
+-- <eucode>
+-- if not remove_directory("the_old_folder") then
+--		crash("Filesystem problem - could not remove the old folder")
+-- end if
+-- </eucode>
+-- See Also:
+-- 	[[:create_directory]],[[:chdir]]
 
 export function remove_directory(sequence name)
 	atom pname, ret
@@ -141,6 +177,7 @@ export function remove_directory(sequence name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
 		ret = not ret 
+	-- else TODO: implement for DOS and Windows
 	end ifdef
 	free(pname)
 	return ret
@@ -158,19 +195,25 @@ global enum
 	D_SECOND
 
 --**
--- Return directory information for the file or directory named by
--- st. If there is no file or directory with this name then -1 is
--- returned. st can also contain * and ? wildcards to select multiple
--- files.
+-- Return directory information for the specofoed file or directory.
+--
+-- Parameters:
+-- 		# ##name##: a sequence, the name to be looked up in the file system.
+--
+-- Returns:
+--		An **object**: -1 if no match found, else a sequence of sequence entries
 --
 -- Comments:
--- This information is similar to what you would get from the DOS DIR command. A sequence 
+-- 		##name## can also contain * and ? wildcards to select multiple
+-- files.
+--
+-- The returned information is similar to what you would get from the DOS DIR command. A sequence
 -- is returned where each element is a sequence that describes one file or subdirectory.
 -- 
--- If st names a **directory** you may have entries for "." and "..,"
--- just as with the DOS DIR command. If st names a **file** then x will
--- have just one entry, i.e. length(x) will
--- be 1. If st contains wildcards you may have multiple entries.
+-- If ##name## refers to a **directory** you may have entries for "." and "..",
+-- just as with the DOS DIR command. If it refers to an existing **file**, and has no wildcards, then the returned sequence will
+-- have just one entry, i.e. its length will
+-- be 1. If ##name## contains wildcards you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
 -- the year, month, day, hour, minute and second of the last modification.
@@ -231,7 +274,7 @@ global enum
 --
 -- d[3][D_NAME] would be "fred"
 -- </eucode>
--- 
+--
 -- See Also:
 --   ##bin\search.ex##
 --
@@ -297,7 +340,10 @@ global function dir(sequence name)
 end function
 
 --**
--- Return the name of the current working directory
+-- Return the name of the current working directory.
+--
+-- Returns:
+--		A **sequence**, the name of the current working directory
 --
 -- Comments:
 -- There will be no slash or backslash on the end of the current directory, except under
@@ -309,25 +355,30 @@ end function
 -- s = current_dir()
 -- -- s would have "C:\EUPHORIA\DOC" if you were in that directory
 -- </eucode>
-
+-- See Also:
+-- 	[[:dir]], [[:chdir]]
 global function current_dir()
 -- returns name of current working directory
 	return machine_func(M_CURRENT_DIR, 0)
 end function
 
 --**
--- Set the current directory to the path given by sequence s. s must name
---  an existing directory on the system. If successful, chdir() returns 1. 
---  If unsuccessful, chdir() returns 0.
+-- Set a new value for the current directory 
+--
+-- Parameters:
+-- 		##newdir##: a sequence, the name for the new working directory.
+--
+-- Returns:
+-- 		An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
--- By setting the current directory, you can refer to files in that directory using just 
+-- By setting the current directory, you can refer to files in that directory using just
 -- the file name.
 -- 
 -- The function current_dir() will return the name of the current directory.
 -- 
--- On DOS32 and WIN32 the current directory is a global property shared
--- by all the processes running under one shell. On Linux/FreeBSD, a subprocess
+-- On //DOS32// and //WIN32// the current directory is a global property shared
+-- by all the processes running under one shell. On //Unix// a subprocess
 -- can change the current directory for itself, but this won't
 -- affect the current directory of its parent process.
 --
@@ -339,7 +390,8 @@ end function
 --     puts(STDERR, "Error: No euphoria directory?\n")
 -- end if
 -- </eucode>
-
+-- See Also:
+-- [[:current_dir]], [[:dir]]
 global function chdir(sequence newdir)
 -- Changes the current directory. Returns 1 - success, 0 - fail.
 	return machine_func(M_CHDIR, newdir)
@@ -372,25 +424,31 @@ global integer my_dir = DEFAULT
 
 --**
 -- Generalized Directory Walker
--- This routine will "walk" through a directory with path name given by st. i2 is the 
--- routine id of a routine that you supply. ##walk_dir()## will call your routine once for 
--- each file and subdirectory in st. If i3 is non-zero (TRUE), then the subdirectories in 
--- st will be walked through recursively.
 --
--- The routine that you supply should accept the path name and dir() entry for each file and 
--- subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
+-- Parameters:
+-- 		# ##path_name##: a sequence, the name of the directory to walk through
+-- 		# ##your_function##: an integer, either ##my_dir## or the routine id of a callback Euphoria function
+-- 		# ##scan_subdirs##: an integer, 1 to also walk though subfolders, 0 to skip them all.
 --
 -- Comments:
+--
+-- This routine will "walk" through a directory named ##path_name##. For each entry in the directory, it will call a function, whose routine_id is ##your_function##.
+-- If ##scan_subdirs## is non-zero (TRUE), then the subdirectories in
+-- st will be walked through recursively in the very same way.
+--
+-- The routine that you supply should accept two sequences, the path name and dir() entry for each file and
+-- subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
+--
 -- This mechanism allows you to write a simple function that handles one file at a time, 
 -- while walk_dir() handles the process of walking through all the files and subdirectories.
 
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
--- a different order, set the global integer my_dir to the routine id of your own modified 
+-- a different order, set the global integer ##my_dir## to the routine id of your own modified
 -- [[:dir]] function that sorts the directory entries differently. See the default ##dir()##
 -- function in filesys.e.
 
 -- The path that you supply to ##walk_dir()## must not contain wildcards (* or ?). Only a 
--- single directory (and its subdirectories) can be searched at one time. --
+-- single directory (and its subdirectories) can be searched at one time.
 --
 -- Example 1:
 -- <eucode>
@@ -477,15 +535,21 @@ end function
 --
 
 --**
--- Copy a file from src to dest.
+-- Copy a file.
+--
+-- Parameters:
+-- 		# ##src##: a sequence, the name of the file or directory to copy
+-- 		# ##dest##: a sequence, the new name or location of the file
+-- 		# ##overwrite##: an integer, 0 to prevent overwriting an existing file
 --
 -- Returns:
---     Returns false if failed, true if succeeded.
+--     An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
---     If overwrite is true, if dest file already exists, 
+--     If overwrite is true, and if dest file already exists,
 --     the function overwrites the existing file and succeeds.
-
+-- See Also:
+-- [[:move_file]],[[rename_file]]
 export function copy_file(sequence src, sequence dest, atom overwrite)
 	ifdef WIN32 then
 	atom psrc, pdest, ret
@@ -530,10 +594,19 @@ export function copy_file(sequence src, sequence dest, atom overwrite)
 end function
 
 --**
--- Rename a file from src to dest.
+-- Rename a file.
+-- 
+-- Parameters:
+-- 		# ##src##: a sequence, the name of the file or directory to rename.
+-- 		# ##dest##: a sequence, the new name for the renamed file
 --
 -- Returns:
---     Returns false if failed, true if succeeded.
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Comments:
+-- 		If ##dest## contains a path specification, this is equivalent to moving the file, as well as possibly changing its name. However, the path must be on the same drive for this to work.
+-- See Also:
+-- [[:move_file]],[[:copy_file]]
 export function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	
@@ -552,21 +625,24 @@ export function rename_file(sequence src, sequence dest)
 end function
 
 --**
--- Delete a file named filename
+-- Delete a file.
+--
+-- Parameters:
+-- 		# ##name##: a sequence, the name of the file to delete.
 --
 -- Returns:
---     Returns false if failed, true if succeeded.
+--     An **integer**, 0 on failure, 1 on success.
 
-export function delete_file(sequence filename)
+export function delete_file(sequence name)
 	atom pfilename, ret
 
 	ifdef DOS32 then
-		-- quick hack
-		system("del "&filename&" > NUL", 2)
+		-- quick hack TODO check whether access was granted
+		system("del "&name&" > NUL", 2)
 		return 1
 	end ifdef
 
-	pfilename = allocate_string(filename)
+	pfilename = allocate_string(name)
 	ret = c_func(xDeleteFile, {pfilename})
 	
 	ifdef UNIX then
@@ -579,10 +655,17 @@ export function delete_file(sequence filename)
 end function
 
 --**
--- Move a file from src to dest.
+-- Move a file to another location.
+--
+-- Parameters:
+-- 		# ##src##: a sequence, the name of the file or directory to move
+-- 		# ##dest##: a sequence, the new location for the file
+--		# ##overwrite##: an integer, 0 to disable overwriting an existing file (the default)
 --
 -- Returns:
---     Returns false if failed, true if succeeded.
+--     An **integer**, 0 on failure, 1 on success.
+-- See Also:
+-- [[:rename_file]],[[:copy_file]]
 
 export function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret
@@ -661,11 +744,18 @@ end function
 
 
 --**
--- Return length of file filename.
+-- Return the size of a file.
+--
+-- Parameters:
+-- 		# ##filename##: the name of the queried file
+--
+-- Returns:
+-- 		An **atom**, the file size, or -1 if file is not found.
 --
 -- Comments:
---     if not found, returns -1
-
+--     This function does not compute the total size for a directory, and returns 0 instead.
+-- See Also:
+-- [[:dir]]
 export function file_length(sequence filename)
 	object list
 	list = dir(filename)
@@ -675,17 +765,38 @@ export function file_length(sequence filename)
 	return list[1][D_SIZE]
 end function
 
+export enum
+	FILETYPE_UNDEFINED = -1,
+	FILETYPE_NOT_FOUND,
+	FILETYPE_FILE,
+	FILETYPE_DIRECTORY
+
 --**
--- Returns the type of the file specified
+-- Get the type of a file.
+--
+-- Parameters:
+--  		# ##filename##: the name of the file to query. It must not have wildcards.
 -- 
 -- Returns:
---     * 0 if filename does not exist
---     * 1 if filename is a file
---     * 2 if filename is a directory
+--		An **integer**:
+--		* -1 if file could be multiply defined
+--      *  0 if filename does not exist
+--      *  1 if filename is a file
+--      *  2 if filename is a directory
+--
+-- Comments:
+-- An exported enum has been created for ease of use:
+-- * FILETYPE_UNDEFINED     = -1,
+-- * FILETYPE_NOT_FOUND, -- = 0
+-- * FILETYPE_FILE,      -- = 1
+-- * FILETYPE_DIRECTORY  -- = 2
+--
+-- See Also:
+-- [[:dir]]
 
 export function file_type(sequence filename)
 object dirfil
-	if find('*', filename) or find('*', filename) then return 0 end if
+	if find('*', filename) or find('?', filename) then return FILETYPE_UNDEFINED end if
 	
 	if length(filename) = 2 and filename[2] = ':' then
 		filename &= "\\"
@@ -694,12 +805,12 @@ object dirfil
 	dirfil = dir(filename)
 	if sequence(dirfil) then
 		if find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
-			return 2
+			return FILETYPE_DIRECTORY
 		else
-			return 1
+			return FILETYPE_FILE
 		end if
 	else
-		return 0
+		return FILETYPE_NOT_FOUND
 	end if
 end function
 
@@ -715,10 +826,19 @@ export enum
 	PATH_DRIVEID
 
 --**
--- Parse the fully qualified pathname (s1) and return a sequence containing directory name, 
--- file name + file extension, file name and file extension.
+-- Parse a fully qualified pathname.
+-- Parameters:
+-- 		# ##path##: a sequence, the path to parse
 --
--- An exported enum has been created for ease of use:
+-- Returns:
+-- 		A **sequence** of length 5. Each of these elements is a string:
+-- 		* The path name
+--		* The full unqualified file name
+--		* the file name, without extension
+--		* the file extension
+--		* the drive id
+-- Comments:
+-- An exported enum has been created for ease of using the returned value:
 --
 -- * PATH_DIR
 -- * PATH_FILENAME
@@ -726,8 +846,7 @@ export enum
 -- * PATH_FILEEXT
 -- * PATH_DRIVEID
 --
--- Comments:
--- The host operating system path separator is used.
+-- The host operating system path separator is used in the parsing.
 --
 -- Example 1:
 -- <eucode>
@@ -802,6 +921,12 @@ end function
 --**
 -- Return the directory name of a fully qualified filename
 --
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the full file name part of ##path##.
+--
 -- Comments:
 -- The host operating system path separator is used.
 --
@@ -812,7 +937,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:driveid]], [[:filename]], [[:fileext]]
+--   [[:driveid]], [[:filename]], [[:pathinfo]]
 
 export function dirname(sequence path)
 	sequence data
@@ -822,6 +947,12 @@ end function
 
 --**
 -- Return the file name portion of a fully qualified filename
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the file name part of ##path##.
 --
 -- Comments:
 -- The host operating system path separator is used.
@@ -833,7 +964,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:pathinfo]], [[:driveid]], [[:dirname]], [[:filebase]], [[:fileext]]
+--   [[:pathinfo]], [[:filebase]], [[:fileext]]
   
 export function filename(sequence path)
 	sequence data
@@ -845,7 +976,13 @@ end function
 
 --**
 -- Return the base filename of path.
--- 
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the base file name part of ##path##.
+--
 -- TODO: Test
 --
 -- Example 1:
@@ -855,7 +992,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:pathinfo]], [[:driveid]], [[:dirname]], [[:filename]], [[:fileext]]
+--     [[:pathinfo]], [[:filename]], [[:fileext]]
 
 export function filebase(sequence path)
 	sequence data
@@ -868,6 +1005,12 @@ end function
 --**
 -- Return the file extension of a fully qualified filename
 --
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the file extension part of ##path##.
+--
 -- Comments:
 -- The host operating system path separator is used.
 --
@@ -878,7 +1021,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:pathinfo]], [[:driveid]], [[:dirname]], [[:filename]], [[:filebase]]
+--     [[:pathinfo]], [[:filename]], [[:filebase]]
 
 export function fileext(sequence path)
 	sequence data
@@ -889,6 +1032,12 @@ end function
 --**
 -- Return the drive letter of the path on //DOS32// and //WIN32// platforms.
 --
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the file extension part of ##path##.
+--
 -- TODO: Test
 --
 -- Example:
@@ -898,7 +1047,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:pathinfo]], [[:dirname]], [[:filename]], [[:filebase]], [[:fileext]]
+--     [[:pathinfo]], [[:dirname]], [[:filename]]
 
 export function driveid(sequence path)
 	sequence data
