@@ -1286,7 +1286,7 @@ procedure InitBackEnd( object ignore )
 		elsif equal(name, "SC2_AND") then
 			name = "SC2_OR"
 		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
-				"END_PARAM_CHECK", "NOPWHILE" }) then 
+				"END_PARAM_CHECK" }) then 
 			-- never emitted
 			name = "NOP2" 
 		elsif equal(name, "GREATER_IFW_I") then
@@ -1305,6 +1305,8 @@ procedure InitBackEnd( object ignore )
 			name = "PEEK"
 		elsif match( "POKE", name ) then
 			name = "POKE"
+		elsif find( name, { "NOPWHILE" } ) then
+			name = "NOP1"
 		end if
 		
 		operation[i] = routine_id("op" & name)
@@ -1334,7 +1336,7 @@ procedure dis( integer sub )
 	integer op, ix
 	sequence sym
 	
-	printf( out, "\nSubProgram [%s:%05d]\n", {SymTab[sub][S_NAME], sub})
+	printf( out, "\nSubProgram [%s-%s:%05d]\n", {file_name[SymTab[sub][S_FILE_NO]],SymTab[sub][S_NAME], sub})
 	Code = SymTab[sub][S_CODE]
 	pc = 1
 	while pc <= length(Code) do
@@ -1355,15 +1357,17 @@ global function extract_options(sequence s)
 end function
 
 global procedure BackEnd( object ignore )
+	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
 	for i = 1 to length(SymTab) do
-		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY and sequence(SymTab[i][S_CODE]) then
+		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY 
+		and sequence(SymTab[i][S_CODE]) 
+		and SymTab[i][S_SCOPE] != SC_PRIVATE then
 			dis( i )
 		else
 			-- other symbols?
 		end if
 	end for
-	save_il( file_name[1] & '.' )
 	close( out )
 end procedure
 mode:set_backend( routine_id("BackEnd") )

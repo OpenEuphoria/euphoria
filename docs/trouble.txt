@@ -327,15 +327,13 @@ In all other contexts it is ok to make a list:
 atom a, b, c, d, e
 </eucode>
 
-==== Declaring variables in middle of routine
+==== Declaring variables in the middle of loop, if or switch
 
-//I'm declaring some variables in the middle of a routine and it gives me a syntax
-error.//
+//I'm declaring some variables in the middle of a loop, if or switch
+block and it gives me a syntax error.//
 
-All of your //private// variable declarations must come at the beginning of
-your **subroutine**, before any executable statements. (At the top-level of
-a program, **outside of any routine**, it is ok to declare variables
-anywhere.)
+All of your variable declarations must come outside of any [[#for], [[#while]],
+[[#if]] or [[#switch] block.
 
 ==== Expected to see...
 

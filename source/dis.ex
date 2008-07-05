@@ -1,7 +1,12 @@
 without type_check
 
 include mode.e
-set_mode( "interpret", 0 )
+sequence cmd = command_line()
+if find( "-t", cmd ) then
+	set_mode( "translate", 0 )
+else
+	set_mode( "interpret", 0 )
+end if
 
 -- standard Euphoria includes
 include wildcard.e
@@ -20,14 +25,14 @@ include intinit.e
 -- Disassembler:
 include dis.e
 
-global procedure OutputIL()
--- dummy routine
-end procedure
-
-global function extract_options(sequence s)
--- dummy routine    
-	return s
-end function
+-- global procedure OutputIL()
+-- -- dummy routine
+-- end procedure
+-- 
+-- global function extract_options(sequence s)
+-- -- dummy routine    
+-- 	return s
+-- end function
 
 -- main program:
 include main.e

@@ -1986,18 +1986,15 @@ procedure Loop_statement()
 end procedure
 
 integer top_level_parser
-
 procedure Ifdef_statement()
 	sequence option
 	integer matched, nested_count, has_matched,  parser_id, in_matched
 	token tok
-
 	matched = 0
 	nested_count = 0
 	has_matched = 0
 	in_matched = 0
-	if --CurrentSub != TopLevelSub or 
-	length(if_labels) or length(loop_labels) then
+	if CurrentSub != TopLevelSub or length(if_labels) or length(loop_labels) then
 		parser_id = forward_Statement_list
 	else
 		parser_id = top_level_parser
@@ -2544,7 +2541,12 @@ procedure Statement_list()
 		elsif id = SWITCH then
 			StartSourceLine(TRUE)
 			Switch_statement()
-
+			
+		elsif id = TYPE or id = QUALIFIED_TYPE then
+			if length( loop_stack ) or length( if_stack ) then
+				CompileErr( "illegal variable declaration" )
+			end if
+			Private_declaration( tok[T_SYM] )
 		else
 			putback(tok)
 			stmt_nest -= 1
@@ -2566,7 +2568,6 @@ procedure SubProg(integer prog_type, integer scope)
 	sequence again
 
 	LeaveTopLevel()
-
 	prog_name = next_token()
 	if not find(prog_name[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 		CompileErr("a name is expected here")

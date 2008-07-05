@@ -35,17 +35,17 @@
 
 * Include file names with accent characters now supported. $$(doneby C. Cuvier)
 * Enhanced symbol resolution to take into account information regarding which files were 
-  included by which files. $$(doneby Matthew Lewis)
+  included by which files. $$(doneby Matt Lewis)
 * Namespaces for a source file now can be used for symbols in the specified file and for 
-  global symbols in all files included by the specified file. $$(doneby Matthew Lewis)
+  global symbols in all files included by the specified file. $$(doneby Matth Lewis)
 * Command line arguments for the translator allow for creating binaries with debugging 
   symbols, and to specify a different runtime library. $$(doneby C. Cuvier)
 * In trace mode, '?' will show the last defined variable of the requested name.
   $$(doneby C. Cuvier)
 * Include directories can now be specified based on command line arguments and config files 
-  in addition to environment variables. $$(doneby Matthew Lewis)
+  in addition to environment variables. $$(doneby Matt Lewis)
 * Improved accuracy in scanning numbers in scientific notation. Scanned numbers are accurate 
-  to the full precision of the IEEE 754 floating point standard. $$(doneby Matthew Lewis)
+  to the full precision of the IEEE 754 floating point standard. $$(doneby Matt Lewis)
 * **Translator:** Added **-lccopt-off** option for translator to disable using the 
   optimization flag when compiling with LCC, as it has problems sometimes.  
   $$(doneby Jeremy Cowgar)
@@ -70,7 +70,7 @@
   omitted on a call. Any expression can be used, and parameters of the same call can even be 
   used. $$(doneby C. Cuvier.)
 * New **switch** ... **end switch** construct, which implements more efficiently a sequence
-  of **elsif**, using the more compact **cse** statement. $$(doneby Matthew Lewis.)
+  of **elsif**, using the more compact **cse** statement. $$(doneby Matt Lewis.)
 * **Unit testing added to Euphoria**. Over 1,000 tests. To run, cd tests and
   type ##eutest##
 * Condition compiling keywords (**ifdef**, **elsifdef**, **end ifdef**) and **with 
@@ -79,7 +79,7 @@
 * New enum keyword that allows for //parse time// sequential constant creation. 
   $$(doneby Jeremy Cowgar.)
 * The namespace **eu** is predefined, and can be used to fully qualify built-in routines.
-  $$(doneby Matthew Lewis.)
+  $$(doneby Matt Lewis.)
 * Warnings now split between maskable and non maskable warnings.
   ##with warning## has been enhanced in order to individually turn maskable warnings on or 
   off. 
@@ -88,7 +88,7 @@
 ## directly include the file where the symbols reside 
 ## directly include a file that uses the "export include file.e" construct to pass export 
    symbols 
-  $$(doneby Matthew Lewis)
+  $$(doneby Matt Lewis)
 * Routine resolution changes
 ## Routines the same name as an internal no longer override the internal by default. You
    must use the keyword **override**.
@@ -109,13 +109,16 @@
 * dis.ex (in the source directory) will parse a euphoria program and output the symbol table
   and the IL code in a readible format.
   $$(doneby Matt Lewis)
+* Variables may be in any part of a routine outside of **for**, **while**, **if** and 
+  **switch** blocks.
+  $$(doneby Matt Lewis)
 
 === New Routines/Constants
 
 * Added **value_from()** in **get.e** to return additional information about the parsing 
   activity. $$(doneby C. Cuvier)
 * New builtin routines: **peeks()**, **peek2s()**, **peek2u()**, **peek_string()**, 
-  **poke2()** $$(doneby Matthew Lewis)
+  **poke2()** $$(doneby Matt Lewis)
 * Began **library expansion**. A large percentage of these functions have been found in The 
   Archive. Many thanks must go to the original developers who have contributed these functions.
 * New routines in **machine.e**:
