@@ -22,10 +22,18 @@ else
 	encoding = ""
 end if
 
-test_true("set()", l:set(locale & encoding))
-test_equal("set/get", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
-test_equal("money", "$1,020.50", l:money(1020.50))
-test_equal("number", "1,020.50", l:number(1020.5))
+test_true("set()", l:set("C"))
+test_equal("set/get", lcc:decanonical("C"), lcc:decanonical(l:get()))
+if l:set(locale & encoding) then
+	test_equal("set/get en_US", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
+	test_equal("money", "$1,020.50", l:money(1020.50))
+	test_equal("number", "1,020.50", l:number(1020.5))
+else
+	-- can not test, maybe emit a warning?
+	puts(1, "warning can not test en_US locale, testing against C locale..")
+	test_equal("money", "1020.50", l:money(1020.50))
+	test_equal("number", "1020.50", l:number(1020.5))
+end if
 
 d:datetime dt1
 dt1 = d:new(2008, 5, 4, 9, 55, 23)
