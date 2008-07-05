@@ -52,7 +52,7 @@ global procedure c_hprintf(sequence format, integer value)
 	end if
 end procedure
 
-global procedure c_printf(sequence format, integer value)
+global procedure c_printf(sequence format, object value)
 -- output C source code with (one) 4-byte formatted value (should allow multiple values later)
 	if emit_c_output then
 		printf(c_code, format, value)

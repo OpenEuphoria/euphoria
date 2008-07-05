@@ -2,7 +2,7 @@ include unittest.e
 include error.e
 
 warning_file(-1)
-
+with trace
 integer n,m,c
 n = 0
 
@@ -32,9 +32,14 @@ end for
 label "d"
 test_pass("Goto jump out of for loop")
 
+function foo( integer x )
+	return x * 0
+end function
+
 c = 1
 goto "e"
-while c = 0 do
+while c = 1 do
+	crash("should never get to this statement")
 	label "e"
 	c = 2
 end while

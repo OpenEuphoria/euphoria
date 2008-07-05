@@ -1142,6 +1142,7 @@ end procedure
 
 procedure opCASE()
 	-- only emitted for translator
+	punary()
 end procedure
 
 procedure opENTRY()
@@ -1154,10 +1155,12 @@ end procedure
 
 procedure opNOPSWITCH()
 	-- translator only
+	pnonary()
 end procedure
 
 procedure opGLABEL()
 	-- translator only
+	punary()
 end procedure
 
 procedure opSPLICE()
