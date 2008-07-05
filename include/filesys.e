@@ -9,7 +9,9 @@
 --
 -- <<LEVELTOC depth=2>>
 
+ifdef !DOS32 then
 include dll.e
+end ifdef
 include machine.e
 include wildcard.e
 include sort.e

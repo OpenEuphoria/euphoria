@@ -10,7 +10,9 @@
 include sequence.e
 include math.e
 
+ifdef !DOS32 then
 include dll.e
+end ifdef
 include machine.e
 
 constant M_SLEEP = 64

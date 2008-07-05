@@ -239,6 +239,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\main.obj &
         .\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\0rror.obj &
         .\$(OBJDIR)\filesys.obj &
         .\$(OBJDIR)\types.obj
 
@@ -294,7 +295,7 @@ EU_TRANSDOS_OBJECTS = &
         .\$(OBJDIR)\io.obj &
         .\$(OBJDIR)\math.obj &
         .\$(OBJDIR)\os.obj &
-        .\$(OBJDIR)\0rror.obj &
+	.\$(OBJDIR)\0rror.obj &
         .\$(OBJDIR)\filesys.obj &
         .\$(OBJDIR)\types.obj
 
