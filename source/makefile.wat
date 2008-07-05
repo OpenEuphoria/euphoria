@@ -503,7 +503,7 @@ source : .SYMBOLIC common-source source-win source-dos
 
 testwin : interpreter
 	cd ..\tests
-	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe --ec ..\source\ecw.exe -lib ..\source\ecw.lib
+	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe -ec ..\source\ecw.exe -lib ..\source\ecw.lib
 	cd ..\source
 
 testdos : dos
