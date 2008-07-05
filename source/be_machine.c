@@ -4987,7 +4987,9 @@ object machine(object opcode, object x)
 				return crash_routine(x);
 				break;
 			case M_COMPILE_PCRE:
-				return compile_pcre(x);
+				x = (object)SEQ_PTR(x);
+				return compile_pcre(*(((s1_ptr)x)->base+1), 
+							 *(((s1_ptr)x)->base+2));
 				break;
 			case M_EXEC_PCRE:
 				return exec_pcre(x);

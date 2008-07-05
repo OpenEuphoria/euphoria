@@ -16,7 +16,7 @@ extern int default_heap;
 
 long get_int();
 
-object compile_pcre(object pattern){
+object compile_pcre(object pattern, object eflags){
 /*       pcre *pcre_compile(const char *pattern, int options,
 			const char **errptr, int *erroffset,
 			const unsigned char *tableptr);
@@ -26,10 +26,19 @@ object compile_pcre(object pattern){
 		int erroffset;
 		char* str;
 		object ret;
+		int pflags;
+
+		if (IS_ATOM_INT(eflags)) {
+			pflags = eflags;
+		} else if (IS_ATOM(eflags)) {
+			pflags = (int)(DBL_PTR(eflags)->dbl);
+		} else {
+			RTFatal("compile_pcre expected an atom as the second parameter, not a sequence");
+		}
 		
 		str = EMalloc( SEQ_PTR(pattern)->length + 1);
 		MakeCString( str, pattern );
-		re = pcre_compile( str, 0, &error, &erroffset, NULL );
+		re = pcre_compile( str, pflags, &error, &erroffset, NULL );
 		if( re == NULL ){
 				// error, so pass the error string to caller
 				return NewString( error );

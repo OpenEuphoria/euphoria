@@ -111,8 +111,8 @@ end type
 -- re = new("foo")
 -- </eucode>
 
-export function new(sequence pattern)
-		return machine_func(M_COMPILE_PCRE, pattern)
+export function new(sequence pattern, atom flags=0)
+		return machine_func(M_COMPILE_PCRE, {pattern, flags})
 end function
 
 --**
