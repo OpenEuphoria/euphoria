@@ -767,7 +767,7 @@ global function keyfind(sequence word, integer file_no)
 	if No_new_entry then
 		return {IGNORED,0}
 	end if
-	
+
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
@@ -875,9 +875,11 @@ global procedure ExitScope()
 	symtab_index s
 
 	s = SymTab[CurrentSub][S_NEXT]
-	while s and SymTab[s][S_SCOPE] = SC_PRIVATE do
-		Hide(s)
-		LintCheck(s)
+	while s do 
+		if SymTab[s][S_SCOPE] = SC_PRIVATE then
+			Hide(s)  --if s>1080 then ?s end if
+			LintCheck(s)
+		end if
 		s = SymTab[s][S_NEXT]
 	end while
 end procedure

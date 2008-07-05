@@ -2409,7 +2409,7 @@ procedure Procedure_call(token tok)
 			putback(temp_tok)
 			NotReached(temp_tok[T_ID], "abort()")
 		end if
-	else 
+	else
 		op_info1 = s  
 		emit_op(PROC)
 		if not TRANSLATE then
@@ -2470,6 +2470,14 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Assignment(tok)
 			
+		elsif id = TYPE or id = QUALIFIED_TYPE then
+			StartSourceLine(TRUE)
+			if CurrentSub != TopLevelSub then
+				Private_declaration(tok[T_SYM])
+			else
+				Global_declaration(tok[T_SYM],SC_LOCAL)
+			end if
+
 		elsif id = PROC or id = QUALIFIED_PROC then
 			if id = PROC then
 				-- possibly warn for non-inclusion
@@ -2501,7 +2509,7 @@ procedure Statement_list()
 		elsif id = EXIT then
 			StartSourceLine(TRUE)
 			Exit_statement()
-			
+
 		elsif id = BREAK then
 			StartSourceLine(TRUE)
 			Break_statement()

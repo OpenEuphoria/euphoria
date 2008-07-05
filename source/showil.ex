@@ -15,8 +15,8 @@
 include machine.e
 include opnames.e
 include reswords.e
-include misc.e
 include file.e
+include pretty.e
 
 -- works as a pseudo INTERPRETER
 include mode.e

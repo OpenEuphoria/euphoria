@@ -38,7 +38,7 @@ else
 	integer count
 	integer foo
 	count = 0
-	for i = 1 to length(x) do
+	for i = 1 to length(x) do 
 		if sequence(x[i]) then
 			foo = recursion1( x[i], level + 1 )
 		end if
