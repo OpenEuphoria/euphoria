@@ -30,6 +30,10 @@ lastintsym = {}
 global integer last_sym
 last_sym = 0
 		 
+sequence scope_stack = {}   -- for using loops and if blocks for scope
+integer scope_id = 0        -- each scope gets a unique id
+sequence scoped_vars = {}   -- remember vars created in each scope so we can hide them at the correct time
+
 function hashfn(sequence name) 
 -- hash function for symbol table
 	integer len
@@ -771,7 +775,9 @@ global function keyfind(sequence word, integer file_no)
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
-
+	if length( scope_stack ) then
+		scoped_vars = append( scoped_vars, { scope_stack[$], tok[T_SYM] } )
+	end if
 	return tok  -- no ref on newly declared symbol
 end function
 
@@ -884,4 +890,24 @@ global procedure ExitScope()
 	end while
 end procedure
 
+-- functions for dealing with scopes created by loops, ifs and switches
+export procedure push_scope()
+	scope_id += 1
+	scope_stack &= scope_id
+end procedure
 
+export procedure pop_scope()
+	if not length(scope_stack) then
+		return 
+	end if
+	integer scope = scope_stack[$]
+	scope_stack = scope_stack[1..$-1]
+	integer sx
+	-- now hide the variables
+	sx = length( scoped_vars )
+	while sx and scoped_vars[sx][1] = scope do
+		Hide( scoped_vars[sx][2] )
+		sx -= 1
+	end while
+	scoped_vars = scoped_vars[1..sx]
+end procedure

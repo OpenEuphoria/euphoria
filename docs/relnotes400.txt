@@ -109,8 +109,8 @@
 * dis.ex (in the source directory) will parse a euphoria program and output the symbol table
   and the IL code in a readible format.
   $$(doneby Matt Lewis)
-* Variables may be in any part of a routine outside of **for**, **while**, **if** and 
-  **switch** blocks.
+* Variables may be in any part of a routine, or in **for**, **while**, **if**, **loop** and 
+  **switch** blocks, in which case the scope of the variable ends when its block ends.
   $$(doneby Matt Lewis)
 
 === New Routines/Constants

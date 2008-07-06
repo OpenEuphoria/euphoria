@@ -1084,12 +1084,19 @@ routine A, requires the a class="brown" href="lib_dyn.htm#routine_id">
 **routine_id()**</a> mechanism.
 
 a name=scope></a> A symbol is defined from the point where it is declared to
-the end of its scope.  The scope of a variable declared inside a procedure or
-function (a private variable) ends at the end of the procedure or function.
+the end of its scope.  The scope of the variable depends upon where it is
+declared.  If it is within a **for**, **while**, **loop** or **switch**, its scope ends 
+at the respective end statement.  In an **if** statement, the scope ends either
+at the next **else**, **elsif** or **end if** statement.  If a variable is declared
+within a routine, but not within one of the structures listed above, the scope of
+the variable ends at the routine's **end** statement.
+
 The scope of all other variables, constants, procedures, functions and types
 ends at the end of the source file in which they are declared and they are
-referred to as local, unless the keyword global precedes their declaration, in
-which case their scope extends indefinitely.
+referred to as local, unless the keyword **global** precedes their declaration, in
+which case their scope extends indefinitely, or if the keyword **export**
+precedes their declaration, in which case their scope extends to any file that
+directly includes the file in which they are declared.
 
 When you **include** a Euphoria file in a main file (see a
 href="refman_2.htm#6">2.6 Special Top-Level Statements</a>), only the variables

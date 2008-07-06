@@ -188,6 +188,7 @@ global procedure InitParser()
     entry_addr = {}
     block_list = {}
     block_index = 0
+    param_num = -1
 end procedure
 
 sequence switch_stack
@@ -1628,6 +1629,8 @@ procedure If_statement()
 	
 	if_stack &= IF
 	
+	push_scope()
+	
 	elist_base = length(break_list)
 	short_circuit += 1
 	short_circuit_B = FALSE
@@ -1652,6 +1655,9 @@ procedure If_statement()
 	tok = next_token()
 
 	while tok[T_ID] = ELSIF do
+		pop_scope()
+		push_scope()
+		
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
 		break_delay &= 1
@@ -1689,6 +1695,9 @@ procedure If_statement()
 	end while
 
 	if tok[T_ID] = ELSE then 
+		pop_scope()
+		push_scope()
+		
 		StartSourceLine(FALSE)
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
@@ -1717,6 +1726,8 @@ procedure If_statement()
 	tok_match(END)
 	tok_match(IF)
 	
+	pop_scope()
+	
 	if TRANSLATE then
 		if length(break_list) > elist_base then
 			emit_op(NOP1)  -- to emit label here
@@ -1741,6 +1752,7 @@ end procedure
 procedure push_switch()
 	if_stack &= SWITCH
 	switch_stack = append( switch_stack, { {}, {}, 0 })
+	push_scope()
 end procedure
 
 procedure pop_switch( integer break_base )
@@ -1751,6 +1763,7 @@ procedure pop_switch( integer break_base )
 	if_labels = if_labels[1..$-1]
 	if_stack  = if_stack[1..$-1]
 	switch_stack  = switch_stack[1..$-1]	
+	pop_scope()
 end procedure
 
 procedure add_case( symtab_index sym )
@@ -1878,6 +1891,8 @@ procedure While_statement()
 	integer bp2
 	integer exit_base
 
+	push_scope()
+	
     exit_base = length(exit_list)
     entry_addr &= length(Code)+1
     emit_op(NOP2) -- Entry_statement may patch this later
@@ -1933,13 +1948,16 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base) 
+	pop_scope()
 end procedure
 
 procedure Loop_statement()
 -- Parse a loop-until loop
     integer bp1
     integer exit_base,next_base
-						  
+	
+	push_scope()
+	
     exit_base = length(exit_list)
     next_base = length(continue_list)
     emit_op(NOP2) -- Entry_statement() may patch this
@@ -1982,7 +2000,8 @@ procedure Loop_statement()
     if TRANSLATE then
 		emit_op(NOP1)
 	end if
-    exit_loop(exit_base)  
+    exit_loop(exit_base)
+    pop_scope()
 end procedure
 
 integer top_level_parser
@@ -2132,7 +2151,7 @@ procedure For_statement()
 		putback(tok)
     	end_op = ENDFOR_INT_UP1 
 	end if
-
+	
 	loop_var_sym = loop_var[T_SYM]
 	if CurrentSub = TopLevelSub then
 		DefinedYet(loop_var_sym)
@@ -2166,6 +2185,8 @@ procedure For_statement()
 			emit_addr(loop_var_sym)
 		end if
 	end if
+	push_scope()
+	
 	call_proc(forward_Statement_list, {})
 	tok_match(END)
 	tok_match(FOR)
@@ -2180,7 +2201,8 @@ procedure For_statement()
 			emit_op(ERASE_SYMBOL)
 			emit_addr(loop_var_sym)
 		end if
-	end if  
+	end if
+	pop_scope()
 	Hide(loop_var_sym)
     exit_loop(exit_base)
 end procedure
@@ -2358,9 +2380,17 @@ procedure Private_declaration(symtab_index type_sym)
    		tok = next_token()
    		if tok[T_ID] = EQUALS then -- assign on declare
 		    putback(tok)
-			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH] -- recover any shadowed var         
+		    -- TODO: MWL 7/6/08: This line and its companion below allow use of another, 
+		    -- previously declared variable to be used when initializing a private variable.
+		    -- I think this should be removed, and caught at run-time as a variable not 
+		    -- assigned error.  Using a previous variable seems counter-intuitive.  It's
+		    -- a side effect when a constant is declared, but I think that's because we don't
+		    -- check to see if constants have been assigned already, not because we want to 
+		    -- allow other, earlier constants with the same name to be used to initialize 
+		    -- a constant.
+			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH] -- recover any shadowed var
 			No_new_entry=1
-		    Assignment({SymTab[sym][S_TOKEN],sym})
+		    Assignment({VARIABLE,sym})
 			No_new_entry=0
 			buckets[SymTab[sym][S_HASHVAL]] = sym  -- put new var back in place
 			tok = next_token()
@@ -2557,10 +2587,14 @@ procedure Statement_list()
 			
 		elsif id = TYPE or id = QUALIFIED_TYPE then
 			StartSourceLine(TRUE)
-			if length( loop_stack ) or length( if_stack ) then
-				CompileErr( "illegal variable declaration" )
+			if param_num != -1 then
+				-- if we're in a routine, we need to know how much stack space will be required
+				param_num += 1
+				Private_declaration( tok[T_SYM] )
+			else
+				Global_declaration( tok[T_SYM], SC_LOCAL )
 			end if
-			Private_declaration( tok[T_SYM] )
+			
 		else
 			putback(tok)
 			stmt_nest -= 1
@@ -2769,7 +2803,7 @@ procedure SubProg(integer prog_type, integer scope)
 	if temps_allocated + param_num > max_stack_per_call then 
 		max_stack_per_call = temps_allocated + param_num
 	end if
-	
+	param_num = -1
 	StraightenBranches()
 	EnterTopLevel()
 end procedure
