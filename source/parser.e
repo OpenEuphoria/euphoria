@@ -2470,13 +2470,13 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Assignment(tok)
 			
-		elsif id = TYPE or id = QUALIFIED_TYPE then
-			StartSourceLine(TRUE)
-			if CurrentSub != TopLevelSub then
-				Private_declaration(tok[T_SYM])
-			else
-				Global_declaration(tok[T_SYM],SC_LOCAL)
-			end if
+-- 		elsif id = TYPE or id = QUALIFIED_TYPE then
+-- 			StartSourceLine(TRUE)
+-- 			if CurrentSub != TopLevelSub then
+-- 				Private_declaration(tok[T_SYM])
+-- 			else
+-- 				Global_declaration(tok[T_SYM],SC_LOCAL)
+-- 			end if
 
 		elsif id = PROC or id = QUALIFIED_PROC then
 			if id = PROC then
@@ -2551,6 +2551,7 @@ procedure Statement_list()
 			Switch_statement()
 			
 		elsif id = TYPE or id = QUALIFIED_TYPE then
+			StartSourceLine(TRUE)
 			if length( loop_stack ) or length( if_stack ) then
 				CompileErr( "illegal variable declaration" )
 			end if
