@@ -4446,7 +4446,7 @@ procedure opPEEK()
 			end if
 		else
 			-- peek_string
-			seg_peek_string( Code[pc+2], Code[pc+1], 0 )
+			seg_peek_string( Code[pc+2], Code[pc+1], 1 )
 		end if
 	end if
 				
