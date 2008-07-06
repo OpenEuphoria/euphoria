@@ -142,7 +142,7 @@ end ifdef
 -- See Also:
 -- 	[[:relove_directory]],[[:chdir]]
 
-export function create_directory(sequence name, integer mode=384)
+export function create_directory(sequence name, integer mode=448)
 	atom pname, ret
 	pname = allocate_string(name)
 	ifdef UNIX then

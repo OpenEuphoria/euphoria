@@ -2255,7 +2255,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 		SymTab[sym][S_SCOPE] = scope
 		
 		if type_ptr = 0 then
-			-- CONSTANT 
+			-- CONSTANT
 			SymTab[sym][S_MODE] = M_CONSTANT 
 			-- temporarily hide sym so it can't be used in defining itself 
 			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH]
@@ -2358,10 +2358,15 @@ procedure Private_declaration(symtab_index type_sym)
    		tok = next_token()
    		if tok[T_ID] = EQUALS then -- assign on declare
 		    putback(tok)
-			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH] -- recover any shadowed var
-		    Assignment({VARIABLE,sym})
+			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH] -- recover any shadowed var         
+			No_new_entry=1
+		    Assignment({SymTab[sym][S_TOKEN],sym})
+			No_new_entry=0
 			buckets[SymTab[sym][S_HASHVAL]] = sym  -- put new var back in place
-	   		tok = next_token()
+			tok = next_token()
+			if tok[T_ID]=IGNORED then
+				tok = keyfind(tok[T_SYM],-1)
+			end if
 		end if
 
 		if tok[T_ID] != COMMA then

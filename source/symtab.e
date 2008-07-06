@@ -569,7 +569,7 @@ global function keyfind(sequence word, integer file_no)
 			-- name matches 
 			
 			tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
-			
+
 			if file_no = -1 then
 				-- unqualified  
 				
@@ -765,7 +765,7 @@ global function keyfind(sequence word, integer file_no)
 	end if
 
 	if No_new_entry then
-		return {IGNORED,0}
+		return {IGNORED,word}
 	end if
 
 	tok = {VARIABLE, NewEntry(word, 0, defined,
@@ -877,7 +877,7 @@ global procedure ExitScope()
 	s = SymTab[CurrentSub][S_NEXT]
 	while s do 
 		if SymTab[s][S_SCOPE] = SC_PRIVATE then
-			Hide(s)  --if s>1080 then ?s end if
+			Hide(s)
 			LintCheck(s)
 		end if
 		s = SymTab[s][S_NEXT]

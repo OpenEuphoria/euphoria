@@ -29,5 +29,13 @@ without warning &= "short_circuit_warning"
 if n and f()=7 then end if
 
 warning_file("warning.lst")
+integer n1
+procedure bar()
+integer nha = 2
+nha+=1
+n1=nha
+end procedure
+bar()
+test_equal("assign_op after assign on declare",3,n1)
 
 test_report()
