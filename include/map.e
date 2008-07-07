@@ -282,7 +282,7 @@ end function
 --   -- ages now contains 2 entries: "Andy" => 12, "Budi" => 14
 --   </eucode>
 
-export function put(map m, object key, object value, integer pTrigger = 100, integer operation = PUT )
+export function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
 	integer index
 	integer hashval
 	integer lOffset
