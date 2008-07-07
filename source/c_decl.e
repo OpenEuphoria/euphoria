@@ -1578,7 +1578,7 @@ global procedure GenerateUserRoutines()
 				
 					-- declare the private vars 
 					unique_params = {}
-					while sp and SymTab[sp][S_SCOPE] = SC_PRIVATE or SymTab[sp][S_SCOPE] = SC_LOOP_VAR do
+					while sp and (SymTab[sp][S_SCOPE] = SC_PRIVATE or SymTab[sp][S_SCOPE] = SC_LOOP_VAR) do
 						if SymTab[sp][S_SCOPE] = SC_LOOP_VAR then
 							sp = SymTab[sp][S_NEXT]
 							continue
