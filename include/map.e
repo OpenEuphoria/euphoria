@@ -341,8 +341,12 @@ export function put(map m, object key, object value, integer pTrigger = 100, int
 	end if
 	-- write new entry
 	m0[iBuckets][index][iKeys] = append(m0[iBuckets][index][iKeys], key)
+	if operation = APPEND then
+		-- If appending, then the user wants the value to be an element, not the entire thing
+		value = { value }
+	end if
 	m0[iBuckets][index][iVals] = append(m0[iBuckets][index][iVals], value)
-
+	
 	return m0
 end function
 
