@@ -1,12 +1,9 @@
 ---------------------------------------------------------------------------------
--- eu_token.e Â© CreativePortal.ca
--- version 0.3
---
--- mailto:code@creativeportal.ca
--- http://www.creativeportal.ca                          written by Chris Bensler
----------------------------------------------------------------------------------
+
 include keywords.e
-		   
+
+---------------------------------------------------------------------------------
+
 constant FALSE = 0, TRUE = 1
 constant EOF = -1
 object EOL					EOL = '\n'
@@ -28,6 +25,7 @@ end function
 global constant
 		 T_EOF        = Enum_Start(EOF,1)
 		,T_NULL				= Enum() -- 
+		,T_SHBANG     = Enum()
 		,T_BLANK      = Enum()
 		,T_COMMENT    = Enum()
 		,T_NUMBER     = Enum()
@@ -93,7 +91,8 @@ global constant
 
 sequence Token         Token = {T_EOF,"",0,0,0}
 
-integer  FN        FN   = EOF
+sequence input     input = ""
+integer  in        in = 0
 integer  LNum      LNum = 0
 integer  LPos      LPos = 0
 integer  Look      Look = EOL
@@ -221,12 +220,13 @@ procedure scan_char()
 		LPos = 0
 	end if
 	LPos += 1
-	Look = getc(FN)
+	in += 1
+	Look = input[in]
 end procedure
 
 ---------------------------------------------------------------------------------
 
-function scan_white()
+function scan_white() -- returns TRUE if a blank line was parsed
  integer lastLF
 	Token[TTYPE] = T_BLANK
 	Token[TDATA] = ""
@@ -476,7 +476,7 @@ procedure next_token()
 			Token[TTYPE] = T_COMMENT
 			Token[TDATA] = "--"
 			scan_char()
-			while (Look != EOL and Look != EOF) do 
+			while (Look != EOL) do
 				Token[TDATA] &= Look
 				scan_char()
 			end while
@@ -493,30 +493,6 @@ procedure next_token()
 		Token[TDATA] = Look
 		if (Look != EOF) then report_error(ERR_UNKNOWN) end if
 	end if
-	
-end procedure
-
----------------------------------------------------------------------------------
-
-procedure close_parse()
-	if (FN != EOF) then close(FN) end if
-	FN = EOF
-end procedure
-
-procedure open_parse(sequence fname)
-	if FN != EOF then close_parse() end if
-	FN = open(fname,"rb")
-	if FN = EOF then
-		report_error(ERR_OPEN)
-		return
-	end if
-	LNum = 1
-	LPos = 1
-	Look = getc(FN)
-	Token[TTYPE] = EOF
-	Token[TDATA] = ""
-	Token[TLNUM] = 1
-	Token[TLPOS] = 1
 end procedure
 
 ---------------------------------------------------------------------------------
@@ -527,7 +503,8 @@ global constant
 		,ET_ERR_LINE		= Enum()
 		,ET_ERR_COLUMN	= Enum()
 
-global function et_tokenize_file(sequence fname)
+
+global function et_tokenize_string(sequence code)
  sequence tokens
 
 	ERR = FALSE
@@ -535,29 +512,63 @@ global function et_tokenize_file(sequence fname)
 	ERR_LPOS = 0
 
 	tokens = {}
-	open_parse(fname)
+		
+	input = code & EOL & EOF
+	LNum = 1
+	LPos = 1
+	in = 1
+	Look = input[in]
+	Token[TTYPE] = EOF
+	Token[TDATA] = ""
+	Token[TLNUM] = 1
+	Token[TLPOS] = 1
+
+  if (Look = '#') and (input[in+1] = '!') then
+    in += 1
+    scan_char()
+    if scan_white() then end if
+    Token[TTYPE] = T_SHBANG
+    while Look != EOL do
+      Token[TDATA] &= Look
+      scan_char()
+    end while
+    scan_char()
+    tokens &= { Token }
+  end if
+
+	next_token()
 	if not ERR then
-
-		next_token()
-		if not ERR then
-			while Token[TTYPE] != T_EOF do
-				tokens &={ Token }
-				next_token()
-				if ERR then exit end if
-			end while
+		while Token[TTYPE] != T_EOF do
 			tokens &={ Token }
-		end if
-
-		close_parse()
+			next_token()
+			if ERR then exit end if
+		end while
+		tokens &={ Token }
 	end if
-
+	
 	return {tokens,ERR,ERR_LNUM, ERR_LPOS}
+end function
+
+global function et_tokenize_file(sequence fname)
+ sequence txt
+ integer fn,c
+	txt = ""
+	fn = open(fname,"rb")
+	if fn != EOF then
+  	c = getc(fn)
+  	while c != EOF do
+  	  txt &= c
+  	  c = getc(fn)
+  	end while
+  	return et_tokenize_string(txt)
+	else
+		report_error(ERR_OPEN)
+	  return {{},ERR,ERR_LNUM,ERR_LPOS}
+	end if
 end function
 
 ---------------------------------------------------------------------------------
 -- TODO --
-
--- et_tokenize_string()
 
 ---------------------------------------------------------------------------------
 -- CONSIDER
