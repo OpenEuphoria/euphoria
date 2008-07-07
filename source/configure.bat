@@ -12,7 +12,11 @@ IF "%1"=="--with-eu3" (
 	echo PWD=%PWD% >> config.wat
 	GOTO EndLoop
 )
-
+IF "%1" =="--prefix" (
+	echo PREFIX="%2" >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
 
 :EndLoop
 SHIFT

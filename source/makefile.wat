@@ -5,6 +5,10 @@
 #                     a version of Euphoria less than 4.  It will use the EUINC
 #                     variable instead of passing the include directory on the
 #                     command line.
+# 
+#     --prefix <dir>  Use this option to specify the location for euphoria to
+#                     be installed.  The default is EUDIR, or c:\euphoria,
+#                     if EUDIR is not set.
 #
 # Syntax:
 #   Interpreter(exw.exe, exwc.exe):  wmake -f makefile.wat interpreter
@@ -326,6 +330,14 @@ PCRE_OBJECTS = &
 MEMFLAG = /dESIMPLE_MALLOC
 !endif
 
+!ifndef PREFIX
+!ifneq PREFIX ""
+PREFIX=$(%EUDIR)
+!else
+PREFIX=C:\euphoria
+!endif
+!endif
+
 !ifeq INT_CODES 1
 #TODO hack
 MEMFLAG = $(MEMFLAG) /dINT_CODES
@@ -501,12 +513,12 @@ source-dos : .SYMBOLIC translate-dos common-source
 	
 source : .SYMBOLIC common-source source-win source-dos
 
-testwin : interpreter
+testwin : .SYMBOLIC interpreter 
 	cd ..\tests
 	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe -ec ..\source\ecw.exe -lib ..\source\ecw.lib
 	cd ..\source
 
-testdos : dos
+testdos : .SYMBOLIC dos
 	cd ..\tests
 	..\source\ex -i ..\include ..\bin\eutest.ex -exe ..\source\ex.exe -ec ..\source\ec.exe -lib ..\source\ec.lib
 	cd ..\source
@@ -529,18 +541,26 @@ interpreter : .SYMBOLIC builddirs
         wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
         wmake -f makefile.wat exwc.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-install : .SYMBOLIC
-	@copy ec.exe $(%EUDIR)\bin\
-	@copy ecw.exe $(%EUDIR)\bin\
-	@copy exw.exe $(%EUDIR)\bin\
-	@copy exwc.exe $(%EUDIR)\bin\
-	@copy backendw.exe $(%EUDIR)\bin\
-	@copy backendc.exe $(%EUDIR)\bin\
-	@copy backendd.exe $(%EUDIR)\bin\
-	@copy ec.lib $(%EUDIR)\bin\
-	@copy ecw.lib $(%EUDIR)\bin\
-	@for %i in (*.e) do @copy %i $(%EUDIR)\source\
-	@for %i in (*.ex) do @copy %i $(%EUDIR)\source\
+install-generic : .SYMBOLIC
+	@for %i in (*.e) do @copy %i $(PREFIX)\source\
+	@for %i in (*.ex) do @copy %i $(PREFIX)\source\
+	@copy ..\include\* $(PREFIX)\include\
+	
+installwin : .SYMBOLIC install-generic
+	@copy ecw.exe $(PREFIX)\bin\
+	@copy exw.exe $(PREFIX)\bin\
+	@copy exwc.exe $(PREFIX)\bin\
+	@copy backendw.exe $(PREFIX)\bin\
+	@copy backendc.exe $(PREFIX)\bin\
+	@copy ecw.lib $(PREFIX)\bin\
+
+installdos : .SYMBOLIC install-generic
+	@copy ec.exe $(PREFIX)\bin\
+	@copy backendd.exe $(%PREFIX)\bin\
+	@copy ec.lib $(PREFIX)\bin\
+	
+install : .SYMBOLIC installwin installdos
+	
 	
 ecw.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
