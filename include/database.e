@@ -713,7 +713,7 @@ global function db_create(sequence path, integer lock_method)
 		lock_method = DB_LOCK_NO
 	end if
 	if lock_method = DB_LOCK_EXCLUSIVE then
-		if not lock_file(db, LOCK_EXCLUSIVE,{}) then
+		if not lock_file(db, LOCK_EXCLUSIVE, {}) then
 			return DB_LOCK_FAIL
 		end if
 	end if
@@ -1189,7 +1189,7 @@ end procedure
 
 global procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
-	atom table,table_ptr 
+	atom table, table_ptr
 	
 	table = table_find(name)
 	if table = -1 then
@@ -1674,7 +1674,7 @@ end function
 -- ? db_record_data(6)
 -- </eucode>
 -- See Also:
--- 		[[:db_find_key]],[[:db_replace_data]]
+-- 		[[:db_find_key]], [[:db_replace_data]]
 global function db_record_data(integer key_location)
 	atom data_ptr
 	object data_value
@@ -1764,7 +1764,7 @@ end function
 -- the return value will be set to DB_OK, and the new compressed database 
 -- file will retain the same name. The current table will be undefined. As 
 -- a backup, the original, uncompressed file will be renamed with an extension 
--- of .t0 (or .t1, .t2 ,..., .t99). In the highly unusual case that the
+-- of .t0 (or .t1, .t2, ..., .t99). In the highly unusual case that the
 -- compression is unsuccessful, the database will be left unchanged, and no 
 -- backup will be made.
 -- When you delete items from a database, you create blocks of free space within

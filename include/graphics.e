@@ -63,7 +63,7 @@
 -- * BLINKING
 
 -- COLOR values -- for characters and pixels
-global constant 
+global constant
 		 BLACK = 0,  -- in graphics modes this is "transparent"
 		 GREEN = 2,
 		 MAGENTA = 5,
@@ -144,17 +144,24 @@ end type
 
 --**
 -- Signature:
--- global procedure position(integer i1, integer i2)
+-- global procedure position(integer row, integer column)
+--
+-- Platform:
+-- 	DOS32
+--
+-- Parameters:
+-- 		# ##row##: an integer, the index of the row to position the cursor on.
+-- 		# ##column##: an integer, the index of the column to position the cursor on.
 --
 -- Description:
---   Set the cursor to line i1, column i2, where the top left corner of the screen is line 1, 
---   column 1. The next character displayed on the screen will be printed at this location. 
---   position() will report an error if the location is off the screen.
+--   Set the cursor to line ##row##, column ##column##, where the top left corner of the screen is line 1,
+--   column 1 in text mode, row 0 and column 0 in graphic mode. The next character displayed on the screen will be printed at this location.
+--   position() will report an error if the location is off the screen. The //Windows// console doesn't check for rows, as the physical height of the console may be vastly less than its logical height.
 --
 -- Comments:
 --   position() works in both text and pixel-graphics modes.
 --
---   The coordinate system for displaying text is different from the one for displaying 
+--   The coordinate system for displaying text is different from the one for displaying
 --   pixels. Pixels are displayed such that the top-left is (x=0,y=0) and the first 
 --   coordinate controls the horizontal, left-right location. In pixel-graphics modes 
 --   you can display both text and pixels. position() only sets the line and column for 
@@ -165,10 +172,19 @@ end type
 --   <eucode>
 --   position(2,1)
 --   -- the cursor moves to the beginning of the second line from the top
----  </eucode>
+--  </eucode>
+-- See Also:
+-- 		[[:get_position]]
 
 --**
 -- Draw a line on a pixel-graphics screen connecting two or more points in s, using color i.
+--
+-- Platform:
+-- 	//DOS32//
+--
+-- Parameters:
+-- 		# ##c##: an integer, the color with which the line is to be drawn
+-- 		# ##xyarray##: a sequence of pairs of coordinates, which represent the vertices of the line.
 --
 -- Example: 	
 -- <eucode>
@@ -179,36 +195,54 @@ end type
 -- -- {200, 200} and another line would be drawn from {200, 200} to
 -- -- {900, 700}.
 -- </eucode>
+--
+-- See Also:
+-- 		[[:polygon]]
 
 global procedure draw_line(color c, point_sequence xyarray)
--- draw a line connecting the 2 or more points
--- in xyarray: {{x1, y1}, {x2, y2}, ...}
--- using a certain color 
 	machine_proc(M_LINE, {c, 0, xyarray})
 end procedure
 
 --**
--- Draw a polygon with 3 or more vertices given in s, on a pixel-graphics screen using a certain 
--- color i1. Fill the area if i2 is 1. Don't fill if i2 is 0.
+-- Draw a polygon with 3 or more vertices on a pixel-graphics screen.
+-- 
+-- Platform:
+-- 	//DOS32//
+--
+-- Parameters:
+-- 		# ##c##: an integer, the color with which the border line is to be drawn
+-- 		# ##fill##: an integer, 0 to draw the outline only, nonzero to fill the polygon
+-- 		# ##xyarray##: a sequence of pairs of coordinates, which represent the vertices of the polygon outline.
 --
 -- Example:
 -- <eucode>
 -- polygon(GREEN, 1, {{100, 100}, {200, 200}, {900, 700}})
 -- -- makes a solid green triangle.
 -- </eucode>
-
+-- See Also:
+-- 		[[:draw_line]]
 global procedure polygon(color c, boolean fill, point_sequence xyarray)
--- draw a polygon using a certain color
--- fill the area if fill is TRUE
--- 3 or more vertices are given in xyarray
 	machine_proc(M_POLYGON, {c, fill, xyarray})
 end procedure
 
 --**
--- Draw an ellipse with color i1 on a pixel-graphics screen. The ellipse will neatly fit 
--- inside the rectangle defined by diagonal points s1 {x1, y1} and s2 {x2, y2}. If the 
--- rectangle is a square then the ellipse will be a circle. Fill the ellipse when i2 is 1. 
--- Don't fill when i2 is 0.
+-- Draw an ellipse with on a pixel-graphics screen. 
+--
+-- Platform:
+-- 	//DOS32//
+--
+-- Parameters:
+-- 		# ##c##: an integer, the color with which the border line is to be drawn
+-- 		# ##fill##: an integer, 0 to draw the outline only, nonzero to fill the ellipse
+-- 		# ##p1##: a sequence, the coordinates of the upper left corner of the bounding rectangle of the ellipse
+-- 		# ##p2##: a sequence, the coordinates of the lower right corner of the bounding rectangle of the ellipse.
+--
+-- Comments:
+-- The ellipse will neatly fit
+-- inside the rectangle defined by diagonal points p1 {x1, y1} and p2 {x2, y2}. If the
+-- rectangle is a square then the ellipse will be a circle. 
+--
+-- This procedure can only draw ellipses whose axes are horizontal and vertical, not tilted ones.
 --
 -- Example:	
 -- <eucode>	
@@ -220,14 +254,20 @@ end procedure
 -- </eucode>
 
 global procedure ellipse(color c, boolean fill, point p1, point p2)
--- draw an ellipse with a certain color that fits in the
--- rectangle defined by diagonal points p1 and p2, i.e. 
--- {x1, y1} and {x2, y2}. The ellipse may be filled or just an outline.   
 	machine_proc(M_ELLIPSE, {c, fill, p1, p2})
 end procedure
 
 --**
--- Select graphics mode i2. If successful, i1 is set to 0, otherwise i1 is set to 1.
+-- Attempt to set up a new graphics mode.
+--
+-- Parameters:
+-- 		# ##m###: an integer, the new graphic mode
+--
+-- Platform:
+-- 	//DOS32//
+--
+-- Returns:
+-- 		An **integer**, 0 on success, 1 on failure.
 --
 -- Comments:
 -- Some modes are referred to as text modes because they only let you display text. Other modes are 
@@ -240,10 +280,10 @@ end procedure
 -- it up with the DOS CLS command, or by running ex or ed.
 --
 -- Some graphics cards will be unable to enter some SVGA modes, under some conditions. You can't 
--- always tell from the i1 value, whether the graphics mode was set up successfully.
+-- always tell from the returned value, whether the graphics mode was set up successfully.
 --
 -- On the //Windows// and //Unix// platforms, ##[[:graphics_mode]]()## will allocate a plain, text mode 
--- console if one does not exist yet. It will then return 0, no matter what value is passed as i2.
+-- console if one does not exist yet. It will then return 0, no matter what value is passed as m.
 --
 -- Example:
 -- <eucode>	
@@ -253,10 +293,9 @@ end procedure
 -- end if
 -- draw_line(BLUE, {{0,0}, {50,50}})
 -- </eucode>
-
+-- See Also:
+-- 		[[:video_config]]
 global function graphics_mode(mode m)
--- try to set up a new graphics mode
--- return 0 if successful, non-zero if failed
    return machine_func(M_GRAPHICS_MODE, m)
 end function
 
@@ -271,16 +310,21 @@ global enum
 	VC_PAGES
 
 --**
--- Return a sequence of values describing the current video configuration:
+-- Return a description of the current video configuration:
 --
--- {{{
--- {
---     color monitor?, graphics mode, text rows, text columns, xpixels, 
---     ypixels, number of colors, number of pages
--- }
--- }}}
+-- Returns:
+-- 		A **sequence** of 8 nonnegative integers, laid out as follows:
+--	# color monitor?: 1 0 if monochrome, 1 otherwise
+--	# current video mode
+-- 	# number of text rows
+-- 	# number of text columns
+--	# screen width in pixels
+--	# screen height in pixels
+--	# number of colors
+--	# number of display pages
 --
---
+-- Comments:
+-- An enum is available for convenient access to the returned configuration data:
 -- <eucode>
 -- global constant 
 --     VC_COLOR   = 1,
@@ -292,8 +336,6 @@ global enum
 --     VC_NCOLORS = 7,
 --     VC_PAGES   = 8
 -- </eucode>
---
--- Comments:
 -- This routine makes it easy for you to parameterize a program so it will work in many 
 -- different graphics modes.
 --
@@ -308,10 +350,9 @@ global enum
 -- -- vc = video_config()  -- in mode 3 with 25-lines of text:
 -- -- vc is {1, 3, 25, 80, 0, 0, 32, 8}
 -- </eucode>
-
+-- See Also:
+-- 		[[:graphics_mode]]
 global function video_config()
--- return sequence of information on video configuration
--- {color?, mode, text lines, text columns, xpixels, ypixels, #colors, pages}
 	return machine_func(M_VIDEO_CONFIG, 0)
 end function
 
@@ -326,6 +367,12 @@ global constant
 --**
 -- Select a style of cursor.
 --
+-- Parameters:
+-- 		# ##style##: an integer defining the cursor shape.
+--
+-- Platform:
+--		Not //Unix//
+-- Comments:
 -- Predefined cursors are:
 --	
 -- <eucode>
@@ -341,7 +388,6 @@ global constant
 -- of pixels in the cursor. The first digit controls whether the cursor will be visible 
 -- or not. For example, #0407 turns on the 4th through 7th rows.
 --
--- Comments:
 --   In pixel-graphics modes no cursor is displayed.
 --
 -- Example:	
@@ -353,13 +399,14 @@ global constant
 --   [[:graphics_mode]], [[:text_rows]]
 
 global procedure cursor(integer style)
--- choose a cursor style
 	machine_proc(M_CURSOR, style)
 end procedure
 
 --**
--- Return the current line and column position of the cursor as a 2-element 
--- sequence ##{line, column}##.
+-- Return the current line and column position of the cursor 
+--
+-- Returns:
+-- 		A **sequence** ##{line, column}##, the current position of the text mode cursor.
 --
 -- Comments:
 --   ##get_position()## works in both text and pixel-graphics modes. In pixel-graphics 
@@ -371,33 +418,44 @@ end procedure
 --   the horizontal, left-right location. In pixel-graphics modes you can display both text and 
 --   pixels. ##get_position()## returns the current line and column for the text that you are 
 --   displaying, not the pixels that you may be plotting. There is no corresponding routine for 
---   getting the current pixel position.
+--   getting the current pixel position, because there is not such a thing.
 --
 -- See Also:
 --   [[:position]], [[:get_pixel]]
+-- See Also:
+-- 		[[:position]]
 
 global function get_position()
--- return {line, column} of current cursor position
 	return machine_func(M_GET_POSITION, 0)
 end function
 
 --**
--- Set the number of lines on a text-mode screen to i1 if possible. i2 will be set to the actual 
--- new number of lines.
+-- Set the number of lines on a text-mode screen.
+--
+-- Parameters:
+-- 		# ##rows##: an integer, the desired number of rows.
+--
+-- Platforms:
+--		Not //Unix//
+--
+-- Returns:
+-- 		An **integer**, the actual number of text lines.
 --
 -- Comments:
 -- Values of 25, 28, 43 and 50 lines are supported by most video cards.
 --
 -- See Also:
---   [[:graphics_mode]]
+--   [[:graphics_mode]], [[:video_fonfig]]
 
 global function text_rows(positive_int rows)
 	return machine_func(M_TEXTROWS, rows)
 end function
 
 --**
--- Allow text to wrap at the right margin (##on## = ##TRUE##) or get truncated 
--- (##on## = ##FALSE##).
+-- Determine whether text will wrap when hitting the rightmost column.
+--
+-- Parameters:
+-- 		# ##on##: a boolean, 0 to truncate text, nonzero to wrap.
 --
 -- Comments:
 -- By default text will wrap.
@@ -418,25 +476,28 @@ end function
 --   [[:puts]], [[:position]]
 
 global procedure wrap(boolean on)
--- on = 1: characters will wrap at end of long line
--- on = 0: lines will be truncated
 	machine_proc(M_WRAP, on)
 end procedure
 
 --**
--- Scroll a region of text on the screen either up (##amount## positive) or down 
--- (##amount## negative) by ##amount## lines. The region is the series of lines on 
--- the screen from ##top_line## to ##bottom_line##, inclusive. New blank lines will 
--- appear at the top or bottom.
+-- Scroll a region of text on the screen.
+--
+-- Parameters:
+--		# ##amount##: an integer, the number of lines byy which to scroll. This is >0 to scroll up and <0 to scroll down.
+-- 		# ##top_line##: the 1-based number of the topmost line to scroll.
+-- 		# ##bottom_line##: the 1-based number of the bottom-most line to scroll.
 --
 -- Comments:
+-- inclusive. New blank lines will
+-- appear at the top or bottom.
+--
 -- You could perform the scrolling operation using a series of calls to ##[:puts]]()##, 
 -- but ##scroll()## is much faster.
 --
 -- The position of the cursor after scrolling is not defined.
 --
--- Example Program:
---   ##bin\ed.ex##
+-- Example 1:
+--   [[../bin/ed.ex]]
 --
 -- See Also:
 --   [[:clear_screen]], [[:text_rows]]
@@ -444,15 +505,14 @@ end procedure
 global procedure scroll(integer amount, 
 						positive_int top_line, 
 						positive_int bottom_line)
--- scroll lines of text on screen between top_line and bottom_line
--- amount > 0: scroll text up by amount lines
--- amount < 0: scroll text down by amount lines
--- (had only the first parameter in v1.2)   
 	machine_proc(M_SCROLL, {amount, top_line, bottom_line})
 end procedure
 
 --**
--- Set the foreground text color. Add ##BLINKING## to get blinking text in some modes.
+-- Set the foreground text color. 
+--
+-- Parameters:
+-- 		# ##c##: the new text color. Add ##BLINKING## to get blinking text in some modes.
 --
 -- Comments:
 -- Text that you print after calling ##[[:text_color]]()## will have the desired color.
@@ -462,13 +522,13 @@ end procedure
 -- in ##WHITE## to restore white text, especially if you are at the bottom line of the 
 -- screen, ready to scroll up.
 --
--- Example:	
+-- Example:
 -- <eucode>	
 -- text_color(BRIGHT_BLUE)
 -- </eucode>
 --	
 -- See Also:
---   [[:bk_color]]
+--   [[:bk_color]] , [[:clear_screen]]
 
 global procedure text_color(color c)
 -- set the foreground text color to c - text or graphics modes
@@ -477,14 +537,18 @@ global procedure text_color(color c)
 end procedure
 
 --**
--- Set the background color to one of the 16 standard colors. In pixel-graphics modes the 
+-- Set the background color to one of the 16 standard colors. 
+--
+-- Parameters:
+-- 		# ##c##: the new text color. Add ##BLINKING## to get blinking text in some modes.
+-- Comments:
+-- 		In pixel-graphics modes the
 -- whole screen is affected immediately. In text modes any new characters that you print 
 -- will have the new background color. In some text modes there might only be 8 distinct 
 -- background colors available.
 --
--- Comments:
 -- In pixel-graphics modes, color 0 which is normally BLACK, will be set to the same 
--- ##{r,g,b}## palette value as color number i.
+-- ##{r,g,b}## palette value as color number ##c##.
 --
 -- In some pixel-graphics modes, there is a border color that appears at the edges of 
 -- the screen. In 256-color modes, this is the 17th color in the palette. You can control
@@ -510,17 +574,38 @@ end procedure
 
 --**
 -- Mixture Type
---
--- ##{red, green, blue}##
+-- Comments:
+-- A mixture is a ##{red, green, blue}## triple of intensities, which enables you to define 
+-- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest 
+-- white is {63, 63, 63}.
 
 export type mixture(sequence s)
-	return length(s) = 3
+	if length(s) != 3 then
+		return 0
+	end if
+	for i=1 to 3 do
+		if not integer(s[i]) or and_bits(s[i],#FFFFFFC0) then
+			return 0
+		end if
+	end for
+	return 1
 end type
 
 --**
--- Change the color for color number ##c## to ##s##, where ##s## is a sequence of 
--- color intensities: ##{red, green, blue}##. Each value in ##s## can be from 0 to 
--- 63. If successful, a  3-element sequence containing the previous color for ##c## will 
+-- Change the color for color number ##c## to a mixture of elementary colors.
+--
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##c##: the color to redefine
+--		# ##s##: a sequence of color intensities: ##{red, green, blue}##. Each value in ##s## can be from 0 to 63.
+--
+-- Returns:
+-- 		An **object**, either -1 on failure, or a mixture representing the previous definition of ##c##.
+--
+-- Comments:
+-- If successful, a  3-element sequence containing the previous color for ##c## will
 -- be returned, and all pixels on the screen with value ##c## will be set to the new 
 -- color. If unsuccessful, the ##atom -1## will be returned.
 --
@@ -532,7 +617,7 @@ end type
 -- </eucode>
 --
 -- See Also:
---   [[:all_pallet]]
+--   [[:all_palette]]
 
 global function palette(color c, mixture s)
 -- choose a new mix of {red, green, blue} to be shown on the screen for
@@ -541,22 +626,25 @@ global function palette(color c, mixture s)
 end function
 
 --**
--- Specify new color intensities for the entire set of colors in the current graphics mode. 
--- s is a sequence of the form:
--- 
--- ##{{r,g,b}, {r,g,b}, ..., {r,g,b}}##
+-- Specify new color intensities for the entire set of colors in the current graphics mode.
 --
--- Each element specifies a new color intensity ##{red, green, blue}## for the corresponding 
--- color number, starting with color number 0. The values for red, green and blue must be 
--- in the range 0 to 63.
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##s##: a sequence of 17 mixtures, i.e. ##{red, green, blue}## triples.
 --
 -- Comments:
--- This executes much faster than if you were to use ##[[:palette]]()## to set the new color 
+-- Each element specifies a new color intensity ##{red, green, blue}## for the corresponding 
+-- color number, starting with color number 0. The values for red, green and blue must be 
+-- in the range 0 to 63. Lst color is the border, also known as overscan, color.
+--
+-- This executes much faster than if you were to use ##[[:palette]]()## to set the new color
 -- intensities one by one. This procedure can be used with ##[[:read_bitmap]]()## to quickly 
 -- display a picture on the screen.
 --
--- Example Program:
---   ##demo\dos32\bitmap.ex##
+-- Example 1:
+--   [[../demo/dos32/bitmap.ex]]
 
 global procedure all_palette(sequence s)
 -- s is a sequence of the form: {{r,g,b},{r,g,b}, ...{r,g,b}}
@@ -576,13 +664,19 @@ export type frequency(integer x)
 end type
 
 --**
--- Turn on the PC speaker at frequency i. If i is 0 the speaker will be turned off.
+-- Turn on the PC speaker at a specified frequency 
+--
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
 --
 -- Comments:
 -- On //Windows// and //Unix// platforms no sound will be made.
 --
 -- Example:
--- <eucode>	
+-- <eucode>
 -- sound(1000) -- starts a fairly high pitched sound
 -- </eucode>
 

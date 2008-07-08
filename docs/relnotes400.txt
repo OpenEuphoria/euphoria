@@ -80,8 +80,7 @@
   $$(doneby Jeremy Cowgar.)
 * The namespace **eu** is predefined, and can be used to fully qualify built-in routines.
   $$(doneby Matt Lewis.)
-* Warnings now split between maskable and non maskable warnings.
-  ##with warning## has been enhanced in order to individually turn maskable warnings on or 
+* ##with warning## has been enhanced in order to individually turn warnings on or
   off. 
   $$(doneby C. Cuvier)
 * New scope: **export**.  Symbols with the export scope can only be seen from files that:
@@ -115,7 +114,7 @@
 
 === New Routines/Constants
 
-* Added **value_from()** in **get.e** to return additional information about the parsing 
+* **value()** and **get()** in **get.e** may return additional information about the parsing 
   activity. $$(doneby C. Cuvier)
 * New builtin routines: **peeks()**, **peek2s()**, **peek2u()**, **peek_string()**, 
   **poke2()** $$(doneby Matt Lewis)

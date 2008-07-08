@@ -21,26 +21,31 @@ constant M_SEEK  = 19,
 
 --**
 -- Standard Input
+-- export constant STDIN = 0
 export constant STDIN = 0
 
 --**
 -- Standard Output
+-- export constant STDOUT = 1
 export constant STDOUT = 1
 
 --**
 -- Standard Error
+-- export constant STDERR = 2
 export constant STDERR = 2
 
 --**
 -- Screen (Standard Out)
+-- export constant SCREEN = 1
 export constant SCREEN = 1
 
 --**
 -- End of file
+-- export constant EOF = -1
 export constant EOF = -1
 
 --****
--- ==== Routines
+-- === Routines
 
 --**
 -- Signature:
@@ -54,13 +59,19 @@ export constant EOF = -1
 -- <eucode>
 -- ? {1, 2} + {3, 4}  -- will display {4, 6}
 -- </eucode>
+-- See Also:
+-- 		[[:print]]
 
 --**
 -- Signature:
 -- global procedure print(integer fn, object x)
 --
 -- Description:
--- Print, to file or device fn, an object x with braces { , , , } to show the structure.
+-- Print an object to a file or device, with braces { , , , } to show the structure.
+--
+-- Parameters:
+--		# ##fn##: an integer, the handle to a file or device to output to
+-- 		# ##x##: the object to print
 --
 -- Example 1:
 -- <eucode>
@@ -72,19 +83,37 @@ export constant EOF = -1
 -- <eucode>
 -- print(STDOUT, repeat({10,20}, 3)) -- output is: {{10,20},{10,20},{10,20}} 
 -- </eucode>
+-- See Also:
+-- 		[[:?]], [[:puts]]
 
 --**
 -- Signature:
--- global procedure printf(integer fn, sequence st, sequence x)
+-- global procedure printf(integer fn, sequence format, object values)
 --
 -- Description:
--- Print x, to file or device fn, using format string st. If x is a sequence, 
--- then format specifiers from st are matched with corresponding elements of 
--- x. If x is an atom, then normally st will contain just one format specifier 
--- and it will be applied to x, however if st contains multiple format specifiers, 
--- each one will be applied to the same value x. Thus printf() always takes 
--- exactly 3 arguments. Only the length of the last argument, containing the 
--- values to be printed, will vary. The basic format specifiers are...
+-- Print one or more values to a file or device, using a format string to embed them in and define how they should be represented.
+--
+-- Parameters:
+--		# ##fn##: an integer, the handle to a file or device to output to
+--		# ##format##: a sequence, the text to print. This text may contain format specifiers.
+--		# ##values##: usually, a sequence of values. It should have as many elements as format specifiers in ##format##, as these values will be substituted to the specifiers.
+--
+-- Errors:
+-- 		If there are less values to show than format specifiers, a run time error will occur.
+--
+-- Comments:
+-- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending in a letter. Some extra information may come in the middle.
+--
+-- ##format## will be scanned for format specifiers. Whenever one is found, the current value 
+-- in ##values## will be turned into a string according to the format specifier. The resulting 
+-- string will be plugged in the result, as if replacing the modifier with the printed value.
+-- Then moving on to next value and carrying the process on.
+--
+-- This way, printf() always takes
+-- exactly 3 arguments, no matter how many values are to be printed. Only the length of the last argument, containing the
+-- values to be printed, will vary.
+--
+-- The basic format specifiers are...
 --
 -- * ##%d## - print an atom as a decimal integer
 -- * ##%x## - print an atom as a hexadecimal integer. Negative numbers are printed
@@ -96,7 +125,7 @@ export constant EOF = -1
 -- * ##%f## - print an atom as a floating-point number with a decimal point but no exponent
 -- * ##%g## - print an atom as a floating-point number using whichever format seems 
 --            appropriate, given the magnitude of the number
--- * ##~%~%## - print the '%' character itself
+-- * ##~%~%## - print the '%' character itself. Yhis is not an actual format specifier.
 --
 -- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number 
 -- before the decimal point is the minimum field width to be used. The number after 
@@ -126,6 +155,8 @@ export constant EOF = -1
 --
 -- Now, the third argument of printf() is a one-element sequence containing the 
 -- item to be formatted.
+--
+-- If there is only one % format specifier, and if the value it stands for is an atom, then ##values## may be simply that atom.
 --
 -- Example 1:
 -- <eucode>
@@ -158,15 +189,19 @@ export constant EOF = -1
 -- </eucode>
 --
 -- See Also:
---     [[:sprintf]], [[:sprint]]
+--     [[:sprintf]], [[:sprint]], [[:print]]
 
 --**
 -- Signature:
--- global procedure puts(integer fn, sequence x)
+-- global procedure puts(integer fn, object text)
+--
+-- Parameters:
+-- 		# ##fn##: an integer, the handle to an opened file or device
+--		# ##text##: an object, either a single character or a sequence of characters.
 --
 -- Description:
--- Output, to file or device fn, a single byte (atom) or sequence of bytes. The low order 
--- 8-bits of each value is actually sent out. If fn is the screen you will see text 
+-- Output, to a file or device, a single byte (atom) or sequence of bytes. The low order
+-- 8-bits of each value is actually sent out. If outputting to the screen you will see text
 -- characters displayed.
 --
 -- Comments:
@@ -188,14 +223,21 @@ export constant EOF = -1
 -- <eucode>
 -- puts(output, 'A')  -- the single byte 65 will be sent to output
 -- </eucode>
+-- See Also:
+-- 		[:print]]
 
 --**
 -- Signature:
 -- global function getc(integer fn)
 --
 -- Description:
---     Get the next character (byte) from file or device fn. The character will have a value 
---     from 0 to 255. [[:EOF]] is returned at end of file.
+--     Get the next character (byte) from a file or device fn. 
+--
+-- Parameters:
+--		# ##fn##: an integer, the handle of the file or device to read from.
+--
+-- Returns:
+--		An **integer**, the character read from the file, in the 0..255 range. If no character is left to read, [[:EOF]] is returned instead.
 --
 -- Comments:
 --     File input using getc() is buffered, i.e. getc() does not actually go out to the disk 
@@ -205,24 +247,29 @@ export constant EOF = -1
 --     When getc() reads from the keyboard, it will not see any characters until the user 
 --     presses Enter. Note that the user can type CTRL+Z, which the operating system treats 
 --     as "end of file". [[:EOF]] will be returned. 
+-- See Also:
+-- 		[[:gets]], [[:get_key]]
 
 --**
 -- Signature:
 -- global function gets(integer fn)
 --
 -- Description:
---     Get the next sequence (one line, including '\n') of characters from file or device fn. The 
---     characters will have values from 0 to 255. The atom [[:EOF]] is returned on end of file.
+--     Get the next sequence (one line, including '\n') of characters from a file or device.
+-- Parameters:
+--		# ##fn##: an integer, the handle of the file or device to read from.
+--
+-- Returns:
+--		An **object**, either [[:EOF]] on end of file, or the next line of text from the file.
 --
 -- Comments:
---     Because either a sequence or an atom (-1) might be returned, you should probably assign the 
---     result to a variable declared as object.
+--    The characters will have values from 0 to 255.
+--
+--	If the line had an end of line marker, a ~'\n'~ terminates the line. The last line of a file needs not have an end of line marker.
 --
 --     After reading a line of text from the keyboard, you should normally output a \n character, 
 --     e.g.  puts(1, '\n'), before printing something. Only on the last line of the screen does the 
 --     operating system automatically scroll the screen and advance to the next line.
---
---     The last line in a file might not end with a new-line '\n' character.
 --
 --     When your program reads from the keyboard, the user can type control-Z, which the operating 
 --     system treats as "end of file". [[:EOF]] will be returned.
@@ -263,23 +310,28 @@ export constant EOF = -1
 -- puts(1, '\n')   -- necessary
 -- puts(1, line & " is a nice name.\n")
 -- </eucode>
+-- See Also:
+--		[[:getc]], [[:read_lines]]
 
 constant CHUNK = 100
 
 --**
--- Read the next n bytes from file number fn. Return the bytes
--- as a sequence. The sequence will be of length n, except
--- when there are fewer than n bytes remaining to be read in the
--- file.
+-- Read the next bytes from a file.
+--
+-- Parameters:
+--		# ##fn##: an integer, the handle to an ope file to read from.
+--		# ##n##: a positive integer, the number of bytes to read.
+--
+-- Returns:
+--		A **seuence** of length at most ##n##, made of the bytes that could be read from the file.
 --
 -- Comments:
---     When i > 0 and <a href="lib_seq.htm#length">length(s)</a> < i you know
+--     When ##n## > 0 and the function returns a sequence of length less than ##n## you know
 --     you've reached the end of file. Eventually, an
---     <a href="refman_2.htm#empty_seq">empty sequence</a> will be returned
---     for s.
---  
+--     [[:empty sequence]] will be returned.
+--
 --     This function is normally used with files opened in binary mode, "rb".
---     This avoids the confusing situation in text mode where DOS will convert CR LF pairs to LF.
+--     This avoids the confusing situation in text mode where //DOS// or //Windows// will convert CR LF pairs to LF.
 --
 -- Example 1:
 --     <eucode>
@@ -303,7 +355,8 @@ constant CHUNK = 100
 --     close(fn)
 --     ? length(whole_file)  -- should match DIR size of "temp"
 --     </eucode>
-
+-- See Also:
+-- 		[[:getc]], [[:gets]]
 export function get_bytes(integer fn, integer n)
 -- Return a sequence of n bytes (maximum) from an open file.
 -- If n > 0 and fewer than n bytes are returned,
@@ -395,11 +448,18 @@ end type
 
 --**
 -- Signature:
--- global function open(atom st1, sequence st2)
+-- global function open(sequence path, sequence mode)
 --
 -- Description:
--- Open a file or device, to get the file number. -1 is returned if the open fails. st1 is 
--- the path name of the file or device. st2 is the mode in which the file is to be opened. 
+-- Open a file or device, to get the file number. 
+--
+-- Parameters:
+--		# ##path##: a strign, the path to the file or device to open.
+-- 		# ##mode##: a string, the mode being used o open the file.
+--
+-- Returns:
+-- 		A small **integer**, -1 on failure, else 0 or more.
+-- Comments:
 -- Possible modes are:
 --
 -- * "r" - open text file for reading
@@ -415,14 +475,14 @@ end type
 -- be created if necessary. A file opened for write will be set to 0 bytes. Output to a 
 -- file opened for append will start at the end of file.
 --
--- On DOS or Windows, output to text files will have carriage-return characters automatically 
+-- On //DOS// or //Windows//, output to text files will have carriage-return characters automatically
 -- added before linefeed characters. On input, these carriage-return characters are removed. 
 -- A control-Z character (ASCII 26) will signal an immediate end of file. Note: on some 
 -- versions of DOS, a control-Z typed by the user might cause standard input to permanently 
 -- appear to be at the end-of-file, until the DOS window is closed.
 --
 -- I/O to binary files is not modified in any way. Any byte values from 0 to 255 can be 
--- read or written. On Linux and FreeBSD, all files are binary files, so "r" mode and "rb" 
+-- read or written. On //Unix//, all files are binary files, so "r" mode and "rb"
 -- mode are equivalent, as are "w" and "wb", "u" and "ub", and "a" and "ab".
 --
 -- Some typical devices that you can open on DOS or Windows are:
@@ -434,13 +494,9 @@ end type
 -- * "PRN" - the printer on the parallel port
 -- * "NUL" - a non-existent device that accepts and discards output
 --
--- Currently, files up to 2 Gb in size can be handled. Beyond that, some file operations may 
--- not work correctly. This limit will likely be increased in the future. 
+-- Close a file or device when done with it, flushing out any still-buffered characters prior.
 --
--- Close a file or device and flush out any still-buffered characters.
---
--- Comments:
--- //DOS32//: When running under //Windows 95// or later, you can open any existing file that has a 
+-- //DOS32//: When running under //Windows 95// or later, you can open any existing file that has a
 -- long file or directory name in its path (i.e. greater than the standard DOS 8.3 format) 
 -- using any open mode - read, write etc. However, if you try to create a new file (open 
 -- with "w" or "a" and the file does not already exist) then the name will be truncated if 
@@ -484,20 +540,29 @@ end type
 -- Description:
 -- Close a file or device and flush out any still-buffered characters.
 --
+-- Parameters:
+-- 		# ##fn##: an integer, the handle to the file or device to close.
 -- Comments:
 -- Any still-open files will be closed automatically when your program terminates.
 
 --**
--- Seek (move) to any byte position in the file fn or to the end of file if a1 is -1. For 
--- each open file there is a current byte position that is updated as a result of I/O 
+-- Seek (move) to any byte position in a file.
+--
+-- Parameters:
+--		# ##fn##: an integer, the handle to the file or device to seek()
+--		# ##pos##: an atom, either an absolute 0-based position or -1 to seek to end of file.
+--
+-- Returns:
+--		An **integer**, 0 on success, 1 on failure. 
+--
+-- Comments:
+-- For each open file, there is a current byte position that is updated as a result of I/O
 -- operations on the file. The initial file position is 0 for files opened for read, write 
--- or update. The initial position is the end of file for files opened for append. The value 
--- returned by seek() is 0 if the seek was successful, and non-zero if it was unsuccessful. 
--- It is possible to seek past the end of a file. If you seek past the end of the file, and 
+-- or update. The initial position is the end of file for files opened for append.
+-- It is possible to seek past the end of a file. If you seek past the end of the file, and
 -- write some data, undefined bytes will be inserted into the gap between the original end 
 -- of file and your new data.
 --
--- Comments:
 -- After seeking and reading (writing) a series of bytes, you may need to call seek() 
 -- explicitly before you switch to writing (reading) bytes, even though the file position 
 -- should already be what you want.
@@ -520,7 +585,8 @@ end type
 --     end if
 -- end for
 -- </eucode>
-
+-- Wee Also:
+--		[[:bet_bytes]], [[:puts]], [[:where]]
 global function seek(file_number fn, file_position pos)
 -- Seeks to a byte position in the file, 
 -- or to end of file if pos is -1.
@@ -530,9 +596,16 @@ global function seek(file_number fn, file_position pos)
 end function
 
 --**
--- This function returns the current byte position in the file fn. This position is updated 
--- by reads, writes and seeks on the file. It is the place in the file where the next byte 
--- will be read from, or written to.
+-- Retrieves the current file position for an opened file or device.
+-- 
+-- Parameters:
+-- 		# ##fn##: an integer, the handle to the file or device to close.
+-- Returns:
+--		An **atom**, the current byte position in the file. 
+-- Comments:
+-- The file position is is the place in the file where the next byte
+-- will be read from, or written to. It is updated
+-- by reads, writes and seeks on the file. 
 
 global function where(file_number fn)
 -- Returns the current byte position in the file.
@@ -542,19 +615,24 @@ global function where(file_number fn)
 end function
 
 --**
+-- Force writing any buffered data to an open file or device.
+--
+-- Parameters:
+-- 		# ##fn##: an integer, the handle to the file or device to close.
+--
+-- Comments:
 -- When you write data to a file, Euphoria normally stores the data
--- in a memory buffer until a large enough chunk of data has accumulated. 
+-- in a memory buffer until a large enough chunk of data has accumulated.
 -- This large chunk can then be written to disk very efficiently. 
 -- Sometimes you may want to force, or flush, all data out immediately, 
 -- even if the memory buffer is not full. To do this you must call flush(fn),
 -- where fn is the file number of a file open for writing or appending.
 --
--- Comments:
 -- When a file is closed, (see close()), all buffered data is flushed out. 
 --  When a program terminates, all open files are flushed and closed 
 --  automatically. Use flush() when another process may need to
 --  see all of the data written so far, but you aren't ready
---   to close the file yet.
+--   to close the file yet. flush() is also used in crash routines, where files may not be closed in the cleanest possible way.
 --
 -- Example 1:
 -- <eucode>
@@ -568,7 +646,8 @@ end function
 --
 -- s = gets(0) -- wait for keyboard input
 -- </eucode>
-
+-- See Also:
+--		[[:close]], [[:crash_routine]]
 global procedure flush(file_number fn)
 -- flush out the buffer associated with file fn
 	machine_proc(M_FLUSH, fn)
@@ -579,9 +658,20 @@ end procedure
 -- file, some kind of locking mechanism may be needed to avoid mangling
 -- the contents of the file, or causing erroneous data to be read from the file.
 --
--- ##lock_file()## attempts to place a lock on an open file, ##fn##, to stop 
--- other processes from using the file while your program is reading it 
--- or writing it. Under //Unix//, there are two types of locks that 
+-- Parameters:
+--		# ##fn##: an integer, the handle to the file or device to (partially) lock.
+--		# ##t##: an integer which defines the kind of lock to apply.
+--		# ##r##: a sequence, defining a section of the file to be locked, or {} for the whole file (the default).
+--
+-- Returns:
+--		An **integer**, 0 on failure, 1 on success.
+--
+-- Comments:
+-- ##lock_file()## attempts to place a lock on an open file, ##fn##, to stop
+-- other processes from using the file while your program is reading it
+-- or writing it.
+--
+-- Under //Unix//, there are two types of locks that
 -- you can request using the ##t## parameter. (Under //DOS32// and //WIN32// the
 -- parameter ##t## is ignored, but should be an integer.)
 -- Ask for a **shared** lock when you intend to read a file, and you want to 
@@ -590,7 +680,7 @@ end procedure
 -- block other processes from reading or writing it. It's ok for many processes to 
 -- simultaneously have shared locks on the same file, but only one process 
 -- can have an exclusive lock, and that can happen only when no other 
--- process has any kind of lock on the file. file.e contains the following
+-- process has any kind of lock on the file. io.e contains the following
 -- declaration:
 -- 
 -- <eucode>
@@ -599,20 +689,17 @@ end procedure
 --     LOCK_EXCLUSIVE
 -- </eucode>
 --
--- On //DOS32// and //WIN32// you can lock a specified portion of a file using the s parameter. 
--- s is a sequence of the form: ##{first_byte, last_byte}##. It indicates the first byte and 
+-- On //DOS32// and //WIN32// you can lock a specified portion of a file using the ##r##  parameter.
+-- ##r## is a sequence of the form: ##{first_byte, last_byte}##. It indicates the first byte and
 -- last byte in the file,  that the lock applies to. Specify the empty sequence ##{}##, 
--- if you want to lock the whole file. In the current release for //Unix//, locks 
--- always apply to the whole file, and you should specify ##{}##
--- for this parameter.
--- 
--- If it is successful in obtaining the desired lock, ##lock_file()## will return 1. If 
--- unsuccessful, it will return 0. ##lock_file()## does not wait
+-- if you want to lock the whole file, or don't specify it at all, as this is the default. In the current release for //Unix//, locks
+-- always apply to the whole file, and you should use this default value.
+--
+-- ##lock_file()## does not wait
 -- for other processes to relinquish their locks. You may have to call it repeatedly, 
 -- before the lock request is granted.
 --
--- Comments:
--- On //Unix//, these locks are called advisory locks, which means they aren't enforced 
+-- On //Unix//, these locks are called advisory locks, which means they aren't enforced
 -- by the operating system. It is up to the processes that use a particular file to cooperate 
 -- with each other. A process can access a file without first obtaining a lock on it. On 
 -- //WIN32// and //DOS32//, locks are enforced by the operating system.
@@ -638,31 +725,38 @@ end procedure
 -- unlock_file(v, {})
 -- close(v)
 -- </eucode>
-
-global function lock_file(file_number fn, lock_type t, byte_range r)
+-- See Also:
+--		[[:unlock_file]]
+global function lock_file(file_number fn, lock_type t, byte_range r={})
 -- Attempt to lock a file so other processes won't interfere with it.
 -- The byte range can be {} if you want to lock the whole file
 	return machine_func(M_LOCK_FILE, {fn, t, r})
 end function
 
 --**
--- Unlock an open file fn, or a portion of file fn. You must have previously locked the 
--- file using lock_file(). On DOS32 and WIN32 you can unlock a range of bytes within a 
--- file by specifying the s parameter as {first_byte, last_byte}. The same range of bytes 
--- must have been locked by a previous call to lock_file(). On Linux/FreeBSD you can 
--- currently only lock or unlock an entire file. The s parameter should be {} when you 
--- want to unlock an entire file. On Linux/FreeBSD, s must always be {}.
+-- Unlock (a portion of) an open file.
+--
+-- Parameters:
+--		# ##fn##: an integer, the handle to the file or device to (partially) lock.
+--		# ##r##: a sequence, defining a section of the file to be locked, or {} for the whole file (the default).
 --
 -- Comments:
+-- You must have previously locked the
+-- file using ##lock_file##(). On //DOS32// and //WIN32// you can unlock a range of bytes within a
+-- file by specifying the ##r## as {first_byte, last_byte}. The same range of bytes
+-- must have been locked by a previous call to [[:lock_file]](). On //Unix// you can
+-- currently only lock or unlock an entire file. ##r## should be {} when you
+-- want to unlock an entire file. On //Unix//, ##r## must always be {}, which is the default.
+--
 --  You should unlock a file as soon as possible so other processes can use it.
 --
 -- 	Any files that you have locked, will automatically be unlocked when your program 
 --  terminates.
 --
--- 	See lock_file() for further comments and an example.
---
+-- See Also:
+-- 		[[:lock_file]]
 
-global procedure unlock_file(file_number fn, byte_range r) 
+global procedure unlock_file(file_number fn, byte_range r={})
 -- The byte range can be {} if you want to unlock the whole file.
 	machine_proc(M_UNLOCK_FILE, {fn, r})
 end procedure
@@ -671,7 +765,16 @@ end procedure
 -- === File Reading/Writting
 
 --**
--- Read the contents of either file named s1 or an open file handle i1 as a sequence of lines.
+-- Read the contents of a file as a sequence of lines.
+--
+-- Parameters:
+--		#file##: an object, either a file path or the handle to an open file.
+--
+-- Returns:
+--		A **sequence** made of lines from the file, as [[:gets]] could read them.
+--
+-- Comments:
+--	If ##file## was a sequence, the file will be closed on completion. Otherwise, it will remain open, but at end of file.
 --
 -- Example 1:
 -- <eucode>
@@ -689,13 +792,14 @@ end procedure
 -- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
 -- </eucode>
-
-export function read_lines(object f)
+-- See Also:
+--		[[:gets]], [[:write_lines]], [[:read_file]]
+export function read_lines(object file)
 	object fn, ret, y
-	if sequence(f) then
-			fn = open(f, "r")
+	if sequence(file) then
+			fn = open(file, "r")
 	else
-			fn = f
+			fn = file
 	end if
 	if fn < 0 then return -1 end if
 	
@@ -709,25 +813,29 @@ export function read_lines(object f)
 		y = gets(fn)
 	end while
 	
-	if sequence(f) then
+	if sequence(file) then
 			close(fn)
 	end if
 	return ret
 end function
 
 --**
--- Write lines contained in s to file named x or file handle x. 
+-- Write a sequence of lines to a file.
+--
+-- Parameters:
+--		# ##file#: an object, either a file path or the handle to an open file.
+--		# ##lines##: the sequence of lines to write
 --
 -- Returns:
---     1 on success
---     -1 on failure.
+--     An **integer**: 1 on success, -1 on failure.
+--
+-- Errors:
+--		If [[:puts]] cannot write some line of text, a run ime error will occur.
 --
 -- Comments:
--- If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is assumed
--- to be a filename.
+--	If ##file## was a sequence, the file will be closed on completion. Otherwise, it will remain open, but at end of file.
 --
--- When x is a file handle, the file is not closed after writing is finished. When x is a
--- file name, it is opened, written to and then closed.
+-- Whatever integer the lines in ##lines## holds will be truncated to its 8 lowest bits so as to fall in tthe 0.255 range.
 --
 -- Example 1:
 -- <eucode>
@@ -737,15 +845,15 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:read_lines]], [[:write_file]]
+--     [[:read_lines]], [[:write_file]], [[:puts]]
 
-export function write_lines(object f, sequence lines)
+export function write_lines(object file, sequence lines)
 	object fn
 
-	if sequence(f) then
-    	fn = open(f, "w")
+	if sequence(file) then
+    	fn = open(file, "w")
 	else
-		fn = f
+		fn = file
 	end if
 	if fn < 0 then return -1 end if
 
@@ -754,7 +862,7 @@ export function write_lines(object f, sequence lines)
 		puts(fn, '\n')
 	end for
 
-	if sequence(f) then
+	if sequence(file) then
 		close(fn)
 	end if
 
@@ -762,12 +870,20 @@ export function write_lines(object f, sequence lines)
 end function
 
 --**
--- Append lines contained in s2 to file named s1. Returns 1 on success, -1 on failure.
+-- Append a sequence of lines to a file.
+--
+-- Parameters:
+--		# ##file##: an object, either a file path or the handle to an open file.
+--		# ##lines##: the sequence of lines to write
+--
+-- Returns:
+--     An **integer**: 1 on success, -1 on failure.
+--
+-- Errors:
+--		If [[:puts]] cannot write some line of text, a run ime error will occur.
 --
 -- Comments:
--- s1 is a filename.
---
--- It is opened, written to and then closed.
+-- ##file## is opened, written to and then closed.
 --
 -- Example 1:
 -- <eucode>
@@ -777,12 +893,12 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:write_lines]]
+--     [[:write_lines]], [[:puts]]
 
-export function append_lines(sequence f, sequence lines)
+export function append_lines(sequence file, sequence lines)
 	object fn
 
-  	fn = open(f, "a")
+  	fn = open(file, "a")
 	if fn < 0 then return -1 end if
 
 	for i = 1 to length(lines) do
@@ -796,8 +912,13 @@ export function append_lines(sequence f, sequence lines)
 end function
 
 --**
--- Read the contents of either file named s1 or an open file handle i1. Returns the contents 
--- as 1 sequence.
+-- Read the contents of a file as a single sequence of bytes.
+--
+-- Parameters:
+--		# ##file#: an object, either a file path or the handle to an open file.
+--
+-- Returns:
+--		A **sequence** holding all the bytes in the file.
 --
 -- Example 1:
 -- <eucode>
@@ -817,16 +938,16 @@ end function
 -- See Also:
 --     [[:write_file]], [[:read_lines]]
 
-export function read_file(object f)
+export function read_file(object file)
 	integer fn
 	integer len
 	sequence ret
 	integer temp
 
-	if sequence(f) then
-		fn = open(f, "rb")
+	if sequence(file) then
+		fn = open(file, "rb")
 	else
-		fn = f
+		fn = file
 	end if
 	if fn < 0 then return -1 end if
 	
@@ -839,7 +960,7 @@ export function read_file(object f)
 		ret[i] = getc(fn)
 	end for
 		
-	if sequence(f) then
+	if sequence(file) then
 		close(fn)
 	end if
 
@@ -847,13 +968,20 @@ export function read_file(object f)
 end function
 
 --**
--- Write data to file named f or file handle f. Returns 1 on success, 0 on failure.
+-- Write a sequence of bytes to a file.
+--
+-- Parameters:
+--		# ##file##: an object, either a file path or the handle to an open file.
+--		# ##data##: the sequence of bytes to write
+--
+-- Returns:
+--     An **integer**: 1 on success, -1 on failure.
+--
+-- Errors:
+--		If [[:puts]] cannot write ##data##, a run ime error will occur.
 --
 -- Comments:
--- If x is an atom, it is assumed to be an open file handle. If x is a sequence, it is 
--- assumed to be a filename.
---
--- When x is a file handle, the file is not closed after writing is finished. When x is a 
+-- When ##file## is a file handle, the file is not closed after writing is finished. When ##file## is a
 -- file name, it is opened, written to and then closed.
 --
 -- Example 1:

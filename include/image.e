@@ -17,6 +17,12 @@ constant OLDHDRSIZE = 12, NEWHDRSIZE = 40
 constant EOF = -1
 
 -- error codes returned by read_bitmap(), save_bitmap() and save_screen()
+-- * BMP_SUCCESS,
+-- * BMP_OPEN_FAILED,
+-- * BMP_UNEXPECTED_EOF,
+-- * BMP_UNSUPPORTED_FORMAT,
+-- * BMP_INVALID_MODE
+
 global enum
 	BMP_SUCCESS,
 	BMP_OPEN_FAILED,
@@ -152,8 +158,39 @@ end function
 --**
 -- Read a bitmap (.BMP) file into a 2-d sequence of sequences (image)
 --
+-- Parameters:
+--		# ##file_name##: a sequence, the path to a .bmp file to read from. The extension is not assumed if missing.
+--
 -- Returns:
---   ##{palette,image}##
+--   An **object**: on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
+--
+-- Comments:
+-- In the returned value, the first element is a list of mixtures, each of which defines a color, and the second, a list of point rows. Each pixel in a row is represented by its color.
+--
+-- The file should be in the bitmap format. The most common variations of the format are supported. You can pass the palette to [[:all_palette]]() (after dividing it by 4 to scale it). The image can be passed to [[:display_image]]().
+--
+-- Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is not in a good format, an error code (atom) is returned instead: 
+--  <eucode>
+--      global constant
+--	* BMP_OPEN_FAILED = 1,
+--  * BMP_UNEXPECTED_EOF = 2,
+--  * BMP_UNSUPPORTED_FORMAT = 3
+-- </eucode>
+--  
+-- You can create your own bitmap picture files using Windows Paintbrush and many other graphics programs. You can then incorporate these pictures into your Euphoria programs.
+--
+-- Example 1:
+-- <eucode>
+--  x = read_bitmap("c:\\windows\\arcade.bmp")
+-- </eucode>
+-- note: double backslash needed to get single backslash in
+-- a string
+--
+-- Example 2: 
+--	[[../demo/dos32/bitmap.ex]]
+--
+-- See Also: 
+--		[[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
 
 global function read_bitmap(sequence file_name)
 	atom Size 
@@ -232,11 +269,37 @@ type text_point(sequence p)
 end type
 
 --**
--- Display a 2-d sequence of pixels at location xy
+-- Display a 2-d sequence of pixels at some location.
+--
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##xy##: a sequence, the pair of 0-based coordinates of the point to start the display at.
+-- 		# ##pixels##: a sequence of lists of pixel values.
 --
 -- Comments:
---   N.B. coordinates are ##{x, y}## with ##{0, 0}## at top left of screen and ##x## values 
---   increasing towards the right, and ##y## values increasing towards the bottom of the screen
+--   N.B. coordinates are ##{x, y}## with ##{0, 0}## at top left of screen and ##x## values
+--   increasing towards the right, and ##y## values increasing towards the bottom of the screen. Pixel rows don't wrap.
+--
+-- ##pixels## might have been created by an earlier call to [[:save_image]], or in any other way. The sequences (rows) of the image do not have to all be the same length.
+--
+-- Example 1:
+-- <eucode>
+--  display_image({20,30}, {{7,5,9,4,8},
+--                         {2,4,1,2},
+--                         {1,0,1,0,4,6,1},
+--                         {5,5,5,5,5,5}})
+-- -- This will display a small image containing 4 rows of
+-- -- pixels. The first pixel (7) of the top row will be at
+-- -- {20,30}. The top row contains 5 pixels. The last row
+-- -- contains 6 pixels ending at {25,33}.
+-- </eucode>
+--
+-- Example 2:
+--	 [[../demo/dos32/bitmap.ex]]
+-- See Also: *
+-- 		[[:save_image]], [[:read_bitmap]], [[:display_text_image]]
 
 global procedure display_image(graphics_point xy, sequence pixels)
 	for i = 1 to length(pixels) do
@@ -248,10 +311,31 @@ end procedure
 --**
 -- Save a rectangular region on a graphics screen
 --
+-- Platform:
+--	//DOS32//
+--
+-- Parameters:
+-- 		# ##top_left##: the coordinates, given as a pair, of the upper left corner of the area to save
+-- 		# ##bottom_right##: the coordinates, given as a pair, of the lower right corner of the area to save
+--
+-- Returns:
+-- 		A **sequence** of pixel values, which [[:display_image]] will read as expected.
+--
 -- Comments:
---   The ##{x, y}## coordinates are for the top-left and bottom-right 
---   corner pixels. The result is a 2-d sequence of pixels suitable 
---   for use in ##display_image()## above.
+--   The 0-based ##{x, y}## coordinates are for the top-left and bottom-right
+--   corner pixels.
+--
+-- Example 1:
+-- <eucode>
+--  s = save_image({0,0}, {50,50})
+-- display_image({100,200}, s)
+-- display_image({300,400}, s)
+-- -- saves a 51x51 square image, then redisplays it at {100,200}
+-- -- and at {300,400}
+-- </eucode>
+--
+-- See Also:
+-- 		[[:display_image]], [[:save_text_image]]
 
 global function save_image(graphics_point top_left, graphics_point bottom_right)
 	integer x, width
@@ -281,28 +365,112 @@ type page_number(integer p)
 end type
 
 --**
--- Return current page# mapped to the monitor
+-- Get the number of the video page being displayed.
+--
+-- Platform:
+--		//DOS32//
+--
+-- Returns
+--		An **integer**, the current page number displayed bythe monitor.
+-- Comments: 
+-- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how manypages are available in the current graphics mode.
+--
+-- The active and display pages are both 0 by default.
+--  
+-- See Also: 
+--      [[:set_display_page]], [[:get_active_page]], [[:video_config]]
+-- 
 
 global function get_display_page()
 	return machine_func(M_GET_DISPLAY_PAGE, 0)
 end function
 
 --**
--- Select a page to be displayed
+-- Select a video memory page to be displayed
+--
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##page##: the number of the page to be mapped.
+--
+-- Comments: 
+-- With multiple pages you can instantaneously change the entire screen without causing any visible "flicker". You can also save the screen and bring it back quickly.
+-- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
+-- 
+-- By default, the active page and the display page are both 0. 
+-- 
+-- This works under DOS, or in a full-screen DOS window. In a partial-screen window you cannot change the active page. 
+--  
+-- Example 1:
+--	 See <a href="active_page">the set_active_page()</a> example.
+--
+-- See Also: 
+--      [[:get_display_page]], [[:set_active_page]], [[:video_config]]
+
 
 global procedure set_display_page(page_number page)
 	machine_proc(M_SET_DISPLAY_PAGE, page)
 end procedure
 
 --**
--- Return current page# that screen output is sent to
-
+-- Determine which is the video memory page output goes to.
+--
+-- Platform:
+--		//DOS32//
+-- Returns:
+-- 		An **integer**, the current page number that screen output is sent to.
+-- Description: 
+-- Comments:
+-- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying a different page. 
+--
+-- The active and display pages are both 0 by default.
+-- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
+--  
+-- See Also: set_active_page, get_display_page, video_config  
+-- 
 global function get_active_page()
 	return machine_func(M_GET_ACTIVE_PAGE, 0)
 end function
 
 --**
 -- Select a page for screen output
+--
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##page##: the number of the page to send output to.
+--
+-- Comments: 
+-- With multiple pages you can instantaneously change the entire screen without causing any visible "flicker". You can also save the screen and bring it back quickly.
+-- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
+-- 
+-- By default, the active page and the display page are both 0. 
+-- 
+-- This works under DOS, or in a full-screen DOS window. In a partial-screen window you cannot change the active page. 
+--  
+-- Example 1:
+-- <a name="active_page">
+-- <eucode>
+--  include image.e
+-- 
+-- -- active & display pages are initially both 0
+-- puts(1, "\nThis is page 0\n")
+-- set_active_page(1)     -- screen output will now go to page 1
+-- clear_screen()
+-- puts(1, "\nNow we've flipped to page 1\n")
+-- if getc(0) then        -- wait for key-press
+-- end if
+-- set_display_page(1)    -- "Now we've ..." becomes visible
+-- if getc(0) then        -- wait for key-press
+-- end if
+-- set_display_page(0)    -- "This is ..." becomes visible again
+-- set_active_page(0)
+-- </eucode>
+-- 
+-- See Also: 
+--      [[:get_active_page]], [[:set_display_page]], [[:video_config]]
 
 global procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
@@ -333,8 +501,31 @@ function DOS_scr_addr(sequence vc, text_point xy)
 end function
 
 --**
--- Returns ##{character, attributes}## of the single character
--- at the given (line, column) position on the screen
+-- Get the value and attribute of the character at a given screen location.
+--
+-- Parameters:
+-- 		# ##line##: the 1-base line number of the location
+-- 		# ##column##: the 1-base column number of the location
+-- Returns:
+-- 		A **sequence**, the pair ##{character, attributes}## for the specified location.
+--
+-- Comments:
+--
+-- This function inspects a single character on the //active page//.
+--
+-- The attribute is an atom that contains the foreground and background color of the character, and possibly other information describing the appearance of the character on the screen.
+--  With get_screen_char() and [[:put_screen_char]]() you can save and restore a character on the screen along with its attributes.
+--
+-- Example 1:
+-- <eucode>
+--  -- read character and attributes at top left corner
+-- s = get_screen_char(1,1) 
+-- -- store character and attributes at line 25, column 10
+-- put_screen_char(25, 10, {s})
+-- </eucode>
+-- 
+-- See Also: 
+--      [[:put_screen_char]], [[:save_text_image]]
 
 global function get_screen_char(positive_atom line, positive_atom column)
 	atom scr_addr
@@ -355,8 +546,32 @@ global function get_screen_char(positive_atom line, positive_atom column)
 end function
 
 --**
--- Stores ##{character, attributes, character, attributes, ...}##
--- of 1 or more characters at position (line, column) on the screen
+-- Stores/displays a sequence of characters with attributes at a given location.
+--
+-- Parameters:
+-- 		# ##line##: the 1-based line at which to start writing
+-- 		# ##column##: the 1-based column at which to start writing
+-- 		# ##char_attr##: a sequence of alternated characters and attributes.
+--
+-- Comments:
+-- ##char_attr# must be in the form  ##{character, attributes, character, attributes, ...}##.
+--
+-- Errors: 
+-- 		The length of ##char_attr## must be a multiple of 2.
+--
+-- Comments:
+--
+-- The attributes atom contains the foreground color, background color, and possibly other platform-dependent information controlling how the character is displayed on the screen.
+-- If ##char_attr## has 0 length, nothing will be written to the screen. The characters are written to the //active page//.
+-- It's faster to write several characters to the screen with a single call to put_screen_char() than it is to write one character at a time. 
+--  
+-- Example 1:
+--  -- write AZ to the top left of the screen
+-- -- (attributes are platform-dependent)
+-- put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
+-- 
+-- See Also: 
+--       [[:get_screen_char]], [[:display_text_image]]
 
 global procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
@@ -381,11 +596,40 @@ global procedure put_screen_char(positive_atom line, positive_atom column,
 end procedure
 
 --**
--- Display a text image at line xy[1], column xy[2] in any text mode.
+-- Display a text image in any text mode.
+--
+-- Parameters:
+-- 		# ##xy##: a pair of 1-based coordinates representing the point at which to start writing
+--		# ##text##: a list of sequences of alternated character and attribute.
 --
 -- Comments:
---   N.B. coordinates are ##{line, column}## with ##{1, 1}## at the top left of screen
---   Displays to the active text page.
+-- This routine displays to the active text page, and only works in text modes.
+--   
+-- On //DOS32//, the attribute should consist of the foreground color plus 16 times the background color.
+-- ##text## may result from a previous call to [[:save_text_image]](), although you could construct it yourself. The sequences of the text image do not have to all be the same length.
+-- 
+-- You might use save_text_image()/display_text_image() in a text-mode graphical user interface, to allow "pop-up" dialog boxes, and drop-down menus to appear and disappear without losing what was previously on the screen. 
+-- 
+-- Example 1:
+-- <eucode>
+--  clear_screen()
+-- display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
+--                            {'C', RED+16*WHITE},
+--                            {'D', BLUE}})
+-- -- displays:
+--      AB
+--      C
+--      D
+-- -- at the top left corner of the screen.
+-- -- 'A' will be white with black (0) background color,
+-- -- 'B' will be green on black, 
+-- -- 'C' will be red on white, and
+-- -- 'D' will be blue on black.
+-- </eucode>
+-- 
+-- See Also:
+-- 		[[:save_text_image]], [[:display_image]], [[:put_screen_char]]
+--
 
 global procedure display_text_image(text_point xy, sequence text)
 	atom scr_addr
@@ -426,16 +670,51 @@ global procedure display_text_image(text_point xy, sequence text)
 end procedure
 
 --**
--- Copy a rectangular block of text out of screen memory,
--- given the coordinates of the top-left and bottom-right corners.
--- Reads from the active text page.
+-- Copy a rectangular block of text out of screen memory
+--
+-- Parameters:
+-- 		# ##top_left##: the coordinates, given as a pair, of the upper left corner of the area to save.
+-- 		# ##bottom_right##: the coordinates, given as a pair, of the lower right corner of the area to save.
+--
+-- Returns:
+-- 		A **sequence** of {character, attribute, character, ...} lists.
+-- Comments:
+--
+-- The returned value is appropriately handled by [[:display_text_image]].
+-- On //DOS32//, an attribute byte is made up of two 4-bit fields that encode the foreground and background color of a character. The high-order 4 bits determine the background color, while the low-order 4 bits determine the foreground color.
+--
+-- This routine reads from the active text page, and only works in text modes.
+-- 
+-- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc. 
+-- 
+-- Example 1:
+-- {{{
+-- If the top 2 lines of the screen have:
+--     Hello
+--    World
+--
+--
+--  And you execute:
+-- }}}
+-- <eucode>
+--  s = save_text_image({1,1}, {2,5})
+-- </eucode>
+-- {{{
+--  Then s is something like:  
+--      {"H-e-l-l-o-",
+--      "W-o-r-l-d-"}
+-- where '-' indicates the attribute bytes
+-- }}}
+-- 
+-- See Also:
+--     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
 global function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
 	atom scr_addr, screen_memory
 	integer screen_width, image_width
 	integer page_size
-	
+
 	vc = video_config()
 	screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
 	ifdef DOS32 then
@@ -573,11 +852,17 @@ end procedure
 -- Get color intensities for the entire set of colors in the current 
 -- graphics mode.
 --
+-- Platform:
+--	//DOS32//
+--
 -- Returns:
---   sequence is ##{{r, g, b}, {r, g, b}, ..., {r, g, b}}##
+--   A **sequence** of [[:mixtures]]
 --
 -- Comments:
 --   Intensity values are in the range 0 to 63.
+-- This function might be used to get the palette values needed by [[:save_bitmap]](). Remember to multiply these values by 4 before calling save_bitmap(), since save_bitmap() expects values in the range 0 to 255.
+-- See Also:
+-- 		[[:video_config]], [[:palette]], [[:all_palette]], [[:read_bitmap]], [[:save_bitmap]], [[:save_screen]]
 
 global function get_all_palette()
 	integer mem, numColors
@@ -622,11 +907,43 @@ end procedure
 -- Capture the whole screen or a region of the screen, and create a Windows
 -- bitmap (.BMP) file. 
 --
+-- Platform:
+--		//DOS32//
+--
+-- Parameters:
+-- 		# ##r##: an object, either 0 (whole screen) or a {top left, bottom right} pair of {x,y} pairs of coordinates.
+--		# ##file_name##: a sequence, the name of the save file.
+--
+-- Returns:
+--		An **integer**, which is BMP_SUCCESS on success.
+--
 -- Comments:
---   The file name is given as a parameter. Region r is
---   either a sequence of 2 sequences: 
---   ##{{topLeftXPixel, topLeftYPixel}, {bottomRightXPixel, bottomRightYPixel}}## 
---   defining a region, or the integer 0 if you want to save the whole screen.
+-- The result will be one of the following codes:
+--  <eucode>
+--      global constant BMP_SUCCESS = 0,
+--                 BMP_OPEN_FAILED = 1,
+--                BMP_INVALID_MODE = 4 -- invalid graphics mode
+--                                     -- or invalid argument
+-- </eucode>
+--  
+-- [[:save_screen]]() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with [[:read_bitmap]](). Windows Paintbrush and some other tools do not support 4-color bitmaps.
+--
+-- save_screen() only works in pixel-graphics modes, not text modes.
+--  
+-- Example 1: 
+-- <eucode> 
+--  -- save whole screen:
+-- code = save_screen(0, "c:\\example\\a1.bmp")
+-- </eucode>
+-- 
+-- Example 2:  
+-- <eucode>  
+--  -- save part of screen:
+-- err = save_screen({{0,0},{200, 15}}, "b1.bmp")
+-- </eucode>
+-- 
+-- See Also:
+-- 		[[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
 
 global function save_screen(region r, sequence file_name)
 	sequence vc
@@ -658,7 +975,7 @@ global function save_screen(region r, sequence file_name)
 	end if
 	
 	if numXPixels <= 0 or numYPixels <= 0 then
-		-- not a valid graphics mode or not a valid argument 
+		-- not a valid graphics mode or not a valid argument
 		close(fn)
 		return BMP_INVALID_MODE
 	end if
@@ -682,7 +999,7 @@ procedure putImage1(sequence image)
 -- Image data is given as a 2-d sequence in the order first row... last row.
 	object   x
 	integer  numPixelsPerByte, shift
-	
+
 	numPixelsPerByte = 8 / bitCount
 	shift = power(2, bitCount)
 	for i = numYPixels to 1 by -1 do
@@ -699,10 +1016,39 @@ procedure putImage1(sequence image)
 end procedure
 
 --**
--- Create a .BMP bitmap file, given a palette and a 2-d sequence of sequences.
+-- Create a .BMP bitmap file, given a palette and a 2-d sequence of sequences of colors.
+--
+-- Parameters:
+-- 		# ##palette_n_image##: a {palette, image} pair, like [[:read_bitmap()]] returns
+-- 		# ##file_name##: a sequence, the name of the file to save to.
+--
+-- Returns:
+-- 		An **integer**, 0 on success.
 --
 -- Comments:
---   The opposite of read_bitmap().
+--   This routine does the opposite of [[:read_bitmap]]().
+-- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each color in the butmap. The second element is a sequence of sequences of pcolors. The inner sequences must have the same length.
+--
+-- The result will be one of the following codes: 
+--  <eucode>
+--      global constant BMP_SUCCESS = 0,
+--                 BMP_OPEN_FAILED = 1,
+--                BMP_INVALID_MODE = 4 -- invalid graphics mode
+-- </eucode>                                    -- or invalid argument
+-- If you use ##get_all_palette##() to get the palette before calling this function, you must multiply the returned intensity values by 4 before calling [[:save_bitmap]](). You might use
+-- [[:ave_image]]() to get the 2-d image.
+--
+-- save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with read_bitmap(). Windows Paintbrush and some other tools do not support 4-color bitmaps. 
+--  
+-- Example 1:
+-- <eucode>
+--  paletteData = get_all_palette() * 4
+-- code = save_bitmap({paletteData, imageData},
+--                    "c:\\example\\a1.bmp")
+-- </eucode>
+--
+-- See Also:
+-- 		[[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
 
 global function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
@@ -713,17 +1059,17 @@ global function save_bitmap(two_seq palette_n_image, sequence file_name)
 	if fn = -1 then
 		return BMP_OPEN_FAILED
 	end if
-	
+
 	color = palette_n_image[1]
 	image = palette_n_image[2]
 	numYPixels = length(image)
 	numXPixels = length(image[1])   -- assume the same length with each row
 	numColors = length(color)
-	
+
 	putBmpFileHeader(numColors)
-	
+
 	if error_code = BMP_SUCCESS then
-		putColorTable(numColors, color) 
+		putColorTable(numColors, color)
 		putImage1(image)
 	end if
 	close(fn)

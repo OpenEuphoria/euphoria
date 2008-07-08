@@ -22,7 +22,7 @@ constant
 --		# ##data##: an object, defaulted to {}.
 --
 -- Comments:
--- 		The actual message being shown, both on standard error and in ex.err (or whatever file last passed to crash_file()), is ##sprintf(fmt,data)##.
+-- 		The actual message being shown, both on standard error and in ex.err (or whatever file last passed to crash_file()), is ##sprintf(fmt, data)##.
 --		The program terminates as for any runtime error. 
 --
 -- Example 1:
@@ -34,7 +34,7 @@ constant
 -- Example 2:
 -- <eucode>
 -- if token = end_of_file then
--- 	crash("Test file #%d is bad, text read so far is %s\n",{file_number,read_so_far})
+-- 	crash("Test file #%d is bad, text read so far is %s\n", {file_number, read_so_far})
 -- end if
 -- </eucode>
 -- See Also:
@@ -61,7 +61,7 @@ end procedure
 -- -- if ##input_text## is too short, user will get a more meaningful message than "index out of bounds".
 -- </eucode>
 -- See Also:
--- 	[[:crash]], [[crash_file]]
+-- 	[[:crash]], [[:crash_file]]
 export procedure crash_message(sequence msg)
 	machine_proc(M_CRASH_MESSAGE, msg)
 end procedure
@@ -131,13 +131,13 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- function report_error(integer dummy)
---	  mylib:email("maintainer@remote_site.org",ex.err)
+--	  mylib:email("maintainer@remote_site.org", "ex.err")
 --    return 0 and dummy
 -- end function
 -- crash_routine(routine_id("report_error"))
 -- </eucode>
 -- See Also:
--- 	[[:crash_file]], [[routine_id]],[[:Debugging and profiling]]
+-- 	[[:crash_file]], [[:routine_id]], [[:Debugging and profiling]]
 export procedure crash_routine(integer func)
 	machine_proc(M_CRASH_ROUTINE, func)
 end procedure

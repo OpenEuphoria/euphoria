@@ -109,7 +109,7 @@ without incurring much disk space overhead.
 Do not store valuable data without a backup.  RDS will not be responsible for
 any damage or data loss.
 
-=== Warning
+=== Warning: Use the right file mode
 
 .edb files are binary files, not text files.  You **must** use ##BINARY## mode when
 transferring a .edb file via FTP from one machine to another. You must also

@@ -37,7 +37,7 @@ constant
 -- Example 1:
 -- <eucode>
 -- 	integer n = get_key()
--- 	if n=-1 then puts(1,"No key waiting.\n") end if
+-- 	if n=-1 then puts(1, "No key waiting.\n") end if
 -- </eucode>
 --
 -- See Also:

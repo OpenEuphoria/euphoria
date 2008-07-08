@@ -41,16 +41,46 @@ lang_path = 0
 --
 
 --**
+-- Set the language path.
+--
+-- Parameters:
+-- 		# ##pp##: an object, either an actual path or an atom.
+--
+-- Comments:
+--	When the language path is not set, and it is unset by default, [[:set]]() does not load any language file.
+-- See Also:
+--		[[:set]]
 export procedure set_lang_path(object pp)
 	lang_path = pp
 end procedure
 
 --**
+-- Get the language path.
+--
+-- Returns:
+-- 		An **object**, the current language path.
+-- See Also:
+--		[[:get_lang_path]]
 export function get_lang_path()
 	return lang_path
 end function
 
 --**
+-- Load a language file.
+--
+-- Parameters:
+-- 		# ##filename##: a sequence, the //base// name of the fie to load.
+--
+-- Returns:
+--		An **integer**: 0 on failure, 1 on success.
+-- Comments:
+-- The language file must be made of lines which either in the form
+-- {{{
+-- key value
+-- }}}
+-- withhout any space in the key part, or else start with a ~#~ character, in which case they are treated as comments. Leading whitespace does not count.
+-- See Also:
+--		[[:w]]
 export function lang_load(sequence filename)
 	object lines
 	sequence line, key, msg
@@ -96,6 +126,16 @@ export function lang_load(sequence filename)
 end function
 
 --**
+-- Translates a word, using the current language file.
+--
+-- Parameters:
+-- 		# ##word##: a sequence, the word to trnslate.
+-- Returns:
+--		A **sequence**, the value associated to the key ##word##.
+-- Comments:
+-- "" is returned if no translation was found.
+-- See Also:
+-- 		[[:set]], [[:lang_load]]
 export function w(sequence word)
 	return m:get(lang, word, "")
 end function
@@ -178,6 +218,19 @@ constant
 	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I)
 
 --**
+-- Set the computer locale, and possibly loas appropriate translation file.
+--
+-- Parameters:
+--		# ##new_locale##: a sequence representing a nex locale.
+--
+-- Returns:
+--		An **integer**, either 0 on failure or 1 on success.
+--
+-- Comments:
+-- Locale strings have the following format: xx_YY or xx_YY.xyz .
+-- The xx part refers to a culture, or main language/script. For instance, "en" refers to english, "de" refers to german, and so on. For some language, a script may be specified, like in "mn_Cyrl_MN" (mongolian in cyrillic transcription).
+-- The YY part refers to a subculture, or variant, of the main language. For instance, "fr_FR" refers to metropolitan France, while "fr_BE" refers to the variant spoken in Wallonie, the french speaking region of Belgium.
+-- The optional .xyz part specifies an encoding, like .utf8. This is required in some cases.
 export function set(sequence new_locale)
 	atom pLocale, ign
 	
@@ -195,6 +248,13 @@ export function set(sequence new_locale)
 end function
 
 --**
+-- Get current locale string
+--
+-- Returns:
+--		A **sequence**, a locaale string.
+--
+-- See Also:
+--		[[:set]]
 export function get()
 	sequence r
 	atom p
@@ -211,6 +271,20 @@ export function get()
 end function
 
 --**
+-- Converts an amount of currency into a string representing that amount.
+--
+-- Parameters:
+--		# ##amount##: an atom, the value to write out.
+--
+-- Returns:
+-- 		A **sequence**, a string that writes out ##amoubt## of current currency.
+-- Example 1:
+-- <eucode>
+-- -- Assuming an en_US locale
+-- ?money(1020.5) -- returns"$1,020.50"
+-- </eucode>
+-- See Also:
+--		[[:set]], [[:number]]
 export function money(atom amount)
 	sequence result
 	integer size
@@ -234,6 +308,20 @@ export function money(atom amount)
 end function
 
 --**
+-- Converts a number into a string representing that number.
+--
+-- Parameters:
+--		# ##num##: an atom, the value to write out.
+--
+-- Returns:
+-- 		A **sequence**, a string that writes out ##num##.
+-- Example 1:
+-- <eucode>
+-- -- Assuming an en_US locale
+-- ?number(1020.5) -- returns"1,020.50"
+-- </eucode>
+-- See Also:
+--		[[:set]], [[:money]]
 export function number(atom num)
 	sequence result
 	integer size
@@ -274,6 +362,21 @@ function mk_tm_struct(dt:datetime dtm)
 end function
 
 --**
+-- Formats a date according to current locale.
+--
+-- Parameters:
+--		# ##fmt##: A format string, as described in [[:format]]
+--		# ##dtm##: the datetime to wrie out.
+--
+-- Returns:
+--		A **sequence**, representing the formatted date.
+-- Example 1:
+-- <eucode>
+--	include datetime.e
+-- ?datetime("Today is a %A",dt:now())
+-- </eucode>
+-- See Also:
+--		[[:format]]
 export function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
 	integer size

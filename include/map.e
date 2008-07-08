@@ -22,7 +22,16 @@ constant iVals = 2
 
 --****
 -- === Constants
---
+--**
+-- Operation codes for ##put##():
+-- * PUT,
+-- * ADD,
+-- * SUBTRACT,
+-- * MULTIPLY,
+-- * DIVIDE,
+-- * APPEND,
+-- * CONCAT
+
 
 export enum
 	PUT,
@@ -41,7 +50,7 @@ export enum
 -- Defines the datatype 'map'
 --
 -- Comments:
--- Used when declaring a map variable.
+-- Used when declaring a map variable. A map is also known as a dictionnary. It organises pair {key, value} so as to make lookup faster. The keys and values may be any Euphoria objects. Only one pair with a given key may exist in a given map.
 --
 -- Example:
 --   <eucode>
@@ -83,14 +92,18 @@ constant maxInt = #3FFFFFFF
 --**
 -- Calculate a Hashing value from the supplied data.
 --
--- This is used whenever you need to a single number to represent the data you supply.
--- It can calculate the number based on all the data you give it, which can be
--- an atom or sequence of any value.
---
 -- Parameters:
 --   * pData = The data for which you want a hash value calculated.
 --   * pMaxHash = (default = 0) The returned value will be no larger than this value.
---     However, a value of 0 or lower menas that it can as large as the maximum integer value.
+--     However, a value of 0 or lower menas that it can grow as large as the maximum integer value.
+--
+-- Returns:
+--		An **integer**, the value of which depends only on the supplied adata.
+--
+-- Comments:
+-- This is used whenever you need a single number to represent the data you supply.
+-- It can calculate the number based on all the data you give it, which can be
+-- an atom or sequence of any value.
 --
 -- Example 1:
 --   <eucode>
@@ -139,6 +152,19 @@ export function calc_hash(object key, integer pMaxHash = 0)
 end function
 
 --**
+-- Changes the width, i.e. the number of buckets, of a hmap.
+--
+-- Parameters:
+--		# ##m##: the map to resize
+--		# ##pRequestedSize##: a lower limit for the new size.
+--
+-- Returns:
+--		A **map** with the same data in, but more evenly dispatched and hence faster to use.
+--
+-- Comment:
+-- If ##pRequestedSize## is not greater than zero, a new width is automatically derived from the current one.
+-- SEe Also:
+--		[[:statistics]], [[:optimise]]
 export function rehash(map m, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
@@ -183,6 +209,12 @@ end function
 --**
 -- Create a new map data structure
 --
+-- Parameters:
+--		# ##initSize##: an initial number of buckets for the map.
+--
+-- Returns:
+--		An empty **map**.
+--
 -- Comments:
 --   A new object of type map is created. type_check should be turned off for better performance.
 --
@@ -201,7 +233,14 @@ export function new(integer initSize = 66)
 end function
 
 --**
--- Check if map has a given key.
+-- Check whether map has a given key.
+--
+-- Parameters:
+-- 		# ##m##: the map to inspect
+--		# ##key##: an object to be looked up
+--
+-- Returns:
+--		An **intger**, 0 if not present, 1 if present.
 --
 -- Example 1:
 --   <eucode>
@@ -211,7 +250,8 @@ end function
 --   ? has(m, "name") -- 1
 --   ? has(m, "age")  -- 0
 --   </eucode>
-
+--See Also:
+-- 		[[:get]]
 export function has(map m, object key)
 	integer lIndex
 
@@ -220,8 +260,15 @@ export function has(map m, object key)
 end function
 
 --**
--- Return the value that corresponds to the object key in the map m. If the key is not in the map, 
--- the object defaultValue is returned instead.
+-- Retrieves the value associated to a key in a map.
+--
+-- Parameters:
+--		# ##m##: the map to inspect
+--		# ##key##: an object, the key being looked tp
+--		# ##defaultValue##: an object, a default value returned if ##key## not found
+--
+-- Returnz:
+--		An **object**, the value that corresponds to ##key## in ##m##. If ##key## is not in ##m##, ##defaultValue## is returned instead.
 --
 -- Example 1:
 --   <eucode>
@@ -238,7 +285,8 @@ end function
 --       printf(1, "The age is %d", age)
 --   end if
 --   </eucode>
-
+-- See Also:
+--		[[:has]]
 export function get(map m, object key, object defaultValue)
 	integer lIndex
 	integer lOffset
@@ -254,23 +302,33 @@ export function get(map m, object key, object defaultValue)
 end function
 
 --**
--- Put an entry on the map m with key x1 and value x2. 
+-- Adds or updates an entry on a map.
+--
+-- Parameters:
+--		# ##m##: the map where an entry is being added or opdated
+--		# ##key##: an object, the key to look up
+--		# ##value##: an object, the value to add, or to use for updating.
+--		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
+--		# ##pTrigger##: an integer. Default is 100. See Comments for details.
+--
+-- Returns:
+--		The updated **map**.
+--
+-- Comments:
 -- The operation parameter can be used to modify the existing value.  Valid operations are: 
 -- 
 -- * ##PUT##:  This is the default, and it replaces any value in there already
 -- * ##ADD##:  Equivalent to using the += operator 
 -- * ##SUBTRACT##:  Equivalent to using the -= operator 
--- * ##MULTIPLY##:  Equivalent to using the *= operator 
+-- * ##MULTIPLY##:  Equivalent to using the *= operator
 -- * ##DIVIDE##: Equivalent to using the /= operator 
 -- * ##APPEND##: Appends the value to the existing data 
 -- * ##CONCAT##: Equivalent to using the &= operator
 --
--- Returns:
---   The modified map.
---
--- Comments:
 --   If existing entry with the same key is already in the map, the value of the entry is updated.
 --
+-- ##pTrigger## sets the sensitivity of ##m## to additions. The lower the value, the more often an addition will cause a [[:rehash]](). A value of 0 or less disables the check, ensuring no rehash takes place on this particular call.. 
+
 -- Example 1:
 --   <eucode>
 --   map ages
@@ -281,7 +339,9 @@ end function
 --
 --   -- ages now contains 2 entries: "Andy" => 12, "Budi" => 14
 --   </eucode>
-
+--
+-- See Also:
+--		[[:remove]], [[:has]]
 export function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
 	integer index
 	integer hashval
@@ -351,10 +411,17 @@ export function put(map m, object key, object value, integer operation = PUT, in
 end function
 
 --**
--- Remove an entry with given key from the map m. The modified map is returned.
+-- Remove an entry with given key from a map.
+--
+-- Parameters:
+--		# ##m##: the map to operate on
+--		# ##key##: an object, the key to remove.
+--
+-- Returns:
+--		 The modified **map**.
 --
 -- Comments:
---   If the map has no entry with the specified key, the original map is returned.
+--   If ##key## is not on ##m##, the ##m## is returned unchanged.
 --
 -- Example 1:
 --   <eucode>
@@ -364,7 +431,9 @@ end function
 --   m = remove(m, "Amy")
 --   -- m is now an empty map again
 --   </eucode>
-
+--
+-- See Also:
+--		[[:put]], [[:has]]
 export function remove(map m, object key)
 	integer hash, index
 	object bucket
@@ -392,7 +461,13 @@ export function remove(map m, object key)
 end function
 
 --**
--- Return the number of entries in the map m.
+-- Return the number of entries in a map.
+--
+-- Parameters:
+--		##m##: the map being queried
+--
+-- Returns:
+--		An **integer**, the number of entries it has.
 --
 -- Comments:
 --   For an empty map, size will be zero
@@ -404,12 +479,29 @@ end function
 --   m = put(m, 2, "b")
 --   ? size(m) -- outputs 2
 --   </eucode>
-
+--
+-- See Also:
+--		[[:statistics]]
 export function size(map m)
 	return m[iCnt]
 end function
 
 --**
+-- Retrieves characteristics of a map.
+--
+-- Parameters:
+-- 		# ##m##: the map being queried
+--
+-- Returns:
+--		A  **sequence** of 7 integers:
+-- * number of entries
+-- * number of buckets in use
+-- * number of buckets
+-- * size of largest bucket
+-- * size of smallest bucket
+-- * average size for a bucket
+-- * * standard deviation for the bucket length series
+
 export function statistics(map m)
 	sequence lStats
 	sequence lLengths
@@ -435,7 +527,13 @@ export function statistics(map m)
 end function
 
 --**
--- Return all keys in map m as a sequence.
+-- Return all keys in a map.
+--
+-- Parameters;
+--		# ##m##: the map being queried
+--
+-- Returns:
+-- 		A **sequence** made of all the keys in the map.
 --
 -- Comments:
 --   The order of the keys returned may not be the same as the putting order.
@@ -452,7 +550,8 @@ end function
 --   sequence keys
 --   keys = keys(m) -- keys might be {20,40,10,30} or some other orders
 --   </eucode>
-
+-- See Also:
+--		[[:has]]
 export function keys(map m)
 	sequence buckets, bucket
 	sequence ret
@@ -474,7 +573,14 @@ export function keys(map m)
 end function
 
 --**
--- Return all values in map m as a sequence.
+--
+-- Return all values in a map.
+--
+-- Parameters:
+--		# ##m##: the map being queried
+--
+-- Returns:
+--		A **sequence** of all values stored in ##m##.
 --
 -- Comments:
 --   The order of the values returned may not be the same as the putting order. 
@@ -492,7 +598,8 @@ end function
 --   sequence values
 --   values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
 --   </eucode>
-
+ -- See Also:
+ --		[[:get]]
 export function values(map m)
 	sequence buckets, bucket
 	sequence ret
@@ -514,6 +621,17 @@ export function values(map m)
 end function
 
 --**
+-- Widens a map to increase performance.
+--
+-- Parameters:
+--		# ##m##: the map being optimised
+--		# ##pAvg##: an atom, an estimate of the desired count of nonempty buckets. Default is 10.
+--
+-- Returns:
+--		The optimised **map**.
+--
+-- See Also:
+--		{{:statistics]]
 export function optimize(map m, atom pAvg = 10)
 	sequence op
 	sequence m0
@@ -531,6 +649,18 @@ export function optimize(map m, atom pAvg = 10)
 end function
 
 --**
+-- Loads a map from a file
+--
+-- Parameters:
+--		# ##pFileName##: a sequence, the name of the file to load from.
+--
+-- Returns:
+--		A **map** with all the entries found in ##pFileName##.
+--
+-- Comments:
+--	Rhe file has one entry per line, each line being of the form <key>=<value>. Whitespace around the key and the value do not count. Comment lines start with "--" and are ignored.
+-- See Also:
+--		[[:new]]
 export function load_map(sequence pFileName)
 	integer fh
 	object lLine

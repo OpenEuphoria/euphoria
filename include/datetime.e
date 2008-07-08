@@ -221,11 +221,25 @@ export sequence ampm = { "AM", "PM" }
 
 --**
 -- Accessors
+-- * YEAR
+-- * MONTH
+-- * DAY
+-- * HOUR
+-- * MINUTE
+-- * SECOND
 
 export enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 
 --**
 -- Intervals
+-- * YEARS
+-- * MONTHS
+-- * WEEKS
+-- * DAYS
+-- * HOURS
+-- * MINUTES
+-- * SECONDS
+-- * DATE
 
 export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 
@@ -239,7 +253,7 @@ export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- 		# ##obj##: any object, so no crash takes place.
 --
 -- Comments:
--- A datetime type consists of a sequence of length 6 in the form {year, month,dat_of_month,hour, minute, second}. Checks are made to guarantee those values are in range.
+-- A datetime type consists of a sequence of length 6 in the form {year, month, dat_of_month,hour, minute, second}. Checks are made to guarantee those values are in range.
 
 export type datetime(object o)
 		return sequence(o) and length(o) = 6

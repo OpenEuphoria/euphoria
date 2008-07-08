@@ -11,6 +11,18 @@
 
 --**
 -- C types for .dll arguments and return value:
+-- * C_CHAR    = #01000001,
+-- * C_UCHAR   = #02000001,
+-- * C_SHORT   = #01000002,
+-- * C_USHORT  = #02000002,
+-- * C_INT     = #01000004,
+-- * C_UINT    = #02000004,
+-- * C_LONG    = C_INT,
+-- * C_ULONG   = C_UINT,
+-- * C_POINTER = C_ULONG,
+-- * C_FLOAT   = #03000004,
+-- * C_DOUBLE  = #03000008
+
 global constant
 	C_CHAR    = #01000001,
 	C_UCHAR   = #02000001,
@@ -26,6 +38,10 @@ global constant
 
 --**
 -- Euphoria types for .dll arguments and return value:
+-- *E_INTEGER = #06000004,
+-- *E_ATOM    = #07000004,
+-- *E_SEQUENCE= #08000004,
+-- *E_OBJECT  = #09000004
 
 global constant
 	E_INTEGER = #06000004,
@@ -35,6 +51,7 @@ global constant
 
 --**
 -- C's NULL pointer
+-- global constant NULL = 0 -- NULL pointer
 
 global constant NULL = 0 -- NULL pointer
 
@@ -100,7 +117,7 @@ end function
 --     Once you have the address of a C variable, and you know its type, you can use peek()
 --     and poke() to read or write the value of the variable. You can in the same way obtain 
 -- the address of a C function and pass it to any external routine that requires a callback address.
--- 
+--
 --     For an example, see euphoria/demo/linux/mylib.exu
 --
 -- See Also:
@@ -284,7 +301,7 @@ end function
 -- Get a machine address for an Euphoria routine.
 --
 -- Parameters:
--- 		# ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+',id}.
+-- 		# ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
 --
 -- Returns:
 -- 		An **atom**, the address of the machine code of the routine. It can be
@@ -293,7 +310,7 @@ end function
 --
 -- Comments:
 --      By default, your routine will work with the stdcall convention. On
--- Windows, you can specify i1s id as {'+',id}, in which case it will work with the cdecl calling
+-- Windows, you can specify i1s id as {'+', id}, in which case it will work with the cdecl calling
 -- convention instead. On non-Microsoft platforms, you
 -- should only use simple ids, as there is just one standard calling convention, ie stdcall.
 --

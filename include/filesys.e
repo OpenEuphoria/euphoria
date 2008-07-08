@@ -125,7 +125,7 @@ end ifdef
 --
 -- Parameters:
 -- 		# ##name##: a sequence, the name of the new directory to create
---		# ##mode##: on //Unix// systems, permissions for the new directory.
+--		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 448 (all rights for owner, none for others).
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
@@ -140,7 +140,7 @@ end ifdef
 -- end if
 -- </eucode>
 -- See Also:
--- 	[[:relove_directory]],[[:chdir]]
+-- 	[[:relove_directory]], [[:chdir]]
 
 export function create_directory(sequence name, integer mode=448)
 	atom pname, ret
@@ -171,7 +171,7 @@ end function
 -- end if
 -- </eucode>
 -- See Also:
--- 	[[:create_directory]],[[:chdir]]
+-- 	[[:create_directory]], [[:chdir]]
 
 export function remove_directory(sequence name)
 	atom pname, ret
@@ -551,7 +551,7 @@ end function
 --     If overwrite is true, and if dest file already exists,
 --     the function overwrites the existing file and succeeds.
 -- See Also:
--- [[:move_file]],[[rename_file]]
+-- [[:move_file]], [[:rename_file]]
 export function copy_file(sequence src, sequence dest, atom overwrite)
 	ifdef WIN32 then
 	atom psrc, pdest, ret
@@ -608,7 +608,7 @@ end function
 -- Comments:
 -- 		If ##dest## contains a path specification, this is equivalent to moving the file, as well as possibly changing its name. However, the path must be on the same drive for this to work.
 -- See Also:
--- [[:move_file]],[[:copy_file]]
+-- [[:move_file]], [[:copy_file]]
 export function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	
@@ -667,7 +667,7 @@ end function
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
 -- See Also:
--- [[:rename_file]],[[:copy_file]]
+-- [[:rename_file]], [[:copy_file]]
 
 export function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret

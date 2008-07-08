@@ -10,10 +10,20 @@
 --
 
 -- error status values returned from get() and value():
+-- * GET_SUCCESS = 0,
+-- * GET_EOF = -1,
+-- * GET_FAIL = 1,
+-- * GET_NOTHING = -2
+
 global constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
 				GET_NOTHING = -2
+
+--**
+-- Answer type for ##get##() and ##value##().
+-- * GET_SHORT_ANSWER
+-- * GET_LONG_ANSWER
 
 constant DIGITS = "0123456789",
 		 HEX_DIGITS = DIGITS & "ABCDEF",
@@ -144,19 +154,19 @@ function read_comment()
 		end while
 		get_ch()
 		if ch=-1 then
-			return {GET_EOF,0}
+			return {GET_EOF, 0}
 		else
-			return {GET_IGNORE,0}
+			return {GET_IGNORE, 0}
 		end if
 	else
 		for i=string_next to length(input_string) do
 			ch=input_string[i]
 			if ch='\n' or ch='\r' then
 				string_next=i+1
-				return {GET_IGNORE,0}
+				return {GET_IGNORE, 0}
 			end if
 		end for
-		return {GET_EOF,0}
+		return {GET_EOF, 0}
 	end if
 end function
 
@@ -305,7 +315,7 @@ function Get()
 				return {GET_SUCCESS, s} -- empty sequence
 			end if
 			
-			while TRUE do -- read: comment(s),element,comment(s),comma and so on till it terminates or errors out
+			while TRUE do -- read: comment(s), element, comment(s), comma and so on till it terminates or errors out
 				while 1 do -- read zero or more comments and an element
 					e = Get() -- read next element, using standard function
 					e1 = e[1]
@@ -359,7 +369,7 @@ integer leading_whitespace
 
 function Get2()
 -- read a Euphoria data object as a string of characters
--- and return {error_flag, value,total number of characters, leading whitespace}
+-- and return {error_flag, value, total number of characters, leading whitespace}
 -- Note: ch is "live" at entry and exit of this routine.
 -- Uses the regular Get() to read sequence elements.
 	sequence s, e
@@ -374,7 +384,7 @@ function Get2()
 	end while
 
 	if ch = -1 then -- string is made of whitespace only
-		return {GET_EOF, 0,string_next-1-offset,string_next-1}
+		return {GET_EOF, 0, string_next-1-offset ,string_next-1}
 	end if
 
 	leading_whitespace = string_next-2-offset -- index of the last whitespace: string_next points past the first non whitespace
@@ -383,11 +393,11 @@ function Get2()
 		if find(ch, START_NUMERIC) then
 			e = get_number()
 			if e[1] != GET_IGNORE then -- either a number or something illegal was read, so exit: the other goto
-				return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
+				return e & {string_next-1-offset-(ch!=-1), leading_whitespace}
 			end if          -- else go read next item, starting at top of loop
 			get_ch()
 			if ch=-1 then
-				return {GET_NOTHING, 0,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
+				return {GET_NOTHING, 0, string_next-1-offset-(ch!=-1), leading_whitespace} -- empty sequence
 			end if
 
 		elsif ch = '{' then
@@ -397,10 +407,10 @@ function Get2()
 			skip_blanks()
 			if ch = '}' then -- empty sequence
 				get_ch()
-				return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
+				return {GET_SUCCESS, s, string_next-1-offset-(ch!=-1), leading_whitespace} -- empty sequence
 			end if
 
-			while TRUE do -- read: comment(s),element,comment(s),comma and so on till it terminates or errors out
+			while TRUE do -- read: comment(s), element, comment(s), comma and so on till it terminates or errors out
 				while 1 do -- read zero or more comments and an element
 					e = Get() -- read next element, using standard function
 					e1 = e[1]
@@ -408,11 +418,11 @@ function Get2()
 						s = append(s, e[2])
 						exit  -- element read and added to result
 					elsif e1 != GET_IGNORE then
-						return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
+						return e & {string_next-1-offset-(ch!=-1), leading_whitespace}
 					-- else it was a comment, keep going
 					elsif ch='}' then
 						get_ch()
-						return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
+						return {GET_SUCCESS, s, string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
 					end if
 				end while
 				
@@ -420,31 +430,31 @@ function Get2()
 					skip_blanks()
 					if ch = '}' then
 						get_ch()
-					return {GET_SUCCESS, s,string_next-1-offset-(ch!=-1),leading_whitespace}
+					return {GET_SUCCESS, s, string_next-1-offset-(ch!=-1), leading_whitespace}
 					elsif ch!='-' then
 						exit
 					else -- comment starts after item and before comma
 						e = get_number() -- reads anything starting witn '-'
 						if e[1] != GET_IGNORE then  -- it wasn't a coment, this is illegal
-							return {GET_FAIL, 0,string_next-1-offset-(ch!=-1),leading_whitespace}
+							return {GET_FAIL, 0, string_next-1-offset-(ch!=-1),leading_whitespace}
 						end if
 						-- read next comment or , or }
 					end if
 			end while
 				if ch != ',' then
-				return {GET_FAIL, 0,string_next-1-offset-(ch!=-1),leading_whitespace}
+				return {GET_FAIL, 0, string_next-1-offset-(ch!=-1), leading_whitespace}
 				end if
 			get_ch() -- skip comma
 			end while
 
 		elsif ch = '\"' then
 			e = get_string()
-			return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
+			return e & {string_next-1-offset-(ch!=-1), leading_whitespace}
 		elsif ch = '\'' then
 			e = get_qchar()
-			return e & {string_next-1-offset-(ch!=-1),leading_whitespace}
+			return e & {string_next-1-offset-(ch!=-1), leading_whitespace}
 		else
-			return {GET_FAIL, 0,string_next-1-offset-(ch!=-1),leading_whitespace}
+			return {GET_FAIL, 0, string_next-1-offset-(ch!=-1), leading_whitespace}
 
 		end if
 		
@@ -458,11 +468,14 @@ global constant
 
 include io.e
 include error.e
-function get_value(object target,integer start_point,integer answer_type)
+function get_value(object target, integer start_point, integer answer_type)
+	if answer_type != GET_SHORT_ANSWER and answer_type != GET_LONG_ANSWER then
+		crash("Invalid type of answer, please only use %s (the default) or %s.", {"GET_SHORT_ANSWER", "GET_LONG_ANSWER"})
+	end if
 	if atom(target) then -- get()
 		input_file = target
 		if start_point then
-		    if seek(target,where(target)+start_point) then
+		    if seek(target, where(target)+start_point) then
 			    crash("Initial seek() for get() failed!")
 		    end if
 		end if
@@ -475,7 +488,7 @@ function get_value(object target,integer start_point,integer answer_type)
 	if answer_type = GET_SHORT_ANSWER then
 		get_ch()
 	end if
-	return call_func(answer_type,{})
+	return call_func(answer_type, {})
 end function
 
 --**
@@ -525,7 +538,7 @@ end function
 -- calls to get() would be needed to read in:
 -- 
 -- {{{
--- "99 5.2 {1,2,3} "Hello" -1"
+-- "99 5.2 {1, 2, 3} "Hello" -1"
 -- }}}
 -- 
 -- On the sixth and any subsequent call to get() you would see a GET_EOF status. If you had 
@@ -580,12 +593,12 @@ end function
 --     See ##bin\mydata.ex##
 -- See Also:
 -- [[:value]]
-global function get(integer file,integer offset=0,integer answer=GET_SHORT_ANSWER)
+global function get(integer file, integer offset=0, integer answer=GET_SHORT_ANSWER)
 -- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
 -- Return {error_status, value}.
 -- Embedded comments inside sequences are now supported.
-	return get_value(file,offset,answer)
+	return get_value(file, offset, answer)
 end function
 
 --**
@@ -655,11 +668,11 @@ end function
 -- </eucode>
 -- See Also:
 -- [[:get]]
-global function value(sequence st,integer start_point=1,integer answer=GET_SHORT_ANSWER)
+global function value(sequence st, integer start_point=1, integer answer=GET_SHORT_ANSWER)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
 -- Trailing whitespace or comments are not considered.
 -- Return {error_status, value}.
 -- Embedded comments inside sequence are now supported.
-	return get_value(st,start_point,answer)
+	return get_value(st, start_point, answer)
 end function
