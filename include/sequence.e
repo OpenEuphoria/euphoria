@@ -1614,3 +1614,70 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 	return lKeyValues
 end function
 
+--**
+-- Adds an item to the sequence if its not already there. If it already exists
+-- in the list, the list is returned unchanged.
+--
+-- Parameters:
+--   * needle - object to add.
+--   * haystack - sequence in which to add it to.
+--   * order - 1=prepend (default), 2=append, 3=ascending, 4=descending
+--
+-- Example 1:
+-- <eucode>
+-- s = add_item( 1, {3,4,2} ) -- prepend
+-- -- s is {1,3,4,2}
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = add_item( 1, {3,4,2}, 2 ) -- append
+-- -- s is {3,4,2,1}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- s = add_item( 1, {3,4,2}, 3 ) -- ascending
+-- -- s is {1,2,3,4}
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- s = add_item( 1, {3,4,2}, 4 ) -- descending
+-- -- s is {4,3,2,1}
+-- </eucode>
+--
+-- Example 5:
+-- <eucode>
+-- s = add_item( 1, {3,1,4,2} )
+-- -- s is {3,1,4,2} -- Item was already in list so no change.
+-- </eucode>
+--
+-- See Also:
+--   [[:remove_all]]
+include sort.e
+
+export function add_item(object needle, sequence haystack, integer pOrder = 1)
+	if find(needle, haystack) then
+		return haystack
+	end if
+	switch pOrder do
+		case 1: -- prepend
+			return prepend(haystack, needle)
+			
+		case 2: -- append
+			return append(haystack, needle)
+			
+		case 3: -- ascending
+		--TODO: Remove comment once 'sort' scoping bug is fixed.
+			--return sort(append(haystack, needle))
+			
+		case 4: -- descending
+		--TODO: Remove comment once 'sort' scoping bug is fixed.
+			--return sort_reverse(append(haystack, needle))
+			
+	end switch
+	
+	return haystack
+end function
+
