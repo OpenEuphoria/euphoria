@@ -3,10 +3,8 @@
 Download and run the latest Euphoria setup program. It will install Euphoria on
 any //Windows// system from //Windows 95// up.
 
-After installing, see ##doc\what2do.doc## (or a
-href="what2do.htm">html\what2do.htm</a>) for ideas on how to use this package.
-You should also read ##readme.doc## (or a href="readme.htm">readme.htm</a>) if
-you have not done so already.
+After installing, see [[:docs/what2do | What to do next]] for ideas on how to use this package.
+You should also see [[:docs/readme | the readme file]] if you have not done so already.
 
 === Possible Problems
 
@@ -21,7 +19,10 @@ you have not done so already.
   ##EUPHORIA## directory to the old system. Set up ##AUTOEXEC.BAT## manually on the old 
   system  as described below.
 
-=== Manually editing AUTOEXEC.BAT
+=== Manually editing Environment Variables
+
+On //Windows 95/98/ME// systems, you will need to edit the autoexec.bat file to 
+update the environment variables before using Euphoria.
 
 # In the file ##c:\autoexec.bat## add ##C:\EUPHORIA\BIN## to the list of directories in 
   your ##PATH## command. You might use the MS-DOS Edit command, Windows Notepad or any other 
@@ -54,6 +55,7 @@ There is another, optional, environment variable used by some experienced users
 of Euphoria. It is called ##EUINC## (see a
 [[http://www.rapideuphoria.com/cgi-bin/guru.exu?refDoc=on&libDoc=on&otherDoc=on&keywords=euinc|Guru Search]]). It determines the search path for included files. You might want
 to add it, or change it, when you install a new version of Euphoria.
+
 
 === How to Uninstall Euphoria
 

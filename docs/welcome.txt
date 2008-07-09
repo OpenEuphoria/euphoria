@@ -14,8 +14,9 @@
 Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical **O**bjects for
 **R**obust **I**nterpreted **A**pplications//.
 
-Euphoria has come a long way since v1.0 was released in July 1993. There are
-now thousands of users around the world.  There's an automated a
+Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
+**D**eployment **S**oftware (//RDS//).
+There are now thousands of users around the world.  There's an automated a
 [[http://www.OpenEuphoria.org/EUforum|discussion forum]], managed and moderated
 by a Euphoria program, and supporting over 500 subscribers.  The
 [[http://www.rapideuphoria.com|Euphoria Web site]] contains over 1800
@@ -43,7 +44,7 @@ set it apart from the crowd:
 * The language is flexible, powerful, and easy to learn.
 * There is no waiting for compiles and links - just edit and run. 
 * You can create and distribute a royalty-free, stand-alone executable files.
-* Dynamic storage allocation is fundamental to Euphoria. Variables grow or 
+* Dynamic storage allocation is fundamental to Euphoria. Arrays grow or 
   shrink in size without the programmer having to worry about allocating and 
   freeing chunks of memory. Elements of an array (Euphoria sequence) can be 
   a dynamic mixture of different types and sizes of data.
@@ -58,7 +59,7 @@ set it apart from the crowd:
   "Great Computer Language Shootout" benchmark (see demo\bench\bench.doc).
 * If that isn't enough, there's a **Euphoria To C Translator** that can translate any 
   Euphoria program to C, and boost your speed even more. Why waste time debugging 
-  hand-coded C/C~+~+? You can easily develop a Euphoria program, and then generate the C code.
+  hand-coded ``C/C++``? You can easily develop a Euphoria program, and then generate the C code.
 * Euphoria programs are not constrained by any 640K memory restrictions for which MS-DOS is 
   infamous. All versions of Euphoria let you use all the memory on your system, and if that 
   isn't enough, a swap file on disk will provide additional virtual memory.
@@ -66,7 +67,7 @@ set it apart from the crowd:
 * Both an execution-count profiler, and a time profiler are available.
 * There is a large and rapidly growing collection of excellent 3rd party programs and 
   libraries, most with full source code.
-* RDS has developed an extremely flexible database system (**EDS**) that is portable 
+* //RDS// has developed a flexible and simple database system (**EDS**) that is portable 
   across all Euphoria platforms.
 * The //WIN32// implementation of Euphoria can access any WIN32 API routine, as well as 
   C or Euphoria routines in .DLL files. A team of people has developed a Windows GUI 
