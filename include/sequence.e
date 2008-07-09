@@ -9,7 +9,17 @@
 include error.e
 include search.e
 include text.e
+
 --****
+-- === Constants
+--**
+-- Direction specifiers for rotate():
+-- * ROTATE_LEFT = 1
+-- * ROTATE_RIGHT = -1
+export constant
+	ROTATE_LEFT  = 1,
+	ROTATE_RIGHT = -1
+
 -- === Routines
 --
 
@@ -1105,27 +1115,27 @@ export function extract(sequence source, sequence indexes)
 end function
 
 --**
--- Rotates a slice of a sequence to the left.
+-- Rotates a slice of a sequence.
 --
--- If the shift is negative, a rotation to the right will be performed instead.
+-- Use amount * direction to specify the shift. direction is either ROTATE_LEFT or ROTATE_RIGHT. A null shift does nothing and returns source unchanged..
 --
 -- Example 1:
 -- <eucode>
--- s = rotate_left({11,13,15,17,19,23},2,5,1)
+-- s = rotate({11,13,15,17,19,23},2,5,ROTATE_LEFT)
 -- -- s is {11,15,17,19,13,23}
 --
--- s = rotate_left({11,13,15,17,19,23},2,5,-1)
+-- s = rotate({11,13,15,17,19,23},2,5,ROTATE_RIGHT)
 -- -- s is {11,19,13,15,17,23}
 -- </eucode>
 --
 -- See Also:
 --     [[:slice]]
 
-export function rotate_left(sequence source, integer start, integer stop, integer left_shift)
+export function rotate(sequence source, integer left_shift, integer start=1, integer stop=length(source))
 	sequence shifted
 	integer len
 
-	if start >= stop or length(source)=0 then
+	if start >= stop or length(source)=0 or not left_shift then
 		return source
 	end if
 	if not valid_index(source,start) or not valid_index(source,stop) then

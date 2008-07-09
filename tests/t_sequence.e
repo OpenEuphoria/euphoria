@@ -140,8 +140,8 @@ project(S1,{{2,3,5},{1,4,6}}))
 test_equal("extract",{11,17,13},extract({13,11,9,17},{2,4,1}))
 test_equal("valid_index",1,valid_index({1,2,3},3.5))
 
-test_equal("rotate_left: left",{1,4,5,6,2,3,7},rotate_left({1,2,3,4,5,6,7},2,6,2))
-test_equal("rotate_left: right",{1,5,6,2,3,4,7},rotate_left({1,2,3,4,5,6,7},2,6,-2))
+test_equal("rotate: left",{1,4,5,6,2,3,7},rotate({1,2,3,4,5,6,7},2*ROTATE_LEFT,2,6))
+test_equal("rotate: right",{1,5,6,2,3,4,7},rotate({1,2,3,4,5,6,7},2*ROTATE_RIGHT,2,6))
 
 sequence a, b, c
 a = split("John Doe")
