@@ -14,23 +14,25 @@ include get.e
 include graphics.e  -- comment after include is ok
 include sort.e
 include machine.e
-include file.e
+include filesys.e
 include wildcard.e as wild
 include image.e
 include dll.e
 include msgbox.e
 include math.e
 include os.e
-include sequence.e
+include text.e
+include error.e
 
 constant msg = 1 -- place to send messages
+constant generic_msg = "sanity tests failed at line number shown in ex.err"
 atom t
 t = time()
 object y
 
 procedure the_end()
     puts(msg, "Press Enter to continue\n")
-    if atom(gets(0)) then
+    if object(gets(0)) then
     end if
     if graphics_mode(-1) then
     end if
@@ -48,16 +50,6 @@ procedure make_sound()
     end for
 end procedure
 
-without warning
-procedure abort()
--- force abort with trace back
-    puts(msg, "\ndivide by 0 to get trace back...Press Enter\n")
-    if sequence(gets(0)) then
-    end if
-    ? 1/0
-end procedure
-with warning
-
 constant epsilon = 1e-10 -- allow for small floating point inaccuracy
 
 procedure show(object x, object y)
@@ -68,7 +60,7 @@ procedure show(object x, object y)
     ? y
     puts(msg, " y - x is ")
     ? y - x
-    abort()
+    crash("Equality Test failed.")
 end procedure
 
 procedure same(object x, object y)
@@ -106,72 +98,72 @@ function built_in()
     d = date()
     if d[1] < 93 or d[2] > 12 or d[3] < 1 or d[4] > 23 or d[5] > 59 or
 	d[6] >59 or d[7] > 7  or d[8] > 366 then
-	abort()
+	crash("Invalid date()")
     end if
     d = power({-5, -4.5, -1,  0, 1,  2,  3.5, 4, 6},
 	      { 3,    2, -1,0.5, 0, 29, -2.5, 5, 8})
     if d[1] != -125 or d[2] != 20.25 or d[3] != -1 or d[4] != 0 then
-	abort()
+	crash("Invalid power() #1")
     end if 
     if d[5] != 1 or d[6] != 536870912 or d[7] <.043 or d[7] > .044 then
-	abort()
+	crash("Invalid power() #2")
     end if
     if d[8] != 1024 or d[9] != 1679616 or power(2,3) != 8 then
-	abort()
+	crash("Invalid power() #3")
     end if
     same(power(16, 0.5), 4)
     d = remainder({5, 9, 15, -27}, {3, 4, 5, 6})
     if d[1] != 2 or d[2] != 1 or d[3] != 0 or d[4] != -3 then
-	abort()
+	crash("Invalid remainder() #1")
     end if
     d = remainder({11.5, -8.8, 3.5, 5.0}, {2, 3.5, -1.5, -100.0})
     if d[1] != 1.5 or d[2] < -1.81 or d[2] > -1.79 or d[3] != 0.5 or d[4] != 5 then
-	abort()
+	crash("Invalid remainder() #2")
     end if
     same(4, sqrt(16))
     same(3, length("ABC"))
     same({1, 1, 1, 1}, repeat(1, 4))
     if rand(10) > 10 or rand(20) < 1 or not find(rand(5.5), {1,2,3,4,5}) then
-	abort()
+	crash("Invalid rand() #1")
     end if
     if equal(0,1) or 
        not equal(-9,-9) or 
        equal(5,{{{}}}) or 
        not equal(5,5.0) then
-	abort()
+	crash("Invalid equal()")
     end if
     set_rand(5555)
     d = rand(repeat(10,20))
     set_rand(5555)
     if not equal(d, rand(repeat(10,20))) then
-	abort()
+	crash("Invalid rand() #2")
     end if
     if time() < 0 then
-	abort()
+	crash("Invalid time()")
     end if
     if call_func(abs_id, {sin(3.1415)}) > 0.02 then
-	abort()
+	crash("Invalid sin()")
     end if
     if cos(0) < .98 then
-	abort()
+	crash("Invalid cos()")
     end if
     if call_func(abs_id, {tan(3.14/4) - 1}) > .02 then
-	abort()
+	crash("Invalid tan()")
     end if
     if (call_func(abs_id, {tan(arctan(1)) - 1}) > 000.02) then
-	abort()
+	crash("Invalid arctan()")
     end if
     if log(2.7) < 0.8 or log(2.7) > 1.2 then
-	abort()
+	crash("Invalid log()")
     end if
     if floor(-3.3) != -4 then
-	abort()
+	crash("Invalid floor() #1")
     end if
     if floor(-999/3.000000001) != -333 then
-	abort()
+	crash("Invalid floor() #2")
     end if
     if floor(9.99/1) != 9 then
-	abort()
+	crash("Invalid floor() #3")
     end if
     for i = -9 to 2 do
 	if i = 1 then
@@ -191,7 +183,7 @@ end function
 
 abs_id = routine_id("abs")
 if abs_id = -1 then
-    abort()
+    crash("Invalid routine_id()")
 end if
 
 procedure sub()
@@ -211,7 +203,7 @@ procedure overflow()
     s = {two30, two30+1, two30+2}
     s += s
     if compare(s, {two30*2, two30*2+2, two30*2+4}) then
-	abort()
+	crash("Invalid overflow #1")
     end if
     mtwo30i = -1
     for i = 1 to 29 do
@@ -222,33 +214,33 @@ procedure overflow()
 	two30i *= 2
     end for
     if 2 * two30i != -2 * mtwo30i then
-	abort()
+	crash("Invalid overflow #2")
     end if
     if two30i*2 != two30 then
-	abort()
+	crash("Invalid overflow #3")
     end if
     two29 = floor(two30 / 2)
     if two29 + two29 != two30 then
-       abort()
+       crash("Invalid overflow #4")
     end if
 
     maxint = floor(two30 - 1)
     if maxint + 1 != two30 then
-	abort()
+	crash("Invalid overflow #5")
     end if
 
     if 2 + maxint != two30 + 1 then
-	abort()
+	crash("Invalid overflow #6")
     end if
 
     if (-maxint - 1) * -1 != two30 then
-	abort()
+	crash("Invalid overflow #7")
     end if
 
     prev_i = -maxint + 1
     for i = -maxint to -maxint -5 by -1 do
 	if i != prev_i - 1 then
-	    abort()
+	    crash("Invalid overflow #8")
 	end if
 	prev_i = i
     end for
@@ -256,17 +248,17 @@ procedure overflow()
     prev_i = maxint - 5
     for i = maxint - 3 to maxint + 3 by 2 do
 	if i != prev_i + 2 then
-	    abort()
+	    crash("Invalid overflow #9")
 	end if
 	prev_i = i
     end for
 
     if floor(two30) != two30 then
-	abort()
+	crash("Invalid overflow #10")
     end if
 
     if floor(two30 + two30 - 1) != two30 * 2 - 1 then
-	abort()
+	crash("Invalid overflow #11")
     end if
 end procedure
 
@@ -281,19 +273,19 @@ procedure atomic_ops()
     natural p
 
     if arcsin(.5) <.523 or arcsin(.5) >.524 then
-	abort()
+	crash("Invalid arcsin() #1")
     end if
     p = 0
     p = 0.000
     p = 4.0/2.0
     if p != 2.0 then
-	abort()
+	crash("Invalid float divide #1")
     end if    
     n = 1
     m = 1
     if n and m then
     else
-	abort()  
+	crash("Invalid logop-and #1")  
     end if
     if atom(n) or 1/0 then
 	-- short-circuit skips the divide
@@ -302,24 +294,24 @@ procedure atomic_ops()
 	-- short-circuit skips the subscript
     end if
     if 1 xor 1 then
-	abort()
+	crash("Invalid logop-xor #1")
     end if
     if not ((0 xor 1) and (1 xor 0))then
-	abort()
+	crash("Invalid logop #1")
     end if
     if 0 xor 0 then
-	abort()
+	crash("Invalid loqop-xor #2")
     end if
     x = 100
     sub() -- y = 200
     z = 300
 
     if x + y != z then
-	abort()
+	crash("Invalid plus/scope #1")
     end if
 
     if x != 100 then
-	abort()
+	crash("Invalid plus/scope #2")
     end if
 
     if 3 * 3 != 9 or
@@ -328,18 +320,18 @@ procedure atomic_ops()
        32000 * 15000 != 480000000 or
        1000 * 13000 != 13000000 or
        13000 * 1000 != 13000000 then
-	abort()
+	crash("Invalid multiply #1")
     end if
     while x != 100 do
-	abort()
+	crash("Invalid scope #3")
     end while
 
     if not (z - y = 100) then
-	abort()
+	crash("Invalid substract #1")
     end if
 
     if #FFFFFFFF != 4294967295 then
-	abort()
+	crash("Invalid hex conv #1")
     end if
    
     p = 20
@@ -347,35 +339,35 @@ procedure atomic_ops()
 	p -= 2       
     end while
     if p != 8 then
-	abort()
+	crash(generic_msg)
     end if
 
     if x * 1000.5 != 100050 or x * y != 20000 or x / y != 0.5 then
-	abort()
+	crash(generic_msg)
     end if
 
     if y < x then
-	abort()
+	crash(generic_msg)
     end if
 
     if y <= x then
-	abort()
+	crash(generic_msg)
     end if
 
     if x > y then
-	abort()
+	crash(generic_msg)
     end if
 
     if x >= y then
-	abort()
+	crash(generic_msg)
     end if
 
     if -x != -100 then
-	abort()
+	crash(generic_msg)
     end if
 
     if x = x and y > z then
-	abort()
+	crash(generic_msg)
     end if
 
     x = 0
@@ -394,9 +386,9 @@ procedure atomic_ops()
 			 if 1 + 1 = 2 then
 			     same(a, "seven")
 			 elsif 1 + 1 = 3 then
-			     abort()
+			     crash(generic_msg)
 			 else
-			     abort()
+			     crash(generic_msg)
 			 end if
 	elsif x = 8 then a = "eight"
 	elsif x = 9 then a = "nine"
@@ -449,7 +441,7 @@ procedure atomic_ops()
 	y = append(y, i)        
     end for
     if compare(y, {800000000}) then
-	abort()
+	crash(generic_msg)
     end if
     y = 5
     n = 3
@@ -470,10 +462,10 @@ procedure floating_pt()
     x = {1.5, -3.5, 1e10, -1e20, 0.0, 0.0001}
     y = repeat(x, 10)
     if x[1]/x[2] > -0.42 or x[1]/x[2] < -0.43 then
-	abort()
+	crash(generic_msg)
     end if
     if find(1e10, x) != 3 then
-	abort()
+	crash(generic_msg)
     end if
     for a = -1.0 to sqrt(999) by 2.5 do
 	if a > 20.0 then
@@ -482,7 +474,7 @@ procedure floating_pt()
 	end if
     end for
     if final < 20.0 or final > 23 then
-	abort()
+	crash(generic_msg)
     end if
 end procedure
 
@@ -506,53 +498,53 @@ function sequence_ops()
     x[1][y[5][$][1]] = 1
     
     if x[1][9] != 1 then
-	abort()
+	crash(generic_msg)
     end if
     
     x = {0, 1, 2, 3, 4, 5}
     y = {1, 0, 1, 1, 0, 0}
    
     if not equal(x xor y, y xor x) then
-	abort()
+	crash(generic_msg)
     end if
     if compare({{1,1,0,0,1,1}}, {x} xor {y}) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     if compare({{1,1}, {2,3}} xor 
 	       {{0,0}, {1,1}}, 
 	       {{1,1}, {0,0}}) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     x = "Hello "
     y = "World"
  
     if find(0, x = x) then
-	abort()
+	crash(generic_msg)
     end if
 
     if x[two()*two() - two()] != 'e' then
-	abort()
+	crash(generic_msg)
     end if
 
     if x[one()+one()] != x[two()] then
-	abort()
+	crash(generic_msg)
     end if
     j = x[1]
     if j != 'H' then
-	abort()
+	crash(generic_msg)
     end if
     s = {3.0}
     s[1] = 1.0000
     j = s[1]
     if j != 1 then
-	abort()
+	crash(generic_msg)
     end if
     i = 1
     if not atom(i) or not integer(i) then 
-	abort()
+	crash(generic_msg)
     end if
     if length(y) != 5 then 
-	abort()
+	crash(generic_msg)
     end if
     while i <= 5 do
 	x = append(x, y[i])
@@ -638,46 +630,46 @@ object x, y
 
     x = "ABCDEFGHIJKLMNOPD"
     if find('D', x) != 4 then
-	abort()
+	crash(generic_msg)
     end if
     if find("ABC", {"", 0.0, 0, "ABC"}) != 4 then
-	abort()
+	crash(generic_msg)
     end if
     if find(0.0, {"", 0.0, 0, "ABC"}) != 2 then
-	abort()
+	crash(generic_msg)
     end if
     if find_from('D', x, 10.0) != length(x) then
-	abort()
+	crash(generic_msg)
     end if
     if find_from('D', x, length(x)+1) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     if match("EFGH", x) != 5 then
-	abort()
+	crash(generic_msg)
     end if
     if match({"AB", "CD"}, {0, 1, 3, {}, {"AB", "C"}, "AB", "CD", "EF"}) != 6 then
-	abort()
+	crash(generic_msg)
     end if
     if match_from("EU", "EUEUXXXEUXXX", 7) != 8 then
-	abort()
+	crash(generic_msg)
     end if
     
     if not equal(x,x) then
-	abort()
+	crash(generic_msg)
     end if
     if compare({}, {}) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     y = repeat(repeat(repeat(99, 5), 5), 5)
     if y[3][3][3] != 99 then
-	abort()
+	crash(generic_msg)
     end if
     if compare(y[4][4][3..5], repeat(99, 3)) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     y[3][2][1..4] = 88
     if compare(y[3][2], {88, 88, 88, 88, 99}) != 0 then
-	abort()
+	crash(generic_msg)
     end if
 end procedure
 
@@ -697,31 +689,31 @@ procedure circularity()
     x = append(x, x)
     x = prepend(x, x)
     if compare(x, x) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     
     y = "ABCDE"
     y[2] = repeat(y, 3)
     if compare(y, y) != 0 then
-	abort()
+	crash(generic_msg)
     end if
 end procedure
 
 procedure patterns()
 -- test wildcard routines   
     if wildcard_file("ABC*DEF.*", "XBCDEF.E") then
-	abort()
+	crash(generic_msg)
     end if
     ifdef !UNIX then
     	if not wildcard_file("A?B?C?D", "a1b2C3D") then
-			abort()
+			crash(generic_msg)
     	end if
     end ifdef
     if wildcard_match("AAA", "AAa") then
-		abort()
+		crash(generic_msg)
     end if
     if not wildcard_match("??Z*Z*", "ABZ123Z123") then
-		abort()
+		crash(generic_msg)
     end if
 end procedure
 
@@ -731,34 +723,34 @@ procedure conversions()
     
     v = sprintf("values are: %5d, %3d, %4.2f", {1234, -89, 6.22})
     if compare(v, "values are:  1234, -89, 6.22") != 0 then
-	abort()
+	crash("Invalid sprintf() #1")
     end if
     v = value("{1,2,3}")
     if compare(v, {GET_SUCCESS, {1,2,3}}) != 0 then
-	abort()
+	crash("Invalid value() #1")
     end if
     for x = 1 to 100 by 3 do
 	v = value(sprintf("%d", x)) 
 	if compare(v, {GET_SUCCESS, x}) != 0 then
-	    abort()
+	    crash("Invalid value() #2;%d", x)
 	end if
 	v = value(sprintf("#%x ", x))
 	if compare(v, {GET_SUCCESS, x}) != 0 then
-	    abort()
+	    crash("Invalid value() #3")
 	end if
     end for
-    v = value_from("  {1,2,3}",2)
-    if compare(v, {GET_SUCCESS, {1,2,3},8,1}) != 0 then
-	abort()
+    v = value("  {1,2,3} ",2, GET_LONG_ANSWER)
+    if compare(v, {GET_SUCCESS, {1,2,3}, 8, 1}) != 0 then
+	crash("Invalid value() #4")
     end if
     for x = 1 to 100 by 3 do
-	v = value_from(sprintf("%d", x),1)
-	if compare(v, {GET_SUCCESS, x,1+(x>=10)+(x>=100),0}) != 0 then
-	    abort()
+	v = value(sprintf("%d", x),1)
+	if compare(v, {GET_SUCCESS, x}) != 0 then
+	    crash("Invalid value() #5;%d", x)
 	end if
 	v = value(sprintf("#%x ", x))
 	if compare(v, {GET_SUCCESS, x}) != 0 then
-	    abort()
+	    crash("Invalid value() #6")
 	end if
     end for
 end procedure
@@ -768,7 +760,7 @@ procedure output()
     integer file_no
     file_no = open("sanityio.tst", "w")
     if file_no < 0 then
-	abort() 
+	crash(generic_msg) 
     end if
     puts(file_no, "-- io test\n")
     print(file_no, {1,2,3})
@@ -797,27 +789,27 @@ procedure input()
 
     file_no = open("sanityio.tst", "r")
     if file_no < 0 then
-	abort()
+	crash(generic_msg)
     end if
     if seek(file_no, 5) then
-	abort()
+	crash(generic_msg)
     end if
     if seek(file_no, -1) then
-	abort()
+	crash(generic_msg)
     end if
     if seek(file_no, 0) then
-	abort()
+	crash(generic_msg)
     end if
     if where(file_no) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     line = gets(file_no)
     if compare(line, "-- io test\n") != 0 then
-	abort()
+	crash(generic_msg)
     end if
     char = getc(file_no)
     if char != '{' then
-	abort()
+	crash(generic_msg)
     end if
     close(file_no)
 end procedure
@@ -832,14 +824,14 @@ procedure testgr()
     sequence x
     
     if v[VC_XPIXELS] < 100 or v[VC_YPIXELS] < 100 then
-	abort()
+	crash(generic_msg)
     end if
     draw_line(BLUE, {{20, 100}, {600, 100}})
 
     for i = 1 to 200 by 5 do
 	pixel(WHITE, {3*i, i})
 	if get_pixel({3*i, i}) != 7 then
-	    abort()
+	    crash(generic_msg)
 	end if
     end for
 
@@ -858,7 +850,7 @@ with type_check
 
 constant TRUE = 1/1, FALSE = 0, junk=-TRUE
 if junk != -1 then
-    abort()
+    crash(generic_msg)
 end if
 
 procedure testget()
@@ -869,10 +861,10 @@ procedure testget()
 
     gd = open("sanityio.tst", "r")
     if gd < 0 or gd > 10 then
-	abort()
+	crash(generic_msg)
     end if
     if not sequence(gets(gd)) then
-	abort()
+	crash(generic_msg)
     end if
     results = {
 	 {0, {1,2,3}},
@@ -949,40 +941,40 @@ procedure machine_level()
     atom addr, dest, src
 
     if 9.99 != float64_to_atom(atom_to_float64(9.99)) then
-	abort()
+	crash(generic_msg)
     end if
     if -27 != float32_to_atom(atom_to_float32(-27)) then
-	abort()
+	crash(generic_msg)
     end if
     
     addr = allocate(100)
     poke4(addr, #12345678)
     if peek4u(addr) != #12345678 then
-	abort()
+	crash(generic_msg)
     end if
     if peek4s(addr) != #12345678 then
-	abort()
+	crash(generic_msg)
     end if
     poke(addr, {77, -1, 5.1, -1.1})
     if compare(peek({addr, 4}), {77, 255, 5, 255}) then
-	abort()
+	crash(generic_msg)
     end if
     poke(addr, #C3) -- RET instruction
     if peek(addr) != #C3 then
-	abort()
+	crash(generic_msg)
     end if
     call(addr)
     free(addr)
     for x = 0 to +2000000 by 99999 do
 	if bytes_to_int(int_to_bytes(x)) != x then
-	    abort()
+	    crash(generic_msg)
 	end if
     end for
     if bits_to_int({1,0,1,0}) != 5 then
-	abort()
+	crash(generic_msg)
     end if
     if not equal(int_to_bits(17,8), {1,0,0,0,1,0,0,0}) then
-	abort()
+	crash(generic_msg)
     end if
     -- mem_copy() and mem_set()
     dest = allocate(20)
@@ -990,11 +982,11 @@ procedure machine_level()
     poke(src, {1,2,3,4,5,6,7,8,9})
     mem_copy(dest, src, 9)
     if compare(peek({dest, 9}), peek({src,9})) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     mem_set(dest+3, 100, 4)
     if compare(peek({dest, 9}), {1,2,3,100,100,100,100,8,9}) != 0 then
-	abort()
+	crash(generic_msg)
     end if
     free(dest)
     free(src)
@@ -1016,29 +1008,29 @@ procedure win32_tests()
     integer Sleep, Beep
     
     if instance() < 0 then
-	abort()
+	crash(generic_msg)
     end if
     
     lib = open_dll("kernel32")
     if lib = 0 then
-	abort()
+	crash(generic_msg)
     end if
     Beep = define_c_func(lib, "Beep", {C_INT, C_INT}, C_INT)
     if Beep = -1 then
-	abort()
+	crash(generic_msg)
     end if
     Sleep = define_c_proc(lib, "Sleep", {C_INT})
     if Sleep = -1 then
-	abort()
+	crash(generic_msg)
     end if
     for i = 1 to 3 do
 	if c_func(Beep, {0, 0}) = 0 then
-	    abort()
+	    crash(generic_msg)
 	end if
 	t = time()
 	c_proc(Sleep, {1000}) -- 1000 milliseconds
 	if time() - t < .5 then
-	    abort()
+	    crash(generic_msg)
 	end if
     end for
 end procedure
@@ -1208,7 +1200,7 @@ global procedure sanity()
 		display_text_image({10,20}, s1)
 		s2 = save_text_image({10, 20}, {11, 22})
 		if not equal(s1, s2) then
-	    	abort()
+	    	crash(generic_msg)
 		end if
 
 		-- graphics mode and other tests
@@ -1217,7 +1209,7 @@ global procedure sanity()
 		clear_screen()
 		position(12, 20)
 		if compare({12, 20}, get_position()) != 0 then
-		    abort()
+		    crash(generic_msg)
 		end if
 		puts(msg, "Euphoria SANITY TEST ... ")
     end ifdef
@@ -1230,13 +1222,13 @@ global procedure sanity()
 	cmd_line = command_line()
 	    
 	if length(cmd_line) < 1 or length(cmd_line) > 10 then
-	    abort()
+	    crash(generic_msg)
 	end if
 	if length(current_dir()) < 2 then
-	    abort()
+	    crash(generic_msg)
 	end if
 	if length(dir(".")) < 2 then
-	    abort()
+	    crash(generic_msg)
 	end if
 	if vga then
 		ifdef !UNIX then
@@ -1309,7 +1301,7 @@ for j = 1 to 10 do
     z = z + j
 end for
 if z != 55 then
-    abort()
+    crash("Invalid for.1 to 10 sum ")
 end if
 
 sanity()

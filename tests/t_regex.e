@@ -1,5 +1,5 @@
 include regex.e as regex
-include sequence.e
+include text.e
 include unittest.e
 
 regex:regex re

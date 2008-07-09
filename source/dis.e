@@ -4,7 +4,7 @@ include mode.e as mode
 include intinit.e
 
 include opnames.e
-include sequence.e
+include text.e
 include pretty.e
 include ../include/error.e
 

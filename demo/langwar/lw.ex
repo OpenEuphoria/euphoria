@@ -21,7 +21,8 @@
 -- tasking approach could be applied to other kinds of programs as well.
 
 -- this was a working program, turn all warnings off
-include machine.e
+include error.e
+include console.e
 warning_file(-1)
 
 global constant QUIET = 0  -- set this to 1 to turn off all sounds

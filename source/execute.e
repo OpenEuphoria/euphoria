@@ -15,7 +15,6 @@
 -- carefully hand-coded back-end written in C.
 
 include os.e
---include dll.e
 include global.e
 include opnames.e
 
@@ -33,7 +32,7 @@ include opnames.e
 include global.e
 include reswords.e
 include symtab.e
-include sequence.e
+include text.e
 include scanner.e
 include mode.e as mode
 include pretty.e

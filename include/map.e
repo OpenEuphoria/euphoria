@@ -11,7 +11,7 @@ include primes.e
 include machine.e
 include math.e
 include stats.e as stats
-include sequence.e
+include text.e
 include search.e
 
 constant iCnt = 1 -- ==> elementCount

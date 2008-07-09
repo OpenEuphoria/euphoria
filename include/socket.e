@@ -14,8 +14,7 @@ include dll.e
 include machine.e
 include get.e
 include wildcard.e
-include sequence.e
-
+include text.e
 --****
 -- === Constants
 --

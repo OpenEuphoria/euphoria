@@ -9,7 +9,7 @@
 -- === Routines
 --
 
-include sequence.e -- upper/lower
+include text.e -- upper/lower
 
 --**
 -- Sort the elements of a sequence into ascending order.

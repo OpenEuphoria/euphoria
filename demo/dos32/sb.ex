@@ -6,7 +6,6 @@ without type_check
 include graphics.e
 include select.e
 
---include machine.e
 --use_vesa(1) -- for modes 256...261
 
 constant GRAPHICS_MODE = 18 -- VGA

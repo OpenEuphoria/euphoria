@@ -2,8 +2,6 @@
     -- Bitmap images for various objects --
     -----------------------------------------
 
-include sequence.e
-
 --   16 color graphics modes:
 
 --   BLACK   = 0         GRAY           = 8

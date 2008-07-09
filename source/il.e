@@ -12,7 +12,7 @@ include compress.e
 include backend.e
 include reswords.e
 include scanner.e
-include sequence.e
+include text.e
 include cominit.e
 include filesys.e
 

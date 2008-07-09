@@ -11,7 +11,7 @@ include dll.e
 include machine.e
 include error.e
 include datetime.e as dt
-include sequence.e
+include text.e
 include io.e
 include map.e as m
 include localeconv.e as lcc

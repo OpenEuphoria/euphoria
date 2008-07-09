@@ -3,7 +3,7 @@
 -- Common initialization (command line options)
 include cominit.e
 include error.e
-include sequence.e
+include text.e
 
 global procedure intoptions()
 -- set translator command-line options  

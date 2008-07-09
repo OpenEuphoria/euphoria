@@ -73,7 +73,7 @@ end procedure
 
 global boolean scanon -- galaxy scan on/off
 
-integer cursor_line, cursor_column
+integer cursor_line=1, cursor_column=1
 
 -- override position()
 

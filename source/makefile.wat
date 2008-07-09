@@ -110,6 +110,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\search.obj &
 	.\$(OBJDIR)\math.obj &
 	.\$(OBJDIR)\os.obj &
@@ -131,6 +132,7 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\dll.obj &
@@ -203,6 +205,7 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
         .\$(OBJDIR)\compress.obj &
@@ -239,6 +242,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\main.obj &
@@ -295,6 +299,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
+	.\$(OBJDIR)\text.obj &
         .\$(OBJDIR)\search.obj &
         .\$(OBJDIR)\io.obj &
         .\$(OBJDIR)\math.obj &
@@ -361,16 +366,19 @@ INCDIR=-i ..\..\include
 
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 all :  .SYMBOLIC
+    @echo ------- ALL -----------
 	wmake -f makefile.wat winall $(VARS)
 	wmake -f makefile.wat dosall $(VARS)
 
 winall : .SYMBOLIC
+    @echo ------- WINALL -----------
 	wmake -f makefile.wat interpreter $(VARS)
 	wmake -f makefile.wat translator $(VARS)
 	wmake -f makefile.wat library $(VARS)
 	wmake -f makefile.wat backend $(VARS)
 
 dosall : .SYMBOLIC
+    @echo ------- DOSALL -----------
 	wmake -f makefile.wat dos $(VARS)
 	wmake -f makefile.wat library OS=DOS $(VARS)
 	wmake -f makefile.wat dostranslator OS=DOS $(VARS)
@@ -434,9 +442,11 @@ builddirs : .SYMBOLIC
 	if not exist dosbkobj\back mkdir dosbkobj\back
 	
 library : .SYMBOLIC builddirs
+    @echo ------- LIBRARY -----------
 	wmake -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 runtime: .SYMBOLIC 
+    @echo ------- RUNTIME -----------
 	set ERUNTIME=/dERUNTIME
 
 backendflag: .SYMBOLIC
@@ -463,11 +473,13 @@ ecsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 exsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 
 translate-win : .SYMBOLIC  builddirs
+    @echo ------- TRANSLATE WIN -----------
         wmake -f makefile.wat exwsource EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
         wmake -f makefile.wat ecwsource EX=exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
         wmake -f makefile.wat backendsource EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	
 translate-dos : .SYMBOLIC builddirs
+    @echo ------- TRANSLATE DOS -----------
 	wmake -f makefile.wat exsource EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -f makefile.wat exsource EX=ec.exe EU_TARGET=int. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
         wmake -f makefile.wat backendsource EX=ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
@@ -578,6 +590,7 @@ dostranslator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ec.exe EX=ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+    @echo ------- BACKEND WIN -----------
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
 	@%append .\$(OBJDIR)\exwb.lbc option caseexact
@@ -589,6 +602,7 @@ backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_B
 
 
 backend : .SYMBOLIC builddirs
+    @echo ------- BACKEND -----------
         wmake -f makefile.wat backendw.exe EX=exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dosbackend : .SYMBOLIC builddirs
@@ -835,6 +849,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\sequence.obj :  .\$(OBJDIR)\main-.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\text.obj :  .\$(OBJDIR)\main-.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\search.obj :  .\$(OBJDIR)\main-.c

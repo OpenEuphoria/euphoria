@@ -8,6 +8,7 @@ include symtab.e
 include scanner.e
 
 include sequence.e
+include text.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile

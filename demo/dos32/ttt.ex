@@ -28,7 +28,7 @@
 include graphics.e
 include mouse.e
 include wildcard.e
-include sequence.e
+include text.e
 
 constant TRUE = 1, FALSE = 0
 constant ON = 1, OFF = 0

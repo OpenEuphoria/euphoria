@@ -6,7 +6,7 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
-include sequence.e
+include text.e
 
 include global.e
 include reswords.e

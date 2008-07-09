@@ -8,7 +8,7 @@
 --
 -- === Routines
 
-include sequence.e as seq -- upper/lower
+include text.e as txt -- upper/lower
 
 function qmatch(sequence p, sequence s)
 -- find pattern p in string s
@@ -100,8 +100,8 @@ end function
 
 global function wildcard_file(sequence pattern, sequence filename)
 	ifdef !UNIX then
-		pattern = seq:upper(pattern)
-		filename = seq:upper(filename)
+		pattern = txt:upper(pattern)
+		filename = txt:upper(filename)
 	end ifdef
 	
 	if not find('.', pattern) then
