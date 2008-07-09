@@ -251,7 +251,6 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/error.o \
-	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/text.o \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/mode.o \

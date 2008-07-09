@@ -7,9 +7,14 @@ include opnames.e
 include text.e
 include pretty.e
 include ../include/error.e
+include map.e as map
 
 integer out, pc, a, b, c, d, target, len, keep_running
 sequence operation
+
+
+map:map called_from = map:new()
+map:map called_by   = map:new()
 
 procedure RTInternal(sequence msg)
 -- Internal errors in back-end
@@ -233,6 +238,28 @@ procedure opEMBEDDED_FUNCTION_CALL()
 	binary()
 end procedure
 
+-- based on execute.e
+function find_line(symtab_index sub, integer pc)
+-- return the file name and line that matches pc in sub
+	sequence linetab
+	integer line, gline
+	
+	linetab = SymTab[sub][S_LINETAB]
+	line = 1
+	for i = 1 to length(linetab) do
+		if linetab[i] >= pc or linetab[i] = -2 then
+			line = i-1
+			while line > 1 and linetab[line] = -1 do
+				line -= 1
+			end while
+			exit
+		end if
+	end for
+	gline = SymTab[sub][S_FIRSTLINE] + line - 1
+	return slist[gline][LOCAL_FILE_NO]
+end function
+
+constant BLANK_MAP = map:new()
 procedure opPROC()  -- Normal subroutine call
     integer n, arg, sub, top
     sequence dsm
@@ -240,7 +267,20 @@ procedure opPROC()  -- Normal subroutine call
     -- make a procedure or function/type call
     sub = Code[pc+1] -- subroutine
     n = SymTab[sub][S_NUM_ARGS]
-
+	
+	integer current_file
+	if CurrentSub = TopLevelSub then
+		current_file = find_line( sub, pc )
+	else
+		current_file = SymTab[CurrentSub][S_FILE_NO]
+	end if
+	
+	-- record the data for the call graph
+	-- called_from maps from the caller to the callee
+	-- called_by maps from the callee back to the caller
+	called_from = map:nested_put( called_from, { current_file, CurrentSub, sub }, SymTab[sub][S_FILE_NO] )
+	called_by   = map:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, CurrentSub }, current_file )
+	
     dsm = sprintf( "%s: %s",{opnames[Code[pc]],name_or_literal(sub)})
 
 	for i = 1 to n do
@@ -269,7 +309,6 @@ result = 0
 object result_val
 
 procedure opRETURNP()   -- return from procedure (or function)
-    integer sub, arg, top, base
     il( "RETURNP", 1 )
 	pc += 2
 end procedure
@@ -1171,6 +1210,42 @@ procedure opINSERT()
 	trinary()
 end procedure
 
+function strip_path( sequence file )
+	for i = length( file ) to 1 by -1 do
+		if find( file[i], "/\\" ) then
+			return file[i+1..$]
+		end if
+	end for
+	return file
+end function
+
+procedure write_call_info( sequence name )
+	-- The output of this procedure is meant to be post processed to
+	-- create *.dot files to be used with something like graphviz to
+	-- produce call graphs.  The *.calls file contains the raw maps, which 
+	-- can be used to generate more focused graphs (i.e., for individual 
+	-- routines).
+	
+	-- called_from:  file -> proc -> called proc : called_proc file
+	-- called_by  :  called_proc file -> called proc -> proc : file
+	sequence files = map:keys( called_from )
+	
+	integer fn = open( name & "calls", "w" )
+	sequence pp = PRETTY_DEFAULT
+	pp[DISPLAY_ASCII] = 2
+	pp[LINE_BREAKS]   = -1
+	
+	puts( fn, "\"called_from\"\n" )
+	pretty_print( fn, called_from, pp )
+	puts( fn, "\n\n\"called_by\"\n" )
+	pretty_print( fn, called_by, pp )
+	puts( fn, "\n\n\"file_name\"\n") 
+	pretty_print( fn, file_name, pp )
+	puts( fn, "\n\n\"file_include\"\n" )
+	pretty_print( fn, file_include, pp )
+	puts( fn, "\n" )
+	close( fn )
+end procedure
 
 procedure line_print( integer fn, object p )
 	integer line_break, count
@@ -1338,7 +1413,7 @@ end function
 procedure dis( integer sub )
 	integer op, ix
 	sequence sym
-	
+	CurrentSub = sub
 	printf( out, "\nSubProgram [%s-%s:%05d]\n", {file_name[SymTab[sub][S_FILE_NO]],SymTab[sub][S_NAME], sub})
 	Code = SymTab[sub][S_CODE]
 	pc = 1
@@ -1372,5 +1447,7 @@ global procedure BackEnd( object ignore )
 		end if
 	end for
 	close( out )
+	write_call_info( file_name[1] & '.' )
+	
 end procedure
 mode:set_backend( routine_id("BackEnd") )

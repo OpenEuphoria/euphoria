@@ -44,16 +44,22 @@ end procedure
 
 procedure indent()
 -- indent the display of a sequence
-	if not pretty_line_breaks then	
+	if pretty_line_breaks = 0 then	
 		pretty_chars = 0
 		return
+	elsif pretty_line_breaks = -1 then
+		
+		cut_line( 0 )
+		
+	else
+		if pretty_chars > 0 then
+			pretty_out('\n')
+			pretty_chars = 0
+		end if
+		pretty_out(repeat(' ', (pretty_start_col-1) + 
+								pretty_level * pretty_indent))	
 	end if
-	if pretty_chars > 0 then
-		pretty_out('\n')
-		pretty_chars = 0
-	end if
-	pretty_out(repeat(' ', (pretty_start_col-1) + 
-							pretty_level * pretty_indent))
+	
 end procedure
 
 function show(integer a)
@@ -235,7 +241,7 @@ end procedure
 --   ## minimum value for printable ASCII - default 32
 --   ## maximum value for printable ASCII - default 127
 --   ## maximum number of lines to output 
---   ## line breaks between elements   - default 1
+--   ## line breaks between elements   - default 1 (0 = no line breaks, -1 = line breaks to wrap only)
 -- 
 -- If the length is less than 8, unspecified options at 
 -- the end of the sequence will keep the default values.    

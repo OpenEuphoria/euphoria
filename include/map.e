@@ -302,6 +302,24 @@ export function get(map m, object key, object defaultValue)
 end function
 
 --**
+-- Returns the value that corresponds to the object ##keys## in the nested map m.  ##keys## is a
+-- sequence of keys.  If any key is not in the map, the object defaultValue is returned instead.
+
+export function nested_get( map m, sequence keys, object defaultValue )
+	for i = 1 to length( keys ) - 1 do
+		object val = get( m, keys[1], 0 )
+		if atom( val ) then
+			-- not a map
+			return defaultValue
+		else
+			m = val
+			keys = keys[2..$]
+		end if
+	end for
+	return get( m, keys[1], defaultValue )
+end function
+
+--**
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
@@ -341,7 +359,8 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:remove]], [[:has]]
+--		[[:remove]], [[:has]],  [[:nested_put]]
+
 export function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
 	integer index
 	integer hashval
@@ -408,6 +427,50 @@ export function put(map m, object key, object value, integer operation = PUT, in
 	m0[iBuckets][index][iVals] = append(m0[iBuckets][index][iVals], value)
 	
 	return m0
+end function
+
+constant BLANK_MAP = new()
+--**
+-- Adds or updates an entry on a map.
+--
+-- Parameters:
+--		# ##m##: the map where an entry is being added or opdated
+--		# ##keys##: a sequence of keys for the nested maps
+--		# ##value##: an object, the value to add, or to use for updating.
+--		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
+--		# ##pTrigger##: an integer. Default is 100. See Comments for details.
+--
+-- Valid operations are: 
+-- 
+-- * ##PUT##:  This is the default, and it replaces any value in there already
+-- * ##ADD##:  Equivalent to using the += operator 
+-- * ##SUBTRACT##:  Equivalent to using the -= operator 
+-- * ##MULTIPLY##:  Equivalent to using the *= operator 
+-- * ##DIVIDE##: Equivalent to using the /= operator 
+-- * ##APPEND##: Appends the value to the existing data 
+-- * ##CONCAT##: Equivalent to using the &= operator
+--
+-- Returns:
+--   The modified map.
+--
+-- Comments:
+--   If existing entry with the same key is already in the map, the value of the entry is updated.
+--
+-- Example 1:
+--   <eucode>
+--   map city_population
+--   city_population = new()
+--   city_population = nested_put(city_population, {"United States", "California", "Los Angeles", 3819951 )
+--   city_population = nested_put(city_population, {"Canada",        "Ontario",    "Toronto",     2503281 )
+--   </eucode>
+--
+-- See also:  [[:put]]
+export function nested_put( map m, sequence keys, object value, integer operation = PUT, integer pTrigger = 100 )
+	if length( keys ) = 1 then
+		return put( m, keys[1], value, operation, pTrigger )
+	else
+		return put( m, keys[1], nested_put( get( m, keys[1], BLANK_MAP ), keys[2..$], value, operation, pTrigger ), PUT, pTrigger )
+	end if
 end function
 
 --**
