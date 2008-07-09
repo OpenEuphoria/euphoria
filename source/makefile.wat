@@ -12,7 +12,7 @@
 #
 # Syntax:
 #   Interpreter(exw.exe, exwc.exe):  wmake -f makefile.wat interpreter
-#   Translator     ec.exe ecw.exe):  wmake -f makefile.wat translator
+#   Translator    (ec.exe ecw.exe):  wmake -f makefile.wat translator
 #   Translator Library   (ec.lib ecw.lib):  wmake -f makefile.wat library
 #   Backend         (backendw.exe):  wmake -f makefile.wat backend 
 #                   (backendc.exe)
@@ -25,6 +25,12 @@
 #       built with just a compiler   wmake -f makefile.wat source-win [SVN_REV=r]
 #     Note that source builds both   wmake -f makefile.wat source-dos [SVN_REV=r]
 #        source-win and source-dos.
+#
+#      Install binaries, source and 
+#                    include files:
+#             Windows and dos files  wmake -f makefile.wat install
+#                Windows files only  wmake -f makefile.wat installwin
+#                    dos files only  wmake -f makefile.wat installdos
 #
 #                   Run unit tests:
 #                     Win32 and DOS  wmake -f makefile.wat test
@@ -204,7 +210,6 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\0ackend.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\backend.obj &
-	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
