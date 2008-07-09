@@ -137,11 +137,42 @@ test_equal("project()",
 {{{3,5,11},{2,7,13}},{{19,23,31},{17,29,37}},{{43,47,59},{41,53,61}}},
 project(S1,{{2,3,5},{1,4,6}}))
 
-test_equal("extract",{11,17,13},extract({13,11,9,17},{2,4,1}))
-test_equal("valid_index",1,valid_index({1,2,3},3.5))
+test_equal("extract 1",{11,17,13},extract({13,11,9,17},{2,4,1}))
+test_equal("extract 2",{11,13,11,13,9,9},extract({13,11,9,17},{2,1,2,1,3,3}))
+test_equal("extract 3",{},extract({13,11,9,17},{}))
+test_equal("extract 4",{17},extract({13,11,9,17},{4}))
 
-test_equal("rotate: left",{1,4,5,6,2,3,7},rotate({1,2,3,4,5,6,7},2*ROTATE_LEFT,2,6))
-test_equal("rotate: right",{1,5,6,2,3,4,7},rotate({1,2,3,4,5,6,7},2*ROTATE_RIGHT,2,6))
+test_equal("valid_index 1", 0,valid_index({1,2,3},3.5))
+test_equal("valid_index 2", 0,valid_index({1,2,3}, -1))
+test_equal("valid_index 3", 0,valid_index({1,2,3}, 0))
+test_equal("valid_index 4", 0,valid_index({1,2,3}, 4))
+test_equal("valid_index 5", 0,valid_index({1,2,3}, {}))
+test_equal("valid_index 6", 0,valid_index({1,2,3}, {2}))
+test_equal("valid_index 7", 1,valid_index({1,2,3}, 1))
+test_equal("valid_index 8", 1,valid_index({1,2,3}, 2))
+test_equal("valid_index 9", 1,valid_index({1,2,3}, 3))
+test_equal("valid_index A", 0,valid_index({}, 0))
+test_equal("valid_index B", 0,valid_index({}, 1))
+
+test_equal("rotate: left -1", {1,6,2,3,4,5,7},rotate({1,2,3,4,5,6,7},-1*ROTATE_LEFT,2,6))
+test_equal("rotate: left 0",  {1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 0*ROTATE_LEFT,2,6))
+test_equal("rotate: left 1",  {1,3,4,5,6,2,7},rotate({1,2,3,4,5,6,7}, 1*ROTATE_LEFT,2,6))
+test_equal("rotate: left 2",  {1,4,5,6,2,3,7},rotate({1,2,3,4,5,6,7}, 2*ROTATE_LEFT,2,6))
+test_equal("rotate: left 3",  {1,6,2,3,4,5,7},rotate({1,2,3,4,5,6,7}, 4*ROTATE_LEFT,2,6))
+test_equal("rotate: left 4",  {1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 5*ROTATE_LEFT,2,6))
+test_equal("rotate: left 7",  {1,4,5,6,2,3,7},rotate({1,2,3,4,5,6,7}, 7*ROTATE_LEFT,2,6))
+test_equal("rotate: left 2/0",{1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 2*ROTATE_LEFT,5,5))
+
+test_equal("rotate: right -1", {1,3,4,5,6,2,7},rotate({1,2,3,4,5,6,7},-1*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 0",  {1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 0*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 1",  {1,6,2,3,4,5,7},rotate({1,2,3,4,5,6,7}, 1*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 2",  {1,5,6,2,3,4,7},rotate({1,2,3,4,5,6,7}, 2*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 3",  {1,3,4,5,6,2,7},rotate({1,2,3,4,5,6,7}, 4*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 4",  {1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 5*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 7",  {1,5,6,2,3,4,7},rotate({1,2,3,4,5,6,7}, 7*ROTATE_RIGHT,2,6))
+test_equal("rotate: right 2/0",{1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 2*ROTATE_RIGHT,5,5))
+
+
 
 sequence a, b, c
 a = split("John Doe")

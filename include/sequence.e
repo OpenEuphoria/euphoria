@@ -1082,11 +1082,16 @@ end function
 --     [[:Sequence Assignments]]
 
 export function valid_index(sequence st, object x)
-	if sequence(x) or x<1 then
+	if not integer(x) then
 		return 0
-	else
-		return x<length(st)+1
 	end if
+	if x < 1 then
+		return 0
+	end if
+	if x > length(st) then
+		return 0
+	end if
+	return 1
 end function
 
 --**
@@ -1107,7 +1112,7 @@ export function extract(sequence source, sequence indexes)
 	for i=1 to length(indexes) do
 		p=indexes[i]
 		if not valid_index(source,p) then
-			crash("%s is not a valid index on the input sequence",{sprint(p)})
+			crash("%d is not a valid index on the input sequence",p)
 		end if
 		indexes[i]=source[p]
 	end for
@@ -1117,38 +1122,46 @@ end function
 --**
 -- Rotates a slice of a sequence.
 --
--- Use amount * direction to specify the shift. direction is either ROTATE_LEFT or ROTATE_RIGHT. A null shift does nothing and returns source unchanged..
+-- Use amount * direction to specify the shift. direction is either ROTATE_LEFT
+-- or ROTATE_RIGHT. A null shift does nothing and returns source unchanged.
 --
 -- Example 1:
 -- <eucode>
--- s = rotate({11,13,15,17,19,23},2,5,ROTATE_LEFT)
+-- s = rotate({11,13,15,17,19,23}, ROTATE_LEFT, 2, 5)
 -- -- s is {11,15,17,19,13,23}
 --
--- s = rotate({11,13,15,17,19,23},2,5,ROTATE_RIGHT)
--- -- s is {11,19,13,15,17,23}
+-- s = rotate({11,13,15,17,19,23}, ROTATE_RIGHT * 2, 2, 5)
+-- -- s is {11,17,19,13,15,23}
 -- </eucode>
 --
 -- See Also:
 --     [[:slice]]
 
-export function rotate(sequence source, integer left_shift, integer start=1, integer stop=length(source))
+export function rotate(sequence source, integer the_direction, integer start=1, integer stop=length(source))
 	sequence shifted
 	integer len
+	integer lSize
 
-	if start >= stop or length(source)=0 or not left_shift then
+	if start >= stop or length(source)=0 or not the_direction then
 		return source
 	end if
-	if not valid_index(source,start) or not valid_index(source,stop) then
-		crash("sequence:rotate_left(): invalid slice specification",0)
+	if not valid_index(source, start) then
+		crash("sequence:rotate(): invalid 'start' parameter %d", start)
+	end if
+	if not valid_index(source, stop) then
+		crash("sequence:rotate(): invalid 'stop' parameter %d", stop)
 	end if
 	len = stop - start + 1
-	left_shift = remainder(left_shift, len)
-	if left_shift<0 then -- convert right shift to left shift
-		left_shift += len
+	lSize = remainder(the_direction, len)
+	if lSize = 0 then
+		return source
 	end if
-	shifted = source[start..start+left_shift-1]
-	source[start..stop-left_shift] = source[start+left_shift..stop]
-	source[stop-left_shift+1..stop] = shifted
+	if lSize < 0 then -- convert right shift to left shift
+		lSize += len
+	end if
+	shifted = source[start .. start + lSize-1]
+	source[start .. stop - lSize] = source[start + lSize .. stop]
+	source[stop - lSize + 1.. stop] = shifted
 	return source
 end function
 
@@ -1207,11 +1220,9 @@ export function add_item(object needle, sequence haystack, integer pOrder = 1)
 			return append(haystack, needle)
 			
 		case 3: -- ascending
-		--TODO: Remove comment once 'sort' scoping bug is fixed.
 			return sort(append(haystack, needle))
 			
 		case 4: -- descending
-		--TODO: Remove comment once 'sort' scoping bug is fixed.
 			return sort_reverse(append(haystack, needle))
 			
 	end switch
