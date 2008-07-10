@@ -218,6 +218,10 @@ constant
 	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
 	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I)
 
+ifdef WIN32 then
+	sequence current_locale = ""
+end ifdef
+
 --**
 -- Set the computer locale, and possibly loas appropriate translation file.
 --
@@ -234,6 +238,10 @@ constant
 -- The optional .xyz part specifies an encoding, like .utf8. This is required in some cases.
 export function set(sequence new_locale)
 	atom pLocale, ign
+	ifdef WIN32 then
+		sequence nlocale
+		nlocale = new_locale
+	end ifdef
 	
 	new_locale = lcc:decanonical(new_locale)
 	pLocale = allocate_string(new_locale)
@@ -242,9 +250,20 @@ export function set(sequence new_locale)
 	ign = c_func(f_setlocale, {LC_ALL, pLocale})
 
 	if sequence(lang_path) then
-		return lang_load(new_locale)
+		ign = lang_load(new_locale)
+		ifdef WIN32 then
+			if ign then
+				current_locale = nlocale
+			end if
+		end ifdef
+		return ign
 	end if
 
+	ifdef WIN32 then
+		if (ign != NULL) then
+			current_locale = nlocale
+		end if
+	end ifdef
 	return (ign != NULL)
 end function
 
@@ -266,6 +285,11 @@ export function get()
 	end if
 
 	r = peek_string(p)
+	ifdef WIN32 then
+		if equal(lcc:decanonical(r), lcc:decanonical(current_locale)) then
+			return current_locale
+		end if
+	end ifdef
 	r = lcc:canonical(r)
 
 	return r
@@ -298,7 +322,7 @@ export function money(atom amount)
 	else
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string(sprintf("%.8f", {amount}))
-		size = c_func(f_strfmon, {lcid:get_lcid(lcc:canon2win(get())), 0, pTmp, NULL, pResult, 4 * 160})
+		size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 	end ifdef
 
 	result = peek_string(pResult)
@@ -335,7 +359,7 @@ export function number(atom num)
 	else
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string(sprintf("%.8f", {num}))
-		size = c_func(f_strfnum, {lcid:get_lcid(lcc:canon2win(get())), 0, pTmp, NULL, pResult, 4 * 160})
+		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 	end ifdef
 
 	result = peek_string(pResult)
