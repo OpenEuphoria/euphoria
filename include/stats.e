@@ -12,8 +12,6 @@ include unittest.e
 include math.e
 include sort.e
 
-with trace
-
 --**
 -- Returns the k-th smallest value from the supplied set of numbers. 
 --
@@ -47,6 +45,147 @@ export function small(sequence pData, integer pIndex)
 	lSortedData = sort(pData)
 	
 	return lSortedData[pIndex]
+end function
+
+--**
+-- Returns the largest of the data points. 
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the largest.
+--             Note that only atom elements are included and any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   atom if there is at least one atom item, otherwise it returns an empty sequence.
+--
+-- Example 1:
+--   <eucode>
+--   ? largest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 8
+--   </eucode>
+--
+-- See also:
+--   [[:range]]
+--
+export function largest(object pData)
+	atom lResult, lTemp
+	integer lFoundAny
+	if atom(pData) then
+			return pData
+	end if
+	lFoundAny = 0
+	for i = 1 to length(pData) do
+		if atom(pData[i]) then
+			lTemp = pData[i]
+			if lFoundAny then
+				if lTemp > lResult then
+					lResult = lTemp
+				end if
+			else
+				lResult = lTemp
+				lFoundAny = 1
+			end if
+		end if
+	end for
+	if lFoundAny = 0 then
+		return {}
+	end if
+	return lResult
+end function
+
+--**
+-- Returns the smallest of the data points. 
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the smallest.
+--             Note that only atom elements are included and any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   atom if there is at least one atom item, otherwise it returns an empty sequence.
+--
+-- Example 1:
+--   <eucode>
+--   ? smallest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 1
+--   </eucode>
+--
+-- See also:
+--   [[:range]]
+--
+export function smallest(object pData)
+	atom lResult, lTemp
+	integer lFoundAny
+	if atom(pData) then
+			return pData
+	end if
+	lFoundAny = 0
+	for i = 1 to length(pData) do
+		if atom(pData[i]) then
+			lTemp = pData[i]
+			if lFoundAny then
+				if lTemp < lResult then
+					lResult = lTemp
+				end if
+			else
+				lResult = lTemp
+				lFoundAny = 1
+			end if
+		end if
+	end for
+	if lFoundAny = 0 then
+		return {}
+	end if
+	return lResult
+end function
+
+--**
+-- Returns the smallest of the data points. 
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the range data.
+--             Note that only atom elements are included and any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   sequence. {Lowest, Highest, Range, Mid-range}
+--
+-- Example 1:
+--   <eucode>
+--   ? range( {7,2,8,5,6,6,4,8,6,16,3,3,4,1,8,"text"} ) -- Ans: {1, 16, 15, 8.5}
+--   </eucode>
+--
+-- See also:
+--   [[:smallest]] [[:largest]]
+--
+export function range(object pData)
+	sequence lResult
+	atom lTemp
+	integer lFoundAny = 0
+	
+	if atom(pData) then
+		pData = {pData}
+	end if
+	
+	for i = 1 to length(pData) do
+		if atom(pData[i]) then
+			lTemp = pData[i]
+			if lFoundAny then
+				if lTemp < lResult[1] then
+					lResult[1] = lTemp
+				elsif lTemp > lResult[2] then
+					lResult[2] = lTemp
+				end if
+			else
+				lResult = {lTemp, lTemp, 0, 0}
+				lFoundAny = 1
+			end if
+		end if
+	end for
+	if lFoundAny = 0 then
+		return {}
+	end if
+	lResult[3] = lResult[2] - lResult[1]
+	lResult[4] = (lResult[1] + lResult[2]) / 2
+	return lResult
 end function
 
 --**
@@ -543,98 +682,155 @@ export function averagea(object pData)
 	if atom(pData) or length(pData) = 0 then
 		return pData
 	end if
-	if length(pData) = 0 then
-		return {}
-	end if
 	return sum(pData) / length(pData)
 end function
  
 --**
--- Returns the largest of the data points. 
+-- Returns the average (mean) of the data points for overlaping periods. This
+-- can be either a simple or weighted moving average.
 --
 -- Parameters:
---   * pData = A list of 1 or more numbers for which you want the largest.
+--   * pData = A list of 1 or more numbers for which you want a moving average.
 --             Note that only atom elements are included and any sub-sequences
 --             elements are ignored.
+--   * pPeriod = Either an integer representing the size of the period; this 
+--               gives a simple moving average, or a list of weightings to
+--               apply to the respective period position, giving a weighted
+--               moving averge.
 --
 -- Returns:
---   atom if there is at least one atom item, otherwise it returns an empty sequence.
+--   sequence. An empty sequence is returned if the Data sequence is empty or
+--             the supplied period is less than one.
+--
+-- Comments: 
+--   A moving average is used to smooth out a set of data points over a period.\\
+--   For example, given a period of 5, the first returned element is the average
+--   of the first five data points [1..5], the second returned element is
+--   the average of the second five data points [2..6], and so on until
+--   the last returned value is the average of the last 5 data points
+--   [$-4 .. $]
 --
 -- Example 1:
 --   <eucode>
---   ? largest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 8
+--   ? movavg( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8}, 10 ) 
+--    -- Ans: {5.8, 5.4, 5.5, 5.1, 4.7, 4.9}
+--   ? movavg( {7,2,8,5,6}, 2 ) 
+--    -- Ans: {4.5, 5, 6.5, 5.5}
+--   ? movavg( {7,2,8,5,6}, {0.5, 1.5} ) 
+--    -- Ans: {3.25, 6.5, 5.75, 5.75}
 --   </eucode>
 --
 -- See also:
---   [[:range]]
+--   [[:average]]
 --
-export function largest(object pData)
-	atom lResult, lTemp
-	integer lFoundAny
+export function movavg(object pData, object pPeriod)
+	sequence lResult 
+	integer lLow
+	integer lHigh
+	integer j
+	integer n
+
 	if atom(pData) then
-			return pData
+		pData = {pData}
+		
+	elsif count(pData) = 0 then
+		return pData
 	end if
-	lFoundAny = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lTemp = pData[i]
-			if lFoundAny then
-				if lTemp > lResult then
-					lResult = lTemp
-				end if
-			else
-				lResult = lTemp
-				lFoundAny = 1
-			end if
+	
+	if atom(pPeriod) then
+		if floor(pPeriod) < 1 then
+			return {}
 		end if
-	end for
-	if lFoundAny = 0 then
-		return {}
+		pPeriod = repeat(1, floor(pPeriod))
 	end if
+	
+	if length(pData) < length(pPeriod) then	
+		pData = repeat(0, length(pPeriod) - length(pData)) & pData
+	end if
+	lLow = 1
+	lHigh = length(pPeriod)
+	lResult = repeat(0, length(pData) - length(pPeriod) + 1)
+	while lHigh <= length(pData) do
+		j = 1
+		n = 0
+		for i = lLow to lHigh do
+			if atom(pData[i]) then
+				lResult[lLow] += pData[i] * pPeriod[j]
+				n += 1
+			end if
+			j += 1
+		end for
+		if n > 0 then
+			lResult[lLow] /= n
+		else
+			lResult[lLow] = 0
+		end if
+
+		lLow += 1
+		lHigh += 1
+	end while
+		
 	return lResult
 end function
 
 --**
--- Returns the smallest of the data points. 
+-- Returns the expotential moving average of a set of data points.
 --
 -- Parameters:
---   * pData = A list of 1 or more numbers for which you want the smallest.
+--   * pData = A list of 1 or more numbers for which you want a moving average.
 --             Note that only atom elements are included and any sub-sequences
 --             elements are ignored.
+--   * pFactor = an atom. Either a specific factor from zero to one, or anything
+--             else which represents the periodic factor (2/(N+1)). This parameter
+--             is the degree of smoothing required. Lower values increase the
+--             smoothing and higher values decrease the smoothing. For example,
+--             zero will smooth all values to zero, and one will have no smoothing
+--             effect at all.
 --
 -- Returns:
---   atom if there is at least one atom item, otherwise it returns an empty sequence.
+--   sequence. An empty sequence is returned if the Data sequence is empty or
+--             the supplied period is less than one.
+--
+-- Comments: 
+--   A moving average is used to smooth out a set of data points over a period.\\
+--
+-- The formula used:
+-- {{{
+--  Y,,i,, = Y,,i-1,, + F * (X,,i,, - Y,,i-1,,)
+-- }}}
 --
 -- Example 1:
 --   <eucode>
---   ? smallest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 1
+--   ? emovavg( {7,2,8,5,6}, 0.75 ) 
+--    -- Ans: {5.25,2.8125,6.703125,5.42578125,5.856445313}
+--   ? emovavg( {7,2,8,5,6}, 0.25 ) 
+--    -- Ans: {1.75,1.8125,3.359375,3.76953125,4.327148438}
+--   ? emovavg( {7,2,8,5,6}, -1 ) 
+--    -- Ans: {2.333333333,2.222222222,4.148148148,4.432098765,4.95473251}
 --   </eucode>
 --
 -- See also:
---   [[:range]]
---
-export function smallest(object pData)
-	atom lResult, lTemp
-	integer lFoundAny
+--   [[:average]]
+
+export function emovavg(object pData, atom pFactor)
+	atom lPrev = 0
+	
 	if atom(pData) then
-			return pData
+		pData = {pData}
+		
+	elsif count(pData) = 0 then
+		return pData
 	end if
-	lFoundAny = 0
+	
+	if pFactor < 0 or pFactor > 1 then
+		pFactor = (2 / (count(pData) + 1))
+	end if
+		
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
-			lTemp = pData[i]
-			if lFoundAny then
-				if lTemp < lResult then
-					lResult = lTemp
-				end if
-			else
-				lResult = lTemp
-				lFoundAny = 1
-			end if
+			pData[i] = (pData[i] - lPrev) * pFactor + lPrev
+			lPrev = pData[i]
 		end if
 	end for
-	if lFoundAny = 0 then
-		return {}
-	end if
-	return lResult
+	return pData
 end function
