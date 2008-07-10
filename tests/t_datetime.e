@@ -189,18 +189,22 @@ for i = 1 to 7 do
     test_equal("format() dow loop #2", day_names[i], d:format(dt1, "%A"))
 end for
 
-for i = 1 to 12 do
-    dt1[MONTH] = i
+for i = 0 to 11 do
+    dt1[MONTH] = i+1
     dt1[HOUR] = i
-    test_equal("format() month loop #1", month_abbrs[i], d:format(dt1, "%b"))
-    test_equal("format() month loop #2", month_names[i], d:format(dt1, "%B"))
+    test_equal("format() month loop #1", month_abbrs[i+1], d:format(dt1, "%b"))
+    test_equal("format() month loop #2", month_names[i+1], d:format(dt1, "%B"))
 
     test_equal("format() hour loop #1", sprintf("%02d", i), d:format(dt1, "%H"))
-    test_equal("format() hour loop #2", sprintf("%02damAM", i), d:format(dt1, "%I%P%p"))
+	if i > 0 then -- AM/PM swap on 0
+	    test_equal("format() hour loop #2", sprintf("%02damAM", i), d:format(dt1, "%I%P%p"))
+	end if
 
     dt1[HOUR] = i + 12
     test_equal("format() hour loop #3", sprintf("%02d", i + 12), d:format(dt1, "%H"))
-    test_equal("format() hour loop #4", sprintf("%dpmPM", i), d:format(dt1, "%l%P%p"))
+	if i > 0 then -- AM/PM swap on 0
+	    test_equal("format() hour loop #4", sprintf("%dpmPM", i), d:format(dt1, "%l%P%p"))
+	end if
 end for
 
 test_report()
