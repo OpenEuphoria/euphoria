@@ -246,7 +246,7 @@ end function
 
 ifdef WIN32 then
 	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("kernel32.dll"), "SetEnvironmentVariable", {C_POINTER, C_POINTER}, C_INT)
+	constant SETENV = define_c_func(open_dll("kernel32.dll"), "SetEnvironmentVariableA", {C_POINTER, C_POINTER}, C_INT)
 	constant UNSETENV = -1
 elsifdef LINUX then
 	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
