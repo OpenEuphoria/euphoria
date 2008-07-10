@@ -61,7 +61,7 @@ end function
 -- * pData = A list of 1 or more numbers for which you want the estimated standard deviation.
 --           These numbers are assumed to represent a random sample, a subset, of 
 --           a larger set of numbers.
---           Note that only atom elements are included, any sequences elements are ignored.
+--           Note that only atom elements are included, any sub-sequences elements are ignored.
 -- Returns:
 --   atom 
 -- 
@@ -77,7 +77,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   average, avedev, var, stdeva
+--   [[:average]], [[:avedev]], [[:var]], [[:stdeva]]
 --
 
 export function stdev(sequence pData)
@@ -123,7 +123,7 @@ end function
 -- * pData = A list of 1 or more numbers for which you want the estimated standard deviation.
 --           These numbers are assumed to represent a random sample, a subset, of 
 --           a larger set of numbers.
---           Note that any sequences elements are assumed to have a value of zero.
+--           Note that any sub-sequences elements are assumed to have a value of zero.
 --
 -- Returns:
 --   atom 
@@ -139,7 +139,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   average, avedev, var, stdev
+--   [[:average]], [[:avedev]], [[:var]], [[:stdev]]
 --
 
 export function stdeva(sequence pData)
@@ -193,7 +193,7 @@ test_equal("stdeva empty", {}, stdeva( {} ))
 -- Parameters:
 --   * pData = A list of 1 or more numbers for which you want the standard deviation.
 --             These numbers are assumed to represent the entire population to test.
---             Note that only atom elements are included, any sequences elements are ignored.
+--             Note that only atom elements are included, any sub-sequences elements are ignored.
 --
 -- Returns:
 --   atom 
@@ -209,7 +209,7 @@ test_equal("stdeva empty", {}, stdeva( {} ))
 --   </eucode>
 --
 -- See also:
---   average, avedev, var, stdevpa, stdev
+--   [[:average]], [[:avedev]], [[:var]], [[:stdevpa]], [[:stdev]]
 --
 
 export function stdevp(sequence pData)
@@ -254,7 +254,7 @@ end function
 -- Parameters:
 --   * pData = A list of 1 or more numbers for which you want the estimated standard deviation.
 --             These numbers are assumed to represent the entire population to test.
---             Note that any sequences elements are assumed to have a value of zero.
+--             Note that any sub-sequences elements are assumed to have a value of zero.
 --
 -- Returns:
 --   atom 
@@ -267,7 +267,7 @@ end function
 --   ? stdevpa( {4,5,6,7,5,4,3,"text"} ) -- Ans: 
 --
 -- See also:
---   average, avedev, var, stdevp, stdev
+--   [[:average]], [[:avedev]], [[:var]], [[:stdevp]], [[:stdev]]
 --
 
 export function stdevpa(sequence pData)
@@ -313,7 +313,7 @@ end function
 --
 -- Parameters:
 --   * pData = A list of 1 or more numbers for which you want the mean of the absolute deviations.
---             Note that only atom elements are included, any sequences elements are ignored.
+--             Note that only atom elements are included, any sub-sequences elements are ignored.
 --
 -- Returns:
 --   atom 
@@ -327,7 +327,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   average, stdev, var
+--   [[:average]], [[:stdev]], [[:var]]
 --
 
 export function avedev(sequence pData)
@@ -363,49 +363,143 @@ export function avedev(sequence pData)
 end function
 
 --**
+-- Returns the sum of all the atoms in an object.  If the object is an atom
+-- then it just returns the parameter, however for sequences it only sums
+-- the atom elements in the sequence and not any subsequences.\\
+-- The equation is: 
+--
+-- {{{
+-- sum(X) ==> SUM( X{1..N} )
+-- }}}
+--
+-- Parameters:
+--   * pData = Either an atom or a list.
+--             Note that only atom elements are included, any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   atom 
+--
+-- Comments: 
+--   sum() is used as a measure of the magnitude of a sequence.
+--
+-- Example 1:
+--   <eucode>
+--   ? sum( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"} ) -- Ans: 32.041
+--   </eucode>
+--
+-- See also:
+--   [[:average]]
+
 export function sum(object pData)
-	atom pResult
+	atom lResult
 	if atom(pData) then
-		pResult = pData
+		lResult = pData
 	else
-		pResult = 0
+		lResult = 0
 		for i = 1 to length(pData) do
 			if atom(pData[i]) then
-				pResult += pData[i]
+				lResult += pData[i]
 			end if
 		end for
 	end if
-	return pResult
+	return lResult
 end function
 
 --**
+-- Returns the count of all the atoms in an object.  If the object is an atom
+-- then it just returns 1, however for sequences it only counts
+-- the atom elements in the sequence and not any subsequences.\\
+--
+-- Parameters:
+--   * pData = Either an atom or a list.
+--             Note that only atom elements are included, any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   atom 
+--
+-- Example 1:
+--   <eucode>
+--   ? count( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"} ) -- Ans: 10
+--   ? count( {"cat", "dog", "lamb", "cow", "rabbit"} ) -- Ans: 0 (no atoms)
+--   ? count( 5 ) -- Ans: 1
+--   </eucode>
+--
+-- See also:
+--   [[:average]], [[:sum]], [[:counta]]
+
 export function count(object pData)
-	atom pResult
+	atom lResult
 	if atom(pData) then
-		pResult = 1
+		lResult = 1
 	else
-		pResult = 0
+		lResult = 0
 		for i = 1 to length(pData) do
 			if atom(pData[i]) then
-				pResult += 1
+				lResult += 1
 			end if
 		end for
 	end if
-	return pResult
+	return lResult
 end function
 
 --**
+-- Returns the count of all the elements in an object.  If the object is an atom
+-- then it just returns 1.
+--
+-- Parameters:
+--   * pData = Either an atom or a list.
+--
+-- Returns:
+--   atom 
+--
+-- Example 1:
+--   <eucode>
+--   ? count( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"} ) -- Ans: 11
+--   ? count( {"cat", "dog", "lamb", "cow", "rabbit"} ) -- Ans: 5
+--   ? count( 5 ) -- Ans: 1
+--   </eucode>
+--
+-- See also:
+--   [[:average]], [[:sum]], [[:count]]
+
 export function counta(object pData)
-	atom pResult
+	atom lResult
 	if atom(pData) then
-		pResult = 1
+		lResult = 1
 	else
-		pResult = length(pData)
+		lResult = length(pData)
 	end if
-	return pResult
+	return lResult
 end function
 
 --**
+-- Returns the average (mean) of the data points. 
+-- The equation for average  is: 
+--
+-- {{{
+-- average(X) ==> SUM( X{1..N} ) / N
+-- }}}
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the mean.
+--             Note that only atom elements are included, any sub-sequences elements are ignored.
+--
+-- Returns:
+--   atom if there are more than zero items, otherwise it returns an empty sequence.
+--
+-- Comments: 
+--   average() is theoretical probable value of a randomly selected item from the set.
+--
+-- Example 1:
+--   <eucode>
+--   ? average( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 5.13333333
+--   </eucode>
+--
+-- See also:
+--   [[:averagea]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
+--
 export function average(object pData)
 	integer lCount
 	if atom(pData) then
@@ -419,63 +513,128 @@ export function average(object pData)
 end function
 
 --**
+-- Returns the average (mean) of the data points. 
+-- The equation for average  is: 
+--
+-- {{{
+-- average(X) ==> SUM( X{1..N} ) / N
+-- }}}
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the mean.
+--             Note that all elements are included and any sub-sequences
+--             elements are assumed to have the value zero.
+--
+-- Returns:
+--   atom if there are more than zero items, otherwise it returns an empty sequence.
+--
+-- Comments: 
+--   average() is theoretical probable value of a randomly selected item from the set.
+--
+-- Example 1:
+--   <eucode>
+--   ? averagea( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 4.8125
+--   </eucode>
+--
+-- See also:
+--   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
+--
 export function averagea(object pData)
 	if atom(pData) or length(pData) = 0 then
 		return pData
 	end if
+	if length(pData) = 0 then
+		return {}
+	end if
 	return sum(pData) / length(pData)
 end function
-
+ 
 --**
+-- Returns the largest of the data points. 
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the largest.
+--             Note that only atom elements are included and any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   atom if there is at least one atom item, otherwise it returns an empty sequence.
+--
+-- Example 1:
+--   <eucode>
+--   ? largest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 8
+--   </eucode>
+--
+-- See also:
+--   [[:range]]
+--
 export function largest(object pData)
-	atom pResult, pTemp
-	integer pStarted
+	atom lResult, lTemp
+	integer lFoundAny
 	if atom(pData) then
 			return pData
 	end if
-	pStarted = 0
+	lFoundAny = 0
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
-			pTemp = max(pData[i])
-			if pStarted then
-				if pTemp > pResult then
-					pResult = pTemp
+			lTemp = pData[i]
+			if lFoundAny then
+				if lTemp > lResult then
+					lResult = lTemp
 				end if
 			else
-				pResult = pTemp
-				pStarted = 1
+				lResult = lTemp
+				lFoundAny = 1
 			end if
 		end if
 	end for
-	if pStarted = 0 then
+	if lFoundAny = 0 then
 		return {}
 	end if
-	return pResult
+	return lResult
 end function
 
 --**
+-- Returns the smallest of the data points. 
+--
+-- Parameters:
+--   * pData = A list of 1 or more numbers for which you want the smallest.
+--             Note that only atom elements are included and any sub-sequences
+--             elements are ignored.
+--
+-- Returns:
+--   atom if there is at least one atom item, otherwise it returns an empty sequence.
+--
+-- Example 1:
+--   <eucode>
+--   ? smallest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 1
+--   </eucode>
+--
+-- See also:
+--   [[:range]]
+--
 export function smallest(object pData)
-	atom pResult, pTemp
-	integer pStarted
+	atom lResult, lTemp
+	integer lFoundAny
 	if atom(pData) then
 			return pData
 	end if
-	pStarted = 0
+	lFoundAny = 0
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
-			pTemp = max(pData[i])
-			if pStarted then
-				if pTemp < pResult then
-					pResult = pTemp
+			lTemp = pData[i]
+			if lFoundAny then
+				if lTemp < lResult then
+					lResult = lTemp
 				end if
 			else
-				pResult = pTemp
-				pStarted = 1
+				lResult = lTemp
+				lFoundAny = 1
 			end if
 		end if
 	end for
-	if pStarted = 0 then
+	if lFoundAny = 0 then
 		return {}
 	end if
-	return pResult
+	return lResult
 end function

@@ -1230,3 +1230,46 @@ export function add_item(object needle, sequence haystack, integer pOrder = 1)
 	return haystack
 end function
 
+--**
+-- Returns a sequence of three sub-sequences. The sub-sequences contain
+-- all the elements less than the supplied pivot value, equal to the pivot,
+-- and greater than the pivot.
+--
+-- Parameters:
+--   * pData = Either an atom or a list. An atom is treated as if it is one-element sequence.
+--   * pPivot = An object. Default is zero.
+--
+-- Returns:
+--   sequence: { {less than pivot}, {equal to pivot}, {greater than pivot} }
+--
+-- Comments: 
+--   pivot() is used as a split up a sequence relative to a specific value.
+--
+-- Example 1:
+--   <eucode>
+--   ? pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 ) 
+--     -- Ans: {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}
+--   ? pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) 
+--     -- Ans: {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}
+--   ? pivot( 5 ) 
+--     -- Ans: {{}, {}, {5}}
+--   </eucode>
+
+export function pivot(object pData, object pPivot = 0)
+	sequence lResult
+	integer lPos
+	
+	lResult = {{}, {}, {}}
+	
+	if atom(pData) then
+		pData = {pData}
+	end if
+	
+	for i = 1 to length(pData) do
+		lPos = compare(pData[i], pPivot) + 2
+		lResult[lPos] = append(lResult[lPos], pData[i])
+	end for
+
+	return lResult
+end function
+

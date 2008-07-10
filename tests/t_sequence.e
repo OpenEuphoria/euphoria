@@ -179,16 +179,20 @@ a = split("John Doe")
 b = a[1]
 c = a[2]
 test_equal("More defaulted params and tokens",{"John","Doe"},{b,c})
-					
 test_equal("replace()  #2,5a", "/--ething", replace("//something", "--", 2, 5))
-
 test_equal("replace() #2,5b ", "/--ething        ", replace("//something        ", "--", 2, 5))
-
 test_not_equal("replace() 2,5 #3a", "/--omeething         ", replace("//something                                        ", "--", 2, 5))
-
 test_not_equal("replace() 2,5 #3b", "/--eething         ", replace("//something                                            ", "--", 2, 5))
-
 test_not_equal("replace() 2,5 #3c", " --someething         ", replace(" //something                                           ", "--", 2, 3))
+
+
+test_equal("pivot #1", {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}, pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 )) 
+test_equal("pivot #2", {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}, pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) )
+test_equal("pivot #3", {{}, {}, {5}}, pivot( 5 ) )
+test_equal("pivot #4", {{}, {5}, {}}, pivot( 5, 5 ) )
+test_equal("pivot #5", {{5}, {}, {}}, pivot( 5, 10 ) )
+test_equal("pivot #6", {{}, {}, {}}, pivot( {}) )
+test_equal("pivot #7", {{"abc", "bcd"}, {}, {"def", "efg", "cdf"}}, pivot( {"abc", "def", "bcd", "efg", "cdf"}, "cat") )
 
 test_report()
 
