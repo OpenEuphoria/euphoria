@@ -1,5 +1,9 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
+include io.e
+include error.e
+
 --****
 -- == Input Routines
 -- **Page Contents**
@@ -9,21 +13,24 @@
 -- === Constants
 --
 
--- error status values returned from get() and value():
--- * GET_SUCCESS = 0,
--- * GET_EOF = -1,
--- * GET_FAIL = 1,
--- * GET_NOTHING = -2
+--****
+-- Error status values returned from get() and value() are
+-- 
+-- * ##GET_SUCCESS## = 0,
+-- * ##GET_EOF## = -1,
+-- * ##GET_FAIL## = 1,
+-- * ##GET_NOTHING## = -2
 
 global constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
 				GET_NOTHING = -2
 
---**
+--****
 -- Answer type for ##get##() and ##value##().
--- * GET_SHORT_ANSWER
--- * GET_LONG_ANSWER
+-- 
+-- * ##GET_SHORT_ANSWER##
+-- * ##GET_LONG_ANSWER##
 
 constant DIGITS = "0123456789",
 		 HEX_DIGITS = DIGITS & "ABCDEF",
@@ -466,8 +473,6 @@ global constant
 	GET_SHORT_ANSWER = routine_id("Get"),
 	GET_LONG_ANSWER  = routine_id("Get2")
 
-include io.e
-include error.e
 function get_value(object target, integer start_point, integer answer_type)
 	if answer_type != GET_SHORT_ANSWER and answer_type != GET_LONG_ANSWER then
 		crash("Invalid type of answer, please only use %s (the default) or %s.", {"GET_SHORT_ANSWER", "GET_LONG_ANSWER"})
@@ -492,29 +497,34 @@ function get_value(object target, integer start_point, integer answer_type)
 end function
 
 --**
--- Input, from an open file, a human-readable string of characters representing a Euphoria object. Convert the string into the numeric value of that object. 
+-- Input, from an open file, a human-readable string of characters representing a Euphoria object.
+-- Convert the string into the numeric value of that object. 
 --
 -- Parameters:
--- 	# ##file##: an integer, the handle to an open file from which to read
---  # ##offset##: an integer, an offset to apply to file position before readig. Defaults to 0.
--- 	# ##answer##: an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
+-- # ##file##: an integer, the handle to an open file from which to read
+-- # ##offset##: an integer, an offset to apply to file position before readig. Defaults to 0.
+-- # ##answer##: an integer, either ##GET_SHORT_ANSWER## (the default) or ##GET_LONG_ANSWER##.
 --
 -- Returns:
--- 		A **sequence of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of:
+-- A **sequence** of length 2 (##GET_SHORT_ANSWER##) or 4 (##GET_LONG_ANSWER##), made of
+--
 -- * an integer, the return status. This is any of:
--- ** GET_SUCCESS -- object was read successfully
--- ** GET_EOF     -- end of file before object was read completely
--- ** GET_FAIL    -- object is not syntactically correct
--- ** GET_NOTHING -- nothing was read, even a partial object string, before end of input
--- * an object, the value that was read. This is valid only if return statys is GET_SUCCESS.
--- * an integer, the number of characters read. On an error, this is the point at which the error was detected.
+-- ** ##GET_SUCCESS##: object was read successfully
+-- ** ##GET_EOF##:     end of file before object was read completely
+-- ** ##GET_FAIL##:    object is not syntactically correct
+-- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
+-- * an object, the value that was read. This is valid only if return statys is ##GET_SUCCESS##.
+-- * an integer, the number of characters read. On an error, this is the point at which the 
+--   error was detected.
 -- * an integer, the amount of initial whitespace read before the firrst active character was found
+--
 -- Comments:
--- When ##answer## is not specified, or explicitly GET_SHORT_ANSWER, only the first two elements in thr returned sequence are actually returned.
+-- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
+-- elements in thr returned sequence are actually returned.
 --
--- The GET_NOTHING return status will not be returned if ##answer## is GET_SHORT_ANSWER.
+-- The ##GET_NOTHING## return status will not be returned if ##answer## is ##GET_SHORT_ANSWER##.
 --
--- get() can read arbitrarily complicated Euphoria objects. You
+-- ##get()## can read arbitrarily complicated Euphoria objects. You
 -- could have a long sequence of values in braces and separated by
 -- commas and comments, e.g. ##{23, {49, 57}, 0.5, -1, 99, 'A', "john"}##.
 -- A single call to get() will read in this entire sequence and return its value as a result, 
@@ -523,60 +533,62 @@ end function
 -- If a nonzero offset is supplied, it is interpreted as an offset to the current file
 -- position, and the file will be seek()ed there first.
 --
--- get() returns a 2 or 4 element sequence, like value() does:
+-- ##get()## returns a 2 or 4 element sequence, like ##[[:value]]()## does:
 --
--- * a status code (success/error/end of file/no value at all)</li>
--- * the value just read (meaningful only when the status code is GET_SUCCESS)</li>
--- (optionally)
+-- * a status code (success/error/end of file/no value at all)
+-- * the value just read (meaningful only when the status code is ##GET_SUCCESS##)
+--   (optionally)
 -- * the total number of characters read
 -- * the amount of initial whitespace read.
 --
--- Using the default value for answer, or setting it to GET_SHORT_ANSWER, returns 2 elements.
--- Setting it to GET_LONG_ANSWER causes 4 elements to be returned.
+-- Using the default value for answer, or setting it to ##GET_SHORT_ANSWER##, returns 2 elements.
+-- Setting it to ##GET_LONG_ANSWER## causes 4 elements to be returned.
 --
--- Each call to get() picks up where the previous call left off. For instance, a series of 5 
--- calls to get() would be needed to read in:
+-- Each call to ##get()## picks up where the previous call left off. For instance, a series of 5 
+-- calls to ##get()## would be needed to read in
 -- 
 -- {{{
 -- "99 5.2 {1, 2, 3} "Hello" -1"
 -- }}}
 -- 
--- On the sixth and any subsequent call to get() you would see a GET_EOF status. If you had 
--- something like:
+-- On the sixth and any subsequent call to ##get()## you would see a ##GET_EOF## status. If you had 
+-- something like
 -- 
 -- {{{
 -- {1, 2, xxx}
 -- }}}
 -- 
--- in the input stream you would see a GET_FAIL error status because xxx is not a Euphoria 
+-- in the input stream you would see a ##GET_FAIL## error status because xxx is not a Euphoria 
 -- object. And seeing
 -- 
 -- {{{
 -- -- something\nBut no value
 -- }}}
 --
--- and the input stream stops right there, you'll receive a status code of GET_NOTHING,
--- because nothing but whitespace or comments was read. If you had opted for a short answer, you'd get GET_EOF instead.
+-- and the input stream stops right there, you'll receive a status code of ##GET_NOTHING##,
+-- because nothing but whitespace or comments was read. If you had opted for a short answer, 
+-- you'd get ##GET_EOF## instead.
 -- 
 -- Multiple "top-level" objects in the input stream must be
 -- separated from each other with one or more "whitespace"
 -- characters (blank, tab, \r or \n). At the very least, a top
 -- level number must be followed by a white space from the following object.
--- Whitespace is not necessary <b><i>within</i></b> a top-level object. Comments, terminated by either '\n' or '\r',
--- are allowed anywhere inside sequences, and ignored if at the top level.
--- A call to get() will read one entire top-level object, plus possibly one additional
--- (whitespace) character, after a top level number, even though the next object may have an identifiable starting pont.
+-- Whitespace is not necessary //within// a top-level object. Comments, terminated by either 
+-- '\n' or '\r', are allowed anywhere inside sequences, and ignored if at the top level.
+-- A call to ##get()## will read one entire top-level object, plus possibly one additional
+-- (whitespace) character, after a top level number, even though the next object may have an 
+-- identifiable starting pont.
 --
--- The combination of print() and get() can be used to save a
+-- The combination of ##[[:print]]()## and ##get()## can be used to save a
 -- Euphoria object to disk and later read it back. This technique
 -- could be used to implement a database as one or more large
 -- Euphoria sequences stored in disk files. The sequences could be
 -- read into memory, updated and then written back to disk after
 -- each series of transactions is complete. Remember to write out
--- a whitespace character (using puts()) after each call to print(),
+-- a whitespace character (using ##[[:puts]]()##) after each call to ##[[:print]]()##,
 -- at least when a top level number was just printed.
 -- 
--- The value returned is not meaningful unless you have a GET_SUCCESS status.
+-- The value returned is not meaningful unless you have a ##GET_SUCCESS## status.
 --
 -- Example 1:
 -- <eucode>
@@ -590,9 +602,11 @@ end function
 -- </eucode>
 --
 -- Example 2:
---     See ##bin\mydata.ex##
+--   See ##bin\mydata.ex##
+--
 -- See Also:
--- [[:value]]
+--   [[:value]]
+
 global function get(integer file, integer offset=0, integer answer=GET_SHORT_ANSWER)
 -- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
@@ -602,52 +616,56 @@ global function get(integer file, integer offset=0, integer answer=GET_SHORT_ANS
 end function
 
 --**
--- Read, from a string, a human-readable string of characters representing a Euphoria object. Convert the string into the numeric value of that object.
+-- Read, from a string, a human-readable string of characters representing a Euphoria object. 
+-- Convert the string into the numeric value of that object.
 --
 -- Parameters:
--- 	# ##st##: a sequence, from which to read text
---  # ##offset##: an integer, the position at which to start reading. Defaults to 1.
--- 	# ##answer##: an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
+-- # ##st##: a sequence, from which to read text
+-- # ##offset##: an integer, the position at which to start reading. Defaults to 1.
+-- # ##answer##: an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
 --
 -- Returns:
--- 		A **sequence of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of:
--- * an integer, the return status. This is any of:
--- ** GET_SUCCESS -- object was read successfully
--- ** GET_EOF     -- end of file before object was read completely
--- ** GET_FAIL    -- object is not syntactically correct
--- ** GET_NOTHING -- nothing was read, even a partial object string, before end of input
--- * an object, the value that was read. This is valid only if return statys is GET_SUCCESS.
--- * an integer, the number of characters read. On an error, this is the point at which the error was detected.
--- * an integer, the amount of initial whitespace read before the firrst active character was found
--- Comments:
--- When ##answer## is not specified, or explicitly GET_SHORT_ANSWER, only the first two elements in thr returned sequence are actually returned.
+-- A **sequence** of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of
 --
--- The GET_NOTHING return status will not be returned if ##answer## is GET_SHORT_ANSWER.
+-- * an integer, the return status. This is any of
+-- ** ##GET_SUCCESS##: object was read successfully
+-- ** ##GET_EOF##:     end of file before object was read completely
+-- ** ##GET_FAIL##:    object is not syntactically correct
+-- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
+-- * an object, the value that was read. This is valid only if return statys is ##GET_SUCCESS##.
+-- * an integer, the number of characters read. On an error, this is the point at which the 
+--   error was detected.
+-- * an integer, the amount of initial whitespace read before the firrst active character was found
+--
+-- Comments:
+-- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
+-- elements in thr returned sequence are actually returned.
+--
+-- The ##GET_NOTHING## return status will not be returned if ##answer## is ##GET_SHORT_ANSWER##.
 --
 -- Read the string representation of a Euphoria object st, and compute the value of that object. 
 -- A 2 or 4 element sequence, is returned, whose first element, the return status, can
--- be one of:
+-- be one of
 --
--- * GET_SUCCESS -- a valid object representation was found
--- * GET_EOF     -- end of string reached too soon
--- * GET_FAIL    -- syntax is wrong
--- * GET_NOTHING -- nothing was read, even a partial object string, before end of input
+-- * ##GET_SUCCESS##: a valid object representation was found
+-- * ##GET_EOF##:     end of string reached too soon
+-- * ##GET_FAIL##:    syntax is wrong
+-- * ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
 --
 -- The start_point parameter is the point at which parsing starts. It defaults to 1 (the start 
 -- of the string).
 --
--- Comments:
---     This works the same as get(), but it reads from a string that you supply, rather than 
---     from a file or device.
+-- This works the same as ##[[:get]]()##, but it reads from a string that you supply, rather than 
+-- from a file or device.
 --
---     After reading one valid representation of a Euphoria object, value() will stop reading 
---     and ignore any additional characters in the string. For example, "36" and "36P" will 
---     both give you {GET_SUCCESS, 36}.
+-- After reading one valid representation of a Euphoria object, ##value()## will stop reading 
+-- and ignore any additional characters in the string. For example, "36" and "36P" will 
+-- both give you ##{GET_SUCCESS, 36}##.
 --
--- The function returns {return_status, value} if the answer type is not passed or set to 
--- GET_SHORT_ANSWER. If set to GET_LONG_ANSWER, the number of character read and the amount of 
--- leading whitespace are returned in 3rd and 4th position. The GET_NOTHING return status can 
--- occur only on a long answer.
+-- The function returns ##{return_status, value}## if the answer type is not passed or set to 
+-- ##GET_SHORT_ANSWER##. If set to ##GET_LONG_ANSWER##, the number of character read and the 
+-- amount of leading whitespace are returned in 3rd and 4th position. The ##GET_NOTHING## return 
+-- status can occur only on a long answer.
 --
 -- Example 1:
 -- <eucode>
@@ -666,8 +684,10 @@ end function
 -- s = value("+++")
 -- -- s is {GET_FAIL, 0}
 -- </eucode>
+--
 -- See Also:
--- [[:get]]
+--   [[:get]]
+
 global function value(sequence st, integer start_point=1, integer answer=GET_SHORT_ANSWER)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
@@ -676,3 +696,4 @@ global function value(sequence st, integer start_point=1, integer answer=GET_SHO
 -- Embedded comments inside sequence are now supported.
 	return get_value(st, start_point, answer)
 end function
+
