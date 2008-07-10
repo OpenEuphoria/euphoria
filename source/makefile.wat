@@ -616,6 +616,9 @@ dosbackend : .SYMBOLIC builddirs
 dos : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
+doseubin : .SYMBOLIC builddirs
+	wmake -f makefile.wat ex.exe EX=exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
+
 backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exb.lbc
 	@%append .\$(OBJDIR)\exb.lbc option quiet
@@ -682,12 +685,14 @@ rev.e :
 
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
-	$(EXE) $(INCDIR) ..\ec.ex $(INCDIR) ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	-if exist scientific.c copy scientific.c scientif.c
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
-	$(EXE) $(INCDIR) ..\ec.ex $(INCDIR) ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	-if exist scientific.c copy scientific.c scientif.c
 	cd ..
 
 .\$(OBJDIR)\int.obj :  .\$(OBJDIR)\int.c
