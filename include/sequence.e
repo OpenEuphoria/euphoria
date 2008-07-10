@@ -1344,6 +1344,7 @@ end function
 -- include text.e
 -- s = apply({1, 2, 3, 4}, routine_id("sprint"))
 -- -- s is {"1", "2", "3", "4"}
+-- </eucode>
 --
 -- Example 2:
 -- <eucode>

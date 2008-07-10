@@ -253,17 +253,76 @@ export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- 		# ##obj##: any object, so no crash takes place.
 --
 -- Comments:
--- A datetime type consists of a sequence of length 6 in the form {year, month, dat_of_month,hour, minute, second}. Checks are made to guarantee those values are in range.
+-- A datetime type consists of a sequence of length 6 in the form 
+-- ##{year, month, dat_of_month,hour, minute, second}##. Checks are made to guarantee 
+-- those values are in range.
 
 export type datetime(object o)
-		return sequence(o) and length(o) = 6
-			and integer(o[YEAR]) and integer(o[MONTH]) and integer(o[DAY])
-			and integer(o[HOUR]) and integer(o[MINUTE]) and atom(o[SECOND]
-		and o[MONTH] >= 1 and o[MONTH] <= 12
-		and o[DAY] >= 1 and o[DAY] <= daysInMonth(o[YEAR], o[MONTH])
-		and o[HOUR] >= 0 and o[HOUR] <= 23
-		and o[MINUTE] >= 0 and o[MINUTE] <= 59
-		and o[SECOND] >= 0 and o[SECOND] < 60)
+	if not sequence(o) then
+		return 0
+	end if
+
+	if not (length(o) = 6) then
+		return 0
+	end if
+
+	if not integer(o[YEAR]) then
+		return 0
+	end if
+
+	if not integer(o[MONTH]) then
+		return 0
+	end if
+
+	if not integer(o[HOUR]) then
+		return 0
+	end if
+	
+	if not integer(o[MINUTE]) then
+		return 0
+	end if
+	
+	if not atom(o[SECOND]) then
+		return 0
+	end if
+
+	if not (o[MONTH] >= 1) then
+		return 0
+	end if
+
+	if not (o[DAY] >= 1) then
+		return 0
+	end if
+
+	if not (o[DAY] <= 31) then
+		return 0
+	end if
+
+	if not (o[HOUR] >= 0) then
+		return 0
+	end if
+
+	if not (o[HOUR] <= 23) then
+		return 0
+	end if
+
+	if not (o[MINUTE] >= 0) then
+		return 0
+	end if
+
+	if not (o[MINUTE] <= 59) then
+		return 0
+	end if
+
+	if not (o[SECOND] >= 0) then
+		return 0
+	end if
+
+	if not (o[SECOND] <= 60) then
+		return 0
+	end if
+
+	return 1
 end type
 
 --****
