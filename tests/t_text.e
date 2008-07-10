@@ -31,7 +31,8 @@ test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
 					
 test_equal("sprint() integer", "10", sprint(10))
 test_equal("sprint() float", "5.5", sprint(5.5))
-test_equal("sprint() sequence", "{1,2,3}", sprint({1,2,3}))
+test_equal("sprint() sequence #1", "{1,{2},3,{}}", sprint({1,{2},3,{}}))
+test_equal("sprint() sequence #2", "{97,98,99}", sprint("abc"))
 test_equal("sprintf() integer", "i=1", sprintf("i=%d", {1}))
 test_equal("sprintf() float", "i=5.5", sprintf("i=%.1f", {5.5}))
 test_equal("sprintf() percent", "%", sprintf("%%", {}))
@@ -72,8 +73,14 @@ test_equal("keyvalues #7", { {"colors", "[black, blue, red]"}  } , s)
 s = keyvalues("colors=`~[black, blue, red]`")
 test_equal("keyvalues #8", { {"colors", "[black, blue, red]"}  }, s)
 
-s = keyvalues("colors=`[black, blue, red]")
+s = keyvalues("colors=`[black, blue, red]`")
 test_equal("keyvalues #9", { {"colors", {"black", "blue", "red"}}  }, s)
+
+s = keyvalues("colors=black, blue, red", "",,,"")
+test_equal("keyvalues #10", { {"colors", "black, blue, red"}  }, s)
+
+s = keyvalues("colors=[black, blue, red]\nanimals=[cat,dog, rabbit]\n")
+test_equal("keyvalues #11", { {"colors", { "black", "blue", "red"}}, {"animals", { "cat", "dog", "rabbit"}  } }, s)
 
 test_report()
 

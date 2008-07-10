@@ -39,6 +39,12 @@
 -- as print(fn, x), except that the output is returned as a sequence of characters, rather 
 -- than being sent to a file or device. x can be any Euphoria object.
 --
+-- Parameters:
+--   # ##x## - Any Euphoria object.
+--
+-- Returns:
+--   ##sequence## - A text representation of ##x##.
+--
 -- Comments:
 -- The atoms contained within x will be displayed to a maximum of 10 significant digits, 
 -- just as with print().
@@ -63,28 +69,37 @@ export function sprint(object x)
 -- This is the same as the output from print(1, x) or '?', but it's
 -- returned as a string sequence rather than printed.
 	sequence s
-								 
+
 	if atom(x) then
 		return sprintf("%.10g", x)
 	else
 		s = "{"
 		for i = 1 to length(x) do
-			s &= sprint(x[i])  
-			if i < length(x) then
-				s &= ','
+			if atom(x[i]) then
+				s &= sprintf("%.10g", x[i])
+			else
+				s &= sprint(x[i])
 			end if
+			s &= ','
 		end for
-		s &= "}"
+		if s[$] = ',' then
+			s[$] = '}'
+		else
+			s &= '}'
+		end if
 		return s
 	end if
 end function
 
 --**
--- Trim any item in what from the head (start) of str
+-- Trim any item in ##what## from the head (start) of ##str##
 --
 -- Parameters:
---   * str - string to trim.
---   * what - what to trim (defaults to " \t\r\n").
+--   # ##str## - string to trim.
+--   # ##what## - what to trim (defaults to " \t\r\n").
+--
+-- Returns:
+--   ##sequence## - The trimmed version of ##str##
 --
 -- Example 1:
 -- <eucode>
@@ -110,15 +125,18 @@ export function trim_head(sequence str, object what=" \t\r\n")
 end function
 
 --**
--- Trim any item in what from the end (tail) of str
+-- Trim any item in ##what## from the end (tail) of ##str##
 --
 -- Parameters:
---   * str - string to trim.
---   * what - what to trim (defaults to " \t\r\n").
+--   # ##str## - string to trim.
+--   # ##what## - what to trim (defaults to " \t\r\n").
+--
+-- Returns:
+--   ##sequence## - The trimmed version of ##str##
 --
 -- Example 1:
 -- <eucode>
--- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
+-- s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "\r\nSentence read from a file"
 -- </eucode>
 --
@@ -140,11 +158,14 @@ export function trim_tail(sequence str, object what=" \t\r\n")
 end function
 
 --**
--- Trim any item in what from the head (start) and tail (end) of str
+-- Trim any item in ##what## from the head (start) and tail (end) of ##str##
 --
 -- Parameters:
---   * str - string to trim.
---   * what - what to trim (defaults to " \t\r\n").
+--   # ##str## - string to trim.
+--   # ##what## - what to trim (defaults to " \t\r\n").
+--
+-- Returns:
+--   ##sequence## - The trimmed version of ##str##
 --
 -- Example 1:
 -- <eucode>
@@ -162,7 +183,17 @@ end function
 constant TO_LOWER = 'a' - 'A'
 
 --**
--- Convert an atom or sequence to lower case. Only alters characters in the 'A'..'Z' range.
+-- Convert an atom or sequence to lower case. 
+--
+-- Parameters:
+--   # ##x## - Any Euphoria object.
+--
+-- Comments:
+-- Alters characters in the 'A'..'Z' range. \\
+-- **WARNING**, This also effects floating point numbers in the range 65 to 90.
+--
+-- Returns:
+--   ##sequence## - The lowercase version of ##x##
 --
 -- Example 1:
 -- <eucode>
@@ -185,7 +216,17 @@ export function lower(object x)
 end function
 
 --**
--- Convert an atom or sequence to upper case. Only alters characters in the 'a'..'z' range.
+-- Convert an atom or sequence to upper case.
+--
+-- Parameters:
+--   # ##x## - Any Euphoria object.
+--
+-- Comments:
+-- Alters characters in the 'a'..'z' range. \\
+-- **WARNING**, This also effects floating point numbers in the range 97 to 122.
+--
+-- Returns:
+--   ##sequence## - The uppercase version of ##x##
 --
 -- Example 1:
 -- <eucode>
@@ -233,6 +274,26 @@ end function
 -- If you need to have a bracket as the first character in a data value, prefix
 -- it with a tilde. Actually a leading tilde will always just be stripped off
 -- regardless of what it prefixes. See example #6.
+--
+-- Parameters:
+-- # ##source## - A text sequence, containing the representation of the key/values.
+-- # ##pair_delim## - An object containing a list of elements that delimit one
+--                   key/value pair from the next. The defaults are semi-colon (;)
+--                   and comma (,).
+-- # ##kv_delim## - An object containing a list of elements that delimit the
+--                key from its value. The defaults are colon (:) and equal (=).
+-- # ##quotes## - An object containing a list of elements that can be used to
+--                enclose either keys or values that contain delimiters or
+--                whitespace. The defaults are double-quote ("), single-quote (')
+--                and back-quote (`)
+-- # ##whitespace## - An object containing a list of elements that are regarded
+--                as whitespace characters. The defaults are space, tab, new-line,
+--                and carriage-return.
+-- # ##haskeys## An integer containing true or false. The default is true. When
+-- ##true##, the ##kv_delimim## values are used to separate keys from values, but
+-- when ##false## it is assumed that each 'pair' is actually just a value. 
+--
+-- Returns:
 --
 -- Example 1:
 -- <eucode>
