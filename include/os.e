@@ -376,7 +376,7 @@ export function is_win_nt()
 	end ifdef
 end function
 
-export function setenv(sequence env, sequence val, integer overwrite)
+export function setenv(sequence env, sequence val, integer overwrite=1)
 	atom ret, penv, pval
 	ifdef DOS32 then
 		-- TODO
