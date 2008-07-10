@@ -1296,6 +1296,11 @@ end ifdef
 -- 		[[:get]], [[:set]], [[:decanonical]]
 export function canonical(sequence new_locale)
 	integer w, ws, p, n
+	ifdef WIN32 then
+		if find('.', new_locale) then
+			new_locale = new_locale[1..find('.', new_locale)-1]
+		end if
+	end ifdef
 	p = find(new_locale, posix_names)
 	w = find(new_locale, w32_names)
 	ws = find(new_locale, w32_name_canonical)
@@ -1323,6 +1328,11 @@ end function
 -- 		[[:get]], [[:set]], [[:canonical]]
 export function decanonical(sequence new_locale)
 	integer w, ws, p, n
+	ifdef WIN32 then
+		if find('.', new_locale) then
+			new_locale = new_locale[1..find('.', new_locale)-1]
+		end if
+	end ifdef
 	p = find(new_locale, posix_names)
 	w = find(new_locale, w32_names)
 	ws = find(new_locale, w32_name_canonical)
@@ -1338,3 +1348,19 @@ export function decanonical(sequence new_locale)
 	end if
 	return platform_locale[n]
 end function
+
+export function canon2win(sequence new_locale)
+	integer w
+	ifdef WIN32 then
+		if find('.', new_locale) then
+			new_locale = new_locale[1..find('.', new_locale)-1]
+		end if
+	end ifdef
+	w = find(new_locale, posix_names)
+	if w = 0 then
+		-- unknown
+		return "C"
+	end if
+	return w32_names[w]
+end function
+

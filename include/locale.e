@@ -15,6 +15,7 @@ include text.e
 include io.e
 include map.e as m
 include localeconv.e as lcc
+include lcid.e as lcid
 
 ------------------------------------------------------------------------------------------
 --
@@ -297,7 +298,7 @@ export function money(atom amount)
 	else
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string(sprintf("%.8f", {amount}))
-		size = c_func(f_strfmon, {LC_ALL, 0, pTmp, NULL, pResult, 4 * 160})
+		size = c_func(f_strfmon, {lcid:get_lcid(lcc:canon2win(get())), 0, pTmp, NULL, pResult, 4 * 160})
 	end ifdef
 
 	result = peek_string(pResult)
@@ -334,7 +335,7 @@ export function number(atom num)
 	else
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string(sprintf("%.8f", {num}))
-		size = c_func(f_strfnum, {LC_ALL, 0, pTmp, NULL, pResult, 4 * 160})
+		size = c_func(f_strfnum, {lcid:get_lcid(lcc:canon2win(get())), 0, pTmp, NULL, pResult, 4 * 160})
 	end ifdef
 
 	result = peek_string(pResult)
