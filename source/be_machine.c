@@ -205,6 +205,11 @@ extern IFILE last_w_file_ptr;
 /********************/
 /* Local variables */
 /*******************/
+#ifdef EDOS
+#ifndef EDJGPP
+static int page_was_set = 0;
+#endif
+#endif
 static int win95 = UNKNOWN;   /* TRUE if long filenames are supported in DOS */
 
 #ifndef EWINDOWS
@@ -262,7 +267,7 @@ IFILE which_file();
 void NewConfig();
 s1_ptr NewS1();
 char *getcwd();
-struct rccoord _gettextposition();
+struct rccoord GetTextPositionP();
 void do_exec(int *);
 void AfterExecute(void);
 void Machine_Handler();
@@ -584,6 +589,8 @@ void InitGraphics()
 	NewConfig();
 
 #if defined(EDOS) && !defined(EDJGPP)
+if (!(getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1))
+{
 	if (config.numtextcols > 80 || config.mode > 10 ||
 		(config.mode >= 4 && config.mode <= 6)) { 
 		/* something doesn't work if starting in graphics mode */
@@ -632,6 +639,7 @@ void InitGraphics()
 		}
 	}
 /* _settextwindow(1,1,25,80); ?*/
+} //endif EUVISTA
 #endif
 }
 
@@ -650,8 +658,10 @@ void EndGraphics()
 #else
 /*    (void)Cursor(C_UNDERLINE); */
 	
+	if (page_was_set) {
 	_setactivepage(0);
 	_setvisualpage(0);
+	}
 
 #endif
 #endif
@@ -1513,11 +1523,24 @@ void NewConfig()
 	image_ok = FALSE;
 #else
 
+if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
+{
+	config.numvideopages = 1;
+	line_max = 24; // maybe use env var
+	col_max = 80;  // maybe use env var
+	config.monitor = _COLOR;
+	config.numtextrows = line_max;
+	config.numtextcols = col_max;
+	image_ok = FALSE;
+}
+else
+{
 	_getvideoconfig(&config); // causes win95 to go full-screen, first time
 	
 	line_max = config.numtextrows;
 	col_max = config.numtextcols;
 	fast_image_check(); 
+} // endif EUVISTA
 #endif
 #endif
 
@@ -3525,7 +3548,7 @@ static object GetPosition()
 	obj_ptr[1] += 1;
 	obj_ptr[2] += 1;
 #else
-	pos = _gettextposition();
+	pos = GetTextPositionP();
 	obj_ptr[1] = MAKE_INT(pos.row);
 	obj_ptr[2] = MAKE_INT(pos.col);
 #endif
@@ -4794,6 +4817,7 @@ object machine(object opcode, object x)
 #if !defined(EDOS) || defined(EDJGPP)
 				not_supported("set_display_page()");
 #else
+				page_was_set = 1;
 				_setvisualpage(get_int(x));  // x will be an integer, but might
 #endif                                   // be in f.p. form
 				return ATOM_1; 
@@ -4810,6 +4834,7 @@ object machine(object opcode, object x)
 				if (get_int(x) != 0)
 					not_supported("set_active_page");
 #else
+				page_was_set = 1;
 				_setactivepage(get_int(x));  
 #endif
 				return ATOM_1;

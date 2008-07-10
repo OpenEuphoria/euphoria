@@ -182,7 +182,7 @@ char *EMalloc();
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
-struct rccoord _gettextposition();
+struct rccoord GetTextPositionP();
 static void ShowName();
 static int screen_size();
 void RTInternal();
@@ -830,7 +830,7 @@ void ShowDebug()
 
 #ifdef EDOS   
 #ifndef EDJGPP   // for now
-	MainPos = _gettextposition();
+	MainPos = GetTextPositionP();
 	MainCol = _gettextcolor();
 	MainBkCol = _getbkcolor(); 
 #endif  
@@ -925,7 +925,7 @@ static void SaveDebugImage()
 #ifndef EDJGPP  // for now  
 	DebugCol = _gettextcolor();
 	DebugBkCol = _getbkcolor();
-	DebugPos = _gettextposition();  //EUNIX too?
+	DebugPos = GetTextPositionP();  //EUNIX too?
 #endif
 #endif
 }

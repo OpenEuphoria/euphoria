@@ -385,8 +385,8 @@ static int user_abort = FALSE; /* TRUE if abort() was called by user program */
 #ifdef EGPM
 int Mouse_Handler(Gpm_Event *, void *);
 #endif
-struct rccoord _gettextposition();
 #endif
+struct rccoord GetTextPositionP();
 symtab_ptr Locate();
 void de_reference();
 s1_ptr NewS1();
@@ -4714,7 +4714,7 @@ void key_gets(char *input_string)
 	cursor.row += 1;
 	cursor.col += 1;
 #else   
-	cursor = _gettextposition();
+	cursor = GetTextPositionP();
 #endif
 
 #endif

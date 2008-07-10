@@ -113,16 +113,38 @@ void RTInternal();
 /*********************/
 /* Defined functions */
 /*********************/
-#ifdef EUNIX
-struct rccoord _gettextposition()
+struct rccoord GetTextPositionP()
 {
+#if defined(EDOS) && !defined(EDJGPP)
+if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
+{
+#endif
 		struct rccoord p;
 		
 		p.row = screen_line;
 		p.col = screen_col;
 		return p;
+#if defined(EDOS) && !defined(EDJGPP)
+} else {
+		return _gettextposition();
+} //endif EUVISTA
+#endif
+}
+void OutTextP(const char * c)
+{
+#if defined(EDOS) && !defined(EDJGPP)
+if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
+{
+#endif
+	printf(c);
+#if defined(EDOS) && !defined(EDJGPP)
+} else {
+	_outtext(c);
+} //endif EUVISTA
+#endif
 }
 
+#ifdef EUNIX
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS], 
 				 struct char_cell b[MAX_LINES][MAX_COLS])
 // copy a screen to another area
@@ -195,7 +217,7 @@ void InitInOut()
 
 #else
 	//DOS
-	position = _gettextposition();  // causes OpenWatcom 1.4 to go full-screen
+	position = GetTextPositionP();  // causes OpenWatcom 1.4 to go full-screen
 
 	screen_col = position.col;   
 	err_to_screen = TRUE;  /* stderr always goes to screen in DOS & WIN32 */
@@ -543,7 +565,7 @@ static void expand_tabs(char *raw_string)
 #ifdef EDJGPP
 				mem_cputs(expanded_string); //critical function
 #else
-				_outtext(expanded_string); //critical function
+				OutTextP(expanded_string); //critical function
 #endif
 #endif // EUNIX
 
@@ -595,7 +617,7 @@ static void expand_tabs(char *raw_string)
 #else           
 			*expanded_ptr++ = c;
 			*expanded_ptr = '\0';
-			_outtext(expanded_string);
+			OutTextP(expanded_string);
 #endif
 #endif
 			screen_col = 1;
@@ -627,7 +649,7 @@ static void expand_tabs(char *raw_string)
 #ifdef EDJGPP
 		mem_cputs(expanded_string);
 #else       
-		_outtext(expanded_string);
+		OutTextP(expanded_string);
 #endif
 #endif
 #endif
@@ -742,7 +764,12 @@ void ClearScreen()
 		clear_to_color(screen, current_bg_color);
 	SetPosition(1,1);
 #else
+if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
+{
+	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+} else {
 	_clearscreen(_GCLEARSCREEN);
+} //endif EUVISTA
 #endif
 #endif
 	screen_line = 1;
@@ -766,7 +793,12 @@ void SetPosition(int line, int col)
 	}
 		
 #else   
+if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
+{
+	// no known workaround yet
+} else {
 	_settextposition(line, col);
+} //endif EUVISTA
 #endif
 #endif
 
