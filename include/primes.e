@@ -21,6 +21,28 @@ export sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 --
 
 --**
+-- Returns all the prime numbers below some threshhold assessed in a possibly limited time.
+--
+-- Parameters:
+--		# ##pMax##: an integer, the value below which all returned prime numbers will be
+--		# ##pTimeOut##: an atom, the number of seconds allotted to computation. Defaults to 10.0.
+--
+-- Returns:
+--		A **sequence** made of prime numbers below ##pMax##, in increasing order.
+--
+-- Comments:
+-- The returned sequence doesn't miss any prime number in less than its last and largest element. If the function times out, it may not hold all primes below ##pMax##, but only the largest ones will be absent.
+--
+-- There is no provision to disable the timeut. Simply give it a large enough value.
+--
+-- Example 1:
+-- <eucode>
+-- ?calc_primes(1000,5)
+-- -- On a very slow computer, you may only get all primes up to say 719. On a faster computer, the last element printed out will be 997. The function always returns within 5 seconds.
+-- </eucode>
+--
+-- See Also:
+--		[[:next_prime]]
 export function calc_primes(integer pMax, atom pTimeLimit = 10)
 	sequence lResult
 	integer lCandidate
@@ -86,9 +108,26 @@ export function calc_primes(integer pMax, atom pTimeLimit = 10)
 end function
 
 --**
--- Returns the next prime number on or after 'n'
-
-export function next_prime(integer n, integer pDefault = 1)
+-- Return the next prime number on or after some number
+--
+-- Paremeters:
+-- 		# ##n##: an integer, the starting point for the search
+--		# ##pDefault##: an integer, used to signal a timed out search. Defaults to -1.
+--
+-- Returns:
+--		An **integer**, which is prime only if it took less than 1 second to determmine the next prime greater or equal to ##n##.
+--
+-- Comments:
+-- The default value of -1 will alert you about an invalid returned value, since a prime not less than ##n## is expected. However, you can pass another value for this parameter.
+--
+-- Example 1:
+-- <eucode>
+-- ?next_prime(997)
+-- -- On a very slow computer, you might get -997, but 1003 is expected.
+--
+-- See Also:
+-- [[:calc_primes]]
+export function next_prime(integer n, integer pDefault = -1)
 	integer i
 
 

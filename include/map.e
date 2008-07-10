@@ -305,7 +305,7 @@ end function
 -- Returns the value that corresponds to the object ##keys## in the nested map m.  ##keys## is a
 -- sequence of keys.  If any key is not in the map, the object defaultValue is returned instead.
 
-export function nested_get( map m, sequence keys, object defaultValue )
+export function nested_get( map m, sequence keys, object defaultValue, integer arg456, integer arg457, integer arg458 )
 	for i = 1 to length( keys ) - 1 do
 		object val = get( m, keys[1], 0 )
 		if atom( val ) then
@@ -346,7 +346,7 @@ end function
 --   If existing entry with the same key is already in the map, the value of the entry is updated.
 --
 -- ##pTrigger## sets the sensitivity of ##m## to additions. The lower the value, the more often an addition will cause a [[:rehash]](). A value of 0 or less disables the check, ensuring no rehash takes place on this particular call.. 
-
+--
 -- Example 1:
 --   <eucode>
 --   map ages

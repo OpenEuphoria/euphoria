@@ -641,29 +641,15 @@ end function
 -- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
 -- elements in thr returned sequence are actually returned.
 --
--- The ##GET_NOTHING## return status will not be returned if ##answer## is ##GET_SHORT_ANSWER##.
---
--- Read the string representation of a Euphoria object st, and compute the value of that object. 
--- A 2 or 4 element sequence, is returned, whose first element, the return status, can
--- be one of
---
--- * ##GET_SUCCESS##: a valid object representation was found
--- * ##GET_EOF##:     end of string reached too soon
--- * ##GET_FAIL##:    syntax is wrong
--- * ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
---
--- The start_point parameter is the point at which parsing starts. It defaults to 1 (the start 
--- of the string).
---
--- This works the same as ##[[:get]]()##, but it reads from a string that you supply, rather than 
+-- This works the same as [[:get]](), but it reads from a string that you supply, rather than
 -- from a file or device.
 --
--- After reading one valid representation of a Euphoria object, ##value()## will stop reading 
+-- After reading one valid representation of a Euphoria object, ##value()## will stop reading
 -- and ignore any additional characters in the string. For example, "36" and "36P" will 
 -- both give you ##{GET_SUCCESS, 36}##.
 --
 -- The function returns ##{return_status, value}## if the answer type is not passed or set to 
--- ##GET_SHORT_ANSWER##. If set to ##GET_LONG_ANSWER##, the number of character read and the 
+-- ##GET_SHORT_ANSWER##. If set to ##GET_LONG_ANSWER##, the number of characters read and the
 -- amount of leading whitespace are returned in 3rd and 4th position. The ##GET_NOTHING## return 
 -- status can occur only on a long answer.
 --

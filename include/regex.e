@@ -88,6 +88,7 @@ export constant
 --
 
 --**
+-- Basically, a ##regex## is an memory address, hence an atom.
 export type regex(object o)
 	return atom(o)
 end type
@@ -99,12 +100,18 @@ end type
 --**
 -- Return an allocated regular expression, which must be freed using free() when done.
 --
--- Comments:
--- 
--- Compiles the pattern and returns an atom that represents the regular expression
--- to be used elsewhere.
+-- Parameters:
+--		# ##pattern##: a sequence representing a human readable regular expression
+--		# ##flags##: an atom, which may be used to pass options to the processing of ##pattern##. Defaults to 0.
 --
--- See the pcre manpages for more details on regular expressions: http://www.pcre.org/pcre.txt
+-- Returns:
+--		A **regex** which other regular expression routines can work on.
+--
+-- Comments:
+--
+-- This routine is the only one that accepts a human readable regular expression like "[A-Z_a-z0-9]". The string is compiled and a regex is returned. This is allocated memory and has to be freed when done wih it.
+--
+-- See the pcre manpages for more details on regular expressions: [[http://www.pcre.org/pcre.txt]]
 --
 -- Example:
 -- <eucode>
@@ -118,16 +125,19 @@ end function
 --**
 -- Returns the first match in text
 --
+-- Parameters:
+--		# ##re##: a regex for a subject to be matched against
+--		# ##text##: a string, the sequence inside which matches will be looked for
+--		# ##from##: an integer, the point in the string from which to start matching. Defaults to 1.
+--		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
+--
+-- Returns:
+--		An **object**, either an atom when an error occurred or no matc was found, or a sequence. The sequence is made of pairs, described in the Comments below.
+--
 -- Comments:
--- Searches text using the regular expression, re, which was returned from new(), and 
--- returns the following
--- 
--- * No matches:  an atom representing the PCRE error condition
--- * N matches:   an N+1 length sequence.  Each element of the sequence
---                is a pair of indices into text representing the start
---                and end of the substring.  The first element is the 
---                entire match, and subsequent elements are the captured
---                substrings, if any.  An empty substring will be {1,0}.
+-- If any match is found, then a sequence of pairs is returned. Each pair is made of the dtart and end point of a slice of ##text##. The first element represents the whole match.
+--
+-- If the matched regex has sunstrings, which means some groups are delineated by an opening and closing parenthesis, then each of thiese substrings was matched as well, and the subsequent pairs show where these submatches took place.
 --
 -- Example 1:
 -- <eucode>
@@ -137,8 +147,11 @@ end function
 -- for i = 1 to length( substrings ) do
 --     printf(1, "substring #%d: %s\n", {i, text[substrings[i][1]..substrings[i][2]] } )
 -- end for
--- -- substring #1: foobar
--- -- substring #2: bar
+-- -- substring #1 (full match): foobar
+-- -- substring #2 (first sunstring): bar
+-- -- no more substrings, so match results stop here.
+-- See Also:
+--	[[:search_all]]
 -- </eucode>
 
 export function search(regex re, sequence text, integer from=1, atom options=0)
@@ -148,9 +161,19 @@ end function
 --**
 -- Returns all matches in text
 --
+-- Parameters:
+--		# ##re##: a regex for a subject to be matched against
+--		# ##text##: a string, the sequence inside which matches will be looked for
+--		# ##from##: an integer, the point in the string from which to start matching. Defaults to 1.
+--		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
+--
+-- Returns:
+--		An **object**, either an atom for no match or some error, or a sequence of match results.
+--
 -- Comments:
---     This function returns a sequence of results in the same format as search().
-
+--     When the function returns a sequence, each element is a sequence itself, as described in the Comments: section for [[:search]].
+-- See Also:
+--	[[:search]]
 export function search_all(regex re, sequence text, integer from=1, atom options=0)
 	object result
 	sequence results
@@ -174,7 +197,19 @@ export function search_all(regex re, sequence text, integer from=1, atom options
 end function
 
 --**
---  Replaces all matches of the regex with the replacement text.
+--  Replaces all matches of a regex with the replacement text.
+--
+-- Parameters:
+-- 		# ##re##: a regex which iwill be used for matching
+--		# ##text##: a string on which search and replace will apply
+--		# ##replacement##: a string, used to replace each of the full matches found.
+--		# ##options##: an atom, defaulted to 0.
+--
+-- Returns:
+--		A **sequence**, the modified ##text##.
+--
+--	Comments:
+--	Matches may be found against the result of previous replacements. Careful experimentation is highly recommended before doing things like text = regex:search_replace(re,text,whatever,something).
 
 export function search_replace(regex re, sequence text, sequence replacement, 
                                atom options = 0)
@@ -189,6 +224,28 @@ export function search_replace(regex re, sequence text, sequence replacement,
 end function
 
 --**
+-- Performs a search nd replace operation, with the replacement being computed by a user defined routine.
+--
+-- Parameters:
+-- 		# ##re##: a regex which iwill be used for matching
+--		# ##text##: a string on which search and replace will apply
+--		# ##rid##: an integer, the id of a routine which will determine the replacement string at each step.
+--		# ##options##: an atom, defaulted to 0.
+--
+-- Returns:
+--		A **sequence**, the modified ##text##.
+--
+-- Comments:
+-- Whenever a match is found, [[:search_replace]] uses a fixed value as a replacement. OInstead, ##search_replace_user##() will replace slices by actual substrings, and pass the resulting sequence to the function you are required to pass the id of.
+--
+-- The custom replace function must take one argument, a sequence of strings, and must return a string. This string will be used as the replacement for the given full match.
+--
+-- Apart from the above, ##search_replace_user##() works like [[:search_replace]].
+--
+-- The routine is responsible for maintaining any state it requires for proper operation.
+--
+-- See Also:
+-- [[:search_replace]]
 export function search_replace_user(regex re, sequence text, integer rid, 
 									atom options = 0)
 	sequence matches, m
@@ -209,16 +266,30 @@ end function
 
 --**
 -- Returns 1 if the regex matches anywhere in the text, 0 otherwise.
-
-export function matches(regex re, sequence text, atom options = 0)
-	return sequence(search(re, text, options))
+--
+-- Parameters:
+--		# ##re##: a regex for a subject to be matched against
+--		# ##text##: a string, the sequence inside which matches will be looked for
+--		# ##from##: an integer, the point in the string from which to start matching. Defaults to 1.
+--		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
+--
+-- Returns:
+-- 		An **integer**, 0 if no match or some error, 1 if there is any match.
+export function matches(regex re, sequence text, integer from=1, atom options = 0)
+	return sequence(search(re, text,from,  options))
 end function
 
 --**
 -- Frees the memory used by regex re, which must have been previously returned by new()
 --
+-- Parameters:
+--		# ##re##: the regex to free.
+--
+-- Comments:
+-- Be sure to use ##regex:free##(), not [[:machine:free]]().
+--
 -- See Also:
---     new
+--     [[:new]]
 
 export procedure free( regex re )
 	machine_proc( M_FREE_PCRE, re )
@@ -226,7 +297,17 @@ end procedure
 
 --**
 -- Returns 1 if the regex matches the entire text, 0 otherwise
-
+--
+-- Parameters:
+--		# ##re##: a regex for a subject to be matched against
+--		# ##text##: a string, the sequence inside which matches will be looked for
+--		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
+--
+-- Returns:
+-- 		An **integer**, 0 if no match or some error, 1 if the whole of ##text## matches ##re## using ##options##.
+--
+-- See Also:
+-- [[:matches]]
 export function full_match(regex re, sequence text, atom options = 0)
 	object matches
 	matches = search( re, text, 1, options )

@@ -217,15 +217,14 @@ procedure pretty( object x, sequence options )
 end procedure
 
 --**
--- Print, to file or device fn, an object x, using braces { , , , }, indentation, and multiple lines 
+-- Print an object to a file or device, using braces { , , , }, indentation, and multiple lines
 -- to show the structure.
 --
 -- Parameters:
--- # file number to write to
--- # the object to display
+-- # ##fn##: an integer, the file/device number to write to
+-- # ##x##: the object to display/convert to printable form
 -- # is an (up to) 10-element options sequence: Pass {} to select the defaults, or set options 
 --   as below:
--- # is an (up to) 8-element options sequence: Pass {} to select the defaults, or set options as below:
 --   ## display ASCII characters:
 --      *** 0: never
 --      *** 1: alongside any integers in printable ASCII range (default)
@@ -243,12 +242,12 @@ end procedure
 --   ## maximum number of lines to output 
 --   ## line breaks between elements   - default 1 (0 = no line breaks, -1 = line breaks to wrap only)
 -- 
--- If the length is less than 8, unspecified options at 
+-- Comments:
+-- If the length is less than 10, unspecified options at
 -- the end of the sequence will keep the default values.    
 -- e.g. {0, 5} will choose "never display ASCII", 
 -- plus 5-character indentation, with defaults for everything else  
 --
--- Comments:
 -- The default options can be accessed using the exported constant PRETTY_DEFAULT, and the
 -- elements may be accessed using the enum:
 --
@@ -327,7 +326,9 @@ end procedure
 --     }
 -- }
 -- </eucode>
-
+--
+-- See Also:
+-- [[:print]], [[:sprint]], [[:printf]], [[:sprintf]], [[:pretty_sprint]]
 global procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 1
 	pretty_file = fn
@@ -336,18 +337,21 @@ global procedure pretty_print(integer fn, object x, sequence options = PRETTY_DE
 end procedure
 
 --**
--- Format an object x, using braces { , , , }, indentation, and multiple lines to show the structure.
+-- Format an object using braces { , , , }, indentation, and multiple lines to show the structure.
 --
 -- Parameters:
---   # x - the object to display
+--   # ##x##: the object to display
 --   # options - is an (up to) 10-element options sequence: Pass {} to select the defaults, or 
 --     set options 
 --
+-- Returns:
+--		A **sequence** of printable characters, representing ##x## in an human-readable form.
+--
 -- Comments:
---   This function formats objects the same as pretty_print().
+--   This function formats objects the same as [[:pretty_print]](), but returns the sequence obtained instead of sending it to some file..
 --
 -- See Also:
---   pretty_print
+--   [[:pretty_print]], [[:sprint]]
 
 export function pretty_sprint(object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 0

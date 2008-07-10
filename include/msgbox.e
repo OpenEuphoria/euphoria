@@ -81,14 +81,18 @@ end ifdef
 --
 
 --**
--- Display a window with title, containing the message string text.
---  style determines the combination of buttons that will be available
---  for the user to press, plus some other characteristics. style can be
---  an atom or a sequence. A return value of 0 indicates a failure to set up
---  the window.
+-- Displays a window with a title, message, buttons and an icon, usually known as a message box.
+--
+-- Parameters:
+--		# ##text##: a sequence, the message to be duisplayed
+--		# ##title##: a sequence, the title the box should have
+--		# ##style##: an object which defines which,icon should be displayed, if any, and which buttons will be presented.
+--
+-- Returns:
+--		An **integer**, the button which was clicked to close the message box, or 0 on failure.
 --
 -- Comments:
--- See ##msgbox.e## for a complete list of possible values for x and i.
+-- See [[:Constants]] above for a complete list of possible values for ##style## and the returned value. If ##style## is a sequence, its elements will be or'ed together.
 
 global function message_box(sequence text, sequence title, object style)
 	integer or_style

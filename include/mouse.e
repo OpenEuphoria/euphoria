@@ -48,10 +48,14 @@ constant M_GET_MOUSE = 14,
 -- === Routines
 
 --**
--- Return the last mouse event in the form: ##{event, x, y}## or return ##-1## if there has not 
--- been a mouse event since the last time get_mouse() was called. 
+-- Queries the last mouse event.
 --
--- Constants have been defined in mouse.e for the possible mouse events: 
+-- Returns:
+--		An **object**, either -1 if there has not 
+-- been a mouse event since the last time ##get_mouse##() was called.
+-- Otherwise, returns a triple ##{event, x, y}##.
+--
+-- Constants have been defined in mouse.e for the possible mouse events (the values for ##event##)::
 -- <eucode>
 -- global constant 
 --     MOVE = 1,
@@ -64,43 +68,42 @@ constant M_GET_MOUSE = 14,
 -- </eucode>
 --
 -- x and y are the coordinates of the mouse pointer at the time that the event occurred.
--- get_mouse() returns immediately with either a -1 or a mouse event. It does not wait
--- for an event to occur. You must check it frequently enough to avoid missing an event.
--- When the next event occurs, the current event will be lost, if you haven't read it.
+-- Comments:
+-- ##get_mouse##() returns immediately with either a -1 or a mouse event, without waiting for an event to occur. So, you must check it frequently enough to avoid missing an event:
+-- when the next event occurs, the current event will be lost, if you haven't read it.
 -- In practice it is not hard to catch almost all events. Losing a MOVE event is generally
 -- not too serious, as the next MOVE will tell you where the mouse pointer is. 
 --
 -- Sometimes multiple events will be reported. For example, if the mouse is moving when the
 -- left button is clicked, get_mouse() will report an event value of LEFT_DOWN+MOVE, i.e.
--- 2+1 or 3. For this reason you should test for a particular event using and_bits(). See
--- examples below.
+-- 2+1 or 3. For this reason you should test for a particular event using [[:and_bits]](). See
+-- examples below. Further, you can determine which events will be reported using [[:mouse_events]].
 --
--- Comments:
 -- In pixel-graphics modes that are 320 pixels wide, you need to divide the x value by 2 to get
 -- the correct position on the screen. (A strange feature of DOS.)
 --
--- In DOS32 text modes you need to scale the x and y coordinates to get line and column positions.
--- In Linux, no scaling is required - x and y correspond to the line and column on the screen,
+-- In //DOS32// text modes you need to scale the x and y coordinates to get line and column positions.
+-- In //Linux//, no scaling is required - x and y correspond to the line and column on the screen,
 -- with (1,1) at the top left. 
 --
--- In DOS32, you need a DOS mouse driver to use this routine. In Linux, GPM Server must be running.
+-- In //DOS32//, you need a DOS mouse driver to use this routine. In Linux, GPM Server must be running.
 --
--- In Linux, mouse movement events are not reported in an xterm window, only in the text console. 
+-- In //Linux//, mouse movement events are not reported in an xterm window, only in the text console.
 --
--- In Linux, LEFT_UP, RIGHT_UP and MIDDLE_UP are not distinguishable from one another. 
+-- In //Linux//, LEFT_UP, RIGHT_UP and MIDDLE_UP are not distinguishable from one another.
 --
--- You can use get_mouse() in most text and pixel-graphics modes. 
+-- You can use ##get_mouse##() in most text and pixel-graphics modes.
 --
--- The first call that you make to get_mouse() will turn on a mouse pointer, or a highlighted character.
+-- The first call that you make to ##get_mouse##() will turn on a mouse pointer, or a highlighted character.
 --
--- DOS generally does not support the use of a mouse in SVGA graphics modes (beyond 640x480 pixels).
+-- //DOS// generally does not support the use of a mouse in SVGA graphics modes (beyond 640x480 pixels).
 -- This restriction has been removed in Windows 95 (DOS 7.0). Graeme Burke, Peter Blue and others
 -- have contributed mouse routines that get around the problems with using a mouse in SVGA. See
 -- the Euphoria Archive Web page. 
 --
 -- The x,y coordinate returned could be that of the very tip of the mouse pointer or might refer to
 -- the pixel pointed-to by the mouse pointer. Test this if you are trying to read the pixel color
--- using get_pixel(). You may have to read x-1,y-1 instead.
+-- using [[:get_pixel]](). You may have to read x-1,y-1 instead.
 --
 -- Example 1:
 -- a return value of: 
@@ -122,22 +125,26 @@ constant M_GET_MOUSE = 14,
 --     end if
 -- end while
 -- </eucode>
-
+-- See Also:
+--	[[:mouse_events]], [[: mouse_pointer]]
 global function get_mouse()
 	return machine_func(M_GET_MOUSE, 0)
 end function
 
 --**
--- Use this procedure to select the mouse events that you want get_mouse() to report. By default,
--- get_mouse() will report all events. mouse_events() can be called at various stages of the
--- execution of your program, as the need to detect events changes. Under Linux, mouse_events()
--- currently has no effect.
+-- Select the mouse events [[:get_mouse]]() is to report. 
+--
+-- Parameters:
+--		# ##events##: an integer, all requested event codes or'ed together.
 --
 -- Comments:
+-- By default, [[:get_mouse]]() will report all events. ##mouse_events##() can be called at various stages of the
+-- execution of your program, as the need to detect events changes. Under //Unix//, ##mouse_events##() currently has no effect.
+--
 -- It is good practice to ignore events that you are not interested in, particularly the very
 -- frequent MOVE event, in order to reduce the chance that you will miss a significant event. 
 --
--- The first call that you make to mouse_events() will turn on a mouse pointer, or a highlighted character.
+-- The first call that you make to ##mouse_events##() will turn on a mouse pointer, or a highlighted character.
 --
 -- Example 1:
 -- <eucode>
@@ -147,21 +154,31 @@ end function
 -- will restrict get_mouse() to reporting the left button
 -- being pressed down or released, and the right button
 -- being pressed down. All other events will be ignored.
-
+--
+--See Also:
+--		[[:get_mouse]], [[: mouse_pointer]]
 global procedure mouse_events(integer events)
 	machine_proc(M_MOUSE_EVENTS, events)
 end procedure
 
 --**
--- If i is 0 hide the mouse pointer, otherwise turn on the mouse pointer. Multiple calls to hide
--- the pointer will require multiple calls to turn it back on. The first call to either get_mouse()
--- or mouse_events(), will also turn the pointer on (once). Under Linux, mouse_pointer() currently
--- has no effect
+-- Turn mouse pointer on or off.
+--
+-- Parameters:
+-- 		# ##show_it##: an integer, 0 to hide and 1 to show.
 --
 -- Comments:
+-- Multiple calls to hide
+-- the pointer will require multiple calls to turn it back on. The first call to either [[:get_mouse]]()
+-- or [[:mouse_events]]() will also turn the pointer on (once). 
+--
+-- Under //Linux//, [[:mouse_pointer]]() currently has no effect
+--
 -- It may be necessary to hide the mouse pointer temporarily when you update the screen. 
 --
--- After a call to text_rows() you may have to call mouse_pointer(1) to see the mouse pointer again.
+-- After a call to [[:text_rows]]() you may have to call [[:mouse_pointer]](1) to see the mouse pointer again.
+-- See Also:
+--		[[:get_mouse]], [[:mouse_pointer]]
 
 global procedure mouse_pointer(integer show_it)
 	machine_proc(M_MOUSE_POINTER, show_it)

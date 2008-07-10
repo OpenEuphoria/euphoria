@@ -901,6 +901,45 @@ end procedure
 --
 --**
 -- Signature:
+-- peeks(object addr_n_length)
+--
+-- Description:
+-- Fetches a byte, or some bytes, from an address in memory.
+--
+-- Parameters:
+--		# ##addr_n_length##: an object, either of
+--		#* an atom ##addr##, to fetch one byte at ##addr##, or
+--		#* a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--
+-- Returns:
+--		An **object**, either an integer if the input was a single address, or a sequence of integers if a sequence was passed. In both cases, integers returned are bytes, in the range -128..127.
+--
+-- Errors:
+--	Peek()ing in memory you don't own may be blocked by the OS, and cause a machine exception. The safe.e include file can catch this sort of issues.
+--
+-- Comments: 
+-- Since addresses are 32-bit numbers, they can be larger than the largest value of type integer (31-bits). Variables that hold an address should therefore be declared as atoms.
+--
+-- It is faster to read several bytes at once using the second form of peek() than it is to read one byte at a time in a loop. The returned sequence has the length you asked for on input.
+-- 
+-- Remember that ##peeks##() takes just one argument, which in the second form is actually a 2-element sequence.
+--  
+-- Example 1: 
+-- <eucode>
+-- -- The following are equivalent:
+-- -- method 1
+-- s = {peeks(100), peek(101), peek(102), peek(103)}
+-- 
+-- -- method 2
+-- s = peeks({100, 4})
+-- </eucode>
+-- 
+-- See Also: 
+--  [[:poke]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]], 
+-- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]], [[peek]]
+--
+--**
+-- Signature:
 -- peek2s(object addr_n_length)
 --
 -- Description:
@@ -1055,16 +1094,19 @@ end procedure
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
--- s = {peek4s(100), peek4s(104), peek4s(108), peek4s(112)}
+-- s = {peek4u(100), peek4u(104), peek4u(108), peek4u(112)}
 --
 -- -- method 2
--- s = peek4s({100, 4})
+-- s = peek4u({100, 4})
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peek]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
+--  [[:poke]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
 --
+
+-- TODO: document peek_string()
+
 --**
 -- Signature:
 -- global procedure poke(atom addr, object x)

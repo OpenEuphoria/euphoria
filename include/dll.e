@@ -252,7 +252,7 @@ end function
 -- result. However, you can pass a 64 bit integer as two C_LONG instead. On calling the routine, pass low doubleword first, then high doubleword.
 --
 -- If you are not interested in using the value returned by the C function, you should 
--- instead define it with [[:define_c_proc]]() and call it with [[:c_proc()]].
+-- instead define it with [[:define_c_proc]]() and call it with [[:c_proc]]().
 -- 
 -- If you use exw to call a cdecl C routine that returns a floating-point value, it might not 
 -- work. This is because the Watcom C compiler (used to build exw) has a non-standard way of 
