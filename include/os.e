@@ -246,12 +246,23 @@ end function
 
 ifdef WIN32 then
 	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
+	constant SETENV = define_c_func(open_dll("kernel32.dll"), "SetEnvironmentVariable", {C_POINTER, C_POINTER}, C_INT)
+	constant UNSETENV = -1
 elsifdef LINUX then
 	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
+	constant SETENV = define_c_func(open_dll(""), "setenv", {C_POINTER, C_POINTER, C_INT}, C_INT)
+	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef FREEBSD then
 	constant UNAME = define_c_func(open_dll("libc.so"), "uname", {C_POINTER}, C_INT)
+	constant SETENV = define_c_func(open_dll("libc.so"), "setenv", {C_POINTER, C_POINTER, C_INT}, C_INT)
+	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef OSX then
 	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
+	constant SETENV = define_c_func(open_dll("libc.dylib"), "setenv", {C_POINTER, C_POINTER, C_INT}, C_INT)
+	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
+elsifdef DOS32 then
+	constant SETENV = -1
+	constant UNSETENV = -1
 end ifdef
 export function uname()
 	ifdef WIN32 then
@@ -363,5 +374,45 @@ export function is_win_nt()
 	else
 		return -1
 	end ifdef
+end function
+
+export function setenv(sequence env, sequence val, integer overwrite)
+	atom ret, penv, pval
+	ifdef DOS32 then
+		-- TODO
+		return 0
+	end ifdef
+	penv = allocate_string(env)
+	pval = allocate_string(val)
+	ifdef UNIX then
+		ret = c_func(SETENV, {penv, pval, overwrite})
+		ret = not ret
+	else
+		if sequence(getenv(env)) and not overwrite then
+			ret = 1
+		else
+			ret = c_func(SETENV, {penv, pval})
+		end if
+	end ifdef
+	free(pval)
+	free(penv)
+	return ret
+end function
+
+export function unsetenv(sequence env)
+	atom ret, penv
+	ifdef DOS32 then
+		-- TODO
+		return 0
+	end ifdef
+	penv = allocate_string(env)
+	ifdef UNIX then
+		ret = c_func(UNSETENV, {penv})
+		ret = not ret
+	else
+		ret = c_func(SETENV, {penv, NULL})
+	end ifdef
+	free(penv)
+	return ret
 end function
 
