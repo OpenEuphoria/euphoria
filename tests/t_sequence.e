@@ -1,4 +1,6 @@
 include sequence.e as seq
+include text.e
+
 include unittest.e
 
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
@@ -185,7 +187,6 @@ test_not_equal("replace() 2,5 #3a", "/--omeething         ", replace("//somethin
 test_not_equal("replace() 2,5 #3b", "/--eething         ", replace("//something                                            ", "--", 2, 5))
 test_not_equal("replace() 2,5 #3c", " --someething         ", replace(" //something                                           ", "--", 2, 3))
 
-
 test_equal("pivot #1", {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}, pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 )) 
 test_equal("pivot #2", {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}, pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) )
 test_equal("pivot #3", {{}, {}, {5}}, pivot( 5 ) )
@@ -193,6 +194,13 @@ test_equal("pivot #4", {{}, {5}, {}}, pivot( 5, 5 ) )
 test_equal("pivot #5", {{5}, {}, {}}, pivot( 5, 10 ) )
 test_equal("pivot #6", {{}, {}, {}}, pivot( {}) )
 test_equal("pivot #7", {{"abc", "bcd"}, {}, {"def", "efg", "cdf"}}, pivot( {"abc", "def", "bcd", "efg", "cdf"}, "cat") )
+
+function gt_ten(integer a)
+	return a > 10
+end function
+
+test_equal("filter #1", {20,30,40}, filter({1,2,3,20,4,30,6,40,6}, routine_id("gt_ten")))
+test_equal("apply #1", {"1","2","3","4"}, apply({1,2,3,4}, routine_id("sprint")))
 
 test_report()
 

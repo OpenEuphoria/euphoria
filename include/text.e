@@ -1,10 +1,12 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Sequence Manipulation
+-- == Text Manipulation
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
+--
+-- === Routines
 
 --**
 -- Signature:

@@ -55,6 +55,7 @@
 ../include/stack.e
 ../include/stats.e
 ../include/task.e
+../include/text.e
 ../include/types.e
 ../include/unicode.e
 ../include/unittest.e

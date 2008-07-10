@@ -9,17 +9,12 @@
 include error.e
 include search.e
 include text.e
+include sort.e
 
 --****
 -- === Constants
---**
--- Direction specifiers for rotate():
--- * ROTATE_LEFT = 1
--- * ROTATE_RIGHT = -1
-export constant
-	ROTATE_LEFT  = 1,
-	ROTATE_RIGHT = -1
 
+--****	
 -- === Routines
 --
 
@@ -1119,46 +1114,79 @@ export function extract(sequence source, sequence indexes)
 	return indexes
 end function
 
+export constant
+	ROTATE_LEFT  = 1,
+	ROTATE_RIGHT = -1
+
 --**
 -- Rotates a slice of a sequence.
 --
--- Use amount * direction to specify the shift. direction is either ROTATE_LEFT
--- or ROTATE_RIGHT. A null shift does nothing and returns source unchanged.
+-- Use amount * direction to specify the shift. direction is either ##ROTATE_LEFT##
+-- or ##ROTATE_RIGHT##. A null shift does nothing and returns source unchanged.
+--
+-- Parameters:
+-- # ##source##: sequence to be rotated
+-- # ##shift##: direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
+-- # ##start##: starting position for shift
+-- # ##stop##: stopping position for shift
+--
+-- Comments:
+--   To shift multiple places, use {{{ROTATE_LEFT * 5}}} for instance to rotate left, 5
+--   positions.
 --
 -- Example 1:
 -- <eucode>
+-- s = rotate({1, 2, 3, 4, 5}, ROTATE_LEFT)
+-- -- s is {2, 3, 4, 5, 1}
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = rotate({1, 2, 3, 4, 5}, ROTATE_RIGHT * 2)
+-- -- s is {4, 5, 1, 2, 3}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
 -- s = rotate({11,13,15,17,19,23}, ROTATE_LEFT, 2, 5)
 -- -- s is {11,15,17,19,13,23}
+-- </eucode>
 --
--- s = rotate({11,13,15,17,19,23}, ROTATE_RIGHT * 2, 2, 5)
--- -- s is {11,17,19,13,15,23}
+-- Example 4:
+-- s = rotate({11,13,15,17,19,23}, ROTATE_RIGHT, 2, 5)
+-- -- s is {11,19,13,15,17,23}
 -- </eucode>
 --
 -- See Also:
---     [[:slice]]
+--     [[:slice]], [[:head]], [[:tail]]
 
-export function rotate(sequence source, integer the_direction, integer start=1, integer stop=length(source))
+export function rotate(sequence source, integer shift, integer start=1, integer stop=length(source))
 	sequence shifted
 	integer len
 	integer lSize
 
-	if start >= stop or length(source)=0 or not the_direction then
+	if start >= stop or length(source)=0 or not shift then
 		return source
 	end if
+
 	if not valid_index(source, start) then
 		crash("sequence:rotate(): invalid 'start' parameter %d", start)
 	end if
+
 	if not valid_index(source, stop) then
 		crash("sequence:rotate(): invalid 'stop' parameter %d", stop)
 	end if
+
 	len = stop - start + 1
-	lSize = remainder(the_direction, len)
+	lSize = remainder(shift, len)
 	if lSize = 0 then
 		return source
 	end if
+
 	if lSize < 0 then -- convert right shift to left shift
 		lSize += len
 	end if
+
 	shifted = source[start .. start + lSize-1]
 	source[start .. stop - lSize] = source[start + lSize .. stop]
 	source[stop - lSize + 1.. stop] = shifted
@@ -1170,9 +1198,9 @@ end function
 -- in the list, the list is returned unchanged.
 --
 -- Parameters:
---   * needle - object to add.
---   * haystack - sequence in which to add it to.
---   * order - 1=prepend (default), 2=append, 3=ascending, 4=descending
+-- # ##needle##:   object to add.
+-- # ##haystack##: sequence in which to add it to.
+-- # ##order##:    1=prepend (default), 2=append, 3=ascending, 4=descending
 --
 -- Example 1:
 -- <eucode>
@@ -1206,7 +1234,6 @@ end function
 --
 -- See Also:
 --   [[:remove_all]]
-include sort.e
 
 export function add_item(object needle, sequence haystack, integer pOrder = 1)
 	if find(needle, haystack) then
@@ -1236,14 +1263,14 @@ end function
 -- and greater than the pivot.
 --
 -- Parameters:
---   * pData = Either an atom or a list. An atom is treated as if it is one-element sequence.
---   * pPivot = An object. Default is zero.
+--   # ##pData##: Either an atom or a list. An atom is treated as if it is one-element sequence.
+--   * ##pPivot##: An object. Default is zero.
 --
 -- Returns:
 --   sequence: { {less than pivot}, {equal to pivot}, {greater than pivot} }
 --
 -- Comments: 
---   pivot() is used as a split up a sequence relative to a specific value.
+--   ##pivot()## is used as a split up a sequence relative to a specific value.
 --
 -- Example 1:
 --   <eucode>
@@ -1271,5 +1298,70 @@ export function pivot(object pData, object pPivot = 0)
 	end for
 
 	return lResult
+end function
+
+--**
+-- Filter a sequence based on a user comparator.
+--
+-- Parameters:
+-- # ##source##: sequence to filter
+-- # ##rid##: [[:routine_id]] of function to use as comparator
+--
+-- Example 1:
+-- <eucode>
+-- function gt_ten(integer a)
+--     return a > 10
+-- end function
+--
+-- s = filter({5,8,20,19,3,2}, routine_id("gt_ten"))
+-- -- s is {20, 19}
+-- </eucode>
+--
+-- See Also:
+--   [[:apply]]
+
+export function filter(sequence source, integer rid)
+	sequence dest = {}
+
+	for a = 1 to length(source) do
+		if call_func(rid, {source[a]}) then
+			dest &= source[a]
+		end if
+	end for
+
+	return dest
+end function
+
+--**
+-- Apply ##rid## to every element of a sequence returning a new sequence of the same size.
+--
+-- Parameters: 
+-- # ##source##: sequence to map
+-- # ##rid##: [[:routine_id]] of function to use as convertor
+--
+-- Example 1:
+-- <eucode>
+-- include text.e
+-- s = apply({1, 2, 3, 4}, routine_id("sprint"))
+-- -- s is {"1", "2", "3", "4"}
+--
+-- Example 2:
+-- <eucode>
+-- function greeter(object o)
+--     return o[1] & ", " & o[2] & "!"
+-- end function
+--
+-- s = apply({{"Hello", "John"}, {"Goodbye", "John"}}, routine_id("greeter"))
+-- -- s is {"Hello, John!", "Goodbye, John!"}
+-- </eucode>
+--
+-- See Also:
+--   [[:filter]]
+
+export function apply(sequence source, integer rid)
+	for a = 1 to length(source) do
+		source[a] = call_func(rid, {source[a]})
+	end for
+	return source
 end function
 

@@ -132,7 +132,8 @@
    **find_any_from()**, **trim()**, **trim_head()**, **trim_tail()**, **truncate()**, 
    **pad_head()**, **pad_tail()**, **chunk()**, **flatten()**, **find_all()**, 
    **match_all()**, **find_replace()**, **vslice()**, **rfind()**, **rfind_from()**, 
-   **rmatch()**, **rmatch_from()**. $$(doneby Jeremy Cowgar, Derek Parnell.)
+   **rmatch()**, **rmatch_from()**, **filter()**, **apply()**. 
+   $$(doneby Jeremy Cowgar, Derek Parnell.)
 * New routines in **sort.e**:
   **sort_reverse()**, **sort_user()**, **sort_columns()**. $$(doneby Derek Parnell.)
 * New routines in **file.e**:
