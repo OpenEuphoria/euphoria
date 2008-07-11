@@ -196,8 +196,10 @@ constant SHIFT = 4   -- 1..78 should be ok
 -- name of edit buffer temp file for Esc m command
 constant TEMPFILE = "editbuff.tmp" 
 
-constant ACCENT = 1  -- Enables read accented from keyboard.  Usefull for
-		     -- write some languages.
+constant ACCENT = 0  -- Set to 1 enables read accented characters from
+ 		     --	keyboard. Usefull to write on spanish keyboard, 
+		     -- may cause problems on Windows using us-international 
+		     -- keyboard layout
 
 -------- END OF USER-MODIFIABLE PARAMETERS ------------------------------------
 
