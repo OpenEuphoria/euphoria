@@ -12,6 +12,8 @@ elsif platform() = 2 then
 	puts (1, "WIN32 interpreter.\n")
 elsif platform() = 3 then
 	puts (1, "LINUX or BSD interpreter.\n")
+elsif platform() = 4 then
+	puts (1, "OS X interpreter.\n")
 else 
 	puts (1, "unknow interpreter.\n")
 end if
