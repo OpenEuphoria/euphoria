@@ -4,6 +4,19 @@
 
 integer code
 
+puts(1, "Testing keyboard codes on ")
+
+if platform() = 1 then
+	puts (1, "DOS32 interpreter.\n")
+elsif platform() = 2 then
+	puts (1, "WIN32 interpreter.\n")
+elsif platform() = 3 then
+	puts (1, "LINUX or BSD interpreter.\n")
+else 
+	puts (1, "unknow interpreter.\n")
+end if
+	
+
 puts(1, "Press any key. I'll show you the key code. Press q to quit\n\n")
 while 1 do
     code = get_key()
