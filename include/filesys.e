@@ -47,8 +47,12 @@ else
 
 end ifdef
 
-ifdef UNIX then
+ifdef LINUX then
+	constant xStatFile        = define_c_func(lib, "__xstat", {C_INT, C_POINTER, C_POINTER}, C_INT)
+elsifdef UNIX then
 	constant xStatFile        = define_c_func(lib, "stat", {C_POINTER, C_POINTER}, C_INT)
+end ifdef
+ifdef UNIX then
 	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_INT)
 	--constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
 	constant xDeleteFile      = define_c_func(lib, "unlink", {C_POINTER}, C_INT)
@@ -669,6 +673,15 @@ end function
 -- See Also:
 -- [[:rename_file]], [[:copy_file]]
 
+ifdef LINUX then
+	function xstat(atom psrc, atom psrcbuf)
+		return c_func(xStatFile, {3, psrc, psrcbuf})
+	end function
+elsifdef UNIX then
+	function xstat(atom psrc, atom psrcbuf)
+		return c_func(xStatFile, {psrc, psrcbuf})
+	end function
+end ifdef
 export function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret
 	ifdef UNIX then
@@ -697,13 +710,13 @@ export function move_file(sequence src, sequence dest, atom overwrite=0)
 	ifdef UNIX then
 		psrcbuf = allocate(stat_buf_size)
 		pdestbuf = allocate(stat_buf_size)
-		ret = c_func(xStatFile, {psrc, psrcbuf})
+		ret = xstat(psrc, psrcbuf)
 		if ret then
 			goto "out"
 		end if
-		ret = c_func(xStatFile, {pdest, pdestbuf})
+		ret = xstat(pdest, pdestbuf)
 		if ret then
-			goto "out"
+			goto "continue"
 		end if
 		if not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
 			-- on different filesystems, can not use rename
@@ -715,6 +728,7 @@ export function move_file(sequence src, sequence dest, atom overwrite=0)
 			ret = delete_file(src)
 			goto "out"
 		end if
+		label "continue"
 	end ifdef
 
 	if overwrite then
