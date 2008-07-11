@@ -947,9 +947,15 @@ procedure opROUTINE_ID()
 --    sub = Code[pc+1]   -- CurrentSub
 --    name = val[Code[pc+2]]  -- routine name sequence
 --    fn = Code[pc+4]    -- file number
-    target = Code[pc+5]
-    il( sprintf("ROUTINE_ID: %s => %s", names( Code[pc+3] & target )), 5 )
-    pc += 6
+	if TRANSLATE then
+		target = Code[pc+4]
+		il( sprintf("ROUTINE_ID: %s => %s", names( Code[pc+2] & target )), 4 )
+    	pc += 5
+    else
+		target = Code[pc+5]
+		il( sprintf("ROUTINE_ID: %s => %s", names( Code[pc+3] & target )), 5 )
+		pc += 6
+	end if
 end procedure
 	    
 procedure opAPPEND()
