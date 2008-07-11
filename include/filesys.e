@@ -682,8 +682,9 @@ elsifdef UNIX then
 		return c_func(xStatFile, {psrc, psrcbuf})
 	end function
 end ifdef
+integer dirname_id = -1
 export function move_file(sequence src, sequence dest, atom overwrite=0)
-	atom psrc, pdest, ret
+	atom psrc, pdest, ret, pdir
 	ifdef UNIX then
 		atom psrcbuf, pdestbuf
 		integer stat_t_offset, dev_t_size, stat_buf_size
@@ -715,6 +716,15 @@ export function move_file(sequence src, sequence dest, atom overwrite=0)
 			goto "out"
 		end if
 		ret = xstat(pdest, pdestbuf)
+		if ret then
+			if length(call_func(dirname_id,{dest})) = 0 then
+				pdir = allocate_string(current_dir())
+			else
+				pdir = allocate_string(call_func(dirname_id,{dest}))
+			end if
+			ret = xstat(pdir, pdestbuf)
+			free(pdir)
+		end if
 		if ret then
 			goto "continue"
 		end if
@@ -960,6 +970,7 @@ export function dirname(sequence path)
 	data = pathinfo(path)
 	return data[1]
 end function
+dirname_id = routine_id("dirname")
 
 --**
 -- Return the file name portion of a fully qualified filename
