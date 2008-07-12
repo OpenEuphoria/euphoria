@@ -8,8 +8,12 @@
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
+-- DOS support code borrowed from DOS.E by Daniel Berstein, Jacques Deschenes, and Rob Craig
 
-ifdef !DOS32 then
+ifdef DOS32 then
+-- constant short_names = dosver() < 7 or atom(getenv("windir"))
+constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
+else
 include dll.e
 end ifdef
 include machine.e
@@ -148,13 +152,38 @@ end ifdef
 
 export function create_directory(sequence name, integer mode=448)
 	atom pname, ret
+	ifdef DOS32 then
+    atom low_buff
+    sequence reg_list
+    low_buff = allocate_low(length (name) + 1)
+    if not low_buff then
+        return 0
+    end if
+    poke(low_buff, name & 0)
+    reg_list = repeat(0,10)
+    if short_names then
+        reg_list[REG_AX] = #3900
+    else
+        reg_list[REG_AX] = #7139
+    end if
+    reg_list[REG_DS] = floor(low_buff / 16)
+    reg_list[REG_DX] = remainder(low_buff, 16)
+    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+    reg_list = dos_interrupt(#21, reg_list)
+    free_low(low_buff)
+    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+        return 0
+    else
+        return 1
+    end if
+	else
 	pname = allocate_string(name)
+	end ifdef
 	ifdef UNIX then
 		ret = not c_func(xCreateDirectory, {pname, mode})
 	elsifdef WIN32 then
 		ret = c_func(xCreateDirectory, {pname, 0})
 		mode = mode -- get rid of not used warning
-	-- else TODO: implement for DOS
 	end ifdef
 	return ret
 end function
@@ -179,7 +208,33 @@ end function
 
 export function remove_directory(sequence name)
 	atom pname, ret
+	ifdef DOS32 then
+    atom low_buff
+    sequence reg_list
+    low_buff = allocate_low(length(name) + 1)
+    if not low_buff then
+        return 0
+    end if
+    poke(low_buff, name & 0)
+    reg_list = repeat(0,10)
+    if short_names then
+        reg_list[REG_AX] = #3A00
+    else
+        reg_list[REG_AX] = #713A
+    end if
+    reg_list[REG_DS] = floor(low_buff / 16)
+    reg_list[REG_DX] = remainder(low_buff, 16)
+    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+    reg_list = dos_interrupt(#21, reg_list)
+    free_low(low_buff)
+    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+        return 0
+    else
+        return 1
+    end if
+	else
 	pname = allocate_string(name)
+	end ifdef
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
 		ret = not ret 
@@ -615,6 +670,53 @@ end function
 -- [[:move_file]], [[:copy_file]]
 export function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
+	ifdef DOS32 then
+    atom low_buff_old, low_buff_new
+    integer i
+    sequence reg_list
+    if length(src) > 3 and length(dest) > 3 then
+        if not compare(src[2],":") and not compare(dest[2],":") then
+            if compare(src[1], dest[1]) then
+                i = copy_file(src,dest)
+                if not i then
+                    return i
+                end if
+                i = delete_file(src)
+                return i
+            end if
+        end if
+    end if
+    low_buff_old = allocate_low(length(src) + 1)
+    if not low_buff_old then
+        return 0
+    end if
+    low_buff_new = allocate_low(length(dest) + 1)
+    if not low_buff_new then
+        free_low(low_buff_old)
+        return 0
+    end if
+    poke(low_buff_old, src & 0)
+    poke(low_buff_new, dest & 0)
+    reg_list = repeat(0,10)
+    if short_names then
+        reg_list[REG_AX] = #5600
+    else
+        reg_list[REG_AX] = #7156
+    end if
+    reg_list[REG_DS] = floor(low_buff_old / 16)
+    reg_list[REG_DX] = remainder(low_buff_old, 16)
+    reg_list[REG_ES] = floor(low_buff_new / 16)
+    reg_list[REG_DI] = remainder(low_buff_new, 16)
+    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+    reg_list = dos_interrupt(#21, reg_list)
+    free_low(low_buff_old)
+    free_low(low_buff_new)
+    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+        return 0
+    else
+        return 1
+    end if
+	end ifdef
 	
 	psrc = allocate_string(src)
 	pdest = allocate_string(dest)
@@ -643,9 +745,30 @@ export function delete_file(sequence name)
 	atom pfilename, ret
 
 	ifdef DOS32 then
-		-- quick hack TODO check whether access was granted
-		system("del "&name&" > NUL", 2)
-		return 1
+    atom low_buff
+    sequence reg_list
+    low_buff = allocate_low(length(name) + 1)
+    if not low_buff then
+        return 0
+    end if
+    poke(low_buff, name & 0)
+    reg_list = repeat(0,10)
+    if short_names then
+        reg_list[REG_AX] = #4100
+    else
+        reg_list[REG_AX] = #7141
+    end if
+    reg_list[REG_DS] = floor(low_buff / 16)
+    reg_list[REG_DX] = remainder(low_buff, 16)
+    reg_list[REG_SI] = #0000
+    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+    reg_list = dos_interrupt(#21, reg_list)
+    free_low(low_buff)
+    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+        return 0
+    else
+        return 1
+    end if
 	end ifdef
 
 	pfilename = allocate_string(name)
@@ -685,6 +808,9 @@ end ifdef
 integer dirname_id = -1
 export function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret, pdir
+	ifdef DOS32 then
+		return rename_file(src, dest) --TODO overwrite check support
+	end ifdef
 	ifdef UNIX then
 		atom psrcbuf, pdestbuf
 		integer stat_t_offset, dev_t_size, stat_buf_size

@@ -516,7 +516,11 @@ export function uname()
 			return ""
 		end if
 	elsifdef DOS32 then
-		return {"DOS"} --TODO
+    sequence reg_list
+    reg_list = repeat(0,10)
+    reg_list[REG_AX] = #3000
+    reg_list = dos_interrupt(#21,reg_list)
+		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) + floor(reg_list[REG_AX]/256)/100)}
 	else
 		return {"UNKNOWN"} --TODO
 	end ifdef
