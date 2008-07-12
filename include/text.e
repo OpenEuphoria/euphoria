@@ -352,6 +352,7 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 	integer lPos
 	integer lChar
 	integer lBPos
+	integer lWasKV
 
 	source = trim(source)
 	if length(source) = 0 then
@@ -391,6 +392,7 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 		lKey = ""
 		lQuote = 0
 		lChar = 0
+		lWasKV = 0
 		if haskeys then
 			while lPos <= length(source) do
 				lChar = source[lPos]
@@ -433,6 +435,10 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 		lValue = ""
 		if find(lChar, kv_delim) != 0  or not haskeys then
 		
+			if find(lChar, kv_delim) != 0 then
+				lWasKV = 1
+			end if
+			
 			-- ignore next whitespace
 			lPos += 1
 			while lPos <= length(source) do
@@ -510,9 +516,11 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 				lKeyValues = append(lKeyValues, {})
 				continue
 			end if
-
-			lValue = lKey
-			lKey = ""
+			
+			if not lWasKV then
+				lValue = lKey
+				lKey = ""
+			end if
 		end if
 		
 		if length(lKey) = 0 then
@@ -521,17 +529,20 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 			end if
 		end if
 		
-		lChar = lValue[1]
-		lBPos = find(lChar, lStartBracket)
-		if lBPos > 0 and lValue[$] = lEndBracket[lBPos] then
-			if lChar = '(' then
-				lValue = keyvalues(lValue[2..$-1], pair_delim, kv_delim, quotes, whitespace, haskeys)
-			else
-				lValue = keyvalues(lValue[2..$-1], pair_delim, kv_delim, quotes, whitespace, 0)
+		if length(lValue) > 0 then
+			lChar = lValue[1]					
+			lBPos = find(lChar, lStartBracket)
+			if lBPos > 0 and lValue[$] = lEndBracket[lBPos] then
+				if lChar = '(' then
+					lValue = keyvalues(lValue[2..$-1], pair_delim, kv_delim, quotes, whitespace, haskeys)
+				else
+					lValue = keyvalues(lValue[2..$-1], pair_delim, kv_delim, quotes, whitespace, 0)
+				end if
+			elsif lChar = '~' then	
+				lValue = lValue[2 .. $]
 			end if
-		elsif lChar = '~' then	
-			lValue = lValue[2 .. $]
 		end if
+		
 		if length(lKey) = 0 then
 			lKeyValues = append(lKeyValues, lValue)
 		else

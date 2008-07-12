@@ -48,14 +48,18 @@ global constant
 
 export constant
 	NO_PARAMETER = 0,
-	HAS_PARAMETER = 1
+	HAS_PARAMETER = 1,
+	NO_CASE = 0,
+	HAS_CASE = 1
 
-constant
-	SINGLE = 1,
-	DOUBLE = 2,
-	HELP   = 3,
-	PARAM  = 4,
-	RID    = 5
+enum
+	SINGLE,
+	DOUBLE,
+	HELP,
+	PARAM,
+	RID,
+	USECASE
+
 
 --****
 -- === Routines
@@ -108,7 +112,7 @@ export procedure show_help(sequence opts, integer add_help_rid=-1)
 		if sequence(opts[i][SINGLE]) then this_size += length(opts[i][SINGLE]) + 1 end if
 		if sequence(opts[i][DOUBLE]) then this_size += length(opts[i][DOUBLE]) + 2 end if
 
-		if opts[i][PARAM] = HAS_PARAMETER then
+		if equal(opts[i][PARAM],HAS_PARAMETER) then
 			this_size += 4
 		end if
 
@@ -120,14 +124,14 @@ export procedure show_help(sequence opts, integer add_help_rid=-1)
 		cmd = ""
 		if sequence(opts[i][SINGLE]) then
 			cmd &= '-' & opts[i][SINGLE]
-			if opts[i][PARAM] = HAS_PARAMETER then
+			if equal(opts[i][PARAM],HAS_PARAMETER) then
 				cmd &= " x"
 			end if
 		end if
 		if sequence(opts[i][DOUBLE]) then
 			if length(cmd) > 0 then cmd &= ", " end if
 			cmd &= "--" & opts[i][DOUBLE]
-			if opts[i][PARAM] = HAS_PARAMETER then
+			if equal(opts[i][PARAM], HAS_PARAMETER) then
 				cmd &= "=x"
 			end if
 		end if
@@ -143,7 +147,29 @@ end procedure
 
 function find_opt(sequence opts, integer typ, object name)
 	integer slash
+	sequence lResult
+	integer lPos = 0
+	sequence lOptName
+	object lOptParam
+	
+	lOptName = repeat(' ', length(name))
+	lOptParam = 0
+	for i = 1 to length(name) do
+		if name[i] = '"' then
+			lPos = i
+		elsif find(name[i], ":=") then
+			if lPos = 0 then
+				lPos = i
+				lOptName = lOptName[1..lPos-1]
+				lOptParam = name[lPos + 1 .. $]
+				exit
+			end if
+		end if
 
+		lOptName[i] = name[i]
+	end for
+
+	
 	slash = 0 -- should we check both single char and words?
 	if typ = 3 then
 		slash = 1
@@ -151,14 +177,21 @@ function find_opt(sequence opts, integer typ, object name)
 	end if
 
 	for i = 1 to length(opts) do
-		if equal(name, opts[i][typ]) or (slash and equal(name, opts[i][1])) then
-			return i
+		if length(opts[i]) > 5 then
+			if equal(opts[i][6], NO_CASE) then
+				if equal(lower(lOptName), lower(opts[i][typ])) or (slash and equal(lower(lOptName), lower(opts[i][1]))) then
+					return {i, lOptParam}
+				end if
+			end if
+		end if
+		
+		if equal(lOptName, opts[i][typ]) or (slash and equal(lOptName, opts[i][1])) then
+			return {i, lOptParam}
 		end if
 	end for
 
-	return 0
+	return {0, "Unrecognised"}
 end function
-
 --**
 -- Parse command line options, and optionally call procedures that relate to these options
 -- 
@@ -186,8 +219,10 @@ end function
 -- # a sequence representing some text following a "-". Use an atom if not relevant;
 -- # a sequence representing some text following a "--". Use an atom if not relevant;
 -- # a sequence, some help text which concerns the above synonymous options. 
--- # either 1 to denote a parameter of the options, or anything else if none.
+-- # either HAS_PARAMETER to denote a parameter of the options, or anything else if none.
 -- # an integer, a routine_id. This id will be called when a lookup he this entry.
+-- # an integer, a value of NO_CASE to indicate that the case of the supplied option
+--   is not significant.
 --
 -- The fifth member of the record must be the id of a procedure. If the fourth member is 
 -- ##NO_PARAMETER##, the rocedure takes no argument. Otherwise, it will be passed a sequence, 
@@ -225,48 +260,94 @@ end function
 
 export function cmd_parse(sequence opts, integer add_help_rid=-1, 
 			sequence cmds = command_line())
-	integer idx, cmd_idx, opts_done
-	sequence cmd, extras, param
+	integer idx, opts_done
+	sequence cmd, extras
+	sequence param
+	sequence find_result
+	integer lType
+	integer lFrom
 
 	extras = {}
-	idx = 3
+	idx = 2
 	opts_done = 0
 
-	while idx <= length(cmds) do
-		cmd_idx = -1 -- cause functions not to be called by default
+	while idx < length(cmds) do
+		idx += 1
+
 		cmd = cmds[idx]
 		if opts_done then
 			extras = append(extras, cmd)
-		elsif cmd[1] = '-' and length(cmd) = 1 then
-			extras = append(extras, cmd)
-		elsif cmd[2] = '-' and length(cmd) = 2 then
+			continue
+		end if
+		
+		if equal(cmd, "--") then
 			opts_done = 1
-		elsif cmd[2] = '-' then    -- found --opt-name
-			cmd_idx = find_opt(opts, 2, cmd[3..$])
-		elsif cmd[1] = '-' then -- found -o
-			cmd_idx = find_opt(opts, 1, cmd[2..$])
-		elsif cmd[1] = '/' then -- found /o
-			cmd_idx = find_opt(opts, 3, cmd[2..$])
-		else                    -- found extra
+			continue
+		end if
+		
+		if find(cmd[1], "-/") =  0 then
 			extras = append(extras, cmd)
+			continue
+		end if
+			
+		
+		if length(cmd) = 1 then
+			extras = append(extras, cmd)
+			continue
+		end if
+		
+		if equal(cmd[1..2], "--") then    -- found --opt-name
+			lType = 2
+			lFrom = 3
+		elsif cmd[1] = '-' then -- found -opt
+			lType = 1
+			lFrom = 2
+		else  -- found /opt
+			lType = 3
+			lFrom = 2
 		end if
 
-		if cmd_idx = 0 then
-			-- invalid parameter
-			printf(1, "Invalid parameter: %s\n\n", {cmd})
+		find_result = find_opt(opts, lType, cmd[lFrom..$])
+		
+		if find_result[1] = 0 then
+			-- something is wrong with the option
+			printf(1, "%s option: %s\n\n", {find_result[2], cmd})
 			show_help(opts, add_help_rid)
 			abort(1)
-		elsif cmd_idx > 0 then
-			if opts[cmd_idx][PARAM] = HAS_PARAMETER then
-				param = cmds[idx+1]
-				call_proc(opts[cmd_idx][RID], {param})
+		elsif find_result[1] > 0 then
+			if equal(opts[find_result[1]][PARAM],HAS_PARAMETER) then
 				idx += 1
+				if idx <= length(cmds) then
+					param = {cmds[idx]}
+				else
+					param = {""}
+				end if
+				
+			elsif equal(opts[find_result[1]][PARAM],NO_PARAMETER) then
+				param = {}
+				
+			elsif sequence(opts[find_result[1]][PARAM]) then
+				if atom(find_result[2]) then
+					idx += 1
+					if idx <= length(cmds) then
+						param = {cmds[idx]}
+					else
+						param = {""}
+					end if
+				else
+					param = {find_result[2]}
+				end if
+				
 			else
-				call_proc(opts[cmd_idx][RID], {})
+				-- Unknown option parameter so don't call the RID.
+				opts[find_result[1]][RID] = -1
+			end if
+			
+			if opts[find_result[1]][RID] >= 0 then
+				call_proc(opts[find_result[1]][RID], param)
 			end if
 		end if
 
-		idx += 1
 	end while
 
 	return extras
