@@ -350,7 +350,7 @@ end type
 -- See Also:
 --     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
 
-export function new(integer year, integer month, integer day, 
+export function new(integer year=0, integer month=1, integer day=1, 
 	                integer hour=0, integer minute=0, atom second=0)
 	datetime d
 	d = {year, month, day, hour, minute, second}

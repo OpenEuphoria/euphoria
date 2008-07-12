@@ -4,7 +4,7 @@ If you get stuck, here are some things you can do:
 
 # Type: ##guru## followed by some keywords associated with your problem. For example,
   ##guru declare global include##
-# Check the list of common problems (a href="trouble.htm#commonp">below</a>).
+# Check the list of common problems ([[:Common Problems and Solutions]]).
 # Read the relevant parts of the documentation, i.e. ##refman.doc## or ##library.doc##
 # Try running your program with trace:
 <eucode>
@@ -42,7 +42,7 @@ You may also run your console program with ##exwc.exe##.
 //At the end of execution of my program, I see "Press Enter" and I have to hit the Enter key. How do I get rid of
 that?//
 
-Call [[#free_console]] just before your program terminates.
+Call [[:free_console]] just before your program terminates.
 
 <eucode>
 include dll.e
@@ -138,7 +138,7 @@ things up:
 //When I run Euphoria programs in SVGA, the output on the screen
 is crammed into the top part of the screen.//
 
-Try: ##[[#use_vesa]](1)## in ##machine.e##.
+Try: ##[[:use_vesa]](1)## in ##machine.e##.
    
 Try downloading the latest driver for your video card from the Internet.
    
@@ -150,7 +150,7 @@ Others have had their video problems clear up after installing the latest versio
 with a normal text window.//
 
 When your program is finished, it should call the function
-##[[#graphics_mode]](-1)## to set the DOS window back to normal. e.g.
+##[[:graphics_mode]](-1)## to set the DOS window back to normal. e.g.
 <eucode>
 if graphics_mode(-1) then
 end if
@@ -228,7 +228,7 @@ cause problems.
 
 //How do I convert a number to a string?//
 
-Use [[#sprintf]]:
+Use [[:sprintf]]:
 
 <eucode>
 string = sprintf("%d", number)
@@ -241,7 +241,7 @@ Besides ##%d##, you can also try other formats, such as
 
 //How do I convert a string to a number?//
 
-Use [[#value]].
+Use [[:value]].
 
 ==== Redefine my for-loop variable?
 
@@ -256,11 +256,11 @@ Remove that earlier declaration or change the name of your loop variable.
 //I get the message "unknown escape character" on a line where I am trying
 to specify a file name.//
 
-**Do not** say ##"C:\TMP\MYFILE"##. You need to say ##"C:\\TMP\\MYFILE"##. 
+**Do not** say ##"C:\TMP\MYFILE"##. You need to say ##"C:~\~\TMP~\~\MYFILE"##. 
 
 Backslash is used for 
 escape characters such as ##\n## or ##\t##. To specify a single backslash in a string you need 
-to type ##\\#. Therefore, say ##"C:\\TMP\\MYFILE"## instead of
+to type ##~\~\##. Therefore, say ##"C:~\~\TMP~\~\MYFILE"## instead of
 ##"C:\TMP\MYFILE"##
 
 ==== Mouse Input in SVGA mode
@@ -277,10 +277,10 @@ to this problem. See their files on the a
 
 ==== Only first character in printf
 
-//I'm trying to print a string using [[#printf]] but only the first character
+//I'm trying to print a string using [[:printf]] but only the first character
 comes out.//
 
-You need to put braces around the parameters sequence to [[#printf]]. You
+You need to put braces around the parameters sequence to [[:printf]]. You
 probably wrote:
 
 <eucode>
@@ -295,12 +295,12 @@ printf(1, "Hello, %s!\n", {mystring})
 
 ==== Only 10 significant digits during printing
 
-//When I print numbers using [[#printf]] or [[#?]] only 10 significant digits are
+//When I print numbers using [[:printf]] or [[:?]] only 10 significant digits are
 displayed.//
 
 Euphoria normally only shows about 10 digits. Internally, all
 calculations are performed using at least 15 significant digits. To see
-more digits you have to use [[#printf]]. For example,
+more digits you have to use [[:printf]]. For example,
 
 <eucode>
 printf(1, "%.15f", 1/3)
@@ -332,8 +332,8 @@ atom a, b, c, d, e
 //I'm declaring some variables in the middle of a loop, if or switch
 block and it gives me a syntax error.//
 
-All of your variable declarations must come outside of any [[#for], [[#while]],
-[[#if]] or [[#switch] block.
+All of your variable declarations must come outside of any [[:for], [[:while]],
+[[:if]] or [[:switch] block.
 
 ==== Expected to see...
 

@@ -21,6 +21,7 @@ constant M_SLEEP = 64
 -- === Constants
 --
 -- ==== Operating System Constants
+--
 -- These constants are returned by the [[:platform]] function.
 --
 -- * DOS32 - Host operating system is DOS
@@ -64,32 +65,37 @@ constant
 -- Show help message for the given opts.
 --
 -- Parameters:
---		# ##opts##: a sequence of options. See the Comments: section for details
---		# ##add_help_rid##: an integer, the routine_id of a procedure that will be called on completion. Defaults to -1 (no call).
+-- # ##opts##: a sequence of options. See the Comments: section for details
+-- # ##add_help_rid##: an integer, the routine_id of a procedure that will be called on 
+--   completion. Defaults to -1 (no call).
 --
 -- Comments:
 -- If ##add_help_rid## is specified, it must be the id of a procedure that takes no arguments.
 --
--- ##opts## is a sequence of records, each of which describes a command line option for a program. The name of the program is fetched from the command line. Each option record is a 5 element sequence:
+-- ##opts## is a sequence of records, each of which describes a command line option for a program. 
+-- The name of the program is fetched from the command line. Each option record is a 5 element 
+-- sequence
 -- # a sequence representing some text following a "-". Use an atom if not relevant;
 -- # a sequence representing some text following a "--". Use an atom if not relevant;
 -- # a sequence, some help text which concerns the above synonymous options. 
 -- # either 1 to denote a parameter of the options, or anything else if none.
 -- # an integer, a routine_id. Currently not used by this procedure.
 --
--- When the second element is specified and there is a parameter, the syntax "=x" is used. When the first element is specified, the " x" syntax is used.
+-- When the second element is specified and there is a parameter, the syntax "=x" is used. When 
+-- the first element is specified, the " x" syntax is used.
 --
 -- Example 1:
 -- <eucode>
 -- -- in myfile.ex
 -- show_help({
---    {"q","silent","Suppresses any output to console",NO_PARAMETER,0},
---    {"r",0,"Sets how many lines the console should display",HAS_PARAMETER,1}})
--- -- dispays:
+--    {"q", "silent", "Suppresses any output to console", NO_PARAMETER, 0},
+--    {"r", 0, "Sets how many lines the console should display", HAS_PARAMETER, 1}})
+-- </eucode>
+--
 -- myfile.ex options:
 -- -q, --silent     Suppresses any output to console
 -- -r x             Sets how many lines the console should display
--- </eucode>
+
 export procedure show_help(sequence opts, integer add_help_rid=-1)
 	integer pad_size, this_size
 	sequence cmds, cmd
@@ -157,22 +163,24 @@ end function
 -- Parse command line options, and optionally call procedures that relate to these options
 -- 
 -- Parameters:
---		###opts##: a sequence of valid option records: See Comments: section for details
---		##add_help_rid##: an integer, the id of ???. Defaults to -1.
+-- # ##opts##: a sequence of valid option records: See Comments: section for details
+--   ##add_help_rid##: an integer, the id of ???. Defaults to -1.
 --
 -- Returns:
---		A **sequence**, the list of all command line arguments.
+--   A **sequence**, the list of all command line arguments.
 --
 -- Comments:
 -- 6 sorts of tokens are recognized on the command line:
 -- # a single '-'. Simply added to the option list
--- # a single "--". This signals the end of command line options. What remains of the command line is added to the option list, and the parsing terminates.
+-- # a single "--". This signals the end of command line options. What remains of the command 
+-- line is added to the option list, and the parsing terminates.
 -- # -something. The option will be looked up in ##opts##.
 -- # --something. Ditto.
 -- # /something. Ditto.
 -- # anything else. The word is simply aded to the option list.
 --
--- On a failed lookup, the progam shows the help by calling [[:show_help]](##opts##, ##add_help_rid##) and terminates with status code 1.
+-- On a failed lookup, the progam shows the help by calling [[:show_help]](##opts##, 
+-- ##add_help_rid##) and terminates with status code 1.
 --
 -- Option records have the following structure:
 -- # a sequence representing some text following a "-". Use an atom if not relevant;
@@ -181,7 +189,9 @@ end function
 -- # either 1 to denote a parameter of the options, or anything else if none.
 -- # an integer, a routine_id. This id will be called when a lookup he this entry.
 --
--- The fifth memner of the record must be the id of a procedure. If the fourth member is NO_PARAMETER, the rocedure takes no argument. Otherwise, it will be passed a sequence, the next word on the command line.
+-- The fifth member of the record must be the id of a procedure. If the fourth member is 
+-- ##NO_PARAMETER##, the rocedure takes no argument. Otherwise, it will be passed a sequence, 
+-- the next word on the command line.
 --
 -- For more details on how the command line is being pre parsed, see [[:command_line]].
 --
@@ -211,7 +221,8 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:show_help]], [[command_line]]
+--   [[:show_help]], [[command_line]]
+
 export function cmd_parse(sequence opts, integer add_help_rid=-1, 
 			sequence cmds = command_line())
 	integer idx, cmd_idx, opts_done
@@ -265,7 +276,7 @@ end function
 -- Suspend thread execution. for ##t## seconds.
 --
 -- Parameters:
---		# ##t##: an atom, the number of seconds for which to sleep.
+-- # ##t##: an atom, the number of seconds for which to sleep.
 --
 -- Comments:
 -- On //Windows// and //Unix//, the operating system will suspend your process and 
@@ -283,8 +294,10 @@ end function
 -- sleep(15)
 -- puts(1, "Done.\n")
 -- </eucode>
+--
 -- See Also:
---     [[:task_schedule]], [[:tick_rate]], [[:task_yield]]
+--   [[:task_schedule]], [[:tick_rate]], [[:task_yield]]
+
 global procedure sleep(atom t)
 -- go to sleep for t seconds
 -- allowing (on WIN32 and Linux) other processes to run
@@ -308,7 +321,8 @@ end function
 
 ifdef WIN32 then
 	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("kernel32.dll"), "SetEnvironmentVariableA", {C_POINTER, C_POINTER}, C_INT)
+	constant SETENV = define_c_func(open_dll("kernel32.dll"), "SetEnvironmentVariableA", 
+		{C_POINTER, C_POINTER}, C_INT)
 	constant UNSETENV = -1
 elsifdef LINUX then
 	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
@@ -316,21 +330,25 @@ elsifdef LINUX then
 	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef FREEBSD then
 	constant UNAME = define_c_func(open_dll("libc.so"), "uname", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("libc.so"), "setenv", {C_POINTER, C_POINTER, C_INT}, C_INT)
+	constant SETENV = define_c_func(open_dll("libc.so"), "setenv", {C_POINTER, C_POINTER, C_INT}, 
+		C_INT)
 	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef OSX then
 	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("libc.dylib"), "setenv", {C_POINTER, C_POINTER, C_INT}, C_INT)
+	constant SETENV = define_c_func(open_dll("libc.dylib"), "setenv", 
+		{C_POINTER, C_POINTER, C_INT}, C_INT)
 	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef DOS32 then
 	constant SETENV = -1
 	constant UNSETENV = -1
 end ifdef
+
 --**
 -- Retrieves the nme of the host OS.
 --
 -- Returns:
--- 		A **sequence**, starting with the OS name. If identification fails, returned string is "". Extra information deoends on the OS (details unavailable).
+-- 	A **sequence**, starting with the OS name. If identification fails, returned string 
+--  is "". Extra information deoends on the OS (details unavailable).
 
 export function uname()
 	ifdef WIN32 then
