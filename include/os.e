@@ -482,6 +482,8 @@ export function unsetenv(sequence env)
 	ifdef UNIX then
 		ret = c_func(UNSETENV, {penv})
 		ret = not ret
+	elsifdef DOS32 then
+		--dont allow DOS to see the NULL
 	else
 		ret = c_func(SETENV, {penv, NULL})
 	end ifdef
