@@ -16,7 +16,7 @@ include dll.e
 end ifdef
 include machine.e
 
-constant M_SLEEP = 64
+constant M_SLEEP = 64, M_SET_ENV = 73, M_UNSET_ENV = 74
 
 --****
 -- === Constants
@@ -405,26 +405,12 @@ end function
 
 ifdef WIN32 then
 	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("kernel32.dll"), "SetEnvironmentVariableA",
-		{C_POINTER, C_POINTER}, C_INT)
-	constant UNSETENV = -1
 elsifdef LINUX then
 	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll(""), "setenv", {C_POINTER, C_POINTER, C_INT}, C_INT)
-	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef FREEBSD then
 	constant UNAME = define_c_func(open_dll("libc.so"), "uname", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("libc.so"), "setenv", {C_POINTER, C_POINTER, C_INT},
-		C_INT)
-	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
 elsifdef OSX then
 	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
-	constant SETENV = define_c_func(open_dll("libc.dylib"), "setenv",
-		{C_POINTER, C_POINTER, C_INT}, C_INT)
-	constant UNSETENV = define_c_func(open_dll(""), "unsetenv", {C_POINTER}, C_INT)
-elsifdef DOS32 then
-	constant SETENV = -1
-	constant UNSETENV = -1
 end ifdef
 
 --**
@@ -571,29 +557,7 @@ end function
 --   [[:getenv]], [[:unsetenv]]
 
 export function setenv(sequence name, sequence val, integer overwrite=1)
-	ifdef DOS32 then
-		-- TODO
-		return 0
-	end ifdef
-
-	atom 
-		pname = allocate_string(name),
-		pval = allocate_string(val),
-		ret = 1
-	
-	ifdef UNIX then
-		ret = c_func(SETENV, {pname, pval, overwrite})
-		ret = not ret
-	else
-		if overwrite or not sequence(getenv(name)) then
-			ret = c_func(SETENV, {pname, pval})
-		end if
-	end ifdef
-
-	free(pval)
-	free(pname)
-
-	return ret
+	return machine_func(M_SET_ENV, {env, val, o})
 end function
 
 --**
@@ -611,22 +575,6 @@ end function
 --   [[:setenv]], [[:getenv]]
 
 export function unsetenv(sequence env)
-	ifdef DOS32 then
-		-- TODO
-		return 0
-	end ifdef
-
-	atom ret, penv = allocate_string(env)
-
-	ifdef UNIX then
-		ret = c_func(UNSETENV, {penv})
-		ret = not ret
-	else
-		ret = c_func(SETENV, {penv, 0})
-	end ifdef
-
-	free(penv)
-
-	return ret
+	return machine_func(M_UNSET_ENV, {env})
 end function
 

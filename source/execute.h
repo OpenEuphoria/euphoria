@@ -390,3 +390,5 @@ struct char_cell {
 #define M_FREE_PCRE    70
 #define M_WARNING_FILE 72
 
+#define M_SET_ENV      73
+#define M_UNSET_ENV    74
