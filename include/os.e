@@ -557,7 +557,7 @@ end function
 --   [[:getenv]], [[:unsetenv]]
 
 export function setenv(sequence name, sequence val, integer overwrite=1)
-	return machine_func(M_SET_ENV, {env, val, o})
+	return machine_func(M_SET_ENV, {name, val, overwrite})
 end function
 
 --**
