@@ -61,6 +61,7 @@ int wrap_around = 1;
 int in_from_keyb;        /* stdin appears to be from keyboard */
 char *collect = NULL;    /* to collect sprintf/sprint output */
 int have_console = FALSE;  // is there a console window yet?
+int already_had_console = -1; /* were we created with a console window or did we have to allocate our own? */
 #ifdef EWINDOWS
 HANDLE console_input;  // HANDLE for WIN32 console input
 HANDLE console_output; // HANDLE for WIN32 console output
@@ -247,6 +248,7 @@ void show_console()
 	CONSOLE_CURSOR_INFO c;
 	INPUT_RECORD pbuffer;
 	DWORD junk;
+	int alloc_ret;
 #else
 	int f, b;
 #endif
@@ -271,7 +273,11 @@ void show_console()
 		}
 		NewConfig();
 #else   
-		AllocConsole();
+		alloc_ret = !AllocConsole();
+		if (already_had_console < 0) {
+			// this effectively tells us if we were started as a GUI app or a CONSOLE app (exw.exe or exwc.exe)
+			already_had_console = alloc_ret;
+		}
 
 		console_output = GetStdHandle(STD_OUTPUT_HANDLE);
 		
@@ -310,7 +316,7 @@ void show_console()
 		// This stops the mouse cursor from appearing in full screen
 		SetConsoleMode(console_input, ENABLE_LINE_INPUT |
 								ENABLE_ECHO_INPUT |
-								ENABLE_PROCESSED_INPUT);  // no mouse please
+								ENABLE_PROCESSED_INPUT);  // no mouse please 
 #endif
 	}
 }
@@ -331,7 +337,15 @@ static void end_of_line(int c)
 			// scroll screen up one line
 			SMALL_RECT src, clip;
 			COORD dest;
+			COORD pos;
 			CHAR_INFO fill_char;
+
+			if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+				pos.X = 0;
+				//pos.Y = console_info.dwSize.Y;
+				pos.Y = console_info.dwSize.Y-1;
+				SetConsoleCursorPosition(console_output, pos);
+			}
 
 			src.Left = 0;
 			src.Right = console_info.dwSize.X; //79;  // assume 80-char screen for now
@@ -369,10 +383,23 @@ static void MyWriteConsole(char *string, int nchars)
 // update the cursor position
 {
 	int i;
+	static int first = 0;
 	CONSOLE_SCREEN_BUFFER_INFO console_info;
+	char old_string[82];
+	COORD ch;
 	
 	show_console();
+	/* hack - if we are exwc, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
 	GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
+	if ( (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1) &&
+	(already_had_console==1) && !first) {
+		if (!(console_info.dwCursorPosition.Y < console_info.dwSize.Y - 1))
+		{
+			//WriteConsole(console_output, "\n", 1, &i, NULL);
+			end_of_line('\n');
+		}
+		first = 1;
+	}
  
 	buff_size.X = nchars;
 
@@ -380,7 +407,29 @@ static void MyWriteConsole(char *string, int nchars)
 	screen_loc.Bottom = screen_loc.Top;
 	screen_loc.Left = console_info.dwCursorPosition.X; //screen_col-1;
 	screen_loc.Right = 79;
+
+	if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+
+	ch.X = screen_loc.Left;
+	ch.Y = screen_loc.Top;
 		
+	strncpy(old_string, string, 80);
+	old_string[81] = '\0';
+
+	for (i = 0; i < nchars; i++)
+	{
+		if (old_string[i] == '\n')
+			old_string[i] = ' ';
+		if (old_string[i] == '\r')
+			old_string[i] = ' ';
+	}
+
+	SetConsoleCursorPosition(console_output, ch);
+	WriteConsole(console_output, string, nchars, &i, NULL);
+	SetConsoleCursorPosition(console_output, ch);
+
+	} else {
+
 	i = 0;
 	while (*string != '\0') {
 		line_buffer[i].Char.AsciiChar = *string;
@@ -393,6 +442,7 @@ static void MyWriteConsole(char *string, int nchars)
 					   buff_size,
 					   buff_start,
 					   &screen_loc);
+	} // EUCONS
 
 	console_info.dwCursorPosition.X += nchars; // what if becomes 80? (i.e 1 too big)
 	SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
