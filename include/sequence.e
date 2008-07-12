@@ -177,9 +177,9 @@ include sort.e
 -- What is inserted as a subsequence. splicing a string into another yields a new string.
 --
 -- Parameters:
---   * st - sequence to splice into.
---   * what - what to split into st.
---   * index - index position at which to splice.
+-- * st - sequence to splice into.
+-- * what - what to split into st.
+-- * index - index position at which to splice.
 --
 -- Comments:
 --   A new sequence is created. st and what can be any type of sequence, including nested 
@@ -213,19 +213,19 @@ include sort.e
 -- Thus {{{-1}}} means the second-last element and {{{0}}} means the last element.
 --
 -- Parameters:
---   * st - object to reverse. If this is an atom it is just returned.
---   * pFrom - The first element. Default is 1.
---   * pTo - The last element. Default is length(st)
+-- * st - object to reverse. If this is an atom it is just returned.
+-- * pFrom - The first element. Default is 1.
+-- * pTo - The last element. Default is length(st)
 --
 -- Example 1:
 -- <eucode>
--- reverse({1,3,5,7})		   -- {7,5,3,1}
+-- reverse({1,3,5,7})          -- {7,5,3,1}
 -- reverse({1,3,5,7,9}, 2, -1) -- {1,7,5,3,9}
 -- reverse({1,3,5,7,9}, 2)     -- {1,9,7,5,3}
 -- reverse({{1,2,3}, {4,5,6}}) -- {{4,5,6}, {1,2,3}}
--- reverse({99})			   -- {99}
--- reverse({})				   -- {}
--- reverse(42)				   -- 42
+-- reverse({99})               -- {99}
+-- reverse({})                 -- {}
+-- reverse(42)                 -- 42
 -- </eucode>
 
 export function reverse(object st, integer pFrom = 1, integer pTo = 0)
@@ -430,13 +430,13 @@ end function
 -- will be returned.
 --
 -- Parameters:
---   * st - sequence to get tail of.
---   * n - number of items to return. (defaults to length(st) - 1)
+-- * st - sequence to get tail of.
+-- * n - number of items to return.
 --
 -- Comments:
---   A new sequence is created.
+-- A new sequence is created.
 --
---   st can be any type of sequence, including nested sequences.
+-- st can be any type of sequence, including nested sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -471,9 +471,9 @@ end function
 -- Remove an item or a range of items from st.
 --
 -- Parameters:
---   * st - sequence in which to remove from.
---   * start - index at which to remove (or starting index to remove)
---   * stop - index at which to stop remove (defaults to start)
+-- * st - sequence in which to remove from.
+-- * start - index at which to remove (or starting index to remove)
+-- * stop - index at which to stop remove
 --
 -- Comments:
 --   A new sequence is created. st can be a string or complex sequence.
@@ -529,8 +529,8 @@ end function
 -- Removes all ocurrences of needle from haystack
 --
 -- Parameters:
---   * needle - object to remove.
---   * haystack - sequence in which to remove from.
+-- * needle - object to remove.
+-- * haystack - sequence in which to remove from.
 --
 -- Example 1:
 -- <eucode>
@@ -602,10 +602,10 @@ end function
 -- Replace from index start to stop of st with object what. what can be any object.
 --
 -- Parameters:
---   * st - sequence in which replacement will be done.
---   * replacement - item to replace with.
---   * start - starting index.
---   * stop - stopping index.
+-- * st - sequence in which replacement will be done.
+-- * replacement - item to replace with.
+-- * start - starting index.
+-- * stop - stopping index.
 --
 -- Comments:
 --   A new sequence is created. st can be a string or complex sequence.
@@ -630,20 +630,14 @@ export function replace(sequence st, object replacement, integer start, integer 
 end function
 
 --**
--- TODO: Limit seems wrong, 1 should split off one item, returning 2 items total.
---
 -- Split the sequence st by delim creating a new sequence. 
 --
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
--- If any is 1 then split by any one item in delim not delim as a whole. If any is 0 then 
--- split by delim as a whole.
---
 -- Paramters:
---   * st - sequence to split.
---   * delim - delimiter to split by.
---   * limit - maximum number of items to split.
---   * any - split by any atom in delim (1) or delim as a whole (0).
+-- * st - sequence to split.
+-- * delim - delimiter to split by.
+-- * limit - maximum number of items to split.
 --
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence
@@ -660,16 +654,10 @@ end function
 -- -- result is {"John", "Middle,Doe"}
 -- </eucode>
 --
--- Example 3:
--- <eucode>
--- result = split("One,Two|Three.Four", ".,|", 0, 1)
--- -- result is {"One", "Two", "Three", "Four"}
--- </eucode>
---
 -- See Also:
---     [[:chunk]]
+--     [[:split_any]], [[:chunk]], [[:join]]
 
-export function split(sequence st, object delim=" ", integer limit=0, integer any=0)
+export function split(sequence st, object delim=" ", integer limit=0)
 	sequence ret = {}
 	integer start = 1, pos, next_pos
 
@@ -678,21 +666,67 @@ export function split(sequence st, object delim=" ", integer limit=0, integer an
 	end if
 
 	while 1 do
-		if any then
-			pos = find_any(delim, st, start)
-			next_pos = pos+1
-		else
-			pos = match_from(delim, st, start)
-			next_pos = pos+length(delim)
-		end if
+		pos = match_from(delim, st, start)
+		next_pos = pos+length(delim)
 
 		if pos then
 			ret = append(ret, st[start..pos-1])
 			start = next_pos
-			if limit = 2 then
+			limit -= 1
+			if limit = 0 then
 				exit
 			end if
+		else
+			exit
+		end if
+	end while
+
+	ret = append(ret, st[start..$])
+
+	return ret
+end function
+
+--**
+-- Split the sequence st by any item in delim creating a new sequence. 
+--
+-- If limit is > 0 then limit the number of tokens that will be split to limit.
+--
+-- Paramters:
+-- * st - sequence to split.
+-- * delim - delimiters to split by.
+-- * limit - maximum number of items to split.
+--
+-- Comments:
+-- This function may be applied to a string sequence or a complex sequence
+--
+-- Example 1:
+-- <eucode>
+-- result = split("One,Two|Three.Four", ".,|")
+-- -- result is {"One", "Two", "Three", "Four"}
+-- </eucode>
+--
+-- See Also:
+--   [[:split]], [[:chunk]], [[:join]]
+
+export function split_any(sequence st, object delim, integer limit=0)
+	sequence ret = {}
+	integer start = 1, pos, next_pos
+
+	if atom(delim) then
+		delim = {delim}
+	end if
+
+	while 1 do
+		pos = find_any(delim, st, start)
+		next_pos = pos + 1
+
+		if pos then
+			ret = append(ret, st[start..pos-1])
+			start = next_pos
 			limit -= 1
+			if limit = 0 then
+				exit
+			end if
 		else
 			exit
 		end if
@@ -707,8 +741,8 @@ end function
 -- Join s by delim
 --
 -- Parameters:
---   * s - sequence of items to join.
---   * delim - delimiter to join by.
+-- * s - sequence of items to join.
+-- * delim - delimiter to join by.
 --
 -- Comments:
 --   This function may be applied to a string sequence or a complex sequence
@@ -726,7 +760,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:split]]
+--     [[:split]], [[:split_any]], [[:chunk]]
 
 export function join(sequence s, object delim=" ")
 	object ret
@@ -747,9 +781,9 @@ end function
 -- Pad the beginning of a sequence with ch up to size in length.
 --
 -- Parameters:
---   * str - string to pad.
---   * size - size to pad str to.
---   * ch - character to pad to (defaults to ' ').
+-- * str - string to pad.
+-- * size - size to pad str to.
+-- * ch - character to pad to.
 --
 -- Comments:
 --   pad_head() will not remove characters. If length(str) is greater than params, this
@@ -779,9 +813,9 @@ end function
 -- Pad the end of a sequence with ch up to size in length.
 --
 -- Parameters:
---   * str - string to pad.
---   * size - size to pad 'str' to.
---   * ch - character to pad to (defaults to ' ').
+-- * str - string to pad.
+-- * size - size to pad 'str' to.
+-- * ch - character to pad to.
 --
 -- Comments:
 --   pad_tail() will not remove characters. If length(str) is greater than params, this
@@ -1125,10 +1159,10 @@ export constant
 -- or ##ROTATE_RIGHT##. A null shift does nothing and returns source unchanged.
 --
 -- Parameters:
--- # ##source##: sequence to be rotated
--- # ##shift##: direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
--- # ##start##: starting position for shift
--- # ##stop##: stopping position for shift
+-- * ##source## - sequence to be rotated
+-- * ##shift##  - direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
+-- * ##start##  - starting position for shift
+-- * ##stop##   - stopping position for shift
 --
 -- Comments:
 --   To shift multiple places, use {{{ROTATE_LEFT * 5}}} for instance to rotate left, 5
@@ -1153,12 +1187,13 @@ export constant
 -- </eucode>
 --
 -- Example 4:
+-- <eucode>
 -- s = rotate({11,13,15,17,19,23}, ROTATE_RIGHT, 2, 5)
 -- -- s is {11,19,13,15,17,23}
 -- </eucode>
 --
 -- See Also:
---     [[:slice]], [[:head]], [[:tail]]
+-- [[:slice]], [[:head]], [[:tail]]
 
 export function rotate(sequence source, integer shift, integer start=1, integer stop=length(source))
 	sequence shifted
@@ -1198,9 +1233,9 @@ end function
 -- in the list, the list is returned unchanged.
 --
 -- Parameters:
--- # ##needle##:   object to add.
--- # ##haystack##: sequence in which to add it to.
--- # ##order##:    1=prepend (default), 2=append, 3=ascending, 4=descending
+-- * ##needle##   - object to add.
+-- * ##haystack## - sequence in which to add it to.
+-- * ##order##    - 1=prepend (default), 2=append, 3=ascending, 4=descending
 --
 -- Example 1:
 -- <eucode>
@@ -1263,14 +1298,14 @@ end function
 -- and greater than the pivot.
 --
 -- Parameters:
---   # ##pData##: Either an atom or a list. An atom is treated as if it is one-element sequence.
---   * ##pPivot##: An object. Default is zero.
+-- * ##pData## - Either an atom or a list. An atom is treated as if it is one-element sequence.
+-- * ##pPivot## - An object. Default is zero.
 --
 -- Returns:
 --   sequence: { {less than pivot}, {equal to pivot}, {greater than pivot} }
 --
 -- Comments: 
---   ##pivot()## is used as a split up a sequence relative to a specific value.
+-- ##pivot()## is used as a split up a sequence relative to a specific value.
 --
 -- Example 1:
 --   <eucode>
@@ -1304,8 +1339,8 @@ end function
 -- Filter a sequence based on a user comparator.
 --
 -- Parameters:
--- # ##source##: sequence to filter
--- # ##rid##: [[:routine_id]] of function to use as comparator
+-- * ##source## - sequence to filter
+-- * ##rid## - [[:routine_id]] of function to use as comparator
 --
 -- Example 1:
 -- <eucode>
@@ -1336,8 +1371,8 @@ end function
 -- Apply ##rid## to every element of a sequence returning a new sequence of the same size.
 --
 -- Parameters: 
--- # ##source##: sequence to map
--- # ##rid##: [[:routine_id]] of function to use as convertor
+-- * ##source## - sequence to map
+-- * ##rid## - [[:routine_id]] of function to use as convertor
 --
 -- Example 1:
 -- <eucode>

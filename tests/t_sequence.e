@@ -46,12 +46,13 @@ test_equal("tail() bounds", {1,2,3,4}, tail({1,2,3,4}, 50))
 test_equal("split() simple string", {"a","b","c"}, split("a,b,c", ","))
 test_equal("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
 test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"}, 0))
-test_equal("split() limit set", {"a", "b,c"}, split("a,b,c", ',', 2))
-test_equal("split() any character", {"a", "b", "c"}, split("a,b.c", ",.", 0, 1))
-test_equal("split() limit and any character", {"a", "b", "c|d"},
-    split("a,b.c|d", ",.|", 3, 1))
+test_equal("split() limit set", {"a", "b,c"}, split("a,b,c", ',', 1))
 test_equal("split() single sequence delimiter",{"while 1 "," end while ",""},
     split("while 1 do end while do","do"))
+
+test_equal("split_any()", {"a", "b", "c"}, split_any("a,b.c", ",."))
+test_equal("split_any() limit", {"a", "b", "c|d"},
+    split_any("a,b.c|d", ",.|", 2))
 
 test_equal("join() simple string default", "a b c", join({"a", "b", "c"}))
 test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
