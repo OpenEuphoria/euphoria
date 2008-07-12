@@ -21,8 +21,8 @@ There are now thousands of users around the world.  There's an automated a
 by a Euphoria program, and supporting over 500 subscribers.  The
 [[http://www.rapideuphoria.com|Euphoria Web site]] contains over 1800
 contributed compressed files packed with Euphoria source programs and library
-routines. Dozens of people have set up their own independent Web pages with
-Euphoria-related content.  Euphoria has been used in a variety of commercial
+routines. Dozens of people have set up their own [[http://www.rapideuphoria.com/othersit.htm|independent Web pages with
+Euphoria-related content]].  Euphoria has been used in a variety of commercial
 programs.  The //Windows// version has been used to create numerous GUI,
 utility and Internet-related programs. The //DOS// version has been used to
 create many exciting high-speed action games, complete with Sound Blaster sound
@@ -56,7 +56,7 @@ set it apart from the crowd:
   machine registers and addresses.
 * The Euphoria interpreter is more than **30 times faster** than either Perl or Python, 
   and it's considerably faster than all other interpreted languages, according to the 
-  "Great Computer Language Shootout" benchmark (see demo\bench\bench.doc).
+  "Great Computer Language Shootout" benchmark (see ##demo\bench\bench.doc##).
 * If that isn't enough, there's a **Euphoria To C Translator** that can translate any 
   Euphoria program to C, and boost your speed even more. Why waste time debugging 
   hand-coded ``C/C++``? You can easily develop a Euphoria program, and then generate the C code.
@@ -115,7 +115,7 @@ automatically generate both plain text and HTML files, from a common source.
 Thus the content of each file in the ##doc## subdirectory should be identical
 to the content of the corresponding file in the ##html## subdirectory, aside
 from the lack of links, fonts, colors, etc. See ##doc\overview.doc## (or
-href="html/overview.htm">**html\overview.htm**</a>) for a summary of the
+<a href="html/overview.htm">**html\overview.htm**</a>) for a summary of the
 documentation files.
 
 You can freely distribute the Euphoria interpreter, and any other files
@@ -124,7 +124,7 @@ program that you have developed. You are completely free to distribute any
 Euphoria programs that you write.
 
 To run the //WIN32// version of Euphoria, you need Windows 95 or any later
-version of Windows.  It runs fine on XP.
+version of Windows.  It runs fine on XP and Vista.
 
 The //DOS32// version will run on any version of Windows, and will also run on
 plain DOS on any 386 or higher processor. Contrary to popular opinion, DOS is

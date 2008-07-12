@@ -3,8 +3,8 @@
 Download and run the latest Euphoria setup program. It will install Euphoria on
 any //Windows// system from //Windows 95// up.
 
-After installing, see [[:docs/what2do | What to do next]] for ideas on how to use this package.
-You should also see [[:docs/readme | the readme file]] if you have not done so already.
+After installing, see [[:docs/what2do.txt | What to do next]] for ideas on how to use this package.
+You should also see [[:docs/readme.txt | the readme file]] if you have not done so already.
 
 === Possible Problems
 
@@ -12,7 +12,7 @@ You should also see [[:docs/readme | the readme file]] if you have not done so a
   to shut down and restart your computer?
 * On //Windows XP/2000//, be careful that your ##PATH## and ##EUDIR## do not conflict with 
   ##autoexec.nt##, which can also be used to set environment variables.
-* On //WinME/98/95// if the ##install## fails to edit your ##autoexec.bat## file, you will have 
+* On //WinME/98/95// if the install procedure fails to edit your ##autoexec.bat## file, you will have 
   to do it yourself. Follow the manual procedure described below.
 * Euphoria can be run under //DOS// on older //Win 3.1// systems, but we no longer maintain an install 
   program for this. You'll have to install Euphoria on a newer system and then copy your 
