@@ -75,7 +75,7 @@ As you will soon discover, sequences make Euphoria very simple //and// very
 powerful.  **Understanding atoms and sequences is the key to understanding
 Euphoria.**
 
-; **Performance Note**:
+; **Performance Note~:**
 : Does this mean that all atoms are stored in memory as 8-byte floating-point
 numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
 machine integers (4 bytes) to save space and improve execution speed. When
@@ -400,7 +400,7 @@ Array of strings:
 <eucode>
 s = {"Hello", "World", "Euphoria", "", "Last One"}
 
--- s[3] is "Euphoria" <br>
+-- s[3] is "Euphoria"
 -- s[3][1] is 'E'
 </eucode>
 
@@ -866,23 +866,19 @@ A copy of the value of each argument is passed in. The formal parameter
 variables may be modified inside the procedure but this does not affect the
 value of the arguments.
 
-<dl>
-<dt>**Performance Note:**</dt>
-<dd>
-The interpreter does not actually copy sequences or floating-point numbers
+;**Performance Note:**
+:The interpreter does not actually copy sequences or floating-point numbers
 unless it becomes necessary. For example,
-
 <eucode>
 y = {1,2,3,4,5,6,7,8.5,"ABC"}
 x = y
 </eucode>
-
 The statement x = y does not actually cause a new copy of y to be created. Both x and y will 
 simply "point" to the same sequence. If we later perform x[3] = 9, then a separate sequence 
 will be created for x in memory (although there will still be just one shared copy of 8.5 and
-"ABC"). The same thing applies to "copies" of arguments passed in to subroutines.</dd>
+"ABC"). The same thing applies to "copies" of arguments passed in to subroutines.
 
-</dl>
+
 
 For a number of procedures or functions - see below -, some parameters may have
 the same value in many cases. The most expected value for any parameter may be
@@ -1302,35 +1298,25 @@ integer values from -1073741824 to +1073741823 inclusive. You can perform exact
 calculations on larger integer values, up to about 15 decimal digits, but
 declare them as **atom**, rather than integer.
 
-<dl>
-<dt>
-**Note:**</dt>
-<dd>
-
-In a procedure or function parameter list like the one for fred() above, a type
+;**Note~:**
+:In a procedure or function parameter list like the one for fred() above, a type
 name may only be followed by a single parameter name.
-</dd>
 
-<dt>**Performance Note:**</dt>
-
-<dd>
-
-Calculations using variables declared as integer will usually be somewhat
+;**Performance Note~:**
+:Calculations using variables declared as integer will usually be somewhat
 faster than calculations involving variables declared as atom. If your machine
 has floating-point hardware, Euphoria will use it to manipulate atoms that
 aren't representable as integers. If your machine doesn't have floating-point
 hardware, Euphoria will call software floating-point arithmetic routines
 contained in **ex.exe** (or in Windows).  You can force ex.exe to
 bypass any floating-point hardware, by setting an environment variable:
-
 {{{
 SET NO87=1
 }}}
-
 The slower software routines will be used, but this could be of some advantage
 if you are worried about the floating-point bug in some early Pentium
-chips.</dd>
-</dl>
+chips.
+
 
 a name=type></a> To augment the a href="refman_2.htm#43">predefined
 types</a>, you can create **user-defined types**. All you have to
@@ -1384,12 +1370,8 @@ Type checking can be turned off or on between subroutines using the with
 type_check or without type_check a href="refman_2.htm#62">special
 statements</a>.  It is initially on by default.
 
-<dl>
-<dt>
-**Note to Benchmarkers:**</dt>
-<dd>
-
-When comparing the speed of Euphoria programs against programs written in other
+;**Note to Benchmarkers~:**
+: When comparing the speed of Euphoria programs against programs written in other
 languages, you should specify **without type_check** at the top of
 the file.  This gives Euphoria permission to skip run-time type checks, thereby
 saving some execution time. All other checks are still performed, e.g.
@@ -1400,9 +1382,8 @@ many cases.  So you may still get a type check failure even when you have
 turned off type checking. Whether type checking is on or off, you will never
 get a **//machine-level//** exception.  **You will always get a
 meaningful message from Euphoria when something goes wrong**.  (//This
-might not be the case when you a href="lib_mach.htm#poke">poke</a> directly
-into memory, or call routines written in C or machine code.//)</dd>
-</dl>
+might not be the case when you [[:poke]] directly
+into memory, or call routines written in C or machine code.//)
 
 Euphoria's method of defining types is simpler than what you will find in other
 languages, yet Euphoria provides the programmer with //greater// flexibility
@@ -1432,24 +1413,17 @@ most other languages. It also increases the reliability of the final program
 since many latent bugs that would have survived the testing phase in other
 languages will have been caught by Euphoria.
 
-<dl>
-<dt>
-**Anecdote 1:**</dt>
-<dd>
-
-In porting a large C program to Euphoria, a number of latent bugs were
+;**Anecdote 1~:**
+: In porting a large C program to Euphoria, a number of latent bugs were
 discovered. Although this C program was believed to be totally "correct", we
 found: a situation where an uninitialized variable was being read; a place
 where element number "-1" of an array was routinely written and read; and a
 situation where something was written just off the screen. These problems
 resulted in errors that weren't easily visible to a casual observer, so they
-had survived testing of the C code.</dd>
+had survived testing of the C code.
 
-<dt>
-**Anecdote 2:**</dt>
-<dd>
-
-The Quick Sort algorithm presented on page 117 of //Writing Efficient
+;**Anecdote 2~:**
+:The Quick Sort algorithm presented on page 117 of //Writing Efficient
 Programs// by Jon Bentley has a subscript error! The algorithm will sometimes
 read the element just //before// the beginning of the array to be sorted,
 and will sometimes read the element just //after// the end of the array.
@@ -1457,20 +1431,13 @@ Whatever garbage is read, the algorithm will still work - this is probably why
 the bug was never caught. But what if there isn't any (virtual) memory just
 before or just after the array? Bentley later modifies the algorithm such that
 this bug goes away -- but he presented this version as being correct.
-**//Even the experts need subscript checking!//**</dd>
+**//Even the experts need subscript checking!//**
 
-<dt>
-**Performance Note:**</dt>
-
-<dd>
-
-When typical user-defined types are used extensively, type checking adds only
+;**Performance Note~:**
+: When typical user-defined types are used extensively, type checking adds only
 20 to 40 percent to execution time. Leave it on unless you really need the
 extra speed. You might also consider turning it off for just a few
-heavily-executed routines.  a href="refman_3.htm#2">Profiling</a> can help
-with this decision.</dd>
-
-</dl>
+heavily-executed routines.  [[:Profiling]] can help with this decision.
 
 == Statements
 
@@ -1934,7 +1901,7 @@ end while
 i.e. an "infinite" while-loop that actually terminates via an **exit
 statement** at some arbitrary point in the body of the loop. 
 
-; **Performance Note**:
+; **Performance Note~:**:
 : Euphoria optimizes this type of loop.  At run-time, no test is performed at the
 top of the loop. There's just a simple unconditional jump from **end while**
 back to the first statement inside the loop.</dd>
