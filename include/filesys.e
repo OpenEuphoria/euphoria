@@ -677,12 +677,8 @@ export function rename_file(sequence src, sequence dest)
     if length(src) > 3 and length(dest) > 3 then
         if not compare(src[2],":") and not compare(dest[2],":") then
             if compare(src[1], dest[1]) then
-                i = copy_file(src,dest)
-                if not i then
-                    return i
-                end if
-                i = delete_file(src)
-                return i
+		-- renaming a file across drives is not supported
+                return 0
             end if
         end if
     end if
@@ -809,7 +805,52 @@ integer dirname_id = -1
 export function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret, pdir
 	ifdef DOS32 then
-		return rename_file(src, dest) --TODO overwrite check support
+    atom low_buff_old, low_buff_new
+    integer i
+    sequence reg_list
+    if length(src) > 3 and length(dest) > 3 then
+        if not compare(src[2],":") and not compare(dest[2],":") then
+            if compare(src[1], dest[1]) then
+                i = copy_file(src,dest,overwrite)
+                if not i then
+                    return i
+                end if
+                i = delete_file(src)
+                return i
+            end if
+        end if
+    end if
+    low_buff_old = allocate_low(length(src) + 1)
+    if not low_buff_old then
+        return 0
+    end if
+    low_buff_new = allocate_low(length(dest) + 1)
+    if not low_buff_new then
+        free_low(low_buff_old)
+        return 0
+    end if
+    poke(low_buff_old, src & 0)
+    poke(low_buff_new, dest & 0)
+    reg_list = repeat(0,10)
+    if short_names then
+        reg_list[REG_AX] = #5600
+    else
+        reg_list[REG_AX] = #7156
+    end if
+    reg_list[REG_DS] = floor(low_buff_old / 16)
+    reg_list[REG_DX] = remainder(low_buff_old, 16)
+    reg_list[REG_ES] = floor(low_buff_new / 16)
+    reg_list[REG_DI] = remainder(low_buff_new, 16)
+    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+--TODO double check that this honors the overwrite flag, and manually add a check if not
+    reg_list = dos_interrupt(#21, reg_list)
+    free_low(low_buff_old)
+    free_low(low_buff_new)
+    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+        return 0
+    else
+        return 1
+    end if
 	end ifdef
 	ifdef UNIX then
 		atom psrcbuf, pdestbuf
