@@ -62,18 +62,11 @@ function bfind_(object x,sequence s,integer startpoint,integer endpoint)
 
     if endpoint>length(s) then
         endpoint=length(s)
-		if not endpoint then
-			return 0
-		end if
     end if
     if startpoint<1 then
-        startpoint=1
-		
+        startpoint=1	
     end if
 	
-	if startpoint > endpoint then
-			return 0
-	end if
 	
     c=compare(x,s[startpoint])
     if c=1 then
@@ -172,7 +165,11 @@ end function
 -- return which set x belongs to
 
 export function belongs_to(object x,set s)
-    return bfind_(x,s,1,length(s))>0
+	if length( s ) then
+		return bfind_(x,s,1,length(s))>0
+	else
+		return 0
+	end if
 end function
 
 function add_to_(object x,sequence s)

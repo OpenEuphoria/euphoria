@@ -150,5 +150,7 @@ test_equal("distributes_right()",1,distributes_right(product,sum,0))
 
 test_equal("distributes_over()",3,distributes_over(product,sum,0))
 
+test_false("belongs_to() empty set", belongs_to( 1, {} ) )
+
 test_report()
 
