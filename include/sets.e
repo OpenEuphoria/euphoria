@@ -62,10 +62,19 @@ function bfind_(object x,sequence s,integer startpoint,integer endpoint)
 
     if endpoint>length(s) then
         endpoint=length(s)
+		if not endpoint then
+			return 0
+		end if
     end if
     if startpoint<1 then
         startpoint=1
+		
     end if
+	
+	if startpoint > endpoint then
+			return 0
+	end if
+	
     c=compare(x,s[startpoint])
     if c=1 then
         c=compare(x,s[endpoint])
