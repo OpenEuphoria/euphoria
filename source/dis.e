@@ -8,13 +8,12 @@ include text.e
 include pretty.e
 include ../include/error.e
 include map.e as map
+include dot.e
+include os.e
+include dox.e as dox
 
 integer out, pc, a, b, c, d, target, len, keep_running
 sequence operation
-
-
-map:map called_from = map:new()
-map:map called_by   = map:new()
 
 procedure RTInternal(sequence msg)
 -- Internal errors in back-end
@@ -278,8 +277,8 @@ procedure opPROC()  -- Normal subroutine call
 	-- record the data for the call graph
 	-- called_from maps from the caller to the callee
 	-- called_by maps from the callee back to the caller
-	called_from = map:nested_put( called_from, { current_file, CurrentSub, sub }, SymTab[sub][S_FILE_NO] )
-	called_by   = map:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, CurrentSub }, current_file )
+	called_from = map:nested_put( called_from, { current_file, CurrentSub, SymTab[sub][S_FILE_NO], sub }, 1 , map:ADD )
+	called_by   = map:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, current_file, CurrentSub }, 1, map:ADD )
 	
     dsm = sprintf( "%s: %s",{opnames[Code[pc]],name_or_literal(sub)})
 
@@ -1225,6 +1224,15 @@ function strip_path( sequence file )
 	return file
 end function
 
+include dot.e
+
+procedure make_pngs( sequence file )
+		system( sprintf( "dot -Tpng %s.dot > %s.dot.png", repeat( file, 2 ) ), 2 )
+		--system( sprintf( "fdp -Tpng %s.dot > %s.fdp.png", repeat( file, 2 ) ), 2 )
+		--system( sprintf( "neato -Tpng %s.dot > %s.neato.png", repeat( file, 2 ) ), 2 )
+		--system( sprintf( "twopi -Tpng %s.dot > %s.twopi.png", repeat( file, 2 ) ), 2 )
+end procedure
+
 procedure write_call_info( sequence name )
 	-- The output of this procedure is meant to be post processed to
 	-- create *.dot files to be used with something like graphviz to
@@ -1232,8 +1240,8 @@ procedure write_call_info( sequence name )
 	-- can be used to generate more focused graphs (i.e., for individual 
 	-- routines).
 	
-	-- called_from:  file -> proc -> called proc : called_proc file
-	-- called_by  :  called_proc file -> called proc -> proc : file
+	-- called_from:  file -> proc -> called_proc file : called proc
+	-- called_by  :  called_proc file -> called proc -> file : proc
 	sequence files = map:keys( called_from )
 	
 	integer fn = open( name & "calls", "w" )
@@ -1251,6 +1259,35 @@ procedure write_call_info( sequence name )
 	pretty_print( fn, file_include, pp )
 	puts( fn, "\n" )
 	close( fn )
+	
+	
+	sequence routines = {"If_statement","main","SetBBType"}
+	for r = 1 to length( routines ) do
+		integer dn = open( sprintf( "%s.dot", {routines[r]}), "w" )
+		puts( dn, diagram_routine( routines[r] ) )
+		close( dn )
+		make_pngs( routines[r] )
+	end for
+	
+	fn = open( name & "include.dot", "w" )
+	puts( fn, diagram_includes() )
+	close( fn )
+	make_pngs( name & "include" )
+	
+	fn = open( name & "include_all.dot", "w" )
+	puts( fn, diagram_includes( 1 ) )
+	close( fn )
+	make_pngs( name & "include_all" )
+	
+	files = short_names
+	for f = 1 to length( files ) do
+		integer dn = open( sprintf("%s.dep.dot", {files[f]}), "w" )
+		if dn != -1 then
+			puts( dn, diagram_file_deps( f ) )
+			close( dn )
+			make_pngs( files[f] & ".dep" )
+		end if
+	end for
 end procedure
 
 procedure line_print( integer fn, object p )
@@ -1421,6 +1458,7 @@ procedure dis( integer sub )
 	sequence sym
 	CurrentSub = sub
 	printf( out, "\nSubProgram [%s-%s:%05d]\n", {file_name[SymTab[sub][S_FILE_NO]],SymTab[sub][S_NAME], sub})
+	proc_names = map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1
 	while pc <= length(Code) do
@@ -1440,7 +1478,22 @@ global function extract_options(sequence s)
 	return s
 end function
 
+integer generate_html = 0
+procedure set_html()
+	generate_html = 1
+end procedure
+
 global procedure BackEnd( object ignore )
+	sequence opts = {
+		{ 0, "html", "html output", NO_PARAMETER, routine_id("set_html") },
+		{ "d", "dir", "output directory", HAS_PARAMETER, routine_id("set_out_dir") },
+		{ "p", "dep", "suppress dependencies", NO_PARAMETER, routine_id("suppress_dependencies") },
+		{ "s", "std", "show standard library information", NO_PARAMETER, routine_id("suppress_stdlib") },
+		{ "f", "file", "include this file", HAS_PARAMETER, routine_id("document_file") },
+		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") }
+		}
+	sequence result = cmd_parse( opts )
+	
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
 	for i = 1 to length(SymTab) do
@@ -1453,7 +1506,12 @@ global procedure BackEnd( object ignore )
 		end if
 	end for
 	close( out )
-	write_call_info( file_name[1] & '.' )
+	
+	
+	if generate_html then
+		dox:generate()
+	end if
+	--write_call_info( file_name[1] & '.' )
 	
 end procedure
 mode:set_backend( routine_id("BackEnd") )

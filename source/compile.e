@@ -18,6 +18,9 @@ include c_decl.e
 include cominit.e
 include compress.e
 include tranplat.e
+include scanner.e
+include emit.e
+include opnames.e
 
 integer np, pc
 
@@ -1470,8 +1473,6 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 	CDeRefStr("_0")
 	SetBBType(Code[pc+3], target_type, novalue, TYPE_OBJECT)
 end procedure 
-
-without warning  -- lots of short-circuit warnings
 
 function unary_optimize(integer pc, integer target_type, sequence target_val,
 						sequence intcode, sequence intcode2, sequence gencode)

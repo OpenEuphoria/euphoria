@@ -1,5 +1,15 @@
+-- Outputs IL code and symbol table
+-- To generate doxygen-like html output use option:
+--   --html
+-- To modify the output:
+-- { "d", "dir", "output directory", HAS_PARAMETER, routine_id("set_out_dir") },
+-- { "p", "dep", "suppress dependencies", NO_PARAMETER, routine_id("suppress_dependencies") },
+-- { "s", "std", "show standard library information", NO_PARAMETER, routine_id("suppress_stdlib") },
+-- { "f", "file", "include this file", HAS_PARAMETER, routine_id("document_file") },
+-- { "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") }
+-- default output dir: eudox
+-- stdlib suppressed by default
 without type_check
-
 include mode.e
 sequence cmd = command_line()
 if find( "-t", cmd ) then

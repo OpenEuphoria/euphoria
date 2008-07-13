@@ -475,7 +475,6 @@ global function ok_name(sequence name)
 	end if
 end function
 
-without warning -- some short-circuits
 global procedure CName(symtab_index s)
 -- display the C name or literal value of an operand 
 	object v
