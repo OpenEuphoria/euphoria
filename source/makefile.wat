@@ -650,7 +650,7 @@ backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_D
 	@%append .\$(OBJDIR)\exb.lbc OPTION QUIET
 	@%append .\$(OBJDIR)\exb.lbc OPTION ELIMINATE
 	@%append .\$(OBJDIR)\exb.lbc OPTION CASEEXACT
-	@for %i in ($(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exb.lbc file %i
+	@for %i in ($(PCRE_OBJECTS) $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exb.lbc file %i
 	wlink  $(DEBUGLINK) @.\$(OBJDIR)\exb.lbc name backendd.exe
 	le23p backendd.exe
 	cwc backendd.exe
