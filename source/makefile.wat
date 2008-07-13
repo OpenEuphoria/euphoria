@@ -218,6 +218,24 @@ EU_BACKEND_RUNNER_OBJECTS = &
         .\$(OBJDIR)\io.obj &
         .\$(OBJDIR)\filesys.obj
 
+EU_DOSBACKEND_RUNNER_OBJECTS = &
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\intinit.obj &
+	.\$(OBJDIR)\machine.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\0ackend.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\text.obj &
+	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\types.obj &
+        .\$(OBJDIR)\compress.obj &
+        .\$(OBJDIR)\io.obj &
+        .\$(OBJDIR)\filesys.obj
+
 EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\main-0.obj &
@@ -619,7 +637,7 @@ dos : .SYMBOLIC builddirs
 doseubin : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
-backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exb.lbc
 	@%append .\$(OBJDIR)\exb.lbc option quiet
 	@%append .\$(OBJDIR)\exb.lbc option caseexact
