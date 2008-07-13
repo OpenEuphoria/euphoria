@@ -1807,10 +1807,36 @@ This differs from a **while** loop in more than one way:
 
 ==== for statement
 
-A **for statement** sets up a special loop with a controlling
-**loop variabl**e that runs from an initial value up or down to
-some final value. e.g.
-
+A **for** statement sets up a special loop that has its own **loop variable**.
+The **loop variable** starts with the specified initial value and increments or
+decrements it to the specified final value. The **for** statement is used when
+you need to repeat a set of statements a specific number of times.\\
+Example:
+<eucode>
+-- Display the numbers 1 to 6 on the screen.
+puts(1, "1\n")
+puts(1, "2\n")
+puts(1, "3\n")
+puts(1, "4\n")
+puts(1, "5\n")
+puts(1, "6\n")
+</eucode>
+This block of code simply starts at the first line and runs each in turn. But it
+could be written more simply and flexible by using a **for** statement.
+<eucode>
+for i = 1 to 6 do
+    printf(1, "%d\n", i)
+end for
+</eucode>
+Now its just three lines of code rather than six, but more importantly if we needed
+to change the program to print the numbers from 1 to 100 we only have to change
+one line rather than add 94 new lines.
+<eucode>
+for i = 1 to 100 do -- One line change.
+    printf(1, "%d\n", i)
+end for
+</eucode>
+Or using another way ...
 <eucode>
 for i = 1 to 10 do
     ? i   -- ? is a short form for print()
@@ -1831,50 +1857,127 @@ before leaving the loop. The compiler will not allow any assignments to a loop
 variable. The initial value, loop limit and increment must all be atoms. If no
 increment is specified then +1 is assumed. The limit and increment values are
 established when the loop is entered, and are not affected by anything that
-happens during the execution of the loop. See also the a
-href="refman_2.htm#loop_scope">scope of the loop variable in 2.4.2
-Scope</a>.
+happens during the execution of the loop. See also the [[:loop scope]].
 
 === Flow control statements
 
-Blocks are good ways toorganise code in easily identifiable chunks. However,
-for efficiency, it is often desirable to exi them early or slightly alter their
-default course of execution.  
+Program execution flow refers to the order in which program statements are run in.
+By default, the next statement to run after the current one is the next statement
+//physically// located after the current one.\\
+Example:
+<eucode>
+a = b + c 
+printf(1, "The result of adding %d and %d is %d", {b,c,a})
+</eucode>
+In that example, ##b## is added to ##c##, assigning the result to ##a##, and then
+the information is displayed on the screen using the ##printf## statement.
 
-Exiting a single block of code is done with a single keyword, like
-**exit**. Likwise, kipping the rest of an iteration in a single
-code block is done using a single keyword, like **continue**. But
-sometimes you need to act on a block above the current one, like exiting three
-levels of loop, or restarting the iteration of the third loop above. How to do
-that?
+However, there are many times in which the order of execution needs to be different
+from the default order, to get the job done. Euphoria has a number of //flow control
+statements// that you can use to arrange the execution order of statements. 
 
-By using an optional parameter right after the control flow keyword. The
-parameter may take the following form:  
+A set of statements that are run in their order of appearance is called a //block//.
+Blocks are good ways to organise code in easily identifiable chunks. However
+it can be desirable to leave a block before reaching the end, or slightly alter
+the default course of execution.\\
 
-* A label string, like in ##break "this_block"##
-* A positive constant integer, the number of levels to act upon, like in ##exit 2## to exit 
-  the loop right above the current one
-* A nonpositive integer, which counts he levels backwards, like in ##continue -1## to start 
-  the next iteration of the second topmost loop (compare with s[$-1])
-* A for loop index variable name, like in ##retry i##, which restarts the current iteration 
-  of the active for loop which has i as loop variable.
+The following flow control keywords are available.  
+<eucode>
+break retry entry exit continue return goto end
+</eucode>
+
+==== exit statement
+Exiting a block of code is done with the keyword **exit**. This causes flow
+to immediately leave the current block and recommence with the first statement
+after the block.
+<eucode>
+for i = a to b do
+	c = i
+    if doSomething(i) = 0 then
+        exit -- Stop executing code inside the 'for' block.
+    end if
+end for
+-- Flow restarts here.
+if c = a then ...
+</eucode>
+But sometimes you need to leave a block that encloses the current one. Euphoria
+has two methods available for you to do this. The safest method, in terms of future
+maintenance, is to name the block you want to exit from and use that name on the
+exit statement. The other method is to use a number on the exit statement
+that refers to the depth that you want to exit from.
+
+A block's name is always a string literal and only a string literal. You cannot use 
+a variable that contains the block's name on an exit statement. The name comes after
+the ##label## keyword, just before the #do# keyword.\\
+Example:
+<eucode>
+integer b
+  b = 0
+  for i = 1 to 20 label "main" do
+    for j = 1 to 20 do
+  	  b  += i + j
+      ? {i, j, b}  	
+  	  if b > 50 then
+        b  = 0
+  	    exit "main"
+  	  end if
+    end for
+  end for
+  ? b
+</eucode>
+The output from this is ...
+<eucode>
+{1,1,2}
+{1,2,5}
+{1,3,9}
+{1,4,14}
+{1,5,20}
+{1,6,27}
+{1,7,35}
+{1,8,44}
+{1,9,54}
+0
+</eucode>
+The **exit "main"** causes execution flow to leave the **for** block named //main//.
+
+
+The same thing could be achieved using the **exit N** format...
+<eucode>
+integer b
+  b = 0
+  for i = 1 to 20 do
+    for j = 1 to 20 do
+  	  b  += i + j
+      ? {i, j, b}  	
+  	  if b > 50 then
+        b  = 0
+  	    exit 2 -- exit 2 levels of depth
+  	  end if
+    end for
+  end for
+  ? b
+</eucode>
+
+But using this method means you have to take more care when changing the program
+so that if you change the depth, you also need to change the //exit// statement.
+
+;Note~:
+:A special form of **exit N** is ##exit 0##. This leaves all levels, regardless
+of the depth. Control continues after the outermost loop block.
 
 For easier and safer program maintainance, the explicit label form is to be
 preferred. Other forms are variously sensitive to changes in the program
 organisation. Yet, they may prove more convenient in short, short lived
-programs, an d are provided moostly for this purose.
+programs, and are provided mostly for this purpose.
 
 For information on how to associate a string o a block of code, see the section
 [[:labeled headers]].
 
-The following flow control keywords are available.  
 
-==== exit statement
-
-An **exit statement** may appear inside a a [[:while statement]] or a [[:for statement]]. It 
-causes immediate termination of the loop, with control passing to the first statement after 
-the loop. e.g.
-
+An **exit** without any label or number in a [[:while statement]] or a [[:for statement]]
+causes immediate termination of that loop, with control passing to the first statement after 
+the loop.\\
+Example:
 <eucode>
 for i = 1 to 100 do
     if a[i] = x then
@@ -1938,7 +2041,8 @@ This code resuls in:
 * "Eup" >  a=3 b=1
 
 ==== continue statement
-
+Likwise, skipping the rest of an iteration in a single
+code block is done using a single keyword, like **continue**.
 The **continue statements** continues execution of the loop it
 applies to by going to the next iteration now. Going to the next iteration
 means testing a condition (for **while** and **loop ... until loops**, or changing 
@@ -1957,6 +2061,23 @@ end for
 </eucode>
 
 This will print 3, 9, 4, (2), 5 25, 6 36.
+
+
+<eucode>
+integer b
+  b = 0
+  for i = 1 to 20 label "main" do
+    for j = 1 to 20 do
+  	  b  += i + j
+  	  if b > 50 then
+	    printf(1, "%d ", b)
+        b  = 0
+  	    continue "main"
+  	  end if
+    end for
+  end for
+  ? b
+</eucode>
 
 ==== retry statement
 
