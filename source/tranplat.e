@@ -24,14 +24,14 @@ else
 	HOSTNL = "\r\n"
 end if
 
-global procedure set_host_platform( integer plat )
-	ihost_platform = plat
-	TUNIX    = (plat = LINUX or plat = FREEBSD or plat = OSX)
+global procedure set_host_platform( atom plat )
+	ihost_platform = floor(plat)
+	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX)
 	TWINDOWS = plat = WIN32
 	TDOS     = plat = DOS32
-	TBSD     = plat = FREEBSD
-	TOSX     = plat = OSX
-	TLINUX   = plat = LINUX
+	TBSD     = plat = UFREEBSD
+	TOSX     = plat = UOSX
+	TLINUX   = plat = ULINUX
 	if TUNIX then
 		HOSTNL = "\n"
 	else

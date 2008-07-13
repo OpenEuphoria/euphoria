@@ -53,34 +53,34 @@ global procedure transoptions()
 		if Argv[i][1] = '-' then
 			uparg = upper(Argv[i])
 			
-			if (match("-DLL", uparg) or match("-SO", uparg)) then
+			if (equal("-DLL", uparg) or equal("-SO", uparg)) then
 				dll_option = TRUE
 				
-			elsif match("-CON", uparg) then
+			elsif equal("-CON", uparg) then
 				con_option = TRUE
 				
-			elsif match("-WAT", uparg) then
+			elsif equal("-WAT", uparg) then
 				wat_option = TRUE
 				
-			elsif match("-KEEP", uparg) then
+			elsif equal("-KEEP", uparg) then
 				keep = TRUE
 				
-			elsif match("-DJG", uparg) then
+			elsif equal("-DJG", uparg) then
 				djg_option = TRUE
 				
-			elsif match("-FASTFP", uparg) then
+			elsif equal("-FASTFP", uparg) then
 				fastfp = TRUE
 				
-			elsif match("-LCCOPT-OFF", uparg) then
+			elsif equal("-LCCOPT-OFF", uparg) then
 				lccopt_option = FALSE
 				
-			elsif match("-LCC", uparg) then
+			elsif equal("-LCC", uparg) then
 				lcc_option = TRUE
 
-			elsif match("-BOR", uparg) then
+			elsif equal("-BOR", uparg) then
 				bor_option = TRUE
 				
-			elsif match("-STACK", uparg) then
+			elsif equal("-STACK", uparg) then
 				if i < Argc then
 					s = value(Argv[i+1])
 					add_switch( Argv[i+1], 1 )
@@ -90,12 +90,14 @@ global procedure transoptions()
 						end if
 					end if
 					move_args( i+1, 1 )
+				else
+					Warning("-stack option missing stack size",translator_warning_flag)
 				end if
 				
-			elsif match("-DEBUG", uparg) then
+			elsif equal("-DEBUG", uparg) then
 				debug_option = TRUE
 				
-			elsif match("-LIB", uparg ) then
+			elsif equal("-LIB", uparg ) then
 				if i < Argc then
 					user_library = Argv[i+1]
 					add_switch( user_library, 1 )
@@ -104,7 +106,7 @@ global procedure transoptions()
 					Warning("-lib option missing library name",translator_warning_flag)
 				end if
 			
-			elsif match("-PLAT", uparg ) then
+			elsif equal("-PLAT", uparg ) then
 				if i < Argc then
 					s = upper(Argv[i+1])
 					add_switch( Argv[i+1], 1 )
@@ -114,19 +116,23 @@ global procedure transoptions()
 					elsif equal( s, "DOS" ) then
 						set_host_platform( DOS32 )
 					elsif equal( s, "LINUX" ) then
-						set_host_platform( LINUX )
+						set_host_platform( ULINUX )
 					elsif equal( s, "FREEBSD" ) then
-						set_host_platform( FREEBSD )
+						set_host_platform( UFREEBSD )
+					elsif equal( s, "OSX" ) then
+						set_host_platform( UOSX )
 					else
 						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
 					end if
 				end if
 			
-			elsif match("-COM", uparg ) then
+			elsif equal("-COM", uparg ) then
 				if i < Argc then
 					compile_dir = Argv[i+1]
 					add_switch( compile_dir, 1 )
 					move_args( i+1, 1 )
+				else
+					Warning("-com option missing compile directory",translator_warning_flag)
 				end if
 			else
 				option = find( uparg, COMMON_OPTIONS )

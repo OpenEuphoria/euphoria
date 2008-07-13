@@ -13,7 +13,12 @@ global constant EUNIX = (platform() = LINUX or platform() = FREEBSD or platform(
 				EDOS = platform() = DOS32,
 				EBSD = FALSE,
 				EOSX = FALSE,
-				ELINUX = (platform() = LINUX) and not EBSD and not EOSX
+				ELINUX = (platform() = LINUX) and not EBSD and not EOSX,
+				-- this is here so traninit.e and tranplat.e can distinguish between FREEBSD and LINUX
+				ULINUX = LINUX + 0.3,
+				UFREEBSD = FREEBSD + 0.4,
+				-- this is not strictly necessary yet
+				UOSX = OSX + 0.5
 
 global integer PATH_SEPARATOR
 global sequence SLASH_CHARS
