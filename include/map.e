@@ -31,7 +31,9 @@ constant iVals = 2
 -- * DIVIDE,
 -- * APPEND,
 -- * CONCAT
-
+--
+-- Convenience empty map:
+-- * BLANK_MAP
 
 export enum
 	PUT,
@@ -429,7 +431,7 @@ export function put(map m, object key, object value, integer operation = PUT, in
 	return m0
 end function
 
-constant BLANK_MAP = new()
+export constant BLANK_MAP = new()
 --**
 -- Adds or updates an entry on a map.
 --
