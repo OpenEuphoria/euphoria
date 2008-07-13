@@ -832,7 +832,7 @@ end function
 -- See Also:
 --   [[:split]], [[:chunk]], [[:join]]
 
-export function split_any(sequence st, object delim, integer limit=0)
+export function split_any(sequence source, object delim, integer limit=0)
 	sequence ret = {}
 	integer start = 1, pos, next_pos
 
@@ -841,7 +841,7 @@ export function split_any(sequence st, object delim, integer limit=0)
 	end if
 
 	while 1 do
-		pos = find_any(delim, st, start)
+		pos = find_any(delim, source, start)
 		next_pos = pos + 1
 		if pos then
 			ret = append(ret, source[start..pos-1])

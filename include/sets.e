@@ -182,7 +182,7 @@ end function
 -- [[:is_inside,]] [[:intersection]], [[:difference]]
 export function belongs_to(object x,set s)
 	if length( s ) then
-		return bfind_(x,s,1,length(s))>0
+		return bfind(x,s,1,length(s))>0
 	else
 		return 0
 	end if
@@ -376,7 +376,7 @@ end function
 -- See Also: 
 -- [[:subsets]], [[:belongs_to]], {{:difference]], [[:is_inside]]
 export function embedding(set small,set large)
-    return is_inside_(s1,s2,1)
+    return is_inside_(small,large,1)
 end function
 
 function abs(integer p)
@@ -1287,8 +1287,8 @@ end function
 export function fiber_product(set first,set second,set base,map from_1_to_base,map from_2_to_base)
     sequence result,x1,x2,x0
 
-    x1=fiber_over_(f10,s1,s0)
-    x2=fiber_over_(f20,s2,s0)
+    x1=fiber_over_(from_1_to_base,first,base)
+    x2=fiber_over_(from_2_to_base,second,base)
     x0=intersection_(x1[2],x2[2])
     result={}
 
@@ -1365,7 +1365,7 @@ end function
 -- See Also:
 -- [[:is_inside]], [[:direct_map]], [[:difference]]
  export function restrict(map f,set source,set restriction)
-    sequence result = s0
+    sequence result = restriction
     integer p = 1, k = 0
 
     for i=1 to length(restriction) do

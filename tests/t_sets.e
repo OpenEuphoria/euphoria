@@ -41,7 +41,7 @@ test_equal("delta(): with inclusion",{-1,5,"abc","acb"},delta(s,s1a))
 
 test_equal("difference()",{-1,3,5,"abc","acb"},difference(s,s1))
 
-set_map f
+map f
 f={2,1,3,3,1,2,1,7,3}
 
 test_equal("product()",{{1,0},{1,1},{1,4},{3,0},{3,1},{3,4}},product({1,3},{0,1,4}))
@@ -67,7 +67,7 @@ test_equal("fiber_over()",{{{3,"abc","acb"},{-1,"abcd"},{5,17}},{1,2,3}},fiber_o
 
 set S,S0
 S={0,1,2,3,4,5,6,7,8,9} S0={0,1,2,3,4}
-set_map r2,r5
+map r2,r5
 r2={1,2,1,2,1,2,1,2,1,2,10,5}
 r5={1,2,3,4,5,1,2,3,4,5,10,5}
 
@@ -78,7 +78,7 @@ test_equal("fiber_product()",
 
 test_equal("reverse_map()",{1,3,5,7,9},reverse_map(r2,S,{1},S0) )
 
-set_map r25
+map r25
 r25=restrict(r2,S,S0)
 
 test_equal("restrict()",{1,2,1,2,1,5,5},restrict(r2,S,S0))
@@ -88,7 +88,7 @@ test_equal("change_target()",{2,4,2,4,2,4,2,4,2,4,10,5},change_target(r2,{0,1},{
 set s11,s12,s21,s22
 s11={2,3,5,7,11,13,17,19} s21={7,13,19,23,29}
 s12={-1,0,1,4} s22={-2,0,1,2,6}
-set_map f1,f2
+map f1,f2
 f1={2,1,3,3,2,3,1,2,8,4} f2={3,3,2,4,5,5,5}
 f=combine_maps(f1,s11,s12,f2,s21,s22)
 
@@ -106,7 +106,7 @@ test_equal("isèsurjective()",0,is_bijective(f))
 
 test_equal("section()",{3,7,8,6,9,4,10,3,5,7,7,10},section(f))
 
-set_operation mul5
+operation mul5
 mul5={{{1,1,1,1,1},{1,2,3,4,5},{1,3,5,2,4},{1,4,2,5,3},{1,5,4,3,2}},{5,5,5}}
 sequence s0,s00
 s0={0,1,2,3,4}
@@ -125,7 +125,7 @@ test_equal("is_left_unit()",0,is_left_unit(3,mul5))
 
 test_equal("all_left_units()",{2},all_left_units(mul5))
 
-set_operation plus01
+operation plus01
 plus01={{{1,2},{2,3},{3,4},{4,5},{5,1}},{5,2,5}}
 
 test_equal("has_right_unit()",1,has_right_unit(plus01))
@@ -136,8 +136,8 @@ test_equal("all_right_units()",{1},all_right_units(plus01))
 
 test_equal("has_unit()",0,has_unit(plus01))
 
-set_operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
-set_operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
+operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
 
 test_equal("distributes_left()",1,distributes_left(product,sum,0))
 
