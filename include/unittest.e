@@ -6,6 +6,45 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+-- === Background
+-- Unit testing is the process of assuring that the smallest programming units 
+-- are actually delivering functionality that complies with their specification.
+-- The units in question are usually individual routines rather than whole programs
+-- or applications.
+--
+-- The theory is that if the components of a system are working correctly, then
+-- there is a high probablity that a system using those components can be made
+-- to work correctly.
+--
+-- In Euphoria terms, this framework provides the tools to make testing and reporting on 
+-- functions and procedures easy and standardized. It gives us a simple way to
+-- write a test case and to report on the findings.\\
+-- Example:
+-- <eucode>
+--  test_equal( "Power function test #1", 4, power(2, 2))
+--  test_equal( "Power function test #2", 4, power(16, 0.5))
+-- </eucode>
+-- In this example, we use the ##test_equal## function to record the result of
+-- a test. The first parameter is the name of the test, which can be anything
+-- and is displayed if the test fails. The second parameter is the expected
+-- result - what we expect the function being tested to return. The third
+-- parameter is the actual result returned by the function being tested. This
+-- is usually written as a call to the function itself.
+--
+-- It is typical to provide as many test cases as would be required to give us
+-- confidence that the function is being truly exercised. This includes calling
+-- it with typical values and edge-case or expectional values. It is also useful
+-- to test the function's error handling by calling it with bad parameters.
+--
+-- When a test fails, the framework displays a message, showing the test's name,
+-- the expected result and the actual result. You can configure the framework to
+-- display each test run, regardless of whether it fails or not.
+--
+-- After running a series of tests, you can get a summary displayed by calling
+-- the ##test_report()## procedure. To get a better feel for unit testing, have
+-- a look at the provided test cases for the standard library in the //tests//
+-- directory.
+
 -- === Constants
 
 include pretty.e
@@ -14,9 +53,9 @@ include pretty.e
 -- Public Variables
 --
 
-export enum 
-	TEST_QUIET = 0, 
-	TEST_SHOW_FAILED_ONLY, 
+export enum
+	TEST_QUIET = 0,
+	TEST_SHOW_FAILED_ONLY,
 	TEST_SHOW_ALL
 
 --
@@ -54,7 +93,7 @@ procedure test_passed(sequence name)
 	if verbose >= TEST_SHOW_ALL then
 		printf(2, "  passed: %s\n", {name})
 	end if
-		
+
 	testsPassed += 1
 end procedure
 
@@ -98,10 +137,10 @@ export procedure test_report()
 		end if
 
 	    printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
-       		{testCount, testsPassed, testsFailed, score})
+	   		{testCount, testsPassed, testsFailed, score})
 	end if
-		
-	if match("t_c_", filename) = 1 then	
+
+	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
 		abort(0)
 	else
@@ -197,5 +236,5 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
-    end if
+	end if
 end for
