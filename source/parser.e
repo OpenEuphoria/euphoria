@@ -10,6 +10,8 @@ include scanner.e
 include sequence.e
 include text.e
 
+include platinit.e
+
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 without trace
@@ -2813,15 +2815,15 @@ global procedure InitGlobals()
 -- initialize global variables
 	ResetTP()
 	OpTypeCheck = TRUE
-	if EWINDOWS then
+	if IWINDOWS then
 		OpDefines &= {"EU400", "WIN32"}
-	elsif ELINUX then
+	elsif ILINUX then
 		OpDefines &= {"EU400", "UNIX", "LINUX"}
-	elsif EOSX then
+	elsif IOSX then
 		OpDefines &= {"EU400", "UNIX", "OSX"}
-	elsif EBSD then
+	elsif IBSD then
 		OpDefines &= {"EU400", "UNIX", "FREEBSD"}
-	elsif EDOS then
+	elsif IDOS then
 		OpDefines &= {"EU400", "DOS32"}
 	end if
 end procedure
@@ -2861,7 +2863,7 @@ procedure SetWith(integer on_off)
 	
 	elsif equal(option, "profile_time") then
 		if not TRANSLATE and not BIND then
-			if not EDOS then
+			if not IDOS then
 				if on_off then
 					not_supported_compile("profile_time")
 				end if
@@ -2887,7 +2889,7 @@ procedure SetWith(integer on_off)
 					sample_size = DEFAULT_SAMPLE_SIZE
 				end if
 				if OpProfileTime then
-					if EDOS then
+					if IDOS then
 						AnyTimeProfile = TRUE
 					end if
 				end if

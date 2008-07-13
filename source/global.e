@@ -49,6 +49,8 @@ elsif ELINUX then
 	version_name = "Linux"
 elsif EBSD then 
 	version_name = "BSD"
+elsif EOSX then 
+	version_name = "Mac OS X"
 elsif EUNIX then  --should never happen
 	version_name = "UNIX"
 end if
