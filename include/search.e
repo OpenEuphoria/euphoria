@@ -14,17 +14,24 @@ include error.e
 
 --**
 -- Signature:
---   global function compare(object x1, object x2)
+--   global function compare(object compared, object reference)
 --
 -- Description:
 --     Compare two items returning less than, equal or greater than.
 --
+-- Parameters:
+--		# ##compared##: the compared object
+--		# ##reference##: the reference object
+--
 -- Returns:
---     Returns 0 if objects are identical, 1 if x1 is greater, -1 if x1 is less than.
+--     An **integer**:
+--	*  0 if objects are identical
+--	*  1 if ##compared## is greater than ##reference##
+--	* -1 if ##compared## is less than ##reference##
 --
 -- Comments:
 --     Atoms are considered to be less than sequences. Sequences are compared alphabetically 
---     starting with the first element until a difference is found.
+--     starting with the first element until a difference is found or one of the sequences is exhausted. Atoms are compared as ordinary reals.
 --
 -- Example 1:
 -- <eucode>
@@ -54,25 +61,26 @@ include error.e
 -- </eucode>
 --
 -- See Also:
---     [[:equal]], 
---     [[:relational operators]],
---     [[:operations on sequences]]
+--     [[:equal]], [[:relational operators]], [[:operations on sequences]], [[:sort]]
 
 --**
 -- Signature:
---     global function equal(object x1, object x2)
+--     global function equal(object left, object right)
 --
 -- Description:
 --     Compare two Euphoria objects to see if they are the same. 
 --
+-- Parameters:
+--			# ##left##: one of the objects to test
+--			# ##right##: the other object
+--
 -- Returns:
---   * Return 1 (true) if they are the same. 
---   * Return 0 (false) if they are different.
+--   An **integer**, 1 if the two objects are identical, else 0.
 --
 -- Comments:
---     This is equivalent to the expression: compare(x1, x2) = 0
--- 
---     This routine, like most other built-in routines, is very fast. It does not have any 
+--     This is equivalent to the expression: ##compare(left, right) = 0##.
+--
+--     This routine, like most other built-in routines, is very fast. It does not have any
 --     subroutine call overhead.
 --
 -- Example 1:
@@ -88,20 +96,23 @@ include error.e
 --    puts(1, "name is George\n")
 -- end if
 -- </eucode>
--- 
+--
 -- See Also:
 --     [[:compare]], [[:equals operator]]
 
 --**
 -- Signature:
---     global function find(object needle, object haystack)
+--     global function find(object needle, sequence haystack)
 --
 -- Description:
---     Find needle as an element of haystack. 
+--     Find the first occurence of a "needle" as an element of a "haystack".
+--
+--Parameters:
+--		# ##needle##: an object whose presence is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle##
 --
 -- Returns:
---     * If successful, return the index of the first element of s that matches. 
---     * If unsuccessful return 0.
+--     An **integer**, 0 if ##needle## is not on ##haystack##, else the smallest index of an element of ##haystack## that equals ##needle##.
 --
 -- Example 1:
 -- <eucode>
@@ -124,15 +135,19 @@ include error.e
 --     global function find_from(object needle, object haystack, integer start)
 --
 -- Description:
---     Find needle as an element of haystack. Start the search at start. 
+--     Find the first occurence of a "needle" as an element of a "haystack". Search starts at a specified index.
+--
+--Parameters:
+--		# ##needle##: an object whose presence is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle##
+--		# ##start##: an integer, the index in ##haystack## at which to start searching.
 --
 -- Returns:
---     * If successful, return the index of the first element of haystack that matches. 
---     * If unsuccessful return 0. 
+--     An **integer**, 0 if ##needle## is not on ##haystack## past position ##start##, else the smallest index, not less than ##start##, of an element of ##haystack## that equals ##needle##.
 --
 -- Comments:
---     start may have any value from 1 to the length of haystack plus 1. (Analogous to the 
---     first index of a slice of haystack).
+--     start may have any value from 1 to the length of ##haystack## plus 1. (Analogous to the
+--     first index of a slice of ##haystack##).
 --
 -- Example 1:
 -- <eucode>
@@ -155,11 +170,14 @@ include error.e
 --     global function match(sequence needle, sequence haystack)
 --
 -- Description:
---     Try to match needle against some slice of haystack. 
+--     Try to match a "needle" against some slice of a "haystack".
+--
+--Parameters:
+--		# ##needle##: a sequence whose presence as a "substring" is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
 --
 -- Returns:
---     If successful, return the element number of haystack where the (first) matching slice 
---     begins, else return 0.
+--     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
 --
 -- Example 1:
 -- <eucode>
@@ -175,15 +193,19 @@ include error.e
 --     global function match_from(sequence needle, sequence haystack, integer start)
 --
 -- Description:
---     Try to match needle against some slice of haystack, starting from index start. 
+--     Try to match a "needle" against some slice of a "haystack", starting from some index.
+--
+--Parameters:
+--		# ##needle##: an sequence whose presence as a subsequence is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--		# ##start##: an integer, the index in ##haystack## at which to start searching.
 --
 -- Returns:
---     If successful, return the element number of haystack where the (first) matching slice 
---     begins, else return 0. 
+--     An **integer**, 0 if no slice of ##haystck## with lower index at least ##start## is ##needle##, else the smallest such index.
 --
 -- Comments:
---     start may have any value from 1 to the length of haystack plus 1. (Just like the first 
---     index of a slice of haystack.)
+--     ##start## may have any value from 1 to the length of ##haystack## plus 1. (Just like the first
+--     index of a slice of ##haystack##.)
 --
 -- Example 1:
 -- <eucode>
@@ -195,8 +217,15 @@ include error.e
 --     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]]
 
 --**
--- Find any element from s1 in s2 starting at position i2 and return
--- its position or 0 if not found.
+-- Find any element from a list inside a sequence. Returns the location of the first hit.
+--
+-- Parameters:
+--		# ##needles##: a sequence, the list of items to look for
+--		# ##haystack##: a sequence, in which "needles" are looked for
+--		# ##start##: an integer, the starting point of the search. Defaults to 1.
+--
+-- Returns:
+--		An **integer**, the smallest index in ##haystack## of an element of ##needles##, or 0 if no needle is found.
 --
 -- Comments:
 --   This function may be applied to a string sequence or a complex
@@ -213,7 +242,9 @@ include error.e
 --   location = find_any("aeiou", "John Doe")
 --   -- location is 2
 --   </eucode>
-
+--
+-- See Also:
+--		[[:find]], [[:find_from]]
 global function find_any(sequence needles, sequence haystack, integer start=1)
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
@@ -225,12 +256,15 @@ global function find_any(sequence needles, sequence haystack, integer start=1)
 end function
 
 --**
--- Find all needle indexes in haystack optionally starting at start.
+-- Find all occurrences of an object inside a sequence, starting at some specified point.
 --
 -- Parameters:
---     * needle - object to search for
---     * haystack - sequence to search in
---     * start - starting index position (defaults to 1)
+--     # ##needle##: an object, what to look for
+--     # ##haystack##: a sequence to search in
+--     # ##start##: an integer, the starting index position (defaults to 1)
+--
+-- Returns:
+--		A **sequence**, the list of all indexes no less than ##start## of elements of ##haystack## that equal ##needle##. This sequence is empty if no match found.
 --
 -- Example 1:
 -- <eucode>
@@ -250,15 +284,20 @@ global function find_all(object needle, sequence haystack, integer start=1)
 	entry
 		start = find_from(needle, haystack, start)
 	end while
-	
+
 	return ret
 end function
 
 --**
 -- Match all items of haystack in needle.
 --
+-- Parameters:
+--     # ##needle##: asequence, what to look for
+--     # ##haystack##: a sequence to search in
+--     # ##start##: an integer, the starting index position (defaults to 1)
+--
 -- Returns:
---   sequence of starting index positions.
+--   A **sequence** of integers, the list of all lower indexes, not less than ##start##, of all slices in ##haystack## that equal ##needle##. The list may be empty.
 --
 -- Example 1:
 -- <eucode>
@@ -269,7 +308,7 @@ end function
 -- See Also:
 --     [[:match]], [[:find]], [[:find_all]]
 
-global function match_all(object needle, sequence haystack, integer start=1)
+global function match_all(sequence needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
 	while start > 0 entry do
@@ -283,19 +322,18 @@ global function match_all(object needle, sequence haystack, integer start=1)
 end function
 
 --**
--- Find needle in haystack in reverse order. 
+-- Find a needle in a haystack in reverse order.
 --
 -- Parameters:
---   * needle - object to search for
---   * haystack - sequence to search in
---   * start - starting index position (defaults to -1)
+--   # ##needle##: an object to search for
+--   # ##haystack##: a sequence to search in
+--   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
 --     
 -- Returns:
---   * If successful, return the index of the first element of haystack that matches. 
---   * If unsuccessful return 0.
+--   An **integer**, 0 if no instance of ##needle## can be found on ##haystack## before index ##start, or the highest such index otherwise.
 --
--- Notes:
---   When start is -1, it is changed to length(haystack), i.e. the last item in haystack.
+-- Comments:
+--   If ##start## is less than 1, ir will be added once to length(##haystack##) to designate a position counted backwards. Thus, if ##start## is -1, the first element to be queried in ##haystack## will be ##haystack##[$-1], then ##haystack##[$-2] and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -311,13 +349,13 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:find]]
+--   [[:find]], [[:rmatch]]
 
 global function rfind(object needle, sequence haystack, integer start=length(haystack))
 	integer len = length(haystack)
 
 	if (start > len) or (len + start < 1) then
-		crash("third argument of rfind_from() is out of bounds (%d)", {start})
+		crash("third argument of rfind() is out of bounds (%d)", {start})
 	end if
 
 	if start < 1 then
@@ -334,19 +372,18 @@ global function rfind(object needle, sequence haystack, integer start=length(hay
 end function
 
 --**
--- Try to match needle against some slice of haystack in reverse order. 
+-- Try to match a needle against some slice of a haystack in reverse order.
 --
 -- Parameters:
---   * needle - object to search for
---   * haystack - sequence to search in
---   * start - starting index position (defaults to -1)
--- 
--- Returns:
---   If successful, return the element number of haystack where the matching slice begins,
---   otherwise return 0.
+--   # ##needle##: a sequence to search for
+--   # ##haystack##: a sequence to search in
+--   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
 --
--- Notes:
---   When start is -1, it is changed to length(haystack), i.e. the last item in haystack.
+-- Returns:
+--   An **integer**, either 0 if no slice of ##haystack## starting before ##start## equals ##needle##, else the highest lower index of such a slice.
+--
+-- Comments:
+--   If ##start## is less than 1, ir will be added once to length(##haystack##) to designate a position counted backwards. Thus, if ##start## is -1, the first element to be queried in ##haystack## will be ##haystack##[$-1], then ##haystack##[$-2] and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -389,8 +426,22 @@ global function rmatch(sequence needle, sequence haystack, integer start=length(
 end function
 
 --**
--- Find needle in up to max slices of haystack and replace with replacement. max can be zero 
--- to mean find/replace all matches.
+-- Finds a "needle" in a "hyaystack", and replace any, or only the first few, occurences with a replacement.
+--
+-- Parameters:
+--
+--		# ##needle##: an object to search and perhaps replace
+--		# ##haystack##: a sequence to be inspected
+--		# ##replacement##: an object to substitute for any (first) instance of ##needle##
+--		# ##max##: an integer, 0 to replace all occu
+--
+-- Returns:
+--		A **sequence**, the modified ##haystack##.
+--
+-- Comments:
+-- Replacements will not be made recursively on the part of ##haystack## that was already changed.
+--
+-- If ##max## is 0 or less, any occurrence of ##needle## in ##haystack## will be replaced by ##replacement##. Otherwise, only the first ##max## occurrences are.
 --
 -- Example 1:
 -- <eucode>
@@ -403,8 +454,9 @@ end function
 -- s = find_replace("the", "THE", "the cat ate the food under the table", 2)
 -- -- s is "THE cat ate THE food under the table"
 -- </eucode>
-
-global function find_replace(object needle, object replacement, sequence haystack, 
+-- See Also:
+--		{{:find]], [[:replace]]
+global function find_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
 	integer posn, needle_len, replacement_len
 	
@@ -435,7 +487,31 @@ global function find_replace(object needle, object replacement, sequence haystac
 end function
 
 --**
--- Assumes haystack is already sorted into ascending order.
+-- Finds a "needle" in an ordered "haystack". Star and end point can be given for the search.
+--
+-- Parameters:
+--		# ##needle##: an object to look for
+--		# ##haystack##: a sequence to search in
+--		# ##startpoint##: an integer, the index at which to start searching. Defaults to 1.
+--		# ##endpoint##: an integer, the end point of the search. Defaults to 0, ie search to end.
+--
+-- Returns:
+--		An **integer**, either:
+-- # a positive integer ##i##, which means ##haystack[i]## equals ##needle##.
+-- # a negative integer, ##-i##, with ##i## between adjusted start and end points. This means that ##needle## is not in the searched slice of ##haystack##, but would be at index ##i## if it were there.
+-- # a negative integer ##-i## with ##i## out of the searched range. This means than ##needle##might be either below the start point if ##i## is below the start point, or above the end point if ##i## is.
+--
+-- Comments:
+-- If ##endpoin## is not greater than zero, it is added to length(##haystack##) once only. Then, the end point of the search is adjusted to length(haystack) if out of bounds.
+--
+-- The start point is adjusted to 1 if below 1.
+--
+-- The way this function returns is very similar to what [[:db_find_key]] does. They use variants of the same algorithm. The latter is all the more efficient as ##haystack## is long.
+--
+-- ##haystack## is assumed to be nondecreasing. Results are undefined if it is not. If duplicate coopies of ##needle## exist in the range searched on ##haystack##, any of the possible contiguous indexes may be returned.
+--
+-- See Also:
+-- [[:find]], [[:db_find_key]]
 
 global function binary_search(object needle, sequence haystack, integer startpoint = 1, 
 		integer endpoint = 0)
@@ -443,9 +519,12 @@ global function binary_search(object needle, sequence haystack, integer startpoi
 	
 	lo = startpoint
 	if endpoint <= 0 then
-		hi = length(haystack) - endpoint
+		hi = length(haystack) + endpoint
 	else
 		hi = endpoint
+	end if
+	if lo<1 then
+		lo=1
 	end if
 	if lo > hi and length(haystack) > 0 then
 		hi = length(haystack)
@@ -469,17 +548,17 @@ global function binary_search(object needle, sequence haystack, integer startpoi
 	end if
 	return -mid
 end function
---**
 
 
 --**
--- Test to see if the full sequence begins with the sub-sequence.
---
--- Note that the sub-sequence can also be a single atom.
+-- Test whether a sequence is the head of another one.
+-- 
+-- Parameters:
+--	# ##pSubSeq##: an object to be looked for
+--  # ##pFullSe##: a sequence, the head of which is being inspected.
 --
 -- Returns:
---   * 1 if the full sequence does begin with the sub-sequence.
---   * 0 if the full sequence does **not** begin with the sub-sequence.
+--		An **integer**, 1 if ##pSubSeq## begins ##pFullSeq##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -490,7 +569,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:ends]]
+--     [[:ends]], [[:head]]
 
 export function begins(object pSubSeq, sequence pFullSeq)
 	if length(pFullSeq) = 0 then
@@ -517,13 +596,14 @@ export function begins(object pSubSeq, sequence pFullSeq)
 end function
 
 --**
--- Test to see if the full sequence ends with the sub-sequence.
+-- Test whether a sequence ends another one.
 --
--- Note that the sub-sequence can also be a single atom.
+-- Parameters:
+--	# ##pSubSeq##: an object to be looked for
+--  # ##pFullSe##: a sequence, the head of which is being inspected.
 --
 -- Returns:
---   * 1 if the full sequence does end with the sub-sequence.
---   * 0 if the full sequence does **not** end with the sub-sequence.
+--		An **integer**, 1 if ##pSubSeq## ends ##pFullSeq##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -534,7 +614,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:begins]]
+--     [[:begins]], [[:tail]]
 
 export function ends(object pSubSeq, sequence pFullSeq)
 	if length(pFullSeq) = 0 then

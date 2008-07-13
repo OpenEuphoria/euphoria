@@ -752,7 +752,7 @@ export function load_map(sequence pFileName)
 			lKey = trim(lLine[1..lDelim-1])
 			if length(lKey) > 0 then
 				lValue = trim(lLine[lDelim+1..$])
-				lValue = find_replace("\\-", "-", lValue)
+				lValue = find_replace("\\-", lValue, "-")
 				lConvRes = value(lValue,,GET_LONG_ANSWER)
 				if lConvRes[1] = GET_SUCCESS then
 					if lConvRes[3] = length(lValue) then

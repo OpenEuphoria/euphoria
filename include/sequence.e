@@ -20,18 +20,27 @@ include sort.e
 
 --**
 -- Signature:
--- global function append(sequence s1, object x)
+-- global function append(sequence target, object x)
 --
 -- Description:
--- Return a new sequence identical to ##s1## but with ##x## added on the end as the last element. 
--- The resulting length will be ##length(s1) + 1##.
+-- Adds an object as the last element of a sequence.
+--
+-- Parameters:
+--		# ##source##: the sequence to add to
+--      # ##x##: the object to add
+--
+-- Returns:
+-- 		A **sequence** whose first elements are those of ##target## and whose last element is ##x##.
 --
 -- Comments:
--- If ##x## is an atom this is equivalent to ##s2 = s1 & x##. If ##x## is a sequence it is
+--
+-- The length of the resulting sequence will be ##length(target) + 1##, no matter what ##x## is.
+--
+-- If ##x## is an atom this is equivalent to ##result = target & x##. If ##x## is a sequence it is
 -- not equivalent.
 --
 -- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic 
--- storage allocation. The case where ##s1## and ##s2## are actually the same variable (as in 
+-- storage allocation. The case where ##target## itsekf is append()ed to (as in
 -- Example 1 below) is highly optimized.
 --
 -- Example 1:
@@ -62,16 +71,24 @@ include sort.e
 
 --**
 -- Signature:
--- global function prepend(sequence s1, object x)
+-- global function prepend(sequence target, object x)
 --
 -- Description:
--- Create a new sequence (s2) identical to s1 but with x added onto the start of s1 as the 
--- first element. The length of s2 will be length(s1) + 1.
+-- Adds an object as the first element of a sequence.
+--
+-- Parameters:
+--		# ##source##: the sequence to add to
+--      # ##x##: the object to add
+--
+-- Returns:
+-- 		A **sequence** whose last elements are those of ##target## and whose first element is ##x##.
 --
 -- Comments:
--- If x is an atom this is the same as s2 = x & s1. If x is a sequence it is not the same.
+-- The length of the returned sequence will be ##length(target) + 1## always.
 --
--- The case where s1 and s2 are the same variable is handled very efficiently.
+-- If ##x## is an atom this is the same as ##result = x & target##. If ##x## is a sequence it is not the same.
+--
+-- The case where ##target## itself is prepend()ed to is handled very efficiently.
 --
 -- Example 1:
 -- <eucode>
@@ -94,13 +111,20 @@ include sort.e
 
 --**
 -- Signature:
--- global function repeat(sequence x, atom a)
+-- global function repeat(object item, atom count)
 --
 -- Description:
--- Create a sequence of length a where each element is x.
+-- Create a sequence whose all elements are identical, with given length.
+--
+-- Parameters:
+--		# ##item##: an object, to which all elements of the result will be equal
+--		# ##count##: the requested length of the result sequence
+--
+-- Rerturns:
+--		A **sequence** of length ##count## each element of which is ##item##.
 --
 -- Comments:
--- When you repeat a sequence or a floating-point number the
+-- When you repeat() a sequence or a floating-point number the
 -- interpreter does not actually make multiple copies in memory.
 -- Rather, a single copy is "pointed to" a number of times.
 --
@@ -118,15 +142,21 @@ include sort.e
 
 --**
 -- Signature:
--- global function length(sequence s)
+-- global function length(sequence targert)
 --
 -- Description:
--- Return the length of a sequence s. An error will occur if s is an atom.
+-- Return the length of a sequence.
+--
+-- Parameters:
+--		# ##target##: the sequence being queried
+--
+-- Returns:
+--		An **integer**, the number of elements ##target## has.
 --
 -- Comments:
 -- The length of each sequence is stored internally by the
--- interpreter for quick access. (In other languages this
--- operation requires a search through memory for an end marker.)
+-- interpreter for quick access. In other languages this
+-- operation requires a search through memory for an end marker.
 --
 -- Example 1:
 -- <eucode>
@@ -141,18 +171,25 @@ include sort.e
 
 --**
 -- Signature:
---   global function insert(sequence st, object what, integer index)
+--   global function insert(sequence target, object what, integer index)
 --
 -- Desiption:
---   Insert what into st at index index as a new element. The item is inserted before index, 
---   not after. 
+--   Insert an object into a sequence as a naw element at a given location.
+--
+--- Parameters:
+--		# ##target##: the sequence to insert into
+--		# ##what##: the object to insert
+--		# ##index##: an integer, the position in ##target## where ##what## should appear
+--
+-- Returns:
+--		A **sequence**, which is ##target## with one more element at ##index##, which is ##what##.
 --
 -- Comments:
---   A new sequence is created. st and what can be any type of sequence, including nested 
---   sequences. What is inserted as a new element in st, so that the length of the new 
---   sequence is always length(st)+1.
+-- ##target## can be a sequence of any shape, and ##what## any kind of object.
 --
---   insert()ing a sequence into a string returns a sequence which is no longer a string.
+-- The length of the returned sequence is ##length(target)+1## always.
+--
+-- insert()ing a sequence into a string returns a sequence which is no longer a string.
 --
 -- Example 1:
 -- <eucode>
@@ -167,25 +204,31 @@ include sort.e
 -- </eucode>
 --
 -- See Also:
---     [[:remove]], [[:splice]], [[:remove_all]]
+--     [[:remove]], [[:splice]], [[:append]], [[:prepend]]
 
 --**
 -- Signature:
---   global function splice(sequence st, object what, integer index)
+--   global function splice(sequence target, object what, integer index)
 --
--- Insert what into st at index. The item is inserted before index, not after. 
--- What is inserted as a subsequence. splicing a string into another yields a new string.
+-- Description:
+-- Inserts an object as a new slice in a sequence at a given position.
 --
 -- Parameters:
--- * st - sequence to splice into.
--- * what - what to split into st.
--- * index - index position at which to splice.
+--		# ##target##: the sequence to insert into
+--		# ##what##: the object to insert
+--		# ##index##: an integer, the position in ##target## where ##what## should appear
+--
+-- Returns:
+--		A **sequence**, which is ##target## with one or more elements, those of ##what##, inserted at locations starting at ##index##.
 --
 -- Comments:
---   A new sequence is created. st and what can be any type of sequence, including nested 
---   sequences. The length of this new sequence is the sum of the lengths of st and what 
---   (atoms are of length 1 for this purpose). splice() is equivalent to insert() when x is 
---   an atom.
+-- ##target## can be a sequence of any shape, and ##what## any kind of object.
+--
+-- The length of this new sequence is the sum of the lengths of ##target## and ##what##
+-- (atoms are of length 1 for this purpose). ##splice##() is equivalent to [[:insert]]() when ##what## is
+--   an atom, but not when it is a sequence.
+--
+-- Splicing a string into a string resunts into a new string.
 --
 -- Example 1:
 -- <eucode>
@@ -200,22 +243,25 @@ include sort.e
 -- </eucode>
 --
 -- See Also:
---     [[:insert]], [[:remove]], [[:replace]], [[:remove_all]]
+--     [[:insert]], [[:remove]], [[:replace]], [[:&]]
 
 --**
 -- Reverse the order of elements in a sequence.
 --
+-- Parameters:
+--		# ##target##: the sequence to reverse.
+--		# ##pFrom##: an integer, the starting point. Defaults to 1.
+--		# ##pTo##: an integer, the end point. Defaults to 0.
+--
+-- Returns:
+--		A **sequence** if ##target## is a sequence, the same length as ##target## and the same elements, but those with index between ##pFrom## and ##pTo## appear in reverse order.
+--
 -- Comments:
--- A new sequence is created where the top-level elements appear in reverse order compared 
+-- In the result sequence, some or all top-level elements appear in reverse order compared
 -- to the original sequence. This does not reverse any sub-sequences found in the original
 -- sequence.\\
--- The {{{pTo}}} parmeter can be negative, which indicates an offset from the last element.
+-- The ##pTo## parmeter can be negative, which indicates an offset from the last element.
 -- Thus {{{-1}}} means the second-last element and {{{0}}} means the last element.
---
--- Parameters:
--- * st - object to reverse. If this is an atom it is just returned.
--- * pFrom - The first element. Default is 1.
--- * pTo - The last element. Default is length(st)
 --
 -- Example 1:
 -- <eucode>
@@ -228,43 +274,48 @@ include sort.e
 -- reverse(42)                 -- 42
 -- </eucode>
 
-export function reverse(object st, integer pFrom = 1, integer pTo = 0)
+export function reverse(object target, integer pFrom = 1, integer pTo = 0)
 	integer uppr, n, lLimit
 	sequence t
 
-	if atom(st) or length(st) < 2 then
-		return st
+	if atom(target) or length(target) < 2 then
+		return target
 	end if
 	
-	n = length(st)
-	if pFrom != 1 or pTo != 0 then
-		if pTo < 1 then
-			pTo = n + pTo
-		end if
-		if pTo - pFrom < 0 then
-			return st
-		end if
-		st[pFrom .. pTo] = reverse(st[pFrom .. pTo])
-		return st
+	n = length(target)
+	if pFrom < 1 then
+		pFrom = 1
+	end if
+	if pTo < 1 then
+		pTo = n + pTo
+	end if
+	if pTo < pFrom or pFrom >= n then
+		return target
+	end if
+	if pTo > n then
+		pTo = n
 	end if
 	
-	lLimit = floor(n/2)
-	t = repeat(0, n)
-	uppr = n
-	for lowr = 1 to lLimit do
-		t[uppr] = st[lowr]
-		t[lowr] = st[uppr]
+	lLimit = floor((pFrom+pTo-1)/2)
+	t = target
+	uppr = pTo
+	for lowr = pFrom to lLimit do
+		t[uppr] = target[lowr]
+		t[lowr] = target[uppr]
 		uppr -= 1
 	end for
-	if uppr > lLimit then
-		t[uppr] = st[uppr]
-	end if
 	return t
 end function
 
 --**
--- Return the first size items of st. If size is greater than the length of st, then the 
--- entire st will be returned.
+-- Return the first items of a sequence.
+--
+-- Parameters:
+--		# ##source##: the sequence from which elements will be returned
+--		# ##size##: an integer, how many head elements at most will be returned. Sefaults to 1.
+--
+-- Returns:
+--		A **sequence**, ##source## if its length is not greater than ##size##, or the ##size## first elements of ##source## otherwise.
 --
 -- Example 1:
 -- <eucode>
@@ -287,17 +338,30 @@ end function
 -- See Also:
 --     [[:tail]], [[:mid]], [[:slice]]
 
-export function head(sequence st, integer size=1)
-	if size < length(st) then
-		return st[1..size]
+export function head(sequence source, integer size=1)
+	if size < length(source) then
+		return source[1..size]
 	end if
 
-	return st
+	return source
 end function
 
 --**
--- Return len items starting at start. If start + len is greater than the length of st, 
--- then everything in st starting at start will be returned.
+-- Returns a slice of a sequence, given by a starting point and a lengty.
+--
+-- Parameters:
+--		# ##source##: the sequence some elements of which will be returned
+--		# ##start##: an integr, the lower index of the slice to return
+--		# ##len##: an integer, the length of the slice to return
+--
+-- Returns:
+--		A **sequence**, made of at most ##len## elements of ##source##. These elements are at contiguous positions in ##source## starting at ##start##.
+--
+-- Errors:
+-- If ##len## is less than ##-length(source)##, an eroror occurs.
+--
+-- Comments:
+-- ##len## may be negative, in which case it is added ##length(source)## once.
 --
 -- Example 1:
 -- <eucode>
@@ -320,32 +384,44 @@ end function
 -- See Also:
 --     [[:head]], [[:tail]], [[:slice]]
 
-export function mid(sequence st, atom start, atom len)
+export function mid(sequence source, atom start, atom len)
 	if len<0 then
-		len += length(st)
+		len += length(source)
 		if len<0 then
 			crash("mid(): len was %d and should be greater than %d.",
-				{len-length(st),-length(st)})
+				{len-length(source),-length(source)})
 		end if
 	end if
-	if start > length(st) or len=0 then
+	if start > length(source) or len=0 then
 		return ""
 	end if
 	if start<1 then
 		start=1
 	end if
-	if start+len-1 >= length(st) then
-		return st[start..$]
+	if start+len-1 >= length(source) then
+		return source[start..$]
 	else
-		return st[start..len+start-1]
+		return source[start..len+start-1]
 	end if
 end function
 
 --**
--- Return items start to stop from st. If stop is greater than the length of st, then from 
--- start to the end of st will be returned. If stop is zero, it will be treated as the end 
--- of st. If stop is a negative value, then it will be treated as stop positions from the 
--- end of st.
+-- Return a slice from a sequence, after adjusting its bounds.
+--
+-- Parameters:
+--		# ##source##: the sequence from which to get a slice
+--		# ##start##: an integer, normally the lower index of the slice to return
+--		# ##stop##: an integer, normally the upper index of the slice to return
+--
+-- Returns:
+--		A **sequence**, as close as possible from ##source[start..stop]]##.
+--
+-- Comments:
+-- ##start## is set to 1 if below.
+--
+-- ##stop## is added ##length(source)## once if not positive, and set to ##length(source)## if above.
+--
+-- After these adjustments, and if ##source[start..stop]## makes sense, it is returned. Otherwise, ##{}## is returned.
 --
 -- Example 1:
 -- <eucode>
@@ -380,18 +456,35 @@ end function
 -- See Also:
 --   [[:head]], [[:mid]], [[:tail]]
 
-export function slice(sequence st, atom start, atom stop)
-	if stop < 0 then stop = length(st) + stop end if
-	if stop = 0 then stop = length(st) end if
+export function slice(sequence source, atom start, atom stop)
+	if stop <= 0 then stop += length(source) end if
 	if start < 1 then start = 1 end if
-	if stop > length(st) then stop = length(st) end if
+	if stop > length(source) then stop = length(source) end if
 	if start > stop then return "" end if
 
-	return st[start..stop]
+	return source[start..stop]
 end function
 
 --**
 -- Perform a vertical slice on a nested sequence
+--
+-- Parameters:
+--		# ##source##: the sequence to take a vertical sloice from
+--		# ##colno##: an atom, the column number to extract (rounded down)
+--		# ##error_control##: an object which says what to do if some element does not exist. Defaults to 0 (crash in such a circumstance).
+--
+-- Returns:
+--		A **sequence**, usually of the same length as ##source##, made of all the ##source[x][colno]##.
+--
+-- Errors:
+-- If an element is not defined and ##error_control## is 0, an error occurs.
+-- If ##colno## is less than 1, it cannot be any valid coumn, and an error occurs.
+--
+-- Comments:
+-- If it is not possible to return the sequence of all ##source[x][colno]]## for all avalable ##x##, the outcome is decided by ##error_control##:
+-- * If 0 (the default), program is aborted.
+-- * If a nonzero atom, the short vertical slice is returned.
+-- * Otherwise, elements of ##error_control## will be taken to make for any missing element. A short vertical slice is returned if ##error_control## is exhausted.
 --
 -- Example 1:
 -- <eucode>
@@ -405,38 +498,53 @@ end function
 -- See Also:
 --   [[:slice]], [[:project]]
 
-export function vslice(sequence s, atom colno)
+export function vslice(sequence source, atom colno, object error_control=0)
 	sequence ret
+	integer substitutes, current_sub
 
 	if colno < 1 then
 		crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
 	end if
 
-	ret = s
+	ret = source
+	if atom(error_control) then
+		substitutes =-(not error_control)
+	else
+		substitutes = length(error_control)
+		current_sub = 1
+	end if
 
-	for i = 1 to length(s) do
-		if colno >= 1+length(s[i]) then
-			crash("sequence:vslice(): colno should be a valid index on the %d-th element, " &
-			      "but was %d", {i,colno})
+	for i = 1 to length(source) do
+		if colno >= 1+length(source[i]) then
+			if substitutes=-1 then
+				crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d", {i,colno})
+			elsif substitutes=0 then
+				return ret[1..i-1]
+			else
+				substitutes -= 1
+				ret[i] = error_control[current_sub]
+				current_sub += 1
+			end if
+		else
+			ret[i] = source[i][colno]
 		end if
-		ret[i] = s[i][colno]
 	end for
 
 	return ret
 end function
 
 --**
--- Return the last n items of st. If n is greater than the length of st, then the entire st 
--- will be returned.
+-- Return the last items of a sequence.
 --
 -- Parameters:
--- * st - sequence to get tail of.
--- * n - number of items to return.
+--   # ##source##: the sequence to get the tail of.
+--   # ##size##: an integer, the number of items to return. (defaults to length(source) - 1)
+--
+-- Returns:
+--		A **sequence** of length at most ##size##. If the length is less than ##size##, then ##source## was returned. Otherwise, the ##size## last elements of ##source## were returned.
 --
 -- Comments:
--- A new sequence is created.
---
--- st can be any type of sequence, including nested sequences.
+--   ##siuurce## can be any type of sequence, including nested sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -459,24 +567,26 @@ end function
 -- See Also:
 --   [[:head]], [[:mid]], [[:slice]]
 
-export function tail(sequence st, atom n=length(st) - 1)
-	if n >= length(st) then
-		return st
+export function tail(sequence source, atom n=length(source) - 1)
+	if n >= length(source) then
+		return source
 	else
-		return st[$-n+1..$]
+		return source[$-n+1..$]
 	end if
 end function
 
 --**
--- Remove an item or a range of items from st.
+-- Remove an item or a range of items from a sequence.
 --
 -- Parameters:
--- * st - sequence in which to remove from.
--- * start - index at which to remove (or starting index to remove)
--- * stop - index at which to stop remove
+--   # ##target##: the sequence to remove from.
+--   # ##start##: an atom, the (starting) index at which to remove
+--   # ##stop##: an atom, the index at which to stop removing (defaults to ##start##)
 --
+-- Returns:
+-- 		A **sequence** obtained from ##target## by carving the ##start..stop## slice out of it.
 -- Comments:
---   A new sequence is created. st can be a string or complex sequence.
+--   A new sequence is created. ##target## can be a string or complex sequence.
 --
 -- Example 1:
 -- <eucode>
@@ -505,32 +615,38 @@ end function
 -- See Also:
 --   [[:replace]], [[:insert]], [[:splice]], [[:remove_all]]
 
-export function remove(sequence st, atom start, atom stop=start)
-	if stop > length(st) then
-		stop = length(st)
+export function remove(sequence target, atom start, atom stop=start)
+	if stop > length(target) then
+		stop = length(target)
 	end if
 
-	if start > length(st) or start > stop or stop < 0 then
-		return st
+	if start > length(target) or start > stop or stop < 0 then
+		return target
 	elsif start < 2 then
-		if stop >= length(st) then
+		if stop >= length(target) then
 			return ""
 		else
-			return st[stop+1..$]
+			return target[stop+1..$]
 		end if
-	elsif stop >= length(st) then
-		return st[1..start-1]
+	elsif stop >= length(target) then
+		return target[1..start-1]
 	end if
 
-	return st[1..start-1] & st[stop+1..$]
+	return target[1..start-1] & target[stop+1..$]
 end function
 
 --**
--- Removes all ocurrences of needle from haystack
+-- Removes all ocurrences of nsome object from a sequence.
 --
 -- Parameters:
--- * needle - object to remove.
--- * haystack - sequence in which to remove from.
+--   # ##needle##: the object to remove.
+--   # ##haystack##: the sequence to remove from.
+--
+-- Returns:
+--		A **sequence** of length at most ##length(haystack)##, and which has the same elements, without any copy of ##needle## left
+--
+-- Comments:
+-- This function weeds elements out, not subsequences.
 --
 -- Example 1:
 -- <eucode>
@@ -545,7 +661,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:remove]]
+--   [[:remove]], [[:replace]]
 
 export function remove_all(object needle, sequence haystack)
 	integer ts, te, ss, se
@@ -556,7 +672,7 @@ export function remove_all(object needle, sequence haystack)
 		return haystack
 	end if
 	
-	-- Now we know there is at least one occurance and because
+	-- Now we know there is at least one occurence and because
 	-- it's the first one, we don't have to move anything yet.
 	-- So pretend we have and set up the 'end' variables
 	-- as if we had moved stuff.
@@ -599,18 +715,21 @@ export function remove_all(object needle, sequence haystack)
 end function
 
 --**
--- Replace from index start to stop of st with object what. what can be any object.
+-- Replace a slice in a sequence by an object.
 --
 -- Parameters:
--- * st - sequence in which replacement will be done.
--- * replacement - item to replace with.
--- * start - starting index.
--- * stop - stopping index.
+--   # ##target##: the sequence in which replacement will be done.
+--   # ##replacement##: an object, the item to replace with.
+--   # ##start##: an integer, the starting index of the slice to replace.
+--   # ##stop##: an integer, the stopping index of the slice to replace.
+--
+-- Returns:
+--		A **sequence, which is made of ##target## with the ##start..stop## slice removed and replaced by ##replacement##, which is [[:splice]]()d in.
 --
 -- Comments:
---   A new sequence is created. st can be a string or complex sequence.
+--   A new sequence is created. ##target## can be a string or complex sequence of any shape.
 --
---   To replace just one element, simply: s[index] = new_item
+--   To replace by just one element, enclose ##replacement## in curly braces, which woll be removed at replace time.
 --
 -- Example 1:
 -- <eucode>
@@ -624,23 +743,26 @@ end function
 -- See Also:
 --     [[:splice]], [[:remove]], [[:remove_all]]
 
-export function replace(sequence st, object replacement, integer start, integer stop=start)
-	st = remove(st, start, stop)
-	return splice(st, replacement, start)
+export function replace(sequence target, object replacement, integer start, integer stop=start)
+	target = remove(target, start, stop)
+	return splice(target, replacement, start)
 end function
 
 --**
--- Split the sequence st by delim creating a new sequence. 
---
--- If limit is > 0 then limit the number of tokens that will be split to limit.
+-- Split a sequence on some delimiters.
 --
 -- Paramters:
--- * st - sequence to split.
--- * delim - delimiter to split by.
--- * limit - maximum number of items to split.
+--   # ##source##: the sequence to split.
+--   # ##delim##: an object, the delimiter(s) to split by.
+--   # ##limit##: an integer, the maximum number of items to split. Default is 0 (no limit)
+--
+-- Returns:
+--		A **sequence** of subsequences of ##source##. Delimiters are removed.
 --
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence
+--
+-- If ##limit## is > 0, the number of tokens that will be split is capped by ##limit##. Otherwise there is no limit.
 --
 -- Example 1:
 -- <eucode>
@@ -687,17 +809,19 @@ export function split(sequence st, object delim=" ", integer limit=0)
 end function
 
 --**
--- Split the sequence st by any item in delim creating a new sequence. 
+-- Split a sequence by any item in a list of delimiters.
 --
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
 -- Paramters:
--- * st - sequence to split.
--- * delim - delimiters to split by.
--- * limit - maximum number of items to split.
+-- # ##source##: the sequence to split.
+-- # ##delim##: a list of delimiters to split by.
+-- # ##limit##: maximum number of items to split.
 --
 -- Comments:
--- This function may be applied to a string sequence or a complex sequence
+-- This function may be applied to a string sequence or a complex sequence. It works like ##split##(), but splits on any delimiter on ##delim## rather than on a single delimiter.
+--
+-- You cannot split by any substring in a list.
 --
 -- Example 1:
 -- <eucode>
@@ -719,9 +843,8 @@ export function split_any(sequence st, object delim, integer limit=0)
 	while 1 do
 		pos = find_any(delim, st, start)
 		next_pos = pos + 1
-
 		if pos then
-			ret = append(ret, st[start..pos-1])
+			ret = append(ret, source[start..pos-1])
 			start = next_pos
 			limit -= 1
 			if limit = 0 then
@@ -732,17 +855,17 @@ export function split_any(sequence st, object delim, integer limit=0)
 		end if
 	end while
 
-	ret = append(ret, st[start..$])
+	ret = append(ret, source[start..$])
 
 	return ret
 end function
 
 --**
--- Join s by delim
+-- Join sequences together using a delimiter.
 --
 -- Parameters:
--- * s - sequence of items to join.
--- * delim - delimiter to join by.
+--   # ##items##: the sequence of items to join.
+--   # ##delim##: an object, the delimiter to join by. Defaults to " ".
 --
 -- Comments:
 --   This function may be applied to a string sequence or a complex sequence
@@ -762,32 +885,35 @@ end function
 -- See Also:
 --     [[:split]], [[:split_any]], [[:chunk]]
 
-export function join(sequence s, object delim=" ")
+export function join(sequence items, object delim=" ")
 	object ret
 
-	if not length(s) then return {} end if
+	if not length(items) then return {} end if
 
 	ret = {}
-	for i=1 to length(s)-1 do
-		ret &= s[i] & delim
+	for i=1 to length(items)-1 do
+		ret &= items[i] & delim
 	end for
 
-	ret &= s[length(s)]
+	ret &= items[$]
 
 	return ret
 end function
 
 --**
--- Pad the beginning of a sequence with ch up to size in length.
+-- Pad the beginning of a sequence with an object so as to meet a minimum length condition.
 --
 -- Parameters:
--- * str - string to pad.
--- * size - size to pad str to.
--- * ch - character to pad to.
+--   # ##target##: the sequence to pad.
+--   # ##size##: an integer, the target minimum size for ##target##
+--   # ##padding##: an object, usually the character to pad to (defaults to ' ').
+--
+-- Returns:
+--		A **sequence**, either ##target## if it was long enough, or a sequence of length ##size## whose last elements are those of ##target## and whose first few head elements all equal ##padding##.
 --
 -- Comments:
---   pad_head() will not remove characters. If length(str) is greater than params, this
---   function simply returns str. See head() if you wish to truncate long sequences.
+--   ##pad_head##() will not remove characters. If ##length(target)## is greater than ##size##, this
+--   function simply returns ##target##. See [[:head]]() if you wish to truncate long sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -801,21 +927,33 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:pad_tail]], [[:head]]
 
-export function pad_head(sequence st, integer size, object ch=' ')
-	if size <= length(st) then
-		return st
+export function pad_head(sequence target, integer size, object ch=' ')
+	if size <= length(target) then
+		return target
 	end if
 
-	return repeat(ch, size - length(st)) & st
+	return repeat(ch, size - length(target)) & target
 end function
 
 --**
--- Pad the end of a sequence with ch up to size in length.
+-- Pad the end of a sequence with an object so as to meet a minimum length condition.
 --
 -- Parameters:
--- * str - string to pad.
--- * size - size to pad 'str' to.
--- * ch - character to pad to.
+--   # ##target##: the sequence to pad.
+--   # ##size##: an integer, the target minimum size for ##target##
+--   # ##padding##: an object, usually the character to pad to (defaults to ' ').
+--
+-- Returns:
+--		A **sequence**, either ##target## if it was long enough, or a sequence of length ##size## whose firt elements are those of ##target## and whose last few head elements all equal ##padding##.
+--
+-- Comments:
+--   ##pad_tail##() will not remove characters. If ##length(target)## is greater than ##size##, this
+--   function simply returns ##target##. See [[:tail]]() if you wish to truncate long sequences.
+--
+-- Parameters:
+--   * str - string to pad.
+--   * size - size to pad 'str' to.
+--   * ch - character to pad to (defaults to ' ').
 --
 -- Comments:
 --   pad_tail() will not remove characters. If length(str) is greater than params, this
@@ -833,20 +971,26 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:pad_head]], [[:tail]]
 
-export function pad_tail(sequence st, integer size, object ch=' ')
-	if size <= length(st) then
-		return st
+export function pad_tail(sequence target, integer size, object ch=' ')
+	if size <= length(target) then
+		return target
 	end if
 
-	return st & repeat(ch, size - length(st))
+	return target & repeat(ch, size - length(target))
 end function
 
 --**
--- Split s1 into multiple sequences of length size
+-- Split a sequence into multiple sequences of a given length.
+--
+-- Parameters:
+-- 		# ##source##: the sequence to split up
+--		# ##size##: an integer, the hunk size in the results.
+--
+-- Returns:
+--		A **sequence** of sequences. The inner sequences have length ##size##, except possibly the last one, which may be shorter. When concatenated, these inner sequences yield ##source## back.
 --
 -- Comments:
---   The very last sequence might not have size items if the length of s is not evenly 
---   divisible by size.
+--   The very last inner sequence in the returned value has [[:remainder]](##length(source),size##) items if the length of ##source## is not evenly  divisible by ##size##.
 --
 -- Example 1:
 -- <eucode>
@@ -869,40 +1013,55 @@ end function
 -- See Also:
 --   [[:split]]
 
-export function chunk(sequence st, integer size)
+export function chunk(sequence source, integer size)
 	sequence ns
 	integer stop
 
 	ns = {}
 
-	for i = 1 to length(st) by size do
+	for i = 1 to length(source) by size do
 		stop = i + size - 1
-		if stop > length(st) then
-			stop = length(st)
+		if stop > length(source) then
+			stop = length(source)
 		end if
 
-		ns = append(ns, st[i..stop])
+		ns = append(ns, source[i..stop])
 	end for
 
 	return ns
 end function
 
 --**
--- Remove all nesting from a sequence
+-- Remove all nesting from a sequence.
+--
+-- Parameters:
+--		# ##s##: the sequence to flatten up.
+--
+-- Returns:
+--		A **sequence** of atoms, all the atoms in ##s## enumerated.
+--
+-- Comments:
+--	If you consider a sequence as a tree, then the enumearation is prformed byleft-right reading of the tree. The elements are simply rad left to right, without any care for braces.
 --
 -- Example 1:
 -- <eucode>
 -- s = flatten({{18, 19}, 45, {18.4, 29.3}})
 -- -- s is {18, 19, 45, 18.4, 29.3}
 -- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = flatten({18,{ 19, {45}}, {18.4, {}, 29.3}})
+-- -- s is {18, 19, 45, 18.4, 29.3}
+-- </eucode>
 
-export function flatten(sequence st)
+export function flatten(sequence s)
 	sequence ret
 	object x
 
 	ret = {}
-	for i = 1 to length(st) do
-		x = st[i]
+	for i = 1 to length(s) do
+		x = s[i]
 		if atom(x) then
 			ret &= x
 		else
@@ -914,7 +1073,14 @@ export function flatten(sequence st)
 end function
 
 --**
--- Checks whether two objects can be legally added together. Returns 1 if so, else 0.
+-- Checks whether two objects can be legally added together.
+--
+-- Parameters:
+--		# ##a##: one of the objects to test for compatible shape
+--		# ##b##: the other object
+--
+-- Returns:
+--		An **integer**, 1 if an addition (or any [[:binary operation]]) is possible between ##a## and ##b##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -939,7 +1105,7 @@ export function can_add(object a, object b)
 		return 0
 	end if
 	for i=1 to length(a) do
-		if not can_add(a[i],b[i]) then
+		if not can_add(a[i], b[i]) then
 			return 0
 		end if
 	end for
@@ -947,7 +1113,19 @@ export function can_add(object a, object b)
 end function
 
 --**
--- Returns a sequence {start, start+increment,...,start+(count-1)*increment, or 0 on failure.
+-- Returns a sequence in arithmetic progression.
+--
+-- Parameters:
+--		# ##start##: the initial value from which to start
+--		# ##increment##: the value to recursivey add to ##start## to get new elements
+--		# ##count##:  an integer, the number of additions to perform.
+--
+-- Returns:
+--		An **object**, either 0 on failure or ##
+--{start, start+increment,...,start+count*increment}##
+--
+-- Comments:
+-- If ##count## is negative, or if adding ##start## to  ##increment## would prove to be impossible, then 0 is returned. Otherwise, a sequence, of length ##count+1##, staring with ##start## and whose adjacent elements differ exactly by ##increment##, is returned.
 --
 -- Example 1:
 -- <eucode>
@@ -973,8 +1151,14 @@ export function linear(object start, object increment, integer count)
 end function
 
 --**
--- Returns a sequence whose n first elements are those of s, as well a the n that follow, 
--- and so on for count copies.
+-- Returns a periodic sequence, given a pattern and a count.
+--
+-- Parameters:
+--		# ##pattern##: the sequence whose elements are to be repeated
+--		# ##count##: an integer, the number of times the pattern is to be repeated.
+--
+-- Returns:
+--		A **seqience**, empty on failure, and of length ##count*length(pattern)## otherwise. The first elements of the returned sequence are those of #pattern##. So are those that follow, on to the end.
 --
 -- Example 1:
 -- <eucode>
@@ -985,18 +1169,18 @@ end function
 -- See Also:
 --   [[:repeat]], [[:linear]]
 
-export function repeat_pattern(sequence st, integer count)
+export function repeat_pattern(sequence pattern, integer count)
 	integer ls
 	sequence result
 
 	if count<=0 then
 		return {}
 	end if
-	ls=length(st)
+	ls = length(pattern)
 	count *= ls
 	result=repeat(0,count)
 	for i=1 to count by ls do
-		result[i..i+ls-1]=st
+		result[i..i+ls-1] = pattern
 	end for
 	return result
 end function
@@ -1004,13 +1188,17 @@ end function
 --**
 -- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
 --
--- vectors is a rectangular matrix, ie a sequence of sequences of objects.
--- coords is a list of coordinate index lists, ie a sequence of sequences of small positive 
--- integers.
+-- Paameters:
+--		# ##vectors##: a sequence of sequences of objects,. Subsequences will be etracted from the inner sequences.
+--		# ##coords##: q list of coordinate index lists, ie a sequence of sequences of small positive integers.
 --
--- Returns a sequence the length of vectors. Each of its elements is a sequence,
--- the length of coords, of sequences. Each innermost sequence is made of the
+-- Returns:
+--		A **sequence** the length of ##vectors##. Each of its elements is a sequence,
+-- the length of ##coords##, of sequences. Each innermost sequence is made of the
 -- coordinates of the vector whose indexes are on the given coordinate list.
+--
+-- Comments:
+--	Another way to describe the output is as follows. For each vector in ##vectors##, and for each coordinate set in ##coords##, the vector is projected on those coordinates. The results are arranged by vector.
 --
 -- Example 1:
 -- <eucode>
@@ -1050,6 +1238,19 @@ end function
 --**
 -- Retrieves an element nested arbitrarily deep into a sequence.
 --
+-- Parameters:
+--		# ##source##: the sequence from hich to fetch
+--		# ##indexes##: a sequence of integers, th path to follow to reach the element to return.
+--
+-- Returns:
+--		An **object**, which is ##source[indexes[1]][indexes[2]]...[infrxd[$]]##
+--
+-- Errors:
+--		If the path cannot be followed to its end, an error about reading an inexistent element, or subscripting an atom, will occur.
+--
+-- Comments:
+-- The last element of ##indexes## may be a pair {lower,upper}, in which case a slice of the innermostly referenced sequence is returned.
+--
 -- Example 1:
 -- <eucode>
 -- x = fetch({0,1,2,3,{"abc","def","ghi"},6},{5,2,3})
@@ -1059,15 +1260,38 @@ end function
 -- See Also:
 --   [[:store]], [[:Sequence Assignments]]
 
-export function fetch(sequence st, sequence indexes)
+export function fetch(sequence source, sequence indexes)
+	object x
+
 	for i=1 to length(indexes)-1 do
-		st=st[indexes[i]]
+		source = source[indexes[i]]
 	end for
-	return st[indexes[$]]
+	x = indexes[$]
+	if atom(x) then
+		return source[x]
+	else
+		return source[x[1]..x[2]]
+	end if
 end function
 
 --**
 -- Stores something at a location nested arbitrarily deep into a sequence.
+--
+-- Parameters:
+--		# ##target##: the sequence in which to store something
+--		# ##indexes##: a sequence of integers, the path to follow to reach the place where to store
+--		# ##x##: the object to store.
+--
+-- Returns:
+--		A **sequence**, a **copy** of ##target## with the speciied place ##indexes## modified by storing ##x## into it.
+--
+-- Errors:
+--		If the path to storage location cannot be followed to its end, or an index is not what one would expect or is not valid, an error about illegal sequence operations will occur.
+--
+-- Comments:
+-- If the last element of ##indexes## is a pair of integers, ##x## will be stored as a slice thee, the bounding indexes being given in the pair as {lower,upper}..
+--
+-- In Euphoria, you can never modify an object by passing it to a routine. You have to get a modified copy and then assign it back to the original.
 --
 -- Example 1:
 -- <eucode>
@@ -1078,28 +1302,44 @@ end function
 -- See Also:
 --     [[:fetch]], [[:Sequence Assignments]]
 
-export function store(sequence st, sequence indexes, object x)
+export function store(sequence target, sequence indexes, object x)
 	sequence partials,result,branch
+	object last_idx
 
-	partials=repeat(st,length(indexes)-1)
-	branch=st
+	partials = repeat(target,length(indexes)-1)
+	branch = target
 	for i=1 to length(indexes)-1 do
 		branch=branch[indexes[i]]
 		partials[i]=branch
 	end for
-	branch[indexes[$]]=x
-	partials=prepend(partials,0) -- avoids computing temp=i+1 a few times
+
+	last_idx = indexes[$]
+	if atom(last_idx) then
+		branch[last_idx]=x
+	else
+		branch[last_idx[1]..last_idx[2]]=x
+	end if
+
+	partials = prepend(partials,0) -- avoids computing temp=i+1 a few times
+
 	for i=length(indexes)-1 to 2 by -1 do
-		result=partials[i]
-		result[indexes[i]]=branch
-		branch=result
+		result = partials[i]
+		result[indexes[i]] = branch
+		branch = result
 	end for
-	st[indexes[1]]=branch
-	return st
+	target[indexes[1]] = branch
+	return target
 end function
 
 --**
--- Checks whether s[x] makes sense. Returns 1 if so, else 0.
+-- Checks whether an index exists on a sequence.
+--
+-- Parameters:
+--		# ##s##: the sequence for which to check
+--		# ##x##: an object, the index to check.
+--
+-- Returns:
+-- 		An **integer**, 1 if ##s[x]## makes sense, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -1111,20 +1351,24 @@ end function
 --     [[:Sequence Assignments]]
 
 export function valid_index(sequence st, object x)
-	if not integer(x) then
+	if sequence(x) then
 		return 0
 	end if
 	if x < 1 then
 		return 0
 	end if
-	if x > length(st) then
-		return 0
-	end if
-	return 1
+	return x < length(st)+1
 end function
 
 --**
--- Turns a sequences of indexes into the sequence of elements in source that have such indexes.
+-- Turns a sequences of indexes into the sequence of elements in a source that have such indexes.
+--
+-- Parameters:
+--		# ##source##: the sequence from which to extract elements
+--		# ##indexes##: a sequence of atoms, the indexes of the elements to be fetched in ##source##.
+--
+-- Returns:
+--		A **sequence** of length at most ##length(indexes)##. If ##p## is the r-th element of ##indexes## which is valid on ##source##, then ##result[r]## is ##source[p]##.
 --
 -- Example 1:
 -- <eucode>
@@ -1148,6 +1392,7 @@ export function extract(sequence source, sequence indexes)
 	return indexes
 end function
 
+--**
 export constant
 	ROTATE_LEFT  = 1,
 	ROTATE_RIGHT = -1
@@ -1155,18 +1400,19 @@ export constant
 --**
 -- Rotates a slice of a sequence.
 --
--- Use amount * direction to specify the shift. direction is either ##ROTATE_LEFT##
--- or ##ROTATE_RIGHT##. A null shift does nothing and returns source unchanged.
---
 -- Parameters:
--- * ##source## - sequence to be rotated
--- * ##shift##  - direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
--- * ##start##  - starting position for shift
--- * ##stop##   - stopping position for shift
+-- # ##source##: sequence to be rotated
+-- # ##shift##: direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
+-- # ##start##: starting position for shift, defaults o 1
+-- # ##stop##: stopping position for shift, defaults to ##length(sourc)##
 --
 -- Comments:
---   To shift multiple places, use {{{ROTATE_LEFT * 5}}} for instance to rotate left, 5
+-- Use ##amount * direction## to specify the shift. direction is either ##ROTATE_LEFT##
+-- or ##ROTATE_RIGHT##. This enables to shift multiple places in a single call. For instance,
+-- use {{{ROTATE_LEFT * 5}}} to rotate left, 5
 --   positions.
+--
+-- A null shift does nothing and returns source unchanged.
 --
 -- Example 1:
 -- <eucode>
@@ -1229,13 +1475,30 @@ export function rotate(sequence source, integer shift, integer start=1, integer 
 end function
 
 --**
+export enum
+	ADD_PREPEND,
+	ADD_APPEND,
+	ADD_SORT_UP,
+	ADD_SORT_DOWN
+
+--**
 -- Adds an item to the sequence if its not already there. If it already exists
 -- in the list, the list is returned unchanged.
 --
 -- Parameters:
--- * ##needle##   - object to add.
--- * ##haystack## - sequence in which to add it to.
--- * ##order##    - 1=prepend (default), 2=append, 3=ascending, 4=descending
+-- # ##needle##:   object to add.
+-- # ##haystack##: sequence in which to add it to.
+-- # ##order##:    an integer in the ADD_* enum, the position the way to add ##needle## to ##haystack##.
+--
+-- Returns:
+-- 		A **sequence** which is ##haystack## with the possible addition of ##needle##. If ##pOrder## is ##ADD_SORT_UP## or ##ADD_SORT_DOWN##, then ##haystack## is sorted accordingly.
+--
+-- Comments:
+-- The following enum is provided for specifying pOrder:
+-- * ADD_PREPEND   : prepend ##needle## to ##haystack##. Rhis i the default option.
+-- * ADD_APPEND    : apepend ##needle## to ##haystack##.
+-- * ADD_SORT_UP   : sort ##haystack## in ascending order after inserting ##needle##
+-- * ADD_SORT_DOWN : sort ##haystack## in descending order after inserting ##needle##
 --
 -- Example 1:
 -- <eucode>
@@ -1298,11 +1561,11 @@ end function
 -- and greater than the pivot.
 --
 -- Parameters:
--- * ##pData## - Either an atom or a list. An atom is treated as if it is one-element sequence.
--- * ##pPivot## - An object. Default is zero.
+--   # ##pData##: Either an atom or a list. An atom is treated as if it is one-element sequence.
+--   # ##pPivot##: An object. Default is zero.
 --
 -- Returns:
---   sequence: { {less than pivot}, {equal to pivot}, {greater than pivot} }
+--   A **sequence**: { {less than pivot}, {equal to pivot}, {greater than pivot} }
 --
 -- Comments: 
 -- ##pivot()## is used as a split up a sequence relative to a specific value.
@@ -1342,6 +1605,12 @@ end function
 -- * ##source## - sequence to filter
 -- * ##rid## - [[:routine_id]] of function to use as comparator
 --
+-- Returns:
+--		A **sequence** made of the elements in ##source## which passed the test.
+--
+-- Comments:
+-- The comparator routine must take one prameter and return an atom. The parameter type must be such that all elements of ##source## have this type. An element is retained if the comparator routine returns a nonzero value.
+--
 -- Example 1:
 -- <eucode>
 -- function gt_ten(integer a)
@@ -1360,7 +1629,7 @@ export function filter(sequence source, integer rid)
 
 	for a = 1 to length(source) do
 		if call_func(rid, {source[a]}) then
-			dest &= source[a]
+			dest &= {source[a]}
 		end if
 	end for
 
@@ -1373,6 +1642,12 @@ end function
 -- Parameters: 
 -- * ##source## - sequence to map
 -- * ##rid## - [[:routine_id]] of function to use as convertor
+--
+-- Returns:
+--		A **sequence** the length of ##source##. Each element there is the corresponding element in ##source## mapped using the routine referred to by ##rid##.
+--
+-- Comments:
+-- The supplied routine must take one parameter. The type of this parameter must be compatible with all the elements in ##source##.
 --
 -- Example 1:
 -- <eucode>

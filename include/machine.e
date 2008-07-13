@@ -1308,14 +1308,66 @@ without warning
 integer check_calls = 1
 
 --**
+-- Description: Add a block of memory to the list of safe blocks maintained by safe.e (the debug version of machine.e). The block starts at address a. The length of the block is i bytes.
+--
+-- Parameters:
+--		# ##block_addr##: an atom, the start address of the block
+--		# ##block_len##: an integer, the size of the block.
+--
+-- Comments: 
+--
+-- In memory.e, this procedure does nothing. It is there simply to simpify switching between machine.e and safe.e.
+--
+-- This routine is only meant to be used for debugging purposes. safe.e tracks the blocks of memory that your program is allowed to [[:peek]](), [[:poke]](), [[mem_copy]]() etc. These are normally just the blocks that you have allocated using Euphoria's [[:allocate]]() or [[:allocate_low]]() routines, and which you have not yet freed using Euphoria's [[:free]]() or [[:free_low]](). In some cases, you may acquire additional, external, blocks of memory, perhaps as a result of calling a C routine. 
+--
+-- If you are debugging your program using safe.e, you must register these external blocks of memory or safe.e will prevent you from accessing them. When you are finished using an external block you can unregister it using unregister_block().
+--
+-- Example 1:
+--  atom addr
+-- 
+-- addr = c_func(x, {})
+-- register_block(addr, 5)
+-- poke(addr, "ABCDE")
+-- unregister_block(addr)
+-- 
+-- See Also: 
+--   [[:unregister_block]], [[:safe.e]]
 global procedure register_block(atom block_addr, atom block_len)
 end procedure
 
 --**
+-- Remove a block of memory from the list of safe blocks maintained by safe.e (the debug version of machine.e).
+--
+-- Parameters:
+--		# ##block_addr##: an atom, the start address of the block
+--
+-- Comments: 
+--
+-- In memory.e, this procedure does nothing. It is there simply to simpify switching between machine.e and safe.e.
+--
+-- This routine is only meant to be used for debugging purposes. Use it to unregister blocks of memory that you have previously registered using [[:register_block]](). By unregistering a block, you remove it from the list of safe blocks maintained by safe.e. This prevents your program from performing any further reads or writes of memory within the block.
+--
+--  See [[:register_block]]() for further comments and an example.
+-- 
+-- See Also: register_block, safe.e  
+--   [[:register_block]], [[:safe.e]]
+
 global procedure unregister_block(atom block_addr)
 end procedure
 
 --**
+-- Scans the list of registered blocks for any corruption.
+--
+-- Comments:
+--
+-- safe.e maintains a list of acquired memory blocks. Those gained through allocate() or allocate_low() are automatically included. Any other block, for debugging purposes, must be registered by [[:register_block]]() and unregistered by [[:untrgister_block]]().
+--
+-- The list is scanned and, if any block shows signs of corruption, it is displayed on the screen and the program terminates. Otherwise, nothing happens.
+--
+-- In memory.e, this routine does nothing. It is there to make switching between debugged and normal version of your program easier.
+--
+-- See Also:
+-- [[:register_block]], [[:unregister_block]], [[:memory.e]]
 global procedure check_all_blocks()
 end procedure
 with warning

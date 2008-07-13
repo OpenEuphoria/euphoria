@@ -132,7 +132,7 @@ end type
 --
 -- Comments:
 --   This function may be applied to an atom or to all elements of a sequence.
---	 In order to get reproducible results from this function, you should call ##set_rand##() with a reproducible value prior.
+--	 In order to get reproducible results from this function, you should call [[:set_rand]]() with a reproducible value prior.
 --
 -- Example 1:
 --   <eucode>
@@ -205,7 +205,7 @@ end type
 -- The arguments to this function may be atoms or sequences. The rules for
 -- <a href="refman_2.htm#26">operations on sequences</a> apply, and determint the shape of the returned object.
 --
--- When both arguments are positive numbers, ##mod##() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
+-- When both arguments are positive numbers, [[:mod]]() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
 --
 -- Example 1:
 -- <eucode>
@@ -274,7 +274,7 @@ end function
 --		# ##value##: an object, any atom of which ##log##() acts upon.
 --
 -- Returns:
---		An **object**, the same shape as ##value##. Fr an atom, the returned atom is its logarithm of base E.
+--		An **object**, the same shape as ##value##. For an atom, the returned atom is its logarithm of base E.
 --
 -- Errors:
 --		If any atom in ##value## is not reater than zero, an error occurs as its logarithm is not defined.
@@ -284,7 +284,7 @@ end function
 -- of a sequence.
 --
 -- To compute the inverse, you can use power(E, x)
--- where E is 2.7182818284590452, or equivalently ##exp##(x). Beware that the logarithm grows very slowly with x, so that ##exp##() grows very fast.
+-- where E is 2.7182818284590452, or equivalently [[:exp]](x). Beware that the logarithm grows very slowly with x, so that [[:exp]]() grows very fast.
 --
 -- Example 1:
 -- <eucode>
@@ -293,6 +293,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:E]], [[:exp]], [[:log10]]
+--
 --**
 -- Signature:
 -- global function power(object base, object exponent)
@@ -441,7 +442,7 @@ end function
 --
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- ##arccos##() is not as fast as ##arctan##().
+-- ##arccos##() is not as fast as [[:arctan]]().
 --
 -- Example 1:
 -- <eucode>
@@ -472,7 +473,7 @@ end function
 --
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- ##arcsin##() is not as fast as ##arctan##().
+-- ##arcsin##() is not as fast as [[:arctan]]().
 --
 -- Example 1:
 -- <eucode>
@@ -498,7 +499,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
---	##ceil##() is 1 more than ##floor##() for values with a fractional part, and is the same for values without a fractional part.
+--	##ceil##() is 1 more than [[:floor]]() for values with a fractional part, and is the same for values without a fractional part.
 --
 -- Example 1:
 -- sequence nums
@@ -644,7 +645,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- For an atom, {{sign##(x) is the same as ##compare##(x,0).
+-- For an atom, ##sign##(x) is the same as [[:compare]](x,0).
 -- Example 1:
 -- <eucode>
 -- i = sign(5)
@@ -691,7 +692,7 @@ end function
 --		# ##values##: an object, all atoms of which will be added up, no matter how nested.
 --
 -- Returns:
---		An **atom**, the sum of all atoms in ##flatten##(##values##).
+--		An **atom**, the sum of all atoms in [[:flatten]](##values##).
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence
@@ -762,7 +763,7 @@ end function
 --		# ##values##: an object, all atoms of which will be inspected, no matter how deeply nested.
 --
 -- Returns:
---		An **atom**, the maximum of all atoms in ##flatten##(##values##).
+--		An **atom**, the maximum of all atoms in [[:flatten]](##values##).
 --
 -- Comments:
 -- This function may be applied to an atom or to a sequence of any shape.
@@ -796,7 +797,7 @@ end function
 --		# ##values##: an object, all atoms of which will be inspected, no matter how deeply nested.
 --
 -- Returns:
---		An **atom**, the minimum of all atoms in ##flatten##(##values##).
+--		An **atom**, the minimum of all atoms in [[:flatten]](##values##).
 --
 -- Comments:
 -- This function may be applied to an atom or to a sequence of any shape.
@@ -834,7 +835,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
 --
--- ##arcin##(), ##arccos##() and ##arctan##() return angles in radians.
+-- [[:arcin]](), [[:arccos]]() and [[:arctan]]() return angles in radians.
 --
 -- Example 1:
 -- <eucode>
@@ -859,7 +860,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
 --
--- ##sin##(), ##cos##() and ##tan##() expect angles in radians.
+-- [[:sin]](), [[:cos]]() and [[:tan]]() expect angles in radians.
 --
 -- Example 1:
 -- <eucode>
@@ -934,7 +935,7 @@ end function
 --		# ##x##: an atom, the denominator of the ratio
 --
 -- Returns:
---		An **atom**, which is equal to ##arctan##(##y##/##x##), except that it can handle zero denominator and is more accurate.
+--		An **atom**, which is equal to [[:arctan]](##y##/##x##), except that it can handle zero denominator and is more accurate.
 --
 -- Example 1:
 -- <eucode>

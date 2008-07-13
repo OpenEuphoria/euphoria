@@ -34,9 +34,9 @@ test_equal("rmatch() #2", 0, rmatch("ABC", "DEFBCA"))
 test_equal("rmatch() #3", 8, rmatch("ABC", "ABCDABCABC", 9))
 test_equal("rmatch() #4", 0, rmatch("ABC", "EEEDDDABC", 5))
 
-test_equal("find_replace() string", "John Smith", find_replace("Doe", "Smith", "John Doe", 0))
-test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({5,2}, {1,1}, {1,5,2,5,2}, 0))
-test_equal("find_replace() max set", "BBBAAA", find_replace("A", "B", "AAAAAA", 3))
+test_equal("find_replace() string", "John Smith", find_replace("Doe", "John Doe","Smith",  0))
+test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({5,2},{1,5,2,5,2},  {1,1}, 0))
+test_equal("find_replace() max set", "BBBAAA", find_replace("A", "AAAAAA","B",  3))
 
 constant haystack = "012345678ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 test_equal("binary_search missing #1", -10, binary_search('9',haystack))

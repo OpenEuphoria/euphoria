@@ -7,11 +7,6 @@ sequence seq
 seq={3,"acb",3,"abc"}
 s1={-2,17,"abcd"}  s1a={3,17,"abcd"}
 
-test_equal("bfind(): bounds #1",0,bfind(1,{1,2,3},{2,1}))
-test_equal("bfind(): bounds #2",2,bfind(2,{1,2,3},{-1,5}))
-test_equal("bfind(): outliers",-4,bfind(3.5,{1,2,3},1))
-test_equal("bfind(): short sets",-2,bfind(4,{2},1))
-
 test_equal("sequence_to_set()",{3,"abc","acb"},sequence_to_set(seq))
 test_equal("cardinal()",7,cardinal(s))
 

@@ -145,7 +145,7 @@ test_equal("extract 2",{11,13,11,13,9,9},extract({13,11,9,17},{2,1,2,1,3,3}))
 test_equal("extract 3",{},extract({13,11,9,17},{}))
 test_equal("extract 4",{17},extract({13,11,9,17},{4}))
 
-test_equal("valid_index 1", 0,valid_index({1,2,3},3.5))
+test_equal("valid_index 1", 1,valid_index({1,2,3},3.5))
 test_equal("valid_index 2", 0,valid_index({1,2,3}, -1))
 test_equal("valid_index 3", 0,valid_index({1,2,3}, 0))
 test_equal("valid_index 4", 0,valid_index({1,2,3}, 4))
