@@ -552,7 +552,7 @@ exwc.exe : interpreter_objects
 	wrc -q -ad exw.res exwc.exe
 
 svn_rev : .SYMBOLIC
-	$(EX) revget.ex svn~1\entries
+	$(EX) revget.ex
 
 interpreter : .SYMBOLIC builddirs 
         wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -681,7 +681,7 @@ ec.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_B
 .\dosbkobj\main-.c: $(EU_CORE_FILES) backend.ex
 
 rev.e :
-	$(EX) revget.ex svn~1\entries
+	$(EX) revget.ex
 
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)

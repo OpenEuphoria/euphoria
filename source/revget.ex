@@ -70,14 +70,25 @@ sequence f
 object x
 sequence g
 integer n
+integer tryst
+tryst = 0
 
 c = command_line()
-if length(c) != 3 then
+if length(c) = 2 then
+	tryst = 1
+elsif length(c) != 3 then
 	puts(2, "Incorrect usage.\n")
 	abort(1)
 end if
 
-h = open(c[3], "r")
+if tryst then
+	h = open(".svn/entries", "r")
+	if h = -1 then
+		h = open("svn~1/entries", "r")
+	end if
+else
+	h = open(c[3], "r")
+end if
 if h = -1 then
 	puts(2, "Unable to open.\n")
 	unknown_rev()
@@ -138,14 +149,25 @@ sequence c
 integer h
 sequence f
 object x
+integer tryst
+tryst = 0
 
 c = command_line()
-if length(c) != 3 then
+if length(c) = 2 then
+	tryst = 1
+elsif length(c) != 3 then
 	puts(2, "Incorrect usage.\n")
 	abort(1)
 end if
 
-h = open(c[3], "r")
+if tryst then
+	h = open(".svn/entries", "r")
+	if h = -1 then
+		h = open("svn~1/entries", "r")
+	end if
+else
+	h = open(c[3], "r")
+end if
 if h = -1 then
 	puts(2, "Unable to open.\n")
 	unknown_rev()
