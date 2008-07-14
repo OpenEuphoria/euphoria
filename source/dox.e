@@ -38,9 +38,10 @@ export procedure document_file( sequence name )
 end procedure
 
 function dir_exists( sequence path )
-	return file_type( path ) = FILETYPE_DIRECTORY
+	return file_type( path ) > 0
 end function
 
+include pretty.e
 procedure make_dir( sequence path )
 	if not create_directory( path ) then
 		crash( sprintf( "could not create directory '%s'", {path} ) )
@@ -269,7 +270,7 @@ procedure dependencies()
 			puts( dotfn, diagram_file_deps( f ) )
 			close( dotfn )
 			void = system_exec( 
-				sprintf( "dot -Tpng \"%s_working_.dot\" -o %simage/%s.dep.png", { out_dir, out_dir, underscore_name( short_names[f] ) } ), 
+				sprintf( "dot -Tpng \"%s_working_.dot\" -o \"%simage/%s.dep.png\"", { out_dir, out_dir, underscore_name( short_names[f] ) } ), 
 				2 )
 			puts(1, '.' )
 		end if
@@ -299,7 +300,7 @@ procedure call_graphs()
 				integer dn = safe_open( "_working_.dot" )
 				puts( dn, diagram_routine( proc ) )
 				close( dn )
-				integer ok = system_exec( sprintf( "dot -Tpng \"%s_working_.dot -o \"%simage/%s.png\"", {out_dir, out_dir, name}), 2)
+				integer ok = system_exec( sprintf( "dot -Tpng \"%s_working_.dot\" -o \"%simage/%s.png\"", {out_dir, out_dir, name}), 2)
 				puts(1, '.' )
 			end for
 		end if
