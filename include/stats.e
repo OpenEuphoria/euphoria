@@ -20,7 +20,7 @@ include sort.e
 -- # ##pIndex## - The relative index of the desired smallest value.
 --
 -- Returns:
--- ##object##: The k-th smallest value.
+-- ##sequence##: {The k-th smallest value, its index in the set}
 --
 -- Comments: small() is used to return a value based on it's size relative to
 -- all the other elements in the sequence.
@@ -28,10 +28,12 @@ include sort.e
 --
 -- Example 1:
 --   <eucode>
---   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) -- Ans: 4 (The 3rd smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) -- Ans: 3 (The 1st smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) -- Ans: 8 (The 7th smallest value)
---   ? small( {"def", "qwe", "abc", "try"}, 2 ) -- Ans: "def" (The 2nd smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) -- Ans: {4,1} (The 3rd smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) -- Ans: {3,7} (The 1st smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) -- Ans: {8,4} (The 7th smallest value)
+--   ? small( {"def", "qwe", "abc", "try"}, 2 ) -- Ans: {"def", 1} (The 2nd smallest value)
+--   ? small( {1,2,3,4}, -1) -- Ans: {} -- no-value
+--   ? small( {1,2,3,4}, 10) -- Ans: {} -- no-value
 --   </eucode>
 --
 -- Parameters:
@@ -50,7 +52,7 @@ export function small(sequence pData, integer pIndex)
 	
 	lSortedData = sort(pData)
 	
-	return lSortedData[pIndex]
+	return {lSortedData[pIndex], find(lSortedData[pIndex], pData)}
 end function
 
 --**
