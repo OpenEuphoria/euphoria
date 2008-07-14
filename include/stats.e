@@ -812,7 +812,8 @@ end function
 --
 -- The smoothing factor controls how data is smoothed. 0 smooths everything to 0, and 1 means no smoothing at all.
 --
--- Any value for ##pFactor## outside the 0.0..1.0 range causes ##pFactor## to be set to the periodic factor ##(2/(N+1))##.
+-- Any value for ##pFactor## outside the 0.0..1.0 range causes ##pFactor## 
+-- to be set to the periodic factor ##(2/(N+1))##.
 --
 -- Example 1:
 --   <eucode>
@@ -828,7 +829,7 @@ end function
 --   [[:average]]
 
 export function emovavg(object pData, atom pFactor)
-	atom lPrev = 0
+	atom lPrev
 	
 	if atom(pData) then
 		pData = {pData}
@@ -840,7 +841,8 @@ export function emovavg(object pData, atom pFactor)
 	if pFactor < 0 or pFactor > 1 then
 		pFactor = (2 / (count(pData) + 1))
 	end if
-		
+	
+	lPrev = average(pData)
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
 			pData[i] = (pData[i] - lPrev) * pFactor + lPrev
@@ -849,3 +851,4 @@ export function emovavg(object pData, atom pFactor)
 	end for
 	return pData
 end function
+
