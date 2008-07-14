@@ -14,19 +14,19 @@ include text.e -- upper/lower
 --**
 -- Sort the elements of a sequence into ascending order.
 --
--- The elements can be atoms or sequences. The standard compare()
--- routine is used to compare elements.
---
 -- Parameters:
---	 * x = The sequence to be sorted.
+--	 ###x##: The sequence to be sorted.
 --
 -- Returns:
---	 sequence - The original sequence in ascending order
+--	 A **sequence**, a copy of the original sequence in ascending order
 --
 -- Comments:
---	 This uses the "Shell" sort algorithm.
+-- The elements can be atoms or sequences. 
 --
--- This sort is not "stable", i.e. elements that are considered equal might
+--	 The standard compare()
+-- routine is used to compare elements. This means that "##y## is greater than ##x##" is defined by ##compare(y, x)=1##.
+--
+-- This fubction uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
 -- change position relative to each other.
 --
 -- Example 1:
@@ -77,28 +77,24 @@ end function
 -- Sort the elements of a sequence according to a user-defined 
 -- order.
 --
--- The elements can be atoms or sequences. Each time that the
--- sort needs to compare two items in the sequence, it calls
--- the user-defined function to determine the order. 
---
 -- Parameters:
---     **custom_compare** = A routine-id of the user defined routine that compares
---     two items in x.
+--     # ##custom_compare##: an integer, the routine-id of the user defined routine that compares two items which appear in the sequence to sort.
+--	   # ##x##: the sequence of items to be sorted.
 --
+-- Returns:
+--     A **sequence**, a copy of the original sequence in sorted order
+--
+-- Comments:
 --	   The user defined routine must accept two objects (A and B) and return
 --	   an integer. It returns -1 if object A must appear before object B,
 --	   1 if object B must appear before object A, and 0 if the order
---	   doesn't matter.
+--	   doesn't matter. Any value greater than zero is taken as 1, and any one less than zero is taken as -1.
 --
---	   **x** = The sequence of items to be sorted.
+-- The elements can be atoms or sequences. Each time that the
+-- sort needs to compare two items in the sequence, it calls
+-- the user-defined function to determine the order.
 --
--- Returns:
---     sequence - The original sequence in sorted order
---
--- Comments:
---     This uses the "Shell" sort algorithm.
---
---     This sort is not "stable", i.e. elements that are considered equal might
+--     This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
 --     change position relative to each other.
 --
 -- Example 1:
@@ -162,25 +158,23 @@ end function
 
 -- Local function used by sort_reverse()
 function reverse_comp(object a, object b)
-	return -(compare(a,b))
+	return compare(b,a)
 end function
 
 --**
 -- Sort the elements of a sequence into descending order.
 --
--- The elements can be atoms or sequences. The standard compare()
--- routine is used to compare elements.
---
 -- Parameters:
---	 * x = The sequence to be sorted.
+--	 # ##x##: the sequence to be sorted.
 --
 -- Returns:
---	 sequence - The original sequence in descending order
+--	 A **sequence**, a copy of the original sequence in descending order
 --
 -- Comments:
---	 This uses the "Shell" sort algorithm.
+-- The elements can be atoms or sequences. The standard [[:compare]]()
+-- routine is used to compare elements.
 --
--- This sort is not "stable", i.e. elements that are considered equal might
+--	 This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
 -- change position relative to each other.
 --
 -- Example 1:
@@ -205,26 +199,24 @@ end function
 -- items in the sequence, it calls the user-defined function to determine the order. 
 --
 -- Parameters:
---   **custom_compare** = A routine-id of the user defined routine that compares
---     two items in x.
+--   # ##custom_compare##: an integer, the routine-id of the user defined routine that compares
+--     two items in the sequence being sorted.
+--   # ##x##: the sequence of items to be sorted.
+--   # ##user_data##: an object, anything that is needed by the user defined routine. (defaults to 0)
 --
---   The user defined routine must accept two objects (A and B) and return
+-- Returns:
+--   A **sequence**, a copy of the original sequence in sorted order
+--
+-- Comments:
+--   The user defined routine must accept three objects (A, B and ##state##) and return
 --   an integer. It returns -1 if object A must appear before object B,
 --   1 if object B must appear before object A, and 0 if the order
 --   doesn't matter.
 --
---   **x** = The sequence of items to be sorted.
---
---   **user_data** = Anything that is needed by the user defined routine. (defaults to 0)
---
--- Returns:
---   sequence - The original sequence in sorted order
---
--- Comments:
---   This uses the "Shell" sort algorithm.
---
---   This sort is not "stable", i.e. elements that are considered equal might
+--   This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
 --   change position relative to each other.
+--
+-- The state  which the user routine is passed on each call is not inspected or used by the routine. It is meant to be used by the user routine in any usful way.
 --
 -- Example 1:
 -- <eucode>
@@ -336,28 +328,28 @@ function column_compare(object a, object b, object cols)
 end function
 
 --**
--- Sort the rows in a sequence according to a user-defined 
+-- Sort the rows in a sequence according to a user-defined
 -- column order.
 --
 -- The elements must be sequences.
 --
 -- Parameters:
--- **x** = The set of sequences to be sorted.
+-- # ##x##: a sequence, holding the sequences to be sorted.
+-- # ##column_list##: a list of columns indexes ##x## is to be sorted by.
 --
--- **column_list** = A list of columns to be sorted. By default,
--- columns are sorted in ascending order. To sort in descending
--- order, make the column number negative.
+-- Returns:
+--	 A **sequence**, a copy of the original sequence in sorted order.
 --
+-- Comments:
 -- A non-existant column is treated as coming before an existing column. This
 -- allows sorting of records that are shorter than the columns in the
 -- column list.
 --
--- Returns:
---	 sequence - The original sequence in sorted order
+-- By default,
+-- columns are sorted in ascending order. To sort in descending
+-- order, make the column number negative.
 --
--- Comments:
---	This uses the "Shell" sort algorithm.
---
+--	This function uses the "Shell" sort algorithm.
 -- This sort is not "stable", i.e. elements that are considered equal might
 -- change position relative to each other.
 --

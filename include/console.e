@@ -48,7 +48,7 @@ constant
 --
 -- Parameters:
 -- 	# ##b##, a boolean: TRUE ( != 0 ) to enable the trapping of
--- Ctrl-C/Ctrl-Break, FALSE ( 0 ) to disable iy.
+-- Ctrl-C/Ctrl-Break, FALSE ( 0 ) to disable it.
 --
 -- Comments:
 -- When i is 1 (true) CTRL+C and CTRL+Break can terminate
@@ -92,7 +92,7 @@ end procedure
 -- Comments:
 -- This is useful after you have called allow_break(0) which
 --  prevents CTRL+C or CTRL+Break from terminating your
---  program. You can use check_break() to find out if the user
+--  program. You can use [[:check_break]]() to find out if the user
 --  has pressed one of these keys. You might then perform some action
 --  such as a graceful shutdown of your program.
 -- 

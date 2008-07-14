@@ -8,7 +8,6 @@
 --
 -- === Routines
 
-include unittest.e
 include math.e
 include sort.e
 
@@ -22,9 +21,14 @@ include sort.e
 -- Returns:
 -- ##sequence##: {The k-th smallest value, its index in the set}
 --
--- Comments: small() is used to return a value based on it's size relative to
--- all the other elements in the sequence.
--- The set of values does not have to be in any particular order.
+-- Comments: 
+-- ##small##() is used to return a value based on its size relative to
+-- all the other elements in the sequence. When ##index## is 1, the smallest index is returned. Use ##index = length(pData)## to return the highest. 
+--
+-- If ##pIndex## is less than one, or greater then length of ##pData##,
+--     an empty sequence is returned.
+--
+-- The set of values does not have to be in any particular order. The values may be any Euphoria object.
 --
 -- Example 1:
 --   <eucode>
@@ -36,16 +40,10 @@ include sort.e
 --   ? small( {1,2,3,4}, 10) -- Ans: {} -- no-value
 --   </eucode>
 --
--- Parameters:
---   # pData = A list of 1 or more values.
---   # pIndex = Which smallest value you want. 1 returns the smallest and length(pData)
---     returns the highest. If pIndex is less than one, or greater then length of pData,
---     an empty sequence is returned.
---
 
 export function small(sequence pData, integer pIndex)
 	sequence lSortedData
-	
+
 	if pIndex < 1 or pIndex > length(pData) then
 		return {}
 	end if
@@ -56,16 +54,18 @@ export function small(sequence pData, integer pIndex)
 end function
 
 --**
--- Returns the largest of the data points. 
+-- Returns the largest of the data points that are atoms.
 --
 -- Parameters:
---   # pData = A list of 1 or more numbers for which you want the largest.
---             **Note:** only atom elements are included and any sub-sequences
---             elements are ignored.
+--   # ##pData##: a list of 1 or more numbers among which you want the largest.
 --
 -- Returns:
---   **atom** (the largest value) if there is at least one atom item in the set\\
---   **sequence** (empty) if there //is// no largest value.
+--   An **object**, either of:
+-- * an atom (the largest value) if there is at least one atom item in the set\\
+-- * ##{} ##if there //is// no largest value.
+--
+-- Comments:
+-- Any ##pData## element which is not an atom is ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -80,7 +80,7 @@ export function largest(object pData)
 	atom lResult, lTemp
 	integer lFoundAny
 	if atom(pData) then
-			return pData
+		return pData
 	end if
 	lFoundAny = 0
 	for i = 1 to length(pData) do
@@ -111,8 +111,12 @@ end function
 --             elements are ignored.
 --
 -- Returns:
---   **atom** (the smallest value) if there is at least one atom item in the set\\
---   **sequence** (empty) if there //is// no smallest value.
+--   An **object**, either of:
+-- * an atom (the smallest value) if there is at least one atom item in the set\\
+-- * ##{} ##if there //is// no largest value.
+--
+-- Comments:
+-- Any ##pData## element which is not an atom is ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -152,12 +156,13 @@ end function
 -- Determines a number of //range// statistics for the data set. 
 --
 -- Parameters:
---   # pData = A list of 1 or more numbers for which you want the range data.
---             Note that only atom elements are included and any sub-sequences
---             elements are ignored.
+--   # ##pData##: a list of 1 or more numbers for which you want the range data.
 --
 -- Returns:
---   **sequence** {Lowest, Highest, Range, Mid-range}
+--  A **sequence**, empty if no atoms were found, else like {Lowest, Highest, Range, Mid-range}
+--
+-- Comments:
+-- Any sequence element in ##pData## is ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -201,25 +206,25 @@ end function
 
 --**
 -- Returns the //estimated// standard deviation based on a random sample of the population. 
--- The equation for //estimated// average deviation is: 
+--
+-- Parameters:
+-- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
+--
+-- Returns:
+--    An **atom**, the estimated stadnard deviation.
+--
+-- Comments:
+-- ##stdev##() is a measure of how values are different from the average. These numbers are
+-- assumed to represent a random sample, a subset, of a larger set of numbers.
+--
+-- This function differs from [[:stdeva]]() in that this ##stdev##() ignores all elements that are
+-- sequences. It differs from [[:stdevp]]() because it assumes that the mean of the sample depends on the sample, so there are only (number of observations)-1 independent data points to compute the deviation amidst.
+--
+-- The equation for //estimated// average deviation is:
 --
 -- {{{
 -- stdev(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / (N-1))
 -- }}}
---
--- Parameters:
--- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
---           These numbers are assumed to represent a random sample, a subset, of 
---           a larger set of numbers.
---           Note that only atom elements are included, any sub-sequences elements are ignored.
--- Returns:
---   **atom** The estimated stadnard deviation.
--- 
--- Comments: 
--- stdev() is a measure of how values are different from the average.
--- This function differs from stdeva() in that this stdev() ignores all elements that are
--- sequences.
---
 --
 -- Example 1:
 --   <eucode>
@@ -263,25 +268,26 @@ end function
 
 --**
 -- Returns the estimated standard deviation based on a random sample of the population. 
--- The equation for average deviation is: 
+--
+-- Parameters:
+-- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
+--
+-- Returns:
+--    An **atom**, the estimated standard deviation.
+--
+-- Comments: 
+-- ##stdeva##() is a measure of how values are different from the average.
+-- This function differs from stdev() in that stdeva() treats all elements that are
+-- sequences as having a value of zero.
+--
+-- The equation for average deviation is:
 --
 -- {{{
 -- stdeva(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / (N-1))
 -- }}}
 --
--- Parameters:
--- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
---           These numbers are assumed to represent a random sample, a subset, of 
---           a larger set of numbers.
---           Note that any sub-sequences elements are assumed to have a value of zero.
---
--- Returns:
---   **atom** The estimated standard deviation. 
---
--- Comments: 
--- stdeva() is a measure of how values are different from the average.
--- This function differs from stdev() in that stdeva() treats all elements that are
--- sequences as having a value of zero.
+-- Note that any sub-sequences elements are assumed to have a value of zero. From that point on,
+-- these numbers are assumed to represent a random sample, a subset, of a larger set of numbers.
 --
 -- Example 1:
 --   <eucode>
@@ -325,27 +331,27 @@ export function stdeva(sequence pData)
 	return power(lSum / (lCnt - 1), 0.5)
 end function
 
-
 --**
 -- Returns the standard deviation based of the population. 
--- The equation for average deviation is: 
---
--- {{{
--- stdev(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / N)
--- }}}
 --
 -- Parameters:
 --   # pData = A list of 1 or more numbers for which you want the standard deviation.
---             These numbers are assumed to represent the entire population to test.
---             Note that only atom elements are included, any sub-sequences elements are ignored.
 --
 -- Returns:
---   **atom** The standard deviation of the population. 
+--   An **atom**, the standard deviation of the population.
 --
 -- Comments: 
--- stdevp() is a measure of how values are different from the average.
--- This function differs from stdevpa() in that stdevp() ignores all elements that are
+-- ##stdevp##() is a measure of how values are different from the average.
+-- This function differs from [[:stdevpa]]() in that ##stdevp##() ignores all elements that are
 -- sequences.
+--
+-- The numbers are assumed to represent the entire population to test. This is how ##stdevp]]() differs from [[:stdev]](), as the mean does not depend on anything, and all observations are independent.
+--
+-- The equation for average deviation is: 
+--
+-- {{{
+-- stdevp(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / N)
+-- }}}
 --
 -- Example 1:
 --   <eucode>
@@ -389,23 +395,22 @@ end function
 
 --**
 -- Returns the standard deviation based of the population. 
--- The equation for average deviation is: 
+--
+-- Parameters:
+--   # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
+--
+-- Returns:
+--   An **atom**, the standard deviation of the population.
+--
+-- Comments: ##stdevpa##() is a measure of how values are different from the average.
+-- This function differs from [[:stdevp]]() in that stdevpa() treats all elements that are
+-- sequences as having a value of zero. The numbers are assumed to represent the entire population to test.
+--
+-- The equation for average deviation is:
 --
 -- {{{
 -- stdevpa(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / N)
 -- }}}
---
--- Parameters:
---   # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
---             These numbers are assumed to represent the entire population to test.
---             Note that any sub-sequences elements are assumed to have a value of zero.
---
--- Returns:
---   **atom** The standard deviation of the population. 
---
--- Comments: stdevpa() is a measure of how values are different from the average.
--- This function differs from stdevp() in that stdevpa() treats all elements that are
--- sequences as having a value of zero.
 --
 -- Example 1:
 -- <eucode>
@@ -450,22 +455,25 @@ export function stdevpa(sequence pData)
 end function
 
 --**
--- Returns the average of the absolute deviations of data points from their mean. 
+-- Returns the average of the absolute deviations of data points from their mean.
 -- The equation for average deviation is: 
+--
+-- Parameters:
+--   # ##pData##: a list of 1 or more numbers for which you want the mean of the absolute deviations.
+--
+-- Returns:
+--   An **atom**, the average deviation from the mean.
+--
+-- Comments: 
+--   ##avedev##() is a measure of the variability in a data set. Its statistical properties are well behaved than those of the standard deviation, which is why it is used less.
+--
+-- Note that only atom elements are included, any sub-sequences elements are ignored.
+--
+-- The equation for absolute average deviation is:
 --
 -- {{{
 -- avedev(X) ==> SUM( ABS(X{1..N} - MEAN(X)) ) / N
 -- }}}
---
--- Parameters:
---   # pData = A list of 1 or more numbers for which you want the mean of the absolute deviations.
---             Note that only atom elements are included, any sub-sequences elements are ignored.
---
--- Returns:
---   **atom** The average deviation from the mean.
---
--- Comments: 
---   avedev() is a measure of the variability in a data set.
 --
 -- Example 1:
 --   <eucode>
@@ -509,25 +517,24 @@ export function avedev(sequence pData)
 end function
 
 --**
--- Returns the sum of all the atoms in an object.  If the object is an atom
--- then it just returns the parameter, however for sequences it only sums
--- the atom elements in the sequence and not any subsequences.\\
--- The equation is: 
+-- Returns the sum of all the atoms in an object.
+--
+-- Parameters:
+--   # ##pData##: Either an atom or a list.
+--
+-- Returns:
+--   An **atom**,  the sum of the atoms in the set.
+--
+-- Comments: 
+--   ##sum##() is used as a measure of the magnitude of a sequence of positive values.
+--
+-- If ##pData## is an atom, then it is returned. Otherwise, atomic elements of a sequence are added up. If there are no atoms on ##pData##, the function returns 0.
+--
+-- The equation is:
 --
 -- {{{
 -- sum(X) ==> SUM( X{1..N} )
 -- }}}
---
--- Parameters:
---   # pData = Either an atom or a list.
---             **Note:** that only atom elements are included, any sub-sequences
---             elements are ignored.
---
--- Returns:
---   **atom** The sum of the atoms in the set.
---
--- Comments: 
---   sum() is used as a measure of the magnitude of a sequence.
 --
 -- Example 1:
 --   <eucode>
@@ -553,17 +560,13 @@ export function sum(object pData)
 end function
 
 --**
--- Returns the count of all the atoms in an object.  If the object is an atom
--- then it just returns 1, however for sequences it only counts
--- the atom elements in the sequence and not any subsequences.\\
+-- Returns the count of all the atoms in an object.
 --
 -- Parameters:
---   # pData = Either an atom or a list.
---             **Note:** that only atom elements are included, any sub-sequences
---             elements are ignored.
+--   # ##pData##: either an atom or a list.
 --
 -- Returns:
---   **atom** The number of atoms in the set. 
+--    An **integer**, the number of atoms in the set. When ##pData## is an atom, 1 is returned.
 --
 -- Example 1:
 --   <eucode>
@@ -591,14 +594,16 @@ export function count(object pData)
 end function
 
 --**
--- Returns the count of all the elements in an object.  If the object is an atom
--- then it just returns 1.
+-- Returns the count of all the elements in an object.
 --
 -- Parameters:
---   # pData = Either an atom or a list.
+--   # ##pData##: either an atom or a list.
 --
 -- Returns:
---   **atom** The number of elements in the set. 
+--   An **integer**, the number of elements in the set. When ##pData## is an atom, 1 is returned.
+--
+-- Comments:
+-- This routine extends [[:length]]() to atoms by returning 1 on atoms.
 --
 -- Example 1:
 --   <eucode>
@@ -608,7 +613,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:sum]], [[:count]]
+--   [[:average]], [[:sum]], [[:count]], [[:length]]
 
 export function counta(object pData)
 	atom lResult
@@ -621,7 +626,7 @@ export function counta(object pData)
 end function
 
 --**
--- Returns the average (mean) of the data points. 
+-- Returns the average (mean) of the data points.
 -- The equation for average  is: 
 --
 -- {{{
@@ -662,23 +667,23 @@ end function
 
 --**
 -- Returns the average (mean) of the data points. 
--- The equation for average  is: 
+--
+-- Parameters:
+--   # ##pData##: a list of 1 or more numbers for which you want the mean.
+--
+-- Returns:
+--    An **object**, either ##{}## if there are no items in the set, or an **atom** (the mean) otherwise.
+--
+-- Comments:
+--   ##averagea##() is the theoretical probable value of a randomly selected item from the set, at least when they folow an unimodal distribution.
+--
+-- All elements are included; any sequence elements are assumed to have the value zero.
+--
+-- The equation for average  is:
 --
 -- {{{
 -- average(X) ==> SUM( X{1..N} ) / N
 -- }}}
---
--- Parameters:
---   # pData = A list of 1 or more numbers for which you want the mean.
---             **Note:** that all elements are included and any sub-sequences
---             elements are assumed to have the value zero.
---
--- Returns:
---   **atom** (the mean) if there are one or items in the set.
---   **sequence** (empty) if there are no items in the set.
---
--- Comments: 
---   averagea() is theoretical probable value of a randomly selected item from the set.
 --
 -- Example 1:
 --   <eucode>
@@ -700,17 +705,16 @@ end function
 -- can be either a simple or weighted moving average.
 --
 -- Parameters:
---   # pData = A list of 1 or more numbers for which you want a moving average.
---             Note that only atom elements are included and any sub-sequences
---             elements are ignored.
---   # pPeriod = Either an integer representing the size of the period; this 
---               gives a simple moving average, or a list of weightings to
---               apply to the respective period position, giving a weighted
---               moving averge.
+--   # ##pData##: a list of 1 or more numbers for which you want a moving average.
+--   # ##pPeriod##: an object, either 
+-- * an integer representing the size of the period, or
+-- * a list of weightings to apply to the respective period positions.
 --
 -- Returns:
---   **sequence** An empty sequence is returned if the Data sequence is empty or
+--   A **sequence**, either the requested averages or ##{}## if the Data sequence is empty or
 --             the supplied period is less than one.
+--
+-- If a list of weights was supplied, the result is a weighted average; otherwise, it is a simple average.
 --
 -- Comments: 
 --   A moving average is used to smooth out a set of data points over a period.\\
@@ -718,7 +722,11 @@ end function
 --   of the first five data points [1..5], the second returned element is
 --   the average of the second five data points [2..6], and so on until
 --   the last returned value is the average of the last 5 data points
---   [$-4 .. $]
+--   [$-4 .. $].
+--
+-- When ##pPeriod## is an atom, it is rounded down to the width of the average. When it is a sequence, the width is its length. If there are not enough data points, zeroes are inserted.
+--
+--  Note that only atom elements are included and any sub-sequence elements are ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -784,28 +792,27 @@ export function movavg(object pData, object pPeriod)
 end function
 
 --**
--- Returns the expotential moving average of a set of data points.
+-- Returns the exponential moving average of a set of data points.
 --
 -- Parameters:
---   # pData = A list of 1 or more numbers for which you want a moving average.
---             **Note:** that only atom elements are included and any sub-sequences
---             elements are ignored.
---   # pFactor = an atom. Either a specific factor from zero to one, or anything
---             else which represents the periodic factor (2/(N+1)). This parameter
---             is the degree of smoothing required. Lower values increase the
---             smoothing and higher values decrease the smoothing. For example,
---             zero will smooth all values to zero, and one will have no smoothing
---             effect at all.
+--   # ##pData##: a list of 1 or more numbers for which you want a moving average.
+--   # ##pFactor##: an atom, the smoothing factor, typically between 0 and 1.
 --
 -- Returns:
---   **sequence** An empty sequence is returned if the Data sequence is empty or
---             the supplied period is less than one.
+--   A **sequence** made of the requested averages, or ##{}## if ##pData## is empty or
+-- the supplied period is less than one.
 --
 -- Comments: 
 --   A moving average is used to smooth out a set of data points over a period.
 --
 -- The formula used:\\
 -- : ##Y,,i,, = Y,,i-1,, + F * (X,,i,, - Y,,i-1,,)##
+--
+-- Note that only atom elements are included and any sub-sequences elements are ignored.
+--
+-- The smoothing factor controls how data is smoothed. 0 smooths everything to 0, and 1 means no smoothing at all.
+--
+-- Any value for ##pFactor## outside the 0.0..1.0 range causes ##pFactor## to be set to the periodic factor ##(2/(N+1))##.
 --
 -- Example 1:
 --   <eucode>
