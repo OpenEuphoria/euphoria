@@ -525,8 +525,11 @@ end function
 --**
 -- Checks if x is an IP address in the form (#.#.#.#[:#])
 --
+-- Parameters:
+--		# ##x##: the address to check
+--
 -- Returns:
---   1 if x is an inetaddr, 0 if it isn't
+--   An **integer**, 1 if x is an inetaddr, 0 if it isn't
 
 export function is_inetaddr(object s)
 	
@@ -559,16 +562,21 @@ end function
 --**
 -- Returns the current error mode.
 --
--- See also:	
---     set_errormode, get_error
+-- See Also:
+--     [[:set_errormode]], [[:get_error]]
 
 export function get_errormode()
 	return error_mode
 end function
 
 --**
--- Sets the error mode to either EUNET_ERRORMODE_EUNET or
--- EUNET_ERRORMODE_OS.  The errors returned will either be generated
+-- Sets the error mode.
+--
+-- Parameters:
+--		# ##mode##: an integer, either EUNET_ERRORMODE_EUNET or EUNET_ERRORMODE_OS.
+--
+-- Comments:
+--	The errors returned will either be generated
 -- by the kernel (OS) or massaged by the library for cross-platform
 -- compatibility (EUNET).
 
@@ -582,9 +590,13 @@ export function set_errormode(integer mode)
 end function
 
 --**
--- Returns a 2-element sequence s, indicating the last
--- error code and error string. If errormode is EUNET_ERRORMODE_EUNET,
--- the error codes will be one of . . .
+-- Retrieves the last error code and error string.
+--
+-- Returns:
+--		A **sequence** of length 2, made of an integer, the error code, and the error string.
+--
+-- Comments:
+-- If error mode is EUNET_ERRORMODE_EUNET, the error codes will be one of . . .
 --
 -- * EUNET_ERROR_NOERROR = 0
 -- * EUNET_ERROR_WRONGMODE = -998
@@ -594,18 +606,18 @@ end function
 -- * EUNET_ERROR_NODNSRECORDS = -1501
 -- * EUNET_ERROR_UNKNOWN = -1999
 --
--- If errormode is EUNET_ERRORMODE_OS, the error returned will be
--- what the OS kernel returns.  Unless otherwise set, errormode is
+-- If error mode is EUNET_ERRORMODE_OS, the error returned will be
+-- what the OS kernel returns.  Unless otherwise set, error mode is
 -- EUNET_ERRORMODE_EUNET by default.
 --
--- Example:
+-- Example 1:
 -- <eucode>
 -- s = get_error()
 -- printf(1,"Error %d: %s\n",s)
 -- </eucode>
 --
--- See also:
---     set_errormode, get_errormode
+-- See Also:
+--     [[:set_errormode]], [[:get_errormode]]
 
 export function get_error()
 	-- returns a 2-element sequence {ERROR_CODE,ERROR_STRING}
@@ -648,8 +660,7 @@ export function get_error()
 end function
 
 --**
--- Use this function to determine whether another socket read is
--- appropriate.
+-- Determine whether another socket read is appropriate.
 --
 -- Returns:
 --     The packet block size in bytes.
@@ -672,12 +683,17 @@ export function get_blocksize()
 end function
 
 --**
--- Delays for millisec * 1/1000 seconds.  Since this function
--- implements kernel routines on each platform, the delay is not
--- a CPU hogging busy loop.
+-- Wait for a short delay.
+--
+-- Parameters:
+--		# ##millisec##: an atom, the number of 1/1000 seconds to wait.
 --
 -- Returns:
 --     0 for success, -1 for error.
+--
+-- Comments:
+-- Since this function implements kernel routines on each platform, the delay is not
+-- a CPU hogging busy loop.
 --
 -- Example 1:
 -- <eucode>
@@ -714,7 +730,7 @@ export function delay(atom millisec)
 	return -1
 end function
 
---Andy Serpas Turbo version
+-- Andy Serpa's Turbo version
 -- c = "object" by Kat ; modded and used in strtok.e
 -- c can now be a list {'z','\n','etc'} and s will be parsed by all those in list
 -- made case insensitive by Kat
@@ -993,9 +1009,14 @@ function unix_get_iface_details(sequence iface_name)
 end function
 
 --**
--- Given a network interface name returned by get_iface_list(),
--- returns a sequence of details about that interface.  The returned
--- sequence is as follows: 
+-- Given a network interface name returned by [[:get_iface_list]](),
+-- returns a sequence of details about that interface.
+--
+-- Parameters:
+-- 		# ##iface_name##: a string, a network interface name
+--
+-- Returns:
+--		A **sequence** of details about the interface. Its layout is as follows:
 --
 -- <eucode>
 -- s = {
@@ -1016,7 +1037,7 @@ end function
 -- sequence stats }
 -- </eucode>
 --
--- Note:
+-- Comments:
 --    If PPP_Dest_IP_addr = IP_addr, serial_keepalive will be the
 --    up/down status of the address.
 
@@ -1057,12 +1078,20 @@ end function
 
 --**
 -- Joins a socket to a specific local internet address and port so
--- later calls only need to provide the socket.  Returns a 0 on
--- success and -1 on failure.
+-- later calls only need to provide the socket. 
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##inet_addr##: a sequence, the address to bind the socket to
+--
+-- Returns 
+--		An **integer**, 0 on success and -1 on failure.
 --
 -- Example 1:
+-- <eucode>
 -- success = bind(socket, "0.0.0.0:8080")
 -- -- Look for connections on port 8080 for any interface.
+-- </eucode>
 
 export function bind(atom socket, sequence inet_addr)
 	ifdef WIN32 then
@@ -1089,16 +1118,25 @@ function windows_listen(atom socket, integer pending_conn_len)
 end function
 
 --**
--- This function is used in a program that will be receiving
--- connections.  Listen only works with TCP sockets.
--- Pending_conn_len is the number of connection requests that
+-- Start monitoring a connection. Only works with TCP sockets.
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##pending_conn_len##: an integer, the number of connection requests that
 -- can be kept waiting before the OS refuses to hear any more.
--- This value is strongly dependent on both the hardware and the
--- amount of time it takes the program to process each connection
--- request. This function must be executed after bind().
 --
 -- Returns:
---    0 on success and an error code on failure.
+--    An **integer**, 0 on success and an error code on failure.
+--
+-- Comments:
+-- This function is used in a program that will be receiving
+-- connections.
+--
+-- The value of ##pending_conn_len## is strongly dependent on both the hardware and the
+-- amount of time it takes the program to process each connection
+-- request. 
+--
+-- This function must be executed after [[:bind]]().
 
 export function listen(atom socket, integer pending_conn_len)
 	ifdef WIN32 then
@@ -1156,15 +1194,23 @@ function windows_accept(atom socket)
 end function
 
 --**
--- Produces a new socket for an incoming connection, allowing
--- communication to occur on a "side channel" while the main server
--- socket remains available for new connections.  accept() must
--- be called after bind() and listen().
+-- Produces a new socket for an incoming connection.
+--
+-- Parameters:
+--		# ##socket##: an atom, the side connection socket id
 --
 -- Returns:
---     A sequence {atom new_socket, sequence peer_ip_address} on success,
---     or -1 on failure.  Use get_error to determine the cause
---     of the failure.
+--     An **object**, either -1 on failure, or a sequence {atom new_socket, sequence peer_ip_address} on success.
+--
+-- Comments:
+-- Using this function allows
+-- communication to occur on a "side channel" while the main server
+-- socket remains available for new connections. 
+--
+-- ##accept##() must be called after ##bind##() and ##listen##().
+--
+-- On failure, use [[:get_error]] to determine the cause of the failure.
+--
 
 export function accept(atom socket)
 	ifdef WIN32 then
@@ -1199,10 +1245,17 @@ function windows_connect(atom socket, sequence inet_addr)
 end function
 
 --**
--- Establish an outgoing connection to a remote computer. Connect
--- only works with TCP sockets.  The inet_address should contain
--- both the IP address and port of the remote listening socket as
--- a string.  Returns 0 for success and -1 on failure.
+-- Establish an outgoing connection to a remote computer. Only works with TCP sockets.
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##inet_addr##: a sequence, the address to bind the socket to
+--
+-- Returns 
+--		An **integer**, 0 for success and -1 on failure.
+--
+-- Comments:
+--	##inet_address## should contain both the IP address and port of the remote listening socket as a string.
 --
 -- Example 1:
 -- <eucode>
@@ -1241,6 +1294,14 @@ end function
 --**
 -- Returns a handle to a newly created socket.
 --
+-- Parameters:
+--		# ##family##: an integer
+--		# ##sock_type##: an integer, the type of socket to create
+--		# ##protocol##: an integer, the communication protocol being used
+--
+-- Returns:
+--		An **atom**, -1 on failure, else a supposedly valid socket id.
+--
 -- Example 1:
 -- <eucode>
 -- socket = new_socket(AF_INET, SOCK_STREAM, 0)
@@ -1270,9 +1331,17 @@ function windows_close_socket(atom socket)
 end function
 
 --**
--- Closes a socket.  It may take several minutes for the OS to
--- declare the socket as closed.   Returns 0 on success and -1 on
--- error.
+-- Closes a socket.
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket to close
+--
+-- Returns:
+--		An **integer**, 0 on success and -1 on error. 
+--
+-- Comments:
+-- It may take several minutes for the OS to declare the socket as closed.
+-- 
 
 export function close_socket(atom socket)
 	ifdef WIN32 then
@@ -1297,11 +1366,20 @@ function windows_shutdown_socket(atom socket, atom method)
 end function
 
 --**
--- Partially or fully close a socket.  A method of 0 closes the
--- socket for reading, 1 closes the socket for writing, and
--- 2 closes the socket for both.  Returns 0 on success and -1 on
--- error.  It may take several minutes for the OS to declare the
--- socket as closed.
+-- Partially or fully close a socket. 
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket to close
+--      # ##method##: an integer, the method used to close the socket
+--
+-- Returns:
+--		An **integer**, 0 on success and -1 on error. 
+--
+-- Comments
+-- A method of 0 closes the socket for reading, 1 closes the socket for writing, and
+-- 2 closes the socket for both.
+--
+--  It may take several minutes for the OS to declare the socket as closed.
 
 export function shutdown_socket(atom socket, atom method)
 	ifdef WIN32 then
@@ -1459,14 +1537,23 @@ function windows_poll(sequence socket_list, atom timeout)
 end function
 
 --**
--- Socket_list is a sequence of 2-element sequences.  Each sequence
--- contains the socket number, and the flags of what to check for.
--- Timeout is the number of milliseconds before returning.  0 returns
--- immediately, -1 returns only when an event occurs. poll may
--- return an atom on no event or error, and a sequence of return
--- event flags (matching socket_list) when an event has occurred.
+-- Monitor socket events.
 --
--- Note:
+-- Parameters:
+--		# ##socket_list##: a sequence of polling policies, see Comments for details
+--		# ##timeout##: an atom, the number of milliseconds before returning.
+--
+-- Returns:
+--		An **object**:
+-- * If no event occurred, or there was an error, an atom
+-- * On an event, a sequence, the return flags for each socket in ##socket_list##.
+--
+-- Comments:
+-- ##socket_list## is a sequence of 2-element sequences.  Each inner sequence
+-- contains the socket number, and the flags of what to check for.
+--
+-- Special values for ##timeout## are  0 returns immediately, -1 returns only when an event occurs.
+--
 -- Another common socket querying routine, select(), is not supported
 -- in this library.  Poll() provides the same functionality more
 -- reliably.
@@ -1547,10 +1634,19 @@ function windows_send(atom socket, sequence data, atom flags)
 end function
 
 --**
--- Send TCP data to a socket connected remotely.  Send works
--- regardless of which socket is the listener and which is the
--- connector. Returns the number of characters sent, or -1 for
--- an error.
+-- Send TCP data to a socket connected remotely.
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##data##: a sequence of atoms, what to send
+--		# ##flags##: an atom,
+--
+-- Returns:
+--		An **integer**, the number of characters sent, or -1 for an error.
+--
+-- Comments:
+-- ##sSend##() works regardless of which socket is the listener and which is the
+-- connector. 
 
 export function send(atom socket, sequence data, atom flags)
 	ifdef WIN32 then
@@ -1587,7 +1683,15 @@ end function
 
 --**
 -- Send data to either a connected or unconnected socket.
--- Returns the number of characters sent, or -1 for an error.
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##data##: a sequence of atoms, what to send
+--		# ##flags##: an atom,
+--		# ##inet_addr##: a sequence representing an IP address
+--
+-- Returns:
+--		An **integer**, the number of characters sent, or -1 for an error.
 
 export function sendto(atom socket, sequence data, atom flags, sequence inet_addr)
 	ifdef WIN32 then
@@ -1630,18 +1734,23 @@ function windows_recv(atom socket, atom flags)
 end function
 
 --**
--- Receive data from a bound socket.  This function will not return
+-- Receive data from a bound socket. 
+--
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##flags##: an atom,
+--
+-- Returns:     
+--   A **sequence**, either a full string of data on success, or a pair {error code, error string} on error or no data.
+--
+-- Comments:
+-- This function will not return
 -- until data is actually received on the socket, unless the flags
 -- parameter contains MSG_DONTWAIT.
 --
--- Note:
 -- MSG_DONTWAIT only works on Linux kernels 2.4 and above.  Similar
 -- functionality is not available in Windows.  The only way to set
 -- up a non-blocking polling loop on Windows is to use poll().
---
--- Returns:     
---   A 2-element sequence on error or no data {error code, error string},
---   or a full string of data on success.
 
 export function recv(atom socket, atom flags)
 	ifdef WIN32 then
@@ -1695,10 +1804,13 @@ end function
 
 --**
 -- Receive data from either a bound or unbound socket.
--- This function will not return until data is actually received on
--- the socket, unless the flags parameter contains MSG_DONTWAIT.
--- This function always returns a 3-element sequence:
 --
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##flags##: an atom,
+--
+-- Returns:
+--		A **sequence** as follows:
 -- <eucode>
 -- s = {
 --     sequence data,
@@ -1707,9 +1819,13 @@ end function
 -- }
 -- </eucode>
 --
--- Peer_address is the same string format used when passing an
+-- Here, ##peer_address## is the same string format used when passing an
 -- internet address to a function, and can be used as is in
--- sendto().
+-- [[:sendto]]().
+--
+-- Commenst:
+-- This function will not return until data is actually received on
+-- the socket, unless the flags parameter contains MSG_DONTWAIT.
 --
 -- Example 1:
 -- <eucode>
@@ -1777,6 +1893,19 @@ function windows_getsockopts(atom socket, integer level, integer optname)
 end function
 
 --**
+-- Get options for a socket.
+-- 
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##level##: an integer, the option level
+--		# ##optname##: a string with the name of the requested option
+--
+-- Returns:
+--		An **object**, either:
+-- * On error, {"ERROR",error_code}.  
+-- * On success, either an atom or a sequence containing the option value, depending on the option.
+--
+-- Comments:
 -- Primarily for use in multicast or more advanced socket
 -- applications.  Level is the option level, and option_name is the
 -- option for which values are being sought. Level is usually
@@ -1822,16 +1951,25 @@ function windows_setsockopts(atom socket, integer level, integer optname, object
 end function
 
 --**
+-- Set options for a socket.
+-- 
+-- Parameters:
+--		# ##socket##: an atom, the socket id
+--		# ##level##: an integer, the option level
+--		# ##optname##: a string with the name of the requested option
+--		# ##val##: an object, the new value for the option
+--
+-- Returns:
+--   An ***integer**, 0 on success, -1 on error.
+--
+-- Comments:
 -- Primarily for use in multicast or more advanced socket
 -- applications.  Level is the option level, and option_name is the
 -- option for which values are being set.  Level is usually
 -- SOL_SOCKET (#FFFF).
 --
--- Returns:
---   0 on success, -1 on error.
---
--- See also:
---    get_socket_options
+-- See Also:
+--    [[:get_socket_options]]
 
 export function set_socket_options(atom socket, integer level, integer optname, object val)
 	ifdef WIN32 then
@@ -2065,15 +2203,21 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 end function
 
 --**
+-- Query DNS info.
+--
+-- Parameters:
+--		# ##dname##: a string, the name to look up
+--		# ##q_type##: an integer, the type of lookup requested
+--		# ##options##: an atom,
+--
+-- Returns:
+--     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
+--
+-- Comments:
 -- For standard A record lookups, getaddrinfo is preferred.
 -- But sometimes, more advanced DNS lookups are required.  Eventually,
 -- this routine will support all types of DNS lookups.  In Euphoria
 -- 4.0, only NS, MX, and A lookups are accepted.
---
--- Returns:
---     A sequence of sequences in the form
---     {{string ip_address, integer query_type, integer priority},...}, or
---     a negative integer on error.
 --
 -- Example 1:
 -- <eucode>
@@ -2087,8 +2231,8 @@ end function
 -- end if
 -- </eucode>
 --
--- See also:
---     getaddrinfo, gethostbyname, getmxrr, getnsrr
+-- See Also:
+--     [[:getaddrinfo]], [[:gethostbyname]], [[:getmxrr]], [[:getnsrr]]
 
 export function dnsquery(sequence dname, integer q_type, atom options)
 	ifdef WIN32 then
@@ -2105,21 +2249,23 @@ end function
 -------------------------------------------------------------------------------
 
 --**
--- Find a mail server for a given domain.  If none can be found,
+-- Find a mail server for a given domain. If none can be found,
 -- attempt a smart query by looking up common variations on
 -- domain_name.
 --
--- Returns:
---     A sequence of sequences in the form
---     {{string ip_address, integer query_type, integer priority},...}, or
---     a negative integer on error.
+-- Parameters:
+--		# ##dname##: a string, the name to look up
+--		# ##options##: an atom,
 --
--- See also:
---     dnsquery
+-- Returns:
+--     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
+--
+-- See Also:
+--     [[:dnsquery]]
 
 export function getmxrr(sequence dname, atom options)
 	object rtn
-	
+
 	-- Error 9003 = MS: RCODE_NAME_ERROR - Something's there, but it's not exact.
 	-- Error 9501 = No Data Found
 	
@@ -2140,17 +2286,19 @@ end function
 -------------------------------------------------------------------------------
 
 --**
--- Find a name server for a given domain.  If none can be found,
+-- Find a name server for a given domain. If none can be found,
 -- attempt a smart query by looking up common variations on
 -- domain_name.
 --
--- Returns:     
---   A sequence of sequences in the form
---   ##{{string ip_address, integer query_type, integer priority},...}##, 
---   or a negative integer on error.
+-- Parameters:
+--		# ##dname##: a string, the name to look up
+--		# ##options##: an atom,
 --
--- See also:
---   dnsquery
+-- Returns:
+--     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
+--
+-- See Also:
+--   [[:dnsquery]]
 
 export function getnsrr(sequence dname, atom options)
 	return dnsquery(dname,NS_T_NS,options)
@@ -2209,6 +2357,14 @@ function windows_gethostbyname(sequence name)
 end function
 
 --**
+-- Get host address, given its name.
+--
+-- Parameters:
+--		# ##name##: a string, the name of te host to look up.
+--
+-- Returns:
+--		???
+
 export function gethostbyname(sequence name)
 	ifdef WIN32 then
 		return windows_gethostbyname(name)
@@ -2354,10 +2510,16 @@ function windows_getaddrinfo(object node, object service, object hints)
 end function
 
 --**
--- Returns a sequence of sequences containing information about
--- a given server name and named service.
+-- Retrieve information about a given server name and named service.
 --
--- These can be accessed with export constants
+-- Parameters:
+-- 		# ##node##: an object, ???
+--		# ##service##: an object, ???
+--		# ##hints##: an object, currently not used
+--
+-- Returns:
+--		A **sequence** of sequences containing the requested information.
+-- The inner sequences have fields that can be accessed with export constants
 --
 -- * ADDR_FLAGS
 -- * ADDR_FAMILY
@@ -2365,6 +2527,7 @@ end function
 -- * ADDR_PROTOCOL
 -- * ADDR_ADDRESS
 --
+-- Comments:
 -- Different DNS servers may return conflicting information about a
 -- name, but getaddrinfo will only return the first.  Future
 -- versions will allow multiple entries to be returned, so this
@@ -2398,7 +2561,7 @@ end function
 -----------------------------------------------------------------------------------
 --URL-encoding
 -----------------------------------------------------------------------------------
---HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
+-- HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
 --   1. Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii 
 --      value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable 
 --      characters, and any others you want to encode-- there's no danger in encoding too many 
@@ -2419,6 +2582,12 @@ end function
 -- Converts all non-alphanumeric characters in a string to their
 -- percent-sign hexadecimal representation, or plus sign for
 -- spaces.
+--
+-- Parameters:
+--		# ##what##: the string to encode
+--
+-- Returns:
+-- 		A **sequence**, the encoded string.
 --
 -- Example 1:
 -- <eucode>
@@ -2457,16 +2626,23 @@ end function -- urlencode(sequence what)
 
 --**
 -- Retrieve either the whole sendheader sequence, or just a single
--- field.  Field can be either an HTTP_HEADER_xxx access constant,
+-- field. 
+--
+-- Parameters:
+--		# ##field##: an object indicating which part is being requested, see Comments section.
+--
+-- Returns:
+--		An **object**, either:
+-- * -1 if the field cannot be found, 
+-- * ##{{"label","delimiter","value"},...}## for the whole sendheader sequence
+-- * a three-element sequence in the form ##{"label","delimiter","value"}## when only a single field is selected.
+--
+-- Comments:
+-- ##field## can be either an HTTP_HEADER_xxx access constant,
 -- the number 0 to retrieve the whole sendheader sequence, or
 -- a string matching one of the header field labels.  The string is
 -- not case sensitive.
 --
--- Returns:     
--- -1 if the field cannot be found, ##{{"label","delimiter","value"},...}##
--- for the whole sendheader sequence, or a three-element sequence in
--- the form ##{"label","delimiter","value"}## when only a single field
--- is selected.
 
 export function get_sendheader(object field)
 	-- if field is 0, return the whole sequence.
@@ -2503,8 +2679,8 @@ end function
 -- is Opera (currently the most standards compliant).  Before setting
 -- any header option individually, programs must call this procedure.
 --
--- See also:
---     get_sendheader, set_sendheader, set_sendheader_useragent_msie
+-- See Also:
+--     [[:get_sendheader]], [[:set_sendheader]], [[:set_sendheader_useragent_msie]]
 
 export procedure set_sendheader_default()
 	-- sets some defaults
@@ -2541,8 +2717,14 @@ export procedure set_sendheader_default()
 end procedure
 
 --**
--- Use the header label string or HTTP_HEADER_xxx constant to set
--- the value of a header field.  If field is not one of the 21 
+-- Set an individual header field.
+--
+-- Parameters:
+--		# ##whatheader##: an object, either an explicit name string or a HTTP_HEADER_xxx constant
+--		# ##whatdata##: a string, the associated data
+--
+-- Comments:
+-- If the requested field is not one of the 21
 -- default header fields, the field MUST be set by string.  This will
 -- increase the length of the header overall.  
 --
@@ -2551,8 +2733,8 @@ end procedure
 -- set_sendheader("Referer","search.yahoo.com")
 -- </eucode>
 --
--- See also:
---     get_sendheader
+-- See Also:
+--     [[:get_sendheader]]
 
 export procedure set_sendheader(object whatheader, sequence whatdata)
 	if atom(whatheader) then
@@ -2576,6 +2758,9 @@ export procedure set_sendheader(object whatheader, sequence whatdata)
 end procedure -- setsendheaderline(sequence whatheader, sequence whatdata)
 
 --**
+-- Inform listener that user agent is Microsoft (R) Internet Explorer (TM).
+--
+-- Comments:
 -- This is a convenience procedure to tell a website that a Microsoft
 -- Internet Explorer (TM) browser is requesting data.  Because some
 -- websites format their response differently (or simply refuse data)
@@ -2625,8 +2810,11 @@ end function -- formatsendheader()
 --**
 -- Populates the internal sequence recvheader from the flat string header.
 --
--- Notes:
---     This must be called prior to calling get_recvheader().
+-- Parameters:
+--		# ##header##: a string, the header data
+--
+-- Comments:
+--     This must be called prior to calling [[:get_recvheader]]().
 
 export procedure parse_recvheader(sequence header)
 	sequence junk
@@ -2650,9 +2838,11 @@ end procedure
 
 --**
 -- Return the value of a named field in the received http header as
--- returned by the most recent call to get_http.  Field can be
--- 0 to return the whole header, a numerical index, or the string
--- of a field name (case insensitive).
+-- returned by the most recent call to [[:get_http]].
+--
+-- Parameters:
+--		# ##field##: an object, either a string holding a field name (case insensitive),
+-- 0 to return the whole header, or a numerical index.
 --
 -- Returns:	
 --     * -1 on error
@@ -2696,9 +2886,13 @@ end function
 --**
 -- Returns data from an http internet site.
 --
+-- Parameters:
+--		# ##inet_addr##: a sequence holding an address
+--		# ##hostname##: a string, the name for the host
+-- 		# ##file##: a file name to transmit
+--
 -- Returns:
---   * empty sequence on error
---   * 2-element sequence of ##{sequence header, sequence data}##.
+--   A **sequence**, empty sequence on error, of length 2 on success, like ##{sequence header, sequence data}##.
 
 export function get_http(sequence inet_addr, sequence hostname, sequence file)
 	
@@ -2760,15 +2954,20 @@ export function get_http(sequence inet_addr, sequence hostname, sequence file)
 end function
 
 --**
--- Works the same as get_url, but maintains an internal
+-- Works the same as [[:get_url]](), but maintains an internal
 -- state register based on cookies received. 
 --
--- Note: 
---   As of Euphoria 4.0, only the internal state is maintained. Future versions of this 
---   library will expand state functionality.
+-- Parameters:
+--		# ##inet_addr##: a sequence holding an address
+--		# ##hostname##: a string, the name for the host
+-- 		# ##file##: a file name to transmit
 --
 -- Returns:	
---   A sequence {header, body} on success, or an empty sequence on error.
+--   A **sequence** {header, body} on success, or an empty sequence on error.
+--
+-- Comments:
+--   As of Euphoria 4.0, only the internal state is maintained. Future versions of this 
+--   library will expand state functionality.
 --
 -- Example 1:
 -- <eucode>
@@ -2973,9 +3172,13 @@ end function
 -- Returns data from an http internet site.  Other common
 -- protocols will be added in future versions.
 --
--- Returns:
---    * empty sequence on error
---    * 2-element sequence of ##{sequence header, sequence data}##.
+-- Parameters:
+--		# ##inet_addr##: a sequence holding an address
+--		# ##hostname##: a string, the name for the host
+-- 		# ##file##: a file name to transmit
+--
+-- Returns:	
+--   A **sequence** {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:
 -- <eucode>
