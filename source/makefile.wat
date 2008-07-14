@@ -419,14 +419,14 @@ distclean : .SYMBOLIC
 #TODO make this smarter
 clean : .SYMBOLIC
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
-		exw.exe exwc.exe ecw.lib backendw.exe main-.h
+		ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q /S &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
 		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
 	    .\pcre\pcre_chartables.c 
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
-		exw.exe exwc.exe ec.exe ec.lib ecw.lib backendw.exe main-.h
+		ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
