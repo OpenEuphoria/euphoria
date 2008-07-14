@@ -488,24 +488,29 @@ global function arcsin(trig_range x)
 end function
 
 --**
--- Computes next integer equal or greater than the argument. This amounts to rounding it up to an integer.
+-- Computes next integer equal or greater than the argument. This means for
+-- integer arguments it has no effect, but for non-integers it rounds up to
+-- the next integer.
 --
 -- Parameters:
---		# ##value##: an object, each atom of which is being acted upon, no matter how deeply nested.
+--		# ##value##: an object, each atom is processed, no matter how deeply nested.
 --
 -- Returns:
---		An **object**, the same shape as ##value##. When ##value## is an atom, the returned value is an atom without a fractional part, the smallest one not less than ##value##.
+--		An **object**, the same shape as ##value##. Each atom in ##value## 
+-- is returned as an integer that is the smallest integer equal to or greater
+-- than the corresponding atom in ##value##.
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
---	##ceil##() is 1 more than [[:floor]]() for values with a fractional part, and is the same for values without a fractional part.
+--	##ceil(X)## is 1 more than ##floor(X)## for non-integers.
 --
 -- Example 1:
+-- <eucode>
 -- sequence nums
 -- nums = {8, -5, 3.14, 4.89, -7.62, -4.3}
 -- nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
---
+-- </eucode>
 -- See Also:
 --		[[:floor]], [[round]]
 global function ceil(object a)
@@ -516,10 +521,11 @@ end function
 -- Returns the absolute value of numbers.
 --
 -- Parameters:
---		# ##value##: an object, each atom of which will be acted upon, no matter how deeply nested.
+--		# ##value##: an object, each atom is processed, no matter how deeply nested.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is the same if not less than zero, and the opposite value otherwise.
+--		An **object** the same shape as ##value##. When ##value## is an atom,
+-- the result is the same if not less than zero, and the opposite value otherwise.
 --
 -- Comments:
 --   This function may be applied to an atom or to all elements of a sequence
@@ -545,7 +551,7 @@ global function abs(object a)
 	end if
 	for i = 1 to length(a) do
 		t = a[i]
-			if atom(t) then
+		if atom(t) then
 			if t < 0 then
 				a[i] = - t
 			end if
@@ -702,7 +708,7 @@ end function
 --   a = sum({10, 20, 30})
 --   -- a is 60
 --
---   a = sum({10.5, 11.2, 8.1})
+--   a = sum({10.5, {11.2} , 8.1})
 --   -- a is 29.8
 --   </eucode>
 -- See Also:
@@ -713,48 +719,16 @@ global function sum(object a)
 		return a
 	end if
 	b = 0
-	for i = length(a) to 1 by -1 do
-		b += sum(a[i])
+	for i = 1 to length(a) do
+		if atom(a[i]) then
+			b += a[i]
+		else
+			b += sum(a[i])
+		end if
 	end for
 	return b
 end function
 
---**
--- Compute the average of all the argument's elements
---
--- Parameters:
---		# ##values##: an object, all atoms of which will be added up. No nesting allowed.
---
--- Returns:
---		An **atom**, the average of all atoms in ##values##.
---
--- Comments:
--- This function may be applied to an atom or to a sequence of atoms. It differs from ##sum## in this respect.
---
--- Example 1:
--- <eucode>
--- a = average({8.5, 7.25, 10, 18.75})
--- -- a is 11.125
--- </eucode>
--- See Also:
---		[[:sum]]
-
-global function average(object a)
-	atom b
-	integer len
-	if atom(a) then
-		return a
-	end if
-
-	len = length(a)
-	b = 0
-
-	for i = 1 to len do
-		b += a[i]
-	end for
-
-	return b / len
-end function
 
 --**
 -- Computes the maximum value among all the argument's elements
@@ -985,7 +959,7 @@ end function
 -- -- s might be: 18, 19, 20, 21, 22, 23 or 24
 -- </eucode>
 -- See Also:
---	[[:rand]], [[:set_rand]]
+--	[[:rand]], [[:set_rand]], [[:rnd]]
 global function rand_range(integer lo, integer hi)
    lo -= 1
    hi -= lo
@@ -993,3 +967,40 @@ global function rand_range(integer lo, integer hi)
    return lo + rand(hi)
 end function
 
+--**
+-- Return a random floating point number in the range 0 to 1.
+--
+-- Parameters:
+--		None.
+--
+-- Returns:
+--		An **atom** randomly drawn between 0.0 and 1.0 inclusive.
+--
+-- Comments:
+--	 In order to get reproducible results from this function, you should
+-- call ##set_rand##() with a reproducible value prior to calling this.
+--
+-- Example 1:
+-- <eucode>
+-- set_rand(1001)
+-- s = rnd()
+--   -- s is 0.2634879318
+-- </eucode>
+-- See Also:
+--	[[:rand]], [[:set_rand]], [[:rand_range]]
+
+global function rnd()
+	atom a,b,r
+
+	 a = rand(#3FFFFFFF)
+	 if a = 1 then return 0 end if
+	 b = rand(#3FFFFFFF)
+	 if b = 1 then return 0 end if
+	 if a > b then
+	 	r = b / a
+	 else
+	 	r = a / b
+	 end if
+	 
+	 return r
+end function
