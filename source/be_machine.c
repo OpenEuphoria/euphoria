@@ -3192,6 +3192,15 @@ static object Dir(object x)
 	
 	if (last >= 1 && path[last-1] == '*' && path[last] == '.')
 		last--; // work around WATCOM bug when we have "*." at end
+#if defined(EDOS) 
+	else if ((path[last] == '*') && ((last == 0) || (path[last-1] != '.')))
+	/* watcom bug fix - turn dir("*") into dir("*.*") */
+	{
+		path[last+1] = '.';
+		path[last+2] = '*';
+		last += 2;
+	}
+#endif  
 	
 	if (path[last] != ':')
 		path[last+1] = 0; // delete any trailing backslash - Watcom has problems
