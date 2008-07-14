@@ -477,7 +477,7 @@ function NameSpace_declaration(symtab_index sym)
 	integer h
 	
 	DefinedYet(sym)
-	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF}) then
+	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PREDEF}) then
 		-- override the global or predefined symbol 
 		h = SymTab[sym][S_HASHVAL]
 		-- create a new entry at beginning of this hash chain 

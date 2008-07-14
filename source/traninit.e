@@ -258,9 +258,6 @@ procedure OpenCFiles()
 	emit_c_output = TRUE
 
 	c_puts("#include \"")
-	if not EUNIX then
-		c_puts(eudir & SLASH)
-	end if
 	c_puts("include" & SLASH & "euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 	
