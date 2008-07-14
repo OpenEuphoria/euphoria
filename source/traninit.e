@@ -152,7 +152,7 @@ global procedure transoptions()
 	end while
 	
 	-- The platform might have changed, so clean up in case of inconsistent options
-	if dll_option and not (TDOS) then
+	if dll_option and (TDOS) then
 		dll_option = FALSE
 		Warning( "cannot build a dll for DOS",translator_warning_flag )
 	end if
