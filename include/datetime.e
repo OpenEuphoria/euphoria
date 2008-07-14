@@ -254,131 +254,55 @@ export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 --
 -- Comments:
 -- A datetime type consists of a sequence of length 6 in the form 
--- ##{year, month, dat_of_month,hour, minute, second}##. Checks are made to guarantee 
--- those values are in range.
+-- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee 
+-- those values are in range. **Note:** All components must be integers except
+-- seconds, as those can also be floating point values.
 
 export type datetime(object o)
-	if not sequence(o) then
-		return 0
-	end if
+	if atom(o) then return 0 end if
 
-	if not (length(o) = 6) then
-		return 0
-	end if
+	if length(o) != 6 then return 0 end if
 
-	if not integer(o[YEAR]) then
-		return 0
-	end if
+	if not integer(o[YEAR]) then return 0 end if
 
-	if not integer(o[MONTH]) then
-		return 0
-	end if
+	if not integer(o[MONTH]) then return 0 end if
 
-	if not integer(o[HOUR]) then
-		return 0
-	end if
+	if not integer(o[DAY]) then return 0 end if
+
+	if not integer(o[HOUR]) then return 0 end if
 	
-	if not integer(o[MINUTE]) then
-		return 0
-	end if
+	if not integer(o[MINUTE]) then return 0 end if
 	
-	if not atom(o[SECOND]) then
-		return 0
-	end if
+	if not atom(o[SECOND]) then return 0 end if
 
-	if not (o[MONTH] >= 1) then
-		return 0
+	if not equal(o[1..3], {0,0,0}) then
+		-- Special case of all zeros is allowed; used when the data is a time only.
+		if o[MONTH] < 1 then return 0 end if
+	
+		if o[MONTH] > 12 then return 0 end if
+	
+		if o[DAY] < 1 then return 0 end if
+	
+		if o[DAY] > daysInMonth(o[YEAR],o[MONTH]) then return 0 end if
 	end if
+		
+	if o[HOUR] < 0 then return 0 end if
 
-	if not (o[DAY] >= 1) then
-		return 0
-	end if
+	if o[HOUR] > 23 then return 0 end if
 
-	if not (o[DAY] <= 31) then
-		return 0
-	end if
+	if o[MINUTE] < 0 then return 0 end if
 
-	if not (o[HOUR] >= 0) then
-		return 0
-	end if
+	if o[MINUTE] > 59 then return 0 end if
 
-	if not (o[HOUR] <= 23) then
-		return 0
-	end if
+	if o[SECOND] < 0 then return 0 end if
 
-	if not (o[MINUTE] >= 0) then
-		return 0
-	end if
-
-	if not (o[MINUTE] <= 59) then
-		return 0
-	end if
-
-	if not (o[SECOND] >= 0) then
-		return 0
-	end if
-
-	if not (o[SECOND] <= 60) then
-		return 0
-	end if
+	if o[SECOND] >= 60 then return 0 end if
 
 	return 1
 end type
 
 --****
 -- === Routines
-
---**
--- Create a new datetime value.
--- 
--- TODO: test default parameter usage
---
--- Parameters:
---     * year is the full year.
---     * month is the month (1-12).
---     * day is the day of the month (1-31).
---     * hour is the hour (0-23) (defaults to 0)
---     * minute is the minute (0-59) (defaults to 0)
---     * second is the second (0-59) (defaults to 0)
---
--- Example 1:
--- <eucode>
--- dt = new(2010, 1, 1, 0, 0, 0)
--- -- dt is Jan 1st, 2010
--- </eucode>
---
--- See Also:
---     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
-
-export function new(integer year=0, integer month=1, integer day=1, 
-	                integer hour=0, integer minute=0, atom second=0)
-	datetime d
-	d = {year, month, day, hour, minute, second}
-	return d
-end function
-
---**
--- Create a new datetime value with a date of zeros.
---
--- TODO: test
---
--- Paramters:
---     hour is the hour (0-23)
---     minute is the minute (0-59)
---     second is the second (0-59)
---
--- Example 1:
--- <eucode>
--- dt = new_time(10, 30, 55)
--- dt is 10:30:55 AM
--- </eucode>
---
--- See Also:
---     [[:from_date]], [[:from_unix]], [[:now]], [[:new]]
-
-export function new_time(integer hour, integer minute, integer second)
-	return new(0, 0, 0, hour, minute, second)
-end function
 
 --**
 -- Convert a sequence formatted according to the built-in date() function to a valid datetime 
@@ -420,6 +344,62 @@ end function
 
 export function now()
 	return from_date(date())
+end function
+
+--**
+-- Create a new datetime value.
+-- 
+-- TODO: test default parameter usage
+--
+-- Parameters:
+--     * year is the full year.
+--     * month is the month (1-12).
+--     * day is the day of the month (1-31).
+--     * hour is the hour (0-23) (defaults to 0)
+--     * minute is the minute (0-59) (defaults to 0)
+--     * second is the second (0-59) (defaults to 0)
+--
+-- Example 1:
+-- <eucode>
+-- dt = new(2010, 1, 1, 0, 0, 0)
+-- -- dt is Jan 1st, 2010
+-- </eucode>
+--
+-- See Also:
+--     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
+
+export function new(integer year=0, integer month=0, integer day=0, 
+	                integer hour=0, integer minute=0, atom second=0)
+	datetime d
+	d = {year, month, day, hour, minute, second}
+	if equal(d, {0,0,0,0,0,0}) then
+		return now()
+	else
+		return d
+	end if
+end function
+
+--**
+-- Create a new datetime value with a date of zeros.
+--
+-- TODO: test
+--
+-- Paramters:
+--     hour is the hour (0-23)
+--     minute is the minute (0-59)
+--     second is the second (0-59)
+--
+-- Example 1:
+-- <eucode>
+-- dt = new_time(10, 30, 55)
+-- dt is 10:30:55 AM
+-- </eucode>
+--
+-- See Also:
+--     [[:from_date]], [[:from_unix]], [[:now]], [[:new]]
+
+export function new_time(integer hour, integer minute, atom second)
+	return new(0, 0, 0, hour, minute, second)
 end function
 
 --**

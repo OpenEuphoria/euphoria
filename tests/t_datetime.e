@@ -4,6 +4,13 @@ include unittest.e
 sequence tmp
 datetime dt1, dt2
 
+dt1 = d:new()
+dt2 = d:now()
+test_equal("new() ", dt1, dt2)
+
+dt1 = d:new_time(18, 53, 14.5)
+test_equal("new_time() ", {0,0,0,18,53,14.5}, dt1)
+
 dt1 = d:new(2008, 4, 23, 15, 38, 00)
 dt2 = d:new(2008, 4, 13, 10, 20, 15)
 
