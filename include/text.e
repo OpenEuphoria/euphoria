@@ -10,15 +10,15 @@
 
 --**
 -- Signature:
--- global function sprintf(sequence st, object x)
+-- global function sprintf(sequence format, object values)
 --
 -- Description:
--- This is exactly the same as printf(), except that the output is returned as a sequence 
--- of characters, rather than being sent to a file or device. st is a format string, ##x##
--- is the value or sequence of values to be formatted. ##printf(fn, st, x)## is equivalent 
--- to ##puts(fn, sprintf(st, x))##.
+-- This is exactly the same as [[:printf]](), except that the output is returned as a sequence
+-- of characters, rather than being sent to a file or device. 
 --
 -- Comments:
+-- ##printf(fn, st, x)## is equivalent to ##puts(fn, sprintf(st, x))##.
+--
 -- Some typical uses of ##sprintf()## are:
 --
 -- # Converting numbers to strings.
@@ -35,19 +35,20 @@
 --   [[:printf]], [[:sprint]]
 
 --**
--- The representation of x as a string of characters is returned. This is exactly the same 
--- as print(fn, x), except that the output is returned as a sequence of characters, rather 
--- than being sent to a file or device. x can be any Euphoria object.
+-- Returns the representation of any Euphoria object as a string of characters.
 --
 -- Parameters:
 --   # ##x## - Any Euphoria object.
 --
 -- Returns:
---   ##sequence## - A text representation of ##x##.
+--   A **sequence**, a string representation of ##x##.
 --
 -- Comments:
--- The atoms contained within x will be displayed to a maximum of 10 significant digits, 
--- just as with print().
+-- This is exactly the same as ##print(fn, x)##, except that the output is returned as a sequence of characters, rather
+-- than being sent to a file or device. x can be any Euphoria object.
+--
+-- The atoms contained within ##x## will be displayed to a maximum of 10 significant digits,
+-- just as with [[:print]]().
 --
 -- Example 1:
 -- <eucode>
@@ -92,14 +93,14 @@ export function sprint(object x)
 end function
 
 --**
--- Trim any item in ##what## from the head (start) of ##str##
+-- Trim any item in a supplied list, starting from the head (start) of a sequence.
 --
 -- Parameters:
---   # ##str## - string to trim.
---   # ##what## - what to trim (defaults to " \t\r\n").
+--   # ##source##: the string to trim.
+--   # ##what##: the list of items to trim (defaults to " \t\r\n").
 --
 -- Returns:
---   ##sequence## - The trimmed version of ##str##
+--   A **sequence**, the trimmed version of ##source##.
 --
 -- Example 1:
 -- <eucode>
@@ -110,14 +111,14 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:trim]], [[:pad_head]]
 
-export function trim_head(sequence str, object what=" \t\r\n")
+export function trim_head(sequence source, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
 
-	for i = 1 to length(str) do
-		if find(str[i], what) = 0 then
-			return str[i..$]
+	for i = 1 to length(source) do
+		if find(source[i], what) = 0 then
+			return source[i..$]
 		end if
 	end for
 
@@ -125,14 +126,14 @@ export function trim_head(sequence str, object what=" \t\r\n")
 end function
 
 --**
--- Trim any item in ##what## from the end (tail) of ##str##
+-- Trim any item in a supplied list from the end (tail) of a sequence.
 --
 -- Parameters:
---   # ##str## - string to trim.
---   # ##what## - what to trim (defaults to " \t\r\n").
+--   # ##source##: the string to trim.
+--   # ##what##: the list of what to trim (defaults to " \t\r\n").
 --
 -- Returns:
---   ##sequence## - The trimmed version of ##str##
+--   A **sequence**, the trimmed version of ##source##
 --
 -- Example 1:
 -- <eucode>
@@ -143,14 +144,14 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:trim]], [[:pad_tail]]
 
-export function trim_tail(sequence str, object what=" \t\r\n")
+export function trim_tail(sequence source, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
 
-	for i = length(str) to 1 by -1 do
-		if find(str[i], what) = 0 then
-			return str[1..i]
+	for i = length(source) to 1 by -1 do
+		if find(source[i], what) = 0 then
+			return source[1..i]
 		end if
 	end for
 
@@ -158,14 +159,14 @@ export function trim_tail(sequence str, object what=" \t\r\n")
 end function
 
 --**
--- Trim any item in ##what## from the head (start) and tail (end) of ##str##
+-- Trim any item in a supplied list from both the head (start) and tail (end) of a sequence.
 --
 -- Parameters:
---   # ##str## - string to trim.
+--   # ##source## - string to trim.
 --   # ##what## - what to trim (defaults to " \t\r\n").
 --
 -- Returns:
---   ##sequence## - The trimmed version of ##str##
+--   A **sequence**, the trimmed version of ##source##
 --
 -- Example 1:
 -- <eucode>
@@ -176,8 +177,8 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:trim_tail]]
 
-export function trim(sequence str, object what=" \t\r\n")
-	return trim_tail(trim_head(str, what), what)
+export function trim(sequence source, object what=" \t\r\n")
+	return trim_tail(trim_head(source, what), what)
 end function
 
 constant TO_LOWER = 'a' - 'A'
@@ -188,12 +189,12 @@ constant TO_LOWER = 'a' - 'A'
 -- Parameters:
 --   # ##x## - Any Euphoria object.
 --
+-- Returns:
+--   A **sequence**, the lowercase version of ##x##
+--
 -- Comments:
 -- Alters characters in the 'A'..'Z' range. \\
 -- **WARNING**, This also effects floating point numbers in the range 65 to 90.
---
--- Returns:
---   ##sequence## - The lowercase version of ##x##
 --
 -- Example 1:
 -- <eucode>
@@ -221,12 +222,12 @@ end function
 -- Parameters:
 --   # ##x## - Any Euphoria object.
 --
+-- Returns:
+--   A **sequence**, the uppercase version of ##x##
+--
 -- Comments:
 -- Alters characters in the 'a'..'z' range. \\
 -- **WARNING**, This also effects floating point numbers in the range 97 to 122.
---
--- Returns:
---   ##sequence## - The uppercase version of ##x##
 --
 -- Example 1:
 -- <eucode>
@@ -250,7 +251,7 @@ end function
 
 
 --**
--- Converts a string containing Key/Value pairs into a set of 
+-- Converts a string containing Key/Value pairs into a set of
 -- sequences, one per K/V pair.
 --
 -- By default, pairs can be delimited by either a comma or semi-colon ",;" and
@@ -276,24 +277,30 @@ end function
 -- regardless of what it prefixes. See example #6.
 --
 -- Parameters:
--- # ##source## - A text sequence, containing the representation of the key/values.
--- # ##pair_delim## - An object containing a list of elements that delimit one
+-- # ##source##: a text sequence, containing the representation of the key/values.
+-- # ##pair_delim##: an object containing a list of elements that delimit one
 --                   key/value pair from the next. The defaults are semi-colon (;)
 --                   and comma (,).
--- # ##kv_delim## - An object containing a list of elements that delimit the
+-- # ##kv_delim##: an object containing a list of elements that delimit the
 --                key from its value. The defaults are colon (:) and equal (=).
--- # ##quotes## - An object containing a list of elements that can be used to
+-- # ##quotes##: an object containing a list of elements that can be used to
 --                enclose either keys or values that contain delimiters or
 --                whitespace. The defaults are double-quote ("), single-quote (')
 --                and back-quote (`)
--- # ##whitespace## - An object containing a list of elements that are regarded
+-- # ##whitespace##: an object containing a list of elements that are regarded
 --                as whitespace characters. The defaults are space, tab, new-line,
 --                and carriage-return.
--- # ##haskeys## An integer containing true or false. The default is true. When
--- ##true##, the ##kv_delimim## values are used to separate keys from values, but
+-- # ##haskeys##: an integer containing true or false. The default is true. When
+-- ##true##, the ##kv_delim## values are used to separate keys from values, but
 -- when ##false## it is assumed that each 'pair' is actually just a value. 
 --
 -- Returns:
+-- 		A **sequece** of pairs. Each pair is in the form {key, value}.
+--
+-- Commenst:
+-- String representatios of atoms are not converted, either in the key or value part, but returned as any regular string instead.
+--
+-- If ##haskeys## is ##true##, but a substring only has what appears to be a value, the key is synthesized as ##p[n]##, where ##n## is the number of the pair.
 --
 -- Example 1:
 -- <eucode>
@@ -364,7 +371,7 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 	end if		
 	if atom(kv_delim) then
 		kv_delim = {kv_delim}
-	end if		
+	end if
 	if atom(quotes) then
 		quotes = {quotes}
 	end if		
@@ -387,7 +394,7 @@ export function keyvalues(sequence source, object pair_delim = ";,",
 			end if
 			lPos +=1 
 		end while
-		
+
 		-- Get key. Ends at any of unquoted whitespace or unquoted delimiter
 		lKey = ""
 		lQuote = 0

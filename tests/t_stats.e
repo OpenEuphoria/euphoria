@@ -2,7 +2,7 @@ include unittest.e
 include stats.e
 include sort.e
 
-test_equal("small list", 4, small( {4,5,6,1,7,5,4,3,"text"}, 3 ))
+test_equal("small list", {4,1}, small( {4,5,6,1,7,5,4,3,"text"}, 3 ))
 test_equal("small 1", {}, small( {100}, 5 ))
 test_equal("small text", {}, small( {"text"},0 ))
 test_equal("small empty", {}, small( {},5 ))

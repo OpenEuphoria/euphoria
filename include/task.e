@@ -7,9 +7,17 @@
 -- === Routines
 
 --**
+-- Suspends a task for a short period, allowing other tasks to run in the meantime.
+--
+-- Parameters
+--		# [[:delaytime]]: an atom, the duration of the delay in seconds.
+--
+-- Comments:
+-- This procedure is similar to ##sleep##(), but allows for other tasks to run by yielding on a regular basis.
+--
+-- See Also:
+-- [[:sleep]]
 global procedure task_delay(atom delaytime)
--- akin to sleep, but allows other tasks to run while sleeping
---causes a delay while allowing other tasks to run.
 	atom t
 	t = time()
 

@@ -24,12 +24,21 @@ export constant TRUE = 1
 --
 
 --** 
--- Returns TRUE if pVal is a character or sequence of characters in 
--- the character set defined by pCharSet.
+-- Determine whether one or more characters are in a given character set.
 --
--- pCharset is either a simple sequence of characters eg. "qwertyuiop[]\\"
+-- Parameters:
+-- 		# ##pVal##: an object, either a character or a string
+--		# ##pCharSet##: a sequence, either a list of allowable characters, or a list of pairs representing allowable ranges.
+--
+-- Returns:
+--		An **integer**, 1 if all characters are allowed, else 0.
+--
+-- Comments:
+-- ##pCharset## is either a simple sequence of characters eg. "qwertyuiop[]\\"
 -- or a sequence of character pairs, which represent allowable ranges
 -- of characters. eg. Alphabetic is defined as {{'a','z'}, {'A', 'Z'}}
+--
+-- To add an isolated character to a character set which is defined using ranges, present it as a range of length 1, like in ##{%,%}##.
 --
 -- Example 1:
 -- <eucode>
@@ -81,6 +90,8 @@ end function
 
 sequence Defined_Sets
 
+--**
+-- Predefined chracter sets:
 export enum
 	CS_FIRST = 0,
 	CS_Consonant,
@@ -131,18 +142,22 @@ end procedure
 --** 
 -- Gets the definition for each of the defined character sets.
 --
--- The returned value is a sequence of pairs. The first element of each pair
+-- Returns:
+-- A **sequence of pairs. The first element of each pair
 -- is the character set id , eg. CS_Whitespace, and the second is the definition
 -- of that character set.
 --
--- This is the same format required for the set_charsets() routine.
+-- Comments:
+-- This is the same format required for the [[:set_charsets]]() routine.
 --
 -- Example 1:
 -- <eucode>
 -- sequence sets
 -- sets = get_charsets()
 -- </eucode>
-
+--
+-- See Also:
+-- [[:set_chracters]], [[:set_default_characters]]
 export function get_charsets()
 	sequence lResult
 	
@@ -157,18 +172,26 @@ end function
 --** 
 -- Sets the definition for one or more defined character sets.
 --
--- The argument must be a sequence of pairs. The first element of each pair
+-- Parameters:
+--		# ##pSets##: a sequence of zero or more character set definitions.
+--
+-- Comments:
+-- ##pSets## must be a sequence of pairs. The first element of each pair
 -- is the character set id , eg. CS_Whitespace, and the second is the definition
 -- of that character set.
 --
--- This is the same format returned by the get_charsets() routine.
+-- This is the same format returned by the [[:get_charsets]]() routine.
+--
+-- You cnnot create new character sets using this routine.
 --
 -- Example 1:
 -- <eucode>
 -- set_charsets({{CS_Whitespace, " \t"}})
 -- t_space('\n') --> FALSE
 -- </eucode>
-
+--
+-- See Also:
+-- [[:get_charsets]]
 export procedure set_charsets(sequence pSets)	
 	for i = 1 to length(pSets) do
 		if sequence(pSets[i]) and length(pSets[i]) = 2 then

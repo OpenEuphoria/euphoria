@@ -33,7 +33,7 @@
 --
 -- It is typical to provide as many test cases as would be required to give us
 -- confidence that the function is being truly exercised. This includes calling
--- it with typical values and edge-case or expectional values. It is also useful
+-- it with typical values and edge-case or exceptional values. It is also useful
 -- to test the function's error handling by calling it with bad parameters.
 --
 -- When a test fails, the framework displays a message, showing the test's name,
@@ -52,7 +52,8 @@ include pretty.e
 --
 -- Public Variables
 --
-
+--**
+-- Verbosity values
 export enum
 	TEST_QUIET = 0,
 	TEST_SHOW_FAILED_ONLY,
@@ -105,16 +106,58 @@ end procedure
 -- === Setup Routines
 
 --**
+-- Set the amount of information that is returned about passed and failed tests.
+--
+-- Parameters:
+-- # ##verbosity##: an atom which takes predefined values for verbosity levels.
+--
+-- Comments:
+-- The following values are allowable for ##verbosity##:
+-- * TEST_QUIET = 0,
+-- * TEST_SHOW_FAILED_ONLY = 1
+-- * TEST_SHOW_ALL = 2
+-- However, anything less than TEST_SHOW_FAILED_ONLY is treated as TEST_QUIET, and everything above TEST_SHOW_ALL is treated as TEST_SHOW_ALL.
+-- * At the lowest verbosity level, only the score is shown, ie the ratio passed tests/total tests.
+-- * At the medium level, in addition, failed tests display their name, the expected outcome and the outcome they got. This is the initial setting.
+-- * At the highest level of verbosity, each test is reported as passed or failed.
+--
+-- If a file crashes while it shouldn't, this event is reported no matter the verbosity level.
+--
+-- The command line switch ""-failed" causes verbosity to be set to medium at startup. The command line switch ""-all" causes verbosity to be set to high at startup.
+--
+-- See Also:
+-- [[:test_report]]
 export procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
 
 --**
+-- Reuest the test report to pause before exiting.
+--
+-- Parameters:
+--		# ##toWait##: an integer, zero not to wait, nonzero to wait.
+--
+-- Comments:
+-- Depending on the environment, the test results may be invisible if ##set_wait_on_summary(1)## was not called prior, as this is not the default. The command line switch "-wait" performs this call.
+-- See Also:
+-- [[:test_report]]
+
 export procedure set_wait_on_summary(integer toWait)
 	wait_on_summary = toWait
 end procedure
 
 --**
+-- Set behaviour on test failure, and return previous value.
+--
+-- Parameters:
+--		# ##pValue##: an integer, the new value for this setting.
+--
+-- Returns:
+-- 		An **integer**, the previous value for the setting.
+--
+-- Comments:
+-- By default, the tests go on even if a file crashed.
+
 export function set_test_abort(integer pValue)
 	integer lTmp
 	lTmp = abort_on_fail
@@ -126,10 +169,17 @@ end function
 -- === Reporting
 
 --**
+-- Output test report
+--
+-- Commments:
+-- The report components are described in the comments section for [[:set_verbosity]]. Everything prints on the standard error device.
+--
+-- See Also:
+-- [[:set_verbosity]]
 export procedure test_report()
 	atom score
 
-	if testsFailed > 0 or verbose = TEST_SHOW_ALL then
+	if testsFailed > 0 or verbose >= TEST_SHOW_ALL then
 		if testCount = 0 then
 			score = 100
 		else
@@ -148,7 +198,6 @@ export procedure test_report()
 	end if
 end procedure
 
---**
 procedure record_result(integer success, sequence name, object a, object b)
 	testCount += 1
 
@@ -164,21 +213,51 @@ end procedure
 --
 
 --**
-export procedure test_equal(sequence name, object a, object b)
+-- Records whether a test passes by comparing two values.
+--
+-- Parameters:
+--		# ##name##: a string, the name of the test
+--		# ##expected##: an object, the expected outcome of some action
+--		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
+--
+-- Comments:
+-- * For atoms, a fuzz of 1e-9 is used to assess equality.
+-- * For sequences, no such fuzz is implemented.
+-- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter is typically a function call, or a variable that was set by some prior action.
+--
+-- While ##expected## and ##outcome## are processedsymmetrically, they are not recorded symmetrically, so be careful to pass ##expected## before ##outcome## for better test failure reports.
+--
+-- See Also:
+-- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+export procedure test_equal(sequence name, object expected, object outcome)
 	integer success
-	if sequence(a) or sequence(b) then
-		success = equal(a,b)
+	if sequence(expected) or sequence(outcome) then
+		success = equal(expected,outcome)
 	else
-		if a > b then
-			success = ((a-b) < 1e-9)
+		if expected > outcome then
+			success = ((expected-outcome) < 1e-9)
 		else
-			success = ((b-a) < 1e-9)
+			success = ((outcome-expected) < 1e-9)
 		end if
 	end if
-	record_result(success, name, a, b)
+	record_result(success, name, expected, outcome)
 end procedure
 
 --**
+-- Records whether a test passes by comparing two values.
+--
+-- Parameters:
+--		# ##name##: a string, the name of the test
+--		# ##expected##: an object, the expected outcome of some action
+--		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
+--
+-- Comments:
+-- * For atoms, a fuzz of 1e-9 is used to assess equality.
+-- * For sequences, no such fuzz is implemented.
+-- A test is recorded as passed if equality does not hold between ##expected## and ##outcome##. The latter is typically a function call, or a variable that was set by some prior action.
+--
+-- See Also:
+-- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
 export procedure test_not_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
@@ -194,33 +273,68 @@ export procedure test_not_equal(sequence name, object a, object b)
 end procedure
 
 --**
-export procedure test_true(sequence name, object a)
+-- Records whether a test passes by comparing two values.
+--
+-- Parameters:
+--		# ##name##: a string, the name of the test
+--		# ##outcome##: an object, some actual value that should not be zero.
+--
+-- Comments:
+-- This assumes an expected value different from 0. No fuzz is applied when checking whether an atom is zero or not. Use [[:test_equal]]() instead in this case.
+--
+-- See Also:
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_false]], [[:test_pass]], [[test_fail]]
+export procedure test_true(sequence name, object outcome)
 	integer success
-	if sequence(a) then
+	if sequence(outcome) then
 		success = 0
 	else
-		success = (a != 0)
+		success = (outcome != 0)
 	end if
-	record_result(success, name, 1, a )
+	record_result(success, name, 1, outcome )
 end procedure
 
 --**
-export procedure test_false(sequence name, object a)
+-- Records whether a test passes by comparing two values.
+--
+-- Parameters:
+--		# ##name##: a string, the name of the test
+--		# ##outcome##: an object, some actual value that should be zero
+--
+-- Comments:
+-- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero or not. Use [[:test_equal]]() instead in this case.
+--
+-- See Also:
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[test_fail]]
+export procedure test_false(sequence name, object outcome)
 	integer success
-	if not integer(a) then
+	if not integer(outcome) then
 		success = 0
 	else
-		success = (a = 0)
+		success = (outcome = 0)
 	end if
-	record_result(success, name, 0, a)
+	record_result(success, name, 0, outcome)
 end procedure
 
 --**
+-- Records that a test failed.
+--
+-- Parameters:
+--		# ##name##: a string, the name of the test
+-- See Also:
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_pass]]
+
 export procedure test_fail(sequence name)
 	record_result(0, name, 1, 0)
 end procedure
 
 --**
+-- Records that a test passed.
+--
+-- Parameters:
+--		# ##name##: a string, the name of the test
+-- See Also:
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_fail]]
 export procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
