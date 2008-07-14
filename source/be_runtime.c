@@ -4688,7 +4688,7 @@ int wingetch()
 }
 #endif
 
-void key_gets(char *input_string)
+void key_gets(unsigned char *input_string)
 /* return input string from keyboard */
 /* lets us use any color to echo user input in graphics modes */
 {   
