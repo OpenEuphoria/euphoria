@@ -2008,14 +2008,19 @@ procedure Loop_statement()
 end procedure
 
 integer top_level_parser
+integer in_ifdef = 0
 procedure Ifdef_statement()
 	sequence option
-	integer matched, nested_count, has_matched,  parser_id, in_matched
+	integer matched, nested_count, has_matched,  parser_id, in_matched, ifdef_count
 	token tok
+	
+	in_ifdef += 1
 	matched = 0
 	nested_count = 0
 	has_matched = 0
 	in_matched = 0
+	ifdef_count = 0
+
 	if CurrentSub != TopLevelSub or length(if_labels) or length(loop_labels) then
 		parser_id = forward_Statement_list
 	else
@@ -2049,7 +2054,12 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
-					exit "top"
+					if ifdef_count then
+						ifdef_count -= 1
+						continue
+					else
+						exit "top"
+					end if
 				elsif nested_count and tok[T_ID] = IF then
 					nested_count -= 1
 				elsif in_matched then
@@ -2064,7 +2074,7 @@ procedure Ifdef_statement()
 				else
 					exit
 				end if
-			elsif tok[T_ID] = ELSE and nested_count = 0 then
+			elsif tok[T_ID] = ELSE and nested_count = 0  and ifdef_count = 0 then
 				No_new_entry = has_matched
 			    if has_matched then
 					in_matched = 0
@@ -2075,10 +2085,12 @@ procedure Ifdef_statement()
 					call_proc(parser_id, {})
 					tok_match(END)
 					tok_match(IFDEF)
-					return
+					exit "top"
 				end if
 			elsif tok[T_ID] = IF then
 				nested_count += 1
+			elsif tok[T_ID] = IFDEF then
+				ifdef_count += 1
 			elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("else",ThisLine,bp)) then
 				-- BOL token was nothing of value to us, just eat the rest of the line
 				read_line()
@@ -2086,6 +2098,7 @@ procedure Ifdef_statement()
 			end if
 		end while
 	end while
+	in_ifdef -= 1
     No_new_entry = 0
 end procedure
 
@@ -3147,6 +3160,14 @@ global procedure real_parser(integer nested)
 		elsif id = IFDEF then
 			StartSourceLine(TRUE)
 			Ifdef_statement()
+
+		elsif id = ELSE then
+			if in_ifdef = 0 then
+				CompileErr("else is allowed only inside if- or ifdef- blocks")
+			else
+				putback(tok)
+				return
+			end if
 
 		elsif id = CASE then
 			StartSourceLine(TRUE)
