@@ -107,6 +107,7 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
 	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\memory.obj &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
@@ -144,7 +145,7 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\filesys.obj
 
-	
+
 EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\main-0.obj &
@@ -152,7 +153,6 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
 	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
 	.\$(OBJDIR)\scanner.obj &
@@ -177,6 +177,7 @@ EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_callc.obj &
 	.\$(OBJDIR)\back\be_inline.obj &
 	.\$(OBJDIR)\back\be_machine.obj &
+	.\$(OBJDIR)\memory.obj &
 	.\$(OBJDIR)\back\be_pcre.obj &
 	.\$(OBJDIR)\back\be_rterror.obj &
 	.\$(OBJDIR)\back\be_syncolor.obj &
@@ -206,7 +207,6 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\0ackend.obj &
 	.\$(OBJDIR)\pathopen.obj &
@@ -226,7 +226,6 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\0ackend.obj &
 	.\$(OBJDIR)\pathopen.obj &
@@ -245,7 +244,6 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\int.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\c_out.obj &
 	.\$(OBJDIR)\symtab.obj &
 	.\$(OBJDIR)\symtab_0.obj &
@@ -284,7 +282,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
 	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\machine.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
 	.\$(OBJDIR)\scanner.obj &
@@ -754,11 +751,11 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\filesys.obj : .\$(OBJDIR)\filesys.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
+.\$(OBJDIR)\memory.obj : .\$(OBJDIR)\memory.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
 
 .\$(OBJDIR)\error.obj :  .MULTIPLE $(OBJDIR)\error.c
-	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
-
-.\$(OBJDIR)\machine.obj :  .MULTIPLE ./$(OBJDIR)/machine.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\symtab.obj :  .MULTIPLE ./$(OBJDIR)\symtab.c

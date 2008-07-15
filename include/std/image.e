@@ -12,6 +12,7 @@
 --include machine.e
 include convert.e
 include graphics.e
+include machine.e
 
 constant BMPFILEHDRSIZE = 14
 constant OLDHDRSIZE = 12, NEWHDRSIZE = 40
@@ -372,9 +373,9 @@ end type
 --		//DOS32//
 --
 -- Returns
---		An **integer**, the current page number displayed by the monitor.
+--		An **integer**, the current page number displayed bythe monitor.
 -- Comments: 
--- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how many pages are available in the current graphics mode.
+-- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how manypages are available in the current graphics mode.
 --
 -- The active and display pages are both 0 by default.
 --  
@@ -850,7 +851,7 @@ procedure putImage()
 end procedure
 
 --**
--- Get color intensities for the entire set of colors in the current 
+-- Get color intensities for the entire set of colors in the current
 -- graphics mode.
 --
 -- Platform:
@@ -864,7 +865,7 @@ end procedure
 -- This function might be used to get the palette values needed by [[:save_bitmap]](). Remember to multiply these values by 4 before calling save_bitmap(), since save_bitmap() expects values in the range 0 to 255.
 -- See Also:
 -- 		[[:video_config]], [[:palette]], [[:all_palette]], [[:read_bitmap]], [[:save_bitmap]], [[:save_screen]]
-
+ifdef DOS32 then
 global function get_all_palette()
 	integer mem, numColors
 	sequence vc, reg, colors
@@ -890,7 +891,7 @@ global function get_all_palette()
 		return {} -- unlikely
 	end if
 end function
-
+end ifdef
 procedure putColorTable(integer numColors, sequence pal)
 -- Write color table information to the .BMP file. 
 -- palette data is given as a sequence {{r,g,b},..,{r,g,b}}, where each
@@ -898,7 +899,7 @@ procedure putColorTable(integer numColors, sequence pal)
 
 	for i = 1 to numColors do
 		puts(fn, pal[i][3])     -- blue first in .BMP file
-		puts(fn, pal[i][2])     -- green second 
+		puts(fn, pal[i][2])     -- green second
 		puts(fn, pal[i][1])     -- red third
 		puts(fn, 0)             -- reserved, must be 0
 	end for
@@ -945,7 +946,7 @@ end procedure
 -- 
 -- See Also:
 -- 		[[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
-
+ifdef DOS32 then
 global function save_screen(region r, sequence file_name)
 	sequence vc
 	integer numColors
@@ -993,7 +994,7 @@ global function save_screen(region r, sequence file_name)
 	close(fn)
 	return error_code
 end function    
-
+end ifdef
 procedure putImage1(sequence image)
 -- Write image data packed according to the bitCount information, in the order
 -- last row ... first row. Data for each row is padded to a 4-byte boundary.
@@ -1028,7 +1029,7 @@ end procedure
 --
 -- Comments:
 --   This routine does the opposite of [[:read_bitmap]]().
--- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each color in the bitmap. The second element is a sequence of sequences of pcolors. The inner sequences must have the same length.
+-- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each color in the butmap. The second element is a sequence of sequences of pcolors. The inner sequences must have the same length.
 --
 -- The result will be one of the following codes: 
 --  <eucode>

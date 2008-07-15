@@ -3,6 +3,7 @@
 -- Store front-end data structures in memory
 -- Called from (a) interpreter front-end
 --          or (b) backend.ex (using different s.t. offsets)
+include machine.e
 include mode.e as mode
 include intinit.e
 procedure InitBackEnd(integer x)
