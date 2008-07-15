@@ -8,7 +8,8 @@
 
 include get.e
 include primes.e
-include machine.e
+--include machine.e
+include convert.e
 include math.e
 include stats.e as stats
 include text.e

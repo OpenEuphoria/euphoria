@@ -9,7 +9,8 @@
 -- === Constants
 --
 
-include machine.e
+--include machine.e
+include convert.e
 include graphics.e
 
 constant BMPFILEHDRSIZE = 14

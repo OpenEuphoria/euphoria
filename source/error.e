@@ -3,7 +3,6 @@
 -- Compile-time Error Handling
 
 include io.e
-include machine.e
 include global.e
 include reswords.e
 

@@ -206,7 +206,8 @@ save_first_rand = rand(1000000000)
 InputIL() -- read Euphoria data structures from compressed IL 
 		  -- in our own .exe file, or from a .il file, and descramble them
 
-set_rand(save_first_rand)
+constant M_SET_RAND = 35
+machine_proc(M_SET_RAND,save_first_rand)
 
 BackEnd(il_file)-- convert Euphoria data structures to memory and call C back-end
 

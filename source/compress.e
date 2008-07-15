@@ -1,7 +1,7 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- compression / decompression
-include machine.e
+include convert.e
 
 global constant IL_MAGIC = 79, -- indicates an IL file
 			  IL_VERSION = -- 10 (2.5 alpha) IL version number
@@ -170,8 +170,9 @@ global procedure fcompress(integer f, object x)
 	end if
 end procedure
 
+constant M_ALLOC = 16
 atom mem0, mem1, mem2, mem3
-mem0 = allocate(4)
+mem0 = machine_func(M_ALLOC,4)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3

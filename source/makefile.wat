@@ -148,6 +148,7 @@ EU_INTERPRETER_OBJECTS =  &
 EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\main-0.obj &
+	.\$(OBJDIR)\convert.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
 	.\$(OBJDIR)\error.obj &
@@ -213,6 +214,7 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
+        .\$(OBJDIR)\convert.obj &
         .\$(OBJDIR)\compress.obj &
         .\$(OBJDIR)\dll.obj &
         .\$(OBJDIR)\io.obj &
@@ -232,6 +234,7 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
+        .\$(OBJDIR)\convert.obj &
         .\$(OBJDIR)\compress.obj &
         .\$(OBJDIR)\io.obj &
         .\$(OBJDIR)\filesys.obj
@@ -258,6 +261,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\parser_1.obj &
 	.\$(OBJDIR)\parser_2.obj &
 	.\$(OBJDIR)\parser_3.obj &
+	.\$(OBJDIR)\convert.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\tranplat.obj &
@@ -316,6 +320,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\convert.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
@@ -735,6 +740,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\pathopen.obj :  .MULTIPLE $(OBJDIR)\pathopen.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\convert.obj :  .MULTIPLE $(OBJDIR)\convert.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\init-.obj :  .MULTIPLE ./$(OBJDIR)\init-.c 

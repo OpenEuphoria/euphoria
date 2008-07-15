@@ -143,6 +143,51 @@ end type
 -- See Als:
 -- 		[[:set_rand]], [[:ceil]]
 
+constant M_SET_RAND = 35
+--==== Miscellaneous
+--**
+-- Reset the random number generator.
+--
+-- Parameters:
+-- 		# ##seed##, an integer, which the generator uses to initialise itself
+--
+-- Comments:
+-- 		Starting from a ##seed##, the values returned by rand() are
+-- reproducible. This is useful for demos and stress tests based on random
+-- data. Normally the numbers returned by the rand() function are totally
+-- unpredictable, and will be different each time you run your program.
+-- Sometimes however you may wish to repeat the same series of numbers,
+-- perhaps because you are trying to debug your program, or maybe you want
+-- the ability to generate the same output (e.g. a random picture) for your
+-- user upon request.  
+--
+-- Example 1:
+-- <eucode>
+--  sequence s, t
+-- s = repeat(0, 3)
+-- t = s
+-- 
+-- set_rand(12345)
+-- s[1] = rand(10)
+-- s[2] = rand(100)
+-- s[3] = rand(1000)
+-- 
+-- set_rand(12345)  -- same value for set_rand()
+-- t[1] = rand(10)  -- same arguments to rand() as before
+-- t[2] = rand(100)
+-- t[3] = rand(1000)
+-- -- at this point s and t will be identical
+--  </eucode>
+-- 
+-- See Also:
+--		[[:rand]]
+
+global procedure set_rand(integer seed)
+-- A given value of seed will cause the same series of
+-- random numbers to be generated from the rand() function
+	machine_proc(M_SET_RAND, seed)
+end procedure
+
 --**
 -- Signature:
 --   global function remainder(object dividend, object divisor)

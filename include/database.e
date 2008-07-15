@@ -7,6 +7,7 @@
 -- <<LEVELTOC depth=2>>
 
 include error.e
+include convert.e
 if not length(date()) then crash("") end if
 include io.e
 include filesys.e

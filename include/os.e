@@ -390,6 +390,59 @@ global procedure sleep(atom t)
 	end if
 end procedure
 
+constant 		 M_TICK_RATE = 38
+--**
+-- Specify the number of clock-tick interrupts per second.
+--
+-- Parameters:
+-- 		# ##rate##, an atom, the number of ticks by seconds.
+--
+-- Cimments:
+-- This setting determines the precision of the time() library routine.
+-- It also affects the sampling rate for time profiling.
+--
+-- ##tick_rate## is efective under //DOS// only, and is a no-op elsewhere.
+-- Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//,
+-- it is always 100 ticks per second.
+--
+-- ##tick_rate##() can increase the setting above the default value. As a
+-- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
+--
+-- If a program runs in a DOS window with a tick rate other than 18.2, the
+-- time() function will not advance unless the window is the active window. 
+--
+-- With a tick rate other than 18.2, the time() function on DOS takes about
+-- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
+-- time() normally executes very quickly.
+-- 
+-- See Also:
+--		[[:Debugging and profiling]]
+
+-- While ex.exe is running, the system will maintain the correct time of day.
+-- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
+-- while the tick rate is high, you (or your user) may need to reboot the
+-- machine to restore the proper rate. If you don't, the system time may
+-- advance too quickly. This problem does not occur on Windows 95/98/NT,
+-- only on DOS or Windows 3.1. You will always get back the correct time
+-- of day from the battery-operated clock in your system when you boot up
+-- again. 
+--  
+-- Example 1:
+-- <eucode>
+--  tick_rate(100)
+-- -- time() will now advance in steps of .01 seconds
+-- -- instead of the usual .055 seconds
+-- </eucode>
+-- 
+-- See Also: 
+--        [[:time]], [[:time profiling]]
+
+global procedure tick_rate(atom rate)
+-- This determines the precision of the time() library routine, 
+-- and also the sampling rate for time profiling.
+	machine_proc(M_TICK_RATE, rate)
+end procedure
+
 constant M_INSTANCE = 55
 
 --**
