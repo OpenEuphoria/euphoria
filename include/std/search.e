@@ -14,7 +14,7 @@ include error.e
 
 --**
 -- Signature:
---   global function compare(object compared, object reference)
+--   export function compare(object compared, object reference)
 --
 -- Description:
 --     Compare two items returning less than, equal or greater than.
@@ -65,7 +65,7 @@ include error.e
 
 --**
 -- Signature:
---     global function equal(object left, object right)
+--     export function equal(object left, object right)
 --
 -- Description:
 --     Compare two Euphoria objects to see if they are the same. 
@@ -102,7 +102,7 @@ include error.e
 
 --**
 -- Signature:
---     global function find(object needle, sequence haystack)
+--     export function find(object needle, sequence haystack)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack".
@@ -132,7 +132,7 @@ include error.e
 
 --**
 -- Signature:
---     global function find_from(object needle, object haystack, integer start)
+--     export function find_from(object needle, object haystack, integer start)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack". Search starts at a specified index.
@@ -167,7 +167,7 @@ include error.e
 
 --**
 -- Signature:
---     global function match(sequence needle, sequence haystack)
+--     export function match(sequence needle, sequence haystack)
 --
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack".
@@ -190,7 +190,7 @@ include error.e
 
 --**
 -- Signature:
---     global function match_from(sequence needle, sequence haystack, integer start)
+--     export function match_from(sequence needle, sequence haystack, integer start)
 --
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack", starting from some index.
@@ -245,7 +245,7 @@ include error.e
 --
 -- See Also:
 --		[[:find]], [[:find_from]]
-global function find_any(sequence needles, sequence haystack, integer start=1)
+export function find_any(sequence needles, sequence haystack, integer start=1)
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
 			return i
@@ -275,7 +275,7 @@ end function
 -- See Also:
 --     [[:find]], [[:match]], [[:match_all]]
 
-global function find_all(object needle, sequence haystack, integer start=1)
+export function find_all(object needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
 	while start > 0 entry do
@@ -308,7 +308,7 @@ end function
 -- See Also:
 --     [[:match]], [[:find]], [[:find_all]]
 
-global function match_all(sequence needle, sequence haystack, integer start=1)
+export function match_all(sequence needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
 	while start > 0 entry do
@@ -351,7 +351,7 @@ end function
 -- See Also:
 --   [[:find]], [[:rmatch]]
 
-global function rfind(object needle, sequence haystack, integer start=length(haystack))
+export function rfind(object needle, sequence haystack, integer start=length(haystack))
 	integer len = length(haystack)
 
 	if (start > len) or (len + start < 1) then
@@ -394,7 +394,7 @@ end function
 -- See Also:
 --     [[:rfind]], [[:match]]
 
-global function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
+export function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
 	integer len, lenx
 
 	len = length(haystack)
@@ -456,7 +456,7 @@ end function
 -- </eucode>
 -- See Also:
 --		{{:find]], [[:replace]]
-global function find_replace(object needle, sequence haystack, object replacement, 
+export function find_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
 	integer posn, needle_len, replacement_len
 	
@@ -513,7 +513,7 @@ end function
 -- See Also:
 -- [[:find]], [[:db_find_key]]
 
-global function binary_search(object needle, sequence haystack, integer startpoint = 1, 
+export function binary_search(object needle, sequence haystack, integer startpoint = 1, 
 		integer endpoint = 0)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	

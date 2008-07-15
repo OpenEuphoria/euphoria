@@ -12,8 +12,13 @@ include math.e
 include text.e
 
 ifdef !DOS32 then
-include dll.e
+	include dll.e
 end ifdef
+
+ifdef DOS32 then
+	include dos_base.e
+end ifdef
+
 include machine.e
 
 constant M_SLEEP = 64, M_SET_ENV = 73, M_UNSET_ENV = 74
@@ -40,7 +45,7 @@ constant M_SLEEP = 64, M_SET_ENV = 73, M_UNSET_ENV = 74
 -- the [[:ifdef statement]]. It is both more accurate and faster.
 --
 
-global constant
+export constant
 	DOS32	= 1, -- ex.exe
 	WIN32	= 2, -- exw.exe
 	LINUX	= 3, -- exu
@@ -382,7 +387,7 @@ end function
 -- See Also:
 --     [[:task_schedule]], [[:tick_rate]], [[:task_yield]]
 
-global procedure sleep(atom t)
+export procedure sleep(atom t)
 -- go to sleep for t seconds
 -- allowing (on WIN32 and Linux) other processes to run
 	if t >= 0 then
@@ -437,7 +442,7 @@ constant 		 M_TICK_RATE = 38
 -- See Also: 
 --        [[:time]], [[:time profiling]]
 
-global procedure tick_rate(atom rate)
+export procedure tick_rate(atom rate)
 -- This determines the precision of the time() library routine, 
 -- and also the sampling rate for time profiling.
 	machine_proc(M_TICK_RATE, rate)
@@ -569,11 +574,12 @@ export function uname()
 			return ""
 		end if
 	elsifdef DOS32 then
-    sequence reg_list
-    reg_list = repeat(0,10)
-    reg_list[REG_AX] = #3000
-    reg_list = dos_interrupt(#21,reg_list)
-		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) + floor(reg_list[REG_AX]/256)/100)}
+    	sequence reg_list
+	    reg_list = repeat(0,10)
+    	reg_list[REG_AX] = #3000
+	    reg_list = dos_interrupt(#21,reg_list)
+		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) + 
+			floor(reg_list[REG_AX]/256)/100)}
 	else
 		return {"UNKNOWN"} --TODO
 	end ifdef

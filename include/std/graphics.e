@@ -63,7 +63,7 @@
 -- * BLINKING
 
 -- COLOR values -- for characters and pixels
-global constant
+export constant
 		 BLACK = 0,  -- in graphics modes this is "transparent"
 		 GREEN = 2,
 		 MAGENTA = 5,
@@ -73,7 +73,7 @@ global constant
 		 BRIGHT_MAGENTA = 13,
 		 BRIGHT_WHITE = 15
 		 
-global integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
+export integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
 
 ifdef UNIX then
 	BLUE  = 4
@@ -95,7 +95,7 @@ else
 	YELLOW = 14
 end ifdef
 
-global constant BLINKING = 16  -- add to color to get blinking text
+export constant BLINKING = 16  -- add to color to get blinking text
 
 -- machine() commands
 constant M_SOUND          = 1,
@@ -144,7 +144,7 @@ end type
 
 --**
 -- Signature:
--- global procedure position(integer row, integer column)
+-- export procedure position(integer row, integer column)
 --
 -- Platform:
 -- 	DOS32
@@ -199,7 +199,7 @@ end type
 -- See Also:
 -- 		[[:polygon]]
 
-global procedure draw_line(color c, point_sequence xyarray)
+export procedure draw_line(color c, point_sequence xyarray)
 	machine_proc(M_LINE, {c, 0, xyarray})
 end procedure
 
@@ -221,7 +221,7 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:draw_line]]
-global procedure polygon(color c, boolean fill, point_sequence xyarray)
+export procedure polygon(color c, boolean fill, point_sequence xyarray)
 	machine_proc(M_POLYGON, {c, fill, xyarray})
 end procedure
 
@@ -253,7 +253,7 @@ end procedure
 -- --        {10, 10}, {10, 20}, {20, 20}, {20, 10}.
 -- </eucode>
 
-global procedure ellipse(color c, boolean fill, point p1, point p2)
+export procedure ellipse(color c, boolean fill, point p1, point p2)
 	machine_proc(M_ELLIPSE, {c, fill, p1, p2})
 end procedure
 
@@ -295,11 +295,11 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:video_config]]
-global function graphics_mode(mode m)
+export function graphics_mode(mode m)
    return machine_func(M_GRAPHICS_MODE, m)
 end function
 
-global enum 
+export enum 
 	VC_COLOR,
 	VC_MODE,
 	VC_LINES,
@@ -326,7 +326,7 @@ global enum
 -- Comments:
 -- An enum is available for convenient access to the returned configuration data:
 -- <eucode>
--- global constant 
+-- export constant 
 --     VC_COLOR   = 1,
 --     VC_MODE    = 2,
 --     VC_LINES   = 3,
@@ -352,12 +352,12 @@ global enum
 -- </eucode>
 -- See Also:
 -- 		[[:graphics_mode]]
-global function video_config()
+export function video_config()
 	return machine_func(M_VIDEO_CONFIG, 0)
 end function
 
 -- cursor styles:
-global constant 
+export constant 
 	NO_CURSOR              = #2000,
 	UNDERLINE_CURSOR       = #0607,
 	THICK_UNDERLINE_CURSOR = #0507,
@@ -376,7 +376,7 @@ global constant
 -- Predefined cursors are:
 --	
 -- <eucode>
--- global constant 
+-- export constant 
 --     NO_CURSOR              = #2000,
 --     UNDERLINE_CURSOR       = #0607,
 --     THICK_UNDERLINE_CURSOR = #0507,
@@ -398,7 +398,7 @@ global constant
 -- See Also:
 --   [[:graphics_mode]], [[:text_rows]]
 
-global procedure cursor(integer style)
+export procedure cursor(integer style)
 	machine_proc(M_CURSOR, style)
 end procedure
 
@@ -425,7 +425,7 @@ end procedure
 -- See Also:
 -- 		[[:position]]
 
-global function get_position()
+export function get_position()
 	return machine_func(M_GET_POSITION, 0)
 end function
 
@@ -447,7 +447,7 @@ end function
 -- See Also:
 --   [[:graphics_mode]], [[:video_fonfig]]
 
-global function text_rows(positive_int rows)
+export function text_rows(positive_int rows)
 	return machine_func(M_TEXTROWS, rows)
 end function
 
@@ -475,7 +475,7 @@ end function
 -- See Also:
 --   [[:puts]], [[:position]]
 
-global procedure wrap(boolean on)
+export procedure wrap(boolean on)
 	machine_proc(M_WRAP, on)
 end procedure
 
@@ -502,7 +502,7 @@ end procedure
 -- See Also:
 --   [[:clear_screen]], [[:text_rows]]
 
-global procedure scroll(integer amount, 
+export procedure scroll(integer amount, 
 						positive_int top_line, 
 						positive_int bottom_line)
 	machine_proc(M_SCROLL, {amount, top_line, bottom_line})
@@ -530,7 +530,7 @@ end procedure
 -- See Also:
 --   [[:bk_color]] , [[:clear_screen]]
 
-global procedure text_color(color c)
+export procedure text_color(color c)
 -- set the foreground text color to c - text or graphics modes
 -- add 16 to get blinking
 	machine_proc(M_SET_T_COLOR, c)
@@ -567,7 +567,7 @@ end procedure
 -- See Also:
 --   [[:text_color]], [[:palette]]
 
-global procedure bk_color(color c)
+export procedure bk_color(color c)
 -- set the background color to c - text or graphics modes
 	machine_proc(M_SET_B_COLOR, c)
 end procedure
@@ -619,7 +619,7 @@ end type
 -- See Also:
 --   [[:all_palette]]
 
-global function palette(color c, mixture s)
+export function palette(color c, mixture s)
 -- choose a new mix of {red, green, blue} to be shown on the screen for
 -- color number c. Returns previous mixture as {red, green, blue}.
 	return machine_func(M_PALETTE, {c, s})
@@ -646,7 +646,7 @@ end function
 -- Example 1:
 --   [[../demo/dos32/bitmap.ex]]
 
-global procedure all_palette(sequence s)
+export procedure all_palette(sequence s)
 -- s is a sequence of the form: {{r,g,b},{r,g,b}, ...{r,g,b}}
 -- that specifies new color intensities for the entire set of
 -- colors in the current graphics mode.  
@@ -680,7 +680,7 @@ end type
 -- sound(1000) -- starts a fairly high pitched sound
 -- </eucode>
 
-global procedure sound(frequency f)
+export procedure sound(frequency f)
 -- turn on speaker at frequency f
 -- turn off speaker if f is 0
 	machine_proc(M_SOUND, f)

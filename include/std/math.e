@@ -17,7 +17,7 @@
 -- -- x is 2.718281828459045235
 -- </eucode>
 
-global constant E = 2.718281828459045235
+export constant E = 2.718281828459045235
 
 --**
 -- PI 3.141592653589793238
@@ -31,7 +31,7 @@ global constant E = 2.718281828459045235
 -- -- x is 3.141592653589793238
 -- </eucode>
 
-global constant PI = 3.141592653589793238
+export constant PI = 3.141592653589793238
 
 constant
 	PI_HALF  =  PI / 2.0,          -- PI / 2
@@ -61,7 +61,7 @@ end type
 
 --**
 -- Signature:
--- global function arctan(object tangent)
+-- export function arctan(object tangent)
 --
 -- Description:
 --   Return an angle with given tangent.
@@ -89,7 +89,7 @@ end type
 
 --**
 -- Signature:
--- global function tan(object angle)
+-- export function tan(object angle)
 --
 -- Description:
 --   Return the tangent of an angle, or a sequence of angles.
@@ -116,7 +116,7 @@ end type
 
 --**
 -- Signature:
--- global function rand(object maximum)
+-- export function rand(object maximum)
 --
 -- Description:
 --   Return a random positive integer.
@@ -182,7 +182,7 @@ constant M_SET_RAND = 35
 -- See Also:
 --		[[:rand]]
 
-global procedure set_rand(integer seed)
+export procedure set_rand(integer seed)
 -- A given value of seed will cause the same series of
 -- random numbers to be generated from the rand() function
 	machine_proc(M_SET_RAND, seed)
@@ -190,7 +190,7 @@ end procedure
 
 --**
 -- Signature:
---   global function remainder(object dividend, object divisor)
+--   export function remainder(object dividend, object divisor)
 --
 -- Description:
 -- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
@@ -277,13 +277,13 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
-global function mod(object x, object y)
+export function mod(object x, object y)
 	return x - y * floor(x / y)
 end function
 
 --**
 -- Signature:
---   global function cos(object angle)
+--   export function cos(object angle)
 --
 -- Description:
 -- Return the cosine of an angle expressed in radians
@@ -310,7 +310,7 @@ end function
 
 --**
 -- Signature:
--- global function log(object value)
+-- export function log(object value)
 --
 -- Description:
 -- Return the natural logarithm of a positive number.
@@ -341,7 +341,7 @@ end function
 --
 --**
 -- Signature:
--- global function power(object base, object exponent)
+-- export function power(object base, object exponent)
 --
 -- Description:
 -- Raise a base value to some power.
@@ -395,7 +395,7 @@ end function
 --
 --**
 -- Signature:
--- global function floor(object value)
+-- export function floor(object value)
 --
 -- Description:
 -- Return the greatest integer less than or equal to some value. This amount to rounding down to an integer.
@@ -417,7 +417,7 @@ end function
 
 --**
 -- Signature:
--- global function sqrt(object value)
+-- export function sqrt(object value)
 --
 -- Description:
 -- Calculate the square root of a number.
@@ -445,7 +445,7 @@ end function
 
 --**
 -- Signature:
--- global function sin(object angle)
+-- export function sin(object angle)
 --
 -- Description:
 -- Return the sine of an angle expressed in radians
@@ -496,7 +496,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:cos]], [[:PI]], [[:arctan]]
-global function arccos(trig_range x)
+export function arccos(trig_range x)
 --  returns angle in radians
 	return PI_HALF - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
@@ -527,7 +527,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:arccos]], [[:arccos]], [[:sin]]
-global function arcsin(trig_range x)
+export function arcsin(trig_range x)
 --  returns angle in radians
 	return 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
@@ -558,7 +558,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:floor]], [[round]]
-global function ceil(object a)
+export function ceil(object a)
 	return -floor(-a)
 end function
 
@@ -585,7 +585,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:sign]]
-global function abs(object a)
+export function abs(object a)
 	object t
 	if atom(a) then
 		if a >= 0 then
@@ -629,7 +629,7 @@ end function
 --
 -- See Also:
 --	[[:floor]], [[:ceil]]
-global function round(object a, object precision=1)
+export function round(object a, object precision=1)
 	integer len
 	sequence s
 	object t, u
@@ -710,7 +710,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:compare]]
-global function sign(object a)
+export function sign(object a)
 	object t
 	if atom(a) then
 		if a > 0 then
@@ -758,7 +758,7 @@ end function
 --   </eucode>
 -- See Also:
 --		[[:can_add]]
-global function sum(object a)
+export function sum(object a)
 	atom b
 	if atom(a) then
 		return a
@@ -794,7 +794,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:min]], [[:compare]], [[:flatten]]
-global function max(object a)
+export function max(object a)
 	atom b, c
 	if atom(a) then
 		return a
@@ -827,7 +827,7 @@ end function
 -- -- a is 3
 -- </eucode>
 
-global function min(object a)
+export function min(object a)
 	atom b, c
 	if atom(a) then
 			return a
@@ -863,7 +863,7 @@ end function
 -- </eucode>
 -- See Also:
 --		{{:deg2rad]]
-global function rad2deg (object x)
+export function rad2deg (object x)
    return x * RADIANS_TO_DEGREES
 end function
 
@@ -888,7 +888,7 @@ end function
 -- </eucode>
 -- See Also:
 -- [[:rad2deg]]
-global function deg2rad (object x)
+export function deg2rad (object x)
    return x * DEGREES_TO_RADIANS
 end function
 
@@ -917,7 +917,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:log]]
-global function log10(object x1)
+export function log10(object x1)
 	return log(x1) * INVLOG10
 end function
 
@@ -942,7 +942,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:log]]
-global function exp(atom x)
+export function exp(atom x)
 	return power(E, x)
 end function
 
@@ -963,7 +963,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:arctan]]
-global function atan2(atom y, atom x)
+export function atan2(atom y, atom x)
 	if x > 0 then
 		return arctan(y/x)
 	elsif x < 0 then
@@ -1005,7 +1005,7 @@ end function
 -- </eucode>
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rnd]]
-global function rand_range(integer lo, integer hi)
+export function rand_range(integer lo, integer hi)
    lo -= 1
    hi -= lo
 
@@ -1034,7 +1034,7 @@ end function
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rand_range]]
 
-global function rnd()
+export function rnd()
 	atom a,b,r
 
 	 a = rand(#3FFFFFFF)

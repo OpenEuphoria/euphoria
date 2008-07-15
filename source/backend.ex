@@ -10,6 +10,7 @@ set_mode("backend", 0 )
 include std/machine.e
 include std/wildcard.e
 include std/os.e
+include std/io.e
 include std/sequence.e
 include std/text.e
 

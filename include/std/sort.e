@@ -40,7 +40,7 @@ include text.e -- upper/lower
 -- See Also:
 --     [[:compare]], [[:sort_reverse]], [[:sort_user]], [[:custom_sort]]
 
-global function sort(sequence x)
+export function sort(sequence x)
 	integer gap, j, first, last
 	object tempi, tempj
 
@@ -123,7 +123,7 @@ end function
 -- See Also:
 --   [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
 
-global function custom_sort(integer custom_compare, sequence x)
+export function custom_sort(integer custom_compare, sequence x)
 	integer gap, j, first, last
 	object tempi, tempj
 
@@ -188,7 +188,7 @@ end function
 -- See Also:
 --	 [[:compare]], [[:sort]], [[:sort_user]], [[:custom_sort]]
 
-global function sort_reverse(sequence x)
+export function sort_reverse(sequence x)
 	return custom_sort(routine_id("reverse_comp"), x)
 end function
 

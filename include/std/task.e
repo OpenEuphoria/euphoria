@@ -17,7 +17,7 @@
 --
 -- See Also:
 -- [[:sleep]]
-global procedure task_delay(atom delaytime)
+export procedure task_delay(atom delaytime)
 	atom t
 	t = time()
 

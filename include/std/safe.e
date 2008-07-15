@@ -45,7 +45,7 @@
 
 -- Some parameters you may wish to change:
 
-global integer check_calls, edges_only
+export integer check_calls, edges_only
 check_calls = 1   -- if 1, check all blocks for edge corruption after each 
 				  -- call(), dos_interrupt(), c_proc(), or c_func(). 
 				  -- To save time, your program can turn off this checking by 
@@ -641,7 +641,7 @@ end function
 
 without warning
 -- override "peek_string" with debug peek_string
-global function peek_string(object x)
+export function peek_string(object x)
 -- safe version of peek_string 
 	integer len
 	atom a
@@ -667,7 +667,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure poke(atom addr, object x)
+-- export procedure poke(atom addr, object x)
 --
 -- Description:
 -- Stores one or more bytes, starting at a memory location.
@@ -729,7 +729,7 @@ procedure original_poke2(atom a, object v)
 end procedure
 
 -- Signature:
--- global procedure poke2(atom addr, object x)
+-- export procedure poke2(atom addr, object x)
 --
 -- Description:
 -- Stores one or more words, starting at a memory location.
@@ -790,7 +790,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure poke4(atom addr, object x)
+-- export procedure poke4(atom addr, object x)
 --
 -- Description:
 -- Stores one or more double words, starting at a memory location.
@@ -1027,7 +1027,7 @@ end procedure
 -- See Also:
 -- [[:register_block]], [[:unregister_block]], [[:memory.e]]
 
-global procedure check_all_blocks()
+export procedure check_all_blocks()
 -- Check all allocated blocks for corruption of the leader and trailer areas. 
 	integer n
 	atom a
@@ -1056,7 +1056,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure call(atom addr)
+-- export procedure call(atom addr)
 --
 -- Description:
 --  Call a machine language routine which was stored in memory prior.
@@ -1095,7 +1095,7 @@ procedure original_c_proc(integer i, sequence s)
 end procedure
 
 -- TODO: document, as well as in dll.e
-global procedure c_proc(integer i, sequence s)
+export procedure c_proc(integer i, sequence s)
 	original_c_proc(i, s)
 	if check_calls then
 		check_all_blocks()
@@ -1107,7 +1107,7 @@ function original_c_func(integer i, sequence s)
 end function
 
 -- TODO: document, as well as in dll.e
-global function c_func(integer i, sequence s)
+export function c_func(integer i, sequence s)
 	object r
 	
 	r = original_c_func(i, s)
@@ -1142,7 +1142,7 @@ end function
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:memory.e]]
-global procedure register_block(machine_addr block_addr, positive_int block_len)
+export procedure register_block(machine_addr block_addr, positive_int block_len)
 -- register an externally-acquired block of memory as being safe to use
 	allocation_num += 1
 	safe_address_list = prepend(safe_address_list, {block_addr, block_len,
@@ -1165,7 +1165,7 @@ end procedure
 -- 
 -- See Also: register_block, safe.e  
 --   [[:register_block]], [[:memory.e]]
-global procedure unregister_block(machine_addr block_addr)
+export procedure unregister_block(machine_addr block_addr)
 -- remove an external block of memory from the safe address list
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][1] = block_addr then
@@ -1226,7 +1226,7 @@ end function
 --		    
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:call]]
-global function allocate(positive_int n)
+export function allocate(positive_int n)
 -- allocate memory block and add it to safe list
 	atom a
 
@@ -1259,7 +1259,7 @@ end function
 -- See Also:
 --   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]
 
-global function allocate_low(positive_int n)
+export function allocate_low(positive_int n)
 -- allocate memory block and add it to safe list
 	atom a
 	
@@ -1292,7 +1292,7 @@ end function
 --
 -- See Also:
 --     [[:allocate]], [[:free_low]]
-global procedure free(machine_addr a)
+export procedure free(machine_addr a)
 -- free address a - make sure it was allocated
 	integer n
 	
@@ -1345,7 +1345,7 @@ end procedure
 --
 -- See Also:
 --   [[:allocate_low]], [[:dos_interrupt]], [[:free]]
-global procedure free_low(low_machine_addr a)
+export procedure free_low(low_machine_addr a)
 -- free low address a - make sure it was allocated
 	integer n
 	
@@ -1375,7 +1375,7 @@ global procedure free_low(low_machine_addr a)
 	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
 
-global constant REG_LIST_SIZE = 10
+export constant REG_LIST_SIZE = 10
 
 type register_list(sequence r)
 -- a list of register values
@@ -1400,7 +1400,7 @@ end type
 --
 -- machine.e has the following declaration which shows the order of the register values in the input and output sequences.
 -- <eucode>
---      global constant REG_DI = 1,
+--      export constant REG_DI = 1,
 --                     REG_SI = 2,
 --                     REG_BP = 3,
 --                     REG_BX = 4,
@@ -1437,7 +1437,7 @@ end type
 -- See Also: , 
 --       [[:allocate_low]], [[:free_low]]
 
-global function dos_interrupt(integer int_num, register_list input_regs)
+export function dos_interrupt(integer int_num, register_list input_regs)
 -- call the DOS operating system via software interrupt int_num, using the
 -- register values in input_regs. A similar register_list is returned.
 -- It contains the register values after the interrupt.
@@ -1462,7 +1462,7 @@ type sequence_4(sequence s)
 	return length(s) = 4
 end type
 
-global constant REG_DI = 1,      
+export constant REG_DI = 1,      
 				REG_SI = 2,
 				REG_BP = 3,
 				REG_BX = 4,
@@ -1508,7 +1508,7 @@ global constant REG_DI = 1,
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]], [[:poke8]]
 
-global function int_to_bytes(atom x)
+export function int_to_bytes(atom x)
 -- returns value of x as a sequence of 4 bytes 
 -- that you can poke into memory 
 --      {bits 0-7,  (least significant)
@@ -1555,7 +1555,7 @@ mem = allocate(4)
 -- 
 -- See Also:
 -- 		[[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]], [[:peek4s]], [[:pee4ku]], [[:poke4]]
-global function bytes_to_int(sequence s)
+export function bytes_to_int(sequence s)
 -- converts 4-byte peek() sequence into an integer value
 	if length(s) = 4 then
 		poke(mem, s)
@@ -1592,7 +1592,7 @@ end function
 --  
 -- See Also:
 --		[[:bits_to_int]], [[:int_to_bytes]], [[:bitwise operations]], [[:operations on sequences]]
-global function int_to_bits(atom x, integer nbits)
+export function int_to_bits(atom x, integer nbits)
 -- Returns the low-order nbits bits of x as a sequence of 1's and 0's. 
 -- Note that the least significant bits come first. You can use Euphoria's
 -- and/or/not operators on sequences of bits. You can also subscript, 
@@ -1645,7 +1645,7 @@ end function
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:operations on sequences]]
 
-global function bits_to_int(sequence bits)
+export function bits_to_int(sequence bits)
 -- get the (positive) value of a sequence of "bits"
 	atom value, p
 	
@@ -1685,7 +1685,7 @@ end function
 -- 
 -- See Also: 
 --       [[:graphics_mode]]
-global procedure use_vesa(integer code)
+export procedure use_vesa(integer code)
 -- If code is 1 then force Euphoria to use the VESA graphics standard.
 -- This may let Euphoria work better in SVGA modes with certain graphics cards.
 -- If code is 0 then Euphoria's normal use of the graphics card is restored.
@@ -1825,7 +1825,7 @@ end procedure
 -- See Also:
 -- 		[[:set_vector]], [[:dos_interrupt]]
 
-global function get_vector(integer int_num)
+export function get_vector(integer int_num)
 -- returns the current (far) address of the interrupt handler
 -- for interrupt vector number int_num as a 2-element sequence: 
 -- {16-bit segment, 32-bit offset}
@@ -1872,7 +1872,7 @@ end function
 -- See Also:
 --       [[:get_vector]], [[:lock_memory]], [[:allocate]]
 
-global procedure set_vector(integer int_num, far_addr a)
+export procedure set_vector(integer int_num, far_addr a)
 -- sets a new interrupt handler address for vector int_num  
 	machine_proc(M_SET_VECTOR, {int_num, a})
 end procedure
@@ -1896,7 +1896,7 @@ end procedure
 -- See Also: 
 --		[[:get_vector]], [[:set_vector]]
 
-global procedure lock_memory(machine_addr a, positive_int n)
+export procedure lock_memory(machine_addr a, positive_int n)
 -- Prevent a chunk of code or data from ever being swapped out to disk.
 -- You should lock any code or data used by an interrupt handler.
 	machine_proc(M_LOCK_MEMORY, {a, n})
@@ -1923,7 +1923,7 @@ end procedure
 -- 
 -- See Also:
 --		[[:float64_to_atom]], [[:int_to_bytes]], [[:atom_to_float32]]
-global function atom_to_float64(atom a)
+export function atom_to_float64(atom a)
 -- Convert an atom to a sequence of 8 bytes in IEEE 64-bit format
 	return machine_func(M_A_TO_F64, a)
 end function
@@ -1951,7 +1951,7 @@ end function
 -- 
 -- See Also:
 --		[[:float32_to_atom]], [[:int_to_bytes]], [[:atom_to_float64]]
-global function atom_to_float32(atom a)
+export function atom_to_float32(atom a)
 -- Convert an atom to a sequence of 4 bytes in IEEE 32-bit format
 	return machine_func(M_A_TO_F32, a)
 end function
@@ -1979,7 +1979,7 @@ end function
 --
 -- See Also:
 --		[[:float32_to_atom]], [[:bytes_to_int]], [[:atom_to_float64]]
-global function float64_to_atom(sequence_8 ieee64)
+export function float64_to_atom(sequence_8 ieee64)
 -- Convert a sequence of 8 bytes in IEEE 64-bit format to an atom
 	return machine_func(M_F64_TO_A, ieee64)
 end function
@@ -2008,7 +2008,7 @@ end function
 --
 -- See Also:
 --		[[:float64_to_atom]], [[:bytes_to_int]], [[:atom_to_float32]]
-global function float32_to_atom(sequence_4 ieee32)
+export function float32_to_atom(sequence_4 ieee32)
 -- Convert a sequence of 4 bytes in IEEE 32-bit format to an atom
 	return machine_func(M_F32_TO_A, ieee32)
 end function
@@ -2037,7 +2037,7 @@ end function
 -- 
 -- See Also:
 --		[[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
-global function allocate_string(sequence s)
+export function allocate_string(sequence s)
 -- create a C-style null-terminated string in memory
 	atom mem
 	

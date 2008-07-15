@@ -20,7 +20,7 @@ include sort.e
 
 --**
 -- Signature:
--- global function append(sequence target, object x)
+-- export function append(sequence target, object x)
 --
 -- Description:
 -- Adds an object as the last element of a sequence.
@@ -71,7 +71,7 @@ include sort.e
 
 --**
 -- Signature:
--- global function prepend(sequence target, object x)
+-- export function prepend(sequence target, object x)
 --
 -- Description:
 -- Adds an object as the first element of a sequence.
@@ -111,7 +111,7 @@ include sort.e
 
 --**
 -- Signature:
--- global function repeat(object item, atom count)
+-- export function repeat(object item, atom count)
 --
 -- Description:
 -- Create a sequence whose all elements are identical, with given length.
@@ -142,7 +142,7 @@ include sort.e
 
 --**
 -- Signature:
--- global function length(sequence target)
+-- export function length(sequence target)
 --
 -- Description:
 -- Return the length of a sequence.
@@ -171,7 +171,7 @@ include sort.e
 
 --**
 -- Signature:
---   global function insert(sequence target, object what, integer index)
+--   export function insert(sequence target, object what, integer index)
 --
 -- Description:
 --   Insert an object into a sequence as a new element at a given location.
@@ -208,7 +208,7 @@ include sort.e
 
 --**
 -- Signature:
---   global function splice(sequence target, object what, integer index)
+--   export function splice(sequence target, object what, integer index)
 --
 -- Description:
 -- Inserts an object as a new slice in a sequence at a given position.

@@ -46,7 +46,7 @@ safe_address_list = {
 -- See Also:
 --   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]
 
-global function allocate_low(positive_int n)
+export function allocate_low(positive_int n)
 -- allocate memory block and add it to safe list
 	atom a
 	
@@ -80,7 +80,7 @@ end function
 --
 -- See Also:
 --   [[:allocate_low]], [[:dos_interrupt]], [[:free]]
-global procedure free_low(low_machine_addr a)
+export procedure free_low(low_machine_addr a)
 -- free low address a - make sure it was allocated
 	integer n
 	
@@ -128,7 +128,7 @@ end procedure
 --
 -- machine.e has the following declaration which shows the order of the register values in the input and output sequences.
 -- <eucode>
---      global constant REG_DI = 1,
+--      export constant REG_DI = 1,
 --                     REG_SI = 2,
 --                     REG_BP = 3,
 --                     REG_BX = 4,
@@ -165,7 +165,7 @@ end procedure
 -- See Also: , 
 --       [[:allocate_low]], [[:free_low]]
 
-global function dos_interrupt(integer int_num, register_list input_regs)
+export function dos_interrupt(integer int_num, register_list input_regs)
 -- call the DOS operating system via software interrupt int_num, using the
 -- register values in input_regs. A similar register_list is returned.
 -- It contains the register values after the interrupt.

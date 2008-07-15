@@ -19,7 +19,7 @@
 --**
 -- Mouse Events
 
-global integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP, MIDDLE_DOWN, MIDDLE_UP, ANY_UP
+export integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP, MIDDLE_DOWN, MIDDLE_UP, ANY_UP
 
 ifdef UNIX then
 	MOVE = 0
@@ -57,7 +57,7 @@ constant M_GET_MOUSE = 14,
 --
 -- Constants have been defined in mouse.e for the possible mouse events (the values for ##event##)::
 -- <eucode>
--- global constant 
+-- export constant 
 --     MOVE = 1,
 --     LEFT_DOWN = 2,
 --     LEFT_UP = 4,
@@ -127,7 +127,7 @@ constant M_GET_MOUSE = 14,
 -- </eucode>
 -- See Also:
 --	[[:mouse_events]], [[: mouse_pointer]]
-global function get_mouse()
+export function get_mouse()
 	return machine_func(M_GET_MOUSE, 0)
 end function
 
@@ -157,7 +157,7 @@ end function
 --
 --See Also:
 --		[[:get_mouse]], [[: mouse_pointer]]
-global procedure mouse_events(integer events)
+export procedure mouse_events(integer events)
 	machine_proc(M_MOUSE_EVENTS, events)
 end procedure
 
@@ -180,6 +180,6 @@ end procedure
 -- See Also:
 --		[[:get_mouse]], [[:mouse_pointer]]
 
-global procedure mouse_pointer(integer show_it)
+export procedure mouse_pointer(integer show_it)
 	machine_proc(M_MOUSE_POINTER, show_it)
 end procedure

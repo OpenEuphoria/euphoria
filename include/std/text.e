@@ -10,7 +10,7 @@
 
 --**
 -- Signature:
--- global function sprintf(sequence format, object values)
+-- export function sprintf(sequence format, object values)
 --
 -- Description:
 -- This is exactly the same as [[:printf]](), except that the output is returned as a sequence

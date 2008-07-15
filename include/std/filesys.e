@@ -244,7 +244,7 @@ export function remove_directory(sequence name)
 	return ret
 end function
 
-global enum 
+export enum 
 	D_NAME,
 	D_ATTRIBUTES,
 	D_SIZE,
@@ -281,7 +281,7 @@ global enum
 -- You can refer to the elements of an entry with the following constants:
 --  
 -- <eucode>
--- global constant 
+-- export constant 
 --     -- File Attributes
 --     D_NAME       = 1,
 --     D_ATTRIBUTES = 2,
@@ -340,7 +340,7 @@ global enum
 --   ##bin\search.ex##
 --
 
-global function dir(sequence name)
+export function dir(sequence name)
 	object dir_data, data, the_name, the_dir
 	integer idx
 
@@ -418,7 +418,7 @@ end function
 -- </eucode>
 -- See Also:
 -- 	[[:dir]], [[:chdir]]
-global function current_dir()
+export function current_dir()
 -- returns name of current working directory
 	return machine_func(M_CURRENT_DIR, 0)
 end function
@@ -438,7 +438,7 @@ end function
 -- 
 -- The function current_dir() will return the name of the current directory.
 -- 
--- On //DOS32// and //WIN32// the current directory is a global property shared
+-- On //DOS32// and //WIN32// the current directory is a export property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
 -- can change the current directory for itself, but this won't
 -- affect the current directory of its parent process.
@@ -453,14 +453,14 @@ end function
 -- </eucode>
 -- See Also:
 -- [[:current_dir]], [[:dir]]
-global function chdir(sequence newdir)
+export function chdir(sequence newdir)
 -- Changes the current directory. Returns 1 - success, 0 - fail.
 	return machine_func(M_CHDIR, newdir)
 end function
 
 -- Generalized recursive directory walker
 
-global constant W_BAD_PATH = -1 -- error code
+export constant W_BAD_PATH = -1 -- error code
 
 function default_dir(sequence path)
 -- Default directory sorting function for walk_dir().
@@ -481,7 +481,7 @@ constant DEFAULT = -2
 
 -- it's better not to use routine_id() here,
 -- or else users will have to bind with clear routine names
-global integer my_dir = DEFAULT
+export integer my_dir = DEFAULT
 
 --**
 -- Generalized Directory Walker
@@ -504,7 +504,7 @@ global integer my_dir = DEFAULT
 -- while walk_dir() handles the process of walking through all the files and subdirectories.
 
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
--- a different order, set the global integer ##my_dir## to the routine id of your own modified
+-- a different order, set the export integer ##my_dir## to the routine id of your own modified
 -- [[:dir]] function that sorts the directory entries differently. See the default ##dir()##
 -- function in filesys.e.
 
@@ -526,7 +526,7 @@ global integer my_dir = DEFAULT
 -- See Also:
 --   ##bin\search.ex##
 
-global function walk_dir(sequence path_name, object your_function, integer scan_subdirs)
+export function walk_dir(sequence path_name, object your_function, integer scan_subdirs)
 	object d, abort_now
 	object orig_func
 	object user_data

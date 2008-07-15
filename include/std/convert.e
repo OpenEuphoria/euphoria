@@ -45,7 +45,7 @@ constant
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]], [[:poke8]]
 
-global function int_to_bytes(atom x)
+export function int_to_bytes(atom x)
 -- returns value of x as a sequence of 4 bytes 
 -- that you can poke into memory 
 --      {bits 0-7,  (least significant)
@@ -106,7 +106,7 @@ end type
 -- [[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]],
 -- [[:peek4s]], [[:pee4ku]], [[:poke4]]
 
-global function bytes_to_int(sequence s)
+export function bytes_to_int(sequence s)
 -- converts 4-byte peek() sequence into an integer value
 	if length(s) = 4 then
 		poke(mem, s)
@@ -148,7 +148,7 @@ end function
 --	[[:bits_to_int]], [[:int_to_bytes]], [[:bitwise operations]],
 --  [[:operations on sequences]]
 
-global function int_to_bits(atom x, integer nbits)
+export function int_to_bits(atom x, integer nbits)
 -- Returns the low-order nbits bits of x as a sequence of 1's and 0's. 
 -- Note that the least significant bits come first. You can use Euphoria's
 -- and/or/not operators on sequences of bits. You can also subscript, 
@@ -206,7 +206,7 @@ end function
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:operations on sequences]]
 
-global function bits_to_int(sequence bits)
+export function bits_to_int(sequence bits)
 -- get the (positive) value of a sequence of "bits"
 	atom value, p
 	
@@ -245,7 +245,7 @@ end function
 -- See Also:
 --		[[:float64_to_atom]], [[:int_to_bytes]], [[:atom_to_float32]]
 
-global function atom_to_float64(atom a)
+export function atom_to_float64(atom a)
 	return machine_func(M_A_TO_F64, a)
 end function
 
@@ -281,7 +281,7 @@ end function
 -- See Also:
 --		[[:float32_to_atom]], [[:int_to_bytes]], [[:atom_to_float64]]
 
-global function atom_to_float32(atom a)
+export function atom_to_float32(atom a)
 -- Convert an atom to a sequence of 4 bytes in IEEE 32-bit format
 	return machine_func(M_A_TO_F32, a)
 end function
@@ -311,7 +311,7 @@ end function
 -- See Also:
 --		[[:float32_to_atom]], [[:bytes_to_int]], [[:atom_to_float64]]
 
-global function float64_to_atom(sequence_8 ieee64)
+export function float64_to_atom(sequence_8 ieee64)
 -- Convert a sequence of 8 bytes in IEEE 64-bit format to an atom
 	return machine_func(M_F64_TO_A, ieee64)
 end function
@@ -342,7 +342,7 @@ end function
 -- See Also:
 --		[[:float64_to_atom]], [[:bytes_to_int]], [[:atom_to_float32]]
 
-global function float32_to_atom(sequence_4 ieee32)
+export function float32_to_atom(sequence_4 ieee32)
 -- Convert a sequence of 4 bytes in IEEE 32-bit format to an atom
 	return machine_func(M_F32_TO_A, ieee32)
 end function

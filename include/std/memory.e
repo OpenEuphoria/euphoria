@@ -37,11 +37,11 @@ constant M_ALLOC = 16,
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-type positive_int(integer x)
+export type positive_int(integer x)
 	return x >= 1
 end type
 
-type machine_addr(atom a)
+export type machine_addr(atom a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
@@ -82,7 +82,7 @@ end type
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:call]]
 
-global function allocate(positive_int n)
+export function allocate(positive_int n)
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
 	return machine_func(M_ALLOC, n)
@@ -115,7 +115,7 @@ end function
 -- See Also:
 --     [[:allocate]], [[:free_low]]
 
-global procedure free(machine_addr addr)
+export procedure free(machine_addr addr)
 -- free the memory at address a
 	machine_proc(M_FREE, addr)
 end procedure
@@ -149,7 +149,7 @@ end procedure
 -- See Also:
 --		[[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
 
-global function allocate_string(sequence s)
+export function allocate_string(sequence s)
 	atom mem
 	
 	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
@@ -165,7 +165,7 @@ end function
 
 --**
 -- Signature:
--- global function peek(object addr_n_length)
+-- export function peek(object addr_n_length)
 --
 -- Description:
 -- Fetches a byte, or some bytes, from an address in memory.
@@ -212,7 +212,7 @@ end function
 --
 --**
 -- Signature:
--- global function peeks(object addr_n_length)
+-- export function peeks(object addr_n_length)
 --
 -- Description:
 -- Fetches a byte, or some bytes, from an address in memory.
@@ -259,7 +259,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek2s(object addr_n_length)
+-- export function peek2s(object addr_n_length)
 --
 -- Description:
 -- Fetches a //signed// word, or some //signed// words	, from an address
@@ -311,7 +311,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek2u(object addr_n_length)
+-- export function peek2u(object addr_n_length)
 --
 -- Description:
 -- Fetches an //unsigned// word, or some //unsigned// words, from an address
@@ -363,7 +363,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek4s(object addr_n_length)
+-- export function peek4s(object addr_n_length)
 --
 -- Description:
 -- Fetches a //signed// double words, or some //signed// double words,
@@ -415,7 +415,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek4u(object addr_n_length)
+-- export function peek4u(object addr_n_length)
 --
 -- Description:
 -- Fetches an //unsigned// double word, or some //unsigned// dounle words,
@@ -472,7 +472,7 @@ end function
 
 --**
 -- Signature:
--- global procedure poke(atom addr, object x)
+-- export procedure poke(atom addr, object x)
 --
 -- Description:
 -- Stores one or more bytes, starting at a memory location.
@@ -518,7 +518,7 @@ end function
 -- 
 --**
 -- Signature:
--- global procedure poke2(atom addr, object x)
+-- export procedure poke2(atom addr, object x)
 --
 -- Description:
 -- Stores one or more words, starting at a memory location.
@@ -566,7 +566,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure poke4(atom addr, object x)
+-- export procedure poke4(atom addr, object x)
 --
 -- Description:
 -- Stores one or more double words, starting at a memory location.
@@ -617,7 +617,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure mem_copy(atom destination, atom origin, integer len)
+-- export procedure mem_copy(atom destination, atom origin, integer len)
 --
 -- Descripotion:
 -- Copy a block of memory from an address to another.
@@ -647,7 +647,7 @@ end function
 -- 
 --**
 -- Signature:
--- global procedure mem_set(atom destination, integer byte_value, integer how_many))
+-- export procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
 -- Sets a contiguous range of memory ocations to a single value.
@@ -675,7 +675,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure call(atom addr)
+-- export procedure call(atom addr)
 --
 -- Description:
 --  Call a machine language routine which was stored in memory prior.
@@ -743,7 +743,7 @@ integer check_calls = 1
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
-global procedure register_block(atom block_addr, atom block_len)
+export procedure register_block(atom block_addr, atom block_len)
 end procedure
 
 --**
@@ -769,7 +769,7 @@ end procedure
 -- See Also: register_block, safe.e  
 --   [[:register_block]], [[:safe.e]]
 
-global procedure unregister_block(atom block_addr)
+export procedure unregister_block(atom block_addr)
 end procedure
 
 --**
@@ -791,6 +791,6 @@ end procedure
 --
 -- See Also:
 -- [[:register_block]], [[:unregister_block]], [[:memory.e]]
-global procedure check_all_blocks()
+export procedure check_all_blocks()
 end procedure
 with warning

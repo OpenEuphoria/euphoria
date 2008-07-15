@@ -88,7 +88,7 @@ include pretty.e
 -- * DB_EXISTS_ALREADY
 -- * DB_LOCK_FAIL
 
-global constant DB_OK = 0,
+export constant DB_OK = 0,
 				DB_OPEN_FAIL = -1, 
 				DB_EXISTS_ALREADY = -2,
 				DB_LOCK_FAIL = -3
@@ -99,7 +99,7 @@ global constant DB_OK = 0,
 -- * DB_LOCK_SHARED
 -- * DB_LOCK_EXCLUSIVE
 
-global constant DB_LOCK_NO = 0,       -- don't bother with file locking 
+export constant DB_LOCK_NO = 0,       -- don't bother with file locking 
 				DB_LOCK_SHARED = 1,   -- read the database
 				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
 				 
@@ -135,7 +135,7 @@ end procedure
 --**
 -- exception handler
 
-global integer db_fatal_id = routine_id("default_fatal")
+export integer db_fatal_id = routine_id("default_fatal")
 
 procedure fatal(sequence msg)
 	call_proc(db_fatal_id, {msg})
@@ -362,7 +362,7 @@ end procedure
 -- db_dump(fn, 0)
 -- </eucode>
 
-global procedure db_dump(integer fn, integer low_level_too)
+export procedure db_dump(integer fn, integer low_level_too)
 -- print an open database in readable form to file fn
 -- (Note: If you turn database.e into a .dll or .so, you will
 -- have to change this routine to accept a file name, rather than
@@ -464,7 +464,7 @@ end procedure
 -- Comments:
 -- This is a debug routine used by RDS to detect corruption of the free list.
 -- Users do not normally call this.
-global procedure check_free_list()
+export procedure check_free_list()
 	atom free_count, free_list, addr, size, free_list_space
 	atom max
   
@@ -682,7 +682,7 @@ end procedure
 -- See Also:
 -- 		[[:db_open]], [[:db_select]]
 
-global function db_create(sequence path, integer lock_method)
+export function db_create(sequence path, integer lock_method)
 	integer db
 	
 	if not find('.', path) then
@@ -806,7 +806,7 @@ end function
 --  See Also:
 -- 		[[:db_create]], [[:db_select]]
   
-global function db_open(sequence path, integer lock_method)
+export function db_open(sequence path, integer lock_method)
 	integer db, magic
 	
 	if not find('.', path) then
@@ -871,7 +871,7 @@ end function
 --  See Also:
 -- 		[[:db_open]], [[:db_select]]
 
-global function db_select(sequence path)
+export function db_select(sequence path)
 	integer index
 	
 	if not find('.', path) then
@@ -894,7 +894,7 @@ end function
 -- Comments:
 -- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file. The current database becomes undefined.
 
-global procedure db_close()
+export procedure db_close()
 -- close the current database
 	integer index
 	
@@ -967,7 +967,7 @@ end function
 -- See Also:
 -- 		[[:db_table_list]]
 
-global function db_select_table(sequence name)
+export function db_select_table(sequence name)
 -- let table with the given name be the current table
 	atom table, nkeys, index
 	atom block_ptr, block_size
@@ -1027,7 +1027,7 @@ end function
 -- See Also:
 -- 		[[:db_select_table]], [db_table_list]]
 
-global function db_create_table(sequence name)
+export function db_create_table(sequence name)
 -- create a new table in the current database file
 	atom name_ptr, nt, tables, newtables, table, records_ptr
 	atom size, newsize, index_ptr
@@ -1105,7 +1105,7 @@ end function
 -- See Also:
 --		[[:db_table_list]], [[:db_table_select]]
 
-global procedure db_delete_table(sequence name)
+export procedure db_delete_table(sequence name)
 -- delete an existing table and all of its records
 	atom table, tables, nt, nrecs, records_ptr, blocks
 	atom p, data_ptr, index
@@ -1188,7 +1188,7 @@ end procedure
 -- See Also:
 --		[[:db_table_list]]
 
-global procedure db_rename_table(sequence name, sequence new_name)
+export procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
 	atom table, table_ptr
 	
@@ -1233,7 +1233,7 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:db_table_select]], [[:db_table_create]]
-global function db_table_list()
+export function db_table_list()
 	sequence table_names
 	atom tables, nt, name
 
@@ -1302,7 +1302,7 @@ end function
 -- </eucode>
 -- See Also:
 -- 		{{db_insert]], [[:db_replace_data]], [[:db_delete_record]]
-global function db_find_key(object key)
+export function db_find_key(object key)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
 	if current_table = -1 then
@@ -1356,7 +1356,7 @@ end function
 -- See Also:
 --		{{db_delete_record]]
 
-global function db_insert(object key, object data)
+export function db_insert(object key, object data)
 	sequence key_string, data_string, last_part, remaining
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size
 	atom key_location, new_block, index_ptr, new_index_ptr, total_recs
@@ -1501,7 +1501,7 @@ end function
 -- </eucode>
 -- See Also:
 -- 		[[:db_find_key]]
-global procedure db_delete_record(integer key_location)
+export procedure db_delete_record(integer key_location)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
 	sequence remaining
@@ -1594,7 +1594,7 @@ end procedure
 -- See Also:
 -- 		[[:db_find_key]]
 
-global procedure db_replace_data(integer key_location, object data)
+export procedure db_replace_data(integer key_location, object data)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 	
@@ -1646,7 +1646,7 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:db_replace_data]]
-global function db_table_size()
+export function db_table_size()
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
@@ -1676,7 +1676,7 @@ end function
 -- </eucode>
 -- See Also:
 -- 		[[:db_find_key]], [[:db_replace_data]]
-global function db_record_data(integer key_location)
+export function db_record_data(integer key_location)
 	atom data_ptr
 	object data_value
 	
@@ -1714,7 +1714,7 @@ end function
 -- </eucode>
 -- See Also:
 -- 		[[:db_record_data]]
-global function db_record_key(integer key_location)
+export function db_record_key(integer key_location)
 	object key_value
 	
 	if current_table = -1 then
@@ -1784,7 +1784,7 @@ end function
 -- end if
 -- </eucode>
 
-global function db_compress()
+export function db_compress()
 	integer index, chunk_size, nrecs, r, fn
 	sequence new_path, old_path, table_list, record, chunk
    
@@ -1889,7 +1889,7 @@ end function
 --
 -- Thanks to Tone Škoda!
 
-global function db_current ()
+export function db_current ()
     integer index
 
     index = find (current_db, db_file_nums)

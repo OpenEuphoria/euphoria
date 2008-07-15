@@ -49,7 +49,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- global procedure ?
+-- export procedure ?
 --
 -- Description:
 -- Shorthand way of saying: **pretty_print(STDOUT, x, {})** - i.e. printing the value of an 
@@ -64,7 +64,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- global procedure print(integer fn, object x)
+-- export procedure print(integer fn, object x)
 --
 -- Description:
 -- Print an object to a file or device, with braces { , , , } to show the structure.
@@ -88,7 +88,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- global procedure printf(integer fn, sequence format, object values)
+-- export procedure printf(integer fn, sequence format, object values)
 --
 -- Description:
 -- Print one or more values to a file or device, using a format string to embed them in and define how they should be represented.
@@ -193,7 +193,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- global procedure puts(integer fn, object text)
+-- export procedure puts(integer fn, object text)
 --
 -- Parameters:
 -- 		# ##fn##: an integer, the handle to an opened file or device
@@ -228,7 +228,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- global function getc(integer fn)
+-- export function getc(integer fn)
 --
 -- Description:
 --     Get the next character (byte) from a file or device fn. 
@@ -252,7 +252,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- global function gets(integer fn)
+-- export function gets(integer fn)
 --
 -- Description:
 --     Get the next sequence (one line, including '\n') of characters from a file or device.
@@ -407,7 +407,7 @@ end function
 -- Described under lock_file()
 --
 
-global enum 
+export enum 
 	LOCK_SHARED, 
 	LOCK_EXCLUSIVE
 
@@ -448,7 +448,7 @@ end type
 
 --**
 -- Signature:
--- global function open(sequence path, sequence mode)
+-- export function open(sequence path, sequence mode)
 --
 -- Description:
 -- Open a file or device, to get the file number. 
@@ -535,7 +535,7 @@ end type
 
 --**
 -- Signature:
--- global procedure close(atom fn)
+-- export procedure close(atom fn)
 --
 -- Description:
 -- Close a file or device and flush out any still-buffered characters.
@@ -587,7 +587,7 @@ end type
 -- </eucode>
 -- Wee Also:
 --		[[:bet_bytes]], [[:puts]], [[:where]]
-global function seek(file_number fn, file_position pos)
+export function seek(file_number fn, file_position pos)
 -- Seeks to a byte position in the file, 
 -- or to end of file if pos is -1.
 -- This function is normally used with
@@ -607,7 +607,7 @@ end function
 -- will be read from, or written to. It is updated
 -- by reads, writes and seeks on the file. 
 
-global function where(file_number fn)
+export function where(file_number fn)
 -- Returns the current byte position in the file.
 -- This function is normally used with
 -- files opened in binary mode.
@@ -648,7 +648,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:close]], [[:crash_routine]]
-global procedure flush(file_number fn)
+export procedure flush(file_number fn)
 -- flush out the buffer associated with file fn
 	machine_proc(M_FLUSH, fn)
 end procedure
@@ -684,7 +684,7 @@ end procedure
 -- declaration:
 -- 
 -- <eucode>
--- global enum
+-- export enum
 --     LOCK_SHARED, 
 --     LOCK_EXCLUSIVE
 -- </eucode>
@@ -727,7 +727,7 @@ end procedure
 -- </eucode>
 -- See Also:
 --		[[:unlock_file]]
-global function lock_file(file_number fn, lock_type t, byte_range r={})
+export function lock_file(file_number fn, lock_type t, byte_range r={})
 -- Attempt to lock a file so other processes won't interfere with it.
 -- The byte range can be {} if you want to lock the whole file
 	return machine_func(M_LOCK_FILE, {fn, t, r})
@@ -756,7 +756,7 @@ end function
 -- See Also:
 -- 		[[:lock_file]]
 
-global procedure unlock_file(file_number fn, byte_range r={})
+export procedure unlock_file(file_number fn, byte_range r={})
 -- The byte range can be {} if you want to unlock the whole file.
 	machine_proc(M_UNLOCK_FILE, {fn, r})
 end procedure

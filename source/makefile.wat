@@ -88,7 +88,7 @@ EU_TRANSLATOR_FILES = &
 	
 EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\ec.obj &
-        .\$(OBJDIR)\0rror.obj &
+	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\c_decl.obj &
 	.\$(OBJDIR)\c_dec0.obj &
 	.\$(OBJDIR)\c_dec1.obj &
@@ -118,9 +118,6 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\search.obj &
-	.\$(OBJDIR)\math.obj &
-	.\$(OBJDIR)\os.obj &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\filesys.obj &

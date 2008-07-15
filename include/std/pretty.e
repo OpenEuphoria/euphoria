@@ -329,7 +329,7 @@ end procedure
 --
 -- See Also:
 -- [[:print]], [[:sprint]], [[:printf]], [[:sprintf]], [[:pretty_sprint]]
-global procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
+export procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 1
 	pretty_file = fn
 	pretty( x, options )

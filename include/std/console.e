@@ -19,7 +19,7 @@ constant
 
 --**
 -- Signature:
--- 		global function get_key()
+-- 		export function get_key()
 --
 -- Returns:
 --		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.

@@ -25,7 +25,7 @@ constant EOF = -1
 -- * BMP_UNSUPPORTED_FORMAT,
 -- * BMP_INVALID_MODE
 
-global enum
+export enum
 	BMP_SUCCESS,
 	BMP_OPEN_FAILED,
 	BMP_UNEXPECTED_EOF,
@@ -173,7 +173,7 @@ end function
 --
 -- Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is not in a good format, an error code (atom) is returned instead: 
 --  <eucode>
---      global constant
+--      export constant
 --	* BMP_OPEN_FAILED = 1,
 --  * BMP_UNEXPECTED_EOF = 2,
 --  * BMP_UNSUPPORTED_FORMAT = 3
@@ -194,7 +194,7 @@ end function
 -- See Also: 
 --		[[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
 
-global function read_bitmap(sequence file_name)
+export function read_bitmap(sequence file_name)
 	atom Size 
 	integer Type, Xhot, Yhot, Planes, BitCount
 	atom Width, Height, Compression, OffBits, SizeHeader, 
@@ -303,7 +303,7 @@ end type
 -- See Also: *
 -- 		[[:save_image]], [[:read_bitmap]], [[:display_text_image]]
 
-global procedure display_image(graphics_point xy, sequence pixels)
+export procedure display_image(graphics_point xy, sequence pixels)
 	for i = 1 to length(pixels) do
 		pixel(pixels[i], xy)
 		xy[2] += 1
@@ -339,7 +339,7 @@ end procedure
 -- See Also:
 -- 		[[:display_image]], [[:save_text_image]]
 
-global function save_image(graphics_point top_left, graphics_point bottom_right)
+export function save_image(graphics_point top_left, graphics_point bottom_right)
 	integer x, width
 	sequence save
 	
@@ -383,7 +383,7 @@ end type
 --      [[:set_display_page]], [[:get_active_page]], [[:video_config]]
 -- 
 
-global function get_display_page()
+export function get_display_page()
 	return machine_func(M_GET_DISPLAY_PAGE, 0)
 end function
 
@@ -411,7 +411,7 @@ end function
 --      [[:get_display_page]], [[:set_active_page]], [[:video_config]]
 
 
-global procedure set_display_page(page_number page)
+export procedure set_display_page(page_number page)
 	machine_proc(M_SET_DISPLAY_PAGE, page)
 end procedure
 
@@ -431,7 +431,7 @@ end procedure
 --  
 -- See Also: set_active_page, get_display_page, video_config  
 -- 
-global function get_active_page()
+export function get_active_page()
 	return machine_func(M_GET_ACTIVE_PAGE, 0)
 end function
 
@@ -474,7 +474,7 @@ end function
 -- See Also: 
 --      [[:get_active_page]], [[:set_display_page]], [[:video_config]]
 
-global procedure set_active_page(page_number page)
+export procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
 end procedure
 
@@ -529,7 +529,7 @@ end function
 -- See Also: 
 --      [[:put_screen_char]], [[:save_text_image]]
 
-global function get_screen_char(positive_atom line, positive_atom column)
+export function get_screen_char(positive_atom line, positive_atom column)
 	atom scr_addr
 	sequence vc
 	
@@ -575,7 +575,7 @@ end function
 -- See Also: 
 --       [[:get_screen_char]], [[:display_text_image]]
 
-global procedure put_screen_char(positive_atom line, positive_atom column, 
+export procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
 	atom scr_addr
 	sequence vc
@@ -633,7 +633,7 @@ end procedure
 -- 		[[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
 
-global procedure display_text_image(text_point xy, sequence text)
+export procedure display_text_image(text_point xy, sequence text)
 	atom scr_addr
 	integer screen_width, extra_col2, extra_lines
 	sequence vc, one_row
@@ -711,7 +711,7 @@ end procedure
 -- See Also:
 --     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
-global function save_text_image(text_point top_left, text_point bottom_right)
+export function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
 	atom scr_addr, screen_memory
 	integer screen_width, image_width
@@ -866,7 +866,7 @@ end procedure
 -- See Also:
 -- 		[[:video_config]], [[:palette]], [[:all_palette]], [[:read_bitmap]], [[:save_bitmap]], [[:save_screen]]
 ifdef DOS32 then
-global function get_all_palette()
+export function get_all_palette()
 	integer mem, numColors
 	sequence vc, reg, colors
 	
@@ -922,7 +922,7 @@ end procedure
 -- Comments:
 -- The result will be one of the following codes:
 --  <eucode>
---      global constant BMP_SUCCESS = 0,
+--      export constant BMP_SUCCESS = 0,
 --                 BMP_OPEN_FAILED = 1,
 --                BMP_INVALID_MODE = 4 -- invalid graphics mode
 --                                     -- or invalid argument
@@ -947,7 +947,7 @@ end procedure
 -- See Also:
 -- 		[[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
 ifdef DOS32 then
-global function save_screen(region r, sequence file_name)
+export function save_screen(region r, sequence file_name)
 	sequence vc
 	integer numColors
 
@@ -1033,7 +1033,7 @@ end procedure
 --
 -- The result will be one of the following codes: 
 --  <eucode>
---      global constant BMP_SUCCESS = 0,
+--      export constant BMP_SUCCESS = 0,
 --                 BMP_OPEN_FAILED = 1,
 --                BMP_INVALID_MODE = 4 -- invalid graphics mode
 -- </eucode>                                    -- or invalid argument
@@ -1052,7 +1052,7 @@ end procedure
 -- See Also:
 -- 		[[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
 
-global function save_bitmap(two_seq palette_n_image, sequence file_name)
+export function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
 	integer numColors
 
