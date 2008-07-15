@@ -4297,8 +4297,8 @@ void do_exec(int *start_pc)
 				BREAK;
 			
 			case L_GET_KEY: /* read an immediate key (if any) from the keyboard 
-			deprintf("case L_GET_KEY:");
 							 or return -1 */
+			deprintf("case L_GET_KEY:");
 				tpc = pc;
 #if defined(EWINDOWS)
 				show_console();
