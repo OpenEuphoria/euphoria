@@ -66,7 +66,6 @@ enum
 	RID,
 	USECASE
 
-
 --****
 -- === Routines
 --

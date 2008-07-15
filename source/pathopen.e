@@ -1,10 +1,16 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 
-include common.e
 include std/memory.e
 include std/os.e
 include std/filesys.e
+
+ifdef DOS32 then
+	include std/dos_base.e
+	include std/dos_mem.e
+end ifdef
+
+include common.e
 
 atom oem2char, convert_buffer
 integer convert_length
@@ -54,39 +60,25 @@ end function
 
 constant include_subfolder = SLASH & "include"
 
-sequence cache_vars
-cache_vars = {}
-sequence cache_strings
-cache_strings = {}
-sequence cache_substrings
-cache_substrings = {}
-sequence cache_starts
-cache_starts = {}
-sequence cache_ends
-cache_ends  = {}
-sequence cache_converted
-ifdef WIN32 then
-	cache_converted = {}
-end ifdef
-sequence cache_complete
-cache_complete = {}
-sequence cache_delims
-cache_delims = {}
 integer num_var
+sequence 
+	cache_vars = {},
+	cache_strings = {},
+	cache_substrings = {},
+	cache_starts = {},
+	cache_ends = {},
+	cache_converted = {},
+	cache_complete = {},
+	cache_delims = {}
 
-sequence config_inc_paths
-config_inc_paths = {}
-integer loaded_config_inc_paths
-loaded_config_inc_paths = 0
+sequence config_inc_paths = {}
+integer loaded_config_inc_paths = 0
 
-object exe_path_cache
-exe_path_cache = 0
+object exe_path_cache = 0
 
-sequence pwd
-pwd = current_dir()
+sequence pwd = current_dir()
 
 global function exe_path()
-	
 	if sequence(exe_path_cache) then
 		return exe_path_cache
 	end if
@@ -121,7 +113,9 @@ function check_cache(sequence env,sequence inc_path)
 				pos = -1
 				for i=1 to length(cache_strings[num_var]) do
 					if cache_ends[num_var][i] > length(inc_path) or 
-					  compare(cache_substrings[num_var][i],inc_path[cache_starts[num_var][i]..cache_ends[num_var][i]]) then
+					  compare(cache_substrings[num_var][i],
+					  	inc_path[cache_starts[num_var][i]..cache_ends[num_var][i]]) 
+					then
 						pos = i-1
 						exit
 					end if
@@ -342,7 +336,8 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 			if try != -1 then
 				return {file_path,try}
 			elsif platform() = WIN32 and sequence(cache_converted[num_var][i]) then
-				-- perhaps this path entry, which had never been checked valid, is so after conversion
+				-- perhaps this path entry, which had never been checked valid, is so 
+				-- after conversion
 				full_path = cache_converted[num_var][i]
 				file_path = full_path & file_name
 				try = open(file_path, "r")
@@ -387,7 +382,7 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 					return {file_path,try}
 				elsif platform() = WIN32 then  
 					if find(1,full_path>=128) then
-  -- accented characters, try converting them
+						-- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
 						file_path = full_path & file_name
 						try = open(file_path, "r")
@@ -460,7 +455,8 @@ global procedure Include_paths(integer add_converted)
 				cache_ends[num_var] &= end_path
 				ifdef WIN32 then
 					if find(1,full_path>=128) then
-  -- accented characters, try converting them. There is no guarantee that the conversion is valid
+						-- accented characters, try converting them. There is no guarantee that 
+						-- the conversion is valid
 						cache_converted[num_var] = convert_from_OEM(full_path)
 					else -- nothing to convert anyway
 						cache_converted[num_var] &= 0
@@ -516,3 +512,4 @@ global function e_path_open(sequence name, sequence mode)
 	end if
 	
 end function
+

@@ -11,11 +11,13 @@
 -- DOS support code borrowed from DOS.E by Daniel Berstein, Jacques Deschenes, and Rob Craig
 
 ifdef DOS32 then
--- constant short_names = dosver() < 7 or atom(getenv("windir"))
-constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
+	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
+	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
+	include dos_base.e
 else
-include dll.e
+	include dll.e
 end ifdef
+
 include machine.e
 include wildcard.e
 include sort.e
@@ -27,10 +29,12 @@ constant
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG}, C_LONG)
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG}, 
+		C_LONG)
 	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_LONG)
 	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, C_LONG)
+	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, 
+		C_LONG)
 	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
 
 elsifdef LINUX then
@@ -52,10 +56,11 @@ else
 end ifdef
 
 ifdef LINUX then
-	constant xStatFile        = define_c_func(lib, "__xstat", {C_INT, C_POINTER, C_POINTER}, C_INT)
+	constant xStatFile = define_c_func(lib, "__xstat", {C_INT, C_POINTER, C_POINTER}, C_INT)
 elsifdef UNIX then
-	constant xStatFile        = define_c_func(lib, "stat", {C_POINTER, C_POINTER}, C_INT)
+	constant xStatFile = define_c_func(lib, "stat", {C_POINTER, C_POINTER}, C_INT)
 end ifdef
+
 ifdef UNIX then
 	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_INT)
 	--constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
@@ -133,7 +138,8 @@ end ifdef
 --
 -- Parameters:
 -- 		# ##name##: a sequence, the name of the new directory to create
---		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 448 (all rights for owner, none for others).
+--		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 
+--		  448 (all rights for owner, none for others).
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
@@ -147,44 +153,50 @@ end ifdef
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
 -- </eucode>
+--
 -- See Also:
 -- 	[[:relove_directory]], [[:chdir]]
 
 export function create_directory(sequence name, integer mode=448)
 	atom pname, ret
 	ifdef DOS32 then
-    atom low_buff
-    sequence reg_list
-    low_buff = allocate_low(length (name) + 1)
-    if not low_buff then
-        return 0
-    end if
-    poke(low_buff, name & 0)
-    reg_list = repeat(0,10)
-    if short_names then
-        reg_list[REG_AX] = #3900
-    else
-        reg_list[REG_AX] = #7139
-    end if
-    reg_list[REG_DS] = floor(low_buff / 16)
-    reg_list[REG_DX] = remainder(low_buff, 16)
-    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-    reg_list = dos_interrupt(#21, reg_list)
-    free_low(low_buff)
-    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-        return 0
-    else
-        return 1
-    end if
+		atom low_buff
+		sequence reg_list
+		low_buff = allocate_low(length (name) + 1)
+		if not low_buff then
+			return 0
+		end if
+
+		poke(low_buff, name & 0)
+		reg_list = repeat(0,10)
+		if short_names then
+			reg_list[REG_AX] = #3900
+		else
+			reg_list[REG_AX] = #7139
+		end if
+
+		reg_list[REG_DS] = floor(low_buff / 16)
+		reg_list[REG_DX] = remainder(low_buff, 16)
+		reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+		reg_list = dos_interrupt(#21, reg_list)
+		free_low(low_buff)
+
+		if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+			return 0
+		else
+			return 1
+		end if
 	else
-	pname = allocate_string(name)
+		pname = allocate_string(name)
 	end ifdef
+
 	ifdef UNIX then
 		ret = not c_func(xCreateDirectory, {pname, mode})
 	elsifdef WIN32 then
 		ret = c_func(xCreateDirectory, {pname, 0})
 		mode = mode -- get rid of not used warning
 	end ifdef
+
 	return ret
 end function
 
@@ -203,6 +215,7 @@ end function
 --		crash("Filesystem problem - could not remove the old folder")
 -- end if
 -- </eucode>
+--
 -- See Also:
 -- 	[[:create_directory]], [[:chdir]]
 
@@ -259,22 +272,22 @@ export enum
 -- Return directory information for the specified file or directory.
 --
 -- Parameters:
--- 		# ##name##: a sequence, the name to be looked up in the file system.
+--     # ##name##: a sequence, the name to be looked up in the file system.
 --
 -- Returns:
---		An **object**: -1 if no match found, else a sequence of sequence entries
+--     An **object**: -1 if no match found, else a sequence of sequence entries
 --
 -- Comments:
--- 		##name## can also contain * and ? wildcards to select multiple
+--     ##name## can also contain * and ? wildcards to select multiple
 -- files.
 --
 -- The returned information is similar to what you would get from the DOS DIR command. A sequence
 -- is returned where each element is a sequence that describes one file or subdirectory.
 -- 
 -- If ##name## refers to a **directory** you may have entries for "." and "..",
--- just as with the DOS DIR command. If it refers to an existing **file**, and has no wildcards, then the returned sequence will
--- have just one entry, i.e. its length will
--- be 1. If ##name## contains wildcards you may have multiple entries.
+-- just as with the DOS DIR command. If it refers to an existing **file**, and has no wildcards, 
+-- then the returned sequence will have just one entry, i.e. its length will be 1. If ##name## 
+-- contains wildcards you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
 -- the year, month, day, hour, minute and second of the last modification.
@@ -416,8 +429,10 @@ end function
 -- s = current_dir()
 -- -- s would have "C:\EUPHORIA\DOC" if you were in that directory
 -- </eucode>
+--
 -- See Also:
 -- 	[[:dir]], [[:chdir]]
+
 export function current_dir()
 -- returns name of current working directory
 	return machine_func(M_CURRENT_DIR, 0)
@@ -451,14 +466,18 @@ end function
 --     puts(STDERR, "Error: No euphoria directory?\n")
 -- end if
 -- </eucode>
+--
 -- See Also:
 -- [[:current_dir]], [[:dir]]
+
 export function chdir(sequence newdir)
--- Changes the current directory. Returns 1 - success, 0 - fail.
 	return machine_func(M_CHDIR, newdir)
 end function
 
 -- Generalized recursive directory walker
+
+--**
+-- Bad path error code
 
 export constant W_BAD_PATH = -1 -- error code
 
@@ -488,26 +507,28 @@ export integer my_dir = DEFAULT
 --
 -- Parameters:
 -- 		# ##path_name##: a sequence, the name of the directory to walk through
--- 		# ##your_function##: an integer, either ##my_dir## or the routine id of a callback Euphoria function
+-- 		# ##your_function##: an integer, either ##my_dir## or the routine id of a callback 
+-- 		  Euphoria function
 -- 		# ##scan_subdirs##: an integer, 1 to also walk though subfolders, 0 to skip them all.
 --
 -- Comments:
 --
--- This routine will "walk" through a directory named ##path_name##. For each entry in the directory, it will call a function, whose routine_id is ##your_function##.
+-- This routine will "walk" through a directory named ##path_name##. For each entry in the 
+-- directory, it will call a function, whose routine_id is ##your_function##.
 -- If ##scan_subdirs## is non-zero (TRUE), then the subdirectories in
 -- st will be walked through recursively in the very same way.
 --
--- The routine that you supply should accept two sequences, the path name and dir() entry for each file and
--- subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
+-- The routine that you supply should accept two sequences, the path name and dir() entry for 
+-- each file and subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
 --
 -- This mechanism allows you to write a simple function that handles one file at a time, 
 -- while walk_dir() handles the process of walking through all the files and subdirectories.
-
+--
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
 -- a different order, set the export integer ##my_dir## to the routine id of your own modified
 -- [[:dir]] function that sorts the directory entries differently. See the default ##dir()##
 -- function in filesys.e.
-
+--
 -- The path that you supply to ##walk_dir()## must not contain wildcards (* or ?). Only a 
 -- single directory (and its subdirectories) can be searched at one time.
 --
@@ -609,8 +630,10 @@ end function
 -- Comments:
 --     If overwrite is true, and if dest file already exists,
 --     the function overwrites the existing file and succeeds.
+--
 -- See Also:
 -- [[:move_file]], [[:rename_file]]
+
 export function copy_file(sequence src, sequence dest, atom overwrite)
 	ifdef WIN32 then
 	atom psrc, pdest, ret
@@ -665,9 +688,13 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
--- 		If ##dest## contains a path specification, this is equivalent to moving the file, as well as possibly changing its name. However, the path must be on the same drive for this to work.
+-- 		If ##dest## contains a path specification, this is equivalent to moving the file, as 
+-- 		well as possibly changing its name. However, the path must be on the same drive for 
+-- 		this to work.
+--
 -- See Also:
 -- [[:move_file]], [[:copy_file]]
+
 export function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	ifdef DOS32 then
@@ -949,6 +976,7 @@ end function
 --     This function does not compute the total size for a directory, and returns 0 instead.
 -- See Also:
 -- [[:dir]]
+
 export function file_length(sequence filename)
 	object list
 	list = dir(filename)

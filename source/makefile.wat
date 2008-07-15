@@ -211,11 +211,11 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
-        .\$(OBJDIR)\convert.obj &
-        .\$(OBJDIR)\compress.obj &
-        .\$(OBJDIR)\dll.obj &
-        .\$(OBJDIR)\io.obj &
-        .\$(OBJDIR)\filesys.obj
+	.\$(OBJDIR)\convert.obj &
+	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\dll.obj &
+	.\$(OBJDIR)\io.obj &
+	.\$(OBJDIR)\filesys.obj
 
 EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -230,10 +230,11 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\text.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\types.obj &
-        .\$(OBJDIR)\convert.obj &
-        .\$(OBJDIR)\compress.obj &
-        .\$(OBJDIR)\io.obj &
-        .\$(OBJDIR)\filesys.obj
+	.\$(OBJDIR)\convert.obj &
+	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\io.obj &
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\dos_mem.obj
 
 EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -268,10 +269,11 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\main.obj &
-        .\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\init-.obj &
 	.\$(OBJDIR)\0rror.obj &
-        .\$(OBJDIR)\filesys.obj &
-        .\$(OBJDIR)\types.obj
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\types.obj &
+	.\$(OBJDIR)\dos_mem.obj
 
 EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -322,13 +324,14 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\text.obj &
-        .\$(OBJDIR)\search.obj &
-        .\$(OBJDIR)\io.obj &
-        .\$(OBJDIR)\math.obj &
-        .\$(OBJDIR)\os.obj &
+	.\$(OBJDIR)\search.obj &
+	.\$(OBJDIR)\io.obj &
+	.\$(OBJDIR)\math.obj &
+	.\$(OBJDIR)\os.obj &
 	.\$(OBJDIR)\0rror.obj &
-        .\$(OBJDIR)\filesys.obj &
-        .\$(OBJDIR)\types.obj
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\types.obj &
+	.\$(OBJDIR)\dos_mem.obj
 
 PCRE_OBJECTS = &
 	.\pcre\pcre_chartables.obj &
@@ -900,6 +903,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\dll.obj : .\$(OBJDIR)\dll.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\dos_mem.obj : .\$(OBJDIR)\dos_mem.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c
