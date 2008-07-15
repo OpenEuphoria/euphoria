@@ -1490,7 +1490,8 @@ global procedure BackEnd( object ignore )
 		{ "p", "dep", "suppress dependencies", NO_PARAMETER, routine_id("suppress_dependencies") },
 		{ "s", "std", "show standard library information", NO_PARAMETER, routine_id("suppress_stdlib") },
 		{ "f", "file", "include this file", HAS_PARAMETER, routine_id("document_file") },
-		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") }
+		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") },
+		{ "t", 0, "translator mode", NO_PARAMETER, -1 }
 		}
 	sequence result = cmd_parse( opts )
 	

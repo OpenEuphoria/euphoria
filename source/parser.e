@@ -1840,8 +1840,9 @@ procedure Switch_statement()
 	Expr()
 	
 	cases = NewStringSym( {-1, length(SymTab) } )
+	
 	emit_opnd( cases )
-	   
+	
 	jump_table = NewStringSym( {-2, length(SymTab) } )
 	emit_opnd( jump_table )
 	
@@ -1870,6 +1871,11 @@ procedure Switch_statement()
 	if TRANSLATE then
 		-- translator doesn't use the else jump
 		Code[else_bp] = length( Code ) + 2
+		-- This prevents the translator from getting confused.  It might
+		-- otherwise use this as a temp somewhere else, leading to wrong
+		-- code being emitted.  A '0' should never be part of a real temp
+		-- string.
+		SymTab[cases][S_OBJ] &= 0
 	else
 		if switch_stack[$][SWITCH_ELSE] then
 			Code[else_bp] = switch_stack[$][SWITCH_ELSE]

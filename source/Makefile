@@ -166,6 +166,7 @@ EU_INTERPRETER_OBJECTS =  \
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \
 	./$(OBJDIR)/main-0.o \
+	./$(OBJDIR)/convert.o \
 	./$(OBJDIR)/cominit.o \
 	./$(OBJDIR)/pathopen.o \
 	./$(OBJDIR)/init-.o \

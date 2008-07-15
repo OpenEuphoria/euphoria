@@ -1538,16 +1538,16 @@ export function add_item(object needle, sequence haystack, integer pOrder = 1)
 		return haystack
 	end if
 	switch pOrder do
-		case 1: -- prepend
+		case ADD_PREPEND:
 			return prepend(haystack, needle)
 			
-		case 2: -- append
+		case ADD_APPEND:
 			return append(haystack, needle)
 			
-		case 3: -- ascending
+		case ADD_SORT_UP:
 			return sort(append(haystack, needle))
 			
-		case 4: -- descending
+		case ADD_SORT_DOWN:
 			return sort_reverse(append(haystack, needle))
 			
 	end switch

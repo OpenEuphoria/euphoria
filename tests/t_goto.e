@@ -38,7 +38,7 @@ end function
 
 c = 1
 goto "e"
-while c = 1 do
+while c = 0 do -- translator used to, but should not optimize this loop away
 	crash("should never get to this statement")
 	label "e"
 	c = 2
