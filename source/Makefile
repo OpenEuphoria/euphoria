@@ -257,6 +257,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/mode.o \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/dll.o \
+	./$(OBJDIR)/convert.o \
 	./$(OBJDIR)/filesys.o
 
 EU_BACKEND_RUNNER_FILES = \
