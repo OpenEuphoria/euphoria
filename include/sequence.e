@@ -751,7 +751,7 @@ end function
 --**
 -- Split a sequence on some delimiters.
 --
--- Paramters:
+-- Parameters:
 --   # ##source##: the sequence to split.
 --   # ##delim##: an object, the delimiter(s) to split by.
 --   # ##limit##: an integer, the maximum number of items to split. Default is 0 (no limit)
@@ -813,7 +813,7 @@ end function
 --
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
--- Paramters:
+-- Parameters:
 -- # ##source##: the sequence to split.
 -- # ##delim##: a list of delimiters to split by.
 -- # ##limit##: maximum number of items to split.

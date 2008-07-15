@@ -384,7 +384,7 @@ end function
 --
 -- TODO: test
 --
--- Paramters:
+-- Parameters:
 --     hour is the hour (0-23)
 --     minute is the minute (0-59)
 --     second is the second (0-59)
