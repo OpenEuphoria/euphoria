@@ -40,7 +40,7 @@ include sort.e
 -- not equivalent.
 --
 -- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic 
--- storage allocation. The case where ##target## itsekf is append()ed to (as in
+-- storage allocation. The case where ##target## itself is append()ed to (as in
 -- Example 1 below) is highly optimized.
 --
 -- Example 1:
@@ -142,7 +142,7 @@ include sort.e
 
 --**
 -- Signature:
--- global function length(sequence targert)
+-- global function length(sequence target)
 --
 -- Description:
 -- Return the length of a sequence.
@@ -174,7 +174,7 @@ include sort.e
 --   global function insert(sequence target, object what, integer index)
 --
 -- Description:
---   Insert an object into a sequence as a naw element at a given location.
+--   Insert an object into a sequence as a new element at a given location.
 --
 --- Parameters:
 --		# ##target##: the sequence to insert into
@@ -228,7 +228,7 @@ include sort.e
 -- (atoms are of length 1 for this purpose). ##splice##() is equivalent to [[:insert]]() when ##what## is
 --   an atom, but not when it is a sequence.
 --
--- Splicing a string into a string resunts into a new string.
+-- Splicing a string into a string results into a new string.
 --
 -- Example 1:
 -- <eucode>
@@ -260,7 +260,7 @@ include sort.e
 -- In the result sequence, some or all top-level elements appear in reverse order compared
 -- to the original sequence. This does not reverse any sub-sequences found in the original
 -- sequence.\\
--- The ##pTo## parmeter can be negative, which indicates an offset from the last element.
+-- The ##pTo## parameter can be negative, which indicates an offset from the last element.
 -- Thus {{{-1}}} means the second-last element and {{{0}}} means the last element.
 --
 -- Example 1:
@@ -312,7 +312,7 @@ end function
 --
 -- Parameters:
 --		# ##source##: the sequence from which elements will be returned
---		# ##size##: an integer, how many head elements at most will be returned. Sefaults to 1.
+--		# ##size##: an integer, how many head elements at most will be returned. Defaults to 1.
 --
 -- Returns:
 --		A **sequence**, ##source## if its length is not greater than ##size##, or the ##size## first elements of ##source## otherwise.
@@ -347,18 +347,18 @@ export function head(sequence source, integer size=1)
 end function
 
 --**
--- Returns a slice of a sequence, given by a starting point and a lengty.
+-- Returns a slice of a sequence, given by a starting point and a length.
 --
 -- Parameters:
 --		# ##source##: the sequence some elements of which will be returned
---		# ##start##: an integr, the lower index of the slice to return
+--		# ##start##: an integer, the lower index of the slice to return
 --		# ##len##: an integer, the length of the slice to return
 --
 -- Returns:
 --		A **sequence**, made of at most ##len## elements of ##source##. These elements are at contiguous positions in ##source## starting at ##start##.
 --
 -- Errors:
--- If ##len## is less than ##-length(source)##, an eroror occurs.
+-- If ##len## is less than ##-length(source)##, an error occurs.
 --
 -- Comments:
 -- ##len## may be negative, in which case it is added ##length(source)## once.
@@ -469,7 +469,7 @@ end function
 -- Perform a vertical slice on a nested sequence
 --
 -- Parameters:
---		# ##source##: the sequence to take a vertical sloice from
+--		# ##source##: the sequence to take a vertical slice from
 --		# ##colno##: an atom, the column number to extract (rounded down)
 --		# ##error_control##: an object which says what to do if some element does not exist. Defaults to 0 (crash in such a circumstance).
 --
@@ -478,10 +478,10 @@ end function
 --
 -- Errors:
 -- If an element is not defined and ##error_control## is 0, an error occurs.
--- If ##colno## is less than 1, it cannot be any valid coumn, and an error occurs.
+-- If ##colno## is less than 1, it cannot be any valid column, and an error occurs.
 --
 -- Comments:
--- If it is not possible to return the sequence of all ##source[x][colno]]## for all avalable ##x##, the outcome is decided by ##error_control##:
+-- If it is not possible to return the sequence of all ##source[x][colno]]## for all available ##x##, the outcome is decided by ##error_control##:
 -- * If 0 (the default), program is aborted.
 -- * If a nonzero atom, the short vertical slice is returned.
 -- * Otherwise, elements of ##error_control## will be taken to make for any missing element. A short vertical slice is returned if ##error_control## is exhausted.
@@ -544,7 +544,7 @@ end function
 --		A **sequence** of length at most ##size##. If the length is less than ##size##, then ##source## was returned. Otherwise, the ##size## last elements of ##source## were returned.
 --
 -- Comments:
---   ##siuurce## can be any type of sequence, including nested sequences.
+--   ##source## can be any type of sequence, including nested sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -636,7 +636,7 @@ export function remove(sequence target, atom start, atom stop=start)
 end function
 
 --**
--- Removes all ocurrences of nsome object from a sequence.
+-- Removes all occurrences of some object from a sequence.
 --
 -- Parameters:
 --   # ##needle##: the object to remove.
@@ -672,7 +672,7 @@ export function remove_all(object needle, sequence haystack)
 		return haystack
 	end if
 	
-	-- Now we know there is at least one occurence and because
+	-- Now we know there is at least one occurrence and because
 	-- it's the first one, we don't have to move anything yet.
 	-- So pretend we have and set up the 'end' variables
 	-- as if we had moved stuff.
@@ -729,7 +729,7 @@ end function
 -- Comments:
 --   A new sequence is created. ##target## can be a string or complex sequence of any shape.
 --
---   To replace by just one element, enclose ##replacement## in curly braces, which woll be removed at replace time.
+--   To replace by just one element, enclose ##replacement## in curly braces, which will be removed at replace time.
 --
 -- Example 1:
 -- <eucode>
@@ -944,7 +944,7 @@ end function
 --   # ##padding##: an object, usually the character to pad to (defaults to ' ').
 --
 -- Returns:
---		A **sequence**, either ##target## if it was long enough, or a sequence of length ##size## whose firt elements are those of ##target## and whose last few head elements all equal ##padding##.
+--		A **sequence**, either ##target## if it was long enough, or a sequence of length ##size## whose first elements are those of ##target## and whose last few head elements all equal ##padding##.
 --
 -- Comments:
 --   ##pad_tail##() will not remove characters. If ##length(target)## is greater than ##size##, this
@@ -1041,7 +1041,7 @@ end function
 --		A **sequence** of atoms, all the atoms in ##s## enumerated.
 --
 -- Comments:
---	If you consider a sequence as a tree, then the enumearation is prformed byleft-right reading of the tree. The elements are simply rad left to right, without any care for braces.
+--	If you consider a sequence as a tree, then the enumeration is performed by left-right reading of the tree. The elements are simply read left to right, without any care for braces.
 --
 -- Example 1:
 -- <eucode>
@@ -1117,7 +1117,7 @@ end function
 --
 -- Parameters:
 --		# ##start##: the initial value from which to start
---		# ##increment##: the value to recursivey add to ##start## to get new elements
+--		# ##increment##: the value to recursively add to ##start## to get new elements
 --		# ##count##:  an integer, the number of additions to perform.
 --
 -- Returns:
@@ -1158,7 +1158,7 @@ end function
 --		# ##count##: an integer, the number of times the pattern is to be repeated.
 --
 -- Returns:
---		A **seqience**, empty on failure, and of length ##count*length(pattern)## otherwise. The first elements of the returned sequence are those of #pattern##. So are those that follow, on to the end.
+--		A **sequence**, empty on failure, and of length ##count*length(pattern)## otherwise. The first elements of the returned sequence are those of #pattern##. So are those that follow, on to the end.
 --
 -- Example 1:
 -- <eucode>
@@ -1188,8 +1188,8 @@ end function
 --**
 -- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
 --
--- Paameters:
---		# ##vectors##: a sequence of sequences of objects,. Subsequences will be etracted from the inner sequences.
+-- Parameters:
+--		# ##vectors##: a sequence of sequences of objects. Subsequences will be extracted from the inner sequences.
 --		# ##coords##: q list of coordinate index lists, ie a sequence of sequences of small positive integers.
 --
 -- Returns:
@@ -1239,11 +1239,11 @@ end function
 -- Retrieves an element nested arbitrarily deep into a sequence.
 --
 -- Parameters:
---		# ##source##: the sequence from hich to fetch
+--		# ##source##: the sequence from which to fetch
 --		# ##indexes##: a sequence of integers, th path to follow to reach the element to return.
 --
 -- Returns:
---		An **object**, which is ##source[indexes[1]][indexes[2]]...[infrxd[$]]##
+--		An **object**, which is ##source[indexes[1]][indexes[2]]...[indexes[$]]##
 --
 -- Errors:
 --		If the path cannot be followed to its end, an error about reading an inexistent element, or subscripting an atom, will occur.
@@ -1283,7 +1283,7 @@ end function
 --		# ##x##: the object to store.
 --
 -- Returns:
---		A **sequence**, a **copy** of ##target## with the speciied place ##indexes## modified by storing ##x## into it.
+--		A **sequence**, a **copy** of ##target## with the specified place ##indexes## modified by storing ##x## into it.
 --
 -- Errors:
 --		If the path to storage location cannot be followed to its end, or an index is not what one would expect or is not valid, an error about illegal sequence operations will occur.
@@ -1404,7 +1404,7 @@ export constant
 -- # ##source##: sequence to be rotated
 -- # ##shift##: direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
 -- # ##start##: starting position for shift, defaults o 1
--- # ##stop##: stopping position for shift, defaults to ##length(sourc)##
+-- # ##stop##: stopping position for shift, defaults to ##length(source)##
 --
 -- Comments:
 -- Use ##amount * direction## to specify the shift. direction is either ##ROTATE_LEFT##
@@ -1495,8 +1495,8 @@ export enum
 --
 -- Comments:
 -- The following enum is provided for specifying pOrder:
--- * ADD_PREPEND   : prepend ##needle## to ##haystack##. Rhis i the default option.
--- * ADD_APPEND    : apepend ##needle## to ##haystack##.
+-- * ADD_PREPEND   : prepend ##needle## to ##haystack##. This is the default option.
+-- * ADD_APPEND    : append ##needle## to ##haystack##.
 -- * ADD_SORT_UP   : sort ##haystack## in ascending order after inserting ##needle##
 -- * ADD_SORT_DOWN : sort ##haystack## in descending order after inserting ##needle##
 --
@@ -1609,7 +1609,7 @@ end function
 --		A **sequence** made of the elements in ##source## which passed the test.
 --
 -- Comments:
--- The comparator routine must take one prameter and return an atom. The parameter type must be such that all elements of ##source## have this type. An element is retained if the comparator routine returns a nonzero value.
+-- The comparator routine must take one parameter and return an atom. The parameter type must be such that all elements of ##source## have this type. An element is retained if the comparator routine returns a nonzero value.
 --
 -- Example 1:
 -- <eucode>
@@ -1641,7 +1641,7 @@ end function
 --
 -- Parameters: 
 -- * ##source## - sequence to map
--- * ##rid## - [[:routine_id]] of function to use as convertor
+-- * ##rid## - [[:routine_id]] of function to use as converter
 --
 -- Returns:
 --		A **sequence** the length of ##source##. Each element there is the corresponding element in ##source## mapped using the routine referred to by ##rid##.

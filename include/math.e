@@ -67,7 +67,7 @@ end type
 --   Return an angle with given tangent.
 --
 -- Parameters:
---		# ##tangent##: an object, each atom of which will be converted, no mtter how deeply nested.
+--		# ##tangent##: an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
 --		An **object** of the same shape as ##tangent##. For each atom in ##flatten(tangent)##, the angle with smallest magnitude that has this atom as tangent is computed.
@@ -95,7 +95,7 @@ end type
 --   Return the tangent of an angle, or a sequence of angles.
 --
 -- Parameters:
---		# ##angle##: an object, each atom of which will be converted, no mtter how deeply nested.
+--		# ##angle##: an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
 --		An **object** of the same shape as ##angle##. Each atom in the flattened ##angle## is replaced by its tangent.
@@ -149,7 +149,7 @@ constant M_SET_RAND = 35
 -- Reset the random number generator.
 --
 -- Parameters:
--- 		# ##seed##, an integer, which the generator uses to initialise itself
+-- 		# ##seed##, an integer, which the generator uses to initialize itself
 --
 -- Comments:
 -- 		Starting from a ##seed##, the values returned by rand() are
@@ -196,7 +196,7 @@ end procedure
 -- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
 --
 -- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an euclidian division
+--		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
 --		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
 --
 -- Returns:
@@ -206,7 +206,7 @@ end procedure
 -- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result has the sign of ##dividend## and lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
--- <a href="refman_2.htm#26">operations on sequences</a> apply, and determint the shape of the returned object.
+-- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
 --
 -- Example 1:
 -- <eucode>
@@ -238,7 +238,7 @@ end procedure
 -- Compute the remainder of the division of two atoms. The result is not less than zero
 --
 -- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an euclidian division
+--		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
 --		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
 --
 -- Returns:
@@ -248,7 +248,7 @@ end procedure
 -- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result is nonnegative and has lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
--- <a href="refman_2.htm#26">operations on sequences</a> apply, and determint the shape of the returned object.
+-- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
 --
 -- When both arguments are positive numbers, [[:mod]]() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
 --
@@ -289,7 +289,7 @@ end function
 -- Return the cosine of an angle expressed in radians
 --
 -- Parameters:
---		# ##angle##: an object, each atom of which will be converted, no mtter how deeply nested.
+--		# ##angle##: an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
 --		An **object**, the same shape as ##angle##. Each atom in ##angle## is turned into its cosine.
@@ -322,7 +322,7 @@ end function
 --		An **object**, the same shape as ##value##. For an atom, the returned atom is its logarithm of base E.
 --
 -- Errors:
---		If any atom in ##value## is not reater than zero, an error occurs as its logarithm is not defined.
+--		If any atom in ##value## is not greater than zero, an error occurs as its logarithm is not defined.
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements
@@ -348,7 +348,7 @@ end function
 --
 -- Parameters:
 --		# ##base##: an object, the value(s) to raise to some power.
---		# ##exponent##: an objetct, the exponent(s) to apply to ##base##.
+--		# ##exponent##: an object, the exponent(s) to apply to ##base##.
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##base##'s and ##exponent##'s. For two atoms, this will be ##base## raised to the power ##exponent##.
@@ -426,10 +426,10 @@ end function
 --		# ##value##: an object, each atom in which will be acted upon.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is the positive atom whoose square is ##value##.
+--		An **object** the same shape as ##value##. When ##value## is an atom, the result is the positive atom whose square is ##value##.
 --
 -- Errors:
---		If any atrtom in ##value## is less than zero, an error will occur, as no squared real can be less than zero.
+--		If any atom in ##value## is less than zero, an error will occur, as no squared real can be less than zero.
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
@@ -459,7 +459,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- The sine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by integer multiles of PI only.
+-- The sine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by integer multiples of PI only.
 --
 -- Example 1:
 -- <eucode>
@@ -924,7 +924,7 @@ end function
 --**
 -- Computes some power of E.
 --
--- Parmeters:
+-- Parameters:
 --		# ##value##: an object, all atoms of which will be acted upon, no matter how deeply nested.
 --
 --Returns:
@@ -989,7 +989,7 @@ end function
 --		# ##hi##: an integer, the upper bound of the range.
 --
 -- Returns:
---		An **integer** randomly drawn between ##lo## ansd ##hi## inclusive.
+--		An **integer** randomly drawn between ##lo## and ##hi## inclusive.
 --
 -- Errors:
 --		If ##lo## is not less than ##hi##, an error will occur.

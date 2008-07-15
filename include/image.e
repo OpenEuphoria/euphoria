@@ -372,9 +372,9 @@ end type
 --		//DOS32//
 --
 -- Returns
---		An **integer**, the current page number displayed bythe monitor.
+--		An **integer**, the current page number displayed by the monitor.
 -- Comments: 
--- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how manypages are available in the current graphics mode.
+-- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how many pages are available in the current graphics mode.
 --
 -- The active and display pages are both 0 by default.
 --  
@@ -1028,7 +1028,7 @@ end procedure
 --
 -- Comments:
 --   This routine does the opposite of [[:read_bitmap]]().
--- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each color in the butmap. The second element is a sequence of sequences of pcolors. The inner sequences must have the same length.
+-- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each color in the bitmap. The second element is a sequence of sequences of pcolors. The inner sequences must have the same length.
 --
 -- The result will be one of the following codes: 
 --  <eucode>

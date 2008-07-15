@@ -156,7 +156,7 @@ end type
 -- Description:
 --   Set the cursor to line ##row##, column ##column##, where the top left corner of the screen is line 1,
 --   column 1 in text mode, row 0 and column 0 in graphic mode. The next character displayed on the screen will be printed at this location.
---   position() will report an error if the location is off the screen. The //Windows// console doesn't check for rows, as the physical height of the console may be vastly less than its logical height.
+--   position() will report an error if the location is off the screen. The //Windows// console does not check for rows, as the physical height of the console may be vastly less than its logical height.
 --
 -- Comments:
 --   position() works in both text and pixel-graphics modes.
@@ -637,7 +637,7 @@ end function
 -- Comments:
 -- Each element specifies a new color intensity ##{red, green, blue}## for the corresponding 
 -- color number, starting with color number 0. The values for red, green and blue must be 
--- in the range 0 to 63. Lst color is the border, also known as overscan, color.
+-- in the range 0 to 63. Last color is the border, also known as overscan, color.
 --
 -- This executes much faster than if you were to use ##[[:palette]]()## to set the new color
 -- intensities one by one. This procedure can be used with ##[[:read_bitmap]]()## to quickly 

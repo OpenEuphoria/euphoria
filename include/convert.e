@@ -16,7 +16,7 @@ constant
 -- Parameters:
 --		# ##x##, an atom, the value to convert.
 --
--- Retrns:
+-- Returns:
 --		A **sequence** of 4 bytes, lowest significant byte first.
 -- Comments:
 -- If the atom does not fit into a 32-bit integer, things may still work right:
@@ -89,7 +89,7 @@ end type
 --
 -- Comments:
 --
---	This perfoms the reverse operation from [[:int_to_bytes]]
+--	This performs the reverse operation from [[:int_to_bytes]]
 --
 --  An atom is being returned, because the converted value may be bigger
 -- than what can fit in an Euphoria integer.
@@ -255,7 +255,7 @@ end function
 -- 		# ##a##, the atom to convert:
 --
 -- Returns:
---		A **sequence** of 4 bytes, which can be poked in memory to rpresent ##a##.
+--		A **sequence** of 4 bytes, which can be poked in memory to represent ##a##.
 --
 -- Comments: 
 -- Euphoria atoms can have values which are 64-bit IEEE floating-point
@@ -268,9 +268,9 @@ end function
 --
 -- Integer values will also be converted to 32-bit floating-point format.
 --
--- On nowadays computers, computations on 64 bit floats are no faster than
+-- On modern computers, computations on 64 bit floats are no faster than
 -- on 32 bit floats. Internally, the PC stores them in 80 bit registers
--- anyway. Euphoria doesn't support these so called long doubles.
+-- anyway. Euphoria does not support these so called long doubles.
 --
 -- Example 1:
 -- <eucode>

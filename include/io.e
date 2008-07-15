@@ -125,7 +125,7 @@ export constant EOF = -1
 -- * ##%f## - print an atom as a floating-point number with a decimal point but no exponent
 -- * ##%g## - print an atom as a floating-point number using whichever format seems 
 --            appropriate, given the magnitude of the number
--- * ##~%~%## - print the '%' character itself. Yhis is not an actual format specifier.
+-- * ##~%~%## - print the '%' character itself. This is not an actual format specifier.
 --
 -- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number 
 -- before the decimal point is the minimum field width to be used. The number after 
@@ -323,7 +323,7 @@ constant CHUNK = 100
 --		# ##n##: a positive integer, the number of bytes to read.
 --
 -- Returns:
---		A **seuence** of length at most ##n##, made of the bytes that could be read from the file.
+--		A **sequence** of length at most ##n##, made of the bytes that could be read from the file.
 --
 -- Comments:
 --     When ##n## > 0 and the function returns a sequence of length less than ##n## you know
@@ -454,7 +454,7 @@ end type
 -- Open a file or device, to get the file number. 
 --
 -- Parameters:
---		# ##path##: a strign, the path to the file or device to open.
+--		# ##path##: a string, the path to the file or device to open.
 -- 		# ##mode##: a string, the mode being used o open the file.
 --
 -- Returns:
@@ -631,7 +631,7 @@ end function
 -- When a file is closed, (see close()), all buffered data is flushed out. 
 --  When a program terminates, all open files are flushed and closed 
 --  automatically. Use flush() when another process may need to
---  see all of the data written so far, but you aren't ready
+--  see all of the data written so far, but you are not ready
 --   to close the file yet. flush() is also used in crash routines, where files may not be closed in the cleanest possible way.
 --
 -- Example 1:
@@ -762,7 +762,7 @@ global procedure unlock_file(file_number fn, byte_range r={})
 end procedure
 
 --****
--- === File Reading/Writting
+-- === File Reading/Writing
 
 --**
 -- Read the contents of a file as a sequence of lines.
@@ -830,16 +830,16 @@ end function
 --     An **integer**: 1 on success, -1 on failure.
 --
 -- Errors:
---		If [[:puts]] cannot write some line of text, a run ime error will occur.
+--		If [[:puts]] cannot write some line of text, a runtime error will occur.
 --
 -- Comments:
 --	If ##file## was a sequence, the file will be closed on completion. Otherwise, it will remain open, but at end of file.
 --
--- Whatever integer the lines in ##lines## holds will be truncated to its 8 lowest bits so as to fall in tthe 0.255 range.
+-- Whatever integer the lines in ##lines## holds will be truncated to its 8 lowest bits so as to fall in the 0.255 range.
 --
 -- Example 1:
 -- <eucode>
--- if write_lines("data.txt", {"This is important data", "Goodybe"}) != -1 then
+-- if write_lines("data.txt", {"This is important data", "Goodbye"}) != -1 then
 --     puts(STDERR, "Failed to write data\n")
 -- end if
 -- </eucode>
@@ -880,7 +880,7 @@ end function
 --     An **integer**: 1 on success, -1 on failure.
 --
 -- Errors:
---		If [[:puts]] cannot write some line of text, a run ime error will occur.
+--		If [[:puts]] cannot write some line of text, a runtime error will occur.
 --
 -- Comments:
 -- ##file## is opened, written to and then closed.
@@ -978,7 +978,7 @@ end function
 --     An **integer**: 1 on success, -1 on failure.
 --
 -- Errors:
---		If [[:puts]] cannot write ##data##, a run ime error will occur.
+--		If [[:puts]] cannot write ##data##, a runtime error will occur.
 --
 -- Comments:
 -- When ##file## is a file handle, the file is not closed after writing is finished. When ##file## is a

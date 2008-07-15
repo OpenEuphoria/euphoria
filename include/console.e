@@ -123,7 +123,7 @@ end function
 -- 		Waits for user to press a key, unless any is pending, and returns key code.
 --
 -- Returns:
---		An **integer**, which is a key code. If one is waiting in keyboard bufer, then return it. Otherwise, wait for one to come up.
+--		An **integer**, which is a key code. If one is waiting in keyboard buffer, then return it. Otherwise, wait for one to come up.
 --
 -- Comments:
 --     You could achieve the same result using get_key() as in the example.
@@ -179,7 +179,7 @@ end procedure
 
 --**
 -- Description:
--- 		Promptz the user to enter a number, and returns only validated input.
+-- 		Prompts the user to enter a number, and returns only validated input.
 --
 -- Parameters:
 --		# ##st## is a string of text that will be displayed on the screen.
@@ -190,10 +190,10 @@ end procedure
 -- 		An **atom** in the assigned range which the user typed in.
 --
 -- Errors:
--- 		If puts() cnnot display ##st## on standard input, or if the first or second element of
--- ##s## is a sequence, a runtime error will be raied.
+-- 		If puts() cannot display ##st## on standard input, or if the first or second element
+--      of ##s## is a sequence, a runtime error will be raised.
 --		If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well 
--- on a type check error.
+--      on a type check error.
 --
 -- Comments:
 -- 		As long as the user enters a number that is less than lower or greater

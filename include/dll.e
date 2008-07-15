@@ -156,7 +156,7 @@ end function
 -- normally expected to follow the stdcall calling convention, but if you wish to use the
 -- cdecl convention instead, you can code {'+', address} instead of address.
 --
--- ##argtypes## is made of type constants, which describe the C types of arguments to the procedure. Tjey may be used to define machine code parameters as well.
+-- ##argtypes## is made of type constants, which describe the C types of arguments to the procedure. They may be used to define machine code parameters as well.
 --
 -- The C function that you define could be one created by the Euphoria To C Translator, in
 -- which case you can pass Euphoria data to it, and receive Euphoria data back. A list of 
@@ -312,7 +312,7 @@ end function
 --      By default, your routine will work with the stdcall convention. On
 -- Windows, you can specify i1s id as {'+', id}, in which case it will work with the cdecl calling
 -- convention instead. On non-Microsoft platforms, you
--- should only use simple ids, as there is just one standard calling convention, ie stdcall.
+-- should only use simple IDs, as there is just one standard calling convention, ie stdcall.
 --
 --     You can set up as many call-back functions as you like, but they must all be Euphoria
 --     functions (or types) with 0 to 9 arguments. If your routine has nothing to return

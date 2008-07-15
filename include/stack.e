@@ -82,7 +82,7 @@ end function
 -- Peek at a stack.
 --
 -- Parameters:
---		# ##sk##: the stack bieing queried
+--		# ##sk##: the stack being queried
 --		# ##idx##: an integer, the place to inspect.
 --
 -- Returns:
@@ -94,7 +94,7 @@ end function
 -- Comments:
 -- ##idx## may be negative, in which case it refers to an element counted backwards. Thus, 0 stands for the last element.
 --
--- In a ##FIFO## type stack, the first object is the one popped last. In a ##FILO## stack, it is popped first. The distinction applies for all possibl values of ##idx##.
+-- In a ##FIFO## type stack, the first object is the one popped last. In a ##FILO## stack, it is popped first. The distinction applies for all possible values of ##idx##.
 --
 -- Example 1:
 -- <eucode>
@@ -132,10 +132,10 @@ export function at(stack sk, integer idx)
 end function
 
 --**
--- Adds something to a stacj.
+-- Adds something to a stack.
 --
 -- Parameters:
---		# ##sk##: the stacj to augment
+--		# ##sk##: the stack to augment
 --		# ##value##: an object, the value to push.
 --
 -- Returns:
@@ -176,7 +176,7 @@ end function
 --		An **object**, the last element on a stack.
 --
 -- Comments:
--- This call is esquivalent to ##at(sk,0)##.
+-- This call is equivalent to ##at(sk,0)##.
 --
 -- ##top(sk)## is the next element to be popped on a ##FILO## stack, and the last one on a ##FIFO## stack.
 --
@@ -209,12 +209,12 @@ end function
 --	A copy of the original **stack**, with the last element removed.
 --
 -- Errors:
--- If the stack is empty, an underflow error occrurs.
+-- If the stack is empty, an underflow error occurs.
 --
 -- Comments:
 -- The object which is removed is at index 0, and was pushed last, in ##FILO## stacks and at position 1, pushed first, in ##FIFO## stacks.
 --
--- The size of the returned stack is ##size(sk)-1## on a succesful ##pop##:
+-- The size of the returned stack is ##size(sk)-1## on a successful ##pop##:
 --
 -- To pop a stack and retrieve he popped value, which this routine does not, you have to do this:
 --

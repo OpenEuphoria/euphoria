@@ -91,7 +91,7 @@ end function
 sequence Defined_Sets
 
 --**
--- Predefined chracter sets:
+-- Predefined character sets:
 export enum
 	CS_FIRST = 0,
 	CS_Consonant,
@@ -243,8 +243,8 @@ export type boolean(object pVal)
 end type
 
 --** 
--- Returns TRUE if argument is an alphanumic character or if every element of 
--- the argument is an alphanumic character.
+-- Returns TRUE if argument is an alphanumeric character or if every element of 
+-- the argument is an alphanumeric character.
 --
 -- Returns FALSE if the argument is an empty sequence, or contains sequences,
 -- or contains non-alphanumeric elements
@@ -382,10 +382,10 @@ end type
 
 --** 
 -- Returns TRUE if argument is a glyph character or if every element of 
--- the argument is a gylph character. (One that is visible when displayed)
+-- the argument is a glyph character. (One that is visible when displayed)
 --
 -- Returns FALSE if the argument is an empty sequence, or contains sequences,
--- or contains non-gylph
+-- or contains non-glyph
 --
 -- Example 1:
 -- <eucode>
@@ -473,11 +473,11 @@ export type t_lower(object pVal)
 end type
 
 --** 
--- Returns TRUE if argument is an displayable character or if every element of 
--- the argument is an displayable character.
+-- Returns TRUE if argument is a character that can be displayed or if every element of 
+-- the argument is a character that can be displayed.
 --
 -- Returns FALSE if the argument is an empty sequence, or contains sequences,
--- or contains non-displayable characters.
+-- or contains characters that cannot be displayed.
 --
 -- Example 1:
 -- <eucode>

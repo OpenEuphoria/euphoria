@@ -256,7 +256,7 @@ global enum
 	D_SECOND
 
 --**
--- Return directory information for the specofoed file or directory.
+-- Return directory information for the specified file or directory.
 --
 -- Parameters:
 -- 		# ##name##: a sequence, the name to be looked up in the file system.

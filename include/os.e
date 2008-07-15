@@ -214,9 +214,9 @@ end function
 -- # -something. The option will be looked up in ##opts##.
 -- # ~-~-something. Ditto.
 -- # /something. Ditto.
--- # anything else. The word is simply aded to the option list.
+-- # anything else. The word is simply added to the option list.
 --
--- On a failed lookup, the progam shows the help by calling [[:show_help]](##opts##,
+-- On a failed lookup, the program shows the help by calling [[:show_help]](##opts##,
 -- ##add_help_rid##) and terminates with status code 1.
 --
 -- Option records have the following structure:
@@ -229,7 +229,7 @@ end function
 --   is not significant.
 --
 -- The fifth member of the record must be the id of a procedure. If the fourth member is
--- ##NO_PARAMETER##, the rocedure takes no argument. Otherwise, it will be passed a sequence,
+-- ##NO_PARAMETER##, the procedure takes no argument. Otherwise, it will be passed a sequence,
 -- the next word on the command line.
 --
 -- For more details on how the command line is being pre parsed, see [[:command_line]].
@@ -397,11 +397,11 @@ constant 		 M_TICK_RATE = 38
 -- Parameters:
 -- 		# ##rate##, an atom, the number of ticks by seconds.
 --
--- Cimments:
+-- Comments:
 -- This setting determines the precision of the time() library routine.
 -- It also affects the sampling rate for time profiling.
 --
--- ##tick_rate## is efective under //DOS// only, and is a no-op elsewhere.
+-- ##tick_rate## is effective under //DOS// only, and is a no-op elsewhere.
 -- Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//,
 -- it is always 100 ticks per second.
 --
@@ -467,11 +467,11 @@ elsifdef OSX then
 end ifdef
 
 --**
--- Retrieves the nme of the host OS.
+-- Retrieves the name of the host OS.
 --
 -- Returns:
 --    A **sequence**, starting with the OS name. If identification fails, returned string
---    is "". Extra information deoends on the OS (details unavailable).
+--    is "". Extra information depends on the OS (details unavailable).
 
 export function uname()
 	ifdef WIN32 then
@@ -599,7 +599,7 @@ end function
 -- Set an environment variable
 --
 -- Parameters:
--- * ##name## - envionment variable name
+-- * ##name## - environment variable name
 -- * ##val## - value to set to
 -- * ##overwrite## - overwrite an existing variable? TRUE/FALSE
 --

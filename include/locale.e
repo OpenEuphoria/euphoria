@@ -130,7 +130,7 @@ end function
 -- Translates a word, using the current language file.
 --
 -- Parameters:
--- 		# ##word##: a sequence, the word to trnslate.
+-- 		# ##word##: a sequence, the word to translate.
 -- Returns:
 --		A **sequence**, the value associated to the key ##word##.
 -- Comments:
@@ -223,10 +223,10 @@ ifdef WIN32 then
 end ifdef
 
 --**
--- Set the computer locale, and possibly loas appropriate translation file.
+-- Set the computer locale, and possibly load appropriate translation file.
 --
 -- Parameters:
---		# ##new_locale##: a sequence representing a nex locale.
+--		# ##new_locale##: a sequence representing a new locale.
 --
 -- Returns:
 --		An **integer**, either 0 on failure or 1 on success.
@@ -271,7 +271,7 @@ end function
 -- Get current locale string
 --
 -- Returns:
---		A **sequence**, a locaale string.
+--		A **sequence**, a locale string.
 --
 -- See Also:
 --		[[:set]]
@@ -302,7 +302,7 @@ end function
 --		# ##amount##: an atom, the value to write out.
 --
 -- Returns:
--- 		A **sequence**, a string that writes out ##amoubt## of current currency.
+-- 		A **sequence**, a string that writes out ##amount## of current currency.
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
@@ -391,7 +391,7 @@ end function
 --
 -- Parameters:
 --		# ##fmt##: A format string, as described in [[:format]]
---		# ##dtm##: the datetime to wrie out.
+--		# ##dtm##: the datetime to write out.
 --
 -- Returns:
 --		A **sequence**, representing the formatted date.

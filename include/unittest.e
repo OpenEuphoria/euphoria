@@ -13,7 +13,7 @@
 -- or applications.
 --
 -- The theory is that if the components of a system are working correctly, then
--- there is a high probablity that a system using those components can be made
+-- there is a high probability that a system using those components can be made
 -- to work correctly.
 --
 -- In Euphoria terms, this framework provides the tools to make testing and reporting on 
@@ -121,7 +121,7 @@ end procedure
 -- * At the medium level, in addition, failed tests display their name, the expected outcome and the outcome they got. This is the initial setting.
 -- * At the highest level of verbosity, each test is reported as passed or failed.
 --
--- If a file crashes while it shouldn't, this event is reported no matter the verbosity level.
+-- If a file crashes when it should not, this event is reported no matter the verbosity level.
 --
 -- The command line switch ""-failed" causes verbosity to be set to medium at startup. The command line switch ""-all" causes verbosity to be set to high at startup.
 --
@@ -132,7 +132,7 @@ export procedure set_test_verbosity(atom verbosity)
 end procedure
 
 --**
--- Reuest the test report to pause before exiting.
+-- Request the test report to pause before exiting.
 --
 -- Parameters:
 --		# ##toWait##: an integer, zero not to wait, nonzero to wait.
@@ -171,7 +171,7 @@ end function
 --**
 -- Output test report
 --
--- Commments:
+-- Comments:
 -- The report components are described in the comments section for [[:set_verbosity]]. Everything prints on the standard error device.
 --
 -- See Also:
@@ -225,7 +225,7 @@ end procedure
 -- * For sequences, no such fuzz is implemented.
 -- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter is typically a function call, or a variable that was set by some prior action.
 --
--- While ##expected## and ##outcome## are processedsymmetrically, they are not recorded symmetrically, so be careful to pass ##expected## before ##outcome## for better test failure reports.
+-- While ##expected## and ##outcome## are processed symmetrically, they are not recorded symmetrically, so be careful to pass ##expected## before ##outcome## for better test failure reports.
 --
 -- See Also:
 -- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]

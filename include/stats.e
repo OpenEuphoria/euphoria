@@ -211,7 +211,7 @@ end function
 -- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
 --
 -- Returns:
---    An **atom**, the estimated stadnard deviation.
+--    An **atom**, the estimated standard deviation.
 --
 -- Comments:
 -- ##stdev##() is a measure of how values are different from the average. These numbers are
@@ -675,7 +675,7 @@ end function
 --    An **object**, either ##{}## if there are no items in the set, or an **atom** (the mean) otherwise.
 --
 -- Comments:
---   ##averagea##() is the theoretical probable value of a randomly selected item from the set, at least when they folow an unimodal distribution.
+--   ##averagea##() is the theoretical probable value of a randomly selected item from the set, at least when they follow a unimodal distribution.
 --
 -- All elements are included; any sequence elements are assumed to have the value zero.
 --
@@ -810,7 +810,7 @@ end function
 --
 -- Note that only atom elements are included and any sub-sequences elements are ignored.
 --
--- The smoothing factor controls how data is smoothed. 0 smooths everything to 0, and 1 means no smoothing at all.
+-- The smoothing factor controls how data is smoothed. 0 smoothes everything to 0, and 1 means no smoothing at all.
 --
 -- Any value for ##pFactor## outside the 0.0..1.0 range causes ##pFactor## 
 -- to be set to the periodic factor ##(2/(N+1))##.

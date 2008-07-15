@@ -203,7 +203,7 @@ end procedure
 -- stored, or 0 on failure.
 -- Comments:
 -- Only the 8 lowest bits of each atom in ##s## is stored. Use
--- ##allocate_wstring##()  for storing dounle byte encoded strings.
+-- ##allocate_wstring##()  for storing double byte encoded strings.
 --
 -- There is no allocate_string_low() function. However, you could easily
 -- craft one by adapting the code for ##allocate_string##.

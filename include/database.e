@@ -459,7 +459,7 @@ global procedure db_dump(integer fn, integer low_level_too)
 end procedure
 
 --**
--- Detects corruption of the free list in a Euphria database.
+-- Detects corruption of the free list in a Euphoria database.
 --
 -- Comments:
 -- This is a debug routine used by RDS to detect corruption of the free list.
@@ -654,7 +654,7 @@ end procedure
 -- DB_LOCK_EXCLUSIVE (exclusive lock). 
 --
 -- Returns:
---		An **integer** status code, either DB_OK if creation succesful or anything else on an error.
+--		An **integer** status code, either DB_OK if creation successful or anything else on an error.
 --
 -- Comments:
 -- 
@@ -757,14 +757,14 @@ end function
 --   ##DB_LOCK_EXCLUSIVE## (for read/write access). 
 --
 -- Returns:
---		An **integer** status code, either DB_OK if creation succesful or anything else on an error.
+--		An **integer** status code, either DB_OK if creation successful or anything else on an error.
 --
 -- The return codes are:
 --
 -- <eucode>
 --    * DB_OK = 0          -- success
---    * DB_OPEN_FAIL = -1  -- couldn't open the file
---    * DB_LOCK_FAIL = -3  -- couldn't lock the file in the
+--    * DB_OPEN_FAIL = -1  -- could not open the file
+--    * DB_LOCK_FAIL = -3  -- could not lock the file in the
 --                        --     manner requested
 -- </eucode>
 --
@@ -865,7 +865,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- if db_select("employees") != DB_OK then
---     puts(2, "Couldn't select employees database\n")
+--     puts(2, "Could not select employees database\n")
 -- end if
 -- </eucode>
 --  See Also:
@@ -1021,7 +1021,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- if db_create_table("my_new_table") != DB_OK then
---     puts(2, "Couldn't create my_new_table!\n")
+--     puts(2, "Could not create my_new_table!\n")
 -- end if
 -- </eucode>
 -- See Also:
@@ -1180,7 +1180,7 @@ end procedure
 --
 -- Errors:
 -- 		* An error occurs if the current database is not defined.
--- 		* If ##name## does not exist on the current database, or if ##new_nalme## does exist on the current database, a fatal error will occur.
+-- 		* If ##name## does not exist on the current database, or if ##new_name## does exist on the current database, a fatal error will occur.
 --
 -- Comments:
 -- 		The table to be renamed can be the current table, or some other table
@@ -1269,7 +1269,7 @@ end function
 --
 -- Returns:
 --		An **integer**, either greater or less than zero:
--- 		* If above zero, the reord identified by ##key## was found on the current table, and the returned intger is its record number.
+-- 		* If above zero, the record identified by ##key## was found on the current table, and the returned integer is its record number.
 --		* If less than zero, the record was not found. The returned integer is the opposite of what the record number would have been, had the record been found.
 --
 -- Errors:
@@ -1278,7 +1278,7 @@ end function
 -- Comments:
 -- 		A fast binary search is used to find the key in the current table.
 -- The number of comparisons is proportional to the log of the number of
--- records in the table. The key is unique - a table is more like a dictionnary than like a spreadsheet.
+-- records in the table. The key is unique - a table is more like a dictionary than like a spreadsheet.
 --		You can select a range of records by searching
 -- for the first and last key values in the range. If those key values don't 
 -- exist, you'll at least get a negative value showing where they would be, 
@@ -1579,7 +1579,7 @@ end procedure
 -- In the current table, replace the data portion of a record  with new data.
 --
 -- Parameters:
--- 		# ##key_location##: an integer, the index of the recordthe data is to be altered
+-- 		# ##key_location##: an integer, the index of the record the data is to be altered
 -- 		# ##data##: an object , the new value associated to the key of the record..
 --
 -- Comments:

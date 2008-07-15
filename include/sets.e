@@ -152,7 +152,7 @@ end function
 -- Return the cardinal of a set
 --
 --Parameters:
---		# ##S##: the set being ueried.
+--		# ##S##: the set being queried.
 -- Returns:
 --		An **integer**, the count of elements in S.
 --
@@ -209,7 +209,7 @@ end function
 --		# ##S##: the set to augment
 --
 -- Returns:
---A **set** which is a **copy** of ##S##, with the addition of ##x## if it wasn't there already.
+--A **set** which is a **copy** of ##S##, with the addition of ##x## if it was not there already.
 --
 -- Example 1:
 -- <eucode>
@@ -348,7 +348,7 @@ end function
 -- Example 1:
 -- <eucode>
 --   set s0 s0={1,3,5,7}
---   ?is_inside({3,5},s0)   -- peinrs out 1
+--   ?is_inside({3,5},s0)   -- prints out 1
 -- </eucode>
 -- See Also: 
 -- [[:subsets]], [[:belongs_to]], [[:difference]], [[:embedding]], [[:embed_union]]
@@ -719,7 +719,7 @@ end function
 -- Returns the set of elements belonging to either of two sets.
 --
 -- Parameters: 
---		# ##s1##: One of the sets totake a symmetrical difference with
+--		# ##s1##: One of the sets to take a symmetrical difference with
 --		# ##s2##: the other set.
 --
 -- Returns: 
@@ -895,7 +895,7 @@ end function
 
 --**
 -- Description:
--- Returns 1 if a seuquence of integers is a valid map descriptor, else 0.
+-- Returns 1 if a sequence of integers is a valid map descriptor, else 0.
 --
 -- Comments:
 --   Actually, what is being called a map is a class of maps, as the elements of the input
@@ -935,11 +935,11 @@ end type
 --    one in a list.
 --
 -- Parameters: 
---		# ##mappin##: the sequence mapped to
+--		# ##mapping##: the sequence mapped to
 --		# ##target##: the target set that contains the elements ##mapping## refers to by index
 --
 -- Returns:
---   	The reuested **map** descriptor.
+--   	The requested **map** descriptor.
 --
 -- Example 1:
 -- <eucode>
@@ -969,8 +969,8 @@ end function
 --
 -- Parameters:
 --		# ##mapped##: the source sequence
---		# ##mapped_o##:  the sequence it must map to.
---		# ##mode##: an integer, nonzero to also return the minial sets the result map maps.
+--		# ##mapped_to##:  the sequence it must map to.
+--		# ##mode##: an integer, nonzero to also return the minimal sets the result map maps.
 --
 -- Returns:
 --		A **sequence**:
@@ -1020,7 +1020,7 @@ end function
 
 --**
 -- Description: 
--- If an object is in some inpuut set, returns how it is mapped by a set_
+-- If an object is in some input set, returns how it is mapped by a set.
 --
 -- Parameters: 
 --		# ##f##: the map to apply
@@ -1184,7 +1184,7 @@ end function
 
 --**
 -- Description: 
--- Returns all pairs in a product that come from applying two maps to the ame element in a base set.
+-- Returns all pairs in a product that come from applying two maps to the same element in a base set.
 -- Parameters:
 --		# ##
 --   The sets to take the sum of; the base set; the map from the base to each of the first
@@ -1310,10 +1310,10 @@ end function
 --		# ##target##: the target set
 --
 -- Returns: 
---		A **set** which is included in ##source## and contains all anteedents of elements in ##elements## by ##f##.
+--		A **set** which is included in ##source## and contains all antecedents of elements in ##elements## by ##f##.
 --
 --Comments:
--- Elements which ##f## doesn't hit are ignored.
+-- Elements which ##f## does not hit are ignored.
 -- Example:
 -- <eucode>
 --   set s1,s2
@@ -1537,7 +1537,7 @@ end function
 
 --**
 -- Description: 
--- Decide whether taaking two different paths along a swuare map diagrams results in the same map.
+-- Decide whether taking two different paths along a square map diagrams results in the same map.
 --
 -- Parameters: 
 --		# ##from_base_path_1##: the outgoing map along path 1
@@ -1567,7 +1567,7 @@ end function
 -- Description: 
 -- Determines whether there is a point in an output set hit twice or more by a map.
 --
--- Paramaters: 
+-- Parameters: 
 --		# ##f##: the map being queried.
 --
 -- Returns: 0
@@ -1667,7 +1667,7 @@ end function
 --		# ##f##: the map to invert.
 --
 -- Returns:
---   A **map** ##g## such that ##f(g(y)) = y## whenever ##y## is hit by ##f##. and  If f is injective, it aso holds that ##g(f(x))=x##.
+--   A **map** ##g## such that ##f(g(y)) = y## whenever ##y## is hit by ##f##. and  If f is injective, it also holds that ##g(f(x))=x##.
 --
 -- Example 1:
 -- <eucode>
@@ -1796,7 +1796,7 @@ end function
 -- 		An **integer**, 1 if exchanging operands makes sense and has no effect, else 0.
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
+--   operation f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
 --   -- f is the addition from {0,1,2}x{0,1,2} to {0,1,2,3,4}.
 --   ?is_symmetric(f)   -- prints out 1.
 -- </eucode>
@@ -1836,7 +1836,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   -- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
 --   ?is_symmetric(f)   -- prints out 1.
 -- </eucode>
@@ -1877,7 +1877,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   -- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
 --   ?has_left_unitf()   -- prints out 1.
 -- </eucode>
@@ -1909,7 +1909,7 @@ end function
 
 --**
 -- Description: 
--- Finds all left uniits for an operation.
+-- Finds all left units for an operation.
 --
 -- Parameters: 
 --		# ##f##: the operation to test.
@@ -1918,7 +1918,7 @@ end function
 --		A possibly empty **sequence**, listing all ##x## such that ##f(x,.)## is the identity map.
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
 --   sequence s s=all_left_units(f)
 --   s is now {1,2}.
 -- </eucode>
@@ -1941,7 +1941,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
 --   ?is_left_unit(3,f)   -- prints out 0.
 -- </eucode>
 --
@@ -1967,7 +1967,7 @@ end function
 --
 -- Example 1:
 -- <eucoe>
---   operatiion f f={{{1,2,3},{2,1,3},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{2,1,3},{3,1,2}},{3,3,3}}
 --   ?has_left_unit(f)   -- prints out 1.
 -- </eucoe>
 --
@@ -2006,7 +2006,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
 --   sequence s s=all_right_units(f)
 --   s is now empty.
 -- </eucode>
@@ -2064,7 +2064,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   ?is_right_unit(3,f)  -- prints out 0.
 -- <e/ucode>
 --
@@ -2098,7 +2098,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   ?has_unit(f)  -- prints out 1.
 -- </eucode>
 --
@@ -2122,7 +2122,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   ?has_inverse(3,f)  -- prints out 2.
 -- </eucode>
 --
@@ -2192,7 +2192,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
 --   ?distributes_left(product,sum,0)  -- prints out 1.
 -- <e/ucode>
@@ -2262,7 +2262,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operatiion sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
 --   ?distributes_right(product,sum,0)  -- prints out 1.
 -- </eucode>
@@ -2291,14 +2291,14 @@ export enum
 --
 -- Returns:
 --		An **integer**, either of
--- * DISTRIBUTE_NO      : ##poduct## doesn't distribute either way over ##sum##
--- * DISTRIBUTE_LEFT    : ##poduct## distributes over ##sum## on the left only
--- * DISTRIBUTE_RIGHT   : ##poduct## distributes over ##sum## on the right only
--- * DISTRIBUTE_BOTH    : ##poduct## distributes over ##sum## o(both ways)
+-- * DISTRIBUTE_NO      : ##product## does not distribute either way over ##sum##
+-- * DISTRIBUTE_LEFT    : ##product## distributes over ##sum## on the left only
+-- * DISTRIBUTE_RIGHT   : ##product## distributes over ##sum## on the right only
+-- * DISTRIBUTE_BOTH    : ##product## distributes over ##sum## o(both ways)
 --
 -- Example 1:
 -- <eucode>
---   operatiion sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
 --   ?distributes_right(product,sum,0)  -- prints out 1.
 -- </eucode>

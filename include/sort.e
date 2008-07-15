@@ -26,7 +26,7 @@ include text.e -- upper/lower
 --	 The standard compare()
 -- routine is used to compare elements. This means that "##y## is greater than ##x##" is defined by ##compare(y, x)=1##.
 --
--- This fubction uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
+-- This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
 -- change position relative to each other.
 --
 -- Example 1:
@@ -88,7 +88,7 @@ end function
 --	   The user defined routine must accept two objects (A and B) and return
 --	   an integer. It returns -1 if object A must appear before object B,
 --	   1 if object B must appear before object A, and 0 if the order
---	   doesn't matter. Any value greater than zero is taken as 1, and any one less than zero is taken as -1.
+--	   does not matter. Any value greater than zero is taken as 1, and any one less than zero is taken as -1.
 --
 -- The elements can be atoms or sequences. Each time that the
 -- sort needs to compare two items in the sequence, it calls
@@ -211,12 +211,12 @@ end function
 --   The user defined routine must accept three objects (A, B and ##state##) and return
 --   an integer. It returns -1 if object A must appear before object B,
 --   1 if object B must appear before object A, and 0 if the order
---   doesn't matter.
+--   does not matter.
 --
 --   This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
 --   change position relative to each other.
 --
--- The state  which the user routine is passed on each call is not inspected or used by the routine. It is meant to be used by the user routine in any usful way.
+-- The state  which the user routine is passed on each call is not inspected or used by the routine. It is meant to be used by the user routine in any useful way.
 --
 -- Example 1:
 -- <eucode>
@@ -341,7 +341,7 @@ end function
 --	 A **sequence**, a copy of the original sequence in sorted order.
 --
 -- Comments:
--- A non-existant column is treated as coming before an existing column. This
+-- A non-existent column is treated as coming before an existing column. This
 -- allows sorting of records that are shorter than the columns in the
 -- column list.
 --

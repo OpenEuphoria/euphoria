@@ -295,10 +295,10 @@ end function
 -- when ##false## it is assumed that each 'pair' is actually just a value. 
 --
 -- Returns:
--- 		A **sequece** of pairs. Each pair is in the form {key, value}.
+-- 		A **sequence** of pairs. Each pair is in the form {key, value}.
 --
--- Commenst:
--- String representatios of atoms are not converted, either in the key or value part, but returned as any regular string instead.
+-- Comments:
+-- String representations of atoms are not converted, either in the key or value part, but returned as any regular string instead.
 --
 -- If ##haskeys## is ##true##, but a substring only has what appears to be a value, the key is synthesized as ##p[n]##, where ##n## is the number of the pair.
 --

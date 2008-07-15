@@ -441,8 +441,8 @@ function Get2()
 					elsif ch!='-' then
 						exit
 					else -- comment starts after item and before comma
-						e = get_number() -- reads anything starting witn '-'
-						if e[1] != GET_IGNORE then  -- it wasn't a coment, this is illegal
+						e = get_number() -- reads anything starting with '-'
+						if e[1] != GET_IGNORE then  -- it was not a comment, this is illegal
 							return {GET_FAIL, 0, string_next-1-offset-(ch!=-1),leading_whitespace}
 						end if
 						-- read next comment or , or }
@@ -502,7 +502,7 @@ end function
 --
 -- Parameters:
 -- # ##file##: an integer, the handle to an open file from which to read
--- # ##offset##: an integer, an offset to apply to file position before readig. Defaults to 0.
+-- # ##offset##: an integer, an offset to apply to file position before reading. Defaults to 0.
 -- # ##answer##: an integer, either ##GET_SHORT_ANSWER## (the default) or ##GET_LONG_ANSWER##.
 --
 -- Returns:
@@ -513,10 +513,10 @@ end function
 -- ** ##GET_EOF##:     end of file before object was read completely
 -- ** ##GET_FAIL##:    object is not syntactically correct
 -- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
--- * an object, the value that was read. This is valid only if return statys is ##GET_SUCCESS##.
+-- * an object, the value that was read. This is valid only if return status is ##GET_SUCCESS##.
 -- * an integer, the number of characters read. On an error, this is the point at which the 
 --   error was detected.
--- * an integer, the amount of initial whitespace read before the firrst active character was found
+-- * an integer, the amount of initial whitespace read before the first active character was found
 --
 -- Comments:
 -- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
@@ -577,7 +577,7 @@ end function
 -- '\n' or '\r', are allowed anywhere inside sequences, and ignored if at the top level.
 -- A call to ##get()## will read one entire top-level object, plus possibly one additional
 -- (whitespace) character, after a top level number, even though the next object may have an 
--- identifiable starting pont.
+-- identifiable starting point.
 --
 -- The combination of ##[[:print]]()## and ##get()## can be used to save a
 -- Euphoria object to disk and later read it back. This technique
@@ -632,10 +632,10 @@ end function
 -- ** ##GET_EOF##:     end of file before object was read completely
 -- ** ##GET_FAIL##:    object is not syntactically correct
 -- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
--- * an object, the value that was read. This is valid only if return statys is ##GET_SUCCESS##.
+-- * an object, the value that was read. This is valid only if return status is ##GET_SUCCESS##.
 -- * an integer, the number of characters read. On an error, this is the point at which the 
 --   error was detected.
--- * an integer, the amount of initial whitespace read before the firrst active character was found
+-- * an integer, the amount of initial whitespace read before the first active character was found
 --
 -- Comments:
 -- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 

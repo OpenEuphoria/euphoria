@@ -11,7 +11,7 @@
 --    (Remember to set things back to normal 
 --     when you are finished debugging.)
 
--- 2. If your program doesn't already include machine.e add:  
+-- 2. If your program does not already include machine.e add:  
 --           include machine.e  
 --    to your main .ex[w][u] file at the top.
 
@@ -57,7 +57,7 @@ edges_only = (platform()=2) -- on WIN32 people often use unregistered blocks
 constant M_SOUND = 1
 
 -- Your program will only be allowed to read/write areas of memory
--- that it allocated (and hasn't freed), as well as areas in low memory 
+-- that it allocated (and has not freed), as well as areas in low memory 
 -- that you list below, or add dynamically via register_block().
 
 sequence safe_address_list
@@ -155,7 +155,7 @@ function safe_address(atom start, integer len)
 		block_start = block[1]
 		if edges_only then
 			-- addresses are considered safe as long as 
-			-- they aren't in any block's border zone
+			-- they are not in any block's border zone
 			if start <= 3 then
 				return BAD -- null pointer (or very small address)
 			end if
@@ -518,7 +518,7 @@ end function
 --		An **object**, either an atom if the input was a single address, or a sequence of atoms if a sequence was passed. In both cases, atoms returned are double words, in the range 0..power(2,32)-1.
 --
 -- Errors:
---	Peek()ing in memory you don't own may be blocked by the OS, and cause a machine exception. The safe.e i,clude file can catch this sort of issues.
+--	Peek()ing in memory you don't own may be blocked by the OS, and cause a machine exception. The safe.e include file can catch these sort of issues.
 --
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest value of type integer (31-bits). Variables that hold an address should therefore be declared as atoms.
@@ -529,7 +529,7 @@ end function
 --
 -- The only difference between ##peek4s##() and ##peek4u##() is how double words with the highest bit set are returned. ##peek4s##() assumes them to be negative, while ##peek4u##() just assumes them to be large and positive.
 -- 
--- This routine overrides ##eu:peek4s##() with a debuug version.
+-- This routine overrides ##eu:peek4s##() with a debug version.
 
 -- Example 1: 
 -- <eucode>
@@ -572,7 +572,7 @@ end function
 -- peek4u(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// double word, or some //unsigned// dounle words, from an address in memory.
+-- Fetches an //unsigned// double word, or some //unsigned// double words, from an address in memory.
 --
 -- Parameters:
 --		# ##addr_n_length##: an object, either of
@@ -806,7 +806,7 @@ end procedure
 --  
 -- The 4-byte values to be stored can be negative or positive. You can read them back with either ##peek4s##() or ##peek4u##(). However, the results are unpredictable if you want to store values with a fractional part or a magnitude greater than power(2,32), even though Euphoria represents them all as atoms.
 --
--- Yhis routine overrides ##eu:poke4##() with a debug version.
+-- This routine overrides ##eu:poke4##() with a debug version.
 --
 -- Example 1:
 -- <eucode>
@@ -894,7 +894,7 @@ end procedure
 -- mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
--- Sets a contiguous range of memory ocations to a single value.
+-- Sets a contiguous range of memory locations to a single value.
 --
 -- Parameters:
 --		# ##destination##: an atom, the address starting the range to set.
@@ -1013,7 +1013,7 @@ end procedure
 --
 -- Comments:
 --
--- safe.e maintains a list of acquired memory blocks. Those gained through allocate() or allocate_low() are automatically included. Any other block, for debugging purposes, must be registered by [[:register_block]]() and unregistered by [[:untrgister_block]]().
+-- safe.e maintains a list of acquired memory blocks. Those gained through allocate() or allocate_low() are automatically included. Any other block, for debugging purposes, must be registered by [[:register_block]]() and unregistered by [[:unregister_block]]().
 --
 -- The list is scanned and, if any block shows signs of corruption, it is displayed on the screen and the program terminates. Otherwise, nothing happens.
 --
@@ -1152,7 +1152,7 @@ end procedure
 --
 -- Comments: 
 --
--- In memory.e, this procedure does nothing. It is there simply to simpify switching between machine.e and safe.e.
+-- In memory.e, this procedure does nothing. It is there to simplify switching between machine.e and safe.e.
 --
 -- This routine is only meant to be used for debugging purposes. Use it to unregister blocks of memory that you have previously registered using [[:register_block]](). By unregistering a block, you remove it from the list of safe blocks maintained by safe.e. This prevents your program from performing any further reads or writes of memory within the block.
 --
@@ -1536,7 +1536,7 @@ mem = allocate(4)
 --
 -- Comments:
 --
---	This perfoms the reverse operation from [[:int_to_bytes]]
+--	This performs the reverse operation from [[:int_to_bytes]]
 --
 --  An atom is being returned, because the converted value may be bigger than what can fit in an Euphoria integer.
 --
@@ -1659,7 +1659,7 @@ end function
 -- Reset the random number generator.
 --
 -- Parameters:
--- 		# ##seed##: an integer, which the generator uses to initialise itself
+-- 		# ##seed##: an integer, which the generator uses to initialize itself
 --
 -- Comments:
 -- 		Starting from a ##seed##, the values returned by rand() are reproducible. This is useful for demos and stress tests based on random data. Normally the numbers returned by the rand() function are totally unpredictable, and will be different each time you run your program. Sometimes however you may wish to repeat the same series of numbers, perhaps because you are trying to debug your program, or maybe you want the ability to generate the same output (e.g. a random picture) for your user upon request.  
@@ -1751,10 +1751,10 @@ end procedure
 -- Specify a file path name in place of "ex.err" where you want
 -- any diagnostic information to be written.
 -- Parameters:
--- 		# ##fie_path##: a sequence, the new error and traceback file path.
+-- 		# ##file_path##: a sequence, the new error and traceback file path.
 --
 -- Comments:
--- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used in case of an error at runtime, whether it was troggered by crash() or not.
+-- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used in case of an error at runtime, whether it was triggered by crash() or not.
 --
 -- See Also:
 -- 		[[:crash]], [[:crash_message]]
@@ -1838,7 +1838,7 @@ end procedure
 -- Comments:
 -- This setting determines the precision of the time() library routine. It also affects the sampling rate for time profiling.
 --
--- ##tick_rate## is efective under //DOS// only, and is a no-op elsewhere. Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//, it is always 100 ticks per second.
+-- ##tick_rate## is effective under //DOS// only, and is a no-op elsewhere. Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//, it is always 100 ticks per second.
 --
 -- ##tick_rate##() can increase the setting above the default value. As a special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
 --
@@ -1977,7 +1977,7 @@ end procedure
 -- 		# ##a##: the atom to convert:
 --
 -- Returns:
---		A **sequence of 8 bytes, which can be poked in memory to rpresent ##a##.
+--		A **sequence of 8 bytes, which can be poked in memory to represent ##a##.
 --
 -- Comments:
 -- All Euphoria atoms have values which can be represented as 64-bit IEEE floating-point numbers, so you can convert any atom to 64-bit format without losing any precision.
@@ -2003,7 +2003,7 @@ end function
 -- 		# ##a##: the atom to convert:
 --
 -- Returns:
---		A **sequence of 4 bytes, which can be poked in memory to rpresent ##a##.
+--		A **sequence of 4 bytes, which can be poked in memory to represent ##a##.
 --
 -- Comments: 
 -- Euphoria atoms can have values which are 64-bit IEEE floating-point numbers, so you may lose precision when you convert to 32-bits (16 significant digits versus 7). The range of exponents is much larger in 64-bit format (10 to the 308, versus 10 to the 38), so some atoms may be too large or too small to represent in 32-bit format. In this case you will get one of the special 32-bit values: inf or -inf (infinity or -infinity). To avoid this, you can use atom_to_float64().
@@ -2091,7 +2091,7 @@ end function
 -- Returns:
 --		An **atom**, the address of the memory block where the string was stored, or 0 on failure.
 -- Comments:
--- Only the 8 lowest bits of each atom in ##s## is stored. Use ##allocate_wstring##()  for storing dounle byte encoded strings.
+-- Only the 8 lowest bits of each atom in ##s## is stored. Use ##allocate_wstring##()  for storing double byte encoded strings.
 --
 -- There is no allocate_string_low() function. However, you could easily craft one by adapting the code for ##allocate_string##.
 --

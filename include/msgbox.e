@@ -84,7 +84,7 @@ end ifdef
 -- Displays a window with a title, message, buttons and an icon, usually known as a message box.
 --
 -- Parameters:
---		# ##text##: a sequence, the message to be duisplayed
+--		# ##text##: a sequence, the message to be displayed
 --		# ##title##: a sequence, the title the box should have
 --		# ##style##: an object which defines which,icon should be displayed, if any, and which buttons will be presented.
 --

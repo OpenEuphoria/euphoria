@@ -53,7 +53,7 @@ export enum
 -- Defines the datatype 'map'
 --
 -- Comments:
--- Used when declaring a map variable. A map is also known as a dictionnary. It organises pair {key, value} so as to make lookup faster. The keys and values may be any Euphoria objects. Only one pair with a given key may exist in a given map.
+-- Used when declaring a map variable. A map is also known as a dictionary. It organizes pair {key, value} so as to make lookup faster. The keys and values may be any Euphoria objects. Only one pair with a given key may exist in a given map.
 --
 -- Example:
 --   <eucode>
@@ -98,10 +98,10 @@ constant maxInt = #3FFFFFFF
 -- Parameters:
 --   * pData = The data for which you want a hash value calculated.
 --   * pMaxHash = (default = 0) The returned value will be no larger than this value.
---     However, a value of 0 or lower menas that it can grow as large as the maximum integer value.
+--     However, a value of 0 or lower means that it can grow as large as the maximum integer value.
 --
 -- Returns:
---		An **integer**, the value of which depends only on the supplied adata.
+--		An **integer**, the value of which depends only on the supplied data.
 --
 -- Comments:
 -- This is used whenever you need a single number to represent the data you supply.
@@ -243,7 +243,7 @@ end function
 --		# ##key##: an object to be looked up
 --
 -- Returns:
---		An **intger**, 0 if not present, 1 if present.
+--		An **integer**, 0 if not present, 1 if present.
 --
 -- Example 1:
 --   <eucode>
@@ -326,7 +326,7 @@ end function
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##m##: the map where an entry is being added or opdated
+--		# ##m##: the map where an entry is being added or updated
 --		# ##key##: an object, the key to look up
 --		# ##value##: an object, the value to add, or to use for updating.
 --		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
@@ -437,7 +437,7 @@ export constant BLANK_MAP = new()
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##m##: the map where an entry is being added or opdated
+--		# ##m##: the map where an entry is being added or updated
 --		# ##keys##: a sequence of keys for the nested maps
 --		# ##value##: an object, the value to add, or to use for updating.
 --		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
@@ -690,11 +690,11 @@ end function
 -- Widens a map to increase performance.
 --
 -- Parameters:
---		# ##m##: the map being optimised
+--		# ##m##: the map being optimized
 --		# ##pAvg##: an atom, an estimate of the desired count of nonempty buckets. Default is 10.
 --
 -- Returns:
---		The optimised **map**.
+--		The optimized **map**.
 --
 -- See Also:
 --		{{:statistics]]
@@ -724,7 +724,7 @@ end function
 --		A **map** with all the entries found in ##pFileName##.
 --
 -- Comments:
---	Rhe file has one entry per line, each line being of the form <key>=<value>. Whitespace around the key and the value do not count. Comment lines start with "--" and are ignored.
+--	The file has one entry per line, each line being of the form <key>=<value>. Whitespace around the key and the value do not count. Comment lines start with "--" and are ignored.
 -- See Also:
 --		[[:new]]
 export function load_map(sequence pFileName)

@@ -288,7 +288,7 @@ sequence windows_poll_seq, this_cookiejar, sendheader, recvheader
 windows_poll_seq = {}
 this_cookiejar = {}
 sendheader = {}  -- HTTP header sequence , sent to somewhere (usually the server)
-recvheader = {}  -- HTTP header sequence , recieved from somewhere (usually the server)
+recvheader = {}  -- HTTP header sequence , received from somewhere (usually the server)
 
 atom error_mode = 1  -- This will indicate whether returned errors will be OS numbers (mode 2)
 -- or EUNET_ERROR numbers (mode 1).  The default is mode 1.
@@ -529,7 +529,7 @@ end function
 --		# ##x##: the address to check
 --
 -- Returns:
---   An **integer**, 1 if x is an inetaddr, 0 if it isn't
+--   An **integer**, 1 if x is an inetaddr, 0 if it is not
 
 export function is_inetaddr(object s)
 	
@@ -1564,7 +1564,7 @@ end function
 -- Cross-platform applications should cancel the polling events,
 -- though the cancellation request is ignored on Linux (events are
 -- implicitly cancelled at the end of the poll).  To keep the
--- returned sequence syncronized, it is best to separate polling
+-- returned sequence synchronized, it is best to separate polling
 -- calls from cancellation calls, even though both may be done in
 -- a single call.
 --
@@ -1823,7 +1823,7 @@ end function
 -- internet address to a function, and can be used as is in
 -- [[:sendto]]().
 --
--- Commenst:
+-- Comments:
 -- This function will not return until data is actually received on
 -- the socket, unless the flags parameter contains MSG_DONTWAIT.
 --
@@ -1988,7 +1988,7 @@ end function
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
--- DnsQuery
+-- DNSQuery
 -------------------------------------------------------------------------------
 -- Returns a set of sequences of {ip_addr, q_type, order} resolving the IP address for
 -- the given domain name and/or host.
@@ -2566,7 +2566,7 @@ end function
 --      value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable 
 --      characters, and any others you want to encode-- there's no danger in encoding too many 
 --      characters. For simplicity, you might encode all non-alphanumeric characters.
---   2. Change all spaces to plusses.
+--   2. Change all spaces to pluses.
 --   3. String the names and values together with = and &, like
 --          name1=value1&name2=value2&name3=value3
 --   4. This string is your message body for POST submissions, or the query string for GET submissions.
@@ -2912,7 +2912,7 @@ export function get_http(sequence inet_addr, sequence hostname, sequence file)
 	
 	-- Modification added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0 {
 	if equal(sendheader,"") then
-		set_sendheader_default() -- it really should be set to something! But isn't **required**
+		set_sendheader_default() -- it really should be set to something! But is not **required**
 	end if
 	
 	if length(file)=0 or file[1]!='/' then file = '/'&file end if
@@ -2999,7 +2999,7 @@ export function get_http_use_cookie(sequence inet_addr, sequence hostname,
 	end if
 	-- Modification added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0 {
 	if equal(sendheader,"") then
-		set_sendheader_default() -- it really should be set to something! But isn't **required**
+		set_sendheader_default() -- it really should be set to something! But is not **required**
 	end if
 	
 	if length(file)=0 or file[1]!='/' then file = '/'&file end if

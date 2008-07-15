@@ -105,7 +105,7 @@ include error.e
 --     global function find(object needle, sequence haystack)
 --
 -- Description:
---     Find the first occurence of a "needle" as an element of a "haystack".
+--     Find the first occurrence of a "needle" as an element of a "haystack".
 --
 --Parameters:
 --		# ##needle##: an object whose presence is being queried
@@ -135,7 +135,7 @@ include error.e
 --     global function find_from(object needle, object haystack, integer start)
 --
 -- Description:
---     Find the first occurence of a "needle" as an element of a "haystack". Search starts at a specified index.
+--     Find the first occurrence of a "needle" as an element of a "haystack". Search starts at a specified index.
 --
 --Parameters:
 --		# ##needle##: an object whose presence is being queried
@@ -201,7 +201,7 @@ include error.e
 --		# ##start##: an integer, the index in ##haystack## at which to start searching.
 --
 -- Returns:
---     An **integer**, 0 if no slice of ##haystck## with lower index at least ##start## is ##needle##, else the smallest such index.
+--     An **integer**, 0 if no slice of ##haystack## with lower index at least ##start## is ##needle##, else the smallest such index.
 --
 -- Comments:
 --     ##start## may have any value from 1 to the length of ##haystack## plus 1. (Just like the first
@@ -292,7 +292,7 @@ end function
 -- Match all items of haystack in needle.
 --
 -- Parameters:
---     # ##needle##: asequence, what to look for
+--     # ##needle##: a sequence, what to look for
 --     # ##haystack##: a sequence to search in
 --     # ##start##: an integer, the starting index position (defaults to 1)
 --
@@ -426,14 +426,14 @@ global function rmatch(sequence needle, sequence haystack, integer start=length(
 end function
 
 --**
--- Finds a "needle" in a "hyaystack", and replace any, or only the first few, occurences with a replacement.
+-- Finds a "needle" in a "haystack", and replace any, or only the first few, occurrences with a replacement.
 --
 -- Parameters:
 --
 --		# ##needle##: an object to search and perhaps replace
 --		# ##haystack##: a sequence to be inspected
 --		# ##replacement##: an object to substitute for any (first) instance of ##needle##
---		# ##max##: an integer, 0 to replace all occu
+--		# ##max##: an integer, 0 to replace all occurrences
 --
 -- Returns:
 --		A **sequence**, the modified ##haystack##.
@@ -502,13 +502,13 @@ end function
 -- # a negative integer ##-i## with ##i## out of the searched range. This means than ##needle##might be either below the start point if ##i## is below the start point, or above the end point if ##i## is.
 --
 -- Comments:
--- If ##endpoin## is not greater than zero, it is added to length(##haystack##) once only. Then, the end point of the search is adjusted to length(haystack) if out of bounds.
+-- If ##endpoint## is not greater than zero, it is added to length(##haystack##) once only. Then, the end point of the search is adjusted to length(haystack) if out of bounds.
 --
 -- The start point is adjusted to 1 if below 1.
 --
 -- The way this function returns is very similar to what [[:db_find_key]] does. They use variants of the same algorithm. The latter is all the more efficient as ##haystack## is long.
 --
--- ##haystack## is assumed to be nondecreasing. Results are undefined if it is not. If duplicate coopies of ##needle## exist in the range searched on ##haystack##, any of the possible contiguous indexes may be returned.
+-- ##haystack## is assumed to be non-decreasing. Results are undefined if it is not. If duplicate copies of ##needle## exist in the range searched on ##haystack##, any of the possible contiguous indexes may be returned.
 --
 -- See Also:
 -- [[:find]], [[:db_find_key]]

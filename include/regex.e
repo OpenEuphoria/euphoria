@@ -109,7 +109,7 @@ end type
 --
 -- Comments:
 --
--- This routine is the only one that accepts a human readable regular expression like "[A-Z_a-z0-9]". The string is compiled and a regex is returned. This is allocated memory and has to be freed when done wih it.
+-- This routine is the only one that accepts a human readable regular expression like "[A-Z_a-z0-9]". The string is compiled and a regex is returned. This is allocated memory and has to be freed when done with it.
 --
 -- See the pcre manpages for more details on regular expressions: [[http://www.pcre.org/pcre.txt]]
 --
@@ -132,12 +132,12 @@ end function
 --		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
 --
 -- Returns:
---		An **object**, either an atom when an error occurred or no matc was found, or a sequence. The sequence is made of pairs, described in the Comments below.
+--		An **object**, either an atom when an error occurred or no match was found, or a sequence. The sequence is made of pairs, described in the Comments below.
 --
 -- Comments:
--- If any match is found, then a sequence of pairs is returned. Each pair is made of the dtart and end point of a slice of ##text##. The first element represents the whole match.
+-- If any match is found, then a sequence of pairs is returned. Each pair is made of the start and end point of a slice of ##text##. The first element represents the whole match.
 --
--- If the matched regex has sunstrings, which means some groups are delineated by an opening and closing parenthesis, then each of thiese substrings was matched as well, and the subsequent pairs show where these submatches took place.
+-- If the matched regex has substrings, which means some groups are delineated by an opening and closing parenthesis, then each of these substrings was matched as well, and the subsequent pairs show where these submatches took place.
 --
 -- Example 1:
 -- <eucode>
@@ -200,7 +200,7 @@ end function
 --  Replaces all matches of a regex with the replacement text.
 --
 -- Parameters:
--- 		# ##re##: a regex which iwill be used for matching
+-- 		# ##re##: a regex which will be used for matching
 --		# ##text##: a string on which search and replace will apply
 --		# ##replacement##: a string, used to replace each of the full matches found.
 --		# ##options##: an atom, defaulted to 0.
@@ -227,7 +227,7 @@ end function
 -- Performs a search nd replace operation, with the replacement being computed by a user defined routine.
 --
 -- Parameters:
--- 		# ##re##: a regex which iwill be used for matching
+-- 		# ##re##: a regex which will be used for matching
 --		# ##text##: a string on which search and replace will apply
 --		# ##rid##: an integer, the id of a routine which will determine the replacement string at each step.
 --		# ##options##: an atom, defaulted to 0.

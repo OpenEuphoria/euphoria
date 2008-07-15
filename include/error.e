@@ -70,10 +70,10 @@ end procedure
 -- Specify a file path name in place of "ex.err" where you want
 -- any diagnostic information to be written.
 -- Parameters:
--- 		# ##fie_path##: a sequence, the new error and traceback file path.
+-- 		# ##file_path##: a sequence, the new error and traceback file path.
 --
 -- Comments:
--- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used in case of an error at runtime, whether it was troggered by crash() or not.
+-- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used in case of an error at runtime, whether it was triggered by crash() or not.
 --
 -- See Also:
 -- 		[[:crash]], [[:crash_message]]

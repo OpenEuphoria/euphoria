@@ -403,7 +403,7 @@ export function new_time(integer hour, integer minute, atom second)
 end function
 
 --**
--- Get the day of week of the date dt1.
+-- Get the day of week of the datetime dt.
 --
 -- Parameters:
 -- 		# ##dt##: a datetime to be queried.
