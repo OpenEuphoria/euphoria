@@ -848,7 +848,7 @@ end procedure
 -- Signature:
 -- mem_copy(atom destination, atom origin, integer len)
 --
--- Descripotion:
+-- Description:
 -- Copy a block of memory from an address to another.
 --
 -- Parameters:
@@ -1477,7 +1477,7 @@ global constant REG_DI = 1,
 -- Parameters:
 --		# ##x##: an atom, the value to convert.
 --
--- Retrns:
+-- Returns:
 --		A **sequence** of 4 bytes, lowest significant byte first.
 -- Comments:
 -- If the atom does not fit into a 32-bit integer, things may still work right:
@@ -1835,7 +1835,7 @@ end procedure
 -- Parameters:
 -- 		# ##rate##: an atom, the number of ticks by seconds.
 --
--- Cimments:
+-- Comments:
 -- This setting determines the precision of the time() library routine. It also affects the sampling rate for time profiling.
 --
 -- ##tick_rate## is efective under //DOS// only, and is a no-op elsewhere. Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//, it is always 100 ticks per second.

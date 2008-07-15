@@ -269,7 +269,7 @@ end function
 --		# ##key##: an object, the key being looked tp
 --		# ##defaultValue##: an object, a default value returned if ##key## not found
 --
--- Returnz:
+-- Returns:
 --		An **object**, the value that corresponds to ##key## in ##m##. If ##key## is not in ##m##, ##defaultValue## is returned instead.
 --
 -- Example 1:

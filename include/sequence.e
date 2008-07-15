@@ -120,7 +120,7 @@ include sort.e
 --		# ##item##: an object, to which all elements of the result will be equal
 --		# ##count##: the requested length of the result sequence
 --
--- Rerturns:
+-- Returns:
 --		A **sequence** of length ##count## each element of which is ##item##.
 --
 -- Comments:
@@ -173,7 +173,7 @@ include sort.e
 -- Signature:
 --   global function insert(sequence target, object what, integer index)
 --
--- Desiption:
+-- Description:
 --   Insert an object into a sequence as a naw element at a given location.
 --
 --- Parameters:
