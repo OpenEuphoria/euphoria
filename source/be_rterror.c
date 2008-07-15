@@ -104,10 +104,10 @@ extern int in_from_keyb;
 extern char *crash_msg;
 
 #ifdef EWINDOWS
-extern HANDLE console_output;
-extern HANDLE console_trace;
-extern HANDLE console_var_display;
-extern HANDLE console_save;
+extern void SaveNormal();
+extern void SaveTrace();
+extern void RestoreNormal();
+extern void RestoreTrace();
 extern unsigned default_heap;
 #endif
 
@@ -509,8 +509,7 @@ void MainScreen()
 	if (TEXT_MODE) {
 		/* text mode */
 #ifdef EWINDOWS
-		console_output = console_save;
-		SetConsoleActiveScreenBuffer(console_output);
+		RestoreNormal();
 #endif
 #ifdef EUNIX
 		screen_copy(screen_image, alt_image_debug); // save debug screen
@@ -715,8 +714,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			flush_screen();
 			col = screen_col;
 #ifdef EWINDOWS         
-			SetConsoleActiveScreenBuffer(console_var_display);
-			console_output = console_var_display;
+			SaveTrace();
 #else
 #ifdef EUNIX
 			screen_copy(screen_image, alt_image_debug);
@@ -736,8 +734,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			if (print_chars != -1)
 				get_key(TRUE); // wait for Enter key
 #ifdef EWINDOWS         
-			SetConsoleActiveScreenBuffer(console_trace);
-			console_output = console_trace;
+			RestoreTrace();
 #else
 #ifdef EUNIX
 			screen_copy(alt_image_debug, screen_image);
@@ -815,9 +812,8 @@ void ShowDebug()
 	screen_line = debug_screen_line;
 	MainWrap = wrap_around;
 #ifdef EWINDOWS
-	SetConsoleActiveScreenBuffer(console_trace);
-	console_save = console_output;
-	console_output = console_trace;
+	SaveNormal();
+	RestoreTrace();
 #endif
 
 #ifdef EUNIX
@@ -934,9 +930,8 @@ static void RestoreDebugImage()
 /* redisplay debug screen image */
 {
 #ifdef EWINDOWS
-	SetConsoleActiveScreenBuffer(console_trace);
-	console_save = console_output;
-	console_output = console_trace;
+	SaveNormal();
+	RestoreTrace();
 #endif
 #ifdef EDOS
 	/* restore various aspects of the display */

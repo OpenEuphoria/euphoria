@@ -876,3 +876,94 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 	screen_line = line;
 }
 
+#ifdef EWINDOWS
+
+void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved, struct rccoord * pos)
+{
+	COORD ch;
+
+	CONSOLE_SCREEN_BUFFER_INFO console_info;
+	GetConsoleScreenBufferInfo(console_output, &console_info);
+
+	*saved = console_info.wAttributes;
+	*pos = GetTextPositionP();
+	
+	ch.X = 0;
+	ch.Y = 0;
+	ReadConsoleOutputCharacter(console_output, str, size, ch, n);
+	ReadConsoleOutputAttribute(console_output, buf, size, ch, m);
+}
+
+void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct rccoord * pos)
+{
+	int size1, size2;
+	COORD ch;
+	ch.X = 0;
+	ch.Y = 0;
+	WriteConsoleOutputCharacter(console_output, str, n, ch, &size1);
+	WriteConsoleOutputAttribute(console_output, buf, m, ch, &size2);
+
+	if (*saved != (WORD)-1)
+	{
+		SetConsoleTextAttribute(console_output, *saved);
+		*saved = (WORD)-1;
+	}
+	SetPosition(pos->row, pos->col);
+}
+
+TCHAR console_save_str[65536];
+int console_save_str_n = 0;
+WORD console_save_buf[65536];
+int console_save_buf_n = 0;
+WORD console_save_saved = (WORD)-1;
+struct rccoord console_save_pos;
+
+TCHAR console_trace_str[65536];
+int console_trace_str_n = 0;
+WORD console_trace_buf[65536];
+int console_trace_buf_n = 0;
+WORD console_trace_saved = (WORD)-1;
+struct rccoord console_trace_pos;
+
+void SaveNormal()
+{
+	int size = 65536;
+	if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+		ReadInto(console_save_buf, console_save_str, size, &console_save_buf_n, &console_save_str_n, &console_save_saved, &console_save_pos);
+	} else {
+		console_save = console_output;
+	} // EUCONS
+}
+
+void SaveTrace()
+{
+	int size = 65536;
+	if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+		ReadInto(console_trace_buf, console_trace_str, size, &console_save_buf_n, &console_save_str_n, &console_trace_saved, &console_trace_pos);
+	} else {
+		SetConsoleActiveScreenBuffer(console_var_display);
+		console_output = console_var_display;
+	} // EUCONS
+}
+
+void RestoreTrace()
+{
+	if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+		WriteOutFrom(console_trace_buf, console_trace_str, console_save_buf_n, console_save_str_n, &console_trace_saved, &console_trace_pos);
+	} else {
+		SetConsoleActiveScreenBuffer(console_trace);
+		console_output = console_trace;
+	} // EUCONS
+}
+
+void RestoreNormal()
+{
+	if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+		WriteOutFrom(console_save_buf, console_save_str, console_save_buf_n, console_save_str_n, &console_save_saved, &console_save_pos);
+	} else {
+		console_output = console_save;
+		SetConsoleActiveScreenBuffer(console_output);
+	} // EUCONS
+}
+
+#endif
