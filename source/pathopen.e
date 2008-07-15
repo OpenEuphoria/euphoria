@@ -2,7 +2,7 @@
 --
 
 include common.e
-include std/machine.e
+include std/memory.e
 include std/os.e
 include std/filesys.e
 
