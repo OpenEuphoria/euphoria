@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 without warning
 function append(object a, object b)

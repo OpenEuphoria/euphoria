@@ -1,4 +1,4 @@
-include get.e 
+include std/get.e 
 
 constant rev = "revision=\""
 

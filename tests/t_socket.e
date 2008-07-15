@@ -1,5 +1,5 @@
-include unittest.e
-include socket.e
+include std/unittest.e
+include std/socket.e
 
 -- TODO: add tests
 -- This at least makes sure it compiles

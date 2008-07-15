@@ -1,17 +1,17 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 
-include os.e
-include filesys.e
+include std/os.e
+include std/filesys.e
 
 -- Translator initialization
-include get.e
+include std/get.e
 include common.e
 include global.e
 include mode.e as mode
 include c_out.e
 include c_decl.e
-include error.e
+include std/error.e
 include compile.e
 include cominit.e
 include tranplat.e

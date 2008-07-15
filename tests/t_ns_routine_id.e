@@ -6,9 +6,9 @@
 -- work just fine also.
 --
 
-include unittest.e
-include map.e as map
-include types.e as t
+include std/unittest.e
+include std/map.e as map
+include std/types.e as t
 
 type str_key_map(object o)
 	integer srid = routine_id("t:t_upper")

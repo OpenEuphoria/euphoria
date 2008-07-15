@@ -2,13 +2,13 @@
 --
 -- Scanner (low-level parser)
 
-include machine.e
-include get.e
-include filesys.e
+include std/machine.e
+include std/get.e
+include std/filesys.e
 
 include global.e
 include reswords.e
-include error.e
+include std/error.e
 include symtab.e
 include scientific.e
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 

@@ -1,5 +1,5 @@
-include unittest.e
-include map.e as m
+include std/unittest.e
+include std/map.e as m
 
 export m:map people
 

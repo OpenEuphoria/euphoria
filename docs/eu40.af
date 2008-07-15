@@ -26,42 +26,42 @@
 
 # API docs
 ../docs/api.txt
-../include/console.e
-../include/database.e
-../include/datetime.e
-../include/dll.e
-../include/error.e
-../include/filesys.e
-../include/get.e
-../include/graphics.e
-../include/image.e
-../include/io.e
-../include/locale.e
-../include/localeconv.e
-../include/machine.e
-../include/map.e
-../include/math.e
-../include/mouse.e
-../include/msgbox.e
-../include/os.e
-../include/pretty.e
-../include/primes.e
-../include/regex.e
-../include/search.e
-../include/sequence.e
-../include/sets.e
-../include/socket.e
-../include/sort.e
-../include/stack.e
-../include/stats.e
-../include/task.e
-../include/text.e
-../include/types.e
-../include/unicode.e
-../include/unittest.e
-../include/wildcard.e
+../include/std/console.e
+../include/std/database.e
+../include/std/datetime.e
+../include/std/dll.e
+../include/std/error.e
+../include/std/filesys.e
+../include/std/get.e
+../include/std/graphics.e
+../include/std/image.e
+../include/std/io.e
+../include/std/locale.e
+../include/std/localeconv.e
+../include/std/machine.e
+../include/std/map.e
+../include/std/math.e
+../include/std/mouse.e
+../include/std/msgbox.e
+../include/std/os.e
+../include/std/pretty.e
+../include/std/primes.e
+../include/std/regex.e
+../include/std/search.e
+../include/std/sequence.e
+../include/std/sets.e
+../include/std/socket.e
+../include/std/sort.e
+../include/std/stack.e
+../include/std/stats.e
+../include/std/task.e
+../include/std/text.e
+../include/std/types.e
+../include/std/unicode.e
+../include/std/unittest.e
+../include/std/wildcard.e
 
-# Release Notes
+## Release Notes
 ../docs/relnotes.txt
 ../docs/relnotes400.txt
 

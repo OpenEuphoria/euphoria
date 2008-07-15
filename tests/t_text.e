@@ -1,5 +1,5 @@
-include text.e as seq
-include unittest.e
+include std/text.e as seq
+include std/unittest.e
 
 
 

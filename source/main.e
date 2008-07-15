@@ -2,13 +2,13 @@
 --
 -- Front End - main routine
 
-include filesys.e
-include io.e
+include std/filesys.e
+include std/io.e
 
 include rev.e
-include get.e
+include std/get.e
 include pathopen.e
-include error.e
+include std/error.e
 include parser.e
 include mode.e
 

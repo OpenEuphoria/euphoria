@@ -1,5 +1,5 @@
-include stack.e as s
-include unittest.e
+include std/stack.e as s
+include std/unittest.e
 
 stack sk
 

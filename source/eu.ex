@@ -24,14 +24,14 @@ set_mode( "interpret", 1 )
 
 
 -- standard Euphoria includes
-include os.e
-include pretty.e
-include wildcard.e
+include std/os.e
+include std/pretty.e
+include std/wildcard.e
 
 -- INTERPRETER front-end
 include global.e
 include reswords.e
-include error.e
+include std/error.e
 include keylist.e
 
 include c_out.e    -- Translator output (leave in for now)

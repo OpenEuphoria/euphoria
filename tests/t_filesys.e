@@ -1,5 +1,5 @@
-include filesys.e
-include unittest.e
+include std/filesys.e
+include std/unittest.e
 
 sequence fullname, pname, fname, fext, crlf, driveid
 integer sep

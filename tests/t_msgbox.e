@@ -1,7 +1,7 @@
-include unittest.e
+include std/unittest.e
 
 ifdef WIN32 then
-	include msgbox.e
+	include std/msgbox.e
 end ifdef
 
 test_pass("msgbox.e at least loads")

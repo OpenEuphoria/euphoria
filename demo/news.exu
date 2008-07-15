@@ -27,8 +27,8 @@
 -- switch to another task that is not blocked. The program quits after a 
 -- period of 10-15 seconds with no progress made on any page.
 
-include wildcard.e
-include graphics.e
+include std/wildcard.e
+include std/graphics.e
 
 sequence cl
 sequence search_phrase

@@ -1,5 +1,5 @@
-include unittest.e
-include error.e
+include std/unittest.e
+include std/error.e
 
 warning_file(-1)
 
@@ -18,7 +18,7 @@ test_equal("Alternate version used",gets(fn),"This is the new puts()!\n")
 test_equal("Task carried out",gets(fn),"This is a test")
 close(fn)
 
-include filesys.e
+include std/filesys.e
 include override.e
 fn = open("override.txt","r")
 test_equal("Standard version used",gets(fn),"This is another test")

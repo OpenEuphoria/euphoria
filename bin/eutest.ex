@@ -2,9 +2,9 @@
 
 -- Specify -exe <path to interpreter> to use a specific interpreter for tests
 
-include sequence.e
-include sort.e
-include filesys.e
+include std/sequence.e
+include std/sort.e
+include std/filesys.e
 
 atom score
 integer failed, total, status

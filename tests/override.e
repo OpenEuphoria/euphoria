@@ -1,5 +1,5 @@
-include unittest.e
-include error.e
+include std/unittest.e
+include std/error.e
 
 warning_file(-1)
 

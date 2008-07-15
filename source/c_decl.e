@@ -6,7 +6,7 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
-include text.e
+include std/text.e
 
 include global.e
 include reswords.e

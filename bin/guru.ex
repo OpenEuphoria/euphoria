@@ -27,11 +27,11 @@
 
 without type_check
 
-include filesys.e
-include wildcard.e
-include graphics.e
-include sort.e
-include sequence.e
+include std/filesys.e
+include std/wildcard.e
+include std/graphics.e
+include std/sort.e
+include std/sequence.e
 
 -------- some user-modifiable parameters: 
 

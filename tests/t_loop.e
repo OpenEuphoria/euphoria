@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 sequence a
 integer idx, idx2

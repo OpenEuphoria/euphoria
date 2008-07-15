@@ -2,7 +2,7 @@
 --
 -- Routines to emit the IL opcode stream
 
-include os.e
+include std/os.e
 
 include reswords.e
 include global.e

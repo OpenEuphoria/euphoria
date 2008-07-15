@@ -7,8 +7,8 @@ include emit.e
 include symtab.e
 include scanner.e
 
-include sequence.e
-include text.e
+include std/sequence.e
+include std/text.e
 
 include platinit.e
 

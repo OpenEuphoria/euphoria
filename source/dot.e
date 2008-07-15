@@ -1,9 +1,9 @@
 include global.e
-include get.e
-include map.e as map
-include sequence.e
-include search.e
-include sets.e as set
+include std/get.e
+include std/map.e as map
+include std/sequence.e
+include std/search.e
+include std/sets.e as set
 
 -- called_from:  file -> proc -> called_proc file : called proc
 -- called_by  :  called_proc file -> called proc -> file : proc

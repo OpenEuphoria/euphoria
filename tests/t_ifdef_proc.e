@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 ifdef NOT_DEFINED then
 	procedure abc()

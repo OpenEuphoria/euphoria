@@ -13,10 +13,11 @@
 --		 STRING_COLOR
 --		BRACKET_COLOR  (a sequence of colors)
 
---include sequence.e
-include text.e
-include wildcard.e
+include std/text.e
+include std/wildcard.e
+
 include keywords.e
+
 integer NORMAL_COLOR,
 		COMMENT_COLOR,
 		KEYWORD_COLOR,

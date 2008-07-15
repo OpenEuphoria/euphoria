@@ -4,12 +4,12 @@ include mode.e as mode
 include intinit.e
 
 include opnames.e
-include text.e
-include pretty.e
+include std/text.e
+include std/pretty.e
 include ../include/error.e
-include map.e as map
+include std/map.e as map
 include dot.e
-include os.e
+include std/os.e
 include dox.e as dox
 
 integer out, pc, a, b, c, d, target, len, keep_running

@@ -1,10 +1,10 @@
 ifdef !DOS32 then
-include localeconv.e as lcc
-include locale.e as l
-include datetime.e as d
+include std/localeconv.e as lcc
+include std/locale.e as l
+include std/datetime.e as d
 end ifdef
 
-include unittest.e
+include std/unittest.e
 
 ifdef !DOS32 then
 sequence locale

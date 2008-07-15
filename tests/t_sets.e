@@ -1,5 +1,5 @@
-include unittest.e
-include sets.e
+include std/unittest.e
+include std/sets.e
 
 set s,s1,s1a
 s={-1,3,5,17,"abc","abcd","acb"}

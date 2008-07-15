@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 constant SWITCH = { 1, 2, "a", 3, "sdflkjasdfglkj" }
 

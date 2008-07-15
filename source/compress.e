@@ -1,7 +1,7 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- compression / decompression
-include convert.e
+include std/convert.e
 
 global constant IL_MAGIC = 79, -- indicates an IL file
 			  IL_VERSION = -- 10 (2.5 alpha) IL version number

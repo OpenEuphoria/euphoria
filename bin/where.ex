@@ -2,9 +2,9 @@
 -- usage:  where filename
 -- (give complete file name including .exe .bat etc.)
 
-include filesys.e
-include os.e
-include os.e
+include std/filesys.e
+include std/os.e
+include std/os.e
 
 constant TRUE = 1
 constant SCREEN = 1, ERROR = 2

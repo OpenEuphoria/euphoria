@@ -1,4 +1,4 @@
-include os.e
+include std/os.e
 include common.e
 
 -- For cross-translation:

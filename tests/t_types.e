@@ -1,5 +1,5 @@
-include types.e
-include unittest.e
+include std/types.e
+include std/unittest.e
 
 test_true("boolean() #1", boolean(1))
 test_true("boolean() #2", boolean(TRUE))

@@ -1,6 +1,6 @@
-include machine.e
-include math.e
-include unittest.e
+include std/machine.e
+include std/math.e
+include std/unittest.e
 
 test_equal("ceil() integer", 5, ceil(5))
 test_equal("ceil() float #1", 4, ceil(4.0))

@@ -13,7 +13,7 @@
 --   You will be asked if you want to print in color, 
 --   and if you want to print in condensed mode.
 
-include wildcard.e
+include std/wildcard.e
 
 constant TRUE = 1, FALSE = 0
 constant KEYB = 0, DISPLAY = 1, ERROR = 2

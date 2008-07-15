@@ -1,7 +1,7 @@
 	-- Display ASCII / code page chart
 	-- in 50 lines-per-screen mode
 
-include graphics.e
+include std/graphics.e
 
 constant SCREEN = 1
 

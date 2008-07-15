@@ -1,5 +1,5 @@
-include unittest.e
-include os.e
+include std/unittest.e
+include std/os.e
 
 ifdef hello then
     test_fail("not defined #1")

@@ -1,5 +1,5 @@
-include datetime.e as d
-include unittest.e
+include std/datetime.e as d
+include std/unittest.e
 
 sequence tmp
 datetime dt1, dt2

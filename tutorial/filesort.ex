@@ -7,7 +7,7 @@
 --          ex filesort < source > dest
 -- If you read from the keyboard, use control-Z (on DOS) to quit
 
-include sort.e  -- This pulls in the standard Euphoria generic sort routine. It 
+include std/sort.e  -- This pulls in the standard Euphoria generic sort routine. It 
 		-- will sort any type of data. e.g. sort({5, 1, 8, 9, 4}) or
 		-- sort({1.5, 9, 0, -999.9e5}) or sort({"ABC", "FRED", "XX"})
 		-- etc. see include\sort.e

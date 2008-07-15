@@ -4,9 +4,9 @@
 -- or vice versa. On Linux, some lines will get error messages from GNU C
 -- if you use DOS-style. 
 
-include file.e
-include get.e
-include wildcard.e
+include std/file.e
+include std/get.e
+include std/wildcard.e
 
 object d, line
 sequence entry, dl, name

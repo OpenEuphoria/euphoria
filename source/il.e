@@ -7,14 +7,14 @@
 -- that are not upwardly compatible. Otherwise, 
 -- change the format number. (IL_VERSION)
 
-include machine.e
+include std/machine.e
 include compress.e
 include backend.e
 include reswords.e
 include scanner.e
-include text.e
+include std/text.e
 include cominit.e
-include filesys.e
+include std/filesys.e
 
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con

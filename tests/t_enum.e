@@ -1,5 +1,5 @@
-include get.e
-include unittest.e
+include std/get.e
+include std/unittest.e
 
 enum A,B,C
 enum D=-2,E,F,G

@@ -22,10 +22,10 @@ constant FIELDS = {
 -- file to store the database in:
 constant MYNAME   = "mydata.edb"
 
-include database.e  -- Euphoria Database System
-include get.e
-include sort.e
-include text.e
+include std/database.e  -- Euphoria Database System
+include std/get.e
+include std/sort.e
+include std/text.e
 
 constant KEYBOARD = 0,
 	 SCREEN   = 1,

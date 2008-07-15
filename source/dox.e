@@ -2,10 +2,10 @@
 
 include ../include/error.e
 include dot.e
-include sets.e as set
-include filesys.e
-include sort.e
-include map.e as map
+include std/sets.e as set
+include std/filesys.e
+include std/sort.e
+include std/map.e as map
 include keylist.e
 
 sequence out_dir           = "eudox/"
@@ -41,7 +41,7 @@ function dir_exists( sequence path )
 	return file_type( path ) > 0
 end function
 
-include pretty.e
+include std/pretty.e
 procedure make_dir( sequence path )
 	if not create_directory( path ) then
 		crash( sprintf( "could not create directory '%s'", {path} ) )

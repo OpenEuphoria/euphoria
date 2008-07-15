@@ -2,7 +2,7 @@
 -- The Euphoria custom_sort routine is passed the routine id
 -- of the comparison function to be used when sorting.
 
-include sort.e  -- contains custom_sort()
+include std/sort.e  -- contains custom_sort()
  
 constant NAME = 1, 
 	 POPULATION = 2

@@ -2,9 +2,9 @@
 --
 
 include common.e
-include machine.e
-include os.e
-include filesys.e
+include std/machine.e
+include std/os.e
+include std/filesys.e
 
 atom oem2char, convert_buffer
 integer convert_length

@@ -1,4 +1,4 @@
-include regex.e as re
+include std/regex.e as re
 
 sequence str, matches
 re:regex r

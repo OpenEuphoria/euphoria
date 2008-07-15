@@ -1,5 +1,5 @@
-include search.e
-include unittest.e
+include std/search.e
+include std/unittest.e
 
 test_equal("find_all() empty", {}, find_all('Z', "ABACDE", 1))
 test_equal("find_all() atom", {1,3}, find_all('A', "ABACDE", 1))

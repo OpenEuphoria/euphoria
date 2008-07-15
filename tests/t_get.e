@@ -1,5 +1,5 @@
-include get.e
-include unittest.e
+include std/get.e
+include std/unittest.e
 
 -- TODO: Many more functions to test
 

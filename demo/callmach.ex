@@ -1,10 +1,10 @@
 		-- Examples of calling a machine code 
 		-- routine from Euphoria
 
-include os.e
-include machine.e
-include graphics.e
-include dll.e
+include std/os.e
+include std/machine.e
+include std/graphics.e
+include std/dll.e
 
 sequence vc
 vc = video_config()

@@ -14,7 +14,7 @@
 -- than the official RDS interpreter. The official interpreter has a 
 -- carefully hand-coded back-end written in C.
 
-include os.e
+include std/os.e
 include global.e
 include opnames.e
 
@@ -32,14 +32,14 @@ include opnames.e
 include global.e
 include reswords.e
 include symtab.e
-include text.e
+include std/text.e
 include scanner.e
 include mode.e as mode
-include pretty.e
-include io.e
+include std/pretty.e
+include std/io.e
 
-include io.e
-include pretty.e
+include std/io.e
+include std/pretty.e
 
 constant M_CALL_BACK = 52,  
 		 M_CRASH_ROUTINE = 66,

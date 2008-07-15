@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 sequence s s={1,2,3}
 
@@ -67,7 +67,7 @@ test_equal("foo3(-1,)", {-1,20}, foo3(-1) )
 
 test_equal("default call as part of compound expression", 2, mul2(1,1) + mul2(1,1) )
 
-include sequence.e
+include std/sequence.e
 function find2(object x,sequence s,integer from=1,integer upto=length(s))
 	s=head(s,upto)
 	if from=1 then

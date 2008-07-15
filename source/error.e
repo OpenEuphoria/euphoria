@@ -2,7 +2,7 @@
 --
 -- Compile-time Error Handling
 
-include io.e
+include std/io.e
 include global.e
 include reswords.e
 

@@ -1,5 +1,5 @@
-include unittest.e
-include database.e
+include std/unittest.e
+include std/database.e
 
 -- TODO: add actual tests
 

@@ -44,11 +44,11 @@ end ifdef
 
 without type_check
 
-include filesys.e
-include wildcard.e
-include sort.e
-include graphics.e
-include sequence.e
+include std/filesys.e
+include std/wildcard.e
+include std/sort.e
+include std/graphics.e
+include std/sequence.e
 
 constant KEYB = 0, SCREEN = 1, ERR = 2
 constant TRUE = 1, FALSE = 0

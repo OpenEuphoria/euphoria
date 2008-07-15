@@ -1,5 +1,5 @@
-include unittest.e
-include graphics.e
+include std/unittest.e
+include std/graphics.e
 
 -- TODO: add actual tests
 

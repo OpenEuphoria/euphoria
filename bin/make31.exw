@@ -1,8 +1,8 @@
 -- Produce exw31.exe, a version of exw.exe that uses 
 -- Windows GUI version 3.1 instead of 4.0
 
-include file.e
-include get.e
+include std/file.e
+include std/get.e
 
 constant new_version = {3,0,10}   -- {4, 0, 0} for 4.0
 

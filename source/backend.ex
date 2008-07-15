@@ -7,21 +7,21 @@ without type_check
 include mode.e
 set_mode("backend", 0 )
 
-include machine.e
-include wildcard.e
+include std/machine.e
+include std/wildcard.e
+include std/os.e
+include std/sequence.e
+include std/text.e
+
 include common.e
 include reswords.e
 include compress.e
-include os.e
 include cominit.e
 include pathopen.e
-include sequence.e
-include text.e
 
 sequence misc
 integer il_file
 il_file = 0
-
 
 include backend.e
 

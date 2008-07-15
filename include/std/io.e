@@ -794,6 +794,7 @@ end procedure
 -- </eucode>
 -- See Also:
 --		[[:gets]], [[:write_lines]], [[:read_file]]
+
 export function read_lines(object file)
 	object fn, ret, y
 	if sequence(file) then

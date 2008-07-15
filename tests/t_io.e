@@ -1,5 +1,5 @@
-include io.e
-include unittest.e
+include std/io.e
+include std/unittest.e
 
 -- TODO: add more tests
 

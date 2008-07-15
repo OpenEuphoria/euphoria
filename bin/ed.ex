@@ -33,14 +33,14 @@
 
 without type_check -- makes it a bit faster
 
-include graphics.e
-include get.e
-include wildcard.e
-include dll.e
-include sequence.e
-include os.e
-include console.e
-include filesys.e
+include std/graphics.e
+include std/get.e
+include std/wildcard.e
+include std/dll.e
+include std/sequence.e
+include std/os.e
+include std/console.e
+include std/filesys.e
 
 constant TRUE = 1,
 	 FALSE = 0
@@ -124,7 +124,7 @@ else
     F1 = 315
     F10 = 324
     
-    if platform() WIN32 then
+    ifdef WIN32 then
 		F11 = 343
 		F12 = 344
 		NUM_PAD_ENTER = 284
@@ -134,7 +134,7 @@ else
 		F12 = 390
 		NUM_PAD_ENTER = 13
 		NUM_PAD_SLASH = -999 -- Never needed
-    end if
+    end ifdef
     
     CONTROL_DELETE = 403 -- key for line-delete 
 			 -- (not available on some systems)

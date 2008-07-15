@@ -6,18 +6,19 @@
 
 without type_check
 
-include filesys.e
+include std/filesys.e
+
 include mode.e
 set_mode( "bind", 0 )
 
 
 -- standard Euphoria includes
-include wildcard.e
+include std/wildcard.e
 
 -- front-end
 include global.e
 include reswords.e
-include error.e
+include std/error.e
 include keylist.e
 include c_out.e     -- Translator output (leave in for now)
 include symtab.e

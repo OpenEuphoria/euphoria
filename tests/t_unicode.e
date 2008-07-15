@@ -1,5 +1,5 @@
-include unittest.e
-include unicode.e
+include std/unittest.e
+include std/unicode.e
 
 wstring s1, s2, s3
 s1 = "abcd"

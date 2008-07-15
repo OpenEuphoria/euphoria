@@ -19,11 +19,11 @@ else
 end if
 
 -- standard Euphoria includes
-include wildcard.e
+include std/wildcard.e
 
 include global.e
 include reswords.e
-include error.e
+include std/error.e
 include keylist.e
 include c_out.e    -- Translator output (leave in for now)
 include symtab.e

@@ -3,9 +3,9 @@
 -- LINUX(=FREEBSD=UNIX) =>{ "UNIX", "LINUX", "FREEBSD" },  
 -- OSX => { "OSX" } } 
 
-include unittest.e
-include map.e as hash
-include os.e as os
+include std/unittest.e
+include std/map.e as hash
+include std/os.e as os
 
 constant platform_names = 
 		--hash:put(  

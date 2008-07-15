@@ -1,7 +1,7 @@
-include unittest.e
-include map.e as m
-include sort.e
-include text.e
+include std/unittest.e
+include std/map.e as m
+include std/sort.e
+include std/text.e
 
 map m1
 m1 = m:new()

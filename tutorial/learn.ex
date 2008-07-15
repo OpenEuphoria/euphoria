@@ -1,8 +1,8 @@
 	-----------------------------------------------
 	-- A Quiz to Test Your Knowledge of Euphoria --
 	-----------------------------------------------
-include get.e
-include graphics.e
+include std/get.e
+include std/graphics.e
 
 constant NTRYS = 3
 constant KEYBOARD = 0, SCREEN = 1

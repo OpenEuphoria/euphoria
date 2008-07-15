@@ -1,7 +1,7 @@
-include sequence.e as seq
-include text.e
+include std/sequence.e as seq
+include std/text.e
 
-include unittest.e
+include std/unittest.e
 
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
 test_equal("reverse() string", "nhoJ", reverse("John"))

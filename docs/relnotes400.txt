@@ -33,6 +33,8 @@
 
 === New Features
 
+* New standard include files are in ##include/std## to resolve many conflicts.
+  $$(doneby Jeremy Cowgar)
 * Include file names with accent characters now supported. $$(doneby C. Cuvier)
 * Enhanced symbol resolution to take into account information regarding which files were 
   included by which files. $$(doneby Matt Lewis)

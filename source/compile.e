@@ -9,8 +9,8 @@
 -- is more precise and efficient. It doesn't actually emit the C code
 -- until the final pass.
 
-include filesys.e
-include io.e
+include std/filesys.e
+include std/io.e
 
 include global.e
 include mode.e as mode

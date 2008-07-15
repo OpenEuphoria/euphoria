@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 function foo()
 	integer bar = 1

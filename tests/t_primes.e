@@ -1,5 +1,5 @@
-include unittest.e
-include primes.e
+include std/unittest.e
+include std/primes.e
 
 integer s
 

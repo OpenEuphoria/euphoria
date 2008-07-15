@@ -10,19 +10,19 @@
 
 with type_check
 
-include get.e
-include graphics.e  -- comment after include is ok
-include sort.e
-include machine.e
-include filesys.e
-include wildcard.e as wild
-include image.e
-include dll.e
-include msgbox.e
-include math.e
-include os.e
-include text.e
-include error.e
+include std/get.e
+include std/graphics.e  -- comment after include is ok
+include std/sort.e
+include std/machine.e
+include std/filesys.e
+include std/wildcard.e as wild
+include std/image.e
+include std/dll.e
+include std/msgbox.e
+include std/math.e
+include std/os.e
+include std/text.e
+include std/error.e
 
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"

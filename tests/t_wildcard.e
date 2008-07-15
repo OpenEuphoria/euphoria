@@ -1,5 +1,5 @@
-include wildcard.e
-include unittest.e
+include std/wildcard.e
+include std/unittest.e
 
 test_equal("wildcard_match()", 1, wildcard_match("A?B*", "AQBXXYY"))
 test_equal("wildcard_match()", 0, wildcard_match("A?BZ*", "AQBXXYY"))

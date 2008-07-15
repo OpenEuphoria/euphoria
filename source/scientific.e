@@ -1,4 +1,4 @@
-include convert.e
+include std/convert.e
 
 --/topic Introduction
 --/info

@@ -1,5 +1,5 @@
-include unittest.e
-include mouse.e
+include std/unittest.e
+include std/mouse.e
 
 -- TODO: add real tests
 

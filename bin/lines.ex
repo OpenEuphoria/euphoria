@@ -9,9 +9,9 @@
 
 without warning
 
-include wildcard.e
-include sequence.e
-include filesys.e
+include std/wildcard.e
+include std/sequence.e
+include std/filesys.e
 
 constant SCREEN = 1
 constant TRUE = 1, FALSE = 0

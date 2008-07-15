@@ -1,5 +1,5 @@
-include unittest.e
-include image.e
+include std/unittest.e
+include std/image.e
 
 test_pass("image.e at least loads")
 

@@ -1,6 +1,6 @@
-include sort.e
-include unittest.e
-include wildcard.e
+include std/sort.e
+include std/unittest.e
+include std/wildcard.e
 
 -----  sort() ------
 test_equal("sort() empty sequence",         

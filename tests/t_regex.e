@@ -1,6 +1,6 @@
-include regex.e as regex
-include text.e
-include unittest.e
+include std/regex.e as regex
+include std/text.e
+include std/unittest.e
 
 regex:regex re
 re = regex:new("[A-Z][a-z]+")

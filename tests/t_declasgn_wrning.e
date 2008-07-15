@@ -1,5 +1,5 @@
-include filesys.e
-include unittest.e
+include std/filesys.e
+include std/unittest.e
 
 integer fn = open("warning.lst","r")
 

@@ -1,4 +1,4 @@
-include unittest.e
+include std/unittest.e
 
 without warning
 sequence cmd_line
@@ -7,7 +7,7 @@ override function command_line()
 end function
 with warning
 
-include os.e
+include std/os.e
 
 integer verbose, help_called
 sequence style_file, count, extras

@@ -12,11 +12,11 @@
 -- Run it with exwc for Windows programs, exu for Linux/FreeBSD.
 -- The result is placed in "icode.lst".
 
-include machine.e
+include std/machine.e
 include opnames.e
 include reswords.e
-include file.e
-include pretty.e
+include std/file.e
+include std/pretty.e
 
 -- works as a pseudo INTERPRETER
 include mode.e
