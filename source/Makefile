@@ -171,7 +171,7 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/pathopen.o \
 	./$(OBJDIR)/init-.o \
 	./$(OBJDIR)/error.o \
-	./$(OBJDIR)/machine.o \
+	./$(OBJDIR)/memory.o \
 	./$(OBJDIR)/mode.o \
 	./$(OBJDIR)/c_out.o \
 	./$(OBJDIR)/symtab.o \
@@ -246,7 +246,7 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/intinit.o \
 	./$(OBJDIR)/cominit.o \
 	./$(OBJDIR)/io.o \
-	./$(OBJDIR)/machine.o \
+	./$(OBJDIR)/memory.o \
 	./$(OBJDIR)/0ackend.o \
 	./$(OBJDIR)/pathopen.o \
 	./$(OBJDIR)/backend.o \
