@@ -75,7 +75,7 @@ for file_idx = 1 to length(files) label "file_loop" do
 		if begins("include", lines[line_idx]) then
 			for inc_idx = 1 to length(std_incs) label "inc_loop" do
 				idx = match(std_incs[inc_idx], lines[line_idx])
-				if idx and lines[line_idx][idx-1] != '/' then
+				if idx and lines[line_idx][idx-1] = ' ' then
 					lines[line_idx] = splice(lines[line_idx], "std/", idx)
 					exit "inc_loop"
 				end if
