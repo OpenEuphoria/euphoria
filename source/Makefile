@@ -305,7 +305,7 @@ builddirs : svn_rev
 	done
 
 svn_rev : 
-	-$(EXE) revget.ex .svn/entries
+	-$(EXE) -i ../include revget.ex .svn/entries
 
 interpreter : builddirs $(PCRE)
 	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
@@ -386,6 +386,7 @@ test : interpreter translator
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
+	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/unix
@@ -401,6 +402,7 @@ install :
 	install exu ecu eubackend eubind eushroud $(DESTDIR)/usr/bin
 	install ecu.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
+	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)/usr/include/euphoria
 	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*

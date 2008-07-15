@@ -6,7 +6,7 @@ include intinit.e
 include opnames.e
 include std/text.e
 include std/pretty.e
-include ../include/error.e
+include std/error.e
 include std/map.e as map
 include dot.e
 include std/os.e

@@ -1,6 +1,6 @@
 -- writes html dox
 
-include ../include/error.e
+include std/error.e
 include dot.e
 include std/sets.e as set
 include std/filesys.e

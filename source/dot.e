@@ -184,7 +184,7 @@ export procedure short_files()
 	end for
 	std_libs = repeat( 0, length( short_names ) )
 	for i = 1 to length( file_name ) do
-		if match( "include", file_name[i]) then
+		if match( "std/", file_name[i]) then
 			short_names[i] = "std/" & short_names[i]
 			if not show_stdlib then
 				-- we only care if user doesn't want to show it
