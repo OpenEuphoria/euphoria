@@ -3,8 +3,16 @@ include std/map.e as m
 include std/sort.e
 include std/text.e
 
+object o1, o2, o3
+o1 = m:threshold()
+o2 = m:threshold(60)
+o3 = m:threshold()
+test_equal("map get threshold #1", o1, o2 )
+test_equal("map get threshold #2", 60, o3 )
+
+
 map m1
-m1 = m:new()
+m1 = m:new(11)
 
 -- add integers from -5 to 5 with keys -50 to 50
 for i = -5 to 5 do
@@ -20,10 +28,18 @@ test_equal("map m1 get \"XXXXXXXXXX\"", 999,    m:get(m1, "XXXXXXXXXX", 999))
 test_equal("map m1 size#1", 11, m:size(m1))
 test_equal("map m1 keys", {-5,-4,-3,-2,-1,0,1,2,3,4,5}, sort(m:keys(m1)) )
 
+test_true ("map m1 has #1", m:has(m1, 0))
+test_false("map m1 has #2", m:has(m1, 9999))
+
+test_equal("map m1 type #1", SMALLMAP, m:is_type(m1))
+
 -- add 1000 integers, 5 of which are already in the map
 for i = 1 to 1000 do
 	m1 = m:put(m1, i, sprint(i))
 end for
+test_equal("map m1 type #2", LARGEMAP, m:is_type(m1))
+test_true ("map m1 has #3", m:has(m1, 0))
+test_false("map m1 has #4", m:has(m1, 9999))
 
 test_equal("map m1 size#2", 1006, m:size(m1))
 
@@ -63,7 +79,7 @@ test_true("map optimize #3", m1s[3] > opms[3]) -- Total Buckets should reduce
 
 -- m2: strings and objects
 map m2
-m2 = m:new(33)
+m2 = m:new(m:threshold())	-- Create a small map
 
 
 for i = 1 to 33 do
@@ -94,9 +110,12 @@ m3 = m:new()
 m3 = m:put(m3, 1, 11)
 m3 = m:put(m3, 2, 22)
 m3 = m:put(m3, 3, 33)
+test_equal("map m3 type #1", LARGEMAP, m:is_type(m3))
 m3 = m:remove(m3, 2)
-
+test_equal("map m3 type #2", SMALLMAP, m:is_type(m3))
 test_equal("map m3 size#1", 2, m:size(m3))
+m3 = m:remove(m3, 2)
+test_equal("map m3 size#2", 2, m:size(m3))
 
 map m4
 m4 = m:new()
@@ -119,7 +138,7 @@ test_equal("map load padding", " padded ", m:get(m1, "padding",-1))
 test_equal("map load embed", "--", m:get(m1, "embed",-1))
 
 map m5
-m5 = m:new()
+m5 = m:new(10)
 m5 = m:put( m5, ADD, 1 )
 m5 = m:put( m5, ADD, 1, ADD ) -- 2
 test_equal( "put ADD", 2, m:get( m5, ADD, "" ) )

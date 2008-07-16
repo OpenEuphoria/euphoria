@@ -5,21 +5,63 @@
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
+--
+-- A map is a special array, often called an associative array or dicionary,
+-- in which the index to the data can be any Euphoria object and not just
+-- an integer. These sort of indexes are also called keys.
+-- For example we can code things like this...
+-- <eucode>
+--    custrec = new() -- Create a new map
+--    custrec = put(custrec, "Name", "Joe Blow")
+--    custrec = put(custrec, "Address", "555 High Street")
+--    custrec = put(custrec, "Phone", 555675632)
+-- </eucode>
+-- This creates three elements in the map, and they are indexed by "Name", 
+-- "Address" and "Phone", meaning that to get the data associated with those
+-- keys we can code ...
+-- <eucode>
+--    object data = get(custrec, "Phone")
+--    -- data now set to 555675632
+-- </eucode>
+-- **Note~:** Only one instance of a given key can exist in a given map, meaning
+-- for example, we couldn't have two separate "Name" values in the above //custrec//
+-- map.
+--
+-- Maps automatically grow to accomodate all the elements placed into it.
+--
+-- Associative arrays can be implemented in many different ways, depending
+-- on what efficiency trade-offs have been made. This implementation allows
+-- you to decide if you want a //small// map or a //large// map.\\
+-- ;small map: Faster for small numbers of elements. Speed is usually proportional
+-- to the number of elements.
+-- ;large map: Faster for large number of elements. Speed is usually the same
+-- regardless of how many elements are in the map. The speed is often slower than
+-- a small map.\\
+-- **Note~:** If the number of elements placed into a //small// map take it over
+-- the initial size of the map, it is automatically converted to a //large// map.
+--
 
-include get.e
-include primes.e
---include machine.e
-include convert.e
-include math.e
-include stats.e as stats
-include text.e
-include search.e
+include std/get.e
+include std/primes.e
+include std/convert.e
+include std/math.e
+include std/stats.e as stats
+include std/text.e
+include std/search.e
 
-constant iCnt = 1 -- ==> elementCount
+constant iElemCnt = 1 -- ==> elementCount
 constant iInUse = 2 -- ==> count of non-empty buckets
 constant iBuckets = 3 -- ==> bucket[] --> bucket = {key[], value[]}
+constant iKeyList = 3 -- ==> Small map keys
+constant iValList = 4 -- ==> Small map values
+constant iFreeSpace = 5 -- ==> Small map freespace
 constant iKeys = 1
 constant iVals = 2
+constant iSmallMap = 5
+constant iLargeMap = 3
+
+integer ri_ConvertToLarge
+integer ri_ConvertToSmall
 
 --****
 -- === Constants
@@ -35,6 +77,10 @@ constant iVals = 2
 --
 -- Convenience empty map:
 -- * BLANK_MAP
+--
+-- Types of Maps
+-- * SMALLMAP
+-- * LARGEMAP
 
 export enum
 	PUT,
@@ -43,7 +89,14 @@ export enum
 	MULTIPLY,
 	DIVIDE,
 	APPEND,
-	CONCAT
+	CONCAT,
+	SMALLMAP,
+	LARGEMAP
+
+integer vSizeThreshold = 50
+
+-- Used to initialize a small map's keys list. 
+constant vInitSmallKey = -960.35894374 
 
 --****
 -- === Types
@@ -53,35 +106,40 @@ export enum
 -- Defines the datatype 'map'
 --
 -- Comments:
--- Used when declaring a map variable. A map is also known as a dictionary. It organizes pair {key, value} so as to make lookup faster. The keys and values may be any Euphoria objects. Only one pair with a given key may exist in a given map.
+-- Used when declaring a map variable.
 --
 -- Example:
 --   <eucode>
---   map SymbolTable
---   SymbolTable = new() -- Create a new map to hold the symbol table.
+--   map SymbolTable = new() -- Create a new map to hold the symbol table.
 --   </eucode>
 
 export type map(object o)
-		if not sequence(o) then
-			return 0
-		end if
-		if length(o) != 3 then
-			return 0
-		end if
-		if not integer(o[1]) then
-			return 0
-		end if
-		if o[1] < 0 then
-			return 0
-		end if
-		if not integer(o[2]) then
-			return 0
-		end if
-		if o[2] < 0 then
-			return 0
-		end if
-		if not sequence(o[3]) then
-			return 0
+-- Large maps have three elements:
+--   (1) 
+--   (2) 
+--   (3) Sequence containing two subsequences: Key-Buckets and Value-Buckets
+
+-- Small maps have five elements:
+--   (1)
+--   (2)
+--   (3) Sequence of keys
+--   (4) Sequence of values, in the same order as the keys.
+--   (5) Sequence. A Free space map.
+		if atom(o) 				then return 0 end if
+		if length(o) < 3 		then return 0 end if
+		if length(o) > 5 		then return 0 end if
+		if length(o) = 4 		then return 0 end if
+		if not integer(o[iElemCnt]) then return 0 end if
+		if o[iElemCnt] < 0 		then return 0 end if
+		if not integer(o[iInUse]) then return 0 end if
+		if o[iInUse] < 0		then return 0 end if
+		if atom(o[iKeyList])	then return 0 end if
+		if length(o) = iSmallMap then
+			if atom(o[iValList]) 		then return 0 end if
+			if atom(o[iFreeSpace]) 		then return 0 end if
+			if length(o[iKeyList]) = 0 then return 0 end if
+			if length(o[iKeyList]) != length(o[iValList]) then return 0 end if
+			if length(o[iKeyList]) != length(o[iFreeSpace]) then return 0 end if
 		end if
 		return 1
 end type
@@ -98,10 +156,10 @@ constant maxInt = #3FFFFFFF
 -- Parameters:
 --   * pData = The data for which you want a hash value calculated.
 --   * pMaxHash = (default = 0) The returned value will be no larger than this value.
---     However, a value of 0 or lower means that it can grow as large as the maximum integer value.
+--     However, a value of 0 or lower menas that it can grow as large as the maximum integer value.
 --
 -- Returns:
---		An **integer**, the value of which depends only on the supplied data.
+--		An **integer**, the value of which depends only on the supplied adata.
 --
 -- Comments:
 -- This is used whenever you need a single number to represent the data you supply.
@@ -155,7 +213,51 @@ export function calc_hash(object key, integer pMaxHash = 0)
 end function
 
 --**
--- Changes the width, i.e. the number of buckets, of a hmap.
+-- Gets or Sets the threshold value that deterimes at what point a small map
+-- converts into a large map structure. Initially this has been set to 50,
+-- meaning that maps up to 50 elements use the 'small map' structure.
+--
+-- Parameters:
+-- # pNewValue = If this is greater than zero then it **sets** the threshold
+-- value.
+--
+-- Returns:
+-- ##integer## The current value (when ##pNewValue## is less than 1) or the
+-- old value prior to setting it to ##pNewValue##.
+--
+export function threshold(integer pNewValue = 0)
+
+	if pNewValue < 1 then
+		return vSizeThreshold
+	end if
+
+	integer lOldValue = vSizeThreshold
+	vSizeThreshold = pNewValue
+	return lOldValue
+		
+end function
+	
+--**
+-- Determines the type of the map.
+--
+-- Parameters:
+-- # m = A map
+--
+-- Returns:
+-- ##integer## Either //SMALLMAP// or //LARGEMAP//
+--
+export function is_type(map m)
+
+	if length(m) = iSmallMap then
+		return SMALLMAP
+	else
+		return LARGEMAP
+	end if		
+end function
+	
+--**
+-- Changes the width, i.e. the number of buckets, of a map. Only effects
+-- //large// maps.
 --
 -- Parameters:
 --		# ##m##: the map to resize
@@ -175,6 +277,10 @@ export function rehash(map m, integer pRequestedSize = 0)
 	atom newsize
 	sequence m0
 
+	if length(m) = iSmallMap then
+		return m
+	end if
+	
 	m0 = m
 
 	if pRequestedSize <= 0 then
@@ -213,26 +319,35 @@ end function
 -- Create a new map data structure
 --
 -- Parameters:
---		# ##initSize##: an initial number of buckets for the map.
+--		# ##initSize##: An estimate of how many initial elements will be stored
+--   in the map. If this value is less than the [[:threshold]] value, the map
+--   will initially be a //small// map otherwise it will be a //large// map.
 --
 -- Returns:
 --		An empty **map**.
 --
 -- Comments:
---   A new object of type map is created. type_check should be turned off for better performance.
+--   A new object of type map is created.
 --
 -- Example 1:
 --   <eucode>
---   map m
---   m = new()
---   -- m is now an empty map (size = 0)
+--   map m = new()  -- m is now an empty map
+--   map x = new(threshold()) -- Forces a small map to be initialized
 --   </eucode>
 
 export function new(integer initSize = 66)
 	integer lBuckets
-	lBuckets = next_prime(floor((max({1,initSize - 2}) + 3) / 4))
 
-	return {0, 0, repeat({{},{}}, lBuckets ) }
+	if initSize < 3 then
+		initSize = 3
+	end if
+	if initSize > vSizeThreshold then
+		-- Return a large map
+		lBuckets = next_prime(floor((initSize + 1) / 4))
+		return {0, 0, repeat({{},{}}, lBuckets ) }
+	end if
+	-- Return a small map
+	return {0,0, repeat(vInitSmallKey, initSize), repeat(0, initSize), repeat(0, initSize)}
 end function
 
 --**
@@ -243,7 +358,7 @@ end function
 --		# ##key##: an object to be looked up
 --
 -- Returns:
---		An **integer**, 0 if not present, 1 if present.
+--		An **intger**, 0 if not present, 1 if present.
 --
 -- Example 1:
 --   <eucode>
@@ -257,9 +372,26 @@ end function
 -- 		[[:get]]
 export function has(map m, object key)
 	integer lIndex
+	integer lFrom
 
-	lIndex = calc_hash(key, length(m[iBuckets]))
-	return (find(key, m[iBuckets][lIndex][iKeys]) != 0)
+	if length(m) = iLargeMap then
+		lIndex = calc_hash(key, length(m[iBuckets]))
+		return (find(key, m[iBuckets][lIndex][iKeys]) != 0)
+	else
+		lFrom = 1
+		while lFrom > 0 do
+			lIndex = find_from(key, m[iKeyList], lFrom)
+			if lIndex then
+				if m[iFreeSpace][lIndex] = 1 then
+					return 1
+				end if
+			else
+				return 0
+			end if
+			lFrom = lIndex + 1
+		end while
+	end if
+	
 end function
 
 --**
@@ -293,15 +425,30 @@ end function
 export function get(map m, object key, object defaultValue)
 	integer lIndex
 	integer lOffset
-
-	lIndex = calc_hash(key, length(m[iBuckets]))
-	lOffset = find(key, m[iBuckets][lIndex][iKeys])
-	if lOffset != 0 then
-		return m[iBuckets][lIndex][iVals][lOffset]
+	integer lFrom
+	
+	if length(m) = iLargeMap then
+		lIndex = calc_hash(key, length(m[iBuckets]))
+		lOffset = find(key, m[iBuckets][lIndex][iKeys])
+		if lOffset != 0 then
+			return m[iBuckets][lIndex][iVals][lOffset]
+		else
+			return defaultValue
+		end if
 	else
-		return defaultValue
+		lFrom = 1
+		while lFrom > 0 do
+			lIndex = find_from(key, m[iKeyList], lFrom)
+			if lIndex then
+				if m[iFreeSpace][lIndex] = 1 then
+					return m[iValList][lIndex]
+				end if
+			else
+				return defaultValue
+			end if
+			lFrom = lIndex + 1
+		end while
 	end if
-
 end function
 
 --**
@@ -326,7 +473,7 @@ end function
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##m##: the map where an entry is being added or updated
+--		# ##m##: the map where an entry is being added or opdated
 --		# ##key##: an object, the key to look up
 --		# ##value##: an object, the value to add, or to use for updating.
 --		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
@@ -365,71 +512,143 @@ end function
 --		[[:remove]], [[:has]],  [[:nested_put]]
 
 export function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
-	integer index
+	integer lIndex
 	integer hashval
 	integer lOffset
 	object bucket
 	atom lAvgLength
 	sequence m0
 	integer bl
-	object old_value
+	integer lFrom
 
 	m0 = m
-	hashval = calc_hash(key, 0)
-	index = remainder(hashval, length(m[iBuckets])) + 1
-	bucket = m[iBuckets][index]
-	bl = length(bucket[iVals])
-	lOffset = find(key, bucket[iKeys])
-
-	if lOffset != 0 then
-		if operation = PUT then
-			bucket[iVals][lOffset] = value
-		else
-			old_value = bucket[iVals][lOffset]
+	if length(m) = iLargeMap then
+		hashval = calc_hash(key, 0)
+		lIndex = remainder(hashval, length(m[iBuckets])) + 1
+		bucket = m[iBuckets][lIndex]
+		bl = length(bucket[iVals])
+		lOffset = find(key, bucket[iKeys])
+	
+		if lOffset != 0 then
 			switch operation do
+				case PUT:
+					bucket[iVals][lOffset] = value
+					break
+					
 				case ADD:
 					bucket[iVals][lOffset] += value
 					break
+					
 				case SUBTRACT:
 					bucket[iVals][lOffset] -= value
 					break
+					
 				case MULTIPLY:
 					bucket[iVals][lOffset] *= value
 					break
+					
 				case DIVIDE:
 					bucket[iVals][lOffset] /= value
 					break
+					
 				case APPEND:
 					bucket[iVals][lOffset] = append( bucket[iVals][lOffset], value )
 					break
+					
 				case CONCAT:
 					bucket[iVals][lOffset] &= value
+					break
+					
 			end switch
-		end if
-		m0[iBuckets][index] = bucket
-		return m0
-	end if
-	if bl = 0 then
-		m0[iInUse] += 1
-	end if
 
-	m0[iCnt] += 1 -- elementCount
-	if pTrigger > 0 then
-		lAvgLength = m0[iCnt] / m0[iInUse]
-		if (lAvgLength >= pTrigger) then
-			m0 = rehash(m0)
-			index = remainder(hashval, length(m0[iBuckets])) + 1
+			m0[iBuckets][lIndex] = bucket
+			return m0
 		end if
-	end if
-	-- write new entry
-	m0[iBuckets][index][iKeys] = append(m0[iBuckets][index][iKeys], key)
-	if operation = APPEND then
-		-- If appending, then the user wants the value to be an element, not the entire thing
-		value = { value }
-	end if
-	m0[iBuckets][index][iVals] = append(m0[iBuckets][index][iVals], value)
+		if bl = 0 then
+			m0[iInUse] += 1
+		end if
 	
-	return m0
+		m0[iElemCnt] += 1 -- elementCount
+		if pTrigger > 0 then
+			lAvgLength = m0[iElemCnt] / m0[iInUse]
+			if (lAvgLength >= pTrigger) then
+				m0 = rehash(m0)
+				lIndex = remainder(hashval, length(m0[iBuckets])) + 1
+			end if
+		end if
+		-- write new entry
+		m0[iBuckets][lIndex][iKeys] = append(m0[iBuckets][lIndex][iKeys], key)
+		if operation = APPEND then
+			-- If appending, then the user wants the value to be an element, not the entire thing
+			value = { value }
+		end if
+		m0[iBuckets][lIndex][iVals] = append(m0[iBuckets][lIndex][iVals], value)
+		
+		return m0
+	else
+		lFrom = 1
+		while lFrom > 0 do
+			lIndex = find_from(key, m0[iKeyList], lFrom)
+			if lIndex then
+				if m0[iFreeSpace][lIndex] = 1 then
+					exit
+				end if
+			else
+				exit
+			end if
+			lFrom = lIndex + 1
+		end while
+		
+		-- Did we find it?
+		if lIndex = 0 then
+			-- No, so add it.
+			lIndex = find(0, m0[iFreeSpace])
+			if lIndex = 0 then
+				-- No room left, so now it becomes a large map.
+				return put(call_func(ri_ConvertToLarge,{m0}), key, value, operation, pTrigger)
+			else
+				m0[iKeyList][lIndex] = key
+				m0[iValList][lIndex] = value
+				m0[iFreeSpace][lIndex] = 1
+				m0[iInUse] += 1
+				m0[iElemCnt] += 1
+				return m0
+			end if
+		end if
+		
+		switch operation do
+			case PUT:
+				m0[iValList][lIndex] = value
+				break
+				
+			case ADD:
+				m0[iValList][lIndex] += value
+				break
+				
+			case SUBTRACT:
+				m0[iValList][lIndex] -= value
+				break
+				
+			case MULTIPLY:
+				m0[iValList][lIndex] *= value
+				break
+				
+			case DIVIDE:
+				m0[iValList][lIndex] /= value
+				break
+				
+			case APPEND:
+				m0[iValList][lIndex] = append( m0[iValList][lIndex], value )
+				break
+				
+			case CONCAT:
+				m0[iValList][lIndex] &= value
+				break
+				
+		end switch
+		return m0
+		
+	end if
 end function
 
 export constant BLANK_MAP = new()
@@ -437,7 +656,7 @@ export constant BLANK_MAP = new()
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##m##: the map where an entry is being added or updated
+--		# ##m##: the map where an entry is being added or opdated
 --		# ##keys##: a sequence of keys for the nested maps
 --		# ##value##: an object, the value to add, or to use for updating.
 --		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
@@ -501,18 +720,21 @@ end function
 -- See Also:
 --		[[:put]], [[:has]]
 export function remove(map m, object key)
-	integer hash, index
+	integer hash, lIndex
 	object bucket
 	sequence m0
+	integer lFrom
+	
 
 	m0 = m
-		index = calc_hash(key, length(m[iBuckets]))
-
+	if length(m0) = iLargeMap then
+		lIndex = calc_hash(key, length(m[iBuckets]))
+	
 		-- find prev entry
-		bucket = m[iBuckets][index]
+		bucket = m[iBuckets][lIndex]
 		hash = find(key, bucket[iKeys])
 		if hash != 0 then
-			m0[iCnt] -= 1
+			m0[iElemCnt] -= 1
 			if length(bucket[iVals]) = 1 then
 				m0[iInUse] -= 1
 				bucket = {{},{}}
@@ -520,10 +742,31 @@ export function remove(map m, object key)
 				bucket[iVals] = bucket[iVals][1 .. hash-1] & bucket[iVals][hash+1 .. $]
 				bucket[iKeys] = bucket[iKeys][1 .. hash-1] & bucket[iKeys][hash+1 .. $]
 			end if
-			m0[iBuckets][index] = bucket
+			m0[iBuckets][lIndex] = bucket
+			
+			if m0[iElemCnt] < floor(51 * vSizeThreshold / 100) then
+				m0 = call_func(ri_ConvertToSmall,{m0})
+			end if
 		end if
-
-		return m0
+	else
+		lFrom = 1
+		while lFrom > 0 do
+			lIndex = find_from(key, m0[iKeyList], lFrom)
+			if lIndex then
+				if m0[iFreeSpace][lIndex] = 1 then
+					m0[iFreeSpace][lIndex] = 0
+					m0[iKeyList][lIndex] = vInitSmallKey
+					m0[iValList][lIndex] = 0
+					m0[iInUse] -= 1
+					m0[iElemCnt] -= 1
+				end if
+			else
+				exit
+			end if
+			lFrom = lIndex + 1
+		end while
+	end if
+	return m0
 end function
 
 --**
@@ -549,7 +792,7 @@ end function
 -- See Also:
 --		[[:statistics]]
 export function size(map m)
-	return m[iCnt]
+	return m[iElemCnt]
 end function
 
 --**
@@ -573,22 +816,26 @@ export function statistics(map m)
 	sequence lLengths
 	integer lLength
 
-	lStats = {m[iCnt], m[iInUse], length(m[iBuckets]), 0, maxInt, 0, 0}
-	lLengths = {}
-	for i = 1 to length(m[iBuckets]) do
-		lLength = length(m[iBuckets][i][iVals])
-		if lLength > 0 then
-			if lLength > lStats[4] then
-				lStats[4] = lLength
+	if length(m) = iLargeMap then
+		lStats = {m[iElemCnt], m[iInUse], length(m[iBuckets]), 0, maxInt, 0, 0}
+		lLengths = {}
+		for i = 1 to length(m[iBuckets]) do
+			lLength = length(m[iBuckets][i][iVals])
+			if lLength > 0 then
+				if lLength > lStats[4] then
+					lStats[4] = lLength
+				end if
+				if lLength < lStats[5] then
+					lStats[5] = lLength
+				end if
+				lLengths &= lLength
 			end if
-			if lLength < lStats[5] then
-				lStats[5] = lLength
-			end if
-			lLengths &= lLength
-		end if
-	end for
-	lStats[6] = stats:average(lLengths)
-	lStats[7] = stdev(lLengths)
+		end for
+		lStats[6] = stats:average(lLengths)
+		lStats[7] = stdev(lLengths)
+	else
+		lStats = {m[iElemCnt], m[iInUse], length(m[iBuckets]), length(m[iKeyList]), length(m[iKeyList]), length(m[iKeyList]), 0}
+	end if
 	return lStats
 end function
 
@@ -623,9 +870,10 @@ export function keys(map m)
 	sequence ret
 	integer pos
 
-		ret = repeat(0, m[iCnt])
+	if length(m) = iLargeMap then
+		ret = repeat(0, m[iElemCnt])
 		pos = 1
-
+	
 		buckets = m[iBuckets]
 		for index = 1 to length(buckets) do
 			bucket = buckets[index]
@@ -634,8 +882,18 @@ export function keys(map m)
 				pos += length(bucket[iKeys])
 			end if
 		end for
-
-		return ret
+	else
+		ret = repeat(0, m[iElemCnt])
+		pos = 1
+		for index = 1 to length(m[iFreeSpace]) do
+			if m[iFreeSpace][index] !=  0 then
+				ret[pos] = m[iKeyList][index]
+				pos += 1
+			end if
+		end for
+		
+	end if
+	return ret
 end function
 
 --**
@@ -671,7 +929,8 @@ export function values(map m)
 	sequence ret
 	integer pos
 
-		ret = repeat(0, m[iCnt])
+	if length(m) = iLargeMap then
+		ret = repeat(0, m[iElemCnt])
 		pos = 1
 
 		buckets = m[iBuckets]
@@ -683,18 +942,29 @@ export function values(map m)
 			end if
 		end for
 
-		return ret
+	else
+		ret = repeat(0, m[iElemCnt])
+		pos = 1
+		for index = 1 to length(m[iFreeSpace]) do
+			if m[iFreeSpace][index] !=  0 then
+				ret[pos] = m[iValList][index]
+				pos += 1
+			end if
+		end for
+		
+	end if
+	return ret
 end function
 
 --**
 -- Widens a map to increase performance.
 --
 -- Parameters:
---		# ##m##: the map being optimized
+--		# ##m##: the map being optimised
 --		# ##pAvg##: an atom, an estimate of the desired count of nonempty buckets. Default is 10.
 --
 -- Returns:
---		The optimized **map**.
+--		The optimised **map**.
 --
 -- See Also:
 --		{{:statistics]]
@@ -703,14 +973,16 @@ export function optimize(map m, atom pAvg = 10)
 	sequence m0
 
 	m0 = m
-	op = statistics(m0)
-	m0 = rehash(m0, floor(op[1] / pAvg))
-	op = statistics(m0)
-
-	while op[4] > pAvg * 1.5 and (op[7]*3 + op[6]) <= op[4] do
-		m0 = rehash(m, floor(op[3] * 1.333))
+	if length(m) = iLargeMap then
 		op = statistics(m0)
-	end while
+		m0 = rehash(m0, floor(op[1] / pAvg))
+		op = statistics(m0)
+	
+		while op[4] > pAvg * 1.5 and (op[7]*3 + op[6]) <= op[4] do
+			m0 = rehash(m, floor(op[3] * 1.333))
+			op = statistics(m0)
+		end while
+	end if
 	return m0
 end function
 
@@ -724,7 +996,7 @@ end function
 --		A **map** with all the entries found in ##pFileName##.
 --
 -- Comments:
---	The file has one entry per line, each line being of the form <key>=<value>. Whitespace around the key and the value do not count. Comment lines start with "--" and are ignored.
+--	Rhe file has one entry per line, each line being of the form <key>=<value>. Whitespace around the key and the value do not count. Comment lines start with "--" and are ignored.
 -- See Also:
 --		[[:new]]
 export function load_map(sequence pFileName)
@@ -742,7 +1014,7 @@ export function load_map(sequence pFileName)
 		return 0
 	end if
 
-	m = new()
+	m = new(vSizeThreshold) -- Assume a small map initially.
 	while sequence(lLine) entry do
 		lComment = rmatch("--", lLine)
 		if lComment != 0 then
@@ -770,3 +1042,45 @@ export function load_map(sequence pFileName)
 	close(fh)
 	return optimize(m)
 end function
+
+
+---- Local Functions ------------
+function ConvertToLarge(map m)
+	sequence m0
+	
+	if length(m) = iLargeMap then
+		return m
+	end if
+	
+	m0 = new()
+	for index = 1 to length(m[iFreeSpace]) do
+		if m[iFreeSpace][index] !=  0 then
+			m0 = put(m0, m[iKeyList][index], m[iValList][index])
+		end if
+	end for
+
+	return m0
+end function
+ri_ConvertToLarge = routine_id("ConvertToLarge")
+
+function ConvertToSmall(map m)
+	sequence m0
+	sequence lKeys
+	sequence lVals
+
+	if length(m) = iSmallMap then
+		return m
+	end if
+	
+	m0 = new(vSizeThreshold)
+	lKeys = keys(m)
+	lVals = values(m)
+	
+	for index = 1 to length(lKeys) do
+		m0 = put(m0, lKeys[index], lVals[index])
+	end for
+
+	return m0
+end function
+ri_ConvertToSmall = routine_id("ConvertToSmall")
+
