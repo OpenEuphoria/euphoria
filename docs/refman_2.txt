@@ -1690,8 +1690,8 @@ set or unset at parse time as well. Euphoria defines some common words itself:
 Further, you can define your own words either in source:
 
 <eucode>
-with define=MY_WORD       -- defines
-without define=OTHER_WORD -- undefines
+with define MY_WORD       -- defines
+without define OTHER_WORD -- undefines
 </eucode>
 
 or by command line:
@@ -2602,6 +2602,26 @@ In addition, two other strings are recognised and have a special action:
 "save" saves the current warning state, i.e. the list of all enabled warnings. This clobbers any previously saved state. Symmetrically, "restore" causes the previously saved state to be 
 restored.
 
+===== with / without define
+
+As mentioned in [[:ifdef]], this top level statement is used to define/undefine tags which the ifdef statement may use.
+
+The following tags have a predefined meaning in Euphoria:
+
+* DOS32: 	platform is 32 bit DOS
+* WIN32: 	platform is any version of Windows (tm) from '95 on to Vista and beyond
+* UNIX:  	platform is any kind of Unix style system
+* LINUX: 	platform is Linux
+* FREEBSD:  platform is FreeBSD
+* OSX:		platform is OS X for Macintosh
+* SAFE:		turns on a slower debugging version of [[:memory.e]] when defined. Switching mode by renaming files **//no longer works//**.
+
+The name of a tag may contain any character that are not white space, including ones that 
+would not be legal in an identifier. However, for consistency, using identifier-like, 
+uppercase words is recommended. "MY TAG" is not a valid tag (TAG has not been declared), but 
+"MY@TAG" or "MYÁTAG" is. The latter is not recommended because it may display differently on 
+different computers.
+
 == Command line switches
 
 You can launch Euphoria with some extra command line switches, in order to add
@@ -2612,7 +2632,7 @@ achieved by clicking the Run... start menu entry, or hitting Windows-R.
 
 The following items may be changed or added, one at a time:
 
-; ##-C cofig_file##:
+; ##-C config_file##:
 : Specifies the path for a file called euinc.conf, which holds a set of include paths, one on each line.
 
 ; ##-I include_path##:

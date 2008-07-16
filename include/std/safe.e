@@ -13,7 +13,7 @@
 
 -- 2. To turn debug version on, issue 
 -- <eucode>
--- with define=SAFE  ~-- no spaces
+-- with define SAFE
 -- </eucode>
 -- in your main program, before the statement including machine.e.
 --
@@ -32,7 +32,8 @@
 --    There will be a "divide by zero" traceback in ex.err 
 --    so you can find the statement that is making the illegal memory access.
 
--- 6. To switch between normal and debig bversions, simply comment in or out the "with define =  SAFE" directive. In means debugging and out means normal.
+-- 6. To switch between normal and debig bversions, simply comment in or out the 
+-- "with define SAFE" directive. In means debugging and out means normal.
 -- Alternatively, you can use -D SAFE as a switch on the command line (debug) or not (normal).
 
 -- 7. The older method of switching files and renaming them //**no longer works**//. machine.e conditionally includes safe.e.

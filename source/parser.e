@@ -2957,14 +2957,15 @@ procedure SetWith(integer on_off)
 		end while
 		putback(tok)
 
-	elsif match("define=", option) = 1 and length(option) > 8 then
+	elsif equal(option,"define" ) then
+		option = StringToken()
 		if on_off = 0 then
-			idx = find(option[8..$], OpDefines)
+			idx = find(option, OpDefines)
 			if idx then
 				OpDefines = remove(OpDefines, idx)
 			end if
 		else
-			OpDefines &= {option[8..$]}
+			OpDefines &= {option}
 		end if
 	
 	elsif on_off and option[1] >= '0' and option[1] <= '9' then

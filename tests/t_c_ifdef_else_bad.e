@@ -1,4 +1,4 @@
-with define=DEFINED
+with define DEFINED
 include std/unittest.e
 
 ifdef NOT_DEFINED then
