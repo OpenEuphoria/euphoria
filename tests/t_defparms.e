@@ -88,5 +88,8 @@ function f2(sequence s,integer n=f1())
 end function
 test_equal("Indirect reference to parameter",5,f2("abcde"))
 
+include unknown_defparm.e
+test_equal("Default parameter relays knwn symbols #1", 3, unk_foo())
+
 test_report()
 

@@ -470,22 +470,36 @@ end procedure
 
 function read_recorded_token(integer n)
     token t
-	integer p
+	integer p, prev_Nne
 
-    if atom(Ns_recorded[n]) then  
+    if atom(Ns_recorded[n]) then
         if use_private_list then
             p=find(Recorded[n],private_list)
 			if p>0 then -- the value of this parameter is known, use it
 				return {VARIABLE,private_sym[p]}
             end if
         end if
-        t = keyfind(Recorded[n],-1)
+        p = Recorded_sym[n]
+        if p = 0 then
+	        t = keyfind(Recorded[n],-1)
+        else
+	        t = {SymTab[p][S_TOKEN], p}
+        end if
     else
         t = keyfind(Ns_recorded[n],-1)
         if t[T_ID] != NAMESPACE then
-            CompileErr("Unknown namespace in replayed token")
+            p = Ns_recorded_sym[n]
+            if p = 0 then
+				CompileErr("Unknown namespace in replayed token")
+			end if
+			t = {NAMESPACE, p}
         end if
-        t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
+        p = Recorded_sym[n]
+        if p = 0 then
+	        t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
+        else
+	        t = {SymTab[p][S_TOKEN], p}
+        end if
         n = t[T_ID]
         if n = VARIABLE then
             n = QUALIFIED_VARIABLE
@@ -496,10 +510,14 @@ function read_recorded_token(integer n)
         elsif n = TYPE then
             n = QUALIFIED_TYPE
         end if
-        t[T_ID]=n
+        t[T_ID] = n
     end if 
     if SymTab[t[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-        CompileErr("Unknown symbol in replayed token")
+        p = Recorded_sym[n]
+		if p = 0 then
+	        CompileErr("Unknown symbol in replayed token")
+        end if
+        t = {SymTab[p][S_TOKEN], p}
     end if
   	return t
 end function

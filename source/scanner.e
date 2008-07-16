@@ -848,7 +848,7 @@ end function
 			
 global function Scanner()
 -- The scanner main routine: returns a lexical token  
-	integer ch, i, sp
+	integer ch, i, sp, prev_Nne
 	sequence yytext, namespaces  -- temporary buffer for a token
 	atom d
 	token tok
@@ -893,8 +893,8 @@ global function Scanner()
 				while ch = ' ' or ch = '\t' do
 					ch = getch()
 				end while
-						
-				if ch = ':' then
+
+				if ch = ':' then -- known namespace
 					-- skip whitespace
 					ch = getch()
 					while ch = ' ' or ch = '\t' do
@@ -904,23 +904,33 @@ global function Scanner()
 					while id_char[ch] do
 						yytext &= ch
 						ch = getch()
-					end while 
+					end while
 					ungetch()
-						
+
 					if length(yytext) = 0 then
 						CompileErr("an identifier is expected here")
-					end if  
-					
+					end if
+
 					-- must look in chosen file.
 					-- can't create a new variable in s.t.
-						
+
 				    if Parser_mode = PAM_RECORD then
 		                Recorded = append(Recorded,yytext)
 		                Ns_recorded = append(Ns_recorded,namespaces)
+		                Ns_recorded_sym &= SymTab[tok[T_SYM]][S_OBJ]
+		                prev_Nne = No_new_entry
+						No_new_entry = 1
+						tok = keyfind(yytext, SymTab[tok[T_SYM]][S_OBJ])
+						if tok[T_ID] = IGNORED then
+							Recorded_sym &= 0 -- must resolve on call site
+						else
+							Recorded_sym &= tok[T_SYM] -- fallback when symbol is undefined on call site
+						end if
+		                No_new_entry = prev_Nne
 		                return {RECORDED,length(Recorded)}
 				    else
 						tok = keyfind(yytext, SymTab[tok[T_SYM]][S_OBJ])
-	
+
 						if tok[T_ID] = VARIABLE then
 							tok[T_ID] = QUALIFIED_VARIABLE
 						elsif tok[T_ID] = FUNC then
@@ -931,23 +941,71 @@ global function Scanner()
 							tok[T_ID] = QUALIFIED_TYPE
 						end if
 					end if
-				else
+				else -- not a namespace, but an overriding var
 					ungetch()
 				    if Parser_mode = PAM_RECORD then
 		                Recorded = append(Recorded,yytext)
 		                Ns_recorded &= 0
+		                Ns_recorded_sym &= 0
+		                prev_Nne = No_new_entry
+						No_new_entry = 1
+						tok = keyfind(yytext, -1)
+						if tok[T_ID] = IGNORED then
+							Recorded_sym &= 0 -- must resolve on call site
+						else
+							Recorded_sym &= tok[T_SYM] -- fallback when symbol is undefined on call site
+						end if
+		                No_new_entry = prev_Nne
 		                tok = {RECORDED,length(Recorded)}
 		            end if
 				end if
-			else
+			else -- not a known namespace
 			    if Parser_mode = PAM_RECORD then
-	                Recorded = append(Recorded,yytext)
-	                Ns_recorded &= 0
-	                tok = {RECORDED,length(Recorded)}
+	                Ns_recorded_sym &= 0
+					ch = getch()
+					while ch = ' ' or ch = '\t' do
+						ch = getch()
+					end while
+
+					if ch = ':' then -- unknown namespace
+		                Ns_recorded = append(Ns_recorded,yytext)
+						Recorded_sym &= 0
+						ch = getch()
+						while ch = ' ' or ch = '\t' do
+							ch = getch()
+						end while
+
+						yytext = ""
+						while id_char[ch] do
+							yytext &= ch
+							ch = getch()
+						end while
+						ungetch()
+	
+						if length(yytext) = 0 then
+							CompileErr("an identifier is expected here")
+						end if
+						Recorded = append(Recorded, yytext)
+
+					else -- a plzin vzriable
+						ungetch()
+						Recorded = append(Recorded, yytext)
+		                Ns_recorded &= 0
+		                prev_Nne = No_new_entry
+						No_new_entry = 1
+						tok = keyfind(yytext, -1)
+						if tok[T_ID] = IGNORED then
+							Recorded_sym &= 0 -- must resolve on call site
+						else
+							Recorded_sym &= tok[T_SYM] -- fallback when symbol is undefined on call site
+						end if
+		                No_new_entry = prev_Nne
+	                end if
+	                tok = {RECORDED, length(Recorded)}
 	            end if
-			end if
+			end if if equal(yytext,"something") then ?tok end if
 			return tok
-			
+			                         -- problem if namespace is not known at this point, must fix
 		elsif class <= ILLEGAL_CHAR then
 			return {class, 0}  -- brackets, punctuation, eof, illegal char etc.
 
