@@ -479,13 +479,19 @@ function read_recorded_token(integer n)
 				return {VARIABLE,private_sym[p]}
             end if
         end if
-        p = Recorded_sym[n]
-        if p = 0 then
-	        t = keyfind(Recorded[n],-1)
-        else
-	        t = {SymTab[p][S_TOKEN], p}
+        prev_Nne = No_new_entry
+        No_new_entry = 1
+        t = keyfind(Recorded[n],-1)
+        if t[T_ID] = IGNORED then
+	        p = Recorded_sym[n]
+	        if p = 0 then
+	        	CompileErr(sprintf("Variable %s has not been declared",{Recorded[n]}))
+	        end if
+		    t = {SymTab[p][S_TOKEN], p}
         end if
     else
+        prev_Nne = No_new_entry
+        No_new_entry = 1
         t = keyfind(Ns_recorded[n],-1)
         if t[T_ID] != NAMESPACE then
             p = Ns_recorded_sym[n]
@@ -494,11 +500,13 @@ function read_recorded_token(integer n)
 			end if
 			t = {NAMESPACE, p}
         end if
-        p = Recorded_sym[n]
-        if p = 0 then
-	        t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
-        else
-	        t = {SymTab[p][S_TOKEN], p}
+        t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
+        if t[T_ID] = IGNORED then
+	        p = Recorded_sym[n]
+	        if p = 0 then
+	        	CompileErr(sprintf("Variable %s has not been declared",{Recorded[n]}))
+	        end if
+		    t = {SymTab[p][S_TOKEN], p}
         end if
         n = t[T_ID]
         if n = VARIABLE then
@@ -512,13 +520,7 @@ function read_recorded_token(integer n)
         end if
         t[T_ID] = n
     end if 
-    if SymTab[t[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-        p = Recorded_sym[n]
-		if p = 0 then
-	        CompileErr("Unknown symbol in replayed token")
-        end if
-        t = {SymTab[p][S_TOKEN], p}
-    end if
+    No_new_entry = prev_Nne
   	return t
 end function
 
