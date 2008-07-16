@@ -485,7 +485,7 @@ ec.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	
 pcre : .SYMBOLIC .\pcre\pcre.h .\pcre\config.h $(PCRE_OBJECTS)
 
-interpreter_objects : .SYMBOLIC rev.e $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+interpreter_objects : .SYMBOLIC svn_rev $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\int.lbc
 	@%append .\$(OBJDIR)\int.lbc option quiet
 	@%append .\$(OBJDIR)\int.lbc option caseexact
@@ -599,7 +599,7 @@ installdos : .SYMBOLIC install-generic
 install : .SYMBOLIC installwin installdos
 	
 	
-ecw.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+ecw.exe : svn_rev $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
@@ -614,7 +614,7 @@ translator : .SYMBOLIC builddirs
 dostranslator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ec.exe EX=ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-backendw.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendw.exe : backendflag svn_rev $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
@@ -639,7 +639,7 @@ dos : .SYMBOLIC builddirs
 doseubin : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
-backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendd.exe : backendflag svn_rev $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exb.lbc
 	@%append .\$(OBJDIR)\exb.lbc option quiet
 	@%append .\$(OBJDIR)\exb.lbc option caseexact
@@ -657,7 +657,7 @@ backendd.exe : backendflag rev.e $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_D
 	le23p backendd.exe
 	cwc backendd.exe
 
-ex.exe : rev.e $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ex.exe : svn_rev $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ex.lbc
 	@%append .\$(OBJDIR)\ex.lbc option quiet
 	@%append .\$(OBJDIR)\ex.lbc option caseexact
@@ -675,7 +675,7 @@ ex.exe : rev.e $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKE
 	le23p ex.exe
 	cwc ex.exe
 
-ec.exe : rev.e $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ec.exe : svn_rev $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
