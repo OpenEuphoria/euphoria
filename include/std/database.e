@@ -13,6 +13,7 @@ include io.e
 include filesys.e
 include get.e
 include pretty.e
+include memory.e
 
 --****
 -- === Database File Format
