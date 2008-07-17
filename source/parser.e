@@ -205,6 +205,9 @@ enum
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
 	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE, IFDEF, ELSIFDEF}) then
+		if equal(keyword, "goto") and find(tok, {LOOP, LABEL, WHILE}) then
+			return
+		end if
 		Warning(sprintf("%s:%d - statement after %%s will never be executed",
 					{name_ext(file_name[current_file_no]), line_number}),
 					not_reached_warning_flag, {keyword})
@@ -1443,6 +1446,7 @@ procedure GLabel_statement()
 	emit_addr(laddr)
     end if
 end procedure
+
 procedure Goto_statement()
 -- Parse an exit statement
     token tok
@@ -1455,26 +1459,26 @@ procedure Goto_statement()
     if tok[T_ID]=STRING then
         n = find(SymTab[tok[T_SYM]][S_OBJ],goto_labels)
         if n = 0 then
-	    goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
-	    goto_list &= length(Code)+2 --not 1???
-	    goto_line &= {{line_number,ThisLine}}
+		    goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
+		    goto_list &= length(Code)+2 --not 1???
+		    goto_line &= {{line_number,ThisLine}}
 	--elsif TRANSLATE then
 		--help the back-end figure out what the label is
 	    --goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
 	    --goto_list &= -1
 	    --goto_line &= {{line_number,ThisLine}}
         end if 
-	tok = next_token()
+		tok = next_token()
     else
-            CompileErr("Goto statement without a string label.")
-            --CompileErr("Goto statement without a string label is not supported.")
+        CompileErr("Goto statement without a string label.")
+        --CompileErr("Goto statement without a string label is not supported.")
     end if
 
     emit_op(GOTO)  
     if n = 0 then
-    emit_addr(0) -- to be back-patched
+	    emit_addr(0) -- to be back-patched
     else
-    emit_addr(goto_addr[n])
+	    emit_addr(goto_addr[n])
     end if
     putback(tok)
     NotReached(tok[T_ID], "goto")
@@ -2034,19 +2038,15 @@ procedure Loop_statement()
 end procedure
 
 integer top_level_parser
-integer in_ifdef = 0
+integer live_ifdef = 0
 procedure Ifdef_statement()
 	sequence option
-	integer matched, nested_count, has_matched,  parser_id, in_matched, ifdef_count
+	integer matched = 0, nested_count = 0, has_matched = 0,  in_matched = 0, dead_ifdef = 0
 	token tok
 	
-	in_ifdef += 1
-	matched = 0
-	nested_count = 0
-	has_matched = 0
-	in_matched = 0
-	ifdef_count = 0
+	live_ifdef += 1
 
+	integer parser_id
 	if CurrentSub != TopLevelSub or length(if_labels) or length(loop_labels) then
 		parser_id = forward_Statement_list
 	else
@@ -2080,9 +2080,8 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
-					if ifdef_count then
-						ifdef_count -= 1
-						continue
+					if dead_ifdef then
+						dead_ifdef -= 1
 					else
 						exit "top"
 					end if
@@ -2100,7 +2099,7 @@ procedure Ifdef_statement()
 				else
 					exit
 				end if
-			elsif tok[T_ID] = ELSE and nested_count = 0  and ifdef_count = 0 then
+			elsif tok[T_ID] = ELSE and nested_count = 0  and dead_ifdef = 0 then
 				No_new_entry = has_matched
 			    if has_matched then
 					in_matched = 0
@@ -2116,7 +2115,7 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = IF then
 				nested_count += 1
 			elsif tok[T_ID] = IFDEF then
-				ifdef_count += 1
+				dead_ifdef += 1
 			elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("else",ThisLine,bp)) then
 				-- BOL token was nothing of value to us, just eat the rest of the line
 				read_line()
@@ -2124,7 +2123,7 @@ procedure Ifdef_statement()
 			end if
 		end while
 	end while
-	in_ifdef -= 1
+	live_ifdef -= 1
     No_new_entry = 0
 end procedure
 
@@ -3189,9 +3188,9 @@ global procedure real_parser(integer nested)
 			Ifdef_statement()
 
 		elsif id = ELSE then
-			if in_ifdef = 0 then
+			if live_ifdef = 0 then
 				CompileErr("else is allowed only inside if- or ifdef- blocks")
-			else
+			else  -- else from a live ifdef at top level
 				putback(tok)
 				return
 			end if

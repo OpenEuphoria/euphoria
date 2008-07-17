@@ -2615,6 +2615,7 @@ The following tags have a predefined meaning in Euphoria:
 * FREEBSD:  platform is FreeBSD
 * OSX:		platform is OS X for Macintosh
 * SAFE:		turns on a slower debugging version of [[:memory.e]] when defined. Switching mode by renaming files **//no longer works//**.
+* EU400:	defined on all versions of the interpreter above 4.0
 
 The name of a tag may contain any character that are not white space, including ones that 
 would not be legal in an identifier. However, for consistency, using identifier-like, 

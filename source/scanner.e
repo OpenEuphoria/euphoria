@@ -944,9 +944,9 @@ global function Scanner()
 				else -- not a namespace, but an overriding var
 					ungetch()
 				    if Parser_mode = PAM_RECORD then
-		                Recorded = append(Recorded,yytext)
 		                Ns_recorded &= 0
 		                Ns_recorded_sym &= 0
+		                Recorded = append(Recorded,yytext)
 		                prev_Nne = No_new_entry
 						No_new_entry = 1
 						tok = keyfind(yytext, -1)
@@ -962,33 +962,6 @@ global function Scanner()
 			else -- not a known namespace
 			    if Parser_mode = PAM_RECORD then
 	                Ns_recorded_sym &= 0
-					ch = getch()
-					while ch = ' ' or ch = '\t' do
-						ch = getch()
-					end while
-
-					if ch = ':' then -- unknown namespace
-		                Ns_recorded = append(Ns_recorded,yytext)
-						Recorded_sym &= 0
-						ch = getch()
-						while ch = ' ' or ch = '\t' do
-							ch = getch()
-						end while
-
-						yytext = ""
-						while id_char[ch] do
-							yytext &= ch
-							ch = getch()
-						end while
-						ungetch()
-	
-						if length(yytext) = 0 then
-							CompileErr("an identifier is expected here")
-						end if
-						Recorded = append(Recorded, yytext)
-
-					else -- a plzin vzriable
-						ungetch()
 						Recorded = append(Recorded, yytext)
 		                Ns_recorded &= 0
 		                prev_Nne = No_new_entry
@@ -1000,7 +973,6 @@ global function Scanner()
 							Recorded_sym &= tok[T_SYM] -- fallback when symbol is undefined on call site
 						end if
 		                No_new_entry = prev_Nne
-	                end if
 	                tok = {RECORDED, length(Recorded)}
 	            end if
 			end if
