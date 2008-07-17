@@ -138,11 +138,8 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/text.o \
 	./$(OBJDIR)/wildcard.o \
-	./$(OBJDIR)/search.o \
 	./$(OBJDIR)/traninit.o \
 	./$(OBJDIR)/tranplat.o \
-	./$(OBJDIR)/math.o \
-	./$(OBJDIR)/os.o \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/filesys.o \
