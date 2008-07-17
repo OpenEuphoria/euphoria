@@ -1003,9 +1003,9 @@ global function Scanner()
 	                end if
 	                tok = {RECORDED, length(Recorded)}
 	            end if
-			end if if equal(yytext,"something") then ?tok end if
+			end if
 			return tok
-			                         -- problem if namespace is not known at this point, must fix
+			
 		elsif class <= ILLEGAL_CHAR then
 			return {class, 0}  -- brackets, punctuation, eof, illegal char etc.
 
