@@ -10,6 +10,13 @@
 
 include unicode.e -- needed for parse() and format()
 
+ifdef WIN32 then
+	include dll.e
+	include memory.e
+	constant vKernel32 = open_dll("kernel32")
+	constant xGetSystemTime = define_c_proc(vKernel32, "GetSystemTime",   {C_POINTER})
+end ifdef
+
 constant
 	XLEAP = 1,
 	Gregorian_Reformation = 1752,
@@ -30,9 +37,9 @@ function isLeap(integer year) -- returns integer (0 or 1)
 	sequence ly
 
 		ly = (remainder(year, {4, 100, 400, 3200, 80000})=0)
-		
+
 		if not ly[1] then return 0 end if
-		
+
 		if year <= Gregorian_Reformation then
 				return 1 -- ly[1] can't possibly be 0 here so set shortcut as '1'.
 		elsif XLEAP then
@@ -178,7 +185,7 @@ function secondsToDateTime(atom seconds) -- returns a DateTime
 
 		hours = floor( seconds / 3600 )
 		seconds -= hours * 3600
-		
+
 		minutes = floor( seconds / 60 )
 		seconds -= minutes* 60
 	return julianDate(days) & {hours, minutes, seconds}
@@ -190,7 +197,7 @@ end function
 --**
 -- Names of the months
 
-export sequence month_names = { "January", "February", "March", "April", "May", "June", "July", 
+export sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
 	"August", "September", "October", "November", "December" }
 
 --**
@@ -205,7 +212,7 @@ export sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
 export sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 	"Saturday" }
 
---** 
+--**
 -- Abbreviations of day names
 
 export sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
@@ -253,8 +260,8 @@ export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- 		# ##obj##: any object, so no crash takes place.
 --
 -- Comments:
--- A datetime type consists of a sequence of length 6 in the form 
--- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee 
+-- A datetime type consists of a sequence of length 6 in the form
+-- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee
 -- those values are in range. **Note:** All components must be integers except
 -- seconds, as those can also be floating point values.
 
@@ -270,22 +277,22 @@ export type datetime(object o)
 	if not integer(o[DAY]) then return 0 end if
 
 	if not integer(o[HOUR]) then return 0 end if
-	
+
 	if not integer(o[MINUTE]) then return 0 end if
-	
+
 	if not atom(o[SECOND]) then return 0 end if
 
 	if not equal(o[1..3], {0,0,0}) then
 		-- Special case of all zeros is allowed; used when the data is a time only.
 		if o[MONTH] < 1 then return 0 end if
-	
+
 		if o[MONTH] > 12 then return 0 end if
-	
+
 		if o[DAY] < 1 then return 0 end if
-	
+
 		if o[DAY] > daysInMonth(o[YEAR],o[MONTH]) then return 0 end if
 	end if
-		
+
 	if o[HOUR] < 0 then return 0 end if
 
 	if o[HOUR] > 23 then return 0 end if
@@ -305,7 +312,7 @@ end type
 -- === Routines
 
 --**
--- Convert a sequence formatted according to the built-in date() function to a valid datetime 
+-- Convert a sequence formatted according to the built-in date() function to a valid datetime
 -- sequence.
 --
 -- Parameters:
@@ -348,7 +355,7 @@ end function
 
 --**
 -- Create a new datetime value.
--- 
+--
 -- TODO: test default parameter usage
 --
 -- Parameters:
@@ -368,7 +375,7 @@ end function
 -- See Also:
 --     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
 
-export function new(integer year=0, integer month=0, integer day=0, 
+export function new(integer year=0, integer month=0, integer day=0,
 	                integer hour=0, integer minute=0, atom second=0)
 	datetime d
 	d = {year, month, day, hour, minute, second}
@@ -432,7 +439,7 @@ end function
 --
 -- Comments:
 -- 		For dates earlier than 1800, this routine may give inaccurate results if the date
--- applies to a country other than United Kingdom or a former colony thereof. The change from 
+-- applies to a country other than United Kingdom or a former colony thereof. The change from
 -- julian to gregorian calendar took place much earlier in some other european countries.
 --
 -- Example 1:
@@ -506,7 +513,7 @@ end function
 --
 -- Comments:
 -- Format string can include the following format specifiers:
--- 
+--
 -- * %%  a literal %
 -- * %a  locale's abbreviated weekday name (e.g., Sun)
 -- * %A  locale's full weekday name (e.g., Sunday)
@@ -656,11 +663,11 @@ end function
 -- Comments:
 --     Please see Constants for Date/Time for a reference of valid intervals.
 --
---     Do not confuse the item access constants such as YEAR, MONTH, DAY, etc... with the 
+--     Do not confuse the item access constants such as YEAR, MONTH, DAY, etc... with the
 --     interval constants YEARS, MONTHS, DAYS, etc...
 --
---     When adding MONTHS, it is a calendar based addition. For instance, a date of 
---     5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number 
+--     When adding MONTHS, it is a calendar based addition. For instance, a date of
+--     5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number
 --     of days per each month and the average number of days per month.
 --
 --     When adding YEARS, leap year is taken into account. Adding 4 YEARS to a date may result
@@ -739,7 +746,7 @@ end function
 --     Please see Constants for Date/Time for a reference of valid intervals.
 --
 --     See the function add() for more information on adding and subtracting date intervals
--- 
+--
 -- Example 1:
 -- <eucode>
 -- dt2 = subtract(dt1, 18, MINUTES) -- subtract 18 minutes from dt1
@@ -760,7 +767,7 @@ end function
 -- Parameters:
 -- 		# ##dt1##: the end datetime
 -- 		# ##dt2##: the start datetime
--- 
+--
 -- Returns:
 -- 		An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
 --
@@ -783,3 +790,30 @@ export function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function
 
+--**
+-- Determines the current date and time in Universal Coordinated Time (UTC)
+--
+-- Comments:
+-- Only implemented for **Windows** platform so far.
+--
+-- Parameters:
+--   none
+--
+-- Returns:
+-- 		##sequence## in standard Date-time format.
+
+export function utc_date()
+ifdef WIN32 then
+	atom lSystemTime
+	sequence lDateVals
+
+	lSystemTime = allocate(32)
+	c_proc(xGetSystemTime, {lSystemTime})
+	lDateVals = peek2s( {lSystemTime, 8} )
+	free(lSystemTime)
+	return {lDateVals[1],lDateVals[2],lDateVals[4],lDateVals[5],lDateVals[6],lDateVals[7]+lDateVals[8]/1000}
+else
+	return {0,0,0,0,0,0} -- TODO for other opsys.
+end ifdef
+
+end function
