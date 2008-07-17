@@ -137,6 +137,10 @@ test_equal("map load equal", "=", m:get(m1, "equal",-1))
 test_equal("map load padding", " padded ", m:get(m1, "padding",-1))
 test_equal("map load embed", "--", m:get(m1, "embed",-1))
 
+test_equal("map save #1", 9, save_map(m1, "save_map.txt"))
+m2 = load_map("save_map.txt")
+test_equal("map save #2", sort(pairs(m1)), sort(pairs(m2)))
+
 map m5
 m5 = m:new(10)
 m5 = m:put( m5, ADD, 1 )

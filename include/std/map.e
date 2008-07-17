@@ -48,6 +48,8 @@ include std/math.e
 include std/stats.e as stats
 include std/text.e
 include std/search.e
+include std/types.e
+include std/pretty.e
 
 constant iElemCnt = 1 -- ==> elementCount
 constant iInUse = 2 -- ==> count of non-empty buckets
@@ -861,7 +863,7 @@ end function
 --   m = put(m, 40, "forty")
 --
 --   sequence keys
---   keys = keys(m) -- keys might be {20,40,10,30} or some other orders
+--   keys = keys(m) -- keys might be {20,40,10,30} or some other order
 --   </eucode>
 -- See Also:
 --		[[:has]]
@@ -870,10 +872,10 @@ export function keys(map m)
 	sequence ret
 	integer pos
 
+	ret = repeat(0, m[iElemCnt])
+	pos = 1
+
 	if length(m) = iLargeMap then
-		ret = repeat(0, m[iElemCnt])
-		pos = 1
-	
 		buckets = m[iBuckets]
 		for index = 1 to length(buckets) do
 			bucket = buckets[index]
@@ -920,7 +922,8 @@ end function
 --   m = put(m, 40, "forty")
 --
 --   sequence values
---   values = values(m) -- values might be {"twenty","forty","ten","thirty"} or some other orders
+--   values = values(m) -- values might be {"twenty","forty","ten","thirty"} 
+--    or some other order
 --   </eucode>
  -- See Also:
  --		[[:get]]
@@ -929,10 +932,10 @@ export function values(map m)
 	sequence ret
 	integer pos
 
-	if length(m) = iLargeMap then
-		ret = repeat(0, m[iElemCnt])
-		pos = 1
+	ret = repeat(0, m[iElemCnt])
+	pos = 1
 
+	if length(m) = iLargeMap then
 		buckets = m[iBuckets]
 		for index = 1 to length(buckets) do
 			bucket = buckets[index]
@@ -943,11 +946,66 @@ export function values(map m)
 		end for
 
 	else
-		ret = repeat(0, m[iElemCnt])
-		pos = 1
 		for index = 1 to length(m[iFreeSpace]) do
 			if m[iFreeSpace][index] !=  0 then
 				ret[pos] = m[iValList][index]
+				pos += 1
+			end if
+		end for
+		
+	end if
+	return ret
+end function
+
+--**
+--
+-- Return all key/value pairs in a map.
+--
+-- Parameters:
+--		# ##m##: the map being queried
+--
+-- Returns:
+--		A **sequence** of all key/value pairs stored in ##m##. Each pair is a 
+-- subsequence in the form {key, value}
+--
+-- Comments:
+--   The order of the values returned may not be the same as the putting order. 
+--
+-- Example 1:
+--   <eucode>
+--   map m
+--   m = new()
+--   m = put(m, 10, "ten")
+--   m = put(m, 20, "twenty")
+--   m = put(m, 30, "thirty")
+--   m = put(m, 40, "forty")
+--
+--   sequence keyvals
+--   keyvals = pairs(m) -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
+--   </eucode>
+ -- See Also:
+ --		[[:get]]
+export function pairs(map m)
+	sequence buckets, bucket
+	sequence ret
+	integer pos
+
+	ret = repeat(0, m[iElemCnt])
+	pos = 1
+	if length(m) = iLargeMap then
+		buckets = m[iBuckets]
+		for index = 1 to length(buckets) do
+			bucket = buckets[index]
+			for j = 1 to length(bucket[iVals]) do
+				ret[pos] = {bucket[iKeys][j], bucket[iVals][j]}
+				pos += 1
+			end for
+		end for
+
+	else
+		for index = 1 to length(m[iFreeSpace]) do
+			if m[iFreeSpace][index] !=  0 then
+				ret[pos] = {m[iKeyList][index], m[iValList][index]}
 				pos += 1
 			end if
 		end for
@@ -996,9 +1054,30 @@ end function
 --		A **map** with all the entries found in ##pFileName##.
 --
 -- Comments:
---	Rhe file has one entry per line, each line being of the form <key>=<value>. Whitespace around the key and the value do not count. Comment lines start with "--" and are ignored.
+-- The imported file format needs to be that it has one entry per line, each
+-- line being of the form <key>=<value>.  Whitespace around the key and the
+-- value is ignored. Comment lines start with {{{"--"}}} and are also ignored.
+-- <values> that can be converted to atom will be, meaning that X=3 is stored
+-- as a key of "X" and a value of 3, rather than "3"\\
+-- Input file example:
+-- :
+-- {{{
+--    -- Set the verbosity Level
+--    verbose=3
+--    -- Tell the app where to put the output files.
+--    outdir = c:\temp
+-- }}}
+--
+-- Example 1:
+-- <eucode>
+--    map AppOptions
+--    AppOptions = load_map("c:\myapp\options.txt")
+--    if get(AppOptions, "verbose", 1) = 3 then
+--        ShowIntructions()
+--    end if
+-- </eucode>
 -- See Also:
---		[[:new]]
+--		[[:new]], [[:save_map]]
 export function load_map(sequence pFileName)
 	integer fh
 	object lLine
@@ -1043,6 +1122,59 @@ export function load_map(sequence pFileName)
 	return optimize(m)
 end function
 
+--**
+-- Saves a map to a file.
+--
+-- Parameters:
+--		# ##m##: a map.
+--		# ##pFileName##: a sequence, the name of the file to save to.
+--
+-- Returns:
+--		##integer## = The number of keys saved to the file.
+--
+-- Comments:
+-- It only saves key/value pairs if the keys only  contain letters, digits and
+-- underscore, and only if the value contains only printable characters. This
+-- means that numeric keys or nested sequence keys are not saved, nor are 
+-- nested sequence values. **Note~:** that numeric values are allowed and
+-- will be saved.
+--
+-- Example 1:
+-- <eucode>
+--    map AppOptions
+--    if save_map(AppOptions, "c:\myapp\options.txt") = 0
+--        Error("Failed to save application options")
+--    end if
+-- </eucode>
+-- See Also:
+--		[[:load_map]]
+export function save_map(map m, sequence pFileName)
+	integer lFH = -2
+	sequence lKeys
+	sequence lValues
+	integer lOutCount = 0
+	
+	
+	lKeys = keys(m)
+	lValues = values(m)
+	for i = 1 to length(lKeys) do
+		if char_test(lKeys[i], {{'a','z'},{'A', 'Z'}, {'_','_'}}) then
+			lValues[i] = pretty_sprint(lValues[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
+			lValues[i] = find_replace("-", lValues[i], "\\-")
+			
+			if lFH < 0 then
+				lFH = open(pFileName, "w")
+				if lFH < 0 then
+					return 0
+				end if
+			end if
+			printf(lFH, "%s = %s\n", {lKeys[i], lValues[i]})
+			lOutCount += 1
+		end if
+	end for
+	close(lFH)
+	return lOutCount
+end function
 
 ---- Local Functions ------------
 function ConvertToLarge(map m)
