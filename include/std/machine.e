@@ -8,12 +8,14 @@
 ifdef SAFE then
 	export include safe.e
 	ifdef DOS32 then
-		export include dos_safe.e
+		export include .\dos\safe.e
 	end ifdef
 else
 	export include memory.e
 	ifdef DOS32 then
-		export include dos_mem.e
+		export include .\dos\memory.e
 	end ifdef
 end ifdef
+
+
 

@@ -9,9 +9,10 @@
 
 
 
-include dos_base.e
+include base_mem.e
 
-include safe.e
+include ..\safe.e
+
 safe_address_list = {
 --      {start , length , allocation_number}
 		{#A0000, 200*320, 0},   -- mode 19 pixel memory, start & length
@@ -109,6 +110,8 @@ export procedure free_low(low_machine_addr a)
 	end for
 	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
+
+export include register.e
 
 --**
 -- Call a //DOS// interrupt.

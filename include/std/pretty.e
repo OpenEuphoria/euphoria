@@ -5,8 +5,6 @@
 -- <<LEVELTOC depth=2>>
 --
 
-include os.e
-
 -- pretty print variables
 integer pretty_end_col, pretty_chars, pretty_start_col, pretty_level, 
 		pretty_file, pretty_ascii, pretty_indent, pretty_ascii_min,

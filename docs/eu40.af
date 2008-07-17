@@ -26,7 +26,9 @@
 
 # API docs
 ../docs/api.txt
+../include/std/dos/base_mem.e
 ../include/std/console.e
+../include/std/convert.e
 ../include/std/database.e
 ../include/std/datetime.e
 ../include/std/dll.e
@@ -35,18 +37,24 @@
 ../include/std/get.e
 ../include/std/graphics.e
 ../include/std/image.e
+../include/std/dos/image.e
 ../include/std/io.e
 ../include/std/locale.e
 ../include/std/localeconv.e
-../include/std/machine.e
+../include/std/memory.e
+../include/std/dos/memory.e
 ../include/std/map.e
 ../include/std/math.e
 ../include/std/mouse.e
 ../include/std/msgbox.e
 ../include/std/os.e
+../include/std/dos/pixels.e
 ../include/std/pretty.e
 ../include/std/primes.e
 ../include/std/regex.e
+../include/std/dos/register.e
+../include/std/safe.e
+../include/std/dos/safe.e
 ../include/std/search.e
 ../include/std/sequence.e
 ../include/std/sets.e

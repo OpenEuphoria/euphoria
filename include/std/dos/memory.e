@@ -7,11 +7,7 @@
 --
 
 
-type positive_int(integer x)
-	return x >= 1
-end type
-
-include dos_base.e
+include base_mem.e
 
 --****
 -- === Constants
@@ -76,6 +72,7 @@ export procedure free_low(low_machine_addr addr)
 	machine_proc(M_FREE_LOW, addr)
 end procedure
 
+export include register.e
 --**
 -- Call a //DOS// interrupt.
 --

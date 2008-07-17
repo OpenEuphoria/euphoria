@@ -6,8 +6,8 @@ include std/os.e
 include std/filesys.e
 
 ifdef DOS32 then
-	include std/dos_base.e
-	include std/dos_mem.e
+	export include std\dos\memory.e
+	include std\dos\register.e
 end ifdef
 
 include common.e

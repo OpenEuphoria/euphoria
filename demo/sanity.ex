@@ -15,6 +15,7 @@ include std/graphics.e  -- comment after include is ok
 include std/sort.e
 include std/machine.e
 include std/filesys.e
+include std/io.e
 include std/wildcard.e as wild
 include std/image.e
 include std/dll.e
@@ -23,6 +24,7 @@ include std/math.e
 include std/os.e
 include std/text.e
 include std/error.e
+include std/convert.e
 
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"
@@ -49,6 +51,7 @@ procedure make_sound()
 	sound(0)
     end for
 end procedure
+
 
 constant epsilon = 1e-10 -- allow for small floating point inaccuracy
 
@@ -846,6 +849,7 @@ procedure testgr()
 	display_image({p,p}, repeat(x+color, 2))
     end for
 end procedure
+
 with type_check
 
 constant TRUE = 1/1, FALSE = 0, junk=-TRUE

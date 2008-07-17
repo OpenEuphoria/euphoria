@@ -18,6 +18,7 @@ include std/os.e
 include global.e
 include opnames.e
 
+
 -- Note: In several places we omit checking for bad arguments to 
 -- built-in routines. Those errors will be caught by the underlying 
 -- interpreter or Euphoria run-time system, and an error will be raised 
@@ -3151,6 +3152,8 @@ cb_cdecl= {
 	#C3,#00,#00,            --   14: ret bytes 
 		#00,#00,#00,#00}    --   17: function pointer (23)
 
+constant 
+	M_ALLOC = 16
 
 procedure do_callback(integer b)
 -- handle callback()
@@ -3158,7 +3161,7 @@ procedure do_callback(integer b)
 	atom asm
 	integer id, convention
 	object x
-	
+
 	-- val[b] is:  routine id or {'+', routine_id}
 	x = val[b]
 	if atom(x) then
@@ -3177,20 +3180,20 @@ procedure do_callback(integer b)
 
 	if platform() = WIN32 and convention = 0 then
 		-- stdcall
-		asm = allocate( length(cb_std) )
+		asm = machine_func(M_ALLOC, length(cb_std) )
 		poke( asm, cb_std ) 
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 20 )
 		poke( asm + 18, SymTab[r][S_NUM_ARGS] * 4 )
-		poke4( asm + 20, call_back( routine_id("machine_callback") ) )
+		poke4( asm + 20, machine_func(M_CALL_BACK, routine_id("machine_callback") ) )
 		
 	else
 		-- cdecl
-		asm = allocate( length(cb_cdecl) )  
+		asm = machine_func(M_ALLOC, length(cb_cdecl) )
 		poke( asm, cb_cdecl )
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 23 )
-		poke4( asm + 23, call_back( '+' & routine_id("machine_callback") ) )
+		poke4( asm + 23, machine_func(M_CALL_BACK, ( '+' & routine_id("machine_callback") )))
 	end if
 
 	val[target] = asm

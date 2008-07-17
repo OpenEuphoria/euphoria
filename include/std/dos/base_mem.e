@@ -6,15 +6,12 @@
 -- <<LEVELTOC depth=2>>
 --
 
-include memory.e
-
 constant
-	M_USE_VESA = 36,
 	M_GET_VECTOR = 39,
 	M_SET_VECTOR = 40,
 	M_LOCK_MEMORY = 41
 
--- internal - used in dos_safe.e and dos_machine.e
+-- internal - used in dos/safe.e and dos/memory.e
 export constant
 	M_ALLOC_LOW = 32,
 	M_FREE_LOW = 33,
@@ -28,75 +25,24 @@ export type low_machine_addr(atom a)
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
 
+export type positive_int(integer x)
+	return x >= 1
+end type
+
+include memory.e
+
+-- biggest address on a 32-bit machine
+constant MAX_ADDR = power(2, 32)-1
+
+export type machine_addr(atom a)
+-- a 32-bit non-null machine address 
+	return a > 0 and a <= MAX_ADDR and floor(a) = a
+end type
+
 type far_addr(sequence a)
 -- protected mode far address {seg, offset}
 	return length(a) = 2 and integer(a[1]) and machine_addr(a[2])
 end type
-
---**
--- Register structure
-
-export enum 
-	REG_DI,
-	REG_SI,
-	REG_BP,
-	REG_BX,
-	REG_DX,
-	REG_CX,
-	REG_AX,
-	REG_FLAGS, -- on input: ignored 
-			   -- on output: low bit has carry flag for 
-			   -- success/fail
-	REG_ES,
-	REG_DS
-
---**
--- Length of a register list
-
-export constant REG_LIST_SIZE = 10
-
---**
--- register list type
-
-export type register_list(sequence r)
--- a list of register values
-	return length(r) = REG_LIST_SIZE
-end type
-
---**
--- Set how Euphoria should use the VESA standard to perform video operations.
---
--- Platform:
---		//DOS32//
---
--- Parameters:
--- 		# ##code##: an integer, must be 0 or 1.
---
--- Comments:
--- If code is 1 then force Euphoria to use the VESA graphics standard.
--- This may let Euphoria work better in SVGA modes with certain graphics cards.
--- If code is 0 then Euphoria's normal use of the graphics card is restored.
--- Values of code other than 0 or 1 should not be used.
---
--- Most people can ignore this. However if you experience difficulty in SVGA graphics modes you 
--- should try calling use_vesa(1) at the start of your program before any calls to graphics_mode().
---
--- Example 1:
--- <eucode>
---  use_vesa(1)
--- fail = graphics_mode(261)
--- </eucode>
--- 
--- See Also: 
---       [[:graphics_mode]]
-
-export procedure use_vesa(integer code)
--- If code is 1 then force Euphoria to use the VESA graphics standard.
--- This may let Euphoria work better in SVGA modes with certain graphics cards.
--- If code is 0 then Euphoria's normal use of the graphics card is restored.
--- Values of code other than 0 or 1 should not be used.
-	machine_proc(M_USE_VESA, code)
-end procedure
 
 --**
 -- Retrieve the address of a //DOS// interrupt handler.
@@ -218,4 +164,5 @@ export procedure lock_memory(machine_addr a, positive_int n)
 -- You should lock any code or data used by an interrupt handler.
 	machine_proc(M_LOCK_MEMORY, {a, n})
 end procedure
+
 

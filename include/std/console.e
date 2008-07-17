@@ -16,6 +16,7 @@ constant
 
 --****
 -- === Routines
+-- ==== Keyboard related routines
 
 --**
 -- Signature:
@@ -272,3 +273,367 @@ export function prompt_string(sequence prompt)
 		return ""
 	end if
 end function
+
+--****
+--==== Gross Platform Text Graphics
+
+-- machine() commands
+constant M_CURSOR         = 6,
+		 M_TEXTROWS       = 12,
+		 M_GET_SCREEN_CHAR = 58,
+		 M_PUT_SCREEN_CHAR = 59
+
+constant BYTES_PER_CHAR = 2
+
+type positive_atom(atom x)
+	return x >= 1
+end type
+
+type text_point(sequence p)
+	return length(p) = 2 and p[1] >= 1 and p[2] >= 1 
+		   and p[1] <= 200 and p[2] <= 500 -- rough sanity check
+end type
+
+export type positive_int(integer x)
+	return x >= 1
+end type
+
+constant COLOR_TEXT_MEMORY = #B8000,
+		  MONO_TEXT_MEMORY = #B0000
+
+export include graphcst.e
+
+ifdef DOS32 then
+function DOS_scr_addr(sequence vc, text_point xy)
+-- calculate address in DOS screen memory for a given line, column
+	atom screen_memory
+	integer page_size
+	
+	if vc[VC_MODE] = 7 then
+		screen_memory = MONO_TEXT_MEMORY
+	else
+		screen_memory = COLOR_TEXT_MEMORY
+	end if
+	page_size = vc[VC_LINES] * vc[VC_COLUMNS] * BYTES_PER_CHAR
+	page_size = 1024 * floor((page_size + 1023) / 1024)
+	screen_memory = screen_memory + get_active_page() * page_size
+	return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1)) 
+						   * BYTES_PER_CHAR
+end function
+end ifdef
+
+--**
+-- Get the value and attribute of the character at a given screen location.
+--
+-- Parameters:
+-- 		# ##line##: the 1-base line number of the location
+-- 		# ##column##: the 1-base column number of the location
+-- Returns:
+-- 		A **sequence**, the pair ##{character, attributes}## for the specified location.
+--
+-- Comments:
+--
+-- This function inspects a single character on the //active page//.
+--
+-- The attribute is an atom that contains the foreground and background color of the character, and possibly other information describing the appearance of the character on the screen.
+--  With get_screen_char() and [[:put_screen_char]]() you can save and restore a character on the screen along with its attributes.
+--
+-- Example 1:
+-- <eucode>
+--  -- read character and attributes at top left corner
+-- s = get_screen_char(1,1) 
+-- -- store character and attributes at line 25, column 10
+-- put_screen_char(25, 10, {s})
+-- </eucode>
+-- 
+-- See Also: 
+--      [[:put_screen_char]], [[:save_text_image]]
+
+export function get_screen_char(positive_atom line, positive_atom column)
+	atom scr_addr
+	sequence vc
+	
+	ifdef DOS32 then
+		vc = video_config()
+		if line >= 1 and line <= vc[VC_LINES] and
+		   column >= 1 and column <= vc[VC_COLUMNS] then
+			scr_addr = DOS_scr_addr(vc, {line, column})
+			return peek({scr_addr, 2})
+		else
+			return {0,0}
+		end if
+	else    
+		return machine_func(M_GET_SCREEN_CHAR, {line, column})
+	end ifdef
+end function
+
+--**
+-- Stores/displays a sequence of characters with attributes at a given location.
+--
+-- Parameters:
+-- 		# ##line##: the 1-based line at which to start writing
+-- 		# ##column##: the 1-based column at which to start writing
+-- 		# ##char_attr##: a sequence of alternated characters and attributes.
+--
+-- Comments:
+-- ##char_attr# must be in the form  ##{character, attributes, character, attributes, ...}##.
+--
+-- Errors: 
+-- 		The length of ##char_attr## must be a multiple of 2.
+--
+-- Comments:
+--
+-- The attributes atom contains the foreground color, background color, and possibly other platform-dependent information controlling how the character is displayed on the screen.
+-- If ##char_attr## has 0 length, nothing will be written to the screen. The characters are written to the //active page//.
+-- It's faster to write several characters to the screen with a single call to put_screen_char() than it is to write one character at a time. 
+--  
+-- Example 1:
+--  -- write AZ to the top left of the screen
+-- -- (attributes are platform-dependent)
+-- put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
+-- 
+-- See Also: 
+--       [[:get_screen_char]], [[:display_text_image]]
+
+export procedure put_screen_char(positive_atom line, positive_atom column, 
+								 sequence char_attr)
+	atom scr_addr
+	sequence vc
+	integer overflow
+	
+	ifdef DOS32 then
+		vc = video_config()
+		if line <= vc[VC_LINES] and column <= vc[VC_COLUMNS] then
+			scr_addr = DOS_scr_addr(vc, {line, column})
+			overflow = length(char_attr) - 2 * (vc[VC_COLUMNS] - column + 1)
+			if overflow > 0 then
+				poke(scr_addr, char_attr[1..$ - overflow])  
+			else
+				poke(scr_addr, char_attr)
+			end if
+		end if
+	else    
+		machine_proc(M_PUT_SCREEN_CHAR, {line, column, char_attr})
+	end ifdef
+end procedure
+
+--**
+-- Display a text image in any text mode.
+--
+-- Parameters:
+-- 		# ##xy##: a pair of 1-based coordinates representing the point at which to start writing
+--		# ##text##: a list of sequences of alternated character and attribute.
+--
+-- Comments:
+-- This routine displays to the active text page, and only works in text modes.
+--   
+-- On //DOS32//, the attribute should consist of the foreground color plus 16 times the background color.
+-- ##text## may result from a previous call to [[:save_text_image]](), although you could construct it yourself. The sequences of the text image do not have to all be the same length.
+-- 
+-- You might use save_text_image()/display_text_image() in a text-mode graphical user interface, to allow "pop-up" dialog boxes, and drop-down menus to appear and disappear without losing what was previously on the screen. 
+-- 
+-- Example 1:
+-- <eucode>
+--  clear_screen()
+-- display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
+--                            {'C', RED+16*WHITE},
+--                            {'D', BLUE}})
+-- -- displays:
+--      AB
+--      C
+--      D
+-- -- at the top left corner of the screen.
+-- -- 'A' will be white with black (0) background color,
+-- -- 'B' will be green on black, 
+-- -- 'C' will be red on white, and
+-- -- 'D' will be blue on black.
+-- </eucode>
+-- 
+-- See Also:
+-- 		[[:save_text_image]], [[:display_image]], [[:put_screen_char]]
+--
+
+export procedure display_text_image(text_point xy, sequence text)
+	atom scr_addr
+	integer screen_width, extra_col2, extra_lines
+	sequence vc, one_row
+	
+	vc = video_config()
+	ifdef DOS32 then
+		screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
+		scr_addr = DOS_scr_addr(vc, xy)
+	end ifdef
+	if xy[1] < 1 or xy[2] < 1 then
+		return -- bad starting point
+	end if
+	extra_lines = vc[VC_LINES] - xy[1] + 1 
+	if length(text) > extra_lines then
+		if extra_lines <= 0 then
+			return -- nothing to display
+		end if
+		text = text[1..extra_lines] -- truncate
+	end if
+	extra_col2 = 2 * (vc[VC_COLUMNS] - xy[2] + 1)
+	for row = 1 to length(text) do
+		one_row = text[row]
+		if length(one_row) > extra_col2 then
+			if extra_col2 <= 0 then
+				return -- nothing to display
+			end if
+			one_row = one_row[1..extra_col2] -- truncate
+		end if
+		ifdef DOS32 then
+			poke(scr_addr, one_row)
+			scr_addr += screen_width
+		else
+			machine_proc(M_PUT_SCREEN_CHAR, {xy[1]+row-1, xy[2], one_row})
+		end ifdef
+	end for
+end procedure
+
+--**
+-- Copy a rectangular block of text out of screen memory
+--
+-- Parameters:
+-- 		# ##top_left##: the coordinates, given as a pair, of the upper left corner of the area to save.
+-- 		# ##bottom_right##: the coordinates, given as a pair, of the lower right corner of the area to save.
+--
+-- Returns:
+-- 		A **sequence** of {character, attribute, character, ...} lists.
+-- Comments:
+--
+-- The returned value is appropriately handled by [[:display_text_image]].
+-- On //DOS32//, an attribute byte is made up of two 4-bit fields that encode the foreground and background color of a character. The high-order 4 bits determine the background color, while the low-order 4 bits determine the foreground color.
+--
+-- This routine reads from the active text page, and only works in text modes.
+-- 
+-- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc. 
+-- 
+-- Example 1:
+-- {{{
+-- If the top 2 lines of the screen have:
+--     Hello
+--    World
+--
+--
+--  And you execute:
+-- }}}
+-- <eucode>
+--  s = save_text_image({1,1}, {2,5})
+-- </eucode>
+-- {{{
+--  Then s is something like:  
+--      {"H-e-l-l-o-",
+--      "W-o-r-l-d-"}
+-- where '-' indicates the attribute bytes
+-- }}}
+-- 
+-- See Also:
+--     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
+
+export function save_text_image(text_point top_left, text_point bottom_right)
+	sequence image, row_chars, vc
+	atom scr_addr, screen_memory
+	integer screen_width, image_width
+	integer page_size
+
+	vc = video_config()
+	screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
+	ifdef DOS32 then
+		if vc[VC_MODE] = 7 then
+			screen_memory = MONO_TEXT_MEMORY
+		else
+			screen_memory = COLOR_TEXT_MEMORY
+		end if
+		page_size = vc[VC_LINES] * screen_width
+		page_size = 1024 * floor((page_size + 1023) / 1024)
+		screen_memory = screen_memory + get_active_page() * page_size
+		scr_addr = screen_memory + 
+				(top_left[1]-1) * screen_width + 
+				(top_left[2]-1) * BYTES_PER_CHAR
+	end ifdef
+	image = {}
+	image_width = (bottom_right[2] - top_left[2] + 1) * BYTES_PER_CHAR
+	for row = top_left[1] to bottom_right[1] do
+		ifdef DOS32 then
+			row_chars = peek({scr_addr, image_width})
+			scr_addr += screen_width
+		else
+			row_chars = {}
+			for col = top_left[2] to bottom_right[2] do
+				row_chars &= machine_func(M_GET_SCREEN_CHAR, {row, col})
+			end for
+		end ifdef
+		image = append(image, row_chars)
+	end for
+	return image
+end function
+
+--**
+-- Set the number of lines on a text-mode screen.
+--
+-- Parameters:
+-- 		# ##rows##: an integer, the desired number of rows.
+--
+-- Platforms:
+--		Not //Unix//
+--
+-- Returns:
+-- 		An **integer**, the actual number of text lines.
+--
+-- Comments:
+-- Values of 25, 28, 43 and 50 lines are supported by most video cards.
+--
+-- See Also:
+--   [[:graphics_mode]], [[:video_fonfig]]
+
+export function text_rows(positive_int rows)
+	return machine_func(M_TEXTROWS, rows)
+end function
+
+-- cursor styles:
+export constant 
+	NO_CURSOR              = #2000,
+	UNDERLINE_CURSOR       = #0607,
+	THICK_UNDERLINE_CURSOR = #0507,
+	HALF_BLOCK_CURSOR      = #0407,
+	BLOCK_CURSOR           = #0007
+		 
+--**
+-- Select a style of cursor.
+--
+-- Parameters:
+-- 		# ##style##: an integer defining the cursor shape.
+--
+-- Platform:
+--		Not //Unix//
+-- Comments:
+-- Predefined cursors are:
+--	
+-- <eucode>
+-- export constant 
+--     NO_CURSOR              = #2000,
+--     UNDERLINE_CURSOR       = #0607,
+--     THICK_UNDERLINE_CURSOR = #0507,
+--     HALF_BLOCK_CURSOR      = #0407,
+--     BLOCK_CURSOR           = #0007
+-- </eucode>
+--
+-- The second and fourth hex digits (from the left) determine the top and bottom rows 
+-- of pixels in the cursor. The first digit controls whether the cursor will be visible 
+-- or not. For example, #0407 turns on the 4th through 7th rows.
+--
+--   In pixel-graphics modes no cursor is displayed.
+--
+-- Example:	
+-- <eucode>
+-- cursor(BLOCK_CURSOR)
+-- </eucode>
+--
+-- See Also:
+--   [[:graphics_mode]], [[:text_rows]]
+
+export procedure cursor(integer style)
+	machine_proc(M_CURSOR, style)
+end procedure
+

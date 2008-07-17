@@ -16,7 +16,8 @@ ifdef !DOS32 then
 end ifdef
 
 ifdef DOS32 then
-	include dos_base.e
+	export include dos\memory.e
+	include dos\register.e
 end ifdef
 
 include machine.e
@@ -63,8 +64,8 @@ enum
 	DOUBLE,
 	HELP,
 	PARAM,
-	RID,
-	USECASE
+	RID
+--	USECASE
 
 --****
 -- === Routines
@@ -152,7 +153,7 @@ end procedure
 
 function find_opt(sequence opts, integer typ, object name)
 	integer slash
-	sequence lResult
+	-- sequence lResult
 	integer lPos = 0
 	sequence lOptName
 	object lOptParam
@@ -360,6 +361,9 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 	return extras
 end function
 
+--****
+-- === Miscellaneous
+
 --**
 -- Suspend thread execution. for ##t## seconds.
 --
@@ -394,7 +398,37 @@ export procedure sleep(atom t)
 	end if
 end procedure
 
-constant 		 M_TICK_RATE = 38
+constant
+ 	M_SOUND      = 1,
+	M_TICK_RATE = 38
+
+--**
+-- Frequency Type
+
+export type frequency(integer x)
+	return x >= 0
+end type
+
+--**
+-- Turn on the PC speaker at a specified frequency 
+--
+-- Parameters:
+-- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
+--
+-- Comments:
+-- On //Windows// and //Unix// platforms no sound will be made.
+--
+-- Example:
+-- <eucode>
+-- sound(1000) -- starts a fairly high pitched sound
+-- </eucode>
+
+export procedure sound(frequency f)
+-- turn on speaker at frequency f
+-- turn off speaker if f is 0
+	machine_proc(M_SOUND, f)
+end procedure
+
 --**
 -- Specify the number of clock-tick interrupts per second.
 --
