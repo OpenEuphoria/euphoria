@@ -4,7 +4,6 @@ include std/search.e
 include std/pretty.e
 include std/console.e
 
-
 puts(1, "You should have a backup of *ALL* files in the current directory\n")
 puts(1, "before continuing. This program will change source code with no\n")
 puts(1, "backup!\n\n")
