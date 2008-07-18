@@ -614,7 +614,7 @@ end function
 
 
 --****
--- === Routines
+-- === File Handling
 --
 
 --**
@@ -807,19 +807,6 @@ export function delete_file(sequence name)
 	return ret
 end function
 
---**
--- Move a file to another location.
---
--- Parameters:
--- 		# ##src##: a sequence, the name of the file or directory to move
--- 		# ##dest##: a sequence, the new location for the file
---		# ##overwrite##: an integer, 0 to disable overwriting an existing file (the default)
---
--- Returns:
---     An **integer**, 0 on failure, 1 on success.
--- See Also:
--- [[:rename_file]], [[:copy_file]]
-
 ifdef LINUX then
 	function xstat(atom psrc, atom psrcbuf)
 		return c_func(xStatFile, {3, psrc, psrcbuf})
@@ -830,6 +817,21 @@ elsifdef UNIX then
 	end function
 end ifdef
 integer dirname_id = -1
+
+--**
+-- Move a file to another location.
+--
+-- Parameters:
+-- 		# ##src##: a sequence, the name of the file or directory to move
+-- 		# ##dest##: a sequence, the new location for the file
+--		# ##overwrite##: an integer, 0 to disable overwriting an existing file (the default)
+--
+-- Returns:
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- See Also:
+-- [[:rename_file]], [[:copy_file]]
+
 export function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret, pdir
 	ifdef DOS32 then

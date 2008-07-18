@@ -245,6 +245,7 @@ include error.e
 --
 -- See Also:
 --		[[:find]], [[:find_from]]
+
 export function find_any(sequence needles, sequence haystack, integer start=1)
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
@@ -454,8 +455,10 @@ end function
 -- s = find_replace("the", "THE", "the cat ate the food under the table", 2)
 -- -- s is "THE cat ate THE food under the table"
 -- </eucode>
+--
 -- See Also:
---		{{:find]], [[:replace]]
+--		[[:find]], [[:replace]]
+
 export function find_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
 	integer posn, needle_len, replacement_len

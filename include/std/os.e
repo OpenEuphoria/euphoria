@@ -402,6 +402,7 @@ constant
  	M_SOUND      = 1,
 	M_TICK_RATE = 38
 
+
 --**
 -- Frequency Type
 
@@ -455,7 +456,7 @@ end procedure
 -- 
 -- See Also:
 --		[[:Debugging and profiling]]
-
+--
 -- While ex.exe is running, the system will maintain the correct time of day.
 -- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
 -- while the tick rate is high, you (or your user) may need to reboot the
@@ -467,7 +468,7 @@ end procedure
 --  
 -- Example 1:
 -- <eucode>
---  tick_rate(100)
+-- tick_rate(100)
 -- -- time() will now advance in steps of .01 seconds
 -- -- instead of the usual .055 seconds
 -- </eucode>
@@ -476,8 +477,6 @@ end procedure
 --        [[:time]], [[:time profiling]]
 
 export procedure tick_rate(atom rate)
--- This determines the precision of the time() library routine, 
--- and also the sampling rate for time profiling.
 	machine_proc(M_TICK_RATE, rate)
 end procedure
 

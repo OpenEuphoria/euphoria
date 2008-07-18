@@ -143,7 +143,7 @@ end procedure
 -- Gets the definition for each of the defined character sets.
 --
 -- Returns:
--- A **sequence of pairs. The first element of each pair
+-- A **sequence** of pairs. The first element of each pair
 -- is the character set id , eg. CS_Whitespace, and the second is the definition
 -- of that character set.
 --
@@ -158,6 +158,7 @@ end procedure
 --
 -- See Also:
 -- [[:set_chracters]], [[:set_default_characters]]
+
 export function get_charsets()
 	sequence lResult
 	
@@ -192,6 +193,7 @@ end function
 --
 -- See Also:
 -- [[:get_charsets]]
+
 export procedure set_charsets(sequence pSets)	
 	for i = 1 to length(pSets) do
 		if sequence(pSets[i]) and length(pSets[i]) = 2 then
@@ -202,7 +204,7 @@ export procedure set_charsets(sequence pSets)
 	end for
 end procedure
 
---***
+--****
 -- === Types
 --
 

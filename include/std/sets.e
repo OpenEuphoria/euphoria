@@ -38,6 +38,7 @@ end procedure
 --
 -- See Also:
 -- [[:compare]]
+
 export type set(object s)
     object x,y
 
@@ -102,7 +103,6 @@ include sort.e
 include sequence.e
 
 --**
--- Description: 
 -- Makes a set out of a sequence by sorting it and removing duplicate elements.
 --
 -- Parameters: 
@@ -178,8 +178,10 @@ end function
 --   set s0 s0={1,3,5,7}
 --   ?belongs_to(2,s)   -- prints out 0
 -- </eucode>
+--
 -- See Also: 
 -- [[:is_inside,]] [[:intersection]], [[:difference]]
+
 export function belongs_to(object x,set s)
 	if length( s ) then
 		return bfind(x,s,1,length(s))>0
@@ -335,7 +337,6 @@ function is_inside_(sequence s1,sequence s2,integer mode)
 end function
 
 --**
--- Description: 
 -- Checks whether a set is a subset of another.
 --
 -- Parameters: 
@@ -357,7 +358,6 @@ export function is_inside(set small,set large)
 end function
 
 --** 
--- Description:
 --   Returns the set of indexes of the elements of a set in a larger set, or 0 if not applicable
 --
 -- Parameters: 
@@ -459,7 +459,6 @@ function embed_union_(sequence s1,sequence s2)
 end function
 
 --**
--- Description:
 --   Returns the embedding of a set into its union with another.
 --
 -- Parameters: 
@@ -481,7 +480,6 @@ export function embed_union(set s1,set s2)
 end function
 
 --**
--- Description: 
 -- Returns the list of all subsets of the input set.
 --
 -- Parameters: 
@@ -592,7 +590,6 @@ function intersection_(sequence s1,sequence s2)
 end function
 
 --**
--- Description: 
 -- Returns the set of elements belonging to both s1 and s2.
 --
 -- Parameters: 
@@ -604,13 +601,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0,s1,s2
---   s1={1,3,5,7} s2={-1,2,3,7,11}
---   s0=intersection(s1,s2)   -- s0 is now {3,7}.
+-- set s0,s1,s2
+-- s1={1,3,5,7} s2={-1,2,3,7,11}
+-- s0=intersection(s1,s2)   -- s0 is now {3,7}.
 -- </eucode>
 --
 -- See Also: 
 -- [[:is_inside]], [[:subsets]], [[:belongs_to]]
+
 export function intersection(set S1,set S2)
     return intersection_(S1,S2)
 end function
@@ -691,7 +689,6 @@ function union1(sequence s1,sequence s2)
 end function
 
 --**
--- Description: 
 -- Returns the set of elements belonging to any of two sets.
 --
 -- Parameters: 
@@ -715,7 +712,6 @@ export function union(set S1,set S2)
 end function
 
 --**
--- Description: 
 -- Returns the set of elements belonging to either of two sets.
 --
 -- Parameters: 
@@ -752,7 +748,6 @@ export function delta(set s1,set s2)
 end function
 
 --**
--- Description: 
 -- Returns the set of elements belonging to some set and not to another.
 --
 -- Parameters: 
@@ -856,7 +851,6 @@ function product_(sequence s1,sequence s2)
 end function
 
 --**
--- Description: 
 -- Returns the set of all pairs made of an element of a set and an element of another set.
 --
 -- Parameters: 
@@ -867,15 +861,17 @@ end function
 --		The **set** of all pairs made of an element of ##S1## and an element of ##S2##.
 --
 -- Example 1:
---  <eucode>
---   set s0,s1,s2
---   s1={1,3,5,7} s2={-1,3}
---   s0=product(s1,s2)   -- s0 is now {{1,-1},{1,3},{3,-1},{3,3},{5,-1},{5,3},{7,-1},{7,3}}
---  </eucode>
+-- <eucode>
+-- set s0,s1,s2
+-- s1 = {1, 3, 5, 7} s2 = {-1, 3}
+-- s0 = product(s1, s2)   -- s0 is now {{1, -1}, {1, 3}, {3, -1}, {3, 3}, {5, -1}, {5, 3}, {7, -1}, {7, 3}}
+-- </eucode>
+--
 -- See Also:
 -- [[:product_map]], [[:amalgamated_sum]], [[:fiber_product]]
-export function product(set S1,set S2)
-    return product_(S1,S2)
+
+export function product(set S1, set S2)
+    return product_(S1, S2)
 end function
 
 function bounded_integer(object x,integer lbound,integer ubound)
@@ -890,11 +886,10 @@ function bounded_integer(object x,integer lbound,integer ubound)
     end if
 end function
 
---**
+--****
 --==== Maps between sets.
 
 --**
--- Description:
 -- Returns 1 if a sequence of integers is a valid map descriptor, else 0.
 --
 -- Comments:
@@ -905,10 +900,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   sequence s0 s0={2,3,4,1,4,2,6,4}
---   ?map(s0)   -- prints out 1.
--- <eucode>
--- See also: [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_ùap]], [[:reverse_map][[:],is_injective]], [[:is_surjective]], [[:is_bijective]]
+-- sequence s0 = {2, 3, 4, 1, 4, 2, 6, 4}
+-- ? map(s0)   -- prints out 1.
+-- </eucode>
+--
+-- See also: 
+--   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_ùap]], [[:reverse_map], 
+--   [[:is_injective]], [[:is_surjective]], [[:is_bijective]]
+
 export type map(sequence s)
     object p,q
 
@@ -930,7 +929,6 @@ export type map(sequence s)
 end type
 
 --**
--- Description:
 --   Returns a map which sends each element of its source set to the corresponding 
 --    one in a list.
 --
@@ -943,13 +941,15 @@ end type
 --
 -- Example 1:
 -- <eucode>
---   sequence s0 s0={2,3,4,1,4,2}
---   set s1 s1={-1,1,2,3,4}
---   map f f=define_map(s0,s1)
---   --  As a sequence, f is {3,4,5,2,5,3,6,5}
+-- sequence s0 = {2, 3, 4, 1, 4, 2}
+-- set s1 = {-1, 1, 2, 3, 4}
+-- map f = define_map(s0,s1)
+-- --  As a sequence, f is {3, 4, 5, 2, 5, 3, 6, 5}
 -- </eucode>
+--
 -- See Also:
--- [[:map, sequences_to_map]], [[:direct_map]]
+--   [[:map, sequences_to_map]], [[:direct_map]]
+
 export function define_map(sequence mapping,set target)
     sequence result
     integer lt
@@ -964,7 +964,6 @@ export function define_map(sequence mapping,set target)
 end function
 
 --**
--- Description:
 --   Returns a map which sends each element of some sequence to the corresponding one in another sequence.
 --
 -- Parameters:
@@ -983,13 +982,17 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   sequence s0,s1
---   s0={2,3,4,1,4} s1={"aba","aac",3,"def"}
---   map f f=sequences_to_map(s0,s1)
---   --  As a sequence, f is {3,2,1,4,4,4}
+-- sequence s0, s1
+-- s0 = {2, 3, 4, 1, 4} 
+-- s1 = {"aba", "aac", 3, "def"}
+--
+-- map f f=sequences_to_map(s0,s1)
+-- --  As a sequence, f is {3,2,1,4,4,4}
 -- </eucode>
+--
 -- See Also:
 -- [[:map]], [[:define_map]]
+
 export function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
     sequence result
     set sorted,sorted_to
@@ -1019,7 +1022,6 @@ export function sequences_to_map(sequence mapped,sequence mapped_to,integer mode
 end function
 
 --**
--- Description: 
 -- If an object is in some input set, returns how it is mapped by a set.
 --
 -- Parameters: 
@@ -1037,14 +1039,16 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   map f f={3,1,2,2,4,3}
---   set s1,s2
---   s1={"Albert","Beatrix","Conrad","Doris"} s2={13,17,19}
---   object x x=image(f,"Conrad",s1,s2}
---   -- x is now 17.
+-- map f={3,1,2,2,4,3}
+-- set s1,s2
+-- s1={"Albert","Beatrix","Conrad","Doris"} s2={13,17,19}
+-- object x x=image(f,"Conrad",s1,s2}
+-- -- x is now 17.
 -- </eucode>
+--
 -- See Also:
--- [[:direct_map]]
+--   [[:direct_map]]
+
 export function image(map f,object x,set input,set output)
     integer p
 
@@ -1062,7 +1066,6 @@ export function image(map f,object x,set input,set output)
 end function
 
 --**
--- Description: 
 -- Returns the set of all values taken by a map in some output set.
 --
 -- Parameters:
@@ -1074,11 +1077,12 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   map f f={3,2,5,2,4,6}
---   set s={"Albert","Beatrix","Conrad","Doris","Eugene","Fabiola"}
---   set s1 s1=range(f,s)
---   -- s1 is now {"Beatrix",,"Conrad","Fabiola"}
+-- map f = {3, 2, 5, 2, 4, 6}
+-- set s = {"Albert", "Beatrix", "Conrad", "Doris", "Eugene", "Fabiola"}
+-- set s1 = range(f, s)
+-- -- s1 is now {"Beatrix", ,"Conrad", "Fabiola"}
 -- </eucode>
+--
 -- See Also:
 -- [[:direct_map]], [[:image]]
 
@@ -1094,7 +1098,6 @@ export function range(map f,set s)
 end function
 
 --**
--- Description:
 --   Returns the image of a list by a map, given the input and output sets.
 --
 -- Parameters: 
@@ -1150,7 +1153,6 @@ export function direct_map(map f,set s1,sequence s0,set s2)
 end function
 
 --**
--- Description: 
 -- Builds a map to a product from a map to each of its components.
 --
 -- Parameters: 
@@ -1183,7 +1185,6 @@ export function product_map(map f1,map f2)
 end function
 
 --**
--- Description: 
 -- Returns all pairs in a product that come from applying two maps to the same element in a base set.
 -- Parameters:
 --		# ##
@@ -1228,7 +1229,6 @@ function fiber_over_(sequence f,sequence s1,sequence s2)
 end function
 
 --**
--- Description:
 -- Given a map between two sets, returns {list of antecedents of elements in target, effective target}.
 -- Parameters: 
 --		# ##f##: the inspected map
@@ -1261,7 +1261,6 @@ export function fiber_over(map f,set source,set target)
 end function
 
 --**
--- Description: 
 -- Returns the set of all pairs in a product on which two given componentwise maps agree.
 --
 -- Parameters:
@@ -1300,7 +1299,6 @@ export function fiber_product(set first,set second,set base,map from_1_to_base,m
 end function
 
 --**
--- Description:
 --   Given a map between two sets, returns the smallest subset whose image contains the set of elements in a list.
 --
 -- Parameters: 
@@ -1344,7 +1342,6 @@ export function reverse_map(map f,set s1,sequence s0,set s2)
 end function
 
 --**
--- Description: 
 -- Restricts f to the intersection of an input set and another set
 --
 -- Parameters: 
@@ -1408,7 +1405,6 @@ function change_target_(sequence f,sequence s1,sequence s2)
 end function
 
 --**
--- Description: 
 -- Converts a map by changing its output set.
 --
 -- Parameters: 
@@ -1434,9 +1430,9 @@ export function change_target(map f,set old_target,set new_target)
 end function
 
 --**
--- Description:
 --   Combines two maps into one defined from the union of source sets to the union 
 --    of target sets.
+--
 -- Parameters:
 --		# ##f1##: the first map
 --		# ##source1##: its source set
@@ -1508,7 +1504,6 @@ function compose_map_(sequence f2,sequence f1)
 end function
 
 --**
--- Description: 
 -- Computes the compound map f2 o f1.
 --
 -- Parameters: 
@@ -1536,7 +1531,6 @@ export function compose_map(map f2,map f1)
 end function
 
 --**
--- Description: 
 -- Decide whether taking two different paths along a square map diagrams results in the same map.
 --
 -- Parameters: 
@@ -1564,7 +1558,6 @@ export function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,seque
 end function
 
 --**
--- Description: 
 -- Determines whether there is a point in an output set hit twice or more by a map.
 --
 -- Parameters: 
@@ -1613,7 +1606,6 @@ function is_surjective_(sequence f)
 end function
 
 --**
--- Description: 
 -- Determine whether all points in the output set are hit by a map.
 --
 -- Parameters: 
@@ -1634,7 +1626,6 @@ export function is_surjective(map f)
 end function
 
 --**
--- Description: 
 -- Determine whether a map is one-to-one.
 --
 -- Parameters:
@@ -1660,7 +1651,6 @@ export function is_bijective(map f)
 end function
 
 --**
--- Description: 
 -- Returns a right, and left is possible, inverse of a map over its [[:range]].
 --
 -- Parameters:
@@ -1671,13 +1661,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   map f,g f={2,3,1,1,2,5,3}
---   g=section(f)
---   g is now {3,1,2,3,5}.
+-- map f = {2, 3, 1, 1, 2, 5, 3}, g = section(f)
+-- -- g is now {3,1,2,3,5}.
 -- </eucode>
 --
 -- See Also: 
 -- [[:reverse_map]], [[:is_injective]]
+
 export function section(map f)
     sequence result = f
     integer k = 0, p = f[$-1]
@@ -1706,22 +1696,24 @@ export function section(map f)
     return result
 end function
 
---**
+--****
 --==== Operations on sets
 
 --**
--- Description: Returns 1 if the data represents a map from the product of two sets to a third one.
+-- Returns 1 if the data represents a map from the product of two sets to a third one.
+--
 -- Comments:
 --   An operation from FxG to H is defined as a sequence of mappings from G to H, plus the
 --   cardinals of the F, G and H. If the input data is consistent with this description,
 --   1 is returned, else 0.
+--
 -- Example 1:
 -- <eucode>
---   sequence s
---   s={{{2,3},{3,1},{1,2},{2,3},{3,1}},{5,2,3}
---   s represents the addition modulo 3 from {0,1,2,3,4} x {1,2} to {0,1,2}
---   ?operation(s)   -- prints out 1.
+-- sequence s = {{{2, 3}, {3, 1}, {1, 2}, {2, 3}, {3, 1}}, {5,2,3}}
+-- -- s represents the addition modulo 3 from {0, 1, 2, 3, 4} x {1, 2} to {0, 1, 2}
+-- ? operation(s)   -- prints out 1.
 -- </eucode>
+
 export type operation(object s)
     sequence u
 
@@ -1739,7 +1731,6 @@ export type operation(object s)
 end type
 
 --**
--- Description: 
 -- Returns an operation that splits by left action into the supplied mappings.
 --
 -- Parameters: 
@@ -1753,17 +1744,20 @@ end type
 -- ##left_actions## must be a rectangular matrix.
 --
 -- Comments:
--- If ##F## is the result, and is defined from ##E1 x E2## to ##E##, then each left action is a map from ##E2## to ##E##, the "left multiplication" by an element of ##E1##.
+-- If ##F## is the result, and is defined from ##E1 x E2## to ##E##, then each left action is 
+-- a map from ##E2## to ##E##, the "left multiplication" by an element of ##E1##.
 --
 -- Example 1:
 -- <eucode>
---   sequence s s={{2,3,2,3},{3,1,2,5},{1,2,2,2},{2,3,2,4},{3,1,2,3}}
---   operation F F=define_operation(s)
---   F is now {{{2,3},{3,1},{1,2},{2,3},{3,1}},{5,2,3}
---   ?operation(s)   -- prints out 1.
+-- sequence s = {{2, 3, 2, 3}, {3, 1, 2, 5}, {1, 2, 2, 2}, {2, 3, 2, 4}, {3, 1, 2, 3}}
+-- operation F = define_operation(s)
+-- -- F is now {{{2,3},{3,1},{1,2},{2,3},{3,1}},{5,2,3}
+-- ? operation(s)   -- prints out 1.
 -- </eucode>
+--
 -- See Also:
 -- [[:operation]]
+
 export function define_operation(sequence left_actions)
     integer size_left,size_right
     map f
@@ -1786,7 +1780,6 @@ export function define_operation(sequence left_actions)
 end function
 
 --**
--- Description: 
 -- Determine whether f(x,y) always equals f(y,x).
 --
 -- Parameters: 
@@ -1794,14 +1787,17 @@ end function
 --
 -- Returns: 
 -- 		An **integer**, 1 if exchanging operands makes sense and has no effect, else 0.
+--
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
---   -- f is the addition from {0,1,2}x{0,1,2} to {0,1,2,3,4}.
---   ?is_symmetric(f)   -- prints out 1.
+-- operation f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
+-- -- f is the addition from {0,1,2}x{0,1,2} to {0,1,2,3,4}.
+-- ? is_symmetric(f)   -- prints out 1.
 -- </eucode>
+--
 -- See Also: 
--- [[:operation]], [[has_left_unit]], [[:has_right_unit]], [[:has_unit]]
+--   [[:operation]], [[has_left_unit]], [[:has_right_unit]], [[:has_unit]]
+
 export function is_symmetric(operation f)
     sequence s
     integer n
@@ -1821,7 +1817,6 @@ export function is_symmetric(operation f)
 end function
 
 --**
--- Description: 
 -- Determine whether the identity f(f(x,y),z)=f(x,f(y,z)) always makes sense and holds.
 --
 -- Parameters: 
@@ -1836,13 +1831,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
---   -- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
---   ?is_symmetric(f)   -- prints out 1.
+-- operation f f={{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
+-- -- f is the addition modulo 3 from {0, 1, 2} x {0, 1, 2} to {0, 1, 2}.
+-- ? is_symmetric(f)   -- prints out 1.
 -- </eucode>
 --
 -- See Also:
---[[:operation]], [[:has_left_unit]], [[:has_right_unit]], [[:has_unit]]
+--    [[:operation]], [[:has_left_unit]], [[:has_right_unit]], [[:has_unit]]
+
 export function is_associative(operation f)
     sequence s
     integer n
@@ -1866,7 +1862,6 @@ export function is_associative(operation f)
 end function
 
 --**
--- Description: 
 -- Returns 0 if a map has no left unit, else a left unit for the map.
 --
 -- Parameters: 
@@ -1877,12 +1872,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
---   -- f is the addition modulo 3 from {0,1,2}x{0,1,2} to {0,1,2}.
---   ?has_left_unitf()   -- prints out 1.
+-- operation f = {{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
+-- -- f is the addition modulo 3 from {0, 1, 2} x {0, 1, 2} to {0, 1, 2}.
+-- ? has_left_unitf()   -- prints out 1.
 -- </eucode>
+--
 -- See Also: 
 -- [[:all_left_unitz]], [[:is_left_unit]], [[:has_right_unit]], [[:has_unit]]
+
 export function has_left_unit(operation f)
     if f[2][2]!=f[2][3] then
         return 0
@@ -1908,7 +1905,6 @@ function all_left_units_(sequence f)
 end function
 
 --**
--- Description: 
 -- Finds all left units for an operation.
 --
 -- Parameters: 
@@ -1916,20 +1912,22 @@ end function
 --
 -- Returns: 
 --		A possibly empty **sequence**, listing all ##x## such that ##f(x,.)## is the identity map.
+--
 -- Example 1:
 -- <eucode>
 --   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
 --   sequence s s=all_left_units(f)
 --   s is now {1,2}.
 -- </eucode>
+--
 -- See Also: 
 -- [[:all_right_unitz]], [[:is_left_unit]], [[:has_left_unit]], [[:has_unitA]]
+
 export function all_left_units(operation f)
     return all_left_units_(f)
 end function
 
 --**
--- Description: 
 -- Determine whether some element acts by the identity through a map.
 --
 -- Parameters: 
@@ -1941,12 +1939,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
---   ?is_left_unit(3,f)   -- prints out 0.
+-- operation f f={{{1, 2, 3}, {1, 2, 3}, {3, 1, 2}}, {3, 3,3 }}
+-- ? is_left_unit(3, f)   -- prints out 0.
 -- </eucode>
 --
 -- See Also: 
 -- [[:all_left_unitz]], [[:is_right_unit]], [[:has_left_unit]], [[:has_unit]]
+
 export function is_left_unit(integer x,operation f)
     if f[2][2]!=f[2][3] or not bounded_integer(x,1,f[2][1]) then
         return 0
@@ -1956,7 +1955,6 @@ export function is_left_unit(integer x,operation f)
 end function
 
 --**
--- Description: 
 -- Determine whether an operation has any right unit.
 --
 -- Parameters: 
@@ -1966,13 +1964,14 @@ end function
 --		An **integer**, the index of the first right unit for f if there is any, else 0.
 --
 -- Example 1:
--- <eucoe>
+-- <eucode>
 --   operation f f={{{1,2,3},{2,1,3},{3,1,2}},{3,3,3}}
 --   ?has_left_unit(f)   -- prints out 1.
--- </eucoe>
+-- </eucode>
 --
 -- See Also: 
 -- [[:all_right_unitz]], [[:is_right_unit]], [[:has_left_unit]], [[:has_unit]]
+
 export function has_right_unit(operation f)
     integer p
     if f[2][3]!=f[2][1] then
@@ -1995,7 +1994,6 @@ export function has_right_unit(operation f)
 end function
 
 --**
--- Description: 
 -- Finds all right units for an operation.
 --
 -- Parameters: 
@@ -2013,6 +2011,7 @@ end function
 --
 -- See Also: 
 -- [[:all_left_unitz]], [[:is_right_unit]], [[:has_right_unit]], [[:has_unit]]
+
 export function all_right_units(operation f)
     integer p
     sequence result
@@ -2052,11 +2051,10 @@ function is_right_unit_(integer x,sequence f)
 end function
 
 --**
--- Description: 
 -- Determine whether an element is a right unit for an operation.
 --
 -- Parameters:
---		{ ##x##: the element to test
+--		# ##x##: the element to test
 --		# ##f##: the operation involved.
 --
 -- Returns: 
@@ -2064,12 +2062,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
---   ?is_right_unit(3,f)  -- prints out 0.
--- <e/ucode>
+-- operation f f={{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
+-- ? is_right_unit(3, f)  -- prints out 0.
+-- </eucode>
 --
 -- See Also: 
 -- [[:all_right_unitz]], [[:is_left_nit]], [[:has_right_unit]], [[:has_unit]]
+
 export function is_right_unit(integer x,operation f)
     return is_right_unit_(x,f)
 end function
@@ -2087,7 +2086,6 @@ function has_unit_(sequence f)
 end function
 
 --**
--- Description: 
 -- Returns the bilateral unit of a map if there is any, else 0.
 --
 -- Parameters: 
@@ -2104,12 +2102,12 @@ end function
 --
 -- See Also: 
 -- [[:has_right_unit]], [[:has_left_unit]]
+
 export function has_unit(operation f)
     return has_unit_(f)
 end function
 
 --**
--- Description: 
 -- Returns the bilateral inverse of an element by a operation if it exists and the operation has a unit.
 --
 -- Parameters: 
@@ -2122,12 +2120,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
---   ?has_inverse(3,f)  -- prints out 2.
+-- operation f f={{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
+--  ? has_inverse(3, f)  -- prints out 2.
 -- </eucode>
 --
 -- See Also: 
 -- [[:has_unit]]
+
 export function has_inverse(integer x,operation f)
     return find(has_unit_(f),f[1][x])
 end function
@@ -2174,7 +2173,6 @@ function distributes_left_(sequence product,sequence sum,integer transpose)
 end function
 
 --**
--- Description: 
 -- Determines whether an operation left distributes over another.
 --
 -- Parameters:
@@ -2195,10 +2193,11 @@ end function
 --   operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
 --   ?distributes_left(product,sum,0)  -- prints out 1.
--- <e/ucode>
+-- </eucode>
 --
 -- See Also: 
 -- [[:distributes_right]], [[:distributes_over]]
+
 export function distributes_left(operation product,operation sum,integer transpose=0)
     return distributes_left_(product,sum,transpose)
 end function
@@ -2244,7 +2243,6 @@ function distributes_right_(sequence product,sequence sum,integer transpose)
 end function
 
 --**
--- Description:
 -- Determines whether an operation right distributes over another.
 --
 -- Parameters:
@@ -2269,19 +2267,15 @@ end function
 --
 -- See Also: 
 -- [[:distributes_left]], [[:distributes_over]]
+
 export function distributes_right(operation product,operation sum,integer transpose=0)
     return distributes_right_(product,sum,transpose)
 end function
 
 --**
-export enum
-	DISTRIBUTE_NO = 0,
-    DISTRIBUTE_LEFT,
-    DISTRIBUTE_RIGHT,
-    DISTRIBUTE_BOTH
+export enum DISTRIBUTE_NO = 0, DISTRIBUTE_LEFT, DISTRIBUTE_RIGHT, DISTRIBUTE_BOTH
 
 --**
--- Description:
 -- Determine whether a product map distributes over a sum
 --
 -- Parameters:
@@ -2298,13 +2292,14 @@ export enum
 --
 -- Example 1:
 -- <eucode>
---   operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation sum 	sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}		
 --   operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
 --   ?distributes_right(product,sum,0)  -- prints out 1.
 -- </eucode>
 --
 -- See Also: 
 -- [[:distributes_left]], [[:distributes_over]]
+
 export function distributes_over(operation product,operation sum,integer transpose)
     return distributes_left_(product,sum,transpose)+2*distributes_right_(product,sum,not transpose)
 end function

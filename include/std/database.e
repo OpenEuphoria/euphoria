@@ -1216,11 +1216,11 @@ end procedure
 -- Lists all tables on the current database.
 --
 -- Returns:
---		a **sequence** of all the table names in the current database. Each element of this
+--	a **sequence** of all the table names in the current database. Each element of this
 -- sequence is a sequence, the name of a table.
 --
 -- Errors:
--- 		An error occurs if the current database is undefined.
+-- An error occurs if the current database is undefined.
 --
 -- Example 1:
 -- <eucode>
@@ -1232,8 +1232,10 @@ end procedure
 --     puts(1, names[i] & '\n')
 -- end for
 -- </eucode>
+--
 -- See Also:
 -- 		[[:db_table_select]], [[:db_table_create]]
+
 export function db_table_list()
 	sequence table_names
 	atom tables, nt, name
@@ -1259,11 +1261,11 @@ function key_value(atom ptr)
 	return decompress(0)
 end function
 
+--****
+--==== Managing Records
+
 --**
---==== Managing records.
---
--- Description:
--- 		Find the record in the current table with supplied key.
+-- Find the record in the current table with supplied key.
 --
 -- Parameters:
 -- 		# ##key##: the identifier of the record to be looked up.
@@ -1301,8 +1303,10 @@ end function
 --     printf(2, "it will be #%d\n", -rec_num)
 -- end if
 -- </eucode>
+--
 -- See Also:
--- 		{{db_insert]], [[:db_replace_data]], [[:db_delete_record]]
+-- 		[[db_insert]], [[:db_replace_data]], [[:db_delete_record]]
+
 export function db_find_key(object key)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
@@ -1346,7 +1350,7 @@ end function
 -- DB_EXISTS_ALREADY if a record already exists on current table with the same key value.
 --
 -- Both key and data can be any Euphoria data objects, atoms or sequences.
-
+--
 -- Example 1:
 -- <eucode>
 -- if db_insert("Smith", {"Peter", 100, 34.5}) != DB_OK then
@@ -1355,7 +1359,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		{{db_delete_record]]
+--		[[db_delete_record]]
 
 export function db_insert(object key, object data)
 	sequence key_string, data_string, last_part, remaining
@@ -1500,8 +1504,10 @@ end function
 -- <eucode>
 -- db_delete_record(55)
 -- </eucode>
+--
 -- See Also:
 -- 		[[:db_find_key]]
+
 export procedure db_delete_record(integer key_location)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n

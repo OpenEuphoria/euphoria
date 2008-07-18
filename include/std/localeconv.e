@@ -1,13 +1,12 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Locale Constants
+-- == Locale Name Conversion
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
 -- === Constants
---** 
 -- //Win32// locale names:
 -- * "af-ZA",
 -- * "sq-AL",
@@ -1292,8 +1291,10 @@ end ifdef
 --			# ##new_locale##: a sequence, the string for the locale.
 -- Returns:
 --		A **sequence**, either the translated locale on success or ##new_locale## on failure.
+--
 -- See Also:
 -- 		[[:get]], [[:set]], [[:decanonical]]
+
 export function canonical(sequence new_locale)
 	integer w, ws, p, n
 	ifdef WIN32 then
@@ -1328,10 +1329,13 @@ end function
 --
 -- Parameters:
 --		# ##new_locale##: a sequence, the string for the locale.
+--
 -- Returns:
 --		A **sequence**, either the translated locale on success or ##new_locale## on failure.
+--
 -- See Also:
 -- 		[[:get]], [[:set]], [[:canonical]]
+
 export function decanonical(sequence new_locale)
 	integer w, ws, p, n
 	ifdef WIN32 then
@@ -1361,6 +1365,9 @@ export function decanonical(sequence new_locale)
 	return new_locale
 end function
 
+--**
+-- TODO: document
+
 export function canon2win(sequence new_locale)
 	integer w
 	ifdef WIN32 then
@@ -1381,4 +1388,3 @@ export function canon2win(sequence new_locale)
 	end ifdef
 	return new_locale
 end function
-

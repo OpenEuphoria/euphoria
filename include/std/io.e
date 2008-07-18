@@ -21,31 +21,31 @@ constant M_SEEK  = 19,
 
 --**
 -- Standard Input
--- export constant STDIN = 0
+
 export constant STDIN = 0
 
 --**
 -- Standard Output
--- export constant STDOUT = 1
+
 export constant STDOUT = 1
 
 --**
 -- Standard Error
--- export constant STDERR = 2
+
 export constant STDERR = 2
 
 --**
 -- Screen (Standard Out)
--- export constant SCREEN = 1
+
 export constant SCREEN = 1
 
 --**
 -- End of file
--- export constant EOF = -1
+
 export constant EOF = -1
 
 --****
--- === Routines
+-- === Read/Write Routines
 
 --**
 -- Signature:
@@ -59,6 +59,7 @@ export constant EOF = -1
 -- <eucode>
 -- ? {1, 2} + {3, 4}  -- will display {4, 6}
 -- </eucode>
+--
 -- See Also:
 -- 		[[:print]]
 
@@ -83,6 +84,7 @@ export constant EOF = -1
 -- <eucode>
 -- print(STDOUT, repeat({10,20}, 3)) -- output is: {{10,20},{10,20},{10,20}} 
 -- </eucode>
+--
 -- See Also:
 -- 		[[:?]], [[:puts]]
 
@@ -102,7 +104,8 @@ export constant EOF = -1
 -- 		If there are less values to show than format specifiers, a run time error will occur.
 --
 -- Comments:
--- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending in a letter. Some extra information may come in the middle.
+-- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending 
+-- in a letter. Some extra information may come in the middle.
 --
 -- ##format## will be scanned for format specifiers. Whenever one is found, the current value 
 -- in ##values## will be turned into a string according to the format specifier. The resulting 
@@ -110,8 +113,8 @@ export constant EOF = -1
 -- Then moving on to next value and carrying the process on.
 --
 -- This way, printf() always takes
--- exactly 3 arguments, no matter how many values are to be printed. Only the length of the last argument, containing the
--- values to be printed, will vary.
+-- exactly 3 arguments, no matter how many values are to be printed. Only the length of the last 
+-- argument, containing the values to be printed, will vary.
 --
 -- The basic format specifiers are...
 --
@@ -310,6 +313,7 @@ export constant EOF = -1
 -- puts(1, '\n')   -- necessary
 -- puts(1, line & " is a nice name.\n")
 -- </eucode>
+--
 -- See Also:
 --		[[:getc]], [[:read_lines]]
 
@@ -355,13 +359,11 @@ constant CHUNK = 100
 --     close(fn)
 --     ? length(whole_file)  -- should match DIR size of "temp"
 --     </eucode>
+--
 -- See Also:
 -- 		[[:getc]], [[:gets]]
+
 export function get_bytes(integer fn, integer n)
--- Return a sequence of n bytes (maximum) from an open file.
--- If n > 0 and fewer than n bytes are returned,
--- you've reached the end of file.
--- This function is normally used with files opened in binary mode.
 	sequence s
 	integer c, first, last
 
@@ -407,9 +409,11 @@ end function
 -- Described under lock_file()
 --
 
-export enum 
-	LOCK_SHARED, 
-	LOCK_EXCLUSIVE
+
+--**
+-- Lock Type Constants
+
+export enum LOCK_SHARED, LOCK_EXCLUSIVE
 
 --**
 -- File number type
@@ -585,13 +589,11 @@ end type
 --     end if
 -- end for
 -- </eucode>
--- Wee Also:
+--
+-- See Also:
 --		[[:bet_bytes]], [[:puts]], [[:where]]
+
 export function seek(file_number fn, file_position pos)
--- Seeks to a byte position in the file, 
--- or to end of file if pos is -1.
--- This function is normally used with
--- files opened in binary mode.
 	return machine_func(M_SEEK, {fn, pos})
 end function
 
@@ -600,17 +602,16 @@ end function
 -- 
 -- Parameters:
 -- 		# ##fn##: an integer, the handle to the file or device to close.
+--
 -- Returns:
 --		An **atom**, the current byte position in the file. 
+--
 -- Comments:
 -- The file position is is the place in the file where the next byte
 -- will be read from, or written to. It is updated
 -- by reads, writes and seeks on the file. 
 
 export function where(file_number fn)
--- Returns the current byte position in the file.
--- This function is normally used with
--- files opened in binary mode.
 	return machine_func(M_WHERE, fn)
 end function
 
@@ -646,10 +647,11 @@ end function
 --
 -- s = gets(0) -- wait for keyboard input
 -- </eucode>
+--
 -- See Also:
 --		[[:close]], [[:crash_routine]]
+
 export procedure flush(file_number fn)
--- flush out the buffer associated with file fn
 	machine_proc(M_FLUSH, fn)
 end procedure
 
@@ -725,11 +727,11 @@ end procedure
 -- unlock_file(v, {})
 -- close(v)
 -- </eucode>
+--
 -- See Also:
 --		[[:unlock_file]]
+
 export function lock_file(file_number fn, lock_type t, byte_range r={})
--- Attempt to lock a file so other processes won't interfere with it.
--- The byte range can be {} if you want to lock the whole file
 	return machine_func(M_LOCK_FILE, {fn, t, r})
 end function
 
@@ -792,6 +794,7 @@ end procedure
 -- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
 -- </eucode>
+--
 -- See Also:
 --		[[:gets]], [[:write_lines]], [[:read_file]]
 
@@ -1013,4 +1016,3 @@ export function write_file(object f, sequence data)
 
 	return 1
 end function
-

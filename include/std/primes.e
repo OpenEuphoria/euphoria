@@ -14,9 +14,10 @@ include machine.e
 --
 
 --**
+
 export sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 
---***
+--****
 -- === Routines
 --
 
@@ -43,6 +44,7 @@ export sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 --
 -- See Also:
 --		[[:next_prime]]
+
 export function calc_primes(integer pMax, atom pTimeLimit = 10)
 	sequence lResult
 	integer lCandidate
@@ -124,9 +126,11 @@ end function
 -- <eucode>
 -- ?next_prime(997)
 -- -- On a very slow computer, you might get -997, but 1003 is expected.
+-- </eucode>
 --
 -- See Also:
 -- [[:calc_primes]]
+
 export function next_prime(integer n, integer pDefault = -1)
 	integer i
 
@@ -149,4 +153,3 @@ export function next_prime(integer n, integer pDefault = -1)
 	return gPrimes[i]
 
 end function
-

@@ -89,6 +89,7 @@ export constant
 
 --**
 -- Basically, a ##regex## is an memory address, hence an atom.
+
 export type regex(object o)
 	return atom(o)
 end type
@@ -150,9 +151,10 @@ end function
 -- -- substring #1 (full match): foobar
 -- -- substring #2 (first sunstring): bar
 -- -- no more substrings, so match results stop here.
+-- </eucode>
+--
 -- See Also:
 --	[[:search_all]]
--- </eucode>
 
 export function search(regex re, sequence text, integer from=1, atom options=0)
 		return machine_func(M_EXEC_PCRE, { re, text, options, from-1 })
@@ -172,8 +174,10 @@ end function
 --
 -- Comments:
 --     When the function returns a sequence, each element is a sequence itself, as described in the Comments: section for [[:search]].
+--
 -- See Also:
 --	[[:search]]
+
 export function search_all(regex re, sequence text, integer from=1, atom options=0)
 	object result
 	sequence results
@@ -246,6 +250,7 @@ end function
 --
 -- See Also:
 -- [[:search_replace]]
+
 export function search_replace_user(regex re, sequence text, integer rid, 
 									atom options = 0)
 	sequence matches, m
@@ -275,6 +280,7 @@ end function
 --
 -- Returns:
 -- 		An **integer**, 0 if no match or some error, 1 if there is any match.
+
 export function matches(regex re, sequence text, integer from=1, atom options = 0)
 	return sequence(search(re, text,from,  options))
 end function
@@ -308,6 +314,7 @@ end procedure
 --
 -- See Also:
 -- [[:matches]]
+
 export function full_match(regex re, sequence text, atom options = 0)
 	object matches
 	matches = search( re, text, 1, options )

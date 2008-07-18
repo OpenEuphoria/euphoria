@@ -49,8 +49,10 @@ lang_path = 0
 --
 -- Comments:
 --	When the language path is not set, and it is unset by default, [[:set]]() does not load any language file.
+--
 -- See Also:
 --		[[:set]]
+
 export procedure set_lang_path(object pp)
 	lang_path = pp
 end procedure
@@ -60,8 +62,10 @@ end procedure
 --
 -- Returns:
 -- 		An **object**, the current language path.
+--
 -- See Also:
 --		[[:get_lang_path]]
+
 export function get_lang_path()
 	return lang_path
 end function
@@ -74,14 +78,20 @@ end function
 --
 -- Returns:
 --		An **integer**: 0 on failure, 1 on success.
+--
 -- Comments:
 -- The language file must be made of lines which either in the form
+--
 -- {{{
 -- key value
 -- }}}
--- withhout any space in the key part, or else start with a ~#~ character, in which case they are treated as comments. Leading whitespace does not count.
+--
+-- withhout any space in the key part, or else start with a ~#~ character, in which case they are 
+-- treated as comments. Leading whitespace does not count.
+--
 -- See Also:
 --		[[:w]]
+
 export function lang_load(sequence filename)
 	object lines
 	sequence line, key, msg
@@ -131,12 +141,16 @@ end function
 --
 -- Parameters:
 -- 		# ##word##: a sequence, the word to translate.
+--
 -- Returns:
 --		A **sequence**, the value associated to the key ##word##.
+--
 -- Comments:
 -- "" is returned if no translation was found.
+--
 -- See Also:
 -- 		[[:set]], [[:lang_load]]
+
 export function w(sequence word)
 	return m:get(lang, word, "")
 end function
@@ -233,9 +247,16 @@ end ifdef
 --
 -- Comments:
 -- Locale strings have the following format: xx_YY or xx_YY.xyz .
--- The xx part refers to a culture, or main language/script. For instance, "en" refers to english, "de" refers to german, and so on. For some language, a script may be specified, like in "mn_Cyrl_MN" (mongolian in cyrillic transcription).
--- The YY part refers to a subculture, or variant, of the main language. For instance, "fr_FR" refers to metropolitan France, while "fr_BE" refers to the variant spoken in Wallonie, the french speaking region of Belgium.
+-- The xx part refers to a culture, or main language/script. For instance, "en" refers to 
+-- English, "de" refers to German, and so on. For some language, a script may be specified, 
+-- like in "mn_Cyrl_MN" (mongolian in cyrillic transcription).
+--
+-- The YY part refers to a subculture, or variant, of the main language. For instance, "fr_FR" 
+-- refers to metropolitan France, while "fr_BE" refers to the variant spoken in Wallonie, the 
+-- French speaking region of Belgium.
+--
 -- The optional .xyz part specifies an encoding, like .utf8. This is required in some cases.
+
 export function set(sequence new_locale)
 	atom pLocale, ign
 	ifdef WIN32 then
@@ -275,6 +296,7 @@ end function
 --
 -- See Also:
 --		[[:set]]
+
 export function get()
 	sequence r
 	atom p
@@ -303,13 +325,16 @@ end function
 --
 -- Returns:
 -- 		A **sequence**, a string that writes out ##amount## of current currency.
+--
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ?money(1020.5) -- returns"$1,020.50"
+-- ? money(1020.5) -- returns"$1,020.50"
 -- </eucode>
+--
 -- See Also:
 --		[[:set]], [[:number]]
+
 export function money(atom amount)
 	sequence result
 	integer size
@@ -340,13 +365,16 @@ end function
 --
 -- Returns:
 -- 		A **sequence**, a string that writes out ##num##.
+--
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
 -- ?number(1020.5) -- returns"1,020.50"
 -- </eucode>
+--
 -- See Also:
 --		[[:set]], [[:money]]
+
 export function number(atom num)
 	sequence result
 	integer size
@@ -395,13 +423,15 @@ end function
 --
 -- Returns:
 --		A **sequence**, representing the formatted date.
+--
 -- Example 1:
 -- <eucode>
---	include datetime.e
--- ?datetime("Today is a %A",dt:now())
+-- ? datetime("Today is a %A",dt:now())
 -- </eucode>
+--
 -- See Also:
 --		[[:format]]
+
 export function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
 	integer size

@@ -324,10 +324,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
 	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\search.obj &
 	.\$(OBJDIR)\io.obj &
-	.\$(OBJDIR)\math.obj &
-	.\$(OBJDIR)\os.obj &
 	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
