@@ -551,8 +551,12 @@ global function et_tokenize_string(sequence code)
 end function
 
 global function et_tokenize_file(sequence fname)
-	sequence txt
+	object txt
 	txt = read_file(fname)
+	if atom(txt) and txt = -1 then
+		return {{}, ERR, ERR_LNUM, ERR_LPOS}
+	end if
+	
 	return et_tokenize_string(txt)
 end function
 
