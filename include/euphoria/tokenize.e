@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------------
 
 include keywords.e
+include std/io.e
 
 ---------------------------------------------------------------------------------
 
@@ -550,21 +551,9 @@ global function et_tokenize_string(sequence code)
 end function
 
 global function et_tokenize_file(sequence fname)
- sequence txt
- integer fn,c
-	txt = ""
-	fn = open(fname,"rb")
-	if fn != EOF then
-  	c = getc(fn)
-  	while c != EOF do
-  	  txt &= c
-  	  c = getc(fn)
-  	end while
-  	return et_tokenize_string(txt)
-	else
-		report_error(ERR_OPEN)
-	  return {{},ERR,ERR_LNUM,ERR_LPOS}
-	end if
+	sequence txt
+	txt = read_file(fname)
+	return et_tokenize_string(txt)
 end function
 
 ---------------------------------------------------------------------------------
