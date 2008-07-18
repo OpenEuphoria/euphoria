@@ -9,13 +9,76 @@
 --
 
 include unicode.e -- needed for parse() and format()
+include std/memory.e
+include std/dll.e
 
-ifdef WIN32 then
-	include dll.e
-	include memory.e
-	constant vKernel32 = open_dll("kernel32")
-	constant xGetSystemTime = define_c_proc(vKernel32, "GetSystemTime",   {C_POINTER})
+ifdef LINUX then
+	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
+	constant time_ = define_c_func(open_dll(""), "time", {C_POINTER}, C_INT)
+elsifdef FREEBSD then
+	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
+	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
+elsifdef OSX then
+	constant gmtime_ = define_c_func(open_dll("libc.dylib"), "gmtime", {C_POINTER}, C_POINTER)
+	constant time_ = define_c_func(open_dll("libc.dylib"), "time", {C_POINTER}, C_INT)
+elsifdef WIN32 then
+	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
+	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
+else
+	constant gmtime_ = -1
+	constant time_ = -1
 end ifdef
+constant sizeof_struct_tm = 4*9
+
+enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR, TM_WDAY, TM_YDAY, TM_ISDST
+
+function time()
+	ifdef WIN32 then
+		sequence ints
+		atom ptra, valhi, vallow, deltahi, deltalow
+		deltahi = 27111902
+		deltalow = 3577643008
+		ptra = allocate(8)
+		c_proc(time_, {ptra})
+		vallow = peek4u(ptra)
+		valhi = peek4u(ptra+4)
+		free(ptra)
+		vallow -= deltalow
+		valhi -= deltahi
+		if vallow < 0 then
+			vallow += power(2, 32)
+			valhi -= 1
+		end if
+		return floor(((valhi * power(2,32)) + vallow) / 10000000)
+	elsifdef UNIX then
+		return c_func(time_, {NULL})
+	else
+		return {0,0,0,0,0,0,0,0,0}
+	end ifdef
+end function
+
+function gmtime(atom time)
+	sequence ret
+	atom timep, tm_p
+	integer n
+	
+	timep = allocate(4)
+	poke4(timep, time)
+	
+	tm_p = c_func(gmtime_, {timep})
+	
+	free(timep)
+	
+	ret = repeat(0, 9)
+	n = 0
+
+	for i = 1 to 9 do
+		ret[i] = peek4s(tm_p+n)
+		n = n + 4
+	end for
+	
+	return ret
+end function
 
 constant
 	XLEAP = 1,
@@ -331,7 +394,7 @@ end type
 --     [[:date]], [[:from_unix]], [[:now]], [[:new]]
 
 export function from_date(sequence src)
-		return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
+	return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
 
 --**
@@ -351,6 +414,24 @@ end function
 
 export function now()
 	return from_date(date())
+end function
+
+--**
+-- Create a new datetime value that falls into the Greenwich Mean Time (GMT) timezone.
+-- This function will return a datetime that is GMT, no matter what timezone the system
+-- is running under.
+--
+-- Example 1:
+-- <eucode>
+-- dt = now_gmt()
+-- -- If time was July 16th, 2008 at 10:34pm CST
+-- -- dt would be July 17th, 2008 at 03:34pm GMT
+-- </eucode>
+--
+
+export function now_gmt()
+   sequence t1 = gmtime(time())
+   return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
 end function
 
 --**
@@ -788,32 +869,4 @@ end function
 
 export function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
-end function
-
---**
--- Determines the current date and time in Universal Coordinated Time (UTC)
---
--- Comments:
--- Only implemented for **Windows** platform so far.
---
--- Parameters:
---   none
---
--- Returns:
--- 		##sequence## in standard Date-time format.
-
-export function utc_date()
-ifdef WIN32 then
-	atom lSystemTime
-	sequence lDateVals
-
-	lSystemTime = allocate(32)
-	c_proc(xGetSystemTime, {lSystemTime})
-	lDateVals = peek2s( {lSystemTime, 8} )
-	free(lSystemTime)
-	return {lDateVals[1],lDateVals[2],lDateVals[4],lDateVals[5],lDateVals[6],lDateVals[7]+lDateVals[8]/1000}
-else
-	return {0,0,0,0,0,0} -- TODO for other opsys.
-end ifdef
-
 end function

@@ -234,7 +234,7 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\io.obj &
 	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\base_mem.obj
+	.\$(OBJDIR)\0emory.obj
 
 EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -273,7 +273,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\base_mem.obj
+	.\$(OBJDIR)\0emory.obj
 
 EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -328,7 +328,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\base_mem.obj
+	.\$(OBJDIR)\0emory.obj
 
 PCRE_OBJECTS = &
 	.\pcre\pcre_chartables.obj &
@@ -903,6 +903,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\base_mem.obj : .\$(OBJDIR)\base_mem.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\0emory.obj : .\$(OBJDIR)\0emory.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c

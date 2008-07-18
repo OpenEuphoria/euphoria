@@ -214,5 +214,8 @@ for i = 0 to 11 do
 	end if
 end for
 
+dt1 = d:now_gmt()
+test_pass("now_gmt() returns valid datetime type")
+
 test_report()
 
