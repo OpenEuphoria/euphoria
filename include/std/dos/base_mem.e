@@ -1,6 +1,6 @@
---****
---== //DOS// routines not affected by safe debugging
 
+--****
+-- == DOS routines not affected by safe debugging
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
@@ -11,20 +11,25 @@ constant
 	M_SET_VECTOR = 40,
 	M_LOCK_MEMORY = 41
 
+
 -- internal - used in dos/safe.e and dos/memory.e
+
 export constant
 	M_ALLOC_LOW = 32,
 	M_FREE_LOW = 33,
 	M_INTERRUPT = 34
 
-    -- biggest address accessible to 16-bit real mode
+--**
+-- biggest address accessible to 16-bit real mode
 export constant LOW_ADDR = power(2, 20)-1
 
-export type low_machine_addr(atom a)
+--**
 -- a legal low machine address
+export type low_machine_addr(atom a)
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
 
+--**
 export type positive_int(integer x)
 	return x >= 1
 end type
@@ -34,6 +39,7 @@ include memory.e
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
+--**
 export type machine_addr(atom a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
@@ -54,7 +60,7 @@ end type
 --		# ##int_um##: an integer in the 0..255 range, the number of the interrupt.
 --
 -- Returns:
---		A **sequence of length 2: {16-bit segment, 32-bit offset}
+--		A **sequence** of length 2: {16-bit segment, 32-bit offset}
 --
 -- Comments:
 -- This way to return the address is convenient to pass it to other //DOS// routines. To convert 
@@ -74,9 +80,6 @@ end type
 -- 		[[:set_vector]], [[:dos_interrupt]]
 
 export function get_vector(integer int_num)
--- returns the current (far) address of the interrupt handler
--- for interrupt vector number int_num as a 2-element sequence: 
--- {16-bit segment, 32-bit offset}
 	return machine_func(M_GET_VECTOR, int_num)
 end function
 
@@ -94,7 +97,7 @@ end function
 -- When setting an interrupt vector, //never// forget to restore it before your program 
 -- terminates. Also, the machine code that will handle the interrupt must be at its expected 
 -- address //before// calling ##set_vector##(). It is highly recommended that you study 
--- [[../demo/dos32/hardint.ex]] before trying to set up your own interrupt handler. This task 
+-- ##../demo/dos32/hardint.ex## before trying to set up your own interrupt handler. This task 
 -- requires a good knowledge of machine-level programming. Disassembling a small freeware TSR 
 -- is one of the best schools for this.
 --
@@ -116,12 +119,12 @@ end function
 -- instruction with both DX and AL set to #20.
 --
 -- The 16-bit segment can be the code segment used by Euphoria. To get the value of this segment 
--- see [[../demo/dos32/hardint.ex]]. The offset can be the 32-bit value returned by
+-- see ##../demo/dos32/hardint.ex##. The offset can be the 32-bit value returned by
 -- [[:allocate]](). Euphoria runs in protected mode with the code segment and data segment pointing 
 -- to the same physical memory, but with different access modes.
 --
 -- Example 1:
---		[[../demo/hardint.ex]]
+--		##../demo/hardint.ex##
 --
 -- Example 2:
 -- <eucode>
@@ -132,7 +135,6 @@ end function
 --       [[:get_vector]], [[:lock_memory]], [[:allocate]]
 
 export procedure set_vector(integer int_num, far_addr a)
--- sets a new interrupt handler address for vector int_num  
 	machine_proc(M_SET_VECTOR, {int_num, a})
 end procedure
 
@@ -154,14 +156,12 @@ end procedure
 -- the interrupt.
 --
 -- Example 1: 
---		[[../demo/dos32/hardint.ex]]
+--		##../demo/dos32/hardint.ex##
 --
 -- See Also: 
 --		[[:get_vector]], [[:set_vector]]
 
 export procedure lock_memory(machine_addr a, positive_int n)
--- Prevent a chunk of code or data from ever being swapped out to disk.
--- You should lock any code or data used by an interrupt handler.
 	machine_proc(M_LOCK_MEMORY, {a, n})
 end procedure
 

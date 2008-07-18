@@ -1,5 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
 --****
 -- == Graphical Image Routines for DOS
 -- **Page Contents**

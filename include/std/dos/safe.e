@@ -1,17 +1,15 @@
---****
---== //DOS low level routines
 
+--****
+-- == DOS low level routines
+--
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
 
-
-
-
 include base_mem.e
 
-include ..\safe.e
+include ../safe.e
 
 safe_address_list = {
 --      {start , length , allocation_number}
@@ -42,7 +40,7 @@ safe_address_list = {
 -- This routine overrides ##machine:allocate_low##() with a debug version.
 --
 -- Example 1:
---   [[../demo/dos32/dosint]]
+--   ##../demo/dos32/dosint##
 --
 -- See Also:
 --   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]

@@ -1,15 +1,16 @@
---**
---== Data type conversion.
-
+--****
+-- == Data type conversion
+--
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
 constant
-		 M_A_TO_F64 = 46,
-		 M_F64_TO_A = 47,
-		 M_A_TO_F32 = 48,
-		 M_F32_TO_A = 49
+	M_A_TO_F64 = 46,
+	M_F64_TO_A = 47,
+	M_A_TO_F32 = 48,
+	M_F32_TO_A = 49
+
 --**
 -- Converts an atom that represents an integer to a sequence of 4 bytes.
 --
@@ -21,10 +22,10 @@ constant
 -- Comments:
 -- If the atom does not fit into a 32-bit integer, things may still work right:
 -- * If there is a fractional part, the first element in the returned value
--- will carry it. If you poke the value to RAM, that fraction will be discarded anyway.
+--   will carry it. If you poke the value to RAM, that fraction will be discarded anyway.
 -- * If ##x## is simply too big, the first three bytes will still be correct, and the 4th 
--- element will be  floor(##x##/power(2,24)). If this is not a byte sized integer, some
--- truncation may occur, but usually o error.
+--   element will be  floor(##x##/power(2,24)). If this is not a byte sized integer, some
+--   truncation may occur, but usually o error.
 --
 -- The integer can be negative. Negative byte-values will be returned, but
 -- after poking them into memory you will have the correct (two's complement)
@@ -32,27 +33,20 @@ constant
 --
 -- Example 1:
 -- <eucode>
---  s = int_to_bytes(999)
+-- s = int_to_bytes(999)
 -- -- s is {231, 3, 0, 0}
 -- </eucode>
 --  
 -- Example 2:  
 -- <eucode>
---  s = int_to_bytes(-999)
+-- s = int_to_bytes(-999)
 -- -- s is {-231, -4, -1, -1}
--- <8eucode>
+-- </eucode>
 -- 
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]], [[:poke8]]
 
 export function int_to_bytes(atom x)
--- returns value of x as a sequence of 4 bytes 
--- that you can poke into memory 
---      {bits 0-7,  (least significant)
---       bits 8-15,
---       bits 16-23,
---       bits 24-31} (most significant)
--- This is the order of bytes in memory on 386+ machines.
 	integer a,b,c,d
 	
 	a = remainder(x, #100)
@@ -66,8 +60,7 @@ export function int_to_bytes(atom x)
 end function
 
 constant M_ALLOC = 16
-atom mem
-mem = machine_func(M_ALLOC,4)
+atom mem  = machine_func(M_ALLOC,4)
 
 type sequence_8(sequence s)
 -- an 8-element sequence
@@ -96,18 +89,17 @@ end type
 --
 -- Example 1:
 -- <eucode>
---  atom int32
+-- atom int32
 --
 -- int32 = bytes_to_int({37,1,0,0})
 -- -- int32 is 37 + 256*1 = 293
 -- </eucode>
 -- 
 -- See Also:
--- [[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]],
--- [[:peek4s]], [[:pee4ku]], [[:poke4]]
+--   [[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]],
+--   [[:peek4s]], [[:pee4ku]], [[:poke4]]
 
 export function bytes_to_int(sequence s)
--- converts 4-byte peek() sequence into an integer value
 	if length(s) = 4 then
 		poke(mem, s)
 	else    
@@ -124,7 +116,7 @@ end function
 -- 		# ##nbits##, the number of bits requested.
 --
 -- Returns:
---		A **sequence of length ##nbits##, made of 1's and 0's.
+--		A **sequence** of length ##nbits##, made of 1's and 0's.
 --
 -- Comments:
 -- ##x## should have no fractional part. If it does, then the first "bit"
@@ -140,19 +132,15 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  s = int_to_bits(177, 8)
+-- s = int_to_bits(177, 8)
 -- -- s is {1,0,0,0,1,1,0,1} -- "reverse" order
 -- </eucode>
---  
+--
 -- See Also:
 --	[[:bits_to_int]], [[:int_to_bytes]], [[:bitwise operations]],
 --  [[:operations on sequences]]
 
 export function int_to_bits(atom x, integer nbits)
--- Returns the low-order nbits bits of x as a sequence of 1's and 0's. 
--- Note that the least significant bits come first. You can use Euphoria's
--- and/or/not operators on sequences of bits. You can also subscript, 
--- slice, concatenate etc. to manipulate bits.
 	sequence bits
 	integer mask
 	
@@ -193,13 +181,14 @@ end function
 -- The first elements in ##bits## represent the bits with the least weight in
 -- the returned value. Only the 52 last bits will matter, as the PC hardware
 -- cannot hold an integer with more digits than this.
---  If you print s the bits will appear in "reverse" order, but it is
+-- 
+-- If you print s the bits will appear in "reverse" order, but it is
 -- convenient to have increasing subscripts access bits of increasing
 -- significance.
 --
 -- Example 1:
 -- <eucode>
---  a = bits_to_int({1,1,1,0,1})
+-- a = bits_to_int({1,1,1,0,1})
 -- -- a is 23 (binary 10111)
 -- </eucode>
 --  
@@ -237,13 +226,13 @@ end function
 -- Integer values will also be converted to 64-bit floating-point format.
 --
 -- Example:
---  <eucode>
---  fn = open("numbers.dat", "wb")
+-- <eucode>
+-- fn = open("numbers.dat", "wb")
 -- puts(fn, atom_to_float64(157.82)) -- write 8 bytes to a file
---  </eucode>
+-- </eucode>
 -- 
 -- See Also:
---		[[:float64_to_atom]], [[:int_to_bytes]], [[:atom_to_float32]]
+--     [[:float64_to_atom]], [[:int_to_bytes]], [[:atom_to_float32]]
 
 export function atom_to_float64(atom a)
 	return machine_func(M_A_TO_F64, a)
@@ -274,7 +263,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  fn = open("numbers.dat", "wb")
+-- fn = open("numbers.dat", "wb")
 -- puts(fn, atom_to_float32(157.82)) -- write 4 bytes to a file
 -- </eucode>
 -- 
@@ -282,7 +271,6 @@ end function
 --		[[:float32_to_atom]], [[:int_to_bytes]], [[:atom_to_float64]]
 
 export function atom_to_float32(atom a)
--- Convert an atom to a sequence of 4 bytes in IEEE 32-bit format
 	return machine_func(M_A_TO_F32, a)
 end function
 
@@ -300,7 +288,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  f = repeat(0, 8)
+-- f = repeat(0, 8)
 -- fn = open("numbers.dat", "rb")  -- read binary
 -- for i = 1 to 8 do
 --     f[i] = getc(fn)
@@ -330,7 +318,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  f = repeat(0, 4)
+-- f = repeat(0, 4)
 -- fn = open("numbers.dat", "rb") -- read binary
 -- f[1] = getc(fn)
 -- f[2] = getc(fn)
@@ -343,7 +331,6 @@ end function
 --		[[:float64_to_atom]], [[:bytes_to_int]], [[:atom_to_float32]]
 
 export function float32_to_atom(sequence_4 ieee32)
--- Convert a sequence of 4 bytes in IEEE 32-bit format to an atom
 	return machine_func(M_F32_TO_A, ieee32)
 end function
 

@@ -2976,7 +2976,7 @@ procedure SetWith(integer on_off)
 		end while
 		putback(tok)
 
-	elsif equal(option,"define" ) then
+	elsif equal(option, "define") then
 		option = StringToken()
 		if on_off = 0 then
 			idx = find(option, OpDefines)
