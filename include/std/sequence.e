@@ -118,10 +118,13 @@ include sort.e
 --
 -- Parameters:
 --		# ##item##: an object, to which all elements of the result will be equal
---		# ##count##: the requested length of the result sequence
+--		# ##count##: an integer, the requested length of the result sequence.
 --
 -- Returns:
 --		A **sequence** of length ##count## each element of which is ##item##.
+--
+-- Errors:
+--	If ##count## is negative, it cannot be a length, which is an error condition.
 --
 -- Comments:
 -- When you repeat() a sequence or a floating-point number the

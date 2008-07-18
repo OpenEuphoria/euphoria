@@ -378,7 +378,7 @@ end function
 --
 -- With multiple tasks, the whole program sleeps, not just the current task. To make
 -- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
--- and then execute ##[[:task_yield]]()##.
+-- and then execute [[:task_yield]](). Another option is to call [[:task_delay]]().
 --
 -- Example:
 -- <eucode>
@@ -388,7 +388,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:task_schedule]], [[:tick_rate]], [[:task_yield]]
+--     [[:task_schedule]], [[:tick_rate]], [[:task_yield]], [[:task_delay]]
 
 export procedure sleep(atom t)
 -- go to sleep for t seconds
@@ -435,6 +435,9 @@ end procedure
 --
 -- Parameters:
 -- 		# ##rate##, an atom, the number of ticks by seconds.
+--
+-- Errors:
+-- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
 --
 -- Comments:
 -- This setting determines the precision of the time() library routine.

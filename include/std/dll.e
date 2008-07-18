@@ -73,7 +73,11 @@ constant M_OPEN_DLL  = 50,
 -- 		# ##file_name##: a sequence, the name of the shared libraru to open.
 --
 -- Returns:
---		An **atom**, actually a 32-bit address. 0 is returned if the .dll can't be found. 
+--		An **atom**, actually a 32-bit address. 0 is returned if the .dll can't be found.
+--
+-- Errors:
+-- The length of ##file_name## should not exceed 1,024 characters.
+--
 -- Comments:
 -- 		##file_name## can
 -- be a relative or an absolute file name. Windows will use the normal search path for 
@@ -105,6 +109,9 @@ end function
 
 --**
 -- Gets the address of a symbol in a shared library or in RAM.
+--
+-- Platform:
+--	not //DOS//
 --
 -- Parameters:
 -- 		 # ##lib##: an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
@@ -138,6 +145,9 @@ end function
 --
 -- Returns:
 -- 		A small **integer**, known as a routine id, will be returned.
+--
+-- Errors:
+-- The length of ##name## should not exceed 1,024 characters.
 --
 -- Comments:
 -- 		Use the returned routine id as the first argument to [[:c_proc]]() when
@@ -213,6 +223,9 @@ end function
 --
 -- Returns:
 -- 		A small **integer**, known as a routine id, will be returned.
+--
+-- Errors:
+-- The length of ##name## should not exceed 1,024 characters.
 --
 -- Comments:
 -- 		Use the returned routine id as the first argument to [[:c_proc]]() when
@@ -298,7 +311,10 @@ export function define_c_func(object lib, object routine_name,
 end function
 
 --**
--- Get a machine address for an Euphoria routine.
+-- Get a machine address for an Euphoria procedure.
+--
+-- Platform:
+--	not //DOS//
 --
 -- Parameters:
 -- 		# ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
@@ -307,6 +323,9 @@ end function
 -- 		An **atom**, the address of the machine code of the routine. It can be
 -- used by Windows, or an external C routine in a Windows .dll or Unix-like shared
 -- library (.so), as a 32-bit "call-back" address for calling your Euphoria routine. 
+--
+-- Errors:
+-- The length of ##name## should not exceed 1,024 characters.
 --
 -- Comments:
 --      By default, your routine will work with the stdcall convention. On
@@ -348,7 +367,7 @@ end function
 --     Euphoria will create a console text window for your program the first time that your 
 --     program prints something to the screen, reads something from the keyboard, or in some 
 --     way needs a console (similar to a DOS-prompt window). On WIN32 this window will 
---     automatically disappear when your program terminates, but you can call free_console() 
+--     automatically disappear when your program terminates, but you can call free_console()
 --     to make it disappear sooner. On Linux or FreeBSD, the text mode console is always 
 --     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt 
 --     at the end of execution.

@@ -74,6 +74,9 @@ export constant EOF = -1
 --		# ##fn##: an integer, the handle to a file or device to output to
 -- 		# ##x##: the object to print
 --
+-- Errors:
+-- The target fole or device must be open.
+--
 -- Example 1:
 -- <eucode>
 -- print(STDOUT, "ABC")  -- output is:  {65, 66, 67}
@@ -102,6 +105,8 @@ export constant EOF = -1
 --
 -- Errors:
 -- 		If there are less values to show than format specifiers, a run time error will occur.
+--
+-- The target fole or device must be open.
 --
 -- Comments:
 -- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending 
@@ -198,14 +203,17 @@ export constant EOF = -1
 -- Signature:
 -- export procedure puts(integer fn, object text)
 --
--- Parameters:
--- 		# ##fn##: an integer, the handle to an opened file or device
---		# ##text##: an object, either a single character or a sequence of characters.
---
 -- Description:
 -- Output, to a file or device, a single byte (atom) or sequence of bytes. The low order
 -- 8-bits of each value is actually sent out. If outputting to the screen you will see text
 -- characters displayed.
+--
+-- Parameters:
+-- 		# ##fn##: an integer, the handle to an opened file or device
+--		# ##text##: an object, either a single character or a sequence of characters.
+--
+-- Errors:
+-- The target fole or device must be open.
 --
 -- Comments:
 -- When you output a sequence of bytes it must not have any (sub)sequences within it. It 
@@ -264,6 +272,9 @@ export constant EOF = -1
 --
 -- Returns:
 --		An **object**, either [[:EOF]] on end of file, or the next line of text from the file.
+--
+-- Errors:
+-- The file or device must be open.
 --
 -- Comments:
 --    The characters will have values from 0 to 255.
@@ -463,6 +474,13 @@ end type
 --
 -- Returns:
 -- 		A small **integer**, -1 on failure, else 0 or more.
+--
+-- Errors:
+--	There is a limit on the number of files that can be simultaneously opened, currently 40. 
+-- If this limit is reached, the next attempt to ##open##() a file will error out.
+--
+-- The length of ##path## should not exceed 1,024 characters.
+--
 -- Comments:
 -- Possible modes are:
 --
@@ -545,7 +563,11 @@ end type
 -- Close a file or device and flush out any still-buffered characters.
 --
 -- Parameters:
--- 		# ##fn##: an integer, the handle to the file or device to close.
+-- 		# ##fn##: an integer, the handle to the file or device to query.
+--
+-- Errors:
+-- The target file or device must be open.
+--
 -- Comments:
 -- Any still-open files will be closed automatically when your program terminates.
 
@@ -558,6 +580,9 @@ end type
 --
 -- Returns:
 --		An **integer**, 0 on success, 1 on failure. 
+--
+-- Errors:
+-- The target file or device must be open.
 --
 -- Comments:
 -- For each open file, there is a current byte position that is updated as a result of I/O
@@ -601,10 +626,15 @@ end function
 -- Retrieves the current file position for an opened file or device.
 -- 
 -- Parameters:
--- 		# ##fn##: an integer, the handle to the file or device to close.
+-- 		# ##fn##: an integer, the handle to the file or device to query.
+--
 --
 -- Returns:
---		An **atom**, the current byte position in the file. 
+--		An **atom**, the current byte position in the file.
+--
+-- Errors:
+-- The target file or device must be open.
+--
 --
 -- Comments:
 -- The file position is is the place in the file where the next byte
@@ -620,6 +650,9 @@ end function
 --
 -- Parameters:
 -- 		# ##fn##: an integer, the handle to the file or device to close.
+--
+-- Errors:
+-- The target file or device must be open.
 --
 -- Comments:
 -- When you write data to a file, Euphoria normally stores the data
@@ -667,6 +700,9 @@ end procedure
 --
 -- Returns:
 --		An **integer**, 0 on failure, 1 on success.
+--
+-- Errors:
+-- The target file or device must be open.
 --
 -- Comments:
 -- ##lock_file()## attempts to place a lock on an open file, ##fn##, to stop
@@ -741,6 +777,9 @@ end function
 -- Parameters:
 --		# ##fn##: an integer, the handle to the file or device to (partially) lock.
 --		# ##r##: a sequence, defining a section of the file to be locked, or {} for the whole file (the default).
+--
+-- Errors:
+-- The target file or device must be open.
 --
 -- Comments:
 -- You must have previously locked the

@@ -184,6 +184,8 @@ end function
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should 
@@ -230,6 +232,9 @@ end function
 -- Errors:
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
 --
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest
@@ -278,6 +283,9 @@ end function
 -- Errors:
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e i,clude file can catch this sort of issues.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
 --
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest
@@ -331,6 +339,9 @@ end function
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+--
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
@@ -382,6 +393,9 @@ end function
 -- Errors:
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e i,clude file can catch this sort of issues.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
 --
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest
@@ -435,6 +449,9 @@ end function
 -- Errors:
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
 --
 -- Comments: 
 -- Since addresses are 32-bit numbers, they can be larger than the largest

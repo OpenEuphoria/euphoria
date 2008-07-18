@@ -282,6 +282,9 @@ export enum
 --     ##name## can also contain * and ? wildcards to select multiple
 -- files.
 --
+-- Errors:
+-- The length of ##name## should not exceed 1,024 characters.
+--
 -- The returned information is similar to what you would get from the DOS DIR command. A sequence
 -- is returned where each element is a sequence that describes one file or subdirectory.
 -- 

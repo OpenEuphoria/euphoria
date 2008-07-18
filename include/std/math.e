@@ -128,7 +128,7 @@ end type
 --		An **integer** from 1 to ##maximum##.
 --
 -- Errors:
---		If [[:ceil]](##maximum##) is not a positive integer <= 1073741823, an error will occur.
+--		If [[:ceil]](##maximum##) is not a positive integer <= 1073741823, an error will occur. It must also be at least 1.
 --
 -- Comments:
 --   This function may be applied to an atom or to all elements of a sequence.
@@ -201,6 +201,9 @@ end procedure
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by  ##divisor##, with ##dividend##'s sign.
+--
+-- Errors:
+--	If any atom in ##divisor## is 0, this is an error condition as it amounts to an attempt to divide by zero.
 --
 -- Comments:
 -- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result has the sign of ##dividend## and lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
@@ -341,7 +344,7 @@ end function
 --
 --**
 -- Signature:
--- export function power(object base, object exponent)
+-- global function power(object base, object exponent)
 --
 -- Description:
 -- Raise a base value to some power.
@@ -357,6 +360,8 @@ end function
 --		If some atom in ##base## is negative and is raised to a non integer exponent, an error will occur, as the result is undefined.
 --
 --		If 0 is raised to any negative power, this is the same as a zero divide and causes an error.
+--
+-- 		power(0,0) is illegal, because there is not an unique value that can be assigned to that quantity.
 --
 -- Comments:
 -- The arguments to this function may be atoms or sequences. The rules for 
@@ -557,7 +562,7 @@ end function
 -- nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
 -- </eucode>
 -- See Also:
---		[[:floor]], [[round]]
+--		[[:floor]], [[:round]]
 export function ceil(object a)
 	return -floor(-a)
 end function
