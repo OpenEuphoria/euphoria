@@ -401,7 +401,7 @@ install :
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
-	install ../include/euphoria.h $(DESTDIR)/usr/include/euphoria/include
+	install ../include/euphoria.h $(DESTDIR)/usr/share/euphoria/include
 	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*

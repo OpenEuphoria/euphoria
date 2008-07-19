@@ -1,8 +1,12 @@
 include std/filesys.e
 include std/unittest.e
 
-integer fn = open("warning.lst","r")
+ifdef EC then
+	-- don't bother with translator for this test, because the warning file
+	-- is already gone
+else
 
+integer fn = open("warning.lst","r")
 test_true("warning file generated", fn >= 0)
 test_equal("with warning += #1","Warning ( short_circuit_warning ):\n", gets(fn))
 ifdef DOS32 then
@@ -43,5 +47,6 @@ test_equal("with warning -=", -1, gets(fn))
 close(fn)
 fn=delete_file("warning.lst")
 
+end ifdef
 test_report()
 

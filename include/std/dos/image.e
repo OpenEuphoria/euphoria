@@ -9,7 +9,7 @@
 --
 -- === Constants
 --
-
+ifdef DOS then
 include ..\graphcst.e
 include base_mem.e
 
@@ -282,3 +282,4 @@ export procedure all_palette(sequence s)
 -- colors in the current graphics mode.  
 	machine_proc(M_ALL_PALETTE, s)
 end procedure
+end ifdef

@@ -1583,8 +1583,15 @@ function ifwi(integer pc, sequence op)
 	end if
 	
 	if result = TRUE then
-		-- skip the entire IF statement_list END IF
-		return Code[pc+3]
+		
+		if forward_branch_into(pc+4, Code[pc+3]-1) then
+			-- there's a goto or something here, so we can't just optimize away
+			Goto( Code[pc+3] )
+			return pc + 4
+		else
+			-- skip the entire IF statement_list END IF
+			return Code[pc+3]
+		end if
 	
 	elsif result = NOVALUE then
 		c_stmt("if (@ " & op & " @)\n", {Code[pc+1], Code[pc+2]})

@@ -34,15 +34,15 @@ if ex and ex < length( cmds ) then
 end if
 
 integer ec = find( "-ec", cmds )
-if ec and ex < length( cmds ) then
-	translator = cmds[ex+1]
-	cmds = cmds[1..ex-1] & cmds[ex+2..$]
+if ec and ec < length( cmds ) then
+	translator = cmds[ec+1]
+	cmds = cmds[1..ec-1] & cmds[ec+2..$]
 end if
 
 integer lib = find( "-lib", cmds )
 if lib and lib < length( cmds ) then
-	library = "-lib " & cmds[ex+1]
-	cmds = cmds[1..ex-1] & cmds[ex+2..$]
+	library = "-lib " & cmds[lib+1]
+	cmds = cmds[1..lib-1] & cmds[lib+2..$]
 end if
 
 if length(cmds) > 2 then
@@ -81,23 +81,25 @@ for i = 1 to total do
 	
 	if length( translator ) then
 		printf(1, "translate %s:\n", {filename})
-		cmd = sprintf("%s %s %s -D UNITTEST -batch %s", {translator, library, options, filename})
+		cmd = sprintf("%s %s %s -D UNITTEST -D EC -batch %s", {translator, library, options, filename})
 		status = system_exec( cmd, 2 )
 		if match( "t_c_", filename ) = 1 then
 			status = not status
 			
 		elsif not status then
-			status = system_exec( "pwd && ./emake", 2 )
-			
 			lib = find( '.', filename )
 			if lib then
 				filename = filename[1..lib-1]
 			end if
+			if delete_file( filename ) then end if
+			status = system_exec( "./emake", 2 )
 			
-			cmd = sprintf("./%s %s", {filename, cmd_opts})
-			status = system_exec( cmd, 2 )
-			if match( "t_c_", filename ) = 1 then
-				status = not status
+			if not status then
+				cmd = sprintf("./%s %s", {filename, cmd_opts})
+				status = system_exec( cmd, 2 )
+				if match( "t_c_", filename ) = 1 then
+					status = not status
+				end if
 			end if
 		end if
 		if status > 0 then
@@ -108,13 +110,14 @@ for i = 1 to total do
 	end if
 	
 end for
-
+total *= 2 -- also account for translated tests
 if total = 0 then
 	score = 100
 else
 	score = ((total - failed) / total) * 100
 end if
 
+puts(1, "\nTest failure summary:\n")
 for i = 1 to length( fail_list ) do
 	printf(1, "    FAIL: %s\n", {fail_list[i]})
 end for
