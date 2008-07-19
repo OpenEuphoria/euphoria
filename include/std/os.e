@@ -864,8 +864,8 @@ end function
 --
 -- Example:
 -- <eucode>
--- puts(1, "Waiting 15 seconds...\n")
--- sleep(15)
+-- puts(1, "Waiting 15 seconds and a quarter...\n")
+-- sleep(15.25)
 -- puts(1, "Done.\n")
 -- </eucode>
 --

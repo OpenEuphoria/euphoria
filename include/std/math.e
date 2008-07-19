@@ -59,7 +59,7 @@ end type
 -- === Routines
 
 --****
--- ==== Extensions to multiply and divide.
+-- ==== Roundings and remainders
 --
 --**
 -- Signature:
