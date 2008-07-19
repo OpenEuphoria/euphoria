@@ -323,6 +323,20 @@ end function
 end ifdef
 
 --**
+-- Sugnature:
+-- global procedure clear_screen()
+--
+-- Description:
+-- Clear the screen using the current background color (may be set by [[:bk_color]]()).
+--
+-- Comments: 
+-- This works in all text and pixel-graphics modes.
+--
+-- See Also: 
+-- [[:bk_color]], [[:graphics_mode]]
+--
+
+--**
 -- Get the value and attribute of the character at a given screen location.
 --
 -- Parameters:

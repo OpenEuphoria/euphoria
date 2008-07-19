@@ -375,6 +375,93 @@ end type
 -- === Routines
 
 --**
+-- Signature:
+-- global procedure time()
+--
+-- Description:
+-- Return the number of seconds since some fixed point in the past.
+--
+-- Returns:
+-- An **atom**, which represetnts an absolute number of seconds.
+--
+-- Comments: 
+-- Take the difference between two readings of ##time##(), to measure, for example, how long 
+-- a section of code takes to execute.
+--
+-- The resolution with //DOS32// is normally about 0.05 seconds. On //WIN32// and //UNIX// it's about 0.01 seconds.
+--
+-- Under //DOS32// you can improve the resolution by calling [[:tick_rate]]().
+-- 
+-- Under //DOS32//, the period of time that you can normally measure is limited to 24 hours. 
+-- After that, the value returned by ##time##() will reset and start over. 
+-- If however, you have called [[:tick_rate]](), and clock ticks are happening at a rate that is higher 
+-- than the usual 18.2/sec, ##time##() will continue much longer, since in that case, 
+-- Euphoria handles the clock-tick interrupt directly, and accumulates the ticks in a larger, 32-bit variable.
+--
+-- //DOS// emulation under Windows XP is not perfect. When you do time profiling, ([[:with profile_time]]),
+-- the ##time##() function might be off by several percent. This problem does not occur on Windows ME/98/95.
+--  
+-- On some machines, ##time##() can return a negative number. However, you can still use the
+-- difference in calls to ##time##() to measure elapsed time.
+--
+-- Example 1:
+-- <eucode>
+--  constant ITERATIONS = 1000000
+-- integer p
+-- atom t0, loop_overhead
+-- 
+-- t0 = time()
+-- for i = 1 to ITERATIONS do
+--     -- time an empty loop
+-- end for
+-- loop_overhead = time() - t0
+-- 
+-- t0 = time()
+-- for i = 1 to ITERATIONS do
+--     p = power(2, 20)
+-- end for
+-- ? (time() - t0 - loop_overhead)/ITERATIONS
+-- -- calculates time (in seconds) for one call to power
+-- </eucode>
+--
+-- See Also: [[:date]], [[:tick_rate]], [[:now]]
+--  
+--**
+--** Signature:
+-- global function date()
+--
+-- Description:
+-- Return a sequence with information on the current date.
+--
+-- Returns:
+-- A **sequence** of length 8, laid out as follows:
+-- # year,  ~-- since 1900
+-- # month, ~-- January = 1
+-- # day,   ~-- day of month, starting at 1
+-- # hour,  ~-- 0 to 23
+-- # minute,~-- 0 to 59
+-- # second,~-- 0 to 59
+-- # day of the week, ~-- Sunday = 1
+-- # day of the year ~-- January 1st = 1
+--
+-- Comments:
+-- The value returned for the year is actually the number of years since 1900 (not the last 2 digits of the year). 
+-- In the year 2000 this value was 100. In 2001 it was 101, etc.
+--  
+-- Example 1:
+--
+--  now = date() 
+-- <eucode>
+-- -- now has: {95,3,24,23,47,38,6,83}
+-- -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
+-- 
+-- See Also:
+--  [[:time]], [[:now]]
+
+
+
+
+--**
 -- Convert a sequence formatted according to the built-in date() function to a valid datetime
 -- sequence.
 --

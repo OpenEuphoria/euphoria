@@ -91,6 +91,43 @@ export procedure crash_file(sequence file_path)
 end procedure
 
 --**
+-- Signature:
+-- global procedure abort(integer error)
+--
+-- Description:
+-- Abort execution of the program. 
+--
+-- Parameters:
+-- 		# ##error##: an integer, the exit code to return.
+--
+-- Comments:
+-- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a succsful completion.
+--
+-- Other values can indicate various kinds of errors. DOS batch (.bat) programs can read 
+-- this value using the errorlevel feature.
+-- A Euphoria program can read this value using system_exec().
+--
+-- ##abort##() is useful when a program is many levels deep in subroutine calls, and execution must end immediately,
+-- perhaps due to a severe error that has been detected.
+--
+-- If you don't use ##abort##(), ex.exe/exw.exe/exu will normally return an exit status code of 0. 
+-- If your program fails with a Euphoria-detected compile-time or run-time error then a code of 1 is returned.
+--  
+-- Example 1:
+-- <euocde>
+--  if x = 0 then
+--     puts(ERR, "can't divide by 0 !!!\n")
+--     abort(1)
+-- else
+--     z = y / x
+-- end if
+-- </euocde>
+-- 
+-- 
+-- See Also: 
+--  [[:crash_message]], [[:system_exec]]
+
+--**
 -- Specify a file path where to output warnings. 
 --
 -- Parameters:

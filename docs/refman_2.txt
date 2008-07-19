@@ -1439,6 +1439,61 @@ this bug goes away -- but he presented this version as being correct.
 extra speed. You might also consider turning it off for just a few
 heavily-executed routines.  [[:Profiling]] can help with this decision.
 
+==== The predefined types in more detail.
+
+===== integer
+
+An Euphoria ##integer## is a mathematical integer restricted to the range -1,073,741,824 to +1,073,741,823.
+As a result, a variable of the integer type, while allowing computations as fast as possible,
+cannot hold 32-bit machine addresses, even though the latter are mathematical integers. You
+must use the [[:atom]] type for this purpose.
+
+===== atom
+
+An ##atom## can hold three kinds of data:
+* Mathematical integers in the range ##-power(2,53)## to +##power(2,53)##
+* Floating point numbers, in the range ##-power(2,1024)+1## to ##+power(2,1024)-1##
+* Large mathematical integers in the same range.
+
+##power(2,53)## is slightly above 9.10^^15^^, ##power(2,1024) is in the 10^^308^^ range.
+
+Because of these constraints, which arise in part from common hardware limitations, some care is needed for specific purpose:
+* The sum or product of two integers is an ##atom##, but may not be an ##integer##.
+* Memory addresses, or handles acquired from anything non Euphoria, including the operating system, **must** be stored as an ##atom##.
+* For large numbers, usual operations may yield starnge results:
+<eucode>
+integer n = power(2,27) -- ok
+integer n_plus = n+1, n_minus = n-1 -- ok
+atom a = n=n -- ok
+atom a1 = n_plus * n_minus -- still ok
+?a-a1 -- prints 0, should be 1 mathematically
+</eucode>
+
+//This is not an Euphoria bug//. The IEEE 754 standard for floating point numbers provides for 53
+bits of presision for any real number, and an accurate computation of ##a-a1## would require
+54 of them. Intel FPUs do have 64 bit precision registers, but the low order 16 bits are only
+used internally, and Intel recommends against using them for high precision arithmetic. Their 
+SIMD machine instruction set only uses the IEEE 754 defined format.
+
+===== sequence
+
+A sequence is a type that is a //container//. A sequence has //elements// which can be 
+accessed through their //index//, like in ##my_sequence[3]##. ##sequence##s are so generic as
+being able to store store all sorts of data structures: strings, trees, lists, anything.
+Accesses to sequences are always bound checked, so that you cannot read or wriute an element
+that doesn't exist, ever. A large amount of extraction and shape change operations on
+sequences is available, both as builtin operations and library routines. The elements of a sequence can have any type.
+
+##sequence##s are implemented very efficiently. Programmers used to pointers will soon notice
+that they can get most usual pointer operations done using sequence indexes. The loss is
+efficiency is usually hard to notice, and the gain is code safety and bug prevention far outweighs it.
+
+===== object
+
+This type can hold any data Euphoria can handle, both atoms and sequences.
+
+The ##object##() type returns 0 if a variable is not initialised, else 1.
+
 == Statements
 
 The following kinds of executable statements are available:

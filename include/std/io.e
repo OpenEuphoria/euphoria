@@ -250,6 +250,9 @@ export constant EOF = -1
 -- Returns:
 --		An **integer**, the character read from the file, in the 0..255 range. If no character is left to read, [[:EOF]] is returned instead.
 --
+-- Errors:
+-- The target file or device must be open.
+--
 -- Comments:
 --     File input using getc() is buffered, i.e. getc() does not actually go out to the disk 
 --     for each character. Instead, a large block of characters will be read in at one time 

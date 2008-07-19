@@ -70,6 +70,90 @@ enum
 --****
 -- === Routines
 --
+--****
+-- ==== Command line utilities.
+--**
+-- Signature:
+-- global procedure command_line()
+--
+-- Description:
+-- A **sequence** of strings, where each string is a word from the command-line that started your program.
+--
+-- Comments:
+-- The returned sequence contains the following information:
+-- # Tthe path to either the Euphoria executable, ex.exe, exw.exe or exu, or to your bound executable file.
+-- # The next word is either the name of your Euphoria main file, or 
+-- (again) the path to your bound executable file.
+-- # Any extra words typed by the user. You can use these words in your program.
+--
+-- There are as many entries as words, plus the two mentioned above.
+--
+-- The Euphoria interpreter itself does not use any command-line options. You are free to use
+-- any options for your own program. It does have [[:command line switches]] though.
+--
+-- The user can put quotes around a series of words to make them into a single argument.
+--
+-- If you convert your program into an executable file, either by binding it, or translating it to C, 
+-- you will find that all command-line arguments remain the same, except for the first two, 
+-- even though your user no longer types "ex" on the command-line (see examples below).
+--  
+-- Example 1:
+-- <eucode>  
+--  -- The user types:  ex myprog myfile.dat 12345 "the end"
+-- 
+-- cmd = command_line()
+-- 
+-- -- cmd will be:
+--       {"C:\EUPHORIA\BIN\EX.EXE",
+--        "myprog",
+--        "myfile.dat",
+--        "12345",
+--        "the end"}
+-- </eucode>
+--
+-- Example 2:  
+-- <eucode>  
+--  -- Your program is bound with the name "myprog.exe"
+-- -- and is stored in the directory c:\myfiles
+-- -- The user types:  myprog myfile.dat 12345 "the end"
+-- 
+-- cmd = command_line()
+-- 
+-- -- cmd will be:
+--        {"C:\MYFILES\MYPROG.EXE",
+--         "C:\MYFILES\MYPROG.EXE", -- place holder
+--         "myfile.dat",
+--         "12345",
+--         "the end"
+--         }
+-- 
+-- -- Note that all arguments remain the same as example 1
+-- -- except for the first two. The second argument is always
+-- -- the same as the first and is inserted to keep the numbering
+-- -- of the subsequent arguments the same, whether your program
+-- -- is bound or translated as a .exe, or not.
+-- </eucode>
+--
+-- See Also: [[:getenv]], [[:cmd_parse]], [[:show_help]]
+
+--**
+-- Signature:
+-- global function option_switches()
+--
+-- Description:
+-- Retrieves the list of switches passed to the interpreter on the comand line.
+--
+-- Returns:
+-- A **sequence** of strings, each containing a word related to switches.
+--
+-- Comments:
+-- All switches are recorded in upper case.
+--
+-- Example 1:
+-- exw -d helLo will result in option_switches() being {"-D","helLo"}
+--
+-- See Also:
+-- [[:Command line switches]]
 
 --**
 -- Show help message for the given opts.
@@ -361,128 +445,6 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 	return extras
 end function
 
---****
--- === Miscellaneous
-
---**
--- Suspend thread execution. for ##t## seconds.
---
--- Parameters:
--- # ##t##: an atom, the number of seconds for which to sleep.
---
--- Comments:
--- On //Windows// and //Unix//, the operating system will suspend your process and
--- schedule other processes. On //DOS//, your program will go into a busy loop for
--- ##t## seconds, during which time other processes may run, but they will compete
--- with your process for the CPU.
---
--- With multiple tasks, the whole program sleeps, not just the current task. To make
--- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
--- and then execute [[:task_yield]](). Another option is to call [[:task_delay]]().
---
--- Example:
--- <eucode>
--- puts(1, "Waiting 15 seconds...\n")
--- sleep(15)
--- puts(1, "Done.\n")
--- </eucode>
---
--- See Also:
---     [[:task_schedule]], [[:tick_rate]], [[:task_yield]], [[:task_delay]]
-
-export procedure sleep(atom t)
--- go to sleep for t seconds
--- allowing (on WIN32 and Linux) other processes to run
-	if t >= 0 then
-		machine_proc(M_SLEEP, t)
-	end if
-end procedure
-
-constant
- 	M_SOUND      = 1,
-	M_TICK_RATE = 38
-
-
---**
--- Frequency Type
-
-export type frequency(integer x)
-	return x >= 0
-end type
-
---**
--- Turn on the PC speaker at a specified frequency 
---
--- Parameters:
--- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
---
--- Comments:
--- On //Windows// and //Unix// platforms no sound will be made.
---
--- Example:
--- <eucode>
--- sound(1000) -- starts a fairly high pitched sound
--- </eucode>
-
-export procedure sound(frequency f)
--- turn on speaker at frequency f
--- turn off speaker if f is 0
-	machine_proc(M_SOUND, f)
-end procedure
-
---**
--- Specify the number of clock-tick interrupts per second.
---
--- Parameters:
--- 		# ##rate##, an atom, the number of ticks by seconds.
---
--- Errors:
--- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
---
--- Comments:
--- This setting determines the precision of the time() library routine.
--- It also affects the sampling rate for time profiling.
---
--- ##tick_rate## is effective under //DOS// only, and is a no-op elsewhere.
--- Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//,
--- it is always 100 ticks per second.
---
--- ##tick_rate##() can increase the setting above the default value. As a
--- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
---
--- If a program runs in a DOS window with a tick rate other than 18.2, the
--- time() function will not advance unless the window is the active window. 
---
--- With a tick rate other than 18.2, the time() function on DOS takes about
--- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
--- time() normally executes very quickly.
--- 
--- See Also:
---		[[:Debugging and profiling]]
---
--- While ex.exe is running, the system will maintain the correct time of day.
--- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
--- while the tick rate is high, you (or your user) may need to reboot the
--- machine to restore the proper rate. If you don't, the system time may
--- advance too quickly. This problem does not occur on Windows 95/98/NT,
--- only on DOS or Windows 3.1. You will always get back the correct time
--- of day from the battery-operated clock in your system when you boot up
--- again. 
---  
--- Example 1:
--- <eucode>
--- tick_rate(100)
--- -- time() will now advance in steps of .01 seconds
--- -- instead of the usual .055 seconds
--- </eucode>
--- 
--- See Also: 
---        [[:time]], [[:time profiling]]
-
-export procedure tick_rate(atom rate)
-	machine_proc(M_TICK_RATE, rate)
-end procedure
-
 constant M_INSTANCE = 55
 
 --**
@@ -505,6 +467,9 @@ elsifdef FREEBSD then
 elsifdef OSX then
 	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
 end ifdef
+
+--****
+--==== Environment.
 
 --**
 -- Retrieves the name of the host OS.
@@ -637,12 +602,37 @@ export function is_win_nt()
 end function
 
 --**
--- Set an environment variable
+-- Signature:
+-- global function getenv(sequence var_name)
+--
+-- Description:
+-- Return the value of an environment variable. 
 --
 -- Parameters:
--- * ##name## - environment variable name
--- * ##val## - value to set to
--- * ##overwrite## - overwrite an existing variable? TRUE/FALSE
+-- 		# ##var_name##: a string, the name of the variable being queried.
+--
+-- Returns:
+--		An **object**, -1 if the variable does not exist, else a sequence holding its value.
+--
+-- Comments: 
+-- Both the argument and the return value, may, or may not be, case sensitive. You might need to test this on your own system.
+--
+-- Example:
+-- <eucode>
+--  e = getenv("EUDIR")
+-- -- e will be "C:\EUPHORIA" -- or perhaps D:, E: etc.
+-- </eucode>
+-- 
+-- See Also:   
+-- [[:setenv]], [[:command_line]]
+
+--**
+-- Set an environment variable.
+--
+-- Parameters:
+-- # ##name##: a string, the environment variable name
+-- # ##val##: a string, the value to set to
+-- # ##overwrite##: an integer, nonzero to overwrite an existing variable, 0 to disallow this.
 --
 -- Example 1:
 -- <eucode>
@@ -675,4 +665,302 @@ end function
 export function unsetenv(sequence env)
 	return machine_func(M_UNSET_ENV, {env})
 end function
+
+--**
+-- Signature:
+-- global function platform()
+--
+-- Description:
+-- Indicates the platform that the program is being executed on: DOS32, WIN32, Linux/FreeBSD or OS X.
+--
+-- Returns:
+-- A small **integer:
+-- <eucode>
+--      global constant DOS32 = 1,
+--                     WIN32 = 2,
+--                     LINUX = 3,
+--                     FREEBSD = 3,
+--					   OSX   = 4
+-- </eucode>
+--
+-- Comments: 
+-- The [[:ifdef]] statement is much more versatile and supersedes ##platform##(), which is 
+-- supported for backward vompatibility and for a limited time only.
+--
+-- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
+-- When exu is running the platform is //LINUX// (or //FREEBSD//) or //OSX//.
+--
+--  ##platform##() used to be the way to execute different code depending on which platform the program is running on.
+-- Additional platforms will be added as Euphoria is ported to new machines and operating environments.
+--
+-- Example 1:
+-- <eucode>
+--  if platform() = WIN32 then
+--     -- call system Beep routine
+--     err = c_func(Beep, {0,0})
+-- elsif platform() = DOS32 then
+--     -- make beep
+--     sound(500)
+--     t = time()
+--     while time() < t + 0.5 do
+--     end while
+--     sound(0)
+-- else
+--     -- do nothing (Linux/FreeBSD)
+-- end if
+-- </eucode>
+--
+-- See Also: 
+-- [[:platform.doc]], [[:ifdef]]
+
+
+--****
+--==== Interacting with the OS
+--
+--**
+-- Signature:
+-- global procedure system(sequence command, integer mode)
+--
+-- Description:
+-- Pass a command string to the operating system command interpreter. 
+--
+-- Parameters:
+--		# ##command##: a string to be passed to the shell
+--		# ##mode##: an integer, indicating the manner in which to return from the call.
+--
+-- Errors:
+-- ##command## should not exceed 1,024 characters.
+--
+-- Comments:
+-- Allowable values for ##mode## are:
+-- * 0: the previous graphics mode is restored and the screen is cleared.
+-- * 1: a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
+-- * 2: the graphics mode is not restored and the screen is not cleared.
+--
+-- ##mode## = 2 should only be used when it is known that the command executed by ##system##() will not change the graphics mode.
+--
+-- You can use Euphoria as a sophisticated "batch" (.bat) language by making calls to ##system##() and ##system_exec##().
+-- 
+-- ##system##() will start a new DOS or Linux/FreeBSD shell.
+-- 
+-- ##system##() allows you to use command-line redirection of standard input and output in  
+-- ##command##.
+--
+-- Under //DOS32//, a Euphoria program will start off using extended memory. 
+-- If extended memory runs out the program will consume conventional memory. 
+-- If conventional memory runs out it will use virtual memory, i.e. swap space on disk. 
+-- The //DOS// command run by ##system##() will fail if there is not enough conventional memory available.
+-- To avoid this situation you can reserve some conventional (low) memory by typing:
+--  {{{
+--      SET CAUSEWAY=LOWMEM:xxx
+--  }}}
+--  
+--  where ##xxx## is the number of K of conventional memory to reserve. Type this before running your program. 
+-- You can also put this in autoexec.bat, or in a .bat file that runs your program. For example:
+-- {{{
+--      SET CAUSEWAY=LOWMEM:80
+--     ex myprog.ex
+-- }}}
+--  This will reserve 80K of conventional memory, which should be enough to run simple //DOS //commands like COPY, MOVE, MKDIR etc.
+--
+-- Example 1:
+-- <eucode>
+--  system("copy temp.txt a:\\temp.bak", 2)
+-- -- note use of double backslash in literal string to get
+-- -- single backslash
+-- </eucode>
+-- 
+-- Example 2:  
+-- <eucode>
+--  system("ex \\test\\myprog.ex < indata > outdata", 2)
+-- -- executes myprog by redirecting standard input and
+-- -- standard output
+-- </eucode>
+-- 
+-- See Also:
+-- [[:system_exec], [[:command_line]], [[:current_dir]], [[:getenv]]
+--
+--**
+-- Signature:
+-- global function system_exec(sequence command, integer mode)
+--
+-- Description: 
+-- Try to run the a shell executable command
+--
+-- Parameters:
+--		# ##command##: a string to be passed to the shell, representing an executable command
+--		# ##mode##: an integer, indicating the manner in which to return from the call.
+--
+-- Returns:
+-- An **integer**, basically the exit/return code from the called process.
+--
+-- Errors:
+-- ##command## should not exceed 1,024 characters.
+--
+-- Comments:
+-- Allowable values for ##mode## are:
+-- * 0: the previous graphics mode is restored and the screen is cleared.
+-- * 1: a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
+-- * 2: the graphics mode is not restored and the screen is not cleared.
+--
+-- If it is not possible to run the program, ##system_exec##() will return -1.
+--
+-- On //DOS32// or //WIN32//, ##system_exec##() will only run .exe and .com programs. 
+-- To run .bat files, or built-in DOS commands, you need [[:system]](). Some commands, 
+-- such as DEL, are not programs, they are actually built-in to the command interpreter.
+--
+-- On //DOS32// and //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
+-- Nor does it allow you to quote strings that contain blanks, such as file names.
+--
+-- exit codes from DOS or Windows programs are normally in the range 0 to 255, with 0 indicating "success". 
+-- 
+-- You can run a Euphoria program using ##system_exec##(). A Euphoria program can return an exit code using [[:abort]]().
+-- 
+-- ##system_exec##() does not start a new //DOS// shell.
+--  
+-- Example 1:  
+-- <eucode>
+--  integer exit_code
+-- exit_code = system_exec("xcopy temp1.dat temp2.dat", 2)
+-- 
+-- if exit_code = -1 then
+--     puts(2, "\n couldn't run xcopy.exe\n")
+-- elsif exit_code = 0 then
+--     puts(2, "\n xcopy succeeded\n")
+-- else
+--     printf(2, "\n xcopy failed with code %d\n", exit_code)
+-- end if
+-- </eucode>
+--  
+-- Example 2:  
+-- <eucode>
+--  -- executes myprog with two file names as arguments
+-- if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
+--     puts(2, "failure!\n")
+-- end if
+-- </eucode>
+--
+-- See Also:
+-- [[:system]], [[:abort]]
+--
+--****
+-- ==== Miscellaneous
+
+--**
+-- Suspend thread execution. for ##t## seconds.
+--
+-- Parameters:
+-- # ##t##: an atom, the number of seconds for which to sleep.
+--
+-- Comments:
+-- On //Windows// and //Unix//, the operating system will suspend your process and
+-- schedule other processes. On //DOS//, your program will go into a busy loop for
+-- ##t## seconds, during which time other processes may run, but they will compete
+-- with your process for the CPU.
+--
+-- With multiple tasks, the whole program sleeps, not just the current task. To make
+-- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
+-- and then execute [[:task_yield]](). Another option is to call [[:task_delay]]().
+--
+-- Example:
+-- <eucode>
+-- puts(1, "Waiting 15 seconds...\n")
+-- sleep(15)
+-- puts(1, "Done.\n")
+-- </eucode>
+--
+-- See Also:
+--     [[:task_schedule]], [[:tick_rate]], [[:task_yield]], [[:task_delay]]
+
+export procedure sleep(atom t)
+-- go to sleep for t seconds
+-- allowing (on WIN32 and Linux) other processes to run
+	if t >= 0 then
+		machine_proc(M_SLEEP, t)
+	end if
+end procedure
+
+constant
+ 	M_SOUND      = 1,
+	M_TICK_RATE = 38
+
+
+--**
+-- Frequency Type
+
+export type frequency(integer x)
+	return x >= 0
+end type
+
+--**
+-- Turn on the PC speaker at a specified frequency 
+--
+-- Parameters:
+-- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
+--
+-- Comments:
+-- On //Windows// and //Unix// platforms no sound will be made.
+--
+-- Example:
+-- <eucode>
+-- sound(1000) -- starts a fairly high pitched sound
+-- </eucode>
+
+export procedure sound(frequency f)
+-- turn on speaker at frequency f
+-- turn off speaker if f is 0
+	machine_proc(M_SOUND, f)
+end procedure
+
+--**
+-- Specify the number of clock-tick interrupts per second.
+--
+-- Parameters:
+-- 		# ##rate##, an atom, the number of ticks by seconds.
+--
+-- Errors:
+-- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
+--
+-- Comments:
+-- This setting determines the precision of the time() library routine.
+-- It also affects the sampling rate for time profiling.
+--
+-- ##tick_rate## is effective under //DOS// only, and is a no-op elsewhere.
+-- Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//,
+-- it is always 100 ticks per second.
+--
+-- ##tick_rate##() can increase the setting above the default value. As a
+-- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
+--
+-- If a program runs in a DOS window with a tick rate other than 18.2, the
+-- time() function will not advance unless the window is the active window. 
+--
+-- With a tick rate other than 18.2, the time() function on DOS takes about
+-- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
+-- time() normally executes very quickly.
+-- 
+-- While ex.exe is running, the system will maintain the correct time of day.
+-- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
+-- while the tick rate is high, you (or your user) may need to reboot the
+-- machine to restore the proper rate. If you don't, the system time may
+-- advance too quickly. This problem does not occur on Windows 95/98/NT,
+-- only on DOS or Windows 3.1. You will always get back the correct time
+-- of day from the battery-operated clock in your system when you boot up
+-- again. 
+--  
+-- Example 1:
+-- <eucode>
+-- tick_rate(100)
+-- -- time() will now advance in steps of .01 seconds
+-- -- instead of the usual .055 seconds
+-- </eucode>
+-- 
+-- See Also: 
+-- See Also:
+--		[[:time]], [[:Debugging and profiling]]
+--
+
+export procedure tick_rate(atom rate)
+	machine_proc(M_TICK_RATE, rate)
+end procedure
 
