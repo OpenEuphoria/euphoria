@@ -1,0 +1,127 @@
+== Dynamic routine calling
+
+Euphoria does not have function pointers. However, it enables you to call about any routine, including some internal to the interpreter, in a dynamic way, using two different sets of
+identifiers.
+
+=== Dynamically calling a routine coded in Euphoria
+
+The following applies to any routine coded in Euphoria that your program uses, whether it is
+defined in the standard library, any third party library or your own code. It does not apply to
+routines implemented in the backend.
+
+==== Getting a routine identifier
+
+Whenever a routine is in scope, you can supply its name to the builtin ##routine_id##() function, which returns a small integer:
+
+<eucode>
+include get.e
+constant value_id = routine_id("value")
+</eucode>
+
+Because get.e exports ##value##(), that routine is in scope. This ensures the call succeeds.
+A failed call returns -1, else a small nonnegative integer.
+
+You can then feed this integer to ##call_func##() or ##call_proc##() as appropriate. It
+doesn't matter whether the routine is still in scope at the time you make that call. Once the
+id is gotten, it's valid.
+
+==== Calling Euphoria routines by id.
+This is very similar to using [[c_func]]() or [[:c_proc]]() to interface with external code.
+
+===== Calling a function
+This is done as follows:
+
+<eucode>
+result = call_func(id_of_the_routine,argument_sequence)
+</eucode>
+
+where
+* ##id_of_the_routine## is an id you obtained from [[:routine_id]]().
+* ##argument_sequence## is the list of the parameters to opass, enclosed into curly braces.
+<eucode>
+include get.e
+
+constant value_id = routine_id("value")
+result = call_func(value_id, {"Model 36A", 6, GET_LONG_ANSWER})
+-- result is {GET_SUCCESS, 36, 4, 1}
+</eucode>
+
+This is equivalent to
+
+<eucode>
+result = value("Model 36A", 6, GET_LONG_ANSWER)
+</eucode>
+
+===== Calling a procedure
+The same formalism applies, but using ##call_proc##() instead. The differences are almost the
+same as between [[:c_func]]() and [[:c_proc]]().
+
+<eucode>
+include std/pretty.e
+
+constant pretty_id = routine_id("pretty_print")
+
+call_proc(pretty_id,{1, some_object, some_options})
+</eucode>
+
+This does the same as a straightforward
+<eucode>
+include std/pretty.e
+
+pretty_print(1, some_object, some_options)
+</eucode>
+
+The difference with [[:c_proc]]() is that you can call n extranal function using [[:c_proc]]() and thus ignore its return value, like in C. You cannot ##call_proc##() an Euphoria function.
+
+==== Why call dynamically?
+
+The above examples do not look quite convincing, because it seems that calling dynamically is
+a more complicated way to call routines. And slower.
+
+There are two main situations where calling dynamically is the thing to do:
+# When you really want a routine you choose at call time to be called. You could have a table
+of routine_ids and perform a call to an indexed entry in the table.
+** Because the name of the routine you want to call is not defined yet, or would resolve to the wrong routine. In pre 4.0 versions, this was the main use of the facility:
+
+<eucode>
+integer foo_id
+
+function bar()
+    return call_func(foo_id,{bar()})
+end function
+
+function bar()
+   return something() + bar()
+end function
+foo_id = routine_id("foo")
+</eucode>
+
+One of the functions has to be defined before the other, and Euphoria's paradigm of
+define-before-use would prevent crossed calls like above without the dynamic call facility.
+
+=== Calling Euphoria's internals
+
+A number of Euphoria routines are defined in different ways depending on the platform they
+will run on. It would be cumbersome, and at times downright impossible, to put such code in 
+include files, nor to make the routine fully builtin.
+
+A response to this is provided by ##machine_func##() and ##machine_proc##(). User code 
+normally doesn't ever need to use these. Various examples are to be found in the standard 
+library.
+
+These primitives are called like this:
+<eucode>
+machine_proc(id, argument)
+* result = machine_func(id, argument)
+</eucode>
+The argment is either an atom or a sequence standing for one or more arguments. Since the 
+first parameter doesn't need to be a constant, you may use some sort of dynamic calling. The 
+circumstances where it is useful are rare.
+
+The complete list of known machine identifiers is to be found in the file source\execute.h.
+
+Defining new identifiers and overriding machine_func/proc() to handle them is an easy way to 
+extend the capabilities of the interpreter.
+
+
+

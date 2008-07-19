@@ -33,6 +33,7 @@
 ../include/std/database.e
 ../include/std/datetime.e
 ../include/std/dll.e
+../docs/dynamic.txt
 ../include/std/error.e
 ../include/std/filesys.e
 ../include/std/get.e
