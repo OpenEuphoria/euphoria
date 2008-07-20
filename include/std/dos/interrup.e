@@ -14,6 +14,7 @@
 -- Length of a register list
 
 export constant REG_LIST_SIZE = 10
+constant M_INTERRUPT = 34
 
 --**
 -- Register structure

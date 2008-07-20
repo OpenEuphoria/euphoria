@@ -16,8 +16,7 @@ constant
 
 export constant
 	M_ALLOC_LOW = 32,
-	M_FREE_LOW = 33,
-	M_INTERRUPT = 34
+	M_FREE_LOW = 33
 
 --**
 -- biggest address accessible to 16-bit real mode

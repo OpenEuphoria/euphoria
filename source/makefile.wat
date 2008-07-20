@@ -225,6 +225,7 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\0ackend.obj &
+	.\$(OBJDIR)\interrup.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\backend.obj &
 	.\$(OBJDIR)\text.obj &
@@ -248,6 +249,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scientif.obj &
+	.\$(OBJDIR)\interrup.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
@@ -278,6 +280,7 @@ EU_DOS_OBJECTS = &
 EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\main-0.obj &
+	.\$(OBJDIR)\interrup.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\init-.obj &
 	.\$(OBJDIR)\error.obj &
@@ -906,6 +909,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\0emory.obj : .\$(OBJDIR)\0emory.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\interrup.obj : .\$(OBJDIR)\interrup.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\back\be_execute.obj : ./be_execute.c

@@ -13,13 +13,13 @@
 ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
-	include dos\base_mem.e
+--	include dos\base_mem.e
 	include dos\interrup.e
 else
 	include dll.e
 end ifdef
 
-include machine.e
+export include machine.e
 include wildcard.e
 include sort.e
 

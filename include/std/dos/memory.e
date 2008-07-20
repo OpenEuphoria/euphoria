@@ -73,15 +73,3 @@ export procedure free_low(low_machine_addr addr)
 	machine_proc(M_FREE_LOW, addr)
 end procedure
 
-
-
-
-
-
-
-
-
-
-
-
-
