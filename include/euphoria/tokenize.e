@@ -25,7 +25,7 @@ end function
 
 global constant
 		 T_EOF        = Enum_Start(EOF,1)
-		,T_NULL				= Enum() -- 
+		,T_NULL       = Enum() -- 
 		,T_SHBANG     = Enum()
 		,T_BLANK      = Enum()
 		,T_COMMENT    = Enum()

@@ -1,9 +1,13 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
+--****
 -- == Error Handling
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
+--
+-- === Routines
 
 constant
 	M_CRASH_MESSAGE = 37,
@@ -11,8 +15,6 @@ constant
 	M_CRASH_ROUTINE = 66,
 	M_CRASH = 67,
 	M_WARNING_FILE = 72
-
--- Crash handling routines:
 
 --**
 -- Crash running program, displaying a formatted error message the way printf() does.
@@ -82,10 +84,12 @@ end procedure
 -- 		# ##file_path##: a sequence, the new error and traceback file path.
 --
 -- Comments:
--- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used in case of an error at runtime, whether it was triggered by crash() or not.
+-- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used 
+--      in case of an error at runtime, whether it was triggered by crash() or not.
 --
 -- See Also:
 -- 		[[:crash]], [[:crash_message]]
+
 export procedure crash_file(sequence file_path)
 	machine_proc(M_CRASH_FILE, file_path)
 end procedure
@@ -153,8 +157,10 @@ end procedure
 -- warning_file(0)
 -- -- changed opinion: warnings will go to standard error as usual
 -- </eucode>
+--
 -- See Also:
 -- 	[[:without warning]]
+
 export procedure warning_file(object file_path)
 	machine_proc(M_WARNING_FILE, file_path)
 end procedure
@@ -196,4 +202,3 @@ end procedure
 export procedure crash_routine(integer func)
 	machine_proc(M_CRASH_ROUTINE, func)
 end procedure
-

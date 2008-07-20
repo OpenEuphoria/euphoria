@@ -15,6 +15,7 @@
 ../docs/bind.txt
 ../docs/c.txt
 ../docs/cgi.txt
+../docs/dynamic.txt
 ../docs/database.txt
 ../docs/tasking.txt
 ../docs/ed.txt
@@ -33,7 +34,6 @@
 ../include/std/database.e
 ../include/std/datetime.e
 ../include/std/dll.e
-../docs/dynamic.txt
 ../include/std/error.e
 ../include/std/filesys.e
 ../include/std/get.e
