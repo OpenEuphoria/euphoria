@@ -335,18 +335,21 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 			try = open(file_path, "r")    
 			if try != -1 then
 				return {file_path,try}
-			elsif platform() = WIN32 and sequence(cache_converted[num_var][i]) then
-				-- perhaps this path entry, which had never been checked valid, is so 
-				-- after conversion
-				full_path = cache_converted[num_var][i]
-				file_path = full_path & file_name
-				try = open(file_path, "r")
-				if try != -1 then
-					cache_converted[num_var][i] = 0
-					cache_substrings[num_var][i] = full_path
-					return {file_path,try}
-				end if
 			end if
+			ifdef WIN32 then 
+				if sequence(cache_converted[num_var][i]) then
+					-- perhaps this path entry, which had never been checked valid, is so 
+					-- after conversion
+					full_path = cache_converted[num_var][i]
+					file_path = full_path & file_name
+					try = open(file_path, "r")
+					if try != -1 then
+						cache_converted[num_var][i] = 0
+						cache_substrings[num_var][i] = full_path
+						return {file_path,try}
+					end if
+				end if
+			end ifdef
 		end for
 		if cache_complete[num_var] then -- nothing to scan
 			return -1
@@ -380,8 +383,9 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 						cache_converted[num_var] &= 0
 					end ifdef
 					return {file_path,try}
-				elsif platform() = WIN32 then  
-					if find(1,full_path>=128) then
+				end if
+				ifdef WIN32 then
+					if find(1, full_path>=128) then
 						-- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
 						file_path = full_path & file_name
@@ -396,7 +400,7 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 					else -- nothing to convert anyway
 						cache_converted[num_var] &= 0
 					end if
-				end if
+				end ifdef
 				start_path = 0
 			end if
 		elsif not start_path and (inc_path[p] != ' ' and inc_path[p] != '\t') then
@@ -408,30 +412,31 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 	return -1
 end function
 
-sequence include_paths
-include_paths = {}
+sequence include_Paths = {}
 
-global procedure Include_paths(integer add_converted)
+global function Include_paths(integer add_converted)
 	integer status,pos
 	sequence inc_path,full_path
 	integer start_path,end_path
 
-	if length(include_paths) then
-		return
+	if length(include_Paths) then
+		return include_Paths
 	end if
+
 	if not loaded_config_inc_paths then
 		load_platform_inc_paths()
-	end if       
-	include_paths = append(config_inc_paths,current_dir())
-	num_var = find("EUINC",cache_vars)
+	end if
+
+	include_Paths = append(config_inc_paths, current_dir())
+	num_var = find("EUINC", cache_vars)
 	inc_path = getenv("EUINC")
-	status = check_cache("EUINC",inc_path)
-	inc_path = append(inc_path,PATH_SEPARATOR)
-	while 1 do  -- not an actual loop, so no indent change
+	status = check_cache("EUINC", inc_path)
+	inc_path = append(inc_path, PATH_SEPARATOR)
+
 	if status then
 		-- some paths are not convrted, how to check them?
 		if cache_complete[num_var] then
-			exit -- one of the last hidden forward goto's
+			goto "cache done"
 		end if
 		pos = cache_delims[num_var]+1
 	else
@@ -444,8 +449,8 @@ global procedure Include_paths(integer add_converted)
 			cache_delims[num_var] = p
 					-- remove any trailing blanks and SLASH in directory
 			end_path = p-1
-			while end_path>=start_path and find(inc_path[end_path]," \t" & SLASH_CHARS) do
-				end_path-=1
+			while end_path >= start_path and find(inc_path[end_path]," \t" & SLASH_CHARS) do
+				end_path -= 1
 			end while
 
 			if start_path and end_path then
@@ -454,10 +459,11 @@ global procedure Include_paths(integer add_converted)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
 				ifdef WIN32 then
-					if find(1,full_path>=128) then
-						-- accented characters, try converting them. There is no guarantee that 
+					if find(1, full_path>=128) then
+						-- accented characters, try converting them. There is no guarantee that
 						-- the conversion is valid
-						cache_converted[num_var] = convert_from_OEM(full_path)
+						cache_converted[num_var] = append(cache_converted[num_var], 
+														convert_from_OEM(full_path))
 					else -- nothing to convert anyway
 						cache_converted[num_var] &= 0
 					end if
@@ -468,20 +474,22 @@ global procedure Include_paths(integer add_converted)
 			start_path = p
 		end if
 	end for
-	exit
-	end while
-	include_paths &= cache_substrings[num_var]
+
+label "cache done"
+	include_Paths &= cache_substrings[num_var]
 	cache_complete[num_var] = 1
+
 	ifdef WIN32 then
-		if  add_converted then
+		if add_converted then
 	    	for i=1 to length(cache_converted[num_var]) do
 	        	if sequence(cache_converted[num_var][i]) then
-		        	include_paths = append(include_paths,cache_converted[num_var][i])
+		        	include_Paths = append(include_Paths, cache_converted[num_var][i])
 		        end if
 			end for
 		end if
 	end ifdef
-end procedure
+	return include_Paths
+end function
 
 -- open a file by searching the user's PATH
 

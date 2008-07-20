@@ -143,8 +143,9 @@ keylist =
 	{"peek_string",      SC_PREDEF, FUNC, PEEK_STRING,      1, E_PURE},
 	{"option_switches",  SC_PREDEF, FUNC, OPTION_SWITCHES,  0, E_PURE},
 	{"warning",  		 SC_PREDEF, PROC, WARNING,  		1, E_OTHER_EFFECT},
-	{"splice",			 SC_PREDEF,	FUNC,	SPLICE,			3, E_PURE},
-	{"insert",			 SC_PREDEF,	FUNC,	INSERT,			3, E_PURE}
+	{"splice",			 SC_PREDEF,	FUNC, SPLICE,			3, E_PURE},
+	{"insert",			 SC_PREDEF,	FUNC, INSERT,			3, E_PURE},
+	{"include_paths",	 SC_PREDEF,	FUNC, INCLUDE_PATHS,	1, E_OTHER_EFFECT}
 }
 	-- new words must go at end to maintain compatibility 
 

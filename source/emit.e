@@ -509,6 +509,22 @@ global procedure emit_op(integer op)
 	    a = Pop()
 		Warning(SymTab[a][S_OBJ], custom_warning_flag,"")
 
+	elsif op = INCLUDE_PATHS then
+		sequence paths
+
+		assignable = TRUE
+	    a = Pop()
+	    emit_opcode(RIGHT_BRACE_N)
+	    paths = Include_paths(SymTab[a][S_OBJ])
+	    emit(length(paths))
+	    for i=length(paths) to 1 by -1 do
+	        c = NewStringSym(paths[i])
+	        emit_addr(c)
+	    end for
+	    b = NewTempSym()
+	    Push(b)
+	    emit_addr(b)
+
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
 	elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
 				STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE, GOTO, GLABEL,

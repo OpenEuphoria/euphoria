@@ -964,3 +964,50 @@ export procedure tick_rate(atom rate)
 	machine_proc(M_TICK_RATE, rate)
 end procedure
 
+--**
+-- Signature:
+-- global function include_paths(integer convert)
+--
+-- Description:
+-- Returns the list of include paths, i the order in which they are searched
+--
+-- Parameters:
+--		# ##convert##: an integer, nonzero to include converted path entries that were not validated yet.
+--
+-- Returns:
+--	A **sequence** of strings, ach holding a fully qualified include path.
+--
+-- Comments:
+-- ##convert## is checked only under //Windows//. If a path has accented characters in it, then 
+-- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
+-- will force conversion for path entries that have accents and which have not been checked to be valid yet.
+-- The extra entries, if any, are returned at the end of the returned sequence.
+--
+-- The paths are ordered in the order they are searched: 
+-- # current directory
+-- # configuration file,
+-- # command line switches,
+-- # EUINC
+-- # a default based on EUDIR.
+--
+-- Backslashes are redoubled, so that the paths can be passd unaltered to [[:system]]() or [[:system_exec]]().
+--
+-- Example 1:
+-- <eucode>
+-- sequence s = include_paths(0)
+-- -- s might contain
+-- {
+--   "C:\\EuphoriA\\tests",
+--   "C:\\EUPHORIA\\INCLUDE",
+--   "C:\\EUPHORIA\\xcontrols\\include",
+--   "C:\\EUPHORIA\\win32lib_0_70_1\\include"
+-- }
+-- </eucode>
+--
+-- See Also:
+-- [[:euinc.conf]], [[:include statement]], [[:option_switches]]
+
+
+
+
+
