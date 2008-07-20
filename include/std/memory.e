@@ -136,7 +136,7 @@ end procedure
 -- There is no allocate_string_low() function. However, you could easily
 -- craft one by adapting the code for ##allocate_string##.
 --
--- Since allocate_string() allocates memory, you are responsible to
+-- Since ##allocate_string##() allocates memory, you are responsible to
 -- [[:free]]() the block when done with it.
 --
 -- Example 1:
@@ -165,7 +165,7 @@ end function
 
 --**
 -- Signature:
--- export function peek(object addr_n_length)
+-- global function peek(object addr_n_length)
 --
 -- Description:
 -- Fetches a byte, or some bytes, from an address in memory.
@@ -214,7 +214,7 @@ end function
 --
 --**
 -- Signature:
--- export function peeks(object addr_n_length)
+-- global function peeks(object addr_n_length)
 --
 -- Description:
 -- Fetches a byte, or some bytes, from an address in memory.
@@ -264,7 +264,7 @@ end function
 --
 --**
 -- Signature:
--- export function peek2s(object addr_n_length)
+-- global function peek2s(object addr_n_length)
 --
 -- Description:
 -- Fetches a //signed// word, or some //signed// words	, from an address
@@ -319,7 +319,7 @@ end function
 --
 --**
 -- Signature:
--- export function peek2u(object addr_n_length)
+-- global function peek2u(object addr_n_length)
 --
 -- Description:
 -- Fetches an //unsigned// word, or some //unsigned// words, from an address
@@ -374,7 +374,7 @@ end function
 --
 --**
 -- Signature:
--- export function peek4s(object addr_n_length)
+-- global function peek4s(object addr_n_length)
 --
 -- Description:
 -- Fetches a //signed// double words, or some //signed// double words,
@@ -429,7 +429,7 @@ end function
 --
 --**
 -- Signature:
--- export function peek4u(object addr_n_length)
+-- global function peek4u(object addr_n_length)
 --
 -- Description:
 -- Fetches an //unsigned// double word, or some //unsigned// dounle words,
@@ -485,11 +485,32 @@ end function
 -- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
 --
 
--- TODO: document peek_string()
+--**
+-- Signature:
+-- global procedure peek_string(atom addr)
+--
+-- Description:
+-- Read an ASCIZ string in RAM, starting from a supplied address.
+--
+-- Parameters:
+-- 		# ##addr#: an atom, the address at whuich to start reading.
+--
+-- Returns:
+-- A **sequence** of bytes, the string that could be read.
+--
+-- Comments:
+-- An ASCIZ string is any sequence of bytes and ends with a 0 byte.
+-- If you ##peek_string##() at some place where there is no string, you will get a sequence of garbage.
+-- Further, pek()ing memory that doesn't belong to your process is something the operating 
+-- system could prevent, and you'd crash with a machine level exception.
+--
+-- See Also:
+-- [[:peek]], [[:peek_wstring]]
+
 
 --**
 -- Signature:
--- export procedure poke(atom addr, object x)
+-- global procedure poke(atom addr, object x)
 --
 -- Description:
 -- Stores one or more bytes, starting at a memory location.
@@ -535,7 +556,7 @@ end function
 -- 
 --**
 -- Signature:
--- export procedure poke2(atom addr, object x)
+-- global procedure poke2(atom addr, object x)
 --
 -- Description:
 -- Stores one or more words, starting at a memory location.
@@ -583,7 +604,7 @@ end function
 --
 --**
 -- Signature:
--- export procedure poke4(atom addr, object x)
+-- global procedure poke4(atom addr, object x)
 --
 -- Description:
 -- Stores one or more double words, starting at a memory location.
@@ -634,7 +655,7 @@ end function
 --
 --**
 -- Signature:
--- export procedure mem_copy(atom destination, atom origin, integer len)
+-- global procedure mem_copy(atom destination, atom origin, integer len)
 --
 -- Descripotion:
 -- Copy a block of memory from an address to another.
@@ -664,7 +685,7 @@ end function
 -- 
 --**
 -- Signature:
--- export procedure mem_set(atom destination, integer byte_value, integer how_many))
+-- global procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
 -- Sets a contiguous range of memory ocations to a single value.
@@ -692,7 +713,7 @@ end function
 --
 --**
 -- Signature:
--- export procedure call(atom addr)
+-- global procedure call(atom addr)
 --
 -- Description:
 --  Call a machine language routine which was stored in memory prior.

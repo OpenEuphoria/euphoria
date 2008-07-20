@@ -173,7 +173,7 @@ export procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
 end procedure
 
-include register.e
+include interrup.e
 ifdef SAFE then
 	export include safe.e
 else

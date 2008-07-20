@@ -20,7 +20,7 @@ constant
 
 --**
 -- Signature:
--- 		export function get_key()
+-- 		global function get_key()
 --
 -- Returns:
 --		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
@@ -64,9 +64,9 @@ constant
 --  has set in his **config.sys** file. (Consult an MS-DOS manual for the BREAK
 --  command.) For some types of program this sudden termination could leave
 --  things in a messy state and might result in loss of data.
---  allow_break(0) lets you avoid this situation.
--- 
--- You can find out if the user has pressed control-c or control-Break by calling 
+--  ##allow_break##(0) lets you avoid this situation.
+--
+-- You can find out if the user has pressed Control-C or Control-Break by calling
 -- check_break().
 --
 -- Example 1:

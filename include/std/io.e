@@ -49,7 +49,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- export procedure ?
+-- global procedure ?
 --
 -- Description:
 -- Shorthand way of saying: **pretty_print(STDOUT, x, {})** - i.e. printing the value of an 
@@ -65,7 +65,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- export procedure print(integer fn, object x)
+-- global procedure print(integer fn, object x)
 --
 -- Description:
 -- Print an object to a file or device, with braces { , , , } to show the structure.
@@ -93,7 +93,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- export procedure printf(integer fn, sequence format, object values)
+-- global procedure printf(integer fn, sequence format, object values)
 --
 -- Description:
 -- Print one or more values to a file or device, using a format string to embed them in and define how they should be represented.
@@ -201,7 +201,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- export procedure puts(integer fn, object text)
+-- global procedure puts(integer fn, object text)
 --
 -- Description:
 -- Output, to a file or device, a single byte (atom) or sequence of bytes. The low order
@@ -239,7 +239,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- export function getc(integer fn)
+-- global function getc(integer fn)
 --
 -- Description:
 --     Get the next character (byte) from a file or device fn. 
@@ -266,7 +266,7 @@ export constant EOF = -1
 
 --**
 -- Signature:
--- export function gets(integer fn)
+-- global function gets(integer fn)
 --
 -- Description:
 --     Get the next sequence (one line, including '\n') of characters from a file or device.
@@ -466,7 +466,7 @@ end type
 
 --**
 -- Signature:
--- export function open(sequence path, sequence mode)
+-- global function open(sequence path, sequence mode)
 --
 -- Description:
 -- Open a file or device, to get the file number. 
@@ -560,7 +560,7 @@ end type
 
 --**
 -- Signature:
--- export procedure close(atom fn)
+-- global procedure close(atom fn)
 --
 -- Description:
 -- Close a file or device and flush out any still-buffered characters.

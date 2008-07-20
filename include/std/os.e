@@ -17,7 +17,7 @@ end ifdef
 
 ifdef DOS32 then
 	export include dos\memory.e
-	include dos\register.e
+	include dos\interrup.e
 end ifdef
 
 include machine.e

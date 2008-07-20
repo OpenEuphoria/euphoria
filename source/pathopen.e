@@ -7,7 +7,7 @@ include std/filesys.e
 
 ifdef DOS32 then
 	export include std\dos\memory.e
-	include std\dos\register.e
+	include std\dos\interrup.e
 end ifdef
 
 include common.e

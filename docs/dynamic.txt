@@ -99,6 +99,10 @@ foo_id = routine_id("foo")
 One of the functions has to be defined before the other, and Euphoria's paradigm of
 define-before-use would prevent crossed calls like above without the dynamic call facility.
 
+One last word: when calling a routine dynamically, its **full* parameter listmust be passed, 
+even if some of its parameters are defaulted. This imitation may be overcome in future 
+versions.
+
 === Calling Euphoria's internals
 
 A number of Euphoria routines are defined in different ways depending on the platform they
@@ -115,7 +119,7 @@ machine_proc(id, argument)
 * result = machine_func(id, argument)
 </eucode>
 The argment is either an atom or a sequence standing for one or more arguments. Since the 
-first parameter doesn't need to be a constant, you may use some sort of dynamic calling. The 
+first parameter doesn't need to be a constant, you may use some sort of dynamic calling. The
 circumstances where it is useful are rare.
 
 The complete list of known machine identifiers is to be found in the file source\execute.h.

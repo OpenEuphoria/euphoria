@@ -42,7 +42,8 @@
 ../include/std/image.e
 ../include/std/dos/image.e
 ../include/std/dos/pixels.e
-../include/std/io.e
+../include/dos/interrup.e
+../include/std//std/io.e
 ../include/std/locale.e
 ../include/std/localeconv.e
 ../include/std/map.e

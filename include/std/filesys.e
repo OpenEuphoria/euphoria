@@ -14,7 +14,7 @@ ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
 	include dos\base_mem.e
-	include dos\register.e
+	include dos\interrup.e
 else
 	include dll.e
 end ifdef
@@ -76,7 +76,7 @@ end ifdef
 
 --**
 -- Signature:
--- export constant SLASH
+-- global constant SLASH
 --
 -- Description:
 -- Current platform's path separator character
@@ -87,7 +87,7 @@ end ifdef
 
 --**
 -- Signature:
--- export constant SLASHES
+-- global constant SLASHES
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -97,7 +97,7 @@ end ifdef
 
 --**
 -- Signature:
--- export constant SLASHES
+-- global constant SLASHES
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -107,14 +107,14 @@ end ifdef
 
 --**
 -- Signature:
--- export constant CRLF
+-- global constant CRLF
 --
 -- Description:
 -- Current platform's newline character(s)
 
 --**
 -- Signature:
--- export constant PATHSEP
+-- global constant PATHSEP
 --
 -- Description:
 -- Current platform's path separator character

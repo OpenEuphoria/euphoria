@@ -14,7 +14,7 @@ include error.e
 
 --**
 -- Signature:
---   export function compare(object compared, object reference)
+--   global function compare(object compared, object reference)
 --
 -- Description:
 --     Compare two items returning less than, equal or greater than.
@@ -65,7 +65,7 @@ include error.e
 
 --**
 -- Signature:
---     export function equal(object left, object right)
+--     global function equal(object left, object right)
 --
 -- Description:
 --     Compare two Euphoria objects to see if they are the same. 
@@ -102,7 +102,7 @@ include error.e
 
 --**
 -- Signature:
---     export function find(object needle, sequence haystack)
+--     global function find(object needle, sequence haystack)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack".
@@ -132,7 +132,7 @@ include error.e
 
 --**
 -- Signature:
---     export function find_from(object needle, object haystack, integer start)
+--     global function find_from(object needle, object haystack, integer start)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack". Search starts at a specified index.
@@ -167,7 +167,7 @@ include error.e
 
 --**
 -- Signature:
---     export function match(sequence needle, sequence haystack)
+--     global function match(sequence needle, sequence haystack)
 --
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack".
@@ -190,7 +190,7 @@ include error.e
 
 --**
 -- Signature:
---     export function match_from(sequence needle, sequence haystack, integer start)
+--     global function match_from(sequence needle, sequence haystack, integer start)
 --
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack", starting from some index.

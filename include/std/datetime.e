@@ -392,7 +392,7 @@ end type
 --
 -- Under //DOS32// you can improve the resolution by calling [[:tick_rate]]().
 -- 
--- Under //DOS32//, the period of time that you can normally measure is limited to 24 hours. 
+-- Under //DOS32//, the period of time that you can normally measure is limited to 24 hours.
 -- After that, the value returned by ##time##() will reset and start over. 
 -- If however, you have called [[:tick_rate]](), and clock ticks are happening at a rate that is higher 
 -- than the usual 18.2/sec, ##time##() will continue much longer, since in that case, 
@@ -427,7 +427,7 @@ end type
 -- See Also: [[:date]], [[:tick_rate]], [[:now]]
 --  
 --**
---** Signature:
+-- Signature:
 -- global function date()
 --
 -- Description:

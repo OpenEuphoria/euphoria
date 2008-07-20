@@ -63,7 +63,7 @@ end type
 --
 --**
 -- Signature:
---   export function remainder(object dividend, object divisor)
+--   global function remainder(object dividend, object divisor)
 --
 -- Description:
 -- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
@@ -159,7 +159,7 @@ end function
 
 --**
 -- Signature:
--- export function floor(object value)
+-- global function floor(object value)
 --
 -- Description:
 -- Return the greatest integer less than or equal to some value. This amount to rounding down to an integer.
@@ -379,7 +379,7 @@ end function
 
 --**
 -- Signature:
--- export function arctan(object tangent)
+-- global function arctan(object tangent)
 --
 -- Description:
 --   Return an angle with given tangent.
@@ -407,7 +407,7 @@ end function
 
 --**
 -- Signature:
--- export function tan(object angle)
+-- global function tan(object angle)
 --
 -- Description:
 --   Return the tangent of an angle, or a sequence of angles.
@@ -433,7 +433,7 @@ end function
 --		[[:sin]], [[:cos]], [[:arctan]]
 --**
 -- Signature:
---   export function cos(object angle)
+--   global function cos(object angle)
 --
 -- Description:
 -- Return the cosine of an angle expressed in radians
@@ -459,7 +459,7 @@ end function
 --		[[:sin]], [[tan]], [[arccos]], [[:PI]], [[:deg2rad]]
 --**
 -- Signature:
--- export function sin(object angle)
+-- global function sin(object angle)
 --
 -- Description:
 -- Return the sine of an angle expressed in radians
@@ -713,7 +713,7 @@ end function
 --
 --**
 -- Signature:
--- export function log(object value)
+-- global function log(object value)
 --
 -- Description:
 -- Return the natural logarithm of a positive number.
@@ -854,7 +854,7 @@ end function
 --
 --**
 -- Signature:
--- export function sqrt(object value)
+-- global function sqrt(object value)
 --
 -- Description:
 -- Calculate the square root of a number.
@@ -1271,7 +1271,7 @@ end procedure
 
 --**
 -- Signature:
--- export function rand(object maximum)
+-- global function rand(object maximum)
 --
 -- Description:
 --   Return a random positive integer.
