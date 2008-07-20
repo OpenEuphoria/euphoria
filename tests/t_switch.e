@@ -74,6 +74,28 @@ end procedure
 nst(B,A)
 test_equal( "nested switch", 6, ns )
 
+constant cases = - {1, "345", 2, 3}
+constant TWO = 2, NEGATIVE_3 = -3
+sequence negative_case = {}
+for i = 1 to length( cases ) do
+	switch cases[i] do
+		case -1:
+			negative_case = append( negative_case,-1 )
+			break
+		case -"345":
+			negative_case = append( negative_case, -"345" )
+			break
+		case -TWO:
+			negative_case = append( negative_case, -TWO )
+			break
+		case NEGATIVE_3:
+			negative_case = append( negative_case, NEGATIVE_3 )
+			break
+	end switch
+end for
+
+test_equal( "switch with negative cases",  cases, negative_case )
+
 
 test_report()
 

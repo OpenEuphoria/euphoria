@@ -1793,8 +1793,8 @@ procedure pop_switch( integer break_base )
 	pop_scope()
 end procedure
 
-procedure add_case( symtab_index sym )
-	switch_stack[$][SWITCH_CASES]      &= sym
+procedure add_case( symtab_index sym, integer sign )
+	switch_stack[$][SWITCH_CASES]      &= sign * sym
 	switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
 	if TRANSLATE then
 		emit_addr( CASE )
@@ -1827,6 +1827,15 @@ procedure Case_statement()
 	end if
 	
 	tok = next_token()
+	integer sign
+	if tok[T_ID] = MINUS then
+		sign = -1
+		tok = next_token()
+		
+	else
+		sign = 1
+	end if
+	
 	if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
 		if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
 			if SymTab[tok[T_SYM]][S_CODE] then
@@ -1840,12 +1849,15 @@ procedure Case_statement()
 	end if
 	
 	if tok[T_ID] = ELSE then
+		if sign = -1 then
+			CompileErr( "expected an atom string or a constant assigned an atom or a string" )
+		end if
 		case_else()
 		
 	else
 		condition = tok[T_SYM]	
 		tok_match( COLON )
-		add_case( condition )	
+		add_case( condition, sign )	
 	end if
 	
 	StartSourceLine( TRUE )
@@ -1885,7 +1897,15 @@ procedure Switch_statement()
 	-- fix up the case values
 	values = switch_stack[$][SWITCH_CASES]
 	for i = 1 to length( values ) do
-		values[i] = SymTab[values[i]][S_OBJ]
+		integer sym = values[i]
+		integer sign
+		if sym < 0 then
+			sign = -1
+			sym = -sym
+		else
+			sign = 1
+		end if
+		values[i] = sign * SymTab[sym][S_OBJ]
 	end for
 	SymTab[cases][S_OBJ] = values
 	
