@@ -218,10 +218,6 @@ function bad_address(atom a)
 	return sprintf(" ADDRESS!!!! %d (#%08x)", {a, a})
 end function
 
-export function original_peek(object x)
-	return peek(x) -- Euphoria's normal peek
-end function
-
 without warning
 --**
 -- Signature:
@@ -280,14 +276,10 @@ override function peek(object x)
 		a = x[1]
 	end if
 	if safe_address(a, len) then
-		return original_peek(x)
+		return eu:peek(x)
 	else
 		die("BAD PEEK" & bad_address(a))
 	end if
-end function
-
-function original_peeks(object x)
-	return peeks(x) -- Euphoria's normal peek
 end function
 
 --**
@@ -345,14 +337,10 @@ override function peeks(object x)
 		a = x[1]
 	end if
 	if safe_address(a, len) then
-		return original_peeks(x)
+		return eu:peeks(x)
 	else
 		die("BAD PEEK" & bad_address(a))
 	end if
-end function
-
-function original_peek2u(object x)
-	return peek2u(x) -- Euphoria's normal peek2u
 end function
 
 without warning
@@ -416,14 +404,10 @@ override function peek2u(object x)
 		a = x[1]
 	end if
 	if safe_address(a, len) then
-		return original_peek2u(x)
+		return eu:original_peek2u(x)
 	else
 		die("BAD PEEK2U" & bad_address(a))
 	end if
-end function
-
-function original_peek2s(object x)
-	return peeks(x) -- Euphoria's normal peek
 end function
 
 --**
@@ -484,14 +468,10 @@ override function peek2s(object x)
 		a = x[1]
 	end if
 	if safe_address(a, len) then
-		return original_peek2s(x)
+		return eu:peek2s(x)
 	else
 		die("BAD PEEK2S" & bad_address(a))
 	end if
-end function
-
-function original_peek4s(object x)
-	return peek4s(x) -- Euphoria's normal peek
 end function
 
 --**
@@ -552,14 +532,10 @@ override function peek4s(object x)
 		a = x[1]
 	end if
 	if safe_address(a, len) then
-		return original_peek4s(x)
+		return eu:peek4s(x)
 	else
 		die("BAD PEEK4S" & bad_address(a))
 	end if
-end function
-
-function original_peek4u(object x)
-	return peek4u(x) -- Euphoria's normal peek
 end function
 
 --**
@@ -619,14 +595,10 @@ override function peek4u(object x)
 		a = x[1]
 	end if
 	if safe_address(a, len) then
-		return original_peek4u(x)
+		return eu:peek4u(x)
 	else
 		die("BAD PEEK4U" & bad_address(a))
 	end if
-end function
-
-function original_peek_string(object x)
-	return peek(x) -- Euphoria's normal peek_string
 end function
 
 without warning
@@ -661,7 +633,7 @@ export function peek_string(object x)
 	len = 1
 	while 1 do
 		if safe_address( a, len ) then
-			if not original_peek( a + len - 1 ) then
+			if not eu:peek( a + len - 1 ) then
 				exit
 			else
 				len += 1
@@ -670,12 +642,8 @@ export function peek_string(object x)
 			die("BAD PEEK_STRING" & bad_address(a))
 		end if
 	end while
-	return original_peek_string(x)
+	return eu:peek_string(x)
 end function
-
-procedure original_poke(atom a, object v)
-	poke(a, v)
-end procedure
 
 --**
 -- Signature:
@@ -730,14 +698,10 @@ override procedure poke(atom a, object v)
 		len = length(v)
 	end if
 	if safe_address(a, len) then
-		original_poke(a, v)
+		eu:poke(a, v)
 	else
 		die("BAD POKE" & bad_address(a))
 	end if
-end procedure
-
-procedure original_poke2(atom a, object v)
-	poke(a, v)
 end procedure
 
 -- Signature:
@@ -790,14 +754,10 @@ override procedure poke2(atom a, object v)
 		len = length(v) * 4
 	end if
 	if safe_address(a, len) then
-		original_poke2(a, v)
+		eu:poke2(a, v)
 	else
 		die("BAD POKE" & bad_address(a))
 	end if
-end procedure
-
-procedure original_poke4(atom a, object v)
-	poke4(a, v)
 end procedure
 
 --**
@@ -851,14 +811,10 @@ override procedure poke4(atom a, object v)
 		len = length(v)*4
 	end if
 	if safe_address(a, len) then
-		original_poke4(a, v)
+		eu:poke4(a, v)
 	else
 		die("BAD POKE4" & bad_address(a))
 	end if
-end procedure
-
-procedure original_mem_copy(atom target, atom source, atom len)
-	mem_copy(target, source, len)
 end procedure
 
 --**
@@ -898,12 +854,8 @@ override procedure mem_copy(machine_addr target, machine_addr source, natural le
 	elsif not safe_address(source, len) then
 		die("BAD MEM_COPY SOURCE" & bad_address(source))
 	else
-		original_mem_copy(target, source, len)
+		eu:mem_copy(target, source, len)
 	end if
-end procedure
-
-procedure original_mem_set(atom target, atom value, integer len)
-	mem_set(target, value, len)
 end procedure
 
 --**
@@ -938,7 +890,7 @@ end procedure
 override procedure mem_set(machine_addr target, atom value, natural len)
 -- safe mem_set
 	if safe_address(target, len) then
-		original_mem_set(target, value, len)
+		eu:mem_set(target, value, len)
 	else
 		die("BAD MEM_SET" & bad_address(target))
 	end if
@@ -951,7 +903,7 @@ procedure show_byte(atom m)
 -- display byte at memory location m
 	integer c
 	
-	c = original_peek(m)
+	c = eu:peek(m)
 	if c <= 9 then
 		printf(1, "%d", c)
 	elsif c < 32 or c > 127 then
@@ -978,7 +930,7 @@ export procedure show_block(sequence block_info)
 	-- check pre-block
 	bad = 0
 	for i = start-BORDER_SPACE to start-1 do
-		p = original_peek(i)
+		p = eu:peek(i)
 		if p != leader[1] or bad then
 			bad += 1
 			if bad = 1 then
@@ -1011,7 +963,7 @@ export procedure show_block(sequence block_info)
 	bad = 0
 	-- check post-block
 	for i = start+len to start+len+BORDER_SPACE-1 do
-		p = original_peek(i)
+		p = eu:peek(i)
 		if p != trailer[1] or bad then
 			bad += 1
 			if bad = 1 then
@@ -1052,18 +1004,14 @@ export procedure check_all_blocks()
 			a = block[1]
 			n = block[2]
 			if not equal(leader, 
-						 original_peek({a-BORDER_SPACE, BORDER_SPACE})) then
+						eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
 				show_block(block)
 			elsif not equal(trailer, 
-						 original_peek({a+n, BORDER_SPACE})) then
+						 eu:peek({a+n, BORDER_SPACE})) then
 				show_block(block)
 			end if          
 		end if
 	end for
-end procedure
-
-procedure original_call(atom addr)
-	call(addr)
 end procedure
 
 --**
@@ -1093,7 +1041,7 @@ end procedure
 override procedure call(atom addr)
 -- safe call - machine code must start in block that we own
 	if safe_address(addr, 1) then
-		original_call(addr)
+		eu:call(addr)
 		if check_calls then
 			check_all_blocks() -- check for any corruption
 		end if
@@ -1102,27 +1050,114 @@ override procedure call(atom addr)
 	end if
 end procedure
 
-procedure original_c_proc(integer i, sequence s)
-	c_proc(i, s)
-end procedure
+--**
+-- Signature:
+-- global procedure c_proc(integer rid, sequence args)
+--
+-- Description:
+-- Call a C void function, or machine code function, or translated/compiled Euphoria procedure by routine id.
+--
+-- Parameters:
+--		# ##rid##: an integer, the routine_id of the external function being called.
+--		# ##args##: a sequence, the list of parameters to pass to the function
+--
+-- Errors:
+-- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
+-- the routine being called, an error occurs.
+--
+-- Comments:
+-- ##rid## must have been returned by [[:define_c_proc]](), **not** by [[:routine_id]](). The
+-- type checks are different, and you would get a machine level exception in the best case.
+--
+-- If the procedure does not take any arguments then ##args## should be ##{}##.
+--
+-- If you pass an argument value which contains a fractional part, where the C void function expects
+-- a C integer type, the argument will be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be passed as -5.
+--
+-- Example 1:
+-- <eucode>
+-- atom user32, hwnd, rect
+-- integer GetClientRect
+-- 
+-- -- open user32.dll - it contains the GetClientRect C function
+-- user32 = open_dll("user32.dll")
+-- 
+-- -- GetClientRect is a VOID C function that takes a C int
+-- -- and a C pointer as its arguments:
+-- GetClientRect = define_c_proc(user32, "GetClientRect",
+--                               {C_INT, C_POINTER})
+-- 
+-- -- pass hwnd and rect as the arguments
+-- c_proc(GetClientRect, {hwnd, rect})
+-- </eucode>
+--
+-- See Also:
+-- [[:c_proc]], [[:define_c_func]], [[:open_dll]], [[../docs/platform.txt]]
+-- 
 
--- TODO: document, as well as in dll.e
-export procedure c_proc(integer i, sequence s)
-	original_c_proc(i, s)
+global procedure c_proc(integer i, sequence s)
+	eu:c_proc(i, s)
 	if check_calls then
 		check_all_blocks()
 	end if
 end procedure
 
-function original_c_func(integer i, sequence s)
-	return c_func(i, s)
-end function
-
--- TODO: document, as well as in dll.e
-export function c_func(integer i, sequence s)
+--**
+-- Signature:
+-- global function c_func(integer rid, sequence args)
+--
+-- Description:
+-- Call a C function, or machine code function, or translated/compiled Euphoria function by routine id. 
+--
+-- Parameters:
+--		# ##rid##: an integer, the routine_id of the external function being called.
+--		# ##args##: a sequence, the list of parameters to pass to the function
+--
+-- Returns:
+--	An **object**, whose type and meaning was defined on calling [[:define_c_func]]().
+--
+-- Errors:
+-- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
+-- the routine being called, an error occurs.
+--
+-- Comments:
+-- ##rid## must have been returned by [[:define_c_func]](), **not** by [[:routine_id]](). The
+-- type checks are different, and you would get a machine level exception in the best case.
+--
+-- If the function does not take any arguments then ##args## should be ##{}##.
+--
+-- If you pass an argument value which contains a fractional part, where the C function expects
+-- a C integer type, the argument will be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be passed as -5.
+-- 
+-- The function could be part of a .dll or .so created by the Euphoria To C Translator. In this case, 
+-- a Euphoria atom or sequence could be returned. C and machine code functions can only return 
+-- integers, or more generally, atoms (IEEE floating-point numbers).
+--  
+-- Example 1:
+-- <eucode>
+--  atom user32, hwnd, ps, hdc
+-- integer BeginPaint
+--
+-- -- open user32.dll - it contains the BeginPaint C function
+-- user32 = open_dll("user32.dll")
+-- 
+-- -- the C function BeginPaint takes a C int argument and
+-- -- a C pointer, and returns a C int as a result:
+-- BeginPaint = define_c_func(user32, "BeginPaint",
+--                            {C_INT, C_POINTER}, C_INT)
+-- 
+-- -- call BeginPaint, passing hwnd and ps as the arguments,
+-- -- hdc is assigned the result:
+-- hdc = c_func(BeginPaint, {hwnd, ps})
+-- </eucode>
+--
+-- See Also: 
+-- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[../docs/platform.txt]]
+--        
+global function c_func(integer i, sequence s)
 	object r
 	
-	r = original_c_func(i, s)
+	r = eu:c_func(i, s)
 	if check_calls then
 		check_all_blocks()
 	end if 
@@ -1197,9 +1232,9 @@ export function prepare_block(atom a, integer n)
 	if a = 0 then
 		die("OUT OF MEMORY!")
 	end if
-	original_poke(a, leader)
+	eu:poke(a, leader)
 	a += BORDER_SPACE
-	original_poke(a+n, trailer)
+	eu:poke(a+n, trailer)
 	allocation_num += 1
 --  if allocation_num = ??? then 
 --      trace(1) -- find out who allocated this block number
@@ -1282,9 +1317,9 @@ export procedure free(machine_addr a)
 				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
 			end if
 			n = safe_address_list[i][2]
-			if not equal(leader, original_peek({a-BORDER_SPACE, BORDER_SPACE})) then
+			if not equal(leader, eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
-			elsif not equal(trailer, original_peek({a+n, BORDER_SPACE})) then
+			elsif not equal(trailer, eu:peek({a+n, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
 			end if          
 			machine_proc(M_FREE, a-BORDER_SPACE)

@@ -305,7 +305,7 @@ end function
 -- See Also
 --     ##demo\callmach.ex##, [[:c_func]], [[:define_c_proc]], [[:c_proc]], [[:open_dll]]
 
-export function define_c_func(object lib, object routine_name, 
+export function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
@@ -359,6 +359,104 @@ end function
 export function call_back(object id)
 	return machine_func(M_CALL_BACK, id)
 end function
+
+--**
+-- Signature:
+-- global function c_func(integer rid, sequence args)
+--
+-- Description:
+-- Call a C function, or machine code function, or translated/compiled Euphoria function by routine id. 
+--
+-- Parameters:
+--		# ##rid##: an integer, the routine_id of the external function being called.
+--		# ##args##: a sequence, the list of parameters to pass to the function
+--
+-- Returns:
+--	An **object**, whose type and meaning was defined on calling [[:define_c_func]]().
+--
+-- Errors:
+-- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
+-- the routine being called, an error occurs.
+--
+-- Comments:
+-- ##rid## must have been returned by [[:define_c_func]](), **not** by [[:routine_id]](). The
+-- type checks are different, and you would get a machine level exception in the best case.
+--
+-- If the function does not take any arguments then ##args## should be ##{}##.
+--
+-- If you pass an argument value which contains a fractional part, where the C function expects
+-- a C integer type, the argument will be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be passed as -5.
+-- 
+-- The function could be part of a .dll or .so created by the Euphoria To C Translator. In this case, 
+-- a Euphoria atom or sequence could be returned. C and machine code functions can only return 
+-- integers, or more generally, atoms (IEEE floating-point numbers).
+--  
+-- Example 1:
+-- <eucode>
+--  atom user32, hwnd, ps, hdc
+-- integer BeginPaint
+--
+-- -- open user32.dll - it contains the BeginPaint C function
+-- user32 = open_dll("user32.dll")
+-- 
+-- -- the C function BeginPaint takes a C int argument and
+-- -- a C pointer, and returns a C int as a result:
+-- BeginPaint = define_c_func(user32, "BeginPaint",
+--                            {C_INT, C_POINTER}, C_INT)
+-- 
+-- -- call BeginPaint, passing hwnd and ps as the arguments,
+-- -- hdc is assigned the result:
+-- hdc = c_func(BeginPaint, {hwnd, ps})
+-- </eucode>
+--
+-- See Also: 
+-- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[../docs/platform.txt]]
+--        
+
+--**
+-- Signature:
+-- global procedure c_proc(integer rid, sequence args)
+--
+-- Description:
+-- Call a C void function, or machine code function, or translated/compiled Euphoria procedure by routine id.
+--
+-- Parameters:
+--		# ##rid##: an integer, the routine_id of the external function being called.
+--		# ##args##: a sequence, the list of parameters to pass to the function
+--
+-- Errors:
+-- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
+-- the routine being called, an error occurs.
+--
+-- Comments:
+-- ##rid## must have been returned by [[:define_c_proc]](), **not** by [[:routine_id]](). The
+-- type checks are different, and you would get a machine level exception in the best case.
+--
+-- If the procedure does not take any arguments then ##args## should be ##{}##.
+--
+-- If you pass an argument value which contains a fractional part, where the C void function expects
+-- a C integer type, the argument will be rounded towards 0. e.g. 5.9 will be passed as 5, -5.9 will be passed as -5.
+--
+-- Example 1:
+-- <eucode>
+-- atom user32, hwnd, rect
+-- integer GetClientRect
+-- 
+-- -- open user32.dll - it contains the GetClientRect C function
+-- user32 = open_dll("user32.dll")
+-- 
+-- -- GetClientRect is a VOID C function that takes a C int
+-- -- and a C pointer as its arguments:
+-- GetClientRect = define_c_proc(user32, "GetClientRect",
+--                               {C_INT, C_POINTER})
+-- 
+-- -- pass hwnd and rect as the arguments
+-- c_proc(GetClientRect, {hwnd, rect})
+-- </eucode>
+--
+-- See Also:
+-- [[:c_proc]], [[:define_c_func]], [[:open_dll]], [[../docs/platform.txt]]
+-- 
 
 --**
 -- Free (delete) any console window associated with your program.
