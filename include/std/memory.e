@@ -5,14 +5,14 @@
 --
 -- Warning: Some of these routines require a knowledge of 
 -- machine-level programming. You could crash your system!
-
--- These routines, along with peek(), poke() and call(), let you access all 
--- of the features of your computer.  You can read and write to any memory 
+--
+-- These routines, along with peek(), poke() and call(), let you access all
+-- of the features of your computer.  You can read and write to any memory
 -- location, and you can create and execute machine code subroutines.
-
+--
 -- If you are manipulating 32-bit addresses or values, remember to use
 -- variables declared as atom. The integer type only goes up to 31 bits.
-
+--
 -- Writing characters to screen memory with poke() is much faster than  
 -- using puts(). Address of start of text screen memory:
 --
@@ -47,10 +47,7 @@ export type machine_addr(atom a)
 end type
 
 --****
--- === Routines
-
---****
--- ==== Memory management
+-- === Memory management
 
 --**
 -- Allocate a contiguous block of memory.

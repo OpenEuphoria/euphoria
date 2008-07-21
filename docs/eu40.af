@@ -27,8 +27,6 @@
 
 # API docs
 ../docs/api.txt
-../include/std/dos/base_mem.e
-../include/std/dos/register.e
 ../include/std/console.e
 ../include/std/convert.e
 ../include/std/database.e
@@ -50,6 +48,7 @@
 ../include/std/math.e
 ../include/std/memory.e
 ../include/std/dos/memory.e
+../include/std/dos/base_mem.e
 ../include/std/safe.e
 ../include/std/dos/safe.e
 ../include/std/mouse.e

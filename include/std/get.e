@@ -10,10 +10,10 @@ include error.e
 --
 -- <<LEVELTOC depth=2>>
 --
--- === Constants
 --
 
 --****
+-- === Constants
 -- Error status values returned from get() and value() are
 -- 
 -- * ##GET_SUCCESS## = 0,
@@ -21,16 +21,12 @@ include error.e
 -- * ##GET_FAIL## = 1,
 -- * ##GET_NOTHING## = -2
 
+--**
 export constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
 				GET_NOTHING = -2
 
---****
--- Answer type for ##get##() and ##value##().
--- 
--- * ##GET_SHORT_ANSWER##
--- * ##GET_LONG_ANSWER##
 
 constant DIGITS = "0123456789",
 		 HEX_DIGITS = DIGITS & "ABCDEF",
@@ -53,9 +49,6 @@ natural string_next
 
 char ch  -- the current character
 
---****
--- === Routines
---
 
 procedure get_ch()
 -- set ch to the next character in the input stream (either string or file)
@@ -469,6 +462,11 @@ function Get2()
 
 end function
 
+--**
+-- Answer type for ##get##() and ##value##().
+-- 
+-- * ##GET_SHORT_ANSWER##
+-- * ##GET_LONG_ANSWER##
 export constant
 	GET_SHORT_ANSWER = routine_id("Get"),
 	GET_LONG_ANSWER  = routine_id("Get2")
@@ -495,6 +493,10 @@ function get_value(object target, integer start_point, integer answer_type)
 	end if
 	return call_func(answer_type, {})
 end function
+
+--****
+-- === Routines
+--
 
 --**
 -- Input, from an open file, a human-readable string of characters representing a Euphoria object.

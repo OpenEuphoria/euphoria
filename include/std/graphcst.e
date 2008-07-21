@@ -3,6 +3,7 @@
 --****
 -- === Constants
 --
+--**
 -- error codes returned by read_bitmap(), save_bitmap() and save_screen()
 -- * BMP_SUCCESS,
 -- * BMP_OPEN_FAILED,
@@ -16,7 +17,9 @@ export enum
 	BMP_UNEXPECTED_EOF,
 	BMP_UNSUPPORTED_FORMAT,
 	BMP_INVALID_MODE
-		 
+
+--**
+-- Fields for the sequence returned by [[:video_config]]()
 export enum
 	VC_COLOR,
 	VC_MODE,
@@ -28,10 +31,9 @@ export enum
 	VC_PAGES
 
 --****
--- === Constants
---
 -- ==== Colors
--- ===== Normal
+--**
+-- Normal:
 -- * BLACK
 -- * BLUE
 -- * BROWN
@@ -43,7 +45,7 @@ export enum
 -- * WHITE
 -- * YELLOW
 --
--- ===== Bright
+-- Bright:
 -- * BRIGHT_BLUE
 -- * BRIGHT_CYAN
 -- * BRIGHT_GREEN
@@ -51,7 +53,7 @@ export enum
 -- * BRIGHT_RED
 -- * BRIGHT_WHITE
 --
--- ===== Miscellaneous
+-- Miscellaneous
 -- * BLINKING
 
 -- COLOR values -- for characters and pixels

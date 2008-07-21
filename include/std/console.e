@@ -15,8 +15,7 @@ constant
 	M_CHECK_BREAK = 43
 
 --****
--- === Routines
--- ==== Keyboard related routines
+-- === Keyboard related routines
 
 --**
 -- Signature:
@@ -275,7 +274,7 @@ export function prompt_string(sequence prompt)
 end function
 
 --****
---==== Gross Platform Text Graphics
+-- === Cross Platform Text Graphics
 
 -- machine() commands
 constant M_CURSOR         = 6,
@@ -323,7 +322,7 @@ end function
 end ifdef
 
 --**
--- Sugnature:
+-- Signature:
 -- global procedure clear_screen()
 --
 -- Description:
