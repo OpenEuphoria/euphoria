@@ -1,5 +1,8 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
+-- == Dynamic Calling
+--
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
@@ -7,8 +10,7 @@
 
 --****
 -- Dynamic calling of routines
---=== Routines
---==== Accessing Euphoria coded routines
+-- === Accessing Euphoria coded routines
 
 --**
 -- Signature
@@ -126,6 +128,7 @@
 -- See Also:
 -- [[:call_proc]], [[:routine_id]], [[:c_func]]
 -- 
+
 --**
 -- Signature:
 -- global procedure call_proc(integer id, sequence args)
@@ -171,7 +174,7 @@
 -- [[:call_func]], [[:routine_id]], [[:c_proc]]
 
 --****
---==== Accessing Euphoria internals dynamically
+--=== Accessing Euphoria internals dynamically
 
 --**
 -- Signature:
@@ -212,8 +215,6 @@
 -- See Also: 
 -- [[:machine_proc]]
 
-
-
 ifdef SAFE then
 	export include safe.e
 	ifdef DOS32 then
@@ -225,6 +226,3 @@ else
 		export include .\dos\memory.e
 	end ifdef
 end ifdef
-
-
-

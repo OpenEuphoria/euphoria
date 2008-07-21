@@ -187,6 +187,8 @@ function safe_address(atom start, integer len)
 	end if
 end function
 
+--**
+
 export procedure die(sequence msg)
 -- Terminate with a message.
 -- makes warning beeps first so you can see what's happening on the screen

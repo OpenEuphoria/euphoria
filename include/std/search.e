@@ -290,6 +290,160 @@ export function find_all(object needle, sequence haystack, integer start=1)
 end function
 
 --**
+-- Flags for [[:find_nested]]()
+
+export constant
+    NESTED_ANY=1,
+    NESTED_ALL=2,
+    NESTED_INDEX=4,
+    NESTED_BACKWARD=8
+
+--**
+-- Finds any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
+--
+-- Parameters:
+--		# ##needle##: an object, either what to look up, or a list of items to look up
+--		# ##haystack##: a sequence, where to look up
+--		# ##flags##: options to the function, see Comments section.  Defaults to 0.
+--		# ##routine##: an integer, the routine_id of an user supplied equal function. Defaults to -1.
+--
+-- Returns:
+-- A possibly empty **sequence** of results, one for each hit.
+--
+-- Comments:
+-- Each item in the returned sequence is either a sequence of indexes, or a pair {sequence of indexes, index in ##needle##}.
+--
+-- The following flags are available to fine tune the search:
+-- * NESTED_BACKWARD: if on ##flags##, search is performed backward. Default is forward.
+-- * NESTED_ALL: if on ##flags##, all occurrences are looked for. Default is one hit only.
+-- * NESTED_ANY: if present on ##flags##, ##needle## is a list of items to look for. Not the default.
+-- * NESTED_INDEXES: if present on ##flags##, an individual result is a pair {position, index 
+--   in ##needle##}. Default is just return the position.
+--
+-- If ##s## is a single index list, or position, from the returned sequence, then ##fetch(haystack, s) = needle##.
+--
+-- If a routine id is supplied, the routine must behave like [[:equal]]() if the NESTED_ANY
+-- flag is not supplied, and like [[:find]]() if it is. The routine is being passed the current
+-- ##haystack## item and ##needle##. The returned integer is interpreted as if returned by
+-- [[:equal]]() or [[:find]]().
+--
+-- If the NESTED_ANY flag is specified, and ##needle## is an atom, then the flag is removed.
+--
+-- Example 1:
+-- <eucode>
+-- sequence s = find_nested(3, {5, {4, {3, {2}}}})
+-- -- s is {2 ,2 ,1}
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL)
+-- -- s is {{3,2}, {3,1}, {2}}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_INDEXES + NESTED_ALL)
+-- -- s is {{{2}, 1}, {{3, 1}, 2}, {{3, 2}, 1}}
+--
+-- See Also:
+-- [[:find]], [[:rfind]], [[:find_any]], [[:fetch]]
+
+export function find_nested(object needle, sequence haystack, integer flags=0, integer routine=-1)
+	sequence occurrences = {} -- accumulated results
+	integer depth = 0
+	sequence branches = {}, indexes = {}, last_indexes = {} -- saved states
+	integer last_idx = length(haystack), current_idx = 1, direction = 1 -- assume forward searches more frequent
+	object x
+	integer rc, any = and_bits(flags, NESTED_ANY)
+	
+	if and_bits(flags,NESTED_BACKWARD) then
+	    current_idx = last_idx
+	    last_idx = 1
+	    direction = -1
+	end if
+	any = any and sequence(needle)
+
+	while 1 do -- traverse the whole haystack tree
+		while compare(current_idx, last_idx) != direction do
+	        x = haystack[current_idx]
+	        
+	        -- is x what we want?
+			if routine <= -1 then
+	         	if any then
+	         		rc = find(x, needle)
+	         	else
+					rc = equal(x, needle)
+	         	end if
+	        else
+		        rc = call_func(routine, {x, needle})
+	        end if
+	        
+	        if rc then
+	        -- yes, it is
+	            sequence info
+
+				-- inline head() from sequence.e
+				if depth < length(indexes) then
+					info = indexes[1..depth] & current_idx
+				else
+					info = indexes & current_idx
+				end if
+				
+	            if and_bits(flags, NESTED_INDEX) then
+	               info = {info, rc}
+	            end if
+	            if and_bits(flags, NESTED_ALL) then
+	                occurrences = append(occurrences, info)
+	            else
+	                return info
+	            end if
+	        end if
+	        
+	        -- either it wasn't, or we keep going
+	        if compare(x, {})=1 then
+	        -- this is a subtree, search inside
+	            -- save state
+				depth += 1
+	            if length(indexes) < depth then
+	                indexes &= current_idx
+	                branches = append(branches, haystack)
+	                last_indexes &= last_idx
+	            else
+	                indexes[depth] = current_idx
+	                branches[depth] = haystack
+	                last_indexes[depth] = last_idx
+	            end if
+	            
+	            -- set new state
+	            haystack = x
+	            if direction = 1 then
+	                current_idx = 1
+	                last_idx = length(haystack)
+	            else
+	                last_idx = 1
+	                current_idx = length(haystack)
+	            end if
+	        else
+	            -- next item
+				current_idx += direction
+	        end if
+	    end while
+	
+	    -- return or backtrack
+	    if depth=0 then
+	        return occurrences -- either accumulated results, or {} if none -> ok
+	    end if
+	
+	    -- restore state
+	    haystack = branches[depth]
+	    last_idx = last_indexes[depth]
+	    current_idx = indexes[depth] + direction
+	    depth -= 1
+	end while
+end function
+
+--**
 -- Match all items of haystack in needle.
 --
 -- Parameters:

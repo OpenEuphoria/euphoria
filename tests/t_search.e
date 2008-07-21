@@ -56,5 +56,13 @@ test_equal("binary_search empty input", -1, binary_search('A',{}))
 
 test_equal("binary_search strings", 5, binary_search("cat",{"apple", "bat", "car", "cast", "cat", "category", "dog"}))
 
+test_equal("find_nested, standard", {2, 3, 2}, find_nested(3,{1,{2,{},{1,3}},{1,{2,3}}}))
+test_equal("find_nested, standard, at top", {1}, find_nested(1,{1,{2,{},{1,3}},{1,{2,3}}}))
+test_equal("find_nested, backwards", {3, 2, 2}, find_nested(3,{1,{2,{},{1,3}},{1,{2,3}}},NESTED_BACKWARD))
+test_equal("find_nested, all hits", {{2, 3, 2}, {3, 2, 2}}, find_nested(3,{1,{2,{},{1,3}},{1,{2,3}}},NESTED_ALL))
+test_equal("find_nested, all hits, any in list",
+		{{{2,1}, 2}, {{2,3,2}, 1}, {{3,2,1}, 2}, {{3,2,2}, 1}}
+		, find_nested({3,2},{1,{2,{},{1,3}},{1,{2,3}}},NESTED_ALL+NESTED_ANY+NESTED_INDEX))
+
 test_report()
 
