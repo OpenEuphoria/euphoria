@@ -18,15 +18,14 @@ without trace
 --*****************
 -- Local variables
 --*****************
-sequence branch_list
-branch_list = {}
+sequence branch_list = {}
 
-integer short_circuit      -- are we doing short-circuit code?
+integer short_circuit = 0  -- are we doing short-circuit code?
 						   -- > 0 means yes - if/elsif/while but not
 						   -- in args, subscripts, slices, {,,}. 
-short_circuit = 0
-boolean short_circuit_B    -- are we in the skippable part of a short
-short_circuit_B = FALSE    -- circuit expression? given short_circuit is TRUE.
+						   
+boolean short_circuit_B = FALSE   -- are we in the skippable part of a short
+                                  -- circuit expression? given short_circuit is TRUE.
 
 integer SC1_patch          -- place to patch jump address for SC1 ops 
 integer SC1_type           -- OR or AND 
@@ -68,27 +67,21 @@ sequence loop_stack
 sequence if_stack
 
 -- Expression statistics:
-integer side_effect_calls -- number of calls to functions with side-effects
-side_effect_calls = 0     -- on local/global variables
+integer side_effect_calls = 0 -- number of calls to functions with side-effects
+                              -- on local/global variables
 
-integer factors           -- number of factors parsed
-factors = 0
+integer factors = 0           -- number of factors parsed
 
-integer lhs_subs_level    -- number of levels of subscripting of lhs var on RHS
-lhs_subs_level = -1
+integer lhs_subs_level = -1   -- number of levels of subscripting of lhs var on RHS
+symtab_index left_sym = 0     -- var used on LHS of assignment
 
-symtab_index left_sym     -- var used on LHS of assignment
-left_sym = 0
+sequence canned_tokens = {}   -- recording stack when parser is in recording mode
+					          -- this sequence will be saved and the tape played back whenever needed
 
-sequence canned_tokens    -- recording stack when parser is in recording mode
-					      -- this sequence will be saved and the tape played back whenever needed
-canned_tokens={}
-integer canned_index      -- previous playback position
-canned_index=0
+integer canned_index = 0      -- previous playback position
 
 procedure EndLineTable()
 -- put marker at end of current line number table 
-
 	LineTable = append(LineTable, -2)
 end procedure
 
@@ -445,17 +438,11 @@ procedure start_playback(sequence s)
     Parser_mode = PAM_PLAYBACK
 end procedure
             
-sequence parseargs_states
-parseargs_states={}
-sequence private_list,private_sym
-private_list={}
-private_sym={}
-integer lock_scanner
-lock_scanner=0
-integer use_private_list
-use_private_list = 0
-integer on_arg
-on_arg = 0
+sequence parseargs_states={}
+sequence private_list = {}, private_sym = {}
+integer lock_scanner = 0
+integer use_private_list = 0
+integer on_arg = 0
 
 procedure restore_parseargs_states()
 	sequence s
@@ -527,7 +514,6 @@ function read_recorded_token(integer n)
   	return t
 end function
 
-
 function next_token()
 -- read next scanner token
 	token t
@@ -536,16 +522,16 @@ function next_token()
 	if sequence(backed_up_tok) then
 		t = backed_up_tok  
 		backed_up_tok = UNDEFINED
-    elsif Parser_mode=PAM_PLAYBACK then
+    elsif Parser_mode = PAM_PLAYBACK then
         if canned_index <= length(canned_tokens) then
             t = canned_tokens[canned_index]
-			if canned_index<length(canned_tokens) then
+			if canned_index < length(canned_tokens) then
 				canned_index += 1
 	        else -- tape ended
 	            s = restore_parser()
 	        end if
         end if
-        if t[T_ID]=RECORDED then
+        if t[T_ID] = RECORDED then
             t=read_recorded_token(t[T_SYM])
         end if
     elsif lock_scanner then
@@ -760,7 +746,7 @@ end procedure
 
 procedure Factor()
 -- parse a factor in an expression
-       token tok, tok2, tok3
+	token tok, tok2, tok3
 	integer id, n, scope, opcode, e
 	integer save_factors, save_lhs_subs_level
 	symtab_index sym
@@ -769,7 +755,7 @@ procedure Factor()
 	tok = next_token()
 	id = tok[T_ID]
 	if id = RECORDED then
-	    tok = read_recorded_token(tok[T_SYM])
+		tok = read_recorded_token(tok[T_SYM])
 		id = tok[T_ID]
 	end if
 	if id = VARIABLE or id = QUALIFIED_VARIABLE then
@@ -960,7 +946,6 @@ procedure Factor()
 				   {LexName(id)}))
 	end if
 end procedure
-
 
 procedure UFactor()
 -- parse an optional unary op applied to a factor 
@@ -1418,96 +1403,102 @@ function exit_level(token tok,integer flag)
 end function
 
 procedure GLabel_statement()
-    token tok
-    object labbel
-    object laddr
-    integer n
-    tok = next_token()
+	token tok
+	object labbel
+	object laddr
+	integer n
 
-    if tok[T_ID] != STRING then
-	CompileErr("A label clause must be followed by a constant string")
+	tok = next_token()
+
+	if tok[T_ID] != STRING then
+		CompileErr("A label clause must be followed by a constant string")
+	end if
+    
+	labbel = SymTab[tok[T_SYM]][S_OBJ]
+	laddr = length(Code) + 1
+	
+	if find(labbel, goto_labels) then
+		CompileErr("Duplicate label name")
     end if
-    labbel=SymTab[tok[T_SYM]][S_OBJ]
-    laddr = length(Code)+1
-    if find(labbel,goto_labels) then
-	CompileErr("Duplicate label name")
-    end if
-    goto_labels = append(goto_labels,labbel)
-    goto_addr = append(goto_addr,laddr)
-    n = find(labbel,goto_delay)
-    while n do
-	backpatch(goto_list[n],laddr)
-	goto_delay[n] = "" --clear it
-	goto_line[n] = {-1,""} --clear it
-	n = find(labbel,goto_delay)
-    end while
-    if TRANSLATE then
-    	emit_op(GLABEL)  
-	emit_addr(laddr)
-    end if
+	
+	goto_labels = append(goto_labels, labbel)
+	goto_addr = append(goto_addr, laddr)
+	
+	while n entry do
+		backpatch(goto_list[n], laddr)
+		goto_delay[n] = "" --clear it
+		goto_line[n] = {-1,""} --clear it
+		
+	entry
+		n = find(labbel, goto_delay)
+	end while
+	
+	if TRANSLATE then
+		emit_op(GLABEL)  
+		emit_addr(laddr)
+	end if
 end procedure
 
 procedure Goto_statement()
 -- Parse an exit statement
-    token tok
-    integer n
-    integer num_labels
+	token tok
+	integer n
+	integer num_labels
 
-    tok = next_token()
-    num_labels = length(goto_labels) 
+	tok = next_token()
+	num_labels = length(goto_labels) 
     
-    if tok[T_ID]=STRING then
-        n = find(SymTab[tok[T_SYM]][S_OBJ],goto_labels)
-        if n = 0 then
-		    goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
-		    goto_list &= length(Code)+2 --not 1???
-		    goto_line &= {{line_number,ThisLine}}
-	--elsif TRANSLATE then
-		--help the back-end figure out what the label is
-	    --goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
-	    --goto_list &= -1
-	    --goto_line &= {{line_number,ThisLine}}
+	if tok[T_ID]=STRING then
+		n = find(SymTab[tok[T_SYM]][S_OBJ],goto_labels)
+		if n = 0 then
+			goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
+			goto_list &= length(Code)+2 --not 1???
+			goto_line &= {{line_number,ThisLine}}
+		--elsif TRANSLATE then
+			--help the back-end figure out what the label is
+		    --goto_delay &= {SymTab[tok[T_SYM]][S_OBJ]}
+		    --goto_list &= -1
+	    	--goto_line &= {{line_number,ThisLine}}
         end if 
-		tok = next_token()
-    else
-        CompileErr("Goto statement without a string label.")
-        --CompileErr("Goto statement without a string label is not supported.")
-    end if
+        tok = next_token()
+	else
+		CompileErr("Goto statement without a string label.")
+	end if
 
-    emit_op(GOTO)  
-    if n = 0 then
-	    emit_addr(0) -- to be back-patched
-    else
-	    emit_addr(goto_addr[n])
-    end if
+	emit_op(GOTO)  
+	if n = 0 then
+		emit_addr(0) -- to be back-patched
+	else
+		emit_addr(goto_addr[n])
+	end if
+    
     putback(tok)
     NotReached(tok[T_ID], "goto")
 end procedure
 
 procedure Exit_statement()
 -- Parse an exit statement
-    token tok
-    sequence by_ref
+	token tok
+	sequence by_ref
 
-    if not length(loop_stack) then
-    	CompileErr("exit statement must be inside a loop")
-    end if
+	if not length(loop_stack) then
+		CompileErr("exit statement must be inside a loop")
+	end if
 
-    by_ref = exit_level(next_token(),0) -- can't pass tok by reference
-    emit_op(EXIT)  
-    AppendXList(length(Code)+1)
-    exit_delay &= by_ref[1]
-    emit_forward_addr()    -- to be back-patched
-    tok = by_ref[2] 
-    putback(tok) 
-
+	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
+	emit_op(EXIT)  
+	AppendXList(length(Code)+1)
+	exit_delay &= by_ref[1]
+	emit_forward_addr()    -- to be back-patched
+	tok = by_ref[2] 
+	putback(tok) 
 end procedure
 
 procedure Continue_statement()
 -- Parse a continue statement
-    token tok
-    sequence by_ref
-    integer loop_level
+	token tok
+	sequence by_ref
+	integer loop_level
 
 	if not length(loop_stack) then
 		CompileErr("continue statement must be inside a loop")
@@ -1573,24 +1564,23 @@ function in_switch()
 end function
 
 procedure Break_statement()
--- Parse an break statement
-    token tok
-    sequence by_ref
+	token tok
+	sequence by_ref
 
-    if not length(if_labels) then
-    	CompileErr("break statement must be inside a if or a switch block")
-    end if
+	if not length(if_labels) then
+		CompileErr("break statement must be inside a if or a switch block")
+	end if
 
-    by_ref = exit_level(next_token(),1)
+	by_ref = exit_level(next_token(),1)
 
-   	emit_op(ELSE)
-    AppendEList(length(Code)+1)
+	emit_op(ELSE)
+	AppendEList(length(Code)+1)
 
-    break_delay &= by_ref[1]
-    emit_forward_addr()    -- to be back-patched
-    tok = by_ref[2]
-    putback(tok)
-    NotReached(tok[T_ID], "break")
+	break_delay &= by_ref[1]
+	emit_forward_addr()    -- to be back-patched
+	tok = by_ref[2]
+	putback(tok)
+	NotReached(tok[T_ID], "break")
 end procedure
 
 integer forward_Statement_list
@@ -1768,12 +1758,12 @@ end procedure
 
 procedure exit_loop(integer exit_base)
 	PatchXList(exit_base)
-    loop_labels = loop_labels[1..$-1]
-    loop_stack = loop_stack[1..$-1]
-    continue_addr = continue_addr[1..$-1]
-    retry_addr = retry_addr[1..$-1]
-    entry_addr = entry_addr[1..$-1]
-    block_index -= 1
+	loop_labels = loop_labels[1..$-1]
+	loop_stack = loop_stack[1..$-1]
+	continue_addr = continue_addr[1..$-1]
+	retry_addr = retry_addr[1..$-1]
+	entry_addr = entry_addr[1..$-1]
+	block_index -= 1
 end procedure
 
 procedure push_switch()
@@ -2059,6 +2049,7 @@ end procedure
 
 integer top_level_parser
 integer live_ifdef = 0
+
 procedure Ifdef_statement()
 	sequence option
 	integer matched = 0, nested_count = 0, has_matched = 0,  in_matched = 0, dead_ifdef = 0
@@ -2372,7 +2363,33 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			emit_opnd(sym)
 
 			if tok[T_ID] = EQUALS then
-				val = IntegerToken()
+				integer negate = 1
+				
+				tok = next_token()
+				if tok[T_ID] = MINUS then
+					negate = -1
+					tok = next_token()
+				end if
+				
+				if tok[T_ID] = ATOM then
+					valsym = tok[T_SYM]
+
+				elsif SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
+					if SymTab[tok[T_SYM]][S_CODE] then
+						valsym = SymTab[tok[T_SYM]][S_CODE]
+						
+					else
+						CompileErr("enum constants must be assigned an atom")
+						
+					end if
+
+				else
+					CompileErr("atom or constant expected")
+
+				end if
+				
+				valsym = tok[T_SYM]
+				val = SymTab[valsym][S_OBJ] * negate
 				Push(NewIntSym(val))
 				val += 1
 			else

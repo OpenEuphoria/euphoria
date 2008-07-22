@@ -130,7 +130,6 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
