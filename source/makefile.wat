@@ -271,7 +271,6 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\0emory.obj
@@ -571,7 +570,7 @@ exwc.exe : interpreter_objects
 	wrc -q -ad exw.res exwc.exe
 
 svn_rev : .SYMBOLIC
-	$(EX) revget.ex
+	$(EX) -i ..\include revget.ex
 
 interpreter : .SYMBOLIC builddirs 
         wmake -f makefile.wat exw.exe EX=exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
