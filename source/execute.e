@@ -1376,6 +1376,21 @@ procedure opWHILE()
 	end if
 end procedure
 
+procedure opSWTICH_SPI()
+-- pc+1: switch value
+-- pc+2: case values
+-- pc+3: jump_table
+-- pc+4: else jump
+	if integer( val[Code[pc+1]] ) then
+		a = val[Code[pc+1]] - val[Code[pc+2]]
+		if a > 0 and a <= length( val[Code[pc+3]] ) then
+			pc += val[Code[pc+3]][a]
+			return
+		end if
+	end if
+	pc = Code[pc+4]
+end procedure
+
 procedure opSWITCH()
 -- pc+1: switch value
 -- pc+2: case values
@@ -3344,6 +3359,8 @@ procedure InitBackEnd(integer ignore)
 			name = "GREATEREQ_IFW"
 		elsif equal(name, "LESSEQ_IFW_I") then
 			name = "LESSEQ_IFW"
+		elsif equal(name, "SWITCH_I") then
+			name = "SWITCH"
 		end if
 		
 		operation[i] = routine_id("op" & name)

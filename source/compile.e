@@ -5210,6 +5210,8 @@ global procedure init_opcodes()
 		elsif find(name, {"DISPLAY_VAR", "ERASE_PRIVATE_NAMES", 
 						  "ERASE_SYMBOL", "NOP2"}) then
 			name = "PROFILE"
+		elsif find(name, {"SWITCH_SPI", "SWITCH_I"}) then
+			name = "SWITCH"
 		elsif find(name, {"ENDFOR_INT_UP", "ENDFOR_UP", "SC2_NULL", 
 						  "ENDFOR_DOWN", "ENDFOR_INT_DOWN1", "ASSIGN_SUBS2", "PLATFORM",
 						  "ENDFOR_INT_DOWN",

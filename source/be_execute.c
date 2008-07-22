@@ -1279,6 +1279,8 @@ void code_set_pointers(int **code)
 				break;
 				
 			case SWITCH:
+			case SWITCH_I:
+			case SWITCH_SPI:
 				code[i+1] = SET_OPERAND(code[i+1]); // select val
 				code[i+2] = SET_OPERAND(code[i+2]); // cases
 				code[i+3] = SET_OPERAND(code[i+3]); // jump table
@@ -1673,8 +1675,10 @@ void do_exec(int *start_pc)
   &&L_OPTION_SWITCHES, &&L_RETRY, &&L_SWITCH,
 /* 187 (previous)*/
   NULL, NULL,/* L_CASE, L_NOPSWITCH not emitted*/
-  &&L_GOTO, &&L_GLABEL, &&L_SPLICE, &&L_INSERT
+  &&L_GOTO, &&L_GLABEL, &&L_SPLICE, &&L_INSERT,
 /* 193 (previous) */
+  &&L_SWITCH_SPI, &&L_SWITCH_I
+/* 195 (previous) */
   };
 #endif
 #endif
@@ -2040,6 +2044,76 @@ void do_exec(int *start_pc)
 					BREAK;
 				}
 				goto if_check;
+			
+			case L_SWITCH_SPI:
+			deprintf("case L_SWITCH_SPI:");
+				tpc = pc;
+				a = *(object_ptr)pc[1];
+				if( IS_SEQUENCE( a ) ){
+					// no match:  goto else or skip the switch
+					pc = (int *) pc[4];
+					thread();
+					BREAK;
+				}
+				if( !IS_ATOM_INT( a ) ){
+					// have to check for integer value
+					top = (int) DBL_PTR( a )->dbl;
+					if( (double)top == DBL_PTR( a )->dbl ){
+						a = (int) DBL_PTR( a )->dbl;
+					}
+					else{
+						pc = (int *) pc[4];
+						thread();
+						BREAK;
+					}
+				}
+				a -= pc[2];
+				if( a > 0 && a <=  SEQ_PTR( *(object_ptr)pc[3])->length ){
+					// bounds check
+					top = SEQ_PTR( *(object_ptr)pc[3])->base[a];
+					pc += top;
+					thread();
+					BREAK;
+				}
+				pc = (int *) pc[4];
+				thread();
+				BREAK;
+				
+			case L_SWITCH_I:
+			deprintf("case L_SWITCH_I:");
+				tpc = pc;
+				a = *(object_ptr)pc[1];
+				if( IS_SEQUENCE( a ) ){
+					// no match:  goto else or skip the switch
+					pc = (int *) pc[4];
+					thread();
+					BREAK;
+				}
+				if( !IS_ATOM_INT( a ) ){
+					// have to check for integer value
+					top = (int) DBL_PTR( a )->dbl;
+					if( (double)top == DBL_PTR( a )->dbl ){
+						a = (int) DBL_PTR( a )->dbl;
+					}
+					else{
+						pc = (int *) pc[4];
+						thread();
+						BREAK;
+					}
+				}
+				top = SEQ_PTR( *(object_ptr)pc[2])->length;
+				obj_ptr = SEQ_PTR( *(object_ptr)pc[2])->base;
+				for( b = 1; b <= top; ++b ){
+					if( a == *obj_ptr++ ){
+						pc += SEQ_PTR(*(object_ptr)pc[3])->base[top];
+						thread();
+						BREAK;
+					}
+				}
+				// no match
+				pc = (int *) pc[4];
+				thread();
+				BREAK;
 				
 			case L_SWITCH:
 			deprintf("case L_SWITCH:");

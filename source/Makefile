@@ -131,8 +131,8 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/compil_9.o \
 	./$(OBJDIR)/compil_A.o \
 	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/0rror.o \
 	./$(OBJDIR)/get.o \
+	./$(OBJDIR)/0rror.o \
 	./$(OBJDIR)/global.o \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/sequence.o \
@@ -149,7 +149,6 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
 	./$(OBJDIR)/intinit.o \
 	./$(OBJDIR)/tranplat.o \
-	./$(OBJDIR)/0rror.o \
 	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/sequence.o \
 	./$(OBJDIR)/text.o \

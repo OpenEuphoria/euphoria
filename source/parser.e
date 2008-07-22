@@ -1853,6 +1853,81 @@ procedure Case_statement()
 	StartSourceLine( TRUE )
 end procedure
 
+procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, integer jump_table )
+	
+	-- fix up the case values
+	sequence values = switch_stack[$][SWITCH_CASES]
+	atom min =  1e+300
+	atom max = -1e+300
+	integer all_ints = 1
+	for i = 1 to length( values ) do
+		integer sym = values[i]
+		integer sign
+		if sym < 0 then
+			sign = -1
+			sym = -sym
+		else
+			sign = 1
+		end if
+		values[i] = sign * SymTab[sym][S_OBJ]
+		if not integer( values[i] ) then
+			all_ints = 0
+		end if
+		if values[i] < min then
+			min = values[i]
+		end if
+		
+		if values[i] > max then
+			max = values[i]
+		end if
+		
+	end for
+	
+	if TRANSLATE then
+		-- translator doesn't use the else jump
+		Code[else_bp] = length( Code ) + 2
+		-- This prevents the translator from getting confused.  It might
+		-- otherwise use this as a temp somewhere else, leading to wrong
+		-- code being emitted.  A '0' should never be part of a real temp
+		-- string.
+		SymTab[cases][S_OBJ] &= 0
+	else
+		if switch_stack[$][SWITCH_ELSE] then
+			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
+		else
+			-- just go to the end
+			Code[else_bp] = length(Code) + 1
+		end if
+	end if
+	
+	integer else_target = Code[else_bp]
+	integer opcode = SWITCH
+	if not TRANSLATE and all_ints then
+		if max - min < 1024 then
+			opcode = SWITCH_SPI
+			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+			sequence switch_table = repeat( else_target, max - min + 1 )
+			integer offset = min - 1
+			for i = 1 to length( values ) do
+				switch_table[values[i] - offset] = jump[i]
+			end for
+			Code[switch_pc + 2] = offset
+			switch_stack[$][SWITCH_JUMP_TABLE] = switch_table
+		else
+			opcode = SWITCH_I
+		end if
+	end if
+	
+	Code[switch_pc] = opcode
+	if opcode != SWITCH_SPI then
+		SymTab[cases][S_OBJ] = values
+	end if
+	
+	-- convert to relative offsets
+	SymTab[jump_table][S_OBJ] = switch_stack[$][SWITCH_JUMP_TABLE] - switch_pc
+	
+end procedure
+
 procedure Switch_statement()
 	integer break_base
 	symtab_index cases, jump_table
@@ -1884,40 +1959,7 @@ procedure Switch_statement()
 	
 	call_proc(forward_Statement_list, {})
 	
-	-- fix up the case values
-	values = switch_stack[$][SWITCH_CASES]
-	for i = 1 to length( values ) do
-		integer sym = values[i]
-		integer sign
-		if sym < 0 then
-			sign = -1
-			sym = -sym
-		else
-			sign = 1
-		end if
-		values[i] = sign * SymTab[sym][S_OBJ]
-	end for
-	SymTab[cases][S_OBJ] = values
-	
-	-- convert to relative offsets
-	SymTab[jump_table][S_OBJ] = switch_stack[$][SWITCH_JUMP_TABLE] - switch_pc
-	
-	if TRANSLATE then
-		-- translator doesn't use the else jump
-		Code[else_bp] = length( Code ) + 2
-		-- This prevents the translator from getting confused.  It might
-		-- otherwise use this as a temp somewhere else, leading to wrong
-		-- code being emitted.  A '0' should never be part of a real temp
-		-- string.
-		SymTab[cases][S_OBJ] &= 0
-	else
-		if switch_stack[$][SWITCH_ELSE] then
-			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
-		else
-			-- just go to the end
-			Code[else_bp] = length(Code) + 1
-		end if
-	end if
+	optimize_switch( switch_pc, else_bp, cases, jump_table )
 	
 	tok_match(END)
 	tok_match(SWITCH)

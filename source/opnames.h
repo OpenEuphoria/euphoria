@@ -193,5 +193,7 @@ static char *opnames[] = {
 	"GOTO",
 	"GLABEL",
 	"SPLICE",
-	"INSERT"
+	"INSERT",
+	"SWITCH_SPI",
+	"SWITCH_I"
 };

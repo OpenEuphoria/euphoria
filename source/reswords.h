@@ -204,7 +204,9 @@
 #define GLABEL 191
 #define SPLICE	192
 #define INSERT 193
-#define MAX_OPCODE          193
+#define SWITCH_SPI          194
+#define SWITCH_I            195
+#define MAX_OPCODE          195
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]
