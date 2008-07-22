@@ -297,8 +297,10 @@ export type positive_int(integer x)
 	return x >= 1
 end type
 
+ifdef DOS32 then
 constant COLOR_TEXT_MEMORY = #B8000,
 		  MONO_TEXT_MEMORY = #B0000
+end ifdef
 
 export include graphcst.e
 
@@ -363,10 +365,9 @@ end ifdef
 --      [[:put_screen_char]], [[:save_text_image]]
 
 export function get_screen_char(positive_atom line, positive_atom column)
-	atom scr_addr
-	sequence vc
-	
 	ifdef DOS32 then
+		atom scr_addr
+		sequence vc
 		vc = video_config()
 		if line >= 1 and line <= vc[VC_LINES] and
 		   column >= 1 and column <= vc[VC_COLUMNS] then
@@ -410,11 +411,10 @@ end function
 
 export procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
-	atom scr_addr
-	sequence vc
-	integer overflow
-	
 	ifdef DOS32 then
+		atom scr_addr
+		sequence vc
+		integer overflow
 		vc = video_config()
 		if line <= vc[VC_LINES] and column <= vc[VC_COLUMNS] then
 			scr_addr = DOS_scr_addr(vc, {line, column})
@@ -467,12 +467,13 @@ end procedure
 --
 
 export procedure display_text_image(text_point xy, sequence text)
-	atom scr_addr
-	integer screen_width, extra_col2, extra_lines
+	integer extra_col2, extra_lines
 	sequence vc, one_row
 	
 	vc = video_config()
 	ifdef DOS32 then
+		atom scr_addr
+		integer screen_width
 		screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
 		scr_addr = DOS_scr_addr(vc, xy)
 	end ifdef
@@ -546,13 +547,13 @@ end procedure
 
 export function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
-	atom scr_addr, screen_memory
 	integer screen_width, image_width
-	integer page_size
 
 	vc = video_config()
 	screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
 	ifdef DOS32 then
+		atom scr_addr, screen_memory
+		integer page_size
 		if vc[VC_MODE] = 7 then
 			screen_memory = MONO_TEXT_MEMORY
 		else
