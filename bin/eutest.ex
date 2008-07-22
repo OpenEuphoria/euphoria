@@ -92,8 +92,11 @@ for i = 1 to total do
 				filename = filename[1..lib-1]
 			end if
 			if delete_file( filename ) then end if
+ifdef UNIX then
 			status = system_exec( "./emake", 2 )
-			
+else
+			status = system_exec( "emake.bat", 2 )
+end ifdef
 			if not status then
 				cmd = sprintf("./%s %s", {filename, cmd_opts})
 				status = system_exec( cmd, 2 )

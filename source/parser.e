@@ -1797,11 +1797,12 @@ function else_case()
 end function
 
 procedure case_else()
+	switch_stack[$][SWITCH_ELSE] = length(Code) + 1
 	if TRANSLATE then
 		emit_addr( CASE )
 		emit_addr( 0 )
 	end if
-	switch_stack[$][SWITCH_ELSE] = length(Code) + 1
+	
 end procedure
 
 procedure Case_statement()
@@ -1920,28 +1921,26 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		
 	end for
 	
+	if switch_stack[$][SWITCH_ELSE] then
+			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
+	else
+		-- just go to the end
+		Code[else_bp] = length(Code) + 1
+	end if
+
 	if TRANSLATE then
-		-- translator doesn't use the else jump
-		Code[else_bp] = length( Code ) + 2
 		-- This prevents the translator from getting confused.  It might
 		-- otherwise use this as a temp somewhere else, leading to wrong
 		-- code being emitted.  A '0' should never be part of a real temp
 		-- string.
 		SymTab[cases][S_OBJ] &= 0
 		
-	else
-		if switch_stack[$][SWITCH_ELSE] then
-			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
-		else
-			-- just go to the end
-			Code[else_bp] = length(Code) + 1
-		end if
 	end if
 	
 	integer else_target = Code[else_bp]
 	integer opcode = SWITCH
-	if not TRANSLATE and all_ints then
-		if max - min < 1024 then
+	if all_ints then
+		if not TRANSLATE and  max - min < 1024 then
 			opcode = SWITCH_SPI
 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
 			sequence switch_table = repeat( else_target, max - min + 1 )

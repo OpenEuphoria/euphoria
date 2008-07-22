@@ -2181,12 +2181,73 @@ procedure opINTERNAL_ERROR()
 	InternalErr("This opcode should never be emitted!")
 end procedure
 
+sequence switch_stack = {}
+
+procedure opSWITCH_I()
+	-- pc+1 = switch value
+	-- pc+2 = cases seq
+	-- pc+3 = jump table  (ignored)
+	-- pc+4 = else offset
+	
+	integer var_type = GType( Code[pc+1] )
+	
+	switch_stack = append( switch_stack, { Code[pc], pc, var_type } )
+	if var_type != TYPE_INTEGER then
+
+		if var_type = TYPE_SEQUENCE then
+			-- it will never work
+			if not forward_branch_into(pc+5, Code[pc+4]-1) then
+				-- ...just go to the default because there's a label in there
+				pc = Code[pc+4]
+				return
+			end if
+			
+			-- just jump ahead
+			Goto( Code[pc+4] )
+			pc += 5
+			return
+		end if
+		
+		-- find something that's not a case
+		atom min = MAXINT
+		sequence cases = SymTab[Code[pc+2]][S_OBJ]
+		for i = 1 to length( cases ) do
+			if cases[i] < min then
+				min = cases[i]-1
+			end if
+		end for
+		
+		-- it's possibly an atom or a sequence, so we have extra checking to do
+		c_stmt("if (IS_SEQUENCE(@) ){\n", Code[pc+1] ) 
+		Goto( Code[pc+4] )
+		c_stmt0("}\n")
+		c_stmt( "if(!IS_ATOM_INT(@)){\n", Code[pc+1] )
+		c_stmt( "if( (DBL_PTR(@)->dbl != (double) ((int) DBL_PTR(@)->dbl) ) ){\n", 
+						repeat( Code[pc+1], 2) )
+		Goto( Code[pc+4] )
+		c_stmt0( "}\n" )
+		c_stmt( "_0 = (int) DBL_PTR(@)->dbl;\n", Code[pc+1] )
+		c_stmt0( "}\n" )
+		c_stmt0( "else {\n" )
+		c_stmt( "_0 = @;\n", Code[pc+1] )
+		c_stmt0( "};\n")
+	else
+		c_stmt( "_0 = @;\n", Code[pc+1] )
+	end if
+	
+	c_stmt0("switch ( _0 ){ \n" )
+	pc += 5
+	
+end procedure
+
 procedure opSWITCH()
 	-- pc+1 = switch value
 	-- pc+2 = cases seq
 	-- pc+3 = jump table  (ignored)
 	-- pc+4 = else offset (ignored)
 	integer is_int
+	
+	switch_stack = append( switch_stack, { Code[pc], pc, 0 } )
 	
 	is_int = BB_var_type(Code[pc+1]) != TYPE_INTEGER
 	if not is_int then
@@ -2199,13 +2260,32 @@ procedure opSWITCH()
 		c_stmt( "DeRef(_0);\n", Code[pc+1] )
 	end if
 	
---	c_stmt("if( _1 ) _1 = SEQ_PTR(@)->base[_1];\n", {Code[pc+3]})
 	c_stmt0("switch ( _1 ){ \n" )
 	pc += 5
 end procedure
 
 procedure opCASE()
-	c_stmt0( sprintf("case %d:\n", Code[pc+1]) )
+	integer caseval = Code[pc+1]
+	integer stmt = 1
+	if find( switch_stack[$][1], {SWITCH_I, SWITCH_SPI}) then
+		-- Get the actual value from the case sequence
+		if caseval = 0 then
+			c_stmt0( "default:\n" )
+			if switch_stack[$][3] != TYPE_SEQUENCE then
+				-- this label might throw off the optimization 
+				-- and emit needless code
+				Label( pc )
+			end if
+			stmt = 0
+		else
+			integer sym = Code[switch_stack[$][2] + 2]
+			caseval = SymTab[sym][S_OBJ][Code[pc+1]]
+		end if
+
+	end if
+	if stmt then
+		c_stmt0( sprintf("case %d:\n", caseval) )
+	end if
 	NewBB(0, E_ALL_EFFECT, 0)
 	pc += 2
 end procedure
@@ -2213,6 +2293,7 @@ end procedure
 procedure opNOPSWITCH()
 	c_stmt0( ";}" )
 	Label( pc + 1 )
+	switch_stack = switch_stack[1..$-1]
 	pc += 1
 end procedure
 
@@ -5211,7 +5292,7 @@ global procedure init_opcodes()
 						  "ERASE_SYMBOL", "NOP2"}) then
 			name = "PROFILE"
 		elsif find(name, {"SWITCH_SPI", "SWITCH_I"}) then
-			name = "SWITCH"
+			name = "SWITCH_I"
 		elsif find(name, {"ENDFOR_INT_UP", "ENDFOR_UP", "SC2_NULL", 
 						  "ENDFOR_DOWN", "ENDFOR_INT_DOWN1", "ASSIGN_SUBS2", "PLATFORM",
 						  "ENDFOR_INT_DOWN",
@@ -5273,7 +5354,7 @@ end function
 
 function is_string( sequence s )
 	for i = 1 to length(s) do
-		if sequence(s[i]) or s[i] > 255 then
+		if sequence(s[i]) or s[i] > 255  or s[i] < 0 then
 			return 0
 		end if
 	end for
