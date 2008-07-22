@@ -1853,6 +1853,32 @@ procedure Case_statement()
 	StartSourceLine( TRUE )
 end procedure
 
+-- We modified the value of something, and need to update translator info,
+-- or else it may improperly optimize things.
+procedure update_translator_info( symtab_index sym, integer all_ints, integer has_integer, integer has_atom, integer has_sequence )
+	SymTab[sym][S_MODE] = M_TEMP    -- override CONSTANT for compile
+	SymTab[sym][S_GTYPE] = TYPE_SEQUENCE
+	SymTab[sym][S_SEQ_LEN] = length( SymTab[sym][S_OBJ] )
+	
+	if SymTab[sym][S_SEQ_LEN] > 0 then
+		if all_ints then
+			SymTab[sym][S_SEQ_ELEM] = TYPE_INTEGER
+		
+		elsif has_atom + has_sequence + has_integer > 1 then
+			SymTab[sym][S_SEQ_ELEM] = TYPE_OBJECT
+		
+		elsif has_atom then
+			SymTab[sym][S_SEQ_ELEM] = TYPE_ATOM
+		
+		else
+			SymTab[sym][S_SEQ_ELEM] = TYPE_SEQUENCE
+		end if
+			
+	else 
+		SymTab[sym][S_SEQ_ELEM] = TYPE_NULL
+	end if
+end procedure
+
 procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, integer jump_table )
 	
 	-- fix up the case values
@@ -1860,6 +1886,10 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	atom min =  1e+300
 	atom max = -1e+300
 	integer all_ints = 1
+	integer has_integer  = 0
+	integer has_atom     = 0
+	integer has_sequence = 0
+	
 	for i = 1 to length( values ) do
 		integer sym = values[i]
 		integer sign
@@ -1872,6 +1902,13 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		values[i] = sign * SymTab[sym][S_OBJ]
 		if not integer( values[i] ) then
 			all_ints = 0
+			if atom( values[i] ) then
+				has_atom = 1
+			else
+				has_sequence = 1
+			end if
+		else
+			has_integer = 1
 		end if
 		if values[i] < min then
 			min = values[i]
@@ -1891,6 +1928,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		-- code being emitted.  A '0' should never be part of a real temp
 		-- string.
 		SymTab[cases][S_OBJ] &= 0
+		
 	else
 		if switch_stack[$][SWITCH_ELSE] then
 			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
@@ -1921,6 +1959,9 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	Code[switch_pc] = opcode
 	if opcode != SWITCH_SPI then
 		SymTab[cases][S_OBJ] = values
+		if TRANSLATE then
+			update_translator_info( cases, all_ints, has_integer, has_atom, has_sequence )
+		end if
 	end if
 	
 	-- convert to relative offsets

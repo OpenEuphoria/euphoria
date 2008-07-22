@@ -65,9 +65,11 @@ function get_eudir()
 	if equal(x, -1) then
 		x = getenv("EUDIR")
 	end if
+ifdef UNIX then
 	if equal(x, -1) then
 		x = "/usr/share/euphoria"
 	end if
+end ifdef
 	return x
 end function
 
