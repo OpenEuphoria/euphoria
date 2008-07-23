@@ -1280,9 +1280,10 @@ void code_set_pointers(int **code)
 				
 			case SWITCH:
 			case SWITCH_I:
+				code[i+2] = SET_OPERAND(code[i+2]); // cases
 			case SWITCH_SPI:
 				code[i+1] = SET_OPERAND(code[i+1]); // select val
-				code[i+2] = SET_OPERAND(code[i+2]); // cases
+				
 				code[i+3] = SET_OPERAND(code[i+3]); // jump table
 				code[i+4] = SET_JUMP(code[i+4]);    // else or end switch
 				i += 5;
@@ -2068,6 +2069,7 @@ void do_exec(int *start_pc)
 					}
 				}
 				a -= pc[2];
+				
 				if( a > 0 && a <=  SEQ_PTR( *(object_ptr)pc[3])->length ){
 					// bounds check
 					top = SEQ_PTR( *(object_ptr)pc[3])->base[a];

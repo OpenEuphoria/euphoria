@@ -96,6 +96,15 @@ end for
 
 test_equal( "switch with negative cases",  cases, negative_case )
 
+integer static_int
+switch 2 do
+	case 2:
+		static_int = 2
+		break
+	case else
+		static_int = 1
+end switch
+test_equal( "static int", 2, static_int )
 
 test_report()
 

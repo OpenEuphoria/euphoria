@@ -1428,6 +1428,8 @@ procedure InitBackEnd( object ignore )
 			name = "POKE"
 		elsif find( name, { "NOPWHILE" } ) then
 			name = "NOP1"
+		elsif find( name, { "SWITCH_I", "SWITCH_SPI" }) then
+			name = "SWITCH"
 		end if
 		
 		operation[i] = routine_id("op" & name)
