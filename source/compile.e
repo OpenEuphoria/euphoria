@@ -2196,12 +2196,20 @@ procedure opSWITCH_I()
 
 		if var_type = TYPE_SEQUENCE then
 			-- it will never work
-			if not forward_branch_into(pc+5, Code[pc+4]-1) then
-				-- ...just go to the default because there's a label in there
-				pc = Code[pc+4]
-				switch_stack[$][3] = -1
-				return
-			end if
+			switch_stack[$][3] = -1
+			
+			-- The commented code below is meant to avoid emitting the switch
+			-- block, since we know it won't work.  The problem occurs if
+			-- there is a backwards goto into the switch somewhere.  We
+			-- don't know about the label yet, so we might incorrectly
+			-- optimize this away.  The extra code emitted will probably 
+			-- be optimized away by the compiler, so it's probably no big
+			-- deal.
+-- 			if not forward_branch_into(pc+5, Code[pc+4]-1) then
+-- 				-- ...just go to the default because there's a label in there
+-- 				pc = Code[pc+4]
+-- 				return
+-- 			end if
 			-- just jump ahead
 			Goto( Code[pc+4] )
 			pc += 5
@@ -2286,8 +2294,13 @@ procedure opCASE()
 			end if
 			
 		else
-			integer sym = Code[switch_stack[$][2] + 2]
-			caseval = SymTab[sym][S_OBJ][Code[pc+1]]
+			if switch_stack[$][3] = -1 then
+				-- the switch has been optimized away, so don't emit the case
+				stmt = 0
+			else
+				integer sym = Code[switch_stack[$][2] + 2]
+				caseval = SymTab[sym][S_OBJ][Code[pc+1]]
+			end if
 		end if
 
 	end if

@@ -106,5 +106,127 @@ switch 2 do
 end switch
 test_equal( "static int", 2, static_int )
 
+integer z = 0
+switch "foo" do
+	case 1:
+		z = 1
+		break
+	case else
+		z = 2
+end switch
+test_equal( "int cases, sequence switch with else", 2, z )
+
+function int_switch1( object cond )
+	integer ret = 0
+	switch cond do
+		case 1:
+			ret = 1
+			break
+		case 2:
+			ret = 2
+			break
+		case else
+			ret = 3
+	end switch
+	return ret
+end function
+
+z = int_switch1( 1 )
+test_equal( "int_switch1( 1 )", 1, z )
+
+z = int_switch1( "foo" )
+test_equal( "int_switch1( \"foo\" )", 3, z )
+
+function int_switch2( object cond )
+	integer ret = 0
+	switch cond do
+		case 1:
+			ret = 1
+			break
+		case 2:
+			ret = 2
+			break
+		case else
+			ret = 3
+	end switch
+	return ret
+end function
+
+z = int_switch2( "foo" )
+test_equal( "int_switch2 -- check for sequence optimization with case else", 3, z )
+
+function int_switch3( object cond )
+	integer ret = 0
+	switch cond do
+		case 1:
+			ret = 1
+			break
+		case 2:
+			ret = 2
+			break
+	end switch
+	return ret
+end function
+
+z = int_switch3( "foo" )
+test_equal( "int_switch3 -- check for sequence optimization without case else", 0, z )
+
+function int_switch4( object cond )
+	integer ret = 0
+	switch cond do
+		case 1:
+			ret = 1
+			break
+		case 2:
+			ret = 2
+			break
+	end switch
+	return ret
+end function
+
+z = int_switch4( "foo" )
+integer is4rid = routine_id("int_switch4" )
+z = call_func( is4rid, {1} )
+test_equal( "int_switch4 -- detect integer cond through r_id", 1, z )
+
+function int_switch5( object cond )
+	integer ret = 0
+	goto "foo"
+	switch cond do
+		case 1:
+		label "foo"
+			ret = 1
+			break
+		case 2:
+			ret = 2
+			break
+	end switch
+	return ret
+end function
+
+z = int_switch5( "foo" )
+test_equal( "int_switch5: goto label exists (forward goto), don't optimize away because of sequence", 1, z )
+
+function int_switch6( object cond )
+	integer ret = 0
+	
+	switch cond do
+		case 1:
+		label "foo"
+			ret = 1
+			break
+		case 2:
+			ret = 2
+			break
+	end switch
+	if not ret then
+		goto "foo"
+	end if
+	return ret
+end function
+z = int_switch6( "foo" )
+test_equal( "int_switch6: goto label exists (backward goto), don't optimize away because of sequence", 1, z )
+
+
 test_report()
 
