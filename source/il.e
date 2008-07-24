@@ -8,13 +8,15 @@
 -- change the format number. (IL_VERSION)
 
 include std/machine.e
+include std/text.e
+include std/filesys.e
+include std/io.e
+
 include compress.e
 include backend.e
 include reswords.e
 include scanner.e
-include std/text.e
 include cominit.e
-include std/filesys.e
 
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con

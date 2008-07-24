@@ -283,7 +283,7 @@ clean :
 	do \
 	    rm "$$d"/*.o; \
 	done
-	-rm exu ecu ecu.a eubackend $(DEB_SOURCE_DIR).tar.gz
+	-rm exu ecu ecu.a backendu $(DEB_SOURCE_DIR).tar.gz
 	cd pcre && $(MAKE) clean
 
 .PHONY : clean distclean all
@@ -367,15 +367,15 @@ ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o ecu
 
 backend : builddirs
-	$(MAKE) eubackend EBACKEND=1 OBJDIR=backobj
+	$(MAKE) backendu EBACKEND=1 OBJDIR=backobj
 
-eubackend : OBJDIR = backobj
-eubackend : EU_TARGET = backend.ex
-eubackend : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
-eubackend : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-eubackend : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendu : OBJDIR = backobj
+backendu : EU_TARGET = backend.ex
+backendu : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
+backendu : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendu : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
-	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o eubackend
+	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o backendu
 
 test : interpreter translator
 	cd ../tests/ && ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu -ec ../source/ecu -lib ../source/ecu.a
@@ -395,7 +395,7 @@ install :
 	mkdir -p $(DESTDIR)/usr/bin 
 	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/include/euphoria
-	install exu ecu eubackend eubind eushroud $(DESTDIR)/usr/bin
+	install exu ecu backendu eubind eushroud $(DESTDIR)/usr/bin
 	install ecu.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
