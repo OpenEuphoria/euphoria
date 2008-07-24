@@ -41,7 +41,11 @@ function names( sequence n )
 	sequence nl
 	nl = {}
 	for i = 1 to length(n) do
-		nl = append( nl, name_or_literal(n[i]))
+		if n[i] then
+			nl = append( nl, name_or_literal(n[i]))
+		else
+			nl = append( nl, "[0]" )
+		end if
 	end for
 	return nl
 end function
