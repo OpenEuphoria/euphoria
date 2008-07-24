@@ -2199,9 +2199,9 @@ procedure opSWITCH_I()
 			if not forward_branch_into(pc+5, Code[pc+4]-1) then
 				-- ...just go to the default because there's a label in there
 				pc = Code[pc+4]
+				switch_stack[$][3] = -1
 				return
 			end if
-			
 			-- just jump ahead
 			Goto( Code[pc+4] )
 			pc += 5
@@ -2270,13 +2270,21 @@ procedure opCASE()
 	if find( switch_stack[$][1], {SWITCH_I, SWITCH_SPI}) then
 		-- Get the actual value from the case sequence
 		if caseval = 0 then
-			c_stmt0( "default:\n" )
-			if switch_stack[$][3] != TYPE_SEQUENCE then
-				-- this label might throw off the optimization 
-				-- and emit needless code
+			if switch_stack[$][3] != -1 then
+				c_stmt0( "default:\n" )
+				if switch_stack[$][3] != TYPE_SEQUENCE then
+					-- this label might throw off the optimization 
+					-- and emit needless code
+					Label( pc )
+				end if
+				stmt = 0	
+			else
+				-- caseval was a sequence for an integer switch
+				-- so do nothing
+				stmt = 0
 				Label( pc )
 			end if
-			stmt = 0
+			
 		else
 			integer sym = Code[switch_stack[$][2] + 2]
 			caseval = SymTab[sym][S_OBJ][Code[pc+1]]
@@ -2291,7 +2299,10 @@ procedure opCASE()
 end procedure
 
 procedure opNOPSWITCH()
-	c_stmt0( ";}" )
+	if switch_stack[$][3] != -1 then
+		c_stmt0( ";}" )
+	end if
+	
 	Label( pc + 1 )
 	switch_stack = switch_stack[1..$-1]
 	pc += 1

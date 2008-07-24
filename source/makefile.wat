@@ -580,7 +580,11 @@ install-generic : .SYMBOLIC
 	@for %i in (*.e) do @copy %i $(PREFIX)\source\
 	@for %i in (*.ex) do @copy %i $(PREFIX)\source\
 	@copy ..\include\* $(PREFIX)\include\
-	
+	@if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
+	@copy ..\include\std\* $(PREFIX)\include\std
+	@if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
+	@copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+		
 installwin : .SYMBOLIC install-generic
 	@copy ecw.exe $(PREFIX)\bin\
 	@copy exw.exe $(PREFIX)\bin\

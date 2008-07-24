@@ -1910,22 +1910,22 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 			end if
 		else
 			has_integer = 1
-		end if
-		if values[i] < min then
-			min = values[i]
-		end if
-		
-		if values[i] > max then
-			max = values[i]
-		end if
-		
+	
+			if values[i] < min then
+				min = values[i]
+			end if
+			
+			if values[i] > max then
+				max = values[i]
+			end if
+		end if	
 	end for
 	
 	if switch_stack[$][SWITCH_ELSE] then
 			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
 	else
 		-- just go to the end
-		Code[else_bp] = length(Code) + 1
+		Code[else_bp] = length(Code) + 1 + TRANSLATE
 	end if
 
 	if TRANSLATE then

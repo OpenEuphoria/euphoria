@@ -1186,7 +1186,13 @@ end procedure
 
 procedure opCASE()
 	-- only emitted for translator
-	punary()
+	if Code[pc+1] then
+		punary()
+	else
+		pnonary()
+		pc += 1
+	end if
+	
 end procedure
 
 procedure opENTRY()
