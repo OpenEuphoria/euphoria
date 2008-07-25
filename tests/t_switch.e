@@ -1,5 +1,5 @@
 include std/unittest.e
-
+without warning
 constant SWITCH = { 1, 2, "a", 3, "sdflkjasdfglkj" }
 
 sequence s

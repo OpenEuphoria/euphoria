@@ -2212,6 +2212,8 @@ procedure Ifdef_statement()
 			elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("else",ThisLine,bp)) then
 				-- BOL token was nothing of value to us, just eat the rest of the line
 				read_line()
+			elsif tok[T_ID] = CASE then
+				tok = next_token()
 --			else read tokens more slowly, because some unusual formatting could be there
 			end if
 		end while
