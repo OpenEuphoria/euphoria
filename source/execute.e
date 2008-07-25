@@ -31,7 +31,7 @@ include opnames.e
 -- Euphoria do the work.
 
 include global.e
-include reswords.e
+include reswords.e as res
 include symtab.e
 include std/text.e
 include scanner.e
@@ -1376,7 +1376,7 @@ procedure opWHILE()
 	end if
 end procedure
 
-procedure opSWTICH_SPI()
+procedure opSWITCH_SPI()
 -- pc+1: switch value
 -- pc+2: case values
 -- pc+3: jump_table
@@ -3065,17 +3065,6 @@ end procedure
 
 sequence operation 
 
-procedure do_exec()
--- execute IL code, starting at pc 
-	integer op
-
-	keep_running = TRUE
-	while keep_running do 
-		op = Code[pc]
-		call_proc(operation[op], {}) -- opcodes start at 1
-	end while
-	keep_running = TRUE -- so higher-level do_exec() will keep running
-end procedure
 
 --            Call-backs
 --
@@ -3104,7 +3093,7 @@ end procedure
 -- 4-argument call-backs are quite common in Windows, so you might
 -- need several of them on that system.
 
-
+integer fwd_do_exec = -1
 function general_callback(sequence routine, sequence args)
 -- call the user's function from an external source 
 -- (interface for Euphoria-coded call-backs)
@@ -3121,7 +3110,7 @@ function general_callback(sequence routine, sequence args)
 	Code = call_back_code 
 	pc = 1 
 	 
-	do_exec()
+	call_proc( fwd_do_exec, {} )
 	
 	-- remove the stack frame
 	pc = call_stack[$-1]
@@ -3294,7 +3283,551 @@ procedure opMACHINE_PROC()
 	end if
 	pc += 3
 end procedure
-		 
+
+ifdef CALLPROC then
+
+procedure do_exec()
+-- execute IL code, starting at pc 
+	integer op
+
+	keep_running = TRUE
+	while keep_running do 
+		op = Code[pc]
+		call_proc(operation[op], {}) -- opcodes start at 1
+	end while
+	keep_running = TRUE -- so higher-level do_exec() will keep running
+end procedure
+
+else
+
+procedure do_exec()
+-- execute IL code, starting at pc 
+	keep_running = TRUE
+	while keep_running do 
+		integer op = Code[pc]
+		switch op do
+			case ABORT:
+				opABORT()
+				break
+			case AND:
+				opAND()
+				break
+			case AND_BITS:
+				opAND_BITS()
+				break
+			case APPEND:
+				opAPPEND()
+				break
+			case ARCTAN:
+				opARCTAN()
+				break
+			case ASSIGN:
+			case ASSIGN_I:
+				opASSIGN()
+				break
+			case ASSIGN_OP_SLICE:
+				opASSIGN_OP_SLICE()
+				break
+			case ASSIGN_OP_SUBS:
+				opASSIGN_OP_SUBS()
+				break
+			case ASSIGN_SLICE:
+				opASSIGN_SLICE()
+				break
+			case ASSIGN_SUBS:
+			case ASSIGN_SUBS_CHECK:
+			case ASSIGN_SUBS_I:
+				opASSIGN_SUBS()
+				break
+			case ATOM_CHECK:
+				opATOM_CHECK()
+				break
+			case BADRETURNF:
+				opBADRETURNF()
+				break
+			case C_FUNC:
+				opC_FUNC()
+				break
+			case C_PROC:
+				opC_PROC()
+				break
+			case CALL:
+				opCALL()
+				break
+			case CALL_BACK_RETURN:
+				opCALL_BACK_RETURN()
+				break
+			case CALL_PROC:
+			case CALL_FUNC:
+				opCALL_PROC()
+				break
+			case CASE:
+				opCASE()
+				break
+			case CLEAR_SCREEN:
+				opCLEAR_SCREEN()
+				break
+			case CLOSE:
+				opCLOSE()
+				break
+			case COMMAND_LINE:
+				opCOMMAND_LINE()
+				break
+			case COMPARE:
+				opCOMPARE()
+				break
+			case CONCAT:
+				opCONCAT()
+				break
+			case CONCAT_N:
+				opCONCAT_N()
+				break
+			case COS:
+				opCOS()
+				break
+			case DATE:
+				opDATE()
+				break
+			case DIV2:
+				opDIV2()
+				break
+			case DIVIDE:
+				opDIVIDE()
+				break
+			case ELSE:
+			case EXIT:
+			case ENDWHILE:
+			case RETRY:
+				opELSE()
+				break
+			case ENDFOR_GENERAL:
+			case ENDFOR_UP:
+			case ENDFOR_DOWN:
+			case ENDFOR_INT_UP:
+			case ENDFOR_INT_DOWN:
+			case ENDFOR_INT_DOWN1:
+				opENDFOR_GENERAL()
+				break
+			case ENDFOR_INT_UP1:
+				opENDFOR_INT_UP1()
+				break
+			case EQUAL:
+				opEQUAL()
+				break
+			case EQUALS:
+				opEQUALS()
+				break
+			case EQUALS_IFW:
+			case EQUALS_IFW_I:
+				opEQUALS_IFW()
+				break
+			case FIND:
+				opFIND()
+				break
+			case FIND_FROM:
+				opFIND_FROM()
+				break
+			case FLOOR:
+				opFLOOR()
+				break
+			case FLOOR_DIV:
+				opFLOOR_DIV()
+				break
+			case FLOOR_DIV2:
+				opFLOOR_DIV2()
+				break
+			case FOR:
+			case FOR_I:
+				opFOR()
+				break
+			case GET_KEY:
+				opGET_KEY()
+				break
+			case GET_PIXEL:
+				opGET_PIXEL()
+				break
+			case GETC:
+				opGETC()
+				break
+			case GETENV:
+				opGETENV()
+				break
+			case GETS:
+				opGETS()
+				break
+			case GLABEL:
+				opGLABEL()
+				break
+			case GLOBAL_INIT_CHECK:
+			case PRIVATE_INIT_CHECK:
+				opGLOBAL_INIT_CHECK()
+				break
+			case GOTO:
+				opGOTO()
+				break
+			case GREATER:
+				opGREATER()
+				break
+			case GREATER_IFW:
+			case GREATER_IFW_I:
+				opGREATER_IFW()
+				break
+			case GREATEREQ:
+				opGREATEREQ()
+				break
+			case GREATEREQ_IFW:
+				opGREATEREQ_IFW()
+				break
+			case IF:
+				opIF()
+				break
+			case INSERT:
+				opINSERT()
+				break
+			case INTEGER_CHECK:
+				opINTEGER_CHECK()
+				break
+			case IS_A_SEQUENCE:
+				opIS_A_SEQUENCE()
+				break
+			case IS_AN_ATOM:
+				opIS_AN_ATOM()
+				break
+			case IS_AN_INTEGER:
+				opIS_AN_INTEGER()
+				break
+			case IS_AN_OBJECT:
+				opIS_AN_OBJECT()
+				break
+			case LENGTH:
+				opLENGTH()
+				break
+			case LESS:
+			case LESS_IFW_I:
+				opLESS()
+				break
+			case LESS_IFW:
+				opLESS_IFW()
+				break
+			case LESSEQ:
+				opLESSEQ()
+				break
+			case LESSEQ_IFW:
+			case LESSEQ_IFW_I:
+				opLESSEQ_IFW()
+				break
+			case LHS_SUBS:
+				opLHS_SUBS()
+				break
+			case LHS_SUBS1:
+				opLHS_SUBS1()
+				break
+			case LHS_SUBS1_COPY:
+				opLHS_SUBS1_COPY()
+				break
+			case LOG:
+				opLOG()
+				break
+			case MACHINE_FUNC:
+				opMACHINE_FUNC()
+				break
+			case MACHINE_PROC:
+				opMACHINE_PROC()
+				break
+			case MATCH:
+				opMATCH()
+				break
+			case MATCH_FROM:
+				opMATCH_FROM()
+				break
+			case MEM_COPY:
+				opMEM_COPY()
+				break
+			case MEM_SET:
+				opMEM_SET()
+				break
+			case MINUS:
+			case MINUS_I:
+				opMINUS()
+				break
+			case MULTIPLY:
+				opMULTIPLY()
+				break
+			case NOP2:
+			case SC2_NULL:
+			case ASSIGN_SUBS2:
+			case PLATFORM:
+			case END_PARAM_CHECK:
+			case NOPWHILE:
+			case NOP1:
+				opNOP2()
+				break
+			case NOPSWITCH:
+				opNOPSWITCH()
+				break
+			case NOT:
+				opNOT()
+				break
+			case NOT_BITS:
+				opNOT_BITS()
+				break
+			case NOT_IFW:
+				opNOT_IFW()
+				break
+			case NOTEQ:
+				opNOTEQ()
+				break
+			case NOTEQ_IFW:
+			case NOTEQ_IFW_I:
+				opNOTEQ_IFW()
+				break
+			case OPEN:
+				opOPEN()
+				break
+			case OPTION_SWITCHES:
+				opOPTION_SWITCHES()
+				break
+			case OR:
+				opOR()
+				break
+			case OR_BITS:
+				opOR_BITS()
+				break
+			case PASSIGN_OP_SLICE:
+				opPASSIGN_OP_SLICE()
+				break
+			case PASSIGN_OP_SUBS:
+				opPASSIGN_OP_SUBS()
+				break
+			case PASSIGN_SLICE:
+				opPASSIGN_SLICE()
+				break
+			case PASSIGN_SUBS:
+				opPASSIGN_SUBS()
+				break
+			case PEEK:
+				opPEEK()
+				break
+			case PEEK_STRING:
+				opPEEK_STRING()
+				break
+			case PEEK2S:
+				opPEEK2S()
+				break
+			case PEEK2U:
+				opPEEK2U()
+				break
+			case PEEK4S:
+				opPEEK4S()
+				break
+			case PEEK4U:
+				opPEEK4U()
+				break
+			case PEEKS:
+				opPEEKS()
+				break
+			case PIXEL:
+				opPIXEL()
+				break
+			case PLENGTH:
+				opPLENGTH()
+				break
+			case PLUS:
+				opPLUS()
+				break
+			case PLUS1:
+			case PLUS1_I:
+				opPLUS1()
+				break
+			case POKE:
+				opPOKE()
+				break
+			case POKE2:
+				opPOKE2()
+				break
+			case POKE4:
+				opPOKE4()
+				break
+			case POSITION:
+				opPOSITION()
+				break
+			case POWER:
+				opPOWER()
+				break
+			case PREPEND:
+				opPREPEND()
+				break
+			case PRINT:
+				opPRINT()
+				break
+			case PRINTF:
+				opPRINTF()
+				break
+			case PROC:
+				opPROC()
+				break
+			case PROFILE:
+			case DISPLAY_VAR:
+			case ERASE_PRIVATE_NAMES:
+			case ERASE_SYMBOL:
+				opPROFILE()
+				break
+			case PUTS:
+				opPUTS()
+				break
+			case QPRINT:
+				opQPRINT()
+				break
+			case RAND:
+				opRAND()
+				break
+			case REMAINDER:
+				opREMAINDER()
+				break
+			case REPEAT:
+				opREPEAT()
+				break
+			case RETURNF:
+				opRETURNF()
+				break
+			case RETURNP:
+				opRETURNP()
+				break
+			case RETURNT:
+				opRETURNT()
+				break
+			case RHS_SLICE:
+				opRHS_SLICE()
+				break
+			case RHS_SUBS:
+			case RHS_SUBS_CHECK:
+			case RHS_SUBS_I:
+				opRHS_SUBS()
+				break
+			case RIGHT_BRACE_2:
+				opRIGHT_BRACE_2()
+				break
+			case RIGHT_BRACE_N:
+				opRIGHT_BRACE_N()
+				break
+			case ROUTINE_ID:
+				opROUTINE_ID()
+				break
+			case SC1_AND:
+				opSC1_AND()
+				break
+			case SC1_AND_IF:
+				opSC1_AND_IF()
+				break
+			case SC1_OR:
+				opSC1_OR()
+				break
+			case SC1_OR_IF:
+				opSC1_OR_IF()
+				break
+			case SC2_OR:
+			case SC2_AND:
+				opSC2_OR()
+				break
+			case SEQUENCE_CHECK:
+				opSEQUENCE_CHECK()
+				break
+			case SIN:
+				opSIN()
+				break
+			case SPACE_USED:
+				opSPACE_USED()
+				break
+			case SPLICE:
+				opSPLICE()
+				break
+			case SPRINTF:
+				opSPRINTF()
+				break
+			case SQRT:
+				opSQRT()
+				break
+			case STARTLINE:
+				opSTARTLINE()
+				break
+			case SWITCH:
+			case SWITCH_I:
+				opSWITCH()
+				break
+			case SWITCH_SPI:
+				opSWITCH_SPI()
+				break
+			case SYSTEM:
+				opSYSTEM()
+				break
+			case SYSTEM_EXEC:
+				opSYSTEM_EXEC()
+				break
+			case TAN:
+				opTAN()
+				break
+			case TASK_CLOCK_START:
+				opTASK_CLOCK_START()
+				break
+			case TASK_CLOCK_STOP:
+				opTASK_CLOCK_STOP()
+				break
+			case TASK_CREATE:
+				opTASK_CREATE()
+				break
+			case TASK_LIST:
+				opTASK_LIST()
+				break
+			case TASK_SCHEDULE:
+				opTASK_SCHEDULE()
+				break
+			case TASK_SELF:
+				opTASK_SELF()
+				break
+			case res:TASK_STATUS:
+				opTASK_STATUS()
+				break
+			case TASK_SUSPEND:
+				opTASK_SUSPEND()
+				break
+			case TASK_YIELD:
+				opTASK_YIELD()
+				break
+			case TIME:
+				opTIME()
+				break
+			case TRACE:
+				opTRACE()
+				break
+			case TYPE_CHECK:
+				opTYPE_CHECK()
+				break
+			case UMINUS:
+				opUMINUS()
+				break
+			case UPDATE_GLOBALS:
+				opUPDATE_GLOBALS()
+				break
+			case WHILE:
+				opWHILE()
+				break
+			case XOR:
+				opXOR()
+				break
+			case XOR_BITS:
+				opXOR_BITS()
+				break
+			case else
+				RTFatal( sprintf("Unknown opcode: %d", op ) )
+		end switch
+	end while
+	keep_running = TRUE -- so higher-level do_exec() will keep running
+end procedure
+
+end ifdef -- CALLPROC
+
+fwd_do_exec = routine_id("do_exec")
+
 procedure InitBackEnd(integer ignore)
 -- initialize Interpreter
 -- Some ops are treated exactly the same as other ops.
@@ -3307,7 +3840,8 @@ procedure InitBackEnd(integer ignore)
 	for i = 1 to length(SymTab) do
 		val[i] = SymTab[i][S_OBJ] -- might be NOVALUE
 	end for
-	
+ifdef CALLPROC then
+
 	-- set up operations
 	operation = repeat(-1, length(opnames))
 	
@@ -3368,6 +3902,7 @@ procedure InitBackEnd(integer ignore)
 			RTInternal("no routine id for op" & name)
 		end if
 	end for
+end ifdef
 end procedure
 
 procedure fake_init( integer ignore )
