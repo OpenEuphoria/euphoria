@@ -541,7 +541,7 @@ export function uname()
 		end if
 	elsifdef UNIX then
 		atom buf, pbuf
-		integer len,i, c, k
+		integer i, c, k
 		sequence sbuf, snam
 		buf = allocate(4096) --excessive, but to be safe
 		if c_func(UNAME, {buf}) = 0 then

@@ -4932,6 +4932,9 @@ object machine(object opcode, object x)
 			
 			case M_PLATFORM:
 				/* obsolete, but keep it */
+#ifdef EOSX
+				return 4;
+#endif
 #ifdef EUNIX
 				return 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
@@ -4981,12 +4984,12 @@ object machine(object opcode, object x)
 				break;
 
 			case M_CRASH_FILE:
-			return crash_file(x);
-			break;
+				return crash_file(x);
+				break;
 			
 			case M_WARNING_FILE:
-			return warning_file(x);
-			break;
+				return warning_file(x);
+				break;
 			
 			case M_FLUSH:
 				return flush_file(x);
@@ -5034,14 +5037,18 @@ object machine(object opcode, object x)
 				break;
 
 			case M_UNSET_ENV:
-				x = (object)SEQ_PTR(x);
-				src = EMalloc(1024);
+				x = (object) SEQ_PTR(x);
+				src = EMalloc(SEQ_PTR(x)->length + 1);
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
 #else
-				temp = unsetenv(src);
-#endif
+#ifdef EUNIX
+				unsetenv(src);
+				temp = 0;
+#endif /* EUNIX */
+#endif /* EWATCOM */
+
 				EFree(src);
 				return !temp;
 				break;
@@ -5051,9 +5058,11 @@ object machine(object opcode, object x)
 				return compile_pcre(*(((s1_ptr)x)->base+1), 
 							 *(((s1_ptr)x)->base+2));
 				break;
+
 			case M_EXEC_PCRE:
 				return exec_pcre(x);
 				break;
+
 			case M_FREE_PCRE:
 				free_regex(x);
 				return 1;
