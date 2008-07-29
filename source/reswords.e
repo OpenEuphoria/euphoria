@@ -198,7 +198,9 @@ global constant
 	INSERT				= 193,
 	SWITCH_SPI          = 194,
 	SWITCH_I            = 195,
-	MAX_OPCODE          = 195
+	HASH                = 196,
+	MAX_OPCODE          = 196
+
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])

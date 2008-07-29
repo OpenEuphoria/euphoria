@@ -145,7 +145,8 @@ keylist =
 	{"warning",  		 SC_PREDEF, PROC, WARNING,  		1, E_OTHER_EFFECT},
 	{"splice",			 SC_PREDEF,	FUNC, SPLICE,			3, E_PURE},
 	{"insert",			 SC_PREDEF,	FUNC, INSERT,			3, E_PURE},
-	{"include_paths",	 SC_PREDEF,	FUNC, INCLUDE_PATHS,	1, E_OTHER_EFFECT}
+	{"include_paths",	 SC_PREDEF,	FUNC, INCLUDE_PATHS,	1, E_OTHER_EFFECT},
+	{"hash",             SC_PREDEF, FUNC, HASH,             2, E_PURE}
 }
 	-- new words must go at end to maintain compatibility 
 

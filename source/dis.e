@@ -1027,6 +1027,10 @@ procedure opEQUAL()
 	binary()
 end procedure
 		
+procedure opHASH()
+	binary()
+end procedure
+
 procedure opCOMPARE()
 	binary()
 end procedure

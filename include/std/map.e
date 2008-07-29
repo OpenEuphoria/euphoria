@@ -65,6 +65,44 @@ constant iLargeMap = 3
 integer ri_ConvertToLarge
 integer ri_ConvertToSmall
 
+--**
+-- Signature:
+--   global function hash(object source, atom algo)
+--
+-- Description:
+--     Calculates a hash value from //key// using the algorithm //algo//
+--
+-- Parameters:
+--		# ##source##: Any Euphoria object
+--		# ##algo##: A code indicating which algorithm to use.
+-- ** -4 uses Fletcher. Very fast and good dispersion
+-- ** -3 uses Adler. Very fast and reasonable dispersion, especially for small strings
+-- ** -2 uses MD5 (not implemented yet) Slower but very good dispersion. 
+-- Suitable for signatures.
+-- ** -1 uses SHA256 (not implemented yet) Slow but excellent dispersion. 
+-- Suitable for signatures. More secure than MD5.
+-- ** 0 and above (integers and decimals) use the cyclic variant (hash = hash * algo + c),
+-- except that for values from zero to less than 1, use (algo + 69096). Fast and good to excellent
+-- dispersion depending on the value of //algo//. Decimals give better dispersion but are
+-- slightly slower.
+--
+-- Returns:
+--     An **integer**:
+--        Except for the MD5 and SHA256 algorithms, this is a 30-bit integer.
+--     A **sequence**:
+--        MD5 returns a 4-element sequence of integers\\
+--        SHA256 returns a 8-element sequence of integers.
+--
+-- Example 1:
+-- <eucode>
+-- x = hash("The quick brown fox jumps over the lazy dog", 0)
+-- -- x is 242399616
+-- x = hash("The quick brown fox jumps over the lazy dog", 99.94)
+-- -- x is 723158
+-- x = hash("The quick brown fox jumps over the lazy dog", -4)
+-- -- x is 467406810
+-- </eucode>
+
 --****
 -- === Constants
 --**

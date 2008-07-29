@@ -201,7 +201,8 @@ static char *predefined[] = {
 	"goto",
 	"label",
 	"splice",
-	"insert"
+	"insert",
+	"hash"
 };
 
 /*********************/

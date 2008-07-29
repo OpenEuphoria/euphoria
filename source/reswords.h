@@ -200,13 +200,14 @@
 #define SWITCH              187
 #define CASE                188
 #define NOPSELECT           189
-#define GOTO 190
-#define GLABEL 191
-#define SPLICE	192
-#define INSERT 193
+#define GOTO                190
+#define GLABEL              191
+#define SPLICE              192
+#define INSERT              193
 #define SWITCH_SPI          194
 #define SWITCH_I            195
-#define MAX_OPCODE          195
+#define HASH                196
+#define MAX_OPCODE          196
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

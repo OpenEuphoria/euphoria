@@ -195,5 +195,6 @@ static char *opnames[] = {
 	"SPLICE",
 	"INSERT",
 	"SWITCH_SPI",
-	"SWITCH_I"
+	"SWITCH_I",
+	"HASH"
 };

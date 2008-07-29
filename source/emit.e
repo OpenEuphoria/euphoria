@@ -300,6 +300,7 @@ op_result[PLATFORM] = T_INTEGER
 op_result[SPLICE] = T_SEQUENCE
 op_result[INSERT] = T_SEQUENCE
 
+
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
 	integer t, source, c
@@ -884,7 +885,7 @@ global procedure emit_op(integer op)
 	-- 2 inputs, 1 output   
 	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, FIND, MATCH,
 					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
-					OPEN, SPRINTF, TASK_CREATE}) then
+					OPEN, SPRINTF, TASK_CREATE, HASH}) then
 		cont21ii(op, FALSE)
 
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything

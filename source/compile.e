@@ -4382,6 +4382,16 @@ procedure opEQUAL()
 	pc += 4
 end procedure
 				
+procedure opHASH()
+	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
+	c_stmt("@ = calc_hash(@, @);\n", 
+		   {Code[pc+3], Code[pc+1], Code[pc+2]})
+	CDeRefStr("_0")
+	target = {0, MAXLEN}
+	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	pc += 4
+end procedure
+
 procedure opCOMPARE()
 	-- OPTIMIZE THIS SOME MORE - IMPORTANT FOR SORTING
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)

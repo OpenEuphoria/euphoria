@@ -51,7 +51,7 @@
 /******************/
 /* Local defines  */
 /******************/
-#define IsDigit(x) (x >= '0' && x <= '9')
+#define IsDigit(x) ((x) >= '0' && (x) <= '9')
 
 #define NUM_SIZE 30     /* enough space to print a number */
 #define LOCAL_SPACE 100 /* some local space */
@@ -356,6 +356,10 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 /* 190 */{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
 {x, x},
 {x, x}
 };
@@ -2067,6 +2071,381 @@ object binary_op(int fn, object a, object b)
 	return MAKE_SEQ(c);
 }
 
+
+object calc_MD5(object a)
+{
+	object lTempResult;
+	long lSLen;
+	int tfi;
+	union TF
+	{
+		double tff;
+		unsigned char tfc[8];
+	} tf;
+
+	object_ptr ap;
+	object av;
+
+		
+	if (IS_ATOM_INT(a)) {
+	}
+	else if (IS_ATOM_DBL(a)) {
+		tf.tff = (DBL_PTR(a)->dbl);
+		for(tfi = 0; tfi < 8; tfi++)
+		{
+		}
+	}
+	else { // input is a sequence 
+		lSLen = SEQ_PTR(a)->length;
+		ap = SEQ_PTR(a)->base;
+		while (lSLen > 0) {
+			av = *(++ap);
+			if (av == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			
+			if (IS_ATOM_INT(av)) {
+			}
+			else if (IS_ATOM_DBL(av)) {
+				tf.tff = (DBL_PTR(av)->dbl);
+				for(tfi = 0; tfi < 8; tfi++)
+				{
+				}
+			}
+			else {
+				lTempResult = calc_MD5(av);
+			}
+			lSLen--;
+		}
+	}
+
+	return (0) & MAXINT;
+}
+
+object calc_SHA256(object a)
+{
+	object lTempResult;
+	long lSLen;
+	int tfi;
+	union TF
+	{
+		double tff;
+		unsigned char tfc[8];
+	} tf;
+
+	object_ptr ap;
+	object av;
+
+		
+	if (IS_ATOM_INT(a)) {
+	}
+	else if (IS_ATOM_DBL(a)) {
+		tf.tff = (DBL_PTR(a)->dbl);
+		for(tfi = 0; tfi < 8; tfi++)
+		{
+		}
+	}
+	else { // input is a sequence 
+		lSLen = SEQ_PTR(a)->length;
+		ap = SEQ_PTR(a)->base;
+		while (lSLen > 0) {
+			av = *(++ap);
+			if (av == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			
+			if (IS_ATOM_INT(av)) {
+			}
+			else if (IS_ATOM_DBL(av)) {
+				tf.tff = (DBL_PTR(av)->dbl);
+				for(tfi = 0; tfi < 8; tfi++)
+				{
+				}
+			}
+			else {
+				lTempResult = calc_SHA256(av);
+			}
+			lSLen--;
+		}
+	}
+
+	return (0) & MAXINT;
+}
+
+
+long calc_adler32(object a)
+{
+	unsigned long lTempResult;
+	long lSLen;
+	int tfi;
+	union TF
+	{
+		double tff;
+		unsigned char tfc[8];
+	} tf;
+	unsigned int lA;
+	unsigned int lB;
+
+	object_ptr ap;
+	object av;
+
+	lA = 1;
+	lB = 0;
+		
+	if (IS_ATOM_INT(a)) {
+		lA +=  a; if (lA >= 65521) lA %= 65521;
+		lB +=  lA; if (lB >= 65521) lB %= 65521;
+	}
+	else if (IS_ATOM_DBL(a)) {
+		tf.tff = (DBL_PTR(a)->dbl);
+		for(tfi = 0; tfi < 8; tfi++)
+		{
+			lA += tf.tfc[tfi]; if (lA >= 65521) lA %= 65521;
+			lB += lA; if (lB >= 65521) lB %= 65521;
+		}
+	}
+	else { /* input is a sequence */
+		lSLen = SEQ_PTR(a)->length;
+
+		ap = SEQ_PTR(a)->base;
+		while (lSLen > 0) {
+			av = *(++ap);
+			if (av == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			
+			if (IS_ATOM_INT(av)) {
+				lA += av; if (lA >= 65521) lA %= 65521;
+				lB += lA; if (lB >= 65521) lB %= 65521;
+			}
+			else if (IS_ATOM_DBL(av)) {
+				tf.tff = (DBL_PTR(av)->dbl);
+				for(tfi = 0; tfi < 8; tfi++)
+				{
+					lA += tf.tfc[tfi]; if (lA >= 65521) lA %= 65521;
+					lB += lA; if (lB >= 65521) lB %= 65521;
+				}
+			}
+			else {
+				lTempResult = calc_adler32(av);
+				lA += lTempResult & 0x0000FFFF; if (lA >= 65521) lA %= 65521;
+				lB += (lTempResult >> 16) & 0x0000FFFF; if (lB >= 65521) lB %= 65521;
+			}
+			lSLen--;
+		}
+	}
+
+	return ((lB << 16) | lA) & MAXINT;
+}
+
+
+long calc_fletcher32(object a)
+{
+	unsigned long lTempResult;
+	long lSLen;
+	int tfi;
+	union TF
+	{
+		double tff;
+		unsigned short tfc[4];
+	} tf;
+	unsigned int lA;
+	unsigned int lB;
+
+	object_ptr ap;
+	object av;
+
+	lA = 1;
+	lB = 0;
+		
+	if (IS_ATOM_INT(a)) {
+		lA +=  a;
+		lB +=  lA;
+	}
+	else if (IS_ATOM_DBL(a)) {
+		tf.tff = (DBL_PTR(a)->dbl);
+		for(tfi = 0; tfi < 4; tfi++)
+		{
+			lA += tf.tfc[tfi];
+			lB += lA;
+		}
+	}
+	else { /* input is a sequence */
+		int lChar;
+		
+		lSLen = SEQ_PTR(a)->length;
+		lChar = -1;
+
+		ap = SEQ_PTR(a)->base;
+		while (lSLen > 0) {
+			av = *(++ap);
+			if (av == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			
+			if (IS_ATOM_INT(av)) {
+				if (av < 256)
+				{
+					if (lChar == -1) {
+						lChar = av;
+					} else {
+						lA += av + lChar << 8;
+						lChar = -1;
+						lB += lA;
+					}
+				}
+				else
+				{
+					lA += av;
+					lB += lA;
+				}
+			}
+			else if (IS_ATOM_DBL(av)) {
+				tf.tff = (DBL_PTR(av)->dbl);
+				for(tfi = 0; tfi < 4; tfi++)
+				{
+					lA += tf.tfc[tfi];
+					lB += lA;
+				}
+			}
+			else {
+				lTempResult = calc_fletcher32(av);
+				lA += lTempResult & 0x0000FFFF; 
+				lB += (lTempResult >> 16) & 0x0000FFFF;
+			}
+			lSLen--;
+		}
+		if (lChar != -1) {
+			lA += lChar << 8;
+			lB += lA;
+		}
+
+	}
+
+	return ((((unsigned long)lB) << 16) | (unsigned long)lA) & MAXINT;
+
+}
+
+
+object calc_hash(object a, object b)
+/* calculate the hash value of object a.
+   b influences the style of hash calculated.
+   b ==> -1 SHA256
+   b ==> -2 MD5
+   b ==> -3 Fletcher-32
+   b ==> -4 Adler-32
+   b ==> >=0 and  <1 69096 + b
+   b ==> >=1 hash = (hash * b + x)
+   
+*/
+{
+	unsigned long lHashValue;
+	long lSLen;
+	long f = 0;
+	double ff = 0.0L;
+	int tfi;
+	union TF
+	{
+		double tff;
+		unsigned short tfs[4];
+	} tf;
+	
+	object_ptr ap;
+	object av;
+
+	if (IS_ATOM_INT(b)) {
+		if (b == -4)
+			return calc_adler32(a);
+			
+		if (b == -3)
+			return calc_fletcher32(a);
+			
+		if (b == -2)
+			return calc_MD5(a);
+			
+		if (b == -1)
+			return calc_SHA256(a);
+			
+		if (b < 0)
+			RTFatal("second argument of hash() must be 1 or higher.");
+		if (b == 0)
+			f = 69096;
+		else
+			f = b;
+		lHashValue = (0x193A74F1 ^ f);
+	}		
+	else if (IS_ATOM_DBL(b)) {
+		ff = (DBL_PTR(b)->dbl);
+		if (ff < 0.0L)
+			RTFatal("second argument of hash() must be 1 or higher.");
+		if (ff < 1.0L)
+			ff += 69096.0L;
+		tf.tff = ff;
+		lHashValue = 0x193A74F1;
+		for(tfi = 0; tfi < 4; tfi++)
+		{
+			if (lHashValue & 1)
+				lHashValue >>= 1;
+			lHashValue +=  tf.tfs[tfi] * (tfi + 1);
+		}
+	}
+	else
+		RTFatal("second argument of hash() must be an atom.");
+
+	
+	if (IS_ATOM_INT(a)) {
+		lHashValue =  a * lHashValue + 1;
+	}
+	else if (IS_ATOM_DBL(a)) {
+		tf.tff = ((DBL_PTR(a)->dbl) * 1.803L) + 1.5L;
+		for(tfi = 0; tfi < 4; tfi++)
+		{
+			if (lHashValue & 1)
+				lHashValue >>= 1;
+			lHashValue +=  tf.tfs[tfi] * (tfi + 1);
+		}
+	}
+	else { /* input is a sequence */
+		lSLen = SEQ_PTR(a)->length;
+		lHashValue += lSLen + 3;
+		ap = SEQ_PTR(a)->base;
+		while (lSLen > 0) {
+			av = *(++ap);
+			if (av == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			if (f != 0) {
+				lHashValue *= f;
+			}
+			else {
+				lHashValue = (long)((double)lHashValue * ff);
+			}
+			
+			lHashValue = (lHashValue & MAXINT);
+			
+			if (IS_ATOM_INT(av)) {
+				lHashValue +=  (av << 8) + 1;			
+			}
+			else if (IS_ATOM_DBL(av)) {
+				tf.tff = ((DBL_PTR(av)->dbl) * 1.803L) + 1.5L;
+				for(tfi = 0; tfi < 4; tfi++)
+				{
+					if (lHashValue & 1)
+						lHashValue >>= 1;
+					lHashValue +=  tf.tfs[tfi] * (tfi + 1);
+				}
+			}
+			else {
+				lHashValue += calc_hash(av,b);
+			}
+			
+			lHashValue = (lHashValue & MAXINT) >> 1;
+			lSLen--;
+		}
+	}
+
+	return lHashValue & MAXINT; 
+}
 
 int compare(object a, object b)
 /* Compare general objects a and b. Return 0 if they are identical,

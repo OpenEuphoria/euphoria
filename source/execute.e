@@ -2664,6 +2664,14 @@ procedure opEQUAL()
 	pc += 4
 end procedure
 				
+procedure opHASH()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	target = Code[pc+3]
+	val[target] = hash(val[a], val[b])
+	pc += 4
+end procedure
+
 procedure opCOMPARE()
 	a = Code[pc+1]
 	b = Code[pc+2]
@@ -3477,6 +3485,9 @@ procedure do_exec()
 				break
 			case GREATEREQ_IFW:
 				opGREATEREQ_IFW()
+				break
+			case HASH:
+				opHASH()
 				break
 			case IF:
 				opIF()

@@ -246,6 +246,7 @@ object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide()
 object x(); /* error */
 symtab_ptr PrivateVar();
 long find(), e_match();
+object calc_hash();
 IFILE which_file();
 #ifndef ESIMPLE_MALLOC
 char *EMalloc();
@@ -1185,6 +1186,7 @@ void code_set_pointers(int **code)
 			case CALL_FUNC:
 			case C_PROC:
 			case TASK_CREATE:
+			case HASH:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1678,8 +1680,8 @@ void do_exec(int *start_pc)
   NULL, NULL,/* L_CASE, L_NOPSWITCH not emitted*/
   &&L_GOTO, &&L_GLABEL, &&L_SPLICE, &&L_INSERT,
 /* 193 (previous) */
-  &&L_SWITCH_SPI, &&L_SWITCH_I
-/* 195 (previous) */
+  &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH
+/* 196 (previous) */
   };
 #endif
 #endif
@@ -3906,6 +3908,17 @@ void do_exec(int *start_pc)
 				DeRefx(*obj_ptr);
 				pc += 4;
 				*obj_ptr = top;               
+				thread();
+				BREAK;
+
+			case L_HASH:
+			deprintf("case L_HASH:");
+				tpc = pc;
+				a = calc_hash(*(object_ptr)pc[1], *(object_ptr)pc[2]);
+				top = MAKE_INT(a);
+				DeRef(*(object_ptr)pc[3]);
+				*(object_ptr)pc[3] = top;               
+				pc += 4;
 				thread();
 				BREAK;
 
