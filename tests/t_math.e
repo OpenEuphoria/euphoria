@@ -91,5 +91,15 @@ test_equal("mod() #3",   -27, mod(-3627, -3600))
 test_equal("mod() #4", -3573, mod(27, -3600))
 test_equal("mod() #5",     0, mod(10, 2))
 
+test_equal("left_shift() #1",  56, left_shift(7, 3))
+test_equal("left_shift() #2",   0, left_shift(0, 9))
+test_equal("left_shift() #3", 512, left_shift(4, 7))
+test_equal("left_shift() #4", 128, left_shift(8, 4))
+
+test_equal("right_shift() #1",  23, right_shift(184, 3))
+test_equal("right_shift() #2",  12, right_shift(48, 2))
+test_equal("right_shift() #3", 131, right_shift(131, 0))
+test_equal("right_shift() #4",  15, right_shift(121, 3))
+
 test_report()
 

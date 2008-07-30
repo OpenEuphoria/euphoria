@@ -1,7 +1,4 @@
 
---****
--- === Constants
-
 constant
 	M_GET_VECTOR = 39,
 	M_SET_VECTOR = 40,
@@ -14,13 +11,18 @@ export constant
 	M_ALLOC_LOW = 32,
 	M_FREE_LOW = 33
 
+--**
 -- biggest address accessible to 16-bit real mode
 export constant LOW_ADDR = power(2, 20)-1
 
+--**
 -- a legal low machine address
 export type low_machine_addr(atom a)
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
+
+--**
+-- Positive Integer Type
 
 export type positive_int(integer x)
 	return x >= 1
@@ -31,6 +33,9 @@ include memory.e
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
+--**
+-- Machine Address Type
+
 export type machine_addr(atom a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
@@ -40,9 +45,6 @@ type far_addr(sequence a)
 -- protected mode far address {seg, offset}
 	return length(a) = 2 and integer(a[1]) and machine_addr(a[2])
 end type
-
---****
--- === Routines
 
 --**
 -- Retrieve the address of a //DOS// interrupt handler.
@@ -158,5 +160,4 @@ end procedure
 export procedure lock_memory(machine_addr a, positive_int n)
 	machine_proc(M_LOCK_MEMORY, {a, n})
 end procedure
-
 

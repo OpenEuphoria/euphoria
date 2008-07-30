@@ -357,14 +357,15 @@ x[2] = {11,22,33}
 </eucode>
 
 Then ##x## becomes: ##{5, {11,22,33}, 9, 0.5, 13}##. Now if we ask for
-##x[2]## we get ##{11,22,33}## and if we ask for ##x[2][3]## we get the ##atom
-##33##. If you try to subscript with a number that is outside of the range
-##1## to the number of elements, you will get a subscript error. For example
-##x[0]##,  ##x[-99]## or ##x[6]## will cause errors. So will ##x[1][3]## since
-##x[1]## is not a sequence. There is no limit to the number of subscripts that
-may follow a variable, but the variable must contain sequences that are nested
-deeply enough. The two dimensional array, common in other languages, can be
-easily represented with a sequence of sequences:
+##x[2]## we get ##{11,22,33}## and if we ask for ##x[2][3]## we get the
+##atom## ##33##. If you try to subscript with a number that is outside
+of the range ##1## to the number of elements, you will get a subscript
+error. For example ##x[0]##,  ##x[-99]## or ##x[6]## will cause errors.
+So will ##x[1][3]## since ##x[1]## is not a sequence. There is no limit
+to the number of subscripts that may follow a variable, but the
+variable must contain sequences that are nested deeply enough. The two
+dimensional array, common in other languages, can be easily represented
+with a sequence of sequences:
 
 <eucode>
 x = {
@@ -375,7 +376,8 @@ x = {
 </eucode>
 
 where we have written the numbers in a way that makes the structure
-clearer. An expression of the form x[i][j] can be used to access any element.
+clearer. An expression of the form ##x[i][j]## can be used to access
+any element.
 
 The two dimensions are not symmetric however, since an entire "row" can be
 selected with x[i], but there is no simple expression to select an entire
@@ -866,7 +868,7 @@ A copy of the value of each argument is passed in. The formal parameter
 variables may be modified inside the procedure but this does not affect the
 value of the arguments.
 
-;**Performance Note:**
+;**Performance Note**:
 :The interpreter does not actually copy sequences or floating-point numbers
 unless it becomes necessary. For example,
 <eucode>
@@ -878,33 +880,32 @@ simply "point" to the same sequence. If we later perform x[3] = 9, then a separa
 will be created for x in memory (although there will still be just one shared copy of 8.5 and
 "ABC"). The same thing applies to "copies" of arguments passed in to subroutines.
 
-
-
-For a number of procedures or functions - see below -, some parameters may have
+For a number of procedures or functions (see below), some parameters may have
 the same value in many cases. The most expected value for any parameter may be
 given a default value. Omitting the value of such a parameter on a given call
 will cause its default value to be passed.
 
 <eucode>
-procedure foo(sequence s,integer n=1)
-?n+length(s)
+procedure foo(sequence s, integer n=1)
+    ? n + length(s)
 end procedure
 
-foo("abc") -- prints out 4 = 3+1. n was not specified, so was set to 1.
-foo("abc",3) -- prints out 6 = 3+3
+foo("abc")    -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
+foo("abc", 3) -- prints out 6 = 3 + 3
 </eucode>
 
 This is not limited to the last parameter(s):
 
 <eucode>
-procedure bar(sequence s="abc",integer n,integer p=1)
-?length(s)+n+p
+procedure bar(sequence s="abc", integer n, integer p=1)
+    ? length(s)+n+p
 end procedure
-bar(,2) -- prints out 6 = 3 + 2 + 1
+
+bar(, 2) -- prints out 6 = 3 + 2 + 1
 bar(2)  -- errors out, as 2 is not a sequence
-bar(,2,) -- same as bar(,2)
-bar(,2,3) -- prints out 8 = 3 + 22 + 3
-bar({},2,) -- prints out 3 = 0 + 2 + 1
+bar(, 2,) -- same as bar(,2)
+bar(, 2, 3) -- prints out 8 = 3 + 22 + 3
+bar({}, 2, ) -- prints out 3 = 0 + 2 + 1
 bar()      -- errors out, second parameter is omitted, but doesn't have a defailt value
 </eucode>
 
@@ -912,9 +913,10 @@ Any expression may be used in a default value. Parameters that have been
 already mentioned may even be part of the expression:
 
 <eucode>
-procedure baz(sequence s,integer n=length(s))
-?n
+procedure baz(sequence s, integer n=length(s))
+    ? n
 end procedure
+
 baz("abcd") -- prints out 4
 </eucode>
 
@@ -946,8 +948,6 @@ applicable to both procedures and functions.
 Defaulted parameters can be used in functions exactly as they are in
 procedures. See the section above for a few examples.
 
-a name="types"></a>
-
 ==== types
 
 These are special functions that may be used in declaring the allowed values
@@ -958,8 +958,6 @@ just like other functions. See [[:Specifying the Type of Variable]].
 Although there are no restrictions to using defaulted parameters with types,
 their use is so much constrained by a type having excatly one argument that
 they are of little practical help there.
-
-a name="variables"></a>
 
 ==== variables
 
@@ -1006,14 +1004,15 @@ performing an initialisation on declare:
 <eucode>
 integer n
 n=5
+
 procedure foo()
     integer n = n + 2
     ? n
 end procedure
+
 foo() -- prints out 7
 </eucode>
 
-a name="constants"></a>
 ==== constants
 
 These are variables that are assigned an initial value that can never change
@@ -1031,8 +1030,7 @@ value of the constant variable is "locked in".
 
 Constants may not be declared inside a subroutine.
 
-a name="enum"></a>
-===== enum
+==== enum
 
 An enumerated value is a special type of constant where the first value
 defaults to the number 1 and each item after that is incremented by 1.
@@ -1044,18 +1042,20 @@ enum ONE, TWO, THREE, FOUR
 </eucode>
 
 You can change the value of any one item by assigning it a numeric value. Enums
-can only take numeric values. You cannot set the starting value to an
-expression or other variable. Subsequent values are always the previous value
-plus one, unless they too are assigned a default value.
+can only take numeric values. You can set the starting value as numeric value, a
+constant containing a numeric value or another enum value. You cannot set the starting
+value to an expression or other variable unknown at compile time. Subsequent values are
+always the previous value plus one, unless they too are assigned a default value.
 
 <eucode>
-enum ONE, TWO, THREE, ABC=10, DEF, XYZ
+enum ONE, TWO, THREE, ABC=10, DEF, XYZ, END_OF_ENUM=XYZ
 
 -- ONE is 1, TWO is TWO, THREE is 3
 -- ABC is 10, DEF is 11, XYZ is 12.
+-- END_OF_ENUM is 12
 </eucode>
 
-a name="scope"></a>
+@[scope]
 === Scope
 
 A symbol's //scope// is the portion of the program where that symbol's
@@ -1070,16 +1070,14 @@ Every user-defined symbol must be declared before it is used.  You can read a
 Euphoria program from beginning to end without encountering any user-defined
 variables or routines that haven't been defined yet. It is possible to call a
 routine that comes later in the source, but you must use the special functions,
-**routine_id()**, and either **call_func()** or
-**call_proc()** to do it.  See a href="library.htm#dyn_call">Part
-II - Library Routines - Dynamic Calls</a>.
+[[:routine_id]](), and either [[:call_func]]() or
+[[:call_proc]]() to do it.  See a [[:dyncall|Library Routines - Dynamic Calls]].
 
 Procedures, functions and types can call themselves //recursively//. Mutual
 recursion, where routine A calls routine B which directly or indirectly calls
-routine A, requires the a class="brown" href="lib_dyn.htm#routine_id">
-**routine_id()**</a> mechanism.
+routine A, requires the [[:routine_id]]() mechanism.
 
-a name=scope></a> A symbol is defined from the point where it is declared to
+A symbol is defined from the point where it is declared to
 the end of its scope.  The scope of the variable depends upon where it is
 declared.  If it is within a **for**, **while**, **loop** or **switch**, its scope ends
 at the respective end statement.  In an **if** statement, the scope ends either
@@ -1094,13 +1092,12 @@ which case their scope extends indefinitely, or if the keyword **export**
 precedes their declaration, in which case their scope extends to any file that
 directly includes the file in which they are declared.
 
-When you **include** a Euphoria file in a main file (see a
-href="refman_2.htm#6">2.6 Special Top-Level Statements</a>), only the variables
-and routines declared using the global or export  keywords are accessible or
-even visible to the main file. The other, non-global, non-exported declarations
-in the included file are forgotten at the end of the included file, and you
-will get an error message, "not declared", if you try to use them in the main
-file.
+When you **include** a Euphoria file in a main file (see [[Special
+Top-Level Statements]]), only the variables and routines declared using the
+global or export  keywords are accessible or even visible to the main file. The
+other, non-global, non-exported declarations in the included file are forgotten
+at the end of the included file, and you will get an error message, "not
+declared", if you try to use them in the main file.
 
 Symbols marked as global or export can be used externally. All other symbols can only be
 used internally within their own file. This information is helpful when
@@ -1174,29 +1171,31 @@ conflicts, especially in a large program consisting of files written by many
 different programmers. A naming conflict might cause a compiler error message,
 or it could lead to a very subtle bug, where different parts of a program
 accidentally modify the same variable without being aware of it.  Try to use
-the most restrictive scope that you can. Make variables
-**private** to one routine where possible, and where that isn't
-possible, make them **local** to a file, rather than
-**global** to the whole program. And whenver an identifier needs to be known from
- a few files only, make it **export** so as to hide it to whoever doesn't need to see it
- - and might some day define the same identifier.
+the most restrictive scope that you can. Make variables **private** to one
+routine where possible, and where that isn't possible, make them **local** to
+a file, rather than **global** to the whole program. And whenver an identifier
+needs to be known from a few files only, make it **export** so as to hide it
+to whoever doesn't need to see it - and might some day define the same
+identifier. For example:
 
-For example:
 <eucode>
 -- sublib.e
 export procedure bar()
-?0
+    ? 0
 end procedure
 
 -- some_lib.e
 include sublib.e
+
 export procedure foo()
-?1
+    ? 1
 end procedure
+
 bar() -- ok, declared in sublib.e
 
 -- my_app.exw
 include some_lib.e
+
 foo() -- ok, declared in some_lib.e
 bar() -- error! bar() is not declared here
 </eucode>
@@ -1240,10 +1239,9 @@ before the executable statements of the subroutine.
 Declarations at the top level, outside of any subroutine, must not be nested
 inside a loop or conditional block of any kind.
 
-a name=loop_scope></a> The controlling variable used in a a
-href="refman_2.htm#for">for-loop</a> is special. It is automatically declared
-at the beginning of the loop, and its scope ends at the end of the for-loop. If
-the loop is inside a function or procedure, the loop variable is a
+@[loop_scope] The controlling variable used in a [[:for-loop]] is special. It is
+automatically declared at the beginning of the loop, and its scope ends at the end
+of the for-loop. If the loop is inside a function or procedure, the loop variable is a
 **private** variable and may not have the same name as any other
 **private** variable. When the loop is at the top level, outside
 of any function or procedure, the loop variable is a **local**
@@ -1256,17 +1254,21 @@ not allowed.
 
 ==== The override qualifier
 
-There are times when it is necessary to replace a global or export identifier. Typically, one would do this to extend the capabilities of a routine.
+There are times when it is necessary to replace a built-in routine.
+Typically, one would do this to extend the capabilities of a routine.
 
 This can be achieved by declaring the identifier as **override**:
 <eucode>
 override procedure puts(integer channel,sequence text)
-eu:puts(log_file,text)
-eu:puts(channel,text)
+    eu:puts(log_file, text)
+    eu:puts(channel, text)
 end procedure
 </eucode>
 
-A warning will be issued whever you do this. It would be very confusing, and would probably break code, for the new routine to change the behaviour of the former routine. Code that was calling the former routine expects no difference in service, so there shouldn't be any.
+A warning will be issued whever you do this. It would be very confusing, and would
+probably break code, for the new routine to change the behaviour of the former
+routine. Code that was calling the former routine expects no difference in service,
+so there shouldn't be any.
 
 If an identifier is declared global or export, but not override, and there is a builtin of the
 same name, Euphoria will not assume an override, and will choose the builtin. A warning will
@@ -1293,7 +1295,7 @@ The types: **object**, **sequence**, **atom** and **integer** are
 declared with type **sequenc**e must always be sequences.  Those declared with
 type **atom** must always be atoms.
 
-a name="integer"></a> Those declared with type **integer** must be atoms with
+@[integer] Those declared with type **integer** must be atoms with
 integer values from -1073741824 to +1073741823 inclusive. You can perform exact
 calculations on larger integer values, up to about 15 decimal digits, but
 declare them as **atom**, rather than integer.
@@ -1318,9 +1320,8 @@ if you are worried about the floating-point bug in some early Pentium
 chips.
 
 
-a name=type></a> To augment the a href="refman_2.htm#43">predefined
-types</a>, you can create **user-defined types**. All you have to
-do is define a single-parameter function, but declare it with **type ...
+@[type] To augment the [[:predefined types]], you can create **user-defined types**.
+All you have to do is define a single-parameter function, but declare it with **type ...
 end type** instead of **function ... end function**.  For
 example,
 
@@ -1359,7 +1360,7 @@ Subroutine parameter types are checked each time that the subroutine is called.
 This checking guarantees that a variable can never have a value that does not
 belong to the type of that variable.
 
-a name=typechk></a> Unlike other languages, the type of a variable does not
+@[typechk] Unlike other languages, the type of a variable does not
 affect any calculations on the variable. Only the value of the variable matters
 in an expression. The type just serves as an error check to prevent any
 "corruption" of the variable.    User-defined types can catch unexpected
@@ -1367,8 +1368,8 @@ logical errors in your program.  They are not designed to catch or correct user
 input errors.
 
 Type checking can be turned off or on between subroutines using the with
-type_check or without type_check a href="refman_2.htm#62">special
-statements</a>.  It is initially on by default.
+type_check or without type_check [[:special statements]].  It is initially on
+by default.
 
 ;**Note to Benchmarkers~:**
 : When comparing the speed of Euphoria programs against programs written in other
@@ -1406,7 +1407,7 @@ desired value.
 
 Types also provide meaningful, machine-checkable documentation about your
 program, making it easier for you or others to understand your code at a later
-date. Combined with the a href="refman_2.htm#21">subscript checking</a>,
+date. Combined with the [[:subscript checking]],
 uninitialized variable checking, and other checking that is always present,
 strict run-time type checking makes debugging much easier in Euphoria than in
 most other languages. It also increases the reliability of the final program
@@ -1462,11 +1463,11 @@ Because of these constraints, which arise in part from common hardware limitatio
 * Memory addresses, or handles acquired from anything non Euphoria, including the operating system, **must** be stored as an ##atom##.
 * For large numbers, usual operations may yield starnge results:
 <eucode>
-integer n = power(2,27) -- ok
-integer n_plus = n+1, n_minus = n-1 -- ok
-atom a = n=n -- ok
+integer n = power(2, 27) -- ok
+integer n_plus = n + 1, n_minus = n - 1 -- ok
+atom a = n * n -- ok
 atom a1 = n_plus * n_minus -- still ok
-?a-a1 -- prints 0, should be 1 mathematically
+? a - a1 -- prints 0, should be 1 mathematically
 </eucode>
 
 //This is not an Euphoria bug//. The IEEE 754 standard for floating point numbers provides for 53
@@ -1549,10 +1550,9 @@ previous value of x, namely the 1000-element sequence, would simply disappear.
 Actually, the space consumed by the 1000-element sequence will be automatically
 recycled due to Euphoria's dynamic storage allocation.
 
-Note that the equals symbol '=' is used for both assignment and for a
-href="refman_2.htm#23">equality testing</a>.  There is never any confusion
-because an assignment in Euphoria is a statement only, it can't be used as an
-expression (as in C).
+Note that the equals symbol '=' is used for both assignment and for [[:equality testing]].
+There is never any confusion because an assignment in Euphoria is a statement only, it
+can't be used as an expression (as in C).
 
 ==== Assignment with Operator
 
@@ -1685,18 +1685,17 @@ The **if** and **elsif** conditions are tested using
 a href="refman_2.htm#shortcir">short-circuit evaluation</a>.
 
 **If** statement headers can have a **label** clause
-right before the **the**n closing keyword. See the section on a
-href="refman_2.htm#labhdr">labelled block headers </a>. This feature does not
-apply to **elsif** conditional statements, as they are not
+right before the **the**n closing keyword. See the section on [[:labeled headers]].
+This feature does not apply to **elsif** conditional statements, as they are not
 standalone, just optionally sectioning an if block.
 
 === switch statement
 
 The switch statement is used to run a specific set of statements, depending on
-the value of an expression. It often replaces a set of if-elsif statements.
-There are some key differences, however.  A switch statement
-operates upon the value of a single expression, and the program flow continues
-based upon defined cases.  The syntax of a switch statement:
+the value of an expression. It often replaces a set of if-elsif statements due to it's
+ability to be highly optimized, thus much greater performance. There are some key differences,
+however.  A switch statement operates upon the value of a single expression, and the program
+flow continues based upon defined cases.  The syntax of a switch statement:
 
 <eucode>
 switch <expr> [label "<label name>"] do
@@ -1830,7 +1829,8 @@ set or unset at parse time as well. Euphoria defines some common words itself:
 * **WIN32** - Platform is Windows
 * **LINUX** - Platform is Linux
 * **FREEBSD** - Platform is FreeBSD
-* **UNIX** - Platform is any Unix (currently Linux or FreeBSD)
+* **OSX** - Platform is OS X
+* **UNIX** - Platform is any Unix (currently Linux, FreeBSD or OS X)
 
 Further, you can define your own words either in source:
 
@@ -1914,9 +1914,8 @@ how to stop or otherwise alter it.  An iterative block may be informally called
 a loop, and each execution of code in a loop is called an iteration of the
 loop.
 
-Euphoria has three flavours of loops. They all may harbor a a
-href="refman_2.htm#labhdr"> labelled block header</a>, in order to make exiting
-them more flexible.
+Euphoria has three flavors of loops. They all may harbor a [[:labeled block header]],
+in order to make exiting them more flexible.
 
 ==== while statement
 
@@ -1955,8 +1954,8 @@ This differs from a **while** loop in more than one way:
 A **for** statement sets up a special loop that has its own **loop variable**.
 The **loop variable** starts with the specified initial value and increments or
 decrements it to the specified final value. The **for** statement is used when
-you need to repeat a set of statements a specific number of times.\\
-Example:
+you need to repeat a set of statements a specific number of times. Example:
+
 <eucode>
 -- Display the numbers 1 to 6 on the screen.
 puts(1, "1\n")
@@ -1966,22 +1965,28 @@ puts(1, "4\n")
 puts(1, "5\n")
 puts(1, "6\n")
 </eucode>
+
 This block of code simply starts at the first line and runs each in turn. But it
 could be written more simply and flexible by using a **for** statement.
+
 <eucode>
 for i = 1 to 6 do
     printf(1, "%d\n", i)
 end for
 </eucode>
+
 Now its just three lines of code rather than six, but more importantly if we needed
 to change the program to print the numbers from 1 to 100 we only have to change
 one line rather than add 94 new lines.
+
 <eucode>
 for i = 1 to 100 do -- One line change.
     printf(1, "%d\n", i)
 end for
 </eucode>
+
 Or using another way ...
+
 <eucode>
 for i = 1 to 10 do
     ? i   -- ? is a short form for print()
@@ -2008,12 +2013,13 @@ happens during the execution of the loop. See also the [[:loop scope]].
 
 Program execution flow refers to the order in which program statements are run in.
 By default, the next statement to run after the current one is the next statement
-//physically// located after the current one.\\
-Example:
+//physically// located after the current one. Example:
+
 <eucode>
 a = b + c
 printf(1, "The result of adding %d and %d is %d", {b,c,a})
 </eucode>
+
 In that example, ##b## is added to ##c##, assigning the result to ##a##, and then
 the information is displayed on the screen using the ##printf## statement.
 
@@ -2027,14 +2033,17 @@ it can be desirable to leave a block before reaching the end, or slightly alter
 the default course of execution.\\
 
 The following flow control keywords are available.
+
 <eucode>
 break retry entry exit continue return goto end
 </eucode>
 
 ==== exit statement
+
 Exiting a block of code is done with the keyword **exit**. This causes flow
 to immediately leave the current block and recommence with the first statement
 after the block.
+
 <eucode>
 for i = a to b do
     c = i
@@ -2042,9 +2051,11 @@ for i = a to b do
         exit -- Stop executing code inside the 'for' block.
     end if
 end for
+
 -- Flow restarts here.
 if c = a then ...
 </eucode>
+
 But sometimes you need to leave a block that encloses the current one. Euphoria
 has two methods available for you to do this. The safest method, in terms of future
 maintenance, is to name the block you want to exit from and use that name on the
@@ -2053,8 +2064,8 @@ that refers to the depth that you want to exit from.
 
 A block's name is always a string literal and only a string literal. You cannot use
 a variable that contains the block's name on an exit statement. The name comes after
-the ##label## keyword, just before the #do# keyword.\\
-Example:
+the ##label## keyword, just before the #do# keyword. Example:
+
 <eucode>
 integer b
   b = 0
@@ -2070,37 +2081,41 @@ integer b
   end for
   ? b
 </eucode>
+
 The output from this is ...
+
 <eucode>
-{1,1,2}
-{1,2,5}
-{1,3,9}
-{1,4,14}
-{1,5,20}
-{1,6,27}
-{1,7,35}
-{1,8,44}
-{1,9,54}
+{1, 1,  2}
+{1, 2,  5}
+{1, 3,  9}
+{1, 4, 14}
+{1, 5, 20}
+{1, 6, 27}
+{1, 7, 35}
+{1, 8, 44}
+{1, 9, 54}
 0
 </eucode>
+
 The **exit "main"** causes execution flow to leave the **for** block named //main//.
 
 
 The same thing could be achieved using the **exit N** format...
+
 <eucode>
-integer b
-  b = 0
-  for i = 1 to 20 do
+integer b = 0
+for i = 1 to 20 do
     for j = 1 to 20 do
-      b  += i + j
-      ? {i, j, b}
-      if b > 50 then
-        b  = 0
-        exit 2 -- exit 2 levels of depth
-      end if
+        b  += i + j
+        ? {i, j, b}
+        if b > 50 then
+            b  = 0
+            exit 2 -- exit 2 levels of depth
+        end if
     end for
-  end for
-  ? b
+end for
+
+? b
 </eucode>
 
 But using this method means you have to take more care when changing the program
@@ -2118,11 +2133,10 @@ programs, and are provided mostly for this purpose.
 For information on how to associate a string o a block of code, see the section
 [[:labeled headers]].
 
-
 An **exit** without any label or number in a [[:while statement]] or a [[:for statement]]
 causes immediate termination of that loop, with control passing to the first statement after
-the loop.\\
-Example:
+the loop. Example:
+
 <eucode>
 for i = 1 to 100 do
     if a[i] = x then
@@ -2152,7 +2166,7 @@ statement** at some arbitrary point in the body of the loop.
 ; **Performance Note~:**:
 : Euphoria optimizes this type of loop.  At run-time, no test is performed at the
 top of the loop. There's just a simple unconditional jump from **end while**
-back to the first statement inside the loop.</dd>
+back to the first statement inside the loop.
 
 ==== break statement
 
@@ -2180,12 +2194,13 @@ end if
 
 This code resuls in:
 
-* "Dur" > a=0 b=0
-* "Exe" > a=3 b=4
-* "Eux" >  a=2 b=1
-* "Eup" >  a=3 b=1
+* ##"Dur" > a=0 b=0##
+* ##"Exe" > a=3 b=4##
+* ##"Eux" >  a=2 b=1##
+* ##"Eup" >  a=3 b=1##
 
 ==== continue statement
+
 Likwise, skipping the rest of an iteration in a single
 code block is done using a single keyword, like **continue**.
 The **continue statements** continues execution of the loop it
@@ -2205,23 +2220,22 @@ for i = 3 to 6 do
 end for
 </eucode>
 
-This will print 3, 9, 4, (2), 5 25, 6 36.
-
+This will print ##3, 9, 4, (2), 5 25, 6 36##.
 
 <eucode>
-integer b
-  b = 0
-  for i = 1 to 20 label "main" do
+integer b = 0
+for i = 1 to 20 label "main" do
     for j = 1 to 20 do
-      b  += i + j
-      if b > 50 then
-        printf(1, "%d ", b)
-        b  = 0
-        continue "main"
-      end if
+        b  += i + j
+        if b > 50 then
+            printf(1, "%d ", b)
+            b  = 0
+            continue "main"
+        end if
     end for
-  end for
-  ? b
+end for
+
+? b
 </eucode>
 
 ==== retry statement
@@ -2431,8 +2445,7 @@ have to type Control-Alt-Delete to either reboot, or (under Windows) terminate
 your DOS prompt session. If the program had files open for writing, it would be
 advisable to run **scandisk** to check your file system integrity.  Only
 when your program is waiting for keyboard input, will control-c abort the
-program (unless a href="lib_file.htm#allow_break">allow_break(0)</a> was
-used).
+program (unless [[:allow_break]](0) was used).
 
 With **exw.exe** or **exu**, control-c will always
 stop your program immediately.
@@ -2484,7 +2497,7 @@ rather than the standard error, which is the default behaviour. This is useful w
 you do not want to suppress warnings, but do not want a consoe window to pop in an
 otherwise graphic environment either.
 
-If the argumnt is not a sequence representing a file name, then:
+If the argument is not a sequence representing a file name, then:
 
 # if an atom not less than 0 is provided, this instructs the interpreter to revert to
   outputting warnings on the standard error;
@@ -2749,24 +2762,21 @@ restored.
 
 ===== with / without define
 
-As mentioned in [[:ifdef]], this top level statement is used to define/undefine tags which the ifdef statement may use.
+As mentioned in [[:ifdef]], this top level statement is used to define/undefine words which
+the ifdef statement may use.
 
-The following tags have a predefined meaning in Euphoria:
+The following words have a predefined meaning in Euphoria:
 
-* DOS32:    platform is 32 bit DOS
-* WIN32:    platform is any version of Windows (tm) from '95 on to Vista and beyond
-* UNIX:     platform is any kind of Unix style system
-* LINUX:    platform is Linux
-* FREEBSD:  platform is FreeBSD
-* OSX:      platform is OS X for Macintosh
-* SAFE:     turns on a slower debugging version of [[:memory.e]] when defined. Switching mode by renaming files **//no longer works//**.
-* EU400:    defined on all versions of the interpreter above 4.0
+* ##DOS32##:    platform is 32 bit DOS
+* ##WIN32##:    platform is any version of Windows (tm) from '95 on to Vista and beyond
+* ##UNIX##:     platform is any kind of Unix style system
+* ##LINUX##:    platform is Linux
+* ##FREEBSD##:  platform is FreeBSD
+* ##OSX##:      platform is Macintosh OS X
+* ##SAFE##:     turns on a slower debugging version of [[:memory.e]] when defined. Switching mode by renaming files **//no longer works//**.
+* ##EU400##:    defined on all versions of the interpreter above 4.0
 
-The name of a tag may contain any character that are not white space, including ones that
-would not be legal in an identifier. However, for consistency, using identifier-like,
-uppercase words is recommended. "MY TAG" is not a valid tag (TAG has not been declared), but
-"MY@TAG" or "MYÁTAG" is. The latter is not recommended because it may display differently on
-different computers.
+The name of a word may contain any character that is not a white space character.
 
 == Command line switches
 
@@ -2808,11 +2818,11 @@ The following items may be changed or added, one at a time:
   The first ##-W## switch resets the list to the warning being introduced, and each subsequent
   switch adds to the list.
 
-; ##-X##;
+; ##-X##:
 : Resets, or adds to, the list of warnings that will not be issued. This is symetric of
   the ##-W## switch.
 
-: ##-WF##:
+; ##-WF##:
 : Sets the file where the warnings should go instead of the standard error.
 
 The case of the switches is ignored, so ##-I## and ##-i## are equivalent.

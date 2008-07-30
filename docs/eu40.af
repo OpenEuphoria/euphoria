@@ -29,19 +29,17 @@
 ../docs/api.txt
 ../include/std/console.e
 ../include/std/convert.e
-../include/std/database.e
+../include/std/get.e
 ../include/std/datetime.e
 ../include/std/dll.e
+../include/std/eds.e
 ../include/std/error.e
 ../include/std/filesys.e
-../include/std/get.e
 ../include/std/graphics.e
 ../include/std/graphcst.e
-../include/std/image.e
 ../include/std/dos/image.e
-../include/std/dos/pixels.e
-../include/dos/interrup.e
-../include/std//std/io.e
+../include/std/dos/interrup.e
+../include/std/io.e
 ../include/std/locale.e
 ../include/std/localeconv.e
 ../include/std/map.e
@@ -52,7 +50,6 @@
 ../include/std/safe.e
 ../include/std/dos/safe.e
 ../include/std/mouse.e
-../include/std/msgbox.e
 ../include/std/os.e
 ../include/std/pretty.e
 ../include/std/primes.e
@@ -69,9 +66,10 @@
 ../include/std/types.e
 ../include/std/unicode.e
 ../include/std/unittest.e
+../include/std/msgbox.e
 ../include/std/wildcard.e
 
-## Release Notes
+### Release Notes
 ../docs/relnotes.txt
 ../docs/relnotes400.txt
 

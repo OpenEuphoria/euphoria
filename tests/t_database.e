@@ -1,8 +1,8 @@
 include std/unittest.e
-include std/database.e
+include std/eds.e
 
 -- TODO: add actual tests
 
-test_pass("database.e at least compiles")
+test_pass("eds.e at least compiles")
 
 test_report()

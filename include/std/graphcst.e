@@ -3,8 +3,8 @@
 --****
 -- === Constants
 --
---**
 -- error codes returned by read_bitmap(), save_bitmap() and save_screen()
+--
 -- * BMP_SUCCESS,
 -- * BMP_OPEN_FAILED,
 -- * BMP_UNEXPECTED_EOF,
@@ -18,8 +18,18 @@ export enum
 	BMP_UNSUPPORTED_FORMAT,
 	BMP_INVALID_MODE
 
---**
+--****
 -- Fields for the sequence returned by [[:video_config]]()
+--
+-- * VC_COLOR
+-- * VC_MODE
+-- * VC_LINES
+-- * VC_COLUMNS
+-- * VC_XPIXELS
+-- * VC_YPIXELS
+-- * VC_NCOLORS
+-- * VC_PAGES
+
 export enum
 	VC_COLOR,
 	VC_MODE,
@@ -32,7 +42,7 @@ export enum
 
 --****
 -- ==== Colors
---**
+--
 -- Normal:
 -- * BLACK
 -- * BLUE
@@ -58,15 +68,15 @@ export enum
 
 -- COLOR values -- for characters and pixels
 export constant
-		 BLACK = 0,  -- in graphics modes this is "transparent"
-		 GREEN = 2,
-		 MAGENTA = 5,
-		 WHITE = 7,
-		 GRAY  = 8,
-		 BRIGHT_GREEN = 10,
-		 BRIGHT_MAGENTA = 13,
-		 BRIGHT_WHITE = 15
-		 
+	BLACK = 0,  -- in graphics modes this is "transparent"
+	GREEN = 2,
+	MAGENTA = 5,
+	WHITE = 7,
+	GRAY  = 8,
+	BRIGHT_GREEN = 10,
+	BRIGHT_MAGENTA = 13,
+	BRIGHT_WHITE = 15
+
 export integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
 
 ifdef UNIX then
@@ -97,9 +107,10 @@ end type
 
 --**
 -- Mixture Type
+--
 -- Comments:
--- A mixture is a ##{red, green, blue}## triple of intensities, which enables you to define 
--- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest 
+-- A mixture is a ##{red, green, blue}## triple of intensities, which enables you to define
+-- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest
 -- white is {63, 63, 63}.
 
 export type mixture(sequence s)
@@ -134,7 +145,7 @@ constant
 -- Comments:
 -- An enum is available for convenient access to the returned configuration data:
 -- <eucode>
--- export constant 
+-- export constant
 --     VC_COLOR   = 1,
 --     VC_MODE    = 2,
 --     VC_LINES   = 3,
@@ -144,13 +155,13 @@ constant
 --     VC_NCOLORS = 7,
 --     VC_PAGES   = 8
 -- </eucode>
--- This routine makes it easy for you to parameterize a program so it will work in many 
+-- This routine makes it easy for you to parameterize a program so it will work in many
 -- different graphics modes.
 --
--- On the PC there are two types of graphics mode. The first type, text mode, lets you 
--- print text only. The second type, pixel-graphics mode, lets you plot pixels, or points, 
--- in various colors, as well as text. You can tell that you are in a text mode, because 
--- the ##VC_XPIXELS## and ##VC_YPIXELS## fields will be 0. Library routines such as 
+-- On the PC there are two types of graphics mode. The first type, text mode, lets you
+-- print text only. The second type, pixel-graphics mode, lets you plot pixels, or points,
+-- in various colors, as well as text. You can tell that you are in a text mode, because
+-- the ##VC_XPIXELS## and ##VC_YPIXELS## fields will be 0. Library routines such as
 -- [[:polygon]], [[:draw_line]], and [[:ellipse]] only work in a pixel-graphics mode.
 --
 -- Example:
@@ -158,8 +169,10 @@ constant
 -- -- vc = video_config()  -- in mode 3 with 25-lines of text:
 -- -- vc is {1, 3, 25, 80, 0, 0, 32, 8}
 -- </eucode>
+--
 -- See Also:
 -- 		[[:graphics_mode]]
+
 export function video_config()
 	return machine_func(M_VIDEO_CONFIG, 0)
 end function

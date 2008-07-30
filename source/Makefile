@@ -254,7 +254,8 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/convert.o \
-	./$(OBJDIR)/filesys.o
+	./$(OBJDIR)/filesys.o \
+	./$(OBJDIR)/get.o
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \

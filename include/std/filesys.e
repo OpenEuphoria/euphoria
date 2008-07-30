@@ -5,9 +5,8 @@
 --
 -- Cross platform file operations for Euphoria
 --
--- **Page Contents**
---
 -- <<LEVELTOC depth=2>>
+
 -- DOS support code borrowed from DOS.E by Daniel Berstein, Jacques Deschenes, and Rob Craig
 
 ifdef DOS32 then

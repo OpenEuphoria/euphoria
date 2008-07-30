@@ -1,10 +1,11 @@
 --****
--- == Data type conversion
---
--- **Page Contents**
+-- == Data Type Conversion
 --
 -- <<LEVELTOC depth=2>>
 --
+
+export include get.e -- value(), get() are conversion routines
+
 constant
 	M_A_TO_F64 = 46,
 	M_F64_TO_A = 47,

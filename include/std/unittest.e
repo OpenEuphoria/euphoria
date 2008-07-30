@@ -2,7 +2,6 @@
 --
 --****
 -- == Unit Testing Framework
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -18,12 +17,32 @@
 --
 -- In Euphoria terms, this framework provides the tools to make testing and reporting on 
 -- functions and procedures easy and standardized. It gives us a simple way to
--- write a test case and to report on the findings.\\
--- Example:
+-- write a test case and to report on the findings. Example:
+--
 -- <eucode>
---  test_equal( "Power function test #1", 4, power(2, 2))
---  test_equal( "Power function test #2", 4, power(16, 0.5))
+-- include std/unittest.e
+--
+-- test_equal( "Power function test #1", 4, power(2, 2))
+-- test_equal( "Power function test #2", 4, power(16, 0.5))
+--
+-- test_report()
 -- </eucode>
+--
+-- Name your test file in the special manner, ##t_NAME.e## and then simply run
+-- ##eutest## in that directory.
+--
+-- {{{
+-- C:\Euphoria> eutest
+-- t_math.e:
+--  failed: Bad math, expected: 100 but got: 8
+--  2 tests run, 1 passed, 1 failed, 50.0% success
+--
+-- Test failure summary:
+--    FAIL: t_math.e
+--
+-- 2 file(s) run 1 file(s) failed, 50.0% success--
+-- }}}
+--
 -- In this example, we use the ##test_equal## function to record the result of
 -- a test. The first parameter is the name of the test, which can be anything
 -- and is displayed if the test fails. The second parameter is the expected
@@ -45,15 +64,12 @@
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
 
--- === Constants
-
 include pretty.e
 
 --
 -- Public Variables
 --
---**
--- Verbosity values
+
 export enum
 	TEST_QUIET = 0,
 	TEST_SHOW_FAILED_ONLY,
@@ -116,17 +132,23 @@ end procedure
 -- * TEST_QUIET = 0,
 -- * TEST_SHOW_FAILED_ONLY = 1
 -- * TEST_SHOW_ALL = 2
--- However, anything less than TEST_SHOW_FAILED_ONLY is treated as TEST_QUIET, and everything above TEST_SHOW_ALL is treated as TEST_SHOW_ALL.
+--
+-- However, anything less than TEST_SHOW_FAILED_ONLY is treated as TEST_QUIET, and everything
+-- above TEST_SHOW_ALL is treated as TEST_SHOW_ALL.
+--
 -- * At the lowest verbosity level, only the score is shown, ie the ratio passed tests/total tests.
--- * At the medium level, in addition, failed tests display their name, the expected outcome and the outcome they got. This is the initial setting.
+-- * At the medium level, in addition, failed tests display their name, the expected outcome and
+--   the outcome they got. This is the initial setting.
 -- * At the highest level of verbosity, each test is reported as passed or failed.
 --
 -- If a file crashes when it should not, this event is reported no matter the verbosity level.
 --
--- The command line switch ""-failed" causes verbosity to be set to medium at startup. The command line switch ""-all" causes verbosity to be set to high at startup.
+-- The command line switch ""-failed" causes verbosity to be set to medium at startup. The
+-- command line switch ""-all" causes verbosity to be set to high at startup.
 --
 -- See Also:
 -- [[:test_report]]
+
 export procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
@@ -138,7 +160,10 @@ end procedure
 --		# ##toWait##: an integer, zero not to wait, nonzero to wait.
 --
 -- Comments:
--- Depending on the environment, the test results may be invisible if ##set_wait_on_summary(1)## was not called prior, as this is not the default. The command line switch "-wait" performs this call.
+-- Depending on the environment, the test results may be invisible if
+-- ##set_wait_on_summary(1)## was not called prior, as this is not the default. The command
+-- line switch "-wait" performs this call.
+--
 -- See Also:
 -- [[:test_report]]
 
@@ -189,10 +214,12 @@ end function
 -- Output test report
 --
 -- Comments:
--- The report components are described in the comments section for [[:set_verbosity]]. Everything prints on the standard error device.
+-- The report components are described in the comments section for [[:set_verbosity]]. Everything
+-- prints on the standard error device.
 --
 -- See Also:
--- [[:set_verbosity]]
+--   [[:set_verbosity]]
+
 export procedure test_report()
 	atom score
 	integer fh
@@ -253,12 +280,17 @@ end procedure
 -- Comments:
 -- * For atoms, a fuzz of 1e-9 is used to assess equality.
 -- * For sequences, no such fuzz is implemented.
--- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter is typically a function call, or a variable that was set by some prior action.
 --
--- While ##expected## and ##outcome## are processed symmetrically, they are not recorded symmetrically, so be careful to pass ##expected## before ##outcome## for better test failure reports.
+-- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter
+-- is typically a function call, or a variable that was set by some prior action.
+--
+-- While ##expected## and ##outcome## are processed symmetrically, they are not recorded
+-- symmetrically, so be careful to pass ##expected## before ##outcome## for better test failure
+-- reports.
 --
 -- See Also:
 -- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+
 export procedure test_equal(sequence name, object expected, object outcome)
 	integer success
 	if sequence(expected) or sequence(outcome) then
@@ -284,10 +316,13 @@ end procedure
 -- Comments:
 -- * For atoms, a fuzz of 1e-9 is used to assess equality.
 -- * For sequences, no such fuzz is implemented.
--- A test is recorded as passed if equality does not hold between ##expected## and ##outcome##. The latter is typically a function call, or a variable that was set by some prior action.
+--
+-- A test is recorded as passed if equality does not hold between ##expected## and ##outcome##. The
+-- latter is typically a function call, or a variable that was set by some prior action.
 --
 -- See Also:
 -- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+
 export procedure test_not_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
@@ -310,10 +345,12 @@ end procedure
 --		# ##outcome##: an object, some actual value that should not be zero.
 --
 -- Comments:
--- This assumes an expected value different from 0. No fuzz is applied when checking whether an atom is zero or not. Use [[:test_equal]]() instead in this case.
+-- This assumes an expected value different from 0. No fuzz is applied when checking whether an
+-- atom is zero or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_false]], [[:test_pass]], [[test_fail]]
+
 export procedure test_true(sequence name, object outcome)
 	integer success
 	if sequence(outcome) then
@@ -332,10 +369,12 @@ end procedure
 --		# ##outcome##: an object, some actual value that should be zero
 --
 -- Comments:
--- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero or not. Use [[:test_equal]]() instead in this case.
+-- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero
+-- or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[test_fail]]
+
 export procedure test_false(sequence name, object outcome)
 	integer success
 	if not integer(outcome) then
@@ -351,6 +390,7 @@ end procedure
 --
 -- Parameters:
 --		# ##name##: a string, the name of the test
+--
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_pass]]
 
@@ -363,8 +403,10 @@ end procedure
 --
 -- Parameters:
 --		# ##name##: a string, the name of the test
+--
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_fail]]
+
 export procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure

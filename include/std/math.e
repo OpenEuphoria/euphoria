@@ -2,7 +2,6 @@
 --
 --****
 -- == Math
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 -- 
@@ -33,8 +32,13 @@ export constant E = 2.718281828459045235
 
 export constant PI = 3.141592653589793238
 
+--**
+-- PI_HALF = PI / 2.0
+--
+export constant PI_HALF = PI / 2.0
+
+
 constant
-	PI_HALF  =  PI / 2.0,          -- PI / 2
 	PINF     = 1E308 * 1000,       -- Plus infinity (used in several routines)
 	MINF     = - PINF,             -- Minus infinity (used in several routines)
 	INVLOG10 = 1 / log(10),        -- for log10() routine
@@ -56,11 +60,9 @@ type trig_range(object x)
 end type
 
 --****
--- === Routines
-
---****
--- ==== Roundings and remainders
+-- === Roundings and remainders
 --
+
 --**
 -- Signature:
 --   global function remainder(object dividend, object divisor)
@@ -107,6 +109,7 @@ end type
 -- s = remainder(16, {2, 3, 5})
 -- -- s is {0, 1, 1}
 -- </eucode>
+--
 -- See Also:
 -- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
 
@@ -151,8 +154,10 @@ end type
 -- s = mod(16, {2, 3, 5})
 -- -- s is {0, 1, 1}
 -- </eucode>
+--
 -- See Also:
 -- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
+
 export function mod(object x, object y)
 	return x - y * floor(x / y)
 end function
@@ -178,6 +183,7 @@ end function
 --
 -- See Also:
 --		[[:ceil]], [[:round]]
+
 --**
 -- Computes next integer equal or greater than the argument. This means for
 -- integer arguments it has no effect, but for non-integers it rounds up to
@@ -202,15 +208,18 @@ end function
 -- nums = {8, -5, 3.14, 4.89, -7.62, -4.3}
 -- nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
 -- </eucode>
+--
 -- See Also:
 --		[[:floor]], [[:round]]
+
 export function ceil(object a)
 	return -floor(-a)
 end function
 
 --****
--- ==== Sign and comparisons
+-- === Sign and comparisons
 --
+
 --**
 -- Returns the absolute value of numbers.
 --
@@ -232,8 +241,10 @@ end function
 -- i = abs(-4)
 -- -- i is 4
 -- </eucode>
+--
 -- See Also:
 --		[[:sign]]
+
 export function abs(object a)
 	object t
 	if atom(a) then
@@ -280,8 +291,10 @@ end function
 -- i = sign(-2)
 -- -- i is -1
 -- </eucode>
+--
 -- See Also:
 --		[[:compare]]
+
 export function sign(object a)
 	object t
 	if atom(a) then
@@ -326,8 +339,10 @@ end function
 -- a = max({10,15.4,3})
 -- -- a is 15.4
 -- </eucode>
+--
 -- See Also:
 --		[[:min]], [[:compare]], [[:flatten]]
+
 export function max(object a)
 	atom b, c
 	if atom(a) then
@@ -360,6 +375,9 @@ end function
 -- a = min({10,15.4,3})
 -- -- a is 3
 -- </eucode>
+--
+-- See Also:
+--   [[:max]]
 
 export function min(object a)
 	atom b, c
@@ -375,7 +393,9 @@ export function min(object a)
 	end for
 	return b
 end function
--- ==== Trigonometry
+
+--****
+-- === Trigonometry
 
 --**
 -- Signature:
@@ -431,6 +451,7 @@ end function
 --   </eucode>
 -- See Also:
 --		[[:sin]], [[:cos]], [[:arctan]]
+
 --**
 -- Signature:
 --   global function cos(object angle)
@@ -457,6 +478,7 @@ end function
 --
 -- See Also:
 --		[[:sin]], [[tan]], [[arccos]], [[:PI]], [[:deg2rad]]
+
 --**
 -- Signature:
 -- global function sin(object angle)
@@ -480,6 +502,7 @@ end function
 -- sin_x = sin({.5, .9, .11})
 -- -- sin_x is {.479, .783, .110}
 -- </eucode>
+--
 -- See Also:
 --		[[:cos]], [[:arcsin]], [[:PI]], [[:deg2rad]]
 
@@ -508,8 +531,10 @@ end function
 -- s = arccos({-1,0,1})
 -- -- s is {3.141592654, 1.570796327, 0}
 -- </eucode>
+--
 -- See Also:
 --		[[:cos]], [[:PI]], [[:arctan]]
+
 export function arccos(trig_range x)
 --  returns angle in radians
 	return PI_HALF - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
@@ -539,12 +564,15 @@ end function
 -- s = arcsin({-1,0,1})
 -- s is {-1.570796327, 0, 1.570796327}
 -- </eucode>
+--
 -- See Also:
 --		[[:arccos]], [[:arccos]], [[:sin]]
+
 export function arcsin(trig_range x)
 --  returns angle in radians
 	return 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
+
 --**
 -- Calculate the arctangent of a ratio.
 --
@@ -560,8 +588,10 @@ end function
 -- a = atan2(10.5, 3.1)
 -- -- a is 1.283713958
 -- </eucode>
+--
 -- See Also:
 --		[[:arctan]]
+
 export function atan2(atom y, atom x)
 	if x > 0 then
 		return arctan(y/x)
@@ -599,8 +629,10 @@ end function
 -- x = rad2deg(3.385938749)
 -- -- x is 194
 -- </eucode>
+--
 -- See Also:
 --		{{:deg2rad]]
+
 export function rad2deg (object x)
    return x * RADIANS_TO_DEGREES
 end function
@@ -624,8 +656,10 @@ end function
 -- x = deg2rad(194)
 -- -- x is 3.385938749
 -- </eucode>
+--
 -- See Also:
 -- [[:rad2deg]]
+
 export function deg2rad (object x)
    return x * DEGREES_TO_RADIANS
 end function
@@ -652,6 +686,7 @@ end function
 --
 -- See Also:
 --	[[:floor]], [[:ceil]]
+
 export function round(object a, object precision=1)
 	integer len
 	sequence s
@@ -707,10 +742,10 @@ export function round(object a, object precision=1)
 	return s
 end function
 
-
 --****
--- ==== Logarithms and powers.
+-- === Logarithms and powers.
 --
+
 --**
 -- Signature:
 -- global function log(object value)
@@ -742,6 +777,7 @@ end function
 -- See Also:
 --		[[:E]], [[:exp]], [[:log10]]
 --
+
 --**
 -- Return the base 10 logarithm of a number.
 --
@@ -765,8 +801,10 @@ end function
 -- a = log10(12)
 -- -- a is 2.48490665
 -- </eucode>
+--
 -- See Also:
 --		[[:log]]
+
 export function log10(object x1)
 	return log(x1) * INVLOG10
 end function
@@ -792,6 +830,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:log]]
+
 export function exp(atom x)
 	return power(E, x)
 end function
@@ -852,6 +891,7 @@ end function
 -- See Also:
 --		[[:log]], [[:Operations on sequences]]
 --
+
 --**
 -- Signature:
 -- global function sqrt(object value)
@@ -882,8 +922,9 @@ end function
 --
 
 --****
--- ==== Accumulation
+-- === Accumulation
 --
+
 --**
 -- Compute the sum of all atoms in the argument, no matter how deeply nested
 --
@@ -906,6 +947,7 @@ end function
 --   </eucode>
 -- See Also:
 --		[[:can_add]], [[:product]], [[:or_all]]
+
 export function sum(object a)
 	atom b
 	if atom(a) then
@@ -921,6 +963,7 @@ export function sum(object a)
 	end for
 	return b
 end function
+
 --**
 -- Compute the product of all the atom in the argument, no matter how deeply nested.
 --
@@ -941,8 +984,10 @@ end function
 --   a = product({10.5, {11.2} , 8.1})
 --   -- a is 952.56
 --   </eucode>
+--
 -- See Also:
 --		[[:can_add]], [[:sum]], [[:or_all]]
+
 export function product(object a)
 	atom b
 	if atom(a) then
@@ -979,6 +1024,7 @@ end function
 --
 -- See Also:
 --		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]
+
 export function or_all	(object a)
 	atom b
 	if atom(a) then
@@ -994,9 +1040,11 @@ export function or_all	(object a)
 	end for
 	return b
 end function
+
 --****
--- ==== Bitwise opreations
+-- === Bitwise opreations
 --
+
 --**
 -- Signature:
 -- global function and_bits(object a, object b)
@@ -1048,6 +1096,7 @@ end function
 -- See Also:
 --  [[:or_bits]], [[:xor_bits]], [[:not_bits]], [[:int_to_bits]]
 --
+
 --**
 -- Signature:
 -- global function xor_bits(object a, object b)
@@ -1079,9 +1128,10 @@ end function
 -- 
 -- See Also: 
 --     [[:and_bits]], [[:or_bits]], [[:not_bits]], [[:int_to_bits]]
+
 --**
 -- Signature:
--- global function or(object a, object b)
+-- global function or_bits(object a, object b)
 --
 -- Description:
 -- Perform the logical OR operation on corresponding bits in two objects. A bit in the
@@ -1116,7 +1166,7 @@ end function
 -- 
 -- See Also: 
 --    [[:and_bits]], [[:xor_bits]], [[:not_bits]], [[:int_to_bits]]
---
+
 --**
 -- Signature:
 -- global function not_bits(object a)
@@ -1152,10 +1202,51 @@ end function
 --   [[:and_bits]], [[:or_bits]], [[:xor_bits]], [[:int_to_bits]]
 
 
+--**
+-- Left shift moves a left by b bits
+--
+-- Parameters
+--   # ##a## - value to be moved
+--   # ##b## - number of bits to be moved left by
+--
+-- Example 1:
+-- <eucode>
+-- ? left_shift(2, 2) -- 8
+-- ? left_shift(4, 2) -- 16
+-- ? left_shift(4, 4) -- 64
+-- </eucode>
+--
+-- See Also:
+--   [[:right_shift]]
 
+export function left_shift(integer a, integer b)
+	return round(a * power(2, b))
+end function
+
+--**
+-- Right shift moves a right by b bits
+--
+-- Parameters:
+--   # ##a## - value to be moved
+--   # ##b## - number of bits to be moved right by
+--
+-- Example 1:
+-- <eucode>
+-- ? right_shift(2, 2) -- 0
+-- ? right_shift(4, 2) -- 1
+-- ? right_shift(40, 2) -- 10
+-- </eucode>
+--
+-- See Also:
+--   [[:left_shift]]
+
+export function right_shift(integer a, integer b)
+	return round(a / power(2, b))
+end function
 
 --****
--- ==== Random numbers
+-- === Random numbers
+
 --**
 -- Return a random integer from a specified integer range.
 --
@@ -1180,6 +1271,7 @@ end function
 -- </eucode>
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rnd]]
+
 export function rand_range(integer lo, integer hi)
    lo -= 1
    hi -= lo
@@ -1188,6 +1280,7 @@ export function rand_range(integer lo, integer hi)
 end function
 
 constant M_SET_RAND = 35
+
 --**
 -- Return a random floating point number in the range 0 to 1.
 --
@@ -1269,7 +1362,7 @@ export procedure set_rand(integer seed)
 	machine_proc(M_SET_RAND, seed)
 end procedure
 
---**
+--****
 -- Signature:
 -- global function rand(object maximum)
 --
@@ -1297,4 +1390,3 @@ end procedure
 --
 -- See Als:
 -- 		[[:set_rand]], [[:ceil]]
-

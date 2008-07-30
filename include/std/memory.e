@@ -1,12 +1,12 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Memory Management and other Machine Level routines
+-- == Low-Level Memory Management
 --
 -- Warning: Some of these routines require a knowledge of 
 -- machine-level programming. You could crash your system!
 --
--- These routines, along with peek(), poke() and call(), let you access all
+-- These routines, along with [[:peek]](), [[:poke]]() and [[:call]](), let you access all
 -- of the features of your computer.  You can read and write to any memory
 -- location, and you can create and execute machine code subroutines.
 --
@@ -23,23 +23,30 @@
 -- a bit of overhead) you *must* pass valid arguments or Euphoria could crash.
 --
 -- Some example programs to look at:
---   * [[../demo/callmach.ex]]      - calling a machine language routine
---   * [[../demo/dos32/hardint.ex]] - setting up a hardware interrupt handler
---   * [[../demo/dos32/dosint.ex]]  - calling a DOS software interrupt
+--   * ##../demo/callmach.ex##      - calling a machine language routine
+--   * ##../demo/dos32/hardint.ex## - setting up a hardware interrupt handler
+--   * ##../demo/dos32/dosint.ex##  - calling a DOS software interrupt
 --
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
 --
 
-constant M_ALLOC = 16,
-		 M_FREE = 17
+constant
+	M_ALLOC = 16,
+	M_FREE = 17
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
+--**
+-- Positive integer type
+
 export type positive_int(integer x)
 	return x >= 1
 end type
+
+--**
+-- Machine address type
 
 export type machine_addr(atom a)
 -- a 32-bit non-null machine address 
@@ -209,6 +216,7 @@ end function
 --  [[:poke]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]], 
 -- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
 --
+
 --**
 -- Signature:
 -- global function peeks(object addr_n_length)
@@ -259,6 +267,7 @@ end function
 --  [[:poke]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]], 
 -- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]], [[peek]]
 --
+
 --**
 -- Signature:
 -- global function peek2s(object addr_n_length)
@@ -314,6 +323,7 @@ end function
 --  [[:poke]], [[:peek]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:call]], [[:peek2u]]
 --
+
 --**
 -- Signature:
 -- global function peek2u(object addr_n_length)
@@ -369,6 +379,7 @@ end function
 --  [[:poke]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:call]], [[:peek4s]], [[:peek4u]]
 --
+
 --**
 -- Signature:
 -- global function peek4s(object addr_n_length)
@@ -383,12 +394,12 @@ end function
 --		** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
 --
 -- Returns:
---		An **object**, either an atom if the input was a single address, or a
+-- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
 -- are double words, in the range 0..power(2,32)-1.
 --
 -- Errors:
---	Peek()ing in memory you don't own may be blocked by the OS, and cause a
+-- Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e i,clude file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -406,11 +417,11 @@ end function
 -- Remember that ##peek4s##() takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek4s##() and ##peek4u##() is how double
+-- The only difference between ##peek4s##() and [[peek4u]]() is how double
 -- words with the highest bit set are returned. ##peek4s##() assumes them to
--- be negative, while ##peek4u##() just assumes them to be large and positive.
---  
--- Example 1: 
+-- be negative, while [[peek4u]]() just assumes them to be large and positive.
+--
+-- Example 1:
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
@@ -421,9 +432,10 @@ end function
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peek]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:poke]], [[:peek]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
 --
+
 --**
 -- Signature:
 -- global function peek4u(object addr_n_length)
@@ -551,6 +563,7 @@ end function
 -- See Also:
 --    [[:peek]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]], [[:safe.e]]
 -- 
+
 --**
 -- Signature:
 -- global procedure poke2(atom addr, object x)
@@ -599,6 +612,7 @@ end function
 -- See Also:
 --     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:allocate]], [[:call]]
 --
+
 --**
 -- Signature:
 -- global procedure poke4(atom addr, object x)
@@ -650,6 +664,7 @@ end function
 -- See Also:
 --     [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:call]]
 --
+
 --**
 -- Signature:
 -- global procedure mem_copy(atom destination, atom origin, integer len)
@@ -671,15 +686,16 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  dest = allocate(50)
+-- dest = allocate(50)
 -- src = allocate(100)
 -- poke(src, {1,2,3,4,5,6,7,8,9})
 -- mem_copy(dest, src, 9)
 -- </eucode>
 -- 
 -- See Also:
---      [[:mem_set]], [[:peek]], [[:poke]], [[:allocate]]
--- 
+-- [[:mem_set]], [[:peek]], [[:poke]], [[:allocate]]
+--
+
 --**
 -- Signature:
 -- global procedure mem_set(atom destination, integer byte_value, integer how_many))
@@ -699,15 +715,16 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  destination = allocate(1000)
+-- destination = allocate(1000)
 -- mem_set(destination, ' ', 1000)
 -- -- 1000 consecutive bytes in memory will be set to 32
 -- -- (the ASCII code for ' ')
 -- </eucode>
--- 
--- See Also:
---      [[:peek]], [[:poke]], [[:allocate]], [[:mem_copy]]
 --
+-- See Also:
+--   [[:peek]], [[:poke]], [[:allocate]], [[:mem_copy]]
+--
+
 --**
 -- Signature:
 -- global procedure call(atom addr)
@@ -778,6 +795,7 @@ integer check_calls = 1
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
+
 export procedure register_block(atom block_addr, atom block_len)
 end procedure
 
@@ -825,7 +843,8 @@ end procedure
 -- between debugged and normal version of your program easier.
 --
 -- See Also:
--- [[:register_block]], [[:unregister_block]], [[:memory.e]]
+-- [[:register_block]], [[:unregister_block]]
+
 export procedure check_all_blocks()
 end procedure
 with warning

@@ -3,7 +3,6 @@
 
 --****
 -- == Calling an interrupt under DOS
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -14,10 +13,22 @@
 -- Length of a register list
 
 export constant REG_LIST_SIZE = 10
+
 constant M_INTERRUPT = 34
 
 --**
 -- Register structure
+--
+-- * REG_DI
+-- * REG_SI
+-- * REG_BP
+-- * REG_BX
+-- * REG_DX
+-- * REG_CX
+-- * REG_AX
+-- * REG_FLAGS
+-- * REG_ES
+-- * REG_DS
 
 export enum
 	REG_DI,
@@ -40,9 +51,11 @@ export type register_list(sequence r)
 -- a list of register values
 	return length(r) = REG_LIST_SIZE
 end type
+
 --****
 -- === Routines
 --
+
 --**
 -- Call a //DOS// interrupt.
 --
@@ -63,22 +76,6 @@ end type
 -- call before making a ##dos_interrupt##() call. Machine level exceptions
 -- are frequent while debugging.
 --
--- machine.e has the following declaration which shows the order of the
--- register values in the input and output sequences.
--- <eucode>
---      export constant REG_DI = 1,
---                     REG_SI = 2,
---                     REG_BP = 3,
---                     REG_BX = 4,
---                     REG_DX = 5,
---                     REG_CX = 6,
---                     REG_AX = 7,
---                     REG_FLAGS = 8, -- input: ignored
---                                    -- output: 1 if carry flag set (which usully means a failure), else 0
---                     REG_ES = 9,
---                     REG_DS = 10
--- </eucode>
---  
 -- Certain interrupts require that you supply addresses of blocks of memory.
 -- These addresses must be conventional, low-memory addresses. You can
 -- allocate/deallocate low-memory using allocate_low() and free_low().

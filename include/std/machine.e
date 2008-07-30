@@ -9,6 +9,7 @@
 --
 
 --****
+-- @[dyncall]
 -- Dynamic calling of routines
 -- === Accessing Euphoria coded routines
 

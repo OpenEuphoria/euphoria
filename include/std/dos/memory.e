@@ -1,17 +1,12 @@
 
 --****
--- == DOS low level routines
---
--- **Page Contents**
+-- === DOS Memory Management
 --
 -- <<LEVELTOC depth=2>>
 --
 
 
 include base_mem.e
-
---****
--- === Constants
 
 --**
 -- Allocate a contiguous block of conventional memory (address below 1 megabyte).
@@ -37,9 +32,6 @@ include base_mem.e
 --   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]
 
 export function allocate_low(positive_int n)
--- Allocate n bytes of low memory (address less than 1Mb) 
--- and return the address. Free this memory using free_low() below.
--- Addresses in this range can be passed to DOS during software interrupts.
 	return machine_func(M_ALLOC_LOW, n)
 end function
 
@@ -69,7 +61,6 @@ end function
 --   [[:allocate_low]], [[:dos_interrupt]], [[:free]]
 
 export procedure free_low(low_machine_addr addr)
--- free the low memory at address a
 	machine_proc(M_FREE_LOW, addr)
 end procedure
 

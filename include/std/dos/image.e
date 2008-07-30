@@ -2,13 +2,10 @@
 --
 
 --****
--- == Graphical Image Routines for DOS
--- **Page Contents**
+-- === DOS Image Routines
 --
--- <<LEVELTOC depth=2>>
 --
--- === Constants
---
+
 ifdef DOS then
 include ..\graphcst.e
 include base_mem.e
@@ -150,18 +147,21 @@ end function
 -- Example 1:
 -- <a name="active_page">
 -- <eucode>
---  include image.e
--- 
+-- include image.e
+--
 -- -- active & display pages are initially both 0
 -- puts(1, "\nThis is page 0\n")
 -- set_active_page(1)     -- screen output will now go to page 1
 -- clear_screen()
 -- puts(1, "\nNow we've flipped to page 1\n")
+--
 -- if getc(0) then        -- wait for key-press
 -- end if
+--
 -- set_display_page(1)    -- "Now we've ..." becomes visible
 -- if getc(0) then        -- wait for key-press
 -- end if
+--
 -- set_display_page(0)    -- "This is ..." becomes visible again
 -- set_active_page(0)
 -- </eucode>
@@ -185,16 +185,22 @@ end ifdef
 -- graphics mode.
 --
 -- Platform:
---	//DOS32//
+-- //DOS32//
 --
 -- Returns:
 --   A **sequence** of [[:mixtures]]
 --
 -- Comments:
 --   Intensity values are in the range 0 to 63.
--- This function might be used to get the palette values needed by [[:save_bitmap]](). Remember to multiply these values by 4 before calling save_bitmap(), since save_bitmap() expects values in the range 0 to 255.
+--
+--   This function might be used to get the palette values needed by [[:save_bitmap]]().
+--   Remember to multiply these values by 4 before calling save_bitmap(), since save_bitmap()
+--   expects values in the range 0 to 255.
+--
 -- See Also:
--- 		[[:video_config]], [[:palette]], [[:all_palette]], [[:read_bitmap]], [[:save_bitmap]], [[:save_screen]]
+--    [[:video_config]], [[:palette]], [[:all_palette]], [[:read_bitmap]], [[:save_bitmap]],
+--    [[:save_screen]]
+
 export function get_all_palette()
 	integer mem, numColors
 	sequence vc, reg, colors
@@ -229,10 +235,12 @@ end function
 --
 -- Parameters:
 -- 		# ##c##: the color to redefine
---		# ##s##: a sequence of color intensities: ##{red, green, blue}##. Each value in ##s## can be from 0 to 63.
+--		# ##s##: a sequence of color intensities: ##{red, green, blue}##. Each value in ##s##
+--        can be from 0 to 63.
 --
 -- Returns:
--- 		An **object**, either -1 on failure, or a mixture representing the previous definition of ##c##.
+-- 		An **object**, either -1 on failure, or a mixture representing the previous definition
+--      of ##c##.
 --
 -- Comments:
 -- If successful, a  3-element sequence containing the previous color for ##c## will
@@ -250,8 +258,6 @@ end function
 --   [[:all_palette]]
 
 export function palette(color c, mixture s)
--- choose a new mix of {red, green, blue} to be shown on the screen for
--- color number c. Returns previous mixture as {red, green, blue}.
 	return machine_func(M_PALETTE, {c, s})
 end function
 
@@ -277,9 +283,7 @@ end function
 --   [[../demo/dos32/bitmap.ex]]
 
 export procedure all_palette(sequence s)
--- s is a sequence of the form: {{r,g,b},{r,g,b}, ...{r,g,b}}
--- that specifies new color intensities for the entire set of
--- colors in the current graphics mode.  
 	machine_proc(M_ALL_PALETTE, s)
 end procedure
+
 end ifdef

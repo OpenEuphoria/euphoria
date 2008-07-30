@@ -2,10 +2,10 @@
 --
 --****
 -- == Graphics and Sound
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
+
 constant
 	M_GRAPHICS_MODE  = 5,
 	M_WRAP           = 7,
@@ -272,10 +272,10 @@ end type
 -- end if
 -- draw_line(BLUE, {{0,0}, {50,50}})
 -- </eucode>
+--
 -- See Also:
 -- 		[[:video_config]]
+
 export function graphics_mode(mode m)
    return machine_func(M_GRAPHICS_MODE, m)
 end function
-
-
