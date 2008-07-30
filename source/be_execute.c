@@ -4368,10 +4368,11 @@ void do_exec(int *start_pc)
 				DeRef(*(object_ptr)pc[1]);
 #ifdef EOSX
 				top = 4;  // OSX
-#endif
+#else
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
-#endif
+#endif // EUNIX
+#endif // EOSX
 #ifdef EWINDOWS
 				top = 2;  // WIN32
 #endif
