@@ -105,7 +105,7 @@ export constant DB_LOCK_NO = 0,       -- don't bother with file locking
 				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
 				 
 constant DB_MAGIC = 77
-constant DB_MAJOR = 3, DB_MINOR = 0   -- database created with Euphoria v3.0 
+constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0 
 constant SIZEOF_TABLE_HEADER = 16
 constant TABLE_HEADERS = 3, FREE_COUNT = 7, FREE_LIST = 11
 constant SCREEN = 1
@@ -120,6 +120,7 @@ constant TRUE = 1
 
 integer current_db = -1
 atom current_table = -1
+sequence current_table_name = ""
 sequence db_names = {}, db_file_nums = {}, db_lock_methods = {}
 integer current_lock
 sequence key_pointers
@@ -166,18 +167,46 @@ function get_string()
 -- read a 0-terminated string at current position in database file
 	sequence s
 	integer c
-	
-	s = ""
-	while TRUE do
-		c = getc(current_db)
+	integer i
+
+	s = repeat(0, 256)
+	i = 0
+	while c entry do
 		if c = -1 then
-			fatal("string is missing 0 terminator")
-		elsif c = 0 then
-			exit
+			fatal("get_string:string is missing 0 terminator")
 		end if
-		s &= c
+		i += 1
+		if i > length(s) then
+			s &= repeat(0, 256)
+		end if
+		s[i] = c
+	  entry
+		c = getc(current_db)
 	end while
-	return s
+	return s[1..i]
+end function
+
+function equal_string(sequence target)
+-- test if string at current position in database file equals given string
+	integer c
+	integer i
+
+	i = 0
+	while c entry do
+		if c = -1 then
+			fatal("equal_string:string is missing 0 terminator")
+		end if
+		i += 1
+		if i > length(target) then
+			return 0
+		end if
+		if target[i] != c then
+			return 0
+		end if
+	  entry
+		c = getc(current_db)
+	end while
+	return (i = length(target))
 end function
 
 -- Compressed format of Euphoria objects on disk
@@ -337,18 +366,20 @@ end procedure
 -- === Routines
 
 --**
--- print an open database in readable form to file fn
+-- print the current database in readable form to file fn
 --
 -- Parameters:
---		# ##fn##: the destination file number for printing the current Euphoria database;
---		# ##low_level_too##: a boolean. If true, a byte-by-byte binary dump is presented as well; otherwise this step is skipped
+--		# ##fn##: the destination file for printing the current Euphoria database;
+--		# ##low_level_too##: a boolean. If true, a byte-by-byte binary dump
+--              is presented as well; otherwise this step is skipped. If omitted,
+--              //false// is assumed.
 --
 -- Errors:
 -- 		If the current database is not defined, an error will occur.
 --
 -- Comments:
---   All records in all tables are shown. 
---	If low_level_too is non-zero,
+--  * All records in all tables are shown. 
+--	* If low_level_too is non-zero,
 --   then a low-level byte-by-byte dump is also shown. The low-level
 --   dump will only be meaningful to someone who is familiar
 --   with the internal format of a Euphoria database.
@@ -360,36 +391,77 @@ end procedure
 --     abort(1)
 -- end if
 -- fn = open("db.txt", "w")
--- db_dump(fn, 0)
+-- db_dump(fn) -- Simple output
+-- db_dump("lowlvl_db.txt", 1) -- Full low-level dump created.
 -- </eucode>
 
-export procedure db_dump(integer fn, integer low_level_too)
+export procedure db_dump(object file_id, integer low_level_too = 0)
 -- print an open database in readable form to file fn
 -- (Note: If you turn database.e into a .dll or .so, you will
--- have to change this routine to accept a file name, rather than
--- an open file number. All other database.e routines are ok as they are.)
+-- have to use a file name, rather than an open file number. 
+-- All other database.e routines are ok as they are.)
 	integer magic, minor, major
+	integer fn
 	atom tables, ntables, tname, trecords, t_header, tnrecs, 
 		 key_ptr, data_ptr, size, addr, tindex
 	object key, data
 	integer c, n, tblocks
 	atom a
+	sequence ll_line
+	integer hi, ci
+	
+	if sequence(file_id) then
+		fn = open(file_id, "w")
+	else
+		fn = file_id
+	end if
+	if fn < 0 then
+		return
+	end if
 	
 	if low_level_too then
 		-- low level dump: show all bytes in the file
 		safe_seek(0)
 		a = 0
-		while TRUE do
-			c = getc(current_db)
+		while c >= 0 entry do
+
 			if c = -1 then
 				exit
 			end if
-			if remainder(a, 10) = 0 then
-				printf(SCREEN, "\n%d: ", a)
+			if remainder(a, 16) = 0 then
+				if a > 0 then
+					printf(fn, "%s\n", {ll_line})
+				else
+					puts(fn, '\n')
+				end if
+				ll_line = repeat(' ', 67)
+				ll_line[9] = ':'
+				ll_line[48] = '|'
+				ll_line[67] = '|'
+				hi = 11
+				ci = 50
+				ll_line[1..8] = sprintf("%08x", a)
 			end if
-			printf(SCREEN, "%d, ", c)
+			ll_line[hi .. hi + 1] = sprintf("%02x", c)
+			hi += 2
+			if find(hi, {19, 28, 38}) then
+				hi += 1
+				if hi = 29 then
+					hi = 30
+				end if
+			end if			
+			if c > ' ' and c < '~' then
+				ll_line[ci] = c
+			else
+				ll_line[ci] = '.'
+			end if
+			ci += 1
+			
 			a += 1
+		  entry
+			c = getc(current_db)
 		end while
+		printf(fn, "%s\n\n", {ll_line})
 	end if
 	
 	-- high level dump
@@ -398,6 +470,9 @@ export procedure db_dump(integer fn, integer low_level_too)
 	magic = get1()
 	if magic != DB_MAGIC then
 		puts(fn, "This is not a Euphoria Database file\n")
+		if sequence(file_id) then
+			close(fn)
+		end if
 		return
 	end if
 	major = get1()
@@ -417,46 +492,61 @@ export procedure db_dump(integer fn, integer low_level_too)
 	for t = 1 to ntables do
 		-- display the next table
 		tname = get4()
-		tnrecs = get4() -- ignore
+		tnrecs = get4()
 		tblocks = get4()
 		tindex = get4()
 		safe_seek(tname)
-		printf(fn, "\ntable \"%s\":\n", {get_string()})
-		for b = 1 to tblocks do
-			printf(fn, "\nblock #%d\n\n", b)
-			safe_seek(tindex+(b-1)*8)
-			tnrecs = get4()
-			trecords = get4()
-			for r = 1 to tnrecs do
-				-- display the next record
-				safe_seek(trecords+(r-1)*4)
-				key_ptr = get4()
-				safe_seek(key_ptr)
-				data_ptr = get4()
-				key = decompress(0)
-				puts(fn, "  key: ")
-				pretty_print(fn, key, {1, 2, 8})
-				puts(fn, '\n')
-				safe_seek(data_ptr)
-				data = decompress(0)
-				puts(fn, "  data: ")
-				pretty_print(fn, data, {1, 2, 9})
-				puts(fn, "\n\n")
+		printf(fn, "\ntable \"%s\", records:%d\n", {get_string(), tnrecs})
+		if tnrecs > 0 then
+			for b = 1 to tblocks do
+				safe_seek(tindex+(b-1)*8)
+				tnrecs = get4()
+				trecords = get4()
+				if tnrecs > 0 then
+					printf(fn, "\nblock #%d\n\n", b)
+					for r = 1 to tnrecs do
+						-- display the next record
+						safe_seek(trecords+(r-1)*4)
+						key_ptr = get4()
+						safe_seek(key_ptr)
+						data_ptr = get4()
+						key = decompress(0)
+						puts(fn, "  key: ")
+						pretty_print(fn, key, {1, 2, 8})
+						puts(fn, '\n')
+						safe_seek(data_ptr)
+						data = decompress(0)
+						puts(fn, "  data: ")
+						pretty_print(fn, data, {1, 2, 9})
+						puts(fn, "\n\n")
+					end for
+				else
+					printf(fn, "\nblock #%d (empty)\n\n", b)
+				end if
 			end for
-		end for
+		end if
 		t_header += SIZEOF_TABLE_HEADER
 		safe_seek(t_header)
 	end for
 	-- show the free list
-	puts(fn, "List of free blocks:\n")
 	safe_seek(FREE_COUNT)
 	n = get4()
-	safe_seek(get4())
-	for i = 1 to n do
-		addr = get4()
-		size = get4()
-		printf(fn, "%d: %d bytes\n", {addr, size})
-	end for
+	puts(fn, '\n')
+	if n > 0 then
+		puts(fn, "List of free blocks:\n")
+		safe_seek(get4())
+		for i = 1 to n do
+			addr = get4()
+			size = get4()
+			printf(fn, "%d: %d bytes\n", {addr, size})
+		end for
+	else
+		puts(fn, "No free blocks available.\n")
+	end if
+	if sequence(file_id) then
+		close(fn)
+	end if
+	
 end procedure
 
 --**
@@ -722,6 +812,7 @@ export function db_create(sequence path, integer lock_method)
 	current_db = db
 	current_lock = lock_method
 	current_table = -1
+	current_table_name = ""
 	db_names = append(db_names, path)
 	db_lock_methods = append(db_lock_methods, lock_method)
 	db_file_nums = append(db_file_nums, db)
@@ -813,7 +904,8 @@ export function db_open(sequence path, integer lock_method)
 	if not find('.', path) then
 		path &= ".edb"
 	end if
-	
+
+ifdef UNIX then
 	if lock_method = DB_LOCK_NO or 
 	   lock_method = DB_LOCK_EXCLUSIVE then
 		-- get read and write access, "ub"
@@ -822,6 +914,13 @@ export function db_open(sequence path, integer lock_method)
 		-- DB_LOCK_SHARED
 		db = open(path, "rb")
 	end if
+else
+	if lock_method = DB_LOCK_SHARED then
+		lock_method = DB_LOCK_EXCLUSIVE
+	end if
+	db = open(path, "ub")
+end ifdef
+
 	if db = -1 then
 		return DB_OPEN_FAIL
 	end if
@@ -843,6 +942,7 @@ export function db_open(sequence path, integer lock_method)
 	end if
 	current_db = db
 	current_table = -1
+	current_table_name = ""
 	current_lock = lock_method
 	db_names = append(db_names, path)
 	db_lock_methods = append(db_lock_methods, lock_method)
@@ -886,6 +986,7 @@ export function db_select(sequence path)
 	current_db = db_file_nums[index]
 	current_lock = db_lock_methods[index]
 	current_table = -1
+	current_table_name = ""
 	return DB_OK
 end function
 
@@ -919,7 +1020,6 @@ function table_find(sequence name)
 -- find a table, given its name 
 -- return table pointer
 	atom tables, nt, t_header, name_ptr
-	sequence tname
 	
 	safe_seek(TABLE_HEADERS)
 	tables = get4()
@@ -930,8 +1030,7 @@ function table_find(sequence name)
 		safe_seek(t_header)
 		name_ptr = get4()
 		safe_seek(name_ptr)
-		tname = get_string()
-		if equal(tname, name) then
+		if equal_string(name) then
 			-- found it
 			return t_header
 		end if
@@ -974,14 +1073,15 @@ export function db_select_table(sequence name)
 	atom block_ptr, block_size
 	integer blocks, k
 
+	if equal(current_table_name, name) then
+		return DB_OK
+	end if
 	table = table_find(name)
 	if table = -1 then
 		return DB_OPEN_FAIL
 	end if
-	if current_table = table then
-		return DB_OK -- nothing to do
-	end if
 	current_table = table
+	current_table_name = name
 	-- read in all the key pointers for the current table
 	safe_seek(table+4)
 	nkeys = get4()
@@ -1001,6 +1101,57 @@ export function db_select_table(sequence name)
 		index += 8
 	end for
 	return DB_OK
+end function
+
+--**
+-- Get name of currently selected table
+--
+-- Parameters:
+--		# None.
+--
+-- Returns:
+-- 		An **sequence**. The name of the current table. An empty string means 
+-- that no table is currently selected.
+--
+-- Example 1:
+-- <eucode>
+-- s = db_current_table()
+-- </eucode>
+-- See Also:
+-- 		[[:db_select_table]], [[:db_table_list]]
+export function db_current_table()
+-- get name of currently selected table
+	return current_table_name
+end function
+
+--**
+-- Get name of currently selected database
+--
+-- Parameters:
+--		# None.
+--
+-- Returns:
+-- 		An **sequence**. The name of the current database. An empty string means 
+-- that no database is currently selected.
+--
+-- Comments:
+-- The actual name returned is the //path// as supplied to the db_open routine.
+--
+-- Example 1:
+-- <eucode>
+-- s = db_current_database()
+-- </eucode>
+-- See Also:
+-- 		[[:db_select]]
+export function db_current_database()
+-- get name of currently selected database
+	integer fnd
+	
+	fnd = find(current_db, db_file_nums)
+	if fnd = 0 then
+		return ""
+	end if
+	return db_names[fnd]
 end function
 
 --**
@@ -1026,7 +1177,7 @@ end function
 -- end if
 -- </eucode>
 -- See Also:
--- 		[[:db_select_table]], [db_table_list]]
+-- 		[[:db_select_table]], [[:db_table_list]]
 
 export function db_create_table(sequence name)
 -- create a new table in the current database file
@@ -1167,8 +1318,13 @@ export procedure db_delete_table(sequence name)
 	
 	if table = current_table then
 		current_table = -1
+		current_table_name = ""
 	elsif table < current_table then
 		current_table -= SIZEOF_TABLE_HEADER
+		safe_seek(current_table)
+		data_ptr = get4()
+		safe_seek(data_ptr)
+		current_table_name = get_string()
 	end if
 end procedure
 
@@ -1305,7 +1461,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- 		[[db_insert]], [[:db_replace_data]], [[:db_delete_record]]
+-- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]]
 
 export function db_find_key(object key)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
@@ -1359,7 +1515,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[db_delete_record]]
+--		[[:db_delete_record]]
 
 export function db_insert(object key, object data)
 	sequence key_string, data_string, last_part, remaining
@@ -1897,13 +2053,13 @@ end function
 -- Thanks to Tone Škoda!
 
 export function db_current ()
-    integer index
+	integer index
 
-    index = find (current_db, db_file_nums)
-    if index != 0 then
-        return db_names [index]
-    else
-        return ""
-    end if
+	index = find (current_db, db_file_nums)
+	if index != 0 then
+		return db_names [index]
+	else
+		return ""
+	end if
 end function
 

@@ -7,19 +7,19 @@ include global.e
 include reswords.e
 
 integer Errors
-Errors = 0   -- number of errors detected during compile 
+Errors = 0   -- number of errors detected during compile
 
 global integer TempErrFile
 global sequence TempErrName
 global integer display_warnings
 global object ThisLine        -- current line of source (or -1)
-global integer bp             -- input line index of next character 
+global integer bp             -- input line index of next character
 
 global sequence warning_list
 warning_list = {}
 
 global procedure screen_output(integer f, sequence msg)
--- output messages to the screen or a file    
+-- output messages to the screen or a file
 	puts(f, msg)
 end procedure
 
@@ -32,7 +32,7 @@ global procedure Warning(sequence msg, integer mask, sequence args = {})
 		return
 	end if
 
-	if Lint_is_on then
+	if Strict_is_on then
 		mask = 0
 	end if
 
@@ -118,9 +118,9 @@ end function
 global procedure Cleanup(integer status)
 -- clean things up before quitting
 	integer w
-	
+
 	w = ShowWarnings(status)
-	
+
 	if not TRANSLATE and (BIND or EWINDOWS or EUNIX) and (w or Errors) then
 		if not batch_job then
 			screen_output(STDERR, "\nPress Enter\n")
@@ -128,7 +128,7 @@ global procedure Cleanup(integer status)
 			end if
 		end if
 	end if
-	
+
 	abort(status)
 end procedure
 
@@ -146,7 +146,7 @@ global procedure OpenErrFile()
 end procedure
 
 procedure ShowErr(integer f)
--- Show place where syntax error occurred  
+-- Show place where syntax error occurred
 	if length(file_name) = 0 then
 		return
 	end if
@@ -155,7 +155,7 @@ procedure ShowErr(integer f)
 	else
 		screen_output(f, ThisLine)
 	end if
-	
+
 	for i = 1 to bp-2 do -- bp-1 points to last character read
 		if ThisLine[i] = '\t' then
 			screen_output(f, "\t")
@@ -163,16 +163,16 @@ procedure ShowErr(integer f)
 			screen_output(f, " ")
 		end if
 	end for
-	screen_output(f, "^\n\n") 
+	screen_output(f, "^\n\n")
 end procedure
 
 global procedure CompileErr(sequence msg)
--- Handle fatal compilation errors 
+-- Handle fatal compilation errors
 	sequence errmsg
-	
+
 	Errors += 1
 	if length(file_name) then
-		errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no], 
+		errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no],
 					 line_number, msg})
 	else
 		errmsg = msg
@@ -181,23 +181,23 @@ global procedure CompileErr(sequence msg)
 	OpenErrFile() -- exits if error filename is ""
 	screen_output(STDERR, errmsg)
 	ShowErr(STDERR)
-	
-	puts(TempErrFile, errmsg) 
-	
-	ShowErr(TempErrFile) 
-	
+
+	puts(TempErrFile, errmsg)
+
+	ShowErr(TempErrFile)
+
 	if ShowWarnings(TempErrFile) then
 	end if
-	
+
 	puts(TempErrFile, "\n")
-	
+
 	close(TempErrFile)
 	Cleanup(1)
 end procedure
 
 procedure not_supported_compile(sequence feature)
 -- report feature not supported
-	CompileErr(sprintf("%s is not supported in Euphoria for %s", 
+	CompileErr(sprintf("%s is not supported in Euphoria for %s",
 					   {feature, version_name}))
 end procedure
 
@@ -207,10 +207,10 @@ global procedure InternalErr(sequence msg)
 	if TRANSLATE then
 		screen_output(STDERR, sprintf("Internal Error: %s\n", {msg}))
 	else
-		screen_output(STDERR, sprintf("Internal Error at %s:%d - %s\n", 
+		screen_output(STDERR, sprintf("Internal Error at %s:%d - %s\n",
 		   {file_name[current_file_no], line_number, msg}))
 	end if
-	
+
 	if batch_job = 0 then
 		screen_output(STDERR, "\nPress Enter\n")
 		if getc(0) then

@@ -57,7 +57,7 @@
 #define LOCAL_SPACE 100 /* some local space */
 
 /* convert atom to char. *must avoid side effects in elem* */
-#define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem)) 
+#define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem))
 
 #define FIRST_USER_FILE 3
 #define MAX_USER_FILE 40
@@ -91,14 +91,14 @@ extern int have_console;
 extern int in_from_keyb;
 extern int screen_col;
 #endif
-extern symtab_ptr *e_routine; 
-extern symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3, 
-				  call_back_arg4, call_back_arg5, call_back_arg6, 
+extern symtab_ptr *e_routine;
+extern symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3,
+				  call_back_arg4, call_back_arg5, call_back_arg6,
 				  call_back_arg7, call_back_arg8, call_back_arg9,
 				  call_back_result;
 
 extern char *crash_msg;
-extern object_ptr expr_stack; 
+extern object_ptr expr_stack;
 extern volatile int sample_next;
 extern int *profile_sample;
 extern int sample_size;
@@ -109,7 +109,7 @@ extern int Argc;
 extern char **Argv;
 extern struct sline *slist;
 extern long gline_number;
-extern unsigned char TempBuff[];                
+extern unsigned char TempBuff[];
 extern d_ptr d_list;
 extern struct videoconfig config;
 extern int il_file;
@@ -147,7 +147,7 @@ int insert_pos;
 /**********************/
 unsigned long good_rand();
 void RHS_Slice();
-object user(), Command_Line(), EOpen(), Repeat(); 
+object user(), Command_Line(), EOpen(), Repeat();
 object machine();
 object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
 	   NewDouble();
@@ -173,7 +173,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {lesseq, Dlesseq},
 {greater, Dgreater},
 {not, Dnot},
-{and, Dand}, 
+{and, Dand},
 {or, Dor},
 /* 10 */ {minus, Dminus},
 {add, Dadd},
@@ -206,7 +206,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 /* 40 */ {x, x},
-{e_sqrt, De_sqrt}, 
+{e_sqrt, De_sqrt},
 {x, x},
 {x, x},
 {x, x},
@@ -223,8 +223,8 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {and_bits, Dand_bits},
 {x, x},
-{x, x}, 
-{x, x}, 
+{x, x},
+{x, x},
 /* 60 */ {x, x},
 {x, x},
 {Random, DRandom},
@@ -241,7 +241,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {e_arctan, De_arctan},
 {e_log, De_log},
 {x, x},
-{x, x}, 
+{x, x},
 {x, x},
 {x, x},
 {x, x},
@@ -253,17 +253,17 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-{x, x}, 
+{x, x},
 {x, x},
 /* 90 */ {x, x},
 {x, x},
 {x, x},
-{x, x}, 
 {x, x},
 {x, x},
 {x, x},
 {x, x},
-{x, x}, 
+{x, x},
+{x, x},
 {x, x},
 /* 100 */ {x, x},
 {x, x},
@@ -298,9 +298,9 @@ struct op_info optable[MAX_OPCODE+1] = {
 /* 130 */ {x, x},
 {x, x},
 {x, x},
-{x, x}, 
 {x, x},
-{x, x}, 
+{x, x},
+{x, x},
 {x, x},
 {x, x},
 {x, x},
@@ -323,7 +323,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},  // system_exec
 {x, x},  // platform - never actually emitted
-{x, x},  // 
+{x, x},  //
 {x, x},  // 159: CONCAT_N
 /* 160 */{x, x},  // 160: NOPWHILE
 {x, x},   // 161: NOP1
@@ -344,7 +344,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-{x, x}, 
+{x, x},
 /* 180 */{x, x},
 {x, x},
 {x, x},
@@ -457,7 +457,7 @@ void debug_int(int num)
 // send an integer to debug.log
 {
 	char buff[40];
-	
+
 	sprintf(buff, "%d", num);
 	debug_msg(buff);
 }
@@ -466,7 +466,7 @@ void debug_dbl(double num)
 // send a double to debug.log
 {
 	char buff[40];
-	
+
 	sprintf(buff, "%g", num);
 	debug_msg(buff);
 }
@@ -491,22 +491,22 @@ int matherr(struct _exception *err)  // OW wants this
 {
 	char *msg;
 	char sbuff[80];
-	
+
 	switch(err->type) {
-		case DOMAIN: 
+		case DOMAIN:
 			msg = "domain";
 			break;
-		case SING: 
+		case SING:
 			msg = "singularity";
 			break;
-		case OVERFLOW: 
+		case OVERFLOW:
 			msg = "overflow";
 			break;
-		case UNDERFLOW: 
+		case UNDERFLOW:
 			msg = "underflow";
 			break;
 		case TLOSS:
-		case PLOSS: 
+		case PLOSS:
 			msg = "loss of significance";
 			break;
 		default:
@@ -520,7 +520,7 @@ int matherr(struct _exception *err)  // OW wants this
 #endif
 
 /* error trace back routines */
-extern int *crash_list;    
+extern int *crash_list;
 extern int crash_routines;
 
 int crash_call_back = FALSE;
@@ -530,31 +530,31 @@ void call_crash_routines()
 {
 	int i, r;
 	object quit;
-	
-	if (crash_count > 0) 
+
+	if (crash_count > 0)
 		return;
 	crash_count++;
 
 	free(TempErrName);
 	TempErrName = (char *)malloc(16);
 	strcpy(TempErrName, "ex_crash.err");
-	
+
 #ifndef ERUNTIME
 	// clear the interpreter call stack
 	expr_stack[1] = 0;
 	expr_top = &expr_stack[2];
 	tpc = 0;
-#endif  
-	
+#endif
+
 	for (i = crash_routines-1; i >= 0; i--) {
 		r = crash_list[i];
 		crash_call_back = TRUE;
 		quit = (object)general_call_back(
 #ifdef ERUNTIME
 		   (int)r,
-#else          
-		   (symtab_ptr)e_routine[r],    
-#endif         
+#else
+		   (symtab_ptr)e_routine[r],
+#endif
 		   0, // first and only arg is 0
 		   0,0,0,0,0,0,0,0 // other args ignored
 		   );
@@ -590,7 +590,7 @@ static void SimpleRTFatal(char *msg)
 	if (TempErrFile != NULL) {
 		iprintf(TempErrFile, "Fatal run-time error:\n");
 		iprintf(TempErrFile, "%s\n", msg);
-		
+
 		if (last_traced_line != NULL) {
 			if (crash_msg == NULL || crash_count > 0)
 				iprintf(stderr, "%s\n", last_traced_line);
@@ -601,17 +601,17 @@ static void SimpleRTFatal(char *msg)
 
 	call_crash_routines();
 	gameover = TRUE;
-	Cleanup(1); 
+	Cleanup(1);
 }
 
 void RTFatal(char *msg)
 /* handle run time fatal errors */
 {
 #ifndef ERUNTIME
-	if (Executing) 
+	if (Executing)
 		CleanUpError(msg, NULL);
 	else
-#endif  
+#endif
 		SimpleRTFatal(msg);
 }
 
@@ -635,7 +635,7 @@ int NumberOpen()
 // return a count of the number of open user files
 {
 	int i, op;
-	
+
 	op = 0;
 	for (i = FIRST_USER_FILE; i < MAX_USER_FILE; i++) {
 		if (user_file[i].mode != EF_CLOSED)
@@ -647,9 +647,9 @@ int NumberOpen()
 static char doChar(object elem)
 /* convert to char (int done in-line) */
 {
-	if (IS_ATOM_INT(elem)) 
+	if (IS_ATOM_INT(elem))
 		return (char)elem;
-	if (IS_ATOM(elem)) 
+	if (IS_ATOM(elem))
 		return (char)(DBL_PTR(elem)->dbl);
 	else {
 		RTFatal("sequence found inside character string");
@@ -666,7 +666,7 @@ void Prepend(object_ptr target, object s1, object a)
 	s1_ptr s1p, new_seq;
 	long len, new_len;
 	object temp;
-	
+
 	t = (s1_ptr)*target;
 	s1p = SEQ_PTR(s1);
 	len = s1p->length;
@@ -714,7 +714,7 @@ void Append(object_ptr target, object s1, object a)
 	long len, new_len;
 	object_ptr base, last;
 	object temp;
-	
+
 	t = (s1_ptr)*target;
 	s1p = SEQ_PTR(s1);
 	len = s1p->length;
@@ -727,23 +727,23 @@ void Append(object_ptr target, object s1, object a)
 			base = s1p->base;
 			/* allow 1*4 for end marker */
 			/* base + new_len + 2 could overflow 32-bits??? */
-			new_s1p = (s1_ptr)ERealloc((char *)s1p, 
+			new_s1p = (s1_ptr)ERealloc((char *)s1p,
 							   (char *)(base + new_len + 2) - (char *)s1p);
-			new_s1p->base = (object_ptr)new_s1p + 
+			new_s1p->base = (object_ptr)new_s1p +
 							 ((object_ptr)base - (object_ptr)s1p);
 			s1p = new_s1p;
 			s1p->postfill = new_len - len;
 			*target = MAKE_SEQ(s1p);
 		/* OPTIMIZE: we may have more space in the malloc'd block
 		   than we think, due to power of 2 round up etc. Can
-		   we find out what we have and increment postfill 
+		   we find out what we have and increment postfill
 		   accordingly? Then we can usually avoid memcopying too much
 		   in Realloc. */
 		}
 		s1p->postfill--;
 		s1p->length++;
 		last = s1p->base + len + 1;
-		*last = a; 
+		*last = a;
 		*(last+1) = NOVALUE;  // make a new end marker
 		return;
 	}
@@ -815,7 +815,7 @@ void Copy_elements(int start,s1_ptr source) {
 	object_ptr s_elem = source->base+1;
 	object temp;
 	int i;
-	
+
 	for (i=1;i<=source->length;i++) {
 		temp = *s_elem++;
 		*t_elem++ = temp;
@@ -826,10 +826,10 @@ void Copy_elements(int start,s1_ptr source) {
 object Insert(object a,object b,int pos)
 {
    	s1_ptr s1 = Add_internal_space(a,pos,1);
-    object_ptr result_ptr = s1->base+pos;
-	    
-    *result_ptr = b;
-    return MAKE_SEQ(s1);
+	object_ptr result_ptr = s1->base+pos;
+
+	*result_ptr = b;
+	return MAKE_SEQ(s1);
 }
 
 void Concat(object_ptr target, object a_obj, s1_ptr b)
@@ -847,7 +847,7 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 		c = NewS1(2);
 		/* both are atoms */
 		*(c->base+1) = a_obj;
-		Ref(a_obj); 
+		Ref(a_obj);
 		*(c->base+2) = (object)b;
 		Ref((object)b);
 	}
@@ -857,17 +857,17 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 		b = SEQ_PTR(b);
 		na = a->length;
 		nb = b->length;
-		
+
 		if (a_obj == *target &&
 			a->ref == 1 &&
 			na > ((nb - a->postfill) << 3)) {
 			/* try to update in-place */
 			int insert;
 			object temp;
-			
+
 			q = b->base+1;
 			while (nb > 0) {
-				insert = (nb <= a->postfill) ? nb : a->postfill;            
+				insert = (nb <= a->postfill) ? nb : a->postfill;
 				p = a->base + 1 + a->length;
 				a->postfill -= insert;
 				a->length += insert;
@@ -889,7 +889,7 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 			}
 			return;
 		}
-		
+
 		c = NewS1(na + nb);
 
 		p = c->base;
@@ -914,24 +914,24 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 			}
 		}
 	}
-	
+
 	DeRef(*target);
 	*target = MAKE_SEQ(c);
 }
 
 void Concat_N(object_ptr target, object_ptr  source, int n)
 /* run-time library version for Translator
- * Concatenate n objects (n > 2). This is more efficient 
+ * Concatenate n objects (n > 2). This is more efficient
  * than doing multiple calls to Concat() above, since we
- * can allocate space for the final result, and copy all 
- * the data just one time. 
+ * can allocate space for the final result, and copy all
+ * the data just one time.
  */
 {
 	s1_ptr result;
 	object s_obj, temp;
 	int i, size;
 	object_ptr p, q;
-	
+
 	/* Compute the total size of all the operands */
 	size = 0;
 	for (i = 1; i <= n; i++) {
@@ -941,10 +941,10 @@ void Concat_N(object_ptr target, object_ptr  source, int n)
 		else
 			size += SEQ_PTR(s_obj)->length;
 	}
-	
+
 	/* Allocate the result sequence */
 	result = NewS1(size);
-	
+
 	/* Copy the operands into the result. */
 	/* The operands are in reverse order. */
 	p = result->base+1;
@@ -969,24 +969,24 @@ void Concat_N(object_ptr target, object_ptr  source, int n)
 			p--;
 		}
 	}
-	
+
 	DeRef(*target);
 	*target = MAKE_SEQ(result);
 }
 
 void Concat_Ni(object_ptr target, object_ptr *source, int n)
 /* version used by interpreter
- * Concatenate n objects (n > 2). This is more efficient 
+ * Concatenate n objects (n > 2). This is more efficient
  * than doing multiple calls to Concat() above, since we
- * can allocate space for the final result, and copy all 
- * the data just one time. 
+ * can allocate space for the final result, and copy all
+ * the data just one time.
  */
 {
 	s1_ptr result;
 	object s_obj, temp;
 	int i, size;
 	object_ptr p, q;
-	
+
 	/* Compute the total size of all the operands */
 	size = 0;
 	for (i = 1; i <= n; i++) {
@@ -996,10 +996,10 @@ void Concat_Ni(object_ptr target, object_ptr *source, int n)
 		else
 			size += SEQ_PTR(s_obj)->length;
 	}
-	
+
 	/* Allocate the result sequence */
 	result = NewS1(size);
-	
+
 	/* Copy the operands into the result. */
 	/* The operands are in reverse order. */
 	p = result->base+1;
@@ -1024,12 +1024,12 @@ void Concat_Ni(object_ptr target, object_ptr *source, int n)
 			p--;
 		}
 	}
-	
+
 	DeRef(*target);
 	*target = MAKE_SEQ(result);
 }
 
-// used by translator 
+// used by translator
 void RepeatElem(int *addr, object item, int repcount)
 /* replicate an object in memory - used by RIGHT_BRACE op */
 /* repcount will be at least 10 */
@@ -1049,13 +1049,13 @@ object Repeat(object item, object repcount)
 	double d;
 	long count;
 	s1_ptr s1;
-	
+
 	if (IS_ATOM_INT(repcount)) {
 		count = repcount;
-		if (count < 0) 
+		if (count < 0)
 			RTFatal("repetition count must not be negative");
 	}
-	
+
 	else if (IS_ATOM_DBL(repcount)) {
 		d = DBL_PTR(repcount)->dbl;
 		if (d > MAXINT_DBL)
@@ -1064,11 +1064,11 @@ object Repeat(object item, object repcount)
 			RTFatal("repetition count must not be negative");
 		count = (long)d;
 	}
-	
+
 	else
 		RTFatal("repetition count must be an atom");
-	
-	
+
+
 	s1 = NewS1(count);
 	obj_ptr = s1->base+1;
 
@@ -1088,14 +1088,14 @@ object Repeat(object item, object repcount)
 			count -= 10;
 		};
 		while (count > 0) {
-			*obj_ptr++ = item;  
+			*obj_ptr++ = item;
 			count--;
 		};
 	}
 	else {
 		(DBL_PTR(item)->ref) += count;
 		while (--count >= 0) {
-			*obj_ptr++ = item;  
+			*obj_ptr++ = item;
 		};
 	}
 	return MAKE_SEQ(s1);
@@ -1108,15 +1108,15 @@ void de_reference(s1_ptr a)
 {
 	object_ptr p;
 	object t;
-	
+
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
-	
-	if ((long)a == NOVALUE || IS_ATOM_INT(a)) 
+
+	if ((long)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
-		RTInternal("more than 1000 refs"); 
-#endif    
+		RTInternal("more than 1000 refs");
+#endif
 	if (IS_ATOM_DBL(a)) {
 #ifdef EXTRA_CHECK
 		a1 = (s1_ptr)DBL_PTR(a);
@@ -1149,7 +1149,7 @@ void de_reference(s1_ptr a)
 					// end of sequence: back up a level
 					p = (object_ptr)a->length;
 					t = (object)a->ref;
-					EFree((char *)a); 
+					EFree((char *)a);
 					a = (s1_ptr)t;
 					if (a == NULL)
 						break;  // it's the top-level sequence - quit
@@ -1170,7 +1170,7 @@ void de_reference(s1_ptr a)
 				}
 			}
 		}
-	} 
+	}
 }
 
 void DeRef1(int a)
@@ -1192,22 +1192,22 @@ void DeRef5(int a, int b, int c, int d, int e)
 /* NEW - non-recursive - only integer elements */
 void de_reference_i(s1_ptr a)
 /* frees an object whose reference count is 0 */
-/* We know that if there are any sequence elements, 
+/* We know that if there are any sequence elements,
    they will all be integers */
 /* a must not be an ATOM_INT */
 {
 	object_ptr p;
 	object t;
-	
+
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
-	
-	if ((long)a == NOVALUE || IS_ATOM_INT(a)) 
+
+	if ((long)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
-		RTInternal("more than 1000 refs"); 
-#endif    
-	if (IS_ATOM_DBL(a)) {  
+		RTInternal("more than 1000 refs");
+#endif
+	if (IS_ATOM_DBL(a)) {
 #ifdef EXTRA_CHECK
 		a1 = (s1_ptr)DBL_PTR(a);
 		if (a1->ref < 0)
@@ -1224,8 +1224,8 @@ void de_reference_i(s1_ptr a)
 		if (a->ref < 0)
 			RTInternal("sequence reference count less than 0");
 #endif
-		EFree((char *)a); 
-	} 
+		EFree((char *)a);
+	}
 }
 
 object DoubleToInt(object d)
@@ -1234,7 +1234,7 @@ object DoubleToInt(object d)
 	double temp_dbl;
 
 	temp_dbl = DBL_PTR(d)->dbl;
-	if (floor(temp_dbl) == temp_dbl && 
+	if (floor(temp_dbl) == temp_dbl &&
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
@@ -1252,7 +1252,7 @@ object x()
 {
 #ifdef EXTRA_CHECK
 	RTInternal("bad fcode");
-#endif  
+#endif
 	return NOVALUE;
 }
 
@@ -1263,7 +1263,7 @@ object add(long a, long b)
 	long c;
 
 	c = a + b;
-	if (c + HIGH_BITS < 0)    
+	if (c + HIGH_BITS < 0)
 		return MAKE_INT(c);
 	else
 		return (object)NewDouble((double)c);
@@ -1286,7 +1286,7 @@ object multiply(long a, long b)
 /* n.b. char type is signed */
 {
 	if (a == (short)a) {
-		if ((b <= INT15 && b >= -INT15) || 
+		if ((b <= INT15 && b >= -INT15) ||
 		   (a == (char)a && b <= INT23 && b >= -INT23) ||
 		   (b == (short)b && a <= INT15 && a >= -INT15))
 			return MAKE_INT(a * b);
@@ -1302,7 +1302,7 @@ object divide(long a, long b)
 {
 	if (b == 0)
 		RTFatal("attempt to divide by 0");
-	if (a % b != 0) 
+	if (a % b != 0)
 		return (object)NewDouble((double)a / b);
 	else
 		return MAKE_INT(a / b);
@@ -1359,15 +1359,15 @@ object Dand_bits(d_ptr a, d_ptr b)
 {
 	unsigned long longa, longb;
 	long c;
-	
+
 	check32(a, b);
 	longa = a->dbl;
 	longb = b->dbl;
 	c = longa & longb;
-	if (c > NOVALUE && c < TOO_BIG_INT) 
+	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
 	else
-		return (object)NewDouble((double)c); 
+		return (object)NewDouble((double)c);
 }
 
 object or_bits(long a, long b)
@@ -1381,15 +1381,15 @@ object Dor_bits(d_ptr a, d_ptr b)
 {
 	unsigned long longa, longb;
 	long c;
-	
+
 	check32(a, b);
 	longa = a->dbl;
 	longb = b->dbl;
 	c = longa | longb;
-	if (c > NOVALUE && c < TOO_BIG_INT) 
+	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
 	else
-		return (object)NewDouble((double)c); 
+		return (object)NewDouble((double)c);
 }
 
 object xor_bits(long a, long b)
@@ -1403,15 +1403,15 @@ object Dxor_bits(d_ptr a, d_ptr b)
 {
 	unsigned long longa, longb;
 	long c;
-	
+
 	check32(a, b);
 	longa = a->dbl;
 	longb = b->dbl;
 	c = longa ^ longb;
-	if (c > NOVALUE && c < TOO_BIG_INT) 
+	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
 	else
-		return (object)NewDouble((double)c); 
+		return (object)NewDouble((double)c);
 }
 
 object not_bits(long a)
@@ -1425,16 +1425,16 @@ object Dnot_bits(d_ptr a)
 {
 	unsigned long longa;
 	long c;
-	
+
 	if (a->dbl < MIN_BITWISE_DBL ||
 		a->dbl > MAX_BITWISE_DBL)
 		 check32(a, a);  // error msg
 	longa = a->dbl;
 	c = ~longa;
-	if (c > NOVALUE && c < TOO_BIG_INT) 
+	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
 	else
-		return (object)NewDouble((double)c); 
+		return (object)NewDouble((double)c);
 }
 
 object power(long a, long b)
@@ -1453,7 +1453,7 @@ object power(long a, long b)
 		return ATOM_1;
 	}
 	else if (b >= 1 && b <= 4 && a >= -178 && a <= 178) {
-		p = a;  
+		p = a;
 		for (i = 2; i <= b; i++)
 			p = p * a;
 		return MAKE_INT(p);
@@ -1484,9 +1484,9 @@ object equals(long a, long b)
 object Dequals(d_ptr a, d_ptr b)
 /* double a = b */
 {
-	if (a->dbl == b->dbl) 
+	if (a->dbl == b->dbl)
 		return ATOM_1;
-	else 
+	else
 		return ATOM_0;
 }
 
@@ -1553,7 +1553,7 @@ object Dnoteq(d_ptr a, d_ptr b)
 object lesseq(long a, long b)
 /* integer a <= b */
 {
-	if (a <= b) 
+	if (a <= b)
 		return ATOM_1;
 	else
 		return ATOM_0;
@@ -1764,7 +1764,7 @@ object De_log(d_ptr a)
 object e_floor(long a)  // not used anymore
 /* floor of a number - no op since a is already known to be an int */
 {
-	return a; 
+	return a;
 }
 
 object De_floor(d_ptr a)
@@ -1772,12 +1772,12 @@ object De_floor(d_ptr a)
 {
 	double temp;
 
-	temp = floor(a->dbl); 
-#ifndef ERUNTIME    
+	temp = floor(a->dbl);
+#ifndef ERUNTIME
 	if (fabs(temp) < MAXINT_DBL)
 		return MAKE_INT((long)temp);
-	else 
-#endif      
+	else
+#endif
 		return (object)NewDouble(temp);
 }
 
@@ -1801,21 +1801,21 @@ void setran()
 	time_t time_of_day;
 	struct tm *local;
 	int garbage;
-	
+
 #ifdef EDOS
 	_bios_timeofday(_TIME_GETCLOCK, &seed1);
 #endif
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
-	seed2 = local->tm_yday * 86400 + local->tm_hour * 3600 + 
-			local->tm_min * 60 +     local->tm_sec;   
-#ifdef EWINDOWS 
+	seed2 = local->tm_yday * 86400 + local->tm_hour * 3600 +
+			local->tm_min * 60 +     local->tm_sec;
+#ifdef EWINDOWS
 	seed1 = GetTickCount();  // milliseconds since Windows started
-#endif  
+#endif
 	if (seed1 == 0)
-		seed1 = 1;    
+		seed1 = 1;
 	if (seed2 == 0)
-		seed2 = 1;    
+		seed2 = 1;
 	good_rand();  // skip first one, second will be more random-looking
 }
 
@@ -1846,7 +1846,7 @@ unsigned long good_rand()
 			seed1 = 123456;
 			seed2 = 9999;
 		}
-		else 
+		else
 			setran();
 	}
 	/* seed = seed * PROOT % PRIME */
@@ -1856,7 +1856,7 @@ unsigned long good_rand()
 
 	/* normalize */
 
-	if (alpha > beta) 
+	if (alpha > beta)
 		seed1 = alpha - beta;
 	else
 		seed1 = alpha - beta + prim1;
@@ -1865,10 +1865,10 @@ unsigned long good_rand()
 	alpha = root2 * temp.rem;
 	beta = rem2 * temp.quot;
 
-	if (alpha > beta) 
+	if (alpha > beta)
 		seed2 = alpha - beta;
 	else
-		seed2 = alpha - beta + prim2;    
+		seed2 = alpha - beta + prim2;
 
 	return V(seed1, seed2);
 }
@@ -1896,7 +1896,7 @@ object DRandom(d_ptr a)
 
 
 object unary_op(int fn, object a)
-/* recursive evaluation of a unary op 
+/* recursive evaluation of a unary op
    c may be the same as a. ATOM_INT case handled in-line by caller */
 {
 	long length;
@@ -1937,8 +1937,8 @@ object binary_op_a(int fn, object a, object b)
 {
 	struct d temp_d;
 
-	if (IS_ATOM_INT(a)) { 
-		if (IS_ATOM_INT(b)) 
+	if (IS_ATOM_INT(a)) {
+		if (IS_ATOM_INT(b))
 			return (*optable[fn].intfn)(INT_VAL(a), INT_VAL(b));
 		else {
 			temp_d.dbl = (double)INT_VAL(a);
@@ -1957,7 +1957,7 @@ object binary_op_a(int fn, object a, object b)
 
 
 object binary_op(int fn, object a, object b)
-/* Recursively calculates fn of a and b. */  
+/* Recursively calculates fn of a and b. */
 /* Caller must handle INT:INT case */
 {
 	long length;
@@ -1966,15 +1966,15 @@ object binary_op(int fn, object a, object b)
 	s1_ptr c;
 	object (*int_fn)();
 	object x;
-	
-	/* handle all ATOM:ATOM cases except INT:INT - not allowed 
+
+	/* handle all ATOM:ATOM cases except INT:INT - not allowed
 	   n.b. IS_ATOM_DBL actually only distinguishes ATOMS from SEQUENCES */
-	if (IS_ATOM_INT(a) && IS_ATOM_DBL(b)) { 
+	if (IS_ATOM_INT(a) && IS_ATOM_DBL(b)) {
 		/* in test above b can't be an int if a is */
 		temp_d.dbl = (double)INT_VAL(a);
 		return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
-	} 
-	else if (IS_ATOM_DBL(a)) { 
+	}
+	else if (IS_ATOM_DBL(a)) {
 		/* a could be an int, but then b must be a sequence */
 		if (IS_ATOM_INT(b)) {
 			temp_d.dbl = (double)INT_VAL(b);
@@ -1984,7 +1984,7 @@ object binary_op(int fn, object a, object b)
 			return (*optable[fn].dblfn)(DBL_PTR(a), DBL_PTR(b));
 		}
 	}
-	
+
 	/* result is a sequence */
 	int_fn = optable[fn].intfn;
 	if (IS_ATOM(a)) {
@@ -2022,7 +2022,7 @@ object binary_op(int fn, object a, object b)
 		cp = c->base;
 		ap = ((s1_ptr)a)->base;
 		if (IS_ATOM_INT(b)) {
-			while (TRUE) { 
+			while (TRUE) {
 				x = *(++ap);
 				if (IS_ATOM_INT(x)) {
 					*(++cp) = (*int_fn)(INT_VAL(x), INT_VAL(b));
@@ -2036,7 +2036,7 @@ object binary_op(int fn, object a, object b)
 		}
 		else {
 			// b is not an integer
-			while (--length >= 0) { 
+			while (--length >= 0) {
 				*(++cp) = binary_op(fn, *(++ap), b);
 			}
 		}
@@ -2047,7 +2047,7 @@ object binary_op(int fn, object a, object b)
 		b = (object)SEQ_PTR(b);
 		length = ((s1_ptr)a)->length;
 		if (length != ((s1_ptr)b)->length) {
-			sprintf(TempBuff, 
+			sprintf(TempBuff,
 				"sequence lengths are not the same (%ld != %ld)",
 				length, ((s1_ptr)b)->length);
 			RTFatal(TempBuff);
@@ -2056,7 +2056,7 @@ object binary_op(int fn, object a, object b)
 		cp = c->base;
 		ap = ((s1_ptr)a)->base;
 		bp = ((s1_ptr)b)->base+1;
-		while (TRUE) { 
+		while (TRUE) {
 			x = *(++ap);
 			if (IS_ATOM_INT(x) && IS_ATOM_INT(*bp)) {
 				*(++cp) = (*int_fn)(INT_VAL(x), INT_VAL(*bp++));
@@ -2086,7 +2086,7 @@ object calc_MD5(object a)
 	object_ptr ap;
 	object av;
 
-		
+
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -2095,7 +2095,7 @@ object calc_MD5(object a)
 		{
 		}
 	}
-	else { // input is a sequence 
+	else { // input is a sequence
 		lSLen = SEQ_PTR(a)->length;
 		ap = SEQ_PTR(a)->base;
 		while (lSLen > 0) {
@@ -2103,7 +2103,7 @@ object calc_MD5(object a)
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			
+
 			if (IS_ATOM_INT(av)) {
 			}
 			else if (IS_ATOM_DBL(av)) {
@@ -2136,7 +2136,7 @@ object calc_SHA256(object a)
 	object_ptr ap;
 	object av;
 
-		
+
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -2145,7 +2145,7 @@ object calc_SHA256(object a)
 		{
 		}
 	}
-	else { // input is a sequence 
+	else { // input is a sequence
 		lSLen = SEQ_PTR(a)->length;
 		ap = SEQ_PTR(a)->base;
 		while (lSLen > 0) {
@@ -2153,7 +2153,7 @@ object calc_SHA256(object a)
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			
+
 			if (IS_ATOM_INT(av)) {
 			}
 			else if (IS_ATOM_DBL(av)) {
@@ -2191,7 +2191,7 @@ long calc_adler32(object a)
 
 	lA = 1;
 	lB = 0;
-		
+
 	if (IS_ATOM_INT(a)) {
 		lA +=  a; if (lA >= 65521) lA %= 65521;
 		lB +=  lA; if (lB >= 65521) lB %= 65521;
@@ -2213,7 +2213,7 @@ long calc_adler32(object a)
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			
+
 			if (IS_ATOM_INT(av)) {
 				lA += av; if (lA >= 65521) lA %= 65521;
 				lB += lA; if (lB >= 65521) lB %= 65521;
@@ -2257,7 +2257,7 @@ long calc_fletcher32(object a)
 
 	lA = 1;
 	lB = 0;
-		
+
 	if (IS_ATOM_INT(a)) {
 		lA +=  a;
 		lB +=  lA;
@@ -2272,7 +2272,7 @@ long calc_fletcher32(object a)
 	}
 	else { /* input is a sequence */
 		int lChar;
-		
+
 		lSLen = SEQ_PTR(a)->length;
 		lChar = -1;
 
@@ -2282,7 +2282,7 @@ long calc_fletcher32(object a)
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			
+
 			if (IS_ATOM_INT(av)) {
 				if (av < 256)
 				{
@@ -2310,7 +2310,7 @@ long calc_fletcher32(object a)
 			}
 			else {
 				lTempResult = calc_fletcher32(av);
-				lA += lTempResult & 0x0000FFFF; 
+				lA += lTempResult & 0x0000FFFF;
 				lB += (lTempResult >> 16) & 0x0000FFFF;
 			}
 			lSLen--;
@@ -2336,7 +2336,7 @@ object calc_hash(object a, object b)
    b ==> -4 Adler-32
    b ==> >=0 and  <1 69096 + b
    b ==> >=1 hash = (hash * b + x)
-   
+
 */
 {
 	unsigned long lHashValue;
@@ -2349,23 +2349,23 @@ object calc_hash(object a, object b)
 		double tff;
 		unsigned short tfs[4];
 	} tf;
-	
+
 	object_ptr ap;
 	object av;
 
 	if (IS_ATOM_INT(b)) {
 		if (b == -4)
 			return calc_adler32(a);
-			
+
 		if (b == -3)
 			return calc_fletcher32(a);
-			
+
 		if (b == -2)
 			return calc_MD5(a);
-			
+
 		if (b == -1)
 			return calc_SHA256(a);
-			
+
 		if (b < 0)
 			RTFatal("second argument of hash() must be 1 or higher.");
 		if (b == 0)
@@ -2373,7 +2373,7 @@ object calc_hash(object a, object b)
 		else
 			f = b;
 		lHashValue = (0x193A74F1 ^ f);
-	}		
+	}
 	else if (IS_ATOM_DBL(b)) {
 		ff = (DBL_PTR(b)->dbl);
 		if (ff < 0.0L)
@@ -2392,7 +2392,7 @@ object calc_hash(object a, object b)
 	else
 		RTFatal("second argument of hash() must be an atom.");
 
-	
+
 	if (IS_ATOM_INT(a)) {
 		lHashValue =  a * lHashValue + 1;
 	}
@@ -2420,11 +2420,11 @@ object calc_hash(object a, object b)
 			else {
 				lHashValue = (long)((double)lHashValue * ff);
 			}
-			
+
 			lHashValue = (lHashValue & MAXINT);
-			
+
 			if (IS_ATOM_INT(av)) {
-				lHashValue +=  (av << 8) + 1;			
+				lHashValue +=  (av << 8) + 1;
 			}
 			else if (IS_ATOM_DBL(av)) {
 				tf.tff = ((DBL_PTR(av)->dbl) * 1.803L) + 1.5L;
@@ -2438,13 +2438,13 @@ object calc_hash(object a, object b)
 			else {
 				lHashValue += calc_hash(av,b);
 			}
-			
+
 			lHashValue = (lHashValue & MAXINT) >> 1;
 			lSLen--;
 		}
 	}
 
-	return lHashValue & MAXINT; 
+	return lHashValue & MAXINT;
 }
 
 int compare(object a, object b)
@@ -2463,12 +2463,12 @@ int compare(object a, object b)
 			return -1;
 		if (IS_ATOM_INT(a)) {
 			/* b *must* be a double */
-			da = (double)a; 
+			da = (double)a;
 			db = DBL_PTR(b)->dbl;
 		}
 		else {
 			da = DBL_PTR(a)->dbl;
-			if (IS_ATOM_INT(b)) 
+			if (IS_ATOM_INT(b))
 				db = (double)b;
 			else
 				db = DBL_PTR(b)->dbl;
@@ -2499,10 +2499,10 @@ int compare(object a, object b)
 				if (IS_ATOM_INT(av) && IS_ATOM_INT(bv)) {
 					if (av < bv)
 						return -1;
-					else 
+					else
 						return 1;
 				}
-				else { 
+				else {
 					c = compare(av, bv);
 					if (c != 0)
 						return c;
@@ -2526,12 +2526,12 @@ long find(object a, s1_ptr b)
 
 	b = SEQ_PTR(b);
 	bp = b->base;
-	
+
 	if (IS_ATOM_INT(a)) {
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
-				if (a == bv) 
+				if (a == bv)
 					return bp - (object_ptr)b->base;
 			}
 			else if (bv == NOVALUE) {
@@ -2542,10 +2542,10 @@ long find(object a, s1_ptr b)
 			}
 		}
 	}
-	
+
 	else if (IS_SEQUENCE(a)) {
 		long a_len;
-		
+
 		length = b->length;
 		a_len = SEQ_PTR(a)->length;
 		while (length > 0) {
@@ -2560,7 +2560,7 @@ long find(object a, s1_ptr b)
 			length--;
 		}
 	}
-	
+
 	else {
 		length = b->length;
 		while (length > 0) {
@@ -2570,13 +2570,13 @@ long find(object a, s1_ptr b)
 			length--;
 		}
 	}
-	
-	return 0; 
+
+	return 0;
 }
 
 
 long e_match(s1_ptr a, s1_ptr b)
-/* find sequence a as a slice within sequence b 
+/* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
 	long ntries, len_remaining;
@@ -2652,7 +2652,7 @@ static void CheckSlice(s1_ptr a, long startval, long endval, long length)
 	a = SEQ_PTR(a);
 	n = a->length;
 	if (startval > n + 1 || length > 0 && startval > n) {
-		sprintf(TempBuff, "slice starts past end of sequence (%ld > %ld)", 
+		sprintf(TempBuff, "slice starts past end of sequence (%ld > %ld)",
 				startval, n);
 		RTFatal(TempBuff);
 	}
@@ -2660,12 +2660,12 @@ static void CheckSlice(s1_ptr a, long startval, long endval, long length)
 		sprintf(TempBuff, "slice ends past end of sequence (%ld > %ld)",
 				endval, n);
 		RTFatal(TempBuff);
-	} 
+	}
 }
 #endif
 
 void RHS_Slice(s1_ptr a, object start, object end)
-/* Construct slice a[start..end] */ 
+/* Construct slice a[start..end] */
 {
 	long startval;
 	long length;
@@ -2674,7 +2674,7 @@ void RHS_Slice(s1_ptr a, object start, object end)
 	object temp;
 	object_ptr p, q, sentinel;
 	object save;
-	
+
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
@@ -2696,34 +2696,34 @@ void RHS_Slice(s1_ptr a, object start, object end)
 		RTFatal("slice upper index is not an atom");
 	length = endval - startval + 1;
 
-#ifndef ERUNTIME 
+#ifndef ERUNTIME
 	CheckSlice(a, startval, endval, length);
 #endif
-	
+
 	olda = SEQ_PTR(a);
-	if (*rhs_slice_target == (object)a && 
+	if (*rhs_slice_target == (object)a &&
 		olda->ref == 1 &&
-		(olda->base + olda->length - (object_ptr)olda) < 8 * (length+1)) {  
+		(olda->base + olda->length - (object_ptr)olda) < 8 * (length+1)) {
 								   // we must limit the wasted space
 		/* do it in-place */       // or we could even run out of memory
 		object_ptr p;
-		
+
 		/* update the sequence descriptor */
 		p = olda->base+1;
 		olda->base = olda->base + startval - 1;
-		
+
 		/* deref the lower excluded elements */
 		for (; p <= olda->base; p++)
 			DeRef(*p);
-		
+
 		/* deref the upper excluded elements */
 		for (p = olda->base + 1 + length;
 			 p <= olda->base + 1 + olda->length - startval;
-			 p++) 
+			 p++)
 			DeRef(*p);
-		
+
 		olda->postfill += olda->length - endval;
-		olda->length = length;  
+		olda->length = length;
 		*(olda->base + length + 1) = NOVALUE; // new end marker
 	}
 	else {
@@ -2731,12 +2731,12 @@ void RHS_Slice(s1_ptr a, object start, object end)
 		newa = NewS1(length);
 		p = newa->base;
 		q = olda->base + startval;
-		
+
 		// plant a sentinel
 		sentinel = q + length;
 		save = *(sentinel);
 		*(sentinel) = NOVALUE;
-		
+
 		while (TRUE) {
 			temp = *q++;
 			*(++p) = temp;
@@ -2746,9 +2746,9 @@ void RHS_Slice(s1_ptr a, object start, object end)
 				RefDS(temp);
 			}
 		}
-		
+
 		*(sentinel) = save;
-		
+
 		DeRef(*rhs_slice_target);
 		*rhs_slice_target = MAKE_SEQ(newa);
 	}
@@ -2763,7 +2763,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	object_ptr s_elem;
 	object_ptr v_elem;
 
-	seq_ptr = assign_slice_seq; /* "4th" arg */   
+	seq_ptr = assign_slice_seq; /* "4th" arg */
 
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
@@ -2792,25 +2792,25 @@ void AssignSlice(object start, object end, s1_ptr val)
 		sp = (s1_ptr)SequenceCopy(sp);
 		*seq_ptr = (s1_ptr)MAKE_SEQ(sp);
 	}
-	s_elem = sp->base + startval; 
+	s_elem = sp->base + startval;
 	if (IS_ATOM(val)) {
-		if (!IS_ATOM_INT(val))   
+		if (!IS_ATOM_INT(val))
 			(DBL_PTR(val)->ref) += length;
-		
+
 		while (--length >= 0) {
 			DeRef(*s_elem);
-			*s_elem++ = (object)val; 
+			*s_elem++ = (object)val;
 		}
 	}
 	else {
 		val = SEQ_PTR(val);
 		v_elem = val->base+1;
 		if (val->length != length) {
-			sprintf(TempBuff, 
+			sprintf(TempBuff,
 			"lengths do not match on assignment to slice (%ld != %ld)",
 			length, val->length);
 			RTFatal(TempBuff);
-		}          
+		}
 		while (TRUE) {
 			if (!IS_ATOM_INT(*v_elem)) {
 				if (*v_elem == NOVALUE)
@@ -2818,7 +2818,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 				RefDS(*v_elem);
 			}
 			DeRef(*s_elem);
-			*s_elem++ = *v_elem++;  
+			*s_elem++ = *v_elem++;
 		}
 	}
 }
@@ -2835,14 +2835,14 @@ object Date()
 	local = localtime(&time_of_day);
 	result = NewS1(8);
 	obj_ptr = result->base;
-	obj_ptr[1] = MAKE_INT(local->tm_year);  
-	obj_ptr[2] = MAKE_INT(local->tm_mon+1);   
-	obj_ptr[3] = MAKE_INT(local->tm_mday);   
-	obj_ptr[4] = MAKE_INT(local->tm_hour);   
-	obj_ptr[5] = MAKE_INT(local->tm_min);   
-	obj_ptr[6] = MAKE_INT(local->tm_sec);   
-	obj_ptr[7] = MAKE_INT(local->tm_wday+1);   
-	obj_ptr[8] = MAKE_INT(local->tm_yday+1);   
+	obj_ptr[1] = MAKE_INT(local->tm_year);
+	obj_ptr[2] = MAKE_INT(local->tm_mon+1);
+	obj_ptr[3] = MAKE_INT(local->tm_mday);
+	obj_ptr[4] = MAKE_INT(local->tm_hour);
+	obj_ptr[5] = MAKE_INT(local->tm_min);
+	obj_ptr[6] = MAKE_INT(local->tm_sec);
+	obj_ptr[7] = MAKE_INT(local->tm_wday+1);
+	obj_ptr[8] = MAKE_INT(local->tm_yday+1);
 	return MAKE_SEQ(result);
 }
 
@@ -2853,12 +2853,12 @@ void MakeCString(char *s, object obj)
 	object_ptr elem;
 	object x;
 
-	if (IS_ATOM(obj)) 
+	if (IS_ATOM(obj))
 		*s++ = Char(obj);
 	else {
 		obj = (object)SEQ_PTR(obj);
 		elem = ((s1_ptr)obj)->base;
-		while (TRUE) { 
+		while (TRUE) {
 			x = *(++elem);
 			if (IS_ATOM_INT(x)) {
 				*s++ = (char)x;
@@ -2885,7 +2885,7 @@ int CheckFileNumber(object a)
 {
 	long file_no;
 
-	if (IS_ATOM_INT(a)) 
+	if (IS_ATOM_INT(a))
 		file_no = a;
 	else if (IS_ATOM_DBL(a))
 		file_no = (long)DBL_PTR(a)->dbl;
@@ -2903,14 +2903,14 @@ IFILE which_file(object a, int mode)
 /* return FILE pointer, given the file number */
 {
 	int file_no;
-	
+
 	file_no = CheckFileNumber(a);
-	if (user_file[file_no].mode & mode) 
+	if (user_file[file_no].mode & mode)
 		return user_file[file_no].fptr;
 	else {
 		if (user_file[file_no].mode == EF_CLOSED) {
 			sprintf(TempBuff, "file number %d is not open", file_no);
-			RTFatal(TempBuff); 
+			RTFatal(TempBuff);
 		}
 		else {
 			RTFatal("wrong file mode for attempted operation");
@@ -2926,13 +2926,13 @@ int strcmp_ins(char *s, char *t)
 	while (TRUE) {
 		low_s = tolower(*s);
 		low_t = tolower(*t);
-		if (low_s != low_t) 
+		if (low_s != low_t)
 			return low_s - low_t;
 		if (low_s == '\0')
 			return 0;
 		s++;
 		t++;
-	} 
+	}
 }
 
 object EOpen(filename, mode_obj)
@@ -2950,7 +2950,7 @@ object mode_obj;
 	if (IS_ATOM(mode_obj))
 		RTFatal("open mode must be a sequence");
 
-	if (!IS_SEQUENCE(filename)) 
+	if (!IS_SEQUENCE(filename))
 		RTFatal("device or file name must be a sequence");
 
 	length = SEQ_PTR(filename)->length + 1;
@@ -2984,7 +2984,7 @@ object mode_obj;
 
 	else if (strcmp(cmode, "a") == 0) {
 		mode = EF_WRITE | EF_APPEND;
-	}   
+	}
 
 	else if (strcmp(cmode, "ab") == 0) {
 		mode = EF_WRITE | EF_APPEND;
@@ -3055,10 +3055,10 @@ object EGets(object file_no)
 	object_ptr obj_ptr;
 	int len;
 	object result_line;
-	
+
 	if (current_screen != MAIN_SCREEN && might_go_screen(file_no))
 		MainScreen();
-	
+
 	if (file_no == last_r_file_no)
 		f = last_r_file_ptr;
 	else {
@@ -3069,8 +3069,8 @@ object EGets(object file_no)
 			last_r_file_no = NOVALUE;
 		last_r_file_ptr = f;
 	}
-	
-	line_ptr = TempBuff; 
+
+	line_ptr = TempBuff;
 
 	/* read first character */
 
@@ -3095,7 +3095,7 @@ object EGets(object file_no)
 			c = getc(f);
 		}
 	}
-	else 
+	else
 #endif  //EDOS
 
 	c = getc(f);
@@ -3105,13 +3105,13 @@ object EGets(object file_no)
 	else {
 		i = 0;
 		if (f == stdin) {
-			do { 
+			do {
 				TempBuff[i++] = c;
 				if (c <= '\n') {
 					if (c == '\n') {
 #ifdef EWINDOWS
 						if (in_from_keyb)
-							screen_col = 1; 
+							screen_col = 1;
 #endif
 						break;
 					}
@@ -3137,15 +3137,15 @@ object EGets(object file_no)
 					c = wingetch();
 #endif
 				else
-#endif                  
+#endif
 				c = getc(f);
-			
+
 			} while (TRUE);
 		}
-		
+
 		else {
 			// not stdin - faster loop
-			do { 
+			do {
 				TempBuff[i++] = c;
 				if (c <= '\n') {
 					if (c == '\n') {
@@ -3161,17 +3161,17 @@ object EGets(object file_no)
 				c = getc(f);
 			} while (TRUE);
 		}
-		
+
 		/* create a sequence */
 		obj_ptr = (object_ptr)NewS1((long)i);
 		result_line = (object)MAKE_SEQ(obj_ptr);
 		obj_ptr = ((s1_ptr)obj_ptr)->base;
 		len = i;
-		
+
 		do {  // i will be > 0
 			*(++obj_ptr) = (unsigned char)*line_ptr++;
-		} while (--i > 0); 
-		
+		} while (--i > 0);
+
 		if (len == TEMP_SIZE && TempBuff[TEMP_SIZE-1] != '\n') {
 			/* long line -- more coming */
 			while (TRUE) {
@@ -3184,7 +3184,7 @@ object EGets(object file_no)
 #ifdef EGPM
 						c = mgetch(TRUE);
 #else
-						c = getc(stdin);   
+						c = getc(stdin);
 #endif
 #else
 						c = wingetch();
@@ -3195,15 +3195,15 @@ object EGets(object file_no)
 				else
 #endif  //EDOS
 				c = getc(f);
-			
-				if (c == '\n' || c == EOF) 
+
+				if (c == '\n' || c == EOF)
 					break;
-				Append(&result_line, result_line, (unsigned char)c); 
+				Append(&result_line, result_line, (unsigned char)c);
 			}
-			
+
 			if (c == '\n') {
 				Append(&result_line, result_line, (unsigned char)'\n');
-			}                       
+			}
 		}
 	}
 
@@ -3211,7 +3211,7 @@ object EGets(object file_no)
 }
 
 void set_text_color(int c)
-/* set the foreground color for color displays 
+/* set the foreground color for color displays
    or just set to white for mono displays */
 {
 	if (color_trace && COLOR_DISPLAY) {
@@ -3254,11 +3254,11 @@ int show_ascii_char(IFILE print_file, int iv)
 /* display corresponding ascii char */
 {
 	char sbuff[4];
-	
-	if (print_file == NULL && color_trace && COLOR_DISPLAY) {  
+
+	if (print_file == NULL && color_trace && COLOR_DISPLAY) {
 		/* show ascii char in different color on color trace screen */
 		flush_screen();
-		set_text_color(13); 
+		set_text_color(13);
 		if (iv == ' ')
 			iv = 254; /* half block character */
 		sbuff[0] = iv;
@@ -3269,7 +3269,7 @@ int show_ascii_char(IFILE print_file, int iv)
 		return 1;
 	}
 	else {
-		/* show ascii char with quotes on ex.err, error report on screen 
+		/* show ascii char with quotes on ex.err, error report on screen
 		   or mono trace screen */
 		sbuff[0] = '\'';
 		sbuff[1] = iv;
@@ -3285,13 +3285,13 @@ static void the_end()
 {
 	int i;
 	int c;
-	
+
 	if (print_file == NULL && print_pretty) {
 		/* pretty printing to screen - prompt the user */
 		screen_output(print_file, "\n");
 		screen_output(print_file, "* Press Enter to continue, or q to quit\n");
 		screen_output(print_file, "\n");
-		
+
 		c = get_key(TRUE);
 		if (c != 'q' && c != 'Q') {
 			ClearScreen();
@@ -3318,7 +3318,7 @@ static void cut_line(int n)
 		print_chars = 0;
 		if (print_file == NULL && print_pretty) {
 			screen_output(print_file, "\n");
-			if (--print_lines == 0) 
+			if (--print_lines == 0)
 				the_end();
 		}
 		else {
@@ -3334,9 +3334,9 @@ static void cut_line(int n)
 
 static void indent()
 /* indent the display of a sequence */
-{               
+{
 	int i;
-	
+
 	if (print_chars > 0) {
 		screen_output(print_file, "\n");
 		print_chars = 0;
@@ -3366,15 +3366,15 @@ static void rPrint(object a)
 			sprintf(sbuff, "%ld", a);
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
-			if (show_ascii && a >= ' ' && 
+			if (show_ascii && a >= ' ' &&
 #ifdef EUNIX
 				a <= 126)  // DEL is a problem with ANSI code display
 #else
-				a <= 127) 
+				a <= 127)
 #endif
 				print_chars += show_ascii_char(print_file, a);
 		}
-		else { 
+		else {
 			sprintf(sbuff, "%.10g", DBL_PTR(a)->dbl);
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
@@ -3386,7 +3386,7 @@ static void rPrint(object a)
 		cut_line(1);
 		if (print_chars == -1)
 			return;
-		
+
 		multi_line = FALSE;
 		if (print_pretty) {
 			/* check if all elements are either atoms or null-sequences */
@@ -3401,34 +3401,34 @@ static void rPrint(object a)
 				length--;
 			}
 		}
-		
+
 		screen_output(print_file, "{");
 		print_chars++;
-		
+
 		elem = ((s1_ptr)a)->base+1;
 		length = ((s1_ptr)a)->length;
 		if (length > 0) {
 			print_level++;
 			while (--length > 0) {
-				if (multi_line) 
+				if (multi_line)
 					indent();
 				rPrint(*elem++);
-				if (print_chars == -1) 
-					return; 
+				if (print_chars == -1)
+					return;
 				screen_output(print_file, ",");
 				print_chars++;
 				cut_line(6);
 				if (print_chars == -1)
 					return;
 			}
-			if (multi_line) 
+			if (multi_line)
 				indent();
 			rPrint(*elem);
 			if (print_chars == -1)
 				return;
 			print_level--;
 		}
-		if (multi_line) 
+		if (multi_line)
 			indent();
 		if (print_chars == -1)
 			return;
@@ -3450,7 +3450,7 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	if (f == stderr)
 		show_ascii = FALSE; /* don't bother showing for type-check failure */
 	else
-		show_ascii = TRUE; 
+		show_ascii = TRUE;
 	buffer_screen();
 	rPrint(a);
 	flush_screen();
@@ -3477,9 +3477,9 @@ void StdPrint(int fn, object a, int new_lines)
 			last_w_file_no = NOVALUE;
 		last_w_file_ptr = print_file;
 	}
-	
+
 	print_lines = MAX_LONG;
-	print_chars = 0; 
+	print_chars = 0;
 	print_start = 0;
 	print_level = 0;
 	show_ascii = FALSE;
@@ -3487,7 +3487,7 @@ void StdPrint(int fn, object a, int new_lines)
 	rPrint(a);
 	flush_screen();
 	if (new_lines)
-		screen_output(print_file, "\n"); 
+		screen_output(print_file, "\n");
 }
 
 void EPuts(object file_no, object obj)
@@ -3510,9 +3510,9 @@ void EPuts(object file_no, object obj)
 			last_w_file_no = NOVALUE;
 		last_w_file_ptr = f;
 	}
-	if (IS_ATOM(obj)) { 
+	if (IS_ATOM(obj)) {
 		c = Char(obj);
-		if (f == stdout || f == stderr || f == NULL) {  
+		if (f == stdout || f == stderr || f == NULL) {
 			/* might be going to screen, won't be binary mode */
 			TempBuff[0] = c;
 			TempBuff[1] = '\0';
@@ -3578,18 +3578,18 @@ object_ptr v_elem;
 	flen = 0;
 	do {
 		cstring[flen++] = c;
-		if (++f_elem > f_last) { 
+		if (++f_elem > f_last) {
 			cstring[flen] = '\0';
 			sprintf(TempBuff, "format specifier is incomplete (%s)", cstring);
 			RTFatal(TempBuff);
-		} 
+		}
 		c = Char(*f_elem);
 	} while (IsDigit(c) || c == '.' || c == '-' || c == '+');
 
 	free_sb = FALSE;
 	if (c == 's') {
 		cstring[flen++] = c;
-		cstring[flen] = '\0'; 
+		cstring[flen] = '\0';
 		free_sv = FALSE;
 		if (IS_SEQUENCE(*v_elem)) {
 			slength = (SEQ_PTR(*v_elem))->length + 1;
@@ -3597,7 +3597,7 @@ object_ptr v_elem;
 				sval = EMalloc(slength);
 				free_sv = TRUE;
 			}
-			else 
+			else
 				sval = quick_alloc1;
 			MakeCString(sval, *v_elem);
 		}
@@ -3606,7 +3606,7 @@ object_ptr v_elem;
 			sval = quick_alloc1;
 			sval[0] = Char(*v_elem);
 			sval[1] = '\0';
-		}    
+		}
 		if (slength + flen > TEMP_SIZE) {
 			sbuff = EMalloc(slength + flen);
 			free_sb = TRUE;
@@ -3655,7 +3655,7 @@ object_ptr v_elem;
 		else
 			sbuff = TempBuff;
 		cstring[flen++] = c;
-		cstring[flen] = '\0'; 
+		cstring[flen] = '\0';
 		if (c == 'f')
 			sprintf(sbuff, cstring, gval);
 		else
@@ -3664,7 +3664,7 @@ object_ptr v_elem;
 	}
 	else if (c == 'e' || c == 'f' || c == 'g') {
 		cstring[flen++] = c;
-		cstring[flen] = '\0'; 
+		cstring[flen] = '\0';
 		if (IS_ATOM_INT(*v_elem))
 			gval = (double)INT_VAL(*v_elem);
 		else
@@ -3680,7 +3680,7 @@ object_ptr v_elem;
 	}
 	else {
 		cstring[flen++] = c;
-		cstring[flen] = '\0'; 
+		cstring[flen] = '\0';
 		sprintf(TempBuff, "Unknown printf format (%s)", cstring);
 		RTFatal(TempBuff);
 	}
@@ -3706,7 +3706,7 @@ object EPrintf(int file_no, object format_obj, object values)
 	IFILE f;
 	object result;
 	s1_ptr format;
-	
+
 	if (file_no == DOING_SPRINTF) {
 		/* sprintf */
 		f = (IFILE )DOING_SPRINTF;
@@ -3726,8 +3726,8 @@ object EPrintf(int file_no, object format_obj, object values)
 	}
 	free_cs = FALSE;
 	buffer_screen();
-	if (IS_ATOM(format_obj)) { 
-		out_string[0] = doChar(format_obj); 
+	if (IS_ATOM(format_obj)) {
+		out_string[0] = doChar(format_obj);
 		out_string[1] = '\0';
 		screen_output(f, out_string);
 	}
@@ -3747,7 +3747,7 @@ object EPrintf(int file_no, object format_obj, object values)
 			}
 			else
 				cstring = quick_alloc;
-			if (IS_ATOM(values)) 
+			if (IS_ATOM(values))
 				v_elem = &values;
 			else {
 				v_elem = SEQ_PTR(values)->base;
@@ -3782,7 +3782,7 @@ object EPrintf(int file_no, object format_obj, object values)
 							s = 0;
 						}
 						f_elem = FormatItem(f, cstring, f_elem, f_last, v_elem);
-						if (IS_SEQUENCE(values))  
+						if (IS_SEQUENCE(values))
 							v_elem++;
 					}
 				}
@@ -3794,9 +3794,9 @@ object EPrintf(int file_no, object format_obj, object values)
 					}
 					out_string[s++] = c;
 				}
-				f_elem++; 
+				f_elem++;
 			} /* end while */
-			
+
 			if (s != 0) {
 				out_string[s] = '\0';
 				screen_output(f, out_string);
@@ -3837,7 +3837,7 @@ int nodelaych(int wait)
 #endif
 
 int get_key(int wait)
-/* Get one key from keyboard, without echo. If wait is TRUE then wait until 
+/* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
 {
 	unsigned a, ascii;
@@ -3855,18 +3855,18 @@ int get_key(int wait)
 		   )
 #else
 		if (*p1 == *p2)
-#endif          
+#endif
 			return -1;
 		if (in_from_keyb && !kbhit())
-			return -1; 
+			return -1;
 	}
-	// wait for the key    
+	// wait for the key
 	if (in_from_keyb) {
 		a = getch();
 		if (a == 0)
 			return 256 + getch();     // DJGPP too?
-		else 
-			return a;   
+		else
+			return a;
 	}
 	else {
 		a = _bios_keybrd(_NKEYBRD_READ);
@@ -3879,31 +3879,31 @@ int get_key(int wait)
 #endif
 
 #ifdef EWINDOWS
-#if defined(EBORLAND) || defined(ELCC)     
+#if defined(EBORLAND) || defined(ELCC)
 		if (wait || winkbhit()) {
 			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
-			a = wingetch(); 
-			
+			a = wingetch();
+
 			//if (a == 0) {  // SAFE TO DO THIS?
 				//a = 256 + wingetch();
 			//}
-			
+
 			// return to normal mode
 			SetConsoleMode(console_input, ENABLE_LINE_INPUT |
 									ENABLE_ECHO_INPUT |
 									ENABLE_PROCESSED_INPUT);
-#else           
+#else
 		if (wait || kbhit()) {
 			a = getch();
 			if (a == 0) {
 				a = 256 + getch();
 			}
-#endif          
+#endif
 			return a;
 		}
 		else {
 			return -1;
-		}   
+		}
 #endif
 
 #ifdef EUNIX
@@ -3914,8 +3914,8 @@ int get_key(int wait)
 		}
 #else
 		a = nodelaych(wait); // no delay, no echo
-#endif      
-		return a;   
+#endif
+		return a;
 #endif // EUNIX
 }
 
@@ -3926,11 +3926,11 @@ static IFILE trace_file;
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
 {
-#ifdef EUNIX   
+#ifdef EUNIX
 	iprintf(trace_file, "%-78.78s\n", line);
-#else   
+#else
 	iprintf(trace_file, "%-77.77s\r\n", line);
-#endif  
+#endif
 }
 
 void ctrace(char *line)
@@ -3962,7 +3962,7 @@ void ctrace(char *line)
 			one_trace_line("");
 			iflush(trace_file);
 			iseek(trace_file, -79*5, SEEK_CUR);
-		}   
+		}
 	}
 }
 
@@ -3995,7 +3995,7 @@ int file_in_include_path( int using, int target, char * checked_files )
 	if(checked_files[using]) return 0;
 	checked_files[using] = 1;
 	for( i = 1; i <= rt02[using][0]; i++ ){
-		node_file = rt02[using][i];     
+		node_file = rt02[using][i];
 		if( target == node_file || file_in_include_path( node_file, target, checked_files ) ){
 			free(files);
 			return 1;
@@ -4010,10 +4010,10 @@ int file_is_direct_include( int using, int target )
 {
 	int i;
 	int node_file;
-	
+
 	if( using == target ) return 1;
-	for( i = 1; i <= rt02[using][0]; i++ ){   
-	
+	for( i = 1; i <= rt02[using][0]; i++ ){
+
 		if( target == rt02[using][i] ){
 			return 1;
 		}
@@ -4021,7 +4021,7 @@ int file_is_direct_include( int using, int target )
 	return 0;
 }
 int CRoutineId(int seq_num, int current_file_no, object name)
-/* Routine_id for compiled code. 
+/* Routine_id for compiled code.
    (Similar to RTLookup() for interpreter, but here we only find routines,
 	not vars, and we don't have the normal symbol table available). */
 {
@@ -4035,40 +4035,40 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	int in_include_path;
 	int out_of_path_found;
 	int in_path_found;
-	
+
 	if (IS_ATOM(name))
 		return ATOM_M1;
 
 	routine_ptr = SEQ_PTR(name);
-	
+
 	if (routine_ptr->length >= TEMP_SIZE)
 		return ATOM_M1;
 
 	routine_string = (char *)&TempBuff;
 	MakeCString(routine_string, name);
-	
+
 	colon = strchr(routine_string, ':');
-	
+
 	if (colon != NULL) {
 		/* look up "ns : name" */
-		
+
 		/* trim off any trailing whitespace from ns */
 		p = colon-1;
 		while ((*p == ' ' || *p == '\t') && p >= routine_string) {
 			p--;
 		}
-		*(p+1) = 0; 
-	
+		*(p+1) = 0;
+
 		ns = routine_string;
-		
+
 		/* trim off any leading whitespace from ns */
 		while (*ns == ' ' || *ns == '\t')
 			ns++;
-		
+
 		if (*ns == 0) {
 			return ATOM_M1;
 		}
-	
+
 		/* step 1: look up NAMESPACE symbol */
 		if( strcmp( ns, "eu") == 0 )
 			// Predefined routines don't have routine_ids
@@ -4077,7 +4077,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 		while (TRUE) {
 			if (rt01[i].seq_num > seq_num)
 				return ATOM_M1; // ignore symbols defined after this point
-			
+
 			if (current_file_no == rt01[i].file_num &&
 				strcmp(ns, rt01[i].name) == 0) {
 				ns_num = rt01[i].ns_num;
@@ -4085,15 +4085,15 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			}
 			i++;
 		}
-		
-		
+
+
 		/* step 2: look up global symbol in the chosen namespace */
 		simple_name = colon + 1;
-		
+
 		/* trim off any leading whitespace from name */
 		while (*simple_name == ' ' || *simple_name == '\t')
 			simple_name++;
-		
+
 		i = 0;
 		ns_num = -ns_num; // to match global only
 		while (rt00[i].seq_num <= seq_num) {
@@ -4102,32 +4102,32 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 				return i;
 			i++;
 		}
-		
+
 		return ATOM_M1;
 	}
-	
+
 	else {
 		/* look up simple unqualified name */
-		
+
 		/* first look for local or global symbol in the same file */
 		i = 0;
 		while (rt00[i].seq_num <= seq_num) {
 			f = rt00[i].file_num;
-			if ((current_file_no == f || 
+			if ((current_file_no == f ||
 				 current_file_no == -f) &&
 				strcmp(routine_string, rt00[i].name) == 0) {
 				return i;
 			}
 			i++;
 		}
-		
+
 		/* then look for unique global or export symbol */
 		i = 0;
 		found = ATOM_M1;
 		out_of_path_found = 0;
 		in_path_found = 0;
 		while (rt00[i].seq_num <= seq_num) {
-			
+
 			if (rt00[i].file_num < 0 &&
 				strcmp(routine_string, rt00[i].name) == 0) {
 				if(rt00[i].scope == S_GLOBAL ){
@@ -4151,7 +4151,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			}
 			i++;
 		}
-		
+
 		if( in_path_found != 1  && ((in_path_found + out_of_path_found) != 1) )
 			return ATOM_M1;
 		return found;
@@ -4159,7 +4159,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
-void eu_startup(struct routine_list *rl, struct ns_list *nl, int **ip, int code, 
+void eu_startup(struct routine_list *rl, struct ns_list *nl, int **ip, int code,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
@@ -4201,12 +4201,12 @@ void Position(object line, object col)
 	else {
 		col_val = (int)(DBL_PTR(col)->dbl);     /* need better check here too */
 	}
-	if (line_val < 1 || 
+	if (line_val < 1 ||
 #ifdef EWINDOWS
 	line_val > line_max ||
 #endif
 		 col_val < 1 ||  col_val > col_max) {
-		sprintf(TempBuff, 
+		sprintf(TempBuff,
 		"attempt to move cursor off the screen to line %d, column %d",
 		line_val, col_val);
 		RTFatal(TempBuff);
@@ -4224,7 +4224,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 {
 	int i, w;
 	char **argv;
-	
+
 	// don't use EMalloc yet:
 	argv = (char **)malloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
@@ -4234,7 +4234,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 			argv[0] = "EXW.EXE";
 		w = 1;
 	}
-	else 
+	else
 #endif
 	   {
 		w = 0;
@@ -4242,8 +4242,8 @@ char **make_arg_cv(char *cmdline, int *argc)
 	i = 0;
 	while (TRUE) {
 		/* skip white space */
-		while (cmdline[i] == ' '  || 
-			   cmdline[i] == '\t' || 
+		while (cmdline[i] == ' '  ||
+			   cmdline[i] == '\t' ||
 			   cmdline[i] == '\n') {
 			i++;
 		}
@@ -4261,7 +4261,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 			argv[w++] = &cmdline[i]; // start of new unquoted word
 			i++;
 			/* move through word */
-			while (cmdline[i] != ' ' && 
+			while (cmdline[i] != ' ' &&
 				cmdline[i] != '\t' &&
 				cmdline[i] != '\n' &&
 				cmdline[i] != '\0') {
@@ -4286,22 +4286,22 @@ void system_call(object command, object wait)
 	char *string_ptr;
 	int len, w;
 	long c;
-	
+
 	if (!IS_SEQUENCE(command))
 		RTFatal("first argument of system() must be a sequence");
-	
+
 	if (IS_ATOM_INT(wait))
 		w = INT_VAL(wait);
 	else if (IS_ATOM_DBL(wait))
 		w = (long)DBL_PTR(wait)->dbl;
 	else
 		RTFatal("second argument of system() must be an atom");
-	
-	len = SEQ_PTR(command)->length + 1; 
+
+	len = SEQ_PTR(command)->length + 1;
 	if (len > TEMP_SIZE)
 		RTFatal("system() command is too long");
 	else
-		string_ptr = TempBuff;     
+		string_ptr = TempBuff;
 	MakeCString(string_ptr, command);
 	system(string_ptr);
 
@@ -4315,7 +4315,7 @@ void system_call(object command, object wait)
 #endif
 		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
 	}
-	if (w != 2) 
+	if (w != 2)
 		RestoreConfig();
 }
 
@@ -4328,22 +4328,22 @@ object system_exec_call(object command, object wait)
 	char **argv;
 	int len, w, exit_code;
 	long c;
-	
+
 	if (!IS_SEQUENCE(command))
 		RTFatal("first argument of system_exec() must be a sequence");
-	
+
 	if (IS_ATOM_INT(wait))
 		w = INT_VAL(wait);
 	else if (IS_ATOM_DBL(wait))
 		w = (long)DBL_PTR(wait)->dbl;
 	else
 		RTFatal("second argument of system_exec() must be an atom");
-	
-	len = SEQ_PTR(command)->length + 1; 
+
+	len = SEQ_PTR(command)->length + 1;
 	if (len > TEMP_SIZE)
 		return (object) -1;
 	else
-		string_ptr = TempBuff;     
+		string_ptr = TempBuff;
 	MakeCString(string_ptr, command);
 
 	exit_code = 0;
@@ -4355,8 +4355,8 @@ object system_exec_call(object command, object wait)
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], argv);
 	free(argv);
-#endif    
-	
+#endif
+
 	if (w == 1) {
 #ifdef EDOS
 		sound(1000);
@@ -4367,7 +4367,7 @@ object system_exec_call(object command, object wait)
 #endif
 		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
 	}
-	if (w != 2) 
+	if (w != 2)
 		RestoreConfig();
 	if (exit_code >= MININT && exit_code <= MAXINT)
 		return (object)exit_code;
@@ -4386,7 +4386,7 @@ object EGetEnv(s1_ptr name)
 		RTFatal("argument to getenv must be a sequence");
 	len = SEQ_PTR(name)->length+1;
 	if (len > TEMP_SIZE)
-		string = (char *)EMalloc(len);    
+		string = (char *)EMalloc(len);
 	else
 		string = TempBuff;
 	MakeCString(string, (object)name);
@@ -4396,7 +4396,7 @@ object EGetEnv(s1_ptr name)
 	if (result == NULL)
 		return ATOM_M1;
 	else
-		return NewString(result);        
+		return NewString(result);
 }
 
 #ifndef ERUNTIME
@@ -4412,7 +4412,7 @@ void match_samples()
 	int i, gline;
 	symtab_ptr proc;
 	int *iptr;
-	
+
 	bad_samples = 0;
 	if (sample_next >= sample_size)
 		sample_overflow = TRUE;
@@ -4423,11 +4423,11 @@ void match_samples()
 			bad_samples++;
 		}
 		else {
-			gline = FindLine((int *)profile_sample[i], proc); 
-				
+			gline = FindLine((int *)profile_sample[i], proc);
+
 			if (gline == 0) {
 				bad_samples++;
-			}       
+			}
 			else if (slist[gline].options & OP_PROFILE_TIME) {
 				iptr = (int *)slist[gline].src;
 				(*iptr)++;
@@ -4452,7 +4452,7 @@ static void show_prof_line(IFILE f, long i)
 	}
 	else {
 		if (slist[i].options & OP_PROFILE_TIME) {
-			sprintf(buff, "%6.2f |", 
+			sprintf(buff, "%6.2f |",
 			(double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
 		}
 		else {
@@ -4478,7 +4478,7 @@ void ProfileCommand()
 		return;
 	}
 	screen_output(stderr, "\nWriting profile results to ex.pro ...\n");
-	
+
 	if (AnyTimeProfile) {
 		match_samples();
 		iprintf(f, "-- Time profile based on %d samples.\n", total_samples);
@@ -4487,9 +4487,9 @@ void ProfileCommand()
 		iprintf(f,
 			   "-- Left margin shows the percentage of total execution time\n");
 		iprintf(f, "-- consumed by the statement(s) on that line.\n\n");
-#ifdef EXTRA_CHECK  
+#ifdef EXTRA_CHECK
 		//iprintf(f, "%d BAD SAMPLES!\n", bad_samples);  //DEBUG!
-#endif  
+#endif
 	}
 	else {
 		iprintf(f, "-- Execution-count profile.\n");
@@ -4518,13 +4518,13 @@ object make_atom32(unsigned c32)
 }
 
 unsigned general_call_back(
-#ifdef ERUNTIME          
-		  int cb_routine, 
+#ifdef ERUNTIME
+		  int cb_routine,
 #else
-		  symtab_ptr cb_routine, 
+		  symtab_ptr cb_routine,
 #endif
-						   unsigned arg1, unsigned arg2, unsigned arg3, 
-						   unsigned arg4, unsigned arg5, unsigned arg6, 
+						   unsigned arg1, unsigned arg2, unsigned arg3,
+						   unsigned arg4, unsigned arg5, unsigned arg6,
 						   unsigned arg7, unsigned arg8, unsigned arg9)
 /* general call-back routine: 0 to 9 args */
 {
@@ -4532,13 +4532,13 @@ unsigned general_call_back(
 	int *save_tpc;
 	int num_args;
 	int (*addr)();
-	
+
 	if (gameover)
 		return (unsigned)0; // ignore messages after we decide to shutdown
 
 #ifdef ERUNTIME
-// translator call-back     
-	num_args = rt00[cb_routine].num_args;   
+// translator call-back
+	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
 	  call_back_arg1->obj = make_atom32((unsigned)arg1);
@@ -4563,7 +4563,7 @@ unsigned general_call_back(
 				}
 			  }
 			}
-		  } 
+		  }
 		}
 	  }
 	}
@@ -4635,12 +4635,12 @@ unsigned general_call_back(
 											call_back_arg9->obj);
 			break;
 	}
-   
+
 #else
 	/* Interpreter: set up a PROC opcode call */
 	code[0] = (int *)opcode(PROC);
 	code[1] = (int *)cb_routine;  // symtab_ptr of Euphoria routine
-	
+
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
@@ -4683,24 +4683,24 @@ unsigned general_call_back(
 				}
 			  }
 			}
-		  } 
+		  }
 		}
 	  }
 	}
-	
+
 	code[num_args+2] = (int *)call_back_result;
 	code[num_args+3] = (int *)opcode(CALL_BACK_RETURN);
-	
+
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top++ = NULL;           // prevents restore_privates()
-	
+
 	// Save the tpc value across do_exec. Sometimes Windows
 	// makes two or more call-backs in a row without returning
 	// at all to the main Euphoria code.
-	save_tpc = tpc; 
-	
+	save_tpc = tpc;
+
 	do_exec((int *)code);  // execute routine without setting up new stack
-	
+
 	tpc = save_tpc;
 	expr_top -= 2;
 #endif
@@ -4721,16 +4721,16 @@ unsigned (*general_ptr)() = (void *)&general_call_back;
 #pragma off (check_stack);
 
 
-/* Windows cdecl - Need only one template. 
+/* Windows cdecl - Need only one template.
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
 
-LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3, 
-						unsigned arg4, unsigned arg5, unsigned arg6, 
+LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
+						unsigned arg4, unsigned arg5, unsigned arg6,
 						unsigned arg7, unsigned arg8, unsigned arg9)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
-									 arg1, arg2, arg3, arg4, arg5, 
+									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
 
@@ -4767,7 +4767,7 @@ LRESULT CALLBACK call_back3(unsigned arg1, unsigned arg2, unsigned arg3)
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back4(unsigned arg1, unsigned arg2, unsigned arg3, 
+LRESULT CALLBACK call_back4(unsigned arg1, unsigned arg2, unsigned arg3,
 							unsigned arg4)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
@@ -4775,57 +4775,57 @@ LRESULT CALLBACK call_back4(unsigned arg1, unsigned arg2, unsigned arg3,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back5(unsigned arg1, unsigned arg2, unsigned arg3, 
+LRESULT CALLBACK call_back5(unsigned arg1, unsigned arg2, unsigned arg3,
 							unsigned arg4, unsigned arg5)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
-									 arg1, arg2, arg3, arg4, arg5, 
+									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back6(unsigned arg1, unsigned arg2, unsigned arg3, 
+LRESULT CALLBACK call_back6(unsigned arg1, unsigned arg2, unsigned arg3,
 							unsigned arg4, unsigned arg5, unsigned arg6)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
-									 arg1, arg2, arg3, arg4, arg5, 
+									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back7(unsigned arg1, unsigned arg2, unsigned arg3, 
-							unsigned arg4, unsigned arg5, unsigned arg6, 
+LRESULT CALLBACK call_back7(unsigned arg1, unsigned arg2, unsigned arg3,
+							unsigned arg4, unsigned arg5, unsigned arg6,
 							unsigned arg7)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
-									 arg1, arg2, arg3, arg4, arg5, 
+									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
 
-LRESULT CALLBACK call_back8(unsigned arg1, unsigned arg2, unsigned arg3, 
-							unsigned arg4, unsigned arg5, unsigned arg6, 
+LRESULT CALLBACK call_back8(unsigned arg1, unsigned arg2, unsigned arg3,
+							unsigned arg4, unsigned arg5, unsigned arg6,
 							unsigned arg7, unsigned arg8)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
-									 arg1, arg2, arg3, arg4, arg5, 
+									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
 
-LRESULT CALLBACK call_back9(unsigned arg1, unsigned arg2, unsigned arg3, 
-							unsigned arg4, unsigned arg5, unsigned arg6, 
+LRESULT CALLBACK call_back9(unsigned arg1, unsigned arg2, unsigned arg3,
+							unsigned arg4, unsigned arg5, unsigned arg6,
 							unsigned arg7, unsigned arg8, unsigned arg9)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
-									 arg1, arg2, arg3, arg4, arg5, 
+									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
 
 #endif  // EDOS
 
 void shift_args(int argc, char *argv[])
-/* insert argv[0] as argv[1] and 
+/* insert argv[0] as argv[1] and
 	move the other args down */
-{   
+{
 	int i;
-	
+
 	Argc = argc+1;
 	Argv = (char **)EMalloc(Argc * sizeof(char *));
 	Argv[0] = argv[0];
@@ -4848,18 +4848,18 @@ object Command_Line()
 	ssize_t len;
 #endif
 #ifndef ERUNTIME
-#ifdef BACKEND  
+#ifdef BACKEND
 	if (Executing && il_file) {
-#else   
+#else
 	if (Executing) {
-#endif      
+#endif
 		// user's program sees one less arg
 		argv = Argv+1; // skip first one
 		switch_len = SEQ_PTR(fe.switches)->length;
-		result = NewS1(Argc - (*file_name_entered == 0) - switch_len); 
+		result = NewS1(Argc - (*file_name_entered == 0) - switch_len);
 		obj_ptr = result->base;
 #ifdef EUNIX
-		// We try to get the actual path of the executable on *nix 
+		// We try to get the actual path of the executable on *nix
 		// systems using readlink()
 		buff = malloc( 2049 );
 		len = readlink( "/proc/self/exe\0", buff, 2048 );
@@ -4871,7 +4871,7 @@ object Command_Line()
 #endif
 		{
 				// not LINUX, or readlink failed, so we'll just report the actual cmd line
-				*(++obj_ptr) = NewString(*Argv);  
+				*(++obj_ptr) = NewString(*Argv);
 		}
 #ifdef EUNIX
 		free(buff);
@@ -4879,7 +4879,7 @@ object Command_Line()
 		for(i=0; i <= switch_len; i++){
 				argv++;
 		}
-		
+
 		for (i = switch_len + 2; i < Argc; i++){
 			*(++obj_ptr) = NewString(*argv++);
 		}
@@ -4887,18 +4887,18 @@ object Command_Line()
 			*(++obj_ptr) = NewString(file_name_entered);
 		}
 	}
-	else {   
-#endif  
+	else {
+#endif
 		argv = Argv;
 		result = NewS1((long)Argc);
 		obj_ptr = result->base;
 		for (i = 0; i < Argc; i++) {
 			*(++obj_ptr) = NewString(*argv++);
 		}
-#ifndef ERUNTIME    
-	}  
+#ifndef ERUNTIME
+	}
 #endif
-	return MAKE_SEQ(result);    
+	return MAKE_SEQ(result);
 }
 
 void Cleanup(int status)
@@ -4911,14 +4911,14 @@ void Cleanup(int status)
 
 	gameover = TRUE;
 
-#ifndef ERUNTIME    
+#ifndef ERUNTIME
 	Executing = FALSE;
 #endif
 
 #ifdef EDOS
 	tick_rate(0);
-#endif    
-	
+#endif
+
 	if (current_screen != MAIN_SCREEN)
 		MainScreen();
 
@@ -4929,7 +4929,7 @@ void Cleanup(int status)
 #endif
 #else
 		(void) mouse_installed();
-#endif  
+#endif
 	}
 	/* conin might be closed here, if we were debugging */
 #ifndef ERUNTIME
@@ -4957,7 +4957,7 @@ void Cleanup(int status)
 			}
 		}
 	}
-#ifndef BACKEND 
+#ifndef BACKEND
 	if (AnyStatementProfile || AnyTimeProfile)
 		ProfileCommand();
 #endif
@@ -4966,16 +4966,16 @@ void Cleanup(int status)
 #ifdef EUNIX
 	if (have_console && (
 		config.numtextrows < 24 ||
-		config.numtextrows > 25 || 
+		config.numtextrows > 25 ||
 		config.numtextcols != 80 ||
-		((xterm = getenv("TERM")) != NULL && 
+		((xterm = getenv("TERM")) != NULL &&
 		  strcmp_ins(xterm, "xterm") == 0))) {
 		screen_output(stderr, "\n\nPress Enter...\n");
 		getc(stdin);
 	}
 #endif
 
-#ifdef EWINDOWS 
+#ifdef EWINDOWS
 	if (TempWarningName == NULL && display_warnings && (warning_count || (status && !user_abort))) {
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
@@ -4988,10 +4988,10 @@ void Cleanup(int status)
 
 #ifndef ERUNTIME
 
-#ifdef EXTRA_STATS  
+#ifdef EXTRA_STATS
 	Stats();
-#endif  
-		
+#endif
+
 #endif
 
 #ifdef EWINDOWS
@@ -4999,7 +4999,7 @@ void Cleanup(int status)
 	for (i = 0; i < open_dll_count; i++) {
 		FreeLibrary(open_dll_list[i]);
 	}
-#endif      
+#endif
 	exit(status);
 }
 
@@ -5021,7 +5021,7 @@ int winkbhit()
 	INPUT_RECORD pbuffer;
 	DWORD junk;
 	int c;
-	
+
 	while (TRUE) {
 		c = PeekConsoleInput(console_input, &pbuffer, 1, &junk);
 		if (junk == 0)
@@ -5030,23 +5030,23 @@ int winkbhit()
 			pbuffer.Event.KeyEvent.bKeyDown) {
 			return TRUE; // Key pressed down (not a release event)
 		}
-		ReadConsoleInput(console_input, &pbuffer, 1, &junk); 
+		ReadConsoleInput(console_input, &pbuffer, 1, &junk);
 	}
 }
 #endif
 
 int wingetch()
-// Windows - read next char from keyboard 
+// Windows - read next char from keyboard
 {
 #if defined(ELCC) || defined(EBORLAND)
 	int c;
-	
+
 	c = MyReadConsoleChar();
-	
+
 	// Fix by Jacques Deschenes for 3.1
 	// if (c == '\r')
 	//     c = MyReadConsoleChar();
-	
+
 	return c;
 #else
 	int c;
@@ -5070,7 +5070,7 @@ int wingetch()
 void key_gets(unsigned char *input_string)
 /* return input string from keyboard */
 /* lets us use any color to echo user input in graphics modes */
-{   
+{
 	int line, len, init_column, column, c;
 	struct rccoord cursor;
 	char one_char[2];
@@ -5092,7 +5092,7 @@ void key_gets(unsigned char *input_string)
 	}
 	cursor.row += 1;
 	cursor.col += 1;
-#else   
+#else
 	cursor = GetTextPositionP();
 #endif
 
@@ -5104,14 +5104,14 @@ void key_gets(unsigned char *input_string)
 	input_string[0] = '\0';
 	while (TRUE) {
 		c = get_key(TRUE);
-		
+
 		if (c == '\r' || c == '\n'
 #ifdef EWINDOWS
 			|| c == 284
 #endif
-		) 
+		)
 			break;
-			
+
 		else if (c == BS || c == LEFT_ARROW
 #ifdef EUNIX   //FOR NOW - must decide what to do about different key codes
 		|| c == 263
@@ -5124,7 +5124,7 @@ void key_gets(unsigned char *input_string)
 				SetPosition(line, column);
 				input_string[column - init_column] = '\0';
 			}
-		}   
+		}
 		else if (c >= CONTROL_Z && c <= 255) {
 			if (column < 79) {
 				len = strlen(input_string);
@@ -5155,7 +5155,7 @@ int mgetch(int wait)
 // via pseudo key presses - they start with 409 in xterm.
 {
 	int key, x, y, action;
-	
+
 	if (key_read != key_write) {
 		key = key_buff[key_read++];
 		if (key_read >= KEYBUFF_SIZE)
@@ -5179,7 +5179,7 @@ int mgetch(int wait)
 			else if (key == 27) {
 				// make this a routine and push keys back into key_buff
 				key = EscapeKey();
-				break;      
+				break;
 			}
 			else {
 				// normal key
@@ -5214,21 +5214,21 @@ long find_from(object a, s1_ptr b, object c)
 	}
 	else
 		RTFatal("third argument of find_from() must be an atom");
-				
+
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > length+1) {
 		sprintf(TempBuff, "third argument of find_from() is out of bounds (%ld)", c);
 		RTFatal(TempBuff);
 	}
-				
+
 	bp = b->base;
 	bp += c - 1;
 	if (IS_ATOM_INT(a)) {
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
-				if (a == bv) 
+				if (a == bv)
 					return bp - (object_ptr)b->base;
 			}
 			else if (bv == NOVALUE) {
@@ -5239,10 +5239,10 @@ long find_from(object a, s1_ptr b, object c)
 			}
 		}
 	}
-	
+
 	else if (IS_SEQUENCE(a)) {
 		long a_len;
-				
+
 		length -= c - 1;
 		a_len = SEQ_PTR(a)->length;
 		while (length > 0) {
@@ -5257,7 +5257,7 @@ long find_from(object a, s1_ptr b, object c)
 			length--;
 		}
 	}
-	
+
 	else {
 		length -= c - 1;
 		while (length > 0) {
@@ -5267,12 +5267,12 @@ long find_from(object a, s1_ptr b, object c)
 			length--;
 		}
 	}
-	
-	return 0; 
+
+	return 0;
 }
 
 e_match_from(s1_ptr a, s1_ptr b, object c)
-/* find sequence a as a slice within sequence b 
+/* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
 	long ntries, len_remaining;
@@ -5283,17 +5283,17 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 
 	if (!IS_SEQUENCE(a))
 		RTFatal("first argument of match_from() must be a sequence");
-	
+
 	if (!IS_SEQUENCE(b))
 		RTFatal("second argument of match_from() must be a sequence");
-	
+
 	a = SEQ_PTR(a);
 	b = SEQ_PTR(b);
-	
+
 	lengtha = a->length;
 	if (lengtha == 0)
 		RTFatal("first argument of match_from() must be a non-empty sequence");
-	
+
 	// same rules as the lower limit on a slice
 	if (IS_ATOM_INT(c)) {
 		;
@@ -5303,7 +5303,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 	}
 	else
 		RTFatal("third argument of match_from() must be an atom");
-				
+
 	lengthb = b->length;
 
 	// we allow c to be $+1, just as we allow the lower limit

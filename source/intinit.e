@@ -6,10 +6,10 @@ include error.e
 include std/text.e
 
 global procedure intoptions()
--- set translator command-line options  
+-- set translator command-line options
 	integer i, option
 	sequence uparg
-	
+
 	-- put file first, strip out the options
 	i = 3
 	while i <= Argc do
@@ -29,10 +29,10 @@ global procedure intoptions()
 			end for
 		else
 			return -- non "-" items are assumed to be the source file
-		end if      
+		end if
 	end while
-	if Lint_is_on then -- overrides any -W/-X switches
-		OpWarning = lint_warning_flag
+	if Strict_is_on then -- overrides any -W/-X switches
+		OpWarning = strict_warning_flag
 		prev_OpWarning = OpWarning
 	end if
 end procedure

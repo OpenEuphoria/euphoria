@@ -16,10 +16,10 @@ global constant COMMON_OPTIONS = {
 	"-D",    -- define a word
 	"-BATCH",-- batch processing, do not "Press Enter" on error
 	"-TEST", -- do not execute, only test syntax
-	"-LINT", -- enable all warnings
+	"-STRICT", -- enable all warnings (lint option)
 	"-W",    -- defines warning level
 	"-X",    -- defines warning level by exclusion
-	"-WF"   -- definesthe file to which the warnings will go instead of stderr
+	"-WF"    -- defines the file to which the warnings will go instead of stderr
 }
 
 global enum
@@ -28,7 +28,7 @@ global enum
 	DEFINE_OPTION, -- ifdef defines
 	BATCH_OPTION,  -- batch processing, do not "Press Enter" on error
 	TEST_OPTION,   -- do not execute, only test syntax
-	LINT_OPTION,   -- enable all warnings
+	STRICT_OPTION,   -- enable all warnings
 	WARNING_OPTION, -- startup warning level
 	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
 	WARNING_FILE_OPTION	-- warning file name
@@ -67,35 +67,41 @@ global procedure common_options( integer option, integer ix )
 	-- we only need to remove our extra options
 	args = 0
 
-	if option = EUINC_OPTION then
+	switch option do
+	case  EUINC_OPTION:
 		if ix < Argc then
 			load_euinc_conf( Argv[ix+1] )
 			add_switch( Argv[ix+1], 1 )
 			args += 1
 		end if
-		
-	elsif option = INCDIR_OPTION then
+		break
+
+	case  INCDIR_OPTION:
 		if ix < Argc then
 			add_include_directory( Argv[ix+1] )
 			add_switch( Argv[ix+1], 1 )
 			args += 1
 		end if
+		break
 
-	elsif option = DEFINE_OPTION then
+	case  DEFINE_OPTION:
 		if ix < Argc then
 			OpDefines &= {Argv[ix+1]}
 			add_switch(Argv[ix+1], 1)
 			args += 1
 		end if
-	
-	elsif option = TEST_OPTION then
+		break
+
+	case  TEST_OPTION:
 		test_only = 1
 		batch_job = 1
+		break
 
-	elsif option = BATCH_OPTION then
+	case  BATCH_OPTION:
 		batch_job = 1
+		break
 
-	elsif option = WARNING_OPTION then
+	case  WARNING_OPTION:
 		if ix < Argc then
 			n = find(Argv[ix+1],warning_names)
 			if n>0 then
@@ -110,8 +116,9 @@ global procedure common_options( integer option, integer ix )
 			add_switch(Argv[ix+1], 1)
 			args += 1
 		end if
+		break
 
-	elsif option = WARNING_EXCLUDE_OPTION then
+	case  WARNING_EXCLUDE_OPTION:
 		if ix < Argc then
 			n = find(Argv[ix+1],warning_names)
 			if n>0 then
@@ -119,26 +126,29 @@ global procedure common_options( integer option, integer ix )
 					OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
 				else
 					option_W = -1
-					OpWarning = lint_warning_flag - warning_flags[n]
+					OpWarning = strict_warning_flag - warning_flags[n]
 				end if
-				prev_OpWarning = OpWarning 
+				prev_OpWarning = OpWarning
 			end if
 			add_switch(Argv[ix+1], 1)
 			args += 1
 		end if
+		break
 
-	elsif option = LINT_OPTION then
-		Lint_is_on = 1
-		add_switch(Argv[ix+1], 1)
+	case  STRICT_OPTION:
+		Strict_is_on = 1
+		break
 
-	elsif option = WARNING_FILE_OPTION then
+	case  WARNING_FILE_OPTION:
 		if ix < Argc then
 			TempWarningName = Argv[ix+1]
 			add_switch(Argv[ix+1], 1)
 			args += 1
 		end if
-	end if
+		break
+		
+	end switch
 
 	move_args( ix+1, args )
-	
+
 end procedure

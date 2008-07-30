@@ -6,7 +6,7 @@
 -- <<LEVELTOC depth=2>>
 --
 -- === Background
--- Unit testing is the process of assuring that the smallest programming units 
+-- Unit testing is the process of assuring that the smallest programming units
 -- are actually delivering functionality that complies with their specification.
 -- The units in question are usually individual routines rather than whole programs
 -- or applications.
@@ -15,7 +15,7 @@
 -- there is a high probability that a system using those components can be made
 -- to work correctly.
 --
--- In Euphoria terms, this framework provides the tools to make testing and reporting on 
+-- In Euphoria terms, this framework provides the tools to make testing and reporting on
 -- functions and procedures easy and standardized. It gives us a simple way to
 -- write a test case and to report on the findings. Example:
 --
@@ -224,7 +224,7 @@ export procedure test_report()
 	atom score
 	integer fh
 	sequence fname
-	
+
 	if testsFailed > 0 or verbose >= TEST_SHOW_ALL then
 		if testCount = 0 then
 			score = 100
@@ -413,6 +413,7 @@ end procedure
 
 sequence cmd
 cmd = command_line()
+
 filename = cmd[2]
 
 for i = 3 to length(cmd) do

@@ -11,12 +11,12 @@
  * This lets us share the heap with any Euphoria .dlls. We serialize access
  * to this heap because of the warnings given in the WIN32 docs.
  * The internal representation of a Euphoria object requires blocks that
- * are 8-byte aligned. We can deal with 4-byte aligned blocks from malloc 
- * on all systems, but we will only see 8-byte aligned blocks on Windows 
+ * are 8-byte aligned. We can deal with 4-byte aligned blocks from malloc
+ * on all systems, but we will only see 8-byte aligned blocks on Windows
  * (except Windows 95), and FreeBSD. A storage "cache" is used to cut down
- * on the number of calls to malloc. On FreeBSD we do not use the 
- * storage cache because it's not easy to determine the block size 
- * of freed blocks. 
+ * on the number of calls to malloc. On FreeBSD we do not use the
+ * storage cache because it's not easy to determine the block size
+ * of freed blocks.
  */
 
 /******************/
@@ -67,7 +67,7 @@ char *malloc_options="A"; // abort
 int pagesize;  // needed for Linux only, not FreeBSD
 #endif
 
-int eu_dll_exists = FALSE; // a Euphoria .dll is being used 
+int eu_dll_exists = FALSE; // a Euphoria .dll is being used
 int align4 = 0;
 int low_on_space = FALSE;  // are we almost out of memory?
 unsigned cache_size = 0;
@@ -90,7 +90,7 @@ long max_bytes_allocated = 0;   /* high water mark */
 #endif
 
 s1_ptr d_list = NULL;
-struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired 
+struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired
 														  to appropriate list */
 
 
@@ -191,35 +191,35 @@ void InitEMalloc()
 	call_back_arg2 = tmp_alloc();
 	call_back_arg2->mode = M_TEMP;
 	call_back_arg2->obj = NOVALUE;
-	
+
 	call_back_arg3 = tmp_alloc();
 	call_back_arg3->mode = M_TEMP;
 	call_back_arg3->obj = NOVALUE;
-	
+
 	call_back_arg4 = tmp_alloc();
 	call_back_arg4->mode = M_TEMP;
 	call_back_arg4->obj = NOVALUE;
-	
+
 	call_back_arg5 = tmp_alloc();
 	call_back_arg5->mode = M_TEMP;
 	call_back_arg5->obj = NOVALUE;
-	
+
 	call_back_arg6 = tmp_alloc();
 	call_back_arg6->mode = M_TEMP;
 	call_back_arg6->obj = NOVALUE;
-	
+
 	call_back_arg7 = tmp_alloc();
 	call_back_arg7->mode = M_TEMP;
 	call_back_arg7->obj = NOVALUE;
-	
+
 	call_back_arg8 = tmp_alloc();
 	call_back_arg8->mode = M_TEMP;
 	call_back_arg8->obj = NOVALUE;
-	
+
 	call_back_arg9 = tmp_alloc();
 	call_back_arg9->mode = M_TEMP;
 	call_back_arg9->obj = NOVALUE;
-	
+
 	call_back_result = tmp_alloc();
 	call_back_result->mode = M_TEMP;
 	call_back_result->obj = NOVALUE;
@@ -242,7 +242,7 @@ void StorageStats()
 			iprintf(stderr, "misaligned s1d pointer!\n");
 	}
 	printf("\nd_list: %ld   ", n);
-	
+
 	for (i = 0; i < NUMBER_OF_SIZES; i++) {
 		printf("%d:", pool[i].size);
 		n = 0;
@@ -265,7 +265,7 @@ void Allocated(long n)
 
 	if (n < 0 || n >= 40000000L) {
 		sprintf(buff, "bad value passed to Allocated (%d)", n);
-		RTInternal(buff); 
+		RTInternal(buff);
 	}
 	bytes_allocated += n;
 	if (bytes_allocated > max_bytes_allocated)
@@ -276,11 +276,11 @@ static DeAllocated(long n)
 /* record that n bytes were freed */
 {
 	char buff[100];
-	 
+
 	bytes_allocated -= n;
 	if (n < 0 || n >= 40000000L)
 		RTInternal("bad value passed to DeAllocated");
-#ifdef FIX  
+#ifdef FIX
 	if (bytes_allocated < 0 || bytes_allocated >= 140000000L) {
 		sprintf(buff, "DeAllocated: bytes_allocated is %d, n is %d\n",
 				bytes_allocated, n);
@@ -293,7 +293,7 @@ void Trash(char *p, long nbytes)
 /* write garbage into freed storage block to prevent accidental reuse */
 {
 	while (nbytes-- > 0)
-		*p++ = (char)0x11;  
+		*p++ = (char)0x11;
 }
 #endif // HEAP_CHECK
 
@@ -310,7 +310,7 @@ static void Free_All()
 		s = (s1_ptr)list->first;
 		while (s != NULL) {
 			p = (unsigned char *)s;
-			s = (s1_ptr)((free_block_ptr)s)->next; 
+			s = (s1_ptr)((free_block_ptr)s)->next;
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 				p = p - 4;
 			free(p);
@@ -331,7 +331,7 @@ static void Free_All()
 }
 
 static void Recycle()
-/* Try to recycle some cached blocks back to heap. 
+/* Try to recycle some cached blocks back to heap.
    With write-back CPU cache, it might be better
    to free an older block on the list, not the most-recently freed,
    but we only have a singly-linked list */
@@ -352,7 +352,7 @@ static void Recycle()
 		free(p); /* give it back to malloc arena */
 		cache_size -= 1;
 	}
-	
+
 	/* try to take one from each other list */
 	for (i = 0; i < NUMBER_OF_SIZES; i++) {
 		list = &pool[i];
@@ -370,7 +370,7 @@ static void Recycle()
 static void SpaceMessage()
 {
 	/* should we free up something first, to ensure iprintf's work? */
-	
+
 	RTFatal("Your program has run out of memory.\nOne moment please...");
 }
 
@@ -396,7 +396,7 @@ static char *Out_Of_Space(long nbytes)
 #endif
 
 #ifndef ESIMPLE_MALLOC
-char *EMalloc(unsigned long nbytes) 
+char *EMalloc(unsigned long nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
@@ -421,7 +421,7 @@ char *EMalloc(unsigned long nbytes)
 	if (nbytes <= MAX_CACHED_SIZE) {
 		/* See if we have a block of this size in our cache.
 		   Every block in the cache is 8-aligned. */
-		
+
 		list = pool_map[(nbytes + (RESOLUTION - 1)) >> LOG_RESOLUTION];
 #ifdef HEAP_CHECK
 		if (list->size < nbytes || list->size > nbytes * 2) {
@@ -430,7 +430,7 @@ char *EMalloc(unsigned long nbytes)
 		}
 #endif
 		temp = (char *)list->first;
-		
+
 		if (temp != NULL) {
 			/* a cache hit */
 
@@ -449,7 +449,7 @@ char *EMalloc(unsigned long nbytes)
 			if (((unsigned long)temp) & 3)
 				RTInternal("unaligned address in storage cache");
 			Allocated(block_size(p));
-#endif          
+#endif
 			return temp; /* will be 8-aligned */
 		}
 		else {
@@ -468,8 +468,8 @@ char *EMalloc(unsigned long nbytes)
 	if (cache_size > CACHE_LIMIT) {
 		// cache is not helping, free some blocks back to general heap
 		Recycle();
-	}   
-	
+	}
+
 	do {
 		p = malloc(nbytes);
 
@@ -482,22 +482,22 @@ char *EMalloc(unsigned long nbytes)
 #endif
 		/* get 8-byte alignment */
 		alignment = ((unsigned long)p) & 7;
-		
-		if (alignment == 0) { 
+
+		if (alignment == 0) {
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 				// don't free. grab a new one.
-				continue;  // magic is there by chance! 
+				continue;  // magic is there by chance!
 						   // (this case is remotely possible on Win95 only)
 			return p;   // already 8-aligned, should happen most of the time
 		}
-		if (alignment != 4) 
+		if (alignment != 4)
 			RTFatal("malloc block NOT 4-byte aligned!\n");
-		
+
 		if (align4) {
 			*(int *)p = MAGIC_FILLER;
 			return p+4;
 		}
-		
+
 		/* first occurrence of a 4-aligned block */
 		free(p);
 		align4 = 4;  // start handling 4-aligned blocks
@@ -528,7 +528,7 @@ void EFree(unsigned char *p)
 
 	if (((long)p & 7) != 0)
 		RTInternal("EFree: badly aligned pointer");
-#endif  
+#endif
 	q = p;
 	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 		q = q - 4;
@@ -544,7 +544,7 @@ void EFree(unsigned char *p)
 	Trash(p, nbytes - ((char *)p - q));
 #endif
 
-	if (nbytes > MAX_CACHED_SIZE || (eu_dll_exists && cache_size > CACHE_LIMIT)) { 
+	if (nbytes > MAX_CACHED_SIZE || (eu_dll_exists && cache_size > CACHE_LIMIT)) {
 		free(q); /* too big to cache, or cache is full */
 	}
 	else {
@@ -554,11 +554,11 @@ void EFree(unsigned char *p)
 			list--;
 		}
 #ifdef HEAP_CHECK
-		if (list->size > nbytes) 
+		if (list->size > nbytes)
 			RTInternal("Free - list size greater than nbytes");
 		if (list->size * 3 / 2 < nbytes - 2)
 			RTInternal("Free - list size is small");
-	
+
 		AlreadyFree(list->first, (free_block_ptr)p);  /* can be very slow */
 #endif
 		((free_block_ptr)p)->next = list->first;
@@ -580,7 +580,7 @@ int heap_dump(char *ptr)
 {
 	struct _heapinfo h_info;
 	int heap_status, found;
-	
+
 	found = FALSE;
 	h_info._pentry = NULL;
 	for (;;) {
@@ -619,7 +619,7 @@ int heap_dump(char *ptr)
 #endif
 #ifndef ESIMPLE_MALLOC
 char *ERealloc(unsigned char *orig, unsigned long newsize)
-/* Enlarge or shrink a malloc'd block. 
+/* Enlarge or shrink a malloc'd block.
    orig must not be NULL - not supported.
    Return a pointer to a storage area of the desired size
    containing all the original data.
@@ -643,7 +643,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 
 #if defined(EWATCOM) && defined(EDOS)
 	// only available with WATCOM on DOS
-	q = _expand(p, newsize);    
+	q = _expand(p, newsize);
 
 #else
 	if (newsize <= oldsize) {
@@ -662,13 +662,13 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 		 */
 	}
 	else if (q == p) {
-		/* p was successfully expanded in-place */   
-#ifdef HEAP_CHECK      
+		/* p was successfully expanded in-place */
+#ifdef HEAP_CHECK
 		if (newsize > oldsize)
 			Allocated(block_size(p) - oldsize);
 		else
 			DeAllocated(oldsize - block_size(p));
-#endif      
+#endif
 		return orig;
 	}
 	else if (((long)q & 0x07) == ((long)p & 0x07)) {
@@ -683,9 +683,9 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 		p = q;
 	}
 
-#ifdef HEAP_CHECK    
+#ifdef HEAP_CHECK
 	Allocated(block_size(p) - oldsize);
-#endif    
+#endif
 	/* failed to expand in-place, malloc a new space */
 	q = EMalloc(newsize);
 	/* copy the data to it's new location */
@@ -702,7 +702,7 @@ static void AlreadyFree(free_block_ptr q, free_block_ptr p)
 /* see if p is already on the free list */
 {
 	while (q != NULL) {
-		if (q == p) 
+		if (q == p)
 			RTInternal("attempt to free again");
 		q = q->next;
 	}
@@ -717,7 +717,7 @@ unsigned char *p;
 	long nbytes;
 	char *q;
 	int alignment;
-	
+
 	q = p;
 	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 		q = q - 4;
@@ -725,17 +725,17 @@ unsigned char *p;
 	DeAllocated(nbytes);
 	if ((long)p % 8 != 0)
 		RTInternal("freeS1: misaligned pointer returned");
-	if (nbytes < D_SIZE 
+	if (nbytes < D_SIZE
 #ifdef EDJGPP
 	- 8
 #endif
 	|| nbytes > 1024)
-		RTInternal("FreeD - bad nbytes "); 
-	Trash(p, D_SIZE); 
+		RTInternal("FreeD - bad nbytes ");
+	Trash(p, D_SIZE);
 	AlreadyFree((free_block_ptr)d_list, (free_block_ptr)p);
-	
+
 	((d_ptr)p)->dbl = 1e300;  // ->next overlaps with this anyway
-	
+
 	((free_block_ptr)p)->next = (free_block_ptr)d_list;
 	d_list = (s1_ptr)p;
 	cache_size += 1;
@@ -802,7 +802,7 @@ s1_ptr SequenceCopy(register s1_ptr a)
 				break;
 			RefDS(temp_ap);
 		}
-	} 
+	}
 	DeRefSP(a);
 	return c;
 }
