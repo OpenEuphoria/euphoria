@@ -69,7 +69,7 @@ integer verbose = TEST_SHOW_FAILED_ONLY
 
 integer abort_on_fail = 0
 integer wait_on_summary = 0
-
+integer accume_on_summary = 0
 --
 -- Private utility functions
 --
@@ -147,6 +147,23 @@ export procedure set_wait_on_summary(integer toWait)
 end procedure
 
 --**
+-- Request the test report to saves run stats in "unittest.dat" before exiting.
+--
+-- Parameters:
+--		# ##toAccume##: an integer, zero not to accume, nonzero to accume.
+--
+-- Comments:
+-- The file "unittest.dat" is appened to with {t,f}\\
+-- : where
+-- :: //t// is total number of tests run
+-- :: //f// is the total number of tests that failed
+--
+
+export procedure set_accume_summary(integer toAccume)
+	accume_on_summary = toAccume
+end procedure
+
+--**
 -- Set behaviour on test failure, and return previous value.
 --
 -- Parameters:
@@ -178,7 +195,9 @@ end function
 -- [[:set_verbosity]]
 export procedure test_report()
 	atom score
-
+	integer fh
+	sequence fname
+	
 	if testsFailed > 0 or verbose >= TEST_SHOW_ALL then
 		if testCount = 0 then
 			score = 100
@@ -188,6 +207,17 @@ export procedure test_report()
 
 	    printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
 	   		{testCount, testsPassed, testsFailed, score})
+	end if
+	if accume_on_summary then
+		fname = command_line()
+		if equal(fname[1], fname[2]) then
+			fname = fname[1]
+		else
+			fname = fname[2]
+		end if
+		fh = open("unittest.dat", "a")
+		printf(fh, "{%d,%d,\"%s\"}\n", {testCount, testsFailed, fname})
+		close(fh)
 	end if
 
 	if match("t_c_", filename) = 1 then
@@ -350,5 +380,7 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
+	elsif equal(cmd[i], "-accume") then
+		set_accume_summary(1)
 	end if
 end for

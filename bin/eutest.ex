@@ -5,6 +5,8 @@
 include std/sequence.e
 include std/sort.e
 include std/filesys.e
+include std/io.e
+include std/get.e
 
 atom score
 integer failed, total, status
@@ -65,6 +67,7 @@ switches = option_switches()
 options = join( switches )
 
 sequence fail_list = {}
+if delete_file("unittest.dat") then end if
 
 for i = 1 to total do
 	filename = files[i][D_NAME]
@@ -103,6 +106,12 @@ end ifdef
 				if match( "t_c_", filename ) = 1 then
 					status = not status
 				end if
+
+ifdef UNIX then
+				if delete_file(filename) then end if
+else
+				if delete_file(filename & ".exe") then end if
+end ifdef				
 			end if
 		end if
 		if status > 0 then
@@ -113,17 +122,41 @@ end ifdef
 	end if
 	
 end for
-total *= 2 -- also account for translated tests
+if length(translator) > 0 then
+	total *= 2 -- also account for translated tests
+end if
+
 if total = 0 then
 	score = 100
 else
 	score = ((total - failed) / total) * 100
 end if
 
-puts(1, "\nTest failure summary:\n")
+puts(1, "\nTest results summary:\n")
 for i = 1 to length( fail_list ) do
 	printf(1, "    FAIL: %s\n", {fail_list[i]})
 end for
-printf(1, "\n%d file(s) run %d file(s) failed, %.1f%% success\n", {total, failed, score})
+printf(1, "Files run: %d, failed: %d (%.1f%% success)\n", {total, failed, score})
+object ln
+object temps
+ln = read_lines("unittest.dat")
+if sequence(ln) then
+	total = 0
+	failed = 0
+	for i = 1 to length(ln) do
+		temps = value(ln[i])
+		if temps[1] = GET_SUCCESS then
+			total += temps[2][1]
+			failed += temps[2][2]
+		end if
+	end for
+	if total = 0 then
+		score = 100
+	else
+		score = ((total - failed) / total) * 100
+	end if
+	printf(1, "Tests run: %d, failed: %d (%.1f%% success)\n", {total, failed, score})
+		
+end if
 
 abort(failed > 0)

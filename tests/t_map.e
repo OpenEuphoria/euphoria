@@ -167,5 +167,20 @@ m5 = m:put( m5, APPEND, {"foo"} )
 m5 = m:put( m5, APPEND, "bar", APPEND )
 test_equal( "put APPEND", {"foo","bar"}, m:get( m5, APPEND, "" ) )
 
+
+map city_population
+city_population = new()
+city_population = nested_put(city_population, {"Canada",        "Quebec",    "SmallTown"},        100 )
+city_population = nested_put(city_population, {"United States", "California", "Los Angeles"}, 3819951 )
+city_population = nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     2503281 )
+
+test_equal("nested #1", 2503281, nested_get(city_population, {"Canada", "Ontario", "Toronto"}, -1))
+test_equal("nested #2", 3819951, nested_get(city_population, {"United States", "California", "Los Angeles"}, -1))
+
+map m6
+m6 = nested_get(city_population, {"Canada"}, -1)
+test_equal("nested #3", {"Ontario", "Quebec"}, sort(keys(m6)))
+
+
 test_report()
 
