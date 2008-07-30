@@ -5026,8 +5026,8 @@ object machine(object opcode, object x)
 
 			case M_SET_ENV:
 				x = (object)SEQ_PTR(x);
-				src = EMalloc(1024);
-				dest = EMalloc(1024);
+				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
+				dest = EMalloc(SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
 				MakeCString(dest, (object) *(((s1_ptr)x)->base+2));
 				temp = setenv(src, dest, *(((s1_ptr)x)->base+3));
@@ -5038,7 +5038,7 @@ object machine(object opcode, object x)
 
 			case M_UNSET_ENV:
 				x = (object) SEQ_PTR(x);
-				src = EMalloc(SEQ_PTR(x)->length + 1);
+				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
