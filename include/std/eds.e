@@ -6,18 +6,19 @@
 --
 -- <<LEVELTOC depth=2>>
 
-include error.e
-include convert.e
-if not length(date()) then crash("") end if
-include io.e
-include filesys.e
-include get.e
-include pretty.e
-include memory.e
+include std/error.e
+include std/convert.e
+include std/io.e
+include std/filesys.e
+include std/get.e
+include std/pretty.e
+include std/memory.e
+include std/sequence.e
+include std/datetime.e
 
 --****
 -- === Database File Format
--- 
+--
 -- ==== Header
 -- * byte 0: magic number for this file-type: 77
 -- * byte 1: version number (major)
@@ -25,26 +26,26 @@ include memory.e
 -- * byte 3: 4-byte pointer to block of table headers
 -- * byte 7: number of free blocks
 -- * byte 11: 4-byte pointer to block of free blocks
---    
+--
 -- ==== Block of table headers
--- * -4: allocated size of this block (for possible reallocation) 
+-- * -4: allocated size of this block (for possible reallocation)
 -- *  0: number of table headers currently in use
 -- *  4: table header1
 -- * 16: table header2
--- * 28: etc. 
---    
--- ==== Table header 
+-- * 28: etc.
+--
+-- ==== Table header
 -- * 0: pointer to the name of this table
 -- * 4: total number of records in this table
 -- * 8: number of blocks of records
 -- * 12: pointer to the index block for this table
 --
--- There are two levels of pointers. The logical array of key pointers 
--- is split up across many physical blocks. A single index block 
--- is used to select the correct small block. This allows 
--- inserts and deletes to be made without having to shift a 
--- large number of key pointers. Only one small block needs to 
--- be adjusted. This is particularly helpful when the table contains 
+-- There are two levels of pointers. The logical array of key pointers
+-- is split up across many physical blocks. A single index block
+-- is used to select the correct small block. This allows
+-- inserts and deletes to be made without having to shift a
+-- large number of key pointers. Only one small block needs to
+-- be adjusted. This is particularly helpful when the table contains
 -- many thousands of records.
 --
 -- ==== Index block
@@ -58,8 +59,8 @@ include memory.e
 -- * 16: etc.
 --
 -- ==== Block of key pointers
--- many per table 
---                 
+-- many per table
+--
 -- * -4: allocated size of this block in bytes
 -- * 0: key pointer 1
 -- * 4: key pointer 2
@@ -67,7 +68,7 @@ include memory.e
 --
 -- ==== Free list
 -- in ascending order of address
--- 
+--
 -- * -4: allocated size of block of free blocks
 -- * 0: address of 1st free block
 -- * 4: size of 1st free block
@@ -76,9 +77,9 @@ include memory.e
 -- * 16: etc.
 --
 -- The key value and the data value for a record are allocated space
--- as needed. A pointer to the data value is stored just before the 
+-- as needed. A pointer to the data value is stored just before the
 -- key value. Euphoria objects, key and data, are stored in a compact form.
--- All allocated blocks have the size of the block in bytes, stored just 
+-- All allocated blocks have the size of the block in bytes, stored just
 -- before the address.
 
 --****
@@ -90,22 +91,22 @@ include memory.e
 -- * DB_LOCK_FAIL
 
 export constant DB_OK = 0,
-				DB_OPEN_FAIL = -1, 
+				DB_OPEN_FAIL = -1,
 				DB_EXISTS_ALREADY = -2,
 				DB_LOCK_FAIL = -3
-				
+
 --****
 -- ==== Lock Types
 -- * DB_LOCK_NO
 -- * DB_LOCK_SHARED
 -- * DB_LOCK_EXCLUSIVE
 
-export constant DB_LOCK_NO = 0,       -- don't bother with file locking 
+export constant DB_LOCK_NO = 0,       -- don't bother with file locking
 				DB_LOCK_SHARED = 1,   -- read the database
 				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
-				 
+
 constant DB_MAGIC = 77
-constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0 
+constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0
 constant SIZEOF_TABLE_HEADER = 16
 constant TABLE_HEADERS = 3, FREE_COUNT = 7, FREE_LIST = 11
 constant SCREEN = 1
@@ -113,7 +114,7 @@ constant SCREEN = 1
 -- initial sizes for various things:
 constant INIT_FREE = 5,
 		 INIT_TABLES = 5,
-		 INIT_INDEX = 10, 
+		 INIT_INDEX = 10,
 		 INIT_RECORDS = 50
 
 constant TRUE = 1
@@ -122,8 +123,11 @@ integer current_db = -1
 atom current_table = -1
 sequence current_table_name = ""
 sequence db_names = {}, db_file_nums = {}, db_lock_methods = {}
-integer current_lock
-sequence key_pointers
+integer current_lock = 0
+sequence key_pointers = {}
+sequence key_cache = {}
+sequence cache_index = {}
+integer caching_option = 1
 
 procedure default_fatal(sequence msg)
 -- default fatal error handler - you can override this
@@ -232,33 +236,33 @@ constant MIN1B = -9,
 
 function decompress(integer c)
 -- read a compressed Euphoria object from disk
--- if c is set, then c is not <= 248    
+-- if c is set, then c is not <= 248
 	sequence s
 	integer len
-	
+
 	if c = 0 then
 		c = getc(current_db)
 		if c < I2B then
 			return c + MIN1B
 		end if
 	end if
-	
+
 	if c = I2B then
-		return getc(current_db) + 
+		return getc(current_db) +
 			   #100 * getc(current_db) +
 			   MIN2B
-	
+
 	elsif c = I3B then
-		return getc(current_db) + 
-			   #100 * getc(current_db) + 
+		return getc(current_db) +
+			   #100 * getc(current_db) +
 			   #10000 * getc(current_db) +
 			   MIN3B
-	
+
 	elsif c = I4B then
 		return get4() + MIN4B
-	
+
 	elsif c = F4B then
-		return float32_to_atom({getc(current_db), getc(current_db), 
+		return float32_to_atom({getc(current_db), getc(current_db),
 								getc(current_db), getc(current_db)})
 	elsif c = F8B then
 		return float64_to_atom({getc(current_db), getc(current_db),
@@ -287,27 +291,27 @@ function decompress(integer c)
 end function
 
 function compress(object x)
--- return the compressed representation of a Euphoria object 
+-- return the compressed representation of a Euphoria object
 -- as a sequence of bytes
 	sequence x4, s
-	
+
 	if integer(x) then
 		if x >= MIN1B and x <= MAX1B then
 			return {x - MIN1B}
-			
+
 		elsif x >= MIN2B and x <= MAX2B then
 			x -= MIN2B
 			return {I2B, and_bits(x, #FF), floor(x / #100)}
-			
+
 		elsif x >= MIN3B and x <= MAX3B then
 			x -= MIN3B
 			return {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)}
-			
+
 		else
-			return I4B & int_to_bytes(x-MIN4B)    
-			
+			return I4B & int_to_bytes(x-MIN4B)
+
 		end if
-	
+
 	elsif atom(x) then
 		-- floating point
 		x4 = atom_to_float32(x)
@@ -324,7 +328,7 @@ function compress(object x)
 			s = {S1B, length(x)}
 		else
 			s = S4B & int_to_bytes(length(x))
-		end if  
+		end if
 		for i = 1 to length(x) do
 			s &= compress(x[i])
 		end for
@@ -348,12 +352,12 @@ procedure put4(atom x)
 end procedure
 
 procedure putn(sequence s)
--- write a sequence of bytes to current database file   
+-- write a sequence of bytes to current database file
 	puts(current_db, s)
 end procedure
 
 procedure safe_seek(atom pos)
--- seek to a position in the current db file    
+-- seek to a position in the current db file
 	if current_db = -1 then
 		fatal("Illegal operation: no current database defined!\n")
 	end if
@@ -378,7 +382,7 @@ end procedure
 -- 		If the current database is not defined, an error will occur.
 --
 -- Comments:
---  * All records in all tables are shown. 
+--  * All records in all tables are shown.
 --	* If low_level_too is non-zero,
 --   then a low-level byte-by-byte dump is also shown. The low-level
 --   dump will only be meaningful to someone who is familiar
@@ -398,29 +402,52 @@ end procedure
 export procedure db_dump(object file_id, integer low_level_too = 0)
 -- print an open database in readable form to file fn
 -- (Note: If you turn database.e into a .dll or .so, you will
--- have to use a file name, rather than an open file number. 
+-- have to use a file name, rather than an open file number.
 -- All other database.e routines are ok as they are.)
 	integer magic, minor, major
 	integer fn
-	atom tables, ntables, tname, trecords, t_header, tnrecs, 
-		 key_ptr, data_ptr, size, addr, tindex
+	atom tables, ntables, tname, trecords, t_header, tnrecs,
+		 key_ptr, data_ptr, size, addr, tindex, fbp
 	object key, data
 	integer c, n, tblocks
 	atom a
 	sequence ll_line
 	integer hi, ci
-	
+
 	if sequence(file_id) then
 		fn = open(file_id, "w")
 	else
 		fn = file_id
+		puts(fn, '\n')
 	end if
 	if fn < 0 then
 		return
 	end if
-	
+
+	printf(fn, "Database dump as at %s\n", {format(now(), "%Y-%m-%d %H:%M:%S")})
+	safe_seek(0)
+	magic = get1()
+	if magic != DB_MAGIC then
+		puts(fn, "This is not a Euphoria Database file.\n")
+	else
+		major = get1()
+		minor = get1()
+		printf(fn, "Euphoria Database System Version %d.%d\n\n", {major, minor})
+		tables = get4()
+		safe_seek(tables)
+		ntables = get4()
+		printf(fn, "The \"%s\" database has %d table",
+			   {db_names[find(current_db, db_file_nums)], ntables})
+		if ntables = 1 then
+			puts(fn, "\n")
+		else
+			puts(fn, "s\n")
+		end if
+	end if
+
 	if low_level_too then
 		-- low level dump: show all bytes in the file
+		puts(fn, "            Disk Dump\nDiskAddr " & repeat('-', 58))
 		safe_seek(0)
 		a = 0
 		while c >= 0 entry do
@@ -449,56 +476,53 @@ export procedure db_dump(object file_id, integer low_level_too = 0)
 				if hi = 29 then
 					hi = 30
 				end if
-			end if			
+			end if
 			if c > ' ' and c < '~' then
 				ll_line[ci] = c
 			else
 				ll_line[ci] = '.'
 			end if
 			ci += 1
-			
+
 			a += 1
 		  entry
 			c = getc(current_db)
 		end while
-		printf(fn, "%s\n\n", {ll_line})
+		printf(fn, "%s\n", {ll_line})
+		puts(fn, repeat('-', 67) & "\n\n")
 	end if
-	
+
 	-- high level dump
-	puts(fn, '\n')
 	safe_seek(0)
 	magic = get1()
 	if magic != DB_MAGIC then
-		puts(fn, "This is not a Euphoria Database file\n")
 		if sequence(file_id) then
 			close(fn)
 		end if
 		return
 	end if
+
 	major = get1()
 	minor = get1()
-	printf(fn, "Euphoria Database System Version %d.%d\n\n", {major, minor})
+
 	tables = get4()
+	if low_level_too then printf(fn, "[tables:#%08x]\n", tables) end if
 	safe_seek(tables)
 	ntables = get4()
-	printf(fn, "The \"%s\" database has %d table", 
-		   {db_names[find(current_db, db_file_nums)], ntables})
-	if ntables = 1 then
-		puts(fn, "\n")
-	else
-		puts(fn, "s\n")
-	end if
 	t_header = where(current_db)
 	for t = 1 to ntables do
+		if low_level_too then printf(fn, "[table header:#%08x]\n", t_header) end if
 		-- display the next table
 		tname = get4()
 		tnrecs = get4()
 		tblocks = get4()
 		tindex = get4()
+		if low_level_too then printf(fn, "[table name:#%08x]\n", tname) end if
 		safe_seek(tname)
 		printf(fn, "\ntable \"%s\", records:%d\n", {get_string(), tnrecs})
 		if tnrecs > 0 then
 			for b = 1 to tblocks do
+				if low_level_too then printf(fn, "[table block %d:#%08x]\n", {b, tindex+(b-1)*8}) end if
 				safe_seek(tindex+(b-1)*8)
 				tnrecs = get4()
 				trecords = get4()
@@ -506,18 +530,21 @@ export procedure db_dump(object file_id, integer low_level_too = 0)
 					printf(fn, "\nblock #%d\n\n", b)
 					for r = 1 to tnrecs do
 						-- display the next record
+						if low_level_too then printf(fn, "[record %d:#%08x]\n", {r, trecords+(r-1)*4}) end if
 						safe_seek(trecords+(r-1)*4)
 						key_ptr = get4()
+						if low_level_too then printf(fn, "[key %d:#%08x]\n", {r, key_ptr}) end if
 						safe_seek(key_ptr)
 						data_ptr = get4()
 						key = decompress(0)
 						puts(fn, "  key: ")
-						pretty_print(fn, key, {1, 2, 8})
+						pretty_print(fn, key, {2, 2, 8})
 						puts(fn, '\n')
+						if low_level_too then printf(fn, "[data %d:#%08x]\n", {r, data_ptr}) end if
 						safe_seek(data_ptr)
 						data = decompress(0)
 						puts(fn, "  data: ")
-						pretty_print(fn, data, {1, 2, 9})
+						pretty_print(fn, data, {2, 2, 9})
 						puts(fn, "\n\n")
 					end for
 				else
@@ -529,16 +556,20 @@ export procedure db_dump(object file_id, integer low_level_too = 0)
 		safe_seek(t_header)
 	end for
 	-- show the free list
+	if low_level_too then printf(fn, "[free blocks:#%08x]\n", FREE_COUNT) end if
 	safe_seek(FREE_COUNT)
 	n = get4()
 	puts(fn, '\n')
 	if n > 0 then
-		puts(fn, "List of free blocks:\n")
-		safe_seek(get4())
+		fbp = get4()
+		puts(fn, "List of free blocks")
+		if low_level_too then printf(fn, " [#%08x]:", fbp) end if
+		puts(fn, '\n')
+		safe_seek(fbp)
 		for i = 1 to n do
 			addr = get4()
 			size = get4()
-			printf(fn, "%d: %d bytes\n", {addr, size})
+			printf(fn, "%08x: %6d bytes\n", {addr, size})
 		end for
 	else
 		puts(fn, "No free blocks available.\n")
@@ -546,7 +577,7 @@ export procedure db_dump(object file_id, integer low_level_too = 0)
 	if sequence(file_id) then
 		close(fn)
 	end if
-	
+
 end procedure
 
 --**
@@ -558,7 +589,7 @@ end procedure
 export procedure check_free_list()
 	atom free_count, free_list, addr, size, free_list_space
 	atom max
-  
+
 	safe_seek(-1)
 	max = where(current_db)
 	safe_seek(FREE_COUNT)
@@ -573,7 +604,7 @@ export procedure check_free_list()
 	safe_seek(free_list-4)
 	free_list_space = get4()
 	if free_list_space > max or free_list_space < INIT_FREE * 8 then
-		fatal("free list space is bad")  
+		fatal("free list space is bad")
 	end if
 	for i = 1 to free_count do
 		safe_seek(free_list+(i-1)*8)
@@ -614,7 +645,7 @@ function db_allocate(atom n)
 			size = get4()
 			if size >= n+4 then
 				-- found a big enough block
-				if size >= n+16 then 
+				if size >= n+16 then
 					-- loose fit: shrink first part, return 2nd part
 					safe_seek(addr-4)
 					put4(size-n-4) -- shrink the block
@@ -623,7 +654,7 @@ function db_allocate(atom n)
 					addr += size-n-4
 					safe_seek(addr-4)
 					put4(n+4)
-				else    
+				else
 					-- close fit: remove whole block from list and return it
 					remaining = get_bytes(current_db, (free_count-i) * 8)
 					safe_seek(free_list+8*(i-1))
@@ -654,7 +685,7 @@ procedure db_free(atom p)
 
 	safe_seek(p-4)
 	psize = get4()
-	
+
 	safe_seek(FREE_COUNT)
 	free_count = get4()
 	free_list = get4()
@@ -679,7 +710,7 @@ procedure db_free(atom p)
 	else
 		new_space = 0
 	end if
-	
+
 	i = 1
 	prev_addr = 0
 	prev_size = 0
@@ -693,9 +724,9 @@ procedure db_free(atom p)
 		prev_size = size
 		i += 1
 	end while
-	
+
 	if i > 1 and prev_addr + prev_size = p then
-		-- combine with previous block 
+		-- combine with previous block
 		safe_seek(free_list+(i-2)*8+4)
 		if i < free_count and p + psize = addr then
 			-- combine space for all 3, delete the following block
@@ -733,6 +764,21 @@ procedure db_free(atom p)
 	end if
 end procedure
 
+procedure save_keys()
+	integer k
+	if caching_option = 1 then
+		if length(key_pointers) > 0 then
+			k = find({current_db, current_table}, cache_index)
+			if k != 0 then
+				key_cache[k] = key_pointers
+			else
+				key_cache = append(key_cache, key_pointers)
+				cache_index = append(cache_index, {current_db, current_table})
+			end if
+		end if
+	end if
+end procedure
+
 --**
 --
 -- ==== Managing databases
@@ -742,13 +788,13 @@ end procedure
 -- Parameters:
 --		# ##path##: a sequence, the path to the file that will contain the database.
 --		# ##lock_method##, an integer specifying which sort of access can be granted to the database. The value of lock_method can be either DB_LOCK_NO (no lock) or
--- DB_LOCK_EXCLUSIVE (exclusive lock). 
+-- DB_LOCK_EXCLUSIVE (exclusive lock).
 --
 -- Returns:
 --		An **integer** status code, either DB_OK if creation successful or anything else on an error.
 --
 -- Comments:
--- 
+--
 -- On success, the newly created database
 -- becomes the **current database** to which
 -- all other database operations will apply.
@@ -775,11 +821,11 @@ end procedure
 
 export function db_create(sequence path, integer lock_method)
 	integer db
-	
+
 	if not find('.', path) then
 		path &= ".edb"
 	end if
-	
+
 	-- see if it already exists
 	db = open(path, "rb")
 	if db != -1 then
@@ -787,14 +833,14 @@ export function db_create(sequence path, integer lock_method)
 		close(db)
 		return DB_EXISTS_ALREADY
 	end if
-	
+
 	-- file must exist before "ub" can be used
 	db = open(path, "wb")
 	if db = -1 then
 		return DB_OPEN_FAIL
 	end if
 	close(db)
-	
+
 	-- get read and write access, "ub"
 	db = open(path, "ub")
 	if db = -1 then
@@ -809,6 +855,7 @@ export function db_create(sequence path, integer lock_method)
 			return DB_LOCK_FAIL
 		end if
 	end if
+	save_keys()
 	current_db = db
 	current_lock = lock_method
 	current_table = -1
@@ -816,7 +863,7 @@ export function db_create(sequence path, integer lock_method)
 	db_names = append(db_names, path)
 	db_lock_methods = append(db_lock_methods, lock_method)
 	db_file_nums = append(db_file_nums, db)
-	
+
 	-- initialize the header
 	put1(DB_MAGIC) -- so we know what type of file it is
 	put1(DB_MAJOR) -- major version
@@ -832,7 +879,7 @@ export function db_create(sequence path, integer lock_method)
 	-- 19:
 	put4(0)   -- number of tables that currently exist
 	-- 23: initial space for tables
-	putn(repeat(0, INIT_TABLES * SIZEOF_TABLE_HEADER)) 
+	putn(repeat(0, INIT_TABLES * SIZEOF_TABLE_HEADER))
 	-- initial space for free list
 	put4(4+INIT_FREE*8)   -- allocated size
 	putn(repeat(0, INIT_FREE * 8))
@@ -846,7 +893,7 @@ end function
 --		# ##path##: a sequence, the path to the file containing the database
 --		# ##lock_method##, an integer specifying which sort of access can be granted to the database. The types of lock that you can use are: ##DB_LOCK_NO## (no lock),
 --   ##DB_LOCK_SHARED## (shared lock for read-only access) and
---   ##DB_LOCK_EXCLUSIVE## (for read/write access). 
+--   ##DB_LOCK_EXCLUSIVE## (for read/write access).
 --
 -- Returns:
 --		An **integer** status code, either DB_OK if creation successful or anything else on an error.
@@ -862,7 +909,7 @@ end function
 --
 -- Comments:
 --   ##DB_LOCK_SHARED## is only
----  supported on Unix platforms. It allows you to read the database, but not 
+---  supported on Unix platforms. It allows you to read the database, but not
 --   write anything to it. If you request ##DB_LOCK_SHARED## on //WIN32// or
 --   //DOS32// it will be treated as if you had asked for DB_LOCK_EXCLUSIVE.
 --
@@ -875,7 +922,7 @@ end function
 -- <eucode>
 -- tries = 0
 -- while 1 do
---     err = db_open("mydata", DB_LOCK_SHARED) 
+--     err = db_open("mydata", DB_LOCK_SHARED)
 --     if err = DB_OK then
 --         exit
 --     elsif err = DB_LOCK_FAIL then
@@ -885,7 +932,7 @@ end function
 --             puts(2, "too many tries, giving up\n")
 --             abort(1)
 --
---     	else    
+--     	else
 --     	    sleep(5)
 --     	end if
 --     else
@@ -897,16 +944,16 @@ end function
 -- </eucode>
 --  See Also:
 -- 		[[:db_create]], [[:db_select]]
-  
+
 export function db_open(sequence path, integer lock_method)
 	integer db, magic
-	
+
 	if not find('.', path) then
 		path &= ".edb"
 	end if
 
 ifdef UNIX then
-	if lock_method = DB_LOCK_NO or 
+	if lock_method = DB_LOCK_NO or
 	   lock_method = DB_LOCK_EXCLUSIVE then
 		-- get read and write access, "ub"
 		db = open(path, "ub")
@@ -940,6 +987,7 @@ end ifdef
 		close(db)
 		return DB_OPEN_FAIL
 	end if
+	save_keys()
 	current_db = db
 	current_table = -1
 	current_table_name = ""
@@ -951,7 +999,7 @@ end ifdef
 end function
 
 --**
--- Choose a new, already open, database to be the current database. 
+-- Choose a new, already open, database to be the current database.
 --
 -- Parameters:
 --		# ##path##: a sequence, the path to the database to be the new current database.
@@ -960,8 +1008,14 @@ end function
 -- 		An **integer**, DB_OK on success or an error code.
 --
 -- Comments:
---Subsequent database operations will apply to this database. path is the path of the database file as it was originally opened with db_open() or db_create().
--- When you create (db_create) or open (db_open) a database, it automatically becomes the current database. Use db_select() when you want to switch back and forth between open databases, perhaps to copy records from one to the other. After selecting a new database, you should select a table within that database using db_select_table().
+--Subsequent database operations will apply to this database. path is the
+-- path of the database file as it was originally opened with db_open()
+-- or db_create().\\
+-- When you create (db_create) or open (db_open) a database, it automatically
+-- becomes the current database. Use db_select() when you want to switch back
+-- and forth between open databases, perhaps to copy records from one to the
+-- other. After selecting a new database, you should select a table within
+-- that database using db_select_table().
 --
 -- Example 1:
 -- <eucode>
@@ -974,15 +1028,16 @@ end function
 
 export function db_select(sequence path)
 	integer index
-	
+
 	if not find('.', path) then
 		path &= ".edb"
 	end if
-	
+
 	index = find(path, db_names)
-	if index = 0 then 
-		return DB_OPEN_FAIL 
+	if index = 0 then
+		return DB_OPEN_FAIL
 	end if
+	save_keys()
 	current_db = db_file_nums[index]
 	current_lock = db_lock_methods[index]
 	current_table = -1
@@ -999,7 +1054,7 @@ end function
 export procedure db_close()
 -- close the current database
 	integer index
-	
+
 	if current_db = -1 then
 		return
 	end if
@@ -1013,14 +1068,21 @@ export procedure db_close()
 		   db_names = db_names[1..index-1] & db_names[index+1..$]
 	   db_file_nums = db_file_nums[1..index-1] & db_file_nums[index+1..$]
 	db_lock_methods = db_lock_methods[1..index-1] & db_lock_methods[index+1..$]
-	current_db = -1 
+	-- delete each cache entry for this database
+	for i = length(cache_index) to 1 by -1 do
+		if cache_index[i][1] = current_db then
+			cache_index = remove(cache_index, i)
+			key_cache = remove(key_cache, i)
+		end if
+	end for
+	current_db = -1
 end procedure
 
 function table_find(sequence name)
--- find a table, given its name 
+-- find a table, given its name
 -- return table pointer
 	atom tables, nt, t_header, name_ptr
-	
+
 	safe_seek(TABLE_HEADERS)
 	tables = get4()
 	safe_seek(tables)
@@ -1080,26 +1142,39 @@ export function db_select_table(sequence name)
 	if table = -1 then
 		return DB_OPEN_FAIL
 	end if
+
+	save_keys()
+
 	current_table = table
 	current_table_name = name
-	-- read in all the key pointers for the current table
-	safe_seek(table+4)
-	nkeys = get4()
-	blocks = get4()
-	index = get4()
-	key_pointers = repeat(0, nkeys)
-	k = 1
-	for b = 0 to blocks-1 do
-		safe_seek(index)
-		block_size = get4()
-		block_ptr = get4()
-		safe_seek(block_ptr)
-		for j = 1 to block_size do
-			key_pointers[k] = get4()
-			k += 1
+
+	k = 0
+	if caching_option = 1 then
+		k = find({current_db, current_table}, cache_index)
+		if k != 0 then
+			key_pointers = key_cache[k]
+		end if
+	end if
+	if k = 0 then
+		-- read in all the key pointers for the current table
+		safe_seek(table+4)
+		nkeys = get4()
+		blocks = get4()
+		index = get4()
+		key_pointers = repeat(0, nkeys)
+		k = 1
+		for b = 0 to blocks-1 do
+			safe_seek(index)
+			block_size = get4()
+			block_ptr = get4()
+			safe_seek(block_ptr)
+			for j = 1 to block_size do
+				key_pointers[k] = get4()
+				k += 1
+			end for
+			index += 8
 		end for
-		index += 8
-	end for
+	end if
 	return DB_OK
 end function
 
@@ -1110,7 +1185,7 @@ end function
 --		# None.
 --
 -- Returns:
--- 		An **sequence**. The name of the current table. An empty string means 
+-- 		An **sequence**. The name of the current table. An empty string means
 -- that no table is currently selected.
 --
 -- Example 1:
@@ -1122,36 +1197,6 @@ end function
 export function db_current_table()
 -- get name of currently selected table
 	return current_table_name
-end function
-
---**
--- Get name of currently selected database
---
--- Parameters:
---		# None.
---
--- Returns:
--- 		An **sequence**. The name of the current database. An empty string means 
--- that no database is currently selected.
---
--- Comments:
--- The actual name returned is the //path// as supplied to the db_open routine.
---
--- Example 1:
--- <eucode>
--- s = db_current_database()
--- </eucode>
--- See Also:
--- 		[[:db_select]]
-export function db_current_database()
--- get name of currently selected database
-	integer fnd
-	
-	fnd = find(current_db, db_file_nums)
-	if fnd = 0 then
-		return ""
-	end if
-	return db_names[fnd]
 end function
 
 --**
@@ -1167,7 +1212,7 @@ end function
 -- 		An error occurs if the current database is not defined.
 --
 -- Comments:
--- 		The supplied name must not exist already on the current database. 
+-- 		The supplied name must not exist already on the current database.
 -- 		The table that you create will initially have 0 records. It becomes the current table.
 --
 -- Example 1:
@@ -1184,12 +1229,12 @@ export function db_create_table(sequence name)
 	atom name_ptr, nt, tables, newtables, table, records_ptr
 	atom size, newsize, index_ptr
 	sequence remaining
-	
+
 	table = table_find(name)
 	if table != -1 then
 		return DB_EXISTS_ALREADY
 	end if
-	
+
 	-- increment number of tables
 	safe_seek(TABLE_HEADERS)
 	tables = get4()
@@ -1216,21 +1261,21 @@ export function db_create_table(sequence name)
 		safe_seek(tables)
 		put4(nt)
 	end if
-	
+
 	-- allocate initial space for 1st block of record pointers
 	records_ptr = db_allocate(INIT_RECORDS * 4)
 	putn(repeat(0, INIT_RECORDS * 4))
 
 	-- allocate initial space for the index
 	index_ptr = db_allocate(INIT_INDEX * 8)
-	put4(0)  -- 0 records 
+	put4(0)  -- 0 records
 	put4(records_ptr) -- point to 1st block
 	putn(repeat(0, (INIT_INDEX-1) * 8))
-		
+
 	-- store new table
 	name_ptr = db_allocate(length(name)+1)
 	putn(name & 0)
-	
+
 	safe_seek(tables+4+(nt-1)*SIZEOF_TABLE_HEADER)
 	put4(name_ptr)
 	put4(0)  -- start with 0 records total
@@ -1242,7 +1287,7 @@ export function db_create_table(sequence name)
 end function
 
 --**
--- Delete a table in the current database. 
+-- Delete a table in the current database.
 --
 -- Parameters:
 -- 		# ##name##: a sequence, he name of the table to delete.
@@ -1262,21 +1307,22 @@ export procedure db_delete_table(sequence name)
 	atom table, tables, nt, nrecs, records_ptr, blocks
 	atom p, data_ptr, index
 	sequence remaining
-	
+	integer k
+
 	table = table_find(name)
 	if table = -1 then
-		return 
+		return
 	end if
-	
-	-- free the table name 
+
+	-- free the table name
 	safe_seek(table)
 	db_free(get4())
-	
+
 	safe_seek(table+4)
 	nrecs = get4()
 	blocks = get4()
 	index = get4()
-	
+
 	-- free all the records
 	for b = 0 to blocks-1 do
 		safe_seek(index+b*8)
@@ -1293,19 +1339,19 @@ export procedure db_delete_table(sequence name)
 		-- free the block
 		db_free(records_ptr)
 	end for
-	
+
 	-- free the index
 	db_free(index)
-	
+
 	-- get tables & number of tables
 	safe_seek(TABLE_HEADERS)
 	tables = get4()
 	safe_seek(tables)
 	nt = get4()
-	
+
 	-- shift later tables up
 	safe_seek(table+SIZEOF_TABLE_HEADER)
-	remaining = get_bytes(current_db, 
+	remaining = get_bytes(current_db,
 						  tables+4+nt*SIZEOF_TABLE_HEADER-
 						  (table+SIZEOF_TABLE_HEADER))
 	safe_seek(table)
@@ -1315,7 +1361,12 @@ export procedure db_delete_table(sequence name)
 	nt -= 1
 	safe_seek(tables)
 	put4(nt)
-	
+
+	k = find({current_db, current_table}, cache_index)
+	if k != 0 then
+		cache_index = remove(cache_index, k)
+		key_cache = remove(key_cache, k)
+	end if
 	if table = current_table then
 		current_table = -1
 		current_table_name = ""
@@ -1341,29 +1392,29 @@ end procedure
 --
 -- Comments:
 -- 		The table to be renamed can be the current table, or some other table
--- in the current database. 
+-- in the current database.
 -- See Also:
 --		[[:db_table_list]]
 
 export procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
 	atom table, table_ptr
-	
+
 	table = table_find(name)
 	if table = -1 then
 		fatal("Source table doesn't exist")
 	end if
-	
+
 	if table_find(new_name) != -1 then
 		fatal("Target table name already exists")
 	end if
-	
+
 	safe_seek(table)
 	db_free(get4())
-	
+
 	table_ptr = db_allocate(length(new_name)+1)
 	putn(new_name & 0)
-	
+
 	safe_seek(table)
 	put4(table_ptr)
 end procedure
@@ -1439,12 +1490,12 @@ end function
 -- The number of comparisons is proportional to the log of the number of
 -- records in the table. The key is unique - a table is more like a dictionary than like a spreadsheet.
 --		You can select a range of records by searching
--- for the first and last key values in the range. If those key values don't 
--- exist, you'll at least get a negative value showing where they would be, 
--- if they existed. e.g. Suppose you want to know which records have keys 
--- greater than "GGG" and less than "MMM". If -5 is returned for key "GGG", 
--- it means a record with "GGG" as a key would be inserted as record number 5. 
--- -27 for "MMM" means a record with "MMM" as its key would be inserted as record 
+-- for the first and last key values in the range. If those key values don't
+-- exist, you'll at least get a negative value showing where they would be,
+-- if they existed. e.g. Suppose you want to know which records have keys
+-- greater than "GGG" and less than "MMM". If -5 is returned for key "GGG",
+-- it means a record with "GGG" as a key would be inserted as record number 5.
+-- -27 for "MMM" means a record with "MMM" as its key would be inserted as record
 -- number 27. This quickly tells you that all records, >= 5 and < 27 qualify.
 --
 -- Example 1:
@@ -1465,7 +1516,7 @@ end function
 
 export function db_find_key(object key)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
-	
+
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
@@ -1492,7 +1543,7 @@ export function db_find_key(object key)
 end function
 
 --**
--- Insert a new record into the current table. 
+-- Insert a new record into the current table.
 --
 -- Parameters:
 --		# ##key##: an object, the record key, which uniquely identifies it inside the current table
@@ -1522,20 +1573,20 @@ export function db_insert(object key, object data)
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size
 	atom key_location, new_block, index_ptr, new_index_ptr, total_recs
 	integer r, blocks, new_recs, n
-	
+
 	key_location = db_find_key(key)
 	if key_location > 0 then
 		-- key is already in the table
 		return DB_EXISTS_ALREADY
 	end if
 	key_location = -key_location
-	
+
 	data_string = compress(data)
 	key_string  = compress(key)
-	
+
 	data_ptr = db_allocate(length(data_string))
 	putn(data_string)
-	
+
 	key_ptr = db_allocate(4+length(key_string))
 	put4(data_ptr)
 	putn(key_string)
@@ -1546,7 +1597,7 @@ export function db_insert(object key, object data)
 	blocks = get4()
 	safe_seek(current_table+4)
 	put4(total_recs)
-	
+
 	n = length(key_pointers)
 	if key_location >= floor(n/2) then
 		-- add space at end
@@ -1560,10 +1611,10 @@ export function db_insert(object key, object data)
 		key_pointers[1..key_location-1] = key_pointers[2..key_location]
 	end if
 	key_pointers[key_location] = key_ptr
-   
+
 	safe_seek(current_table+12) -- get after put - seek is necessary
 	index_ptr = get4()
-	
+
 	safe_seek(index_ptr)
 	r = 0
 	while TRUE do
@@ -1574,16 +1625,16 @@ export function db_insert(object key, object data)
 			exit
 		end if
 	end while
-	
+
 	current_block = where(current_db)-8
-	
+
 	key_location -= (r-nrecs)
-	
+
 	safe_seek(records_ptr+4*(key_location-1))
 	for i = key_location to nrecs+1 do
 		put4(key_pointers[i+r-nrecs])
 	end for
-	
+
 	-- increment number of records in this block
 	safe_seek(current_block)
 	nrecs += 1
@@ -1594,14 +1645,14 @@ export function db_insert(object key, object data)
 	size = get4() - 4
 	if nrecs*4 > size-4 then
 		-- This block is now full - split it into 2 pieces.
-		-- Magic formula: On average we'd like to have N blocks with 
-		-- N records in each block and space for 2N records, 
-		-- with N-squared total records in the table. We should also 
-		-- avoid allocating extremely small blocks, and we should 
+		-- Magic formula: On average we'd like to have N blocks with
+		-- N records in each block and space for 2N records,
+		-- with N-squared total records in the table. We should also
+		-- avoid allocating extremely small blocks, and we should
 		-- anticipate some future growth of the database.
 
 		new_size = 8 * (20 + floor(sqrt(1.5 * total_recs)))
-		
+
 		new_recs = floor(new_size/8)
 		if new_recs > floor(nrecs/2) then
 			new_recs = floor(nrecs/2)
@@ -1614,11 +1665,11 @@ export function db_insert(object key, object data)
 		putn(last_part)
 		-- fill the rest
 		putn(repeat(0, new_size-length(last_part)))
-		
+
 		-- change nrecs for this block in index
 		safe_seek(current_block)
 		put4(nrecs-new_recs)
-		
+
 		-- insert new block into index after current block
 		safe_seek(current_block+8)
 		remaining = get_bytes(current_db, index_ptr+blocks*8-(current_block+8))
@@ -1668,7 +1719,7 @@ export procedure db_delete_record(integer key_location)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
 	sequence remaining
-	
+
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
@@ -1680,28 +1731,28 @@ export procedure db_delete_record(integer key_location)
 	data_ptr = get4()
 	db_free(key_ptr)
 	db_free(data_ptr)
-	
+
 	n = length(key_pointers)
 	if key_location >= floor(n/2) then
 		-- shift down
 		key_pointers[key_location..n-1] = key_pointers[key_location+1..n]
-		key_pointers = key_pointers[1..n-1]  
+		key_pointers = key_pointers[1..n-1]
 	else
 		-- shift up
 		key_pointers[2..key_location] = key_pointers[1..key_location-1]
 		key_pointers = key_pointers[2..n]
 	end if
-	
+
 	-- decrement number of records in whole table
 	safe_seek(current_table+4)
 	nrecs = get4()-1
 	blocks = get4()
 	safe_seek(current_table+4)
 	put4(nrecs)
-	
+
 	safe_seek(current_table+12)
 	index_ptr = get4()
-	
+
 	safe_seek(index_ptr)
 	r = 0
 	while TRUE do
@@ -1712,11 +1763,11 @@ export procedure db_delete_record(integer key_location)
 			exit
 		end if
 	end while
-	
+
 	r -= nrecs
 	current_block = where(current_db)-8
 	nrecs -= 1
-	
+
 	if nrecs = 0 and blocks > 1 then
 		-- delete this block from the index (unless it's the very last block)
 		remaining = get_bytes(current_db, index_ptr+blocks*8-(current_block+8))
@@ -1747,7 +1798,7 @@ end procedure
 --
 -- Comments:
 	--##key_location## must be from 1 to the number of records in the
--- current table. 
+-- current table.
 -- ##data## is an Euphoria object of any kind, atom or sequence.
 --
 -- Example 1:
@@ -1760,7 +1811,7 @@ end procedure
 export procedure db_replace_data(integer key_location, object data)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
-	
+
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
@@ -1774,7 +1825,7 @@ export procedure db_replace_data(integer key_location, object data)
 	old_size = get4()-4
 	data_string = compress(data)
 	new_size = length(data_string)
-	if new_size <= old_size and 
+	if new_size <= old_size and
 	   new_size >= old_size - 8 then
 		-- keep the same data block
 		safe_seek(data_ptr)
@@ -1826,7 +1877,7 @@ end function
 --		An **object**, the data portion of requested record.
 --
 -- Comments:
--- Each record in a Euphoria database consists of a key portion and a data 
+-- Each record in a Euphoria database consists of a key portion and a data
 -- portion. Each of these can be any Euphoria atom or sequence.
 --
 -- Errors:
@@ -1842,7 +1893,7 @@ end function
 export function db_record_data(integer key_location)
 	atom data_ptr
 	object data_value
-	
+
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
@@ -1867,7 +1918,7 @@ end function
 --		If the current table is not defined, or if the record index is invalid, an error will occur.
 --
 -- Comments:
--- Each record in a Euphoria database consists of a key portion and a 
+-- Each record in a Euphoria database consists of a key portion and a
 -- data portion. Each of these can be any Euphoria atom or sequence.
 --
 -- Example 1:
@@ -1878,23 +1929,20 @@ end function
 -- See Also:
 -- 		[[:db_record_data]]
 export function db_record_key(integer key_location)
-	object key_value
-	
+
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
-	safe_seek(key_pointers[key_location]+4)
-	key_value = decompress(0)
-	return key_value
+	return key_value(key_pointers[key_location])
 end function
 
 function name_only(sequence s)
 -- return the file name only, without the path
 	sequence filename
-	
+
 	filename = ""
 	for i = length(s) to 1 by -1 do
 		if find(s[i], SLASH) then
@@ -1917,7 +1965,7 @@ function delete_whitespace(sequence text)
 end function
 
 --**
--- Compresses the current database. 
+-- Compresses the current database.
 --
 -- Returns:
 -- 		An **integer**, either DB_OK on success or an error code on failure.
@@ -1925,17 +1973,17 @@ end function
 -- Comments:
 -- The current database is copied to a new
 -- file such that any blocks of unused space are eliminated. If successful,
--- the return value will be set to DB_OK, and the new compressed database 
--- file will retain the same name. The current table will be undefined. As 
--- a backup, the original, uncompressed file will be renamed with an extension 
+-- the return value will be set to DB_OK, and the new compressed database
+-- file will retain the same name. The current table will be undefined. As
+-- a backup, the original, uncompressed file will be renamed with an extension
 -- of .t0 (or .t1, .t2, ..., .t99). In the highly unusual case that the
--- compression is unsuccessful, the database will be left unchanged, and no 
+-- compression is unsuccessful, the database will be left unchanged, and no
 -- backup will be made.
 -- When you delete items from a database, you create blocks of free space within
--- the database file. The system keeps track of these blocks and tries to use them 
+-- the database file. The system keeps track of these blocks and tries to use them
 -- for storing new data that you insert. db_compress() will copy the current
--- database without copying these free areas. The size of the database file may 
--- therefore be reduced. If the backup filenames reach .t99 you will have to 
+-- database without copying these free areas. The size of the database file may
+-- therefore be reduced. If the backup filenames reach .t99 you will have to
 -- delete some of them.
 --
 -- Thanks to Mike Nelson!
@@ -1950,20 +1998,20 @@ end function
 export function db_compress()
 	integer index, chunk_size, nrecs, r, fn
 	sequence new_path, old_path, table_list, record, chunk
-   
+
 	if current_db = -1 then
 		fatal("no current database")
 	end if
-	
+
 	index = find(current_db, db_file_nums)
 	new_path = delete_whitespace(db_names[index])
 	db_close()
-	
+
 	fn = -1
 	for i = 0 to 99 do
 		-- try to find a temp name that isn't in use
 		old_path = new_path[1..$-3] & sprintf("t%d", i)
-		fn = open(old_path, "r") 
+		fn = open(old_path, "r")
 		if fn = -1 then
 			exit
 		else
@@ -1974,7 +2022,7 @@ export function db_compress()
 	if fn != -1 then
 		return DB_EXISTS_ALREADY -- you better delete some temp files
 	end if
-	
+
 	-- TODO: replace with shell commands from shell.e
 	--       move_file, copy_file, etc...
 	-- rename database as .tmp
@@ -1982,11 +2030,11 @@ export function db_compress()
 		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)
 	elsifdef WIN32 then
 		system("ren \"" & new_path & "\" \"" & name_only(old_path) & '"', 2)
-	else    
+	else
 		-- DOS
 		system("ren " & new_path & " " & name_only(old_path), 2)
 	end ifdef
-	
+
 	-- create a new database
 	index = db_create(new_path, DB_LOCK_NO)
 	if index != DB_OK then
@@ -1995,24 +2043,24 @@ export function db_compress()
 			system( "mv \"" & old_path & "\" \"" & new_path & '"', 2)
 		elsifdef WIN32 then
 			system("ren \"" & old_path & "\" \"" & name_only(new_path) & '"', 2)
-		else    
+		else
 			-- DOS
 			system("ren " & old_path & " " & name_only(new_path), 2)
 		end ifdef
-		
+
 		return index
 	end if
-	
+
 	index = db_open(old_path, DB_LOCK_NO)
 	table_list = db_table_list()
-	
+
 	for i = 1 to length(table_list) do
 		index = db_select(new_path)
 		index = db_create_table(table_list[i])
-		
+
 		index = db_select(old_path)
 		index = db_select_table(table_list[i])
-	
+
 		nrecs = db_table_size()
 		r = 1
 		while r <= nrecs do
@@ -2038,7 +2086,7 @@ export function db_compress()
 			end for
 			-- switch back to old table
 			index = db_select(old_path)
-			index = db_select_table(table_list[i])        
+			index = db_select_table(table_list[i])
 		end while
 	end for
 	db_close()
@@ -2047,11 +2095,25 @@ export function db_compress()
 end function
 
 --**
--- Returns:
---		A **sequence**, "" if the current database is undefined, else its name.
---
+-- Get name of currently selected database.\\
 -- Thanks to Tone Škoda!
-
+--
+-- Parameters:
+--		# None.
+--
+-- Returns:
+-- 		An **sequence**. The name of the current database. An empty string means
+-- that no database is currently selected.
+--
+-- Comments:
+-- The actual name returned is the //path// as supplied to the db_open routine.
+--
+-- Example 1:
+-- <eucode>
+-- s = db_current_database()
+-- </eucode>
+-- See Also:
+-- 		[[:db_select]]
 export function db_current ()
 	integer index
 
@@ -2063,3 +2125,37 @@ export function db_current ()
 	end if
 end function
 
+--**
+-- Sets the key cache behavior.\\
+-- Initially, the cache option is turned on. This means that when possible, the
+-- keys of a table are kept in RAM rather than read from disk each time
+-- db_select_table() is called. For most databases, this will improve performance
+-- when you have more than one table in it.
+--
+-- Parameters:
+--		# ##integer##. 0 will turn of caching, 1 will turn it back on.
+--
+-- Returns:
+-- 		An **integer**. The previous setting of the option.
+--
+-- Comments:
+-- When caching is turned off, the current cache contents is totally cleared.
+--
+-- Example 1:
+-- <eucode>
+-- x = db_set_caching(0) -- Turn off key caching.
+-- </eucode>
+
+export function db_set_caching(atom pVal)
+	integer lOldVal
+
+	lOldVal = caching_option
+	caching_option = (pVal != 0)
+
+	if caching_option = 0 then
+		-- Wipe existing cache data.
+		cache_index = {}
+		key_cache = {}
+	end if
+	return lOldVal
+end function

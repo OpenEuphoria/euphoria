@@ -8,17 +8,17 @@ object void
 
 void = delete_file("testunit.edb")
 
-test_equal("current db #1", "", db_current_database())
+test_equal("current db #1", "", db_current())
 test_equal("create db #1", DB_OK, db_create("testunit.edb", DB_LOCK_EXCLUSIVE))
-test_equal("current db #2", "testunit.edb", db_current_database())
+test_equal("current db #2", "testunit.edb", db_current())
 test_equal("create db #2", DB_EXISTS_ALREADY, db_create("testunit.edb", DB_LOCK_SHARED))
-test_equal("current db #3", "testunit.edb", db_current_database())
+test_equal("current db #3", "testunit.edb", db_current())
 db_close()
-test_equal("current db #4", "", db_current_database())
+test_equal("current db #4", "", db_current())
 
 
 test_equal("open db", DB_OK, db_open("testunit.edb", DB_LOCK_EXCLUSIVE))
-test_equal("current db #4", "testunit.edb", db_current_database())
+test_equal("current db #4", "testunit.edb", db_current())
 
 test_equal("create table #1", DB_OK, db_create_table("first"))
 test_equal("current table #1", "first", db_current_table())
@@ -57,8 +57,27 @@ test_equal("current table #8", "third", db_current_table())
 test_equal("select table #4", DB_OPEN_FAIL, db_select_table("bad table name"))
 test_equal("current table #9", "third", db_current_table())
 
-db_dump("lowlvl.txt", 1)
+void = db_select_table("first")
+test_equal("insert #1", DB_OK, db_insert("one", {1,2,3,"four"}))
+test_equal("insert #2", DB_OK, db_insert("two", {2,3,4,"five"}))
+test_equal("insert #3", DB_OK, db_insert("three", {3,4,5,"six"}))
+test_equal("insert #4", DB_OK, db_insert("four", {4,5,6,"seven"}))
+test_equal("insert #5", DB_EXISTS_ALREADY, db_insert("two", {9,9,9,"nine"}))
+
+
+void = db_select_table("third")
+test_equal("insert #6", DB_OK, db_insert("1", {1,2,3,"four"}))
+test_equal("insert #7", DB_OK, db_insert("2", {2,3,4,"five"}))
+test_equal("insert #8", DB_OK, db_insert("3", {3,4,5,"six"}))
+test_equal("insert #9", DB_OK, db_insert("4", {4,5,6,"seven"}))
+
+
+void = db_select_table("first")
+db_delete_table("third")
+
 db_close()
+test_equal("current db #5", "", db_current())
+
 void = delete_file("testunit.edb")
 
 test_report()
