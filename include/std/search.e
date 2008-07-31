@@ -600,13 +600,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = find_replace("the", "THE", "the cat ate the food under the table", 0)
+-- s = find_replace("the", "the cat ate the food under the table", "THE", 0)
 -- -- s is "THE cat ate THE food under THE table"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- s = find_replace("the", "THE", "the cat ate the food under the table", 2)
+-- s = find_replace("the", "the cat ate the food under the table", "THE", 2)
 -- -- s is "THE cat ate THE food under the table"
 -- </eucode>
 --

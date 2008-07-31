@@ -169,6 +169,7 @@ end function
 --
 -- See Also:
 -- 	[[:wait_key]]
+
 export procedure any_key(object prompt="Press Any Key to continue...")
 	object ignore
 
@@ -260,6 +261,7 @@ end function
 --
 -- See Also:
 -- 	[[:prompt_string]]
+
 export function prompt_string(sequence prompt)
 	object answer
 	
@@ -277,6 +279,7 @@ end function
 -- === Cross Platform Text Graphics
 
 -- machine() commands
+
 constant M_CURSOR         = 6,
 		 M_TEXTROWS       = 12,
 		 M_GET_SCREEN_CHAR = 58,
@@ -299,7 +302,9 @@ end type
 
 ifdef DOS32 then
 constant COLOR_TEXT_MEMORY = #B8000,
-		  MONO_TEXT_MEMORY = #B0000
+	MONO_TEXT_MEMORY = #B0000
+
+include std/dos/image.e
 end ifdef
 
 export include graphcst.e

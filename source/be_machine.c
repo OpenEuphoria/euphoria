@@ -5044,8 +5044,12 @@ object machine(object opcode, object x)
 				temp = setenv(src, NULL, 1);
 #else
 #ifdef EUNIX
+#ifdef ELINUX
+				temp = unsetenv(src);
+#else
 				unsetenv(src);
 				temp = 0;
+#endif /* ELINUX */
 #endif /* EUNIX */
 #endif /* EWATCOM */
 

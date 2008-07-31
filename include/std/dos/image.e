@@ -6,18 +6,18 @@
 --
 --
 
-ifdef DOS then
+ifdef DOS32 then
 include ..\graphcst.e
 include base_mem.e
 
 constant
-	M_PALETTE        = 3,
-	M_USE_VESA = 36,
-	M_ALL_PALETTE    = 27,
+	M_PALETTE          = 3,
+	M_USE_VESA         = 36,
+	M_ALL_PALETTE      = 27,
 	M_GET_DISPLAY_PAGE = 28,
 	M_SET_DISPLAY_PAGE = 29,
-	M_GET_ACTIVE_PAGE = 30,
-	M_SET_ACTIVE_PAGE = 31
+	M_GET_ACTIVE_PAGE  = 30,
+	M_SET_ACTIVE_PAGE  = 31
 
 type page_number(integer p)
 	return p >= 0 and p <= 7
@@ -51,10 +51,6 @@ end type
 --       [[:graphics_mode]]
 
 export procedure use_vesa(integer code)
--- If code is 1 then force Euphoria to use the VESA graphics standard.
--- This may let Euphoria work better in SVGA modes with certain graphics cards.
--- If code is 0 then Euphoria's normal use of the graphics card is restored.
--- Values of code other than 0 or 1 should not be used.
 	machine_proc(M_USE_VESA, code)
 end procedure
 
@@ -286,4 +282,4 @@ export procedure all_palette(sequence s)
 	machine_proc(M_ALL_PALETTE, s)
 end procedure
 
-end ifdef
+end ifdef -- DOS32

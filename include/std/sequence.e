@@ -727,12 +727,14 @@ end function
 --   # ##stop##: an integer, the stopping index of the slice to replace.
 --
 -- Returns:
---		A **sequence, which is made of ##target## with the ##start..stop## slice removed and replaced by ##replacement##, which is [[:splice]]()d in.
+--   A **sequence**, which is made of ##target## with the ##start..stop## slice removed
+--   and replaced by ##replacement##, which is [[:splice]]()d in.
 --
 -- Comments:
 --   A new sequence is created. ##target## can be a string or complex sequence of any shape.
 --
---   To replace by just one element, enclose ##replacement## in curly braces, which will be removed at replace time.
+--   To replace by just one element, enclose ##replacement## in curly braces, which will be
+--   removed at replace time.
 --
 -- Example 1:
 -- <eucode>
