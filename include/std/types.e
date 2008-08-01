@@ -109,6 +109,7 @@ export enum
 	CS_Digit,
 	CS_Graphic,
 	CS_Bytes,
+	CS_SpecWord,
 	CS_LAST
 
 
@@ -137,6 +138,7 @@ export procedure set_default_charsets()
 	Defined_Sets[CS_Digit 		] = {{'0', '9'}}
 	Defined_Sets[CS_Graphic 	] = {{'!', '~'}}
 	Defined_Sets[CS_Bytes	 	] = {{0, 255}}
+	Defined_Sets[CS_SpecWord 	] = "_"
 end procedure
 
 --** 
@@ -189,6 +191,10 @@ end function
 -- <eucode>
 -- set_charsets({{CS_Whitespace, " \t"}})
 -- t_space('\n') --> FALSE
+--
+-- t_specword('$') --> FALSE
+-- set_charsets({{CS_SpecWord, "_-#$%"}})
+-- t_specword('$') --> TRUE
 -- </eucode>
 --
 -- See Also:
@@ -410,6 +416,42 @@ end type
 
 export type t_graph(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Graphic])
+end type
+
+--** 
+-- Returns TRUE if argument is a special word character or if every element of 
+-- the argument is a special word character.
+--
+-- Returns FALSE if the argument is an empty sequence, or contains sequences,
+-- or contains non-special-word characters.
+--
+-- Comments:
+-- A //special word character// is any character that is not normally part of
+-- a word but in certain cases may be considered. This is most commonly used
+-- when looking for words in programming source code which allows an underscore
+-- as a word character. 
+--
+-- Example 1:
+-- <eucode>
+-- t_specword(-1)            -- FALSE
+-- t_specword(0)             -- FALSE 
+-- t_specword(1)             -- FALSE
+-- t_specword(1.234)         -- FALSE
+-- t_specword('A')           -- FALSE
+-- t_specword('9')           -- FALSE
+-- t_specword('?')           -- FALSE
+-- t_specword('_')           -- TRUE
+-- t_specword("abc")         -- FALSE 
+-- t_specword("ab3")         -- FALSE
+-- t_specword("123")         -- FALSE
+-- t_specword({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- t_specword({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- t_specword({1, 2, 'a')    -- FALSE (control chars (1,2) don't have glyphs)
+-- t_specword({})            -- FALSE (empty sequence)
+-- </eucode>
+
+export type t_specword(object pVal)
+	return char_test(pVal, Defined_Sets[CS_SpecWord])
 end type
 
 --** 

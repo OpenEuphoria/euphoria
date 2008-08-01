@@ -37,6 +37,20 @@ test_equal("sprintf() integer", "i=1", sprintf("i=%d", {1}))
 test_equal("sprintf() float", "i=5.5", sprintf("i=%.1f", {5.5}))
 test_equal("sprintf() percent", "%", sprintf("%%", {}))
 
+
+-- proper
+test_equal("proper #1", {"The Quick Brown", "The Quick Brown", "_abc Abc_12_def34fgh", {2.3, 'a'}, "123Word*Another*Word((Here))"},
+	proper({"the quick brown", "THE QUICK BROWN", "_abc abc_12_def34fgh", {2.3, 'a'}, "123word*another*word((here))"})
+	)
+test_equal("proper #2", "Euphoria Programming Language", proper("euphoria programming language"))
+test_equal("proper #3", "Euphoria Programming Language", proper("EUPHORIA PROGRAMMING LANGUAGE"))
+test_equal("proper #4", {"Euphoria Programming", "Language", "Rapid Deployment", "Software"},
+			proper({"EUPHORIA PROGRAMMING", "language", "rapid dEPLOYMENT", "sOfTwArE"}))
+test_equal("proper #5", {'A', 'b', 'c'}, proper({'a', 'b', 'c'}))
+test_equal("proper #6", {'a', 'b', 'c', 3.1472}, proper({'a', 'b', 'c', 3.1472}))
+test_equal("proper #7", {"Abc", 3.1472}, proper({"abc", 3.1472}))
+
+
 -- keyvalues()
 sequence s
 s = keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")

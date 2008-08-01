@@ -322,7 +322,7 @@ test_false("t_bytearray({})", t_bytearray({}))
 
 sequence dc
 dc = get_charsets()
-test_equal("get_charsets", 15, length(dc) )
+test_equal("get_charsets", 16, length(dc) )
 test_true("Default WS", t_space(" \t\n\r"))
 set_charsets({{CS_Whitespace, " \t" & 5}})
 test_false("Altered WS #1", t_space(" \t\n\r"))
@@ -331,6 +331,10 @@ set_charsets(dc)
 test_true("Default WS", t_space(" \t\n\r"))
 test_false("Altered WS #3", t_space(5 & "\t "))
 
+test_true("Spec Word #1", t_specword('_'))
+test_false("Spec Word #2", t_specword('$'))
+set_charsets({{CS_SpecWord, "_-#$%"}})
+test_true("Spec Word #3", t_specword('$'))
 
 test_report()
 

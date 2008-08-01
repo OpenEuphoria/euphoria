@@ -8,6 +8,8 @@
 --
 -- === Routines
 
+include std/types.e
+
 --**
 -- Signature:
 -- global function sprintf(sequence format, object values)
@@ -209,7 +211,7 @@ constant TO_LOWER = 'a' - 'A'
 -- </eucode>
 --
 -- See Also:
---   [[:upper]]
+--   [[:upper]] [[:proper]]
 
 export function lower(object x)
 -- convert atom or sequence to lower case
@@ -242,13 +244,119 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:lower]]
+--     [[:lower]] [[:proper]]
 
 export function upper(object x)
 -- convert atom or sequence to upper case
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
 
+--**
+-- Convert a text sequence to capitalized words.
+--
+-- Parameters:
+--   # ##x## - A text sequence.
+--
+-- Returns:
+--   A **sequence**, the Capitalized Version of ##x##
+--
+-- Comments:
+-- A text sequence is one in which all elements are either characters or
+-- text sequences. This means that if a non-character is found in the input,
+-- it is not converted. However this rule only applies to elements on the
+-- same level, meaning that sub-sequences could be converted if they are 
+-- actually text sequences.
+-- 
+--
+-- Example 1:
+-- <eucode>
+-- s = proper("euphoria programming language")
+-- -- s is "Euphoria Programming Language"
+-- s = proper("EUPHORIA PROGRAMMING LANGUAGE")
+-- -- s is "Euphoria Programming Language"
+-- s = proper({"EUPHORIA PROGRAMMING", "language", "rapid dEPLOYMENT", "sOfTwArE"})
+-- -- s is {"Euphoria Programming", "Language", "Rapid Deployment", "Software"}
+-- s = proper({'a', 'b', 'c'})
+-- -- s is {'A', 'b', c'} -- "Abc"
+-- s = proper({'a', 'b', 'c', 3.1472})
+-- -- s is {'a', 'b', c', 3.1472} -- Unchanged because it contains a non-character.
+-- s = proper({"abc", 3.1472})
+-- -- s is {"Abc", 3.1472} -- The embedded text sequence is converted.
+-- </eucode>
+--
+-- See Also:
+--     [[:lower]] [[:upper]]
+
+export function proper(sequence x)
+-- Converts text to lowercase and makes each word start with an uppercase.
+	integer pos
+	integer inword
+	integer convert
+	sequence res
+	
+	inword = 0	-- Initially not in a word
+	convert = 1	-- Initially convert text
+	res = x		-- Work on a copy of the original, in case we need to restore.
+	for i = 1 to length(res) do
+		if integer(res[i]) then
+			if convert then
+				-- Check for upper case
+				pos = t_upper(res[i])
+				if pos = 0 then
+					-- Not upper, so check for lower case
+					pos = t_lower(res[i])
+					if pos = 0 then
+						-- Not lower so check for digits
+						-- n.b. digits have no effect on if its in a word or not.
+						pos = t_digit(res[i])
+						if pos = 0 then
+							-- not digit so check for special word chars
+							pos = t_specword(res[i])
+							if pos then
+								inword = 1
+							else
+								inword = 0
+							end if
+						end if
+					else
+						if inword = 0 then
+							-- start of word, so convert only lower to upper.
+							if pos <= 26 then
+								res[i] = upper(res[i]) -- Convert to uppercase
+							end if
+							inword = 1	-- now we are in a word
+						end if
+					end if
+				else
+					if inword = 1 then
+						-- Upper, but as we are in a word convert it to lower.
+						res[i] = lower(res[i]) -- Convert to lowercase
+					else
+						inword = 1	-- now we are in a word
+					end if
+				end if
+			end if
+		else
+			-- A non-integer means this is NOT a text sequence, so
+			-- only convert subsequences.
+			if convert then
+				-- Restore any values that might have been converted.
+				for j = 1 to i-1 do
+					if atom(x[j]) then
+						res[j] = x[j]
+					end if
+				end for
+				-- Turn conversion off for the rest of this level.
+				convert = 0
+			end if
+			
+			if sequence(res[i]) then
+				res[i] = proper(res[i])	-- recursive conversion
+			end if			
+		end if
+	end for
+	return res
+end function
 
 --**
 -- Converts a string containing Key/Value pairs into a set of
