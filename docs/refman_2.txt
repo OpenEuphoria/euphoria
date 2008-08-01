@@ -2492,18 +2492,26 @@ Using any kind of variable or expression will result in a blank warning;
 
 === warning_file() statement
 
-This procedure call requests any generated warnings to be output to the specified file
-rather than the standard error, which is the default behaviour. This is useful when
-you do not want to suppress warnings, but do not want a consoe window to pop in an
-otherwise graphic environment either.
+This procedure call causes any generated warnings to be sent to the specified file
+rather than the standard error device (usually the screen), which is the default
+behaviour. This is useful when you do not want to suppress warnings, but do
+not want a console window to pop up, such as in graphic environment or Web CGI
+programming.
 
-If the argument is not a sequence representing a file name, then:
+If the argument is not a sequence, representing a file name, then:
 
-# if an atom not less than 0 is provided, this instructs the interpreter to revert to
-  outputting warnings on the standard error;
+# if an atom with a value of zero or higher, the interpreter reverts to
+  using the standard error device
 # otherwise, all warnings are suppressed and no output takes place, even if the
-  ##-LINT## command line option had been specified at strtup. This is the only way
+  ##-STRICT## command line option had been specified at startup. This is the only way
   to override it.
+  
+Examples:
+<eucode>
+warning_file("captured.txt") -- Warnings are written to a file called "captured.txt"
+warning_file(0) -- Warnings are written to the Standard Error Device
+warning_file(-1) -- All warnings are supressed.
+</eucode>
 
 == Special Top-Level Statements
 

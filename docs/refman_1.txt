@@ -183,9 +183,31 @@ Euphoria programs are executed by typing one of the following:
 # ##exwc##
 # ##exu##
  
-followed by the name of the main Euphoria file. You can type additional words (known as //arguments//) on this line, known as the //command-line//.
+followed by the name of the main Euphoria file. You can type additional 
+words (known as //arguments//) on this line, known as the //command-line//.
 
-Your program can call the built-in function <libref>command_line()</libref> to read the command-line.
+The command-line supports a number of options that affect the way your program
+runs.
+: -C; specify a euinc.conf file
+: -I; specify a directory to search for include files
+: -D; define a word
+: -BATCH; batch processing, do not "Press Enter" on error
+: -TEST; do not execute, only test syntax
+: -STRICT; enable all warnings (lint option)
+: -W; defines warning level
+: -X; defines warning level by exclusion
+: -WF; defines the file to which the warnings will go instead of stderr
+
+If you are using any of these, they **must** be placed between the name of
+the Euphoria executable and your application.\\
+Example:
+{{{
+exwc -D test -BATCH -WF capture.txt -STRICT myapp.exw
+}}}
+
+Any options which are placed **after** your program's file name are ignored by
+Euphoria and are made available to your program. You can call the built-in
+function [[:command_line]] to read the command-line.
 
 The //DOS32// version of the Euphoria interpreter is called ##ex.exe##. The 
 //WIN32// version is called ##exw.exe##. The //Linux/FreeBSD// version is called 
