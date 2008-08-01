@@ -49,6 +49,7 @@ include std/wildcard.e
 include std/sort.e
 include std/graphics.e
 include std/sequence.e
+include std/text.e
 
 constant KEYB = 0, SCREEN = 1, ERR = 2
 constant TRUE = 1, FALSE = 0

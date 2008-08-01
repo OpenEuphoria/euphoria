@@ -41,6 +41,7 @@ include std/sequence.e
 include std/os.e
 include std/console.e
 include std/filesys.e
+include std/text.e
 
 constant TRUE = 1,
 	 FALSE = 0

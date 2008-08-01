@@ -32,6 +32,7 @@ include std/wildcard.e
 include std/graphics.e
 include std/sort.e
 include std/sequence.e
+include std/text.e
 
 -------- some user-modifiable parameters: 
 
