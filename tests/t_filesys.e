@@ -42,5 +42,8 @@ test_equal("fileext() filename no extension", "", fileext(fname))
 test_equal("SLASH", sep, SLASH)
 test_equal("CRLF", crlf, CRLF)
 
+test_equal("file_exists #1", 1, file_exists("t_filesys.e"))
+test_equal("file_exists #2", 0, file_exists("nononononono.txt"))
+
 test_report()
 

@@ -35,6 +35,7 @@ ifdef WIN32 then
 	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, 
 		C_LONG)
 	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
+	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT)
 
 elsifdef LINUX then
 	constant lib = open_dll("")
@@ -46,12 +47,16 @@ elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
 	
 else
-	constant xCopyFile        = -1
-	constant xMoveFile        = -1
-	constant xDeleteFile      = -1
-	constant xCreateDirectory = -1
-	constant xRemoveDirectory = -1
+	constant xCopyFile          = -1
+	constant xMoveFile          = -1
+	constant xDeleteFile        = -1
+	constant xCreateDirectory   = -1
+	constant xRemoveDirectory   = -1
+	constant xGetFileAttributes = -1
 
+	function file_exists(sequence name)
+		return sequence(dir(name))
+	end function
 end ifdef
 
 ifdef LINUX then
@@ -66,6 +71,7 @@ ifdef UNIX then
 	constant xDeleteFile      = define_c_func(lib, "unlink", {C_POINTER}, C_INT)
 	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
 	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
+	constant xGetFileAttributes = define_c_func(lib, "access", {C_POINTER, C_INT}, C_INT)
 end ifdef
 
 
@@ -617,6 +623,43 @@ end function
 --****
 -- === File Handling
 --
+
+--**
+-- Check to see if a file exists
+--
+-- Parameters:
+--   * name - filename to check existence of
+--
+-- Returns:
+--   1 on yes, 0 on no
+--
+-- Example 1:
+-- <eucode>
+-- if file_exists("abc.e") then
+--     puts(1, "abc.e exists already\n")
+-- end if
+-- </eucode>
+
+export function file_exists(sequence name)
+	ifdef WIN32 then
+		atom pName = allocate_string(name)
+		integer r = c_func(xGetFileAttributes, {pName})
+		free(pName)
+
+		return r > 0
+
+	elsifdef UNIX then
+		atom pName = allocate_string(name)
+		integer r = c_func(xGetFileAttributes, {pName, 0})
+		free(pName)
+
+		return r = 0
+
+	else
+
+		return sequence(dir(name))
+	end ifdef
+end function
 
 --**
 -- Copy a file.
