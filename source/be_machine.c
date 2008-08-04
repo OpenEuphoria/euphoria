@@ -126,6 +126,7 @@ END_COLOR_DEPTH_LIST
 HINSTANCE winInstance;
 #endif
 
+int is_batch = 0; /* batch mode? Should press enter be displayed? 1=no, 0=yes */
 unsigned char TempBuff[TEMP_SIZE]; /* buffer for error messages */
 
 int c_routine_next = 0;       /* index of next available element */
@@ -4630,9 +4631,10 @@ object start_backend(object x)
  * x is {symtab, topcode, subcode, names, line_table, miscellaneous}
  */
 {
+	int switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
-	
+
 	w = "backend";
 	
 	x_ptr = SEQ_PTR(x);
@@ -4652,6 +4654,20 @@ object start_backend(object x)
 #endif  
 
 	fe_set_pointers(); /* change some fe indexes into pointers */
+
+	/* Look at the switches for any information pertient to the backend */
+	switch_len = SEQ_PTR(fe.switches)->length;
+	for (i=1; i <= switch_len; i++) {
+		x_ptr = SEQ_PTR(fe.switches)->base[i];
+		w = (char *)EMalloc(SEQ_PTR(x_ptr)->length + 1);
+		MakeCString(w, (object) x_ptr);
+
+		if (strcmp(w, "-batch") == 0) {
+			is_batch = 1;
+		}
+
+		EFree(w);
+	}
 
 	be_init(); //earlier for DJGPP
 

@@ -3286,7 +3286,7 @@ static void the_end()
 	int i;
 	int c;
 
-	if (print_file == NULL && print_pretty) {
+	if (is_batch == 0 && print_file == NULL && print_pretty) {
 		/* pretty printing to screen - prompt the user */
 		screen_output(print_file, "\n");
 		screen_output(print_file, "* Press Enter to continue, or q to quit\n");
@@ -4943,7 +4943,7 @@ void Cleanup(int status)
 			screen_output(stderr, "\n");
 			for (i = 0; i < warning_count; i++) {
 				screen_output(stderr, warning_list[i]);
-				if (((i+1) % 20) == 0) {
+				if (((i+1) % 20) == 0 && is_batch == 0) {
 					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
 #ifdef EWINDOWS
 					c = wingetch();
@@ -4964,7 +4964,7 @@ void Cleanup(int status)
 #endif
 
 #ifdef EUNIX
-	if (have_console && (
+	if (is_batch == 0 && have_console && (
 		config.numtextrows < 24 ||
 		config.numtextrows > 25 ||
 		config.numtextcols != 80 ||
@@ -4976,7 +4976,9 @@ void Cleanup(int status)
 #endif
 
 #ifdef EWINDOWS
-	if (TempWarningName == NULL && display_warnings && (warning_count || (status && !user_abort))) {
+	if (is_batch == 0 && TempWarningName == NULL && display_warnings &&
+		(warning_count || (status && !user_abort)))
+	{
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
 		screen_output(stderr, "\n\nPress Enter...\n");

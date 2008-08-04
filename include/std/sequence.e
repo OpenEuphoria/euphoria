@@ -2,7 +2,6 @@
 --
 --****
 -- == Sequence Manipulation
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 

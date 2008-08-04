@@ -202,3 +202,4 @@ struct rccoord {
 #define realloc(p, n) HeapReAlloc((void *)default_heap, 0, p, n)
 #endif
 
+extern int is_batch;
