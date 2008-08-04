@@ -1781,7 +1781,7 @@ object De_floor(d_ptr a)
 		return (object)NewDouble(temp);
 }
 
-#define V(a,b) ((((a) << 1) & 0xFFFF0000) | (((b) >> 14) & 0x0000FFFF))
+#define V(a,b) ((((a) << 1) | (a & 0x1)) ^ ((((b) >> 14) & 0x0000FFFF) | ((b) << 18)))
 
 #define prim1 ((long)2147483563L)
 #define prim2 ((long)2147483399L)
