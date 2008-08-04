@@ -54,9 +54,6 @@ else
 	constant xRemoveDirectory   = -1
 	constant xGetFileAttributes = -1
 
-	function file_exists(sequence name)
-		return sequence(dir(name))
-	end function
 end ifdef
 
 ifdef LINUX then
