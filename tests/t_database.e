@@ -73,6 +73,20 @@ test_equal("insert #9", DB_OK, db_insert("4", {4,5,6,"seven"}))
 
 
 void = db_select_table("first")
+test_equal("db_insert w/table name #1", DB_OK, db_insert("5", {6,7,8,"nine"}, "third"))
+test_equal("db_insert w/table name #2", DB_OK, db_insert("five", {6,7,8,"nine"}, "first"))
+test_equal("db_find_key w/table name #1", 5, db_find_key("5", "third"))
+test_equal("db_find_key w/table name #2", 4, db_find_key("three", "first"))
+db_delete_record(5, "third")
+db_delete_record(4, "first")
+test_equal("db_table_size/db_delete_record w/table name #1", 4, db_table_size("third"))
+test_equal("db_table_size/db_delete_record w/table name #2", 4, db_table_size("first"))
+db_replace_data(1, {3,3,3,"third"}, "third")
+db_replace_data(1, {1,1,1,"first"}, "first")
+test_equal("db_replace_data w/table name #1", {3,3,3,"third"}, db_record_data(1, "third"))
+test_equal("db_replace_data w/table name #1", {1,1,1,"first"}, db_record_data(1, "first"))
+
+void = db_select_table("first")
 db_delete_table("third")
 
 db_close()

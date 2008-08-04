@@ -247,47 +247,50 @@ function decompress(integer c)
 		end if
 	end if
 
-	if c = I2B then
-		return getc(current_db) +
-			   #100 * getc(current_db) +
-			   MIN2B
+	switch c do
+		case I2B:
+			return getc(current_db) +
+				#100 * getc(current_db) +
+				MIN2B
 
-	elsif c = I3B then
-		return getc(current_db) +
-			   #100 * getc(current_db) +
-			   #10000 * getc(current_db) +
-			   MIN3B
+		case I3B:
+			return getc(current_db) +
+				#100 * getc(current_db) +
+				#10000 * getc(current_db) +
+				MIN3B
 
-	elsif c = I4B then
-		return get4() + MIN4B
+		case I4B:
+			return get4() + MIN4B
 
-	elsif c = F4B then
-		return float32_to_atom({getc(current_db), getc(current_db),
-								getc(current_db), getc(current_db)})
-	elsif c = F8B then
-		return float64_to_atom({getc(current_db), getc(current_db),
-								getc(current_db), getc(current_db),
-								getc(current_db), getc(current_db),
-								getc(current_db), getc(current_db)})
-	else
-		-- sequence
-		if c = S1B then
-			len = getc(current_db)
-		else
-			len = get4()
-		end if
-		s = repeat(0, len)
-		for i = 1 to len do
-			-- in-line small integer for greater speed on strings
-			c = getc(current_db)
-			if c < I2B then
-				s[i] = c + MIN1B
+		case F4B:
+			return float32_to_atom({getc(current_db), getc(current_db),
+				getc(current_db), getc(current_db)})
+
+		case F8B:
+			return float64_to_atom({getc(current_db), getc(current_db),
+				getc(current_db), getc(current_db),
+				getc(current_db), getc(current_db),
+				getc(current_db), getc(current_db)})
+
+		case else
+			-- sequence
+			if c = S1B then
+				len = getc(current_db)
 			else
-				s[i] = decompress(c)
+				len = get4()
 			end if
-		end for
-		return s
-	end if
+			s = repeat(0, len)
+			for i = 1 to len do
+				-- in-line small integer for greater speed on strings
+				c = getc(current_db)
+				if c < I2B then
+					s[i] = c + MIN1B
+				else
+					s[i] = decompress(c)
+				end if
+			end for
+			return s
+	end switch
 end function
 
 function compress(object x)
@@ -1476,6 +1479,7 @@ end function
 --
 -- Parameters:
 -- 		# ##key##: the identifier of the record to be looked up.
+--      # ##table_name##: optional name of table to find key in
 --
 -- Returns:
 --		An **integer**, either greater or less than zero:
@@ -1514,8 +1518,14 @@ end function
 -- See Also:
 -- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]]
 
-export function db_find_key(object key)
+export function db_find_key(object key, object table_name=current_table)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
+
+	if not equal(table_name, current_table) then
+		if db_select_table(table_name) != DB_OK then
+			return DB_OPEN_FAIL
+		end if
+	end if
 
 	if current_table = -1 then
 		fatal("no table selected")
@@ -1548,6 +1558,7 @@ end function
 -- Parameters:
 --		# ##key##: an object, the record key, which uniquely identifies it inside the current table
 --		# ##data##: an object, associated to ##key##.
+--      # ##table_name##: optional table name to insert record into
 --
 -- Returns:
 -- 		An **integer**, either DB_OK on success or an error code on failure.
@@ -1568,13 +1579,13 @@ end function
 -- See Also:
 --		[[:db_delete_record]]
 
-export function db_insert(object key, object data)
+export function db_insert(object key, object data, object table_name=current_table)
 	sequence key_string, data_string, last_part, remaining
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size
 	atom key_location, new_block, index_ptr, new_index_ptr, total_recs
 	integer r, blocks, new_recs, n
 
-	key_location = db_find_key(key)
+	key_location = db_find_key(key, table_name) -- Let it set the current table if necessary
 	if key_location > 0 then
 		-- key is already in the table
 		return DB_EXISTS_ALREADY
@@ -1703,6 +1714,7 @@ end function
 --
 -- Parameter:
 -- 		# ##key_location##: a positive integer, designating the record to delete.
+--      # ##table_name##: optional table name to delete record from.
 --
 -- Errors:
 -- 	If the current table is not defined, or ##key_location## is not a valid record index, an error will occur. Valid record indexes are between 1 and the number of records in the table.
@@ -1715,10 +1727,16 @@ end function
 -- See Also:
 -- 		[[:db_find_key]]
 
-export procedure db_delete_record(integer key_location)
+export procedure db_delete_record(integer key_location, object table_name=current_table)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
 	sequence remaining
+
+	if not equal(table_name, current_table) then
+		if db_select_table(table_name) != DB_OK then
+			fatal("invalid table name given: " & table_name)
+		end if
+	end if
 
 	if current_table = -1 then
 		fatal("no table selected")
@@ -1793,8 +1811,9 @@ end procedure
 -- In the current table, replace the data portion of a record  with new data.
 --
 -- Parameters:
--- 		# ##key_location##: an integer, the index of the record the data is to be altered
--- 		# ##data##: an object , the new value associated to the key of the record..
+-- 		# ##key_location##: an integer, the index of the record the data is to be altered.
+-- 		# ##data##: an object , the new value associated to the key of the record.
+--      # ##table_name##: optional table name of record to replace data in.
 --
 -- Comments:
 	--##key_location## must be from 1 to the number of records in the
@@ -1808,9 +1827,15 @@ end procedure
 -- See Also:
 -- 		[[:db_find_key]]
 
-export procedure db_replace_data(integer key_location, object data)
+export procedure db_replace_data(integer key_location, object data, object table_name=current_table)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
+
+	if not equal(table_name, current_table) then
+		if db_select_table(table_name) != DB_OK then
+			fatal("invalid table name given: " & table_name)
+		end if
+	end if
 
 	if current_table = -1 then
 		fatal("no table selected")
@@ -1842,6 +1867,11 @@ export procedure db_replace_data(integer key_location, object data)
 end procedure
 
 --**
+-- Get the size (number of records) of the default table.
+--
+-- Parameters:
+--     # ##table_name##: optional table name to get the size of.
+--
 -- Returns
 --		An **integer, the current number of records in the current table.
 --
@@ -1858,9 +1888,17 @@ end procedure
 --     end if
 -- end for
 -- </eucode>
+--
 -- See Also:
 -- 		[[:db_replace_data]]
-export function db_table_size()
+
+export function db_table_size(object table_name=current_table)
+	if not equal(table_name, current_table) then
+		if db_select_table(table_name) != DB_OK then
+			return DB_OPEN_FAIL
+		end if
+	end if
+
 	if current_table = -1 then
 		fatal("no table selected")
 	end if
@@ -1872,6 +1910,7 @@ end function
 --
 -- Parameters:
 -- 		# ##key_location##: the index of the record the data of which is being fetched.
+--      # ##table_name##: optional table name to get record data from.
 --
 -- Returns:
 --		An **object**, the data portion of requested record.
@@ -1888,11 +1927,19 @@ end function
 -- puts(1, "The 6th record has data value: ")
 -- ? db_record_data(6)
 -- </eucode>
+--
 -- See Also:
 -- 		[[:db_find_key]], [[:db_replace_data]]
-export function db_record_data(integer key_location)
+
+export function db_record_data(integer key_location, object table_name=current_table)
 	atom data_ptr
 	object data_value
+
+	if not equal(table_name, current_table) then
+		if db_select_table(table_name) != DB_OK then
+			return DB_OPEN_FAIL
+		end if
+	end if
 
 	if current_table = -1 then
 		fatal("no table selected")
@@ -1900,10 +1947,12 @@ export function db_record_data(integer key_location)
 	if key_location < 1 or key_location > length(key_pointers) then
 		fatal("bad record number")
 	end if
+
 	safe_seek(key_pointers[key_location])
 	data_ptr = get4()
 	safe_seek(data_ptr)
 	data_value = decompress(0)
+
 	return data_value
 end function
 
@@ -1913,6 +1962,7 @@ end function
 --
 -- Parameters:
 -- 		# ##key_location##: an integer, the index of the record the key is being requested.
+--      # ##table_name##: optional table name to get record key from.
 --
 -- Errors:
 --		If the current table is not defined, or if the record index is invalid, an error will occur.
@@ -1928,7 +1978,13 @@ end function
 -- </eucode>
 -- See Also:
 -- 		[[:db_record_data]]
-export function db_record_key(integer key_location)
+
+export function db_record_key(integer key_location, object table_name=current_table)
+	if not equal(table_name, current_table) then
+		if db_select_table(table_name) != DB_OK then
+			return DB_OPEN_FAIL
+		end if
+	end if
 
 	if current_table = -1 then
 		fatal("no table selected")
