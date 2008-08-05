@@ -120,7 +120,7 @@ constant INIT_FREE = 5,
 constant TRUE = 1
 
 integer current_db = -1
-atom current_table = -1
+atom current_table_pos = -1
 sequence current_table_name = ""
 sequence db_names = {}, db_file_nums = {}, db_lock_methods = {}
 integer current_lock = 0
@@ -141,10 +141,14 @@ end procedure
 --**
 -- exception handler
 
-export integer db_fatal_id = routine_id("default_fatal")
+export integer db_fatal_id = -404
 
 procedure fatal(sequence msg)
-	call_proc(db_fatal_id, {msg})
+	if db_fatal_id >= 0 then
+		call_proc(db_fatal_id, {msg})
+	else
+		default_fatal(msg)
+	end if
 end procedure
 
 function get1()
@@ -771,12 +775,12 @@ procedure save_keys()
 	integer k
 	if caching_option = 1 then
 		if length(key_pointers) > 0 then
-			k = find({current_db, current_table}, cache_index)
+			k = find({current_db, current_table_pos}, cache_index)
 			if k != 0 then
 				key_cache[k] = key_pointers
 			else
 				key_cache = append(key_cache, key_pointers)
-				cache_index = append(cache_index, {current_db, current_table})
+				cache_index = append(cache_index, {current_db, current_table_pos})
 			end if
 		end if
 	end if
@@ -861,7 +865,7 @@ export function db_create(sequence path, integer lock_method)
 	save_keys()
 	current_db = db
 	current_lock = lock_method
-	current_table = -1
+	current_table_pos = -1
 	current_table_name = ""
 	db_names = append(db_names, path)
 	db_lock_methods = append(db_lock_methods, lock_method)
@@ -992,7 +996,7 @@ end ifdef
 	end if
 	save_keys()
 	current_db = db
-	current_table = -1
+	current_table_pos = -1
 	current_table_name = ""
 	current_lock = lock_method
 	db_names = append(db_names, path)
@@ -1043,7 +1047,7 @@ export function db_select(sequence path)
 	save_keys()
 	current_db = db_file_nums[index]
 	current_lock = db_lock_methods[index]
-	current_table = -1
+	current_table_pos = -1
 	current_table_name = ""
 	return DB_OK
 end function
@@ -1148,12 +1152,12 @@ export function db_select_table(sequence name)
 
 	save_keys()
 
-	current_table = table
+	current_table_pos = table
 	current_table_name = name
 
 	k = 0
 	if caching_option = 1 then
-		k = find({current_db, current_table}, cache_index)
+		k = find({current_db, current_table_pos}, cache_index)
 		if k != 0 then
 			key_pointers = key_cache[k]
 		end if
@@ -1365,17 +1369,17 @@ export procedure db_delete_table(sequence name)
 	safe_seek(tables)
 	put4(nt)
 
-	k = find({current_db, current_table}, cache_index)
+	k = find({current_db, current_table_pos}, cache_index)
 	if k != 0 then
 		cache_index = remove(cache_index, k)
 		key_cache = remove(key_cache, k)
 	end if
-	if table = current_table then
-		current_table = -1
+	if table = current_table_pos then
+		current_table_pos = -1
 		current_table_name = ""
-	elsif table < current_table then
-		current_table -= SIZEOF_TABLE_HEADER
-		safe_seek(current_table)
+	elsif table < current_table_pos then
+		current_table_pos -= SIZEOF_TABLE_HEADER
+		safe_seek(current_table_pos)
 		data_ptr = get4()
 		safe_seek(data_ptr)
 		current_table_name = get_string()
@@ -1518,16 +1522,16 @@ end function
 -- See Also:
 -- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]]
 
-export function db_find_key(object key, object table_name=current_table)
+export function db_find_key(object key, object table_name=current_table_name)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 
-	if not equal(table_name, current_table) then
+	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			return DB_OPEN_FAIL
+			fatal("invalid table name given: " & table_name)
 		end if
 	end if
 
-	if current_table = -1 then
+	if current_table_pos = -1 then
 		fatal("no table selected")
 	end if
 	lo = 1
@@ -1579,7 +1583,7 @@ end function
 -- See Also:
 --		[[:db_delete_record]]
 
-export function db_insert(object key, object data, object table_name=current_table)
+export function db_insert(object key, object data, object table_name=current_table_name)
 	sequence key_string, data_string, last_part, remaining
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size
 	atom key_location, new_block, index_ptr, new_index_ptr, total_recs
@@ -1603,10 +1607,10 @@ export function db_insert(object key, object data, object table_name=current_tab
 	putn(key_string)
 
 	-- increment number of records in whole table
-	safe_seek(current_table+4)
+	safe_seek(current_table_pos+4)
 	total_recs = get4()+1
 	blocks = get4()
-	safe_seek(current_table+4)
+	safe_seek(current_table_pos+4)
 	put4(total_recs)
 
 	n = length(key_pointers)
@@ -1623,7 +1627,7 @@ export function db_insert(object key, object data, object table_name=current_tab
 	end if
 	key_pointers[key_location] = key_ptr
 
-	safe_seek(current_table+12) -- get after put - seek is necessary
+	safe_seek(current_table_pos+12) -- get after put - seek is necessary
 	index_ptr = get4()
 
 	safe_seek(index_ptr)
@@ -1688,7 +1692,7 @@ export function db_insert(object key, object data, object table_name=current_tab
 		put4(new_recs)
 		put4(new_block)
 		putn(remaining)
-		safe_seek(current_table+8)
+		safe_seek(current_table_pos+8)
 		blocks += 1
 		put4(blocks)
 		-- enlarge index if full
@@ -1702,7 +1706,7 @@ export function db_insert(object key, object data, object table_name=current_tab
 			putn(remaining)
 			putn(repeat(0, new_size-blocks*8))
 			db_free(index_ptr)
-			safe_seek(current_table+12)
+			safe_seek(current_table_pos+12)
 			put4(new_index_ptr)
 		end if
 	end if
@@ -1727,18 +1731,18 @@ end function
 -- See Also:
 -- 		[[:db_find_key]]
 
-export procedure db_delete_record(integer key_location, object table_name=current_table)
+export procedure db_delete_record(integer key_location, object table_name=current_table_name)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
 	sequence remaining
 
-	if not equal(table_name, current_table) then
+	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
 			fatal("invalid table name given: " & table_name)
 		end if
 	end if
 
-	if current_table = -1 then
+	if current_table_pos = -1 then
 		fatal("no table selected")
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
@@ -1762,13 +1766,13 @@ export procedure db_delete_record(integer key_location, object table_name=curren
 	end if
 
 	-- decrement number of records in whole table
-	safe_seek(current_table+4)
+	safe_seek(current_table_pos+4)
 	nrecs = get4()-1
 	blocks = get4()
-	safe_seek(current_table+4)
+	safe_seek(current_table_pos+4)
 	put4(nrecs)
 
-	safe_seek(current_table+12)
+	safe_seek(current_table_pos+12)
 	index_ptr = get4()
 
 	safe_seek(index_ptr)
@@ -1791,7 +1795,7 @@ export procedure db_delete_record(integer key_location, object table_name=curren
 		remaining = get_bytes(current_db, index_ptr+blocks*8-(current_block+8))
 		safe_seek(current_block)
 		putn(remaining)
-		safe_seek(current_table+8)
+		safe_seek(current_table_pos+8)
 		put4(blocks-1)
 		db_free(records_ptr)
 	else
@@ -1827,17 +1831,17 @@ end procedure
 -- See Also:
 -- 		[[:db_find_key]]
 
-export procedure db_replace_data(integer key_location, object data, object table_name=current_table)
+export procedure db_replace_data(integer key_location, object data, object table_name=current_table_name)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 
-	if not equal(table_name, current_table) then
+	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
 			fatal("invalid table name given: " & table_name)
 		end if
 	end if
 
-	if current_table = -1 then
+	if current_table_pos = -1 then
 		fatal("no table selected")
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
@@ -1892,14 +1896,14 @@ end procedure
 -- See Also:
 -- 		[[:db_replace_data]]
 
-export function db_table_size(object table_name=current_table)
-	if not equal(table_name, current_table) then
+export function db_table_size(object table_name=current_table_name)
+	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			return DB_OPEN_FAIL
+			fatal("invalid table name given: " & table_name)
 		end if
 	end if
 
-	if current_table = -1 then
+	if current_table_pos = -1 then
 		fatal("no table selected")
 	end if
 	return length(key_pointers)
@@ -1931,17 +1935,17 @@ end function
 -- See Also:
 -- 		[[:db_find_key]], [[:db_replace_data]]
 
-export function db_record_data(integer key_location, object table_name=current_table)
+export function db_record_data(integer key_location, object table_name=current_table_name)
 	atom data_ptr
 	object data_value
 
-	if not equal(table_name, current_table) then
+	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			return DB_OPEN_FAIL
+			fatal("invalid table name given: " & table_name)
 		end if
 	end if
 
-	if current_table = -1 then
+	if current_table_pos = -1 then
 		fatal("no table selected")
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
@@ -1979,14 +1983,14 @@ end function
 -- See Also:
 -- 		[[:db_record_data]]
 
-export function db_record_key(integer key_location, object table_name=current_table)
-	if not equal(table_name, current_table) then
+export function db_record_key(integer key_location, object table_name=current_table_name)
+	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			return DB_OPEN_FAIL
+			fatal("invalid table name given: " & table_name)
 		end if
 	end if
 
-	if current_table = -1 then
+	if current_table_pos = -1 then
 		fatal("no table selected")
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
