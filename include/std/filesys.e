@@ -14,12 +14,13 @@ ifdef DOS32 then
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
 	include dos\interrup.e
 else
-	include dll.e
+	include std/dll.e
 end ifdef
 
-export include machine.e
-include wildcard.e
-include sort.e
+export include std/machine.e
+include std/wildcard.e
+include std/sort.e
+include std/search.e
 
 constant
 	M_DIR	      = 22,
@@ -142,6 +143,8 @@ end ifdef
 -- 		# ##name##: a sequence, the name of the new directory to create
 --		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 
 --		  448 (all rights for owner, none for others).
+--      # ##mkparent## If true (default) the parent directories are also created
+--        if needed. 
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
@@ -154,16 +157,41 @@ end ifdef
 -- if not create_directory("the_new_folder") then
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
+-- 
+-- -- This example will also create "myapp/" and "myapp/interface/" if they don't exist.
+-- if not create_directory("myapp/interface/letters") then
+--		crash("Filesystem problem - could not create the new folder")
+-- end if
+--
+-- -- This example will NOT create "myapp/" and "myapp/interface/" if they don't exist.
+-- if not create_directory("myapp/interface/letters",,0) then
+--		crash("Filesystem problem - could not create the new folder")
+-- end if
 -- </eucode>
 --
 -- See Also:
--- 	[[:relove_directory]], [[:chdir]]
+-- 	[[:remove_directory]], [[:chdir]]
 
-export function create_directory(sequence name, integer mode=448)
+export function create_directory(sequence name, integer mode=448, integer mkparent = 1)
 	atom pname, ret
+	integer pos
+
+	-- Remove any trailing slash.
+	if name[$] = SLASH then
+		name = name[1 .. $-1]
+	end if
+	
+	if mkparent != 0 then
+		pos = rfind(SLASH, name)
+		if pos != 0 then
+			ret = create_directory(name[1.. pos-1], mode, mkparent)
+		end if
+	end if
+	
 	ifdef DOS32 then
 		atom low_buff
 		sequence reg_list
+		mode = mode -- get rid of not used warning
 		low_buff = allocate_low(length (name) + 1)
 		if not low_buff then
 			return 0
@@ -223,36 +251,42 @@ end function
 
 export function remove_directory(sequence name)
 	atom pname, ret
+	
+	-- Remove any trailing slash.
+	if name[$] = SLASH then
+		name = name[1 .. $-1]
+	end if
+	
 	ifdef DOS32 then
-    atom low_buff
-    sequence reg_list
-    low_buff = allocate_low(length(name) + 1)
-    if not low_buff then
-        return 0
-    end if
-    poke(low_buff, name & 0)
-    reg_list = repeat(0,10)
-    if short_names then
-        reg_list[REG_AX] = #3A00
-    else
-        reg_list[REG_AX] = #713A
-    end if
-    reg_list[REG_DS] = floor(low_buff / 16)
-    reg_list[REG_DX] = remainder(low_buff, 16)
-    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-    reg_list = dos_interrupt(#21, reg_list)
-    free_low(low_buff)
-    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-        return 0
-    else
-        return 1
-    end if
-	else
-	pname = allocate_string(name)
+	    atom low_buff
+	    sequence reg_list
+	    low_buff = allocate_low(length(name) + 1)
+	    if not low_buff then
+	        return 0
+	    end if
+	    poke(low_buff, name & 0)
+	    reg_list = repeat(0,10)
+	    if short_names then
+	        reg_list[REG_AX] = #3A00
+	    else
+	        reg_list[REG_AX] = #713A
+	    end if
+	    reg_list[REG_DS] = floor(low_buff / 16)
+	    reg_list[REG_DX] = remainder(low_buff, 16)
+	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+	    reg_list = dos_interrupt(#21, reg_list)
+	    free_low(low_buff)
+	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+	        return 0
+	    else
+	        return 1
+	    end if
 	end ifdef
+	
+	pname = allocate_string(name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
-		ret = not ret 
+			ret = not ret 
 	-- else TODO: implement for DOS and Windows
 	end ifdef
 	free(pname)
@@ -371,27 +405,15 @@ export function dir(sequence name)
 	end if
 
 	-- Is there a path involved?
-	if find('/', name) = 0 and find('\\', name) = 0 then
+	if find(SLASH, name) = 0 then
 		the_dir = "."
 		the_name = name
 	else
 		-- Find a SLASH character and break the name there resulting in
 		-- a directory and file name.
-		idx = length(name)
-		while idx > 0 do
-			ifdef WIN32 then
-				if name[idx] = '\\' then
-					exit
-				end if
-			end ifdef
-			if name[idx] = '/' then
-				exit
-			end if
-			idx -= 1
-		end while
-
-		the_dir = name[1..idx]
-		the_name = name[idx+1..$]
+		idx = rfind(SLASH, name)
+		the_dir = name[1 .. idx]
+		the_name = name[idx+1 .. $]
 	end if
 
 	-- Get directory contents
@@ -1320,3 +1342,7 @@ export function driveid(sequence path)
 	data = pathinfo(path)
 	return data[5]
 end function
+
+--- TODO
+--- copy_directory( srcpath, destpath, structonly = 0)
+--- clear_directory( path, recurse = 1)
