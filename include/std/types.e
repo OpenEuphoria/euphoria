@@ -138,7 +138,7 @@ export procedure set_default_charsets()
 	Defined_Sets[CS_Digit 		] = {{'0', '9'}}
 	Defined_Sets[CS_Graphic 	] = {{'!', '~'}}
 	Defined_Sets[CS_Bytes	 	] = {{0, 255}}
-	Defined_Sets[CS_SpecWord 	] = "_"
+	Defined_Sets[CS_SpecWord 	] = "_'"
 end procedure
 
 --** 

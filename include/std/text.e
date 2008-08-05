@@ -282,6 +282,8 @@ end function
 -- -- s is {'a', 'b', c', 3.1472} -- Unchanged because it contains a non-character.
 -- s = proper({"abc", 3.1472})
 -- -- s is {"Abc", 3.1472} -- The embedded text sequence is converted.
+-- s = proper("We'd all come o'er and \"that'll be 'OK'\", i've heard the David's say.") -- Use of special word characters.
+-- -- s is "We'd All Come O'er And \"That'll Be 'ok'\", I've Heard The David's Say."
 -- </eucode>
 --
 -- See Also:
