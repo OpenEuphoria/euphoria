@@ -121,7 +121,8 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\io.obj
+	.\$(OBJDIR)\io.obj &
+	.\$(OBJDIR)\search.obj
 
 EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\backend.obj &
@@ -139,7 +140,9 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\dll.obj &
-	.\$(OBJDIR)\filesys.obj
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\0rror.obj &
+	.\$(OBJDIR)\search.obj
 
 
 EU_CORE_OBJECTS = &
@@ -275,7 +278,9 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\init-.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\0emory.obj
+	.\$(OBJDIR)\0emory.obj &
+	.\$(OBJDIR)\0rror.obj &
+	.\$(OBJDIR)\search.obj
 
 EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -331,7 +336,8 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\0emory.obj
+	.\$(OBJDIR)\0emory.obj &
+	.\$(OBJDIR)\search.obj
 
 PCRE_OBJECTS = &
 	.\pcre\pcre_chartables.obj &
