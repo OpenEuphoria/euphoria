@@ -88,10 +88,40 @@ test_equal("db_replace_data w/table name #1", {1,1,1,"first"}, db_record_data(1,
 
 void = db_select_table("first")
 db_delete_table("third")
+db_clear_table("first")
+test_equal("db_table_size after clear #1", 0, db_table_size("first"))
+test_equal("insert #10", DB_OK, db_insert("one", {1,2,3,"four"}, "first"))
+test_equal("db_table_size ", 1, db_table_size("first"))
+db_delete_record(1)
+test_equal("db_table_size after delete", 0, db_table_size("first"))
+
+for i = 1 to 500 do
+    void = db_insert(i, sprintf("Record %05d",i))
+end for
+test_equal("db_table_size after mass insert", 500, db_table_size("first"))
+db_clear_table("first")
+test_equal("db_table_size after clear #2", 0, db_table_size("first"))
+
+
+for i = 1 to 100 do
+    void = db_insert(i, sprintf("Record %05d",i))
+end for
+
+integer n
+for i = 3 to 100 by 7 do
+	n = db_find_key(i)
+    db_delete_record(n)
+end for
+test_equal("db_table_size after mass delete ", 86, db_table_size("first"))
+void = delete_file("testunit.t0")
+test_equal("compress", DB_OK, db_compress())
+test_equal("db_table_size after compress ", 86, db_table_size("first"))
+
 
 db_close()
 test_equal("current db #5", "", db_current())
 
 void = delete_file("testunit.edb")
+void = delete_file("testunit.t0")
 
 test_report()
