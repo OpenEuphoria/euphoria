@@ -100,23 +100,48 @@ for i = 1 to 500 do
 end for
 test_equal("db_table_size after mass insert", 500, db_table_size("first"))
 db_clear_table("first")
+check_free_list()
 test_equal("db_table_size after clear #2", 0, db_table_size("first"))
 
 
 for i = 1 to 100 do
     void = db_insert(i, sprintf("Record %05d",i))
 end for
+check_free_list()
 
 integer n
 for i = 3 to 100 by 7 do
 	n = db_find_key(i)
     db_delete_record(n)
 end for
+check_free_list()
 test_equal("db_table_size after mass delete ", 86, db_table_size("first"))
 void = delete_file("testunit.t0")
 test_equal("compress", DB_OK, db_compress())
+check_free_list()
 test_equal("db_table_size after compress ", 86, db_table_size("first"))
 
+atom rid1, rid2
+rid1 = db_get_recid(3)
+test_true("get recid #1", rid1 = 0)
+rid1 = db_get_recid(20)
+test_true("get recid #2", rid1 != 0)
+rid2 = db_get_recid(99)
+test_true("get recid #3", rid2 != 0)
+
+-- Change table so its not the same as we got the recids from.
+void = db_select_table("second")
+test_equal("db_table_size before recid fetch ", 0, db_table_size())
+
+object rec
+db_dump("dump1.txt", 1)
+rec = db_record_recid(rid2)
+test_equal("fetch with recid #1", {99, "Record 00099"}, rec) 
+test_equal("fetch with recid #2", {20, "Record 00020"}, db_record_recid(rid1)) 
+rec[2] = "Updated 99"
+db_replace_recid(rid2, rec[2]) 
+test_equal("fetch with recid #3", {99, "Updated 99"}, db_record_recid(rid2)) 
+db_dump("dump2.txt", 1)
 
 db_close()
 test_equal("current db #5", "", db_current())
