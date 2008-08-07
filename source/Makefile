@@ -143,7 +143,8 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/filesys.o \
-	./$(OBJDIR)/io.o
+	./$(OBJDIR)/io.o \
+	./$(OBJDIR)/search.o
 	
 EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/backend.o \
@@ -157,7 +158,9 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/sort.o \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/filesys.o
+	./$(OBJDIR)/filesys.o \
+	./$(OBJDIR)/0rror.o \
+	./$(OBJDIR)/search.o
 
 EU_CORE_OBJECTS = \
 	./$(OBJDIR)/main-.o \
