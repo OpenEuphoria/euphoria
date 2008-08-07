@@ -505,14 +505,17 @@ end function
 -- names = {"fred", "rob", "rob", "george", "mary"}
 -- location = rfind("rob", names)
 -- -- location is set to 3
+-- location = rfind("rob", names, -4)
+-- -- location is set to 2
 -- </eucode>
 --
 -- See Also:
 --   [[:find]], [[:rmatch]]
 
-export function rfind(object needle, sequence haystack, integer start=length(haystack))
+export function rfind(object needle, sequence haystack, integer start=0) --length(haystack))
 	integer len = length(haystack)
 
+	if start = 0 then start = len end if
 	if (start > len) or (len + start < 1) then
 		return 0
 	end if
@@ -543,7 +546,7 @@ end function
 --   ##start## equals ##needle##, else the highest lower index of such a slice.
 --
 -- Comments:
---   If ##start## is less than 1, ir will be added once to length(##haystack##)
+--   If ##start## is less than 1, it will be added once to length(##haystack##)
 --   to designate a position counted backwards. Thus, if ##start## is -1, the
 --   first element to be queried in ##haystack## will be ##haystack##[$-1],
 --   then ##haystack##[$-2] and so on.
@@ -551,7 +554,9 @@ end function
 -- Example 1:
 -- <eucode>
 -- location = rmatch("the", "the dog ate the steak from the table.")
--- -- location is set to 28 (3rd the)
+-- -- location is set to 28 (3rd 'the')
+-- location = rmatch("the", "the dog ate the steak from the table.", -11)
+-- -- location is set to 13 (2nd 'the')
 -- </eucode>
 --
 -- See Also:

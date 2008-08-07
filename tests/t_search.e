@@ -24,15 +24,22 @@ test_equal("find_any() floats", 3, find_any({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,
 
 test_equal("rfind() #1", 5, rfind('E', "EEEDEFG"))
 test_equal("rfind() #2", 0, rfind('E', "ABC"))
-
 test_equal("rfind() #3", 3, rfind('E', "EEEDEFG", 4))
 test_equal("rfind() #4", 0, rfind('E', "ABC", 2))
+test_equal("rfind() #5", 0, rfind('E', "ABC", -5))
+test_equal("rfind() #6", 0, rfind('E', "ABC", 20))
+test_equal("rfind() #7", 3, rfind("rob", {"fred", "rob", "rob", "george", "mary"}))
+test_equal("rfind() #8", 2, rfind("rob", {"fred", "rob", "rob", "george", "mary"}, -3))
 
 test_equal("rmatch() #1", 5, rmatch("ABC", "ABCDABC"))
 test_equal("rmatch() #2", 0, rmatch("ABC", "DEFBCA"))
-
 test_equal("rmatch() #3", 8, rmatch("ABC", "ABCDABCABC", 9))
 test_equal("rmatch() #4", 0, rmatch("ABC", "EEEDDDABC", 5))
+test_equal("rmatch() #5", 0, rmatch("ABC", "ABCDABCABC", -50))
+test_equal("rmatch() #6", 0, rmatch("ABC", "EEEDDDABC", 50))
+test_equal("rmatch() #7", 0, rmatch("", "EEEDDDABC"))
+test_equal("rmatch() #8",28, rmatch("the", "the dog ate the steak from the table."))
+test_equal("rmatch() #9",13, rmatch("the", "the dog ate the steak from the table.", -11))
 
 test_equal("find_replace() string", "John Smith", find_replace("Doe", "John Doe","Smith",  0))
 test_equal("find_replace() sequence", {1,1,1,1,1}, find_replace({5,2},{1,5,2,5,2},  {1,1}, 0))
