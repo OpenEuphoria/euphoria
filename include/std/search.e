@@ -485,10 +485,14 @@ end function
 --   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
 --     
 -- Returns:
---   An **integer**, 0 if no instance of ##needle## can be found on ##haystack## before index ##start, or the highest such index otherwise.
+--   An **integer**, 0 if no instance of ##needle## can be found on ##haystack##
+--   before index ##start, or the highest such index otherwise.
 --
 -- Comments:
---   If ##start## is less than 1, ir will be added once to length(##haystack##) to designate a position counted backwards. Thus, if ##start## is -1, the first element to be queried in ##haystack## will be ##haystack##[$-1], then ##haystack##[$-2] and so on.
+--   If ##start## is less than 1, ir will be added once to length(##haystack##)
+--   to designate a position counted backwards. Thus, if ##start## is -1, the
+--   first element to be queried in ##haystack## will be ##haystack##[$-1],
+--   then ##haystack##[$-2] and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -510,7 +514,7 @@ export function rfind(object needle, sequence haystack, integer start=length(hay
 	integer len = length(haystack)
 
 	if (start > len) or (len + start < 1) then
-		crash("third argument of rfind() is out of bounds (%d)", {start})
+		return 0
 	end if
 
 	if start < 1 then
@@ -535,10 +539,14 @@ end function
 --   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
 --
 -- Returns:
---   An **integer**, either 0 if no slice of ##haystack## starting before ##start## equals ##needle##, else the highest lower index of such a slice.
+--   An **integer**, either 0 if no slice of ##haystack## starting before 
+--   ##start## equals ##needle##, else the highest lower index of such a slice.
 --
 -- Comments:
---   If ##start## is less than 1, ir will be added once to length(##haystack##) to designate a position counted backwards. Thus, if ##start## is -1, the first element to be queried in ##haystack## will be ##haystack##[$-1], then ##haystack##[$-2] and so on.
+--   If ##start## is less than 1, ir will be added once to length(##haystack##)
+--   to designate a position counted backwards. Thus, if ##start## is -1, the
+--   first element to be queried in ##haystack## will be ##haystack##[$-1],
+--   then ##haystack##[$-2] and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -556,9 +564,9 @@ export function rmatch(sequence needle, sequence haystack, integer start=length(
 	lenx = length(needle)
 
 	if lenx = 0 then
-		crash("first argument of rmatch() must be a non-empty sequence", {})
+		return 0
 	elsif (start > len) or  (len + start < 1) then
-		crash("third argument of rmatch() is out of bounds (%d)", {start})
+		return 0
 	end if
 
 	if start < 1 then
