@@ -10,6 +10,8 @@
 include sequence.e
 include math.e
 include text.e
+include memory.e
+include machine.e
 
 ifdef !DOS32 then
 	include dll.e
@@ -20,9 +22,10 @@ ifdef DOS32 then
 	include dos\interrup.e
 end ifdef
 
-include machine.e
-
-constant M_SLEEP = 64, M_SET_ENV = 73, M_UNSET_ENV = 74
+constant
+	M_SLEEP = 64,
+	M_SET_ENV = 73,
+	M_UNSET_ENV = 74
 
 --****
 -- === Constants

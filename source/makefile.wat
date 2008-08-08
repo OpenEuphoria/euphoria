@@ -141,7 +141,6 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\search.obj
 
 
@@ -279,7 +278,6 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\0emory.obj &
-	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\search.obj
 
 EU_TRANSDOS_OBJECTS = &

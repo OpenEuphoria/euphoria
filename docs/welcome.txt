@@ -4,11 +4,9 @@
 %%splitlevel = 2
 %%toclevel = 3
 
-= Euphoria Programming Language v4.0
-
 <<TOC level=3>>
 
-== Introduction
+= Euphoria Programming Language v4.0
 
 Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical **O**bjects for
 **R**obust **I**nterpreted **A**pplications//.

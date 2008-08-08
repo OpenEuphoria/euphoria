@@ -485,8 +485,8 @@ end function
 --   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
 --     
 -- Returns:
---   An **integer**, 0 if no instance of ##needle## can be found on ##haystack##
---   before index ##start, or the highest such index otherwise.
+--   An **integer**, 0 if no instance of ##needle## can be found on ##haystack## before
+--   index ##start##, or the highest such index otherwise.
 --
 -- Comments:
 --   If ##start## is less than 1, ir will be added once to length(##haystack##)

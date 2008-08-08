@@ -2,7 +2,6 @@
 --
 --****
 -- == Date/Time
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 
@@ -376,7 +375,7 @@ end type
 
 --**
 -- Signature:
--- global procedure time()
+-- global function time()
 --
 -- Description:
 -- Return the number of seconds since some fixed point in the past.
@@ -425,7 +424,7 @@ end type
 -- </eucode>
 --
 -- See Also: [[:date]], [[:tick_rate]], [[:now]]
---  
+
 --**
 -- Signature:
 -- global function date()
@@ -454,12 +453,10 @@ end type
 -- <eucode>
 -- -- now has: {95,3,24,23,47,38,6,83}
 -- -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
--- 
+-- </eucode>
+--
 -- See Also:
 --  [[:time]], [[:now]]
-
-
-
 
 --**
 -- Convert a sequence formatted according to the built-in date() function to a valid datetime

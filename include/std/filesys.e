@@ -561,10 +561,10 @@ export integer my_dir = DEFAULT
 --
 -- Example 1:
 -- <eucode>
--- function look_at(sequence path_name, sequence entry)
+-- function look_at(sequence path_name, sequence item)
 -- -- this function accepts two sequences as arguments
 --     printf(STDOUT, "%s\\%s: %d\n",
---            {path_name, entry[D_NAME], entry[D_SIZE]})
+--            {path_name, item[D_NAME], item[D_SIZE]})
 --     return 0 -- keep going
 -- end function
 --
