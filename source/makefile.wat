@@ -107,8 +107,6 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
 	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\memory.obj &
-	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &
@@ -131,7 +129,6 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
 	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\wildcard.obj &

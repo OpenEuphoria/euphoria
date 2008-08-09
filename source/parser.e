@@ -850,7 +850,6 @@ procedure Factor()
 		tok_match(LEFT_ROUND)
 		scope = SymTab[tok[T_SYM]][S_SCOPE]
 		opcode = SymTab[tok[T_SYM]][S_OPCODE] 
-		if opcode=LENGTH and length(SymTab)=254 then ?SymTab[254] end if
 		--if equal(SymTab[tok[T_SYM]][S_NAME],"object") then
 		if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
 			tok2 = next_token()
@@ -929,7 +928,6 @@ procedure Factor()
 		else
 			ParseArgs(tok[T_SYM])
 		end if
-		if opcode=LENGTH and length(SymTab)=254 then ?SymTab[254] end if
 		if scope = SC_PREDEF then
 			emit_op(opcode)
 		else

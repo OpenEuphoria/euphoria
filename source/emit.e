@@ -310,7 +310,6 @@ procedure cont11ii(integer op, boolean ii)
 	emit_addr(source)
 	assignable = TRUE
 	t = op_result[op]
-	if length(SymTab)=254 then ?SymTab[254] end if
 	 -- for PEEK should really check for IsAtom(source)
 	if t = T_INTEGER or (ii and IsInteger(source)) then
 		c = NewTempSym()
