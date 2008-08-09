@@ -25,7 +25,7 @@ for i = 1 to length(n) do
     x += 1 test_equal(sprintf("hash(-s[1], n[%d])",i), r[x], hash(-s[1], n[i]) )
     x += 1 test_equal(sprintf("hash(-s[1] - 0.0123, n[%d])",i), r[x], hash(-s[1] - 0.123, n[i]) )
     x += 1 test_equal(sprintf("hash(\"\", n[%d])",i), r[x], hash("", n[i]) )
-    x += 1 test_equal(sprintf("hash(s[1..5] & {{1,1.1,{2.23,9}}}, n[i])",i), r[x], hash(s[1..5] & {{1,1.1,{2.23,9}}}, n[i]) )
+    x += 1 test_equal(sprintf("hash(s[1..5] & {{1,1.1,{2.23,9}}}, %g)",n[i]), r[x], hash(s[1..5] & {{1,1.1,{2.23,9}}}, n[i]) )
 end for
 
 

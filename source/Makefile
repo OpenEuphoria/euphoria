@@ -159,7 +159,6 @@ EU_INTERPRETER_OBJECTS =  \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/filesys.o \
-	./$(OBJDIR)/0rror.o \
 	./$(OBJDIR)/search.o
 
 EU_CORE_OBJECTS = \
