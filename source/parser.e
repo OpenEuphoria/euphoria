@@ -704,9 +704,7 @@ procedure ParseArgs(symtab_index subsym)
 						-- some defaulted arg follows with a default value
 							putback( tok )
 							start_playback(SymTab[s][S_CODE] )
-							?j if length(SymTab)=254 then ?SymTab[254] end if
 							call_proc(forward_expr, {})
-							?j if length(SymTab)=254 then ?SymTab[254] end if
 							if j<n then
 								private_list = append(private_list,SymTab[s][S_NAME])
 								private_sym &= Top()
