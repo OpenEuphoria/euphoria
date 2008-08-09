@@ -3,7 +3,6 @@
 
 --****
 -- == Error Handling
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -118,33 +117,32 @@ end procedure
 -- If your program fails with a Euphoria-detected compile-time or run-time error then a code of 1 is returned.
 --  
 -- Example 1:
--- <euocde>
---  if x = 0 then
+-- <eucode>
+-- if x = 0 then
 --     puts(ERR, "can't divide by 0 !!!\n")
 --     abort(1)
 -- else
 --     z = y / x
 -- end if
--- </euocde>
+-- </eucode>
 -- 
--- 
--- See Also: 
+-- See Also:
 --  [[:crash_message]], [[:system_exec]]
 
 --**
 -- Specify a file path where to output warnings. 
 --
 -- Parameters:
--- 		#file_path##: an object indicating where to dump any warning that were produced.
+-- 		# ##file_path##: an object indicating where to dump any warning that were produced.
 --
 -- Comments:
 --   By default, warnings are displayed on the standard error, and require pressing the 
 --   Enter key to keep going. Redirecting to a file enables skipping the latter step and having 
 --   a console window open, while retaining ability to inspect the warnings in case any was issued.
 --
---   Any atom >=0 causes standard error to be used, thus reverting to default behaviour.
+--   Any atom >= 0 causes standard error to be used, thus reverting to default behaviour.
 --
---   Any atom <0 suppresses both warning generation and output. Use this latter in extreme cases 
+--   Any atom < 0 suppresses both warning generation and output. Use this latter in extreme cases
 --   only.
 --
 --   On an error, some output to the console is performed anyway, so that whatever warning file 
@@ -159,7 +157,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- 	[[:without warning]]
+--   [[:without warning]]
 
 export procedure warning_file(object file_path)
 	machine_proc(M_WARNING_FILE, file_path)
@@ -205,8 +203,7 @@ end procedure
 -- </eucode>
 -- 
 -- will result, when some_app.exw is run with warning, in the following text being
--- displayed in the console window:
--- 
+-- displayed in the console window
 -- {{{
 -- 123
 -- Warning: ( custom_warning ):
@@ -216,8 +213,7 @@ end procedure
 -- }}}
 -- 
 -- See Also:
--- [[:warning_file]]
--- 
+--   [[:warning_file]]
 
 --**
 -- Specify a function to be called when an error takes place at run time.

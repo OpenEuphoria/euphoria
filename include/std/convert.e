@@ -1,8 +1,6 @@
 --****
 -- == Data type conversion
 --
--- **Page Contents**
---
 -- <<LEVELTOC depth=2>>
 --
 

@@ -7,11 +7,7 @@ include machine.e
 --****
 -- == Graphical Image Routines
 --
--- **Page Contents**
---
 -- <<LEVELTOC depth=2>>
---
--- === Bitmap handling routines
 --
 
 constant BMPFILEHDRSIZE = 14
@@ -144,7 +140,7 @@ function unpack(sequence image, integer BitCount, integer Width, integer Height)
 end function
 
 --****
--- === Routines
+-- === Bitmap handling
 --
 
 --**
@@ -164,12 +160,14 @@ end function
 -- You can pass the palette to [[:all_palette]]() (after dividing it by 4 to scale it). 
 -- The image can be passed to [[:display_image]]().
 --
--- Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is not in a good format, an error code (atom) is returned instead: 
---  <eucode>
---      export constant
---	* BMP_OPEN_FAILED = 1,
---  * BMP_UNEXPECTED_EOF = 2,
---  * BMP_UNSUPPORTED_FORMAT = 3
+-- Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is not in a good format, an error
+-- code (atom) is returned instead
+--
+-- <eucode>
+-- export constant
+--     BMP_OPEN_FAILED = 1,
+--     BMP_UNEXPECTED_EOF = 2,
+--     BMP_UNSUPPORTED_FORMAT = 3
 -- </eucode>
 --  
 -- You can create your own bitmap picture files using Windows Paintbrush and many other 
@@ -178,7 +176,7 @@ end function
 -- Example 1:
 --
 -- <eucode>
---  x = read_bitmap("c:\\windows\\arcade.bmp")
+-- x = read_bitmap("c:\\windows\\arcade.bmp")
 -- </eucode>
 --
 -- note: double backslash needed to get single backslash in a string
@@ -347,10 +345,10 @@ end function
 -- 		# ##char_attr##: a sequence of alternated characters and attributes.
 --
 -- Comments:
--- ##char_attr# must be in the form  ##{character, attributes, character, attributes, ...}##.
+-- ##char_attr## must be in the form  ##{character, attributes, character, attributes, ...}##.
 --
 -- Errors: 
--- 		The length of ##char_attr## must be a multiple of 2.
+--   The length of ##char_attr## must be a multiple of 2.
 --
 -- Comments:
 --
@@ -359,12 +357,14 @@ end function
 -- It's faster to write several characters to the screen with a single call to put_screen_char() than it is to write one character at a time. 
 --  
 -- Example 1:
---  -- write AZ to the top left of the screen
+-- <eucode>
+-- -- write AZ to the top left of the screen
 -- -- (attributes are platform-dependent)
--- put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
+-- put_screen_char(1, 1, {'A', 152, 'Z', 131})
+-- </eucode>
 -- 
 -- See Also: 
---       [[:get_screen_char]], [[:display_text_image]]
+--   [[:get_screen_char]], [[:display_text_image]]
 
 export procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
@@ -405,14 +405,14 @@ end procedure
 -- 
 -- Example 1:
 -- <eucode>
---  clear_screen()
+-- clear_screen()
 -- display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
 --                            {'C', RED+16*WHITE},
 --                            {'D', BLUE}})
 -- -- displays:
---      AB
---      C
---      D
+-- --     AB
+-- --     C
+-- --     D
 -- -- at the top left corner of the screen.
 -- -- 'A' will be white with black (0) background color,
 -- -- 'B' will be green on black, 
@@ -421,7 +421,7 @@ end procedure
 -- </eucode>
 -- 
 -- See Also:
--- 		[[:save_text_image]], [[:display_image]], [[:put_screen_char]]
+--   [[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
 
 export procedure display_text_image(text_point xy, sequence text)
@@ -481,24 +481,12 @@ end procedure
 -- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc. 
 -- 
 -- Example 1:
--- {{{
--- If the top 2 lines of the screen have:
---     Hello
---    World
---
---
---  And you execute:
--- }}}
 -- <eucode>
---  s = save_text_image({1,1}, {2,5})
+-- -- If the top 2 lines of the screen have Hello and World
+-- s = save_text_image({1,1}, {2,5})
+-- -- s is something like: {"H-e-l-l-o-", "W-o-r-l-d-"}
 -- </eucode>
--- {{{
---  Then s is something like:  
---      {"H-e-l-l-o-",
---      "W-o-r-l-d-"}
--- where '-' indicates the attribute bytes
--- }}}
--- 
+--
 -- See Also:
 --     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
@@ -693,11 +681,14 @@ end procedure
 -- sequences must have the same length.
 --
 -- The result will be one of the following codes: 
---  <eucode>
---      export constant BMP_SUCCESS = 0,
---                 BMP_OPEN_FAILED = 1,
---                BMP_INVALID_MODE = 4 -- invalid graphics mode
--- </eucode>                                    -- or invalid argument
+-- <eucode>
+-- export constant
+--     BMP_SUCCESS = 0,
+--     BMP_OPEN_FAILED = 1,
+--     BMP_INVALID_MODE = 4 -- invalid graphics mode
+--                          -- or invalid argument
+-- </eucode>
+--
 -- If you use ##get_all_palette##() to get the palette before calling this function, you must 
 -- multiply the returned intensity values by 4 before calling [[:save_bitmap]](). You might use
 -- [[:save_image]]() to get the 2-d image.
@@ -707,13 +698,13 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
---  paletteData = get_all_palette() * 4
+-- paletteData = get_all_palette() * 4
 -- code = save_bitmap({paletteData, imageData},
 --                    "c:\\example\\a1.bmp")
 -- </eucode>
 --
 -- See Also:
--- 		[[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
+--   [[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
 
 export function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
@@ -750,7 +741,8 @@ ifdef DOS32 then
 --		//DOS32//
 --
 -- Parameters:
--- 		# ##r##: an object, either 0 (whole screen) or a {top left, bottom right} pair of {x,y} pairs of coordinates.
+-- 		# ##r##: an object, either 0 (whole screen) or a {top left, bottom right} pair
+--        of {x,y} pairs of coordinates.
 --		# ##file_name##: a sequence, the name of the save file.
 --
 -- Returns:
@@ -758,32 +750,33 @@ ifdef DOS32 then
 --
 -- Comments:
 -- The result will be one of the following codes:
---  <eucode>
---      export constant BMP_SUCCESS = 0,
---                 BMP_OPEN_FAILED = 1,
---                BMP_INVALID_MODE = 4 -- invalid graphics mode
---                                     -- or invalid argument
+-- <eucode>
+-- export constant
+--     BMP_SUCCESS = 0,
+--     BMP_OPEN_FAILED = 1,
+--     BMP_INVALID_MODE = 4 -- invalid graphics mode
+--                          -- or invalid argument
 -- </eucode>
 --  
--- [[:save_screen]]() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with [[:read_bitmap]](). Windows Paintbrush and some other tools do not support 4-color bitmaps.
+-- [[:save_screen]]() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with
+-- [[:read_bitmap]](). Windows Paintbrush and some other tools do not support 4-color bitmaps.
 --
 -- save_screen() only works in pixel-graphics modes, not text modes.
 --  
 -- Example 1: 
 -- <eucode> 
---  -- save whole screen:
+-- -- save whole screen:
 -- code = save_screen(0, "c:\\example\\a1.bmp")
 -- </eucode>
 -- 
 -- Example 2:  
 -- <eucode>  
---  -- save part of screen:
+-- -- save part of screen:
 -- err = save_screen({{0,0},{200, 15}}, "b1.bmp")
 -- </eucode>
 -- 
 -- See Also:
---
--- 		[[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
+--   [[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
 
 export function save_screen(region r, sequence file_name)
 	sequence vc

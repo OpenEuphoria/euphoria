@@ -406,7 +406,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
---  constant ITERATIONS = 1000000
+-- constant ITERATIONS = 1000000
 -- integer p
 -- atom t0, loop_overhead
 -- 
@@ -452,7 +452,7 @@ end type
 -- Example 1:
 --
 -- <eucode>
---  now = date() 
+-- now = date()
 -- -- now has: {95,3,24,23,47,38,6,83}
 -- -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
 -- </eucode>

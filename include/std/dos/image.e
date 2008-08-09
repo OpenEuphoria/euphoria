@@ -20,9 +20,6 @@ constant
 type page_number(integer p)
 	return p >= 0 and p <= 7
 end type
---****
--- === Routines
---
 
 --**
 -- Set how Euphoria should use the VESA standard to perform video operations.
@@ -45,7 +42,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
---  use_vesa(1)
+-- use_vesa(1)
 -- fail = graphics_mode(261)
 -- </eucode>
 -- 
@@ -98,10 +95,10 @@ end function
 -- This works under DOS, or in a full-screen DOS window. In a partial-screen window you cannot change the active page. 
 --  
 -- Example 1:
---	 See <a href="active_page">the set_active_page()</a> example.
+--   See the [[:set_active_page]] example.
 --
 -- See Also: 
---      [[:get_display_page]], [[:set_active_page]], [[:video_config]]
+--   [[:get_display_page]], [[:set_active_page]], [[:video_config]]
 
 
 export procedure set_display_page(page_number page)

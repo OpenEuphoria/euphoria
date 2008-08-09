@@ -9,7 +9,6 @@
 
 --****
 -- @[dyncall]
--- Dynamic calling of routines
 -- === Accessing Euphoria coded routines
 --
 
@@ -71,7 +70,7 @@
 --  
 -- Example 2:  
 -- <eucode>
---  function apply_to_all(sequence s, integer f)
+-- function apply_to_all(sequence s, integer f)
 --     -- apply a function to all elements of a sequence
 --     sequence result
 --     result = {}
@@ -157,7 +156,7 @@
 --
 -- Example 1:
 -- <eucode>
---  export integer foo_id
+-- export integer foo_id
 --
 -- procedure x()
 --     call_proc(foo_id, {1, "Hello World\n"})
@@ -173,12 +172,12 @@
 -- </eucode>
 --  
 -- See Also: 
--- [[:call_func]], [[:routine_id]], [[:c_proc]]
+--   [[:call_func]], [[:routine_id]], [[:c_proc]]
 
 --****
---=== Accessing Euphoria internals dynamically
+-- === Accessing Euphoria internals dynamically
 
---**
+--****
 -- Signature:
 -- global function machine_func(integer machine_id, object args)
 --
@@ -196,10 +195,10 @@
 --
 -- A direct call might cause a machine exception if done incorrectly.
 --
--- See Also: 
+-- See Also:
 -- [[:machine_func]]
 
---**
+--****
 -- Signature:
 -- global procedure machine_proc(integer machine_id, object args)
 --
@@ -214,7 +213,7 @@
 --
 -- A direct call might cause a machine exception if done incorrectly.
 --
--- See Also: 
+-- See Also:
 -- [[:machine_proc]]
 
 ifdef SAFE then

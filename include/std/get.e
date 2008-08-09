@@ -6,7 +6,6 @@ include error.e
 
 --****
 -- == Input Routines
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -21,7 +20,6 @@ include error.e
 -- * ##GET_FAIL## = 1,
 -- * ##GET_NOTHING## = -2
 
---**
 export constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
@@ -595,11 +593,9 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- If he types 77.5, get(0) would return:
---
 -- {GET_SUCCESS, 77.5}
 --
 -- -- whereas gets(0) would return:
---
 -- "77.5\n"
 -- </eucode>
 --

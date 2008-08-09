@@ -63,7 +63,7 @@ export enum
 -- * BRIGHT_RED
 -- * BRIGHT_WHITE
 --
--- Miscellaneous
+-- Miscellaneous:
 -- * BLINKING
 
 -- COLOR values -- for characters and pixels

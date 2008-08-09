@@ -2,7 +2,6 @@
 --
 --****
 -- == Console 
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 
@@ -36,13 +35,14 @@ constant
 --
 -- Example 1:
 -- <eucode>
--- 	integer n = get_key()
--- 	if n=-1 then puts(1, "No key waiting.\n") end if
+-- integer n = get_key()
+-- if n=-1 then
+--     puts(1, "No key waiting.\n")
+-- end if
 -- </eucode>
 --
 -- See Also:
---
--- 		[[:wait_key]]
+--   [[:wait_key]]
 
 --**
 -- Set behavior of CTRL+C/CTRL+Break
@@ -371,15 +371,14 @@ end ifdef
 --
 -- Example 1:
 -- <eucode>
---  -- read character and attributes at top left corner
+-- -- read character and attributes at top left corner
 -- s = get_screen_char(1,1) 
 -- -- store character and attributes at line 25, column 10
 -- put_screen_char(25, 10, {s})
 -- </eucode>
 -- 
 -- See Also: 
---
---      [[:put_screen_char]], [[:save_text_image]]
+--   [[:put_screen_char]], [[:save_text_image]]
 
 export function get_screen_char(positive_atom line, positive_atom column)
 	ifdef DOS32 then
@@ -421,14 +420,13 @@ end function
 --  
 -- Example 1:
 -- <eucode>
---  -- write AZ to the top left of the screen
+-- -- write AZ to the top left of the screen
 -- -- (attributes are platform-dependent)
--- put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
+-- put_screen_char(1, 1, {'A', 152, 'Z', 131})
 -- </eucode>
 -- 
 -- See Also: 
---
---       [[:get_screen_char]], [[:display_text_image]]
+--   [[:get_screen_char]], [[:display_text_image]]
 
 export procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
@@ -470,14 +468,14 @@ end procedure
 -- 
 -- Example 1:
 -- <eucode>
---  clear_screen()
+-- clear_screen()
 -- display_text_image({1,1}, {{'A', WHITE, 'B', GREEN},
 --                            {'C', RED+16*WHITE},
 --                            {'D', BLUE}})
 -- -- displays:
---      AB
---      C
---      D
+-- --     AB
+-- --     C
+-- --     D
 -- -- at the top left corner of the screen.
 -- -- 'A' will be white with black (0) background color,
 -- -- 'B' will be green on black, 
@@ -486,8 +484,7 @@ end procedure
 -- </eucode>
 -- 
 -- See Also:
---
--- 		[[:save_text_image]], [[:display_image]], [[:put_screen_char]]
+--   [[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
 
 export procedure display_text_image(text_point xy, sequence text)
@@ -548,27 +545,15 @@ end procedure
 -- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc. 
 -- 
 -- Example 1:
--- {{{
--- If the top 2 lines of the screen have:
---     Hello
---    World
---
---
---  And you execute:
--- }}}
 -- <eucode>
---  s = save_text_image({1,1}, {2,5})
--- </eucode>
--- {{{
---  Then s is something like:  
---      {"H-e-l-l-o-",
---      "W-o-r-l-d-"}
--- where '-' indicates the attribute bytes
--- }}}
--- 
--- See Also:
+-- -- Top 2 lines are: Hello and World
+-- s = save_text_image({1,1}, {2,5})
 --
---     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
+-- -- s is something like: {"H-e-l-l-o-", "W-o-r-l-d-"}
+-- </eucode>
+--
+-- See Also:
+--   [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
 export function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc

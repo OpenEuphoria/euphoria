@@ -1482,7 +1482,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- result = split("One,Two|Three.Four", ".,|")
+-- result = split_any("One,Two|Three.Four", ".,|")
 -- -- result is {"One", "Two", "Three", "Four"}
 -- </eucode>
 --

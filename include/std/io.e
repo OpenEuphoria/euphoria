@@ -2,7 +2,6 @@
 --
 --****
 -- == I/O
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 
@@ -44,6 +43,7 @@ export constant SCREEN = 1
 
 export constant EOF = -1
 
+
 --****
 -- === Read/Write Routines
 --
@@ -62,7 +62,7 @@ export constant EOF = -1
 -- </eucode>
 --
 -- See Also:
--- 		[[:print]]
+--   [[:print]]
 
 --**
 -- Signature:
@@ -235,8 +235,9 @@ export constant EOF = -1
 -- <eucode>
 -- puts(output, 'A')  -- the single byte 65 will be sent to output
 -- </eucode>
+--
 -- See Also:
--- 		[:print]]
+--   [[:print]]
 
 --**
 -- Signature:
@@ -722,8 +723,7 @@ end procedure
 -- block other processes from reading or writing it. It's ok for many processes to 
 -- simultaneously have shared locks on the same file, but only one process 
 -- can have an exclusive lock, and that can happen only when no other 
--- process has any kind of lock on the file. io.e contains the following
--- declaration:
+-- process has any kind of lock on the file. io.e contains the following declarations:
 -- 
 -- <eucode>
 -- export enum
@@ -813,7 +813,7 @@ end procedure
 -- Read the contents of a file as a sequence of lines.
 --
 -- Parameters:
---		#file##: an object, either a file path or the handle to an open file.
+--		##file##: an object, either a file path or the handle to an open file.
 --
 -- Returns:
 --		A **sequence** made of lines from the file, as [[:gets]] could read them.
@@ -870,7 +870,7 @@ end function
 -- Write a sequence of lines to a file.
 --
 -- Parameters:
---		# ##file#: an object, either a file path or the handle to an open file.
+--		# ##file##: an object, either a file path or the handle to an open file.
 --		# ##lines##: the sequence of lines to write
 --
 -- Returns:

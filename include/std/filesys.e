@@ -7,7 +7,6 @@
 --
 -- <<LEVELTOC depth=2>>
 
--- DOS support code borrowed from DOS.E by Daniel Berstein, Jacques Deschenes, and Rob Craig
 
 ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))

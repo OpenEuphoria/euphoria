@@ -204,34 +204,6 @@ end procedure
 
 --****
 -- === Graphics Modes
---
---**
--- argument to graphics_mode()
---
--- | mode |  description |
--- |  -1  | restore to original default mode |
--- |   0  | 40 x 25 text, 16 grey |
--- |   1  | 40 x 25 text, 16/8 color |
--- |   2  | 80 x 25 text, 16 grey |
--- |   3  | 80 x 25 text, 16/8 color |
--- |   4  | 320 x 200, 4 color |
--- |   5  | 320 x 200, 4 grey |
--- |   6  | 640 x 200, BW |
--- |   7  | 80 x 25 text, BW |
--- |  11  | 720 x 350, BW  (many video cards are lacking this one) |
--- |  13  | 320 x 200, 16 color |
--- |  14  | 640 x 200, 16 color |
--- |  15  | 640 x 350, BW  (may be 4-color with blinking) |
--- |  16  | 640 x 350, 4 or 16 color |
--- |  17  | 640 x 480, BW |
--- |  18  | 640 x 480, 16 color |
--- |  19  | 320 x 200, 256 color |
--- | 256  | 640 x 400, 256 color  (some cards are missing this one) |
--- | 257  | 640 x 480, 256 color  (some cards are missing this one) |
--- | 258  | 800 x 600, 16 color |
--- | 259  | 800 x 600, 256 color |
--- | 260  | 1024 x 768, 16 color |
--- | 261  | 1024 x 768, 256 color |
 
 type mode(integer x)
 	return (x >= -3 and x <= 19) or (x >= 256 and x <= 263)
@@ -262,7 +234,34 @@ end type
 -- On the //Windows// and //Unix// platforms, ##[[:graphics_mode]]()## will allocate a plain, text mode 
 -- console if one does not exist yet. It will then return 0, no matter what value is passed as m.
 --
--- Example:
+-- Possible graphic modes:
+--
+-- | mode |  description |
+-- |  -1  | restore to original default mode |
+-- |   0  | 40 x 25 text, 16 grey |
+-- |   1  | 40 x 25 text, 16/8 color |
+-- |   2  | 80 x 25 text, 16 grey |
+-- |   3  | 80 x 25 text, 16/8 color |
+-- |   4  | 320 x 200, 4 color |
+-- |   5  | 320 x 200, 4 grey |
+-- |   6  | 640 x 200, BW |
+-- |   7  | 80 x 25 text, BW |
+-- |  11  | 720 x 350, BW  (many video cards are lacking this one) |
+-- |  13  | 320 x 200, 16 color |
+-- |  14  | 640 x 200, 16 color |
+-- |  15  | 640 x 350, BW  (may be 4-color with blinking) |
+-- |  16  | 640 x 350, 4 or 16 color |
+-- |  17  | 640 x 480, BW |
+-- |  18  | 640 x 480, 16 color |
+-- |  19  | 320 x 200, 256 color |
+-- | 256  | 640 x 400, 256 color  (some cards are missing this one) |
+-- | 257  | 640 x 480, 256 color  (some cards are missing this one) |
+-- | 258  | 800 x 600, 16 color |
+-- | 259  | 800 x 600, 256 color |
+-- | 260  | 1024 x 768, 16 color |
+-- | 261  | 1024 x 768, 256 color |
+--
+-- Example 1:
 -- <eucode>	
 -- if graphics_mode(18) then
 --     puts(SCREEN, "need VGA graphics!\n")

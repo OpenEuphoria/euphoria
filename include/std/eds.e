@@ -2,7 +2,6 @@
 --
 --****
 -- == Euphoria Database (EDS)
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 
@@ -911,10 +910,11 @@ end function
 -- The return codes are:
 --
 -- <eucode>
---    * DB_OK = 0          -- success
---    * DB_OPEN_FAIL = -1  -- could not open the file
---    * DB_LOCK_FAIL = -3  -- could not lock the file in the
---                        --     manner requested
+-- export constant
+--     DB_OK = 0          -- success
+--     DB_OPEN_FAIL = -1  -- could not open the file
+--     DB_LOCK_FAIL = -3  -- could not lock the file in the
+--                        -- manner requested
 -- </eucode>
 --
 -- Comments:
@@ -936,24 +936,22 @@ end function
 --     if err = DB_OK then
 --         exit
 --     elsif err = DB_LOCK_FAIL then
---
---     	tries += 1
---     	if tries > 10 then
+--         tries += 1
+--         if tries > 10 then
 --             puts(2, "too many tries, giving up\n")
 --             abort(1)
---
---     	else
---     	    sleep(5)
---     	end if
+--         else
+--             sleep(5)
+--         end if
 --     else
---     	puts(2, "Couldn't open the database!\n")
---
---     	abort(1)
+--         puts(2, "Couldn't open the database!\n")
+--         abort(1)
 --     end if
 -- end while
 -- </eucode>
---  See Also:
--- 		[[:db_create]], [[:db_select]]
+--
+-- See Also:
+--   [[:db_create]], [[:db_select]]
 
 export function db_open(sequence path, integer lock_method)
 	integer db, magic
@@ -1018,7 +1016,7 @@ end function
 -- 		An **integer**, DB_OK on success or an error code.
 --
 -- Comments:
---Subsequent database operations will apply to this database. path is the
+-- Subsequent database operations will apply to this database. path is the
 -- path of the database file as it was originally opened with db_open()
 -- or db_create().\\
 -- When you create (db_create) or open (db_open) a database, it automatically
@@ -1033,8 +1031,9 @@ end function
 --     puts(2, "Could not select employees database\n")
 -- end if
 -- </eucode>
---  See Also:
--- 		[[:db_open]], [[:db_select]]
+--
+-- See Also:
+--   [[:db_open]], [[:db_select]]
 
 export function db_select(sequence path)
 	integer index
@@ -1139,7 +1138,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- 		[[:db_table_list]]
+--   [[:db_table_list]]
 
 export function db_select_table(sequence name)
 -- let table with the given name be the current table
@@ -1197,17 +1196,18 @@ end function
 --		# None.
 --
 -- Returns:
--- 		An **sequence**. The name of the current table. An empty string means
--- that no table is currently selected.
+--   An **sequence**. The name of the current table. An empty string means
+--   that no table is currently selected.
 --
 -- Example 1:
 -- <eucode>
 -- s = db_current_table()
 -- </eucode>
+--
 -- See Also:
--- 		[[:db_select_table]], [[:db_table_list]]
+--   [[:db_select_table]], [[:db_table_list]]
+
 export function db_current_table()
--- get name of currently selected table
 	return current_table_name
 end function
 
@@ -1238,11 +1238,11 @@ end function
 --     puts(2, "Could not create my_new_table!\n")
 -- end if
 -- </eucode>
+--
 -- See Also:
--- 		[[:db_select_table]], [[:db_table_list]]
+--   [[:db_select_table]], [[:db_table_list]]
 
 export function db_create_table(sequence name, integer init_records = INIT_RECORDS)
--- create a new table in the current database file
 	atom name_ptr, nt, tables, newtables, table, records_ptr
 	atom size, newsize, index_ptr
 	sequence remaining
@@ -1476,7 +1476,7 @@ export procedure db_clear_table(sequence name)
 	if table = current_table_pos then
 		key_pointers = {}
 	end if
-	
+
 end procedure
 
 --**
@@ -1531,10 +1531,7 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- sequence names
---
--- names = db_table_list()
---
+-- sequence names = db_table_list()
 -- for i = 1 to length(names) do
 --     puts(1, names[i] & '\n')
 -- end for
@@ -1767,7 +1764,7 @@ export function db_insert(object key, object data, object table_name=current_tab
 	putn(key_string)
 
 	-- increment number of records in whole table
-	
+
 	void = seek(current_db, current_table_pos+4)
 	total_recs = get4()+1
 	blocks = get4()
@@ -2052,6 +2049,7 @@ end procedure
 -- rec[2][3] *= 1.10
 -- db_replace_recid(rid, rec[2])
 -- </eucode>
+--
 -- See Also:
 -- 		[[:db_find_key]], [[:db_get_recid]]
 
@@ -2088,14 +2086,14 @@ end procedure
 --     # ##table_name##: optional table name to get the size of.
 --
 -- Returns
---		An **integer, the current number of records in the current table.
+--		An **integer**, the current number of records in the current table.
 --
 -- Errors:
 -- 		If the current table is undefined, an error will occur.
 --
 -- Example 1:
 -- <eucode>
--- look at all records in the current table
+-- -- look at all records in the current table
 -- for i = 1 to db_table_size() do
 --     if db_record_key(i) = 0 then
 --     	puts(1, "0 key found\n")
@@ -2225,7 +2223,7 @@ end function
 -- portion. Each of these can be any Euphoria atom or sequence.
 --
 -- This function does not need the requested record to be from the current
--- table. The recid can refer to a record in any table. 
+-- table. The recid can refer to a record in any table.
 --
 -- Errors:
 --		If the current table is not defined an error will occur.
@@ -2274,8 +2272,6 @@ end function
 -- database without copying these free areas. The size of the database file may
 -- therefore be reduced. If the backup filenames reach .t99 you will have to
 -- delete some of them.
---
--- Thanks to Mike Nelson!
 --
 -- Example 1:
 -- <eucode>
@@ -2384,14 +2380,13 @@ export function db_compress()
 end function
 
 --**
--- Get name of currently selected database.\\
--- Thanks to Tone Škoda!
+-- Get name of currently selected database.
 --
 -- Parameters:
 --		# None.
 --
 -- Returns:
--- 		An **sequence**. The name of the current database. An empty string means
+-- An **sequence**. The name of the current database. An empty string means
 -- that no database is currently selected.
 --
 -- Comments:
@@ -2401,8 +2396,10 @@ end function
 -- <eucode>
 -- s = db_current_database()
 -- </eucode>
+--
 -- See Also:
--- 		[[:db_select]]
+--   [[:db_select]]
+
 export function db_current ()
 	integer index
 

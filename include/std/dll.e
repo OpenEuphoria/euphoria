@@ -2,7 +2,6 @@
 --
 --****
 -- == Dynamic Linking to C
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --

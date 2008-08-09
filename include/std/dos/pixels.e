@@ -123,7 +123,7 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
---  display_image({20,30}, {{7,5,9,4,8},
+-- display_image({20,30}, {{7,5,9,4,8},
 --                         {2,4,1,2},
 --                         {1,0,1,0,4,6,1},
 --                         {5,5,5,5,5,5}})
@@ -135,8 +135,9 @@ end procedure
 --
 -- Example 2:
 --	 [[../demo/dos32/bitmap.ex]]
+--
 -- See Also: *
--- 		[[:save_image]], [[:read_bitmap]], [[:display_text_image]]
+--   [[:save_image]], [[:read_bitmap]], [[:display_text_image]]
 
 export procedure display_image(graphics_point xy, sequence pixels)
 	for i = 1 to length(pixels) do
@@ -164,7 +165,7 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
---  s = save_image({0,0}, {50,50})
+-- s = save_image({0,0}, {50,50})
 -- display_image({100,200}, s)
 -- display_image({300,400}, s)
 -- -- saves a 51x51 square image, then redisplays it at {100,200}
@@ -186,8 +187,3 @@ export function save_image(graphics_point top_left, graphics_point bottom_right)
 	end for
 	return save
 end function
-
-
-
-
-
