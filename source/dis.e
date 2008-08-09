@@ -404,10 +404,7 @@ procedure opRIGHT_BRACE_N()  -- form a sequence of any length
 end procedure
 
 procedure opRIGHT_BRACE_2()   -- form a sequence of length 2
-    target = Code[pc+3]
-    il( sprintf("RIGHT_BRACE_2: %s, %s => %s", names( Code[pc+2] & Code[pc+1] & target )), 2)
-    -- the second one comes first
-    pc += 4
+	binary()
 end procedure
 
 procedure opPLUS1() --or opPLUS1_I then
