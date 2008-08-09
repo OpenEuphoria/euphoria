@@ -387,3 +387,6 @@ global sequence Recorded = {}, Ns_recorded = {}, Recorded_sym = {}, Ns_recorded_
 
 global sequence goto_delay = {}, goto_list = {}
 
+global sequence private_sym = {}
+global integer use_private_list = 0
+

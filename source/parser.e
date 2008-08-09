@@ -439,9 +439,8 @@ procedure start_playback(sequence s)
 end procedure
 
 sequence parseargs_states={}
-sequence private_list = {}, private_sym = {}
+sequence private_list = {}
 integer lock_scanner = 0
-integer use_private_list = 0
 integer on_arg = 0
 
 procedure restore_parseargs_states()

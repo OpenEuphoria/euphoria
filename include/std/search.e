@@ -512,7 +512,7 @@ end function
 -- See Also:
 --   [[:find]], [[:rmatch]]
 
-export function rfind(object needle, sequence haystack, integer start=0) --length(haystack))
+export function rfind(object needle, sequence haystack, integer start=length(haystack))
 	integer len = length(haystack)
 
 	if start = 0 then start = len end if

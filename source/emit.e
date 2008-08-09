@@ -138,7 +138,7 @@ global function Pop()
 
 	t = cg_stack[$]
 	cg_stack = cg_stack[1..$-1]
-	if SymTab[t][S_MODE] = M_TEMP then
+	if SymTab[t][S_MODE] = M_TEMP and use_private_list and not find(t, private_sym) then
 		SymTab[t][S_SCOPE] = FREE -- mark it as being free
 						-- n.b. we assume one copy of temp on stack 
 						-- temps are normally not Popped & Pushed back on stack
@@ -310,6 +310,7 @@ procedure cont11ii(integer op, boolean ii)
 	emit_addr(source)
 	assignable = TRUE
 	t = op_result[op]
+	
 	 -- for PEEK should really check for IsAtom(source)
 	if t = T_INTEGER or (ii and IsInteger(source)) then
 		c = NewTempSym()
@@ -742,7 +743,7 @@ global procedure emit_op(integer op)
 	elsif find(op, {IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT,
 					LENGTH, GETC, SQRT, SIN, COS, TAN, ARCTAN, LOG, GETS, 
 					GET_PIXEL, GETENV}) then
-		cont11ii(op, FALSE)   
+		cont11ii(op, FALSE)
 
 	-- special 1 input, 1 output - also emits CurrentSub 
 	elsif op = ROUTINE_ID then
