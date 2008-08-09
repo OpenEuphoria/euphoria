@@ -462,14 +462,14 @@ function Get2()
 
 end function
 
+export constant
+	GET_SHORT_ANSWER = routine_id("Get"),
+	GET_LONG_ANSWER  = routine_id("Get2")
 --**
 -- Answer type for ##get##() and ##value##().
 -- 
 -- * ##GET_SHORT_ANSWER##
 -- * ##GET_LONG_ANSWER##
-export constant
-	GET_SHORT_ANSWER = routine_id("Get"),
-	GET_LONG_ANSWER  = routine_id("Get2")
 
 function get_value(object target, integer start_point, integer answer_type)
 	if answer_type != GET_SHORT_ANSWER and answer_type != GET_LONG_ANSWER then

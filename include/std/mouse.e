@@ -18,6 +18,15 @@
 
 --**
 -- Mouse Events
+-- The following constants can be used to identify and specify mouse events. They are platform dependent.
+-- * MOVE
+-- * LEFT_DOWN
+-- * LEFT_UP
+-- * RIGHT_DOWN
+-- * RIGHT_UP
+-- * MIDDLE_DOWN
+-- * MIDDLE_UP
+	
 
 export integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP, MIDDLE_DOWN, MIDDLE_UP, ANY_UP
 

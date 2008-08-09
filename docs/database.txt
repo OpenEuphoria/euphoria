@@ -62,15 +62,30 @@ easy to loop through the records looking for a particular field value.
 === How to access the data
 
 To reduce the number of parameters that you have to pass, there is a notion of
-the **current database**, and **current table**.  Most routines use these
+the **current database**, and **current table**. 
+
+==== The current databse.
+
+Any data operation or table operation assumes there is a current database being defined.
+You set the current database by opening, creating or selecting a database. Deleting the current database leaves the current database undefined.
+
+==== The current table.
+
+All data operations assume there is a current table being defined. You must create, select or
+rename a table in order to make it current. Deleting the current table leaves the current
+table undefined.
+
+==== Accessing data
+
+ Most routines use these
 **current** values automatically.  You normally start by opening (or creating)
 a database file, then selecting the table that you want to work with.
  
-You can map a key to a record number using [[db_find_key]]. It uses an
+You can map a key to a record number using [[:db_find_key]]. It uses an
 efficient binary search. Most of the other record-level routines expect the
-record number as an argument. You can very quickly access any record, given
+record number as a parameter. You can very quickly access any record, given
 it's number. You can access all the records by starting at record number 1 and
-looping through to the record number returned by [[db_table_size]].
+looping through to the record number returned by [[:db_table_size]].
  
 === How does storage get recycled?
 

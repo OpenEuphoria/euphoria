@@ -1,9 +1,8 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 
+--****
 -- == Dynamic Calling
---
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -12,9 +11,10 @@
 -- @[dyncall]
 -- Dynamic calling of routines
 -- === Accessing Euphoria coded routines
+--
 
 --**
--- Signature
+-- Signature:
 -- global function routine_id(sequence routine_name)
 --
 -- Description:
@@ -96,7 +96,7 @@
 -- [[:task_create]], [[../docs/platform.txt]], [[../docs/dynamic.txt]]
 
 --**
--- Signature
+-- Signature:
 -- global function call_func(integer id, sequence args)
 --
 -- Description:
@@ -133,6 +133,7 @@
 --**
 -- Signature:
 -- global procedure call_proc(integer id, sequence args)
+--
 -- Description:
 -- Call a user-defined Euphoria procedure by routine id.
 --

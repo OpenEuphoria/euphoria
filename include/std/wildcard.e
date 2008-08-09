@@ -6,6 +6,8 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+
+--****
 -- === Routines
 
 include text.e as txt -- upper/lower
@@ -48,6 +50,7 @@ constant END_MARKER = -1
 --		An **integer**, TRUE if ##string## matches ##pattern##, else FALSE.
 --
 -- Comments:
+--
 -- Character comparisons are case sensitive.
 -- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]](), or both through [[:lower]](), before calling ##wildcard_match##().
 --
@@ -77,7 +80,7 @@ constant END_MARKER = -1
 -- </eucode>
 --
 -- Example 4: 
--- [[../bin/search.ex]]
+-- ##bin/search.ex##
 --
 -- See Also: 
 -- [[:wildcard_file, match]], [[:upper]], [[:lower]], [[:Regular expressions]]
@@ -130,7 +133,6 @@ export function wildcard_match(sequence pattern, sequence string)
 end function
 
 --**
--- Return 1 (TRUE) 
 -- Determine whether a file name matches a wildcard pattern.
 --
 -- Parameters:
@@ -141,6 +143,7 @@ end function
 --		An **integer**, TRUE if ##filename## matches ##pattern##, else FALSE.
 --
 -- Comments:
+--
 --   Similar to DOS wild card matching but better. For example, 
 --   "*ABC.*" in DOS will match *all* files, where this function will 
 --   only match when the file name part has "ABC" at the end.
@@ -149,7 +152,7 @@ end function
 --
 -- You might use this function to check the output of the [[:dir]]() routine for file names that match a pattern supplied by the user of your program.
 --
--- In DOS "*ABC.*" will match all files. ##wildcard_file("*ABC.*", s)## will only match when the file name part has "ABC" at the end (as you would expect).
+-- In //DOS// "*ABC.*" will match all files. ##wildcard_file("*ABC.*", s)## will only match when the file name part has "ABC" at the end (as you would expect).
 --  
 -- Example 1: 
 -- <eucode> 
@@ -165,7 +168,7 @@ end function
 -- </eucode>
 --
 -- Example 3: 
--- [[../bin/search.ex]]
+-- ##bin/search.ex##
 --
 -- See Also: 
 -- [[:wildcard_match]], [[:dir]]

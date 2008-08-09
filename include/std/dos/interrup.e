@@ -2,11 +2,7 @@
 --
 
 --****
--- == Calling an interrupt under DOS
---
--- <<LEVELTOC depth=2>>
---
--- === Constants
+-- === Machine register constants
 --
 
 --**
@@ -43,9 +39,6 @@ export enum
 			   -- success/fail
 	REG_ES,
 	REG_DS
-
---**
--- register list type
 
 export type register_list(sequence r)
 -- a list of register values

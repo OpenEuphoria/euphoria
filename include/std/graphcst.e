@@ -101,14 +101,26 @@ end ifdef
 
 export constant BLINKING = 16  -- add to color to get blinking text
 
+export constant BYTES_PER_CHAR = 2
+
+ifdef DOS32 then
+export constant
+	COLOR_TEXT_MEMORY = #B8000,
+	MONO_TEXT_MEMORY = #B0000
+end ifdef
+
 export type color(integer x)
 	return x >= 0 and x <= 255
 end type
+
+--****
+-- ==== Routines
 
 --**
 -- Mixture Type
 --
 -- Comments:
+--
 -- A mixture is a ##{red, green, blue}## triple of intensities, which enables you to define
 -- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest
 -- white is {63, 63, 63}.
@@ -143,7 +155,8 @@ constant
 --	# number of display pages
 --
 -- Comments:
--- An enum is available for convenient access to the returned configuration data:
+--
+-- An exported enum is available for convenient access to the returned configuration data:
 -- <eucode>
 -- export constant
 --     VC_COLOR   = 1,

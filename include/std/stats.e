@@ -208,12 +208,13 @@ end function
 -- Returns the //estimated// standard deviation based on a random sample of the population. 
 --
 -- Parameters:
--- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
+-- # ##pData##: a list of 1 or more numbers for which you want the estimated standard deviation.
 --
 -- Returns:
 --    An **atom**, the estimated standard deviation.
 --
 -- Comments:
+--
 -- ##stdev##() is a measure of how values are different from the average. These numbers are
 -- assumed to represent a random sample, a subset, of a larger set of numbers.
 --
@@ -276,6 +277,7 @@ end function
 --    An **atom**, the estimated standard deviation.
 --
 -- Comments: 
+--
 -- ##stdeva##() is a measure of how values are different from the average.
 -- This function differs from stdev() in that stdeva() treats all elements that are
 -- sequences as having a value of zero.
@@ -341,11 +343,13 @@ end function
 --   An **atom**, the standard deviation of the population.
 --
 -- Comments: 
+--
 -- ##stdevp##() is a measure of how values are different from the average.
 -- This function differs from [[:stdevpa]]() in that ##stdevp##() ignores all elements that are
 -- sequences.
 --
--- The numbers are assumed to represent the entire population to test. This is how ##stdevp]]() differs from [[:stdev]](), as the mean does not depend on anything, and all observations are independent.
+-- The numbers are assumed to represent the entire population to test. This is how ##stdevp##()
+-- differs from [[:stdev]](), as the mean does not depend on anything, and all observations are independent.
 --
 -- The equation for average deviation is: 
 --
@@ -402,7 +406,9 @@ end function
 -- Returns:
 --   An **atom**, the standard deviation of the population.
 --
--- Comments: ##stdevpa##() is a measure of how values are different from the average.
+-- Comments:
+--
+-- ##stdevpa##() is a measure of how values are different from the average.
 -- This function differs from [[:stdevp]]() in that stdevpa() treats all elements that are
 -- sequences as having a value of zero. The numbers are assumed to represent the entire population to test.
 --
@@ -456,7 +462,6 @@ end function
 
 --**
 -- Returns the average of the absolute deviations of data points from their mean.
--- The equation for average deviation is: 
 --
 -- Parameters:
 --   # ##pData##: a list of 1 or more numbers for which you want the mean of the absolute deviations.
@@ -465,11 +470,12 @@ end function
 --   An **atom**, the average deviation from the mean.
 --
 -- Comments: 
+--
 --   ##avedev##() is a measure of the variability in a data set. Its statistical properties are well behaved than those of the standard deviation, which is why it is used less.
 --
 -- Note that only atom elements are included, any sub-sequences elements are ignored.
 --
--- The equation for absolute average deviation is:
+-- The equation for absolute average deviation is~:
 --
 -- {{{
 -- avedev(X) ==> SUM( ABS(X{1..N} - MEAN(X)) ) / N
@@ -526,11 +532,12 @@ end function
 --   An **atom**,  the sum of the atoms in the set.
 --
 -- Comments: 
+--
 --   ##sum##() is used as a measure of the magnitude of a sequence of positive values.
 --
 -- If ##pData## is an atom, then it is returned. Otherwise, atomic elements of a sequence are added up. If there are no atoms on ##pData##, the function returns 0.
 --
--- The equation is:
+-- The equation is~:
 --
 -- {{{
 -- sum(X) ==> SUM( X{1..N} )
@@ -566,6 +573,7 @@ end function
 --   # ##pData##: either an atom or a list.
 --
 -- Returns:
+--
 --    An **integer**, the number of atoms in the set. When ##pData## is an atom, 1 is returned.
 --
 -- Example 1:
@@ -603,6 +611,7 @@ end function
 --   An **integer**, the number of elements in the set. When ##pData## is an atom, 1 is returned.
 --
 -- Comments:
+--
 -- This routine extends [[:length]]() to atoms by returning 1 on atoms.
 --
 -- Example 1:
@@ -627,11 +636,6 @@ end function
 
 --**
 -- Returns the average (mean) of the data points.
--- The equation for average  is: 
---
--- {{{
--- average(X) ==> SUM( X{1..N} ) / N
--- }}}
 --
 -- Parameters:
 --   # pData = A list of 1 or more numbers for which you want the mean.
@@ -639,11 +643,19 @@ end function
 --             sub-sequences elements are ignored.
 --
 -- Returns:
---   **atom** (the mean) if there are one or more atoms in the set.
---   **sequence** (empty) if there are no atoms in the set.
+--	An **object**:
+-- * ##{}## (the empty sequence) if there are no atoms in the set.
+-- * an atom (the mean) if there are one or more atoms in the set.
 --
 -- Comments: 
---   average() is theoretical probable value of a randomly selected item from the set.
+--
+--   ##average##() is the theoretical probable value of a randomly selected item from the set.
+--
+-- The equation for average  is:
+--
+-- {{{
+-- average(X) ==> SUM( X{1..N} ) / N
+-- }}}
 --
 -- Example 1:
 --   <eucode>
@@ -675,7 +687,9 @@ end function
 --    An **object**, either ##{}## if there are no items in the set, or an **atom** (the mean) otherwise.
 --
 -- Comments:
---   ##averagea##() is the theoretical probable value of a randomly selected item from the set, at least when they follow a unimodal distribution.
+--
+--   ##averagea##() is the theoretical probable value of a randomly selected item from the 
+-- set, at least when they follow a unimodal distribution.
 --
 -- All elements are included; any sequence elements are assumed to have the value zero.
 --
@@ -717,14 +731,18 @@ end function
 -- If a list of weights was supplied, the result is a weighted average; otherwise, it is a simple average.
 --
 -- Comments: 
+--
 --   A moving average is used to smooth out a set of data points over a period.\\
---   For example, given a period of 5, the first returned element is the average
---   of the first five data points [1..5], the second returned element is
---   the average of the second five data points [2..6], and so on until
+--   For example, given a period of 5:
+-- # the first returned element is the average
+--   of the first five data points [1..5], 
+-- # the second returned element is
+--   the average of the second five data points [2..6], \\and so on \\until
 --   the last returned value is the average of the last 5 data points
 --   [$-4 .. $].
 --
--- When ##pPeriod## is an atom, it is rounded down to the width of the average. When it is a sequence, the width is its length. If there are not enough data points, zeroes are inserted.
+-- When ##pPeriod## is an atom, it is rounded down to the width of the average. When it is a 
+-- sequence, the width is its length. If there are not enough data points, zeroes are inserted.
 --
 --  Note that only atom elements are included and any sub-sequence elements are ignored.
 --
@@ -803,9 +821,10 @@ end function
 -- the supplied period is less than one.
 --
 -- Comments: 
+--
 --   A moving average is used to smooth out a set of data points over a period.
 --
--- The formula used:\\
+-- The formula used is:\\
 -- : ##Y,,i,, = Y,,i-1,, + F * (X,,i,, - Y,,i-1,,)##
 --
 -- Note that only atom elements are included and any sub-sequences elements are ignored.

@@ -34,7 +34,7 @@ export include console.e
 --   position() will report an error if the location is off the screen. The //Windows// console does not check for rows, as the physical height of the console may be vastly less than its logical height.
 --
 -- Comments:
---   position() works in both text and pixel-graphics modes.
+--   ##position##() works in both text and pixel-graphics modes.
 --
 --   The coordinate system for displaying text is different from the one for displaying
 --   pixels. Pixels are displayed such that the top-left is (x=0,y=0) and the first
@@ -71,14 +71,12 @@ export include console.e
 --
 -- See Also:
 --   [[:position]], [[:get_pixel]]
--- See Also:
--- 		[[:position]]
 
 export function get_position()
 	return machine_func(M_GET_POSITION, 0)
 end function
 
-
+include graphcst.e
 --**
 -- Set the foreground text color. 
 --
@@ -193,7 +191,7 @@ end procedure
 -- The position of the cursor after scrolling is not defined.
 --
 -- Example 1:
---   [[../bin/ed.ex]]
+--   ##bin/ed.ex##
 --
 -- See Also:
 --   [[:clear_screen]], [[:text_rows]]
@@ -243,7 +241,7 @@ end type
 -- Attempt to set up a new graphics mode.
 --
 -- Parameters:
--- 		# ##m###: an integer, the new graphic mode
+-- 		# ##m##: an integer, the new graphic mode
 --
 -- Returns:
 -- 		An **integer**, 0 on success, 1 on failure.

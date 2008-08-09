@@ -21,11 +21,11 @@ constant
 -- Signature:
 -- 		global function get_key()
 --
--- Returns:
---		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
---
 -- Description:
 --     Return the key that was pressed by the user, without waiting. Special codes are returned for the function keys, arrow keys etc.
+--
+-- Returns:
+--		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
 --
 -- Comments:
 --     The operating system can hold a small number of key-hits in its keyboard buffer. 
@@ -41,6 +41,7 @@ constant
 -- </eucode>
 --
 -- See Also:
+--
 -- 		[[:wait_key]]
 
 --**
@@ -51,22 +52,22 @@ constant
 -- Ctrl-C/Ctrl-Break, FALSE ( 0 ) to disable it.
 --
 -- Comments:
--- When i is 1 (true) CTRL+C and CTRL+Break can terminate
+-- When ##b## is 1 (true), CTRL+C and CTRL+Break can terminate
 -- your program when it tries to read input from the keyboard. When
 -- i is 0 (false) your program will not be terminated by CTRL+C or CTRL+Break.
 --
--- DOS will display ^C on the screen, even when your program cannot be terminated.
+-- //DOS// will display ^C on the screen, even when your program cannot be terminated.
 -- 
 -- Initially your program can be terminated at any point where
 --  it tries to read from the keyboard. It could also be terminated
 --  by other input/output operations depending on options the user
---  has set in his **config.sys** file. (Consult an MS-DOS manual for the BREAK
---  command.) For some types of program this sudden termination could leave
+--  has set in his **config.sys** file: consult an MS-DOS manual for the BREAK
+--  command. For some types of program this sudden termination could leave
 --  things in a messy state and might result in loss of data.
 --  ##allow_break##(0) lets you avoid this situation.
 --
 -- You can find out if the user has pressed Control-C or Control-Break by calling
--- check_break().
+-- [[:check_break]]().
 --
 -- Example 1:
 -- <eucode>
@@ -74,6 +75,7 @@ constant
 -- </eucode>
 --
 -- See Also:
+--
 -- 		[[:check_break]]
 
 export procedure allow_break(boolean b)
@@ -90,15 +92,16 @@ end procedure
 --  beginning of the program if this is the first call.
 --
 -- Comments:
--- This is useful after you have called allow_break(0) which
+--
+-- This is useful after you have called [[:allow_break]](0) which
 --  prevents CTRL+C or CTRL+Break from terminating your
---  program. You can use [[:check_break]]() to find out if the user
+--  program. You can use ##check_break##() to find out if the user
 --  has pressed one of these keys. You might then perform some action
 --  such as a graceful shutdown of your program.
 -- 
 -- Neither CTRL+C or CTRL+Break will be returned as input
 --  characters when you read the keyboard. You can only detect
---  them by calling check_break().
+--  them by calling ##check_break##().
 --
 -- Example 1:
 -- <eucode>
@@ -112,6 +115,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
+--
 -- 		[[:allow_break]]
 
 export function check_break()
@@ -126,12 +130,12 @@ end function
 --		An **integer**, which is a key code. If one is waiting in keyboard buffer, then return it. Otherwise, wait for one to come up.
 --
 -- Comments:
---     You could achieve the same result using get_key() as in the example.
--- 	   However, on multi-tasking systems like Windows or Linux/FreeBSD/OS X, this "busy waiting"
+--     You could achieve the same result using [[:get_key]]() as in the example.
+-- 	   However, on multi-tasking systems, that is, all except //DOS//, this "busy waiting"
 --     would tend to slow the system down. wait_key() lets the operating system do other
 --     useful work while your program is waiting for the user to press a key.
 --
---     You could also use getc(0), assuming file number 0 was input from the keyboard, except 
+--     You could also use [[:getc]](0), assuming file number 0 was input from the keyboard, except
 -- that you wouldn't pick up the special codes for function keys, arrow keys etc.
 --
 -- Example 1:
@@ -145,6 +149,7 @@ end function
 --     </eucode>
 --
 -- See Also:
+--
 -- 		[[:get_key]], [[:getc]]
 
 export function wait_key()
@@ -155,7 +160,11 @@ end function
 -- Display a prompt to the user and wait for any key.
 --
 -- Parameters:
---   ##prompt## - Prompt to display, defaults to "Press Any Key to continue..."
+-- 		# ##prompt## - Prompt to display, defaults to "Press Any Key to continue..."
+--
+-- Comments:
+-- This wraps [[:wait_key]] by giving a clue to user that s/he should press a key, and 
+-- perhaps do some other things as well.
 --
 -- Example 1:
 -- <eucode>
@@ -168,6 +177,7 @@ end function
 -- </eucode>
 --
 -- See Also:
+--
 -- 	[[:wait_key]]
 
 export procedure any_key(object prompt="Press Any Key to continue...")
@@ -191,10 +201,11 @@ end procedure
 -- 		An **atom** in the assigned range which the user typed in.
 --
 -- Errors:
--- 		If puts() cannot display ##st## on standard input, or if the first or second element
+-- 		If [[:puts]]() cannot display ##st## on standard output, or if the first or second element
 --      of ##s## is a sequence, a runtime error will be raised.
---		If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well 
---      on a type check error.
+--
+--		If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well,
+-- issuing a type check error.
 --
 -- Comments:
 -- 		As long as the user enters a number that is less than lower or greater
@@ -214,6 +225,7 @@ end procedure
 --   </eucode>
 --
 -- See Also:
+--
 -- 	[[:puts]], [[:prompt_string]]
 export function prompt_number(sequence prompt, sequence range)
 	object answer
@@ -231,9 +243,7 @@ export function prompt_number(sequence prompt, sequence range)
 				  if range[1] <= answer[2] and answer[2] <= range[2] then
 					  return answer[2]
 				  else
-					  printf(1,
-					  "A number from %g to %g is expected here - try again\n",
-					   range)
+					printf(1, "A number from %g to %g is expected here - try again\n", range)
 				  end if
 			  else
 				  return answer[2]
@@ -260,6 +270,7 @@ end function
 --     </eucode>
 --
 -- See Also:
+--
 -- 	[[:prompt_string]]
 
 export function prompt_string(sequence prompt)
@@ -282,10 +293,9 @@ end function
 
 constant M_CURSOR         = 6,
 		 M_TEXTROWS       = 12,
+		 M_FREE_CONSOLE = 54,
 		 M_GET_SCREEN_CHAR = 58,
 		 M_PUT_SCREEN_CHAR = 59
-
-constant BYTES_PER_CHAR = 2
 
 type positive_atom(atom x)
 	return x >= 1
@@ -301,13 +311,10 @@ export type positive_int(integer x)
 end type
 
 ifdef DOS32 then
-constant COLOR_TEXT_MEMORY = #B8000,
-	MONO_TEXT_MEMORY = #B0000
-
 include std/dos/image.e
 end ifdef
 
-export include graphcst.e
+include graphcst.e
 
 ifdef DOS32 then
 function DOS_scr_addr(sequence vc, text_point xy)
@@ -333,12 +340,15 @@ end ifdef
 -- global procedure clear_screen()
 --
 -- Description:
+--
 -- Clear the screen using the current background color (may be set by [[:bk_color]]()).
 --
 -- Comments: 
+--
 -- This works in all text and pixel-graphics modes.
 --
 -- See Also: 
+--
 -- [[:bk_color]], [[:graphics_mode]]
 --
 
@@ -348,6 +358,7 @@ end ifdef
 -- Parameters:
 -- 		# ##line##: the 1-base line number of the location
 -- 		# ##column##: the 1-base column number of the location
+--
 -- Returns:
 -- 		A **sequence**, the pair ##{character, attributes}## for the specified location.
 --
@@ -367,6 +378,7 @@ end ifdef
 -- </eucode>
 -- 
 -- See Also: 
+--
 --      [[:put_screen_char]], [[:save_text_image]]
 
 export function get_screen_char(positive_atom line, positive_atom column)
@@ -395,7 +407,8 @@ end function
 -- 		# ##char_attr##: a sequence of alternated characters and attributes.
 --
 -- Comments:
--- ##char_attr# must be in the form  ##{character, attributes, character, attributes, ...}##.
+--
+-- ##char_attr## must be in the form  ##{character, attributes, character, attributes, ...}##.
 --
 -- Errors: 
 -- 		The length of ##char_attr## must be a multiple of 2.
@@ -407,11 +420,14 @@ end function
 -- It's faster to write several characters to the screen with a single call to put_screen_char() than it is to write one character at a time. 
 --  
 -- Example 1:
+-- <eucode>
 --  -- write AZ to the top left of the screen
 -- -- (attributes are platform-dependent)
 -- put_screen_char(1, 1, {'A', 152, 'Z', 131}) 
+-- </eucode>
 -- 
 -- See Also: 
+--
 --       [[:get_screen_char]], [[:display_text_image]]
 
 export procedure put_screen_char(positive_atom line, positive_atom column, 
@@ -448,7 +464,9 @@ end procedure
 -- On //DOS32//, the attribute should consist of the foreground color plus 16 times the background color.
 -- ##text## may result from a previous call to [[:save_text_image]](), although you could construct it yourself. The sequences of the text image do not have to all be the same length.
 -- 
--- You might use save_text_image()/display_text_image() in a text-mode graphical user interface, to allow "pop-up" dialog boxes, and drop-down menus to appear and disappear without losing what was previously on the screen. 
+-- You might use [[:save_text_image]]()/[[:display_text_image]]() in a text-mode graphical 
+-- user interface, to allow "pop-up" dialog boxes, and drop-down menus to appear and disappear
+-- without losing what was previously on the screen.
 -- 
 -- Example 1:
 -- <eucode>
@@ -468,6 +486,7 @@ end procedure
 -- </eucode>
 -- 
 -- See Also:
+--
 -- 		[[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
 
@@ -548,6 +567,7 @@ end procedure
 -- }}}
 -- 
 -- See Also:
+--
 --     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
 export function save_text_image(text_point top_left, text_point bottom_right)
@@ -604,6 +624,7 @@ end function
 -- Values of 25, 28, 43 and 50 lines are supported by most video cards.
 --
 -- See Also:
+--
 --   [[:graphics_mode]], [[:video_fonfig]]
 
 export function text_rows(positive_int rows)
@@ -644,15 +665,54 @@ export constant
 --
 --   In pixel-graphics modes no cursor is displayed.
 --
--- Example:	
+-- Example 1:
 -- <eucode>
 -- cursor(BLOCK_CURSOR)
 -- </eucode>
 --
 -- See Also:
+--
 --   [[:graphics_mode]], [[:text_rows]]
 
 export procedure cursor(integer style)
 	machine_proc(M_CURSOR, style)
 end procedure
+
+--**
+-- Free (delete) any console window associated with your program.
+--
+-- Comments:
+--     Euphoria will create a console text window for your program the first time that your 
+--     program prints something to the screen, reads something from the keyboard, or in some 
+--     way needs a console (similar to a DOS-prompt window). On WIN32 this window will 
+--     automatically disappear when your program terminates, but you can call free_console()
+--     to make it disappear sooner. On Linux or FreeBSD, the text mode console is always 
+--     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt 
+--     at the end of execution.
+--
+--     On Unix-style systems, free_console() will set the terminal parameters back to normal,
+--     undoing the effect that curses has on the screen.
+--
+--     In an xterm window, a call to free_console(), without any further
+--     printing to the screen or reading from the keyboard, will eliminate the 
+--     "Press Enter" prompt that Euphoria normally issues at the end of execution.
+--
+--     After freeing the console window, you can create a new console window by printing 
+--     something to the screen, or simply calling clear_screen(), position() or any other 
+--     routine that needs a console.
+--
+--     When you use the trace facility, or when your program has an error, Euphoria will 
+--     automatically create a console window to display trace information, error messages etc.
+--
+--     There's a WIN32 API routine, FreeConsole() that does something similar to 
+--     free_console(). You should use free_console() instead, because it lets the interpreter know
+--     that there is no longer a console to write to or read from.
+--
+-- See Also:
+--     [[:clear_screen]]
+
+export procedure free_console()
+	machine_proc(M_FREE_CONSOLE, 0)
+end procedure
+
 

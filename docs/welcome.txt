@@ -13,13 +13,15 @@ Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical **
 
 Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
 **D**eployment **S**oftware (//RDS//).
-There are now thousands of users around the world.  There's an automated a
+There are now thousands of users around the world.  There's an automated
 [[http://www.OpenEuphoria.org/EUforum|discussion forum]], managed and moderated
 by a Euphoria program, and supporting over 500 subscribers.  The
 [[http://www.rapideuphoria.com|Euphoria Web site]] contains over 1800
 contributed compressed files packed with Euphoria source programs and library
-routines. Dozens of people have set up their own [[http://www.rapideuphoria.com/othersit.htm|independent Web pages with
-Euphoria-related content]].  Euphoria has been used in a variety of commercial
+routines. Dozens of people have set up their own 
+[[http://www.rapideuphoria.com/othersit.htm|independent Web pages]] 
+with Euphoria-related content.
+Euphoria has been used in a variety of commercial
 programs.  The //Windows// version has been used to create numerous GUI,
 utility and Internet-related programs. The //DOS// version has been used to
 create many exciting high-speed action games, complete with Sound Blaster sound
@@ -28,7 +30,7 @@ programs, Web-based (CGI, FastCGI and SCGI) programs, and lots of useful tools a
 
 == Yet Another Programming Language?
 
-Euphoria is a very-high-level programming language with several features that
+Euphoria is a very high-level programming language with several features that
 set it apart from the crowd:
 
 * Euphoria programs run on:
@@ -40,7 +42,7 @@ set it apart from the crowd:
 * Euphoria is free and open source
 * The language is flexible, powerful, and easy to learn.
 * There is no waiting for compiles and links - just edit and run. 
-* You can create and distribute a royalty-free, stand-alone executable files.
+* You can create and distribute royalty-free, stand-alone executable files.
 * Dynamic storage allocation is fundamental to Euphoria. Arrays grow or 
   shrink in size without the programmer having to worry about allocating and 
   freeing chunks of memory. Elements of an array (Euphoria sequence) can be 

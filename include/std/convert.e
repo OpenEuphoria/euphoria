@@ -1,5 +1,7 @@
 --****
--- == Data Type Conversion
+-- == Data type conversion
+--
+-- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -12,6 +14,9 @@ constant
 	M_A_TO_F32 = 48,
 	M_F32_TO_A = 49
 
+--****
+-- === Routines
+
 --**
 -- Converts an atom that represents an integer to a sequence of 4 bytes.
 --
@@ -23,10 +28,10 @@ constant
 -- Comments:
 -- If the atom does not fit into a 32-bit integer, things may still work right:
 -- * If there is a fractional part, the first element in the returned value
---   will carry it. If you poke the value to RAM, that fraction will be discarded anyway.
+--   will carry it. If you poke the sequence to RAM, that fraction will be discarded anyway.
 -- * If ##x## is simply too big, the first three bytes will still be correct, and the 4th 
---   element will be  floor(##x##/power(2,24)). If this is not a byte sized integer, some
---   truncation may occur, but usually o error.
+--   element will be  ##floor(x/power(2,24))##. If this is not a byte sized integer, some
+--   truncation may occur, but usually no error.
 --
 -- The integer can be negative. Negative byte-values will be returned, but
 -- after poking them into memory you will have the correct (two's complement)
@@ -39,6 +44,7 @@ constant
 -- </eucode>
 --  
 -- Example 2:  
+-- 
 -- <eucode>
 -- s = int_to_bytes(-999)
 -- -- s is {-231, -4, -1, -1}
@@ -248,19 +254,20 @@ end function
 --		A **sequence** of 4 bytes, which can be poked in memory to represent ##a##.
 --
 -- Comments: 
+--
 -- Euphoria atoms can have values which are 64-bit IEEE floating-point
 -- numbers, so you may lose precision when you convert to 32-bits
 -- (16 significant digits versus 7). The range of exponents is much larger
 -- in 64-bit format (10 to the 308, versus 10 to the 38), so some atoms may
 -- be too large or too small to represent in 32-bit format. In this case you
 -- will get one of the special 32-bit values: inf or -inf (infinity or
--- -infinity). To avoid this, you can use atom_to_float64().
+-- -infinity). To avoid this, you can use [[:atom_to_float64]]().
 --
 -- Integer values will also be converted to 32-bit floating-point format.
 --
--- On modern computers, computations on 64 bit floats are no faster than
+-- On modern computers, computations on 64 bit floats are no slower than
 -- on 32 bit floats. Internally, the PC stores them in 80 bit registers
--- anyway. Euphoria does not support these so called long doubles.
+-- anyway. Euphoria does not support these so called long doubles. Not all C compilers do.
 --
 -- Example 1:
 -- <eucode>

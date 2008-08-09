@@ -2,7 +2,6 @@
 --
 --****
 -- == Map (hash table)
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -44,8 +43,7 @@
 include std/get.e
 include std/primes.e
 include std/convert.e
-include std/math.e
-include std/stats.e as stats
+export include stats.e as stats
 include std/text.e
 include std/search.e
 include std/types.e
@@ -187,24 +185,26 @@ end type
 constant maxInt = #3FFFFFFF
 
 --****
--- === Routines
+-- === Support outines
 --
 
 --**
 -- Calculate a Hashing value from the supplied data.
 --
 -- Parameters:
---   * pData = The data for which you want a hash value calculated.
---   * pMaxHash = (default = 0) The returned value will be no larger than this value.
---     However, a value of 0 or lower menas that it can grow as large as the maximum integer value.
+--   # ##pData##: the data for which you want a hash value calculated.
+--   # ##pMaxHash##: an integer, which is a cap on the returned value. Defaults to 0 (no cap).
 --
 -- Returns:
 --		An **integer**, the value of which depends only on the supplied adata.
 --
 -- Comments:
+--
 -- This is used whenever you need a single number to represent the data you supply.
 -- It can calculate the number based on all the data you give it, which can be
 -- an atom or sequence of any value.
+--
+-- If ##pMaxHash## is less than one, the returned value can grow as large as the maximum Euphoria integer.
 --
 -- Example 1:
 --   <eucode>
@@ -253,18 +253,21 @@ export function calc_hash(object key, integer pMaxHash = 0)
 end function
 
 --**
--- Gets or Sets the threshold value that deterimes at what point a small map
--- converts into a large map structure. Initially this has been set to 50,
--- meaning that maps up to 50 elements use the 'small map' structure.
+-- Gets or Sets the threshhold value that determines at what point a small map
+-- converts into a large map structure.
 --
 -- Parameters:
--- # pNewValue = If this is greater than zero then it **sets** the threshold
--- value.
+-- # ##pNewValue##: an integer, 0 or less to get the threshhold, greater than zero to set.
 --
 -- Returns:
--- ##integer## The current value (when ##pNewValue## is less than 1) or the
--- old value prior to setting it to ##pNewValue##.
+-- An ##integer##:
+-- * when ##pNewValue## is less than 1, the current threshhold value; or
+-- * when ##pNewValue## is 1 or more, the prevous value of the threshhold.
 --
+-- Comments:
+--
+-- Initially this has been set to 50,
+-- meaning that maps up to 50 elements use the 'small map' structure.
 export function threshold(integer pNewValue = 0)
 
 	if pNewValue < 1 then
@@ -281,10 +284,10 @@ end function
 -- Determines the type of the map.
 --
 -- Parameters:
--- # m = A map
+-- # ##m##: the map being queried.
 --
 -- Returns:
--- ##integer## Either //SMALLMAP// or //LARGEMAP//
+-- An ##integer##, either ##SMALLMAP## or ##LARGEMAP##.
 --
 export function is_type(map m)
 
@@ -308,7 +311,8 @@ end function
 --
 -- Comment:
 -- If ##pRequestedSize## is not greater than zero, a new width is automatically derived from the current one.
--- SEe Also:
+--
+-- See Also:
 --		[[:statistics]], [[:optimise]]
 export function rehash(map m, integer pRequestedSize = 0)
 	integer size, index2
@@ -355,19 +359,23 @@ export function rehash(map m, integer pRequestedSize = 0)
 	return m0
 end function
 
+--****
+-- === Map management
+--
+
 --**
 -- Create a new map data structure
 --
 -- Parameters:
---		# ##initSize##: An estimate of how many initial elements will be stored
---   in the map. If this value is less than the [[:threshold]] value, the map
---   will initially be a //small// map otherwise it will be a //large// map.
+--		# ##initSize##: An initial estimate of how many elements will be stored
+--   in the map.
 --
 -- Returns:
 --		An empty **map**.
 --
 -- Comments:
---   A new object of type map is created.
+--   A new object of type map is created. If ##initSize## is less than the [[:threshold]] value, the map
+--   will initially be a //small// map otherwise it will be a //large// map.
 --
 -- Example 1:
 --   <eucode>
@@ -398,7 +406,7 @@ end function
 --		# ##key##: an object to be looked up
 --
 -- Returns:
---		An **intger**, 0 if not present, 1 if present.
+--		An **integer**, 0 if not present, 1 if present.
 --
 -- Example 1:
 --   <eucode>
@@ -461,7 +469,7 @@ end function
 --   end if
 --   </eucode>
 -- See Also:
---		[[:has]]
+--		[[:has]], [[:nested_get]]
 export function get(map m, object key, object defaultValue)
 	integer lIndex
 	integer lOffset
@@ -492,8 +500,25 @@ export function get(map m, object key, object defaultValue)
 end function
 
 --**
--- Returns the value that corresponds to the object ##keys## in the nested map m.  ##keys## is a
--- sequence of keys.  If any key is not in the map, the object defaultValue is returned instead.
+-- Returns the value that corresponds to a key in a nested map.
+--
+-- Parameters:
+--		# ##m##: the master map in which to search.
+--		# ##keys##: a non empty sequence, each element of which is a key in the previous one, which is a map.
+--		# ##defaultValue##: an object, to be return on an unsuccesful lookup.
+--
+-- Returns:
+-- An **object**, either the value associated to ##keys[$]## in its home map, or ##defaultValue## on failure.
+--
+-- Comments:
+--
+-- If any of the ##keys[i]## but the last is not a map, the search fails.
+--
+-- ##keys[1]## is looked up in ##m##. On success, ##keys[2]## is looked up in ##keys[1]##, and so on.
+-- The last step is an ordinary [[:get]]().
+--
+-- See Also:
+-- [[:get]]
 
 export function nested_get( map m, sequence keys, object defaultValue )
 	for i = 1 to length( keys ) - 1 do
@@ -691,6 +716,8 @@ export function put(map m, object key, object value, integer operation = PUT, in
 	end if
 end function
 
+--**
+-- Convenience new map.
 export constant BLANK_MAP = new()
 --**
 -- Adds or updates an entry on a map.
@@ -808,6 +835,10 @@ export function remove(map m, object key)
 	end if
 	return m0
 end function
+
+--****
+-- === Retrieving information from a map
+--
 
 --**
 -- Return the number of entries in a map.
@@ -1022,7 +1053,7 @@ end function
 --   keyvals = pairs(m) -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
 --   </eucode>
  -- See Also:
- --		[[:get]]
+ --		[[:get]], [[:keys]], [[:values]]
 export function pairs(map m)
 	sequence buckets, bucket
 	sequence ret
@@ -1052,6 +1083,10 @@ export function pairs(map m)
 	return ret
 end function
 
+--****
+-- === Optimisation
+--
+
 --**
 -- Widens a map to increase performance.
 --
@@ -1063,7 +1098,7 @@ end function
 --		The optimised **map**.
 --
 -- See Also:
---		{{:statistics]]
+--		[[:statistics]]
 export function optimize(map m, atom pAvg = 10)
 	sequence op
 	sequence m0
@@ -1081,6 +1116,10 @@ export function optimize(map m, atom pAvg = 10)
 	end if
 	return m0
 end function
+
+--****
+-- === Map serialization
+--
 
 --**
 -- Loads a map from a file
@@ -1114,6 +1153,7 @@ end function
 --        ShowIntructions()
 --    end if
 -- </eucode>
+--
 -- See Also:
 --		[[:new]], [[:save_map]]
 export function load_map(sequence pFileName)
@@ -1168,7 +1208,7 @@ end function
 --		# ##pFileName##: a sequence, the name of the file to save to.
 --
 -- Returns:
---		##integer## = The number of keys saved to the file.
+--		An ##integer##, the number of keys saved to the file.
 --
 -- Comments:
 -- It only saves key/value pairs if the keys only  contain letters, digits and

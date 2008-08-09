@@ -25,7 +25,7 @@ constant
 --
 -- Comments:
 -- 		The actual message being shown, both on standard error and in ex.err (or whatever 
--- 		file last passed to crash_file()), is ##sprintf(fmt, data)##.
+-- 		file last passed to [[:crash_file]]()), is ##sprintf(fmt, data)##.
 --		The program terminates as for any runtime error. 
 --
 -- Example 1:
@@ -59,7 +59,7 @@ end procedure
 --     # ##msg##: a sequence to display. It must only contain printable characters.
 --
 -- Comments:
---     There can be as many crash_message() call as needed in a program. Whatever was defined 
+--     There can be as many calls to ##crash_message##() as needed in a program. Whatever was defined
 --     last will be used in case of a runtime error.
 --
 -- Example 1:
@@ -84,8 +84,8 @@ end procedure
 -- 		# ##file_path##: a sequence, the new error and traceback file path.
 --
 -- Comments:
--- 		There can be as many calls to crash_file() as needed. Whatever was defined last will be used 
---      in case of an error at runtime, whether it was triggered by crash() or not.
+-- 		There can be as many calls to ##crash_file##() as needed. Whatever was defined last will be used
+--      in case of an error at runtime, whether it was triggered by [[:crash]]() or not.
 --
 -- See Also:
 -- 		[[:crash]], [[:crash_message]]
@@ -96,7 +96,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure abort(integer error)
+-- global procedure abort(atom error)
 --
 -- Description:
 -- Abort execution of the program. 
@@ -108,8 +108,8 @@ end procedure
 -- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a succsful completion.
 --
 -- Other values can indicate various kinds of errors. DOS batch (.bat) programs can read 
--- this value using the errorlevel feature.
--- A Euphoria program can read this value using system_exec().
+-- this value using the errorlevel feature. Non integer values are rounded down.
+-- A Euphoria program can read this value using [[:system_exec]]().
 --
 -- ##abort##() is useful when a program is many levels deep in subroutine calls, and execution must end immediately,
 -- perhaps due to a severe error that has been detected.
@@ -166,6 +166,60 @@ export procedure warning_file(object file_path)
 end procedure
 
 --**
+-- Signature:
+-- global procedure warning(sequence message)
+--
+-- Description:
+-- Causes the specified warning message to be displayed as a regular warning.
+--
+-- Parameters:
+-- 		# ##message##: a double quoted litteral string, the text to display.
+--
+-- Comments:
+--
+-- Writing a library has specific requirements, since the code you write will be mainly used
+-- inside code you didn't write. It may be desirable then to influence, from inside the library,
+-- that code you didn't write.
+-- 
+-- This is what ##warning##(), in a limited way, does. It enables to generate custom warnings in
+-- code that will include yours. Of course, you can also geenrate warnings in your own code, for
+-- instance as a kind of memo. The [[:without warning]] top level statement disables such warnings.
+--
+-- The warning is issued with the ##custom_warning## level. This level is enabled by default, 
+-- but can be turned off any time.
+--
+-- Using any kind of expression in ##message## will esult in a blank warning text.
+-- 
+-- Example 1:
+-- 
+-- <eucode>
+-- -- mylib.e
+-- procedure foo(integer n)
+--     warning("The foo() procedure is obsolete, use bar() instead.")
+--     ? n
+-- end procedure
+-- 
+-- -- some_app.exw
+-- include mylib.e
+-- foo(123)
+-- </eucode>
+-- 
+-- will result, when some_app.exw is run with warning, in the following text being
+-- displayed in the console window:
+-- 
+-- {{{
+-- 123
+-- Warning: ( custom_warning ):
+--     The foo() procedure is obsolete, use bar() instead.
+-- 
+-- Press Enter...
+-- }}}
+-- 
+-- See Also:
+-- [[:warning_file]]
+-- 
+
+--**
 -- Specify a function to be called when an error takes place at run time.
 --
 -- Parameters:
@@ -176,7 +230,7 @@ end procedure
 --   Defaulted parameters in crash routines are not supported yet.
 --
 --   Euphoria maintains a linked list of routines to execute upon a crash. crash_routine() adds 
---   a new function to the list. The routines are executed last defined first. You cannot unlink 
+--   a new function to the list. The routines defined first are executed last. You cannot unlink
 --   a routine once it is linked, nor inspect the crash routine chain.
 --
 --   Currently, the crash routines are passed 0. Future versions may attempt to convey more

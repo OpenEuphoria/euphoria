@@ -4,15 +4,20 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+
+--****
 -- === Routines
+
+constant M_SLEEP = 64
 
 --**
 -- Suspends a task for a short period, allowing other tasks to run in the meantime.
 --
--- Parameters
+-- Parameters:
 --		# ##delaytime##: an atom, the duration of the delay in seconds.
 --
 -- Comments:
+--
 -- This procedure is similar to [[:sleep]](), but allows for other tasks to run by yielding on a regular basis.
 -- Like [[:sleep]](), its argument needs not being an integer.
 --
@@ -34,7 +39,9 @@ end procedure
 --
 -- Description: 
 -- Restart the clock used for scheduling real-time tasks. 
+--
 -- Comments:
+--
 -- Call this routine, some time after calling task_clock_stop(), when you want scheduling of real-time tasks to continue.
 --
 -- [[:task_clock_stop]]() and ##task_clock_start##() can be used to freeze the scheduling of real-time tasks.
@@ -55,7 +62,8 @@ end procedure
 -- </eucode>
 --
 -- See Also: 
---  [[:task_clock_stop]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]], [[:task_delay]]
+--  [[:task_clock_stop]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]], 
+-- [[:task_delay]]
 -- 
 --**
 -- Signature:
@@ -65,6 +73,7 @@ end procedure
 -- Stop the scheduling of real-time tasks.
 --
 -- Comments:
+--
 -- Call ##task_clock_stop##() when you want to take time out from scheduling real-time tasks.
 -- For instance, you want to temporarily suspend a game or simulation for a period of time.
 --
@@ -75,7 +84,8 @@ end procedure
 -- The [[:time]]() function is not affected by this.
 --  
 -- See Also: 
---  [[:task_clock_start]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]], [[:task_delay]]
+--  [[:task_clock_start]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]], 
+-- [[:task_delay]]
 --
 --**
 -- Signature:
@@ -95,6 +105,7 @@ end procedure
 -- There must be at most 12 parameters in ##args##.
 --
 -- Comments:
+--
 -- ##task_create##() creates a new task, but does not start it executing. You must call [[:task_schedule]]() for this purpose.
 --
 -- Each task has its own set of private variables and its own call stack. Global and local variables are shared between all tasks.
@@ -127,6 +138,7 @@ end procedure
 -- A **sequence** of atoms, the list of all task that are or may be scheduled.
 --
 -- Comments: 
+--
 -- This function lets you find out which tasks currently exist. Tasks that have terminated are not included. 
 -- You can pass a task id to [[:task_status]]() to find out more about a particular task.
 --
@@ -157,6 +169,7 @@ end procedure
 --		# ##schedule##: an object, describing when and how often to run the task.
 --
 -- Comments:
+--
 -- ##task_id## must have been returned by [[:task_create]]().
 --
 -- The task scheduler, which is built-in to the Euphoria run-time system, will use ##schedule 
@@ -165,23 +178,25 @@ end procedure
 -- long before yielding control, that another task misses its desired time window.
 --
 -- ##schedule## is being interpreted as follows:
--- # ##schedule## is an integer
--- ----
--- : This defines ##task_id## as time shared, and tells the task scheduler how many times it
+-- ===== ##schedule## is an integer
+--
+-- This defines ##task_id## as time shared, and tells the task scheduler how many times it
 -- should the task in one burst before it considers running other tasks. ##schedule## must be greater than zero then.
 --
--- : Increasing this count will increase the percentage of CPU time given to the selected task, 
+-- Increasing this count will increase the percentage of CPU time given to the selected task,
 -- while decreasing the percentage given to other time-shared tasks. Use trial and error to find the optimal trade off. 
 -- It will also increase the efficiency of the program, since each actual task switch wastes a bit of time.
 --
--- # ##schedule is a sequence
--- ----
--- : In this case, it must be a pair of positive atoms, the first one not being less than the second one.
+-- ===== ##schedule is a sequence
+-- -
+-- In this case, it must be a pair of positive atoms, the first one not being less than the second one.
 -- This defines ##task_id## as a real time task.
 -- The pair states the minimum and maximum times, in seconds, to wait before running the task. 
 -- The pair also sets the time interval for subsequent runs of the task, until the next call to ##task_schedule##() or [[:task_suspend]]().
 --
--- : Real-time tasks have a higher priority. Time-shared tasks are run when no real-time task is ready to execute.
+-- Real-time tasks have a higher priority. Time-shared tasks are run when no real-time task is ready to execute.
+--
+-- ----
 --
 -- A task can switch back and forth between real-time and time-shared. It all depends on the last call to ##task_schedule##() for that task. 
 -- The scheduler never runs a real-time task before the start of its time frame (min value in the ##{min, max}## pair),
@@ -236,6 +251,7 @@ end procedure
 -- Return the task id of the current task.
 --
 -- Comments: 
+--
 -- This value may be needed, if a task wants to schedule or suspend itself.
 --
 -- Example 1:
@@ -264,6 +280,7 @@ end procedure
 -- * 1 : task is active
 --
 -- Comments:
+--
 -- A task might want to know the status of one or more other tasks when deciding whether to proceed with some processing.
 --
 -- Example 1:
@@ -294,6 +311,7 @@ end procedure
 -- 		# ##task_id##: an atom, the id of the task to suspend.
 --
 -- Comments:
+--
 -- A suspended task will not be executed again unless there is a call to [[:task_schedule]]() for the task.
 --
 -- ##task_id## is a task id returned from [[:task_create]]().
@@ -325,6 +343,7 @@ end procedure
 -- perhaps let the current task continue running.
 --
 -- Comments: 
+-- 
 -- Tasks should call ##task_yield##() periodically so other tasks will have a chance to run. 
 -- Only when ##task_yield##() is called, is there a way for the scheduler to take back control 
 -- from a task. This is what's known as cooperative multitasking.
@@ -351,7 +370,7 @@ end procedure
 -- With cooperative multitasking, these concurrency issues are much less of a problem than with
 -- the preemptive multitasking that other languages support.
 --  
--- Example:  
+-- Example 1:
 -- <eucode>
 --  -- From Language war game.
 -- -- This small task deducts life support energy from either the

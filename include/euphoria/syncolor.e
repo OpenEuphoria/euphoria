@@ -4,7 +4,7 @@
 -- Break Euphoria statements into words with multiple colors.
 -- The editor and pretty printer (eprint.ex) both use this file.
 
--- The user can define the following symbols to be colors for the
+-- The user can define the following identifiers to be colors for the
 -- various syntax classes:
 --		 NORMAL_COLOR
 --		COMMENT_COLOR

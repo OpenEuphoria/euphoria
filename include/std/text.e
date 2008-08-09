@@ -6,9 +6,11 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+
+--****
 -- === Routines
 
-include std/types.e
+include types.e
 
 --**
 -- Signature:
@@ -18,7 +20,15 @@ include std/types.e
 -- This is exactly the same as [[:printf]](), except that the output is returned as a sequence
 -- of characters, rather than being sent to a file or device. 
 --
+-- Parameters:
+--		# ##format##: a sequence, the text to print. This text may contain format specifiers.
+--		# ##values##: usually, a sequence of values. It should have as many elements as format specifiers in ##format##, as these values will be substituted to the specifiers.
+--
+-- Returns:
+-- A **squence** of printable characters, representing ##format## with the values in ##values## spliced in.
+--
 -- Comments:
+--
 -- ##printf(fn, st, x)## is equivalent to ##puts(fn, sprintf(st, x))##.
 --
 -- Some typical uses of ##sprintf()## are:
@@ -46,6 +56,7 @@ include std/types.e
 --   A **sequence**, a string representation of ##x##.
 --
 -- Comments:
+--
 -- This is exactly the same as ##print(fn, x)##, except that the output is returned as a sequence of characters, rather
 -- than being sent to a file or device. x can be any Euphoria object.
 --
@@ -102,6 +113,7 @@ end function
 --   # ##what##: the list of items to trim (defaults to " \t\r\n").
 --
 -- Returns:
+--
 --   A **sequence**, the trimmed version of ##source##.
 --
 -- Example 1:
@@ -135,6 +147,7 @@ end function
 --   # ##what##: the list of what to trim (defaults to " \t\r\n").
 --
 -- Returns:
+--
 --   A **sequence**, the trimmed version of ##source##
 --
 -- Example 1:
@@ -168,6 +181,7 @@ end function
 --   # ##what## - what to trim (defaults to " \t\r\n").
 --
 -- Returns:
+--
 --   A **sequence**, the trimmed version of ##source##
 --
 -- Example 1:
@@ -195,7 +209,9 @@ constant TO_LOWER = 'a' - 'A'
 --   A **sequence**, the lowercase version of ##x##
 --
 -- Comments:
--- Alters characters in the 'A'..'Z' range. \\
+--
+-- Alters characters in the 'A'..'Z' range. ##x## may be a sequence of any shape, all atoms of which will be acted upon.
+--
 -- **WARNING**, This also effects floating point numbers in the range 65 to 90.
 --
 -- Example 1:
@@ -228,7 +244,8 @@ end function
 --   A **sequence**, the uppercase version of ##x##
 --
 -- Comments:
--- Alters characters in the 'a'..'z' range. \\
+-- Alters characters in the 'a'..'z' range. ##x## may be a sequence of any shape, all atoms of which will be acted upon.
+--
 -- **WARNING**, This also effects floating point numbers in the range 97 to 122.
 --
 -- Example 1:
@@ -282,8 +299,6 @@ end function
 -- -- s is {'a', 'b', c', 3.1472} -- Unchanged because it contains a non-character.
 -- s = proper({"abc", 3.1472})
 -- -- s is {"Abc", 3.1472} -- The embedded text sequence is converted.
--- s = proper("We'd all come o'er and \"that'll be 'OK'\", i've heard the David's say.") -- Use of special word characters.
--- -- s is "We'd All Come O'er And \"That'll Be 'ok'\", I've Heard The David's Say."
 -- </eucode>
 --
 -- See Also:
@@ -364,28 +379,6 @@ end function
 -- Converts a string containing Key/Value pairs into a set of
 -- sequences, one per K/V pair.
 --
--- By default, pairs can be delimited by either a comma or semi-colon ",;" and
--- a key is delimited from its value by either an equal or a colon "=:". 
--- Whitespace between pairs, and between delimiters is ignored.
---
--- By default, each value must have a key and if you don't supply one, the
--- routine generates a key in the format "p[<n>]" where <n> is the count of
--- K/V pairs so far processed. See example #2.
---
--- If you need to have one of the delimiters in the value data, enclose it in
--- quotation marks. You can use any of single, double and back quotes, which 
--- also means you can quote quotation marks themselves. See example #3.
---
--- It is possible that the value data itself is a nested set of pairs. To do
--- this enclose the value in parentheses. Nested sets can nested to any level.
--- See example #4.
---
--- If a sublist has only data values and not keys, enclose it in either braces
--- or square brackets. See example #5.
--- If you need to have a bracket as the first character in a data value, prefix
--- it with a tilde. Actually a leading tilde will always just be stripped off
--- regardless of what it prefixes. See example #6.
---
 -- Parameters:
 -- # ##source##: a text sequence, containing the representation of the key/values.
 -- # ##pair_delim##: an object containing a list of elements that delimit one
@@ -408,9 +401,29 @@ end function
 -- 		A **sequence** of pairs. Each pair is in the form {key, value}.
 --
 -- Comments:
+--
 -- String representations of atoms are not converted, either in the key or value part, but returned as any regular string instead.
 --
--- If ##haskeys## is ##true##, but a substring only has what appears to be a value, the key is synthesized as ##p[n]##, where ##n## is the number of the pair.
+-- If ##haskeys## is ##true##, but a substring only holds what appears to be a value, the key 
+-- is synthesized as ##p[n]##, where ##n## is the number of the pair. See example #2.
+--
+-- By default, pairs can be delimited by either a comma or semi-colon ",;" and
+-- a key is delimited from its value by either an equal or a colon "=:". 
+-- Whitespace between pairs, and between delimiters is ignored.
+--
+-- If you need to have one of the delimiters in the value data, enclose it in
+-- quotation marks. You can use any of single, double and back quotes, which 
+-- also means you can quote quotation marks themselves. See example #3.
+--
+-- It is possible that the value data itself is a nested set of pairs. To do
+-- this enclose the value in parentheses. Nested sets can nested to any level.
+-- See example #4.
+--
+-- If a sublist has only data values and not keys, enclose it in either braces
+-- or square brackets. See example #5.
+-- If you need to have a bracket as the first character in a data value, prefix
+-- it with a tilde. Actually a leading tilde will always just be stripped off
+-- regardless of what it prefixes. See example #6.
 --
 -- Example 1:
 -- <eucode>

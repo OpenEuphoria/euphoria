@@ -702,10 +702,11 @@ procedure ParseArgs(symtab_index subsym)
 						s = SymTab[s][S_NEXT]
 						if sequence(SymTab[s][S_CODE]) then
 						-- some defaulted arg follows with a default value
-
 							putback( tok )
 							start_playback(SymTab[s][S_CODE] )
+							?j if length(SymTab)=254 then ?SymTab[254] end if
 							call_proc(forward_expr, {})
+							?j if length(SymTab)=254 then ?SymTab[254] end if
 							if j<n then
 								private_list = append(private_list,SymTab[s][S_NAME])
 								private_sym &= Top()
@@ -850,7 +851,8 @@ procedure Factor()
 		end if
 		tok_match(LEFT_ROUND)
 		scope = SymTab[tok[T_SYM]][S_SCOPE]
-		opcode = SymTab[tok[T_SYM]][S_OPCODE]
+		opcode = SymTab[tok[T_SYM]][S_OPCODE] 
+		if opcode=LENGTH and length(SymTab)=254 then ?SymTab[254] end if
 		--if equal(SymTab[tok[T_SYM]][S_NAME],"object") then
 		if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
 			tok2 = next_token()
@@ -929,6 +931,7 @@ procedure Factor()
 		else
 			ParseArgs(tok[T_SYM])
 		end if
+		if opcode=LENGTH and length(SymTab)=254 then ?SymTab[254] end if
 		if scope = SC_PREDEF then
 			emit_op(opcode)
 		else

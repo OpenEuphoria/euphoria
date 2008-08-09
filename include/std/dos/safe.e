@@ -1,12 +1,4 @@
 
---****
--- == DOS low level routines
---
--- **Page Contents**
---
--- <<LEVELTOC depth=2>>
---
-
 include base_mem.e
 
 include ../safe.e
@@ -20,7 +12,6 @@ safe_address_list = {
 		-- add more here
 }
 
---**
 -- Allocate a contiguous block of conventional memory (address below 1 megabyte).
 --
 -- Platform:
@@ -53,7 +44,6 @@ export function allocate_low(positive_int n)
 	return prepare_block(a, n)
 end function
 
---**
 -- Free up a previously allocated block of conventional memory.
 --
 -- Platform:
@@ -93,9 +83,9 @@ export procedure free_low(low_machine_addr a)
 				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
 			end if
 			n = safe_address_list[i][2]
-			if not equal(leader, original_peek({a-BORDER_SPACE, BORDER_SPACE})) then
+			if not equal(leader, eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
-			elsif not equal(trailer, original_peek({a+n, BORDER_SPACE})) then
+			elsif not equal(trailer, eu:peek({a+n, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
 			end if          
 			machine_proc(M_FREE_LOW, a-BORDER_SPACE)

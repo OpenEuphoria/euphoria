@@ -8,7 +8,7 @@
 --
 
 include dll.e
-include machine.e
+export include machine.e
 
 without warning
 
@@ -47,6 +47,7 @@ export constant
 	MB_YESNO = #04,                   -- Message box contains Yes and No
 	MB_YESNOCANCEL = #03              -- Message box contains Yes, No, and Cancel
 
+--**
 -- possible values returned by MessageBox() 
 -- 0 means failure
 export constant IDABORT = 3,  -- Abort button was selected.

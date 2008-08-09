@@ -19,6 +19,28 @@ export constant FALSE = 0
 
 export constant TRUE = 1
 
+--**
+-- Predefined character sets:
+export enum
+	CS_FIRST = 0,
+	CS_Consonant,
+	CS_Vowel,
+	CS_Hexadecimal,
+	CS_Whitespace,
+	CS_Punctuation,
+	CS_Printable,
+	CS_Lowercase,
+	CS_Uppercase,
+	CS_Alphanumeric ,
+	CS_Alphabetic ,
+	CS_ASCII,
+	CS_Control,
+	CS_Digit,
+	CS_Graphic,
+	CS_Bytes,
+	CS_SpecWord,
+	CS_LAST
+
 --****
 -- === Support Functions
 --
@@ -34,9 +56,10 @@ export constant TRUE = 1
 --		An **integer**, 1 if all characters are allowed, else 0.
 --
 -- Comments:
+--
 -- ##pCharset## is either a simple sequence of characters eg. "qwertyuiop[]\\"
 -- or a sequence of character pairs, which represent allowable ranges
--- of characters. eg. Alphabetic is defined as {{'a','z'}, {'A', 'Z'}}
+-- of characters. eg. Alphabetic is defined as ~{{'a','z'}, {'A', 'Z'}}
 --
 -- To add an isolated character to a character set which is defined using ranges, present it as a range of length 1, like in ##{%,%}##.
 --
@@ -91,29 +114,6 @@ end function
 sequence Defined_Sets
 
 --**
--- Predefined character sets:
-export enum
-	CS_FIRST = 0,
-	CS_Consonant,
-	CS_Vowel,
-	CS_Hexadecimal,
-	CS_Whitespace,
-	CS_Punctuation,
-	CS_Printable,
-	CS_Lowercase,
-	CS_Uppercase,
-	CS_Alphanumeric ,
-	CS_Alphabetic ,
-	CS_ASCII,
-	CS_Control,
-	CS_Digit,
-	CS_Graphic,
-	CS_Bytes,
-	CS_SpecWord,
-	CS_LAST
-
-
---** 
 -- Sets all the defined character sets to their default definitions.
 --
 -- Example 1:
@@ -138,7 +138,7 @@ export procedure set_default_charsets()
 	Defined_Sets[CS_Digit 		] = {{'0', '9'}}
 	Defined_Sets[CS_Graphic 	] = {{'!', '~'}}
 	Defined_Sets[CS_Bytes	 	] = {{0, 255}}
-	Defined_Sets[CS_SpecWord 	] = "_'"
+	Defined_Sets[CS_SpecWord 	] = "_"
 end procedure
 
 --** 

@@ -86,7 +86,7 @@ end function
 -- key value
 -- }}}
 --
--- withhout any space in the key part, or else start with a ~#~ character, in which case they are 
+-- without any space in the key part, or else start with a ~#~ character, in which case they are 
 -- treated as comments. Leading whitespace does not count.
 --
 -- See Also:
@@ -255,7 +255,7 @@ end ifdef
 -- refers to metropolitan France, while "fr_BE" refers to the variant spoken in Wallonie, the 
 -- French speaking region of Belgium.
 --
--- The optional .xyz part specifies an encoding, like .utf8. This is required in some cases.
+-- The optional .xyz part specifies an encoding, like .utf8 or .1252 . This is required in some cases.
 
 export function set(sequence new_locale)
 	atom pLocale, ign
@@ -344,10 +344,11 @@ export function money(atom amount)
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string("%n")
 		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
-	else
+	elsifdef WIN32 then
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string(sprintf("%.8f", {amount}))
 		size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
+	-- else doesn't work under DOS
 	end ifdef
 
 	result = peek_string(pResult)
@@ -384,10 +385,11 @@ export function number(atom num)
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string("%!n")
 		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
-	else
+	elsifdef WIN32 then
 		pResult = allocate(4 * 160)
 		pTmp = allocate_string(sprintf("%.8f", {num}))
 		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
+	-- else doesn't work under DOS
 	end ifdef
 
 	result = peek_string(pResult)

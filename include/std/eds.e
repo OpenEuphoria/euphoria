@@ -1587,6 +1587,7 @@ end function
 -- 		If the current table is not defined, an error is raised.
 --
 -- Comments:
+--
 -- 		A fast binary search is used to find the key in the current table.
 -- The number of comparisons is proportional to the log of the number of
 -- records in the table. The key is unique - a table is more like a dictionary than like a spreadsheet.
@@ -1741,7 +1742,7 @@ end function
 --
 -- See Also:
 --		[[:db_delete_record]]
-with trace
+
 export function db_insert(object key, object data, object table_name=current_table_name)
 	sequence key_string, data_string, last_part, remaining
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size

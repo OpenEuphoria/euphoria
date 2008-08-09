@@ -194,5 +194,5 @@ completed a logical operation.
 === Summary 
  
 For a complete function reference, refer to the Library Documentation
-href="lib_task.htm">Multitasking</a>.
+[[:Multitasking]].
 

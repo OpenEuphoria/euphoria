@@ -239,7 +239,7 @@ existence of hardware floating-point. This can cause floating-point intensive
 programs to run about twice as fast, but they will fail to run at all on old
 486's and 386's that are lacking hardware floating-point support. With
 ##-fastfp##, ##emake.bat## chooses faster WATCOM C compiler options, and
-##emake.bat## must also link in ##ecfastfp.lib# instead of ##ec.lib##.
+##emake.bat## must also link in ##ecfastfp.lib## instead of ##ec.lib##.
 
 On all other platforms, Euphoria uses fast hardware floating-point
 instructions, and the operating system handles the case where hardware f.p. is
@@ -278,10 +278,10 @@ the "##global##" keyword, will be exported from the ##.dll## (##.so##).
 
 Any Euphoria program, whether translated/compiled or interpreted, can link
 with a Euphoria ##.dll## (##.so##) using the same mechanism that lets you link with a
-##.dll## (##.so##) written in C. The program first calls ##open_dll()## to open the
-##.dll## or ##.so## file, then it calls ##define_c_func()## or ##define_c_proc()## for
-any routines that it wants to call. It calls these routines using ##c_func()##
-and ##c_proc()##. See **library.doc** for the details.
+##.dll## (##.so##) written in C. The program first calls [[:open_dll]]() to open the
+##.dll## or ##.so## file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
+any routines that it wants to call. It calls these routines using [[:c_func]]()
+and [[:c_proc]]().
 
 The routine names exported from a Euphoria ##.dll## will vary depending on which C
 compiler you use.
@@ -295,35 +295,35 @@ global procedure foo(integer x, integer y)
 
 would be exported as "##_0foo##" or maybe "##_1foo##" etc. The underscore and digit
 are added to prevent naming conflicts. The digit refers to the Euphoria file
-where the symbol is defined. The main file is numbered as 0. The include files
+where the identifier is defined. The main file is numbered as 0. The include files
 are numbered in the order they are encountered by the compiler. You should
 check the C source to be sure.
 
-Lcc would export ##foo()## as "##__0foo@8##", where 8 is the number of parameters (2)
+Lcc would export ##foo()## as "##~__0foo@8##", where 8 is the number of parameters (2)
 times 4. You can check the ##.def## file created by the **Translator** to see all
 the exported names.
 
 For Borland the **Translator** also creates a ##.def## file, but this ##.def## file
-renames the exported symbols back into the same names that you used in your
+renames the exported identifiers back into the same names that you used in your
 Euphoria source, so ##foo()## would be exported as "##foo##". 
 
 For Watcom the same renaming as with Borland occurs, but instead of a ##.def##
-file, an EXPORT command is added to ##objfiles.lnk## for each exported symbol.
+file, an EXPORT command is added to ##objfiles.lnk## for each exported identifier.
 
 With Borland and Watcom you can edit the ##.def## or ##objfiles.lnk## file, and
-rerun ##emake.bat##, to rename the exported symbols, or remove ones that you
-don't want to export. With Lcc you can remove symbols but you can't rename
+rerun ##emake.bat##, to rename the exported identifiers, or remove ones that you
+don't want to export. With Lcc you can remove identifiers but you can't rename
 them.
 
 Having nice exported names is not critical, since the name need only appear
 once in each Euphoria program that uses the .dll, i.e. in a single
-##define_c_func()## or ##define_c_proc()## statement. The author of a .dll
+[[:define_c_func]]() or [[:define_c_proc]]() statement. The author of a .dll
 should probably provide his users with a Euphoria include file containing the
-necessary ##define_c_func()## and ##define_c_proc()## statements, and he might
+necessary [[:define_c_func]]() and [[:define_c_proc]]() statements, and he might
 even provide a set of Euphoria "wrapper" routines to call the routines in the
 .dll.
 
-When you call ##open_dll()##, any top-level Euphoria statements in the .dll or
+When you call [[:open_dll]](), any top-level Euphoria statements in the .dll or
 .so will be executed automatically, just like a normal program. This gives the
 library a chance to initialize its data structures prior to the first call to
 a library routine. For many libraries no initialization is required.
@@ -344,8 +344,8 @@ global constant
 Use these in **define_c_proc()** and **define_c_func()** just as you currently
 use ##C_INT##, ##C_UINT## etc. to call C .dll's and .so's.
 
-Currently, file numbers returned by ##open()##, and routine id's returned by
-##routine_id()##, can be passed and returned, but the library and the main
+Currently, file numbers returned by [[:open]](), and routine id's returned by
+[[:routine_id]](), can be passed and returned, but the library and the main
 program each have their own separate ideas of what these numbers mean. Instead
 of passing the file number of an open file, you could instead pass the file
 name and let the .dll (.so) open it. Unfortunately there is no simple solution
@@ -531,7 +531,7 @@ of the supported C compilers, and the Translator is now quite stable.
 
 On //Windows//, if you call a C routine that uses the cdecl calling convention
 (instead of stdcall), you must specify a '##+##' character at the start of the
-routine's name in ##define_c_proc()## and ##define_c_func()##. If you don't,
+routine's name in [[:define_c_proc]]() and [[:define_c_func]](). If you don't,
 the call may work when running the ##exw## Interpreter, but will probably fail
 (crash) when you translate and compile with Borland or Lcc.
   

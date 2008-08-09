@@ -384,6 +384,7 @@ end type
 -- An **atom**, which represetnts an absolute number of seconds.
 --
 -- Comments: 
+--
 -- Take the difference between two readings of ##time##(), to measure, for example, how long 
 -- a section of code takes to execute.
 --
@@ -423,8 +424,9 @@ end type
 -- -- calculates time (in seconds) for one call to power
 -- </eucode>
 --
--- See Also: [[:date]], [[:tick_rate]], [[:now]]
-
+-- See Also: 
+-- [[:date]], [[:tick_rate]], [[:now]]
+ 
 --**
 -- Signature:
 -- global function date()
@@ -449,8 +451,8 @@ end type
 --  
 -- Example 1:
 --
---  now = date() 
 -- <eucode>
+--  now = date() 
 -- -- now has: {95,3,24,23,47,38,6,83}
 -- -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
 -- </eucode>
@@ -494,7 +496,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:from_date]], [[:from_unix]], [[:new]], [[:new_time]]
+--     [[:from_date]], [[:from_unix]], [[:new]], [[:new_time]], [[:now_gmt]]
 
 export function now()
 	return from_date(date())
@@ -512,6 +514,8 @@ end function
 -- -- dt would be July 17th, 2008 at 03:34pm GMT
 -- </eucode>
 --
+-- See Also:
+-- [[:now]]
 
 export function now_gmt()
    sequence t1 = gmtime(time())
@@ -521,15 +525,15 @@ end function
 --**
 -- Create a new datetime value.
 --
--- TODO: test default parameter usage
+-- !! TODO: test default parameter usage
 --
 -- Parameters:
---     * year is the full year.
---     * month is the month (1-12).
---     * day is the day of the month (1-31).
---     * hour is the hour (0-23) (defaults to 0)
---     * minute is the minute (0-59) (defaults to 0)
---     * second is the second (0-59) (defaults to 0)
+--     # ##year##: the full year.
+--     # ##month##: the month (1-12).
+--     # ##day##: the day of the month (1-31).
+--     # ##hour##: the hour (0-23) (defaults to 0)
+--     # ##minute##: the minute (0-59) (defaults to 0)
+--     # ##second##: the second (0-59) (defaults to 0)
 --
 -- Example 1:
 -- <eucode>
@@ -554,7 +558,7 @@ end function
 --**
 -- Create a new datetime value with a date of zeros.
 --
--- TODO: test
+-- !! TODO: test
 --
 -- Parameters:
 --     hour is the hour (0-23)
@@ -674,12 +678,13 @@ end function
 --
 -- Parameters:
 -- 		# ##d##: a datetime which is to be printed out
--- 		# ##format##: a format string, similar to the ones sprintf() uses, but with sme Unicode encoding.
+-- 		# ##format##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
 --
 -- Comments:
+--
 -- Format string can include the following format specifiers:
 --
--- * %%  a literal %
+-- * ~%%  a literal %
 -- * %a  locale's abbreviated weekday name (e.g., Sun)
 -- * %A  locale's full weekday name (e.g., Sunday)
 -- * %b  locale's abbreviated month name (e.g., Jan)

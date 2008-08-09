@@ -14,7 +14,7 @@ ifdef DOS32 then
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
 	include dos\interrup.e
 else
-	include std/dll.e
+	include dll.e
 end ifdef
 
 export include std/machine.e
@@ -112,14 +112,14 @@ end ifdef
 -- global constant CRLF
 --
 -- Description:
--- Current platform's newline character(s)
+-- Current platform's newline character(s): ##\n## on //Unix//, else ##\r\n##.
 
 --**
 -- Signature:
 -- global constant PATHSEP
 --
 -- Description:
--- Current platform's path separator character
+-- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
 ifdef UNIX then
 	export constant SLASH='/'
@@ -313,12 +313,12 @@ export enum
 -- Returns:
 --     An **object**: -1 if no match found, else a sequence of sequence entries
 --
+-- Errors:
+-- The length of ##name## should not exceed 1,024 characters.
+--
 -- Comments:
 --     ##name## can also contain * and ? wildcards to select multiple
 -- files.
---
--- Errors:
--- The length of ##name## should not exceed 1,024 characters.
 --
 -- The returned information is similar to what you would get from the DOS DIR command. A sequence
 -- is returned where each element is a sequence that describes one file or subdirectory.
@@ -478,7 +478,7 @@ end function
 -- By setting the current directory, you can refer to files in that directory using just
 -- the file name.
 -- 
--- The function current_dir() will return the name of the current directory.
+-- The [[:current_dir]]() function will return the name of the current directory.
 -- 
 -- On //DOS32// and //WIN32// the current directory is a export property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
@@ -538,6 +538,12 @@ export integer my_dir = DEFAULT
 -- 		  Euphoria function
 -- 		# ##scan_subdirs##: an integer, 1 to also walk though subfolders, 0 to skip them all.
 --
+-- Returns:
+-- An **object**:
+-- * 0 on success
+-- * W_BAD_PATH: an error occurred
+-- * anything else: the custom function returned something to stop [[:walk_dir]]().
+--
 -- Comments:
 --
 -- This routine will "walk" through a directory named ##path_name##. For each entry in the 
@@ -546,7 +552,8 @@ export integer my_dir = DEFAULT
 -- st will be walked through recursively in the very same way.
 --
 -- The routine that you supply should accept two sequences, the path name and dir() entry for 
--- each file and subdirectory. It should return 0 to keep going, or non-zero to stop walk_dir(). 
+-- each file and subdirectory. It should return 0 to keep going, or non-zero to stop 
+-- walk_dir(). Returning ##W_BAD_PATH## is taken as denoting some error.
 --
 -- This mechanism allows you to write a simple function that handles one file at a time, 
 -- while walk_dir() handles the process of walking through all the files and subdirectories.
@@ -692,7 +699,7 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
---     If overwrite is true, and if dest file already exists,
+--     If ##overwrite## is true, and if dest file already exists,
 --     the function overwrites the existing file and succeeds.
 --
 -- See Also:
@@ -1125,6 +1132,7 @@ export enum
 --		* the file extension
 --		* the drive id
 -- Comments:
+--
 -- An exported enum has been created for ease of using the returned value:
 --
 -- * PATH_DIR

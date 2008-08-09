@@ -1,4 +1,7 @@
 
+--****
+-- === Constants
+
 constant
 	M_GET_VECTOR = 39,
 	M_SET_VECTOR = 40,
@@ -28,8 +31,6 @@ export type positive_int(integer x)
 	return x >= 1
 end type
 
-include memory.e
-
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
@@ -46,6 +47,9 @@ type far_addr(sequence a)
 	return length(a) = 2 and integer(a[1]) and machine_addr(a[2])
 end type
 
+--****
+-- === Routines
+
 --**
 -- Retrieve the address of a //DOS// interrupt handler.
 --
@@ -59,8 +63,9 @@ end type
 --		A **sequence** of length 2: {16-bit segment, 32-bit offset}
 --
 -- Comments:
+--
 -- This way to return the address is convenient to pass it to other //DOS// routines. To convert 
--- it back to a flat 32-bit address, simply use 65536*segment+offset.
+-- it back to a flat 32-bit address, simply use ##65536*segment+offset##.
 --
 -- Example 1:
 -- <eucode>
@@ -70,7 +75,7 @@ end type
 -- </eucode>
 --  
 -- Example 2: 
---		[[../demo/dos32/hardint.ex]]
+--		##demo/dos32/hardint.ex##
 --
 -- See Also:
 -- 		[[:set_vector]], [[:dos_interrupt]]
@@ -90,6 +95,7 @@ end function
 -- 		# ##addr##: a sequence like returned by [[:get_vector]].
 --
 -- Comments:
+--
 -- When setting an interrupt vector, //never// forget to restore it before your program 
 -- terminates. Also, the machine code that will handle the interrupt must be at its expected 
 -- address //before// calling ##set_vector##(). It is highly recommended that you study 
@@ -120,7 +126,7 @@ end function
 -- to the same physical memory, but with different access modes.
 --
 -- Example 1:
---		##../demo/hardint.ex##
+--		##demo/hardint.ex##
 --
 -- Example 2:
 -- <eucode>
@@ -145,14 +151,15 @@ end procedure
 --		# ##len##: an integer, the length of the area to protect.
 --
 -- Comments:
--- lock_memory() should only be used in the highly-specialized situation where you have set up 
+--
+-- ##lock_memory##() should only be used in the highly-specialized situation where you have set up 
 -- your own DOS hardware interrupt handler using machine code. When a hardware interrupt occurs, 
 -- it is not possible for the operating system to retrieve any code or data that has been swapped 
 -- out, so you need to protect any blocks of machine code or data that will be needed in servicing 
 -- the interrupt.
 --
 -- Example 1: 
---		##../demo/dos32/hardint.ex##
+--		##demo/dos32/hardint.ex##
 --
 -- See Also: 
 --		[[:get_vector]], [[:set_vector]]

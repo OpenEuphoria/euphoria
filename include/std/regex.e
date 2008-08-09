@@ -23,6 +23,9 @@ constant
 -- ==== Options
 --
 
+--**
+-- Values to add or [[:or_bits]]() together in order to alte the behaviour of regex searches.
+-- TODO: add comments describing what each flag does
 export constant 
 	DEFAULT            = #00000000,
 	CASELESS           = #00000001,
@@ -56,7 +59,9 @@ export constant
 --****
 -- ==== Error Codes
 --
-
+--**
+-- Error codes
+-- TODO: add comments to show what each code means
 export constant
 	ERROR_NOMATCH        =  (-1),
 	ERROR_NULL           =  (-2),

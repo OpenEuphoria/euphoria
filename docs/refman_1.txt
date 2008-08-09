@@ -91,11 +91,11 @@ print_sorted_list()     -- this command starts the program
 </eucode>
 
 The above example contains 4 separate commands that are processed in order. The
-first declares two variables: list and sorted_list to be a
-href="refman_2.htm#1">sequences</a> (flexible arrays). The second defines a a
-href="refman_2.htm#412">function</a> merge_sort(). The third defines a a
-href="refman_2.htm#411"> procedure</a> print_sorted_list(). The final command
-calls procedure print_sorted_list().
+first declares two variables: ##list## and ##sorted_list## to be a
+[[:sequence]] (flexible arrays). The second defines a
+[[:function]], ##merge_sort##(). The third defines a
+[[:procedure]], ##print_sorted_list##(). The final command
+calls procedure ##print_sorted_list##().
 
 The output from the program will be:
  
@@ -103,7 +103,7 @@ The output from the program will be:
 {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 }}}
 
-merge_sort() will just as easily sort
+##merge_sort##() will just as easily sort
 
 {{{
 {1.5, -9, 1e6, 100}
@@ -121,13 +121,13 @@ ex allsorts
  
 to see timings on several different sorting algorithms for
 increasing numbers of objects. For a quick tutorial example of Euphoria
-programming see ##euphoria\demo\bench\filesort.ex##.
+programming, see ##euphoria\demo\bench\filesort.ex##.
 
 === Installation
 
 ==== DOS/Windows
 
-To install Euphoria on your machine, first read the file ##install.doc##. Installation simply 
+To install Euphoria on your machine, first read the file ##install.txt##. Installation simply
 involves copying the //euphoria// files to your hard disk under a directory
 named ##euphoria##, and then modifying your ##autoexec.bat## file so that
 ##euphoria\bin## is on your search path, and the environment variable **EUDIR**
@@ -143,7 +143,8 @@ When installed, the ##euphoria## directory will look something like this:
     ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, 
     Interpreter ##exu## and Translator ##ecu##. There are also utility 
     programs such as ##ed.bat##, ##guru.bat##, etc.
-** ##\include## - standard include files, e.g. ##file.e##, ##sequence.e##
+** ##\include## - standard include files
+*** ##\include\std## - the standard Euphoria library include files, e.g. ##file.e##, ##sequence.e##
 ** ##\source## - the complete source code (interpreter, translator, binder)
 ** ##\docs## - plain text, man pages, html documentation files
 ** ##\tutorial## - small tutorial programs to help you learn Euphoria
@@ -183,31 +184,12 @@ Euphoria programs are executed by typing one of the following:
 # ##exwc##
 # ##exu##
  
-followed by the name of the main Euphoria file. You can type additional 
-words (known as //arguments//) on this line, known as the //command-line//.
+followed by the name of the main Euphoria file. You can type additional words (known as 
+//arguments//) on this line, known as the //command-line//. Optionally, 
+[[:command line switches]] can precede the main program name in order to alter the behaviour 
+of the interpreter somehow.
 
-The command-line supports a number of options that affect the way your program
-runs.
-: -C; specify a euinc.conf file
-: -I; specify a directory to search for include files
-: -D; define a word
-: -BATCH; batch processing, do not "Press Enter" on error
-: -TEST; do not execute, only test syntax
-: -STRICT; enable all warnings (lint option)
-: -W; defines warning level
-: -X; defines warning level by exclusion
-: -WF; defines the file to which the warnings will go instead of stderr
-
-If you are using any of these, they **must** be placed between the name of
-the Euphoria executable and your application.\\
-Example:
-{{{
-exwc -D test -BATCH -WF capture.txt -STRICT myapp.exw
-}}}
-
-Any options which are placed **after** your program's file name are ignored by
-Euphoria and are made available to your program. You can call the built-in
-function [[:command_line]] to read the command-line.
+Your program can call the built-in function [[:command_line]]() to read the command-line.
 
 The //DOS32// version of the Euphoria interpreter is called ##ex.exe##. The 
 //WIN32// version is called ##exw.exe##. The //Linux/FreeBSD// version is called 
@@ -230,10 +212,12 @@ ex filesort < raw.txt > sorted.txt
 }}}
 
 
-Unlike many other compilers and interpreters, there are no special command-line options for ##ex##, 
+Unlike many other compilers and interpreters, there is no obligation for special command-line options for ##ex##,
 ##exw## or ##exu##. Only the name of you Euphoria file is expected, and if you don't 
 supply it, you will be prompted for it.
 
+Under Windows, you will need to use Start -> Run...## facility if you ned to enter 
+command line switches or other arguments to a .exw program.
 
 For frequently-used programs under //DOS/Windows// you might want to make a small ##.bat## (batch) file, 
 perhaps called ##myprog.bat##, containing two statements like:
@@ -244,7 +228,7 @@ ex myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 }}}
 
 The first statement turns off echoing of commands to the screen. The second runs ##ex myprog.ex##
-with up to 9 command-line arguments. See <libref>command_line()</libref> for an example of how to read these arguments. 
+with up to 9 command-line arguments. See [[:command_line]]() for an example of how to read these arguments.
 Having a .bat file will save you the minor inconvenience of typing ##ex## (or ##exw##) all 
 the time; i.e., you can just type:
  
@@ -260,7 +244,7 @@ ex myprog
 
 
 Unfortunately //DOS// will not allow redirection of standard input and output when you use 
-a ##.bat## file.
+a ##.bat## file. However, this works in a Windows DOS box.
  
 
 Under //Linux/FreeBSD//, you can type the path to the Euphoria interpreter on the first line of your main 
@@ -289,8 +273,8 @@ foo.exu
 }}}
 
 to run your program. You could even shorten the name to simply "foo". Euphoria ignores the first line when it starts 
-with **#!**.  Be careful though that your first line ends with the //Linux/FreeBSD//-style <code>\n</code>,
-and not the //DOS/Windows//-style <code>\r\n</code>, or the //Linux/FreeBSD// shell might 
+with **#!**.  Be careful though that your first line ends with the //Linux/FreeBSD//-style 
+##\n##, and not the //DOS/Windows//-style ##\r\n##, or the //Linux/FreeBSD// shell might
 get confused. If your file is shrouded, you must give the path to ##backendu##, not ##exu##.
 
 
@@ -298,10 +282,10 @@ You can also run ##bind.bat## (//DOS32//), or ##bindw.bat## (//WIN32//)
 or ##bindu## (//Linux/FreeBSD//) to combine your Euphoria program with ##ex.exe##,
 ##exw.exe## or ##exu##, to make a stand-alone executable file (##.exe## file on 
 //DOS/Windows//). With a stand-alone ##.exe## file you //can// redirect standard input and 
-output. Binding is discussed further in a href="refman_1.htm#5">Distributing a Program</a>.
+output. Binding is discussed further in [[:Distributing a Program]].
 
 
-Using the a href="e2c.htm">Euphoria to C Translator</a>, you can also make 
+Using the [[:Euphoria to C Translator]], you can also make
 a stand-alone ##.exe## file, and it will normally run much faster than a bound
 program.
 
@@ -334,7 +318,7 @@ Settings"## to allocate more extended memory for your program.
 
 Under pure //DOS//, outside of //Windows//, there is no system swap file so the 
 //DOS//-extender built in to ##ex.exe## (//DOS//32) will create one for possible use by your 
-program. See a href="platform.htm#swapfile">**platform.doc**</a>.
+program. See [[:swap file]].
 
 === Editing a Program
 
@@ -354,8 +338,7 @@ screen.
 
 Under //Windows// you can associate ##ed.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
-##.exw##, ##.exu##, ##.e##, ##.ew##, ##.eu##, and ##.pro## (a
-href="refman_3.htm#2">profile</a>) files.
+##.exw##, ##.exu##, ##.e##, ##.ew##, ##.eu##, and ##.pro## ([[:profile]] files).
 
 Most keys that you type are inserted into the file at the cursor position. Hit the ##Esc## 
 key once to get a menu bar of special commands. The arrow keys, and the 
@@ -403,7 +386,7 @@ to create a single, stand-alone executable (##.exe##) file. For example, if your
 about shrouding and binding, see a href="bind.htm">bind.doc</a>.
 
 
-Finally, with the a href="e2c.htm">Euphoria To C Translator</a>, you can translate your Euphoria program into C and 
+Finally, with the [[:Euphoria To C Translator]], you can translate your Euphoria program into C and
 then compile it with a C compiler to get an executable (##.exe##) file. 
 
 
@@ -432,10 +415,10 @@ with or without your changes.
 The high-speed version of the Euphoria Interpreter back-end is written in ANSI
 C, and can be compiled with many different C compilers. The complete source
 code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous a href=License.txt>open source
-License</a> allows both personal and commercial use, and unlike many other open
+Euphoria-coded back-end. The generous [[:Open source License]] allows both personal and 
+commercial use, and unlike many other open
 source licenses, your changes do not have to be made open source.
 
-Some additional 3rd-party legal restrictions might apply when you use the a
-href=e2c.htm#legal>Euphoria To C Translator</a>.
+Some additional 3rd-party legal restrictions might apply when you use the
+[[:Euphoria To C Translator]].
 

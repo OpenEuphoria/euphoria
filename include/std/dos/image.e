@@ -4,9 +4,7 @@
 --****
 -- === DOS Image Routines
 --
---
 
-ifdef DOS32 then
 include ..\graphcst.e
 include base_mem.e
 
@@ -22,6 +20,9 @@ constant
 type page_number(integer p)
 	return p >= 0 and p <= 7
 end type
+--****
+-- === Routines
+--
 
 --**
 -- Set how Euphoria should use the VESA standard to perform video operations.
@@ -33,13 +34,14 @@ end type
 -- 		# ##code##: an integer, must be 0 or 1.
 --
 -- Comments:
--- If code is 1 then force Euphoria to use the VESA graphics standard.
+-- If ##code## is 1 then force Euphoria to use the VESA graphics standard.
 -- This may let Euphoria work better in SVGA modes with certain graphics cards.
--- If code is 0 then Euphoria's normal use of the graphics card is restored.
--- Values of code other than 0 or 1 should not be used.
+-- If ##code## is 0 then Euphoria's normal use of the graphics card is restored.
+-- Values of ##code## other than 0 or 1 should not be used.
 --
 -- Most people can ignore this. However if you experience difficulty in SVGA graphics modes you 
--- should try calling use_vesa(1) at the start of your program before any calls to graphics_mode().
+-- should try calling ##use_vesa##(1) at the start of your program before any calls to 
+-- [[:graphics_mode]]().
 --
 -- Example 1:
 -- <eucode>
@@ -62,7 +64,9 @@ end procedure
 --
 -- Returns
 --		An **integer**, the current page number displayed bythe monitor.
+--
 -- Comments: 
+--
 -- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how manypages are available in the current graphics mode.
 --
 -- The active and display pages are both 0 by default.
@@ -85,6 +89,7 @@ end function
 -- 		# ##page##: the number of the page to be mapped.
 --
 -- Comments: 
+--
 -- With multiple pages you can instantaneously change the entire screen without causing any visible "flicker". You can also save the screen and bring it back quickly.
 -- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
 --
@@ -108,10 +113,12 @@ end procedure
 --
 -- Platform:
 --		//DOS32//
+--
 -- Returns:
 -- 		An **integer**, the current page number that screen output is sent to.
--- Description: 
+--
 -- Comments:
+--
 -- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying a different page. 
 --
 -- The active and display pages are both 0 by default.
@@ -133,6 +140,7 @@ end function
 -- 		# ##page##: the number of the page to send output to.
 --
 -- Comments: 
+--
 -- With multiple pages you can instantaneously change the entire screen without causing any visible "flicker". You can also save the screen and bring it back quickly.
 -- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
 -- 
@@ -163,6 +171,7 @@ end function
 -- </eucode>
 -- 
 -- See Also: 
+--
 --      [[:get_active_page]], [[:set_display_page]], [[:video_config]]
 
 export procedure set_active_page(page_number page)
@@ -187,6 +196,7 @@ end ifdef
 --   A **sequence** of [[:mixtures]]
 --
 -- Comments:
+--
 --   Intensity values are in the range 0 to 63.
 --
 --   This function might be used to get the palette values needed by [[:save_bitmap]]().
@@ -282,4 +292,3 @@ export procedure all_palette(sequence s)
 	machine_proc(M_ALL_PALETTE, s)
 end procedure
 
-end ifdef -- DOS32

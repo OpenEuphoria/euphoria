@@ -58,7 +58,6 @@ export constant NULL = 0 -- NULL pointer
 constant M_OPEN_DLL  = 50,
 		 M_DEFINE_C  = 51,
 		 M_CALL_BACK = 52,
-		 M_FREE_CONSOLE = 54,
 		 M_DEFINE_VAR = 56
 
 --****
@@ -66,7 +65,7 @@ constant M_OPEN_DLL  = 50,
 --
 
 --**
--- Open a Windows dynamic link library (.dll) file, or a Linux or FreeBSD shared library 
+-- Open a Windows dynamic link library (.dll) file, or a //Unix// shared library
 -- (.so) file. 
 --
 -- Parameters:
@@ -125,7 +124,7 @@ end function
 --     and poke() to read or write the value of the variable. You can in the same way obtain 
 -- the address of a C function and pass it to any external routine that requires a callback address.
 --
---     For an example, see euphoria/demo/linux/mylib.exu
+--     For an example, see ##euphoria/demo/linux/mylib.exu##
 --
 -- See Also:
 --     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
@@ -302,7 +301,7 @@ end function
 -- end if
 -- </eucode>
 --
--- See Also
+-- See Also:
 --     ##demo\callmach.ex##, [[:c_func]], [[:define_c_proc]], [[:c_proc]], [[:open_dll]]
 
 export function define_c_func(object lib, object routine_name,
@@ -351,7 +350,8 @@ end function
 --     might not work with exw. This is because the Watcom C compiler (used to build exw) has 
 --     a non-standard way of handling cdecl floating-point return values.
 --
---     For an example, see: demo\win32\window.exw, demo\linux\qsort.exu
+-- Example 1: 
+-- See: ##demo\win32\window.exw##, ##demo\linux\qsort.exu##
 --
 -- See Also:
 --     [[:routine_id]]
@@ -410,6 +410,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
+--
 -- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[../docs/platform.txt]]
 --        
 
@@ -458,40 +459,4 @@ end function
 -- [[:c_proc]], [[:define_c_func]], [[:open_dll]], [[../docs/platform.txt]]
 -- 
 
---**
--- Free (delete) any console window associated with your program.
---
--- Comments:
---     Euphoria will create a console text window for your program the first time that your 
---     program prints something to the screen, reads something from the keyboard, or in some 
---     way needs a console (similar to a DOS-prompt window). On WIN32 this window will 
---     automatically disappear when your program terminates, but you can call free_console()
---     to make it disappear sooner. On Linux or FreeBSD, the text mode console is always 
---     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt 
---     at the end of execution.
---
---     On Unix-style systems, free_console() will set the terminal parameters back to normal,
---     undoing the effect that curses has on the screen.
---
---     In an xterm window, a call to free_console(), without any further
---     printing to the screen or reading from the keyboard, will eliminate the 
---     "Press Enter" prompt that Euphoria normally issues at the end of execution.
---
---     After freeing the console window, you can create a new console window by printing 
---     something to the screen, or simply calling clear_screen(), position() or any other 
---     routine that needs a console.
---
---     When you use the trace facility, or when your program has an error, Euphoria will 
---     automatically create a console window to display trace information, error messages etc.
---
---     There's a WIN32 API routine, FreeConsole() that does something similar to 
---     free_console(). You should use free_console() instead, because it lets the interpreter know
---     that there is no longer a console to write to or read from.
---
--- See Also:
---     [[:clear_screen]]
-
-export procedure free_console()
-	machine_proc(M_FREE_CONSOLE, 0)
-end procedure
 

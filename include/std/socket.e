@@ -293,10 +293,6 @@ recvheader = {}  -- HTTP header sequence , received from somewhere (usually the 
 atom error_mode = 1  -- This will indicate whether returned errors will be OS numbers (mode 2)
 -- or EUNET_ERROR numbers (mode 1).  The default is mode 1.
 
---****
--- === Routines
---
-
 -- select() will not be supported because Euphoria does not support
 -- wrapping of macros.  FD_SET, etc. do not have extern functions
 -- available, and are required in order for select() to work.
@@ -522,6 +518,10 @@ function make_sockaddr(sequence inet_addr)
 end function
 
 -------------------------------------------------------------------------------
+--****
+-- === Support routines
+--
+
 --**
 -- Checks if x is an IP address in the form (#.#.#.#[:#])
 --
@@ -778,6 +778,9 @@ end function
 -------------------------------------------------------------------------------
 -- Get list of networking interfaces
 -------------------------------------------------------------------------------
+--****
+-- === Network interface availability
+--
 
 function windows_get_adapters_table()
 	
@@ -1057,6 +1060,10 @@ end function
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+--****
+-- === Socket routines - server side
+--
+
 -------------------------------------------------------------------------------
 -- Bind
 -------------------------------------------------------------------------------
@@ -1227,6 +1234,9 @@ end function
 -- Client-side sockets (connect)
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+--****
+-- === Socket routines - client side
+
 -- Returns 0 on success and -1 on failure
 
 function unix_connect(atom socket, sequence inet_addr)
@@ -1277,6 +1287,9 @@ end function
 -- Routines for both server & client (socket, read, write, select)
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+--****
+-- === Socket routines - both sides
+--
 
 -------------------------------------------------------------------------------
 -- New socket
@@ -1375,7 +1388,8 @@ end function
 -- Returns:
 --		An **integer**, 0 on success and -1 on error. 
 --
--- Comments
+-- Comments:
+--
 -- A method of 0 closes the socket for reading, 1 closes the socket for writing, and
 -- 2 closes the socket for both.
 --
@@ -1960,9 +1974,10 @@ end function
 --		# ##val##: an object, the new value for the option
 --
 -- Returns:
---   An ***integer**, 0 on success, -1 on error.
+--   An **integer**, 0 on success, -1 on error.
 --
 -- Comments:
+--
 -- Primarily for use in multicast or more advanced socket
 -- applications.  Level is the option level, and option_name is the
 -- option for which values are being set.  Level is usually
@@ -1990,6 +2005,10 @@ end function
 -------------------------------------------------------------------------------
 -- DNSQuery
 -------------------------------------------------------------------------------
+--****
+-- === DNS query routines
+--
+
 -- Returns a set of sequences of {ip_addr, q_type, order} resolving the IP address for
 -- the given domain name and/or host.
 -- At present, only A,MX,and NS queries are supported.
@@ -2214,6 +2233,7 @@ end function
 --     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
 --
 -- Comments:
+--
 -- For standard A record lookups, getaddrinfo is preferred.
 -- But sometimes, more advanced DNS lookups are required.  Eventually,
 -- this routine will support all types of DNS lookups.  In Euphoria
@@ -2258,6 +2278,7 @@ end function
 --		# ##options##: an atom,
 --
 -- Returns:
+--
 --     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
 --
 -- See Also:
@@ -2363,7 +2384,7 @@ end function
 --		# ##name##: a string, the name of te host to look up.
 --
 -- Returns:
---		???
+--	A **sequence**, a string representing the IP address of queried host.
 
 export function gethostbyname(sequence name)
 	ifdef WIN32 then
@@ -2561,6 +2582,10 @@ end function
 -----------------------------------------------------------------------------------
 --URL-encoding
 -----------------------------------------------------------------------------------
+--****
+-- === URL encoding
+--
+
 -- HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
 --   1. Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii 
 --      value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable 
@@ -2587,6 +2612,7 @@ end function
 --		# ##what##: the string to encode
 --
 -- Returns:
+--
 -- 		A **sequence**, the encoded string.
 --
 -- Example 1:
@@ -2623,6 +2649,9 @@ end function -- urlencode(sequence what)
 -------------------------------------------------------------------------------
 -- sendheader manipulation
 -------------------------------------------------------------------------------
+--****
+-- === Header management
+--
 
 --**
 -- Retrieve either the whole sendheader sequence, or just a single
@@ -2845,6 +2874,8 @@ end procedure
 -- 0 to return the whole header, or a numerical index.
 --
 -- Returns:	
+--
+--	An **ovject**:
 --     * -1 on error
 --     * a sequence in the form, ##{field name, field value}## on success.
 
@@ -2882,6 +2913,9 @@ end function
 -------------------------------------------------------------------------------
 -- get_http
 -------------------------------------------------------------------------------
+--****
+-- === Web interface
+--
 
 --**
 -- Returns data from an http internet site.
@@ -2966,6 +3000,7 @@ end function
 --   A **sequence** {header, body} on success, or an empty sequence on error.
 --
 -- Comments:
+--
 --   As of Euphoria 4.0, only the internal state is maintained. Future versions of this 
 --   library will expand state functionality.
 --
@@ -3169,8 +3204,7 @@ end function
 -------------------------------------------------------------------------------
 
 --**
--- Returns data from an http internet site.  Other common
--- protocols will be added in future versions.
+-- Returns data from an http internet site. Other common protocols will be added in future versions.
 --
 -- Parameters:
 --		# ##inet_addr##: a sequence holding an address
@@ -3178,6 +3212,7 @@ end function
 -- 		# ##file##: a file name to transmit
 --
 -- Returns:	
+--
 --   A **sequence** {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:

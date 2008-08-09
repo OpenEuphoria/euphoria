@@ -23,12 +23,14 @@
 -- a bit of overhead) you *must* pass valid arguments or Euphoria could crash.
 --
 -- Some example programs to look at:
---   * ##../demo/callmach.ex##      - calling a machine language routine
---   * ##../demo/dos32/hardint.ex## - setting up a hardware interrupt handler
---   * ##../demo/dos32/dosint.ex##  - calling a DOS software interrupt
+--   * ##demo/callmach.ex##      - calling a machine language routine
+--   * ##demo/dos32/hardint.ex## - setting up a hardware interrupt handler
+--   * ##demo/dos32/dosint.ex##  - calling a DOS software interrupt
 --
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
+--
+-- <<LEVELTOC depth=2>>
 --
 
 constant
@@ -75,7 +77,7 @@ end type
 --
 -- The address returned will be at least 4-byte aligned.
 --
--- Example:		
+-- Example 1:
 -- <eucode>
 -- buffer = allocate(100)
 -- for i = 0 to 99 do
@@ -114,7 +116,7 @@ end function
 -- then free() the old block.
 --
 -- Example 1:
---   [[../demo/callmach.]]
+--   ##demo/callmach.ex##
 --
 -- See Also:
 --     [[:allocate]], [[:free_low]]
@@ -165,7 +167,7 @@ export function allocate_string(sequence s)
 end function
 
 --****
--- ==== Memory access
+-- === Memory access
 
 --**
 -- Signature:
@@ -185,12 +187,14 @@ end function
 -- integers returned are bytes, in the range 0..255.
 --
 -- Errors:
+--
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
--- Comments: 
+-- Comments:
+--
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should 
 -- therefore be declared as atoms.
@@ -213,10 +217,9 @@ end function
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]], 
--- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
+--  [[:poke]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:free_low]], [[:peek2u]]
 --
-
 --**
 -- Signature:
 -- global function peeks(object addr_n_length)
@@ -230,18 +233,20 @@ end function
 --		** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
 --
 -- Returns:
+--
 --		An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are bytes, in the range -128..127.
 --
 -- Errors:
+--
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
---
 -- Comments: 
+--
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -253,7 +258,8 @@ end function
 -- Remember that ##peeks##() takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --  
--- Example 1: 
+-- Example 1:
+--
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
@@ -263,11 +269,11 @@ end function
 -- s = peeks({100, 4})
 -- </eucode>
 -- 
--- See Also: 
---  [[:poke]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]], 
--- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]], [[peek]]
+-- See Also:
 --
-
+--  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:free_low]], [[:peek2s]], [[peek]]
+--
 --**
 -- Signature:
 -- global function peek2s(object addr_n_length)
@@ -282,18 +288,20 @@ end function
 --		** a pair {##addr,len}##, to fetch ##len## words at ##addr##
 --
 -- Returns:
+--
 --		An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are double words, in the range -32768..32767.
 --
 -- Errors:
+--
 --	Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e i,clude file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
---
 -- Comments: 
+--
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -310,6 +318,7 @@ end function
 -- negative, while ##peek2u##() just assumes them to be large and positive.
 --  
 -- Example 1: 
+--
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
@@ -319,11 +328,11 @@ end function
 -- s = peek2s({100, 4})
 -- </eucode>
 -- 
--- See Also: 
---  [[:poke]], [[:peek]], [[:peek4s]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:call]], [[:peek2u]]
+-- See Also:
 --
-
+--  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:free_low]], [[:peek2u]]
+--
 --**
 -- Signature:
 -- global function peek2u(object addr_n_length)
@@ -348,8 +357,8 @@ end function
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
---
 -- Comments: 
+--
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -376,10 +385,9 @@ end function
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:call]], [[:peek4s]], [[:peek4u]]
+--  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:free_low]], [[:peek4u]]
 --
-
 --**
 -- Signature:
 -- global function peek4s(object addr_n_length)
@@ -404,8 +412,8 @@ end function
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
---
 -- Comments: 
+--
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -432,10 +440,9 @@ end function
 -- </eucode>
 -- 
 -- See Also: 
--- [[:poke]], [[:peek]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
+-- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:free_low]], [[:peek2s]]
 --
-
 --**
 -- Signature:
 -- global function peek4u(object addr_n_length)
@@ -461,8 +468,8 @@ end function
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
---
 -- Comments: 
+--
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -490,8 +497,8 @@ end function
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:call]], [[:peek2s]], [[:peek2u]]
+--  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
+-- [[:free_low]], [[:peek2u]]
 --
 
 --**
@@ -507,14 +514,17 @@ end function
 -- Returns:
 -- A **sequence** of bytes, the string that could be read.
 --
--- Comments:
--- An ASCIZ string is any sequence of bytes and ends with a 0 byte.
--- If you ##peek_string##() at some place where there is no string, you will get a sequence of garbage.
--- Further, pek()ing memory that doesn't belong to your process is something the operating 
+-- Errors:
+-- Further, peek()ing memory that doesn't belong to your process is something the operating
 -- system could prevent, and you'd crash with a machine level exception.
 --
+-- Comments:
+--
+-- An ASCIZ string is any sequence of bytes and ends with a 0 byte.
+-- If you ##peek_string##() at some place where there is no string, you will get a sequence of garbage.
+--
 -- See Also:
--- [[:peek]], [[:peek_wstring]]
+-- [[:peek]], [[:peek_wstring]], [[:allocate_string]]
 
 
 --**
@@ -532,7 +542,8 @@ end function
 --	Poke()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
--- Comments: 
+-- Comments:
+--
 -- The lower 8-bits of each byte value, i.e. remainder(x, 256), is actually
 -- stored in memory.
 --
@@ -558,12 +569,11 @@ end function
 -- </eucode>
 -- 
 -- Example 2: 
---  [[../demo/callmach.ex]]
+--  ##demo/callmach.ex##
 -- 
 -- See Also:
---    [[:peek]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]], [[:safe.e]]
+--    [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]], [[:safe.e]], [[:mem_copy]]], [[:mem_set]]
 -- 
-
 --**
 -- Signature:
 -- global procedure poke2(atom addr, object x)
@@ -580,6 +590,7 @@ end function
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments: 
+--
 -- There is no point in having poke2s() or poke2u(). For example, both 32768
 -- and -32768 are stored as #F000 when stored as words. It' up to whoever
 -- reads the value to figure it out.
@@ -610,9 +621,8 @@ end function
 -- </eucode>
 -- 
 -- See Also:
---     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:allocate]], [[:call]]
+--     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:allocate]], [[:free]], [[:call]]
 --
-
 --**
 -- Signature:
 -- global procedure poke4(atom addr, object x)
@@ -630,6 +640,7 @@ end function
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments: 
+--
 -- There is no point in having poke4s() or poke4u(). For example, both
 -- +power(2,31) and -power(2,31) are stored as #F0000000. It' up to whoever
 -- reads the value to figure it out.
@@ -662,9 +673,8 @@ end function
 -- </eucode>
 -- 
 -- See Also:
---     [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:call]]
+--     [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
 --
-
 --**
 -- Signature:
 -- global procedure mem_copy(atom destination, atom origin, integer len)
@@ -678,6 +688,7 @@ end function
 --		# ##len##, an integer, how many bytes are to be copied.
 --
 -- Comments: 
+--
 -- The bytes of memory will be copied correctly even if the block of memory
 -- at ##destination## overlaps with the block of memory at ##origin##.
 --
@@ -693,8 +704,8 @@ end function
 -- </eucode>
 -- 
 -- See Also:
--- [[:mem_set]], [[:peek]], [[:poke]], [[:allocate]]
---
+-- [[:mem_set]], [[:peek]], [[:poke]], [[:allocate]], [[:free]]
+-- 
 
 --**
 -- Signature:
@@ -708,7 +719,8 @@ end function
 --		# ##byte_value##, an integer, the value to copy at all addresses in the range.
 --		# ##how_many##, an integer, how many bytes are to be set.
 --
--- Comments: 
+-- Comments:
+--
 -- The low order 8 bits of ##byte_value## are actually stored in each byte.
 -- mem_set(destination, byte_value, how_many) is equivalent to: 
 -- poke(destination, repeat(byte_value, how_many)) but is much faster.
@@ -722,9 +734,8 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:peek]], [[:poke]], [[:allocate]], [[:mem_copy]]
+--   [[:peek]], [[:poke]], [[:allocate]], [[:free]], [[:mem_copy]]
 --
-
 --**
 -- Signature:
 -- global procedure call(atom addr)
@@ -736,6 +747,7 @@ end function
 --		# ##addr##, an atom, the address at which to transfer execution control.
 --
 -- Comments:
+--
 -- The machine code routine must execute a RET instruction #C3 to return
 -- control to Euphoria. 
 -- The routine should save and restore any registers that it uses.
@@ -748,14 +760,15 @@ end function
 -- If your machine code uses the stack, use ##c_proc##() instead of ##call##().
 --
 -- Example 1: 
---		[[../demo/callmach.ex]]
+--		##demo/callmach.ex##
 --
 -- See Also:
 -- 		[[:allocate]], [[:free]], [[:peek]], [[:poke]], [[:c_proc]], [[:define_c_proc]]
 
---=== variables and routines used in safe.e
 without warning
 integer check_calls = 1
+--****
+-- === Safe memory access
 
 --**
 -- Description: Add a block of memory to the list of safe blocks maintained
@@ -769,7 +782,7 @@ integer check_calls = 1
 -- Comments: 
 --
 -- In memory.e, this procedure does nothing. It is there simply to simpify
--- switching between machine.e and safe.e.
+-- switching between the normal and debu version of the library.
 --
 -- This routine is only meant to be used for debugging purposes. safe.e
 -- tracks the blocks of memory that your program is allowed to 
@@ -786,12 +799,14 @@ integer check_calls = 1
 -- unregister_block().
 --
 -- Example 1:
+-- <eucode>
 --  atom addr
 -- 
 -- addr = c_func(x, {})
 -- register_block(addr, 5)
 -- poke(addr, "ABCDE")
 -- unregister_block(addr)
+-- </eucode>
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
@@ -809,7 +824,7 @@ end procedure
 -- Comments: 
 --
 -- In memory.e, this procedure does nothing. It is there simply to simpify
--- switching between machine.e and safe.e.
+-- switching between the normal and debug version of the library.
 --
 -- This routine is only meant to be used for debugging purposes. Use it to
 -- unregister blocks of memory that you have previously registered using
@@ -819,7 +834,7 @@ end procedure
 --
 --  See [[:register_block]]() for further comments and an example.
 -- 
--- See Also: register_block, safe.e  
+-- See Also:
 --   [[:register_block]], [[:safe.e]]
 
 export procedure unregister_block(atom block_addr)

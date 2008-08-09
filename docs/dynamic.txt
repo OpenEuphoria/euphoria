@@ -81,7 +81,7 @@ a more complicated way to call routines. And slower.
 There are two main situations where calling dynamically is the thing to do:
 # When you really want a routine you choose at call time to be called. You could have a table
 of routine_ids and perform a call to an indexed entry in the table.
-** Because the name of the routine you want to call is not defined yet, or would resolve to the wrong routine. In pre 4.0 versions, this was the main use of the facility:
+# Because the name of the routine you want to call is not defined yet, or would resolve to the wrong routine. In pre 4.0 versions, this was the main use of the facility:
 
 <eucode>
 integer foo_id
@@ -99,8 +99,8 @@ foo_id = routine_id("foo")
 One of the functions has to be defined before the other, and Euphoria's paradigm of
 define-before-use would prevent crossed calls like above without the dynamic call facility.
 
-One last word: when calling a routine dynamically, its **full* parameter listmust be passed, 
-even if some of its parameters are defaulted. This imitation may be overcome in future 
+One last word: when calling a routine dynamically, its **full** parameter listmust be passed,
+even if some of its parameters are defaulted. This limitation may be overcome in future
 versions.
 
 === Calling Euphoria's internals
@@ -116,13 +116,13 @@ library.
 These primitives are called like this:
 <eucode>
 machine_proc(id, argument)
-* result = machine_func(id, argument)
+result = machine_func(id, argument)
 </eucode>
-The argment is either an atom or a sequence standing for one or more arguments. Since the 
+##argument## is either an atom, or a sequence standing for one or more parameters. Since the
 first parameter doesn't need to be a constant, you may use some sort of dynamic calling. The
 circumstances where it is useful are rare.
 
-The complete list of known machine identifiers is to be found in the file source\execute.h.
+The complete list of known values for ##id## is to be found in the file ##source/execute.h##.
 
 Defining new identifiers and overriding machine_func/proc() to handle them is an easy way to 
 extend the capabilities of the interpreter.

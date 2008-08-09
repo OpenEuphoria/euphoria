@@ -17,8 +17,8 @@
 --
 -- In Euphoria terms, this framework provides the tools to make testing and reporting on
 -- functions and procedures easy and standardized. It gives us a simple way to
--- write a test case and to report on the findings. Example:
---
+-- write a test case and to report on the findings.\\
+-- Example~:
 -- <eucode>
 -- include std/unittest.e
 --
@@ -64,12 +64,17 @@
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
 
+--****
+-- === Constants
+--
+
 include pretty.e
 
 --
 -- Public Variables
 --
 
+-- Verbosity values
 export enum
 	TEST_QUIET = 0,
 	TEST_SHOW_FAILED_ONLY,
@@ -214,6 +219,7 @@ end function
 -- Output test report
 --
 -- Comments:
+--
 -- The report components are described in the comments section for [[:set_verbosity]]. Everything
 -- prints on the standard error device.
 --
@@ -278,6 +284,7 @@ end procedure
 --		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
 --
 -- Comments:
+--
 -- * For atoms, a fuzz of 1e-9 is used to assess equality.
 -- * For sequences, no such fuzz is implemented.
 --
@@ -411,8 +418,7 @@ export procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
 
-sequence cmd
-cmd = command_line()
+sequence cmd = command_line()
 
 filename = cmd[2]
 

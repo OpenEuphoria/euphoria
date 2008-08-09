@@ -41,7 +41,7 @@ Performance & Maintenance -> System -> Advanced## then click the ##Environment
 Variables## button. Click the top ##New...## button then enter ##EUDIR## as the
 Variable Name and ##c:\euphoria## (or whatever is correct) for the value, then
 click ##OK##. Find ##PATH## in the list of your variables, select it, then
-click ##Edit...##. Add ##;c:\euphoria\bin## at the end  and click ##OK##.
+click ##Edit...##. Add ##;c:\euphoria\bin## at the end  and click ##OK##. The change will be effective next time you open explorer.exe or a DOS console window, or after a computer reboot.
 
 Some systems, such as //Windows ME//, have an ##AUTOEXEC.BAT## file, but it's a
 hidden file that might not show up in a directory listing. Nevertheless it's

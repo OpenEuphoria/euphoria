@@ -26,10 +26,18 @@
   **include/euphoria**. $$(doneby Jeremy Cowgar)
 * **Moved** **instance()** and **sleep()** from **misc.e** to **os.e**
   $$(doneby Jeremy Cowgar)
+* **Moved** **free_console()** from **dll.e** to **console.e**
+  $$(doneby C. Cuvier)
+* **Moved**// DOS// specific commands to the **std/dos** directory
+  $$(doneby C. Cuvier)
+* **Moved** text mode grapic commands to **console.e**
+  $$(doneby C. Cuvier)
 * Documentation moved to a new format. $$(doneby Jeremy Cowgar and CK Lester)
 * **file.e** deprecated. **filesys.e**, **io.e** and **console.e** created
   in it's place. **file.e** still exists and includes the 3 replacements
   so old apps will still function. $$(doneby Jeremy Cowgar)
+* Switching between safe and normal memory routines no longer requires renaming files.
+$$(doneby C. Cuvier)
 
 === New Features
 
@@ -38,10 +46,10 @@
 * Include file names with accent characters now supported. $$(doneby C. Cuvier)
 * Enhanced symbol resolution to take into account information regarding which files were 
   included by which files. $$(doneby Matt Lewis)
-* Namespaces for a source file now can be used for symbols in the specified file and for 
-  global symbols in all files included by the specified file. $$(doneby Matth Lewis)
+* Namespaces for a source file now can be used for identifiers in the specified file and for 
+  global identifierss in all files included by the specified file. $$(doneby Matt Lewis)
 * Command line arguments for the translator allow for creating binaries with debugging 
-  symbols, and to specify a different runtime library. $$(doneby C. Cuvier)
+  symbols, and to specify a different runtime library. $$(doneby Matt Lewis)
 * In trace mode, '?' will show the last defined variable of the requested name.
   $$(doneby C. Cuvier)
 * Include directories can now be specified based on command line arguments and config files 
@@ -54,13 +62,13 @@
 * New **loop do** ... **until**//condition// loop construct, which differs from a while loop 
   in that it performs its test at the end of the block, rather than at the start. 
   $$(doneby C. Cuvier.)
-* New keywords to give greater control over the instruction flow:
+* New keywords to give greater control over the instruction flow: $$(doneby C. Cuvier.)
 ** **continue**: start next iteration of a loop;
 ** **retry**: restarts the current iteration of a loop
 ** **entry**: marks the entry point into a loop, skipping initial test
 ** **break**: exit an if block or switch block
 ** **goto**: jump to a label that is in the same scope
-  $$(doneby C. Cuvier.)
+  $$(doneby J. Brown.)
 * The **exit**, **break**, **continue** and **retry** keywords now can take an optional 
   parameter, which enables to xit several blocks at a time, or (re)starting an iteration of 
   a loop which is not the innermost one. $$(doneby C. Cuvier.)
@@ -85,10 +93,10 @@
 * ##with warning## has been enhanced in order to individually turn warnings on or
   off. 
   $$(doneby C. Cuvier)
-* New scope: **export**.  Symbols with the export scope can only be seen from files that:
-## directly include the file where the symbols reside 
+* New scope: **export**.  Identifiers with the export scope can only be seen from files that:
+## directly include the file where the identifiers are defined
 ## directly include a file that uses the "export include file.e" construct to pass export 
-   symbols 
+   identifiers 
   $$(doneby Matt Lewis)
 * Routine resolution changes
 ## Routines the same name as an internal no longer override the internal by default. You
@@ -108,7 +116,7 @@
   code will be 1 on success, 0 on failure as normal. Editors/IDE's may need
   both -test and -batch. $$(doneby Jeremy Cowgar)
 * dis.ex (in the source directory) will parse a euphoria program and output the symbol table
-  and the IL code in a readible format.
+  and the IL code in a readable format.
   $$(doneby Matt Lewis)
 * Variables may be in any part of a routine, or in **for**, **while**, **if**, **loop** and 
   **switch** blocks, in which case the scope of the variable ends when its block ends.
@@ -122,23 +130,25 @@
   **poke2()** $$(doneby Matt Lewis)
 * Began **library expansion**. A large percentage of these functions have been found in The 
   Archive. Many thanks must go to the original developers who have contributed these functions.
-* New routines in **machine.e**:
+* New routines in **error.e**:
   **crash()**. $$(doneby Jeremy Cowgar.)
 * New routines in **math.e**:
   **ceil()**, **round_to()**, **round()**, **sign()**, **abs()**, **sum()**, **average()**, 
   **min()**, **max()**, **deg2rad()**, **rad2deg()**, **log10()**, **atan2()**, 
   **rand_range()**, **mod()**. Global Constant **E**. $$(doneby Jeremy Cowgar.)
-* New routines in **sequence.e**: 
+* New routines in **sequence.e** and **search.e**:
    **insert()**, **splice()**, **remove()**, **replace()**, **head()**, **mid()**, 
    **slice()**, **tail()**, **split()**, **split_adv()**, **join()**, **find_any()**, 
    **find_any_from()**, **trim()**, **trim_head()**, **trim_tail()**, **truncate()**, 
    **pad_head()**, **pad_tail()**, **chunk()**, **flatten()**, **find_all()**, 
    **match_all()**, **find_replace()**, **vslice()**, **rfind()**, **rfind_from()**, 
-   **rmatch()**, **rmatch_from()**, **filter()**, **apply()**. 
-   $$(doneby Jeremy Cowgar, Derek Parnell.)
+   **rmatch()**, **rmatch_from()**, **filter()**, **apply()**, **can_add**, **linear**, 
+   **repeat_pattern**, **project**, **extract**, valid_index**, **find_nested**.
+   $$(doneby Jeremy Cowgar, Derek Parnell, C. Cuvier.)
+* New **sets.e** library to handle sets, set maps and set operations. $$(doneby C. Cuvier)
 * New routines in **sort.e**:
   **sort_reverse()**, **sort_user()**, **sort_columns()**. $$(doneby Derek Parnell.)
-* New routines in **file.e**:
+* New routines in **filesys.e**, **io.e** and **os.e**:
   **read_lines()**, **read_file()**, **write_lines()**, **append_lines**,
   **write_file()**, **pathinfo()**, **dirname()**, **filename()**,
   **fileext()** and Global Constants **SLASH** and **CRLF**. $$(doneby Jeremy Cowgar.)

@@ -2,16 +2,13 @@
 --
 --****
 -- == Operating System Helpers
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
 
 include sequence.e
-include math.e
+
 include text.e
-include memory.e
-include machine.e
 
 ifdef !DOS32 then
 	include dll.e
@@ -22,16 +19,18 @@ ifdef DOS32 then
 	include dos\interrup.e
 end ifdef
 
+include machine.e
+
 constant
-	M_SLEEP = 64,
-	M_SET_ENV = 73,
+	M_SLEEP = 64, 
+	M_SET_ENV = 73, 
 	M_UNSET_ENV = 74
 
 --****
--- === Constants
---
 -- ==== Operating System Constants
 --
+
+--**
 -- These constants are returned by the [[:platform]] function.
 --
 -- * DOS32 - Host operating system is DOS
@@ -71,10 +70,8 @@ enum
 --	USECASE
 
 --****
--- === Routines
---
---****
--- ==== Command line utilities.
+-- === Command line utilities.
+
 --**
 -- Signature:
 -- global procedure command_line()
@@ -83,6 +80,7 @@ enum
 -- A **sequence** of strings, where each string is a word from the command-line that started your program.
 --
 -- Comments:
+--
 -- The returned sequence contains the following information:
 -- # Tthe path to either the Euphoria executable, ex.exe, exw.exe or exu, or to your bound executable file.
 -- # The next word is either the name of your Euphoria main file, or 
@@ -137,7 +135,8 @@ enum
 -- -- is bound or translated as a .exe, or not.
 -- </eucode>
 --
--- See Also: [[:getenv]], [[:cmd_parse]], [[:show_help]]
+-- See Also:
+-- [[:getenv]], [[:cmd_parse]], [[:show_help]]
 
 --**
 -- Signature:
@@ -150,10 +149,11 @@ enum
 -- A **sequence** of strings, each containing a word related to switches.
 --
 -- Comments:
+--
 -- All switches are recorded in upper case.
 --
 -- Example 1:
--- exw -d helLo will result in option_switches() being {"-D","helLo"}
+-- exw -d helLo will result in ##option_switches##() being ##{"-D","helLo"}##.
 --
 -- See Also:
 -- [[:Command line switches]]
@@ -190,7 +190,7 @@ enum
 -- </eucode>
 --
 -- myfile.ex options:
--- -q, --silent		Suppresses any output to console
+-- -q, ~--silent		Suppresses any output to console
 -- -r x				Sets how many lines the console should display
 
 export procedure show_help(sequence opts, integer add_help_rid=-1)
@@ -209,7 +209,9 @@ export procedure show_help(sequence opts, integer add_help_rid=-1)
 			this_size += 4
 		end if
 
-		pad_size = max({pad_size, this_size + 6})
+		if pad_size < this_size + 6 then
+			pad_size = this_size + 6
+		end if
 	end for
 
 	printf(1, "%s options:\n", {cmds[2]})
@@ -299,6 +301,7 @@ end function
 --  A **sequence**, the list of all command line arguments.
 --
 -- Comments:
+--
 -- 6 sorts of tokens are recognized on the command line:
 -- # a single '-'. Simply added to the option list
 -- # a single "~-~-". This signals the end of command line options. What remains of the command
@@ -448,6 +451,9 @@ export function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 	return extras
 end function
 
+--****
+-- === Environment.
+
 constant M_INSTANCE = 55
 
 --**
@@ -470,9 +476,6 @@ elsifdef FREEBSD then
 elsifdef OSX then
 	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
 end ifdef
-
---****
---==== Environment.
 
 --**
 -- Retrieves the name of the host OS.
@@ -618,6 +621,7 @@ end function
 --		An **object**, -1 if the variable does not exist, else a sequence holding its value.
 --
 -- Comments: 
+--
 -- Both the argument and the return value, may, or may not be, case sensitive. You might need to test this on your own system.
 --
 -- Example:
@@ -633,6 +637,7 @@ end function
 -- Set an environment variable.
 --
 -- Parameters:
+--
 -- # ##name##: a string, the environment variable name
 -- # ##val##: a string, the value to set to
 -- # ##overwrite##: an integer, nonzero to overwrite an existing variable, 0 to disallow this.
@@ -677,7 +682,7 @@ end function
 -- Indicates the platform that the program is being executed on: DOS32, WIN32, Linux/FreeBSD or OS X.
 --
 -- Returns:
--- A small **integer:
+-- A small **integer**:
 -- <eucode>
 --      global constant DOS32 = 1,
 --                     WIN32 = 2,
@@ -687,6 +692,7 @@ end function
 -- </eucode>
 --
 -- Comments: 
+--
 -- The [[:ifdef]] statement is much more versatile and supersedes ##platform##(), which is 
 -- supported for backward vompatibility and for a limited time only.
 --
@@ -718,7 +724,7 @@ end function
 
 
 --****
---==== Interacting with the OS
+-- === Interacting with the OS
 --
 --**
 -- Signature:
@@ -801,6 +807,7 @@ end function
 -- ##command## should not exceed 1,024 characters.
 --
 -- Comments:
+--
 -- Allowable values for ##mode## are:
 -- * 0: the previous graphics mode is restored and the screen is cleared.
 -- * 1: a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
@@ -847,7 +854,7 @@ end function
 -- [[:system]], [[:abort]]
 --
 --****
--- ==== Miscellaneous
+-- === Miscellaneous
 
 --**
 -- Suspend thread execution. for ##t## seconds.
@@ -902,9 +909,10 @@ end type
 -- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
 --
 -- Comments:
--- On //Windows// and //Unix// platforms no sound will be made.
 --
--- Example:
+-- On //Windows// and //Unix// platforms, no sound will be made.
+--
+-- Example 1:
 -- <eucode>
 -- sound(1000) -- starts a fairly high pitched sound
 -- </eucode>
@@ -925,6 +933,7 @@ end procedure
 -- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
 --
 -- Comments:
+--
 -- This setting determines the precision of the time() library routine.
 -- It also affects the sampling rate for time profiling.
 --
@@ -959,7 +968,6 @@ end procedure
 -- </eucode>
 -- 
 -- See Also: 
--- See Also:
 --		[[:time]], [[:Debugging and profiling]]
 --
 
@@ -981,6 +989,7 @@ end procedure
 --	A **sequence** of strings, ach holding a fully qualified include path.
 --
 -- Comments:
+--
 -- ##convert## is checked only under //Windows//. If a path has accented characters in it, then 
 -- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
 -- will force conversion for path entries that have accents and which have not been checked to be valid yet.
@@ -1003,7 +1012,7 @@ end procedure
 --   "C:\\EuphoriA\\tests",
 --   "C:\\EUPHORIA\\INCLUDE",
 --   "C:\\EUPHORIA\\xcontrols\\include",
---   "C:\\EUPHORIA\\win32lib_0_70_1\\include"
+--   "C:\\EUPHORIA\\win32lib_0_70_4a\\include"
 -- }
 -- </eucode>
 --

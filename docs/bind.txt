@@ -30,7 +30,7 @@ On //Windows// use:
 backendw myprog.il
 }}}
  
-On //Linux// or //FreeBSD// use:
+On //Unix// use:
 
 {{{
 backendu myprog.il
@@ -57,12 +57,12 @@ items from each file. The unused items will be deleted.
 * **-list**: Produce a listing in **deleted.txt** of the routines and constants that were 
   deleted.
 * **-quiet**: Suppress normal messages and statistics. Only report errors.
-* **-out shrouded_file**: Write the output to shrouded_file.
+* **-out shrouded_file**: Write the output to ##shrouded_file##.
 
 The Euphoria interpreter will not perform tracing on a shrouded file. You must
 trace your original source.
 
-On //Linux/FreeBSD//, the shrouder will make your shrouded file executable,
+On //Unix//, the shrouder will make your shrouded file executable,
 and will add a ###!## line at the top, that will run ##backendu.## You
 can override this ###!## line by specifying your own ###!##
 line at the top of your main Euphoria file.
@@ -127,9 +127,8 @@ of the three since it includes a lot of pixel graphics routines, not part of
 executable may trigger a warning message from a virus scanner. This is simply
 because the executable file looks abnormal to the virus scanner.
 
-The first two arguments returned by the command_line() library routine will be
-slightly different when your program is bound. See a
-href="lib_os.htm#command_line">library.doc</a> for the details.
+The first two items returned by [[:command_line]]() will be
+slightly different when your program is bound. See the procedure description for the details.
 
 A **bound executable** file //can// handle standard input and output redirection. e.g.
 

@@ -1,5 +1,5 @@
 with define DEFINED
-include std/unittest.e
+include unittest.e
 
 ifdef DEFINED then
 	end if

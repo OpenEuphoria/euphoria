@@ -163,10 +163,6 @@ procedure rPrint(object a)
 	end if
 end procedure
 
---****
--- === Constants
---
-
 ifdef UNIX then
 	export constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 126, 1000000000, 1}
 else
@@ -221,33 +217,35 @@ end procedure
 -- Parameters:
 -- # ##fn##: an integer, the file/device number to write to
 -- # ##x##: the object to display/convert to printable form
--- # is an (up to) 10-element options sequence: Pass {} to select the defaults, or set options 
---   as below:
---   ## display ASCII characters:
---      *** 0: never
---      *** 1: alongside any integers in printable ASCII range (default)
---      *** 2: display as "string" when all integers of a sequence 
---             are in ASCII range
---      *** 3: show strings, and quoted characters (only) for any integers 
---             in ASCII range as well as the characters: \t \r \n
---   ## amount to indent for each level of sequence nesting - default: 2
---   ## column we are starting at - default: 1
---   ## approximate column to wrap at - default: 78
---   ## format to use for integers - default: "%d"
---   ## format to use for floating-point numbers - default: "%.10g"
---   ## minimum value for printable ASCII - default 32
---   ## maximum value for printable ASCII - default 127
---   ## maximum number of lines to output 
---   ## line breaks between elements   - default 1 (0 = no line breaks, -1 = line breaks to wrap only)
--- 
+-- # ##options## is an (up to) 10-element options sequence.
+--
 -- Comments:
+--
+--  Pass {} in ##options## to select the defaults, or set options as below:
+--   # display ASCII characters:
+--     ** 0: never
+--     ** 1: alongside any integers in printable ASCII range (default)
+--     ** 2: display as "string" when all integers of a sequence
+--             are in ASCII range
+--     ** 3: show strings, and quoted characters (only) for any integers
+--             in ASCII range as well as the characters: \t \r \n
+--   # amount to indent for each level of sequence nesting - default: 2
+--   # column we are starting at - default: 1
+--   # approximate column to wrap at - default: 78
+--   # format to use for integers - default: "%d"
+--   # format to use for floating-point numbers - default: "%.10g"
+--   # minimum value for printable ASCII - default 32
+--   # maximum value for printable ASCII - default 127
+--   # maximum number of lines to output 
+--   # line breaks between elements   - default 1 (0 = no line breaks, -1 = line breaks to wrap only)
+-- 
 -- If the length is less than 10, unspecified options at
 -- the end of the sequence will keep the default values.    
--- e.g. {0, 5} will choose "never display ASCII", 
--- plus 5-character indentation, with defaults for everything else  
+-- e.g. {0, 5} will choose "never display ASCII",
+-- plus 5-character indentation, with defaults for everything else.
 --
--- The default options can be accessed using the exported constant PRETTY_DEFAULT, and the
--- elements may be accessed using the enum:
+-- The default options can be applied using the exported constant ##PRETTY_DEFAULT##, and the
+-- elements may be accessed using the following exported enum~:
 --
 -- # DISPLAY_ASCII
 -- # INDENT
@@ -339,13 +337,14 @@ end procedure
 --
 -- Parameters:
 --   # ##x##: the object to display
---   # options - is an (up to) 10-element options sequence: Pass {} to select the defaults, or 
+--   # ##options## is an (up to) 10-element options sequence: Pass {} to select the defaults, or
 --     set options 
 --
 -- Returns:
 --		A **sequence** of printable characters, representing ##x## in an human-readable form.
 --
 -- Comments:
+--
 --   This function formats objects the same as [[:pretty_print]](), but returns the sequence obtained instead of sending it to some file..
 --
 -- See Also:

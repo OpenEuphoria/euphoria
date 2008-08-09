@@ -119,18 +119,18 @@ test_equal("is_associative()",1,is_associative(mul5))
 
 test_equal("is_symmetric()",1,is_symmetric(mul5))
 
-test_equal("has_left_unit()",2,has_left_unit(mul5))
+test_equal("has_left_unit()",2,has_unit(mul5, SIDE_LEFT))
 
-test_equal("is_left_unit()",0,is_left_unit(3,mul5))
+test_equal("is_left_unit()",0,is_unit(3,mul5))
 
 test_equal("all_left_units()",{2},all_left_units(mul5))
 
 operation plus01
 plus01={{{1,2},{2,3},{3,4},{4,5},{5,1}},{5,2,5}}
 
-test_equal("has_right_unit()",1,has_right_unit(plus01))
+test_equal("has_right_unit()",1,has_unit(plus01, SIDE_RIGHT))
 
-test_equal("is_right_unit()",0,is_right_unit(2,plus01))
+test_equal("is_right_unit()",0,is_unit(2,plus01))
 
 test_equal("all_right_units()",{1},all_right_units(plus01))
 
@@ -138,10 +138,6 @@ test_equal("has_unit()",0,has_unit(plus01))
 
 operation sum sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
-
-test_equal("distributes_left()",1,distributes_left(product,sum,0))
-
-test_equal("distributes_right()",1,distributes_right(product,sum,0))
 
 test_equal("distributes_over()",3,distributes_over(product,sum,0))
 

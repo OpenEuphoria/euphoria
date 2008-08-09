@@ -15,8 +15,9 @@
 include std/machine.e
 include opnames.e
 include reswords.e
-include std/file.e
 include std/pretty.e
+include std/io.e
+include std/os.e
 
 -- works as a pseudo INTERPRETER
 include mode.e
@@ -197,7 +198,7 @@ procedure showCode(integer flist, sequence Code)
 				word = Code[i+j]
 				show_operand(flist, word)
 			end for
-			
+
 			if SymTab[sub][TOKEN] != PROC then
 				word = Code[i+2+n]
 				show_operand(flist, word)

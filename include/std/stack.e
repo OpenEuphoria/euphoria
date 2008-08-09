@@ -13,6 +13,12 @@ include error.e
 -- === Constants
 --
 
+--**
+-- Stack types
+-- * FIFO: like people standing in line: first item in is first item out
+-- * FILO: like for a stack of plates  : first item in is last item out
+
+
 export constant
 	FIFO = 1,
 	FILO = 2
@@ -38,7 +44,7 @@ end type
 --		# ##stack_type##: an integer, defining the semantics of the stack
 --
 -- Returns:
---		An empty **stack***.
+--		An empty **stack**.
 --
 -- Comments:
 -- There are two sorts of stacks, designated by the types ##FIFO## and ##FILO##:
@@ -172,7 +178,7 @@ end function
 -- Parameters:
 --		# ##sk##: the stack to inspect.
 --
--- Returns
+-- Returns:
 --		An **object**, the last element on a stack.
 --
 -- Comments:

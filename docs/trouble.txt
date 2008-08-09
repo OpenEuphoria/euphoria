@@ -327,14 +327,6 @@ In all other contexts it is ok to make a list:
 atom a, b, c, d, e
 </eucode>
 
-==== Declaring variables in the middle of loop, if or switch
-
-//I'm declaring some variables in the middle of a loop, if or switch
-block and it gives me a syntax error.//
-
-All of your variable declarations must come outside of any [[:for], [[:while]],
-[[:if]] or [[:switch] block.
-
 ==== Expected to see...
 
 //It says: ##Syntax Error - expected to see possibly 'xxx', not 'yyy'##//

@@ -26,7 +26,9 @@ Use the Euphoria editor, ##ed##, to edit a Euphoria file. Notice the use of colo
 adjust these colors along with the cursor size and many other "user-modifiable" parameters by 
 editing constant declarations in ##ed.ex##. Use //Esc q// to quit the editor or //Esc h// for 
 help. There are several, even better, Euphoria-oriented editors in 
-[[http://www.rapideuphoria.com/edi.htm|The Archive]].
+[[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text 
+editor, many have a highlighter file for Euphoria. You will find it either on the Archive or 
+on the community page for that editor.
 
 === Benchmark
 

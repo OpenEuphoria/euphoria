@@ -85,39 +85,39 @@ test_equal("custom_sort() mixed",
 -----  sort_reverse() ------
 test_equal("sort_reverse() empty sequence",         
                     {}, 
-                    sort_reverse(  {})
+                    sort(  {}, DESCENDING)
            )
 test_equal("sort_reverse() one item sequence",
                     {9}, 
-                    sort_reverse(  {9})
+                    sort(  {9}, DESCENDING)
           )
 test_equal("sort_reverse() integer sorted ",
                     {3,2,1}, 
-                    sort_reverse(  {1,2,3})
+                    sort(  {1,2,3}, DESCENDING)
           )
 test_equal("sort_reverse() integer rev sorted ",
                     {3,2,1}, 
-                    sort_reverse(  {3,2,1})
+                    sort(  {3,2,1}, DESCENDING)
            )
 test_equal("sort_reverse() integer dups ",
                     {3,2,2,1,1},
-                    sort_reverse(  {1,2,3,2,1})
+                    sort(  {1,2,3,2,1}, DESCENDING)
            )
 test_equal("sort_reverse() integer sequence",
                     {3,2,1},
-                    sort_reverse(  {3,1,2})
+                    sort(  {3,1,2}, DESCENDING)
            )
 test_equal("sort_reverse() float sequence",
                     {6.5, 5.2, 5.1},
-                    sort_reverse(  {5.1, 6.5, 5.2})
+                    sort(  {5.1, 6.5, 5.2}, DESCENDING)
           )
 test_equal("sort_reverse() string", 
                     "aBA", 
-                    sort_reverse(  "BaA")
+                    sort(  "BaA", DESCENDING)
           )
 test_equal("sort_reverse() mixed", 
                     {"ABa",  {1,{2,3}, 4.5}, {-5}, "", 3, 2.477},
-                    sort_reverse(  {"ABa",3, "", 2.477, {-5}, {1,{2,3},4.5}})
+                    sort(  {"ABa",3, "", 2.477, {-5}, {1,{2,3},4.5}}, DESCENDING)
           )
 
 -----  sort_user() ------

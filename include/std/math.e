@@ -4,7 +4,8 @@
 -- == Math
 --
 -- <<LEVELTOC depth=2>>
--- 
+--
+--****
 -- === Constants
 
 --**
@@ -16,10 +17,14 @@
 -- -- x is 2.718281828459045235
 -- </eucode>
 
-export constant E = 2.718281828459045235
+export constant
+	E         = 2.7182818284590452353602874
 
 --**
--- PI 3.141592653589793238
+-- * PI     : 3.141592653589793238 and usual multiples
+-- * HALFPI : its half
+-- * QUARTPI: its quarter
+-- * TWOPI  : its double
 --
 -- Comments:
 -- Enough digits have been used to attain the maximum accuracy possible for a Euphoria atom.
@@ -30,20 +35,41 @@ export constant E = 2.718281828459045235
 -- -- x is 3.141592653589793238
 -- </eucode>
 
-export constant PI = 3.141592653589793238
+export constant
+	PI        = 3.141592653589793238462643,
+	QUARTPI   = 0.78539816339744830962,
+	HALFPI    = 1.57079632679489661923,
+	TWOPI     = 6.28318530717958647692
 
 --**
--- PI_HALF = PI / 2.0
---
-export constant PI_HALF = PI / 2.0
+-- Miscellaneous constants:
+-- * LN2      : natural logarithm of 2
+-- * INVLN2   : the inverse of LN2
+-- * LN10     : natural logarithm of 10
+-- * INVLN10  : the inverse of LN10
+-- * SQRT2    : the square root of 2
+-- * HALFSQRT2 : the half, and also the inverse, of SQRT2
+-- * RADIANS_TO_DEGREE  : 180 / PI, how many degrees a radian is worth
+-- * DEGREES_TO_RADIANS : PI / 180, how many radians a degree is worth
+-- * EULER_GAMMA : the Euler-Mascheroni-Soldner gamma constant: 0.57721566490153286606065121
+-- * EULER_NORMAL: 1/sqrt(2*PI), or 0.3989422804014326779399461
+
+export constant
+	LN2       = 0.69314718055994530941,
+	INVLN2    = 1 / LN2,
+	LN10      = 2.30258509299404568401,
+	INVLN10   = 1 / LN10,        -- for log10() routine
+	SQRT2     = 1.41421356237309504880,
+	HALFSQRT2 = 0.70710678118654752440,
+	DEGREES_TO_RADIANS  = 0.01745329251994329576,
+	RADIANS_TO_DEGREES   = 1/DEGREES_TO_RADIANS,
+	EULER_GAMMA  = machine_func(47,{25,182,111,252,140,120,226,63}),
+	EULER_NORMAL = machine_func(47,{81,54,212,51,69,136,217,63})
 
 
 constant
 	PINF     = 1E308 * 1000,       -- Plus infinity (used in several routines)
-	MINF     = - PINF,             -- Minus infinity (used in several routines)
-	INVLOG10 = 1 / log(10),        -- for log10() routine
-	RADIANS_TO_DEGREES = 180.0/PI, -- for rad2deg()
-	DEGREES_TO_RADIANS = PI/180.0  -- for deg2rad()
+	MINF     = - PINF             -- Minus infinity (used in several routines)
 
 type trig_range(object x)
 --  values passed to arccos and arcsin must be [-1,+1]
@@ -59,162 +85,7 @@ type trig_range(object x)
 	end if
 end type
 
---****
--- === Roundings and remainders
---
-
---**
--- Signature:
---   global function remainder(object dividend, object divisor)
---
--- Description:
--- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
---
--- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
---		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
---
--- Returns:
---		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by  ##divisor##, with ##dividend##'s sign.
---
--- Errors:
---	If any atom in ##divisor## is 0, this is an error condition as it amounts to an attempt to divide by zero.
---
--- Comments:
--- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result has the sign of ##dividend## and lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
---
--- The arguments to this function may be atoms or sequences. The rules for
--- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
---
--- Example 1:
--- <eucode>
--- a = remainder(9, 4)
--- -- a is 1
--- </eucode>
---
--- Example 2:
--- <eucode>
--- s = remainder({81, -3.5, -9, 5.5}, {8, -1.7, 2, -4})
--- -- s is {1, -0.1, -1, 1.5}
--- </eucode>
---
--- Example 3:
--- <eucode>
--- s = remainder({17, 12, 34}, 16)
--- -- s is {1, 12, 2}
--- </eucode>
---
--- Example 4:
--- <eucode>
--- s = remainder(16, {2, 3, 5})
--- -- s is {0, 1, 1}
--- </eucode>
---
--- See Also:
--- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
-
---**
--- Compute the remainder of the division of two atoms. The result is not less than zero
---
--- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
---		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
---
--- Returns:
---		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by ##divisor##, with ##divisor##'s sign.
---
--- Comments:
--- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result is nonnegative and has lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
---
--- The arguments to this function may be atoms or sequences. The rules for
--- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
---
--- When both arguments are positive numbers, [[:mod]]() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
---
--- Example 1:
--- <eucode>
--- a = mod(9, 4)
--- -- a is 1
--- </eucode>
---
--- Example 2:
--- <eucode>
--- s = mod({81, -3.5, -9, 5.5}, {8, -1.7, 2, -4})
--- -- s is {1, 1.6, 1, 1.5}
--- </eucode>
---
--- Example 3:
--- <eucode>
--- s = mod({17, 12, 34}, 16)
--- -- s is {1, 12, 2}
--- </eucode>
---
--- Example 4:
--- <eucode>
--- s = mod(16, {2, 3, 5})
--- -- s is {0, 1, 1}
--- </eucode>
---
--- See Also:
--- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
-
-export function mod(object x, object y)
-	return x - y * floor(x / y)
-end function
-
---**
--- Signature:
--- global function floor(object value)
---
--- Description:
--- Return the greatest integer less than or equal to some value. This amount to rounding down to an integer.
---
--- Parameters:
---		# ##value##: an object, each atom in which will be acted upon.
---
--- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is the atom with no fractional part equal or immediately below ##value##.
---
--- Example 1:
--- <eucode>
--- y = floor({0.5, -1.6, 9.99, 100})
--- -- y is {0, -2, 9, 100}
--- </eucode>
---
--- See Also:
---		[[:ceil]], [[:round]]
-
---**
--- Computes next integer equal or greater than the argument. This means for
--- integer arguments it has no effect, but for non-integers it rounds up to
--- the next integer.
---
--- Parameters:
---		# ##value##: an object, each atom is processed, no matter how deeply nested.
---
--- Returns:
---		An **object**, the same shape as ##value##. Each atom in ##value## 
--- is returned as an integer that is the smallest integer equal to or greater
--- than the corresponding atom in ##value##.
---
--- Comments:
--- This function may be applied to an atom or to all elements of a sequence.
---
---	##ceil(X)## is 1 more than ##floor(X)## for non-integers.
---
--- Example 1:
--- <eucode>
--- sequence nums
--- nums = {8, -5, 3.14, 4.89, -7.62, -4.3}
--- nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
--- </eucode>
---
--- See Also:
---		[[:floor]], [[:round]]
-
-export function ceil(object a)
-	return -floor(-a)
-end function
+include error.e
 
 --****
 -- === Sign and comparisons
@@ -231,6 +102,7 @@ end function
 -- the result is the same if not less than zero, and the opposite value otherwise.
 --
 -- Comments:
+--
 --   This function may be applied to an atom or to all elements of a sequence
 --
 -- Example 1:
@@ -277,6 +149,7 @@ end function
 --		An **object** the same shape as ##value##. When ##value## is an atom, the result is -1 if ##value## is less than zero, 1 if greater and 0 if equal.
 --
 -- Comments:
+--
 -- This function may be applied to an atom or to all elements of a sequence.
 --
 -- For an atom, ##sign##(x) is the same as [[:compare]](x,0).
@@ -339,7 +212,6 @@ end function
 -- a = max({10,15.4,3})
 -- -- a is 15.4
 -- </eucode>
---
 -- See Also:
 --		[[:min]], [[:compare]], [[:flatten]]
 
@@ -375,9 +247,6 @@ end function
 -- a = min({10,15.4,3})
 -- -- a is 3
 -- </eucode>
---
--- See Also:
---   [[:max]]
 
 export function min(object a)
 	atom b, c
@@ -395,7 +264,238 @@ export function min(object a)
 end function
 
 --****
--- === Trigonometry
+-- === Roundings and remainders
+--
+
+--**
+-- Signature:
+--   global function remainder(object dividend, object divisor)
+--
+-- Description:
+-- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
+--
+-- Parameters:
+--		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
+--		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
+--
+-- Returns:
+--		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by  ##divisor##, with ##dividend##'s sign.
+--
+-- Errors:
+--	If any atom in ##divisor## is 0, this is an error condition as it amounts to an attempt to divide by zero.
+--
+-- Comments:
+-- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result has the sign of ##dividend## and lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
+--
+-- The arguments to this function may be atoms or sequences. The rules for
+-- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
+--
+-- Example 1:
+-- <eucode>
+-- a = remainder(9, 4)
+-- -- a is 1
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = remainder({81, -3.5, -9, 5.5}, {8, -1.7, 2, -4})
+-- -- s is {1, -0.1, -1, 1.5}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- s = remainder({17, 12, 34}, 16)
+-- -- s is {1, 12, 2}
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- s = remainder(16, {2, 3, 5})
+-- -- s is {0, 1, 1}
+-- </eucode>
+-- See Also:
+-- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
+
+--**
+-- Compute the remainder of the division of two atoms. The result is not less than zero
+--
+-- Parameters:
+--		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
+--		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
+--
+-- Returns:
+--		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by ##divisor##, with ##divisor##'s sign.
+--
+-- Comments:
+-- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result is nonnegative and has lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
+--
+-- The arguments to this function may be atoms or sequences. The rules for
+-- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
+--
+-- When both arguments are positive numbers, [[:mod]]() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
+--
+-- Example 1:
+-- <eucode>
+-- a = mod(9, 4)
+-- -- a is 1
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = mod({81, -3.5, -9, 5.5}, {8, -1.7, 2, -4})
+-- -- s is {1, 1.6, 1, 1.5}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- s = mod({17, 12, 34}, 16)
+-- -- s is {1, 12, 2}
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- s = mod(16, {2, 3, 5})
+-- -- s is {0, 1, 1}
+-- </eucode>
+-- See Also:
+-- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
+
+export function mod(object x, object y)
+	return x - y * floor(x / y)
+end function
+
+--**
+-- Signature:
+-- global function floor(object value)
+--
+-- Description:
+-- Return the greatest integer less than or equal to some value. This amount to rounding down to an integer.
+--
+-- Parameters:
+--		# ##value##: an object, each atom in which will be acted upon.
+--
+-- Returns:
+--		An **object** the same shape as ##value##. When ##value## is an atom, the result is the atom with no fractional part equal or immediately below ##value##.
+--
+-- Example 1:
+-- <eucode>
+-- y = floor({0.5, -1.6, 9.99, 100})
+-- -- y is {0, -2, 9, 100}
+-- </eucode>
+--
+-- See Also:
+--		[[:ceil]], [[:round]]
+
+--**
+-- Computes the next integer equal or greater than the argument. 
+--
+-- Parameters:
+--		# ##value##: an object, each atom of which processed, no matter how deeply nested.
+--
+-- Returns:
+--		An **object**, the same shape as ##value##. Each atom in ##value## 
+-- is returned as an integer that is the smallest integer equal to or greater
+-- than the corresponding atom in ##value##.
+--
+-- Comments:
+-- This function may be applied to an atom or to all elements of a sequence.
+--
+--	##ceil(X)## is 1 more than ##floor(X)## for non-integers. For integers, ##X = floor(X) = ceil(X)##.
+--
+-- Example 1:
+-- <eucode>
+-- sequence nums
+-- nums = {8, -5, 3.14, 4.89, -7.62, -4.3}
+-- nums = ceil(nums) -- {8, -5, 4, 5, -7, -4}
+-- </eucode>
+--
+-- See Also:
+--		[[:floor]], [[:round]]
+
+export function ceil(object a)
+	return -floor(-a)
+end function
+
+--**
+-- Return the argument's elements rounded to some precision
+--
+-- Parameters:
+--		# ##value##: an object, each atom of which will be acted upon, no matter how deeply nested.
+--		# ##precision##: an object, the rounding precision(s). If not passed, this defaults to 1.
+--
+-- Returns:
+--		An **object** the same shape as ##value##. When ##value## is an atom, the result is that atom rounded to the nearest integer multiple of 1/##precision##.
+--
+-- Comments:
+-- This function may be applied to an atom or to all elements of a sequence.
+--
+-- Example 1:
+-- <eucode>
+-- round(5.2) -- 5
+-- round({4.12, 4.67, -5.8, -5.21}, 10) -- {4.1, 4.7, -5.8, -5.2}
+-- round(12.2512, 100) -- 12.25
+-- </eucode>
+--
+-- See Also:
+--	[[:floor]], [[:ceil]]
+
+export function round(object a, object precision=1)
+	integer len
+	sequence s
+	object t, u
+
+	precision = abs(precision)
+	if atom(a) then
+		if atom(precision) then
+			return floor(0.5 + (a * precision )) / precision
+		end if
+		len = length(precision)
+		s = repeat(0, len)
+		for i = 1 to len do
+			t = precision[i]
+			if atom (t) then
+				s[i] = floor( 0.5 + (a * t)) / t
+			else
+				s[i] = round(a, t)
+			end if
+		end for
+		return s
+	elsif atom(precision) then
+		len = length(a)
+		s = repeat(0, len)
+		for i = 1 to len do
+			t = a[i]
+			if atom(t) then
+				s[i] = floor(0.5 + (t * precision)) / precision
+			else
+				s[i] = round(t, precision)
+			end if
+		end for
+		return s
+	end if
+	len = length(a)
+	if len != length(precision) then
+		crash("The lengths of the two supplied sequences do not match.")
+	end if
+	s = repeat(0, len)
+	for i = 1 to len do
+		t = precision[i]
+		if atom(t) then
+			u = a[i]
+			if atom(u) then
+				s[i] = floor(0.5 + (u * t)) / t
+			else
+				s[i] = round(u, t)
+			end if
+		else
+			s[i] = round(a[i], t)
+		end if
+	end for
+	return s
+end function
+
+--****
+-- ==== Trigonometry
 
 --**
 -- Signature:
@@ -537,7 +637,7 @@ end function
 
 export function arccos(trig_range x)
 --  returns angle in radians
-	return PI_HALF - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
+	return HALFPI - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
 
 --**
@@ -572,7 +672,6 @@ export function arcsin(trig_range x)
 --  returns angle in radians
 	return 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
-
 --**
 -- Calculate the arctangent of a ratio.
 --
@@ -602,9 +701,9 @@ export function atan2(atom y, atom x)
 			return arctan(y/x) + PI
 		end if
 	elsif y > 0 then
-		return PI_HALF
+		return HALFPI
 	elsif y < 0 then
-		return -(PI_HALF)
+		return -(HALFPI)
 	else
 		return 0
 	end if
@@ -648,7 +747,6 @@ end function
 --
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
---
 -- [[:sin]](), [[:cos]]() and [[:tan]]() expect angles in radians.
 --
 -- Example 1:
@@ -656,7 +754,6 @@ end function
 -- x = deg2rad(194)
 -- -- x is 3.385938749
 -- </eucode>
---
 -- See Also:
 -- [[:rad2deg]]
 
@@ -664,88 +761,9 @@ export function deg2rad (object x)
    return x * DEGREES_TO_RADIANS
 end function
 
---**
--- Return the argument's elements rounded to some precision
---
--- Parameters:
---		# ##value##: an object, each atom of which will be acted upon, no matter how deeply nested.
---		# ##precision##: an object, the rounding precision(s). If not passed, this defaults to 1.
---
--- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is that atom rounded to the nearest integer multiple of 1/##precision##.
---
--- Comments:
--- This function may be applied to an atom or to all elements of a sequence.
---
--- Example 1:
--- <eucode>
--- round(5.2) -- 5
--- round({4.12, 4.67, -5.8, -5.21}, 10) -- {4.1, 4.7, -5.8, -5.2}
--- round(12.2512, 100) -- 12.25
--- </eucode>
---
--- See Also:
---	[[:floor]], [[:ceil]]
-
-export function round(object a, object precision=1)
-	integer len
-	sequence s
-	object t, u
-
-	a = abs(a)
-	if atom(a) then
-		if atom(precision) then
-			return floor(0.5 + (a * precision )) / precision
-		end if
-		len = length(precision)
-		s = repeat(0, len)
-		for i = 1 to len do
-			t = precision[i]
-			if atom (t) then
-				s[i] = floor( 0.5 + (a * t)) / t
-			else
-				s[i] = round(a, t)
-			end if
-		end for
-		return s
-	elsif atom(precision) then
-		len = length(a)
-		s = repeat(0, len)
-		for i = 1 to len do
-			t = a[i]
-			if atom(t) then
-				s[i] = floor(0.5 + (t * precision)) / precision
-			else
-				s[i] = round(t, precision)
-			end if
-		end for
-		return s
-	end if
-	len = length(a)
-	if len != length(precision) then
-			abort(1)
-	end if
-	s = repeat(0, len)
-	for i = 1 to len do
-		t = precision[i]
-		if atom(t) then
-			u = a[i]
-			if atom(u) then
-				s[i] = floor(0.5 + (u * t)) / t
-			else
-				s[i] = round(u, t)
-			end if
-		else
-			s[i] = round(a[i], t)
-		end if
-	end for
-	return s
-end function
-
 --****
--- === Logarithms and powers.
+-- ==== Logarithms and powers.
 --
-
 --**
 -- Signature:
 -- global function log(object value)
@@ -806,7 +824,7 @@ end function
 --		[[:log]]
 
 export function log10(object x1)
-	return log(x1) * INVLOG10
+	return log(x1) * INVLN10
 end function
 
 --**
@@ -857,12 +875,13 @@ end function
 -- 		power(0,0) is illegal, because there is not an unique value that can be assigned to that quantity.
 --
 -- Comments:
+--
 -- The arguments to this function may be atoms or sequences. The rules for 
 -- <a href="refman_2.htm#26">operations on sequences</a> apply.
 --
 -- Powers of 2 are calculated very efficiently.
 --
--- Other languages have a ** or ^ operator to perform the same action. But they don't have  sequences.
+-- Other languages have a ~** or ^ operator to perform the same action. But they don't have  sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -891,7 +910,6 @@ end function
 -- See Also:
 --		[[:log]], [[:Operations on sequences]]
 --
-
 --**
 -- Signature:
 -- global function sqrt(object value)
@@ -920,6 +938,194 @@ end function
 -- Se Also:
 --		[[:power]], [[:Operations on sequences]]
 --
+
+--****
+-- === Hyperbolic trigonometry
+--
+
+--**
+-- Computes the hyperbolic cosine of an object.
+--
+-- Parameters:
+--		# ##x##: the object to process.
+--
+-- Returns:
+-- An **object**, the same shape as ##x##, each atom of which was acted upon.
+--
+-- Comments:
+--
+-- The hyperbolic cosine grows like the exponential function.
+--
+-- For all reals, ##poweer(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
+--
+-- Example 1:
+-- <eucode>
+-- ?cosh(LN2) -- prints out 1.25
+-- </eucode>
+-- See Also:
+-- [[:cos]], [[:sinh]], [[:arccosh]]
+
+export function cosh(object a)
+    return (exp(a)+exp(-a))/2
+end function
+
+--**
+-- Computes the hyperbolic sine of an object.
+--
+-- Parameters:
+--		# ##x##: the object to process.
+--
+-- Returns:
+-- An **object**, the same shape as ##x##, each atom of which was acted upon.
+--
+-- Comments:
+--
+-- The hyperbolic sine grows like the exponential function.
+--
+-- For all reals, ##poweer(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
+--
+-- Example 1:
+-- <eucode>
+-- ?sinh(LN2) -- prints out 0.75
+-- </eucode>
+-- See Also:
+-- [[:cosh]], [[:sin]], [[:arcsinh]]
+
+export function sinh(object a)
+    return (exp(a)-exp(-a))/2
+end function
+
+--**
+-- Computes the hyperbolic tangent of an object.
+--
+-- Parameters:
+--		# ##x##: the object to process.
+--
+-- Returns:
+-- An **object**, the same shape as ##x##, each atom of which was acted upon.
+--
+-- Comments:
+--
+-- The hyperbolic tangent takes values from -1 to +1.
+--
+-- ##tanh##() is he ratio ##sinh() / cosh()##. Compare with ordinary trigonometry.
+--
+-- Example 1:
+-- <eucode>
+-- ?tanh(LN2) -- prints out 0.6
+-- </eucode>
+--
+-- See Also:
+-- [[:cosh]], [[:sinh]], [[:tan]], [[:arctanh]]
+
+export function tanh(object a)
+    return sinh(a)/cosh(a)
+end function
+
+--**
+-- Computes the reverse hyperbolic sine of an object.
+--
+-- Parameters:
+--		# ##x##: the object to process.
+--
+-- Returns:
+-- An **object**, the same shape as ##x##, each atom of which was acted upon.
+--
+-- Comments:
+--
+-- The hyperbolic sine grows like the logarithm function.
+--
+-- Example 1:
+-- <eucode>
+-- ?arcsinh(1) -- prints out 0,4812118250596034
+-- </eucode>
+--
+-- See Also:
+-- [[:arccosh]], [[:arcsin]], [[:sinh]]
+
+export function arcsinh(object a)
+    return log(a+sqrt(1+a*a))
+end function
+
+type not_below_1(object x)
+    if atom(x) then
+        return x>=1.0
+    end if
+    for i=1 to length(x) do
+        if not not_below_1(x[i]) then
+            return 0
+        end if
+    end for
+    return 1
+end type
+
+--**
+-- Computes the reverse hyperbolic cosine of an object.
+--
+-- Parameters:
+--		# ##x##: the object to process.
+--
+-- Returns:
+-- An **object**, the same shape as ##x##, each atom of which was acted upon.
+--
+-- Errors:
+-- Since [[:cosh]] only takes values not below 1, an argument below 1 causes an error.
+--
+-- Comments:
+--
+-- The hyperbolic cosine grows like the logarithm function.
+--
+-- Example 1:
+-- <eucode>
+-- ?arccosh(1) -- prints out 0
+-- </eucode>
+--
+-- See Also:
+-- [[:arccos]], [[:arcsinh]], [[:cosh]]
+
+export function arccosh(not_below_1 a)
+    return log(a+sqrt(a*a-1))
+end function
+
+type abs_below_1(object x)
+    if atom(x) then
+        return x>-1.0 and x<1.0
+    end if
+    for i=1 to length(x) do
+        if not abs_below_1(x[i]) then
+            return 0
+        end if
+    end for
+    return 1
+end type
+
+--**
+-- Computes the reverse hyperbolic tangent of an object.
+--
+-- Parameters:
+--		# ##x##: the object to process.
+--
+-- Returns:
+-- An **object**, the same shape as ##x##, each atom of which was acted upon.
+--
+-- Errors:
+-- Since [[:tanh]] only takes values between -1 and +1 excluded, an out of range argument causes an error.
+--
+-- Comments:
+--
+-- The hyperbolic cosine grows like the logarithm function.
+--
+-- Example 1:
+-- <eucode>
+-- ?arctanh(1/2) -- prints out 0,5493061443340548456976
+-- </eucode>
+--
+-- See Also:
+-- [[:arccos]], [[:arcsinh]], [[:cosh]]
+
+export function arctanh(abs_below_1 a)
+    return log((1+a)/(1-a))/2
+end function
 
 --****
 -- === Accumulation
@@ -1015,12 +1221,14 @@ end function
 --		An **atom**, the result of or'ing all atoms in [[:flatten]](##values##).
 --
 -- Comments:
+--
 -- This function may be applied to an atom or to all elements of a sequence. It performs [[:or_bits]]() operations repeatedly.
 --
 -- Example 1:
 --   <eucode>
 --   a = sum({10, 7, 35})
 --   -- a is 47
+--   </eucode>
 --
 -- See Also:
 --		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]
@@ -1040,11 +1248,9 @@ export function or_all	(object a)
 	end for
 	return b
 end function
-
 --****
--- === Bitwise opreations
+-- ==== Bitwise opreations
 --
-
 --**
 -- Signature:
 -- global function and_bits(object a, object b)
@@ -1062,6 +1268,7 @@ end function
 -- is obtained by logical AND between atoms on both objects.
 --
 -- Comments: 
+--
 -- The arguments to this function may be atoms or sequences. The rules for operations on sequences apply.
 -- The atoms in the arguments must be representable as 32-bit numbers, either signed or unsigned.
 -- 
@@ -1096,7 +1303,6 @@ end function
 -- See Also:
 --  [[:or_bits]], [[:xor_bits]], [[:not_bits]], [[:int_to_bits]]
 --
-
 --**
 -- Signature:
 -- global function xor_bits(object a, object b)
@@ -1128,7 +1334,6 @@ end function
 -- 
 -- See Also: 
 --     [[:and_bits]], [[:or_bits]], [[:not_bits]], [[:int_to_bits]]
-
 --**
 -- Signature:
 -- global function or_bits(object a, object b)
@@ -1201,7 +1406,6 @@ end function
 -- See Also: 
 --   [[:and_bits]], [[:or_bits]], [[:xor_bits]], [[:int_to_bits]]
 
-
 --**
 -- Left shift moves a left by b bits
 --
@@ -1245,8 +1449,7 @@ export function right_shift(integer a, integer b)
 end function
 
 --****
--- === Random numbers
-
+-- ==== Random numbers
 --**
 -- Return a random integer from a specified integer range.
 --
@@ -1362,7 +1565,7 @@ export procedure set_rand(integer seed)
 	machine_proc(M_SET_RAND, seed)
 end procedure
 
---****
+--**
 -- Signature:
 -- global function rand(object maximum)
 --
@@ -1390,3 +1593,4 @@ end procedure
 --
 -- See Als:
 -- 		[[:set_rand]], [[:ceil]]
+
