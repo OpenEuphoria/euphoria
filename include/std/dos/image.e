@@ -4,7 +4,7 @@
 --****
 -- === DOS Image Routines
 --
-
+ifdef DOS then
 include ..\graphcst.e
 include base_mem.e
 
@@ -292,3 +292,4 @@ export procedure all_palette(sequence s)
 	machine_proc(M_ALL_PALETTE, s)
 end procedure
 
+end ifdef
