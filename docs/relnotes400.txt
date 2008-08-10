@@ -26,6 +26,8 @@
   **include/euphoria**. $$(doneby Jeremy Cowgar)
 * **Moved** **instance()** and **sleep()** from **misc.e** to **os.e**
   $$(doneby Jeremy Cowgar)
+* **Moved** **sound()** and **tick_rate()** from **machine.e** to **os.e**
+  $$(doneby C. Cuvier)
 * **Moved** **free_console()** from **dll.e** to **console.e**
   $$(doneby C. Cuvier)
 * **Moved**// DOS// specific commands to the **std/dos** directory
@@ -135,7 +137,9 @@ $$(doneby C. Cuvier)
 * New routines in **math.e**:
   **ceil()**, **round_to()**, **round()**, **sign()**, **abs()**, **sum()**, **average()**, 
   **min()**, **max()**, **deg2rad()**, **rad2deg()**, **log10()**, **atan2()**, 
-  **rand_range()**, **mod()**. Global Constant **E**. $$(doneby Jeremy Cowgar.)
+  **rand_range()**, **mod()**, **sinh**, cosh**, tanh**, **arcsinh**, **arccosh**, 
+  **arstanh**. Global Constants **E**, **HALFPI**, **TWOPI**, **QUARTPI**,
+  **LN2**, **INVLOG2**, **EULER_GAMMA**, EULER_NORMAL**. $$(doneby Jeremy Cowgar, C. Cuvier)
 * New routines in **sequence.e** and **search.e**:
    **insert()**, **splice()**, **remove()**, **replace()**, **head()**, **mid()**, 
    **slice()**, **tail()**, **split()**, **split_adv()**, **join()**, **find_any()**, 
@@ -146,12 +150,18 @@ $$(doneby C. Cuvier)
    **repeat_pattern**, **project**, **extract**, valid_index**, **find_nested**.
    $$(doneby Jeremy Cowgar, Derek Parnell, C. Cuvier.)
 * New **sets.e** library to handle sets, set maps and set operations. $$(doneby C. Cuvier)
+* New **stats.e** library for statistical and engineering math routines. $$(doneby Derek Parnell)
 * New routines in **sort.e**:
-  **sort_reverse()**, **sort_user()**, **sort_columns()**. $$(doneby Derek Parnell.)
+  **sort_user()**, **sort_columns()**. All routines can use ascending or descending order.
+$$(doneby Derek Parnell, C. Cuvier.)
 * New routines in **filesys.e**, **io.e** and **os.e**:
   **read_lines()**, **read_file()**, **write_lines()**, **append_lines**,
-  **write_file()**, **pathinfo()**, **dirname()**, **filename()**,
-  **fileext()** and Global Constants **SLASH** and **CRLF**. $$(doneby Jeremy Cowgar.)
+  **write_file()**, **pathinfo()**, **dirname()**, **filename()**, **create_directory()**, 
+  **remove_directory()**, **file_exists()**, **copy_file()**, **rename_file()**, 
+  **delete_file()**, **move_file()**, **file_type()**, **file_length()**, **driveid()**
+  **fileext()**, **show_help()**, **cmd_parse()**, **uname()**, **is_win_nt()**,
+  **setenv()**, unsetenv()**
+   and Global Constants **SLASH** and **CRLF**. $$(doneby Jeremy Cowgar, Jim Brown)
 * New routines in **datetime.e**:
   **new()**, **from_date()**,
   **now()**, **dow()**, **doy()**, **to_unix()**,
@@ -164,7 +174,7 @@ $$(doneby C. Cuvier)
   $$(doneby Yuku Sugianto, Jeremy Cowgar. )
 * New map routines in **map.e**:
   **new()**, **has()**, **get()**, **put()**, **remove()**, **size()**, **keys()**,
-  **values()**. $$(doneby Yuku Sugianto, Derek Parnell.)
+  **values()**, **hash()** (built-in), and more. $$(doneby Yuku Sugianto, Derek Parnell.)
 * New unit testing library: **unittest.e**: see tests/all.ex for examples
   on how to use with your own libraries. $$(doneby Jeremy Cowgar.)
 * New stack routines in **stack.e**: 
@@ -180,4 +190,13 @@ $$(doneby C. Cuvier)
   warning must be a litteral constant. $$(doneby C. Cuvier.)
 * Warnings also may be redirected or suppressed using **warning_file()**. 
   $$(doneby C. Cuvier.)
+* New routines in ***eds.e** (formerly **database.e**): **db_clear()**, **db_clear_table()**,    
+ **db_get_recid()**, db_replace_recid()**, ***db_current_table()**, **db_record_recid()**,
+ **db_set_caching()** $$(doneby Derek Parnell)
+* New **primes.e** library devoted to prime numbers $$(doneby Derek Parnell)
+* New **regex.e** library on regular expressions, using the standard PCRE library $$(doneby Jim Brown, Matt Lewis)
+* New **socket.e** library for network/internet data interchange $$(doneby Mike Sabal, Kathy Smith)
+* New character sets types and routines in **types.e** $$(doneby Derek Parnell)
+* New **unicode.e** for encoding/decoding/storing strings in UTF16 format $$(doneby Matt Lewis)
+
 
