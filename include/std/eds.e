@@ -79,8 +79,9 @@ include std/text.e
 -- The key value and the data value for a record are allocated space
 -- as needed. A pointer to the data value is stored just before the
 -- key value. Euphoria objects, key and data, are stored in a compact form.
--- All allocated blocks have the size of the block in bytes, stored just
--- before the address.
+--
+-- All allocated blocks have the size of the block in bytes, stored in the 
+-- four bytes just before the address.
 
 --****
 -- === Constants
@@ -93,7 +94,8 @@ include std/text.e
 export constant DB_OK = 0,
 				DB_OPEN_FAIL = -1,
 				DB_EXISTS_ALREADY = -2,
-				DB_LOCK_FAIL = -3
+				DB_LOCK_FAIL = -3,
+				DB_FATAL_FAIL = -404
 
 --****
 -- ==== Lock Types
@@ -105,6 +107,27 @@ export constant DB_LOCK_NO = 0,       -- don't bother with file locking
 				DB_LOCK_SHARED = 1,   -- read the database
 				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
 
+--****
+-- ==== Error Codes 
+-- * MISSING_END
+-- * NO_DATABASE
+-- * BAD_SEEK
+-- * NO_TABLE
+-- * DUP_TABLE
+-- * BAD_RECNO
+-- * INSERT_FAILED
+
+	
+export enum 
+	MISSING_END = 900,	-- missing 0 terminator 
+	NO_DATABASE,		-- current_db is not set
+	BAD_SEEK,			-- seek() failed.
+	NO_TABLE,			-- no table found
+	DUP_TABLE,			-- this table already exists
+	BAD_RECNO,			-- unknown key_location index supplied
+	INSERT_FAILED,		-- couldn't insert a new record
+	LAST_ERROR_CODE
+	
 constant DB_MAGIC = 77
 constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0
 constant SIZEOF_TABLE_HEADER = 16
@@ -132,25 +155,30 @@ sequence cache_index = {}
 integer  caching_option = 1
 object   void
 
-procedure default_fatal(sequence msg)
--- default fatal error handler - you can override this
-	crash("Fatal Database Error: %s", {msg})
-end procedure
-
 --****
 -- === Variables
 --
 
 --**
--- exception handler
+-- **Exception handler**\\
+-- Set this to a valid routine_id value for a procedure that
+-- will be called whenever the library detects a serious error. You procedure
+-- will be passed a single text string that describes the error. It may also
+-- call [[:db_get_errors]] to get more detail about the cause of the error.
 
-export integer db_fatal_id = -404
+export integer db_fatal_id 
 
-procedure fatal(sequence msg)
+db_fatal_id = DB_FATAL_FAIL	-- Initialized separately from declaration so
+                            -- the initial value doesn't show up in docs.
+
+
+sequence vLastErrors = {}
+
+
+procedure fatal(integer errcode, sequence msg, sequence routine_name, sequence parms)
+	vLastErrors = append(vLastErrors, {errcode, msg, routine_name, parms})
 	if db_fatal_id >= 0 then
-		call_proc(db_fatal_id, {msg})
-	else
-		default_fatal(msg)
+		call_proc(db_fatal_id, sprintf("Error Code %d: %s, from %s", {errcode, msg, routine_name}))
 	end if
 end procedure
 
@@ -184,7 +212,8 @@ function get_string()
 	i = 0
 	while c entry do
 		if c = -1 then
-			fatal("get_string:string is missing 0 terminator")
+			fatal(MISSING_END, "string is missing 0 terminator", "get_string", {where(current_db)})
+			exit
 		end if
 		i += 1
 		if i > length(s) then
@@ -205,7 +234,8 @@ function equal_string(sequence target)
 	i = 0
 	while c entry do
 		if c = -1 then
-			fatal("equal_string:string is missing 0 terminator")
+			fatal(MISSING_END, "string is missing 0 terminator", "equal_string", {where(current_db)})
+			return DB_FATAL_FAIL
 		end if
 		i += 1
 		if i > length(target) then
@@ -369,15 +399,61 @@ end procedure
 procedure safe_seek(atom pos)
 -- seek to a position in the current db file
 	if current_db = -1 then
-		fatal("Illegal operation: no current database defined!\n")
+		fatal(NO_DATABASE, "no current database defined", "safe_seek", {pos})
+		return
 	end if
 	if seek(current_db, pos) != 0 then
-		fatal(sprintf("seek to position %d failed!\n", pos))
+		fatal(BAD_SEEK, "seek to position failed", "safe_seek", {pos})
+		return
 	end if
 end procedure
 
 --****
 -- === Routines
+
+--**
+-- Fetches the most recent set of errors recorded by the library.
+--
+-- Parameters:
+--		# ##clearing##: if zero the set of errors is not reset, otherwise
+--      it will be cleared out. The default is to clear the set.
+--
+-- Returns:
+--   a Sequence. Each element is a set of four fields.
+--     	# Error Code.
+--		# Error Text.
+--		# Name of library routine that recorded the error.
+--      # Parameters passed to that routine.
+--
+-- Comments:
+--  * A number of library routines can detect errors. If the routine is a 
+--    function, it usually returns an error code. However, procedures that
+--    detect an error can't do that. Instead, they record the error details
+--    and you can query that after calling the library routine. 
+--	* Both functions and procedures that detect errors record the details
+--    in the ##Last Error Set##, which is fetched by this function.
+--
+--
+-- Example 1:
+-- <eucode>
+-- db_replace_data(recno, new_data)
+-- errs = db_get_errors()
+-- if length(errs) != 0 then
+--     display_errors(errs)
+--     abort(1)
+-- end if
+-- </eucode>
+
+export function db_get_errors(integer clearing = 1)
+	sequence lErrors
+	
+	lErrors = vLastErrors
+	if clearing then
+		vLastErrors = {}
+	end if
+	
+	return lErrors
+end function
 
 --**
 -- print the current database in readable form to file fn
@@ -436,6 +512,7 @@ export procedure db_dump(object file_id, integer low_level_too = 0)
 
 	printf(fn, "Database dump as at %s\n", {format(now(), "%Y-%m-%d %H:%M:%S")})
 	safe_seek(0)
+	if length(vLastErrors) > 0 then return end if
 	magic = get1()
 	if magic != DB_MAGIC then
 		puts(fn, "This is not a Euphoria Database file.\n")
@@ -601,34 +678,35 @@ export procedure check_free_list()
 	atom max
 
 	safe_seek(-1)
+	if length(vLastErrors) > 0 then return end if
 	max = where(current_db)
 	void = seek(current_db, FREE_COUNT)
 	free_count = get4()
 	if free_count > max/13 then
-		fatal("free count is too high")
+		crash("free count is too high")
 	end if
 	free_list = get4()
 	if free_list > max then
-		fatal("bad free list pointer")
+		crash("bad free list pointer")
 	end if
 	void = seek(current_db, free_list - 4)
 	free_list_space = get4()
 	if free_list_space > max or free_list_space < INIT_FREE * 8 then
-		fatal("free list space is bad")
+		crash("free list space is bad")
 	end if
 	for i = 0 to free_count - 1 do
 		void = seek(current_db, free_list + i * 8)
 		addr = get4()
 		if addr > max then
-			fatal("bad block address")
+			crash("bad block address")
 		end if
 		size = get4()
 		if size > max then
-			fatal("block size too big")
+			crash("block size too big")
 		end if
 		void = seek(current_db, addr - 4)
 		if get4() > size then
-			fatal("bad size in front of free block")
+			crash("bad size in front of free block")
 		end if
 	end for
 end procedure
@@ -1092,9 +1170,12 @@ end procedure
 function table_find(sequence name)
 -- find a table, given its name
 -- return table pointer
-	atom tables, nt, t_header, name_ptr
+	atom tables
+	integer nt
+	atom t_header, name_ptr
 
 	safe_seek(TABLE_HEADERS)
+	if length(vLastErrors) > 0 then return -1 end if
 	tables = get4()
 	void = seek(current_db, tables)
 	nt = get4()
@@ -1103,7 +1184,7 @@ function table_find(sequence name)
 		void = seek(current_db, t_header)
 		name_ptr = get4()
 		void = seek(current_db, name_ptr)
-		if equal_string(name) then
+		if equal_string(name) > 0 then
 			-- found it
 			return t_header
 		end if
@@ -1488,7 +1569,9 @@ end procedure
 --
 -- Errors:
 -- 		* An error occurs if the current database is not defined.
--- 		* If ##name## does not exist on the current database, or if ##new_name## does exist on the current database, a fatal error will occur.
+-- 		* If ##name## does not exist on the current database, 
+--        or if ##new_name## does exist on the current database,
+--        an error will occur.
 --
 -- Comments:
 -- 		The table to be renamed can be the current table, or some other table
@@ -1502,11 +1585,13 @@ export procedure db_rename_table(sequence name, sequence new_name)
 
 	table = table_find(name)
 	if table = -1 then
-		fatal("Source table doesn't exist")
+		fatal(NO_TABLE, "source table doesn't exist", "db_rename_table", {name, new_name})
+		return
 	end if
 
 	if table_find(new_name) != -1 then
-		fatal("Target table name already exists")
+		fatal(DUP_TABLE, "target table name already exists", "db_rename_table", {name, new_name})
+		return
 	end if
 
 	void = seek(current_db, table)
@@ -1545,6 +1630,7 @@ export function db_table_list()
 	atom tables, nt, name
 
 	safe_seek(TABLE_HEADERS)
+	if length(vLastErrors) > 0 then return {} end if
 	tables = get4()
 	void = seek(current_db, tables)
 	nt = get4()
@@ -1577,11 +1663,15 @@ end function
 --
 -- Returns:
 --		An **integer**, either greater or less than zero:
--- 		* If above zero, the record identified by ##key## was found on the current table, and the returned integer is its record number.
---		* If less than zero, the record was not found. The returned integer is the opposite of what the record number would have been, had the record been found.
+-- 		* If above zero, the record identified by ##key## was found on the
+--        current table, and the returned integer is its record number.
+--		* If less than zero, the record was not found. The returned integer
+--        is the opposite of what the record number would have been, had
+--        the record been found.
+--      * If equal to zero, an error occured.
 --
 -- Errors:
--- 		If the current table is not defined, an error is raised.
+-- 		If the current table is not defined, it returns 0.
 --
 -- Comments:
 --
@@ -1618,12 +1708,14 @@ export function db_find_key(object key, object table_name=current_table_name)
 
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_find_key", {key, table_name})
+			return 0
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_find_key", {key, table_name})
+		return 0
 	end if
 	lo = 1
 	hi = length(key_pointers)
@@ -1648,7 +1740,7 @@ export function db_find_key(object key, object table_name=current_table_name)
 end function
 
 --**
--- Returns the unique recid value for the record.
+-- Returns the unique record identifier (##recid##) value for the record.
 --
 -- Parameters:
 -- 		# ##key##: the identifier of the record to be looked up.
@@ -1656,19 +1748,25 @@ end function
 --
 -- Returns:
 --		An **atom**, either greater or equal to zero:
--- 		* If above zero, it is a recid, and can be used to quickly refetch the record.
---		* If zero, the record wasn't found.
+-- 		* If above zero, it is a ##recid##.
+--		* If less than zero, the record wasn't found.
+--      * If equal to zero, an error occured.
 --
 -- Errors:
--- 		If the current table is not defined, an error is raised.
+-- 		If the table is not defined, an error is raised.
 --
 -- Comments:
--- 		A //recid// is only valid for the current database and only while
---      the database is open and while the record exists. Once you delete
---      the record or close the database, the recid cannot be used for
---      anything.\\
---      It is used to quickly fetch data or to test if two given records are
---      the same record or not.
+-- A **##recid##** is a number that uniquely identifies a record in the database. 
+-- No two records in a database has the same ##recid## value. They can be used
+-- instead of keys to //quickly// refetch a record, as they avoid the overhead of
+-- looking for a matching record key. They can also be used without selecting
+-- a table first, as the ##recid## is unique to the database and not just a table.
+-- However, they only remain valid while a database is open and so long as it
+-- doesn't get compressed. Compressing the database will give each record a
+-- new ##recid## value. 
+--
+-- Because it is faster to fetch a record with a ##recid## rather than with its key,
+-- these are used when you know you have to **refetch** a record. 
 --
 -- Example 1:
 -- <eucode>
@@ -1688,12 +1786,14 @@ export function db_get_recid(object key, object table_name=current_table_name)
 
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_get_recid", {key, table_name})
+			return 0
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_get_recid", {key, table_name})
+		return 0
 	end if
 	lo = 1
 	hi = length(key_pointers)
@@ -1710,7 +1810,7 @@ export function db_get_recid(object key, object table_name=current_table_name)
 			return key_pointers[mid]
 		end if
 	end while
-	return 0
+	return -1
 end function
 
 --**
@@ -1896,18 +1996,22 @@ export procedure db_delete_record(integer key_location, object table_name=curren
 
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_delete_record", {key_location, table_name})
+			return
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_delete_record", {key_location, table_name})
+		return
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
-		fatal("bad record number")
+		fatal(BAD_RECNO, "bad record number", "db_delete_record", {key_location, table_name})
+		return
 	end if
 	key_ptr = key_pointers[key_location]
 	safe_seek(key_ptr)
+	if length(vLastErrors) > 0 then return end if
 	data_ptr = get4()
 	db_free(key_ptr)
 	db_free(data_ptr)
@@ -1970,6 +2074,59 @@ export procedure db_delete_record(integer key_location, object table_name=curren
 end procedure
 
 --**
+-- In the current database, replace the data portion of a record with new data.
+-- This can be used to quickly update records that have already been located
+-- by calling [[:db_get_recid]]. This operation is faster than using
+-- [[:db_replace_data]]
+--
+-- Parameters:
+-- 		# ##recid##: an atom, the ##recid## of the record to be updated.
+-- 		# ##data##: an object, the new value of the record.
+--
+-- Comments:
+-- * ##recid## must be fetched using [[:db_get_recid]] first.
+-- * ##data## is an Euphoria object of any kind, atom or sequence.
+-- * The ##recid## does not have to be from the current table.
+-- * This does no error checking. It assumes the database is open and valid.
+--
+-- Example 1:
+-- <eucode>
+-- rid = db_get_recid("Peter")
+-- rec = db_record_recid(rid)
+-- rec[2][3] *= 1.10
+-- db_replace_recid(rid, rec[2])
+-- </eucode>
+--
+-- See Also:
+-- 		[[:db_replace_data]], [[:db_find_key]], [[:db_get_recid]]
+
+export procedure db_replace_recid(integer recid, object data)
+	atom old_size, new_size, key_ptr, data_ptr
+	sequence data_string
+
+	void = seek(current_db, recid)
+	data_ptr = get4()
+	void = seek(current_db, data_ptr-4)
+	old_size = get4()-4
+	data_string = compress(data)
+	new_size = length(data_string)
+	if new_size <= old_size and
+	   new_size >= old_size - 16 then
+		-- keep the same data block
+		void = seek(current_db, data_ptr)
+	else
+		-- free the old block
+		db_free(data_ptr)
+		-- get a new data block
+		data_ptr = db_allocate(new_size + 8)
+		void = seek(current_db, recid)
+		put4(data_ptr)
+		void = seek(current_db, data_ptr)
+	end if
+	putn(data_string)
+end procedure
+
+--**
 -- In the current table, replace the data portion of a record  with new data.
 --
 -- Parameters:
@@ -1995,88 +2152,20 @@ export procedure db_replace_data(integer key_location, object data, object table
 
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_replace_data", {key_location, data, table_name})
+			return
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_replace_data", {key_location, data, table_name})
+		return
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
-		fatal("bad record number")
+		fatal(BAD_RECNO, "bad record number", "db_replace_data", {key_location, data, table_name})
+		return
 	end if
-	key_ptr = key_pointers[key_location]
-	safe_seek(key_ptr)
-	data_ptr = get4()
-	void = seek(current_db, data_ptr-4)
-	old_size = get4()-4
-	data_string = compress(data)
-	new_size = length(data_string)
-	if new_size <= old_size and
-	   new_size >= old_size - 16 then
-		-- keep the same data block
-		void = seek(current_db, data_ptr)
-	else
-		-- free the old block
-		db_free(data_ptr)
-		-- get a new data block
-		data_ptr = db_allocate(new_size + 8)
-		void = seek(current_db, key_ptr)
-		put4(data_ptr)
-		void = seek(current_db, data_ptr)
-	end if
-	putn(data_string)
-end procedure
-
---**
--- In the current database, replace the data portion of a record with new data.
--- This can be used to quickly update records that have already been located
--- by calling [[:db_get_recid]].
---
--- Parameters:
--- 		# ##recid##: an atom, the recid of the record to be updated.
--- 		# ##data##: an object, the new value of the record.
---
--- Comments:
--- * ##recid## must be fetched using [[:db_get_recid]] first.
--- * ##data## is an Euphoria object of any kind, atom or sequence.
--- * The recid does not have to be from the current table.
---
--- Example 1:
--- <eucode>
--- rid = db_get_recid("Peter")
--- rec = db_record_recid(rid)
--- rec[2][3] *= 1.10
--- db_replace_recid(rid, rec[2])
--- </eucode>
---
--- See Also:
--- 		[[:db_find_key]], [[:db_get_recid]]
-
-export procedure db_replace_recid(integer recid, object data)
-	atom old_size, new_size, key_ptr, data_ptr
-	sequence data_string
-
-	safe_seek(recid)
-	data_ptr = get4()
-	void = seek(current_db, data_ptr-4)
-	old_size = get4()-4
-	data_string = compress(data)
-	new_size = length(data_string)
-	if new_size <= old_size and
-	   new_size >= old_size - 16 then
-		-- keep the same data block
-		void = seek(current_db, data_ptr)
-	else
-		-- free the old block
-		db_free(data_ptr)
-		-- get a new data block
-		data_ptr = db_allocate(new_size + 8)
-		void = seek(current_db, recid)
-		put4(data_ptr)
-		void = seek(current_db, data_ptr)
-	end if
-	putn(data_string)
+	db_replace_recid(key_pointers[key_location], data)
 end procedure
 
 --**
@@ -2087,6 +2176,7 @@ end procedure
 --
 -- Returns
 --		An **integer**, the current number of records in the current table.
+--      If a value less than zero is returned, it means that an error occured.
 --
 -- Errors:
 -- 		If the current table is undefined, an error will occur.
@@ -2108,12 +2198,14 @@ end procedure
 export function db_table_size(object table_name=current_table_name)
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_table_size", {table_name})
+			return -1
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_table_size", {table_name})
+		return -1
 	end if
 	return length(key_pointers)
 end function
@@ -2126,7 +2218,11 @@ end function
 --      # ##table_name##: optional table name to get record data from.
 --
 -- Returns:
---		An **object**, the data portion of requested record.
+--		An **object**, the data portion of requested record.\\
+--      **NOTE** This function returns a value of -1 if an error prevented
+--      the correct data being returned. However, as -1 could possibly be
+--      a valid data object, you will need to call [[:db_error]] to retrieve
+--      the exact cause of an error, if in fact there was an error.
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a data
@@ -2150,18 +2246,22 @@ export function db_record_data(integer key_location, object table_name=current_t
 
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_record_data", {key_location, table_name})
+			return -1
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_record_data", {key_location, table_name})
+		return -1
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
-		fatal("bad record number")
+		fatal(BAD_RECNO, "bad record number", "db_record_data", {key_location, table_name})
+		return -1
 	end if
 
 	safe_seek(key_pointers[key_location])
+	if length(vLastErrors) > 0 then return -1 end if
 	data_ptr = get4()
 	void = seek(current_db, data_ptr)
 	data_value = decompress(0)
@@ -2171,7 +2271,11 @@ end function
 
 --**
 -- Returns
--- 		An **object**, the key of the record being queried by index.
+-- 		An **object**, the key of the record being queried by index.\\
+--      **NOTE** This function returns a value of -1 if an error prevented
+--      the correct data being returned. However, as -1 could possibly be
+--      a valid data object, you will need to call [[:db_error]] to retrieve
+--      the exact cause of an error, if in fact there was an error.
 --
 -- Parameters:
 -- 		# ##key_location##: an integer, the index of the record the key is being requested.
@@ -2195,38 +2299,38 @@ end function
 export function db_record_key(integer key_location, object table_name=current_table_name)
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
-			fatal("invalid table name given: " & table_name)
+			fatal(NO_TABLE, "invalid table name given", "db_record_key", {key_location, table_name})
+			return -1
 		end if
 	end if
 
 	if current_table_pos = -1 then
-		fatal("no table selected")
+		fatal(NO_TABLE, "no table selected", "db_record_key", {key_location, table_name})
+		return -1
 	end if
 	if key_location < 1 or key_location > length(key_pointers) then
-		fatal("bad record number")
+		fatal(BAD_RECNO, "bad record number", "db_record_key", {key_location, table_name})
+		return -1
 	end if
 	return key_value(key_pointers[key_location])
 end function
 
 --**
--- Returns the key and data in a record queried by recid.
+-- Returns the key and data in a record queried by ##recid##.
 --
 -- Parameters:
--- 		# ##recid##: the recid of the required record.
+-- 		# ##recid##: the ##recid## of the required record, which has been
+--         previously fetched using [[:db_get_recid]].
 --
 -- Returns:
 --		An **sequence**, the first element is the key and the second element
 --      is the data portion of requested record.
 --
 -- Comments:
--- Each record in a Euphoria database consists of a key portion and a data
--- portion. Each of these can be any Euphoria atom or sequence.
---
--- This function does not need the requested record to be from the current
--- table. The recid can refer to a record in any table.
---
--- Errors:
---		If the current table is not defined an error will occur.
+-- * This is much faster than calling [[:db_record_key]] and [[:db_record_data]].
+-- * This does no error checking. It assumes the database is open and valid.
+-- * This function does not need the requested record to be from the current
+-- table. The ##recid## can refer to a record in any table.
 --
 -- Example 1:
 -- <eucode>
@@ -2235,14 +2339,14 @@ end function
 -- </eucode>
 --
 -- See Also:
--- 		[[:db_find_key]], [[:db_get_recid]], [[:db_replace_recid]]
+-- 		[[:db_get_recid]], [[:db_replace_recid]]
 
 export function db_record_recid(integer recid)
 	atom data_ptr
 	object data_value
 	object key_value
 
-	safe_seek(recid)
+	void = seek(current_db, recid)
 	data_ptr = get4()
 	key_value = decompress(0)
 	void = seek(current_db, data_ptr)
@@ -2285,7 +2389,8 @@ export function db_compress()
 	sequence new_path, old_path, table_list, record, chunk
 
 	if current_db = -1 then
-		fatal("no current database")
+		fatal(NO_DATABASE, "no current database", "db_compress", {})
+		return -1
 	end if
 
 	index = find(current_db, db_file_nums)
@@ -2366,7 +2471,8 @@ export function db_compress()
 			-- insert a bunch of records
 			for j = 1 to chunk_size do
 				if db_insert(chunk[j][1], chunk[j][2]) != DB_OK then
-					fatal("couldn't insert into new database")
+					fatal(INSERT_FAILED, "couldn't insert into new database", "db_compress", {})
+					return DB_FATAL_FAIL
 				end if
 			end for
 			-- switch back to old table
