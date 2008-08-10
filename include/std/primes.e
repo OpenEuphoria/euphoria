@@ -67,23 +67,25 @@ export function calc_primes(integer pMax, atom pTimeLimit = 10)
 	end if
 	lResult = gPrimes & repeat(0, floor(pMax  / 3.5))
 
-	slot = find(-1, returned)
-	-- there s no task_killl(). If the function returns before time out, the slot must not be
-	-- recycled. 0 means active, 1 means return done, -1 means can recycle
-	if slot=0 then
-	    timed_out &= 0
-	    returned &= 0
-	    slot = length(returned)
-	else
-		timed_out[slot] = 0
-		returned[slot] = 0
-	end if
-	task_schedule(task_create(rTime_out, {slot}), {pTimeLimit, pTimeLimit * 1.02})
-
+	lTimeOut = time() + pTimeLimit
+-- 	slot = find(-1, returned)
+-- 	-- there s no task_killl(). If the function returns before time out, the slot must not be
+-- 	-- recycled. 0 means active, 1 means return done, -1 means can recycle
+-- 	if slot=0 then
+-- 	    timed_out &= 0
+-- 	    returned &= 0
+-- 	    slot = length(returned)
+-- 	else
+-- 		timed_out[slot] = 0
+-- 		returned[slot] = 0
+-- 	end if
+-- 	task_schedule(task_create(rTime_out, {slot}), {pTimeLimit, pTimeLimit * 1.02})
+-- 
 	lPos = length(gPrimes)
 
 	while lResult[lPos] < pMax do
-		if timed_out[slot] then
+--		if timed_out[slot] then
+		if time() > lTimeOut then
 			exit
 		end if
 
@@ -126,10 +128,10 @@ export function calc_primes(integer pMax, atom pTimeLimit = 10)
 				lCandidate += 2
 			end if
 		end while
-		task_yield()
+--		task_yield()
 	end while
 
-	returned[slot] = 1
+--	returned[slot] = 1
 	return lResult[1..lPos]
 end function
 
@@ -138,13 +140,16 @@ end function
 --
 -- Paremeters:
 -- 		# ##n##: an integer, the starting point for the search
---		# ##pDefault##: an integer, used to signal a timed out search. Defaults to -1.
+--		# ##pDefault##: an integer, used to signal error. Defaults to -1.
 --
 -- Returns:
---		An **integer**, which is prime only if it took less than 1 second to determine the next prime greater or equal to ##n##.
+--		An **integer**, which is prime only if it took less than 1 second 
+--      to determine the next prime greater or equal to ##n##.
 --
 -- Comments:
--- The default value of -1 will alert you about an invalid returned value, since a prime not less than ##n## is expected. However, you can pass another value for this parameter.
+-- The default value of -1 will alert you about an invalid returned value,
+-- since a prime not less than ##n## is expected. However, you can pass
+-- another value for this parameter.
 --
 -- Example 1:
 -- <eucode>
@@ -155,12 +160,15 @@ end function
 -- See Also:
 -- [[:calc_primes]]
 
-export function next_prime(integer n, integer pDefault = -1)
+export function next_prime(integer n, integer pDefault = -1, atom pTimeOut = 1)
 	integer i
 
 
+	if n < 0 then
+		return pDefault
+	end if
 	if gPrimes[$] < n then
-		gPrimes = calc_primes(n,1)
+		gPrimes = calc_primes(n,pTimeOut)
 	end if
 	if n > gPrimes[$] then
 		return n * pDefault

@@ -13,10 +13,12 @@ test_equal("primes found #3" , 547, next_prime(542))
 test_true("primes growth #2", s < length(gPrimes))
 s = length(gPrimes)
 
-test_equal("primes missing #1" , 0, next_prime(200000, 0))
+integer n = next_prime(200000, 0, 0) -- use timeout of zero to force error
+test_equal("primes missing #1" , 0, n)
+
 test_true("primes growth #3", s < length(gPrimes))
 s = length(gPrimes)
-test_equal("primes missing #2" , 2, next_prime(-1))
+test_equal("primes missing #2" , -1, next_prime(-1))
 test_true("primes growth #4", s = length(gPrimes))
 
 test_report()
