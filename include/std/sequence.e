@@ -32,7 +32,7 @@ export constant
 --		# ##b##: the other object
 --
 -- Returns:
---		An **integer**, 1 if an addition (or any [[:binary operation]]) is possible between ##a## and ##b##, else 0.
+--		An **integer**, 1 if an addition (or any [[:Relational operator]]) is possible between ##a## and ##b##, else 0.
 --
 -- Example 1:
 --   <eucode>
@@ -87,7 +87,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:store]], [[:Sequence Assignments]]
+--   [[:store]], [[:Subscripting of Sequences]]
 
 export function fetch(sequence source, sequence indexes)
 	object x
@@ -129,7 +129,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:fetch]], [[:Sequence Assignments]]
+--     [[:fetch]], [[:Subscripting of Sequences]]
 
 export function store(sequence target, sequence indexes, object x)
 	sequence partials,result,branch
@@ -177,7 +177,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:Sequence Assignments]]
+--     [[:Subscripting of Sequences]]
 
 export function valid_index(sequence st, object x)
 	if sequence(x) then

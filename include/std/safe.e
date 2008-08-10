@@ -3,14 +3,17 @@
 -- Euphoria 3.1
 -- Machine Level Programming (386/486/Pentium)
 
+--****
+-- === safe.e
+--
 -- This is a slower DEBUGGING VERSION of machine.e
-
+--
 -- How To Use This File:
-
+--
 -- 1. If your program doesn't already include machine.e add:
---           include machine.e  
+--           include machine.e
 --    to your main .ex[w][u] file at the top.
-
+--
 -- 2. To turn debug version on, issue 
 -- <eucode>
 -- with define SAFE
@@ -23,50 +26,61 @@
 --    through Euphoria's allocate() or allocate_low(). Call 
 --    unregister_block(address) when you want to prevent further access to
 --    an external block.
-
+--
 -- 4. Run your program. It might be 10x slower than normal but it's
 --    worth it to catch a nasty bug.
-
+--
 -- 5. If a bug is caught, you will hear some "beep" sounds.
 --    Press Enter to clear the screen and see the error message. 
 --    There will be a "divide by zero" traceback in ex.err 
 --    so you can find the statement that is making the illegal memory access.
-
+--
 -- 6. To switch between normal and debig bversions, simply comment in or out the 
 -- "with define SAFE" directive. In means debugging and out means normal.
 -- Alternatively, you can use -D SAFE as a switch on the command line (debug) or not (normal).
-
+--
 -- 7. The older method of switching files and renaming them //**no longer works**//. machine.e conditionally includes safe.e.
-
+--
 -- This file is equivalent to machine.e, but it overrides the built-in 
 -- routines: 
 --     poke, peek, poke4, peek4s, peek4u, call, mem_copy, and mem_set
 -- and it provides alternate versions of:
 --     allocate, allocate_low, free, free_low
+--
+-- Your program will only be allowed to read/write areas of memory
+-- that it allocated (and hasn't freed), as well as areas in low memory
+-- that you list below, or add dynamically via register_block().
 
 -- Some parameters you may wish to change:
 
-export integer check_calls, edges_only
-check_calls = 1   -- if 1, check all blocks for edge corruption after each 
-				  -- call(), dos_interrupt(), c_proc(), or c_func(). 
-				  -- To save time, your program can turn off this checking by 
-				  -- setting check_calls to 0. 
+--**
+-- Define block checking policy.
+--
+-- Comments:
+--
+-- If this integer is 1, (the default), check all blocks for edge corruption after each
+-- [[:call]](), [[:dos_interrupt]](), [[:c_proc]]() or [[:c_func]]().
+-- To save time, your program can turn off this checking by setting check_calls to 0.
 
-edges_only = (platform()=2) -- on WIN32 people often use unregistered blocks   
-				  -- if 1, only check for references to the leader or trailer
-				  -- areas just outside each registered block.
-				  -- don't complain about addresses that are far out of bounds
-				  -- (it's probably a legitimate block from another source)
-				  -- For a stronger check, set this to 0 if your program 
-				  -- will never read/write an unregistered block of memory.
+export integer check_calls = 1
+
+--**
+-- Determine whether to flag accesses to remote memory areas.
+--
+-- Comments:
+--
+-- If this integer is 1 (the default under //WIN32//), only check for references to the 
+-- leader or trailer areas just outside each registered block, and don't complain about 
+-- addresses that are far out of bounds (it's probably a legitimate block from another source)
+--
+-- For a stronger check, set this to 0 if your program will never read/write an unregistered block of memory.
+--
+-- On //WIN32// people often use unregistered blocks.
+export integer edges_only = (platform()=2) 
 				  
 
 -- from misc.e and graphics.e:
 constant M_SOUND = 1
-
--- Your program will only be allowed to read/write areas of memory
--- that it allocated (and hasn't freed), as well as areas in low memory
--- that you list below, or add dynamically via register_block().
 
 -- Include the starting address and length of any 
 -- acceptable areas of memory for peek/poke here. 

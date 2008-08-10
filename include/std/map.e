@@ -313,7 +313,7 @@ end function
 -- If ##pRequestedSize## is not greater than zero, a new width is automatically derived from the current one.
 --
 -- See Also:
---		[[:statistics]], [[:optimise]]
+--		[[:statistics]], [[:optimize]]
 export function rehash(map m, integer pRequestedSize = 0)
 	integer size, index2
 	sequence oldBuckets, newBuckets
@@ -548,6 +548,7 @@ end function
 --		The updated **map**.
 --
 -- Comments:
+--
 -- The operation parameter can be used to modify the existing value.  Valid operations are: 
 -- 
 -- * ##PUT##:  This is the default, and it replaces any value in there already
@@ -718,7 +719,12 @@ end function
 
 --**
 -- Convenience new map.
+--
+-- See Also:
+-- [[:new]]
+
 export constant BLANK_MAP = new()
+
 --**
 -- Adds or updates an entry on a map.
 --
@@ -729,8 +735,13 @@ export constant BLANK_MAP = new()
 --		# ##operation##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
 --		# ##pTrigger##: an integer. Default is 100. See Comments for details.
 --
--- Valid operations are: 
--- 
+-- Returns:
+--   The modified map.
+--
+-- Comments:
+--
+-- Valid operations are:
+--
 -- * ##PUT##:  This is the default, and it replaces any value in there already
 -- * ##ADD##:  Equivalent to using the += operator 
 -- * ##SUBTRACT##:  Equivalent to using the -= operator 
@@ -739,10 +750,6 @@ export constant BLANK_MAP = new()
 -- * ##APPEND##: Appends the value to the existing data 
 -- * ##CONCAT##: Equivalent to using the &= operator
 --
--- Returns:
---   The modified map.
---
--- Comments:
 --   If existing entry with the same key is already in the map, the value of the entry is updated.
 --
 -- Example 1:
@@ -753,7 +760,9 @@ export constant BLANK_MAP = new()
 --   city_population = nested_put(city_population, {"Canada",        "Ontario",    "Toronto",     2503281 )
 --   </eucode>
 --
--- See also:  [[:put]]
+-- See also:
+--  [[:put]]
+
 export function nested_put( map m, sequence keys, object value, integer operation = PUT, integer pTrigger = 100 )
 	if length( keys ) = 1 then
 		return put( m, keys[1], value, operation, pTrigger )
@@ -770,15 +779,14 @@ end function
 --		# ##key##: an object, the key to remove.
 --
 -- Returns:
---		 The modified **map**.
+-- The modified **map**.
 --
 -- Comments:
 --   If ##key## is not on ##m##, the ##m## is returned unchanged.
 --
 -- Example 1:
 --   <eucode>
---   map m
---   m = new()
+--   map m = new()
 --   m = put(m, "Amy", 66.9)
 --   m = remove(m, "Amy")
 --   -- m is now an empty map again
@@ -786,6 +794,7 @@ end function
 --
 -- See Also:
 --		[[:put]], [[:has]]
+--
 export function remove(map m, object key)
 	integer hash, lIndex
 	object bucket

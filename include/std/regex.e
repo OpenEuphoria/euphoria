@@ -297,7 +297,7 @@ end function
 --		# ##re##: the regex to free.
 --
 -- Comments:
--- Be sure to use ##regex:free##(), not [[:machine:free]]().
+-- Be sure to use ##regex:free##(), not [[:machine:free|free]]().
 --
 -- See Also:
 --     [[:new]]

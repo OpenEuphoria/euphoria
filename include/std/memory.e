@@ -96,6 +96,7 @@ end function
 
 --**
 -- Free up a previously allocated block of memory.
+-- @[machine:free]
 --
 -- Parameters:
 --		# ##addr##, an atom, the address of a block to free.
@@ -572,7 +573,8 @@ end function
 --  ##demo/callmach.ex##
 -- 
 -- See Also:
---    [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]], [[:safe.e]], [[:mem_copy]]], [[:mem_set]]
+-- [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]],
+-- [[[:mem_copy]]], [[:mem_set]]
 -- 
 --**
 -- Signature:
@@ -835,7 +837,7 @@ end procedure
 --  See [[:register_block]]() for further comments and an example.
 -- 
 -- See Also:
---   [[:register_block]], [[:safe.e]]
+--   [[:register_block]], [[safe.e]]
 
 export procedure unregister_block(atom block_addr)
 end procedure
@@ -848,7 +850,7 @@ end procedure
 -- safe.e maintains a list of acquired memory blocks. Those gained through
 -- allocate() or allocate_low() are automatically included. Any other block,
 -- for debugging purposes, must be registered by [[:register_block]]()
--- and unregistered by [[:untrgister_block]]().
+-- and unregistered by [[:unregister_block]]().
 --
 -- The list is scanned and, if any block shows signs of corruption, it is
 -- displayed on the screen and the program terminates. Otherwise, nothing

@@ -14,7 +14,7 @@ optionally a list of the most recently executed statements. For extremely large
 sequences, only a partial dump is shown. If the name **ex.err** is not convenient, or if a nondefault path is required, you
 can choose another file name, anywhere on your system, by calling [[:crash_file]]().
 
-In addition, you are able to create [[:user-defined types]] that precisely determine the set
+In addition, you are able to create [[:udt|user-defined types]] that precisely determine the set
 of legal values for each of your variables. An error report will occur the moment that one of 
 your variables is assigned an illegal value.
 
@@ -25,7 +25,7 @@ print statements at strategic locations in order to monitor the internal logic
 of the program. This approach is particularly convenient in an interpreted
 language like Euphoria since you can simply edit the source and rerun the
 program without waiting for a re-compile/re-link.
-
+@[trace]
 ==== The with/without trace directive
 
 The interpreter provides you with additional powerful tools for debugging.
@@ -38,7 +38,7 @@ The **with/without trace** special statements select the parts
 of your program that are available for tracing. Often you will simply insert a
 with trace statement at the very beginning of your source code to make it all
 traceable. Sometimes it is better to place the first with trace after all of
-your [[:user-defined types]], so you don't trace into
+your [[:udt|user-defined types]], so you don't trace into
 these routines after each assignment to a variable.  At other times, you may
 know exactly which routine or routines you are interested in tracing, and you
 will want to select only these ones. Of course, once you are in the trace
@@ -104,7 +104,7 @@ so it returns 0 for the strange value (99) instead of 1, you can force a
 diagnostic dump into **ex.err**.
 
 Remember that the argument to ##trace()## does not need to be a constant. It only needs to be 0,
-1, 2 or 3, but these values may be the result from any expression pssed to ##trace##(). 
+1, 2 or 3, but these values may be the result from any expression pssed to ##trace##().
 Other values will cause ##trace()## to fail.
 
 
@@ -180,7 +180,7 @@ The source code for a statement is written to **ctrace.out**, and flushed, just
 
 === Profiling 
 
-If you specify a [[:with profile]] or [[:with profile_time]] (DOS32 only) directive, then a special listing of your program, called a
+If you specify a ##with profile## or ##with profile_time## (DOS32 only) directive, then a special listing of your program, called a
 //profile//, will be produced by the interpreter when your program finishes
 execution.  This listing is written to the file **ex.pro** in the current
 directory.
@@ -194,7 +194,7 @@ make two separate runs.
 We ran the **sieve8k.ex** benchmark program in **demo\bench** under both types
 of profiling. The results are in **sieve8k.pro** (execution-count profiling)
 and **sieve8k.pro2** (time profiling).
-
+@[profile_file]
 Execution-count profiling shows precisely how many times each statement in your
 program was executed. If the statement was never executed the count field will
 be blank.

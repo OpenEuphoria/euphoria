@@ -24,6 +24,7 @@ end type
 --****
 -- === Pixel graphics routines
 --
+
 --**
 -- Draw a line on a pixel-graphics screen connecting two or more points in s, using color i.
 --
@@ -187,3 +188,50 @@ export function save_image(graphics_point top_left, graphics_point bottom_right)
 	end for
 	return save
 end function
+
+--**
+-- Signature:
+-- global function get_pixel(sequence coords)
+--
+-- Description:
+--
+-- Retrieve the color (a small integer) of the pixel(s) on the pixel-graphics screen at a given location.
+--
+-- Parameters:
+--		# ##coords##: a sequence, the first two elements of which are the coordinates of the (starting) point.
+--
+-- Returns:
+-- An **object**, either:
+-- * an integer, the color of the pixel at the requested location;
+-- * a sequence of ##n## colors, where ##n## is the third element of ##coords##.
+--
+-- Comments:
+--
+-- When ##coords## is a 2-element sequence representing screen coordinates, ##get_pixel##() 
+-- only returbn the color of this pixel.
+--
+-- When ##coords## is a 3-element sequence of the form ##{x, y, n}##, ##get_pixel##() returns a
+-- sequence of ##n## colors for the points starting at ##{x, y}## and moving to the right 
+-- ##{x+1, y}, {x+2, y}## etc.
+--
+-- A very fast algorithm is used to read the pixel colors on the screen, so that is much 
+-- faster to call get_pixel() once, specifying a large value of n, than it is to call it many 
+-- times, reading one pixel color at a time.
+--
+-- Points off the screen have unpredictable color values.
+--
+-- Example 1:
+--<eucode>
+--  object x
+-- 
+-- x = get_pixel({30,40})
+-- -- x is set to the color value of point x=30, y=40
+-- 
+-- x = get_pixel({30,40,100})
+-- -- x is set to a sequence of 100 integer values, representing
+-- -- the colors starting at {30,40} and going to the right
+-- </eucode>
+--
+-- See Also:
+-- [[:pixel]], [[:graphics_mode]], [[:get_position]]
+-- 

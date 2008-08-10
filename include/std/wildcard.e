@@ -83,7 +83,7 @@ constant END_MARKER = -1
 -- ##bin/search.ex##
 --
 -- See Also: 
--- [[:wildcard_file, match]], [[:upper]], [[:lower]], [[:Regular expressions]]
+-- [[:wildcard_file]], [[:upper]], [[:lower]], [[:Regular expressions]]
 
 export function wildcard_match(sequence pattern, sequence string)
 	integer p, f, t 

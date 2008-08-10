@@ -5,8 +5,10 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+
 --****
 -- === Constants
+--
 
 --**
 -- Base of the natural logarithm
@@ -314,7 +316,7 @@ end function
 -- -- s is {0, 1, 1}
 -- </eucode>
 -- See Also:
--- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
+-- 		[[:mod]], [[:Relational operators]], [[:Operations on sequences]]
 
 --**
 -- Compute the remainder of the division of two atoms. The result is not less than zero
@@ -358,7 +360,7 @@ end function
 -- -- s is {0, 1, 1}
 -- </eucode>
 -- See Also:
--- 		[[:mod]], [[:Binary operators]], [[:Operations on sequences]]
+-- 		[[:mod]], [[:Relational operators]], [[:Operations on sequences]]
 
 export function mod(object x, object y)
 	return x - y * floor(x / y)
@@ -721,7 +723,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
 --
--- [[:arcin]](), [[:arccos]]() and [[:arctan]]() return angles in radians.
+-- [[:arcsin]](), [[:arccos]]() and [[:arctan]]() return angles in radians.
 --
 -- Example 1:
 -- <eucode>
@@ -1450,6 +1452,8 @@ end function
 
 --****
 -- ==== Random numbers
+--
+
 --**
 -- Return a random integer from a specified integer range.
 --

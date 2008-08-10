@@ -190,7 +190,7 @@ end ifdef
 -- //DOS32//
 --
 -- Returns:
---   A **sequence** of [[:mixtures]]
+--   A **sequence** of [[:mixture]]s.
 --
 -- Comments:
 --
@@ -283,7 +283,7 @@ end function
 -- display a picture on the screen.
 --
 -- Example 1:
---   [[../demo/dos32/bitmap.ex]]
+--   ##demo\dos32\bitmap.ex##
 
 export procedure all_palette(sequence s)
 	machine_proc(M_ALL_PALETTE, s)

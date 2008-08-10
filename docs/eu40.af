@@ -47,6 +47,7 @@
 ../include/std/map.e
 ../include/std/math.e
 ../include/std/memory.e
+../include/std/safe.e
 ../include/std/dos/memory.e
 ../include/std/dos/base_mem.e
 ../include/std/dos/interrup.e

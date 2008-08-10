@@ -348,7 +348,7 @@ constant CHUNK = 100
 -- Comments:
 --     When ##n## > 0 and the function returns a sequence of length less than ##n## you know
 --     you've reached the end of file. Eventually, an
---     [[:empty sequence]] will be returned.
+--     empty sequence will be returned.
 --
 --     This function is normally used with files opened in binary mode, "rb".
 --     This avoids the confusing situation in text mode where //DOS// or //Windows// will convert CR LF pairs to LF.
@@ -621,7 +621,7 @@ end type
 -- </eucode>
 --
 -- See Also:
---		[[:bet_bytes]], [[:puts]], [[:where]]
+--		[[:get_bytes]], [[:puts]], [[:where]]
 
 export function seek(file_number fn, file_position pos)
 	return machine_func(M_SEEK, {fn, pos})

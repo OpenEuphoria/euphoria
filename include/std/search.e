@@ -9,7 +9,7 @@
 include error.e
 
 --****
--- === Routines
+-- === Equality
 --
 
 --**
@@ -98,7 +98,11 @@ include error.e
 -- </eucode>
 --
 -- See Also:
---     [[:compare]], [[:equals operator]]
+--     [[:compare]]
+
+--****
+-- === Finding
+--
 
 --**
 -- Signature:
@@ -164,29 +168,6 @@ include error.e
 --
 -- See Also:
 --     [[:find]], [[:match]], [[:match_from]], [[:compare]]
-
---**
--- Signature:
---     global function match(sequence needle, sequence haystack)
---
--- Description:
---     Try to match a "needle" against some slice of a "haystack".
---
---Parameters:
---		# ##needle##: a sequence whose presence as a "substring" is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
---
--- Returns:
---     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
---
--- Example 1:
--- <eucode>
--- location = match("pho", "Euphoria")
--- -- location is set to 3
--- </eucode>
---
--- See Also:
---     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard_match]]
 
 --**
 -- Signature:
@@ -289,9 +270,6 @@ export function find_all(object needle, sequence haystack, integer start=1)
 	return ret
 end function
 
---**
--- Flags for [[:find_nested]]()
-
 export constant
     NESTED_ANY=1,
     NESTED_ALL=2,
@@ -299,7 +277,7 @@ export constant
     NESTED_BACKWARD=8
 
 --**
--- Finds any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
+-- Find any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
 --
 -- Parameters:
 --		# ##needle##: an object, either what to look up, or a list of items to look up
@@ -345,6 +323,7 @@ export constant
 -- <eucode>
 -- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_INDEXES + NESTED_ALL)
 -- -- s is {{{2}, 1}, {{3, 1}, 2}, {{3, 2}, 1}}
+-- </eucode>
 --
 -- See Also:
 -- [[:find]], [[:rfind]], [[:find_any]], [[:fetch]]
@@ -444,39 +423,6 @@ export function find_nested(object needle, sequence haystack, integer flags=0, i
 end function
 
 --**
--- Match all items of haystack in needle.
---
--- Parameters:
---     # ##needle##: a sequence, what to look for
---     # ##haystack##: a sequence to search in
---     # ##start##: an integer, the starting index position (defaults to 1)
---
--- Returns:
---   A **sequence** of integers, the list of all lower indexes, not less than ##start##, of all slices in ##haystack## that equal ##needle##. The list may be empty.
---
--- Example 1:
--- <eucode>
--- s = match_all("the", "the dog chased the cat under the table.")
--- -- s is {1,16,30}
--- </eucode>
---
--- See Also:
---     [[:match]], [[:find]], [[:find_all]]
-
-export function match_all(sequence needle, sequence haystack, integer start=1)
-	sequence ret = {}
-
-	while start > 0 entry do
-		ret &= start
-		start += length(needle)
-	entry
-		start = match_from(needle, haystack, start)
-	end while
-
-	return ret
-end function
-
---**
 -- Find a needle in a haystack in reverse order.
 --
 -- Parameters:
@@ -488,7 +434,8 @@ end function
 --   An **integer**, 0 if no instance of ##needle## can be found on ##haystack## before
 --   index ##start##, or the highest such index otherwise.
 --
--- Comments:
+-- Comments: 
+--
 --   If ##start## is less than 1, ir will be added once to length(##haystack##)
 --   to designate a position counted backwards. Thus, if ##start## is -1, the
 --   first element to be queried in ##haystack## will be ##haystack##[$-1],
@@ -526,66 +473,6 @@ export function rfind(object needle, sequence haystack, integer start=length(hay
 
 	for i = start to 1 by -1 do
 		if equal(haystack[i], needle) then
-			return i
-		end if
-	end for
-
-	return 0
-end function
-
---**
--- Try to match a needle against some slice of a haystack in reverse order.
---
--- Parameters:
---   # ##needle##: a sequence to search for
---   # ##haystack##: a sequence to search in
---   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
---
--- Returns:
---   An **integer**, either 0 if no slice of ##haystack## starting before 
---   ##start## equals ##needle##, else the highest lower index of such a slice.
---
--- Comments:
---   If ##start## is less than 1, it will be added once to length(##haystack##)
---   to designate a position counted backwards. Thus, if ##start## is -1, the
---   first element to be queried in ##haystack## will be ##haystack##[$-1],
---   then ##haystack##[$-2] and so on.
---
--- Example 1:
--- <eucode>
--- location = rmatch("the", "the dog ate the steak from the table.")
--- -- location is set to 28 (3rd 'the')
--- location = rmatch("the", "the dog ate the steak from the table.", -11)
--- -- location is set to 13 (2nd 'the')
--- </eucode>
---
--- See Also:
---     [[:rfind]], [[:match]]
-
-export function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
-	integer len, lenx
-
-	len = length(haystack)
-	lenx = length(needle)
-
-	if lenx = 0 then
-		return 0
-	elsif (start > len) or  (len + start < 1) then
-		return 0
-	end if
-
-	if start < 1 then
-		start = len + start
-	end if
-
-	if start + lenx - 1 > len then
-		start = len - lenx + 1
-	end if
-
-	lenx -= 1
-
-	for i=start to 1 by -1 do
-		if equal(needle, haystack[i..i + lenx]) then
 			return i
 		end if
 	end for
@@ -717,6 +604,126 @@ export function binary_search(object needle, sequence haystack, integer startpoi
 		mid += 1
 	end if
 	return -mid
+end function
+
+--****
+-- === Matching
+--
+
+--**
+-- Signature:
+--     global function match(sequence needle, sequence haystack)
+--
+-- Description:
+--     Try to match a "needle" against some slice of a "haystack".
+--
+--Parameters:
+--		# ##needle##: a sequence whose presence as a "substring" is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--
+-- Returns:
+--     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
+--
+-- Example 1:
+-- <eucode>
+-- location = match("pho", "Euphoria")
+-- -- location is set to 3
+-- </eucode>
+--
+-- See Also:
+--     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard_match]]
+
+--**
+-- Match all items of haystack in needle.
+--
+-- Parameters:
+--     # ##needle##: a sequence, what to look for
+--     # ##haystack##: a sequence to search in
+--     # ##start##: an integer, the starting index position (defaults to 1)
+--
+-- Returns:
+--   A **sequence** of integers, the list of all lower indexes, not less than ##start##, of all slices in ##haystack## that equal ##needle##. The list may be empty.
+--
+-- Example 1:
+-- <eucode>
+-- s = match_all("the", "the dog chased the cat under the table.")
+-- -- s is {1,16,30}
+-- </eucode>
+--
+-- See Also:
+--     [[:match]], [[:find]], [[:find_all]]
+
+export function match_all(sequence needle, sequence haystack, integer start=1)
+	sequence ret = {}
+
+	while start > 0 entry do
+		ret &= start
+		start += length(needle)
+	entry
+		start = match_from(needle, haystack, start)
+	end while
+
+	return ret
+end function
+
+--**
+-- Try to match a needle against some slice of a haystack in reverse order.
+--
+-- Parameters:
+--   # ##needle##: a sequence to search for
+--   # ##haystack##: a sequence to search in
+--   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
+--
+-- Returns:
+--   An **integer**, either 0 if no slice of ##haystack## starting before 
+--   ##start## equals ##needle##, else the highest lower index of such a slice.
+--
+-- Comments:
+--   If ##start## is less than 1, it will be added once to length(##haystack##)
+--   to designate a position counted backwards. Thus, if ##start## is -1, the
+--   first element to be queried in ##haystack## will be ##haystack##[$-1],
+--   then ##haystack##[$-2] and so on.
+--
+-- Example 1:
+-- <eucode>
+-- location = rmatch("the", "the dog ate the steak from the table.")
+-- -- location is set to 28 (3rd 'the')
+-- location = rmatch("the", "the dog ate the steak from the table.", -11)
+-- -- location is set to 13 (2nd 'the')
+-- </eucode>
+--
+-- See Also:
+--     [[:rfind]], [[:match]]
+
+export function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
+	integer len, lenx
+
+	len = length(haystack)
+	lenx = length(needle)
+
+	if lenx = 0 then
+		return 0
+	elsif (start > len) or  (len + start < 1) then
+		return 0
+	end if
+
+	if start < 1 then
+		start = len + start
+	end if
+
+	if start + lenx - 1 > len then
+		start = len - lenx + 1
+	end if
+
+	lenx -= 1
+
+	for i=start to 1 by -1 do
+		if equal(needle, haystack[i..i + lenx]) then
+			return i
+		end if
+	end for
+
+	return 0
 end function
 
 

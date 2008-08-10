@@ -220,11 +220,11 @@ end function
 --
 -- Comments:
 --
--- The report components are described in the comments section for [[:set_verbosity]]. Everything
+-- The report components are described in the comments section for [[:set_test_verbosity]]. Everything
 -- prints on the standard error device.
 --
 -- See Also:
---   [[:set_verbosity]]
+--   [[:set_test_verbosity]]
 
 export procedure test_report()
 	atom score

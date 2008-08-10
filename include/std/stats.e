@@ -233,7 +233,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:avedev]], [[:var]], [[:stdeva]]
+--   [[:average]], [[:avedev]], [[:stdevp]], [[:stdeva]]
 --
 
 export function stdev(sequence pData)
@@ -297,7 +297,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:avedev]], [[:var]], [[:stdev]]
+--   [[:average]], [[:avedev]], [[:stdevp]], [[:stdev]]
 --
 
 export function stdeva(sequence pData)
@@ -363,7 +363,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:avedev]], [[:var]], [[:stdevpa]], [[:stdev]]
+--   [[:average]], [[:avedev]], [[:stdeva]], [[:stdevpa]], [[:stdev]]
 --
 
 export function stdevp(sequence pData)
@@ -424,7 +424,7 @@ end function
 -- </eucode>
 --
 -- See also:
---   [[:average]], [[:avedev]], [[:var]], [[:stdevp]], [[:stdev]]
+--   [[:average]], [[:avedev]], [[:stdeva]], [[:stdevp]], [[:stdev]]
 --
 
 export function stdevpa(sequence pData)
@@ -487,7 +487,7 @@ end function
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:stdev]], [[:var]]
+--   [[:average]], [[:stdev]]
 --
 
 export function avedev(sequence pData)
@@ -678,7 +678,110 @@ export function average(object pData)
 end function
 
 --**
--- Returns the average (mean) of the data points. 
+-- Returns the geometric mean of the atoms in a sequence.
+--
+-- Parameters:
+--		# ##data##: the values to take the geometric mean of.
+--
+-- Returns:
+--
+-- An **atom** not less than zero, representing the geometric mean of the atoms in ##data##.
+-- Sequences are ignored.
+-- If there is no atom to take the mean of, 1 is returned.
+--
+-- Comments:
+--
+-- The geometric mean of ##n## atoms is the n-th root of their product. Signs are ignored.
+--
+-- This is useful to compute average growth rates.
+--
+-- Example 1:
+-- <eucode>
+-- ?geomean({3, {}, -2, 6}) -- prints out power(36,1/3) = 3,30192724889462669
+-- </eucode>
+--
+-- See Also:
+-- [[:average]]
+
+export function geomean(sequence data)
+	atom prod = 1.0
+	integer count = length(data)
+
+	for i=1 to length(data) do
+		object x = data[i]
+		
+		if sequence(x) then
+			count -= 1
+		else
+		    x *= compare(x,0)
+		    if x=0 then
+		        return 0.0
+			else
+			    prod *= x
+		    end if
+		end if
+	end for
+	if count > 2 then
+		return power(prod, 1/count)
+	elsif count = 2 then
+		return sqrt(prod)
+	else
+		return prod
+	end if
+end function
+
+--**
+-- Returns the harmonic mean of the atoms in a sequence.
+--
+-- Parameters:
+--		# ##data##: the values to take the geometric mean of.
+--
+-- Returns:
+--
+-- An **atom** representing the harmonic mean of the atoms in ##data##.
+-- Sequences are ignored.
+-- If there is no atom to take the mean of, or if 0 is on ##data##, 0 is returned.
+--
+-- Comments:
+--
+-- The harmonic mean of some atoms is the invers of the average of their inverses.
+--
+-- This is useful in engineering to compute equivalent capacities and resistances.
+--
+-- Example 1:
+-- <eucode>
+-- ?harmean({3, {}, -2, 6}) -- errors out, as the sum of inverses is 0.
+-- ?harmean({{2, 3, 4}) -- prints out 36/11 = 3,27272727272727
+-- </eucode>
+--
+-- See Also:
+-- [[:average]]
+
+export function harmean(sequence data)
+	atom sum_inv = 0.0, last_x = 0.0
+	integer count = length(data)
+
+	for i=1 to length(data) do
+		object x = data[i]
+		
+		if sequence(x) then
+			count -= 1
+		elsif x=0 then
+	        return 0.0
+		else
+		    sum_inv += 1/x
+		    last_x = x
+		end if
+	end for
+	if count > 1 then
+		return count / sum_inv
+	else
+		return last_x -- avoids double reciprocal
+	end if
+end function
+
+--**
+-- Returns the average (mean) of the data points.
 --
 -- Parameters:
 --   # ##pData##: a list of 1 or more numbers for which you want the mean.
@@ -780,7 +883,7 @@ export function movavg(object pData, object pPeriod)
 		pPeriod = repeat(1, floor(pPeriod))
 	end if
 	
-	if length(pData) < length(pPeriod) then	
+	if length(pData) < length(pPeriod) then
 		pData = repeat(0, length(pPeriod) - length(pData)) & pData
 	end if
 	lLow = 1

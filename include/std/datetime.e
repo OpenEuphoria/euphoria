@@ -398,7 +398,7 @@ end type
 -- than the usual 18.2/sec, ##time##() will continue much longer, since in that case, 
 -- Euphoria handles the clock-tick interrupt directly, and accumulates the ticks in a larger, 32-bit variable.
 --
--- //DOS// emulation under Windows XP is not perfect. When you do time profiling, ([[:with profile_time]]),
+-- //DOS// emulation under Windows XP is not perfect. When you do time [[:Profiling]] using ##with profile_time##,
 -- the ##time##() function might be off by several percent. This problem does not occur on Windows ME/98/95.
 --  
 -- On some machines, ##time##() can return a negative number. However, you can still use the

@@ -101,5 +101,12 @@ test_equal("right_shift() #2",  12, right_shift(48, 2))
 test_equal("right_shift() #3", 131, right_shift(131, 0))
 test_equal("right_shift() #4",  15, right_shift(121, 3))
 
+test_equal("sh", 0.75, sinh(LN2))
+test_equal("ch", 1.25, cosh(LN2))
+test_equal("argsh", 1.146215834780588843900393655674, arcsinh(SQRT2))
+test_equal("argch", 1.7627471740390860504652186499596, arccosh(3))
+test_equal("th", 0.46211715726000975850231848364367, tanh(0.5))
+test_equal("argth", log(3)/2, arctanh(0.5))
+
 test_report()
 

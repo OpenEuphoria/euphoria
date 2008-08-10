@@ -610,7 +610,7 @@ end function
 --
 -- See Also:
 --
---   [[:graphics_mode]], [[:video_fonfig]]
+--   [[:graphics_mode]], [[:video_config]]
 
 export function text_rows(positive_int rows)
 	return machine_func(M_TEXTROWS, rows)

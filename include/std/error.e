@@ -42,7 +42,7 @@ constant
 -- </eucode>
 --
 -- See Also:
---		[[:crash_file]], [[:crash_meaasge]], [[:printf]]
+--		[[:crash_file]], [[:crash_message]], [[:printf]]
 
 export procedure crash(sequence fmt, object data={})
 	object msg
@@ -157,7 +157,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
---   [[:without warning]]
+--   [[:On/off options|without warning]], [[:warning]]
 
 export procedure warning_file(object file_path)
 	machine_proc(M_WARNING_FILE, file_path)
@@ -181,7 +181,7 @@ end procedure
 -- 
 -- This is what ##warning##(), in a limited way, does. It enables to generate custom warnings in
 -- code that will include yours. Of course, you can also geenrate warnings in your own code, for
--- instance as a kind of memo. The [[:without warning]] top level statement disables such warnings.
+-- instance as a kind of memo. The [[:On/off options|without warning]] top level statement disables such warnings.
 --
 -- The warning is issued with the ##custom_warning## level. This level is enabled by default, 
 -- but can be turned off any time.

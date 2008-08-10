@@ -27,6 +27,10 @@ test_equal("stdevpa 1", 0, stdevpa( {100} ))
 test_equal("stdevpa text", 0, stdevpa( {"text"} ))
 test_equal("stdevpa empty", {}, stdevpa( {} ))
 
+test_equal("Geometric mean", 2.8844991406148167646432766215602, geomean({2, "", -3, 4}))
+test_equal("Geometric mean, no data", 1, geomean({"", {-3, 4}}))
+test_equal("Harmonic mean", 36/13, harmean({2, "", 3, 4}))
+test_equal("HGeometric mean, no data", 0, harmean({"", {-3, 4}}))
 
 test_equal("avedev list", 1.85777777777778, avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ))
 test_equal("avedev text", {}, avedev( {"text"} ))

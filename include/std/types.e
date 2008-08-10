@@ -159,7 +159,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- [[:set_chracters]], [[:set_default_characters]]
+-- [[:set_charsets]], [[:set_default_charsets]]
 
 export function get_charsets()
 	sequence lResult

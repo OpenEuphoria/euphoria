@@ -49,7 +49,7 @@ constant
 -- </eucode>
 -- 
 -- See Also:
---		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]], [[:poke8]]
+--		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]]
 
 export function int_to_bytes(atom x)
 	integer a,b,c,d
@@ -102,7 +102,7 @@ end type
 -- 
 -- See Also:
 --   [[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]],
---   [[:peek4s]], [[:pee4ku]], [[:poke4]]
+--   [[:peek4s]], [[:peek4u]], [[:poke4]]
 
 export function bytes_to_int(sequence s)
 	if length(s) = 4 then
@@ -142,7 +142,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---	[[:bits_to_int]], [[:int_to_bytes]], [[:bitwise operations]],
+--	[[:bits_to_int]], [[:int_to_bytes]], [[:Relational operators]],
 --  [[:operations on sequences]]
 
 export function int_to_bits(atom x, integer nbits)

@@ -1400,7 +1400,7 @@ end function
 --      becomes undefined.
 --
 -- See Also:
---		[[:db_table_list]], [[:db_table_select]], [[:db_clear_table]]
+--		[[:db_table_list]], [[:db_select_table]], [[:db_clear_table]]
 
 export procedure db_delete_table(sequence name)
 -- delete an existing table and all of its records
@@ -1495,7 +1495,7 @@ end procedure
 --      it will still be the current table.
 --
 -- See Also:
---		[[:db_table_list]], [[:db_table_select]], [[:db_delete_table]]
+--		[[:db_table_list]], [[:db_select_table]], [[:db_delete_table]]
 
 export procedure db_clear_table(sequence name)
 -- delete all of records in the table
@@ -1623,7 +1623,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- 		[[:db_table_select]], [[:db_table_create]]
+-- 		[[:db_select_table]], [[:db_create_table]]
 
 export function db_table_list()
 	sequence table_names

@@ -693,7 +693,7 @@ end function
 --
 -- Comments: 
 --
--- The [[:ifdef]] statement is much more versatile and supersedes ##platform##(), which is 
+-- The [[:ifdef statement]] is much more versatile and supersedes ##platform##(), which is 
 -- supported for backward vompatibility and for a limited time only.
 --
 -- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
@@ -720,7 +720,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:platform.txt]], [[:ifdef]]
+-- [[:platform.txt]], [[:ifdef statement]]
 
 
 --****
@@ -787,7 +787,7 @@ end function
 -- </eucode>
 -- 
 -- See Also:
--- [[:system_exec], [[:command_line]], [[:current_dir]], [[:getenv]]
+-- [[:system_exec]], [[:command_line]], [[:current_dir]], [[:getenv]]
 --
 --**
 -- Signature:
@@ -1017,7 +1017,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- [[:euinc.conf]], [[:include statement]], [[:option_switches]]
+-- [[:euinc.conf]], [[:include]], [[:option_switches]]
 
 
 

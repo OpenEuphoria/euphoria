@@ -85,7 +85,7 @@ end function
 -- </eucode>
 --
 -- See also: 
---   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_ùap]], [[:reverse_map], 
+--   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_map]], [[:reverse_map],
 --   [[:is_injective]], [[:is_surjective]], [[:is_bijective]]
 
 export type map(sequence s)
@@ -267,7 +267,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:is_inside,]] [[:intersection]], [[:difference]]
+-- [[:is_inside]] , [[:intersection]], [[:difference]]
 
 export function belongs_to(object x,set s)
 	if length( s ) then
@@ -468,7 +468,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:subsets]], [[:belongs_to]], {{:difference]], [[:is_inside]]
+-- [[:subsets]], [[:belongs_to]], [[:difference]], [[:is_inside]]
 export function embedding(set small,set large)
     return is_inside_(small,large,1)
 end function
@@ -567,9 +567,10 @@ end function
 -- <eucode>
 -- set s1 = {2, 5, 7}, s2 = {1, 3, 4}
 -- sequence s = embed_union(s1,s2) -- s is now {2, 5, 6}
--- <eucode>
+-- </eucode>
 -- See Also:
 --		[[:embedding]], [[:union]]
+
 export function embed_union(set s1,set s2)
     return embed_union_(s1,s2)
 end function
@@ -598,6 +599,7 @@ end function
 --
 -- See Also: 
 --  [[:is_inside]]
+
 export function subsets(set s)
     integer p,k,L
     sequence result,s1,s2,x
@@ -806,7 +808,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:is_inside, subsets]], [[:belongs_to]]
+-- [[:is_inside]], [[:subsets]], [[:belongs_to]]
 export function union(set S1,set S2)
     return union1(S1,S2)
 end function
@@ -1002,7 +1004,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:map, sequences_to_map]], [[:direct_map]]
+--   [[:map]], [[:sequences_to_map]], [[:direct_map]]
 
 export function define_map(sequence mapping,set target)
     sequence result
@@ -1542,10 +1544,6 @@ export function is_bijective(map f)
     end if
 end function
 
---****
--- === Reverse mappings
---
-
 function fiber_over_(sequence f,sequence s1,sequence s2)
     sequence fibers,result
     integer p
@@ -1561,6 +1559,10 @@ function fiber_over_(sequence f,sequence s1,sequence s2)
     return {result,fibers}
 end function
 
+--****
+-- === Reverse mappings
+--
+
 --**
 -- Given a map between two sets, returns {list of antecedents of elements in target, effective target}.
 --
@@ -1568,7 +1570,9 @@ end function
 --		# ##f##: the inspected map
 --		# ##source##: the source set
 --		# ##target##: the target set.
+--
 -- Returns:
+--
 --   A **sequence** which is empty on failure. On success, it has two elements:
 -- * A sequence of sets; each of these sets is included in ##source## and is mapped to a single point by ##f##.
 -- * A set, the points in ##target## hit by ##f##.
@@ -1576,9 +1580,11 @@ end function
 -- Comments:
 --
 -- The listed sets, which are reverse images of points in ##target##,
---   are called //fibers// of ##f## over points, specially if they are isomorphic to one another for some extra algebraic or topological structure.
+--   are called //fibers// of ##f## over points, specially if they are isomorphic to one 
+-- another for some extra algebraic or topological structure.
 --
--- The fibers are enumerated in the same order as the points in the effective target, i.e. the points in ##target## ##f## hits.
+-- The fibers are enumerated in the same order as the points in the effective target, i.e. 
+-- the points in ##target## ##f## hits.
 --
 -- Example 1:
 -- <eucode>
@@ -1623,6 +1629,7 @@ end function
 --
 -- See Also: 
 -- [[:direct_map]], [[:fiber_over]]
+
 export function reverse_map(map f,set s1,sequence s0,set s2)
     sequence x,done,result
     integer p
@@ -1642,7 +1649,7 @@ export function reverse_map(map f,set s1,sequence s0,set s2)
 end function
 
 --**
--- Returns a right, and left is possible, inverse of a map over its [[:range]].
+-- Return a right, and left is possible, inverse of a map over its [[:range]].
 --
 -- Parameters:
 --		# ##f##: the map to invert.
@@ -1824,8 +1831,8 @@ end function
 export enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
 
 --****
--- ==== Operations on sets
-
+-- === Operations on sets
+--
 --**
 -- Returns an operation that splits by left action into the supplied mappings.
 --
@@ -2002,7 +2009,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:all_right_unitz]], [[:is_unit]], [[:has_unitA]]
+-- [[:all_right_units]], [[:is_unit]], [[:has_unit]]
 
 export function all_left_units(operation f)
     return all_left_units_(f)
@@ -2055,7 +2062,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:all_left_unitz]], [[:is_unit]], [[:has_unit]]
+-- [[:all_left_units]], [[:is_unit]], [[:has_unit]]
 
 export function all_right_units(operation f)
     integer p
@@ -2131,7 +2138,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:all_units]], [[:is_unit]]
+-- [[:all_left_units]], [[:all_right_units]],[[:is_unit]]
 
 export function has_unit(operation f, integer flags = SIDE_BOTH)
 	flags = and_bits(flags, SIDE_BOTH)
@@ -2163,7 +2170,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:all_left_unitz]], [[:has_unit]]
+-- [[:all_left_units]], [[:has_unit]]
 
 export function is_unit(integer x, operation f)
 	return is_left_unit(x, f) + SIDE_RIGHT * is_right_unit_(x, f)

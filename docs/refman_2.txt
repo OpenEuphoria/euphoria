@@ -234,8 +234,8 @@ not 6       -- 0 (false)
 These operators can also be applied to sequences. See below.
 
 In some cases [[:short-circuit]] evaluation will be used for expressions containing ##and##
-or ##or##. Specifically, short circuiting applies inside decision taking statements, like 
-[[:if]], [[:while]] pr [[:loop]]. More on this later.
+or ##or##. Specifically, short circuiting applies inside decision taking statements, like the
+[[:if statement]], [[:while statement]] or [[:loop ... until statement]]. More on this later.
 
 ==== Arithmetic Operators
 
@@ -551,7 +551,7 @@ expressions.
 
 We need to be a bit more precise in defining the rules for **empty
 slices**. Consider a slice ##s[i..j]## where ##s## is of length ##n##. A slice from
-##i## to ##j##, where  ##j = i - 1##  and ##i >= 1## produces the [[:empty sequence]],
+##i## to ##j##, where  ##j = i - 1##  and ##i >= 1## produces the [[:emptyseq|empty sequence]],
 even if ##i = n + 1##. Thus
 ##1..0## and ##n + 1..n## and everything in between are legal **(empty) slices**.  Empty
 slices are quite useful in many algorithms. A slice from ##i## to ##j## where
@@ -618,7 +618,7 @@ The sequence-formation operator is listed at the bottom of the a
 Some other important operations that you can perform on sequences have English
 names, rather than special characters. These operations are built-in to
 **ex.exe/exw.exe/exu**, so they'll always be there, and so they'll be fast. They are
-described in detail in [[:Library Reference]], but are
+described in detail in the [[:Language Reference]], but are
 important enough to Euphoria programming that we should mention them here before
 proceeding. You call these operations as if they were subroutines, although
 they are actually implemented much more efficiently than that.
@@ -994,7 +994,7 @@ procedures. See the section above for a few examples.
 These are special functions that may be used in declaring the allowed values
 for a variable. A type must have exactly one parameter and should return an
 atom that is either true (non-zero) or false (zero).  Types can also be called
-just like other functions. See [[:Specifying the Type of Variable]].
+just like other functions. See [[:Specifying the Type of a variable]].
 
 Although there are no restrictions to using defaulted parameters with types,
 their use is so much constrained by a type having exactly one parameter that
@@ -1122,7 +1122,7 @@ For example, procedures, functions and types can call themselves or one another
 recursion, where routine A calls routine B which directly or indirectly calls
 routine A, implies one of A or B being called before it is defined. This is perhaps
 the most frequent situation which requires using the [[:routine_id]]() mechanism.
-See [[:Dynamic Calls]] for more details.
+See [[:Dynamic Routine Calling]] for more details.
 
 ==== Defining the scope of an identifier
 
@@ -1320,7 +1320,7 @@ identifiers from within the library itself, users of the library will not be
 able to deconflict those symbols with the namespace associated with the main
 file of the library. But this circumstance is very unlikely.
 
-The controlling variable used in a [[:for-loop]] is special. It is automatically declared
+The controlling variable used in a [[:for statement]] is special. It is automatically declared
 at the beginning of the loop, and its scope ends at the end of the for-loop. If
 the loop is inside a function or procedure, the loop variable is a
 **private** variable and may not have the same name as any other
@@ -1334,7 +1334,7 @@ legal values of the loop variable - specifying a type would be redundant and is
 not allowed.
 
 Variables defined inside a **loop**, **while**, **if** or **switch** statement behave exactly
-like for-loop index variables in that respect, apart from the need to declare them in the 
+like for-loop index variables in that respect, apart from the need to declare them in the
 normal way.
 
 ==== The override qualifier
@@ -1359,7 +1359,7 @@ If an identifier is declared global or export, but not override, and there is a 
 same name, Euphoria will not assume an override, and will choose the builtin. A warning will
 be generated whenever this happens.
 
-=== Specifying the Type of a Variable
+=== Specifying the type of a variable
 
 So far you've already seen some examples of variable types but now we will
 define types more precisely.
@@ -1404,7 +1404,7 @@ The slower software routines will be used, but this could be of some advantage
 if you are worried about the floating-point bug in some early Pentium
 chips.
 
-
+@[udt]
 To augment the [[:predefined types]], you can create **user-defined types**. All you have to
 do is define a single-parameter function, but declare it with **type ...
 end type** instead of **function ... end function**.  For
@@ -1451,7 +1451,7 @@ in an expression. The type just serves as an error check to prevent any
 "corruption" of the variable.    User-defined types can catch unexpected
 logical errors in your program.  They are not designed to catch or correct user
 input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
-
+@[type_check]
 Type checking can be turned off or on between subroutines using the with
 type_check or without type_check (see [[:special
 statements]].  It is initially on by default.
@@ -1492,7 +1492,7 @@ desired value.
 
 Types also provide meaningful, machine-checkable documentation about your
 program, making it easier for you or others to understand your code at a later
-date. Combined with the [[:subscript checking]],
+date. Combined with the subscript checking,
 uninitialized variable checking, and other checking that is always present,
 strict run-time type checking makes debugging much easier in Euphoria than in
 most other languages. It also increases the reliability of the final program
@@ -1637,7 +1637,7 @@ Actually, the space consumed by the 1000-element sequence will be automatically
 recycled due to Euphoria's dynamic storage allocation.
 
 Note that the equals symbol '=' is used for both assignment and for a
-[[:equality testing]].  There is never any confusion
+equality testing.  There is never any confusion
 because an assignment in Euphoria is a statement only, it can't be used as an
 expression (as in C).
 
@@ -1781,7 +1781,7 @@ The **if** and **elsif** conditions are tested using
 [[:short-circuit]] evaluation.
 
 **If** statement headers can have a **label** clause
-right before the **then** closing keyword. See the section on [[:labelled block headers]]. 
+right before the **then** closing keyword. See the section on [[:labelled headers]]. 
 This feature does not apply to **elsif** conditional statements, as they are not
 standalone, just optionally sectioning an if block.
 
@@ -2014,7 +2014,7 @@ how to stop or otherwise alter it.  An iterative block may be informally called
 a loop, and each execution of code in a loop is called an iteration of the
 loop.
 
-Euphoria has three flavours of loops. They all may harbor a [[:labelled block header]], in 
+Euphoria has three flavours of loops. They all may harbor a [[:labelled header]], in 
 order to make exiting or resuming them more flexible.
 
 ==== while statement
@@ -2111,7 +2111,7 @@ before leaving the loop. The compiler will not allow any assignments to a loop
 variable. The initial value, loop limit and increment must all be atoms. If no
 increment is specified then +1 is assumed. The limit and increment values are
 established only on entering the loop, and are not affected by anything that
-happens during the execution of the loop. See also the [[:loop scope]].
+happens during the execution of the loop. 
 
 === Flow control statements
 
@@ -2453,11 +2453,11 @@ while 1 entry label "top" do
 </eucode>
 
 are both correct and equivalent.
-
+@[short-circuit]
 == Short-Circuit Evaluation
 
 When the condition tested by if, elsif, until, or while contains ##and## or ##or##
-operators, //short-circuit// evaluation will be used.  For example,
+operators, [[:short-circuit]] evaluation will be used.  For example,
 
 <eucode>
 if a < 0 and b > 0 then ...
@@ -2495,7 +2495,7 @@ the result to be true.
 If the expression B contains a call to a function, and that function has
 possible **side-effects**, i.e. it might do more than just return a value,
 you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
-not use **short-circuit** evaluation, and it's possible that some
+not use [[:short-circuit]] evaluation, and it's possible that some
 old code will no longer work correctly, although a search of the Euphoria
 archives did not turn up any programs that depend on side-effects in this
 way. But some unsubmitted Euphoria code might do.
@@ -2621,7 +2621,7 @@ the file relative to the following directories, in the following order:
 # The directory containing the current source file.  i.e. the source file that
   contains the include statement that is being processed.
 # The directory containing the main file given on the interpreter, translator or
-  binder - see [[:command-line]].
+  binder - see [[:command_line]].
 # If you've defined an environment variable named ##EUINC##, Euphoria will
   check each directory listed in ##EUINC## (from left to right).
   ##EUINC## should be a list of directories, separated by semicolons
@@ -2667,7 +2667,7 @@ The second form of the include statement is:
   that can be attached to global identifiers in the included file that
   you want to refer to in the main file. This might be necessary to disambiguate
   references to those identifiers, or you might feel that it makes your code more
-  readable. See [[:Scope Rules]] for more. This namespace overrides the default namespace the file may define.
+  readable. See [[:Using namespaces]] for more. This namespace overrides the default namespace the file may define.
 
 === with / without
 
@@ -2679,8 +2679,8 @@ multiple states.
 ==== On/Off options
 
 || Default || Option ||
-| off      | [[:profile]]       |
-| off      | [[:profile_time]]  |
+| off      | [[:Profiling|profile]]       |
+| off      | [[:Profiling|profile_time]]  |
 | off      | [[:trace]]         |
 | on       | [[:type_check]]    |
 
@@ -2690,7 +2690,7 @@ multiple states.
 
 For more information on the ##profile##, ##profile_time## and ##trace##
 options, see [[:Debugging and Profiling]]. For more information on the
-##type_check## option, see [[:Performance]].
+##type_check## option, see [[perform.txt|Performance]].
 
 There is also a rarely-used special ##with## option where a code
 number appears after ##with##.  In previous releases this code was
@@ -2813,7 +2813,7 @@ In addition, two other strings are recognised and have a special action:
 
 ===== with / without define
 
-As mentioned in [[:ifdef]], this top level statement is used to define/undefine tags which the ifdef statement may use.
+As mentioned about [[:ifdef statement]], this top level statement is used to define/undefine tags which the ifdef statement may use.
 
 The following tags have a predefined meaning in Euphoria:
 
@@ -2823,7 +2823,7 @@ The following tags have a predefined meaning in Euphoria:
 * LINUX:    platform is Linux
 * FREEBSD:  platform is FreeBSD
 * OSX:      platform is OS X for Macintosh
-* SAFE:     turns on a slower debugging version of [[:memory.e]] when defined. Switching mode by renaming files **//no longer works//**.
+* SAFE:     turns on a slower debugging version of ##memory.e## called ##safe.e## when defined. Switching mode by renaming files **//no longer works//**.
 * EU400:    defined on all versions of the interpreter above 4.0
 
 The name of a tag may contain any character that are not white space, including ones that
@@ -2841,7 +2841,7 @@ program being launched may need for proper, expectd operation. Under //Windows//
 achieved by clicking the Run... start menu entry, or hitting Windows-R.
 
 The following items may be changed or added, one at a time:
-
+@[euinc.conf]
 ; ##-C config_file##:
 : Specifies the path for a file called euinc.conf, which holds a set of include paths, one on each line.
 

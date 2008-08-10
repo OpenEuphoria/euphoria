@@ -310,7 +310,7 @@ to run it.
 
 If you run a Euphoria program under //Linux/FreeBSD// or //Windows// (or in a //DOS// shell 
 under //Windows//), and the program runs out of physical memory, it will start using "virtual 
-memory". The operating system provides this virtual memory automatically by swapping out the 
+memory". The operating system provides this virtual memory automatically by swapping out the
 least-recently-used code and data to a system swap file. To change the size of the //Windows// 
 swap file, click on ##Control Panel / 386 Enhanced / "virtual memory..."##. Under OS/2 you can 
 adjust the "DPMI_MEMORY_LIMIT" by clicking the ##Virtual //DOS// machine icon / "//DOS// 
@@ -338,12 +338,12 @@ screen.
 
 Under //Windows// you can associate ##ed.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
-##.exw##, ##.exu##, ##.e##, ##.ew##, ##.eu##, and ##.pro## ([[:profile]] files).
+##.exw##, ##.exu##, ##.e##, ##.ew##, ##.eu##, and ##.pro## ([[:profile_file|profile files]]).
 
 Most keys that you type are inserted into the file at the cursor position. Hit the ##Esc## 
 key once to get a menu bar of special commands. The arrow keys, and the 
 ##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under //Linux/FreeBSD// some 
-keys may not be available, and alternate keys are provided. See the file 
+keys may not be available, and alternate keys are provided. See the file
 ##euphoria\doc\ed.doc## (a href="ed.htm">euphoria\html\ed.htm</a>) for a complete description 
 of the editing commands. ##Esc h## (help) will let you view ##ed.doc## from your editing 
 session.
@@ -415,7 +415,7 @@ with or without your changes.
 The high-speed version of the Euphoria Interpreter back-end is written in ANSI
 C, and can be compiled with many different C compilers. The complete source
 code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous [[:Open source License]] allows both personal and 
+Euphoria-coded back-end. The generous [[../license.txt|Open source License]] allows both personal and
 commercial use, and unlike many other open
 source licenses, your changes do not have to be made open source.
 

@@ -163,7 +163,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
+--   [[:compare]], [[:sort]], [[:sort_user]]
 
 export function custom_sort(integer custom_compare, sequence x, object data = {}, integer order = ASCENDING)
 	integer gap, j, first, last, comp
@@ -286,7 +286,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---	 [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
+--	 [[:compare]], [[:sort]], [[:sort_user]]
 
 export function sort_user(integer custom_compare, sequence x, object user_data=0, integer order = ASCENDING)
 	if sequence(user_data) then
@@ -364,7 +364,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---	 [[:compare]], [[:sort]], [[:sort_reverse]], [[:sort_user]]
+--	 [[:compare]], [[:sort]], [[:sort_user]]
 
 export function sort_columns(sequence x, sequence column_list)
 	return custom_sort(routine_id("column_compare"), x, {column_list})
