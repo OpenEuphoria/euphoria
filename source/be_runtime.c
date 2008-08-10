@@ -2326,7 +2326,7 @@ long calc_fletcher32(object a)
 
 }
 
-
+#define rol(a,b) (((a) << b) | ((a) >> (32 - b)))
 object calc_hash(object a, object b)
 /* calculate the hash value of object a.
    b influences the style of hash calculated.
@@ -2347,8 +2347,13 @@ object calc_hash(object a, object b)
 	union TF
 	{
 		double tff;
-		unsigned short tfs[4];
-	} tf;
+		struct dbllong
+		{
+			unsigned long a;
+			unsigned long b;
+		} dl;
+		unsigned char tfs[8];
+	} tf, seeder;
 
 	object_ptr ap;
 	object av;
@@ -2369,40 +2374,43 @@ object calc_hash(object a, object b)
 		if (b < 0)
 			RTFatal("second argument of hash() must be 1 or higher.");
 		if (b == 0)
-			f = 69096;
+			seeder.tff = 69096.0;
 		else
-			f = b;
-		lHashValue = (0x193A74F1 ^ f);
+			seeder.dl.a = b;
+			seeder.dl.b = rol(b, 15);
 	}
 	else if (IS_ATOM_DBL(b)) {
-		ff = (DBL_PTR(b)->dbl);
-		if (ff < 0.0L)
-			RTFatal("second argument of hash() must be 1 or higher.");
-		if (ff < 1.0L)
-			ff += 69096.0L;
-		tf.tff = ff;
-		lHashValue = 0x193A74F1;
-		for(tfi = 0; tfi < 4; tfi++)
-		{
-			if (lHashValue & 1)
-				lHashValue >>= 1;
-			lHashValue +=  tf.tfs[tfi] * (tfi + 1);
-		}
+		seeder.tff = (DBL_PTR(b)->dbl);
 	}
 	else
 		RTFatal("second argument of hash() must be an atom.");
 
-
+	lHashValue = 0x193A74F1;
+	for(tfi = 0; tfi < 8; tfi++)
+	{
+		if (seeder.tfs[tfi] == 0)
+			seeder.tfs[tfi] = (tfi * 171 + 1);
+		seeder.tfs[tfi] += (tfi + 1) << 8;
+		lHashValue = rol(lHashValue, 7) ^ seeder.tfs[tfi];
+	}
+	
 	if (IS_ATOM_INT(a)) {
-		lHashValue =  a * lHashValue + 1;
+		tf.dl.a = a;
+		tf.dl.b = rol(a,15);
+		for(tfi = 0; tfi < 8; tfi++)
+		{
+			if (tf.tfs[tfi] == 0)
+				tf.tfs[tfi] = (tfi * 171 + 1);
+			lHashValue = rol(lHashValue, 7) ^ (tf.tfs[tfi] + (tfi + 1) << 8);
+		}
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.tff = ((DBL_PTR(a)->dbl) * 1.803L) + 1.5L;
-		for(tfi = 0; tfi < 4; tfi++)
+		tf.tff = ((DBL_PTR(a)->dbl));
+		for(tfi = 0; tfi < 8; tfi++)
 		{
-			if (lHashValue & 1)
-				lHashValue >>= 1;
-			lHashValue +=  tf.tfs[tfi] * (tfi + 1);
+			if (tf.tfs[tfi] == 0)
+				tf.tfs[tfi] = (tfi * 171 + 1);
+			lHashValue = rol(lHashValue, 7) ^ (tf.tfs[tfi] + (tfi + 1) << 8);
 		}
 	}
 	else { /* input is a sequence */
@@ -2414,32 +2422,35 @@ object calc_hash(object a, object b)
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			if (f != 0) {
-				lHashValue *= f;
-			}
-			else {
-				lHashValue = (long)((double)lHashValue * ff);
+	
+			for(tfi = 0; tfi < 8; tfi++)
+			{
+				lHashValue = rol(lHashValue, 7) ^ seeder.tfs[tfi];
 			}
 
 			lHashValue = (lHashValue & MAXINT);
 
-			if (IS_ATOM_INT(av)) {
-				lHashValue +=  (av << 8) + 1;
-			}
-			else if (IS_ATOM_DBL(av)) {
-				tf.tff = ((DBL_PTR(av)->dbl) * 1.803L) + 1.5L;
-				for(tfi = 0; tfi < 4; tfi++)
+			if (IS_SEQUENCE(av))
+				lHashValue += calc_hash(av,b);
+			else
+			{
+				if (IS_ATOM_INT(av)) {
+					tf.dl.a = av;
+					tf.dl.b = rol(av,15);
+				}
+				else if (IS_ATOM_DBL(av)) {
+					tf.tff = ((DBL_PTR(av)->dbl));
+				}
+				
+				for(tfi = 0; tfi < 8; tfi++)
 				{
-					if (lHashValue & 1)
-						lHashValue >>= 1;
-					lHashValue +=  tf.tfs[tfi] * (tfi + 1);
+					if (tf.tfs[tfi] == 0)
+						tf.tfs[tfi] = (tfi * 171 + 1);
+					lHashValue = rol(lHashValue, 7) ^ (tf.tfs[tfi] + (tfi + 1) << 8);
 				}
 			}
-			else {
-				lHashValue += calc_hash(av,b);
-			}
 
-			lHashValue = (lHashValue & MAXINT) >> 1;
+			lHashValue = (rol(lHashValue,1) & MAXINT);
 			lSLen--;
 		}
 	}
