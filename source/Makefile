@@ -130,6 +130,8 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/compil_8.o \
 	./$(OBJDIR)/compil_9.o \
 	./$(OBJDIR)/compil_A.o \
+	./$(OBJDIR)/compil_B.o \
+	./$(OBJDIR)/compil_C.o \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/0rror.o \
@@ -177,6 +179,7 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/scanner.o \
 	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/scanne_0.o \
+	./$(OBJDIR)/scanne_1.o \
 	./$(OBJDIR)/main.o \
 	./$(OBJDIR)/emit.o \
 	./$(OBJDIR)/emit_0.o \
@@ -380,8 +383,10 @@ backendu : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making backendu $(OBJDIR)
 	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o backendu
 
-test : interpreter translator
-	cd ../tests/ && ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu -ec ../source/ecu -lib ../source/ecu.a
+test : interpreter translator library
+	export EUCOMPILEDIR=../ && \
+	    cd ../tests/ && \
+	     ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu -ec ../source/ecu -lib ../source/ecu.a
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
