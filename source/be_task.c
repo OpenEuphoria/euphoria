@@ -83,17 +83,10 @@
 #ifdef EUNIX
 #define push_regs() asm("pushal")
 #define pop_regs() asm("popal")
-#ifdef EBSD
-#define set_esp() asm("movl 44(%esp), %esp")
-#define read_esp() asm("movl %esp, 44(%esp)")
-#define read_esp_tc() asm("movl %esp, 60(%esp)")
-#else
-// ListFilter
-#define set_esp() asm("movl 44(%esp), %esp")
-#define read_esp() asm("movl %esp, 44(%esp)")
-#define read_esp_tc() asm("movl %esp, 24(%esp)")
-// Mandrake
-#endif
+#define set_esp() asm("movl %0, %%esp" : /* no out */ : "r"(stack_top) : "%esp" )
+#define read_esp() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
+// this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
+#define read_esp_tc() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
 #endif
 
 #ifdef ELCC
@@ -131,32 +124,22 @@
 		"POPAD" \
 		modify[ESP];
 
-#ifdef EWINDOWS
-#pragma aux set_esp = \
-		"MOV ESP, -4H[EBP]" \
+#define set_esp() wset_esp(stack_top)
+void wset_esp(long);
+#pragma aux wset_esp = \
+		"MOV ESP, ECX" \
+		parm [ECX] \
 		modify[ESP];
 
-#pragma aux read_esp = \
-		"MOV -4H[EBP], ESP" \
+#define read_esp() stack_top = wread_esp()
+long wread_esp(void);
+#pragma aux wread_esp = \
+		"MOV ECX, ESP" \
+		value [ECX] \
 		modify[ESP];
 
-#pragma aux read_esp_tc = \
-		"MOV -24H[EBP], ESP" \
-		modify[ESP];
-#else 
-  // DOS
-#pragma aux set_esp = \
-		"MOV ESP, -1CH[EBP]" \
-		modify[ESP];
-
-#pragma aux read_esp = \
-		"MOV -1CH[EBP], ESP" \
-		modify[ESP];
-
-#pragma aux read_esp_tc = \
-		"MOV -2CH[EBP], ESP" \
-		modify[ESP];
-#endif
+// this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
+#define read_esp_tc() stack_top = wread_esp()
 #endif
 
 
