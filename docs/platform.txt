@@ -66,8 +66,7 @@ Internet server machines. It's also open source.
  
  Sometimes you'll find that the majority of your code will be the 
  same on all platforms, but some small parts will have to be 
- written differently for each platform. Use the
- a href=lib_p_r.htm#platform>platform()</a> built-in function to 
+ written differently for each platform. Use the [[:platform]] built-in function to 
  tell you which platform you are currently running on. Note that
  platform() returns the same value (3) on both Linux and FreeBSD,
  since those systems are so similar.
@@ -100,7 +99,8 @@ Internet server machines. It's also open source.
  you with library routines for both modes.
  There is rarely any need to call DOS directly, but you can do 
  this using the a [[:dos_interrupt]] routine. You can also use [[:peek]] and
- [[:poke]] to access special memory locations to achieve high-speed graphics and get access to low-level details of the system.
+ [[:poke]] to access special memory locations to achieve high-speed graphics
+ and get access to low-level details of the system.
  
  
  Under **DOS32 for Windows 95 and later systems**,
@@ -218,16 +218,17 @@ console window, just like a DOS program would when using ex.exe.
  (API), including the C structures defined by the API. There is a large 
  WIN32.HLP file (c) Microsoft that is available with many programming tools
  for Windows. There are numerous books available on the
- subject of WIN32 programming for C/C++. You can adapt most of what you find
+ subject of WIN32 programming for {{{C/C++}}}. You can adapt most of what you find
  in those books to the world of Euphoria programming for WIN32.
- A good book is {{{Programming Windows}}} by Charles Petzold.
+ A good book is **//{{{Programming Windows}}} by Charles Petzold//**.
       
 
- A WIN32 API Windows help file (8 Mb) can be downloaded from [[ftp://ftp.borland.com/pub/delphi/techpubs/delphi2/win32.zip | Borland's 
- Web site]]
+ A WIN32 API Windows help file (8 Mb) can be downloaded from
+ ftp://ftp.borland.com/pub/delphi/techpubs/delphi2/win32.zip, Borland's 
+ Web site.
 
- See also the [[http://www.RapidEuphoria.com/doc.htm | Euphoria Archive Web
- page - "documentation"]].
+ See also the http://www.RapidEuphoria.com/doc.htm, Euphoria Archive Web
+ page - "documentation".
  
 
 === The Linux and FreeBSD Platforms
@@ -284,8 +285,8 @@ Euphoria routines to C, and compile them into a .dll or .so file.
 You can pass Euphoria atoms and sequences to these
 compiled Euphoria routines, and receive Euphoria data as 
 a result. Translated/compiled routines typically
-run much faster than interpreted routines. For more information 
-see a href=e2c.htm> the Translator</a>.
+run much faster than interpreted routines. For more information, see 
+the [[::Translator]].
 
 
  
@@ -295,7 +296,7 @@ see a href=e2c.htm> the Translator</a>.
  you must perform the following steps:
   # Open the **.**dll or **.**so file that contains the C function by
      calling [[:open_dll]].
-  # Define the C function, by calling[[:define_c_func]] or [[:define_c_proc]].
+  # Define the C function, by calling [[:define_c_func]] or [[:define_c_proc]].
      This tells Euphoria the number and type of the arguments as well as the
      type of value returned.\\
       Euphoria currently supports all C integer and pointer types as 
@@ -308,7 +309,7 @@ see a href=e2c.htm> the Translator</a>.
       Euphoria also supports all forms of Euphoria data - atoms and
       arbitrarily-complex sequences, as arguments to translated/compiled 
       Euphoria routines.
-  # Call the C function by calling [[:c_func(]] or [[:c_proc]]
+  # Call the C function by calling [[:c_func]] or [[:c_proc]]
 
 <eucode>
 include dll.e
@@ -328,25 +329,25 @@ icon = c_func(LoadIcon, {NULL, IDI_APPLICATION})
 </eucode>
  
  
- See [[:c_func]], [[:c_proc], [[:define_c_func]], 
+ See [[:c_func]], [[:c_proc]], [[:define_c_func]], 
      [[:define_c_proc]], [[:open_dll]]
      
  See ##**demo\win32**## or ##**demo/linux**## for example programs.
 
 
 On Windows there is more than one C calling convention.
-The Windows API routines all use the **__stdcall** convention.
-Most C compilers however have **__cdecl** as their default.
-__cdecl allows for variable numbers of arguments to be passed.
-Euphoria assumes __stdcall, but if you need to call a C routine
-that uses __cdecl, you can put a '+' sign at the start of the
+The Windows API routines all use the **{{{__stdcall}}** convention.
+Most C compilers however have **{{{__cdecl}}}** as their default.
+{{{__cdecl}}} allows for variable numbers of arguments to be passed.
+Euphoria assumes {{{__stdcall}}}, but if you need to call a C routine
+that uses {{{__cdecl}}}, you can put a '+' sign at the start of the
 routine name in define_c_proc() and define_c_func(). In the
 example above, you would have "+LoadIconA", instead of "LoadIconA".
 
 
  
  You can examine a ##dll## file by right-clicking on it, and choosing
- "QuickView" (if it's on your system). You will see a list of all the C
+ "~QuickView" (if it's on your system). You will see a list of all the C
  routines that the ##dll## exports.
 
 
@@ -524,22 +525,22 @@ which will give you a big advantage over those forced to code in C.
  to a routine that takes 3 unsigned parameters - i.e. your Euphoria routine.
  
 
- In WATCOM C, "CALLBACK" is the same as "__stdcall".
+ In WATCOM C, "CALLBACK" is the same as "{{{__stdcall}}}".
  This is the calling convention that's used to call WIN32 API routines,
  and the C pointer to your Euphoria routine should be declared this way too,
  or you'll get an error when your Euphoria routine tries to return to 
  your .DLL.
  
  
- If you need your Euphoria routine to be called using the __cdecl
+ If you need your Euphoria routine to be called using the {{{__cdecl}}}
  convention, you must code the call to call_back() as:
  
 <eucode>
         myroutineaddr = call_back({'+', id})
 </eucode>
 
-The plus sign and braces indicate the __cdecl convention. The simple case,
-with no braces, is __stdcall.
+The plus sign and braces indicate the {{{__cdecl}}} convention. The simple case,
+with no braces, is {{{__stdcall}}}.
 
 
  In the example above, your Euphoria routine will be passed the 
@@ -552,4 +553,5 @@ with no braces, is __stdcall.
 function to specify a Euphoria routine to handle various signals (e.g. SIGTERM).
 It can also be passed to C routines such as qsort(), to specify a Euphoria
 comparison function.
+
 

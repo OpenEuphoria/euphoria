@@ -21,9 +21,8 @@
 ../docs/ed.txt
 ../docs/e2c.txt
 ../docs/trouble.txt
-## TODO: these two need fixed, they have not been translated yet.
-#../docs/perform.txt
-#../docs/platform.txt
+../docs/platform.txt
+../docs/perform.txt
 
 # API docs
 ../docs/api.txt
