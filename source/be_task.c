@@ -83,8 +83,8 @@
 #ifdef EUNIX
 #define push_regs() asm("pushal")
 #define pop_regs() asm("popal")
-#define set_esp() asm("movl %0, %%esp" : /* no out */ : "r"(stack_top) : "%esp" )
-#define read_esp() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
+#define set_esp() asm volatile("movl %0, %%esp" : /* no out */ : "r"(stack_top) )
+#define read_esp() asm volatile("movl %%esp, %0" : "=r"(stack_top)  )
 // this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
 #define read_esp_tc() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
 #endif
@@ -216,7 +216,6 @@ static void grow_stack(int x)
 // we need this because there seems to be no way to commit stack space
 {
 	volatile char a[1024];
-	
 	a[1] = x;
 	if (x == 1)
 		return;
