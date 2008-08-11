@@ -1083,7 +1083,7 @@ void scheduler(double now)
 	struct tcb *tp;
 	int p;
 #ifndef ERUNTIME    
-	int **code[3];
+	static int **code[3];
 	int stack_size;
 #endif  
 	// first check the real-time tasks
