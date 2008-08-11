@@ -271,7 +271,7 @@ type positive_atom(atom x)
 end type
 
 ifdef DOS32 then
-include dos/image.e
+export include dos/image.e
 
 function DOS_scr_addr(sequence vc, text_point xy)
 -- calculate address in DOS screen memory for a given line, column
@@ -479,7 +479,7 @@ end procedure
 -- This routine reads from the active text page, and only works in text modes.
 -- 
 -- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc. 
--- 
+--
 -- Example 1:
 -- <eucode>
 -- -- If the top 2 lines of the screen have Hello and World

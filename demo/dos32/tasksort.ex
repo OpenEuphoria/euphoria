@@ -8,8 +8,11 @@
 
 without type_check
 
-include graphics.e
-include file.e
+include std\graphics.e
+include std/graphcst.e
+include std/graphcst.e
+include std\file.e
+include std\os.e
 
 if graphics_mode(18) then
 end if

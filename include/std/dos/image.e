@@ -4,7 +4,7 @@
 --****
 -- === DOS Image Routines
 --
-ifdef DOS then
+ifdef DOS32 then
 include ..\graphcst.e
 include base_mem.e
 

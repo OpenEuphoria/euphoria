@@ -18,9 +18,9 @@ constant NTASKS = 9 -- number of E's spinning simultaneously.
 constant FULL_SCREEN = 0  -- 1 for full screen display
 
 without type_check
-include dll.e
-include machine.e
-include wildcard.e
+include std/dll.e
+include std/machine.e
+include std/wildcard.e
 without warning
 
 constant X = 1, Y = 2, Z = 3

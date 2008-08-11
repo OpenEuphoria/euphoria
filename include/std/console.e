@@ -311,7 +311,7 @@ export type positive_int(integer x)
 end type
 
 ifdef DOS32 then
-include std/dos/image.e
+include dos/image.e
 end ifdef
 
 include graphcst.e
