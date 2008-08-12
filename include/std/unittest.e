@@ -68,6 +68,7 @@
 -- === Constants
 --
 
+include io.e
 include pretty.e
 
 --
@@ -84,16 +85,31 @@ export enum
 -- Private variables
 --
 
-integer testCount = 0, testsPassed = 0, testsFailed = 0
+atom time_start = time(), time_test = time()
+
+integer test_count = 0, tests_passed = 0, tests_failed = 0
 sequence filename
 integer verbose = TEST_SHOW_FAILED_ONLY
 
 integer abort_on_fail = 0
 integer wait_on_summary = 0
-integer accume_on_summary = 0
+integer accumulate_on_summary = 0
+integer logging = 0, log_fh = 0
+
 --
 -- Private utility functions
 --
+
+procedure add_log(object data)
+	if log_fh = 0 then
+		return
+	end if
+
+	puts(log_fh, "entry = ")
+	pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
+	puts(log_fh, "\n")
+	flush(log_fh)
+end procedure
 
 procedure test_failed(sequence name, object a, object b)
 	if verbose >= TEST_SHOW_FAILED_ONLY then
@@ -104,7 +120,11 @@ procedure test_failed(sequence name, object a, object b)
 		puts(2, "\n")
 	end if
 
-	testsFailed += 1
+	tests_failed += 1
+
+	add_log({ "failed", name, a, b, time() - time_test })
+	time_test = time()
+
 	if abort_on_fail then
 		puts(2, "Abort On Fail set.\n")
 		abort(2)
@@ -116,7 +136,10 @@ procedure test_passed(sequence name)
 		printf(2, "  passed: %s\n", {name})
 	end if
 
-	testsPassed += 1
+	tests_passed += 1
+
+	add_log({ "passed", name, time() - time_test })
+	time_test = time()
 end procedure
 
 --
@@ -162,7 +185,7 @@ end procedure
 -- Request the test report to pause before exiting.
 --
 -- Parameters:
---		# ##toWait##: an integer, zero not to wait, nonzero to wait.
+--		# ##to_wait##: an integer, zero not to wait, nonzero to wait.
 --
 -- Comments:
 -- Depending on the environment, the test results may be invisible if
@@ -172,15 +195,15 @@ end procedure
 -- See Also:
 -- [[:test_report]]
 
-export procedure set_wait_on_summary(integer toWait)
-	wait_on_summary = toWait
+export procedure set_wait_on_summary(integer to_wait)
+	wait_on_summary = to_wait
 end procedure
 
 --**
--- Request the test report to saves run stats in "unittest.dat" before exiting.
+-- Request the test report to save run stats in "unittest.dat" before exiting.
 --
 -- Parameters:
---		# ##toAccume##: an integer, zero not to accume, nonzero to accume.
+--		# ##accumulate##: an integer, zero not to accumulate, nonzero to accumulate.
 --
 -- Comments:
 -- The file "unittest.dat" is appened to with {t,f}\\
@@ -189,15 +212,15 @@ end procedure
 -- :: //f// is the total number of tests that failed
 --
 
-export procedure set_accume_summary(integer toAccume)
-	accume_on_summary = toAccume
+export procedure set_accumulate_summary(integer accumulate)
+	accumulate_on_summary = accumulate
 end procedure
 
 --**
--- Set behaviour on test failure, and return previous value.
+-- Set behavior on test failure, and return previous value.
 --
 -- Parameters:
---		# ##pValue##: an integer, the new value for this setting.
+--		# ##abort_test##: an integer, the new value for this setting.
 --
 -- Returns:
 -- 		An **integer**, the previous value for the setting.
@@ -205,11 +228,11 @@ end procedure
 -- Comments:
 -- By default, the tests go on even if a file crashed.
 
-export function set_test_abort(integer pValue)
-	integer lTmp
-	lTmp = abort_on_fail
-	abort_on_fail = pValue
-	return lTmp
+export function set_test_abort(integer abort_test)
+	integer tmp = abort_on_fail
+	abort_on_fail = abort_test
+
+	return tmp
 end function
 
 --****
@@ -231,17 +254,18 @@ export procedure test_report()
 	integer fh
 	sequence fname
 
-	if testsFailed > 0 or verbose >= TEST_SHOW_ALL then
-		if testCount = 0 then
+	if tests_failed > 0 or verbose >= TEST_SHOW_ALL then
+		if test_count = 0 then
 			score = 100
 		else
-			score = (testsPassed / testCount) * 100
+			score = (tests_passed / test_count) * 100
 		end if
 
-	    printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
-	   		{testCount, testsPassed, testsFailed, score})
+		printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
+			{test_count, tests_passed, tests_failed, score})
 	end if
-	if accume_on_summary then
+
+	if accumulate_on_summary then
 		fname = command_line()
 		if equal(fname[1], fname[2]) then
 			fname = fname[1]
@@ -249,20 +273,22 @@ export procedure test_report()
 			fname = fname[2]
 		end if
 		fh = open("unittest.dat", "a")
-		printf(fh, "{%d,%d,\"%s\"}\n", {testCount, testsFailed, fname})
+		printf(fh, "{%d,%d,\"%s\"}\n", {test_count, tests_failed, fname})
 		close(fh)
 	end if
+
+	add_log({ "summary", test_count, tests_failed, tests_passed, time() - time_start })
 
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
 		abort(0)
 	else
-		abort(testsFailed > 0)
+		abort(tests_failed > 0)
 	end if
 end procedure
 
 procedure record_result(integer success, sequence name, object a, object b)
-	testCount += 1
+	test_count += 1
 
 	if success then
 		test_passed(name)
@@ -429,7 +455,10 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
-	elsif equal(cmd[i], "-accume") then
-		set_accume_summary(1)
+	elsif equal(cmd[i], "-accumulate") then
+		set_accumulate_summary(1)
+	elsif equal(cmd[i], "-log") then
+		log_fh = open("unittest.log", "a")
+		add_log({"file", filename})
 	end if
 end for
