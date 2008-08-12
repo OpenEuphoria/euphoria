@@ -106,8 +106,6 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\compil_8.obj &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
-	.\$(OBJDIR)\compil_B.obj &
-	.\$(OBJDIR)\compil_C.obj &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
@@ -155,7 +153,6 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scientific.obj &
 	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
@@ -251,7 +248,6 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\interrup.obj &
 	.\$(OBJDIR)\pathopen.obj &
@@ -293,7 +289,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
@@ -321,8 +316,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\compil_8.obj &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
-	.\$(OBJDIR)\compil_B.obj &
-	.\$(OBJDIR)\compil_C.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &
@@ -785,9 +778,6 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\scanne_0.obj :  .MULTIPLE $(OBJDIR)\scanne_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\scanne_1.obj :  .MULTIPLE $(OBJDIR)\scanne_1.c
-	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
-
 .\$(OBJDIR)\scientific.obj :  .MULTIPLE ./$(OBJDIR)\scientific.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
@@ -881,19 +871,13 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\compil_A.obj :  ./$(OBJDIR)\compil_A.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\compil_B.obj :  ./$(OBJDIR)\compil_B.c
-	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
-
-.\$(OBJDIR)\compil_C.obj :  ./$(OBJDIR)\compil_C.c
-	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
-
 .\$(OBJDIR)\traninit.obj :  ./$(OBJDIR)\traninit.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\tranplat.obj :  ./$(OBJDIR)\tranplat.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\get.obj :  .\$(OBJDIR)\main-.c 
+.\$(OBJDIR)\get.obj :  .\$(OBJDIR)\main-.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\sort.obj :  .\$(OBJDIR)\main-.c

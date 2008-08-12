@@ -639,22 +639,65 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 				SymTab[subsym][S_NUM_ARGS], plural}))
 end procedure
 
+procedure MissingArgs(symtab_index subsym)
+	sequence eentry = SymTab[subsym], name=eentry[S_NAME], def_args=eentry[S_DEF_ARGS]
+	sequence msg
+
+	if eentry[S_TOKEN] = FUNC or eentry[S_TOKEN] = QUALIFIED_FUNC then
+		msg = "function "
+	else
+		msg = "procedure "
+	end if
+	msg &= sprintf("%s() takes at least %d parameters.", {name, def_args[2]})
+	if length(def_args[3]) then
+		def_args = def_args[3]
+		if length(def_args)=1 then 
+			if integer(def_args[1]) then
+				msg &= sprintf(" Parameter %d", def_args[1])
+			else
+				msg &= sprintf(" Parameters %d-%d", def_args[1])
+			end if
+		else
+			msg &= " Parameters"
+			integer n = length(msg)+1 -- plac to patch a 's'
+			for i=1 to length(def_args)-1 do
+				if integer(def_args[i]) then
+					msg &= sprintf(", %d", def_args[i])
+				else
+					msg &= sprintf(", %d-%d", def_args[i])
+				end if
+			end for
+			if integer(def_args[$]) then
+				msg &= sprintf(" and %d", def_args[$])
+			else
+				msg &= sprintf(" and %d-%d", def_args[$])
+			end if
+			msg[n] = 's'
+		end if
+		msg &= " may be defaulted."
+	end if
+	CompileErr(msg)
+end procedure
+
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call
-	integer n, fda
+	integer n, fda, lnda
 	token tok
 	symtab_index s
-	object tok2
 
 	n = SymTab[subsym][S_NUM_ARGS]
-	fda = SymTab[subsym][S_FIRST_DEF_ARG]
+	if sequence(SymTab[subsym][S_DEF_ARGS]) then
+		fda = SymTab[subsym][S_DEF_ARGS][1]
+		lnda = SymTab[subsym][S_DEF_ARGS][2]
+	else
+		fda = 0
+	end if
 	s = subsym
 
 	parseargs_states = append(parseargs_states,
 				{length(private_list),lock_scanner,use_private_list,on_arg})
 	lock_scanner = 0
 	on_arg = 0
-	tok2 = UNDEFINED
 
 	short_circuit -= 1
 	for i = 1 to n do
@@ -691,8 +734,10 @@ procedure ParseArgs(symtab_index subsym)
 			tok = next_token()
 			if tok[T_ID] != COMMA then
 		  		if tok[T_ID] = RIGHT_ROUND then -- not as many actual args as formal args
-					if fda=0 or i<fda-1 then
+					if fda=0 then
 						WrongNumberArgs(subsym, "")
+					elsif i<lnda then
+						MissingArgs(subsym)
 					end if
 					lock_scanner = 1
 					use_private_list = 1
@@ -2840,9 +2885,11 @@ procedure SubProg(integer prog_type, integer scope)
 	param_num = 0
 
 	-- start of executable code for subprogram:
-
+	sequence middle_def_args = {}
+	integer last_nda = 0, start_def = 0
 	while tok[T_ID] != RIGHT_ROUND do
 		-- parse the parameter declarations
+
 		if tok[T_ID] != TYPE and tok[T_ID] != QUALIFIED_TYPE then
 			if tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
 				UndefinedVar(tok[T_SYM])
@@ -2863,7 +2910,7 @@ procedure SubProg(integer prog_type, integer scope)
 
 		SymTab[sym][S_USAGE] = U_WRITTEN
 		tok = next_token()
-		if tok[T_ID] = EQUALS then
+		if tok[T_ID] = EQUALS then -- defaulted parameter
 		    start_recording()
 		    Expr()
 		    SymTab[sym][S_CODE] = restore_parser()
@@ -2872,6 +2919,19 @@ procedure SubProg(integer prog_type, integer scope)
 				first_def_arg = param_num
 			end if
 			previous_op = -1 -- no interferences betwen defparms, or them and subsequent code
+			if start_def = 0 then
+				start_def = param_num
+			end if
+		else
+			last_nda = param_num
+			if start_def then
+				if start_def = param_num-1 then
+					middle_def_args &= start_def
+				else
+					middle_def_args = append(middle_def_args, {start_def, param_num-1})
+				end if
+				start_def = 0
+			end if
 		end if
 		if tok[T_ID] = COMMA then
 			tok = next_token()
@@ -2885,7 +2945,7 @@ procedure SubProg(integer prog_type, integer scope)
 	Code = {} -- removes any spurious code emitted while recording parameters
 			  -- but don't scrub SymTab, because created temps may be referenced somewhere else
 	SymTab[p][S_NUM_ARGS] = param_num
-	SymTab[p][S_FIRST_DEF_ARG] = first_def_arg
+	SymTab[p][S_DEF_ARGS] = {first_def_arg, last_nda, middle_def_args}
 	if TRANSLATE then
 		if param_num > max_params then
 			max_params = param_num

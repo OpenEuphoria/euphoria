@@ -138,11 +138,16 @@ global function Pop()
 
 	t = cg_stack[$]
 	cg_stack = cg_stack[1..$-1]
-	if SymTab[t][S_MODE] = M_TEMP and use_private_list and not find(t, private_sym) then
-		SymTab[t][S_SCOPE] = FREE -- mark it as being free
-						-- n.b. we assume one copy of temp on stack 
-						-- temps are normally not Popped & Pushed back on stack
-						-- but see TempKeep() and TempFree() above 
+	if SymTab[t][S_MODE] = M_TEMP then 
+		if use_private_list = 0 then  -- no problem with reusing the temp
+			SymTab[t][S_SCOPE] = FREE -- mark it as being free
+							-- n.b. we assume one copy of temp on stack 
+							-- temps are normally not Popped & Pushed back on stack
+							-- but see TempKeep() and TempFree() above 
+		elsif find(t, private_sym) = 0 then 
+		-- don't mark as free if the temp could be reused in default parm expressions
+			SymTab[t][S_SCOPE] = FREE -- mark it as being free
+		end if
 	end if
 	return t    
 end function

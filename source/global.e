@@ -100,8 +100,9 @@ global constant
 	                                       -- executing this routine
 	S_STACK_SPACE = 25 - get_backend()*12, -- amount of stack space needed by this routine
 	                                       -- (for private data)
-	S_FIRST_DEF_ARG = 26                   -- index of first defaulted arg in a routine, or
-	                                       -- 0 if none
+	S_DEF_ARGS = 26                   -- {index of first defaulted arg in a routine, last 
+										--	nondef, list of middle defaulted params}
+	                                    -- or 0 if none
 
 -- extra fields for TRANSLATOR (for temps and vars/routines)
 global constant
