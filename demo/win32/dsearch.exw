@@ -17,9 +17,9 @@ dll_list = {
     "comctl32.dll"
 }
 
-include file.e
-include dll.e
-include machine.e
+include std/filesys.e
+include std/dll.e
+include std/machine.e
 
 constant KEYB = 0, SCREEN = 1
 

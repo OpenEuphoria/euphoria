@@ -9,10 +9,10 @@
 
 -- MS Exchange Inbox should work too.
 
-include dll.e
-include machine.e
-include wildcard.e
-include msgbox.e
+include std/dll.e
+include std/machine.e
+include std/wildcard.e
+include std/msgbox.e
 
 without warning
 
