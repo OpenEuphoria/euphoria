@@ -148,7 +148,7 @@ int insert_pos;
 unsigned long good_rand();
 void RHS_Slice();
 object user(), Command_Line(), EOpen(), Repeat();
-object machine();
+object machine(), make_atom32();
 object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
 	   NewDouble();
 object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
@@ -2119,7 +2119,7 @@ object calc_MD5(object a)
 		}
 	}
 
-	return (0) & MAXINT;
+	return 0;
 }
 
 object calc_SHA256(object a)
@@ -2169,13 +2169,13 @@ object calc_SHA256(object a)
 		}
 	}
 
-	return (0) & MAXINT;
+	return 0;
 }
 
 
-long calc_adler32(object a)
+unsigned int calc_adler32(object a)
 {
-	unsigned long lTempResult;
+	object lTempResult;
 	long lSLen;
 	int tfi;
 	union TF
@@ -2185,6 +2185,7 @@ long calc_adler32(object a)
 	} tf;
 	unsigned int lA;
 	unsigned int lB;
+	unsigned int lC;
 
 	object_ptr ap;
 	object av;
@@ -2227,21 +2228,21 @@ long calc_adler32(object a)
 				}
 			}
 			else {
-				lTempResult = calc_adler32(av);
-				lA += lTempResult & 0x0000FFFF; if (lA >= 65521) lA %= 65521;
-				lB += (lTempResult >> 16) & 0x0000FFFF; if (lB >= 65521) lB %= 65521;
+				lC = calc_adler32(av);			
+				lA += lC & 0x0000FFFF; if (lA >= 65521) lA %= 65521;
+				lB += (lC >> 16) & 0x0000FFFF; if (lB >= 65521) lB %= 65521;
 			}
 			lSLen--;
 		}
 	}
 
-	return ((lB << 16) | lA) & MAXINT;
+	return ((lB << 16) | lA);
 }
 
 
-long calc_fletcher32(object a)
+unsigned int calc_fletcher32(object a)
 {
-	unsigned long lTempResult;
+	object lTempResult;
 	long lSLen;
 	int tfi;
 	union TF
@@ -2251,6 +2252,7 @@ long calc_fletcher32(object a)
 	} tf;
 	unsigned int lA;
 	unsigned int lB;
+	unsigned int lC;
 
 	object_ptr ap;
 	object av;
@@ -2309,9 +2311,9 @@ long calc_fletcher32(object a)
 				}
 			}
 			else {
-				lTempResult = calc_fletcher32(av);
-				lA += lTempResult & 0x0000FFFF;
-				lB += (lTempResult >> 16) & 0x0000FFFF;
+				lC = calc_fletcher32(av);
+				lA += lC & 0x0000FFFF;
+				lB += (lC >> 16) & 0x0000FFFF;
 			}
 			lSLen--;
 		}
@@ -2322,7 +2324,7 @@ long calc_fletcher32(object a)
 
 	}
 
-	return ((((unsigned long)lB) << 16) | (unsigned long)lA) & MAXINT;
+	return ((lB << 16) | lA);
 
 }
 
@@ -2344,6 +2346,7 @@ object calc_hash(object a, object b)
 	long f = 0;
 	double ff = 0.0L;
 	int tfi;
+	object lTemp;
 	union TF
 	{
 		double tff;
@@ -2360,10 +2363,10 @@ object calc_hash(object a, object b)
 
 	if (IS_ATOM_INT(b)) {
 		if (b == -4)
-			return calc_adler32(a);
+			return make_atom32(calc_adler32(a));
 
 		if (b == -3)
-			return calc_fletcher32(a);
+			return make_atom32(calc_fletcher32(a));
 
 		if (b == -2)
 			return calc_MD5(a);
@@ -2428,10 +2431,20 @@ object calc_hash(object a, object b)
 				lHashValue = rol(lHashValue, 7) ^ seeder.tfs[tfi];
 			}
 
-			lHashValue = (lHashValue & MAXINT);
-
 			if (IS_SEQUENCE(av))
-				lHashValue += calc_hash(av,b);
+			{
+				lTemp = calc_hash(av,b);
+				if (IS_ATOM_INT(lTemp))
+				{
+					lHashValue += (unsigned long)lTemp;
+				}
+				else //	if (IS_ATOM_DBL(lTemp))
+				{
+					lHashValue += (unsigned long)(DBL_PTR(lTemp)->dbl);
+					DeRef(lTemp);
+				}
+
+			}	
 			else
 			{
 				if (IS_ATOM_INT(av)) {
@@ -2439,7 +2452,7 @@ object calc_hash(object a, object b)
 					tf.dl.b = rol(av,15);
 				}
 				else if (IS_ATOM_DBL(av)) {
-					tf.tff = ((DBL_PTR(av)->dbl));
+					tf.tff = (DBL_PTR(av)->dbl);
 				}
 				
 				for(tfi = 0; tfi < 8; tfi++)
@@ -2450,12 +2463,12 @@ object calc_hash(object a, object b)
 				}
 			}
 
-			lHashValue = (rol(lHashValue,1) & MAXINT);
+			lHashValue = rol(lHashValue,1);
 			lSLen--;
 		}
 	}
 
-	return lHashValue & MAXINT;
+	return make_atom32((unsigned int)lHashValue);
 }
 
 int compare(object a, object b)
