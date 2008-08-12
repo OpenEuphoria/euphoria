@@ -70,6 +70,8 @@ function show(integer a)
 		return "\\r"
 	elsif a = '\\' then
 		return "\\\\"
+	elsif a = '"' then
+		return "\\\""
 	else
 		return a
 	end if
