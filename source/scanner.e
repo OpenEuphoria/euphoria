@@ -270,6 +270,20 @@ global function s_expand(sequence slist)
 	return new_slist
 end function
 
+ifdef STDDEBUG then
+procedure fake_include_line()
+	integer n
+	
+	line_number += 1
+	gline_number += 1
+	
+	ThisLine = "include std/all.e -- injected by the scanner\n"
+	bp = 1
+	n = length(ThisLine)
+	AppendSourceLine()
+end procedure
+end ifdef
+
 global procedure read_line()
 -- read next line of source  
 	integer n
@@ -618,7 +632,6 @@ procedure IncludePush()
 					end if
 				end if
 			end if
-			
 			read_line() -- we can't return without reading a line first
 			return -- ignore it  
 		end if
@@ -649,7 +662,13 @@ procedure IncludePush()
 		export_include = FALSE
 		patch_exports( current_file_no )
 	end if
-	
+
+ifdef STDDEBUG then
+	if not match("std/", new_name ) then
+		file_include[$] &= 2 -- include the unexported std library
+	end if
+end ifdef
+
 	src_file = new_file
 	file_start_sym = last_sym
 	if current_file_no >= MAX_FILE then
@@ -1418,9 +1437,23 @@ global procedure IncludeScan( integer exported )
 	export_include = exported
 end procedure
 
+ifdef STDDEBUG then
+procedure all_include()
+	new_include_name = "std/all.e"
+	new_include_space = 0
+	start_include = TRUE
+	export_include = FALSE
+end procedure
+end ifdef
 
 -- start parsing the main file
 global procedure main_file()
+ifdef STDDEBUG then
+	all_include()
+	IncludePush()
+	fake_include_line()
+else
 	read_line()
 	default_namespace( 0, 0 )
+end ifdef
 end procedure

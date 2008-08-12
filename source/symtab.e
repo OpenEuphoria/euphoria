@@ -549,6 +549,12 @@ include_warnings = {}
 sequence builtin_warnings
 builtin_warnings = {}
 
+ifdef STDDEBUG then
+-- remember which files have gotten warnings already to too many
+sequence export_warnings
+export_warnings = {}
+end ifdef
+with trace
 global integer No_new_entry = 0
 global function keyfind(sequence word, integer file_no)
 -- Uses hashing algorithm to try to match 'word' in the symbol
@@ -558,7 +564,7 @@ global function keyfind(sequence word, integer file_no)
 	integer hashval, scope, defined, ix
 	symtab_index st_ptr, st_builtin
 	token tok, gtok
-
+	
 	dup_globals = {}
 	dup_overrides = {}
 	in_include_path = {}
@@ -567,7 +573,7 @@ global function keyfind(sequence word, integer file_no)
 
 	hashval = hashfn(word)
 	st_ptr = buckets[hashval]
-
+	
 	while st_ptr do
 		if equal(word, SymTab[st_ptr][S_NAME]) then
 			-- name matches
@@ -621,6 +627,28 @@ global function keyfind(sequence word, integer file_no)
 						dup_globals &= st_ptr
 						in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
 					end if
+ifdef STDDEBUG then
+					if not is_direct_include( st_ptr, current_file_no ) and
+						symbol_in_include_path( st_ptr, current_file_no, {} )  
+					then 
+						gtok = tok
+						dup_globals &= st_ptr
+						in_include_path &= 0
+						if not find( {current_file_no,SymTab[tok[T_SYM]][S_FILE_NO]}, export_warnings ) then
+							
+							export_warnings = prepend( export_warnings,
+								{ current_file_no, SymTab[tok[T_SYM]][S_FILE_NO] })
+							
+							symbol_resolution_warning = {
+								sprintf("File '%s' uses exported symbols from '%s', but does not include that file.",
+									{ name_ext(file_name[current_file_no]),
+									name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])  })
+								,{word}}
+						end if
+						
+						
+					end if
+end ifdef
 
 				elsif scope = SC_LOCAL then
 					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
@@ -723,6 +751,21 @@ global function keyfind(sequence word, integer file_no)
 		return tok
 	end if
 
+ifdef STDDEBUG then
+	if length(dup_globals) > 1 and not find( 1, in_include_path ) then
+		-- filter out possibly erroneous exports that may have snuck in
+		integer dx = 1
+		while dx <= length( dup_globals ) do
+			if SymTab[dup_globals[dx]][S_SCOPE] = SC_EXPORT then
+				dup_globals = dup_globals[1..dx-1] & dup_globals[dx+1..$]
+				in_include_path = in_include_path[1..dx-1] & in_include_path[dx+1..$]
+			else
+				dx += 1
+			end if
+		end while
+	end if
+end ifdef
+
 	if length(dup_globals) > 1 and find( 1, in_include_path ) then
 		-- filter out based on include path
 		ix = 1
@@ -741,6 +784,15 @@ global function keyfind(sequence word, integer file_no)
 		end if
 	end if
 
+ifdef STDDEBUG then
+	if length( dup_globals ) = 1 and in_include_path[1] = 0 and length( symbol_resolution_warning ) then
+		-- Turn this into an export warning, so pretend that it's included
+		in_include_path[1] = 1
+	else
+		symbol_resolution_warning = ""
+	end if
+end ifdef
+
 	if length(dup_globals) = 1 and st_builtin = 0 then
 		-- matched exactly one global
 
@@ -752,9 +804,16 @@ global function keyfind(sequence word, integer file_no)
 		then
 			include_warnings = prepend( include_warnings,
 				{ current_file_no, SymTab[gtok[T_SYM]][S_FILE_NO] })
-			symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included",
-				{ name_ext(file_name[current_file_no]), line_number,
-				name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]) }),{word}}
+ifdef STDDEBUG then
+				if SymTab[gtok[T_SYM]][S_SCOPE] = SC_EXPORT then
+				-- we've already issued an export warning, don't need to add this one
+					return gtok
+				end if
+end ifdef
+				symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included (%d)",
+					{ name_ext(file_name[current_file_no]), line_number,
+					name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]),
+					SymTab[gtok[T_SYM]][S_SCOPE] - SC_EXPORT }),{word}}
 		end if
 		return gtok
 	end if

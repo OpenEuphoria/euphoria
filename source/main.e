@@ -255,7 +255,10 @@ procedure main()
 		OutputIL()
 
 	elsif INTERPRET and not test_only then
+ifdef STDDEBUG then
+else
 		BackEnd(0) -- execute IL using Euphoria-coded back-end
+end ifdef
 	end if
 
 	Cleanup(0) -- does warnings
