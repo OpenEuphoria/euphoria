@@ -174,7 +174,13 @@ procedure ascii_out(sequence data)
 			break
 
 		case "passed":
-			printf(1, "  Passed: %s (%f)\n", { data[2], data[3] })
+			sequence anum
+			if data[3] = 0 then
+				anum = "0"
+			else
+				anum = sprintf("%f", data[3])
+			end if
+			printf(1, "  Passed: %s (%s)\n", { data[2], anum })
 			break
 
 		case "summary":
@@ -199,14 +205,20 @@ procedure html_out(sequence data)
 			break
 
 		case "failed":
-			printf(1, "<tr bgcolor=\"#ffaaaa\"><th align=left>%s</th><td>%f</td><td>%s</td><td>%s</td></tr>\n",
+			printf(1, "<tr bgcolor=\"#ffaaaa\"><th align=left width=50%%>%s</th><td>%f</td><td>%s</td><td>%s</td></tr>\n",
 				{ data[2], pretty_sprint(data[5]), pretty_sprint(data[3]), data[4] })
 
 			break
 
 		case "passed":
-			printf(1, "<tr bgcolor=\"#aaffaa\"><th align=left>%s</th><td>%f</td><td>-</td><td>-</td></tr>\n",
-				{ data[2], data[3] })
+			sequence anum
+			if data[3] = 0 then
+				anum = "0"
+			else
+				anum = sprintf("%f", data[3])
+			end if
+			printf(1, "<tr bgcolor=\"#aaffaa\"><th align=left width=50%%>%s</th><td>%s</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n",
+				{ data[2], anum })
 			break
 
 		case "summary":
