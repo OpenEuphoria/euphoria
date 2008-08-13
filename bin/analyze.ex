@@ -80,7 +80,7 @@ procedure main(sequence args=command_line())
 		usage()
 	end if
 
-	puts(1, "Collecting include paths.\n")
+	puts(1, "Collecting include paths...\n")
 	sequence paths = include_paths(1)
 	for a = 1 to length(paths) do
 		integer exit_code = walk_dir(paths[a], routine_id("find_includes"), 1)
@@ -89,8 +89,10 @@ procedure main(sequence args=command_line())
 	for file_idx = 3 to length(args) do
 		integer ok = 1
 		sequence fname = args[file_idx], locals = {}
-		printf(1, "Processing file: %s\n", { fname })
+
+		printf(1, "Processing file: %s...\n", { fname })
 		object file_tokens = et_tokenize_file(fname)
+
 		file_tokens = file_tokens[1]
 		missed_inc = m:new()
 
@@ -116,6 +118,7 @@ procedure main(sequence args=command_line())
 						end if
 					end for
 
+
 					printf(1, "  Not included: %s\n    but found in...\n", { tok[TDATA] })
 					sequence finds = m:get(inc_funcs, tok[TDATA], {})
 					for b = 1 to length(finds) do
@@ -136,6 +139,8 @@ procedure main(sequence args=command_line())
 				if equal(tok[TDATA], "include") then
 					a += 1
 					add_include(file_tokens[a][TDATA])
+				elsif equal(tok[TDATA], "end") then
+					a += 1 -- skip what we are ending, i.e. end procedure?
 				elsif find(tok[TDATA], { "function", "procedure", "type" }) then
 					a += 1
 					locals &= { file_tokens[a][TDATA] }
