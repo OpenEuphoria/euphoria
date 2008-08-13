@@ -109,10 +109,13 @@ test_equal("pad_tail() #4", "ABC...", pad_tail("ABC", 6, '.'))
 test_equal("chunk() sequence", {{1,2,3}, {4,5,6}}, chunk({1,2,3,4,5,6}, 3))
 test_equal("chunk() string", {"AB", "CD", "EF"}, chunk("ABCDEF", 2))
 test_equal("chunk() odd size", {"AB", "CD", "E"}, chunk("ABCDE", 2))
+test_equal("chunk() empty", {""}, chunk("", 2))
+test_equal("chunk() bad size", {"ABCDE"}, chunk("ABCDE", 0))
 
 test_equal("flatten() nested", {1,2,3}, flatten({{1}, {2}, {3}}))
 test_equal("flatten() deeply nested", {1,2,3}, flatten({{{{1}}}, 2, {{{{{3}}}}}}))
 test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
+test_equal("flatten() empty", "", flatten({{"", {""}},{{}}}))
 
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))

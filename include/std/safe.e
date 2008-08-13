@@ -11,7 +11,7 @@
 -- How To Use This File:
 --
 -- 1. If your program doesn't already include machine.e add:
---           include machine.e
+--           include std/machine.e
 --    to your main .ex[w][u] file at the top.
 --
 -- 2. To turn debug version on, issue 

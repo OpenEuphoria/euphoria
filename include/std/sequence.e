@@ -282,7 +282,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- include text.e
+-- include std/sequence.e
 -- s = apply({1, 2, 3, 4}, routine_id("sprint"))
 -- -- s is {"1", "2", "3", "4"}
 -- </eucode>
@@ -1562,13 +1562,19 @@ end function
 --
 -- Parameters:
 -- 		# ##source##: the sequence to split up
---		# ##size##: an integer, the hunk size in the results.
+--		# ##size##: an integer, the length of each resulting sub-sequence.
 --
 -- Returns:
---		A **sequence** of sequences. The inner sequences have length ##size##, except possibly the last one, which may be shorter. When concatenated, these inner sequences yield ##source## back.
+--	A **sequence** of sequences. The inner sequences have length ##size##,
+--  except possibly the last one, which may be shorter. When concatenated,
+--  these inner sequences yield ##source## back.
 --
 -- Comments:
---   The very last inner sequence in the returned value has [[:remainder]](##length(source),size##) items if the length of ##source## is not evenly  divisible by ##size##.
+--   * If the length of ##source## is not evenly divisible by ##size##, 
+--   the very last inner sequence in the returned value has
+--   [[:remainder]](##length(source),size##) items.
+--   * If ##size## is less than 1 or is greater than length of ##source##
+--     this function returns a sequence with the ##source## as its only element.
 --
 -- Example 1:
 -- <eucode>
@@ -1582,45 +1588,62 @@ end function
 -- -- s is {"12", "34", "5"}
 -- </eucode>
 --
--- Example 2:
+-- Example 3:
 -- <eucode>
 -- s = chunk({1,2,3,4,5,6}, 3)
 -- -- s is {{1,2,3}, {4,5,6}}
 -- </eucode>
 --
+-- Example 4:
+-- <eucode>
+-- s = chunk("ABCDEF", 0)
+-- -- s is {"ABCDEF"}
+-- </eucode>
+--
 -- See Also:
---   [[:split]]
+--   [[:split]] [[:flatten]]
 
 export function chunk(sequence source, integer size)
 	sequence ns
 	integer stop
+	integer pos
 
-	ns = {}
-
-	for i = 1 to length(source) by size do
-		stop = i + size - 1
-		if stop > length(source) then
-			stop = length(source)
+	if size < 1 or size >= length(source) then
+		return {source}
 	end if
 
-		ns = append(ns, source[i..stop])
+	-- Allocate the top level sequence.
+	ns = repeat(0, floor((length(source) + size - 1) / size))
+
+	-- Place each source element into its appropriate target sub-sequence.
+	-- This sets all but the last sub-sequence.
+	pos = 1
+	for i = 1 to length(ns) - 1 do
+		stop = pos + size - 1
+		ns[i] = source[pos .. stop]
+		pos = stop + 1
 	end for
+	
+	-- Set the last sub-sequence, which could be smaller than size.
+	ns[$] = source[pos .. $]
 
 	return ns
 end function
-
 
 --**
 -- Remove all nesting from a sequence.
 --
 -- Parameters:
---		# ##s##: the sequence to flatten up.
+--		# ##s##: the sequence to flatten out.
 --
 -- Returns:
 --		A **sequence** of atoms, all the atoms in ##s## enumerated.
 --
 -- Comments:
---	If you consider a sequence as a tree, then the enumeration is performed by left-right reading of the tree. The elements are simply read left to right, without any care for braces.
+-- * If you consider a sequence as a tree, then the enumeration is performed
+-- by left-right reading of the tree. The elements are simply read left to
+-- right, without any care for braces.
+-- * Empty sub-sequences are stripped out entirely.
 --
 -- Example 1:
 -- <eucode>
@@ -1633,20 +1656,25 @@ end function
 -- s = flatten({18,{ 19, {45}}, {18.4, {}, 29.3}})
 -- -- s is {18, 19, 45, 18.4, 29.3}
 -- </eucode>
-			
+
 export function flatten(sequence s)
 	sequence ret
 	object x
+	integer len
+	integer pos
 			
-	ret = {}
-	for i = 1 to length(s) do
-		x = s[i]
-		if atom(x) then
-			ret &= x
+	ret = s
+	pos = 1
+	len = length(ret)
+	while pos <= len do
+		x = ret[pos]
+		if sequence(x) then
+			ret = ret[1..pos-1] & flatten(x) & ret[pos+1 .. $]
+			len = length(ret)
 		else
-			ret &= flatten(x)
+			pos += 1
 		end if
-	end for
+	end while
 	
 	return ret
 end function
