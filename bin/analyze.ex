@@ -14,6 +14,7 @@ include std/pretty.e
 sequence exts = { ".e", ".eu", ".ew", ".ed"}
 sequence inc_files = {}
 m:map inc_funcs = m:new()
+m:map missed_inc = m:new()
 
 procedure usage()
 	puts(1, "includes file1 [file2 file3 ...]\n")
@@ -79,6 +80,7 @@ procedure main(sequence args=command_line())
 		usage()
 	end if
 
+	puts(1, "Collecting include paths.\n")
 	sequence paths = include_paths(1)
 	for a = 1 to length(paths) do
 		integer exit_code = walk_dir(paths[a], routine_id("find_includes"), 1)
@@ -90,6 +92,7 @@ procedure main(sequence args=command_line())
 		printf(1, "Processing file: %s\n", { fname })
 		object file_tokens = et_tokenize_file(fname)
 		file_tokens = file_tokens[1]
+		missed_inc = m:new()
 
 		integer a = 1
 		while a <= length(file_tokens) label "top" do
@@ -113,7 +116,7 @@ procedure main(sequence args=command_line())
 						end if
 					end for
 
-					printf(1, "  %s was not included but found in:\n", { tok[TDATA] })
+					printf(1, "  Not included: %s\n    but found in...\n", { tok[TDATA] })
 					sequence finds = m:get(inc_funcs, tok[TDATA], {})
 					for b = 1 to length(finds) do
 						printf(1, "        * %s\n", { finds[b] })
@@ -124,7 +127,10 @@ procedure main(sequence args=command_line())
 					a += 1
 					continue
 				else
-					printf(1, "  %s was not include and not found anywhere.\n", { tok[TDATA] })
+					if m:has(missed_inc, tok[TDATA]) = 0 then
+						printf(1, "  Not included and not found anywhere: %s\n", { tok[TDATA] })
+						missed_inc = m:put(missed_inc, tok[TDATA], 1)
+					end if
 				end if
 			elsif tok[TTYPE] = T_KEYWORD then
 				if equal(tok[TDATA], "include") then
