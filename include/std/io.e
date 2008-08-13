@@ -607,7 +607,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- include file.e
+-- include std/io.e
 --
 -- integer fn
 -- fn = open("mydata", "rb")
@@ -751,7 +751,7 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- include file.e
+-- include std/io.e
 -- integer v
 -- atom t
 -- v = open("visitor_log", "a")  -- open for append

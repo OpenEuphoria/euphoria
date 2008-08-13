@@ -212,7 +212,7 @@ constant TO_LOWER = 'a' - 'A'
 --
 -- Alters characters in the 'A'..'Z' range. ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
--- **WARNING**, This also effects floating point numbers in the range 65 to 90.
+-- **WARNING**, This also affects floating point numbers in the range 65 to 90.
 --
 -- Example 1:
 -- <eucode>
@@ -246,7 +246,7 @@ end function
 -- Comments:
 -- Alters characters in the 'a'..'z' range. ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
--- **WARNING**, This also effects floating point numbers in the range 97 to 122.
+-- **WARNING**, This also affects floating point numbers in the range 97 to 122.
 --
 -- Example 1:
 -- <eucode>

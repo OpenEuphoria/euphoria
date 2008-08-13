@@ -2580,7 +2580,7 @@ possible to have a program with nothing but top-level executable statements and
 no routines. For example you might want to use Euphoria as a simple calculator,
 typing just a few [[:print]] or [[:?]] statements into a file, and then executing it.
 
-As we have seen, you can use any Euphoria a [[:statement]], including
+As we have seen, you can use any Euphoria statement, including
 [[:for statement]], [[:while statement]], [[:if statement]], etc... (but not [[:return]]),
 at the top level i.e. //outside// of any [[:function]] or [[:procedure]]. In addition, the
 following special statements may //only// appear at the top level:

@@ -425,10 +425,10 @@ Euphoria procedure or function by returning an integer value. This
 value can be used later to call the routine. You can also use it as an
 argument to the [[:call_back]] function.
 
-In the example above, The 32-bit //call-back address//, ##WndProcAddress##, 
+In the example above, The 32-bit //call-back address//, ##~WndProcAddress##, 
 can be stored in a C structure and passed to Windows via the
-RegisterClass() C API function.\\
-**This gives Windows the ability to call the Euphoria routine, WndProc(),
+~RegisterClass() C API function.\\
+**This gives Windows the ability to call the Euphoria routine, ~WndProc(),
 whenever the user performs an action on a certain class of window.**
 Actions include clicking the mouse, typing a key, resizing the window etc.\\
 //See the **window.exw** demo program for the whole story.//
@@ -456,7 +456,7 @@ given parameter, a Euphoria type-check error may occur (depending on
 [[:type_check]]) \\
 No error will occur if you declare all parameters as ##atom##.
 
-Normally, as in the case of WndProc() above, Windows initiates these
+Normally, as in the case of ~WndProc() above, Windows initiates these
 call-backs to your routines. **It is also
 possible for a C routine in any .dll to call one of your Euphoria
 routines.** You just have to declare the C routine properly,

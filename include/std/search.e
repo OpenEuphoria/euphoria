@@ -53,13 +53,6 @@ include error.e
 -- -- while "a" is a sequence
 -- </eucode>
 --
--- Example 4:
--- <eucode>
--- x = compare('a', "a")
--- -- x will be -1 because 'a' is an atom
--- -- while "a" is a sequence
--- </eucode>
---
 -- See Also:
 --     [[:equal]], [[:relational operators]], [[:operations on sequences]], [[:sort]]
 
