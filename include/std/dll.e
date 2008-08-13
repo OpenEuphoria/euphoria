@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Dynamic Linking to C
+-- == Dynamic Linking to external code
 --
 -- <<LEVELTOC depth=2>>
 --

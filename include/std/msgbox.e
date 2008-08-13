@@ -2,7 +2,6 @@
 --
 --****
 -- == Windows Message Box
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --

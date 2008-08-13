@@ -2,7 +2,6 @@
 --
 --****
 -- == Mouse
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -14,19 +13,7 @@
 -- * //FreeBSD// - not implemented
 -- * //OS X// - not implemented
 --
--- === Constants
 
---**
--- Mouse Events
--- The following constants can be used to identify and specify mouse events. They are platform dependent.
--- * MOVE
--- * LEFT_DOWN
--- * LEFT_UP
--- * RIGHT_DOWN
--- * RIGHT_UP
--- * MIDDLE_DOWN
--- * MIDDLE_UP
-	
 
 export integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP, MIDDLE_DOWN, MIDDLE_UP, ANY_UP
 
@@ -53,6 +40,21 @@ constant M_GET_MOUSE = 14,
 		 M_MOUSE_EVENTS = 15,
 		 M_MOUSE_POINTER = 24
 
+--****
+-- === Constants
+--
+
+--**
+-- Mouse Events
+-- The following constants can be used to identify and specify mouse events. They are platform dependent.
+-- * MOVE
+-- * LEFT_DOWN
+-- * LEFT_UP
+-- * RIGHT_DOWN
+-- * RIGHT_UP
+-- * MIDDLE_DOWN
+-- * MIDDLE_UP
+	
 --****
 -- === Routines
 

@@ -2,7 +2,7 @@
 --
 
 --****
--- == Error Handling
+-- == Errors and Warnings
 --
 -- <<LEVELTOC depth=2>>
 --

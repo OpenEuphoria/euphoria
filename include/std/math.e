@@ -43,19 +43,6 @@ export constant
 	HALFPI    = 1.57079632679489661923,
 	TWOPI     = 6.28318530717958647692
 
---**
--- Miscellaneous constants:
--- * LN2      : natural logarithm of 2
--- * INVLN2   : the inverse of LN2
--- * LN10     : natural logarithm of 10
--- * INVLN10  : the inverse of LN10
--- * SQRT2    : the square root of 2
--- * HALFSQRT2 : the half, and also the inverse, of SQRT2
--- * RADIANS_TO_DEGREE  : 180 / PI, how many degrees a radian is worth
--- * DEGREES_TO_RADIANS : PI / 180, how many radians a degree is worth
--- * EULER_GAMMA : the Euler-Mascheroni-Soldner gamma constant: 0.57721566490153286606065121
--- * EULER_NORMAL: 1/sqrt(2*PI), or 0.3989422804014326779399461
-
 export constant
 	LN2       = 0.69314718055994530941,
 	INVLN2    = 1 / LN2,
@@ -88,6 +75,19 @@ type trig_range(object x)
 end type
 
 include error.e
+
+--**
+-- Miscellaneous constants:
+-- * LN2      : natural logarithm of 2
+-- * INVLN2   : the inverse of LN2
+-- * LN10     : natural logarithm of 10
+-- * INVLN10  : the inverse of LN10
+-- * SQRT2    : the square root of 2
+-- * HALFSQRT2 : the half, and also the inverse, of SQRT2
+-- * RADIANS_TO_DEGREE  : 180 / PI, how many degrees a radian is worth
+-- * DEGREES_TO_RADIANS : PI / 180, how many radians a degree is worth
+-- * EULER_GAMMA : the Euler-Mascheroni-Soldner gamma constant: 0.57721566490153286606065121
+-- * EULER_NORMAL: 1/sqrt(2*PI), or 0.3989422804014326779399461
 
 --****
 -- === Sign and comparisons
@@ -497,7 +497,7 @@ export function round(object a, object precision=1)
 end function
 
 --****
--- ==== Trigonometry
+-- === Trigonometry
 
 --**
 -- Signature:
@@ -764,7 +764,7 @@ export function deg2rad (object x)
 end function
 
 --****
--- ==== Logarithms and powers.
+-- === Logarithms and powers.
 --
 --**
 -- Signature:
@@ -1251,7 +1251,7 @@ export function or_all	(object a)
 	return b
 end function
 --****
--- ==== Bitwise opreations
+-- === Bitwise opreations
 --
 --**
 -- Signature:
@@ -1277,7 +1277,7 @@ end function
 -- If you intend to manipulate full 32-bit values, you should declare your variables as atom, rather than integer. Euphoria's integer type is limited to 31-bits. 
 -- 
 -- Results are treated as signed numbers. They will be negative when the highest-order bit is 1. 
--- 
+--
 -- To understand the binary representation of a number you should display it in hexadecimal notation. 
 -- Use the %x format of [[:printf]](). Using [[:int_to_bits]]() is an even more direct approach.
 --  
@@ -1357,7 +1357,7 @@ end function
 -- 
 -- If you intend to manipulate full 32-bit values, you should declare your variables as atom, rather than integer. Euphoria's integer type is limited to 31-bits. 
 -- 
--- Results are treated as signed numbers. They will be negative when the highest-order bit is 1. 
+-- Results are treated as signed numbers. They will be negative when the highest-order bit is 1.
 --
 -- Example 1:  
 -- <eucode>
@@ -1379,7 +1379,7 @@ end function
 -- global function not_bits(object a)
 --
 -- Description:
--- Perform the logical NOT operation on each bit in an object. A bit in the result will be 1 
+-- Perform the logical NOT operation on each bit in an object. A bit in the result will be 1
 -- when the corresponding bit in x1 is 0, and will be 0 when the corresponding bit in x1 is 1.
 --
 -- Parameters:
@@ -1451,7 +1451,7 @@ export function right_shift(integer a, integer b)
 end function
 
 --****
--- ==== Random numbers
+-- === Random numbers
 --
 
 --**
@@ -1598,3 +1598,66 @@ end procedure
 -- See Als:
 -- 		[[:set_rand]], [[:ceil]]
 
+--****
+-- Arithmetics
+--
+
+--**
+-- Returns the greater common divisor of to atoms
+--
+-- Parameters:
+--		# ##p##: one of the atoms to consider
+--		# ##q##: the other atom.
+--
+-- Returns:
+-- A positive **atom** without a fractional part, evenly dividing both parameters, and is the 
+-- greatest value with those properties.
+--
+-- Comments:
+--
+-- Signs are ignored. Atoms are rounded down to integers.
+--
+-- Any zero parameter causes 0 to be returned.
+--
+-- Parameters and return value are atoms so as to take mathematical integers up to ##power(2,53)##.
+--
+-- Example 1:
+-- <eucode>
+-- ?gcd(76.3, -114) -- prints out gcd(76,114), which is 38
+-- </eucode>
+--
+
+export function gcd(atom p, atom q)
+	atom r
+	
+	if p<0 then
+		p=floor(-p)
+	else
+		p=floor(p)
+	end if
+	if q<0 then
+		q=floor(-q)
+	else
+		q=floor(q)
+	end if
+	if p<q then
+		r=p
+		p=q
+		q=r
+	end if
+	if q<=1 then
+		return q
+	end if
+
+    while 1 do
+		r=remainder(p,q)
+		if r=1 then
+			return r
+		elsif r=0 then
+			return q
+		else
+			p=q
+			q=r
+		end if
+    end while
+end function

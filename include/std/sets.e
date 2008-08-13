@@ -2,13 +2,12 @@
 --
 --****
 -- == Sets
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
 -- The sets.e module defines a type for sets and provides basic tools for handling them.
 --
--- Other modules may be built upon them, for instance graph handling or simplicial topology, finite groups etc...
+-- Other modules may be built upon them, for instance graph handling or simplicial topology, finite groups etc.
 --
 -- Notes:
 --   * A set is an ordered sequence in ascending order, not more, not less

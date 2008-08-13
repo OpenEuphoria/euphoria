@@ -27,25 +27,7 @@ constant
 	M_UNSET_ENV = 74
 
 --****
--- ==== Operating System Constants
---
-
---**
--- These constants are returned by the [[:platform]] function.
---
--- * DOS32 - Host operating system is DOS
--- * WIN32 - Host operating system is Windows
--- * LINUX - Host operating system is Linux **or** FreeBSD
--- * FREEBSD - Host operating system is Linux **or** FreeBSD
--- * OSX - Host operating system is Mac OS X
---
--- Note:
--- Via the [[:platform]] call, there is no way to determine if you are on Linux
--- or FreeBSD. This was done to provide a generic UNIX return value for
--- [[:platform]].
---
--- In most situations you are better off to test the host platform by using
--- the [[:ifdef statement]]. It is both more accurate and faster.
+-- === Operating System Constants
 --
 
 export constant
@@ -68,6 +50,24 @@ enum
 	PARAM,
 	RID
 --	USECASE
+
+--**
+-- These constants are returned by the [[:platform]] function.
+--
+-- * DOS32 - Host operating system is DOS
+-- * WIN32 - Host operating system is Windows
+-- * LINUX - Host operating system is Linux **or** FreeBSD
+-- * FREEBSD - Host operating system is Linux **or** FreeBSD
+-- * OSX - Host operating system is Mac OS X
+--
+-- Note:
+-- Via the [[:platform]] call, there is no way to determine if you are on Linux
+-- or FreeBSD. This was done to provide a generic UNIX return value for
+-- [[:platform]].
+--
+-- In most situations you are better off to test the host platform by using
+-- the [[:ifdef statement]]. It is both more accurate and faster.
+--
 
 --****
 -- === Command line utilities.

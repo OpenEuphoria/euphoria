@@ -198,5 +198,5 @@ $$(doneby Derek Parnell, C. Cuvier.)
 * New **socket.e** library for network/internet data interchange $$(doneby Mike Sabal, Kathy Smith)
 * New character sets types and routines in **types.e** $$(doneby Derek Parnell)
 * New **unicode.e** for encoding/decoding/storing strings in UTF16 format $$(doneby Matt Lewis)
-
+* New **task.e** extending the multitasking proitives of Euphoria $$(doneby Ryan Johnson)
 

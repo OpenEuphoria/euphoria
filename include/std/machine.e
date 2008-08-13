@@ -8,7 +8,7 @@
 --
 
 --****
--- @[dyncall]
+-- @[dyncall|]
 -- === Accessing Euphoria coded routines
 --
 

@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Graphics and Sound
+-- == Cross Platform Graphics
 --
 -- <<LEVELTOC depth=2>>
 --

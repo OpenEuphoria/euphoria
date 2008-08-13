@@ -1,5 +1,8 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+-- <<LEVELTOC depth=2>>
+--
+
 --****
 -- == Low-Level Memory Management
 --
@@ -40,14 +43,12 @@ constant
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
---**
 -- Positive integer type
 
 export type positive_int(integer x)
 	return x >= 1
 end type
 
---**
 -- Machine address type
 
 export type machine_addr(atom a)
@@ -57,6 +58,7 @@ end type
 
 --****
 -- === Memory management
+--
 
 --**
 -- Allocate a contiguous block of memory.
