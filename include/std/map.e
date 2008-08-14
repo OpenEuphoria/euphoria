@@ -43,7 +43,7 @@
 include std/get.e
 include std/primes.e
 include std/convert.e
-export include stats.e as stats
+include stats.e as stats
 include std/text.e
 include std/search.e
 include std/types.e
@@ -152,7 +152,7 @@ constant maxInt = #3FFFFFFF
 
 --**
 -- Signature:
---   global function hash(object source, atom algo)
+--   global function hash(object source, object algo)
 --
 -- Description:
 --     Calculates a hash value from //key// using the algorithm //algo//
@@ -166,14 +166,14 @@ constant maxInt = #3FFFFFFF
 -- Suitable for signatures.
 -- ** -1 uses SHA256 (not implemented yet) Slow but excellent dispersion. 
 -- Suitable for signatures. More secure than MD5.
--- ** 0 and above (integers and decimals) use the cyclic variant (hash = hash * algo + c),
--- except that for values from zero to less than 1, use (algo + 69096). Fast and good to excellent
--- dispersion depending on the value of //algo//. Decimals give better dispersion but are
--- slightly slower.
+-- ** Anything else except negative integers: uses the cyclic variant (hash = hash * algo + c)
+--   Fast and good to excellent dispersion depending on the value of //algo//.
+--  Decimals give better dispersion but are slightly slower. The value zero is 
+--  also slightly slower but gives a secure hash value.
 --
 -- Returns:
---     An **integer**:
---        Except for the MD5 and SHA256 algorithms, this is a 30-bit integer.
+--     An **atom**:
+--        Except for the MD5 and SHA256 algorithms, this is a 32-bit value.
 --     A **sequence**:
 --        MD5 returns a 4-element sequence of integers\\
 --        SHA256 returns a 8-element sequence of integers.
@@ -181,11 +181,13 @@ constant maxInt = #3FFFFFFF
 -- Example 1:
 -- <eucode>
 -- x = hash("The quick brown fox jumps over the lazy dog", 0)
--- -- x is 242399616
+-- -- x is 3071488335
 -- x = hash("The quick brown fox jumps over the lazy dog", 99.94)
--- -- x is 723158
+-- -- x is 2065442629
 -- x = hash("The quick brown fox jumps over the lazy dog", -4)
--- -- x is 467406810
+-- -- x is 1541148634
+-- x = hash("The quick brown fox jumps over the lazy dog", "secret word")
+-- -- x is 1300119431
 -- </eucode>
 --
 -- See Also:
@@ -216,37 +218,9 @@ constant maxInt = #3FFFFFFF
 --   </eucode>
 
 export function calc_hash(object key, integer pMaxHash = 0)
-	integer ret
-	integer temp
+	atom ret
 
-	if integer(key) then	
-		ret = key
-	else
-		if atom(key) then
-			key = atom_to_float64(key)
-		end if
-		ret = length(key)
-		for i = length(key) to 1 by -1 do
-			temp = ret * 2
-			temp *= 2
-			temp *= 2
-			temp *= 2
-			ret = temp - ret			
-			if integer(key[i]) then
-				ret += key[i]
-			elsif atom(key[i]) then
-				ret += calc_hash(atom_to_float64(key[i]))
-			else
-				ret += calc_hash(key[i])
-			end if
-			ret = and_bits(ret, #03FFFFFF)
-		end for
-	end if
-	
-	if ret < 0 then
-		ret = -ret
-	end if
-	
+	ret = hash(key, 0)	
 	if pMaxHash <= 0 then
 		return ret
 	end if
@@ -318,7 +292,8 @@ end function
 -- See Also:
 --		[[:statistics]], [[:optimize]]
 export function rehash(map m, integer pRequestedSize = 0)
-	integer size, index2
+	integer size
+	atom index2
 	sequence oldBuckets, newBuckets
 	object key, value
 	atom newsize
@@ -422,7 +397,7 @@ end function
 --See Also:
 -- 		[[:get]]
 export function has(map m, object key)
-	integer lIndex
+	atom lIndex
 	integer lFrom
 
 	if length(m) = iLargeMap then
@@ -474,7 +449,7 @@ end function
 -- See Also:
 --		[[:has]], [[:nested_get]]
 export function get(map m, object key, object defaultValue)
-	integer lIndex
+	atom lIndex
 	integer lOffset
 	integer lFrom
 	
@@ -582,7 +557,7 @@ end function
 
 export function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
 	integer lIndex
-	integer hashval
+	atom hashval
 	integer lOffset
 	object bucket
 	atom lAvgLength
@@ -799,7 +774,8 @@ end function
 --		[[:put]], [[:has]]
 --
 export function remove(map m, object key)
-	integer hash, lIndex
+	integer hash
+	atom lIndex
 	object bucket
 	sequence m0
 	integer lFrom

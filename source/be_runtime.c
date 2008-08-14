@@ -2079,7 +2079,7 @@ object calc_MD5(object a)
 	int tfi;
 	union TF
 	{
-		double tff;
+		double ieee_double;
 		unsigned char tfc[8];
 	} tf;
 
@@ -2090,7 +2090,7 @@ object calc_MD5(object a)
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.tff = (DBL_PTR(a)->dbl);
+		tf.ieee_double = (DBL_PTR(a)->dbl);
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 		}
@@ -2107,7 +2107,7 @@ object calc_MD5(object a)
 			if (IS_ATOM_INT(av)) {
 			}
 			else if (IS_ATOM_DBL(av)) {
-				tf.tff = (DBL_PTR(av)->dbl);
+				tf.ieee_double = (DBL_PTR(av)->dbl);
 				for(tfi = 0; tfi < 8; tfi++)
 				{
 				}
@@ -2129,7 +2129,7 @@ object calc_SHA256(object a)
 	int tfi;
 	union TF
 	{
-		double tff;
+		double ieee_double;
 		unsigned char tfc[8];
 	} tf;
 
@@ -2140,7 +2140,7 @@ object calc_SHA256(object a)
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.tff = (DBL_PTR(a)->dbl);
+		tf.ieee_double = (DBL_PTR(a)->dbl);
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 		}
@@ -2157,7 +2157,7 @@ object calc_SHA256(object a)
 			if (IS_ATOM_INT(av)) {
 			}
 			else if (IS_ATOM_DBL(av)) {
-				tf.tff = (DBL_PTR(av)->dbl);
+				tf.ieee_double = (DBL_PTR(av)->dbl);
 				for(tfi = 0; tfi < 8; tfi++)
 				{
 				}
@@ -2180,7 +2180,7 @@ unsigned int calc_adler32(object a)
 	int tfi;
 	union TF
 	{
-		double tff;
+		double ieee_double;
 		unsigned char tfc[8];
 	} tf;
 	unsigned int lA;
@@ -2198,7 +2198,7 @@ unsigned int calc_adler32(object a)
 		lB +=  lA; if (lB >= 65521) lB %= 65521;
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.tff = (DBL_PTR(a)->dbl);
+		tf.ieee_double = (DBL_PTR(a)->dbl);
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 			lA += tf.tfc[tfi]; if (lA >= 65521) lA %= 65521;
@@ -2220,7 +2220,7 @@ unsigned int calc_adler32(object a)
 				lB += lA; if (lB >= 65521) lB %= 65521;
 			}
 			else if (IS_ATOM_DBL(av)) {
-				tf.tff = (DBL_PTR(av)->dbl);
+				tf.ieee_double = (DBL_PTR(av)->dbl);
 				for(tfi = 0; tfi < 8; tfi++)
 				{
 					lA += tf.tfc[tfi]; if (lA >= 65521) lA %= 65521;
@@ -2247,7 +2247,7 @@ unsigned int calc_fletcher32(object a)
 	int tfi;
 	union TF
 	{
-		double tff;
+		double ieee_double;
 		unsigned short tfc[4];
 	} tf;
 	unsigned int lA;
@@ -2265,7 +2265,7 @@ unsigned int calc_fletcher32(object a)
 		lB +=  lA;
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.tff = (DBL_PTR(a)->dbl);
+		tf.ieee_double = (DBL_PTR(a)->dbl);
 		for(tfi = 0; tfi < 4; tfi++)
 		{
 			lA += tf.tfc[tfi];
@@ -2303,7 +2303,7 @@ unsigned int calc_fletcher32(object a)
 				}
 			}
 			else if (IS_ATOM_DBL(av)) {
-				tf.tff = (DBL_PTR(av)->dbl);
+				tf.ieee_double = (DBL_PTR(av)->dbl);
 				for(tfi = 0; tfi < 4; tfi++)
 				{
 					lA += tf.tfc[tfi];
@@ -2347,19 +2347,20 @@ object calc_hash(object a, object b)
 	double ff = 0.0L;
 	int tfi;
 	object lTemp;
+	object lTemp2;
 	union TF
 	{
-		double tff;
+		double ieee_double;
 		struct dbllong
 		{
-			unsigned long a;
-			unsigned long b;
-		} dl;
-		unsigned char tfs[8];
-	} tf, seeder;
+			unsigned int a;
+			unsigned int b;
+		} ieee_uint;
+		unsigned char ieee_char[8];
+	} tf, seeder, prev;
 
-	object_ptr ap;
-	object av;
+	object_ptr ap, lp;
+	object av, lv;
 
 	if (IS_ATOM_INT(b)) {
 		if (b == -4)
@@ -2375,94 +2376,143 @@ object calc_hash(object a, object b)
 			return calc_SHA256(a);
 
 		if (b < 0)
-			RTFatal("second argument of hash() must be 1 or higher.");
+			RTFatal("second argument of hash() must not be a negative integer.");
 		if (b == 0)
-			seeder.tff = 69096.0;
-		else
-			seeder.dl.a = b;
-			seeder.dl.b = rol(b, 15);
+		{
+			if (IS_ATOM_INT(a)) {
+				tf.ieee_double = 69096.0 + (double)a;
+			}
+			else if (IS_ATOM_DBL(a)) {
+				tf.ieee_double = 3690961.0 + (DBL_PTR(a)->dbl);
+			}
+			else {
+				tf.ieee_double = 196069.10 + (double)(SEQ_PTR(a)->length);
+			}
+			tf.ieee_uint.a &= MAXINT;
+			if (tf.ieee_uint.a == 0) {
+				tf.ieee_uint.a = MAXINT;
+			}
+			//lTemp2 = make_atom32(tf.ieee_uint.a);
+			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
+			//DeRef(lTemp2)
+			if (IS_ATOM_INT(lTemp)) {
+				seeder.ieee_uint.a = lTemp;
+				seeder.ieee_uint.b = rol(lTemp, 15);
+			}
+			else {
+				seeder.ieee_double = (DBL_PTR(lTemp)->dbl);
+			}
+			DeRef(lTemp);
+		}
+		else {
+			seeder.ieee_uint.a = b;
+			seeder.ieee_uint.b = rol(b, 15);
+		}
 	}
 	else if (IS_ATOM_DBL(b)) {
-		seeder.tff = (DBL_PTR(b)->dbl);
+		seeder.ieee_double = (DBL_PTR(b)->dbl);
 	}
-	else
-		RTFatal("second argument of hash() must be an atom.");
+	else {
+		lTemp = calc_hash(b, 16063 + (unsigned int)(SEQ_PTR(b)->length));
+		if (IS_ATOM_INT(lTemp)) {
+			seeder.ieee_uint.a = lTemp;
+			seeder.ieee_uint.b = rol(lTemp, 15);
+		}
+		else {
+			seeder.ieee_double = (DBL_PTR(lTemp)->dbl);
+		}
+		DeRef(lTemp);
+	}
 
 	lHashValue = 0x193A74F1;
+
 	for(tfi = 0; tfi < 8; tfi++)
 	{
-		if (seeder.tfs[tfi] == 0)
-			seeder.tfs[tfi] = (tfi * 171 + 1);
-		seeder.tfs[tfi] += (tfi + 1) << 8;
-		lHashValue = rol(lHashValue, 7) ^ seeder.tfs[tfi];
+		if (seeder.ieee_char[tfi] == 0)
+			seeder.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+		seeder.ieee_char[tfi] += (tfi + 1) << 8;
+		lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 	}
 	
 	if (IS_ATOM_INT(a)) {
-		tf.dl.a = a;
-		tf.dl.b = rol(a,15);
+		tf.ieee_uint.a = a;
+		tf.ieee_uint.b = rol(a, 15);
 		for(tfi = 0; tfi < 8; tfi++)
 		{
-			if (tf.tfs[tfi] == 0)
-				tf.tfs[tfi] = (tfi * 171 + 1);
-			lHashValue = rol(lHashValue, 7) ^ (tf.tfs[tfi] + (tfi + 1) << 8);
+			if (tf.ieee_char[tfi] == 0)
+				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+			lHashValue = rol(lHashValue, 3) ^ (tf.ieee_char[tfi] + (tfi + 1) << 8);
 		}
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.tff = ((DBL_PTR(a)->dbl));
+		tf.ieee_double = ((DBL_PTR(a)->dbl));
 		for(tfi = 0; tfi < 8; tfi++)
 		{
-			if (tf.tfs[tfi] == 0)
-				tf.tfs[tfi] = (tfi * 171 + 1);
-			lHashValue = rol(lHashValue, 7) ^ (tf.tfs[tfi] + (tfi + 1) << 8);
+			if (tf.ieee_char[tfi] == 0)
+				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+			lHashValue = rol(lHashValue, 3) ^ (tf.ieee_char[tfi] + (tfi + 1) << 8);
 		}
 	}
 	else { /* input is a sequence */
 		lSLen = SEQ_PTR(a)->length;
 		lHashValue += lSLen + 3;
 		ap = SEQ_PTR(a)->base;
+		lp = ap + lSLen + 1;
 		while (lSLen > 0) {
 			av = *(++ap);
+			lv = *(--lp);
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
 	
 			for(tfi = 0; tfi < 8; tfi++)
 			{
-				lHashValue = rol(lHashValue, 7) ^ seeder.tfs[tfi];
+				lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 			}
 
-			if (IS_SEQUENCE(av))
+			if (IS_ATOM_INT(lv)) {
+				prev.ieee_uint.a = lv;
+				prev.ieee_uint.b = rol(lv, 15);
+			}
+			else if (IS_ATOM_DBL(lv)) {
+				prev.ieee_double = (DBL_PTR(lv)->dbl);
+			}
+			else {
+				lv = (unsigned int)(SEQ_PTR(lv)->length);				
+				prev.ieee_uint.a = lv;
+				prev.ieee_uint.b = rol(lv, 15);
+			}
+			
+			if (IS_ATOM_INT(av)) {
+				tf.ieee_uint.a = av;
+				tf.ieee_uint.b = rol(av, 15);				
+			}
+			else if (IS_ATOM_DBL(av)) {
+				tf.ieee_double = (DBL_PTR(av)->dbl);
+			}
+			else if (IS_SEQUENCE(av))
 			{
 				lTemp = calc_hash(av,b);
 				if (IS_ATOM_INT(lTemp))
 				{
-					lHashValue += (unsigned long)lTemp;
+					tf.ieee_uint.a = lTemp;
+					tf.ieee_uint.b = rol(lTemp, 15);				
 				}
 				else //	if (IS_ATOM_DBL(lTemp))
 				{
-					lHashValue += (unsigned long)(DBL_PTR(lTemp)->dbl);
-					DeRef(lTemp);
+					tf.ieee_double = (DBL_PTR(lTemp)->dbl);
 				}
-
+				DeRef(lTemp);
 			}	
-			else
-			{
-				if (IS_ATOM_INT(av)) {
-					tf.dl.a = av;
-					tf.dl.b = rol(av,15);
-				}
-				else if (IS_ATOM_DBL(av)) {
-					tf.tff = (DBL_PTR(av)->dbl);
-				}
-				
-				for(tfi = 0; tfi < 8; tfi++)
-				{
-					if (tf.tfs[tfi] == 0)
-						tf.tfs[tfi] = (tfi * 171 + 1);
-					lHashValue = rol(lHashValue, 7) ^ (tf.tfs[tfi] + (tfi + 1) << 8);
-				}
-			}
 
+			tf.ieee_uint.a += prev.ieee_uint.b;
+			tf.ieee_uint.b += prev.ieee_uint.a;
+			for(tfi = 0; tfi < 8; tfi++)
+			{
+				if (tf.ieee_char[tfi] == 0)
+					tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+				lHashValue = rol(lHashValue, 3) ^ (tf.ieee_char[tfi] + (tfi + 1) << 8);
+			}
 			lHashValue = rol(lHashValue,1);
 			lSLen--;
 		}
