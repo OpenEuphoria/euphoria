@@ -2,6 +2,8 @@
 	-- in 50 lines-per-screen mode
 
 include std/graphics.e
+include std/graphcst.e
+include std/console.e
 
 constant SCREEN = 1
 

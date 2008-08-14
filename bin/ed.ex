@@ -34,6 +34,7 @@
 without type_check -- makes it a bit faster
 
 include std/graphics.e
+include std/graphcst.e
 include std/get.e
 include std/wildcard.e
 include std/dll.e
