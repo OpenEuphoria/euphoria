@@ -130,8 +130,6 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/compil_8.o \
 	./$(OBJDIR)/compil_9.o \
 	./$(OBJDIR)/compil_A.o \
-	./$(OBJDIR)/compil_B.o \
-	./$(OBJDIR)/compil_C.o \
 	./$(OBJDIR)/compress.o \
 	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/0rror.o \
@@ -179,7 +177,6 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/scanner.o \
 	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/scanne_0.o \
-	./$(OBJDIR)/scanne_1.o \
 	./$(OBJDIR)/main.o \
 	./$(OBJDIR)/emit.o \
 	./$(OBJDIR)/emit_0.o \
