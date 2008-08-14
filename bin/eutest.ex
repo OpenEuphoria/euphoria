@@ -81,7 +81,7 @@ procedure do_test(sequence cmds)
 
 		if length(translator) then
 			printf(1, "translate %s:\n", {filename})
-			cmd = sprintf("%s %s %s -D UNITTEST -D EC -batch %s", {translator, library, options, filename})
+			cmd = sprintf("%s %s %s -D UNITTEST -con -D EC -batch %s", {translator, library, options, filename})
 			status = system_exec(cmd, 2)
 			if match("t_c_", filename) = 1 then
 				status = not status

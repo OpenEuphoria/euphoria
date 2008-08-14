@@ -17,7 +17,11 @@ IF "%1" =="--prefix" (
 	SHIFT
 	GOTO EndLoop
 )
-
+IF "%1" =="--eubin" (
+	echo EUBIN="%2" >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
 :EndLoop
 SHIFT
 GOTO Loop
