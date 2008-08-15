@@ -4388,7 +4388,7 @@ procedure opHASH()
 		   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_ATOM, target, TYPE_OBJECT)
 	pc += 4
 end procedure
 

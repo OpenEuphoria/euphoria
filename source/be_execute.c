@@ -3914,10 +3914,11 @@ void do_exec(int *start_pc)
 			case L_HASH:
 			deprintf("case L_HASH:");
 				tpc = pc;
-				a = calc_hash(*(object_ptr)pc[1], *(object_ptr)pc[2]);
-				top = MAKE_INT(a);
 				DeRef(*(object_ptr)pc[3]);
-				*(object_ptr)pc[3] = top;               
+				*(object_ptr)pc[3] = calc_hash(*(object_ptr)pc[1], *(object_ptr)pc[2]);
+//				top = MAKE_INT(a);
+//				DeRef(*(object_ptr)pc[3]);
+//				*(object_ptr)pc[3] = top;               
 				pc += 4;
 				thread();
 				BREAK;

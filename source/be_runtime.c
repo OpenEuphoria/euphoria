@@ -2518,7 +2518,13 @@ object calc_hash(object a, object b)
 		}
 	}
 
-	return make_atom32((unsigned int)lHashValue);
+	if (lHashValue  & HIGH_BITS) {
+		return NewDouble((double)lHashValue);
+	}
+	else {
+		return MAKE_INT(lHashValue);
+	}
+
 }
 
 int compare(object a, object b)
