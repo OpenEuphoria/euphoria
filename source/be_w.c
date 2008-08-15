@@ -20,6 +20,7 @@
 #ifdef EDJGPP
 #include <pc.h>
 #include <sys/farptr.h>
+#include <dpmi.h>
 #include <go32.h>
 #include <allegro.h>
 #else
@@ -33,6 +34,11 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
+#ifdef EWATCOM
+#ifdef EDOS
+#include <i86.h>
+#endif
+#endif
 
 /******************/
 /* Local defines  */
@@ -138,6 +144,7 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 {
 #endif
 	printf(c);
+	fflush(stdout);
 #if defined(EDOS) && !defined(EDJGPP)
 } else {
 	_outtext(c);
@@ -789,6 +796,90 @@ void EClearLines(int first_line, int last_line, int len, WORD attributes)
 }
 #endif
 
+#ifdef EDOS
+#ifdef EWATCOM
+void SetPosInt(char x, char y)
+{
+/* Perform a DOS software interrupt. */
+	int int_no;
+	object_ptr obj_ptr;
+
+#ifdef EDJGPP
+	__dpmi_regs reglist;
+#else
+	// register list for Causeway IntXX
+	struct xx {
+		unsigned int edi;
+		unsigned int esi;
+		unsigned int ebp;
+		unsigned int z0;
+		unsigned int ebx;
+		unsigned int edx;
+		unsigned int ecx;
+		unsigned int eax;
+		unsigned short flags;
+		unsigned short es;
+		unsigned short ds;
+		unsigned short fs;
+		unsigned short gs;
+		unsigned short z1;
+		unsigned short z2;
+		unsigned short z3;
+		unsigned short z4;
+	} reglist;
+	union REGS regs;
+	struct SREGS seg_regs;
+#endif
+	
+	int_no =       0x10;
+	
+	// fill up reglist
+#ifdef EDJGPP
+	reglist.x.di = 0;
+	reglist.x.si = 0;
+	reglist.x.bp = 0;
+	reglist.x.bx = 0;
+	reglist.x.dx = y*256+x;
+	reglist.x.cx = 0;
+	reglist.x.ax = 0x0200;
+	reglist.x.flags = 0;
+	reglist.x.es = 0;
+	reglist.x.ds = 0;
+	
+	__dpmi_int(int_no, &reglist);
+
+#else
+	reglist.edi = 0;
+	reglist.esi = 0;
+	reglist.ebp = 0;
+	reglist.z0 = 0;
+	reglist.ebx = 0;
+	reglist.edx = y*256+x;
+	reglist.ecx = 0;
+	reglist.eax = 0x0200;
+	reglist.flags = 0;
+	reglist.es = 0;
+	reglist.ds = 0;
+	
+	reglist.fs = 0;
+	reglist.gs = 0;
+	reglist.z1 = 0;
+	reglist.z2 = 0;
+	reglist.z3 = 0;
+	reglist.z4 = 0;
+	
+	segread(&seg_regs);
+	memset(&regs, 0, sizeof(regs));
+	regs.x.edi = (unsigned int)&reglist;
+	regs.x.ebx = (unsigned int)int_no; // The user's interrupt number
+	regs.x.eax = 0x0ff01; // Causeway Simulate real mode interrupt
+		
+	int386x(0x31, &regs, &regs, &seg_regs); 
+#endif
+}
+#endif // EWATCOM
+#endif // EDOS
+
 void ClearScreen()
 {
 #ifdef EWINDOWS
@@ -816,7 +907,8 @@ void ClearScreen()
 #else
 if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 {
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	system("CLS");
+	SetPosInt(0,0);
 } else {
 	_clearscreen(_GCLEARSCREEN);
 } //endif EUVISTA
@@ -845,7 +937,7 @@ void SetPosition(int line, int col)
 #else   
 if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 {
-	// no known workaround yet
+	SetPosInt((char)(line-1), (char)(col-1));
 } else {
 	_settextposition(line, col);
 } //endif EUVISTA
