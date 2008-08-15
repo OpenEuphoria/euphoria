@@ -286,7 +286,6 @@ export function remove_directory(sequence name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
 			ret = not ret 
-	-- else TODO: implement for DOS and Windows
 	end ifdef
 	free(pname)
 	return ret
@@ -1352,4 +1351,49 @@ end function
 
 --- TODO
 --- copy_directory( srcpath, destpath, structonly = 0)
---- clear_directory( path, recurse = 1)
+
+--**
+-- Clear a directory.
+--
+-- Parameters:
+--		# ##name##: a sequence, the name of the directory to remove.
+--		# ##recurse##: an integer, whether or not to recursively remove files in the directory. If 0 then this function is identical to remove_directory(). If 1, then we recursively delete the directory and its contents. Defaults to 1.
+--
+-- Returns:
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Example 1:
+-- <eucode>
+-- if not remove_directory("the_old_folder", 1) then
+--		crash("Filesystem problem - could not remove the old folder")
+-- end if
+-- </eucode>
+--
+-- See Also:
+-- 	[[:remove_directory]], [[:delete_file]]
+export function clear_directory(sequence path, integer recurse = 1)
+	object files
+	integer ret
+	if not recurse then
+		return remove_directory(path)
+	end if
+	files = dir(path)
+	if atom(files) then
+		return 0
+	end if
+	for i = 1 to length(files) do
+		if find(files[i][D_NAME], {".", ".."}) then
+			-- skip
+			ret = 1
+		elsif find('d', files[i][D_ATTRIBUTES]) then
+			ret = clear_directory(path & SLASH & files[i][D_NAME], recurse)
+		else
+			ret = delete_file(path & SLASH & files[i][D_NAME])
+		end if
+		if not ret then
+			return ret
+		end if
+	end for
+	ret = remove_directory(path)
+	return ret
+end function
