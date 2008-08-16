@@ -248,13 +248,45 @@ end function
 -- See Also:
 -- 	[[:create_directory]], [[:chdir]]
 
-export function remove_directory(sequence name)
+integer delete_file_id = -1, dir_id = -1
+
+export function remove_directory(sequence name, integer force=0)
 	atom pname, ret
+	object files
+	integer D_NAME = 1, D_ATTRIBUTES = 2
 	
 	-- Remove any trailing slash.
 	if name[$] = SLASH then
 		name = name[1 .. $-1]
 	end if
+
+	--files = dir(name)
+	files = call_func(dir_id, {name})
+	if atom(files) then
+		return 0
+	end if
+	for i = 1 to length(files) do
+		if find(files[i][D_NAME], {".", ".."}) then
+			-- skip
+			ret = 1
+		elsif find('d', files[i][D_ATTRIBUTES]) then
+			if force then
+				ret = remove_directory(name & SLASH & files[i][D_NAME], force)
+			else
+				return 0
+			end if
+		else
+			if force then
+				-- ret = delete_file(name & SLASH & files[i][D_NAME])
+				ret = call_func(delete_file_id, {name & SLASH & files[i][D_NAME]})
+			else
+				return 0
+			end if
+		end if
+		if not ret then
+			return ret
+		end if
+	end for
 	
 	ifdef DOS32 then
 	    atom low_buff
@@ -437,6 +469,7 @@ export function dir(sequence name)
 	end if
 	return data
 end function
+dir_id = routine_id("dir")
 
 --**
 -- Return the name of the current working directory.
@@ -874,6 +907,7 @@ export function delete_file(sequence name)
 
 	return ret
 end function
+delete_file_id = routine_id("delete_file")
 
 ifdef LINUX then
 	function xstat(atom psrc, atom psrcbuf)
@@ -1374,9 +1408,6 @@ end function
 export function clear_directory(sequence path, integer recurse = 1)
 	object files
 	integer ret
-	if not recurse then
-		return remove_directory(path)
-	end if
 	files = dir(path)
 	if atom(files) then
 		return 0
@@ -1386,7 +1417,12 @@ export function clear_directory(sequence path, integer recurse = 1)
 			-- skip
 			ret = 1
 		elsif find('d', files[i][D_ATTRIBUTES]) then
-			ret = clear_directory(path & SLASH & files[i][D_NAME], recurse)
+			if recurse then
+				ret = clear_directory(path & SLASH & files[i][D_NAME], recurse)
+			else
+				-- skip
+				ret = 1
+			end if
 		else
 			ret = delete_file(path & SLASH & files[i][D_NAME])
 		end if
@@ -1394,6 +1430,5 @@ export function clear_directory(sequence path, integer recurse = 1)
 			return ret
 		end if
 	end for
-	ret = remove_directory(path)
 	return ret
 end function
