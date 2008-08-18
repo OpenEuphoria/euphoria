@@ -15,8 +15,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #else
+#ifdef EMINGW
+#include <sys/types.h>
+#include <sys/stat.h>
+#else
 #include <sys\types.h>
 #include <sys\stat.h>
+#endif
 #ifdef EDJGPP
 #include <pc.h>
 #include <sys/farptr.h>

@@ -28,8 +28,13 @@
 #ifdef EBORLAND
 #include <float.h>
 #else
+#ifdef EMINGW
+#include <sys/types.h>
+#include <sys/stat.h>
+#else
 #include <sys\types.h>
 #include <sys\stat.h>
+#endif
 #if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
 #include <i86.h>
 #include <bios.h>

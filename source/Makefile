@@ -56,10 +56,11 @@ ifeq "$(EMINGW)" "1"
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
 	EOSMING=-ffast-math -O3 -Os
-	EBACKENDU=backendw
-	EBACKENDC=backendc
-	EECU=ecw
-	EEXU=exw
+	EBACKENDU=backendw.exe
+	EBACKENDC=backendc.exe
+	EECU=ecw.exe
+	EEXU=exw.exe
+	EEXUC=exwc.exe
 	EECUA=ecw.a
 else
 	EOSTYPE=-DEUNIX
@@ -388,7 +389,7 @@ $(EEXU) :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making $(EEXU)
 	@echo $(OS)
 	$(CC) $(EOSFLAGS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXU)
-	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXU)c; fi
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXUC); fi
 
 $(EECU) :  OBJDIR = transobj
 $(EECU) :  EU_TARGET = ec.ex
