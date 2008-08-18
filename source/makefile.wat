@@ -257,6 +257,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\interrup.obj &
 	.\$(OBJDIR)\pathopen.obj &
@@ -296,8 +297,9 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
 	.\$(OBJDIR)\scanner.obj &
-	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\scanne_1.obj &
+	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
