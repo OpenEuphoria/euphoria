@@ -553,8 +553,6 @@ procedure declare_default_namespace( integer namespace_file )
 		CompileErr(sprintf("default namespace identifier '%s' for %s already defined",
 			{default_namespaces[namespace_file], file_name[namespace_file]}))
 	end if
-	printf(1, "Declaring default namespace '%s' for file '%s' in including file '%s'\n",
-		{default_namespaces[namespace_file], file_name[namespace_file], file_name[current_file_no]})
 	new_include_space = NameSpace_declaration(s[T_SYM])
 	SymTab[new_include_space][S_OBJ] = namespace_file
 	SymTab[new_include_space][S_FILE_NO] = current_file_no
