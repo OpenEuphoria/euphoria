@@ -81,6 +81,12 @@ else
 DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
 endif
 
+ifeq "$(MANAGED_MEM)" "1"
+MEM_FLAGS=
+else
+MEM_FLAGS=-DESIMPLE_MALLOC
+endif
+
 ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
@@ -99,7 +105,7 @@ endif
 
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/
-BE_FLAGS =  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+BE_FLAGS =  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS)
 
 PCRE=./pcre/.libs/libpcre.a
 
