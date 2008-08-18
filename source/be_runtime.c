@@ -2608,28 +2608,64 @@ long find(object a, s1_ptr b)
 	bp = b->base;
 
 	if (IS_ATOM_INT(a)) {
+		double da;
+		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
 				if (a == bv)
 					return bp - (object_ptr)b->base;
 			}
+			else if (IS_SEQUENCE(bv)) {
+				continue;  // can't be equal so skip it.
+			}
 			else if (bv == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			else if (compare(a, bv) == 0) {  /* not INT-INT case */
-				return bp - (object_ptr)b->base;
+			else if (compare(a, bv) == 0) {  /* INT-DBL case */
+				if (! daok) {
+					da = (double)a;
+					daok = 1;
+				}
+				if (da == DBL_PTR(bv)->dbl)
+					return bp - (object_ptr)b->base;
 			}
 		}
 	}
 
-	else if (IS_SEQUENCE(a)) {
+	else if (IS_ATOM_DBL(a)) {
+		double da = DBL_PTR(a)->dbl;
+		while (TRUE) {
+			bv = *(++bp);
+			if (IS_ATOM_INT(bv)) {
+				if (da == (double)bv) {  /* DBL-INT case */
+					return bp - (object_ptr)b->base;
+				}
+			}
+			else if (IS_SEQUENCE(bv)) {
+				continue;  // can't be equal so skip it.
+			}
+			else if (bv == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			else {  /* DBL-DBL case */
+				if (da == DBL_PTR(bv)->dbl)
+					return bp - (object_ptr)b->base;
+			}
+		}
+	}
+	else { // IS_SEQUENCE(a) 
+	
 		long a_len;
 
 		length = b->length;
 		a_len = SEQ_PTR(a)->length;
-		while (length > 0) {
+		while (TRUE) {
 			bv = *(++bp);
+			if (bv == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			
 			if (IS_SEQUENCE(bv)) {
 				if (a_len == SEQ_PTR(bv)->length) {
 					/* a is SEQUENCE => not INT-INT case */
@@ -2637,20 +2673,9 @@ long find(object a, s1_ptr b)
 						return bp - (object_ptr)b->base;
 				}
 			}
-			length--;
 		}
 	}
-
-	else {
-		length = b->length;
-		while (length > 0) {
-			/* a is ATOM double => not INT-INT case */
-			if (compare(a, *(++bp)) == 0)
-				return bp - (object_ptr)b->base;
-			length--;
-		}
-	}
-
+	
 	return 0;
 }
 
@@ -5307,28 +5332,63 @@ long find_from(object a, s1_ptr b, object c)
 	bp = b->base;
 	bp += c - 1;
 	if (IS_ATOM_INT(a)) {
+		double da;
+		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
 				if (a == bv)
 					return bp - (object_ptr)b->base;
 			}
-			else if (bv == NOVALUE) {
-				break; // we hit the end marker
+			else if (IS_SEQUENCE(bv)) {
+				continue;  // can't be equal so skip it.
 			}
-			else if (compare(a, bv) == 0) {  /* not INT-INT case */
-				return bp - (object_ptr)b->base;
+			else if (bv == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			else if (compare(a, bv) == 0) {  /* INT-DBL case */
+				if (! daok) {
+					da = (double)a;
+					daok = 1;
+				}
+				if (da == DBL_PTR(bv)->dbl)
+					return bp - (object_ptr)b->base;
 			}
 		}
 	}
 
-	else if (IS_SEQUENCE(a)) {
+	else if (IS_ATOM_DBL(a)) {
+		double da = DBL_PTR(a)->dbl;
+		while (TRUE) {
+			bv = *(++bp);
+			if (IS_ATOM_INT(bv)) {
+				if (da == (double)bv) {  /* DBL-INT case */
+					return bp - (object_ptr)b->base;
+				}
+			}
+			else if (IS_SEQUENCE(bv)) {
+				continue;  // can't be equal so skip it.
+			}
+			else if (bv == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			else {  /* DBL-DBL case */
+				if (da == DBL_PTR(bv)->dbl)
+					return bp - (object_ptr)b->base;
+			}
+		}
+	}
+	else { // IS_SEQUENCE(a) 
 		long a_len;
 
 		length -= c - 1;
 		a_len = SEQ_PTR(a)->length;
-		while (length > 0) {
+		while (TRUE) {
 			bv = *(++bp);
+			if (bv == NOVALUE) {
+				break;  // we hit the end marker
+			}
+			
 			if (IS_SEQUENCE(bv)) {
 				if (a_len == SEQ_PTR(bv)->length) {
 					/* a is SEQUENCE => not INT-INT case */
@@ -5336,17 +5396,6 @@ long find_from(object a, s1_ptr b, object c)
 						return bp - (object_ptr)b->base;
 				}
 			}
-			length--;
-		}
-	}
-
-	else {
-		length -= c - 1;
-		while (length > 0) {
-			/* a is ATOM double => not INT-INT case */
-			if (compare(a, *(++bp)) == 0)
-				return bp - (object_ptr)b->base;
-			length--;
 		}
 	}
 
