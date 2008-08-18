@@ -5093,20 +5093,20 @@ object machine(object opcode, object x)
 				return !temp;
 				break;
 
-			case M_COMPILE_PCRE:
-				x = (object)SEQ_PTR(x);
-				return compile_pcre(*(((s1_ptr)x)->base+1), 
-							 *(((s1_ptr)x)->base+2));
-				break;
+			case M_REGEX_COMPILE:
+				return regex_compile(x);
 
-			case M_EXEC_PCRE:
-				return exec_pcre(x);
-				break;
+            case M_REGEX_EXEC:
+				return regex_exec(x, 0);
 
-			case M_FREE_PCRE:
-				free_regex(x);
-				return 1;
-				break;
+			case M_REGEX_MATCH:
+				return regex_exec(x, 1);
+
+            case M_REGEX_REPLACE:
+				return regex_replace(x);
+
+			case M_REGEX_FREE:
+				return regex_free(x);
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

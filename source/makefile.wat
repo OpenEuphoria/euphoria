@@ -144,7 +144,6 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\search.obj
 
-
 EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
 	.\$(OBJDIR)\main-0.obj &
@@ -177,13 +176,14 @@ EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_callc.obj &
 	.\$(OBJDIR)\back\be_inline.obj &
 	.\$(OBJDIR)\back\be_machine.obj &
-	.\$(OBJDIR)\memory.obj &
-	.\$(OBJDIR)\back\be_pcre.obj &
 	.\$(OBJDIR)\back\be_rterror.obj &
 	.\$(OBJDIR)\back\be_syncolor.obj &
 	.\$(OBJDIR)\back\be_runtime.obj &
 	.\$(OBJDIR)\back\be_symtab.obj &
-	.\$(OBJDIR)\back\be_w.obj
+	.\$(OBJDIR)\back\be_w.obj &
+	.\$(OBJDIR)\back\be_regex.obj &
+	.\$(OBJDIR)\back\regex.obj &
+	.\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
 	.\$(OBJDIR)\back\be_decompress.obj &
@@ -193,8 +193,9 @@ EU_LIB_OBJECTS = &
 	.\$(OBJDIR)\back\be_inline.obj &
 	.\$(OBJDIR)\back\be_runtime.obj &
 	.\$(OBJDIR)\back\be_task.obj &
-	.\$(OBJDIR)\back\be_pcre.obj &
-	.\$(OBJDIR)\back\be_callc.obj
+	.\$(OBJDIR)\back\be_callc.obj &
+	.\$(OBJDIR)\back\be_regex.obj &
+	.\$(OBJDIR)\back\regex.obj
 
 EU_BACKEND_RUNNER_FILES = &
 	.\$(OBJDIR)\backend.ex &
@@ -300,6 +301,8 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\scientif.obj &
+	.\$(OBJDIR)\scanne_1.obj &
+	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
@@ -345,29 +348,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\0emory.obj &
 	.\$(OBJDIR)\search.obj
-
-PCRE_OBJECTS = &
-	.\pcre\pcre_chartables.obj &
-	.\pcre\pcre_compile.obj &
-	.\pcre\pcre_config.obj &
-	.\pcre\pcre_dfa_exec.obj &
-	.\pcre\pcre_exec.obj &
-	.\pcre\pcre_fullinfo.obj &
-	.\pcre\pcre_get.obj &
-	.\pcre\pcre_globals.obj &
-	.\pcre\pcre_info.obj &
-	.\pcre\pcre_maketables.obj &
-	.\pcre\pcre_newline.obj &
-	.\pcre\pcre_ord2utf8.obj &
-	.\pcre\pcre_refcount.obj &
-	.\pcre\pcre_study.obj &
-	.\pcre\pcre_tables.obj &
-	.\pcre\pcre_try_flipped.obj &
-	.\pcre\pcre_ucp_searchfuncs.obj &
-	.\pcre\pcre_valid_utf8.obj &
-	.\pcre\pcre_version.obj &
-	.\pcre\pcre_xclass.obj
-
 
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
@@ -441,16 +421,10 @@ clean : .SYMBOLIC
 		ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
 	-if not exist $(%WINDIR)\command\deltree.exe del /Q /S &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
-	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
-		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
-	    .\pcre\pcre_chartables.c 
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
 		ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
 	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
 		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\*
-	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
-		.\pcre\*.obj .\pcre\config.h .\pcre\pcre.h &
-	    .\pcre\pcre_chartables.c 
 
 !ifeq OS DOS
 OSFLAG=EDOS
@@ -463,7 +437,6 @@ LIBTARGET=ecw.lib
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) /I..\
 BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
-PCRE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /dHAVE_CONFIG_H
 
 builddirs : .SYMBOLIC
 	if not exist intobj mkdir intobj
@@ -494,19 +467,17 @@ runtime: .SYMBOLIC
 backendflag: .SYMBOLIC
 	set EBACKEND=/dBACKEND
 
-ecw.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
-	wlib -q ecw.lib $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
+ecw.lib : runtime $(EU_LIB_OBJECTS)
+	wlib -q ecw.lib $(EU_LIB_OBJECTS)
 
-ec.lib : runtime $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
-	wlib -q ec.lib $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
+ec.lib : runtime $(EU_LIB_OBJECTS)
+	wlib -q ec.lib $(EU_LIB_OBJECTS)
 	
-pcre : .SYMBOLIC .\pcre\pcre.h .\pcre\config.h $(PCRE_OBJECTS)
-
-interpreter_objects : .SYMBOLIC svn_rev $(OBJDIR)\int.c pcre $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+interpreter_objects : .SYMBOLIC svn_rev $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\int.lbc
 	@%append .\$(OBJDIR)\int.lbc option quiet
 	@%append .\$(OBJDIR)\int.lbc option caseexact
-	@for %i in ($(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
 exwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 ecwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
@@ -534,10 +505,8 @@ SOURCEDIR= euphoria-r$(SVN_REV)
 common-source : .SYMBOLIC
 	if exist $(SOURCEDIR) rmdir /Q /S $(SOURCEDIR)
 	mkdir $(SOURCEDIR)
-	mkdir $(SOURCEDIR)\pcre
 	copy configure.bat $(SOURCEDIR)
 	copy makefile.wat $(SOURCEDIR)
-	copy pcre\* $(SOURCEDIR)\pcre
 	copy int.ex $(SOURCEDIR)
 	copy ec.ex $(SOURCEDIR)
 	copy backend.ex $(SOURCEDIR)
@@ -620,11 +589,11 @@ installdos : .SYMBOLIC install-generic
 install : .SYMBOLIC installwin installdos
 	
 	
-ecw.exe : svn_rev $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+ecw.exe : svn_rev $(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
-	@for %i in ($(PCRE_OBJECTS) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\ec.lbc name ecw.exe
 	wrc -q -ad exw.res ecw.exe
 
@@ -635,12 +604,12 @@ translator : .SYMBOLIC builddirs
 dostranslator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ec.exe EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-backendw.exe : backendflag svn_rev $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendw.exe : backendflag svn_rev $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
 	@%create .\$(OBJDIR)\exwb.lbc
 	@%append .\$(OBJDIR)\exwb.lbc option quiet
 	@%append .\$(OBJDIR)\exwb.lbc option caseexact
-	@for %i in ($(PCRE_OBJECTS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exwb.lbc file %i
+	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exwb.lbc file %i
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendw.exe
 	wrc -q -ad exw.res backendw.exe
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendc.exe
@@ -660,7 +629,7 @@ dos : .SYMBOLIC builddirs
 doseubin : .SYMBOLIC builddirs
 	wmake -f makefile.wat ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
-backendd.exe : backendflag svn_rev $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+backendd.exe : backendflag svn_rev $(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\exb.lbc
 	@%append .\$(OBJDIR)\exb.lbc option quiet
 	@%append .\$(OBJDIR)\exb.lbc option caseexact
@@ -673,12 +642,12 @@ backendd.exe : backendflag svn_rev $(OBJDIR)\backend.c pcre $(PCRE_OBJECTS) $(EU
 	@%append .\$(OBJDIR)\exb.lbc OPTION QUIET
 	@%append .\$(OBJDIR)\exb.lbc OPTION ELIMINATE
 	@%append .\$(OBJDIR)\exb.lbc OPTION CASEEXACT
-	@for %i in ($(PCRE_OBJECTS) $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exb.lbc file %i
+	@for %i in ($(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exb.lbc file %i
 	wlink  $(DEBUGLINK) @.\$(OBJDIR)\exb.lbc name backendd.exe
 	le23p backendd.exe
 	cwc backendd.exe
 
-ex.exe : svn_rev $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ex.exe : svn_rev $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ex.lbc
 	@%append .\$(OBJDIR)\ex.lbc option quiet
 	@%append .\$(OBJDIR)\ex.lbc option caseexact
@@ -691,12 +660,12 @@ ex.exe : svn_rev $(OBJDIR)\int.c pcre $(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BAC
 	@%append .\$(OBJDIR)\ex.lbc OPTION QUIET
 	@%append .\$(OBJDIR)\ex.lbc OPTION ELIMINATE
 	@%append .\$(OBJDIR)\ex.lbc OPTION CASEEXACT
-	@for %i in ($(PCRE_OBJECTS) $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
+	@for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
 	wlink  $(DEBUGLINK) @.\$(OBJDIR)\ex.lbc name ex.exe
 	le23p ex.exe
 	cwc ex.exe
 
-ec.exe : svn_rev $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+ec.exe : svn_rev $(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create .\$(OBJDIR)\ec.lbc
 	@%append .\$(OBJDIR)\ec.lbc option quiet
 	@%append .\$(OBJDIR)\ec.lbc option caseexact
@@ -709,7 +678,7 @@ ec.exe : svn_rev $(OBJDIR)\ec.c pcre $(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU
 	@%append .\$(OBJDIR)\ec.lbc OPTION QUIET
 	@%append .\$(OBJDIR)\ec.lbc OPTION ELIMINATE
 	@%append .\$(OBJDIR)\ec.lbc OPTION CASEEXACT
-	@for %i in ($(PCRE_OBJECTS) $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	@for %i in ($(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
 	wlink $(DEBUGLINK) @.\$(OBJDIR)\ec.lbc name ec.exe
 	le23p ec.exe
 	cwc ec.exe
@@ -968,9 +937,6 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\back\be_syncolor.obj : ./be_syncolor.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-.\$(OBJDIR)\back\be_pcre.obj : ./be_pcre.c
-	$(CC) $(BE_FLAGS) $(FE_FLAGS) $(PCRE_FLAGS) /I.\pcre $^&.c -fo=$^@
-
 .\$(OBJDIR)\back\be_runtime.obj : ./be_runtime.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
@@ -982,71 +948,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 
 .\$(OBJDIR)\back\be_decompress.obj : ./be_decompress.c
 	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
-	
-.\pcre\pcre_chartables.obj : .\pcre\pcre_chartables.c.win
-	-copy .\pcre\pcre_chartables.c.win .\pcre\pcre_chartables.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
 
-.\pcre\pcre_compile.obj : .\pcre\pcre_compile.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
+.\$(OBJDIR)\back\be_regex.obj : ./be_regex.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-.\pcre\pcre_config.obj : .\pcre\pcre_config.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_dfa_exec.obj : .\pcre\pcre_dfa_exec.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_exec.obj : .\pcre\pcre_exec.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_fullinfo.obj : .\pcre\pcre_fullinfo.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_get.obj : .\pcre\pcre_get.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_globals.obj : .\pcre\pcre_globals.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_info.obj : .\pcre\pcre_info.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_maketables.obj : .\pcre\pcre_maketables.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_newline.obj : .\pcre\pcre_newline.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_ord2utf8.obj : .\pcre\pcre_ord2utf8.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_refcount.obj : .\pcre\pcre_refcount.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_study.obj : .\pcre\pcre_study.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_tables.obj : .\pcre\pcre_tables.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_try_flipped.obj : .\pcre\pcre_try_flipped.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_ucp_searchfuncs.obj : .\pcre\pcre_ucp_searchfuncs.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_valid_utf8.obj : .\pcre\pcre_valid_utf8.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_version.obj : .\pcre\pcre_version.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre_xclass.obj : .\pcre\pcre_xclass.c
-	$(CC) $(PCRE_FLAGS) $^*.c -fo=$^@
-
-.\pcre\pcre.h : .\pcre\pcre.h.win
-	-copy .\pcre\pcre.h.win .\pcre\pcre.h
-
-.\pcre\config.h : .\pcre\config.h.win
-	-copy .\pcre\config.h.win .\pcre\config.h
-
+.\$(OBJDIR)\back\regex.obj : ./regex.c
+	$(CC) $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@

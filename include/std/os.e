@@ -22,9 +22,9 @@ end ifdef
 include machine.e
 
 constant
-	M_SLEEP = 64, 
-	M_SET_ENV = 73, 
-	M_UNSET_ENV = 74
+	M_SLEEP     = 64,
+	M_SET_ENV   = 74,
+	M_UNSET_ENV = 75
 
 --****
 -- === Operating System Constants

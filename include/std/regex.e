@@ -1,203 +1,232 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
--- Regular expression routines
 
 --****
 -- == Regular Expressions
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
-
-include sequence.e
+--
+--
+-- Regular expressions are a way to specify text patterns when searching for text in a sequence.
+-- Regular expressions consist of normal characters and special operator characters with a
+-- special meaning. Operators allow you to anchor matches, match classes of characters, match
+-- a given pattern one or several times, match alternate patterns and more. Operators can also
+-- be grouped into sub-patterns.
+--
+-- === Expression Syntax
+--
+-- * **##\##** Quotes the following character. If the following character is not alphanumeric, it will lose its special meaning, otherwise it will gain a special meaning as described below.
+-- * **##\n##** Matches a 0x0A (LF) character. 
+-- * **##\r##** Matches a 0x0D (CR) character. 
+-- * **##\t##** Matches a 0x09 (TAB) character. 
+-- * **##\e##** Matches an escape character (0x1B) 
+-- * **##\s##** Matches whitespace (CR, LF, TAB, SPACE) characters. 
+-- * **##\S##** Matches non-whitespace (the reverse of \s) 
+-- * **##\w##** Matches word character [a-zA-Z0-9] 
+-- * **##\W##** Matches non-word character 
+-- * **##\d##** Matches a digit [0-9]. 
+-- * **##\D##** Matches a non-digit. 
+-- * **##\U##** Matches uppercase characters (A-Z) 
+-- * **##\L##** Matches lowercase characters (a-z) 
+-- * **##\x####** Matches specified hex value (\x0A, \x0D, \x09, etc.) 
+-- * **##\o#####** Matches specified octal value (\o000, \o015, etc.) 
+-- * **##\N#####** Matches specified decimal value (\N000, \N013, \N009, etc.) 
+-- * **##\C##** Starts case sensitive matching. 
+-- * **##\c##** Starts case insensitive matching. 
+-- * **##^##** Match a beginning of line. 
+-- * **##$##** Match an end of line. 
+-- * **##.##** Match any character. 
+-- * **##<##** Match beginning of word (word consists of [A-Za-z0-9]). 
+-- * **##>##** Match end of word. 
+-- * **##[ ]##** Specifies a class of characters ([abc123], [\]\x10], etc). 
+-- * **##[ - ]##** Specified a range of characters ([0-9a-zA-Z_], [0-9], etc) 
+-- * **##[^ ]##** Specifies complement class ([^a-z], [^\-], etc) 
+-- * **##?##** Matches preceeding pattern optionally (a?bc, filename\.?, $?, etc) 
+-- * **##|##** Matches preceeding or next pattern (a|b, c|d, abc|d). Only one character will be used as pattern unless grouped together using {} or (). 
+-- * **##*##** Match zero or more occurances of preceeding pattern. Matching is greedy and will match as much as possible. 
+-- * **##+##** Match one or more occurances of preceeding pattern. Match is greedy. 
+-- * **##@##** Match zero or more occurances of preceeding pattern. Matching is non-greedy and will match as little as possible without causing the rest of the pattern match to fail. 
+-- * **#####** Match one or more occurances of preceeding pattern. Matching is non-greedy. 
+-- * **##{ }##** Group patterns together to form complex pattern. ( {abc}, {abc}|{cde}, {abc}?, {word}?) 
+-- * **##( )##** Group patterns together to form complex pattern. Also used to save the matched substring into the register which can be used for substitution operation. Up to 9 registers can be used. 
+-- 
+-- ==== Special replacement operators
+-- 
+-- * **##\##** Causes the next character to lose its special meaning. 
+-- * **##\n##** Inserts a 0x0A (LF) character. 
+-- * **##\r##** Inserts a 0x0D (CR) character. 
+-- * **##\t##** Inserts a 0x09 (TAB) character. 
+-- * **##\1##** to **##\9##** Recalls stored substrings from registers (\1, \2, \3, to \9).
+-- * **##\0##** Recalls entire matched pattern. 
+-- * **##\u##** Convert next character to uppercase 
+-- * **##\l##** Convert next character to lowercase 
+-- * **##\U##** Convert to uppercase till ##\E## or ##\e## 
+-- * **##\L##** Convert to lowercase till ##\E## or ##\e##
+--
 
 constant
-		M_COMPILE_PCRE = 68,
-		M_EXEC_PCRE    = 69,
-		M_FREE_PCRE    = 70
+	M_REGEX_COMPILE = 68,
+	M_REGEX_EXEC    = 69,
+	M_REGEX_MATCH   = 70,
+	M_REGEX_REPLACE = 71,
+	M_REGEX_FREE    = 72
+
 
 --****
--- === Constants
---
-
---****
--- ==== Options
---
+-- === Create/Destroy
 
 --**
--- Values to add or [[:or_bits]]() together in order to alte the behaviour of regex searches.
--- TODO: add comments describing what each flag does
-public constant 
-	DEFAULT            = #00000000,
-	CASELESS           = #00000001,
-	MULTILINE          = #00000002,
-	DOTALL             = #00000004,
-	EXTENDED           = #00000008,
-	ANCHORED           = #00000010,
-	DOLLAR_ENDONLY     = #00000020,
-	EXTRA              = #00000040,
-	NOTBOL             = #00000080,
-	NOTEOL             = #00000100,
-	UNGREEDY           = #00000200,
-	NOTEMPTY           = #00000400,
-	UTF8               = #00000800,
-	NO_AUTO_CAPTURE    = #00001000,
-	NO_UTF8_CHECK      = #00002000,
-	AUTO_CALLOUT       = #00004000,
-	PARTIAL            = #00008000,
-	DFA_SHORTEST       = #00010000,
-	DFA_RESTART        = #00020000,
-	FIRSTLINE          = #00040000,
-	DUPNAMES           = #00080000,
-	NEWLINE_CR         = #00100000,
-	NEWLINE_LF         = #00200000,
-	NEWLINE_CRLF       = #00300000,
-	NEWLINE_ANY        = #00400000,
-	NEWLINE_ANYCRLF    = #00500000,
-	BSR_ANYCRLF        = #00800000,
-	BSR_UNICODE        = #01000000
-
---****
--- ==== Error Codes
---
---**
--- Error codes
--- TODO: add comments to show what each code means
-public constant
-	ERROR_NOMATCH        =  (-1),
-	ERROR_NULL           =  (-2),
-	ERROR_BADOPTION      =  (-3),
-	ERROR_BADMAGIC       =  (-4),
-	ERROR_UNKNOWN_OPCODE =  (-5),
-	ERROR_UNKNOWN_NODE   =  (-5), -- /* For backward compatibility */
-	ERROR_NOMEMORY       =  (-6),
-	ERROR_NOSUBSTRING    =  (-7),
-	ERROR_MATCHLIMIT     =  (-8),
-	ERROR_CALLOUT        =  (-9), -- /* Never used by PCRE itself */
-	ERROR_BADUTF8        = (-10),
-	ERROR_BADUTF8_OFFSET = (-11),
-	ERROR_PARTIAL        = (-12),
-	ERROR_BADPARTIAL     = (-13),
-	ERROR_INTERNAL       = (-14),
-	ERROR_BADCOUNT       = (-15),
-	ERROR_DFA_UITEM      = (-16),
-	ERROR_DFA_UCOND      = (-17),
-	ERROR_DFA_UMLIMIT    = (-18),
-	ERROR_DFA_WSSIZE     = (-19),
-	ERROR_DFA_RECURSE    = (-20),
-	ERROR_RECURSIONLIMIT = (-21),
-	ERROR_NULLWSLIMIT    = (-22), -- /* No longer actually used */
-	ERROR_BADNEWLINE     = (-23)
-
---****
--- === Types
---
-
---**
--- Basically, a ##regex## is an memory address, hence an atom.
+-- Regular expression type
 
 public type regex(object o)
 	return atom(o)
 end type
 
---****
--- === Routines
--- 
-
 --**
--- Return an allocated regular expression, which must be freed using free() when done.
+-- Return an allocated regular expression which must be freed using [[:free]]() when done.
 --
 -- Parameters:
---		# ##pattern##: a sequence representing a human readable regular expression
---		# ##flags##: an atom, which may be used to pass options to the processing of ##pattern##. Defaults to 0.
+--   # ##pattern##: a sequence representing a human redable regular expression
 --
 -- Returns:
---		A **regex** which other regular expression routines can work on.
+--   A [[:regex]] which other regular expression routines can work on.
 --
 -- Comments:
+--   This is the only routine that accepts a human readable regular expression. The string is
+--   compiled and a [[:regex]] is returned. Analyzing and compiling a regular expression is a
+--   costly operation and should not be done more than necessary. For instance, if your application
+--   looks for an email address among text frequently, you should create the regular expression
+--   as a constant accessable to your source code and any files that may use it, thus, the regular
+--   expression is analyzed and compiled only once per run of your application.
 --
--- This routine is the only one that accepts a human readable regular expression like "[A-Z_a-z0-9]". The string is compiled and a regex is returned. This is allocated memory and has to be freed when done with it.
+--   **Bad Example**
+--   <eucode>
+--   while sequence(line) do
+--       re:regex proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
+--       if re:match(line) then
+--           -- code
+--       end if
+--       re:free(proper_name)
+--   end while
+--   </eucode>
 --
--- See the pcre manpages for more details on regular expressions: [[http://www.pcre.org/pcre.txt]]
---
--- Example:
--- <eucode>
--- re = new("foo")
--- </eucode>
-
-public function new(sequence pattern, atom flags=0)
-		return machine_func(M_COMPILE_PCRE, {pattern, flags})
-end function
-
---**
--- Returns the first match in text
---
--- Parameters:
---		# ##re##: a regex for a subject to be matched against
---		# ##text##: a string, the sequence inside which matches will be looked for
---		# ##from##: an integer, the point in the string from which to start matching. Defaults to 1.
---		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
---
--- Returns:
---		An **object**, either an atom when an error occurred or no match was found, or a sequence. The sequence is made of pairs, described in the Comments below.
---
--- Comments:
--- If any match is found, then a sequence of pairs is returned. Each pair is made of the start and end point of a slice of ##text##. The first element represents the whole match.
---
--- If the matched regex has substrings, which means some groups are delineated by an opening and closing parenthesis, then each of these substrings was matched as well, and the subsequent pairs show where these submatches took place.
+--   **Good Example**
+--   <eucode>
+--   constant re_proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
+--   while sequence(line) do
+--       if re:match(line) then
+--           -- code
+--       end if
+--   end while
+--   </eucode>
 --
 -- Example 1:
--- <eucode>
--- re = new("foo(bar)")
--- text = "this is foobar"
--- substrings = search( re, text )
--- for i = 1 to length( substrings ) do
---     printf(1, "substring #%d: %s\n", {i, text[substrings[i][1]..substrings[i][2]] } )
--- end for
--- -- substring #1 (full match): foobar
--- -- substring #2 (first sunstring): bar
--- -- no more substrings, so match results stop here.
--- </eucode>
+--   <eucode>
+--   include regex.e as re
+--   re:regex number = re:new("[0-9]+")
+--   </eucode>
 --
--- See Also:
---	[[:search_all]]
+-- Note:
+--   For simple finds, matches or even simple wildcard matches, the built-in Euphoria
+--   routines [[:find]], [[:match]] and [[:wildcard]] are often times easier to use and
+--   a little faster. Regular expressions are faster for complex searching/matching.
+--
 
-public function search(regex re, sequence text, integer from=1, atom options=0)
-		return machine_func(M_EXEC_PCRE, { re, text, options, from-1 })
+public function new(sequence pattern)
+	return machine_func(M_REGEX_COMPILE, {pattern})
 end function
 
 --**
--- Returns all matches in text
---
--- Parameters:
---		# ##re##: a regex for a subject to be matched against
---		# ##text##: a string, the sequence inside which matches will be looked for
---		# ##from##: an integer, the point in the string from which to start matching. Defaults to 1.
---		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
---
--- Returns:
---		An **object**, either an atom for no match or some error, or a sequence of match results.
---
--- Comments:
---     When the function returns a sequence, each element is a sequence itself, as described in the Comments: section for [[:search]].
+-- Frees the memory used by a [[:regex]].
 --
 -- See Also:
---	[[:search]]
+--   [[:new]]
 
-public function search_all(regex re, sequence text, integer from=1, atom options=0)
+public procedure free(regex re)
+	if equal(re, 0) then
+		return
+	end if
+
+	machine_proc(M_REGEX_FREE, {re})
+end procedure
+
+
+--****
+-- === Find/Match
+
+--**
+-- Find the first match of ##re## in ##haystack##. You can optionally start at the position
+-- ##from##.
+--
+-- Parameters:
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
+--
+-- Returns:
+--   An object which is either an atom of 0, meaning nothing found or a sequence of matched pairs.
+--   For the explanation of the returned sequence, please see the first example.
+--
+--
+-- Example 1:
+--   <eucode>
+--   r = re:new("([A-Za-z]+) ([0-9]+)") -- John 20 or Jane 45
+--   object result = re:find(r, "John 20")
+--
+--   -- The return value will be:
+--   -- {
+--   --    { 1, 7 }, --Total match
+--   --    { 1, 4 }, -- First grouping "John" ([A-Za-z]+)
+--   --    { 6, 7 }  -- Second grouping "20" ([0-9]+)
+--   -- }
+--   </eucode>
+--
+
+public function find(regex re, sequence haystack, integer from=1)
+	return machine_func(M_REGEX_EXEC, {re, haystack, from})
+end function
+
+--**
+-- Find all occurrances of ##re## in ##haystack## optionally starting at the sequence position
+-- ##from##.
+--
+-- Parameters:
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
+--
+-- Returns:
+--   Returns a sequence of matches. Please see [[:find]] for a detailed description of the return
+--   value.
+--
+-- Example 1:
+--   <eucode>
+--   constant re_number = re:new("[0-9]+")
+--   object matches = re:find_all(re_number, "10 20 30")
+--
+--   -- matches is:
+--   -- {
+--   --     {1, 2},
+--   --     {4, 5},
+--   --     {7, 8}
+--   -- }
+--   </eucode>
+--
+
+public function find_all(regex re, sequence haystack, integer from=1)
 	object result
 	sequence results
 	
 	results = {}
 	
 	while 1 do
-		result = search(re, text, from, options)
+		result = find(re, haystack, from)
 		if atom(result) then
 			exit
 		end if
 		
 		results = append(results, result)
 		from = result[1][2] + 1
-		if from > length(text) then
+		if from > length(haystack) then
 			exit
 		end if
 	end while
@@ -206,126 +235,60 @@ public function search_all(regex re, sequence text, integer from=1, atom options
 end function
 
 --**
---  Replaces all matches of a regex with the replacement text.
+-- Determine if ##re## matches any portion of ##haystack##.
 --
 -- Parameters:
--- 		# ##re##: a regex which will be used for matching
---		# ##text##: a string on which search and replace will apply
---		# ##replacement##: a string, used to replace each of the full matches found.
---		# ##options##: an atom, defaulted to 0.
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
 --
 -- Returns:
---		A **sequence**, the modified ##text##.
+--   An atom. 1 if ##re## matches any portion of ##haystack## or 0 if not.
 --
---	Comments:
---	Matches may be found against the result of previous replacements. Careful experimentation is highly recommended before doing things like text = regex:search_replace(re,text,whatever,something).
 
-public function search_replace(regex re, sequence text, sequence replacement, 
-                               atom options = 0)
-	sequence matches
-	
-	matches = search_all(re, text, options)
-	for i = length(matches) to 1 by -1 do
-		text = replace(text, replacement, matches[i][1][1], matches[i][1][2])
-	end for
-	
-	return text
+public function has_match(regex re, sequence haystack, integer from=1)
+	return sequence(machine_func(M_REGEX_EXEC, {re, haystack, from}))
 end function
 
 --**
--- Performs a search nd replace operation, with the replacement being computed by a user defined routine.
+-- Determine if the entire ##haystack## matches ##re##.
 --
 -- Parameters:
--- 		# ##re##: a regex which will be used for matching
---		# ##text##: a string on which search and replace will apply
---		# ##rid##: an integer, the id of a routine which will determine the replacement string at each step.
---		# ##options##: an atom, defaulted to 0.
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
 --
 -- Returns:
---		A **sequence**, the modified ##text##.
+--   An atom. 1 if ##re## matches the entire ##haystack## or 0 if not.
+--
+
+public function is_match(regex re, sequence haystack, integer from=1)
+	return machine_func(M_REGEX_MATCH, {re, haystack, from})
+end function
+
+--****
+-- === Replacement
+
+--**
+-- Perform a fast regular expression replacement.
+--
+-- Parameters:
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##replacement##: a string to replace with
 --
 -- Comments:
--- Whenever a match is found, [[:search_replace]] uses a fixed value as a replacement. OInstead, ##search_replace_user##() will replace slices by actual substrings, and pass the resulting sequence to the function you are required to pass the id of.
+--   ##replacement## may contain special operators. Please see [[:Special replacement operators]]
+--   for more information.
 --
--- The custom replace function must take one argument, a sequence of strings, and must return a string. This string will be used as the replacement for the given full match.
+-- Example 1:
+--   <eucode>
+--   constant r = re:new("([A-za-z]+)\\.([A-Za-z]+)")
+--   sequence s = re:replace(r, "myfile.txt", "Filename: \\1 Extension: \\2")
+--   -- s is "Filename: myfile Extension: txt"
+--   </eucode>
 --
--- Apart from the above, ##search_replace_user##() works like [[:search_replace]].
---
--- The routine is responsible for maintaining any state it requires for proper operation.
---
--- See Also:
--- [[:search_replace]]
 
-public function search_replace_user(regex re, sequence text, integer rid, 
-									atom options = 0)
-	sequence matches, m
-	
-	matches = search_all(re, text, options)
-	for i = length(matches) to 1 by -1 do
-		m = matches[i]
-		for a = 1 to length(m)  do
-			m[a] = text[m[a][1]..m[a][2]]
-		end for
-		
-		text = replace(text, call_func(rid, {m}), matches[i][1][1], 
-					   matches[i][1][2])
-	end for
-	
-	return text
-end function
-
---**
--- Returns 1 if the regex matches anywhere in the text, 0 otherwise.
---
--- Parameters:
---		# ##re##: a regex for a subject to be matched against
---		# ##text##: a string, the sequence inside which matches will be looked for
---		# ##from##: an integer, the point in the string from which to start matching. Defaults to 1.
---		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
---
--- Returns:
--- 		An **integer**, 0 if no match or some error, 1 if there is any match.
-
-public function matches(regex re, sequence text, integer from=1, atom options = 0)
-	return sequence(search(re, text,from,  options))
-end function
-
---**
--- Frees the memory used by regex re, which must have been previously returned by new()
---
--- Parameters:
---		# ##re##: the regex to free.
---
--- Comments:
--- Be sure to use ##regex:free##(), not [[:machine:free|free]]().
---
--- See Also:
---     [[:new]]
-
-public procedure free( regex re )
-	machine_proc( M_FREE_PCRE, re )
-end procedure
-
---**
--- Returns 1 if the regex matches the entire text, 0 otherwise
---
--- Parameters:
---		# ##re##: a regex for a subject to be matched against
---		# ##text##: a string, the sequence inside which matches will be looked for
---		# ##options##: an atom, used to pass options to the match engine. Defaults to 0.
---
--- Returns:
--- 		An **integer**, 0 if no match or some error, 1 if the whole of ##text## matches ##re## using ##options##.
---
--- See Also:
--- [[:matches]]
-
-public function full_match(regex re, sequence text, atom options = 0)
-	object matches
-	matches = search( re, text, 1, options )
-	if sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text) then
-		return 1
-	end if
-
-	return 0
+public function replace(regex re, sequence haystack, sequence replacement)
+	return machine_func(M_REGEX_REPLACE, {re, haystack, replacement})
 end function

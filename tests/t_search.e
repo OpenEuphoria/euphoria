@@ -65,8 +65,13 @@ test_equal("find_nested, standard, at top", {1}, find_nested(1,{1,{2,{},{1,3}},{
 test_equal("find_nested, backwards", {3, 2, 2}, find_nested(3,{1,{2,{},{1,3}},{1,{2,3}}},NESTED_BACKWARD))
 test_equal("find_nested, all hits", {{2, 3, 2}, {3, 2, 2}}, find_nested(3,{1,{2,{},{1,3}},{1,{2,3}}},NESTED_ALL))
 test_equal("find_nested, all hits, any in list",
-		{{{2,1}, 2}, {{2,3,2}, 1}, {{3,2,1}, 2}, {{3,2,2}, 1}}
-		, find_nested({3,2},{1,{2,{},{1,3}},{1,{2,3}}},NESTED_ALL+NESTED_ANY+NESTED_INDEX))
+	{{{2,1}, 2}, {{2,3,2}, 1}, {{3,2,1}, 2}, {{3,2,2}, 1}}
+, find_nested({3,2},{1,{2,{},{1,3}},{1,{2,3}}},NESTED_ALL+NESTED_ANY+NESTED_INDEX))
+
+test_equal("ends #1", 1, ends("txt", "hello.txt"))
+test_equal("ends #2", 0, ends("txt", "hello.doc"))
+test_equal("ends #3", 1, ends("exe", "hello.exe"))
+test_equal("ends #4", 0, ends("ex", "hello.exe"))
 
 test_report()
 

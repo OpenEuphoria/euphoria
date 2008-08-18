@@ -316,79 +316,80 @@ struct char_cell {
 #define DOING_SPRINTF -9999999 // indicates sprintf rather than printf
 
 /* Machine Operations - avoid renumbering existing constants */
-#define M_COMPLETE      0  /* determine Complete Edition */
-#define M_SOUND         1
-#define M_LINE          2
-#define M_PALETTE       3 
-#define M_PIXEL         4 // obsolete, but keep for now
-#define M_GRAPHICS_MODE 5
-#define M_CURSOR        6
-#define M_WRAP          7
-#define M_SCROLL        8
-#define M_SET_T_COLOR   9
-#define M_SET_B_COLOR  10
-#define M_POLYGON      11
-#define M_TEXTROWS     12
-#define M_VIDEO_CONFIG 13
-#define M_GET_MOUSE    14
-#define M_MOUSE_EVENTS 15
-#define M_ALLOC        16
-#define M_FREE         17
-#define M_ELLIPSE      18
-#define M_SEEK         19
-#define M_WHERE        20
-#define M_GET_PIXEL    21 // obsolete, but keep for now
-#define M_DIR          22
-#define M_CURRENT_DIR  23
-#define M_MOUSE_POINTER 24
-#define M_GET_POSITION 25
-#define M_WAIT_KEY     26
-#define M_ALL_PALETTE  27
-#define M_GET_DISPLAY_PAGE 28
-#define M_SET_DISPLAY_PAGE 29
-#define M_GET_ACTIVE_PAGE 30
-#define M_SET_ACTIVE_PAGE 31
-#define M_ALLOC_LOW    32
-#define M_FREE_LOW     33
-#define M_INTERRUPT    34
-#define M_SET_RAND     35
-#define M_USE_VESA     36
-#define M_CRASH_MESSAGE 37
-#define M_TICK_RATE    38
-#define M_GET_VECTOR   39
-#define M_SET_VECTOR   40
-#define M_LOCK_MEMORY  41
-#define M_ALLOW_BREAK  42
-#define M_CHECK_BREAK  43
-#define M_MEM_COPY     44 // obsolete, but keep for now
-#define M_MEM_SET      45 // obsolete, but keep for now
-#define M_A_TO_F64     46
-#define M_F64_TO_A     47
-#define M_A_TO_F32     48
-#define M_F32_TO_A     49
-#define M_OPEN_DLL     50
-#define M_DEFINE_C     51
-#define M_CALLBACK     52
-#define M_PLATFORM     53 // obsolete, but keep for now
-#define M_FREE_CONSOLE 54
-#define M_INSTANCE     55
-#define M_DEFINE_VAR   56
-#define M_CRASH_FILE   57
-#define M_GET_SCREEN_CHAR 58
-#define M_PUT_SCREEN_CHAR 59
-#define M_FLUSH        60
-#define M_LOCK_FILE    61
-#define M_UNLOCK_FILE  62
-#define M_CHDIR        63
-#define M_SLEEP        64
-#define M_BACKEND      65
-#define M_CRASH_ROUTINE 66
-#define M_CRASH        67
+#define M_COMPLETE            0  /* determine Complete Edition */
+#define M_SOUND               1
+#define M_LINE                2
+#define M_PALETTE             3
+#define M_PIXEL               4 // obsolete, but keep for now
+#define M_GRAPHICS_MODE       5
+#define M_CURSOR              6
+#define M_WRAP                7
+#define M_SCROLL              8
+#define M_SET_T_COLOR         9
+#define M_SET_B_COLOR        10
+#define M_POLYGON            11
+#define M_TEXTROWS           12
+#define M_VIDEO_CONFIG       13
+#define M_GET_MOUSE          14
+#define M_MOUSE_EVENTS       15
+#define M_ALLOC              16
+#define M_FREE               17
+#define M_ELLIPSE            18
+#define M_SEEK               19
+#define M_WHERE              20
+#define M_GET_PIXEL          21 // obsolete, but keep for now
+#define M_DIR                22
+#define M_CURRENT_DIR        23
+#define M_MOUSE_POINTER      24
+#define M_GET_POSITION       25
+#define M_WAIT_KEY           26
+#define M_ALL_PALETTE        27
+#define M_GET_DISPLAY_PAGE   28
+#define M_SET_DISPLAY_PAGE   29
+#define M_GET_ACTIVE_PAGE    30
+#define M_SET_ACTIVE_PAGE    31
+#define M_ALLOC_LOW          32
+#define M_FREE_LOW           33
+#define M_INTERRUPT          34
+#define M_SET_RAND           35
+#define M_USE_VESA           36
+#define M_CRASH_MESSAGE      37
+#define M_TICK_RATE          38
+#define M_GET_VECTOR         39
+#define M_SET_VECTOR         40
+#define M_LOCK_MEMORY        41
+#define M_ALLOW_BREAK        42
+#define M_CHECK_BREAK        43
+#define M_MEM_COPY           44 // obsolete, but keep for now
+#define M_MEM_SET            45 // obsolete, but keep for now
+#define M_A_TO_F64           46
+#define M_F64_TO_A           47
+#define M_A_TO_F32           48
+#define M_F32_TO_A           49
+#define M_OPEN_DLL           50
+#define M_DEFINE_C           51
+#define M_CALLBACK           52
+#define M_PLATFORM           53 // obsolete, but keep for now
+#define M_FREE_CONSOLE       54
+#define M_INSTANCE           55
+#define M_DEFINE_VAR         56
+#define M_CRASH_FILE         57
+#define M_GET_SCREEN_CHAR    58
+#define M_PUT_SCREEN_CHAR    59
+#define M_FLUSH              60
+#define M_LOCK_FILE          61
+#define M_UNLOCK_FILE        62
+#define M_CHDIR              63
+#define M_SLEEP              64
+#define M_BACKEND            65
+#define M_CRASH_ROUTINE      66
+#define M_CRASH              67
+#define M_REGEX_COMPILE      68
+#define M_REGEX_EXEC         69
+#define M_REGEX_MATCH        70
+#define M_REGEX_REPLACE      71
+#define M_REGEX_FREE         72
 
-#define M_COMPILE_PCRE 68
-#define M_EXEC_PCRE    69
-#define M_FREE_PCRE    70
-#define M_WARNING_FILE 72
-
-#define M_SET_ENV      73
-#define M_UNSET_ENV    74
+#define M_WARNING_FILE       73
+#define M_SET_ENV            74
+#define M_UNSET_ENV          75
