@@ -218,7 +218,9 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\io.obj &
 	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\get.obj
+	.\$(OBJDIR)\get.obj &
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\search.obj 
 
 EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
@@ -239,6 +241,8 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\io.obj &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\0emory.obj &
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\search.obj &
 	.\$(OBJDIR)\get.obj
 
 EU_DOS_OBJECTS = &
@@ -334,6 +338,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\io.obj &
 	.\$(OBJDIR)\0rror.obj &
 	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\filesy_0.obj &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\0emory.obj &
 	.\$(OBJDIR)\search.obj
@@ -762,6 +767,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\filesys.obj : .\$(OBJDIR)\filesys.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$@
+
+.\$(OBJDIR)\filesy_0.obj : .\$(OBJDIR)\filesy_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$@
 
 .\$(OBJDIR)\memory.obj : .\$(OBJDIR)\memory.c

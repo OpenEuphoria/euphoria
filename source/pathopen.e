@@ -6,7 +6,7 @@ include std/os.e
 include std/filesys.e
 
 ifdef DOS32 then
-	export include std\dos\memory.e
+	public include std\dos\memory.e
 	include std\dos\interrup.e
 end ifdef
 
