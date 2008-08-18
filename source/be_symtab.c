@@ -186,7 +186,7 @@ int symbol_in_include_path( symtab_ptr sym, int check_file, char * checked_file 
 	return 0;
 }
 
-int is_direct_include( symtab_ptr sym, int check_file )
+int is_direct_include( symtab_ptr sym, int check_file, int export_ok )
 /* Determines if sym is in the include path of file #check_file */
 {
 	int i;
@@ -198,7 +198,7 @@ int is_direct_include( symtab_ptr sym, int check_file )
 	node = fe.includes->nodes + check_file;
 	for( i = 0; i < node->size; i++ ){
 	
-		if( file_no == node->file_no[i] ){
+		if( file_no == node->file_no[i] || (export_ok && file_no == -node->file_no[i]) ){
 			return 1;
 		}
 	}
@@ -283,8 +283,9 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		
 		/* find global name in ns file */
 		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
-			if ((s->file_no == ns_file || symbol_in_include_path( s, ns_file, NULL) ) && 
-				s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {
+			if ((s->file_no == ns_file || is_direct_include( s, ns_file, s->scope != S_EXPORT ) ) && 
+				(s->scope == S_GLOBAL || s->scope == S_PUBLIC || s->scope == S_EXPORT )
+				&& strcmp(name, s->name) == 0) {
 				return s;
 			}
 		}
@@ -309,7 +310,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
 			if (s->file_no == file && 
 				(s->scope == S_LOCAL || s->scope == S_GLOBAL ||
-				s->scope == S_EXPORT || 
+				s->scope == S_EXPORT || s->scope == S_PUBLIC ||
 				(proc == TopLevelSub && s->scope == S_GLOOP_VAR)) &&
 				strcmp(name, s->name) == 0) {  
 				// shouldn't really be able to see GLOOP_VARs unless we are
@@ -335,8 +336,8 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 					found_outside_path++;
 				}
 			}
-			else if( s->scope == S_EXPORT && strcmp(name, s->name) == 0){
-				if( is_direct_include( s, file ) ){
+			else if( (s->scope == S_EXPORT || s->scope == S_PUBLIC ) && strcmp(name, s->name) == 0){
+				if( is_direct_include( s, file, s->scope == S_PUBLIC ) ){
 					global_found = s;
 					found_in_path++;
 				}

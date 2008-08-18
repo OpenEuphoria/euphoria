@@ -56,8 +56,8 @@ keylist =
 	{"switch",    SC_KEYWORD, SWITCH,    0, 0, 0},
 	{"case",      SC_KEYWORD, CASE,      0, 0, 0},
 	{"override",  SC_KEYWORD, OVERRIDE,  0, 0, 0},
-	{"goto",      SC_KEYWORD, GOTO, 0, 0, 0},
-	--{"label",      SC_KEYWORD, GLABEL, 0, 0, 0},
+	{"goto",      SC_KEYWORD, GOTO,      0, 0, 0},
+	{"public",    SC_KEYWORD, PUBLIC,    0, 0, 0 },
 	-- new ones must go at end to maintain compatibility with old shrouded code
 
 	-- PREDEFINED SUBPROGRAMS and TYPEs 

@@ -4085,7 +4085,7 @@ int file_in_include_path( int using, int target, char * checked_files )
 	return 0;
 }
 
-int file_is_direct_include( int using, int target )
+int file_is_direct_include( int using, int target, int export_ok )
 /* Checks to see if the target file is in the include path for using */
 {
 	int i;
@@ -4094,7 +4094,7 @@ int file_is_direct_include( int using, int target )
 	if( using == target ) return 1;
 	for( i = 1; i <= rt02[using][0]; i++ ){
 
-		if( target == rt02[using][i] ){
+		if( target == rt02[using][i] || (export_ok && target == -rt02[using][i] ) ){
 			return 1;
 		}
 	}
@@ -4221,9 +4221,9 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 						if(!in_path_found) found = i;
 					}
 				}
-				else if(rt00[i].scope == S_EXPORT) {
+				else if(rt00[i].scope == S_EXPORT || rt00[i].scope == S_PUBLIC ) {
 
-					if( file_is_direct_include( current_file_no, -rt00[i].file_num ) ){
+					if( file_is_direct_include( current_file_no, -rt00[i].file_num, rt00[i].scope == S_PUBLIC ) ){
 						found = i;
 						in_path_found++;
 					}

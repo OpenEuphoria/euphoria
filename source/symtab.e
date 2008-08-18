@@ -451,7 +451,7 @@ global procedure add_ref(token tok)
 	end if
 end procedure
 
-export function is_direct_include( symtab_index sym, integer check_file )
+export function is_direct_include( symtab_index sym, integer check_file, integer export_ok = 1 )
 		integer file_no
 		file_no = SymTab[sym][S_FILE_NO]
 
@@ -459,7 +459,11 @@ export function is_direct_include( symtab_index sym, integer check_file )
 			return 1
 		end if
 
-		return find( file_no, file_include[check_file] ) != 0
+		integer is_direct = find( file_no, file_include[check_file] )
+		if not is_direct and export_ok then
+			is_direct = find( -file_no, file_include[check_file] )
+		end if
+		return is_direct
 end function
 
 global procedure MarkTargets(symtab_index s, integer attribute)
@@ -508,7 +512,8 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 		while p != 0 do
 			if SymTab[p][S_FILE_NO] = current_file_no or
 			   SymTab[p][S_SCOPE] = SC_GLOBAL or
-			   (SymTab[p][S_SCOPE] = SC_EXPORT and is_direct_include( p, current_file_no )) then
+			   (SymTab[p][S_SCOPE] = SC_PUBLIC and is_direct_include( p, current_file_no )) or
+			   (SymTab[p][S_SCOPE] = SC_EXPORT and is_direct_include( p, current_file_no, 0 )) then
 				SymTab[p][attribute] += 1
 			end if
 			p = SymTab[p][S_NEXT]
@@ -525,11 +530,16 @@ export function symbol_in_include_path( symtab_index sym, integer check_file, se
 		if file_no = check_file then
 			return 1
 		end if
+		
+		if check_file < 0 then
+			check_file = -check_file
+		end if
+		
 		if find(check_file, path_checked ) then
 			return 0
 		end if
 		path_checked &= check_file
-		if file_no = check_file or find( file_no, file_include[check_file] ) then
+		if file_no = check_file or find( file_no, file_include[check_file] ) or find( -file_no, file_include[check_file] ) then
 				return 1
 		else
 				for i = 1 to length( file_include[check_file] ) do
@@ -611,7 +621,7 @@ global function keyfind(sequence word, integer file_no)
 
 					-- continue looking for more globals with same name
 
-				elsif scope = SC_EXPORT then
+				elsif scope = SC_EXPORT or scope = SC_PUBLIC then
 					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
 						-- found export in current file
 						if BIND then
@@ -621,11 +631,11 @@ global function keyfind(sequence word, integer file_no)
 						return tok
 					end if
 
-					if is_direct_include( st_ptr, current_file_no ) then
-						-- found export in another file
+					if is_direct_include( st_ptr, current_file_no, scope = SC_PUBLIC ) then
+						-- found export or public in another file 
 						gtok = tok
 						dup_globals &= st_ptr
-						in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
+						in_include_path &= 1
 					end if
 ifdef STDDEBUG then
 					if not is_direct_include( st_ptr, current_file_no ) and
@@ -687,9 +697,15 @@ end ifdef
 				elsif ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or
 						symbol_in_include_path(tok[T_SYM], file_no, {})) and
 						SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL) or
+						
 						((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or
 							is_direct_include(tok[T_SYM], file_no )) and
+						SymTab[tok[T_SYM]][S_SCOPE] = SC_PUBLIC) or
+						
+						((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or
+							is_direct_include(tok[T_SYM], file_no, 0 )) and
 						SymTab[tok[T_SYM]][S_SCOPE] = SC_EXPORT)
+						
 				then
 					if file_no = SymTab[tok[T_SYM]][S_FILE_NO] then
 						if BIND then
@@ -810,10 +826,9 @@ ifdef STDDEBUG then
 					return gtok
 				end if
 end ifdef
-				symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included (%d)",
+				symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included",
 					{ name_ext(file_name[current_file_no]), line_number,
-					name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]]),
-					SymTab[gtok[T_SYM]][S_SCOPE] - SC_EXPORT }),{word}}
+					name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])}),{word}}
 		end if
 		return gtok
 	end if

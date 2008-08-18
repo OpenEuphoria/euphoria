@@ -221,6 +221,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 				if ref then
 					if SymTab[sym][S_SCOPE] = SC_GLOBAL or
 					   SymTab[sym][S_SCOPE] = SC_EXPORT or
+					   SymTab[sym][S_SCOPE] = SC_PUBLIC or
 					   SymTab[sym][S_SCOPE] = SC_LOCAL then
 						emit_op(GLOBAL_INIT_CHECK) -- will become NOP2
 					else
@@ -1216,6 +1217,7 @@ procedure Assignment(token left_var)
 
 	elsif SymTab[left_sym][S_SCOPE] = SC_LOCAL or
 		  SymTab[left_sym][S_SCOPE] = SC_GLOBAL or
+		  SymTab[left_sym][S_SCOPE] = SC_PUBLIC or
 		  SymTab[left_sym][S_SCOPE] = SC_EXPORT then
 		-- this helps us to optimize things below
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
@@ -2272,27 +2274,34 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 	symtab_index t
 
 	scope = SymTab[s][S_SCOPE]
-
-	if find(scope, {SC_PRIVATE, SC_LOOP_VAR}) then
-		DefinedYet(s)
-		return s
-
-	elsif find(scope, {SC_UNDEFINED, SC_MULTIPLY_DEFINED}) then
-		SymTab[s][S_SCOPE] = SC_PRIVATE
-		SymTab[s][S_VARNUM] = n
-		SymTab[s][S_VTYPE] = type_sym
-		return s
-
-	elsif find(scope, {SC_LOCAL, SC_GLOBAL, SC_PREDEF, SC_EXPORT}) then
-		hashval = SymTab[s][S_HASHVAL]
-		t = buckets[hashval]
-		buckets[hashval] = NewEntry(SymTab[s][S_NAME], n, SC_PRIVATE,
-									VARIABLE, hashval, t, type_sym)
-		return buckets[hashval]
-	else
-		InternalErr("SetPS")
-
-	end if
+	switch scope do
+		case SC_PRIVATE:
+		case SC_LOOP_VAR:
+			DefinedYet(s)
+			return s
+		
+		case SC_UNDEFINED:
+		case SC_MULTIPLY_DEFINED:
+			SymTab[s][S_SCOPE] = SC_PRIVATE
+			SymTab[s][S_VARNUM] = n
+			SymTab[s][S_VTYPE] = type_sym
+			return s
+		
+		case SC_LOCAL:
+		case SC_GLOBAL:
+		case SC_PREDEF:
+		case SC_PUBLIC:
+		case SC_EXPORT:
+			hashval = SymTab[s][S_HASHVAL]
+			t = buckets[hashval]
+			buckets[hashval] = NewEntry(SymTab[s][S_NAME], n, SC_PRIVATE,
+										VARIABLE, hashval, t, type_sym)
+			return buckets[hashval]
+		
+		case else
+			InternalErr("SetPS")
+			
+	end switch
 
 	return 0
 end function
@@ -2446,7 +2455,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 		end if
 		sym = tok[T_SYM]
 		DefinedYet(sym)
-		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF, SC_EXPORT}) then
+		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF, SC_PUBLIC, SC_EXPORT}) then
 			h = SymTab[sym][S_HASHVAL]
 			-- create a new entry at beginning of this hash chain
 			sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0)
@@ -2836,7 +2845,7 @@ procedure SubProg(integer prog_type, integer scope)
 		pt = TYPE
 	end if
 
-	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_EXPORT, SC_OVERRIDE}) then
+	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry
 		if scope = SC_OVERRIDE then
 			if SymTab[p][S_SCOPE] = SC_PREDEF or SymTab[p][S_SCOPE] = SC_OVERRIDE then
@@ -3201,13 +3210,17 @@ global procedure real_parser(integer nested)
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 			SubProg(tok[T_ID], SC_LOCAL)
 
-		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE then
+		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC then
 			if id = GLOBAL then
 			    scope = SC_GLOBAL
 			elsif id = EXPORT then
-				scope = SC_EXPORT
-			elsif OVERRIDE then
+				-- TODO: this is temporary for the transition
+				--scope = SC_EXPORT
+				scope = SC_PUBLIC
+			elsif id = OVERRIDE then
 				scope = SC_OVERRIDE
+			elsif id = PUBLIC then
+				scope = SC_PUBLIC
 			end if
 
 			tok = next_token()
@@ -3226,8 +3239,8 @@ global procedure real_parser(integer nested)
 
 			elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 				SubProg(id, scope )
-
-			elsif scope = SC_EXPORT and id = INCLUDE then
+			
+			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
 				PushGoto()
 			else
@@ -3238,7 +3251,7 @@ global procedure real_parser(integer nested)
 					CompileErr( "'global' must be followed by:\n" &
 								"<a type>, 'constant', 'procedure', 'type' or 'function'")
 				else
-					CompileErr( "'export' must be followed by:\n" &
+					CompileErr( "'public' or 'export' must be followed by:\n" &
 								"<a type>, 'constant', 'procedure', 'type' or 'function'")
 				end if
 			end if

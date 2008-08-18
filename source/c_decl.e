@@ -100,7 +100,8 @@ global procedure NewBB(integer a_call, integer mask, symtab_index sub)
 			if SymTab[s][S_MODE] = M_NORMAL and
 				(SymTab[s][S_SCOPE] = SC_GLOBAL or
 				 SymTab[s][S_SCOPE] = SC_LOCAL  or
-				 SymTab[s][S_SCOPE] = SC_EXPORT ) then
+				 SymTab[s][S_SCOPE] = SC_EXPORT or
+				 SymTab[s][S_SCOPE] = SC_PUBLIC ) then
 				  if and_bits(mask, power(2, remainder(s, E_SIZE))) then
 					  if mask = E_ALL_EFFECT or s < sub then
 						  BB_info[i][BB_TYPE..BB_OBJ] = 
@@ -602,7 +603,8 @@ global procedure DeclareFileVars()
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		eentry = SymTab[s]
-		if eentry[S_SCOPE] >= SC_LOCAL and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT) and
+		if eentry[S_SCOPE] >= SC_LOCAL and (eentry[S_SCOPE] <= SC_GLOBAL 
+			or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC) and
 			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
 			not find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
 			c_puts("int ")
@@ -740,7 +742,7 @@ global procedure DeclareRoutineList()
 	while s do
 		if SymTab[s][S_USAGE] != U_DELETED and
 			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
-			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT } ) and dll_option then
+			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) and dll_option then
 				-- declare the global routine as an exported DLL function
 				if TWINDOWS then            
 				 -- c_hputs("int __declspec (dllexport) __stdcall\n")
@@ -793,7 +795,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", seq_num)
 				
-				if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT } ) then
+				if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) then
 					c_printf(", %d", - SymTab[s][S_FILE_NO])
 				else
 					c_printf(", %d", SymTab[s][S_FILE_NO])
@@ -801,7 +803,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", SymTab[s][S_NUM_ARGS])
 				
-				if TWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT} ) then
+				if TWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) then
 					c_puts(", 1")  -- must call with __stdcall convention
 				else
 					c_puts(", 0")  -- default: call with normal or __cdecl convention
@@ -893,7 +895,7 @@ procedure Write_def_file(integer def_file)
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
-			if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT}) then
+			if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC}) then
 				if sequence(bor_path) then             
 					printf(def_file, "%s=_%d%s\n", 
 						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
@@ -1545,7 +1547,7 @@ global procedure GenerateUserRoutines()
 						add_file(c_file)
 					end if
 				
-					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT} ) and dll_option then
+					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
 						-- declare the global routine as an exported DLL function
 						if TWINDOWS then      
 							-- c_stmt0("int __declspec (dllexport) __stdcall\n")

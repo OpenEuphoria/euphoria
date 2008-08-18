@@ -390,7 +390,6 @@ procedure opRIGHT_BRACE_N()  -- form a sequence of any length
     sequence x
     
     len = Code[pc+1]
-	
     x = sprintf("RIGHT_BRACE: len %d", len)
     
     for i = pc+len+1 to pc+2 by -1 do
@@ -399,9 +398,10 @@ procedure opRIGHT_BRACE_N()  -- form a sequence of any length
     end for
     target = Code[pc+len+2]
     x &= sprintf(" => %s", {name_or_literal(target)})
-    il( x, len + 2 )
+    il( x, len + 3 )
     pc += 3 + len
 end procedure
+
 
 procedure opRIGHT_BRACE_2()   -- form a sequence of length 2
 	binary()

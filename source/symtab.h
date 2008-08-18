@@ -38,6 +38,8 @@ struct symtab_entry {
 #define S_UNDEFINED 9   // new undefined symbol 
 #define S_MULTIPLY_DEFINED 10  // global symbol defined in 2 or more other files 
 #define S_EXPORT   11   // visible to any file that includes it
+#define S_OVERRIDE 12   // overrides a built in
+#define S_PUBLIC   13   // visible to any file that includes it (or through "export public"
 
 	unsigned char file_no; // file number symbol defined in 
 

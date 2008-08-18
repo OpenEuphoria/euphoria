@@ -34,7 +34,7 @@ global symtab_index new_include_space -- new namespace qualifier or NULL
 boolean start_include   -- TRUE if we should start a new file at end of line
 start_include = FALSE
 
-boolean export_include -- TRUE if we should pass along exported includes
+boolean public_include -- TRUE if we should pass along public includes
 
 global integer LastLineNumber  -- last global line number (avoid dups in line tab)
 LastLineNumber = -1     
@@ -491,7 +491,7 @@ function NameSpace_declaration(symtab_index sym)
 	integer h
 	
 	DefinedYet(sym)
-	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PREDEF}) then
+	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_PREDEF}) then
 		-- override the global or predefined symbol 
 		h = SymTab[sym][S_HASHVAL]
 		-- create a new entry at beginning of this hash chain 
@@ -565,7 +565,7 @@ procedure add_exports( integer from_file, integer to_file )
 	exports = file_export[from_file]
 	for i = 1 to length(exports) do
 		if not find( exports[i], direct ) then
-			direct &= exports[i]
+			direct &= -exports[i]
 		end if
 	end for
 	file_include[to_file] = direct
@@ -616,15 +616,19 @@ procedure IncludePush()
 			end if
 			close(new_file)
 			
-			if not find( i, file_include[current_file_no] ) then
+			if find( -i, file_include[current_file_no] ) then
+				-- it was included via export before, but we can now mark it as directly included
+				file_include[current_file_no][ find( -i, file_include[current_file_no] ) ] = i
+				
+			elsif not find( i, file_include[current_file_no] ) then
 				-- don't reparse the file, but note that it was included here
 				file_include[current_file_no] &= i
 				
 				-- also add anything that file exports
 				add_exports( i, current_file_no )
 				
-				if export_include then
-					export_include = FALSE
+				if public_include then
+					public_include = FALSE
 					if not find( i, file_export[current_file_no] ) then
 						file_export[current_file_no] &= i
 					end if
@@ -655,9 +659,9 @@ procedure IncludePush()
 	file_include = append( file_include, {} )
 	file_export  = append( file_export, {} )
 	file_include[current_file_no] &= length( file_include )
-	if export_include then
+	if public_include then
 		file_export[current_file_no] &= length( file_export )
-		export_include = FALSE
+		public_include = FALSE
 		patch_exports( current_file_no )
 	end if
 
@@ -1327,7 +1331,7 @@ global function StringToken()
 	return gtext
 end function
 
-global procedure IncludeScan( integer exported )
+global procedure IncludeScan( integer is_public )
 -- Special scan for an include statement:
 -- include filename as namespace
    
@@ -1432,7 +1436,7 @@ global procedure IncludeScan( integer exported )
 	end if
 	
 	start_include = TRUE -- let scanner know
-	export_include = exported
+	public_include = is_public
 end procedure
 
 ifdef STDDEBUG then
@@ -1440,7 +1444,7 @@ procedure all_include()
 	new_include_name = "std/all.e"
 	new_include_space = 0
 	start_include = TRUE
-	export_include = FALSE
+	public_include = FALSE
 end procedure
 end ifdef
 

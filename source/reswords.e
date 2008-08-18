@@ -274,7 +274,8 @@ global enum
 	CONTINUE,
 	ENUM,
 	EXPORT,
-	OVERRIDE
+	OVERRIDE,
+	PUBLIC
 
 global enum 
 	FUNC = 501,

@@ -167,7 +167,8 @@ global enum
 	SC_UNDEFINED,   -- new undefined symbol
 	SC_MULTIPLY_DEFINED,  -- global symbol defined in 2 or more files
 	SC_EXPORT,   -- visible to anyone that includes the file
-	SC_OVERRIDE -- override an internal
+	SC_OVERRIDE, -- override an internal
+	SC_PUBLIC    -- visible to any file that includes it, or via "public include"
 
 -- USAGE values          -- how symbol has been used (1,2 can be OR'd)
 global enum
