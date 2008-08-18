@@ -7,19 +7,19 @@
 --
 -- <<LEVELTOC depth=2>>
 
-
 ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
 	include dos\interrup.e
 else
-	include dll.e
+	include std/dll.e
 end ifdef
 
-export include std/machine.e
+include std/machine.e
 include std/wildcard.e
 include std/sort.e
 include std/search.e
+include std/memory.e
 
 constant
 	M_DIR	      = 22,
@@ -234,6 +234,10 @@ end function
 --
 -- Parameters:
 --		# ##name##: a sequence, the name of the directory to remove.
+--      # ##force##: an integer, if 1 this will also remove files and
+--                    sub-directories in the directory. The default is
+--                   0, which means that it will only remove the
+--                   directory if it is already empty.
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
@@ -246,56 +250,72 @@ end function
 -- </eucode>
 --
 -- See Also:
--- 	[[:create_directory]], [[:chdir]]
+-- 	[[:create_directory]], [[:chdir]], [[:clear_directory]]
 
 integer delete_file_id = -1, dir_id = -1
-
-export function remove_directory(sequence name, integer force=0)
+with trace
+export function remove_directory(sequence dir_name, integer force=0)
 	atom pname, ret
 	object files
 	integer D_NAME = 1, D_ATTRIBUTES = 2
 	
-	-- Remove any trailing slash.
-	if name[$] = SLASH then
-		name = name[1 .. $-1]
+	-- Remove any trailing slash
+ 	if length(dir_name) > 0 then
+		if dir_name[$] = SLASH then
+			dir_name = dir_name[1 .. $-1]
+		end if
 	end if
+	
+	if length(dir_name) = 0 then
+		return 0	-- nothing specified to delete.
+		            -- (not allowed to delete root directory btw)
+	end if
+	
+	ifdef WIN32 then
+		if length(dir_name) = 2 then
+			if dir_name[2] = ':' then
+				return 0 -- nothing specified to delete
+			end if
+		end if
+	end ifdef
 
-	--files = dir(name)
-	files = call_func(dir_id, {name})
+	files = call_func(dir_id, {dir_name})
 	if atom(files) then
 		return 0
 	end if
+	if not equal(files[1][D_NAME], ".") then
+		return 0	-- Supplied dir_name was not a directory
+	end if
+	
+	
+	dir_name &= SLASH
+	
 	for i = 1 to length(files) do
 		if find(files[i][D_NAME], {".", ".."}) then
-			-- skip
-			ret = 1
-		elsif find('d', files[i][D_ATTRIBUTES]) then
-			if force then
-				ret = remove_directory(name & SLASH & files[i][D_NAME], force)
-			else
-				return 0
-			end if
+			continue
+			
+		elsif not force then
+			return 0
 		else
-			if force then
-				-- ret = delete_file(name & SLASH & files[i][D_NAME])
-				ret = call_func(delete_file_id, {name & SLASH & files[i][D_NAME]})
+			if find('d', files[i][D_ATTRIBUTES]) then
+				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
 			else
+				ret = call_func(delete_file_id, {dir_name & files[i][D_NAME]})
+			end if
+			if not ret then
 				return 0
 			end if
-		end if
-		if not ret then
-			return ret
 		end if
 	end for
 	
 	ifdef DOS32 then
 	    atom low_buff
 	    sequence reg_list
-	    low_buff = allocate_low(length(name) + 1)
+	    low_buff = allocate_low(length(dir_name) + 1)
 	    if not low_buff then
 	        return 0
 	    end if
-	    poke(low_buff, name & 0)
+	    poke(low_buff, dir_name & 0)
 	    reg_list = repeat(0,10)
 	    if short_names then
 	        reg_list[REG_AX] = #3A00
@@ -314,7 +334,7 @@ export function remove_directory(sequence name, integer force=0)
 	    end if
 	end ifdef
 	
-	pname = allocate_string(name)
+	pname = allocate_string(dir_name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
 			ret = not ret 
@@ -1387,20 +1407,30 @@ end function
 --- copy_directory( srcpath, destpath, structonly = 0)
 
 --**
--- Clear a directory.
+-- Clear (delete) a directory of all files, but retaining sub-directories.
 --
 -- Parameters:
---		# ##name##: a sequence, the name of the directory to remove.
---		# ##recurse##: an integer, whether or not to recursively remove files in the directory. If 0 then this function is identical to remove_directory(). If 1, then we recursively delete the directory and its contents. Defaults to 1.
+--		# ##name##: a sequence, the name of the directory whose files you want to remove.
+--		# ##recurse##: an integer, whether or not to remove files in the 
+--        directory's sub-directories. If 0 then this function is identical
+--        to remove_directory(). If 1, then we recursively delete the
+--        directory and its contents. Defaults to 1.
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, 0 on failure, otherwise the number of files plus 1.
+--
+-- Comment:
+-- This never removes a directory. It only ever removes files. It is used to 
+-- clear a directory structure of all existing files, leaving the structure
+-- intact.
 --
 -- Example 1:
 -- <eucode>
--- if not remove_directory("the_old_folder", 1) then
---		crash("Filesystem problem - could not remove the old folder")
+-- integer cnt = clear_directory("the_old_folder")
+-- if cnt = 0 then
+--		crash("Filesystem problem - could not remove one or more of the files.")
 -- end if
+-- printf(1, "Number of files removed: %d\n", cnt - 1)
 -- </eucode>
 --
 -- See Also:
@@ -1408,26 +1438,54 @@ end function
 export function clear_directory(sequence path, integer recurse = 1)
 	object files
 	integer ret
+	if length(path) > 0 then
+		if path[$] = SLASH then
+			path = path[1 .. $-1]
+		end if
+	end if
+	
+	if length(path) = 0 then
+		return 0 -- Nothing specified to clear. Not safe to assume anything.
+		         -- (btw, not allowed to clear root directory)
+	end if
+	ifdef WIN32 then
+		if length(path) = 2 then
+			if path[2] = ':' then
+				return 0 -- nothing specified to delete
+			end if
+		end if
+	end ifdef
+
+	
 	files = dir(path)
 	if atom(files) then
 		return 0
 	end if
+	if not equal(files[1][D_NAME], ".") then
+		return 0 -- Supplied name was not a directory
+	end if
+	
+	ret = 1
+	path &= SLASH
+	
 	for i = 1 to length(files) do
 		if find(files[i][D_NAME], {".", ".."}) then
-			-- skip
-			ret = 1
+			continue
 		elsif find('d', files[i][D_ATTRIBUTES]) then
 			if recurse then
-				ret = clear_directory(path & SLASH & files[i][D_NAME], recurse)
+				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+				if cnt = 0 then
+					return 0
+				end if
+				ret += cnt
 			else
-				-- skip
-				ret = 1
+				continue
 			end if
 		else
-			ret = delete_file(path & SLASH & files[i][D_NAME])
-		end if
-		if not ret then
-			return ret
+			if delete_file(path & files[i][D_NAME]) = 0 then
+				return 0
+			end if
+			ret += 1
 		end if
 	end for
 	return ret
