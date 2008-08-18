@@ -105,9 +105,7 @@ endif
 
 CC = gcc
 FE_FLAGS =  -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/
-BE_FLAGS =  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS)
-
-PCRE=./pcre/.libs/libpcre.a
+BE_FLAGS =  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS)
 
 EU_CORE_FILES = \
 	common.e \
@@ -253,12 +251,13 @@ EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_callc.o \
 	./$(OBJDIR)/back/be_inline.o \
 	./$(OBJDIR)/back/be_machine.o \
-	./$(OBJDIR)/back/be_pcre.o \
+	./$(OBJDIR)/back/be_regex.o \
 	./$(OBJDIR)/back/be_rterror.o \
 	./$(OBJDIR)/back/be_syncolor.o \
 	./$(OBJDIR)/back/be_runtime.o \
 	./$(OBJDIR)/back/be_symtab.o \
-	./$(OBJDIR)/back/be_w.o
+	./$(OBJDIR)/back/be_w.o \
+	./$(OBJDIR)/back/regex.o
 
 EU_LIB_OBJECTS = \
 	./$(OBJDIR)/back/be_decompress.o \
@@ -266,10 +265,11 @@ EU_LIB_OBJECTS = \
 	./$(OBJDIR)/back/be_w.o \
 	./$(OBJDIR)/back/be_alloc.o \
 	./$(OBJDIR)/back/be_inline.o \
+	./$(OBJDIR)/back/be_regex.o \
 	./$(OBJDIR)/back/be_runtime.o \
 	./$(OBJDIR)/back/be_task.o \
-	./$(OBJDIR)/back/be_pcre.o \
-	./$(OBJDIR)/back/be_callc.o
+	./$(OBJDIR)/back/be_callc.o \
+	./$(OBJDIR)/back/regex.o
 
 EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/main-.o \
@@ -305,8 +305,6 @@ EU_BACKEND_RUNNER_FILES = \
 	error.e \
 	mode.e
 
-PCRE_OBJECTS = \
-	./pcre/*.o
 all : interpreter translator library backend
 
 BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
@@ -314,7 +312,6 @@ BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ 
 distclean : clean
 	-rm rev.e
 	-rm -r $(BUILD_DIRS)
-	cd pcre && $(MAKE) clean
 
 clean : 
 	@-for d in $(BUILD_DIRS); \
@@ -322,14 +319,13 @@ clean :
 	    rm "$$d"/*.o; \
 	done
 	-rm $(EEXU) $(EECU) $(EECUA) $(EBACKENDU) $(DEB_SOURCE_DIR).tar.gz
-	cd pcre && $(MAKE) clean
 
 .PHONY : clean distclean all
 
-library : builddirs $(PCRE)
+library : builddirs
 	$(MAKE) $(EECUA) OBJDIR=libobj ERUNTIME=1
 $(EECUA) : $(EU_LIB_OBJECTS)
-	ar -rc $(EECUA) $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
+	ar -rc $(EECUA) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
 builddirs : svn_rev
@@ -341,10 +337,10 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex .svn/entries
 
-interpreter : builddirs $(PCRE)
+interpreter : builddirs
 	$(MAKE) $(EEXU) OBJDIR=intobj EBSD=$(EBSD)
 
-translator : builddirs $(PCRE)
+translator : builddirs
 	$(MAKE) $(EECU) OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
@@ -377,7 +373,6 @@ source-tarball : source
 	cp ec.ex       $(SOURCEDIR)
 	cp backend.ex  $(SOURCEDIR)
 	cp *.e         $(SOURCEDIR)
-	cp -r pcre     $(SOURCEDIR)
 	cp Makefile    $(SOURCEDIR)
 	cp configure   $(SOURCEDIR)
 	cp ../include/euphoria.h $(SOURCEDIR)
@@ -394,8 +389,8 @@ $(EEXU) :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_O
 $(EEXU) :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making $(EEXU)
 	@echo $(OS)
-	$(CC) $(EOSFLAGS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXU)
-	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXUC); fi
+	$(CC) $(EOSFLAGS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXU)
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXUC); fi
 
 $(EECU) :  OBJDIR = transobj
 $(EECU) :  EU_TARGET = ec.ex
@@ -403,7 +398,7 @@ $(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 $(EECU) :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(EECU) : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EECU)
 
 backend : builddirs
 	$(MAKE) $(EBACKENDU) EBACKEND=1 OBJDIR=backobj
@@ -414,8 +409,8 @@ $(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 $(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making BACKENDU $(OBJDIR)
-	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o $(EBACKENDU)
-	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o $(EBACKENDC); fi
+	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EBACKENDU)
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EBACKENDC); fi
 
 test : interpreter translator library
 	export EUCOMPILEDIR=../ && \
@@ -506,6 +501,3 @@ $(OBJDIR)/back/be_callc.o : ./be_callc.c
 
 $(OBJDIR)/back/be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
-
-$(PCRE) : 
-	cd pcre && $(MAKE) libpcre.la

@@ -59,5 +59,3 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-
-cd pcre && ./configure --enable-utf8 --disable-cpp --disable-shared
