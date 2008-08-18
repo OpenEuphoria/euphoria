@@ -3484,6 +3484,7 @@ procedure do_exec()
 				opGREATEREQ()
 				break
 			case GREATEREQ_IFW:
+			case GREATEREQ_IFW_I:
 				opGREATEREQ_IFW()
 				break
 			case HASH:
@@ -3889,7 +3890,9 @@ ifdef CALLPROC then
 		elsif equal(name, "SC2_AND") then
 			name = "SC2_OR"
 		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
-						  "END_PARAM_CHECK", "NOPWHILE", "NOP1"}) then 
+						  "END_PARAM_CHECK", "NOPWHILE", "NOP1",
+						  "PROC_FORWARD", "FUNC_FORWARD",
+						  "TRANSGOTO"}) then 
 			-- never emitted
 			name = "NOP2" 
 		elsif equal(name, "GREATER_IFW_I") then

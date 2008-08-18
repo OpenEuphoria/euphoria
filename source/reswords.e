@@ -199,7 +199,10 @@ global constant
 	SWITCH_SPI          = 194,
 	SWITCH_I            = 195,
 	HASH                = 196,
-	MAX_OPCODE          = 196
+	PROC_FORWARD        = 197,
+	FUNC_FORWARD        = 198,
+	TRANSGOTO           = 199,
+	MAX_OPCODE          = 199
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

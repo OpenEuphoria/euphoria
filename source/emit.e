@@ -1,7 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Routines to emit the IL opcode stream
-
 include std/os.e
 
 include reswords.e
@@ -138,19 +137,22 @@ global function Pop()
 
 	t = cg_stack[$]
 	cg_stack = cg_stack[1..$-1]
-	if SymTab[t][S_MODE] = M_TEMP then 
-		if use_private_list = 0 then  -- no problem with reusing the temp
-			SymTab[t][S_SCOPE] = FREE -- mark it as being free
-							-- n.b. we assume one copy of temp on stack 
-							-- temps are normally not Popped & Pushed back on stack
-							-- but see TempKeep() and TempFree() above 
-		elsif find(t, private_sym) = 0 then 
-		-- don't mark as free if the temp could be reused in default parm expressions
-			SymTab[t][S_SCOPE] = FREE -- mark it as being free
+	if t then
+		if SymTab[t][S_MODE] = M_TEMP then 
+			if use_private_list = 0 then  -- no problem with reusing the temp
+				SymTab[t][S_SCOPE] = FREE -- mark it as being free
+								-- n.b. we assume one copy of temp on stack 
+								-- temps are normally not Popped & Pushed back on stack
+								-- but see TempKeep() and TempFree() above 
+			elsif find(t, private_sym) = 0 then 
+			-- don't mark as free if the temp could be reused in default parm expressions
+				SymTab[t][S_SCOPE] = FREE -- mark it as being free
+			end if
 		end if
 	end if
 	return t    
 end function
+pop_rid = routine_id("Pop")
 
 procedure TempKeep(symtab_index x)
 	if SymTab[x][S_MODE] = M_TEMP then
@@ -159,9 +161,11 @@ procedure TempKeep(symtab_index x)
 end procedure
 
 global procedure TempFree(symtab_index x)
-   if SymTab[x][S_MODE] = M_TEMP then
-	   SymTab[x][S_SCOPE] = FREE 
-   end if
+	if x then
+		if SymTab[x][S_MODE] = M_TEMP then
+			SymTab[x][S_SCOPE] = FREE 
+		end if
+	end if
 end procedure
 
 procedure TempInteger(symtab_index x)  
@@ -476,6 +480,7 @@ global procedure emit_op(integer op)
 		current_sequence = append(current_sequence, target)
 		
 	elsif op = PROC then  -- procedure, function and type calls
+	
 		assignable = FALSE -- assume for now 
 		subsym = op_info1
 		n = SymTab[subsym][S_NUM_ARGS]
@@ -510,7 +515,46 @@ global procedure emit_op(integer op)
 			-- emit location to assign result to
 			emit_addr(c)
 		end if
-
+		
+	elsif op = PROC_FORWARD or op = FUNC_FORWARD then
+		assignable = FALSE -- assume for now 
+		forward_references = append( forward_references, repeat( 0, 6 ) )
+		integer ref = length( forward_references )
+		n = Pop() -- number of known args
+		
+		forward_references[ref][FR_TYPE]    = PROC
+		forward_references[ref][FR_NAME]    = SymTab[op_info1][S_NAME]
+		forward_references[ref][FR_FILE]    = current_file_no
+		forward_references[ref][FR_SUBPROG] = CurrentSub
+		forward_references[ref][FR_PC]      = length( Code ) + 1
+		forward_references[ref][FR_LINE]    = line_number
+		emit_opcode(op)
+		emit_addr(ref)
+		emit_addr( n ) -- this changes to be the "next" instruction
+		for i = length(cg_stack)-n+1 to length(cg_stack) do 
+			emit_addr(cg_stack[i])
+			TempFree(cg_stack[i])
+		end for
+		cg_stack = cg_stack[1..$-n]
+		
+		-- emit padding for
+		--   additional default params:  5
+		--   possible goto for default:  2
+		--   goto to skip extra params:  2
+		--   Total Padding:              9
+		for pad = 1 to FORWARD_DEFAULT_PADDING + 4  do
+			emit_addr( 0 )
+		end for
+		
+		
+		if op != PROC_FORWARD then
+			assignable = TRUE
+			forward_references[ref][FR_TYPE] = FUNC
+			c = NewTempSym() -- put final result in temp 
+			Push(c)
+			-- emit location to assign result to
+			emit_addr(c)
+		end if
 	elsif op = WARNING then
 		assignable = FALSE  
 	    a = Pop()
@@ -794,6 +838,7 @@ global procedure emit_op(integer op)
 	elsif find(op, {SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
 					C_PROC, PIXEL, POKE, POKE4, TASK_SCHEDULE, POKE2}) then
 		emit_opcode(op)
+		
 		b = Pop()
 		emit_addr(Pop())
 		emit_addr(b)

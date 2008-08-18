@@ -199,5 +199,8 @@ global constant opnames = {
 	"INSERT",
 	"SWITCH_SPI",
 	"SWITCH_I",
-	"HASH"
+	"HASH",
+	"PROC_FORWARD",
+	"FUNC_FORWARD",
+	"TRANSGOTO"
 }

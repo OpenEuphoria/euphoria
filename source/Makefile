@@ -202,6 +202,7 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/scanner.o \
 	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/scanne_0.o \
+	./$(OBJDIR)/scanne_1.o \
 	./$(OBJDIR)/main.o \
 	./$(OBJDIR)/emit.o \
 	./$(OBJDIR)/emit_0.o \

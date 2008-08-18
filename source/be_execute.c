@@ -1682,8 +1682,9 @@ void do_exec(int *start_pc)
   NULL, NULL,/* L_CASE, L_NOPSWITCH not emitted*/
   &&L_GOTO, &&L_GLABEL, &&L_SPLICE, &&L_INSERT,
 /* 193 (previous) */
-  &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH
+  &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH,
 /* 196 (previous) */
+ NULL, NULL, NULL /* L_PROC_FORWARD, L_FUNC_FORWARD, TRANSGOTO not emitted */
   };
 #endif
 #endif

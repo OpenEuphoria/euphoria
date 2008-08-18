@@ -56,7 +56,6 @@ global procedure remove_symbol( symtab_index sym )
 	integer hash
 	integer st_ptr
 
-
 	hash = SymTab[sym][S_HASHVAL]
 	st_ptr = buckets[hash]
 	while st_ptr != sym do
@@ -66,7 +65,6 @@ global procedure remove_symbol( symtab_index sym )
 	if st_ptr = buckets[hash] then
 		-- it was the last one, and in the bucket
 		buckets[hash] = SymTab[st_ptr][S_SAMEHASH]
-
 	else
 		-- we're somewhere in the chain
 		SymTab[st_ptr][S_SAMEHASH] = SymTab[sym][S_SAMEHASH]
@@ -566,7 +564,7 @@ export_warnings = {}
 end ifdef
 with trace
 global integer No_new_entry = 0
-global function keyfind(sequence word, integer file_no)
+global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no )
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier.
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
@@ -604,7 +602,7 @@ global function keyfind(sequence word, integer file_no)
 					st_builtin = st_ptr
 
 				elsif scope = SC_GLOBAL then
-					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
+					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file
 
 						if BIND then
@@ -617,12 +615,12 @@ global function keyfind(sequence word, integer file_no)
 					-- found global in another file
 					gtok = tok
 					dup_globals &= st_ptr
-					in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
+					in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
 
 					-- continue looking for more globals with same name
 
 				elsif scope = SC_EXPORT or scope = SC_PUBLIC then
-					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
+					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found export in current file
 						if BIND then
 							add_ref(tok)
@@ -631,27 +629,27 @@ global function keyfind(sequence word, integer file_no)
 						return tok
 					end if
 
-					if is_direct_include( st_ptr, current_file_no, scope = SC_PUBLIC ) then
+					if is_direct_include( st_ptr, scanning_file, scope = SC_PUBLIC ) then
 						-- found export or public in another file 
 						gtok = tok
 						dup_globals &= st_ptr
-						in_include_path &= 1
+						in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
 					end if
 ifdef STDDEBUG then
-					if not is_direct_include( st_ptr, current_file_no ) and
-						symbol_in_include_path( st_ptr, current_file_no, {} )  
+					if not is_direct_include( st_ptr, scanning_file ) and
+						symbol_in_include_path( st_ptr, scanning_file, {} )  
 					then 
 						gtok = tok
 						dup_globals &= st_ptr
 						in_include_path &= 0
-						if not find( {current_file_no,SymTab[tok[T_SYM]][S_FILE_NO]}, export_warnings ) then
+						if not find( {scanning_file,SymTab[tok[T_SYM]][S_FILE_NO]}, export_warnings ) then
 							
 							export_warnings = prepend( export_warnings,
-								{ current_file_no, SymTab[tok[T_SYM]][S_FILE_NO] })
+								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
 							symbol_resolution_warning = {
 								sprintf("File '%s' uses exported symbols from '%s', but does not include that file.",
-									{ name_ext(file_name[current_file_no]),
+									{ name_ext(file_name[scanning_file]),
 									name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])  })
 								,{word}}
 						end if
@@ -661,7 +659,7 @@ ifdef STDDEBUG then
 end ifdef
 
 				elsif scope = SC_LOCAL then
-					if current_file_no = SymTab[st_ptr][S_FILE_NO] then
+					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found local in current file
 
 						if BIND then
@@ -716,7 +714,7 @@ end ifdef
 
 					gtok = tok
 					dup_globals &= st_ptr
-					in_include_path &= symbol_in_include_path( st_ptr, current_file_no, {} )
+					in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
 				end if
 			end if
 
@@ -816,10 +814,10 @@ end ifdef
 			add_ref(gtok)
 		end if
 		if not in_include_path[1] and
-				not find( {current_file_no,SymTab[gtok[T_SYM]][S_FILE_NO]}, include_warnings )
+				not find( {scanning_file,SymTab[gtok[T_SYM]][S_FILE_NO]}, include_warnings )
 		then
 			include_warnings = prepend( include_warnings,
-				{ current_file_no, SymTab[gtok[T_SYM]][S_FILE_NO] })
+				{ scanning_file, SymTab[gtok[T_SYM]][S_FILE_NO] })
 ifdef STDDEBUG then
 				if SymTab[gtok[T_SYM]][S_SCOPE] = SC_EXPORT then
 				-- we've already issued an export warning, don't need to add this one
@@ -827,7 +825,7 @@ ifdef STDDEBUG then
 				end if
 end ifdef
 				symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included",
-					{ name_ext(file_name[current_file_no]), line_number,
+					{ name_ext(file_name[scanning_file]), line_number,
 					name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])}),{word}}
 		end if
 		return gtok
@@ -849,6 +847,7 @@ end ifdef
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
+
 	if length( scope_stack ) then
 		scoped_vars = append( scoped_vars, { scope_stack[$], tok[T_SYM] } )
 	end if
@@ -860,7 +859,7 @@ global procedure Hide(symtab_index s)
 -- remove the visibility of a symbol
 -- by deleting it from its hash chain
 	symtab_index prev, p
-
+	
 	p = buckets[SymTab[s][S_HASHVAL]]
 	prev = 0
 	while p != s and p != 0 do

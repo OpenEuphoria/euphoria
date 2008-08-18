@@ -680,6 +680,24 @@ procedure MissingArgs(symtab_index subsym)
 	CompileErr(msg)
 end procedure
 
+procedure Parse_default_arg( symtab_index subsym, integer arg )
+	symtab_index param = subsym
+	
+	for i = 1 to arg do
+		param = SymTab[param][S_NEXT]
+	end for
+	
+	if atom(SymTab[param][S_CODE]) then  -- but no default set
+		CompileErr(sprintf("Argument %d of %s (%s) is defaulted, but has no default value",
+			{arg, SymTab[subsym][S_NAME], SymTab[param][S_NAME]}))
+	end if
+	
+	start_playback(SymTab[param][S_CODE] )
+	call_proc(forward_expr, {})
+	
+end procedure
+parse_arg_rid = routine_id("Parse_default_arg")
+
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call
 	integer n, fda, lnda
@@ -788,6 +806,163 @@ procedure ParseArgs(symtab_index subsym)
 	restore_parseargs_states()
 end procedure
 
+procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
+	integer args = 0
+	op_info1 = tok[T_SYM]
+	
+	remove_symbol( op_info1 )
+	while 1 do
+		tok = next_token()
+		integer id = tok[T_ID]
+		
+		switch id do
+			case COMMA:
+				emit_opnd( 0 ) -- clean this up later
+				args += 1
+				break
+			case RIGHT_ROUND:
+				exit
+			case else
+				putback( tok )
+				call_proc( forward_expr, {} )
+				args += 1
+		end switch
+	end while
+	integer fc_pc = length( Code ) + 1
+	emit_opnd( args )
+	
+	emit_op( opcode )
+	if not TRANSLATE then
+		if OpTrace then
+			emit_op(UPDATE_GLOBALS)
+		end if
+	end if
+end procedure
+
+procedure Function_call( token tok )
+	token tok2, tok3
+	integer id, n, scope, opcode, e
+	integer save_factors, save_lhs_subs_level
+	symtab_index sym
+
+	id = tok[T_ID]
+	if id = FUNC or id = TYPE then
+		-- to warn if not in include tree
+		UndefinedVar( tok[T_SYM] )
+	end if
+	
+	e = SymTab[tok[T_SYM]][S_EFFECT]
+	if e then
+		-- the routine we are calling has side-effects
+		if e = E_ALL_EFFECT or tok[T_SYM] > left_sym then
+			-- it can access the LHS var (it uses indirect calls or comes later)
+			side_effect_calls = or_bits(side_effect_calls, e)
+		end if
+
+		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
+											   e)
+
+		if short_circuit > 0 and short_circuit_B and
+				  find(id, {FUNC, QUALIFIED_FUNC}) then
+			Warning(sprintf("%.99s:%d - call to %%s() might be short-circuited",
+					{file_name[current_file_no], line_number}),
+					short_circuit_warning_flag, {SymTab[tok[T_SYM]][S_NAME]})
+		end if
+	end if
+	tok_match(LEFT_ROUND)
+	scope = SymTab[tok[T_SYM]][S_SCOPE]
+	opcode = SymTab[tok[T_SYM]][S_OPCODE] 
+	--if equal(SymTab[tok[T_SYM]][S_NAME],"object") then
+	if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
+		tok2 = next_token()
+		if tok2[T_ID] = VARIABLE or tok2[T_ID] = QUALIFIED_VARIABLE then
+			tok3 = next_token()
+			if tok3[T_ID] = RIGHT_ROUND then
+				-- what we are looking for
+				sym = tok2[T_SYM]
+				UndefinedVar(sym)
+
+				SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
+
+				-- don't emit an INIT_CHECK, so object() can see if it is NOVALUE or not
+				emit_opnd(sym)
+			elsif tok3[T_ID] = COMMA then
+				-- give a sane error message
+				WrongNumberArgs(tok[T_SYM], "")
+			else
+				-- since we can only put back
+				-- one token, and we already took
+				-- two, we need to manually do the
+				-- parse args ourselves.
+				-- The only possible valid case is
+				-- a variable followed by a slice
+				sym = tok2[T_SYM]
+				UndefinedVar(sym)
+
+				SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
+
+				InitCheck(sym, TRUE)
+				emit_opnd(sym)
+
+				if sym = left_sym then
+					lhs_subs_level = 0
+					-- start counting subscripts
+				end if
+
+				--short_circuit -= 1
+				tok2 = tok3
+				current_sequence = append(current_sequence, sym)
+				while tok2[T_ID] = LEFT_SQUARE do
+						if lhs_subs_level >= 0 then
+						lhs_subs_level += 1
+					end if
+					save_factors = factors
+					save_lhs_subs_level = lhs_subs_level
+					call_proc(forward_expr, {})
+					tok2 = next_token()
+					if tok2[T_ID] = SLICE then
+						call_proc(forward_expr, {})
+						emit_op(RHS_SLICE)
+						tok_match(RIGHT_SQUARE)
+						tok2 = next_token()
+						exit
+					else
+						putback(tok2)
+						tok_match(RIGHT_SQUARE)
+						current_sequence = current_sequence[1..$-1]
+						emit_op(RHS_SUBS)
+						-- current_sequence will be updated
+					end if
+					factors = save_factors
+					lhs_subs_level = save_lhs_subs_level
+						tok2 = next_token()
+				end while
+				current_sequence = current_sequence[1..$-1]
+				putback(tok2)
+				--short_circuit += 1
+				tok_match(RIGHT_ROUND)
+
+			end if
+		else
+			putback(tok2)
+			ParseArgs(tok[T_SYM])
+		end if
+	else
+		ParseArgs(tok[T_SYM])
+	end if
+	if scope = SC_PREDEF then
+		emit_op(opcode)
+	else
+		op_info1 = tok[T_SYM]
+		emit_op(PROC)
+		if not TRANSLATE then
+			if OpTrace then
+				emit_op(UPDATE_GLOBALS)
+			end if
+		end if
+	end if
+end procedure
+
 procedure Factor()
 -- parse a factor in an expression
 	token tok, tok2, tok3
@@ -802,193 +977,101 @@ procedure Factor()
 		tok = read_recorded_token(tok[T_SYM])
 		id = tok[T_ID]
 	end if
-	if id = VARIABLE or id = QUALIFIED_VARIABLE then
-		sym = tok[T_SYM]
-		UndefinedVar(sym)
-
-		SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
-
-		InitCheck(sym, TRUE)
-		emit_opnd(sym)
-
-		if sym = left_sym then
-			lhs_subs_level = 0 -- start counting subscripts
-		end if
-
-		short_circuit -= 1
-		tok = next_token()
-		current_sequence = append(current_sequence, sym)
-		while tok[T_ID] = LEFT_SQUARE do
-			if lhs_subs_level >= 0 then
-				lhs_subs_level += 1
+	switch id label "factor" do
+		case VARIABLE:
+		case QUALIFIED_VARIABLE:
+		
+			sym = tok[T_SYM]
+			if SymTab[sym][S_SCOPE] = SC_UNDEFINED then
+				token forward = next_token()
+				if forward[T_ID] = LEFT_ROUND then
+					Forward_call( tok, FUNC_FORWARD )
+					break "factor"
+				end if
 			end if
-			save_factors = factors
-			save_lhs_subs_level = lhs_subs_level
-			call_proc(forward_expr, {})
+			UndefinedVar(sym)
+
+			SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
+
+			InitCheck(sym, TRUE)
+			emit_opnd(sym)
+
+			if sym = left_sym then
+				lhs_subs_level = 0 -- start counting subscripts
+			end if
+
+			short_circuit -= 1
 			tok = next_token()
-			if tok[T_ID] = SLICE then
+			current_sequence = append(current_sequence, sym)
+			while tok[T_ID] = LEFT_SQUARE do
+				if lhs_subs_level >= 0 then
+					lhs_subs_level += 1
+				end if
+				save_factors = factors
+				save_lhs_subs_level = lhs_subs_level
 				call_proc(forward_expr, {})
-				emit_op(RHS_SLICE)
-				tok_match(RIGHT_SQUARE)
 				tok = next_token()
-				exit
-			else
-				putback(tok)
-				tok_match(RIGHT_SQUARE)
-				current_sequence = current_sequence[1..$-1]
-				emit_op(RHS_SUBS) -- current_sequence will be updated
-			end if
-			factors = save_factors
-			lhs_subs_level = save_lhs_subs_level
-			tok = next_token()
-		end while
-		current_sequence = current_sequence[1..$-1]
-		putback(tok)
-		short_circuit += 1
-
-	elsif id = DOLLAR then
-		if length(current_sequence) then
-			emit_op(DOLLAR)
-		else
-			CompileErr("'$' must only appear between '[' and ']'")
-		end if
-
-	elsif id = ATOM then
-		emit_opnd(tok[T_SYM])
-
-	elsif id = LEFT_BRACE then
-		n = Expr_list()
-		tok_match(RIGHT_BRACE)
-		op_info1 = n
-		emit_op(RIGHT_BRACE_N)
-
-	elsif id = STRING then
-		emit_opnd(tok[T_SYM])
-
-	elsif id = LEFT_ROUND then
-		call_proc(forward_expr, {})
-		tok_match(RIGHT_ROUND)
-
-	elsif find(id, {FUNC, TYPE, QUALIFIED_FUNC, QUALIFIED_TYPE}) then
-		if id = FUNC or id = TYPE then
-			-- to warn if not in include tree
-			UndefinedVar( tok[T_SYM] )
-		end if
-		e = SymTab[tok[T_SYM]][S_EFFECT]
-		if e then
-			-- the routine we are calling has side-effects
-			if e = E_ALL_EFFECT or tok[T_SYM] > left_sym then
-				-- it can access the LHS var (it uses indirect calls or comes later)
-				side_effect_calls = or_bits(side_effect_calls, e)
-			end if
-
-			SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
-												   e)
-
-			if short_circuit > 0 and short_circuit_B and
-					  find(id, {FUNC, QUALIFIED_FUNC}) then
-				Warning(sprintf("%.99s:%d - call to %%s() might be short-circuited",
-						{file_name[current_file_no], line_number}),
-				 		short_circuit_warning_flag, {SymTab[tok[T_SYM]][S_NAME]})
-			end if
-		end if
-		tok_match(LEFT_ROUND)
-		scope = SymTab[tok[T_SYM]][S_SCOPE]
-		opcode = SymTab[tok[T_SYM]][S_OPCODE] 
-		--if equal(SymTab[tok[T_SYM]][S_NAME],"object") then
-		if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
-			tok2 = next_token()
-			if tok2[T_ID] = VARIABLE or tok2[T_ID] = QUALIFIED_VARIABLE then
-				tok3 = next_token()
-				if tok3[T_ID] = RIGHT_ROUND then
-					-- what we are looking for
-					sym = tok2[T_SYM]
-					UndefinedVar(sym)
-
-					SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
-
-					-- don't emit an INIT_CHECK, so object() can see if it is NOVALUE or not
-					emit_opnd(sym)
-				elsif tok3[T_ID] = COMMA then
-					-- give a sane error message
-					WrongNumberArgs(tok[T_SYM], "")
+				if tok[T_ID] = SLICE then
+					call_proc(forward_expr, {})
+					emit_op(RHS_SLICE)
+					tok_match(RIGHT_SQUARE)
+					tok = next_token()
+					exit
 				else
-					-- since we can only put back
-					-- one token, and we already took
-					-- two, we need to manually do the
-					-- parse args ourselves.
-					-- The only possible valid case is
-					-- a variable followed by a slice
-					sym = tok2[T_SYM]
-					UndefinedVar(sym)
-
-					SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
-
-					InitCheck(sym, TRUE)
-					emit_opnd(sym)
-
-					if sym = left_sym then
-						lhs_subs_level = 0
-						-- start counting subscripts
-					end if
-
-					--short_circuit -= 1
-					tok2 = tok3
-					current_sequence = append(current_sequence, sym)
-					while tok2[T_ID] = LEFT_SQUARE do
-				       		if lhs_subs_level >= 0 then
-							lhs_subs_level += 1
-						end if
-						save_factors = factors
-						save_lhs_subs_level = lhs_subs_level
-						call_proc(forward_expr, {})
-						tok2 = next_token()
-						if tok2[T_ID] = SLICE then
-							call_proc(forward_expr, {})
-							emit_op(RHS_SLICE)
-							tok_match(RIGHT_SQUARE)
-							tok2 = next_token()
-							exit
-						else
-							putback(tok2)
-							tok_match(RIGHT_SQUARE)
-							current_sequence = current_sequence[1..$-1]
-							emit_op(RHS_SUBS)
-							-- current_sequence will be updated
-						end if
-						factors = save_factors
-						lhs_subs_level = save_lhs_subs_level
-				       		tok2 = next_token()
-					end while
+					putback(tok)
+					tok_match(RIGHT_SQUARE)
 					current_sequence = current_sequence[1..$-1]
-					putback(tok2)
-					--short_circuit += 1
-					tok_match(RIGHT_ROUND)
-
+					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
+				factors = save_factors
+				lhs_subs_level = save_lhs_subs_level
+				tok = next_token()
+			end while
+			current_sequence = current_sequence[1..$-1]
+			putback(tok)
+			short_circuit += 1
+			break
+			
+		case DOLLAR:
+			if length(current_sequence) then
+				emit_op(DOLLAR)
 			else
-				putback(tok2)
-				ParseArgs(tok[T_SYM])
+				CompileErr("'$' must only appear between '[' and ']'")
 			end if
-		else
-			ParseArgs(tok[T_SYM])
-		end if
-		if scope = SC_PREDEF then
-			emit_op(opcode)
-		else
-			op_info1 = tok[T_SYM]
-			emit_op(PROC)
-			if not TRANSLATE then
-				if OpTrace then
-					emit_op(UPDATE_GLOBALS)
-				end if
-			end if
-		end if
-	else
-		CompileErr(sprintf(
-				   "Syntax error - expected to see an expression, not %s",
-				   {LexName(id)}))
-	end if
+			break
+			
+		case ATOM:
+			emit_opnd(tok[T_SYM])
+			break
+			
+		case LEFT_BRACE:
+			n = Expr_list()
+			tok_match(RIGHT_BRACE)
+			op_info1 = n
+			emit_op(RIGHT_BRACE_N)
+			break
+			
+		case STRING:
+			emit_opnd(tok[T_SYM])
+			break
+
+		case LEFT_ROUND:
+			call_proc(forward_expr, {})
+			tok_match(RIGHT_ROUND)
+			break
+		
+		case FUNC:
+		case TYPE:
+		case QUALIFIED_FUNC:
+		case QUALIFIED_TYPE:
+			Function_call( tok )
+			break
+		
+		case else
+			CompileErr(sprintf(
+					   "Syntax error - expected to see an expression, not %s",
+					   {LexName(id)}))
+	end switch
 end procedure
 
 procedure UFactor()
@@ -2620,6 +2703,7 @@ procedure Private_declaration(symtab_index type_sym)
 	putback(tok)
 end procedure
 
+
 procedure Procedure_call(token tok)
 -- parse a procedure call statement
 	integer n, scope, opcode
@@ -2716,6 +2800,13 @@ procedure Statement_list()
 		id = tok[T_ID]
 
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
+			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+				token forward = next_token()
+				if forward[T_ID] = LEFT_ROUND then
+					Forward_call( tok )
+					continue
+				end if
+			end if
 			StartSourceLine(TRUE)
 			Assignment(tok)
 
@@ -2836,7 +2927,6 @@ procedure SubProg(integer prog_type, integer scope)
 	end if
 	p = prog_name[T_SYM]
 	DefinedYet(p)
-
 	if prog_type = PROCEDURE then
 		pt = PROC
 	elsif prog_type = FUNCTION then
@@ -3203,6 +3293,13 @@ global procedure real_parser(integer nested)
 		tok = next_token()
 		id = tok[T_ID]
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
+			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+				token forward = next_token()
+				if forward[T_ID] = LEFT_ROUND then
+					Forward_call( tok )
+					continue
+				end if
+			end if
 			StartSourceLine(TRUE)
 			Assignment(tok)
 			ExecCommand()
@@ -3419,6 +3516,7 @@ end procedure
 
 global procedure parser()
 	real_parser(0)
+	Resolve_forward_references( 1 )
 end procedure
 
 global procedure nested_parser()

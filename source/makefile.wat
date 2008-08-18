@@ -157,6 +157,7 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scientific.obj &
 	.\$(OBJDIR)\scanne_0.obj &
+	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &
@@ -794,6 +795,9 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\scanne_0.obj :  .MULTIPLE $(OBJDIR)\scanne_0.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
+.\$(OBJDIR)\scanne_1.obj :  .MULTIPLE $(OBJDIR)\scanne_1.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+	
 .\$(OBJDIR)\scientific.obj :  .MULTIPLE ./$(OBJDIR)\scientific.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 

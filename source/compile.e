@@ -1978,6 +1978,10 @@ procedure opSTARTLINE()
 	pc += 2
 end procedure
 
+procedure opTRANSGOTO()
+	pc = Code[pc+1]
+end procedure
+
 procedure opPROC()
 -- Normal subroutine call
 -- generate code for a procedure/function call
@@ -5330,7 +5334,7 @@ global procedure init_opcodes()
 		elsif find(name, {"ENDFOR_INT_UP", "ENDFOR_UP", "SC2_NULL",
 						  "ENDFOR_DOWN", "ENDFOR_INT_DOWN1", "ASSIGN_SUBS2", "PLATFORM",
 						  "ENDFOR_INT_DOWN",
-						  "END_PARAM_CHECK"}) then
+						  "END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD"}) then
 			-- never emitted
 			name = "INTERNAL_ERROR"
 		end if

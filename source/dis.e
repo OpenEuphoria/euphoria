@@ -153,7 +153,7 @@ procedure pnonary()
 	il( sprintf( "%s:", {opnames[Code[pc]]}), 0)
 	pc += 1
 end procedure
-with trace
+
 procedure opSTARTLINE()
 -- Start of a line. Use for diagnostics.
 	object line
@@ -262,6 +262,7 @@ function find_line(symtab_index sub, integer pc)
 	return slist[gline][LOCAL_FILE_NO]
 end function
 
+
 constant BLANK_MAP = map:new()
 procedure opPROC()  -- Normal subroutine call
     integer n, arg, sub, top
@@ -298,9 +299,9 @@ procedure opPROC()  -- Normal subroutine call
 
     if SymTab[sub][S_TOKEN] != PROC then
     	dsm[1..4] = "FUNC"
-    	dsm &= sprintf( " => %s", {name_or_literal(Code[pc + n + 2])})
+		dsm &= sprintf( " => %s", {name_or_literal(Code[pc + n + 2])})
 		il( dsm, n + 2 )
-	    pc += n + 3
+		pc += n + 3
 	else
 		il( dsm, n + 1 )
 	    pc += n + 2
@@ -1394,7 +1395,7 @@ procedure InitBackEnd( object ignore )
 			name = "ASSIGN_SUBS"
 		elsif equal(name, "ASSIGN_I") then
 			name = "ASSIGN"
-		elsif find(name, {"EXIT", "ENDWHILE", "RETRY", "GOTO"}) then
+		elsif find(name, {"EXIT", "ENDWHILE", "RETRY", "GOTO", "TRANSGOTO"}) then
 			name = "ELSE"
 		elsif equal(name, "PLUS1_I") then
 			name = "PLUS1"      
@@ -1418,7 +1419,7 @@ procedure InitBackEnd( object ignore )
 		elsif equal(name, "SC2_AND") then
 			name = "SC2_OR"
 		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
-				"END_PARAM_CHECK" }) then 
+				"END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD" }) then 
 			-- never emitted
 			name = "NOP2" 
 		elsif equal(name, "GREATER_IFW_I") then

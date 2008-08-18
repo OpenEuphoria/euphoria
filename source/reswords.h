@@ -207,7 +207,10 @@
 #define SWITCH_SPI          194
 #define SWITCH_I            195
 #define HASH                196
-#define MAX_OPCODE          196
+#define PROC_FORWARD        197
+#define FUNC_FORWARD        198
+#define TRANSGOTO           199
+#define MAX_OPCODE          199
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]
