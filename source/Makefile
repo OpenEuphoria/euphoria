@@ -62,6 +62,11 @@ ifeq "$(EMINGW)" "1"
 	EEXU=exw.exe
 	EEXUC=exwc.exe
 	EECUA=ecw.a
+	ifeq "$(MANAGED_MEM)" "1"
+		MEM_FLAGS=
+	else
+		MEM_FLAGS=-DESIMPLE_MALLOC
+	endif
 else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
@@ -72,6 +77,7 @@ else
 	EECU=ecu
 	EEXU=exu
 	EECUA=ecu.a
+	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 
 ifdef EDEBUG
@@ -79,12 +85,6 @@ DEBUG_FLAGS=-g3 -O0
 CALLC_DEBUG=-g3
 else
 DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
-endif
-
-ifeq "$(MANAGED_MEM)" "1"
-MEM_FLAGS=
-else
-MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 
 ifeq  "$(ELINUX)" "1"
