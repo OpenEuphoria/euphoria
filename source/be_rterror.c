@@ -13,7 +13,7 @@
 #include <setjmp.h>
 
 #ifndef EUNIX
-#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP)
+#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
 #include <graph.h>
 #include <bios.h>
 #endif

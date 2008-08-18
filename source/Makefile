@@ -35,17 +35,6 @@ ifdef EBACKEND
 BACKEND_FLAGS = -DBACKEND
 endif
 
-ifdef EDEBUG
-DEBUG_FLAGS=-g3 -O0
-CALLC_DEBUG=-g3
-else
-DEBUG_FLAGS=-fomit-frame-pointer -O2
-endif
-
-ifeq  "$(ELINUX)" "1"
-EBSDFLAG=-DELINUX
-endif
-
 ifeq  "$(EBSD)" "1"
   LDLFLAG=
   EBSDFLAG=-DEBSD -DEBSD62
@@ -59,11 +48,47 @@ else
   SEDFLAG=-ri
 endif
 
+ifeq "$(EMINGW)" "1"
+	EOSTYPE=-DEWINDOWS
+	EBSDFLAG=-DEMINGW
+	LDLFLAG=
+	SEDFLAG=-ri
+	EOSFLAGS=-mno-cygwin -mwindows
+	EOSFLAGSCONSOLE=-mno-cygwin
+	EOSMING=-ffast-math -O3 -Os
+	EBACKENDU=backendw
+	EBACKENDC=backendc
+	EECU=ecw
+	EEXU=exw
+	EECUA=ecw.a
+else
+	EOSTYPE=-DEUNIX
+	EOSFLAGS=
+	EOSFLAGSCONSOLE=
+	EOSMING=-O2
+	EBACKENDU=backendu
+	EBACKENDC=backendu
+	EECU=ecu
+	EEXU=exu
+	EECUA=ecu.a
+endif
+
+ifdef EDEBUG
+DEBUG_FLAGS=-g3 -O0
+CALLC_DEBUG=-g3
+else
+DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
+endif
+
+ifeq  "$(ELINUX)" "1"
+EBSDFLAG=-DELINUX
+endif
+
 ifeq "$(EU3)" "1"
-EXE=export EUINC=$(PWD)/../include && exu
+EXE=export EUINC=$(PWD)/../include && $(EEXU)
 INCDIR=
 else
-EXE=exu
+EXE=$(EEXU)
 INCDIR=-i ../../include
 endif
 
@@ -72,8 +97,8 @@ TARGETPLAT=-plat $(PLAT)
 endif
 
 CC = gcc
-FE_FLAGS =  -c -w -fsigned-char -O2 -ffast-math $(DEBUG_FLAGS) -I../ -I../../include/
-BE_FLAGS =  -c -w -DEUNIX $(EBSDFLAG) $(RUNTIME_FLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
+FE_FLAGS =  -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/
+BE_FLAGS =  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -I./pcre/ -fsigned-char -ffast-math $(DEBUG_FLAGS) -DESIMPLE_MALLOC
 
 PCRE=./pcre/.libs/libpcre.a
 
@@ -288,15 +313,15 @@ clean :
 	do \
 	    rm "$$d"/*.o; \
 	done
-	-rm exu ecu ecu.a backendu $(DEB_SOURCE_DIR).tar.gz
+	-rm $(EEXU) $(EECU) $(EECUA) $(EBACKENDU) $(DEB_SOURCE_DIR).tar.gz
 	cd pcre && $(MAKE) clean
 
 .PHONY : clean distclean all
 
 library : builddirs $(PCRE)
-	$(MAKE) ecu.a OBJDIR=libobj ERUNTIME=1
-ecu.a : $(EU_LIB_OBJECTS)
-	ar -rc ecu.a $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
+	$(MAKE) $(EECUA) OBJDIR=libobj ERUNTIME=1
+$(EECUA) : $(EU_LIB_OBJECTS)
+	ar -rc $(EECUA) $(PCRE_OBJECTS) $(EU_LIB_OBJECTS)
 	echo $(MAKEARGS)
 
 builddirs : svn_rev
@@ -309,10 +334,10 @@ svn_rev :
 	-$(EXE) -i ../include revget.ex .svn/entries
 
 interpreter : builddirs $(PCRE)
-	$(MAKE) exu OBJDIR=intobj EBSD=$(EBSD)
+	$(MAKE) $(EEXU) OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs $(PCRE)
-	$(MAKE) ecu OBJDIR=transobj EBSD=$(EBSD)
+	$(MAKE) $(EECU) OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
 .PHONY : interpreter
@@ -355,37 +380,39 @@ source-tarball : source
 .PHONY : backendsource
 .PHONY : source
 
-exu :  EU_TARGET = int.ex
-exu :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
-exu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-exu :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@echo making exu
+$(EEXU) :  EU_TARGET = int.ex
+$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+$(EEXU) :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EEXU) :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@echo making $(EEXU)
 	@echo $(OS)
-	$(CC) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o exu
+	$(CC) $(EOSFLAGS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXU)
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EEXU)c; fi
 
-ecu :  OBJDIR = transobj
-ecu :  EU_TARGET = ec.ex
-ecu :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
-ecu :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-ecu : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@echo making ecu
-	$(CC) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o ecu
+$(EECU) :  OBJDIR = transobj
+$(EECU) :  EU_TARGET = ec.ex
+$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
+$(EECU) :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EECU) : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@echo making $(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(PCRE) $(LDLFLAG) -o $(EECU)
 
 backend : builddirs
-	$(MAKE) backendu EBACKEND=1 OBJDIR=backobj
+	$(MAKE) $(EBACKENDU) EBACKEND=1 OBJDIR=backobj
 
-backendu : OBJDIR = backobj
-backendu : EU_TARGET = backend.ex
-backendu : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
-backendu : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-backendu : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@echo making backendu $(OBJDIR)
-	$(CC) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o backendu
+$(EBACKENDU) : OBJDIR = backobj
+$(EBACKENDU) : EU_TARGET = backend.ex
+$(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
+$(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@echo making BACKENDU $(OBJDIR)
+	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o $(EBACKENDU)
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PCRE) -lm $(LDLFLAG) -o $(EBACKENDC); fi
 
 test : interpreter translator library
 	export EUCOMPILEDIR=../ && \
 	    cd ../tests/ && \
-	     ../source/exu -i ../include ../bin/eutest.ex -exe ../source/exu -ec ../source/ecu -lib ../source/ecu.a
+	     ../source/$(EEXU) -i ../include ../bin/eutest.ex -exe ../source/$(EEXU) -ec ../source/$(EECU) -lib ../source/$(EECUA)
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
@@ -402,8 +429,8 @@ install :
 	mkdir -p $(DESTDIR)/usr/bin 
 	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/include/euphoria
-	install exu ecu backendu eubind eushroud $(DESTDIR)/usr/bin
-	install ecu.a $(DESTDIR)/usr/lib
+	install $(EEXU) $(EECU) $(EBACKENDU) eubind eushroud $(DESTDIR)/usr/bin
+	install $(EECUA) $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
@@ -431,8 +458,9 @@ install :
 	           be_*.c \
 	           *.h
 
+# This doesn't seem right. What about backendu or eushroud ?
 uninstall :
-	-rm /usr/bin/exu /usr/bin/ecu /usr/lib/ecu.a
+	-rm /usr/bin/$(EEXU) /usr/bin/$(EECU) /usr/lib/$(EECUA)
 	-rm -r /usr/share/euphoria
 	-rm -r /usr/share/doc/euphoria
 	-rm -r /etc/euphoria
@@ -465,8 +493,8 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o
 
 $(OBJDIR)/back/be_callc.o : ./be_callc.c
-	$(CC) -c -w -DEUNIX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.o
-	$(CC) -S -w -DEUNIX $(EBSDFLAG) -fsigned-char -O2 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.s
+	$(CC) -c -w $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.o
+	$(CC) -S -w $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) be_callc.c -o$*.s
 
 $(OBJDIR)/back/be_inline.o : ./be_inline.c
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o

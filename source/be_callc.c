@@ -50,7 +50,7 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 /* Local variables */
 /*******************/
 
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 #define push() asm("movl %0,%%ecx; pushl (%%ecx);" : /* no out */ : "r"(last_offset) : "%ecx" )
 #define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
 #endif  // EUNIX

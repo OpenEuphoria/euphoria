@@ -23,14 +23,14 @@
 #include <gpm.h>
 #endif
 #else
-#if !defined(ELCC) && !defined(EBORLAND)
+#if !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
 #include <bios.h>
 #endif
 #ifdef EDJGPP
 #include <go32.h>
 #include <allegro.h>
 #endif
-#if !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND)
+#if !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
 #include <graph.h>
 #endif
 #ifdef ELCC
@@ -3984,7 +3984,7 @@ int get_key(int wait)
 #endif
 
 #ifdef EWINDOWS
-#if defined(EBORLAND) || defined(ELCC)
+#if defined(EBORLAND) || defined(ELCC) || defined(EMINGW)
 		if (wait || winkbhit()) {
 			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
 			a = wingetch();
@@ -5121,7 +5121,7 @@ void UserCleanup(int status)
 static unsigned char one_line[84];
 static unsigned char *next_char_ptr = NULL;
 
-#if defined(EBORLAND) || defined(ELCC)
+#if defined(EBORLAND) || defined(ELCC) || defined(EMINGW)
 int winkbhit()
 /* kbhit for Windows GUI apps */
 {
@@ -5145,7 +5145,7 @@ int winkbhit()
 int wingetch()
 // Windows - read next char from keyboard
 {
-#if defined(ELCC) || defined(EBORLAND)
+#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
 	int c;
 
 	c = MyReadConsoleChar();

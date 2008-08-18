@@ -118,7 +118,7 @@ struct time_info {
 	long tot_ticks;
 };
 
-#if defined(EUNIX) || defined(EDJGPP) || defined(ELCC) || defined(EBORLAND)
+#if defined(EUNIX) || defined(EDJGPP) || defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
 #define KEYBUFF_SIZE 50
 #define __far
 #ifndef EBORLAND
@@ -128,14 +128,16 @@ struct time_info {
 void show_console();
 #else
 #ifndef EBORLAND
+#ifndef EMINGW
 typedef int (*FARPROC)();
 #define CALLBACK
 #define WINAPI
 #endif
 #endif
+#endif
 #define __interrupt
 #define LRESULT long
-#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP)
+#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
 #define O_TEXT 0
 #define HINSTANCE int
 #endif

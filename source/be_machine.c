@@ -104,6 +104,11 @@ END_COLOR_DEPTH_LIST
 #include <windows.h>
 #endif
 
+#ifdef EMINGW
+#include <sys/stat.h>
+#include <dirent.h>
+#endif
+
 #include "alldefs.h"
 #include "alloc.h"
 #include <signal.h>
@@ -299,6 +304,17 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned, unsigned);
 #endif
 
+#ifdef EMINGW
+#define setenv MySetEnv
+static int MySetEnv(const char *name, const char *value, const int overwrite) {
+	int len = strlen(name)+1+strlen(value)+1;
+	char * str = malloc(len);
+	if (!overwrite && (getenv(name) != NULL))
+		return 0;
+	sprintf(str, "%s=%s", name, value);
+	return putenv(str);
+}
+#endif
 
 unsigned long get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
@@ -2024,12 +2040,12 @@ object SetTColor(object x)
 	return ATOM_1;
 }
 
-#if defined(EDJGPP) || defined(ELCC)
+#if defined(EDJGPP) || defined(ELCC) || defined(EMINGW)
 // temporary
 static long colors[16];
 #endif
 
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
 static long colors[16] = {
 	_BLACK, _BLUE, _GREEN, _CYAN, 
 	_RED, _MAGENTA, _BROWN, _WHITE,
@@ -2996,7 +3012,11 @@ static object Seek(object x)
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2); 
 	if (pos == -1)
+#ifdef EMINGW
+		result = iseek(f, 0L, SEEK_END);
+#else
 		result = iiseek(f, 0L, SEEK_END);
+#endif
 #if defined(ELINUX) || defined(EWATCOM)
 	else if (!(pos > (IOFF)MAXINT || pos < (IOFF)MININT))
 		result = iiseek(f, pos, SEEK_SET);
@@ -3275,7 +3295,7 @@ unsigned short _djstat_flags =
 					_STAT_DIRSIZE | _STAT_ROOT_TIME | _STAT_WRITEBIT;
 #endif       
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 	// 3 of 3: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
@@ -3289,7 +3309,7 @@ static object Dir(object x)
 	int r;
 	struct stat stbuf;
 	struct tm *date_time;
-#ifdef EDJGPP   
+#if defined(EDJGPP) || defined(EMINGW)
 	char full_name[MAX_FILE_NAME+1+257];
 #else   
 	char full_name[MAX_FILE_NAME+1+NAME_MAX+1];
@@ -3619,7 +3639,7 @@ static object lock_file(object x)
 	}
 	if (last < first)
 		return ATOM_0;
-#if defined(ELCC)
+#if defined(ELCC) || defined(EMINGW)
 	r = 0;  // FOR NOW!
 #else
 	r = lock(fd, first, last - first + 1);
@@ -3644,7 +3664,7 @@ static object unlock_file(object x)
 	fn = *(((s1_ptr)x)->base+1);
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = ifileno(f); 
-#ifdef EUNIX   
+#ifdef EUNIX
 	flock(fd, LOCK_UN);
 #else
 	// get 2nd element of x - range - assume it's a sequence
@@ -3661,7 +3681,7 @@ static object unlock_file(object x)
 	else {
 		RTFatal("2nd argument to unlock_file must be a sequence of length 0 or 2");
 	}
-#if defined(ELCC)
+#if defined(ELCC) || defined(EMINGW)
 	/* do nothing */
 #else
 	if (last >= first)
@@ -4649,7 +4669,7 @@ object start_backend(object x)
 	fe.includes = (struct include_info *) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
 #endif  
 

@@ -24,7 +24,7 @@
 #include <go32.h>
 #include <allegro.h>
 #else
-#if !defined(ELCC) && !defined(EBORLAND)
+#if !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
 #include <graph.h>
 #endif
 #endif
@@ -373,7 +373,7 @@ static void end_of_line(int c)
 	SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
 }
 
-#if defined(ELCC) || defined(EBORLAND)
+#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
 int MyReadConsoleChar()
 // Read the next character typed by the user on the console
 {

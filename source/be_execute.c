@@ -732,6 +732,7 @@ static void do_poke4(object a, object top)
 
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
+#if !defined(EMINGW)
 #if defined(EWINDOWS) || (defined(EDOS) && defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
 // #pragma aux thread aborts; does nothing
 
@@ -787,6 +788,7 @@ void threadpc3(void);
 #define BREAK break
 #include "redef.h"
 #endif
+#endif // !defined(EMINGW)
 
 #if defined(EDOS) && defined(EWATCOM) && defined(FP_EMULATION_NEEDED)
 // WATCOM:
@@ -840,7 +842,7 @@ long wcin3pc(long x);
 #include "redef.h"
 #endif
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
@@ -959,7 +961,7 @@ void InitExecute()
 void Execute(int *);
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 int **jumptab; // initialized in do_exec() 
 #else
 /* Important! The offset below is based on the object code WATCOM 
@@ -1561,7 +1563,7 @@ void Execute(int *start_index)
 }
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 // don't use switch/case - use special jump to label feature
 #define case
 #endif 
@@ -1601,7 +1603,7 @@ void do_exec(int *start_pc)
 	s1_ptr s1,s2;
 	object *block;
 	
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
   &&L_LESS, &&L_GREATEREQ, &&L_EQUALS, &&L_NOTEQ, &&L_LESSEQ, &&L_GREATER,
@@ -1686,7 +1688,7 @@ void do_exec(int *start_pc)
 #endif
 #endif
 	if (start_pc == NULL) {
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 #ifndef INT_CODES
 		jumptab = (int **)localjumptab;
 #endif
@@ -1722,7 +1724,7 @@ void do_exec(int *start_pc)
 #else
 // threaded code
 		thread();
-#if !defined(EUNIX) && !defined(EDJGPP)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
 		switch((int)pc) {                                       
 #endif
 
@@ -4800,7 +4802,7 @@ void do_exec(int *start_pc)
 #ifdef INT_CODES
 		}
 #else
-#if !defined(EUNIX) && !defined(EDJGPP)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
 		}
 #endif
 #endif

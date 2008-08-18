@@ -30,7 +30,7 @@
 #else
 #include <sys\types.h>
 #include <sys\stat.h>
-#if !defined(ELCC) && !defined(EDJGPP)
+#if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
 #include <i86.h>
 #include <bios.h>
 #include <graph.h>
@@ -221,7 +221,7 @@ void be_init()
 #endif
 	}
 	
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 	strcpy(main_path, file_name[1]); // FOR NOW!
 #else
 	(void)_fullpath(main_path, file_name[1], PATH_MAX+1); 
