@@ -166,12 +166,12 @@ procedure rPrint(object a)
 end procedure
 
 ifdef UNIX then
-	export constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 126, 1000000000, 1}
+	public constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 126, 1000000000, 1}
 else
-	export constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 127, 1000000000, 1}
+	public constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 127, 1000000000, 1}
 end ifdef
 
-export enum
+public enum
 	DISPLAY_ASCII = 1,
 	INDENT,
 	START_COLUMN,
@@ -246,8 +246,8 @@ end procedure
 -- e.g. {0, 5} will choose "never display ASCII",
 -- plus 5-character indentation, with defaults for everything else.
 --
--- The default options can be applied using the exported constant ##PRETTY_DEFAULT##, and the
--- elements may be accessed using the following exported enum~:
+-- The default options can be applied using the public constant ##PRETTY_DEFAULT##, and the
+-- elements may be accessed using the following public enum~:
 --
 -- # DISPLAY_ASCII
 -- # INDENT
@@ -327,7 +327,7 @@ end procedure
 --
 -- See Also:
 -- [[:print]], [[:sprint]], [[:printf]], [[:sprintf]], [[:pretty_sprint]]
-export procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
+public procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 1
 	pretty_file = fn
 	pretty( x, options )
@@ -352,7 +352,7 @@ end procedure
 -- See Also:
 --   [[:pretty_print]], [[:sprint]]
 
-export function pretty_sprint(object x, sequence options = PRETTY_DEFAULT )
+public function pretty_sprint(object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 0
 	pretty( x, options )
 	return pretty_line

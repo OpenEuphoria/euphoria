@@ -45,13 +45,13 @@ constant MAX_ADDR = power(2, 32)-1
 
 -- Positive integer type
 
-export type positive_int(integer x)
+public type positive_int(integer x)
 	return x >= 1
 end type
 
 -- Machine address type
 
-export type machine_addr(atom a)
+public type machine_addr(atom a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
@@ -90,7 +90,7 @@ end type
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:call]]
 
-export function allocate(positive_int n)
+public function allocate(positive_int n)
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
 	return machine_func(M_ALLOC, n)
@@ -124,7 +124,7 @@ end function
 -- See Also:
 --     [[:allocate]], [[:free_low]]
 
-export procedure free(machine_addr addr)
+public procedure free(machine_addr addr)
 -- free the memory at address a
 	machine_proc(M_FREE, addr)
 end procedure
@@ -158,7 +158,7 @@ end procedure
 -- See Also:
 --		[[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
 
-export function allocate_string(sequence s)
+public function allocate_string(sequence s)
 	atom mem
 	
 	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
@@ -815,7 +815,7 @@ integer check_calls = 1
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
 
-export procedure register_block(atom block_addr, atom block_len)
+public procedure register_block(atom block_addr, atom block_len)
 end procedure
 
 --**
@@ -841,7 +841,7 @@ end procedure
 -- See Also:
 --   [[:register_block]], [[safe.e]]
 
-export procedure unregister_block(atom block_addr)
+public procedure unregister_block(atom block_addr)
 end procedure
 
 --**
@@ -864,6 +864,6 @@ end procedure
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
 
-export procedure check_all_blocks()
+public procedure check_all_blocks()
 end procedure
 with warning

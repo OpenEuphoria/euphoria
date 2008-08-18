@@ -16,7 +16,7 @@ constant EOF = -1
 
 integer fn, error_code
 
-export type graphics_point(sequence p)
+public type graphics_point(sequence p)
 	return length(p) = 2 and p[1] >= 0 and p[2] >= 0
 end type
 
@@ -164,7 +164,7 @@ end function
 -- code (atom) is returned instead
 --
 -- <eucode>
--- export constant
+-- public constant
 --     BMP_OPEN_FAILED = 1,
 --     BMP_UNEXPECTED_EOF = 2,
 --     BMP_UNSUPPORTED_FORMAT = 3
@@ -187,7 +187,7 @@ end function
 -- See Also: 
 --		[[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
 
-export function read_bitmap(sequence file_name)
+public function read_bitmap(sequence file_name)
 	atom Size 
 	integer Type, Xhot, Yhot, Planes, BitCount
 	atom Width, Height, Compression, OffBits, SizeHeader, 
@@ -271,7 +271,7 @@ type positive_atom(atom x)
 end type
 
 ifdef DOS32 then
-export include dos/image.e
+public include dos/image.e
 
 function DOS_scr_addr(sequence vc, text_point xy)
 -- calculate address in DOS screen memory for a given line, column
@@ -318,7 +318,7 @@ end ifdef
 -- See Also: 
 --      [[:put_screen_char]], [[:save_text_image]]
 
-export function get_screen_char(positive_atom line, positive_atom column)
+public function get_screen_char(positive_atom line, positive_atom column)
 	atom scr_addr
 	sequence vc
 	
@@ -366,7 +366,7 @@ end function
 -- See Also: 
 --   [[:get_screen_char]], [[:display_text_image]]
 
-export procedure put_screen_char(positive_atom line, positive_atom column, 
+public procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
 	atom scr_addr
 	sequence vc
@@ -424,7 +424,7 @@ end procedure
 --   [[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
 
-export procedure display_text_image(text_point xy, sequence text)
+public procedure display_text_image(text_point xy, sequence text)
 	atom scr_addr
 	integer screen_width, extra_col2, extra_lines
 	sequence vc, one_row
@@ -490,7 +490,7 @@ end procedure
 -- See Also:
 --     [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
-export function save_text_image(text_point top_left, text_point bottom_right)
+public function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
 	atom scr_addr, screen_memory
 	integer screen_width, image_width
@@ -682,7 +682,7 @@ end procedure
 --
 -- The result will be one of the following codes: 
 -- <eucode>
--- export constant
+-- public constant
 --     BMP_SUCCESS = 0,
 --     BMP_OPEN_FAILED = 1,
 --     BMP_INVALID_MODE = 4 -- invalid graphics mode
@@ -706,7 +706,7 @@ end procedure
 -- See Also:
 --   [[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
 
-export function save_bitmap(two_seq palette_n_image, sequence file_name)
+public function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
 	integer numColors
 
@@ -751,7 +751,7 @@ ifdef DOS32 then
 -- Comments:
 -- The result will be one of the following codes:
 -- <eucode>
--- export constant
+-- public constant
 --     BMP_SUCCESS = 0,
 --     BMP_OPEN_FAILED = 1,
 --     BMP_INVALID_MODE = 4 -- invalid graphics mode
@@ -778,7 +778,7 @@ ifdef DOS32 then
 -- See Also:
 --   [[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
 
-export function save_screen(region r, sequence file_name)
+public function save_screen(region r, sequence file_name)
 	sequence vc
 	integer numColors
 

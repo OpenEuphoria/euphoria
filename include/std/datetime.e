@@ -259,30 +259,30 @@ end function
 --**
 -- Names of the months
 
-export sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
+public sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
 	"August", "September", "October", "November", "December" }
 
 --**
 -- Abbreviations of month names
 
-export sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+public sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
 	"Aug", "Sep", "Oct", "Nov", "Dec" }
 
 --**
 -- Names of the days
 
-export sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+public sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 	"Saturday" }
 
 --**
 -- Abbreviations of day names
 
-export sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+public sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 
 --**
 -- AM/PM
 
-export sequence ampm = { "AM", "PM" }
+public sequence ampm = { "AM", "PM" }
 
 --****
 -- === Constants
@@ -297,7 +297,7 @@ export sequence ampm = { "AM", "PM" }
 -- * MINUTE
 -- * SECOND
 
-export enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
+public enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 
 --**
 -- Intervals
@@ -310,7 +310,7 @@ export enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 -- * SECONDS
 -- * DATE
 
-export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
+public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 
 --****
 -- === Types
@@ -327,7 +327,7 @@ export enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- those values are in range. **Note:** All components must be integers except
 -- seconds, as those can also be floating point values.
 
-export type datetime(object o)
+public type datetime(object o)
 	if atom(o) then return 0 end if
 
 	if length(o) != 6 then return 0 end if
@@ -479,7 +479,7 @@ end type
 -- See Also:
 --     [[:date]], [[:from_unix]], [[:now]], [[:new]]
 
-export function from_date(sequence src)
+public function from_date(sequence src)
 	return {src[YEAR]+1900, src[MONTH], src[DAY], src[HOUR], src[MINUTE], src[SECOND]}
 end function
 
@@ -498,7 +498,7 @@ end function
 -- See Also:
 --     [[:from_date]], [[:from_unix]], [[:new]], [[:new_time]], [[:now_gmt]]
 
-export function now()
+public function now()
 	return from_date(date())
 end function
 
@@ -517,7 +517,7 @@ end function
 -- See Also:
 -- [[:now]]
 
-export function now_gmt()
+public function now_gmt()
    sequence t1 = gmtime(time())
    return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
 end function
@@ -544,7 +544,7 @@ end function
 -- See Also:
 --     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
 
-export function new(integer year=0, integer month=0, integer day=0,
+public function new(integer year=0, integer month=0, integer day=0,
 	                integer hour=0, integer minute=0, atom second=0)
 	datetime d
 	d = {year, month, day, hour, minute, second}
@@ -574,7 +574,7 @@ end function
 -- See Also:
 --     [[:from_date]], [[:from_unix]], [[:now]], [[:new]]
 
-export function new_time(integer hour, integer minute, atom second)
+public function new_time(integer hour, integer minute, atom second)
 	return new(0, 0, 0, hour, minute, second)
 end function
 
@@ -593,7 +593,7 @@ end function
 -- day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
 -- </eucode>
 
-export function dow(datetime dt)
+public function dow(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
@@ -617,7 +617,7 @@ end function
 -- day = doy(d) -- day is 123
 -- </eucode>
 
-export function doy(datetime dt)
+public function doy(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
 end function
 
@@ -640,7 +640,7 @@ end function
 -- See Also:
 --     [[:from_unix]], [[:format]]
 
-export function to_unix(datetime dt)
+public function to_unix(datetime dt)
 		return datetimeToSeconds(dt) - EPOCH_1970
 end function
 
@@ -662,14 +662,14 @@ end function
 -- See Also:
 --     [[:to_unix]], [[:from_date]], [[:now]], [[:new]]
 
-export function from_unix(atom unix)
+public function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
 -- TODO: create, test, document
 -- datetime parse(wstring string)
 -- parse the string and returns the datetime
-export function parse(wstring string)
+public function parse(wstring string)
 	return 0
 end function
 
@@ -724,7 +724,7 @@ end function
 -- See Also:
 --     [[:to_unix]]
 
-export function format(datetime d, wstring format)
+public function format(datetime d, wstring format)
 	integer in_fmt, ch, tmp
 	sequence res
 
@@ -853,7 +853,7 @@ end function
 -- See Also:
 --     [[:subtract]], [[:diff]]
 
-export function add(datetime dt, object qty, integer interval)
+public function add(datetime dt, object qty, integer interval)
 	integer inc
 
 	if interval = SECONDS then
@@ -927,7 +927,7 @@ end function
 -- See Also:
 --     [[:add]], [[:diff]]
 
-export function subtract(datetime dt, atom qty, integer interval)
+public function subtract(datetime dt, atom qty, integer interval)
 	return add(dt, -(qty), interval)
 end function
 
@@ -956,6 +956,6 @@ end function
 -- See Also:
 --    [[:add]], [[:subtract]]
 
-export function diff(datetime dt1, datetime dt2)
+public function diff(datetime dt1, datetime dt2)
 		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function

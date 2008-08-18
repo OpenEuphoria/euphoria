@@ -15,7 +15,7 @@ ifdef !DOS32 then
 end ifdef
 
 ifdef DOS32 then
-	export include dos\memory.e
+	public include dos\memory.e
 	include dos\interrup.e
 end ifdef
 
@@ -30,14 +30,14 @@ constant
 -- === Operating System Constants
 --
 
-export constant
+public constant
 	DOS32	= 1, -- ex.exe
 	WIN32	= 2, -- exw.exe
 	LINUX	= 3, -- exu
 	FREEBSD = 3, -- exu
 	OSX		= 4  -- exu
 
-export constant
+public constant
 	NO_PARAMETER = 0,
 	HAS_PARAMETER = 1,
 	NO_CASE = 0,
@@ -193,7 +193,7 @@ enum
 -- -q, ~--silent		Suppresses any output to console
 -- -r x				Sets how many lines the console should display
 
-export procedure show_help(sequence opts, integer add_help_rid=-1)
+public procedure show_help(sequence opts, integer add_help_rid=-1)
 	integer pad_size, this_size
 	sequence cmds, cmd
 
@@ -357,7 +357,7 @@ end function
 -- See Also:
 --     [[:show_help]], [[command_line]]
 
-export function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds = command_line())
+public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds = command_line())
 	integer idx, opts_done
 	sequence cmd, extras
 	sequence param
@@ -463,7 +463,7 @@ constant M_INSTANCE = 55
 -- On //Windows// the ##hInstance## can be passed around to various
 -- //Windows// routines.
 
-export function instance()
+public function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
 
@@ -484,7 +484,7 @@ end ifdef
 --    A **sequence**, starting with the OS name. If identification fails, returned string
 --    is "". Extra information depends on the OS (details unavailable).
 
-export function uname()
+public function uname()
 	ifdef WIN32 then
 		atom buf
 		sequence sbuf
@@ -597,7 +597,7 @@ end function
 -- Returns:
 -- An **integer**, 1 if host system is a newer Windows (NT/2K/XP/Vista), else 0.
 
-export function is_win_nt()
+public function is_win_nt()
 	ifdef WIN32 then
 		sequence s
 		s = uname()
@@ -652,7 +652,7 @@ end function
 -- See Also:
 --   [[:getenv]], [[:unsetenv]]
 
-export function setenv(sequence name, sequence val, integer overwrite=1)
+public function setenv(sequence name, sequence val, integer overwrite=1)
 	return machine_func(M_SET_ENV, {name, val, overwrite})
 end function
 
@@ -670,7 +670,7 @@ end function
 -- See Also:
 --   [[:setenv]], [[:getenv]]
 
-export function unsetenv(sequence env)
+public function unsetenv(sequence env)
 	return machine_func(M_UNSET_ENV, {env})
 end function
 
@@ -882,7 +882,7 @@ end function
 -- See Also:
 --     [[:task_schedule]], [[:tick_rate]], [[:task_yield]], [[:task_delay]]
 
-export procedure sleep(atom t)
+public procedure sleep(atom t)
 -- go to sleep for t seconds
 -- allowing (on WIN32 and Linux) other processes to run
 	if t >= 0 then
@@ -898,7 +898,7 @@ constant
 --**
 -- Frequency Type
 
-export type frequency(integer x)
+public type frequency(integer x)
 	return x >= 0
 end type
 
@@ -917,7 +917,7 @@ end type
 -- sound(1000) -- starts a fairly high pitched sound
 -- </eucode>
 
-export procedure sound(frequency f)
+public procedure sound(frequency f)
 -- turn on speaker at frequency f
 -- turn off speaker if f is 0
 	machine_proc(M_SOUND, f)
@@ -971,7 +971,7 @@ end procedure
 --		[[:time]], [[:Debugging and profiling]]
 --
 
-export procedure tick_rate(atom rate)
+public procedure tick_rate(atom rate)
 	machine_proc(M_TICK_RATE, rate)
 end procedure
 

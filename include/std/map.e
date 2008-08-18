@@ -82,7 +82,7 @@ integer ri_ConvertToSmall
 -- * SMALLMAP
 -- * LARGEMAP
 
-export enum
+public enum
 	PUT,
 	ADD,
 	SUBTRACT,
@@ -113,7 +113,7 @@ constant vInitSmallKey = -960.35894374
 --   map SymbolTable = new() -- Create a new map to hold the symbol table.
 --   </eucode>
 
-export type map(object o)
+public type map(object o)
 -- Large maps have three elements:
 --   (1) 
 --   (2) 
@@ -217,7 +217,7 @@ constant maxInt = #3FFFFFFF
 --   h1 = calc_hash( symbol_name )
 --   </eucode>
 
-export function calc_hash(object key, integer pMaxHash = 0)
+public function calc_hash(object key, integer pMaxHash = 0)
 	atom ret
 
 	ret = hash(key, 0)	
@@ -245,7 +245,7 @@ end function
 --
 -- Initially this has been set to 50,
 -- meaning that maps up to 50 elements use the 'small map' structure.
-export function threshold(integer pNewValue = 0)
+public function threshold(integer pNewValue = 0)
 
 	if pNewValue < 1 then
 		return vSizeThreshold
@@ -266,7 +266,7 @@ end function
 -- Returns:
 -- An ##integer##, either ##SMALLMAP## or ##LARGEMAP##.
 --
-export function is_type(map m)
+public function is_type(map m)
 
 	if length(m) = iSmallMap then
 		return SMALLMAP
@@ -291,7 +291,7 @@ end function
 --
 -- See Also:
 --		[[:statistics]], [[:optimize]]
-export function rehash(map m, integer pRequestedSize = 0)
+public function rehash(map m, integer pRequestedSize = 0)
 	integer size
 	atom index2
 	sequence oldBuckets, newBuckets
@@ -361,7 +361,7 @@ end function
 --   map x = new(threshold()) -- Forces a small map to be initialized
 --   </eucode>
 
-export function new(integer initSize = 66)
+public function new(integer initSize = 66)
 	integer lBuckets
 
 	if initSize < 3 then
@@ -396,7 +396,7 @@ end function
 --   </eucode>
 --See Also:
 -- 		[[:get]]
-export function has(map m, object key)
+public function has(map m, object key)
 	atom lIndex
 	integer lFrom
 
@@ -448,7 +448,7 @@ end function
 --   </eucode>
 -- See Also:
 --		[[:has]], [[:nested_get]]
-export function get(map m, object key, object defaultValue)
+public function get(map m, object key, object defaultValue)
 	atom lIndex
 	integer lOffset
 	integer lFrom
@@ -498,7 +498,7 @@ end function
 -- See Also:
 -- [[:get]]
 
-export function nested_get( map m, sequence keys, object defaultValue )
+public function nested_get( map m, sequence keys, object defaultValue )
 	for i = 1 to length( keys ) - 1 do
 		object val = get( m, keys[1], 0 )
 		if atom( val ) then
@@ -555,7 +555,7 @@ end function
 -- See Also:
 --		[[:remove]], [[:has]],  [[:nested_put]]
 
-export function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
+public function put(map m, object key, object value, integer operation = PUT, integer pTrigger = 100 )
 	integer lIndex
 	atom hashval
 	integer lOffset
@@ -701,7 +701,7 @@ end function
 -- See Also:
 -- [[:new]]
 
-export constant BLANK_MAP = new()
+public constant BLANK_MAP = new()
 
 --**
 -- Adds or updates an entry on a map.
@@ -741,7 +741,7 @@ export constant BLANK_MAP = new()
 -- See also:
 --  [[:put]]
 
-export function nested_put( map m, sequence keys, object value, integer operation = PUT, integer pTrigger = 100 )
+public function nested_put( map m, sequence keys, object value, integer operation = PUT, integer pTrigger = 100 )
 	if length( keys ) = 1 then
 		return put( m, keys[1], value, operation, pTrigger )
 	else
@@ -773,7 +773,7 @@ end function
 -- See Also:
 --		[[:put]], [[:has]]
 --
-export function remove(map m, object key)
+public function remove(map m, object key)
 	integer hash
 	atom lIndex
 	object bucket
@@ -850,7 +850,7 @@ end function
 --
 -- See Also:
 --		[[:statistics]]
-export function size(map m)
+public function size(map m)
 	return m[iElemCnt]
 end function
 
@@ -870,7 +870,7 @@ end function
 -- * average size for a bucket
 -- * * standard deviation for the bucket length series
 
-export function statistics(map m)
+public function statistics(map m)
 	sequence lStats
 	sequence lLengths
 	integer lLength
@@ -924,7 +924,7 @@ end function
 --   </eucode>
 -- See Also:
 --		[[:has]]
-export function keys(map m)
+public function keys(map m)
 	sequence buckets, bucket
 	sequence ret
 	integer pos
@@ -984,7 +984,7 @@ end function
 --   </eucode>
  -- See Also:
  --		[[:get]]
-export function values(map m)
+public function values(map m)
 	sequence buckets, bucket
 	sequence ret
 	integer pos
@@ -1042,7 +1042,7 @@ end function
 --   </eucode>
  -- See Also:
  --		[[:get]], [[:keys]], [[:values]]
-export function pairs(map m)
+public function pairs(map m)
 	sequence buckets, bucket
 	sequence ret
 	integer pos
@@ -1087,7 +1087,7 @@ end function
 --
 -- See Also:
 --		[[:statistics]]
-export function optimize(map m, atom pAvg = 10)
+public function optimize(map m, atom pAvg = 10)
 	sequence op
 	sequence m0
 
@@ -1144,7 +1144,7 @@ end function
 --
 -- See Also:
 --		[[:new]], [[:save_map]]
-export function load_map(sequence pFileName)
+public function load_map(sequence pFileName)
 	integer fh
 	object lLine
 	integer lComment
@@ -1214,7 +1214,7 @@ end function
 -- </eucode>
 -- See Also:
 --		[[:load_map]]
-export function save_map(map m, sequence pFileName)
+public function save_map(map m, sequence pFileName)
 	integer lFH = -2
 	sequence lKeys
 	sequence lValues

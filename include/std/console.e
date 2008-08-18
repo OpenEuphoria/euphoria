@@ -78,7 +78,7 @@ constant
 --
 -- 		[[:check_break]]
 
-export procedure allow_break(boolean b)
+public procedure allow_break(boolean b)
 	machine_proc(M_ALLOW_BREAK, b)
 end procedure
 
@@ -118,7 +118,7 @@ end procedure
 --
 -- 		[[:allow_break]]
 
-export function check_break()
+public function check_break()
 	return machine_func(M_CHECK_BREAK, 0)
 end function
 
@@ -152,7 +152,7 @@ end function
 --
 -- 		[[:get_key]], [[:getc]]
 
-export function wait_key()
+public function wait_key()
 	return machine_func(M_WAIT_KEY, 0)
 end function
 
@@ -180,7 +180,7 @@ end function
 --
 -- 	[[:wait_key]]
 
-export procedure any_key(object prompt="Press Any Key to continue...")
+public procedure any_key(object prompt="Press Any Key to continue...")
 	object ignore
 
 	puts(1, prompt)
@@ -227,7 +227,7 @@ end procedure
 -- See Also:
 --
 -- 	[[:puts]], [[:prompt_string]]
-export function prompt_number(sequence prompt, sequence range)
+public function prompt_number(sequence prompt, sequence range)
 	object answer
 
 	while 1 do
@@ -273,7 +273,7 @@ end function
 --
 -- 	[[:prompt_string]]
 
-export function prompt_string(sequence prompt)
+public function prompt_string(sequence prompt)
 	object answer
 	
 	puts(1, prompt)
@@ -306,7 +306,7 @@ type text_point(sequence p)
 		   and p[1] <= 200 and p[2] <= 500 -- rough sanity check
 end type
 
-export type positive_int(integer x)
+public type positive_int(integer x)
 	return x >= 1
 end type
 
@@ -380,7 +380,7 @@ end ifdef
 -- See Also: 
 --   [[:put_screen_char]], [[:save_text_image]]
 
-export function get_screen_char(positive_atom line, positive_atom column)
+public function get_screen_char(positive_atom line, positive_atom column)
 	ifdef DOS32 then
 		atom scr_addr
 		sequence vc
@@ -428,7 +428,7 @@ end function
 -- See Also: 
 --   [[:get_screen_char]], [[:display_text_image]]
 
-export procedure put_screen_char(positive_atom line, positive_atom column, 
+public procedure put_screen_char(positive_atom line, positive_atom column, 
 								 sequence char_attr)
 	ifdef DOS32 then
 		atom scr_addr
@@ -487,7 +487,7 @@ end procedure
 --   [[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
 
-export procedure display_text_image(text_point xy, sequence text)
+public procedure display_text_image(text_point xy, sequence text)
 	integer extra_col2, extra_lines
 	sequence vc, one_row
 	
@@ -555,7 +555,7 @@ end procedure
 -- See Also:
 --   [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
 
-export function save_text_image(text_point top_left, text_point bottom_right)
+public function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
 	integer screen_width, image_width
 
@@ -612,12 +612,12 @@ end function
 --
 --   [[:graphics_mode]], [[:video_config]]
 
-export function text_rows(positive_int rows)
+public function text_rows(positive_int rows)
 	return machine_func(M_TEXTROWS, rows)
 end function
 
 -- cursor styles:
-export constant 
+public constant 
 	NO_CURSOR              = #2000,
 	UNDERLINE_CURSOR       = #0607,
 	THICK_UNDERLINE_CURSOR = #0507,
@@ -636,7 +636,7 @@ export constant
 -- Predefined cursors are:
 --	
 -- <eucode>
--- export constant 
+-- public constant 
 --     NO_CURSOR              = #2000,
 --     UNDERLINE_CURSOR       = #0607,
 --     THICK_UNDERLINE_CURSOR = #0507,
@@ -659,7 +659,7 @@ export constant
 --
 --   [[:graphics_mode]], [[:text_rows]]
 
-export procedure cursor(integer style)
+public procedure cursor(integer style)
 	machine_proc(M_CURSOR, style)
 end procedure
 
@@ -696,7 +696,7 @@ end procedure
 -- See Also:
 --     [[:clear_screen]]
 
-export procedure free_console()
+public procedure free_console()
 	machine_proc(M_FREE_CONSOLE, 0)
 end procedure
 

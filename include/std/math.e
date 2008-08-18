@@ -19,7 +19,7 @@
 -- -- x is 2.718281828459045235
 -- </eucode>
 
-export constant
+public constant
 	E         = 2.7182818284590452353602874
 
 --**
@@ -37,13 +37,13 @@ export constant
 -- -- x is 3.141592653589793238
 -- </eucode>
 
-export constant
+public constant
 	PI        = 3.141592653589793238462643,
 	QUARTPI   = 0.78539816339744830962,
 	HALFPI    = 1.57079632679489661923,
 	TWOPI     = 6.28318530717958647692
 
-export constant
+public constant
 	LN2       = 0.69314718055994530941,
 	INVLN2    = 1 / LN2,
 	LN10      = 2.30258509299404568401,
@@ -119,7 +119,7 @@ include error.e
 -- See Also:
 --		[[:sign]]
 
-export function abs(object a)
+public function abs(object a)
 	object t
 	if atom(a) then
 		if a >= 0 then
@@ -170,7 +170,7 @@ end function
 -- See Also:
 --		[[:compare]]
 
-export function sign(object a)
+public function sign(object a)
 	object t
 	if atom(a) then
 		if a > 0 then
@@ -217,7 +217,7 @@ end function
 -- See Also:
 --		[[:min]], [[:compare]], [[:flatten]]
 
-export function max(object a)
+public function max(object a)
 	atom b, c
 	if atom(a) then
 		return a
@@ -250,7 +250,7 @@ end function
 -- -- a is 3
 -- </eucode>
 
-export function min(object a)
+public function min(object a)
 	atom b, c
 	if atom(a) then
 			return a
@@ -362,7 +362,7 @@ end function
 -- See Also:
 -- 		[[:mod]], [[:Relational operators]], [[:Operations on sequences]]
 
-export function mod(object x, object y)
+public function mod(object x, object y)
 	return x - y * floor(x / y)
 end function
 
@@ -414,7 +414,7 @@ end function
 -- See Also:
 --		[[:floor]], [[:round]]
 
-export function ceil(object a)
+public function ceil(object a)
 	return -floor(-a)
 end function
 
@@ -441,7 +441,7 @@ end function
 -- See Also:
 --	[[:floor]], [[:ceil]]
 
-export function round(object a, object precision=1)
+public function round(object a, object precision=1)
 	integer len
 	sequence s
 	object t, u
@@ -637,7 +637,7 @@ end function
 -- See Also:
 --		[[:cos]], [[:PI]], [[:arctan]]
 
-export function arccos(trig_range x)
+public function arccos(trig_range x)
 --  returns angle in radians
 	return HALFPI - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
@@ -670,7 +670,7 @@ end function
 -- See Also:
 --		[[:arccos]], [[:arccos]], [[:sin]]
 
-export function arcsin(trig_range x)
+public function arcsin(trig_range x)
 --  returns angle in radians
 	return 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
@@ -693,7 +693,7 @@ end function
 -- See Also:
 --		[[:arctan]]
 
-export function atan2(atom y, atom x)
+public function atan2(atom y, atom x)
 	if x > 0 then
 		return arctan(y/x)
 	elsif x < 0 then
@@ -734,7 +734,7 @@ end function
 -- See Also:
 --		{{:deg2rad]]
 
-export function rad2deg (object x)
+public function rad2deg (object x)
    return x * RADIANS_TO_DEGREES
 end function
 
@@ -759,7 +759,7 @@ end function
 -- See Also:
 -- [[:rad2deg]]
 
-export function deg2rad (object x)
+public function deg2rad (object x)
    return x * DEGREES_TO_RADIANS
 end function
 
@@ -825,7 +825,7 @@ end function
 -- See Also:
 --		[[:log]]
 
-export function log10(object x1)
+public function log10(object x1)
 	return log(x1) * INVLN10
 end function
 
@@ -851,7 +851,7 @@ end function
 -- See Also:
 --		[[:log]]
 
-export function exp(atom x)
+public function exp(atom x)
 	return power(E, x)
 end function
 
@@ -967,7 +967,7 @@ end function
 -- See Also:
 -- [[:cos]], [[:sinh]], [[:arccosh]]
 
-export function cosh(object a)
+public function cosh(object a)
     return (exp(a)+exp(-a))/2
 end function
 
@@ -993,7 +993,7 @@ end function
 -- See Also:
 -- [[:cosh]], [[:sin]], [[:arcsinh]]
 
-export function sinh(object a)
+public function sinh(object a)
     return (exp(a)-exp(-a))/2
 end function
 
@@ -1020,7 +1020,7 @@ end function
 -- See Also:
 -- [[:cosh]], [[:sinh]], [[:tan]], [[:arctanh]]
 
-export function tanh(object a)
+public function tanh(object a)
     return sinh(a)/cosh(a)
 end function
 
@@ -1045,7 +1045,7 @@ end function
 -- See Also:
 -- [[:arccosh]], [[:arcsin]], [[:sinh]]
 
-export function arcsinh(object a)
+public function arcsinh(object a)
     return log(a+sqrt(1+a*a))
 end function
 
@@ -1085,7 +1085,7 @@ end type
 -- See Also:
 -- [[:arccos]], [[:arcsinh]], [[:cosh]]
 
-export function arccosh(not_below_1 a)
+public function arccosh(not_below_1 a)
     return log(a+sqrt(a*a-1))
 end function
 
@@ -1125,7 +1125,7 @@ end type
 -- See Also:
 -- [[:arccos]], [[:arcsinh]], [[:cosh]]
 
-export function arctanh(abs_below_1 a)
+public function arctanh(abs_below_1 a)
     return log((1+a)/(1-a))/2
 end function
 
@@ -1156,7 +1156,7 @@ end function
 -- See Also:
 --		[[:can_add]], [[:product]], [[:or_all]]
 
-export function sum(object a)
+public function sum(object a)
 	atom b
 	if atom(a) then
 		return a
@@ -1196,7 +1196,7 @@ end function
 -- See Also:
 --		[[:can_add]], [[:sum]], [[:or_all]]
 
-export function product(object a)
+public function product(object a)
 	atom b
 	if atom(a) then
 		return a
@@ -1235,7 +1235,7 @@ end function
 -- See Also:
 --		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]
 
-export function or_all	(object a)
+public function or_all	(object a)
 	atom b
 	if atom(a) then
 		return a
@@ -1425,7 +1425,7 @@ end function
 -- See Also:
 --   [[:right_shift]]
 
-export function left_shift(integer a, integer b)
+public function left_shift(integer a, integer b)
 	return round(a * power(2, b))
 end function
 
@@ -1446,7 +1446,7 @@ end function
 -- See Also:
 --   [[:left_shift]]
 
-export function right_shift(integer a, integer b)
+public function right_shift(integer a, integer b)
 	return round(a / power(2, b))
 end function
 
@@ -1479,7 +1479,7 @@ end function
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rnd]]
 
-export function rand_range(integer lo, integer hi)
+public function rand_range(integer lo, integer hi)
    lo -= 1
    hi -= lo
 
@@ -1510,7 +1510,7 @@ constant M_SET_RAND = 35
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rand_range]]
 
-export function rnd()
+public function rnd()
 	atom a,b,r
 
 	 a = rand(#3FFFFFFF)
@@ -1563,7 +1563,7 @@ end function
 -- See Also:
 --		[[:rand]]
 
-export procedure set_rand(integer seed)
+public procedure set_rand(integer seed)
 -- A given value of seed will cause the same series of
 -- random numbers to be generated from the rand() function
 	machine_proc(M_SET_RAND, seed)
@@ -1627,7 +1627,7 @@ end procedure
 -- </eucode>
 --
 
-export function gcd(atom p, atom q)
+public function gcd(atom p, atom q)
 	atom r
 	
 	if p<0 then

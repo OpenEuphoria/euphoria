@@ -18,7 +18,7 @@ include get.e
 constant value_id = routine_id("value")
 </eucode>
 
-Because get.e exports ##value##(), that routine is in scope. This ensures the call succeeds.
+Because ##value##() is defined as public, that routine is in scope. This ensures the call succeeds.
 A failed call returns -1, else a small nonnegative integer.
 
 You can then feed this integer to ##call_func##() or ##call_proc##() as appropriate. It

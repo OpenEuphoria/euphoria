@@ -41,7 +41,7 @@ include sort.e
 --   </eucode>
 --
 
-export function small(sequence pData, integer pIndex)
+public function small(sequence pData, integer pIndex)
 	sequence lSortedData
 
 	if pIndex < 1 or pIndex > length(pData) then
@@ -76,7 +76,7 @@ end function
 -- See also:
 --   [[:range]]
 --
-export function largest(object pData)
+public function largest(object pData)
 	atom lResult, lTemp
 	integer lFoundAny
 	if atom(pData) then
@@ -126,7 +126,7 @@ end function
 --
 -- See also:
 --   [[:range]]
-export function smallest(object pData)
+public function smallest(object pData)
 	atom lResult, lTemp
 	integer lFoundAny
 	if atom(pData) then
@@ -172,7 +172,7 @@ end function
 -- See also:
 --   [[:smallest]] [[:largest]]
 --
-export function range(object pData)
+public function range(object pData)
 	sequence lResult
 	atom lTemp
 	integer lFoundAny = 0
@@ -236,7 +236,7 @@ end function
 --   [[:average]], [[:avedev]], [[:stdevp]], [[:stdeva]]
 --
 
-export function stdev(sequence pData)
+public function stdev(sequence pData)
 	atom lSum
 	atom lMean
 	integer lCnt
@@ -300,7 +300,7 @@ end function
 --   [[:average]], [[:avedev]], [[:stdevp]], [[:stdev]]
 --
 
-export function stdeva(sequence pData)
+public function stdeva(sequence pData)
 	atom lSum
 	atom lMean
 	integer lCnt
@@ -366,7 +366,7 @@ end function
 --   [[:average]], [[:avedev]], [[:stdeva]], [[:stdevpa]], [[:stdev]]
 --
 
-export function stdevp(sequence pData)
+public function stdevp(sequence pData)
 	atom lSum
 	atom lMean
 	integer lCnt
@@ -427,7 +427,7 @@ end function
 --   [[:average]], [[:avedev]], [[:stdeva]], [[:stdevp]], [[:stdev]]
 --
 
-export function stdevpa(sequence pData)
+public function stdevpa(sequence pData)
 	atom lSum
 	atom lMean
 	integer lCnt
@@ -490,7 +490,7 @@ end function
 --   [[:average]], [[:stdev]]
 --
 
-export function avedev(sequence pData)
+public function avedev(sequence pData)
 	atom lSum
 	atom lMean
 	integer lCnt
@@ -551,7 +551,7 @@ end function
 -- See also:
 --   [[:average]]
 
-export function sum(object pData)
+public function sum(object pData)
 	atom lResult
 	if atom(pData) then
 		lResult = pData
@@ -586,7 +586,7 @@ end function
 -- See also:
 --   [[:average]], [[:sum]], [[:counta]]
 
-export function count(object pData)
+public function count(object pData)
 	atom lResult
 	if atom(pData) then
 		lResult = 1
@@ -624,7 +624,7 @@ end function
 -- See also:
 --   [[:average]], [[:sum]], [[:count]], [[:length]]
 
-export function counta(object pData)
+public function counta(object pData)
 	atom lResult
 	if atom(pData) then
 		lResult = 1
@@ -665,7 +665,7 @@ end function
 -- See also:
 --   [[:averagea]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
-export function average(object pData)
+public function average(object pData)
 	integer lCount
 	if atom(pData) then
 		return pData
@@ -703,7 +703,7 @@ end function
 -- See Also:
 -- [[:average]]
 
-export function geomean(sequence data)
+public function geomean(sequence data)
 	atom prod = 1.0
 	integer count = length(data)
 
@@ -757,7 +757,7 @@ end function
 -- See Also:
 -- [[:average]]
 
-export function harmean(sequence data)
+public function harmean(sequence data)
 	atom sum_inv = 0.0, last_x = 0.0
 	integer count = length(data)
 
@@ -810,7 +810,7 @@ end function
 -- See also:
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
-export function averagea(object pData)
+public function averagea(object pData)
 	if atom(pData) or length(pData) = 0 then
 		return pData
 	end if
@@ -862,7 +862,7 @@ end function
 -- See also:
 --   [[:average]]
 --
-export function movavg(object pData, object pPeriod)
+public function movavg(object pData, object pPeriod)
 	sequence lResult 
 	integer lLow
 	integer lHigh
@@ -950,7 +950,7 @@ end function
 -- See also:
 --   [[:average]]
 
-export function emovavg(object pData, atom pFactor)
+public function emovavg(object pData, atom pFactor)
 	atom lPrev
 	
 	if atom(pData) then

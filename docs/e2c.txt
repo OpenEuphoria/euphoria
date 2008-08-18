@@ -274,7 +274,8 @@ routines will likely run much faster when translated and compiled. Both
 translated/compiled and interpreted programs will be able to use your library.
 
 Only the global Euphoria procedures and functions, i.e. those declared with
-the "##global##" keyword, will be exported from the ##.dll## (##.so##).
+the "##global##", "##public##" or "##export##" keyword, will be exported from 
+the ##.dll## (##.so##).
 
 Any Euphoria program, whether translated/compiled or interpreted, can link
 with a Euphoria ##.dll## (##.so##) using the same mechanism that lets you link with a

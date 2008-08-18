@@ -7,7 +7,7 @@
 --
 
 include dll.e
-export include machine.e
+public include machine.e
 
 without warning
 
@@ -17,7 +17,7 @@ without warning
 -- Possible style values for message_box() style sequence
 --
 
-export constant 
+public constant 
 	MB_ABORTRETRYIGNORE = #02,        --  Abort, Retry, Ignore
 	MB_APPLMODAL = #00,               -- User must respond before doing something else
 	MB_DEFAULT_DESKTOP_ONLY = #20000,    
@@ -49,7 +49,7 @@ export constant
 --**
 -- possible values returned by MessageBox() 
 -- 0 means failure
-export constant IDABORT = 3,  -- Abort button was selected.
+public constant IDABORT = 3,  -- Abort button was selected.
 				IDCANCEL = 2, -- Cancel button was selected.
 				IDIGNORE = 5, -- Ignore button was selected.
 				IDNO = 7,     -- No button was selected.
@@ -94,7 +94,7 @@ end ifdef
 -- Comments:
 -- See [[:Constants]] above for a complete list of possible values for ##style## and the returned value. If ##style## is a sequence, its elements will be or'ed together.
 
-export function message_box(sequence text, sequence title, object style)
+public function message_box(sequence text, sequence title, object style)
 	integer or_style
 	atom text_ptr, title_ptr, ret
 	

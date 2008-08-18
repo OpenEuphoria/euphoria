@@ -91,7 +91,7 @@ include std/text.e
 -- * DB_EXISTS_ALREADY
 -- * DB_LOCK_FAIL
 
-export constant DB_OK = 0,
+public constant DB_OK = 0,
 				DB_OPEN_FAIL = -1,
 				DB_EXISTS_ALREADY = -2,
 				DB_LOCK_FAIL = -3,
@@ -103,7 +103,7 @@ export constant DB_OK = 0,
 -- * DB_LOCK_SHARED
 -- * DB_LOCK_EXCLUSIVE
 
-export constant DB_LOCK_NO = 0,       -- don't bother with file locking
+public constant DB_LOCK_NO = 0,       -- don't bother with file locking
 				DB_LOCK_SHARED = 1,   -- read the database
 				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
 
@@ -118,7 +118,7 @@ export constant DB_LOCK_NO = 0,       -- don't bother with file locking
 -- * INSERT_FAILED
 
 	
-export enum 
+public enum 
 	MISSING_END = 900,	-- missing 0 terminator 
 	NO_DATABASE,		-- current_db is not set
 	BAD_SEEK,			-- seek() failed.
@@ -166,7 +166,7 @@ object   void
 -- will be passed a single text string that describes the error. It may also
 -- call [[:db_get_errors]] to get more detail about the cause of the error.
 
-export integer db_fatal_id 
+public integer db_fatal_id 
 
 db_fatal_id = DB_FATAL_FAIL	-- Initialized separately from declaration so
                             -- the initial value doesn't show up in docs.
@@ -444,7 +444,7 @@ end procedure
 -- end if
 -- </eucode>
 
-export function db_get_errors(integer clearing = 1)
+public function db_get_errors(integer clearing = 1)
 	sequence lErrors
 	
 	lErrors = vLastErrors
@@ -485,7 +485,7 @@ end function
 -- db_dump("lowlvl_db.txt", 1) -- Full low-level dump created.
 -- </eucode>
 
-export procedure db_dump(object file_id, integer low_level_too = 0)
+public procedure db_dump(object file_id, integer low_level_too = 0)
 -- print an open database in readable form to file fn
 -- (Note: If you turn database.e into a .dll or .so, you will
 -- have to use a file name, rather than an open file number.
@@ -673,7 +673,7 @@ end procedure
 -- Comments:
 -- This is a debug routine used by RDS to detect corruption of the free list.
 -- Users do not normally call this.
-export procedure check_free_list()
+public procedure check_free_list()
 	atom free_count, free_list, addr, size, free_list_space
 	atom max
 
@@ -906,7 +906,7 @@ end procedure
 -- See Also:
 -- 		[[:db_open]], [[:db_select]]
 
-export function db_create(sequence path, integer lock_method)
+public function db_create(sequence path, integer lock_method)
 	integer db
 
 	if not find('.', path) then
@@ -988,7 +988,7 @@ end function
 -- The return codes are:
 --
 -- <eucode>
--- export constant
+-- public constant
 --     DB_OK = 0          -- success
 --     DB_OPEN_FAIL = -1  -- could not open the file
 --     DB_LOCK_FAIL = -3  -- could not lock the file in the
@@ -1031,7 +1031,7 @@ end function
 -- See Also:
 --   [[:db_create]], [[:db_select]]
 
-export function db_open(sequence path, integer lock_method)
+public function db_open(sequence path, integer lock_method)
 	integer db, magic
 
 	if not find('.', path) then
@@ -1113,7 +1113,7 @@ end function
 -- See Also:
 --   [[:db_open]], [[:db_select]]
 
-export function db_select(sequence path)
+public function db_select(sequence path)
 	integer index
 
 	if not find('.', path) then
@@ -1139,7 +1139,7 @@ end function
 -- Comments:
 -- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file. The current database becomes undefined.
 
-export procedure db_close()
+public procedure db_close()
 -- close the current database
 	integer index
 
@@ -1221,7 +1221,7 @@ end function
 -- See Also:
 --   [[:db_table_list]]
 
-export function db_select_table(sequence name)
+public function db_select_table(sequence name)
 -- let table with the given name be the current table
 	atom table, nkeys, index
 	atom block_ptr, block_size
@@ -1288,7 +1288,7 @@ end function
 -- See Also:
 --   [[:db_select_table]], [[:db_table_list]]
 
-export function db_current_table()
+public function db_current_table()
 	return current_table_name
 end function
 
@@ -1323,7 +1323,7 @@ end function
 -- See Also:
 --   [[:db_select_table]], [[:db_table_list]]
 
-export function db_create_table(sequence name, integer init_records = INIT_RECORDS)
+public function db_create_table(sequence name, integer init_records = INIT_RECORDS)
 	atom name_ptr, nt, tables, newtables, table, records_ptr
 	atom size, newsize, index_ptr
 	sequence remaining
@@ -1402,7 +1402,7 @@ end function
 -- See Also:
 --		[[:db_table_list]], [[:db_select_table]], [[:db_clear_table]]
 
-export procedure db_delete_table(sequence name)
+public procedure db_delete_table(sequence name)
 -- delete an existing table and all of its records
 	atom table, tables, nt, nrecs, records_ptr, blocks
 	atom p, data_ptr, index
@@ -1497,7 +1497,7 @@ end procedure
 -- See Also:
 --		[[:db_table_list]], [[:db_select_table]], [[:db_delete_table]]
 
-export procedure db_clear_table(sequence name)
+public procedure db_clear_table(sequence name)
 -- delete all of records in the table
 	atom table, nrecs, records_ptr, blocks
 	atom p, data_ptr, index_ptr
@@ -1579,7 +1579,7 @@ end procedure
 -- See Also:
 --		[[:db_table_list]]
 
-export procedure db_rename_table(sequence name, sequence new_name)
+public procedure db_rename_table(sequence name, sequence new_name)
 -- rename an existing table - written by Jordah Ferguson
 	atom table, table_ptr
 
@@ -1625,7 +1625,7 @@ end procedure
 -- See Also:
 -- 		[[:db_select_table]], [[:db_create_table]]
 
-export function db_table_list()
+public function db_table_list()
 	sequence table_names
 	atom tables, nt, name
 
@@ -1703,7 +1703,7 @@ end function
 -- See Also:
 -- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]], [[:db_get_recid]]
 
-export function db_find_key(object key, object table_name=current_table_name)
+public function db_find_key(object key, object table_name=current_table_name)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 
 	if not equal(table_name, current_table_name) then
@@ -1781,7 +1781,7 @@ end function
 -- See Also:
 -- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]], [[:db_find_key]]
 
-export function db_get_recid(object key, object table_name=current_table_name)
+public function db_get_recid(object key, object table_name=current_table_name)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 
 	if not equal(table_name, current_table_name) then
@@ -1840,7 +1840,7 @@ end function
 -- See Also:
 --		[[:db_delete_record]]
 
-export function db_insert(object key, object data, object table_name=current_table_name)
+public function db_insert(object key, object data, object table_name=current_table_name)
 	sequence key_string, data_string, last_part, remaining
 	atom key_ptr, data_ptr, records_ptr, nrecs, current_block, size, new_size
 	atom key_location, new_block, index_ptr, new_index_ptr, total_recs
@@ -1989,7 +1989,7 @@ end function
 -- See Also:
 -- 		[[:db_find_key]]
 
-export procedure db_delete_record(integer key_location, object table_name=current_table_name)
+public procedure db_delete_record(integer key_location, object table_name=current_table_name)
 	atom key_ptr, nrecs, records_ptr, data_ptr, index_ptr, current_block
 	integer r, blocks, n
 	sequence remaining
@@ -2100,7 +2100,7 @@ end procedure
 -- See Also:
 -- 		[[:db_replace_data]], [[:db_find_key]], [[:db_get_recid]]
 
-export procedure db_replace_recid(integer recid, object data)
+public procedure db_replace_recid(integer recid, object data)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 
@@ -2146,7 +2146,7 @@ end procedure
 -- See Also:
 -- 		[[:db_find_key]]
 
-export procedure db_replace_data(integer key_location, object data, object table_name=current_table_name)
+public procedure db_replace_data(integer key_location, object data, object table_name=current_table_name)
 	atom old_size, new_size, key_ptr, data_ptr
 	sequence data_string
 
@@ -2195,7 +2195,7 @@ end procedure
 -- See Also:
 -- 		[[:db_replace_data]]
 
-export function db_table_size(object table_name=current_table_name)
+public function db_table_size(object table_name=current_table_name)
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
 			fatal(NO_TABLE, "invalid table name given", "db_table_size", {table_name})
@@ -2240,7 +2240,7 @@ end function
 -- See Also:
 -- 		[[:db_find_key]], [[:db_replace_data]]
 
-export function db_record_data(integer key_location, object table_name=current_table_name)
+public function db_record_data(integer key_location, object table_name=current_table_name)
 	atom data_ptr
 	object data_value
 
@@ -2296,7 +2296,7 @@ end function
 -- See Also:
 -- 		[[:db_record_data]]
 
-export function db_record_key(integer key_location, object table_name=current_table_name)
+public function db_record_key(integer key_location, object table_name=current_table_name)
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
 			fatal(NO_TABLE, "invalid table name given", "db_record_key", {key_location, table_name})
@@ -2341,7 +2341,7 @@ end function
 -- See Also:
 -- 		[[:db_get_recid]], [[:db_replace_recid]]
 
-export function db_record_recid(integer recid)
+public function db_record_recid(integer recid)
 	atom data_ptr
 	object data_value
 	object key_value
@@ -2384,7 +2384,7 @@ end function
 -- end if
 -- </eucode>
 
-export function db_compress()
+public function db_compress()
 	integer index, chunk_size, nrecs, r, fn
 	sequence new_path, old_path, table_list, record, chunk
 
@@ -2506,7 +2506,7 @@ end function
 -- See Also:
 --   [[:db_select]]
 
-export function db_current ()
+public function db_current ()
 	integer index
 
 	index = find (current_db, db_file_nums)
@@ -2538,7 +2538,7 @@ end function
 -- x = db_set_caching(0) -- Turn off key caching.
 -- </eucode>
 
-export function db_set_caching(atom pVal)
+public function db_set_caching(atom pVal)
 	integer lOldVal
 
 	lOldVal = caching_option

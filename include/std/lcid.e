@@ -420,7 +420,7 @@ constant lcid_string = {
 "zu_ZA",
 "C"}
 
-export function get_lcid(sequence name)
+public function get_lcid(sequence name)
 	integer i
 	i = find(name, lcid_string)
 	if not i then

@@ -22,7 +22,7 @@
 -- * C_FLOAT   = #03000004,
 -- * C_DOUBLE  = #03000008
 
-export constant
+public constant
 	C_CHAR    = #01000001,
 	C_UCHAR   = #02000001,
 	C_SHORT   = #01000002,
@@ -42,7 +42,7 @@ export constant
 -- *E_SEQUENCE= #08000004,
 -- *E_OBJECT  = #09000004
 
-export constant
+public constant
 	E_INTEGER = #06000004,
 	E_ATOM    = #07000004,
 	E_SEQUENCE= #08000004,
@@ -50,9 +50,9 @@ export constant
 
 --**
 -- C's NULL pointer
--- export constant NULL = 0 -- NULL pointer
+-- public constant NULL = 0 -- NULL pointer
 
-export constant NULL = 0 -- NULL pointer
+public constant NULL = 0 -- NULL pointer
 
 constant M_OPEN_DLL  = 50,
 		 M_DEFINE_C  = 51,
@@ -101,7 +101,7 @@ constant M_OPEN_DLL  = 50,
 -- See Also:
 --     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
-export function open_dll(sequence file_name)
+public function open_dll(sequence file_name)
 	return machine_func(M_OPEN_DLL, file_name)
 end function
 
@@ -113,7 +113,7 @@ end function
 --
 -- Parameters:
 -- 		 # ##lib##: an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
--- 		# ##variable_name##: a sequence, the name of a export C variable defined within the library.
+-- 		# ##variable_name##: a sequence, the name of a public C variable defined within the library.
 --
 -- Returns:
 --		An **atom**, the memory address of ##variable_name##.
@@ -128,7 +128,7 @@ end function
 -- See Also:
 --     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
 
-export function define_c_var(atom lib, sequence variable_name)
+public function define_c_var(atom lib, sequence variable_name)
 	return machine_func(M_DEFINE_VAR, {lib, variable_name})
 end function
 
@@ -204,7 +204,7 @@ end function
 -- See Also:
 --     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
 
-export function define_c_proc(object lib, object routine_name, 
+public function define_c_proc(object lib, object routine_name, 
 							  sequence arg_types)
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, 0})
 end function
@@ -303,7 +303,7 @@ end function
 -- See Also:
 --     ##demo\callmach.ex##, [[:c_func]], [[:define_c_proc]], [[:c_proc]], [[:open_dll]]
 
-export function define_c_func(object lib, object routine_name,
+public function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
@@ -355,7 +355,7 @@ end function
 -- See Also:
 --     [[:routine_id]]
 
-export function call_back(object id)
+public function call_back(object id)
 	return machine_func(M_CALL_BACK, id)
 end function
 

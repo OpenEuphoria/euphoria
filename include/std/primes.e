@@ -8,7 +8,7 @@
 
 include search.e
 
-export sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
+public sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 
 --****
 -- === Routines
@@ -48,7 +48,7 @@ constant rTime_out = routine_id("time_out")
 -- See Also:
 --		[[:next_prime]]
 
-export function calc_primes(integer pMax, atom pTimeLimit = 10)
+public function calc_primes(integer pMax, atom pTimeLimit = 10)
 	sequence lResult
 	integer lCandidate
 	integer lLo
@@ -159,7 +159,7 @@ end function
 -- See Also:
 -- [[:calc_primes]]
 
-export function next_prime(integer n, integer pDefault = -1, atom pTimeOut = 1)
+public function next_prime(integer n, integer pDefault = -1, atom pTimeOut = 1)
 	integer i
 
 

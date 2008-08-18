@@ -2,7 +2,7 @@
 --
 -- Keywords and routines built in to ex, exw and exu
 
-export constant keywords = {
+public constant keywords = {
 	"and",
 	"as",
 	"break",
@@ -32,6 +32,7 @@ export constant keywords = {
 	"or",
 	"override",
 	"procedure",
+	"public",
 	"retry",
 	"return",
 	"switch",
@@ -45,7 +46,7 @@ export constant keywords = {
 	"xor"
 }
 
-export constant builtins = {
+public constant builtins = {
 	"abort",
 	"and_bits",
 	"append",

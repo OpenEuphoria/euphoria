@@ -10,7 +10,7 @@
 -- === Constants
 --
 
-export constant ASCENDING = -1, DESCENDING = 1
+public constant ASCENDING = -1, DESCENDING = 1
 
 include text.e -- upper/lower
 
@@ -56,7 +56,7 @@ include text.e -- upper/lower
 -- See Also:
 --     [[:compare]], [[:sort_user]], [[:custom_sort]]
 
-export function sort(sequence x, integer order = ASCENDING)
+public function sort(sequence x, integer order = ASCENDING)
 	integer gap, j, first, last
 	object tempi, tempj
 
@@ -164,7 +164,7 @@ end function
 -- See Also:
 --   [[:compare]], [[:sort]], [[:sort_user]]
 
-export function custom_sort(integer custom_compare, sequence x, object data = {}, integer order = ASCENDING)
+public function custom_sort(integer custom_compare, sequence x, object data = {}, integer order = ASCENDING)
 	integer gap, j, first, last, comp
 	object tempi, tempj, result
 	sequence args = {0, 0}
@@ -287,7 +287,7 @@ end function
 -- See Also:
 --	 [[:compare]], [[:sort]], [[:sort_user]]
 
-export function sort_user(integer custom_compare, sequence x, object user_data=0, integer order = ASCENDING)
+public function sort_user(integer custom_compare, sequence x, object user_data=0, integer order = ASCENDING)
 	if sequence(user_data) then
 		user_data = {user_data}
 	end if
@@ -365,7 +365,7 @@ end function
 -- See Also:
 --	 [[:compare]], [[:sort]], [[:sort_user]]
 
-export function sort_columns(sequence x, sequence column_list)
+public function sort_columns(sequence x, sequence column_list)
 	return custom_sort(routine_id("column_compare"), x, {column_list})
 end function
 

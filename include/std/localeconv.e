@@ -212,7 +212,7 @@
 -- * "yo-NG",
 -- * "zu-ZA"
 
-export constant w32_names = {
+public constant w32_names = {
 	"af-ZA",
 	"sq-AL",
 	"gsw-FR",
@@ -634,7 +634,7 @@ export constant w32_names = {
 -- * "Ukrainian_Ukraine",
 -- * "Ukrainian_Ukraine"
 
-export constant w32_name_canonical = {
+public constant w32_name_canonical = {
 	"Afrikaans_South Africa",
 	"Afrikaans_South Africa",
 	"Afrikaans_South Africa",
@@ -1056,7 +1056,7 @@ export constant w32_name_canonical = {
 -- * "yo_NG",
 -- * "zu_ZA"
 
-export constant posix_names = {
+public constant posix_names = {
 	"af_ZA",
 	"sq_AL",
 	"gsw_FR",
@@ -1267,12 +1267,12 @@ export constant posix_names = {
 	"zu_ZA"
 }
 
-export constant locale_canonical = posix_names
+public constant locale_canonical = posix_names
 
 ifdef UNIX then
-	export constant platform_locale = posix_names
+	public constant platform_locale = posix_names
 else
-	export constant platform_locale = w32_name_canonical
+	public constant platform_locale = w32_name_canonical
 end ifdef
 
 --****
@@ -1290,7 +1290,7 @@ end ifdef
 -- See Also:
 -- 		[[:get]], [[:set]], [[:decanonical]]
 
-export function canonical(sequence new_locale)
+public function canonical(sequence new_locale)
 	integer w, ws, p, n
 	ifdef WIN32 then
 		if find('.', new_locale) then
@@ -1331,7 +1331,7 @@ end function
 -- See Also:
 -- 		[[:get]], [[:set]], [[:canonical]]
 
-export function decanonical(sequence new_locale)
+public function decanonical(sequence new_locale)
 	integer w, ws, p, n
 	ifdef WIN32 then
 		if find('.', new_locale) then
@@ -1363,7 +1363,7 @@ end function
 --**
 -- TODO: document
 
-export function canon2win(sequence new_locale)
+public function canon2win(sequence new_locale)
 	integer w
 	ifdef WIN32 then
 		if find('.', new_locale) then

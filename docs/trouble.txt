@@ -188,7 +188,7 @@ graphics.e##" (without the quotes) before the place where you first call the rou
 try to call the routine it says the routine has not been declared. But it **has** 
 been declared.//
 
-Did you remember to define the routine as ##export## or possibly ##global##?
+Did you remember to define the routine as ##public##, ##export## or possibly ##global##?
 If not, the routine is not visible outside of its own file.
 
 ==== After user input, left margin problem

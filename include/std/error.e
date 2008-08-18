@@ -44,7 +44,7 @@ constant
 -- See Also:
 --		[[:crash_file]], [[:crash_message]], [[:printf]]
 
-export procedure crash(sequence fmt, object data={})
+public procedure crash(sequence fmt, object data={})
 	object msg
 	msg = sprintf(fmt, data)
 	machine_proc(M_CRASH, msg)
@@ -72,7 +72,7 @@ end procedure
 -- See Also:
 --     [[:crash]], [[:crash_file]]
 
-export procedure crash_message(sequence msg)
+public procedure crash_message(sequence msg)
 	machine_proc(M_CRASH_MESSAGE, msg)
 end procedure
 
@@ -89,7 +89,7 @@ end procedure
 -- See Also:
 -- 		[[:crash]], [[:crash_message]]
 
-export procedure crash_file(sequence file_path)
+public procedure crash_file(sequence file_path)
 	machine_proc(M_CRASH_FILE, file_path)
 end procedure
 
@@ -159,7 +159,7 @@ end procedure
 -- See Also:
 --   [[:On/off options|without warning]], [[:warning]]
 
-export procedure warning_file(object file_path)
+public procedure warning_file(object file_path)
 	machine_proc(M_WARNING_FILE, file_path)
 end procedure
 
@@ -249,6 +249,6 @@ end procedure
 -- See Also:
 -- 	[[:crash_file]], [[:routine_id]], [[:Debugging and profiling]]
 
-export procedure crash_routine(integer func)
+public procedure crash_routine(integer func)
 	machine_proc(M_CRASH_ROUTINE, func)
 end procedure

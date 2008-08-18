@@ -4,7 +4,7 @@
 -- <<LEVELTOC depth=2>>
 --
 
-export include get.e -- value(), get() are conversion routines
+public include get.e -- value(), get() are conversion routines
 
 constant
 	M_A_TO_F64 = 46,
@@ -51,7 +51,7 @@ constant
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]]
 
-export function int_to_bytes(atom x)
+public function int_to_bytes(atom x)
 	integer a,b,c,d
 	
 	a = remainder(x, #100)
@@ -104,7 +104,7 @@ end type
 --   [[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]],
 --   [[:peek4s]], [[:peek4u]], [[:poke4]]
 
-export function bytes_to_int(sequence s)
+public function bytes_to_int(sequence s)
 	if length(s) = 4 then
 		poke(mem, s)
 	else    
@@ -145,7 +145,7 @@ end function
 --	[[:bits_to_int]], [[:int_to_bytes]], [[:Relational operators]],
 --  [[:operations on sequences]]
 
-export function int_to_bits(atom x, integer nbits)
+public function int_to_bits(atom x, integer nbits)
 	sequence bits
 	integer mask
 	
@@ -200,7 +200,7 @@ end function
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:operations on sequences]]
 
-export function bits_to_int(sequence bits)
+public function bits_to_int(sequence bits)
 -- get the (positive) value of a sequence of "bits"
 	atom value, p
 	
@@ -239,7 +239,7 @@ end function
 -- See Also:
 --     [[:float64_to_atom]], [[:int_to_bytes]], [[:atom_to_float32]]
 
-export function atom_to_float64(atom a)
+public function atom_to_float64(atom a)
 	return machine_func(M_A_TO_F64, a)
 end function
 
@@ -276,7 +276,7 @@ end function
 -- See Also:
 --		[[:float32_to_atom]], [[:int_to_bytes]], [[:atom_to_float64]]
 
-export function atom_to_float32(atom a)
+public function atom_to_float32(atom a)
 	return machine_func(M_A_TO_F32, a)
 end function
 
@@ -305,7 +305,7 @@ end function
 -- See Also:
 --		[[:float32_to_atom]], [[:bytes_to_int]], [[:atom_to_float64]]
 
-export function float64_to_atom(sequence_8 ieee64)
+public function float64_to_atom(sequence_8 ieee64)
 -- Convert a sequence of 8 bytes in IEEE 64-bit format to an atom
 	return machine_func(M_F64_TO_A, ieee64)
 end function
@@ -336,7 +336,7 @@ end function
 -- See Also:
 --		[[:float64_to_atom]], [[:bytes_to_int]], [[:atom_to_float32]]
 
-export function float32_to_atom(sequence_4 ieee32)
+public function float32_to_atom(sequence_4 ieee32)
 	return machine_func(M_F32_TO_A, ieee32)
 end function
 

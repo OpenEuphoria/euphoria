@@ -26,7 +26,7 @@ constant
 --**
 -- Values to add or [[:or_bits]]() together in order to alte the behaviour of regex searches.
 -- TODO: add comments describing what each flag does
-export constant 
+public constant 
 	DEFAULT            = #00000000,
 	CASELESS           = #00000001,
 	MULTILINE          = #00000002,
@@ -62,7 +62,7 @@ export constant
 --**
 -- Error codes
 -- TODO: add comments to show what each code means
-export constant
+public constant
 	ERROR_NOMATCH        =  (-1),
 	ERROR_NULL           =  (-2),
 	ERROR_BADOPTION      =  (-3),
@@ -95,7 +95,7 @@ export constant
 --**
 -- Basically, a ##regex## is an memory address, hence an atom.
 
-export type regex(object o)
+public type regex(object o)
 	return atom(o)
 end type
 
@@ -124,7 +124,7 @@ end type
 -- re = new("foo")
 -- </eucode>
 
-export function new(sequence pattern, atom flags=0)
+public function new(sequence pattern, atom flags=0)
 		return machine_func(M_COMPILE_PCRE, {pattern, flags})
 end function
 
@@ -161,7 +161,7 @@ end function
 -- See Also:
 --	[[:search_all]]
 
-export function search(regex re, sequence text, integer from=1, atom options=0)
+public function search(regex re, sequence text, integer from=1, atom options=0)
 		return machine_func(M_EXEC_PCRE, { re, text, options, from-1 })
 end function
 
@@ -183,7 +183,7 @@ end function
 -- See Also:
 --	[[:search]]
 
-export function search_all(regex re, sequence text, integer from=1, atom options=0)
+public function search_all(regex re, sequence text, integer from=1, atom options=0)
 	object result
 	sequence results
 	
@@ -220,7 +220,7 @@ end function
 --	Comments:
 --	Matches may be found against the result of previous replacements. Careful experimentation is highly recommended before doing things like text = regex:search_replace(re,text,whatever,something).
 
-export function search_replace(regex re, sequence text, sequence replacement, 
+public function search_replace(regex re, sequence text, sequence replacement, 
                                atom options = 0)
 	sequence matches
 	
@@ -256,7 +256,7 @@ end function
 -- See Also:
 -- [[:search_replace]]
 
-export function search_replace_user(regex re, sequence text, integer rid, 
+public function search_replace_user(regex re, sequence text, integer rid, 
 									atom options = 0)
 	sequence matches, m
 	
@@ -286,7 +286,7 @@ end function
 -- Returns:
 -- 		An **integer**, 0 if no match or some error, 1 if there is any match.
 
-export function matches(regex re, sequence text, integer from=1, atom options = 0)
+public function matches(regex re, sequence text, integer from=1, atom options = 0)
 	return sequence(search(re, text,from,  options))
 end function
 
@@ -302,7 +302,7 @@ end function
 -- See Also:
 --     [[:new]]
 
-export procedure free( regex re )
+public procedure free( regex re )
 	machine_proc( M_FREE_PCRE, re )
 end procedure
 
@@ -320,7 +320,7 @@ end procedure
 -- See Also:
 -- [[:matches]]
 
-export function full_match(regex re, sequence text, atom options = 0)
+public function full_match(regex re, sequence text, atom options = 0)
 	object matches
 	matches = search( re, text, 1, options )
 	if sequence( matches ) and matches[1][1] = 1 and matches[1][2] = length(text) then

@@ -76,7 +76,7 @@ include pretty.e
 --
 
 -- Verbosity values
-export enum
+public enum
 	TEST_QUIET = 0,
 	TEST_SHOW_FAILED_ONLY,
 	TEST_SHOW_ALL
@@ -177,7 +177,7 @@ end procedure
 -- See Also:
 -- [[:test_report]]
 
-export procedure set_test_verbosity(atom verbosity)
+public procedure set_test_verbosity(atom verbosity)
 	verbose = verbosity
 end procedure
 
@@ -195,7 +195,7 @@ end procedure
 -- See Also:
 -- [[:test_report]]
 
-export procedure set_wait_on_summary(integer to_wait)
+public procedure set_wait_on_summary(integer to_wait)
 	wait_on_summary = to_wait
 end procedure
 
@@ -212,7 +212,7 @@ end procedure
 -- :: //f// is the total number of tests that failed
 --
 
-export procedure set_accumulate_summary(integer accumulate)
+public procedure set_accumulate_summary(integer accumulate)
 	accumulate_on_summary = accumulate
 end procedure
 
@@ -228,7 +228,7 @@ end procedure
 -- Comments:
 -- By default, the tests go on even if a file crashed.
 
-export function set_test_abort(integer abort_test)
+public function set_test_abort(integer abort_test)
 	integer tmp = abort_on_fail
 	abort_on_fail = abort_test
 
@@ -249,7 +249,7 @@ end function
 -- See Also:
 --   [[:set_test_verbosity]]
 
-export procedure test_report()
+public procedure test_report()
 	atom score
 	integer fh
 	sequence fname
@@ -324,7 +324,7 @@ end procedure
 -- See Also:
 -- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
 
-export procedure test_equal(sequence name, object expected, object outcome)
+public procedure test_equal(sequence name, object expected, object outcome)
 	integer success
 	if sequence(expected) or sequence(outcome) then
 		success = equal(expected,outcome)
@@ -356,7 +356,7 @@ end procedure
 -- See Also:
 -- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
 
-export procedure test_not_equal(sequence name, object a, object b)
+public procedure test_not_equal(sequence name, object a, object b)
 	integer success
 	if sequence(a) or sequence(b) then
 		success = not equal(a,b)
@@ -384,7 +384,7 @@ end procedure
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_false]], [[:test_pass]], [[test_fail]]
 
-export procedure test_true(sequence name, object outcome)
+public procedure test_true(sequence name, object outcome)
 	integer success
 	if sequence(outcome) then
 		success = 0
@@ -408,7 +408,7 @@ end procedure
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[test_fail]]
 
-export procedure test_false(sequence name, object outcome)
+public procedure test_false(sequence name, object outcome)
 	integer success
 	if not integer(outcome) then
 		success = 0
@@ -427,7 +427,7 @@ end procedure
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_pass]]
 
-export procedure test_fail(sequence name)
+public procedure test_fail(sequence name)
 	record_result(0, name, 1, 0)
 end procedure
 
@@ -440,7 +440,7 @@ end procedure
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_fail]]
 
-export procedure test_pass(sequence name)
+public procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)
 end procedure
 

@@ -11,16 +11,16 @@
 --** 
 -- Boolean FALSE value
 
-export constant FALSE = 0
+public constant FALSE = 0
 
 --**
 -- Boolean TRUE value
 
-export constant TRUE = 1
+public constant TRUE = 1
 
 --**
 -- Predefined character sets:
-export enum
+public enum
 	CS_FIRST = 0,
 	CS_Consonant,
 	CS_Vowel,
@@ -77,7 +77,7 @@ export enum
 -- -- FALSE, not every character is in the set 'n', 'o', 'v', 'e', 'l'
 -- </eucode>
 
-export function char_test(object pVal, sequence pCharSet)
+public function char_test(object pVal, sequence pCharSet)
 	integer lChr
 	
 	if integer(pVal) then
@@ -120,7 +120,7 @@ sequence Defined_Sets
 -- set_default_charsets()
 -- </eucode>
 
-export procedure set_default_charsets()
+public procedure set_default_charsets()
 	Defined_Sets = repeat(0, CS_LAST - CS_FIRST - 1)
 	Defined_Sets[CS_Alphabetic	] = {{'a', 'z'}, {'A', 'Z'}}
 	Defined_Sets[CS_Alphanumeric] = {{'0', '9'}, {'a', 'z'}, {'A', 'Z'}}
@@ -160,7 +160,7 @@ end procedure
 -- See Also:
 -- [[:set_charsets]], [[:set_default_charsets]]
 
-export function get_charsets()
+public function get_charsets()
 	sequence lResult
 	
 	lResult = {}
@@ -199,7 +199,7 @@ end function
 -- See Also:
 -- [[:get_charsets]]
 
-export procedure set_charsets(sequence pSets)	
+public procedure set_charsets(sequence pSets)	
 	for i = 1 to length(pSets) do
 		if sequence(pSets[i]) and length(pSets[i]) = 2 then
 			if integer(pSets[i][1]) and pSets[i][1] > CS_FIRST and pSets[i][1] < CS_LAST then
@@ -235,7 +235,7 @@ end procedure
 -- boolean({})            -- FALSE (empty sequence)
 -- </eucode>
 	
-export type boolean(object pVal)
+public type boolean(object pVal)
 	-- A boolean is a value that is either zero or not zero.
 	if atom(pVal) then
 		return TRUE
@@ -272,7 +272,7 @@ end type
 -- t_alnum({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_alnum(object pVal)
+public type t_alnum(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Alphanumeric])
 end type
 
@@ -299,7 +299,7 @@ end type
 -- t_alpha({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_alpha(object pVal)
+public type t_alpha(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Alphabetic])
 end type
 
@@ -326,7 +326,7 @@ end type
 -- t_ascii({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_ascii(object pVal)
+public type t_ascii(object pVal)
 	return char_test(pVal, Defined_Sets[CS_ASCII])
 end type
 
@@ -354,7 +354,7 @@ end type
 -- t_cntrl({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_cntrl(object pVal)
+public type t_cntrl(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Control])
 end type
 
@@ -383,7 +383,7 @@ end type
 -- t_digit({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_digit(object pVal)
+public type t_digit(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Digit])
 end type
 
@@ -413,7 +413,7 @@ end type
 -- t_graph({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_graph(object pVal)
+public type t_graph(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Graphic])
 end type
 
@@ -449,7 +449,7 @@ end type
 -- t_specword({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_specword(object pVal)
+public type t_specword(object pVal)
 	return char_test(pVal, Defined_Sets[CS_SpecWord])
 end type
 
@@ -482,7 +482,7 @@ end type
 -- t_bytearray({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_bytearray(object pVal)
+public type t_bytearray(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Bytes])
 end type
 
@@ -511,7 +511,7 @@ end type
 -- t_lower({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_lower(object pVal)
+public type t_lower(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Lowercase])
 end type
 
@@ -540,7 +540,7 @@ end type
 -- t_print({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_print(object pVal)
+public type t_print(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Printable])
 end type
 
@@ -569,7 +569,7 @@ end type
 -- t_punct({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_punct(object pVal)
+public type t_punct(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Punctuation])
 end type
 
@@ -597,7 +597,7 @@ end type
 -- t_space({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_space(object pVal)
+public type t_space(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Whitespace])
 end type
 
@@ -626,7 +626,7 @@ end type
 -- t_upper({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_upper(object pVal)
+public type t_upper(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Uppercase])
 end type
 
@@ -655,7 +655,7 @@ end type
 -- t_xdigit({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_xdigit(object pVal)
+public type t_xdigit(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Hexadecimal])
 end type
 
@@ -684,7 +684,7 @@ end type
 -- t_vowel({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_vowel(object pVal)
+public type t_vowel(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Vowel])
 end type
 
@@ -713,7 +713,7 @@ end type
 -- t_consonant({})            -- FALSE (empty sequence)
 -- </eucode>
 
-export type t_consonant(object pVal)
+public type t_consonant(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Consonant])
 end type
 

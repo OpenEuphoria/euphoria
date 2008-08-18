@@ -156,7 +156,7 @@
 --
 -- Example 1:
 -- <eucode>
--- export integer foo_id
+-- public integer foo_id
 --
 -- procedure x()
 --     call_proc(foo_id, {1, "Hello World\n"})
@@ -217,13 +217,13 @@
 -- [[:machine_proc]]
 
 ifdef SAFE then
-	export include safe.e
+	public include safe.e
 	ifdef DOS32 then
-		export include .\dos\safe.e
+		public include .\dos\safe.e
 	end ifdef
 else
-	export include memory.e
+	public include memory.e
 	ifdef DOS32 then
-		export include .\dos\memory.e
+		public include .\dos\memory.e
 	end ifdef
 end ifdef

@@ -862,14 +862,14 @@ underscores. The following **reserved words** have special meaning
 in Euphoria and may not be used as identifiers:
 
 <eucode>
-and            elsif        function      not          to
-break          elsifdef     global        or           type
-by             end          goto          override     until
-case           entry        if            procedure    while
-constant       enum         ifdef         retry        with
-continue       exit         include       return       without
-do             export       label         switch       xor
-else           for          loop          then
+and            elsif        function      not          then
+break          elsifdef     global        or           to
+by             end          goto          override     type
+case           entry        if            procedure    until
+constant       enum         ifdef         public       while
+continue       exit         include       retry        with
+do             export       label         return       without
+else           for          loop          switch       xor
 </eucode>
 
 The Euphoria editor displays these words in blue.
@@ -1144,20 +1144,20 @@ ends at the end of the source file in which they are declared and they are
 referred to as **local**, unless a scope keyword is used before the declaration:
 * If the keyword **global** precedes the declaration,
 the scope of the identifier extends indefinitely;
-* If the keyword **export** precedes the declaration, the scope extends to any file that
+* If the keyword **public** or **export** precedes the declaration, the scope extends to any file that
 directly includes the file in which the identifier is declared.
 
 When you **[[:include]]** a Euphoria file in another file, only the variables
-and routines declared using the **override**, **global** or **export** keywords are
+and routines declared using the **override**, **global**, **public** or **export** keywords are
 accessible or even visible to the file. The other, non-global, non-exported declarations
 in the included file are forgotten at the end of the included file, and you
 will get an error message, "not declared", if you try to use them in the main
-file. There is one variant of the **include** statement, called **export include**, which
-will be discussed later and behaves differently on **export** symbols.
+file. There is one variant of the **include** statement, called **public include**, which
+will be discussed later and behaves differently on **public** symbols.
 
 **Constant** or **enum** declarations must be outside of any subroutine.
 Constants or enums (a concise way of declaring a group of related constants) can be global,
-export or local, but not **private**.
+public, export or local, but not **private**.
 
 Euphoria encourages you to restrict the scope of identifiers. If all identifiers were
 automatically global to the whole program, you might have a lot of naming
@@ -1169,7 +1169,7 @@ the most restrictive scope that you can. Make variables
 **private** to one routine where possible, and where that isn't
 possible, make them **local** to a file, rather than
 **global** to the whole program. And whenever an identifier needs to be known from
- a few files only, make it **export** so as to hide it to whoever doesn't need to see it
+ a few files only, make it **public** or **export** so as to hide it from whomever doesn't need to see it
  - and might some day define the same identifier.
 
 For example:
@@ -1194,16 +1194,16 @@ bar() -- error! bar() is not declared here
 
 Why not declare ##foo##() as global, as it is meant to be used anywhere? Well, one could, but this
 will increase the risks of name conflicts. This is why, for instance, all
-public identifiers from the standard library have export scope. **global** should be used
-parsimoniously, if ever. Because earlier versions of Euphoria didn't have **export**, it has
+public identifiers from the standard library have **public** scope. **global** should be used
+parsimoniously, if ever. Because earlier versions of Euphoria didn't have **public** or **export**, it has
 to remain there for a while. One should be very sure of not polluting any foreign file's
-symbol table before using global scope - which is what a large part of the Euphoria source
+symbol table before using **global** scope - which is what a large part of the Euphoria source
 files do. Built-in identifiers act as if declared as **global** - but they are not declared in any
 Euphoria coded file.
 
 ==== Using namespaces
 
-Identifiers marked as ##global## or ##export## can be used externally. All other identifiers
+Identifiers marked as ##global##, ##public## or ##export## can be used externally. All other identifiers
 can only be used within their own file. This information is helpful when
 maintaining or enhancing the file, or when learning how to use the file. You
 can make changes to the internal routines and variables, without having to
@@ -1265,19 +1265,19 @@ comments are ignored) should be 'namespace' followed by the desired name:
 namespace foo
 </eucode>
 
-==== The visibility of export identifiers
+==== The visibility of public and export identifiers
 
-If a file is included by say an application's main file, but needs to see the exported
-identifiers in that file, it must include its parent file.
+If a file is included by say an application's main file, but needs to see the public or
+exported identifiers in that file, it must include its parent file.
 
-The **export** qualifier seems overly rigid, since changing the repartition of identifiers
+The **public** and **export** qualifiers seem overly rigid, since changing the repartition of identifiers
 among files, perhaps as the result of splitting up one of them, will change the visibility of
 this identifier.
 
 To alleviate this, a variant of the include statement was introduced, called
-**export include**. If a file **export include**s another, it will see all the
+**public include**. If a file **public include**s another, it will see all the
 identifiers that the included file sees. This amounts to propagating identifiers marked as
-export one level up in the file hierarchy. Note that source file systems may not form a true
+public one level up in the file hierarchy. Note that source file systems may not form a true
 hierarchy - they would with a simpler system like older versions were using.
 
 
@@ -1303,8 +1303,9 @@ party libraries can be used in the same application, even if they have
 conflicting identifiers, as each library will only see the identifier it defined - unless
 they include one another, but this is extremely unlikely.
 
-The same rule applies to export identifiers. In the case where identifiers with the export and
-global scopes are found to be visible, they are collectively treated as if they were all global.
+The same rule applies to public and export identifiers. In the case where identifiers with the
+public, export and global scopes are found to be visible, they are collectively treated as if
+ they were all global.
 
 The application code that uses the libraries and mentions one of the multiply defined
 identifiers will have to use explicit namespaces to tell which identifier, among those with
@@ -1344,9 +1345,9 @@ normal way.
 
 ==== The override qualifier
 
-There are times when it is necessary to replace a global or export identifier. Typically, one
+There are times when it is necessary to replace a global, public or export identifier. Typically, one
 would do this to extend the capabilities of a routine. Or perhaps to supersede the user
-defined type of some export or global variable, since the type itself may not be global.
+defined type of some publice, export or global variable, since the type itself may not be global.
 
 This can be achieved by declaring the identifier as **override**:
 <eucode>
@@ -1360,7 +1361,7 @@ A warning will be issued when you do this. It would be very confusing, and would
 break code, for the new routine to change the behaviour of the former routine. Code that was
 calling the former routine expects no difference in service, so there shouldn't be any.
 
-If an identifier is declared global or export, but not override, and there is a built-in of the
+If an identifier is declared global, public or export, but not override, and there is a built-in of the
 same name, Euphoria will not assume an override, and will choose the built-in. A warning will
 be generated whenever this happens.
 
@@ -2605,7 +2606,7 @@ Some Examples:
 <eucode>
 include graphics.e
 include \mylib\myroutines.e
-export include library.e
+public include library.e
 </eucode>
 
 Any top-level code in the included file will be executed.
@@ -2618,11 +2619,11 @@ defined in the including file will be visible in the included file.
 remainder of the including file. Their visibility in other included files or in the main
 program file depends on other factors.
 
-An identifier marked as **export** in the including file is not seen by the included file,
+An identifier marked as **public** or **export** in the including file is not seen by the included file,
 unless the latter also includes the including file.
 
-If export precedes the include statement, then all exported identifiers from the
-included file will also be exported from the current file, and visible to any
+If public precedes the include statement, then all public identifiers from the
+included file will also be visible to the including file, and visible to any
 file that includes the current file.
 
 If an absolute //filename// is given, Euphoria will open it and start
@@ -2847,7 +2848,7 @@ The following tags have a predefined meaning in Euphoria:
 The name of a tag may contain any character that are not white space, including ones that
 would not be legal in an identifier. However, for consistency, using identifier-like,
 uppercase words is recommended. "MY TAG" is not a valid tag (TAG has not been declared), but
-"MY@TAG" or "MYçTAG" is. The latter is not recommended because it may display differently on
+"MY@TAG" or "MYï¿½TAG" is. The latter is not recommended because it may display differently on
 different computers.
 
 == Command line switches

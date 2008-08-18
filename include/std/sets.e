@@ -35,7 +35,7 @@ end procedure
 -- See Also:
 -- [[:compare]]
 
-export type set(object s)
+public type set(object s)
     object x,y
 
     if atom(s) or length(s)<2 then
@@ -87,7 +87,7 @@ end function
 --   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_map]], [[:reverse_map],
 --   [[:is_injective]], [[:is_surjective]], [[:is_bijective]]
 
-export type map(sequence s)
+public type map(sequence s)
     object p,q
 
     q=s[$-1]
@@ -123,7 +123,7 @@ end type
 -- ? operation(s)   -- prints out 1.
 -- </eucode>
 
-export type operation(object s)
+public type operation(object s)
     sequence u
 
     if atom(s) or length(s)!=2 or length(s[2])!=3 or length(s[1])!=s[2][1] then
@@ -203,7 +203,7 @@ include sequence.e
 -- See also: 
 -- [[:set]]
 
-export function sequence_to_set(sequence s)
+public function sequence_to_set(sequence s)
     sequence result
     integer k,ls
 
@@ -244,7 +244,7 @@ end function
 -- See Also:
 -- [[:set]]
 
-export function cardinal(set S)
+public function cardinal(set S)
     return length(S)
 end function
 
@@ -268,7 +268,7 @@ end function
 -- See Also: 
 -- [[:is_inside]] , [[:intersection]], [[:difference]]
 
-export function belongs_to(object x,set s)
+public function belongs_to(object x,set s)
 	if length( s ) then
 		return bfind(x,s,1,length(s))>0
 	else
@@ -309,7 +309,7 @@ end function
 -- See Also: 
 -- [[:remove_from]], [[:belongs_to]], [[:union]]
 
-export function add_to(object x,set S)
+public function add_to(object x,set S)
     return add_to_(x,S)
 end function
 
@@ -344,7 +344,7 @@ end function
 -- See Also: 
 -- [[:remove_from]], [[:belongs_to]], [[:union]]
 
-export function remove_from(object x,set s)
+public function remove_from(object x,set s)
     return remove_from_(x,s)
 end function
 
@@ -443,7 +443,7 @@ end function
 --
 -- See Also: 
 -- [[:subsets]], [[:belongs_to]], [[:difference]], [[:embedding]], [[:embed_union]]
-export function is_inside(set small,set large)
+public function is_inside(set small,set large)
     return is_inside_(small,large,0)
 end function
 
@@ -468,7 +468,7 @@ end function
 --
 -- See Also: 
 -- [[:subsets]], [[:belongs_to]], [[:difference]], [[:is_inside]]
-export function embedding(set small,set large)
+public function embedding(set small,set large)
     return is_inside_(small,large,1)
 end function
 
@@ -570,7 +570,7 @@ end function
 -- See Also:
 --		[[:embedding]], [[:union]]
 
-export function embed_union(set s1,set s2)
+public function embed_union(set s1,set s2)
     return embed_union_(s1,s2)
 end function
 
@@ -599,7 +599,7 @@ end function
 -- See Also: 
 --  [[:is_inside]]
 
-export function subsets(set s)
+public function subsets(set s)
     integer p,k,L
     sequence result,s1,s2,x
 
@@ -709,7 +709,7 @@ end function
 -- See Also: 
 -- [[:is_inside]], [[:subsets]], [[:belongs_to]]
 
-export function intersection(set S1,set S2)
+public function intersection(set S1,set S2)
     return intersection_(S1,S2)
 end function
 
@@ -808,7 +808,7 @@ end function
 --
 -- See Also: 
 -- [[:is_inside]], [[:subsets]], [[:belongs_to]]
-export function union(set S1,set S2)
+public function union(set S1,set S2)
     return union1(S1,S2)
 end function
 
@@ -832,7 +832,7 @@ end function
 --
 -- See Also: 
 --		[[:intersection]], [[:union]], [[:difference]]
-export function delta(set s1,set s2)
+public function delta(set s1,set s2)
     integer ls1,ls2
 
     ls1=length(s1)
@@ -869,7 +869,7 @@ end function
 --
 -- See Also:
 -- [::remove_from,]] [[:is_inside]], [[:delta]]
-export function difference(set base,set removed)
+public function difference(set base,set removed)
     integer k1,k2,k,c,ls1,ls2,k0
     sequence result
     ls1=length(base)
@@ -975,7 +975,7 @@ end function
 -- See Also:
 -- [[:product_map]], [[:amalgamated_sum]], [[:fiber_product]]
 
-export function product(set S1, set S2)
+public function product(set S1, set S2)
     return product_(S1, S2)
 end function
 
@@ -1005,7 +1005,7 @@ end function
 -- See Also:
 --   [[:map]], [[:sequences_to_map]], [[:direct_map]]
 
-export function define_map(sequence mapping,set target)
+public function define_map(sequence mapping,set target)
     sequence result
     integer lt
 
@@ -1050,7 +1050,7 @@ end function
 -- See Also:
 -- [[:map]], [[:define_map]]
 
-export function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
+public function sequences_to_map(sequence mapped,sequence mapped_to,integer mode)
     sequence result
     set sorted,sorted_to
     integer ls,lm_to,lm
@@ -1107,7 +1107,7 @@ end function
 -- See Also:
 --   [[:direct_map]]
 
-export function image(map f,object x,set input,set output)
+public function image(map f,object x,set input,set output)
     integer p
 
     if f[$]>length(output) then
@@ -1145,7 +1145,7 @@ end function
 -- See Also:
 -- [[:direct_map]], [[:image]]
 
-export function range(map f,set s)
+public function range(map f,set s)
     sequence result
 
     result=sequence_to_set(f[1..$-2])
@@ -1189,7 +1189,7 @@ end function
 -- See Also: 
 -- [[:reverse_map]]
 
-export function direct_map(map f,set s1,sequence s0,set s2)
+public function direct_map(map f,set s1,sequence s0,set s2)
     sequence result
     integer k,p,ls1
 
@@ -1235,7 +1235,7 @@ end function
 --
 -- See Also:
 -- [[:is_inside]], [[:direct_map]], [[:difference]]
- export function restrict(map f,set source,set restriction)
+ public function restrict(map f,set source,set restriction)
     sequence result = restriction
     integer p = 1, k = 0
 
@@ -1303,7 +1303,7 @@ end function
 -- See Also: 
 -- [[:restrict]], [[:direct_map]]
 
-export function change_target(map f,set old_target,set new_target)
+public function change_target(map f,set old_target,set new_target)
     return change_target_(f,old_target,new_target)
 end function
 
@@ -1342,7 +1342,7 @@ end function
 -- See Also:
 -- [[:restrict]], [[:direct_map]]
 
-export function combine_maps(map f1,set source1,set target1,map f2,set source2,set target2)
+public function combine_maps(map f1,set source1,set target1,map f2,set source2,set target2)
     integer len_result,p
     set s
     sequence result
@@ -1412,7 +1412,7 @@ end function
 --
 -- See Also:
 -- [[:diagram_commutes]]
-export function compose_map(map f2,map f1)
+public function compose_map(map f2,map f1)
     return compose_map_(f1,f2)
 end function
 
@@ -1441,7 +1441,7 @@ end function
 --
 -- See Also:
 -- [[:compose_map]]
-export function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
+public function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
     return not compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
 end function
 
@@ -1463,7 +1463,7 @@ end function
 --
 -- See Also: 
 -- [[:is_surjective]], [[:is_bijective]], [[:reverse_map]], [[:fiber_over]]
-export function is_injective(map f)
+public function is_injective(map f)
     sequence s
     integer p
     object x,y
@@ -1513,7 +1513,7 @@ end function
 --
 -- See Also: 
 -- [[:is_surjective]], [[:is_bijective]], [[:direct_map]], [[:section]]
-export function is_surjective(map f)
+public function is_surjective(map f)
     return is_surjective_(f)
 end function
 
@@ -1535,7 +1535,7 @@ end function
 --
 -- See Also: 
 -- [[:is_surjective]], [[:is_bijective]], [[:direct_map]], [[:inverse]]
-export function is_bijective(map f)
+public function is_bijective(map f)
     if f[$]!=f[$-1] then
         return 0
     else
@@ -1596,7 +1596,7 @@ end function
 --
 -- See Also: 
 -- [[:reverse_map]], [[:fiber_product]]
-export function fiber_over(map f,set source,set target)
+public function fiber_over(map f,set source,set target)
     return fiber_over_(f,source,target)
 end function
 
@@ -1629,7 +1629,7 @@ end function
 -- See Also: 
 -- [[:direct_map]], [[:fiber_over]]
 
-export function reverse_map(map f,set s1,sequence s0,set s2)
+public function reverse_map(map f,set s1,sequence s0,set s2)
     sequence x,done,result
     integer p
 
@@ -1667,7 +1667,7 @@ end function
 -- See Also: 
 -- [[:reverse_map]], [[:is_injective]]
 
-export function section(map f)
+public function section(map f)
     sequence result = f
     integer k = 0, p = f[$-1]
 
@@ -1721,7 +1721,7 @@ end function
 --
 -- See Also: 
 -- [[:product]], [[:amalgamated_sum]], [[:fiber_product]]
-export function product_map(map f1,map f2)
+public function product_map(map f1,map f2)
     sequence result,s
     integer k ,p
     k=1
@@ -1763,7 +1763,7 @@ end function
 --
 -- [[:product]], [[:product_map]], [[:fiber_product]]
 
-export function amalgamated_sum(set first,set second,set base,map base_to_1,map base_to_2)
+public function amalgamated_sum(set first,set second,set base,map base_to_1,map base_to_2)
     sequence result
 
     result=base
@@ -1800,7 +1800,7 @@ end function
 --
 -- See Also: 
 -- [[:reverse_map]], {{:amalgamated_sum]], [[:fiber_over]]
-export function fiber_product(set first,set second,set base,map from_1_to_base,map from_2_to_base)
+public function fiber_product(set first,set second,set base,map from_1_to_base,map from_2_to_base)
     sequence result,x1,x2,x0
 
     x1=fiber_over_(from_1_to_base,first,base)
@@ -1827,7 +1827,7 @@ end function
 -- * SIDE_BOTH:  property is requested or verified on both sides.
 
 
-export enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
+public enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
 
 --****
 -- === Operations on sets
@@ -1861,7 +1861,7 @@ export enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
 -- See Also:
 -- [[:operation]]
 
-export function define_operation(sequence left_actions)
+public function define_operation(sequence left_actions)
     integer size_left,size_right
     map f
 
@@ -1902,7 +1902,7 @@ end function
 -- See Also: 
 --   [[:operation]], [[:has_unit]]
 
-export function is_symmetric(operation f)
+public function is_symmetric(operation f)
     sequence s
     integer n
     n=f[2][1]
@@ -1944,7 +1944,7 @@ end function
 -- See Also:
 --    [[:operation]], [[:has_unit]]
 
-export function is_associative(operation f)
+public function is_associative(operation f)
     sequence s
     integer n
     
@@ -2010,7 +2010,7 @@ end function
 -- See Also: 
 -- [[:all_right_units]], [[:is_unit]], [[:has_unit]]
 
-export function all_left_units(operation f)
+public function all_left_units(operation f)
     return all_left_units_(f)
 end function
 
@@ -2063,7 +2063,7 @@ end function
 -- See Also: 
 -- [[:all_left_units]], [[:is_unit]], [[:has_unit]]
 
-export function all_right_units(operation f)
+public function all_right_units(operation f)
     integer p
     sequence result
 
@@ -2139,7 +2139,7 @@ end function
 -- See Also: 
 -- [[:all_left_units]], [[:all_right_units]],[[:is_unit]]
 
-export function has_unit(operation f, integer flags = SIDE_BOTH)
+public function has_unit(operation f, integer flags = SIDE_BOTH)
 	flags = and_bits(flags, SIDE_BOTH)
     switch flags do
     	case SIDE_LEFT:
@@ -2171,7 +2171,7 @@ end function
 -- See Also:
 -- [[:all_left_units]], [[:has_unit]]
 
-export function is_unit(integer x, operation f)
+public function is_unit(integer x, operation f)
 	return is_left_unit(x, f) + SIDE_RIGHT * is_right_unit_(x, f)
 end function
 --**
@@ -2195,7 +2195,7 @@ end function
 -- See Also: 
 -- [[:has_unit]]
 
-export function has_inverse(integer x,operation f)
+public function has_inverse(integer x,operation f)
     return find(has_unit_(f),f[1][x])
 end function
 
@@ -2304,7 +2304,7 @@ end function
 -- </eucode>
 --
 
-export function distributes_over(operation product,operation sum,integer transpose=0)
+public function distributes_over(operation product,operation sum,integer transpose=0)
     return distributes_left_(product,sum,transpose)+2*distributes_right_(product,sum,not transpose)
 end function
 

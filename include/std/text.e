@@ -78,7 +78,7 @@ include types.e
 -- See Also:
 --    [[:sprintf]], [[:printf]]
 
-export function sprint(object x)
+public function sprint(object x)
 -- Return the string representation of any Euphoria data object. 
 -- This is the same as the output from print(1, x) or '?', but it's
 -- returned as a string sequence rather than printed.
@@ -125,7 +125,7 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:trim]], [[:pad_head]]
 
-export function trim_head(sequence source, object what=" \t\r\n")
+public function trim_head(sequence source, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
@@ -159,7 +159,7 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:trim]], [[:pad_tail]]
 
-export function trim_tail(sequence source, object what=" \t\r\n")
+public function trim_tail(sequence source, object what=" \t\r\n")
 	if atom(what) then
 		what = {what}
 	end if
@@ -193,7 +193,7 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:trim_tail]]
 
-export function trim(sequence source, object what=" \t\r\n")
+public function trim(sequence source, object what=" \t\r\n")
 	return trim_tail(trim_head(source, what), what)
 end function
 
@@ -229,7 +229,7 @@ constant TO_LOWER = 'a' - 'A'
 -- See Also:
 --   [[:upper]] [[:proper]]
 
-export function lower(object x)
+public function lower(object x)
 -- convert atom or sequence to lower case
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
 end function
@@ -263,7 +263,7 @@ end function
 -- See Also:
 --     [[:lower]] [[:proper]]
 
-export function upper(object x)
+public function upper(object x)
 -- convert atom or sequence to upper case
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
@@ -304,7 +304,7 @@ end function
 -- See Also:
 --     [[:lower]] [[:upper]]
 
-export function proper(sequence x)
+public function proper(sequence x)
 -- Converts text to lowercase and makes each word start with an uppercase.
 	integer pos
 	integer inword
@@ -466,7 +466,7 @@ end function
 -- -- s is { {"colors", "[black, blue, red]"}  } }
 -- </eucode>
 
-export function keyvalues(sequence source, object pair_delim = ";,", 
+public function keyvalues(sequence source, object pair_delim = ";,", 
                           object kv_delim = ":=", object quotes =  "\"'`", 
                           object whitespace = " \t\n\r", integer haskeys = 1)
                           

@@ -1,8 +1,8 @@
 include bar_export.e
-export include baz_export.e
+public include baz_export.e
 
 export function export_test()
 	return "foo"
 end function
 
-export constant EXPORT_CONSTANT = "foo"
+public constant EXPORT_CONSTANT = "foo"

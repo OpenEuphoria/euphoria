@@ -220,7 +220,7 @@ include error.e
 -- See Also:
 --		[[:find]], [[:find_from]]
 
-export function find_any(sequence needles, sequence haystack, integer start=1)
+public function find_any(sequence needles, sequence haystack, integer start=1)
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
 			return i
@@ -250,7 +250,7 @@ end function
 -- See Also:
 --     [[:find]], [[:match]], [[:match_all]]
 
-export function find_all(object needle, sequence haystack, integer start=1)
+public function find_all(object needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
 	while start > 0 entry do
@@ -263,7 +263,7 @@ export function find_all(object needle, sequence haystack, integer start=1)
 	return ret
 end function
 
-export constant
+public constant
     NESTED_ANY=1,
     NESTED_ALL=2,
     NESTED_INDEX=4,
@@ -321,7 +321,7 @@ export constant
 -- See Also:
 -- [[:find]], [[:rfind]], [[:find_any]], [[:fetch]]
 
-export function find_nested(object needle, sequence haystack, integer flags=0, integer routine=-1)
+public function find_nested(object needle, sequence haystack, integer flags=0, integer routine=-1)
 	sequence occurrences = {} -- accumulated results
 	integer depth = 0
 	sequence branches = {}, indexes = {}, last_indexes = {} -- saved states
@@ -452,7 +452,7 @@ end function
 -- See Also:
 --   [[:find]], [[:rmatch]]
 
-export function rfind(object needle, sequence haystack, integer start=length(haystack))
+public function rfind(object needle, sequence haystack, integer start=length(haystack))
 	integer len = length(haystack)
 
 	if start = 0 then start = len end if
@@ -506,7 +506,7 @@ end function
 -- See Also:
 --		[[:find]], [[:replace]]
 
-export function find_replace(object needle, sequence haystack, object replacement, 
+public function find_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
 	integer posn, needle_len, replacement_len
 	
@@ -563,7 +563,7 @@ end function
 -- See Also:
 -- [[:find]], [[:db_find_key]]
 
-export function binary_search(object needle, sequence haystack, integer startpoint = 1, 
+public function binary_search(object needle, sequence haystack, integer startpoint = 1, 
 		integer endpoint = 0)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
@@ -646,7 +646,7 @@ end function
 -- See Also:
 --     [[:match]], [[:find]], [[:find_all]]
 
-export function match_all(sequence needle, sequence haystack, integer start=1)
+public function match_all(sequence needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
 	while start > 0 entry do
@@ -688,7 +688,7 @@ end function
 -- See Also:
 --     [[:rfind]], [[:match]]
 
-export function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
+public function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
 	integer len, lenx
 
 	len = length(haystack)
@@ -741,7 +741,7 @@ end function
 -- See Also:
 --     [[:ends]], [[:head]]
 
-export function begins(object pSubSeq, sequence pFullSeq)
+public function begins(object pSubSeq, sequence pFullSeq)
 	if length(pFullSeq) = 0 then
 		return 0
 	end if
@@ -786,7 +786,7 @@ end function
 -- See Also:
 --     [[:begins]], [[:tail]]
 
-export function ends(object pSubSeq, sequence pFullSeq)
+public function ends(object pSubSeq, sequence pFullSeq)
 	if length(pFullSeq) = 0 then
 		return 0
 	end if

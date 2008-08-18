@@ -11,7 +11,7 @@
 -- * BMP_UNSUPPORTED_FORMAT,
 -- * BMP_INVALID_MODE
 
-export enum
+public enum
 	BMP_SUCCESS,
 	BMP_OPEN_FAILED,
 	BMP_UNEXPECTED_EOF,
@@ -30,7 +30,7 @@ export enum
 -- * VC_NCOLORS
 -- * VC_PAGES
 
-export enum
+public enum
 	VC_COLOR,
 	VC_MODE,
 	VC_LINES,
@@ -67,7 +67,7 @@ export enum
 -- * BLINKING
 
 -- COLOR values -- for characters and pixels
-export constant
+public constant
 	BLACK = 0,  -- in graphics modes this is "transparent"
 	GREEN = 2,
 	MAGENTA = 5,
@@ -77,7 +77,7 @@ export constant
 	BRIGHT_MAGENTA = 13,
 	BRIGHT_WHITE = 15
 
-export integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
+public integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
 
 ifdef UNIX then
 	BLUE  = 4
@@ -99,17 +99,17 @@ else
 	YELLOW = 14
 end ifdef
 
-export constant BLINKING = 16  -- add to color to get blinking text
+public constant BLINKING = 16  -- add to color to get blinking text
 
-export constant BYTES_PER_CHAR = 2
+public constant BYTES_PER_CHAR = 2
 
 ifdef DOS32 then
-export constant
+public constant
 	COLOR_TEXT_MEMORY = #B8000,
 	MONO_TEXT_MEMORY = #B0000
 end ifdef
 
-export type color(integer x)
+public type color(integer x)
 	return x >= 0 and x <= 255
 end type
 
@@ -125,7 +125,7 @@ end type
 -- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest
 -- white is {63, 63, 63}.
 
-export type mixture(sequence s)
+public type mixture(sequence s)
 	if length(s) != 3 then
 		return 0
 	end if
@@ -156,9 +156,9 @@ constant
 --
 -- Comments:
 --
--- An exported enum is available for convenient access to the returned configuration data:
+-- A public enum is available for convenient access to the returned configuration data:
 -- <eucode>
--- export constant
+-- public constant
 --     VC_COLOR   = 1,
 --     VC_MODE    = 2,
 --     VC_LINES   = 3,
@@ -186,7 +186,7 @@ constant
 -- See Also:
 -- 		[[:graphics_mode]]
 
-export function video_config()
+public function video_config()
 	return machine_func(M_VIDEO_CONFIG, 0)
 end function
 

@@ -14,7 +14,7 @@ constant
 	M_SET_B_COLOR    = 10,
 	M_GET_POSITION   = 25
 
-export include console.e
+public include console.e
 
 --****
 -- === Routines
@@ -72,7 +72,7 @@ export include console.e
 -- See Also:
 --   [[:position]], [[:get_pixel]]
 
-export function get_position()
+public function get_position()
 	return machine_func(M_GET_POSITION, 0)
 end function
 
@@ -99,7 +99,7 @@ include graphcst.e
 -- See Also:
 --   [[:bk_color]] , [[:clear_screen]]
 
-export procedure text_color(color c)
+public procedure text_color(color c)
 -- set the foreground text color to c - text or graphics modes
 -- add 16 to get blinking
 	machine_proc(M_SET_T_COLOR, c)
@@ -136,7 +136,7 @@ end procedure
 -- See Also:
 --   [[:text_color]], [[:palette]]
 
-export procedure bk_color(color c)
+public procedure bk_color(color c)
 -- set the background color to c - text or graphics modes
 	machine_proc(M_SET_B_COLOR, c)
 end procedure
@@ -169,7 +169,7 @@ end type
 -- See Also:
 --   [[:puts]], [[:position]]
 
-export procedure wrap(boolean on)
+public procedure wrap(boolean on)
 	machine_proc(M_WRAP, on)
 end procedure
 
@@ -196,7 +196,7 @@ end procedure
 -- See Also:
 --   [[:clear_screen]], [[:text_rows]]
 
-export procedure scroll(integer amount, 
+public procedure scroll(integer amount, 
 						positive_int top_line, 
 						positive_int bottom_line)
 	machine_proc(M_SCROLL, {amount, top_line, bottom_line})
@@ -273,6 +273,6 @@ end type
 -- See Also:
 -- 		[[:video_config]]
 
-export function graphics_mode(mode m)
+public function graphics_mode(mode m)
    return machine_func(M_GRAPHICS_MODE, m)
 end function

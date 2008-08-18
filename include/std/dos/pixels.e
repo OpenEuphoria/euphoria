@@ -48,7 +48,7 @@ end type
 -- See Also:
 -- 		[[:polygon]]
 
-export procedure draw_line(color c, point_sequence xyarray)
+public procedure draw_line(color c, point_sequence xyarray)
 	machine_proc(M_LINE, {c, 0, xyarray})
 end procedure
 
@@ -70,7 +70,7 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:draw_line]]
-export procedure polygon(color c, boolean fill, point_sequence xyarray)
+public procedure polygon(color c, boolean fill, point_sequence xyarray)
 	machine_proc(M_POLYGON, {c, fill, xyarray})
 end procedure
 
@@ -102,7 +102,7 @@ end procedure
 -- --        {10, 10}, {10, 20}, {20, 20}, {20, 10}.
 -- </eucode>
 
-export procedure ellipse(color c, boolean fill, point p1, point p2)
+public procedure ellipse(color c, boolean fill, point p1, point p2)
 	machine_proc(M_ELLIPSE, {c, fill, p1, p2})
 end procedure
 
@@ -140,7 +140,7 @@ end procedure
 -- See Also: *
 --   [[:save_image]], [[:read_bitmap]], [[:display_text_image]]
 
-export procedure display_image(graphics_point xy, sequence pixels)
+public procedure display_image(graphics_point xy, sequence pixels)
 	for i = 1 to length(pixels) do
 		pixel(pixels[i], xy)
 		xy[2] += 1
@@ -176,7 +176,7 @@ end procedure
 -- See Also:
 -- 		[[:display_image]], [[:save_text_image]]
 
-export function save_image(graphics_point top_left, graphics_point bottom_right)
+public function save_image(graphics_point top_left, graphics_point bottom_right)
 	integer x, width
 	sequence save
 	

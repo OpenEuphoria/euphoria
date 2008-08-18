@@ -62,7 +62,7 @@
 -- [[:call]](), [[:dos_interrupt]](), [[:c_proc]]() or [[:c_func]]().
 -- To save time, your program can turn off this checking by setting check_calls to 0.
 
-export integer check_calls = 1
+public integer check_calls = 1
 
 --**
 -- Determine whether to flag accesses to remote memory areas.
@@ -76,7 +76,7 @@ export integer check_calls = 1
 -- For a stronger check, set this to 0 if your program will never read/write an unregistered block of memory.
 --
 -- On //WIN32// people often use unregistered blocks.
-export integer edges_only = (platform()=2) 
+public integer edges_only = (platform()=2) 
 				  
 
 -- from misc.e and graphics.e:
@@ -85,7 +85,7 @@ constant M_SOUND = 1
 -- Include the starting address and length of any 
 -- acceptable areas of memory for peek/poke here. 
 -- Set allocation number to 0.
-export sequence safe_address_list = {}
+public sequence safe_address_list = {}
 
 with type_check
 
@@ -129,9 +129,9 @@ type low_machine_addr(atom a)
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
 
-export constant BORDER_SPACE = 40
-export constant leader = repeat('@', BORDER_SPACE)
-export constant trailer = repeat('%', BORDER_SPACE)
+public constant BORDER_SPACE = 40
+public constant leader = repeat('@', BORDER_SPACE)
+public constant trailer = repeat('%', BORDER_SPACE)
 
 function safe_address(atom start, integer len)
 -- is it ok to read/write all addresses from start to start+len-1?
@@ -201,7 +201,7 @@ function safe_address(atom start, integer len)
 	end if
 end function
 
-export procedure die(sequence msg)
+public procedure die(sequence msg)
 -- Terminate with a message.
 -- makes warning beeps first so you can see what's happening on the screen
 	atom t
@@ -462,7 +462,7 @@ procedure show_byte(atom m)
 	puts(1, ",  ")
 end procedure
 
-export procedure show_block(sequence block_info)
+public procedure show_block(sequence block_info)
 -- display a corrupted block and die
 	integer len, id, bad, p
 	atom start
@@ -521,7 +521,7 @@ export procedure show_block(sequence block_info)
 	die("")
 end procedure
 
-export procedure check_all_blocks()
+public procedure check_all_blocks()
 -- Check all allocated blocks for corruption of the leader and trailer areas. 
 	integer n
 	atom a
@@ -573,14 +573,14 @@ override function c_func(integer i, sequence s)
 	return r
 end function
 
-export procedure register_block(machine_addr block_addr, positive_int block_len)
+public procedure register_block(machine_addr block_addr, positive_int block_len)
 -- register an externally-acquired block of memory as being safe to use
 	allocation_num += 1
 	safe_address_list = prepend(safe_address_list, {block_addr, block_len,
 	   -allocation_num})
 end procedure
 
-export procedure unregister_block(machine_addr block_addr)
+public procedure unregister_block(machine_addr block_addr)
 -- remove an external block of memory from the safe address list
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][1] = block_addr then
@@ -595,7 +595,7 @@ export procedure unregister_block(machine_addr block_addr)
 	die("ATTEMPT TO UNREGISTER A BLOCK THAT WAS NOT REGISTERED!")
 end procedure
 
-export function prepare_block(atom a, integer n)
+public function prepare_block(atom a, integer n)
 -- set up an allocated block so we can check it for corruption
 	if a = 0 then
 		die("OUT OF MEMORY!")
@@ -611,7 +611,7 @@ export function prepare_block(atom a, integer n)
 	return a
 end function
 
-export function allocate(positive_int n)
+public function allocate(positive_int n)
 -- allocate memory block and add it to safe list
 	atom a
 
@@ -619,7 +619,7 @@ export function allocate(positive_int n)
 	return prepare_block(a, n)
 end function
 
-export procedure free(machine_addr a)
+public procedure free(machine_addr a)
 -- free address a - make sure it was allocated
 	integer n
 	
@@ -646,7 +646,7 @@ export procedure free(machine_addr a)
 	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
 
-export function allocate_string(sequence s)
+public function allocate_string(sequence s)
 -- create a C-style null-terminated string in memory
 	atom mem
 	

@@ -23,7 +23,7 @@ constant M_SLEEP = 64
 --
 -- See Also:
 -- [[:sleep]]
-export procedure task_delay(atom delaytime)
+public procedure task_delay(atom delaytime)
 	atom t
 	t = time()
 

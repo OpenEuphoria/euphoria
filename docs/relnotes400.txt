@@ -97,14 +97,16 @@ $$(doneby C. Cuvier)
   $$(doneby C. Cuvier)
 * New scope: **export**.  Identifiers with the export scope can only be seen from files that:
 ## directly include the file where the identifiers are defined
-## directly include a file that uses the "export include file.e" construct to pass export 
+* New scope: **public**.  Identifiers with the public scope can only be seen from files that:
+## directly include the file where the identifiers are defined
+## directly include a file that uses the "public include file.e" construct to pass public 
    identifiers 
   $$(doneby Matt Lewis)
 * Routine resolution changes
 ## Routines the same name as an internal no longer override the internal by default. You
    must use the keyword **override**.
 ## An unqualified call to routine that exists as an internal calls the internal unless
-   overridden with the override keyword. global and export functions are not called. A
+   overridden with the override keyword. global, public and export functions are not called. A
    namespace must be used.
  $$(doneby Jeremy Cowgar.)
 * ##-STRICT## option added that will display **all** warnings regardless of the file's

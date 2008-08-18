@@ -21,27 +21,27 @@ constant M_SEEK  = 19,
 --**
 -- Standard Input
 
-export constant STDIN = 0
+public constant STDIN = 0
 
 --**
 -- Standard Output
 
-export constant STDOUT = 1
+public constant STDOUT = 1
 
 --**
 -- Standard Error
 
-export constant STDERR = 2
+public constant STDERR = 2
 
 --**
 -- Screen (Standard Out)
 
-export constant SCREEN = 1
+public constant SCREEN = 1
 
 --**
 -- End of file
 
-export constant EOF = -1
+public constant EOF = -1
 
 
 --****
@@ -379,7 +379,7 @@ constant CHUNK = 100
 -- See Also:
 -- 		[[:getc]], [[:gets]]
 
-export function get_bytes(integer fn, integer n)
+public function get_bytes(integer fn, integer n)
 	sequence s
 	integer c, first, last
 
@@ -429,19 +429,19 @@ end function
 --**
 -- Lock Type Constants
 
-export enum LOCK_SHARED, LOCK_EXCLUSIVE
+public enum LOCK_SHARED, LOCK_EXCLUSIVE
 
 --**
 -- File number type
 
-export type file_number(integer f)
+public type file_number(integer f)
 	return f >= 0
 end type
 
 --**
 -- File position type
 
-export type file_position(atom p)
+public type file_position(atom p)
 	return p >= -1
 end type
 
@@ -449,14 +449,14 @@ end type
 --**
 -- Lock Type
 
-export type lock_type(integer t)
+public type lock_type(integer t)
 	return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
 end type
 
 --**
 -- Byte Range Type
 
-export type byte_range(sequence r)
+public type byte_range(sequence r)
 	if length(r) = 0 then
 		return 1
 	elsif length(r) = 2 and r[1] <= r[2] then
@@ -623,7 +623,7 @@ end type
 -- See Also:
 --		[[:get_bytes]], [[:puts]], [[:where]]
 
-export function seek(file_number fn, file_position pos)
+public function seek(file_number fn, file_position pos)
 	return machine_func(M_SEEK, {fn, pos})
 end function
 
@@ -646,7 +646,7 @@ end function
 -- will be read from, or written to. It is updated
 -- by reads, writes and seeks on the file. 
 
-export function where(file_number fn)
+public function where(file_number fn)
 	return machine_func(M_WHERE, fn)
 end function
 
@@ -689,7 +689,7 @@ end function
 -- See Also:
 --		[[:close]], [[:crash_routine]]
 
-export procedure flush(file_number fn)
+public procedure flush(file_number fn)
 	machine_proc(M_FLUSH, fn)
 end procedure
 
@@ -726,7 +726,7 @@ end procedure
 -- process has any kind of lock on the file. io.e contains the following declarations:
 -- 
 -- <eucode>
--- export enum
+-- public enum
 --     LOCK_SHARED, 
 --     LOCK_EXCLUSIVE
 -- </eucode>
@@ -771,7 +771,7 @@ end procedure
 -- See Also:
 --		[[:unlock_file]]
 
-export function lock_file(file_number fn, lock_type t, byte_range r={})
+public function lock_file(file_number fn, lock_type t, byte_range r={})
 	return machine_func(M_LOCK_FILE, {fn, t, r})
 end function
 
@@ -801,7 +801,7 @@ end function
 -- See Also:
 -- 		[[:lock_file]]
 
-export procedure unlock_file(file_number fn, byte_range r={})
+public procedure unlock_file(file_number fn, byte_range r={})
 -- The byte range can be {} if you want to unlock the whole file.
 	machine_proc(M_UNLOCK_FILE, {fn, r})
 end procedure
@@ -841,7 +841,7 @@ end procedure
 -- See Also:
 --		[[:gets]], [[:write_lines]], [[:read_file]]
 
-export function read_lines(object file)
+public function read_lines(object file)
 	object fn, ret, y
 	if sequence(file) then
 			fn = open(file, "r")
@@ -894,7 +894,7 @@ end function
 -- See Also:
 --     [[:read_lines]], [[:write_file]], [[:puts]]
 
-export function write_lines(object file, sequence lines)
+public function write_lines(object file, sequence lines)
 	object fn
 
 	if sequence(file) then
@@ -942,7 +942,7 @@ end function
 -- See Also:
 --     [[:write_lines]], [[:puts]]
 
-export function append_lines(sequence file, sequence lines)
+public function append_lines(sequence file, sequence lines)
 	object fn
 
   	fn = open(file, "a")
@@ -985,7 +985,7 @@ end function
 -- See Also:
 --     [[:write_file]], [[:read_lines]]
 
-export function read_file(object file)
+public function read_file(object file)
 	integer fn
 	integer len
 	sequence ret
@@ -1041,7 +1041,7 @@ end function
 -- See Also:
 --    [[:read_file]], [[:write_lines]]
 
-export function write_file(object f, sequence data)
+public function write_file(object f, sequence data)
 	integer fn
 
 	if sequence(f) then

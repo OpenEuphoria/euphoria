@@ -20,7 +20,7 @@ include error.e
 -- * ##GET_FAIL## = 1,
 -- * ##GET_NOTHING## = -2
 
-export constant GET_SUCCESS = 0,
+public constant GET_SUCCESS = 0,
 				GET_EOF = -1,
 				GET_FAIL = 1,
 				GET_NOTHING = -2
@@ -460,7 +460,7 @@ function Get2()
 
 end function
 
-export constant
+public constant
 	GET_SHORT_ANSWER = routine_id("Get"),
 	GET_LONG_ANSWER  = routine_id("Get2")
 
@@ -606,7 +606,7 @@ end function
 -- See Also:
 --   [[:value]]
 
-export function get(integer file, integer offset=0, integer answer=GET_SHORT_ANSWER)
+public function get(integer file, integer offset=0, integer answer=GET_SHORT_ANSWER)
 -- Read the string representation of a Euphoria object
 -- from a file. Convert to the value of the object.
 -- Return {error_status, value}.
@@ -673,7 +673,7 @@ end function
 -- See Also:
 --   [[:get]]
 
-export function value(sequence st, integer start_point=1, integer answer=GET_SHORT_ANSWER)
+public function value(sequence st, integer start_point=1, integer answer=GET_SHORT_ANSWER)
 -- Read the representation of a Euphoria object
 -- from a sequence of characters. Convert to the value of the object.
 -- Trailing whitespace or comments are not considered.

@@ -5,6 +5,6 @@ include machine.e
 
 warning("file.e is deprecated, please see io.e, filesys.e and console.e")
 
-export include io.e
-export include filesys.e
-export include console.e
+public include io.e
+public include filesys.e
+public include console.e

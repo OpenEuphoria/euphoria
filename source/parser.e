@@ -3214,9 +3214,7 @@ global procedure real_parser(integer nested)
 			if id = GLOBAL then
 			    scope = SC_GLOBAL
 			elsif id = EXPORT then
-				-- TODO: this is temporary for the transition
-				--scope = SC_EXPORT
-				scope = SC_PUBLIC
+				scope = SC_EXPORT
 			elsif id = OVERRIDE then
 				scope = SC_OVERRIDE
 			elsif id = PUBLIC then

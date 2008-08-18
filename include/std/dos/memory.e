@@ -37,7 +37,7 @@ include base_mem.e
 -- See Also:
 --   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]
 
-export function allocate_low(positive_int n)
+public function allocate_low(positive_int n)
 	return machine_func(M_ALLOC_LOW, n)
 end function
 
@@ -67,7 +67,7 @@ end function
 -- See Also:
 --   [[:allocate_low]], [[:dos_interrupt]], [[:free]]
 
-export procedure free_low(low_machine_addr addr)
+public procedure free_low(low_machine_addr addr)
 	machine_proc(M_FREE_LOW, addr)
 end procedure
 

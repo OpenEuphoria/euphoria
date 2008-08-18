@@ -36,7 +36,7 @@ safe_address_list = {
 -- See Also:
 --   [[:dos_interrupt]], [[:free_low]], [[:allocate]], [[:peek]], [[:poke]]
 
-export function allocate_low(positive_int n)
+public function allocate_low(positive_int n)
 -- allocate memory block and add it to safe list
 	atom a
 	
@@ -69,7 +69,7 @@ end function
 --
 -- See Also:
 --   [[:allocate_low]], [[:dos_interrupt]], [[:free]]
-export procedure free_low(low_machine_addr a)
+public procedure free_low(low_machine_addr a)
 -- free low address a - make sure it was allocated
 	integer n
 	

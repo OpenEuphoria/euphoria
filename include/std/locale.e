@@ -53,7 +53,7 @@ lang_path = 0
 -- See Also:
 --		[[:set]]
 
-export procedure set_lang_path(object pp)
+public procedure set_lang_path(object pp)
 	lang_path = pp
 end procedure
 
@@ -66,7 +66,7 @@ end procedure
 -- See Also:
 --		[[:get_lang_path]]
 
-export function get_lang_path()
+public function get_lang_path()
 	return lang_path
 end function
 
@@ -92,7 +92,7 @@ end function
 -- See Also:
 --		[[:w]]
 
-export function lang_load(sequence filename)
+public function lang_load(sequence filename)
 	object lines
 	sequence line, key, msg
 	integer sp, cont -- continuation
@@ -151,7 +151,7 @@ end function
 -- See Also:
 -- 		[[:set]], [[:lang_load]]
 
-export function w(sequence word)
+public function w(sequence word)
 	return m:get(lang, word, "")
 end function
 
@@ -257,7 +257,7 @@ end ifdef
 --
 -- The optional .xyz part specifies an encoding, like .utf8 or .1252 . This is required in some cases.
 
-export function set(sequence new_locale)
+public function set(sequence new_locale)
 	atom pLocale, ign
 	ifdef WIN32 then
 		sequence nlocale
@@ -297,7 +297,7 @@ end function
 -- See Also:
 --		[[:set]]
 
-export function get()
+public function get()
 	sequence r
 	atom p
 
@@ -335,7 +335,7 @@ end function
 -- See Also:
 --		[[:set]], [[:number]]
 
-export function money(atom amount)
+public function money(atom amount)
 	sequence result
 	integer size
 	atom pResult, pTmp
@@ -376,7 +376,7 @@ end function
 -- See Also:
 --		[[:set]], [[:money]]
 
-export function number(atom num)
+public function number(atom num)
 	sequence result
 	integer size
 	atom pResult, pTmp
@@ -434,7 +434,7 @@ end function
 -- See Also:
 --		[[:format]]
 
-export function datetime(sequence fmt, dt:datetime dtm)
+public function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
 	integer size
 	sequence res

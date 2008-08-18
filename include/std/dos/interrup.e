@@ -8,7 +8,7 @@
 --**
 -- Length of a register list
 
-export constant REG_LIST_SIZE = 10
+public constant REG_LIST_SIZE = 10
 
 constant M_INTERRUPT = 34
 
@@ -26,7 +26,7 @@ constant M_INTERRUPT = 34
 -- * REG_ES
 -- * REG_DS
 
-export enum
+public enum
 	REG_DI,
 	REG_SI,
 	REG_BP,
@@ -40,7 +40,7 @@ export enum
 	REG_ES,
 	REG_DS
 
-export type register_list(sequence r)
+public type register_list(sequence r)
 -- a list of register values
 	return length(r) = REG_LIST_SIZE
 end type
@@ -97,7 +97,7 @@ end type
 -- See Also: , 
 --       [[:allocate_low]], [[:free_low]]
 
-export function dos_interrupt(integer int_num, register_list input_regs)
+public function dos_interrupt(integer int_num, register_list input_regs)
 -- call the DOS operating system via software interrupt int_num, using the
 -- register values in input_regs. A similar register_list is returned.
 -- It contains the register values after the interrupt.

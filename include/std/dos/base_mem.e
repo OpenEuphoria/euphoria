@@ -10,24 +10,24 @@ constant
 
 -- internal - used in dos/safe.e and dos/memory.e
 
-export constant
+public constant
 	M_ALLOC_LOW = 32,
 	M_FREE_LOW = 33
 
 --**
 -- biggest address accessible to 16-bit real mode
-export constant LOW_ADDR = power(2, 20)-1
+public constant LOW_ADDR = power(2, 20)-1
 
 --**
 -- a legal low machine address
-export type low_machine_addr(atom a)
+public type low_machine_addr(atom a)
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
 
 --**
 -- Positive Integer Type
 
-export type positive_int(integer x)
+public type positive_int(integer x)
 	return x >= 1
 end type
 
@@ -37,7 +37,7 @@ constant MAX_ADDR = power(2, 32)-1
 --**
 -- Machine Address Type
 
-export type machine_addr(atom a)
+public type machine_addr(atom a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
@@ -80,7 +80,7 @@ end type
 -- See Also:
 -- 		[[:set_vector]], [[:dos_interrupt]]
 
-export function get_vector(integer int_num)
+public function get_vector(integer int_num)
 	return machine_func(M_GET_VECTOR, int_num)
 end function
 
@@ -136,7 +136,7 @@ end function
 -- See Also:
 --       [[:get_vector]], [[:lock_memory]], [[:allocate]]
 
-export procedure set_vector(integer int_num, far_addr a)
+public procedure set_vector(integer int_num, far_addr a)
 	machine_proc(M_SET_VECTOR, {int_num, a})
 end procedure
 
@@ -164,7 +164,7 @@ end procedure
 -- See Also: 
 --		[[:get_vector]], [[:set_vector]]
 
-export procedure lock_memory(machine_addr a, positive_int n)
+public procedure lock_memory(machine_addr a, positive_int n)
 	machine_proc(M_LOCK_MEMORY, {a, n})
 end procedure
 

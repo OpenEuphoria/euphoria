@@ -121,15 +121,15 @@ end ifdef
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
 ifdef UNIX then
-	export constant SLASH='/'
-	export constant SLASHES = "/"
-	export constant CRLF = "\n"
-	export constant PATHSEP = ':'
+	public constant SLASH='/'
+	public constant SLASHES = "/"
+	public constant CRLF = "\n"
+	public constant PATHSEP = ':'
 else
-	export constant SLASH='\\'
-	export constant SLASHES = ":\\/"
-	export constant CRLF = "\r\n"
-	export constant PATHSEP = ';'
+	public constant SLASH='\\'
+	public constant SLASHES = ":\\/"
+	public constant CRLF = "\r\n"
+	public constant PATHSEP = ';'
 end ifdef
 
 --****
@@ -171,7 +171,7 @@ end ifdef
 -- See Also:
 -- 	[[:remove_directory]], [[:chdir]]
 
-export function create_directory(sequence name, integer mode=448, integer mkparent = 1)
+public function create_directory(sequence name, integer mode=448, integer mkparent = 1)
 	atom pname, ret
 	integer pos
 
@@ -254,7 +254,7 @@ end function
 
 integer delete_file_id = -1, dir_id = -1
 with trace
-export function remove_directory(sequence dir_name, integer force=0)
+public function remove_directory(sequence dir_name, integer force=0)
 	atom pname, ret
 	object files
 	integer D_NAME = 1, D_ATTRIBUTES = 2
@@ -343,7 +343,7 @@ export function remove_directory(sequence dir_name, integer force=0)
 	return ret
 end function
 
-export enum 
+public enum 
 	D_NAME,
 	D_ATTRIBUTES,
 	D_SIZE,
@@ -383,7 +383,7 @@ export enum
 -- You can refer to the elements of an entry with the following constants:
 --  
 -- <eucode>
--- export constant 
+-- public constant 
 --     -- File Attributes
 --     D_NAME       = 1,
 --     D_ATTRIBUTES = 2,
@@ -442,7 +442,7 @@ export enum
 --   ##bin\search.ex##
 --
 
-export function dir(sequence name)
+public function dir(sequence name)
 	object dir_data, data, the_name, the_dir
 	integer idx
 
@@ -511,7 +511,7 @@ dir_id = routine_id("dir")
 -- See Also:
 -- 	[[:dir]], [[:chdir]]
 
-export function current_dir()
+public function current_dir()
 -- returns name of current working directory
 	return machine_func(M_CURRENT_DIR, 0)
 end function
@@ -531,7 +531,7 @@ end function
 -- 
 -- The [[:current_dir]]() function will return the name of the current directory.
 -- 
--- On //DOS32// and //WIN32// the current directory is a export property shared
+-- On //DOS32// and //WIN32// the current directory is a public property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
 -- can change the current directory for itself, but this won't
 -- affect the current directory of its parent process.
@@ -548,7 +548,7 @@ end function
 -- See Also:
 -- [[:current_dir]], [[:dir]]
 
-export function chdir(sequence newdir)
+public function chdir(sequence newdir)
 	return machine_func(M_CHDIR, newdir)
 end function
 
@@ -557,7 +557,7 @@ end function
 --**
 -- Bad path error code
 
-export constant W_BAD_PATH = -1 -- error code
+public constant W_BAD_PATH = -1 -- error code
 
 function default_dir(sequence path)
 -- Default directory sorting function for walk_dir().
@@ -578,7 +578,7 @@ constant DEFAULT = -2
 
 -- it's better not to use routine_id() here,
 -- or else users will have to bind with clear routine names
-export integer my_dir = DEFAULT
+public integer my_dir = DEFAULT
 
 --**
 -- Generalized Directory Walker
@@ -610,7 +610,7 @@ export integer my_dir = DEFAULT
 -- while walk_dir() handles the process of walking through all the files and subdirectories.
 --
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
--- a different order, set the export integer ##my_dir## to the routine id of your own modified
+-- a different order, set the public integer ##my_dir## to the routine id of your own modified
 -- [[:dir]] function that sorts the directory entries differently. See the default ##dir()##
 -- function in filesys.e.
 --
@@ -632,7 +632,7 @@ export integer my_dir = DEFAULT
 -- See Also:
 --   ##bin\search.ex##
 
-export function walk_dir(sequence path_name, object your_function, integer scan_subdirs)
+public function walk_dir(sequence path_name, object your_function, integer scan_subdirs)
 	object d, abort_now
 	object orig_func
 	object user_data
@@ -717,7 +717,7 @@ end function
 -- end if
 -- </eucode>
 
-export function file_exists(sequence name)
+public function file_exists(sequence name)
 	ifdef WIN32 then
 		atom pName = allocate_string(name)
 		integer r = c_func(xGetFileAttributes, {pName})
@@ -756,7 +756,7 @@ end function
 -- See Also:
 -- [[:move_file]], [[:rename_file]]
 
-export function copy_file(sequence src, sequence dest, atom overwrite)
+public function copy_file(sequence src, sequence dest, atom overwrite)
 	ifdef WIN32 then
 	atom psrc, pdest, ret
 
@@ -817,7 +817,7 @@ end function
 -- See Also:
 -- [[:move_file]], [[:copy_file]]
 
-export function rename_file(sequence src, sequence dest)
+public function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	ifdef DOS32 then
     atom low_buff_old, low_buff_new
@@ -886,7 +886,7 @@ end function
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
 
-export function delete_file(sequence name)
+public function delete_file(sequence name)
 	atom pfilename, ret
 
 	ifdef DOS32 then
@@ -954,7 +954,7 @@ integer dirname_id = -1
 -- See Also:
 -- [[:rename_file]], [[:copy_file]]
 
-export function move_file(sequence src, sequence dest, atom overwrite=0)
+public function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret, pdir
 	ifdef DOS32 then
     atom low_buff_old, low_buff_new
@@ -1102,7 +1102,7 @@ end function
 -- See Also:
 -- [[:dir]]
 
-export function file_length(sequence filename)
+public function file_length(sequence filename)
 	object list
 	list = dir(filename)
 	if atom(list) or length(list) = 0 then
@@ -1111,7 +1111,7 @@ export function file_length(sequence filename)
 	return list[1][D_SIZE]
 end function
 
-export enum
+public enum
 	FILETYPE_UNDEFINED = -1,
 	FILETYPE_NOT_FOUND,
 	FILETYPE_FILE,
@@ -1131,7 +1131,7 @@ export enum
 --      *  2 if filename is a directory
 --
 -- Comments:
--- An exported enum has been created for ease of use:
+-- A public enum has been created for ease of use:
 -- * FILETYPE_UNDEFINED     = -1,
 -- * FILETYPE_NOT_FOUND, -- = 0
 -- * FILETYPE_FILE,      -- = 1
@@ -1140,7 +1140,7 @@ export enum
 -- See Also:
 -- [[:dir]]
 
-export function file_type(sequence filename)
+public function file_type(sequence filename)
 object dirfil
 	if find('*', filename) or find('?', filename) then return FILETYPE_UNDEFINED end if
 	
@@ -1164,7 +1164,7 @@ end function
 --****
 -- === File name parsing
 
-export enum
+public enum
 	PATH_DIR,
 	PATH_FILENAME,
 	PATH_BASENAME,
@@ -1185,7 +1185,7 @@ export enum
 --		* the drive id
 -- Comments:
 --
--- An exported enum has been created for ease of using the returned value:
+-- A public enum has been created for ease of using the returned value:
 --
 -- * PATH_DIR
 -- * PATH_FILENAME
@@ -1219,7 +1219,7 @@ export enum
 -- See Also:
 --   [[:driveid]], [[:dirname]], [[:filename]], [[:fileext]]
 
-export function pathinfo(sequence path)
+public function pathinfo(sequence path)
 	integer slash, period, ch
 	sequence dir_name, file_name, file_ext, file_full, drive_id
 
@@ -1286,7 +1286,7 @@ end function
 -- See Also:
 --   [[:driveid]], [[:filename]], [[:pathinfo]]
 
-export function dirname(sequence path)
+public function dirname(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[1]
@@ -1314,7 +1314,7 @@ dirname_id = routine_id("dirname")
 -- See Also:
 --   [[:pathinfo]], [[:filebase]], [[:fileext]]
   
-export function filename(sequence path)
+public function filename(sequence path)
 	sequence data
 
 	data = pathinfo(path)
@@ -1342,7 +1342,7 @@ end function
 -- See Also:
 --     [[:pathinfo]], [[:filename]], [[:fileext]]
 
-export function filebase(sequence path)
+public function filebase(sequence path)
 	sequence data
 
 	data = pathinfo(path)
@@ -1371,7 +1371,7 @@ end function
 -- See Also:
 --     [[:pathinfo]], [[:filename]], [[:filebase]]
 
-export function fileext(sequence path)
+public function fileext(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[4]
@@ -1397,7 +1397,7 @@ end function
 -- See Also:
 --     [[:pathinfo]], [[:dirname]], [[:filename]]
 
-export function driveid(sequence path)
+public function driveid(sequence path)
 	sequence data
 	data = pathinfo(path)
 	return data[5]
@@ -1435,7 +1435,7 @@ end function
 --
 -- See Also:
 -- 	[[:remove_directory]], [[:delete_file]]
-export function clear_directory(sequence path, integer recurse = 1)
+public function clear_directory(sequence path, integer recurse = 1)
 	object files
 	integer ret
 	if length(path) > 0 then

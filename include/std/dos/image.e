@@ -49,7 +49,7 @@ end type
 -- See Also: 
 --       [[:graphics_mode]]
 
-export procedure use_vesa(integer code)
+public procedure use_vesa(integer code)
 	machine_proc(M_USE_VESA, code)
 end procedure
 
@@ -72,7 +72,7 @@ end procedure
 --      [[:set_display_page]], [[:get_active_page]], [[:video_config]]
 -- 
 
-export function get_display_page()
+public function get_display_page()
 	return machine_func(M_GET_DISPLAY_PAGE, 0)
 end function
 
@@ -101,7 +101,7 @@ end function
 --   [[:get_display_page]], [[:set_active_page]], [[:video_config]]
 
 
-export procedure set_display_page(page_number page)
+public procedure set_display_page(page_number page)
 	machine_proc(M_SET_DISPLAY_PAGE, page)
 end procedure
 
@@ -123,7 +123,7 @@ end procedure
 --  
 -- See Also: set_active_page, get_display_page, video_config  
 -- 
-export function get_active_page()
+public function get_active_page()
 	return machine_func(M_GET_ACTIVE_PAGE, 0)
 end function
 
@@ -171,15 +171,15 @@ end function
 --
 --      [[:get_active_page]], [[:set_display_page]], [[:video_config]]
 
-export procedure set_active_page(page_number page)
+public procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
 end procedure
 
 include interrup.e
 ifdef SAFE then
-	export include safe.e
+	public include safe.e
 else
-	export include memory.e
+	public include memory.e
 end ifdef
 
 --**
@@ -204,7 +204,7 @@ end ifdef
 --    [[:video_config]], [[:palette]], [[:all_palette]], [[:read_bitmap]], [[:save_bitmap]],
 --    [[:save_screen]]
 
-export function get_all_palette()
+public function get_all_palette()
 	integer mem, numColors
 	sequence vc, reg, colors
 	
@@ -260,7 +260,7 @@ end function
 -- See Also:
 --   [[:all_palette]]
 
-export function palette(color c, mixture s)
+public function palette(color c, mixture s)
 	return machine_func(M_PALETTE, {c, s})
 end function
 
@@ -285,7 +285,7 @@ end function
 -- Example 1:
 --   ##demo\dos32\bitmap.ex##
 
-export procedure all_palette(sequence s)
+public procedure all_palette(sequence s)
 	machine_proc(M_ALL_PALETTE, s)
 end procedure
 

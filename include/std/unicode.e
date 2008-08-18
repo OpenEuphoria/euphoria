@@ -21,7 +21,7 @@ constant M_ALLOC = 16
 --**
 -- UCS-2 string (0-65535). In C known as wchar_t* (but \0's are allowed)
 
-export type wstring(object s)
+public type wstring(object s)
 	if not sequence(s) then 
 		return 0
 	end if
@@ -37,7 +37,7 @@ end type
 
 --**
 -- ASCII string (0-255), or UTF-8 string. In C known as char* (but \0's are allowed)
-export type astring(object s)
+public type astring(object s)
 	if not sequence(s) then 
 		return 0
 	end if
@@ -66,7 +66,7 @@ end type
 --
 -- See Also:
 -- [[:utf8_decode]]
-export function utf8_encode(wstring src)
+public function utf8_encode(wstring src)
 	sequence tmp
 	integer pos
 	integer c
@@ -109,7 +109,7 @@ end function
 -- See Also:
 -- [[:utf8_encode]]
 
-export function utf8_decode(astring src)
+public function utf8_decode(astring src)
 	sequence tmp
 	integer pos, spos
 	integer c
@@ -157,7 +157,7 @@ end function
 --
 -- See Also:
 -- [[:allocate_string]]
-export function allocate_wstring(wstring s)
+public function allocate_wstring(wstring s)
 		atom mem
 
 		mem = machine_func(M_ALLOC, length(s)*2 + 2)
@@ -181,7 +181,7 @@ end function
 -- See Also:
 -- [[:peek_string]]
 
-export function peek_wstring(atom addr)
+public function peek_wstring(atom addr)
 		atom ptr
 		
 		ptr = addr

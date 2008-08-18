@@ -19,7 +19,7 @@ include error.e
 -- * FILO: like for a stack of plates  : first item in is last item out
 
 
-export constant
+public constant
 	FIFO = 1,
 	FILO = 2
 
@@ -29,7 +29,7 @@ export constant
 
 --**
 -- A stack is a sequence of objects with some internal data.
-export type stack(object o)
+public type stack(object o)
 	return sequence(o) and length(o) >= 1
 end type
 
@@ -53,7 +53,7 @@ end type
 --
 -- See Also:
 -- [[:is_empty]]
-export function new(integer stack_type)
+public function new(integer stack_type)
 	return {stack_type}
 end function
 
@@ -68,7 +68,7 @@ end function
 --
 -- See Also:
 -- [[:size]]
-export function is_empty(stack sk)
+public function is_empty(stack sk)
 	return length(sk) = 1
 end function
 
@@ -80,7 +80,7 @@ end function
 --
 -- Returns:
 --		An **integer**, the number of elements in ##sk##.
-export function size(stack sk)
+public function size(stack sk)
 	return length(sk) - 1
 end function
 
@@ -120,7 +120,7 @@ end function
 --
 -- See Also:
 -- [[:size]], [[:top]]
-export function at(stack sk, integer idx)
+public function at(stack sk, integer idx)
 	if idx <= 0 then
 		-- number from top
 		idx = length(sk) + idx
@@ -161,7 +161,7 @@ end function
 --
 -- See Also:
 -- [[:pop]], [[:top]]
-export function push(stack sk, object value)
+public function push(stack sk, object value)
 
 	if sk[1] = FIFO then
 		sk = prepend(sk, FIFO)
@@ -197,7 +197,7 @@ end function
 --
 -- See Also:
 -- [[:at]], [[:pop]]
-export function top(stack sk)
+public function top(stack sk)
 	if length(sk) = 1 then
 		crash("stack underflow in top()", {})
 	end if
@@ -231,7 +231,7 @@ end function
 -- </eucode>
 -- See Also:
 -- [[:push]], [[:top]], [[:is_empty]]
-export function pop(stack sk)
+public function pop(stack sk)
 	if length(sk) = 1 then
 		crash("stack underflow in pop()", {})
 	end if
@@ -263,7 +263,7 @@ end function
 --
 -- Comments:
 -- Various algorithms use this primitive.
-export function swap(stack sk)
+public function swap(stack sk)
 	object a, b
 
 	if length(sk) < 3 then
@@ -307,7 +307,7 @@ end function
 -- </eucode>
 --
 -- The size of the returned stack is 1 more than ##size(sk)##.
-export function dup(stack sk)
+public function dup(stack sk)
 	if length(sk) = 1 then
 		crash("stack underflow in dup()", {})
 	end if
@@ -326,6 +326,6 @@ end function
 --
 -- See Also:
 -- [[:new]], [[is_empty]]
-export function clear(stack sk)
+public function clear(stack sk)
 	return {sk[1]}
 end function

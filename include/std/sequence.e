@@ -10,13 +10,13 @@ include search.e
 include text.e
 include sort.e
 
-export enum
+public enum
 	ADD_PREPEND,
 	ADD_APPEND,
 	ADD_SORT_UP,
 	ADD_SORT_DOWN
 
-export constant
+public constant
 	ROTATE_LEFT  = 1,
 	ROTATE_RIGHT = -1
 
@@ -49,7 +49,7 @@ export constant
 -- See Also:
 --     [[:linear]]
 
-export function can_add(object a, object b)
+public function can_add(object a, object b)
 	if atom(a) or atom(b) then
 		return 1
 	end if
@@ -89,7 +89,7 @@ end function
 -- See Also:
 --   [[:store]], [[:Subscripting of Sequences]]
 
-export function fetch(sequence source, sequence indexes)
+public function fetch(sequence source, sequence indexes)
 	object x
 
 	for i=1 to length(indexes)-1 do
@@ -131,7 +131,7 @@ end function
 -- See Also:
 --     [[:fetch]], [[:Subscripting of Sequences]]
 
-export function store(sequence target, sequence indexes, object x)
+public function store(sequence target, sequence indexes, object x)
 	sequence partials,result,branch
 	object last_idx
 
@@ -179,7 +179,7 @@ end function
 -- See Also:
 --     [[:Subscripting of Sequences]]
 
-export function valid_index(sequence st, object x)
+public function valid_index(sequence st, object x)
 	if sequence(x) then
 		return 0
 	end if
@@ -234,7 +234,7 @@ end function
 -- See Also:
 -- [[:slice]], [[:head]], [[:tail]]
 
-export function rotate(sequence source, integer shift, integer start=1, integer stop=length(source))
+public function rotate(sequence source, integer shift, integer start=1, integer stop=length(source))
 	sequence shifted
 	integer len
 	integer lSize
@@ -300,7 +300,7 @@ end function
 -- See Also:
 --   [[:filter]]
 
-export function apply(sequence source, integer rid)
+public function apply(sequence source, integer rid)
 	for a = 1 to length(source) do
 		source[a] = call_func(rid, {source[a]})
 	end for
@@ -364,7 +364,7 @@ end function
 -- reverse(42)                 -- 42
 -- </eucode>
 
-export function reverse(object target, integer pFrom = 1, integer pTo = 0)
+public function reverse(object target, integer pFrom = 1, integer pTo = 0)
 	integer uppr, n, lLimit
 	sequence t
 
@@ -426,7 +426,7 @@ end function
 -- See Also:
 --     [[:repeat_pattern]]
 
-export function linear(object start, object increment, integer count)
+public function linear(object start, object increment, integer count)
 	sequence result
 
 	if count<0 or not can_add(start,increment) then
@@ -459,7 +459,7 @@ end function
 -- See Also:
 --   [[:repeat]], [[:linear]]
 
-export function repeat_pattern(sequence pattern, integer count)
+public function repeat_pattern(sequence pattern, integer count)
 	integer ls
 	sequence result
 
@@ -708,7 +708,7 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:pad_tail]], [[:head]]
 
-export function pad_head(sequence target, integer size, object ch=' ')
+public function pad_head(sequence target, integer size, object ch=' ')
 	if size <= length(target) then
 		return target
 	end if
@@ -748,7 +748,7 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:pad_head]], [[:tail]]
 	
-export function pad_tail(sequence target, integer size, object ch=' ')
+public function pad_tail(sequence target, integer size, object ch=' ')
 	if size <= length(target) then
 		return target
 	end if
@@ -813,7 +813,7 @@ end function
 -- See Also:
 --   [[:remove_all]]
 
-export function add_item(object needle, sequence haystack, integer pOrder = 1)
+public function add_item(object needle, sequence haystack, integer pOrder = 1)
 	if find(needle, haystack) then
 		return haystack
 	end if
@@ -870,7 +870,7 @@ end function
 -- See Also:
 --     [[:tail]], [[:mid]], [[:slice]]
 
-export function head(sequence source, integer size=1)
+public function head(sequence source, integer size=1)
 	if size < length(source) then
 		return source[1..size]
 		end if
@@ -916,7 +916,7 @@ end function
 -- See Also:
 --     [[:head]], [[:tail]], [[:slice]]
 
-export function mid(sequence source, atom start, atom len)
+public function mid(sequence source, atom start, atom len)
 	if len<0 then
 		len += length(source)
 		if len<0 then
@@ -988,7 +988,7 @@ end function
 -- See Also:
 --   [[:head]], [[:mid]], [[:tail]]
 
-export function slice(sequence source, atom start, atom stop)
+public function slice(sequence source, atom start, atom stop)
 	if stop <= 0 then stop += length(source) end if
 	if start < 1 then start = 1 end if
 	if stop > length(source) then stop = length(source) end if
@@ -1030,7 +1030,7 @@ end function
 -- See Also:
 --   [[:slice]], [[:project]]
 
-export function vslice(sequence source, atom colno, object error_control=0)
+public function vslice(sequence source, atom colno, object error_control=0)
 	sequence ret
 	integer substitutes, current_sub
 
@@ -1099,7 +1099,7 @@ end function
 -- See Also:
 --   [[:head]], [[:mid]], [[:slice]]
 
-export function tail(sequence source, atom n=length(source) - 1)
+public function tail(sequence source, atom n=length(source) - 1)
 	if n >= length(source) then
 		return source
 	else
@@ -1147,7 +1147,7 @@ end function
 -- See Also:
 --   [[:replace]], [[:insert]], [[:splice]], [[:remove_all]]
 
-export function remove(sequence target, atom start, atom stop=start)
+public function remove(sequence target, atom start, atom stop=start)
 	if stop > length(target) then
 		stop = length(target)
 	end if
@@ -1195,7 +1195,7 @@ end function
 -- See Also:
 --   [[:remove]], [[:replace]]
 
-export function remove_all(object needle, sequence haystack)
+public function remove_all(object needle, sequence haystack)
 	integer ts, te, ss, se
 	
 	-- See if we have to anything at all.    
@@ -1272,7 +1272,7 @@ end function
 -- See Also:
 --   [[:apply]]
 
-export function filter(sequence source, integer rid)
+public function filter(sequence source, integer rid)
 	sequence dest = {}
 
 	for a = 1 to length(source) do
@@ -1314,7 +1314,7 @@ end function
 -- See Also:
 --     [[:splice]], [[:remove]], [[:remove_all]]
 
-export function replace(sequence target, object replacement, integer start, integer stop=start)
+public function replace(sequence target, object replacement, integer start, integer stop=start)
 	target = remove(target, start, stop)
 	return splice(target, replacement, start)
 end function
@@ -1343,7 +1343,7 @@ end function
 -- See Also:
 --   [[:vslice]]
 
-export function project(sequence vectors, sequence coords)
+public function project(sequence vectors, sequence coords)
 	sequence result, current_vector, coord_set, result_item, projection
 	integer current_index
 
@@ -1388,7 +1388,7 @@ end function
 -- See Also:
 --     [[:slice]]
 
-export function extract(sequence source, sequence indexes)
+public function extract(sequence source, sequence indexes)
 	object p
 
 	for i=1 to length(indexes) do
@@ -1436,7 +1436,7 @@ end function
 -- See Also:
 --     [[:split_any]], [[:chunk]], [[:join]]
 
-export function split(sequence st, object delim=" ", integer limit=0)
+public function split(sequence st, object delim=" ", integer limit=0)
 	sequence ret = {}
 	integer start = 1, pos, next_pos
 
@@ -1489,7 +1489,7 @@ end function
 -- See Also:
 --   [[:split]], [[:chunk]], [[:join]]
 
-export function split_any(sequence source, object delim, integer limit=0)
+public function split_any(sequence source, object delim, integer limit=0)
 	sequence ret = {}
 	integer start = 1, pos, next_pos
 
@@ -1542,7 +1542,7 @@ end function
 -- See Also:
 --     [[:split]], [[:split_any]], [[:chunk]]
 
-export function join(sequence items, object delim=" ")
+public function join(sequence items, object delim=" ")
 	object ret
 
 	if not length(items) then return {} end if
@@ -1603,7 +1603,7 @@ end function
 -- See Also:
 --   [[:split]] [[:flatten]]
 
-export function chunk(sequence source, integer size)
+public function chunk(sequence source, integer size)
 	sequence ns
 	integer stop
 	integer pos
@@ -1657,7 +1657,7 @@ end function
 -- -- s is {18, 19, 45, 18.4, 29.3}
 -- </eucode>
 
-export function flatten(sequence s)
+public function flatten(sequence s)
 	sequence ret
 	object x
 	integer len
@@ -1704,7 +1704,7 @@ end function
 --     -- Ans: {{}, {}, {5}}
 --   </eucode>
 
-export function pivot(object pData, object pPivot = 0)
+public function pivot(object pData, object pPivot = 0)
 	sequence lResult
 	integer lPos
 	
@@ -1742,7 +1742,7 @@ end function
 --   end if
 --   </eucode>
 
-export function is_in_range(object item, sequence range_limits)
+public function is_in_range(object item, sequence range_limits)
 	if length(range_limits) < 2 then
 		return 0
 	end if
@@ -1780,7 +1780,7 @@ end function
 --   procA(valid_data)
 --   </eucode>
 
-export function set_in_range(object item, sequence range_limits)
+public function set_in_range(object item, sequence range_limits)
 	if length(range_limits) < 2 then
 		return item
 	end if
@@ -1812,7 +1812,7 @@ end function
 --   end if
 --   </eucode>
 
-export function is_in_list(object item, sequence list)
+public function is_in_list(object item, sequence list)
 	return (find(item, list) != 0)
 end function
 
@@ -1836,7 +1836,7 @@ end function
 --   procA(valid_data)
 --   </eucode>
 
-export function set_in_list(object item, sequence list)
+public function set_in_list(object item, sequence list)
 	if length(list) = 0 then
 		return item
 	end if

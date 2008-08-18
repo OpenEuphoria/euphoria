@@ -17,10 +17,11 @@ test_equal( "default namespace", "foo", foo:test() )
 test_equal( "override default namespace", "bar", bar:test() )
 
 include foo_export.e
-test_equal( "export function", "foo", export_test() )
-test_equal( "export constant", "foo", EXPORT_CONSTANT )
-test_not_equal( "export routine id", -1, routine_id("export_test"))
-test_equal( "export include",  "baz", baz() )
-
+test_equal( "public function", "foo", export_test() )
+test_equal( "public constant", "foo", EXPORT_CONSTANT )
+test_not_equal( "public routine id", -1, routine_id("export_test"))
+test_equal( "public include",  "baz", baz() )
+test_not_equal( "routine id public visible through public include", -1, routine_id("baz") )
+test_equal( "routine id export not visible through public include", -1, routine_id("baz_export") )
 test_report()
 

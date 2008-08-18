@@ -85,7 +85,7 @@ constant END_MARKER = -1
 -- See Also: 
 -- [[:wildcard_file]], [[:upper]], [[:lower]], [[:Regular expressions]]
 
-export function wildcard_match(sequence pattern, sequence string)
+public function wildcard_match(sequence pattern, sequence string)
 	integer p, f, t 
 	sequence match_string
 	
@@ -173,7 +173,7 @@ end function
 -- See Also: 
 -- [[:wildcard_match]], [[:dir]]
 
-export function wildcard_file(sequence pattern, sequence filename)
+public function wildcard_file(sequence pattern, sequence filename)
 	ifdef !UNIX then
 		pattern = txt:upper(pattern)
 		filename = txt:upper(filename)
