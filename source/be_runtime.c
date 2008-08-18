@@ -2622,7 +2622,7 @@ long find(object a, s1_ptr b)
 			else if (bv == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			else if (compare(a, bv) == 0) {  /* INT-DBL case */
+			else {  /* INT-DBL case */
 				if (! daok) {
 					da = (double)a;
 					daok = 1;
@@ -5346,7 +5346,7 @@ long find_from(object a, s1_ptr b, object c)
 			else if (bv == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			else if (compare(a, bv) == 0) {  /* INT-DBL case */
+			else {  /* INT-DBL case */
 				if (! daok) {
 					da = (double)a;
 					daok = 1;
