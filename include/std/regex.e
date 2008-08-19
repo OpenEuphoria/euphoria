@@ -127,7 +127,7 @@ end type
 --
 -- Note:
 --   For simple finds, matches or even simple wildcard matches, the built-in Euphoria
---   routines [[:find]], [[:match]] and [[:wildcard]] are often times easier to use and
+--   routines [[:find]], [[:match]] and [[:wildcard_match]] are often times easier to use and
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
 
@@ -174,7 +174,7 @@ end procedure
 --
 --   -- The return value will be:
 --   -- {
---   --    { 1, 7 }, --Total match
+--   --    { 1, 7 }, -- Total match
 --   --    { 1, 4 }, -- First grouping "John" ([A-Za-z]+)
 --   --    { 6, 7 }  -- Second grouping "20" ([0-9]+)
 --   -- }

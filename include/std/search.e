@@ -169,7 +169,7 @@ include error.e
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack", starting from some index.
 --
---Parameters:
+-- Parameters:
 --		# ##needle##: an sequence whose presence as a subsequence is being queried
 --		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
 --		# ##start##: an integer, the index in ##haystack## at which to start searching.
@@ -610,9 +610,9 @@ end function
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack".
 --
---Parameters:
---		# ##needle##: a sequence whose presence as a "substring" is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+-- Parameters:
+--   # ##needle##: a sequence whose presence as a "substring" is being queried
+--   # ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
 --
 -- Returns:
 --     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
