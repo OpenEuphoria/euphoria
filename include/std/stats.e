@@ -77,7 +77,7 @@ end function
 --   [[:range]]
 --
 public function largest(object pData)
-	atom lResult, lTemp
+	atom result_, temp_
 	integer lFoundAny
 	if atom(pData) then
 		return pData
@@ -85,13 +85,13 @@ public function largest(object pData)
 	lFoundAny = 0
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
-			lTemp = pData[i]
+			temp_ = pData[i]
 			if lFoundAny then
-				if lTemp > lResult then
-					lResult = lTemp
+				if temp_ > result_ then
+					result_ = temp_
 				end if
 			else
-				lResult = lTemp
+				result_ = temp_
 				lFoundAny = 1
 			end if
 		end if
@@ -99,7 +99,7 @@ public function largest(object pData)
 	if lFoundAny = 0 then
 		return {}
 	end if
-	return lResult
+	return result_
 end function
 
 --**
@@ -127,7 +127,7 @@ end function
 -- See also:
 --   [[:range]]
 public function smallest(object pData)
-	atom lResult, lTemp
+	atom result_, temp_
 	integer lFoundAny
 	if atom(pData) then
 			return pData
@@ -135,13 +135,13 @@ public function smallest(object pData)
 	lFoundAny = 0
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
-			lTemp = pData[i]
+			temp_ = pData[i]
 			if lFoundAny then
-				if lTemp < lResult then
-					lResult = lTemp
+				if temp_ < result_ then
+					result_ = temp_
 				end if
 			else
-				lResult = lTemp
+				result_ = temp_
 				lFoundAny = 1
 			end if
 		end if
@@ -149,7 +149,7 @@ public function smallest(object pData)
 	if lFoundAny = 0 then
 		return {}
 	end if
-	return lResult
+	return result_
 end function
 
 --**
@@ -173,8 +173,8 @@ end function
 --   [[:smallest]] [[:largest]]
 --
 public function range(object pData)
-	sequence lResult
-	atom lTemp
+	sequence result_
+	atom temp_
 	integer lFoundAny = 0
 	
 	if atom(pData) then
@@ -183,15 +183,15 @@ public function range(object pData)
 	
 	for i = 1 to length(pData) do
 		if atom(pData[i]) then
-			lTemp = pData[i]
+			temp_ = pData[i]
 			if lFoundAny then
-				if lTemp < lResult[1] then
-					lResult[1] = lTemp
-				elsif lTemp > lResult[2] then
-					lResult[2] = lTemp
+				if temp_ < result_[1] then
+					result_[1] = temp_
+				elsif temp_ > result_[2] then
+					result_[2] = temp_
 				end if
 			else
-				lResult = {lTemp, lTemp, 0, 0}
+				result_ = {temp_, temp_, 0, 0}
 				lFoundAny = 1
 			end if
 		end if
@@ -199,9 +199,9 @@ public function range(object pData)
 	if lFoundAny = 0 then
 		return {}
 	end if
-	lResult[3] = lResult[2] - lResult[1]
-	lResult[4] = (lResult[1] + lResult[2]) / 2
-	return lResult
+	result_[3] = result_[2] - result_[1]
+	result_[4] = (result_[1] + result_[2]) / 2
+	return result_
 end function
 
 --**
@@ -552,18 +552,18 @@ end function
 --   [[:average]]
 
 public function sum(object pData)
-	atom lResult
+	atom result_
 	if atom(pData) then
-		lResult = pData
+		result_ = pData
 	else
-		lResult = 0
+		result_ = 0
 		for i = 1 to length(pData) do
 			if atom(pData[i]) then
-				lResult += pData[i]
+				result_ += pData[i]
 			end if
 		end for
 	end if
-	return lResult
+	return result_
 end function
 
 --**
@@ -587,18 +587,18 @@ end function
 --   [[:average]], [[:sum]], [[:counta]]
 
 public function count(object pData)
-	atom lResult
+	atom result_
 	if atom(pData) then
-		lResult = 1
+		result_ = 1
 	else
-		lResult = 0
+		result_ = 0
 		for i = 1 to length(pData) do
 			if atom(pData[i]) then
-				lResult += 1
+				result_ += 1
 			end if
 		end for
 	end if
-	return lResult
+	return result_
 end function
 
 --**
@@ -625,13 +625,13 @@ end function
 --   [[:average]], [[:sum]], [[:count]], [[:length]]
 
 public function counta(object pData)
-	atom lResult
+	atom result_
 	if atom(pData) then
-		lResult = 1
+		result_ = 1
 	else
-		lResult = length(pData)
+		result_ = length(pData)
 	end if
-	return lResult
+	return result_
 end function
 
 --**
@@ -863,7 +863,7 @@ end function
 --   [[:average]]
 --
 public function movavg(object pData, object pPeriod)
-	sequence lResult 
+	sequence result_ 
 	integer lLow
 	integer lHigh
 	integer j
@@ -888,28 +888,28 @@ public function movavg(object pData, object pPeriod)
 	end if
 	lLow = 1
 	lHigh = length(pPeriod)
-	lResult = repeat(0, length(pData) - length(pPeriod) + 1)
+	result_ = repeat(0, length(pData) - length(pPeriod) + 1)
 	while lHigh <= length(pData) do
 		j = 1
 		n = 0
 		for i = lLow to lHigh do
 			if atom(pData[i]) then
-				lResult[lLow] += pData[i] * pPeriod[j]
+				result_[lLow] += pData[i] * pPeriod[j]
 				n += 1
 			end if
 			j += 1
 		end for
 		if n > 0 then
-			lResult[lLow] /= n
+			result_[lLow] /= n
 		else
-			lResult[lLow] = 0
+			result_[lLow] = 0
 		end if
 
 		lLow += 1
 		lHigh += 1
 	end while
 		
-	return lResult
+	return result_
 end function
 
 --**

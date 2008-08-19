@@ -5,11 +5,11 @@
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
-namespace stdprimes
+namespace primes
 
 include search.e
 
-public sequence gPrimes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
+sequence list_of_primes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 
 --****
 -- === Routines
@@ -29,14 +29,14 @@ constant rTime_out = routine_id("time_out")
 -- Returns all the prime numbers below some threshhold, with a cap on computation time.
 --
 -- Parameters:
---		# ##pMax##: an integer, the value below which all returned prime numbers will be
---		# ##pTimeOut##: an atom, the number of seconds allotted to computation. Defaults to 10.0.
+--		# ##max_p##: an integer, the value below which all returned prime numbers will be
+--		# ##time_out_p##: an atom, the number of seconds allotted to computation. Defaults to 10.0.
 --
 -- Returns:
---		A **sequence** made of prime numbers below ##pMax##, in increasing order.
+--		A **sequence** made of prime numbers below ##max_p##, in increasing order.
 --
 -- Comments:
--- The returned sequence does not miss any prime number in less than its last and largest element. If the function times out, it may not hold all primes below ##pMax##, but only the largest ones will be absent.
+-- The returned sequence does not miss any prime number in less than its last and largest element. If the function times out, it may not hold all primes below ##max_p##, but only the largest ones will be absent.
 --
 -- There is no provision to disable the timeout. Simply give it a large enough value.
 --
@@ -49,25 +49,25 @@ constant rTime_out = routine_id("time_out")
 -- See Also:
 --		[[:next_prime]]
 
-public function calc_primes(integer pMax, atom pTimeLimit = 10)
-	sequence lResult
-	integer lCandidate
-	integer lLo
-	atom lTimeOut
-	integer lPos
-	integer lTop
+public function calc_primes(integer max_p, atom time_limit_p = 10)
+	sequence result_
+	integer candidate_
+	integer low_
+	atom time_out_
+	integer pos_
+	integer top_
 	integer slot
 	
-	if pMax <= gPrimes[$] then
-		lPos = binary_search(pMax, gPrimes)
-		if lPos < 0 then
-			lPos = (-lPos)
+	if max_p <= list_of_primes[$] then
+		pos_ = binary_search(max_p, list_of_primes)
+		if pos_ < 0 then
+			pos_ = (-pos_)
 		end if
-		return gPrimes[1..lPos]
+		return list_of_primes[1..pos_]
 	end if
-	lResult = gPrimes & repeat(0, floor(pMax  / 3.5))
+	result_ = list_of_primes & repeat(0, floor(max_p  / 3.5))
 
-	--lTimeOut = time() + pTimeLimit
+	--lTimeOut = time() + time_limit_p
 	slot = find(-1, returned)
 	-- there s no task_killl(). If the function returns before time out, the slot must not be
 	-- recycled. 0 means active, 1 means return done, -1 means can recycle
@@ -79,60 +79,60 @@ public function calc_primes(integer pMax, atom pTimeLimit = 10)
 		timed_out[slot] = 0
 		returned[slot] = 0
 	end if
-	task_schedule(task_create(rTime_out, {slot}), {pTimeLimit, pTimeLimit * 1.02})
+	task_schedule(task_create(rTime_out, {slot}), {time_limit_p, time_limit_p * 1.02})
 -- 
-	lPos = length(gPrimes)
+	pos_ = length(list_of_primes)
 
-	while lResult[lPos] < pMax do
+	while result_[pos_] < max_p do
 		if timed_out[slot] then
--- 		if time() > lTimeOut then
+-- 		if time() > time_out_ then
 			exit
 		end if
 
-		lTop = lResult[lPos]
-		lCandidate = lTop * 2 - 1
-		for i = 2 to lPos label "TL" do
-			for j = i to lPos do
-				lLo = lResult[i] * lResult[j]
-				if lLo = lCandidate then
-					lCandidate += 2
-				elsif lLo > lTop and lLo < lCandidate and and_bits(lLo,1) = 1 then
-					lCandidate = lLo
+		top_ = result_[pos_]
+		candidate_ = top_ * 2 - 1
+		for i = 2 to pos_ label "TL" do
+			for j = i to pos_ do
+				low_ = result_[i] * result_[j]
+				if low_ = candidate_ then
+					candidate_ += 2
+				elsif low_ > top_ and low_ < candidate_ and and_bits(low_,1) = 1 then
+					candidate_ = low_
 					exit "TL"
 				end if
 			end for
 		end for
 		
-		lLo = 0
-		while lLo = 0 do
-			for i = lTop + 2 to lCandidate by 2 do
-				lLo = i
-				for j = 2 to lPos do
-					if remainder(i, lResult[j]) = 0 then
-						lLo = 0
+		low_ = 0
+		while low_ = 0 do
+			for i = top_ + 2 to candidate_ by 2 do
+				low_ = i
+				for j = 2 to pos_ do
+					if remainder(i, result_[j]) = 0 then
+						low_ = 0
 						exit
 					end if
 				end for
-				if lLo = i then
-					lCandidate= lLo
+				if low_ = i then
+					candidate_= low_
 					exit
 				end if
 			end for
-			if lLo != 0 then
-				lPos += 1
-				if lPos > length(lResult) then
-					lResult &= repeat(0, 1000)
+			if low_ != 0 then
+				pos_ += 1
+				if pos_ > length(result_) then
+					result_ &= repeat(0, 1000)
 				end if
-				lResult[lPos] = lCandidate
+				result_[pos_] = candidate_
 			else
-				lCandidate += 2
+				candidate_ += 2
 			end if
 		end while
 		task_yield()
 	end while
 
 	returned[slot] = 1
-	return lResult[1..lPos]
+	return result_[1..pos_]
 end function
 
 --**
@@ -140,7 +140,7 @@ end function
 --
 -- Paremeters:
 -- 		# ##n##: an integer, the starting point for the search
---		# ##pDefault##: an integer, used to signal error. Defaults to -1.
+--		# ##default_value_p##: an integer, used to signal error. Defaults to -1.
 --
 -- Returns:
 --		An **integer**, which is prime only if it took less than 1 second 
@@ -160,28 +160,67 @@ end function
 -- See Also:
 -- [[:calc_primes]]
 
-public function next_prime(integer n, integer pDefault = -1, atom pTimeOut = 1)
+public function next_prime(integer n, integer default_value_p = -1, atom time_out_p = 1)
 	integer i
 
 
 	if n < 0 then
-		return pDefault
+		return default_value_p
 	end if
-	if gPrimes[$] < n then
-		gPrimes = calc_primes(n,pTimeOut)
+	if list_of_primes[$] < n then
+		list_of_primes = calc_primes(n,time_out_p)
 	end if
-	if n > gPrimes[$] then
-		return n * pDefault
+	if n > list_of_primes[$] then
+		return n * default_value_p
 	end if
 	-- Assumes that most searches will be less than about 1000
-	if n < 1009 and 1009 <= gPrimes[$] then
-		i = binary_search(n, gPrimes, ,169)
+	if n < 1009 and 1009 <= list_of_primes[$] then
+		i = binary_search(n, list_of_primes, ,169)
 	else
-		i = binary_search(n, gPrimes)
+		i = binary_search(n, list_of_primes)
 	end if
 	if i < 0 then
 		i = (-i)
 	end if
-	return gPrimes[i]
+	return list_of_primes[i]
 
 end function
+
+--**
+-- Returns a list of prime numbers.
+--
+-- Paremeters:
+-- 		# ##top_prime_p##: The list will end with the prime less than or equal
+--        to this value. If this is zero, the current list calculated primes
+--        is returned.
+--
+-- Returns:
+--		An **sequence**, a list of prime numbers from 2 to ##top_prime_p##
+--
+-- Example 1:
+-- <eucode>
+-- sequence pl = prime_list(1000)
+-- -- pl will now contain all the primes from 2 up to the largest less than or
+-- --    equal to 1000.
+-- </eucode>
+--
+-- See Also:
+-- [[:calc_primes]], [[:next_prime]]
+public function prime_list(integer top_prime_p = 0)
+	integer index_
+	
+	if top_prime_p <= 0 then
+		return list_of_primes
+	end if
+	
+	if list_of_primes[$] < top_prime_p then
+		list_of_primes = calc_primes(top_prime_p, 5)
+	end if
+	
+	index_ = binary_search(top_prime_p, list_of_primes)
+	if index_ < 0 then
+		index_ = - index_
+	end if
+	
+	return list_of_primes[1 .. index_]
+end function	

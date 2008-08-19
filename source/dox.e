@@ -119,26 +119,26 @@ procedure write_index()
 end procedure
 
 -- maps file -> sequence of all of its routines
-stdmap:map routine_map = stdmap:new()
+map:map routine_map = map:new()
 procedure make_routine_map()
 	for s = length( keylist ) + 1 to length( SymTab ) do
 		if length( SymTab[s] ) = SIZEOF_ROUTINE_ENTRY and find( SymTab[s][S_TOKEN], {FUNC, PROC, TYPE})
 		and SymTab[s][S_SCOPE] != SC_PREDEF  then
 			if not std_libs[ SymTab[s][S_FILE_NO] ] then
-				stdmap:put( routine_map, SymTab[s][S_FILE_NO], s, stdmap:APPEND )
+				map:put( routine_map, SymTab[s][S_FILE_NO], s, map:APPEND )
 			end if
 		end if
 	end for
 end procedure
 
-stdmap:map scope_map = stdmap:new()
-stdmap:put( scope_map, SC_GLOBAL, "global " )
-stdmap:put( scope_map, SC_EXPORT, "export " )
+map:map scope_map = map:new()
+map:put( scope_map, SC_GLOBAL, "global " )
+map:put( scope_map, SC_EXPORT, "export " )
 
 -- TODO: make anchor for the signature
 function signature( symtab_index proc )
 	symtab_entry e = SymTab[proc]
-	sequence sig = stdmap:get( scope_map, e[S_SCOPE], "" )
+	sequence sig = map:get( scope_map, e[S_SCOPE], "" )
 	sig &= sprintf( "<a name=\"%d\">%s</a>(", { proc, SymTab[proc][S_NAME] } )
 	
 	integer args = e[S_NUM_ARGS]
@@ -158,16 +158,16 @@ function signature( symtab_index proc )
 	return sig & " )"	
 end function
 
-function routine_ref( integer f, symtab_index proc, stdmap:map call_map )
-	stdmap:map file_map = new_extra( stdmap:nested_get( call_map, {f, proc}) )
+function routine_ref( integer f, symtab_index proc, map:map call_map )
+	map:map file_map = new_extra( map:nested_get( call_map, {f, proc}) )
 	
-	sequence files = stdmap:keys( file_map )
+	sequence files = map:keys( file_map )
 	sequence names = {}
 	for fx = 1 to length( files ) do
 		integer fn = files[fx]
 		if not std_libs[fn] then
-			stdmap:map proc_map = new_extra( stdmap:get( file_map, fn) )
-			sequence procs = stdmap:keys( proc_map )
+			map:map proc_map = new_extra( map:get( file_map, fn) )
+			sequence procs = map:keys( proc_map )
 			for p = 1 to length( procs ) do
 				symtab_index psym = procs[p]
 				if SymTab[psym][S_SCOPE] != SC_PREDEF then
@@ -190,7 +190,7 @@ function proc_link( symtab_index proc )
 end function
 
 procedure write_routines( integer fn, integer f )
-	sequence rsyms = stdmap:get( routine_map, f, {} )
+	sequence rsyms = map:get( routine_map, f, {} )
 	if not length( rsyms) then
 		return
 	end if
@@ -291,11 +291,11 @@ procedure call_graphs()
 		return
 	end if
 	
-	sequence files = stdmap:keys( routine_map )
+	sequence files = map:keys( routine_map )
 	for f = 1 to length( files ) do
 		integer file = files[f]
 		if not std_libs[file] then
-			sequence procs = stdmap:get( routine_map, file, {} )
+			sequence procs = map:get( routine_map, file, {} )
 			for p = 1 to length( procs ) do
 				symtab_index proc = procs[p]
 				sequence name = proc_file_name( proc )

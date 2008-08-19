@@ -161,14 +161,14 @@ end procedure
 -- [[:set_charsets]], [[:set_default_charsets]]
 
 public function get_charsets()
-	sequence lResult
+	sequence result_
 	
-	lResult = {}
+	result_ = {}
 	for i = CS_FIRST + 1 to CS_LAST - 1 do
-		lResult = append(lResult, {i, Defined_Sets[i]} )
+		result_ = append(result_, {i, Defined_Sets[i]} )
 	end for
 	
-	return lResult
+	return result_
 end function
 
 --** 

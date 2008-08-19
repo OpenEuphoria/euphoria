@@ -1685,8 +1685,8 @@ end function
 -- and greater than the pivot.
 --
 -- Parameters:
---   # ##pData##: Either an atom or a list. An atom is treated as if it is one-element sequence.
---   # ##pPivot##: An object. Default is zero.
+--   # ##data_p##: Either an atom or a list. An atom is treated as if it is one-element sequence.
+--   # ##pivot_p##: An object. Default is zero.
 --
 -- Returns:
 --   A **sequence**: { {less than pivot}, {equal to pivot}, {greater than pivot} }
@@ -1704,22 +1704,22 @@ end function
 --     -- Ans: {{}, {}, {5}}
 --   </eucode>
 
-public function pivot(object pData, object pPivot = 0)
-	sequence lResult
-	integer lPos
+public function pivot(object data_p, object pivot_p = 0)
+	sequence result_
+	integer pos_
 	
-	lResult = {{}, {}, {}}
+	result_ = {{}, {}, {}}
 	
-	if atom(pData) then
-		pData = {pData}
+	if atom(data_p) then
+		data_p = {data_p}
 	end if
 	
-	for i = 1 to length(pData) do
-		lPos = compare(pData[i], pPivot) + 2
-		lResult[lPos] = append(lResult[lPos], pData[i])
+	for i = 1 to length(data_p) do
+		pos_ = compare(data_p[i], pivot_p) + 2
+		result_[pos_] = append(result_[pos_], data_p[i])
 	end for
 
-	return lResult
+	return result_
 end function
 
 --**

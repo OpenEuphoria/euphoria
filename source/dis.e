@@ -281,8 +281,8 @@ procedure opPROC()  -- Normal subroutine call
 	-- record the data for the call graph
 	-- called_from maps from the caller to the callee
 	-- called_by maps from the callee back to the caller
-	stdmap:nested_put( called_from, { current_file, CurrentSub, SymTab[sub][S_FILE_NO], sub }, 1 , stdmap:ADD )
-	stdmap:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, current_file, CurrentSub }, 1, stdmap:ADD )
+	map:nested_put( called_from, { current_file, CurrentSub, SymTab[sub][S_FILE_NO], sub }, 1 , map:ADD )
+	map:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, current_file, CurrentSub }, 1, map:ADD )
 	
     dsm = sprintf( "%s: %s",{opnames[Code[pc]],name_or_literal(sub)})
 
@@ -1253,7 +1253,7 @@ procedure write_call_info( sequence name )
 	
 	-- called_from:  file -> proc -> called_proc file : called proc
 	-- called_by  :  called_proc file -> called proc -> file : proc
-	sequence files = stdmap:keys( called_from )
+	sequence files = map:keys( called_from )
 	
 	integer fn = open( name & "calls", "w" )
 	sequence pp = PRETTY_DEFAULT
@@ -1471,7 +1471,7 @@ procedure dis( integer sub )
 	sequence sym
 	CurrentSub = sub
 	printf( out, "\nSubProgram [%s-%s:%05d]\n", {file_name[SymTab[sub][S_FILE_NO]],SymTab[sub][S_NAME], sub})
-	stdmap:put( proc_names, SymTab[sub][S_NAME], sub )
+	map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1
 	while pc <= length(Code) do

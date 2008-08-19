@@ -242,26 +242,25 @@ end procedure
 
 function find_opt(sequence opts, integer typ, object name)
 	integer slash
-	-- sequence lResult
-	integer lPos = 0
-	sequence lOptName
-	object lOptParam
+	integer posn = 0
+	sequence opt_name
+	object opt_param
 
-	lOptName = repeat(' ', length(name))
-	lOptParam = 0
+	opt_name = repeat(' ', length(name))
+	opt_param = 0
 	for i = 1 to length(name) do
 		if name[i] = '"' then
-			lPos = i
+			posn = i
 		elsif find(name[i], ":=") then
-			if lPos = 0 then
-				lPos = i
-				lOptName = lOptName[1..lPos-1]
-				lOptParam = name[lPos + 1 .. $]
+			if posn = 0 then
+				posn = i
+				opt_name = opt_name[1 .. posn - 1]
+				opt_param = name[posn + 1 .. $]
 				exit
 			end if
 		end if
 
-		lOptName[i] = name[i]
+		opt_name[i] = name[i]
 	end for
 
 
@@ -274,16 +273,16 @@ function find_opt(sequence opts, integer typ, object name)
 	for i = 1 to length(opts) do
 		if length(opts[i]) > 5 then
 			if equal(opts[i][6], NO_CASE) then
-				if equal(lower(lOptName), lower(opts[i][typ])) or 
-					(slash and equal(lower(lOptName), lower(opts[i][1]))) 
+				if equal(lower(opt_name), lower(opts[i][typ])) or 
+					(slash and equal(lower(opt_name), lower(opts[i][1]))) 
 				then
-					return {i, lOptParam}
+					return {i, opt_param}
 				end if
 			end if
 		end if
 
-		if equal(lOptName, opts[i][typ]) or (slash and equal(lOptName, opts[i][1])) then
-			return {i, lOptParam}
+		if equal(opt_name, opts[i][typ]) or (slash and equal(opt_name, opts[i][1])) then
+			return {i, opt_param}
 		end if
 	end for
 
@@ -363,7 +362,7 @@ public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 	sequence param
 	sequence find_result
 	integer lType
-	integer lFrom
+	integer from_
 
 	extras = {}
 	idx = 2
@@ -396,16 +395,16 @@ public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 
 		if equal(cmd[1..2], "--") then	  -- found --opt-name
 			lType = 2
-			lFrom = 3
+			from_ = 3
 		elsif cmd[1] = '-' then -- found -opt
 			lType = 1
-			lFrom = 2
+			from_ = 2
 		else  -- found /opt
 			lType = 3
-			lFrom = 2
+			from_ = 2
 		end if
 
-		find_result = find_opt(opts, lType, cmd[lFrom..$])
+		find_result = find_opt(opts, lType, cmd[from_..$])
 
 		if find_result[1] = 0 then
 			-- something is wrong with the option

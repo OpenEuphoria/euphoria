@@ -471,15 +471,15 @@ public function keyvalues(sequence source, object pair_delim = ";,",
                           object whitespace = " \t\n\r", integer haskeys = 1)
                           
 	sequence lKeyValues
-	sequence lValue
-	sequence lKey
+	sequence value_
+	sequence key_
 	sequence lAllDelim
 	sequence lWhitePair
 	sequence lStartBracket
 	sequence lEndBracket
 	sequence lBracketed
 	integer lQuote
-	integer lPos
+	integer pos_
 	integer lChar
 	integer lBPos
 	integer lWasKV
@@ -508,24 +508,24 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 	lEndBracket   = "}])"
 	
 	lKeyValues = {}
-	lPos = 1
-	while lPos <= length(source) do
+	pos_ = 1
+	while pos_ <= length(source) do
 		-- ignore leading whitespace
-		while lPos < length(source) do
-			if find(source[lPos], whitespace) = 0 then
+		while pos_ < length(source) do
+			if find(source[pos_], whitespace) = 0 then
 				exit
 			end if
-			lPos +=1 
+			pos_ +=1 
 		end while
 
 		-- Get key. Ends at any of unquoted whitespace or unquoted delimiter
-		lKey = ""
+		key_ = ""
 		lQuote = 0
 		lChar = 0
 		lWasKV = 0
 		if haskeys then
-			while lPos <= length(source) do
-				lChar = source[lPos]
+			while pos_ <= length(source) do
+				lChar = source[pos_]
 				if find(lChar, quotes) != 0 then
 					if lChar = lQuote then
 						-- End of quoted span
@@ -542,27 +542,27 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 					
 				end if
 				if lChar > 0 then
-					lKey &= lChar			
+					key_ &= lChar			
 				end if
-				lPos += 1
+				pos_ += 1
 			end while
 			
 			-- ignore next whitespace
 			if find(lChar, whitespace) != 0 then
-				lPos += 1
-				while lPos <= length(source) do
-					lChar = source[lPos]
+				pos_ += 1
+				while pos_ <= length(source) do
+					lChar = source[pos_]
 					if find(lChar, whitespace) = 0 then
 						exit
 					end if
-					lPos +=1 
+					pos_ +=1 
 				end while
 			end if
 		else
-			lPos -= 1	-- Put back the last char.
+			pos_ -= 1	-- Put back the last char.
 		end if
 						
-		lValue = ""
+		value_ = ""
 		if find(lChar, kv_delim) != 0  or not haskeys then
 		
 			if find(lChar, kv_delim) != 0 then
@@ -570,21 +570,21 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 			end if
 			
 			-- ignore next whitespace
-			lPos += 1
-			while lPos <= length(source) do
-				lChar = source[lPos]
+			pos_ += 1
+			while pos_ <= length(source) do
+				lChar = source[pos_]
 				if find(lChar, whitespace) = 0 then
 					exit
 				end if
-				lPos +=1 
+				pos_ +=1 
 			end while
 			
 			-- Get value. Ends at any of unquoted whitespace or unquoted delimiter
 			lQuote = 0
 			lChar = 0
 			lBracketed = {}
-			while lPos <= length(source) do
-				lChar = source[lPos]
+			while pos_ <= length(source) do
+				lChar = source[pos_]
 				if length(lBracketed) = 0 and find(lChar, quotes) != 0 then
 					if lChar = lQuote then
 						-- End of quoted span
@@ -599,7 +599,7 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
 				
-				elsif length(lValue) = 1 and lValue[1] = '~' and find(lChar, lStartBracket) > 0 then
+				elsif length(value_) = 1 and value_[1] = '~' and find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
 				
@@ -612,71 +612,71 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 				end if
 				
 				if lChar > 0 then
-					lValue &= lChar			
+					value_ &= lChar			
 				end if
-				lPos += 1
+				pos_ += 1
 			end while
 			
 			if find(lChar, whitespace) != 0  then			
 				-- ignore next whitespace
-				lPos += 1
-				while lPos <= length(source) do
-					lChar = source[lPos]
+				pos_ += 1
+				while pos_ <= length(source) do
+					lChar = source[pos_]
 					if find(lChar, whitespace) = 0 then
 						exit
 					end if
-					lPos +=1 
+					pos_ +=1 
 				end while
 			end if
 			
 			if find(lChar, pair_delim) != 0  then
-				lPos += 1
-				if lPos <= length(source) then
-					lChar = source[lPos]
+				pos_ += 1
+				if pos_ <= length(source) then
+					lChar = source[pos_]
 				end if
 			end if
 		end if
 
 		if find(lChar, pair_delim) != 0  then
-			lPos += 1
+			pos_ += 1
 		end if
 		
-		if length(lValue) = 0 then
-			if length(lKey) = 0 then
+		if length(value_) = 0 then
+			if length(key_) = 0 then
 				lKeyValues = append(lKeyValues, {})
 				continue
 			end if
 			
 			if not lWasKV then
-				lValue = lKey
-				lKey = ""
+				value_ = key_
+				key_ = ""
 			end if
 		end if
 		
-		if length(lKey) = 0 then
+		if length(key_) = 0 then
 			if haskeys then			
-				lKey =  sprintf("p[%d]", length(lKeyValues) + 1)
+				key_ =  sprintf("p[%d]", length(lKeyValues) + 1)
 			end if
 		end if
 		
-		if length(lValue) > 0 then
-			lChar = lValue[1]					
+		if length(value_) > 0 then
+			lChar = value_[1]					
 			lBPos = find(lChar, lStartBracket)
-			if lBPos > 0 and lValue[$] = lEndBracket[lBPos] then
+			if lBPos > 0 and value_[$] = lEndBracket[lBPos] then
 				if lChar = '(' then
-					lValue = keyvalues(lValue[2..$-1], pair_delim, kv_delim, quotes, whitespace, haskeys)
+					value_ = keyvalues(value_[2..$-1], pair_delim, kv_delim, quotes, whitespace, haskeys)
 				else
-					lValue = keyvalues(lValue[2..$-1], pair_delim, kv_delim, quotes, whitespace, 0)
+					value_ = keyvalues(value_[2..$-1], pair_delim, kv_delim, quotes, whitespace, 0)
 				end if
 			elsif lChar = '~' then	
-				lValue = lValue[2 .. $]
+				value_ = value_[2 .. $]
 			end if
 		end if
 		
-		if length(lKey) = 0 then
-			lKeyValues = append(lKeyValues, lValue)
+		if length(key_) = 0 then
+			lKeyValues = append(lKeyValues, value_)
 		else
-			lKeyValues = append(lKeyValues, {lKey, lValue})
+			lKeyValues = append(lKeyValues, {key_, value_})
 		end if
 		
 	end while

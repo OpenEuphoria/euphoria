@@ -1,53 +1,54 @@
-namespace stdeumem
+namespace eumem
 
-export sequence gMem = {}
-integer gFreeList = 0
+export sequence ram_space = {}
+integer ram_free_list = 0
 
 ------------------------------------------
-export function malloc(object pCnt = 1)
+export function malloc(object count_p = 1)
 ------------------------------------------
-	integer lTemp
+	integer temp_
 
-	if atom(pCnt) then
-		pCnt = repeat(0, pCnt)
+	if atom(count_p) then
+		count_p = repeat(0, count_p)
 	end if
-	if gFreeList = 0 then
-		gMem = append(gMem, pCnt)
-		return length(gMem)
+	if ram_free_list = 0 then
+		ram_space = append(ram_space, count_p)
+		return length(ram_space)
 	end if
 
-	lTemp = gFreeList
-	gFreeList = gMem[lTemp]
-	gMem[lTemp] = pCnt
-	return lTemp
+	temp_ = ram_free_list
+	ram_free_list = ram_space[temp_]
+	ram_space[temp_] = count_p
+	return temp_
 
 end function
 
 ------------------------------------------
-export procedure free(integer pMem)
+export procedure free(integer mem_p)
 ------------------------------------------
-	if pMem < 1 then return end if
-	if pMem > length(gMem) then return end if
+	if mem_p < 1 then return end if
+	if mem_p > length(ram_space) then return end if
 
-	gMem[pMem] = gFreeList
-	gFreeList = pMem
+	ram_space[mem_p] = ram_free_list
+	ram_free_list = mem_p
 end procedure
 
+
 ------------------------------------------
-export function valid(object pMem, object pCnt = 1)
+export function valid(object mem_p, object count_p = 1)
 ------------------------------------------
-	if not integer(pMem) then return 0 end if
-	if pMem < 1 then return 0 end if
-	if pMem > length(gMem) then return 0 end if
+	if not integer(mem_p) then return 0 end if
+	if mem_p < 1 then return 0 end if
+	if mem_p > length(ram_space) then return 0 end if
 	
-	if sequence(pCnt) then return 1 end if
+	if sequence(count_p) then return 1 end if
 	
-	if atom(gMem[pMem]) then 
-		if pCnt >= 0 then return 0 end if
+	if atom(ram_space[mem_p]) then 
+		if count_p >= 0 then return 0 end if
 		return 1
 	end if
 
-	if length(gMem[pMem]) != pCnt then return 0 end if
+	if length(ram_space[mem_p]) != count_p then return 0 end if
 	return 1
 end function
 

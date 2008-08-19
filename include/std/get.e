@@ -1,5 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+namespace stdget
 
 include io.e
 include error.e

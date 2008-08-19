@@ -31,7 +31,7 @@ constant P = C_POINTER, I = C_INT, D = C_DOUBLE
 --
 ------------------------------------------------------------------------------------------
 
-stdmap:map lang = stdmap:new()
+map:map lang = map:new()
 
 object lang_path = 0
 
@@ -103,7 +103,7 @@ public function lang_load(sequence filename)
 		return 0  -- TODO: default to English?
 	end if
 
-	lang = stdmap:new() -- clear any old data
+	lang = map:new() -- clear any old data
 
 	for i = 1 to length(lines) do
 		line = trim(lines[i], " \r\n")
@@ -111,7 +111,7 @@ public function lang_load(sequence filename)
 			msg &= trim_tail(line, " &")
 			if line[$] != '&' then
 				cont = 0
-				stdmap:put(lang, key, msg)
+				map:put(lang, key, msg)
 			else
 				msg &= '\n'
 			end if
@@ -123,7 +123,7 @@ public function lang_load(sequence filename)
 					key = line[1..sp-1]
 					msg = trim_tail(line[sp+1..$], " &") & '\n'
 				else
-					stdmap:put(lang, line[1..sp-1], line[sp+1..$])
+					map:put(lang, line[1..sp-1], line[sp+1..$])
 				end if
 			else
 				crash("Malformed Language file %s on line %d", {filename, i})
@@ -150,7 +150,7 @@ end function
 -- 		[[:set]], [[:lang_load]]
 
 public function w(sequence word)
-	return stdmap:get(lang, word, "")
+	return map:get(lang, word, "")
 end function
 
 ------------------------------------------------------------------------------------------
