@@ -5,6 +5,7 @@
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
+namespace stdprimes
 
 include search.e
 

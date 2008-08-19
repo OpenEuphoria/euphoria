@@ -548,17 +548,25 @@ end function
 -- Returns:
 --		An **integer**, either:
 -- # a positive integer ##i##, which means ##haystack[i]## equals ##needle##.
--- # a negative integer, ##-i##, with ##i## between adjusted start and end points. This means that ##needle## is not in the searched slice of ##haystack##, but would be at index ##i## if it were there.
--- # a negative integer ##-i## with ##i## out of the searched range. This means than ##needle##might be either below the start point if ##i## is below the start point, or above the end point if ##i## is.
+-- # a negative integer, ##-i##, with ##i## between adjusted start and end
+--    points. This means that ##needle## is not in the searched slice of 
+--    ##haystack##, but would be at index ##i## if it were there.
+-- # a negative integer ##-i## with ##i## out of the searched range. This
+--   means than ##needle##might be either below the start point if ##i## 
+--   is below the start point, or above the end point if ##i## is.
 --
 -- Comments:
--- If ##endpoint## is not greater than zero, it is added to length(##haystack##) once only. Then, the end point of the search is adjusted to length(haystack) if out of bounds.
---
--- The start point is adjusted to 1 if below 1.
---
--- The way this function returns is very similar to what [[:db_find_key]] does. They use variants of the same algorithm. The latter is all the more efficient as ##haystack## is long.
---
--- ##haystack## is assumed to be non-decreasing. Results are undefined if it is not. If duplicate copies of ##needle## exist in the range searched on ##haystack##, any of the possible contiguous indexes may be returned.
+-- * If ##endpoint## is not greater than zero, it is added to 
+--   length(##haystack##) once only. Then, the end point of the search is
+--   adjusted to length(haystack) if out of bounds.
+-- * The start point is adjusted to 1 if below 1.
+-- * The way this function returns is very similar to what [[:db_find_key]]
+--   does. They use variants of the same algorithm. The latter is all the
+--   more efficient as ##haystack## is long.
+-- * ##haystack## is assumed to be in ascending order. Results are undefined
+--   if it is not. 
+-- * If duplicate copies of ##needle## exist in the range searched on
+--   ##haystack##, any of the possible contiguous indexes may be returned.
 --
 -- See Also:
 -- [[:find]], [[:db_find_key]]

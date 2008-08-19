@@ -4,12 +4,13 @@
 -- or vice versa. On Linux, some lines will get error messages from GNU C
 -- if you use DOS-style. 
 
-include std/file.e
+include std/console.e
+include std/filesys.e
 include std/get.e
-include std/wildcard.e
+include std/text.e
 
 object d, line
-sequence entry, dl, name
+sequence lEntry, dl, name
 integer len, linux_style, infile, outfile
 
 d = dir(".")
@@ -23,19 +24,19 @@ if not find('d', dl) and not find('l', dl) then
 end if
 linux_style = find('l', dl)
 for i = 1 to length(d) do
-	entry = upper(d[i][D_NAME]) & '^'
-	if match(".C^", entry) or
-	   match(".H^", entry) or
-	   match(".E^", entry) or
-	   match(".EX^", entry) or
-	   match("IMAKEU^", entry) then
+	lEntry = upper(d[i][D_NAME]) & '^'
+	if match(".C^", lEntry) or
+	   match(".H^", lEntry) or
+	   match(".E^", lEntry) or
+	   match(".EX^", lEntry) or
+	   match("IMAKEU^", lEntry) then
 		name = d[i][D_NAME]
 		puts(2, name & ' ')
-		if platform() = LINUX then
+		ifdef LINUX then
 			system("mv " & name & " junk.xxx", 2)
 		else    
 			system("move " & name & " junk.xxx > NUL" , 2)
-		end if
+		end ifdef
 		infile = open("junk.xxx", "rb")
 		if infile = -1 then
 			puts(2, "Can't open junk.xxx\n")
@@ -67,7 +68,7 @@ for i = 1 to length(d) do
 		end while
 		close(infile)
 		close(outfile)
-		if match("IMAKEU^", entry) then
+		if match("IMAKEU^", lEntry) then
 			system("chmod +x imakeu", 2)
 		end if
 	end if

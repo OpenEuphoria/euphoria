@@ -7,7 +7,7 @@ include opnames.e
 include std/text.e
 include std/pretty.e
 include std/error.e
-include std/map.e as map
+include std/map.e
 include dot.e
 include std/os.e
 include dox.e as dox
@@ -263,7 +263,6 @@ function find_line(symtab_index sub, integer pc)
 end function
 
 
-constant BLANK_MAP = map:new()
 procedure opPROC()  -- Normal subroutine call
     integer n, arg, sub, top
     sequence dsm
@@ -282,8 +281,8 @@ procedure opPROC()  -- Normal subroutine call
 	-- record the data for the call graph
 	-- called_from maps from the caller to the callee
 	-- called_by maps from the callee back to the caller
-	called_from = map:nested_put( called_from, { current_file, CurrentSub, SymTab[sub][S_FILE_NO], sub }, 1 , map:ADD )
-	called_by   = map:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, current_file, CurrentSub }, 1, map:ADD )
+	stdmap:nested_put( called_from, { current_file, CurrentSub, SymTab[sub][S_FILE_NO], sub }, 1 , stdmap:ADD )
+	stdmap:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, current_file, CurrentSub }, 1, stdmap:ADD )
 	
     dsm = sprintf( "%s: %s",{opnames[Code[pc]],name_or_literal(sub)})
 
@@ -1254,7 +1253,7 @@ procedure write_call_info( sequence name )
 	
 	-- called_from:  file -> proc -> called_proc file : called proc
 	-- called_by  :  called_proc file -> called proc -> file : proc
-	sequence files = map:keys( called_from )
+	sequence files = stdmap:keys( called_from )
 	
 	integer fn = open( name & "calls", "w" )
 	sequence pp = PRETTY_DEFAULT
@@ -1472,7 +1471,7 @@ procedure dis( integer sub )
 	sequence sym
 	CurrentSub = sub
 	printf( out, "\nSubProgram [%s-%s:%05d]\n", {file_name[SymTab[sub][S_FILE_NO]],SymTab[sub][S_NAME], sub})
-	proc_names = map:put( proc_names, SymTab[sub][S_NAME], sub )
+	stdmap:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1
 	while pc <= length(Code) do

@@ -13,7 +13,7 @@ include error.e
 include datetime.e as dt
 include text.e
 include io.e
-include map.e as m
+include std/map.e
 include localeconv.e as lcc
 include lcid.e as lcid
 
@@ -31,11 +31,9 @@ constant P = C_POINTER, I = C_INT, D = C_DOUBLE
 --
 ------------------------------------------------------------------------------------------
 
-m:map lang
-lang = m:new()
+stdmap:map lang = stdmap:new()
 
-object lang_path
-lang_path = 0
+object lang_path = 0
 
 --****
 -- === Message translation functions
@@ -105,7 +103,7 @@ public function lang_load(sequence filename)
 		return 0  -- TODO: default to English?
 	end if
 
-	lang = m:new() -- clear any old data
+	lang = stdmap:new() -- clear any old data
 
 	for i = 1 to length(lines) do
 		line = trim(lines[i], " \r\n")
@@ -113,7 +111,7 @@ public function lang_load(sequence filename)
 			msg &= trim_tail(line, " &")
 			if line[$] != '&' then
 				cont = 0
-				lang = m:put(lang, key, msg)
+				stdmap:put(lang, key, msg)
 			else
 				msg &= '\n'
 			end if
@@ -125,7 +123,7 @@ public function lang_load(sequence filename)
 					key = line[1..sp-1]
 					msg = trim_tail(line[sp+1..$], " &") & '\n'
 				else
-					lang = m:put(lang, line[1..sp-1], line[sp+1..$])
+					stdmap:put(lang, line[1..sp-1], line[sp+1..$])
 				end if
 			else
 				crash("Malformed Language file %s on line %d", {filename, i})
@@ -152,7 +150,7 @@ end function
 -- 		[[:set]], [[:lang_load]]
 
 public function w(sequence word)
-	return m:get(lang, word, "")
+	return stdmap:get(lang, word, "")
 end function
 
 ------------------------------------------------------------------------------------------

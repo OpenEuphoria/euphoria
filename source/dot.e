@@ -1,18 +1,18 @@
 include global.e
 include std/get.e
-include std/map.e as map
+include std/map.e
 include std/sequence.e
 include std/search.e
 include std/sets.e as set
 
 -- called_from:  file -> proc -> called_proc file : called proc
 -- called_by  :  called_proc file -> called proc -> file : proc
-export map:map called_from = map:new()
-export map:map called_by   = map:new()
-export map:map proc_names  = map:new()
+export stdmap:map called_from = stdmap:new()
+export stdmap:map called_by   = stdmap:new()
+export stdmap:map proc_names  = stdmap:new()
 
 -- file, token (proc/func), scope, proc sym : 0
-map:map cluster
+stdmap:map cluster
 
 export sequence short_names = {}
 export sequence std_libs    = {}
@@ -28,25 +28,24 @@ export constant
 	CALL_FROM = 2,
 	ALL_CALLS = 3
 
-constant BLANK_MAP = map:new()
 
 -- reset any local variables
 procedure new_diagram()
-	cluster = map:new()
+	cluster = stdmap:new()
 end procedure
 
 
-function edges( map:map call_map, integer proc, integer files, integer direction )
+function edges( stdmap:map call_map, integer proc, integer files, integer direction )
 	integer file = SymTab[proc][S_FILE_NO]
-	map:map proc_map = map:nested_get( call_map, { file, proc }, BLANK_MAP )
-	sequence from_files = map:keys( proc_map )
+	stdmap:map proc_map = new_extra( stdmap:nested_get( call_map, { file, proc } ) )
+	sequence from_files = stdmap:keys( proc_map )
 	
 	sequence lines = {}
 	for i = 1 to length( from_files ) do
 		if and_bits( INTER_FILE, files ) or file = from_files[i] then
 			
-			map:map file_map = map:get( proc_map, from_files[i], BLANK_MAP )
-			sequence procs = map:keys( file_map )
+			stdmap:map file_map = new_extra( stdmap:get( proc_map, from_files[i]) )
+			sequence procs = stdmap:keys( file_map )
 			sequence edge_lines = ""
 			integer edge_count = 0
 			for j = 1 to length( procs ) do
@@ -63,9 +62,9 @@ function edges( map:map call_map, integer proc, integer files, integer direction
 						caller = SymTab[called_proc][S_NAME]
 					end if
 					
-					cluster = map:nested_put( cluster, {direction, from_files[i], sym_ent[S_TOKEN], sym_ent[S_SCOPE], called_proc}, 0 )
+					stdmap:nested_put( cluster, {direction, from_files[i], sym_ent[S_TOKEN], sym_ent[S_SCOPE], called_proc}, 0 )
 					edge_lines &= sprintf("\t\"%s\" -> \"%s\"\n", { caller, callee } )
-					integer count = map:get( file_map, called_proc, 1 )
+					integer count = stdmap:get( file_map, called_proc, 1 )
 					if count > 1 then
 						edge_lines &= sprintf("\t[label=\"%d\"]\n", count )
 					end if
@@ -83,10 +82,10 @@ end function
 
 function clusters()
 	sequence lines = {}
-	sequence call_type = map:keys( cluster )
+	sequence call_type = stdmap:keys( cluster )
 	for ct = 1 to length( call_type ) do
-		map:map file_map = map:get( cluster, call_type[ct], BLANK_MAP )
-		sequence files = map:keys( file_map )
+		stdmap:map file_map = new_extra( stdmap:get( cluster, call_type[ct]) )
+		sequence files = stdmap:keys( file_map )
 		for f = 1 to length( files ) do
 			integer fn = files[f]
 			if call_type[ct] then
@@ -96,8 +95,8 @@ function clusters()
 				lines &= sprintf("\tsubgraph \"cluster_target\" {\n\t\tlabel = \"%s\"\n\t\tcolor = blue\n", 
 						{ file_name[fn] } )
 			end if
-			map:map token_map = map:get( file_map, fn, BLANK_MAP )
-			sequence tokens = map:keys( token_map )
+			stdmap:map token_map = new_extra( stdmap:get( file_map, fn) )
+			sequence tokens = stdmap:keys( token_map )
 			for t = 1 to length( tokens ) do
 				sequence fill
 				integer token = tokens[t]
@@ -107,8 +106,8 @@ function clusters()
 					fill = ",style=\"\""
 				end if
 				
-				map:map scope_map = map:get( token_map, token, BLANK_MAP )
-				sequence scopes = map:keys( scope_map )
+				stdmap:map scope_map = new_extra( stdmap:get( token_map, token) )
+				sequence scopes = stdmap:keys( scope_map )
 				for s = 1 to length( scopes ) do
 					integer scope = scopes[s]
 					sequence shape
@@ -120,8 +119,8 @@ function clusters()
 						shape = "shape=box"
 					end if
 					
-					map:map proc_map = map:get( scope_map, scope, BLANK_MAP )
-					sequence procs = map:keys( proc_map )
+					stdmap:map proc_map = new_extra( stdmap:get( scope_map, scope) )
+					sequence procs = stdmap:keys( proc_map )
 					lines &= sprintf( "\t\t\tnode [%s%s]\n", {shape, fill})
 					for p = 1 to length( procs ) do
 						symtab_index proc = procs[p]
@@ -142,7 +141,7 @@ export function diagram_routine( object proc, integer files = ALL_FILES, integer
 	new_diagram()
 	
 	if sequence( proc ) then
-		proc = map:get( proc_names, proc, 0 )
+		proc = stdmap:get( proc_names, proc, 0 )
 	end if
 	
 	if not proc then
@@ -153,7 +152,7 @@ export function diagram_routine( object proc, integer files = ALL_FILES, integer
 	lines = ""
 	integer fn = SymTab[proc][S_FILE_NO]
 	
-	cluster = map:nested_put( cluster, {0, fn, SymTab[proc][S_TOKEN], SymTab[proc][S_SCOPE], proc}, 0 )
+	stdmap:nested_put( cluster, {0, fn, SymTab[proc][S_TOKEN], SymTab[proc][S_SCOPE], proc}, 0 )
 	
 	if and_bits( calls, CALL_BY ) then
 		lines &= edges( called_by, proc, files, CALL_BY )

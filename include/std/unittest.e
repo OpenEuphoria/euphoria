@@ -68,8 +68,9 @@
 -- === Constants
 --
 
-include io.e
-include pretty.e
+include std/io.e
+include std/pretty.e
+include std/search.e
 
 --
 -- Public Variables
@@ -455,7 +456,7 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
-	elsif equal(cmd[i], "-accumulate") then
+	elsif begins(cmd[i], "-accumulate") then
 		set_accumulate_summary(1)
 	elsif equal(cmd[i], "-log") then
 		log_fh = open("unittest.log", "a")

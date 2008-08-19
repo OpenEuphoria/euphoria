@@ -308,6 +308,7 @@ op_result[TASK_LIST] = T_SEQUENCE
 op_result[PLATFORM] = T_INTEGER
 op_result[SPLICE] = T_SEQUENCE
 op_result[INSERT] = T_SEQUENCE
+op_result[HASH] = T_ATOM
 
 
 procedure cont11ii(integer op, boolean ii)

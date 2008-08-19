@@ -16,7 +16,7 @@ type str_key_map(object o)
 end type
 
 str_key_map m = map:new(10)
-m = map:put(m, "a", 1)
+map:put(m, "a", 1)
 
 test_pass("type check cause machine exception?")
 
