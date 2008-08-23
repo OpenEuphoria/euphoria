@@ -15,7 +15,11 @@ without type_check
 
 include std/machine.e
 
+ifdef DOS32 then
 tick_rate(100) -- get better clock resolution on DOS32
+end ifdef
+
+include std/math.e
 set_rand(9999)
 
 constant MAX = 50000
