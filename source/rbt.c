@@ -197,7 +197,8 @@ static int walk_tree(rbt_tree* tree_p, rbt_node* node_p, void *walk_data_p)
 	
 	end_l = tree_p->end;
 	
-	if (node_p != end_l) {
+	if (node_p != end_l)
+	{
 		/* Do everything to the left first. */
 		if ( (next_node_l = node_p->left) != end_l) 
 			if ( (res_l = walk_tree(tree_p, next_node_l, walk_data_p)) != 0)
@@ -215,6 +216,52 @@ static int walk_tree(rbt_tree* tree_p, rbt_node* node_p, void *walk_data_p)
 				return res_l;
 	}
 	return 0;
+}
+
+/*------------------------------------------------------------------------------
+Function:  walk_tree 
+
+Arguments:  
+	tree_p = The tree being walked
+	node_p = The top of the branch being walked.
+	walk_data_p = Whatever data was passed to RBT_Walk()
+
+Returns: 0 if walk should continue, !0 if walk should stop. It can only be !0
+         if that is what is returned by the user supplied node processing routine.
+
+Description: This is called by RBT_Walk and it recursively walks the left branch,
+             then calls the user supplied routine with the current node, then
+             walks the right branch. The net effect is that each key/value is
+             passed to the user supplied routine in order.
+------------------------------------------------------------------------------*/
+#include <stdio.h>
+static void debug_tree(rbt_tree* tree_p, rbt_node* node_p)
+{
+	rbt_node *end_l;
+	rbt_node *next_node_l;
+	
+	end_l = tree_p->end;
+	
+	if (node_p != end_l)
+	{
+		/* Do everything to the left first. */
+		if ( (next_node_l = node_p->left) != end_l) 
+			debug_tree(tree_p, next_node_l);
+		
+		printf("n=%08x ", node_p);
+		printf("p=%08x ", node_p->parent);
+		printf("l=%08x ", node_p->left);
+		printf("r=%08x ", node_p->right);
+		printf("k=%08x ", node_p->data.key);
+		printf("v=%08x ", node_p->data.value);
+		printf("t=%d ",   node_p->type);
+		printf("\n");
+		
+		/* Finally, do everything to the right. */
+		if ( (next_node_l = node_p->right) != end_l)
+			debug_tree(tree_p, next_node_l);
+	}
+	return;
 }
 
 /*------------------------------------------------------------------------------
@@ -893,7 +940,7 @@ void RBT_Delete(rbt_tree* tree, rbt_kv* data)
 		if (deleted_node_l->right == end)
 		{	// The node to delete only has left-hand children
 			deleted_node_l->left->parent = parent;
-			parent->left = deleted_node_l->right;
+			parent->left = deleted_node_l->left;
 			fixup_child = parent->left;
 		}
 		else
@@ -941,6 +988,7 @@ void RBT_Delete(rbt_tree* tree, rbt_kv* data)
 	
 	// Release the node's RAM.
 	free(deleted_node_l); 
+	(tree->count)--;
 	return;	
 }
 
@@ -956,4 +1004,16 @@ Description: Returns the number of nodes in the tree.
 int RBT_Length(rbt_tree* tree)
 {
 	return tree->count;
+}
+
+
+void RBT_Debug(rbt_tree* tree_p)
+{
+	printf("\n======== TREE ===========\n");
+    printf("t=%08x ", tree_p);
+	printf("e=%08x ", tree_p->end);
+	printf("r=%08x ", tree_p->root);
+	printf("f=%08x ", tree_p->root->left);
+	printf("c=%d\n",  tree_p->count);
+	debug_tree(tree_p, tree_p->root->left);
 }
