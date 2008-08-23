@@ -55,7 +55,11 @@ ifeq "$(EMINGW)" "1"
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
-	EOSMING=-ffast-math -O3 -Os
+	ifdef EDEBUG
+		EOSMING=
+	else
+		EOSMING=-ffast-math -O3 -Os
+	endif
 	EBACKENDU=backendw.exe
 	EBACKENDC=backendc.exe
 	EECU=ecw.exe
