@@ -12,6 +12,7 @@ test_not_equal("override routine_id #1", routine_id("append"), -1 )
 test_equal("routine_id(\"eu:append\")", routine_id("eu:id"), -1 )
 
 include foo_default.e
+include foo_default.e
 include bar_default.e as bar
 test_equal( "default namespace", "foo", foo:test() )
 test_equal( "override default namespace", "bar", bar:test() )

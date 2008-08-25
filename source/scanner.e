@@ -549,13 +549,26 @@ procedure declare_default_namespace( integer namespace_file )
 	token s
 	
 	s = keyfind(default_namespaces[namespace_file], -1)
-	if not find(s[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-		CompileErr(sprintf("default namespace identifier '%s' for %s already defined",
-			{default_namespaces[namespace_file], file_name[namespace_file]}))
-	end if
-	new_include_space = NameSpace_declaration(s[T_SYM])
-	SymTab[new_include_space][S_OBJ] = namespace_file
-	SymTab[new_include_space][S_FILE_NO] = current_file_no
+	integer id = s[T_ID]
+	switch id do
+		case VARIABLE:
+		case FUNC:
+		case TYPE:
+		case PROC:
+			new_include_space = NameSpace_declaration(s[T_SYM])
+			SymTab[new_include_space][S_OBJ] = namespace_file
+			SymTab[new_include_space][S_FILE_NO] = current_file_no
+		
+		case NAMESPACE:
+			-- either already included, or another namespace was already
+			-- declared, so just skip it.
+			return
+		
+		case else
+			CompileErr(sprintf("default namespace identifier '%s' for %s already defined",
+				{default_namespaces[namespace_file], file_name[namespace_file]}))
+	end switch
+	
 end procedure
 
 procedure add_exports( integer from_file, integer to_file )
