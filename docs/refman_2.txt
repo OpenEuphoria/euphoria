@@ -2052,7 +2052,7 @@ until x<=0
 </eucode>
 
 <eucode>
-loop do entry
+loop entry do
     a = a * 2
   entry
     x = x - 1
