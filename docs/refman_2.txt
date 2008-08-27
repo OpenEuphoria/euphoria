@@ -2051,6 +2051,23 @@ loop do
 until x<=0
 </eucode>
 
+<eucode>
+loop do entry
+    a = a * 2
+  entry
+    x = x - 1
+until x<=0
+</eucode>
+
+<eucode>
+loop do label "GONEXT"
+    a = a * 2
+    y += 1
+    if y = 7 then continue "GONEXT" end if
+    x = x - 1
+until x<=0
+</eucode>
+
 This differs from a **while** loop in more than one way:
 
 # The body of the loop is executed at least once, since testing takes place AFTER
@@ -2077,7 +2094,7 @@ puts(1, "6\n")
 </eucode>
 
 This block of code simply starts at the first line and runs each in turn. But it
-could be written more simply and flexible by using a **for** statement.
+could be written more simply and flexibly by using a **for** statement.
 
 <eucode>
 for i = 1 to 6 do
