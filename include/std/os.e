@@ -692,8 +692,7 @@ end function
 --
 -- Comments: 
 --
--- The [[:ifdef statement]] is much more versatile and supersedes ##platform##(), which is 
--- supported for backward vompatibility and for a limited time only.
+-- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##().
 --
 -- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
 -- When exu is running the platform is //LINUX// (or //FREEBSD//) or //OSX//.
