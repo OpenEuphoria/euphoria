@@ -84,7 +84,7 @@ include error.e
 -- * INVLN10  : the inverse of LN10
 -- * SQRT2    : the square root of 2
 -- * HALFSQRT2 : the half, and also the inverse, of SQRT2
--- * RADIANS_TO_DEGREE  : 180 / PI, how many degrees a radian is worth
+-- * RADIANS_TO_DEGREES : 180 / PI, how many degrees a radian is worth
 -- * DEGREES_TO_RADIANS : PI / 180, how many radians a degree is worth
 -- * EULER_GAMMA : the Euler-Mascheroni-Soldner gamma constant: 0.57721566490153286606065121
 -- * EULER_NORMAL: 1/sqrt(2*PI), or 0.3989422804014326779399461
@@ -1206,7 +1206,7 @@ public function product(object a)
 		if atom(a[i]) then
 			b *= a[i]
 		else
-			b *= sum(a[i])
+			b *= product(a[i])
 		end if
 	end for
 	return b
