@@ -19,3 +19,7 @@ global function foo4(integer a)
 	end for
 	return a + 4
 end function
+
+fwd_var = 1
+
+

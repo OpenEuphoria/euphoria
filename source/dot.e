@@ -1,6 +1,6 @@
 include global.e
 include std/get.e
-include std/map.e
+include std/map.e as map
 include std/sequence.e
 include std/search.e
 include std/sets.e as set

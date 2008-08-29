@@ -15,6 +15,7 @@ include platinit.e
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 without trace
+
 --*****************
 -- Local variables
 --*****************
@@ -206,6 +207,25 @@ procedure NotReached(integer tok, sequence keyword)
 					not_reached_warning_flag, {keyword})
 	end if
 end procedure
+
+
+procedure Forward_InitCheck( token tok, integer fr, integer ref )
+	if ref then
+		sequence fwd     = repeat( 0, FR_SIZE )
+		fwd[FR_TYPE]     = GLOBAL_INIT_CHECK
+		fwd[FR_NAME]     = SymTab[tok[T_SYM]][S_NAME]
+		fwd[FR_FILE]     = current_file_no
+		fwd[FR_SUBPROG]  = CurrentSub
+		fwd[FR_PC]       = length( Code ) + 1
+		fwd[FR_LINE]     = line_number
+		fwd[FR_THISLINE] = ThisLine
+		forward_references = append( forward_references, fwd )
+		
+		emit_op( GLOBAL_INIT_CHECK )
+		emit_addr( 0 )
+	end if
+end procedure
+
 
 procedure InitCheck(symtab_index sym, integer ref)
 -- emit INIT_CHECK opcode if we aren't sure if a var has been
@@ -806,6 +826,24 @@ procedure ParseArgs(symtab_index subsym)
 	restore_parseargs_states()
 end procedure
 
+procedure Forward_var( token tok, integer init_check = -1 )
+	sequence ref     = repeat( 0, FR_SIZE )
+	ref[FR_TYPE]     = VARIABLE
+	ref[FR_NAME]     = SymTab[tok[T_SYM]][S_NAME]
+	ref[FR_FILE]     = current_file_no
+	ref[FR_SUBPROG]  = CurrentSub
+	ref[FR_PC]       = length( Code ) + 1
+	ref[FR_LINE]     = line_number
+	ref[FR_THISLINE] = ThisLine
+	
+	forward_references = append( forward_references, ref )
+	emit_opnd( - length( forward_references ) )
+	
+	if init_check != -1 then
+		Forward_InitCheck( tok, length( forward_references ), init_check )
+	end if
+end procedure
+
 procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	integer args = 0
 	op_info1 = tok[T_SYM]
@@ -987,14 +1025,20 @@ procedure Factor()
 				if forward[T_ID] = LEFT_ROUND then
 					Forward_call( tok, FUNC_FORWARD )
 					break "factor"
+				else
+					putback( forward )
+					Forward_var( tok, TRUE )
 				end if
+				
+			else
+				UndefinedVar(sym)
+				SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
+				InitCheck(sym, TRUE)
+				emit_opnd(sym)
 			end if
-			UndefinedVar(sym)
+			
 
-			SymTab[sym][S_USAGE] = or_bits(SymTab[sym][S_USAGE], U_READ)
-
-			InitCheck(sym, TRUE)
-			emit_opnd(sym)
+			
 
 			if sym = left_sym then
 				lhs_subs_level = 0 -- start counting subscripts
@@ -1220,7 +1264,29 @@ forward_expr = routine_id("Expr")
 procedure TypeCheck(symtab_index var)
 -- emit code to type-check a var (after it has been assigned-to)
 	symtab_index which_type
-
+	
+	if SymTab[var][S_SCOPE] = SC_UNDEFINED then
+		-- forward reference, so defer type check until later
+		sequence ref = repeat( 0, FR_SIZE )
+		ref[FR_TYPE]     = TYPE_CHECK
+		ref[FR_NAME]     = SymTab[var][S_NAME]
+		ref[FR_FILE]     = current_file_no
+		ref[FR_LINE]     = line_number
+		ref[FR_SUBPROG]  = CurrentSub
+		ref[FR_PC]       = length( Code ) + 1
+		ref[FR_THISLINE] = ThisLine
+		ref[FR_BP]       = bp
+		
+		forward_references = append( forward_references, ref )
+		if not TRANSLATE then
+			-- possible extra integer check
+			Code &= TYPE_CHECK & 0
+		end if
+		Code &= { TYPE_CHECK, var, OpTypeCheck, 0, 0 }
+		
+		return
+	end if
+	
 	which_type = SymTab[var][S_VTYPE]
 	if TRANSLATE then
 		if OpTypeCheck then
@@ -1288,8 +1354,11 @@ procedure Assignment(token left_var)
 	boolean dangerous  -- tricky subscripted assignment
 
 	left_sym = left_var[T_SYM]
-
-	UndefinedVar(left_sym)
+	if SymTab[left_sym][S_SCOPE] = SC_UNDEFINED then
+		Forward_var( left_var )
+	else
+		UndefinedVar(left_sym)
+	end if
 
 	if SymTab[left_sym][S_SCOPE] = SC_LOOP_VAR or
 	   SymTab[left_sym][S_SCOPE] = SC_GLOOP_VAR then
@@ -1301,7 +1370,8 @@ procedure Assignment(token left_var)
 	elsif SymTab[left_sym][S_SCOPE] = SC_LOCAL or
 		  SymTab[left_sym][S_SCOPE] = SC_GLOBAL or
 		  SymTab[left_sym][S_SCOPE] = SC_PUBLIC or
-		  SymTab[left_sym][S_SCOPE] = SC_EXPORT then
+		  SymTab[left_sym][S_SCOPE] = SC_EXPORT or
+		  SymTab[left_sym][S_SCOPE] = SC_UNDEFINED then
 		-- this helps us to optimize things below
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
 										 power(2, remainder(left_sym, E_SIZE)))
@@ -2545,8 +2615,11 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			buckets[h] = sym
 			-- more fields set below:
 		end if
+		if SymTab[sym][S_SCOPE] = SC_UNDEFINED and SymTab[sym][S_FILE_NO] != current_file_no then
+			SymTab[sym][S_FILE_NO] = current_file_no
+		end if
 		SymTab[sym][S_SCOPE] = scope
-
+		
 		if type_ptr = 0 then
 			-- CONSTANT
 			SymTab[sym][S_MODE] = M_CONSTANT
@@ -3292,12 +3365,15 @@ global procedure real_parser(integer nested)
 		start_index = length(Code)+1
 		tok = next_token()
 		id = tok[T_ID]
+
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
 				if forward[T_ID] = LEFT_ROUND then
 					Forward_call( tok )
 					continue
+				else
+					putback( forward )
 				end if
 			end if
 			StartSourceLine(TRUE)
@@ -3418,6 +3494,7 @@ global procedure real_parser(integer nested)
 
 		elsif id = END_OF_FILE then
 			if IncludePop() then
+				backed_up_tok = -999
 				PopGoto()
 				read_line()
 			else

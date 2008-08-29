@@ -1,6 +1,5 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
 -- Symbol Table Routines
 
 include global.e
@@ -562,7 +561,7 @@ ifdef STDDEBUG then
 sequence export_warnings
 export_warnings = {}
 end ifdef
-with trace
+
 global integer No_new_entry = 0
 global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no )
 -- Uses hashing algorithm to try to match 'word' in the symbol

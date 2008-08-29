@@ -3830,6 +3830,7 @@ procedure do_exec()
 				opXOR_BITS()
 				break
 			case else
+				
 				RTFatal( sprintf("Unknown opcode: %d", op ) )
 		end switch
 	end while

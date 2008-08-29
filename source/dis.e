@@ -262,7 +262,6 @@ function find_line(symtab_index sub, integer pc)
 	return slist[gline][LOCAL_FILE_NO]
 end function
 
-
 procedure opPROC()  -- Normal subroutine call
     integer n, arg, sub, top
     sequence dsm

@@ -400,8 +400,13 @@ global enum
 	FR_FILE,
 	FR_SUBPROG,
 	FR_PC,
-	FR_LINE
+	FR_LINE,
+	FR_THISLINE,
+	FR_BP
+
+global constant FR_SIZE = FR_BP
 
 -- # extra default parameters to leave space when
 -- emitting a forward call
 global constant FORWARD_DEFAULT_PADDING = 5
+

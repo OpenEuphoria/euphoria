@@ -1,4 +1,10 @@
 -- t_fwd.e
+-- TODO:  mutual inclusion test
+-- TODO: crash tests:
+--                   forward ref variable in same file
+--                   forward init check fail
+--                   forward type check fail
+
 include std/unittest.e
 
 integer n0=2
@@ -26,7 +32,12 @@ n0 = foo4( 6 )
 test_equal("with pseudo namespace #1", {1,2,3,4}, result4)
 test_equal("with pseudo namespace #2", 10 , n0)
 
-include fwd.e --as xyz
+include fwd.e
+object a, b, c, d, e, f, g, h
+export atom fwd_var
 
+test_equal("forward assign different file", 1, fwd_var )
 
 test_report()
+
+
