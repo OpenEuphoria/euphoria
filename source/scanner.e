@@ -539,6 +539,7 @@ procedure default_namespace( integer file_no, integer use )
 			SymTab[sym][S_FILE_NO] = file_no
 			sym  = NameSpace_declaration( sym )
 			SymTab[sym][S_OBJ] = current_file_no
+			SymTab[sym][S_SCOPE] = SC_PUBLIC
 		else
 			remove_symbol( sym )
 		end if
@@ -549,33 +550,6 @@ procedure default_namespace( integer file_no, integer use )
 		-- start over from the beginning of the line
 		bp = 1
 	end if
-	
-end procedure
-
-
-procedure declare_default_namespace( integer namespace_file )
-	token s
-	
-	s = keyfind(default_namespaces[namespace_file], -1)
-	integer id = s[T_ID]
-	switch id do
-		case VARIABLE:
-		case FUNC:
-		case TYPE:
-		case PROC:
-			new_include_space = NameSpace_declaration(s[T_SYM])
-			SymTab[new_include_space][S_OBJ] = namespace_file
-			SymTab[new_include_space][S_FILE_NO] = current_file_no
-		
-		case NAMESPACE:
-			-- either already included, or another namespace was already
-			-- declared, so just skip it.
-			return
-		
-		case else
-			CompileErr(sprintf("default namespace identifier '%s' for %s already defined",
-				{default_namespaces[namespace_file], file_name[namespace_file]}))
-	end switch
 	
 end procedure
 
@@ -631,9 +605,6 @@ procedure IncludePush()
 			if new_include_space != 0 then
 				SymTab[new_include_space][S_OBJ] = i -- but note any namespace
 				
-			elsif sequence( default_namespaces[i] ) then
-				-- no namespace declared, but there is a default namespace
-				declare_default_namespace( i )
 			end if
 			close(new_file)
 			
@@ -1059,8 +1030,8 @@ function find_reference( sequence fr )
 	integer ix = find( ':', name )
 	if ix then
 		sequence ns = name[1..ix-1]
-		token ns_tok = keyfind( ns, ns_file, file )
-		if ns_tok[T_ID] = IGNORED then
+		token ns_tok = keyfind( ns, ns_file, file, 1 )
+		if ns_tok[T_ID] != NAMESPACE then
 			return ns_tok
 		end if
 	end if
@@ -1330,7 +1301,12 @@ function my_sscanf(sequence yytext)
 	end if
 	return mantissa
 end function
-			
+
+integer not_a_namespace = 0
+export procedure no_namespace()
+	not_a_namespace = 1
+end procedure
+
 global function Scanner()
 -- The scanner main routine: returns a lexical token  
 	integer ch, i, sp, prev_Nne
@@ -1370,16 +1346,26 @@ global function Scanner()
 			end while
 			yytext = ThisLine[sp-1..bp-2]
 			bp -= 1  -- ungetch
-			tok = keyfind(yytext, -1)
-			if tok[T_ID] = NAMESPACE then
+			
+			-- is it a namespace?
+			ch = getch()
+			while ch = ' ' or ch = '\t' do
+				ch = getch()
+			end while
+			integer is_namespace = (ch = ':' and not not_a_namespace)
+			not_a_namespace = 0
+			
+			tok = keyfind(yytext, -1, , is_namespace )
+			if not is_namespace then
+				ungetch()
+			end if
+			
+			if is_namespace then
 				-- skip whitespace
 				namespaces = yytext
-				ch = getch()
-				while ch = ' ' or ch = '\t' do
-					ch = getch()
-				end while
+				
 
-				if ch = ':' then -- known namespace
+				if tok[T_ID] = NAMESPACE then -- known namespace
 					-- skip whitespace
 					ch = getch()
 					while ch = ' ' or ch = '\t' do
@@ -1758,7 +1744,7 @@ global procedure eu_namespace()
 	token eu_tok
 	symtab_index eu_ns
 	
-	eu_tok = keyfind("eu", -1)
+	eu_tok = keyfind("eu", -1, , 1)
 	-- create a new entry at beginning of this hash chain
 	eu_ns  = NameSpace_declaration(eu_tok[T_SYM])
 	SymTab[eu_ns][S_OBJ] = 0
@@ -1881,7 +1867,7 @@ global procedure IncludeScan( integer is_public )
 					end while
 					
 					ungetch()
-					s = keyfind(gtext, -1)
+					s = keyfind(gtext, -1, , 1)
 					if not find(s[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 						CompileErr("a new namespace identifier is expected here")
 					end if

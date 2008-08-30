@@ -502,7 +502,7 @@ function read_recorded_token(integer n)
 	else
 		prev_Nne = No_new_entry
 		No_new_entry = 1
-		t = keyfind(Ns_recorded[n],-1)
+		t = keyfind(Ns_recorded[n],-1, , 1)
 		if t[T_ID] != NAMESPACE then
 			p = Ns_recorded_sym[n]
 			if p = 0 then
@@ -2014,7 +2014,8 @@ procedure Case_statement()
 		CompileErr( "a case block cannot follow a case else block" )
 
 	end if
-
+	
+	no_namespace()
 	tok = next_token()
 	integer sign
 	if tok[T_ID] = MINUS then

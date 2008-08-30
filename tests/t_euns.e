@@ -24,5 +24,14 @@ test_not_equal( "public routine id", -1, routine_id("export_test"))
 test_equal( "public include",  "baz", baz() )
 test_not_equal( "routine id public visible through public include", -1, routine_id("baz") )
 test_equal( "routine id export not visible through public include", -1, routine_id("baz_export") )
+
+include def_ns.e
+
+def_ns dn = {}
+def_ns:def_ns dn2 = public_ns:foo()
+
+test_equal( "type clash with default namespace", "", dn )
+test_equal( "using a default namespace through a 'public include'", "public_ns:foo", dn2 )
+
 test_report()
 

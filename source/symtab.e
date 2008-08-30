@@ -563,7 +563,7 @@ export_warnings = {}
 end ifdef
 
 global integer No_new_entry = 0
-global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no )
+global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier.
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
@@ -582,7 +582,8 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 	st_ptr = buckets[hashval]
 	
 	while st_ptr do
-		if equal(word, SymTab[st_ptr][S_NAME]) then
+		if equal(word, SymTab[st_ptr][S_NAME]) 
+		and ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) then
 			-- name matches
 
 			tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
