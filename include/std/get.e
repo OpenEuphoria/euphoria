@@ -2,8 +2,8 @@
 --
 namespace stdget
 
-include io.e
-include error.e
+include std/io.e
+include std/error.e
 
 --****
 -- == Input Routines

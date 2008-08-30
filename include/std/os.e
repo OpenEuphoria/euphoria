@@ -8,18 +8,19 @@
 
 include sequence.e
 
-include text.e
+include std/text.e
 
-ifdef !DOS32 then
-	include dll.e
-end ifdef
+
 
 ifdef DOS32 then
-	public include dos\memory.e
-	include dos\interrup.e
+	public include std\dos\memory.e
+	include std\dos\interrup.e
+else
+	include std/dll.e
+	include std/memory.e
 end ifdef
 
-include machine.e
+include std/machine.e
 
 constant
 	M_SLEEP     = 64,

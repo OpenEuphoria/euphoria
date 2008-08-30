@@ -12,7 +12,7 @@
 
 public constant ASCENDING = -1, DESCENDING = 1
 
-include text.e -- upper/lower
+include std/text.e -- upper/lower
 
 --**
 -- The following constants define in which order sorting is done:

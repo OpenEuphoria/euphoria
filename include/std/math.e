@@ -74,7 +74,7 @@ type trig_range(object x)
 	end if
 end type
 
-include error.e
+include std/error.e
 
 --**
 -- Miscellaneous constants:

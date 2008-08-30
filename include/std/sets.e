@@ -17,7 +17,7 @@
 --     ExF, and the triple {card(E),card(F),card(G)}.
 --
 
-include error.e
+include std/error.e
 
 procedure report_error(sequence s)
 -- Description: Prints an error message on stderr and abort(1)s.

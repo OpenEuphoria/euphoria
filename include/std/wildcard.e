@@ -10,7 +10,7 @@
 --****
 -- === Routines
 
-include text.e as txt -- upper/lower
+include std/text.e as txt -- upper/lower
 
 function qmatch(sequence p, sequence s)
 -- find pattern p in string s

@@ -4,7 +4,7 @@
 -- <<LEVELTOC depth=2>>
 --
 
-public include get.e -- value(), get() are conversion routines
+include std/get.e -- value(), get() are conversion routines
 
 constant
 	M_A_TO_F64 = 46,

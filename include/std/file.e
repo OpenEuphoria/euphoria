@@ -5,6 +5,6 @@ include machine.e
 
 warning("file.e is deprecated, please see io.e, filesys.e and console.e")
 
-public include io.e
-public include filesys.e
-public include console.e
+public include std/io.e
+public include std/filesys.e
+public include std/console.e

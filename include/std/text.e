@@ -10,7 +10,7 @@
 --****
 -- === Routines
 
-include types.e
+include std/types.e
 
 --**
 -- Signature:

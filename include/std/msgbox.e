@@ -6,8 +6,9 @@
 -- <<LEVELTOC depth=2>>
 --
 
-include dll.e
-public include machine.e
+include std/dll.e
+include std/machine.e
+include std/memory.e
 
 without warning
 

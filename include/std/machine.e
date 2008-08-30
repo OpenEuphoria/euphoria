@@ -217,12 +217,12 @@
 -- [[:machine_proc]]
 
 ifdef SAFE then
-	public include safe.e
+	public include std/safe.e
 	ifdef DOS32 then
 		public include .\dos\safe.e
 	end ifdef
 else
-	public include memory.e
+	public include std/memory.e
 	ifdef DOS32 then
 		public include .\dos\memory.e
 	end ifdef

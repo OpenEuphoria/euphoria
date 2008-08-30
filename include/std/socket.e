@@ -10,11 +10,12 @@
 --
 -- <<LEVELTOC depth=2>>
  
-include dll.e
-include machine.e
-include get.e
-include wildcard.e
-include text.e
+include std/dll.e
+include std/machine.e
+include std/get.e
+include std/wildcard.e
+include std/text.e
+include std/memory.e
 --****
 -- === Constants
 --

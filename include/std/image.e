@@ -1,8 +1,8 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
-include graphcst.e
-include convert.e
-include machine.e
+include std/graphcst.e
+include std/convert.e
+include std/machine.e
 
 --****
 -- == Graphical Image Routines

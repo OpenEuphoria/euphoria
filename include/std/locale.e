@@ -7,15 +7,15 @@
 -- <<LEVELTOC depth=2>>
 -- 
 
-include dll.e
-include machine.e
-include error.e
-include datetime.e as dt
-include text.e
-include io.e
+include std/dll.e
+include std/machine.e
+include std/error.e
+include std/datetime.e as dt
+include std/text.e
+include std/io.e
 include std/map.e
-include localeconv.e as lcc
-include lcid.e as lcid
+include std/localeconv.e as lcc
+include std/lcid.e as lcid
 
 ------------------------------------------------------------------------------------------
 --

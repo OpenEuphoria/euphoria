@@ -5,10 +5,10 @@
 --
 -- <<LEVELTOC depth=2>>
 
-include error.e
-include search.e
-include text.e
-include sort.e
+include std/error.e
+include std/search.e
+include std/text.e
+include std/sort.e
 
 public enum
 	ADD_PREPEND,

@@ -8,8 +8,8 @@
 --
 -- === Routines
 
-include math.e
-include sort.e
+include std/math.e
+include std/sort.e
 
 --**
 -- Determines the k-th smallest value from the supplied set of numbers. 

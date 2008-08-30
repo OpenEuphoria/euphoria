@@ -5,8 +5,8 @@
 --
 -- <<LEVELTOC depth=2>>
 
-include types.e
-include get.e
+include std/types.e
+include std/get.e
 
 constant
 	M_WAIT_KEY    = 26,
