@@ -108,5 +108,9 @@ test_equal("argch", 1.7627471740390860504652186499596, arccosh(3))
 test_equal("th", 0.46211715726000975850231848364367, tanh(0.5))
 test_equal("argth", log(3)/2, arctanh(0.5))
 
+test_true("Hex Literal #1", #abcdef = #ABCDEF)
+test_true("Hex Literal #2", #012345 = #012345)
+test_true("Hex Literal #3", #AbC = #aBc)
+
 test_report()
 

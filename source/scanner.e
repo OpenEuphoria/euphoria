@@ -1619,6 +1619,9 @@ global function Scanner()
 				elsif ch >= 'A' and ch <= 'F' then   
 					i = (i * 16) + ch - ('A'-10)
 					is_int = TRUE
+				elsif ch >= 'a' and ch <= 'f' then   
+					i = (i * 16) + ch - ('a'-10)
+					is_int = TRUE
 				else
 					exit 
 				end if
