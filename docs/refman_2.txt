@@ -8,12 +8,14 @@
 
 All data **objects** in Euphoria are either **atoms**
 or **sequences**.  An **atom** is a single numeric
-value.  A **sequence** is a collection of values, either numeric or sequences
-themselves, all of the same kind or thoroughly mixed up..
+value.  A **sequence** is a collection of objects, either atoms or sequences
+themselves. A sequence can contain any mixture of atom and sequences; a sequence
+does not have to contain all the same data type. Because the **objects**
+contained in a sequence can be an arbitrary mix of atoms or sequences, it is
+an extremely versatile data structure, capable of repesenting any sort of data. 
 
-The **objects** contained in a sequence can be an arbitrary mix of
-atoms or sequences. A sequence is represented by a list of objects in brace
-brackets, separated by commas. Atoms can have any integer or double-precision
+A sequence is represented by a list of objects in brace brackets **{ }**, 
+separated by commas. Atoms can have any integer or double-precision
 floating point value. They can range from approximately -1e300 (minus one times
 10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
 some Euphoria objects:
@@ -2060,7 +2062,7 @@ until x<=0
 </eucode>
 
 <eucode>
-loop do label "GONEXT"
+loop label "GONEXT" do
     a = a * 2
     y += 1
     if y = 7 then continue "GONEXT" end if
