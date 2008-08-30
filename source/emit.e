@@ -161,7 +161,7 @@ procedure TempKeep(symtab_index x)
 end procedure
 
 global procedure TempFree(symtab_index x)
-	if x then
+	if x > 0 then
 		if SymTab[x][S_MODE] = M_TEMP then
 			SymTab[x][S_SCOPE] = FREE 
 		end if

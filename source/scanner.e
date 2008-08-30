@@ -1017,7 +1017,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 		elsif which_type = integer_type or
 				 SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = integer_type then
 				 -- check integers too
-			Code[pc..pc+3] = { INTEGER_CHECK, var, 0, next_pc }
+			Code[pc..pc+3] = { INTEGER_CHECK, var, ELSE, next_pc }
 			pc += 4
 			
 		end if
@@ -1026,15 +1026,15 @@ procedure patch_forward_type_check( token tok, integer ref )
 			if pc = start_pc then
 				Code[pc..pc+1] = { TRANSGOTO, next_pc }
 			else
-				Code[pc+2] = TRANSGOTO
+				Code[pc-2] = TRANSGOTO
 			end if
 		else
 			if pc = start_pc then
 				Code[pc..pc+1] = { ELSE, next_pc }
 				Code[pc+2..next_pc-1] = NOP1
 			else
-				Code[pc+2] = ELSE
-				Code[pc+4..next_pc-1] = NOP1
+				Code[pc-2] = ELSE
+				Code[pc..next_pc-1] = NOP1
 			end if
 		end if
 	end if

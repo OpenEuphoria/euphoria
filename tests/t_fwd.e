@@ -1,9 +1,4 @@
 -- t_fwd.e
--- TODO:  mutual inclusion test
--- TODO: crash tests:
---                   forward ref variable in same file
---                   forward init check fail
---                   forward type check fail
 
 include std/unittest.e
 
