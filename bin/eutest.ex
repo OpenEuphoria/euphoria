@@ -9,6 +9,18 @@ include std/filesys.e
 include std/io.e
 include std/get.e
 
+ifdef DOS32 then
+	include std/text.e
+end ifdef
+
+function dos_lower(sequence s)
+	ifdef DOS32 then
+		return lower(s)
+	else
+		return s
+	end ifdef
+end function
+
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status
@@ -71,7 +83,7 @@ procedure do_test(sequence cmds)
 		printf(1, "%s:\n", {filename})
 		cmd = sprintf("%s %s -D UNITTEST -batch %s %s", {executable, options, filename, cmd_opts})
 		status = system_exec(cmd, 2)
-		if match("t_c_", filename) = 1 then
+		if match("t_c_", dos_lower(filename)) = 1 then
 			status = not status
 		end if
 		if status > 0 then
@@ -83,7 +95,7 @@ procedure do_test(sequence cmds)
 			printf(1, "translate %s:\n", {filename})
 			cmd = sprintf("%s %s %s -D UNITTEST -con -D EC -batch %s", {translator, library, options, filename})
 			status = system_exec(cmd, 2)
-			if match("t_c_", filename) = 1 then
+			if match("t_c_", dos_lower(filename)) = 1 then
 				status = not status
 
 			elsif not status then
@@ -100,7 +112,7 @@ procedure do_test(sequence cmds)
 				if not status then
 					cmd = sprintf("./%s %s", {filename, cmd_opts})
 					status = system_exec(cmd, 2)
-					if match("t_c_", filename) = 1 then
+					if match("t_c_", dos_lower(filename)) = 1 then
 						status = not status
 					end if
 
