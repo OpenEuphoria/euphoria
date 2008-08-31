@@ -865,6 +865,17 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 				putback( tok )
 				call_proc( forward_expr, {} )
 				args += 1
+				
+				tok = next_token()
+				id = tok[T_ID]
+				switch id do
+					case RIGHT_ROUND:
+						exit
+					case COMMA:
+						break
+					case else
+						CompileErr("expected ',' or ')'")
+				end switch
 		end switch
 	end while
 	integer fc_pc = length( Code ) + 1

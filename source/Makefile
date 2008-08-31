@@ -220,7 +220,8 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/parser_0.o \
 	./$(OBJDIR)/parser_1.o \
 	./$(OBJDIR)/parser_2.o \
-	./$(OBJDIR)/parser_3.o
+	./$(OBJDIR)/parser_3.o \
+	./$(OBJDIR)/parser_4.o
 
 EU_CORE_C_FILES = \
 	./$(OBJDIR)/main-.c \

@@ -35,6 +35,12 @@ test_equal("forward assign different file", 1, fwd_var )
 export atom var2
 foo5()
 test_equal( "forward assign in a procedure", 3, var2 )
+test_equal( "forward ref with multiple args (non-default)", 3, mult_args_fwd( 1, 2 ) )
+
+function mult_args_fwd( integer a, integer b )
+	return a + b
+end function
+
 test_report()
 
 
