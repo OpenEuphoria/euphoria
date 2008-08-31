@@ -201,4 +201,10 @@ $$(doneby Derek Parnell, C. Cuvier.)
 * New character sets types and routines in **types.e** $$(doneby Derek Parnell)
 * New **unicode.e** for encoding/decoding/storing strings in UTF16 format $$(doneby Matt Lewis)
 * New **task.e** extending the multitasking proitives of Euphoria $$(doneby Ryan Johnson)
+* New forward referencing: routines may be used before they are declared, and variables in other 
+  files may be referenced before they are declared (such as when two files include each other)
+  $$(doneby Matt Lewis)
+* New: Parser is smarter about identifying namespaces vs regular symbols $$(doneby Matt Lewis)
+* New: Default namespace may be declared by a file. $$(doneby Matt Lewis)
+
 
