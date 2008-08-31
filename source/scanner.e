@@ -693,6 +693,31 @@ end procedure
 export integer parse_arg_rid
 export integer pop_rid
 
+sequence patch_code_temp = {}
+symtab_index patch_code_sub
+symtab_index patch_current_sub
+procedure set_code( integer ref )
+	patch_code_sub = forward_references[ref][FR_SUBPROG]
+	
+	if patch_code_sub != CurrentSub then
+		patch_code_temp = Code
+		Code = SymTab[patch_code_sub][S_CODE]
+		patch_current_sub = CurrentSub
+		CurrentSub = patch_code_sub
+	else
+		patch_current_sub = patch_code_sub
+	end if
+	
+end procedure
+
+procedure reset_code( )
+	SymTab[patch_code_sub][S_CODE] = Code
+	if patch_code_sub != patch_current_sub then
+		CurrentSub = patch_current_sub
+		Code = patch_code_temp
+	end if
+end procedure
+
 procedure patch_forward_call( token tok, integer ref )
 	-- Format of IL:
 	-- pc   OPCODE
@@ -875,22 +900,23 @@ procedure patch_forward_variable( token tok, integer ref )
 		return
 	end if
 	
+	set_code( ref )
 	integer vx = find_from( -ref, Code, fr[FR_PC] )
 	
 	if vx then
 		Code[vx] = tok[T_SYM]
 		forward_references[ref] = 0
 	end if
-	
+	reset_code()
 end procedure
 
 procedure patch_forward_init_check( token tok, integer ref )
 -- forward reference for a variable
 	sequence fr = forward_references[ref]
-	
+	set_code( ref )
 	Code[fr[FR_PC]+1] = tok[T_SYM]
 	forward_references[ref] = 0
-	
+	reset_code()
 end procedure
 
 
@@ -918,7 +944,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 	if not which_type then
 		return
 	end if
-	
+	set_code( ref )
 	sequence fr = forward_references[ref]
 	integer pc = fr[FR_PC]
 	symtab_index var = tok[T_SYM]
@@ -1010,6 +1036,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 		end if
 	end if
 	forward_references[ref] = 0
+	reset_code()
 end procedure
 
 procedure forward_error( token tok, integer ref )
@@ -1447,6 +1474,7 @@ global function Scanner()
 	                tok = {RECORDED, length(Recorded)}
 	            end if
 			end if
+			
 			return tok
 			
 		elsif class <= ILLEGAL_CHAR then

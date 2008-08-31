@@ -23,3 +23,7 @@ end function
 fwd_var = 1
 
 
+public procedure foo5()
+	var2 = 3
+end procedure
+

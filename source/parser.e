@@ -562,6 +562,7 @@ function next_token()
 	        canned_tokens = append(canned_tokens,t)
 	    end if
 	end if
+	
 	return t
 end function
 
@@ -2880,6 +2881,7 @@ procedure Statement_list()
 					Forward_call( tok )
 					continue
 				end if
+				putback( forward )
 			end if
 			StartSourceLine(TRUE)
 			Assignment(tok)

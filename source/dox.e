@@ -5,7 +5,7 @@ include dot.e
 include std/sets.e as set
 include std/filesys.e
 include std/sort.e
-include std/map.e
+include std/map.e as map
 include keylist.e
 include std/search.e
 

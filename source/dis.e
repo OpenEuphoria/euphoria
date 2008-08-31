@@ -384,6 +384,9 @@ procedure opELSE()  -- or EXIT, ENDWHILE}) then
 	pc += 2
 end procedure
 
+procedure opTRANSGOTO()
+	pc = Code[pc+1]
+end procedure
 	    
 procedure opRIGHT_BRACE_N()  -- form a sequence of any length 
     sequence x
@@ -1393,7 +1396,7 @@ procedure InitBackEnd( object ignore )
 			name = "ASSIGN_SUBS"
 		elsif equal(name, "ASSIGN_I") then
 			name = "ASSIGN"
-		elsif find(name, {"EXIT", "ENDWHILE", "RETRY", "GOTO", "TRANSGOTO"}) then
+		elsif find(name, {"EXIT", "ENDWHILE", "RETRY", "GOTO"}) then
 			name = "ELSE"
 		elsif equal(name, "PLUS1_I") then
 			name = "PLUS1"      

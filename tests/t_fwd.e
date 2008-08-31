@@ -30,9 +30,11 @@ test_equal("with pseudo namespace #2", 10 , n0)
 include fwd.e
 object a, b, c, d, e, f, g, h
 export atom fwd_var
-
 test_equal("forward assign different file", 1, fwd_var )
 
+export atom var2
+foo5()
+test_equal( "forward assign in a procedure", 3, var2 )
 test_report()
 
 
