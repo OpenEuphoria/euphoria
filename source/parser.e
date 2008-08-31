@@ -2016,7 +2016,7 @@ procedure Case_statement()
 
 	end if
 	
-	no_namespace()
+	maybe_namespace()
 	tok = next_token()
 	integer sign
 	if tok[T_ID] = MINUS then

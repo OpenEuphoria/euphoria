@@ -567,6 +567,9 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier.
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
+-- namespace_ok: 0 => ignore namespaces, 1 => ignore everything but namespaces,
+--              -1 => look at everything, and find the best resolution (probably a case statement)
+
 	sequence msg, b_name
 	integer hashval, scope, defined, ix
 	symtab_index st_ptr, st_builtin
@@ -580,10 +583,10 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 
 	hashval = hashfn(word)
 	st_ptr = buckets[hashval]
-	
+	integer any_symbol = namespace_ok = -1
 	while st_ptr do
 		if equal(word, SymTab[st_ptr][S_NAME]) 
-		and ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) then
+		and ( any_symbol or ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) ) then
 			-- name matches
 
 			tok = {SymTab[st_ptr][S_TOKEN], st_ptr}

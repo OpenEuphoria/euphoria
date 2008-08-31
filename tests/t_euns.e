@@ -33,5 +33,19 @@ def_ns:def_ns dn2 = public_ns:foo()
 test_equal( "type clash with default namespace", "", dn )
 test_equal( "using a default namespace through a 'public include'", "public_ns:foo", dn2 )
 
+include case_file.e
+
+sequence cf = repeat( 0, 2 )
+for i = 1 to 2 do
+	switch i do
+		case CASE_FILE:CASE_1:
+			cf[i] = CASE_FILE:CASE_2
+			break
+		case CASE_FILE:CASE_2:
+			cf[i] = CASE_FILE:CASE_1
+	end switch
+end for
+test_equal( "switch with cases that use namespace", {2,1}, cf )
+
 test_report()
 

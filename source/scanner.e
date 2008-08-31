@@ -1329,9 +1329,9 @@ function my_sscanf(sequence yytext)
 	return mantissa
 end function
 
-integer not_a_namespace = 0
-export procedure no_namespace()
-	not_a_namespace = 1
+integer might_be_namespace = 0
+export procedure maybe_namespace()
+	might_be_namespace = 1
 end procedure
 
 global function Scanner()
@@ -1379,10 +1379,18 @@ global function Scanner()
 			while ch = ' ' or ch = '\t' do
 				ch = getch()
 			end while
-			integer is_namespace = (ch = ':' and not not_a_namespace)
-			not_a_namespace = 0
+			integer is_namespace
 			
-			tok = keyfind(yytext, -1, , is_namespace )
+			if might_be_namespace then
+				tok = keyfind(yytext, -1, , -1 )
+				is_namespace = tok[T_ID] = NAMESPACE
+				might_be_namespace = 0
+			else
+				is_namespace = ch = ':'
+				tok = keyfind(yytext, -1, , is_namespace )
+			end if
+			
+			
 			if not is_namespace then
 				ungetch()
 			end if
