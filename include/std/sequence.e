@@ -655,7 +655,8 @@ end function
 --		# ##index##: an integer, the position in ##target## where ##what## should appear
 --
 -- Returns:
---		A **sequence**, which is ##target## with one or more elements, those of ##what##, inserted at locations starting at ##index##.
+--		A **sequence**, which is ##target## with one or more elements, those of ##what##, 
+-- inserted at locations starting at ##index##.
 --
 -- Comments:
 -- ##target## can be a sequence of any shape, and ##what## any kind of object.
@@ -690,7 +691,9 @@ end function
 --   # ##padding##: an object, usually the character to pad to (defaults to ' ').
 --
 -- Returns:
---		A **sequence**, either ##target## if it was long enough, or a sequence of length ##size## whose last elements are those of ##target## and whose first few head elements all equal ##padding##.
+--		A **sequence**, either ##target## if it was long enough, or a sequence of length 
+-- ##size## whose last elements are those of ##target## and whose first few head elements all
+-- equal ##padding##.
 --
 -- Comments:
 --   ##pad_head##() will not remove characters. If ##length(target)## is greater than ##size##, this
@@ -870,10 +873,12 @@ end function
 -- See Also:
 --     [[:tail]], [[:mid]], [[:slice]]
 
-public function head(sequence source, integer size=1)
-	if size < length(source) then
+public function head(sequence source, atom size=1)
+	if size < 1 then
+		return {}
+	elsif size < length(source) then
 		return source[1..size]
-		end if
+	end if
 
 	return source
 end function
@@ -932,9 +937,9 @@ public function mid(sequence source, atom start, atom len)
 	end if
 	if start+len-1 >= length(source) then
 		return source[start..$]
-		else
+	else
 		return source[start..len+start-1]
-		end if
+	end if
 end function
 
 --**
@@ -1081,13 +1086,13 @@ end function
 -- Example 1:
 -- <eucode>
 -- s2 = tail("John Doe", 3)
--- -- s2 is Doe
+-- -- s2 is "Doe"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- s2 = tail("John Doe", 50)
--- -- s2 is John Doe
+-- -- s2 is "John Doe"
 -- </eucode>
 --
 -- Example 3:
@@ -1102,9 +1107,11 @@ end function
 public function tail(sequence source, atom n=length(source) - 1)
 	if n >= length(source) then
 		return source
+	elsif n <= 0 then
+		return {}
 	else
 		return source[$-n+1..$]
-		end if
+	end if
 end function
 
 --**
@@ -1162,7 +1169,7 @@ public function remove(sequence target, atom start, atom stop=start)
 		end if
 	elsif stop >= length(target) then
 		return target[1..start-1]
-		end if
+	end if
 
 	return target[1..start-1] & target[stop+1..$]
 end function
@@ -1240,7 +1247,7 @@ public function remove_all(object needle, sequence haystack)
 	else
 		-- Need to backtrack one needle.
 		te = ts - 1
-		end if
+	end if
 	
 	-- Return only the stuff we moved.
 	return haystack[1 .. te]
@@ -1278,7 +1285,7 @@ public function filter(sequence source, integer rid)
 	for a = 1 to length(source) do
 		if call_func(rid, {source[a]}) then
 			dest &= {source[a]}
-	end if
+		end if
 	end for
 
 	return dest
@@ -1455,9 +1462,9 @@ public function split(sequence st, object delim=" ", integer limit=0)
 			if limit = 0 then
 				exit
 			end if
-	else
+		else
 			exit
-	end if
+		end if
 	end while
 
 	ret = append(ret, st[start..$])
@@ -1506,7 +1513,7 @@ public function split_any(sequence source, object delim, integer limit=0)
 			limit -= 1
 			if limit = 0 then
 				exit
-	end if
+			end if
 		else
 			exit
 		end if
