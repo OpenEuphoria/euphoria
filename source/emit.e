@@ -200,6 +200,11 @@ function IsInteger(symtab_index sym)
 	integer mode
 	symtab_index t, pt
 	
+	if sym < 1 then
+		-- probably a forward reference
+		return 0
+	end if
+	
 	mode = SymTab[sym][S_MODE]
 	if mode = M_NORMAL then
 		t = SymTab[sym][S_VTYPE] 
