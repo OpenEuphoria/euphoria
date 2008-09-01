@@ -96,5 +96,28 @@ test_equal("keyvalues #10", { {"colors", "black, blue, red"}  }, s)
 s = keyvalues("colors=[black, blue, red]\nanimals=[cat,dog, rabbit]\n")
 test_equal("keyvalues #11", { {"colors", { "black", "blue", "red"}}, {"animals", { "cat", "dog", "rabbit"}  } }, s)
 
-test_report()
 
+set_encoding_properties("Test Encoded", "aeiouy", "AEIOUY")
+test_equal("Encoding #1", {"Test Encoded", "aeiouy", "AEIOUY"}, get_encoding_properties())
+
+test_equal("Encoding uppercase #1", "thE cAt In thE hAt", upper("the cat in the hat"))
+test_equal("Encoding lowercase #1", "THe CaT iN THe HaT", lower("THE CAT IN THE HAT"))
+
+set_encoding_properties("", "", "")
+test_equal("Encoding #2", {"ASCII", "", ""}, get_encoding_properties())
+
+test_equal("Encoding uppercase #2", "THE CAT IN THE HAT", upper("the cat in the hat"))
+test_equal("Encoding lowercase #3", "the cat in the hat", lower("THE CAT IN THE HAT"))
+
+set_encoding_properties("..\\bin\\win1251")
+object ec
+ec = get_encoding_properties()
+test_equal("Encoding #3", "Windows 1251", ec[1])
+test_equal("Encoding uppercase #3", "THE CAT IN THE HAT", upper("the cat in the hat"))
+-- Test cyrillic characters
+test_equal("Encoding uppercase #4", {#80,#81,#8A,#8C,#8D,#8E,#8F,#A1,#A3,#A5,#A8,#AA,#AF,#B2,#BD,#C0,#C1,#C2,#C3,#C4,#C5,#C6,#C7,#C8,#C9,#CA,#CB,#CC,#CD,#CE,#CF,#D0,#D1,#D2,#D3,#D4,#D5,#D6,#D7,#D8,#D9,#DA,#DB,#DC,#DD,#DE,#DF},
+							  upper({#90,#83,#9A,#9C,#9D,#9E,#9F,#A2,#BC,#B4,#B8,#BA,#BF,#B3,#BE,#E0,#E1,#E2,#E3,#E4,#E5,#E6,#E7,#E8,#E9,#EA,#EB,#EC,#ED,#EE,#EF,#F0,#F1,#F2,#F3,#F4,#F5,#F6,#F7,#F8,#F9,#FA,#FB,#FC,#FD,#FE,#FF}))
+
+set_encoding_properties("", "", "")
+
+test_report()

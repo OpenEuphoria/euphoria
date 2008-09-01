@@ -4,13 +4,14 @@
 -- <<LEVELTOC depth=2>>
 --
 
-include std/get.e -- value(), get() are conversion routines
-
 constant
 	M_A_TO_F64 = 46,
 	M_F64_TO_A = 47,
 	M_A_TO_F32 = 48,
 	M_F32_TO_A = 49
+
+constant M_ALLOC = 16
+atom mem  = machine_func(M_ALLOC,4)
 
 --****
 -- === Routines
@@ -63,9 +64,6 @@ public function int_to_bytes(atom x)
 	d = remainder(x, #100)
 	return {a,b,c,d}
 end function
-
-constant M_ALLOC = 16
-atom mem  = machine_func(M_ALLOC,4)
 
 type sequence_8(sequence s)
 -- an 8-element sequence
@@ -338,5 +336,107 @@ end function
 
 public function float32_to_atom(sequence_4 ieee32)
 	return machine_func(M_F32_TO_A, ieee32)
+end function
+
+--**
+-- Convert a text representation of a hexadecimal number to an atom
+-- Parameters:
+-- 		# ##text##, the text to convert.
+--
+-- Returns:
+--		An **atom**, the numeric equivalent to ##text##
+--
+-- Comments:
+-- * The text can optionally begin with '#' which is ignored.
+-- * The text can have any number of underscores, all of which are ignored.
+-- * The text can have one leading '-', indicating a negative number.
+-- * The text can have any number of underscores, all of which are ignored.
+--
+-- Example 1:
+-- <eucode>
+--  atom h = hex_text("-#3_4FA.00E_1BD")
+--  -- h is now -13562.003444492816925
+--  atom h = hex_text("DEADBEEF")
+--  -- h is now 3735928559
+-- </eucode>
+--
+-- See Also:
+--		[[:value]]
+
+public function hex_text(sequence text)
+	atom res
+	atom fp
+	integer div
+	integer pos
+	integer sign
+	integer n
+	
+	res = 0
+	fp = 0
+	div = 0
+	sign = 0
+	n = 0
+	
+	for i = 1 to length(text) do
+		if text[i] = '_' then
+			continue
+		end if
+		
+		if text[i] = '#' then
+			if n = 0 then
+				continue
+			else
+				exit
+			end if
+		end if
+		
+		if text[i] = '.' then
+			if div = 0 then
+				div = 1	
+				continue
+			else
+				exit
+			end if
+		end if
+		
+		if text[i] = '-' then
+			if sign = 0 and n = 0 then
+				sign = -1	
+				continue
+			else
+				exit
+			end if
+		end if
+		
+		pos = find(text[i], "0123456789abcdefABCDEF")
+		if pos = 0 then
+			exit
+		end if
+		
+		if pos > 16 then
+			pos -= 6
+		end if
+		pos -= 1
+		if div = 0 then
+			res = res * 16 + pos
+		else
+		    fp = fp * 16 + pos
+		    div += 1
+		end if
+		n += 1
+		
+	end for
+	
+	while div > 1 do
+		fp /= 16
+		div -= 1
+	end while
+	res += fp
+	if sign != 0 then
+		res = -res
+	end if
+	
+	return res
+		
 end function
 

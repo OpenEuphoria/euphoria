@@ -10,7 +10,12 @@
 --****
 -- === Routines
 
+include std/filesys.e
 include std/types.e
+include std/sequence.e
+include std/io.e
+include std/search.e
+include std/convert.e
 
 --**
 -- Signature:
@@ -199,6 +204,172 @@ end function
 
 constant TO_LOWER = 'a' - 'A'
 
+sequence lower_case_SET = {}
+sequence upper_case_SET = {}
+sequence encoding_NAME = "ASCII"
+with trace
+
+function load_code_page(sequence cpname)
+	object cpdata
+	integer pos
+	sequence kv
+	
+	cpname = defaultext(cpname, ".ecp")
+	-- cpname = locate_file(cpname) -- TODO
+	
+	cpdata = read_lines(cpname)
+	if atom(cpdata) then
+		return -1 -- Couldn't open file
+	end if
+	
+	pos = 2
+	while pos <= length(cpdata) do
+		cpdata[pos]  = trim(cpdata[pos])
+		if begins("--CASE--", cpdata[pos]) then
+			exit
+		end if
+		pos += 1
+	end while
+	if pos > length(cpdata) then
+		return -2 -- No Case Conversion table found.
+	end if
+	
+	upper_case_SET = ""
+	lower_case_SET = ""
+	while pos < length(cpdata) do
+		pos += 1
+		cpdata[pos]  = trim(cpdata[pos])
+		if length(cpdata[pos]) < 3 then
+			continue
+		end if
+		if cpdata[pos][1] = ';' then
+			continue	-- A comment line
+		end if
+		if cpdata[pos][1] = '-' then
+			exit
+		end if
+
+		kv = keyvalues(cpdata[pos])		
+		upper_case_SET &= hex_text(kv[1][1])
+		lower_case_SET &= hex_text(kv[1][2])
+	end while
+	
+	encoding_NAME = cpdata[1]
+	return 0
+end function
+
+--**
+-- Sets the table of lowercase and uppercase characters that is used by
+-- [[:lower]] and [[:upper]] 
+--
+-- Parameters:
+--   # ##en## - The name of the encoding represented by these character sets
+--   # ##lc## - The set of lowercase characters
+--   # ##uc## - The set of upper case characters
+--
+--
+-- Comments:
+-- * ##lc## and ##uc## must be the same length.
+-- * If no parameters are given, the default ASCII table is set.
+--
+-- Example 1:
+-- <eucode>
+-- set_encoding_properties( "Elvish", "aeiouy", "AEIOUY")
+-- </eucode>
+--
+-- Example 1:
+-- <eucode>
+-- set_encoding_properties( "1251") -- Loads a predefined code page.
+-- </eucode>
+--
+-- See Also:
+--   [[:lower]], [[:upper]], [[:get_encoding_properties]]
+
+public procedure set_encoding_properties(sequence en = "", sequence lc = "", sequence uc = "")
+	integer res
+	
+	if length(en) > 0 and length(lc) = 0 and length(uc) = 0 then
+		res = load_code_page(en)
+		if res != 0 then
+			printf(2, "Failed to load code page '%s'. Error # %d\n", {en, res})
+		end if
+		return
+	end if
+	
+	if length(lc) = length(uc) then
+		if length(lc) = 0 and length(en) = 0 then
+			en = "ASCII"
+		end if
+		lower_case_SET = lc
+		upper_case_SET = uc
+		encoding_NAME = en
+	end if
+end procedure
+
+--**
+-- Gets the table of lowercase and uppercase characters that is used by
+-- [[:lower]] and [[:upper]] 
+--
+-- Parameters: none
+--
+-- Returns: A sequence containing three items.\\
+--   {Encoding_Name, LowerCase_Set, UpperCase_Set}
+--
+-- Example 1:
+-- <eucode>
+-- encode_sets = get_encoding_properties()
+-- </eucode>
+--
+-- See Also:
+--   [[:lower]], [[:upper]], [[:set_encoding_properties]]
+public function get_encoding_properties( )
+	return {encoding_NAME, lower_case_SET, upper_case_SET}
+end function
+
+--**
+-- Each character from ##subject## found in ##from_SET## is transformed into the
+-- corresponding character in ##to_SET##
+--
+-- Parameters:
+--   # ##subject##: Any Euphoria object to be transformed.
+--   # ##from_SET##: A sequence of characters representing the only characters from
+--                   ##subect## that are actually transformed.
+--   # ##to_SET##: A sequence of characters representing that transformed equivalents
+--                 of those found in ##from_SET##.
+--
+-- Returns:
+--   An **object**: The transformed version of ##subject##.
+--
+-- Example 1:
+--   <eucode>
+--   res = transform("The Cat in the Hat", "aeiou", "AEIOU")
+--   -- res is now "ThE CAt In thE HAt"
+--   </eucode>
+
+public function transform(object subject, sequence from_SET, sequence to_SET)
+	integer pos
+
+	if atom(subject) then
+		pos = find(subject, from_SET)
+		if pos != 0 then
+			subject = to_SET[pos]
+		end if
+	else
+		for i = 1 to length(subject) do
+			if atom(subject[i]) then
+				pos = find(subject[i], from_SET)
+				if pos != 0 then
+					subject[i] = to_SET[pos]
+				end if
+			else
+				subject[i] = transform(subject[i], from_SET, to_SET)
+			end if
+		end for
+	end if
+	
+	return subject
+end function
+
 --**
 -- Convert an atom or sequence to lower case. 
 --
@@ -209,10 +380,14 @@ constant TO_LOWER = 'a' - 'A'
 --   A **sequence**, the lowercase version of ##x##
 --
 -- Comments:
+-- * This uses the case conversion tables set in by [[:set_encoding_properties]]
+-- * By default, this only works on ASCII characters. It alters characters in
+--   the 'a'..'z' range. If you need to do case conversion with other encodings
+--   use the [[:set_encoding_properties]] first.
+-- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
--- Alters characters in the 'A'..'Z' range. ##x## may be a sequence of any shape, all atoms of which will be acted upon.
---
--- **WARNING**, This also affects floating point numbers in the range 65 to 90.
+-- **WARNING**, When using ASCII encoding, this can also affects floating point
+-- numbers in the range 65 to 90.
 --
 -- Example 1:
 -- <eucode>
@@ -227,10 +402,13 @@ constant TO_LOWER = 'a' - 'A'
 -- </eucode>
 --
 -- See Also:
---   [[:upper]] [[:proper]]
+--   [[:upper]], [[:proper]], [[:set_encoding_properties]], [[:get_encoding_properties]]
 
 public function lower(object x)
 -- convert atom or sequence to lower case
+	if length(lower_case_SET) != 0 then
+		return transform(x, upper_case_SET, lower_case_SET)
+	end if
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
 end function
 
@@ -244,9 +422,14 @@ end function
 --   A **sequence**, the uppercase version of ##x##
 --
 -- Comments:
--- Alters characters in the 'a'..'z' range. ##x## may be a sequence of any shape, all atoms of which will be acted upon.
+-- * This uses the case conversion tables set in by [[:set_encoding_properties]]
+-- * By default, this only works on ASCII characters. It alters characters in
+--   the 'a'..'z' range. If you need to do case conversion with other encodings
+--   use the [[:set_encoding_properties]] first.
+-- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
--- **WARNING**, This also affects floating point numbers in the range 97 to 122.
+-- **WARNING**, When using ASCII encoding, this can also affects floating point
+-- numbers in the range 97 to 122.
 --
 -- Example 1:
 -- <eucode>
@@ -261,10 +444,13 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:lower]] [[:proper]]
+--     [[:lower]], [[:proper]], [[:set_encoding_properties]], [[:get_encoding_properties]]
 
 public function upper(object x)
 -- convert atom or sequence to upper case
+	if length(upper_case_SET) != 0 then
+		return transform(x, lower_case_SET, upper_case_SET)
+	end if
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
 

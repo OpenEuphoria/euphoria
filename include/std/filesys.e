@@ -478,9 +478,9 @@ public function dir(sequence name)
 	-- Filter the directory contents returning only those items
 	-- matching name.
 	for i = 1 to length(dir_data) do
-		if wildcard_file(the_name, dir_data[i][1]) then
-				data = append(data, dir_data[i])
-		end if
+ 		if wildcard_file(the_name, dir_data[i][1]) then
+ 				data = append(data, dir_data[i])
+ 		end if
 	end for
 
 	if not length(data) then
@@ -1403,6 +1403,54 @@ public function driveid(sequence path)
 	return data[5]
 end function
 
+--**
+-- Returns the supplied filepath with the supplied extension, if
+-- the filepath does not have an extension already.
+--
+-- Parameters:
+-- 		# ##path##: the path to check for an extension.
+-- 		# ##defext##: the extentsion to add if ##path## does not have one.
+--
+-- Returns:
+-- 		A **sequence**, the path with an extension.
+--
+-- Example:
+-- <eucode>
+--  -- ensure that the supplied path has an extension, but if it doesn't use "tmp".
+-- theFile = defaultext(UserFileName, "tmp")
+-- </eucode>
+--
+-- See Also:
+--     [[:pathinfo]]
+
+public function defaultext( sequence path, sequence defext)
+	if length(defext) = 0 then
+		return path
+	end if
+	
+	for i = length(path) to 1 by -1 do
+		if path[i] = '.' then
+			-- There is a dot in the file name part
+			return path
+		end if
+		if path[i] = SLASH then
+			if i = length(path) then
+				-- No file name in supplied path
+				return path
+			else
+				-- No dot in file name part.
+				exit
+			end if
+		end if
+	end for
+	
+	if defext[1] != '.' then
+		path &= '.'
+	end if
+	
+	return path & defext
+end function
+
 --- TODO
 --- copy_directory( srcpath, destpath, structonly = 0)
 
@@ -1490,3 +1538,4 @@ public function clear_directory(sequence path, integer recurse = 1)
 	end for
 	return ret
 end function
+

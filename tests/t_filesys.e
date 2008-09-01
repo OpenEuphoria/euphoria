@@ -39,6 +39,12 @@ test_equal("fileext() full path", fext, fileext(fullname))
 test_equal("fileext() filename only", fext, fileext(fullname))
 test_equal("fileext() filename no extension", "", fileext(fname))
 
+test_equal("defaultext #1", "abc.def", defaultext("abc", "def"))
+test_equal("defaultext #2", "abc.xyz", defaultext("abc.xyz", "def"))
+test_equal("defaultext #3", "abc.xyz" & SLASH & "abc.xyz", defaultext("abc.xyz" & SLASH & "abc.xyz", "def"))
+test_equal("defaultext #4", "abc.xyz" & SLASH & "abc.def", defaultext("abc.xyz" & SLASH & "abc", "def"))
+
+
 test_equal("SLASH", sep, SLASH)
 test_equal("CRLF", crlf, CRLF)
 

@@ -732,11 +732,11 @@ end function
 -- Test whether a sequence is the head of another one.
 -- 
 -- Parameters:
---	# ##pSubSeq##: an object to be looked for
---  # ##pFullSe##: a sequence, the head of which is being inspected.
+--	# ##subtext##: an object to be looked for
+--  # ##fulltext##: a sequence, the head of which is being inspected.
 --
 -- Returns:
---		An **integer**, 1 if ##pSubSeq## begins ##pFullSeq##, else 0.
+--		An **integer**, 1 if ##subtext## begins ##fulltext##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -749,24 +749,24 @@ end function
 -- See Also:
 --     [[:ends]], [[:head]]
 
-public function begins(object pSubSeq, sequence pFullSeq)
-	if length(pFullSeq) = 0 then
+public function begins(object subtext, sequence fulltext)
+	if length(fulltext) = 0 then
 		return 0
 	end if
 	
-	if atom(pSubSeq) then
-		if equal(pSubSeq, pFullSeq[1]) then
+	if atom(subtext) then
+		if equal(subtext, fulltext[1]) then
 			return 1
 		else
 			return 0
 		end if
 	end if
 	
-	if length(pSubSeq) > length(pFullSeq) then
+	if length(subtext) > length(fulltext) then
 		return 0
 	end if
 	
-	if equal(pSubSeq, pFullSeq[1.. length(pSubSeq)]) then
+	if equal(subtext, fulltext[1.. length(subtext)]) then
 		return 1
 	else
 		return 0
@@ -777,11 +777,11 @@ end function
 -- Test whether a sequence ends another one.
 --
 -- Parameters:
---	# ##pSubSeq##: an object to be looked for
---  # ##pFullSe##: a sequence, the head of which is being inspected.
+--	# ##subtext##: an object to be looked for
+--  # ##fulltext##: a sequence, the head of which is being inspected.
 --
 -- Returns:
---		An **integer**, 1 if ##pSubSeq## ends ##pFullSeq##, else 0.
+--		An **integer**, 1 if ##subtext## ends ##fulltext##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -794,24 +794,24 @@ end function
 -- See Also:
 --     [[:begins]], [[:tail]]
 
-public function ends(object pSubSeq, sequence pFullSeq)
-	if length(pFullSeq) = 0 then
+public function ends(object subtext, sequence fulltext)
+	if length(fulltext) = 0 then
 		return 0
 	end if
 	
-	if atom(pSubSeq) then
-		if equal(pSubSeq, pFullSeq[$]) then
+	if atom(subtext) then
+		if equal(subtext, fulltext[$]) then
 			return 1
 		else
 			return 0
 		end if
 	end if
 	
-	if length(pSubSeq) > length(pFullSeq) then
+	if length(subtext) > length(fulltext) then
 		return 0
 	end if
 	
-	if equal(pSubSeq, pFullSeq[length(pFullSeq) - length(pSubSeq) + 1 .. $]) then
+	if equal(subtext, fulltext[length(fulltext) - length(subtext) + 1 .. $]) then
 		return 1
 	else
 		return 0
