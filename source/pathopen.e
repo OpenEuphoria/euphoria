@@ -416,7 +416,8 @@ sequence include_Paths = {}
 
 global function Include_paths(integer add_converted)
 	integer status,pos
-	sequence inc_path,full_path
+	object inc_path
+	sequence full_path
 	integer start_path,end_path
 
 	if length(include_Paths) then
@@ -430,8 +431,13 @@ global function Include_paths(integer add_converted)
 	include_Paths = append(config_inc_paths, current_dir())
 	num_var = find("EUINC", cache_vars)
 	inc_path = getenv("EUINC")
+	if atom(inc_path) then
+		inc_path = ""
+	end if
 	status = check_cache("EUINC", inc_path)
-	inc_path = append(inc_path, PATH_SEPARATOR)
+	if length(inc_path) then
+		inc_path = append(inc_path, PATH_SEPARATOR)
+	end if
 
 	if status then
 		-- some paths are not convrted, how to check them?
