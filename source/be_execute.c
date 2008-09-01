@@ -1383,10 +1383,17 @@ void symtab_set_pointers()
 				}
 			}
 		}
-		else if (s->mode == M_CONSTANT && s->obj) {
-			// namespaces, literal values only - vars declared as "constant" are left as 0
-			string_ptr = (unsigned char *)s->obj;
-			s->obj = decompress(0);
+		else if (s->mode == M_CONSTANT ) {
+			if (s->obj) {
+				// namespaces, literal values only
+				string_ptr = (unsigned char *)s->obj;
+				s->obj = decompress(0);
+			}
+			else {
+				// Set constants to NOVALUE because there may be 
+				// forward references that require init checks
+				s->obj = NOVALUE;
+			}
 		}
 
 		else {

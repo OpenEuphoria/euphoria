@@ -416,11 +416,11 @@ function path_open()
 	inc_path = getenv("EUINC")
 	conf_path = get_conf_dirs()
 	if atom(inc_path) then
-		errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s%sinclude",
-						  {new_include_name, main_path, conf_path, eudir, SLASH})
-	else
 		errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s\nor in %s%sinclude",
-						  {new_include_name, main_path, conf_path, inc_path, eudir, SLASH})
+						  {new_include_name, currdir, main_path, conf_path, eudir, SLASH})
+	else
+		errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s\nor in %s\nor in %s%sinclude",
+						  {new_include_name, currdir, main_path, conf_path, inc_path, eudir, SLASH})
 	end if
 	CompileErr(errbuff)
 end function

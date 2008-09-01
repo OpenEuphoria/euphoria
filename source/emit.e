@@ -379,6 +379,10 @@ function good_string(sequence elements)
 	element_vals = {}
 	for i = 1 to length(elements) do
 		e = elements[i]
+		if e < 1 then
+			-- if there's a forward reference, assume false
+			return -1
+		end if
 		obj = SymTab[e][S_OBJ]
 		if SymTab[e][S_MODE] = M_CONSTANT and
 		   integer(obj) and 
