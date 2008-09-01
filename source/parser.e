@@ -847,9 +847,9 @@ end procedure
 
 procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	integer args = 0
-	op_info1 = tok[T_SYM]
+	symtab_index proc = tok[T_SYM]
 	
-	remove_symbol( op_info1 )
+	remove_symbol( proc )
 	while 1 do
 		tok = next_token()
 		integer id = tok[T_ID]
@@ -878,9 +878,11 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 				end switch
 		end switch
 	end while
+	
 	integer fc_pc = length( Code ) + 1
 	emit_opnd( args )
 	
+	op_info1 = proc
 	emit_op( opcode )
 	if not TRANSLATE then
 		if OpTrace then

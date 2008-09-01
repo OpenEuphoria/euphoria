@@ -36,9 +36,14 @@ export atom var2
 foo5()
 test_equal( "forward assign in a procedure", 3, var2 )
 test_equal( "forward ref with multiple args (non-default)", 3, mult_args_fwd( 1, 2 ) )
+test_equal( "nested forward call with different number of args", 3, mult_args_fwd( 1, single_arg_fwd( 1 ) ) )
 
 function mult_args_fwd( integer a, integer b )
 	return a + b
+end function
+
+function single_arg_fwd( integer a )
+	return a + 1
 end function
 
 test_report()
