@@ -221,7 +221,6 @@ EU_BACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\io.obj &
 	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\search.obj 
 
@@ -245,8 +244,7 @@ EU_DOSBACKEND_RUNNER_OBJECTS = &
 	.\$(OBJDIR)\filesys.obj &
 	.\$(OBJDIR)\0emory.obj &
 	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\search.obj &
-	.\$(OBJDIR)\get.obj
+	.\$(OBJDIR)\search.obj
 
 EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\main-.obj &
