@@ -979,10 +979,11 @@ end procedure
 -- global function include_paths(integer convert)
 --
 -- Description:
--- Returns the list of include paths, i the order in which they are searched
+-- Returns the list of include paths, in the order in which they are searched
 --
 -- Parameters:
---		# ##convert##: an integer, nonzero to include converted path entries that were not validated yet.
+--    # ##convert##: an integer, nonzero to include converted path entries
+--    that were not validated yet.
 --
 -- Returns:
 --	A **sequence** of strings, ach holding a fully qualified include path.
@@ -1001,17 +1002,15 @@ end procedure
 -- # EUINC
 -- # a default based on EUDIR.
 --
--- Backslashes are redoubled, so that the paths can be passd unaltered to [[:system]]() or [[:system_exec]]().
---
 -- Example 1:
 -- <eucode>
 -- sequence s = include_paths(0)
 -- -- s might contain
 -- {
---   "C:\\EuphoriA\\tests",
---   "C:\\EUPHORIA\\INCLUDE",
---   "C:\\EUPHORIA\\xcontrols\\include",
---   "C:\\EUPHORIA\\win32lib_0_70_4a\\include"
+--   "/usr/euphoria/tests",
+--   "/usr/euphoria/include",
+--   "./include",
+--   "../include"
 -- }
 -- </eucode>
 --

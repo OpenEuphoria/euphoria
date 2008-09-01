@@ -20,7 +20,7 @@ include std/wildcard.e
 include std/sort.e
 include std/search.e
 include std/memory.e
-
+include std/sequence.e
 constant
 	M_DIR	      = 22,
 	M_CURRENT_DIR = 23,
@@ -1539,3 +1539,130 @@ public function clear_directory(sequence path, integer recurse = 1)
 	return ret
 end function
 
+--**
+-- Determine if the supplied string is an absolute path or a relative path.
+--
+-- Parameters:
+--		# ##filename##: a sequence, the name of the file path
+--
+-- Returns:
+--     An **integer**, 0 if ##filename## is a relative path or 1 otherwise.
+--
+-- Comment:
+-- A //relative// path is one which is relative to the current directory and
+-- an //absolute// path is one that doesn't need to knw the current directory
+-- to find the file.
+--
+-- Example 1:
+-- <eucode>
+-- ? absolute_path("/usr/bin/abc") -- returns 1
+-- ? absolute_path("../abc") -- returns 0
+-- ? absolute_path("c:..\\abc") -- returns 0
+-- ? absolute_path("c:\\windows\\system32\\abc") -- returns 1
+-- </eucode>
+public function absolute_path(sequence filename)
+	if filename[1] = SLASH then
+		return 1
+	end if
+	ifdef !WIN32 then
+		if length(filename) > 1 then
+			if filename[2] = ':' then
+				if length(filename) > 2 then
+					if filename[3] = SLASH then
+						return 1
+					else
+						return 0
+					end if
+				else
+					return 0
+				end if
+			end if
+		end if
+	end ifdef
+	return 0
+	
+end function
+
+--**
+-- Locates a file by looking in a set of directories for it.
+--
+-- Parameters:
+--		# ##filename##: a sequence, the name of the file to search for.
+--		# ##search_list##: a sequence, the list of directories to look in. By
+--        default this is "", meaning that a predefined set of directories
+--        is scanned. See comments below.
+--
+-- Returns:
+--     A **sequence**, the located file path if found, else the original file name.
+--
+-- Comment:
+-- If ##filename## is an absolute path, it is just returned and no searching
+-- takes place.
+--
+-- If ##search_list## is supplied, it can be either a sequence of directory names,
+-- of a string of directory names delimited by ':' in UNIX and ';' in Windows.
+--
+-- If the ##search_list## is omitted or "", this will look in the following places...
+-- * The directory in $HOME ($HOMEPATH in Windows)
+-- * The directories returned by include_paths()
+-- * $EUDIR/bin
+-- * $EUDIR/docs
+-- * The directories listed in $USERPATH
+-- * The directories listed in $PATH
+--
+-- Example 1:
+-- <eucode>
+--  res = locate_file("abc.def", {"/usr/bin", "/u2/someapp", "/etc"})
+--  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
+--  res = locate_file("abc.def") -- Scan default locations.
+-- </eucode>
+public function locate_file(sequence filename, sequence search_list = {})
+	object extra_paths
+	
+	if absolute_path(filename) then
+		return filename
+	end if
+
+	if length(search_list) = 0 then
+ifdef LINUX	then
+		extra_paths = getenv("HOME")
+else
+		extra_paths = getenv("HOMEPATH")
+end ifdef		
+		if sequence(extra_paths) then
+			search_list = {extra_paths & SLASH}
+		end if				
+		search_list &= include_paths(1)
+		extra_paths = getenv("EUDIR")
+		if sequence(extra_paths) then
+			search_list = append(search_list, extra_paths & SLASH & "bin" & SLASH)
+			search_list = append(search_list, extra_paths & SLASH & "docs" & SLASH)
+		end if
+		extra_paths = getenv("USERPATH")
+		if sequence(extra_paths) then
+			extra_paths = split(extra_paths, PATHSEP)
+			search_list &= extra_paths
+		end if
+		extra_paths = getenv("PATH")
+		if sequence(extra_paths) then
+			extra_paths = split(extra_paths, PATHSEP)
+			search_list &= extra_paths
+		end if
+		
+	else
+		if integer(search_list[1]) then
+			search_list = split(search_list, PATHSEP)
+		end if
+	end if
+		
+	for i = 1 to length(search_list) do
+		if search_list[i][$] != SLASH then
+			search_list[i] &= SLASH
+		end if
+
+		if file_exists(search_list[i] & filename)
+			then return search_list[i] & filename
+		end if
+	end for
+	return filename	
+end function

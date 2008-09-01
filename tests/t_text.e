@@ -109,7 +109,7 @@ test_equal("Encoding #2", {"ASCII", "", ""}, get_encoding_properties())
 test_equal("Encoding uppercase #2", "THE CAT IN THE HAT", upper("the cat in the hat"))
 test_equal("Encoding lowercase #3", "the cat in the hat", lower("THE CAT IN THE HAT"))
 
-set_encoding_properties("../bin/win1251")
+set_encoding_properties("win1251")
 object ec
 ec = get_encoding_properties()
 test_equal("Encoding #3", "Windows 1251", ec[1])

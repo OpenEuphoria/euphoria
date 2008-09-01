@@ -215,7 +215,7 @@ function load_code_page(sequence cpname)
 	sequence kv
 	
 	cpname = defaultext(cpname, ".ecp")
-	-- cpname = locate_file(cpname) -- TODO
+	cpname = locate_file(cpname)
 	
 	cpdata = read_lines(cpname)
 	if atom(cpdata) then
