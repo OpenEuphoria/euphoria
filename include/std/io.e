@@ -854,6 +854,13 @@ public function read_lines(object file)
 	while sequence(y) entry do
 		if y[$] = '\n' then
 			y = y[1..$-1]
+ifdef UNIX then
+			if length(y) then
+				if y[$] = '\r' then
+					y = y[1..$-1]
+				end if
+			end if
+end ifdef
 		end if
 		ret = append(ret, y)
 	entry
