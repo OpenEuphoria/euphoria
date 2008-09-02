@@ -552,7 +552,7 @@ procedure default_namespace( integer file_no, integer use )
 	end if
 	
 end procedure
-
+with trace
 procedure add_exports( integer from_file, integer to_file )
 	sequence exports
 	sequence direct
@@ -560,7 +560,9 @@ procedure add_exports( integer from_file, integer to_file )
 	exports = file_export[from_file]
 	for i = 1 to length(exports) do
 		if not find( exports[i], direct ) then
-			direct &= -exports[i]
+			if not find( -exports[i], direct ) then
+				direct &= -exports[i]
+			end if
 		end if
 	end for
 	file_include[to_file] = direct
@@ -570,10 +572,10 @@ procedure patch_exports( integer for_file )
 	integer export_len
 	
 	for i = 1 to length(file_include) do
-		if find( for_file, file_include[i] ) then
-			export_len = length( file_export[i] )
+		if find( for_file, file_include[i] ) or find( -for_file, file_include[i] ) then
+			export_len = length( file_include[i] )
 			add_exports( for_file, i )
-			if length( file_export[i] ) != export_len then	
+			if length( file_include[i] ) != export_len then	
 				-- propagate the export up the include stack
 				patch_exports( i )
 			end if
@@ -619,10 +621,12 @@ procedure IncludePush()
 				-- also add anything that file exports
 				add_exports( i, current_file_no )
 				
+				
 				if public_include then
 					public_include = FALSE
 					if not find( i, file_export[current_file_no] ) then
 						file_export[current_file_no] &= i
+						patch_exports( current_file_no )
 					end if
 				end if
 			end if

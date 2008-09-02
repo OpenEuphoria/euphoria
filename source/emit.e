@@ -451,7 +451,8 @@ global procedure emit_op(integer op)
 			if IsInteger(source) and IsInteger(target) then
 				op = ASSIGN_I
 			end if
-			if SymTab[source][S_MODE] = M_CONSTANT and 
+			if source > 0 and target > 0 and
+			   SymTab[source][S_MODE] = M_CONSTANT and 
 			   SymTab[target][S_MODE] = M_CONSTANT then
 				-- record: constant var=literal 
 				-- for interpreter
@@ -650,7 +651,8 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
-			if SymTab[c][S_MODE] != M_CONSTANT or 
+			if c < 1 or
+			   SymTab[c][S_MODE] != M_CONSTANT or 
 			   not sequence(SymTab[c][S_OBJ]) then
 				emit_opcode(op)
 				emit_addr(op_info1)
