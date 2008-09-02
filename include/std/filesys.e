@@ -21,6 +21,9 @@ include std/sort.e
 include std/search.e
 include std/memory.e
 include std/sequence.e
+include std/types.e
+include std/text.e
+
 constant
 	M_DIR	      = 22,
 	M_CURRENT_DIR = 23,
@@ -253,7 +256,7 @@ end function
 -- 	[[:create_directory]], [[:chdir]], [[:clear_directory]]
 
 integer delete_file_id = -1, dir_id = -1
-with trace
+
 public function remove_directory(sequence dir_name, integer force=0)
 	atom pname, ret
 	object files
@@ -1599,11 +1602,16 @@ end function
 -- If ##filename## is an absolute path, it is just returned and no searching
 -- takes place.
 --
+-- If ##filename## is located, the full path of the file is returned.
+--
 -- If ##search_list## is supplied, it can be either a sequence of directory names,
 -- of a string of directory names delimited by ':' in UNIX and ';' in Windows.
 --
 -- If the ##search_list## is omitted or "", this will look in the following places...
--- * The directory in $HOME ($HOMEPATH in Windows)
+-- * The current directory
+-- * The directory that the program is run from.
+-- * The directory in $HOME ($HOMEDRIVE & $HOMEPATH in Windows)
+-- * The parent directory of the current directory
 -- * The directories returned by include_paths()
 -- * $EUDIR/bin
 -- * $EUDIR/docs
@@ -1616,6 +1624,7 @@ end function
 --  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
 --  res = locate_file("abc.def") -- Scan default locations.
 -- </eucode>
+
 public function locate_file(sequence filename, sequence search_list = {})
 	object extra_paths
 	
@@ -1624,25 +1633,37 @@ public function locate_file(sequence filename, sequence search_list = {})
 	end if
 
 	if length(search_list) = 0 then
+		search_list = append(search_list, "." & SLASH)
+		
+		extra_paths = command_line()
+		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
+		search_list = append(search_list, extra_paths)
+		
 ifdef LINUX	then
 		extra_paths = getenv("HOME")
 else
 		extra_paths = getenv("HOMEPATH")
 end ifdef		
 		if sequence(extra_paths) then
-			search_list = {extra_paths & SLASH}
+			search_list = append(search_list, extra_paths & SLASH)
 		end if				
+		
+		search_list = append(search_list, ".." & SLASH)
+		
 		search_list &= include_paths(1)
+		
 		extra_paths = getenv("EUDIR")
 		if sequence(extra_paths) then
 			search_list = append(search_list, extra_paths & SLASH & "bin" & SLASH)
 			search_list = append(search_list, extra_paths & SLASH & "docs" & SLASH)
 		end if
+		
 		extra_paths = getenv("USERPATH")
 		if sequence(extra_paths) then
 			extra_paths = split(extra_paths, PATHSEP)
 			search_list &= extra_paths
 		end if
+		
 		extra_paths = getenv("PATH")
 		if sequence(extra_paths) then
 			extra_paths = split(extra_paths, PATHSEP)
@@ -1660,9 +1681,230 @@ end ifdef
 			search_list[i] &= SLASH
 		end if
 
-		if file_exists(search_list[i] & filename)
-			then return search_list[i] & filename
+		if file_exists(search_list[i] & filename) then
+			return canonical_path(search_list[i] & filename)
 		end if
 	end for
-	return filename	
+	return filename
 end function
+
+--**
+-- Returns the current directory, with a trailing SLASH
+--
+-- Parameters:
+--		# ##drive_id##: For non-Unix systems only. This is the Drive letter to
+--      to get the current directory of. If omitted, the current drive is used.
+--
+-- Returns:
+--     A **sequence**, the current directory.
+--
+-- Comment:
+--  Windows and MS-DOS maintain a current directory for each disk drive. You
+--  would use this routine if you wanted the current directory for a drive that
+--  may not be the current drive.
+--
+--  For Unix systems, this is simply ignored because there is only one current
+--  directory at any time on Unix.
+--
+--  **Note**: This always ensures that the returned value has a trailing SLASH
+-- character.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_curdir('D') -- Find the current directory on the D: drive.
+-- -- res might be "D:\backup\music\"
+-- res = get_curdir()    -- Find the current directory on the current drive.
+-- -- res might be "C:\myapp\work\"
+-- </eucode>
+public function get_curdir(integer drive_id = 0)
+
+    sequence lCurDir
+ifdef !LINUX then    
+    sequence lOrigDir = ""
+    sequence lDrive
+    object void
+
+    if t_alpha(drive_id) then
+	    lOrigDir =  current_dir()
+	    lDrive = "  "
+	    lDrive[1] = drive_id
+	    lDrive[2] = ':'
+	    if chdir(lDrive) = 0 then
+	    	lOrigDir = ""
+	    end if
+	end if
+end ifdef
+    
+    lCurDir = current_dir()
+ifdef !LINUX then    
+	if length(lOrigDir) > 0 then
+    	void = chdir(lOrigDir[1..2])
+    end if
+end ifdef
+
+	-- Ensure that it ends in a path separator.
+	if (lCurDir[$] != SLASH) then
+		lCurDir &= SLASH
+	end if
+	
+	return lCurDir
+end function
+
+sequence InitCurDir = get_curdir() -- Capture the original PWD
+
+--**
+-- Returns the original current directory
+--
+-- Parameters:
+--		None.
+--
+-- Returns:
+--     A **sequence**, the current directory at the time the program started running.
+--
+-- Comment:
+-- You would use this if the program might change the current directory during
+-- its processing and you wanted to return to the original directory.
+--
+--  **Note**: This always ensures that the returned value has a trailing SLASH
+-- character.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_init_curdir() -- Find the original current directory.
+-- </eucode>
+public function get_init_curdir()
+	return InitCurDir
+end function
+
+
+--**
+-- Returns the full path and file name of the supplid file name.
+--
+-- Parameters:
+--	# ##path_in## - A sequence. This is the file name whose full path you want.
+--  # ##directory_given## - An integer. This is zero if ##path_in## is 
+--  to be interpreted as a file specification otherwise it is assumed to be a
+--  directory specification. The default is zero.
+--
+-- Returns:
+--     A **sequence**, the full path and file name.
+--
+-- Comment:
+-- * In non-Unix systems, the result is always in lowercase.
+-- * The supplied file/directory does not have to actually exist.
+--
+--
+-- Example 1:
+-- <eucode>
+-- -- Assuming the current directory is "/usr/foo/bar" 
+-- res = canonical_path("../abc.def")
+-- -- res is now "/usr/foo/abc.def"
+-- </eucode>
+public function canonical_path(sequence path_in, integer directory_given = 0)
+    -- Does not (yet) handle UNC paths or unix links.
+    sequence lPath = ""
+    integer lPosA = -1
+    integer lPosB = -1
+    integer lPosC = -1
+    sequence lLevel = ""
+    sequence lHome
+
+ifdef !LINUX then
+    sequence lDrive = ""
+    -- Replace unix style separators with DOS style
+    lPath = find_replace("/", path_in, SLASH)
+end ifdef
+
+    -- Strip off any enclosing quotes.
+    if (length(lPath) > 2 and lPath[1] = '"' and lPath[$] = '"') then
+        lPath = lPath[2..$-1]
+	end if
+
+    -- Replace any leading tilde with 'HOME' directory.
+    if (length(lPath) > 0 and lPath[1] = '~') then
+ifdef !LINUX then
+        lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+else
+        lHome = getenv("HOME")
+end ifdef
+		if lHome[$] != SLASH then
+			lHome &= SLASH
+		end if
+		
+		if length(lPath) > 1 and lPath[2] = SLASH then
+			lPath = lHome & lPath[3 .. $]
+		else
+			lPath = lHome & lPath[2 .. $]
+		end if
+    end if
+
+ifdef !LINUX then
+	-- Strip off any drive letter attached.
+    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
+	then
+		lDrive = lPath[1..2]
+		lPath = lPath[3..$]
+	end if
+end ifdef
+
+	-- If a relative path, prepend the PWD of the appropriate drive.
+	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
+	then
+ifdef !LINUX then
+		if (length(lDrive) = 0) then
+			lPath = get_curdir() & lPath
+		else
+			lPath = get_curdir(lDrive[1]) & lPath
+		end if
+		-- Strip of the drive letter if it got attached again.
+		if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
+			if (length(lDrive) = 0) then
+				lDrive = lPath[1..2]
+			end if
+			lPath = lPath[3..$]
+		end if
+else
+		lPath = get_curdir() & lPath
+end ifdef		
+	end if
+	
+	-- If the input is supposed to be a directory, ensure it ends in a path separator.
+	if ((directory_given != 0) and (lPath[$] != SLASH) ) then
+		lPath &= SLASH
+	end if
+	
+	-- Replace all instances of "/./" with "/"
+	lLevel = SLASH & '.' & SLASH
+	while( lPosA != 0 ) entry do
+		lPath = lPath[1..lPosA-1] & lPath[lPosA + 2 .. $]
+		
+	  entry
+		lPosA = match(lLevel, lPath)
+	end while
+	
+	-- Replace all instances of "X/Y/../" with "X/"
+	lLevel = SLASH & ".." & SLASH
+	
+	while( lPosA != 0 ) entry do
+		-- Locate preceding directory separator.
+		lPosB = lPosA-1
+		while((lPosB > 0) and (lPath[lPosB] != SLASH)) do
+			lPosB -= 1
+		end while
+		if (lPosB <= 0) then
+			lPosB = 1
+		end if
+		
+		lPath = lPath[1..lPosB-1] & lPath[lPosA + 3 .. $]
+		
+	  entry
+		lPosA = match(lLevel, lPath)
+	end while
+	
+ifdef !LINUX then
+	lPath = lower(lDrive & lPath)
+end ifdef
+	
+	return lPath
+end function
+
