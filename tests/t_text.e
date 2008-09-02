@@ -109,10 +109,10 @@ test_equal("Encoding #2", {"ASCII", "", ""}, get_encoding_properties())
 test_equal("Encoding uppercase #2", "THE CAT IN THE HAT", upper("the cat in the hat"))
 test_equal("Encoding lowercase #3", "the cat in the hat", lower("THE CAT IN THE HAT"))
 
-set_encoding_properties("win1251")
+set_encoding_properties("1251")
 object ec
 ec = get_encoding_properties()
-test_equal("Encoding #3", "Windows 1251", ec[1])
+test_equal("Encoding #3", "Windows 1251 (Cyrillic)", ec[1])
 test_equal("Encoding uppercase #3", "THE CAT IN THE HAT", upper("the cat in the hat"))
 -- Test cyrillic characters
 test_equal("Encoding uppercase #4", {#80,#81,#8A,#8C,#8D,#8E,#8F,#A1,#A3,#A5,#A8,#AA,#AF,#B2,#BD,#C0,#C1,#C2,#C3,#C4,#C5,#C6,#C7,#C8,#C9,#CA,#CB,#CC,#CD,#CE,#CF,#D0,#D1,#D2,#D3,#D4,#D5,#D6,#D7,#D8,#D9,#DA,#DB,#DC,#DD,#DE,#DF},

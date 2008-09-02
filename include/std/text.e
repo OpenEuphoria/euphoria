@@ -207,7 +207,6 @@ constant TO_LOWER = 'a' - 'A'
 sequence lower_case_SET = {}
 sequence upper_case_SET = {}
 sequence encoding_NAME = "ASCII"
-with trace
 
 function load_code_page(sequence cpname)
 	object cpdata
@@ -222,13 +221,24 @@ function load_code_page(sequence cpname)
 		return -1 -- Couldn't open file
 	end if
 	
-	pos = 2
-	while pos <= length(cpdata) do
+	pos = 0
+	while pos < length(cpdata) do
+		pos += 1
 		cpdata[pos]  = trim(cpdata[pos])
+		if begins("--HEAD--", cpdata[pos]) then
+			continue
+		end if
+		if cpdata[pos][1] = ';' then
+			continue	-- A comment line
+		end if
 		if begins("--CASE--", cpdata[pos]) then
 			exit
 		end if
-		pos += 1
+		
+		kv = keyvalues(cpdata[pos],,,,"")
+		if equal(lower(kv[1][1]), "title") then
+			encoding_NAME = kv[1][2]
+		end if
 	end while
 	if pos > length(cpdata) then
 		return -2 -- No Case Conversion table found.
@@ -254,7 +264,6 @@ function load_code_page(sequence cpname)
 		lower_case_SET &= hex_text(kv[1][2])
 	end while
 	
-	encoding_NAME = cpdata[1]
 	return 0
 end function
 
@@ -859,6 +868,8 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 			end if
 		end if
 		
+		key_ = trim(key_)
+		value_ = trim(value_)
 		if length(key_) = 0 then
 			lKeyValues = append(lKeyValues, value_)
 		else
