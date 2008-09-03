@@ -12,7 +12,6 @@ test_not_equal("override routine_id #1", routine_id("append"), -1 )
 test_equal("routine_id(\"eu:append\")", routine_id("eu:id"), -1 )
 
 include foo_default.e
-include foo_default.e
 include bar_default.e as bar
 test_equal( "default namespace", "foo", foo:test() )
 test_equal( "override default namespace", "bar", bar:test() )
@@ -46,6 +45,9 @@ for i = 1 to 2 do
 	end switch
 end for
 test_equal( "switch with cases that use namespace", {2,1}, cf )
+
+include use_default.e
+test_equal( "default namespaces usable from file other than first to include", "foo", use_default() )
 
 test_report()
 

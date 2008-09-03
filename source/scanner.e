@@ -518,7 +518,7 @@ end function
 
 integer scanner_rid
 
-procedure default_namespace( integer file_no, integer use )
+procedure default_namespace( )
 	token tok
 	symtab_index sym
 	
@@ -532,17 +532,10 @@ procedure default_namespace( integer file_no, integer use )
 		
 		sym = tok[T_SYM]
 		
-		-- if it's the main file, file_no will be zero, because
-		-- there is no using file		
-		if file_no and use then
-			
-			SymTab[sym][S_FILE_NO] = file_no
-			sym  = NameSpace_declaration( sym )
-			SymTab[sym][S_OBJ] = current_file_no
-			SymTab[sym][S_SCOPE] = SC_PUBLIC
-		else
-			remove_symbol( sym )
-		end if
+		SymTab[sym][S_FILE_NO] = current_file_no
+		sym  = NameSpace_declaration( sym )
+		SymTab[sym][S_OBJ] = current_file_no
+		SymTab[sym][S_SCOPE] = SC_PUBLIC
 		
 		default_namespaces[current_file_no] = SymTab[sym][S_NAME]
 		
@@ -552,7 +545,7 @@ procedure default_namespace( integer file_no, integer use )
 	end if
 	
 end procedure
-with trace
+
 procedure add_exports( integer from_file, integer to_file )
 	sequence exports
 	sequence direct
@@ -682,14 +675,8 @@ end ifdef
 	
 	if new_include_space != 0 then
 		SymTab[new_include_space][S_OBJ] = current_file_no
-		default_namespace( old_file_no, 0 )
-	
-	else
-		-- look for a default namespace
-		default_namespace( old_file_no, 1 )
 	end if
-	
-	
+	default_namespace( )
 	
 end procedure
 
@@ -1949,6 +1936,6 @@ ifdef STDDEBUG then
 	fake_include_line()
 else
 	read_line()
-	default_namespace( 0, 0 )
+	default_namespace( )
 end ifdef
 end procedure
