@@ -1175,6 +1175,72 @@ public function remove(sequence target, atom start, atom stop=start)
 end function
 
 --**
+-- Changes a sequence slice, possibly with padding
+--
+-- Parameters:
+-- 		# ##target##: a sequence, a modified copy of which will be returned
+--		# ##source##: a sequence, to be patched inside or outside ##target##
+--		# ##start##: an integer, the position at which to patch
+--		# ##filler##: an bject, used for filling gaps. Defaults to ' '
+--
+-- Returns:
+-- A **sequence**, which looks like ##target##, but a slice starting at ##start## equals ##source##.
+--
+-- Comments:
+--
+-- In some cases, this call will result in the same result as [[:replace]]().
+--
+-- If ##source## doesn't fit into ##target## because of the lengths and the supplied ##start## value,
+-- gaps will be created, and ##filler## is used to fill them in.
+--
+-- Notionally, ##target## has an infinite amount of ##filler## on both sides, and ##start## counts 
+-- position relative to where ##target## actually starts. Then, notionally, a [[:replace]]() operation is performed.
+--
+-- Example 1:
+-- <eucode>
+-- sequence source = "abc", target = "John Doe"
+-- sequence s = patch(target, source, 11,'0')
+-- -- s is now "John Doe00abc"
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- sequence source = "abc", target = "John Doe"
+-- sequence s = patch(target, source, -1)
+-- -- s is now "abcohn Doe"
+-- Note that there was no gap to fill.
+-- Since -1 = 1 - 2, the patching started 2 positions before the initial 'J'.
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- sequence source = "abc", target = "John Doe"
+-- sequence s = patch(target, source, 6)
+-- -- s is now "abcohn Dabc"
+-- </eucode>
+--
+-- See Also:
+-- [[:mid]], [[replace]]
+
+public function patch(sequence target, sequence source, integer start, object filler = ' ')
+	if start + length(source) <= 0 then
+		return source & repeat(filler, -start-length(source))+1 & target
+	elsif start + length(source) <= length(target) then
+		if start<=0 then
+			return source & target[start+length(source)..$]
+		else
+        	return target[1..start-1] & source &  target[start+length(source)..$]
+        end if
+	elsif start <= 1 then
+		return source
+	elsif start <= length(target)+1 then
+		return target[1..start-1] & source
+	else
+		return target & repeat(filler,start-length(target)-1) & source
+	end if
+end function
+
+--**
 -- Removes all occurrences of some object from a sequence.
 --
 -- Parameters:
