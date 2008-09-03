@@ -290,7 +290,6 @@ EU_BACKEND_RUNNER_OBJECTS = \
 	./$(OBJDIR)/error.o \
 	./$(OBJDIR)/text.o \
 	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/get.o \
 	./$(OBJDIR)/mode.o \
 	./$(OBJDIR)/types.o \
 	./$(OBJDIR)/dll.o \
