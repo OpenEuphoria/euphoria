@@ -12,9 +12,9 @@
 -- For example we can code things like this...
 -- <eucode>
 --    custrec = new() -- Create a new map
---    custrec = put(custrec, "Name", "Joe Blow")
---    custrec = put(custrec, "Address", "555 High Street")
---    custrec = put(custrec, "Phone", 555675632)
+--    put(custrec, "Name", "Joe Blow")
+--    put(custrec, "Address", "555 High Street")
+--    put(custrec, "Phone", 555675632)
 -- </eucode>
 -- This creates three elements in the map, and they are indexed by "Name", 
 -- "Address" and "Phone", meaning that to get the data associated with those
@@ -563,7 +563,7 @@ end function
 --   <eucode>
 --   map the_map_p
 --   the_map_p = new()
---   the_map_p = put(the_map_p, "name", "John")
+--   put(the_map_p, "name", "John")
 --   ? has(the_map_p, "name") -- 1
 --   ? has(the_map_p, "age")  -- 0
 --   </eucode>
@@ -897,8 +897,8 @@ end procedure
 --   <eucode>
 --   map city_population
 --   city_population = new()
---   city_population = nested_put(city_population, {"United States", "California", "Los Angeles"}, 3819951 )
---   city_population = nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     2503281 )
+--   nested_put(city_population, {"United States", "California", "Los Angeles"}, 3819951 )
+--   nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     2503281 )
 --   </eucode>
 --
 -- See also:  [[:put]]
@@ -1053,8 +1053,8 @@ end procedure
 -- Example 1:
 --   <eucode>
 --   map the_map_p
---   the_map_p = put(the_map_p, 1, "a")
---   the_map_p = put(the_map_p, 2, "b")
+--   put(the_map_p, 1, "a")
+--   put(the_map_p, 2, "b")
 --   ? size(the_map_p) -- outputs 2
 --   </eucode>
 --
@@ -1204,10 +1204,10 @@ end function
 --   <eucode>
 --   map the_map_p
 --   the_map_p = new()
---   the_map_p = put(the_map_p, 10, "ten")
---   the_map_p = put(the_map_p, 20, "twenty")
---   the_map_p = put(the_map_p, 30, "thirty")
---   the_map_p = put(the_map_p, 40, "forty")
+--   put(the_map_p, 10, "ten")
+--   put(the_map_p, 20, "twenty")
+--   put(the_map_p, 30, "thirty")
+--   put(the_map_p, 40, "forty")
 --
 --   sequence values
 --   values = values(the_map_p) -- values might be {"twenty","forty","ten","thirty"} 
@@ -1266,10 +1266,10 @@ end function
 --   <eucode>
 --   map the_map_p
 --   the_map_p = new()
---   the_map_p = put(the_map_p, 10, "ten")
---   the_map_p = put(the_map_p, 20, "twenty")
---   the_map_p = put(the_map_p, 30, "thirty")
---   the_map_p = put(the_map_p, 40, "forty")
+--   put(the_map_p, 10, "ten")
+--   put(the_map_p, 20, "twenty")
+--   put(the_map_p, 30, "thirty")
+--   put(the_map_p, 40, "forty")
 --
 --   sequence keyvals
 --   keyvals = pairs(the_map_p) -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
