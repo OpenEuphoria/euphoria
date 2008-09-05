@@ -243,5 +243,77 @@ test_equal("set_in_list #4", 100, set_in_list(100, {100, 2, 45, 9, 17, -6}))
 test_equal("set_in_list #5", -6, set_in_list(-6, {100, 2, 45, 9, 17, -6}))
 test_equal("set_in_list #6", 9, set_in_list(9, {100, 2, 45, 9, 17, -6}))
 
+
+
+include std/math.e
+include std/search.e
+
+function f1(object x, sequence i, object q)
+ -- modify the input if twice the input is above a threshold
+	if (2 * abs(x) > q) then
+   		return {1,{abs(x) * x, i[1]}}
+   	else	
+   		return {0}
+   	end if 
+end function
+
+function f2(object x, sequence i, object q)
+ -- remove zeros if they in an 'even' position
+ 
+
+	if (x = 0) and (remainder(i[1],2) = 0) then
+		return {0}
+	else
+		return {1,x}
+	end if
+end function
+
+function f3(object x, sequence i, object q)
+ -- remove items
+	if (x < q) then
+		return {0}
+	else
+		return {1,x}
+	end if
+end function
+
+function f4(object x, sequence i, object q)
+ -- Create alternate file names for C source code files.
+	integer pos
+	
+	if atom(x) then return {} end if
+	pos = rfind('.', x)
+	if pos > 0 then
+		if find(x[pos+1 ..$], {"c", "h", "cpp", "hpp"}) then
+			x = x[1..pos] 
+		else 
+			return {}
+		end if
+	else
+		x = x & '.' 
+	end if
+	x &= q 
+	if (i[1] != i[2]) then
+		x &= ','
+	end if
+	return {1,x }
+
+end function
+
+integer r1 = routine_id("f1")
+integer r2 = routine_id("f2")
+integer r3 = routine_id("f3")
+integer r4 = routine_id("f4")
+
+test_equal("build_list #1", {-9,1,-4,2,-1.5,0,1.1,4,6,9,7}, build_list({-3,-2,-1.5,0,1.1,2,3}, {r1,r2,-1}, 0, 3))
+test_equal("build_list #2", {{-9,1},{-4,2},-1.5,0,1.1,{4,6},{9,7}}, build_list({-3,-2,-1.5,0,1.1,2,3}, {r1,r2,-1},, 3))
+test_equal("build_list #3", {-9,1,-4,2,4,6,9,7}, build_list({-3,-2,-1.5,0,1.1,2,3}, r1,0, 3))
+test_equal("build_list #4", {-3,-2,-1.5,0,1.1,2,3}, build_list({-3,-2,-1.5,0,1.1,2,3}, -1))
+test_equal("build_list #5", {0,1.1,2,3}, build_list({-3,-2,-1.5,0,1.1,2,3}, r3,,0))
+test_equal("build_list #6", "reader.bak,conio.bak,writer.bak,utils.bak",  build_list({
+		"reader.c", "conio.h", 123.456, "app.obj", "writer", "utils.cpp"
+			}, r4,0, "bak"))
+
+
 test_report()
 

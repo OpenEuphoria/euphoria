@@ -1919,3 +1919,98 @@ public function set_in_list(object item, sequence list)
 	return item
 end function
 
+
+--**
+-- Implements "List Comprehension" or building a list based on the contents of another list.
+--
+-- Parameters:
+--   # ##source##: A sequence. The list of items to base the new list upon.
+--   # ##transformer##: One or more routine_ids. These are [[:routine_id | routine ids]]
+--        of functions that must receive three parameters (object x, sequence i, object u)
+--        where 'x' is an item in the ##source## list, 'i' contains the position that 'x' is
+--        found in the ##source## list and the length of ##source##, and 'u' 
+--        is the ##user_data## value. Each transformer
+--        must return a two-element sequence. If the first element is zero, then build_list() continues
+--        on with the next transformer function for the same 'x'. If the first element is not
+--        zero, the second element is added to the new list being built (other elements
+--        are ignored) and build_list skips the rest of the transformers and processes
+--        the next element in ##source##.
+--   # ##singlton##: An integer. If zero then the transformer functions return multiple
+--                   list elements. If not zero then the transformer functions return
+--                   a single item (which might be a sequence).
+--   # ##user_data##: Any object. This is passed unchanged to each transformer function.
+--
+-- Returns:
+--   A **sequence**: The new list of items.
+--
+-- Comments:
+-- * If the transformer is -1, then the source item is just copied.
+--
+-- Example 1:
+-- <eucode>
+-- function remitem(object x, sequence i, object q)
+-- 	if (x < q) then
+-- 		return {0} -- no output
+-- 	else
+-- 		return {1,x} -- copy 'x'
+-- 	end if
+-- end function
+-- 
+-- sequence s
+-- -- Remove negative elements (x < 0)
+-- s = build_list({-3, 0, 1.1, -2, 2, 3, -1.5}, routine_id("remitem"), , 0)
+-- -- s is {0, 1.1, 2, 3}
+-- </eucode>
+
+public function build_list( sequence source, object transformer, integer singlton = 1, object user_data = {})
+	sequence result = {}
+	sequence x
+	object new_x
+
+	-- Special case where only one transformer is supplied.
+	if integer(transformer) then
+		transformer = {transformer}
+	end if
+	
+	for i = 1 to length(source) do
+		x = {source[i], {i, length(source)}, user_data}
+		
+		for j = 1 to length(transformer) do
+		
+			if transformer[j] >= 0 then
+				new_x = call_func(transformer[j], x)
+				if length(new_x) = 0 then
+					-- This didn't return anything so go to the next transformer.
+					continue
+				end if
+				if new_x[1] = 0 then
+					-- This didn't return anything so go to the next transformer.
+					continue
+				end if
+				if new_x[1] < 0 then
+					-- This didn't return anything and skip other transformers.
+					exit
+				end if
+				
+				new_x = new_x[2]
+			else
+				-- Just copy the input.
+				new_x = x[1]
+			end if
+						
+			if singlton then
+				result = append(result, new_x)
+			else
+				result &= new_x
+			end if
+			
+			-- Stop calling any more transformers for this input item.
+			exit
+			
+		end for
+		
+		
+	end for
+
+	return result
+end function
