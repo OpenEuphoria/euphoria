@@ -460,9 +460,16 @@ procedure start_playback(sequence s)
 end procedure
 
 sequence parseargs_states={}
+enum -- struct parseargs_states record
+	PS_POSITION,
+	PS_SCAN_LOCK,
+	PS_USE_LIST,
+	PS_ON_ARG
+
 sequence private_list = {}
 integer lock_scanner = 0
 integer on_arg = 0
+sequence nested_calls = {}
 
 procedure restore_parseargs_states()
 	sequence s
@@ -470,12 +477,13 @@ procedure restore_parseargs_states()
 
 	s = parseargs_states[$]
 	parseargs_states = parseargs_states[1..$-1]
-	n=s[1]
+	n=s[PS_POSITION]
 	private_list = private_list[1..n]
 	private_sym = private_sym[1..n]
-	lock_scanner = s[2]
-	use_private_list = s[3]
-	on_arg = s[4]
+	lock_scanner = s[PS_SCAN_LOCK]
+	use_private_list = s[PS_USE_LIST]
+	on_arg = s[PS_ON_ARG]
+	nested_calls = nested_calls[1..$-1]
 end procedure
 
 function read_recorded_token(integer n)
@@ -553,6 +561,13 @@ function next_token()
 		end if
 		if t[T_ID] = RECORDED then
 			t=read_recorded_token(t[T_SYM])
+		elsif t[T_ID] = DEF_PARAM then ?nested_calls
+        	for i=length(nested_calls) to 1 by -1 do
+        	    if nested_calls[i] = t[T_SYM][2] then
+					return {VARIABLE, private_sym[parseargs_states[i][PS_POSITION]+t[T_SYM][1]]}
+				end if
+			end for
+			CompileErr("internal nested call parsing error")
 		end if
 	elsif lock_scanner then
 		return {PLAYBACK_ENDS,0}
@@ -703,7 +718,7 @@ end procedure
 
 procedure Parse_default_arg( symtab_index subsym, integer arg )
 	symtab_index param = subsym
-	
+
 	for i = 1 to arg do
 		param = SymTab[param][S_NEXT]
 	end for
@@ -724,6 +739,8 @@ procedure ParseArgs(symtab_index subsym)
 	integer n, fda, lnda
 	token tok
 	symtab_index s
+	object var_code
+	sequence name
 
 	n = SymTab[subsym][S_NUM_ARGS]
 	if sequence(SymTab[subsym][S_DEF_ARGS]) then
@@ -731,11 +748,13 @@ procedure ParseArgs(symtab_index subsym)
 		lnda = SymTab[subsym][S_DEF_ARGS][2]
 	else
 		fda = 0
+		lnda = 0
 	end if
 	s = subsym
 
 	parseargs_states = append(parseargs_states,
 				{length(private_list),lock_scanner,use_private_list,on_arg})
+	nested_calls &= subsym
 	lock_scanner = 0
 	on_arg = 0
 
@@ -744,26 +763,42 @@ procedure ParseArgs(symtab_index subsym)
 
 	  	tok = next_token()
 		if tok[T_ID] = COMMA then  -- defaulted arg
-			s = SymTab[s][S_NEXT]
-			if atom(SymTab[s][S_CODE]) then  -- but no default set
+			if SymTab[subsym][S_OPCODE] then
+				if atom(SymTab[subsym][S_CODE]) then
+					var_code = 0
+				else
+					var_code = SymTab[subsym][S_CODE][i]
+				end if
+				name = ""
+			else
+				s = SymTab[s][S_NEXT]
+				var_code = SymTab[s][S_CODE]
+				name = SymTab[s][S_NAME]
+			end if
+			if atom(var_code) then  -- but no default set
 				CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
 			end if
 			use_private_list = 1
-			start_playback(SymTab[s][S_CODE])
+			start_playback(var_code)
 			lock_scanner=1
 			call_proc(forward_expr, {})
 			lock_scanner=0
 			on_arg += 1
-			private_list = append(private_list,SymTab[s][S_NAME])
+			private_list = append(private_list,name)
 			private_sym &= Top()
 			backed_up_tok = tok
 		elsif tok[T_ID] != RIGHT_ROUND then
-			s = SymTab[s][S_NEXT]
+			if SymTab[subsym][S_OPCODE] then
+				name = ""
+			else
+				s = SymTab[s][S_NEXT]
+				name = SymTab[s][S_NAME]
+			end if
 			use_private_list = 0
 			putback(tok)
 			call_proc(forward_expr, {})
 			on_arg += 1
-			private_list = append(private_list,SymTab[s][S_NAME])
+			private_list = append(private_list,name)
 			private_sym &= Top()
 		end if
 
@@ -783,14 +818,25 @@ procedure ParseArgs(symtab_index subsym)
 					use_private_list = 1
 					for j = on_arg + 1 to n do
 
-						s = SymTab[s][S_NEXT]
-						if sequence(SymTab[s][S_CODE]) then
+						if SymTab[subsym][S_OPCODE] then
+							if atom(SymTab[subsym][S_CODE]) then
+								var_code = 0
+							else
+								var_code = SymTab[subsym][S_CODE][j]
+							end if
+							name = ""
+						else
+							s = SymTab[s][S_NEXT]
+							var_code = SymTab[s][S_CODE]
+							name = SymTab[s][S_NAME]
+						end if
+						if sequence(var_code) then
 						-- some defaulted arg follows with a default value
 							putback( tok )
-							start_playback(SymTab[s][S_CODE] )
+							start_playback(var_code)
 							call_proc(forward_expr, {})
 							if j<n then
-								private_list = append(private_list,SymTab[s][S_NAME])
+								private_list = append(private_list,name)
 								private_sym &= Top()
 							end if
 							on_arg += 1

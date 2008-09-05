@@ -78,6 +78,7 @@ EU_INTERPRETER_FILES = &
 	c_out.e &
 	cominit.e &
 	intinit.e &
+	..\include\std\get.e &
 	int.ex
 
 EU_TRANSLATOR_FILES = &
@@ -114,7 +115,6 @@ EU_TRANSLATOR_OBJECTS = &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
@@ -132,8 +132,6 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\compress.obj &
 	.\$(OBJDIR)\cominit.obj &
 	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\wildcard.obj &
 	.\$(OBJDIR)\sequence.obj &
@@ -142,6 +140,7 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\types.obj &
 	.\$(OBJDIR)\dll.obj &
 	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\search.obj
 
 EU_CORE_OBJECTS = &
@@ -153,6 +152,8 @@ EU_CORE_OBJECTS = &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
+	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\symtab_1.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scientific.obj &
 	.\$(OBJDIR)\scanne_0.obj &
@@ -255,6 +256,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\c_out.obj &
 	.\$(OBJDIR)\symtab.obj &
 	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\symtab_1.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scanne_1.obj &
@@ -297,6 +299,8 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\error.obj &
 	.\$(OBJDIR)\mode.obj &
 	.\$(OBJDIR)\symtab.obj &
+	.\$(OBJDIR)\symtab_0.obj &
+	.\$(OBJDIR)\symtab_1.obj &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scanne_1.obj &
@@ -336,7 +340,6 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\sort.obj &
 	.\$(OBJDIR)\convert.obj &
 	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\traninit.obj &
 	.\$(OBJDIR)\tranplat.obj &
 	.\$(OBJDIR)\wildcard.obj &
@@ -755,7 +758,10 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 .\$(OBJDIR)\symtab.obj :  .MULTIPLE ./$(OBJDIR)\symtab.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
-.\$(OBJDIR)\symtab_0.obj :  .MULTIPLE ./$(OBJDIR)\symtab.c
+.\$(OBJDIR)\symtab_0.obj :  .MULTIPLE ./$(OBJDIR)\symtab_0.c
+	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
+
+.\$(OBJDIR)\symtab_1.obj :  .MULTIPLE ./$(OBJDIR)\symtab_1.c
 	$(CC) $(FE_FLAGS) $^*.c -fo=$^@
 
 .\$(OBJDIR)\0rror.obj :  .MULTIPLE ./$(OBJDIR)\0rror.c

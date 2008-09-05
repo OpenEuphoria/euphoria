@@ -387,7 +387,7 @@ global procedure InitSymTab()
 	integer hashval, len
 	--register symtab_index *bptr
 	symtab_index s,st_index
-	sequence kname
+	sequence kname, fixups = {}
 
 	for k = 1 to length(keylist) do
 		kname = keylist[k][K_NAME]
@@ -406,6 +406,11 @@ global procedure InitSymTab()
 			SymTab[st_index][S_OPCODE] = keylist[k][K_OPCODE]
 			SymTab[st_index][S_EFFECT] = keylist[k][K_EFFECT]
 			SymTab[st_index][S_REFLIST] = {}
+			if length(keylist[k]) > K_EFFECT then
+			    SymTab[st_index][S_CODE] = keylist[k][K_CODE]
+			    SymTab[st_index][S_DEF_ARGS] = keylist[k][K_DEF_ARGS]
+			    fixups &= st_index
+			end if
 		end if
 		if keylist[k][K_TOKEN] = PROC then
 			if equal(kname, "_toplevel_") then
@@ -433,6 +438,39 @@ global procedure InitSymTab()
 		end if
 	end for
 	file_start_sym = length(SymTab)
+	-- interpret token sequences for builtin defparms
+	sequence si, sj
+	CurrentSub = TopLevelSub
+	for i=1 to length(fixups) do
+	    si = SymTab[fixups[i]][S_CODE] -- seq of either 0's or sequences of tokens
+	    for j=1 to length(si) do
+	        if sequence(si[j]) then
+	            sj = si[j] -- a sequence of tokens
+				for ij=1 to length(sj) do
+	                switch sj[ij][T_ID] do
+	                    case ATOM: -- must crate a lasting temp
+	                    	st_index = NewTempSym()
+	                    	SymTab[st_index][S_OBJ] = sj[ij][T_SYM]
+							SymTab[st_index][S_SCOPE] = IN_USE -- TempKeep()
+							sj[ij][T_SYM] = st_index
+							break
+						case STRING: -- same
+	                    	st_index = NewStringSym(sj[ij][T_SYM])
+							SymTab[st_index][S_SCOPE] = IN_USE -- TempKeep()
+							sj[ij][T_SYM] = st_index
+							break
+						case BUILT_IN: -- name of a builtin in econd field
+                            sj[ij] = keyfind(sj[ij][T_SYM],-1)
+							break
+						case DEF_PARAM:
+							sj[ij][T_SYM] &= fixups[i]
+					end switch
+				end for
+				si[j] = sj
+			end if
+		end for
+		SymTab[fixups[i]][S_CODE] = si
+	end for
 end procedure
 
 global procedure add_ref(token tok)

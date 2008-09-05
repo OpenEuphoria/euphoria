@@ -10,7 +10,10 @@ global enum
 	K_TOKEN,     -- token number returned to parser 
 	K_OPCODE,    -- opcode to emit (predefined subprograms) 
 	K_NUM_ARGS,  -- number of arguments (predefined subprograms) 
-	K_EFFECT     -- side effects 
+	K_EFFECT,    -- side effects
+	-- optional fields
+	K_CODE,
+	K_DEF_ARGS
 
 global sequence keylist
 -- N.B. order and number of keywords and builtins 
@@ -159,3 +162,31 @@ end if
 -- top level pseudo-procedure (assumed to be last on the list) 
 keylist = append(keylist, {"_toplevel_", SC_PREDEF, PROC, 0, 0, E_ALL_EFFECT})
 
+-- Howw to add defaulted parms to builtins:
+--
+-- Here are fictitious entries in keylist, which have been used for testing purposes:
+-- Here, equal() gets its second parameter defaulted, not the first.
+-- This is why the K_CODE field starts with 0.
+--	{"equal",            SC_PREDEF, FUNC, EQUAL,            2, E_PURE,
+-- The K_DEF_ARGS field reflects the lists of defaulted and non defaulted params, and 
+-- is just like it were built in a S_DEF_ARGS field of a regular SymTab entry, built in parser:SubProg().
+-- So here it reads {2,1,{2}}: param 2 is the first defaulted, pram 1 is the last non defaulted
+-- and the complete list of defparm indexes is {2}.
+--
+-- Now the K_CODE entry:
+-- 1/ second param defaults to 0: {0,{{{ATOM,0}}
+-- 2/ second param defaults to length(command_line()):  {0,
+-- {{BUILT_IN,"length"},
+-- {LEFT_ROUND,0},
+-- {BUILT_IN,"command_line"},
+-- {LEFT_ROUND,0},
+-- {RIGHT_ROUND,0},
+-- {RIGHT_ROUND,0}
+-- }}
+-- 3/ second param defaults to the first one: {0,{{DEF_PARAM,1}}}
+--
+-- So, the K_CODE field is a sequence of either 0's or sequences of almost regular tokens.
+-- Notes:
+-- Only builtin names can appear in a BUILT_IN token;
+-- The T_SYM entry in a DEF_PARAM token is the index of the param being referred to. It must
+-- be less than the current index in the K_CODE field.
