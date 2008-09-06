@@ -294,13 +294,13 @@ public function remove_directory(sequence dir_name, integer force=0)
 	dir_name &= SLASH
 	
 	for i = 1 to length(files) do
-		if find(files[i][D_NAME], {".", ".."}) then
+		if eu:find(files[i][D_NAME], {".", ".."}) then
 			continue
 			
 		elsif not force then
 			return 0
 		else
-			if find('d', files[i][D_ATTRIBUTES]) then
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
 				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
 			else
 				ret = call_func(delete_file_id, {dir_name & files[i][D_NAME]})
@@ -450,7 +450,7 @@ public function dir(sequence name)
 	integer idx
 
 	-- Did the user give a wildcard? If not, just return the standard dir.
-	if find('*', name) > 0 or find('?', name) > 0 then
+	if eu:find('*', name) > 0 or eu:find('?', name) > 0 then
 		-- Empty if so that we can short circuit if * is found, otherwise
 		-- we would have to run a search for * and ? even if * is found.
 	else
@@ -458,7 +458,7 @@ public function dir(sequence name)
 	end if
 
 	-- Is there a path involved?
-	if find(SLASH, name) = 0 then
+	if eu:find(SLASH, name) = 0 then
 		the_dir = "."
 		the_name = name
 	else
@@ -657,14 +657,14 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	
 	-- trim any trailing blanks or '\' characters from the path
 	while length(path_name) > 0 and 
-		  find(path_name[$], {' ', SLASH}) do
+		  eu:find(path_name[$], {' ', SLASH}) do
 		path_name = path_name[1..$-1]
 	end while
 	
 	for i = 1 to length(d) do
-		if find('d', d[i][D_ATTRIBUTES]) then
+		if eu:find('d', d[i][D_ATTRIBUTES]) then
 			-- a directory
-			if not find(d[i][D_NAME], {".", ".."}) then
+			if not eu:find(d[i][D_NAME], {".", ".."}) then
 				if atom(orig_func) then
 					abort_now = call_func(your_function, {path_name, d[i]})
 				else
@@ -827,8 +827,8 @@ public function rename_file(sequence src, sequence dest)
     integer i
     sequence reg_list
     if length(src) > 3 and length(dest) > 3 then
-        if not compare(src[2],":") and not compare(dest[2],":") then
-            if compare(src[1], dest[1]) then
+        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
+            if eu:compare(src[1], dest[1]) then
 		-- renaming a file across drives is not supported
                 return 0
             end if
@@ -964,8 +964,8 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
     integer i
     sequence reg_list
     if length(src) > 3 and length(dest) > 3 then
-        if not compare(src[2],":") and not compare(dest[2],":") then
-            if compare(src[1], dest[1]) then
+        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
+            if eu:compare(src[1], dest[1]) then
                 i = copy_file(src,dest,overwrite)
                 if not i then
                     return i
@@ -1145,7 +1145,7 @@ public enum
 
 public function file_type(sequence filename)
 object dirfil
-	if find('*', filename) or find('?', filename) then return FILETYPE_UNDEFINED end if
+	if eu:find('*', filename) or eu:find('?', filename) then return FILETYPE_UNDEFINED end if
 	
 	if length(filename) = 2 and filename[2] = ':' then
 		filename &= "\\"
@@ -1153,7 +1153,7 @@ object dirfil
 	
 	dirfil = dir(filename)
 	if sequence(dirfil) then
-		if find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
+		if eu:find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
 			return FILETYPE_DIRECTORY
 		else
 			return FILETYPE_FILE
@@ -1239,7 +1239,7 @@ public function pathinfo(sequence path)
 		ch = path[i]
 		if period = 0 and ch = '.' then
 			period = i
-		elsif find(ch, SLASHES) then
+		elsif eu:find(ch, SLASHES) then
 			slash = i
 			exit
 		end if
@@ -1249,7 +1249,7 @@ public function pathinfo(sequence path)
 		dir_name = path[1..slash-1]
 		
 		ifdef !UNIX then
-			ch = find(':', dir_name)
+			ch = eu:find(':', dir_name)
 			if ch != 0 then
 				drive_id = dir_name[1..ch-1]
 				dir_name = dir_name[ch+1..$]
@@ -1520,9 +1520,9 @@ public function clear_directory(sequence path, integer recurse = 1)
 	path &= SLASH
 	
 	for i = 1 to length(files) do
-		if find(files[i][D_NAME], {".", ".."}) then
+		if eu:find(files[i][D_NAME], {".", ".."}) then
 			continue
-		elsif find('d', files[i][D_ATTRIBUTES]) then
+		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
 			if recurse then
 				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
 				if cnt = 0 then

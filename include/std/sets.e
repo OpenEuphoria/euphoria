@@ -44,7 +44,7 @@ public type set(object s)
     x=s[1]
     for i=2 to length(s) do
         y=s[i]
-        if compare(y,x)<1 then
+        if eu:compare(y,x)<1 then
             return 0
         end if
         x=y
@@ -153,13 +153,13 @@ function bfind(object x,sequence s,integer startpoint,integer endpoint)
         startpoint=1	
     end if
 	
-    c=compare(x,s[startpoint])
+    c=eu:compare(x,s[startpoint])
     if c=1 then
-        c=compare(x,s[endpoint])
+        c=eu:compare(x,s[endpoint])
         if c=-1 then
             while endpoint-startpoint>1 do
                 r=floor((endpoint+startpoint)/2)
-                c=compare(x,s[r])
+                c=eu:compare(x,s[r])
                 if c=-1 then
                     endpoint=r
                 elsif c=0 then
@@ -214,7 +214,7 @@ public function sequence_to_set(sequence s)
     result=sort(s)
     k=0
     for i=1 to ls-1 do
-        if compare(result[i],result[i+1])=0 then
+        if eu:compare(result[i],result[i+1])=0 then
             k=i
             exit
         end if
@@ -223,7 +223,7 @@ public function sequence_to_set(sequence s)
         return result
     end if
     for i=k+2 to ls do
-        if compare(result[i],result[k])=1 then
+        if eu:compare(result[i],result[k])=1 then
             k+=1
             result[k]=result[i]
         end if
@@ -419,7 +419,7 @@ function is_inside_(sequence s1,sequence s2,integer mode)
         if mode then
             return iota(ls1)
         else
-            return not compare(s1,s2)
+            return not eu:compare(s1,s2)
         end if
     end if
 end function
@@ -490,9 +490,9 @@ function embed_union_(sequence s1,sequence s2)
     if q>1 then
         ls1=length(s1)
         if ls1>1 then
-            if compare(s1[$],s2[1])=-1 then
+            if eu:compare(s1[$],s2[1])=-1 then
                 return iota(length(s1))
-            elsif compare(s2[$],s1[1])=-1 then
+            elsif eu:compare(s2[$],s1[1])=-1 then
                 return iota(length(s1))+q
             end if
             temp=s1
@@ -655,7 +655,7 @@ function intersection_(sequence s1,sequence s2)
     k1=1
     k2=1
     k=1
-    c=compare(s1[1],s2[1])
+    c=eu:compare(s1[1],s2[1])
     while k1<=ls1 and k2<=ls2 do
         if c=0 then
             result[k]=s1[k1]
@@ -665,7 +665,7 @@ function intersection_(sequence s1,sequence s2)
             if k1>ls1 or k2>ls2 then
                 return result[1..k-1]
             else
-                c=compare(s1[k1],s2[k2])
+                c=eu:compare(s1[k1],s2[k2])
             end if
         elsif c=1 then
             k2=bfind(s1[k1],s2,k2,length(s2))
@@ -723,7 +723,7 @@ function union_(sequence s1,sequence s2,integer ls1,integer ls2,integer mode)
     k1=1
     k2=1
     k=1
-    c=compare(s1[1],s2[1])
+    c=eu:compare(s1[1],s2[1])
     while k1<=ls1 and k2<=ls2 do
         if c=0 then
             if mode then
@@ -735,7 +735,7 @@ function union_(sequence s1,sequence s2,integer ls1,integer ls2,integer mode)
             if k1>ls1 or k2>ls2 then
                 exit
             else
-                c=compare(s1[k1],s2[k2])
+                c=eu:compare(s1[k1],s2[k2])
             end if
         elsif c=1 then
             k0=bfind(s1[k1],s2,k2,length(s2))
@@ -891,7 +891,7 @@ public function difference(set base,set removed)
     k1=1
     k2=1
     k=1
-    c=compare(base[1],removed[1])
+    c=eu:compare(base[1],removed[1])
     while k1<=ls1 and k2<=ls2 do
         if c=0 then
             k1+=1
@@ -899,7 +899,7 @@ public function difference(set base,set removed)
             if k1>ls1 or k2>ls2 then
                 exit
             else
-                c=compare(base[k1],removed[k2])
+                c=eu:compare(base[k1],removed[k2])
             end if
         elsif c=1 then
             k2=bfind(base[k1],removed,k2,length(removed))
@@ -1442,7 +1442,7 @@ end function
 -- See Also:
 -- [[:compose_map]]
 public function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
-    return not compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
+    return not eu:compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
 end function
 
 --**

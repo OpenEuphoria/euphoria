@@ -1788,7 +1788,7 @@ public function pivot(object data_p, object pivot_p = 0)
 	end if
 	
 	for i = 1 to length(data_p) do
-		pos_ = compare(data_p[i], pivot_p) + 2
+		pos_ = eu:compare(data_p[i], pivot_p) + 2
 		result_[pos_] = append(result_[pos_], data_p[i])
 	end for
 
@@ -1820,10 +1820,10 @@ public function is_in_range(object item, sequence range_limits)
 		return 0
 	end if
 	
-	if compare(item, range_limits[1]) < 0 then
+	if eu:compare(item, range_limits[1]) < 0 then
 		return 0
 	end if
-	if compare(item, range_limits[$]) > 0 then
+	if eu:compare(item, range_limits[$]) > 0 then
 		return 0
 	end if
 	return 1
@@ -1858,10 +1858,10 @@ public function set_in_range(object item, sequence range_limits)
 		return item
 	end if
 	
-	if compare(item, range_limits[1]) < 0 then
+	if eu:compare(item, range_limits[1]) < 0 then
 		return range_limits[1]
 	end if
-	if compare(item, range_limits[$]) > 0 then
+	if eu:compare(item, range_limits[$]) > 0 then
 		return range_limits[$]
 	end if
 	return item

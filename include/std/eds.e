@@ -524,7 +524,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 		void = seek(current_db, tables)
 		ntables = get4()
 		printf(fn, "The \"%s\" database has %d table",
-			   {db_names[find(current_db, db_file_nums)], ntables})
+			   {db_names[eu:find(current_db, db_file_nums)], ntables})
 		if ntables = 1 then
 			puts(fn, "\n")
 		else
@@ -558,7 +558,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 			end if
 			ll_line[hi .. hi + 1] = sprintf("%02x", c)
 			hi += 2
-			if find(hi, {19, 28, 38}) then
+			if eu:find(hi, {19, 28, 38}) then
 				hi += 1
 				if hi = 29 then
 					hi = 30
@@ -855,7 +855,7 @@ procedure save_keys()
 	integer k
 	if caching_option = 1 then
 		if length(key_pointers) > 0 then
-			k = find({current_db, current_table_pos}, cache_index)
+			k = eu:find({current_db, current_table_pos}, cache_index)
 			if k != 0 then
 				key_cache[k] = key_pointers
 			else
@@ -909,7 +909,7 @@ end procedure
 public function db_create(sequence path, integer lock_method)
 	integer db
 
-	if not find('.', path) then
+	if not eu:find('.', path) then
 		path &= ".edb"
 	end if
 
@@ -1034,7 +1034,7 @@ end function
 public function db_open(sequence path, integer lock_method)
 	integer db, magic
 
-	if not find('.', path) then
+	if not eu:find('.', path) then
 		path &= ".edb"
 	end if
 
@@ -1116,11 +1116,11 @@ end function
 public function db_select(sequence path)
 	integer index
 
-	if not find('.', path) then
+	if not eu:find('.', path) then
 		path &= ".edb"
 	end if
 
-	index = find(path, db_names)
+	index = eu:find(path, db_names)
 	if index = 0 then
 		return DB_OPEN_FAIL
 	end if
@@ -1152,7 +1152,7 @@ public procedure db_close()
 	end if
 	close(current_db)
 	-- delete info for current_db
-	index = find(current_db, db_file_nums)
+	index = eu:find(current_db, db_file_nums)
 		   db_names = db_names[1..index-1] & db_names[index+1..$]
 	   db_file_nums = db_file_nums[1..index-1] & db_file_nums[index+1..$]
 	db_lock_methods = db_lock_methods[1..index-1] & db_lock_methods[index+1..$]
@@ -1242,7 +1242,7 @@ public function db_select_table(sequence name)
 
 	k = 0
 	if caching_option = 1 then
-		k = find({current_db, current_table_pos}, cache_index)
+		k = eu:find({current_db, current_table_pos}, cache_index)
 		if k != 0 then
 			key_pointers = key_cache[k]
 		end if
@@ -1462,7 +1462,7 @@ public procedure db_delete_table(sequence name)
 	void = seek(current_db, tables)
 	put4(nt)
 
-	k = find({current_db, current_table_pos}, cache_index)
+	k = eu:find({current_db, current_table_pos}, cache_index)
 	if k != 0 then
 		cache_index = remove(cache_index, k)
 		key_cache = remove(key_cache, k)
@@ -1549,7 +1549,7 @@ public procedure db_clear_table(sequence name)
 	put4(index_ptr)
 
 	-- Clear cache and RAM pointers
-	k = find({current_db, current_table_pos}, cache_index)
+	k = eu:find({current_db, current_table_pos}, cache_index)
 	if k != 0 then
 		cache_index = remove(cache_index, k)
 		key_cache = remove(key_cache, k)
@@ -1723,7 +1723,7 @@ public function db_find_key(object key, object table_name=current_table_name)
 	c = 0
 	while lo <= hi do
 		mid = floor((lo + hi) / 2)
-		c = compare(key, key_value(key_pointers[mid]))
+		c = eu:compare(key, key_value(key_pointers[mid]))
 		if c < 0 then
 			hi = mid - 1
 		elsif c > 0 then
@@ -1801,7 +1801,7 @@ public function db_get_recid(object key, object table_name=current_table_name)
 	c = 0
 	while lo <= hi do
 		mid = floor((lo + hi) / 2)
-		c = compare(key, key_value(key_pointers[mid]))
+		c = eu:compare(key, key_value(key_pointers[mid]))
 		if c < 0 then
 			hi = mid - 1
 		elsif c > 0 then
@@ -2393,7 +2393,7 @@ public function db_compress()
 		return -1
 	end if
 
-	index = find(current_db, db_file_nums)
+	index = eu:find(current_db, db_file_nums)
 	new_path = trim(db_names[index])
 	db_close()
 

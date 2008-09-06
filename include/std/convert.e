@@ -408,7 +408,7 @@ public function hex_text(sequence text)
 			end if
 		end if
 		
-		pos = find(text[i], "0123456789abcdefABCDEF")
+		pos = eu:find(text[i], "0123456789abcdefABCDEF")
 		if pos = 0 then
 			exit
 		end if

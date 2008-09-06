@@ -713,7 +713,7 @@ public function geomean(sequence data)
 		if sequence(x) then
 			count -= 1
 		else
-		    x *= compare(x,0)
+		    x *= eu:compare(x,0)
 		    if x=0 then
 		        return 0.0
 			else

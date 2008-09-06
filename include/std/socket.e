@@ -929,10 +929,10 @@ function windows_get_iface_details(sequence iface_name)
 	free(iptable)
 	
 	for ctr = 1 to length(list) do
-		if compare(iface_name,list[ctr][2])=0 then
+		if eu:compare(iface_name,list[ctr][2])=0 then
 			row = {list[ctr][2],list[ctr][4],0,"",0,0,0,0,{},0,list[ctr][6],"","",list[ctr][7],{}}
 			for ctr2 = 1 to length(list2) do
-				if compare(list2[ctr2][2],list[ctr][4])=0 then -- matching index
+				if eu:compare(list2[ctr2][2],list[ctr][4])=0 then -- matching index
 					row[4] = ""
 					for ctr3 = 1 to length(list[ctr][3]) do
 						row[4] = row[4] & sprintf("%02x:",list[ctr][3][ctr3])
@@ -2515,7 +2515,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 	elsif svcport > 0 then
 		cpos = find(':',rtn[1][5])
 		if cpos = 0 or cpos = length(rtn[1][5]) or
-				compare(rtn[1][5][length(rtn[1][5])-1..length(rtn[1][5])],":0")=0 then
+				eu:compare(rtn[1][5][length(rtn[1][5])-1..length(rtn[1][5])],":0")=0 then
 			if cpos = 0 then
 				rtn[1][5] = rtn[1][5] & sprintf(":%d",svcport)
 			else
@@ -3184,8 +3184,8 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname,
 		for ctr = 1 to length(this_cookiejar) do
 			if sequence(this_cookiejar[ctr]) and length(this_cookiejar[ctr])>=2 and
 					match(cookie[1],this_cookiejar[ctr][1])>0 and
-					compare(cookie[2],this_cookiejar[ctr][2])=0 and
-					compare(this_cookiejar[ctr][3],cookie[3])=0 then
+					eu:compare(cookie[2],this_cookiejar[ctr][2])=0 and
+					eu:compare(this_cookiejar[ctr][3],cookie[3])=0 then
 				this_cookiejar[ctr] = cookie
 				cpos = ctr
 				exit
@@ -3324,7 +3324,7 @@ public function get_url(sequence url)
 		inet_addr = addrinfo[1][5]
 	end if
 	data = {}
-	if compare(lower(protocol),"http")=0 then
+	if eu:compare(lower(protocol),"http")=0 then
 		data = get_http(inet_addr,hostname,file)
 	end if
 	

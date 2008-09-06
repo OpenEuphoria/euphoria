@@ -337,7 +337,7 @@ public function find_nested(object needle, sequence haystack, integer flags=0, i
 	any = any and sequence(needle)
 
 	while 1 do -- traverse the whole haystack tree
-		while compare(current_idx, last_idx) != direction do
+		while eu:compare(current_idx, last_idx) != direction do
 	        x = haystack[current_idx]
 	        
 	        -- is x what we want?
@@ -373,7 +373,7 @@ public function find_nested(object needle, sequence haystack, integer flags=0, i
 	        end if
 	        
 	        -- either it wasn't, or we keep going
-	        if compare(x, {})=1 then
+	        if eu:compare(x, {})=1 then
 	        -- this is a subtree, search inside
 	            -- save state
 				depth += 1
@@ -591,7 +591,7 @@ public function binary_search(object needle, sequence haystack, integer startpoi
 	c = 0
 	while lo <= hi do
 		mid = floor((lo + hi) / 2)
-		c = compare(needle, haystack[mid])
+		c = eu:compare(needle, haystack[mid])
 		if c < 0 then
 			hi = mid - 1
 		elsif c > 0 then

@@ -10,7 +10,7 @@
 -- === Constants
 --
 
-public constant ASCENDING = -1, DESCENDING = 1
+public constant ASCENDING = 1, DESCENDING = -1
 
 include std/text.e -- upper/lower
 
@@ -29,8 +29,8 @@ include std/text.e -- upper/lower
 -- Sort the elements of a sequence into ascending order.
 --
 -- Parameters:
---	 ###x##: The sequence to be sorted.
---      # ##order##: the sort order. Default is ##ASCENDING##.
+--	 # ##x##: The sequence to be sorted.
+--   # ##order##: the sort order. Default is ##ASCENDING##.
 --
 -- Returns:
 --	 A **sequence**, a copy of the original sequence in ascending order
@@ -60,6 +60,13 @@ public function sort(sequence x, integer order = ASCENDING)
 	integer gap, j, first, last
 	object tempi, tempj
 
+	if order >= 0 then
+		order = -1
+	else
+		order = 1
+	end if
+	
+	
 	last = length(x)
 	gap = floor(last / 10) + 1
 	while 1 do
@@ -69,7 +76,7 @@ public function sort(sequence x, integer order = ASCENDING)
 			j = i - gap
 			while 1 do
 				tempj = x[j]
-				if compare(tempi, tempj) != order then
+				if eu:compare(tempi, tempj) != order then
 					j += gap
 					exit
 				end if
@@ -102,41 +109,43 @@ end function
 --     A **sequence**, a copy of the original sequence in sorted order
 --
 -- Errors:
--- Specifying ##order = 0## is illegal and causes a crash.
---
 -- If the user defined routine does not return according to the specifications in the 
 -- Comments: section below, an error will occur.
 --
 -- Comments:
---
--- If some custom data s being provided, it must be either an atom or the first element of a 
+-- * Any ##order## value of zero or greater will do an ascending sort, and any value
+--  less than zero will do a descending sort.
+-- * If some custom data s being provided, it must be either an atom or the first element of a 
 -- sequence, in which case the remainder of the sequence is ignored. It is not used or 
 -- inspected it in any way other than passing it to the user defined routine and storing it if updated.
 --
--- Basically (howver, see below), the user defined routine is passed two objects, A and B, and is expected to
--- return a //comparison result//:
--- * -1, or any atom below 0, if object A must appear before object B;
--- * 1, or any atom above 0, 1 if object B must appear before object A;
--- * 0 if the order does not matter.
+-- * Basically (however, see below), the user defined routine is passed two
+--  objects, A and B, and is expected to return a //comparison result//:
+-- ** a **negative** value if object A must appear before object B
+-- ** a **positive** value if object B must appear before object A
+-- ** 0 if the order does not matter
+-- >
+-- *NOTE:** The meaning of the value returned by the user-defined routine is reversed 
+-- when ##order = DESCENDING##, so that sorting is in descending order.
+-- The default is ##order = ASCENDING##, which sorts in ascending order.
 --
--- The meanings of -1 and 1 are reversed when ##order = DESCENDING##, so that sorting is in descending order.
--- The default is  ##order = ASCENDING##, to sort in ascending order.
+-- * When no user data is provided, the user defined routine must accept two
+--  objects (A and B) and return a //comparison result//. This is the default case.
 --
--- When no user data is provided, the user defined routine must accept two objects (A and B) and return a //comparison result//. This is the default case.
---
--- When some user data is provided,
+-- * When some user data is provided,
 -- the user defined routine must take three objects (A, B and data). It should return either
 -- an atom or a sequence of length 2 at least:
--- * if an integer, it is a //comparison result//;
--- * if a sequence, the second element is the new value for user data, and the first element 
+-- ** if an integer, it is a //comparison result//;
+-- ** if a sequence, the second element is the new value for user data, and the first element 
 -- is a //comparison result//.
 --
--- The elements of ##x## can be atoms or sequences. Each time that the
+-- * The elements of ##x## can be atoms or sequences. Each time that the
 -- sort needs to compare two items in the sequence, it calls
 -- the user-defined function to determine the order.
 --
---     This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
---     change position relative to each other.
+-- * This function uses the "Shell" sort algorithm. This sort is not "stable", 
+--  i.e. elements that are considered equal might change position relative to
+--  each other.
 --
 -- Example 1:
 -- <eucode>
@@ -169,7 +178,12 @@ public function custom_sort(integer custom_compare, sequence x, object data = {}
 	object tempi, tempj, result
 	sequence args = {0, 0}
 
-	order = 1/compare(order, 0)
+	if order >= 0 then
+		order = -1
+	else
+		order = 1
+	end if
+	
 	if atom(data) then
 		args &= data
 	elsif length(data) then
@@ -190,9 +204,9 @@ public function custom_sort(integer custom_compare, sequence x, object data = {}
 				result = call_func(custom_compare, args)
 				if sequence(result) then
 					args[3] = result[2]
-					comp = compare(result[1], 0)
+					comp = eu:compare(result[1], 0)
 				else
-					comp = compare(result, 0)
+					comp = eu:compare(result, 0)
 				end if
 				if comp != order then
 					j += gap
@@ -310,7 +324,7 @@ function column_compare(object a, object b, object cols)
 		if column <= length(a) then
 			if column <= length(b) then
 				if not equal(a[column], b[column]) then
-					return sign * compare(upper(a[column]), upper(b[column]))
+					return sign * eu:compare(upper(a[column]), upper(b[column]))
 				end if
 			else
 				return sign * -1
