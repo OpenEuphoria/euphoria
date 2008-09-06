@@ -1267,9 +1267,51 @@ comments are ignored) should be 'namespace' followed by the desired name:
 namespace foo
 </eucode>
 
+A namespace that is declared as part of an ##include## statement is local to the file
+where the ##include## statement is.  A default namespace declared in a file is
+considered a public symbol in that file.  Namespaces and other symbols (e.g.,
+variables, functions, procedures and types) can have the same name without conflict.
+A namespace declared through an ##include## statement will mask a default namespace
+declared in another file, just like a normal local variable will mask a public 
+variable in anther file.  In this case, rather than using the default namespace,
+declare a new namespace through the ##include## statement.
+
+Note that declaring a namespace, either through the include statement or as a
+default namespace does not **require** that every symbol reference must be
+qualified with that namespace.  The namespace simply **allows** the user to
+deconflict between symbols in different files with the same name, or to
+allow the programmer to be explicit about where symbols are coming from
+for the purposes of clarity, or to avoid possible future conflicts.
+
+A qualified reference does not absolutely restrict the reference to symbols that
+actually reside within the specified file.  It can also apply to symbols included
+by that file.  This is especially useful for multi-file libraries.  Programmers
+can use a single namespace for the library, even though some of the visible
+symbols in that library are not declared in the main file:
+
+<eucode>
+-- lib.e
+namespace lib.e
+
+public include sublib.e
+
+public procedure main()
+...
+
+-- sublib.e
+public procedure sub()
+...
+
+-- app.ex
+include lib.e
+
+lib:main()
+lib:sub()
+</eucode>
+
 ==== The visibility of public and export identifiers
 
-If a file is included by say an application's main file, but needs to see the public or
+If a file is included by an application's main file, but needs to see the public or
 exported identifiers in that file, it must include its parent file.
 
 The **public** and **export** qualifiers seem overly rigid, since changing the repartition of identifiers
@@ -1282,6 +1324,10 @@ identifiers that the included file sees. This amounts to propagating identifiers
 public one level up in the file hierarchy. Note that source file systems may not form a true
 hierarchy - they would with a simpler system like older versions were using.
 
+The **public include** mechanism was also meant to be used by libraries that have multiple
+files.  That way, symbols meant for the end user can be declared in files other than the
+main file, and the library can still be organized however the author prefers without
+affecting the end user.
 
 ==== The complete set of resolution rules
 

@@ -140,7 +140,7 @@ After creating your executable file, emake removes all the C files that were
 created. If you want to look at these files, run the translator again and look
 at the files before running emake.
 
-==== Note to Linux and FreeBSD users:
+==== Note to Linux, FreeBSD and OSX users:
 
 The files will be called ##emake## and ##shell##, and you type ##./emake## to
 perform the compiles and link, and **./shell** to run the shell sort program.
@@ -261,6 +261,23 @@ that only the default library is supplied. Use the ##-lib {library}## option:
 {{{
 ecu -lib decu.a myapp.exu
 }}}
+
+{{{
+-plat DOS
+-plat FREEBSD
+-plat LINUX
+-plat OSX
+-plat WIN
+}}}
+Use one of these options to translate code for the specified platform, even
+if running on a different platform.  The default will always be the native
+platform of the translator that is executed, so ##ec.exe## will default to
+DOS, while ##ecw.exe## will default to windows, and ##ecu## will default
+to the platform upon which it was built.
+
+The resulting output can be compiled by the appropriate compiler on the 
+specified platform, or, possibly a cross platform compiler, if you have
+one configured.
 
 === Dynamic Link Libraries (Shared Libraries)
 
