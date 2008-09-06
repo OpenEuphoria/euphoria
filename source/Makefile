@@ -208,6 +208,7 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/c_out.o \
 	./$(OBJDIR)/symtab.o \
 	./$(OBJDIR)/symtab_0.o \
+	./$(OBJDIR)/symtab_1.o \
 	./$(OBJDIR)/scanner.o \
 	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/scanne_0.o \
