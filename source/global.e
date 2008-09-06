@@ -315,19 +315,19 @@ global constant warning_flags = {
 }
 
 global constant warning_names = {
-	"no_warning",
-	"resolution_warning",
-	"short_circuit_warning",
-	"override_warning",
-	"builtin_chosen_warning",
-	"not_used_warning",
-	"no_value_warning",
-	"custom_warning",
-	"translator_warning",
-	"cmdline_warning",
-	"not_reached_warning",
-	"mixed_profile_warning",
-	"strict_warning"
+	"none",
+	"resolution",
+	"short_circuit",
+	"override",
+	"builtin_chosen",
+	"not_used",
+	"no_value",
+	"custom",
+	"translator",
+	"cmdline",
+	"not_reached",
+	"mixed_profile",
+	"strict"
 }
 
 global integer Strict_is_on = 0

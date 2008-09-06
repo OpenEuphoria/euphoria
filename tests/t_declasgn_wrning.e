@@ -8,7 +8,7 @@ else
 
 integer fn = open("warning.lst","r")
 test_true("warning file generated", fn >= 0)
-test_equal("with warning += #1","Warning ( short_circuit_warning ):\n", gets(fn))
+test_equal("with warning += #1","Warning ( short_circuit ):\n", gets(fn))
 ifdef DOS32 then
 	if find(gets(fn), {
 		"\tt_declasgn.e:14 - call to f() might be short-circuited\n",
@@ -24,9 +24,9 @@ ifdef DOS32 then
 else
 	test_equal("with warning += #2","\tt_declasgn.e:14 - call to f() might be short-circuited\n", gets(fn))
 end ifdef
-test_equal("warning() #1","Warning ( custom_warning ):\n", gets(fn))
+test_equal("warning() #1","Warning ( custom ):\n", gets(fn))
 test_equal("warning() #2","\tUseless code\n", gets(fn))
-test_equal("with warning += #3","Warning ( not_used_warning ):\n", gets(fn))
+test_equal("with warning += #3","Warning ( not_used ):\n", gets(fn))
 ifdef DOS32 then
 	if find(gets(fn), {
 		"\tlocal variable n0 in t_declasgn.e is not used\n",

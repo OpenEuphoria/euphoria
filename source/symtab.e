@@ -783,14 +783,14 @@ end ifdef
 
 			b_name = {SymTab[st_builtin][S_NAME]}
 			if length(dup_globals) > 1 then
-				msg = "built-in %s() chosen over global/export function(s) in:\n"
+				msg = "The built-in %s() over rides the global/public routine(s) in:\n"
 
 				-- extended warning message
 				for i = length(dup_globals) to 1 by -1 do
 					msg &= "    " & file_name[SymTab[dup_globals[i]][S_FILE_NO]] & "\n"
 				end for
 			else
-				msg = sprintf("built-in %%s() chosen over global/export function in: %s",
+				msg = sprintf("The built-in %%s() over rides the global/public routine in: %s",
 					{file_name[SymTab[dup_globals[1]][S_FILE_NO]]})
 			end if
 

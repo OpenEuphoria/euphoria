@@ -14,6 +14,8 @@ include platinit.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
+constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
+						DIVIDE_EQUALS, CONCAT_EQUALS}
 without trace
 
 --*****************
@@ -561,7 +563,7 @@ function next_token()
 		end if
 		if t[T_ID] = RECORDED then
 			t=read_recorded_token(t[T_SYM])
-		elsif t[T_ID] = DEF_PARAM then ?nested_calls
+		elsif t[T_ID] = DEF_PARAM then --?nested_calls
         	for i=length(nested_calls) to 1 by -1 do
         	    if nested_calls[i] = t[T_SYM][2] then
 					return {VARIABLE, private_sym[parseargs_states[i][PS_POSITION]+t[T_SYM][1]]}
@@ -1486,8 +1488,7 @@ procedure Assignment(token left_var)
 	lhs_ptr = FALSE
 
 	assign_op = tok[T_ID]
-	if not find(assign_op, {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
-							DIVIDE_EQUALS, CONCAT_EQUALS}) then
+	if not find(assign_op, ASSIGN_OPS) then
 		CompileErr("Syntax error - expected to see =, +=, -=, *=, /= or &=")
 	end if
 
@@ -3293,6 +3294,8 @@ procedure SetWith(integer on_off)
 	sequence option
 	integer idx
 	token tok
+	object nexttok
+	integer reset_flags = 1
 
 	option = StringToken()
 
@@ -3356,39 +3359,66 @@ procedure SetWith(integer on_off)
 		tok = next_token()
 		if tok[T_ID] = CONCAT_EQUALS then
 			tok = next_token()
-			if tok[T_ID] != STRING then
-				CompileErr("One or more warning names is expected here")
+			if tok[T_ID] != LEFT_ROUND then
+				CompileErr("warning names must be enclosed in '(' ')'")
 			end if
-		elsif tok[T_ID] != STRING then
-			if on_off = 0 then
-				OpWarning = no_warning_flag
-			else
-				OpWarning = strict_warning_flag
+			reset_flags = 0
+		elsif tok[T_ID] = VARIABLE then
+			option = SymTab[tok[T_SYM]][S_NAME]
+			if equal(option, "save") then
+				prev_OpWarning = OpWarning
+				tok = {}
+				
+			elsif equal(option, "restore") then
+				OpWarning = prev_OpWarning
+				tok = {}
 			end if
 		end if
 
-		while tok[T_ID] = STRING do
-			option = SymTab[tok[T_SYM]][S_OBJ]
-			idx = find(option, warning_names)
-			if idx = 0 then
-				idx = find(option,{"save","restore"})
-				if idx=0 then
-					exit
-				elsif idx=1 then
-					prev_OpWarning = OpWarning
+		if length(tok) > 0 then
+			if reset_flags then
+				if on_off = 0 then
+					OpWarning = no_warning_flag
 				else
-					OpWarning = prev_OpWarning
+					OpWarning = strict_warning_flag
 				end if
 			end if
-			if on_off then
-				OpWarning = or_bits(OpWarning, warning_flags[idx])
+			
+			if tok[T_ID] = LEFT_ROUND then
+				tok = next_token()
+				while tok[T_ID] != RIGHT_ROUND do
+					if tok[T_ID] = VARIABLE then
+				    	option = SymTab[tok[T_SYM]][S_NAME]
+					elsif tok[T_ID] = STRING then
+						option = SymTab[tok[T_SYM]][S_OBJ]
+					else
+						tok = next_token()	
+						continue
+					end if
+					idx = find(option, warning_names)
+					if idx = 0 then
+							CompileErr("Unknown warning name")
+					end if
+					idx = warning_flags[idx]
+					if idx = 0 then
+						if on_off then
+							OpWarning = no_warning_flag
+						else
+						    OpWarning = strict_warning_flag
+						end if
+					else
+						if on_off then
+							OpWarning = or_bits(OpWarning, idx)
+						else
+						    OpWarning = and_bits(OpWarning, not_bits(idx))
+						end if
+					end if
+					tok = next_token()
+				end while
 			else
-			    OpWarning = and_bits(OpWarning, not_bits(warning_flags[idx]))
+				putback(tok)
 			end if
-			tok = next_token()
-		end while
-		putback(tok)
-
+		end if
 	elsif equal(option, "define") then
 		option = StringToken()
 		if on_off = 0 then
@@ -3556,7 +3586,7 @@ global procedure real_parser(integer nested)
 
 		elsif id = END_OF_FILE then
 			if IncludePop() then
-				backed_up_tok = -999
+				backed_up_tok = UNDEFINED
 				PopGoto()
 				read_line()
 			else

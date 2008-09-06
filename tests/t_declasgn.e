@@ -1,7 +1,7 @@
 include std/unittest.e
 include std/error.e
 
-with warning "short_circuit_warning"
+with warning (short_circuit)
 
 integer n=3,n0
 sequence s0="Useless code"
@@ -13,7 +13,7 @@ end function
 
 if n and f()=7 then end if
 
-with warning &= "not_used_warning" "custom_warning"
+with warning &= (not_used, custom)
 
 function foo()
 	integer n=n+f()
@@ -25,7 +25,7 @@ test_equal("Assign on declare 1",n,3)
 test_equal("Use default params in initial value",7,foo())
 warning("Useless code")
 
-without warning &= "short_circuit_warning"
+without warning &= (short_circuit)
 if n and f()=7 then end if
 
 warning_file("warning.lst")
