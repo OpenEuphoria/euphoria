@@ -1410,6 +1410,9 @@ struct sline *slist;
 char **file_name;
 extern int warning_count;
 extern char **warning_list;
+#ifdef EWINDOWS
+extern DWORD WINAPI WinTimer(LPVOID lpParameter);
+#endif
 int max_stack_per_call;
 int AnyTimeProfile;
 int AnyStatementProfile;
@@ -1433,6 +1436,13 @@ void fe_set_pointers()
 		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
 		lock_region(profile_sample, sample_size * sizeof(int));
 		tick_rate(100);
+	}
+#elif defined(EWINDOWS)
+	if (sample_size > 0) {
+		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
+		//lock_region(profile_sample, sample_size * sizeof(int));
+		//tick_rate(100);
+		SetThreadPriority(CreateThread(0,0,WinTimer,0,0,0),THREAD_PRIORITY_TIME_CRITICAL);
 	}
 #endif  
 	gline_number = fe.misc[4];

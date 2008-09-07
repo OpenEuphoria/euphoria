@@ -3324,7 +3324,7 @@ procedure SetWith(integer on_off)
 
 	elsif equal(option, "profile_time") then
 		if not TRANSLATE and not BIND then
-			if not IDOS then
+			if not (IDOS or IWINDOWS) then
 				if on_off then
 					not_supported_compile("profile_time")
 				end if
@@ -3350,7 +3350,7 @@ procedure SetWith(integer on_off)
 					sample_size = DEFAULT_SAMPLE_SIZE
 				end if
 				if OpProfileTime then
-					if IDOS then
+					if IDOS or IWINDOWS then
 						AnyTimeProfile = TRUE
 					end if
 				end if

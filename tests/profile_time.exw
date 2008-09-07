@@ -1,0 +1,7 @@
+with profile_time 50000
+profile(1)
+include std\os.e
+for i = 1 to 26 do
+? i
+sleep(1)
+end for

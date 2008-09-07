@@ -3844,6 +3844,30 @@ double current_time()
 	}
 }
 
+
+#ifndef ERUNTIME
+#ifdef EWINDOWS
+DWORD WINAPI WinTimer(LPVOID lpParameter)
+{
+	LARGE_INTEGER freq,lcount,ncount;
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&lcount);
+	while(sample_next < sample_size){
+		lcount.QuadPart=((double)lcount.QuadPart)+((double)freq.QuadPart)*0.001;
+		QueryPerformanceCounter(&ncount);
+		if(ncount.QuadPart<lcount.QuadPart){
+			Sleep((((double)(lcount.QuadPart-ncount.QuadPart))/((double)freq.QuadPart))*1000.0);
+		}
+		if (Executing && ProfileOn) {
+			profile_sample[sample_next++] = (int)tpc;
+		}
+	}
+	return 0;
+}
+#endif
+#endif
+
+
 #ifdef EDJGPP
 static void TickHandler()
 {
