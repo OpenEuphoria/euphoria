@@ -25,6 +25,9 @@
 #   Run Unit Tests            :  make test
 
 include Makefile.eu
+include Makefile.intobj
+include Makefile.backobj
+include Makefile.transobj
 EU_VERSION = 4.0
 
 ifdef ERUNTIME
@@ -147,107 +150,17 @@ EU_TRANSLATOR_FILES = \
 	traninit.e \
 	tranplat.e
 
-EU_TRANSLATOR_OBJECTS = \
-	./$(OBJDIR)/ec.o \
-	./$(OBJDIR)/c_decl.o \
-	./$(OBJDIR)/c_dec0.o \
-	./$(OBJDIR)/c_dec1.o \
-	./$(OBJDIR)/compile.o \
-	./$(OBJDIR)/compil_0.o \
-	./$(OBJDIR)/compil_1.o \
-	./$(OBJDIR)/compil_2.o \
-	./$(OBJDIR)/compil_3.o \
-	./$(OBJDIR)/compil_4.o \
-	./$(OBJDIR)/compil_5.o \
-	./$(OBJDIR)/compil_6.o \
-	./$(OBJDIR)/compil_7.o \
-	./$(OBJDIR)/compil_8.o \
-	./$(OBJDIR)/compil_9.o \
-	./$(OBJDIR)/compil_A.o \
-	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/get.o \
-	./$(OBJDIR)/0rror.o \
-	./$(OBJDIR)/global.o \
-	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/sequence.o \
-	./$(OBJDIR)/text.o \
-	./$(OBJDIR)/wildcard.o \
-	./$(OBJDIR)/traninit.o \
-	./$(OBJDIR)/tranplat.o \
-	./$(OBJDIR)/types.o \
-	./$(OBJDIR)/dll.o \
-	./$(OBJDIR)/filesys.o \
-	./$(OBJDIR)/io.o \
-	./$(OBJDIR)/symtab_1.o \
-	./$(OBJDIR)/search.o
-	
-EU_INTERPRETER_OBJECTS =  \
-	./$(OBJDIR)/backend.o \
-	./$(OBJDIR)/intinit.o \
-	./$(OBJDIR)/tranplat.o \
-	./$(OBJDIR)/dll.o \
-	./$(OBJDIR)/sequence.o \
-	./$(OBJDIR)/text.o \
-	./$(OBJDIR)/wildcard.o \
-	./$(OBJDIR)/get.o \
-	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/types.o \
-	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/filesys.o \
-	./$(OBJDIR)/search.o
+EU_BACKEND_RUNNER_FILES = \
+	intinit.e \
+	cominit.e \
+	backend.e \
+	pathopen.e \
+	backend.ex \
+	compress.e \
+	backend.e \
+	error.e \
+	mode.e
 
-EU_CORE_OBJECTS = \
-	./$(OBJDIR)/main-.o \
-	./$(OBJDIR)/main-0.o \
-	./$(OBJDIR)/convert.o \
-	./$(OBJDIR)/cominit.o \
-	./$(OBJDIR)/pathopen.o \
-	./$(OBJDIR)/init-.o \
-	./$(OBJDIR)/error.o \
-	./$(OBJDIR)/memory.o \
-	./$(OBJDIR)/mode.o \
-	./$(OBJDIR)/c_out.o \
-	./$(OBJDIR)/symtab.o \
-	./$(OBJDIR)/symtab_0.o \
-	./$(OBJDIR)/scanner.o \
-	./$(OBJDIR)/scientific.o \
-	./$(OBJDIR)/scanne_0.o \
-	./$(OBJDIR)/scanne_1.o \
-	./$(OBJDIR)/main.o \
-	./$(OBJDIR)/emit.o \
-	./$(OBJDIR)/emit_0.o \
-	./$(OBJDIR)/emit_1.o \
-	./$(OBJDIR)/parser.o \
-	./$(OBJDIR)/parser_0.o \
-	./$(OBJDIR)/parser_1.o \
-	./$(OBJDIR)/parser_2.o \
-	./$(OBJDIR)/parser_3.o \
-	./$(OBJDIR)/parser_4.o
-
-EU_CORE_C_FILES = \
-	./$(OBJDIR)/main-.c \
-	./$(OBJDIR)/main-0.c \
-	./$(OBJDIR)/pathopen.c \
-	./$(OBJDIR)/init-.c \
-	./$(OBJDIR)/io.c \
-	./$(OBJDIR)/error.c \
-	./$(OBJDIR)/machine.c \
-	./$(OBJDIR)/symtab.c \
-	./$(OBJDIR)/symtab_0.o \
-	./$(OBJDIR)/scanner.c \
-	./$(OBJDIR)/scanne_0.c \
-	./$(OBJDIR)/scientific.o \
-	./$(OBJDIR)/main.c \
-	./$(OBJDIR)/mode.c \
-	./$(OBJDIR)/emit.c \
-	./$(OBJDIR)/emit_0.c \
-	./$(OBJDIR)/emit_1.c \
-	./$(OBJDIR)/parser.c \
-	./$(OBJDIR)/parser_0.c \
-	./$(OBJDIR)/parser_1.c \
-	./$(OBJDIR)/parser_2.c \
-	./$(OBJDIR)/parser_3.c
-	
 EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_decompress.o \
 	./$(OBJDIR)/back/be_execute.o \
@@ -276,39 +189,6 @@ EU_LIB_OBJECTS = \
 	./$(OBJDIR)/back/be_task.o \
 	./$(OBJDIR)/back/be_callc.o \
 	./$(OBJDIR)/back/regex.o
-
-EU_BACKEND_RUNNER_OBJECTS = \
-	./$(OBJDIR)/main-.o \
-	./$(OBJDIR)/init-.o \
-	./$(OBJDIR)/intinit.o \
-	./$(OBJDIR)/cominit.o \
-	./$(OBJDIR)/io.o \
-	./$(OBJDIR)/memory.o \
-	./$(OBJDIR)/0ackend.o \
-	./$(OBJDIR)/pathopen.o \
-	./$(OBJDIR)/backend.o \
-	./$(OBJDIR)/compress.o \
-	./$(OBJDIR)/error.o \
-	./$(OBJDIR)/text.o \
-	./$(OBJDIR)/sort.o \
-	./$(OBJDIR)/mode.o \
-	./$(OBJDIR)/types.o \
-	./$(OBJDIR)/dll.o \
-	./$(OBJDIR)/convert.o \
-	./$(OBJDIR)/filesys.o \
-	./$(OBJDIR)/wildcard.o \
-	./$(OBJDIR)/search.o
-
-EU_BACKEND_RUNNER_FILES = \
-	intinit.e \
-	cominit.e \
-	backend.e \
-	pathopen.e \
-	backend.ex \
-	compress.e \
-	backend.e \
-	error.e \
-	mode.e
 
 all : interpreter translator library backend
 
@@ -342,10 +222,30 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex .svn/entries
 
+objlist : 
+	cd $(OBJDIR) && \
+	if [ "$(OBJDIR)" = "backobj" ]; then \
+		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR) ; \
+	elif [ "$(OBJDIR)" = "transobj" ]; then \
+		/bin/echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR) ; \
+	elif [ "$(OBJDIR)" = "intobj" ]; then \
+		/bin/echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR) ; \
+	fi && \
+	for i in *.c; \
+	do \
+		/bin/echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR) ; \
+	done && \
+	/bin/echo -ne "\t" >> ../Makefile.$(OBJDIR) && \
+	cd ..
+
 interpreter : builddirs
+	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD)
+	$(MAKE) objlist OBJDIR=intobj
 	$(MAKE) $(EEXU) OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs
+	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
+	$(MAKE) objlist OBJDIR=transobj
 	$(MAKE) $(EECU) OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
@@ -390,22 +290,24 @@ source-tarball : source
 
 $(EEXU) :  EU_TARGET = int.ex
 $(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
-$(EEXU) :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(EEXU) :  $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making $(EEXU)
 	@echo $(OS)
-	$(CC) $(EOSFLAGS) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXU)
-	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXUC); fi
+	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXU)
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXUC); fi
 
 $(EECU) :  OBJDIR = transobj
 $(EECU) :  EU_TARGET = ec.ex
 $(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
-$(EECU) :  EU_OBJS = $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(EECU) : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EECU)
 
 backend : builddirs
+	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj
+	$(MAKE) objlist OBJDIR=backobj
 	$(MAKE) $(EBACKENDU) EBACKEND=1 OBJDIR=backobj
 
 $(EBACKENDU) : OBJDIR = backobj
@@ -488,11 +390,6 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 ./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
 
-#./$(OBJDIR)/main-.c : $(EU_MAIN)
-#	echo Translating $(EU_TARGET) to create $(EU_MAIN)
-#	cd ./$(OBJDIR) && exu ../ec.ex ../$(EU_TARGET)
-
-#./$(OBJDIR)/main-.c
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	echo Translating $(EU_TARGET) to create $(EU_MAIN)
 	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
