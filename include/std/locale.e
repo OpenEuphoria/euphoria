@@ -23,7 +23,7 @@ include std/lcid.e as lcid
 --
 ------------------------------------------------------------------------------------------
 
-constant P = C_POINTER, I = C_INT, D = C_DOUBLE
+constant P = C_POINTER, I = C_INT
 
 ------------------------------------------------------------------------------------------
 --
@@ -179,7 +179,7 @@ ifdef WIN32 then
 elsifdef LINUX then
 
 	lib = open_dll("")
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
 	f_strfnum = -1
 	LC_ALL      = 6
 	LC_CTYPE    = 0
@@ -192,7 +192,7 @@ elsifdef LINUX then
 elsifdef FREEBSD then
 
 	lib = open_dll("libc.so")
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
 	f_strfnum = -1
 
 	LC_ALL      = 0
@@ -206,7 +206,7 @@ elsifdef FREEBSD then
 elsifdef OSX then
 
 	lib = open_dll("libc.dylib")
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, D}, I)
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
 	f_strfnum = -1
 
 	LC_ALL      = 0

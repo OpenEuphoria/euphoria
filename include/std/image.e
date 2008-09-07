@@ -292,7 +292,7 @@ end ifdef
 -- Junko C. Miura of Rapid Deployment Software.  
 
 integer numXPixels, numYPixels, bitCount, numRowBytes
-integer startXPixel, startYPixel, endYPixel
+integer startXPixel =0, startYPixel = 0, endYPixel = 0
 
 type region(object r)
 	-- a region on the screen

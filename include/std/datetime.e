@@ -27,13 +27,11 @@ else
 	constant gmtime_ = -1
 	constant time_ = -1
 end ifdef
-constant sizeof_struct_tm = 4*9
 
-enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR, TM_WDAY, TM_YDAY, TM_ISDST
+enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
 
 function time()
 	ifdef WIN32 then
-		sequence ints
 		atom ptra, valhi, vallow, deltahi, deltalow
 		deltahi = 27111902
 		deltalow = 3577643008
@@ -669,7 +667,7 @@ end function
 -- TODO: create, test, document
 -- datetime parse(wstring string)
 -- parse the string and returns the datetime
-public function parse(wstring string)
+public function parse() --wstring string)
 	return 0
 end function
 

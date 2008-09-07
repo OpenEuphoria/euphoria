@@ -958,7 +958,7 @@ integer dirname_id = -1
 -- [[:rename_file]], [[:copy_file]]
 
 public function move_file(sequence src, sequence dest, atom overwrite=0)
-	atom psrc, pdest, ret, pdir
+	atom psrc, pdest, ret
 	ifdef DOS32 then
     atom low_buff_old, low_buff_new
     integer i
@@ -1031,6 +1031,7 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 	pdest = allocate_string(dest)
 
 	ifdef UNIX then
+		atom pdir
 		psrcbuf = allocate(stat_buf_size)
 		pdestbuf = allocate(stat_buf_size)
 		ret = xstat(psrc, psrcbuf)

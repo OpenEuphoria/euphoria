@@ -53,7 +53,6 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 	sequence result_
 	integer candidate_
 	integer low_
-	atom time_out_
 	integer pos_
 	integer top_
 	integer slot
@@ -85,7 +84,6 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 
 	while result_[pos_] < max_p do
 		if timed_out[slot] then
--- 		if time() > time_out_ then
 			exit
 		end if
 

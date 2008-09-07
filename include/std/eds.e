@@ -131,7 +131,7 @@ public enum
 constant DB_MAGIC = 77
 constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0
 constant SIZEOF_TABLE_HEADER = 16
-constant TABLE_HEADERS = 3, FREE_COUNT = 7, FREE_LIST = 11, SIZEOF_DATABASE_HEADER = 14
+constant TABLE_HEADERS = 3, FREE_COUNT = 7, FREE_LIST = 11 --, SIZEOF_DATABASE_HEADER = 14
 
 
 -- initial sizes for various things:
@@ -1361,8 +1361,11 @@ public function db_create_table(sequence name, integer init_records = INIT_RECOR
 	end if
 
 	-- allocate initial space for 1st block of record pointers
-	records_ptr = db_allocate(INIT_RECORDS * 4)
-	putn(repeat(0, INIT_RECORDS * 4))
+	if init_records < 1 then
+		init_records = 1
+	end if
+	records_ptr = db_allocate(init_records * 4)
+	putn(repeat(0, init_records * 4))
 
 	-- allocate initial space for the index
 	index_ptr = db_allocate(INIT_INDEX * 8)
@@ -2101,7 +2104,7 @@ end procedure
 -- 		[[:db_replace_data]], [[:db_find_key]], [[:db_get_recid]]
 
 public procedure db_replace_recid(integer recid, object data)
-	atom old_size, new_size, key_ptr, data_ptr
+	atom old_size, new_size, data_ptr
 	sequence data_string
 
 	void = seek(current_db, recid)
@@ -2147,9 +2150,6 @@ end procedure
 -- 		[[:db_find_key]]
 
 public procedure db_replace_data(integer key_location, object data, object table_name=current_table_name)
-	atom old_size, new_size, key_ptr, data_ptr
-	sequence data_string
-
 	if not equal(table_name, current_table_name) then
 		if db_select_table(table_name) != DB_OK then
 			fatal(NO_TABLE, "invalid table name given", "db_replace_data", {key_location, data, table_name})

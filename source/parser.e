@@ -17,6 +17,9 @@ constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
 						DIVIDE_EQUALS, CONCAT_EQUALS}
+constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
+	
+
 without trace
 
 --*****************
@@ -242,10 +245,9 @@ procedure InitCheck(symtab_index sym, integer ref)
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS]) then
 			if SymTab[sym][S_INITLEVEL] = -1 then
 				if ref then
-					if SymTab[sym][S_SCOPE] = SC_GLOBAL or
-					   SymTab[sym][S_SCOPE] = SC_EXPORT or
-					   SymTab[sym][S_SCOPE] = SC_PUBLIC or
-					   SymTab[sym][S_SCOPE] = SC_LOCAL then
+					if SymTab[sym][S_SCOPE] = SC_UNDEFINED then
+						emit_op(PRIVATE_INIT_CHECK)
+					elsif find(SymTab[sym][S_SCOPE], SCOPE_TYPES) then
 						emit_op(GLOBAL_INIT_CHECK) -- will become NOP2
 					else
 						emit_op(PRIVATE_INIT_CHECK)
@@ -1334,7 +1336,7 @@ forward_expr = routine_id("Expr")
 
 procedure TypeCheck(symtab_index var)
 -- emit code to type-check a var (after it has been assigned-to)
-	symtab_index which_type
+	integer which_type
 	
 	if SymTab[var][S_SCOPE] = SC_UNDEFINED then
 		-- forward reference, so defer type check until later
@@ -1376,28 +1378,28 @@ procedure TypeCheck(symtab_index var)
 		if OpTypeCheck then
 			if which_type != object_type then
 				if which_type = integer_type then
-					op_info1 = var
-					emit_op(INTEGER_CHECK)
+						op_info1 = var
+						emit_op(INTEGER_CHECK)
 
 				elsif which_type = sequence_type then
-					op_info1 = var
-					emit_op(SEQUENCE_CHECK)
+						op_info1 = var
+						emit_op(SEQUENCE_CHECK)
 
 				elsif which_type = atom_type then
-					op_info1 = var
-					emit_op(ATOM_CHECK)
+						op_info1 = var
+						emit_op(ATOM_CHECK)
 
 				else
-					-- user-defined
-					if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] =
-					   integer_type then
-						op_info1 = var
-						emit_op(INTEGER_CHECK) -- need integer conversion
-					end if
-					emit_opnd(var)
-					op_info1 = which_type
-					emit_op(PROC)
-					emit_op(TYPE_CHECK)
+						-- user-defined
+						if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] =
+						   integer_type then
+							op_info1 = var
+							emit_op(INTEGER_CHECK) -- need integer conversion
+						end if
+						emit_opnd(var)
+						op_info1 = which_type
+						emit_op(PROC)
+						emit_op(TYPE_CHECK)
 				end if
 			end if
 		end if
@@ -1438,11 +1440,7 @@ procedure Assignment(token left_var)
 	elsif SymTab[left_sym][S_MODE] = M_CONSTANT then
 		CompileErr("may not change the value of a constant")
 
-	elsif SymTab[left_sym][S_SCOPE] = SC_LOCAL or
-		  SymTab[left_sym][S_SCOPE] = SC_GLOBAL or
-		  SymTab[left_sym][S_SCOPE] = SC_PUBLIC or
-		  SymTab[left_sym][S_SCOPE] = SC_EXPORT or
-		  SymTab[left_sym][S_SCOPE] = SC_UNDEFINED then
+	elsif find(SymTab[left_sym][S_SCOPE], SCOPE_TYPES) then
 		-- this helps us to optimize things below
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
 										 power(2, remainder(left_sym, E_SIZE)))

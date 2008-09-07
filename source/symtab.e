@@ -957,7 +957,7 @@ procedure LintCheck(symtab_index s)
 		else
 			vtype = "private variable"
 		end if
-		place = "of " & SymTab[CurrentSub][S_NAME] & "()"
+		place = " of " & SymTab[CurrentSub][S_NAME] & "()"
 
 	end if
 

@@ -319,7 +319,6 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	object value_
 	atom new_size_
 	sequence temp_map_
-	integer pos_
 
 	if ram_space[the_map_p][map_type] = SMALLMAP then
 		return -- small maps are not hashed.

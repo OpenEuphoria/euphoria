@@ -273,7 +273,10 @@ public constant MSG_OOB = #1,
 
 constant BLOCK_SIZE = 4096
 
-atom dll_, ipdll_, sockdll_, kerneldll_, dnsdll_,
+ifdef !WIN32 then
+atom dll_
+end ifdef
+atom ipdll_, sockdll_, kerneldll_, dnsdll_,
 	wsastart_, wsacleanup_, wsawaitformultipleevents_,
 	wsacreateevent_, wsaeventselect_, wsaenumnetworkevents_, wsacloseevent_,
 	ioctl_, socket_, bind_, connect_, listen_, accept_,
@@ -355,6 +358,7 @@ elsifdef WIN32 then
 	delay_ = define_c_proc(kerneldll_,"Sleep",{C_INT})
 	dnsquery_ = define_c_func(dnsdll_,"DnsQuery_A",{C_POINTER,C_USHORT,C_INT,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	dnsrlfree_ = define_c_proc(dnsdll_,"DnsRecordListFree",{C_POINTER,C_INT})
+	dnsexpand_ = -1
 elsifdef LINUX then
 	dll_ = open_dll("") -- libc
 	dnsdll_ = open_dll("libresolv.so")
@@ -710,12 +714,12 @@ public function delay(atom millisec)
 	-- Delays nicely for a set number of milliseconds (or a few more)
 	-- Returns 0 on success or something else on error.
 	
-	atom result, timptr
-	
 	ifdef WIN32 then
 		c_proc(delay_,{millisec})
 		return 0
 	elsifdef UNIX then
+	atom result
+	atom timptr
 		timptr = allocate(16) -- Reserved for when OSs start using 64bit time_t
 		if millisec >= 1000 then
 			poke4(timptr,floor(millisec/1000))
@@ -2149,6 +2153,7 @@ function unix_dnsquery(sequence dname, integer q_type)
 	
 end function
 
+
 function windows_dnsquery(sequence dname, integer q_type, atom options)
 	-- NOTE: This function does not work on Windows versions below Windows 2000.
 	
@@ -2221,6 +2226,7 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 	return rtn
 	
 end function
+
 
 --**
 -- Query DNS info.
@@ -2458,6 +2464,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 	atom cpos
 	sequence rtn, val
 	
+	hints = hints -- TODO -- not imlemented.
 	addrinfo = allocate(32)
 	poke(addrinfo,repeat(0,32))
 	if sequence(node) then

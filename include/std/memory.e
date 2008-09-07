@@ -816,7 +816,11 @@ integer check_calls = 1
 --   [[:unregister_block]], [[:safe.e]]
 
 public procedure register_block(atom block_addr, atom block_len)
+	-- NOP to avoid strict lint
+	block_addr = block_addr
+	block_len = block_len
 end procedure
+
 
 --**
 -- Remove a block of memory from the list of safe blocks maintained by safe.e
@@ -842,6 +846,8 @@ end procedure
 --   [[:register_block]], [[safe.e]]
 
 public procedure unregister_block(atom block_addr)
+	-- NOP to avoid strict lint
+	block_addr =  block_addr
 end procedure
 
 --**
