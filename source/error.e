@@ -3,6 +3,7 @@
 -- Compile-time Error Handling
 
 include std/io.e
+--include std/error.e
 include global.e
 include reswords.e
 
@@ -31,15 +32,14 @@ global procedure Warning(sequence msg, integer mask, sequence args = {})
 	if display_warnings=0 then
 		return
 	end if
-
+	p = mask -- =0 for non maskable warnings - none implemented so far
 	if Strict_is_on then
 		mask = 0
 	end if
 
 	if mask = 0 or and_bits(OpWarning, mask) then
-		p = mask -- =0 for non maskable warnings - none implemented so far
 		if p then
-			p = find(mask,warning_flags)
+			p = find(p,warning_flags)
 		end if
 
 		if p then
@@ -216,6 +216,7 @@ global procedure InternalErr(sequence msg)
 		if getc(0) then
 		end if
 	end if
-	? 1/0
-	--abort(1)
+	
+    -- M_CRASH = 67
+	machine_proc(67, "Failed due to internal error.")
 end procedure

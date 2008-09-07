@@ -29,18 +29,18 @@ test_equal("warning() #2","\tUseless code\n", gets(fn))
 test_equal("with warning += #3","Warning ( not_used ):\n", gets(fn))
 ifdef DOS32 then
 	if find(gets(fn), {
-		"\tlocal variable n0 in t_declasgn.e is not used\n",
-		"\tlocal variable n0 in t_declas.e is not used\n",
-		"\tlocal variable n0 in T_DECLAS.E is not used\n",
-		"\tlocal variable n0 in T_DECL~1.E is not used\n",
-		"\tlocal variable n0 in T_DECL~2.E is not used\n"
+		"\tlocal variable 'n0' in file t_declasgn.e\n",
+		"\tlocal variable 'n0' in file t_declas.e\n",
+		"\tlocal variable 'n0' in file T_DECLAS.E\n",
+		"\tlocal variable 'n0' in file T_DECL~1.E\n",
+		"\tlocal variable 'n0' in file T_DECL~2.E\n"
 	}) then
 		test_pass("with warning += #4")
 	else
 		test_fail("with warning += #4")
 	end if
 else
-	test_equal("with warning += #4","\tlocal variable n0 in t_declasgn.e is not used\n", gets(fn))
+	test_equal("with warning += #4","\tlocal variable 'n0' in file t_declasgn.e\n", gets(fn))
 end ifdef
 test_equal("with warning -=", -1, gets(fn))
 

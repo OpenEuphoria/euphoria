@@ -594,8 +594,10 @@ end procedure
 
 procedure RTInternal(sequence msg)
 -- Internal errors in back-end
-	puts(2, '\n' & msg & '\n')
-	? 1/0
+	--puts(2, '\n' & msg & '\n')
+
+    -- M_CRASH = 67
+	machine_proc(67, msg)
 end procedure
 
 -- Multi-tasking operations
@@ -2967,7 +2969,7 @@ end procedure
 procedure opQPRINT()
 -- Code[pc+1] not used
 	a = Code[pc+2]
-	? val[a]
+--	? val[a]
 	pc += 3
 end procedure
 		

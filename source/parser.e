@@ -9,6 +9,7 @@ include scanner.e
 
 include std/sequence.e
 include std/text.e
+include std/search.e
 
 include platinit.e
 
@@ -644,17 +645,25 @@ procedure UndefinedVar(symtab_index s)
 -- report a possibly undefined or multiply-defined symbol
 	symtab_index dup
 	sequence errmsg
+	sequence rname
+	sequence fname
 
 	if SymTab[s][S_SCOPE] = SC_UNDEFINED then
 		CompileErr(sprintf("%s has not been declared", {SymTab[s][S_NAME]}))
 
 	elsif SymTab[s][S_SCOPE] = SC_MULTIPLY_DEFINED then
-		errmsg = sprintf("A namespace qualifier is needed to resolve %s.\n%s is defined as a global symbol in:\n",
-						 {SymTab[s][S_NAME], SymTab[s][S_NAME]})
+		rname = SymTab[s][S_NAME]
+		errmsg = sprintf("A namespace qualifier is needed to resolve '%s'\nbecause '%s' is declared as a global/public symbol in:\n",
+						 {rname, rname})
 		-- extended error message
-		for i = length(dup_globals) to 1 by -1 do
+		for i = 1 to length(dup_globals) do
 			dup = dup_globals[i]
-			errmsg &= "    " & file_name[SymTab[dup][S_FILE_NO]] & "\n"
+			ifdef UNIX then
+				fname = file_name[SymTab[dup][S_FILE_NO]]
+			else
+				fname = find_replace("/", file_name[SymTab[dup][S_FILE_NO]], "\\")
+			end ifdef
+			errmsg &= "    " & fname & "\n"
 		end for
 
 		CompileErr(errmsg)

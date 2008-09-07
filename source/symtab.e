@@ -6,6 +6,7 @@ include global.e
 include c_out.e
 include keylist.e
 include error.e
+include std/search.e
 
 constant NBUCKETS = 2003  -- prime helps
 global sequence buckets   -- hash buckets
@@ -196,14 +197,13 @@ end procedure
 global function name_ext(sequence s)
 -- Returns the file name & extension part of a path.
 -- Note: both forward slash and backslash are handled for all platforms.
-	integer i
+	for i = length(s) to 1 by -1 do
+		if find(s[i], "/\\:") then
+			return s[i+1 .. $]
+		end if
+	end for
 
-	i = length(s)
-	while i >= 1 and not find(s[i], "/\\:") do
-		i -= 1
-	end while
-
-	return s[i+1..$]
+	return s
 end function
 
 constant SEARCH_LIMIT = 20 + 500 * (TRANSLATE or BIND)
@@ -671,7 +671,7 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 					end if
 
 					if is_direct_include( st_ptr, scanning_file, scope = SC_PUBLIC ) then
-						-- found export or public in another file 
+						-- found public in another file 
 						gtok = tok
 						dup_globals &= st_ptr
 						in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
@@ -689,7 +689,7 @@ ifdef STDDEBUG then
 								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
 							symbol_resolution_warning = {
-								sprintf("File '%s' uses exported symbols from '%s', but does not include that file.",
+								sprintf("File '%s' uses public symbols from '%s', but does not include that file.",
 									{ name_ext(file_name[scanning_file]),
 									name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])  })
 								,{word}}
@@ -779,22 +779,32 @@ end ifdef
 
 	elsif st_builtin != 0 then
 		if length(dup_globals) and find(SymTab[st_builtin][S_NAME], builtin_warnings) = 0 then
-			builtin_warnings &= {SymTab[st_builtin][S_NAME]}
-
-			b_name = {SymTab[st_builtin][S_NAME]}
+			sequence msg_file 
+			
+			b_name = SymTab[st_builtin][S_NAME]
+			builtin_warnings = append(builtin_warnings, b_name)
+			msg = "The built-in %s() over rides the global/public %s() in:"
 			if length(dup_globals) > 1 then
-				msg = "The built-in %s() over rides the global/public routine(s) in:\n"
-
-				-- extended warning message
-				for i = length(dup_globals) to 1 by -1 do
-					msg &= "    " & file_name[SymTab[dup_globals[i]][S_FILE_NO]] & "\n"
-				end for
-			else
-				msg = sprintf("The built-in %%s() over rides the global/public routine in: %s",
-					{file_name[SymTab[dup_globals[1]][S_FILE_NO]]})
+				msg &= '\n'
 			end if
+			-- Get list of files...
+			for i = 1 to length(dup_globals) do
+				ifdef UNIX then
+					msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
+				else
+					msg_file = find_replace("/", file_name[SymTab[dup_globals[i]][S_FILE_NO]], '\\')
+				end ifdef
+				
+				msg_file = find_replace("%", msg_file, "%%")
+				if length(dup_globals) > 1 then
+					msg &= "    "
+				else
+					msg &= " "
+				end if
+				msg &= msg_file & "\n"
+			end for
 
-			Warning(msg, builtin_chosen_warning_flag, b_name)
+			Warning(msg, builtin_chosen_warning_flag, {b_name, b_name})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -923,7 +933,11 @@ procedure LintCheck(symtab_index s)
 	sequence vtype, place, problem, file
 
 	u = SymTab[s][S_USAGE]
-	file = name_ext(file_name[current_file_no])
+	ifdef UNIX then
+		file = file_name[current_file_no]
+	else
+		file = find_replace("/", file_name[current_file_no], "\\")
+	end ifdef
 
 	if SymTab[s][S_SCOPE] = SC_LOCAL then
 		if SymTab[s][S_MODE] = M_CONSTANT then
@@ -940,34 +954,29 @@ procedure LintCheck(symtab_index s)
 		else
 			vtype = "private variable"
 		end if
-		place = SymTab[CurrentSub][S_NAME]
+		place = "of " & SymTab[CurrentSub][S_NAME] & "()"
 
 	end if
 
-	problem = ""
 	if u != or_bits(U_READ, U_WRITTEN) then
+		warn_level = 0
 		if u = U_UNUSED or
 			 (u = U_WRITTEN and
 				(equal(vtype, "local constant")
---               or equal(vtype, "parameter") -- this is rarely a real problem
+               or (equal(vtype, "parameter") and Strict_is_on) -- this is rarely a real problem
 				 ))
 				 then
-			problem = "not used"
+			problem = ""
 			warn_level = not_used_warning_flag
 
 		elsif u = U_READ then
-			problem = "never assigned a value"
+			problem = " is never assigned a value"
 		    warn_level = no_value_warning_flag
 		end if
 
-		if length(problem) then
-			if length(place) then
-				Warning(sprintf("%s %%s in %s() in %s is %s", {vtype, place, file, problem}),
+		if warn_level then
+			Warning(sprintf("%s '%%s'%s in file %s%s", {vtype, place, file, problem}),
 								warn_level,{SymTab[s][S_NAME]})
-			else
-				Warning(sprintf("%s %%s in %s is %s", {vtype, file, problem}),warn_level,
-							 { SymTab[s][S_NAME]})
-			end if
 		end if
 	end if
 end procedure

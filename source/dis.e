@@ -17,8 +17,10 @@ sequence operation
 
 procedure RTInternal(sequence msg)
 -- Internal errors in back-end
-	puts(2, '\n' & msg & '\n')
-	? 1/0
+	--puts(2, '\n' & msg & '\n')
+	--? 1/0
+    -- M_CRASH = 67
+	machine_proc(67, msg)
 end procedure
 
 sequence ps_options = PRETTY_DEFAULT
