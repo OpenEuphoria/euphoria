@@ -191,7 +191,7 @@ end function
 
 --**
 -- Signature:
--- global function get_pixel(sequence coords)
+-- <built-in> function get_pixel(sequence coords)
 --
 -- Description:
 --

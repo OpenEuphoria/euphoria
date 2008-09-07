@@ -95,7 +95,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure abort(atom error)
+-- <built-in> procedure abort(atom error)
 --
 -- Description:
 -- Abort execution of the program. 
@@ -165,7 +165,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure warning(sequence message)
+-- <built-in> procedure warning(sequence message)
 --
 -- Description:
 -- Causes the specified warning message to be displayed as a regular warning.

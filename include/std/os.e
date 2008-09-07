@@ -75,7 +75,7 @@ enum
 
 --**
 -- Signature:
--- global procedure command_line()
+-- <built-in> procedure command_line()
 --
 -- Description:
 -- A **sequence** of strings, where each string is a word from the command-line that started your program.
@@ -141,7 +141,7 @@ enum
 
 --**
 -- Signature:
--- global function option_switches()
+-- <built-in> function option_switches()
 --
 -- Description:
 -- Retrieves the list of switches passed to the interpreter on the comand line.
@@ -609,7 +609,7 @@ end function
 
 --**
 -- Signature:
--- global function getenv(sequence var_name)
+-- <built-in> function getenv(sequence var_name)
 --
 -- Description:
 -- Return the value of an environment variable. 
@@ -676,7 +676,7 @@ end function
 
 --**
 -- Signature:
--- global function platform()
+-- <built-in> function platform()
 --
 -- Description:
 -- Indicates the platform that the program is being executed on: DOS32, WIN32, Linux/FreeBSD or OS X.
@@ -727,7 +727,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure system(sequence command, integer mode)
+-- <built-in> procedure system(sequence command, integer mode)
 --
 -- Description:
 -- Pass a command string to the operating system command interpreter. 
@@ -790,7 +790,7 @@ end function
 --
 --**
 -- Signature:
--- global function system_exec(sequence command, integer mode)
+-- <built-in> function system_exec(sequence command, integer mode)
 --
 -- Description: 
 -- Try to run the a shell executable command
@@ -976,7 +976,7 @@ end procedure
 
 --**
 -- Signature:
--- global function include_paths(integer convert)
+-- <built-in> function include_paths(integer convert)
 --
 -- Description:
 -- Returns the list of include paths, in the order in which they are searched

@@ -361,7 +361,7 @@ end function
 
 --**
 -- Signature:
--- global function c_func(integer rid, sequence args)
+-- <built-in> function c_func(integer rid, sequence args)
 --
 -- Description:
 -- Call a C function, or machine code function, or translated/compiled Euphoria function by routine id. 
@@ -415,7 +415,7 @@ end function
 
 --**
 -- Signature:
--- global procedure c_proc(integer rid, sequence args)
+-- <built-in> procedure c_proc(integer rid, sequence args)
 --
 -- Description:
 -- Call a C void function, or machine code function, or translated/compiled Euphoria procedure by routine id.

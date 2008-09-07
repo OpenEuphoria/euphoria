@@ -309,7 +309,7 @@ end function
 
 --**
 -- Signature:
--- global function length(sequence target)
+-- <built-in> function length(sequence target)
 --
 -- Description:
 -- Return the length of a sequence.
@@ -477,7 +477,7 @@ end function
 
 --**
 -- Signature:
--- global function repeat(object item, atom count)
+-- <built-in> function repeat(object item, atom count)
 --
 -- Description:
 -- Create a sequence whose all elements are identical, with given length.
@@ -515,7 +515,7 @@ end function
 
 --**
 -- Signature:
--- global function append(sequence target, object x)
+-- <built-in> function append(sequence target, object x)
 --
 -- Description:
 -- Adds an object as the last element of a sequence.
@@ -566,7 +566,7 @@ end function
 
 --**
 -- Signature:
--- global function prepend(sequence target, object x)
+-- <built-in> function prepend(sequence target, object x)
 --
 -- Description:
 -- Adds an object as the first element of a sequence.

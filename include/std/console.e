@@ -337,7 +337,7 @@ end ifdef
 
 --**
 -- Signature:
--- global procedure clear_screen()
+-- <built-in> procedure clear_screen()
 --
 -- Description:
 --

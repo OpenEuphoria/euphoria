@@ -22,7 +22,7 @@ public include console.e
 
 --**
 -- Signature:
--- global procedure position(integer row, integer column)
+-- <built-in> procedure position(integer row, integer column)
 --
 -- Parameters:
 -- 		# ##row##: an integer, the index of the row to position the cursor on.

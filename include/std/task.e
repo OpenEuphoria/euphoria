@@ -35,7 +35,7 @@ end procedure
 
 --**
 -- Signature:
--- global procedure task_clock_start()
+-- <built-in> procedure task_clock_start()
 --
 -- Description: 
 -- Restart the clock used for scheduling real-time tasks. 
@@ -67,7 +67,7 @@ end procedure
 -- 
 --**
 -- Signature:
--- global procedure task_clock_stop()
+-- <built-in> procedure task_clock_stop()
 --
 -- Description: 
 -- Stop the scheduling of real-time tasks.
@@ -89,7 +89,7 @@ end procedure
 --
 --**
 -- Signature:
--- global function task_create(integer rid, sequence args)
+-- <built-in> function task_create(integer rid, sequence args)
 --
 -- Description: 
 -- Create a new task, given a home procedure and the arguments passed to it.
@@ -129,7 +129,7 @@ end procedure
 -- 
 --**
 -- Signature:
--- global function task_list()
+-- <built-in> function task_list()
 --
 -- Description: 
 -- Get a sequence containing the task id's for all active or suspended tasks.
@@ -159,7 +159,7 @@ end procedure
 --
 --**
 -- Signature:
--- global procedure task_schedule(atom task_id, object schedule)
+-- <built-in> procedure task_schedule(atom task_id, object schedule)
 --
 -- Description: 
 -- Schedule a task to run using a scheduling parameter. 
@@ -245,7 +245,7 @@ end procedure
 --
 --**
 -- Signature:
--- global function task_self()
+-- <built-in> function task_self()
 --
 -- Description: 
 -- Return the task id of the current task.
@@ -265,7 +265,7 @@ end procedure
 --
 --**
 -- Signature:
--- global function task_status(atom task_id)
+-- <built-in> function task_status(atom task_id)
 --
 -- Description: 
 -- Return the status of a task.
@@ -302,7 +302,7 @@ end procedure
 --
 -- **
 -- Signature:
--- global procedure task_suspend(atom task_id)
+-- <built-in> procedure task_suspend(atom task_id)
 --
 -- Description: 
 -- Suspend execution of a task.
@@ -336,7 +336,7 @@ end procedure
 --
 --**
 -- Signature:
--- global procedure task_yield()
+-- <built-in> procedure task_yield()
 --
 -- Description: 
 -- Yield control to the scheduler. The scheduler can then choose another task to run, or 
@@ -380,7 +380,7 @@ end procedure
 -- -- every 1.7 to 1.8 seconds throughout the game.
 -- -- It deducts either 3 units or 13 units of life support energy each time.
 -- 
--- global procedure task_life()
+-- <built-in> procedure task_life()
 -- -- independent task: subtract life support energy 
 --     while TRUE do
 --         if shuttle then

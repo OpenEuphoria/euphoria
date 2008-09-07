@@ -368,7 +368,7 @@ end function
 
 --**
 -- Signature:
--- global function floor(object value)
+-- <built-in> function floor(object value)
 --
 -- Description:
 -- Return the greatest integer less than or equal to some value. This amount to rounding down to an integer.
@@ -501,7 +501,7 @@ end function
 
 --**
 -- Signature:
--- global function arctan(object tangent)
+-- <built-in> function arctan(object tangent)
 --
 -- Description:
 --   Return an angle with given tangent.
@@ -529,7 +529,7 @@ end function
 
 --**
 -- Signature:
--- global function tan(object angle)
+-- <built-in> function tan(object angle)
 --
 -- Description:
 --   Return the tangent of an angle, or a sequence of angles.
@@ -583,7 +583,7 @@ end function
 
 --**
 -- Signature:
--- global function sin(object angle)
+-- <built-in> function sin(object angle)
 --
 -- Description:
 -- Return the sine of an angle expressed in radians
@@ -768,7 +768,7 @@ end function
 --
 --**
 -- Signature:
--- global function log(object value)
+-- <built-in> function log(object value)
 --
 -- Description:
 -- Return the natural logarithm of a positive number.
@@ -857,7 +857,7 @@ end function
 
 --**
 -- Signature:
--- global function power(object base, object exponent)
+-- <built-in> function power(object base, object exponent)
 --
 -- Description:
 -- Raise a base value to some power.
@@ -914,7 +914,7 @@ end function
 --
 --**
 -- Signature:
--- global function sqrt(object value)
+-- <built-in> function sqrt(object value)
 --
 -- Description:
 -- Calculate the square root of a number.
@@ -1255,7 +1255,7 @@ end function
 --
 --**
 -- Signature:
--- global function and_bits(object a, object b)
+-- <built-in> function and_bits(object a, object b)
 --
 -- Description:
 -- Perform the logical AND operation on corresponding bits in two objects. A bit in the
@@ -1307,7 +1307,7 @@ end function
 --
 --**
 -- Signature:
--- global function xor_bits(object a, object b)
+-- <built-in> function xor_bits(object a, object b)
 --
 -- Description:
 -- Perform the logical XOR operation on corresponding bits in two objects. A bit in the
@@ -1338,7 +1338,7 @@ end function
 --     [[:and_bits]], [[:or_bits]], [[:not_bits]], [[:int_to_bits]]
 --**
 -- Signature:
--- global function or_bits(object a, object b)
+-- <built-in> function or_bits(object a, object b)
 --
 -- Description:
 -- Perform the logical OR operation on corresponding bits in two objects. A bit in the
@@ -1376,7 +1376,7 @@ end function
 
 --**
 -- Signature:
--- global function not_bits(object a)
+-- <built-in> function not_bits(object a)
 --
 -- Description:
 -- Perform the logical NOT operation on each bit in an object. A bit in the result will be 1
@@ -1571,7 +1571,7 @@ end procedure
 
 --**
 -- Signature:
--- global function rand(object maximum)
+-- <built-in> function rand(object maximum)
 --
 -- Description:
 --   Return a random positive integer.

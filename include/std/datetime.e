@@ -373,7 +373,7 @@ end type
 
 --**
 -- Signature:
--- global function time()
+-- <built-in> function time()
 --
 -- Description:
 -- Return the number of seconds since some fixed point in the past.
@@ -427,7 +427,7 @@ end type
  
 --**
 -- Signature:
--- global function date()
+-- <built-in> function date()
 --
 -- Description:
 -- Return a sequence with information on the current date.

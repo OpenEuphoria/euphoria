@@ -174,7 +174,7 @@ end function
 
 --**
 -- Signature:
--- global function peek(object addr_n_length)
+-- <built-in> function peek(object addr_n_length)
 --
 -- Description:
 -- Fetches a byte, or some bytes, from an address in memory.
@@ -225,7 +225,7 @@ end function
 --
 --**
 -- Signature:
--- global function peeks(object addr_n_length)
+-- <built-in> function peeks(object addr_n_length)
 --
 -- Description:
 -- Fetches a byte, or some bytes, from an address in memory.
@@ -279,7 +279,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek2s(object addr_n_length)
+-- <built-in> function peek2s(object addr_n_length)
 --
 -- Description:
 -- Fetches a //signed// word, or some //signed// words	, from an address
@@ -338,7 +338,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek2u(object addr_n_length)
+-- <built-in> function peek2u(object addr_n_length)
 --
 -- Description:
 -- Fetches an //unsigned// word, or some //unsigned// words, from an address
@@ -393,7 +393,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek4s(object addr_n_length)
+-- <built-in> function peek4s(object addr_n_length)
 --
 -- Description:
 -- Fetches a //signed// double words, or some //signed// double words,
@@ -448,7 +448,7 @@ end function
 --
 --**
 -- Signature:
--- global function peek4u(object addr_n_length)
+-- <built-in> function peek4u(object addr_n_length)
 --
 -- Description:
 -- Fetches an //unsigned// double word, or some //unsigned// dounle words,
@@ -506,7 +506,7 @@ end function
 
 --**
 -- Signature:
--- global procedure peek_string(atom addr)
+-- <built-in> procedure peek_string(atom addr)
 --
 -- Description:
 -- Read an ASCIZ string in RAM, starting from a supplied address.
@@ -532,7 +532,7 @@ end function
 
 --**
 -- Signature:
--- global procedure poke(atom addr, object x)
+-- <built-in> procedure poke(atom addr, object x)
 --
 -- Description:
 -- Stores one or more bytes, starting at a memory location.
@@ -580,7 +580,7 @@ end function
 -- 
 --**
 -- Signature:
--- global procedure poke2(atom addr, object x)
+-- <built-in> procedure poke2(atom addr, object x)
 --
 -- Description:
 -- Stores one or more words, starting at a memory location.
@@ -629,7 +629,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure poke4(atom addr, object x)
+-- <built-in> procedure poke4(atom addr, object x)
 --
 -- Description:
 -- Stores one or more double words, starting at a memory location.
@@ -681,7 +681,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure mem_copy(atom destination, atom origin, integer len)
+-- <built-in> procedure mem_copy(atom destination, atom origin, integer len)
 --
 -- Descripotion:
 -- Copy a block of memory from an address to another.
@@ -713,7 +713,7 @@ end function
 
 --**
 -- Signature:
--- global procedure mem_set(atom destination, integer byte_value, integer how_many))
+-- <built-in> procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
 -- Sets a contiguous range of memory ocations to a single value.
@@ -742,7 +742,7 @@ end function
 --
 --**
 -- Signature:
--- global procedure call(atom addr)
+-- <built-in> procedure call(atom addr)
 --
 -- Description:
 --  Call a machine language routine which was stored in memory prior.

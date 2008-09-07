@@ -14,7 +14,7 @@
 
 --**
 -- Signature:
--- global function routine_id(sequence routine_name)
+-- <built-in> function routine_id(sequence routine_name)
 --
 -- Description:
 -- Return an integer id number for a user-defined Euphoria procedure or function.
@@ -96,7 +96,7 @@
 
 --**
 -- Signature:
--- global function call_func(integer id, sequence args)
+-- <built-in> function call_func(integer id, sequence args)
 --
 -- Description:
 --  Call the user-defined Euphoria function by routine id.
@@ -131,7 +131,7 @@
 
 --**
 -- Signature:
--- global procedure call_proc(integer id, sequence args)
+-- <built-in> procedure call_proc(integer id, sequence args)
 --
 -- Description:
 -- Call a user-defined Euphoria procedure by routine id.
@@ -179,7 +179,7 @@
 
 --****
 -- Signature:
--- global function machine_func(integer machine_id, object args)
+-- <built-in> function machine_func(integer machine_id, object args)
 --
 -- Description:
 -- Perform a machine-specific operation that returns a value.
@@ -200,7 +200,7 @@
 
 --****
 -- Signature:
--- global procedure machine_proc(integer machine_id, object args)
+-- <built-in> procedure machine_proc(integer machine_id, object args)
 --
 -- Description:
 -- Perform a machine-specific operation that does not return a value.

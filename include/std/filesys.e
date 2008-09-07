@@ -80,7 +80,7 @@ end ifdef
 
 --**
 -- Signature:
--- global constant SLASH
+-- <built-in> constant SLASH
 --
 -- Description:
 -- Current platform's path separator character
@@ -91,7 +91,7 @@ end ifdef
 
 --**
 -- Signature:
--- global constant SLASHES
+-- <built-in> constant SLASHES
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -101,7 +101,7 @@ end ifdef
 
 --**
 -- Signature:
--- global constant SLASHES
+-- <built-in> constant SLASHES
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -111,14 +111,14 @@ end ifdef
 
 --**
 -- Signature:
--- global constant CRLF
+-- <built-in> constant CRLF
 --
 -- Description:
 -- Current platform's newline character(s): ##\n## on //Unix//, else ##\r\n##.
 
 --**
 -- Signature:
--- global constant PATHSEP
+-- <built-in> constant PATHSEP
 --
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.

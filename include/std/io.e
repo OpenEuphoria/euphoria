@@ -50,7 +50,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- global procedure ?
+-- <built-in> procedure ?
 --
 -- Description:
 -- Shorthand way of saying: **pretty_print(STDOUT, x, {})** - i.e. printing the value of an 
@@ -66,7 +66,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- global procedure print(integer fn, object x)
+-- <built-in> procedure print(integer fn, object x)
 --
 -- Description:
 -- Print an object to a file or device, with braces { , , , } to show the structure.
@@ -94,7 +94,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- global procedure printf(integer fn, sequence format, object values)
+-- <built-in> procedure printf(integer fn, sequence format, object values)
 --
 -- Description:
 -- Print one or more values to a file or device, using a format string to embed them in and define how they should be represented.
@@ -202,7 +202,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- global procedure puts(integer fn, object text)
+-- <built-in> procedure puts(integer fn, object text)
 --
 -- Description:
 -- Output, to a file or device, a single byte (atom) or sequence of bytes. The low order
@@ -241,7 +241,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- global function getc(integer fn)
+-- <built-in> function getc(integer fn)
 --
 -- Description:
 --     Get the next character (byte) from a file or device fn. 
@@ -268,7 +268,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- global function gets(integer fn)
+-- <built-in> function gets(integer fn)
 --
 -- Description:
 --     Get the next sequence (one line, including '\n') of characters from a file or device.
@@ -468,7 +468,7 @@ end type
 
 --**
 -- Signature:
--- global function open(sequence path, sequence mode)
+-- <built-in> function open(sequence path, sequence mode)
 --
 -- Description:
 -- Open a file or device, to get the file number. 
@@ -562,7 +562,7 @@ end type
 
 --**
 -- Signature:
--- global procedure close(atom fn)
+-- <built-in> procedure close(atom fn)
 --
 -- Description:
 -- Close a file or device and flush out any still-buffered characters.
