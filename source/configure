@@ -59,3 +59,7 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+cp Makefile.intobj.dist Makefile.intobj
+cp Makefile.transobj.dist Makefile.transobj
+cp Makefile.backobj.dist Makefile.backobj

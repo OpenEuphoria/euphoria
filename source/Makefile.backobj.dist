@@ -1,0 +1,22 @@
+EU_BACKEND_RUNNER_OBJECTS = \
+./backobj/0ackend.o \
+./backobj/backend.o \
+./backobj/cominit.o \
+./backobj/compress.o \
+./backobj/convert.o \
+./backobj/dll.o \
+./backobj/error.o \
+./backobj/filesys.o \
+./backobj/init-.o \
+./backobj/intinit.o \
+./backobj/io.o \
+./backobj/main-.o \
+./backobj/memory.o \
+./backobj/mode.o \
+./backobj/pathopen.o \
+./backobj/search.o \
+./backobj/sort.o \
+./backobj/text.o \
+./backobj/types.o \
+./backobj/wildcard.o \
+	
