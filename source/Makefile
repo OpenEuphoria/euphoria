@@ -178,6 +178,7 @@ EU_TRANSLATOR_OBJECTS = \
 	./$(OBJDIR)/dll.o \
 	./$(OBJDIR)/filesys.o \
 	./$(OBJDIR)/io.o \
+	./$(OBJDIR)/symtab_1.o \
 	./$(OBJDIR)/search.o
 	
 EU_INTERPRETER_OBJECTS =  \
@@ -208,7 +209,6 @@ EU_CORE_OBJECTS = \
 	./$(OBJDIR)/c_out.o \
 	./$(OBJDIR)/symtab.o \
 	./$(OBJDIR)/symtab_0.o \
-	./$(OBJDIR)/symtab_1.o \
 	./$(OBJDIR)/scanner.o \
 	./$(OBJDIR)/scientific.o \
 	./$(OBJDIR)/scanne_0.o \
