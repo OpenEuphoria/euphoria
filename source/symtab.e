@@ -449,8 +449,11 @@ global procedure InitSymTab()
 				for ij=1 to length(sj) do
 	                switch sj[ij][T_ID] do
 	                    case ATOM: -- must crate a lasting temp
-	                    	st_index = NewTempSym()
-	                    	SymTab[st_index][S_OBJ] = sj[ij][T_SYM]
+	                    	if integer(sj[ij][T_SYM]) then
+								st_index = NewIntSym(sj[ij][T_SYM])
+							else
+								st_index = NewDoubleSym(sj[ij][T_SYM])
+							end if
 							SymTab[st_index][S_SCOPE] = IN_USE -- TempKeep()
 							sj[ij][T_SYM] = st_index
 							break

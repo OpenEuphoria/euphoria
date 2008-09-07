@@ -564,7 +564,7 @@ function next_token()
 		end if
 		if t[T_ID] = RECORDED then
 			t=read_recorded_token(t[T_SYM])
-		elsif t[T_ID] = DEF_PARAM then --?nested_calls
+		elsif t[T_ID] = DEF_PARAM then
         	for i=length(nested_calls) to 1 by -1 do
         	    if nested_calls[i] = t[T_SYM][2] then
 					return {VARIABLE, private_sym[parseargs_states[i][PS_POSITION]+t[T_SYM][1]]}
@@ -3433,7 +3433,7 @@ procedure SetWith(integer on_off)
 		if on_off = 0 then
 			idx = find(option, OpDefines)
 			if idx then
-				OpDefines = remove(OpDefines, idx)
+				OpDefines = OpDefines[1..idx-1]&OpDefines[idx+1..$]
 			end if
 		else
 			OpDefines &= {option}
@@ -3441,7 +3441,7 @@ procedure SetWith(integer on_off)
 
 	elsif on_off and option[1] >= '0' and option[1] <= '9' then
 		-- Ignore numeric stamp - not supported anymore
-
+		option = patch(option,option,0)
 	else
 		CompileErr("unknown with/without option")
 
