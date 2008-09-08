@@ -1,0 +1,21 @@
+EU_DOSBACKEND_RUNNER_OBJECTS = &
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\intinit.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\0ackend.obj &
+	.\$(OBJDIR)\interrup.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\text.obj &
+	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\types.obj &
+	.\$(OBJDIR)\convert.obj &
+	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\io.obj &
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\0emory.obj &
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\search.obj

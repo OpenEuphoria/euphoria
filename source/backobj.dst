@@ -1,0 +1,20 @@
+EU_BACKEND_RUNNER_OBJECTS = &
+	.\$(OBJDIR)\main-.obj &
+	.\$(OBJDIR)\init-.obj &
+	.\$(OBJDIR)\cominit.obj &
+	.\$(OBJDIR)\error.obj &
+	.\$(OBJDIR)\intinit.obj &
+	.\$(OBJDIR)\mode.obj &
+	.\$(OBJDIR)\0ackend.obj &
+	.\$(OBJDIR)\pathopen.obj &
+	.\$(OBJDIR)\backend.obj &
+	.\$(OBJDIR)\text.obj &
+	.\$(OBJDIR)\sort.obj &
+	.\$(OBJDIR)\types.obj &
+	.\$(OBJDIR)\convert.obj &
+	.\$(OBJDIR)\compress.obj &
+	.\$(OBJDIR)\dll.obj &
+	.\$(OBJDIR)\io.obj &
+	.\$(OBJDIR)\filesys.obj &
+	.\$(OBJDIR)\wildcard.obj &
+	.\$(OBJDIR)\search.obj 

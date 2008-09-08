@@ -91,83 +91,12 @@ EU_TRANSLATOR_FILES = &
 	tranplat.e &
 	compress.e
 	
-EU_TRANSLATOR_OBJECTS = &
-	.\$(OBJDIR)\ec.obj &
-	.\$(OBJDIR)\0rror.obj &
-	.\$(OBJDIR)\c_decl.obj &
-	.\$(OBJDIR)\c_dec0.obj &
-	.\$(OBJDIR)\c_dec1.obj &
-	.\$(OBJDIR)\c_out.obj &
-	.\$(OBJDIR)\cominit.obj &
-	.\$(OBJDIR)\compile.obj &
-	.\$(OBJDIR)\compil_0.obj &
-	.\$(OBJDIR)\compil_1.obj &
-	.\$(OBJDIR)\compil_2.obj &
-	.\$(OBJDIR)\compil_3.obj &
-	.\$(OBJDIR)\compil_4.obj &
-	.\$(OBJDIR)\compil_5.obj &
-	.\$(OBJDIR)\compil_6.obj &
-	.\$(OBJDIR)\compil_7.obj &
-	.\$(OBJDIR)\compil_8.obj &
-	.\$(OBJDIR)\compil_9.obj &
-	.\$(OBJDIR)\compil_A.obj &
-	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\get.obj &
-	.\$(OBJDIR)\global.obj &
-	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\traninit.obj &
-	.\$(OBJDIR)\tranplat.obj &
-	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\dll.obj &
-	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\io.obj &
-	.\$(OBJDIR)\search.obj
-
-EU_INTERPRETER_OBJECTS =  &
-	.\$(OBJDIR)\backend.obj &
-	.\$(OBJDIR)\c_out.obj &
-	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\cominit.obj &
-	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\tranplat.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\dll.obj &
-	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\get.obj &
-	.\$(OBJDIR)\search.obj
-
-EU_CORE_OBJECTS = &
-	.\$(OBJDIR)\main-.obj &
-	.\$(OBJDIR)\main-0.obj &
-	.\$(OBJDIR)\convert.obj &
-	.\$(OBJDIR)\pathopen.obj &
-	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\mode.obj &
-	.\$(OBJDIR)\symtab.obj &
-	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\symtab_1.obj &
-	.\$(OBJDIR)\scanner.obj &
-	.\$(OBJDIR)\scientific.obj &
-	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scanne_1.obj &
-	.\$(OBJDIR)\main.obj &
-	.\$(OBJDIR)\emit.obj &
-	.\$(OBJDIR)\emit_0.obj &
-	.\$(OBJDIR)\emit_1.obj &
-	.\$(OBJDIR)\parser.obj &
-	.\$(OBJDIR)\parser_0.obj &
-	.\$(OBJDIR)\parser_1.obj &
-	.\$(OBJDIR)\parser_2.obj &
-	.\$(OBJDIR)\parser_3.obj &
-	.\$(OBJDIR)\parser_4.obj
+!include transobj.wat
+!include intobj.wat
+!include backobj.wat
+!include dosobj.wat
+!include dostrobj.wat
+!include dosbkobj.wat
 
 EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_execute.obj &
@@ -203,155 +132,6 @@ EU_BACKEND_RUNNER_FILES = &
 	.\$(OBJDIR)\backend.ex &
 	.\$(OBJDIR)\wildcard.e &
 	.\$(OBJDIR)\compress.e
-
-EU_BACKEND_RUNNER_OBJECTS = &
-	.\$(OBJDIR)\main-.obj &
-	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\cominit.obj &
-	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\mode.obj &
-	.\$(OBJDIR)\0ackend.obj &
-	.\$(OBJDIR)\pathopen.obj &
-	.\$(OBJDIR)\backend.obj &
-	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\convert.obj &
-	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\dll.obj &
-	.\$(OBJDIR)\io.obj &
-	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\search.obj 
-
-EU_DOSBACKEND_RUNNER_OBJECTS = &
-	.\$(OBJDIR)\main-.obj &
-	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\cominit.obj &
-	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\mode.obj &
-	.\$(OBJDIR)\0ackend.obj &
-	.\$(OBJDIR)\interrup.obj &
-	.\$(OBJDIR)\pathopen.obj &
-	.\$(OBJDIR)\backend.obj &
-	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\convert.obj &
-	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\io.obj &
-	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\0emory.obj &
-	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\search.obj
-
-EU_DOS_OBJECTS = &
-	.\$(OBJDIR)\main-.obj &
-	.\$(OBJDIR)\main-0.obj &
-	.\$(OBJDIR)\int.obj &
-	.\$(OBJDIR)\mode.obj &
-	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\c_out.obj &
-	.\$(OBJDIR)\symtab.obj &
-	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\symtab_1.obj &
-	.\$(OBJDIR)\scanner.obj &
-	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scanne_1.obj &
-	.\$(OBJDIR)\scientif.obj &
-	.\$(OBJDIR)\interrup.obj &
-	.\$(OBJDIR)\pathopen.obj &
-	.\$(OBJDIR)\emit.obj &
-	.\$(OBJDIR)\emit_0.obj &
-	.\$(OBJDIR)\emit_1.obj &
-	.\$(OBJDIR)\parser.obj &
-	.\$(OBJDIR)\parser_0.obj &
-	.\$(OBJDIR)\parser_1.obj &
-	.\$(OBJDIR)\parser_2.obj &
-	.\$(OBJDIR)\parser_3.obj &
-	.\$(OBJDIR)\parser_4.obj &
-	.\$(OBJDIR)\convert.obj &
-	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\backend.obj &
-	.\$(OBJDIR)\tranplat.obj &
-	.\$(OBJDIR)\cominit.obj &
-	.\$(OBJDIR)\intinit.obj &
-	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\get.obj &
-	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\main.obj &
-	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\0emory.obj &
-	.\$(OBJDIR)\search.obj
-
-EU_TRANSDOS_OBJECTS = &
-	.\$(OBJDIR)\main-.obj &
-	.\$(OBJDIR)\main-0.obj &
-	.\$(OBJDIR)\interrup.obj &
-	.\$(OBJDIR)\pathopen.obj &
-	.\$(OBJDIR)\init-.obj &
-	.\$(OBJDIR)\error.obj &
-	.\$(OBJDIR)\mode.obj &
-	.\$(OBJDIR)\symtab.obj &
-	.\$(OBJDIR)\symtab_0.obj &
-	.\$(OBJDIR)\symtab_1.obj &
-	.\$(OBJDIR)\scanner.obj &
-	.\$(OBJDIR)\scanne_0.obj &
-	.\$(OBJDIR)\scanne_1.obj &
-	.\$(OBJDIR)\scientif.obj &
-	.\$(OBJDIR)\scanne_1.obj &
-	.\$(OBJDIR)\scientif.obj &
-	.\$(OBJDIR)\main.obj &
-	.\$(OBJDIR)\emit.obj &
-	.\$(OBJDIR)\emit_0.obj &
-	.\$(OBJDIR)\emit_1.obj &
-	.\$(OBJDIR)\parser.obj &
-	.\$(OBJDIR)\parser_0.obj &
-	.\$(OBJDIR)\parser_1.obj &
-	.\$(OBJDIR)\parser_2.obj &
-	.\$(OBJDIR)\parser_3.obj &
-	.\$(OBJDIR)\parser_4.obj &
-	.\$(OBJDIR)\ec.obj &
-	.\$(OBJDIR)\c_decl.obj &
-	.\$(OBJDIR)\c_dec0.obj &
-	.\$(OBJDIR)\c_dec1.obj &
-	.\$(OBJDIR)\c_out.obj &
-	.\$(OBJDIR)\cominit.obj &
-	.\$(OBJDIR)\compile.obj &
-	.\$(OBJDIR)\compil_0.obj &
-	.\$(OBJDIR)\compil_1.obj &
-	.\$(OBJDIR)\compil_2.obj &
-	.\$(OBJDIR)\compil_3.obj &
-	.\$(OBJDIR)\compil_4.obj &
-	.\$(OBJDIR)\compil_5.obj &
-	.\$(OBJDIR)\compil_6.obj &
-	.\$(OBJDIR)\compil_7.obj &
-	.\$(OBJDIR)\compil_8.obj &
-	.\$(OBJDIR)\compil_9.obj &
-	.\$(OBJDIR)\compil_A.obj &
-	.\$(OBJDIR)\get.obj &
-	.\$(OBJDIR)\global.obj &
-	.\$(OBJDIR)\sort.obj &
-	.\$(OBJDIR)\convert.obj &
-	.\$(OBJDIR)\compress.obj &
-	.\$(OBJDIR)\traninit.obj &
-	.\$(OBJDIR)\tranplat.obj &
-	.\$(OBJDIR)\wildcard.obj &
-	.\$(OBJDIR)\sequence.obj &
-	.\$(OBJDIR)\text.obj &
-	.\$(OBJDIR)\io.obj &
-	.\$(OBJDIR)\0rror.obj &
-	.\$(OBJDIR)\filesys.obj &
-	.\$(OBJDIR)\filesy_0.obj &
-	.\$(OBJDIR)\types.obj &
-	.\$(OBJDIR)\0emory.obj &
-	.\$(OBJDIR)\search.obj
 
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
@@ -482,6 +262,27 @@ interpreter_objects : .SYMBOLIC svn_rev $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_
 	@%append .\$(OBJDIR)\int.lbc option quiet
 	@%append .\$(OBJDIR)\int.lbc option caseexact
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
+
+objlist : .SYMBOLIC
+	@mkdir objtmp
+	@copy $(OBJDIR)\*.c objtmp
+	@cd objtmp
+	@ren *.c *.obj
+	@cd ..
+	@%create $(OBJDIR).wat
+	@if $(OBJDIR)==intobj echo EU_INTERPRETER_OBJECTS = & > $(OBJDIR).wat
+	@if $(OBJDIR)==transobj echo EU_TRANSLATOR_OBJECTS = & > $(OBJDIR).wat
+	@if $(OBJDIR)==backobj echo EU_BACKEND_RUNNER_OBJECTS = & > $(OBJDIR).wat
+	@if $(OBJDIR)==dosobj echo EU_DOS_OBJECTS = & > $(OBJDIR).wat
+	@if $(OBJDIR)==dostrobj echo EU_TRANSDOS_OBJECTS = & > $(OBJDIR).wat
+	@if $(OBJDIR)==dosbkobj echo EU_DOSBACKEND_RUNNER_OBJECTS = & > $(OBJDIR).wat
+	@cd objtmp
+	@for %i in (*.obj) do @%append ..\$(OBJDIR).wat .\$(OBJDIR)\%i &  
+	@del *.obj
+	@cd ..
+	@rmdir objtmp
+	@%append $(OBJDIR).wat   
+#	@for %i in ($(OBJDIR)\*.c) do @%append $(OBJDIR).wat %i &  
 
 exwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 ecwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
