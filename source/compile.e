@@ -4305,10 +4305,19 @@ procedure opINSERT()
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
-	else
+	elsif TypeIs( Code[pc+2], TYPE_INTEGER ) then
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Append(&@,@,@);\n",
 			{ Code[pc+1], Code[pc+4], Code[pc+1], Code[pc+2] } )
 		c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	else
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
+		c_stmt("Ref( @ );\n", { Code[pc+2] } )
+		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
+		c_stmt0("}\n")
+		c_stmt0("else {\n" )
+		c_stmt("Ref( @ );\n", { Code[pc+2] } )
+		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0("}\n")
 	end if
 	
 	c_stmt0("}\n")
