@@ -264,7 +264,6 @@ interpreter_objects : .SYMBOLIC svn_rev $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
 
 objlist : .SYMBOLIC
-	echo Is On.
 	@mkdir objtmp
 	@copy $(OBJDIR)\*.c objtmp
 	@cd objtmp
@@ -294,7 +293,7 @@ translate-win : .SYMBOLIC  builddirs
 translate-dos : .SYMBOLIC builddirs
     @echo ------- TRANSLATE DOS -----------
 	wmake -f makefile.wat exsource EX=$(EUBIN)\ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
-	wmake -f makefile.wat ecsource EX=$(EUBIN)\ec.exe EU_TARGET=int. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat ecsource EX=$(EUBIN)\ec.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
         wmake -f makefile.wat backendsource EX=$(EUBIN)\ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	
 translate : .SYMBOLIC translate-win translate-dos
@@ -406,7 +405,7 @@ translator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ecw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dostranslator : .SYMBOLIC builddirs
-	wmake -f makefile.wat .\dostrobj\main-.c EX=$(EUBIN)\ec.exe EU_TARGET=int. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat .\dostrobj\main-.c EX=$(EUBIN)\ec.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS
 	wmake -f makefile.wat ec.exe EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
