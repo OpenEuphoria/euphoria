@@ -378,7 +378,7 @@ uninstall :
 .PHONY : install
 .PHONY : uninstall
 intobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
-transobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+transobj/main-.c : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 
 %obj :

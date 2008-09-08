@@ -4295,9 +4295,22 @@ end procedure
 procedure opINSERT()
 	splins() -- _0 = obj_ptr
 	c_stmt("if (insert_pos <= 0) Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
-	c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Append(&@,@,@);\n",{Code[pc+1],Code[pc+4],Code[pc+1],Code[pc+2]})
-	--c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
-	c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	
+	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
+		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
+		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
+		c_stmt0("}\n")
+		c_stmt0("else {\n" )
+		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
+		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0("}\n")
+	else
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Append(&@,@,@);\n",
+			{ Code[pc+1], Code[pc+4], Code[pc+1], Code[pc+2] } )
+		c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	end if
+	
 	c_stmt0("}\n")
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))
 	pc += 5
