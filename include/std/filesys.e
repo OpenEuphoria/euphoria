@@ -1616,6 +1616,9 @@ end function
 -- * The directories returned by include_paths()
 -- * $EUDIR/bin
 -- * $EUDIR/docs
+-- * $EUDIST/
+-- * $EUDIST/etc
+-- * $EUDIST/data
 -- * The directories listed in $USERPATH
 -- * The directories listed in $PATH
 --
@@ -1657,6 +1660,13 @@ end ifdef
 		if sequence(extra_paths) then
 			search_list = append(search_list, extra_paths & SLASH & "bin" & SLASH)
 			search_list = append(search_list, extra_paths & SLASH & "docs" & SLASH)
+		end if
+		
+		extra_paths = getenv("EUDIST")
+		if sequence(extra_paths) then
+			search_list = append(search_list, extra_paths & SLASH)
+			search_list = append(search_list, extra_paths & SLASH & "etc" & SLASH)
+			search_list = append(search_list, extra_paths & SLASH & "data" & SLASH)
 		end if
 		
 		extra_paths = getenv("USERPATH")
