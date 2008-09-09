@@ -293,9 +293,9 @@ translate-win : .SYMBOLIC  builddirs
 	
 translate-dos : .SYMBOLIC builddirs
     @echo ------- TRANSLATE DOS -----------
-	wmake -f makefile.wat exsource EX=$(EUBIN)\$(DOSEXE) EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
-	wmake -f makefile.wat ecsource EX=$(EUBIN)\$(DOSTREXE) EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
-        wmake -f makefile.wat backendsource EX=$(EUBIN)\$(DOSEXE) EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat exsource EX=$(EUBIN)\ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat ecsource EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+        wmake -f makefile.wat backendsource EX=$(EUBIN)\ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	
 translate : .SYMBOLIC translate-win translate-dos
 	
@@ -406,9 +406,9 @@ translator : .SYMBOLIC builddirs
 	wmake -f makefile.wat ecw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dostranslator : .SYMBOLIC builddirs
-	wmake -f makefile.wat .\dostrobj\main-.c EX=$(EUBIN)\$(DOSTREXE) EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat .\dostrobj\main-.c EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS
-	wmake -f makefile.wat ec.exe EX=$(EUBIN)\$(DOSEXE) EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat ec.exe EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 backendw.exe : backendflag svn_rev $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
@@ -430,17 +430,17 @@ backend : .SYMBOLIC builddirs
 
 dosbackend : .SYMBOLIC builddirs
     @echo ------- BACKEND -----------
-        wmake -f makefile.wat .\dosbkobj\main-.c EX=$(EUBIN)\$(DOSEXE) EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+        wmake -f makefile.wat .\dosbkobj\main-.c EX=$(EUBIN)\ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -f makefile.wat objlist OBJDIR=dosbkobj EU_NAME_OBJECT=EU_DOSBACKEND_RUNNER_OBJECTS
-        wmake -f makefile.wat backendd.exe EX=$(EUBIN)\$(DOSEXE) EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+        wmake -f makefile.wat backendd.exe EX=$(EUBIN)\ex.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 dos : .SYMBOLIC builddirs
-	wmake -f makefile.wat .\dosobj\main-.c EX=$(EUBIN)\$(DOSEXE) EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat .\dosobj\main-.c EX=$(EUBIN)\ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS
-	wmake -f makefile.wat ex.exe EX=$(EUBIN)\$(DOSEXE) EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat ex.exe EX=$(EUBIN)\ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 doseubin : .SYMBOLIC builddirs
-	wmake -f makefile.wat .\dosobj\main-.c EX=$(EUBIN)\$(DOSEXE) EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -f makefile.wat .\dosobj\main-.c EX=$(EUBIN)\ex.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS
 	wmake -f makefile.wat ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
