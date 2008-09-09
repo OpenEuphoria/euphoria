@@ -1810,7 +1810,9 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
     sequence lLevel = ""
     sequence lHome
 
-ifdef !LINUX then
+ifdef UNIX then
+	lPath = path_in
+else
     sequence lDrive = ""
     -- Replace unix style separators with DOS style
     lPath = find_replace("/", path_in, SLASH)
@@ -1823,10 +1825,10 @@ end ifdef
 
     -- Replace any leading tilde with 'HOME' directory.
     if (length(lPath) > 0 and lPath[1] = '~') then
-ifdef !LINUX then
-        lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+ifdef UNIX then
+		lHome = getenv("HOME")
 else
-        lHome = getenv("HOME")
+		lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
 end ifdef
 		if lHome[$] != SLASH then
 			lHome &= SLASH
@@ -1839,7 +1841,7 @@ end ifdef
 		end if
     end if
 
-ifdef !LINUX then
+ifdef !UNIX then
 	-- Strip off any drive letter attached.
     if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
 	then
@@ -1851,7 +1853,9 @@ end ifdef
 	-- If a relative path, prepend the PWD of the appropriate drive.
 	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
 	then
-ifdef !LINUX then
+ifdef UNIX then
+		lPath = get_curdir() & lPath
+else
 		if (length(lDrive) = 0) then
 			lPath = get_curdir() & lPath
 		else
@@ -1864,8 +1868,6 @@ ifdef !LINUX then
 			end if
 			lPath = lPath[3..$]
 		end if
-else
-		lPath = get_curdir() & lPath
 end ifdef		
 	end if
 	
@@ -1902,7 +1904,7 @@ end ifdef
 		lPosA = match(lLevel, lPath)
 	end while
 	
-ifdef !LINUX then
+ifdef !UNIX then
 	lPath = lower(lDrive & lPath)
 end ifdef
 	
