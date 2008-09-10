@@ -43,6 +43,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\compil_8.obj &
 	.\$(OBJDIR)\compil_9.obj &
 	.\$(OBJDIR)\compil_A.obj &
+	.\$(OBJDIR)\compil_B.obj &
 	.\$(OBJDIR)\get.obj &
 	.\$(OBJDIR)\global.obj &
 	.\$(OBJDIR)\sort.obj &

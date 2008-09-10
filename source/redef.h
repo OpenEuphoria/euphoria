@@ -191,5 +191,11 @@
 #define L_SWITCH_SPI	SWITCH_SPI
 #define L_SWITCH_I		SWITCH_I
 #define L_HASH			HASH
-#define L_PROC_FORWARD  PROC_FORWARD
-#define L_FUNC_FORWARD  FUNC_FORWARD
+#define L_HEAD			HEAD
+#define L_TAIL			TAIL
+#define L_REMOVE		REMOVE
+#define L_REPLACE 		REPLACE
+
+
+
+

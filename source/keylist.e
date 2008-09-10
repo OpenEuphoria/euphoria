@@ -149,7 +149,12 @@ keylist =
 	{"splice",			 SC_PREDEF,	FUNC, SPLICE,			3, E_PURE},
 	{"insert",			 SC_PREDEF,	FUNC, INSERT,			3, E_PURE},
 	{"include_paths",	 SC_PREDEF,	FUNC, INCLUDE_PATHS,	1, E_OTHER_EFFECT},
-	{"hash",             SC_PREDEF, FUNC, HASH,             2, E_PURE}
+	{"hash",             SC_PREDEF, FUNC, HASH,             2, E_PURE},
+	{"head",             SC_PREDEF, FUNC, HEAD,             2, E_PURE, {0,{{ATOM,1}}},{2,1,{2}}},
+	{"tail",             SC_PREDEF, FUNC, TAIL,             2, E_PURE, 
+	{0,{{BUILT_IN,"length"},{LEFT_ROUND,0},{DEF_PARAM,1},{RIGHT_ROUND,0},{MINUS,0},{ATOM,1}}},{2,1,{2}}},
+	{"remove",           SC_PREDEF, FUNC, REMOVE,           3, E_PURE, {0,0,{{DEF_PARAM,2}}}, {3,2,{3}}},
+	{"replace",          SC_PREDEF, FUNC, REPLACE,          4, E_PURE, {0,0,0,{{DEF_PARAM,3}}}, {4,3,{4}}}
 }
 	-- new words must go at end to maintain compatibility 
 

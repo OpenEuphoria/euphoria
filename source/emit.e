@@ -314,7 +314,10 @@ op_result[PLATFORM] = T_INTEGER
 op_result[SPLICE] = T_SEQUENCE
 op_result[INSERT] = T_SEQUENCE
 op_result[HASH] = T_ATOM
-
+op_result[HEAD] = T_SEQUENCE
+op_result[TAIL] = T_SEQUENCE
+op_result[REMOVE] = T_SEQUENCE
+op_result[REPLACE] = T_SEQUENCE
 
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
@@ -951,7 +954,7 @@ global procedure emit_op(integer op)
 	-- 2 inputs, 1 output   
 	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, FIND, MATCH,
 					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
-					OPEN, SPRINTF, TASK_CREATE, HASH}) then
+					OPEN, SPRINTF, TASK_CREATE, HASH, HEAD, TAIL}) then
 		cont21ii(op, FALSE)
 
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
@@ -983,7 +986,7 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output 
-	elsif find(op, {RHS_SLICE, FIND_FROM, MATCH_FROM, SPLICE, INSERT}) then
+	elsif find(op, {RHS_SLICE, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE}) then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()
@@ -1090,12 +1093,31 @@ global procedure emit_op(integer op)
 		emit_opcode(op)
 		b = Pop() -- rhs value
 		a = Pop() -- 2nd subs
-		c = Pop() -- 1st subs 
+		c = Pop() -- 1st subs
 		emit_addr(Pop()) -- sequence
 		emit_addr(c)
 		emit_addr(a)  
 		emit_addr(b)
 		assignable = FALSE
+
+	-- 4 inputs, 1 output
+	elsif op = REPLACE then
+		emit_opcode(op)
+			
+		b = Pop()  -- source
+		a = Pop()  -- replacement
+		c = Pop()  -- start of replaced slice
+		d = Pop()  -- end of replaced slice
+		emit_addr(d)
+		emit_addr(c)
+		emit_addr(a)
+		emit_addr(b)
+
+		c = NewTempSym()
+		Push(c)
+		emit_addr(c)     -- place to store result
+		
+		assignable = TRUE
 
 	-- 4 inputs, 1 output
 	elsif op = ASSIGN_OP_SLICE or op = PASSIGN_OP_SLICE then  
@@ -1114,7 +1136,7 @@ global procedure emit_op(integer op)
 		d = Pop()
 		TempKeep(d)      -- sequence   
 		
-		emit_addr(d) 
+		emit_addr(d)
 		Push(d)
 		
 		emit_addr(c) 

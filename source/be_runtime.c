@@ -361,6 +361,13 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
 {x, x}
 };
 
@@ -817,9 +824,10 @@ void Copy_elements(int start,s1_ptr source) {
 	int i;
 
 	for (i=1;i<=source->length;i++) {
-		temp = *s_elem++;
-		*t_elem++ = temp;
-		Ref(temp);
+		temp = *(s_elem++);
+		*(t_elem++) = temp;
+		if (!IS_ATOM_INT(temp))
+			RefDS(temp);
 	}
 }
 
@@ -830,6 +838,133 @@ object Insert(object a,object b,int pos)
 
 	*result_ptr = b;
 	return MAKE_SEQ(s1);
+}
+
+void Head(s1_ptr s1, int start, object_ptr target)
+{
+	int i;
+	if (s1->ref == 1 && *target == s1) {
+		for (i=start;i<=s1->length;i++)
+			DeRef(*(s1->base+i));
+		*(s1->base+start) = NOVALUE;
+		s1->postfill += (s1->length - start + 2);
+		s1->length = start-1;
+	}
+	else { 
+		s1_ptr s2 = NewS1(start-1);
+		object temp;
+		for (i=1;i<start;i++) {
+			temp = *(s1->base+i);
+			*(s2->base+i) = temp;
+			if (!IS_ATOM_INT(temp))
+			  	RefDS(temp);
+		}
+		*(s2->base+start) = NOVALUE;
+		DeRef(*target);
+		*target = MAKE_SEQ(s2);
+		RefDS(*target);
+	}
+}
+
+void Tail(s1_ptr s1, int start, object_ptr target)
+{
+	if (s1->ref == 1 && s1 == *target) {
+		int i;
+		for (i=1;i<start;i++)
+			DeRef(*(s1->base+i));
+		memcpy((char *)(s1->base+1),(char *)(s1->base+start),4*(s1->length - start)+8);
+		s1->postfill += start-1;
+		s1->length -= start-1;
+    }
+    else {
+		s1_ptr s2 = NewS1(s1->length-start+1);
+		object temp;
+		object_ptr src=s1->base+start-1, trg = s2->base;
+		while (TRUE) {
+			temp = *(++src);
+			*(++trg) = temp;
+	   		if (!IS_ATOM_INT(temp)) {
+	     		if (temp == NOVALUE)
+	       			break;
+				RefDS(temp);
+			}
+	 	}
+		DeRef(*target);
+		*target = MAKE_SEQ(s2);
+		RefDS(*target);
+    }
+}
+
+void Remove_elements(int start, int stop, object_ptr target)
+{
+	int n = stop-start+1;
+	s1_ptr s1 = *assign_slice_seq;
+	if (UNIQUE(s1) && *target == *assign_slice_seq) {
+		int i;
+		char *pstart = (char *)(s1->base+start);
+		char *pstop = (char *)(s1->base+stop+1);
+		for (i=start;i<=stop;i++)
+			DeRef(*(s1->base+i));
+		memcpy(pstart,pstop, 4*(s1->length-stop)+8);
+		s1->postfill += n;
+		s1->length -= n;
+	}
+	else {  
+		s1_ptr s2 = NewS1(s1->length-n);
+		int i;
+		object temp, *src = s1->base, *trg = s2->base;
+		for (i=1;i<start;i++) {
+			temp = *(++src);
+			*(++trg) = temp;
+		  	if (!IS_ATOM_INT(temp))
+		  		RefDS(temp);
+		}
+        src = s1->base+stop;
+		while (TRUE) {
+			temp = *(++src);
+			*(++trg) = temp;
+			if (!IS_ATOM_INT(temp)) {
+		    	if (temp == NOVALUE)
+		      		break;
+				RefDS(temp);
+			}
+		}
+		DeRef(*target);
+		*target = MAKE_SEQ(s2);
+		RefDS(*target);
+	}
+}
+
+void AssignElement(object what, int place, object_ptr target)
+{
+	s1_ptr s1 = *assign_slice_seq;
+	if (UNIQUE(s1) && *target == *assign_slice_seq)
+		{DeRef(*(s1->base+place));}
+	else {
+		s1_ptr s2 = NewS1(s1->length);
+		int i;
+		object temp, *src = s1->base, *trg = s2->base;
+		for (i=1;i<place;i++) {
+			temp = *(++src);
+			*(++trg) = temp;
+			if (!IS_ATOM_INT(temp))
+				RefDS(temp);
+		}
+		*(++trg) = what;
+		src++;
+		while (TRUE) {
+			temp = *(++src);
+			*(++trg) = temp;
+			if (!IS_ATOM_INT(temp)) {
+		    	if (temp == NOVALUE)
+		      		break;
+				RefDS(temp);
+			}
+		}
+		DeRef(*target);
+		*target = MAKE_SEQ(s2);
+		RefDS(*target);
+	}
 }
 
 void Concat(object_ptr target, object a_obj, s1_ptr b)

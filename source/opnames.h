@@ -199,5 +199,9 @@ static char *opnames[] = {
 	"HASH",
 	"PROC_FORWARD",
 	"FUNC_FORWARD",
-	"TRANSGOTO"
+	"TRANSGOTO",
+	"HEAD",
+	"TAIL",
+	"REMOVE",
+	"REPLACE"
 };

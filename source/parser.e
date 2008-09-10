@@ -3439,7 +3439,7 @@ procedure SetWith(integer on_off)
 
 	elsif on_off and option[1] >= '0' and option[1] <= '9' then
 		-- Ignore numeric stamp - not supported anymore
-		option = patch(option,option,0)
+		
 	else
 		CompileErr("unknown with/without option")
 

@@ -218,7 +218,17 @@ extern int *profile_sample;
 #ifdef EWINDOWS
 extern unsigned default_heap;
 #endif
+
+/**********************/
+/* Imported functions */
+/**********************/
 extern void Copy_elements();
+extern void Head();
+extern void Tail();
+extern void Remove_elements();
+extern void AssignSlice();
+extern void AssignElement();
+
 /**********************/
 /* Declared functions */
 /**********************/
@@ -1189,6 +1199,8 @@ void code_set_pointers(int **code)
 			case C_PROC:
 			case TASK_CREATE:
 			case HASH:
+			case HEAD:
+			case TAIL:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1239,12 +1251,23 @@ void code_set_pointers(int **code)
 			case MATCH_FROM:
 			case SPLICE:
 			case INSERT:
+			case REMOVE:
 				// 4 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
 				code[i+3] = SET_OPERAND(code[i+3]);
 				code[i+4] = SET_OPERAND(code[i+4]);
 				i += 5;
+				break;
+
+			case REPLACE:
+				// 5 operands follow
+				code[i+1] = SET_OPERAND(code[i+1]);
+				code[i+2] = SET_OPERAND(code[i+2]);
+				code[i+3] = SET_OPERAND(code[i+3]);
+				code[i+4] = SET_OPERAND(code[i+4]);
+				code[i+5] = SET_OPERAND(code[i+5]);
+				i += 6;
 				break;
 
 			case ROUTINE_ID:
@@ -1701,7 +1724,9 @@ void do_exec(int *start_pc)
 /* 193 (previous) */
   &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH,
 /* 196 (previous) */
- NULL, NULL, NULL /* L_PROC_FORWARD, L_FUNC_FORWARD, TRANSGOTO not emitted */
+ NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TRANSGOTO not emitted */
+  &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE
+/* 203 (previous) */
   };
 #endif
 #endif
@@ -3757,6 +3782,220 @@ void do_exec(int *start_pc)
 				tpc = pc;
 				Ref(top);
 				Prepend((object_ptr)pc[3], b, top);
+				thread4();
+				BREAK;
+
+			case L_REMOVE:
+			deprintf("case L_REMOVE:");
+				tpc = pc;
+				// type check and normalise arguments
+				a = *(object_ptr)pc[1];  // source
+				if (!IS_SEQUENCE(a))
+					RTFatal("First argument to remove() must be a sequence");
+				s1 = SEQ_PTR(a);
+				cf = s1->length;
+				b = *(object_ptr)pc[2];  //start
+				if (IS_SEQUENCE(b)) 
+					RTFatal("Second argument to remove() must be an atom");
+				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
+				top = *(object_ptr)pc[3]; //stop
+				if (IS_SEQUENCE(top))
+					RTFatal("Third argument to remove() must be an atom");
+				file_no = (IS_ATOM_INT(top)) ? top : (long)(DBL_PTR(top)->dbl);
+				if (file_no > cf)
+					file_no=cf;
+				obj_ptr = (object_ptr)pc[4];
+				top = *obj_ptr;
+				// no removal
+				if (nvars > cf || nvars > file_no || file_no<0) {  // return target
+					*obj_ptr = a;
+					Ref(*obj_ptr);
+					DeRef(top);
+					thread5();
+					BREAK;
+				}
+				// remove all or start
+				if (nvars < 2 ) {  
+					if (file_no >= cf) {   // return ""
+						*obj_ptr = MAKE_SEQ(NewS1(0));
+						Ref(*obj_ptr);
+						DeRef(top);
+					}
+				   	else
+						Tail(s1,file_no+1,obj_ptr); //file_no = 1st element kept
+				   	thread5();
+				   	BREAK;
+				}
+				if (file_no >= cf) //remove tail
+					Head(s1,nvars,obj_ptr);   //nvars=1+final length
+				else { // carve slice out
+					*assign_slice_seq = s1;
+					Remove_elements(nvars,file_no,obj_ptr);
+				}
+				thread5();
+				BREAK;
+			
+			case L_REPLACE:
+			deprintf("case L_REPLACE:");
+				// type check arguments
+				tpc = pc;
+				a = *(object_ptr)pc[1];  //source
+				if (!IS_SEQUENCE(a))
+					RTFatal("First argument to replace() must be a sequence");
+				s1 = SEQ_PTR(a);
+				cf = s1->length;
+				b = *(object_ptr)pc[3];  //start
+				if (IS_SEQUENCE(b))
+					RTFatal("Third argument to replace() must be an atom");
+				nvars = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
+				top = *(object_ptr)pc[4];  //stop
+				if (IS_SEQUENCE(top))
+					RTFatal("Fourth argument to replace() must be an atom");
+				file_no = (!IS_ATOM_INT(top)) ? (long)(DBL_PTR(top)->dbl) : top;
+				if (file_no > cf)
+					file_no=cf;
+				b = *(object_ptr)pc[2];  // replacement
+				obj_ptr = (object_ptr)pc[5];
+				top = *obj_ptr;
+				//  normalise arguments, dispatch special cases
+				if (file_no<0) {  // return replacement & target
+					Concat(obj_ptr,b,a);
+					pc += 6;
+					thread();
+					BREAK;
+				}
+				if (file_no > cf)
+					file_no = cf;
+				if (nvars > cf) {  // return target & replacement
+					Concat(obj_ptr,a,b);
+					pc += 6;
+					thread();
+					BREAK;
+				}
+				if (nvars < 2 ) { //replacing start or all
+				    if (file_no >= cf) {
+						Ref(b);
+						*obj_ptr = b;
+						DeRef(top);
+				    }
+				    else
+						Concat(obj_ptr,b,a);
+					pc += 6;
+					thread();
+					BREAK;
+				}
+				if (nvars > file_no) {  // just splice
+	       			if (IS_SEQUENCE(b)) {
+						s2 = SEQ_PTR(b);
+						s1 = Add_internal_space(a,nvars,s2->length);
+						*assign_slice_seq = s1;
+						Copy_elements(nvars,s2);
+		       			DeRef(*obj_ptr);
+						*obj_ptr = MAKE_SEQ(s1);
+					}
+					else {
+						DeRef(*(obj_ptr));
+						*obj_ptr = Insert(a,b,nvars);
+					}
+					pc += 6;
+					thread();
+					BREAK;
+				}
+				// actual inner replacing
+				if (IS_SEQUENCE(b)) {
+					s2 = SEQ_PTR(b);
+					going_up = s2->length;
+					*assign_slice_seq = s1;
+					if (going_up > file_no - nvars+1) { //replacement longer than replaced
+						s1 = Add_internal_space(a,going_up+nvars-file_no-1, s2->length+file_no);
+						Copy_elements(nvars,s2);
+		       			DeRef(*obj_ptr);
+						*obj_ptr = MAKE_SEQ(s1);
+	 				}
+	 				else { // remove any extra elements, and then assign a regular slice
+						if (going_up < file_no - nvars+1) {
+							Remove_elements(nvars+going_up,file_no,obj_ptr);
+							s1 = SEQ_PTR(*obj_ptr);
+							*assign_slice_seq = s1;
+						}
+		       			else
+							DeRef(*obj_ptr);
+						Copy_elements(nvars,s2);
+						*obj_ptr = MAKE_SEQ(s1);
+					}
+				}
+				else {  // replacing by an atom
+					*assign_slice_seq = s1;
+					if (!IS_ATOM_INT(b))
+						Ref(b);
+					if (nvars < file_no) {
+						object_ptr optr;
+						Remove_elements(nvars+1,file_no,obj_ptr);
+						optr = SEQ_PTR(*obj_ptr)->base+nvars;
+						DeRef(*optr);
+						*optr = b;
+					}
+					else AssignElement(b, nvars, obj_ptr);
+				}
+				pc += 6;
+				thread();
+				BREAK;
+
+			case L_HEAD:
+			deprintf("case L_HEAD:");
+				// type check and normalise arguments
+				tpc = pc;
+				a = *(object_ptr)pc[1];  // source
+				if (!IS_SEQUENCE(a))
+					RTFatal("First argument to head() must be a sequence");
+				s1 = SEQ_PTR(a);
+				cf = s1->length;
+				b = *(object_ptr)pc[2];   // start
+				if (IS_SEQUENCE(b)) 
+					RTFatal("Second argument to head() must be an atom");
+				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
+				obj_ptr = (object_ptr)pc[3];
+				top = *obj_ptr;
+				// get first elements
+				if (nvars <= 0) {
+					*obj_ptr = MAKE_SEQ(NewS1(0));
+				}
+				else if (nvars >= cf) {
+					Ref(a);
+					*obj_ptr = a;
+				}
+				else
+					Head(s1,nvars+1,obj_ptr);
+				thread4();
+				BREAK;
+
+			case L_TAIL:
+			deprintf("case L_TAIL:");
+				// type check and normalise arguments
+				tpc = pc;
+				a = *(object_ptr)pc[1];  // source
+				if (!IS_SEQUENCE(a))
+					RTFatal("First argument to tail() must be a sequence");
+				s1 = SEQ_PTR(a);
+				cf = s1->length;
+				b = *(object_ptr)pc[2];  //start
+				if (IS_SEQUENCE(b)) 
+					RTFatal("Second argument to tail() must be an atom");
+				nvars = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
+				obj_ptr = (object_ptr)pc[3];
+				top = *obj_ptr;
+				// get last elements
+				if (nvars <= 0) {
+					*obj_ptr = MAKE_SEQ(NewS1(0));
+					DeRef(top);
+				}
+				else if (nvars >= cf) {
+					Ref(a);
+					*obj_ptr = a;
+					DeRef(top);
+				}
+				else
+					Tail(s1,cf-nvars+1,obj_ptr);
 				thread4();
 				BREAK;
 

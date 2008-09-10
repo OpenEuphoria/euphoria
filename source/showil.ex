@@ -108,7 +108,7 @@ procedure showCode(integer flist, sequence Code)
 			word = Code[i+2]
 			show_operand(flist, word)
 			i += 3
-		
+
 		
 		elsif find(word, {LESS, GREATEREQ, EQUALS, NOTEQ, LESSEQ, GREATER,
 						  LESS_IFW_I, GREATEREQ_IFW_I, EQUALS_IFW_I, 
@@ -125,7 +125,7 @@ procedure showCode(integer flist, sequence Code)
 						  DIV2, FLOOR_DIV2, FLOOR_DIV, SC1_AND, SC1_AND_IF,
 						  SC1_OR, SC1_OR_IF, MEM_COPY, MEM_SET,
 						  SYSTEM_EXEC, PRINTF, SPRINTF, MACHINE_FUNC,
-						  TASK_CREATE, C_PROC, CALL_FUNC
+						  TASK_CREATE, C_PROC, CALL_FUNC, HEAD, TAIL
 						  }) then
 			
 			-- 3 operands follow
@@ -141,7 +141,8 @@ procedure showCode(integer flist, sequence Code)
 						  ENDFOR_INT_DOWN, ASSIGN_OP_SLICE, ASSIGN_SLICE,
 						  PASSIGN_SLICE, PASSIGN_OP_SLICE, LHS_SUBS, LHS_SUBS1, 
 						  LHS_SUBS1_COPY, RHS_SLICE, ENDFOR_UP, ENDFOR_DOWN, 
-						  C_FUNC, ENDFOR_GENERAL, FIND_FROM, MATCH_FROM
+						  C_FUNC, ENDFOR_GENERAL, FIND_FROM, MATCH_FROM, REMOVE,
+						  INSERT, SPLICE
 						  }) then
 			-- 4 operands follow
 			word = Code[i+1]
@@ -154,7 +155,7 @@ procedure showCode(integer flist, sequence Code)
 			show_operand(flist, word)
 			i += 5
 		
-		elsif word = ROUTINE_ID then
+		elsif word = ROUTINE_ID or word = REPLACE then
 			-- 5 operands follow
 			word = Code[i+1]
 			show_operand(flist, word)
@@ -407,7 +408,7 @@ il_file = match(".il", cl[3])
 
 if not il_file then
 	if platform() = DOS32 then
-		OUR_SIZE = 170000 -- roughly, 
+		OUR_SIZE = 170000 -- roughly,
 						  -- but must be less or equal to size of backend[w].exe
 	else
 		OUR_SIZE = 61500 

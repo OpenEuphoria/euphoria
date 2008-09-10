@@ -843,7 +843,11 @@ end function
 --
 
 --**
--- Return the first items of a sequence.
+-- Signature:
+-- <built-in> function head(sequence source, atom size=1)
+--
+-- Description:
+-- Return the first item(s) of a sequence.
 --
 -- Parameters:
 --		# ##source##: the sequence from which elements will be returned
@@ -872,16 +876,6 @@ end function
 --
 -- See Also:
 --     [[:tail]], [[:mid]], [[:slice]]
-
-public function head(sequence source, atom size=1)
-	if size < 1 then
-		return {}
-	elsif size < length(source) then
-		return source[1..size]
-	end if
-
-	return source
-end function
 
 --**
 -- Returns a slice of a sequence, given by a starting point and a length.
@@ -1071,6 +1065,10 @@ public function vslice(sequence source, atom colno, object error_control=0)
 end function
 
 --**
+-- Signature:
+-- <built-in> function tail(sequence source, atom n=length(source) - 1)
+--
+-- Description:
 -- Return the last items of a sequence.
 --
 -- Parameters:
@@ -1104,18 +1102,12 @@ end function
 -- See Also:
 --   [[:head]], [[:mid]], [[:slice]]
 
-public function tail(sequence source, atom n=length(source) - 1)
-	if n >= length(source) then
-		return source
-	elsif n <= 0 then
-		return {}
-	else
-		return source[$-n+1..$]
-	end if
-end function
-
 --**
--- Remove an item or a range of items from a sequence.
+-- Signature:
+-- <built-in> function remove(sequence target, atom start, atom stop=start)
+--
+-- Description:
+-- Remove an item, or a range of items from a sequence.
 --
 -- Parameters:
 --   # ##target##: the sequence to remove from.
@@ -1154,25 +1146,6 @@ end function
 -- See Also:
 --   [[:replace]], [[:insert]], [[:splice]], [[:remove_all]]
 
-public function remove(sequence target, atom start, atom stop=start)
-	if stop > length(target) then
-		stop = length(target)
-	end if
-
-	if start > length(target) or start > stop or stop < 0 then
-		return target
-	elsif start < 2 then
-		if stop >= length(target) then
-			return ""
-		else
-			return target[stop+1..$]
-		end if
-	elsif stop >= length(target) then
-		return target[1..start-1]
-	end if
-
-	return target[1..start-1] & target[stop+1..$]
-end function
 
 --**
 -- Changes a sequence slice, possibly with padding
@@ -1358,6 +1331,10 @@ public function filter(sequence source, integer rid)
 end function
 
 --**
+-- Signature:
+-- <built-in> function replace(sequence target, object replacement, integer start, integer stop=start)
+--
+-- Description:
 -- Replace a slice in a sequence by an object.
 --
 -- Parameters:
@@ -1386,11 +1363,6 @@ end function
 --
 -- See Also:
 --     [[:splice]], [[:remove]], [[:remove_all]]
-
-public function replace(sequence target, object replacement, integer start, integer stop=start)
-	target = remove(target, start, stop)
-	return splice(target, replacement, start)
-end function
 
 --**
 -- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.

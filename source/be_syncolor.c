@@ -202,7 +202,11 @@ static char *predefined[] = {
 	"label",
 	"splice",
 	"insert",
-	"hash"
+	"hash",
+	"head",
+	"tail",
+	"remove",
+	"replace"
 };
 
 /*********************/

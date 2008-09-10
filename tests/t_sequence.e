@@ -16,7 +16,6 @@ test_equal("reverse() 0-elements", "", reverse(""))
 test_equal("reverse() atom", 42, reverse(42))
 test_equal("reverse() with sub-seq", {{-10,-200}, {5,6,7}, {1,2}}, reverse({{1,2}, {5,6,7}, {-10, -200}}))
 
-
 test_equal("head() string default", "J", head("John Doe"))
 test_equal("head() string", "John", head("John Doe", 4))
 test_equal("head() sequence", {1,2,3}, head({1,2,3,4,5,6}, 3))

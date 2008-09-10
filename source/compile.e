@@ -2777,7 +2777,7 @@ end procedure
 
 procedure opGLOBAL_INIT_CHECK()
 -- init checks - ignored by Translator
--- GLOBAL_INIT_CHECK / PRIVATE_INIT_CHECK
+-- <built-in>_INIT_CHECK / PRIVATE_INIT_CHECK
 	pc += 2
 end procedure
 
@@ -4323,6 +4323,157 @@ procedure opINSERT()
 	c_stmt0("}\n")
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))
 	pc += 5
+end procedure
+
+procedure opHEAD()
+	--CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
+	c_stmt0("{\n")
+	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("if (size <= 0) @ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
+	c_stmt0("else if (len <= size) {\n")
+	c_stmt("RefDS(@);\n", {Code[pc+1]})
+	c_stmt("DeRef(@);\n", {Code[pc+3]})
+	c_stmt("@ = @;\n",{Code[pc+3], Code[pc+1]})
+	c_stmt0("}\n")
+	c_stmt("else Head(SEQ_PTR(@),size+1,&@);\n",{Code[pc+1], Code[pc+3]})
+	c_stmt0("}\n")
+	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]))
+	pc += 4
+end procedure
+
+procedure opTAIL()
+	c_stmt0("{\n")
+	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt0("if (size <= 0) {\n")
+	c_stmt("DeRef(@);\n", {Code[pc+3]})
+	c_stmt("@ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
+	c_stmt0("}\n")
+	c_stmt0("else if (len <= size) {\n")
+	c_stmt("RefDS(@);\n", {Code[pc+1]})
+	c_stmt("DeRef(@);\n", {Code[pc+3]})
+	c_stmt("@ = @;\n",{Code[pc+3], Code[pc+1]})
+	c_stmt0("}\n")
+	c_stmt("else Tail(SEQ_PTR(@), len-size+1, &@);\n",{Code[pc+1], Code[pc+3]})
+	c_stmt0("}\n")
+	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]))
+	pc += 4
+end procedure
+
+procedure opREMOVE()
+	c_stmt0("{;\n")
+	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
+	c_stmt0("int len = assign_space->length;\n")
+	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
+	c_stmt0("if (stop > len) stop = len;\n")
+	c_stmt0("if (start > len || start > stop || stop<0) {\n")
+	c_stmt("RefDS(@);\n", {Code[pc+1]})
+	c_stmt("DeRef(@);\n", {Code[pc+4]})
+	c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	c_stmt0("}\n")
+	c_stmt0("else if (start < 2) {\n")
+	c_stmt0("if (stop >= len) {\n")
+	c_stmt("DeRef(@);\n", {Code[pc+4]})
+	c_stmt("@ = MAKE_SEQ(NewS1(0));\n",{Code[pc+4]})
+	c_stmt0("}\n")
+	c_stmt("else Tail(SEQ_PTR(@), stop+1, &@);\n",{Code[pc+1], Code[pc+4]})
+	c_stmt0("}\n")
+	c_stmt("else if (stop >= len) Head(SEQ_PTR(@), start, &@);\n",{Code[pc+1], Code[pc+4]})
+	c_stmt0("else {\n")
+	c_stmt0("assign_slice_seq = &assign_space;\n")
+	c_stmt("Remove_elements(start, stop, &@);\n", {Code[pc+4]})
+	c_stmt0("}\n")
+	c_stmt0("}\n")
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]))
+	pc += 5
+end procedure
+
+procedure opREPLACE()
+	sequence relay_else = ""
+
+	c_stmt0("{\n")
+	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
+	c_stmt0("int len = assign_space->length;\n")
+	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
+	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n", repeat(Code[pc+4], 3))
+	c_stmt0("if (stop > len) stop = len;\n")
+	--c_stmt("DeRefDS(@);\n", {Code[pc+1]})
+	c_stmt("if (!IS_ATOM_INT(@)) RefDS(@);\n",repeat(Code[pc+2],2))
+	c_stmt("if (stop < 0) Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
+	c_stmt("else if (start > len) Concat(&@, @, @);\n", {Code[pc+5], Code[pc+1], Code[pc+2]})
+	c_stmt0("else if (start < 2 ) {\n")
+	c_stmt0(" if (stop >= len) {\n")
+	c_stmt("DeRef(@);\n",{Code[pc+5]})
+	c_stmt("@ = @;\n", {Code[pc+5], Code[pc+2]})
+	c_stmt0("}\n")
+	c_stmt("else Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
+	c_stmt0("}\n")
+	if not TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then -- could be a sequence
+		if TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
+			relay_else = "else "
+		else
+			c_stmt("else if (IS_SEQUENCE(@)) {\n", {Code[pc+2]}) -- replacement is a sequence
+		end if
+		c_stmt0(relay_else & "if (start > stop) {\n") -- splice replacement in at start
+		c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
+		c_stmt("assign_space = Add_internal_space(@, start, s2->length);\n", {Code[pc+1]})
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt0("Copy_elements(start, s2);\n")
+		c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n", {Code[pc+5]})
+		c_stmt0("}\n")
+	 	c_stmt0("else {\n") -- actual replacement inside source
+		c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
+		c_stmt0("int repl_len = s2->length;\n")
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt0("if (repl_len > stop - start + 1) {\n") -- replacement is longer than replaced
+		c_stmt("assign_space = Add_internal_space(@, repl_len+start-stop-1, s2->length+stop);\n", {Code[pc+1]})
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt0("Copy_elements(start, s2);\n")
+		c_stmt("DeRef(@);\n",{Code[pc+5]})
+		c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n", {Code[pc+5]})
+		c_stmt0("}\n")
+	 	c_stmt0("else {\n") -- replacement shorter or equal length
+		c_stmt0("if (repl_len < stop - start+1) {\n")
+		c_stmt("Remove_elements(start+repl_len, stop, &@);\n", {Code[pc+5]})
+		c_stmt("assign_space = SEQ_PTR(@);\n", {Code[pc+5]})
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt0("}\n")
+		c_stmt("else DeRef(@);\n",{Code[pc+5]})
+		c_stmt("Copy_elements(start, SEQ_PTR(@));\n", {Code[pc+2]})
+		c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n", {Code[pc+5]})
+		c_stmt0("}\n")
+		c_stmt0("}\n")
+		if not TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
+			indent -= 4
+			c_stmt0("}\n")
+		end if
+
+		SetBBType(Code[pc+5], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2])))
+	else
+		c_stmt("else if (start > stop) @ = Insert(@, @, start);\n",
+				 {Code[pc+5], Code[pc+1], Code[pc+2]}) -- splice replacement (an atom) in at start
+		c_stmt0("else if (start < stop) {\n") -- replace one element, more room available
+		c_stmt0("object_ptr ptr;\n")
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt("Remove_elements(start+1, stop, &@);\n", {Code[pc+5]})
+		c_stmt("ptr = (SEQ_PTR(@))->base+start;\n", {Code[pc+5]})
+		c_stmt0("DeRef(*ptr);\n")
+		c_stmt("*ptr = @;\n", {Code[pc+2]})
+		c_stmt0("}\n")
+		c_stmt0("else {\n") -- patch an atom
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt("if (!IS_ATOM_INT(@)) RefDS(@);\n",repeat(Code[pc+2],2))
+		c_stmt("AssignElement(@, start, &@);\n", {Code[pc+2], Code[pc+5]})
+		c_stmt0("}\n")
+
+		SetBBType(Code[pc+5], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))	
+	end if
+	c_stmt0("}\n") -- end of block
+
+
+	pc += 6
 end procedure
 
 procedure opCONCAT_N()

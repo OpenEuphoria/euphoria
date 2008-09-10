@@ -2,7 +2,7 @@
 --
 -- Translator main file
 
-without type_check
+ without type_check
 
 include mode.e
 set_mode("translate", 0 )

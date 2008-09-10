@@ -202,7 +202,11 @@ global constant
 	PROC_FORWARD        = 197,
 	FUNC_FORWARD        = 198,
 	TRANSGOTO           = 199,
-	MAX_OPCODE          = 199
+	HEAD				= 200,
+	TAIL				= 201,
+	REMOVE				= 202,
+	REPLACE				= 203,
+	MAX_OPCODE          = 203
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

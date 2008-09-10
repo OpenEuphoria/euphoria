@@ -3226,6 +3226,22 @@ procedure do_crash_routine(integer b)
 	end if
 end procedure
 
+procedure opHEAD()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	target = Code[pc+3]
+	val[target] = head(val[a],val[b])
+	pc += 4
+end procedure
+
+procedure opTAIL()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	target = Code[pc+3]
+	val[target] = tail(val[a],val[b])
+	pc += 4
+end procedure
+
 procedure opMACHINE_FUNC()
 	a = Code[pc+1]
 	b = Code[pc+2] 

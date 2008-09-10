@@ -210,7 +210,11 @@
 #define PROC_FORWARD        197
 #define FUNC_FORWARD        198
 #define TRANSGOTO           199
-#define MAX_OPCODE          199
+#define HEAD           		200
+#define TAIL           		201
+#define REMOVE           	202
+#define REPLACE           	203
+#define MAX_OPCODE          203
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]
@@ -218,7 +222,7 @@
    emit.e, keylist.e, compile.e, be_syncolor.c
 */
 
-#define END_OF_FILE_CHAR   26    
+#define END_OF_FILE_CHAR   26
 #define VARIABLE         -100
 #define NAMESPACE         523
 #define FUNC              501
