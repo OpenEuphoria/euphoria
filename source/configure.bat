@@ -26,9 +26,9 @@ IF "%1" =="--eubin" (
 SHIFT
 GOTO Loop
 :Continue
-copy intobj.dst intobj.wat
-copy transobj.dst transobj.wat
-copy backobj.dst backobj.wat
-copy dosobj.dst dosobj.wat
-copy dostrobj.dst dostrobj.wat
-copy dosbkobj.dst dosbkobj.wat
+if not exist transobj.wat copy transobj.dst transobj.wat
+if not exist intobj.wat copy intobj.dst intobj.wat
+if not exist backobj.wat copy backobj.dst backobj.wat
+if not exist dosobj.wat copy dosobj.dst dosobj.wat
+if not exist dosbkobj.wat copy dosbkobj.dst dosbkobj.wat
+if not exist dostrobj.wat copy dostrobj.dst dostrobj.wat
