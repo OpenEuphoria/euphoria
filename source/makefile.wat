@@ -732,13 +732,13 @@ rev.e :
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
-	-if exist scientific.c copy scientific.c scientif.c
+	-if exist scientific.c rename scientific.c scientif.c
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
-	-if exist scientific.c copy scientific.c scientif.c
+	-if exist scientific.c rename scientific.c scientif.c
 	cd ..
 
 .\$(OBJDIR)\int.obj :  .\$(OBJDIR)\int.c
