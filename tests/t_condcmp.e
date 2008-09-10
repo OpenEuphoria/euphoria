@@ -5,14 +5,14 @@ ifdef hello then
     test_fail("not defined #1")
 end ifdef
 
-with define helloç
-ifdef helloç then
+with define hello?
+ifdef hello? then
     test_pass("defined #1")
-else
+elsedef
     test_fail("defined #1")
 end ifdef
 
-without define helloç
+without define hello?
 ifdef hello then
     test_fail("undefine #1")
 end ifdef
@@ -47,7 +47,7 @@ end ifdef
 
 ifdef EU400 then
     test_pass("EU400")
-else
+elsedef
     test_fail("EU400")
 end ifdef
 

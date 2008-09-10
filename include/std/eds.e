@@ -1047,7 +1047,7 @@ ifdef UNIX then
 		-- DB_LOCK_SHARED
 		db = open(path, "rb")
 	end if
-else
+elsedef
 	if lock_method = DB_LOCK_SHARED then
 		lock_method = DB_LOCK_EXCLUSIVE
 	end if
@@ -2420,7 +2420,7 @@ public function db_compress()
 		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)
 	elsifdef WIN32 then
 		system("ren \"" & new_path & "\" \"" & filename(old_path) & '"', 2)
-	else
+	elsedef
 		-- DOS
 		system("ren " & new_path & " " & filename(old_path), 2)
 	end ifdef
@@ -2433,7 +2433,7 @@ public function db_compress()
 			system( "mv \"" & old_path & "\" \"" & new_path & '"', 2)
 		elsifdef WIN32 then
 			system("ren \"" & old_path & "\" \"" & filename(new_path) & '"', 2)
-		else
+		elsedef
 			-- DOS
 			system("ren " & old_path & " " & filename(new_path), 2)
 		end ifdef

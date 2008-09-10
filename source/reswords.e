@@ -262,6 +262,7 @@ global enum
 	FUNCTION,
 	IFDEF,
 	ELSIFDEF,
+	ELSEDEF,
 	THEN,
 	DO,
 	GLOBAL,

@@ -256,7 +256,7 @@ procedure main()
 
 	elsif INTERPRET and not test_only then
 ifdef STDDEBUG then
-else
+elsedef
 		BackEnd(0) -- execute IL using Euphoria-coded back-end
 end ifdef
 	end if

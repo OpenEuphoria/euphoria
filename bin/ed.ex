@@ -100,7 +100,7 @@ ifdef UNIX then
     CONTROL_DELETE = DELETE -- key for line-delete 
 			    -- (not available on some systems)
     NUM_PAD_SLASH = -999  -- Please check on console and Xterm
-else
+elsedef
     -- DOS/Windows
     SAFE_CHAR = 14
     delete_cmd = "del "
@@ -131,7 +131,7 @@ else
 		F12 = 344
 		NUM_PAD_ENTER = 284
 		NUM_PAD_SLASH = 309
-    else
+    elsedef
 		F11 = 389
 		F12 = 390
 		NUM_PAD_ENTER = 13

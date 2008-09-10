@@ -794,7 +794,7 @@ end ifdef
 			for i = 1 to length(dup_globals) do
 				ifdef UNIX then
 					msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
-				else
+				elsedef
 					msg_file = find_replace("/", file_name[SymTab[dup_globals[i]][S_FILE_NO]], '\\')
 				end ifdef
 				
@@ -938,7 +938,7 @@ procedure LintCheck(symtab_index s)
 	u = SymTab[s][S_USAGE]
 	ifdef UNIX then
 		file = file_name[current_file_no]
-	else
+	elsedef
 		file = find_replace("/", file_name[current_file_no], "\\")
 	end ifdef
 

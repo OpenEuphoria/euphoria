@@ -26,7 +26,7 @@ ifdef UNIX then
 	MIDDLE_DOWN = 2
 	MIDDLE_UP = 2
 	ANY_UP = 35  -- LEFT, RIGHT or MIDDLE up (best you can do under xterm)
-else
+elsedef
 	MOVE = 1
 	LEFT_DOWN = 2
 	LEFT_UP = 4

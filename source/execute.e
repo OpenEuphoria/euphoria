@@ -3324,7 +3324,7 @@ procedure do_exec()
 	keep_running = TRUE -- so higher-level do_exec() will keep running
 end procedure
 
-else
+elsedef
 
 procedure do_exec()
 -- execute IL code, starting at pc 

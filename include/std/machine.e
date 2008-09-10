@@ -221,7 +221,7 @@ ifdef SAFE then
 	ifdef DOS32 then
 		public include .\dos\safe.e
 	end ifdef
-else
+elsedef
 	public include std/memory.e
 	ifdef DOS32 then
 		public include .\dos\memory.e

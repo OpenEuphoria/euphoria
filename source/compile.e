@@ -2368,16 +2368,6 @@ procedure opIF()
 	end if
 end procedure
 
--- TODO: Do we need this?
-procedure opIFDEF()
-	pc += 1
-end procedure
-
--- TODO: Do we need this?
-procedure opELSIFDEF()
-	pc += 1
-end procedure
-
 procedure opINTEGER_CHECK()
 -- INTEGER_CHECK
 	if BB_var_type(Code[pc+1]) != TYPE_INTEGER then

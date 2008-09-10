@@ -10,7 +10,7 @@ ifdef NOT_DEFINED then
 		integer a
 		a = 10
 	end procedure
-else
+elsedef
 	procedure abc()
 		integer a
 		a = 10
@@ -25,7 +25,7 @@ end ifdef
 integer n=1
 ifdef NOT_DEFINED then
 	if n=1 then n=2 end if
-else
+elsedef
 	n=0
 end ifdef
 test_equal("Format of ifdef code",0,n)
@@ -34,7 +34,7 @@ test_equal("Format of ifdef code",0,n)
 function recursion1( sequence x, integer level=1 )
 ifdef DONT_DEFINE_FOO then
 	return 0
-else
+elsedef
 	integer count
 	integer foo
 	count = 0

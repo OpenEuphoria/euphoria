@@ -24,7 +24,7 @@ EUINC = getenv("EUINC")
 integer ENTER
 ifdef UNIX then
         ENTER = 10
-else    
+elsedef
         ENTER = 13
 end ifdef
 

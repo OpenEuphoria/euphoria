@@ -392,7 +392,7 @@ public function get_screen_char(positive_atom line, positive_atom column)
 		else
 			return {0,0}
 		end if
-	else    
+	elsedef
 		return machine_func(M_GET_SCREEN_CHAR, {line, column})
 	end ifdef
 end function
@@ -444,7 +444,7 @@ public procedure put_screen_char(positive_atom line, positive_atom column,
 				poke(scr_addr, char_attr)
 			end if
 		end if
-	else    
+	elsedef
 		machine_proc(M_PUT_SCREEN_CHAR, {line, column, char_attr})
 	end ifdef
 end procedure
@@ -520,7 +520,7 @@ public procedure display_text_image(text_point xy, sequence text)
 		ifdef DOS32 then
 			poke(scr_addr, one_row)
 			scr_addr += screen_width
-		else
+		elsedef
 			machine_proc(M_PUT_SCREEN_CHAR, {xy[1]+row-1, xy[2], one_row})
 		end ifdef
 	end for
@@ -582,7 +582,7 @@ public function save_text_image(text_point top_left, text_point bottom_right)
 		ifdef DOS32 then
 			row_chars = peek({scr_addr, image_width})
 			scr_addr += screen_width
-		else
+		elsedef
 			row_chars = {}
 			for col = top_left[2] to bottom_right[2] do
 				row_chars &= machine_func(M_GET_SCREEN_CHAR, {row, col})

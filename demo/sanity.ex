@@ -1100,7 +1100,7 @@ end procedure
 procedure reboot_msg()
 	ifdef UNIX then
 		puts(msg, "Did you forget to edit your profile and log in again?\n")
-    else    
+    elsedef
 		puts(msg, "Did you forget to reboot (restart) your machine?\n")
     end ifdef
     
@@ -1162,7 +1162,7 @@ procedure check_install(integer doit)
 --      else
 --           corrupt("exu") -- could be FreeBSD
 --      end if
-    else    
+    elsedef
 	-- DOS & Windows
 		eudir &= "\\BIN\\"
 		ex_sum = checksum(eudir & "ex.exe")
@@ -1192,7 +1192,7 @@ global procedure sanity()
 		if ok = IDCANCEL then
 		    return
 		end if
-    else
+    elsedef
 		-- some text mode tests
 		clear_screen()
 		position(1,1)
@@ -1275,7 +1275,7 @@ global procedure sanity()
     
 	ifdef UNIX then
 		system("rm sanityio.tst", 2)
-    else
+    elsedef
 		system("del sanityio.tst", 2)
     end ifdef  
     save_colors = {}
@@ -1291,7 +1291,7 @@ global procedure sanity()
       all_palette(save_colors)
 	elsifdef WIN32 then
 		ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
-    else
+    elsedef
 		puts(msg, "\nPASSED (100%)\n")
 		the_end()    
     end ifdef

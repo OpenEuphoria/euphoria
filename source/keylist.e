@@ -47,6 +47,7 @@ keylist =
 	{"xor",       SC_KEYWORD, XOR,       0, 0, 0},
 	{"continue",  SC_KEYWORD, CONTINUE,  0, 0, 0},
 	{"ifdef",     SC_KEYWORD, IFDEF,     0, 0, 0},
+	{"elsedef",   SC_KEYWORD, ELSEDEF,   0, 0, 0},
 	{"elsifdef",  SC_KEYWORD, ELSIFDEF,  0, 0, 0},
 	{"label",     SC_KEYWORD, LABEL,     0, 0, 0},
 	{"loop",      SC_KEYWORD, LOOP,      0, 0, 0},

@@ -16,7 +16,7 @@ end ifdef
 function dos_lower(sequence s)
 	ifdef DOS32 then
 		return lower(s)
-	else
+	elsedef
 		return s
 	end ifdef
 end function
@@ -31,7 +31,7 @@ procedure do_test(sequence cmds)
 		executable = "exu"
 	elsifdef WIN32 then
 		executable = "exwc"
-	else
+	elsedef
 		executable = "ex"
 	end ifdef
 
@@ -106,7 +106,7 @@ procedure do_test(sequence cmds)
 				if delete_file(filename) then end if
 				ifdef UNIX then
 					status = system_exec("./emake", 2)
-				else
+				elsedef
 					status = system_exec("emake.bat", 2)
 				end ifdef
 				if not status then
@@ -118,7 +118,7 @@ procedure do_test(sequence cmds)
 
 					ifdef UNIX then
 						if delete_file(filename) then end if
-					else
+					elsedef
 						if delete_file(filename & ".exe") then end if
 					end ifdef
 				end if

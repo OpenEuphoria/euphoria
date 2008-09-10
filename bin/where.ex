@@ -38,7 +38,7 @@ ifdef DOS32 then
    	constant exe_name ="ex"
 elsifdef WIN32 then
    	constant exe_name ="exwc"
-else
+elsedef
 	constant exe_name ="exu"
 end ifdef
 

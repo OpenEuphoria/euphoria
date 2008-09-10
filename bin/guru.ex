@@ -47,7 +47,7 @@ ifdef UNIX then
     else
 		log_path = log_name  
     end if
-else
+elsedef
     log_path = getenv("EUDIR")
     if equal(log_path, -1) then
 		log_path = "C:" 
@@ -62,7 +62,7 @@ ifdef UNIX then
 		"*.so", "*.lib", "*.o", 
 		"*.tar", "*.zip", "*.gz", "*.dylib"
     }
-else    
+elsedef
     skip_list = {
 	"*.EXE", "*.DLL", "*.LIB", "*.OBJ", 
 	"*.SWP", "*.PAR", "*.ZIP", "*.BMP", 
@@ -673,7 +673,7 @@ if euphoria then
 	    ifdef UNIX then
 		    puts(ERR, "EUDIR not set\n")
 	    	abort(1)
-		else
+		elsedef
 		    d = "C:\\EUPHORIA"
 		end ifdef
     end if

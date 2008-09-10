@@ -9,7 +9,7 @@ ifdef NOT_DEF_1 then
 	ifdef NOT_DEF_2 then
 		include dos_safe.e
 	end ifdef
-else
+elsedef
 	integer n=1
 	ifdef NOT_DEF_2 then
 		include dos_machine.e

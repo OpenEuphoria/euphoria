@@ -217,7 +217,7 @@ elsifdef OSX then
 	LC_TIME     = 5
 	LC_MESSAGES = 6
   
-else
+elsedef
 
 	crash("locale.e requires Windows, Linux, FreeBSD or OS X", {})
 

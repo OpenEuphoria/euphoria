@@ -61,6 +61,7 @@ constant token_name =
 	{DIVIDE, "'/'"},
 	{DO, "'do'"},
 	{ELSE, "'else'"},
+	{ELSEDEF, "'elsedef'"},
 	{ELSIF, "'elsif'"},
 	{ELSIFDEF, "'elsifdef'"},
 	{END, "'end'"},

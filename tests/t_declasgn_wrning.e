@@ -4,7 +4,7 @@ include std/unittest.e
 ifdef EC then
 	-- don't bother with translator for this test, because the warning file
 	-- is already gone
-else
+elsedef
 
 integer fn = open("warning.lst","r")
 test_true("warning file generated", fn >= 0)
@@ -21,7 +21,7 @@ ifdef DOS32 then
 	else
 		test_fail("with warning += #2")
 	end if
-else
+elsedef
 	test_equal("with warning += #2","\tt_declasgn.e:14 - call to f() might be short-circuited\n", gets(fn))
 end ifdef
 test_equal("warning() #1","Warning ( custom ):\n", gets(fn))
@@ -39,7 +39,7 @@ ifdef DOS32 then
 	else
 		test_fail("with warning += #4")
 	end if
-else
+elsedef
 	test_equal("with warning += #4","\tlocal variable 'n0' in file t_declasgn.e\n", gets(fn))
 end ifdef
 test_equal("with warning -=", -1, gets(fn))

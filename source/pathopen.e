@@ -148,7 +148,7 @@ global function get_conf_dirs()
 	
 	ifdef UNIX then
 		delimiter = ':'
-	else
+	elsedef
 		delimiter = ';'
 	end ifdef
 	
@@ -281,7 +281,7 @@ global procedure load_platform_inc_paths()
 		if sequence(env) then
 			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
 		end if
-	else
+	elsedef
 		-- none for DOS
 	end ifdef
 end procedure

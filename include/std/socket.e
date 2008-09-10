@@ -646,7 +646,7 @@ public function get_error()
 				rtn = {EUNET_ERROR_WINDOWSONLY,"This only works on Windows."}
 			elsifdef WIN32 then
 				rtn = {EUNET_ERROR_LINUXONLY,"This only works on Linux."}
-			else
+			elsedef
 				rtn = {EUNET_ERROR_UNKNOWN,"You are not using Windows or Linux."}
 			end ifdef
 		elsif rtn[1] = WSAENOTCONN or rtn[1] = ENOTCONN then
@@ -880,7 +880,7 @@ public function get_iface_list()
 		return windows_get_iface_list()
 	elsifdef UNIX then
 		return unix_get_iface_list()
-	else
+	elsedef
 		return {}
 	end ifdef
 end function

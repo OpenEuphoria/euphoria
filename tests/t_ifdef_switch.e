@@ -12,7 +12,7 @@ for i = 1 to 3 do
 	end switch
 end for
 foo = 1
-else
+elsedef
 
 end ifdef
 

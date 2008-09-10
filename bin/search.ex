@@ -32,7 +32,7 @@ ifdef UNIX then
     skip_list = {
 		"*.so", "*.lib", "*.tar", "*.o", "*.zip", "*.gz", "*.dylib"
     }
-else
+elsedef
     skip_list = {
 		"*.EXE", "*.ZIP", "*.BMP", "*.GIF", "*.OBJ",
 		"*.DLL", "*.OBJ", "*.SWP", "*.PAR", "*.JPG", 
@@ -71,7 +71,7 @@ ifdef UNIX then
     else
 		log_path = log_name  
     end if
-else
+elsedef
     SLASH='\\'
     log_path = getenv("EUDIR")
     if equal(log_path, -1) then
@@ -428,7 +428,7 @@ end procedure
 
 ifdef UNIX then
 	-- do nothing
-else
+elsedef
     log_name = upper(log_name)
 end ifdef
 

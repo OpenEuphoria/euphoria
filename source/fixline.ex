@@ -34,7 +34,7 @@ for i = 1 to length(d) do
 		puts(2, name & ' ')
 		ifdef LINUX then
 			system("mv " & name & " junk.xxx", 2)
-		else    
+		elsedef
 			system("move " & name & " junk.xxx > NUL" , 2)
 		end ifdef
 		infile = open("junk.xxx", "rb")

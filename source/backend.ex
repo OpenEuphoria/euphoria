@@ -141,7 +141,7 @@ cl = command_line()
 -- open our own .exe file
 ifdef UNIX then
 	current_db = e_path_open(cl[1], "rb")
-else
+elsedef
 	current_db = open(cl[1], "rb") 
 end ifdef
 
@@ -163,7 +163,7 @@ elsifdef UNIX then
 		OUR_SIZE = 150000  -- backendu for Linux
 	end if
 
-else
+elsedef
 	OUR_SIZE = 67000  -- backendw.exe (upx compression)
 end ifdef
 

@@ -15,7 +15,7 @@ include std/text.e
 ifdef DOS32 then
 	public include std\dos\memory.e
 	include std\dos\interrup.e
-else
+elsedef
 	include std/dll.e
 	include std/memory.e
 end ifdef
@@ -586,7 +586,7 @@ public function uname()
 	    reg_list = dos_interrupt(#21,reg_list)
 		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) + 
 			floor(reg_list[REG_AX]/256)/100)}
-	else
+	elsedef
 		return {"UNKNOWN"} --TODO
 	end ifdef
 end function
@@ -602,7 +602,7 @@ public function is_win_nt()
 		sequence s
 		s = uname()
 		return equal(s[1], "WinNT")
-	else
+	elsedef
 		return -1
 	end ifdef
 end function

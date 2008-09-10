@@ -88,7 +88,7 @@ ifdef UNIX then
 	BRIGHT_CYAN = 14
 	BRIGHT_RED = 9
 	YELLOW = 11
-else
+elsedef
 	BLUE  = 1
 	CYAN =  3
 	RED   = 4

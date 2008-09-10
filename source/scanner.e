@@ -1934,7 +1934,7 @@ ifdef STDDEBUG then
 	all_include()
 	IncludePush()
 	fake_include_line()
-else
+elsedef
 	read_line()
 	default_namespace( )
 end ifdef

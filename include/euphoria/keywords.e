@@ -12,6 +12,7 @@ public constant keywords = {
 	"continue",
 	"do",
 	"else",
+	"elsedef",
 	"elsif",
 	"elsifdef",
 	"end",

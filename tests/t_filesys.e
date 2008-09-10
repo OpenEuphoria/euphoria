@@ -10,7 +10,7 @@ ifdef UNIX then
     sep = '/'
     crlf = "\n"
     driveid = ""
-else
+elsedef
     fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
     pname = "\\EUPHORIA\\DOCS"
     sep = '\\'

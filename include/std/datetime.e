@@ -23,7 +23,7 @@ elsifdef OSX then
 elsifdef WIN32 then
 	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
-else
+elsedef
 	constant gmtime_ = -1
 	constant time_ = -1
 end ifdef
@@ -49,7 +49,7 @@ function time()
 		return floor(((valhi * power(2,32)) + vallow) / 10000000)
 	elsifdef UNIX then
 		return c_func(time_, {NULL})
-	else
+	elsedef
 		return {0,0,0,0,0,0,0,0,0}
 	end ifdef
 end function

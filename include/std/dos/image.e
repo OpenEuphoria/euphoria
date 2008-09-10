@@ -178,7 +178,7 @@ end procedure
 include interrup.e
 ifdef SAFE then
 	public include safe.e
-else
+elsedef
 	public include memory.e
 end ifdef
 

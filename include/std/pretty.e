@@ -167,7 +167,7 @@ end procedure
 
 ifdef UNIX then
 	public constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 126, 1000000000, 1}
-else
+elsedef
 	public constant PRETTY_DEFAULT = {1, 2, 1, 78, "%d", "%.10g", 32, 127, 1000000000, 1}
 end ifdef
 

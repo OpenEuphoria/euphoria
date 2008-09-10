@@ -204,7 +204,7 @@ enum
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
-	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE, IFDEF, ELSIFDEF}) then
+	if not find(tok, {END, ELSE, ELSIF, END_OF_FILE, CASE, IFDEF, ELSIFDEF, ELSEDEF}) then
 		if equal(keyword, "goto") and find(tok, {LOOP, LABEL, WHILE}) then
 			return
 		end if
@@ -662,7 +662,7 @@ procedure UndefinedVar(symtab_index s)
 			dup = dup_globals[i]
 			ifdef UNIX then
 				fname = file_name[SymTab[dup][S_FILE_NO]]
-			else
+			elsedef
 				fname = find_replace("/", file_name[SymTab[dup][S_FILE_NO]], "\\")
 			end ifdef
 			errmsg &= "    " & fname & "\n"
@@ -1972,7 +1972,8 @@ procedure If_statement()
 			prev_false2 = SC1_patch
 		end if
 		short_circuit -= 1
-		tok_match(THEN)
+		--tok_match(THEN)
+		tok_optional(THEN)
 		call_proc(forward_Statement_list, {})
 		tok = next_token()
 	end while
@@ -2401,7 +2402,7 @@ integer live_ifdef = 0
 
 procedure Ifdef_statement()
 	sequence option
-	integer matched = 0, nested_count = 0, has_matched = 0,  in_matched = 0, dead_ifdef = 0
+	integer matched = 0, has_matched = 0,  in_matched = 0, dead_ifdef = 0, in_elsedef = 0
 	token tok
 
 	live_ifdef += 1
@@ -2414,9 +2415,10 @@ procedure Ifdef_statement()
 	end if
 
 	while 1 label "top" do
-		if matched = 0 then
+		if matched = 0 and in_elsedef = 0 then
 			option = StringToken()
-			tok_match(THEN)
+			--tok_match(THEN)
+			tok_optional(THEN)
 			if option[1] = '!' then
 				matched = find(option[2..$], OpDefines) = 0
 			else
@@ -2445,8 +2447,6 @@ procedure Ifdef_statement()
 					else
 						exit "top"
 					end if
-				elsif nested_count and tok[T_ID] = IF then
-					nested_count -= 1
 				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
 					CompileErr("unknown command")
@@ -2459,29 +2459,32 @@ procedure Ifdef_statement()
 				else
 					exit
 				end if
-			elsif tok[T_ID] = ELSE and nested_count = 0  and dead_ifdef = 0 then
-				No_new_entry = has_matched
-			    if has_matched then
-					in_matched = 0
-					if not (match_from("end",ThisLine,bp) or match_from("idf",ThisLine,bp)) then
+			elsif tok[T_ID] = ELSEDEF then
+				if not dead_ifdef then
+					if has_matched then
+						in_matched = 0
+						No_new_entry = 1
 						read_line()
+					else
+						No_new_entry = 0
+						in_elsedef = 1
+						call_proc(parser_id, {})
+						tok_match(END)
+						tok_match(IFDEF)
+						live_ifdef -= 1
+						return
 					end if
-				else
-					call_proc(parser_id, {})
-					tok_match(END)
-					tok_match(IFDEF)
-					exit "top"
 				end if
-			elsif tok[T_ID] = IF then
-				nested_count += 1
 			elsif tok[T_ID] = IFDEF then
 				dead_ifdef += 1
-			elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("else",ThisLine,bp)) then
+			--elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("elsedef",ThisLine,bp)) then
 				-- BOL token was nothing of value to us, just eat the rest of the line
-				read_line()
-			elsif tok[T_ID] = CASE then
-				tok = next_token()
+				--read_line()
 --			else read tokens more slowly, because some unusual formatting could be there
+			--elsif tok[T_ID] = INCLUDE then
+				--read_line()
+			else
+				read_line()
 			end if
 		end while
 	end while
@@ -2673,6 +2676,8 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	while TRUE do
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+			? tok[T_ID]
+			? IGNORED
 			CompileErr("a name is expected here")
 		end if
 		sym = tok[T_SYM]
@@ -3649,14 +3654,6 @@ global procedure real_parser(integer nested)
 		elsif id = IFDEF then
 			StartSourceLine(TRUE)
 			Ifdef_statement()
-
-		elsif id = ELSE then
-			if live_ifdef = 0 then
-				CompileErr("else is allowed only inside if- or ifdef- blocks")
-			else  -- else from a live ifdef at top level
-				putback(tok)
-				return
-			end if
 
 		elsif id = CASE then
 			StartSourceLine(TRUE)

@@ -1271,7 +1271,7 @@ public constant locale_canonical = posix_names
 
 ifdef UNIX then
 	public constant platform_locale = posix_names
-else
+elsedef
 	public constant platform_locale = w32_name_canonical
 end ifdef
 
@@ -1306,7 +1306,7 @@ public function canonical(sequence new_locale)
 		n = w
 	elsif ws != 0 then
 		n = ws
-	else
+	elsedef
 		--unknown, can not be canonical
 		return new_locale
 	end if
@@ -1347,7 +1347,7 @@ public function decanonical(sequence new_locale)
 		n = w
 	elsif ws != 0 then
 		n = ws
-	else
+	elsedef
 		--unknown, can not be canonical
 		return new_locale
 	end if

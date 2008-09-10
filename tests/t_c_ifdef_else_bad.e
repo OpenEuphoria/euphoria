@@ -4,7 +4,7 @@ include std/unittest.e
 ifdef NOT_DEFINED then
 elsifdef DEFINED then
 	end for
-else
+elsedef
 	end while
 end ifdef
 

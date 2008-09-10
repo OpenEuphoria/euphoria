@@ -11,7 +11,7 @@ ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
 	include std\dos\interrup.e
-else
+elsedef
 	include std/dll.e
 end ifdef
 
@@ -49,7 +49,7 @@ elsifdef FREEBSD then
 elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
 	
-else
+elsedef
 	constant xCopyFile          = -1
 	constant xMoveFile          = -1
 	constant xDeleteFile        = -1
@@ -128,7 +128,7 @@ ifdef UNIX then
 	public constant SLASHES = "/"
 	public constant CRLF = "\n"
 	public constant PATHSEP = ':'
-else
+elsedef
 	public constant SLASH='\\'
 	public constant SLASHES = ":\\/"
 	public constant CRLF = "\r\n"
@@ -218,7 +218,7 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 		else
 			return 1
 		end if
-	else
+	elsedef
 		pname = allocate_string(name)
 	end ifdef
 
@@ -735,7 +735,7 @@ public function file_exists(sequence name)
 
 		return r = 0
 
-	else
+	elsedef
 
 		return sequence(dir(name))
 	end ifdef
@@ -768,7 +768,7 @@ public function copy_file(sequence src, sequence dest, atom overwrite)
 	ret = c_func(xCopyFile, {psrc, pdest, not overwrite})
 	free(pdest)
 	free(psrc)
-	else
+	elsedef
 		integer f, h, c, ret
 		ret = 0
 		f = open(src, "rb")
@@ -1822,7 +1822,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 
 ifdef UNIX then
 	lPath = path_in
-else
+elsedef
     sequence lDrive = ""
     -- Replace unix style separators with DOS style
     lPath = find_replace("/", path_in, SLASH)
@@ -1837,7 +1837,7 @@ end ifdef
     if (length(lPath) > 0 and lPath[1] = '~') then
 ifdef UNIX then
 		lHome = getenv("HOME")
-else
+elsedef
 		lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
 end ifdef
 		if lHome[$] != SLASH then
@@ -1865,7 +1865,7 @@ end ifdef
 	then
 ifdef UNIX then
 		lPath = get_curdir() & lPath
-else
+elsedef
 		if (length(lDrive) = 0) then
 			lPath = get_curdir() & lPath
 		else
