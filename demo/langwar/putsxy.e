@@ -15,7 +15,7 @@
 without type_check
 without warning
 
-include image.e
+include std/image.e
 
 global constant CLEAR = -1  -- transparent background 'color'
 global sequence font_index  -- for compatibility with original putsxy.e (Rob)

@@ -12,14 +12,16 @@
 --                     (see euphoria\include\graphics.e for a list of modes)
 -- Press Enter at any time to skip to the next function.
 
-constant GRAPHICS_MODE = 18  
+constant GRAPHICS_MODE = 18
 
 without type_check
 
-include graphics.e
+include std/graphics.e
+include std/graphcst.e
+include std/dos/pixels.e
 include select.e
 
-include machine.e
+include std/machine.e
 -- use_vesa(1) -- FOR ATI cards
 
 constant NFUNCS = 6

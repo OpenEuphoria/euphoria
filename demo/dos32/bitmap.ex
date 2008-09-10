@@ -8,7 +8,10 @@
 -- try mode 19, or see graphics.e
 
 without type_check
-include image.e
+include std/image.e
+include std/graphics.e
+include std/graphcst.e
+include std/dos/pixels.e
 
 constant ERR = 2
 

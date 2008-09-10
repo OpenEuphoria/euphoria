@@ -1,6 +1,8 @@
 	-- DOS Interrupt examples
 
-include machine.e
+include std/machine.e
+include std/dos/base_mem.e
+include std/dos/interrup.e
 
 constant SCREEN = 1, ERR = 2
 

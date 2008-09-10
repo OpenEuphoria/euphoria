@@ -11,7 +11,8 @@
 -- picture can contain digits from 1 to 9 to indicate "depth"
 
 without type_check
-include graphics.e
+include std/graphics.e
+include std/graphcst.e
 
 constant DEPTH = 13
 sequence vc

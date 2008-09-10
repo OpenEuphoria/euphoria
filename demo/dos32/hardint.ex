@@ -1,7 +1,9 @@
 	-- hardware interrupt handler example
-include machine.e
+include std/machine.e
+include std/convert.e
+include std/dos/base_mem.e
 
-atom handlerA_address, handlerB_address 
+atom handlerA_address, handlerB_address
 sequence usual_address
 atom code_segment
 

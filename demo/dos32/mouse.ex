@@ -5,8 +5,11 @@
 -- function. No call is made to mouse_events(), so by default all events are
 -- reported by get_mouse(). 
 
-include mouse.e
-include graphics.e
+include std/mouse.e
+include std/graphics.e
+include std/graphcst.e
+include std/dos/pixels.e
+include std/os.e
 
 sequence vc
 vc = video_config()

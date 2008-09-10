@@ -22,7 +22,7 @@
 --         - ignorable fluff with no effect on the game
 -- 65...: stars - no effect on game, but they shouldn't be destroyed
 
-include sequence.e
+include std/sequence.e
 
 function make_image(sequence digits)
 -- convert a 2-d sequence of hex digits into a 2-d image

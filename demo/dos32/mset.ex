@@ -11,7 +11,7 @@
 -- display are saved in eu_mseta.bmp, eu_msetb.bmp, ...
 
 -- Move any eu_mset.bmp file of the right screen dimensions to \windows 
--- and it will be added to your list of choices for "wallpaper". 
+-- and it will be added to your list of choices for "wallpaper".
 -- Right click on your wallpaper to change it (Win95/98).
 
 constant GRAPHICS_MODE = 18
@@ -22,9 +22,13 @@ constant GRAPHICS_MODE = 18
 
 without type_check
 
-include image.e
+include std/image.e
 include select.e
-include get.e
+include std/get.e
+include std/graphcst.e
+include std/graphics.e
+include std/dos/pixels.e
+include std/os.e
 
 -- use_vesa(1) -- for ATI cards
 

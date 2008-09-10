@@ -6,10 +6,12 @@
 
 without type_check
 
-include graphics.e
+public include std/graphics.e
+public include std/graphcst.e
 include select.e
 
-include machine.e
+include std/machine.e
+include std/dos/pixels.e
 -- use_vesa(1)  -- for ATI cards if you use SVGA
 
 constant GRAPHICS_MODE = 18 

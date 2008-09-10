@@ -7,7 +7,7 @@
 -- each other. Which algorithm is better?
 
 -- How it Works:
--- * There are two major data structures. positions describes each board 
+-- * There are two major data structures. positions describes each board
 --   position. lines describes each possible winning line of 4 positions  
 --   in a row.
 -- * ttt keeps a close eye on the lines data structure, looking first for
@@ -25,10 +25,12 @@
 --   differ in their strategies. AGGRESSO is more concerned with its
 --   own possibilities of winning than with blocking your possibilities.
 
-include graphics.e
-include mouse.e
-include wildcard.e
-include text.e
+include std/graphics.e
+include std/graphcst.e
+include std/dos/pixels.e
+include std/mouse.e
+include std/wildcard.e
+include std/text.e
 
 constant TRUE = 1, FALSE = 0
 constant ON = 1, OFF = 0

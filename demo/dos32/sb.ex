@@ -3,12 +3,15 @@
 		------------------------------------
 without type_check
 
-include graphics.e
+include std/graphics.e
+include std/graphcst.e
+include std/dos/pixels.e
 include select.e
 
 --use_vesa(1) -- for modes 256...261
 
-constant GRAPHICS_MODE = 18 -- VGA
+
+constant GRAPHICS_MODE =18 -- VGA
 
 constant MAX_POPULATION = 125          -- maximum number of circles
 constant MAX_SIZE = 5, MIN_SIZE = 1    -- size of circles

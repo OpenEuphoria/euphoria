@@ -9,10 +9,12 @@ constant GRAPHICS_MODE = 18 -- SVGA, if this fails try mode 18
 			     -- see also euphoria\include\graphics.e
 without type_check
 
-include graphics.e
+include std/graphics.e
+include std/graphcst.e
+include std/dos/pixels.e
 include select.e
 
-include machine.e
+include std/machine.e
 -- use_vesa(1) -- for ATI cards
 
 constant TRUE = 1

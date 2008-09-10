@@ -4,7 +4,7 @@
 
 constant nice_color_modes = {261,18,260,259,258,257,256,19,16,14,13,4},
 	 nice_mono_modes = {17, 11, 15, 6, 5}
-
+include wire.ex
 global function select_mode(integer choice)
 -- Try to select the choice mode, but if it fails try other modes.
 -- This is not guaranteed to work - you may have to set the mode

@@ -20,10 +20,8 @@
 -- decides which task to run next. This cooperative, non-preemptive
 -- tasking approach could be applied to other kinds of programs as well.
 
--- this was a working program, turn all warnings off
-include error.e
-include console.e
-warning_file(-1)
+include std/error.e
+include std/console.e
 
 global constant QUIET = 0  -- set this to 1 to turn off all sounds
 
@@ -36,9 +34,9 @@ end type
 file_number sum_no
 object line
 
-include image.e
-include graphics.e
-include get.e
+include std/image.e
+include std/graphics.e
+include std/get.e
 include vars.e
 include putsxy.e
 

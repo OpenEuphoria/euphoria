@@ -78,7 +78,7 @@ integer cursor_line=1, cursor_column=1
 -- override position()
 
 without warning
-global procedure position(integer line, integer column)
+override procedure position(integer line, integer column)
     cursor_line = line
     cursor_column = column
 end procedure
