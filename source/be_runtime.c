@@ -862,7 +862,7 @@ void Head(s1_ptr s1, int start, object_ptr target)
 		*(s2->base+start) = NOVALUE;
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		RefDS(*target);
+		//RefDS(*target);
 	}
 }
 
@@ -891,7 +891,7 @@ void Tail(s1_ptr s1, int start, object_ptr target)
 	 	}
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		RefDS(*target);
+		//RefDS(*target);
     }
 }
 
@@ -931,7 +931,7 @@ void Remove_elements(int start, int stop, object_ptr target)
 		}
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		RefDS(*target);
+		//RefDS(*target);
 	}
 }
 
@@ -963,7 +963,7 @@ void AssignElement(object what, int place, object_ptr target)
 		}
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		RefDS(*target);
+		//RefDS(*target);
 	}
 }
 
