@@ -323,5 +323,8 @@ sequence replace_ref_result = replace_with_refcount( replace_ref_count )
 test_equal( "replace_refcount", replace_ref_result, "1abc567890_" )
 test_equal( "replace doesn't clobber target if refcount > 1", "12345567890_", replace_ref_count )
 
+sequence result = replace( "xyza", "kcd", 2, 4 )
+test_not_equal( "replace doesn't modify temps (failure will display expected and result as equal)", "xyza", result )
+
 test_report()
 
