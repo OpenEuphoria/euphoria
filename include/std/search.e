@@ -99,17 +99,23 @@ include std/error.e
 
 --**
 -- Signature:
---     global function find(object needle, sequence haystack)
+--     global function find(object needle, sequence haystack, integer start)
 --
 -- Description:
---     Find the first occurrence of a "needle" as an element of a "haystack".
+--     Find the first occurrence of a "needle" as an element of a "haystack", starting from position "start"..
 --
 --Parameters:
 --		# ##needle##: an object whose presence is being queried
 --		# ##haystack##: a sequence, which is being looked up for ##needle##
+--		# ##start##: an integer, the position at which to start searching. Defaults to 1.
 --
 -- Returns:
---     An **integer**, 0 if ##needle## is not on ##haystack##, else the smallest index of an element of ##haystack## that equals ##needle##.
+--     An **integer**, 0 if ##needle## is not on ##haystack##, else the smallest index of an 
+-- element of ##haystack## that equals ##needle##.
+--
+-- Comments:
+--
+-- ##find##() and [[:find_from]]() are identical, but you can omit giving ##find##() a starting point.
 --
 -- Example 1:
 -- <eucode>
@@ -146,6 +152,8 @@ include std/error.e
 --     start may have any value from 1 to the length of ##haystack## plus 1. (Analogous to the
 --     first index of a slice of ##haystack##).
 --
+-- ##find##() and [[:find_from]]() are identical, but you can omit giving ##find##() a starting point.
+--
 -- Example 1:
 -- <eucode>
 -- location = find_from(11, {11, 8, 11, 2, 3}, 2)
@@ -180,6 +188,8 @@ include std/error.e
 -- Comments:
 --     ##start## may have any value from 1 to the length of ##haystack## plus 1. (Just like the first
 --     index of a slice of ##haystack##.)
+--
+-- ##match##() and [[:match_from]]() are identical, but you can omit giving ##match##() a starting point.
 --
 -- Example 1:
 -- <eucode>
@@ -613,17 +623,22 @@ end function
 
 --**
 -- Signature:
---     global function match(sequence needle, sequence haystack)
+--     global function match(sequence needle, sequence haystack, integer start)
 --
 -- Description:
---     Try to match a "needle" against some slice of a "haystack".
+--     Try to match a "needle" against some slice of a "haystack", starting at position "start".
 --
 -- Parameters:
---   # ##needle##: a sequence whose presence as a "substring" is being queried
---   # ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--		# ##needle##: a sequence whose presence as a "substring" is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--		# ##start##: an integer, the point from which matching is attempted. Defaults to 1.
 --
 -- Returns:
 --     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
+--
+-- Comments:
+--
+-- ##match##() and [[:match_from]]() are identical, but you can omit giving ##match##() a starting point.
 --
 -- Example 1:
 -- <eucode>

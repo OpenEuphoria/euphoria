@@ -953,7 +953,7 @@ global procedure emit_op(integer op)
 		-- but not FLOOR_DIV (x/-1)
 
 	-- 2 inputs, 1 output   
-	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, FIND, MATCH,
+	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, 
 					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
 					OPEN, SPRINTF, TASK_CREATE, HASH, HEAD, TAIL}) then
 		cont21ii(op, FALSE)
@@ -987,7 +987,7 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output 
-	elsif find(op, {RHS_SLICE, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE}) then
+	elsif find(op, {RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE}) then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()
