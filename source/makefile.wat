@@ -507,7 +507,7 @@ ec.exe : svn_rev $(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 .\dosbkobj\main-.c: $(EU_CORE_FILES) backend.ex
 
 rev.e :
-	$(EX) revget.ex
+	$(EX) -i ..\include revget.ex
 
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)

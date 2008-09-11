@@ -314,5 +314,14 @@ test_equal("build_list #6", "reader.bak,conio.bak,writer.bak,utils.bak",  build_
 			}, r4,0, "bak"))
 
 
+function replace_with_refcount( sequence s2 )
+	return replace( s2, "abc", 2, 4)
+end function
+
+sequence replace_ref_count = "1234567890_"
+sequence replace_ref_result = replace_with_refcount( replace_ref_count )
+test_equal( "replace_refcount", replace_ref_result, "1abc567890_" )
+test_equal( "replace doesn't clobber target if refcount > 1", "12345567890_", replace_ref_count )
+
 test_report()
 
