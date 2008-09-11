@@ -48,77 +48,77 @@ constant LEX_NAME = 2
 -- descriptive names for scanner tokens - keep up-to-date 
 constant token_name = 
 {
-	{AND, "'and'"},
+	{AND, "and"},
 	{ATOM, "a number"},
-	{BANG, "'!'"},
-	{BREAK, "'break'"},
-	{BY, "'by'"},
-	{COLON, "':'"},
-	{COMMA, "','"},
-	{CONCAT, "'&'"},
-	{CONSTANT, "'constant'"},
-	{CONTINUE, "'continue'"},
-	{DIVIDE, "'/'"},
-	{DO, "'do'"},
-	{ELSE, "'else'"},
-	{ELSEDEF, "'elsedef'"},
-	{ELSIF, "'elsif'"},
-	{ELSIFDEF, "'elsifdef'"},
-	{END, "'end'"},
+	{BANG, "!"},
+	{BREAK, "break"},
+	{BY, "by"},
+	{COLON, ":"},
+	{COMMA, ","},
+	{CONCAT, "&"},
+	{CONSTANT, "constant"},
+	{CONTINUE, "continue"},
+	{DIVIDE, "/"},
+	{DO, "do"},
+	{ELSE, "else"},
+	{ELSEDEF, "elsedef"},
+	{ELSIF, "elsif"},
+	{ELSIFDEF, "elsifdef"},
+	{END, "end"},
 	{END_OF_FILE, "the end of file"},
-	{ENTRY, "'entry'"},
-	{ENUM, "'enum'"},
-	{EQUALS, "'='"},
-	{EXIT, "'exit'"},
-	{FOR, "'for'"},
+	{ENTRY, "entry"},
+	{ENUM, "enum"},
+	{EQUALS, "="},
+	{EXIT, "exit"},
+	{FOR, "for"},
 	{FUNC, "a function"},
-	{FUNCTION, "'function'"},
-	{GLABEL, "'label'"},
-	{GLOBAL, "'global'"},
-	{GOTO, "'goto'"},
-	{GREATER, "'>'"},
-	{GREATEREQ, "'>='"},
-	{IF,  "'if'"},
-	{IFDEF, "'ifdef'"},
+	{FUNCTION, "function"},
+	{GLABEL, "label"},
+	{GLOBAL, "global"},
+	{GOTO, "goto"},
+	{GREATER, ">"},
+	{GREATEREQ, ">="},
+	{IF,  "if"},
+	{IFDEF, "ifdef"},
 	{ILLEGAL_CHAR, "an illegal character"},
-	{INCLUDE, "'include'"},
-	{LEFT_BRACE, "'{'"},
-	{LEFT_ROUND, "'('"},
-	{LEFT_SQUARE, "'['"},
-	{LESS, "'<'"},
-	{LESSEQ, "'<='"},
-	{LOOP, "'loop'"},
-	{MINUS, "'-'"},
-	{MULTIPLY, "'*'"},
+	{INCLUDE, "include"},
+	{LEFT_BRACE, "{"},
+	{LEFT_ROUND, "("},
+	{LEFT_SQUARE, "["},
+	{LESS, "<"},
+	{LESSEQ, "<="},
+	{LOOP, "loop"},
+	{MINUS, "-"},
+	{MULTIPLY, "*"},
 	{NAMESPACE, "a namespace qualifier"},
-	{NEWLINE, "end-of-line"},
-	{NOT, "'not'"},
-	{NOTEQ, "'!='"},
-	{OR, "'or'"},
-	{PLUS, "'+'"},
+	{NEWLINE, "the end of a line"},
+	{NOT, "not"},
+	{NOTEQ, "!="},
+	{OR, "or"},
+	{PLUS, "+"},
 	{PROC, "a procedure"},
-	{PROCEDURE, "'procedure'"},
+	{PROCEDURE, "procedure"},
 	{QUALIFIED_VARIABLE, "a variable"},
 	{QUALIFIED_FUNC, "a function"},
 	{QUALIFIED_PROC, "a procedure"},
 	{QUALIFIED_TYPE, "a type"},
-	{RETRY, "'retry'"},
-	{RETURN, "'return'"},
-	{RIGHT_BRACE, "'}'"},
-	{RIGHT_ROUND, "')'"},
-	{RIGHT_SQUARE, "']'"},
+	{RETRY, "retry"},
+	{RETURN, "return"},
+	{RIGHT_BRACE, "}"},
+	{RIGHT_ROUND, ")"},
+	{RIGHT_SQUARE, "]"},
 	{SLICE, "a slice"},
 	{STRING, "a character string"},
-	{TO, "'to'"},
-	{THEN, "'then'"},
+	{TO, "to"},
+	{THEN, "then"},
 	{TYPE, "a type"},
-	{UNTIL, "'until'"},
-	{TYPE_DECL, "'type'"},
+	{UNTIL, "until"},
+	{TYPE_DECL, "type"},
 	{VARIABLE, "a variable"},
-	{WITH, "'with'"},
-	{WITHOUT, "'without'"},
-	{WHILE, "'while'"},
-	{'?', "'?'"}
+	{WITH, "with"},
+	{WITHOUT, "without"},
+	{WHILE, "while"},
+	{'?', "?"}
 } 
 
 
@@ -178,17 +178,18 @@ end procedure
 
 global function LexName(integer t)
 -- returns token name given token number 
-	integer i
+	sequence name
+	for i = 1 to length(token_name) do
+		if t = token_name[i][LEX_NUMBER] then
+			name = token_name[i][LEX_NAME]
+			if not find(' ', name) then
+				name = "'" & name & "'"
+			end if
+			return name
+		end if
+	end for
+	return "this ..." -- try to avoid this case 
 	
-	i = 1
-	while i <= length(token_name) and t != token_name[i][LEX_NUMBER] do
-		i += 1
-	end while
-	if i > length(token_name) then
-		return "this ..." -- try to avoid this case 
-	else
-		return token_name[i][LEX_NAME]
-	end if
 end function
 
 global procedure InitEmit()

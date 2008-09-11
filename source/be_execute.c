@@ -1632,10 +1632,12 @@ void do_exec(int *start_pc)
 	int nvars;   
 	int *iptr;
 	int file_no;
+	int end_pos;
 	int going_up; 
 	object_ptr result_ptr;
 	object result_val;
-	int cf, cfl;
+	int cf;
+	int seqlen;
 	opcode_type *patch;
 	object b, c;
 	symtab_ptr sym, sub, caller;
@@ -3793,7 +3795,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to remove() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cfl = s1->length;
+				seqlen = s1->length;
 				b = *(object_ptr)pc[2];  //start
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to remove() must be an atom");
@@ -3801,13 +3803,13 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[3]; //stop
 				if (IS_SEQUENCE(top))
 					RTFatal("Third argument to remove() must be an atom");
-				file_no = (IS_ATOM_INT(top)) ? top : (long)(DBL_PTR(top)->dbl);
-				if (file_no > cfl)
-					file_no=cfl;
+				end_pos = (IS_ATOM_INT(top)) ? top : (long)(DBL_PTR(top)->dbl);
+				if (end_pos > seqlen)
+					end_pos=seqlen;
 				obj_ptr = (object_ptr)pc[4];
 				top = *obj_ptr;
 				// no removal
-				if (nvars > cfl || nvars > file_no || file_no<0) {  // return target
+				if (nvars > seqlen || nvars > end_pos || end_pos<0) {  // return target
 					*obj_ptr = a;
 					Ref(*obj_ptr);
 					DeRef(top);
@@ -3816,21 +3818,21 @@ void do_exec(int *start_pc)
 				}
 				// remove all or start
 				if (nvars < 2 ) {  
-					if (file_no >= cfl) {   // return ""
+					if (end_pos >= seqlen) {   // return ""
 						*obj_ptr = MAKE_SEQ(NewS1(0));
 						Ref(*obj_ptr);
 						DeRef(top);
 					}
 				   	else
-						Tail(s1,file_no+1,obj_ptr); //file_no = 1st element kept
+						Tail(s1,end_pos+1,obj_ptr); //end_pos = 1st element kept
 				   	thread5();
 				   	BREAK;
 				}
-				if (file_no >= cfl) //remove tail
+				if (end_pos >= seqlen) //remove tail
 					Head(s1,nvars,obj_ptr);   //nvars=1+final length
 				else { // carve slice out
 					*assign_slice_seq = s1;
-					Remove_elements(nvars,file_no,obj_ptr);
+					Remove_elements(nvars,end_pos,obj_ptr);
 				}
 				thread5();
 				BREAK;
@@ -3843,7 +3845,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to replace() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cfl = s1->length;
+				seqlen = s1->length;
 				b = *(object_ptr)pc[3];  //start
 				if (IS_SEQUENCE(b))
 					RTFatal("Third argument to replace() must be an atom");
@@ -3851,29 +3853,29 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[4];  //stop
 				if (IS_SEQUENCE(top))
 					RTFatal("Fourth argument to replace() must be an atom");
-				file_no = (!IS_ATOM_INT(top)) ? (long)(DBL_PTR(top)->dbl) : top;
-				if (file_no > cfl)
-					file_no=cfl;
+				end_pos = (!IS_ATOM_INT(top)) ? (long)(DBL_PTR(top)->dbl) : top;
+				if (end_pos > seqlen)
+					end_pos=seqlen;
 				b = *(object_ptr)pc[2];  // replacement
 				obj_ptr = (object_ptr)pc[5];
 				top = *obj_ptr;
 				//  normalise arguments, dispatch special cases
-				if (file_no<0) {  // return replacement & target
+				if (end_pos<0) {  // return replacement & target
 					Concat(obj_ptr,b,a);
 					pc += 6;
 					thread();
 					BREAK;
 				}
-				if (file_no > cfl)
-					file_no = cfl;
-				if (nvars > cfl) {  // return target & replacement
+				if (end_pos > seqlen)
+					end_pos = seqlen;
+				if (nvars > seqlen) {  // return target & replacement
 					Concat(obj_ptr,a,b);
 					pc += 6;
 					thread();
 					BREAK;
 				}
 				if (nvars < 2 ) { //replacing start or all
-				    if (file_no >= cfl) {
+				    if (end_pos >= seqlen) {
 						Ref(b);
 						*obj_ptr = b;
 						DeRef(top);
@@ -3884,7 +3886,7 @@ void do_exec(int *start_pc)
 					thread();
 					BREAK;
 				}
-				if (nvars > file_no) {  // just splice
+				if (nvars > end_pos) {  // just splice
 	       			if (IS_SEQUENCE(b)) {
 						s2 = SEQ_PTR(b);
 						s1 = Add_internal_space(a,nvars,s2->length);
@@ -3906,15 +3908,15 @@ void do_exec(int *start_pc)
 					s2 = SEQ_PTR(b);
 					going_up = s2->length;
 					*assign_slice_seq = s1;
-					if (going_up > file_no - nvars+1) { //replacement longer than replaced
-						s1 = Add_internal_space(a,going_up+nvars-file_no-1, s2->length+file_no);
+					if (going_up > end_pos - nvars+1) { //replacement longer than replaced
+						s1 = Add_internal_space(a,going_up+nvars-end_pos-1, s2->length+end_pos);
 						Copy_elements(nvars,s2);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 	 				}
 	 				else { // remove any extra elements, and then assign a regular slice
-						if (going_up < file_no - nvars+1) {
-							Remove_elements(nvars+going_up,file_no,obj_ptr);
+						if (going_up < end_pos - nvars+1) {
+							Remove_elements(nvars+going_up,end_pos,obj_ptr);
 							s1 = SEQ_PTR(*obj_ptr);
 							*assign_slice_seq = s1;
 						}
@@ -3928,9 +3930,9 @@ void do_exec(int *start_pc)
 					*assign_slice_seq = s1;
 					if (!IS_ATOM_INT(b))
 						Ref(b);
-					if (nvars < file_no) {
+					if (nvars < end_pos) {
 						object_ptr optr;
-						Remove_elements(nvars+1,file_no,obj_ptr);
+						Remove_elements(nvars+1,end_pos,obj_ptr);
 						optr = SEQ_PTR(*obj_ptr)->base+nvars;
 						DeRef(*optr);
 						*optr = b;
@@ -3949,7 +3951,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to head() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cfl = s1->length;
+				seqlen = s1->length;
 				b = *(object_ptr)pc[2];   // start
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to head() must be an atom");
@@ -3960,7 +3962,7 @@ void do_exec(int *start_pc)
 				if (nvars <= 0) {
 					*obj_ptr = MAKE_SEQ(NewS1(0));
 				}
-				else if (nvars >= cfl) {
+				else if (nvars >= seqlen) {
 					Ref(a);
 					*obj_ptr = a;
 				}
@@ -3977,7 +3979,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to tail() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cfl = s1->length;
+				seqlen = s1->length;
 				b = *(object_ptr)pc[2];  //start
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to tail() must be an atom");
@@ -3989,13 +3991,13 @@ void do_exec(int *start_pc)
 					*obj_ptr = MAKE_SEQ(NewS1(0));
 					DeRef(top);
 				}
-				else if (nvars >= cfl) {
+				else if (nvars >= seqlen) {
 					Ref(a);
 					*obj_ptr = a;
 					DeRef(top);
 				}
 				else
-					Tail(s1,cfl-nvars+1,obj_ptr);
+					Tail(s1,seqlen-nvars+1,obj_ptr);
 				thread4();
 				BREAK;
 

@@ -630,15 +630,11 @@ procedure tok_match(integer tok)
 end procedure
 
 procedure tok_optional(integer tok)
--- match token or else syntax error
+-- match token or else put it back
 	token t
-	--sequence expected, actual
 
 	t = next_token()
 	if t[T_ID] != tok then
-		--expected = LexName(tok)
-		--actual = LexName(t[T_ID])
-		-- Warning(sprintf("Optional token %s, but got %s", {expected, actual}))
 		putback(t)
 	end if
 end procedure
@@ -651,7 +647,7 @@ procedure UndefinedVar(symtab_index s)
 	sequence fname
 
 	if SymTab[s][S_SCOPE] = SC_UNDEFINED then
-		CompileErr(sprintf("%s has not been declared", {SymTab[s][S_NAME]}))
+		CompileErr(sprintf("'%s' has not been declared", {SymTab[s][S_NAME]}))
 
 	elsif SymTab[s][S_SCOPE] = SC_MULTIPLY_DEFINED then
 		rname = SymTab[s][S_NAME]
@@ -684,7 +680,7 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 	else
 		plural = "s"
 	end if
-	CompileErr(sprintf("%s takes %s%d argument%s",
+	CompileErr(sprintf("'%s' takes %s%d argument%s",
 			   {SymTab[subsym][S_NAME], only,
 				SymTab[subsym][S_NUM_ARGS], plural}))
 end procedure
@@ -1972,7 +1968,6 @@ procedure If_statement()
 			prev_false2 = SC1_patch
 		end if
 		short_circuit -= 1
-		--tok_match(THEN)
 		tok_optional(THEN)
 		call_proc(forward_Statement_list, {})
 		tok = next_token()
@@ -2417,7 +2412,6 @@ procedure Ifdef_statement()
 	while 1 label "top" do
 		if matched = 0 and in_elsedef = 0 then
 			option = StringToken()
-			--tok_match(THEN)
 			tok_optional(THEN)
 			if option[1] = '!' then
 				matched = find(option[2..$], OpDefines) = 0

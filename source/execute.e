@@ -3226,6 +3226,25 @@ procedure do_crash_routine(integer b)
 	end if
 end procedure
 
+procedure opREMOVE()
+ 	a = Code[pc+1]
+ 	b = Code[pc+2]
+ 	c = Code[pc+3]
+ 	target = Code[pc+4]
+ 	val[target] = remove(val[a],val[b],val[c])
+ 	pc += 5
+end procedure
+
+procedure opREPLACE()
+ 	a = Code[pc+1]
+ 	b = Code[pc+2]
+ 	c = Code[pc+3]
+ 	d = Code[pc+4]
+ 	target = Code[pc+5]
+ 	val[target] = replace(val[a],val[b],val[c],val[d])
+ 	pc += 6
+end procedure
+
 procedure opHEAD()
 	a = Code[pc+1]
 	b = Code[pc+2]
@@ -3508,6 +3527,9 @@ procedure do_exec()
 			case HASH:
 				opHASH()
 				break
+			case HEAD:
+				opHEAD()
+				break
 			case IF:
 				opIF()
 				break
@@ -3714,8 +3736,14 @@ procedure do_exec()
 			case REMAINDER:
 				opREMAINDER()
 				break
+			case REMOVE:
+				opREMOVE()
+				break
 			case REPEAT:
 				opREPEAT()
+				break
+			case REPLACE:
+				opREPLACE()
 				break
 			case RETURNF:
 				opRETURNF()
@@ -3792,6 +3820,9 @@ procedure do_exec()
 				break
 			case SYSTEM_EXEC:
 				opSYSTEM_EXEC()
+				break
+			case TAIL:
+				opTAIL()
 				break
 			case TAN:
 				opTAN()
