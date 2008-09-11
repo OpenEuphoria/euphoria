@@ -1306,7 +1306,7 @@ public function canonical(sequence new_locale)
 		n = w
 	elsif ws != 0 then
 		n = ws
-	elsedef
+	else
 		--unknown, can not be canonical
 		return new_locale
 	end if
@@ -1347,7 +1347,7 @@ public function decanonical(sequence new_locale)
 		n = w
 	elsif ws != 0 then
 		n = ws
-	elsedef
+	else
 		--unknown, can not be canonical
 		return new_locale
 	end if
