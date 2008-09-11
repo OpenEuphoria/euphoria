@@ -1635,7 +1635,7 @@ void do_exec(int *start_pc)
 	int going_up; 
 	object_ptr result_ptr;
 	object result_val;
-	int cf;
+	int cf, cfl;
 	opcode_type *patch;
 	object b, c;
 	symtab_ptr sym, sub, caller;
@@ -3793,7 +3793,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to remove() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cf = s1->length;
+				cfl = s1->length;
 				b = *(object_ptr)pc[2];  //start
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to remove() must be an atom");
@@ -3802,12 +3802,12 @@ void do_exec(int *start_pc)
 				if (IS_SEQUENCE(top))
 					RTFatal("Third argument to remove() must be an atom");
 				file_no = (IS_ATOM_INT(top)) ? top : (long)(DBL_PTR(top)->dbl);
-				if (file_no > cf)
-					file_no=cf;
+				if (file_no > cfl)
+					file_no=cfl;
 				obj_ptr = (object_ptr)pc[4];
 				top = *obj_ptr;
 				// no removal
-				if (nvars > cf || nvars > file_no || file_no<0) {  // return target
+				if (nvars > cfl || nvars > file_no || file_no<0) {  // return target
 					*obj_ptr = a;
 					Ref(*obj_ptr);
 					DeRef(top);
@@ -3816,7 +3816,7 @@ void do_exec(int *start_pc)
 				}
 				// remove all or start
 				if (nvars < 2 ) {  
-					if (file_no >= cf) {   // return ""
+					if (file_no >= cfl) {   // return ""
 						*obj_ptr = MAKE_SEQ(NewS1(0));
 						Ref(*obj_ptr);
 						DeRef(top);
@@ -3826,7 +3826,7 @@ void do_exec(int *start_pc)
 				   	thread5();
 				   	BREAK;
 				}
-				if (file_no >= cf) //remove tail
+				if (file_no >= cfl) //remove tail
 					Head(s1,nvars,obj_ptr);   //nvars=1+final length
 				else { // carve slice out
 					*assign_slice_seq = s1;
@@ -3843,7 +3843,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to replace() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cf = s1->length;
+				cfl = s1->length;
 				b = *(object_ptr)pc[3];  //start
 				if (IS_SEQUENCE(b))
 					RTFatal("Third argument to replace() must be an atom");
@@ -3852,8 +3852,8 @@ void do_exec(int *start_pc)
 				if (IS_SEQUENCE(top))
 					RTFatal("Fourth argument to replace() must be an atom");
 				file_no = (!IS_ATOM_INT(top)) ? (long)(DBL_PTR(top)->dbl) : top;
-				if (file_no > cf)
-					file_no=cf;
+				if (file_no > cfl)
+					file_no=cfl;
 				b = *(object_ptr)pc[2];  // replacement
 				obj_ptr = (object_ptr)pc[5];
 				top = *obj_ptr;
@@ -3864,16 +3864,16 @@ void do_exec(int *start_pc)
 					thread();
 					BREAK;
 				}
-				if (file_no > cf)
-					file_no = cf;
-				if (nvars > cf) {  // return target & replacement
+				if (file_no > cfl)
+					file_no = cfl;
+				if (nvars > cfl) {  // return target & replacement
 					Concat(obj_ptr,a,b);
 					pc += 6;
 					thread();
 					BREAK;
 				}
 				if (nvars < 2 ) { //replacing start or all
-				    if (file_no >= cf) {
+				    if (file_no >= cfl) {
 						Ref(b);
 						*obj_ptr = b;
 						DeRef(top);
@@ -3949,7 +3949,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to head() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cf = s1->length;
+				cfl = s1->length;
 				b = *(object_ptr)pc[2];   // start
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to head() must be an atom");
@@ -3960,7 +3960,7 @@ void do_exec(int *start_pc)
 				if (nvars <= 0) {
 					*obj_ptr = MAKE_SEQ(NewS1(0));
 				}
-				else if (nvars >= cf) {
+				else if (nvars >= cfl) {
 					Ref(a);
 					*obj_ptr = a;
 				}
@@ -3977,7 +3977,7 @@ void do_exec(int *start_pc)
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to tail() must be a sequence");
 				s1 = SEQ_PTR(a);
-				cf = s1->length;
+				cfl = s1->length;
 				b = *(object_ptr)pc[2];  //start
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to tail() must be an atom");
@@ -3989,13 +3989,13 @@ void do_exec(int *start_pc)
 					*obj_ptr = MAKE_SEQ(NewS1(0));
 					DeRef(top);
 				}
-				else if (nvars >= cf) {
+				else if (nvars >= cfl) {
 					Ref(a);
 					*obj_ptr = a;
 					DeRef(top);
 				}
 				else
-					Tail(s1,cf-nvars+1,obj_ptr);
+					Tail(s1,cfl-nvars+1,obj_ptr);
 				thread4();
 				BREAK;
 
