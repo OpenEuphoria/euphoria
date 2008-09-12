@@ -801,19 +801,19 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	q = seq->base;
 	for (i=1;i<at;i++) {
 		temp = *(++q);
-		*++p = temp;
+		*(++p) = temp;
 		if (!IS_ATOM_INT(temp)) RefDS(temp);
 	}
 	p += len;
 	while (TRUE) {  // NOVALUE will be copied
 		temp = *(++q);
-		*++p = temp;
+		*(++p) = temp;
 		if (!IS_ATOM_INT(temp)) {
 			if (temp == NOVALUE)
 				break;
 			RefDS(temp);
 		}
-	}
+	}	
 	return new_seq;
 }
 

@@ -3909,7 +3909,8 @@ void do_exec(int *start_pc)
 					going_up = s2->length;
 					*assign_slice_seq = s1;
 					if (going_up > end_pos - nvars+1) { //replacement longer than replaced
-						s1 = Add_internal_space(a,going_up+nvars-end_pos-1, s2->length+end_pos);
+						s1 = Add_internal_space(a,end_pos+1,going_up+nvars-end_pos-1);
+						*assign_slice_seq = s1;
 						Copy_elements(nvars,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);

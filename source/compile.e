@@ -4418,7 +4418,7 @@ procedure opREPLACE()
 		c_stmt0("int repl_len = s2->length;\n")
 		c_stmt0("assign_slice_seq = &assign_space;\n")
 		c_stmt0("if (repl_len > stop - start + 1) {\n") -- replacement is longer than replaced
-		c_stmt("assign_space = Add_internal_space(@, repl_len+start-stop-1, s2->length+stop);\n", {Code[pc+1]})
+		c_stmt("assign_space = Add_internal_space(@, stop+1, repl_len+start-stop-1);\n", {Code[pc+1]})
 		c_stmt0("assign_slice_seq = &assign_space;\n")
 		c_stmt0("Copy_elements(start, s2, assign_slice_seq);\n")
 		c_stmt("DeRef(@);\n",{Code[pc+5]})

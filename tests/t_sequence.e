@@ -106,14 +106,14 @@ test_equal("replace() 2,5 #3c", " --something         "
              , replace(" //something         ", "--", 2, 3))
 
 test_equal( "replace 4,3", "johaaandoe", replace("johndoe", "aaa", 4,3 ))
-test_equal( "replace 4,4", "johaaandoe", replace("johndoe", "aaa", 4,4 ))
+test_equal( "replace 4,4", "johaaadoe",  replace("johndoe", "aaa", 4,4 ))
 test_equal( "replace 4,5", "johaaaoe",   replace("johndoe", "aaa", 4,5 ))
 test_equal( "replace 4,6", "johaaae",    replace("johndoe", "aaa", 4,6 ))
 test_equal( "replace 4,7", "johaaa",     replace("johndoe", "aaa", 4,7 ))
 test_equal( "replace 4,8", "johaaa",     replace("johndoe", "aaa", 4,8 ))
 
 test_equal( "replace 0,0", "aaajohndoe", replace("johndoe", "aaa", 0,0 ))
-test_equal( "replace 0,1", "aaaohndoe",  replace("johndoe", "aaa", 0,1 ))
+test_equal( "replace 0,1", "aaajohndoe",  replace("johndoe", "aaa", 0,1 ))
 test_equal( "replace 0,2", "aaahndoe",   replace("johndoe", "aaa", 0,2 ))
 test_equal( "replace 0,3", "aaandoe",    replace("johndoe", "aaa", 0,3 ))
 test_equal( "replace 0,4", "aaadoe",     replace("johndoe", "aaa", 0,4 ))
@@ -228,7 +228,7 @@ test_not_equal("replace() 2,5 #3a", "/--omeething         ", replace("//somethin
 test_not_equal("replace() 2,5 #3b", "/--eething         ", replace("//something                                            ", "--", 2, 5))
 test_not_equal("replace() 2,5 #3c", " --someething         ", replace(" //something                                           ", "--", 2, 3))
 
-test_equal("pivot #1", {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}, pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 )) 
+test_equal("pivot #1", {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}, pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 ))
 test_equal("pivot #2", {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}, pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) )
 test_equal("pivot #3", {{}, {}, {5}}, pivot( 5 ) )
 test_equal("pivot #4", {{}, {5}, {}}, pivot( 5, 5 ) )
