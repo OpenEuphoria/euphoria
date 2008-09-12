@@ -222,7 +222,7 @@ extern unsigned default_heap;
 /**********************/
 /* Imported functions */
 /**********************/
-extern void Copy_elements();
+extern s1_ptr Copy_elements();
 extern void Head();
 extern void Tail();
 extern void Remove_elements();
@@ -3891,7 +3891,7 @@ void do_exec(int *start_pc)
 						s2 = SEQ_PTR(b);
 						s1 = Add_internal_space(a,nvars,s2->length);
 						*assign_slice_seq = s1;
-						Copy_elements(nvars,s2);
+						Copy_elements(nvars,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 					}
@@ -3910,7 +3910,7 @@ void do_exec(int *start_pc)
 					*assign_slice_seq = s1;
 					if (going_up > end_pos - nvars+1) { //replacement longer than replaced
 						s1 = Add_internal_space(a,going_up+nvars-end_pos-1, s2->length+end_pos);
-						Copy_elements(nvars,s2);
+						Copy_elements(nvars,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 	 				}
@@ -3919,17 +3919,18 @@ void do_exec(int *start_pc)
 							Remove_elements(nvars+going_up,end_pos,obj_ptr);
 							s1 = SEQ_PTR(*obj_ptr);
 							*assign_slice_seq = s1;
+							s1 = Copy_elements(nvars,s2,assign_slice_seq);
 						}
-		       			else
-							DeRef(*obj_ptr);
-						Copy_elements(nvars,s2);
+		       			else {
+							s1 = Copy_elements(nvars,s2,obj_ptr);
+						}
 						*obj_ptr = MAKE_SEQ(s1);
 					}
 				}
 				else {  // replacing by an atom
 					*assign_slice_seq = s1;
 					if (!IS_ATOM_INT(b))
-						Ref(b);
+						RefDS(b);
 					if (nvars < end_pos) {
 						object_ptr optr;
 						Remove_elements(nvars+1,end_pos,obj_ptr);
@@ -4055,7 +4056,7 @@ void do_exec(int *start_pc)
 					s2 = SEQ_PTR(b);
 					s1 = Add_internal_space(a,nvars,s2->length);
 					*assign_slice_seq = s1;
-					Copy_elements(nvars,s2);
+					Copy_elements(nvars,s2,assign_slice_seq);
 	       			DeRef(*obj_ptr);
 					*obj_ptr = MAKE_SEQ(s1);
 	   			}

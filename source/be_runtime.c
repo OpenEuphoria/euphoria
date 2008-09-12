@@ -817,17 +817,54 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	return new_seq;
 }
 
-void Copy_elements(int start,s1_ptr source) {
-	object_ptr t_elem = (*assign_slice_seq)->base+start;
-	object_ptr s_elem = source->base+1;
+s1_ptr Copy_elements(int start,s1_ptr source, object_ptr target)
+{
+	object_ptr t_elem, s_elem;
+	s1_ptr s1 = *assign_slice_seq;
 	object temp;
 	int i;
 
-	for (i=1;i<=source->length;i++) {
-		temp = *(s_elem++);
-		*(t_elem++) = temp;
-		if (!IS_ATOM_INT(temp))
-			RefDS(temp);
+	if (s1->ref != 1 || *target != s1) {
+		s1_ptr new_seq = NewS1(s1->length);
+		object_ptr next_pos;
+		t_elem = new_seq->base;
+		s_elem = s1->base;
+		for (i=1;i<start;i++) {
+			temp = *(++s_elem);
+			*(++t_elem) = temp;
+			if (!IS_ATOM_INT(temp))
+				RefDS(temp);
+		}
+		next_pos = s_elem+source->length;
+		s_elem = source->base;
+		for (i=1;i<=source->length;i++) {
+			temp = *(++s_elem);
+			*(++t_elem) = temp;
+			if (!IS_ATOM_INT(temp))
+				RefDS(temp);
+		}
+		s_elem = next_pos;
+		while (TRUE) {
+			temp = *(++s_elem);
+			*(++t_elem) = temp;
+			if (!IS_ATOM_INT(temp)) {
+				if (temp == NOVALUE)
+					break;
+				RefDS(temp);
+			}
+		}
+		return new_seq;
+	}
+	else {
+		t_elem = (*assign_slice_seq)->base+start;
+		s_elem = source->base+1;
+		for (i=1;i<=source->length;i++) {
+			temp = *(s_elem++);
+			*(t_elem++) = temp;
+			if (!IS_ATOM_INT(temp))
+				RefDS(temp);
+		}
+		return s1;
 	}
 }
 
@@ -862,7 +899,6 @@ void Head(s1_ptr s1, int start, object_ptr target)
 		*(s2->base+start) = NOVALUE;
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		//RefDS(*target);
 	}
 }
 
@@ -891,7 +927,6 @@ void Tail(s1_ptr s1, int start, object_ptr target)
 	 	}
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		//RefDS(*target);
     }
 }
 
@@ -931,7 +966,6 @@ void Remove_elements(int start, int stop, object_ptr target)
 		}
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		//RefDS(*target);
 	}
 }
 
@@ -963,7 +997,6 @@ void AssignElement(object what, int place, object_ptr target)
 		}
 		DeRef(*target);
 		*target = MAKE_SEQ(s2);
-		//RefDS(*target);
 	}
 }
 
