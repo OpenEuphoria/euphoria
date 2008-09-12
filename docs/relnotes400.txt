@@ -192,8 +192,8 @@ $$(doneby Derek Parnell, C. Cuvier.)
   warning must be a litteral constant. $$(doneby C. Cuvier.)
 * Warnings also may be redirected or suppressed using **warning_file()**. 
   $$(doneby C. Cuvier.)
-* New routines in ***eds.e** (formerly **database.e**): **db_clear()**, **db_clear_table()**,    
- **db_get_recid()**, db_replace_recid()**, ***db_current_table()**, **db_record_recid()**,
+* New routines in **eds.e** (formerly **database.e**): **db_clear()**, **db_clear_table()**,
+ **db_get_recid()**, **db_replace_recid()**, **db_current_table()**, **db_record_recid()**,
  **db_set_caching()** $$(doneby Derek Parnell)
 * New **primes.e** library devoted to prime numbers $$(doneby Derek Parnell)
 * New **regex.e** library on regular expressions, using the standard PCRE library $$(doneby Jim Brown, Matt Lewis)

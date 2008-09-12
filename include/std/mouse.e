@@ -46,6 +46,7 @@ constant M_GET_MOUSE = 14,
 
 --**
 -- Mouse Events
+--
 -- The following constants can be used to identify and specify mouse events. They are platform dependent.
 -- * MOVE
 -- * LEFT_DOWN

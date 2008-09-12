@@ -77,7 +77,7 @@ end type
 include std/error.e
 
 --**
--- Miscellaneous constants:
+-- Miscellaneous constants~:
 -- * LN2      : natural logarithm of 2
 -- * INVLN2   : the inverse of LN2
 -- * LN10     : natural logarithm of 10
@@ -263,6 +263,44 @@ public function min(object a)
 		end if
 	end for
 	return b
+end function
+
+--**
+-- Ensures that the ##item## is in a range of values supplied by ##range_limits##
+--
+-- Parameters:
+--   # ##item##: The object to test for.
+--   # ##range_limits##: A sequence of two or more elements. The first is assumed
+--    to be the smallest value and the last is assumed to tbe the highest value.
+--
+-- Returns:
+--   A **object**: If ##item# is lower than the first item in the ##range_limits##
+--                 it returns the first item. 
+--                 If  ##item# is higher than the last element in the ##range_limits##
+--                 it returns the last item.
+--                 Otherwise it returns ##item##.
+--
+-- Example 1:
+--   <eucode>
+--   object valid_data = set_in_range(user_data, {2, 75})
+--   if not equal(valid_data, user_data) then
+--       errmsg("Invalid input supplied. Using %d instead.", valid_data)
+--   end if
+--   procA(valid_data)
+--   </eucode>
+
+public function set_in_range(object item, sequence range_limits)
+	if length(range_limits) < 2 then
+		return item
+	end if
+	
+	if eu:compare(item, range_limits[1]) < 0 then
+		return range_limits[1]
+	end if
+	if eu:compare(item, range_limits[$]) > 0 then
+		return range_limits[$]
+	end if
+	return item
 end function
 
 --****

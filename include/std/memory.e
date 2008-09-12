@@ -1,10 +1,9 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- <<LEVELTOC depth=2>>
---
-
 --****
 -- == Low-Level Memory Management
+--
+-- <<LEVELTOC depth=2>>
 --
 -- Warning: Some of these routines require a knowledge of 
 -- machine-level programming. You could crash your system!

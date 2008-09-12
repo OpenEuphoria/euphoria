@@ -1820,7 +1820,7 @@ end function
 --
 
 --**
--- The ffollowing constants denote orientation of distributivity or unitarity:
+-- The ffollowing constants denote orientation of distributivity or unitarity~:
 -- * SIDE_NONE: no unuits, or no distributivity
 -- * SIDE_LEFT: property is requested or verified on the left side
 -- * SIDE_RIGHT: property is requeste or verified on the right side
@@ -1832,6 +1832,7 @@ public enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
 --****
 -- === Operations on sets
 --
+
 --**
 -- Returns an operation that splits by left action into the supplied mappings.
 --

@@ -620,7 +620,7 @@ public function doy(datetime dt)
 end function
 
 --**
--- Convert a datetime value to the unix numeric format (seconds since EPOCH)
+-- Convert a datetime value to the unix numeric format (seconds since ##EPOCH_1970##)
 --
 -- Parameters:
 -- 		# ##dt##: a datetime to be queried.
@@ -680,7 +680,7 @@ end function
 --
 -- Comments:
 --
--- Format string can include the following format specifiers:
+-- Format string can include the following format specifiers~:
 --
 -- * ~%%  a literal %
 -- * %a  locale's abbreviated weekday name (e.g., Sun)

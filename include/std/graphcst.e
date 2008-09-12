@@ -114,7 +114,7 @@ public type color(integer x)
 end type
 
 --****
--- ==== Routines
+-- === Routines
 
 --**
 -- Mixture Type

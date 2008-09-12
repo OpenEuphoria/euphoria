@@ -50,7 +50,7 @@ public constant EOF = -1
 
 --**
 -- Signature:
--- <built-in> procedure ?
+-- <built-in> procedure ? (no parens around he unique parameter)
 --
 -- Description:
 -- Shorthand way of saying: **pretty_print(STDOUT, x, {})** - i.e. printing the value of an 

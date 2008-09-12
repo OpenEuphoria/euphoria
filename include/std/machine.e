@@ -46,14 +46,16 @@
 --
 -- Some typical uses of routine_id() are:
 --
--- # Calling a routine that is defined later in a program.
 -- # Creating a subroutine that takes another routine as a parameter. (See Example 2 below)
--- # Using a sequence of routine id's to make a case (switch) statement.
+-- # Using a sequence of routine id's to make a case (switch) statement. Using the 
+-- [[:switch_statement]] is more efficient.
 -- # Setting up an Object-Oriented system.
 -- # Getting a routine id so you can pass it to [[:call_back]](). (See [[../docs/platform.txt]])
 -- # Getting a routine id so you can pass it to [[:task_create]](). (See [[../docs/tasking.txt]])
+-- # Calling a routine that is defined later in a program. This is no longer needed from v4.0 onward.
 --
--- Note that C routines, callable by Euphoria, also have routine id's.
+-- Note that C routines, callable by Euphoria, also have ids, but they cannot be used where 
+-- routine ids are, because of the different type checking and other technical issues.
 -- See [[:define_c_proc]]() and [[:define_c_func]]().
 --
 -- Example 1:

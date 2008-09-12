@@ -2506,6 +2506,54 @@ used).
 With **exw.exe** or **exu**, control-c will always
 stop your program immediately.
 
+==== goto statement
+
+##goto## instructs the computer to resume code execution at a place which does not follow the statement.
+The place to resume execution is called the //target// of the statement. It is restricted to 
+lie in the current routine, or the current file if outside any routine.
+
+Syntax is:
+<eucode>
+goto "label string"
+</eucode>
+
+The target of a ##goto## statement can be any accessible ##label## statement:
+<eucode>
+label "label strng"
+</eucode>
+
+Label names must be double quoted constant strings. Characters that would be illegal in an 
+Euphria identifier may appear in a label name, since it is a regular string.
+
+[[:Labelled headers|Header labels]] do not count as possible goto label targets.
+
+Use ##goto## in production code when all the following applies:
+* you want to proceed with a statement which is not the following one;
+* the various structured constructs wouldn't do, or very awkwardly;
+* you contemplate a significant gain in speed/reliability from such a direct move;
+* the code flow remains understandable for an outsider nevertheless.
+
+During early development, it may be nice to have while the code isn't firmly structured. But 
+most instances of ##goto## should melt into structured constructs as soon as possible as code 
+matures. You may find out that modifying a program that has goto statements is usually 
+trickier than if it had not had them.
+
+The following may be situations where ##goto## can help:
+* A routine has several return statements, and some processing must be done before returning, 
+no matter from where. It may be clearer to goto a single return point and perform the 
+processing only at this point.
+* An exit statement in a loop corresponds to an early exxit, and the normal pocessing that 
+immediately follows the loop is not relevant. Replacing an exit statement followed by various 
+flag testing by a single goto can help.
+
+Explicit label names will tremendously help maintenance. Remember that there is no limit to 
+their contents.
+
+goto-ing into a scope (like an if block, a for loop,...) will just do that. Some variables 
+may be defined only in that scope, and they may or may not have sensible values. It is up to 
+the programmer to take appropriate action in this respect.
+
+
 === Labelled headers
 
 As shown in the above section on control flow statements, most of them may take

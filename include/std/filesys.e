@@ -1164,6 +1164,294 @@ object dirfil
 	end if
 end function
 
+--**
+-- Locates a file by looking in a set of directories for it.
+--
+-- Parameters:
+--		# ##filename##: a sequence, the name of the file to search for.
+--		# ##search_list##: a sequence, the list of directories to look in. By
+--        default this is "", meaning that a predefined set of directories
+--        is scanned. See comments below.
+--
+-- Returns:
+--     A **sequence**, the located file path if found, else the original file name.
+--
+-- Comment:
+-- If ##filename## is an absolute path, it is just returned and no searching
+-- takes place.
+--
+-- If ##filename## is located, the full path of the file is returned.
+--
+-- If ##search_list## is supplied, it can be either a sequence of directory names,
+-- of a string of directory names delimited by ':' in UNIX and ';' in Windows.
+--
+-- If the ##search_list## is omitted or "", this will look in the following places...
+-- * The current directory
+-- * The directory that the program is run from.
+-- * The directory in $HOME ($HOMEDRIVE & $HOMEPATH in Windows)
+-- * The parent directory of the current directory
+-- * The directories returned by include_paths()
+-- * $EUDIR/bin
+-- * $EUDIR/docs
+-- * $EUDIST/
+-- * $EUDIST/etc
+-- * $EUDIST/data
+-- * The directories listed in $USERPATH
+-- * The directories listed in $PATH
+--
+-- Example 1:
+-- <eucode>
+--  res = locate_file("abc.def", {"/usr/bin", "/u2/someapp", "/etc"})
+--  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
+--  res = locate_file("abc.def") -- Scan default locations.
+-- </eucode>
+
+public function locate_file(sequence filename, sequence search_list = {})
+	object extra_paths
+	
+	if absolute_path(filename) then
+		return filename
+	end if
+
+	if length(search_list) = 0 then
+		search_list = append(search_list, "." & SLASH)
+		
+		extra_paths = command_line()
+		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
+		search_list = append(search_list, extra_paths)
+		
+ifdef LINUX	then
+		extra_paths = getenv("HOME")
+else
+		extra_paths = getenv("HOMEPATH")
+end ifdef		
+		if sequence(extra_paths) then
+			search_list = append(search_list, extra_paths & SLASH)
+		end if				
+		
+		search_list = append(search_list, ".." & SLASH)
+		
+		search_list &= include_paths(1)
+		
+		extra_paths = getenv("EUDIR")
+		if sequence(extra_paths) then
+			search_list = append(search_list, extra_paths & SLASH & "bin" & SLASH)
+			search_list = append(search_list, extra_paths & SLASH & "docs" & SLASH)
+		end if
+		
+		extra_paths = getenv("EUDIST")
+		if sequence(extra_paths) then
+			search_list = append(search_list, extra_paths & SLASH)
+			search_list = append(search_list, extra_paths & SLASH & "etc" & SLASH)
+			search_list = append(search_list, extra_paths & SLASH & "data" & SLASH)
+		end if
+		
+		extra_paths = getenv("USERPATH")
+		if sequence(extra_paths) then
+			extra_paths = split(extra_paths, PATHSEP)
+			search_list &= extra_paths
+		end if
+		
+		extra_paths = getenv("PATH")
+		if sequence(extra_paths) then
+			extra_paths = split(extra_paths, PATHSEP)
+			search_list &= extra_paths
+		end if
+		
+	else
+		if integer(search_list[1]) then
+			search_list = split(search_list, PATHSEP)
+		end if
+	end if
+		
+	for i = 1 to length(search_list) do
+		if search_list[i][$] != SLASH then
+			search_list[i] &= SLASH
+		end if
+
+		if file_exists(search_list[i] & filename) then
+			return canonical_path(search_list[i] & filename)
+		end if
+	end for
+	return filename
+end function
+
+--**
+-- Returns the current directory, with a trailing SLASH
+--
+-- Parameters:
+--		# ##drive_id##: For non-Unix systems only. This is the Drive letter to
+--      to get the current directory of. If omitted, the current drive is used.
+--
+-- Returns:
+--     A **sequence**, the current directory.
+--
+-- Comment:
+--  Windows and MS-DOS maintain a current directory for each disk drive. You
+--  would use this routine if you wanted the current directory for a drive that
+--  may not be the current drive.
+--
+--  For Unix systems, this is simply ignored because there is only one current
+--  directory at any time on Unix.
+--
+--  **Note**: This always ensures that the returned value has a trailing SLASH
+-- character.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_curdir('D') -- Find the current directory on the D: drive.
+-- -- res might be "D:\backup\music\"
+-- res = get_curdir()    -- Find the current directory on the current drive.
+-- -- res might be "C:\myapp\work\"
+-- </eucode>
+public function get_curdir(integer drive_id = 0)
+
+    sequence lCurDir
+ifdef !LINUX then    
+    sequence lOrigDir = ""
+    sequence lDrive
+    object void
+
+    if t_alpha(drive_id) then
+	    lOrigDir =  current_dir()
+	    lDrive = "  "
+	    lDrive[1] = drive_id
+	    lDrive[2] = ':'
+	    if chdir(lDrive) = 0 then
+	    	lOrigDir = ""
+	    end if
+	end if
+end ifdef
+    
+    lCurDir = current_dir()
+ifdef !LINUX then    
+	if length(lOrigDir) > 0 then
+    	void = chdir(lOrigDir[1..2])
+    end if
+end ifdef
+
+	-- Ensure that it ends in a path separator.
+	if (lCurDir[$] != SLASH) then
+		lCurDir &= SLASH
+	end if
+	
+	return lCurDir
+end function
+
+sequence InitCurDir = get_curdir() -- Capture the original PWD
+
+--**
+-- Returns the original current directory
+--
+-- Parameters:
+--		None.
+--
+-- Returns:
+--     A **sequence**, the current directory at the time the program started running.
+--
+-- Comment:
+-- You would use this if the program might change the current directory during
+-- its processing and you wanted to return to the original directory.
+--
+--  **Note**: This always ensures that the returned value has a trailing SLASH
+-- character.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_init_curdir() -- Find the original current directory.
+-- </eucode>
+public function get_init_curdir()
+	return InitCurDir
+end function
+
+--- TODO
+--- copy_directory( srcpath, destpath, structonly = 0)
+
+--**
+-- Clear (delete) a directory of all files, but retaining sub-directories.
+--
+-- Parameters:
+--		# ##name##: a sequence, the name of the directory whose files you want to remove.
+--		# ##recurse##: an integer, whether or not to remove files in the 
+--        directory's sub-directories. If 0 then this function is identical
+--        to remove_directory(). If 1, then we recursively delete the
+--        directory and its contents. Defaults to 1.
+--
+-- Returns:
+--     An **integer**, 0 on failure, otherwise the number of files plus 1.
+--
+-- Comment:
+-- This never removes a directory. It only ever removes files. It is used to 
+-- clear a directory structure of all existing files, leaving the structure
+-- intact.
+--
+-- Example 1:
+-- <eucode>
+-- integer cnt = clear_directory("the_old_folder")
+-- if cnt = 0 then
+--		crash("Filesystem problem - could not remove one or more of the files.")
+-- end if
+-- printf(1, "Number of files removed: %d\n", cnt - 1)
+-- </eucode>
+--
+-- See Also:
+-- 	[[:remove_directory]], [[:delete_file]]
+public function clear_directory(sequence path, integer recurse = 1)
+	object files
+	integer ret
+	if length(path) > 0 then
+		if path[$] = SLASH then
+			path = path[1 .. $-1]
+		end if
+	end if
+	
+	if length(path) = 0 then
+		return 0 -- Nothing specified to clear. Not safe to assume anything.
+		         -- (btw, not allowed to clear root directory)
+	end if
+	ifdef WIN32 then
+		if length(path) = 2 then
+			if path[2] = ':' then
+				return 0 -- nothing specified to delete
+			end if
+		end if
+	end ifdef
+
+	
+	files = dir(path)
+	if atom(files) then
+		return 0
+	end if
+	if not equal(files[1][D_NAME], ".") then
+		return 0 -- Supplied name was not a directory
+	end if
+	
+	ret = 1
+	path &= SLASH
+	
+	for i = 1 to length(files) do
+		if eu:find(files[i][D_NAME], {".", ".."}) then
+			continue
+		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
+			if recurse then
+				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+				if cnt = 0 then
+					return 0
+				end if
+				ret += cnt
+			else
+				continue
+			end if
+		else
+			if delete_file(path & files[i][D_NAME]) = 0 then
+				return 0
+			end if
+			ret += 1
+		end if
+	end for
+	return ret
+end function
+
 
 --****
 -- === File name parsing
@@ -1455,94 +1743,6 @@ public function defaultext( sequence path, sequence defext)
 	return path & defext
 end function
 
---- TODO
---- copy_directory( srcpath, destpath, structonly = 0)
-
---**
--- Clear (delete) a directory of all files, but retaining sub-directories.
---
--- Parameters:
---		# ##name##: a sequence, the name of the directory whose files you want to remove.
---		# ##recurse##: an integer, whether or not to remove files in the 
---        directory's sub-directories. If 0 then this function is identical
---        to remove_directory(). If 1, then we recursively delete the
---        directory and its contents. Defaults to 1.
---
--- Returns:
---     An **integer**, 0 on failure, otherwise the number of files plus 1.
---
--- Comment:
--- This never removes a directory. It only ever removes files. It is used to 
--- clear a directory structure of all existing files, leaving the structure
--- intact.
---
--- Example 1:
--- <eucode>
--- integer cnt = clear_directory("the_old_folder")
--- if cnt = 0 then
---		crash("Filesystem problem - could not remove one or more of the files.")
--- end if
--- printf(1, "Number of files removed: %d\n", cnt - 1)
--- </eucode>
---
--- See Also:
--- 	[[:remove_directory]], [[:delete_file]]
-public function clear_directory(sequence path, integer recurse = 1)
-	object files
-	integer ret
-	if length(path) > 0 then
-		if path[$] = SLASH then
-			path = path[1 .. $-1]
-		end if
-	end if
-	
-	if length(path) = 0 then
-		return 0 -- Nothing specified to clear. Not safe to assume anything.
-		         -- (btw, not allowed to clear root directory)
-	end if
-	ifdef WIN32 then
-		if length(path) = 2 then
-			if path[2] = ':' then
-				return 0 -- nothing specified to delete
-			end if
-		end if
-	end ifdef
-
-	
-	files = dir(path)
-	if atom(files) then
-		return 0
-	end if
-	if not equal(files[1][D_NAME], ".") then
-		return 0 -- Supplied name was not a directory
-	end if
-	
-	ret = 1
-	path &= SLASH
-	
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
-			if recurse then
-				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
-				if cnt = 0 then
-					return 0
-				end if
-				ret += cnt
-			else
-				continue
-			end if
-		else
-			if delete_file(path & files[i][D_NAME]) = 0 then
-				return 0
-			end if
-			ret += 1
-		end if
-	end for
-	return ret
-end function
-
 --**
 -- Determine if the supplied string is an absolute path or a relative path.
 --
@@ -1585,206 +1785,6 @@ public function absolute_path(sequence filename)
 	end ifdef
 	return 0
 	
-end function
-
---**
--- Locates a file by looking in a set of directories for it.
---
--- Parameters:
---		# ##filename##: a sequence, the name of the file to search for.
---		# ##search_list##: a sequence, the list of directories to look in. By
---        default this is "", meaning that a predefined set of directories
---        is scanned. See comments below.
---
--- Returns:
---     A **sequence**, the located file path if found, else the original file name.
---
--- Comment:
--- If ##filename## is an absolute path, it is just returned and no searching
--- takes place.
---
--- If ##filename## is located, the full path of the file is returned.
---
--- If ##search_list## is supplied, it can be either a sequence of directory names,
--- of a string of directory names delimited by ':' in UNIX and ';' in Windows.
---
--- If the ##search_list## is omitted or "", this will look in the following places...
--- * The current directory
--- * The directory that the program is run from.
--- * The directory in $HOME ($HOMEDRIVE & $HOMEPATH in Windows)
--- * The parent directory of the current directory
--- * The directories returned by include_paths()
--- * $EUDIR/bin
--- * $EUDIR/docs
--- * $EUDIST/
--- * $EUDIST/etc
--- * $EUDIST/data
--- * The directories listed in $USERPATH
--- * The directories listed in $PATH
---
--- Example 1:
--- <eucode>
---  res = locate_file("abc.def", {"/usr/bin", "/u2/someapp", "/etc"})
---  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
---  res = locate_file("abc.def") -- Scan default locations.
--- </eucode>
-
-public function locate_file(sequence filename, sequence search_list = {})
-	object extra_paths
-	
-	if absolute_path(filename) then
-		return filename
-	end if
-
-	if length(search_list) = 0 then
-		search_list = append(search_list, "." & SLASH)
-		
-		extra_paths = command_line()
-		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
-		search_list = append(search_list, extra_paths)
-		
-ifdef LINUX	then
-		extra_paths = getenv("HOME")
-else
-		extra_paths = getenv("HOMEPATH")
-end ifdef		
-		if sequence(extra_paths) then
-			search_list = append(search_list, extra_paths & SLASH)
-		end if				
-		
-		search_list = append(search_list, ".." & SLASH)
-		
-		search_list &= include_paths(1)
-		
-		extra_paths = getenv("EUDIR")
-		if sequence(extra_paths) then
-			search_list = append(search_list, extra_paths & SLASH & "bin" & SLASH)
-			search_list = append(search_list, extra_paths & SLASH & "docs" & SLASH)
-		end if
-		
-		extra_paths = getenv("EUDIST")
-		if sequence(extra_paths) then
-			search_list = append(search_list, extra_paths & SLASH)
-			search_list = append(search_list, extra_paths & SLASH & "etc" & SLASH)
-			search_list = append(search_list, extra_paths & SLASH & "data" & SLASH)
-		end if
-		
-		extra_paths = getenv("USERPATH")
-		if sequence(extra_paths) then
-			extra_paths = split(extra_paths, PATHSEP)
-			search_list &= extra_paths
-		end if
-		
-		extra_paths = getenv("PATH")
-		if sequence(extra_paths) then
-			extra_paths = split(extra_paths, PATHSEP)
-			search_list &= extra_paths
-		end if
-		
-	else
-		if integer(search_list[1]) then
-			search_list = split(search_list, PATHSEP)
-		end if
-	end if
-		
-	for i = 1 to length(search_list) do
-		if search_list[i][$] != SLASH then
-			search_list[i] &= SLASH
-		end if
-
-		if file_exists(search_list[i] & filename) then
-			return canonical_path(search_list[i] & filename)
-		end if
-	end for
-	return filename
-end function
-
---**
--- Returns the current directory, with a trailing SLASH
---
--- Parameters:
---		# ##drive_id##: For non-Unix systems only. This is the Drive letter to
---      to get the current directory of. If omitted, the current drive is used.
---
--- Returns:
---     A **sequence**, the current directory.
---
--- Comment:
---  Windows and MS-DOS maintain a current directory for each disk drive. You
---  would use this routine if you wanted the current directory for a drive that
---  may not be the current drive.
---
---  For Unix systems, this is simply ignored because there is only one current
---  directory at any time on Unix.
---
---  **Note**: This always ensures that the returned value has a trailing SLASH
--- character.
---
--- Example 1:
--- <eucode>
--- res = get_curdir('D') -- Find the current directory on the D: drive.
--- -- res might be "D:\backup\music\"
--- res = get_curdir()    -- Find the current directory on the current drive.
--- -- res might be "C:\myapp\work\"
--- </eucode>
-public function get_curdir(integer drive_id = 0)
-
-    sequence lCurDir
-ifdef !LINUX then    
-    sequence lOrigDir = ""
-    sequence lDrive
-    object void
-
-    if t_alpha(drive_id) then
-	    lOrigDir =  current_dir()
-	    lDrive = "  "
-	    lDrive[1] = drive_id
-	    lDrive[2] = ':'
-	    if chdir(lDrive) = 0 then
-	    	lOrigDir = ""
-	    end if
-	end if
-end ifdef
-    
-    lCurDir = current_dir()
-ifdef !LINUX then    
-	if length(lOrigDir) > 0 then
-    	void = chdir(lOrigDir[1..2])
-    end if
-end ifdef
-
-	-- Ensure that it ends in a path separator.
-	if (lCurDir[$] != SLASH) then
-		lCurDir &= SLASH
-	end if
-	
-	return lCurDir
-end function
-
-sequence InitCurDir = get_curdir() -- Capture the original PWD
-
---**
--- Returns the original current directory
---
--- Parameters:
---		None.
---
--- Returns:
---     A **sequence**, the current directory at the time the program started running.
---
--- Comment:
--- You would use this if the program might change the current directory during
--- its processing and you wanted to return to the original directory.
---
---  **Note**: This always ensures that the returned value has a trailing SLASH
--- character.
---
--- Example 1:
--- <eucode>
--- res = get_init_curdir() -- Find the original current directory.
--- </eucode>
-public function get_init_curdir()
-	return InitCurDir
 end function
 
 

@@ -14,8 +14,10 @@ include std/error.e
 
 --****
 -- === Constants
+
+--**
 -- Error status values returned from get() and value() are
--- 
+--
 -- * ##GET_SUCCESS## = 0,
 -- * ##GET_EOF## = -1,
 -- * ##GET_FAIL## = 1,
