@@ -82,9 +82,9 @@ elsif length(c) != 3 then
 end if
 
 if tryst then
-	h = open(".svn/entries", "r")
+	h = open("../.svn/entries", "r")
 	if h = -1 then
-		h = open("svn~1/entries", "r")
+		h = open("../svn~1/entries", "r")
 	end if
 else
 	h = open(c[3], "r")
@@ -161,9 +161,9 @@ elsif length(c) != 3 then
 end if
 
 if tryst then
-	h = open(".svn/entries", "r")
+	h = open("../.svn/entries", "r")
 	if h = -1 then
-		h = open("svn~1/entries", "r")
+		h = open("../svn~1/entries", "r")
 	end if
 else
 	h = open(c[3], "r")

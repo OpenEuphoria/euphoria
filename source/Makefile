@@ -257,7 +257,7 @@ builddirs : svn_rev
 	done
 
 svn_rev : 
-	-$(EXE) -i ../include revget.ex .svn/entries
+	-$(EXE) -i ../include revget.ex ../.svn/entries
 
 objlist : 
 	cd $(OBJDIR) && \
