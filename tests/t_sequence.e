@@ -69,6 +69,10 @@ test_equal("remove() range bounds #2", "John Doe", remove("John Doe", 3, 1))
 test_equal("remove() range bounds #3", "John Doe", remove("John Doe", -3, -1))
 test_equal("remove() range bounds with floats", "n Doe", remove("John Doe", 1.5, 3))
 
+test_equal("remove 0,2", "cdefg",   remove("abcdefg", 0, 2))
+test_equal("remove 7,2", "abcdef",  remove("abcdefg", 7, 9))
+test_equal("remove 8,2", "abcdefg", remove("abcdefg", 8, 9))
+
 test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
 test_equal("remove_all() 2", "Ask what you can do for your country.", 
            remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
@@ -100,6 +104,34 @@ test_equal("replace() 2,5 #3b", "/--eething         "
 --subscript value 34 is out of bounds, reading from a sequence of length 33
 test_equal("replace() 2,5 #3c", " --something         "
              , replace(" //something         ", "--", 2, 3))
+
+test_equal( "replace 4,3", "johaaandoe", replace("johndoe", "aaa", 4,3 ))
+test_equal( "replace 4,4", "johaaandoe", replace("johndoe", "aaa", 4,4 ))
+test_equal( "replace 4,5", "johaaaoe",   replace("johndoe", "aaa", 4,5 ))
+test_equal( "replace 4,6", "johaaae",    replace("johndoe", "aaa", 4,6 ))
+test_equal( "replace 4,7", "johaaa",     replace("johndoe", "aaa", 4,7 ))
+test_equal( "replace 4,8", "johaaa",     replace("johndoe", "aaa", 4,8 ))
+
+test_equal( "replace 0,0", "aaajohndoe", replace("johndoe", "aaa", 0,0 ))
+test_equal( "replace 0,1", "aaaohndoe",  replace("johndoe", "aaa", 0,1 ))
+test_equal( "replace 0,2", "aaahndoe",   replace("johndoe", "aaa", 0,2 ))
+test_equal( "replace 0,3", "aaandoe",    replace("johndoe", "aaa", 0,3 ))
+test_equal( "replace 0,4", "aaadoe",     replace("johndoe", "aaa", 0,4 ))
+test_equal( "replace 0,5", "aaaoe",      replace("johndoe", "aaa", 0,5 ))
+
+test_equal( "replace 7,0", "johndoaaae", replace("johndoe", "aaa", 7,0 ))
+test_equal( "replace 7,1", "johndoaaa",  replace("johndoe", "aaa", 7,1 ))
+test_equal( "replace 7,2", "johndoaaa",  replace("johndoe", "aaa", 7,2 ))
+test_equal( "replace 7,3", "johndoaaa",  replace("johndoe", "aaa", 7,3 ))
+test_equal( "replace 7,4", "johndoaaa",  replace("johndoe", "aaa", 7,4 ))
+test_equal( "replace 7,5", "johndoaaa",  replace("johndoe", "aaa", 7,5 ))
+
+test_equal( "replace 8,0", "johndoeaaa", replace("johndoe", "aaa", 8,0 ))
+test_equal( "replace 8,1", "johndoeaaa", replace("johndoe", "aaa", 8,1 ))
+test_equal( "replace 8,2", "johndoeaaa", replace("johndoe", "aaa", 8,2 ))
+test_equal( "replace 8,3", "johndoeaaa", replace("johndoe", "aaa", 8,3 ))
+test_equal( "replace 8,4", "johndoeaaa", replace("johndoe", "aaa", 8,4 ))
+test_equal( "replace 8,5", "johndoeaaa", replace("johndoe", "aaa", 8,5 ))
 
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))
@@ -324,6 +356,7 @@ test_equal( "replace doesn't clobber target if refcount > 1", "1234567890_", rep
 
 sequence result = replace( "xyza", "kcd", 2, 4 )
 test_not_equal( "replace doesn't modify temps (failure will display expected and result as equal)", "xyza", result )
+
 
 test_report()
 
