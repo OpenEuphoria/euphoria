@@ -477,7 +477,10 @@ global procedure emit_op(integer op)
 		c = Pop() -- sequence 
 		target = NewTempSym() -- target 
 
-		if SymTab[c][S_MODE] = M_NORMAL then
+		if c < 0 then -- forward reference
+			-- we can't know what it is, so emit the check
+			op = RHS_SUBS_CHECK
+		elsif SymTab[c][S_MODE] = M_NORMAL then
 			if SymTab[c][S_VTYPE] != sequence_type and 
 			SymTab[SymTab[SymTab[c][S_VTYPE]][S_NEXT]][S_VTYPE] != 
 			sequence_type then
