@@ -1985,7 +1985,7 @@ procedure opMULTIPLY()
 	val[target] = val[a] * val[b]
 	pc += 4
 end procedure
-			
+
 procedure opPLUS() 
 -- PLUS, PLUS_I
 	a = Code[pc+1]
@@ -3685,6 +3685,7 @@ procedure do_exec()
 				opPLENGTH()
 				break
 			case PLUS:
+			case PLUS_I:
 				opPLUS()
 				break
 			case PLUS1:

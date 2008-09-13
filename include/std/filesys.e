@@ -761,13 +761,13 @@ end function
 
 public function copy_file(sequence src, sequence dest, atom overwrite)
 	ifdef WIN32 then
-	atom psrc, pdest, ret
-
-	psrc = allocate_string(src)
-	pdest = allocate_string(dest)
-	ret = c_func(xCopyFile, {psrc, pdest, not overwrite})
-	free(pdest)
-	free(psrc)
+		atom psrc, pdest, ret
+	
+		psrc = allocate_string(src)
+		pdest = allocate_string(dest)
+		ret = c_func(xCopyFile, {psrc, pdest, not overwrite})
+		free(pdest)
+		free(psrc)
 	elsedef
 		integer f, h, c, ret
 		ret = 0
@@ -823,47 +823,47 @@ end function
 public function rename_file(sequence src, sequence dest)
 	atom psrc, pdest, ret
 	ifdef DOS32 then
-    atom low_buff_old, low_buff_new
-    integer i
-    sequence reg_list
-    if length(src) > 3 and length(dest) > 3 then
-        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
-            if eu:compare(src[1], dest[1]) then
-		-- renaming a file across drives is not supported
-                return 0
-            end if
-        end if
-    end if
-    low_buff_old = allocate_low(length(src) + 1)
-    if not low_buff_old then
-        return 0
-    end if
-    low_buff_new = allocate_low(length(dest) + 1)
-    if not low_buff_new then
-        free_low(low_buff_old)
-        return 0
-    end if
-    poke(low_buff_old, src & 0)
-    poke(low_buff_new, dest & 0)
-    reg_list = repeat(0,10)
-    if short_names then
-        reg_list[REG_AX] = #5600
-    else
-        reg_list[REG_AX] = #7156
-    end if
-    reg_list[REG_DS] = floor(low_buff_old / 16)
-    reg_list[REG_DX] = remainder(low_buff_old, 16)
-    reg_list[REG_ES] = floor(low_buff_new / 16)
-    reg_list[REG_DI] = remainder(low_buff_new, 16)
-    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-    reg_list = dos_interrupt(#21, reg_list)
-    free_low(low_buff_old)
-    free_low(low_buff_new)
-    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-        return 0
-    else
-        return 1
-    end if
+	    atom low_buff_old, low_buff_new
+	    integer i
+	    sequence reg_list
+	    if length(src) > 3 and length(dest) > 3 then
+	        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
+	            if eu:compare(src[1], dest[1]) then
+			-- renaming a file across drives is not supported
+	                return 0
+	            end if
+	        end if
+	    end if
+	    low_buff_old = allocate_low(length(src) + 1)
+	    if not low_buff_old then
+	        return 0
+	    end if
+	    low_buff_new = allocate_low(length(dest) + 1)
+	    if not low_buff_new then
+	        free_low(low_buff_old)
+	        return 0
+	    end if
+	    poke(low_buff_old, src & 0)
+	    poke(low_buff_new, dest & 0)
+	    reg_list = repeat(0,10)
+	    if short_names then
+	        reg_list[REG_AX] = #5600
+	    else
+	        reg_list[REG_AX] = #7156
+	    end if
+	    reg_list[REG_DS] = floor(low_buff_old / 16)
+	    reg_list[REG_DX] = remainder(low_buff_old, 16)
+	    reg_list[REG_ES] = floor(low_buff_new / 16)
+	    reg_list[REG_DI] = remainder(low_buff_new, 16)
+	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+	    reg_list = dos_interrupt(#21, reg_list)
+	    free_low(low_buff_old)
+	    free_low(low_buff_new)
+	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+	        return 0
+	    else
+	        return 1
+	    end if
 	end ifdef
 	
 	psrc = allocate_string(src)
@@ -893,30 +893,30 @@ public function delete_file(sequence name)
 	atom pfilename, ret
 
 	ifdef DOS32 then
-    atom low_buff
-    sequence reg_list
-    low_buff = allocate_low(length(name) + 1)
-    if not low_buff then
-        return 0
-    end if
-    poke(low_buff, name & 0)
-    reg_list = repeat(0,10)
-    if short_names then
-        reg_list[REG_AX] = #4100
-    else
-        reg_list[REG_AX] = #7141
-    end if
-    reg_list[REG_DS] = floor(low_buff / 16)
-    reg_list[REG_DX] = remainder(low_buff, 16)
-    reg_list[REG_SI] = #0000
-    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-    reg_list = dos_interrupt(#21, reg_list)
-    free_low(low_buff)
-    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-        return 0
-    else
-        return 1
-    end if
+	    atom low_buff
+	    sequence reg_list
+	    low_buff = allocate_low(length(name) + 1)
+	    if not low_buff then
+	        return 0
+	    end if
+	    poke(low_buff, name & 0)
+	    reg_list = repeat(0,10)
+	    if short_names then
+	        reg_list[REG_AX] = #4100
+	    else
+	        reg_list[REG_AX] = #7141
+	    end if
+	    reg_list[REG_DS] = floor(low_buff / 16)
+	    reg_list[REG_DX] = remainder(low_buff, 16)
+	    reg_list[REG_SI] = #0000
+	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+	    reg_list = dos_interrupt(#21, reg_list)
+	    free_low(low_buff)
+	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+	        return 0
+	    else
+	        return 1
+	    end if
 	end ifdef
 
 	pfilename = allocate_string(name)
@@ -960,52 +960,52 @@ integer dirname_id = -1
 public function move_file(sequence src, sequence dest, atom overwrite=0)
 	atom psrc, pdest, ret
 	ifdef DOS32 then
-    atom low_buff_old, low_buff_new
-    integer i
-    sequence reg_list
-    if length(src) > 3 and length(dest) > 3 then
-        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
-            if eu:compare(src[1], dest[1]) then
-                i = copy_file(src,dest,overwrite)
-                if not i then
-                    return i
-                end if
-                i = delete_file(src)
-                return i
-            end if
-        end if
-    end if
-    low_buff_old = allocate_low(length(src) + 1)
-    if not low_buff_old then
-        return 0
-    end if
-    low_buff_new = allocate_low(length(dest) + 1)
-    if not low_buff_new then
-        free_low(low_buff_old)
-        return 0
-    end if
-    poke(low_buff_old, src & 0)
-    poke(low_buff_new, dest & 0)
-    reg_list = repeat(0,10)
-    if short_names then
-        reg_list[REG_AX] = #5600
-    else
-        reg_list[REG_AX] = #7156
-    end if
-    reg_list[REG_DS] = floor(low_buff_old / 16)
-    reg_list[REG_DX] = remainder(low_buff_old, 16)
-    reg_list[REG_ES] = floor(low_buff_new / 16)
-    reg_list[REG_DI] = remainder(low_buff_new, 16)
-    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
---TODO double check that this honors the overwrite flag, and manually add a check if not
-    reg_list = dos_interrupt(#21, reg_list)
-    free_low(low_buff_old)
-    free_low(low_buff_new)
-    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-        return 0
-    else
-        return 1
-    end if
+	    atom low_buff_old, low_buff_new
+	    integer i
+	    sequence reg_list
+	    if length(src) > 3 and length(dest) > 3 then
+	        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
+	            if eu:compare(src[1], dest[1]) then
+	                i = copy_file(src,dest,overwrite)
+	                if not i then
+	                    return i
+	                end if
+	                i = delete_file(src)
+	                return i
+	            end if
+	        end if
+	    end if
+	    low_buff_old = allocate_low(length(src) + 1)
+	    if not low_buff_old then
+	        return 0
+	    end if
+	    low_buff_new = allocate_low(length(dest) + 1)
+	    if not low_buff_new then
+	        free_low(low_buff_old)
+	        return 0
+	    end if
+	    poke(low_buff_old, src & 0)
+	    poke(low_buff_new, dest & 0)
+	    reg_list = repeat(0,10)
+	    if short_names then
+	        reg_list[REG_AX] = #5600
+	    else
+	        reg_list[REG_AX] = #7156
+	    end if
+	    reg_list[REG_DS] = floor(low_buff_old / 16)
+	    reg_list[REG_DX] = remainder(low_buff_old, 16)
+	    reg_list[REG_ES] = floor(low_buff_new / 16)
+	    reg_list[REG_DI] = remainder(low_buff_new, 16)
+	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+	--TODO double check that this honors the overwrite flag, and manually add a check if not
+	    reg_list = dos_interrupt(#21, reg_list)
+	    free_low(low_buff_old)
+	    free_low(low_buff_new)
+	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+	        return 0
+	    else
+	        return 1
+	    end if
 	end ifdef
 	ifdef UNIX then
 		atom psrcbuf, pdestbuf
@@ -1257,7 +1257,6 @@ end ifdef
 			extra_paths = split(extra_paths, PATHSEP)
 			search_list &= extra_paths
 		end if
-		
 	else
 		if integer(search_list[1]) then
 			search_list = split(search_list, PATHSEP)
@@ -1307,7 +1306,7 @@ end function
 public function get_curdir(integer drive_id = 0)
 
     sequence lCurDir
-ifdef !LINUX then    
+ifdef !LINUX then
     sequence lOrigDir = ""
     sequence lDrive
     object void
@@ -1324,7 +1323,7 @@ ifdef !LINUX then
 end ifdef
     
     lCurDir = current_dir()
-ifdef !LINUX then    
+ifdef !LINUX then
 	if length(lOrigDir) > 0 then
     	void = chdir(lOrigDir[1..2])
     end if

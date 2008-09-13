@@ -113,8 +113,9 @@ EU_BACKEND_OBJECTS = &
 	.\$(OBJDIR)\back\be_symtab.obj &
 	.\$(OBJDIR)\back\be_w.obj &
 	.\$(OBJDIR)\back\be_regex.obj &
-	.\$(OBJDIR)\back\regex.obj &
-	.\$(OBJDIR)\memory.obj
+	.\$(OBJDIR)\back\regex.obj 
+#	&
+#	.\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
 	.\$(OBJDIR)\back\be_decompress.obj &
