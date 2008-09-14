@@ -81,7 +81,8 @@ procedure do_test(sequence cmds)
 	for i = 1 to total do
 		filename = files[i][D_NAME]
 		printf(1, "%s:\n", {filename})
-		cmd = sprintf("%s -i ..\\include %s -D UNITTEST -batch %s %s", {executable, options, filename, cmd_opts})
+		cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
+		--print	f(1, "CMD '%s'\n", {cmd})
 		status = system_exec(cmd, 2)
 		if match("t_c_", dos_lower(filename)) = 1 then
 			status = not status
