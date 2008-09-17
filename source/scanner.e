@@ -1059,10 +1059,11 @@ function find_reference( sequence fr )
 	No_new_entry = 0
 	return tok
 end function
-
+with trace
 export procedure Resolve_forward_references( integer report_errors = 0 )
 	sequence errors = {}
 	sequence code = {}
+	? forward_references
 	for ref = 1 to length( forward_references ) do
 		
 		if sequence( forward_references[ref] ) then
@@ -1073,7 +1074,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				errors &= ref
 				continue
 			end if
-			
+			trace(1)
 			sequence fname = file_name[fr[FR_FILE]]
 			sequence cname = file_name[current_file_no]
 			

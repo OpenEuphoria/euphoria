@@ -832,6 +832,7 @@ function which_task(atom tid)
 	RTFatal("invalid task id")
 end function
 
+
 procedure opTASK_STATUS()
 -- return task status   
 	integer r
@@ -1383,8 +1384,9 @@ procedure opSWITCH_SPI()
 -- pc+2: case values
 -- pc+3: jump_table
 -- pc+4: else jump
+
 	if integer( val[Code[pc+1]] ) then
-		a = val[Code[pc+1]] - val[Code[pc+2]]
+		a = val[Code[pc+1]] - Code[pc+2]
 		if a > 0 and a <= length( val[Code[pc+3]] ) then
 			pc += val[Code[pc+3]][a]
 			return
@@ -3334,7 +3336,6 @@ ifdef CALLPROC then
 procedure do_exec()
 -- execute IL code, starting at pc 
 	integer op
-
 	keep_running = TRUE
 	while keep_running do 
 		op = Code[pc]

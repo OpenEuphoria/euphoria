@@ -114,6 +114,15 @@ procedure il( sequence dsm, integer len )
 	
 end procedure
 
+procedure quadary()
+	il( sprintf( "%s: %s, %s, %s, %s => %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+5])), 5)
+	pc += 6
+end procedure
+
+procedure pquadary()
+	il( sprintf( "%s: %s, %s, %s %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+4])), 4)
+	pc += 5	
+end procedure
 
 
 procedure trinary()
@@ -184,7 +193,7 @@ procedure opSTARTLINE()
 	
 	pc += 2
 end procedure
-	
+
 procedure opTASK_YIELD()
 -- temporarily stop running this task, and give the scheduler a chance
 -- to pick a new task
@@ -1230,6 +1239,23 @@ procedure opINSERT()
 	trinary()
 end procedure
 
+procedure opHEAD()
+	binary()
+end procedure
+
+procedure opTAIL()
+	binary()
+end procedure
+
+procedure opREMOVE()
+	trinary()
+end procedure
+
+procedure opREPLACE()
+	quadary()
+end procedure
+
+
 function strip_path( sequence file )
 	for i = length( file ) to 1 by -1 do
 		if find( file[i], "/\\" ) then
@@ -1514,7 +1540,7 @@ global procedure BackEnd( object ignore )
 	
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
-	for i = 1 to length(SymTab) do
+	for i = TopLevelSub to length(SymTab) do
 		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY 
 		and sequence(SymTab[i][S_CODE]) 
 		and SymTab[i][S_SCOPE] != SC_PRIVATE then

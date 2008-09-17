@@ -602,7 +602,7 @@ ifdef STDDEBUG then
 sequence export_warnings
 export_warnings = {}
 end ifdef
-
+with trace
 global integer No_new_entry = 0
 global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
 -- Uses hashing algorithm to try to match 'word' in the symbol
@@ -727,6 +727,11 @@ end ifdef
 				-- qualified - must match global symbol in specified file (or be in the file's
 				-- include path)
 
+if 0 and file_no and SymTab[tok[T_SYM]][S_SCOPE] = SC_PREDEF then
+printf(1,"%s: %d %s\n", {file_name[current_file_no], file_no, word })
+? SymTab[tok[T_SYM]]
+	trace(1)
+end if
 				if not file_no then
 					-- internal eu namespace was used
 					if SymTab[tok[T_SYM]][S_SCOPE] = SC_PREDEF then
@@ -749,6 +754,7 @@ end ifdef
 						SymTab[tok[T_SYM]][S_SCOPE] = SC_EXPORT)
 						
 				then
+				
 					if file_no = SymTab[tok[T_SYM]][S_FILE_NO] then
 						if BIND then
 							add_ref(tok)
