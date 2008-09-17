@@ -402,9 +402,10 @@ global enum
 	FR_PC,
 	FR_LINE,
 	FR_THISLINE,
-	FR_BP
+	FR_BP,
+	FR_QUALIFIED
 
-global constant FR_SIZE = FR_BP
+global constant FR_SIZE = FR_QUALIFIED
 
 -- # extra default parameters to leave space when
 -- emitting a forward call

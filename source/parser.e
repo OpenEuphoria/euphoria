@@ -217,15 +217,7 @@ end procedure
 
 procedure Forward_InitCheck( token tok, integer fr, integer ref )
 	if ref then
-		sequence fwd     = repeat( 0, FR_SIZE )
-		fwd[FR_TYPE]     = GLOBAL_INIT_CHECK
-		fwd[FR_NAME]     = SymTab[tok[T_SYM]][S_NAME]
-		fwd[FR_FILE]     = current_file_no
-		fwd[FR_SUBPROG]  = CurrentSub
-		fwd[FR_PC]       = length( Code ) + 1
-		fwd[FR_LINE]     = line_number
-		fwd[FR_THISLINE] = ThisLine
-		forward_references = append( forward_references, fwd )
+		ref = new_forward_reference( GLOBAL_INIT_CHECK, tok[T_SYM] )
 		
 		emit_op( GLOBAL_INIT_CHECK )
 		emit_addr( 0 )
@@ -883,20 +875,11 @@ procedure ParseArgs(symtab_index subsym)
 end procedure
 
 procedure Forward_var( token tok, integer init_check = -1 )
-	sequence ref     = repeat( 0, FR_SIZE )
-	ref[FR_TYPE]     = VARIABLE
-	ref[FR_NAME]     = SymTab[tok[T_SYM]][S_NAME]
-	ref[FR_FILE]     = current_file_no
-	ref[FR_SUBPROG]  = CurrentSub
-	ref[FR_PC]       = length( Code ) + 1
-	ref[FR_LINE]     = line_number
-	ref[FR_THISLINE] = ThisLine
-	
-	forward_references = append( forward_references, ref )
-	emit_opnd( - length( forward_references ) )
+	integer ref = new_forward_reference( VARIABLE, tok[T_SYM] )
+	emit_opnd( - ref )
 	
 	if init_check != -1 then
-		Forward_InitCheck( tok, length( forward_references ), init_check )
+		Forward_InitCheck( tok, ref, init_check )
 	end if
 end procedure
 
@@ -1336,17 +1319,7 @@ procedure TypeCheck(symtab_index var)
 	
 	if SymTab[var][S_SCOPE] = SC_UNDEFINED then
 		-- forward reference, so defer type check until later
-		sequence ref = repeat( 0, FR_SIZE )
-		ref[FR_TYPE]     = TYPE_CHECK
-		ref[FR_NAME]     = SymTab[var][S_NAME]
-		ref[FR_FILE]     = current_file_no
-		ref[FR_LINE]     = line_number
-		ref[FR_SUBPROG]  = CurrentSub
-		ref[FR_PC]       = length( Code ) + 1
-		ref[FR_THISLINE] = ThisLine
-		ref[FR_BP]       = bp
-		
-		forward_references = append( forward_references, ref )
+		integer ref = new_forward_reference( TYPE_CHECK, var )
 		if not TRANSLATE then
 			-- possible extra integer check
 			Code &= TYPE_CHECK & 0

@@ -62,6 +62,8 @@ constant FILE_NO = 1,           -- file number
 		 OP_DEFINES = 10,        -- ifdef defines
 		 PREV_OP_WARNING = 11
 
+integer qualified_fwd = -1 -- remember namespaces for forward reference purposes
+
 -- list of source lines & execution counts 
 
 global procedure InitLex()
@@ -492,6 +494,8 @@ function same_name(sequence a, sequence b)
 		return dos_compare(a,b)
 	end if
 end function
+
+
 
 function NameSpace_declaration(symtab_index sym)
 -- add a new namespace symbol to the symbol table.
@@ -1052,6 +1056,8 @@ function find_reference( sequence fr )
 		if ns_tok[T_ID] != NAMESPACE then
 			return ns_tok
 		end if
+	else
+		ns_file = fr[FR_QUALIFIED]
 	end if
 	
 	No_new_entry = 1
@@ -1059,11 +1065,29 @@ function find_reference( sequence fr )
 	No_new_entry = 0
 	return tok
 end function
-with trace
+
+
+export function new_forward_reference( integer op, symtab_index sym )
+	forward_references = append( forward_references, repeat( 0, FR_SIZE ) )
+	integer ref = length( forward_references )
+	
+	forward_references[ref][FR_TYPE]      = op
+	forward_references[ref][FR_NAME]      = SymTab[sym][S_NAME]
+	forward_references[ref][FR_FILE]      = current_file_no
+	forward_references[ref][FR_SUBPROG]   = CurrentSub
+	forward_references[ref][FR_PC]        = length( Code ) + 1
+	forward_references[ref][FR_LINE]      = line_number
+	forward_references[ref][FR_THISLINE]  = ThisLine
+	forward_references[ref][FR_BP]        = bp
+	forward_references[ref][FR_QUALIFIED] = qualified_fwd
+	
+	return ref
+end function
+	
 export procedure Resolve_forward_references( integer report_errors = 0 )
 	sequence errors = {}
 	sequence code = {}
-	? forward_references
+	
 	for ref = 1 to length( forward_references ) do
 		
 		if sequence( forward_references[ref] ) then
@@ -1393,6 +1417,8 @@ global function Scanner()
 				
 
 				if tok[T_ID] = NAMESPACE then -- known namespace
+					qualified_fwd = SymTab[tok[T_SYM]][S_OBJ]
+			
 					-- skip whitespace
 					ch = getch()
 					while ch = ' ' or ch = '\t' do
@@ -1438,6 +1464,7 @@ global function Scanner()
 						elsif tok[T_ID] = TYPE then
 							tok[T_ID] = QUALIFIED_TYPE
 						end if
+						
 					end if
 				else -- not a namespace, but an overriding var
 					ungetch()
@@ -1458,6 +1485,7 @@ global function Scanner()
 		            end if
 				end if
 			else -- not a known namespace
+				qualified_fwd = -1
 			    if Parser_mode = PAM_RECORD then
 	                Ns_recorded_sym &= 0
 						Recorded = append(Recorded, yytext)

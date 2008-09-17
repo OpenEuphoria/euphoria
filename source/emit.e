@@ -537,18 +537,15 @@ global procedure emit_op(integer op)
 		
 	elsif op = PROC_FORWARD or op = FUNC_FORWARD then
 		assignable = FALSE -- assume for now 
-		forward_references = append( forward_references, repeat( 0, FR_SIZE ) )
-		integer ref = length( forward_references )
+		integer real_op
+		if op = PROC_FORWARD then
+			real_op = PROC
+		else
+			real_op = FUNC
+		end if
+		integer ref = new_forward_reference( real_op, op_info1 )
 		n = Pop() -- number of known args
 		
-		forward_references[ref][FR_TYPE]     = PROC
-		forward_references[ref][FR_NAME]     = SymTab[op_info1][S_NAME]
-		forward_references[ref][FR_FILE]     = current_file_no
-		forward_references[ref][FR_SUBPROG]  = CurrentSub
-		forward_references[ref][FR_PC]       = length( Code ) + 1
-		forward_references[ref][FR_LINE]     = line_number
-		forward_references[ref][FR_THISLINE] = ThisLine
-		forward_references[ref][FR_BP]       = bp
 		emit_opcode(op)
 		emit_addr(ref)
 		emit_addr( n ) -- this changes to be the "next" instruction
@@ -570,7 +567,6 @@ global procedure emit_op(integer op)
 		
 		if op != PROC_FORWARD then
 			assignable = TRUE
-			forward_references[ref][FR_TYPE] = FUNC
 			c = NewTempSym() -- put final result in temp 
 			Push(c)
 			-- emit location to assign result to
