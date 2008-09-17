@@ -156,7 +156,7 @@ end function
 pop_rid = routine_id("Pop")
 
 procedure TempKeep(symtab_index x)
-	if SymTab[x][S_MODE] = M_TEMP then
+	if x > 0 and SymTab[x][S_MODE] = M_TEMP then
 		SymTab[x][S_SCOPE] = IN_USE
 	end if
 end procedure
@@ -170,7 +170,7 @@ global procedure TempFree(symtab_index x)
 end procedure
 
 procedure TempInteger(symtab_index x)  
-	if SymTab[x][S_MODE] = M_TEMP then
+	if x > 0 and SymTab[x][S_MODE] = M_TEMP then
 		SymTab[x][S_USAGE] = T_INTEGER
 	end if
 end procedure
@@ -630,7 +630,7 @@ global procedure emit_op(integer op)
 		
 		elsif op = WHILE and    
 				-- need extra code in parser to optimize IF/ELSIF too 
-			  SymTab[a][S_MODE] = M_CONSTANT and
+			  a > 0 and SymTab[a][S_MODE] = M_CONSTANT and
 			  integer(SymTab[a][S_OBJ]) and 
 			  not equal(SymTab[a][S_OBJ], 0) then
 			optimized_while = TRUE   -- while TRUE ... emit nothing
@@ -675,8 +675,8 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
-			if (SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ]))
-			   and not IsInteger(c) then
+			if c < 1 or ((SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ]))
+			   and not IsInteger(c)) then
 				emit_opcode(op)
 				emit_addr(op_info1)
 			end if
@@ -726,11 +726,13 @@ global procedure emit_op(integer op)
 		c = Pop() -- sequence
 		if op = ASSIGN_SUBS then
 			-- maybe change the op
-			if (previous_op != LHS_SUBS) and 
+			if (previous_op != LHS_SUBS) and
+				c > 0 and 
 				(SymTab[c][S_MODE] != M_NORMAL or 
 				(SymTab[c][S_VTYPE] != sequence_type and 
+				(SymTab[c][S_VTYPE] > 0 and
 				SymTab[SymTab[SymTab[c][S_VTYPE]][S_NEXT]][S_VTYPE] != 
-				sequence_type)) then
+				sequence_type ))) then
 				op = ASSIGN_SUBS_CHECK
 			else 
 				if IsInteger(b) then
@@ -784,8 +786,11 @@ global procedure emit_op(integer op)
 	elsif op = UMINUS then
 		-- check for constant folding 
 		a = Pop()
-		obj = SymTab[a][S_OBJ]
-		if SymTab[a][S_MODE] = M_CONSTANT then
+		if a > 0 then
+			obj = SymTab[a][S_OBJ]
+		end if
+		
+		if a > 0 and SymTab[a][S_MODE] = M_CONSTANT then
 			if integer(obj) then
 				if obj = MININT then
 					Push(NewDoubleSym(-MININT_VAL))
@@ -803,7 +808,7 @@ global procedure emit_op(integer op)
 				cont11ii(op, FALSE)   
 			end if 
 	   
-		elsif TRANSLATE and SymTab[a][S_MODE] = M_TEMP and 
+		elsif TRANSLATE and a > 0 and SymTab[a][S_MODE] = M_TEMP and 
 			  SymTab[a][S_GTYPE] = TYPE_DOUBLE then
 			Push(NewDoubleSym(-obj)) 
 	   
@@ -879,13 +884,14 @@ global procedure emit_op(integer op)
 		-- result could overflow int
 		b = Pop()
 		a = Pop()
-		if SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 1) then 
+		
+		if b > 1 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 1) then 
 			op = PLUS1
 			emit_opcode(op)
 			emit_addr(a)
 			emit_addr(0)
 			cont21d(op, a, b, FALSE)
-		elsif SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 1) then
+		elsif a > 0 and SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 1) then
 			op = PLUS1
 			emit_opcode(op)
 			emit_addr(b)
@@ -901,7 +907,7 @@ global procedure emit_op(integer op)
 			-- result could overflow int
 		b = Pop()
 		a = Pop()
-		if SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
+		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
 			-- Note: x * 2.0 is just as fast as x + x when x is f.p. 
 			op = PLUS
 			emit_opcode(op)
@@ -909,7 +915,7 @@ global procedure emit_op(integer op)
 			emit_addr(a)
 			cont21d(op, a, b, FALSE)
 			
-		elsif SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 2) then
+		elsif a > 0 and SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 2) then
 			op = PLUS
 			emit_opcode(op)
 			emit_addr(b)
@@ -925,7 +931,7 @@ global procedure emit_op(integer op)
 			
 	elsif op = DIVIDE then
 		b = Pop()
-		if SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
+		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
 			op = DIV2
 			emit_opcode(op)
 			emit_addr(Pop()) -- n.b. "a" hasn't been set
@@ -1017,12 +1023,13 @@ global procedure emit_op(integer op)
 		Push(c)
 			
 	elsif op = FOR then
-		c = Pop() -- increment 
+		c = Pop() -- increment
 		TempKeep(c)
 		ic = IsInteger(c)
-		if SymTab[c][S_MODE] = M_NORMAL and 
+		if c < 1 or 
+			(SymTab[c][S_MODE] = M_NORMAL and 
 			SymTab[c][S_SCOPE] != SC_LOOP_VAR and 
-			SymTab[c][S_SCOPE] != SC_GLOOP_VAR then
+			SymTab[c][S_SCOPE] != SC_GLOOP_VAR) then
 			-- must make a copy in case var is modified 
 			emit_opcode(ASSIGN)
 			emit_addr(c)
@@ -1032,9 +1039,10 @@ global procedure emit_op(integer op)
 		b = Pop() -- limit 
 		TempKeep(b)
 		ib = IsInteger(b)
-		if SymTab[b][S_MODE] = M_NORMAL and 
+		if b < 1 or
+			(SymTab[b][S_MODE] = M_NORMAL and 
 			SymTab[b][S_SCOPE] != SC_LOOP_VAR and
-			SymTab[b][S_SCOPE] != SC_GLOOP_VAR then
+			SymTab[b][S_SCOPE] != SC_GLOOP_VAR) then
 			-- must make a copy in case var is modified 
 			emit_opcode(ASSIGN)
 			emit_addr(b)
@@ -1210,7 +1218,7 @@ global procedure emit_op(integer op)
 		-- result could overflow int
 		b = Pop()
 		a = Pop()
-		if SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then 
+		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then 
 			-- convert power(x,2) to x*x 
 			op = MULTIPLY
 			emit_opcode(op)
