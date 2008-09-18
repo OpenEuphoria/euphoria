@@ -172,6 +172,9 @@ typedef int *opcode_type;
 /* de-ref a general object in x.c and set tpc (for time-profile) */
 #define DeRefx(a) if (IS_DBL_OR_SEQUENCE(a)) { DeRefDSx(a); }
 
+/* Reassign Target object as a Sequence */
+#define ASSIGN_SEQ(t,s) DeRef(*(t)); *(t) = MAKE_SEQ(s);
+
 
 #define UNIQUE(seq) (((s1_ptr)(seq))->ref == 1)
 

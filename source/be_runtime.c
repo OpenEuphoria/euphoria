@@ -707,8 +707,7 @@ void Prepend(object_ptr target, object s1, object a)
 			RefDS(temp);
 		}
 	}
-	DeRef(*target);
-	*target = MAKE_SEQ(new_seq);
+	ASSIGN_SEQ(target, new_seq);
 }
 
 void Append(object_ptr target, object s1, object a)
@@ -772,8 +771,7 @@ void Append(object_ptr target, object s1, object a)
 	}
 	*p++ = a;
 	*p = NOVALUE; // end marker
-	DeRef(*target);
-	*target = MAKE_SEQ(new_seq);
+	ASSIGN_SEQ(target, new_seq);
 }
 
 s1_ptr Add_internal_space(object a,int at,int len)
@@ -877,56 +875,75 @@ object Insert(object a,object b,int pos)
 	return MAKE_SEQ(s1);
 }
 
-void Head(s1_ptr s1, int start, object_ptr target)
+void Head(s1_ptr s1, int reqlen, object_ptr target)
 {
 	int i;
+	object_ptr op, se;
+	
 	if (s1->ref == 1 && *target == s1) {
-		for (i=start;i<=s1->length;i++)
-			DeRef(*(s1->base+i));
-		*(s1->base+start) = NOVALUE;
-		s1->postfill += (s1->length - start + 2);
-		s1->length = start-1;
+		// Target is same as source and source only has one reference,
+		// so just use the existing allocation rather than creare a new sequence.
+		
+		// First, dereference all existing elements after the new end position.
+		for (op = (s1->base+reqlen), se = s1->base + s1->length; op < se; op++)
+			DeRef(*op);
+			
+		// Mark the 'end-of-sequence'
+		*(s1->base+reqlen) = NOVALUE;
+		
+		// Update the post-fill count.
+		s1->postfill += (s1->length - reqlen + 2);
+		
+		// Adjust the new length.
+		s1->length = reqlen-1;
 	}
-	else { 
-		s1_ptr s2 = NewS1(start-1);
+	else {
+		// Build a new sequence.
+		s1_ptr s2 = NewS1(reqlen-1);
 		object temp;
-		for (i=1;i<start;i++) {
+		
+		for (i = 1; i < reqlen; i++) {
 			temp = *(s1->base+i);
 			*(s2->base+i) = temp;
-			if (!IS_ATOM_INT(temp))
-			  	RefDS(temp);
+		  	Ref(temp);
 		}
-		*(s2->base+start) = NOVALUE;
-		DeRef(*target);
-		*target = MAKE_SEQ(s2);
+		
+		*(s2->base+reqlen) = NOVALUE;
+		ASSIGN_SEQ(target, s2);
 	}
 }
 
 void Tail(s1_ptr s1, int start, object_ptr target)
 {
+	int i;
+	int newlen;
+	object_ptr ss, op, se;
+	
+	newlen = s1->length - start + 1;
 	if (s1->ref == 1 && s1 == *target) {
-		int i;
-		for (i=1;i<start;i++)
-			DeRef(*(s1->base+i));
-		memcpy((char *)(s1->base+1),(char *)(s1->base+start),4*(s1->length - start)+8);
+		// Target is same as source and source only has one reference,
+		// so just use the existing allocation rather than creare a new sequence.
+		
+		// First, dereference all existing elements before the new start position.
+		for (ss = op = (s1->base + 1), se = s1->base + start; op < se; op++)
+			DeRef(*op);
+		// Now copy the 'tail' elements to the start of the existing sequence.	
+		memmove((void *)ss,(void *)se, sizeof(object_ptr)*(newlen + 1));
 		s1->postfill += start-1;
-		s1->length -= start-1;
+		s1->length = newlen;
     }
     else {
-		s1_ptr s2 = NewS1(s1->length-start+1);
+		s1_ptr s2 = NewS1(newlen);
 		object temp;
-		object_ptr src=s1->base+start-1, trg = s2->base;
+		object_ptr src = s1->base + start - 1, trg = s2->base;
 		while (TRUE) {
 			temp = *(++src);
 			*(++trg) = temp;
-	   		if (!IS_ATOM_INT(temp)) {
-	     		if (temp == NOVALUE)
-	       			break;
-				RefDS(temp);
-			}
+     		if (temp == NOVALUE)
+       			break;
+			Ref(temp);
 	 	}
-		DeRef(*target);
-		*target = MAKE_SEQ(s2);
+	 	ASSIGN_SEQ(target, s2);
     }
 }
 
@@ -964,8 +981,7 @@ void Remove_elements(int start, int stop, object_ptr target)
 				RefDS(temp);
 			}
 		}
-		DeRef(*target);
-		*target = MAKE_SEQ(s2);
+		ASSIGN_SEQ(target, s2);
 	}
 }
 
@@ -995,8 +1011,7 @@ void AssignElement(object what, int place, object_ptr target)
 				RefDS(temp);
 			}
 		}
-		DeRef(*target);
-		*target = MAKE_SEQ(s2);
+		ASSIGN_SEQ(target, s2);
 	}
 }
 
@@ -1083,8 +1098,7 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 		}
 	}
 
-	DeRef(*target);
-	*target = MAKE_SEQ(c);
+	ASSIGN_SEQ(target, c);
 }
 
 void Concat_N(object_ptr target, object_ptr  source, int n)
@@ -1138,8 +1152,7 @@ void Concat_N(object_ptr target, object_ptr  source, int n)
 		}
 	}
 
-	DeRef(*target);
-	*target = MAKE_SEQ(result);
+	ASSIGN_SEQ(target, result);
 }
 
 void Concat_Ni(object_ptr target, object_ptr *source, int n)
@@ -1193,8 +1206,7 @@ void Concat_Ni(object_ptr target, object_ptr *source, int n)
 		}
 	}
 
-	DeRef(*target);
-	*target = MAKE_SEQ(result);
+	ASSIGN_SEQ(target, result);
 }
 
 // used by translator
@@ -1219,16 +1231,16 @@ object Repeat(object item, object repcount)
 	s1_ptr s1;
 
 	if (IS_ATOM_INT(repcount)) {
-		count = repcount;
-		if (count < 0)
+		if (repcount < 0)
 			RTFatal("repetition count must not be negative");
+		count = repcount;
 	}
 
 	else if (IS_ATOM_DBL(repcount)) {
 		d = DBL_PTR(repcount)->dbl;
 		if (d > MAXINT_DBL)
 			RTFatal("repetition count is too large");
-		if (d < 0.0)
+		if (d < 0.0L)
 			RTFatal("repetition count must not be negative");
 		count = (long)d;
 	}
@@ -1242,17 +1254,16 @@ object Repeat(object item, object repcount)
 
 	if (IS_ATOM_INT(item)) {
 		while (count >= 10) {
-			obj_ptr[0] = item;
-			obj_ptr[1] = item;
-			obj_ptr[2] = item;
-			obj_ptr[3] = item;
-			obj_ptr[4] = item;
-			obj_ptr[5] = item;
-			obj_ptr[6] = item;
-			obj_ptr[7] = item;
-			obj_ptr[8] = item;
-			obj_ptr[9] = item;
-			obj_ptr += 10;
+			*obj_ptr++   = item; // 1
+			*obj_ptr++   = item; // 2
+			*obj_ptr++   = item; // 3
+			*obj_ptr++   = item; // 4
+			*obj_ptr++   = item; // 5
+			*obj_ptr++   = item; // 6
+			*obj_ptr++   = item; // 7
+			*obj_ptr++   = item; // 8
+			*obj_ptr++   = item; // 9
+			*obj_ptr++   = item; // 10
 			count -= 10;
 		};
 		while (count > 0) {
@@ -3022,8 +3033,7 @@ void RHS_Slice(s1_ptr a, object start, object end)
 
 		*(sentinel) = save;
 
-		DeRef(*rhs_slice_target);
-		*rhs_slice_target = MAKE_SEQ(newa);
+		ASSIGN_SEQ(rhs_slice_target, newa);
 	}
 }
 

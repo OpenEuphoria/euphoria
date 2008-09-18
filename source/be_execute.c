@@ -3958,18 +3958,22 @@ void do_exec(int *start_pc)
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to head() must be an atom");
 				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
+				if (nvars < 0) 
+					RTFatal("Second argument to head() must not be negative");
 				obj_ptr = (object_ptr)pc[3];
-				top = *obj_ptr;
+//				top = *obj_ptr;
 				// get first elements
-				if (nvars <= 0) {
+				if (nvars == 0) {
+					// Nothing to get so return an empty sequence.
 					*obj_ptr = MAKE_SEQ(NewS1(0));
 				}
 				else if (nvars >= seqlen) {
+					// Caller wants it all. So pass another reference to source.
 					Ref(a);
 					*obj_ptr = a;
 				}
 				else
-					Head(s1,nvars+1,obj_ptr);
+					Head(s1, nvars+1, obj_ptr);
 				thread4();
 				BREAK;
 
@@ -3977,29 +3981,33 @@ void do_exec(int *start_pc)
 			deprintf("case L_TAIL:");
 				// type check and normalise arguments
 				tpc = pc;
+				
 				a = *(object_ptr)pc[1];  // source
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to tail() must be a sequence");
 				s1 = SEQ_PTR(a);
 				seqlen = s1->length;
-				b = *(object_ptr)pc[2];  //start
+				
+				b = *(object_ptr)pc[2];  // length
 				if (IS_SEQUENCE(b)) 
 					RTFatal("Second argument to tail() must be an atom");
 				nvars = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
-				obj_ptr = (object_ptr)pc[3];
-				top = *obj_ptr;
+				if (nvars < 0) 
+					RTFatal("Second argument to tail() must not be negative");
+					
+				obj_ptr = (object_ptr)pc[3]; // target
 				// get last elements
-				if (nvars <= 0) {
+				if (nvars == 0) {
+					DeRef(*obj_ptr);
 					*obj_ptr = MAKE_SEQ(NewS1(0));
-					DeRef(top);
 				}
 				else if (nvars >= seqlen) {
+					DeRef(*obj_ptr);
 					Ref(a);
 					*obj_ptr = a;
-					DeRef(top);
 				}
 				else
-					Tail(s1,seqlen-nvars+1,obj_ptr);
+					Tail(s1, seqlen - nvars + 1, obj_ptr);
 				thread4();
 				BREAK;
 
