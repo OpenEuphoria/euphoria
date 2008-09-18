@@ -881,13 +881,17 @@ global procedure emit_op(integer op)
 		b = Pop()
 		a = Pop()
 		
-		if b > 1 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 1) then 
+		if b < 1 or a < 1 then
+			Push(a)
+			Push(b)
+			cont21ii(op, FALSE)
+		elsif SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 1) then 
 			op = PLUS1
 			emit_opcode(op)
 			emit_addr(a)
 			emit_addr(0)
 			cont21d(op, a, b, FALSE)
-		elsif a > 0 and SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 1) then
+		elsif SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 1) then
 			op = PLUS1
 			emit_opcode(op)
 			emit_addr(b)
@@ -903,7 +907,12 @@ global procedure emit_op(integer op)
 			-- result could overflow int
 		b = Pop()
 		a = Pop()
-		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
+		if a < 1 or b < 1 then
+			Push(a)
+			Push(b)
+			cont21ii(op, FALSE)
+			
+		elsif SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
 			-- Note: x * 2.0 is just as fast as x + x when x is f.p. 
 			op = PLUS
 			emit_opcode(op)
@@ -911,7 +920,7 @@ global procedure emit_op(integer op)
 			emit_addr(a)
 			cont21d(op, a, b, FALSE)
 			
-		elsif a > 0 and SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 2) then
+		elsif SymTab[a][S_MODE] = M_CONSTANT and equal(SymTab[a][S_OBJ], 2) then
 			op = PLUS
 			emit_opcode(op)
 			emit_addr(b)

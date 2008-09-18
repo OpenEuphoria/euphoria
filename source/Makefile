@@ -238,7 +238,7 @@ distclean : clean
 clean : 
 	@-for d in $(BUILD_DIRS); \
 	do \
-	    rm "$$d"/*.o && rm"$$d"/*.c; \
+	    rm "$$d"/*.o ; rm "$$d"/*.c; \
 	done
 	-rm $(EEXU) $(EECU) $(EECUA) $(EBACKENDU) $(DEB_SOURCE_DIR).tar.gz
 
