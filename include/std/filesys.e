@@ -91,7 +91,7 @@ end ifdef
 
 --**
 -- Signature:
--- <built-in> constant SLASHES
+-- public constant SLASHES
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -101,7 +101,7 @@ end ifdef
 
 --**
 -- Signature:
--- <built-in> constant SLASHES
+-- public constant SLASHES
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -111,14 +111,14 @@ end ifdef
 
 --**
 -- Signature:
--- <built-in> constant CRLF
+-- public constant CRLF
 --
 -- Description:
 -- Current platform's newline character(s): ##\n## on //Unix//, else ##\r\n##.
 
 --**
 -- Signature:
--- <built-in> constant PATHSEP
+-- public constant PATHSEP
 --
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
