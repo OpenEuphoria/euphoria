@@ -22,6 +22,14 @@ IF "%1" =="--eubin" (
 	SHIFT
 	GOTO EndLoop
 )
+IF "%1" =="--managed-mem" (
+	echo MANAGED_MEM=1 >> config.wat
+	GOTO EndLoop
+)
+IF "%1" =="--debug" (
+	echo DEBUG=1 >> config.wat
+	GOTO EndLoop
+)
 :EndLoop
 SHIFT
 GOTO Loop
