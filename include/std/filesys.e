@@ -31,14 +31,13 @@ constant
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG}, 
-		C_LONG)
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG}, C_LONG)
 	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_LONG)
 	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, 
-		C_LONG)
+	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, C_LONG)
 	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
 	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT)
+	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", {C_CHAR, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_INT)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
@@ -80,7 +79,7 @@ end ifdef
 
 --**
 -- Signature:
--- <built-in> constant SLASH
+-- public constant SLASH
 --
 -- Description:
 -- Current platform's path separator character
@@ -111,10 +110,18 @@ end ifdef
 
 --**
 -- Signature:
--- public constant CRLF
+-- public constant EOLSEP
 --
 -- Description:
--- Current platform's newline character(s): ##\n## on //Unix//, else ##\r\n##.
+-- Current platform's newline string: ##"\n"## on //Unix//, else ##"\r\n"##.
+
+--**
+-- Signature:
+-- public constant EOL
+--
+-- Description:
+-- All platform's newline character: ##'\n'##. When text lines are read the native
+-- platform's EOLSEP string is replaced by a single character EOL.
 
 --**
 -- Signature:
@@ -126,14 +133,15 @@ end ifdef
 ifdef UNIX then
 	public constant SLASH='/'
 	public constant SLASHES = "/"
-	public constant CRLF = "\n"
+	public constant EOLSEP = "\n"
 	public constant PATHSEP = ':'
 elsedef
 	public constant SLASH='\\'
 	public constant SLASHES = ":\\/"
-	public constant CRLF = "\r\n"
+	public constant EOLSEP = "\r\n"
 	public constant PATHSEP = ';'
 end ifdef
+public constant EOL = '\n'
 
 --****
 -- === Directory Handling
@@ -1220,11 +1228,12 @@ public function locate_file(sequence filename, sequence search_list = {})
 		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
 		search_list = append(search_list, extra_paths)
 		
-ifdef LINUX	then
-		extra_paths = getenv("HOME")
-else
-		extra_paths = getenv("HOMEPATH")
-end ifdef		
+		ifdef LINUX	then
+			extra_paths = getenv("HOME")
+		else
+			extra_paths = getenv("HOMEPATH")
+		end ifdef		
+		
 		if sequence(extra_paths) then
 			search_list = append(search_list, extra_paths & SLASH)
 		end if				
@@ -1306,28 +1315,28 @@ end function
 public function get_curdir(integer drive_id = 0)
 
     sequence lCurDir
-ifdef !LINUX then
-    sequence lOrigDir = ""
-    sequence lDrive
-    object void
-
-    if t_alpha(drive_id) then
-	    lOrigDir =  current_dir()
-	    lDrive = "  "
-	    lDrive[1] = drive_id
-	    lDrive[2] = ':'
-	    if chdir(lDrive) = 0 then
-	    	lOrigDir = ""
-	    end if
-	end if
-end ifdef
+	ifdef !LINUX then
+	    sequence lOrigDir = ""
+	    sequence lDrive
+	    object void
+	
+	    if t_alpha(drive_id) then
+		    lOrigDir =  current_dir()
+		    lDrive = "  "
+		    lDrive[1] = drive_id
+		    lDrive[2] = ':'
+		    if chdir(lDrive) = 0 then
+		    	lOrigDir = ""
+		    end if
+		end if
+	end ifdef
     
     lCurDir = current_dir()
-ifdef !LINUX then
-	if length(lOrigDir) > 0 then
-    	void = chdir(lOrigDir[1..2])
-    end if
-end ifdef
+	ifdef !LINUX then
+		if length(lOrigDir) > 0 then
+	    	void = chdir(lOrigDir[1..2])
+	    end if
+	end ifdef
 
 	-- Ensure that it ends in a path separator.
 	if (lCurDir[$] != SLASH) then
@@ -1802,6 +1811,7 @@ end function
 -- Comment:
 -- * In non-Unix systems, the result is always in lowercase.
 -- * The supplied file/directory does not have to actually exist.
+-- * Does not (yet) handle UNC paths or unix links.
 --
 --
 -- Example 1:
@@ -1811,7 +1821,6 @@ end function
 -- -- res is now "/usr/foo/abc.def"
 -- </eucode>
 public function canonical_path(sequence path_in, integer directory_given = 0)
-    -- Does not (yet) handle UNC paths or unix links.
     sequence lPath = ""
     integer lPosA = -1
     integer lPosB = -1
@@ -1819,13 +1828,13 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
     sequence lLevel = ""
     sequence lHome
 
-ifdef UNIX then
-	lPath = path_in
-elsedef
-    sequence lDrive = ""
-    -- Replace unix style separators with DOS style
-    lPath = find_replace("/", path_in, SLASH)
-end ifdef
+	ifdef UNIX then
+		lPath = path_in
+	elsedef
+	    sequence lDrive = ""
+	    -- Replace unix style separators with DOS style
+	    lPath = find_replace("/", path_in, SLASH)
+	end ifdef
 
     -- Strip off any enclosing quotes.
     if (length(lPath) > 2 and lPath[1] = '"' and lPath[$] = '"') then
@@ -1834,11 +1843,12 @@ end ifdef
 
     -- Replace any leading tilde with 'HOME' directory.
     if (length(lPath) > 0 and lPath[1] = '~') then
-ifdef UNIX then
-		lHome = getenv("HOME")
-elsedef
-		lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
-end ifdef
+		ifdef UNIX then
+				lHome = getenv("HOME")
+		elsedef
+				lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+		end ifdef
+		
 		if lHome[$] != SLASH then
 			lHome &= SLASH
 		end if
@@ -1850,34 +1860,34 @@ end ifdef
 		end if
     end if
 
-ifdef !UNIX then
-	-- Strip off any drive letter attached.
-    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
-	then
-		lDrive = lPath[1..2]
-		lPath = lPath[3..$]
-	end if
-end ifdef
+	ifdef !UNIX then
+		-- Strip off any drive letter attached.
+	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
+		then
+			lDrive = lPath[1..2]
+			lPath = lPath[3..$]
+		end if
+	end ifdef
 
 	-- If a relative path, prepend the PWD of the appropriate drive.
 	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
 	then
-ifdef UNIX then
-		lPath = get_curdir() & lPath
-elsedef
-		if (length(lDrive) = 0) then
-			lPath = get_curdir() & lPath
-		else
-			lPath = get_curdir(lDrive[1]) & lPath
-		end if
-		-- Strip of the drive letter if it got attached again.
-		if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
-			if (length(lDrive) = 0) then
-				lDrive = lPath[1..2]
-			end if
-			lPath = lPath[3..$]
-		end if
-end ifdef		
+		ifdef UNIX then
+				lPath = get_curdir() & lPath
+		elsedef
+				if (length(lDrive) = 0) then
+					lPath = get_curdir() & lPath
+				else
+					lPath = get_curdir(lDrive[1]) & lPath
+				end if
+				-- Strip of the drive letter if it got attached again.
+				if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
+					if (length(lDrive) = 0) then
+						lDrive = lPath[1..2]
+					end if
+					lPath = lPath[3..$]
+				end if
+		end ifdef		
 	end if
 	
 	-- If the input is supposed to be a directory, ensure it ends in a path separator.
@@ -1913,10 +1923,215 @@ end ifdef
 		lPosA = match(lLevel, lPath)
 	end while
 	
-ifdef !UNIX then
-	lPath = lower(lDrive & lPath)
-end ifdef
+	ifdef !UNIX then
+		lPath = lower(lDrive & lPath)
+	end ifdef
 	
 	return lPath
 end function
 
+public enum
+	SECTORS_PER_CLUSTER,
+	BYTES_PER_SECTOR,
+	NUMBER_OF_FREE_CLUSTERS,
+	TOTAL_NUMBER_OF_CLUSTERS
+public enum
+	TOTAL_BYTES,
+	FREE_BYTES,
+	USED_BYTES
+ 
+--**
+-- Returns some information about a disk drive.
+--
+-- Parameters:
+--	# ##disk_path## - A sequence. This is the path that identifies the disk to inquire upon.
+--
+-- Returns:
+--     A **sequence**, containing SECTORS_PER_CLUSTER, BYTES_PER_SECTOR, 
+--                     NUMBER_OF_FREE_CLUSTERS, and TOTAL_NUMBER_OF_CLUSTERS
+-- Comment:
+-- * Not yet supported on Unix systems.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_disk_metrics("C:\\")
+-- min_file_size = res[SECTORS_PER_CLUSTER] * res[BYTES_PER_SECTOR]
+-- </eucode>
+public function get_disk_metrics(object disk_path) 
+	sequence disk_metrics = {0, 0, 0, 0} 
+	atom path_addr = 0
+	atom metric_addr = 0
+	
+	ifdef WIN32 then
+		if sequence(disk_path) then 
+			path_addr = allocate_string(disk_path) 
+		else 
+			path_addr = 0 
+		end if 
+	 
+		metric_addr = allocate(16) 
+	 
+		if c_func(xGetDiskFreeSpace, {path_addr, 
+		                               metric_addr + 0,
+		                               metric_addr + 4,
+		                               metric_addr + 8,
+		                               metric_addr + 12
+		                               }) then 
+			disk_metrics = peek4s({metric_addr, 4}) 
+		end if 
+	 
+		if path_addr != 0 then 
+			free(path_addr) 
+		end if 
+		free(metric_addr) 
+	end ifdef 
+	
+	return disk_metrics 
+end function 
+ 
+--**
+-- Returns the amount of space for a disk drive.
+--
+-- Parameters:
+--	# ##disk_path## - A sequence. This is the path that identifies the disk to inquire upon.
+--
+-- Returns:
+--     A **sequence**, containing TOTAL_BYTES, USED_BYTES, FREE_BYTES
+--
+-- Comment:
+-- * Not yet supported on Unix systems.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_disk_size("C:\\")
+-- printf(1, "Drive %s has %3.2f%% free space\n", {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
+-- </eucode>
+public function get_disk_size(object disk_path) 
+	sequence disk_size = {0,0,0}
+	
+	ifdef WIN32 then
+		sequence disk_metrics 
+		atom bytes_per_cluster
+		
+	
+		disk_metrics = get_disk_metrics(disk_path) 
+		
+		bytes_per_cluster = disk_metrics[BYTES_PER_SECTOR] * disk_metrics[SECTORS_PER_CLUSTER]
+	
+		disk_size[TOTAL_BYTES] = bytes_per_cluster * disk_metrics[TOTAL_NUMBER_OF_CLUSTERS] 
+		disk_size[FREE_BYTES]  = bytes_per_cluster * disk_metrics[NUMBER_OF_FREE_CLUSTERS] 
+		disk_size[USED_BYTES]  = disk_size[TOTAL_BYTES] - disk_size[FREE_BYTES] 
+	end ifdef 
+	
+	return disk_size 
+end function 
+
+public enum
+		COUNT_DIRS,
+		COUNT_FILES,
+		COUNT_SIZE,
+		COUNT_TYPES
+public enum		
+		EXT_NAME,
+		EXT_COUNT,
+		EXT_SIZE
+sequence file_counters = {}
+
+-- Parameter inst contains two items: 'count_all' flag, and 'index' into file_counters.
+function count_files(sequence orig_path, sequence dir_info, sequence inst)
+	integer pos = 0
+	sequence ext
+
+	if equal(dir_info[D_NAME], ".") then
+		return 0
+	end if
+	if equal(dir_info[D_NAME], "..") then
+		return 0
+	end if
+	
+	
+	if inst[1] = 0 then -- count all is false
+		if find('h', dir_info[D_ATTRIBUTES]) then
+			return 0
+		end if
+		
+		if find('s', dir_info[D_ATTRIBUTES]) then
+			return 0
+		end if
+	end if
+		
+	file_counters[inst[2]][COUNT_SIZE] += dir_info[D_SIZE]
+	if find('d', dir_info[D_ATTRIBUTES]) then
+		file_counters[inst[2]][COUNT_DIRS] += 1
+	else
+		file_counters[inst[2]][COUNT_FILES] += 1
+		ifdef !UNIX then
+			ext = fileext(lower(dir_info[D_NAME]))
+		elsedef
+			ext = fileext(dir_info[D_NAME])
+		end ifdef
+			
+		pos = 0
+		for i = 1 to length(file_counters[inst[2]][COUNT_TYPES]) do
+			if equal(file_counters[inst[2]][COUNT_TYPES][i][EXT_NAME], ext) then
+				pos = i
+				exit
+			end if
+		end for
+		if pos = 0 then
+			file_counters[inst[2]][COUNT_TYPES] &= {{ext, 0, 0}}
+			pos = length(file_counters[inst[2]][COUNT_TYPES])
+		end if
+		file_counters[inst[2]][COUNT_TYPES][pos][EXT_COUNT] += 1
+		file_counters[inst[2]][COUNT_TYPES][pos][EXT_SIZE] += dir_info[D_SIZE]
+	end if
+	return 0
+end function
+
+--**
+-- Returns the amount of space used by a directory.
+--
+-- Parameters:
+--	# ##dir_path## - A sequence. This is the path that identifies the directory to inquire upon.
+--  # ##count_all## - An integer. Used by Windows systems. If zero (the default) 
+--                    it will not include //system// or //hidden// files in the
+--                    count, otherwise they are included.
+--
+-- Returns:
+--     A **sequence**, containing four elements; the number of sub-directories [COUNT_DIRS],
+--                     the number of files [COUNT_FILES], 
+--                     the total space used by the directory [COUNT_SIZE], and
+--                     breakdown of the file contents by file extention [COUNT_TYPES].
+--                  
+-- Comments:
+--  * The total space used by the directory does not include space used by any sub-directories.
+--  * The file breakdown is a sequence of three-element sub-sequences. Each sub-sequence
+--    contains the extention [EXT_NAME], the number of files of this extention [EXT_COUNT],
+--    and the space used by these files [EXT_SIZE]. The sub-sequences are presented in
+--    extention name order. On Windows and DOS systems, the extentions are all in lowercase.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_dir_size("/usr/localbin")
+-- printf(1, "Directory %s contains %d files\n", {"/usr/localbin", res[COUNT_FILES]})
+-- for i = 1 to length(res[COUNT_TYPES]) do
+--   printf(1, "  Type: %s (%d files %d bytes)\n", {res[COUNT_TYPES][i][EXT_NAME],
+--                                                  res[COUNT_TYPES][i][EXT_COUNT],
+--                                                  res[COUNT_TYPES][i][EXT_SIZE]})
+-- end for
+-- </eucode>
+public function get_dir_size(sequence dir_path, integer count_all = 0)
+	integer ok 
+	sequence fc
+
+	-- We create our own instance of the global 'file_counters' to use in case
+	-- the application is using threads.
+	
+	file_counters = append(file_counters, {0,0,0,{}})
+	ok = walk_dir(dir_path, {routine_id("count_files"), {count_all, length(file_counters)}}, 0)
+	
+	fc = file_counters[$]
+	file_counters = file_counters[1 .. $-1]
+	fc[COUNT_TYPES] = sort(fc[COUNT_TYPES])
+	return fc
+end function
