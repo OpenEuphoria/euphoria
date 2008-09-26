@@ -15,7 +15,7 @@ include std/memory.e
 include std/sequence.e
 include std/datetime.e
 include std/text.e
-
+include std/math.e
 --****
 -- === Database File Format
 --
@@ -691,7 +691,7 @@ public procedure check_free_list()
 	end if
 	void = seek(current_db, free_list - 4)
 	free_list_space = get4()
-	if free_list_space > max or free_list_space < INIT_FREE * 8 then
+	if free_list_space > max or free_list_space < 0 then
 		crash("free list space is bad")
 	end if
 	for i = 0 to free_count - 1 do
@@ -874,8 +874,14 @@ end procedure
 --
 -- Parameters:
 --		# ##path##: a sequence, the path to the file that will contain the database.
---		# ##lock_method##, an integer specifying which sort of access can be granted to the database. The value of lock_method can be either DB_LOCK_NO (no lock) or
--- DB_LOCK_EXCLUSIVE (exclusive lock).
+--		# ##lock_method##, an integer specifying which type of access can be
+--                         granted to the database. The value of ##lock_method##
+--                         can be either ##DB_LOCK_NO## (no lock) or 
+--                         ##DB_LOCK_EXCLUSIVE## (exclusive lock).
+--      # ##init_tables##, an integer giving the initial number of tables to
+--                         reserve space for. The default is 5 and the minimum is 1.
+--      # ##init_free##, an integer giving the initial amount of free space pointers to
+--                         reserve space for. The default is 5 and the minimum is 0.
 --
 -- Returns:
 --		An **integer** status code, either DB_OK if creation successful or anything else on an error.
@@ -906,9 +912,17 @@ end procedure
 -- See Also:
 -- 		[[:db_open]], [[:db_select]]
 
-public function db_create(sequence path, integer lock_method)
+public function db_create(sequence path, integer lock_method, integer init_tables = INIT_TABLES, integer init_free = INIT_FREE )
 	integer db
 
+	if init_tables < 1 then
+		init_tables = 1
+	end if
+	
+	if init_free < 0 then
+		init_free = 0
+	end if
+	
 	if not eu:find('.', path) then
 		path &= ".edb"
 	end if
@@ -960,16 +974,16 @@ public function db_create(sequence path, integer lock_method)
 	-- 7:
 	put4(0)   -- number of free blocks
 	-- 11:
-	put4(23 + INIT_TABLES * SIZEOF_TABLE_HEADER + 4)   -- pointer to free list
+	put4(23 + init_tables * SIZEOF_TABLE_HEADER + 4)   -- pointer to free list
 	-- 15: initial table block:
-	put4( 8 + INIT_TABLES * SIZEOF_TABLE_HEADER)  -- allocated size
+	put4( 8 + init_tables * SIZEOF_TABLE_HEADER)  -- allocated size
 	-- 19:
 	put4(0)   -- number of tables that currently exist
 	-- 23: initial space for tables
-	putn(repeat(0, INIT_TABLES * SIZEOF_TABLE_HEADER))
+	putn(repeat(0, init_tables * SIZEOF_TABLE_HEADER))
 	-- initial space for free list
-	put4(4+INIT_FREE*8)   -- allocated size
-	putn(repeat(0, INIT_FREE * 8))
+	put4(4+init_free*8)   -- allocated size
+	putn(repeat(0, init_free * 8))
 	return DB_OK
 end function
 
@@ -978,9 +992,11 @@ end function
 --
 -- Parameters:
 --		# ##path##: a sequence, the path to the file containing the database
---		# ##lock_method##, an integer specifying which sort of access can be granted to the database. The types of lock that you can use are: ##DB_LOCK_NO## (no lock),
---   ##DB_LOCK_SHARED## (shared lock for read-only access) and
---   ##DB_LOCK_EXCLUSIVE## (for read/write access).
+--		# ##lock_method##, an integer specifying which sort of access can
+--           be granted to the database. The types of lock that you can use are:
+--      ## ##DB_LOCK_NO## (no lock) - The default
+--      ## ##DB_LOCK_SHARED## (shared lock for read-only access) 
+--      ## ##DB_LOCK_EXCLUSIVE## (for read/write access).
 --
 -- Returns:
 --		An **integer** status code, either DB_OK if creation successful or anything else on an error.
@@ -1031,7 +1047,7 @@ end function
 -- See Also:
 --   [[:db_create]], [[:db_select]]
 
-public function db_open(sequence path, integer lock_method)
+public function db_open(sequence path, integer lock_method = DB_LOCK_NO)
 	integer db, magic
 
 	if not eu:find('.', path) then
@@ -1327,12 +1343,18 @@ public function db_create_table(sequence name, integer init_records = INIT_RECOR
 	atom name_ptr, nt, tables, newtables, table, records_ptr
 	atom size, newsize, index_ptr
 	sequence remaining
+	integer init_index
 
 	table = table_find(name)
 	if table != -1 then
 		return DB_EXISTS_ALREADY
 	end if
 
+	if init_records < 1 then
+		init_records = 1
+	end if
+	init_index = min({init_records, INIT_INDEX})
+	
 	-- increment number of tables
 	void = seek(current_db, TABLE_HEADERS)
 	tables = get4()
@@ -1361,17 +1383,14 @@ public function db_create_table(sequence name, integer init_records = INIT_RECOR
 	end if
 
 	-- allocate initial space for 1st block of record pointers
-	if init_records < 1 then
-		init_records = 1
-	end if
 	records_ptr = db_allocate(init_records * 4)
 	putn(repeat(0, init_records * 4))
 
 	-- allocate initial space for the index
-	index_ptr = db_allocate(INIT_INDEX * 8)
+	index_ptr = db_allocate(init_index * 8)
 	put4(0)  -- 0 records
 	put4(records_ptr) -- point to 1st block
-	putn(repeat(0, (INIT_INDEX-1) * 8))
+	putn(repeat(0, (init_index-1) * 8))
 
 	-- store new table
 	name_ptr = db_allocate(length(name)+1)
@@ -1500,16 +1519,22 @@ end procedure
 -- See Also:
 --		[[:db_table_list]], [[:db_select_table]], [[:db_delete_table]]
 
-public procedure db_clear_table(sequence name)
+public procedure db_clear_table(sequence name, integer init_records = INIT_RECORDS)
 -- delete all of records in the table
 	atom table, nrecs, records_ptr, blocks
 	atom p, data_ptr, index_ptr
 	integer k
+	integer init_index
 
 	table = table_find(name)
 	if table = -1 then
 		return
 	end if
+
+	if init_records < 1 then
+		init_records = 1
+	end if
+	init_index = min({init_records, INIT_INDEX})
 
 	void = seek(current_db, table + 4)
 	nrecs = get4()
@@ -1537,14 +1562,14 @@ public procedure db_clear_table(sequence name)
 	db_free(index_ptr)
 
 	-- allocate initial space for 1st block of record pointers
-	data_ptr = db_allocate(INIT_RECORDS * 4)
-	putn(repeat(0, INIT_RECORDS * 4))
+	data_ptr = db_allocate(init_records * 4)
+	putn(repeat(0, init_records * 4))
 
 	-- allocate initial space for the index block
-	index_ptr = db_allocate(INIT_INDEX * 8)
+	index_ptr = db_allocate(init_index * 8)
 	put4(0)  -- 0 records
 	put4(data_ptr) -- point to 1st block
-	putn(repeat(0, (INIT_INDEX-1) * 8))
+	putn(repeat(0, (init_index-1) * 8))
 
 	void = seek(current_db, table + 4)
 	put4(0)  -- start with 0 records total
@@ -2267,6 +2292,50 @@ public function db_record_data(integer key_location, object table_name=current_t
 	data_value = decompress(0)
 
 	return data_value
+end function
+
+--**
+-- Returns the data for the record with supplied key.
+--
+-- Parameters:
+-- 		# ##key##: the identifier of the record to be looked up.
+--      # ##table_name##: optional name of table to find key in
+--
+-- Returns:
+--		An **integer**,
+--		* If less than zero, the record was not found. The returned integer
+--        is the opposite of what the record number would have been, had
+--        the record been found.
+--      * If equal to zero, an error occured.
+--      A sequence, the data for the record.
+--
+-- Errors:
+-- 		If the current table is not defined, it returns 0.
+--
+-- Comments:
+-- Each record in a Euphoria database consists of a key portion and a data
+-- portion. Each of these can be any Euphoria atom or sequence. **NOTE** This
+-- function does not support records that data consists of a single non-sequence value.
+-- In those cases you will need to use [[:db_find_key]] and [[:db_record_data]].
+--
+-- Example 1:
+-- <eucode>
+-- printf(1, "The record['%s'] has data value:\n", {"foo"})
+-- ? db_fetch_record("foo")
+-- </eucode>
+--
+-- See Also:
+-- 		[[:db_find_key]], [[:db_record_data]]
+
+public function db_fetch_record(object key, object table_name=current_table_name)
+	integer pos
+	
+	pos = db_find_key(key, table_name)
+	if pos > 0 then
+		return db_record_data(pos, table_name)
+	else
+		return pos
+	end if
 end function
 
 --**

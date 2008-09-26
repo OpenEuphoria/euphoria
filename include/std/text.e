@@ -16,6 +16,7 @@ include std/sequence.e
 include std/io.e
 include std/search.e
 include std/convert.e
+include std/eds.e
 
 --**
 -- Signature:
@@ -212,58 +213,76 @@ function load_code_page(sequence cpname)
 	object cpdata
 	integer pos
 	sequence kv
+	sequence cp_source
+	sequence cp_db
+
+	cp_source = defaultext(cpname, ".ecp")
+	cp_source = locate_file(cp_source)
 	
-	cpname = defaultext(cpname, ".ecp")
-	cpname = locate_file(cpname)
+	cpdata = read_lines(cp_source)
+	if sequence(cpdata) then
 	
-	cpdata = read_lines(cpname)
-	if atom(cpdata) then
-		return -1 -- Couldn't open file
-	end if
-	
-	pos = 0
-	while pos < length(cpdata) do
-		pos += 1
-		cpdata[pos]  = trim(cpdata[pos])
-		if begins("--HEAD--", cpdata[pos]) then
-			continue
-		end if
-		if cpdata[pos][1] = ';' then
-			continue	-- A comment line
-		end if
-		if begins("--CASE--", cpdata[pos]) then
-			exit
+		pos = 0
+		while pos < length(cpdata) do
+			pos += 1
+			cpdata[pos]  = trim(cpdata[pos])
+			if begins("--HEAD--", cpdata[pos]) then
+				continue
+			end if
+			if cpdata[pos][1] = ';' then
+				continue	-- A comment line
+			end if
+			if begins("--CASE--", cpdata[pos]) then
+				exit
+			end if
+			
+			kv = keyvalues(cpdata[pos],,,,"")
+			if equal(lower(kv[1][1]), "title") then
+				encoding_NAME = kv[1][2]
+			end if
+		end while
+		if pos > length(cpdata) then
+			return -2 -- No Case Conversion table found.
 		end if
 		
-		kv = keyvalues(cpdata[pos],,,,"")
-		if equal(lower(kv[1][1]), "title") then
-			encoding_NAME = kv[1][2]
+		upper_case_SET = ""
+		lower_case_SET = ""
+		while pos < length(cpdata) do
+			pos += 1
+			cpdata[pos]  = trim(cpdata[pos])
+			if length(cpdata[pos]) < 3 then
+				continue
+			end if
+			if cpdata[pos][1] = ';' then
+				continue	-- A comment line
+			end if
+			if cpdata[pos][1] = '-' then
+				exit
+			end if
+	
+			kv = keyvalues(cpdata[pos])		
+			upper_case_SET &= hex_text(kv[1][1])
+			lower_case_SET &= hex_text(kv[1][2])
+		end while
+			
+	else
+		-- See if its in the database.
+		cp_db = locate_file("ecp.edb")
+		pos = db_open(cp_db)
+		if pos != DB_OK then
+			return -2 -- Couldn't open DB
 		end if
-	end while
-	if pos > length(cpdata) then
-		return -2 -- No Case Conversion table found.
+		pos = db_select_table(cpname)
+		if pos != DB_OK then
+			return -1 -- Couldn't find code page in DB
+		end if
+		
+		upper_case_SET = db_fetch_record("uppercase")
+		lower_case_SET = db_fetch_record("lowercase")
+		encoding_NAME = db_fetch_record("title")
+		db_close()
+				
 	end if
-	
-	upper_case_SET = ""
-	lower_case_SET = ""
-	while pos < length(cpdata) do
-		pos += 1
-		cpdata[pos]  = trim(cpdata[pos])
-		if length(cpdata[pos]) < 3 then
-			continue
-		end if
-		if cpdata[pos][1] = ';' then
-			continue	-- A comment line
-		end if
-		if cpdata[pos][1] = '-' then
-			exit
-		end if
-
-		kv = keyvalues(cpdata[pos])		
-		upper_case_SET &= hex_text(kv[1][1])
-		lower_case_SET &= hex_text(kv[1][2])
-	end while
-	
 	return 0
 end function
 
