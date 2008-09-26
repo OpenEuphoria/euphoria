@@ -1363,6 +1363,42 @@ procedure line_print( integer fn, object p )
 	puts(fn, p )
 end procedure
 
+constant MODES = {"M_NORMAL", "M_CONSTANT", "M_TEMP" }
+constant SCOPES = {
+	"SC_?",
+	"SC_LOOP_VAR",    -- "private" loop vars known within a single loop
+	"SC_PRIVATE",    -- private within subprogram
+	"SC_GLOOP_VAR",   -- "global" loop var
+	"SC_LOCAL",    -- local to the file
+	"SC_GLOBAL",    -- global across all files
+	"SC_PREDEF",    -- predefined symbol - could be overriden
+	"SC_KEYWORD",    -- a keyword
+	"SC_UNDEFINED",   -- new undefined symbol
+	"SC_MULTIPLY_DEFINED",  -- global symbol defined in 2 or more files
+	"SC_EXPORT",   -- visible to anyone that includes the file
+	"SC_OVERRIDE", -- override an internal
+	"SC_PUBLIC" }   -- visible to any file that includes it, or via "public include"
+
+constant USAGE_VALUES = {
+	U_UNUSED,
+	U_READ,
+	U_WRITTEN,
+	U_DELETED} -- we've decided to delete this symbol
+
+constant USAGES = {
+	"U_UNUSED",
+	"U_READ",
+	"U_WRITTEN",
+	"U_DELETED"} -- we've decided to delete this symbol
+
+function format_symbol( sequence symbol )
+	symbol[S_MODE] = MODES[symbol[S_MODE]]
+	if symbol[S_SCOPE] then
+		symbol[S_SCOPE] = SCOPES[symbol[S_SCOPE]]
+	end if
+	return symbol
+end function
+
 procedure save_il( sequence name )
 	integer st, max_width
 	sequence line_format, pretty_options = PRETTY_DEFAULT
@@ -1372,7 +1408,7 @@ procedure save_il( sequence name )
 	pretty_options[LINE_BREAKS]   = 0
 	
 	for j = 1 to length( SymTab ) do
-		puts( st,  pretty_sprint( j & SymTab[j], pretty_options ) )
+		puts( st,  pretty_sprint( j & format_symbol( SymTab[j] ), pretty_options ) )
 -- 		pretty_print( st, j & SymTab[j], pretty_options )
 		puts( st, "\n" )
 	end for

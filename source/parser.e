@@ -228,25 +228,25 @@ end procedure
 procedure InitCheck(symtab_index sym, integer ref)
 -- emit INIT_CHECK opcode if we aren't sure if a var has been
 -- initialized yet. ref is TRUE if this is a read of this var
-	if SymTab[sym][S_MODE] = M_NORMAL and
+	if sym < 0 or (SymTab[sym][S_MODE] = M_NORMAL and
 	    SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
-	    SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
-		if (SymTab[sym][S_SCOPE] != SC_PRIVATE and
+	    SymTab[sym][S_SCOPE] != SC_GLOOP_VAR) then
+		if sym < 0 or ((SymTab[sym][S_SCOPE] != SC_PRIVATE and
 		   equal(SymTab[sym][S_OBJ], NOVALUE)) or
 		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and
-		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS]) then
-			if SymTab[sym][S_INITLEVEL] = -1 then
+		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS])) then
+			if sym < 0 or (SymTab[sym][S_INITLEVEL] = -1) then
 				if ref then
-					if SymTab[sym][S_SCOPE] = SC_UNDEFINED then
+					if sym > 0 and (SymTab[sym][S_SCOPE] = SC_UNDEFINED) then
 						emit_op(PRIVATE_INIT_CHECK)
-					elsif find(SymTab[sym][S_SCOPE], SCOPE_TYPES) then
+					elsif sym < 0 or find(SymTab[sym][S_SCOPE], SCOPE_TYPES) then
 						emit_op(GLOBAL_INIT_CHECK) -- will become NOP2
 					else
 						emit_op(PRIVATE_INIT_CHECK)
 					end if
 					emit_addr(sym)
 				end if
-				if short_circuit <= 0 or short_circuit_B = FALSE then
+				if sym > 0 and (short_circuit <= 0 or short_circuit_B = FALSE) then
 					init_stack = append(init_stack, sym)
 					SymTab[sym][S_INITLEVEL] = stmt_nest
 				end if
@@ -874,10 +874,9 @@ procedure ParseArgs(symtab_index subsym)
 	restore_parseargs_states()
 end procedure
 
-procedure Forward_var( token tok, integer init_check = -1 )
-	integer ref = new_forward_reference( VARIABLE, tok[T_SYM] )
+procedure Forward_var( token tok, integer init_check = -1, integer op = tok[T_ID] )
+	integer ref = new_forward_reference( VARIABLE, tok[T_SYM], op )
 	emit_opnd( - ref )
-	
 	if init_check != -1 then
 		Forward_InitCheck( tok, ref, init_check )
 	end if
@@ -1317,7 +1316,7 @@ procedure TypeCheck(symtab_index var)
 -- emit code to type-check a var (after it has been assigned-to)
 	integer which_type
 	
-	if SymTab[var][S_SCOPE] = SC_UNDEFINED then
+	if var < 0 or SymTab[var][S_SCOPE] = SC_UNDEFINED then
 		-- forward reference, so defer type check until later
 		integer ref = new_forward_reference( TYPE_CHECK, var )
 		if not TRANSLATE then
@@ -1397,25 +1396,27 @@ procedure Assignment(token left_var)
 
 	left_sym = left_var[T_SYM]
 	if SymTab[left_sym][S_SCOPE] = SC_UNDEFINED then
-		Forward_var( left_var )
+		Forward_var( left_var, ,ASSIGN )
+		left_sym = Pop() -- pops off what forward var emitted, because it gets emitted later
 	else
 		UndefinedVar(left_sym)
+		if SymTab[left_sym][S_SCOPE] = SC_LOOP_VAR or
+		SymTab[left_sym][S_SCOPE] = SC_GLOOP_VAR then
+			CompileErr("may not assign to a for-loop variable")
+	
+		elsif SymTab[left_sym][S_MODE] = M_CONSTANT then
+			CompileErr("may not change the value of a constant")
+	
+		elsif find(SymTab[left_sym][S_SCOPE], SCOPE_TYPES) then
+			-- this helps us to optimize things below
+			SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
+											power(2, remainder(left_sym, E_SIZE)))
+		end if
+	
+		SymTab[left_sym][S_USAGE] = or_bits(SymTab[left_sym][S_USAGE], U_WRITTEN)
 	end if
 
-	if SymTab[left_sym][S_SCOPE] = SC_LOOP_VAR or
-	   SymTab[left_sym][S_SCOPE] = SC_GLOOP_VAR then
-		CompileErr("may not assign to a for-loop variable")
-
-	elsif SymTab[left_sym][S_MODE] = M_CONSTANT then
-		CompileErr("may not change the value of a constant")
-
-	elsif find(SymTab[left_sym][S_SCOPE], SCOPE_TYPES) then
-		-- this helps us to optimize things below
-		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
-										 power(2, remainder(left_sym, E_SIZE)))
-	end if
-
-	SymTab[left_sym][S_USAGE] = or_bits(SymTab[left_sym][S_USAGE], U_WRITTEN)
+	
 
 	tok = next_token()
 	subs = 0
@@ -1475,14 +1476,15 @@ procedure Assignment(token left_var)
 			InitCheck(left_sym, FALSE)
 		else
 			InitCheck(left_sym, TRUE)
-			SymTab[left_sym][S_USAGE] = or_bits(SymTab[left_sym][S_USAGE], U_READ)
+			if left_sym > 0 then
+				SymTab[left_sym][S_USAGE] = or_bits(SymTab[left_sym][S_USAGE], U_READ)
+			end if
 			emit_opnd(left_sym)
 			Expr() -- RHS expression
 			emit_assign_op(assign_op)
 		end if
 		emit_op(ASSIGN)
 		TypeCheck(left_sym)
-
 	else
 		-- subscripted
 		factors = 0
@@ -1490,7 +1492,7 @@ procedure Assignment(token left_var)
 		Expr() -- RHS expression
 
 		if subs > 1 then
-			if SymTab[left_sym][S_SCOPE] != SC_PRIVATE and
+			if left_sym < 0 or SymTab[left_sym][S_SCOPE] != SC_PRIVATE and
 			   and_bits(side_effect_calls,
 						power(2, remainder(left_sym, E_SIZE))) then
 				-- this var might be overwritten by a function call while
@@ -1562,7 +1564,7 @@ procedure Assignment(token left_var)
 			end if
 		end if
 
-		if OpTypeCheck and SymTab[left_sym][S_VTYPE] != sequence_type then
+		if OpTypeCheck and (left_sym < 0 or SymTab[left_sym][S_VTYPE] != sequence_type) then
 			TypeCheck(left_sym)
 		end if
 	end if
@@ -2643,8 +2645,6 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	while TRUE do
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-			? tok[T_ID]
-			? IGNORED
 			CompileErr("a name is expected here")
 		end if
 		sym = tok[T_SYM]

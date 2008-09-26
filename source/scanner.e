@@ -895,11 +895,20 @@ procedure patch_forward_variable( token tok, integer ref )
 		return
 	end if
 	
+	if fr[FR_OP] = ASSIGN and SymTab[sym][S_MODE] = M_CONSTANT then
+		prep_forward_error( ref )
+		CompileErr( "may not change the value of a constant" )
+	end if
+	
 	set_code( ref )
 	integer vx = find_from( -ref, Code, fr[FR_PC] )
-	
 	if vx then
-		Code[vx] = tok[T_SYM]
+		while vx do
+			-- subscript assignments might cause the
+			-- sym to be emitted multiple times
+			Code[vx] = sym
+			vx = find_from( -ref, Code, fr[FR_PC] )
+		end while
 		forward_references[ref] = 0
 	end if
 	reset_code()
@@ -1034,9 +1043,13 @@ procedure patch_forward_type_check( token tok, integer ref )
 	reset_code()
 end procedure
 
-procedure forward_error( token tok, integer ref )
+procedure prep_forward_error( integer ref )
 	ThisLine = forward_references[ref][FR_THISLINE]
-	bp = forward_references[ref][FR_THISLINE]
+	bp = forward_references[ref][FR_BP]
+end procedure
+
+procedure forward_error( token tok, integer ref )
+	prep_forward_error( ref )
 	
 	CompileErr(sprintf("expected %s, not %s", 
 		{ expected_name( forward_references[ref][FR_TYPE] ),
@@ -1067,12 +1080,18 @@ function find_reference( sequence fr )
 end function
 
 
-export function new_forward_reference( integer op, symtab_index sym )
+export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
 	forward_references = append( forward_references, repeat( 0, FR_SIZE ) )
 	integer ref = length( forward_references )
 	
-	forward_references[ref][FR_TYPE]      = op
-	forward_references[ref][FR_NAME]      = SymTab[sym][S_NAME]
+	
+	forward_references[ref][FR_TYPE]      = fwd_op
+	if sym < 0 then
+		forward_references[ref][FR_NAME] = forward_references[-sym][FR_NAME]
+	else
+		forward_references[ref][FR_NAME] = SymTab[sym][S_NAME]
+	end if
+	
 	forward_references[ref][FR_FILE]      = current_file_no
 	forward_references[ref][FR_SUBPROG]   = CurrentSub
 	forward_references[ref][FR_PC]        = length( Code ) + 1
@@ -1080,6 +1099,7 @@ export function new_forward_reference( integer op, symtab_index sym )
 	forward_references[ref][FR_THISLINE]  = ThisLine
 	forward_references[ref][FR_BP]        = bp
 	forward_references[ref][FR_QUALIFIED] = qualified_fwd
+	forward_references[ref][FR_OP]        = op
 	
 	return ref
 end function
@@ -1098,7 +1118,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				errors &= ref
 				continue
 			end if
-			trace(1)
+			
 			sequence fname = file_name[fr[FR_FILE]]
 			sequence cname = file_name[current_file_no]
 			
@@ -1111,6 +1131,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				case FUNC:
 					
 					sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
+					if sym_tok != fr_type then
+						forward_error( tok, ref )
+					end if
 					switch sym_tok do
 						case PROC:
 						case FUNC:
@@ -1130,10 +1153,13 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 						continue
 					end if
 					switch sym_tok do
-						case VARIABLE:
 						case CONSTANT:
 						case ENUM:
+						case VARIABLE:
 							patch_forward_variable( tok, ref )
+							if sequence( forward_references[ref] ) then
+								errors &= ref
+							end if
 							continue
 						case else
 							forward_error( tok, ref )

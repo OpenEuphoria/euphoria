@@ -1581,27 +1581,37 @@ global procedure GenerateUserRoutines()
 				
 					-- declare the private vars 
 					unique_params = {}
-					while sp and (SymTab[sp][S_SCOPE] = SC_PRIVATE or SymTab[sp][S_SCOPE] = SC_LOOP_VAR) do
-						if SymTab[sp][S_SCOPE] = SC_LOOP_VAR then
-							sp = SymTab[sp][S_NEXT]
-							continue
-						end if
-						if find( SymTab[sp][S_NAME], unique_params ) then
-							-- rename it to not conflict with anything else
-							SymTab[sp][S_NAME] &= sprintf("_%d", sp )
-						end if
-						unique_params = append( unique_params, SymTab[sp][S_NAME] )
-						c_stmt0("int ")
-						c_puts("_")
-						c_puts(ok_name(SymTab[sp][S_NAME]))
-						if SymTab[sp][S_GTYPE] != TYPE_INTEGER then
-							-- avoid DeRef in 1st BB
-							c_puts(" = 0")
-							target[MIN] = 0
-							target[MAX] = 0
-							SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT)
-						end if
-						c_puts(";\n")
+					while sp do
+						integer scope = SymTab[sp][S_SCOPE]
+						switch scope do
+							case SC_LOOP_VAR:
+							case SC_UNDEFINED:
+								-- don't need to declare this
+								-- an undefined var is a forward reference
+								break
+						
+							case SC_PRIVATE:
+								if find( SymTab[sp][S_NAME], unique_params ) then
+									-- rename it to not conflict with anything else
+									SymTab[sp][S_NAME] &= sprintf("_%d", sp )
+								end if
+								unique_params = append( unique_params, SymTab[sp][S_NAME] )
+								c_stmt0("int ")
+								c_puts("_")
+								c_puts(ok_name(SymTab[sp][S_NAME]))
+								if SymTab[sp][S_GTYPE] != TYPE_INTEGER then
+									-- avoid DeRef in 1st BB
+									c_puts(" = 0")
+									target[MIN] = 0
+									target[MAX] = 0
+									SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT)
+								end if
+								c_puts(";\n")
+								break
+								
+							case else
+								exit
+						end switch
 						sp = SymTab[sp][S_NEXT]
 					end while
 				

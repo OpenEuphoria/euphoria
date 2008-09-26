@@ -1,20 +1,20 @@
 include std/filesys.e
 include std/unittest.e
 
-sequence fullname, pname, fname, fext, crlf, driveid
+sequence fullname, pname, fname, fext, eolsep, driveid
 integer sep
 
 ifdef UNIX then
     fullname = "/opt/euphoria/docs/readme.txt"
     pname = "/opt/euphoria/docs"
     sep = '/'
-    crlf = "\n"
+    eolsep = "\n"
     driveid = ""
 elsedef
     fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
     pname = "\\EUPHORIA\\DOCS"
     sep = '\\'
-    crlf = "\r\n"
+    eolsep = "\r\n"
     driveid = "C"
 end ifdef
 
@@ -46,7 +46,7 @@ test_equal("defaultext #4", "abc.xyz" & SLASH & "abc.def", defaultext("abc.xyz" 
 
 
 test_equal("SLASH", sep, SLASH)
-test_equal("CRLF", crlf, CRLF)
+test_equal("EOLSEP", eolsep, EOLSEP)
 
 test_equal("file_exists #1", 1, file_exists("t_filesys.e"))
 test_equal("file_exists #2", 0, file_exists("nononononono.txt"))
