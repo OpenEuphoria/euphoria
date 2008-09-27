@@ -1273,6 +1273,10 @@ public function locate_file(sequence filename, sequence search_list = {})
 	end if
 		
 	for i = 1 to length(search_list) do
+		if length(search_list[i]) = 0 then
+			continue
+		end if
+		
 		if search_list[i][$] != SLASH then
 			search_list[i] &= SLASH
 		end if
