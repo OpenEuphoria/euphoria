@@ -2426,7 +2426,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 			if SymTab[s][S_SCOPE] = SC_GLOBAL and 
 			   equal(name, SymTab[s][S_NAME]) then
 			
-				s_in_include_path = symbol_in_include_path( s, file, {} )
+				s_in_include_path = include_matrix[file][SymTab[s][S_FILE_NO]] != 0
 				if s_in_include_path then
 					global_found = s
 					found_in_path += 1
@@ -2437,7 +2437,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 					found_outside_path += 1
 				end if
 			elsif SymTab[s][S_SCOPE] = SC_EXPORT and equal( name, SymTab[s][S_NAME] ) then
-				if is_direct_include( s, file ) then
+				if and_bits( DIRECT_INCLUDE, include_matrix[file][SymTab[s][S_FILE_NO]] ) then
 					global_found = s
 				end if
 					found_in_path += 1

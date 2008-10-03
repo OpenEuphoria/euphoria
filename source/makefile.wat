@@ -514,12 +514,14 @@ rev.e :
 	cd .\$(OBJDIR)
 	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	-if exist scientific.c rename scientific.c scientif.c
+	echo -if exist scientific.c del scientific.c
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	-if exist scientific.c rename scientific.c scientif.c
+	echo -if exist scientific.c del scientific.c
 	cd ..
 
 .c: $(OBJDIR);$(OBJDIR)\back
