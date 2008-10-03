@@ -654,6 +654,7 @@ procedure UndefinedVar(symtab_index s)
 				fname = find_replace("/", file_name[SymTab[dup][S_FILE_NO]], "\\")
 			end ifdef
 			errmsg &= "    " & fname & "\n"
+			
 		end for
 
 		CompileErr(errmsg)

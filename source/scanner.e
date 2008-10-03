@@ -5,7 +5,7 @@
 include std/memory.e
 include std/get.e
 include std/filesys.e
-
+include common.e
 include global.e
 include reswords.e
 include std/error.e
@@ -554,12 +554,15 @@ procedure add_exports( integer from_file, integer to_file )
 	sequence exports
 	sequence direct
 	direct = file_include[to_file]
-	exports = file_export[from_file]
+	exports = file_public[from_file]
 	for i = 1 to length(exports) do
 		if not find( exports[i], direct ) then
 			if not find( -exports[i], direct ) then
 				direct &= -exports[i]
+				
+				
 			end if
+			include_matrix[to_file][exports[i]] = or_bits( PUBLIC_INCLUDE, include_matrix[to_file][exports[i]] )
 		end if
 	end for
 	file_include[to_file] = direct
@@ -578,6 +581,94 @@ procedure patch_exports( integer for_file )
 			end if
 		end if
 	end for
+end procedure
+
+-- File (A) included or re-included:
+-- Add direct include to the file that just included it (B).
+--  If public include, add public include to files that directly include B
+--  Walk up all branches of includes, adding indirect or public based on how they were included.
+--  Stop the walk in a particular branch if we've already updated that file in the same
+--  way.
+
+procedure update_include_matrix( integer included_file, integer from_file )
+
+	include_matrix[from_file][included_file] = or_bits( DIRECT_INCLUDE, include_matrix[from_file][included_file] )
+	
+	if public_include then
+	
+		-- add PUBLIC_INCLUDE where appropriate
+		sequence add_public = file_include_by[from_file]
+		for i = 1 to length( add_public ) do
+			-- add public to anything that directly included from_file
+			include_matrix[add_public[i]][included_file] = 
+				or_bits( PUBLIC_INCLUDE, include_matrix[add_public[i]][included_file] )
+				
+		end for
+		
+		-- now we need to walk up the public include tree
+		add_public = file_public_by[from_file]
+		integer px = length( add_public ) + 1
+		while px <= length( add_public ) do
+			include_matrix[add_public[px]][included_file] = 
+				or_bits( PUBLIC_INCLUDE, include_matrix[add_public[px]][included_file] )
+				
+			for i = 1 to length( file_public_by[add_public[px]] ) do
+				if not find( file_public[add_public[px]][i], add_public ) then
+					add_public &= file_public[add_public[px]][i]
+				end if
+			end for
+			
+			for i = 1 to length( file_include_by[add_public[px]] ) do
+				include_matrix[file_include_by[add_public[px]]][included_file] = 
+					or_bits( PUBLIC_INCLUDE, include_matrix[file_include_by[add_public[px]]][included_file] )
+			end for
+			
+			px += 1
+		end while
+	end if
+	
+	-- update indirect includes
+	sequence indirect = file_include_by[from_file]
+	-- the mask relies on INDIRECT_INCLUDE being 1
+	sequence mask = include_matrix[included_file] != 0
+	include_matrix[from_file] = or_bits( include_matrix[from_file], mask )
+	mask = include_matrix[from_file] != 0
+	integer ix = 1
+	while ix <= length(indirect) do
+		integer indirect_file = indirect[ix]
+		include_matrix[indirect_file] = 
+			or_bits( mask, include_matrix[indirect_file] )
+		for i = 1 to length( file_include_by[indirect_file] ) do
+		
+			if not find( file_include_by[indirect_file][i], indirect ) then
+				indirect &= file_include_by[indirect_file][i]
+			end if
+		
+		end for
+		ix += 1
+	end while
+	public_include = FALSE
+end procedure
+
+procedure add_include_by( integer by_file, integer included_file, integer is_public = 0 )
+	include_matrix[by_file][included_file] = or_bits( DIRECT_INCLUDE, include_matrix[by_file][included_file] )
+	if not find( by_file, file_include_by[included_file] ) then
+		file_include_by[included_file] &= by_file
+	end if
+	
+	if not find( included_file, file_include[by_file] ) then
+		file_include[by_file] &= included_file
+	end if
+	
+	if is_public then
+		if not find( by_file, file_public_by[included_file] ) then
+			file_public_by[included_file] &= by_file
+		end if
+		
+		if not find( included_file, file_public[by_file] ) then
+			file_public[by_file] &= included_file
+		end if
+	end if
 end procedure
 
 procedure IncludePush()
@@ -611,6 +702,8 @@ procedure IncludePush()
 				-- it was included via export before, but we can now mark it as directly included
 				file_include[current_file_no][ find( -i, file_include[current_file_no] ) ] = i
 				
+				
+				
 			elsif not find( i, file_include[current_file_no] ) then
 				-- don't reparse the file, but note that it was included here
 				file_include[current_file_no] &= i
@@ -618,15 +711,18 @@ procedure IncludePush()
 				-- also add anything that file exports
 				add_exports( i, current_file_no )
 				
-				
 				if public_include then
-					public_include = FALSE
-					if not find( i, file_export[current_file_no] ) then
-						file_export[current_file_no] &= i
+					
+					if not find( i, file_public[current_file_no] ) then
+						file_public[current_file_no] &= i
 						patch_exports( current_file_no )
 					end if
+					
 				end if
 			end if
+			add_include_by( current_file_no, i, public_include )
+			update_include_matrix( i, current_file_no )
+			public_include = FALSE
 			read_line() -- we can't return without reading a line first
 			return -- ignore it  
 		end if
@@ -650,14 +746,23 @@ procedure IncludePush()
 							   prev_OpWarning})
 							   
 	file_include = append( file_include, {} )
-	file_export  = append( file_export, {} )
+	file_include_by = append( file_include_by, {} )
+	for i = 1 to length( include_matrix) do
+		include_matrix[i] &= 0
+	end for
+	include_matrix = append( include_matrix, repeat( 0, length( file_include ) ) )
+	include_matrix[$][$] = DIRECT_INCLUDE
+	include_matrix[current_file_no][$] = DIRECT_INCLUDE
+	
+	file_public  = append( file_public, {} )
+	file_public_by = append( file_public_by, {} )
 	file_include[current_file_no] &= length( file_include )
+	add_include_by( current_file_no, length(file_include), public_include )
 	if public_include then
-		file_export[current_file_no] &= length( file_export )
-		public_include = FALSE
+		file_public[current_file_no] &= length( file_public )
 		patch_exports( current_file_no )
 	end if
-
+	
 ifdef STDDEBUG then
 	if not match("std/", new_name ) then
 		file_include[$] &= 2 -- include the unexported std library
@@ -672,6 +777,8 @@ end ifdef
 	file_name = append(file_name, new_include_name)
 	default_namespaces &= 0
 	
+	update_include_matrix( length( file_include ), current_file_no )
+	
 	old_file_no = current_file_no
 	current_file_no = length(file_name)
 	line_number = 0
@@ -681,8 +788,8 @@ end ifdef
 		SymTab[new_include_space][S_OBJ] = current_file_no
 	end if
 	default_namespace( )
-	
 end procedure
+
 
 -- TODO: update side effects tracking for routines
 export integer parse_arg_rid

@@ -489,28 +489,14 @@ global procedure add_ref(token tok)
 	end if
 end procedure
 
-export function is_direct_include( symtab_index sym, integer check_file, integer export_ok = 1 )
-		integer file_no
-		file_no = SymTab[sym][S_FILE_NO]
-
-		if file_no = check_file then
-			return 1
-		end if
-
-		integer is_direct = find( file_no, file_include[check_file] )
-		if not is_direct and export_ok then
-			is_direct = find( -file_no, file_include[check_file] )
-		end if
-		return is_direct
-end function
-
 global procedure MarkTargets(symtab_index s, integer attribute)
 -- Note the possible targets of a routine id call
 	symtab_index p
 	sequence sname
 	sequence string
 	integer colon, h
-
+	integer scope
+	
 	if (SymTab[s][S_MODE] = M_TEMP or
 		SymTab[s][S_MODE] = M_CONSTANT) and
 		sequence(SymTab[s][S_OBJ]) then
@@ -548,11 +534,26 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 		-- mark all visible routines parsed so far
 		p = SymTab[TopLevelSub][S_NEXT]
 		while p != 0 do
-			if SymTab[p][S_FILE_NO] = current_file_no or
-			   SymTab[p][S_SCOPE] = SC_GLOBAL or
-			   (SymTab[p][S_SCOPE] = SC_PUBLIC and is_direct_include( p, current_file_no )) or
-			   (SymTab[p][S_SCOPE] = SC_EXPORT and is_direct_include( p, current_file_no, 0 )) then
+			integer sym_file = SymTab[p][S_FILE_NO]
+			if sym_file = current_file_no then
 				SymTab[p][attribute] += 1
+			else
+				scope = SymTab[p][S_SCOPE]
+				switch scope do
+					case SC_PUBLIC:
+						if and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+							SymTab[p][attribute] += 1
+						end if
+						break
+					case SC_EXPORT:
+						if not and_bits( DIRECT_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+							break
+						end if
+						-- fallthrough
+					case SC_GLOBAL:
+						SymTab[p][attribute] += 1
+						
+				end switch
 			end if
 			p = SymTab[p][S_NEXT]
 		end while
@@ -560,34 +561,6 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 end procedure
 
 global sequence dup_globals, dup_overrides, in_include_path
-
-export function symbol_in_include_path( symtab_index sym, integer check_file, sequence path_checked  )
-		integer file_no
-		file_no = SymTab[sym][S_FILE_NO]
-
-		if file_no = check_file then
-			return 1
-		end if
-		
-		if check_file < 0 then
-			check_file = -check_file
-		end if
-		
-		if find(check_file, path_checked ) then
-			return 0
-		end if
-		path_checked &= check_file
-		if file_no = check_file or find( file_no, file_include[check_file] ) or find( -file_no, file_include[check_file] ) then
-				return 1
-		else
-				for i = 1 to length( file_include[check_file] ) do
-						if symbol_in_include_path( sym, file_include[check_file][i], path_checked ) then
-								return 1
-						end if
-				end for
-		end if
-		return 0
-end function
 
 -- remember which files have gotten warnings already to avoid issuing too many
 sequence include_warnings
@@ -639,13 +612,15 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 
 				scope = SymTab[st_ptr][S_SCOPE]
 
-				if scope = SC_OVERRIDE then
+				switch scope do
+				case SC_OVERRIDE:
 					dup_overrides &= st_ptr
-
-				elsif scope = SC_PREDEF then
+					break
+					
+				case SC_PREDEF:
 					st_builtin = st_ptr
-
-				elsif scope = SC_GLOBAL then
+					break
+				case SC_GLOBAL:
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file
 
@@ -659,11 +634,12 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 					-- found global in another file
 					gtok = tok
 					dup_globals &= st_ptr
-					in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
-
+					in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 -- symbol_in_include_path( st_ptr, scanning_file, {} )
+					break
 					-- continue looking for more globals with same name
 
-				elsif scope = SC_EXPORT or scope = SC_PUBLIC then
+				case SC_EXPORT:
+				case SC_PUBLIC:
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found export in current file
 						if BIND then
@@ -673,15 +649,19 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 						return tok
 					end if
 
-					if is_direct_include( st_ptr, scanning_file, scope = SC_PUBLIC ) then
+					if (scope = SC_PUBLIC and 
+						and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
+						or (scope = SC_EXPORT and
+						and_bits( DIRECT_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
+					then
 						-- found public in another file 
 						gtok = tok
 						dup_globals &= st_ptr
-						in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
+						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 --symbol_in_include_path( st_ptr, scanning_file, {} )
 					end if
 ifdef STDDEBUG then
-					if not is_direct_include( st_ptr, scanning_file ) and
-						symbol_in_include_path( st_ptr, scanning_file, {} )  
+					if not and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ) and
+						include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 --symbol_in_include_path( st_ptr, scanning_file, {} )  
 					then 
 						gtok = tok
 						dup_globals &= st_ptr
@@ -701,8 +681,8 @@ ifdef STDDEBUG then
 						
 					end if
 end ifdef
-
-				elsif scope = SC_LOCAL then
+					break
+				case SC_LOCAL:
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found local in current file
 
@@ -712,8 +692,8 @@ end ifdef
 
 						return tok
 					end if
-
-				else
+					break
+				case else
 
 					if BIND then
 						add_ref(tok)
@@ -721,45 +701,53 @@ end ifdef
 
 					return tok -- keyword, private
 
-				end if
+				end switch
 
 			else
 				-- qualified - must match global symbol in specified file (or be in the file's
 				-- include path)
-
+				scope = SymTab[tok[T_SYM]][S_SCOPE]
+				
 				if not file_no then
 					-- internal eu namespace was used
-					if SymTab[tok[T_SYM]][S_SCOPE] = SC_PREDEF then
+					if scope = SC_PREDEF then
 						if BIND then
 							add_ref( tok )
 						end if
 						return tok
 					end if
 
-				elsif ((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or
-						symbol_in_include_path(tok[T_SYM], file_no, {})) and
-						SymTab[tok[T_SYM]][S_SCOPE] = SC_GLOBAL) or
-						
-						((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or
-							is_direct_include(tok[T_SYM], file_no )) and
-						SymTab[tok[T_SYM]][S_SCOPE] = SC_PUBLIC) or
-						
-						((file_no = SymTab[tok[T_SYM]][S_FILE_NO] or
-							is_direct_include(tok[T_SYM], file_no, 0 )) and
-						SymTab[tok[T_SYM]][S_SCOPE] = SC_EXPORT)
-						
-				then
-				
-					if file_no = SymTab[tok[T_SYM]][S_FILE_NO] then
-						if BIND then
-							add_ref(tok)
-						end if
-						return tok
+				else
+					integer tok_file = SymTab[tok[T_SYM]][S_FILE_NO]
+					integer good = 0
+					if file_no = tok_file then
+						good = 1
+					else
+						switch scope do
+						case SC_GLOBAL:
+							good = and_bits( ANY_INCLUDE, include_matrix[file_no][tok_file] )
+							break
+						case SC_PUBLIC:
+							good = and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file_no][tok_file] )
+							break
+						case SC_EXPORT:
+							good = and_bits( DIRECT_INCLUDE, include_matrix[file_no][tok_file] )
+						end switch
 					end if
-
-					gtok = tok
-					dup_globals &= st_ptr
-					in_include_path &= symbol_in_include_path( st_ptr, scanning_file, {} )
+					
+					if good then
+				
+						if file_no = tok_file then
+							if BIND then
+								add_ref(tok)
+							end if
+							return tok
+						end if
+	
+						gtok = tok
+						dup_globals &= st_ptr
+						in_include_path &= include_matrix[scanning_file][tok_file] != 0
+					end if
 				end if
 			end if
 

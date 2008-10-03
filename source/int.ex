@@ -1,7 +1,6 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- the official C back-end interpreter
-
 without type_check
 
 include mode.e
@@ -28,11 +27,6 @@ include backend.e
 global procedure OutputIL()
 -- dummy routine
 end procedure
-
-global function extract_options(sequence s)
--- dummy routine    
-	return s
-end function
 
 -- main program:
 include main.e

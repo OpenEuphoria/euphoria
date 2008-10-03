@@ -245,7 +245,7 @@ procedure main()
 	main_file()
 	
 	parser()
-
+	
 	-- we've parsed successfully
 	-- now run the appropriate back-end
 	if TRANSLATE then
