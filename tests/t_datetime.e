@@ -1,8 +1,39 @@
 include std/datetime.e as d
 include std/unittest.e
 
+function all_strings(object s)
+	if atom(s) then return 0 end if
+	for i = 1 to length(s) do
+		if atom(s[i]) then return 0 end if
+		for j = 1 to length(s[i]) do
+			if not integer(s[i][j]) then return 0 end if
+			if s[i][j] < 0 then return 0 end if
+		end for
+	end for
+	return 1
+end function
+
 sequence tmp
 datetime dt1, dt2
+test_equal("length month_names", 12, length(month_names))
+test_equal("length month_abbrs", 12, length(month_abbrs))
+test_equal("length day_names", 7, length(day_names))
+test_equal("length day_abbrs", 7, length(day_abbrs))
+test_equal("length ampm", 2, length(ampm))
+
+test_true(" month_names", all_strings(month_names))
+test_true(" month_abbrs", all_strings(month_abbrs))
+test_true(" day_names", all_strings(day_names))
+test_true(" day_abbrs", all_strings(day_abbrs))
+test_true(" ampm", all_strings(ampm))
+
+for i = 1 to length(month_names) do
+	test_true(sprintf(" month abbrev %d", i), length(month_names[i]) >= length(month_abbrs[i]))
+end for
+
+for i = 1 to length(day_names) do
+	test_true(sprintf(" day abbrev %d", i), length(day_names[i]) >= length(day_abbrs[i]))
+end for
 
 dt1 = d:new()
 dt2 = d:now()

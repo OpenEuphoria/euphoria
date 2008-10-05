@@ -257,25 +257,34 @@ end function
 --**
 -- Names of the months
 
-public sequence month_names = { "January", "February", "March", "April", "May", "June", "July",
-	"August", "September", "October", "November", "December" }
+public sequence month_names = { "January", "February", "March", 
+                                "April", "May", "June", 
+                                "July",	"August", "September",
+                                "October", "November", "December" }
 
 --**
 -- Abbreviations of month names
 
-public sequence month_abbrs = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-	"Aug", "Sep", "Oct", "Nov", "Dec" }
+public sequence month_abbrs = { "Jan", "Feb", "Mar", 
+                                "Apr", "May", "Jun",
+                                "Jul", "Aug", "Sep",
+                                "Oct", "Nov", "Dec" }
 
 --**
 -- Names of the days
 
-public sequence day_names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-	"Saturday" }
+public sequence day_names = { "Sunday", "Monday", 
+                              "Tuesday", "Wednesday",
+                              "Thursday", "Friday",
+                              "Saturday" }
 
 --**
 -- Abbreviations of day names
 
-public sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+public sequence day_abbrs = { "Sun", "Mon", 
+							  "Tue", "Wed", 
+							  "Thu", "Fri", 
+							  "Sat" }
 
 --**
 -- AM/PM
@@ -898,6 +907,7 @@ public function add(datetime dt, object qty, integer interval)
 
 		return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
+
 
 --**
 -- Subtract a number of //intervals// to a base datetime.
