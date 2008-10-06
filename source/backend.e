@@ -73,7 +73,7 @@ procedure BackEnd(integer il_file)
 				
 				if find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
 					-- routines only
-					if sequence(eentry[S_CODE]) and eentry[S_OPCODE]=0 then  
+					if sequence(eentry[S_CODE]) and (get_backend() or eentry[S_OPCODE]=0) then  
 						-- routines with code
 						e_addr = allocate(4+4*length(eentry[S_CODE])) -- IL code
 						poke4(e_addr, length(eentry[S_CODE]))

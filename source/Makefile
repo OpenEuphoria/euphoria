@@ -429,6 +429,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	echo Translating $(EU_TARGET) to create $(EU_MAIN)
+	-rm ./$(OBJDIR)/*.c
 	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
