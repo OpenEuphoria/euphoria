@@ -93,7 +93,7 @@ add_code = {
        -- first int argument is at stack offset +4, 2nd int is at +8 
        #8B, #44, #24, #04,        -- mov   eax, +4[esp]
        #03, #44, #24, #08,        -- add   eax, +8[esp]
-       #C2, #08, #00              -- ret 8  -- pop 8 bytes off the stack
+       #C2, #00, #08 * platform() = WIN32 -- ret 8  -- pop 8 bytes off the stack
 }
 
 code_space = allocate(length(add_code))
@@ -120,7 +120,7 @@ multiply_code = {
    -- int argument is at stack offset +4, double is at +8 
    #DB, #44, #24, #04,        -- fild  dword ptr +4[esp]
    #DC, #4C, #24, #08,        -- fmul  qword ptr +8[esp]
-   #C2, #0C - 4 * (platform()=LINUX), #00  -- ret C -- pop 12 (or 8) bytes 
+   #C2, #0C * (platform()=WIN32), #00  -- ret C -- pop 12 (or 8) bytes 
 					   -- off the stack
     }
 
@@ -138,6 +138,7 @@ if platform() = WIN32 or platform() = LINUX or platform() = OSX then
 	  {x, y, c_func(r, {x, y})})
 
     free(code_space)
+    puts(1, "Finished.  Press any key to exit.\n" )
     if getc(0) then
     end if
 end if
