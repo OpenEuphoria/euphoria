@@ -1,6 +1,6 @@
 	-- Calls to C routines in standard shared libraries
-include dll.e
-include machine.e
+include std/dll.e
+include std/machine.e
 
 atom libc, libm, p, q, format
 sequence text

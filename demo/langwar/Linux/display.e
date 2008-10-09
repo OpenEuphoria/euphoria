@@ -1,5 +1,10 @@
 -- display.e
 -- graphics, sound and text display on screen
+include std/graphics.e
+include vars.e
+include screen.e
+include sched.e
+include soundeff.e
 
 global sequence ship
 

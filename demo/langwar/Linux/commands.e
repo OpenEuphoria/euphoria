@@ -1,6 +1,11 @@
 -- commands.e
 -- process user commands
-
+include screen.e
+include soundeff.e
+include display.e
+include weapons.e
+include damage.e
+include std/graphics.e
 constant ESC = 27
 
 global natural nchars

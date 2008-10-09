@@ -1,5 +1,10 @@
 -- enemy.e
 -- operate the enemy ships
+include std/graphics.e
+include damage.e
+include emove.e
+include screen.e
+include display.e
 
 procedure set_basic_color(natural c)
 -- set new color and "shape" for BASIC ships after truce/hostile change

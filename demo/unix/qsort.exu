@@ -3,8 +3,8 @@
 -- In this demo, the C qsort() library routine calls the 
 -- Euphoria qcompare() routine to compare any two items.
 
-include dll.e
-include machine.e
+include std/dll.e
+include std/machine.e
 
 atom libc
 integer qid, nitems, item_size, qsort, ncalls

@@ -31,6 +31,8 @@
 
 -- Having said all this, the code is actually quite simple:
 
+include vars.e
+
 global constant HUGE_TIME = 1e30
 global constant INACTIVE = 0
 

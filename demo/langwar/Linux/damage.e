@@ -1,5 +1,10 @@
 -- damage.e
 -- compute effects of damage
+include display.e
+include screen.e
+include sched.e
+include soundeff.e
+include std/graphics.e
 
 global function Java_target(valid_quadrant_row r)
 -- select target for Java ship at row r

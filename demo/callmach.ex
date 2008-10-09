@@ -28,6 +28,7 @@ string = {'E', BRIGHT_BLUE, 'u', BRIGHT_GREEN, 'p', BRIGHT_CYAN,
 	  'i', BRIGHT_WHITE, 'a', GREEN, '!', BROWN+128}
 
 ifdef DOS32 then
+include std/convert.e
     -- The screen is only accessible like this under DOS
     
     string_space = allocate(length(string)+1)

@@ -20,6 +20,8 @@
 -- and the second selects the character within that line. This helps
 -- when multiple characters are read or written on one line, since
 -- we can use a slice.
+include std/graphics.e
+include vars.e
 
 integer mono_monitor
 global integer max_lines

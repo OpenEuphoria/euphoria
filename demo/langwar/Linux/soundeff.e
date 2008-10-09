@@ -1,4 +1,6 @@
 -- soundeff.e: Sound Effects
+include std/os.e
+include sched.e
 
 global procedure errbeep()
 -- error signal

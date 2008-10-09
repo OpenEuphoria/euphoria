@@ -26,9 +26,10 @@ end type
 file_number sum_no
 object line
 
-include graphics.e
+
 include vars.e
 include screen.e
+include std/graphics.e
 
 -- display summary file
 sum_no = open("lw.sum", "r")

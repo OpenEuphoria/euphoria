@@ -1,5 +1,12 @@
 -- weapons.e
 -- phasors, torpedos, antimatter pods
+include damage.e
+include soundeff.e
+include display.e
+include sched.e
+include std/os.e
+include std/graphics.e
+include std/math.e
 
 global constant W_PHASOR = 1,
 		W_TORPEDO = 2,

@@ -5,6 +5,11 @@
 -- WARP 4 is the most efficient after you take life support
 -- energy into account. WARP 5 is good if you can use it to avoid
 -- getting blasted.
+include weapons.e
+include soundeff.e
+include display.e
+include std/graphics.e
+
 constant fuel = {0, 5, 8, 12, 25, 70}
 
 global function gmod(natural x)
