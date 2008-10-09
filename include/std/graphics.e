@@ -76,7 +76,7 @@ public function get_position()
 	return machine_func(M_GET_POSITION, 0)
 end function
 
-include graphcst.e
+public include graphcst.e
 --**
 -- Set the foreground text color. 
 --
