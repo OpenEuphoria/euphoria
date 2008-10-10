@@ -25,7 +25,7 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\symtab_0.obj &
 	.\$(OBJDIR)\symtab_1.obj &
 	.\$(OBJDIR)\scanner.obj &
-	.\$(OBJDIR)\scientific.obj &
+	.\$(OBJDIR)\scinot.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\main.obj &

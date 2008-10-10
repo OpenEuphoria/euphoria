@@ -11,7 +11,7 @@ EU_DOS_OBJECTS = &
 	.\$(OBJDIR)\scanner.obj &
 	.\$(OBJDIR)\scanne_0.obj &
 	.\$(OBJDIR)\scanne_1.obj &
-	.\$(OBJDIR)\scientif.obj &
+	.\$(OBJDIR)\scinot.obj &
 	.\$(OBJDIR)\interrup.obj &
 	.\$(OBJDIR)\pathopen.obj &
 	.\$(OBJDIR)\emit.obj &

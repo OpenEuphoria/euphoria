@@ -1447,10 +1447,12 @@ void analyze_switch()
 	int max = MININT;
 	int all_ints = 1;
 	int negative;
+	int offset;
 	object sym;
 	s1_ptr values = SEQ_PTR( *(object_ptr)tpc[2] );
 	s1_ptr jump   = SEQ_PTR( *(object_ptr)tpc[3] );
 	s1_ptr new_values = NewS1( values->length );
+	s1_ptr lookup;
 	int i;
 	object top;
 	for( i = 1; i <= values->length; ++i ){
@@ -1506,8 +1508,9 @@ void analyze_switch()
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
 		*tpc = (int *)opcode( SWITCH_SPI );
-		s1_ptr lookup = SEQ_PTR( Repeat( *(object_ptr)tpc[4], max - min + 1 ));
-		int offset = min - 1;
+		a = Repeat( *(object_ptr)tpc[4], max - min + 1 );
+		lookup = SEQ_PTR( a );
+		offset = min - 1;
 		for( i = 1; i <= new_values->length; ++i ){
 			lookup->base[new_values->base[i] - offset] = jump->base[i];
 		}

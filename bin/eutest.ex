@@ -21,6 +21,35 @@ function dos_lower(sequence s)
 	end ifdef
 end function
 
+function run_emake()
+	integer emake
+ifdef UNIX then
+	emake = open( "emake", "r" )
+elsedef
+	emake = open( "emake.bat", "r" )
+end ifdef
+	if emake = -1 then
+		return 1
+	end if
+	sequence file = read_lines( emake )
+	close(emake)
+	for i = 1 to length( file ) do
+		sequence line = file[i]
+		if length( line < 4 )
+		or equal( "echo", line[1..4] )
+		or equal( "if", line[1..2] )
+		or line[1] = ':' then
+			
+		else
+			integer status = system_exec( line, -2 )
+			if status then
+				return status
+			end if
+		end if
+	end for
+	return 0
+end function
+
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status
@@ -105,11 +134,7 @@ procedure do_test(sequence cmds)
 					filename = filename[1..lib-1]
 				end if
 				if delete_file(filename) then end if
-				ifdef UNIX then
-					status = system_exec("./emake", 2)
-				elsedef
-					status = system_exec("emake.bat", 2)
-				end ifdef
+				status = run_emake()
 				if not status then
 					cmd = sprintf("./%s %s", {filename, cmd_opts})
 					status = system_exec(cmd, 2)

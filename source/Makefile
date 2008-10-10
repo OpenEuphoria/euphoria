@@ -122,7 +122,7 @@ EU_CORE_FILES = \
 	error.e \
 	symtab.e \
 	scanner.e \
-	scientific.e \
+	scinot.e \
 	emit.e \
 	parser.e \
 	opnames.e \

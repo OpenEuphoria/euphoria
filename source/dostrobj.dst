@@ -14,7 +14,7 @@ EU_TRANSDOS_OBJECTS = &
 	.\$(OBJDIR)\scanne_1.obj &
 	.\$(OBJDIR)\scientif.obj &
 	.\$(OBJDIR)\scanne_1.obj &
-	.\$(OBJDIR)\scientif.obj &
+	.\$(OBJDIR)\scinot.obj &
 	.\$(OBJDIR)\main.obj &
 	.\$(OBJDIR)\emit.obj &
 	.\$(OBJDIR)\emit_0.obj &

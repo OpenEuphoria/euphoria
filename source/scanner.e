@@ -10,7 +10,7 @@ include global.e
 include reswords.e
 include std/error.e
 include symtab.e
-include scientific.e
+include scinot.e
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
 constant MAX_FILE = 256       -- maximum number of source files
 
