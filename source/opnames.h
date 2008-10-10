@@ -203,5 +203,6 @@ static char *opnames[] = {
 	"HEAD",
 	"TAIL",
 	"REMOVE",
-	"REPLACE"
+	"REPLACE",
+	"SWITCH_RT"
 };

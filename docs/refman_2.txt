@@ -1893,7 +1893,8 @@ if not breaking then
 end if
 </eucode>
 
-The <val> in a ##case## must be either an atom or a literal string.  One
+The <val> in a ##case## must be either an atom, literal string, constant or
+enum.  One
 important difference between a switch block and an if block is that control
 does not automatically go to the end of the block when the next case statement
 is encountered.  This is referred to as **fall-through**, and allows the same code

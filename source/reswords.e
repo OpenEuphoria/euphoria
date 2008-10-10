@@ -206,7 +206,8 @@ global constant
 	TAIL				= 201,
 	REMOVE				= 202,
 	REPLACE				= 203,
-	MAX_OPCODE          = 203
+	SWITCH_RT           = 204,
+	MAX_OPCODE          = 204
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

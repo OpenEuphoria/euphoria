@@ -195,7 +195,7 @@
 #define L_TAIL			TAIL
 #define L_REMOVE		REMOVE
 #define L_REPLACE 		REPLACE
-
+#define L_SWITCH_RT     SWITCH_RT
 
 
 

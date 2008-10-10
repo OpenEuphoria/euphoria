@@ -82,7 +82,7 @@ $$(doneby C. Cuvier)
   omitted on a call. Any expression can be used, and parameters of the same call can even be 
   used. $$(doneby C. Cuvier.)
 * New **switch** ... **end switch** construct, which implements more efficiently a sequence
-  of **elsif**, using the more compact **cse** statement. $$(doneby Matt Lewis.)
+  of **elsif**, using the more compact **case** statement. $$(doneby Matt Lewis.)
 * **Unit testing added to Euphoria**. Over 1,000 tests. To run, cd tests and
   type ##eutest##
 * Condition compiling keywords (**ifdef**, **elsifdef**, **end ifdef**) and **with 

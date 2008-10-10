@@ -610,7 +610,7 @@ global procedure DeclareFileVars()
 			c_puts("int ")
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
-			c_puts(";\n")
+			c_puts(" = 0;\n")
 			
 			c_hputs("extern int ")
 			c_hprintf("_%d", eentry[S_FILE_NO])

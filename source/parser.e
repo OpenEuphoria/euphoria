@@ -2024,6 +2024,7 @@ end procedure
 procedure add_case( symtab_index sym, integer sign )
 	switch_stack[$][SWITCH_CASES]      &= sign * sym
 	switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+	
 	if TRANSLATE then
 		emit_addr( CASE )
 		emit_addr( length( switch_stack[$][SWITCH_CASES] ) )
@@ -2070,11 +2071,9 @@ procedure Case_statement()
 		if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
 			if SymTab[tok[T_SYM]][S_CODE] then
 				tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
-			else
-				CompileErr( "case constants must be assigned a string or an atom" )
 			end if
 		else
-			CompileErr( "expected else, an atom, string or a constant assigned an atom or a string" )
+			CompileErr( "expected else, an atom, string, constant or enum" )
 		end if
 	end if
 
@@ -2126,10 +2125,10 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	atom min =  1e+300
 	atom max = -1e+300
 	integer all_ints = 1
-	integer has_integer  = 0
-	integer has_atom     = 0
-	integer has_sequence = 0
-
+	integer has_integer    = 0
+	integer has_atom       = 0
+	integer has_sequence   = 0
+	integer has_unassigned = 0
 	for i = 1 to length( values ) do
 		integer sym = values[i]
 		integer sign
@@ -2139,27 +2138,36 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		else
 			sign = 1
 		end if
-		values[i] = sign * SymTab[sym][S_OBJ]
-		if not integer( values[i] ) then
-			all_ints = 0
-			if atom( values[i] ) then
-				has_atom = 1
+		if not equal(SymTab[sym][S_OBJ], NOVALUE) then
+			values[i] = sign * SymTab[sym][S_OBJ]
+			if not integer( values[i] ) then
+				all_ints = 0
+				if atom( values[i] ) then
+					has_atom = 1
+				else
+					has_sequence = 1
+				end if
 			else
-				has_sequence = 1
+				has_integer = 1
+	
+				if values[i] < min then
+					min = values[i]
+				end if
+	
+				if values[i] > max then
+					max = values[i]
+				end if
 			end if
 		else
-			has_integer = 1
-
-			if values[i] < min then
-				min = values[i]
-			end if
-
-			if values[i] > max then
-				max = values[i]
-			end if
+			has_unassigned = 1
+			exit
 		end if
 	end for
-
+	
+	if has_unassigned then
+		values = switch_stack[$][SWITCH_CASES]
+	end if
+	
 	if switch_stack[$][SWITCH_ELSE] then
 			Code[else_bp] = switch_stack[$][SWITCH_ELSE]
 	else
@@ -2178,7 +2186,10 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 
 	integer else_target = Code[else_bp]
 	integer opcode = SWITCH
-	if all_ints then
+	if has_unassigned then
+		opcode = SWITCH_RT
+		
+	elsif all_ints then
 		if not TRANSLATE and  max - min < 1024 then
 			opcode = SWITCH_SPI
 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]

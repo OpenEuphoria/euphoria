@@ -206,5 +206,6 @@ global constant opnames = {
 	"HEAD",
 	"TAIL",
 	"REMOVE",
-	"REPLACE"
+	"REPLACE",
+	"SWITCH_RT"
 }

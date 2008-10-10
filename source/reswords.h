@@ -214,7 +214,8 @@
 #define TAIL           		201
 #define REMOVE           	202
 #define REPLACE           	203
-#define MAX_OPCODE          203
+#define SWITCH_RT           204
+#define MAX_OPCODE          204
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

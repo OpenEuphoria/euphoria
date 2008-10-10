@@ -1395,6 +1395,7 @@ procedure opSWITCH_SPI()
 	pc = Code[pc+4]
 end procedure
 
+
 procedure opSWITCH()
 -- pc+1: switch value
 -- pc+2: case values
@@ -1406,6 +1407,63 @@ procedure opSWITCH()
 		pc += val[Code[pc+3]][a]
 	else
 		pc = Code[pc + 4]
+	end if
+end procedure
+
+procedure opSWITCH_RT()
+-- Analyze the values, and update to the appropriate type of switch
+-- Then call it
+
+-- pc+1: switch value
+-- pc+2: case values
+-- pc+3: jump_table
+-- pc+4: else jump
+	sequence values = val[Code[pc+2]]
+	integer all_ints = 1
+	integer max = MININT
+	integer min = MAXINT
+	for i = 1 to length( values ) do
+		integer sym = values[i]
+		integer sign = 1
+		if sym < 0 then
+			sign = -1
+			sym = -sym
+		end if
+		if equal(val[sym], NOVALUE) then
+			RTFatal( sprintf( "'%s' has not been assigned a value", {SymTab[sym][S_NAME]} ) )
+		end if
+		object new_value = sign * val[sym]
+		values[i] = new_value
+		if not integer( new_value ) then
+			all_ints = 0
+			
+		elsif all_ints then
+			if new_value < min then
+				min = new_value
+			end if
+			
+			if new_value > max then
+				max = new_value
+			end if
+		end if
+	end for
+	val[Code[pc+1]] = values
+	if all_ints and max - min < 1024 then
+		Code[pc] = SWITCH_SPI
+		SymTab[call_stack[$]][S_CODE] = Code
+		sequence jump = val[Code[pc+3]]
+		sequence switch_table = repeat( val[Code[pc+4]], max - min + 1 )
+		integer offset = min - 1
+		for i = 1 to length( values ) do
+			switch_table[values[i] - offset] = jump[i]
+		end for
+		val[Code[pc+3]] = offset
+		val[Code[pc+2]] = switch_table
+		opSWITCH_SPI()
+	else
+		Code[pc] = SWITCH
+		SymTab[call_stack[$]][S_CODE] = Code
+		opSWITCH()
 	end if
 end procedure
 
@@ -3816,6 +3874,9 @@ procedure do_exec()
 				break
 			case SWITCH_SPI:
 				opSWITCH_SPI()
+				break
+			case SWITCH_RT:
+				opSWITCH_RT()
 				break
 			case SYSTEM:
 				opSYSTEM()

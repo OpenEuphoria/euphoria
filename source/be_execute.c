@@ -924,6 +924,7 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 	return 0; // not reached
 }
 
+
 void InitStack(int size, int toplevel)
 // called to create the initial call stack for a task
 {
@@ -1304,9 +1305,10 @@ void code_set_pointers(int **code)
 				code[i+6] = SET_JUMP(code[i+6]);
 				i += 7;
 				break;
-				
+			
 			case SWITCH:
 			case SWITCH_I:
+			case SWITCH_RT:
 				code[i+2] = SET_OPERAND(code[i+2]); // cases
 			case SWITCH_SPI:
 				code[i+1] = SET_OPERAND(code[i+1]); // select val
@@ -1424,6 +1426,103 @@ void symtab_set_pointers()
 			// leave obj as 0
 		}
 		s++;
+	}
+}
+
+void analyze_switch()
+// changes a SWITCH_RT to a real switch statement
+{
+/*
+ pc+1: switch value
+ pc+2: case values
+ pc+3: jump_table
+ pc+4: else jump
+ 
+ SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
+ SET_JUMP(word) ((int *)(&code[(int)(word)]))
+*/
+
+	object a;
+	int min = MAXINT;
+	int max = MININT;
+	int all_ints = 1;
+	int negative;
+	object sym;
+	s1_ptr values = SEQ_PTR( *(object_ptr)tpc[2] );
+	s1_ptr jump   = SEQ_PTR( *(object_ptr)tpc[3] );
+	s1_ptr new_values = NewS1( values->length );
+	int i;
+	object top;
+	for( i = 1; i <= values->length; ++i ){
+		negative = 0;
+		sym = values->base[i];
+		if( sym < 0 ){
+			negative = 1;
+			sym = -sym;
+		}
+		top = fe.st[sym].obj;
+		
+		if( top == NOVALUE ){
+			NoValue( (symtab_ptr)sym );
+		}
+		
+		// int check
+		if (IS_ATOM_INT(top) || IS_ATOM_DBL(top)) {
+			if (!IS_ATOM_INT(top) ) {
+				a = DoubleToInt(top);
+				if (IS_ATOM_INT(a)) {
+					DeRefDS(top);
+					top = a;
+				}
+			}
+			
+			if( top > max ) max = top;
+			if( top < min ) min = top;
+		}
+		else{
+			all_ints = 0;
+		}
+		
+		if( negative ){
+			
+			if( IS_ATOM_INT( top ) ){
+				if (top == MININT) {
+					top = (object)NewDouble((double)-MININT_VAL);
+				}
+				else
+					top = -top;
+			}
+			else {
+				top = unary_op( UMINUS, top );
+			}
+				
+			new_values->base[i] = top;
+		}
+		else{
+			new_values->base[i] = fe.st[sym].obj;
+		}
+	}
+	
+	DeRefDS( MAKE_SEQ( values ) );
+	if( all_ints &&  max - min < 1024){
+		*tpc = (int *)opcode( SWITCH_SPI );
+		s1_ptr lookup = SEQ_PTR( Repeat( *(object_ptr)tpc[4], max - min + 1 ));
+		int offset = min - 1;
+		for( i = 1; i <= new_values->length; ++i ){
+			lookup->base[new_values->base[i] - offset] = jump->base[i];
+		}
+		tpc[2] = (int *)offset;
+		DeRefDS( *(object_ptr)tpc[3] );
+		*(object_ptr)tpc[3] = (int *)MAKE_SEQ( lookup );
+	}
+	else{
+		*(object_ptr)tpc[2] = (int *)MAKE_SEQ( new_values );
+		if( all_ints ){
+			*tpc = (int *)opcode( SWITCH_I );
+		}
+		else{
+			*tpc = (int *)opcode( SWITCH );
+		}
 	}
 }
 
@@ -1727,8 +1826,8 @@ void do_exec(int *start_pc)
   &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH,
 /* 196 (previous) */
  NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TRANSGOTO not emitted */
-  &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE
-/* 203 (previous) */
+  &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT
+/* 204 (previous) */
   };
 #endif
 #endif
@@ -2095,6 +2194,14 @@ void do_exec(int *start_pc)
 				}
 				goto if_check;
 			
+			case L_SWITCH_RT:
+				tpc = pc;
+				
+				// *pc will be updated by analyze_switch()
+				analyze_switch();
+				thread();
+				BREAK;
+				
 			case L_SWITCH_SPI:
 			deprintf("case L_SWITCH_SPI:");
 				tpc = pc;

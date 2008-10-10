@@ -227,6 +227,46 @@ end function
 z = int_switch6( "foo" )
 test_equal( "int_switch6: goto label exists (backward goto), don't optimize away because of sequence", 1, z )
 
+function make_D()
+	return 3
+end function
+
+constant 
+	D = make_D(),
+	E = {1,2,"3"}
+
+function rt_int_switch( object x )
+	switch x do
+		case A:
+			return A
+		case D:
+			return D
+		case else
+			return "else"
+	end switch
+end function
+
+function rt_switch( object x )
+	switch x do
+		case D:
+			return D
+		case E:
+			return E
+		case else
+			return "else"
+	end switch
+end function
+
+test_equal( "rt int switch #1", D, rt_int_switch( D ) )
+test_equal( "rt int switch #2", A, rt_int_switch( A ) )
+test_equal( "rt int switch #3", "else", rt_int_switch( 0 ) )
+test_equal( "rt int switch #4", "else", rt_int_switch( "" ) )
+
+test_equal( "rt switch #1", D, rt_switch( D ) )
+test_equal( "rt switch #2", E, rt_switch( E ) )
+test_equal( "rt switch #3", "else", rt_switch( 0 ) )
+test_equal( "rt switch #4", "else", rt_switch( "" ) )
+
 
 test_report()
 

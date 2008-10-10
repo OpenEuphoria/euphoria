@@ -2276,6 +2276,68 @@ procedure opSWITCH()
 	pc += 5
 end procedure
 
+procedure opSWITCH_RT()
+	-- pc+1 = switch value
+	-- pc+2 = cases seq
+	-- pc+3 = jump table  (ignored)
+	-- pc+4 = else offset
+	sequence cases = SymTab[Code[pc+2]][S_OBJ]
+	integer all_ints = 1
+	sequence values = cases
+	for i = 1 to length( cases ) do
+		object c = ObjValue( cases[i] )
+		if not integer( c ) then
+			all_ints = 0
+			exit
+		end if
+		values[i] = c
+	end for
+	
+	if all_ints then
+		SymTab[Code[pc+2]][S_OBJ] = values
+		Code[pc] = SWITCH_I
+		SymTab[CurrentSub][S_CODE] = Code
+		-- don't increment pc, because we'll just let it go to opSWITCH_I
+		return
+	end if
+	
+	-- Need to turn this into a regular SWITCH, but the trick is that 
+	-- the sequence needs to reference the actual literals / variables.
+	integer s = CurrentSub
+	sequence init_var = sprintf( "_%d_cases", Code[pc+2] )
+	while SymTab[s][S_NEXT] != 0 and compare( init_var, SymTab[s][S_NAME] ) do
+		s = SymTab[s][S_NEXT]
+	end while
+	if compare( SymTab[s][S_NAME], init_var ) then
+		-- need to add the variable
+		sequence eentry = repeat( 0, SIZEOF_VAR_ENTRY )
+		eentry[S_NAME]  = init_var
+		eentry[S_MODE]  = M_NORMAL
+		eentry[S_SCOPE] = SC_LOCAL
+		eentry[S_FILE_NO] = SymTab[CurrentSub][S_FILE_NO]
+		eentry[S_USAGE] = U_READ
+		SymTab = append( SymTab, eentry )
+		SymTab[s][S_NEXT] = length( SymTab )
+	end if
+	
+	c_stmt( "if( @ == 0 ){\n", s )
+	c_stmt( "@ = 1;\n", s )
+	for i = 1 to length( cases ) do
+		if cases[i] < 0 then
+			if integer( ObjValue( -cases[i] ) ) then
+				c_stmt( sprintf("SEQ_PTR( @ )->base[%d] = -@;\n", i ), { Code[pc+2], -cases[i] } )
+			else
+				c_stmt( sprintf("SEQ_PTR( @ )->base[%d] = unary_op(UMINUS, @);\n", i ), { Code[pc+2], -cases[i] } )
+			end if
+		else
+			c_stmt( sprintf("SEQ_PTR( @ )->base[%d] = @;\n", i ), { Code[pc+2], cases[i] } )
+		end if
+	end for
+	c_stmt0( "}\n" )
+	opSWITCH()
+	
+end procedure
+
 procedure opCASE()
 	integer caseval = Code[pc+1]
 	integer stmt = 1

@@ -1505,7 +1505,7 @@ procedure InitBackEnd( object ignore )
 			name = "POKE"
 		elsif find( name, { "NOPWHILE" } ) then
 			name = "NOP1"
-		elsif find( name, { "SWITCH_I", "SWITCH_SPI" }) then
+		elsif find( name, { "SWITCH_I", "SWITCH_SPI", "SWITCH_RT" }) then
 			name = "SWITCH"
 		end if
 		

@@ -5653,4 +5653,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 	return 0; /* couldn't match */
 }
 
+#ifdef ERUNTIME
+
+#endif
 

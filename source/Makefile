@@ -161,43 +161,6 @@ EU_BACKEND_RUNNER_FILES = \
 	error.e \
 	mode.e
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 EU_BACKEND_OBJECTS = \
 	./$(OBJDIR)/back/be_decompress.o \
 	./$(OBJDIR)/back/be_execute.o \
