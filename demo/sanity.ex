@@ -821,7 +821,7 @@ without type_check
 integer color
 color = 1
 sequence v
-
+ifdef DOS then
 procedure testgr()
 -- test basic VGA graphics operations
     sequence x
@@ -849,7 +849,7 @@ procedure testgr()
 	display_image({p,p}, repeat(x+color, 2))
     end for
 end procedure
-
+end ifdef
 with type_check
 
 constant TRUE = 1/1, FALSE = 0, junk=-TRUE
@@ -1235,7 +1235,7 @@ global procedure sanity()
 	    crash(generic_msg)
 	end if
 	if vga then
-		ifdef !UNIX then
+		ifdef DOS then
 			testgr()
 		end ifdef
 	end if
