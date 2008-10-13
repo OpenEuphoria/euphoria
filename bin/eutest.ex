@@ -35,7 +35,7 @@ end ifdef
 	close(emake)
 	for i = 1 to length( file ) do
 		sequence line = file[i]
-		if length( line < 4 )
+		if length( line ) < 4
 		or equal( "echo", line[1..4] )
 		or equal( "if", line[1..2] )
 		or line[1] = ':' then
