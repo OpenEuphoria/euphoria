@@ -29,6 +29,8 @@
 
 include std/wildcard.e
 include std/graphics.e
+include std/text.e
+include std/os.e
 
 sequence cl
 sequence search_phrase
