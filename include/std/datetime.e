@@ -10,6 +10,8 @@
 include unicode.e -- needed for parse() and format()
 include std/memory.e
 include std/dll.e
+include std/sequence.e
+include std/get.e
 
 ifdef LINUX then
 	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
@@ -676,8 +678,23 @@ end function
 -- TODO: create, test, document
 -- datetime parse(wstring string)
 -- parse the string and returns the datetime
-public function parse() --wstring string)
-	return 0
+public function parse(sequence sDateTime) --wstring string)
+sequence sWork, dVar, tVar
+	-- this assumes a string of format Y-M-D H:M:S
+	sDateTime = split(sDateTime," ")
+	-- now something like { "2008-10-13", "12:17:23" }
+	dVar = split( sDateTime[1], "-" )
+	tVar = split( sDateTime[2], ":" )
+	-- dVar is now { "2008", "10", "13" }
+	-- tVar is now { "12","17",23" }
+	
+	sDateTime = dVar & tVar -- now { "2008", "10", "13", "12", "17", "23" }
+	for t=1 to 6 do -- get the value of each string
+		sDateTime[t] = value( sDateTime[t] )
+		sDateTime[t] = sDateTime[t][2]
+	end for
+	
+	return sDateTime
 end function
 
 --**
