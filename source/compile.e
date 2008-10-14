@@ -5705,7 +5705,14 @@ procedure BackEnd(atom ignore)
 	emit_c_output = FALSE
 
 	slist = s_expand(slist)
-
+	
+	-- prevent conflicts
+	for i = TopLevelSub+1 to length(SymTab) do
+		if length(SymTab[i]) = SIZEOF_VAR_ENTRY and find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
+			SymTab[i][S_NAME] &= sprintf( "_%d", i )
+		end if
+	end for
+	
 	-- Perform Multiple Passes through the IL
 
 	Pass = 1

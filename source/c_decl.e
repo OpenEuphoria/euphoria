@@ -1443,7 +1443,7 @@ global procedure GenerateUserRoutines()
 -- optionally generating code 
 	symtab_index s, sp
 	integer next_c_char, q, temps
-	sequence buff, base_name, c_file, unique_params
+	sequence buff, base_name, c_file
 
 	for file_no = 1 to length(file_name) do
 		if file_no = 1 or any_code(file_no) then 
@@ -1580,7 +1580,6 @@ global procedure GenerateUserRoutines()
 					Initializing = TRUE
 				
 					-- declare the private vars 
-					unique_params = {}
 					while sp do
 						integer scope = SymTab[sp][S_SCOPE]
 						switch scope do
@@ -1591,11 +1590,6 @@ global procedure GenerateUserRoutines()
 								break
 						
 							case SC_PRIVATE:
-								if find( SymTab[sp][S_NAME], unique_params ) then
-									-- rename it to not conflict with anything else
-									SymTab[sp][S_NAME] &= sprintf("_%d", sp )
-								end if
-								unique_params = append( unique_params, SymTab[sp][S_NAME] )
 								c_stmt0("int ")
 								c_puts("_")
 								c_puts(ok_name(SymTab[sp][S_NAME]))
