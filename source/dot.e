@@ -4,6 +4,7 @@ include std/map.e as map
 include std/sequence.e
 include std/search.e
 include std/sets.e as set
+include std/math.e
 
 -- called_from:  file -> proc -> called_proc file : called proc
 -- called_by  :  called_proc file -> called proc -> file : proc
@@ -171,7 +172,7 @@ export procedure short_files()
 	for f = 1 to length( short_names ) do
 		-- just the short name
 		sequence name = short_names[f]
-		name = find_replace( '\\', '/', name )
+		name = find_replace( '\\', name, '/' )
 		file_name[f] = name
 		for r = length( name ) to 1 by -1 do
 			if name[r] = '/' then
@@ -209,10 +210,11 @@ export function diagram_includes( integer show_all = 0, integer stdlib = 0)
 	set:set included = {}
 	for fi = 1 to length( file_include ) do
 		for i = 1 to length( file_include[fi] ) do
-			if show_all or not set:belongs_to( file_include[fi][i], included ) then
-				if stdlib or match( "std/", short_names[file_include[fi][i]] ) != 1 then
-					lines &= sprintf("\t\"%s\" -> \"%s\"\n", {short_names[fi], short_names[file_include[fi][i]]})
-					included = set:add_to( file_include[fi][i], included )
+			integer file = abs( file_include[fi][i])
+			if show_all or not set:belongs_to( file, included ) then
+				if stdlib or match( "std/", short_names[file] ) != 1 then
+					lines &= sprintf("\t\"%s\" -> \"%s\"\n", {short_names[fi], short_names[file]})
+					included = set:add_to( file, included )
 				end if
 			end if
 		end for
@@ -242,7 +244,7 @@ export function diagram_file_deps( integer fn )
 		else
 			
 			for i = 1 to length( file_include[f] ) do
-				lines &= sprintf("\t\"%s\" -> \"%s\"\n", { short_names[fn], short_names[file_include[f][i]] } )
+				lines &= sprintf("\t\"%s\" -> \"%s\"\n", { short_names[fn], short_names[abs(file_include[f][i])] } )
 			end for
 		end if
 	end for

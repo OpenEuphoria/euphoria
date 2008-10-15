@@ -80,8 +80,8 @@ end procedure
 
 
 function underscore_name( sequence name )
-	name = find_replace( '\\', '_', name )
-	name = find_replace( '/',  '_', name )
+	name = find_replace( '\\', name, '_' )
+	name = find_replace( '/', name,  '_' )
 	return name
 end function
 
@@ -331,5 +331,5 @@ export procedure generate()
 	puts(1, "generating the call graphs\n" )
 	call_graphs()
 	
-	if delete_file( sprintf( "%s_working_.dot", {out_dir}) ) then end if
+	--if delete_file( sprintf( "%s_working_.dot", {out_dir}) ) then end if
 end procedure
