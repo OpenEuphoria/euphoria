@@ -127,7 +127,8 @@ EU_CORE_FILES = \
 	parser.e \
 	opnames.e \
 	reswords.e \
-	keylist.e
+	keylist.e \
+	fwdref.e
 
 EU_INTERPRETER_FILES = \
 	global.e \
@@ -393,7 +394,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	echo Translating $(EU_TARGET) to create $(EU_MAIN)
 	-rm ./$(OBJDIR)/*.c
-	-cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
+	cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o

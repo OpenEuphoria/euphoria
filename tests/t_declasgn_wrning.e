@@ -11,18 +11,18 @@ test_true("warning file generated", fn >= 0)
 test_equal("with warning += #1","Warning ( short_circuit ):\n", gets(fn))
 ifdef DOS32 then
 	if find(gets(fn), {
-		"\tt_declasgn.e:14 - call to f() might be short-circuited\n",
-		"\tt_declas.e:14 - call to f() might be short-circuited\n",
-		"\tT_DECLAS.E:14 - call to f() might be short-circuited\n",
-		"\tT_DECL~1.E:14 - call to f() might be short-circuited\n",
-		"\tT_DECL~2.E:14 - call to f() might be short-circuited\n"
+		"\tt_declasgn.e:16 - call to f() might be short-circuited\n",
+		"\tt_declas.e:16 - call to f() might be short-circuited\n",
+		"\tT_DECLAS.E:16 - call to f() might be short-circuited\n",
+		"\tT_DECL~1.E:16 - call to f() might be short-circuited\n",
+		"\tT_DECL~2.E:16 - call to f() might be short-circuited\n"
 	}) then
 		test_pass("with warning += #2")
 	else
 		test_fail("with warning += #2")
 	end if
 elsedef
-	test_equal("with warning += #2","\tt_declasgn.e:14 - call to f() might be short-circuited\n", gets(fn))
+	test_equal("with warning += #2","\tt_declasgn.e:16 - call to f() might be short-circuited\n", gets(fn))
 end ifdef
 test_equal("warning() #1","Warning ( custom ):\n", gets(fn))
 test_equal("warning() #2","\tUseless code\n", gets(fn))

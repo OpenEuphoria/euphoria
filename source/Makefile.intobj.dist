@@ -39,4 +39,4 @@ EU_INTERPRETER_OBJECTS = \
 ./intobj/tranplat.o \
 ./intobj/types.o \
 ./intobj/wildcard.o \
-	
+./intobj/fwdref.e

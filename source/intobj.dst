@@ -37,4 +37,6 @@ EU_INTERPRETER_OBJECTS =  &
 	.\$(OBJDIR)\parser_1.obj &
 	.\$(OBJDIR)\parser_2.obj &
 	.\$(OBJDIR)\parser_3.obj &
-	.\$(OBJDIR)\parser_4.obj
+	.\$(OBJDIR)\parser_4.obj &
+	.\$(OBJDIR)\fwdref.obj
+

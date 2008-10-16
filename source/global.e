@@ -392,23 +392,3 @@ global sequence goto_delay = {}, goto_list = {}
 global sequence private_sym = {}
 global integer use_private_list = 0
 
--- Tracking forward references
-global sequence forward_references = {}
-global enum
-	FR_TYPE,
-	FR_NAME,
-	FR_FILE,
-	FR_SUBPROG,
-	FR_PC,
-	FR_LINE,
-	FR_THISLINE,
-	FR_BP,
-	FR_QUALIFIED,
-	FR_OP
-
-global constant FR_SIZE = FR_OP
-
--- # extra default parameters to leave space when
--- emitting a forward call
-global constant FORWARD_DEFAULT_PADDING = 5
-

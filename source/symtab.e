@@ -717,11 +717,13 @@ end ifdef
 						end if
 						return tok
 					end if
-
 				else
 					integer tok_file = SymTab[tok[T_SYM]][S_FILE_NO]
 					integer good = 0
-					if file_no = tok_file then
+					if scope = SC_PRIVATE then
+						-- ignore this one
+						
+					elsif file_no = tok_file then
 						good = 1
 					else
 						switch scope do
@@ -918,6 +920,40 @@ global procedure Hide(symtab_index s)
 	else
 		SymTab[prev][S_SAMEHASH] = SymTab[s][S_SAMEHASH]
 	end if
+	SymTab[s][S_SAMEHASH] = 0
+end procedure
+
+global procedure Show(symtab_index s)
+-- restore the visibility of a symbol
+-- by adding it to its hash chain
+	symtab_index prev, p
+	
+	p = buckets[SymTab[s][S_HASHVAL]]
+	
+	if SymTab[s][S_SAMEHASH] or p = s then
+		-- already visible
+		return
+	end if
+	
+	SymTab[s][S_SAMEHASH] = p
+	buckets[SymTab[s][S_HASHVAL]] = s
+	
+end procedure
+
+export procedure hide_params( symtab_index s )
+	symtab_index param = s
+	for i = 1 to SymTab[s][S_NUM_ARGS] do
+		param = SymTab[s][S_NEXT]
+		Hide( param )
+	end for
+end procedure
+
+export procedure show_params( symtab_index s )
+	symtab_index param = s
+	for i = 1 to SymTab[s][S_NUM_ARGS] do
+		param = SymTab[s][S_NEXT]
+		Show( param )
+	end for
 end procedure
 
 procedure LintCheck(symtab_index s)

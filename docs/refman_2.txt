@@ -1050,14 +1050,17 @@ n = 5
 
 It is not infrequent that one defines a private variable that bears the same
 name as one already in scope. You can reuse the value of that variable when
-performing an initialisation on declare:
+performing an initialisation on declare by using a default namespace for the
+current file:
 
 <eucode>
+namespace app
+
 integer n
 n=5
 
 procedure foo()
-    integer n = n + 2
+    integer n = app:n + 2
     ? n
 end procedure
 

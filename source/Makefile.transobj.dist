@@ -57,4 +57,4 @@ EU_TRANSLATOR_OBJECTS = \
 ./transobj/tranplat.o \
 ./transobj/types.o \
 ./transobj/wildcard.o \
-	
+./transobj/fwdref.o

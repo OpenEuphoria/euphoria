@@ -2310,7 +2310,8 @@ procedure opSWITCH_RT()
 	end while
 	if compare( SymTab[s][S_NAME], init_var ) then
 		-- need to add the variable
-		sequence eentry = repeat( 0, SIZEOF_VAR_ENTRY )
+		sequence eentry 
+		eentry = repeat( 0, SIZEOF_VAR_ENTRY )
 		eentry[S_NAME]  = init_var
 		eentry[S_MODE]  = M_NORMAL
 		eentry[S_SCOPE] = SC_LOCAL

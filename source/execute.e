@@ -1503,6 +1503,7 @@ procedure opLENGTH()
 	a = Code[pc+1]
 	target = Code[pc+2]
 	if atom(val[a]) then
+	? a & val[a]
 		RTFatal("length of an atom is not defined")
 	end if
 	val[target] = length(val[a])

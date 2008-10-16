@@ -1,5 +1,11 @@
 include std/unittest.e
 
+procedure test_fwd_init()
+	object foo_fwd_init = foo()
+	test_equal( "init declared var using forward function", "hello world", foo_fwd_init )
+end procedure
+test_fwd_init()
+
 function foo()
 	integer bar = 1
 	if bar then
@@ -100,6 +106,8 @@ while while_at_top_level < 4 do
 	end while
 end while
 
+
+
 -- TODO: Test for switch statement
 
 test_equal( "declare variable anywhere at top level of routine", "hello world", foo() )
@@ -109,4 +117,5 @@ test_equal( "declare inside for in a routine", 29, for_in_routine( 1 ) )
 test_equal( "declare inside for at top level", 29, for_at_top_level )
 test_equal( "declare inside while in a routine", 8, while_in_routine( 1 ) )
 test_equal( "declare inside while at top level", 8, while_at_top_level )
+
 test_report()

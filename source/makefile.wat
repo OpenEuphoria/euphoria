@@ -70,7 +70,8 @@ EU_CORE_FILES = &
 	parser.e &
 	opnames.e &
 	reswords.e &
-	keylist.e
+	keylist.e &
+	fwdref.e
 
 EU_INTERPRETER_FILES = &
 	compress.e &

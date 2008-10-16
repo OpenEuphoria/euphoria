@@ -8,6 +8,7 @@ include global.e
 include symtab.e
 include scanner.e
 include tranplat.e
+include fwdref.e
 
 global integer op_info1, op_info2
 global integer optimized_while
@@ -543,7 +544,8 @@ global procedure emit_op(integer op)
 		else
 			real_op = FUNC
 		end if
-		integer ref = new_forward_reference( real_op, op_info1 )
+		integer ref
+		ref = new_forward_reference( real_op, op_info1, real_op )
 		n = Pop() -- number of known args
 		
 		emit_opcode(op)

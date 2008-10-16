@@ -6,6 +6,7 @@ include global.e
 include emit.e
 include symtab.e
 include scanner.e
+include fwdref.e
 
 include std/sequence.e
 include std/text.e
@@ -217,7 +218,7 @@ end procedure
 
 procedure Forward_InitCheck( token tok, integer fr, integer ref )
 	if ref then
-		ref = new_forward_reference( GLOBAL_INIT_CHECK, tok[T_SYM] )
+		ref = new_forward_reference( GLOBAL_INIT_CHECK, tok[T_SYM], GLOBAL_INIT_CHECK )
 		
 		emit_op( GLOBAL_INIT_CHECK )
 		emit_addr( 0 )
@@ -718,21 +719,33 @@ procedure MissingArgs(symtab_index subsym)
 	CompileErr(msg)
 end procedure
 
-procedure Parse_default_arg( symtab_index subsym, integer arg )
+procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_private_list, sequence fwd_private_sym )
 	symtab_index param = subsym
-
+	on_arg = arg
+	parseargs_states = append(parseargs_states,
+				{length(private_list),lock_scanner,use_private_list,on_arg})
+	nested_calls &= subsym
+	
 	for i = 1 to arg do
 		param = SymTab[param][S_NEXT]
 	end for
+	
+	private_list = fwd_private_list
+	private_sym  = fwd_private_sym
 	
 	if atom(SymTab[param][S_CODE]) then  -- but no default set
 		CompileErr(sprintf("Argument %d of %s (%s) is defaulted, but has no default value",
 			{arg, SymTab[subsym][S_NAME], SymTab[param][S_NAME]}))
 	end if
 	
+	use_private_list = 1
+	lock_scanner = 1
 	start_playback(SymTab[param][S_CODE] )
 	call_proc(forward_expr, {})
 	
+	add_private_symbol( Top(), SymTab[param][S_NAME] )
+	lock_scanner = 0
+	restore_parseargs_states()
 end procedure
 parse_arg_rid = routine_id("Parse_default_arg")
 
@@ -876,7 +889,8 @@ procedure ParseArgs(symtab_index subsym)
 end procedure
 
 procedure Forward_var( token tok, integer init_check = -1, integer op = tok[T_ID] )
-	integer ref = new_forward_reference( VARIABLE, tok[T_SYM], op )
+	integer ref
+	ref = new_forward_reference( VARIABLE, tok[T_SYM], op )
 	emit_opnd( - ref )
 	if init_check != -1 then
 		Forward_InitCheck( tok, ref, init_check )
@@ -1052,6 +1066,7 @@ procedure Function_call( token tok )
 		end if
 	end if
 end procedure
+
 
 procedure Factor()
 -- parse a factor in an expression
@@ -1319,7 +1334,8 @@ procedure TypeCheck(symtab_index var)
 	
 	if var < 0 or SymTab[var][S_SCOPE] = SC_UNDEFINED then
 		-- forward reference, so defer type check until later
-		integer ref = new_forward_reference( TYPE_CHECK, var )
+		integer ref
+		ref = new_forward_reference( TYPE_CHECK, var, TYPE_CHECK )
 		if not TRANSLATE then
 			-- possible extra integer check
 			Code &= TYPE_CHECK & 0
@@ -2811,11 +2827,12 @@ procedure Private_declaration(symtab_index type_sym)
 		    -- check to see if constants have been assigned already, not because we want to
 		    -- allow other, earlier constants with the same name to be used to initialize
 		    -- a constant.
-			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH] -- recover any shadowed var
-			No_new_entry=1
+-- 		    symtab_index old_hash = SymTab[sym][S_SAMEHASH]
+-- 			buckets[SymTab[sym][S_HASHVAL]] = old_hash -- recover any shadowed var
+		    -- MWL 10/14/08: removed No_new_entry, since we may need forward references
 		    Assignment({VARIABLE,sym})
-			No_new_entry=0
-			buckets[SymTab[sym][S_HASHVAL]] = sym  -- put new var back in place
+-- 			buckets[SymTab[sym][S_HASHVAL]] = sym  -- put new var back in place
+-- 			SymTab[sym][S_SAMEHASH] = old_hash
 			tok = next_token()
 			if tok[T_ID]=IGNORED then
 				tok = keyfind(tok[T_SYM],-1)
