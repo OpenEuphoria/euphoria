@@ -600,7 +600,8 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 	integer any_symbol = namespace_ok = -1
 	while st_ptr do
 		if equal(word, SymTab[st_ptr][S_NAME]) 
-		and ( any_symbol or ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) ) then
+		and ( any_symbol or ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) ) 
+		and SymTab[st_ptr][S_SCOPE] != SC_UNDEFINED then
 			-- name matches
 
 			tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
