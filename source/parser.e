@@ -2107,7 +2107,8 @@ procedure Case_statement()
 
 	elsif fwd then
 		tok_match( COLON )
-		integer fwdref = new_forward_reference( CASE, fwd )
+		integer fwdref
+		fwdref = new_forward_reference( CASE, fwd )
 		add_case( {fwdref}, sign )
 		fwd:set_data( fwdref, switch_stack[$][SWITCH_PC] )
 		
