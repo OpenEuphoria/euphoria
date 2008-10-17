@@ -510,7 +510,8 @@ global procedure emit_op(integer op)
 			-- calling ourself - parameter values may 
 			-- get overwritten before we can use them 
 			for i = length(cg_stack)-n+1 to length(cg_stack) do
-				if SymTab[cg_stack[i]][S_SCOPE] = SC_PRIVATE and 
+				if cg_stack[i] > 0 and -- if it's a forward reference, it's not a private
+				   SymTab[cg_stack[i]][S_SCOPE] = SC_PRIVATE and 
 				   SymTab[cg_stack[i]][S_VARNUM] < i then
 					-- copy parameter to a temp 
 					emit_opcode(ASSIGN)
