@@ -550,7 +550,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		for e = 1 to length( errors ) do
 			sequence ref = forward_references[errors[e]]
 			if ref[FR_TYPE] = TYPE_CHECK then
-				continue
+--				continue
 				msg &= sprintf("\t%s (%d): type check for %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
 			else
 				msg &= sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
@@ -563,7 +563,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			
 		end for
 		if error_count then
-			puts(1, msg ) ? 1/0
+			puts(1, msg ) --? 1/0
 			CompileErr( msg )
 		end if
 	end if
