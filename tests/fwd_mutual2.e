@@ -1,4 +1,5 @@
 public include fwd_mutual1.e
+include std/unittest.e
 
 export function foo2()
 	return 2
@@ -38,6 +39,8 @@ function fwd_switch( object x )
 	end switch
 end function
 
-test_equal( "fwd_switch #1", 1, fwd_switch( FWD_CASE_1 ) )
-test_equal( "fwd_switch #2", 2, fwd_switch( FWD_CASE_2 ) )
-test_equal( "fwd_switch #3", 0, fwd_switch( 999 ) )
+export procedure test_forward_case()
+	test_equal( "fwd_switch #1", 1, fwd_switch( FWD_CASE_1 ) )
+	test_equal( "fwd_switch #2", 2, fwd_switch( FWD_CASE_2 ) )
+	test_equal( "fwd_switch #3", 0, fwd_switch( 999 ) )
+end procedure

@@ -17,3 +17,5 @@ public sequence fwd_sub_assign
 public constant 
 	FWD_CASE_1 = 1,
 	FWD_CASE_2 = {1,"2"}
+
+test_forward_case()

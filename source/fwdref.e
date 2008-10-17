@@ -1,6 +1,7 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Forward reference resolution
+namespace fwd
 
 include global.e
 include parser.e
@@ -21,9 +22,10 @@ enum
 	FR_BP,
 	FR_QUALIFIED,
 	FR_OP,
-	FR_PRIVATE_LIST
+	FR_PRIVATE_LIST,
+	FR_DATA  -- extra info
 
-constant FR_SIZE = FR_PRIVATE_LIST
+constant FR_SIZE = FR_DATA
 
 -- # extra default parameters to leave space when
 -- emitting a forward call
@@ -57,6 +59,10 @@ procedure reset_code( )
 		CurrentSub = patch_current_sub
 		Code = patch_code_temp
 	end if
+end procedure
+
+export procedure set_data( integer ref, object data )
+	forward_references[ref][FR_DATA] = data
 end procedure
 
 sequence fwd_private_sym  = {}
@@ -308,6 +314,39 @@ function expected_name( integer id )
 	
 end function
 
+procedure patch_forward_case( token tok, integer ref )
+	sequence fr = forward_references[ref]
+	
+	integer switch_pc = fr[FR_DATA]
+	
+	symtab_index case_sym = SymTab[fr[FR_SUBPROG]][S_CODE][switch_pc + 2]
+	
+	sequence case_values = SymTab[case_sym][S_OBJ]
+	
+	integer cx = find( { ref }, case_values )
+	if not cx then
+		cx = find( { -ref }, case_values )
+	end if
+	
+	if not cx then
+		InternalErr( sprintf("Error resolving forward reference in case for '%s'", { fr[FR_NAME] } ) )
+	end if
+	
+	integer negative = 0
+	if case_values[cx][1] < 0 then
+		negative = 1
+		case_values[cx][1] *= -1
+	end if
+	
+	if negative then
+		case_values[cx] = - tok[T_SYM]
+	else
+		case_values[cx] = tok[T_SYM]
+	end if
+	SymTab[case_sym][S_OBJ] = case_values
+	forward_references[ref] = 0
+end procedure
+
 procedure patch_forward_type_check( token tok, integer ref )
 	symtab_index which_type = SymTab[tok[T_SYM]][S_VTYPE]
 	if not which_type then
@@ -536,6 +575,10 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				case GLOBAL_INIT_CHECK:
 					patch_forward_init_check( tok, ref )
 					continue
+				
+				case CASE:
+					patch_forward_case( tok, ref )
+					continue
 					
 				case else
 					-- ?? what is it?
@@ -549,9 +592,10 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		integer error_count = 0
 		for e = 1 to length( errors ) do
 			sequence ref = forward_references[errors[e]]
-			if ref[FR_TYPE] = TYPE_CHECK then
---				continue
-				msg &= sprintf("\t%s (%d): type check for %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
+			if ref[FR_TYPE] = TYPE_CHECK or ref[FR_TYPE] = GLOBAL_INIT_CHECK then
+				-- these checks end up looking like duplicate errors
+				continue
+
 			else
 				msg &= sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
 			end if
@@ -563,7 +607,6 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			
 		end for
 		if error_count then
-			puts(1, msg ) --? 1/0
 			CompileErr( msg )
 		end if
 	end if

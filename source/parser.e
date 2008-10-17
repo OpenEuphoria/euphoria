@@ -201,7 +201,8 @@ switch_stack = {}
 enum
 	SWITCH_CASES,
 	SWITCH_JUMP_TABLE,
-	SWITCH_ELSE
+	SWITCH_ELSE,
+	SWITCH_PC
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
@@ -2022,7 +2023,7 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	switch_stack = append( switch_stack, { {}, {}, 0 })
+	switch_stack = append( switch_stack, { {}, {}, 0, 0 })
 	push_scope()
 end procedure
 
@@ -2037,8 +2038,8 @@ procedure pop_switch( integer break_base )
 	pop_scope()
 end procedure
 
-procedure add_case( symtab_index sym, integer sign )
-	switch_stack[$][SWITCH_CASES]      &= sign * sym
+procedure add_case( object sym, integer sign )
+	switch_stack[$][SWITCH_CASES]       = append( switch_stack[$][SWITCH_CASES], sign * sym )
 	switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
 	
 	if TRANSLATE then
@@ -2082,12 +2083,17 @@ procedure Case_statement()
 	else
 		sign = 1
 	end if
-
+	
+	integer fwd = 0
+	
 	if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
 		if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
 			if SymTab[tok[T_SYM]][S_CODE] then
 				tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
 			end if
+		elsif tok[T_ID] = VARIABLE and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+			-- forward reference to a variable
+			fwd = tok[T_SYM]
 		else
 			CompileErr( "expected else, an atom, string, constant or enum" )
 		end if
@@ -2099,6 +2105,12 @@ procedure Case_statement()
 		end if
 		case_else()
 
+	elsif fwd then
+		tok_match( COLON )
+		integer fwdref = new_forward_reference( CASE, fwd )
+		add_case( {fwdref}, sign )
+		fwd:set_data( fwdref, switch_stack[$][SWITCH_PC] )
+		
 	else
 		condition = tok[T_SYM]
 		tok_match( COLON )
@@ -2145,7 +2157,12 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	integer has_atom       = 0
 	integer has_sequence   = 0
 	integer has_unassigned = 0
+	integer has_fwdref     = 0
 	for i = 1 to length( values ) do
+		if sequence( values[i] ) then
+			has_fwdref = 1
+			exit
+		end if
 		integer sym = values[i]
 		integer sign
 		if sym < 0 then
@@ -2180,7 +2197,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		end if
 	end for
 	
-	if has_unassigned then
+	if has_unassigned or has_fwdref then
 		values = switch_stack[$][SWITCH_CASES]
 	end if
 	
@@ -2202,7 +2219,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 
 	integer else_target = Code[else_bp]
 	integer opcode = SWITCH
-	if has_unassigned then
+	if has_unassigned or has_fwdref then
 		opcode = SWITCH_RT
 		
 	elsif all_ints then
@@ -2256,6 +2273,8 @@ procedure Switch_statement()
 	if finish_block_header(SWITCH) then end if
 
 	switch_pc = length(Code) + 1
+	switch_stack[$][SWITCH_PC] = switch_pc
+	
 	emit_op(SWITCH)
 	emit_forward_addr()  -- the else
 	else_bp = length( Code )
@@ -2263,7 +2282,7 @@ procedure Switch_statement()
 	tok_match(CASE)
 	Case_statement()
 
-	call_proc(forward_Statement_list, {})
+	Statement_list()
 
 	optimize_switch( switch_pc, else_bp, cases, jump_table )
 

@@ -1395,13 +1395,11 @@ procedure opSWITCH_SPI()
 	pc = Code[pc+4]
 end procedure
 
-
 procedure opSWITCH()
 -- pc+1: switch value
 -- pc+2: case values
 -- pc+3: jump_table
 -- pc+4: else jump
-
 	a = find( val[Code[pc+1]], val[Code[pc+2]] )
 	if a then
 		pc += val[Code[pc+3]][a]
@@ -1447,7 +1445,8 @@ procedure opSWITCH_RT()
 			end if
 		end if
 	end for
-	val[Code[pc+1]] = values
+	
+	val[Code[pc+2]] = values
 	if all_ints and max - min < 1024 then
 		Code[pc] = SWITCH_SPI
 		SymTab[call_stack[$]][S_CODE] = Code
@@ -1459,6 +1458,7 @@ procedure opSWITCH_RT()
 		end for
 		val[Code[pc+3]] = offset
 		val[Code[pc+2]] = switch_table
+		
 		opSWITCH_SPI()
 	else
 		Code[pc] = SWITCH

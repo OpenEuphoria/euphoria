@@ -1272,13 +1272,13 @@ global procedure emit_op(integer op)
 	
 	elsif op = SWITCH then
 		emit_opcode( op )
-		c = Pop() -- Case values
-		b = Pop() -- Jump table
-		a = Pop() -- Switch Expr
-		emit_addr( a )
-		emit_addr( b )
-		emit_addr( c )
---		emit_addr( 0 )
+		c = Pop() 
+		b = Pop() 
+		a = Pop() 
+		emit_addr( a ) -- Switch Expr
+		emit_addr( b ) -- Case values
+		emit_addr( c ) -- Jump table
+--		emit_addr( 0 ) -- parser emits the else after return
 		assignable = FALSE
 	
 	elsif op = CASE then
