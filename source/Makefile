@@ -25,9 +25,11 @@
 #   Run Unit Tests            :  make test
 
 include Makefile.eu
-include Makefile.intobj
-include Makefile.backobj
-include Makefile.transobj
+
+ifneq "$(OBJDIR)" ""
+include Makefile.$(OBJDIR)s
+endif
+
 EU_VERSION = 4.0
 
 ifdef ERUNTIME
@@ -193,6 +195,10 @@ EU_LIB_OBJECTS = \
 
 all : interpreter translator library backend
 
+
+Makefile.$(OBJDIR)s :
+	echo "#" > $@
+
 BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
 
 distclean : clean
@@ -223,30 +229,12 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex ../.svn/entries
 
-objlist : 
-	cd $(OBJDIR) && \
-	if [ "$(OBJDIR)" = "backobj" ]; then \
-		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR) ; \
-	elif [ "$(OBJDIR)" = "transobj" ]; then \
-		/bin/echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR) ; \
-	elif [ "$(OBJDIR)" = "intobj" ]; then \
-		/bin/echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR) ; \
-	fi && \
-	for i in *.c; \
-	do \
-		/bin/echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR) ; \
-	done && \
-	/bin/echo -ne "\t" >> ../Makefile.$(OBJDIR) && \
-	cd ..
-
 interpreter : builddirs
 	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD)
-	$(MAKE) objlist OBJDIR=intobj
 	$(MAKE) $(EEXU) OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs
 	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
-	$(MAKE) objlist OBJDIR=transobj
 	$(MAKE) $(EECU) OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
@@ -280,6 +268,7 @@ source-tarball : source
 	cp backend.ex  $(SOURCEDIR)
 	cp *.e         $(SOURCEDIR)
 	cp Makefile    $(SOURCEDIR)
+	cp Makefile.*s $(SOURCEDIR)
 	cp configure   $(SOURCEDIR)
 	cp ../include/euphoria.h $(SOURCEDIR)
 	cp *.h         $(SOURCEDIR)
@@ -308,7 +297,6 @@ $(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 
 backend : builddirs
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj
-	$(MAKE) objlist OBJDIR=backobj
 	$(MAKE) $(EBACKENDU) EBACKEND=1 OBJDIR=backobj
 
 $(EBACKENDU) : OBJDIR = backobj
@@ -392,9 +380,22 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
 
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
-	echo Translating $(EU_TARGET) to create $(EU_MAIN)
-	-rm ./$(OBJDIR)/*.c
-	cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
+	@echo Translating $(EU_TARGET) to create $(EU_MAIN)
+	@-rm ./$(OBJDIR)/*.c
+	@cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET) && \
+	if [ "$(OBJDIR)" = "backobj" ]; then \
+		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
+	elif [ "$(OBJDIR)" = "transobj" ]; then \
+		/bin/echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
+	elif [ "$(OBJDIR)" = "intobj" ]; then \
+		/bin/echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
+	fi && \
+	for i in *.c; \
+	do \
+		/bin/echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR)s ; \
+	done && \
+	/bin/echo -ne "\t" >> ../Makefile.$(OBJDIR)
+
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o
