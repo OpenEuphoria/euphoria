@@ -33,7 +33,7 @@ procedure ShowHelp()
 	puts(1, Test)
     end if
     
-    puts (1,"\nEUINC pointing to the include dir inside you source directory\n")
+    puts (1,"\nEUINC pointing to the include dir inside your source directory\n")
     puts (1,"Current EUINC=")
     
     Test = getenv("EUINC")
@@ -127,7 +127,7 @@ procedure Main()
 --  .... ecw.lib goes by .... 
     system ("dir *.exe",2)
     system ("dir *.lib",2)
-    
+    abort(0)
 end procedure
 
 
