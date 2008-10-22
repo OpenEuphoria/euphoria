@@ -576,6 +576,13 @@ sequence export_warnings
 export_warnings = {}
 end ifdef
 
+-- Prevent (or allow) unincluded globals from being resolved in favor of
+-- forward references in files that haven't been fully parsed yet.
+integer Resolve_unincluded_globals = 0
+export procedure resolve_unincluded_globals( integer ok )
+	Resolve_unincluded_globals = ok
+end procedure
+
 global integer No_new_entry = 0
 global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
 -- Uses hashing algorithm to try to match 'word' in the symbol
@@ -633,9 +640,12 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 					end if
 
 					-- found global in another file
-					gtok = tok
-					dup_globals &= st_ptr
-					in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 -- symbol_in_include_path( st_ptr, scanning_file, {} )
+					if Resolve_unincluded_globals or include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]]
+					or SymTab[st_ptr][S_TOKEN] = NAMESPACE then -- this allows the eu: namespace to work
+						gtok = tok
+						dup_globals &= st_ptr
+						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 -- symbol_in_include_path( st_ptr, scanning_file, {} )
+					end if
 					break
 					-- continue looking for more globals with same name
 

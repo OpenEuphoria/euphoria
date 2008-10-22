@@ -3728,6 +3728,7 @@ end procedure
 
 global procedure parser()
 	real_parser(0)
+	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
 end procedure
 
