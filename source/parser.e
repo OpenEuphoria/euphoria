@@ -2725,12 +2725,19 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
 
-			emit_op(ASSIGN)
-
-			valsym = get_assigned_sym()
-			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
-				-- need to remember this for select/case statements
-				SymTab[sym][S_CODE] = valsym
+			valsym = Top()
+			if compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				valsym = Pop()
+				SymTab[sym][S_OBJ] = SymTab[valsym][S_OBJ]
+				SymTab[sym][S_INITLEVEL] = 0
+			else
+				emit_op(ASSIGN)
+	
+				valsym = get_assigned_sym()
+				if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+					-- need to remember this for select/case statements
+					SymTab[sym][S_CODE] = valsym
+				end if
 			end if
 
 		elsif type_ptr = -1 then
@@ -2758,18 +2765,26 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				elsif SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
 					if SymTab[tok[T_SYM]][S_CODE] then
 						valsym = SymTab[tok[T_SYM]][S_CODE]
-
+						
+					elsif compare( SymTab[tok[T_SYM]][S_OBJ], NOVALUE ) then
+						valsym = tok[T_SYM]
+					
 					else
-						CompileErr("enum constants must be assigned an atom")
+						CompileErr("enum constants must be assigned an integer")
 
 					end if
-
+				elsif valsym < 0 then
+					-- forward reference
+					
 				else
-					CompileErr("atom or constant expected")
+					CompileErr("integer or constant expected")
 
 				end if
 
 				valsym = tok[T_SYM]
+				if not integer( SymTab[valsym][S_OBJ] ) then
+					CompileErr("enum constants must be integers")
+				end if
 				val = SymTab[valsym][S_OBJ] * negate
 				Push(NewIntSym(val))
 				val += 1
@@ -2777,6 +2792,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				putback(tok)
 				Push(NewIntSym(val))
 				val += 1
+				valsym = 0
 			end if
 			buckets[SymTab[sym][S_HASHVAL]] = sym
 			SymTab[sym][S_USAGE] = U_WRITTEN
@@ -2785,12 +2801,19 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				SymTab[sym][S_GTYPE] = TYPE_OBJECT
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
-
-			emit_op(ASSIGN)
-			valsym = get_assigned_sym()
+			
+			if valsym < 0 then
+				-- fwd reference
+				
+			end if
+			
+-- 			valsym = get_assigned_sym()
 			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				-- need to remember this for select/case statements
 				SymTab[sym][S_CODE] = valsym
+				SymTab[sym][S_OBJ]  = val - 1
+			else
+				SymTab[sym][S_OBJ] = val - 1
 			end if
 		else
 			-- variable

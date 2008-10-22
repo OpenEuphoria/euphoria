@@ -20,9 +20,9 @@ global integer main_name_num, init_name_num
 main_name_num = 0
 init_name_num = 0
 
-global sequence novalue, target
+global sequence novalue--, target
 novalue = {MININT, MAXINT}
-target = {0, 0}
+-- target = {0, 0}
 
 global procedure c_putc(integer c)
 -- output a byte of C source code 

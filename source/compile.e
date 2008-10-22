@@ -5619,7 +5619,7 @@ function hex_char(integer c)
 	return "\\x" & hex_chars[1+floor(c/16)] & hex_chars[1+remainder(c, 16)]
 end function
 
-function is_string( sequence s )
+export function is_string( sequence s )
 	for i = 1 to length(s) do
 		if sequence(s[i]) or s[i] > 255  or s[i] < 0 then
 			return 0
@@ -5628,45 +5628,27 @@ function is_string( sequence s )
 	return 1
 end function
 
-procedure init_string( symtab_index tp )
--- string
-	sequence string
-	integer decompress
-	integer use_hex, c
-
-	string = SymTab[tp][S_OBJ]
-	decompress = not is_string( string )
-
-	if decompress then
-		-- it's a more complex object, so we'll compress
-		string = compress( string )
-		c_stmt0("string_ptr = \"")
-	else
-		c_stmt0("_")
-		c_printf("%d = NewString(\"", SymTab[tp][S_TEMP_NAME])
-	end if
-
-	-- output the string sequence one char at a time with escapes
-	use_hex = FALSE
+export procedure escape_string( sequence string )
+	integer use_hex = FALSE
 	for elem = 1 to length(string) do
 		if (string[elem] < 32 or string[elem] > 127) and
 		   not find(string[elem], "\n\t\r") then
 			use_hex = TRUE
+			exit
 		end if
 	end for
-
+	
 	if use_hex then
-		-- must use hex in whole string or C might get confused
 		for elem = 1 to length(string) do
-			c_puts(hex_char(string[elem]))
-			if remainder(elem, 15) = 0 and elem < length(string) then
-				c_puts("\"\n\"") -- start a new string chunk,
-								 -- avoid long line
-			end if
+				c_puts(hex_char(string[elem]))
+				if remainder(elem, 15) = 0 and elem < length(string) then
+					c_puts("\"\n\"") -- start a new string chunk,
+									-- avoid long line
+				end if
 		end for
 	else
 		for elem = 1 to length(string) do
-			c = string[elem]
+			integer c = string[elem]
 			if c = '\t' then
 				c_puts("\\t")
 			elsif c = '\n' then
@@ -5682,7 +5664,26 @@ procedure init_string( symtab_index tp )
 			end if
 		end for
 	end if
+end procedure
 
+procedure init_string( symtab_index tp )
+-- string
+	sequence string
+
+	string = SymTab[tp][S_OBJ]
+	integer decompress = not is_string( string )
+
+	if decompress then
+		-- it's a more complex object, so we'll compress
+		string = compress( string )
+		c_stmt0("string_ptr = \"")
+	else
+		c_stmt0("_")
+		c_printf("%d = NewString(\"", SymTab[tp][S_TEMP_NAME])
+	end if
+
+	escape_string( string )
+	
 	if decompress then
 		c_printf("\";\n\t_%d = decompress( 0 );\n", SymTab[tp][S_TEMP_NAME])
 	else
@@ -6047,8 +6048,6 @@ procedure BackEnd(atom ignore)
 			tp_count = 0
 		end if
 
-
-
 		if atom(SymTab[tp][S_OBJ]) then -- can't be NOVALUE
 			-- double
 			c_stmt0("_")
@@ -6061,7 +6060,61 @@ procedure BackEnd(atom ignore)
 		tp = SymTab[tp][S_NEXT]
 		tp_count += 1
 	end while
-
+	
+	for csym = TopLevelSub to length(SymTab) do
+		if compare( SymTab[csym][S_OBJ], NOVALUE ) then
+		if not integer( SymTab[csym][S_OBJ] ) then
+		if SymTab[csym][S_MODE] != M_TEMP then  
+			if tp_count > INIT_CHUNK then
+				-- close current .c and start a new one
+				c_stmt0("init_literal")
+				c_printf("%d();\n", init_name_num)
+				c_stmt0("}\n")
+				init_name = sprintf("init-%d", init_name_num)
+				new_c_file(init_name)
+				c_stmt0("init_literal")
+				c_printf("%d()\n", init_name_num)
+				c_stmt0("{\n")
+				c_stmt0("extern double sqrt();\n")
+				init_name_num += 1
+				tp_count = 0
+			end if
+			
+			-- non-integer constant
+			if sequence( SymTab[csym][S_OBJ] ) then
+				string = SymTab[csym][S_OBJ]
+				integer decompress = not is_string( string )
+				
+				if decompress then
+					-- it's a more complex object, so we'll compress
+					string = compress( string )
+					c_stmt0("string_ptr = \"")
+				else
+					c_printf( "\t_%d", SymTab[csym][S_FILE_NO] )
+					c_puts( SymTab[csym][S_NAME] )
+					c_puts(" = NewString(\"" )
+				end if
+			
+				escape_string( string )
+				
+				if decompress then
+					c_printf( "\"\n\t_%d", SymTab[csym][S_FILE_NO] )
+					c_puts( SymTab[c][S_NAME] )
+					c_printf(" = decompress( 0 );\n", SymTab[csym][S_TEMP_NAME])
+				else
+					c_puts("\");\n")
+				end if
+			else
+				c_printf( "\t_%d", SymTab[csym][S_FILE_NO] )
+				c_puts( SymTab[csym][S_NAME] )
+				c_printf( " = NewDouble( %0.16f );\n", SymTab[csym][S_OBJ] )
+			end if
+			
+			tp_count += 1
+		end if
+		end if
+		end if
+	end for
 	c_stmt0("}\n")
 
 	c_hputs("extern int TraceOn;\n")

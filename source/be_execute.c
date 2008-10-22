@@ -1410,7 +1410,7 @@ void symtab_set_pointers()
 		}
 		else if (s->mode == M_CONSTANT ) {
 			if (s->obj) {
-				// namespaces, literal values only
+				// namespaces, some constants and literal values only
 				string_ptr = (unsigned char *)s->obj;
 				s->obj = decompress(0);
 			}

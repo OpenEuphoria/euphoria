@@ -97,12 +97,12 @@ procedure BackEnd(integer il_file)
 					poke4(addr+48, eentry[S_STACK_SPACE])
 				end if
 			
-			elsif (length(eentry) >= S_TOKEN and eentry[S_TOKEN] = NAMESPACE) or 
-				  (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) then
-				-- compress literal values in memory
+			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
+			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
+				-- compress constants and literal values in memory
 				poke4(addr, length(lit_string))  -- record the current offset
 				lit_string &= compress(eentry[S_OBJ])
-		
+
 			end if
 
 		end if
@@ -136,9 +136,9 @@ procedure BackEnd(integer il_file)
 					poke(addr, 0)  -- 0-delimited string
 					addr += 1
 				
-					if eentry[S_TOKEN] = NAMESPACE then
+					if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
 						-- convert offset to address
-						poke4(entry_addr, peek4u(entry_addr)+lit) 
+						poke4(entry_addr, peek4u(entry_addr)+lit)
 					end if
 				else
 					-- no name

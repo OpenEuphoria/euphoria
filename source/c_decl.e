@@ -12,6 +12,7 @@ include global.e
 include reswords.e
 include symtab.e
 include tranplat.e
+include compile.e
 
 -- Translator
 global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
@@ -607,14 +608,21 @@ global procedure DeclareFileVars()
 			or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC) and
 			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
 			not find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
+			
+			
 			c_puts("int ")
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
-			c_puts(" = 0;\n")
+			if integer( eentry[S_OBJ] ) then
+					c_printf(" = %d;\n", eentry[S_OBJ] )
+			else
+				c_puts(" = 0;\n")
+			end if
 			
 			c_hputs("extern int ")
 			c_hprintf("_%d", eentry[S_FILE_NO])
 			c_hputs(eentry[S_NAME])
+			
 			c_hputs(";\n")
 		end if
 		s = SymTab[s][S_NEXT]
