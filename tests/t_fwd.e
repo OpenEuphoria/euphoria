@@ -2,6 +2,11 @@
 
 include std/unittest.e
 
+-- These files test resolution of unincluded globals, which
+-- are treated as forward resolutions until the end of parsing
+include fwdglobal.e
+include fwdnoinc.e
+
 integer n0=2
 integer var1
 public sequence result4 = repeat(0,4)

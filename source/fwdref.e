@@ -90,7 +90,7 @@ procedure patch_forward_call( token tok, integer ref )
 	integer code_sub = fr[FR_SUBPROG]
 	symtab_index sub = tok[T_SYM]
 	integer args = SymTab[sub][S_NUM_ARGS]
-	integer is_func = (SymTab[sub][S_TOKEN] = FUNC)
+	integer is_func = (SymTab[sub][S_TOKEN] = FUNC) or (SymTab[sub][S_TOKEN] = TYPE)
 	
 	integer real_file = current_file_no
 	current_file_no = fr[FR_FILE]
@@ -240,10 +240,8 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	if code_sub = CurrentSub then
 		Code = code
-	else
-		SymTab[code_sub][S_CODE] = code
 	end if
-	
+	SymTab[code_sub][S_CODE] = code
 	-- mark this one as resolved already
 	forward_references[ref] = 0
 			
@@ -450,11 +448,12 @@ end procedure
 procedure prep_forward_error( integer ref )
 	ThisLine = forward_references[ref][FR_THISLINE]
 	bp = forward_references[ref][FR_BP]
+	line_number = forward_references[ref][FR_LINE]
+	current_file_no = forward_references[ref][FR_FILE]
 end procedure
 
 procedure forward_error( token tok, integer ref )
 	prep_forward_error( ref )
-	
 	CompileErr(sprintf("expected %s, not %s", 
 		{ expected_name( forward_references[ref][FR_TYPE] ),
 			expected_name( tok[T_ID] ) } ) )
@@ -535,13 +534,15 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				case FUNC:
 					
 					sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
+					if sym_tok = TYPE then
+						sym_tok = FUNC
+					end if
 					if sym_tok != fr_type then
 						forward_error( tok, ref )
 					end if
 					switch sym_tok do
 						case PROC:
 						case FUNC:
-					
 							patch_forward_call( tok, ref )
 							continue
 							
