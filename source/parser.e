@@ -2726,15 +2726,14 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			end if
 
 			valsym = Top()
-			if compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+			if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				valsym = Pop()
 				SymTab[sym][S_OBJ] = SymTab[valsym][S_OBJ]
 				SymTab[sym][S_INITLEVEL] = 0
 			else
 				emit_op(ASSIGN)
-	
 				valsym = get_assigned_sym()
-				if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
 				end if
