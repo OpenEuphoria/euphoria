@@ -215,7 +215,7 @@ function IsInteger(symtab_index sym)
 		if t = integer_type then
 			return TRUE
 		end if
-		if t then
+		if t > 0 then
 			pt = SymTab[t][S_NEXT]
 			if pt and SymTab[pt][S_VTYPE] = integer_type then
 				return TRUE   -- usertype(integer x)
@@ -478,8 +478,7 @@ global procedure emit_op(integer op)
 		b = Pop() -- subscript 
 		c = Pop() -- sequence 
 		target = NewTempSym() -- target 
-
-		if c < 0 then -- forward reference
+		if c < 0 or length(SymTab[c]) < S_VTYPE or SymTab[c][S_VTYPE] < 0 then -- forward reference
 			-- we can't know what it is, so emit the check
 			op = RHS_SUBS_CHECK
 		elsif SymTab[c][S_MODE] = M_NORMAL then

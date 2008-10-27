@@ -312,6 +312,19 @@ function expected_name( integer id )
 	
 end function
 
+
+procedure patch_forward_type( token tok, integer ref )
+	sequence fr = forward_references[ref]
+	sequence syms = fr[FR_DATA]
+	for i = 2 to length( syms ) do
+		SymTab[syms[i]][S_VTYPE] = tok[T_SYM]
+		if TRANSLATE then
+			SymTab[syms[i]][S_GTYPE] = CompileType(tok[T_SYM])
+		end if
+	end for
+	forward_references[ref] = 0
+end procedure
+
 procedure patch_forward_case( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	
@@ -346,17 +359,36 @@ procedure patch_forward_case( token tok, integer ref )
 end procedure
 
 procedure patch_forward_type_check( token tok, integer ref )
-	symtab_index which_type = SymTab[tok[T_SYM]][S_VTYPE]
-	if not which_type then
-		return
-	end if
-	set_code( ref )
 	sequence fr = forward_references[ref]
+	symtab_index which_type
+	symtab_index var
+	
+	if fr[FR_OP] = TYPE_CHECK then
+		which_type = SymTab[tok[T_SYM]][S_VTYPE]
+		if not which_type then
+			which_type = tok[T_SYM]
+			var = 0
+		else
+			var = tok[T_SYM]
+		end if
+		
+		
+	elsif fr[FR_OP] = TYPE then
+		which_type = tok[T_SYM]
+		var = 0
+	end if
+	
+	set_code( ref )
+	
 	integer pc = fr[FR_PC]
-	symtab_index var = tok[T_SYM]
-	integer with_type_check = Code[pc + 3 + (not TRANSLATE) * 2]
+	integer with_type_check = Code[pc + 2 + (not TRANSLATE) * 2]
 	integer next_pc
 	
+	if not var then
+		-- type type was the forward reference
+		var = Code[pc+3]
+	end if
+
 	if TRANSLATE then
 		next_pc = pc + 5
 		if with_type_check then
@@ -380,7 +412,6 @@ procedure patch_forward_type_check( token tok, integer ref )
 			if which_type = object_type then
 					-- skip it
 					Code[pc..pc+6] = { ELSE, next_pc, NOP1, NOP1, NOP1, NOP1, NOP1 }
-			
 			else
 				-- TODO:  Some of these could be optimized away
 				if which_type = integer_type then
@@ -398,7 +429,10 @@ procedure patch_forward_type_check( token tok, integer ref )
 						integer_type then
 					
 						Code[pc..pc+1] = { INTEGER_CHECK, var }
+						
 						pc += 2
+					else
+						Code[pc+5..pc+6] = NOP1
 					end if
 					symtab_index c = NewTempSym()
 					Code[pc..pc+4] = { PROC, which_type, var, c, TYPE_CHECK }
@@ -482,6 +516,13 @@ function find_reference( sequence fr )
 	return tok
 end function
 
+-- record places where we're using a forward type so it can be patched later
+export procedure register_forward_type( symtab_index sym, integer ref )
+	if ref < 0 then
+		ref = -ref
+	end if
+	forward_references[ref][FR_DATA] &= sym
+end procedure
 
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
 	forward_references = append( forward_references, repeat( 0, FR_SIZE ) )
@@ -529,6 +570,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			integer code_sub = fr[FR_SUBPROG]
 			integer fr_type  = fr[FR_TYPE]
 			integer sym_tok
+			
 			switch fr_type label "fr_type" do
 				case PROC:
 				case FUNC:
@@ -581,6 +623,10 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 					patch_forward_case( tok, ref )
 					continue
 					
+				case TYPE:
+					patch_forward_type( tok, ref )
+					continue
+					
 				case else
 					-- ?? what is it?
 					InternalErr( sprintf("unrecognized forward reference type: %d (%s)", {fr[FR_TYPE], fr[FR_NAME]} ))
@@ -591,9 +637,10 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	if report_errors and length( errors ) then
 		sequence msg = "Errors resolving the following references:\n"
 		integer error_count = 0
+		
 		for e = 1 to length( errors ) do
 			sequence ref = forward_references[errors[e]]
-			if ref[FR_TYPE] = TYPE_CHECK or ref[FR_TYPE] = GLOBAL_INIT_CHECK then
+			if (ref[FR_TYPE] = TYPE_CHECK and ref[FR_OP] = TYPE_CHECK) or ref[FR_TYPE] = GLOBAL_INIT_CHECK then
 				-- these checks end up looking like duplicate errors
 				continue
 

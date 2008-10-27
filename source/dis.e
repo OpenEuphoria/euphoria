@@ -27,9 +27,10 @@ sequence ps_options = PRETTY_DEFAULT
 ps_options[DISPLAY_ASCII] = 2
 ps_options[LINE_BREAKS]   = 0
 function name_or_literal( integer sym )
-	if length(SymTab[sym]) = 1 then
+	if not sym then
+		return "[0: ???]"
+	elsif length(SymTab[sym]) = 1 then
 		return sprintf("[_deleted_:%d]", sym)
-
 	elsif length(SymTab[sym]) >= SIZEOF_VAR_ENTRY then
 		return sprintf("[%s:%d]", {SymTab[sym][S_NAME],sym})
 	elsif SymTab[sym][S_MODE] = M_TEMP then
@@ -946,7 +947,7 @@ procedure opCALL_PROC() -- or opCALL_FUNC
     
     a = Code[pc+1]  -- routine id
     b = Code[pc+2]  -- argument list
-    if Code[pc] = CALL_FUNC then
+    if Code[pc] = CALL_FUNC and pc > length(Code)+3 then
     	il( sprintf("%s: %s %s", {opnames[Code[pc]]} & names( a&b & Code[pc+3]) ), 3 )
     else
     	il( sprintf("%s: %s %s", {opnames[Code[pc]]} & names( a&b) ), 2 )

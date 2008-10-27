@@ -1347,6 +1347,17 @@ procedure TypeCheck(symtab_index var)
 	end if
 	
 	which_type = SymTab[var][S_VTYPE]
+	if which_type < 0 or SymTab[which_type][S_TOKEN] = VARIABLE  then
+		integer ref = new_forward_reference( TYPE_CHECK, which_type, TYPE )
+		if not TRANSLATE then
+			-- possible extra integer check
+			Code &= TYPE_CHECK & 0
+		end if
+		Code &= { TYPE_CHECK, var, OpTypeCheck, which_type, 0 }
+		
+		return
+	end if
+	
 	if TRANSLATE then
 		if OpTypeCheck then
 			if which_type != object_type then
@@ -1374,7 +1385,7 @@ procedure TypeCheck(symtab_index var)
 				elsif which_type = atom_type then
 						op_info1 = var
 						emit_op(ATOM_CHECK)
-
+					
 				else
 						-- user-defined
 						if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] =
@@ -2527,6 +2538,9 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 			SymTab[s][S_SCOPE] = SC_PRIVATE
 			SymTab[s][S_VARNUM] = n
 			SymTab[s][S_VTYPE] = type_sym
+			if type_sym < 0 then
+				register_forward_type( s, type_sym )
+			end if
 			return s
 		
 		case SC_LOCAL:
@@ -2637,10 +2651,15 @@ procedure For_statement()
 	exit_loop(exit_base)
 end procedure
 
-function CompileType(symtab_index type_ptr)
+export function CompileType(symtab_index type_ptr)
 -- Translator only: set the compile type for a variable
 	integer t
 
+	if type_ptr < 0 then
+		-- forward reference.  patch it later
+		return type_ptr
+	end if
+	
 	if SymTab[type_ptr][S_TOKEN] = OBJECT then
 		return TYPE_OBJECT
 
@@ -2689,7 +2708,14 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	symtab_index sym, valsym
 	integer h, val
 	val = 1
-
+	
+	integer is_fwd_ref = 0
+	if type_ptr > 0 and SymTab[type_ptr][S_SCOPE] = SC_UNDEFINED then
+		is_fwd_ref = 1
+		Hide(type_ptr)
+		type_ptr = -new_forward_reference( TYPE, type_ptr )
+	end if
+	
 	while TRUE do
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
@@ -2739,7 +2765,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				end if
 			end if
 
-		elsif type_ptr = -1 then
+		elsif type_ptr = -1 and not is_fwd_ref then
 			-- ENUM
 			SymTab[sym][S_MODE] = M_CONSTANT
 			-- temporarily hide sym so it can't be used in defining itself
@@ -2817,10 +2843,13 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 		else
 			-- variable
 			SymTab[sym][S_MODE] = M_NORMAL
-			if SymTab[type_ptr][S_TOKEN] = OBJECT then
+			if type_ptr > 0 and SymTab[type_ptr][S_TOKEN] = OBJECT then
 				SymTab[sym][S_VTYPE] = object_type
 			else
 				SymTab[sym][S_VTYPE] = type_ptr
+				if type_ptr < 0 then
+					register_forward_type( sym, type_ptr )
+				end if
 			end if
 
 			if TRANSLATE then
@@ -2845,7 +2874,12 @@ procedure Private_declaration(symtab_index type_sym)
 -- parse a private declaration of one or more variables
 	token tok
 	symtab_index sym
-
+	
+	if SymTab[type_sym][S_SCOPE] = SC_UNDEFINED then
+		Hide( type_sym )
+		type_sym = -new_forward_reference( TYPE, type_sym )
+	end if
+	
 	while TRUE do
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC, NAMESPACE}) then
@@ -2987,22 +3021,25 @@ procedure Statement_list()
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
-				if forward[T_ID] = LEFT_ROUND then
-					Forward_call( tok )
-					continue
-				end if
+				switch forward[T_ID] do
+					case LEFT_ROUND:
+						Forward_call( tok )
+						continue
+					case VARIABLE:
+						putback( forward )
+						if param_num != -1 then
+							-- if we're in a routine, we need to know how much stack space will be required
+							param_num += 1
+							Private_declaration( tok[T_SYM] )
+						else
+							Global_declaration( tok[T_SYM], SC_LOCAL )
+						end if
+						continue
+				end switch
 				putback( forward )
 			end if
 			StartSourceLine(TRUE)
 			Assignment(tok)
-
--- 		elsif id = TYPE or id = QUALIFIED_TYPE then
--- 			StartSourceLine(TRUE)
--- 			if CurrentSub != TopLevelSub then
--- 				Private_declaration(tok[T_SYM])
--- 			else
--- 				Global_declaration(tok[T_SYM],SC_LOCAL)
--- 			end if
 
 		elsif id = PROC or id = QUALIFIED_PROC then
 			if id = PROC then
@@ -3177,9 +3214,10 @@ procedure SubProg(integer prog_type, integer scope)
 
 		if tok[T_ID] != TYPE and tok[T_ID] != QUALIFIED_TYPE then
 			if tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
-				UndefinedVar(tok[T_SYM])
+				tok[T_SYM] = - new_forward_reference( TYPE, tok[T_SYM] )
+-- 				UndefinedVar(tok[T_SYM])
 			end if
-			CompileErr("a type is expected here")
+-- 			CompileErr("a type is expected here")
 		end if
 		type_sym = tok[T_SYM]
 		tok = next_token()
@@ -3253,6 +3291,9 @@ procedure SubProg(integer prog_type, integer scope)
 	temps_allocated = 0
 	sym = SymTab[p][S_NEXT]
 	for i = 1 to SymTab[p][S_NUM_ARGS] do
+		while SymTab[sym][S_SCOPE] != SC_PRIVATE do
+			sym = SymTab[sym][S_NEXT]
+		end while
 		TypeCheck(sym)
 		sym = SymTab[sym][S_NEXT]
 	end for
@@ -3511,12 +3552,19 @@ global procedure real_parser(integer nested)
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
-				if forward[T_ID] = LEFT_ROUND then
-					Forward_call( tok )
-					continue
-				else
+				switch forward[T_ID] do
+					case LEFT_ROUND:
+						Forward_call( tok )
+						continue
+						
+					case VARIABLE:
+						putback( forward )
+						Global_declaration( tok[T_SYM], SC_LOCAL )
+						continue
+						
+					case else
 					putback( forward )
-				end if
+				end switch
 			end if
 			StartSourceLine(TRUE)
 			Assignment(tok)

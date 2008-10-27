@@ -11,5 +11,4 @@ elsedef
 -- typechecks are turned off when translated...
 test_equal( "fail forward type check", 0, 1 )
 end ifdef
-
 test_report()

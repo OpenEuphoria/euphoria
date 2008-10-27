@@ -6,6 +6,8 @@ include global.e
 include c_out.e
 include keylist.e
 include error.e
+include fwdref.e
+
 include std/search.e
 
 constant NBUCKETS = 2003  -- prime helps
@@ -129,6 +131,7 @@ global function NewEntry(sequence name, integer varnum, integer scope,
 	new[S_VARNUM] = varnum
 	new[S_INITLEVEL] = -1
 	new[S_VTYPE] = type_sym
+	
 	new[S_HASHVAL] = hashval
 	new[S_SAMEHASH] = samehash
 	new[S_OBJ] = NOVALUE -- important
@@ -139,6 +142,9 @@ global function NewEntry(sequence name, integer varnum, integer scope,
 		SymTab[last_sym][S_NEXT] = length(SymTab)
 	end if
 	last_sym = length(SymTab)
+	if type_sym < 0 then
+		register_forward_type( last_sym, type_sym )
+	end if
 	return last_sym
 end function
 
