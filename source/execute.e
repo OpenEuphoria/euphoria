@@ -3030,7 +3030,7 @@ end procedure
 procedure opQPRINT()
 -- Code[pc+1] not used
 	a = Code[pc+2]
---	? val[a]
+	? val[a]
 	pc += 3
 end procedure
 		
@@ -3615,9 +3615,9 @@ procedure do_exec()
 				opLENGTH()
 				break
 			case LESS:
-			case LESS_IFW_I:
 				opLESS()
 				break
+			case LESS_IFW_I:
 			case LESS_IFW:
 				opLESS_IFW()
 				break
