@@ -269,6 +269,12 @@ procedure patch_forward_variable( token tok, integer ref )
 		CompileErr( "may not change the value of a constant" )
 	end if
 	
+	if fr[FR_OP] = ASSIGN then
+		SymTab[sym][S_USAGE] = or_bits( U_WRITTEN, SymTab[sym][S_USAGE] )
+	else
+		SymTab[sym][S_USAGE] = or_bits( U_READ, SymTab[sym][S_USAGE] )
+	end if
+	
 	set_code( ref )
 	integer vx = find_from( -ref, Code, fr[FR_PC] )
 	if vx then

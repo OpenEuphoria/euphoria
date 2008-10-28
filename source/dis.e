@@ -1449,7 +1449,7 @@ procedure save_il( sequence name )
 	st = open( sprintf("%shash", { name }), "wb" )
 	sequence bucket = repeat( "", length( buckets ) )
 	for i = 1 to length( SymTab ) do
-		if length( SymTab[i] ) >= S_HASHVAL then
+		if length( SymTab[i] ) >= S_HASHVAL and SymTab[i][S_HASHVAL] then
 			if not find( SymTab[i][S_NAME], bucket[SymTab[i][S_HASHVAL]] ) then
 				bucket[SymTab[i][S_HASHVAL]] = append( bucket[SymTab[i][S_HASHVAL]], SymTab[i][S_NAME] )
 			end if
