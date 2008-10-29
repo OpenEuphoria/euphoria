@@ -589,6 +589,10 @@ export procedure resolve_unincluded_globals( integer ok )
 	Resolve_unincluded_globals = ok
 end procedure
 
+export function get_resolve_unincluded_globals()
+	return Resolve_unincluded_globals
+end function
+
 global integer No_new_entry = 0
 global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
 -- Uses hashing algorithm to try to match 'word' in the symbol

@@ -557,11 +557,15 @@ end function
 export procedure Resolve_forward_references( integer report_errors = 0 )
 	sequence errors = {}
 	sequence code = {}
+	integer unincluded_ok = get_resolve_unincluded_globals()
 	
 	for ref = 1 to length( forward_references ) do
 		
 		if sequence( forward_references[ref] ) then
 			sequence fr = forward_references[ref]
+			if include_matrix[fr[FR_FILE]][current_file_no] = NOT_INCLUDED and not unincluded_ok then
+				continue
+			end if
 			token tok = find_reference( fr )
 			
 			if tok[T_ID] = IGNORED then
