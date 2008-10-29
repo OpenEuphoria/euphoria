@@ -438,7 +438,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 						
 						pc += 2
 					else
-						Code[pc+5..pc+6] = NOP1
+						Code[pc+5..pc+6] = NOP2
 					end if
 					symtab_index c = NewTempSym()
 					Code[pc..pc+4] = { PROC, which_type, var, c, TYPE_CHECK }

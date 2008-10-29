@@ -7,3 +7,8 @@ ifdef EC then
 fwd_object = 0
 test_equal( "non-include global variable survives translation", 0, fwd_object )
 end ifdef
+
+with type_check
+UDT u
+u = 0
+test_pass( "forward UDT type check doesn't hang execution" )
