@@ -161,18 +161,21 @@ int symbol_in_include_path( symtab_ptr sym, int check_file, char * checked_file 
 	int file_no = sym->file_no;
 	char * files;
 	struct include_node * node;
-	
+	int abs_check_file;
 	
 	if( file_no == check_file ) return 1;
 	
-	node = fe.includes->nodes + check_file;
+	if( check_file < 0 ) abs_check_file = -check_file;
+	else abs_check_file = check_file;
+	
+	node = fe.includes->nodes + abs_check_file;
 	files = NULL;
 	if( checked_file == NULL ){
 		files = malloc( fe.misc[0] +1 );
 		memset( files, 0, fe.misc[0] + 1 );
 		checked_file = files;
 	}
-	else if( checked_file[check_file] ) return 0;
+	else if( checked_file[abs_check_file] ) return 0;
 	checked_file[check_file] = 1;
 	
 	for( i = 0; i < node->size; i++ ){
