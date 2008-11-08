@@ -51,6 +51,12 @@ function single_arg_fwd( integer a )
 	return a + 1
 end function
 
+boolean bool = 1
+test_pass( "foward integer type check" )
+type boolean( integer b )
+	return b = 0 or b = 1
+end type
+
 test_report()
 
 

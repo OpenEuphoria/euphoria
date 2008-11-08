@@ -392,7 +392,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 	
 	if not var then
 		-- type type was the forward reference
-		var = Code[pc+3]
+		if TRANSLATE then
+			var = Code[pc+1]
+		else
+			var = Code[pc+3]
+		end if
 	end if
 
 	if TRANSLATE then
