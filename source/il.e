@@ -157,7 +157,7 @@ procedure OutputSymTab(file f)
 				-- variable
 				-- constants are deleted (but there will be an OBJ field 
 				-- to hold their value at run-time)
-				if SymTab[i][S_MODE] = M_CONSTANT then
+				if SymTab[i][S_MODE] = M_CONSTANT and equal( SymTab[i][S_OBJ], NOVALUE ) then
 					-- constant
 					SymTab[i] = SymTab[i][S_NEXT] -- "deleted"
 				else

@@ -136,15 +136,15 @@ procedure BackEnd(integer il_file)
 					poke(addr, 0)  -- 0-delimited string
 					addr += 1
 				
-					if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
-						-- convert offset to address
-						poke4(entry_addr, peek4u(entry_addr)+lit)
-					end if
 				else
 					-- no name
 					poke4(entry_addr+12, no_name)
-				end if  
-			
+				end if
+				
+				if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
+					-- convert offset to address
+					poke4(entry_addr, peek4u(entry_addr)+lit)
+				end if
 			elsif eentry[S_MODE] = M_CONSTANT then
 				-- literals - convert offset of literal value to address
 				poke4(entry_addr, peek4u(entry_addr)+lit) 
