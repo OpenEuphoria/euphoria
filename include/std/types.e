@@ -214,24 +214,23 @@ end procedure
 --
 
 --** 
--- Returns TRUE if argument is an atom or if every element of the argument
--- is an atom.
+-- Returns TRUE if argument is 1 or 0
 --
--- Returns FALSE if the argument is an empty sequence or contains sequences.
+-- Returns FALSE if the argument is anything else other than 1 or 0.
 --
 -- Example 1:
 -- <eucode>
--- boolean(-1)            -- TRUE
+-- boolean(-1)            -- FALSE
 -- boolean(0)             -- TRUE 
 -- boolean(1)             -- TRUE
--- boolean(1.234)         -- TRUE
--- boolean('A')           -- TRUE
--- boolean('9')           -- TRUE
--- boolean('?')           -- TRUE
--- boolean("abc")         -- TRUE (every element is an atom)
--- boolean("ab3")         -- TRUE
--- boolean({1,2,"abc"})   -- FALSE (contains a sequence)
--- boolean({1, 2, 9.7)    -- TRUE
+-- boolean(1.234)         -- FALSE
+-- boolean('A')           -- FALSE
+-- boolean('9')           -- FALSE
+-- boolean('?')           -- FALSE
+-- boolean("abc")         -- FALSE
+-- boolean("ab3")         -- FALSE
+-- boolean({1,2,"abc"})   -- FALSE
+-- boolean({1, 2, 9.7)    -- FALSE
 -- boolean({})            -- FALSE (empty sequence)
 -- </eucode>
 	
