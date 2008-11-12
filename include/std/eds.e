@@ -2607,6 +2607,11 @@ end function
 -- x = db_set_caching(0) -- Turn off key caching.
 -- </eucode>
 
+public procedure db_cache_clear()
+	cache_index = {}
+	key_cache = {}
+end procedure
+
 public function db_set_caching(atom pVal)
 	integer lOldVal
 
@@ -2615,8 +2620,7 @@ public function db_set_caching(atom pVal)
 
 	if caching_option = 0 then
 		-- Wipe existing cache data.
-		cache_index = {}
-		key_cache = {}
+		db_cache_clear()
 	end if
 	return lOldVal
 end function

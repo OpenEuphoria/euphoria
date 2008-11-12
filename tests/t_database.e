@@ -2,6 +2,7 @@ include std/unittest.e
 include std/eds.e
 include std/filesys.e
 include std/sort.e
+include std/pretty.e
 
 -- TODO: add actual tests
 object void
@@ -158,9 +159,12 @@ void = delete_file("testunit.t0")
 procedure test_db_select()
 	-- create some fresh databases:
 	sequence the_db = "the_db.edb"
-	object ok = delete_file( the_db )
 	
-	ok = db_create( the_db, DB_LOCK_NO )
+	-- WITHOUT CACHING
+	object ok = db_set_caching(0)
+	
+	ok = delete_file( the_db )
+	ok = db_create( the_db )
 	ok = db_create_table( "TABLEDEF" )
 	ok = db_insert( "MY_DATA", "original data" )
 	
@@ -171,14 +175,43 @@ procedure test_db_select()
 	ok = db_select_table( "TABLEDEF" )
 	ok = db_find_key( "MY_DATA" )
 	db_delete_record(ok)
+	ok = db_find_key( "MY_DATA" )
+	test_equal( "Found MY_DATA #1 w/o caching", -1, ok)
 	
 	-- insert new TABLEDEF entry into the_db
 	ok = db_select( the_db )
 	ok = db_select_table( "TABLEDEF" )
 	ok = db_insert( "MY_DATA", temp_data )
+	test_equal( "Found MY_DATA #2 w/o caching", 0, ok)
 	
 	object the_data = db_record_data( db_find_key( "MY_DATA" ) )
-	test_equal( "insert, delete, select db/table, insert, get", temp_data, the_data )
+	test_equal( "w/o caching -> insert, delete, select db/table, insert, get", temp_data, the_data )
+	ok = delete_file( the_db )
+
+	-- WITH CACHING
+	ok = db_set_caching(1)
+	
+	ok = delete_file( the_db )		
+	ok = db_create( the_db )
+	ok = db_create_table( "TABLEDEF" )
+	ok = db_insert( "MY_DATA", "original data" )
+	
+	temp_data = "replacement data"
+	
+	-- delete TABLEDEF entry in the_db
+	ok = db_select( the_db )
+	ok = db_select_table( "TABLEDEF" )
+	ok = db_find_key( "MY_DATA" )
+	db_delete_record(ok)
+	test_equal( "db_find_key( \"MY_DATA\" ) w/caching", -1, db_find_key( "MY_DATA" ))
+	
+	-- insert new TABLEDEF entry into the_db
+	ok = db_select( the_db )
+	ok = db_select_table( "TABLEDEF" )
+	test_equal( "db_insert( \"MY_DATA\", \"" & temp_data & "\" ) w/caching", 0, db_insert( "MY_DATA", temp_data ))
+	
+	the_data = db_record_data( db_find_key( "MY_DATA" ) )
+	test_equal( "w/caching -> insert, delete, select db/table, insert, get", temp_data, the_data )
 	ok = delete_file( the_db )
 	
 end procedure

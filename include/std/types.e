@@ -237,15 +237,18 @@ end procedure
 	
 public type boolean(object pVal)
 	-- A boolean is a value that is either zero or not zero.
-	if atom(pVal) then
-		return TRUE
-	end if
-	for i = 1 to length(pVal) do
-		if sequence(pVal[i]) then
-			return FALSE
-		end if
-	end for
-	return length(pVal) > 0
+	
+	return find(pVal,{1,0})
+	
+-- 	if atom(pVal) then
+-- 		return TRUE
+-- 	end if
+-- 	for i = 1 to length(pVal) do
+-- 		if sequence(pVal[i]) then
+-- 			return FALSE
+-- 		end if
+-- 	end for
+-- 	return length(pVal) > 0
 	
 end type
 
