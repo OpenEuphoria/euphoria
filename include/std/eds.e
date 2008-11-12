@@ -854,7 +854,7 @@ end procedure
 procedure save_keys()
 	integer k
 	if caching_option = 1 then
-		if length(key_pointers) > 0 then
+		if current_table_pos > 0 then
 			k = eu:find({current_db, current_table_pos}, cache_index)
 			if k != 0 then
 				key_cache[k] = key_pointers

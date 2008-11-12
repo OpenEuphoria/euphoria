@@ -49,6 +49,8 @@ test_equal("current table #5", "first", db_current_table())
 
 test_equal("select table #2", DB_OK, db_select_table("second"))
 test_equal("current table #6", "second", db_current_table())
+-- Ensure at least one record is in the second table.
+test_equal("insert table 'second' #1", DB_OK, db_insert(-1, {}))
 
 test_equal("select table #3", DB_OK, db_select_table("third"))
 test_equal("current table #7", "third", db_current_table())
@@ -117,6 +119,28 @@ for i = 3 to 100 by 7 do
 end for
 check_free_list()
 test_equal("db_table_size after mass delete ", 86, db_table_size("first"))
+
+for i = 3 to 100 by 7 do
+	n = db_find_key(i)
+    test_true(sprintf("Delete of '%d' worked", i), n < 0)
+end for
+
+-- Saves table 'first' keys to cache and gets table 'second' keys
+void = db_select_table("second")
+test_true("'Second records are still okay'", db_find_key(-1) > 0)
+
+-- Saves table 'second' keys to cache and gets table 'first' keys
+void = db_select_table("first")
+for i = 3 to 100 by 7 do
+	n = db_find_key(i)
+    test_true(sprintf("Delete of '%d' still worked", i), n < 0)
+end for
+for i = 2 to 100 by 7 do
+	n = db_find_key(i)
+    test_true(sprintf("'%d' still exists", i), n > 0)
+end for
+
+
 void = delete_file("testunit.t0")
 test_equal("compress", DB_OK, db_compress())
 check_free_list()
@@ -132,7 +156,7 @@ test_true("get recid #3", rid2 > 0)
 
 -- Change table so its not the same as we got the recids from.
 void = db_select_table("second")
-test_equal("db_table_size before recid fetch ", 0, db_table_size())
+test_equal("db_table_size before recid fetch ", 1, db_table_size())
 
 object rec
 
