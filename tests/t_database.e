@@ -155,4 +155,33 @@ test_true( "Errors cleared", length(db_get_errors()) = 0)
 void = delete_file("testunit.edb")
 void = delete_file("testunit.t0")
 
+procedure test_db_select()
+	-- create some fresh databases:
+	sequence the_db = "the_db.edb"
+	object ok = delete_file( the_db )
+	
+	ok = db_create( the_db, DB_LOCK_NO )
+	ok = db_create_table( "TABLEDEF" )
+	ok = db_insert( "MY_DATA", "original data" )
+	
+	object temp_data = "replacement data"
+	
+	-- delete TABLEDEF entry in the_db
+	ok = db_select( the_db )
+	ok = db_select_table( "TABLEDEF" )
+	ok = db_find_key( "MY_DATA" )
+	db_delete_record(ok)
+	
+	-- insert new TABLEDEF entry into the_db
+	ok = db_select( the_db )
+	ok = db_select_table( "TABLEDEF" )
+	ok = db_insert( "MY_DATA", temp_data )
+	
+	object the_data = db_record_data( db_find_key( "MY_DATA" ) )
+	test_equal( "insert, delete, select db/table, insert, get", temp_data, the_data )
+	ok = delete_file( the_db )
+	
+end procedure
+test_db_select()
+
 test_report()
