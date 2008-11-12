@@ -69,13 +69,13 @@ end function
 --
 -- Parameters:
 --		# ##source##: the sequence from which to fetch
---		# ##indexes##: a sequence of integers, th path to follow to reach the element to return.
+--		# ##indexes##: a sequence of integers, the path to follow to reach the element to return.
 --
 -- Returns:
 --		An **object**, which is ##source[indexes[1]][indexes[2]]...[indexes[$]]##
 --
 -- Errors:
---		If the path cannot be followed to its end, an error about reading an inexistent element, or subscripting an atom, will occur.
+--		If the path cannot be followed to its end, an error about reading a nonexistent element, or subscripting an atom, will occur.
 --
 -- Comments:
 -- The last element of ##indexes## may be a pair {lower,upper}, in which case a slice of the innermostly referenced sequence is returned.
@@ -1244,7 +1244,7 @@ end function
 public function remove_all(object needle, sequence haystack)
 	integer ts, te, ss, se
 	
-	-- See if we have to anything at all.    
+	-- See if we have to do anything at all.
 	se = find(needle, haystack)
 	if se = 0 then
 		return haystack

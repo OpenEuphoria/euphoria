@@ -912,7 +912,7 @@ end procedure
 -- See Also:
 -- 		[[:db_open]], [[:db_select]]
 
-public function db_create(sequence path, integer lock_method, integer init_tables = INIT_TABLES, integer init_free = INIT_FREE )
+public function db_create(sequence path, integer lock_method = DB_LOCK_NO, integer init_tables = INIT_TABLES, integer init_free = INIT_FREE )
 	integer db
 
 	if init_tables < 1 then
