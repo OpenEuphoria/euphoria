@@ -951,7 +951,7 @@ void Remove_elements(int start, int stop, object_ptr target)
 {
 	int n = stop-start+1;
 	s1_ptr s1 = *assign_slice_seq;
-	if (UNIQUE(s1) && *target == *assign_slice_seq) {
+	if (UNIQUE(s1) && (SEQ_PTR(*target) == *assign_slice_seq)) {
 		int i;
 		char *pstart = (char *)(s1->base+start);
 		char *pstop = (char *)(s1->base+stop+1);

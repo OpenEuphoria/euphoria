@@ -3941,7 +3941,7 @@ void do_exec(int *start_pc)
 				if (end_pos >= seqlen) //remove tail
 					Head(s1,nvars,obj_ptr);   //nvars=1+final length
 				else { // carve slice out
-					*assign_slice_seq = s1;
+					assign_slice_seq = &s1;
 					Remove_elements(nvars,end_pos,obj_ptr);
 				}
 				thread5();
