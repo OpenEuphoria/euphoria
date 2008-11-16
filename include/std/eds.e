@@ -2150,6 +2150,11 @@ public procedure db_replace_recid(integer recid, object data)
 		void = seek(current_db, recid)
 		put4(data_ptr)
 		void = seek(current_db, data_ptr)
+		
+		-- if the data comes from the end of the file, we need to 
+		-- make sure it gets filled
+		data_string &= repeat( 0, 8 )
+		
 	end if
 	putn(data_string)
 end procedure
