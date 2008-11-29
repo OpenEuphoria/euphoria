@@ -3214,10 +3214,13 @@ procedure SubProg(integer prog_type, integer scope)
 
 		if tok[T_ID] != TYPE and tok[T_ID] != QUALIFIED_TYPE then
 			if tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
-				tok[T_SYM] = - new_forward_reference( TYPE, tok[T_SYM] )
--- 				UndefinedVar(tok[T_SYM])
+				if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+					tok[T_SYM] = - new_forward_reference( TYPE, tok[T_SYM] )
+				else
+					CompileErr("a type is expected here")
+				end if
+				
 			end if
--- 			CompileErr("a type is expected here")
 		end if
 		type_sym = tok[T_SYM]
 		tok = next_token()
