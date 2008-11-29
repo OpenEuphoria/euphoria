@@ -175,6 +175,7 @@ global enum
 	U_UNUSED=0,
 	U_READ,
 	U_WRITTEN,
+	U_FORWARD = 4,
 	U_DELETED=99   -- we've decided to delete this symbol
 
 -- Does a routine have an effect other than just returning a value?

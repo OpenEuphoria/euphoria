@@ -673,3 +673,12 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		end if
 	end if
 end procedure
+
+export function might_be_fwdref( sequence name )
+	for i = 1 to length( forward_references ) do
+		if sequence( forward_references[i] ) and equal( forward_references[i][FR_NAME], name ) then
+			return 1
+		end if
+	end for
+	return 0
+end function

@@ -237,7 +237,9 @@ procedure InitCheck(symtab_index sym, integer ref)
 		   equal(SymTab[sym][S_OBJ], NOVALUE)) or
 		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS])) then
-			if sym < 0 or (SymTab[sym][S_INITLEVEL] = -1) then
+			if sym < 0 or (SymTab[sym][S_INITLEVEL] = -1) 
+			or (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD )) 
+			then
 				if ref then
 					if sym > 0 and (SymTab[sym][S_SCOPE] = SC_UNDEFINED) then
 						emit_op(PRIVATE_INIT_CHECK)
@@ -248,7 +250,8 @@ procedure InitCheck(symtab_index sym, integer ref)
 					end if
 					emit_addr(sym)
 				end if
-				if sym > 0 and (short_circuit <= 0 or short_circuit_B = FALSE) then
+				if sym > 0 and (short_circuit <= 0 or short_circuit_B = FALSE)
+				and not (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD )) then
 					init_stack = append(init_stack, sym)
 					SymTab[sym][S_INITLEVEL] = stmt_nest
 				end if
@@ -3200,6 +3203,10 @@ procedure SubProg(integer prog_type, integer scope)
 	SymTab[p][S_TEMPS] = 0
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
+	
+	if might_be_fwdref( SymTab[p][S_NAME] ) then
+		SymTab[p][S_USAGE] = or_bits( SymTab[p][S_USAGE], U_FORWARD )
+	end if
 
 	StartSourceLine(FALSE)
 	tok_match(LEFT_ROUND)
