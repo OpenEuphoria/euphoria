@@ -2,6 +2,9 @@
 -- phasors, torpedos, antimatter pods
 
 include math.e
+include vars.e
+include std/graphcst.e
+include std/dos/image.e
 
 extended_h_coord x0
 extended_v_coord y0

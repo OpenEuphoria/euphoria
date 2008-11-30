@@ -5,6 +5,7 @@
 -- WARP 4 is the most efficient after you take life support
 -- energy into account. WARP 5 is good if you can use it to avoid
 -- getting blasted.
+include std/graphcst.e
 
 constant fuel = {0, 0.5, 1, 2, 4, 9}
 

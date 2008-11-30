@@ -1,5 +1,8 @@
 -- display.e
 -- graphics, sound and text display on screen
+include vars.e
+include std/graphcst.e
+include std/dos/pixels.e
 
 global sequence oshape -- images for all objects
 

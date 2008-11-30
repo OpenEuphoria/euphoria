@@ -22,6 +22,8 @@
 
 include std/error.e
 include std/console.e
+include std/os.e
+include std/dos/image.e
 
 global constant QUIET = 0  -- set this to 1 to turn off all sounds
 

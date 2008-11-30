@@ -1,5 +1,6 @@
 -- damage.e
 -- compute effects of damage
+include std/graphcst.e
 
 global function Java_target(valid_quadrant_row r)
 -- select target for Java ship at row r

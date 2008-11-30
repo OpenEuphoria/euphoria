@@ -1,5 +1,6 @@
 -- enemy.e
 -- operate the enemy ships
+include std/graphcst.e
 
 procedure set_basic_color()
 -- set new color and "shape" for BASIC ships after truce/hostile change

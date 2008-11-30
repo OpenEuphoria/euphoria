@@ -1,5 +1,8 @@
 -- commands.e
 -- process user commands
+include std/graphcst.e
+include std/os.e
+include std/graphics.e
 
 constant ESC = 27
 

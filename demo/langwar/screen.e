@@ -12,6 +12,9 @@
 -- (VSIZE,1)..........(VSIZE,HSIZE)
 
 -- Note however that pixel() uses origin (0,0) coordinates
+include vars.e
+include std/graphcst.e
+include std/dos/pixels.e
 
 global constant HSIZE = 80 * 8,  -- horizontal size (char positions)
 		VSIZE = 26 * 16, -- vertical size (lines) graphics portion

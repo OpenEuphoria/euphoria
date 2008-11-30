@@ -1,4 +1,5 @@
 -- soundeff.e: Sound Effects
+include std/os.e
 
 constant FREQ = 1, DURATION = 2
 
