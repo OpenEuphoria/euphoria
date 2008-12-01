@@ -9,7 +9,6 @@
 --       exu sanity.ex
 
 with type_check
-
 include std/get.e
 include std/graphics.e  -- comment after include is ok
 include std/sort.e
@@ -25,7 +24,9 @@ include std/os.e
 include std/text.e
 include std/error.e
 include std/convert.e
-
+ifdef DOS32
+include std/dos/pixels.e
+end ifdef
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"
 atom t
@@ -821,7 +822,7 @@ without type_check
 integer color
 color = 1
 sequence v
-ifdef DOS then
+ifdef DOS32 then
 procedure testgr()
 -- test basic VGA graphics operations
     sequence x
@@ -1235,7 +1236,7 @@ global procedure sanity()
 	    crash(generic_msg)
 	end if
 	if vga then
-		ifdef DOS then
+		ifdef DOS32 then
 			testgr()
 		end ifdef
 	end if
@@ -1289,7 +1290,10 @@ global procedure sanity()
       end for
       sound(0)
       all_palette(save_colors)
-	elsifdef WIN32 then
+
+      puts(msg, "\nPASSED (100%)\n")
+      the_end()    
+    elsifdef WIN32 then
 		ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
     elsedef
 		puts(msg, "\nPASSED (100%)\n")

@@ -11,7 +11,9 @@ public include std/graphics.e
 public include std/image.e
 public include std/io.e
 public include std/lcid.e
-public include std/locale.e
+ifdef !DOS32 then
+    public include std/locale.e
+end ifdef
 public include std/localeconv.e
 public include std/machine.e
 public include std/map.e
