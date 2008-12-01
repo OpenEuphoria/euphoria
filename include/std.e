@@ -11,7 +11,13 @@ public include std/graphics.e
 public include std/image.e
 public include std/io.e
 public include std/lcid.e
-ifdef !DOS32 then
+ifdef DOS32 then
+    public include std/dos/image.e
+    public include std/dos/interrup.e
+    public include std/dos/memory.e
+    public include std/dos/pixels.e
+    public include std/dos/base_mem.e
+else
     public include std/locale.e
 end ifdef
 public include std/localeconv.e
