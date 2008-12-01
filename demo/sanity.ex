@@ -1290,6 +1290,7 @@ global procedure sanity()
       end for
       sound(0)
       all_palette(save_colors)
+      clear_screen()
 
       puts(msg, "\nPASSED (100%)\n")
       the_end()    
