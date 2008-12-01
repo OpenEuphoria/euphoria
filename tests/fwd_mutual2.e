@@ -43,4 +43,7 @@ export procedure test_forward_case()
 	test_equal( "fwd_switch #1", 1, fwd_switch( FWD_CASE_1 ) )
 	test_equal( "fwd_switch #2", 2, fwd_switch( FWD_CASE_2 ) )
 	test_equal( "fwd_switch #3", 0, fwd_switch( 999 ) )
+
+	test_equal( "forward dollar", "2", FWD_CASE_2[$] )
 end procedure
+

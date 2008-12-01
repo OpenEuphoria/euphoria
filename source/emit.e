@@ -10,6 +10,7 @@ include symtab.e
 include scanner.e
 include tranplat.e
 include fwdref.e
+include parser.e
 
 global integer op_info1, op_info2
 global integer optimized_while
@@ -1247,6 +1248,18 @@ global procedure emit_op(integer op)
 		
 	-- 0 inputs, 1 output, special op
 	elsif op = DOLLAR then
+		
+		if SymTab[current_sequence[$]][S_SCOPE] = SC_UNDEFINED then
+			if lhs_ptr and length(current_sequence) = 1 then
+				c = PLENGTH
+			else
+				c = LENGTH
+			end if
+			c = - new_forward_reference( VARIABLE, current_sequence[$], c )
+		else
+			c = current_sequence[$]
+		end if
+		
 		-- length of the current sequence (or pointer to current sequence)
 		if lhs_ptr and length(current_sequence) = 1 then
 			emit_opcode(PLENGTH)
@@ -1254,7 +1267,8 @@ global procedure emit_op(integer op)
 			emit_opcode(LENGTH) 
 		end if
 		
-		emit_addr(current_sequence[$])
+		emit_addr( c )
+		
 		c = NewTempSym()
 		TempInteger(c)
 		Push(c)
