@@ -24,7 +24,6 @@ public include std/localeconv.e
 public include std/machine.e
 public include std/map.e
 public include std/math.e
-public include std/memory.e
 public include std/mouse.e
 public include std/msgbox.e
 public include std/os.e
