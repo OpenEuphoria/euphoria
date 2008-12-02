@@ -6,21 +6,16 @@
 -- <<LEVELTOC depth=2>>
 --
 
-include sequence.e
-
+include std/sequence.e
 include std/text.e
-
-
+include std/machine.e
 
 ifdef DOS32 then
-	public include std\dos\memory.e
 	include std\dos\interrup.e
 elsedef
 	include std/dll.e
-	include std/memory.e
 end ifdef
 
-include std/machine.e
 
 constant
 	M_SLEEP     = 64,

@@ -174,13 +174,8 @@ end function
 public procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
 end procedure
-
-include interrup.e
-ifdef SAFE then
-	public include safe.e
-elsedef
-	public include memory.e
-end ifdef
+include std/machine.e
+include std/dos/interrup.e
 
 --**
 -- Get color intensities for the entire set of colors in the current

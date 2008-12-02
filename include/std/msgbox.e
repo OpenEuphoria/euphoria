@@ -8,7 +8,6 @@
 
 include std/dll.e
 include std/machine.e
-include std/memory.e
 
 without warning
 

@@ -8,7 +8,7 @@
 --
 
 include unicode.e -- needed for parse() and format()
-include std/memory.e
+include std/machine.e
 include std/dll.e
 include std/sequence.e
 include std/get.e

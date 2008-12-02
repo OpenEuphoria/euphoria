@@ -11,7 +11,7 @@ include std/io.e
 include std/filesys.e
 include std/get.e
 include std/pretty.e
-include std/memory.e
+include std/machine.e
 include std/sequence.e
 include std/datetime.e
 include std/text.e

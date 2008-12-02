@@ -15,7 +15,6 @@ include std/machine.e
 include std/get.e
 include std/wildcard.e
 include std/text.e
-include std/memory.e
 --****
 -- === Constants
 --

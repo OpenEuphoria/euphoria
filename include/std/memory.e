@@ -1,6 +1,12 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
+-- == Usage Notes
+-- <<LEVELTOC depth=2>>
+-- This file is not normally included directly. The normal approach is to
+-- ##include std/machine.e##, which will automatically include either this file
+-- or ##std/safe.e## if the SAFE symbol has been defined.
+--
 -- == Low-Level Memory Management
 --
 -- <<LEVELTOC depth=2>>
