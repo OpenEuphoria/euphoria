@@ -900,6 +900,8 @@ end ifdef
 	-- couldn't find unique one
 	if length(dup_globals) = 0 then
 		defined = SC_UNDEFINED
+		ForwardLine = ThisLine
+		forward_bp = bp
 	elsif length(dup_globals) then
 		defined = SC_MULTIPLY_DEFINED
 	elsif length(dup_overrides) then

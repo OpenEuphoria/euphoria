@@ -550,14 +550,14 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_SUBPROG]   = CurrentSub
 	forward_references[ref][FR_PC]        = length( Code ) + 1
 	forward_references[ref][FR_LINE]      = line_number
-	forward_references[ref][FR_THISLINE]  = ThisLine
-	forward_references[ref][FR_BP]        = bp
+	forward_references[ref][FR_THISLINE]  = ForwardLine
+	forward_references[ref][FR_BP]        = forward_bp
 	forward_references[ref][FR_QUALIFIED] = get_qualified_fwd()
 	forward_references[ref][FR_OP]        = op
 	
 	return ref
 end function
-	
+
 export procedure Resolve_forward_references( integer report_errors = 0 )
 	sequence errors = {}
 	sequence code = {}
@@ -666,7 +666,6 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			bp          = ref[FR_BP]
 			CurrentSub  = ref[FR_SUBPROG]
 			line_number = ref[FR_LINE]
-			
 		end for
 		if error_count then
 			CompileErr( msg )

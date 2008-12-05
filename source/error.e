@@ -13,8 +13,11 @@ Errors = 0   -- number of errors detected during compile
 global integer TempErrFile
 global sequence TempErrName
 global integer display_warnings
-global object ThisLine        -- current line of source (or -1)
-global integer bp             -- input line index of next character
+global object ThisLine = ""        -- current line of source (or -1)
+global object ForwardLine     -- remember the line when a possible forward reference occurs
+
+global integer bp = 0         -- input line index of next character
+global integer forward_bp     -- cached line index for a possible forward reference   
 
 global sequence warning_list
 warning_list = {}
