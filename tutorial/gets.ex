@@ -19,25 +19,22 @@ object line   -- the next line from the file
 -- First, we try to open the file called "tutorial.doc"
 fn = open("tutorial.doc", "r")
 if fn = -1 then
-    puts(1, "Can't open tutorial.doc\n")
-    abort(1)
+	puts(1, "Can't open tutorial.doc\n")
+	abort(1)
 end if
 -- By successfully opening the file we have established that 
 -- the file exists, and open() gives us a file number (or "handle") 
 -- that we can use to perform operations on the file.
 
 e = 0
-while 1 do   -- this is always true - apparently an "infinite" loop
-    line = gets(fn)
-    if atom(line) then
-	exit -- no more lines, end of file, 
-	     -- this is how we quit the loop
-    end if
-    if match("Euphoria", line) then
-	e = e + 1 
-    end if
-    -- When you get bored, 
-    -- Press down-arrow until you are out of the loop
+while sequence(line) entry do   -- this is always true - apparently an "infinite" loop
+	if match("Euphoria", line) then
+		e = e + 1 
+	end if
+  entry
+	line = gets(fn)
+	-- When you get bored, 
+	-- Press down-arrow until you are out of the loop
 end while
 
 -- Print the total number of lines containing "Euphoria".

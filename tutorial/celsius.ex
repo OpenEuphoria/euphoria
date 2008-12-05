@@ -1,4 +1,4 @@
-include std/get.e -- so we can use the prompt_number() function
+include std/console.e -- so we can use the prompt_number() function
 
 -- Tutorial - Convert Fahrenheit to Celsius
 
