@@ -902,6 +902,7 @@ end ifdef
 		defined = SC_UNDEFINED
 		ForwardLine = ThisLine
 		forward_bp = bp
+		fwd_line_number = line_number
 	elsif length(dup_globals) then
 		defined = SC_MULTIPLY_DEFINED
 	elsif length(dup_overrides) then

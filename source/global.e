@@ -267,6 +267,7 @@ global sequence file_name_entered = ""  -- interactively entered file name
 global integer shroud_only = FALSE      -- making an unbound .il file
 global integer current_file_no = 1      -- current file number
 global integer line_number              -- source line number within current file (16 bits)
+global integer fwd_line_number          -- remember the line number for forward references
 global integer gline_number             -- overall line number (32 bits)
 global symtab_index file_start_sym
 global symtab_index TopLevelSub         -- s.t. index of top level procedure

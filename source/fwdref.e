@@ -549,7 +549,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_FILE]      = current_file_no
 	forward_references[ref][FR_SUBPROG]   = CurrentSub
 	forward_references[ref][FR_PC]        = length( Code ) + 1
-	forward_references[ref][FR_LINE]      = line_number
+	forward_references[ref][FR_LINE]      = fwd_line_number
 	forward_references[ref][FR_THISLINE]  = ForwardLine
 	forward_references[ref][FR_BP]        = forward_bp
 	forward_references[ref][FR_QUALIFIED] = get_qualified_fwd()
