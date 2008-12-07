@@ -12,6 +12,7 @@ without warning
 include std/wildcard.e
 include std/sequence.e
 include std/filesys.e
+include std/text.e
 
 constant SCREEN = 1
 constant TRUE = 1, FALSE = 0
