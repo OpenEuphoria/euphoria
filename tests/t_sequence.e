@@ -107,6 +107,8 @@ test_equal("replace() integer sequence w/sequence", {1,2,3,4},
     replace({1,8,9,4}, {2,3}, 2, 3))
 test_equal("replace() string sequence", "John", replace("Jahn", 'o', 2))
 test_equal("replace() string sequence 2", "Jane", replace("John", "ane", 2, 4))
+test_equal("replace() string sequence 1", "Jane", replace("Bone", "Ja", 1, 2) )
+test_equal("replace() negative size slice", "Jane", replace("ne", "Ja", 1, 0 ) )
 test_equal("replace() 2,5 #3a", "/--ething         "
               , replace("//something         ", "--" , 2, 5))
 

@@ -3989,12 +3989,17 @@ void do_exec(int *start_pc)
 						Ref(b);
 						*obj_ptr = b;
 						DeRef(top);
+						pc += 6;
+						thread();
+						BREAK;
 				    }
-				    else
+				    else if( end_pos < 1 ){
 						Concat(obj_ptr,b,a);
-					pc += 6;
-					thread();
-					BREAK;
+						pc += 6;
+						thread();
+						BREAK;
+						}
+					
 				}
 				if (nvars > end_pos) {  // just splice
 	       			if (IS_SEQUENCE(b)) {
