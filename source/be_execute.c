@@ -1734,6 +1734,7 @@ void do_exec(int *start_pc)
 	int nvars;   
 	int *iptr;
 	int file_no;
+	int start_pos;
 	int end_pos;
 	int going_up; 
 	object_ptr result_ptr;
@@ -3956,36 +3957,47 @@ void do_exec(int *start_pc)
 					RTFatal("First argument to replace() must be a sequence");
 				s1 = SEQ_PTR(a);
 				seqlen = s1->length;
+				
 				b = *(object_ptr)pc[3];  //start
 				if (IS_SEQUENCE(b))
 					RTFatal("Third argument to replace() must be an atom");
-				nvars = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
-				top = *(object_ptr)pc[4];  //stop
-				if (IS_SEQUENCE(top))
+				start_pos = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
+				
+				b = *(object_ptr)pc[4];  //stop
+				if (IS_SEQUENCE(b))
 					RTFatal("Fourth argument to replace() must be an atom");
-				end_pos = (!IS_ATOM_INT(top)) ? (long)(DBL_PTR(top)->dbl) : top;
-				if (end_pos > seqlen)
-					end_pos=seqlen;
+				end_pos = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
+				
 				b = *(object_ptr)pc[2];  // replacement
 				obj_ptr = (object_ptr)pc[5];
 				top = *obj_ptr;
+				
 				//  normalise arguments, dispatch special cases
-				if (end_pos<0) {  // return replacement & target
+				if (end_pos < 0 && start_pos <= seqlen) {  // return (replacement & target)
 					Concat(obj_ptr,b,a);
 					pc += 6;
 					thread();
 					BREAK;
 				}
+				
 				if (end_pos > seqlen)
-					end_pos = seqlen;
-				if (nvars > seqlen) {  // return target & replacement
+					end_pos = seqlen;   // Can't be after last position.
+					
+				if (start_pos < 1)
+				    if (seqlen > 0)
+				        start_pos = 1;
+				    else
+				        start_pos = 0;
+				    
+				if (start_pos > seqlen) {  // return (target & replacement)
 					Concat(obj_ptr,a,b);
 					pc += 6;
 					thread();
 					BREAK;
 				}
-				if (nvars < 2 ) { //replacing start or all
-				    if (end_pos >= seqlen) {
+				
+				if (start_pos < 2 ) { //replacing start or all
+				    if (end_pos == seqlen) { // all
 						Ref(b);
 						*obj_ptr = b;
 						DeRef(top);
@@ -4001,18 +4013,18 @@ void do_exec(int *start_pc)
 						}
 					
 				}
-				if (nvars > end_pos) {  // just splice
+				if (start_pos > end_pos) {  // just splice
 	       			if (IS_SEQUENCE(b)) {
 						s2 = SEQ_PTR(b);
-						s1 = Add_internal_space(a,nvars,s2->length);
+						s1 = Add_internal_space(a,start_pos,s2->length);
 						assign_slice_seq = &s1;
-						Copy_elements(nvars,s2,assign_slice_seq);
+						Copy_elements(start_pos,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 					}
 					else {
 						DeRef(*(obj_ptr));
-						*obj_ptr = Insert(a,b,nvars);
+						*obj_ptr = Insert(a,b,start_pos);
 					}
 					pc += 6;
 					thread();
@@ -4023,22 +4035,22 @@ void do_exec(int *start_pc)
 					s2 = SEQ_PTR(b);
 					going_up = s2->length;
 					assign_slice_seq = &s1;
-					if (going_up > end_pos - nvars+1) { //replacement longer than replaced
-						s1 = Add_internal_space(a,end_pos+1,going_up+nvars-end_pos-1);
+					if (going_up > end_pos - start_pos+1) { //replacement longer than replaced
+						s1 = Add_internal_space(a,end_pos+1,going_up+start_pos-end_pos-1);
 						assign_slice_seq = &s1;
-						Copy_elements(nvars,s2,assign_slice_seq);
+						Copy_elements(start_pos,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 	 				}
 	 				else { // remove any extra elements, and then assign a regular slice
-						if (going_up < end_pos - nvars+1) {
-							Remove_elements(nvars+going_up,end_pos,obj_ptr);
+						if (going_up < end_pos - start_pos+1) {
+							Remove_elements(start_pos+going_up,end_pos,obj_ptr);
 							s1 = SEQ_PTR(*obj_ptr);
 							assign_slice_seq = &s1;
-							s1 = Copy_elements(nvars,s2,assign_slice_seq);
+							s1 = Copy_elements(start_pos,s2,assign_slice_seq);
 						}
 		       			else {
-							s1 = Copy_elements(nvars,s2,obj_ptr);
+							s1 = Copy_elements(start_pos,s2,obj_ptr);
 						}
 						*obj_ptr = MAKE_SEQ(s1);
 					}
@@ -4047,14 +4059,14 @@ void do_exec(int *start_pc)
 					assign_slice_seq = &s1;
 					if (!IS_ATOM_INT(b))
 						RefDS(b);
-					if (nvars < end_pos) {
+					if (start_pos < end_pos) {
 						object_ptr optr;
-						Remove_elements(nvars+1,end_pos,obj_ptr);
-						optr = SEQ_PTR(*obj_ptr)->base+nvars;
+						Remove_elements(start_pos+1,end_pos,obj_ptr);
+						optr = SEQ_PTR(*obj_ptr)->base+start_pos;
 						DeRef(*optr);
 						*optr = b;
 					}
-					else AssignElement(b, nvars, obj_ptr);
+					else AssignElement(b, start_pos, obj_ptr);
 				}
 				pc += 6;
 				thread();
@@ -4156,8 +4168,8 @@ void do_exec(int *start_pc)
 				tpc = pc;
 				if (!IS_SEQUENCE(*(object_ptr)pc[1]))
 					RTFatal("First argument to splice/insert() must be an atom");
-    			a = *(object_ptr)pc[1]; // the source
-    			i = SEQ_PTR(a)->length;
+				a = *(object_ptr)pc[1]; // the source
+				i = SEQ_PTR(a)->length;
 				obj_ptr = (object_ptr)pc[3];  
 				if (IS_SEQUENCE(*obj_ptr))
 					RTFatal("Third argument to splice/insert() must be an atom");  
@@ -4168,13 +4180,13 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)pc[4]; //-> the target
 				// now the variable part
 				if (nvars <= 0) {
-                	if (splins) Concat(obj_ptr,b,a);
+					if (splins) Concat(obj_ptr,b,a);
 					else Prepend(obj_ptr,a,b);
-    			}
-    			else if (nvars > i) {
-                	if (splins) Concat(obj_ptr,a,b);
+				}
+				else if (nvars > i) {
+					if (splins) Concat(obj_ptr,a,b);
 					else Append(obj_ptr,a,b);
-       			}
+	   			}
 				else if (IS_SEQUENCE(b) && splins) {
 				// splice is now just a sequence assign
 					s2 = SEQ_PTR(b);
@@ -4188,8 +4200,8 @@ void do_exec(int *start_pc)
 	       			DeRef(*(obj_ptr));
 	       			*(obj_ptr) = Insert(a,b,nvars);
 				}
-                thread5();
-                BREAK;
+				thread5();
+				BREAK;
 
 			case L_CONCAT_N:
 			deprintf("case L_CONCAT_N:");
