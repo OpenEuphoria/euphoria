@@ -1452,21 +1452,12 @@ void NewConfig()
 {
 #ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO info;
-	if(!have_console){
 		// properly initializes the console when running in exwc mode
-		show_console();
-	}
+	show_console();
 	
-	if (have_console) {
-		GetConsoleScreenBufferInfo(console_output, &info);
-		line_max = info.dwMaximumWindowSize.Y;
-		col_max = info.dwMaximumWindowSize.X; 
-		
-	}
-	else {
-		line_max = 25;
-		col_max = 80;
-	}
+	GetConsoleScreenBufferInfo(console_output, &info);
+	line_max = info.dwMaximumWindowSize.Y;
+	col_max = info.dwMaximumWindowSize.X; 
 	config.numtextrows = line_max;
 	config.numtextcols = col_max;
 
@@ -1682,7 +1673,7 @@ static object Graphics_Mode(object x)
 #endif  
 #else
 #if defined(EWINDOWS)  
-	show_console();
+	NewConfig();
 #endif  
 	return ATOM_0;
 #endif
@@ -1747,10 +1738,11 @@ static object TextRows(object x)
 	COORD newsize;
 	
 	new_rows = get_int(x);
-	show_console();
-	newsize.X = 80; // what about 40-char modes?
+	NewConfig();
+	newsize.X = config.numtextcols;
 	newsize.Y = new_rows;
 	SetConsoleScreenBufferSize(console_output, newsize);
+	NewConfig();
 #endif
 #ifdef EDOS
 	new_rows = get_int(x); 
@@ -1852,6 +1844,7 @@ void do_scroll(int top, int bottom, int amount)
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	
 	show_console();
+	GetConsoleScreenBufferInfo(console_output, &info);
 	src.Left = 0;
 	src.Right = info.dwMaximumWindowSize.X;
 	src.Top = top - 1;
@@ -1859,7 +1852,7 @@ void do_scroll(int top, int bottom, int amount)
 	clip = src;
 	dest.X = 0;
 	dest.Y = src.Top - amount; // for now
-	GetConsoleScreenBufferInfo(console_output, &info);
+//	GetConsoleScreenBufferInfo(console_output, &info);
 	fill_char.Char.AsciiChar = ' ';
 	fill_char.Attributes = info.wAttributes;
 	if (abs(amount) > abs(bottom - top)) {

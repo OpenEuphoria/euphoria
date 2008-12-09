@@ -3408,7 +3408,6 @@ object EGets(object file_no)
 
 				/* read next character */
 #ifndef EDOS
-				// show_console(); assume done already above
 				if (in_from_keyb)
 #ifdef EUNIX
 #ifdef EGPM
@@ -3461,7 +3460,6 @@ object EGets(object file_no)
 				/* read next character */
 #ifndef EDOS
 				if (f == stdin) {
-					// show_console(); assume done already above
 					if (in_from_keyb)
 #ifdef EUNIX
 #ifdef EGPM

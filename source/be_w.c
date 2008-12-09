@@ -257,82 +257,61 @@ void InitInOut()
 void show_console()
 /* set up a console window if not done yet */
 {
-#ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	CONSOLE_CURSOR_INFO c;
 	INPUT_RECORD pbuffer;
 	DWORD junk;
 	int alloc_ret;
-#else
-	int f, b;
-#endif
-	if (!have_console) {
-		have_console = TRUE;
-#ifdef EUNIX
-		initscr();  // maybe use newterm() to avoid screen clearing
-		ESCDELAY=0;
-		if (has_colors())
-			start_color();
-		cbreak();  // chars are immediately available without CR
-		//noecho();
-		//nonl();
-		scrollok(stdscr, FALSE);
-		intrflush(stdscr, FALSE);
-		keypad(stdscr, TRUE);
-		for (f = 0; f < config.numcolors; f++) {
-			for (b = 0; b < config.numcolors; b++) {
-				if (f != 0 || b != 0)
-					init_pair((f << 3) + b, f, b);
-			}
-		}
-		NewConfig();
-#else   
-		alloc_ret = !AllocConsole();
-		if (already_had_console < 0) {
-			// this effectively tells us if we were started as a GUI app or a CONSOLE app (exw.exe or exwc.exe)
-			already_had_console = alloc_ret;
-		}
-
-		console_output = GetStdHandle(STD_OUTPUT_HANDLE);
-		
-		console_trace = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
-										  FILE_SHARE_READ | FILE_SHARE_WRITE,
-										  NULL,
-										  CONSOLE_TEXTMODE_BUFFER,
-										  NULL);
-		
-		console_var_display = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
-										  FILE_SHARE_READ | FILE_SHARE_WRITE,
-										  NULL,
-										  CONSOLE_TEXTMODE_BUFFER,
-										  NULL);
-		
-		c.dwSize = 12;
-		c.bVisible = FALSE;
-		SetConsoleCursorInfo(console_trace, &c);
-		
-		out_to_screen = GetConsoleScreenBufferInfo(console_output, &info);
-		
-		if (!out_to_screen) {
-			console_output = CreateFile("CONOUT$",
-									GENERIC_READ | GENERIC_WRITE,
-									FILE_SHARE_WRITE,
-									NULL,
-									OPEN_EXISTING,
-									0,
-									NULL);
-		}
 	
-		console_input = GetStdHandle(STD_INPUT_HANDLE);
+	if (have_console)
+		return;
 
-		in_from_keyb = PeekConsoleInput(console_input, &pbuffer, 1, &junk);  
-
-		// This stops the mouse cursor from appearing in full screen
-		SetConsoleMode(console_input, ENABLE_LINE_INPUT |
-								ENABLE_ECHO_INPUT |
-								ENABLE_PROCESSED_INPUT);  // no mouse please 
-#endif
+	have_console = TRUE;
+	alloc_ret = !AllocConsole();
+	if (already_had_console < 0) {
+		// this effectively tells us if we were started as a GUI app or a CONSOLE app (exw.exe or exwc.exe)
+		already_had_console = alloc_ret;
 	}
+
+	console_output = GetStdHandle(STD_OUTPUT_HANDLE);
+	
+	console_trace = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+									  FILE_SHARE_READ | FILE_SHARE_WRITE,
+									  NULL,
+									  CONSOLE_TEXTMODE_BUFFER,
+									  NULL);
+	
+	console_var_display = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+									  FILE_SHARE_READ | FILE_SHARE_WRITE,
+									  NULL,
+									  CONSOLE_TEXTMODE_BUFFER,
+									  NULL);
+	
+	c.dwSize = 12;
+	c.bVisible = FALSE;
+	SetConsoleCursorInfo(console_trace, &c);
+	
+	out_to_screen = GetConsoleScreenBufferInfo(console_output, &info);
+	
+	if (!out_to_screen) {
+		console_output = CreateFile("CONOUT$",
+								GENERIC_READ | GENERIC_WRITE,
+								FILE_SHARE_WRITE,
+								NULL,
+								OPEN_EXISTING,
+								0,
+								NULL);
+	}
+
+	console_input = GetStdHandle(STD_INPUT_HANDLE);
+
+	in_from_keyb = PeekConsoleInput(console_input, &pbuffer, 1, &junk);  
+
+	// This stops the mouse cursor from appearing in full screen
+	SetConsoleMode(console_input, ENABLE_LINE_INPUT |
+							ENABLE_ECHO_INPUT |
+							ENABLE_PROCESSED_INPUT);  // no mouse please 
+
 }
 #endif
 
@@ -356,7 +335,6 @@ static void end_of_line(int c)
 
 			if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
 				pos.X = 0;
-				//pos.Y = console_info.dwSize.Y;
 				pos.Y = console_info.dwSize.Y-1;
 				SetConsoleCursorPosition(console_output, pos);
 			}
