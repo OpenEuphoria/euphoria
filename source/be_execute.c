@@ -4032,7 +4032,6 @@ void do_exec(int *start_pc)
 	 				}
 	 				else { // remove any extra elements, and then assign a regular slice
 						if (going_up < end_pos - nvars+1) {
-						puts("removing elements");
 							Remove_elements(nvars+going_up,end_pos,obj_ptr);
 							s1 = SEQ_PTR(*obj_ptr);
 							assign_slice_seq = &s1;
