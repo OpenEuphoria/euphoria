@@ -4005,7 +4005,7 @@ void do_exec(int *start_pc)
 	       			if (IS_SEQUENCE(b)) {
 						s2 = SEQ_PTR(b);
 						s1 = Add_internal_space(a,nvars,s2->length);
-						*assign_slice_seq = s1;
+						assign_slice_seq = &s1;
 						Copy_elements(nvars,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
@@ -4022,19 +4022,20 @@ void do_exec(int *start_pc)
 				if (IS_SEQUENCE(b)) {
 					s2 = SEQ_PTR(b);
 					going_up = s2->length;
-					*assign_slice_seq = s1;
+					assign_slice_seq = &s1;
 					if (going_up > end_pos - nvars+1) { //replacement longer than replaced
 						s1 = Add_internal_space(a,end_pos+1,going_up+nvars-end_pos-1);
-						*assign_slice_seq = s1;
+						assign_slice_seq = &s1;
 						Copy_elements(nvars,s2,assign_slice_seq);
 		       			DeRef(*obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 	 				}
 	 				else { // remove any extra elements, and then assign a regular slice
 						if (going_up < end_pos - nvars+1) {
+						puts("removing elements");
 							Remove_elements(nvars+going_up,end_pos,obj_ptr);
 							s1 = SEQ_PTR(*obj_ptr);
-							*assign_slice_seq = s1;
+							assign_slice_seq = &s1;
 							s1 = Copy_elements(nvars,s2,assign_slice_seq);
 						}
 		       			else {
@@ -4044,7 +4045,7 @@ void do_exec(int *start_pc)
 					}
 				}
 				else {  // replacing by an atom
-					*assign_slice_seq = s1;
+					assign_slice_seq = &s1;
 					if (!IS_ATOM_INT(b))
 						RefDS(b);
 					if (nvars < end_pos) {
@@ -4179,7 +4180,7 @@ void do_exec(int *start_pc)
 				// splice is now just a sequence assign
 					s2 = SEQ_PTR(b);
 					s1 = Add_internal_space(a,nvars,s2->length);
-					*assign_slice_seq = s1;
+					assign_slice_seq = &s1;
 					Copy_elements(nvars,s2,assign_slice_seq);
 	       			DeRef(*obj_ptr);
 					*obj_ptr = MAKE_SEQ(s1);
