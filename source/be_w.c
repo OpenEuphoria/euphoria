@@ -88,7 +88,9 @@ HANDLE console_save;   // place to save console_output while in trace screen
 static int out_to_screen;  /* stdout is going to screen */
 static int err_to_screen;  /* stderr is going to screen (always TRUE) */
 #ifdef EWINDOWS
-static CHAR_INFO line_buffer[80]; // need more if we support graphics modes
+static CHAR_INFO* line_buffer = 0;
+static int line_buffer_size = 0;
+
 static COORD buff_size;
 static COORD buff_start;
 static SMALL_RECT screen_loc;
@@ -343,7 +345,7 @@ static void end_of_line(int c)
 	GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
 	console_info.dwCursorPosition.X = 0;
 	if (c == '\n') {   
-		if (console_info.dwCursorPosition.Y < console_info.dwSize.Y - 1)
+		if (console_info.dwCursorPosition.Y < console_info.dwMaximumWindowSize.Y - 1)
 			console_info.dwCursorPosition.Y++;
 		else {
 			// scroll screen up one line
@@ -360,7 +362,7 @@ static void end_of_line(int c)
 			}
 
 			src.Left = 0;
-			src.Right = console_info.dwSize.X; //79;  // assume 80-char screen for now
+			src.Right = console_info.dwMaximumWindowSize.X
 			src.Top = 0;
 			src.Bottom = console_info.dwSize.Y-1; // -1 ???
 			clip = src;
@@ -418,7 +420,7 @@ static void MyWriteConsole(char *string, int nchars)
 	screen_loc.Top = console_info.dwCursorPosition.Y;
 	screen_loc.Bottom = screen_loc.Top;
 	screen_loc.Left = console_info.dwCursorPosition.X; //screen_col-1;
-	screen_loc.Right = 79;
+	screen_loc.Right = console_info.dwMaximumWindowSize.X;
 
 	if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
 
@@ -443,6 +445,11 @@ static void MyWriteConsole(char *string, int nchars)
 	} else {
 
 	i = 0;
+	if( line_buffer_size < console_info.dwMaximumWindowSize.X ){
+		line_buffer_size = console_info.dwMaximumWindowSize.X;
+		line_buffer = malloc( sizeof( CHAR_INFO ) * line_buffer_size );
+	}
+	
 	while (*string != '\0') {
 		line_buffer[i].Char.AsciiChar = *string;
 		line_buffer[i].Attributes = console_info.wAttributes;

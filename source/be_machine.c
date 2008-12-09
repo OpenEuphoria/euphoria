@@ -1452,11 +1452,16 @@ void NewConfig()
 {
 #ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO info;
+	if(!have_console){
+		// properly initializes the console when running in exwc mode
+		show_console();
+	}
 	
 	if (have_console) {
 		GetConsoleScreenBufferInfo(console_output, &info);
-		line_max = info.dwSize.Y;
-		col_max = info.dwSize.X; 
+		line_max = info.dwMaximumWindowSize.Y;
+		col_max = info.dwMaximumWindowSize.X; 
+		
 	}
 	else {
 		line_max = 25;
@@ -1848,7 +1853,7 @@ void do_scroll(int top, int bottom, int amount)
 	
 	show_console();
 	src.Left = 0;
-	src.Right = 79; // assume for now !!!
+	src.Right = info.dwMaximumWindowSize.X;
 	src.Top = top - 1;
 	src.Bottom = bottom - 1;
 	clip = src;
@@ -1858,7 +1863,7 @@ void do_scroll(int top, int bottom, int amount)
 	fill_char.Char.AsciiChar = ' ';
 	fill_char.Attributes = info.wAttributes;
 	if (abs(amount) > abs(bottom - top)) {
-		EClearLines(top, bottom, info.dwSize.X, fill_char.Attributes);
+		EClearLines(top, bottom, info.dwMaximumWindowSize.X, fill_char.Attributes);
 	}
 	else {
 		ScrollConsoleScreenBuffer(console_output,
