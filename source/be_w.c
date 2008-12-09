@@ -362,7 +362,7 @@ static void end_of_line(int c)
 			}
 
 			src.Left = 0;
-			src.Right = console_info.dwMaximumWindowSize.X
+			src.Right = console_info.dwMaximumWindowSize.X;
 			src.Top = 0;
 			src.Bottom = console_info.dwSize.Y-1; // -1 ???
 			clip = src;
