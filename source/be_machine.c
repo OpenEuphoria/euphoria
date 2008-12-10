@@ -1685,7 +1685,7 @@ static object Video_config()
 	object_ptr obj_ptr;
 	s1_ptr result;
 #if defined(EWINDOWS)
-	show_console();
+	NewConfig(); // Windows size might have changed since last call.
 #endif
 	result = NewS1((long)8);
 	obj_ptr = result->base;
