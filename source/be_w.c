@@ -425,10 +425,10 @@ static void MyWriteConsole(char *string, int nchars)
     i = 0;
     if( line_buffer_size < console_info.dwMaximumWindowSize.X ){
         if (line_buffer != 0) {
-            free(line_buffer);
+            EFree(line_buffer);
         }
         line_buffer_size = console_info.dwMaximumWindowSize.X;
-        line_buffer = malloc( sizeof( CHAR_INFO ) * line_buffer_size );
+        line_buffer = (CHAR_INFO*) EMalloc( sizeof( CHAR_INFO ) * line_buffer_size );
     }
 
     while (*string != '\0') {
