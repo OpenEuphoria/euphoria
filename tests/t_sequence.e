@@ -384,6 +384,42 @@ test_equal( "replace doesn't clobber target if refcount > 1", "1234567890_", rep
 sequence result = replace( "xyza", "kcd", 2, 4 )
 test_not_equal( "replace doesn't modify temps (failure will display expected and result as equal)", "xyza", result )
 
+-- insert in place
+sequence in_place
+in_place = "1234567890"
+in_place = insert( in_place, 'a', 2 )
+test_equal( "first in place insert (will make copy)", in_place, "1a234567890" )
+in_place = insert( in_place, 'b', 4 )
+test_equal( "second in place insert (actually change in place)", in_place, "1a2b34567890" )
+
+-- splice in place
+in_place = "1234567890"
+in_place = splice( in_place, "a", 2 )
+test_equal( "first in place splice (will make copy)", in_place, "1a234567890" )
+in_place = insert( in_place, "b", 4 )
+test_equal( "second in place splice (actually change in place)", in_place, "1a2b34567890" )
+
+-- in place replace
+in_place = "1234567890"
+in_place = replace( in_place, "a", 1, 1 )
+test_equal( "replace in place sequence same size", "a234567890", in_place )
+in_place = replace( in_place, "b", 2, 2 )
+test_equal( "replace in place sequence same size (2)", "ab34567890", in_place )
+in_place = replace( in_place, "cd", 3, 2 )
+test_equal( "inplace replace 3, 2", "abcd34567890", in_place )
+test_equal( "replace 3, 2", "abcd34567890", replace( "ab34567890", "cd", 3, 2 ) )
+test_equal( "replace 4,3", "johaaandoe", replace("johndoe", "aaa", 4,3 ))
+
+-- remove in place
+in_place = "1234567890"
+in_place = remove( in_place, 1, 1 )
+test_equal( "remove in place (will make a copy)", "234567890", in_place )
+in_place = remove( in_place, 1, 1 )
+test_equal( "remove in place 1,1", "34567890", in_place )
+in_place = remove( in_place, 2, 3 )
+test_equal( "remove in place 2,3", "367890", in_place )
+in_place = remove( in_place, 5, 6 )
+test_equal( "remove in place 5,6", "3678", in_place )
 
 test_report()
 
