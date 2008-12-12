@@ -395,9 +395,9 @@ test_equal( "second in place insert (actually change in place)", in_place, "1a2b
 -- splice in place
 in_place = "1234567890"
 in_place = splice( in_place, "a", 2 )
-test_equal( "first in place splice (will make copy)", in_place, "1a234567890" )
-in_place = insert( in_place, "b", 4 )
-test_equal( "second in place splice (actually change in place)", in_place, "1a2b34567890" )
+test_equal( "first in place splice (will make copy)", "1a234567890", in_place )
+in_place = splice( in_place, "b", 4 )
+test_equal( "second in place splice (actually change in place)", "1a2b34567890", in_place )
 
 -- in place replace
 in_place = "1234567890"

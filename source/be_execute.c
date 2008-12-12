@@ -3997,15 +3997,15 @@ void do_exec(int *start_pc)
 				}
 				
 				if (start_pos < 2 ) { //replacing start or all
-				    if (end_pos == seqlen) { // all
+					if (end_pos == seqlen) { // all
 						Ref(b);
 						*obj_ptr = b;
 						DeRef(top);
 						pc += 6;
 						thread();
 						BREAK;
-				    }
-				    else if( end_pos < 1 ){
+					}
+					else if( end_pos < 1 ){
 						Concat(obj_ptr,b,a);
 						pc += 6;
 						thread();
@@ -4014,18 +4014,34 @@ void do_exec(int *start_pc)
 					
 				}
 				if (start_pos > end_pos) {  // just splice
-	       			if (IS_SEQUENCE(b)) {
+					if (IS_SEQUENCE(b)) {
 						s2 = SEQ_PTR(b);
-						s1 = Add_internal_space(a,start_pos,s2->length);
+						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
+							// not in place: need to deref the target and ref the orig seq
+							if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
+							
+							// ensures that Add_internal_space will make a copy
+							RefDS( a );
+							
+						}
+						s1 = Add_internal_space( a, start_pos, s2->length );
+						
 						assign_slice_seq = &s1;
-						Copy_elements(start_pos,s2,assign_slice_seq);
-		       			DeRef(*obj_ptr);
-						*obj_ptr = MAKE_SEQ(s1);
+						
+						s1 = Copy_elements( start_pos, s2, obj_ptr );
+						*obj_ptr = MAKE_SEQ( s1 );
+						
 					}
-					else {
-						DeRef(*(obj_ptr));
-						*obj_ptr = Insert(a,b,start_pos);
+					else if( (*obj_ptr == a) && ( SEQ_PTR( a )->ref == 1 ) ){
+						// in place
+						*obj_ptr = Insert( a, b, nvars );
 					}
+					else{
+						if( *obj_ptr != NOVALUE ) DeRef(*(obj_ptr));
+						RefDS( a );
+						*obj_ptr = Insert(a,b,nvars);
+					}
+					//
 					pc += 6;
 					thread();
 					BREAK;
@@ -4036,23 +4052,37 @@ void do_exec(int *start_pc)
 					going_up = s2->length;
 					assign_slice_seq = &s1;
 					if (going_up > end_pos - start_pos+1) { //replacement longer than replaced
-						s1 = Add_internal_space(a,end_pos+1,going_up+start_pos-end_pos-1);
+						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
+							// not in place: need to deref the target and ref the orig seq
+							if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
+							
+							// ensures that Add_internal_space will make a copy
+							RefDS( a );
+						}
+						s1 = Add_internal_space( a, end_pos + 1, going_up + start_pos - end_pos - 1);
 						assign_slice_seq = &s1;
-						Copy_elements(start_pos,s2,assign_slice_seq);
-		       			DeRef(*obj_ptr);
+						s1 = Copy_elements( start_pos, s2, obj_ptr);
 						*obj_ptr = MAKE_SEQ(s1);
 	 				}
 	 				else { // remove any extra elements, and then assign a regular slice
+						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
+							// ensures that Add_internal_space will make a copy
+							RefDS( a );
+						}
 						if (going_up < end_pos - start_pos+1) {
-							Remove_elements(start_pos+going_up,end_pos,obj_ptr);
+							s1 = SEQ_PTR( a );
+							assign_slice_seq = &s1;
+							Remove_elements( start_pos + going_up, end_pos, obj_ptr);
 							s1 = SEQ_PTR(*obj_ptr);
 							assign_slice_seq = &s1;
-							s1 = Copy_elements(start_pos,s2,assign_slice_seq);
+							s1 = Copy_elements( start_pos, s2, obj_ptr );
 						}
-		       			else {
-							s1 = Copy_elements(start_pos,s2,obj_ptr);
+						else {
+							s1 = Copy_elements( start_pos, s2, obj_ptr);
+							if( MAKE_SEQ( s1 ) != *obj_ptr ){
+								*obj_ptr = MAKE_SEQ( s1 );
+							}
 						}
-						*obj_ptr = MAKE_SEQ(s1);
 					}
 				}
 				else {  // replacing by an atom
@@ -4167,16 +4197,19 @@ void do_exec(int *start_pc)
 			spin:
 				tpc = pc;
 				if (!IS_SEQUENCE(*(object_ptr)pc[1]))
-					RTFatal("First argument to splice/insert() must be an atom");
+					RTFatal("First argument to splice/insert() must be a sequence");
 				a = *(object_ptr)pc[1]; // the source
 				i = SEQ_PTR(a)->length;
+				
 				obj_ptr = (object_ptr)pc[3];  
 				if (IS_SEQUENCE(*obj_ptr))
 					RTFatal("Third argument to splice/insert() must be an atom");  
 				nvars = (IS_ATOM_INT(*obj_ptr)) ?
 					*obj_ptr : (long)DBL_PTR(*obj_ptr)->dbl;  //insertion point
+				
 				b = *(object_ptr)pc[2]; //the stuff to insert
 				Ref(b);
+				
 				obj_ptr = (object_ptr)pc[4]; //-> the target
 				// now the variable part
 				if (nvars <= 0) {
@@ -4186,19 +4219,33 @@ void do_exec(int *start_pc)
 				else if (nvars > i) {
 					if (splins) Concat(obj_ptr,a,b);
 					else Append(obj_ptr,a,b);
-	   			}
+				}
 				else if (IS_SEQUENCE(b) && splins) {
 				// splice is now just a sequence assign
 					s2 = SEQ_PTR(b);
-					s1 = Add_internal_space(a,nvars,s2->length);
+					if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
+						// not in place: need to deref the target and ref the orig seq
+						if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
+						
+						// ensures that Add_internal_space will make a copy
+						RefDS( a );
+					}
+					s1 = Add_internal_space( a, nvars, s2->length );
 					assign_slice_seq = &s1;
-					Copy_elements(nvars,s2,assign_slice_seq);
-	       			DeRef(*obj_ptr);
+					
+					s1 = Copy_elements( nvars, s2, assign_slice_seq );
 					*obj_ptr = MAKE_SEQ(s1);
-	   			}
-				else { // inserting is just addig an extra element and assigning it
-	       			DeRef(*(obj_ptr));
-	       			*(obj_ptr) = Insert(a,b,nvars);
+			}
+				else { // inserting is just adding an extra element and assigning it
+					if( (*obj_ptr == a) && ( SEQ_PTR( a )->ref == 1 ) ){
+						// in place
+						*obj_ptr = Insert( a, b, nvars );
+					}
+					else{
+						if( *obj_ptr != NOVALUE ) DeRef(*(obj_ptr));
+						RefDS( a );
+						*obj_ptr = Insert(a,b,nvars);
+					}
 				}
 				thread5();
 				BREAK;

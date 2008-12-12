@@ -328,20 +328,19 @@ install :
 	mkdir -p $(DESTDIR)/usr/bin 
 	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/include/euphoria
-	install $(EEXU) $(EECU) $(EBACKENDU) eubind eushroud $(DESTDIR)/usr/bin
 	install $(EECUA) $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)/usr/share/euphoria/include
-	install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
+	-install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar ../demo/langwar/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/unix ../demo/unix/*
-	install -t $(DESTDIR)/usr/share/doc/euphoria/doc ../doc/*
-	install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
+	-install -t $(DESTDIR)/usr/share/doc/euphoria/doc ../doc/*
+	-install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
 	install -t $(DESTDIR)/usr/share/euphoria/bin \
 	           ../bin/ed.ex \
 	           ../bin/ascii.ex \
@@ -351,7 +350,7 @@ install :
 	           ../bin/lines.ex \
 	           ../bin/search.ex \
 	           ../bin/where.ex
-	install -t $(DESTDIR)/usr/share/euphoria/source \
+	-install -t $(DESTDIR)/usr/share/euphoria/source \
 	           *.ex \
 	           *.e \
 	           be_*.c \

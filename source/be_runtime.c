@@ -779,22 +779,47 @@ s1_ptr Add_internal_space(object a,int at,int len)
 {
 	char *obj_ptr;
 	s1_ptr new_seq;
+	object_ptr base;
 	object temp;
 	int i;
+	int new_len;
 	object_ptr p,q;
 	s1_ptr seq = SEQ_PTR(a);
 	int nseq = seq->length;
-
-	if (seq->ref == 1 && len < (seq->postfill >> 1)) {
-	 /*We can deal with it by a straight mmeomry copy*/
-	 	seq->postfill -= len;
-	 	seq->length += len;
-	 	obj_ptr = (char *)(seq->base+at);
-	 	memcpy(obj_ptr+4*len, obj_ptr, 4*(nseq-at)+8);
+	if (seq->ref == 1 ){
+		if( len >= seq->postfill ){
+			new_len = EXTRA_EXPAND(nseq + len);
+			base = seq->base;
+			/* allow 1*4 for end marker */
+			/* base + new_len + 2 could overflow 32-bits??? */
+			new_seq = (s1_ptr)ERealloc((char *)seq,
+							   (int)(base + new_len + 2) - (int)seq);
+			
+			new_seq->base = (object_ptr)new_seq +
+							 ((object_ptr)base - (object_ptr)seq);
+			seq = new_seq;
+			seq->postfill = new_len - len;
+			
+		}
+		else{
+			seq->postfill -= len;
+		}
+		seq->length += len;
+		seq->base[seq->length+1] = NOVALUE;
+		q = seq->base + nseq;
+		p = seq->base + seq->length;
+		
+		new_len = seq->length+1;
+		len = nseq+1;
+		for( i = nseq - at; i > -1; i-- ){
+			*(p--) = *(q--);
+			len--;
+			new_len--;
+		}
 		return seq;
 	}
-	new_seq = NewS1(nseq + len);
 
+	new_seq = NewS1(nseq + len);
 	p = new_seq->base;
 	q = seq->base;
 	for (i=1;i<at;i++) {
@@ -804,6 +829,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	}
 	p += len;
 	while (TRUE) {  // NOVALUE will be copied
+	
 		temp = *(++q);
 		*(++p) = temp;
 		if (!IS_ATOM_INT(temp)) {
@@ -811,9 +837,12 @@ s1_ptr Add_internal_space(object a,int at,int len)
 				break;
 			RefDS(temp);
 		}
-	}	
+		i++;
+	}
+	DeRefDS( MAKE_SEQ( seq ) );
 	return new_seq;
 }
+
 
 s1_ptr Copy_elements(int start,s1_ptr source, object_ptr target)
 {
@@ -822,7 +851,7 @@ s1_ptr Copy_elements(int start,s1_ptr source, object_ptr target)
 	object temp;
 	int i;
 
-	if (s1->ref != 1 || *target != s1) {
+	if (s1->ref != 1 || *target != MAKE_SEQ( s1 )) {
 		s1_ptr new_seq = NewS1(s1->length);
 		object_ptr next_pos;
 		t_elem = new_seq->base;
@@ -868,10 +897,8 @@ s1_ptr Copy_elements(int start,s1_ptr source, object_ptr target)
 
 object Insert(object a,object b,int pos)
 {
-   	s1_ptr s1 = Add_internal_space(a,pos,1);
-	object_ptr result_ptr = s1->base+pos;
-
-	*result_ptr = b;
+	s1_ptr s1 = Add_internal_space(a,pos,1);
+	s1->base[pos] = b;
 	return MAKE_SEQ(s1);
 }
 
@@ -951,13 +978,19 @@ void Remove_elements(int start, int stop, object_ptr target)
 {
 	int n = stop-start+1;
 	s1_ptr s1 = *assign_slice_seq;
+	
 	if (UNIQUE(s1) && (SEQ_PTR(*target) == *assign_slice_seq)) {
 		int i;
-		char *pstart = (char *)(s1->base+start);
-		char *pstop = (char *)(s1->base+stop+1);
+		object_ptr p = s1->base + start;
+		object_ptr q = s1->base + stop + 1;
+		
 		for (i=start;i<=stop;i++)
 			DeRef(*(s1->base+i));
-		memcpy(pstart,pstop, 4*(s1->length-stop)+8);
+		
+		for( ; i <= s1->length+1; i++ ){
+			*(p++) = *(q++);
+		}
+		
 		s1->postfill += n;
 		s1->length -= n;
 	}
@@ -965,7 +998,7 @@ void Remove_elements(int start, int stop, object_ptr target)
 		s1_ptr s2 = NewS1(s1->length-n);
 		int i;
 		object temp, *src = s1->base, *trg = s2->base;
-		for (i=1;i<start;i++) {
+		for ( i = 1; i < start; i++) {
 			temp = *(++src);
 			*(++trg) = temp;
 		  	if (!IS_ATOM_INT(temp))
