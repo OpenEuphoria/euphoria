@@ -406,7 +406,7 @@ static object do_peek2(object a, int b, int *pc)
 #ifdef EDJGPP                       
 				if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
 					top = _farpeekl(_go32_info_block.selector_for_linear_memory,
-									   (unsigned)peek4_addr++);
+									   (unsigned)peek2_addr++);
 				else    
 #endif                      
 					top = (object)*peek2_addr++;
@@ -586,7 +586,7 @@ static void do_poke2(object a, object top)
 #ifdef EDJGPP       
 		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
 			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr, (unsigned long)INT_VAL(top));
+					  (unsigned long)poke2_addr, (unsigned long)INT_VAL(top));
 		else
 #endif      
 			*poke2_addr = (unsigned long)INT_VAL(top);
