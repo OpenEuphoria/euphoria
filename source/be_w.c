@@ -312,6 +312,7 @@ void show_console()
                             ENABLE_ECHO_INPUT |
                             ENABLE_PROCESSED_INPUT);  // no mouse please
 
+    NewConfig(TRUE); // update line_max and col_max
 }
 #endif
 

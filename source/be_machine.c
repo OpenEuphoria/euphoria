@@ -603,7 +603,7 @@ void InitGraphics()
 	//noecho(0); // necessary?
 #endif
 	
-	NewConfig();
+	NewConfig(FALSE);
 
 #if defined(EDOS) && !defined(EDJGPP)
 if (!(getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1))
@@ -612,7 +612,7 @@ if (!(getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1))
 		(config.mode >= 4 && config.mode <= 6)) { 
 		/* something doesn't work if starting in graphics mode */
 		_setvideomode(3);       
-		NewConfig();
+		NewConfig(TRUE);
 	} 
 	else {
 		memset(&regs, 0, sizeof(regs));
@@ -1446,18 +1446,25 @@ static void fast_image_check()
 #endif
 }
 
-void NewConfig()
+void NewConfig(int raise_console)
 /* note new video configuration - this doesn't work
    after a system call that changes modes - could be out of sync */
 {
 #ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO info;
+	if (raise_console) {
 		// properly initializes the console when running in exwc mode
 	show_console();
 	
 	GetConsoleScreenBufferInfo(console_output, &info);
 	line_max = info.dwMaximumWindowSize.Y;
 	col_max = info.dwMaximumWindowSize.X; 
+	} else {
+		// don't care on startup - this will be initialized later.
+	line_max = 80;
+	col_max = 25;
+	}
+
 	config.numtextrows = line_max;
 	config.numtextcols = col_max;
 
@@ -1668,12 +1675,12 @@ static object Graphics_Mode(object x)
 #else
 	_setvideomode((short)mode);
 	status = _grstatus();
-	NewConfig();
+	NewConfig(TRUE);
 	return (status != 0);
 #endif  
 #else
 #if defined(EWINDOWS)  
-	NewConfig();
+	NewConfig(TRUE);
 #endif  
 	return ATOM_0;
 #endif
@@ -1685,7 +1692,7 @@ static object Video_config()
 	object_ptr obj_ptr;
 	s1_ptr result;
 #if defined(EWINDOWS)
-	NewConfig(); // Windows size might have changed since last call.
+	NewConfig(TRUE); // Windows size might have changed since last call.
 #endif
 	result = NewS1((long)8);
 	obj_ptr = result->base;
@@ -1738,11 +1745,11 @@ static object TextRows(object x)
 	COORD newsize;
 	
 	new_rows = get_int(x);
-	NewConfig();
+	NewConfig(TRUE);
 	newsize.X = config.numtextcols;
 	newsize.Y = new_rows;
 	SetConsoleScreenBufferSize(console_output, newsize);
-	NewConfig();
+	NewConfig(TRUE);
 #endif
 #ifdef EDOS
 	new_rows = get_int(x); 
@@ -1752,7 +1759,7 @@ static object TextRows(object x)
 	rows = _settextrows(new_rows);
 #endif
 #endif
-	NewConfig();
+	NewConfig(TRUE);
 	return MAKE_INT(line_max);
 }
 
