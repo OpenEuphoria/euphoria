@@ -341,7 +341,7 @@ static void end_of_line(int c)
             }
 
             src.Left = 0;
-            src.Right = console_info.dwMaximumWindowSize.X;
+            src.Right = console_info.dwMaximumWindowSize.X - 1;
             src.Top = 0;
             src.Bottom = console_info.dwSize.Y-1; // -1 ???
             clip = src;
@@ -399,7 +399,7 @@ static void MyWriteConsole(char *string, int nchars)
     screen_loc.Top = console_info.dwCursorPosition.Y;
     screen_loc.Bottom = screen_loc.Top;
     screen_loc.Left = console_info.dwCursorPosition.X; //screen_col-1;
-    screen_loc.Right = console_info.dwMaximumWindowSize.X;
+    screen_loc.Right = console_info.dwMaximumWindowSize.X - 1;
 
     if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
 

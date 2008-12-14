@@ -1853,7 +1853,7 @@ void do_scroll(int top, int bottom, int amount)
 	show_console();
 	GetConsoleScreenBufferInfo(console_output, &info);
 	src.Left = 0;
-	src.Right = info.dwMaximumWindowSize.X;
+	src.Right = info.dwMaximumWindowSize.X - 1;
 	src.Top = top - 1;
 	src.Bottom = bottom - 1;
 	clip = src;
@@ -1863,7 +1863,7 @@ void do_scroll(int top, int bottom, int amount)
 	fill_char.Char.AsciiChar = ' ';
 	fill_char.Attributes = info.wAttributes;
 	if (abs(amount) > abs(bottom - top)) {
-		EClearLines(top, bottom, info.dwMaximumWindowSize.X, fill_char.Attributes);
+		EClearLines(top, bottom, info.dwMaximumWindowSize.X - 1, fill_char.Attributes);
 	}
 	else {
 		ScrollConsoleScreenBuffer(console_output,
