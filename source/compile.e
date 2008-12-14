@@ -4313,26 +4313,39 @@ procedure splins()
 	c_stmt0("s1_ptr assign_space;\n")
 	--c_stmt0("_2 = (object_ptr)pc[3];\n")
 	--c_stmt("_2 = (object_ptr)@;\n",{Code[pc+3]})
-	if not TypeIs(Code[pc+2],TYPE_SEQUENCE) then
+	if not TypeIsNot(Code[pc+2],TYPE_SEQUENCE) then
 		c_stmt("if (IS_SEQUENCE(@))\n",{Code[pc+3]})
 		c_stmt0("RTFatal(\"Third argument to splice/insert() must be an atom\");\n")
 	end if
-	c_stmt("insert_pos = IS_ATOM_INT(@) ? @ : DBL_PTR(@)->dbl;\n",{Code[pc+3],Code[pc+3],Code[pc+3]})
-	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
+	
+	if TypeIs( Code[pc+3], TYPE_INTEGER ) then
+		c_stmt("insert_pos = @;\n", Code[pc+3] )
+	else
+		c_stmt("insert_pos = IS_ATOM_INT(@) ? @ : DBL_PTR(@)->dbl;\n",{Code[pc+3],Code[pc+3],Code[pc+3]})
+	end if
+	
+-- 	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
 end procedure
 
 procedure opSPLICE()
 	splins()
-	c_stmt("if (insert_pos <= 0) Concat(&@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
-	c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Concat(&@,@,@);\n",{Code[pc+1],Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0( "if (insert_pos <= 0) {\n" )
+		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
+	c_stmt0( "}\n" )
+	c_stmt( "else if (insert_pos > SEQ_PTR(@)->length){\n", Code[pc+1] )
+		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0( "}\n")
 	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
-	--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
-	c_stmt("assign_space = Add_internal_space(@,insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
-	c_stmt0("assign_slice_seq = &assign_space;\n")
-	c_stmt("Copy_elements(insert_pos,SEQ_PTR(@), assign_slice_seq);\n",{Code[pc+2]})
-	c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n",{Code[pc+4]})
+		--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
+		c_stmt("assign_space = Add_internal_space(@,insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
+		c_stmt0("assign_slice_seq = &assign_space;\n")
+		c_stmt("assign_space = Copy_elements(insert_pos,SEQ_PTR(@), &@ );\n",{Code[pc+2], Code[pc+4]})
+		c_stmt("@ = MAKE_SEQ( assign_space );\n",{Code[pc+4]})
 	c_stmt0("}\n")
-	c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0( "else {\n" )
+		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0("}\n")
 	c_stmt0("}\n")
 	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
 		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
@@ -4347,7 +4360,8 @@ end procedure
 
 procedure opINSERT()
 	splins() -- _0 = obj_ptr
-	c_stmt("if (insert_pos <= 0) Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0( "if (insert_pos <= 0)\n" )
+	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
 	
 	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
@@ -4356,12 +4370,17 @@ procedure opINSERT()
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
+		c_stmt("RefDS( @ );\n", { Code[pc+1] } )
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	elsif TypeIs( Code[pc+2], TYPE_INTEGER ) then
-		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) Append(&@,@,@);\n",
-			{ Code[pc+1], Code[pc+4], Code[pc+1], Code[pc+2] } )
-		c_stmt("else @ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length){\n", Code[pc+1] )
+		c_stmt("Append(&@,@,@);\n", { Code[pc+4], Code[pc+1], Code[pc+2] } )
+		c_stmt0( "}\n" )
+		c_stmt0( "else {\n" )
+		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0( "}\n" )
 	else
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
@@ -4369,6 +4388,7 @@ procedure opINSERT()
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
+		c_stmt("RefDS( @ );\n", Code[pc+1] )
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	end if
@@ -4445,61 +4465,121 @@ end procedure
 
 procedure opREPLACE()
 	sequence relay_else = ""
-
+	integer end_label = find_label( pc + 6 )
 	c_stmt0("{\n")
-	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
-	c_stmt0("int len = assign_space->length;\n")
-	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
-	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n", repeat(Code[pc+4], 3))
-	c_stmt0("if (stop > len) stop = len;\n")
-	--c_stmt("DeRefDS(@);\n", {Code[pc+1]})
-	c_stmt("if (!IS_ATOM_INT(@)) RefDS(@);\n",repeat(Code[pc+2],2))
-	c_stmt("if (stop < 0) Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
-	c_stmt("else if (start > len) Concat(&@, @, @);\n", {Code[pc+5], Code[pc+1], Code[pc+2]})
-	c_stmt0("else if (start < 2 ) {\n")
-	c_stmt0(" if (stop >= len) {\n")
-	c_stmt("DeRef(@);\n",{Code[pc+5]})
-	c_stmt("@ = @;\n", {Code[pc+5], Code[pc+2]})
-	c_stmt0("}\n")
-	c_stmt("else Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
-	c_stmt0("}\n")
-	if not TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then -- could be a sequence
-		if TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
-			relay_else = "else "
+		c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
+		c_stmt0("int len = assign_space->length;\n") 
+		if TypeIs( Code[pc+3], TYPE_INTEGER ) then
+			c_stmt( "int start = @;\n", Code[pc+3] )
 		else
-			c_stmt("else if (IS_SEQUENCE(@)) {\n", {Code[pc+2]}) -- replacement is a sequence
+			c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
 		end if
+		
+		if TypeIs( Code[pc+4], TYPE_INTEGER ) then
+			c_stmt( "int stop = @;\n", Code[pc+4] )
+		else
+			c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n", repeat(Code[pc+4], 3))
+		end if
+		
+		--c_stmt("DeRefDS(@);\n", {Code[pc+1]})
+-- 		c_stmt("if (!IS_ATOM_INT(@)){\n", Code[pc+2] )
+-- 			c_stmt("RefDS(@);\n", Code[pc+2 ])
+-- 		c_stmt0("}\n")
+		
+		c_stmt0("if (stop < 0 && start <= len ){\n")
+			c_stmt( "Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
+			Goto( end_label )
+		c_stmt0( "}\n" )
+		c_stmt0( "if( stop > len ) {\n" )
+			c_stmt0( "stop = len;\n" )
+		c_stmt0( "}\n" )
+		
+		c_stmt0( "if( start < 1 ){\n" )
+			c_stmt0( "start = (len > 0);\n" )
+		c_stmt0( "}\n" )
+		
+		c_stmt0("if (start > len){\n" )
+			c_stmt( "Concat(&@, @, @);\n", {Code[pc+5], Code[pc+1], Code[pc+2]})
+			Goto( end_label )
+		c_stmt0( "}\n" )
+		c_stmt0("if (start < 2 ) {\n")
+			c_stmt0(" if (stop == len) {\n")
+				c_stmt("Ref(@);\n", Code[pc+2] )
+				c_stmt("DeRef(@);\n",{Code[pc+5]})
+				c_stmt("@ = @;\n", {Code[pc+5], Code[pc+2]})
+				Goto( end_label )
+			c_stmt0("}\n")
+			c_stmt0("else if( stop < 1 ) {\n" )
+				c_stmt( "Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
+				Goto( end_label )
+			c_stmt0( "}\n" )
+		c_stmt0("}\n")
+	if not TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then -- could be a sequence
+		if not TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
+			c_stmt("if (IS_SEQUENCE(@)) {\n", {Code[pc+2]}) -- replacement is a sequence
+		end if
+		
 		c_stmt0(relay_else & "if (start > stop) {\n") -- splice replacement in at start
-		c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
-		c_stmt("assign_space = Add_internal_space(@, start, s2->length);\n", {Code[pc+1]})
-		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt0("Copy_elements(start, s2, assign_slice_seq);\n")
-		c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n", {Code[pc+5]})
+			c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
+			if SymTab[Code[pc+4]][S_MODE] = M_NORMAL and Code[pc+1] != Code[pc+4] then
+				c_stmt( "if( SEQ_PTR( @ )->ref != 1 ){\n", { Code[pc+1] } )
+			end if
+			if SymTab[Code[pc+4]][S_MODE] = M_NORMAL and Code[pc+1] != Code[pc+4] then
+				c_stmt( "DeRef( @ );\n", Code[pc+4] )
+			end if
+			if SymTab[Code[pc+4]][S_MODE] != M_NORMAL or Code[pc+1] != Code[pc+4] then
+				c_stmt( "RefDS( @ ); // not in place, so need to ref\n", {Code[pc+1]})
+			end if
+			if SymTab[Code[pc+4]][S_MODE] = M_NORMAL and Code[pc+1] != Code[pc+4] then
+				c_stmt0( "}\n" )
+			end if
+			
+			c_stmt("assign_space = Add_internal_space(@, start, s2->length);\n", {Code[pc+1]})
+			c_stmt0("assign_slice_seq = &assign_space;\n")
+			c_stmt("assign_space = Copy_elements(start, s2, &@ ) ;\n", Code[pc+5])
+			c_stmt("@ = MAKE_SEQ(assign_space);\n", {Code[pc+5]})
 		c_stmt0("}\n")
+		
 	 	c_stmt0("else {\n") -- actual replacement inside source
-		c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
-		c_stmt0("int repl_len = s2->length;\n")
-		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt0("if (repl_len > stop - start + 1) {\n") -- replacement is longer than replaced
-		c_stmt("assign_space = Add_internal_space(@, stop+1, repl_len+start-stop-1);\n", {Code[pc+1]})
-		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt0("Copy_elements(start, s2, assign_slice_seq);\n")
-		c_stmt("DeRef(@);\n",{Code[pc+5]})
-		c_stmt("@ = MAKE_SEQ(*assign_slice_seq);\n", {Code[pc+5]})
+			c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
+			c_stmt0("int repl_len = s2->length;\n")
+			
+			-- need to check to see if this is in place
+			-- if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
+			if SymTab[Code[pc+4]][S_MODE] = M_NORMAL and Code[pc+1] != Code[pc+4] then
+				c_stmt( "if( SEQ_PTR( @ )->ref != 1 ){\n", { Code[pc+1] } )
+			end if
+			if SymTab[Code[pc+4]][S_MODE] = M_NORMAL and Code[pc+1] != Code[pc+4] then
+				c_stmt( "DeRef( @ );\n", Code[pc+4] )
+			end if
+			if SymTab[Code[pc+4]][S_MODE] != M_NORMAL or Code[pc+1] != Code[pc+4] then
+				c_stmt( "RefDS( @ ); // not in place, so need to ref\n", {Code[pc+1]})
+			end if
+			if SymTab[Code[pc+4]][S_MODE] = M_NORMAL and Code[pc+1] != Code[pc+4] then
+				c_stmt0( "}\n" )
+			end if
+			c_stmt0("assign_slice_seq = &assign_space;\n")
+			c_stmt0("if (repl_len > stop - start + 1) {\n") -- replacement is longer than replaced
+			c_stmt("assign_space = Add_internal_space(@, stop+1, repl_len+start-stop-1);\n", {Code[pc+1]})
+			c_stmt0("assign_slice_seq = &assign_space;\n")
+			c_stmt("assign_space = Copy_elements(start, s2, &@ );\n", Code[pc+5] )
+-- 			c_stmt("DeRef(@);\n",{Code[pc+5]})
+			c_stmt("@ = MAKE_SEQ(assign_space);\n", {Code[pc+5]})
 		c_stmt0("}\n")
-	 	c_stmt0("else {\n") -- replacement shorter or equal length
-		c_stmt0("s1_ptr s1;\n")
-		c_stmt0("if (repl_len < stop - start+1) {\n")
-		c_stmt("Remove_elements(start+repl_len, stop, &@);\n", {Code[pc+5]})
-		c_stmt("assign_space = SEQ_PTR(@);\n", {Code[pc+5]})
-		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt("s1 = Copy_elements(start, SEQ_PTR(@), assign_slice_seq);\n", {Code[pc+2]})
-		c_stmt0("}\n")
-		c_stmt0("else {\n")
-		c_stmt("s1 = Copy_elements(start, SEQ_PTR(@), &@);\n", {Code[pc+2], Code[pc+5]})
-		c_stmt0("}\n")
-		c_stmt("@ = MAKE_SEQ(s1);\n", {Code[pc+5]})
-		c_stmt0("}\n")
+	 	
+		c_stmt0("else {\n") -- replacement shorter or equal length
+			c_stmt0("s1_ptr s1;\n")
+			c_stmt0("if (repl_len < stop - start+1) {\n")
+				c_stmt("Remove_elements(start+repl_len, stop, &@);\n", {Code[pc+5]})
+				c_stmt("assign_space = SEQ_PTR(@);\n", {Code[pc+5]})
+				c_stmt0("assign_slice_seq = &assign_space;\n")
+				c_stmt("s1 = Copy_elements(start, SEQ_PTR(@), &@ );\n", {Code[pc+2], Code[pc+5]})
+			c_stmt0("}\n")
+			c_stmt0("else {\n")
+				c_stmt("s1 = Copy_elements(start, SEQ_PTR(@), &@);\n", {Code[pc+2], Code[pc+5]})
+			c_stmt0("}\n")
+			c_stmt("@ = MAKE_SEQ(s1);\n", {Code[pc+5]})
+			c_stmt0("}\n")
 		c_stmt0("}\n")
 		if not TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
 			indent -= 4
@@ -4530,6 +4610,7 @@ procedure opREPLACE()
 
 
 	pc += 6
+	Label( end_label )
 end procedure
 
 procedure opCONCAT_N()
