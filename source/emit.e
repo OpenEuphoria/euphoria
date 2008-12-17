@@ -405,6 +405,16 @@ function good_string(sequence elements)
 	return element_vals
 end function
 
+integer last_op = 0
+integer last_pc = 0
+export function Last_op()
+	return last_op
+end function
+
+export function Last_pc()
+	return last_pc
+end function
+
 global procedure emit_op(integer op)
 -- Emit a postfix operator.
 -- The cases have been sorted according to profile frequency.
@@ -418,6 +428,8 @@ global procedure emit_op(integer op)
 	sequence elements
 	object element_vals
 
+	last_op = op
+	last_pc = length(Code) + 1
 	-- 1 input, 0 outputs, can combine with previous op
 	if op = ASSIGN then
 		source = Pop()

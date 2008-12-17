@@ -207,7 +207,8 @@ global constant
 	REMOVE				= 202,
 	REPLACE				= 203,
 	SWITCH_RT           = 204,
-	MAX_OPCODE          = 204
+	PROC_TAIL           = 205,
+	MAX_OPCODE          = 205
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

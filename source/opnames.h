@@ -204,5 +204,6 @@ static char *opnames[] = {
 	"TAIL",
 	"REMOVE",
 	"REPLACE",
-	"SWITCH_RT"
+	"SWITCH_RT",
+	"PROC_TAIL"
 };

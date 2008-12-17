@@ -1121,6 +1121,28 @@ procedure opSTARTLINE()
 	pc += 2
 end procedure
 		
+procedure opPROC_TAIL()
+	integer arg, sub
+	
+	sub = Code[pc+1] -- subroutine
+	arg = SymTab[sub][S_NEXT] 
+	
+	-- set the param values
+	for i = 1 to SymTab[sub][S_NUM_ARGS] do
+		val[arg] = val[Code[pc+1+i]]
+		arg = SymTab[arg][S_NEXT]
+	end for
+	
+	-- free the temps
+	while arg and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
+		val[arg] = NOVALUE
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	-- start over!
+	pc = 1
+end procedure
+
 procedure opPROC()  
 -- Normal subroutine call
 	integer n, arg, sub, p
@@ -3775,6 +3797,9 @@ procedure do_exec()
 				break
 			case PRINTF:
 				opPRINTF()
+				break
+			case PROC_TAIL:
+				opPROC_TAIL()
 				break
 			case PROC:
 				opPROC()

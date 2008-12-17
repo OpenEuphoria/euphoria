@@ -1534,6 +1534,8 @@ procedure InitBackEnd( object ignore )
 			name = "NOP1"
 		elsif find( name, { "SWITCH_I", "SWITCH_SPI", "SWITCH_RT" }) then
 			name = "SWITCH"
+		elsif equal( name, "PROC_TAIL" ) then
+			name = "PROC"
 		end if
 		
 		operation[i] = routine_id("op" & name)

@@ -1982,6 +1982,51 @@ procedure opTRANSGOTO()
 	pc = Code[pc+1]
 end procedure
 
+procedure opPROC_TAIL()
+	for i = 1 to length(loop_stack) do
+		if loop_stack[i][LOOP_VAR] != 0 then
+			-- active for-loop var
+			CDeRef(loop_stack[i][LOOP_VAR])
+		end if
+	end for
+
+	-- deref the temps and privates
+	sub = Code[pc+1]
+
+	-- assign the params
+	sym = SymTab[sub][S_NEXT]
+	for i = 1 to SymTab[sub][S_NUM_ARGS] do
+		if sym != Code[pc+1+i] then
+			c_stmt( "_0 = @;\n", sym )
+			c_stmt( "@ = @;\n", {sym, Code[pc+1+i]})
+			CRef( sym )
+			c_stmt( "DeRef(_0);\n", {} )
+		end if
+		sym = SymTab[sym][S_NEXT]
+	end for
+	
+	while sym != 0 and SymTab[sym][S_SCOPE] <= SC_PRIVATE do
+		if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
+		   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
+			CDeRef(sym)
+		end if
+		sym = SymTab[sym][S_NEXT]
+	end while
+
+	sym = SymTab[sub][S_TEMPS]
+	while sym != 0 do
+		if SymTab[sym][S_SCOPE] != DELETED then
+			FinalDeRef(sym)
+		end if
+		sym = SymTab[sym][S_NEXT]
+	end while
+	FlushDeRef()
+	
+	
+	Goto( 1 )
+	pc += 2 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC)
+end procedure
+
 procedure opPROC()
 -- Normal subroutine call
 -- generate code for a procedure/function call
@@ -5662,6 +5707,13 @@ procedure do_exec(integer start_pc)
 	loop_stack = {}
 	label_map = {}
 	all_done = FALSE
+	
+	if start_pc = 1 and CurrentSub != TopLevelSub then
+		if match( {PROC_TAIL, CurrentSub}, Code ) != 0 then
+			Label(1)
+		end if
+	end if
+	
 	while not all_done do
 		previous_previous_op = previous_op
 		previous_op = opcode
@@ -5683,7 +5735,7 @@ global procedure Execute(symtab_index proc)
 
 	CurrentSub = proc
 	Code = SymTab[CurrentSub][S_CODE]
-
+	
 	do_exec(1)
 
 	indent = 0

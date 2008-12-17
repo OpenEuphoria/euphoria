@@ -1634,6 +1634,7 @@ end procedure
 procedure Return_statement()
 -- Parse a return statement
 	token tok
+	integer pop
 
 	if CurrentSub = TopLevelSub then
 		CompileErr("return must be inside a procedure or function")
@@ -1646,10 +1647,20 @@ procedure Return_statement()
 	end if
 	if SymTab[CurrentSub][S_TOKEN] != PROC then
 		Expr()
-		FuncReturn = TRUE
-		emit_op(RETURNF)
+		if Last_op() = PROC and Code[Last_pc()+1] = CurrentSub then
+			pop = Pop() -- prevent cg_stack leakage
+			Code[Last_pc()] = PROC_TAIL
+		else
+			FuncReturn = TRUE
+			emit_op(RETURNF)
+		end if
 	else
-		emit_op(RETURNP)
+		if Last_op() = PROC and Code[Last_pc()+1] = CurrentSub then
+			pop = Pop() -- prevent cg_stack leakage
+			Code[Last_pc()] = PROC_TAIL
+		else
+			emit_op(RETURNP)
+		end if
 	end if
 	tok = next_token()
 	putback(tok)

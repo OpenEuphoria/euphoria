@@ -1321,6 +1321,7 @@ void code_set_pointers(int **code)
 		// special cases: variable number of operands
 		
 			case PROC:
+			case PROC_TAIL:
 				sub = (int)code[i+1];
 				code[i+1] = SET_OPERAND(sub);
 				
@@ -1830,8 +1831,10 @@ void do_exec(int *start_pc)
   &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH,
 /* 196 (previous) */
  NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TRANSGOTO not emitted */
-  &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT
+  &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
+  &&L_PROC_TAIL
+/* 205 (previous) */
   };
 #endif
 #endif
@@ -3780,6 +3783,43 @@ void do_exec(int *start_pc)
 				
 				*expr_top++ = (object)obj_ptr; // push return address
 				*expr_top++ = sub;             // push sub symtab pointer 
+				pc = sub->u.subp.code;         // start executing the sub
+				thread();
+				BREAK;
+				
+			case L_PROC_TAIL:   // tail recursion
+				sub = ((symtab_ptr)pc[1]);
+				sym = sub->next; /* first private var */
+				
+				// pc (ESI) is used for role of obj_ptr here and in loop 
+				obj_ptr = (object_ptr)(pc + 2); // list of argument addresses
+				
+				a = (object)(obj_ptr + sub->u.subp.num_args);
+				/* just copy the args */
+				while (obj_ptr < (object_ptr)a) {
+					b = sym->obj;
+					sym->obj = *(object_ptr)obj_ptr[0];
+					Ref(sym->obj);
+					DeRef( b );
+					sym = sym->next;
+					obj_ptr++;                      
+				}
+				
+				/* free the privates and set to NOVALUE */
+				while (sym && sym->scope <= S_PRIVATE) {
+					DeRef(sym->obj);
+					sym->obj = NOVALUE; // not actually needed for params
+					sym = sym->next;
+				}
+					
+				/* free the temps and set to NOVALUE */ 
+				sym = sub->u.subp.temps;
+				while (sym != NULL) {
+					DeRef(sym->obj);
+					sym->obj = NOVALUE;
+					sym = sym->next;
+				}
+				
 				pc = sub->u.subp.code;         // start executing the sub
 				thread();
 				BREAK;
