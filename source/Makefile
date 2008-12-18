@@ -329,6 +329,9 @@ install :
 	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/include/euphoria
 	install $(EECUA) $(DESTDIR)/usr/lib
+	install exu $(DESTDIR)/usr/bin
+	install ecu $(DESTDIR)/usr/bin
+	install ecu.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria

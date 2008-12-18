@@ -1647,7 +1647,7 @@ procedure Return_statement()
 	end if
 	if SymTab[CurrentSub][S_TOKEN] != PROC then
 		Expr()
-		if Last_op() = PROC and Code[Last_pc()+1] = CurrentSub then
+		if Last_op() = PROC and length(Code) > Last_pc() and Code[Last_pc()+1] = CurrentSub then
 			pop = Pop() -- prevent cg_stack leakage
 			Code[Last_pc()] = PROC_TAIL
 		else
