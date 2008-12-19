@@ -38,6 +38,7 @@ public enum
 	CS_Graphic,
 	CS_Bytes,
 	CS_SpecWord,
+	CS_Boolean,
 	CS_LAST
 
 --****
@@ -138,6 +139,7 @@ public procedure set_default_charsets()
 	Defined_Sets[CS_Graphic 	] = {{'!', '~'}}
 	Defined_Sets[CS_Bytes	 	] = {{0, 255}}
 	Defined_Sets[CS_SpecWord 	] = "_"
+	Defined_Sets[CS_Boolean     ] = {TRUE,FALSE}
 end procedure
 
 --** 
@@ -235,10 +237,30 @@ end procedure
 -- </eucode>
 	
 public type boolean(object pVal)
-	-- A boolean is a value that is either zero or not zero.
+	-- A boolean is a value that is either zero or one.
 	
 	return find(pVal,{1,0}) != 0
 		
+end type
+
+--** 
+-- Returns TRUE if argument is boolean (1 or 0) or if every element of
+-- the argument is boolean.
+--
+-- Returns FALSE if the argument is an empty sequence, or contains sequences,
+-- or contains non-boolean elements
+--
+-- Example 1:
+-- <eucode>
+-- t_boolean(-1)            -- FALSE
+-- t_boolean(0)             -- TRUE 
+-- t_boolean(1)             -- TRUE
+-- t_boolean({1, 1, 0})     -- TRUE
+-- t_boolean({1, 1, 9.7)    -- FALSE
+-- t_boolean({})            -- FALSE (empty sequence)
+-- </eucode>
+public type t_boolean(object pVal)
+	return char_test(pVal, Defined_Sets[CS_Boolean])
 end type
 
 --** 

@@ -19,6 +19,13 @@ test_false("boolean({1,2,\"abc\"})", boolean({1,2,"abc"}))
 test_false("boolean({1, 2, 9.7})", boolean({1, 2, 9.7}))
 test_false("boolean({})", boolean({}))
 
+test_false("t_boolean(-1)", t_boolean(-1))
+test_true ("t_boolean(0)", t_boolean(0))
+test_true ("t_boolean(1)", t_boolean(1))
+test_true ("t_boolean({1, 1, 0})", t_boolean({1, 1, 0}))
+test_false("t_boolean({1, 1, 9.7})", t_boolean({1, 1, 9.7}))
+test_false("t_boolean({})", t_boolean({}))
+
 test_true("t_alnum() #1", t_alnum('a'))
 test_true("t_alnum() #2", t_alnum('A'))
 test_false("t_alnum() #3", t_alnum('-'))
@@ -319,7 +326,7 @@ test_false("t_bytearray({})", t_bytearray({}))
 
 sequence dc
 dc = get_charsets()
-test_equal("get_charsets", 16, length(dc) )
+test_equal("get_charsets", CS_LAST-1, length(dc) )
 test_true("Default WS", t_space(" \t\n\r"))
 set_charsets({{CS_Whitespace, " \t" & 5}})
 test_false("Altered WS #1", t_space(" \t\n\r"))
