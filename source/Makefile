@@ -32,7 +32,7 @@ endif
 
 EU_VERSION = 4.0
 
-ifdef RELEASE
+ifeq "$(RELEASE)" "0"
 RELEASE_FLAG = -D EU_FULL_RELEASE
 endif
 

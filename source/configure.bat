@@ -1,5 +1,6 @@
 @echo off
 echo # Configuration for Watcom > config.wat
+echo RELEASE=1 >> config.wat
 
 :Loop
 IF "%1"=="" GOTO Continue
@@ -22,8 +23,8 @@ IF "%1" =="--eubin" (
 	SHIFT
 	GOTO EndLoop
 )
-IF "%1" =="--managed-mem" (
-	echo MANAGED_MEM=1 >> config.wat
+IF "%1" =="--full" (
+	echo RELEASE=0 >> config.wat
 	GOTO EndLoop
 )
 IF "%1" =="--debug" (
