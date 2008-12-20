@@ -29,6 +29,9 @@ include parser.e
 -- BINDER backend:
 include il.e
    
+-- Disable SVN Revision banner
+with define EU_FULL_RELEASE
+
 -- main program:
 include main.e
 

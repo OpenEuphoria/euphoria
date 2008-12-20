@@ -138,6 +138,12 @@ EU_BACKEND_RUNNER_FILES = &
 
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
+!else
+MANAGED_FLAG = -D EU_MANAGED_MEM
+!endif
+
+!ifndef RELEASE
+RELEASE_FLAG = -D EU_FULL_RELEASE
 !endif
 
 !ifndef EUBIN
@@ -514,13 +520,13 @@ rev.e :
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	del *.c
-	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	del *.c
-	$(EXE) $(INCDIR) ..\ec.ex $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 
 .c: $(OBJDIR);$(OBJDIR)\back

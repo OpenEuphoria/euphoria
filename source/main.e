@@ -5,7 +5,9 @@
 include std/filesys.e
 include std/io.e
 
-include rev.e
+ifdef !EU_FULL_RELEASE then
+	include rev.e
+end ifdef
 include std/get.e
 include pathopen.e
 include std/error.e
@@ -56,7 +58,14 @@ function ProcessOptions()
 			end if
 		end if
 
-		screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
+		ifdef !EU_FULL_RELEASE then
+			screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
+		end ifdef
+		ifdef EU_MANAGED_MEM then
+			screen_output(STDERR, "Using Managed Memory\n")
+		elsedef
+			screen_output(STDERR, "Using System Memory\n")
+		end ifdef
 		screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2008\n")
 
 		screen_output(STDERR,

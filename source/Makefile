@@ -32,6 +32,10 @@ endif
 
 EU_VERSION = 4.0
 
+ifdef RELEASE
+RELEASE_FLAG = -D EU_FULL_RELEASE
+endif
+
 ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME
 endif
@@ -384,7 +388,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	@echo Translating $(EU_TARGET) to create $(EU_MAIN)
 	@-rm ./$(OBJDIR)/*.c
-	@cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET) && \
+	@cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET) && \
 	if [ "$(OBJDIR)" = "backobj" ]; then \
 		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
 	elif [ "$(OBJDIR)" = "transobj" ]; then \
