@@ -181,8 +181,8 @@ function bfind(object x,sequence s,integer startpoint,integer endpoint)
     end if
 end function
 
-include sort.e
-include sequence.e
+include std/sort.e
+include std/sequence.e
 
 --**
 -- Makes a set out of a sequence by sorting it and removing duplicate elements.

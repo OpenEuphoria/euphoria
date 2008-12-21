@@ -130,9 +130,12 @@ public type mixture(sequence s)
 		return 0
 	end if
 	for i=1 to 3 do
-		if not integer(s[i]) or and_bits(s[i],#FFFFFFC0) then
+		if not integer(s[i]) then
 			return 0
 		end if
+  		if and_bits(s[i],#FFFFFFC0) then
+  			return 0
+  		end if
 	end for
 	return 1
 end type

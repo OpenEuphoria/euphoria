@@ -14,7 +14,7 @@ constant
 	M_SET_B_COLOR    = 10,
 	M_GET_POSITION   = 25
 
-public include console.e
+public include std/console.e
 
 --****
 -- === Routines
@@ -76,7 +76,7 @@ public function get_position()
 	return machine_func(M_GET_POSITION, 0)
 end function
 
-public include graphcst.e
+public include std/graphcst.e
 --**
 -- Set the foreground text color. 
 --

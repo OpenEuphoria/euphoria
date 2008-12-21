@@ -309,7 +309,7 @@ end function
 
 --**
 -- Signature:
---   global function remainder(object dividend, object divisor)
+--   <built-in> function remainder(object dividend, object divisor)
 --
 -- Description:
 -- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
@@ -594,7 +594,7 @@ end function
 
 --**
 -- Signature:
---   global function cos(object angle)
+--   <built-in> function cos(object angle)
 --
 -- Description:
 -- Return the cosine of an angle expressed in radians

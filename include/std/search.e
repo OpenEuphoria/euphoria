@@ -14,7 +14,7 @@ include std/error.e
 
 --**
 -- Signature:
---   global function compare(object compared, object reference)
+--   <built-in> function compare(object compared, object reference)
 --
 -- Description:
 --     Compare two items returning less than, equal or greater than.
@@ -58,7 +58,7 @@ include std/error.e
 
 --**
 -- Signature:
---     global function equal(object left, object right)
+--     <built-in> function equal(object left, object right)
 --
 -- Description:
 --     Compare two Euphoria objects to see if they are the same. 
@@ -99,7 +99,7 @@ include std/error.e
 
 --**
 -- Signature:
---     global function find(object needle, sequence haystack, integer start)
+--     <built-in> function find(object needle, sequence haystack, integer start)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack", starting from position "start"..
@@ -135,7 +135,7 @@ include std/error.e
 
 --**
 -- Signature:
---     global function find_from(object needle, object haystack, integer start)
+--     <built-in> function find_from(object needle, object haystack, integer start)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack". Search starts at a specified index.
@@ -172,7 +172,7 @@ include std/error.e
 
 --**
 -- Signature:
---     global function match_from(sequence needle, sequence haystack, integer start)
+--     <built-in> function match_from(sequence needle, sequence haystack, integer start)
 --
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack", starting from some index.
@@ -623,7 +623,7 @@ end function
 
 --**
 -- Signature:
---     global function match(sequence needle, sequence haystack, integer start)
+--     <built-in> function match(sequence needle, sequence haystack, integer start)
 --
 -- Description:
 --     Try to match a "needle" against some slice of a "haystack", starting at position "start".

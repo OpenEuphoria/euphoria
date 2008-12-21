@@ -7,7 +7,7 @@
 
 --
 
-include unicode.e -- needed for parse() and format()
+include std/unicode.e -- needed for parse() and format()
 include std/machine.e
 include std/dll.e
 include std/sequence.e

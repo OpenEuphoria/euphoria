@@ -69,7 +69,7 @@ constant free_list     = 7 -- ==> Small map freespace
 constant type_is_map   = "Eu:StdMap"
 --**
 -- Signature:
---   global function hash(object source, atom algo)
+--   <built-in> function hash(object source, atom algo)
 --
 -- Description:
 --     Calculates a hash value from //key// using the algorithm //algo//

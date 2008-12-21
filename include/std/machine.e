@@ -221,11 +221,11 @@
 ifdef SAFE then
 	public include std/safe.e
 	ifdef DOS32 then
-		public include .\dos\safe.e
+		public include std\dos\safe.e
 	end ifdef
 elsedef
 	public include std/memory.e
 	ifdef DOS32 then
-		public include .\dos\memory.e
+		public include std\dos\memory.e
 	end ifdef
 end ifdef

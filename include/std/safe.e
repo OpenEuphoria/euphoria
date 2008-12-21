@@ -354,7 +354,7 @@ without warning
 override function peek_string(object x)
 -- safe version of peek_string 
 	integer len
-	atom a
+	atom a = x
 	
 	len = 1
 	while 1 do

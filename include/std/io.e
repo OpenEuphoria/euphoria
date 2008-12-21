@@ -5,9 +5,10 @@
 --
 -- <<LEVELTOC depth=2>>
 
-include sort.e
-include wildcard.e
-include types.e
+include std/sort.e
+include std/wildcard.e
+include std/types.e
+include std/memory.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -46,7 +47,6 @@ public constant EOF = -1
 
 --****
 -- === Read/Write Routines
---
 
 --**
 -- Signature:
@@ -333,13 +333,30 @@ public constant EOF = -1
 -- See Also:
 --		[[:getc]], [[:read_lines]]
 
+--**
+-- Signature:
+-- <built-in> function get_key()
+--
+-- Description:
+--     Get the next keystroke without waiting for it or echoing it on the console. 
+--
+-- Parameters:
+--		# None.
+--
+-- Returns:
+--		An **integer**, the code number for the key pressed. If there is no key
+--      press waiting, then this returns -1.
+--
+-- See Also:
+-- 		[[:gets]], [[:getc]]
+
 constant CHUNK = 100
 
 --**
 -- Read the next bytes from a file.
 --
 -- Parameters:
---		# ##fn##: an integer, the handle to an ope file to read from.
+--		# ##fn##: an integer, the handle to an open file to read from.
 --		# ##n##: a positive integer, the number of bytes to read.
 --
 -- Returns:
@@ -377,7 +394,7 @@ constant CHUNK = 100
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]]
+-- 		[[:getc]], [[:gets]], [[:get_integer32]], [[::get_dstring]]
 
 public function get_bytes(integer fn, integer n)
 	sequence s
@@ -417,6 +434,127 @@ public function get_bytes(integer fn, integer n)
 	return s
 end function
 
+
+atom mem0, mem1, mem2, mem3
+mem0 = allocate(4)
+mem1 = mem0 + 1
+mem2 = mem0 + 2
+mem3 = mem0 + 3
+
+--**
+-- Read the next four bytes from a file and returns them as a single integer.
+--
+-- Parameters:
+--		# ##fh##: an integer, the handle to an open file to read from.
+--
+-- Returns:
+--		An **atom**, made of the bytes that could be read from the file.
+--
+-- Comments:
+--     * This function is normally used with files opened in binary mode, "rb".
+--     * Assumes that there at least four bytes available to be read.
+--
+-- Example 1:
+--     <eucode>
+--     
+--     integer fn
+--     fn = open("temp", "rb")  -- an existing file
+--
+--     atom file_type_code
+--     file_type_code = get_integer32(fn)
+--     </eucode>
+--
+-- See Also:
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+
+public function get_integer32(integer fh)
+-- read the 4 bytes as a single integer value at current position in file
+	poke(mem0, getc(fh))
+	poke(mem1, getc(fh))
+	poke(mem2, getc(fh))
+	poke(mem3, getc(fh))
+	return peek4u(mem0)
+end function
+
+--**
+-- Write the supplied integer as four bytes to a file.
+--
+-- Parameters:
+--		# ##fh##: an integer, the handle to an open file to write to.
+--      # ##val##: an integer 
+--
+-- Comments:
+--     * This function is normally used with files opened in binary mode, "wb".
+--
+-- Example 1:
+--     <eucode>
+--     
+--     integer fn
+--     fn = open("temp", "wb")
+--
+--     put_integer32(fn, 1234)
+--     </eucode>
+--
+-- See Also:
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+
+public procedure put_integer32(integer fh, integer val)
+	poke4(mem0, val)
+	puts(fh, peek({mem0,4}))
+end procedure
+
+--**
+-- Read a delimited byte string from an opened file .
+--
+-- Parameters:
+--		# ##fh##: an integer, the handle to an open file to read from.
+--      # ##delim##: an integer, the delimiter that marks the end of a byte string.
+--                   If omitted, a zero is assumed.
+--
+-- Returns:
+--		An **sequence**, made of the bytes that could be read from the file.
+--
+-- Comments:
+--     * If the end-of-file is found before the delimiter, the delimiter is appended
+--       to the returned string.
+--
+-- Example 1:
+--     <eucode>
+--     
+--     integer fn
+--     fn = open("temp", "rb")  -- an existing file
+--
+--     sequence text
+--     text = get_dstring(fn)	-- Get a zero-delimited string
+--     text = get_dstring(fn, '$')	-- Get a '$'-delimited string
+--     </eucode>
+--
+-- See Also:
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_integer32]]
+
+public function get_dstring(integer fh, integer delim = 0)
+	sequence s
+	integer c
+	integer i
+
+	s = repeat(-1, 256)
+	i = 0
+	while c != delim entry do
+		i += 1
+		if i > length(s) then
+			s &= repeat(-1, 256)
+		end if
+		
+		if c = -1 then
+			exit
+		end if
+		s[i] = c
+	  entry
+		c = getc(fh)
+	end while
+	
+	return s[1..i]
+end function
 
 --****
 -- === Low Level File/Device Handling

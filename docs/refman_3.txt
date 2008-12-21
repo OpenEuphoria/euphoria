@@ -180,7 +180,8 @@ The source code for a statement is written to **ctrace.out**, and flushed, just
 
 === Profiling 
 
-If you specify a ##with profile## or ##with profile_time## (DOS32 only) directive, then a special listing of your program, called a
+If you specify a ##with profile## or ##with profile_time## (DOS32/Windows only) directive,
+then a special listing of your program, called a
 //profile//, will be produced by the interpreter when your program finishes
 execution.  This listing is written to the file **ex.pro** in the current
 directory.

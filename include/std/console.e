@@ -311,10 +311,10 @@ public type positive_int(integer x)
 end type
 
 ifdef DOS32 then
-include dos/image.e
+include std/dos/image.e
 end ifdef
 
-include graphcst.e
+include std/graphcst.e
 
 ifdef DOS32 then
 function DOS_scr_addr(sequence vc, text_point xy)

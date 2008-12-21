@@ -268,7 +268,7 @@ type positive_atom(atom x)
 end type
 
 ifdef DOS32 then
-public include dos/image.e
+public include std/dos/image.e
 
 function DOS_scr_addr(sequence vc, text_point xy)
 -- calculate address in DOS screen memory for a given line, column

@@ -146,7 +146,6 @@ end function
 -- This works under DOS, or in a full-screen DOS window. In a partial-screen window you cannot change the active page. 
 --
 -- Example 1:
--- <a name="active_page">
 -- <eucode>
 -- include image.e
 --

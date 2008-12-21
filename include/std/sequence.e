@@ -607,7 +607,7 @@ end function
 
 --**
 -- Signature:
---   global function insert(sequence target, object what, integer index)
+--   <built-in> function insert(sequence target, object what, integer index)
 --
 -- Description:
 --   Insert an object into a sequence as a new element at a given location.
@@ -644,7 +644,7 @@ end function
 
 --**
 -- Signature:
---   global function splice(sequence target, object what, integer index)
+--   <built-in> function splice(sequence target, object what, integer index)
 --
 -- Description:
 -- Inserts an object as a new slice in a sequence at a given position.

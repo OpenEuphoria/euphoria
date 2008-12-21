@@ -1,4 +1,4 @@
-/* Euphoria 3.0 
+/* Euphoria
    C include file for Euphoria programs 
    that have been translated to C */
 
