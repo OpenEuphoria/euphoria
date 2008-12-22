@@ -1,6 +1,5 @@
 @echo off
 echo # Configuration for Watcom > config.wat
-echo RELEASE=1 >> config.wat
 
 :Loop
 IF "%1"=="" GOTO Continue
@@ -24,7 +23,7 @@ IF "%1" =="--eubin" (
 	GOTO EndLoop
 )
 IF "%1" =="--full" (
-	echo RELEASE=0 >> config.wat
+	echo RELEASE=1 >> config.wat
 	GOTO EndLoop
 )
 IF "%1" =="--debug" (

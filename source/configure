@@ -29,7 +29,6 @@ else
 	fi
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 fi
-echo RELEASE=1 >> "$PREFIX"Makefile.eu
 
 case "${UNAME_SYSTEM}:${ECONFIG}" in
 	Linux:BSD)
@@ -59,7 +58,7 @@ while [ "$1" != "" ]; do
                        echo PWD=`pwd` >> "$PREFIX"Makefile.eu
         ;;
         --full )
-                       echo RELEASE=0 >> "$PREFIX"Makefile.eu
+                       echo RELEASE=1 >> "$PREFIX"Makefile.eu
         ;;
     esac
     shift
