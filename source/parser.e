@@ -1639,6 +1639,16 @@ procedure Return_statement()
 	if CurrentSub = TopLevelSub then
 		CompileErr("return must be inside a procedure or function")
 	end if
+	
+	integer 
+		last_op = Last_op(),
+		last_pc = Last_pc(),
+		is_tail = 0
+	
+	if last_op = PROC and length(Code) > last_pc and Code[last_pc+1] = CurrentSub then
+		is_tail = 1
+	end if
+	
 	if not TRANSLATE then
 		if OpTrace then
 			emit_op(ERASE_PRIVATE_NAMES)
@@ -1647,7 +1657,7 @@ procedure Return_statement()
 	end if
 	if SymTab[CurrentSub][S_TOKEN] != PROC then
 		Expr()
-		if Last_op() = PROC and length(Code) > Last_pc() and Code[Last_pc()+1] = CurrentSub then
+		if is_tail then
 			pop = Pop() -- prevent cg_stack leakage
 			Code[Last_pc()] = PROC_TAIL
 		else
@@ -1655,7 +1665,7 @@ procedure Return_statement()
 			emit_op(RETURNF)
 		end if
 	else
-		if Last_op() = PROC and Code[Last_pc()+1] = CurrentSub then
+		if is_tail then
 			pop = Pop() -- prevent cg_stack leakage
 			Code[Last_pc()] = PROC_TAIL
 		else

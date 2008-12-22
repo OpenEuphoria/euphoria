@@ -2839,7 +2839,7 @@ procedure opMATCH_FROM()
 				pc += 5
 				return
 		end if
-		if c > length(s) then
+		if not (length(s) = 0 and c = 1) and c > length(s) then
 				RTFatal("index out of bounds in match_from()")
 				pc += 5
 				return

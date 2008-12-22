@@ -2016,11 +2016,11 @@ procedure opPROC_TAIL()
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
 		if SymTab[sym][S_SCOPE] != DELETED then
-			FinalDeRef(sym)
+			c_stmt( "DeRef( @ );\n", sym )
+			c_stmt( "@ = 0;\n", sym )
 		end if
 		sym = SymTab[sym][S_NEXT]
 	end while
-	FlushDeRef()
 	
 	
 	Goto( 1 )
