@@ -7,7 +7,9 @@ public include common.e
 
 global constant MAJ_VER = 4, MIN_VER = 0, PAT_VER = 0
 global constant INTERPRETER_VERSION = "4.0 (development)"
-global constant  TRANSLATOR_VERSION = "4.0 (development)"
+global constant TRANSLATOR_VERSION = "4.0 (development)"
+--global constant INTERPRETER_VERSION = "4.0a1"
+--global constant TRANSLATOR_VERSION = "4.0a1"
 
 global constant
 	INTERPRET = mode:get_interpret(),

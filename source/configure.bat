@@ -17,6 +17,10 @@ IF "%1" =="--prefix" (
 	SHIFT
 	GOTO EndLoop
 )
+IF "%1" =="--managed-mem" (
+	echo MANAGED_MEM=1 >> config.wat
+	GOTO EndLoop
+)
 IF "%1" =="--eubin" (
 	echo EUBIN="%2" >> config.wat
 	SHIFT
