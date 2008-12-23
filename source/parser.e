@@ -1668,9 +1668,9 @@ procedure Return_statement()
 		if is_tail then
 			pop = Pop() -- prevent cg_stack leakage
 			Code[Last_pc()] = PROC_TAIL
-		else
-			emit_op(RETURNP)
 		end if
+		emit_op(RETURNP)
+		
 	end if
 	tok = next_token()
 	putback(tok)
