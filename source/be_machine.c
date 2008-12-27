@@ -3017,7 +3017,7 @@ static object Seek(object x)
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2); 
 	if (pos == -1)
-#ifdef EMINGW
+#if defined(EMINGW) || defined(EDJGPP)
 		result = iseek(f, 0L, SEEK_END);
 #else
 		result = iiseek(f, 0L, SEEK_END);

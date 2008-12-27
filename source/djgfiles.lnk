@@ -46,7 +46,6 @@ COMINIT.o
 COMPRESS.o
 BACKEND.o
 MAIN.o
--lalleg
 be_inline.o
 be_alloc.o
 be_execute.o
@@ -62,4 +61,5 @@ be_decompress.o
 be_regex.o
 be_task.o
 regex.o
+
 
