@@ -1,1 +1,1 @@
--DEDOS -DEDJGPP -O2 -mpentium -ffast-math -fsigned-char 
+-DEDOS -DEDJGPP -O2 -ffast-math -fsigned-char 
