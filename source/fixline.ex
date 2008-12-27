@@ -32,7 +32,7 @@ for i = 1 to length(d) do
 	   match("IMAKEU^", lEntry) then
 		name = d[i][D_NAME]
 		puts(2, name & ' ')
-		ifdef LINUX then
+		ifdef UNIX then
 			system("mv " & name & " junk.xxx", 2)
 		elsedef
 			system("move " & name & " junk.xxx > NUL" , 2)
@@ -68,9 +68,11 @@ for i = 1 to length(d) do
 		end while
 		close(infile)
 		close(outfile)
-		if match("IMAKEU^", lEntry) then
-			system("chmod +x imakeu", 2)
-		end if
+		ifdef UNIX then
+			if match("IMAKEU^", lEntry) then
+				system("chmod +x imakeu", 2)
+			end if
+		end ifdef
 	end if
 end for
 puts(2, '\n')
