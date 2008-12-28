@@ -134,7 +134,8 @@ EU_CORE_FILES = \
 	opnames.e \
 	reswords.e \
 	keylist.e \
-	fwdref.e
+	fwdref.e \
+	shift.e
 
 EU_INTERPRETER_FILES = \
 	global.e \

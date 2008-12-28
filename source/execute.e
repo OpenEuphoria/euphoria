@@ -1525,7 +1525,6 @@ procedure opLENGTH()
 	a = Code[pc+1]
 	target = Code[pc+2]
 	if atom(val[a]) then
-	? a & val[a]
 		RTFatal("length of an atom is not defined")
 	end if
 	val[target] = length(val[a])
@@ -3968,7 +3967,6 @@ procedure do_exec()
 				opXOR_BITS()
 				break
 			case else
-				
 				RTFatal( sprintf("Unknown opcode: %d", op ) )
 		end switch
 	end while
@@ -4031,7 +4029,7 @@ ifdef CALLPROC then
 		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
 						  "END_PARAM_CHECK", "NOPWHILE", "NOP1",
 						  "PROC_FORWARD", "FUNC_FORWARD",
-						  "TRANSGOTO"}) then 
+						  "TYPE_CHECK_FORWARD"}) then 
 			-- never emitted
 			name = "NOP2" 
 		elsif equal(name, "GREATER_IFW_I") then

@@ -22,7 +22,6 @@ constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
 	
 
 without trace
-
 --*****************
 -- Local variables
 --*****************
@@ -1358,25 +1357,15 @@ procedure TypeCheck(symtab_index var)
 	
 	if var < 0 or SymTab[var][S_SCOPE] = SC_UNDEFINED then
 		-- forward reference, so defer type check until later
-		integer ref
-		ref = new_forward_reference( TYPE_CHECK, var, TYPE_CHECK )
-		if not TRANSLATE then
-			-- possible extra integer check
-			Code &= TYPE_CHECK & 0
-		end if
-		Code &= { TYPE_CHECK, var, OpTypeCheck, 0, 0 }
-		
+		integer ref = new_forward_reference( TYPE_CHECK, var, TYPE_CHECK_FORWARD )
+		Code &= { TYPE_CHECK_FORWARD, var, OpTypeCheck }
 		return
 	end if
 	
 	which_type = SymTab[var][S_VTYPE]
 	if which_type < 0 or SymTab[which_type][S_TOKEN] = VARIABLE  then
 		integer ref = new_forward_reference( TYPE_CHECK, which_type, TYPE )
-		if not TRANSLATE then
-			-- possible extra integer check
-			Code &= TYPE_CHECK & 0
-		end if
-		Code &= { TYPE_CHECK, var, OpTypeCheck, which_type, 0 }
+		Code &= { TYPE_CHECK_FORWARD, var, OpTypeCheck }
 		
 		return
 	end if
@@ -1523,6 +1512,7 @@ procedure Assignment(token left_var)
 
 	if subs = 0 then
 		-- not subscripted
+		integer temp_len = length(Code)
 		if assign_op = EQUALS then
 			Expr() -- RHS expression
 			InitCheck(left_sym, FALSE)
@@ -1635,7 +1625,6 @@ procedure Return_statement()
 -- Parse a return statement
 	token tok
 	integer pop
-
 	if CurrentSub = TopLevelSub then
 		CompileErr("return must be inside a procedure or function")
 	end if
@@ -2794,12 +2783,12 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				SymTab[sym][S_GTYPE] = TYPE_OBJECT
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
-
 			valsym = Top()
 			if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				valsym = Pop()
 				SymTab[sym][S_OBJ] = SymTab[valsym][S_OBJ]
 				SymTab[sym][S_INITLEVEL] = 0
+				valsym = Pop() -- pop the sym for the constant, too
 			else
 				emit_op(ASSIGN)
 				valsym = get_assigned_sym()
@@ -2808,7 +2797,6 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 					SymTab[sym][S_CODE] = valsym
 				end if
 			end if
-
 		elsif type_ptr = -1 and not is_fwd_ref then
 			-- ENUM
 			SymTab[sym][S_MODE] = M_CONSTANT
@@ -2884,6 +2872,8 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			else
 				SymTab[sym][S_OBJ] = val - 1
 			end if
+			valsym = Pop()
+			valsym = Pop()
 		else
 			-- variable
 			SymTab[sym][S_MODE] = M_NORMAL
@@ -3288,6 +3278,7 @@ procedure SubProg(integer prog_type, integer scope)
 		    start_recording()
 		    Expr()
 		    SymTab[sym][S_CODE] = restore_parser()
+			if Pop() then end if -- don't leak the default argument
 			tok = next_token()
 			if first_def_arg = 0 then
 				first_def_arg = param_num

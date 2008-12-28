@@ -209,11 +209,11 @@
 #define HASH                196
 #define PROC_FORWARD        197
 #define FUNC_FORWARD        198
-#define TRANSGOTO           199
-#define HEAD           		200
-#define TAIL           		201
-#define REMOVE           	202
-#define REPLACE           	203
+#define TYPE_CHECK_FORWARD  199
+#define HEAD                200
+#define TAIL                201
+#define REMOVE              202
+#define REPLACE             203
 #define SWITCH_RT           204
 #define PROC_TAIL           205
 #define MAX_OPCODE          205

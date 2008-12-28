@@ -1830,7 +1830,7 @@ void do_exec(int *start_pc)
 /* 193 (previous) */
   &&L_SWITCH_SPI, &&L_SWITCH_I, &&L_HASH,
 /* 196 (previous) */
- NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TRANSGOTO not emitted */
+ NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TYPE_CHECK_FORWARD not emitted */
   &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
   &&L_PROC_TAIL

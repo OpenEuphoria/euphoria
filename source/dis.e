@@ -92,9 +92,9 @@ procedure il( sequence dsm, integer len )
 		end if
 	end if
 	line = 1
-	while length(dsm) > 40 do
+	while length(dsm) > 60 do
 		space = 0
-		for i = 40 to length(dsm) do
+		for i = 60 to length(dsm) do
 			if dsm[i] = 32 then
 				if line > 1 then
 					puts( out, repeat( 32, 41 ) & "#     " )
@@ -400,10 +400,6 @@ procedure opELSE()  -- or EXIT, ENDWHILE}) then
 	pc += 2
 end procedure
 
-procedure opTRANSGOTO()
-	pc = Code[pc+1]
-end procedure
-	    
 procedure opRIGHT_BRACE_N()  -- form a sequence of any length 
     sequence x
     
@@ -637,6 +633,10 @@ procedure opRHS_SLICE() -- rhs slice of a sequence a[i..j]
     target = Code[pc+4]  
     il(sprintf("RHS_SLICE: %s %s..%s => %s", names({a,b,c,target})),4)
     pc += 5
+end procedure
+
+procedure opTYPE_CHECK_FORWARD()
+	punary()
 end procedure
 
 procedure opTYPE_CHECK() 
@@ -1511,7 +1511,7 @@ procedure InitBackEnd( object ignore )
 		elsif equal(name, "SC2_AND") then
 			name = "SC2_OR"
 		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
-				"END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD" }) then 
+				"END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD"}) then 
 			-- never emitted
 			name = "NOP2" 
 		elsif equal(name, "GREATER_IFW_I") then

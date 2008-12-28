@@ -57,13 +57,12 @@ end function
 global procedure remove_symbol( symtab_index sym )
 	integer hash
 	integer st_ptr
-
+	
 	hash = SymTab[sym][S_HASHVAL]
 	st_ptr = buckets[hash]
 	while st_ptr != sym do
 		st_ptr = SymTab[st_ptr][S_SAMEHASH]
 	end while
-
 	if st_ptr = buckets[hash] then
 		-- it was the last one, and in the bucket
 		buckets[hash] = SymTab[st_ptr][S_SAMEHASH]

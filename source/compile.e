@@ -1978,9 +1978,6 @@ procedure opSTARTLINE()
 	pc += 2
 end procedure
 
-procedure opTRANSGOTO()
-	pc = Code[pc+1]
-end procedure
 
 procedure opPROC_TAIL()
 	for i = 1 to length(loop_stack) do
@@ -4586,6 +4583,7 @@ procedure opREPLACE()
 		c_stmt0("}\n")
 		
 	 	c_stmt0("else {\n") -- actual replacement inside source
+
 			c_stmt("s1_ptr s2 = SEQ_PTR(@);\n", {Code[pc+2]})
 			c_stmt0("int repl_len = s2->length;\n")
 			
@@ -5689,7 +5687,8 @@ global procedure init_opcodes()
 		elsif find(name, {"ENDFOR_INT_UP", "ENDFOR_UP", "SC2_NULL",
 						  "ENDFOR_DOWN", "ENDFOR_INT_DOWN1", "ASSIGN_SUBS2", "PLATFORM",
 						  "ENDFOR_INT_DOWN",
-						  "END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD"}) then
+						  "END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD",
+						  "TYPE_CHECK_FORWARD"}) then
 			-- never emitted
 			name = "INTERNAL_ERROR"
 		end if
@@ -5726,6 +5725,7 @@ procedure do_exec(integer start_pc)
 		intcode2 = ""
 		dblfn = ""
 		intcode_extra = ""
+		c_stmt0( sprintf("// SubProg %s pc: %d op: %s (%d)\n", { SymTab[CurrentSub][S_NAME], pc, opnames[opcode], opcode }))
 		call_proc(operation[opcode], {})
 	end while
 end procedure

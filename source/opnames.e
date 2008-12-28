@@ -202,7 +202,7 @@ global constant opnames = {
 	"HASH",
 	"PROC_FORWARD",
 	"FUNC_FORWARD",
-	"TRANSGOTO",
+	"TYPE_CHECK_FORWARD",
 	"HEAD",
 	"TAIL",
 	"REMOVE",

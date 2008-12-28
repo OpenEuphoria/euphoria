@@ -991,7 +991,7 @@ global function Scanner()
 	token tok
 	integer is_int, class
 	sequence name
-
+	
 	while TRUE do
 		ch = ThisLine[bp]  -- getch inlined (in all the "hot" spots)
 		bp += 1
@@ -1002,7 +1002,7 @@ global function Scanner()
 		if ch = 0 then
 			bad_zero()
 		end if
-			
+		
 		class = char_class[ch]
 			
 		-- if/elsif cases have been sorted so most common ones come first
@@ -1435,8 +1435,8 @@ global procedure eu_namespace()
 -- add the "eu" namespace
 	token eu_tok
 	symtab_index eu_ns
-	
 	eu_tok = keyfind("eu", -1, , 1)
+	
 	-- create a new entry at beginning of this hash chain
 	eu_ns  = NameSpace_declaration(eu_tok[T_SYM])
 	SymTab[eu_ns][S_OBJ] = 0

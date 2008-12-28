@@ -40,7 +40,7 @@ global symtab_index lhs_subs1_copy_temp,
 					lhs_target_temp      
 
 -- Code generation Stack 
-sequence cg_stack -- expression stack 
+global sequence cg_stack -- expression stack 
 
 boolean assignable   -- did previous op have a re-assignable result?
 assignable = FALSE         
@@ -570,16 +570,6 @@ global procedure emit_op(integer op)
 			TempFree(cg_stack[i])
 		end for
 		cg_stack = cg_stack[1..$-n]
-		
-		-- emit padding for
-		--   additional default params:  5
-		--   possible goto for default:  2
-		--   goto to skip extra params:  2
-		--   Total Padding:              9
-		for pad = 1 to FORWARD_DEFAULT_PADDING + 4  do
-			emit_addr( 0 )
-		end for
-		
 		
 		if op != PROC_FORWARD then
 			assignable = TRUE

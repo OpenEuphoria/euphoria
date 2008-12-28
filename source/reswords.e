@@ -201,7 +201,7 @@ global constant
 	HASH                = 196,
 	PROC_FORWARD        = 197,
 	FUNC_FORWARD        = 198,
-	TRANSGOTO           = 199,
+	TYPE_CHECK_FORWARD  = 199,
 	HEAD				= 200,
 	TAIL				= 201,
 	REMOVE				= 202,
