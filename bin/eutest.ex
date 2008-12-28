@@ -123,7 +123,13 @@ procedure do_test(sequence cmds)
 
 		if length(translator) then
 			printf(1, "translate %s:\n", {filename})
-			cmd = sprintf("%s %s %s -D UNITTEST -con -D EC -batch %s", {translator, library, options, filename})
+			ifdef WINDOWS then
+				sequence con = "-con"
+			elsedef
+				sequence con = ""
+			end ifdef
+			
+			cmd = sprintf("%s %s %s -D UNITTEST %s -D EC -batch %s", {translator, library, options, con, filename})
 			status = system_exec(cmd, 2)
 			if match("t_c_", dos_lower(filename)) = 1 then
 				status = not status

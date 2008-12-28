@@ -376,10 +376,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 					insert_code( { ATOM_CHECK, var }, pc )
 					pc += 2
 					
-				else
+				elsif SymTab[which_type][S_NEXT]
 					integer start_pc = pc
-					if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] =
-						integer_type then
+					
+					
+					if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = integer_type then
 						
 						insert_code( { INTEGER_CHECK, var }, pc )
 						
@@ -394,7 +395,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 		end if
 	end if
 
-	if TRANSLATE or not with_type_check then
+	if (TRANSLATE or not with_type_check) and SymTab[which_type][S_NEXT] then
 		integer start_pc = pc
 
 		if which_type = sequence_type or

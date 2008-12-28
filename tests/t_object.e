@@ -1,5 +1,6 @@
 include std/unittest.e
 
+ifdef !EC then
 include obj_fwd.e
 
 export integer a
@@ -45,5 +46,7 @@ test_equal( "subscripted dollar object call", 1, object( c[$] ) )
 test_equal( "subscripted dollar and number object call", 1, object( c[$][1] ) )
 test_equal( "double subscripted dollar object call", 1, object( c[$][$] ) )
 forward_test_subscripts()
+
+end ifdef
 
 test_report()
