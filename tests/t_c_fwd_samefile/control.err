@@ -1,0 +1,8 @@
+t_c_fwd_samefile.e:4
+Errors resolving the following references:
+	t_c_fwd_samefile.e (4): x
+
+x = 1
+  ^
+
+

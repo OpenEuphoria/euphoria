@@ -1,0 +1,6 @@
+t_c_fwd_badtok.e:3
+expected a procedure, not a function
+foo()
+    ^
+
+

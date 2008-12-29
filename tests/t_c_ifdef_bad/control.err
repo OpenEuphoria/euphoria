@@ -1,0 +1,6 @@
+t_c_ifdef_bad.e:5
+unknown command
+	end if
+	     ^
+
+
