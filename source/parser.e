@@ -1655,7 +1655,6 @@ procedure Return_statement()
 		end if
 	else
 		if is_tail then
-			pop = Pop() -- prevent cg_stack leakage
 			Code[Last_pc()] = PROC_TAIL
 		end if
 		emit_op(RETURNP)
