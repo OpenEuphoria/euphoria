@@ -4309,8 +4309,8 @@ int file_in_include_path( int using, int target, char * checked_files )
 	if(checked_files[using]) return 0;
 	checked_files[using] = 1;
 	for( i = 1; i <= rt02[using][0]; i++ ){
-		node_file = rt02[using][i];
-		if( target == node_file || file_in_include_path( node_file, target, checked_files ) ){
+		node_file = abs(rt02[using][i]);
+		if( !checked_files[node_file] && (target == node_file || file_in_include_path( node_file, target, checked_files )) ){
 			free(files);
 			return 1;
 		}
