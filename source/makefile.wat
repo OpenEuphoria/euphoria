@@ -347,12 +347,12 @@ source : .SYMBOLIC common-source source-win source-dos
 
 testwin : .SYMBOLIC interpreter 
 	cd ..\tests
-	..\source\exwc -i ..\include ..\bin\eutest.ex -exe ..\source\exwc.exe -ec ..\source\ecw.exe -lib ..\source\ecw.lib
+	..\source\exwc -i ..\include ..\bin\eutest.ex -cc wat -exe ..\source\exwc.exe -ec ..\source\ecw.exe -lib ..\source\ecw.lib
 	cd ..\source
 
 testdos : .SYMBOLIC dos
 	cd ..\tests
-	..\source\ex -i ..\include ..\bin\eutest.ex -exe ..\source\ex.exe -ec ..\source\ec.exe -lib ..\source\ec.lib
+	..\source\ex -i ..\include ..\bin\eutest.ex -cc wat -exe ..\source\ex.exe -ec ..\source\ec.exe -lib ..\source\ec.lib
 	cd ..\source
 	
 test : .SYMBOLIC testwin testdos
@@ -520,13 +520,13 @@ rev.e :
 .\$(OBJDIR)\main-.c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	del *.c
-	$(EXE) $(INCDIR) ..\ec.ex $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex -wat $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 
 $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	cd .\$(OBJDIR)
 	del *.c
-	$(EXE) $(INCDIR) ..\ec.ex $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) ..\ec.ex -wat $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 
 .c: $(OBJDIR);$(OBJDIR)\back
