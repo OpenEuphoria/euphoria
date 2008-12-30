@@ -237,6 +237,7 @@ procedure init_op_info()
 	op_info[RIGHT_BRACE_N       ] = { VARIABLE_SIZE, 3, {} }
 	op_info[CONCAT_N            ] = { VARIABLE_SIZE, 0, {} }
 	op_info[PROC                ] = { VARIABLE_SIZE, 0, {} }
+	op_info[PROC_TAIL           ] = op_info[PROC]
 end procedure
 
 init_op_info()
@@ -255,6 +256,7 @@ function advance( integer pc )
 	else
 		switch op do
 			case PROC:
+			case PROC_TAIL:
 				return pc + SymTab[Code[pc+1]][S_NUM_ARGS] + 2 + (SymTab[Code[pc+1]][S_TOKEN] != PROC)
 			case PROC_FORWARD:
 				return pc + Code[pc+2] + 3
