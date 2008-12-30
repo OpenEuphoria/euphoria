@@ -57,6 +57,27 @@ test_equal("dow() #2", 1, d:dow(dt2))
 
 test_equal("doy() #1", 114, d:doy(dt1))
 
+d:datetime dt3 = d:new(2008, 2, 1, 0, 0, 0)
+d:datetime dt4 = d:new(2007, 2, 1, 0, 0, 0)
+
+test_equal("is_leap_year #1", 1, d:is_leap_year(dt3))
+test_equal("is_leap_year #2", 0, d:is_leap_year(dt4))
+
+test_equal("days_in_year #1", 366, d:days_in_year(dt3))
+test_equal("days_in_year #2", 365, d:days_in_year(dt4))
+
+test_equal("days_in_month #1", 30, d:days_in_month(dt1))
+test_equal("days_in_month #2", 29, d:days_in_month(dt3))
+test_equal("days_in_month #3", 28, d:days_in_month(dt4))
+
+constant days_in_month = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+
+for theMonth = 1 to 12 do
+	dt4[MONTH] = theMonth
+	test_equal(sprintf("days_in_month #%d", {theMonth + 3}),
+		d:days_in_month(dt4), days_in_month[theMonth])
+end for
+
 test_equal("diff_seconds() #1", 883065, d:diff(dt2, dt1))
 
 test_equal("compare() same", 0, compare(dt1, dt1))

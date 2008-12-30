@@ -631,6 +631,76 @@ public function doy(datetime dt)
 end function
 
 --**
+-- Determine if ##dt## falls within leap year.
+--
+-- Parameters:
+-- 		# ##dt##: a datetime to be queried.
+--
+-- Returns:
+--     An **integer** of 1 if leap year, otherwise 0.
+--
+-- Example 1:
+-- <eucode>
+-- d = new(2008, 1, 1, 0, 0, 0)
+-- ? is_leap_year(d) -- prints 1
+-- d = new(2005, 1, 1, 0, 0, 0)
+-- ? is_leap_year(d) -- prints 0
+-- </eucode>
+--
+-- See Also:
+--   [[:days_in_month]]
+
+public function is_leap_year(datetime dt)
+	return isLeap(dt[YEAR])
+end function
+
+--**
+-- Return the number of days in the month of ##dt##.
+--
+-- This takes into account leap year.
+--
+-- Parameters:
+-- 		# ##dt##: a datetime to be queried.
+--
+-- Example 1:
+-- <eucode>
+-- d = new(2008, 1, 1, 0, 0, 0)
+-- ? days_in_month(d) -- 31
+-- d = new(2008, 2, 1, 0, 0, 0) -- Leap year
+-- ? days_in_month(d) -- 29
+-- </eucode>
+--
+-- See Also:
+--   [[:is_leap_year]]
+
+public function days_in_month(datetime dt)
+	return daysInMonth(dt[YEAR], dt[MONTH])
+end function
+
+--**
+-- Return the number of days in the year of ##dt##.
+--
+-- This takes into account leap year.
+--
+-- Parameters:
+--     # ##dt##: a datetime to be queried.
+--
+-- Example 1:
+-- <eucode>
+-- d = new(2007, 1, 1, 0, 0, 0)
+-- ? days_in_year(d) -- 365
+-- d = new(2008, 1, 1, 0, 0, 0) -- leap year
+-- ? days_in_year(d) -- 366
+-- </eucode>
+--
+-- See Also:
+--   [[:is_leap_year]], [[:days_in_month]]
+
+public function days_in_year(datetime dt)
+	return daysInYear(dt[YEAR])
+end function
+
+--**
 -- Convert a datetime value to the unix numeric format (seconds since ##EPOCH_1970##)
 --
 -- Parameters:
