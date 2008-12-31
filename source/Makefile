@@ -26,7 +26,7 @@
 
 include Makefile.eu
 
-include Makefile.$(OBJDIR)s
+include Makefile.$(OBJDIR)smak
 
 EU_VERSION = 4.0
 
@@ -199,7 +199,7 @@ EU_LIB_OBJECTS = \
 all : interpreter translator library backend
 
 
-Makefile.$(OBJDIR)s :
+Makefile.$(OBJDIR)smak :
 	echo "#" > $@
 
 BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back intobj/ transobj/ libobj/ backobj/
@@ -389,15 +389,15 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	@-rm ./$(OBJDIR)/*.c
 	@cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET) && \
 	if [ "$(OBJDIR)" = "backobj" ]; then \
-		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
+		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
 	elif [ "$(OBJDIR)" = "transobj" ]; then \
-		/bin/echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
+		/bin/echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
 	elif [ "$(OBJDIR)" = "intobj" ]; then \
-		/bin/echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR)s ; \
+		/bin/echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
 	fi && \
 	for i in *.c; \
 	do \
-		/bin/echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR)s ; \
+		/bin/echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR)smak ; \
 	done && \
 	/bin/echo -ne "\t" >> ../Makefile.$(OBJDIR)
 
