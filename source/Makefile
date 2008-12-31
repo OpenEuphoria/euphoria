@@ -79,6 +79,19 @@ ifeq "$(EMINGW)" "1"
 		MEM_FLAGS=-DESIMPLE_MALLOC
 	endif
 else
+ifeq "$(EDJGPP)" "1"
+	EOSTYPE=-DEDOS -DEDJGPP
+	EOSFLAGS=
+	EOSFLAGSCONSOLE=
+	EOSMING=-O2
+	EBACKENDU=backendd
+	EBACKENDC=backendd
+	EECU=ec
+	EEXU=ex
+	EECUA=ec.a
+	MEM_FLAGS=
+	ECHO=echo
+else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
@@ -89,6 +102,7 @@ else
 	EEXU=exu
 	EECUA=ecu.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
+endif
 endif
 
 ifdef EDEBUG
