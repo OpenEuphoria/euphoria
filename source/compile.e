@@ -5911,7 +5911,7 @@ procedure BackEnd(atom ignore)
 	end if
 	end if
 
-	if EDJGPP then
+	if TDOS and sequence(dj_path) then
 		c_hputs("extern __Go32_Info_Block _go32_info_block;\n")
 	end if
 
