@@ -47,14 +47,19 @@ test_equal("min() sequence", 3, min({5,8,3,100,32}))
 test_equal("max() integer", 5, max(5))
 test_equal("max() integer", 109, max({5,4,3,109,108,35}))
 
-test_equal("log() #1", 2.30259, round(log(10), 100000))
-test_equal("log() #2", 2.48491, round(log(12), 100000))
-test_equal("log() #3", 6.84375, round(log(938), 100000))
-test_equal("log() #4", {2.48491, 6.84375}, round(log({12, 938}), 100000))
 
-test_equal("log10() #1", 3.0, round(log10(1000.0), 100000))
-test_equal("log10() #2", 1.91908, round(log10(83), 100000))
-test_equal("log10() #3", {3.0, 1.91908}, round(log10({1000.0, 83}), 100000))
+function close_enough( object expected, object result, atom epsilon )
+	return abs( expected - result ) < epsilon
+end function
+
+test_equal("log() #1", 1, close_enough( 2.30259, log(10), 0.00001 ) )
+test_equal("log() #2", 1, close_enough( 2.48491, log(12), 0.00001 ) )
+test_equal("log() #3", 1, close_enough( 6.84375, log(938), 0.00001 ) )
+test_equal("log() #4", {1,1}, close_enough( {2.48491, 6.84375}, log({12, 938}), 0.00001 ) )
+
+test_equal("log10() #1", 1, close_enough( 3.0, log10(1000.0), 0.00001) )
+test_equal("log10() #2", 1, close_enough( 1.91908, log10(83), 0.00001) )
+test_equal("log10() #3", {1,1}, close_enough( {3.0, 1.91908}, log10({1000.0, 83}), 0.00001  ) )
 
 test_equal("deg2rad() #1", "0.0174532925", sprintf("%.10f", deg2rad(1)))
 test_equal("deg2rad() #2", "3.4906585040", sprintf("%.10f", deg2rad(200)))
