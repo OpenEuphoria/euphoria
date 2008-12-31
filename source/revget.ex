@@ -241,5 +241,5 @@ end if
 end procedure
 
 if not rev_with_svnversion() then 
-	rev_1_4()
+	rev_1_3()
 end if
