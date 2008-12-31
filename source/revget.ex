@@ -1,6 +1,19 @@
 include std/get.e 
+include std/filesys.e
 
 constant rev = "revision=\""
+
+
+procedure update_rev_e( object f )
+	integer h
+	puts(1,"updating rev.e\n")
+	if atom(f) then
+	    f = sprintf( "%d", { f } )
+	end if
+	h = open("rev.e", "w")
+	printf(h, "global constant SVN_REVISION = \"%s\"\n", {f})
+	close(h)
+end procedure
 
 function is_numeric(sequence s)
 	for i = 1 to length(s) do
@@ -15,6 +28,9 @@ function is_numeric(sequence s)
 	return 1
 end function
 
+
+-- Returns true iff the value SVN_REVISION in rev.e is set
+-- to is equal to the value of rev passed here.
 function is_current( object rev )
 	integer fn
 	integer current
@@ -25,11 +41,9 @@ function is_current( object rev )
 		return 0
 	end if
 	
-	if sequence( rev ) then
-		rev = value( rev )
-		rev = rev[2]
-	end if
-	
+	if atom( rev ) then
+		rev = sprintf( "%d", {rev} )
+	end if	
 	
 	current = 0
 	while sequence( line ) entry do
@@ -37,8 +51,7 @@ function is_current( object rev )
 		if ix then
 			jx = find_from( '"', line, ix + 17 )
 			if jx then
-				line = value( line[ix+16..jx-1] )
-				if line[2] >= rev then
+				if compare( line[ix+16..jx-1], rev ) = 0 then
 					current = 1
 				end if
 				exit
@@ -51,15 +64,38 @@ function is_current( object rev )
 	return current
 end function
 
-procedure unknown_rev()
-	integer fn
-	fn = open( "rev.e", "r" )
-	if fn != -1 then
-		return
+-- function attemps to retrieve svnversion program
+-- if the svnversion program is not on the system
+-- or doesn't produce any output it returns 0.  If
+-- svnversion does produce some string and this 
+-- string differs from what is already in rev.e, it
+-- updates the rev.e file and returns 1
+function rev_with_svnversion()
+	integer x
+	object line
+	sequence n
+	-- run svnversion with .. argument to include support directories
+	system( "svnversion ..>rev.dat", 0 )
+	x = open( "rev.dat", "r" )
+	if x > -1 then
+	  line = gets(x)
+	  close(x)	  
+	  if sequence( line ) and length(line) then
+	  	n = line[1..$-1]
+		if not is_current( n ) then
+			update_rev_e( n )
+		end if		
+		x += 0 * delete_file("rev.dat")		
+		return 1
+	  end if
+	  close(x)
 	end if
-	fn = open( "rev.e", "w" )
-	puts(fn, "global constant SVN_REVISION = \"???\"\n")
-	close(fn)
+	x += 0 * delete_file("rev.dat")
+	return 0
+end function
+
+procedure unknown_rev()
+	update_rev_e( "???" )
 end procedure
 
 procedure rev_1_4()
@@ -138,9 +174,7 @@ for i = 2 to length(f) do
 	end if
 end for
 if not is_current( n ) then
-	h = open("rev.e", "w")
-	printf(h, "global constant SVN_REVISION = \"%d\"\n", {n})
-	close(h)
+	update_rev_e( n )
 end if
 end procedure
 
@@ -202,11 +236,10 @@ end if
 f = f[1..find('"', f)-1]
 --puts(1, f)
 if not is_current( f ) then
-puts(1,"updating rev.e\n")
-	h = open("rev.e", "w")
-	printf(h, "global constant SVN_REVISION = \"%s\"\n", {f})
-	close(h)
+        update_rev_e( f )
 end if
 end procedure
 
-rev_1_3()
+if not rev_with_svnversion() then 
+	rev_1_4()
+end if
