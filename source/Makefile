@@ -389,17 +389,17 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 	@-rm ./$(OBJDIR)/*.c
 	@cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET) && \
 	if [ "$(OBJDIR)" = "backobj" ]; then \
-		/bin/echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
+		echo -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
 	elif [ "$(OBJDIR)" = "transobj" ]; then \
-		/bin/echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
+		echo -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
 	elif [ "$(OBJDIR)" = "intobj" ]; then \
-		/bin/echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
+		echo -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
 	fi && \
 	for i in *.c; \
 	do \
-		/bin/echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR)smak ; \
+		echo -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR)smak ; \
 	done && \
-	/bin/echo -ne "\t" >> ../Makefile.$(OBJDIR)
+	echo -ne "\t" >> ../Makefile.$(OBJDIR)
 
 
 ./$(OBJDIR)/back/%.o : %.c
