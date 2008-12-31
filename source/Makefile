@@ -27,8 +27,9 @@
 include Makefile.eu
 
 ifneq "$(OBJDIR)" ""
-include Makefile.$(OBJDIR)s
+OBJDIR="."
 endif
+include Makefile.$(OBJDIR)s
 
 EU_VERSION = 4.0
 
