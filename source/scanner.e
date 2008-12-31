@@ -920,14 +920,16 @@ function my_sscanf(sequence yytext)
 		-- get fraction
 		c = yytext[i]
 		i += 1
-		dec = 10.0
+		dec = 1.0
+		atom frac = 0
 		while c >= '0' and c <= '9' do
 			ndigits += 1
-			mantissa = mantissa + (c - '0') / dec
-			dec = dec * 10.0
+			frac = frac * 10 + (c - '0')
+			dec *= 10.0
 			c = yytext[i]
 			i += 1
 		end while
+		mantissa += frac / dec
 	end if
 	
 	if ndigits = 0 then
