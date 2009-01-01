@@ -1,6 +1,14 @@
 #!/bin/sh
 
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
+if echo "$UNAME_SYSTEM" | grep CYGWIN; then
+	# for now, we build with -mno-cygwin under cygwin, so this is treated
+	# identically to MinGW
+	# A true exu.exe should probably set UNAME_SYSTEM="CYGWIN"
+	UNAME_SYSTEM=WINDOWS
+elif echo "$UNAME_SYSTEM" | grep MINGW; then
+	UNAME_SYSTEM=WINDOWS
+fi
 
 if [ -e source/global.e ]; then
 	PREFIX=source/
@@ -19,6 +27,22 @@ if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
+	echo EMINGW= >> "$PREFIX"Makefile.eu
+	echo EDJGPP= >> "$PREFIX"Makefile.eu
+elif test $UNAME_SYSTEM = "MS-DOS"; then
+	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"Makefile.eu
+	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ELINUX= >> "$PREFIX"Makefile.eu
+	echo EMINGW= >> "$PREFIX"Makefile.eu
+	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
+elif test $UNAME_SYSTEM = "WINDOWS"; then
+	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"Makefile.eu
+	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ELINUX= >> "$PREFIX"Makefile.eu
+	echo EMINGW=1 >> "$PREFIX"Makefile.eu
+	echo EDJGPP= >> "$PREFIX"Makefile.eu
 else
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
@@ -28,6 +52,8 @@ else
 		echo EOSX= >> "$PREFIX"Makefile.eu
 	fi
 	echo ELINUX= >> "$PREFIX"Makefile.eu
+	echo EMINGW= >> "$PREFIX"Makefile.eu
+	echo EDJGPP= >> "$PREFIX"Makefile.eu
 fi
 
 case "${UNAME_SYSTEM}:${ECONFIG}" in
@@ -59,6 +85,13 @@ while [ "$1" != "" ]; do
         ;;
         --full )
                        echo RELEASE=1 >> "$PREFIX"Makefile.eu
+        ;;
+        --managed-mem )
+		       # currently this is Windows only
+                       echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu
+        ;;
+        --debug )
+                       echo EDEBUG=1 >> "$PREFIX"Makefile.eu
         ;;
     esac
     shift
