@@ -20,6 +20,7 @@ end ifdef
 
 integer translator_platform
 integer interpreter_platform
+integer verbose_switch = 0
 
 integer ctcfh = 0
 sequence error_list = repeat({},4)
@@ -125,7 +126,7 @@ procedure do_test(sequence cmds)
 	sequence control_err, ex_err, interpreter_os_name
 	integer log_where = 0 -- keep track of unittest.log
 	integer log_fd = 0
-	integer es -- expected status
+	integer expected_status 
 
 	ifdef UNIX then
 		executable = "exu"
@@ -222,12 +223,14 @@ procedure do_test(sequence cmds)
 		if cmds[i][1] != '-' then
 			files &= {{cmds[i]}}
 		else
-			cmd_opts = cmds[i] & " "
+			cmd_opts &= cmds[i] & " "
 		end if
 	end for
-
-	cmd_opts = "-log"
 	
+	-- for some illogical reason '-log' is mandatory now.
+	cmd_opts &= "-log "
+	
+
 	if length(files) = 0 then
 		files = sort(dir("t_*.e"))
 	end if
@@ -250,19 +253,18 @@ procedure do_test(sequence cmds)
 		end if
 		if delete_file( "cw.err" ) then
 		end if
-		if find( filename, {"t_files.e", "t_machne.e"} ) then
-			trace(1)
-		end if
 		printf(1, "%s:\n", {filename})
 		cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
-		printf(1, "CMD '%s'\n", {cmd})
+		if verbose_switch != 0 then
+			printf(1, "CMD '%s'\n", {cmd})
+		end if
 		
 		if match("t_c_", dos_lower(filename)) = 1 then
-			es = 1
+			expected_status = 1
 			status = system_exec( cmd, 2 )
 		else
 			status = invoke( 0, cmd, filename, E_INTERPRET, "interpreted" )
-			es = 0
+			expected_status = 0
 			if status then
 				failed += 1
 				fail_list = append(fail_list, filename )
@@ -270,7 +272,7 @@ procedure do_test(sequence cmds)
 			end if
 		end if
 
-		if es then
+		if expected_status then
 			directory = filename[1..find('.',filename)-1] & SLASH & interpreter_os_name
 			if sequence( dir( directory ) ) then
 				if sequence( dir( directory & SLASH & "control.err" ) ) then
@@ -310,7 +312,7 @@ procedure do_test(sequence cmds)
 			end ifdef
 		end if
 
-		if status xor es then
+		if status xor expected_status then
 			failed += 1
 			fail_list = append( fail_list, filename )
 			if not file_exists("ex.err") then
@@ -320,7 +322,7 @@ procedure do_test(sequence cmds)
 
 			end if
 			continue
-		elsif es = 0 then
+		elsif expected_status = 0 then
 			for j = 1 to 5 do
 				if file_exists("unittest.log") then
 					exit
@@ -347,14 +349,14 @@ procedure do_test(sequence cmds)
 			
 		end if
 		
-		if length(translator) and es = 0 then
+		if length(translator) and expected_status = 0 then
 			printf(1, "translating %s:\n", {filename})
 			-- translator for windows                       
 
 			cmd = sprintf("%s %s %s %s -D UNITTEST %s -D EC -batch %s", {translator, library, compiler, options, con, filename})
 			status = system_exec( cmd, 0 )
 
-			if status = es and es = 0 then
+			if status = expected_status and expected_status = 0 then
 				lib = find('.', filename)
 				if lib then
 					filename = filename[1..lib-1]
@@ -381,7 +383,7 @@ procedure do_test(sequence cmds)
 							"program could not be compiled. Compilation process exited with status %d", {emake_outcome} )
 					end if
 				end if
-			elsif es = 0 then
+			elsif expected_status = 0 then
 				failed += 1
 				fail_list = append(fail_list, "translate " & filename )
 				error( filename & ".e", E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
@@ -701,7 +703,6 @@ procedure do_process_log(sequence cmds)
 	
 	for i = 1 to length(other_files) do
 		if find( other_files[i], error_list[1] ) then
-			trace(1)
 			call_proc( out_r, {{"file",other_files[i]}} )
 			call_proc( out_r, {{"summary",0,0,0,0}} )
 		end if
@@ -714,7 +715,8 @@ procedure do_process_log(sequence cmds)
 	
 	if html then
 		if find(1, error_list[3] = E_EUTEST ) then
-			printf(1, "There was an internal error to the testing system involving %s<br>", 				{error_list[1][find( E_EUTEST, error_list[3] )]} )
+			printf(1, "There was an internal error to the testing system involving %s<br>",
+			 				{error_list[1][find( E_EUTEST, error_list[3] )]} )
 		end if
 		puts(1, "<a name='summary'>\n" )
 		puts(1, "<table style=\"font-size: 1.5em\"><tr><th colspan=2 align=left>Overall</th></tr>\n")
@@ -739,10 +741,13 @@ procedure main(sequence cmds = command_line())
 		&"\t[-ec translator-path-and-filename]\n"
 		&"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n"
 		&"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n"
-		&"\t[-log]"
-		&"\t[unit test files]")
+		&"\t[-log]\n"
+		&"\t[-verbose]\n"
+		&"\t[unit test files]\n")
 		abort(0)
 	end if  
+	verbose_switch = (find("-verbose", cmds) != 0)
+	
 	if find("-process-log", cmds) then
 		do_process_log(cmds)
 	else
