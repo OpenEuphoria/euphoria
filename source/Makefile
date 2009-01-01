@@ -89,7 +89,8 @@ ifeq "$(EDJGPP)" "1"
 	EECU=ec
 	EEXU=ex
 	EECUA=ec.a
-	MEM_FLAGS=
+	MEM_FLAGS=-DESIMPLE_MALLOC
+	LDLFLAG=-lalleg
 	ECHO=echo
 else
 	EOSTYPE=-DEUNIX
