@@ -20,7 +20,6 @@ end ifdef
 
 integer translator_platform
 integer interpreter_platform
-integer verbose_switch = 0
 
 integer ctcfh = 0
 sequence error_list = repeat({},4)
@@ -75,8 +74,8 @@ end ifdef
 			
 		
 		elsif equal( "move", line[1..4] ) or
-		        equal( "del", line[1..3] ) then
-		        system( line, 2 )
+		       equal( "del", line[1..3] ) then
+		       system( line, 2 )
 		else
 		        sequence source = ""
 			integer fnptr = match( "t_", lower(line) )
@@ -131,15 +130,15 @@ end function
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
-	object rfiles, before_emake, emake_outcome
-	sequence files = {}, filename, dexe, executable, cmd, cmd_opts = "", options, switches
+	object rfiles, before_emake, emake_outcome, files = {}
+	sequence filename, dexe, executable, cmd, cmd_opts = "", options, switches
 	sequence translator = "", library = "", compiler = "", con = ""
 	sequence directory
 	sequence control_err, ex_err, interpreter_os_name
 	integer log_where = 0 -- keep track of unittest.log
 	integer log_fd = 0
-	integer expected_status 
-
+	integer expected_status -- expected status
+	
 	ifdef UNIX then
 		executable = "exu"
 		dexe = ""
@@ -153,6 +152,8 @@ procedure do_test(sequence cmds)
 
 	integer log = find("-log", cmds)
 
+	integer verbose_switch = find( "-verbose", cmds )
+	
 	integer ex
 	while ex and ex < length(cmds) entry do
 		executable = cmds[ex+1]
@@ -231,6 +232,7 @@ procedure do_test(sequence cmds)
 		cci = find( "-cc", cmds )               
 	end while
 
+	
 	for i = 3 to length(cmds) do
 		if cmds[i][1] != '-' then
 			files &= {{cmds[i]}}
@@ -239,12 +241,13 @@ procedure do_test(sequence cmds)
 		end if
 	end for
 	
-	-- for some illogical reason '-log' is mandatory now.
-	cmd_opts &= "-log "
-	
-
 	if length(files) = 0 then
-		files = sort(dir("t_*.e"))
+		files = dir("t_*.e")
+		if atom(files) then
+			puts(2,"No unit tests supplied or found.\n")
+			abort(1)
+		end if
+		files = sort(files)
 	end if
 
 	total = length(files)
@@ -275,109 +278,111 @@ procedure do_test(sequence cmds)
 
 		if 1 label "interpreter" then		
 			printf(1, "interpreting %s:\n", {filename})
-			cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
-			if verbose_switch != 0 then
-				printf(1, "CMD '%s'\n", {cmd})
-			end if
-			
-			if match("t_c_", dos_lower(filename)) = 1 then
+		cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
+		if verbose_switch > 0 then
+			printf(1, "CMD '%s'\n", {cmd})
+		end if
+		
+		if match("t_c_", dos_lower(filename)) = 1 then
 			expected_status = 1
-				status = system_exec( cmd, 2 )
-			else
-				status = invoke( 0, cmd, filename, E_INTERPRET, "interpreted" )
+			status = system_exec( cmd, 2 )
+		else
+			status = invoke( 0, cmd, filename, E_INTERPRET, "interpreted" )
 			expected_status = 0
-				if status then
-					failed += 1
-					fail_list = append(fail_list, filename )
+			if status then
+				failed += 1
+				fail_list = append(fail_list, filename )
 					break "interpreter"
-				end if
 			end if
+		end if
 	
-			if expected_status then
-				directory = filename[1..find('.',filename)-1] & SLASH & interpreter_os_name
-				if sequence( dir( directory ) ) then
-					if sequence( dir( directory & SLASH & "control.err" ) ) then
-						control_err = read_lines( directory & SLASH & "control.err" )
-						ex_err = read_lines( "ex.err" )
-						if length(ex_err) > 4 then
-							ex_err = ex_err[1..4]
+		if expected_status then
+			directory = filename[1..find('.',filename)-1] & SLASH & interpreter_os_name
+			if sequence( dir( directory ) ) then
+				if sequence( dir( directory & SLASH & "control.err" ) ) then
+					control_err = read_lines( directory & SLASH & "control.err" )
+					ex_err = read_lines( "ex.err" )
+					if length(ex_err) > 4 then
+						ex_err = ex_err[1..4]
+					end if
+					if length(control_err) > 4 then
+						control_err = control_err[1..4]
+					end if 
+					comparison = compare( ex_err, control_err )
+					if comparison then
+						failed += 1
+						fail_list = append( fail_list, filename )
+						if length( ex_err ) >=4  and length( control_err ) >= 4 then
+							error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
+						elsif length( ex_err ) then
+							error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
+						else
+							error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
 						end if
-						if length(control_err) > 4 then
-							control_err = control_err[1..4]
-						end if 
-						comparison = compare( ex_err, control_err )
-						if comparison then
-							failed += 1
-							fail_list = append( fail_list, filename )
-							if length( ex_err ) >=4  and length( control_err ) >= 4 then
-								error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
-							elsif length( ex_err ) then
-								error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
-							else
-								error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
-							end if
 							break "interpreter"
-						end if
+					end if
 	
-					elsif atom( dir( "ex.err" ) ) then
-						error( filename, E_INTERPRET, "ex.err not generated.", {} )
+				elsif atom( dir( "ex.err" ) ) then
+					error( filename, E_INTERPRET, "ex.err not generated.", {} )
 						break "interpreter"
-					end if
-					
 				end if
-				ifdef REC then
-					if create_directory( filename[1..find('.',filename)-1] )
-					and create_directory( directory ) 
-					and move_file( "ex.err", directory & SLASH & "control.err" ) then 
-					end if
-				end ifdef
+				
 			end if
+			ifdef REC then
+				if create_directory( filename[1..find('.',filename)-1] )
+				and create_directory( directory ) 
+				and move_file( "ex.err", directory & SLASH & "control.err" ) then 
+				end if
+			end ifdef
+		end if
 	
-			if status xor expected_status then
+		if status xor expected_status then
+			failed += 1
+			fail_list = append( fail_list, filename )
+			if not file_exists("ex.err") then
+				error( filename , E_INTERPRET, "program closed with status %d", {status} )
+			else
+				error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
+	
+			end if
+				break "interpreter"
+		elsif (expected_status = 0) and log then
+			for j = 1 to 5 do
+				if file_exists("unittest.log") then
+					exit
+				end if
+				sleep(0.1)
+			end for
+				
+			log_fd = open( "unittest.log", "a" )
+				
+			if log_fd = -1  then
+				error( filename, E_INTERPRET, "couldn't generate unittest.log", {}, "ex.err" )
 				failed += 1
 				fail_list = append( fail_list, filename )
-				if not file_exists("ex.err") then
-					error( filename , E_INTERPRET, "program closed with status %d", {status} )
-				else
-					error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
-	
-				end if
-				break "interpreter"
-			elsif expected_status = 0 and log != 0 then
-				for j = 1 to 5 do
-					if file_exists("unittest.log") then
-						exit
-					end if
-					sleep(0.1)
-				end for
-				
-				log_fd = open( "unittest.log", "a" )
-				
-				if log_fd = -1  then
-					error( filename, E_INTERPRET, "couldn't generate unittest.log", {}, "ex.err" )
-					failed += 1
-					fail_list = append( fail_list, filename )
-					close( log_fd )
-					break "interpreter"
-				elsif log_where = where( log_fd ) then
-					error( filename, E_INTERPRET, "couldn't add to unittest.log", {}, "ex.err" )
-					failed += 1
-					fail_list = append( fail_list, filename )
-					close( log_fd )
-					break "interpreter"
-				end if
-				log_where = where( log_fd )
 				close( log_fd )
-				log_fd = 0
-				
+					break "interpreter"
+			elsif log_where = where( log_fd ) then
+				error( filename, E_INTERPRET, "couldn't add to unittest.log", {}, "ex.err" )
+				failed += 1
+				fail_list = append( fail_list, filename )
+				close( log_fd )
+					break "interpreter"
 			end if
+			log_where = where( log_fd )
+			close( log_fd )
+			log_fd = 0
+			
+		end if
 		end if -- interpreter
 		
 		if length(translator) and expected_status = 0 then
 			total += 1 -- also account for this translated test
 			printf(1, "translating %s:\n", {filename})
 			cmd = sprintf("%s %s %s %s -D UNITTEST %s -D EC -batch %s", {translator, library, compiler, options, con, filename})
-			printf(1, "CMD '%s'\n", {cmd})                      
+			if verbose_switch > 0 then
+				printf(1, "CMD '%s'\n", {cmd})
+			end if
 			status = system_exec( cmd, 0 )
 
 			if status = expected_status and expected_status = 0 then
@@ -553,7 +558,7 @@ procedure html_out(sequence data)
 				end if
 			printf( 1, "<tr bgcolor=#dddddd><th align=left>test name</th><th>elapsed time</th><th>expected outcome</th><th>actual outcome</tr>\n", {} )
 					
-		
+						
 			end if
 			break
 
@@ -765,8 +770,6 @@ procedure main(sequence cmds = command_line())
 		&"\t[unit test files]\n")
 		abort(0)
 	end if  
-	verbose_switch = (find("-verbose", cmds) != 0)
-	
 	if find("-process-log", cmds) then
 		do_process_log(cmds)
 	else

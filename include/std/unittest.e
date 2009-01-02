@@ -280,6 +280,11 @@ public procedure test_report()
 
 	add_log({ "summary", test_count, tests_failed, tests_passed, time() - time_start })
 
+	if log_fh != 0 then
+		close( log_fh )
+		log_fh = 0
+	end if
+	
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
 		abort(0)
@@ -460,6 +465,10 @@ for i = 3 to length(cmd) do
 		set_accumulate_summary(1)
 	elsif equal(cmd[i], "-log") then
 		log_fh = open("unittest.log", "a")
+		if log_fh = -1 then
+			puts(2,"Cannot open unittest.log for append.\n")
+			abort(1)
+		end if
 		add_log({"file", filename})
 	end if
 end for
