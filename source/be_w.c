@@ -235,7 +235,7 @@ void InitInOut()
     position = GetTextPositionP();  // causes OpenWatcom 1.4 to go full-screen
 
     screen_col = position.col;
-    err_to_screen = TRUE;  /* stderr always goes to screen in DOS & WIN32 */
+    err_to_screen = TRUE;  /* stderr always goes to screen in DOS */
     rc = fstat(1, &buf);
     if (rc == -1 || ((buf.st_atime == 0 || buf.st_mtime == 0)
                      && (buf.st_dev < 0 || buf.st_dev > 9)))
@@ -262,6 +262,7 @@ void show_console()
     INPUT_RECORD pbuffer;
     DWORD junk;
     int alloc_ret;
+    HANDLE stderr_cons;
 
     if (have_console)
         return;
@@ -301,6 +302,14 @@ void show_console()
                                 OPEN_EXISTING,
                                 0,
                                 NULL);
+    }
+
+    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+	/* when EUCONS is set, allow stderr to be redirected so rxvt (which redirects it to a pipe) will work */
+    	stderr_cons = GetStdHandle(STD_ERROR_HANDLE);
+    	err_to_screen = GetConsoleScreenBufferInfo(stderr_cons, &info);
+    } else {
+    	err_to_screen = TRUE;  /* stderr always goes to screen in WIN32 */
     }
 
     console_input = GetStdHandle(STD_INPUT_HANDLE);
@@ -759,7 +768,7 @@ void screen_output(IFILE f, char *out_string)
 #endif
             if (current_screen != MAIN_SCREEN)
                 MainScreen();
-            if (out_to_screen || f == stderr) {  //stderr always goes to screen
+            if (out_to_screen || ((f == stderr) && err_to_screen)) {  //stderr always goes to screen if stdout is not being redirected
                 expand_tabs(out_string);
                 return;
             }
@@ -772,6 +781,11 @@ void screen_output(IFILE f, char *out_string)
         }
 
         iputs(out_string, f);
+        if ((f == stdout || f == stderr) &&
+		(getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1)) {
+		// for rxvt - note that in this instance EUCONS will also work on DOS
+		iflush(f);
+        }
     }
 }
 
