@@ -280,7 +280,7 @@ override function peek2u(object x)
 	atom a
 	
 	if atom(x) then
-		len = 1
+		len = 2
 		a = x
 	else
 		len = x[2] * 2
@@ -299,7 +299,7 @@ override function peek2s(object x)
 	atom a
 	
 	if atom(x) then
-		len = 1
+		len = 2
 		a = x
 	else
 		len = x[2] * 2
@@ -393,9 +393,9 @@ override procedure poke2(atom a, object v)
 	integer len
 	
 	if atom(v) then
-		len = 1
+		len = 2
 	else
-		len = length(v) * 4
+		len = length(v) * 2
 	end if
 	if safe_address(a, len) then
 		eu:poke2(a, v)
