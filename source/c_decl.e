@@ -891,6 +891,23 @@ global procedure DeclareNameSpaceList()
 	c_puts("  {\"\", 0, 999999999, 0}\n};\n\n")  -- end marker
 end procedure
 
+function is_exported( symtab_index s )
+-- returns 1 if symbol should be exported from dll/so
+	sequence eentry = SymTab[s]
+	integer scope = eentry[S_SCOPE]
+	if eentry[S_MODE] = M_NORMAL then
+		if eentry[S_FILE_NO] = 1 or scope = SC_GLOBAL then
+			return 1
+		end if
+		
+		if scope = SC_PUBLIC 
+		and and_bits( include_matrix[1][eentry[S_FILE_NO]], PUBLIC_INCLUDE ) then
+			return 1
+		end if
+	end if
+	return 0
+end function
+
 
 procedure Write_def_file(integer def_file)
 -- output the list of exported symbols for a .dll 
@@ -903,7 +920,7 @@ procedure Write_def_file(integer def_file)
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
-			if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC}) then
+			if is_exported( s ) then
 				if sequence(bor_path) then             
 					printf(def_file, "%s=_%d%s\n", 
 						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
@@ -1554,20 +1571,26 @@ global procedure GenerateUserRoutines()
 						end if
 						add_file(c_file)
 					end if
-				
+					
+					sequence ret_type
+					if SymTab[s][S_TOKEN] = PROC then
+						ret_type = ""
+					else
+						ret_type = "int "
+					end if
 					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
 						-- declare the global routine as an exported DLL function
 						if TWINDOWS then      
 							-- c_stmt0("int __declspec (dllexport) __stdcall\n")
-							c_stmt0("int __stdcall\n")
+							c_stmt0( ret_type & "__stdcall\n")
 						end if                  
 						-- mark it as a routine_id target, so it won't be deleted
 						SymTab[s][S_RI_TARGET] = TRUE
 						LeftSym = TRUE
-						c_stmt("@(", s)
+						c_stmt(ret_type & "@(", s)
 					else 
 						LeftSym = TRUE
-						c_stmt("int @(", s)
+						c_stmt( ret_type & "@(", s)
 					end if
 				
 					-- declare the parameters 
@@ -1681,8 +1704,15 @@ global procedure GenerateUserRoutines()
 				
 					-- walk through the IL for this routine 
 					call_proc(Execute_id, {s})
-				
-					c_puts("    ;\n}\n\n\n")
+					
+					c_puts("    ;\n}\n")
+					if TUNIX and dll_option and is_exported( s ) then
+						-- create an alias for exporting routines
+						LeftSym = TRUE
+						c_stmt( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"@\")));\n", s )
+						LeftSym = FALSE
+					end if
+					c_puts("\n\n" )
 				end if
 			
 				s = SymTab[s][S_NEXT]

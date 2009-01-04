@@ -665,6 +665,9 @@ end procedure
 
 procedure add_include_by( integer by_file, integer included_file, integer is_public = 0 )
 	include_matrix[by_file][included_file] = or_bits( DIRECT_INCLUDE, include_matrix[by_file][included_file] )
+	if is_public then
+		include_matrix[by_file][included_file] = or_bits( PUBLIC_INCLUDE, include_matrix[by_file][included_file] )
+	end if
 	if not find( by_file, file_include_by[included_file] ) then
 		file_include_by[included_file] &= by_file
 	end if
