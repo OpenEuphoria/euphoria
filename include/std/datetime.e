@@ -12,6 +12,7 @@ include std/machine.e
 include std/dll.e
 include std/sequence.e
 include std/get.e
+include std/error.e
 
 ifdef LINUX then
 	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
@@ -49,34 +50,40 @@ function time()
 			valhi -= 1
 		end if
 		return floor(((valhi * power(2,32)) + vallow) / 10000000)
-	elsifdef UNIX then
-		return c_func(time_, {NULL})
 	elsedef
-		return {0,0,0,0,0,0,0,0,0}
+		ifdef DOS32 then
+			crash( "This function, time(), is not supported for this Operating System." )
+		end ifdef
+		return c_func(time_, {NULL})
 	end ifdef
 end function
-
+	
 function gmtime(atom time)
 	sequence ret
 	atom timep, tm_p
 	integer n
-	
-	timep = allocate(4)
-	poke4(timep, time)
-	
-	tm_p = c_func(gmtime_, {timep})
-	
-	free(timep)
-	
-	ret = repeat(0, 9)
-	n = 0
 
-	for i = 1 to 9 do
-		ret[i] = peek4s(tm_p+n)
-		n = n + 4
-	end for
+	ifdef DOS32 then
+		crash( "This function, gmtime() is not supported for this Operating System." )
+	elsedef
+		timep = allocate(4)
+		poke4(timep, time)
+		
+		tm_p = c_func(gmtime_, {timep})
+		
+		free(timep)
+		
+		ret = repeat(0, 9)
+		n = 0
 	
-	return ret
+		for i = 1 to 9 do
+			ret[i] = peek4s(tm_p+n)
+			n = n + 4
+		end for
+		
+		return ret
+	end ifdef
+	return 0
 end function
 
 constant
@@ -527,10 +534,15 @@ end function
 -- [[:now]]
 
 public function now_gmt()
-   sequence t1 = gmtime(time())
-   return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
+ifdef DOS32 then
+	crash( "The function, now_gmt(), is not supported for this Operating System." )
+	-- avoid 'function doesn't return' warning:
+	return -1
+elsedef
+	sequence t1 = gmtime(time())
+	return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
+end ifdef
 end function
-
 --**
 -- Create a new datetime value.
 --
