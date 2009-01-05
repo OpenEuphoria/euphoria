@@ -1250,8 +1250,7 @@ global procedure emit_op(integer op)
 		
 	-- 0 inputs, 1 output, special op
 	elsif op = DOLLAR then
-		
-		if SymTab[current_sequence[$]][S_SCOPE] = SC_UNDEFINED then
+		if current_sequence[$] < 0 or SymTab[current_sequence[$]][S_SCOPE] = SC_UNDEFINED then
 			if lhs_ptr and length(current_sequence) = 1 then
 				c = PLENGTH
 			else
