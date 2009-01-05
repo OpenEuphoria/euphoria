@@ -50,7 +50,7 @@ public constant
 
 --**
 -- C's NULL pointer
--- public constant NULL = 0 -- NULL pointer
+-- public constant NULL = 0 ~-- NULL pointer
 
 public constant NULL = 0 -- NULL pointer
 
@@ -68,7 +68,7 @@ constant M_OPEN_DLL  = 50,
 -- (.so) file. 
 --
 -- Parameters:
--- 		# ##file_name##: a sequence, the name of the shared libraru to open.
+-- 		# ##file_name##: a sequence, the name of the shared library to open.
 --
 -- Returns:
 --		An **atom**, actually a 32-bit address. 0 is returned if the .dll can't be found.
@@ -329,7 +329,7 @@ end function
 --      By default, your routine will work with the stdcall convention. On
 -- Windows, you can specify i1s id as {'+', id}, in which case it will work with the cdecl calling
 -- convention instead. On non-Microsoft platforms, you
--- should only use simple IDs, as there is just one standard calling convention, ie stdcall.
+-- should only use simple IDs, as there is just one standard calling convention, i.e. stdcall.
 --
 --     You can set up as many call-back functions as you like, but they must all be Euphoria
 --     functions (or types) with 0 to 9 arguments. If your routine has nothing to return
