@@ -397,7 +397,7 @@ end type
 -- Return the number of seconds since some fixed point in the past.
 --
 -- Returns:
--- An **atom**, which represetnts an absolute number of seconds.
+-- An **atom**, which represents an absolute number of seconds.
 --
 -- Comments: 
 --
@@ -630,7 +630,7 @@ end function
 -- Comments:
 -- 		For dates earlier than 1800, this routine may give inaccurate results if the date
 -- applies to a country other than United Kingdom or a former colony thereof. The change from
--- julian to gregorian calendar took place much earlier in some other european countries.
+-- Julian to Gregorian calendar took place much earlier in some other European countries.
 --
 -- Example 1:
 -- <eucode>
@@ -1013,8 +1013,8 @@ end function
 --
 -- Parameters:
 -- 		# ##dt##: the base datetime
--- 		# ##qty##: the number of //intervals// to substract. It should be positive.
--- 		# ##interval##: which kind of interval to substract.
+-- 		# ##qty##: the number of //intervals// to subtract. It should be positive.
+-- 		# ##interval##: which kind of interval to subtract.
 --
 -- Returns:
 -- 		A **sequence**, more precisely a **datetime** representing the new moment in time.
