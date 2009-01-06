@@ -1,4 +1,5 @@
 -- shift IL code to dynamically insert, delete or replace previously emitted  IL code
+namespace shift
 
 include reswords.e
 include global.e
@@ -272,6 +273,7 @@ function advance( integer pc )
 end function
 
 procedure shift_switch( integer pc, integer start, integer amount )
+-- switch ops require some special processing due to their relative jumps
 	if start < pc or start > Code[pc+4] then
 		-- doesn't affect the switch jumps
 		return
@@ -287,10 +289,20 @@ procedure shift_switch( integer pc, integer start, integer amount )
 end procedure
 
 procedure shift( integer start, integer amount, integer bound = start )
-	
+-- modifies the IL code and the linetable
 	if amount = 0 then
 		return
 	end if
+	
+	for i = length( LineTable ) to 1 by -1 do
+		if LineTable[i] > 0 then
+			if LineTable[i] < start then
+			exit
+			end if
+			LineTable[i] += amount
+		end if
+	end for
+	
 	
 	integer pc = 1
 	integer op

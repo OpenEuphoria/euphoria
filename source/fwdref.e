@@ -38,7 +38,20 @@ export integer parse_arg_rid
 export integer pop_rid
 integer shifting_sub = 0
 
+procedure insert_code( sequence code, integer index, integer subprog )
+	shifting_sub = subprog
+	shift:insert_code( code, index )
+	shifting_sub = 0
+end procedure
+
+procedure replace_code( sequence code, integer start, integer finish, integer subprog )
+	shifting_sub = subprog
+	shift:replace_code( code, start, finish )
+	shifting_sub = 0
+end procedure
+
 sequence patch_code_temp = {}
+sequence patch_linetab_temp = {}
 symtab_index patch_code_sub
 symtab_index patch_current_sub
 procedure set_code( integer ref )
@@ -46,7 +59,11 @@ procedure set_code( integer ref )
 	
 	if patch_code_sub != CurrentSub then
 		patch_code_temp = Code
+		patch_linetab_temp = LineTable
+		
 		Code = SymTab[patch_code_sub][S_CODE]
+		LineTable = SymTab[patch_code_sub][S_LINETAB]
+		
 		patch_current_sub = CurrentSub
 		CurrentSub = patch_code_sub
 	else
@@ -57,9 +74,11 @@ end procedure
 
 procedure reset_code( )
 	SymTab[patch_code_sub][S_CODE] = Code
+	SymTab[patch_code_sub][S_LINETAB] = LineTable
 	if patch_code_sub != patch_current_sub then
 		CurrentSub = patch_current_sub
 		Code = patch_code_temp
+		LineTable = patch_linetab_temp
 	end if
 end procedure
 
@@ -90,7 +109,6 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	sequence fr = forward_references[ref]
 	integer code_sub = fr[FR_SUBPROG]
-	shifting_sub = code_sub
 	symtab_index sub = tok[T_SYM]
 	integer args = SymTab[sub][S_NUM_ARGS]
 	integer is_func = (SymTab[sub][S_TOKEN] = FUNC) or (SymTab[sub][S_TOKEN] = TYPE)
@@ -168,7 +186,6 @@ procedure patch_forward_call( token tok, integer ref )
 	if args != ( supplied_args + extra_default_args ) then
 		err_msg = sprintf( "Wrong number of arguments supplied for forward reference\n\t%s (%d): %s %s.  Expected %d, but found %d.",
 			{ file_name[from_file], line, routine_type, name, args, supplied_args + extra_default_args } )
-	
 	end if
 	
 	if length( err_msg ) then
@@ -182,12 +199,11 @@ procedure patch_forward_call( token tok, integer ref )
 		new_code &= target
 	end if
 	
-	replace_code( new_code, pc, next_pc - 1 )
+	replace_code( new_code, pc, next_pc - 1, code_sub )
 	
 	reset_code()
 	-- mark this one as resolved already
 	forward_references[ref] = 0
-	shifting_sub = 0
 end procedure
 
 procedure set_error_info( integer ref )
@@ -343,7 +359,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 	end if
 	
 	-- clear out the old stuff
-	replace_code( {}, pc, pc + 2 )
+	replace_code( {}, pc, pc + 2, fr[FR_SUBPROG])
 	
 	if TRANSLATE then
 		if with_type_check then
@@ -351,7 +367,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 				if SymTab[which_type][S_EFFECT] then
 					-- only call user-defined types that have side-effects
 					integer c = NewTempSym()
-					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc )
+					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 5
 				end if
 			end if
@@ -365,15 +381,15 @@ procedure patch_forward_type_check( token tok, integer ref )
 			else
 				-- TODO:  Some of these could be optimized away
 				if which_type = integer_type then
-					insert_code( { INTEGER_CHECK, var }, pc )
+					insert_code( { INTEGER_CHECK, var }, pc, fr[FR_SUBPROG] )
 					pc += 2
 					
 				elsif which_type = sequence_type then
-					insert_code( { SEQUENCE_CHECK, var }, pc)
+					insert_code( { SEQUENCE_CHECK, var }, pc, fr[FR_SUBPROG])
 					pc += 2
 					
 				elsif which_type = atom_type then
-					insert_code( { ATOM_CHECK, var }, pc )
+					insert_code( { ATOM_CHECK, var }, pc, fr[FR_SUBPROG] )
 					pc += 2
 					
 				elsif SymTab[which_type][S_NEXT]
@@ -382,12 +398,12 @@ procedure patch_forward_type_check( token tok, integer ref )
 					
 					if SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = integer_type then
 						
-						insert_code( { INTEGER_CHECK, var }, pc )
+						insert_code( { INTEGER_CHECK, var }, pc, fr[FR_SUBPROG] )
 						
 						pc += 2
 					end if
 					symtab_index c = NewTempSym()
-					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc )
+					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 4
 					
 				end if
@@ -401,13 +417,13 @@ procedure patch_forward_type_check( token tok, integer ref )
 		if which_type = sequence_type or
 			SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = sequence_type then
 			-- check sequences anyway, so we can avoid it on subscripting etc.
-			insert_code( { SEQUENCE_CHECK, var }, pc )
+			insert_code( { SEQUENCE_CHECK, var }, pc, fr[FR_SUBPROG] )
 			pc += 2
 			
 		elsif which_type = integer_type or
 				 SymTab[SymTab[which_type][S_NEXT]][S_VTYPE] = integer_type then
 				 -- check integers too
-			insert_code( { INTEGER_CHECK, var }, pc )
+			insert_code( { INTEGER_CHECK, var }, pc, fr[FR_SUBPROG] )
 			pc += 4
 			
 		end if
@@ -614,7 +630,7 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 		if sequence( forward_references[i] ) then
 			sequence ref = forward_references[i]
 			if ref[FR_SUBPROG] = shifting_sub then
-				if ref[FR_PC] > pc then
+				if ref[FR_PC] >= pc then
 					forward_references[i][FR_PC] += amount
 				end if
 			end if
