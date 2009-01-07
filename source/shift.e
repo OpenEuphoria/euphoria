@@ -246,14 +246,9 @@ init_op_info()
 function advance( integer pc )
 
 	integer op = Code[pc]
-	if op = TYPE_CHECK and Code[pc-1] < 0 then
-		if TRANSLATE then
-			return pc + 5
-		else
-			return pc + 7
-		end if
-	elsif op_info[Code[pc]][OP_SIZE_TYPE] = FIXED_SIZE then
-		return pc + op_info[Code[pc]][OP_SIZE]
+	sequence info = op_info[op]
+	if info[OP_SIZE_TYPE] = FIXED_SIZE then
+		return pc + info[OP_SIZE]
 	else
 		switch op do
 			case PROC:
@@ -306,10 +301,7 @@ procedure shift( integer start, integer amount, integer bound = start )
 	
 	integer pc = 1
 	integer op
-	integer prev_op = -1
-	while pc <= length( Code ) entry do
-		prev_op = op
-	entry
+	while pc <= length( Code ) do
 		op = Code[pc]
 		for i = 1 to length( op_info[op][OP_ADDR] ) do
 			

@@ -11,7 +11,11 @@ include scanner.e
 include shift.e
 
 -- Tracking forward references
-sequence forward_references = {}
+sequence 
+	forward_references = {},
+	active_references  = {},
+	active_refnames    = {}
+
 enum
 	FR_TYPE,
 	FR_NAME,
@@ -48,6 +52,17 @@ procedure replace_code( sequence code, integer start, integer finish, integer su
 	shifting_sub = subprog
 	shift:replace_code( code, start, finish )
 	shifting_sub = 0
+end procedure
+
+procedure resolved_reference( integer ref )
+	forward_references[ref] = 0
+	integer ix = find( ref, active_references )
+	if ix then
+		active_references = remove( active_references, ix, ix )
+		active_refnames   = remove( active_refnames, ix, ix )
+	else
+		InternalErr( "Attempted to remove invalid forward reference" )
+	end if
 end procedure
 
 sequence patch_code_temp = {}
@@ -203,7 +218,7 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	reset_code()
 	-- mark this one as resolved already
-	forward_references[ref] = 0
+	resolved_reference( ref )
 end procedure
 
 procedure set_error_info( integer ref )
@@ -243,7 +258,7 @@ procedure patch_forward_variable( token tok, integer ref )
 			Code[vx] = sym
 			vx = find_from( -ref, Code, fr[FR_PC] )
 		end while
-		forward_references[ref] = 0
+		resolved_reference( ref )
 	end if
 	reset_code()
 end procedure
@@ -253,7 +268,7 @@ procedure patch_forward_init_check( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	set_code( ref )
 	Code[fr[FR_PC]+1] = tok[T_SYM]
-	forward_references[ref] = 0
+	resolved_reference( ref )
 	reset_code()
 end procedure
 
@@ -287,7 +302,7 @@ procedure patch_forward_type( token tok, integer ref )
 			SymTab[syms[i]][S_GTYPE] = CompileType(tok[T_SYM])
 		end if
 	end for
-	forward_references[ref] = 0
+	resolved_reference( ref )
 end procedure
 
 procedure patch_forward_case( token tok, integer ref )
@@ -320,7 +335,7 @@ procedure patch_forward_case( token tok, integer ref )
 		case_values[cx] = tok[T_SYM]
 	end if
 	SymTab[case_sym][S_OBJ] = case_values
-	forward_references[ref] = 0
+	resolved_reference( ref )
 end procedure
 
 procedure patch_forward_type_check( token tok, integer ref )
@@ -429,7 +444,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 		end if
 		
 	end if
-	forward_references[ref] = 0
+	resolved_reference( ref )
 	reset_code()
 end procedure
 
@@ -498,6 +513,10 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_BP]        = forward_bp
 	forward_references[ref][FR_QUALIFIED] = get_qualified_fwd()
 	forward_references[ref][FR_OP]        = op
+	
+	active_references &= ref
+	active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
+	
 	return ref
 end function
 
@@ -506,89 +525,89 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	sequence code = {}
 	integer unincluded_ok = get_resolve_unincluded_globals()
 	
-	for ref = length( forward_references ) to 1 by -1 do
+	for ar = length( active_references ) to 1 by -1 do
+		integer ref = active_references[ar]
 		
-		if sequence( forward_references[ref] ) then
-			sequence fr = forward_references[ref]
-			if include_matrix[fr[FR_FILE]][current_file_no] = NOT_INCLUDED and not unincluded_ok then
-				continue
-			end if
-			token tok = find_reference( fr )
-			
-			if tok[T_ID] = IGNORED then
-				errors &= ref
-				continue
-			end if
-			
-			sequence fname = file_name[fr[FR_FILE]]
-			sequence cname = file_name[current_file_no]
-			
-			-- found a match...
-			integer code_sub = fr[FR_SUBPROG]
-			integer fr_type  = fr[FR_TYPE]
-			integer sym_tok
-			
-			switch fr_type label "fr_type" do
-				case PROC:
-				case FUNC:
-					
-					sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
-					if sym_tok = TYPE then
-						sym_tok = FUNC
-					end if
-					if sym_tok != fr_type then
-						forward_error( tok, ref )
-					end if
-					switch sym_tok do
-						case PROC:
-						case FUNC:
-							patch_forward_call( tok, ref )
-							continue
-							
-						case else
-							forward_error( tok, ref )
-							
-					end switch
-					
-				case VARIABLE:
-					sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
-					if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-						errors &= ref
-						continue
-					end if
-					switch sym_tok do
-						case CONSTANT:
-						case ENUM:
-						case VARIABLE:
-							patch_forward_variable( tok, ref )
-							if sequence( forward_references[ref] ) then
-								errors &= ref
-							end if
-							continue
-						case else
-							forward_error( tok, ref )
-					end switch
-				case TYPE_CHECK:
-					patch_forward_type_check( tok, ref )
-					continue
-				
-				case GLOBAL_INIT_CHECK:
-					patch_forward_init_check( tok, ref )
-					continue
-				
-				case CASE:
-					patch_forward_case( tok, ref )
-					continue
-					
-				case TYPE:
-					patch_forward_type( tok, ref )
-					continue
-					
-				case else
-					-- ?? what is it?
-					InternalErr( sprintf("unrecognized forward reference type: %d (%s)", {fr[FR_TYPE], fr[FR_NAME]} ))
-			end switch
+		sequence fr = forward_references[ref]
+		if include_matrix[fr[FR_FILE]][current_file_no] = NOT_INCLUDED and not unincluded_ok then
+			continue
 		end if
+		token tok = find_reference( fr )
+		
+		if tok[T_ID] = IGNORED then
+			errors &= ref
+			continue
+		end if
+		
+		sequence fname = file_name[fr[FR_FILE]]
+		sequence cname = file_name[current_file_no]
+		
+		-- found a match...
+		integer code_sub = fr[FR_SUBPROG]
+		integer fr_type  = fr[FR_TYPE]
+		integer sym_tok
+		
+		switch fr_type label "fr_type" do
+			case PROC:
+			case FUNC:
+				
+				sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
+				if sym_tok = TYPE then
+					sym_tok = FUNC
+				end if
+				if sym_tok != fr_type then
+					forward_error( tok, ref )
+				end if
+				switch sym_tok do
+					case PROC:
+					case FUNC:
+						patch_forward_call( tok, ref )
+						continue
+						
+					case else
+						forward_error( tok, ref )
+						
+				end switch
+				
+			case VARIABLE:
+				sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
+				if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+					errors &= ref
+					continue
+				end if
+				switch sym_tok do
+					case CONSTANT:
+					case ENUM:
+					case VARIABLE:
+						patch_forward_variable( tok, ref )
+						if sequence( forward_references[ref] ) then
+							errors &= ref
+						end if
+						continue
+					case else
+						forward_error( tok, ref )
+				end switch
+			case TYPE_CHECK:
+				patch_forward_type_check( tok, ref )
+				continue
+			
+			case GLOBAL_INIT_CHECK:
+				patch_forward_init_check( tok, ref )
+				continue
+			
+			case CASE:
+				patch_forward_case( tok, ref )
+				continue
+				
+			case TYPE:
+				patch_forward_type( tok, ref )
+				continue
+				
+			case else
+				-- ?? what is it?
+				InternalErr( sprintf("unrecognized forward reference type: %d (%s)", {fr[FR_TYPE], fr[FR_NAME]} ))
+		end switch
+		
 	end for
 	
 	if report_errors and length( errors ) then
@@ -617,22 +636,16 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 end procedure
 
 export function might_be_fwdref( sequence name )
-	for i = 1 to length( forward_references ) do
-		if sequence( forward_references[i] ) and equal( forward_references[i][FR_NAME], name ) then
-			return 1
-		end if
-	end for
-	return 0
+	return find( name, active_refnames )
 end function
 
 export procedure shift_fwd_refs( integer pc, integer amount )
-	for i = 1 to length( forward_references ) do
-		if sequence( forward_references[i] ) then
-			sequence ref = forward_references[i]
-			if ref[FR_SUBPROG] = shifting_sub then
-				if ref[FR_PC] >= pc then
-					forward_references[i][FR_PC] += amount
-				end if
+	for i = length( active_references ) to 1 by -1 do
+		if forward_references[active_references[i]][FR_SUBPROG] = shifting_sub then
+			if forward_references[active_references[i]][FR_PC] >= pc then
+				forward_references[active_references[i]][FR_PC] += amount
+			else
+				exit
 			end if
 		end if
 	end for
