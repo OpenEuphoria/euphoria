@@ -23,7 +23,7 @@ integer interpreter_platform
 
 integer ctcfh = 0
 sequence error_list = repeat({},4)
-enum E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_EUTEST
+enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_EUTEST
 type error_class( integer i )
 	return i > 0 and i <= E_EUTEST
 end type
@@ -232,10 +232,21 @@ procedure do_test(sequence cmds)
 		cci = find( "-cc", cmds )               
 	end while
 
-	
+	-- pass options with arguments passed to eutest to the 
+	-- interpreter or translator...
+	integer outstanding_argument_count
+	outstanding_argument_count = 0
 	for i = 3 to length(cmds) do
-		if cmds[i][1] != '-' then
+		if outstanding_argument_count > 0 then
+			outstanding_argument_count -= 1
+			continue
+		elsif cmds[i][1] != '-' then
 			files &= {{cmds[i]}}
+		-- put the options that take arguments in the sequence argument
+		-- to find below.
+		elsif find(cmds[i],{"-i"}) and i < length(cmds) then
+			outstanding_argument_count = 1 -- an argument to skip
+			cmd_opts &= cmds[i] & " " & cmds[i+1]
 		else
 			cmd_opts &= cmds[i] & " "
 		end if
@@ -259,8 +270,7 @@ procedure do_test(sequence cmds)
 		switches = switches[1..cl-1] & switches[cl+1..$]
 	end if
 	options = join(switches)
-	
-	options = ""
+
 
 	sequence fail_list = {}
 	if log and atom(
@@ -268,7 +278,7 @@ procedure do_test(sequence cmds)
 	  + delete_file("unittest.log") + delete_file("ctc.log") ) then
 		ctcfh = open( "ctc.log", "w" )
 	end if
-	
+
 	for i = 1 to length(files) do
 		filename = files[i][D_NAME]
 		if delete_file( "ex.err" ) then
@@ -278,107 +288,111 @@ procedure do_test(sequence cmds)
 
 		if 1 label "interpreter" then		
 			printf(1, "interpreting %s:\n", {filename})
-		cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
-		if verbose_switch > 0 then
-			printf(1, "CMD '%s'\n", {cmd})
-		end if
-		
-		if match("t_c_", dos_lower(filename)) = 1 then
-			expected_status = 1
-			status = system_exec( cmd, 2 )
-		else
-			status = invoke( 0, cmd, filename, E_INTERPRET, "interpreted" )
-			expected_status = 0
-			if status then
-				failed += 1
-				fail_list = append(fail_list, filename )
-					break "interpreter"
+			cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
+			if verbose_switch > 0 then
+				printf(1, "CMD '%s'\n", {cmd})
 			end if
-		end if
-	
-		if expected_status then
-			directory = filename[1..find('.',filename)-1] & SLASH & interpreter_os_name
-			if sequence( dir( directory ) ) then
-				if sequence( dir( directory & SLASH & "control.err" ) ) then
-					control_err = read_lines( directory & SLASH & "control.err" )
-					ex_err = read_lines( "ex.err" )
-					if length(ex_err) > 4 then
-						ex_err = ex_err[1..4]
-					end if
-					if length(control_err) > 4 then
-						control_err = control_err[1..4]
-					end if 
-					comparison = compare( ex_err, control_err )
-					if comparison then
-						failed += 1
-						fail_list = append( fail_list, filename )
-						if length( ex_err ) >=4  and length( control_err ) >= 4 then
-							error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
-						elsif length( ex_err ) then
-							error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
-						else
-							error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
-						end if
-							break "interpreter"
-					end if
-	
-				elsif atom( dir( "ex.err" ) ) then
-					error( filename, E_INTERPRET, "ex.err not generated.", {} )
+			
+			if match("t_c_", dos_lower(filename)) = 1 then
+				expected_status = 1
+				status = system_exec( cmd, 2 )
+			else
+				status = invoke( 0, cmd, filename, E_INTERPRET, "interpreted" )
+				expected_status = 0
+				if status then
+					failed += 1
+					fail_list = append(fail_list, filename )
 						break "interpreter"
 				end if
-				
 			end if
-			ifdef REC then
-				if create_directory( filename[1..find('.',filename)-1] )
-				and create_directory( directory ) 
-				and move_file( "ex.err", directory & SLASH & "control.err" ) then 
+		
+			if expected_status then
+				directory = filename[1..find('.',filename)-1] & SLASH & interpreter_os_name
+				if sequence( dir( directory ) ) then
+					if sequence( dir( directory & SLASH & "control.err" ) ) then
+						control_err = read_lines( directory & SLASH & "control.err" )
+						ex_err = read_lines( "ex.err" )
+						if length(ex_err) > 4 then
+							ex_err = ex_err[1..4]
+						end if
+						if length(control_err) > 4 then
+							control_err = control_err[1..4]
+						end if 
+						comparison = compare( ex_err, control_err )
+						if comparison then
+							failed += 1
+							fail_list = append( fail_list, filename )
+							if length( ex_err ) >=4  and length( control_err ) >= 4 then
+								error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
+							elsif length( ex_err ) then
+								error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
+							else
+								error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
+							end if
+								break "interpreter"
+						end if
+		
+					elsif atom( dir( "ex.err" ) ) then
+						error( filename, E_INTERPRET, "ex.err not generated.", {} )
+							break "interpreter"
+					end if
+					
 				end if
-			end ifdef
-		end if
-	
-		if status xor expected_status then
-			failed += 1
-			fail_list = append( fail_list, filename )
-			if not file_exists("ex.err") then
-				error( filename , E_INTERPRET, "program closed with status %d", {status} )
-			else
-				error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
-	
+				ifdef REC then
+					if create_directory( filename[1..find('.',filename)-1] )
+					and create_directory( directory ) 
+					and move_file( "ex.err", directory & SLASH & "control.err" ) then 
+					end if
+				end ifdef
 			end if
-				break "interpreter"
-		elsif (expected_status = 0) and log then
-			for j = 1 to 5 do
-				if file_exists("unittest.log") then
-					exit
-				end if
-				sleep(0.1)
-			end for
-				
-			log_fd = open( "unittest.log", "a" )
-				
-			if log_fd = -1  then
-				error( filename, E_INTERPRET, "couldn't generate unittest.log", {}, "ex.err" )
+		
+			if status xor expected_status then
 				failed += 1
 				fail_list = append( fail_list, filename )
-				close( log_fd )
+				if not file_exists("ex.err") then
+					error( filename , E_INTERPRET, "program closed with status %d", {status} )
+				else
+					error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
+		
+				end if
 					break "interpreter"
-			elsif log_where = where( log_fd ) then
-				error( filename, E_INTERPRET, "couldn't add to unittest.log", {}, "ex.err" )
-				failed += 1
-				fail_list = append( fail_list, filename )
+			elsif (expected_status = 0) and log then
+				for j = 1 to 5 do
+					if file_exists("unittest.log") then
+						exit
+					end if
+					sleep(0.1)
+				end for
+					
+				log_fd = open( "unittest.log", "a" )
+					
+				if log_fd = -1  then
+					error( filename, E_INTERPRET, "couldn't generate unittest.log", {}, "ex.err" )
+					failed += 1
+					fail_list = append( fail_list, filename )
+					close( log_fd )
+						break "interpreter"
+				elsif log_where = where( log_fd ) then
+					error( filename, E_INTERPRET, "couldn't add to unittest.log", {}, "ex.err" )
+					failed += 1
+					fail_list = append( fail_list, filename )
+					close( log_fd )
+						break "interpreter"
+				end if
+				log_where = where( log_fd )
 				close( log_fd )
-					break "interpreter"
+				log_fd = 0
+				
 			end if
-			log_where = where( log_fd )
-			close( log_fd )
-			log_fd = 0
-			
-		end if
 		end if -- interpreter
 		
 		if length(translator) and expected_status = 0 then
 			total += 1 -- also account for this translated test
-			printf(1, "translating %s:\n", {filename})
+			if verbose_switch > 0 then
+				printf(1, "translating: %s\n", {filename})
+			else
+				printf(1, "translating, compiling, and executing executable: %s\n", {filename})
+			end if
 			cmd = sprintf("%s %s %s %s -D UNITTEST %s -D EC -batch %s", {translator, library, compiler, options, con, filename})
 			if verbose_switch > 0 then
 				printf(1, "CMD '%s'\n", {cmd})
@@ -392,18 +406,26 @@ procedure do_test(sequence cmds)
 				end if
 				if delete_file(filename&dexe) then end if
 				if delete_file( "cw.err" ) then end if
+				if verbose_switch > 0 then
+					printf(1, "compiling %s\n", {filename&".c"})
+				end if
 				emake_outcome = run_emake()
 				if compare(emake_outcome,0) = 0 then
+					if verbose_switch > 0 then
+						printf(1, "executing %s:\n", {filename&dexe})
+					end if
 					cmd = sprintf("./%s %s", {filename&dexe, cmd_opts})
 					status = invoke( status, cmd, filename&dexe,  E_EXECUTE, "translated " ) 
 					if status then
 						failed += 1
 						fail_list = append(fail_list, "translated" & " " & filename&dexe )
+					else
+						error( filename&dexe, E_NOERROR, "all tests successful", {} )
 					end if
 					if delete_file(filename & dexe) then end if
 				else
 					failed += 1
-					fail_list = append(fail_list, "compiling " & filename )
+					fail_list = append(fail_list, "compiling " & filename )					
 					if sequence( emake_outcome ) then
 						error( filename& dexe, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4] )
 					else
@@ -415,6 +437,16 @@ procedure do_test(sequence cmds)
 				failed += 1
 				fail_list = append(fail_list, "translating " & filename )
 				error( filename & ".e", E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
+			end if
+			if verbose_switch > -1 and length( error_list ) and 
+				find( error_list[1][length(error_list[1])], 
+				{ filename&".e", filename&dexe } ) != 0 then
+				if error_list[3][length(error_list[3])] = E_NOERROR then
+					puts(1, "SUCCESS: ")
+				else
+					puts(1, "FAILURE: ")
+				end if
+				printf(1, "%s\n", {error_list[2][length(error_list[1])]})
 			end if
 		end if -- length( translator )
 	end for
@@ -545,7 +577,13 @@ procedure html_out(sequence data)
 			printf( 1, "<table width=100%%><tr bgcolor=#dddddd><th colspan=4 align=left><a name='%s'>%s</a></th></tr>\n", { data[2], data[2] } )
 			err = find( data[2], error_list[1] ) 
 			if err then
-				printf(1,"<tr bgcolor=\"#ffaaaa\"><th align=left width=50%%>%s</th><td colspan=3>%s</td></tr>\n",
+				puts(1,"<tr bgcolor=\"")
+				if error_list[3][err] = E_NOERROR then
+					printf( 1,"#aaffaa",{})
+				else
+					printf( 1,"#ffaaaa",{})
+				end if
+				printf( 1,"\"><th align=left width=50%%>%s</th><td colspan=3>%s</td></tr>\n",
 				{ data[2], error_list[2][err] })
 				
 				if sequence( error_list[4][err] ) then
@@ -736,6 +774,7 @@ procedure do_process_log(sequence cmds)
 	summarize_error( "%d tests could not be translated", E_TRANSLATE, html )
 	summarize_error( "%d translated tests could not be compiled", E_COMPILE, html )
 	summarize_error( "%d compiled tests failed unexpectedly", E_EXECUTE, html )
+	summarize_error( "%d compiled tests ran successfully", E_NOERROR, html )
 	
 	if html then
 		if find(1, error_list[3] = E_EUTEST ) then
@@ -762,7 +801,7 @@ procedure main(sequence cmds = command_line())
 	if find("-help", cmds) or find("--help",cmds) or find("/?", cmds) then
 		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n"
 		&"\t[-exe interpreter-path-and-filename]\n"
-		&"\t[-ec translator-path-and-filename]\n"
+		&"\t[-ec translator-path-and-filename] [-i include directory]\n"
 		&"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n"
 		&"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n"
 		&"\t[-log]\n"
