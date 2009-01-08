@@ -350,7 +350,7 @@ end procedure
 procedure OutputIL()
 -- BIND only: output the IL: symbol table, code, line table, etc.
 	integer out, be, m, c, ic, size
-	sequence out_name, last6, backend_name
+	sequence out_name, last6, backend_name, source_dir
 	object eu_dir
 	
 	if length(user_out) then
@@ -391,16 +391,33 @@ procedure OutputIL()
 			eudir = SLASH & "euphoria" -- Linux/FreeBSD?
 		end if
 
-		backend_name = eudir & SLASH & "bin" & SLASH 
+		source_dir = command_line()
+		source_dir = source_dir[2]
+		for j = length( source_dir ) to 1 by -1 do
+			if source_dir[j] = SLASH then
+				source_dir = source_dir[1..j]
+				exit
+			elsif j = 1 then
+				source_dir = current_dir() & SLASH
+			end if
+		end for
+				
 		be = -1
 		if w32 then
-			backend_name &= "backendw.exe"
+			backend_name = "backendw.exe"
 		elsif EUNIX then
-			backend_name &= "backendu"
+			backend_name = "backendu"
 			-- try to get the installed eubackend, if it exists:
 			be = open( "/usr/bin/eubackend", "r" )
 		else    
-			backend_name &= "backend.exe"
+			backend_name = "backendd.exe"
+		end if
+		if compare( backend_name, locate_file( backend_name, { 
+			eu_dir & SLASH & "bin", source_dir }
+			) ) then
+			backend_name = locate_file( backend_name, { 
+			eu_dir & SLASH & "bin", source_dir }
+			)
 		end if
 		if be = -1 then
 			be = open(backend_name, "rb")

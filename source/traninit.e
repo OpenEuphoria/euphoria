@@ -1,5 +1,15 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+-- This module sets one of wat_path, bor_path, or dj_path or none at all 
+-- to indicate lcc or gcc.  Using the command line options or environment variables
+-- as hints it checks for command line sanity and sets the said environment
+-- variables.
+-- 
+-- If the user selects the compiler at the command line and it cannot
+-- find its envinronment variable the translator will exit with an error.
+-- If the user doesn't select it then it will try all of the environment
+-- variables and use the selected platform to determine which compiler must
+-- be used.
 
 include std/os.e
 include std/filesys.e
@@ -12,15 +22,21 @@ include mode.e as mode
 include c_out.e
 include c_decl.e
 include std/error.e
+include std/sort.e
 include compile.e
 include cominit.e
 include tranplat.e
 
-global boolean wat_option, djg_option, bor_option, lcc_option
+-- true if we want to force the user to choose the compiler
+constant FORCE_CHOOSE = FALSE
+
+boolean help_option = FALSE
+global boolean wat_option, djg_option, bor_option, lcc_option, gcc_option
 wat_option = FALSE
 djg_option = FALSE
 bor_option = FALSE
-lcc_option = FALSE 
+lcc_option = FALSE
+gcc_option = FALSE
 
 sequence compile_dir
 compile_dir = ""
@@ -53,7 +69,10 @@ global procedure transoptions()
 		if Argv[i][1] = '-' then
 			uparg = upper(Argv[i])
 			
-			if (equal("-DLL", uparg) or equal("-SO", uparg)) then
+			if find(uparg,{"-HELP","-?"}) then
+				help_option = TRUE
+			
+			elsif (equal("-DLL", uparg) or equal("-SO", uparg)) then
 				dll_option = TRUE
 				
 			elsif equal("-CON", uparg) then
@@ -79,6 +98,9 @@ global procedure transoptions()
 
 			elsif equal("-BOR", uparg) then
 				bor_option = TRUE
+				
+			elsif equal("-GCC", uparg) then
+				gcc_option = TRUE
 				
 			elsif equal("-STACK", uparg) then
 				if i < Argc then
@@ -150,6 +172,36 @@ global procedure transoptions()
 			i += 1 -- ignore non "-" items
 		end if      
 	end while
+
+	if help_option then
+		CompileErr(
+"Usage: ec [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]\n"&
+"          [-com /compile_directory/] [-keep] [-debug]\n"&
+"          [-lib /library relative to %EUDIR%\\bin/] [-stack /stack size/]\n"&
+"          [/os specific options/]:\n" &
+"\n"&
+"OS Specific Options:\n"&
+"       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]\n" &
+"       DOS    :  [-djg|-wat] [-fastfp]\n" &
+"       Linux  :  [-gcc] [-dll]\n" &
+"       FreeBSD:  [-gcc] [-dll]\n" &
+"       OSX    :  [-gcc] [-dll]\n" &
+"\n"&
+"LCC Only: -lccopt-off\n\n"&
+"Explainations:\n" &
+"       -CON : Don't create a new window when using the console.\n"
+			   
+			   
+			   )	
+	end if
+	
+	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option,  bor_option}, {0,0,0,0} ) = 0 then
+		Warning( "No compiler specified for Windows or DOS (Watcom (-wat), DJG (-djg), LCC (-lcc), or Borland (-bor)).\n", translator_warning_flag  )
+	end if
+	
+	if (TWINDOWS or TDOS) and compare( sort({wat_option,  djg_option,  lcc_option,  bor_option}), {0,0,0,1} ) > 0 then
+		Warning( "You should specify one and only one compiler you want to use: Watcom (-wat), DJG (-djg), LCC (-lcc), or Borland (-bor).", translator_warning_flag )
+	end if
 	
 	-- The platform might have changed, so clean up in case of inconsistent options
 	if dll_option and (TDOS) then
@@ -158,38 +210,55 @@ global procedure transoptions()
 	end if
 	
 	if con_option and not TWINDOWS then
-		con_option = FALSE
 		Warning( "console option only available for Windows",translator_warning_flag )
 	end if
 	
-	if wat_option and not (TWINDOWS or TDOS) then
-		wat_option = FALSE
-		Warning( "Watcom option only available for Windows or DOS",translator_warning_flag )
+	if wat_option then
+		if not (TWINDOWS or TDOS) then
+			set_host_platform( WIN32 )
+			Warning( "Watcom option only available for Windows or DOS... Choosing Windows", translator_warning_flag )
+		end if
+	
+		if atom( getenv( "WATCOM" ) ) then
+	    		-- let this die later..
+		elsif find( ' ', getenv("WATCOM" ) ) != 0 then
+			Warning( "Watcom cannot build translated files when there is a space in its parent folders", translator_warning_flag )
+		elsif atom( getenv( "INCLUDE" ) ) then
+			Warning( "Watcom needs to have an INCLUDE variable set to its included directories",
+				translator_warning_flag )
+		elsif match( upper(getenv("WATCOM") & "\\H;" 
+			& getenv("WATCOM") & "\\H\\NT"),
+			upper(getenv("INCLUDE")) ) != 1 then
+				Warning( "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable.", translator_warning_flag )
+			--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
+		end if
+	
 	end if
 	
 	if djg_option and not TDOS then
-		djg_option = FALSE
-		Warning( "DJGPP option only available for DOS",translator_warning_flag )
+		CompileErr( "DJGPP option only available for DOS." )
 	end if
 
 	if bor_option and not TWINDOWS then
-		bor_option = FALSE
-		Warning( "Borland option only available for Windows", translator_warning_flag)
+		CompileErr( "Borland option only available for Windows." )
 	end if
 	
 	if lcc_option and not TWINDOWS then
-		lcc_option = FALSE
-		Warning( "LCC option only available for Windows",translator_warning_flag )
+		CompileErr( "LCC option only available for Windows." )
 	end if
 	
 	if not lccopt_option and not TWINDOWS then
-		lccopt_option = FALSE
-		Warning( "LCC Opt-Off only available for Windows" ,translator_warning_flag)
+		CompileErr( "LCC Opt-Off only available for Windows." )
 	end if
 	
 	if fastfp and not TDOS then
 		fastfp = FALSE
-		Warning( "Fast FP option only available for DOS",translator_warning_flag )
+		CompileErr( "Fast FP option only available for DOS" )
+	end if
+
+	if gcc_option and (not (TUNIX or TDOS)) then
+		-- could happen, mingw for example.
+		Warning( "Using GCC option for non-UNIX target.  If you are porting cygwin or mingw please consider adding another option to this translator.", translator_warning_flag )
 	end if
 	
 end procedure
@@ -237,7 +306,7 @@ function get_bor_path()
 	path = path[1..c-1]
 	
 	-- move backward to ; or start
-	while b and path[b] != ';' do
+	while b > 1 and path[b] != ';' do
 		b -= 1
 	end while
 	if b and path[b] = ';' then
@@ -281,8 +350,17 @@ procedure InitBackEnd(integer c)
 	init_opcodes()
 	
 	transoptions()
+
+	-- If no compiler has been chosen test the variables to
+	-- see which is installed.  If a UNIX system choose gcc.
+	-- If Windows or DOS
+	-- Try in the order: WATCOM, DJGPP, or Borland
+	
 	
 	if TDOS then
+		if gcc_option then
+			djg_option = 1
+		end if
 		wat_path = 0
 		if length(compile_dir) then
 			if djg_option then
@@ -297,36 +375,32 @@ procedure InitBackEnd(integer c)
 		if atom(dj_path) or wat_option then
 			wat_path = getenv("WATCOM")
 			if atom(wat_path) then
-				wat_path = "C:\\WATCOM"
+				CompileErr("WATCOM environment variable is not set")
 			end if
 			dj_path = 0
 		end if
 		if djg_option and atom(dj_path) then
 			CompileErr("DJGPP environment variable is not set")
 		end if
-		if wat_option and atom(wat_path) then
-			CompileErr("WATCOM environment variable is not set")
-		end if
+		bor_path = 0
 	end if
 
 	if TWINDOWS then
+		djg_path = 0
 		bor_path = 0
 		wat_path = 0
 		if not lcc_option then
 			if not bor_option then
 				if length(compile_dir) then
 					wat_path = compile_dir
-					return
 				else
 					wat_path = getenv("WATCOM")
 				end if
 			else
-				bor_path = get_bor_path()
-				if sequence(wat_path) then
-					bor_path = 0
-				end if
-				if sequence(bor_path) then
-					wat_path = 0
+				if length(compile_dir) then
+					bor_path = compile_dir
+				else
+					bor_path = get_bor_path()
 				end if
 			end if
 		end if
@@ -338,6 +412,18 @@ procedure InitBackEnd(integer c)
 			CompileErr("WATCOM environment variable is not set")
 		end if
 	end if
+	
+	if TUNIX then
+		djg_path = 0
+		gcc_option = 1
+		wat_path = 0
+		bor_path = 0
+	end if
+	
+	if sequence(wat_path)+gcc_option+sequence(djg_path)+sequence(bor_path)+lcc_option = 0 then
+		CompileErr( "Cannot determine for which compiler to translate for." ) 
+	end if
+	
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 

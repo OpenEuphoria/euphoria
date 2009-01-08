@@ -7,6 +7,8 @@
 ----------------------------------------------------------------------------
 
 include std/text.e
+include std/math.e
+include std/os.e
 
 include global.e
 include reswords.e
@@ -14,6 +16,7 @@ include symtab.e
 include tranplat.e
 include compile.e
 
+with type_check
 -- Translator
 global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
 
@@ -1022,7 +1025,7 @@ procedure add_file(sequence filename)
 		link_line &= filename & ".o "
 	
 	elsif TDOS then
-		if atom(dj_path) then
+		if sequence(wat_path) then
 			printf(link_file, "FILE %s.obj\n", {filename})
 		else
 			printf(link_file, "%s.o\n", {filename})
@@ -1084,7 +1087,7 @@ global procedure start_emake()
 		if debug_option then
 			debug_flag = " /g3"
 		end if
-		if atom(dj_path) then
+		if sequence(wat_path) then
 			-- /ol removed due to bugs with SEQ_PTR() inside a loop
 			-- can remove /fpc and add /fp5 /fpi87 for extra speed
 			puts(doit, "echo compiling with WATCOM"&HOSTNL)
@@ -1178,12 +1181,12 @@ global procedure start_emake()
 	end if
 	
 	if TDOS then
-		if atom(dj_path) then  
+		if sequence(wat_path) then  
 			cc_name = "wcc386"
 			puts(link_file, "option osname='CauseWay'\n")
 			printf(link_file, "libpath %s\\lib386\n", {wat_path})
 			printf(link_file, "libpath %s\\lib386\\dos\n", {wat_path})
-			printf(link_file, "OPTION stub=%s\\bin\\cwstub.exe\n", {get_eudir()})
+			printf(link_file, "OPTION stub=%s\\bin\\cwstub.exe\n", {shrink_to_83(get_eudir())})
 			puts(link_file, "format os2 le ^\n")
 			printf(link_file, "OPTION STACK=%d\n", total_stack_size) 
 			puts(link_file, "OPTION QUIET\n") 
@@ -1192,7 +1195,7 @@ global procedure start_emake()
 		else 
 			cc_name = "gcc"
 		end if
-		c_opts &= sprintf( " -I%s", {get_eudir()})
+		c_opts &= sprintf( " -I%s", {shrink_to_83(get_eudir())})
 	end if      
 
 	if TWINDOWS then    
@@ -1223,28 +1226,106 @@ global procedure start_emake()
 	end if      
 end procedure       
 
-function pathnames_to_8( sequence s )
-	integer sl, -- slash location
-		osl -- old slash location
-	osl = find( ':', s )
-	if osl = 0 then
-		osl = find( '\\', s )
+type legaldos_filename_char( integer i )
+	if ('A' <= i and i <= 'Z') or
+	   ('0' <= i and i <= '9') or
+	   (128 <=i and  i <= 255) or
+	   find( i, " !#$%'()@^_`{}~" ) != 0
+	then
+		return 1
+	else
+		return 0
 	end if
-	sl = osl + find( '\\', s[osl+1..$] ) -- find_from
+end type  
+
+type legaldos_filename( sequence s )
+	integer dloc
+
+	if find( s, { "..", "." } ) then
+		return 1
+	end if
+	dloc = find('.',s)
+	if dloc > 8 or ( dloc > 0 and dloc + 3 < length(s) ) or ( dloc = 0 and length(s) > 8 ) then
+		return 0
+	end if
+	for i = 1 to length(s) do
+		if s[i] = '.' then
+			for j = i+1 to length(s) do
+				if not legaldos_filename_char(s[j]) then
+					return 0
+				end if
+			end for
+			exit
+		end if
+		if not legaldos_filename_char(s[i]) then
+			return 0
+		end if
+	end for
+	
+	return 1
+end type
+
+function shrink_to_83( sequence s )
+	integer dl, -- dot location
+		sl, -- slash location
+		osl -- old slash location
+	sequence se -- short extension
+
+	osl = find( ':', s )
+	sl = osl + find( '\\', s[osl+1..$] ) -- find_from osl
+	-- if slash immediately follows the colon skip the part between : and slash.
+	if sl=osl+1 then
+		osl = sl
+	end if
+	sl = osl + find( '\\', s[osl+1..$] )
+	dl = osl + find( '.', s[osl+1..sl] )
+	if dl > osl then
+		se = s[dl..min({dl+3,sl-1})]
+	else
+		se = ""
+	end if
+	
 	while sl != osl do
-		if find( ' ', s[osl..sl] ) then
-			s = s[1..osl] & s[osl+1..osl+6] & "~1" & s[sl..$]
-			sl = osl+8
+		if find( ' ', s[osl+1..sl] ) or not legaldos_filename(upper(s[osl+1..sl-1])) then
+			s = s[1..osl] & s[osl+1..osl+6] & "~1" & se & s[sl..$]
+			sl = osl+8+length(se)
 		end if
 		osl = sl
 		sl += find( '\\', s[sl+1..$] )
-	end while	
+		dl = osl + find( '.', s[osl+1..sl] )
+		if dl > osl then
+			se = s[dl..min({dl+3,sl})]
+		else
+			se = ""
+		end if
+	end while
+	if dl > osl then
+		se = s[dl..min({dl+3,length(s)})]
+	end if
+	if find( ' ', s[osl+1..$] ) or not legaldos_filename(upper(s[osl+1..$])) then
+		s = s[1..osl] & s[osl+1..osl+6] & "~1" & se
+	end if
+	
 	return s
+end function
+
+function truncate_to_83( sequence lfn )
+	integer dl
+	dl = find( '.', lfn )
+	if dl = 0 and length(lfn) > 8 then
+		return lfn[1..8]
+	elsif dl = 0 and length(lfn) <= 8 then
+		return lfn
+	elsif dl > 9 and dl + 3 <= length(lfn) then
+		return lfn[1..8] & lfn[dl..$]
+	else
+		CompileErr( "Cannot use the filename, " & lfn & ", under DOS.  Use the Windows version with -plat DOS instead.\n")
+	end if
 end function
 
 global procedure finish_emake()
 -- finish emake.bat 
-	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem
+	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file
 	integer lib_dir
 	integer fp, def_file
 	
@@ -1266,15 +1347,21 @@ global procedure finish_emake()
 	if atom(bor_path) then
 		printf(doit, "%s linking"&HOSTNL, {echo})
 	end if
-		
+	
+	ifdef DOS32 then
+		short_c_file = truncate_to_83(file0)
+	elsedef
+		short_c_file = file0
+	end ifdef
+
 	if TDOS then    
-		if atom(dj_path) then
-			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {file0})
-			printf(link_file, "FILE %s\\bin\\", {get_eudir()})
+		if sequence(wat_path) then
+			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {short_c_file})
+			printf(link_file, "FILE %s\\bin\\", {shrink_to_83(get_eudir())})
 			if fastfp then
 				puts(link_file, "ecfastfp.lib\n") 
 			elsif length(user_library) then
-				printf(link_file, "%s\n", {user_library})
+				printf(link_file, "%s\n", {shrink_to_83(user_library)})
 			else    
 				puts(link_file, "ec.lib\n") 
 			end if
@@ -1289,8 +1376,11 @@ global procedure finish_emake()
 				fp = open(path, "rb")
 				if fp != -1 then
 					close(fp)
-					printf(doit, "le23p %s.exe"&HOSTNL, {file0})
-					printf(doit, "cwc %s.exe"&HOSTNL, {file0})
+					printf(doit, "le23p %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
+					printf(doit, "cwc %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
+					if compare( short_c_file, file0 ) != 0 then
+						printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
+					end if 
 				end if
 			end if
 			close(link_file)
@@ -1316,13 +1406,15 @@ global procedure finish_emake()
 
 	if TWINDOWS then
 		if sequence(wat_path) then     
-			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {file0})
+			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {short_c_file})
 			if length(user_library) then
 				printf(link_file, "FILE %s\n", {user_library}) 
 			else
 				printf(link_file, "FILE %s\\bin\\ecw.lib\n", {get_eudir()}) 	
 			end if
-			
+			if compare( short_c_file, file0 ) != 0 then
+				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
+			end if			
 
 		elsif sequence(bor_path) then
 			printf(doit, "bcc32 %s %s.c @objfiles.lnk"&HOSTNL, {c_opts, file0})
@@ -1353,9 +1445,9 @@ global procedure finish_emake()
 				{subsystem, total_stack_size, total_stack_size, file0})
 			end if
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {get_eudir(), user_library}) 
+				printf(link_file, "%s\\bin\\%s\n", {shrink_to_83(get_eudir()), user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ecwl.lib\n", {pathnames_to_8(get_eudir())}) 
+				printf(link_file, "%s\\bin\\ecwl.lib\n", {shrink_to_83(get_eudir())}) 
 			end if
 			
 		end if
@@ -1408,21 +1500,21 @@ global procedure finish_emake()
 		end if
 		if length(user_library) then
 			printf(doit, 
-				  "gcc %s %s.o %s %s -lm ",
-				  {dll_flag, file0, link_line, user_library})
+				  "gcc %s %s.o %s %s -o %s -lm ",
+				  {dll_flag, short_c_file, link_line, user_library, file0})
 		else
 			-- need to check to see if euphoria is installed into
 			-- the system:
 			lib_dir = open("/usr/lib/ecu.a","r" )
 			if lib_dir = -1 then
 				printf(doit, 
-					"gcc %s %s.o %s -I%s %s/bin/ecu.a -lm ",
-					{dll_flag, file0, link_line, get_eudir(), get_eudir()})
+					"gcc %s %s.o %s -I%s %s/bin/ecu.a -o %s -lm ",
+					{dll_flag, short_c_file, link_line, get_eudir(), get_eudir(), file0})
 			else
 				close(lib_dir)
 				printf(doit,
-					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/ecu.a -lm",
-					{dll_flag, file0, link_line})
+					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/ecu.a -o %s -lm",
+					{dll_flag, short_c_file, link_line, file0})
 			end if
 			
 		end if
@@ -1458,7 +1550,7 @@ global procedure finish_emake()
 	end if
 		
 	close(doit)
-	if TUNIX then
+	if TUNIX and EUNIX then
 		system("chmod +x emake", 2)
 	end if
 end procedure
@@ -1468,7 +1560,9 @@ global procedure GenerateUserRoutines()
 -- optionally generating code 
 	symtab_index s, sp
 	integer next_c_char, q, temps
-	sequence buff, base_name, c_file
+	sequence buff, base_name, long_c_file, c_file
+
+
 
 	for file_no = 1 to length(file_name) do
 		if file_no = 1 or any_code(file_no) then 
@@ -1477,6 +1571,7 @@ global procedure GenerateUserRoutines()
 			next_c_char = 1
 			base_name = name_ext(file_name[file_no])
 			c_file = base_name
+
 			q = length(c_file)
 			while q >= 1 do
 				if c_file[q] = '.' then
@@ -1485,11 +1580,16 @@ global procedure GenerateUserRoutines()
 				end if
 				q -= 1
 			end while
-		
+						
 			if find(lower(c_file), {"main-", "init-"})  then
 				CompileErr(base_name & " conflicts with a file name used internally by the Translator")
 			end if
-			
+
+			long_c_file = c_file
+			ifdef DOS32 then
+				c_file = truncate_to_83(c_file)
+			end ifdef
+
 			if Pass = LAST_PASS and file_no > 1 then
 				c_file = unique_c_name(c_file)
 				add_file(c_file)
@@ -1513,7 +1613,7 @@ global procedure GenerateUserRoutines()
 						add_file(buff)
 					end for
 				end if
-				file0 = c_file
+				file0 = long_c_file
 			end if
 		
 			if Pass = LAST_PASS then
@@ -1720,5 +1820,6 @@ global procedure GenerateUserRoutines()
 		end if
 	end for   
 end procedure
+
 
 
