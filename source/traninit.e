@@ -386,7 +386,7 @@ procedure InitBackEnd(integer c)
 	end if
 
 	if TWINDOWS then
-		djg_path = 0
+		dj_path = 0
 		bor_path = 0
 		wat_path = 0
 		if not lcc_option then
@@ -414,13 +414,13 @@ procedure InitBackEnd(integer c)
 	end if
 	
 	if TUNIX then
-		djg_path = 0
+		dj_path = 0
 		gcc_option = 1
 		wat_path = 0
 		bor_path = 0
 	end if
 	
-	if sequence(wat_path)+gcc_option+sequence(djg_path)+sequence(bor_path)+lcc_option = 0 then
+	if sequence(wat_path)+gcc_option+sequence(dj_path)+sequence(bor_path)+lcc_option = 0 then
 		CompileErr( "Cannot determine for which compiler to translate for." ) 
 	end if
 	
