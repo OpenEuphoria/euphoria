@@ -240,6 +240,10 @@ if not is_current( f ) then
 end if
 end procedure
 
+ifdef DOS32 then
+	rev_1_3()
+elsedef
 if not rev_with_svnversion() then 
 	rev_1_3()
 end if
+end ifdef
