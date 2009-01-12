@@ -12,6 +12,7 @@ include std/os.e as ut
 include std/text.e 
 include std/math.e
 
+
 without trace
 
 ifdef DOS32 then
@@ -28,9 +29,6 @@ type error_class( integer i )
 	return i > 0 and i <= E_EUTEST
 end type
 procedure error( sequence file, error_class e, sequence message, sequence vals, object error_file = 0 )
-	integer dp
-	dp = find( '.', file )
-	file = file[1..dp-1] & ".e"
 	object lines
 	if sequence( error_file ) then
 		lines = read_lines( error_file )
@@ -355,8 +353,9 @@ procedure do_test(sequence cmds)
 					error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
 		
 				end if
-					break "interpreter"
-			elsif (expected_status = 0) and log then
+				break "interpreter"
+			elsif status = 0 then
+				if log then
 				for j = 1 to 5 do
 					if file_exists("unittest.log") then
 						exit
@@ -382,7 +381,8 @@ procedure do_test(sequence cmds)
 				log_where = where( log_fd )
 				close( log_fd )
 				log_fd = 0
-				
+				end if
+				error( filename, E_NOERROR, "all tests successful", {} )
 			end if
 		end if -- interpreter
 		
@@ -436,7 +436,7 @@ procedure do_test(sequence cmds)
 			elsif expected_status = 0 then
 				failed += 1
 				fail_list = append(fail_list, "translating " & filename )
-				error( filename & ".e", E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
+				error( filename, E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
 			end if
 			if verbose_switch > -1 and length( error_list ) and 
 				find( error_list[1][length(error_list[1])], 
@@ -774,7 +774,7 @@ procedure do_process_log(sequence cmds)
 	summarize_error( "%d tests could not be translated", E_TRANSLATE, html )
 	summarize_error( "%d translated tests could not be compiled", E_COMPILE, html )
 	summarize_error( "%d compiled tests failed unexpectedly", E_EXECUTE, html )
-	summarize_error( "%d compiled tests ran successfully", E_NOERROR, html )
+	summarize_error( "%d tests ran successfully", E_NOERROR, html )
 	
 	if html then
 		if find(1, error_list[3] = E_EUTEST ) then
