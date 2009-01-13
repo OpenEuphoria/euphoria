@@ -267,25 +267,25 @@ end function
 -- Names of the months
 
 public sequence month_names = { "January", "February", "March", 
-                                "April", "May", "June", 
-                                "July",	"August", "September",
-                                "October", "November", "December" }
+				"April", "May", "June", 
+				"July", "August", "September",
+				"October", "November", "December" }
 
 --**
 -- Abbreviations of month names
 
 public sequence month_abbrs = { "Jan", "Feb", "Mar", 
-                                "Apr", "May", "Jun",
-                                "Jul", "Aug", "Sep",
-                                "Oct", "Nov", "Dec" }
+				"Apr", "May", "Jun",
+				"Jul", "Aug", "Sep",
+				"Oct", "Nov", "Dec" }
 
 --**
 -- Names of the days
 
 public sequence day_names = { "Sunday", "Monday", 
-                              "Tuesday", "Wednesday",
-                              "Thursday", "Friday",
-                              "Saturday" }
+			      "Tuesday", "Wednesday",
+			      "Thursday", "Friday",
+			      "Saturday" }
 
 --**
 -- Abbreviations of day names
@@ -335,7 +335,7 @@ public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- datetime type
 --
 -- Parameters:
--- 		# ##obj##: any object, so no crash takes place.
+--              # ##obj##: any object, so no crash takes place.
 --
 -- Comments:
 -- A datetime type consists of a sequence of length 6 in the form
@@ -481,10 +481,10 @@ end type
 -- sequence.
 --
 -- Parameters:
---		# ##src##: a sequence which date() might have returned
+--              # ##src##: a sequence which date() might have returned
 --
 -- Returns:
--- 		A **sequence**, more precisely a **datetime** corresponding to the same moment in time.
+--              A **sequence**, more precisely a **datetime** corresponding to the same moment in time.
 --
 -- Example 1:
 -- <eucode>
@@ -503,7 +503,7 @@ end function
 -- Create a new datetime value initialized with the current date and time
 --
 -- Returns:
--- 		A **sequence**, more precisely a **datetime** corresponding to the current moment in time.
+--              A **sequence**, more precisely a **datetime** corresponding to the current moment in time.
 --
 -- Example 1:
 -- <eucode>
@@ -522,6 +522,9 @@ end function
 -- Create a new datetime value that falls into the Greenwich Mean Time (GMT) timezone.
 -- This function will return a datetime that is GMT, no matter what timezone the system
 -- is running under.
+--
+--- Platform:
+--	not //DOS//
 --
 -- Example 1:
 -- <eucode>
@@ -566,7 +569,7 @@ end function
 --     [[:from_date]], [[:from_unix]], [[:now]], [[:new_time]]
 
 public function new(integer year=0, integer month=0, integer day=0,
-	                integer hour=0, integer minute=0, atom second=0)
+			integer hour=0, integer minute=0, atom second=0)
 	datetime d
 	d = {year, month, day, hour, minute, second}
 	if equal(d, {0,0,0,0,0,0}) then
@@ -603,10 +606,10 @@ end function
 -- Get the day of week of the datetime dt.
 --
 -- Parameters:
--- 		# ##dt##: a datetime to be queried.
+--              # ##dt##: a datetime to be queried.
 --
 -- Returns:
--- 		An **integer** between 1 (Sunday) and 7 (Saturday).
+--              An **integer** between 1 (Sunday) and 7 (Saturday).
 --
 -- Example 1:
 -- <eucode>
@@ -622,13 +625,13 @@ end function
 -- Get the Julian day of year of the supplied date.
 --
 -- Parameters:
--- 		# ##dt##: a datetime to be queried.
+--              # ##dt##: a datetime to be queried.
 --
 -- Returns:
--- 	An **integer** between 1 and 366.
+--      An **integer** between 1 and 366.
 --
 -- Comments:
--- 		For dates earlier than 1800, this routine may give inaccurate results if the date
+--              For dates earlier than 1800, this routine may give inaccurate results if the date
 -- applies to a country other than United Kingdom or a former colony thereof. The change from
 -- Julian to Gregorian calendar took place much earlier in some other European countries.
 --
@@ -646,7 +649,7 @@ end function
 -- Determine if ##dt## falls within leap year.
 --
 -- Parameters:
--- 		# ##dt##: a datetime to be queried.
+--              # ##dt##: a datetime to be queried.
 --
 -- Returns:
 --     An **integer** of 1 if leap year, otherwise 0.
@@ -672,7 +675,7 @@ end function
 -- This takes into account leap year.
 --
 -- Parameters:
--- 		# ##dt##: a datetime to be queried.
+--              # ##dt##: a datetime to be queried.
 --
 -- Example 1:
 -- <eucode>
@@ -716,10 +719,10 @@ end function
 -- Convert a datetime value to the unix numeric format (seconds since ##EPOCH_1970##)
 --
 -- Parameters:
--- 		# ##dt##: a datetime to be queried.
+--              # ##dt##: a datetime to be queried.
 --
 -- Returns:
--- 		An **atom**, so this will not overflow during the winter 2038-2039.
+--              An **atom**, so this will not overflow during the winter 2038-2039.
 --
 --
 -- Example 1:
@@ -739,10 +742,10 @@ end function
 -- Create a datetime value from the unix numeric format (seconds since EPOCH)
 --
 -- Parameters:
--- 		# ##unix##: an atom, counting seconds elapsed since EPOCH.
+--              # ##unix##: an atom, counting seconds elapsed since EPOCH.
 --
 -- Returns:
--- 		A **sequence**, more precisely a **datetime** representing the same moment in time.
+--              A **sequence**, more precisely a **datetime** representing the same moment in time.
 --
 -- Example 1:
 -- <eucode>
@@ -783,8 +786,8 @@ end function
 -- Format the date according to the format string
 --
 -- Parameters:
--- 		# ##d##: a datetime which is to be printed out
--- 		# ##format##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
+--              # ##d##: a datetime which is to be printed out
+--              # ##format##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
 --
 -- Comments:
 --
@@ -929,12 +932,12 @@ end function
 -- Add a number of //intervals// to a datetime.
 --
 -- Parameters:
--- 		# ##dt##: the base datetime
--- 		# ##qty##: the number of //intervals// to add. It should be positive.
--- 		# ##interval##: which kind of interval to add.
+--              # ##dt##: the base datetime
+--              # ##qty##: the number of //intervals// to add. It should be positive.
+--              # ##interval##: which kind of interval to add.
 --
 -- Returns:
--- 		A **sequence**, more precisely a **datetime** representing the new moment in time.
+--              A **sequence**, more precisely a **datetime** representing the new moment in time.
 --
 -- Comments:
 --     Please see Constants for Date/Time for a reference of valid intervals.
@@ -1012,12 +1015,12 @@ end function
 -- Subtract a number of //intervals// to a base datetime.
 --
 -- Parameters:
--- 		# ##dt##: the base datetime
--- 		# ##qty##: the number of //intervals// to subtract. It should be positive.
--- 		# ##interval##: which kind of interval to subtract.
+--              # ##dt##: the base datetime
+--              # ##qty##: the number of //intervals// to subtract. It should be positive.
+--              # ##interval##: which kind of interval to subtract.
 --
 -- Returns:
--- 		A **sequence**, more precisely a **datetime** representing the new moment in time.
+--              A **sequence**, more precisely a **datetime** representing the new moment in time.
 --
 -- Comments:
 --     Please see Constants for Date/Time for a reference of valid intervals.
@@ -1042,11 +1045,11 @@ end function
 -- Compute the difference, in seconds, between two dates.
 --
 -- Parameters:
--- 		# ##dt1##: the end datetime
--- 		# ##dt2##: the start datetime
+--              # ##dt1##: the end datetime
+--              # ##dt2##: the start datetime
 --
 -- Returns:
--- 		An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
+--              An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
 --
 -- Comments:
 --     dt2 is subtracted from dt1, therefore, you can come up with a negative value.
