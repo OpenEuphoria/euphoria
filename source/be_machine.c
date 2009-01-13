@@ -4524,15 +4524,29 @@ object CallBack(object x)
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
 	symtab_ptr routine;
+	int bare_flag;
 	s1_ptr x_ptr;
 	int convention;
-	
+	void * replace_value;
+        s1_ptr result;	
+	object_ptr obj_ptr;
 #ifdef EDOS
 	not_supported("call_back()");
 	return 0;
 #else
+	bare_flag = 0;
+start:
 	if (IS_SEQUENCE(x)) {
 		x_ptr = SEQ_PTR(x);
+		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, SEQ_PTR(*obj_ptr)->length=%d\n",
+		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
+		fflush(stdout);*/	
+		if ((x_ptr->length == 1) && (!IS_SEQUENCE(*(obj_ptr=x_ptr->base+1)) 
+			|| (SEQ_PTR(obj_ptr)->length == 2))) {
+			bare_flag = 1;
+			x = *obj_ptr;
+			goto start;
+		}
 		if (x_ptr->length != 2)
 			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
 		if (get_int(*(x_ptr->base+1)) != '+')
@@ -4586,7 +4600,7 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-	
+	if (bare_flag) goto bare;
 	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
 #ifdef EUNIX   
 #ifndef EBSD    
@@ -4615,7 +4629,20 @@ object CallBack(object x)
 		return addr;
 	else
 		return NewDouble((double)addr); 
+	
 #endif
+bare:
+#ifdef ERUNTIME         
+	replace_value = routine_id;
+#else      
+	replace_value = e_routine[routine_id];
+#endif
+	result = NewS1(3);
+	obj_ptr = result->base+1;
+	obj_ptr[0] = NewDouble((double)(unsigned long)addr);
+	obj_ptr[1] = NewDouble((double)(unsigned long)replace_value);
+	obj_ptr[2] = NewDouble((double)(unsigned long)CALLBACK_SIZE);
+	return MAKE_SEQ(result);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash

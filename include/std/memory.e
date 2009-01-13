@@ -101,6 +101,442 @@ public function allocate(positive_int n)
 	return machine_func(M_ALLOC, n)
 end function
 
+include std/machine.e
+include std/os.e
+include std/dll.e
+-- This works on 4.0 too even though 4.0 defines OSX:
+constant OSX = 4
+
+-- Linux constants
+constant PROT_EXEC = 4, PROT_READ = 1, PROT_WRITE = 2,
+ PROT_NONE = 0
+
+constant MAP_ANONYMOUS = #20, MAP_PRIVATE = #2
+--,MAP_SHARED = #1, MAP_TYPE = #F, MAP_FIXED = #10,
+--MAP_FILE = 0
+
+-- Windows constants
+constant MEM_COMMIT = #1000,
+	MEM_RESERVE = #2000,
+	--MEM_RESET = #8000,
+	MEM_RELEASE = #8000
+
+--****
+-- === Memory access
+	
+--****
+-- === Constants
+--
+-- Memory Protection Constants are 
+-- the same constants across all platforms.
+public constant 
+
+	PAGE_EXECUTE = #10,        -- You may run the data in this page
+	PAGE_EXECUTE_READ = #20,   -- You may run and read the data
+	PAGE_EXECUTE_READWRITE = #40,-- You may run, read or write this page
+	PAGE_EXECUTE_WRITECOPY = #80,-- You may run, read or write this page
+	PAGE_WRITECOPY = #08,        
+	PAGE_READWRITE = #04,
+	PAGE_NOACCESS = #01,        -- 
+	PAGE_READONLY = #02         -- You may only read data
+
+--**
+-- End of file
+
+atom kernel_dll, memDLL_id
+atom getpagesize_rid, mmap_rid, VirtualAlloc_rid, 
+	VirtualLock_rid, VirtualUnlock_rid, 
+	VirtualProtect_rid, GetLastError_rid, 
+	GetSystemInfo_rid,
+	mprotect_rid, VirtualFree_rid, munmap_rid,
+	mlock_rid, munlock_rid, VirtualQuery_rid
+
+constant M_OPEN_DLL  = 50
+
+
+function xalloc_open_dll( sequence dllname ) 
+	return machine_func(M_OPEN_DLL, dllname )
+end function
+function xalloc_opendll( sequence dllname)
+	return xalloc_open_dll( dllname )
+end function
+
+if platform() != DOS32 then
+	if platform() = WIN32 then
+		memDLL_id = xalloc_open_dll( "kernel32.dll" )
+		kernel_dll = memDLL_id
+		VirtualQuery_rid = define_c_func( memDLL_id, "VirtualQuery", { C_POINTER, C_POINTER, C_UINT }, C_UINT )
+		VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
+		VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
+		VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
+		VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
+		GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
+		GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
+		VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
+		
+	elsif find( platform(), { FREEBSD, LINUX } ) then
+		
+		getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
+		mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
+		mprotect_rid = define_c_func( -1, "mprotect", { C_POINTER, C_UINT, C_INT }, C_INT )
+		munmap_rid = define_c_func( -1, "munmap", { C_POINTER, C_UINT }, C_INT )
+		mlock_rid = define_c_func( -1, "mlock", { C_POINTER, C_UINT }, C_INT )
+		munlock_rid = define_c_func( -1, "munlock", { C_POINTER, C_UINT }, C_INT )
+		
+	end if
+else
+	
+end if
+
+function VirtualAlloc( atom addr, atom size, atom flallocationtype, atom flprotect )
+	atom r1
+	r1 = c_func( VirtualAlloc_rid, {addr, size, flallocationtype, flprotect } )
+	return r1
+end function
+
+function mmap( object start, integer length, integer protection, integer flags, integer fd, integer offset )
+	atom pc
+	if atom( start ) then
+		return c_func( mmap_rid, { start, length, protection, flags, fd, offset } )
+	else
+		pc = mmap( 0, length, protection, flags, fd, offset )
+		poke( pc, start )
+		return pc
+	end if
+end function
+
+
+function mem_const_set( sequence s, sequence hash )
+	for i = 1 to length( hash ) do
+		s[log(hash[i][1])/log(2)+1] = hash[i][2]
+	end for
+	return s
+end function
+
+function make_constants_table()
+	sequence s
+	s  =  repeat( PROT_NONE, 10 )
+	s = mem_const_set( s, { 
+		{ PAGE_EXECUTE_READWRITE, or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ) },
+		{ PAGE_EXECUTE_READ, or_bits( PROT_READ, PROT_EXEC ) },
+		{ PAGE_EXECUTE, PROT_EXEC },
+		{ PAGE_EXECUTE_WRITECOPY, or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ) },
+		{ PAGE_NOACCESS, PROT_NONE },
+		{ PAGE_READONLY, PROT_READ },
+		{ PAGE_READWRITE, or_bits( PROT_READ, PROT_WRITE ) },
+		{ PAGE_WRITECOPY, or_bits( PROT_READ, PROT_WRITE ) }
+	} )	
+	return s
+end function
+
+
+type valid_windows_memory_protection_constant( integer x )
+	atom value
+	value = log(x)/log(2)
+	return integer( value ) and (value <= 8) and (value >= 0)
+end type
+
+type page_aligned_address( atom a )
+	return remainder( a, 4096 ) = 0
+end type
+
+constant mem_constants_table = make_constants_table()
+
+function mem_win2linux( valid_windows_memory_protection_constant protection )
+	return mem_constants_table[log(protection)/log(2)+1]
+end function
+
+type multiple_of_4( atom a )
+	return not remainder( a, 4 )
+end type
+
+
+--**
+-- Signature:
+-- function allocate_protect( sequence data, integer protection )
+--
+-- Description:
+-- Allocates and copies data into memory and gives it protection using Microsoft's Memory Protection Constants.  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
+
+-- See <a href="http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx">Microsoft's Memory Protection Constants<br>
+-- http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx</a><p>
+
+-- Parameters:
+-- The first parameter, data, is the machine code to be put into memory. 
+--
+-- Returns:
+-- The function returns the address to the required memory
+-- or 0 if it fails.  This function is guaranteed to return memory on 
+-- the 4 byte boundary.  It also guarantees that the memory returned with 
+-- at least the protection given (but you may get more).
+--
+-- If you want to call ##allocate_protect( data, PAGE_READWRITE )##, you can use 
+-- [[:allocate]] instead.  It is more efficient and simplier.
+--
+-- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
+-- [[:allocate_code()]] instead.  It is more efficient and simplier.
+--
+-- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
+public function allocate_protect( sequence data, valid_windows_memory_protection_constant protection )
+	atom addr, oldprotptr
+	integer size
+	
+	size = length(data)
+
+	if platform() = DOS32 or not xalloc_loaded() then
+
+		addr = allocate( size )
+		if addr = 0 then
+			return 0
+		end if
+		poke( addr, data )
+
+	elsif platform() = WIN32 then
+
+		addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
+		if addr = 0 or not multiple_of_4( addr ) then
+		    return 0
+		end if
+		oldprotptr = allocate(4)
+		if oldprotptr = 0 then
+		    return 0
+		end if
+		poke( addr, data )
+		if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
+		    -- 0 indicates failure here
+		    return 0
+		end if
+		free( oldprotptr )
+
+	elsif find( platform(), {LINUX, FREEBSD, OSX} ) then
+
+		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if addr = -1 then
+			return 0
+		end if
+		poke( addr, data )
+		if c_func( mprotect_rid, { addr, size, mem_win2linux( protection ) } ) != 0 then
+			-- non zero indicates failure in mprotect 			
+			return 0
+		end if
+
+	else
+
+		addr = allocate( size )
+		poke( addr, data )
+
+	end if
+
+	return addr
+
+	-- Implementation notes:
+	--    The amount of memory actually allocated on Windows is the lowest 
+	--    multiple of the page_size (4kB on Windows XP)  
+	--    The C manuals do not guarantee that the memory RETURNED from 
+	--    underlying C-functions are page aligned only but they require 
+	--    what you pass into them must be page aligned.  I suspect that 
+	--    that is the spirit of the work though.  
+end function
+
+-- Undocumented function
+function allocate_exec( integer size )
+	atom addr
+	
+	if platform() = DOS32 or not xalloc_loaded() then
+
+		addr = allocate( size )
+		if addr = 0 then
+			return 0
+		end if
+
+	elsif platform() = WIN32 then
+		
+		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
+		if addr = 0 then
+		    return 0
+		end if
+		
+	elsif find( platform(), { FREEBSD, LINUX, OSX } ) then
+
+		addr = c_func( mmap_rid, { 0, size, or_bits(PROT_WRITE,PROT_EXEC), or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if addr = -1 then
+			return 0
+		end if
+
+	else -- unknown platform.  Return normal memory.
+
+		addr = allocate( size )
+
+	end if
+
+	return addr
+	
+end function
+
+--**
+-- Signature: 
+-- function allocate_code( sequence a_sequence_of_machine_code_bytes )
+--
+-- Description:
+-- Allocates and copies data into executible memory.
+--
+-- Parameters:
+-- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory.  To be later called with [[:call()]]        
+
+-- Return Value:
+-- The function returns the address in memory of the byte-code that can be safely executed whether DEP is enabled or not or 0 if it fails.  On the other hand, if you try to execute a code address returned by [[:allocate()]] with DEP enabled the program will receive a machine exception.  
+
+-- Comments:
+-- 
+-- Use this for the machine code you want to run in memory.  The copying is done for you and when the routine returns the memory may not be readable or writable but it is guaranteed to be executable.  If you want to also write to this memory **after the machine code has been copied** you should use [[:allocate_protect()]] instead and you should read about having memory executable and writable at the same time is a bad idea.  You mustn't use ##free()## on memory returned from this function.  You may instead use ##free_code()## but since you will probably need the code througout the life of your program's process this normally is not necessary.
+public function allocate_code( sequence data )
+	atom addr, oldprotptr
+	integer size
+	
+	size = length(data)
+
+	if platform() = DOS32 or not xalloc_loaded() then
+
+		addr = allocate( size )
+		if addr = 0 then
+			return 0
+		end if
+		poke( addr, data )
+
+	elsif platform() = WIN32 then
+		
+		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
+		oldprotptr = allocate(4) 
+		if addr = 0 then
+		    return 0
+		end if
+		poke( addr, data )
+		if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
+			-- 0 indicates failure here
+			return 0
+		end if
+		free( oldprotptr )
+		
+	elsif find( platform(), { FREEBSD, LINUX, OSX } ) then
+
+		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if addr = -1 then
+			return 0
+		end if
+		poke( addr, data )
+		if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
+			-- non zero indicates failure here
+			return 0
+		end if
+
+	else -- unknown platform.  Return normal memory.
+
+		addr = allocate( size )
+		poke( addr, data )
+
+	end if
+
+	return addr
+
+end function
+
+
+
+-- new_addr = memory_reprotect( addr, size, protection )
+--
+-- Changes protection on a segment of memory using MS-Windows style constants.
+--
+-- The memory should have been returned from allocate_protect or allocate_code.
+--
+-- The affected region is really:
+--        floor( addr / page_size() ) * page_size() .. ceil( (addr+size) / page_size() ) * page_size
+-- On an error 0 is returned.  If you ask this function to do what it can't it
+-- will return 0.
+-- See the memory protection constants at:
+--   http://msdn2.microsoft.com/en-us/library/aa366786(VS.85).aspx
+--   The idea is to support everything that both mmap and VirtualAlloc can
+--   do and no more.
+--
+--
+-- Implementation notes: The memory constants that are less than #100 are supported
+-- and you may NOT put two together with or_bits().
+-- WARNING: UNTESTED FUNCTION
+function memory_reprotect( page_aligned_address addr, integer size, valid_windows_memory_protection_constant protection )
+	integer linux_protection
+	atom new_addr
+	
+	if not xalloc_loaded() then
+		return addr
+	elsif platform() = DOS32 then
+		if addr = 0 then
+			new_addr = allocate( size )
+			poke( new_addr, peek( { addr, size } ) )
+		else
+		    	new_addr = addr
+		end if
+	elsif platform() = WIN32 then
+		new_addr = VirtualAlloc( addr, size, or_bits( MEM_RESERVE, MEM_COMMIT ), protection )
+		poke( new_addr, peek( { addr, size } ) )
+	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
+		linux_protection = mem_win2linux( protection )
+		new_addr = c_func( mmap_rid, { 0, size, linux_protection, 
+			or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if new_addr = -1 then
+			return 0
+		end if
+	else
+		return 0
+	end if
+	return new_addr
+end function	
+
+--**
+-- Signature:
+-- procedure free_code( atom addr, integer size )
+--
+-- Description:
+-- frees up allocated code memory
+-- Parameters:
+-- ##addr## must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   The size is the size you specified when you called the afore mentioned functions.                           
+-- Comments:
+-- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
+public procedure free_code( atom addr, integer size )
+	integer free_succeeded
+	if not xalloc_loaded() then
+		free( addr )
+	elsif platform() = WIN32 then
+		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
+	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
+		free_succeeded = not c_func( munmap_rid, { addr, size } )
+	elsif platform() = DOS32 then
+		free( addr )
+	end if
+end procedure
+
+function memory_protection( atom addr, integer size )
+	atom memory_basic_information_ptr
+	atom protection
+	memory_basic_information_ptr = allocate( 28 )
+	if c_func( VirtualQuery_rid, { addr, memory_basic_information_ptr, size } ) < 12 then
+		return -1
+	end if
+	protection = peek4u( memory_basic_information_ptr + 8 )
+	free( memory_basic_information_ptr )
+	return or_bits( protection, #FF )
+end function
+
+function xalloc_loaded()
+	if platform() = WIN32 then
+		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
+			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
+	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
+		return mmap_rid != -1 and getpagesize_rid != -1
+	else
+		return 1
+	end if
+	return 0
+end function
+
 --**
 -- Free up a previously allocated block of memory.
 -- @[machine:free]
@@ -174,8 +610,6 @@ public function allocate_string(sequence s)
 	return mem
 end function
 
---****
--- === Memory access
 
 --**
 -- Signature:

@@ -21,6 +21,8 @@
 -- * C_POINTER = C_ULONG,
 -- * C_FLOAT   = #03000004,
 -- * C_DOUBLE  = #03000008
+include std/convert.e
+include std/memory.e
 
 public constant
 	C_CHAR    = #01000001,
@@ -308,6 +310,9 @@ public function define_c_func(object lib, object routine_name,
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
 
+constant call_back_size = 92 -- maximum value of C based Euphoria and the 
+			     -- Euphoria based Euphoria.
+
 --**
 -- Get a machine address for an Euphoria procedure.
 --
@@ -354,9 +359,19 @@ end function
 --
 -- See Also:
 --     [[:routine_id]]
-
 public function call_back(object id)
-	return machine_func(M_CALL_BACK, id)
+	sequence s, code, rep
+	atom addr, size, repi
+	s = machine_func(M_CALL_BACK, {id})
+	addr = s[1]
+	rep =  int_to_bytes( s[2] )
+	size = s[3]
+	code = peek( {addr, size} )
+	repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
+	if repi = 4 then
+		abort(1)
+	end if
+	return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
 end function
 
 --**
