@@ -62,11 +62,48 @@ public type machine_addr(atom a)
 end type
 
 --****
+-- === Microsoft's Memory Protection Constants
+--
+-- 
+-- Memory Protection Constants are the same constants 
+-- across all platforms.  The API converts them as
+-- necessary.  They are only necessary for [[:allocate_protect]]
+
+--** 
+-- You may run the data in this page
+
+public constant PAGE_EXECUTE = #10
+
+	--** PAGE_EXECUTE_READ
+	-- You may run and read the data    
+public constant 	PAGE_EXECUTE_READ = #20
+	--**
+	-- You may run, read or write this page
+public constant 	PAGE_EXECUTE_READWRITE = #40
+	--**
+	-- You may run, read or write this page
+public constant 	PAGE_EXECUTE_WRITECOPY = #80
+	--**
+	-- You may write to this page.
+public constant 	PAGE_WRITECOPY = #08
+	--**
+	-- You may read or write to this page.
+public constant 	PAGE_READWRITE = #04
+	--**
+	-- You may only read data 
+public constant	PAGE_READONLY = #02    	
+--**
+	-- You have no access to this page
+public constant 	PAGE_NOACCESS = #01
+     
+--
+
+--****
 -- === Memory allocation
 --
 
 --**
--- Allocate a contiguous block of memory.
+-- Allocate a contiguous block of data memory.
 --
 -- Parameters:
 --		# ##n##, a positive integer, the size of the requested block.
@@ -191,6 +228,9 @@ function mem_const_set( sequence s, sequence hash )
 	return s
 end function
 
+
+
+
 function make_constants_table()
 	sequence s
 	s  =  repeat( PROT_NONE, 10 )
@@ -235,7 +275,7 @@ end function
 -- Allocates and copies data into executible memory.
 --
 -- Parameters:
--- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory.  To be later called with [[:call()]]        
+-- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory to be later called with [[:call()]]        
 
 -- Return Value:
 -- The function returns the address in memory of the byte-code that can be safely executed whether DEP is enabled or not or 0 if it fails.  On the other hand, if you try to execute a code address returned by [[:allocate()]] with DEP enabled the program will receive a machine exception.  
@@ -243,6 +283,7 @@ end function
 -- Comments:
 -- 
 -- Use this for the machine code you want to run in memory.  The copying is done for you and when the routine returns the memory may not be readable or writable but it is guaranteed to be executable.  If you want to also write to this memory **after the machine code has been copied** you should use [[:allocate_protect()]] instead and you should read about having memory executable and writable at the same time is a bad idea.  You mustn't use ##free()## on memory returned from this function.  You may instead use ##free_code()## but since you will probably need the code througout the life of your program's process this normally is not necessary.
+-- If you want to put only data in the memory to be read and written use [[:allocate]].
 -- See Also:
 -- [[:allocate]], [[:free_code]], [[:allocate_protect]]
 public function allocate_code( sequence data )
@@ -341,7 +382,7 @@ end function
 -- function allocate_protect( sequence data, integer protection )
 --
 -- Description:
--- Allocates and copies data into memory and gives it protection using Microsoft's Memory Protection Constants.  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
+-- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
 
 -- See <a href="http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx">Microsoft's Memory Protection Constants<br>
 -- http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx</a><p>
@@ -379,7 +420,7 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 	elsif platform() = WIN32 then
 
 		addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
-		if addr = 0 or not multiple_of_4( addr ) then
+		if addr = 0 then
 		    return 0
 		end if
 		oldprotptr = allocate(4)
@@ -422,45 +463,6 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 	--    what you pass into them must be page aligned.  I suspect that 
 	--    that is the spirit of the work though.  
 end function
-
-
-
---
--- Memory Protection Constants are 
--- the same constants across all platforms.  The
--- granularity of these protections are coarse at
--- normally 4kB depending on the OS.  These units
--- are called "pages."
-
---** 
--- You may run the data in this page
-
-public constant PAGE_EXECUTE = #10
-
-	--** PAGE_EXECUTE_READ
-	-- You may run and read the data    
-public constant 	PAGE_EXECUTE_READ = #20
-	--**
-	-- You may run, read or write this page
-public constant 	PAGE_EXECUTE_READWRITE = #40
-	--**
-	-- You may run, read or write this page
-public constant 	PAGE_EXECUTE_WRITECOPY = #80
-	--**
-	-- You may write to this page.
-public constant 	PAGE_WRITECOPY = #08
-	--**
-	-- You may read or write to this page.
-public constant 	PAGE_READWRITE = #04
-	--**
-	-- You may only read data 
-public constant	PAGE_READONLY = #02    	
---**
-	-- You have no access to this page
-public constant 	PAGE_NOACCESS = #01
-     
---
-
 
 
 -- Undocumented function
@@ -1237,7 +1239,7 @@ end procedure
 --		##demo/callmach.ex##
 --
 -- See Also:
--- 		[[:allocate]], [[:free]], [[:peek]], [[:poke]], [[:c_proc]], [[:define_c_proc]]
+-- 		[[:allocate_code]], [[:free_code]], [[:c_proc]], [[:define_c_proc]]
 
 without warning
 integer check_calls = 1
