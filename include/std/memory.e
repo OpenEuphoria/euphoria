@@ -62,7 +62,7 @@ public type machine_addr(atom a)
 end type
 
 --****
--- === Memory management
+-- === Memory allocation
 --
 
 --**
@@ -72,7 +72,7 @@ end type
 --		# ##n##, a positive integer, the size of the requested block.
 --
 -- Return:
---		An **atom**, the address of the allocated memory, or 0 if the memory
+--		An **atom**, the address of the allocated memory or 0 if the memory
 -- can't be allocated.
 --
 -- Comments:
@@ -80,7 +80,8 @@ end type
 -- ##[[:free]]()##. This will free the block and make the memory available for other purposes. 
 -- Euphoria will never free or reuse your block until you explicitly call ##[[:free]]()##. When 
 -- your program terminates, the operating system will reclaim all memory for use with other 
--- programs.
+-- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
+-- For that purpose you may use ##[[:allocate_code]]()## instead. 
 --
 -- The address returned will be at least 4-byte aligned.
 --
@@ -93,7 +94,7 @@ end type
 -- </eucode>
 --		    
 -- See Also:
---     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:call]]
+--     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
 
 public function allocate(positive_int n)
 -- Allocate n bytes of memory and return the address.
@@ -104,8 +105,6 @@ end function
 include std/machine.e
 include std/os.e
 include std/dll.e
--- This works on 4.0 too even though 4.0 defines OSX:
-constant OSX = 4
 
 -- Linux constants
 constant PROT_EXEC = 4, PROT_READ = 1, PROT_WRITE = 2,
@@ -121,27 +120,6 @@ constant MEM_COMMIT = #1000,
 	--MEM_RESET = #8000,
 	MEM_RELEASE = #8000
 
---****
--- === Memory access
-	
---****
--- === Constants
---
--- Memory Protection Constants are 
--- the same constants across all platforms.
-public constant 
-
-	PAGE_EXECUTE = #10,        -- You may run the data in this page
-	PAGE_EXECUTE_READ = #20,   -- You may run and read the data
-	PAGE_EXECUTE_READWRITE = #40,-- You may run, read or write this page
-	PAGE_EXECUTE_WRITECOPY = #80,-- You may run, read or write this page
-	PAGE_WRITECOPY = #08,        
-	PAGE_READWRITE = #04,
-	PAGE_NOACCESS = #01,        -- 
-	PAGE_READONLY = #02         -- You may only read data
-
---**
--- End of file
 
 atom kernel_dll, memDLL_id
 atom getpagesize_rid, mmap_rid, VirtualAlloc_rid, 
@@ -246,9 +224,116 @@ function mem_win2linux( valid_windows_memory_protection_constant protection )
 	return mem_constants_table[log(protection)/log(2)+1]
 end function
 
-type multiple_of_4( atom a )
-	return not remainder( a, 4 )
-end type
+--****
+-- === Allocating and Writing to memory:
+
+--**
+-- Signature: 
+-- function allocate_code( sequence a_sequence_of_machine_code_bytes )
+--
+-- Description:
+-- Allocates and copies data into executible memory.
+--
+-- Parameters:
+-- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory.  To be later called with [[:call()]]        
+
+-- Return Value:
+-- The function returns the address in memory of the byte-code that can be safely executed whether DEP is enabled or not or 0 if it fails.  On the other hand, if you try to execute a code address returned by [[:allocate()]] with DEP enabled the program will receive a machine exception.  
+
+-- Comments:
+-- 
+-- Use this for the machine code you want to run in memory.  The copying is done for you and when the routine returns the memory may not be readable or writable but it is guaranteed to be executable.  If you want to also write to this memory **after the machine code has been copied** you should use [[:allocate_protect()]] instead and you should read about having memory executable and writable at the same time is a bad idea.  You mustn't use ##free()## on memory returned from this function.  You may instead use ##free_code()## but since you will probably need the code througout the life of your program's process this normally is not necessary.
+-- See Also:
+-- [[:allocate]], [[:free_code]], [[:allocate_protect]]
+public function allocate_code( sequence data )
+	atom addr, oldprotptr
+	integer size
+	
+	size = length(data)
+
+	if platform() = DOS32 or not xalloc_loaded() then
+
+		addr = allocate( size )
+		if addr = 0 then
+			return 0
+		end if
+		poke( addr, data )
+
+	elsif platform() = WIN32 then
+		
+		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
+		oldprotptr = allocate(4) 
+		if addr = 0 then
+		    return 0
+		end if
+		poke( addr, data )
+		if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
+			-- 0 indicates failure here
+			return 0
+		end if
+		free( oldprotptr )
+		
+	elsif find( platform(), { FREEBSD, LINUX, OSX } ) then
+
+		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if addr = -1 then
+			return 0
+		end if
+		poke( addr, data )
+		if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
+			-- non zero indicates failure here
+			return 0
+		end if
+
+	else -- unknown platform.  Return normal memory.
+
+		addr = allocate( size )
+		poke( addr, data )
+
+	end if
+
+	return addr
+
+end function
+
+--**
+-- Allocate a C-style null-terminated string in memory
+--
+-- Parameters:
+--		# ##s##, a sequence, the string to store in RAM.
+--
+-- Returns:
+--		An **atom**, the address of the memory block where the string was
+-- stored, or 0 on failure.
+-- Comments:
+-- Only the 8 lowest bits of each atom in ##s## is stored. Use
+-- ##allocate_wstring##()  for storing double byte encoded strings.
+--
+-- There is no allocate_string_low() function. However, you could easily
+-- craft one by adapting the code for ##allocate_string##.
+--
+-- Since ##allocate_string##() allocates memory, you are responsible to
+-- [[:free]]() the block when done with it.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate_string("The Wizard of Oz")
+-- </eucode>
+-- 
+-- See Also:
+--		[[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
+public function allocate_string(sequence s)
+	atom mem
+	
+	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
+	if mem then
+		poke(mem, s)
+		poke(mem+length(s), 0)  -- Thanks to Aku
+	end if
+	return mem
+end function
 
 
 --**
@@ -338,6 +423,46 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 	--    that is the spirit of the work though.  
 end function
 
+
+
+--
+-- Memory Protection Constants are 
+-- the same constants across all platforms.  The
+-- granularity of these protections are coarse at
+-- normally 4kB depending on the OS.  These units
+-- are called "pages."
+
+--** 
+-- You may run the data in this page
+
+public constant PAGE_EXECUTE = #10
+
+	--** PAGE_EXECUTE_READ
+	-- You may run and read the data    
+public constant 	PAGE_EXECUTE_READ = #20
+	--**
+	-- You may run, read or write this page
+public constant 	PAGE_EXECUTE_READWRITE = #40
+	--**
+	-- You may run, read or write this page
+public constant 	PAGE_EXECUTE_WRITECOPY = #80
+	--**
+	-- You may write to this page.
+public constant 	PAGE_WRITECOPY = #08
+	--**
+	-- You may read or write to this page.
+public constant 	PAGE_READWRITE = #04
+	--**
+	-- You may only read data 
+public constant	PAGE_READONLY = #02    	
+--**
+	-- You have no access to this page
+public constant 	PAGE_NOACCESS = #01
+     
+--
+
+
+
 -- Undocumented function
 function allocate_exec( integer size )
 	atom addr
@@ -373,72 +498,6 @@ function allocate_exec( integer size )
 	
 end function
 
---**
--- Signature: 
--- function allocate_code( sequence a_sequence_of_machine_code_bytes )
---
--- Description:
--- Allocates and copies data into executible memory.
---
--- Parameters:
--- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory.  To be later called with [[:call()]]        
-
--- Return Value:
--- The function returns the address in memory of the byte-code that can be safely executed whether DEP is enabled or not or 0 if it fails.  On the other hand, if you try to execute a code address returned by [[:allocate()]] with DEP enabled the program will receive a machine exception.  
-
--- Comments:
--- 
--- Use this for the machine code you want to run in memory.  The copying is done for you and when the routine returns the memory may not be readable or writable but it is guaranteed to be executable.  If you want to also write to this memory **after the machine code has been copied** you should use [[:allocate_protect()]] instead and you should read about having memory executable and writable at the same time is a bad idea.  You mustn't use ##free()## on memory returned from this function.  You may instead use ##free_code()## but since you will probably need the code througout the life of your program's process this normally is not necessary.
-public function allocate_code( sequence data )
-	atom addr, oldprotptr
-	integer size
-	
-	size = length(data)
-
-	if platform() = DOS32 or not xalloc_loaded() then
-
-		addr = allocate( size )
-		if addr = 0 then
-			return 0
-		end if
-		poke( addr, data )
-
-	elsif platform() = WIN32 then
-		
-		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
-		oldprotptr = allocate(4) 
-		if addr = 0 then
-		    return 0
-		end if
-		poke( addr, data )
-		if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
-			-- 0 indicates failure here
-			return 0
-		end if
-		free( oldprotptr )
-		
-	elsif find( platform(), { FREEBSD, LINUX, OSX } ) then
-
-		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if addr = -1 then
-			return 0
-		end if
-		poke( addr, data )
-		if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
-			-- non zero indicates failure here
-			return 0
-		end if
-
-	else -- unknown platform.  Return normal memory.
-
-		addr = allocate( size )
-		poke( addr, data )
-
-	end if
-
-	return addr
-
-end function
 
 
 
@@ -490,29 +549,6 @@ function memory_reprotect( page_aligned_address addr, integer size, valid_window
 	return new_addr
 end function	
 
---**
--- Signature:
--- procedure free_code( atom addr, integer size )
---
--- Description:
--- frees up allocated code memory
--- Parameters:
--- ##addr## must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   The size is the size you specified when you called the afore mentioned functions.                           
--- Comments:
--- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
-public procedure free_code( atom addr, integer size )
-	integer free_succeeded
-	if not xalloc_loaded() then
-		free( addr )
-	elsif platform() = WIN32 then
-		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
-	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
-		free_succeeded = not c_func( munmap_rid, { addr, size } )
-	elsif platform() = DOS32 then
-		free( addr )
-	end if
-end procedure
-
 function memory_protection( atom addr, integer size )
 	atom memory_basic_information_ptr
 	atom protection
@@ -536,6 +572,38 @@ function xalloc_loaded()
 	end if
 	return 0
 end function
+
+--****
+-- === Memory disposal
+--
+
+--**
+-- Signature:
+-- procedure free_code( atom addr, integer size )
+--
+-- Description:
+-- frees up allocated code memory
+-- Parameters:
+-- ##addr## must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   
+-- The ##size## is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().                           
+
+-- Comments:
+-- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
+--
+-- See Also: [[:allocate_code]], [[:free]]
+public procedure free_code( atom addr, integer size )
+	integer free_succeeded
+	if not xalloc_loaded() then
+		free( addr )
+	elsif platform() = WIN32 then
+		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
+	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
+		free_succeeded = not c_func( munmap_rid, { addr, size } )
+	elsif platform() = DOS32 then
+		free( addr )
+	end if
+end procedure
+
 
 --**
 -- Free up a previously allocated block of memory.
@@ -563,53 +631,16 @@ end function
 --   ##demo/callmach.ex##
 --
 -- See Also:
---     [[:allocate]], [[:free_low]]
+--     [[:allocate]], [[:free_low]], [[:free_code]]
 
 public procedure free(machine_addr addr)
 -- free the memory at address a
 	machine_proc(M_FREE, addr)
 end procedure
 
---**
--- Allocate a C-style null-terminated string in memory
---
--- Parameters:
---		# ##s##, a sequence, the string to store in RAM.
---
--- Returns:
---		An **atom**, the address of the memory block where the string was
--- stored, or 0 on failure.
--- Comments:
--- Only the 8 lowest bits of each atom in ##s## is stored. Use
--- ##allocate_wstring##()  for storing dounle byte encoded strings.
---
--- There is no allocate_string_low() function. However, you could easily
--- craft one by adapting the code for ##allocate_string##.
---
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it.
---
--- Example 1:
--- <eucode>
---  atom title
---
--- title = allocate_string("The Wizard of Oz")
--- </eucode>
--- 
--- See Also:
---		[[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
 
-public function allocate_string(sequence s)
-	atom mem
-	
-	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
-	end if
-	return mem
-end function
-
+--****
+-- === Reading from, Writing to, and Calling into Memory
 
 --**
 -- Signature:
@@ -1196,9 +1227,9 @@ end function
 -- The routine should save and restore any registers that it uses.
 --
 -- You can allocate a block of memory for the routine and then poke in the
--- bytes of machine code. You might allocate other blocks of memory for data
--- and parameters that the machine code can operate on. The addresses of these
--- blocks could be poked into the machine code.
+-- bytes of machine code using ##allocate_code()##. You might allocate other blocks of memory for data
+-- and parameters that the machine code can operate on using ##allocate()##. The addresses of these
+-- blocks could be part of the machine code.
 --
 -- If your machine code uses the stack, use ##c_proc##() instead of ##call##().
 --
