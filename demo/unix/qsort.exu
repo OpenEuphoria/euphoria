@@ -5,6 +5,7 @@
 
 include std/dll.e
 include std/machine.e
+include std/callback.e
 
 atom libc
 integer qid, nitems, item_size, qsort, ncalls

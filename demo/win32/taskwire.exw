@@ -21,6 +21,7 @@ without type_check
 include std/dll.e
 include std/machine.e
 include std/wildcard.e
+include std/callback.e
 without warning
 
 constant X = 1, Y = 2, Z = 3
