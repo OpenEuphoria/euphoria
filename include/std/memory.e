@@ -155,27 +155,12 @@ constant MEM_COMMIT = #1000,
 	--MEM_RESET = #8000,
 	MEM_RELEASE = #8000
 
-
-atom kernel_dll, memDLL_id
-atom getpagesize_rid, mmap_rid, VirtualAlloc_rid, 
-	VirtualLock_rid, VirtualUnlock_rid, 
-	VirtualProtect_rid, GetLastError_rid, 
-	GetSystemInfo_rid,
-	mprotect_rid, VirtualFree_rid, munmap_rid,
-	mlock_rid, munlock_rid, VirtualQuery_rid
-
-constant M_OPEN_DLL  = 50
-
-
-function xalloc_open_dll( sequence dllname ) 
-	return machine_func(M_OPEN_DLL, dllname )
-end function
-function xalloc_opendll( sequence dllname)
-	return xalloc_open_dll( dllname )
-end function
-
 ifdef WIN32 then
-		memDLL_id = xalloc_open_dll( "kernel32.dll" )
+		atom kernel_dll, memDLL_id, VirtualFree_rid, VirtualQuery_rid,
+		VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid, 
+		VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
+
+		memDLL_id = open_dll( "kernel32.dll" )
 		kernel_dll = memDLL_id
 		VirtualQuery_rid = define_c_func( memDLL_id, "VirtualQuery", { C_POINTER, C_POINTER, C_UINT }, C_UINT )
 		VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
@@ -187,6 +172,8 @@ ifdef WIN32 then
 		VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
 		
 elsifdef UNIX then
+		atom getpagesize_rid, mmap_rid, mprotect_rid, munmap_rid,
+		mlock_rid, munlock_rid
 		
 		getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
 		mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
@@ -197,11 +184,17 @@ elsifdef UNIX then
 		
 end ifdef
 
+ifdef WIN32 then
+
 function VirtualAlloc( atom addr, atom size, atom flallocationtype, atom flprotect )
 	atom r1
 	r1 = c_func( VirtualAlloc_rid, {addr, size, flallocationtype, flprotect } )
 	return r1
 end function
+
+end ifdef
+
+ifdef UNIX then
 
 function mmap( object start, integer length, integer protection, integer flags, integer fd, integer offset )
 	atom pc
@@ -214,6 +207,7 @@ function mmap( object start, integer length, integer protection, integer flags, 
 	end if
 end function
 
+end ifdef
 
 function mem_const_set( sequence s, sequence hash )
 	for i = 1 to length( hash ) do
@@ -572,6 +566,8 @@ function memory_reprotect( page_aligned_address addr, integer size, valid_window
 	return new_addr
 end function	
 
+ifdef WIN32 then
+
 function memory_protection( atom addr, integer size )
 	atom memory_basic_information_ptr
 	atom protection
@@ -584,7 +580,9 @@ function memory_protection( atom addr, integer size )
 	return or_bits( protection, #FF )
 end function
 
-function xalloc_loaded()
+end ifdef
+
+public function xalloc_loaded()
 	ifdef WIN32 then
 		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
