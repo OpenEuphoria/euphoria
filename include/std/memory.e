@@ -567,7 +567,7 @@ end function
 end ifdef
 
 -- Returns 1 if the DEP executing data only memory would cause an exception
-function dep_works()
+public function dep_works()
 	
 	ifdef WIN32 then
 		return compare( os_data, {} ) != 0 
