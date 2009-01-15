@@ -41,6 +41,8 @@
 -- <<LEVELTOC depth=2>>
 --
 
+include std/os.e
+
 constant
 	M_ALLOC = 16,
 	M_FREE = 17
@@ -145,42 +147,43 @@ include std/dll.e
 constant PROT_EXEC = 4, PROT_READ = 1, PROT_WRITE = 2,
  PROT_NONE = 0
 
-constant MAP_ANONYMOUS = #20, MAP_PRIVATE = #2
---,MAP_SHARED = #1, MAP_TYPE = #F, MAP_FIXED = #10,
---MAP_FILE = 0
 
--- Windows constants
-constant MEM_COMMIT = #1000,
+
+ifdef WIN32 then
+	-- Windows constants
+	constant MEM_COMMIT = #1000,
 	MEM_RESERVE = #2000,
 	--MEM_RESET = #8000,
 	MEM_RELEASE = #8000
+	
+	atom kernel_dll, memDLL_id, VirtualFree_rid, VirtualQuery_rid,
+	VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid, 
+	VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
 
-ifdef WIN32 then
-		atom kernel_dll, memDLL_id, VirtualFree_rid, VirtualQuery_rid,
-		VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid, 
-		VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
-
-		memDLL_id = open_dll( "kernel32.dll" )
-		kernel_dll = memDLL_id
-		VirtualQuery_rid = define_c_func( memDLL_id, "VirtualQuery", { C_POINTER, C_POINTER, C_UINT }, C_UINT )
-		VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
-		VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
-		VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
-		VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
-		GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
-		GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
-		VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
+	memDLL_id = open_dll( "kernel32.dll" )
+	kernel_dll = memDLL_id
+	VirtualQuery_rid = define_c_func( memDLL_id, "VirtualQuery", { C_POINTER, C_POINTER, C_UINT }, C_UINT )
+	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
+	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
+	VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
+	VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
+	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
+	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
+	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
 		
 elsifdef UNIX then
-		atom getpagesize_rid, mmap_rid, mprotect_rid, munmap_rid,
-		mlock_rid, munlock_rid
-		
-		getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
-		mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
-		mprotect_rid = define_c_func( -1, "mprotect", { C_POINTER, C_UINT, C_INT }, C_INT )
-		munmap_rid = define_c_func( -1, "munmap", { C_POINTER, C_UINT }, C_INT )
-		mlock_rid = define_c_func( -1, "mlock", { C_POINTER, C_UINT }, C_INT )
-		munlock_rid = define_c_func( -1, "munlock", { C_POINTER, C_UINT }, C_INT )
+	constant MAP_ANONYMOUS = #20, MAP_PRIVATE = #2
+	--,MAP_SHARED = #1, MAP_TYPE = #F, MAP_FIXED = #10,
+	--MAP_FILE = 0
+	atom getpagesize_rid, mmap_rid, mprotect_rid, munmap_rid,
+	mlock_rid, munlock_rid
+	
+	getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
+	mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
+	mprotect_rid = define_c_func( -1, "mprotect", { C_POINTER, C_UINT, C_INT }, C_INT )
+	munmap_rid = define_c_func( -1, "munmap", { C_POINTER, C_UINT }, C_INT )
+	mlock_rid = define_c_func( -1, "mlock", { C_POINTER, C_UINT }, C_INT )
+	munlock_rid = define_c_func( -1, "munlock", { C_POINTER, C_UINT }, C_INT )
 		
 end ifdef
 

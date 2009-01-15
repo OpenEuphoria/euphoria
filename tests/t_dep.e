@@ -68,6 +68,7 @@ end function
 
 integer calling_dmemfunction
 calling_dmemfunction = 0
+-- This will be called if an exception is raised in calling read-write-only memory.
 function dep_is_enabled(object x)
     if calling_dmemfunction then
 	if fs:delete_file( "ex.err" ) then
@@ -75,7 +76,9 @@ function dep_is_enabled(object x)
 	end if
 	ifdef UNITTEST then
 		test_pass( "Is memory allocated by allocate_code() executable?" )
-		test_pass( "Can we call functions returned by call_back?" )
+		ifdef DOS32 then
+			test_pass( "Can we call functions returned by call_back?" )
+		end ifdef
 		test_report()
 	elsedef
         	puts(1, "The code allocated with allocate(), however raised an exception and it SHOULD.  Therefore D.E.P. is enabled for the interpreter you used for this test on your system.  This means, your system is configured correctly to test allocate_code() and that allocate_code() and call_back() work properly.\n" )
@@ -149,12 +152,16 @@ function five()
 	return 5 
 end function 
  
-atom five_cb = call_back(routine_id("five"))  
-integer cb = define_c_func("", {'+', five_cb}, {}, C_INT) 
+ifdef !DOS32 then
+	atom five_cb = call_back(routine_id("five"))  
 
-calling_call_back = 1
-void = c_func(cb, {}) 
-calling_call_back = 0
+	integer cb 
+	cb = define_c_func("", {'+', five_cb}, {}, C_INT)
+	calling_call_back = 1
+	void = c_func(cb, {}) 
+	calling_call_back = 0
+	
+end ifdef
 
 calling_dmemfunction = 1
 void = c_func(rdata, {x,y})
