@@ -7,12 +7,12 @@
 --
 include std/convert.e
 include std/machine.e
+include std/error.e
 
 constant M_CALL_BACK = 52
 
 constant call_back_size = 92 -- maximum value of C based Euphoria and the 
 			     -- Euphoria based Euphoria.
-
 --**
 -- Get a machine address for an Euphoria procedure.
 --
@@ -64,24 +64,14 @@ public function call_back(object id)
 	atom addr, size, repi
 	atom z
 	s = machine_func(M_CALL_BACK, {id})
-	if not xalloc_loaded() then
-		return s[1]
-	end if
 	addr = s[1]
 	rep =  int_to_bytes( s[2] )
 	size = s[3]
 	code = peek( {addr, size} )
 	repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
 	if repi = 4 then
-		abort(1)
+		crash( "Signature not found in creating call back address." )
 	end if
-	--return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
-	-- temporary workaround for windows 98 until xalloc_loaded() is fixed
-	z = allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
-	if z = 0 then
-		return s[1]
-	else
-		return z
-	end if
+	return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )
 end function
 

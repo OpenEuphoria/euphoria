@@ -170,6 +170,8 @@ ifdef WIN32 then
 	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
 	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
 	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
+	sequence os_data = uname()
+		
 		
 elsifdef UNIX then
 	constant MAP_ANONYMOUS = #20, MAP_PRIVATE = #2
@@ -283,49 +285,40 @@ public function allocate_code( sequence data )
 	
 	size = length(data)
 
-	if not xalloc_loaded() then
-		goto "no_dep"
+	if dep_works() then
+
+		ifdef WIN32 then
+
+			addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
+			oldprotptr = allocate(4) 
+			if addr = 0 then
+			    return 0
+			end if
+			poke( addr, data )
+			if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
+				-- 0 indicates failure here
+				return 0
+			end if
+			free( oldprotptr )
+			return addr
+			
+		elsifdef UNIX then
+	
+			addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+			if addr = -1 then
+				return 0
+			end if
+			poke( addr, data )
+			if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
+				-- non zero indicates failure here
+				return 0
+			end if
+			return addr
+	
+		end ifdef 
+
 	end if
 
-	ifdef DOS32 then
-
-		goto "no_dep"
-
-	elsifdef WIN32 then
-		
-		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
-		oldprotptr = allocate(4) 
-		if addr = 0 then
-		    return 0
-		end if
-		poke( addr, data )
-		if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
-			-- 0 indicates failure here
-			return 0
-		end if
-		free( oldprotptr )
-		return addr
-		
-	elsifdef UNIX then
-
-		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if addr = -1 then
-			return 0
-		end if
-		poke( addr, data )
-		if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
-			-- non zero indicates failure here
-			return 0
-		end if
-		return addr
-
-	elsedef -- unknown platform.  Return normal memory.
-
-		goto "no_dep"
-
-	end ifdef
-
-	label "no_dep"
 	addr = allocate( size )
 	if addr = 0 then
 		return 0
@@ -407,52 +400,44 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 	
 	size = length(data)
 
-	if not xalloc_loaded() then
-		goto "no_dep"
+	if dep_works() then
+
+		ifdef WIN32 then
+	
+			addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
+			if addr = 0 then
+			    return 0
+			end if
+			oldprotptr = allocate(4)
+			if oldprotptr = 0 then
+			    return 0
+			end if
+			poke( addr, data )
+			if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
+			    -- 0 indicates failure here
+			    return 0
+			end if
+			free( oldprotptr )
+			return addr
+	
+		elsifdef UNIX then
+	
+			addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+			if addr = -1 then
+				return 0
+			end if
+			poke( addr, data )
+			if c_func( mprotect_rid, { addr, size, mem_win2linux( protection ) } ) != 0 then
+				-- non zero indicates failure in mprotect 			
+				return 0
+			end if
+			return addr
+	
+		end ifdef
+
 	end if
 
-	ifdef DOS32 then
 
-		goto "no_dep"
-
-	elsifdef WIN32 then
-
-		addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
-		if addr = 0 then
-		    return 0
-		end if
-		oldprotptr = allocate(4)
-		if oldprotptr = 0 then
-		    return 0
-		end if
-		poke( addr, data )
-		if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
-		    -- 0 indicates failure here
-		    return 0
-		end if
-		free( oldprotptr )
-		return addr
-
-	elsifdef UNIX then
-
-		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if addr = -1 then
-			return 0
-		end if
-		poke( addr, data )
-		if c_func( mprotect_rid, { addr, size, mem_win2linux( protection ) } ) != 0 then
-			-- non zero indicates failure in mprotect 			
-			return 0
-		end if
-		return addr
-
-	elsedef
-
-		goto "no_dep"
-
-	end ifdef
-
-	label "no_dep"
 	addr = allocate( size )
 	if addr = 0 then
 		return 0
@@ -475,7 +460,7 @@ end function
 function allocate_exec( integer size )
 	atom addr
 	
-	if not xalloc_loaded() then
+	if not dep_works() then
 		goto "no_dep"
 	end if
 
@@ -541,18 +526,16 @@ function memory_reprotect( page_aligned_address addr, integer size, valid_window
 	integer linux_protection
 	atom new_addr
 
-	if not xalloc_loaded() then
-		return addr
-	end if
-
-	ifdef DOS32 then
+	if not dep_works() then
 		if addr = 0 then
 			new_addr = allocate( size )
 			poke( new_addr, peek( { addr, size } ) )
 		else
 		    	new_addr = addr
 		end if
-	elsifdef WIN32 then
+	end if
+	
+	ifdef WIN32 then
 		new_addr = VirtualAlloc( addr, size, or_bits( MEM_RESERVE, MEM_COMMIT ), protection )
 		poke( new_addr, peek( { addr, size } ) )
 	elsifdef UNIX then
@@ -562,8 +545,6 @@ function memory_reprotect( page_aligned_address addr, integer size, valid_window
 		if new_addr = -1 then
 			return 0
 		end if
-	elsedef -- unknown platform
-		return 0
 	end ifdef
 
 	return new_addr
@@ -585,17 +566,24 @@ end function
 
 end ifdef
 
-public function xalloc_loaded()
+-- Returns 1 if the DEP executing data only memory would cause an exception
+function dep_works()
+	
 	ifdef WIN32 then
-		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
+		return compare( os_data, {} ) != 0 
+			and find( os_data[1], { "WinNT" } ) > 0 
+			and match( "WinNT", os_data[2] ) = 0
+			and VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 	elsifdef UNIX then
-		return mmap_rid != -1 and getpagesize_rid != -1
-	elsedef
-		return 1
+		return 0 -- put your OS here if it works with uname
+			and getpagesize_rid != -1 and mmap_rid != -1 
+			and mprotect_rid != -1 and munmap_rid != -1
 	end ifdef
+	
 	return 0
 end function
+
 
 --****
 -- === Memory disposal
@@ -617,7 +605,7 @@ end function
 -- See Also: [[:allocate_code]], [[:free]]
 public procedure free_code( atom addr, integer size )
 	integer free_succeeded
-	if not xalloc_loaded() then
+	if not dep_works() then
 		free( addr )
 		return
 	end if
@@ -626,10 +614,6 @@ public procedure free_code( atom addr, integer size )
 		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
 	elsifdef UNIX then
 		free_succeeded = not c_func( munmap_rid, { addr, size } )
-	elsifdef DOS32 then
-		free( addr )
-	elsedef
-		free( addr )
 	end ifdef
 end procedure
 
