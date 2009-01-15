@@ -64,9 +64,6 @@ public function call_back(object id)
 	atom addr, size, repi
 	atom z
 	s = machine_func(M_CALL_BACK, {id})
-	if not dep_works() then
-		return s[1]
-	end if
 	addr = s[1]
 	rep =  int_to_bytes( s[2] )
 	size = s[3]
