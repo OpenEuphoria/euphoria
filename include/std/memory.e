@@ -156,13 +156,12 @@ ifdef WIN32 then
 	--MEM_RESET = #8000,
 	MEM_RELEASE = #8000
 	
-	atom kernel_dll, memDLL_id, VirtualFree_rid, VirtualQuery_rid,
+	atom kernel_dll, memDLL_id, VirtualFree_rid, 
 	VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid, 
 	VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
 
 	memDLL_id = open_dll( "kernel32.dll" )
 	kernel_dll = memDLL_id
-	VirtualQuery_rid = define_c_func( memDLL_id, "VirtualQuery", { C_POINTER, C_POINTER, C_UINT }, C_UINT )
 	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
 	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
 	VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
@@ -455,117 +454,6 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 	--    that is the spirit of the work though.  
 end function
 
-
--- Undocumented function
-function allocate_exec( integer size )
-	atom addr
-	
-	if not dep_works() then
-		goto "no_dep"
-	end if
-
-	ifdef DOS32 then
-
-		goto "no_dep"
-
-	elsifdef WIN32 then
-		
-		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
-		if addr = 0 then
-		    return 0
-		end if
-		return addr
-		
-	elsifdef UNIX then
-
-		addr = c_func( mmap_rid, { 0, size, or_bits(PROT_WRITE,PROT_EXEC), or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if addr = -1 then
-			return 0
-		end if
-		return addr
-
-	elsedef -- unknown platform.  Return normal memory.
-
-		goto "no_dep"
-
-	end ifdef
-
-	label "no_dep"
-	addr = allocate( size )
-	if addr = 0 then
-		return 0
-	end if
-
-	return addr
-	
-end function
-
-
-
-
--- new_addr = memory_reprotect( addr, size, protection )
---
--- Changes protection on a segment of memory using MS-Windows style constants.
---
--- The memory should have been returned from allocate_protect or allocate_code.
---
--- The affected region is really:
---        floor( addr / page_size() ) * page_size() .. ceil( (addr+size) / page_size() ) * page_size
--- On an error 0 is returned.  If you ask this function to do what it can't it
--- will return 0.
--- See the memory protection constants at:
---   http://msdn2.microsoft.com/en-us/library/aa366786(VS.85).aspx
---   The idea is to support everything that both mmap and VirtualAlloc can
---   do and no more.
---
---
--- Implementation notes: The memory constants that are less than #100 are supported
--- and you may NOT put two together with or_bits().
--- WARNING: UNTESTED FUNCTION
-function memory_reprotect( page_aligned_address addr, integer size, valid_windows_memory_protection_constant protection )
-	integer linux_protection
-	atom new_addr
-
-	if not dep_works() then
-		if addr = 0 then
-			new_addr = allocate( size )
-			poke( new_addr, peek( { addr, size } ) )
-		else
-		    	new_addr = addr
-		end if
-	end if
-	
-	ifdef WIN32 then
-		new_addr = VirtualAlloc( addr, size, or_bits( MEM_RESERVE, MEM_COMMIT ), protection )
-		poke( new_addr, peek( { addr, size } ) )
-	elsifdef UNIX then
-		linux_protection = mem_win2linux( protection )
-		new_addr = c_func( mmap_rid, { 0, size, linux_protection, 
-			or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if new_addr = -1 then
-			return 0
-		end if
-	end ifdef
-
-	return new_addr
-end function	
-
-ifdef WIN32 then
-
-function memory_protection( atom addr, integer size )
-	atom memory_basic_information_ptr
-	atom protection
-	memory_basic_information_ptr = allocate( 28 )
-	if c_func( VirtualQuery_rid, { addr, memory_basic_information_ptr, size } ) < 12 then
-		return -1
-	end if
-	protection = peek4u( memory_basic_information_ptr + 8 )
-	free( memory_basic_information_ptr )
-	return or_bits( protection, #FF )
-end function
-
-end ifdef
-
 -- Returns 1 if the DEP executing data only memory would cause an exception
 function dep_works()
 	
@@ -576,9 +464,12 @@ function dep_works()
 			and VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 	elsifdef UNIX then
-		return 0 -- put your OS here if it works with uname
+		return 
 			and getpagesize_rid != -1 and mmap_rid != -1 
 			and mprotect_rid != -1 and munmap_rid != -1
+			ifdef LINUX then
+				and 0
+			end ifdef 			
 	end ifdef
 	
 	return 0
