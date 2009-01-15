@@ -139,8 +139,6 @@ public function allocate(positive_int n)
 	return machine_func(M_ALLOC, n)
 end function
 
-include std/machine.e
-include std/os.e
 include std/dll.e
 
 -- Linux constants
@@ -176,8 +174,7 @@ function xalloc_opendll( sequence dllname)
 	return xalloc_open_dll( dllname )
 end function
 
-if platform() != DOS32 then
-	if platform() = WIN32 then
+ifdef WIN32 then
 		memDLL_id = xalloc_open_dll( "kernel32.dll" )
 		kernel_dll = memDLL_id
 		VirtualQuery_rid = define_c_func( memDLL_id, "VirtualQuery", { C_POINTER, C_POINTER, C_UINT }, C_UINT )
@@ -189,7 +186,7 @@ if platform() != DOS32 then
 		GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
 		VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
 		
-	elsif find( platform(), { FREEBSD, LINUX } ) then
+elsifdef UNIX then
 		
 		getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
 		mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
@@ -198,10 +195,7 @@ if platform() != DOS32 then
 		mlock_rid = define_c_func( -1, "mlock", { C_POINTER, C_UINT }, C_INT )
 		munlock_rid = define_c_func( -1, "munlock", { C_POINTER, C_UINT }, C_INT )
 		
-	end if
-else
-	
-end if
+end ifdef
 
 function VirtualAlloc( atom addr, atom size, atom flallocationtype, atom flprotect )
 	atom r1
@@ -292,15 +286,15 @@ public function allocate_code( sequence data )
 	
 	size = length(data)
 
-	if platform() = DOS32 or not xalloc_loaded() then
+	if not xalloc_loaded() then
+		goto "no_dep"
+	end if
 
-		addr = allocate( size )
-		if addr = 0 then
-			return 0
-		end if
-		poke( addr, data )
+	ifdef DOS32 then
 
-	elsif platform() = WIN32 then
+		goto "no_dep"
+
+	elsifdef WIN32 then
 		
 		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
 		oldprotptr = allocate(4) 
@@ -313,8 +307,9 @@ public function allocate_code( sequence data )
 			return 0
 		end if
 		free( oldprotptr )
+		return addr
 		
-	elsif find( platform(), { FREEBSD, LINUX, OSX } ) then
+	elsifdef UNIX then
 
 		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
 		if addr = -1 then
@@ -325,14 +320,20 @@ public function allocate_code( sequence data )
 			-- non zero indicates failure here
 			return 0
 		end if
+		return addr
 
-	else -- unknown platform.  Return normal memory.
+	elsedef -- unknown platform.  Return normal memory.
 
-		addr = allocate( size )
-		poke( addr, data )
+		goto "no_dep"
 
+	end ifdef
+
+	label "no_dep"
+	addr = allocate( size )
+	if addr = 0 then
+		return 0
 	end if
-
+	poke( addr, data )
 	return addr
 
 end function
@@ -409,15 +410,15 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 	
 	size = length(data)
 
-	if platform() = DOS32 or not xalloc_loaded() then
+	if not xalloc_loaded() then
+		goto "no_dep"
+	end if
 
-		addr = allocate( size )
-		if addr = 0 then
-			return 0
-		end if
-		poke( addr, data )
+	ifdef DOS32 then
 
-	elsif platform() = WIN32 then
+		goto "no_dep"
+
+	elsifdef WIN32 then
 
 		addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
 		if addr = 0 then
@@ -433,8 +434,9 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 		    return 0
 		end if
 		free( oldprotptr )
+		return addr
 
-	elsif find( platform(), {LINUX, FREEBSD, OSX} ) then
+	elsifdef UNIX then
 
 		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
 		if addr = -1 then
@@ -445,13 +447,20 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 			-- non zero indicates failure in mprotect 			
 			return 0
 		end if
+		return addr
 
-	else
+	elsedef
 
-		addr = allocate( size )
-		poke( addr, data )
+		goto "no_dep"
 
+	end ifdef
+
+	label "no_dep"
+	addr = allocate( size )
+	if addr = 0 then
+		return 0
 	end if
+	poke( addr, data )
 
 	return addr
 
@@ -469,31 +478,40 @@ end function
 function allocate_exec( integer size )
 	atom addr
 	
-	if platform() = DOS32 or not xalloc_loaded() then
+	if not xalloc_loaded() then
+		goto "no_dep"
+	end if
 
-		addr = allocate( size )
-		if addr = 0 then
-			return 0
-		end if
+	ifdef DOS32 then
 
-	elsif platform() = WIN32 then
+		goto "no_dep"
+
+	elsifdef WIN32 then
 		
 		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
 		if addr = 0 then
 		    return 0
 		end if
+		return addr
 		
-	elsif find( platform(), { FREEBSD, LINUX, OSX } ) then
+	elsifdef UNIX then
 
 		addr = c_func( mmap_rid, { 0, size, or_bits(PROT_WRITE,PROT_EXEC), or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
 		if addr = -1 then
 			return 0
 		end if
+		return addr
 
-	else -- unknown platform.  Return normal memory.
+	elsedef -- unknown platform.  Return normal memory.
 
-		addr = allocate( size )
+		goto "no_dep"
 
+	end ifdef
+
+	label "no_dep"
+	addr = allocate( size )
+	if addr = 0 then
+		return 0
 	end if
 
 	return addr
@@ -525,29 +543,32 @@ end function
 function memory_reprotect( page_aligned_address addr, integer size, valid_windows_memory_protection_constant protection )
 	integer linux_protection
 	atom new_addr
-	
+
 	if not xalloc_loaded() then
 		return addr
-	elsif platform() = DOS32 then
+	end if
+
+	ifdef DOS32 then
 		if addr = 0 then
 			new_addr = allocate( size )
 			poke( new_addr, peek( { addr, size } ) )
 		else
 		    	new_addr = addr
 		end if
-	elsif platform() = WIN32 then
+	elsifdef WIN32 then
 		new_addr = VirtualAlloc( addr, size, or_bits( MEM_RESERVE, MEM_COMMIT ), protection )
 		poke( new_addr, peek( { addr, size } ) )
-	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
+	elsifdef UNIX then
 		linux_protection = mem_win2linux( protection )
 		new_addr = c_func( mmap_rid, { 0, size, linux_protection, 
 			or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
 		if new_addr = -1 then
 			return 0
 		end if
-	else
+	elsedef -- unknown platform
 		return 0
-	end if
+	end ifdef
+
 	return new_addr
 end function	
 
@@ -564,14 +585,14 @@ function memory_protection( atom addr, integer size )
 end function
 
 function xalloc_loaded()
-	if platform() = WIN32 then
+	ifdef WIN32 then
 		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
-	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
+	elsifdef UNIX then
 		return mmap_rid != -1 and getpagesize_rid != -1
-	else
+	elsedef
 		return 1
-	end if
+	end ifdef
 	return 0
 end function
 
@@ -597,13 +618,18 @@ public procedure free_code( atom addr, integer size )
 	integer free_succeeded
 	if not xalloc_loaded() then
 		free( addr )
-	elsif platform() = WIN32 then
-		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
-	elsif find( platform(), { LINUX, FREEBSD, OSX } ) then
-		free_succeeded = not c_func( munmap_rid, { addr, size } )
-	elsif platform() = DOS32 then
-		free( addr )
+		return
 	end if
+
+	ifdef WIN32 then
+		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
+	elsifdef UNIX then
+		free_succeeded = not c_func( munmap_rid, { addr, size } )
+	elsifdef DOS32 then
+		free( addr )
+	elsedef
+		free( addr )
+	end ifdef
 end procedure
 
 
