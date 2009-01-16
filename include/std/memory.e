@@ -41,8 +41,6 @@
 -- <<LEVELTOC depth=2>>
 --
 
-include std/os.e
-
 constant
 	M_ALLOC = 16,
 	M_FREE = 17
@@ -169,7 +167,6 @@ ifdef WIN32 then
 	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
 	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
 	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
-	sequence os_data = uname()
 		
 		
 elsifdef UNIX then
@@ -288,31 +285,37 @@ public function allocate_code( sequence data )
 
 		ifdef WIN32 then
 
-			addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
-			oldprotptr = allocate(4) 
-			if addr = 0 then
-			    return 0
-			end if
-			poke( addr, data )
-			if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
-				-- 0 indicates failure here
-				return 0
-			end if
-			free( oldprotptr )
-			return addr
-			
-		elsifdef UNIX then
+		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
+		oldprotptr = allocate(4) 
+		-- Windows 98 has VirtualAlloc but its VirtualAlloc always returns 0
+		-- The following three lines are a kludge for Windows 9x
+		-- Including os.e caused in r1338. 
+		if addr = 0 then
+		    addr = allocate( size ) 
+		end if
+		if addr = 0 then
+			return 0
+		end if
+		poke( addr, data )
+		if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
+			-- 0 indicates failure here
+			return 0
+		end if
+		free( oldprotptr )
+		return addr
+		
+	elsifdef UNIX then
 	
-			addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-			if addr = -1 then
-				return 0
-			end if
-			poke( addr, data )
-			if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
-				-- non zero indicates failure here
-				return 0
-			end if
-			return addr
+		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if addr = -1 then
+			return 0
+		end if
+		poke( addr, data )
+		if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
+			-- non zero indicates failure here
+			return 0
+		end if
+		return addr
 	
 		end ifdef 
 
@@ -403,34 +406,34 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 
 		ifdef WIN32 then
 	
-			addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
-			if addr = 0 then
-			    return 0
-			end if
-			oldprotptr = allocate(4)
-			if oldprotptr = 0 then
-			    return 0
-			end if
-			poke( addr, data )
-			if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
-			    -- 0 indicates failure here
-			    return 0
-			end if
-			free( oldprotptr )
-			return addr
+		addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
+		if addr = 0 then
+		    return 0
+		end if
+		oldprotptr = allocate(4)
+		if oldprotptr = 0 then
+		    return 0
+		end if
+		poke( addr, data )
+		if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
+		    -- 0 indicates failure here
+		    return 0
+		end if
+		free( oldprotptr )
+		return addr
 	
-		elsifdef UNIX then
+	elsifdef UNIX then
 	
-			addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-			if addr = -1 then
-				return 0
-			end if
-			poke( addr, data )
-			if c_func( mprotect_rid, { addr, size, mem_win2linux( protection ) } ) != 0 then
-				-- non zero indicates failure in mprotect 			
-				return 0
-			end if
-			return addr
+		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
+		if addr = -1 then
+			return 0
+		end if
+		poke( addr, data )
+		if c_func( mprotect_rid, { addr, size, mem_win2linux( protection ) } ) != 0 then
+			-- non zero indicates failure in mprotect 			
+			return 0
+		end if
+		return addr
 	
 		end ifdef
 
@@ -458,18 +461,14 @@ end function
 function dep_works()
 	
 	ifdef WIN32 then
-		return compare( os_data, {} ) != 0 
-			and find( os_data[1], { "WinNT" } ) > 0 
-			and match( "WinNT", os_data[2] ) = 0
-			and VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
+		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 	elsifdef UNIX then
-		return 
-			and getpagesize_rid != -1 and mmap_rid != -1 
+		ifdef LINUX then
+			return 0
+		end ifdef		
+		return getpagesize_rid != -1 and mmap_rid != -1 
 			and mprotect_rid != -1 and munmap_rid != -1
-			ifdef LINUX then
-				and 0
-			end ifdef 			
 	end ifdef
 	
 	return 0

@@ -76,7 +76,7 @@ function dep_is_enabled(object x)
 	end if
 	ifdef UNITTEST then
 		test_pass( "Is memory allocated by allocate_code() executable?" )
-		ifdef DOS32 then
+		ifdef !DOS32 then
 			test_pass( "Can we call functions returned by call_back?" )
 		end ifdef
 		test_report()

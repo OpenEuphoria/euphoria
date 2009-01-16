@@ -13,6 +13,7 @@ constant M_CALL_BACK = 52
 
 constant call_back_size = 92 -- maximum value of C based Euphoria and the 
 			     -- Euphoria based Euphoria.
+
 --**
 -- Get a machine address for an Euphoria procedure.
 --
@@ -63,6 +64,10 @@ public function call_back(object id)
 	sequence s, code, rep
 	atom addr, size, repi
 	atom z
+	ifdef !WIN32 then
+		-- save speed for OSes that do not have DEP.
+		return machine_func(M_CALL_BACK, id)
+	end ifdef
 	s = machine_func(M_CALL_BACK, {id})
 	addr = s[1]
 	rep =  int_to_bytes( s[2] )
@@ -70,8 +75,18 @@ public function call_back(object id)
 	code = peek( {addr, size} )
 	repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
 	if repi = 4 then
-		crash( "Signature not found in creating call back address." )
+		crash("Cannot generate call_back address.")
 	end if
-	return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )
+	return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
+	-- temporary workaround for windows 98 until allocate_code() is fixed
+	code = code[1..repi-1] & rep & code[repi+4..length(code)]
+	z = allocate_code( code )
+	if z = 0 then
+		z = allocate( length(code) )
+		poke( z, code )
+		return z
+	else
+		return z
+	end if
 end function
 
