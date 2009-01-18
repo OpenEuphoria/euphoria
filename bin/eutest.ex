@@ -135,6 +135,7 @@ procedure do_test(sequence cmds)
 	sequence control_err, ex_err, interpreter_os_name
 	integer log_where = 0 -- keep track of unittest.log
 	integer log_fd = 0
+	sequence silent = ""
 	integer expected_status -- expected status
 	
 	ifdef UNIX then
@@ -169,7 +170,6 @@ procedure do_test(sequence cmds)
 		ec = find("-ec", cmds)
 	end while
 
-	
 	if (length(translator) >= 7 and match( upper("ecw.exe"), upper(translator) ) != 0)
 		or ( length(translator) = 0 and platform() = WIN32 ) then
 		translator_platform = WIN32
@@ -269,6 +269,11 @@ procedure do_test(sequence cmds)
 	end if
 	options = join(switches)
 
+	if verbose_switch > 0 then
+		silent = ""
+	else
+		silent = "-silent"
+	end if
 
 	sequence fail_list = {}
 	if log and atom(
@@ -393,7 +398,7 @@ procedure do_test(sequence cmds)
 			else
 				printf(1, "translating, compiling, and executing executable: %s\n", {filename})
 			end if
-			cmd = sprintf("%s %s %s %s -D UNITTEST %s -D EC -batch %s", {translator, library, compiler, options, con, filename})
+			cmd = sprintf("%s %s %s %s %s -D UNITTEST %s -D EC -batch %s", {translator, silent, library, compiler, options, con, filename})
 			if verbose_switch > 0 then
 				printf(1, "CMD '%s'\n", {cmd})
 			end if
@@ -770,11 +775,11 @@ procedure do_process_log(sequence cmds)
 		end if
 	end for
 	
-	summarize_error( "%d interpreted tests failed unexpectedly", E_INTERPRET, html )
-	summarize_error( "%d tests could not be translated", E_TRANSLATE, html )
-	summarize_error( "%d translated tests could not be compiled", E_COMPILE, html )
-	summarize_error( "%d compiled tests failed unexpectedly", E_EXECUTE, html )
-	summarize_error( "%d tests ran successfully", E_NOERROR, html )
+	summarize_error( "%d interpreted test files failed unexpectedly", E_INTERPRET, html )
+	summarize_error( "%d test files could not be translated", E_TRANSLATE, html )
+	summarize_error( "%d translated test files could not be compiled", E_COMPILE, html )
+	summarize_error( "%d compiled test files failed unexpectedly", E_EXECUTE, html )
+	summarize_error( "%d test files ran successfully", E_NOERROR, html )
 	
 	if html then
 		if find(1, error_list[3] = E_EUTEST ) then

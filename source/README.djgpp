@@ -1,0 +1,26 @@
+
+Get the following packages:
+http://www.delorie.com/pub/djgpp/current/v2gnu/
+
+djdev203, gcc432b, fil41b, bnu219b, all422a, mak3791b, 
+shl2011b, bsh204b, grep253b, sed415b 
+
+these for debugging:
+gdb611b, faq230b, txi412b,
+
+Make sure an existing 4.0 alpha or higher version of EUPHORIA is the 
+first one in your path then
+issue the following command line in the source sub directory:
+bash configure --managed-mem --debug
+set PATH=f:\modbin;e:\djgpp\bin;$PATH
+F:\eumod\source>e:\djgpp\bin\make SHELL=e:\djgpp\bin\bash.exe MAKESHELL=e:\djgpp\bin\bash.exe all
+
+For configure you can use any combination of --full, --managed-mem, and --debug
+but you must call it with 'bash' and NOT 'sh'.  You *do* need both SHELL and MAKESHELL
+variables set.
+
+If you see some error like it cannot find Memory.C.c to compile memory.c.o
+or some similiar nonesense I cannot help you.  Ask on the EUForum or the euphoria
+chat channel.
+
+

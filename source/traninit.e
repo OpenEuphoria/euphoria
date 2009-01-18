@@ -32,6 +32,7 @@ constant FORCE_CHOOSE = FALSE
 
 boolean help_option = FALSE
 global boolean wat_option, djg_option, bor_option, lcc_option, gcc_option
+global boolean silent = FALSE
 wat_option = FALSE
 djg_option = FALSE
 bor_option = FALSE
@@ -72,6 +73,9 @@ global procedure transoptions()
 			if find(uparg,{"-HELP","-?"}) then
 				help_option = TRUE
 			
+			elsif (equal("-SILENT", uparg)) then
+				silent = TRUE
+				
 			elsif (equal("-DLL", uparg) or equal("-SO", uparg)) then
 				dll_option = TRUE
 				
@@ -176,7 +180,7 @@ global procedure transoptions()
 	if help_option then
 		CompileErr(
 "Usage: ec [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]\n"&
-"          [-com /compile_directory/] [-keep] [-debug]\n"&
+"          [-com /compile_directory/] [-keep] [-debug] [-silent]\n"&
 "          [-lib /library relative to %EUDIR%\\bin/] [-stack /stack size/]\n"&
 "          [/os specific options/]:\n" &
 "\n"&

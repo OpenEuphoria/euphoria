@@ -13,6 +13,9 @@ procedure update_rev_e( object f )
 	h = open("rev.e", "w")
 	printf(h, "global constant SVN_REVISION = \"%s\"\n", {f})
 	close(h)
+	h = open("rev.dat","w")
+	printf(h,"%s",{f})
+	close(h)
 end procedure
 
 function is_numeric(sequence s)
@@ -75,8 +78,8 @@ function rev_with_svnversion()
 	object line
 	sequence n
 	-- run svnversion with .. argument to include support directories
-	system( "svnversion ..>rev.dat", 0 )
-	x = open( "rev.dat", "r" )
+	system( "svnversion ..>rev.tmp", 0 )
+	x = open( "rev.tmp", "r" )
 	if x > -1 then
 	  line = gets(x)
 	  close(x)	  
@@ -85,12 +88,12 @@ function rev_with_svnversion()
 		if not is_current( n ) then
 			update_rev_e( n )
 		end if		
-		x += 0 * delete_file("rev.dat")		
+		x += 0 * delete_file("rev.tmp")		
 		return 1
 	  end if
 	  close(x)
 	end if
-	x += 0 * delete_file("rev.dat")
+	x += 0 * delete_file("rev.tmp")
 	return 0
 end function
 
