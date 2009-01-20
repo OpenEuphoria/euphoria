@@ -90,6 +90,7 @@ ifeq "$(EDJGPP)" "1"
 	MEM_FLAGS=-DESIMPLE_MALLOC
 	LDLFLAG=-lalleg
 	ECHO=echo
+	PLAT=DOS
 else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
@@ -104,7 +105,7 @@ else
 endif
 endif
 
-PLAT=DOS
+
 
 ifdef EDEBUG
 DEBUG_FLAGS=-g3 -O0
