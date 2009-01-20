@@ -1103,7 +1103,7 @@ global procedure start_emake()
 			if debug_option then
 				debug_flag = " -g3"
 			else
-				debug_flag = " -fomit-frame-pointer -g4"
+				debug_flag = " -fomit-frame-pointer -g0"
 			end if
 			puts(doit, "echo compiling with DJGPP"&HOSTNL)
 			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
@@ -1393,7 +1393,14 @@ global procedure finish_emake()
 				printf(link_file, "%s\\bin\\ec.a\n", {get_eudir()}) 
 			end if
 			
-			printf(link_file, "%s\\bin\\liballeg.a\n", {get_eudir()}) 
+			integer nsl,sl
+			nsl = 0
+			loop do
+				sl = nsl
+				nsl = sl + find( '\\', dj_path[sl+1..$] )
+			until sl = nsl
+			
+			printf(link_file, "%slib\\liballeg.a\n", {dj_path[1..sl]}) 
 			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, {file0, file0})
 			if not keep then
 				puts(doit, "del *.o"&HOSTNL)

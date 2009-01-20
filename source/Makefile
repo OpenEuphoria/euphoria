@@ -26,8 +26,6 @@
 
 include Makefile.eu
 
-include Makefile.$(OBJDIR)smak
-
 EU_VERSION = 4.0
 
 ifeq "$(RELEASE)" "1"
@@ -86,8 +84,8 @@ ifeq "$(EDJGPP)" "1"
 	EOSMING=-O2
 	EBACKENDU=backendd
 	EBACKENDC=backendd
-	EECU=ec
-	EEXU=ex
+	EECU=ec.exe
+	EEXU=ex.exe
 	EECUA=ec.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
 	LDLFLAG=-lalleg
@@ -105,6 +103,8 @@ else
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 endif
+
+PLAT=DOS
 
 ifdef EDEBUG
 DEBUG_FLAGS=-g3 -O0
@@ -252,24 +252,18 @@ svn_rev :
 	-$(EXE) -i ../include revget.ex ../.svn/entries
 
 interpreter : builddirs
-	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD)
-	$(MAKE) $(EEXU) OBJDIR=intobj EBSD=$(EBSD)
+	$(MAKE) EU_TARGET=int.ex OBJDIR=intobj EBSD=$(EBSD) int.ex.a
+	$(MAKE) $(EEXU) EU_TARGET=int.ex OBJDIR=intobj EBSD=$(EBSD)
 
 translator : builddirs
-	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
-	$(MAKE) $(EECU) OBJDIR=transobj EBSD=$(EBSD)
+	$(MAKE) EU_TARGET=ec.ex OBJDIR=transobj EBSD=$(EBSD) ec.ex.a
+	$(MAKE) $(EECU) EU_TARGET=ec.ex OBJDIR=transobj EBSD=$(EBSD)
 
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
 
-exusource : intobj/main-.c
-exusource :  EU_TARGET = int.ex
-ecusource : transobj/main-.c
-ecusource :  EU_TARGET = ec.ex
-backendsource : backobj/main-.c
-backendsource :  EU_TARGET = backend.ex
 source : builddirs
 	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD)
 	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD)
@@ -300,35 +294,40 @@ source-tarball : source
 .PHONY : backendsource
 .PHONY : source
 
+ifdef EU_TARGET
+
 $(EEXU) :  EU_TARGET = int.ex
 $(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 $(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EEXU) :  ./$(EU_TARGET).a $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EEXU)
 	@echo $(OS)
-	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXU)
+	$(CC) $(EOSFLAGS) ./$(EU_TARGET).a $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXU)
 	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EEXUC); fi
 
 $(EECU) :  OBJDIR = transobj
 $(EECU) :  EU_TARGET = ec.ex
 $(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 $(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EECU) : $(EU_TARGET).a $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) ./$(EU_TARGET).a $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EECU)
+
+endif
 
 backend : builddirs
-	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj
-	$(MAKE) $(EBACKENDU) EBACKEND=1 OBJDIR=backobj
-
+	$(MAKE) EU_TARGET=backend.ex OBJDIR=backobj EBSD=$(EBSD) backend.ex.a
+	$(MAKE) $(EBACKENDU) EU_TARGET=backend.ex OBJDIR=backobj EBSD=$(EBSD)
+	
+	
 $(EBACKENDU) : OBJDIR = backobj
 $(EBACKENDU) : EU_TARGET = backend.ex
 $(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 $(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(EBACKENDU) : ./$(EU_TARGET).a $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making BACKENDU $(OBJDIR)
-	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EBACKENDU)
-	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EBACKENDC); fi
+	$(CC) $(EOSFLAGS) $(EU_TARGET).a $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EBACKENDU)
+	if [ "$(EMINGW)" = "1" ]; then $(CC) $(EOSFLAGSCONSOLE) $(EU_TARGET).a $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(EBACKENDC); fi
 
 test : interpreter translator library
 	export EUCOMPILEDIR=../ && \
@@ -399,28 +398,18 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 
 %back : %
 	mkdir -p $@
-	
-./$(OBJDIR)/%.o : ./$(OBJDIR)/%.c
-	$(CC) $(EBSDFLAG) $(FE_FLAGS) ./$(OBJDIR)/$*.c -I/usr/share/euphoria -o./$(OBJDIR)/$*.o
 
-./$(OBJDIR)/%.c : $(EU_MAIN) 
+./$(EU_TARGET).a : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	@-rm ./$(OBJDIR)/*.c
 	cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
-	@cd ./$(OBJDIR) && \
-	if [ "$(OBJDIR)" = "backobj" ]; then \
-		$(ECHO) -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
-	elif [ "$(OBJDIR)" = "transobj" ]; then \
-		$(ECHO) -e "EU_TRANSLATOR_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
-	elif [ "$(OBJDIR)" = "intobj" ]; then \
-		$(ECHO) -e "EU_INTERPRETER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
-	fi && \
-	for i in *.c; \
-	do \
-		$(ECHO) -e "./$(OBJDIR)/`basename $$i .c`.o \\" >> ../Makefile.$(OBJDIR)smak ; \
-	done && \
-	$(ECHO) -ne "\t" >> ../Makefile.$(OBJDIR)
-
+	@cd ./$(OBJDIR)
+	cd ./$(OBJDIR) && for f in *.c; do echo $(EU_TARGET) $$f; $(CC) $(EBSDFLAG) $(FE_FLAGS) -I ../.. $$f -I/usr/share/euphoria ; done
+	ar r $(EU_TARGET).a ./$(OBJDIR)/*.o
+	
+./int.ex.a : $(EU_INTERPRETER_FILES)
+./ec.ex.a  : $(EU_TRANSLATOR_FILES)
+./backend.ex.a : $(EU_BACKEND_RUNNER_FILES)
 
 ./$(OBJDIR)/back/%.o : %.c
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o
