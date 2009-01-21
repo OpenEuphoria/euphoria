@@ -17,3 +17,9 @@ with type_check
 UDT u
 u = 0
 test_pass( "forward UDT type check doesn't hang execution" )
+
+export procedure check_unincluded_type( sloppy s )
+	if not sloppy(s) then
+		puts(1,"")
+	end if
+end procedure

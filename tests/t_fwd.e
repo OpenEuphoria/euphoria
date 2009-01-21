@@ -7,6 +7,12 @@ include std/unittest.e
 include fwdglobal.e
 include fwdnoinc.e
 
+global type sloppy( object s )
+	return 1
+end type
+check_unincluded_type( 1 )
+test_pass( "Unincluded global / forward type" )
+
 integer n0=2
 integer var1
 public sequence result4 = repeat(0,4)

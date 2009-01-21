@@ -33,9 +33,9 @@ constant call_back_size = 92 -- maximum value of C based Euphoria and the
 --
 -- Comments:
 --      By default, your routine will work with the stdcall convention. On
--- Windows, you can specify i1s id as {'+', id}, in which case it will work with the cdecl calling
+-- Windows, you can specify its id as {'+', id}, in which case it will work with the cdecl calling
 -- convention instead. On non-Microsoft platforms, you
--- should only use simple IDs, as there is just one standard calling convention, i.e. stdcall.
+-- should only use simple IDs, as there is just one standard calling convention, i.e. cdecl.
 --
 --     You can set up as many call-back functions as you like, but they must all be Euphoria
 --     functions (or types) with 0 to 9 arguments. If your routine has nothing to return
@@ -61,32 +61,34 @@ constant call_back_size = 92 -- maximum value of C based Euphoria and the
 -- See Also:
 --     [[:routine_id]]
 public function call_back(object id)
-	sequence s, code, rep
-	atom addr, size, repi
-	atom z
+	
 	ifdef !WIN32 then
 		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
+	elsedef
+		sequence s, code, rep
+		atom addr, size, repi
+		atom z
+		s = machine_func(M_CALL_BACK, {id})
+		addr = s[1]
+		rep =  int_to_bytes( s[2] )
+		size = s[3]
+		code = peek( {addr, size} )
+		repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
+		if repi = 4 then
+			crash("Cannot generate call_back address.")
+		end if
+		return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
+		-- temporary workaround for windows 98 until allocate_code() is fixed
+		code = code[1..repi-1] & rep & code[repi+4..length(code)]
+		z = allocate_code( code )
+		if z = 0 then
+			z = allocate( length(code) )
+			poke( z, code )
+			return z
+		else
+			return z
+		end if
 	end ifdef
-	s = machine_func(M_CALL_BACK, {id})
-	addr = s[1]
-	rep =  int_to_bytes( s[2] )
-	size = s[3]
-	code = peek( {addr, size} )
-	repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
-	if repi = 4 then
-		crash("Cannot generate call_back address.")
-	end if
-	return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
-	-- temporary workaround for windows 98 until allocate_code() is fixed
-	code = code[1..repi-1] & rep & code[repi+4..length(code)]
-	z = allocate_code( code )
-	if z = 0 then
-		z = allocate( length(code) )
-		poke( z, code )
-		return z
-	else
-		return z
-	end if
 end function
 

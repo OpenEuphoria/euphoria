@@ -3246,6 +3246,7 @@ procedure SubProg(integer prog_type, integer scope)
 	-- start of executable code for subprogram:
 	sequence middle_def_args = {}
 	integer last_nda = 0, start_def = 0
+	symtab_index last_link = p
 	while tok[T_ID] != RIGHT_ROUND do
 		-- parse the parameter declarations
 
@@ -3266,7 +3267,14 @@ procedure SubProg(integer prog_type, integer scope)
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
 		param_num += 1
-
+		if SymTab[last_link][S_NEXT] != sym then
+			-- ignore SC_UNDEFINED symbols (should be forward declared types)
+			SymTab[SymTab[last_link][S_NEXT]][S_NEXT] = 0
+			SymTab[last_link][S_NEXT] = sym
+			
+		end if
+		last_link = sym
+		
 		if TRANSLATE then
 			SymTab[sym][S_GTYPE] = CompileType(type_sym)
 		end if

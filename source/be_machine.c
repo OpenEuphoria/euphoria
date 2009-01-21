@@ -4524,7 +4524,9 @@ object CallBack(object x)
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
 	symtab_ptr routine;
-	int bare_flag;
+#ifdef EWINDOWS
+	int bare_flag = 0;
+#endif
 	s1_ptr x_ptr;
 	int convention;
 	void * replace_value;
@@ -4534,29 +4536,32 @@ object CallBack(object x)
 	not_supported("call_back()");
 	return 0;
 #else
-	bare_flag = 0;
+	convention = C_CDECL;
 start:
 	if (IS_SEQUENCE(x)) {
 		x_ptr = SEQ_PTR(x);
 		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, SEQ_PTR(*obj_ptr)->length=%d\n",
 		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
 		fflush(stdout);*/	
+#ifdef EWINDOWS
 		if ((x_ptr->length == 1) && (!IS_SEQUENCE(*(obj_ptr=x_ptr->base+1)) 
 			|| (SEQ_PTR(obj_ptr)->length == 2))) {
 			bare_flag = 1;
 			x = *obj_ptr;
 			goto start;
 		}
+#endif
 		if (x_ptr->length != 2)
 			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
 		if (get_int(*(x_ptr->base+1)) != '+')
 			RTFatal("for cdecl, use call_back({'+', routine_id})");
 		routine_id = get_int(*(x_ptr->base+2));
-		convention = C_CDECL;
 	}
 	else {
 		routine_id = get_int(x);
+#ifdef EWINDOWS
 		convention = C_STDCALL;
+#endif
 	}
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;   
@@ -4600,7 +4605,9 @@ start:
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
+#ifdef EWINDOWS
 	if (bare_flag) goto bare;
+#endif
 	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
 #ifdef EUNIX   
 #ifndef EBSD    
@@ -4631,6 +4638,7 @@ start:
 		return NewDouble((double)addr); 
 	
 #endif
+#ifdef EWINDOWS
 bare:
 #ifdef ERUNTIME         
 	replace_value = routine_id;
@@ -4643,6 +4651,7 @@ bare:
 	obj_ptr[1] = NewDouble((double)(unsigned long)replace_value);
 	obj_ptr[2] = NewDouble((double)(unsigned long)CALLBACK_SIZE);
 	return MAKE_SEQ(result);
+#endif
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash

@@ -32,7 +32,7 @@ object line
 procedure PETC()
 	ifdef !UNITTEST then
 		puts(1,"Press Enter to Continue")
-		line = gets(0)
+-- 		line = gets(0)
 		puts(1,10)
 	end ifdef
 end procedure
@@ -40,7 +40,7 @@ end procedure
 function fPETC()
 	ifdef !UNITTEST then
 		puts(1,"Press Enter to Continue")
-		line = gets(0)
+-- 		line = gets(0)
 		puts(1,10)
 		return line
 	elsedef
@@ -119,7 +119,7 @@ multiply_code = {
    -- int argument is at stack offset +4, double is at +8 
    #DB, #44, #24, #04,        -- fild  dword ptr +4[esp]
    #DC, #4C, #24, #08,        -- fmul  qword ptr +8[esp]
-   #C2, #0C - 4 * (platform()=LINUX), #00  -- ret C -- pop 12 (or 8) bytes 
+   #C2, #0C * (platform() != LINUX), #00  -- ret C -- pop 12 (or 0) bytes 
 					   -- off the stack
     }
 
