@@ -4544,18 +4544,20 @@ start:
 		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
 		fflush(stdout);*/	
 #ifdef EWINDOWS
-		if ((x_ptr->length == 1) && (!IS_SEQUENCE(*(obj_ptr=x_ptr->base+1)) 
-			|| (SEQ_PTR(obj_ptr)->length == 2))) {
+		obj_ptr = x_ptr->base + 1;
+		if ((x_ptr->length == 1) && (!IS_SEQUENCE(*obj_ptr) 
+			|| (SEQ_PTR(*obj_ptr)->length == 2))) {
 			bare_flag = 1;
 			x = *obj_ptr;
 			goto start;
 		}
 #endif
-		if (x_ptr->length != 2)
+		if (x_ptr->length != 2){
 			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
-		if (get_int(*(x_ptr->base+1)) != '+')
+		}
+		if (get_int( x_ptr->base[1] ) != '+')
 			RTFatal("for cdecl, use call_back({'+', routine_id})");
-		routine_id = get_int(*(x_ptr->base+2));
+		routine_id = get_int( x_ptr->base[2] );
 	}
 	else {
 		routine_id = get_int(x);

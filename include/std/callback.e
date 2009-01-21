@@ -79,16 +79,18 @@ public function call_back(object id)
 			crash("Cannot generate call_back address.")
 		end if
 		return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
-		-- temporary workaround for windows 98 until allocate_code() is fixed
-		code = code[1..repi-1] & rep & code[repi+4..length(code)]
-		z = allocate_code( code )
-		if z = 0 then
-			z = allocate( length(code) )
-			poke( z, code )
-			return z
-		else
-			return z
-		end if
+		ifdef DEADCODE then
+			-- temporary workaround for windows 98 until allocate_code() is fixed
+			code = code[1..repi-1] & rep & code[repi+4..length(code)]
+			z = allocate_code( code )
+			if z = 0 then
+				z = allocate( length(code) )
+				poke( z, code )
+				return z
+			else
+				return z
+			end if
+		end ifdef
 	end ifdef
 end function
 
