@@ -61,6 +61,7 @@ public type machine_addr(atom a)
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
 
+ifdef WIN32 then
 --****
 -- === Microsoft's Memory Protection Constants
 --
@@ -95,8 +96,38 @@ public constant	PAGE_READONLY = #02
 --**
 	-- You have no access to this page
 public constant 	PAGE_NOACCESS = #01
-     
---
+
+
+elsedef
+
+constant 
+	PROT_EXEC = 4, 
+	PROT_READ = 1, 
+	PROT_WRITE = 2,
+	PROT_NONE = 0
+ 
+public constant 
+	PAGE_EXECUTE = PROT_EXEC,
+	PAGE_EXECUTE_READ = or_bits( PROT_READ, PROT_EXEC ),
+	PAGE_EXECUTE_READWRITE = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),
+	PAGE_EXECUTE_WRITECOPY = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),
+	PAGE_WRITECOPY = or_bits( PROT_READ, PROT_WRITE ), 
+	PAGE_READWRITE = or_bits( PROT_READ, PROT_WRITE ),
+	PAGE_READONLY = PROT_READ,
+	PAGE_NOACCESS = PROT_NONE
+
+end ifdef
+
+constant MEMORY_PROTECTION = {
+	PAGE_EXECUTE = PROT_EXEC,
+	PAGE_EXECUTE_READ,
+	PAGE_EXECUTE_READWRITE,
+	PAGE_EXECUTE_WRITECOPY,
+	PAGE_WRITECOPY,
+	PAGE_READWRITE,
+	PAGE_READONLY,
+	PAGE_NOACCESS 
+	}
 
 --****
 -- === Memory allocation
@@ -140,11 +171,6 @@ public function allocate(positive_int n)
 end function
 
 include std/dll.e
-
--- Linux constants
-constant PROT_EXEC = 4, PROT_READ = 1, PROT_WRITE = 2,
- PROT_NONE = 0
-
 
 
 ifdef WIN32 then
@@ -210,48 +236,13 @@ end function
 
 end ifdef
 
-function mem_const_set( sequence s, sequence hash )
-	for i = 1 to length( hash ) do
-		s[log(hash[i][1])/log(2)+1] = hash[i][2]
-	end for
-	return s
-end function
-
-
-
-
-function make_constants_table()
-	sequence s
-	s  =  repeat( PROT_NONE, 10 )
-	s = mem_const_set( s, { 
-		{ PAGE_EXECUTE_READWRITE, or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ) },
-		{ PAGE_EXECUTE_READ, or_bits( PROT_READ, PROT_EXEC ) },
-		{ PAGE_EXECUTE, PROT_EXEC },
-		{ PAGE_EXECUTE_WRITECOPY, or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ) },
-		{ PAGE_NOACCESS, PROT_NONE },
-		{ PAGE_READONLY, PROT_READ },
-		{ PAGE_READWRITE, or_bits( PROT_READ, PROT_WRITE ) },
-		{ PAGE_WRITECOPY, or_bits( PROT_READ, PROT_WRITE ) }
-	} )	
-	return s
-end function
-
-
 type valid_windows_memory_protection_constant( integer x )
-	atom value
-	value = log(x)/log(2)
-	return integer( value ) and (value <= 8) and (value >= 0)
+	return 0 != find( x, MEMORY_PROTECTION )
 end type
 
 type page_aligned_address( atom a )
 	return remainder( a, 4096 ) = 0
 end type
-
-constant mem_constants_table = make_constants_table()
-
-function mem_win2linux( valid_windows_memory_protection_constant protection )
-	return mem_constants_table[log(protection)/log(2)+1]
-end function
 
 --****
 -- === Allocating and Writing to memory:
@@ -429,7 +420,7 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 			return 0
 		end if
 		poke( addr, data )
-		if c_func( mprotect_rid, { addr, size, mem_win2linux( protection ) } ) != 0 then
+		if c_func( mprotect_rid, { addr, size, protection } ) != 0 then
 			-- non zero indicates failure in mprotect 			
 			return 0
 		end if
