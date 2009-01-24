@@ -507,6 +507,14 @@ $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
 	$(EXE) $(INCDIR) ..\ec.ex -wat $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
 	cd ..
 !endif
+!else
+.\$(OBJDIR)\main-.c $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
+	@echo *****************************************************************
+	@echo If you have EUPHORIA installed you'll need to run configure again.
+	@echo Make is configured to not try to use the interpreter.
+	@echo *****************************************************************
+	
+	FAILHERE
 !endif
 
 .c: $(OBJDIR);$(OBJDIR)\back

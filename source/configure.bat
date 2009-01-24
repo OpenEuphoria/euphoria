@@ -34,7 +34,7 @@ IF "%1" =="--debug" (
 SHIFT
 GOTO Loop
 :Continue
-if "%NOEU%" == "0" (
+if "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
 )
 if not exist transobj.wat copy transobj.dst transobj.wat

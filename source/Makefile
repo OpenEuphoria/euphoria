@@ -220,7 +220,7 @@ all : interpreter translator library backend
 
 BASE_BUILD_DIRS=intobj transobj libobj backobj
 BACK_BUILD_DIRS=intobj/back transobj/back libobj/back backobj/back
-BUILD_DIRS=$(BASE_BUILD_DIRS) $(BACK_BUILD_DIRS)
+BUILD_DIRS=intobj transobj libobj backobj intobj/back transobj/back libobj/back backobj/back
 
 # Need to call mkdir with -p because gnu makes this target even
 # when it exists (why?) and when it does
@@ -237,10 +237,7 @@ distclean :
 	-rm -f $(EEXU) $(EECU) $(EECUA) $(EBACKENDU) $(DEB_SOURCE_DIR).tar.gz
 
 clean : 
-	@-for d in $(BUILD_DIRS); \
-	do \
-	    rm -f "$$d"/*.o ;  \
-	done
+	for f in ./*obj/*.o ./*obj/back/*.o; do rm -f $$f ; done
 	-rm -f $(EEXU) $(EECU) $(EECUA) $(EBACKENDU) $(DEB_SOURCE_DIR).tar.gz
 
 .PHONY : clean distclean all
@@ -435,6 +432,11 @@ ifdef EUPHORIA
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_TARGET).a
 	@-rm ./$(OBJDIR)/*.c
 	cd ./$(OBJDIR) && $(EXE) $(INCDIR) ../ec.ex $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
+else
+	@echo "*****************************************************************"
+	@echo "If you have EUPHORIA installed you'll need to run configure again."
+	@echo "Make is configured to not try to use the interpreter."
+	@echo "*****************************************************************"
 endif	
 	@cd ./$(OBJDIR)
 	cd ./$(OBJDIR) && for f in *.c; do echo $(EU_TARGET) $$f; $(CC) $(EBSDFLAG) $(FE_FLAGS) -I ../.. $$f -I/usr/share/euphoria ; done

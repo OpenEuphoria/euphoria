@@ -234,6 +234,15 @@ procedure do_test(sequence cmds)
 		cci = find( "-cc", cmds )               
 	end while
 
+
+	switches = option_switches()
+	integer cl
+	cl = find( "-con", switches )
+	if cl then
+		switches = switches[1..cl-1] & switches[cl+1..$]
+	end if
+	options = join(switches)
+
 	-- pass options with arguments passed to eutest to the 
 	-- interpreter or translator...
 	integer outstanding_argument_count
@@ -249,6 +258,8 @@ procedure do_test(sequence cmds)
 		elsif find(cmds[i],{"-i"}) and i < length(cmds) then
 			outstanding_argument_count = 1 -- an argument to skip
 			cmd_opts &= cmds[i] & " " & cmds[i+1]
+--		elsif find( cmds[i], { "-verbose" } ) then
+--			options = " " & cmds[i]
 		else
 			cmd_opts &= cmds[i] & " "
 		end if
@@ -265,13 +276,6 @@ procedure do_test(sequence cmds)
 
 	total = length(files)
 
-	switches = option_switches()
-	integer cl
-	cl = find( "-con", switches )
-	if cl then
-		switches = switches[1..cl-1] & switches[cl+1..$]
-	end if
-	options = join(switches)
 
 	if verbose_switch > 0 then
 		silent = ""

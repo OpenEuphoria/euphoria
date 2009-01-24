@@ -20,7 +20,7 @@ e:\djgpp\bin\make SHELL=e:\djgpp\bin\sh.exe EXE=/modbin/exwc.exe
 
 For configure you can use any combination of --full, --managed-mem, and --debug
 Note that EXE must use forward slashes and must be on the same drive as 
-your current directory.
-
+your current directory.  Note the foward slashes in EXE but the DOS style paths
+for make and sh.
 
 

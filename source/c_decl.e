@@ -1403,7 +1403,7 @@ global procedure finish_emake()
 			until sl = nsl
 			
 			printf(link_file, "%slib\\liballeg.a\n", {dj_path[1..sl]}) 
-			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, {file0, file0})
+			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, repeat(truncate_to_83(file0), 2))
 			if not keep then
 				puts(doit, "del *.o"&HOSTNL)
 			end if
@@ -1411,6 +1411,10 @@ global procedure finish_emake()
 				puts(doit, "set LFN=n"&HOSTNL)
 				printf(doit, "strip %s.exe"&HOSTNL, {file0})
 				puts(doit, "set LFN="&HOSTNL)
+			end if
+			if compare(truncate_to_83(file0), file0)!=0 then
+				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, 
+					{truncate_to_83(file0),file0} )
 			end if
 		end if
 	end if      
