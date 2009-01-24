@@ -75,8 +75,16 @@ end function
 -- updates the rev.e file and returns 1
 function rev_with_svnversion()
 	integer x
-	object line
+	object line, path
 	sequence n
+	path = getenv( "PATH" )
+	if atom(path) then
+		return 0
+	end if
+	line = locate_file( "svnversion.exe", path )
+	if compare( line, "svnversion.exe" ) = 0 then
+		return 0
+	end if
 	-- run svnversion with .. argument to include support directories
 	system( "svnversion ..>rev.tmp", 0 )
 	x = open( "rev.tmp", "r" )
@@ -243,10 +251,7 @@ if not is_current( f ) then
 end if
 end procedure
 
-ifdef DOS32 then
-	rev_1_3()
-elsedef
 if not rev_with_svnversion() then 
 	rev_1_3()
 end if
-end ifdef
+

@@ -1376,8 +1376,10 @@ global procedure finish_emake()
 				fp = open(path, "rb")
 				if fp != -1 then
 					close(fp)
-					printf(doit, "le23p %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
-					printf(doit, "cwc %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
+					if not debug_option then
+						printf(doit, "le23p %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
+						printf(doit, "cwc %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
+					end if
 					if compare( short_c_file, file0 ) != 0 then
 						printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
 					end if 
@@ -1405,9 +1407,11 @@ global procedure finish_emake()
 			if not keep then
 				puts(doit, "del *.o"&HOSTNL)
 			end if
-			puts(doit, "set LFN=n"&HOSTNL)
-			printf(doit, "strip %s.exe"&HOSTNL, {file0})
-			puts(doit, "set LFN="&HOSTNL)
+			if not debug_option then
+				puts(doit, "set LFN=n"&HOSTNL)
+				printf(doit, "strip %s.exe"&HOSTNL, {file0})
+				puts(doit, "set LFN="&HOSTNL)
+			end if
 		end if
 	end if      
 

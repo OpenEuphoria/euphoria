@@ -122,6 +122,7 @@ global procedure transoptions()
 				
 			elsif equal("-DEBUG", uparg) then
 				debug_option = TRUE
+				keep = TRUE -- you'll need the sources to debug
 				
 			elsif equal("-LIB", uparg ) then
 				if i < Argc then

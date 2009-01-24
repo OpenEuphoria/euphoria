@@ -4,12 +4,8 @@ echo # Configuration for Watcom > config.wat
 :Loop
 IF "%1"=="" GOTO Continue
 
-IF "%1"=="--with-eu3" (
-	echo EU3=1 >> config.wat
-	cd > config.wat.tmp
-	set /p PWD=<config.wat.tmp
-	set PWD
-	echo PWD=%PWD% >> config.wat
+IF "%1"=="--without-euphoria" (
+	set NOEU=1
 	GOTO EndLoop
 )
 IF "%1" =="--prefix" (
@@ -38,6 +34,9 @@ IF "%1" =="--debug" (
 SHIFT
 GOTO Loop
 :Continue
+if "%NOEU%" == "0" (
+	echo EUPHORIA=1 >> config.wat
+)
 if not exist transobj.wat copy transobj.dst transobj.wat
 if not exist intobj.wat copy intobj.dst intobj.wat
 if not exist backobj.wat copy backobj.dst backobj.wat

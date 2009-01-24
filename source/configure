@@ -79,9 +79,8 @@ esac
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
-        --with-eu3 )   
-                       echo EU3=1 >> "$PREFIX"Makefile.eu
-                       echo PWD=`pwd` >> "$PREFIX"Makefile.eu
+        --without-euphoria )
+			export EUPHORIA=0
         ;;
         --full )
                        echo RELEASE=1 >> "$PREFIX"Makefile.eu
@@ -89,6 +88,9 @@ while [ "$1" != "" ]; do
         --managed-mem )
 		       # currently this is Windows only
                        echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu
+		       if test $UNAME_SYSTEM = "MS-DOS"; then
+		       	    echo "Information: Managed memory always on for DJGPP."
+		       fi
         ;;
         --debug )
                        echo EDEBUG=1 >> "$PREFIX"Makefile.eu
@@ -96,3 +98,6 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+if [ "$EUPHORIA" == "" ]; then
+	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
+fi

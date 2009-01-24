@@ -13,7 +13,7 @@ first one in your path then
 issue the following command line in the source sub directory adjusting
 your particular paths:
 bash configure --managed-mem --debug
-set PATH=f:\modbin;e:\djgpp\bin;$PATH
+set PATH=f:\modbin;e:\djgpp\bin;%PATH%
 f:
 cd \eumod\source
 e:\djgpp\bin\make SHELL=e:\djgpp\bin\sh.exe EXE=/modbin/exwc.exe

@@ -64,15 +64,19 @@ end ifdef
 	for i = 1 to length( file ) do
 		sequence line = file[i]
 		if length( line ) < 4
-		or equal( "echo", line[1..4] )
-		or equal( "if", line[1..2] )
+		or match( "echo ", line )
+		or equal( "if ", line[1..3] )
 		or match( "@echo", line ) = 1
-		or equal( "goto", line[1..4] )
+		or match( "goto ", line )
 		or line[1] = ':' then
 			
 		
-		elsif equal( "move", line[1..4] ) or
-		       equal( "del", line[1..3] ) then
+		elsif match( "set ", line ) = 1 then 
+			sequence pair
+			pair = split(line[5..$], "=")
+			pair = {setenv( pair[1], pair[2] )}
+		elsif match( "move ", line ) = 1 or
+		       equal( "del ", line[1..4] ) then
 		       system( line, 2 )
 		else
 		        sequence source = ""
