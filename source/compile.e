@@ -353,7 +353,11 @@ procedure Label(integer addr)
 
 	NewBB(0, E_ALL_EFFECT, 0)
 	label_index = find_label(addr)
-	c_printf("L%x:\n", label_index)
+	ifdef DEBUG then
+		c_printf("L%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
+	elsedef
+		c_printf("L%x: \n", label_index)
+	end ifdef
 end procedure
 
 procedure RLabel(integer addr)
@@ -402,7 +406,7 @@ procedure Goto(integer addr)
 
 	label_index = find_label(addr)
 	c_stmt0("goto ")
-	c_printf("L%x;\n", label_index)
+	c_printf("L%x; // [%d] %d\n", {label_index, pc, addr})
 end procedure
 
 procedure RGoto(integer addr)
@@ -541,7 +545,6 @@ procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 				 (SymTab[v][S_MODE] = M_TEMP or
 				  IsParameter(v) or
 				  deref_exist)
-
 	if deref_type != TYPE_INTEGER then
 		if target_differs(v, a, b, c) then
 			-- target differs from operands - can DeRef it immediately
@@ -2183,7 +2186,7 @@ procedure opRHS_SUBS()
 			CDeRefStr("_0")
 			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT)
 
-		elsif Code[pc+4] = INTEGER_CHECK then
+		elsif Code[pc+4] = INTEGER_CHECK and Code[pc+5] = Code[pc+3] then
 			-- INTEGER_CHECK coming next
 			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
 				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT)
@@ -2206,7 +2209,6 @@ procedure opRHS_SUBS()
 			end if
 			CDeRefStr("_0")
 			SetBBType(Code[pc+3], SeqElem(Code[pc+1]), novalue, TYPE_OBJECT)
-
 		end if
 	end if
 
@@ -2475,15 +2477,19 @@ end procedure
 
 procedure opINTEGER_CHECK()
 -- INTEGER_CHECK
-	if BB_var_type(Code[pc+1]) != TYPE_INTEGER then
-		c_stmt("if (!IS_ATOM_INT(@)) {\n", Code[pc+1])
+	symtab_index sym = Code[pc+1]
+	if SymTab[sym][S_MODE] = M_CONSTANT and integer( SymTab[sym][S_OBJ] ) then
+		-- do nothing: an inlined routine could cause this situation
+		
+	elsif BB_var_type(sym) != TYPE_INTEGER then
+		c_stmt("if (!IS_ATOM_INT(@)) {\n", sym)
 		LeftSym = TRUE
-		c_stmt("_1 = (long)(DBL_PTR(@)->dbl);\n", Code[pc+1])
+		c_stmt("_1 = (long)(DBL_PTR(@)->dbl);\n", sym)
 		LeftSym = TRUE
-		c_stmt("DeRefDS(@);\n", Code[pc+1])
-		c_stmt("@ = _1;\n", Code[pc+1])
+		c_stmt("DeRefDS(@);\n", sym)
+		c_stmt("@ = _1;\n", sym)
 		c_stmt0("}\n")
-		SetBBType(Code[pc+1], TYPE_INTEGER, novalue, TYPE_OBJECT)
+		SetBBType(sym, TYPE_INTEGER, novalue, TYPE_OBJECT)
 	end if
 	pc += 2
 end procedure
@@ -2936,14 +2942,14 @@ procedure opASSIGN_OP_SLICE()
 	if opcode = PASSIGN_OP_SLICE then
 		-- adjust etype of Code[pc+1]? - no, not the top level
 		c_stmt0("assign_slice_seq = (s1_ptr *)_3;\n")
-		c_stmt("RHS_Slice((s1_ptr)*(int *)_3, @, @);\n",
+		c_stmt("RHS_Slice(*(int *)_3, @, @);\n",
 			   {Code[pc+2], Code[pc+3]})
 	else
 		c_stmt("assign_slice_seq = (s1_ptr *)&@;\n", Code[pc+1])
 		target[MIN] = -1
 		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, TYPE_OBJECT)
 		-- OR-in the element type
-		c_stmt("RHS_Slice((s1_ptr)@, @, @);\n",
+		c_stmt("RHS_Slice(@, @, @);\n",
 			   {Code[pc+1], Code[pc+2], Code[pc+3]})
 	end if
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, TYPE_OBJECT)
@@ -2979,7 +2985,7 @@ procedure opRHS_SLICE()
 
 	t = Code[pc+4]
 	c_stmt("rhs_slice_target = (object_ptr)&@;\n", t)
-	c_stmt("RHS_Slice((s1_ptr)@, @, @);\n", {Code[pc+1], Code[pc+2], Code[pc+3]})
+	c_stmt("RHS_Slice(@, @, @);\n", {Code[pc+1], Code[pc+2], Code[pc+3]})
 	target = {NOVALUE, 0}
 	left_val = ObjMinMax(Code[pc+2])
 	right_val = ObjMinMax(Code[pc+3])
@@ -3719,7 +3725,13 @@ procedure opFOR()
 	sequence range1, range2, inc
 
 	loop_stack &= {{Code[pc+5], FOR, pc+7}} -- loop var, type, Label
-	c_stmt("{ int @;\n", Code[pc+5])
+	integer is_loop_var = find( SymTab[Code[pc+5]][S_SCOPE] , {SC_LOOP_VAR, SC_GLOOP_VAR})
+	if is_loop_var then
+		-- inlined loop vars are regular vars
+		c_stmt("{ int @;\n", Code[pc+5])
+	else
+		c_stmt0("{\n")
+	end if
 
 	CRef(Code[pc+3])
 	c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
@@ -4279,7 +4291,7 @@ procedure opCONCAT()
 		 TypeIs(Code[pc+2], TYPE_SEQUENCE)) or
 		   (TypeIsNot(Code[pc+1], TYPE_SEQUENCE) and
 			TypeIsNot(Code[pc+2], TYPE_SEQUENCE)) then
-		c_stmt("Concat((object_ptr)&@, @, (s1_ptr)@);\n",
+		c_stmt("Concat((object_ptr)&@, @, @);\n",
 					   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	end if
 
@@ -4507,8 +4519,7 @@ end procedure
 
 procedure opREPLACE()
 	sequence relay_else = ""
-	integer end_label = find_label( pc + 6 )
-	c_stmt0("{\n")
+	c_stmt0(" do{\n")
 		c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
 		c_stmt0("int len = assign_space->length;\n") 
 		if TypeIs( Code[pc+3], TYPE_INTEGER ) then
@@ -4523,14 +4534,9 @@ procedure opREPLACE()
 			c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n", repeat(Code[pc+4], 3))
 		end if
 		
-		--c_stmt("DeRefDS(@);\n", {Code[pc+1]})
--- 		c_stmt("if (!IS_ATOM_INT(@)){\n", Code[pc+2] )
--- 			c_stmt("RefDS(@);\n", Code[pc+2 ])
--- 		c_stmt0("}\n")
-		
 		c_stmt0("if (stop < 0 && start <= len ){\n")
 			c_stmt( "Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
-			Goto( end_label )
+			c_stmt0("break;\n")
 		c_stmt0( "}\n" )
 		c_stmt0( "if( stop > len ) {\n" )
 			c_stmt0( "stop = len;\n" )
@@ -4542,18 +4548,18 @@ procedure opREPLACE()
 		
 		c_stmt0("if (start > len){\n" )
 			c_stmt( "Concat(&@, @, @);\n", {Code[pc+5], Code[pc+1], Code[pc+2]})
-			Goto( end_label )
+			c_stmt0( "break;\n" )
 		c_stmt0( "}\n" )
 		c_stmt0("if (start < 2 ) {\n")
 			c_stmt0(" if (stop == len) {\n")
 				c_stmt("Ref(@);\n", Code[pc+2] )
 				c_stmt("DeRef(@);\n",{Code[pc+5]})
 				c_stmt("@ = @;\n", {Code[pc+5], Code[pc+2]})
-				Goto( end_label )
+				c_stmt0( "break;\n" )
 			c_stmt0("}\n")
 			c_stmt0("else if( stop < 1 ) {\n" )
 				c_stmt( "Concat(&@, @, @);\n", {Code[pc+5], Code[pc+2], Code[pc+1]})
-				Goto( end_label )
+				c_stmt0( "break;\n" )
 			c_stmt0( "}\n" )
 		c_stmt0("}\n")
 	if not TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then -- could be a sequence
@@ -4606,7 +4612,6 @@ procedure opREPLACE()
 			c_stmt("assign_space = Add_internal_space(@, stop+1, repl_len+start-stop-1);\n", {Code[pc+1]})
 			c_stmt0("assign_slice_seq = &assign_space;\n")
 			c_stmt("assign_space = Copy_elements(start, s2, &@ );\n", Code[pc+5] )
--- 			c_stmt("DeRef(@);\n",{Code[pc+5]})
 			c_stmt("@ = MAKE_SEQ(assign_space);\n", {Code[pc+5]})
 		c_stmt0("}\n")
 	 	
@@ -4657,11 +4662,10 @@ procedure opREPLACE()
 
 		SetBBType(Code[pc+5], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))	
 	end if
-	c_stmt0("}\n") -- end of block
-
+	c_stmt0("} while(0);\n") -- end of block
 
 	pc += 6
-	Label( end_label )
+	
 end procedure
 
 procedure opCONCAT_N()
@@ -5733,7 +5737,9 @@ procedure do_exec(integer start_pc)
 		intcode2 = ""
 		dblfn = ""
 		intcode_extra = ""
-		c_stmt0( sprintf("// SubProg %s pc: %d op: %s (%d)\n", { SymTab[CurrentSub][S_NAME], pc, opnames[opcode], opcode }))
+		ifdef DEBUG then
+			c_stmt0( sprintf("// SubProg %s pc: %d op: %s (%d)\n", { SymTab[CurrentSub][S_NAME], pc, opnames[opcode], opcode }))
+		end ifdef
 		call_proc(operation[opcode], {})
 	end while
 end procedure
@@ -5851,7 +5857,7 @@ procedure BackEnd(atom ignore)
 	
 	-- prevent conflicts
 	for i = TopLevelSub+1 to length(SymTab) do
-		if length(SymTab[i]) = SIZEOF_VAR_ENTRY and find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
+		if sequence(SymTab[i][S_NAME]) and find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
 			SymTab[i][S_NAME] &= sprintf( "_%d", i )
 		end if
 	end for

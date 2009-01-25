@@ -2422,7 +2422,7 @@ void do_exec(int *start_pc)
 				pc[10] = pc[1];
 				rhs_slice_target = (object_ptr)pc[4];
 				tpc = pc;
-				RHS_Slice((s1_ptr)*(object_ptr)top, 
+				RHS_Slice(*(object_ptr)top, 
 						  *(object_ptr)pc[2], 
 						  *(object_ptr)pc[3]);
 				thread5();
@@ -2450,7 +2450,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_RHS_SLICE:");
 				tpc = pc;
 				rhs_slice_target = (object_ptr)pc[4];
-				RHS_Slice((s1_ptr)*(object_ptr)pc[1], 
+				RHS_Slice(*(object_ptr)pc[1], 
 						  *(object_ptr)pc[2], 
 						  *(object_ptr)pc[3]);
 				thread5();
@@ -4230,7 +4230,7 @@ void do_exec(int *start_pc)
 					goto prep_copy; /* prepend is faster */
 				}
 				tpc = pc;
-				Concat((object_ptr)pc[3], b, (s1_ptr)top);
+				Concat((object_ptr)pc[3], b, top);
 				pc += 4;  // WATCOM thread() fails
 				BREAK;
 			

@@ -457,7 +457,7 @@ function dep_works()
 	elsifdef UNIX then
 		ifdef LINUX then
 			return 0
-		end ifdef		
+		end ifdef
 		return getpagesize_rid != -1 and mmap_rid != -1 
 			and mprotect_rid != -1 and munmap_rid != -1
 	end ifdef

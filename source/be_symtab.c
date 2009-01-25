@@ -262,10 +262,13 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		}
 
 		/* step 1: look up NAMESPACE symbol */
-		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
+		for (s = TopLevelSub->next; s != NULL; s = s->next) {
 			if (file == s->file_no && 
 				s->token == NAMESPACE && strcmp(ns, s->name) == 0) {
 				did_find = 1;
+				break;
+			}
+			else if( s > stop && s->scope != S_PRIVATE ){
 				break;
 			}
 		}
@@ -285,7 +288,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 			name++;
 		
 		/* find global name in ns file */
-		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
+		for (s = TopLevelSub->next; s != NULL && ( s <= stop || s->scope == S_PRIVATE); s = s->next) {
 			if ((s->file_no == ns_file || is_direct_include( s, ns_file, s->scope != S_EXPORT ) ) && 
 				(s->scope == S_GLOBAL || s->scope == S_PUBLIC || s->scope == S_EXPORT )
 				&& strcmp(name, s->name) == 0) {
@@ -310,7 +313,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		}
 		
 		/* try to match a LOCAL, EXPORT or GLOBAL symbol in the same source file */
-		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
+		for (s = TopLevelSub->next; s != NULL && ( s <= stop || s->scope == S_PRIVATE); s = s->next) {
 			if (s->file_no == file && 
 				(s->scope == S_LOCAL || s->scope == S_GLOBAL ||
 				s->scope == S_EXPORT || s->scope == S_PUBLIC ||
@@ -326,7 +329,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		global_found = NULL;
 		found_in_path = 0;
 		found_outside_path = 0;
-		for (s = TopLevelSub->next; s != NULL && s <= stop; s = s->next) {
+		for (s = TopLevelSub->next; s != NULL && ( s <= stop || s->scope == S_PRIVATE); s = s->next) {
 			if (s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {
 			
 				s_in_include_path = symbol_in_include_path( s, file, NULL );

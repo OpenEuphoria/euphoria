@@ -1675,6 +1675,7 @@ end function
 function key_value(atom ptr)
 -- return the value of a key,
 -- given a pointer to the key in the database
+? void
 	void = seek(current_db, ptr+4) -- skip ptr to data
 	return decompress(0)
 end function
@@ -1875,6 +1876,7 @@ public function db_insert(object key, object data, object table_name=current_tab
 	integer r, blocks, new_recs, n
 
 	key_location = db_find_key(key, table_name) -- Let it set the current table if necessary
+	
 	if key_location > 0 then
 		-- key is already in the table
 		return DB_EXISTS_ALREADY

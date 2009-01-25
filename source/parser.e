@@ -13,6 +13,7 @@ include std/text.e
 include std/search.e
 
 include platinit.e
+include inline.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
@@ -40,7 +41,7 @@ integer start_index        -- start of current top level command
 
 object backed_up_tok       -- place to back up a token
 integer FuncReturn         -- TRUE if a function return appeared
-integer param_num          -- number of parameters and private variables
+export integer param_num          -- number of parameters and private variables
 					       -- in current procedure
 --sequence goto_list        -- back-patch list for end if label
 --sequence goto_delay        -- delay list for end if label
@@ -1081,7 +1082,8 @@ procedure Function_call( token tok )
 		emit_op(opcode)
 	else
 		op_info1 = tok[T_SYM]
-		emit_op(PROC)
+-- 		emit_op(PROC)
+		emit_or_inline()
 		if not TRANSLATE then
 			if OpTrace then
 				emit_op(UPDATE_GLOBALS)
@@ -1377,7 +1379,8 @@ procedure TypeCheck(symtab_index var)
 					-- only call user-defined types that have side-effects
 					emit_opnd(var)
 					op_info1 = which_type
-					emit_op(PROC)
+					--emit_op(PROC)
+					emit_or_inline()
 					emit_op(TYPE_CHECK)
 				end if
 			end if
@@ -1407,7 +1410,8 @@ procedure TypeCheck(symtab_index var)
 						end if
 						emit_opnd(var)
 						op_info1 = which_type
-						emit_op(PROC)
+						emit_or_inline()
+-- 						emit_op(PROC)
 						emit_op(TYPE_CHECK)
 				end if
 			end if
@@ -2996,7 +3000,8 @@ procedure Procedure_call(token tok)
 		end if
 	else
 		op_info1 = s
-		emit_op(PROC)
+		--emit_op(PROC)
+		emit_or_inline()
 		if not TRANSLATE then
 			if OpTrace then
 				emit_op(UPDATE_GLOBALS)
@@ -3394,12 +3399,13 @@ procedure SubProg(integer prog_type, integer scope)
 		end if
 	end if
 
-	SymTab[p][S_STACK_SPACE] = temps_allocated + param_num
+	SymTab[p][S_STACK_SPACE] += temps_allocated + param_num
 	if temps_allocated + param_num > max_stack_per_call then
 		max_stack_per_call = temps_allocated + param_num
 	end if
 	param_num = -1
 	StraightenBranches()
+	check_inline( p )
 	EnterTopLevel()
 end procedure
 
@@ -3826,6 +3832,7 @@ global procedure parser()
 	real_parser(0)
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
+	inline_deferred_calls()
 end procedure
 
 global procedure nested_parser()

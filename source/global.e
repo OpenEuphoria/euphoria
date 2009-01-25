@@ -102,52 +102,55 @@ global constant
 	                                       -- executing this routine
 	S_STACK_SPACE = 25 - get_backend()*12, -- amount of stack space needed by this routine
 	                                       -- (for private data)
-	S_DEF_ARGS = 26                   -- {index of first defaulted arg in a routine, last 
+	S_DEF_ARGS = 26,                  -- {index of first defaulted arg in a routine, last 
 										--	nondef, list of middle defaulted params}
 	                                    -- or 0 if none
+	S_INLINE = 27                          -- 0 if routine cannot be inlined, or sequence of
+	                                       -- inline code if it can
 
 -- extra fields for TRANSLATOR (for temps and vars/routines)
 global constant
-	S_OBJ_MIN = 27,   -- minimum integer value
-	S_OBJ_MAX = 28,   -- maximum integer value
-	S_SEQ_LEN = 29,   -- length of a sequence
-	S_SEQ_ELEM = 30,  -- type of all elements of a sequence, or
+	S_OBJ_MIN = 28,   -- minimum integer value
+	S_OBJ_MAX = 29,   -- maximum integer value
+	S_SEQ_LEN = 30,   -- length of a sequence
+	S_SEQ_ELEM = 31,  -- type of all elements of a sequence, or
 	                  -- type returned by a function/type
-	S_TEMP_NAME = 31, -- for temps: number to use in the outputted C name
-	S_ONE_REF = 32,   -- TRUE if we see that a variable can only ever have
+	S_TEMP_NAME = 32, -- for temps: number to use in the outputted C name
+	S_ONE_REF = 33,   -- TRUE if we see that a variable can only ever have
 	                  -- 1 reference count
-	S_GTYPE = 33      -- current global idea of what the worst-case type is
+	S_GTYPE = 34      -- current global idea of what the worst-case type is
 
 -- extra fields for TRANSLATOR (for vars/routines only)
 global constant
-	S_LHS_SUBS2 = 34,        -- routine does double or more LHS subscripting
-	S_GTYPE_NEW = 35,        -- new idea being formed of global type
-	S_SEQ_LEN_NEW = 36,      -- new idea being formed of length of a sequence
-	S_SEQ_ELEM_NEW = 37,     -- new type being formed on a pass
+	S_LHS_SUBS2 = 35,        -- routine does double or more LHS subscripting
+	S_GTYPE_NEW = 36,        -- new idea being formed of global type
+	S_SEQ_LEN_NEW = 37,      -- new idea being formed of length of a sequence
+	S_SEQ_ELEM_NEW = 38,     -- new type being formed on a pass
 
-	S_OBJ_MIN_NEW = 38,      -- new integer value
-	S_OBJ_MAX_NEW = 39,      -- new integer value
+	S_OBJ_MIN_NEW = 39,      -- new integer value
+	S_OBJ_MAX_NEW = 40,      -- new integer value
 
-	S_ARG_TYPE = 40,         -- argument type info, stable and new versions
-	S_ARG_TYPE_NEW = 41,
+	S_ARG_TYPE = 41,         -- argument type info, stable and new versions
+	S_ARG_TYPE_NEW = 42,
 
-	S_ARG_SEQ_ELEM = 42,
-	S_ARG_SEQ_ELEM_NEW = 43,
+	S_ARG_SEQ_ELEM = 43,
+	S_ARG_SEQ_ELEM_NEW = 44,
 
-	S_ARG_MIN = 44,          -- argument min/max integers or NOVALUE or -NOVALUE
-	S_ARG_MAX = 45,
-	S_ARG_MIN_NEW = 46,
-	S_ARG_MAX_NEW = 47,
+	S_ARG_MIN = 45,          -- argument min/max integers or NOVALUE or -NOVALUE
+	S_ARG_MAX = 46,
+	S_ARG_MIN_NEW = 47,
+	S_ARG_MAX_NEW = 48,
 
-	S_ARG_SEQ_LEN = 48,
-	S_ARG_SEQ_LEN_NEW = 49,
-	S_RI_TARGET = 50         -- > 0 if targeted by a routine_id call or other
+	S_ARG_SEQ_LEN = 49,
+	S_ARG_SEQ_LEN_NEW = 50,
+	S_RI_TARGET = 51         -- > 0 if targeted by a routine_id call or other
 	                         -- external call, e.g. call to a DLL
+	
 
 global constant
-	SIZEOF_ROUTINE_ENTRY = 26 + 24 * TRANSLATE,
-	SIZEOF_VAR_ENTRY     = 15 + 35 * TRANSLATE,
-	SIZEOF_TEMP_ENTRY    =  5 + 28 * TRANSLATE
+	SIZEOF_ROUTINE_ENTRY = 27 + 24 * TRANSLATE,
+	SIZEOF_VAR_ENTRY     = 15 + 36 * TRANSLATE,
+	SIZEOF_TEMP_ENTRY    =  5 + 29 * TRANSLATE
 
 -- Permitted values for various symbol table fields
 

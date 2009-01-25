@@ -72,12 +72,14 @@ global procedure remove_symbol( symtab_index sym )
 	end if
 end procedure
 
-global function NewEntry(sequence name, integer varnum, integer scope,
+-- creates a new symbol entry, but does not add it to the hash table,
+-- nor connect it in the S_NEXT chain
+export function NewBasicEntry(sequence name, integer varnum, integer scope,
 				  integer token, integer hashval, symtab_index samehash,
 				  symtab_index type_sym)
--- Enter a symbol into the table at the next available position
+	
 	sequence new
-
+	
 	if TRANSLATE then
 		new = repeat(0, SIZEOF_ROUTINE_ENTRY)
 	else
@@ -90,7 +92,6 @@ global function NewEntry(sequence name, integer varnum, integer scope,
 	new[S_MODE] = M_NORMAL
 	new[S_USAGE] = U_UNUSED
 	new[S_FILE_NO] = current_file_no
-
 
 	if TRANSLATE then
 		-- initialize extra fields for Translator
@@ -137,10 +138,21 @@ global function NewEntry(sequence name, integer varnum, integer scope,
 
 	-- add new symbol to the end of the symbol table
 	SymTab = append(SymTab, new)
+	
+	return length(SymTab)
+end function
+
+global function NewEntry(sequence name, integer varnum, integer scope,
+				  integer token, integer hashval, symtab_index samehash,
+				  symtab_index type_sym)
+-- Enter a symbol into the table at the next available position
+	symtab_index new = NewBasicEntry( name, varnum, scope, token, hashval, samehash, type_sym )
+
+	
 	if last_sym then
-		SymTab[last_sym][S_NEXT] = length(SymTab)
+		SymTab[last_sym][S_NEXT] = new
 	end if
-	last_sym = length(SymTab)
+	last_sym = new
 	if type_sym < 0 then
 		register_forward_type( last_sym, type_sym )
 	end if
@@ -342,16 +354,20 @@ end function
 global integer temps_allocated   -- number of temps allocated for CurrentSub
 temps_allocated = 0
 
-global function NewTempSym()
+global function NewTempSym( integer inlining = 0)
 -- allocate a new temp and link it with the list of temps
 -- for the current subprogram
 	symtab_index p, q
-
-	p = SymTab[CurrentSub][S_TEMPS]
-	while p != 0 and SymTab[p][S_SCOPE] != FREE do
-		p = SymTab[p][S_NEXT]
-	end while
-
+	
+	if inlining then
+		p = SymTab[CurrentSub][S_TEMPS]
+		while p != 0 and SymTab[p][S_SCOPE] != FREE do
+			p = SymTab[p][S_NEXT]
+		end while
+	else
+		p = 0
+	end if
+	
 	if p = 0 then
 		-- no free temps available
 		temps_allocated += 1
@@ -930,10 +946,12 @@ global procedure Hide(symtab_index s)
 	
 	p = buckets[SymTab[s][S_HASHVAL]]
 	prev = 0
+	
 	while p != s and p != 0 do
 		prev = p
 		p = SymTab[p][S_SAMEHASH]
 	end while
+	
 	if p = 0 then
 		return -- already hidden
 	end if

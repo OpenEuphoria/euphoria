@@ -1041,14 +1041,14 @@ void AssignElement(object what, int place, object_ptr target)
 	}
 }
 
-void Concat(object_ptr target, object a_obj, s1_ptr b)
+void Concat(object_ptr target, object a_obj, object b_obj)
 /* concatenate a & b, put result in new object c */
 /* new object created - no copy needed to avoid circularity */
 /* only handles seq & seq and atom & atom */
 /* seq & atom done by append, atom & seq done by prepend */
 {
 	object_ptr p, q;
-	s1_ptr c, a;
+	s1_ptr c, a, b;
 	long na, nb;
 	object temp;
 
@@ -1057,13 +1057,13 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 		/* both are atoms */
 		*(c->base+1) = a_obj;
 		Ref(a_obj);
-		*(c->base+2) = (object)b;
-		Ref((object)b);
+		*(c->base+2) = b_obj;
+		Ref(b_obj);
 	}
 	else {
 		/* both are sequences */
 		a = SEQ_PTR(a_obj);
-		b = SEQ_PTR(b);
+		b = SEQ_PTR(b_obj);
 		na = a->length;
 		nb = b->length;
 
@@ -1100,7 +1100,6 @@ void Concat(object_ptr target, object a_obj, s1_ptr b)
 		}
 
 		c = NewS1(na + nb);
-
 		p = c->base;
 		q = a->base;
 		while (TRUE) {  // NOVALUE will be copied
@@ -1177,7 +1176,6 @@ void Concat_N(object_ptr target, object_ptr  source, int n)
 			p--;
 		}
 	}
-
 	ASSIGN_SEQ(target, result);
 }
 
@@ -2974,7 +2972,7 @@ static void CheckSlice(s1_ptr a, long startval, long endval, long length)
 }
 #endif
 
-void RHS_Slice(s1_ptr a, object start, object end)
+void RHS_Slice( object a, object start, object end)
 /* Construct slice a[start..end] */
 {
 	long startval;
@@ -3004,14 +3002,18 @@ void RHS_Slice(s1_ptr a, object start, object end)
 	}
 	else
 		RTFatal("slice upper index is not an atom");
+	olda = SEQ_PTR(a);
+	if( startval < 0 ) startval += olda->length;
+	if( endval < 0 )   endval   += olda->length;
+	
 	length = endval - startval + 1;
-
+	
 #ifndef ERUNTIME
 	CheckSlice(a, startval, endval, length);
 #endif
 
-	olda = SEQ_PTR(a);
-	if (*rhs_slice_target == (object)a &&
+	
+	if (*rhs_slice_target == a &&
 		olda->ref == 1 &&
 		(olda->base + olda->length - (object_ptr)olda) < 8 * (length+1)) {
 								   // we must limit the wasted space

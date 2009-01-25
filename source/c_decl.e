@@ -301,8 +301,13 @@ global procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 				SymTab[s][S_SEQ_LEN] = NOVALUE
 			end if
 			if not Initializing then
-				temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW] =
-				   or_type(temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW], t)
+				integer new_type = or_type(temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW], t)
+				if new_type = TYPE_NULL then
+					new_type = TYPE_OBJECT
+				end if
+				temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW] = new_type
+-- 				   or_type(temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW], t)
+				
 			end if
 			tn = SymTab[s][S_TEMP_NAME]
 			i = 1
@@ -1757,12 +1762,16 @@ global procedure GenerateUserRoutines()
 				
 					-- declare the temps 
 					temps = SymTab[s][S_TEMPS]
+					sequence names = {}
 					while temps != 0 do
 						if SymTab[temps][S_SCOPE] != DELETED then
+							sequence name = sprintf("_%d", SymTab[temps][S_TEMP_NAME] )
 							if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] 
-																!= TYPE_NULL then
+																!= TYPE_NULL 
+								and not find( name, names ) then
 								c_stmt0("int ")
-								c_printf("_%d", SymTab[temps][S_TEMP_NAME])
+								c_puts( name )
+-- 								c_printf("_%d", SymTab[temps][S_TEMP_NAME])
 								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] 
 																!= TYPE_INTEGER then
 									c_puts(" = 0")
@@ -1771,7 +1780,16 @@ global procedure GenerateUserRoutines()
 									-- PROBLEM: sp could be temp or symtab entry?
 									SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT)
 								end if
-								c_puts(";\n")
+								ifdef DEBUG then
+									c_puts(sprintf("; // %d %d\n", {temps, SymTab[temps][S_TEMP_NAME]} ) )
+								elsedef
+									c_puts(";\n")
+								end ifdef
+								names = prepend( names, name )
+							else
+								ifdef DEBUG then
+									c_printf("// skipping %s  name type: %d\n", {name,temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] } )
+								end ifdef
 							end if
 						end if
 						SymTab[temps][S_GTYPE] = TYPE_OBJECT

@@ -83,7 +83,9 @@ EU_CORE_FILES = &
 	opnames.e &
 	reswords.e &
 	keylist.e &
-	fwdref.e
+	fwdref.e &
+	shift.e &
+	inline.e
 
 EU_INTERPRETER_FILES = &
 	compress.e &

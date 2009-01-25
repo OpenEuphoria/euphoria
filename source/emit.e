@@ -158,7 +158,7 @@ global function Pop()
 end function
 pop_rid = routine_id("Pop")
 
-procedure TempKeep(symtab_index x)
+export procedure TempKeep(symtab_index x)
 	if x > 0 and SymTab[x][S_MODE] = M_TEMP then
 		SymTab[x][S_SCOPE] = IN_USE
 	end if
@@ -415,6 +415,18 @@ export function Last_pc()
 	return last_pc
 end function
 
+export procedure clear_op()
+	previous_op = -1
+	assignable = FALSE
+end procedure
+
+boolean inlined = FALSE
+export procedure inlined_function()
+	previous_op = PROC
+	assignable = TRUE
+	inlined = TRUE
+end procedure
+
 global procedure emit_op(integer op)
 -- Emit a postfix operator.
 -- The cases have been sorted according to profile frequency.
@@ -435,6 +447,10 @@ global procedure emit_op(integer op)
 		source = Pop()
 		target = Pop()
 		if assignable then
+			if inlined then
+				inlined = 0
+				break
+			end if
 			-- replace previous op (temp) target with ASSIGN target 
 			Code = Code[1..$-1] -- drop previous target
 			op = previous_op -- keep same previous op 

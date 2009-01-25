@@ -33,7 +33,7 @@ function name_or_literal( integer sym )
 		return sprintf("[_deleted_:%d]", sym)
 	elsif length(SymTab[sym]) >= SIZEOF_VAR_ENTRY then
 		return sprintf("[%s:%d]", {SymTab[sym][S_NAME],sym})
-	elsif SymTab[sym][S_MODE] = M_TEMP then
+	elsif SymTab[sym][S_MODE] = M_TEMP and equal( SymTab[sym][S_OBJ], NOVALUE ) then
 		return sprintf("[_temp_:%d]", sym)
 	else
 		return sprintf("[LIT %s:%d]",{ pretty_sprint(SymTab[sym][S_OBJ], ps_options), sym})
@@ -412,7 +412,7 @@ procedure opRIGHT_BRACE_N()  -- form a sequence of any length
     end for
     target = Code[pc+len+2]
     x &= sprintf(" => %s", {name_or_literal(target)})
-    il( x, len + 3 )
+    il( x, len + 2 )
     pc += 3 + len
 end procedure
 
@@ -967,7 +967,7 @@ procedure opROUTINE_ID()
 --    fn = Code[pc+4]    -- file number
 	if TRANSLATE then
 		target = Code[pc+4]
-		il( sprintf("ROUTINE_ID: %s => %s", names( Code[pc+2] & target )), 4 )
+		il( sprintf("ROUTINE_ID: (max=%d) %s => %s", Code[pc+1] & names( Code[pc+2] & target )), 4 )
     	pc += 5
     else
 		target = Code[pc+5]
@@ -1169,12 +1169,12 @@ procedure opGETENV()
 end procedure
 
 procedure opC_PROC()
-	il( sprintf( "%s: %s, %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+4])), 3)
+	il( sprintf( "%s: %s, %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+2])), 3)
 	pc += 4
 end procedure
 	  
 procedure opC_FUNC()
-	il( sprintf( "%s: %s, %s => %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+4])), 4)
+	il( sprintf( "%s: %s, %s (sub %s) => %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+4])), 4)
 	pc += 5
 end procedure
 	    
@@ -1203,7 +1203,8 @@ procedure opMACHINE_PROC()
 end procedure
 
 procedure opSWITCH()
-	il( sprintf( "%s: value %s cases %s jump %s else %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+5])), 5)
+	il( sprintf( "%s: value %s cases %s jump %s else goto %d", 
+		{opnames[Code[pc]]} & names(Code[pc+1..pc+3]) & Code[pc+4] ), 5)
 	pc += 5
 end procedure
 
@@ -1233,7 +1234,8 @@ end procedure
 
 procedure opGLABEL()
 	-- translator only
-	punary()
+	il( sprintf("%s: %04d", {opnames[Code[pc]], Code[pc+1]}),1 )
+	pc += 2
 end procedure
 
 procedure opSPLICE()

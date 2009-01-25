@@ -206,5 +206,4 @@ $$(doneby Derek Parnell, C. Cuvier.)
   $$(doneby Matt Lewis)
 * New: Parser is smarter about identifying namespaces vs regular symbols $$(doneby Matt Lewis)
 * New: Default namespace may be declared by a file. $$(doneby Matt Lewis)
-
-
+* New: Some routines may be inlined for optimization. $$(doneby Matt Lewis)

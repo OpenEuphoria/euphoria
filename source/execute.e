@@ -42,6 +42,8 @@ include std/io.e
 include std/io.e
 include std/pretty.e
 
+with trace
+
 constant M_CALL_BACK = 52,  
 		 M_CRASH_ROUTINE = 66,
 		 M_CRASH_MESSAGE = 37,
@@ -2485,24 +2487,26 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 		s = SymTab[TopLevelSub][S_NEXT]
 		found_in_path = 0
 		found_outside_path = 0
-		while s != 0 and s <= stlen do
+		
+		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
+		
 			if SymTab[s][S_FILE_NO] = file and 
 				(SymTab[s][S_SCOPE] = SC_LOCAL or 
 				 SymTab[s][S_SCOPE] = SC_GLOBAL or 
 				 SymTab[s][S_SCOPE] = SC_EXPORT or
 				(proc = TopLevelSub and SymTab[s][S_SCOPE] = SC_GLOOP_VAR)) and
-				equal(name, SymTab[s][S_NAME]) then  
+				equal(name, SymTab[s][S_NAME])
+				then  
 				-- shouldn't really be able to see GLOOP_VARs unless we are
 				-- currently inside the loop - only affects interactive var display
 				return s
 			end if
 			s = SymTab[s][S_NEXT]
 		end while 
-
 		-- try to match a single earlier GLOBAL or EXPORT symbol
 		global_found = FALSE
 		s = SymTab[TopLevelSub][S_NEXT]
-		while s != 0 and s <= stlen do
+		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
 			if SymTab[s][S_SCOPE] = SC_GLOBAL and 
 			   equal(name, SymTab[s][S_NAME]) then
 			
@@ -2640,6 +2644,7 @@ procedure opROUTINE_ID()
 		val[target] = -1
 		return
 	end if
+	
 	p = RTLookup(name, fn, sub, stlen)
 	if p = 0 or not find(SymTab[p][S_TOKEN], {PROC, FUNC, TYPE}) then
 		val[target] = -1  -- name is not a routine
@@ -3347,6 +3352,7 @@ procedure opMACHINE_FUNC()
 	a = Code[pc+1]
 	b = Code[pc+2] 
 	target = Code[pc+3]
+	
 	pc += 4
 	-- handle CALL_BACK specially
 	if val[a] = M_CALL_BACK then
@@ -3431,6 +3437,8 @@ procedure do_exec()
 	keep_running = TRUE
 	while keep_running do 
 		integer op = Code[pc]
+		
+		printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
 		switch op do
 			case ABORT:
 				opABORT()
@@ -4066,6 +4074,7 @@ global procedure Execute(symtab_index proc, integer start_index)
 	current_task = 1
 	call_stack = {proc}
 	pc = start_index
+	Code = SymTab[proc][S_CODE]
 	do_exec()
 end procedure
 
