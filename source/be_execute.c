@@ -4009,7 +4009,7 @@ void do_exec(int *start_pc)
 				end_pos = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
 				
 				b = *(object_ptr)pc[2];  // replacement
-				obj_ptr = (object_ptr)pc[5];
+				obj_ptr = (object_ptr)pc[5];  // target
 				top = *obj_ptr;
 				
 				//  normalise arguments, dispatch special cases
@@ -4097,18 +4097,23 @@ void do_exec(int *start_pc)
 							if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
 							
 							// ensures that Add_internal_space will make a copy
+							// Add_internal_space will DeRef a for us
 							RefDS( a );
+							
 						}
 						s1 = Add_internal_space( a, end_pos + 1, going_up + start_pos - end_pos - 1);
 						assign_slice_seq = &s1;
 						s1 = Copy_elements( start_pos, s2, obj_ptr);
+						
 						*obj_ptr = MAKE_SEQ(s1);
 	 				}
 	 				else { // remove any extra elements, and then assign a regular slice
 						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
 							// ensures that Add_internal_space will make a copy
 							RefDS( a );
+							c = 1;
 						}
+						else c = 0;
 						if (going_up < end_pos - start_pos+1) {
 							s1 = SEQ_PTR( a );
 							assign_slice_seq = &s1;
@@ -4118,11 +4123,13 @@ void do_exec(int *start_pc)
 							s1 = Copy_elements( start_pos, s2, obj_ptr );
 						}
 						else {
+							if( IS_DBL_OR_SEQUENCE( top ) && top != a ) DeRefDS( top );
 							s1 = Copy_elements( start_pos, s2, obj_ptr);
 							if( MAKE_SEQ( s1 ) != *obj_ptr ){
 								*obj_ptr = MAKE_SEQ( s1 );
 							}
 						}
+						if( c ) DeRefDS(a);
 					}
 				}
 				else {  // replacing by an atom
@@ -4251,6 +4258,7 @@ void do_exec(int *start_pc)
 				Ref(b);
 				
 				obj_ptr = (object_ptr)pc[4]; //-> the target
+				
 				// now the variable part
 				if (nvars <= 0) {
 					if (splins) Concat(obj_ptr,b,a);

@@ -4612,6 +4612,11 @@ procedure opREPLACE()
 	 	
 		c_stmt0("else {\n") -- replacement shorter or equal length
 			c_stmt0("s1_ptr s1;\n")
+			c_stmt0("int c = 0;\n")
+			c_stmt("if( (@ != @) || ( SEQ_PTR( @ )->ref != 1 ) ){\n", {Code[pc+5], Code[pc+1], Code[pc+1]})
+				c_stmt("RefDS( @ );\n", Code[pc+1] )
+				c_stmt("c = @ != @;\n", {Code[pc+1], Code[pc+5]})
+			c_stmt0("}\n")
 			c_stmt0("if (repl_len < stop - start+1) {\n")
 				c_stmt("Remove_elements(start+repl_len, stop, &@);\n", {Code[pc+5]})
 				c_stmt("assign_space = SEQ_PTR(@);\n", {Code[pc+5]})
@@ -4619,10 +4624,13 @@ procedure opREPLACE()
 				c_stmt("s1 = Copy_elements(start, SEQ_PTR(@), &@ );\n", {Code[pc+2], Code[pc+5]})
 			c_stmt0("}\n")
 			c_stmt0("else {\n")
+				c_stmt("if( IS_DBL_OR_SEQUENCE( @ ) && @ != @ ) DeRefDS( @ );\n", {Code[pc+5],Code[pc+5],Code[pc+1],Code[pc+5]})
 				c_stmt("s1 = Copy_elements(start, SEQ_PTR(@), &@);\n", {Code[pc+2], Code[pc+5]})
 			c_stmt0("}\n")
 			c_stmt("@ = MAKE_SEQ(s1);\n", {Code[pc+5]})
+			c_stmt("if( c ) DeRefDS(@);\n", Code[pc+1])
 			c_stmt0("}\n")
+			
 		c_stmt0("}\n")
 		if not TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
 			indent -= 4

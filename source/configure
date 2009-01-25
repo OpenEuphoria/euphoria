@@ -97,10 +97,10 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-if [ "x$EUPHORIA" == "x" ]; then
+if [ "x$EUPHORIA" = "x" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
 fi
-if [ "x$MANAGED_MEM" == "x" ]; then
+if [ "x$MANAGED_MEM" = "x" ]; then
        if test $UNAME_SYSTEM = "MS-DOS"; then
 	       	    echo "Information: Managed memory always on for DJGPP."
        fi

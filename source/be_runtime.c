@@ -779,7 +779,6 @@ s1_ptr Add_internal_space(object a,int at,int len)
 {
 	char *obj_ptr;
 	s1_ptr new_seq;
-	object_ptr base;
 	object temp;
 	int i;
 	int new_len;
@@ -789,16 +788,10 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
 			new_len = EXTRA_EXPAND(nseq + len);
-			base = seq->base;
-			/* allow 1*4 for end marker */
-			/* base + new_len + 2 could overflow 32-bits??? */
-			new_seq = (s1_ptr)ERealloc((char *)seq,
-							   (int)(base + new_len + 2) - (int)seq);
-			
-			new_seq->base = (object_ptr)new_seq +
-							 ((object_ptr)base - (object_ptr)seq);
+			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 3)*4);
+			new_seq->base = ((object_ptr)new_seq) + 3;
 			seq = new_seq;
-			seq->postfill = new_len - len;
+			seq->postfill = new_len - (len + nseq) - 1;
 			
 		}
 		else{
