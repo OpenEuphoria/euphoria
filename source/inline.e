@@ -34,10 +34,13 @@ integer
 	inline_target,
 	prev_pc,
 	return_gotos,
-	deferred_inlining = 0
+	deferred_inlining = 0,
+	varnum,
+	inline_start
 
 symtab_index
-	inline_sub
+	inline_sub,
+	last_param
 
 sequence deferred_inline_decisions = {}
 sequence deferred_inline_calls     = {}
@@ -452,6 +455,7 @@ procedure replace_temp( integer pc )
 	if not inline_temps[temp_num] then
 		
 		inline_temps[temp_num] = NewTempSym( TRUE )
+		inline_temps[temp_num] = new_inline_var( -temp_num )
 	end if
 	
 	inline_code[pc] = inline_temps[temp_num]
@@ -500,17 +504,24 @@ procedure fixup_special_op( integer pc )
 	end switch
 end procedure
 
-function new_inline_var( symtab_index s, symtab_index last, integer varnum, integer start )
-	symtab_index var
-	sequence name = sprintf( "pvt_%s_%s_at%d", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME], start})
+function new_inline_var( symtab_index s )
+	symtab_index var, vtype
+	sequence name
+	if s > 0 then
+		name = sprintf( "pvt_%s_%s_at%d", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME], inline_start})
+		vtype = SymTab[s][S_VTYPE]
+	else
+		name = sprintf( "tmp_%d_%s_at%d", {-s, SymTab[inline_sub][S_NAME], inline_start})
+		vtype = object_type
+	end if
 	if CurrentSub = TopLevelSub then
-		var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, 1, 0, SymTab[s][S_VTYPE] )
+		var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, 1, 0, vtype )
 		
 	else
-		var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, 1, 0, SymTab[s][S_VTYPE] )
-		SymTab[var][S_NEXT] = SymTab[last][S_NEXT]
-		SymTab[last][S_NEXT] = var
-		if last = last_sym then
+		var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, 1, 0, vtype )
+		SymTab[var][S_NEXT] = SymTab[last_param][S_NEXT]
+		SymTab[last_param][S_NEXT] = var
+		if last_param = last_sym then
 			last_sym = var
 		end if
 	end if
@@ -540,9 +551,10 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	
 	symtab_index s = SymTab[sub][S_NEXT]
 	
-	integer varnum = SymTab[CurrentSub][S_NUM_ARGS]
+	varnum = SymTab[CurrentSub][S_NUM_ARGS]
+	inline_start = start
 	
-	symtab_index last_param = CurrentSub
+	last_param = CurrentSub
 	for p = 1 to SymTab[CurrentSub][S_NUM_ARGS] do
 		last_param = SymTab[last_param][S_NEXT]
 	end for
@@ -562,9 +574,9 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			-- This param is left alone in the routine, but we don't
 			-- want the parser to re-use it as another temp
 			varnum += 1
-			symtab_index var = new_inline_var( s, last_param, varnum, start )
+			symtab_index var = new_inline_var( s )
 			prolog &= {ASSIGN, param, var}
-			start += 3
+			inline_start += 3
 			passed_params[1] = var
 		end if
 		s = SymTab[s][S_NEXT]
@@ -575,7 +587,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	while s and SymTab[s][S_SCOPE] <= SC_PRIVATE do
 		-- make new vars for the privates of the routine
 		varnum += 1
-		symtab_index var = new_inline_var( s, last_param, varnum, start )
+		symtab_index var = new_inline_var( s )
 		proc_vars &= var
 		s = SymTab[s][S_NEXT]
 	end while
@@ -593,7 +605,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		
 		if create_target_var then
 			varnum += 1
-			inline_target = new_inline_var( sub, last_param, varnum, start )
+			inline_target = new_inline_var( sub )
 			SymTab[inline_target][S_VTYPE] = object_type
 		end if
 		proc_vars &= inline_target
@@ -603,9 +615,9 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	
 	for i = 1 to length( assigned_params ) do
 		varnum += 1
-		symtab_index param_temp = new_inline_var( inline_params[assigned_params[i]], last_param, varnum, start )
+		symtab_index param_temp = new_inline_var( inline_params[assigned_params[i]] )
 		prolog &= ASSIGN & passed_params[assigned_params[i]] & param_temp
-		start += 3
+		inline_start += 3
 		passed_params[assigned_params[i]] = param_temp
 		
 	end for
@@ -663,7 +675,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					replace_param( pc )
 					break
 				case INLINE_ADDR:
-					inline_code[pc] = start + inline_code[pc][2]
+					inline_code[pc] = inline_start + inline_code[pc][2]
 					break
 				case INLINE_TARGET:
 					inline_code[pc] = inline_target
