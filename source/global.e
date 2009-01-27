@@ -399,3 +399,5 @@ global sequence goto_delay = {}, goto_list = {}
 global sequence private_sym = {}
 global integer use_private_list = 0
 
+global boolean wat_option, djg_option, bor_option, lcc_option, gcc_option
+global boolean silent = FALSE

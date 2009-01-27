@@ -1,5 +1,23 @@
 include std/unittest.e
 without warning
+
+integer nx = 1
+--switch nx do
+--end switch
+
+--test_true("case-less switch", nx = 1)
+
+switch nx do
+   case 1
+      nx = 2
+      break
+   case 2
+      nx = 3
+      break
+end switch
+
+test_true("colon-less switch", nx = 2)
+
 constant SWITCH = { 1, 2, "a", 3, "sdflkjasdfglkj" }
 
 sequence s

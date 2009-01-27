@@ -31,8 +31,6 @@ include tranplat.e
 constant FORCE_CHOOSE = FALSE
 
 boolean help_option = FALSE
-global boolean wat_option, djg_option, bor_option, lcc_option, gcc_option
-global boolean silent = FALSE
 wat_option = FALSE
 djg_option = FALSE
 bor_option = FALSE

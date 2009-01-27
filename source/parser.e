@@ -2148,12 +2148,12 @@ procedure Case_statement()
 
 	if tok[T_ID] = ELSE then
 		if sign = -1 then
-			CompileErr( "expected an atom string or a constant assigned an atom or a string" )
+			CompileErr( "expected an atom, string or a constant assigned an atom or a string" )
 		end if
 		case_else()
 
 	elsif fwd then
-		tok_match( COLON )
+		tok_optional( COLON )
 		integer fwdref
 		fwdref = new_forward_reference( CASE, fwd )
 		add_case( {fwdref}, sign )
@@ -2161,7 +2161,7 @@ procedure Case_statement()
 		
 	else
 		condition = tok[T_SYM]
-		tok_match( COLON )
+		tok_optional( COLON )
 		add_case( condition, sign )
 	end if
 
