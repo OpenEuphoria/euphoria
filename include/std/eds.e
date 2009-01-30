@@ -1675,7 +1675,6 @@ end function
 function key_value(atom ptr)
 -- return the value of a key,
 -- given a pointer to the key in the database
-? void
 	void = seek(current_db, ptr+4) -- skip ptr to data
 	return decompress(0)
 end function
