@@ -50,7 +50,7 @@
 #	define iputc fputc
 #	define iread fread
 #	define iwrite fwrite
-#	define iseek(f,o,w) _lseeki64(fileno(f),(o),(w))
+#	define iseek(f,o,w) _lseeki64(fileno(f),(__int64)(o),(w))
 #	define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
 #	define iiseek fseek
 #	define iitell ftell

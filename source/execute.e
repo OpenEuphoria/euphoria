@@ -3437,8 +3437,9 @@ procedure do_exec()
 	keep_running = TRUE
 	while keep_running do 
 		integer op = Code[pc]
-		
-		printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
+		ifdef DEBUG then
+			printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
+		end ifdef
 		switch op do
 			case ABORT:
 				opABORT()
