@@ -3195,7 +3195,8 @@ procedure SubProg(integer prog_type, integer scope)
 	else
 		pt = TYPE
 	end if
-
+	
+	clear_fwd_refs()
 	if find(SymTab[p][S_SCOPE], {SC_PREDEF, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_OVERRIDE}) then
 		-- redefine by creating new symbol table entry
 		if scope = SC_OVERRIDE then

@@ -10,6 +10,7 @@ include shift.e
 include emit.e
 include error.e
 include parser.e
+include fwdref.e
 
 export integer max_inline = 80 -- max code size that may be inlined
 
@@ -349,6 +350,11 @@ export procedure check_inline( symtab_index sub )
 		return
 	end if
 	
+	if get_fwdref_count() then
+		defer()
+		return
+	end if
+	
 	temp_code = ""
 	if sub != CurrentSub then
 		Code = SymTab[sub][S_CODE]
@@ -424,6 +430,7 @@ export procedure check_inline( symtab_index sub )
 				end for
 				backpatch_op = append( backpatch_op, pc )
 				goto "inline op"
+
 			case ROUTINE_ID:
 				backpatch_op = append( backpatch_op, pc )
 				-- fall through
@@ -659,6 +666,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			case STARTLINE:
 				check_pc += 2
 				continue
+			
 			case else
 				exit
 		end switch

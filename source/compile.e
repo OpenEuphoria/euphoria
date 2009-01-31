@@ -1093,11 +1093,16 @@ procedure main_temps()
 
 	NewBB(0, E_ALL_EFFECT, 0)
 	sp = SymTab[TopLevelSub][S_TEMPS]
+	Initializing = TRUE
+	sequence names = {}
 	while sp != 0 do
 		if SymTab[sp][S_SCOPE] != DELETED then
-			if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_NULL then
+			sequence name = sprintf("_%d", SymTab[sp][S_TEMP_NAME] )
+			if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_NULL 
+			and not find( name, names ) then
 				c_stmt0("int ")
-				c_printf("_%d", SymTab[sp][S_TEMP_NAME])
+				c_printf("%s", {name})
+				names = append( names, name )
 				if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_INTEGER then
 					c_puts(" = 0")
 					-- avoids DeRef in 1st BB, but may hurt global type:
@@ -1115,6 +1120,7 @@ procedure main_temps()
 	else
 		c_stmt0("int _0, _1, _2;\n\n")
 	end if
+	Initializing = FALSE
 end procedure
 
 function FoldInteger(integer op, integer target, integer left, integer right)
@@ -2226,7 +2232,8 @@ procedure opNOP1()
 end procedure
 
 procedure opINTERNAL_ERROR()
-	InternalErr("This opcode should never be emitted!")
+	InternalErr(sprintf("This opcode (%d) should never be emitted!  SubProg [%s]", 
+		{ Code[pc], SymTab[CurrentSub][S_NAME] } ))
 end procedure
 
 sequence switch_stack = {}

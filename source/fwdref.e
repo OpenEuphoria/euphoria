@@ -12,9 +12,10 @@ include shift.e
 
 -- Tracking forward references
 sequence 
-	forward_references = {},
-	active_references  = {},
-	active_refnames    = {}
+	forward_references  = {},
+	active_references   = {},
+	active_refnames     = {},
+	inactive_references = {}
 
 enum
 	FR_TYPE,
@@ -41,6 +42,15 @@ export constant FORWARD_DEFAULT_PADDING = 5
 export integer parse_arg_rid
 export integer pop_rid
 integer shifting_sub = 0
+integer fwdref_count = 0
+
+export procedure clear_fwd_refs()
+	fwdref_count = 0
+end procedure
+
+export function get_fwdref_count()
+	return fwdref_count
+end function
 
 procedure insert_code( sequence code, integer index, integer subprog )
 	shifting_sub = subprog
@@ -60,6 +70,7 @@ procedure resolved_reference( integer ref )
 	if ix then
 		active_references = remove( active_references, ix, ix )
 		active_refnames   = remove( active_refnames, ix, ix )
+		inactive_references &= ref
 	else
 		InternalErr( "Attempted to remove invalid forward reference" )
 	end if
@@ -338,6 +349,7 @@ procedure patch_forward_case( token tok, integer ref )
 	resolved_reference( ref )
 end procedure
 
+
 procedure patch_forward_type_check( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	symtab_index which_type
@@ -368,6 +380,9 @@ procedure patch_forward_type_check( token tok, integer ref )
 	integer pc = fr[FR_PC]
 	integer with_type_check = Code[pc + 2]
 	
+	if Code[pc] != TYPE_CHECK_FORWARD then
+		forward_error( tok, ref )
+	end if
 	if not var then
 		-- type type was the forward reference
 		var = Code[pc+1]
@@ -444,6 +459,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 		end if
 		
 	end if
+	
 	resolved_reference( ref )
 	reset_code()
 end procedure
@@ -494,9 +510,19 @@ export procedure register_forward_type( symtab_index sym, integer ref )
 end procedure
 
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
-	forward_references = append( forward_references, repeat( 0, FR_SIZE ) )
-	integer ref = length( forward_references )
 	
+	integer 
+		ref, 
+		len = length( inactive_references )
+	
+	if len then
+		ref = inactive_references[len]
+		inactive_references = remove( inactive_references, len, len )
+	else
+		forward_references &= 0
+		ref = length( forward_references )
+	end if
+	forward_references[ref] = repeat( 0, FR_SIZE )
 	
 	forward_references[ref][FR_TYPE]      = fwd_op
 	if sym < 0 then
@@ -516,7 +542,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	
 	active_references &= ref
 	active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
-	
+	fwdref_count += 1
 	return ref
 end function
 
@@ -562,8 +588,8 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 					case PROC:
 					case FUNC:
 						patch_forward_call( tok, ref )
-						continue
-						
+						break "fr_type"
+												
 					case else
 						forward_error( tok, ref )
 						
@@ -580,33 +606,34 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 					case ENUM:
 					case VARIABLE:
 						patch_forward_variable( tok, ref )
-						if sequence( forward_references[ref] ) then
-							errors &= ref
-						end if
-						continue
+						break "fr_type"
 					case else
 						forward_error( tok, ref )
 				end switch
+
 			case TYPE_CHECK:
 				patch_forward_type_check( tok, ref )
-				continue
+				break
 			
 			case GLOBAL_INIT_CHECK:
 				patch_forward_init_check( tok, ref )
-				continue
+				break
 			
 			case CASE:
 				patch_forward_case( tok, ref )
-				continue
+				break
 				
 			case TYPE:
 				patch_forward_type( tok, ref )
-				continue
+				break
 				
 			case else
 				-- ?? what is it?
 				InternalErr( sprintf("unrecognized forward reference type: %d (%s)", {fr[FR_TYPE], fr[FR_NAME]} ))
 		end switch
+		if sequence( forward_references[ref] ) then
+			errors &= ref
+		end if
 		
 	end for
 	

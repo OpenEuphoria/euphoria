@@ -636,7 +636,8 @@ procedure opRHS_SLICE() -- rhs slice of a sequence a[i..j]
 end procedure
 
 procedure opTYPE_CHECK_FORWARD()
-	punary()
+	il( sprintf("TYPE_CHECK_FORWARD: %s OpTypeCheck: %d", names({Code[pc+1]}) & Code[pc+2] ), 2 )
+	pc += 3
 end procedure
 
 procedure opTYPE_CHECK() 

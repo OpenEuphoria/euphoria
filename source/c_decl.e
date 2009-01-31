@@ -545,7 +545,7 @@ global procedure c_stmt(sequence stmt, object arg)
 -- output a C statement with replacements for @ or @1 @2 @3, ... @9
 	integer argcount, i
 	
-	if Pass = LAST_PASS then
+	if Pass = LAST_PASS and Initializing = FALSE then
 		cfile_size += 1
 	end if
 		
@@ -961,7 +961,7 @@ global procedure new_c_file(sequence name)
 	if Pass != LAST_PASS then
 		return
 	end if
-	
+
 	close(c_code)
 	c_code = open(name & ".c", "w")
 	if c_code = -1 then
@@ -1654,9 +1654,9 @@ global procedure GenerateUserRoutines()
 			  
 					-- Check for oversize C file 
 					if Pass = LAST_PASS and 
-					   cfile_size > MAX_CFILE_SIZE or 
-						(cfile_size > MAX_CFILE_SIZE/4 and 
-						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE) then
+					   (cfile_size > MAX_CFILE_SIZE or 
+						(s != TopLevelSub and cfile_size > MAX_CFILE_SIZE/4 and 
+						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE)) then
 						-- start a new C file 
 						-- (we generate about 1 line of C per element of CODE)
 						
@@ -1729,7 +1729,7 @@ global procedure GenerateUserRoutines()
 
 					NewBB(0, E_ALL_EFFECT, 0)
 					Initializing = TRUE
-				
+					
 					-- declare the private vars 
 					while sp do
 						integer scope = SymTab[sp][S_SCOPE]
@@ -1771,7 +1771,6 @@ global procedure GenerateUserRoutines()
 								and not find( name, names ) then
 								c_stmt0("int ")
 								c_puts( name )
--- 								c_printf("_%d", SymTab[temps][S_TEMP_NAME])
 								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] 
 																!= TYPE_INTEGER then
 									c_puts(" = 0")
