@@ -2742,7 +2742,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 -- type_ptr is NULL if constant
 	token tok
 	symtab_index sym, valsym
-	integer h, val
+	integer h, val, count = 0
 	val = 1
 	
 	integer is_fwd_ref = 0
@@ -2799,6 +2799,16 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
 				end if
+				
+				if TRANSLATE then
+					count += 1
+					if count = 10 then
+						count = 0
+						-- break up really long declarations
+						emit_op( RETURNT )
+					end if					
+				end if
+
 			end if
 		elsif type_ptr = -1 and not is_fwd_ref then
 			-- ENUM
