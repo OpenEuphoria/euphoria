@@ -1568,7 +1568,17 @@ procedure dis( integer sub )
 	integer op, ix
 	sequence sym
 	CurrentSub = sub
-	printf( out, "\nSubProgram [%s-%s:%05d]\n", {file_name[SymTab[sub][S_FILE_NO]],SymTab[sub][S_NAME], sub})
+	
+	symtab_index param = SymTab[sub][S_NEXT]
+	sequence params = {}
+	for p = 1 to SymTab[sub][S_NUM_ARGS] do
+		params &= sprintf( " %s", names({param}) )
+		param = SymTab[param][S_NEXT]
+	end for
+	
+	printf( out, "\nSubProgram [%s-%s:%05d] %s\n", 
+		{file_name[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
+	 
 	map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1

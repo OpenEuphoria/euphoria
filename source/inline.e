@@ -2,6 +2,7 @@
 -- Inlining euphoria routines
 
 include std/sort.e
+include std/map.e as map
 
 include reswords.e
 include global.e
@@ -45,6 +46,8 @@ symtab_index
 
 sequence deferred_inline_decisions = {}
 sequence deferred_inline_calls     = {}
+
+map inline_var_map = map:new()
 
 function advance( integer pc, sequence code )
 	prev_pc = pc
@@ -179,8 +182,9 @@ end function
 -- checks the target to determine if a parameter is assigned to
 procedure check_target( integer pc, integer op )
 	sequence targets = op_info[op][OP_TARGET]
+	
 	if length( targets ) then
-		for i = 1 to length( targets ) do
+	for i = 1 to length( targets ) do
 			if check_for_param( pc + targets[i] ) then
 				return
 			end if
@@ -228,8 +232,8 @@ function is_literal( symtab_index sym )
 	end if
 	
 	integer mode = SymTab[sym][S_MODE]
-	if (mode = M_CONSTANT and compare( NOVALUE, SymTab[sym][S_OBJ]) ) 
-	or (TRANSLATE and (mode = M_TEMP) and compare( SymTab[sym][S_OBJ], NOVALUE ) ) then
+	if (mode = M_CONSTANT and eu:compare( NOVALUE, SymTab[sym][S_OBJ]) ) 
+	or (TRANSLATE and (mode = M_TEMP) and eu:compare( SymTab[sym][S_OBJ], NOVALUE ) ) then
 		return 1
 	else
 		return 0
@@ -354,7 +358,6 @@ export procedure check_inline( symtab_index sub )
 		defer()
 		return
 	end if
-	
 	temp_code = ""
 	if sub != CurrentSub then
 		Code = SymTab[sub][S_CODE]
@@ -408,13 +411,16 @@ export procedure check_inline( symtab_index sub )
 				end if
 				
 				integer args = SymTab[routine][S_NUM_ARGS]
-				
+				if SymTab[routine][S_TOKEN] != PROC and check_for_param( pc + args + 2 ) then
+					
+				end if
 				for i = 2 to args + 1 + (SymTab[routine][S_TOKEN] != PROC) do
 					if not adjust_symbol( pc + i ) then 
 						defer()
 						return
 					end if
 				end for
+				
 				
 				break
 			
@@ -511,33 +517,56 @@ procedure fixup_special_op( integer pc )
 	end switch
 end procedure
 
-function new_inline_var( symtab_index s )
-	symtab_index var, vtype
+function new_inline_var( symtab_index s, integer reuse = 1 )
+	symtab_index 
+		var = 0, 
+		vtype
 	sequence name
-	if s > 0 then
-		name = sprintf( "pvt_%s_%s_at%d", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME], inline_start})
-		vtype = SymTab[s][S_VTYPE]
-	else
-		name = sprintf( "tmp_%d_%s_at%d", {-s, SymTab[inline_sub][S_NAME], inline_start})
-		vtype = object_type
+	
+	if reuse then
+		var = map:nested_get( inline_var_map, { CurrentSub, s } )
 	end if
-	if CurrentSub = TopLevelSub then
-		var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, 1, 0, vtype )
-		
-	else
-		var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, 1, 0, vtype )
-		SymTab[var][S_NEXT] = SymTab[last_param][S_NEXT]
-		SymTab[last_param][S_NEXT] = var
-		if last_param = last_sym then
-			last_sym = var
+	
+	if not var then
+		if s > 0 then
+			if reuse then
+				name = sprintf( "pvt_%s_%s", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME]})
+			else
+				name = sprintf( "pvt_%s_at%d_%s", {SymTab[s][S_NAME], inline_start, SymTab[inline_sub][S_NAME]})
+			end if
+			
+			vtype = SymTab[s][S_VTYPE]
+		else
+			if reuse then
+				name = sprintf( "tmp_%d_%s", {-s, SymTab[inline_sub][S_NAME]})
+			else
+				name = sprintf( "tmp_%d_at%d_%s", {-s, inline_start, SymTab[inline_sub][S_NAME]})
+			end if
+			vtype = object_type
 		end if
+		if CurrentSub = TopLevelSub then
+			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, 1, 0, vtype )
+			
+		else
+			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, 1, 0, vtype )
+			SymTab[var][S_NEXT] = SymTab[last_param][S_NEXT]
+			SymTab[last_param][S_NEXT] = var
+			if last_param = last_sym then
+				last_sym = var
+			end if
+		end if
+		if deferred_inlining then
+			SymTab[CurrentSub][S_STACK_SPACE] += 1
+		else
+			param_num += 1
+		end if
+		SymTab[var][S_USAGE] = U_READ + U_WRITTEN
+		if reuse then
+			map:nested_put( inline_var_map, {CurrentSub, s }, var )
+		end if
+		
 	end if
-	if deferred_inlining then
-		SymTab[CurrentSub][S_STACK_SPACE] += 1
-	else
-		param_num += 1
-	end if
-	SymTab[var][S_USAGE] = U_READ + U_WRITTEN
+	
 	return var
 end function
 
@@ -572,19 +601,22 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		last_sym = SymTab[last_sym][S_NEXT]
 		varnum += 1
 	end while
-	
 	for p = SymTab[sub][S_NUM_ARGS] to 1 by -1 do
-		symtab_index param = Pop()
-		passed_params = prepend( passed_params, param )
+		passed_params = prepend( passed_params, Pop() )
+	end for
+	
+	for p = 1 to SymTab[sub][S_NUM_ARGS] do
+		symtab_index param = passed_params[p]
 		inline_params &= s
-		if not find( p, assigned_params ) and is_temp( param ) then
+		if find( p, assigned_params ) or is_temp( param ) then
 			-- This param is left alone in the routine, but we don't
 			-- want the parser to re-use it as another temp
 			varnum += 1
 			symtab_index var = new_inline_var( s )
 			prolog &= {ASSIGN, param, var}
 			inline_start += 3
-			passed_params[1] = var
+			passed_params[p] = var
+			
 		end if
 		s = SymTab[s][S_NEXT]
 		
@@ -612,22 +644,13 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		
 		if create_target_var then
 			varnum += 1
-			inline_target = new_inline_var( sub )
+			inline_target = new_inline_var( sub, 0 )
 			SymTab[inline_target][S_VTYPE] = object_type
 		end if
 		proc_vars &= inline_target
 	else
 		inline_target = 0
 	end if
-	
-	for i = 1 to length( assigned_params ) do
-		varnum += 1
-		symtab_index param_temp = new_inline_var( inline_params[assigned_params[i]] )
-		prolog &= ASSIGN & passed_params[assigned_params[i]] & param_temp
-		inline_start += 3
-		passed_params[assigned_params[i]] = param_temp
-		
-	end for
 	
 	-- we may be able to avoid some of these...
 	integer check_pc = 1
@@ -658,6 +681,14 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 						CompileErr("Type Check Error when inlining literal")
 					end if
 					
+				elsif not is_temp( sym ) then
+					if (op = INTEGER_CHECK and SymTab[sym][S_VTYPE] = integer_type )
+					or (op = SEQUENCE_CHECK and SymTab[sym][S_VTYPE] = sequence_type )
+					or (op = ATOM_CHECK and find( SymTab[sym][S_VTYPE], {integer_type, atom_type} ) ) then
+						replace_code( {}, check_pc, check_pc+1 )
+					else
+						check_pc += 2
+					end if
 				else
 					-- TODO: can we eliminate if we're passing an integer -> integer (etc)?
 					check_pc += 2
@@ -795,6 +826,6 @@ export procedure inline_deferred_calls()
 			end for
 		end if
 	end for
-	
+	map:delete( inline_var_map )
 end procedure
 

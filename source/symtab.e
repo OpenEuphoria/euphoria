@@ -813,7 +813,7 @@ end ifdef
 			
 			b_name = SymTab[st_builtin][S_NAME]
 			builtin_warnings = append(builtin_warnings, b_name)
-			msg = "The built-in %s() over rides the global/public %s() in:"
+			msg = "The built-in %s() in %s over rides the global/public %s() in:"
 			if length(dup_globals) > 1 then
 				msg &= '\n'
 			end if
@@ -834,7 +834,7 @@ end ifdef
 				msg &= msg_file & "\n"
 			end for
 
-			Warning(msg, builtin_chosen_warning_flag, {b_name, b_name})
+			Warning(msg, builtin_chosen_warning_flag, {b_name, file_name[scanning_file], b_name})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
