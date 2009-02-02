@@ -13,7 +13,7 @@ include error.e
 include parser.e
 include fwdref.e
 
-export integer max_inline = 80 -- max code size that may be inlined
+export constant DEFAULT_INLINE = 30 -- default code size that may be inlined
 
 enum
 	INLINE_PARAM,
@@ -345,7 +345,7 @@ end procedure
 
 -- Determine whether a routine can be inlined.
 -- Can't inline if:
---    * Length of IL code is > max_inline
+--    * Length of IL code is > OpInline
 --    * Recursion (other than tail call)
 --    * OpTrace is on
 export procedure check_inline( symtab_index sub )
@@ -365,7 +365,7 @@ export procedure check_inline( symtab_index sub )
 		temp_code = Code
 	end if
 	
-	if length(Code) > max_inline then
+	if length(Code) > OpInline then
 		return
 	end if
 	

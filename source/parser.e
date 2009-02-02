@@ -3435,6 +3435,7 @@ global procedure InitGlobals()
 	elsif IDOS then
 		OpDefines &= {"EU400", "DOS32"}
 	end if
+	OpInline = DEFAULT_INLINE
 end procedure
 
 procedure not_supported_compile(sequence feature)
@@ -3585,6 +3586,20 @@ procedure SetWith(integer on_off)
 			end if
 		else
 			OpDefines &= {option}
+		end if
+		
+	elsif equal(option, "inline") then
+		if on_off then
+			tok = next_token()
+			if tok[T_ID] = ATOM then
+				OpInline = floor( SymTab[tok[T_SYM]][S_OBJ] )
+			else
+				putback(tok)
+				OpInline = DEFAULT_SAMPLE_SIZE
+			end if
+		else
+			OpInline = 0
+			
 		end if
 
 	elsif on_off and option[1] >= '0' and option[1] <= '9' then
