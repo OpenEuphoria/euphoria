@@ -19,6 +19,7 @@ end ifdef
 
 --integer translator_platform
 
+integer verbose_switch = 0
 
 integer ctcfh = 0
 sequence error_list = repeat({},4)
@@ -145,12 +146,13 @@ end function
 
 procedure report_last_error( sequence filename )
 	if length( error_list ) and length( error_list[3] )  then
-		if error_list[3][length(error_list[3])] = E_NOERROR then
-			puts(1, "SUCCESS: ")
+		if error_list[3][$] = E_NOERROR then
+			if verbose_switch != 0 then
+				printf(1, "SUCCESS: %s\n", {error_list[2][length(error_list[1])]})
+			end if
 		else
-			puts(1, "FAILURE: ")
+			printf(1, "FAILURE: %s\n", {error_list[2][length(error_list[1])]})
 		end if
-		printf(1, "%s\n", {error_list[2][length(error_list[1])]})
 	end if
 end procedure
 
@@ -181,7 +183,7 @@ procedure do_test(sequence cmds)
 
 	integer log = find("-log", cmds)
 
-	integer verbose_switch = find( "-verbose", cmds )
+	verbose_switch = find( "-verbose", cmds )
 	
 	integer ex
 	while ex and ex < length(cmds) entry do
@@ -783,11 +785,11 @@ procedure do_process_log(sequence cmds)
 		end if
 	end for
 	
-	summarize_error( "%d interpreted test files failed unexpectedly", E_INTERPRET, html )
-	summarize_error( "%d test files could not be translated", E_TRANSLATE, html )
-	summarize_error( "%d translated test files could not be compiled", E_COMPILE, html )
-	summarize_error( "%d compiled test files failed unexpectedly", E_EXECUTE, html )
-	summarize_error( "%d test files ran successfully", E_NOERROR, html )
+	summarize_error( "Interpreted test files failed unexpectedly.: %d", E_INTERPRET, html )
+	summarize_error( "Test files could not be translated.........: %d", E_TRANSLATE, html )
+	summarize_error( "Translated test files could not be compiled: %d", E_COMPILE, html )
+	summarize_error( "Compiled test files failed unexpectedly....: %d", E_EXECUTE, html )
+	summarize_error( "Test files run successfully................: %d", E_NOERROR, html )
 	
 	if html then
 		if find(1, error_list[3] = E_EUTEST ) then
