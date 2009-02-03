@@ -1,4 +1,5 @@
 @echo off
+set BUILDDIR=.
 echo # Configuration for Watcom > config.wat
 
 :Loop
@@ -18,7 +19,12 @@ IF "%1" =="--managed-mem" (
 	GOTO EndLoop
 )
 IF "%1" =="--eubin" (
-	echo EUBIN="%2" >> config.wat
+	echo EUBIN=%2 >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
+IF "%1" =="--build" (
+	set BUILDDIR=%2
 	SHIFT
 	GOTO EndLoop
 )
@@ -37,9 +43,14 @@ GOTO Loop
 if "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
 )
-if not exist transobj.wat copy transobj.dst transobj.wat
-if not exist intobj.wat copy intobj.dst intobj.wat
-if not exist backobj.wat copy backobj.dst backobj.wat
-if not exist dosobj.wat copy dosobj.dst dosobj.wat
-if not exist dosbkobj.wat copy dosbkobj.dst dosbkobj.wat
-if not exist dostrobj.wat copy dostrobj.dst dostrobj.wat
+cd > config.wat.tmp
+set /p PWD=<config.wat.tmp
+set PWD > NUL
+echo SOURCEDIR=%PWD% >> config.wat
+echo BUILDDIR=%BUILDDIR% >> config.wat
+if not exist %BUILDDIR%\transobj.wat copy transobj.dst %BUILDDIR%\transobj.wat
+if not exist %BUILDDIR%\intobj.wat copy intobj.dst %BUILDDIR%\intobj.wat
+if not exist %BUILDDIR%\backobj.wat copy backobj.dst %BUILDDIR%\backobj.wat
+if not exist %BUILDDIR%\dosobj.wat copy dosobj.dst %BUILDDIR%\dosobj.wat
+if not exist %BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %BUILDDIR%\dosbkobj.wat
+if not exist %BUILDDIR%\dostrobj.wat copy dostrobj.dst %BUILDDIR%\dostrobj.wat

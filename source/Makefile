@@ -336,7 +336,7 @@ $(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 test : interpreter translator library
 	export EUCOMPILEDIR=../ && \
 	    cd ../tests/ && \
-	     ../source/$(EEXU) -i ../include ../bin/eutest.ex -exe ../source/$(EEXU) -ec ../source/$(EECU) -lib ../source/$(EECUA)
+	     $(EXE) ../bin/eutest.ex -i ..%sinclude -exe ../source/$(EEXU) -ec ../source/$(EECU) -lib ../source/$(EECUA)
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria

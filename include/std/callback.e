@@ -8,23 +8,26 @@
 include std/convert.e
 include std/machine.e
 include std/error.e
+include std/math.e
 
 constant M_CALL_BACK = 52
-
+constant EXECUTABLE_ALIGNMENT = 4 -- can we execute on 2 mod 4 or even odd 
+                                -- addresses?
 constant call_back_size = 92 -- maximum value of C based Euphoria and the 
-			     -- Euphoria based Euphoria.
-
+                             -- Euphoria based Euphoria.
+atom page_addr = 0
+atom page_offset = 0
 --**
 -- Get a machine address for an Euphoria procedure.
 --
 -- Platform:
---	not //DOS//
+--      not //DOS//
 --
 -- Parameters:
--- 		# ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
+--              # ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
 --
 -- Returns:
--- 		An **atom**, the address of the machine code of the routine. It can be
+--              An **atom**, the address of the machine code of the routine. It can be
 -- used by Windows, or an external C routine in a Windows .dll or Unix-like shared
 -- library (.so), as a 32-bit "call-back" address for calling your Euphoria routine. 
 --
@@ -61,36 +64,32 @@ constant call_back_size = 92 -- maximum value of C based Euphoria and the
 -- See Also:
 --     [[:routine_id]]
 public function call_back(object id)
-	
-	ifdef !WIN32 then
-		-- save speed for OSes that do not have DEP.
-		return machine_func(M_CALL_BACK, id)
-	elsedef
-		sequence s, code, rep
-		atom addr, size, repi
-		atom z
-		s = machine_func(M_CALL_BACK, {id})
-		addr = s[1]
-		rep =  int_to_bytes( s[2] )
-		size = s[3]
-		code = peek( {addr, size} )
-		repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
-		if repi = 4 then
-			crash("Cannot generate call_back address.")
-		end if
-		return allocate_code( code[1..repi-1] & rep & code[repi+4..length(code)] )	
-		ifdef DEADCODE then
-			-- temporary workaround for windows 98 until allocate_code() is fixed
-			code = code[1..repi-1] & rep & code[repi+4..length(code)]
-			z = allocate_code( code )
-			if z = 0 then
-				z = allocate( length(code) )
-				poke( z, code )
-				return z
-			else
-				return z
-			end if
-		end ifdef
-	end ifdef
+        
+        ifdef !WIN32 then
+                -- save speed for OSes that do not have DEP.
+                return machine_func(M_CALL_BACK, id)
+        elsedef
+                sequence s, code, rep
+                atom addr, size, repi
+                atom z
+                s = machine_func(M_CALL_BACK, {id})
+                addr = s[1]
+                rep =  int_to_bytes( s[2] )
+                size = s[3]
+                code = peek( {addr, size} )
+                repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
+                if repi = 4 then
+                        crash("Cannot generate call_back address.")
+                end if
+                if page_addr = 0 or page_addr + page_offset + call_back_size >= PAGE_SIZE then  
+                        page_addr = allocate_protect( code[1..repi-1] & rep & code[repi+4..length(code)], PAGE_EXECUTE_READWRITE )
+                        page_offset = 0
+                else
+                        -- align for execution (need 8-byte?) and put after the previous call back
+                        page_offset += EXECUTABLE_ALIGNMENT* ceil( size / EXECUTABLE_ALIGNMENT ) 
+                        poke( page_addr + page_offset, code[1..repi-1] & rep & code[repi+4..length(code)] )                             
+                end if
+                return page_offset + page_addr
+        end ifdef
 end function
 

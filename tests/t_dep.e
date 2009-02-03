@@ -26,50 +26,37 @@ include std/unittest.e
 
 object line
 
-integer calling_memfunction
-calling_memfunction = 0
-function print_failure(object x)
-    if calling_memfunction then
-		test_fail( "Is memory allocated by allocate_code() executable?" )
-		test_report()
-        abort(0)
-    end if
-    return 0
+sequence test_message = ""
+function bad_failure(object x)
+	if compare( test_message, "" ) = 0 then
+		return 0
+	end if
+	if fs:delete_file( "ex.err" ) then
+	end if
+	test_fail( test_message )
+	test_report()
+	abort(0)
 end function
 
 integer calling_dmemfunction
 calling_dmemfunction = 0
 -- This will be called if an exception is raised in calling read-write-only memory.
+-- This is what DEP is susposed to do, so we get an ugly message from the
+-- interpreter.  We want an exception to be raised.
 function dep_is_enabled(object x)
     if calling_dmemfunction then
 	if fs:delete_file( "ex.err" ) then
-		puts(1, "The file ex.err has been deleted.\n" )
+		puts(1, "The file ex.err has been deleted.\n\n" )
 	end if
-	test_pass( "Is memory allocated by allocate_code() executable?" )
-	ifdef !DOS32 then
-		test_pass( "Can we call functions returned by call_back?" )
-	end ifdef
+	puts(1, "DEP is enabled for this process\n")
 	test_report()
 	abort(0)
     end if
     return 0
 end function
 
-integer calling_call_back = 0
-function when_callback_call_fails( object x )
-    if calling_call_back then
-	if fs:delete_file( "ex.err" ) then
-	end if
-	test_pass( "Is memory allocated by allocate_code() executable?" )
-	test_fail( "Can we call functions returned by call_back?" )
-	test_report()
-	puts( 1, "Executing from an address returned by callback caused an exception.\n" )
-	abort(0)
-    end if
-    return 0
-end function
 
-atom code_space, data_space
+atom code_space, data_space, r_space, rw_space, rwx_space, n_space, w_space
 sequence multiply_code
 atom rexec, rdata
 atom x,y
@@ -85,14 +72,18 @@ multiply_code = {
 					   -- off the stack
     }
 
-crash_routine(routine_id("print_failure"))
+crash_routine(routine_id("bad_failure"))
 crash_routine(routine_id("dep_is_enabled"))
-crash_routine(routine_id("when_callback_call_fails"))
+
+test_message = "allocate code memory"
 code_space = allocate_code(multiply_code)
+test_not_equal( "allocate code memory", 0, code_space )
+
 data_space = allocate(length(multiply_code))
-if data_space = 0 then
-    puts(  1, "Could not allocate memory!" )
-    abort(0)
+test_not_equal( "allocate data memory", 0, data_space )
+if code_space = 0 or data_space = 0 then
+	test_report()
+	abort(0)
 end if
 poke( data_space, multiply_code )
 rexec = define_c_func("", code_space, {C_INT, C_DOUBLE}, C_DOUBLE)
@@ -101,18 +92,15 @@ rdata = define_c_func("", data_space, {C_INT, C_DOUBLE}, C_DOUBLE )
 x = 7
 y = 8.5
 
-calling_memfunction = 1
-void = c_func(rexec, {x, y})
-calling_memfunction = 0
-
-function ifthenelse( integer condition, sequence s1, object x2 )
-	if condition then return s1 else return x2 end if
-end function
-
 function five( atom x ) 
 	return 5 + x
 end function 
- 
+
+test_message = "Is memory allocated by allocate_code() executable?"
+void = c_func(rexec, {x, y})
+test_pass( "Is memory allocated by allocate_code() executable?" )
+test_message = ""
+
 ifdef !DOS32 then
 	atom five_cb_cdecl = call_back( '+' & routine_id("five") )
 	test_not_equal( "create forced cdecl callback", 0, five_cb_cdecl )
@@ -128,19 +116,82 @@ ifdef !DOS32 then
 	test_not_equal( "define_c callback (forced cdecl)", -1, cb_cdecl )
 	test_not_equal( "define_c callback", -1, cb )
 	
-	calling_call_back = 1
+	test_message = "call regular callback"
 	result = c_func( cb, {1})
 	test_equal( "call regular callback", 6, result )
-	calling_call_back = 0
 	
-	calling_call_back = 1
+	test_message = "call forced cdecl callback"
 	result = c_func( cb_cdecl, {2})
 	test_equal( "call forced cdecl callback", 7, c_func( cb_cdecl, {2}) )
-	calling_call_back = 0
+
+	test_message = "call_back() called many times"
+	for i = 1 to 60 do
+		void = call_back( routine_id("allocate_protect") )
+		void = call_back( routine_id("allocate") )
+		void = call_back( routine_id("allocate_code") )
+	end for
+	five_cb = call_back( routine_id("five") )
+	void = call_back( routine_id("allocate_protect") )
+	
+	test_message = "call declared cdecl callback after many calls"
+	cb_cdecl = define_c_func("", {'+', five_cb}, {C_INT}, C_INT)
+	test_message = "call forced cdecl callback after many calls"
+	result = c_func( cb_cdecl, {2})
+	test_equal( "call forced cdecl callback", 10, c_func( cb_cdecl, {5}) )
+	test_message = ""
+	
 end ifdef
 
+test_message = "allocate readonly memory"
+r_space = allocate_protect( { 5,6,7,8}, PAGE_READONLY )
+test_not_equal( test_message, 0, r_space )
+test_message = "reading from readonly memory"
+test_equal( test_message, {5,6,7,8}, peek( { r_space, 4 } ) )
+test_message = "free readonly memory"
+free_code( r_space, 4 )
+
+test_message = "allocate read and write memory" -- use allocate() for this
+rw_space = allocate_protect( {1,2,3,4}, PAGE_READWRITE )
+test_not_equal( test_message, 0, rw_space )
+test_message = "read from readonly memory"
+test_equal( test_message, {1,2,3,4}, peek( { rw_space, 4 } ) )	
+test_message = "write to readonly memory"
+poke( rw_space, 5 )
+poke( rw_space+1, {6,7,8} )
+test_message = "read from readonly memory"
+test_equal( test_message, {5,6,7,8}, peek( { rw_space, 4 } ) )	
+test_pass( test_message )
+
+test_message = "allocate read write and execute memory"
+rwx_space = allocate_protect( multiply_code, PAGE_EXECUTE_READWRITE )
+test_not_equal( test_message, 0, rwx_space )
+test_message = ""
+rexec = define_c_func("", code_space, {C_INT, C_DOUBLE}, C_DOUBLE)
+test_message = "execute using read write and execute memory"
+void = c_func(rexec, {x, y})
+test_pass( test_message )
+test_message = "write to read write and execute memory"
+poke( rwx_space, 5 )
+test_pass( test_message )
+test_message = "read from read write and execute memory"
+test_equal( test_message, {5, #44, #24, #04}, peek( { rwx_space, 4 } ) )	
+
+test_message = "allocate no access memory"
+n_space = allocate_protect( multiply_code, PAGE_NOACCESS )
+test_not_equal( test_message, 0, n_space )
+-- do nothing
+test_message = ""
+puts( 1, "The following should cause a machine exception:" )
 calling_dmemfunction = 1
 void = c_func(rdata, {x,y})
 calling_dmemfunction = 0
-    
+
+-- DOS and Linux are known not to work yet for this.
+-- yet there are patches for Linux available...
+ifdef WIN32 then
+	puts(1, "DEP is not Enabled for this process\n")
+end ifdef
+ifdef UNIX then
+	puts(1, "DEP is not Enabled for this process\n")
+end ifdef
 test_report()

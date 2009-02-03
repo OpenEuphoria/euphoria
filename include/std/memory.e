@@ -42,8 +42,8 @@
 --
 
 constant
-	M_ALLOC = 16,
-	M_FREE = 17
+        M_ALLOC = 16,
+        M_FREE = 17
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -51,83 +51,16 @@ constant MAX_ADDR = power(2, 32)-1
 -- Positive integer type
 
 public type positive_int(integer x)
-	return x >= 1
+        return x >= 1
 end type
 
 -- Machine address type
 
 public type machine_addr(atom a)
 -- a 32-bit non-null machine address 
-	return a > 0 and a <= MAX_ADDR and floor(a) = a
+        return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
 
-ifdef WIN32 then
---****
--- === Microsoft's Memory Protection Constants
---
--- 
--- Memory Protection Constants are the same constants 
--- across all platforms.  The API converts them as
--- necessary.  They are only necessary for [[:allocate_protect]]
-
---** 
--- You may run the data in this page
-
-public constant PAGE_EXECUTE = #10
-
-	--** PAGE_EXECUTE_READ
-	-- You may run and read the data    
-public constant 	PAGE_EXECUTE_READ = #20
-	--**
-	-- You may run, read or write this page
-public constant 	PAGE_EXECUTE_READWRITE = #40
-	--**
-	-- You may run, read or write this page
-public constant 	PAGE_EXECUTE_WRITECOPY = #80
-	--**
-	-- You may write to this page.
-public constant 	PAGE_WRITECOPY = #08
-	--**
-	-- You may read or write to this page.
-public constant 	PAGE_READWRITE = #04
-	--**
-	-- You may only read data 
-public constant	PAGE_READONLY = #02    	
---**
-	-- You have no access to this page
-public constant 	PAGE_NOACCESS = #01
-
-
-elsedef
-
-constant 
-	PROT_EXEC = 4, 
-	PROT_READ = 1, 
-	PROT_WRITE = 2,
-	PROT_NONE = 0
- 
-public constant 
-	PAGE_EXECUTE = PROT_EXEC,
-	PAGE_EXECUTE_READ = or_bits( PROT_READ, PROT_EXEC ),
-	PAGE_EXECUTE_READWRITE = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),
-	PAGE_EXECUTE_WRITECOPY = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),
-	PAGE_WRITECOPY = or_bits( PROT_READ, PROT_WRITE ), 
-	PAGE_READWRITE = or_bits( PROT_READ, PROT_WRITE ),
-	PAGE_READONLY = PROT_READ,
-	PAGE_NOACCESS = PROT_NONE
-
-end ifdef
-
-constant MEMORY_PROTECTION = {
-	PAGE_EXECUTE,
-	PAGE_EXECUTE_READ,
-	PAGE_EXECUTE_READWRITE,
-	PAGE_EXECUTE_WRITECOPY,
-	PAGE_WRITECOPY,
-	PAGE_READWRITE,
-	PAGE_READONLY,
-	PAGE_NOACCESS 
-	}
 
 --****
 -- === Memory allocation
@@ -137,10 +70,10 @@ constant MEMORY_PROTECTION = {
 -- Allocate a contiguous block of data memory.
 --
 -- Parameters:
---		# ##n##, a positive integer, the size of the requested block.
+--              # ##n##, a positive integer, the size of the requested block.
 --
 -- Return:
---		An **atom**, the address of the allocated memory or 0 if the memory
+--              An **atom**, the address of the allocated memory or 0 if the memory
 -- can't be allocated.
 --
 -- Comments:
@@ -160,175 +93,25 @@ constant MEMORY_PROTECTION = {
 --     poke(buffer+i, 0)
 -- end for
 -- </eucode>
---		    
+--                  
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
 
 public function allocate(positive_int n)
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
-	return machine_func(M_ALLOC, n)
+        return machine_func(M_ALLOC, n)
 end function
 
-include std/dll.e
-
-
-ifdef WIN32 then
-	-- Windows constants
-	constant MEM_COMMIT = #1000,
-	MEM_RESERVE = #2000,
-	--MEM_RESET = #8000,
-	MEM_RELEASE = #8000
-	
-	atom kernel_dll, memDLL_id, VirtualFree_rid, 
-	VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid, 
-	VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
-
-	memDLL_id = open_dll( "kernel32.dll" )
-	kernel_dll = memDLL_id
-	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
-	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
-	VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
-	VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
-	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
-	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
-	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
-		
-		
-elsifdef UNIX then
-	constant MAP_ANONYMOUS = #20, MAP_PRIVATE = #2
-	--,MAP_SHARED = #1, MAP_TYPE = #F, MAP_FIXED = #10,
-	--MAP_FILE = 0
-	atom getpagesize_rid, mmap_rid, mprotect_rid, munmap_rid,
-	mlock_rid, munlock_rid
-	
-	getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
-	mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
-	mprotect_rid = define_c_func( -1, "mprotect", { C_POINTER, C_UINT, C_INT }, C_INT )
-	munmap_rid = define_c_func( -1, "munmap", { C_POINTER, C_UINT }, C_INT )
-	mlock_rid = define_c_func( -1, "mlock", { C_POINTER, C_UINT }, C_INT )
-	munlock_rid = define_c_func( -1, "munlock", { C_POINTER, C_UINT }, C_INT )
-		
-end ifdef
-
-ifdef WIN32 then
-
-function VirtualAlloc( atom addr, atom size, atom flallocationtype, atom flprotect )
-	atom r1
-	r1 = c_func( VirtualAlloc_rid, {addr, size, flallocationtype, flprotect } )
-	return r1
-end function
-
-end ifdef
-
-ifdef UNIX then
-
-function mmap( object start, integer length, integer protection, integer flags, integer fd, integer offset )
-	atom pc
-	if atom( start ) then
-		return c_func( mmap_rid, { start, length, protection, flags, fd, offset } )
-	else
-		pc = mmap( 0, length, protection, flags, fd, offset )
-		poke( pc, start )
-		return pc
-	end if
-end function
-
-end ifdef
-
-type valid_windows_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
-end type
-
-type page_aligned_address( atom a )
-	return remainder( a, 4096 ) = 0
-end type
-
---****
--- === Allocating and Writing to memory:
-
---**
--- Signature: 
--- function allocate_code( sequence a_sequence_of_machine_code_bytes )
---
--- Description:
--- Allocates and copies data into executible memory.
---
--- Parameters:
--- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory to be later called with [[:call()]]        
-
--- Return Value:
--- The function returns the address in memory of the byte-code that can be safely executed whether DEP is enabled or not or 0 if it fails.  On the other hand, if you try to execute a code address returned by [[:allocate()]] with DEP enabled the program will receive a machine exception.  
-
--- Comments:
--- 
--- Use this for the machine code you want to run in memory.  The copying is done for you and when the routine returns the memory may not be readable or writable but it is guaranteed to be executable.  If you want to also write to this memory **after the machine code has been copied** you should use [[:allocate_protect()]] instead and you should read about having memory executable and writable at the same time is a bad idea.  You mustn't use ##free()## on memory returned from this function.  You may instead use ##free_code()## but since you will probably need the code througout the life of your program's process this normally is not necessary.
--- If you want to put only data in the memory to be read and written use [[:allocate]].
--- See Also:
--- [[:allocate]], [[:free_code]], [[:allocate_protect]]
-public function allocate_code( sequence data )
-	atom addr, oldprotptr
-	integer size
-	
-	size = length(data)
-
-	if dep_works() then
-
-		ifdef WIN32 then
-
-		addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
-		oldprotptr = allocate(4) 
-		-- Windows 98 has VirtualAlloc but its VirtualAlloc always returns 0
-		-- The following three lines are a kludge for Windows 9x
-		-- Including os.e caused in r1338. 
-		if addr = 0 then
-		    addr = allocate( size ) 
-		end if
-		if addr = 0 then
-			return 0
-		end if
-		poke( addr, data )
-		if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
-			-- 0 indicates failure here
-			return 0
-		end if
-		free( oldprotptr )
-		return addr
-		
-	elsifdef UNIX then
-	
-		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if addr = -1 then
-			return 0
-		end if
-		poke( addr, data )
-		if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
-			-- non zero indicates failure here
-			return 0
-		end if
-		return addr
-	
-		end ifdef 
-
-	end if
-
-	addr = allocate( size )
-	if addr = 0 then
-		return 0
-	end if
-	poke( addr, data )
-	return addr
-
-end function
 
 --**
 -- Allocate a C-style null-terminated string in memory
 --
 -- Parameters:
---		# ##s##, a sequence, the string to store in RAM.
+--              # ##s##, a sequence, the string to store in RAM.
 --
 -- Returns:
---		An **atom**, the address of the memory block where the string was
+--              An **atom**, the address of the memory block where the string was
 -- stored, or 0 on failure.
 -- Comments:
 -- Only the 8 lowest bits of each atom in ##s## is stored. Use
@@ -348,155 +131,19 @@ end function
 -- </eucode>
 -- 
 -- See Also:
---		[[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
+--              [[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
 public function allocate_string(sequence s)
-	atom mem
-	
-	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
-	end if
-	return mem
+        atom mem
+        
+        mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
+        if mem then
+                poke(mem, s)
+                poke(mem+length(s), 0)  -- Thanks to Aku
+        end if
+        return mem
 end function
 
 
---**
--- Signature:
--- function allocate_protect( sequence data, integer protection )
---
--- Description:
--- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
-
--- See <a href="http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx">Microsoft's Memory Protection Constants<br>
--- http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx</a><p>
-
--- Parameters:
--- The first parameter, data, is the machine code to be put into memory. 
---
--- Returns:
--- The function returns the address to the required memory
--- or 0 if it fails.  This function is guaranteed to return memory on 
--- the 4 byte boundary.  It also guarantees that the memory returned with 
--- at least the protection given (but you may get more).
---
--- If you want to call ##allocate_protect( data, PAGE_READWRITE )##, you can use 
--- [[:allocate]] instead.  It is more efficient and simplier.
---
--- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
--- [[:allocate_code()]] instead.  It is more efficient and simplier.
---
--- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
-public function allocate_protect( sequence data, valid_windows_memory_protection_constant protection )
-	atom addr, oldprotptr
-	integer size
-	
-	size = length(data)
-
-	if dep_works() then
-
-		ifdef WIN32 then
-	
-		addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
-		if addr = 0 then
-		    return 0
-		end if
-		oldprotptr = allocate(4)
-		if oldprotptr = 0 then
-		    return 0
-		end if
-		poke( addr, data )
-		if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
-		    -- 0 indicates failure here
-		    return 0
-		end if
-		free( oldprotptr )
-		return addr
-	
-	elsifdef UNIX then
-	
-		addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-		if addr = -1 then
-			return 0
-		end if
-		poke( addr, data )
-		if c_func( mprotect_rid, { addr, size, protection } ) != 0 then
-			-- non zero indicates failure in mprotect 			
-			return 0
-		end if
-		return addr
-	
-		end ifdef
-
-	end if
-
-
-	addr = allocate( size )
-	if addr = 0 then
-		return 0
-	end if
-	poke( addr, data )
-
-	return addr
-
-	-- Implementation notes:
-	--    The amount of memory actually allocated on Windows is the lowest 
-	--    multiple of the page_size (4kB on Windows XP)  
-	--    The C manuals do not guarantee that the memory RETURNED from 
-	--    underlying C-functions are page aligned only but they require 
-	--    what you pass into them must be page aligned.  I suspect that 
-	--    that is the spirit of the work though.  
-end function
-
--- Returns 1 if the DEP executing data only memory would cause an exception
-function dep_works()
-	
-	ifdef WIN32 then
-		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
-			and GetLastError_rid != -1 and GetSystemInfo_rid != -1
-	elsifdef UNIX then
-		ifdef LINUX then
-			return 0
-		end ifdef
-		return getpagesize_rid != -1 and mmap_rid != -1 
-			and mprotect_rid != -1 and munmap_rid != -1
-	end ifdef
-	
-	return 0
-end function
-
-
---****
--- === Memory disposal
---
-
---**
--- Signature:
--- procedure free_code( atom addr, integer size )
---
--- Description:
--- frees up allocated code memory
--- Parameters:
--- ##addr## must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   
--- The ##size## is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().                           
-
--- Comments:
--- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
---
--- See Also: [[:allocate_code]], [[:free]]
-public procedure free_code( atom addr, integer size )
-	integer free_succeeded
-	if not dep_works() then
-		free( addr )
-		return
-	end if
-
-	ifdef WIN32 then
-		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
-	elsifdef UNIX then
-		free_succeeded = not c_func( munmap_rid, { addr, size } )
-	end ifdef
-end procedure
 
 
 --**
@@ -504,7 +151,7 @@ end procedure
 -- @[machine:free]
 --
 -- Parameters:
---		# ##addr##, an atom, the address of a block to free.
+--              # ##addr##, an atom, the address of a block to free.
 -- block, i.e. the address that was returned by ##[[:allocate]]()##.
 --
 -- Comments:
@@ -529,7 +176,7 @@ end procedure
 
 public procedure free(machine_addr addr)
 -- free the memory at address a
-	machine_proc(M_FREE, addr)
+        machine_proc(M_FREE, addr)
 end procedure
 
 
@@ -544,18 +191,18 @@ end procedure
 -- Fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
---		# ##addr_n_length##, an object, either of
---		** an atom ##addr##, to fetch one byte at ##addr##, or
---		** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--              # ##addr_n_length##, an object, either of
+--              ** an atom ##addr##, to fetch one byte at ##addr##, or
+--              ** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
 --
 -- Returns:
---		An **object**, either an integer if the input was a single address,
+--              An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are bytes, in the range 0..255.
 --
 -- Errors:
 --
---	Peek()ing in memory you don't own may be blocked by the OS, and cause a
+--      Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -595,19 +242,19 @@ end procedure
 -- Fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
---		# ##addr_n_length##, an object, either of
---		** an atom ##addr##, to fetch one byte at ##addr##, or
---		** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--              # ##addr_n_length##, an object, either of
+--              ** an atom ##addr##, to fetch one byte at ##addr##, or
+--              ** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
 --
 -- Returns:
 --
---		An **object**, either an integer if the input was a single address,
+--              An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are bytes, in the range -128..127.
 --
 -- Errors:
 --
---	Peek()ing in memory you don't own may be blocked by the OS, and cause
+--      Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -646,23 +293,23 @@ end procedure
 -- <built-in> function peek2s(object addr_n_length)
 --
 -- Description:
--- Fetches a //signed// word, or some //signed// words	, from an address
+-- Fetches a //signed// word, or some //signed// words  , from an address
 -- in memory.
 --
 -- Parameters:
---		# ##addr_n_length##, an object, either of
---		** an atom ##addr##, to fetch one word at ##addr##, or
---		** a pair {##addr,len}##, to fetch ##len## words at ##addr##
+--              # ##addr_n_length##, an object, either of
+--              ** an atom ##addr##, to fetch one word at ##addr##, or
+--              ** a pair {##addr,len}##, to fetch ##len## words at ##addr##
 --
 -- Returns:
 --
---		An **object**, either an integer if the input was a single address,
+--              An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are double words, in the range -32768..32767.
 --
 -- Errors:
 --
---	Peek()ing in memory you don't own may be blocked by the OS, and cause
+--      Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e i,clude file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -709,17 +356,17 @@ end procedure
 -- in memory.
 --
 -- Parameters:
---		# ##addr_n_length##, an object, either of
---		** an atom ##addr##, to fetch one double word at ##addr##, or
---		** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length##, an object, either of
+--              ** an atom ##addr##, to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
 --
 -- Returns:
---		An **object**, either an integer if the input was a single address,
+--              An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are words, in the range 0..65535.
 --
 -- Errors:
---	Peek()ing in memory you don't own may be blocked by the OS, and cause a
+--      Peek()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -764,9 +411,9 @@ end procedure
 -- from an address in memory.
 --
 -- Parameters:
---		# ##addr_n_length##, an object, either of
---		** an atom ##addr##, to fetch one double word at ##addr##, or
---		** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length##, an object, either of
+--              ** an atom ##addr##, to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
 --
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
@@ -819,18 +466,18 @@ end procedure
 -- from an address in memory.
 --
 -- Parameters:
---		# ##addr_n_length##, an object, either of
---		** an atom ##addr##, to fetch one double word at ##addr##, or
---		** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length##, an object, either of
+--              ** an atom ##addr##, to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
 --
 -- Returns:
---		An **object**, either an atom if the input was a single address, or
+--              An **object**, either an atom if the input was a single address, or
 -- a sequence of atoms if a sequence was passed. In both cases, atoms
 -- returned are double words, in the range 
 -- -power(2,31)..power(2,31)-1.
 --
 -- Errors:
---	Peek()ing in memory you don't own may be blocked by the OS, and cause
+--      Peek()ing in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -876,7 +523,7 @@ end procedure
 -- Read an ASCIZ string in RAM, starting from a supplied address.
 --
 -- Parameters:
--- 		# ##addr#: an atom, the address at whuich to start reading.
+--              # ##addr#: an atom, the address at whuich to start reading.
 --
 -- Returns:
 -- A **sequence** of bytes, the string that could be read.
@@ -902,11 +549,11 @@ end procedure
 -- Stores one or more bytes, starting at a memory location.
 --
 -- Parameters:
---		# ##addr##, an atom, the address at which to store
---		# ##x##, an object, either a byte or a non empty sequence of bytes.
+--              # ##addr##, an atom, the address at which to store
+--              # ##x##, an object, either a byte or a non empty sequence of bytes.
 --
 -- Errors:
---	Poke()ing in memory you don't own may be blocked by the OS, and cause a
+--      Poke()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments:
@@ -950,11 +597,11 @@ end procedure
 -- Stores one or more words, starting at a memory location.
 --
 -- Parameters:
---		# ##addr##, an atom, the address at which to store
---		# ##x##, an object, either a word or a non empty sequence of words.
+--              # ##addr##, an atom, the address at which to store
+--              # ##x##, an object, either a word or a non empty sequence of words.
 --
 -- Errors:
---	Poke()ing in memory you don't own may be blocked by the OS, and cause a
+--      Poke()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments: 
@@ -999,12 +646,12 @@ end procedure
 -- Stores one or more double words, starting at a memory location.
 --
 -- Parameters:
---		# ##addr##, an atom, the address at which to store
---		# ##x##, an object, either a double word or a non empty sequence of
+--              # ##addr##, an atom, the address at which to store
+--              # ##x##, an object, either a double word or a non empty sequence of
 -- double words.
 --
 -- Errors:
---	Poke()ing in memory you don't own may be blocked by the OS, and cause a
+--      Poke()ing in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments: 
@@ -1051,9 +698,9 @@ end procedure
 -- Copy a block of memory from an address to another.
 --
 -- Parameters:
---		# ##destination##, an atom, the address at which data is to be copied
---		# ##origin##, an atom, the address from which data is to be copied
---		# ##len##, an integer, how many bytes are to be copied.
+--              # ##destination##, an atom, the address at which data is to be copied
+--              # ##origin##, an atom, the address from which data is to be copied
+--              # ##len##, an integer, how many bytes are to be copied.
 --
 -- Comments: 
 --
@@ -1083,9 +730,9 @@ end procedure
 -- Sets a contiguous range of memory ocations to a single value.
 --
 -- Parameters:
---		# ##destination##, an atom, the address starting the range to set.
---		# ##byte_value##, an integer, the value to copy at all addresses in the range.
---		# ##how_many##, an integer, how many bytes are to be set.
+--              # ##destination##, an atom, the address starting the range to set.
+--              # ##byte_value##, an integer, the value to copy at all addresses in the range.
+--              # ##how_many##, an integer, how many bytes are to be set.
 --
 -- Comments:
 --
@@ -1112,7 +759,7 @@ end procedure
 --  Call a machine language routine which was stored in memory prior.
 --
 -- Parameters:
---		# ##addr##, an atom, the address at which to transfer execution control.
+--              # ##addr##, an atom, the address at which to transfer execution control.
 --
 -- Comments:
 --
@@ -1128,10 +775,10 @@ end procedure
 -- If your machine code uses the stack, use ##c_proc##() instead of ##call##().
 --
 -- Example 1: 
---		##demo/callmach.ex##
+--              ##demo/callmach.ex##
 --
 -- See Also:
--- 		[[:allocate_code]], [[:free_code]], [[:c_proc]], [[:define_c_proc]]
+--              [[:allocate_code]], [[:free_code]], [[:c_proc]], [[:define_c_proc]]
 
 without warning
 integer check_calls = 1
@@ -1144,8 +791,8 @@ integer check_calls = 1
 -- The length of the block is i bytes.
 --
 -- Parameters:
---		# ##block_addr##, an atom, the start address of the block
---		# ##block_len##, an integer, the size of the block.
+--              # ##block_addr##, an atom, the start address of the block
+--              # ##block_len##, an integer, the size of the block.
 --
 -- Comments: 
 --
@@ -1180,9 +827,9 @@ integer check_calls = 1
 --   [[:unregister_block]], [[:safe.e]]
 
 public procedure register_block(atom block_addr, atom block_len)
-	-- NOP to avoid strict lint
-	block_addr = block_addr
-	block_len = block_len
+        -- NOP to avoid strict lint
+        block_addr = block_addr
+        block_len = block_len
 end procedure
 
 
@@ -1191,7 +838,7 @@ end procedure
 -- (the debug version of machine.e).
 --
 -- Parameters:
---		# ##block_addr##, an atom, the start address of the block
+--              # ##block_addr##, an atom, the start address of the block
 --
 -- Comments: 
 --
@@ -1210,8 +857,8 @@ end procedure
 --   [[:register_block]], [[safe.e]]
 
 public procedure unregister_block(atom block_addr)
-	-- NOP to avoid strict lint
-	block_addr =  block_addr
+        -- NOP to avoid strict lint
+        block_addr =  block_addr
 end procedure
 
 --**

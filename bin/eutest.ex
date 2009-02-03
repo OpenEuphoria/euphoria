@@ -13,14 +13,12 @@ include std/text.e
 include std/math.e
 
 
-without trace
-
 ifdef DOS32 then
 	include std/text.e
 end ifdef
 
-integer translator_platform
-integer interpreter_platform
+--integer translator_platform
+
 
 integer ctcfh = 0
 sequence error_list = repeat({},4)
@@ -129,12 +127,40 @@ function invoke( integer status, sequence cmd, sequence filename, integer err, s
 	return status
 end function
 
+-- returns the location in the log file if there has been
+-- writing to the log or or a string indicating which error 
+function check_log( sequence filename, integer log_where )
+	integer log_fd = open( "unittest.log", "a" )
+					
+	if log_fd = -1  then
+		return "couldn't generate unittest.log"
+	elsif log_where = where( log_fd ) then
+		close( log_fd )
+		return  "couldn't add to unittest.log"
+	end if
+	log_where = where( log_fd )
+	close( log_fd )
+	return log_where
+end function
+
+procedure report_last_error( sequence filename )
+	if length( error_list ) and length( error_list[3] )  then
+		if error_list[3][length(error_list[3])] = E_NOERROR then
+			puts(1, "SUCCESS: ")
+		else
+			puts(1, "FAILURE: ")
+		end if
+		printf(1, "%s\n", {error_list[2][length(error_list[1])]})
+	end if
+end procedure
+
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
-	object rfiles, before_emake, emake_outcome, files = {}
-	sequence filename, dexe, executable, cmd, cmd_opts = "", options, switches
-	sequence translator = "", library = "", compiler = "", con = ""
+	object emake_outcome, files = {}
+	sequence filename, dexe, executable, cmd
+	sequence interpreter_options = "", translator_options = "", test_options = ""
+	sequence translator = "", library = "", compiler = ""
 	sequence directory
 	sequence control_err, ex_err, interpreter_os_name
 	integer log_where = 0 -- keep track of unittest.log
@@ -176,21 +202,18 @@ procedure do_test(sequence cmds)
 
 	if (length(translator) >= 7 and match( upper("ecw.exe"), upper(translator) ) != 0)
 		or ( length(translator) = 0 and platform() = WIN32 ) then
-		translator_platform = WIN32
-		con = "-CON"
-	else
-		con = ""
-		if ( match( upper("ecu"), upper(translator) ) != 0 )
-			or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX } ) ) then
-			translator_platform = LINUX -- means FREEBSD or OSX too
-		elsif ( length(translator) = 0 and platform() = DOS32 ) or 
+		--translator_platform = WIN32
+		translator_options &= " -CON"
+	elsif ( match( upper("ecu"), upper(translator) ) != 0 )
+		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX } ) ) then
+		--translator_platform = LINUX -- means FREEBSD or OSX too
+	elsif ( length(translator) = 0 and platform() = DOS32 ) or 
 			match( upper("ec.exe"), upper(translator) ) != 0 then
-			translator_platform = DOS32
-		else
-			printf( 2, "Cannot determine translator\'s platform.", {} )
-			abort(1)
-		end if                                  
-	end if
+		--translator_platform = DOS32
+	else
+		printf( 2, "Cannot determine translator\'s platform.", {} )
+		abort(1)
+	end if                                  
 	
 	if match( upper("exwc.exe"), upper(executable) ) != 0 then
 		interpreter_os_name = "WIN32"		
@@ -211,15 +234,6 @@ procedure do_test(sequence cmds)
 		end if                                  
 	end if
 
-
-	integer lib
-	while lib and lib < length(cmds) entry do
-		library = "-lib " & cmds[lib+1]
-		cmds = cmds[1..lib-1] & cmds[lib+2..$]
-	entry
-		lib = find("-lib", cmds)
-	end while       
-
 	integer cci
 	
 	compiler = ""
@@ -234,15 +248,6 @@ procedure do_test(sequence cmds)
 		cci = find( "-cc", cmds )               
 	end while
 
-
-	switches = option_switches()
-	integer cl
-	cl = find( "-con", switches )
-	if cl then
-		switches = switches[1..cl-1] & switches[cl+1..$]
-	end if
-	options = join(switches)
-
 	-- pass options with arguments passed to eutest to the 
 	-- interpreter or translator...
 	integer outstanding_argument_count
@@ -251,17 +256,23 @@ procedure do_test(sequence cmds)
 		if outstanding_argument_count > 0 then
 			outstanding_argument_count -= 1
 			continue
-		elsif cmds[i][1] != '-' then
-			files &= {{cmds[i]}}
+		elsif cmds[i][1] != '-' then			
+			files = append(files,repeat(0,8))
+			files[$][D_NAME] = cmds[i]
 		-- put the options that take arguments in the sequence argument
 		-- to find below.
-		elsif find(cmds[i],{"-i"}) and i < length(cmds) then
+		elsif find(cmds[i],{"-i","-D"}) and i < length(cmds) then
+			-- for both interpreter and translator but not test
 			outstanding_argument_count = 1 -- an argument to skip
-			cmd_opts &= cmds[i] & " " & cmds[i+1]
---		elsif find( cmds[i], { "-verbose" } ) then
---			options = " " & cmds[i]
+			interpreter_options &= " " & cmds[i] & " " & cmds[i+1]
+			translator_options &= " " & cmds[i] & " " & cmds[i+1]
+		elsif find(cmds[i],{"-lib"}) and i < length(cmds) then
+			-- for translator only
+			outstanding_argument_count = 1
+			translator_options &= " " & cmds[i] & " " & cmds[i+1]	
 		else
-			cmd_opts &= cmds[i] & " "
+			-- for test 
+			test_options &= " " & cmds[i] & " "
 		end if
 	end for
 	
@@ -277,10 +288,8 @@ procedure do_test(sequence cmds)
 	total = length(files)
 
 
-	if verbose_switch > 0 then
-		silent = ""
-	else
-		silent = "-silent"
+	if verbose_switch <= 0 then
+		translator_options &= " -silent"
 	end if
 
 	sequence fail_list = {}
@@ -299,7 +308,7 @@ procedure do_test(sequence cmds)
 
 		if 1 label "interpreter" then		
 			printf(1, "interpreting %s:\n", {filename})
-			cmd = sprintf("%s -i ..%sinclude %s -D UNITTEST -batch %s %s", {executable, SLASH, options, filename, cmd_opts})
+			cmd = sprintf("%s %s -D UNITTEST -batch %s %s", {executable, interpreter_options, filename, test_options})
 			if verbose_switch > 0 then
 				printf(1, "CMD '%s'\n", {cmd})
 			end if
@@ -318,7 +327,7 @@ procedure do_test(sequence cmds)
 			end if
 		
 			if expected_status then
-				directory = filename[1..find('.',filename)-1] & SLASH & interpreter_os_name
+				directory = filename[1..find('.',filename&'.')-1] & SLASH & interpreter_os_name
 				if sequence( dir( directory ) ) then
 					if sequence( dir( directory & SLASH & "control.err" ) ) then
 						control_err = read_lines( directory & SLASH & "control.err" )
@@ -350,7 +359,7 @@ procedure do_test(sequence cmds)
 					
 				end if
 				ifdef REC then
-					if create_directory( filename[1..find('.',filename)-1] )
+					if create_directory( filename[1..find('.',filename&'.')-1] )
 					and create_directory( directory ) 
 					and move_file( "ex.err", directory & SLASH & "control.err" ) then 
 					end if
@@ -367,37 +376,23 @@ procedure do_test(sequence cmds)
 		
 				end if
 				break "interpreter"
-			elsif status = 0 then
+			elsif status = 0 then -- expected_status = 0 therefore
 				if log then
-				for j = 1 to 5 do
-					if file_exists("unittest.log") then
-						exit
-					end if
-					sleep(0.1)
-				end for
-					
-				log_fd = open( "unittest.log", "a" )
-					
-				if log_fd = -1  then
-					error( filename, E_INTERPRET, "couldn't generate unittest.log", {}, "ex.err" )
-					failed += 1
-					fail_list = append( fail_list, filename )
-					close( log_fd )
+					object token = check_log( filename, log_where )
+					if sequence(token) then
+						failed += 1
+						fail_list = append(fail_list, filename )					
+						error( filename, E_INTERPRET, token, {}, "ex.err" )
 						break "interpreter"
-				elsif log_where = where( log_fd ) then
-					error( filename, E_INTERPRET, "couldn't add to unittest.log", {}, "ex.err" )
-					failed += 1
-					fail_list = append( fail_list, filename )
-					close( log_fd )
-						break "interpreter"
-				end if
-				log_where = where( log_fd )
-				close( log_fd )
-				log_fd = 0
-				end if
+					else
+						log_where = token
+					end if -- sequence(token)
+				
+				end if -- log
 				error( filename, E_NOERROR, "all tests successful", {} )
 			end if
 		end if -- interpreter
+		report_last_error( filename )
 		
 		if length(translator) and expected_status = 0 then
 			total += 1 -- also account for this translated test
@@ -406,16 +401,20 @@ procedure do_test(sequence cmds)
 			else
 				printf(1, "translating, compiling, and executing executable: %s\n", {filename})
 			end if
-			cmd = sprintf("%s %s %s %s %s -D UNITTEST %s -D EC -batch %s", {translator, silent, library, compiler, options, con, filename})
+			cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s", {translator, library, compiler, translator_options, filename})
 			if verbose_switch > 0 then
 				printf(1, "CMD '%s'\n", {cmd})
 			end if
 			status = system_exec( cmd, 0 )
-
+			integer dl
+			dl = find('.', filename)
+			if dl then
+				filename = filename[1..dl-1]
+			end if
 			if status = expected_status and expected_status = 0 then
-				lib = find('.', filename)
-				if lib then
-					filename = filename[1..lib-1]
+				dl = find('.', filename)
+				if dl then
+					filename = filename[1..dl-1]
 				end if
 				if delete_file(filename&dexe) then end if
 				if delete_file( "cw.err" ) then end if
@@ -427,14 +426,29 @@ procedure do_test(sequence cmds)
 					if verbose_switch > 0 then
 						printf(1, "executing %s:\n", {filename&dexe})
 					end if
-					cmd = sprintf("./%s %s", {filename&dexe, cmd_opts})
+					cmd = sprintf("./%s %s", {filename&dexe, test_options})
 					status = invoke( status, cmd, filename&dexe,  E_EXECUTE, "translated " ) 
 					if status then
 						failed += 1
 						fail_list = append(fail_list, "translated" & " " & filename&dexe )
 					else
-						error( filename&dexe, E_NOERROR, "all tests successful", {} )
+						object token
+						if log then
+							token = check_log( filename, log_where )
+						else
+							token = 0
+						end if	
+						if sequence(token) then
+							failed += 1
+							fail_list = append(fail_list, "translated" & " " & filename&dexe )					
+							error( filename&dexe, E_EXECUTE, token, {}, "ex.err" )
+						else
+							log_where = token
+							error( filename&dexe, E_NOERROR, "all tests successful", {} )
+						end if -- sequence(token)
+				
 					end if
+					
 					if delete_file(filename & dexe) then end if
 				else
 					failed += 1
@@ -449,18 +463,10 @@ procedure do_test(sequence cmds)
 			elsif expected_status = 0 then
 				failed += 1
 				fail_list = append(fail_list, "translating " & filename )
-				error( filename, E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
+				error( filename&dexe, E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
 			end if
-			if verbose_switch > -1 and length( error_list ) and 
-				find( error_list[1][length(error_list[1])], 
-				{ filename&".e", filename&dexe } ) != 0 then
-				if error_list[3][length(error_list[3])] = E_NOERROR then
-					puts(1, "SUCCESS: ")
-				else
-					puts(1, "FAILURE: ")
-				end if
-				printf(1, "%s\n", {error_list[2][length(error_list[1])]})
-			end if
+			report_last_error( filename&dexe )
+
 		end if -- length( translator )
 	end for
 	
@@ -586,8 +592,7 @@ procedure html_out(sequence data)
 	switch data[1] do
 		case "file":
 			unsummarized_files = append( unsummarized_files, data[2] )
-			puts( 1, "<a href='#summary'>summary</a><br>\n" )
-			printf( 1, "<table width=100%%><tr bgcolor=#dddddd><th colspan=4 align=left><a name='%s'>%s</a></th></tr>\n", { data[2], data[2] } )
+			printf( 1, "<table width=100%%><tr bgcolor=#dddddd><th colspan=3 align=left><a name='%s'>%s</a></th><td><a href='#summary'>all file summary</a></th></tr>\n", { data[2], data[2] } )
 			err = find( data[2], error_list[1] ) 
 			if err then
 				puts(1,"<tr bgcolor=\"")
@@ -687,13 +692,6 @@ procedure do_process_log(sequence cmds)
 		out_r = routine_id( "ascii_out" )
 	end if
 	
-	other_files = dir( "t_*.e" )
-	if atom(other_files) then
-		other_files = {}
-	end if
-	for i = 1 to length( other_files ) do
-		other_files[i] = other_files[i][D_NAME]
-	end for
 	
 	ctcfh = open("ctc.log","r")
 	if ctcfh != -1 then
@@ -716,6 +714,8 @@ procedure do_process_log(sequence cmds)
 		ctcfh = 0
 	end if
 	
+	other_files = error_list[1]
+
 	if html then
 		puts(1, "<html><body>\n")
 	end if

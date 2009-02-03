@@ -82,15 +82,23 @@ while [ "$1" != "" ]; do
         --without-euphoria )
 			export EUPHORIA=0
         ;;
+	--eubin )
+			echo "EUBIN=$2" >> "$PREFIX"Makefile.eu
+			shift
+	;;
         --full )
                        echo RELEASE=1 >> "$PREFIX"Makefile.eu
         ;;
         --managed-mem )
 		       # currently this is Windows only;
 		       export MANAGED_MEM=1
-                       echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu       ;;
+                       echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu       
+	;;
 	
-		   
+        --build )
+             		export BUILDDIR=$2
+			shift
+	;;
         --debug )
                        echo EDEBUG=1 >> "$PREFIX"Makefile.eu
         ;;
@@ -104,4 +112,8 @@ if [ "x$MANAGED_MEM" = "x" ]; then
        if test $UNAME_SYSTEM = "MS-DOS"; then
 	       	    echo "Information: Managed memory always on for DJGPP."
        fi
+fi
+echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
+if [ -e Makefile.unix ]; then
+	cp Makefile.unix Makefile
 fi

@@ -20,7 +20,7 @@ with type_check
 -- Translator
 global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
 
-global constant LAST_PASS = 7         -- number of Translator passes
+global constant LAST_PASS = 7        -- number of Translator passes
 
 global integer Pass   -- the pass number, 1 ... LAST_PASS 
 
@@ -1362,13 +1362,15 @@ global procedure finish_emake()
 	if TDOS then    
 		if sequence(wat_path) then
 			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {short_c_file})
+			if length( user_library ) then
+				printf(link_file, "FILE %s", {shrink_to_83(user_library)})
+			else
 			printf(link_file, "FILE %s\\bin\\", {shrink_to_83(get_eudir())})
 			if fastfp then
 				puts(link_file, "ecfastfp.lib\n") 
-			elsif length(user_library) then
-				printf(link_file, "%s\n", {shrink_to_83(user_library)})
 			else    
 				puts(link_file, "ec.lib\n") 
+			end if
 			end if
 			if not keep then
 				puts(doit, "del *.obj > NUL"&HOSTNL)
@@ -1395,7 +1397,7 @@ global procedure finish_emake()
 		else 
 			-- DJGPP 
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {get_eudir(), user_library}) 
+				printf(link_file, "%s\n", {user_library}) 
 			else
 				printf(link_file, "%s\\bin\\ec.a\n", {get_eudir()}) 
 			end if
@@ -1439,7 +1441,7 @@ global procedure finish_emake()
 		elsif sequence(bor_path) then
 			printf(doit, "bcc32 %s %s.c @objfiles.lnk"&HOSTNL, {c_opts, file0})
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {get_eudir(), user_library}) 
+				printf(link_file, "%s\n", {user_library}) 
 			else
 				printf(link_file, "%s\\bin\\ecwb.lib\n", {get_eudir()}) 	
 			end if
@@ -1465,7 +1467,7 @@ global procedure finish_emake()
 				{subsystem, total_stack_size, total_stack_size, file0})
 			end if
 			if length(user_library) then
-				printf(link_file, "%s\\bin\\%s\n", {shrink_to_83(get_eudir()), user_library}) 
+				printf(link_file, "%s\n", {shrink_to_83(user_library)}) 
 			else
 				printf(link_file, "%s\\bin\\ecwl.lib\n", {shrink_to_83(get_eudir())}) 
 			end if

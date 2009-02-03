@@ -1,5 +1,6 @@
 include std/get.e 
 include std/filesys.e
+include std/os.e
 
 constant rev = "revision=\""
 
@@ -76,14 +77,30 @@ end function
 function rev_with_svnversion()
 	integer x
 	object line, path
-	sequence n
+	sequence n, dexe
 	path = getenv( "PATH" )
 	if atom(path) then
 		return 0
 	end if
-	line = locate_file( "svnversion.exe", path )
-	if compare( line, "svnversion.exe" ) = 0 then
+	ifdef UNIX then
+		dexe = ""
+	elsedef
+		dexe = ".exe"
+	end ifdef
+	line = locate_file( "svnversion"&dexe, path )
+	if compare( line, "svnversion"&dexe ) = 0 then
 		return 0
+	else
+		-- avoid having the rev.e string change from NNNNM to NNNN.
+
+		-- If svnversion is found under DOS it will not be able to run
+		-- it successfully if there is a space in its path.
+		ifdef DOS32 then
+			if find(' ',line) then
+				puts(2,"This program must be interpreted using exwc.exe.")
+				abort(0)
+			end if
+		end ifdef
 	end if
 	-- run svnversion with .. argument to include support directories
 	system( "svnversion ..>rev.tmp", 0 )
@@ -160,7 +177,7 @@ for i = 1 to length(f) do
 	end while
 	--if length(f[i]) = 3 then
 	-- ^L is 12, apparently
-	if is_numeric(f[i]) then
+	if is_numeric(f[i]) and i+1 < length(f)+1 then
 		if not equal(f[i+1], {12,10}) then
 			g &= {f[i]}
 		end if
