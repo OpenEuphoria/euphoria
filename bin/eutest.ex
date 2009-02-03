@@ -97,7 +97,9 @@ end ifdef
 			
 			end if
 		end if
+		puts(1,'.')
 	end for
+	puts(1,"\n")
 	return 0
 end function
 

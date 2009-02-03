@@ -804,32 +804,35 @@ global procedure emit_op(integer op)
 	elsif op = UMINUS then
 		-- check for constant folding 
 		a = Pop()
+		
 		if a > 0 then
 			obj = SymTab[a][S_OBJ]
-		end if
-		
-		if a > 0 and SymTab[a][S_MODE] = M_CONSTANT then
-			if integer(obj) then
-				if obj = MININT then
-					Push(NewDoubleSym(-MININT_VAL))
+			if SymTab[a][S_MODE] = M_CONSTANT then
+				if integer(obj) then
+					if obj = MININT then
+						Push(NewDoubleSym(-MININT_VAL))
+					else
+						Push(NewIntSym(-obj))
+					end if
+				elsif atom(obj) and obj != NOVALUE then
+					-- N.B. a constant won't have its value set until
+					-- the end of the  constant var=xxx, var=xxx, ...
+					-- statement. Be careful in the future if we
+					-- add any more constant folding besides unary minus. 
+					Push(NewDoubleSym(-obj)) 
 				else
-					Push(NewIntSym(-obj))
-				end if
-			elsif atom(obj) and obj != NOVALUE then
-				-- N.B. a constant won't have its value set until
-				-- the end of the  constant var=xxx, var=xxx, ...
-				-- statement. Be careful in the future if we
-				-- add any more constant folding besides unary minus. 
+					Push(a)
+					cont11ii(op, FALSE)   
+				end if 
+		
+			elsif TRANSLATE and SymTab[a][S_MODE] = M_TEMP and 
+				SymTab[a][S_GTYPE] = TYPE_DOUBLE then
 				Push(NewDoubleSym(-obj)) 
+		
 			else
 				Push(a)
 				cont11ii(op, FALSE)   
-			end if 
-	   
-		elsif TRANSLATE and a > 0 and SymTab[a][S_MODE] = M_TEMP and 
-			  SymTab[a][S_GTYPE] = TYPE_DOUBLE then
-			Push(NewDoubleSym(-obj)) 
-	   
+			end if
 		else
 			Push(a)
 			cont11ii(op, FALSE)   
