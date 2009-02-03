@@ -26,7 +26,7 @@ end function
 d = 0
 e = time() + 0.1
 while time() < e do
-    s = short_wo('a', "abc")
+    s = short_wi('a', "abc")
     d += 1
 end while
 
