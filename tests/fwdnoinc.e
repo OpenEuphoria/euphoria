@@ -23,3 +23,8 @@ export procedure check_unincluded_type( sloppy s )
 		puts(1,"")
 	end if
 end procedure
+with inline 50
+procedure no_fwd_param_inlined( sequence o )
+	test_true( "no fwd param inlined", sequence(o))
+end procedure
+no_fwd_param_inlined( FORWARD_GLOBAL_SEQUENCE )

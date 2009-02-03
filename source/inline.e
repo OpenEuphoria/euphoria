@@ -691,6 +691,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			case SEQUENCE_CHECK:
 			case INTEGER_CHECK:
 				symtab_index sym = get_param_sym( check_pc + 1 )
+				
 				if is_literal( sym ) then
 					integer check_result
 						
@@ -795,6 +796,15 @@ procedure defer_call()
 	end if
 end procedure
 
+function forward_params()
+	for i = length(cg_stack) - (SymTab[inline_sub][S_NUM_ARGS]-1) to length(cg_stack) do
+		if cg_stack[i] < 0 then
+			return 1
+		end if
+	end for
+	return 0
+end function
+
 -- Either emits an inline routine or emits a call to the routine
 -- if that can't be done.
 export procedure emit_or_inline()
@@ -806,7 +816,7 @@ export procedure emit_or_inline()
 		emit_op( PROC )
 		return
 		
-	elsif atom( SymTab[sub][S_INLINE] ) then
+	elsif atom( SymTab[sub][S_INLINE] ) or forward_params() then
 		defer_call()
 		emit_op( PROC )
 		return
