@@ -3,6 +3,7 @@
 
 include std/sort.e
 include std/map.e as map
+include std/search.e
 
 include reswords.e
 include global.e
@@ -244,6 +245,59 @@ function file_and_name( symtab_index sym )
 	return sprintf("%s:%s:%d", {file_name[SymTab[sym][S_FILE_NO]], SymTab[sym][S_NAME], sym})
 end function
 
+
+function returnf( integer pc )
+	-- RETURNF SUB RETSYM [BADRETURNF]
+	symtab_index retsym = inline_code[pc+2]
+	inline_code[$] = NOP1	
+	
+	if is_temp( retsym ) or SymTab[retsym][S_SCOPE] <= SC_PRIVATE then
+		sequence code = {}
+		
+		integer ret_pc = 0
+		
+		if not (find( retsym, inline_params ) or find( retsym, proc_vars )) then
+			ret_pc = rfind( generic_symbol( retsym ), inline_code, pc )
+		end if
+		
+		if ret_pc then
+	
+			inline_code[ret_pc] = {INLINE_TARGET}
+		else
+		
+			code = {ASSIGN, generic_symbol( retsym ), {INLINE_TARGET}}
+			
+		end if
+		
+		
+		if pc != length( inline_code ) - 3 then
+			code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
+			
+		elsif INTERPRET then -- or inline_code[$] = BADRETURNF then
+			
+			replace_code( {}, length(inline_code), length(inline_code) )
+			
+		end if
+		
+		replace_code( code, pc, pc + 2 )
+		return 1
+	else
+		-- returning a literal or non-private variable
+		sequence code = {ASSIGN, retsym, {INLINE_TARGET}}
+		if pc != length( inline_code ) - 3 then
+			code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
+			
+		elsif INTERPRET or inline_code[$] = BADRETURNF then
+			replace_code( {}, length(inline_code), length(inline_code) )
+		end if
+		
+		replace_code( code, pc, pc + 2 )
+
+		return 1
+	end if
+	return 0
+end function
+
 -- genericizes an op for inlining
 function inline_op( integer pc )
 	integer op = inline_code[pc]
@@ -265,49 +319,12 @@ function inline_op( integer pc )
 			
 		elsif TRANSLATE and inline_code[$] = BADRETURNF then
 			inline_code[$] = NOP1
--- 			replace_code( {NOP1}, length(inline_code), length(inline_code) )
 		end if
 		replace_code( code, pc, pc + 1 )
 		
 	elsif op = RETURNF then
-		-- RETURNF SUB RETSYM [BADRETURNF]
-		symtab_index retsym = inline_code[pc+2]
--- 		if pc != length( inline_code ) - 3 then
-			inline_code[$] = NOP1
--- 		end if
-		
--- 		if TRANSLATE then
--- 			inline_code[$] = NOP1
--- 		end if
-		
-		if is_temp( retsym ) or SymTab[retsym][S_SCOPE] <= SC_PRIVATE then
-			sequence code = {ASSIGN, generic_symbol( retsym ), {INLINE_TARGET}}
-			if pc != length( inline_code ) - 3 then
-				code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
-				
-			elsif INTERPRET then -- or inline_code[$] = BADRETURNF then
-				
-				replace_code( {}, length(inline_code), length(inline_code) )
-				
-			end if
-			
-			replace_code( code, pc, pc + 2 )
-			return 1
-		else
-			-- returning a literal or non-private variable
-			sequence code = {ASSIGN, retsym, {INLINE_TARGET}}
-			if pc != length( inline_code ) - 3 then
-				code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
-				
-			elsif INTERPRET or inline_code[$] = BADRETURNF then
-				replace_code( {}, length(inline_code), length(inline_code) )
-			end if
-			
-			replace_code( code, pc, pc + 2 )
+		return returnf( pc )
 
-			return 1
-		end if
-		return 0
 		
 	elsif op_info[op][OP_SIZE_TYPE] = FIXED_SIZE then
 	
@@ -349,11 +366,11 @@ end procedure
 --    * Recursion (other than tail call)
 --    * OpTrace is on
 export procedure check_inline( symtab_index sub )
--- return
+	
 	if OpTrace then
 		return
 	end if
-	
+	inline_sub      = sub
 	if get_fwdref_count() then
 		defer()
 		return
@@ -369,7 +386,6 @@ export procedure check_inline( symtab_index sub )
 		return
 	end if
 	
-	inline_sub      = sub
 	inline_code     = Code
 	return_gotos    = 0
 	prev_pc         = 1
@@ -466,9 +482,12 @@ procedure replace_temp( integer pc )
 	end if
 	
 	if not inline_temps[temp_num] then
-		
-		inline_temps[temp_num] = NewTempSym( TRUE )
-		inline_temps[temp_num] = new_inline_var( -temp_num )
+		if TRANSLATE then
+			inline_temps[temp_num] = new_inline_var( -temp_num )
+		else
+			inline_temps[temp_num] = NewTempSym( TRUE )
+			
+		end if
 	end if
 	
 	inline_code[pc] = inline_temps[temp_num]
@@ -572,13 +591,13 @@ end function
 
 export function get_inlined_code( symtab_index sub, integer start, integer deferred = 0 )
 	integer is_proc = SymTab[sub][S_TOKEN] = PROC
+	clear_inline_targets()
 	
 	inline_temps = {}
 	inline_params = {}
 	assigned_params      = SymTab[sub][S_INLINE][1]
 	inline_code          = SymTab[sub][S_INLINE][2]
 	sequence backpatches = SymTab[sub][S_INLINE][3]
-	
 	
 	passed_params = {}
 	proc_vars = {}
@@ -608,15 +627,19 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	for p = 1 to SymTab[sub][S_NUM_ARGS] do
 		symtab_index param = passed_params[p]
 		inline_params &= s
-		if find( p, assigned_params ) or is_temp( param ) then
+		integer ax = find( p, assigned_params )
+		if ax or is_temp( param ) then
 			-- This param is left alone in the routine, but we don't
 			-- want the parser to re-use it as another temp
-			varnum += 1
-			symtab_index var = new_inline_var( s )
-			prolog &= {ASSIGN, param, var}
-			inline_start += 3
-			passed_params[p] = var
-			
+			if not ax then
+				TempKeep( param )
+			else
+				varnum += 1
+				symtab_index var = new_inline_var( s )
+				prolog &= {ASSIGN, param, var}
+				inline_start += 3
+				passed_params[p] = var
+			end if
 		end if
 		s = SymTab[s][S_NEXT]
 		
@@ -644,8 +667,13 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		
 		if create_target_var then
 			varnum += 1
-			inline_target = new_inline_var( sub, 0 )
-			SymTab[inline_target][S_VTYPE] = object_type
+			if TRANSLATE then
+				inline_target = new_inline_var( sub, 0 )
+				SymTab[inline_target][S_VTYPE] = object_type
+			else
+				inline_target = NewTempSym()
+				
+			end if
 		end if
 		proc_vars &= inline_target
 	else
@@ -676,6 +704,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					
 					if check_result then
 						replace_code( {}, check_pc, check_pc+1 )
+						
 					else
 						-- TODO: make this more descriptive!
 						CompileErr("Type Check Error when inlining literal")
@@ -686,6 +715,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					or (op = SEQUENCE_CHECK and SymTab[sym][S_VTYPE] = sequence_type )
 					or (op = ATOM_CHECK and find( SymTab[sym][S_VTYPE], {integer_type, atom_type} ) ) then
 						replace_code( {}, check_pc, check_pc+1 )
+						
 					else
 						check_pc += 2
 					end if
@@ -718,6 +748,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					break
 				case INLINE_TARGET:
 					inline_code[pc] = inline_target
+					add_inline_target( pc + inline_start )
 					break
 				case INLINE_SUB:
 					inline_code[pc] = CurrentSub
@@ -740,7 +771,9 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		fixup_special_op( backpatches[i] )
 	end for
 	
-	if not is_proc then
+	if is_proc then
+		clear_op()
+	else
 		if not deferred then
 			Push( inline_target )
 			inlined_function()
@@ -781,7 +814,7 @@ export procedure emit_or_inline()
 	end if
 	sequence code = get_inlined_code( sub, length(Code) )
 	Code &= code
-	clear_op()
+	
 end procedure
 
 -- Called after all parsing and forward reference resolution is complete.

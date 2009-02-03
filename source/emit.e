@@ -427,6 +427,15 @@ export procedure inlined_function()
 	inlined = TRUE
 end procedure
 
+sequence inlined_targets = {}
+export procedure add_inline_target( integer pc )
+	inlined_targets &= pc
+end procedure
+
+export procedure clear_inline_targets()
+	inlined_targets = {}
+end procedure
+
 global procedure emit_op(integer op)
 -- Emit a postfix operator.
 -- The cases have been sorted according to profile frequency.
@@ -443,13 +452,22 @@ global procedure emit_op(integer op)
 	last_op = op
 	last_pc = length(Code) + 1
 	-- 1 input, 0 outputs, can combine with previous op
-	if op = ASSIGN then
+	if op = ASSIGN label "EMIT" then
 		source = Pop()
 		target = Pop()
 		if assignable then
+		
 			if inlined then
 				inlined = 0
-				break
+				if length( inlined_targets ) then
+					for i = 1 to length( inlined_targets ) do
+						Code[inlined_targets[i]] = target
+					end for
+					clear_inline_targets()
+					
+				end if
+				assignable = FALSE
+				break "EMIT"
 			end if
 			-- replace previous op (temp) target with ASSIGN target 
 			Code = Code[1..$-1] -- drop previous target
@@ -1372,6 +1390,7 @@ global procedure emit_op(integer op)
 	end if
 
 	previous_op = op 
+	inlined = 0
 
 end procedure
 
