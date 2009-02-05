@@ -86,10 +86,11 @@ ifeq "$(EDJGPP)" "1"
 	EOSMING=-O2
 	EBACKENDU=backendd
 	EBACKENDC=backendd
-	EECU=ec
-	EEXU=ex
+	EECU=ec.exe
+	EEXU=ex.exe
 	EECUA=ec.a
-	MEM_FLAGS=-DESIMPLE_MALLOC
+	PLAT=DOS
+	MEM_FLAGS=
 	LDLFLAG=-lalleg
 	ECHO=echo
 else
@@ -118,13 +119,8 @@ ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
 
-ifeq "$(EU3)" "1"
-EXE=export EUINC=$(PWD)/../include && $(EEXU)
-INCDIR=
-else
 EXE=$(EEXU)
 INCDIR=-i ../../include
-endif
 
 ifdef PLAT
 TARGETPLAT=-plat $(PLAT)
@@ -336,7 +332,7 @@ $(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 test : interpreter translator library
 	export EUCOMPILEDIR=../ && \
 	    cd ../tests/ && \
-	     $(EXE) ../bin/eutest.ex -i ..%sinclude -exe ../source/$(EEXU) -ec ../source/$(EECU) -lib ../source/$(EECUA)
+	     $(EXE) ../bin/eutest.ex -i ../include -exe ../source/$(EEXU) -ec ../source/$(EECU) -lib ../source/$(EECUA)
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
@@ -409,7 +405,7 @@ backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)
 ./$(OBJDIR)/%.c : $(EU_MAIN) 
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	@-rm ./$(OBJDIR)/*.c
-	cd ./$(OBJDIR) && $(EXE) $(INCDIR) $(EC_DEBUG) ../ec.ex $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
+	cd ./$(OBJDIR) && $(EXE) $(INCDIR) $(EC_DEBUG) ../ec.ex -gcc $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
 	@cd ./$(OBJDIR) && \
 	if [ "$(OBJDIR)" = "backobj" ]; then \
 		$(ECHO) -e "EU_BACKEND_RUNNER_OBJECTS = \\" > ../Makefile.$(OBJDIR)smak ; \
