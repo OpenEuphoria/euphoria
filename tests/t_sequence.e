@@ -159,6 +159,20 @@ test_equal( "replace 8,3", "johndoeaaa", replace("johndoe", "aaa", 8,3 ))
 test_equal( "replace 8,4", "johndoeaaa", replace("johndoe", "aaa", 8,4 ))
 test_equal( "replace 8,5", "johndoeaaa", replace("johndoe", "aaa", 8,5 ))
 test_equal( "replace 8,8", "johndoeaaa", replace("johndoe", "aaa", 8,8 ))
+
+
+procedure replace_objs()
+	sequence 
+		Code = {1,2,3,4,5},
+		val = {"1234567890", {}, 9, 10, 0 }
+	integer a, b, c , d, target, pc = 0	
+	a = Code[pc+1]
+ 	b = Code[pc+2]
+ 	c = Code[pc+3]
+ 	d = Code[pc+4]
+	test_equal( "replace end of sequence using temps",  "12345678", replace(val[a],val[b],val[c],val[d]) )
+end procedure
+replace_objs()
 -- 
 test_equal("pad_head() #1", "   ABC", pad_head("ABC", 6))
 test_equal("pad_head() #2", "ABC", pad_head("ABC", 3))

@@ -4569,7 +4569,7 @@ procedure opREPLACE()
 				c_stmt0( "break;\n" )
 			c_stmt0( "}\n" )
 		c_stmt0("}\n")
-	if not TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then -- could be a sequence
+	if not TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then -- could be a sequence
 		if not TypeIs(Code[pc+2], TYPE_SEQUENCE) then -- may be an atom
 			c_stmt("if (IS_SEQUENCE(@)) {\n", {Code[pc+2]}) -- replacement is a sequence
 		end if
@@ -4651,8 +4651,10 @@ procedure opREPLACE()
 
 		SetBBType(Code[pc+5], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2])))
 	else
-		c_stmt("else if (start > stop) @ = Insert(@, @, start);\n",
+		c_stmt0("else if (start > stop){\n")
+		c_stmt("@ = Insert(@, @, start);\n",
 				 {Code[pc+5], Code[pc+1], Code[pc+2]}) -- splice replacement (an atom) in at start
+		c_stmt0("}\n")
 		c_stmt0("else if (start < stop) {\n") -- replace one element, more room available
 		c_stmt0("object_ptr ptr;\n")
 		c_stmt0("assign_slice_seq = &assign_space;\n")
@@ -4663,7 +4665,9 @@ procedure opREPLACE()
 		c_stmt0("}\n")
 		c_stmt0("else {\n") -- patch an atom
 		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt("if (!IS_ATOM_INT(@)) RefDS(@);\n",repeat(Code[pc+2],2))
+		c_stmt("if (!IS_ATOM_INT(@)){\n", Code[pc+2] )
+		c_stmt("RefDS(@);\n", Code[pc+2] )
+		c_stmt0("}\n")
 		c_stmt("AssignElement(@, start, &@);\n", {Code[pc+2], Code[pc+5]})
 		c_stmt0("}\n")
 
