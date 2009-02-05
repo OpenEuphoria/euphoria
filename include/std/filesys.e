@@ -24,6 +24,10 @@ include std/sequence.e
 include std/types.e
 include std/text.e
 
+ifdef UNIX then
+	include std/get.e -- for get_disk_size()
+end ifdef
+
 constant
 	M_DIR	      = 22,
 	M_CURRENT_DIR = 23,
@@ -1943,7 +1947,7 @@ public enum
 	TOTAL_BYTES,
 	FREE_BYTES,
 	USED_BYTES
- 
+
 --**
 -- Returns some information about a disk drive.
 --
@@ -1953,8 +1957,6 @@ public enum
 -- Returns:
 --     A **sequence**, containing SECTORS_PER_CLUSTER, BYTES_PER_SECTOR, 
 --                     NUMBER_OF_FREE_CLUSTERS, and TOTAL_NUMBER_OF_CLUSTERS
--- Comment:
--- * Not yet supported on Unix systems.
 --
 -- Example 1:
 -- <eucode>
@@ -1988,6 +1990,51 @@ public function get_disk_metrics(object disk_path)
 			free(path_addr) 
 		end if 
 		free(metric_addr) 
+	elsifdef UNIX then
+		sequence disk_size = {0,0,0}
+
+		atom bytes_per_cluster
+		atom psrc, ret, psrcbuf
+		integer stat_t_offset, dev_t_size, stat_buf_size
+
+		ifdef LINUX then
+			stat_t_offset = 48
+			stat_buf_size = 88
+			dev_t_size = 4
+		elsifdef OSX then
+			--TODO
+			stat_t_offset = 48
+			stat_buf_size = 88
+			dev_t_size = 4
+		elsifdef FREEBSD then
+			--TODO
+			stat_t_offset = 48
+			stat_buf_size = 88
+			dev_t_size = 4
+		end ifdef
+
+		psrc = allocate_string(disk_path)
+		psrcbuf = allocate(stat_buf_size)
+		ret = xstat(psrc,psrcbuf)
+		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
+		free(psrcbuf)
+		free(psrc)
+		if ret then
+			-- failure
+			return disk_metrics 
+		end if
+
+		disk_size = get_disk_size(disk_path)
+
+		-- this is hardcoded for now, but may be x86 specific
+		-- on other Unix platforms that run on non x86 hardware, this
+		-- may need to be changed - there is no portable way to get this
+		disk_metrics[BYTES_PER_SECTOR] = 512
+
+		disk_metrics[SECTORS_PER_CLUSTER] = bytes_per_cluster / disk_metrics[BYTES_PER_SECTOR]
+		disk_metrics[TOTAL_NUMBER_OF_CLUSTERS] = disk_size[TOTAL_BYTES] / bytes_per_cluster
+		disk_metrics[NUMBER_OF_FREE_CLUSTERS] = disk_size[FREE_BYTES] / bytes_per_cluster
+
 	end ifdef 
 	
 	return disk_metrics 
@@ -2000,10 +2047,7 @@ end function
 --	# ##disk_path## - A sequence. This is the path that identifies the disk to inquire upon.
 --
 -- Returns:
---     A **sequence**, containing TOTAL_BYTES, USED_BYTES, FREE_BYTES
---
--- Comment:
--- * Not yet supported on Unix systems.
+--     A **sequence**, containing TOTAL_BYTES, USED_BYTES, FREE_BYTES, and a string which represents the filesystem name
 --
 -- Example 1:
 -- <eucode>
@@ -2011,7 +2055,7 @@ end function
 -- printf(1, "Drive %s has %3.2f%% free space\n", {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
 -- </eucode>
 public function get_disk_size(object disk_path) 
-	sequence disk_size = {0,0,0}
+	sequence disk_size = {0,0,0, disk_path}
 	
 	ifdef WIN32 then
 		sequence disk_metrics 
@@ -2025,6 +2069,47 @@ public function get_disk_size(object disk_path)
 		disk_size[TOTAL_BYTES] = bytes_per_cluster * disk_metrics[TOTAL_NUMBER_OF_CLUSTERS] 
 		disk_size[FREE_BYTES]  = bytes_per_cluster * disk_metrics[NUMBER_OF_FREE_CLUSTERS] 
 		disk_size[USED_BYTES]  = disk_size[TOTAL_BYTES] - disk_size[FREE_BYTES] 
+	elsifdef UNIX then
+		integer temph
+		sequence tempfile
+		object data
+		sequence filesys = ""
+
+		tempfile = "/tmp/eudf" & sprintf("%d", rand(1000)) & ".tmp"
+		system("df "&disk_path&" > "&tempfile, 2)
+
+		temph = open(tempfile, "r")
+		if temph = -1 then
+			-- failure
+			return disk_size
+		end if
+		-- skip the human readable header
+		data = gets(temph)
+		-- skip the name of the device node
+		while not find(data," \t\r\n") entry do
+		entry
+			data = getc(temph)
+			filesys &= data
+			if data = -1 then
+				-- failure
+				close(temph)
+				temph = delete_file(tempfile)
+				disk_size[4] = filesys
+				return disk_size
+			end if
+		end while
+
+		data = get(temph)
+		disk_size[TOTAL_BYTES] = data[2] * 1024
+		data = get(temph)
+		disk_size[USED_BYTES] = data[2] * 1024
+		data = get(temph)
+		disk_size[FREE_BYTES] = data[2] * 1024
+		disk_size[4] = filesys
+
+		close(temph)
+		temph = delete_file(tempfile)
+
 	end ifdef 
 	
 	return disk_size 
