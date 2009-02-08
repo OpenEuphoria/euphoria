@@ -195,8 +195,7 @@ global procedure InitParser()
 	param_num = -1
 end procedure
 
-sequence switch_stack
-switch_stack = {}
+sequence switch_stack = {}
 
 enum
 	SWITCH_CASES,
@@ -410,11 +409,11 @@ procedure putback(token t)
 	backed_up_tok = t
 end procedure
 
-sequence psm_stack, can_stack, idx_stack, tok_stack
-can_stack = {}
-psm_stack = {}
-idx_stack = {}
-tok_stack = {}
+sequence
+	psm_stack = {},
+	can_stack = {},
+	idx_stack = {},
+	tok_stack = {}
 
 procedure start_recording()
 	psm_stack &= Parser_mode
@@ -1057,8 +1056,7 @@ procedure Function_call( token tok )
 			side_effect_calls = or_bits(side_effect_calls, e)
 		end if
 
-		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
-											   e)
+		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT], e)
 
 		if short_circuit > 0 and short_circuit_B and
 				  find(id, {FUNC, QUALIFIED_FUNC}) then
@@ -2502,7 +2500,7 @@ procedure Ifdef_statement()
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
-				CompileErr("End of file reached while searching for end ifdef")
+				CompileErr("End of file reached while searching for 'end ifdef'")
 			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
@@ -2513,7 +2511,7 @@ procedure Ifdef_statement()
 					end if
 				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
-					CompileErr("unknown command")
+					CompileErr("'end' command out of place")
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
 				if has_matched then
