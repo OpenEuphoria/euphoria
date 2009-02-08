@@ -26,7 +26,7 @@
 #   Interpreter(exw.exe, exwc.exe):  wmake -f makefile.wat interpreter
 #   Translator    (ec.exe ecw.exe):  wmake -f makefile.wat translator
 #   Translator Library   (ecw.lib):  wmake -f makefile.wat library
-#   Translator Library   (ecw.lib):  wmake -f makefile.wat library
+#   Translator Library    (ec.lib):  wmake -f makefile.wat library
 #   Backend         (backendw.exe):  wmake -f makefile.wat backend 
 #                   (backendc.exe)
 #                 Make all targets:  wmake -f makefile.wat
@@ -64,103 +64,100 @@
 #
 #                          DEBUG:  Set this to 1 to build debug versions of the targets.  ex:
 #                                      wmake -h -f makefile.wat interpreter DEBUG=1
-#
-!ifndef CONFIG
-CONFIG=config.wat
-!endif
-!include $(CONFIG)
+
+!include config.wat
 
 EU_CORE_FILES = &
-        rev.e &
-        main.e &
-        global.e &
-        common.e &
-        mode.e &
-        pathopen.e &
-        error.e &
-        symtab.e &
-        scanner.e &
-        scinot.e &
-        emit.e &
-        parser.e &
-        opnames.e &
-        reswords.e &
-        keylist.e &
-        fwdref.e &
-        shift.e &
-        inline.e
+	rev.e &
+	main.e &
+	global.e &
+	common.e &
+	mode.e &
+	pathopen.e &
+	error.e &
+	symtab.e &
+	scanner.e &
+	scinot.e &
+	emit.e &
+	parser.e &
+	opnames.e &
+	reswords.e &
+	keylist.e &
+	fwdref.e &
+	shift.e &
+	inline.e
 
 EU_INTERPRETER_FILES = &
-        compress.e &
-        backend.e &
-        c_out.e &
-        cominit.e &
-        intinit.e &
-        $(TRUNKDIR)\include\std\get.e &
-        int.ex
+	compress.e &
+	backend.e &
+	c_out.e &
+	cominit.e &
+	intinit.e &
+	..\include\std\get.e &
+	int.ex
 
 EU_TRANSLATOR_FILES = &
-        compile.e &
-        ec.ex &
-        c_decl.e &
-        c_out.e &
-        cominit.e &
-        traninit.e &
-        tranplat.e &
-        compress.e
-        
-!include $(BUILDDIR)\transobj.wat
-!include $(BUILDDIR)\intobj.wat
-!include $(BUILDDIR)\backobj.wat
-!include $(BUILDDIR)\dosobj.wat
-!include $(BUILDDIR)\dostrobj.wat
-!include $(BUILDDIR)\dosbkobj.wat
+	compile.e &
+	ec.ex &
+	c_decl.e &
+	c_out.e &
+	cominit.e &
+	traninit.e &
+	tranplat.e &
+	compress.e
+	
+!include transobj.wat
+!include intobj.wat
+!include backobj.wat
+!include dosobj.wat
+!include dostrobj.wat
+!include dosbkobj.wat
 
 EU_BACKEND_OBJECTS = &
-        $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_main.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_rterror.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\regex.obj 
-#       &
-#       $(BUILDDIR)\$(OBJDIR)\memory.obj
+	.\$(OBJDIR)\back\be_execute.obj &
+	.\$(OBJDIR)\back\be_decompress.obj &
+	.\$(OBJDIR)\back\be_task.obj &
+	.\$(OBJDIR)\back\be_main.obj &
+	.\$(OBJDIR)\back\be_alloc.obj &
+	.\$(OBJDIR)\back\be_callc.obj &
+	.\$(OBJDIR)\back\be_inline.obj &
+	.\$(OBJDIR)\back\be_machine.obj &
+	.\$(OBJDIR)\back\be_rterror.obj &
+	.\$(OBJDIR)\back\be_syncolor.obj &
+	.\$(OBJDIR)\back\be_runtime.obj &
+	.\$(OBJDIR)\back\be_symtab.obj &
+	.\$(OBJDIR)\back\be_w.obj &
+	.\$(OBJDIR)\back\be_regex.obj &
+	.\$(OBJDIR)\back\regex.obj 
+#	&
+#	.\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
-        $(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
-        $(BUILDDIR)\$(OBJDIR)\back\regex.obj
+	.\$(OBJDIR)\back\be_decompress.obj &
+	.\$(OBJDIR)\back\be_machine.obj &
+	.\$(OBJDIR)\back\be_w.obj &
+	.\$(OBJDIR)\back\be_alloc.obj &
+	.\$(OBJDIR)\back\be_inline.obj &
+	.\$(OBJDIR)\back\be_runtime.obj &
+	.\$(OBJDIR)\back\be_task.obj &
+	.\$(OBJDIR)\back\be_callc.obj &
+	.\$(OBJDIR)\back\be_regex.obj &
+	.\$(OBJDIR)\back\regex.obj
 
 EU_BACKEND_RUNNER_FILES = &
-        .\backend.ex &
-        .\compress.e &
-        .\reswords.e &
-        .\common.e &
-        .\cominit.e &
-        .\pathopen.e
+	.\backend.ex &
+	.\compress.e &
+	.\reswords.e &
+	.\common.e &
+	.\cominit.e &
+	.\pathopen.e
 
 
-EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
-                $(TRUNKDIR)\include\euphoria\*.e
+EU_INCLUDES = ..\include\std\*.e ..\include\*.e &
+		..\include\euphoria\*.e
 
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
-                 int.ex ec.ex backend.ex
+		 int.ex ec.ex backend.ex
 
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
@@ -173,7 +170,7 @@ RELEASE_FLAG = -D EU_FULL_RELEASE
 !endif
 
 !ifndef EUBIN
-EUBIN=$(TRUNKDIR)\bin
+EUBIN=..\bin
 !endif
 
 !ifndef PREFIX
@@ -184,17 +181,13 @@ PREFIX=C:\euphoria
 !endif
 !endif
 
-!ifndef BUILDDIR
-BUILDDIR=.
-!endif
-
 !ifeq INT_CODES 1
 #TODO hack
 MEMFLAG = $(MEMFLAG) /dINT_CODES
 !endif
 
 !ifeq DEBUG 1
-DEBUGFLAG = /d2 /dEDEBUG /dINT_CODES
+DEBUGFLAG = /d2 /dEDEBUG
 DEBUGLINK = debug all
 !endif
 
@@ -202,351 +195,339 @@ DEBUGLINK = debug all
 EX=$(EUBIN)\exwc.exe
 !endif
 
-
-
 EXE=$(EX)
-INCDIR=-i $(TRUNKDIR)\include
+INCDIR=-i ..\..\include
 
-VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
+VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 all :  .SYMBOLIC
     @echo ------- ALL -----------
-        wmake -h -f makefile.wat winall $(VARS)
-        wmake -h -f makefile.wat dosall $(VARS)
+	wmake -h -f makefile.wat winall $(VARS)
+	wmake -h -f makefile.wat dosall $(VARS)
 
 winall : .SYMBOLIC
     @echo ------- WINALL -----------
-        wmake -h -f makefile.wat interpreter $(VARS)
-        wmake -h -f makefile.wat translator $(VARS)
-        wmake -h -f makefile.wat library $(VARS)
-        wmake -h -f makefile.wat backend $(VARS)
+	wmake -h -f makefile.wat interpreter $(VARS)
+	wmake -h -f makefile.wat translator $(VARS)
+	wmake -h -f makefile.wat library $(VARS)
+	wmake -h -f makefile.wat backend $(VARS)
 
 dosall : .SYMBOLIC
     @echo ------- DOSALL -----------
-        wmake -h -f makefile.wat dos $(VARS)
-        wmake -h -f makefile.wat library OS=DOS $(VARS)
-        wmake -h -f makefile.wat dostranslator OS=DOS $(VARS)
-        wmake -h -f makefile.wat dosbackend OS=DOS $(VARS)
+	wmake -h -f makefile.wat dos $(VARS)
+	wmake -h -f makefile.wat library OS=DOS $(VARS)
+	wmake -h -f makefile.wat dostranslator OS=DOS $(VARS)
+	wmake -h -f makefile.wat dosbackend OS=DOS $(VARS)
 
-BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\DOSlibobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\dosbkobj $(BUILDDIR)\dosobj $(BUILDDIR)\dostrobj
+BUILD_DIRS=intobj transobj DOSlibobj WINlibobj backobj dosbkobj dosobj dostrobj
 
+#TODO make this smarter
+distclean : .SYMBOLIC
+	-if not exist $(%WINDIR)\command\deltree.exe rmdir /Q/S $(BUILD_DIRS)
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q config.wat rev.e
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y $(BUILD_DIRS)
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y config.wat rev.e
 
-
-distclean : .SYMBOLIC clean
-!ifndef RM
-        @ECHO Please run configure
-        error
-!endif
-        $(RM) config.wat
-
+#TODO make this smarter
 clean : .SYMBOLIC
-        cd $(BUILDDIR)
-!ifndef DELTREE
-        @ECHO Please run configure
-        error
-!endif
-        -$(RM) &
-                ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
-        -@for %i in (*obj) do @$(DELTREE) %i
-        -@for %i in (*obj\back) do @$(RMDIR) %i
-        -@for %i in (*obj) do @$(RMDIR) %i
-        cd $(TRUNKDIR)\source
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q &
+		ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
+	-if not exist $(%WINDIR)\command\deltree.exe del /Q /S &
+		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\* dosbkobj\* dostrobj\*
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
+		ex.exe ec.exe exw.exe exwc.exe ecw.exe ec.lib ecw.lib backendw.exe backendc.exe backendd.exe main-.h
+	-if exist $(%WINDIR)\command\deltree.exe deltree /y &
+		intobj\* transobj\* libobj\* backobj\* dosobj\* doslibobj\* dosbkobj\* dostrobj\*
 
 $(BUILD_DIRS) : .existsonly
-        mkdir $@
-        mkdir $@\back
+	mkdir $@
+	mkdir $@\back
 
 !ifeq OS DOS
 OSFLAG=EDOS
-LIBTARGET=$(BUILDDIR)\ec.lib
+LIBTARGET=ec.lib
 !else
 OS=WIN
 OSFLAG=EWINDOWS
-LIBTARGET=$(BUILDDIR)\ecw.lib
+LIBTARGET=ecw.lib
 !endif
 
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) /I..\
 BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
 
-interpreter : .SYMBOLIC
-        wmake -h -f makefile.wat $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=intobj EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\exw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\exwc.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-
-install : .SYMBOLIC installwin installdos
-        
-translator : .SYMBOLIC 
-        wmake -h -f makefile.wat $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\ecw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-
-dostranslator : .SYMBOLIC
-        wmake -h -f makefile.wat $(BUILDDIR)\dostrobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\ec.exe EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS CONFIG=$(CONFIG)
-
-dosbackend : .SYMBOLIC backendflag 
-    @echo ------- BACKEND -----------
-        wmake -h -f makefile.wat $(BUILDDIR)\dosbkobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=dosbkobj EU_NAME_OBJECT=EU_DOSBACKEND_RUNNER_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\backendd.exe EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS CONFIG=$(CONFIG)
-
-dos : .SYMBOLIC
-        wmake -h -f makefile.wat $(BUILDDIR)\dosobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS CONFIG=$(CONFIG)
-
-doseubin : .SYMBOLIC
-        wmake -h -f makefile.wat $(BUILDDIR)\dosobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS" CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS" CONFIG=$(CONFIG)
-
-        
-library : .SYMBOLIC runtime 
+	
+library : .SYMBOLIC $(BUILD_DIRS)  runtime 
     @echo ------- LIBRARY -----------
-        wmake -h -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-
-doslibrary : .SYMBOLIC 
-        wmake -h -f makefile.wat OS=DOS library
-
-winlibrary : .SYMBOLIC
-        wmake -h -f makefile.wat OS=WIN library 
+	wmake -h -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 runtime: .SYMBOLIC 
     @echo ------- RUNTIME -----------
-        set ERUNTIME=/dERUNTIME
+	set ERUNTIME=/dERUNTIME
 
 backendflag: .SYMBOLIC
-        set EBACKEND=/dBACKEND
+	set EBACKEND=/dBACKEND
 
-$(BUILDDIR)\ecw.lib : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
-        wlib -q $(BUILDDIR)\ecw.lib $(EU_LIB_OBJECTS)
+ecw.lib :$(EU_LIB_OBJECTS)
+	wlib -q ecw.lib $(EU_LIB_OBJECTS)
 
-$(BUILDDIR)\ec.lib : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
-        wlib -q $(BUILDDIR)\ec.lib $(EU_LIB_OBJECTS)
+ec.lib : $(EU_LIB_OBJECTS)
+	wlib -q ec.lib $(EU_LIB_OBJECTS)
 
 
 !ifdef OBJDIR
-        
+	
+interpreter_objects : $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	wtouch interpreter_objects
 
 objlist : .SYMBOLIC 
-        wmake -h -f Makefile.wat        EU_NAME_OBJECT=$(EU_NAME_OBJECT) OBJDIR=$(OBJDIR) $(BUILDDIR)\$(OBJDIR).wat EX=$(EUBIN)\exwc.exe
+	wmake -h -f Makefile.wat 	EU_NAME_OBJECT=$(EU_NAME_OBJECT) OBJDIR=$(OBJDIR) $(OBJDIR).wat EX=$(EUBIN)\exwc.exe
 
 
-    
-$(BUILDDIR)\$(OBJDIR)\back : .EXISTSONLY $(BUILDDIR)\$(OBJDIR)
-    -mkdir $(BUILDDIR)\$(OBJDIR)\back
 
-$(BUILDDIR)\$(OBJDIR).wat : $(BUILDDIR)\$(OBJDIR)\main-.c
-        @if exist $(BUILDDIR)\objtmp rmdir /Q /S $(BUILDDIR)\objtmp
-        @mkdir $(BUILDDIR)\objtmp
-        @copy $(BUILDDIR)\$(OBJDIR)\*.c $(BUILDDIR)\objtmp
-        @cd $(BUILDDIR)\objtmp
-        ren *.c *.obj
-        %create $(OBJDIR).wat
-        %append $(OBJDIR).wat $(EU_NAME_OBJECT) = &  
-        for %i in (*.obj) do @%append $(OBJDIR).wat $(BUILDDIR)\$(OBJDIR)\%i & 
-        %append $(OBJDIR).wat    
-        del *.obj
-        cd $(TRUNKDIR)\source
-        move $(BUILDDIR)\objtmp\$(OBJDIR).wat $(BUILDDIR)
-        rmdir $(BUILDDIR)\objtmp
+$(OBJDIR).wat : .\$(OBJDIR)\main-.c
+	@if exist objtmp rmdir /Q /S objtmp
+	@mkdir objtmp
+	@copy $(OBJDIR)\*.c objtmp
+	@cd objtmp
+	@ren *.c *.obj
+	@cd ..
+	@%create $(OBJDIR).wat
+	@%append $(OBJDIR).wat $(EU_NAME_OBJECT) = &  
+	@cd objtmp
+	@for %i in (*.obj) do @%append ..\$(OBJDIR).wat .\$(OBJDIR)\%i &  
+	@del *.obj
+	@cd ..
+	@rmdir objtmp
+	@%append $(OBJDIR).wat   
 
 
-exwsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
-ecwsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
-backendsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
-ecsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
-exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
+exwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+ecwsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+backendsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+ecsource : .SYMBOLIC .\$(OBJDIR)/main-.c
+exsource : .SYMBOLIC .\$(OBJDIR)/main-.c
 
 !endif
 # OBJDIR
 
 !ifdef EUPHORIA
-translate-win : .SYMBOLIC  
+translate-win : .SYMBOLIC  $(BUILD_DIRS)
     @echo ------- TRANSLATE WIN -----------
         wmake -h -f makefile.wat exwsource EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
         wmake -h -f makefile.wat ecwsource EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
         wmake -h -f makefile.wat backendsource EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-        
-translate-dos : .SYMBOLIC 
+	
+translate-dos : .SYMBOLIC $(BUILD_DIRS)
     @echo ------- TRANSLATE DOS -----------
-        wmake -h -f makefile.wat exsource EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
-        wmake -h -f makefile.wat ecsource EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -h -f makefile.wat exsource EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -h -f makefile.wat ecsource EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
         wmake -h -f makefile.wat backendsource EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
-        
+	
 translate : .SYMBOLIC translate-win translate-dos
 
 
 testwin : .SYMBOLIC
-        cd ..\tests
-        $(EXE) ..\bin\eutest.ex -i ..\include -cc wat -exe $(BUILDDIR)\exwc.exe -ec $(BUILDDIR)\ecw.exe -lib $(BUILDDIR)\ecw.lib
-        cd ..\source
+	cd ..\tests
+	$(EXE) ..\bin\eutest.ex -i ..\include -cc wat -exe ..\source\exwc.exe -ec ..\source\ecw.exe -lib ..\source\ecw.lib
+	cd ..\source
 
 testdos : .SYMBOLIC dos
-        cd ..\tests
-        $(EXE) ..\bin\eutest.ex -i ..\include -cc wat -exe $(BUILDDIR)\ex.exe -ec $(BUILDDIR)\ec.exe -lib $(BUILDDIR)\ec.lib
-        cd ..\source
-        
+	cd ..\tests
+	$(EXE) ..\bin\eutest.ex -i ..\include -cc wat -exe ..\source\ex.exe -ec ..\source\ec.exe -lib ..\source\ec.lib
+	cd ..\source
+	
 test : .SYMBOLIC testwin testdos
 
-!endif #EUPHORIA        
+!endif #EUPHORIA	
 
-$(BUILDDIR)\exwc.exe $(BUILDDIR)\exw.exe: $(BUILDDIR)\$(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-        @%create $(BUILDDIR)\$(OBJDIR)\int.lbc
-        @%append $(BUILDDIR)\$(OBJDIR)\int.lbc option quiet
-        @%append $(BUILDDIR)\$(OBJDIR)\int.lbc option caseexact
-        @for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\int.lbc file %i
-        wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\int.lbc name $(BUILDDIR)\exwc.exe
-        wrc -q -ad exw.res $(BUILDDIR)\exwc.exe
-        wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\int.lbc name $(BUILDDIR)\exw.exe
-        wrc -q -ad exw.res $(BUILDDIR)\exw.exe
+exwc.exe exw.exe: interpreter_objects $(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\int.lbc
+	@%append .\$(OBJDIR)\int.lbc option quiet
+	@%append .\$(OBJDIR)\int.lbc option caseexact
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\int.lbc file %i
+	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exwc.exe
+	wrc -q -ad exw.res exwc.exe
+	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\int.lbc name exw.exe
+	wrc -q -ad exw.res exw.exe
+
+interpreter : .SYMBOLIC $(BUILD_DIRS) 
+        wmake -h -f makefile.wat .\intobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h -f makefile.wat objlist OBJDIR=intobj EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
+        wmake -h -f makefile.wat exw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+        wmake -h -f makefile.wat exwc.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install-generic : .SYMBOLIC
-        @for %i in (*.e) do @copy %i $(PREFIX)\source\
-        @for %i in (*.ex) do @copy %i $(PREFIX)\source\
-        @copy ..\include\* $(PREFIX)\include\
-        @if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
-        @copy ..\include\std\* $(PREFIX)\include\std
-        @if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
-        @copy ..\include\euphoria\* $(PREFIX)\include\euphoria
-        
+	@for %i in (*.e) do @copy %i $(PREFIX)\source\
+	@for %i in (*.ex) do @copy %i $(PREFIX)\source\
+	@copy ..\include\* $(PREFIX)\include\
+	@if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
+	@copy ..\include\std\* $(PREFIX)\include\std
+	@if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
+	@copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	
 installwin : .SYMBOLIC install-generic
-        @copy $(BUILDDIR)\ecw.exe $(PREFIX)\bin\
-        @copy $(BUILDDIR)\exw.exe $(PREFIX)\bin\
-        @copy $(BUILDDIR)\exwc.exe $(PREFIX)\bin\
-        @copy $(BUILDDIR)\backendw.exe $(PREFIX)\bin\
-        @copy $(BUILDDIR)\backendc.exe $(PREFIX)\bin\
-        @copy $(BUILDDIR)\ecw.lib $(PREFIX)\bin\
+	@copy ecw.exe $(PREFIX)\bin\
+	@copy exw.exe $(PREFIX)\bin\
+	@copy exwc.exe $(PREFIX)\bin\
+	@copy backendw.exe $(PREFIX)\bin\
+	@copy backendc.exe $(PREFIX)\bin\
+	@copy ecw.lib $(PREFIX)\bin\
 
 installdos : .SYMBOLIC install-generic
-        @copy $(BUILDDIR)\ec.exe $(PREFIX)\bin\
-        @copy $(BUILDDIR)\backendd.exe $(%PREFIX)\bin\
-        @copy $(BUILDDIR)\ec.lib $(PREFIX)\bin\
-        
-        
-$(BUILDDIR)\ecw.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-        @%create $(BUILDDIR)\$(OBJDIR)\ec.lbc
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option quiet
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option caseexact
-        @for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc file %i
-        wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\ec.lbc name $(BUILDDIR)\ecw.exe
-        wrc -q -ad exw.res $(BUILDDIR)\ecw.exe
+	@copy ec.exe $(PREFIX)\bin\
+	@copy backendd.exe $(%PREFIX)\bin\
+	@copy ec.lib $(PREFIX)\bin\
+	
+install : .SYMBOLIC installwin installdos
+	
+	
+ecw.exe : $(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\ec.lbc
+	@%append .\$(OBJDIR)\ec.lbc option quiet
+	@%append .\$(OBJDIR)\ec.lbc option caseexact
+	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\ec.lbc name ecw.exe
+	wrc -q -ad exw.res ecw.exe
 
 
-$(BUILDDIR)\backendw.exe :  $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+translator : .SYMBOLIC $(BUILD_DIRS)
+        wmake -h -f makefile.wat .\transobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h -f makefile.wat objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS
+	wmake -h -f makefile.wat ecw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+
+dostranslator : .SYMBOLIC $(BUILD_DIRS)
+	wmake -h -f makefile.wat .\dostrobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -h -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS
+	wmake -h -f makefile.wat ec.exe EX=$(EUBIN)\ex.exe EU_TARGET=ec. OBJDIR=dostrobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+
+backendw.exe :  $(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
-        @%create $(BUILDDIR)\$(OBJDIR)\exwb.lbc
-        @%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc option quiet
-        @%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc option caseexact
-        @for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc file %i
-        wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\exwb.lbc name $(BUILDDIR)\backendw.exe
-        wrc -q -ad exw.res $(BUILDDIR)\backendw.exe
-        wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\exwb.lbc name $(BUILDDIR)\backendc.exe
-        wrc -q -ad exw.res $(BUILDDIR)\backendc.exe
+	@%create .\$(OBJDIR)\exwb.lbc
+	@%append .\$(OBJDIR)\exwb.lbc option quiet
+	@%append .\$(OBJDIR)\exwb.lbc option caseexact
+	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exwb.lbc file %i
+	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendw.exe
+	wrc -q -ad exw.res backendw.exe
+	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @.\$(OBJDIR)\exwb.lbc name backendc.exe
+	wrc -q -ad exw.res backendc.exe
 
 
-backend : .SYMBOLIC backendflag 
+backend : .SYMBOLIC $(BUILD_DIRS) backendflag 
     @echo ------- BACKEND -----------
-        wmake -h -f makefile.wat $(BUILDDIR)\backobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS CONFIG=$(CONFIG)
-        wmake -h -f makefile.wat $(BUILDDIR)\backendw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
+        wmake -h -f makefile.wat .\backobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h -f makefile.wat objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS
+        wmake -h -f makefile.wat backendw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-$(BUILDDIR)\backendd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-        @%create $(BUILDDIR)\$(OBJDIR)\exb.lbc
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc option quiet
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc option caseexact
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc option osname='CauseWay'
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc libpath $(%WATCOM)\lib386
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc libpath $(%WATCOM)\lib386\dos
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc format os2 le ^
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION STACK=262144
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION QUIET
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION ELIMINATE
-        @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION CASEEXACT
-        @for %i in ($(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc file %i
-        wlink  $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\exb.lbc name $(BUILDDIR)\backendd.exe
-        le23p $(BUILDDIR)\backendd.exe
-        cwc  $(BUILDDIR)\backendd.exe
+dosbackend : .SYMBOLIC $(BUILD_DIRS) backendflag 
+    @echo ------- BACKEND -----------
+        wmake -h -f makefile.wat .\dosbkobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -h -f makefile.wat objlist OBJDIR=dosbkobj EU_NAME_OBJECT=EU_DOSBACKEND_RUNNER_OBJECTS
+        wmake -h -f makefile.wat backendd.exe EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=dosbkobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-$(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
-        @%create $(BUILDDIR)\$(OBJDIR)\ex.lbc
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc option quiet
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc option caseexact
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc option osname='CauseWay'
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc libpath $(%WATCOM)\lib386
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc libpath $(%WATCOM)\lib386\dos
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc format os2 le ^
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc OPTION STACK=262144
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc OPTION QUIET
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc OPTION ELIMINATE
-        @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc OPTION CASEEXACT
-        @for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc file %i
-        wlink  $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\ex.lbc name $(BUILDDIR)\ex.exe
-        le23p $(BUILDDIR)\ex.exe
-        cwc  $(BUILDDIR)\ex.exe
+dos : .SYMBOLIC $(BUILD_DIRS)
+	wmake -h -f makefile.wat .\dosobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
+	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS
+	wmake -h -f makefile.wat ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-$(BUILDDIR)\ec.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
-        @%create $(BUILDDIR)\$(OBJDIR)\ec.lbc
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option quiet
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option caseexact
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option osname='CauseWay'
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc libpath $(%WATCOM)\lib386
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc libpath $(%WATCOM)\lib386\dos
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc format os2 le ^
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc OPTION STACK=262144
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc OPTION QUIET
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc OPTION ELIMINATE
-        @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc OPTION CASEEXACT
-        @for %i in ($(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc file %i
-        wlink $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\ec.lbc name $(BUILDDIR)\ec.exe
-        le23p $(BUILDDIR)\ec.exe
-        cwc $(BUILDDIR)\ec.exe
+doseubin : .SYMBOLIC $(BUILD_DIRS)
+	wmake -h -f makefile.wat .\dosobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
+	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS
+	wmake -h -f makefile.wat ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
-$(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\backobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\dosobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\dostrobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\dosbkobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES)
+backendd.exe : $(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\exb.lbc
+	@%append .\$(OBJDIR)\exb.lbc option quiet
+	@%append .\$(OBJDIR)\exb.lbc option caseexact
+	@%append .\$(OBJDIR)\exb.lbc option osname='CauseWay'
+	@%append .\$(OBJDIR)\exb.lbc libpath $(%WATCOM)\lib386
+	@%append .\$(OBJDIR)\exb.lbc libpath $(%WATCOM)\lib386\dos
+	@%append .\$(OBJDIR)\exb.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
+	@%append .\$(OBJDIR)\exb.lbc format os2 le ^
+	@%append .\$(OBJDIR)\exb.lbc OPTION STACK=262144
+	@%append .\$(OBJDIR)\exb.lbc OPTION QUIET
+	@%append .\$(OBJDIR)\exb.lbc OPTION ELIMINATE
+	@%append .\$(OBJDIR)\exb.lbc OPTION CASEEXACT
+	@for %i in ($(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\exb.lbc file %i
+	wlink  $(DEBUGLINK) @.\$(OBJDIR)\exb.lbc name backendd.exe
+	le23p backendd.exe
+	cwc  backendd.exe
+
+ex.exe : $(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\ex.lbc
+	@%append .\$(OBJDIR)\ex.lbc option quiet
+	@%append .\$(OBJDIR)\ex.lbc option caseexact
+	@%append .\$(OBJDIR)\ex.lbc option osname='CauseWay'
+	@%append .\$(OBJDIR)\ex.lbc libpath $(%WATCOM)\lib386
+	@%append .\$(OBJDIR)\ex.lbc libpath $(%WATCOM)\lib386\dos
+	@%append .\$(OBJDIR)\ex.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
+	@%append .\$(OBJDIR)\ex.lbc format os2 le ^
+	@%append .\$(OBJDIR)\ex.lbc OPTION STACK=262144
+	@%append .\$(OBJDIR)\ex.lbc OPTION QUIET
+	@%append .\$(OBJDIR)\ex.lbc OPTION ELIMINATE
+	@%append .\$(OBJDIR)\ex.lbc OPTION CASEEXACT
+	@for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ex.lbc file %i
+	wlink  $(DEBUGLINK) @.\$(OBJDIR)\ex.lbc name ex.exe
+	le23p ex.exe
+	cwc  ex.exe
+
+ec.exe : $(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+	@%create .\$(OBJDIR)\ec.lbc
+	@%append .\$(OBJDIR)\ec.lbc option quiet
+	@%append .\$(OBJDIR)\ec.lbc option caseexact
+	@%append .\$(OBJDIR)\ec.lbc option osname='CauseWay'
+	@%append .\$(OBJDIR)\ec.lbc libpath $(%WATCOM)\lib386
+	@%append .\$(OBJDIR)\ec.lbc libpath $(%WATCOM)\lib386\dos
+	@%append .\$(OBJDIR)\ec.lbc OPTION stub=$(%WATCOM)\binw\cwstub.exe
+	@%append .\$(OBJDIR)\ec.lbc format os2 le ^
+	@%append .\$(OBJDIR)\ec.lbc OPTION STACK=262144
+	@%append .\$(OBJDIR)\ec.lbc OPTION QUIET
+	@%append .\$(OBJDIR)\ec.lbc OPTION ELIMINATE
+	@%append .\$(OBJDIR)\ec.lbc OPTION CASEEXACT
+	@for %i in ($(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append .\$(OBJDIR)\ec.lbc file %i
+	wlink $(DEBUGLINK) @.\$(OBJDIR)\ec.lbc name ec.exe
+	le23p ec.exe
+	cwc ec.exe
+
+.\intobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
+.\transobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
+.\backobj\main-.c: $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES)
+.\dosobj\main-.c: $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
+.\dostrobj\main-.c: $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
+.\dosbkobj\main-.c: $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES)
 
 !ifdef EUPHORIA
 # We should have ifdef EUPHORIA so that make doesn't decide
 # to update rev.e when there is no $(EX)
 rev.e : .recheck .always
-        $(EX) -i ..\include revget.ex
+	$(EX) -i ..\include revget.ex
 
 !ifdef EU_TARGET
 !ifdef OBJDIR
-$(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back
-        del $(BUILDDIR)\$(OBJDIR)\*.c
-        cd  $(BUILDDIR)\$(OBJDIR)
-        $(EXE) $(INCDIR) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
-        cd $(TRUNKDIR)\source
+.\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(OBJDIR)
+	del .\$(OBJDIR)\*.c
+	cd .\$(OBJDIR)
+	$(EXE) $(INCDIR) ..\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	cd ..
 
-$(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back
-        del $(BUILDDIR)\$(OBJDIR)\*.c
-        cd $(BUILDDIR)\$(OBJDIR)
-        $(EXE) $(INCDIR) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
-        cd $(TRUNKDIR)\source
+$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex $(OBJDIR)
+	del .\$(OBJDIR)\*.c
+	cd .\$(OBJDIR)
+	$(EXE) $(INCDIR) ..\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) ..\$(EU_TARGET)ex
+	cd ..
 !endif
 !endif
 !else
-$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back
-        @echo *****************************************************************
-        @echo If you have EUPHORIA installed you'll need to run configure again.
-        @echo Make is configured to not try to use the interpreter.
-        @echo *****************************************************************
+.\$(OBJDIR)\main-.c $(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex
+	@echo *****************************************************************
+	@echo If you have EUPHORIA installed you'll need to run configure again.
+	@echo Make is configured to not try to use the interpreter.
+	@echo *****************************************************************
 
 !endif
 
-.c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
-.c.obj: 
-        $(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
-        
-$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
-        $(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
+.c: $(OBJDIR);$(OBJDIR)\back
+.c.obj:
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
+	
+.\$(OBJDIR)\back\be_inline.obj : ./be_inline.c
+	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
