@@ -36,6 +36,9 @@ IF "%1" =="--debug" (
 	echo DEBUG=1 >> config.wat
 	GOTO EndLoop
 )
+
+echo Unknown option '%1'
+
 :EndLoop
 SHIFT
 GOTO Loop
@@ -43,10 +46,26 @@ GOTO Loop
 if "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
 )
-cd > config.wat.tmp
-set /p PWD=<config.wat.tmp
+IF not exist %WINDIR%\command\deltree.exe (
+	echo DELTREE=del /Q /S >> config.wat
+	echo RM=del /Q >> config.wat
+	echo RMDIR=rmdir /Q/S >> config.wat
+)
+IF exist %WINDIR%\command\deltree.exe (
+	echo DELTREE=deltree /y >> config.wat
+	echo RM=deltree /y >> config.wat
+	echo RMDIR=deltree /y >> config.wat
+)
+if not exist %BUILDDIR% mkdir %BUILDDIR%
+cd ..
+if not exist build mkdir build
+cd > build\config.wat.tmp
+set /p PWD=<build\config.wat.tmp
+del build\config.wat.tmp
 set PWD > NUL
-echo SOURCEDIR=%PWD% >> config.wat
+cd source
+
+echo TRUNKDIR=%PWD% >> config.wat
 echo BUILDDIR=%BUILDDIR% >> config.wat
 if not exist %BUILDDIR%\transobj.wat copy transobj.dst %BUILDDIR%\transobj.wat
 if not exist %BUILDDIR%\intobj.wat copy intobj.dst %BUILDDIR%\intobj.wat
