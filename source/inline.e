@@ -249,7 +249,7 @@ end function
 function returnf( integer pc )
 	-- RETURNF SUB RETSYM [BADRETURNF]
 	symtab_index retsym = inline_code[pc+2]
-	inline_code[$] = NOP1	
+	inline_code[$] = NOP1
 	
 	if is_temp( retsym ) or SymTab[retsym][S_SCOPE] <= SC_PRIVATE then
 		sequence code = {}
@@ -325,6 +325,16 @@ function inline_op( integer pc )
 	elsif op = RETURNF then
 		return returnf( pc )
 
+	elsif op = ROUTINE_ID then
+		
+		integer
+			stlen = inline_code[pc+2+TRANSLATE],
+			file  = inline_code[pc+4+TRANSLATE],
+			ok    = adjust_il( pc, op )
+		inline_code[pc+2+TRANSLATE] = stlen
+		inline_code[pc+4+TRANSLATE] = file
+		
+		return ok
 		
 	elsif op_info[op][OP_SIZE_TYPE] = FIXED_SIZE then
 	
@@ -452,10 +462,7 @@ export procedure check_inline( symtab_index sub )
 				end for
 				backpatch_op = append( backpatch_op, pc )
 				goto "inline op"
-
-			case ROUTINE_ID:
-				backpatch_op = append( backpatch_op, pc )
-				-- fall through
+				
 			case else
 			label "inline op"
 				if not inline_op( pc ) then
