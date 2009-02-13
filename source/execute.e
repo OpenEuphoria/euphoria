@@ -467,8 +467,12 @@ procedure trace_back(sequence msg)
 
 				while v != 0 and 
 					(SymTab[v][S_SCOPE] = SC_PRIVATE or 
-					SymTab[v][S_SCOPE] = SC_LOOP_VAR) do
-					show_var(v)
+					SymTab[v][S_SCOPE] = SC_LOOP_VAR or
+					SymTab[v][S_SCOPE] = SC_UNDEFINED) do
+					if SymTab[v][S_SCOPE] != SC_UNDEFINED then
+						show_var(v)
+					end if
+					
 					v = SymTab[v][S_NEXT]
 				end while
 				

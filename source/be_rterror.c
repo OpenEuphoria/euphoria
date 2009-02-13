@@ -1177,14 +1177,16 @@ static void DumpPrivates(IFILE f, symtab_ptr proc)
 	/* iprintf(f, " %s()\n", proc->name);*/
 	sym = proc->next; 
 	while (sym != NULL && 
-		   (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR)) {
-		if (sym->obj == NOVALUE) {
-			iprintf(f, "    %s = <no value>\n", sym->name);
-		}
-		else {
-			iprintf(f, "    %s = ", sym->name);
-			Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
-			iprintf(f, "\n");
+		   (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR || sym->scope == S_UNDEFINED)) {
+		if (sym->scope != S_UNDEFINED ){
+			if (sym->obj == NOVALUE) {
+				iprintf(f, "    %s = <no value>\n", sym->name);
+			}
+			else {
+				iprintf(f, "    %s = ", sym->name);
+				Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
+				iprintf(f, "\n");
+			}
 		}
 		sym = sym->next;
 	}
