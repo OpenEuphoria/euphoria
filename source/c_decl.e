@@ -811,11 +811,7 @@ global procedure DeclareRoutineList()
 				
 				c_printf(", %d", seq_num)
 				
-				if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) then
-					c_printf(", %d", - SymTab[s][S_FILE_NO])
-				else
-					c_printf(", %d", SymTab[s][S_FILE_NO])
-				end if
+				c_printf(", %d", SymTab[s][S_FILE_NO])
 				
 				c_printf(", %d", SymTab[s][S_NUM_ARGS])
 				
@@ -853,8 +849,8 @@ global procedure DeclareRoutineList()
 	end if
 	c_puts("  {\"\", 0, 999999999, 0, 0, 0, 0}\n};\n\n")  -- end marker
 
-	c_hputs("extern int ** _02;\n")
-	c_puts("int ** _02;\n")
+	c_hputs("extern unsigned char ** _02;\n")
+	c_puts("unsigned char ** _02;\n")
 	
 	c_hputs("extern object _0switches;\n")
 	c_puts("object _0switches;\n")

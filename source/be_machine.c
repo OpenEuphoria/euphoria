@@ -4733,7 +4733,7 @@ object start_backend(object x)
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
 	fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
 	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
-	fe.includes = (struct include_info *) get_pos_int(w, *(x_ptr->base+5));
+	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
 
 #if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)

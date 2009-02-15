@@ -347,6 +347,7 @@ global integer OpProfileStatement   -- statement profile option currently on
 global integer OpProfileTime        -- time profile option currently on
 global sequence OpDefines = {}      -- defines
 global integer OpInline             -- inline max size (0 = off)
+global integer OpIndirectInclude
 
 -- COMPILE only
 global object dj_path = 0, wat_path = 0, bor_path = 0

@@ -6067,19 +6067,24 @@ procedure BackEnd(atom ignore)
 			max_len = length(file_include[i])
 		end if
 	end for
-	c_stmt0(sprintf("_02 = (int**) malloc( 4 * %d );\n", length(file_include) + 1 ))
+	c_stmt0(sprintf("_02 = (unsigned char**) malloc( 4 * %d );\n", length(file_include) + 1 ))
 	c_stmt0("_02[0] = (int*) malloc( 4 );\n" )
 	c_stmt0(sprintf("_02[0][0] = %d;\n", length(file_include) ))
 
-	for i = 1 to length(file_include) do
-		c_stmt0(sprintf("_02[%d] = (int*) malloc( 4 * %d );\n", {i, length(file_include[i]) + 1} ))
-		c_stmt0(sprintf("_02[%d][0] = %d;\n", {i, length(file_include[i])}))
-
-		for j = 1 to length(file_include[i]) do
-			c_stmt0(sprintf("_02[%d][%d] = %d;\n", {i,j, file_include[i][j]}) )
-		end for
-
+	for i = 1 to length(include_matrix) do
+		c_stmt0( sprintf( "_02[%d] = \"", i ) )
+		escape_string( i & include_matrix[i] )
+		c_puts( "\";\n" )
 	end for
+-- 	for i = 1 to length(file_include) do
+-- 		c_stmt0(sprintf("_02[%d] = (int*) malloc( 4 * %d );\n", {i, length(file_include[i]) + 1} ))
+-- 		c_stmt0(sprintf("_02[%d][0] = %d;\n", {i, length(file_include[i])}))
+-- 
+-- 		for j = 1 to length(file_include[i]) do
+-- 			c_stmt0(sprintf("_02[%d][%d] = %d;\n", {i,j, file_include[i][j]}) )
+-- 		end for
+-- 
+-- 	end for
 	c_puts("\n")
 
 	-- fail safe mechanism in case

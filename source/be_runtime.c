@@ -4285,50 +4285,9 @@ void RTInternal(char *msg)
 
 struct routine_list *rt00;
 struct ns_list *rt01;
-int ** rt02;
+unsigned char ** rt02;
 void *xstdin;
 
-int file_in_include_path( int using, int target, char * checked_files )
-/* Checks to see if the target file is in the include path for using */
-{
-	int i;
-	int node_file;
-	char * files;
-	files = NULL;
-	if( using == target ) return 1;
-	if( checked_files == NULL ){
-		files = malloc( rt02[0][0] + 1 );
-		memset( files, 0, rt02[0][0] );
-		checked_files = files;
-	}
-	if(checked_files[using]) return 0;
-	checked_files[using] = 1;
-	for( i = 1; i <= rt02[using][0]; i++ ){
-		node_file = abs(rt02[using][i]);
-		if( !checked_files[node_file] && (target == node_file || file_in_include_path( node_file, target, checked_files )) ){
-			free(files);
-			return 1;
-		}
-	}
-	free(files);
-	return 0;
-}
-
-int file_is_direct_include( int using, int target, int export_ok )
-/* Checks to see if the target file is in the include path for using */
-{
-	int i;
-	int node_file;
-
-	if( using == target ) return 1;
-	for( i = 1; i <= rt02[using][0]; i++ ){
-
-		if( target == rt02[using][i] || (export_ok && target == -rt02[using][i] ) ){
-			return 1;
-		}
-	}
-	return 0;
-}
 int CRoutineId(int seq_num, int current_file_no, object name)
 /* Routine_id for compiled code.
    (Similar to RTLookup() for interpreter, but here we only find routines,
@@ -4336,7 +4295,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 {
 	char *routine_string;
 	s1_ptr routine_ptr;
-	int i, f, ns_num, found;
+	int i, f, ns_file, found;
 	char *colon;
 	char *simple_name;
 	char *p;
@@ -4384,17 +4343,16 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			return ATOM_M1;
 		i = 0;
 		while (TRUE) {
-			if (rt01[i].seq_num > seq_num)
+			if (rt01[i].seq_num > seq_num){
 				return ATOM_M1; // ignore symbols defined after this point
-
-			if (current_file_no == rt01[i].file_num &&
+			}
+			if (rt02[current_file_no][rt01[i].file_num] & DIRECT_OR_PUBLIC_INCLUDE &&
 				strcmp(ns, rt01[i].name) == 0) {
-				ns_num = rt01[i].ns_num;
+				ns_file = rt01[i].ns_num;
 				break;
 			}
 			i++;
 		}
-
 
 		/* step 2: look up global symbol in the chosen namespace */
 		simple_name = colon + 1;
@@ -4404,14 +4362,26 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			simple_name++;
 
 		i = 0;
-		ns_num = -ns_num; // to match global only
+		
 		while (rt00[i].seq_num <= seq_num) {
-			if ((rt00[i].file_num == ns_num || file_in_include_path(-ns_num, -rt00[i].file_num, NULL))  &&
-				strcmp(simple_name, rt00[i].name) == 0)
+			if( (( rt00[i].scope == S_PUBLIC
+					&& ( (rt00[i].file_num == ns_file && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE ) || 
+						(rt02[ns_file][rt00[i].file_num] & PUBLIC_INCLUDE &&
+						 rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)))
+				||
+				( rt00[i].scope == S_EXPORT
+					&& rt00[i].file_num == ns_file && rt02[current_file_no][ns_file] & DIRECT_INCLUDE)
+				||
+				( rt00[i].scope == S_GLOBAL
+					&& ( (rt00[i].file_num == ns_file  && rt02[current_file_no][ns_file] ) || 
+						(rt02[ns_file][rt01[i].file_num] && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)) )
+				||
+				( rt00[i].scope == S_LOCAL && ns_file == current_file_no && ns_file == rt00[i].file_num))
+				&& strcmp(simple_name, rt00[i].name) == 0) {
 				return i;
+			}
 			i++;
 		}
-
 		return ATOM_M1;
 	}
 
@@ -4430,17 +4400,20 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			i++;
 		}
 
-		/* then look for unique global or export symbol */
+		/* then look for unique global, public or export symbol */
 		i = 0;
 		found = ATOM_M1;
 		out_of_path_found = 0;
 		in_path_found = 0;
 		while (rt00[i].seq_num <= seq_num) {
 
-			if (rt00[i].file_num < 0 &&
+			if (rt00[i].scope != S_LOCAL &&
 				strcmp(routine_string, rt00[i].name) == 0) {
+				
+				
+				
 				if(rt00[i].scope == S_GLOBAL ){
-					in_include_path = file_in_include_path( current_file_no, -rt00[i].file_num, NULL );
+					in_include_path = rt02[current_file_no][rt00[i].file_num] != NOT_INCLUDED;
 					if (in_include_path) {
 						found = i;
 						in_path_found++;
@@ -4450,17 +4423,16 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 						if(!in_path_found) found = i;
 					}
 				}
-				else if(rt00[i].scope == S_EXPORT || rt00[i].scope == S_PUBLIC ) {
+				else if( (rt00[i].scope == S_EXPORT && (rt02[current_file_no][rt00[i].file_num] & DIRECT_INCLUDE)) 
+				|| (rt00[i].scope == S_PUBLIC && (rt02[current_file_no][rt00[i].file_num] & DIRECT_OR_PUBLIC_INCLUDE) ) ){
 
-					if( file_is_direct_include( current_file_no, -rt00[i].file_num, rt00[i].scope == S_PUBLIC ) ){
-						found = i;
-						in_path_found++;
-					}
+					found = i;
+					in_path_found++;
 				}
 			}
 			i++;
 		}
-
+		
 		if( in_path_found != 1  && ((in_path_found + out_of_path_found) != 1) )
 			return ATOM_M1;
 		return found;

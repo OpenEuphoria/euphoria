@@ -197,22 +197,19 @@ struct arg_info {
 	int convention;       // calling convention
 };
 
-struct include_node {
-		int size;
-		int * file_no;
-};
-
-struct include_info {
-		int size;
-		struct include_node * nodes;
-};
+#define NOT_INCLUDED     0x0
+#define INDIRECT_INCLUDE 0x1
+#define DIRECT_INCLUDE   0x2
+#define PUBLIC_INCLUDE   0x4
+#define DIRECT_OR_PUBLIC_INCLUDE  (PUBLIC_INCLUDE | DIRECT_INCLUDE)
+#define ANY_INCLUDE               (INDIRECT_INCLUDE | DIRECT_INCLUDE | PUBLIC_INCLUDE)
 
 struct IL {
 	struct symtab_entry *st;
 	struct sline *sl;
 	int *misc;
 	char *lit;
-	struct include_info * includes;
+	unsigned char **includes;
 	object switches;
 };
 

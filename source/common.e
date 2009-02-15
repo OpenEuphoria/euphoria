@@ -44,6 +44,7 @@ global sequence SymTab = {}  -- the symbol table
 global sequence file_name = {}
 global sequence file_include = {{}} -- remember which files were included where
 global sequence include_matrix = {{DIRECT_INCLUDE}} -- quicker access to include information
+global sequence indirect_include = {{1}}
 global sequence file_public = {{}}  -- also remember which files are "public include"d
 global sequence file_include_by = {{}}
 global sequence file_public_by = {{}}

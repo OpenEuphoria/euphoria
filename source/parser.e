@@ -3434,6 +3434,7 @@ global procedure InitGlobals()
 		OpDefines &= {"EU400", "DOS32"}
 	end if
 	OpInline = DEFAULT_INLINE
+	OpIndirectInclude = 1
 end procedure
 
 procedure not_supported_compile(sequence feature)
@@ -3599,6 +3600,9 @@ procedure SetWith(integer on_off)
 			OpInline = 0
 			
 		end if
+	
+	elsif equal( option, "indirect_includes" ) then
+		OpIndirectInclude = on_off
 
 	elsif on_off and option[1] >= '0' and option[1] <= '9' then
 		-- Ignore numeric stamp - not supported anymore

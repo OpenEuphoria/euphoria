@@ -417,8 +417,9 @@ else
 	cd ./$(OBJDIR) && $(EXE) $(INCDIR) $(EC_DEBUG) ../ec.ex -gcc $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) ../$(EU_TARGET)
 endif	
 
+./$(OBJDIR)/back/%.o : execute.h alloc.h global.h alldefs.h opnames.h reswords.h symtab.h
 
-./$(OBJDIR)/back/%.o : %.c
+./$(OBJDIR)/back/%.o : %.c execute.h alloc.h global.h alldefs.h opnames.h reswords.h symtab.h
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o./$(OBJDIR)/back/$*.o
 
 $(OBJDIR)/back/be_callc.o : ./be_callc.c

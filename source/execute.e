@@ -1,6 +1,6 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
--- Euphoria 3.1
+-- Euphoria
 -- The Interpreter Back-End
 
 -- This back-end is written in Euphoria. It uses the same front-end
@@ -2461,10 +2461,23 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 		
 		-- step 2: find global name in ns file 
 		s = SymTab[TopLevelSub][S_NEXT]
-		while s != 0 and s <= stlen do
-			if SymTab[s][S_FILE_NO] = ns_file and 
-				SymTab[s][S_SCOPE] = SC_GLOBAL and 
-				equal(name, SymTab[s][S_NAME]) then
+		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
+			integer scope = SymTab[s][S_SCOPE]
+			
+			if (((scope = SC_PUBLIC) and 
+					(SymTab[s][S_FILE_NO] = ns_file 
+					 or ( and_bits( PUBLIC_INCLUDE, include_matrix[ns_file][SymTab[s][S_FILE_NO]] ) and
+					      and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][ns_file] ) ) ))
+				or
+				(scope = SC_EXPORT and SymTab[s][S_FILE_NO] = ns_file 
+				    and and_bits( DIRECT_INCLUDE, include_matrix[file][ns_file]) )
+				or
+				(scope = SC_GLOBAL) and 
+					(SymTab[s][S_FILE_NO] = ns_file 
+					 or ( include_matrix[ns_file][SymTab[s][S_FILE_NO]] and
+					      and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][ns_file] ) ) ))
+			and equal( SymTab[s][S_NAME], name )
+			then
 				return s
 			end if
 			s = SymTab[s][S_NEXT]
@@ -2511,7 +2524,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 		global_found = FALSE
 		s = SymTab[TopLevelSub][S_NEXT]
 		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
-			if SymTab[s][S_SCOPE] = SC_GLOBAL and 
+			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_PUBLIC }) and 
 			   equal(name, SymTab[s][S_NAME]) then
 			
 				s_in_include_path = include_matrix[file][SymTab[s][S_FILE_NO]] != 0

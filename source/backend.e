@@ -236,18 +236,18 @@ procedure BackEnd(integer il_file)
 		fn += 1
 	end for
 	
-	-- include info
-	include_info = allocate( 8 )
-	include_node = allocate( 8 * (1 + length( file_include ) )) 
-	poke4( include_info, length( file_include ) & include_node )
-	include_node += 8
-	for i = 1 to length( file_include ) do
+	include_info = allocate( 4 * (1 + length( include_matrix )) ) 
+	include_node = include_info
+	poke4( include_info, 0 )
+	include_node += 4
+	
+	for i = 1 to length( include_matrix ) do
 		
-		include_array = allocate( 4 * length( file_include[i] ) )
-		poke4( include_array, (file_include[i] ) )
-		poke4( include_node, {length(file_include[i]), include_array })
+		include_array = allocate( 1 + length( include_matrix ) )
+		poke( include_array, i & include_matrix[i] )
+		poke4( include_node, include_array )
 		
-		include_node += 8
+		include_node += 4
 	end for
 	
 	machine_proc(65, {st, sl, ms, lit, include_info, get_switches()})

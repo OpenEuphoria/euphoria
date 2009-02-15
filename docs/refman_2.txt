@@ -2813,6 +2813,7 @@ multiple states.
 | off      | [[:Profiling|profile_time]]  |
 | off      | [[:trace]]         |
 | on       | [[:type_check]]    |
+| on       | [[:indirect_includes]] |
 
 
 ##with## - This turns **on** one of the options while ##without## turns
@@ -2838,6 +2839,24 @@ settings, but they will revert back to their original state at the end of the
 included file.  For instance, an included file might turn off warnings for
 itself and (initially) for any files that it includes, but this will not turn
 off warnings for the main file.
+
+@[indirect_includes]
+This ##with/without## option changes the way in which global symbols are
+resolved.  Normally, the parser uses the way that files were included to
+resolve a usage of a global symbol.  If ##without indirect_includes## is
+in effect, then only direct includes are considered when resolving global
+symbols.
+
+This option is especially useful when a program uses some code that was 
+developed for a prior version of Euphoria that uses the pre-4.0 standard
+library, when all exposed symbols were global.  These can often clash
+with symbols in the new standard library.  Using ##without indirect_includes##
+would not force a coder to use namespaces to resolve symbols that clashed
+with the new standard library.
+
+Note that this setting does not propagate down to included files, unlike
+most ##with/without options##.  Each file begins with ##indirect_includes##
+turned on.
 
 ==== Complex with/without options
 
@@ -2960,6 +2979,15 @@ would not be legal in an identifier. However, for consistency, using identifier-
 uppercase words is recommended. "MY TAG" is not a valid tag (TAG has not been declared), but
 "MY@TAG" or "MY�TAG" is. The latter is not recommended because it may display differently on
 different computers.
+
+==== with / without inline
+
+This directive allows coders some flexibility with inlined routines.  The default is
+for inlining to be on.  Any routine that is defined when ##without inline## is in 
+effect will never be inlined.
+
+##with inline## takes an optional integer parameter that defines the largest routine
+(by size of IL code) that will be considered for inlining.  The default is 30.
 
 == Command line switches
 

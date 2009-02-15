@@ -206,4 +206,8 @@ $$(doneby Derek Parnell, C. Cuvier.)
   $$(doneby Matt Lewis)
 * New: Parser is smarter about identifying namespaces vs regular symbols $$(doneby Matt Lewis)
 * New: Default namespace may be declared by a file. $$(doneby Matt Lewis)
-* New: Some routines may be inlined for optimization. $$(doneby Matt Lewis)
+* New: Some routines may be inlined for optimization. ##with/without inline##
+  give some control over which routines will be inlined to the coder. $$(doneby Matt Lewis)
+* New: ##with/without indirect_includes## help with using pre-eu4 code that uses
+  global symbols with eu4 code, especially with respect to the respective standard
+  libraries.  $$(doneby Matt Lewis)

@@ -153,61 +153,6 @@ symtab_ptr Locate(int *pc)
 	return NULL; 
 }
 
-int symbol_in_include_path( symtab_ptr sym, int check_file, char * checked_file )
-/* Determines if sym is in the include path of file #check_file */
-{
-	int i;
-	int node_file;
-	int file_no = sym->file_no;
-	char * files;
-	struct include_node * node;
-	int abs_check_file;
-	
-	if( file_no == check_file ) return 1;
-	
-	if( check_file < 0 ) abs_check_file = -check_file;
-	else abs_check_file = check_file;
-	
-	node = fe.includes->nodes + abs_check_file;
-	files = NULL;
-	if( checked_file == NULL ){
-		files = malloc( fe.misc[0] +1 );
-		memset( files, 0, fe.misc[0] + 1 );
-		checked_file = files;
-	}
-	else if( checked_file[abs_check_file] ) return 0;
-	checked_file[check_file] = 1;
-	
-	for( i = 0; i < node->size; i++ ){
-		node_file = *( node->file_no + i);
-		if( file_no == node_file || symbol_in_include_path( sym, node_file, checked_file ) ){
-			free(files);
-			return 1;
-		}
-	}
-	free(files);
-	return 0;
-}
-
-int is_direct_include( symtab_ptr sym, int check_file, int export_ok )
-/* Determines if sym is in the include path of file #check_file */
-{
-	int i;
-	int file_no = sym->file_no;
-	struct include_node * node;
-	
-	if( file_no == check_file ) return 1;
-	
-	node = fe.includes->nodes + check_file;
-	for( i = 0; i < node->size; i++ ){
-	
-		if( file_no == node->file_no[i] || (export_ok && file_no == -node->file_no[i]) ){
-			return 1;
-		}
-	}
-	return 0;
-}
-
 symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen)
 /* Look up a name (routine or var) in the symbol table at runtime.
    The name must have been defined earlier in the source than
@@ -263,7 +208,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 
 		/* step 1: look up NAMESPACE symbol */
 		for (s = TopLevelSub->next; s != NULL; s = s->next) {
-			if (file == s->file_no && 
+			if ( (fe.includes[file][s->file_no] & DIRECT_OR_PUBLIC_INCLUDE) && 
 				s->token == NAMESPACE && strcmp(ns, s->name) == 0) {
 				did_find = 1;
 				break;
@@ -287,10 +232,21 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		while (*name == ' ' || *name == '\t')
 			name++;
 		
-		/* find global name in ns file */
+		/* find name in ns file */
 		for (s = TopLevelSub->next; s != NULL && ( s <= stop || s->scope == S_PRIVATE); s = s->next) {
-			if ((s->file_no == ns_file || is_direct_include( s, ns_file, s->scope != S_EXPORT ) ) && 
-				(s->scope == S_GLOBAL || s->scope == S_PUBLIC || s->scope == S_EXPORT )
+			if( (( s->scope == S_PUBLIC
+					&& ( (s->file_no == ns_file && fe.includes[file][ns_file] & DIRECT_OR_PUBLIC_INCLUDE ) || 
+						(fe.includes[ns_file][s->file_no] & PUBLIC_INCLUDE &&
+						 fe.includes[file][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)))
+				||
+				( s->scope == S_EXPORT
+					&& s->file_no == ns_file && fe.includes[file][ns_file] & DIRECT_INCLUDE)
+				||
+				( s->scope == S_GLOBAL
+					&& ( (s->file_no == ns_file  && fe.includes[file][ns_file] ) || 
+						(fe.includes[ns_file][s->file_no] && fe.includes[file][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)) )
+				||
+				( s->scope == S_LOCAL && ns_file == file && ns_file == s->file_no))
 				&& strcmp(name, s->name) == 0) {
 				return s;
 			}
@@ -332,7 +288,7 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 		for (s = TopLevelSub->next; s != NULL && ( s <= stop || s->scope == S_PRIVATE); s = s->next) {
 			if (s->scope == S_GLOBAL && strcmp(name, s->name) == 0) {
 			
-				s_in_include_path = symbol_in_include_path( s, file, NULL );
+				s_in_include_path = fe.includes[file][s->file_no] != NOT_INCLUDED; // symbol_in_include_path( s, file, NULL );
 				if ( s_in_include_path){
 					global_found = s;
 					found_in_path++;
@@ -342,11 +298,11 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 					found_outside_path++;
 				}
 			}
-			else if( (s->scope == S_EXPORT || s->scope == S_PUBLIC ) && strcmp(name, s->name) == 0){
-				if( is_direct_include( s, file, s->scope == S_PUBLIC ) ){
+			else if( ((s->scope == S_EXPORT && (fe.includes[file][s->file_no] & DIRECT_INCLUDE)) 
+				|| (s->scope == S_PUBLIC && (fe.includes[file][s->file_no] & DIRECT_OR_PUBLIC_INCLUDE) ) ) 
+				&& strcmp(name, s->name) == 0){
 					global_found = s;
 					found_in_path++;
-				}
 			}
 
 		} 

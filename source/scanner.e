@@ -62,7 +62,10 @@ constant FILE_NO = 1,           -- file number
 		 OP_PROFILE_TIME = 8,
 		 OP_PROFILE_STATEMENT = 9,
 		 OP_DEFINES = 10,        -- ifdef defines
-		 PREV_OP_WARNING = 11
+		 PREV_OP_WARNING = 11,
+		 OP_INLINE = 12,
+		 OP_INDIRECT_INCLUDE = 13,
+		 OP_PREV_INDIRECT_INCLUDE = 14
 
 integer qualified_fwd = -1 -- remember namespaces for forward reference purposes
 export procedure set_qualified_fwd( integer fwd )
@@ -640,6 +643,7 @@ procedure update_include_matrix( integer included_file, integer from_file )
 		end while
 	end if
 	
+	
 	-- update indirect includes
 	sequence indirect = file_include_by[from_file]
 	-- the mask relies on INDIRECT_INCLUDE being 1
@@ -649,17 +653,21 @@ procedure update_include_matrix( integer included_file, integer from_file )
 	integer ix = 1
 	while ix <= length(indirect) do
 		integer indirect_file = indirect[ix]
-		include_matrix[indirect_file] = 
-			or_bits( mask, include_matrix[indirect_file] )
-		for i = 1 to length( file_include_by[indirect_file] ) do
-		
-			if not find( file_include_by[indirect_file][i], indirect ) then
-				indirect &= file_include_by[indirect_file][i]
-			end if
-		
-		end for
+		if indirect_include[indirect_file][included_file] then
+			include_matrix[indirect_file] = 
+				or_bits( mask, include_matrix[indirect_file] )
+			for i = 1 to length( file_include_by[indirect_file] ) do
+			
+				if not find( file_include_by[indirect_file][i], indirect ) then
+					indirect &= file_include_by[indirect_file][i]
+				end if
+			
+			end for
+		end if
 		ix += 1
-	end while
+	end while	
+	
+	
 	public_include = FALSE
 end procedure
 
@@ -736,6 +744,7 @@ procedure IncludePush()
 					
 				end if
 			end if
+			indirect_include[current_file_no][i] = OpIndirectInclude
 			add_include_by( current_file_no, i, public_include )
 			update_include_matrix( i, current_file_no )
 			public_include = FALSE
@@ -759,16 +768,24 @@ procedure IncludePush()
 							   OpProfileTime,
 							   OpProfileStatement,
 							   OpDefines,
-							   prev_OpWarning})
-							   
+							   prev_OpWarning,
+							   OpInline,
+							   OpIndirectInclude})
+	
+	
 	file_include = append( file_include, {} )
 	file_include_by = append( file_include_by, {} )
 	for i = 1 to length( include_matrix) do
-		include_matrix[i] &= 0
+		include_matrix[i]   &= 0
+		indirect_include[i] &= 0
 	end for
 	include_matrix = append( include_matrix, repeat( 0, length( file_include ) ) )
 	include_matrix[$][$] = DIRECT_INCLUDE
 	include_matrix[current_file_no][$] = DIRECT_INCLUDE
+	
+	indirect_include = append( indirect_include, repeat( 0, length( file_include ) ) )
+	indirect_include[current_file_no][$] = OpIndirectInclude
+	OpIndirectInclude = 1
 	
 	file_public  = append( file_public, {} )
 	file_public_by = append( file_public_by, {} )
@@ -792,9 +809,7 @@ end ifdef
 	end if
 	file_name = append(file_name, new_include_name)
 	default_namespaces &= 0
-	
 	update_include_matrix( length( file_include ), current_file_no )
-	
 	old_file_no = current_file_no
 	current_file_no = length(file_name)
 	line_number = 0
@@ -835,7 +850,9 @@ global function IncludePop()
 	OpProfileTime      = top[OP_PROFILE_TIME]
 	OpProfileStatement = top[OP_PROFILE_STATEMENT]
 	OpDefines          = top[OP_DEFINES]
-	prev_OpWarning		= top[PREV_OP_WARNING]
+	prev_OpWarning     = top[PREV_OP_WARNING]
+	OpInline           = top[OP_INLINE]
+	OpIndirectInclude  = top[OP_INDIRECT_INCLUDE]
 
 	IncludeStk = IncludeStk[1..$-1]
 	

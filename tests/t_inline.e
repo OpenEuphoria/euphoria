@@ -33,3 +33,12 @@ end while
 -- The number of executions of 'with out' should be less than 'with'.
 test_true(sprintf("inline %d < %d", {c,d}), c < d)
 
+function set( sequence s, object v )
+	s[1] = v
+	return s
+end function
+s = {1}
+s = set( s, 2 )
+test_equal( "parameter assigned and return value", 2, s[1] )
+
+test_report()
