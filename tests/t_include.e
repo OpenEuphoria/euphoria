@@ -1,10 +1,10 @@
 
 include std/unittest.e
-include std/sort.e as srt
 
 without indirect_includes
+include std/sort.e as srt
 include indirect.e
-with indirect_includes
+include indirect2.e
 
 test_equal( "global w/out indirect_includes doesn't interfere", {1,2,3}, sort({3,2,1}, ASCENDING ) )
 
