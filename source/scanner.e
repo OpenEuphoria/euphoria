@@ -644,29 +644,31 @@ procedure update_include_matrix( integer included_file, integer from_file )
 	end if
 	
 	
-	-- update indirect includes
-	sequence indirect = file_include_by[from_file]
-	-- the mask relies on INDIRECT_INCLUDE being 1
-	sequence mask = include_matrix[included_file] != 0
-	include_matrix[from_file] = or_bits( include_matrix[from_file], mask )
-	mask = include_matrix[from_file] != 0
-	integer ix = 1
-	while ix <= length(indirect) do
-		integer indirect_file = indirect[ix]
-		if indirect_include[indirect_file][included_file] then
-			include_matrix[indirect_file] = 
-				or_bits( mask, include_matrix[indirect_file] )
-			for i = 1 to length( file_include_by[indirect_file] ) do
-			
-				if not find( file_include_by[indirect_file][i], indirect ) then
-					indirect &= file_include_by[indirect_file][i]
-				end if
-			
-			end for
-		end if
-		ix += 1
-	end while	
 	
+	if indirect_include[from_file][included_file] then
+		-- update indirect includes
+		sequence indirect = file_include_by[from_file]
+		-- the mask relies on INDIRECT_INCLUDE being 1
+		sequence mask = include_matrix[included_file] != 0
+		include_matrix[from_file] = or_bits( include_matrix[from_file], mask )
+		mask = include_matrix[from_file] != 0
+		integer ix = 1
+		while ix <= length(indirect) do
+			integer indirect_file = indirect[ix]
+			if indirect_include[indirect_file][included_file] then
+				include_matrix[indirect_file] = 
+					or_bits( mask, include_matrix[indirect_file] )
+				for i = 1 to length( file_include_by[indirect_file] ) do
+				
+					if not find( file_include_by[indirect_file][i], indirect ) then
+						indirect &= file_include_by[indirect_file][i]
+					end if
+				
+				end for
+			end if
+			ix += 1
+		end while
+	end if
 	
 	public_include = FALSE
 end procedure
