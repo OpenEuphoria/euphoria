@@ -4440,7 +4440,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
-void eu_startup(struct routine_list *rl, struct ns_list *nl, int **ip, int code,
+void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip, int code,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {

@@ -6068,7 +6068,7 @@ procedure BackEnd(atom ignore)
 		end if
 	end for
 	c_stmt0(sprintf("_02 = (unsigned char**) malloc( 4 * %d );\n", length(file_include) + 1 ))
-	c_stmt0("_02[0] = (int*) malloc( 4 );\n" )
+	c_stmt0("_02[0] = (unsigned char*) malloc( 4 );\n" )
 	c_stmt0(sprintf("_02[0][0] = %d;\n", length(file_include) ))
 
 	for i = 1 to length(include_matrix) do
