@@ -88,11 +88,70 @@ happens automatically.
 ==== Character Strings and Individual Characters
 
 A **character string** is just a ##sequence## of characters.  It may be
-entered using quotes e.g.
+entered in one of two ways ... 
+
+* using double-quotes e.g.
 
 <eucode>
 "ABCDEFG"
 </eucode>
+
+* using extended string notation e.g.
+
+<eucode>
+#'ABCDEFG'
+</eucode>
+
+The rules for double-quote strings are...
+# they begin and end with a double-quote character
+# they cannot contain a double-quote
+# they must be only on a single line
+# they cannot contain the TAB character
+# they cannot contain the back-slash '\' character
+
+If you need to include double-quote, end-of-line, back-slash, or TAB characters
+inside a double-quoted string, you need to enter them in a special manner. 
+
+* Use \" for a double-quote character
+* Use \n for a new-line character
+* Use \\ for a back-slash character
+* Use \t for a TAB character
+
+e.g.
+
+<eucode>
+"Bill said\n\t\"This is a back-slash \\ character\".\n"
+</eucode>
+Which, when displayed should look like ...
+{{{
+Bill said
+    "This is a back-slash \ character".
+}}}
+
+
+The rules for extended strings are...
+# they begin with a # character, followed immediately by one of ##**#'`~~$^/~\|**##
+# they end with the next occurance of the character that followed the initial # character
+# If the resulting string begins with a new-line, the initial new-line is removed
+and any trailing new-line is also removed.
+
+e.g.
+
+<eucode>
+##
+Bill said
+    "This is a back-slash \ character".
+#
+</eucode>
+Which, when displayed should look like ...
+{{{
+Bill said
+    "This is a back-slash \ character".
+}}}
+
+Extended string literals are useful when the string contains new-lines, tabs, 
+double-quotes or back-slash characters because they do not have to be entered
+in the special manner. 
 
 Character strings may be manipulated and operated upon just like any other
 sequences. For example the above string is entirely equivalent to the

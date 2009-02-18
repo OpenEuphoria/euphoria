@@ -1009,7 +1009,8 @@ end procedure
 
 global function Scanner()
 -- The scanner main routine: returns a lexical token  
-	integer ch, i, sp, prev_Nne
+	integer ch, i, sp, prev_Nne, ech
+	integer cline
 	sequence yytext, namespaces  -- temporary buffer for a token
 	atom d
 	token tok
@@ -1352,6 +1353,31 @@ global function Scanner()
 						IncludePush()
 					end if
 					read_line()
+				elsif find(ch, "#'`~$^/\\|") != 0 then
+					ech = ch
+					cline = line_number
+					ch = ThisLine[bp]  -- getch
+					bp += 1
+					yytext = ""
+					while ch != ech do
+						if ch = END_OF_FILE_CHAR then
+							CompileErr(sprintf("Extended string literal from line %d not terminated.", cline))
+						else
+							yytext &= ch
+						end if
+						if bp > length(ThisLine) then
+							read_line()
+						end if
+						ch = ThisLine[bp]  -- getch
+						bp += 1
+					end while
+					if length(yytext) > 0 and find(yytext[1], "\n\r") then
+						yytext = yytext[2 .. $]
+						if length(yytext) > 0 and find(yytext[$], "\n\r") then
+							yytext = yytext[1 .. $-1]
+						end if				
+					end if
+					return {STRING, NewStringSym(yytext)}
 				else
 					CompileErr("hex number not formed correctly")
 				end if
