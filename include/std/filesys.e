@@ -753,6 +753,161 @@ public function file_exists(sequence name)
 	end ifdef
 end function
 
+
+--****
+-- === File name parsing
+
+public enum
+	PATH_DIR,
+	PATH_FILENAME,
+	PATH_BASENAME,
+	PATH_FILEEXT,
+	PATH_DRIVEID
+
+--**
+-- Parse a fully qualified pathname.
+-- Parameters:
+-- 		# ##path##: a sequence, the path to parse
+--
+-- Returns:
+-- 		A **sequence** of length 5. Each of these elements is a string:
+-- 		* The path name
+--		* The full unqualified file name
+--		* the file name, without extension
+--		* the file extension
+--		* the drive id
+-- Comments:
+--
+-- A public enum has been created for ease of using the returned value:
+--
+-- * PATH_DIR
+-- * PATH_FILENAME
+-- * PATH_BASENAME
+-- * PATH_FILEEXT
+-- * PATH_DRIVEID
+--
+-- The host operating system path separator is used in the parsing.
+--
+-- Example 1:
+-- <eucode>
+-- -- DOS32/WIN32
+-- info = pathinfo("C:\\euphoria\\docs\\readme.txt")
+-- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt"}
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- -- Linux/FreeBSD
+-- info = pathinfo("/opt/euphoria/docs/readme.txt")
+-- -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- -- no extension
+-- info = pathinfo("/opt/euphoria/docs/readme")
+-- -- info is {"/opt/euphoria/docs", "readme", "readme", ""}
+-- </eucode>
+--
+-- See Also:
+--   [[:driveid]], [[:dirname]], [[:filename]], [[:fileext]]
+
+public function pathinfo(sequence path)
+	integer slash, period, ch
+	sequence dir_name, file_name, file_ext, file_full, drive_id
+
+	dir_name  = ""
+	file_name = ""
+	file_ext  = ""
+	file_full = ""
+	drive_id  = ""
+
+	slash = 0
+	period = 0
+
+	for i = length(path) to 1 by -1 do
+		ch = path[i]
+		if period = 0 and ch = '.' then
+			period = i
+		elsif eu:find(ch, SLASHES) then
+			slash = i
+			exit
+		end if
+	end for
+
+	if slash > 0 then
+		dir_name = path[1..slash-1]
+		
+		ifdef !UNIX then
+			ch = eu:find(':', dir_name)
+			if ch != 0 then
+				drive_id = dir_name[1..ch-1]
+				dir_name = dir_name[ch+1..$]
+			end if
+		end ifdef
+	end if
+	if period > 0 then
+		file_name = path[slash+1..period-1]
+		file_ext = path[period+1..$]
+		file_full = file_name & '.' & file_ext
+	else
+		file_name = path[slash+1..$]
+		file_full = file_name
+	end if
+
+	return {dir_name, file_full, file_name, file_ext, drive_id}
+end function
+
+
+public enum
+	FILETYPE_UNDEFINED = -1,
+	FILETYPE_NOT_FOUND,
+	FILETYPE_FILE,
+	FILETYPE_DIRECTORY
+
+--**
+-- Get the type of a file.
+--
+-- Parameters:
+--  		# ##filename##: the name of the file to query. It must not have wildcards.
+-- 
+-- Returns:
+--		An **integer**:
+--		* -1 if file could be multiply defined
+--      *  0 if filename does not exist
+--      *  1 if filename is a file
+--      *  2 if filename is a directory
+--
+-- Comments:
+-- A public enum has been created for ease of use:
+-- * FILETYPE_UNDEFINED     = -1,
+-- * FILETYPE_NOT_FOUND, -- = 0
+-- * FILETYPE_FILE,      -- = 1
+-- * FILETYPE_DIRECTORY  -- = 2
+--
+-- See Also:
+-- [[:dir]]
+
+public function file_type(sequence filename)
+object dirfil
+	if eu:find('*', filename) or eu:find('?', filename) then return FILETYPE_UNDEFINED end if
+	
+	if length(filename) = 2 and filename[2] = ':' then
+		filename &= "\\"
+	end if
+	
+	dirfil = dir(filename)
+	if sequence(dirfil) then
+		if eu:find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
+			return FILETYPE_DIRECTORY
+		else
+			return FILETYPE_FILE
+		end if
+	else
+		return FILETYPE_NOT_FOUND
+	end if
+end function
+
 --**
 -- Copy a file.
 --
@@ -772,45 +927,49 @@ end function
 -- [[:move_file]], [[:rename_file]]
 
 public function copy_file(sequence src, sequence dest, atom overwrite)
-	ifdef WIN32 then
-		atom psrc, pdest, ret
 	
-		psrc = allocate_string(src)
-		pdest = allocate_string(dest)
-		ret = c_func(xCopyFile, {psrc, pdest, not overwrite})
+	if length(dest) and file_type( dest ) = FILETYPE_DIRECTORY then
+		if dest[$] != SLASH then
+			dest &= SLASH
+		end if
+		sequence info = pathinfo( src )
+		dest &= info[PATH_FILENAME]
+	end if
+	
+	ifdef WIN32 then
+		atom psrc = allocate_string(src)
+		atom pdest = allocate_string(dest)
+		integer success = c_func(xCopyFile, {psrc, pdest, not overwrite})
 		free(pdest)
 		free(psrc)
+		
 	elsedef
-		integer f, h, c, ret
-		ret = 0
-		f = open(src, "rb")
-		if f = -1 then
-			return ret
+		integer success = 0
+		integer f = open(src, "rb")
+		if f = -1 then 
+			return success
 		end if
-		if not overwrite then
-			h = open(dest, "rb")
+		
+		if overwrite or not file_exists( dest ) then
+			
+			integer h = open( dest, "wb" )
 			if h != -1 then
-				goto "cleanupboth"
+				integer c
+				while c != -1 entry do
+					puts(h, c)
+				entry
+					c = getc(f)
+				end while
+				
+				close( h )
+				success = 1
 			end if
 		end if
-		h = open(dest, "wb")
-		if h = -1 then
-			goto "cleanupf"
-		end if
-		while c != -1 entry do
-			puts(h, c)
-		entry
-			c = getc(f)
-		end while
-	
-		label "cleanupboth"
-		close(h)
-
-		label "cleanupf"
 		close(f)
+		
 	end ifdef
 
-	return ret
+	return success
 
 end function
 
@@ -902,7 +1061,7 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 
 public function delete_file(sequence name)
-	atom pfilename, ret
+	
 
 	ifdef DOS32 then
 	    atom low_buff
@@ -929,18 +1088,21 @@ public function delete_file(sequence name)
 	    else
 	        return 1
 	    end if
-	end ifdef
-
-	pfilename = allocate_string(name)
-	ret = c_func(xDeleteFile, {pfilename})
 	
-	ifdef UNIX then
-		ret = not ret
+	elsedef
+		atom pfilename = allocate_string(name)
+		integer success = c_func(xDeleteFile, {pfilename})
+		
+		ifdef UNIX then
+			success = not success
+		end ifdef
+	
+		free(pfilename)
+		return success
 	end ifdef
 
-	free(pfilename)
-
-	return ret
+	
+	
 end function
 delete_file_id = routine_id("delete_file")
 
@@ -1060,20 +1222,17 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 			ret = xstat(pdir, pdestbuf)
 			free(pdir)
 		end if
-		if ret then
-			goto "continue"
-		end if
-		if not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
+		
+		if not ret and not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
 			-- on different filesystems, can not use rename
 			-- fall back on copy&delete
 			ret = copy_file(src, dest, overwrite)
-			if not ret then
-				goto "out"
+			if ret then
+				ret = delete_file(src)
 			end if
-			ret = delete_file(src)
-			goto "out"
+			
 		end if
-		label "continue"
+		
 	end ifdef
 
 	if overwrite then
@@ -1125,55 +1284,6 @@ public function file_length(sequence filename)
 		return -1
 	end if
 	return list[1][D_SIZE]
-end function
-
-public enum
-	FILETYPE_UNDEFINED = -1,
-	FILETYPE_NOT_FOUND,
-	FILETYPE_FILE,
-	FILETYPE_DIRECTORY
-
---**
--- Get the type of a file.
---
--- Parameters:
---  		# ##filename##: the name of the file to query. It must not have wildcards.
--- 
--- Returns:
---		An **integer**:
---		* -1 if file could be multiply defined
---      *  0 if filename does not exist
---      *  1 if filename is a file
---      *  2 if filename is a directory
---
--- Comments:
--- A public enum has been created for ease of use:
--- * FILETYPE_UNDEFINED     = -1,
--- * FILETYPE_NOT_FOUND, -- = 0
--- * FILETYPE_FILE,      -- = 1
--- * FILETYPE_DIRECTORY  -- = 2
---
--- See Also:
--- [[:dir]]
-
-public function file_type(sequence filename)
-object dirfil
-	if eu:find('*', filename) or eu:find('?', filename) then return FILETYPE_UNDEFINED end if
-	
-	if length(filename) = 2 and filename[2] = ':' then
-		filename &= "\\"
-	end if
-	
-	dirfil = dir(filename)
-	if sequence(dirfil) then
-		if eu:find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
-			return FILETYPE_DIRECTORY
-		else
-			return FILETYPE_FILE
-		end if
-	else
-		return FILETYPE_NOT_FOUND
-	end if
 end function
 
 --**
@@ -1469,109 +1579,6 @@ public function clear_directory(sequence path, integer recurse = 1)
 end function
 
 
---****
--- === File name parsing
-
-public enum
-	PATH_DIR,
-	PATH_FILENAME,
-	PATH_BASENAME,
-	PATH_FILEEXT,
-	PATH_DRIVEID
-
---**
--- Parse a fully qualified pathname.
--- Parameters:
--- 		# ##path##: a sequence, the path to parse
---
--- Returns:
--- 		A **sequence** of length 5. Each of these elements is a string:
--- 		* The path name
---		* The full unqualified file name
---		* the file name, without extension
---		* the file extension
---		* the drive id
--- Comments:
---
--- A public enum has been created for ease of using the returned value:
---
--- * PATH_DIR
--- * PATH_FILENAME
--- * PATH_BASENAME
--- * PATH_FILEEXT
--- * PATH_DRIVEID
---
--- The host operating system path separator is used in the parsing.
---
--- Example 1:
--- <eucode>
--- -- DOS32/WIN32
--- info = pathinfo("C:\\euphoria\\docs\\readme.txt")
--- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt"}
--- </eucode>
---
--- Example 2:
--- <eucode>
--- -- Linux/FreeBSD
--- info = pathinfo("/opt/euphoria/docs/readme.txt")
--- -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
--- </eucode>
---
--- Example 3:
--- <eucode>
--- -- no extension
--- info = pathinfo("/opt/euphoria/docs/readme")
--- -- info is {"/opt/euphoria/docs", "readme", "readme", ""}
--- </eucode>
---
--- See Also:
---   [[:driveid]], [[:dirname]], [[:filename]], [[:fileext]]
-
-public function pathinfo(sequence path)
-	integer slash, period, ch
-	sequence dir_name, file_name, file_ext, file_full, drive_id
-
-	dir_name  = ""
-	file_name = ""
-	file_ext  = ""
-	file_full = ""
-	drive_id  = ""
-
-	slash = 0
-	period = 0
-
-	for i = length(path) to 1 by -1 do
-		ch = path[i]
-		if period = 0 and ch = '.' then
-			period = i
-		elsif eu:find(ch, SLASHES) then
-			slash = i
-			exit
-		end if
-	end for
-
-	if slash > 0 then
-		dir_name = path[1..slash-1]
-		
-		ifdef !UNIX then
-			ch = eu:find(':', dir_name)
-			if ch != 0 then
-				drive_id = dir_name[1..ch-1]
-				dir_name = dir_name[ch+1..$]
-			end if
-		end ifdef
-	end if
-	if period > 0 then
-		file_name = path[slash+1..period-1]
-		file_ext = path[period+1..$]
-		file_full = file_name & '.' & file_ext
-	else
-		file_name = path[slash+1..$]
-		file_full = file_name
-	end if
-
-	return {dir_name, file_full, file_name, file_ext, drive_id}
-end function
 
 --**
 -- Return the directory name of a fully qualified filename
