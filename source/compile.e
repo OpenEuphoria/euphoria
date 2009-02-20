@@ -3859,7 +3859,10 @@ procedure opENDFOR_GENERAL()
 	sequence gencode, intcode
 
 	loop_stack = loop_stack[1..$-1]
-	Label(pc) -- for continue to work
+	if Code[pc-1] != NOP1 then
+		Label(pc) -- for continue to work
+	end if
+	
 	CSaveStr("_0", Code[pc+3], Code[pc+3], Code[pc+4], 0)
 	-- always delay the DeRef
 

@@ -74,5 +74,16 @@ while idx < 2 do
 end while
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 
+ifdef EC then
+	function foo( sequence x )
+		for i = 1 to length(x) do if atom(x[i]) then return 0 end if end for
+		return 1
+	end function
+	
+	test_equal( "translated for loop with if on one line #1", 0, foo("abc") )
+	test_equal( "translated for loop with if on one line #2", 1, foo( {{2}, {3}} ) )
+
+end ifdef
+
 test_report()
 
