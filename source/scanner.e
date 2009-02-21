@@ -1011,6 +1011,7 @@ global function Scanner()
 -- The scanner main routine: returns a lexical token  
 	integer ch, i, sp, prev_Nne, ech
 	integer cline
+	integer trimming = 0
 	sequence yytext, namespaces  -- temporary buffer for a token
 	atom d
 	token tok
@@ -1354,11 +1355,26 @@ global function Scanner()
 					end if
 					read_line()
 				elsif find(ch, "#'`~$^/\\|") != 0 then
-					ech = ch
+					-- Extended String Literal --
 					cline = line_number
+					yytext = ""
+					trimming = 0
+					ech = ch -- Save the 'end of string character'
 					ch = ThisLine[bp]  -- getch
 					bp += 1
-					yytext = ""
+					if bp > length(ThisLine) then
+						-- Test for 'trimming pattern'
+						read_line()
+						while ThisLine[bp] = '_' do
+							trimming += 1
+							bp += 1
+						end while
+						if trimming > 0 then
+							ch = ThisLine[bp]
+							bp += 1
+						end if
+					end if
+					
 					while ch != ech do
 						if ch = END_OF_FILE_CHAR then
 							CompileErr(sprintf("Extended string literal from line %d not terminated.", cline))
@@ -1366,7 +1382,16 @@ global function Scanner()
 							yytext &= ch
 						end if
 						if bp > length(ThisLine) then
-							read_line()
+							read_line() -- sets bp to 1, btw.
+							if trimming > 0 then
+								while bp <= trimming and bp <= length(ThisLine) do
+									ch = ThisLine[bp]
+									if ch != ' ' and ch != '\t' then
+										exit
+									end if
+									bp += 1
+								end while
+							end if
 						end if
 						ch = ThisLine[bp]  -- getch
 						bp += 1
@@ -1380,8 +1405,7 @@ global function Scanner()
 					return {STRING, NewStringSym(yytext)}
 				else
 					CompileErr("hex number not formed correctly")
-				end if
-			
+				end if			
 			else
 				if i >= MAXINT_VAL/32 then
 					d = i

@@ -134,6 +134,13 @@ The rules for extended strings are...
 # they end with the next occurance of the character that followed the initial # character
 # If the resulting string begins with a new-line, the initial new-line is removed
 and any trailing new-line is also removed.
+# A special form is used to automatically trim off leading whitespace from the
+source code text. You might code this form to align the source text for ease of
+reading. If the first line after the extended string start token begins
+with one or more underscore characters, it signifies the maximum number of
+whitespace characters that will be trimmed off each line of the extended string
+text. The number of underscores present is used as the measure of an assumed
+left margin. Also, the underscores do not form part of the extended string text.
 
 e.g.
 
@@ -141,6 +148,19 @@ e.g.
 ##
 Bill said
     "This is a back-slash \ character".
+#
+</eucode>
+Which, when displayed should look like ...
+{{{
+Bill said
+    "This is a back-slash \ character".
+}}}
+
+
+<eucode>
+##
+_____Bill said
+         "This is a back-slash \ character".
 #
 </eucode>
 Which, when displayed should look like ...

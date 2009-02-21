@@ -41,4 +41,40 @@ s = ##"three'
 #
 test_equal("Extended string literal C", "\"three'\n'four\"\n", s)
 
+
+s = #/
+________
+        Dear Mr. John Doe, 
+        
+            I am very happy for your support 
+            with respect to the offer of
+            help.
+        
+     Mr. Jeff Doe 
+/     
+sequence t = ##
+Dear Mr. John Doe, 
+
+    I am very happy for your support 
+    with respect to the offer of
+    help.
+
+Mr. Jeff Doe 
+#
+
+test_equal("Extended string literal D", t, s)
+     
+
+s = ##
+__________________if ( strcmp( "foo", "bar" ) == 1 ) {
+                       printf("strcmp works correctly.");
+                  }
+#
+
+t = ##if ( strcmp( "foo", "bar" ) == 1 ) {
+     printf("strcmp works correctly.");
+}
+#
+test_equal("Extended string literal E", t, s)
+
 test_report()
