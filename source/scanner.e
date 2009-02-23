@@ -5,6 +5,7 @@
 include std/memory.e
 include std/get.e
 include std/filesys.e
+include std/search.e
 include common.e
 include global.e
 include reswords.e
@@ -86,6 +87,7 @@ global procedure InitLex()
 	char_class = repeat(ILLEGAL_CHAR, 255)  -- we screen out the 0 character
 
 	char_class['0'..'9'] = DIGIT
+	char_class['_']      = DIGIT
 	char_class['a'..'z'] = LETTER
 	char_class['A'..'Z'] = LETTER
 	char_class[KEYWORD_BASE+1..KEYWORD_BASE+NUM_KEYWORDS] = KEYWORD
@@ -125,7 +127,7 @@ global procedure InitLex()
 	-- helps speed up scanner a bit
 	id_char = repeat(FALSE, 255)
 	for i = 1 to 255 do
-		if i = '_' or find(char_class[i], {LETTER, DIGIT}) then
+		if find(char_class[i], {LETTER, DIGIT}) then
 			id_char[i] = TRUE
 		end if
 	end for
@@ -871,8 +873,8 @@ function MakeInt(sequence text)
 		return -1            -- use f.p. calculations  
 	end if
 	
-	num = text[1] - '0'
-	for i = 2 to length(text) do 
+	num = 0
+	for i = 1 to length(text) do 
 		num = num * 10 + (text[i] - '0')
 	end for
 
@@ -1032,7 +1034,7 @@ global function Scanner()
 		class = char_class[ch]
 			
 		-- if/elsif cases have been sorted so most common ones come first
-		if class = LETTER then 
+		if class = LETTER or ch = '_' then 
 			sp = bp
 			ch = ThisLine[bp]  -- getch
 			bp += 1 
@@ -1084,12 +1086,16 @@ global function Scanner()
 						ch = getch()
 					end while
 					yytext = ""
-					while id_char[ch] do
+					if char_class[ch] = LETTER or ch = '_' then
 						yytext &= ch
 						ch = getch()
-					end while
-					ungetch()
-
+						while id_char[ch] = TRUE do
+							yytext &= ch
+							ch = getch()
+						end while
+						ungetch()
+					end if
+					
 					if length(yytext) = 0 then
 						CompileErr("an identifier is expected here")
 					end if
@@ -1247,7 +1253,13 @@ global function Scanner()
 			end if
 				
 			bp -= 1  --ungetch
-				
+
+			while i != 0 entry do
+			    yytext = yytext[1 .. i-1] & yytext[i+1 .. $]
+			  entry
+			    i = find('_', yytext)
+			end while
+			
 			i = MakeInt(yytext)
 			if is_int and i != -1 then
 				return {ATOM, NewIntSym(i)}
@@ -1263,6 +1275,7 @@ global function Scanner()
 				end if
 			end if
 		
+						
 		elsif class = MINUS then
 			ch = ThisLine[bp] -- getch
 			bp += 1
@@ -1273,7 +1286,6 @@ global function Scanner()
 				else
 					read_line()
 				end if
-				
 			elsif ch = '=' then
 				return {MINUS_EQUALS, 0}
 			else 
@@ -1329,8 +1341,10 @@ global function Scanner()
 			while i < MAXINT_VAL/32 do             
 				ch = getch()
 				if char_class[ch] = DIGIT then
-					i = i * 16 + ch - '0'
-					is_int = TRUE
+					if ch != '_' then
+						i = i * 16 + ch - '0'
+						is_int = TRUE
+					end if
 				elsif ch >= 'A' and ch <= 'F' then   
 					i = (i * 16) + ch - ('A'-10)
 					is_int = TRUE
@@ -1413,9 +1427,15 @@ global function Scanner()
 					while TRUE do
 						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line 
 						if char_class[ch] = DIGIT then
-							d = (d * 16) + ch - '0'
+							if ch != '_' then
+								d = (d * 16) + ch - '0'
+							end if
 						elsif ch >= 'A' and ch <= 'F' then   
 							d = (d * 16) + ch - ('A'- 10)
+						elsif ch >= 'a' and ch <= 'f' then   
+							d = (d * 16) + ch - ('a'-10)
+						elsif ch = '_' then
+							-- ignore spacing character
 						else
 							exit 
 						end if
@@ -1447,6 +1467,23 @@ global function Scanner()
 			ch = getch()
 			if ch = '=' then
 				return {DIVIDE_EQUALS, 0}
+			elsif ch = '*' then
+				cline = line_number
+				-- block comment start
+				while ch = 0 entry do
+					read_line()
+					if ThisLine[1] = END_OF_FILE_CHAR then
+						exit
+					end if
+				  entry
+					ch = rmatch( "*/", ThisLine[bp .. $])
+				end while
+				
+				if ch != 0 then
+					bp = ch + bp + 1
+				else
+					CompileErr(sprintf("Block comment from line %d not terminated.", cline))				
+				end if
 			else 
 				ungetch()
 				return {DIVIDE, 0}
@@ -1622,12 +1659,10 @@ global procedure IncludeScan( integer is_public )
 				end while
 				
 				-- scan namespace identifier  
-				if char_class[ch] = LETTER then
+				if char_class[ch] = LETTER or ch = '_' then
 					gtext = {ch}
 					ch = getch()
-					while char_class[ch] = LETTER or
-						  char_class[ch] = DIGIT or
-						  ch = '_' do
+					while id_char[ch] = TRUE do
 						gtext &= ch
 						ch = getch()
 					end while
