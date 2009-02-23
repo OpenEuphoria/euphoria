@@ -28,6 +28,12 @@ test_equal("Extended string literal 9", "\"one\" \"two\"", #|"one" "two"|)
 
 
 /* Test for string which extend over multiple lines. */
+integer c1 = 0
+integer c2 = 0
+
+/* C1 */ c1 = 1 /* C2 */ c2 = 1 /* eoc */
+test_equal("Dual comments", {1,1}, {c1, c2})
+
 sequence _s
 _s = ##
 

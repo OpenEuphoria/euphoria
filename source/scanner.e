@@ -1476,7 +1476,7 @@ global function Scanner()
 						exit
 					end if
 				  entry
-					ch = rmatch( "*/", ThisLine[bp .. $])
+					ch = match( "*/", ThisLine[bp .. $])
 				end while
 				
 				if ch != 0 then
