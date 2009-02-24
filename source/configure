@@ -126,7 +126,7 @@ if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
 	echo "Information: Working around djgpp's PWD bug"
 	export PPWD=$PWD
 fi
-export TRUNKDIR=$PWD
+export TRUNKDIR=$PPWD
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu

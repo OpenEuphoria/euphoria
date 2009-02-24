@@ -18,7 +18,7 @@
 # 
 #     --eubin <dir>   Use this option to specify the location of the interpreter
 #		     binary to use to translate the front end.  The default
-#		     is ..\bin
+#		     is ../bin
 #
 #     --managed-mem   Use this option to turn EUPHORIA's memory cache on in
 #		     the targets
@@ -38,6 +38,7 @@
 #   Translator Library (ecu.a):  make library
 #   Backend         (backendu):  make backendu
 #   Run Unit Tests            :  make test
+#   Run Unit Tests for DJGPP  :  make test-djgpp
 
 ifndef CONFIG
 CONFIG = Makefile.eu
@@ -347,16 +348,16 @@ ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EBACKENDC)
 endif
 
-test :  
-ifeq "$(EDJGPP)" "1"
+
+test-djgpp :  
 ifneq "$(HASCHANGEDDIRECTORY)" "1"
 	cp Makefile.eu revget.ex ../tests
 	export EUCOMPILEDIR=$(TRUNKDIR)
-	$(MAKE) -k -C ../tests -f ../source/Makefile EUCOMPILEDIR=.. CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 test
-else
-	$(EXE) ../bin/eutest.ex -i ../include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
-endif	     
+	$(MAKE) -k -C ../tests -f ../source/Makefile EUCOMPILEDIR=.. CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 test     
 endif
+
+test :
+	cd ../tests && $(EXE) ../bin/eutest.ex -i ../include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
@@ -429,7 +430,7 @@ $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 ifneq	"$(HASCHANGEDDIRECTORY)" "1"
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
-	cp Makefile.eu Makefile revget.ex $(BUILDDIR)\$(OBJDIR)
+	cp Makefile.eu Makefile revget.ex $(BUILDDIR)/$(OBJDIR)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	$(MAKE) translate-here -k -C $(BUILDDIR)/$(OBJDIR) EU_TARGET=$(EU_TARGET) SHELL=$(SHELL) CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 
 endif

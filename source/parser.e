@@ -3228,6 +3228,7 @@ procedure SubProg(integer prog_type, integer scope)
 
 	CurrentSub = p
 	first_def_arg = 0
+	temps_allocated = 0
 
 	SymTab[p][S_SCOPE] = scope
 
@@ -3351,7 +3352,6 @@ procedure SubProg(integer prog_type, integer scope)
 	end while
 
 	-- code to perform type checks on all the parameters
-	temps_allocated = 0
 	sym = SymTab[p][S_NEXT]
 	for i = 1 to SymTab[p][S_NUM_ARGS] do
 		while SymTab[sym][S_SCOPE] != SC_PRIVATE do

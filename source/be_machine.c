@@ -4675,7 +4675,7 @@ start:
 			break;
 		}
 	}
-	
+#ifdef EWINDOWS
         if ( 
 	    ( 
 		    addr = (unsigned) VirtualAlloc( copy_addr, CALLBACK_SIZE, 
@@ -4683,6 +4683,7 @@ start:
 	    ) 
 	    == 
 	    0 )
+#endif
 	addr = (unsigned)copy_addr;
 	
 	if (addr <= (unsigned)MAXINT_VAL)
