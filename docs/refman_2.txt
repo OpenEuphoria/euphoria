@@ -1,4 +1,4 @@
-== Language Definition
+= Language Definition
 
 <<LEVELTOC depth=2>>
 
@@ -43,12 +43,30 @@ Numbers can also be entered in hexadecimal. For example:
 -#10            -- -16
 </eucode>
 
-Only the capital letters A, B, C, D, E, F are allowed in hex numbers.  Hex
-numbers are always positive, unless you add a minus sign in front of the #
-character. So for instance #FFFFFFFF is a huge positive number (4294967295),
-**not** -1, as some machine-language programmers might expect.
+Only digits and the letters A, B, C, D, E, F, in either uppercase or lowercase, are allowed
+in hex numbers.  Hex numbers are always positive, unless you add a minus sign
+in front of the # character. So for instance #FFFFFFFF is a huge positive number
+(4294967295), **not** -1, as some machine-language programmers might expect.
 
-Sequences can be nested to any depth, i.e. you can have sequences within
+Sometimes, and especially with large numbers, it can make reading numeric literals
+easier when they have embedded grouping characters. We are familiar with using
+commas (periods in Europe) to group large numbers by 3-digit subgroups. In Euphoria
+we use the underscore character to acheive the same thing, and we can group them
+anyway that is useful to us.
+
+<eucode>
+atom big = 32_873_787  -- Set 'big' to the value 32873787
+
+atom salary = 56_110.66 -- Set salary to the value 56110.66
+
+integer defflags = #0323_F3CD
+
+object phone = 61_3_5536_7733
+
+</eucode>
+
+
+**Sequences** can be nested to any depth, i.e. you can have sequences within
 sequences within sequences and so on to any depth (until you run out of
 memory). Brace brackets are used to construct sequences out of a list of
 expressions.  These expressions can be constant or evaluated at run-time.
@@ -220,21 +238,64 @@ Special characters may be entered using a back-slash:
 For example, "Hello, World!\n", or '~\~\'. The Euphoria editor displays character
 strings in green.
 
+=== Identifiers
+An identifier is just the name you give something in your program. This can be 
+a variable, constant, function, procedure, parameter, or namespace. An identifier
+must begin with either a letter or an underscore, then followed by zero or more 
+letters, digits or underscore characters. There is no theoretical limit to how 
+large an identifier can be but in practice it should be no more than about 30
+characters. 
+
+Identifiers are case-sensitive. THis means that "Name" is a different identifier
+to "name", or "NAME", etc...
+
+Examples of valid identifiers...
+{{{
+n
+color26
+ShellSort
+quick_sort
+a_very_long_indentifier_that_is_really_too_long_for_its_own_good
+_alpha
+}}}
+
+Examples of invalid identifiers...
+{{{
+0n	-- must not start with a digit
+^color26 -- must not start with a punctuation character
+Shell Sort -- Cannot have spaces in identifiers.
+quick-sort -- must only consist of letters, digits or underscore.
+}}}
+
 === Comments
-
-Comments are started by two dashes and extend to the end of the current line.
-e.g.
-
-<eucode>
--- this is a comment
-</eucode>
-
-Comments are ignored by the compiler and have no effect on execution speed.
+Comments are ignored by Euphoria and have no effect on execution speed.
 The editor displays comments in red.
 
-On the first line (only) of your program, you can use a special comment
-beginning with #!, e.g.
+There are three forms of comment text. 
+* The //line// format comment is started by two dashes and extends to the
+ end of the current line.
+ 
+e.g.
+<eucode>
+-- This is a comment which extends to the end of this line only.
+</eucode>
 
+* The //multi-line// format comment is started by ##/*## and extends to the
+ next occurance of ##*/##, even if that occurs on a different line.
+ 
+e.g.
+<eucode>
+/* This is a comment which
+   extends over a number
+   of text lines.
+*/
+</eucode>
+
+* On the first line only of your program, you can use a special comment
+beginning with the two character sequence ###!##. This is mainly used to tell Linux
+shells which program to execute the 'script' program with.
+
+e.g.
 <eucode>
 #!/home/rob/euphoria/bin/exu
 </eucode>
@@ -245,6 +306,10 @@ your file executable, you can run it, just by typing its name, and without the
 need to type "##exu##". On //DOS// and //Windows// this line is just treated as
 a comment (though Apache Web server on //Windows// does recognize it.). If your
 file is a shrouded ##.il## file, use backendu instead of ##exu##.
+
+Line comments are typically used to annotate a single (or small section) of
+code, whereas multi-line comments are typically used to give larger pieces of
+documentation inside the source text.
 
 === Expressions
 
