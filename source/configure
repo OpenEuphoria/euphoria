@@ -1,5 +1,4 @@
 #!/bin/sh
-
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 if echo "$UNAME_SYSTEM" | grep CYGWIN; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
@@ -75,7 +74,7 @@ case "${UNAME_SYSTEM}:${ECONFIG}" in
 		# do nothing
 		;;
 esac
-
+export BUILDDIR=.
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
@@ -102,6 +101,9 @@ while [ "$1" != "" ]; do
         --debug )
                        echo EDEBUG=1 >> "$PREFIX"Makefile.eu
         ;;
+	* )
+			echo "Unknown option '$1'"
+	;;
     esac
     shift
 done
@@ -109,11 +111,23 @@ if [ "x$EUPHORIA" = "x" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
 fi
 if [ "x$MANAGED_MEM" = "x" ]; then
-       if test $UNAME_SYSTEM = "MS-DOS"; then
-	       	    echo "Information: Managed memory always on for DJGPP."
-       fi
+        if test $UNAME_SYSTEM = "MS-DOS"; then
+        	echo "Information: Managed memory always on for DJGPP."
+		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu 
+	fi
 fi
+export PWD=`pwd`
+export PPWD=`cd .. && pwd`
+# The following works around a bug in djgpp's pwd
+# that at times returns the parent of the current
+# directory instead of the current directory.
+if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
+	# bug is present
+	echo "Information: Working around djgpp's PWD bug"
+	export PPWD=$PWD
+fi
+export TRUNKDIR=$PWD
+export BUILDDIR=`cd "$BUILDDIR" && pwd`
+echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
-if [ -e Makefile.unix ]; then
-	cp Makefile.unix Makefile
-fi
+

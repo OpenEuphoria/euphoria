@@ -112,6 +112,10 @@ function invoke( integer status, sequence cmd, sequence filename, integer err, s
 	if delete_file("cw.err") then end if
 	if delete_file("ex.err") then end if	
 	status = system_exec(cmd, 2)
+	if status = -1073741510 then
+		-- user break
+		abort(1)
+	end if
 	sleep( 0.1 )
 	if status != 0 or file_exists( "cw.err" ) or file_exists( "ex.err" ) then
 		if file_exists( "cw.err" ) then

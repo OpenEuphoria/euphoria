@@ -3683,6 +3683,10 @@ static void rPrint(object a)
 #endif
 				print_chars += show_ascii_char(print_file, a);
 		}
+                else if (a == NOVALUE) {
+                        screen_output(print_file, "NOVALUE" );
+                        print_chars += strlen("NOVALUE");
+                }
 		else {
 			sprintf(sbuff, "%.10g", DBL_PTR(a)->dbl);
 			screen_output(print_file, sbuff);

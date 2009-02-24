@@ -4516,6 +4516,9 @@ object DefineC(object x)
 #endif
 extern struct routine_list *rt00;
 
+#ifdef EWINDOWS
+typedef void * (__cdecl *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection); 
+#endif
 object CallBack(object x)
 /* return a call-back address for routine id x 
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl */
@@ -4529,9 +4532,19 @@ object CallBack(object x)
 #endif
 	s1_ptr x_ptr;
 	int convention;
+#ifdef EWINDOWS	
+	VirtualAlloc_t VirtualAlloc_ptr;
+	HINSTANCE hinstLib; 
+	BOOL fFreeResult, fRunTimeLinkSuccess = FALSE; 
+	// Get a handle to the DLL module.
+ 
 	void * replace_value;
         s1_ptr result;	
 	object_ptr obj_ptr;
+	hinstLib = LoadLibrary(TEXT("kernel32")); 
+#endif
+ 
+ 
 #ifdef EDOS
 	not_supported("call_back()");
 	return 0;
@@ -4610,7 +4623,37 @@ start:
 #ifdef EWINDOWS
 	if (bare_flag) goto bare;
 #endif
+#ifdef EWINDOWS
+	// If the handle is valid, try to get the function address.
+	copy_addr = NULL;
+	if (hinstLib != NULL) 
+	    { 
+		VirtualAlloc_ptr = (VirtualAlloc_t) GetProcAddress(hinstLib, "VirtualAlloc"); 
+	 
+		// If the function address is valid, call the function.
+	 
+		if (NULL != VirtualAlloc_ptr) 
+		{
+		    copy_addr = (VirtualAlloc_ptr)( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, 
+			PAGE_EXECUTE_READWRITE );
+		    fRunTimeLinkSuccess = TRUE;
+		}
+	 
+		// Free the DLL module.
+	 
+		fFreeResult = FreeLibrary(hinstLib); 
+	    }
+	else
+	    VirtualAlloc_ptr = 0;
+    
+	if (copy_addr == NULL) {
+		RTFatal("Your program has run out of memory.\nOne moment please...");
+	}
+	if (!fRunTimeLinkSuccess)
 	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
+#else /* ndef EWNIDOWS */
+	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
+#endif /* ndef EWINDOWS */
 #ifdef EUNIX   
 #ifndef EBSD    
 	mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
@@ -4632,6 +4675,14 @@ start:
 			break;
 		}
 	}
+	
+        if ( 
+	    ( 
+		    addr = (unsigned) VirtualAlloc( copy_addr, CALLBACK_SIZE, 
+			    MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE )
+	    ) 
+	    == 
+	    0 )
 	addr = (unsigned)copy_addr;
 	
 	if (addr <= (unsigned)MAXINT_VAL)

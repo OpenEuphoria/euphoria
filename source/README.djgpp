@@ -9,18 +9,18 @@ these for debugging:
 gdb611b, faq230b, txi412b,
 
 Make sure an existing 4.0 alpha or higher version of EUPHORIA is the 
-first one in your path then
-issue the following command line in the source sub directory adjusting
-your particular paths:
-bash configure --managed-mem --debug
+first one in your path then issue the following command line in the source sub 
+directory adjusting your particular paths:
+bash configure --managed-mem --debug --build ../build/djgpp-managed-mem-debug
 set PATH=f:\modbin;e:\djgpp\bin;%PATH%
 f:
 cd \eumod\source
 e:\djgpp\bin\make SHELL=e:\djgpp\bin\sh.exe EXE=/modbin/exwc.exe
 
 For configure you can use any combination of --full, --managed-mem, and --debug
-Note that EXE must use forward slashes and must be on the same drive as 
-your current directory.  Note the foward slashes in EXE but the DOS style paths
-for make and sh.
+Only the value passed to the variable SHELL and the invocation of make itself 
+can and must use backslashes.  Yet anything else you pass to configure or make 
+must use forward slashes.  I haven't had any success invoking make from sh.exe 
+on djgpp.
 
 

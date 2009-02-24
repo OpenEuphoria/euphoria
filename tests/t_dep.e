@@ -181,17 +181,4 @@ n_space = allocate_protect( multiply_code, PAGE_NOACCESS )
 test_not_equal( test_message, 0, n_space )
 -- do nothing
 test_message = ""
-puts( 1, "The following should cause a machine exception:" )
-calling_dmemfunction = 1
-void = c_func(rdata, {x,y})
-calling_dmemfunction = 0
-
--- DOS and Linux are known not to work yet for this.
--- yet there are patches for Linux available...
-ifdef WIN32 then
-	puts(1, "DEP is not Enabled for this process\n")
-end ifdef
-ifdef UNIX then
-	puts(1, "DEP is not Enabled for this process\n")
-end ifdef
 test_report()
