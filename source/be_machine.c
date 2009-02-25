@@ -4517,7 +4517,7 @@ object DefineC(object x)
 extern struct routine_list *rt00;
 
 #ifdef EWINDOWS
-typedef void * (__cdecl *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection); 
+typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection); 
 #endif
 object CallBack(object x)
 /* return a call-back address for routine id x 

@@ -181,4 +181,9 @@ n_space = allocate_protect( multiply_code, PAGE_NOACCESS )
 test_not_equal( test_message, 0, n_space )
 -- do nothing
 test_message = ""
+
+-- Regression test for Euphoria 3 Std Library callbacks:
+without indirect_includes
+include dep3.e
+
 test_report()
