@@ -242,7 +242,7 @@ distclean : .SYMBOLIC clean
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i\back
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*	
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i
-	-$(RM) $(BUILDDIR)\*.wat
+	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i.wat
 	-$(RM) $(CONFIG)
 
 clean : .SYMBOLIC
