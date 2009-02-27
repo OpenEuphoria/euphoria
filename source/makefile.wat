@@ -474,8 +474,10 @@ $(BUILDDIR)\backendd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNE
 	@%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION CASEEXACT
 	@for %i in ($(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc file %i
 	wlink  $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\exb.lbc name $(BUILDDIR)\backendd.exe
-	le23p $(BUILDDIR)\backendd.exe
-	cwc  $(BUILDDIR)\backendd.exe
+	cd $(BUILDDIR)
+	le23p backendd.exe
+	cwc  backendd.exe
+	cd $(TRUNKDIR)
 
 $(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create $(BUILDDIR)\$(OBJDIR)\ex.lbc
@@ -492,8 +494,10 @@ $(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_
 	@%append $(BUILDDIR)\$(OBJDIR)\ex.lbc OPTION CASEEXACT
 	@for %i in ($(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\ex.lbc file %i
 	wlink  $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\ex.lbc name $(BUILDDIR)\ex.exe
-	le23p $(BUILDDIR)\ex.exe
-	cwc  $(BUILDDIR)\ex.exe
+	cd $(BUILDDIR)
+	le23p ex.exe
+	cwc  ex.exe
+	cd $(TRUNKDIR)
 
 $(BUILDDIR)\ec.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create $(BUILDDIR)\$(OBJDIR)\ec.lbc
@@ -510,8 +514,10 @@ $(BUILDDIR)\ec.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACK
 	@%append $(BUILDDIR)\$(OBJDIR)\ec.lbc OPTION CASEEXACT
 	@for %i in ($(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc file %i
 	wlink $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\ec.lbc name $(BUILDDIR)\ec.exe
-	le23p $(BUILDDIR)\ec.exe
-	cwc $(BUILDDIR)\ec.exe
+	cd $(BUILDDIR)
+	le23p ec.exe
+	cwc ec.exe
+	cd $(TRUNKDIR)
 
 $(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
 $(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
