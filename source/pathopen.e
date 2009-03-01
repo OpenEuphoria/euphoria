@@ -259,13 +259,15 @@ global procedure load_platform_inc_paths()
 	if loaded_config_inc_paths then return end if
 	loaded_config_inc_paths = 1
 
-	-- load the local (same dir as interpreter/translator)
+	-- If a unix variant, this loads the config file from the current working directory
+	-- If Windows, this loads the config file from the same path as the binary. This
+	-- can be different, for instance the binary may be C:\euphoria\bin\exwc.exe but
+	-- you are loading it such as: C:\euphoria\demo> exwc demo.ex ... In this case
+	-- this command loads C:\euphoria\bin\euinc.conf not C:\euphoria\demo\euinc.conf
+	-- as it would under unix variants.
 	env = strip_file_from_path( exe_path() )
 	load_euinc_conf( env & "euinc.conf" )
 
-	-- load the config file from the path the program was execute from
-	load_euinc_conf("./euinc.conf")
-	
 	-- platform specific
 	ifdef UNIX then
 		env = getenv( "HOME" )
@@ -275,6 +277,10 @@ global procedure load_platform_inc_paths()
 		load_euinc_conf( "/etc/euphoria/euinc.conf" )
 		
 	elsifdef WIN32 then
+		-- load the config file from the current working directory
+		-- This is not needed on unix variants as it is handled above
+		load_euinc_conf("./euinc.conf")
+	
 		env = getenv( "APPDATA" )
 		if sequence(env) then
 			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
