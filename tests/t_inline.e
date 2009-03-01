@@ -47,4 +47,19 @@ s = {1}
 s = set( s, 2 )
 test_equal( "parameter assigned and return value", 2, s[1] )
 
+with inline 50
+function return_literal( object o )
+	if sequence(o) then
+		return 2
+	end if
+	if o > 3 then
+		return 3
+	end if
+	return 1
+end function
+
+test_equal( "return literal {}", 2, return_literal( {} ) )
+test_equal( "return literal 0", 1, return_literal( 0 ) )
+test_equal( "return literal 4", 3, return_literal( 4 ) )
+
 test_report()

@@ -251,7 +251,7 @@ function returnf( integer pc )
 	symtab_index retsym = inline_code[pc+2]
 	inline_code[$] = NOP1
 	
-	if is_temp( retsym ) or SymTab[retsym][S_SCOPE] <= SC_PRIVATE then
+	if is_temp( retsym ) or (not is_literal( retsym) and SymTab[retsym][S_SCOPE] <= SC_PRIVATE) then
 		sequence code = {}
 		
 		integer ret_pc = 0
@@ -261,20 +261,15 @@ function returnf( integer pc )
 		end if
 		
 		if ret_pc then
-	
 			inline_code[ret_pc] = {INLINE_TARGET}
 		else
-		
 			code = {ASSIGN, generic_symbol( retsym ), {INLINE_TARGET}}
-			
 		end if
-		
 		
 		if pc != length( inline_code ) - 3 then
 			code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
 			
 		elsif INTERPRET then -- or inline_code[$] = BADRETURNF then
-			
 			replace_code( {}, length(inline_code), length(inline_code) )
 			
 		end if
