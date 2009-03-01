@@ -290,7 +290,7 @@ global procedure load_platform_inc_paths()
 		if sequence(env) then
 			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
 		end if
-	elsifdef
+	elsedef
 		-- none for DOS
 	end ifdef
 end procedure
