@@ -9,6 +9,7 @@ include std/error.e
 include std/search.e
 include std/text.e
 include std/sort.e
+include std/math.e
 
 public enum
 	ADD_PREPEND,
@@ -395,6 +396,30 @@ public function reverse(object target, integer pFrom = 1, integer pTo = 0)
 		uppr -= 1
 	end for
 	return t
+end function
+
+--**
+-- Shuffle the elements of a sequence.
+--
+-- Parameters:
+--		# ##target##: the sequence to shuffle.
+--		# ##level##: an integer, the number of times to randomize the list
+--
+-- Returns:
+--		A **sequence**
+--
+-- Example 1:
+-- <eucode>
+-- shuffle({1,2,3}) -- {3,1,2}
+-- shuffle({1,2,3}) -- {2,3,1}
+-- </eucode>
+
+public function shuffle(sequence l, integer level=length(l))
+	for i = 1 to level do
+		l = reverse(reverse(l, 1, rand_range(1, length(l))))
+	end for
+
+	return l
 end function
 
 --****

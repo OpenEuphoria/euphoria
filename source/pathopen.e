@@ -216,7 +216,7 @@ global procedure load_euinc_conf( sequence file )
 	integer fn, absolute
 	object in, home
 	sequence conf_path
-	
+
 	conf_path = strip_file_from_path( file )
 	home = ""
 	
@@ -262,6 +262,9 @@ global procedure load_platform_inc_paths()
 	-- load the local (same dir as interpreter/translator)
 	env = strip_file_from_path( exe_path() )
 	load_euinc_conf( env & "euinc.conf" )
+
+	-- load the config file from the path the program was execute from
+	load_euinc_conf("./euinc.conf")
 	
 	-- platform specific
 	ifdef UNIX then
@@ -281,7 +284,7 @@ global procedure load_platform_inc_paths()
 		if sequence(env) then
 			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
 		end if
-	elsedef
+	elsifdef
 		-- none for DOS
 	end ifdef
 end procedure
