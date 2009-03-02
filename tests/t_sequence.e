@@ -160,6 +160,11 @@ test_equal( "replace 8,4", "johndoeaaa", replace("johndoe", "aaa", 8,4 ))
 test_equal( "replace 8,5", "johndoeaaa", replace("johndoe", "aaa", 8,5 ))
 test_equal( "replace 8,8", "johndoeaaa", replace("johndoe", "aaa", 8,8 ))
 
+sequence shuffleOrig = {1,2,3}, shuffled = shuffle(shuffleOrig)
+test_equal( "shuffle 1,2,3", 3, length(shuffled))
+test_true( "shuffle 1,2,3", find(1, shuffled))
+test_true( "shuffle 1,2,3", find(2, shuffled))
+test_true( "shuffle 1,2,3", find(3, shuffled))
 
 procedure replace_objs()
 	sequence 

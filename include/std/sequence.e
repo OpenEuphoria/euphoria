@@ -402,8 +402,7 @@ end function
 -- Shuffle the elements of a sequence.
 --
 -- Parameters:
---		# ##target##: the sequence to shuffle.
---		# ##level##: an integer, the number of times to randomize the list
+--		# ##seq##: the sequence to shuffle.
 --
 -- Returns:
 --		A **sequence**
@@ -414,12 +413,26 @@ end function
 -- shuffle({1,2,3}) -- {2,3,1}
 -- </eucode>
 
-public function shuffle(sequence l, integer level=length(l))
-	for i = 1 to level do
-		l = reverse(reverse(l, 1, rand_range(1, length(l))))
+public function shuffle(sequence seq)
+	integer remainder = length(seq)
+
+	for toIdx = 1 to length(seq) do
+		-- Get a random spot in the remaining items
+		integer fromIdx = rand(remainder) + toIdx - 1
+		
+		-- Swap the newly picked item with whatever is at the receiving spot
+		if fromIdx != toIdx then
+			object swapValue = seq[fromIdx]
+
+			seq[fromIdx] = seq[toIdx]
+			seq[toIdx] = swapValue
+		end if
+		
+		-- Bump to the next receiving spot
+		remainder -= 1
 	end for
 
-	return l
+	return seq
 end function
 
 --****
