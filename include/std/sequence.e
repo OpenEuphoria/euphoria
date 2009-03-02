@@ -407,10 +407,16 @@ end function
 -- Returns:
 --		A **sequence**
 --
+-- Comments:
+-- The input sequence does not have to be in any specific order and can
+-- contain duplicates. The output will be in an unpredicable order, which
+-- might even be the same as the input order.
+--
 -- Example 1:
 -- <eucode>
--- shuffle({1,2,3}) -- {3,1,2}
--- shuffle({1,2,3}) -- {2,3,1}
+-- shuffle({1,2,3,3}) -- {3,1,3,2}
+-- shuffle({1,2,3,3}) -- {2,3,1,3}
+-- shuffle({1,2,3,3}) -- {1,2,3,3}
 -- </eucode>
 
 public function shuffle(sequence seq)
@@ -428,7 +434,7 @@ public function shuffle(sequence seq)
 			seq[toIdx] = swapValue
 		end if
 		
-		-- Bump to the next receiving spot
+		-- Reduce the number of items still to shuffle in
 		remainder -= 1
 	end for
 

@@ -1,5 +1,6 @@
 include std/text.e
 include std/sequence.e as seq
+include std/search.e as srch
 
 include std/unittest.e
 
@@ -160,11 +161,15 @@ test_equal( "replace 8,4", "johndoeaaa", replace("johndoe", "aaa", 8,4 ))
 test_equal( "replace 8,5", "johndoeaaa", replace("johndoe", "aaa", 8,5 ))
 test_equal( "replace 8,8", "johndoeaaa", replace("johndoe", "aaa", 8,8 ))
 
-sequence shuffleOrig = {1,2,3}, shuffled = shuffle(shuffleOrig)
-test_equal( "shuffle 1,2,3", 3, length(shuffled))
-test_true( "shuffle 1,2,3", find(1, shuffled))
-test_true( "shuffle 1,2,3", find(2, shuffled))
-test_true( "shuffle 1,2,3", find(3, shuffled))
+sequence shuffleOrig = {1,2,3,3,4,5,5,5,6,"TEST"}, shuffled = shuffle(shuffleOrig)
+-- Ensure that the result is the same length
+test_equal( "shuffle size", length(shuffleOrig), length(shuffled))
+-- Ensure that the same number of each original item is in shuffled.
+for i = 1 to length(shuffleOrig) do
+	test_equal( "shuffle items",  length(srch:find_all(shuffleOrig[i], shuffleOrig)),
+	                              length(srch:find_all(shuffleOrig[i], shuffled)))
+end for
+
 
 procedure replace_objs()
 	sequence 
