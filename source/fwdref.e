@@ -670,7 +670,9 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 	for i = length( active_references ) to 1 by -1 do
 		if forward_references[active_references[i]][FR_SUBPROG] = shifting_sub then
 			if forward_references[active_references[i]][FR_PC] >= pc then
-				forward_references[active_references[i]][FR_PC] += amount
+				if forward_references[active_references[i]][FR_PC] > 1 then
+					forward_references[active_references[i]][FR_PC] += amount
+				end if
 			else
 				exit
 			end if
