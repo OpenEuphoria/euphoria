@@ -422,9 +422,9 @@ char *EMalloc(unsigned long nbytes)
 		/* See if we have a block of this size in our cache.
 		   Every block in the cache is 8-aligned. */
 
-		list = pool_map[(nbytes + (RESOLUTION - 1)) >> LOG_RESOLUTION];
+		list = pool_map[((nbytes & 7) != 0) + (nbytes >> LOG_RESOLUTION)];
 #ifdef HEAP_CHECK
-		if (list->size < nbytes || list->size > nbytes * 2) {
+		if (list->size < nbytes) {
 			sprintf(msg, "Alloc - size is %d, nbytes is %d", list->size, nbytes);
 			RTInternal(msg);
 		}
@@ -471,7 +471,7 @@ char *EMalloc(unsigned long nbytes)
 	}
 
 	do {
-		p = malloc(nbytes);
+		p = malloc(nbytes+8);
 
 		if (p == NULL) {
 			p = Out_Of_Space(nbytes);
@@ -548,7 +548,7 @@ void EFree(unsigned char *p)
 		free(q); /* too big to cache, or cache is full */
 	}
 	else {
-		list = pool_map[nbytes >> LOG_RESOLUTION];
+		list = pool_map[((nbytes & 7) != 0) + (nbytes >> LOG_RESOLUTION)];
 		if (list->size > nbytes) {
 			/* only happens with non-standard size (from realloc maybe) */
 			list--;

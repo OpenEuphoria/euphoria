@@ -197,7 +197,7 @@ MEMFLAG = $(MEMFLAG) /dINT_CODES
 !endif
 
 !ifeq DEBUG 1
-DEBUGFLAG = /d2 /dEDEBUG
+DEBUGFLAG = /d2 /dEDEBUG /dHEAP_CHECK
 #DEBUGFLAG = /d2 /dEDEBUG /dDEBUG_OPCODE_TRACE
 DEBUGLINK = debug all
 !endif
@@ -477,7 +477,7 @@ $(BUILDDIR)\backendd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNE
 	cd $(BUILDDIR)
 	le23p backendd.exe
 	cwc  backendd.exe
-	cd $(TRUNKDIR)
+	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create $(BUILDDIR)\$(OBJDIR)\ex.lbc
@@ -497,7 +497,7 @@ $(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_
 	cd $(BUILDDIR)
 	le23p ex.exe
 	cwc  ex.exe
-	cd $(TRUNKDIR)
+	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\ec.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create $(BUILDDIR)\$(OBJDIR)\ec.lbc
@@ -517,7 +517,7 @@ $(BUILDDIR)\ec.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACK
 	cd $(BUILDDIR)
 	le23p ec.exe
 	cwc ec.exe
-	cd $(TRUNKDIR)
+	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
 $(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)

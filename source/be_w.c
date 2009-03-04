@@ -433,7 +433,7 @@ static void MyWriteConsole(char *string, int nchars)
     } else {
 
     i = 0;
-    if( line_buffer_size < console_info.dwMaximumWindowSize.X ){
+    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
         if (line_buffer != 0) {
             EFree(line_buffer);
         }

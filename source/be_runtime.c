@@ -548,8 +548,10 @@ void call_crash_routines()
 
 #ifndef ERUNTIME
 	// clear the interpreter call stack
-	expr_stack[1] = 0;
-	expr_top = &expr_stack[2];
+	if ( expr_stack != NULL ) {
+		expr_stack[1] = 0;
+		expr_top = &expr_stack[2];
+	}
 	tpc = 0;
 #endif
 
