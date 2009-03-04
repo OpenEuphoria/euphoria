@@ -420,22 +420,18 @@ end function
 -- </eucode>
 
 public function shuffle(sequence seq)
-	integer remainder = length(seq)
+-- 1963 shuffle algorithm written by L.E. Moses and R.V. Oakford
 
-	for toIdx = 1 to length(seq) do
+	for toIdx = length(seq) to 2 by -1 do
 		-- Get a random spot in the remaining items
-		integer fromIdx = rand(remainder) + toIdx - 1
+		integer fromIdx = rand(toIdx)
 		
 		-- Swap the newly picked item with whatever is at the receiving spot
-		if fromIdx != toIdx then
-			object swapValue = seq[fromIdx]
+		object swapValue = seq[fromIdx]
 
-			seq[fromIdx] = seq[toIdx]
-			seq[toIdx] = swapValue
-		end if
+		seq[fromIdx] = seq[toIdx]
+		seq[toIdx] = swapValue
 		
-		-- Reduce the number of items still to shuffle in
-		remainder -= 1
 	end for
 
 	return seq
