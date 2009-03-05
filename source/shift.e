@@ -289,7 +289,7 @@ procedure shift_switch( integer pc, integer start, integer amount )
 	
 	sequence jump = SymTab[Code[pc+3]][S_OBJ]
 	for i = 1 to length(jump) do
-		if start < pc + jump[i] then
+		if start > pc and start < pc + jump[i] then
 			jump[i] += amount
 		end if
 	end for

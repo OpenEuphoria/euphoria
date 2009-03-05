@@ -84,4 +84,27 @@ end type
 foo(1)
 test_pass( "shift when pc = addr" )
 
+with inline
+function int_switch( integer i )
+	switch i do
+		case 1:
+			return 1
+		case 2:
+			return 2
+		case else
+			return 0
+	end switch
+end function
+
+procedure test_inline_switch_jumps()
+	sequence s = {0,1,2}
+	
+	for i = 0 to 2 do
+		test_equal( sprintf( "inlined int switch with known int #%d", i), i, int_switch( i ) )
+		test_equal( sprintf( "inlined switch with unknown int #%d", i ), i, int_switch( s[i+1] ) )
+	end for
+
+end procedure
+test_inline_switch_jumps()
+
 test_report()
