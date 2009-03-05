@@ -62,4 +62,26 @@ test_equal( "return literal {}", 2, return_literal( {} ) )
 test_equal( "return literal 0", 1, return_literal( 0 ) )
 test_equal( "return literal 4", 3, return_literal( 4 ) )
 
+without inline
+
+function baz( fwdtype b )
+	return b
+end function
+
+
+procedure foo( integer bar )
+	if bar = 1 then
+	else
+		fwdtype f = {123}
+		f = baz( f )
+	end if
+	
+end procedure
+
+type fwdtype( sequence f )
+	return sequence(f)
+end type
+foo(1)
+test_pass( "shift when pc = addr" )
+
 test_report()

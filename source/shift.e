@@ -298,7 +298,7 @@ end procedure
 
 procedure shift_addr( integer pc, integer amount, integer start, integer bound )
 	if atom( Code[pc] ) then
-		if Code[pc] > start then
+		if Code[pc] >= start then
 			if Code[pc] < bound then
 				Code[pc] = start
 			else
@@ -306,7 +306,7 @@ procedure shift_addr( integer pc, integer amount, integer start, integer bound )
 			end if
 		end if
 	else
-		if Code[pc][2] > start then
+		if Code[pc][2] >= start then
 			if Code[pc][2] < bound then
 				Code[pc][2] = start
 			else
