@@ -12,7 +12,7 @@ while sock:listen(socket, 10) = 0 do
 	object client = sock:accept(socket)
 	if sequence(client) then
 		puts(1, "Connection from " & client[2] & "\n")
-		_ = sock:send(client[1], "Hello " & client[2] & "\r\n", 0)
+		_ = sock:send(client[1], sock:recv(client[1], 0), 0)
 		_ = sock:close_socket(client[1])
 	end if
 end while
