@@ -143,8 +143,63 @@ public function allocate_string(sequence s)
         return mem
 end function
 
+--**
+-- Allocate a NULL terminated pointer array.
+--
+-- Parameters:
+--   # #pointers# - A sequence of pointers to add to the pointer array.
+--
+-- Comments:
+--   This function adds the NULL terminator.
+--
+-- Example 1:
+-- <eucode>
+-- atom pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
+-- </eucode>
+--
+-- See Also:
+--   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
 
+public function allocate_pointer_array(sequence pointers)
+    atom pList
 
+    if atom(pointers) then
+        return NULL
+    end if
+
+    pointers &= 0
+    pList = allocate(length(pointers) * 4)
+    poke4(pList, pointers)
+
+    return pList
+end function
+
+--**
+-- Allocate a C-style null-terminated array of strings in memory
+--
+-- Parameters:
+--   # #string_list# - sequence of strings to store in RAM.
+--
+-- Returns:
+--   An **atom**, the address of the memory block where the string pointer
+--   array was stored.
+--
+-- Example 1:
+-- <eucode>
+-- atom p = allocate_string_pointer_array({ "One", "Two", "Three" })
+-- -- Same as C: char *p = { "One", "Two", "Three", NULL };
+-- </eucode>
+--
+-- See Also:
+--   [[:free_pointers_array]]
+
+public function allocate_string_pointer_array(sequence string_list)
+	for i = 1 to length(string_list) do
+		string_list[i] = allocate_string(string_list[i])
+	end for
+
+	return allocate_string_pointer_array(string_list)
+end function
 
 --**
 -- Free up a previously allocated block of memory.
@@ -175,10 +230,34 @@ end function
 --     [[:allocate]], [[:free_low]], [[:free_code]]
 
 public procedure free(machine_addr addr)
--- free the memory at address a
         machine_proc(M_FREE, addr)
 end procedure
 
+--**
+-- Free a NULL terminated pointers array.
+--
+-- Parameters:
+--   # #pointers_array# - memory address of where the NULL terminated array exists at.
+--
+-- Comments:
+--   This is for NULL terminated lists.
+--
+-- See Also:
+--   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
+
+public procedure free_pointer_array(atom pointers_array)
+	atom saved = pointers_array,
+		ptr = peek4u(pointers_array)
+
+	while ptr do
+		free(ptr)
+
+		pointers_array+=4
+		ptr = peek4u(pointers_array)
+	end while
+
+	free(saved)
+end procedure
 
 --****
 -- === Reading from, Writing to, and Calling into Memory
