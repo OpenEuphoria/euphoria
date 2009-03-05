@@ -16,6 +16,7 @@ include std/sequence.e
 include std/datetime.e
 include std/text.e
 include std/math.e
+
 --****
 -- === Database File Format
 --
@@ -84,48 +85,50 @@ include std/math.e
 -- four bytes just before the address.
 
 --****
--- === Constants
--- ==== Error Status
--- * DB_OK
--- * DB_OPEN_FAIL
--- * DB_EXISTS_ALREADY
--- * DB_LOCK_FAIL
+-- === Error Status Constants
 
-public constant DB_OK = 0,
-				DB_OPEN_FAIL = -1,
-				DB_EXISTS_ALREADY = -2,
-				DB_LOCK_FAIL = -3,
-				DB_FATAL_FAIL = -404
-
---****
--- ==== Lock Types
--- * DB_LOCK_NO
--- * DB_LOCK_SHARED
--- * DB_LOCK_EXCLUSIVE
-
-public constant DB_LOCK_NO = 0,       -- don't bother with file locking
-				DB_LOCK_SHARED = 1,   -- read the database
-				DB_LOCK_EXCLUSIVE = 2 -- read and write the database
+public constant
+	--** Database is OK, not error has occurred.
+	DB_OK = 0,
+	--** The database could not be opened.
+	DB_OPEN_FAIL = -1,
+	--** The database could not be created, it already exists.
+	DB_EXISTS_ALREADY = -2,
+	--** A lock could not be gained on the database.
+	DB_LOCK_FAIL = -3,
+	--** A fatal error has occurred.
+	DB_FATAL_FAIL = -404
 
 --****
--- ==== Error Codes 
--- * MISSING_END
--- * NO_DATABASE
--- * BAD_SEEK
--- * NO_TABLE
--- * DUP_TABLE
--- * BAD_RECNO
--- * INSERT_FAILED
+-- === Lock Type Constants
 
-	
-public enum 
-	MISSING_END = 900,	-- missing 0 terminator 
-	NO_DATABASE,		-- current_db is not set
-	BAD_SEEK,			-- seek() failed.
-	NO_TABLE,			-- no table found
-	DUP_TABLE,			-- this table already exists
-	BAD_RECNO,			-- unknown key_location index supplied
-	INSERT_FAILED,		-- couldn't insert a new record
+public enum
+	--** Do not lock the file.
+	DB_LOCK_NO = 0,
+	--** Open the database with read-only access.
+	DB_LOCK_SHARED,
+	--** Open the database with read and write access.
+	DB_LOCK_EXCLUSIVE
+
+--****
+-- === Error Code Constants
+
+public enum
+	--** Missing 0 terminator
+	MISSING_END = 900,
+	--** current_db is not set
+	NO_DATABASE,
+	--** seek() failed.
+	BAD_SEEK,
+	--** no table was found.
+	NO_TABLE,
+	--** this table already exists.
+	DUP_TABLE,
+	--** unknown key_location index was supplied.
+	BAD_RECNO,
+	--** couldn't insert a new record.
+	INSERT_FAILED,
+	--** last error code
 	LAST_ERROR_CODE
 	
 constant DB_MAGIC = 77

@@ -5,56 +5,67 @@
 --
 -- <<LEVELTOC depth=2>>
 --
--- === Constants
---
 
---**
--- C types for .dll arguments and return value:
--- * C_CHAR    = #01000001,
--- * C_UCHAR   = #02000001,
--- * C_SHORT   = #01000002,
--- * C_USHORT  = #02000002,
--- * C_INT     = #01000004,
--- * C_UINT    = #02000004,
--- * C_LONG    = C_INT,
--- * C_ULONG   = C_UINT,
--- * C_POINTER = C_ULONG,
--- * C_FLOAT   = #03000004,
--- * C_DOUBLE  = #03000008
 include std/convert.e
---include std/memory.e
+
+--****
+-- === C Type Constants
+-- These C type constants are used when defining external C functions in a shared
+-- library file.
+--
+-- Example 1:
+--   See [[:define_c_proc]]
+--
+-- See Also:
+--   [[:define_c_proc]], [[:define_c_func]], [[:define_c_var]]
 
 public constant
+	--** char
 	C_CHAR    = #01000001,
+	--** unsigned char
 	C_UCHAR   = #02000001,
+	--** short
 	C_SHORT   = #01000002,
+	--** unsigned short
 	C_USHORT  = #02000002,
+	--** int
 	C_INT     = #01000004,
+	--** unsigned int
 	C_UINT    = #02000004,
+	--** long
 	C_LONG    = C_INT,
+	--** unsigned long
 	C_ULONG   = C_UINT,
+	--** any valid pointer
 	C_POINTER = C_ULONG,
+	--** float
 	C_FLOAT   = #03000004,
+	--** double
 	C_DOUBLE  = #03000008
 
---**
--- Euphoria types for .dll arguments and return value:
--- *E_INTEGER = #06000004,
--- *E_ATOM    = #07000004,
--- *E_SEQUENCE= #08000004,
--- *E_OBJECT  = #09000004
+--****
+-- === External Euphoria Type Constants
+-- These are used for arguments to and the return value from a Euphoria shared
+-- library file (.dll, .so or .dylib).
 
 public constant
+	--** integer
 	E_INTEGER = #06000004,
+	--** atom
 	E_ATOM    = #07000004,
+	--** sequence
 	E_SEQUENCE= #08000004,
+	--** object
 	E_OBJECT  = #09000004
+
+
+--****
+-- === Constants
 
 --**
 -- C's NULL pointer
--- public constant NULL = 0 ~-- NULL pointer
 
-public constant NULL = 0 -- NULL pointer
+public constant NULL = 0
 
 constant M_OPEN_DLL  = 50,
 		 M_DEFINE_C  = 51,

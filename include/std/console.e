@@ -14,6 +14,24 @@ constant
 	M_CHECK_BREAK = 43
 
 --****
+-- === Cursor Style Constants
+--
+-- In the cursor constants below, the second and fourth hex digits (from the
+-- left) determine the top and bottom row of pixels in the cursor. The first
+-- digit controls whether the cursor will be visible or not. For example, #0407
+-- turns on the 4th through 7th rows.
+--
+-- See Also:
+--   [[:cursor]]
+
+public constant 
+	NO_CURSOR              = #2000,
+	UNDERLINE_CURSOR       = #0607,
+	THICK_UNDERLINE_CURSOR = #0507,
+	HALF_BLOCK_CURSOR      = #0407,
+	BLOCK_CURSOR           = #0007
+
+--****
 -- === Keyboard related routines
 
 --**
@@ -616,14 +634,6 @@ public function text_rows(positive_int rows)
 	return machine_func(M_TEXTROWS, rows)
 end function
 
--- cursor styles:
-public constant 
-	NO_CURSOR              = #2000,
-	UNDERLINE_CURSOR       = #0607,
-	THICK_UNDERLINE_CURSOR = #0507,
-	HALF_BLOCK_CURSOR      = #0407,
-	BLOCK_CURSOR           = #0007
-		 
 --**
 -- Select a style of cursor.
 --
@@ -633,20 +643,6 @@ public constant
 -- Platform:
 --		Not //Unix//
 -- Comments:
--- Predefined cursors are:
---	
--- <eucode>
--- public constant 
---     NO_CURSOR              = #2000,
---     UNDERLINE_CURSOR       = #0607,
---     THICK_UNDERLINE_CURSOR = #0507,
---     HALF_BLOCK_CURSOR      = #0407,
---     BLOCK_CURSOR           = #0007
--- </eucode>
---
--- The second and fourth hex digits (from the left) determine the top and bottom rows 
--- of pixels in the cursor. The first digit controls whether the cursor will be visible 
--- or not. For example, #0407 turns on the 4th through 7th rows.
 --
 --   In pixel-graphics modes no cursor is displayed.
 --
@@ -658,6 +654,14 @@ public constant
 -- See Also:
 --
 --   [[:graphics_mode]], [[:text_rows]]
+--
+-- *Cursor Type Constants*
+-- * [[:NO_CURSOR]]
+-- * [[:UNDERLINE_CURSOR]]
+-- * [[:THICK_UNDERLINE_CURSOR]]
+-- * [[:HALF_BLOCK_CURSOR]]
+-- * [[:BLOCK_CURSOR]]
+--
 
 public procedure cursor(integer style)
 	machine_proc(M_CURSOR, style)
