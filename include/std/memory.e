@@ -164,7 +164,7 @@ public function allocate_pointer_array(sequence pointers)
     atom pList
 
     if atom(pointers) then
-        return NULL
+        return 0
     end if
 
     pointers &= 0
