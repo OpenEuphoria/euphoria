@@ -193,12 +193,12 @@ end function
 -- See Also:
 --   [[:free_pointers_array]]
 
-public function allocate_string_pointer_array(sequence string_list)
+public function allocate_string_pointer_array(object string_list)
 	for i = 1 to length(string_list) do
 		string_list[i] = allocate_string(string_list[i])
 	end for
 
-	return allocate_string_pointer_array(string_list)
+	return allocate_pointer_array(string_list)
 end function
 
 --**
