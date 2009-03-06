@@ -107,4 +107,20 @@ procedure test_inline_switch_jumps()
 end procedure
 test_inline_switch_jumps()
 
+function const_init( integer x )
+	if x = 0 then
+		return 0
+	else
+		return x * x
+	end if
+end function
+
+constant
+	ZERO_INIT = const_init( 0 ),
+	ONE_INIT  = const_init( 1 ),
+	TWO_INIT  = const_init( 2 )
+test_equal( "inlined const init 0", 0, ZERO_INIT )
+test_equal( "inlined const init 1", 1, ONE_INIT )
+test_equal( "inlined const init 2", 4, TWO_INIT )
+
 test_report()

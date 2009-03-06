@@ -1399,11 +1399,39 @@ constant USAGES = {
 	"U_WRITTEN",
 	"U_DELETED"} -- we've decided to delete this symbol
 
+constant TEMP_USAGES = {
+	"T_INTEGER",
+	"T_SEQUENCE",
+	"T_ATOM",
+	"T_UNKNOWN"
+	}
 function format_symbol( sequence symbol )
+	if symbol[S_MODE] = M_TEMP then
+		symbol[S_USAGE] = TEMP_USAGES[symbol[S_USAGE]]
+	else
+		switch symbol[S_USAGE] do
+		case U_UNUSED:
+			symbol[S_USAGE] = "U_UNUSED"
+			break
+		case U_DELETED:
+			symbol[S_USAGE] = "U_DELETED"
+			break
+		case U_READ:
+		case U_WRITTEN:
+			symbol[S_USAGE] = USAGES[symbol[S_USAGE]]
+			break
+		case 3:
+			symbol[S_USAGE] = "U_READ + U_WRITTEN"
+			break
+		case else
+			symbol[S_USAGE] = "Usage Unknown"
+		end switch
+	end if
 	symbol[S_MODE] = MODES[symbol[S_MODE]]
 	if symbol[S_SCOPE] then
 		symbol[S_SCOPE] = SCOPES[symbol[S_SCOPE]]
 	end if
+	
 	return symbol
 end function
 

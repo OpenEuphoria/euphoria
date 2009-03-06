@@ -2633,21 +2633,12 @@ procedure opASSIGN()
 	CRef(Code[pc+1])
 	SymTab[Code[pc+1]][S_ONE_REF] = FALSE
 	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
-	if SymTab[Code[pc+2]][S_MODE] = M_CONSTANT then
-		if SymTab[Code[pc+1]][S_MODE] != M_CONSTANT or
-		   TypeIsNot(Code[pc+1], TYPE_INTEGER) or
-		   not integer(ObjValue(Code[pc+1])) then
-			c_stmt("@ = @;\n", {Code[pc+2], Code[pc+1]})
-		else
-			-- don't have to assign literal integer to a constant
-			-- mark the constant as deleted
-			SymTab[Code[pc+2]][S_USAGE] = U_DELETED
-		end if
-
-	else
+	
+	if SymTab[Code[pc+2]][S_MODE] != M_CONSTANT then
 		CDeRef(Code[pc+2])
-		c_stmt("@ = @;\n", {Code[pc+2], Code[pc+1]})
 	end if
+	
+	c_stmt("@ = @;\n", {Code[pc+2], Code[pc+1]})
 
 	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
 		target[MIN] = SeqLen(Code[pc+1])
