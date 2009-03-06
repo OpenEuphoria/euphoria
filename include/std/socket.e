@@ -2345,18 +2345,20 @@ function unix_gethostbyname(sequence name)
 	name_ptr = allocate_string(name)
 	hostent = c_func(gethostbyname_,{name_ptr})
 	free(name_ptr)
+
 	if hostent = 0 then
 		return ""
 	end if
+
 	host_addr_ptr = peek4u(hostent+16)  -- May be hostent+12 on Windows, may be hostent+16 on Linux
+
 	if host_addr_ptr > 0 then
 		host_addr = sprintf("%d.%d.%d.%d",peek({peek4u(host_addr_ptr),4}))
 	else
 		host_addr = ""
 	end if
-	free(hostent)
+
 	return host_addr
-	
 end function
 
 function windows_gethostbyname(sequence name)
