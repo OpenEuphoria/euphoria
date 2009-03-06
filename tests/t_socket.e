@@ -1,13 +1,8 @@
-
 include std/unittest.e
 include std/socket.e as sock
 include std/console.e
 
 object _ = 0
-
--- TODO: Test HTTP stuff
-
-test_equal("urlencode 1", "Hello%20%26%20World", urlencode("Hello & World"))
 
 sequence addrinfo = sock:getaddrinfo("localhost", "http", 0)
 test_equal("getaddrinfo localhost, http", "127.0.0.1:80", addrinfo[1][5])
