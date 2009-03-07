@@ -389,7 +389,7 @@ end function
 
 integer INCLUDE_NEXT	INCLUDE_NEXT = FALSE
 function scan_identifier()
-	if not Alpha_Char(Look) then return FALSE end if
+	if not Alpha_Char(Look) and Look != '_' then return FALSE end if
 	Token[TTYPE] = T_IDENTIFIER
 	Token[TDATA] = ""
 	while Identifier_Char(Look) do

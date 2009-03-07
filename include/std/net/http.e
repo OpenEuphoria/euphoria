@@ -24,7 +24,6 @@ sequence
 -- made case insensitive by Kat
 -- mod'd again for eunet
 function eunet_parse(sequence s, object c)
-	
 	integer slen, spt, flag
 	sequence parsed, upperc, uppers
 	
@@ -66,16 +65,15 @@ end function
 --****
 -- === URL encoding
 --
-
 -- HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
---   1. Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii 
---      value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable 
---      characters, and any others you want to encode-- there's no danger in encoding too many 
---      characters. For simplicity, you might encode all non-alphanumeric characters.
---   2. Change all spaces to pluses.
---   3. String the names and values together with = and &, like
---          name1=value1&name2=value2&name3=value3
---   4. This string is your message body for POST submissions, or the query string for GET submissions.
+-- # Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii
+--   value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable
+--   characters, and any others you want to encode-- there's no danger in encoding too many
+--   characters. For simplicity, you might encode all non-alphanumeric characters.
+-- # Change all spaces to pluses.
+-- # String the names and values together with = and &, like
+--   name1=value1&name2=value2&name3=value3
+-- # This string is your message body for POST submissions, or the query string for GET submissions.
 --
 -- For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors" 
 -- that's set to "Fred & Ethel", the URL-encoded form data would be:

@@ -1,5 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 
+include std/math.e
+
 --****
 -- == Regular Expressions
 --
@@ -214,21 +216,17 @@ end function
 
 public function find_all(regex re, sequence haystack, integer from=1)
 	object result
-	sequence results
 	
-	results = {}
-	
-	while 1 do
-		result = find(re, haystack, from)
-		if atom(result) then
-			exit
-		end if
-		
-		results = append(results, result)
-		from = result[1][2] + 1
+	sequence results = {}
+	while sequence(result) entry do
+		results = append(results, result[1])
+		from = max(result) + 1
+
 		if from > length(haystack) then
 			exit
 		end if
+	entry
+		result = find(re, haystack, from)
 	end while
 	
 	return results

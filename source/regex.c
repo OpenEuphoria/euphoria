@@ -644,7 +644,7 @@ int RxMatch(RxNode *rx) {
 
     //printf(">>");
     while (n) {
-        //printf("%-50.50s\n", rex);
+        //printf("%-50.50s, %i\n", rex, n->fWhat);
         //RxDump(1, n);
         switch (n->fWhat) {
         case RE_NOTHING:
@@ -743,12 +743,12 @@ int RxMatch(RxNode *rx) {
         case RE_JUMP:
             n = n->data.fPtr;
             continue;
-        case RE_END:
+		case RE_END:
             return 1;
         case RE_BREAK:
             n = n->fNext;
             if (n->fNext == 0) break;
-            n = n->fNext;
+			n = n->fNext;
             if (n->fWhat & RE_BRANCH) {
                 while ((n->fWhat & RE_BRANCH) && n->data.fPtr && ((n->fWhat & 0xFF) == '|'))
                     n = n->data.fPtr->fNext;
@@ -807,8 +807,9 @@ int RxMatch(RxNode *rx) {
                     continue;
                 }
             }
-            break;
-        }
+			break;
+		}
+		if (n == 0) break;
         n = n->fNext;
     }
     /* NOTREACHED */
@@ -1146,3 +1147,19 @@ int RxReplace(const char *rep, const char *Src, int len, RxMatchRes match, char 
     *Dest = dest;
     return 0;
 }
+
+/*
+int main(int argc, char **argv)
+{
+	const char regstr[] = {123,251,129,105,117,184,89,215,105,124,0};
+	const char str[] = {251,129,105,117,184,89,215,105,124,0};
+
+	printf("'%s'\n", regstr);
+	printf("'%s'\n", str);
+
+	RxMatchRes matches;
+	RxNode *r = RxCompile(regstr);
+	printf("%i\n", RxExecMatch(r, str, strlen(str), str, &matches, RX_CASE));
+	return 0;
+}
+*/

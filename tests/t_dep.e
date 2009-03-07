@@ -20,7 +20,6 @@ include std/machine.e as mach
 include std/dll.e as dll
 include std/os.e as os
 include std/error.e as error
-include std/callback.e as callback
 
 include std/unittest.e
 

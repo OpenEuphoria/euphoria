@@ -27,8 +27,8 @@
 # API docs
 ../docs/api.txt
 ../include/std/console.e
-../include/std/convert.e
 ../include/std/get.e
+../include/std/convert.e
 ../include/std/datetime.e
 ../include/std/dll.e
 ../include/std/eds.e
