@@ -4727,6 +4727,13 @@ static object crash_routine(object x)
 	   )
 		RTFatal("invalid routine id passed to crash_routine()");
 		
+#ifndef ERUNTIME
+	if (e_routine[r]->token == PROC)
+	{
+		RTFatal("procedure's routine id passed to crash_routine()");
+	}
+#endif
+
 	if (crash_list == NULL) {
 #ifdef ERUNTIME     
 		// Interpreter does this in InitExecute()
