@@ -59,6 +59,7 @@
 ../include/std/sequence.e
 ../include/std/sets.e
 ../include/std/socket.e
+../include/std/net/http.e
 ../include/std/sort.e
 ../include/std/stack.e
 ../include/std/stats.e

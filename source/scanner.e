@@ -404,6 +404,12 @@ function path_open()
 		full_path = main_path & new_include_name
 		try = open(full_path,  "r")
 	end if
+
+	if try = -1 then
+		-- eudir path
+		full_path = eudir & SLASH & "include" & SLASH & new_include_name
+		try = open(full_path, "r")
+	end if
  
 	if try != -1 then
 		new_include_name = full_path
