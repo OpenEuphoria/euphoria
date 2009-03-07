@@ -7,6 +7,9 @@
 --
 
 include std/convert.e
+include std/machine.e
+include std/math.e
+include std/error.e
 
 --****
 -- === C Type Constants
