@@ -752,9 +752,9 @@ int RxMatch(RxNode *rx) {
             continue;
 	case RE_END:
 	    level--;
-	    //if (level != 0) {
+	    if (level != 0) {
 	    	break_out = 1;
-	    //}
+	    }
 	    return 1;
         case RE_BREAK:
             n = n->fNext;
@@ -827,7 +827,7 @@ int RxMatch(RxNode *rx) {
     //assert(1 == 0 /* internal regexp error */);
     level--;
     if ((break_out == 1) && (level == 0)) {
-    	//break_out = 0;
+    	break_out = 0;
     }
     return 0;
 }
