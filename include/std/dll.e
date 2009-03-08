@@ -480,7 +480,7 @@ atom page_offset = 0
 --     [[:routine_id]]
 
 public function call_back(object id)
-	ifdef !WIN32 then
+	ifdef not WIN32 then
 		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
 	elsedef

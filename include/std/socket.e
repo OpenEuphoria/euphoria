@@ -273,7 +273,7 @@ public constant MSG_OOB = #1,
 
 constant BLOCK_SIZE = 4096
 
-ifdef !WIN32 then
+ifdef not WIN32 then
 atom dll_
 end ifdef
 atom ipdll_, sockdll_, kerneldll_, dnsdll_,

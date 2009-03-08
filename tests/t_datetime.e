@@ -266,7 +266,7 @@ for i = 0 to 11 do
 	end if
 end for
 
-ifdef !DOS32 then
+ifdef not DOS32 then
 	dt1 = d:now_gmt()
 	test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
 end ifdef

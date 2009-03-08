@@ -100,7 +100,7 @@ void = c_func(rexec, {x, y})
 test_pass( "Is memory allocated by allocate_code() executable?" )
 test_message = ""
 
-ifdef !DOS32 then
+ifdef not DOS32 then
 	atom five_cb_cdecl = call_back( '+' & routine_id("five") )
 	test_not_equal( "create forced cdecl callback", 0, five_cb_cdecl )
 	

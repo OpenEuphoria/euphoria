@@ -174,7 +174,7 @@ end function
 -- [[:wildcard_match]], [[:dir]]
 
 public function wildcard_file(sequence pattern, sequence filename)
-	ifdef !UNIX then
+	ifdef not UNIX then
 		pattern = txt:upper(pattern)
 		filename = txt:upper(filename)
 	end ifdef
