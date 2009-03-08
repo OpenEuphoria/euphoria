@@ -2760,6 +2760,23 @@ function get_assigned_sym()
 	return Code[$-1]
 end function
 
+procedure Assign_Constant( symtab_index sym )
+	symtab_index valsym = Pop() -- pop the sym for the constant, too
+	object val = SymTab[valsym][S_OBJ]
+	
+	SymTab[sym][S_OBJ] = val
+	SymTab[sym][S_INITLEVEL] = 0
+	
+	if TRANSLATE then
+		-- Let the translator know about its value
+		SymTab[sym][S_GTYPE] = SymTab[valsym][S_GTYPE]
+		SymTab[sym][S_SEQ_ELEM] = SymTab[valsym][S_SEQ_ELEM]
+		SymTab[sym][S_OBJ_MIN] = SymTab[valsym][S_OBJ_MIN]
+		SymTab[sym][S_OBJ_MAX] = SymTab[valsym][S_OBJ_MAX]
+		SymTab[sym][S_SEQ_LEN] = SymTab[valsym][S_SEQ_LEN]
+	end if
+end procedure
+
 procedure Global_declaration(symtab_index type_ptr, integer scope)
 -- parse a command-level variable or constant declaration
 -- type_ptr is NULL if constant
@@ -2811,10 +2828,8 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			end if
 			valsym = Top()
 			if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
-				valsym = Pop()
-				SymTab[sym][S_OBJ] = SymTab[valsym][S_OBJ]
-				SymTab[sym][S_INITLEVEL] = 0
-				valsym = Pop() -- pop the sym for the constant, too
+				Assign_Constant( sym )
+				sym = Pop()
 			else
 				emit_op(ASSIGN)
 				valsym = get_assigned_sym()
@@ -2905,6 +2920,15 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				-- need to remember this for select/case statements
 				SymTab[sym][S_CODE] = valsym
 				SymTab[sym][S_OBJ]  = val - 1
+				
+				if TRANSLATE then
+					-- Let the translator know about its value
+					SymTab[sym][S_GTYPE] = SymTab[valsym][S_GTYPE]
+					SymTab[sym][S_SEQ_ELEM] = SymTab[valsym][S_SEQ_ELEM]
+					SymTab[sym][S_OBJ_MIN] = val - 1
+					SymTab[sym][S_OBJ_MAX] = val - 1
+					SymTab[sym][S_SEQ_LEN] = SymTab[valsym][S_SEQ_LEN]
+				end if
 			else
 				SymTab[sym][S_OBJ] = val - 1
 			end if

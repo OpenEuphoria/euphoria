@@ -716,7 +716,9 @@ global procedure PromoteTypeInfo()
 		end if
 		SymTab[s][S_SEQ_LEN_NEW] = -NOVALUE
 		
-		if SymTab[s][S_TOKEN] != NAMESPACE then
+		if SymTab[s][S_TOKEN] != NAMESPACE 
+		and SymTab[s][S_MODE] != M_CONSTANT then
+			
 			if SymTab[s][S_OBJ_MIN_NEW] = -NOVALUE or
 			   SymTab[s][S_OBJ_MIN_NEW] = NOVALUE then
 				SymTab[s][S_OBJ_MIN] = MININT

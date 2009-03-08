@@ -404,12 +404,6 @@ function path_open()
 		full_path = main_path & new_include_name
 		try = open(full_path,  "r")
 	end if
-
-	if try = -1 then
-		-- eudir path
-		full_path = eudir & SLASH & "include" & SLASH & new_include_name
-		try = open(full_path, "r")
-	end if
  
 	if try != -1 then
 		new_include_name = full_path
@@ -426,6 +420,15 @@ function path_open()
 		scan_result = ScanPath(new_include_name, "EUDIR",1)
 	end if
 
+	if atom(scan_result) then
+		-- eudir path
+		full_path = eudir & SLASH & "include" & SLASH & new_include_name
+		try = open(full_path, "r")
+		if try != -1 then
+			return try
+		end if
+	end if
+	
 	if sequence(scan_result) then
 		-- successful
 		new_include_name = scan_result[1]
