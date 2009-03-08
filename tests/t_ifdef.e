@@ -67,4 +67,22 @@ elsedef
 	test_fail("ifdef and and not")
 end ifdef
 
+--
+-- Nested
+--
+
+ifdef ABC then
+	ifdef DEF then
+		test_pass("ifdef nested 1")
+	elsedef
+		test_fail("ifdef nested 1")
+	end ifdef
+
+	ifdef NOT_DEFINED then
+		test_fail("ifdef nested 2")
+	elsedef
+		test_pass("ifdef nested 2")
+	end ifdef
+end ifdef
+
 test_report()
