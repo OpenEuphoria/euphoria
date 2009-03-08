@@ -1,11 +1,11 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
+-- main.e
 -- Front End - main routine
 
 include std/filesys.e
 include std/io.e
 
-ifdef not EU_FULL_RELEASE then
+ifdef !EU_FULL_RELEASE then
 	include rev.e
 end ifdef
 include std/get.e
@@ -58,7 +58,7 @@ function ProcessOptions()
 			end if
 		end if
 
-		ifdef not EU_FULL_RELEASE then
+		ifdef !EU_FULL_RELEASE then
 			screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
 		end ifdef
 		ifdef EU_MANAGED_MEM then

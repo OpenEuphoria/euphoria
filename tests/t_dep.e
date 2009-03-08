@@ -1,3 +1,4 @@
+
 -- Test routines to see whether code returned by 
 -- allocate_code() and call_back() crash.  They should never crash.
 --
@@ -100,7 +101,7 @@ void = c_func(rexec, {x, y})
 test_pass( "Is memory allocated by allocate_code() executable?" )
 test_message = ""
 
-ifdef not DOS32 then
+ifdef !DOS32 then
 	atom five_cb_cdecl = call_back( '+' & routine_id("five") )
 	test_not_equal( "create forced cdecl callback", 0, five_cb_cdecl )
 	

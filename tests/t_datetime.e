@@ -1,3 +1,4 @@
+
 include std/datetime.e as d
 include std/unittest.e
 
@@ -266,7 +267,7 @@ for i = 0 to 11 do
 	end if
 end for
 
-ifdef not DOS32 then
+ifdef !DOS32 then
 	dt1 = d:now_gmt()
 	test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
 end ifdef

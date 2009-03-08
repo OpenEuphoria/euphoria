@@ -1,8 +1,8 @@
-		------------------------------------------
-		-- AUTOMATIC SELF-CHECKING SANITY TEST  --
-		-- for Euphoria                         --
-		-- A quick test of most of the features --
-		------------------------------------------
+------------------------------------------
+-- AUTOMATIC SELF-CHECKING SANITY TEST  --
+-- for Euphoria                         --
+-- A quick test of most of the features --
+------------------------------------------
 -- Usage:
 --        ex sanity
 --       exw sanity.ex
@@ -708,7 +708,7 @@ procedure patterns()
     if wildcard_file("ABC*DEF.*", "XBCDEF.E") then
 	crash(generic_msg)
     end if
-    ifdef not UNIX then
+    ifdef !UNIX then
     	if not wildcard_file("A?B?C?D", "a1b2C3D") then
 			crash(generic_msg)
     	end if

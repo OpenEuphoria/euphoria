@@ -1,6 +1,7 @@
+
 include std/unittest.e
 
-ifdef not EC then
+ifdef !EC then
 include obj_fwd.e
 
 export integer a

@@ -1,5 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
+-- dll.e
 --****
 -- == Dynamic Linking to external code
 --
@@ -480,7 +480,7 @@ atom page_offset = 0
 --     [[:routine_id]]
 
 public function call_back(object id)
-	ifdef not WIN32 then
+	ifdef !WIN32 then
 		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
 	elsedef

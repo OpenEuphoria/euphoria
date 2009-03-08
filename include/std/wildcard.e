@@ -1,5 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
+-- wildcard.e
 --****
 -- == Wildcard Matching
 -- **Page Contents**
@@ -174,7 +174,7 @@ end function
 -- [[:wildcard_match]], [[:dir]]
 
 public function wildcard_file(sequence pattern, sequence filename)
-	ifdef not UNIX then
+	ifdef !UNIX then
 		pattern = txt:upper(pattern)
 		filename = txt:upper(filename)
 	end ifdef

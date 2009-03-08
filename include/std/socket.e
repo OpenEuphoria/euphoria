@@ -1,5 +1,5 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
+-- socket.e
 --****
 -- == Internet Sockets
 --
@@ -273,7 +273,7 @@ public constant MSG_OOB = #1,
 
 constant BLOCK_SIZE = 4096
 
-ifdef not WIN32 then
+ifdef !WIN32 then
 atom dll_
 end ifdef
 atom ipdll_, sockdll_, kerneldll_, dnsdll_,
