@@ -118,9 +118,31 @@ union pc_t {
 						   DeRefDSx(a);              \
 					  }
 
+
+#define SHOW_PARAM(foo) 	if (foo == NOVALUE) {    \
+					printf("NOVALUE");          \
+				} else if (IS_SEQUENCE(foo)) {          \
+					printf("0x%x=MAKE_SEQ(0x%x)", foo, SEQ_PTR(foo)); \
+				} else if (IS_ATOM_INT(foo)) {                  \
+					printf("%d",foo);              \
+				} else if (IS_ATOM_DBL(foo))              \
+					printf("%e",*DBL_PTR(foo))
+				
+				
+#ifdef DEBUG_OPCODE_TRACE
+#	define SHOW_START_BIN_OP_OPCODE_PARAMETERS() printf("(%d=>",pc[1]); \
+				SHOW_PARAM(a); \
+				printf(", %d=>",pc[2]); \
+				SHOW_PARAM(top); \
+				deprintf(")")
+				
+#else
+#	define SHOW_START_BIN_OP_OPCODE_PARAMETERS() 0
+#endif
 #ifdef EDEBUG					  
 #	define START_BIN_OP  a = *(object_ptr)pc[1];	\
-					  top = *(object_ptr)pc[2];      \
+				top = *(object_ptr)pc[2];      \
+				SHOW_START_BIN_OP_OPCODE_PARAMETERS();   \
 					  if ( a == NOVALUE || top == NOVALUE ) RTFatal( "NOVALUE passed to a binary op." ); \
 					  obj_ptr = (object_ptr)pc[3];   \
 					  if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
@@ -2354,6 +2376,13 @@ void do_exec(int *start_pc)
 			case L_ASSIGN_I:
 			deprintf("case L_ASSIGN_I:");
 				/* source & destination are known to be integers */
+#if DEBUG_OPCODE_TRACE
+				deprintf("(");
+				SHOW_PARAM(pc[2]);
+				deprintf(", ");
+				SHOW_PARAM((*(int*)pc[1]));
+				deprintf(")");
+#endif				
 				*(object_ptr)pc[2] = *(object_ptr)pc[1];
 				inc3pc();
 				thread();
@@ -2362,6 +2391,13 @@ void do_exec(int *start_pc)
 			case L_ASSIGN:
 			deprintf("case L_ASSIGN:");
 				obj_ptr = (object_ptr)pc[2];
+#if DEBUG_OPCODE_TRACE
+				deprintf("(");
+				SHOW_PARAM(pc[2]);
+				deprintf(", ");
+				SHOW_PARAM((*(int*)pc[1]));
+				deprintf(")");
+#endif
 				top = *obj_ptr; 
 				*obj_ptr = *(object_ptr)pc[1];
 				Ref(*obj_ptr);

@@ -9,6 +9,7 @@
 include std/text.e
 include std/math.e
 include std/os.e
+include std/filesys.e
 
 include global.e
 include reswords.e
@@ -1063,6 +1064,7 @@ end function
 integer doit
 sequence cc_name, echo
 sequence file0
+sequence prepared_file0
 
 global procedure start_emake()
 -- start creating emake.bat     
@@ -1083,21 +1085,27 @@ global procedure start_emake()
 		puts(doit, "@echo off"&HOSTNL)
 		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
 	end if
-		
+	
+	ifdef DOS32 then
+		prepared_file0 = truncate_to_83(file0)
+	elsedef
+		prepared_file0 = file0
+	end ifdef
+	
 	if TDOS then
-		if debug_option then
-			debug_flag = " /g3"
-		end if
 		if sequence(wat_path) then
+			if debug_option then
+				debug_flag = "/d2 "
+			end if
 			-- /ol removed due to bugs with SEQ_PTR() inside a loop
 			-- can remove /fpc and add /fp5 /fpi87 for extra speed
 			puts(doit, "echo compiling with WATCOM"&HOSTNL)
 			if fastfp then
 				-- fast f.p. that assumes f.p. hardware
-				c_opts = "/w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
+				c_opts = debug_flag & " /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s"
 			else    
 				-- slower f.p. but works on all machines
-				c_opts = "/w0 /zq /j /zp4 /fpc /5r /otimra /s" & debug_flag
+				c_opts = debug_flag & "/w0 /zq /j /zp4 /fpc /5r /otimra /s"
 			end if
 				
 		else 
@@ -1184,6 +1192,9 @@ global procedure start_emake()
 	if TDOS then
 		if sequence(wat_path) then  
 			cc_name = "wcc386"
+			if not dll_option and debug_option then
+				puts(link_file, "DEBUG ALL\n")
+			end if
 			puts(link_file, "option osname='CauseWay'\n")
 			printf(link_file, "libpath %s\\lib386\n", {wat_path})
 			printf(link_file, "libpath %s\\lib386\\dos\n", {wat_path})
@@ -1192,7 +1203,8 @@ global procedure start_emake()
 			printf(link_file, "OPTION STACK=%d\n", total_stack_size) 
 			puts(link_file, "OPTION QUIET\n") 
 			puts(link_file, "OPTION ELIMINATE\n") 
-			puts(link_file, "OPTION CASEEXACT\n") 
+			puts(link_file, "OPTION CASEEXACT\n")
+			printf(link_file, "FILE %s.obj\n", {prepared_file0} )
 		else 
 			cc_name = "gcc"
 		end if
@@ -1200,8 +1212,12 @@ global procedure start_emake()
 	end if      
 
 	if TWINDOWS then    
-		if sequence(wat_path) then
+		if sequence(wat_path) then		
 			cc_name = "wcc386"
+			
+			if not dll_option and debug_option then
+				puts(link_file, "DEBUG ALL\n")
+			end if
 			if dll_option then    
 				puts(link_file, "SYSTEM NT_DLL initinstance terminstance\n")
 			elsif con_option then
@@ -1216,7 +1232,7 @@ global procedure start_emake()
 			puts(link_file, "OPTION QUIET\n") 
 			puts(link_file, "OPTION ELIMINATE\n") 
 			puts(link_file, "OPTION CASEEXACT\n") 
-			
+			printf(link_file, "FILE %s.obj\n", {prepared_file0} )			
 		elsif sequence(bor_path) then
 			cc_name = "bcc32"
 			
@@ -1326,10 +1342,27 @@ end function
 
 global procedure finish_emake()
 -- finish emake.bat 
-	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file
+	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file, arguments
+	object bin_path
 	integer lib_dir
 	integer fp, def_file
 	
+	arguments = command_line()
+	if length( arguments ) > 0 then
+		integer sl
+		sl = length( arguments[1] )
+		while sl and arguments[1][sl] != SLASH do
+			sl -= 1
+		end while
+		if sl then
+			bin_path = arguments[1][1..sl-1]
+		else
+			bin_path = 0 
+		end if
+	else
+		bin_path = 0
+	end if
+
 	-- init-.c files
 	if atom(bor_path) then
 		printf(doit, "%s init-.c"&HOSTNL, {echo})
@@ -1355,18 +1388,22 @@ global procedure finish_emake()
 		short_c_file = file0
 	end ifdef
 
+	if atom(bin_path) then
+		bin_path = get_eudir() & SLASH & "bin"
+	end if
+	
 	if TDOS then    
 		if sequence(wat_path) then
-			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {short_c_file})
+			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length( user_library ) then
 				printf(link_file, "FILE %s", {shrink_to_83(user_library)})
 			else
-			printf(link_file, "FILE %s\\bin\\", {shrink_to_83(get_eudir())})
-			if fastfp then
-				puts(link_file, "ecfastfp.lib\n") 
-			else    
-				puts(link_file, "ec.lib\n") 
-			end if
+				printf(link_file, "FILE %s\\", {bin_path})
+				if fastfp then
+					puts(link_file, "ecfastfp.lib\n") 
+				else    
+					puts(link_file, "ec.lib\n") 
+				end if
 			end if
 			if not keep then
 				puts(doit, "del *.obj > NUL"&HOSTNL)
@@ -1395,7 +1432,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ec.a\n", {get_eudir()}) 
+				printf(link_file, "%s\\ec.a\n", {bin_path}) 
 			end if
 			
 			integer nsl,sl
@@ -1424,11 +1461,11 @@ global procedure finish_emake()
 
 	if TWINDOWS then
 		if sequence(wat_path) then     
-			printf(doit, "wlink FILE %s.obj @objfiles.lnk"&HOSTNL, {short_c_file})
+			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length(user_library) then
 				printf(link_file, "FILE %s\n", {user_library}) 
 			else
-				printf(link_file, "FILE %s\\bin\\ecw.lib\n", {get_eudir()}) 	
+				printf(link_file, "FILE %s\\ecw.lib\n", {bin_path}) 	
 			end if
 			if compare( short_c_file, file0 ) != 0 then
 				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
@@ -1439,7 +1476,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {user_library}) 
 			else
-				printf(link_file, "%s\\bin\\ecwb.lib\n", {get_eudir()}) 	
+				printf(link_file, "%s\\ecwb.lib\n", {bin_path}) 	
 			end if
 			
 			if not keep then
@@ -1465,7 +1502,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {shrink_to_83(user_library)}) 
 			else
-				printf(link_file, "%s\\bin\\ecwl.lib\n", {shrink_to_83(get_eudir())}) 
+				printf(link_file, "%s\\ecwl.lib\n", {shrink_to_83(bin_path)}) 
 			end if
 			
 		end if

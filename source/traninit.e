@@ -386,9 +386,6 @@ procedure InitBackEnd(integer c)
 			CompileErr("DJGPP environment variable is not set")
 		end if
 		bor_path = 0
-		if wat_option and debug_option then
-			CompileErr("DEBUG not supported with WATCOM")
-		end if
 	end if
 
 	if TWINDOWS then
@@ -416,9 +413,6 @@ procedure InitBackEnd(integer c)
 		end if
 		if wat_option and atom(wat_path) then
 			CompileErr("WATCOM environment variable is not set")
-		end if
-		if wat_option and debug_option then
-			CompileErr("DEBUG not supported with WATCOM")
 		end if
 	end if
 	
