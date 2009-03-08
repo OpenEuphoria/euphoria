@@ -2479,13 +2479,43 @@ procedure Ifdef_statement()
 
 	while 1 label "top" do
 		if matched = 0 and in_elsedef = 0 then
-			option = StringToken()
-			tok_optional(THEN)
-			if option[1] = '!' then
-				matched = find(option[2..$], OpDefines) = 0
-			else
-				matched = find(option, OpDefines)
-			end if
+			integer negate = 0, conjunction = 0
+
+			while 1 label "deflist" do
+				option = StringToken()
+				if equal(option, "then") then
+					exit "deflist"
+				elsif equal(option, "not") then
+					negate = 1
+					option = StringToken()
+				elsif equal(option, "and") then
+					conjunction = 1
+					continue "deflist"
+				elsif equal(option, "or") then
+					conjunction = 2
+					continue "deflist"
+				end if
+
+				-- TODO: Remove after giving users a bit of time to change their code
+				if option[1] = '!' then
+					option = option[2..$]
+					negate = 1
+				end if
+
+				integer this_matched = find(option, OpDefines)
+				if negate then
+					this_matched = not this_matched
+				end if
+
+				if conjunction = 0 then
+					matched = this_matched
+				elsif conjunction = 1 then
+					matched = matched and this_matched
+				elsif conjunction = 2 then
+					matched = matched or this_matched
+				end if
+			end while
+
 			in_matched = matched
 			if matched then
 				No_new_entry = 0
@@ -2539,17 +2569,12 @@ procedure Ifdef_statement()
 				end if
 			elsif tok[T_ID] = IFDEF then
 				dead_ifdef += 1
-			--elsif not (match_from("end",ThisLine,bp) or match_from("if",ThisLine,bp) or match_from("elsedef",ThisLine,bp)) then
-				-- BOL token was nothing of value to us, just eat the rest of the line
-				--read_line()
---			else read tokens more slowly, because some unusual formatting could be there
-			--elsif tok[T_ID] = INCLUDE then
-				--read_line()
 			else
 				read_line()
 			end if
 		end while
 	end while
+
 	live_ifdef -= 1
 	No_new_entry = 0
 end procedure
