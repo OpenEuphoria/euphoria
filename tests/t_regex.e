@@ -2,6 +2,8 @@ include std/regex.e as regex
 include std/text.e
 include std/unittest.e
 
+object ignore = 0
+
 regex:regex re = regex:new("[A-Z][a-z]+")
 test_true("new()", re > 0)
 test_equal("exec() #1", {{5,8}}, regex:find(re, "and John ran"))
@@ -42,8 +44,46 @@ test_true("has_match() #1", regex:has_match(re, "john DOE had a DOG"))
 test_false("has_match() #2", regex:has_match(re, "john doe had a dog"))
 regex:free(re)
 
-re = regex:new({123,251,129,105,117,184,89,215,105,124})
-test_true("has_match #3", regex:has_match(re, {251,129,105,117,184,89,215,105,124}))
+test_false("regex mismatch groups 1", regex:new("(x}"))
+test_false("regex mismatch groups 2", regex:new("{x)"))
+
+re = regex:new("{x}")
+test_true("regex matched groups 1", re)
 regex:free(re)
+
+re = regex:new("(x)")
+test_true("regex matched groups 2", re)
+regex:free(re)
+
+re = regex:new("{x?}#y")
+test_false("regex runaway", regex:find(re, ""))
+regex:free(re)
+
+re = regex:new("{x?}#y")
+test_equal("regex fixed runaway", {{1,3}}, regex:find(re, "xxy"))
+regex:free(re)
+
+re = regex:new("^")
+test_equal("regex bol on empty string", {{1,0}}, regex:find(re, ""))
+regex:free(re)
+
+re = regex:new("$")
+test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
+regex:free(re)
+
+re = regex:new({123,251,129,105,117,184,89,215,105,124})
+ignore = regex:has_match(re, {251,129,105,117,184,89,215,105,124})
+test_pass("regex new/match combo that produced a seg fault 1")
+regex:free(re)
+
+/*
+-- Runs away only to give a seg fault due to stack problems.
+re = regex:new("{x?}+y")
+ignore = regex:find(re, "xxy")
+test_pass("regex new/match combo that produced a seg fault 1")
+regex:free(re)
+*/
+
+test_fail("regex seg fault 2, runs away w/stack")
 
 test_report()

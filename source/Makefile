@@ -43,6 +43,7 @@
 ifndef CONFIG
 CONFIG = Makefile.eu
 endif
+
 include $(CONFIG)
 
 EU_VERSION = 4.0
@@ -241,14 +242,14 @@ all : interpreter translator library backend
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
 distclean : clean
-	-rm Makefile.eu
-	-rmdir $(BUILD_DIRS)
+	-rm -f Makefile.eu
+	-rm -fr $(BUILD_DIRS)
 
 clean : 
 	-rm -fr $(BUILDDIR)/{int,trans,lib,back}obj
-	-rm $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EBACKENDU) $(BUILDDIR)/$(DEB_SOURCE_DIR).tar.gz
+	-rm -f $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EBACKENDU) $(BUILDDIR)/$(DEB_SOURCE_DIR).tar.gz
 ifeq "$(MINGW)" "1"
-	-rm $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
+	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
 endif
 
 .PHONY : clean distclean all

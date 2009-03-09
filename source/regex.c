@@ -531,7 +531,7 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
 
 #define CHECK(n,f) do { if ((n) == 0) { RxFree(f); return 0;} } while (0)
 
-static RxNode *RxComp(const char **const Regexp) {
+static RxNode *RxComp(const char **const Regexp, int flags) {
     RxNode *F = 0;
     RxNode *N = 0;
     int C;
@@ -548,19 +548,22 @@ static RxNode *RxComp(const char **const Regexp) {
         case '|':
             CHECK(MakeSub(&F, &N, Ch), F);
             break;
-        case '}':
-        case ')':
+		case '}':
+			if (flags == RE_MEM) { RxFree(F); return 0; }
+			return F;
+		case ')':
+			if ((flags & RE_MEM) == 0) { RxFree(F); return 0; }
             return F;
         case '{':
             CHECK(AddNode(&F, &N, NewNode(RE_GROUP | RE_OPEN)), F);
-            CHECK(AddNode(&F, &N, RxComp(Regexp)), F);
+            CHECK(AddNode(&F, &N, RxComp(Regexp, 0)), F);
             while (N->fNext) N = N->fNext;
             CHECK(AddNode(&F, &N, NewNode(RE_GROUP | RE_CLOSE)), F);
             break;
         case '(':
             C = ++RegCount;
             CHECK(AddNode(&F, &N, NewNode(RE_GROUP | RE_OPEN | RE_MEM | C)), F);
-            CHECK(AddNode(&F, &N, RxComp(Regexp)), F);
+            CHECK(AddNode(&F, &N, RxComp(Regexp, RE_MEM)), F);
             while (N->fNext) N = N->fNext;
             CHECK(AddNode(&F, &N, NewNode(RE_GROUP | RE_CLOSE | RE_MEM | C)), F);
             break;
@@ -603,7 +606,7 @@ RxNode *RxCompile(const char *Regexp) {
     RxNode *n = 0, *x;
     if (Regexp == 0) return 0;
     RegCount = 0;
-    n = RxComp(&Regexp);
+    n = RxComp(&Regexp, 0);
     if (n == 0) return 0;
     n = RxOptimize(n);
     x = n;
@@ -642,12 +645,13 @@ static const char *rex;
 int RxMatch(RxNode *rx) {
     RxNode *n = rx;
 
-    //printf(">>");
+    //printf("RxMatch>>");
     while (n) {
-		//printf("%-50.50s\n", rex);
-		//RxDump(1, n);
+        //printf("%i,%s\n", n->fWhat, rex);
+        //RxDump(1, n);
         switch (n->fWhat) {
-        case RE_NOTHING:
+		case RE_NOTHING:
+			if (bop == eop) return 0;
             break;
         case RE_CASE:
             flags |= RX_CASE;
@@ -767,31 +771,32 @@ int RxMatch(RxNode *rx) {
             }
             break;
         default:
-            if (n->fWhat & RE_GROUP) {
-                if (n->fWhat & RE_MEM) {
-                    const char *save = rex;
-                    int b = n->fWhat & 0xFF;
-                    int fl = flags;
+			if (n->fWhat & RE_GROUP) {
+				if (n->fWhat & RE_MEM) {
+					const char *save = rex;
+					int b = n->fWhat & 0xFF;
+					int fl = flags;
 
-                    if (RxMatch(n->fNext) == 0) {
-                        flags = fl;
-                        if (n->fWhat & RE_OPEN)
-                            match->Open[b] = -1;
-                        else
-                            match->Close[b] = -1;
-                        return 0;
-                    }
+					if (RxMatch(n->fNext) == 0) {
+						flags = fl;
+						if (n->fWhat & RE_OPEN)
+							match->Open[b] = -1;
+						else
+							match->Close[b] = -1;
+						return 0;
+					}
 
-                    if (n->fWhat & RE_OPEN) {
-                        //                        if (match->Open[b] == -1)
-                        match->Open[b] = (int)(save - bop);
-                    } else {
-                        //                        if (match->Close[b] == -1)
-                        match->Close[b] = (int)(save - bop);
-                    }
-                    return 1;
-                }
-            } else if (n->fWhat & RE_BRANCH) {
+					if (n->fWhat & RE_OPEN) {
+						//                        if (match->Open[b] == -1)
+						match->Open[b] = (int)(save - bop);
+					} else {
+						//                        if (match->Close[b] == -1)
+						match->Close[b] = (int)(save - bop);
+					}
+
+					return 1;
+				}
+			} else if (n->fWhat & RE_BRANCH) {
                 const char *save = rex;
                 int fl = flags;
 
@@ -799,7 +804,7 @@ int RxMatch(RxNode *rx) {
                     if (RxMatch(n->data.fPtr) == 1) return 1;
                     flags = fl;
                     rex = save;
-                } else {
+				} else {
                     if (RxMatch(n->fNext) == 1) return 1;
                     flags = fl;
                     rex = save;
@@ -813,11 +818,12 @@ int RxMatch(RxNode *rx) {
         n = n->fNext;
     }
     /* NOTREACHED */
-    //assert(1 == 0 /* internal regexp error */);
+	//assert(1 == 0 /* internal regexp error */);
     return 0;
 }
 
 int RxTry(RxNode *rx, const char *s) {
+
     int fl = flags, i;
     rex = s;
     for (i = 0; i < NSEXPS; i++)
@@ -1148,21 +1154,19 @@ int RxReplace(const char *rep, const char *Src, int len, RxMatchRes match, char 
     return 0;
 }
 
-
 /*
-//  ?re:has_match(re:new("(x?}#y"),"")
-
 int main(int argc, char **argv)
 {
 	//const char regstr[] = {123,251,129,105,117,184,89,215,105,124,0};
 	//const char str[] = {251,129,105,117,184,89,215,105,124,0};
-	const char *regstr = "(x?}#y";
-	const char *str = "";
+	const char *regstr = "{x?}+y";//argv[1];
+	const char *str = "xxy"; //argv[2];
 
 	RxMatchRes matches;
-RxNode *r = RxCompile(regstr);
-	printf("%i\n", RxExecMatch(r, str, strlen(str), str, &matches, RX_CASE));
+	RxNode *r = RxCompile(regstr);
+	printf("%s/%s %p\n", regstr, str, r);
+	printf("%i\n", RxExec(r, str, strlen(str), str, &matches, RX_CASE));
+	RxFree(r);
 	return 0;
 }
-
 */
