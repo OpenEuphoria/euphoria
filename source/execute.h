@@ -83,6 +83,11 @@ struct d {                         /* a double precision number */
 
 #define D_SIZE (sizeof(struct d))  
 
+/* **** Important Note ****
+  The offset of the 'ref' field in the 'struct d' and the 'struct s1' must
+  always be the same. This offset is assumed to be the same by the RefDS() macro.
+*/
+
 struct free_block {                /* a free storage block */
 	struct free_block *next;       /* pointer to next free block */
 	long filler;
@@ -91,7 +96,10 @@ struct free_block {                /* a free storage block */
 
 struct symtab_entry;
 
-struct routine_list {   // sync with euphoria\include\euphoria.h
+
+/* 'routine_list' must always be identical to definition in euphoria\include\euphoria.h
+*/
+struct routine_list {   
 	char *name;
 	int (*addr)();
 	int seq_num;
