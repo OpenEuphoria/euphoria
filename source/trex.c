@@ -530,17 +530,23 @@ static const TRexChar *trex_matchnode(TRex* exp,TRexNode *node,const TRexChar *s
 /* public api */
 TRex *trex_compile(const TRexChar *pattern,const TRexChar **error)
 {
+	if (*pattern == '\0') {
+		*error = _SC("empty pattern");
+		return 0;
+	}
+
 	TRex *exp = (TRex *)malloc(sizeof(TRex));
-	exp->_eol = exp->_bol = NULL;
+	exp->_error = error;
+ 	exp->_eol = exp->_bol = NULL;
 	exp->_p = pattern;
 	exp->_nallocated = (int)scstrlen(pattern) * sizeof(TRexChar);
 	exp->_nodes = (TRexNode *)malloc(exp->_nallocated * sizeof(TRexNode));
 	exp->_nsize = 0;
 	exp->_matches = 0;
 	exp->_nsubexpr = 0;
-	exp->_first = trex_newnode(exp,OP_EXPR);
-	exp->_error = error;
+	exp->_first = trex_newnode(exp, OP_EXPR);
 	exp->_jmpbuf = malloc(sizeof(jmp_buf));
+
 	if(setjmp(*((jmp_buf*)exp->_jmpbuf)) == 0) {
 		int res = trex_list(exp);
 		exp->_nodes[exp->_first].left = res;
