@@ -4,8 +4,13 @@ include std/console.e
 
 object _ = 0
 
-sequence addrinfo = sock:getaddrinfo("localhost", "http", 0)
-test_equal("getaddrinfo localhost, http", "127.0.0.1:80", addrinfo[1][5])
+object addrinfo = sock:getaddrinfo("localhost", "http", 0)
+if sequence(addrinfo) then
+	test_equal("getaddrinfo localhost, http", "127.0.0.1:80", addrinfo[1][5])
+else
+	test_fail(sprintf("getaddrinfo returned error %d", addrinfo ))
+end if
+
 
 test_true("is_inetaddr 1", is_inetaddr("127.0.0.1"))
 test_true("is_inetaddr 2", is_inetaddr("127.0.0.1:100"))
