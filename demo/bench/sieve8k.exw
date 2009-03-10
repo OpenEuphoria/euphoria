@@ -9,7 +9,6 @@
 without type_check
 include std/get.e
 include std/search.e
-
 integer SIZE = 8192 
 integer iterations = 1
 integer count
@@ -36,15 +35,17 @@ procedure init()
 end procedure
 
 procedure main()
-		
 	for iter = 1 to iterations do
 		count = 0
 		flags = repeat(ON, SIZE)
 		for i = 2 to SIZE do
 			if flags[i] then
-				for k = i + i to SIZE by i do
+				integer MAX = SIZE - i
+				integer k = i
+				while k <= MAX do
+					k += i
 					flags[k] = OFF
-				end for 
+				end while
 				count += 1
 			end if
 		end for

@@ -626,6 +626,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		passed_params = prepend( passed_params, Pop() )
 	end for
 	
+	symtab_index int_sym = 0
 	for p = 1 to SymTab[sub][S_NUM_ARGS] do
 		symtab_index param = passed_params[p]
 		inline_params &= s
@@ -639,6 +640,12 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 				varnum += 1
 				symtab_index var = new_inline_var( s )
 				prolog &= {ASSIGN, param, var}
+				if not int_sym then
+					int_sym = NewIntSym( 0 )
+				end if
+				
+				-- force earlier deref of temps to prevent unnecessary COWs
+				epilog &= {ASSIGN, int_sym, var}
 				inline_start += 3
 				passed_params[p] = var
 			end if
@@ -653,6 +660,12 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		varnum += 1
 		symtab_index var = new_inline_var( s )
 		proc_vars &= var
+		if int_sym = 0 then
+			int_sym = NewIntSym( 0 )
+		end if
+		
+		-- force earlier deref of temps to prevent unnecessary COWs
+		epilog &= {ASSIGN, int_sym, var}
 		s = SymTab[s][S_NEXT]
 	end while
 	
@@ -774,6 +787,15 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		fixup_special_op( backpatches[i] )
 	end for
 	
+	for i = 1 to length(inline_temps) do
+		if int_sym = 0 then
+			int_sym = NewIntSym( 0 )
+		end if
+		
+		-- force earlier deref of temps to prevent unnecessary COWs
+		epilog &= {ASSIGN, int_sym, inline_temps[i]}
+	end for
+	
 	if is_proc then
 		clear_op()
 	else
@@ -784,8 +806,20 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		
 		if final_target then
 			epilog &= { ASSIGN, inline_target, final_target }
+		else
+		
+		if int_sym 
+		and is_temp( inline_target )
+		and SymTab[sub][S_TOKEN] = TYPE then
+			-- This allows type checks to work properly, since they expect a 0/1 
+			-- object ptr immediately before.  The PRIVATE_INIT_CHECK is skipped, 
+			-- and is used since it takes a single symbol coming after it.
+			epilog &= { ELSE, length(prolog) + length(inline_code) + length(epilog) + inline_start + 5,
+				PRIVATE_INIT_CHECK, inline_target }
+		end if
 		end if
 	end if
+	
 	
 	return prolog & inline_code & epilog
 end function
