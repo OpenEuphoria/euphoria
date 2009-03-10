@@ -1,0 +1,12 @@
+CAUTION:
+
+This is an ALPHA release. This means that Euphoria may not yet be stable, it may
+crash, it may cause problems, and the API may change. You should use this version
+of This version of Euphoria is for testing purposes and for early adopters.
+
+If you have previously installed Euphoria on your system, you may choose to install
+to the same directory. Your current Euphoria files will be saved in the
+"euphoria\backup" subdirectory.
+
+Alternatively, you could Cancel, rename your current Euphoria directory, and start
+this install again.
