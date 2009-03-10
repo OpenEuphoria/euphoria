@@ -213,12 +213,14 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_machine.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_regex.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_trex.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_rterror.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_syncolor.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
-	$(BUILDDIR)/$(OBJDIR)/back/regex.o
+	$(BUILDDIR)/$(OBJDIR)/back/regex.o \
+	$(BUILDDIR)/$(OBJDIR)/back/trex.o
 
 EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
@@ -227,10 +229,12 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_alloc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_regex.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_trex.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
-	$(BUILDDIR)/$(OBJDIR)/back/regex.o
+	$(BUILDDIR)/$(OBJDIR)/back/regex.o \
+	$(BUILDDIR)/$(OBJDIR)/back/trex.o
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))

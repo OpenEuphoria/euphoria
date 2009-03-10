@@ -5234,6 +5234,15 @@ object machine(object opcode, object x)
 			case M_REGEX_FREE:
 				return regex_free(x);
 
+			case M_TREX_COMPILE:
+				return eu_trex_compile(x);
+
+			case M_TREX_EXEC:
+				return eu_trex_exec(x);
+
+			case M_TREX_FREE:
+				return eu_trex_free(x);
+
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

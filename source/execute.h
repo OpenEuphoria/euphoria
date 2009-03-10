@@ -401,3 +401,7 @@ struct char_cell {
 #define M_WARNING_FILE       73
 #define M_SET_ENV            74
 #define M_UNSET_ENV          75
+
+#define M_TREX_COMPILE       76
+#define M_TREX_EXEC          77
+#define M_TREX_FREE          78

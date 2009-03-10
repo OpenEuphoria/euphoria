@@ -461,8 +461,8 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
                 *F = New;
             }
             New->data.fPtr = No;
-            No->data.fPtr = New;
-            Jump->data.fPtr = New;
+			No->data.fPtr = New;
+			Jump->data.fPtr = New;
             *N = No;
             //puts("BRANCH *");
             break;
@@ -538,7 +538,7 @@ static RxNode *RxComp(const char **const Regexp, int flags) {
     char Ch;
 
     while (**Regexp) {
-        //        puts(*Regexp);
+        // puts(*Regexp);
         switch (Ch = (*(*Regexp)++)) {
         case '?':
         case '*':
@@ -645,83 +645,83 @@ static const char *rex;
 int RxMatch(RxNode *rx) {
     RxNode *n = rx;
 
-    //printf("RxMatch>>");
+    //printf("RxMatch>>\n");
     while (n) {
         //printf("%i,%s\n", n->fWhat, rex);
         //RxDump(1, n);
         switch (n->fWhat) {
-		case RE_NOTHING:
+		case RE_NOTHING:/* printf("RE_NOTHING %s\n", rex);*/
 			if (bop == eop) return 0;
             break;
-        case RE_CASE:
+        case RE_CASE:/* printf("RE_CASE %s\n", rex);*/
             flags |= RX_CASE;
             break;
-        case RE_NCASE:
+        case RE_NCASE:/* printf("RE_NCASE %s\n", rex);*/
             flags &= ~RX_CASE;
             break;
-        case RE_ATBOL:
+        case RE_ATBOL:/* printf("RE_ATBOL %s\n", rex);*/
             if (rex != bop) return 0;
             break;
-        case RE_ATEOL:
+        case RE_ATEOL:/* printf("RE_ATEOL %s\n", rex);*/
             if (rex != eop) return 0;
             break;
-        case RE_ANY:
+        case RE_ANY:/* printf("RE_ANY %s\n", rex);*/
             if (rex == eop) return 0;
             rex++;
             break;
-        case RE_WSPACE:
+        case RE_WSPACE:/* printf("RE_WSPACE %s\n", rex);*/
             if (rex == eop) return 0;
             if (*rex != ' ' && *rex != '\n' && *rex != '\r' && *rex != '\t') return 0;
             rex++;
             break;
-        case RE_NWSPACE:
+        case RE_NWSPACE:/* printf("RE_NWSPACE %s\n", rex);*/
             if (rex == eop) return 0;
             if (*rex == ' ' || *rex == '\n' || *rex == '\r' || *rex == '\t') return 0;
             rex++;
             break;
-        case RE_WORD:
+        case RE_WORD:/* printf("RE_WORD %s\n", rex);*/
             if (rex == eop) return 0;
             if (!isalnum(*rex)) return 0;
             rex++;
             break;
-        case RE_NWORD:
+        case RE_NWORD:/* printf("RE_NWORD %s\n", rex);*/
             if (rex == eop) return 0;
             if (isalnum(*rex)) return 0;
             rex++;
             break;
-        case RE_DIGIT:
+        case RE_DIGIT:/* printf("RE_DIGIT %s\n", rex);*/
             if (rex == eop) return 0;
             if (!isdigit(*rex)) return 0;
             rex++;
             break;
-        case RE_NDIGIT:
+        case RE_NDIGIT:/* printf("RE_NDIGIT %s\n", rex);*/
             if (rex == eop) return 0;
             if (isdigit(*rex)) return 0;
             rex++;
             break;
-        case RE_UPPER:
+        case RE_UPPER:/* printf("RE_UPPER %s\n", rex);*/
             if (rex == eop) return 0;
             if (!isupper(*rex)) return 0;
             rex++;
             break;
-        case RE_LOWER:
+        case RE_LOWER:/* printf("RE_LOWER %s\n", rex);*/
             if (rex == eop) return 0;
             if (!islower(*rex)) return 0;
             rex++;
             break;
-        case RE_ATBOW:
+        case RE_ATBOW:/* printf("RE_ATBOW %s\n", rex);*/
             if (rex >= eop) return 0;
             if (rex > bop) {
                 if ((ChClass(*rex) != 1) || (ChClass(*(rex - 1)) != 0)) return 0;
             }
             break;
-        case RE_ATEOW:
+        case RE_ATEOW:/* printf("RE_ATEOW %s\n", rex);*/
             if (rex <= bop) return 0;
             if (rex < eop) {
                 if ((ChClass(*rex) != 0) || (ChClass(*(rex - 1)) != 1)) return 0;
             }
             break;
-        case RE_CHAR:
+        case RE_CHAR:/* printf("RE_CHAR %s\n", rex);*/
             if (rex == eop) return 0;
             if (flags & RX_CASE) {
                 if (*n->data.fChar != *rex) return 0;
@@ -734,22 +734,22 @@ int RxMatch(RxNode *rx) {
             }
             rex += n->fLen;
             break;
-        case RE_INSET:
+        case RE_INSET:/* printf("RE_INSET %s\n", rex);*/
             if (rex == eop) return 0;
             if ((n->data.fChar[(unsigned char)(*rex) >> 3] & (1 << ((unsigned char)(*rex) & 7))) == 0) return 0;
             rex++;
             break;
-        case RE_NOTINSET:
+        case RE_NOTINSET:/* printf("RE_NOTINSET %s\n", rex);*/
             if (rex == eop) return 0;
             if (n->data.fChar[(unsigned char)(*rex) >> 3] & (1 << ((unsigned char)(*rex) & 7))) return 0;
             rex++;
             break;
-        case RE_JUMP:
-            n = n->data.fPtr;
-            continue;
-        case RE_END:
+		case RE_JUMP:/* printf("RE_JUMP %s\n", rex);*/
+			n = n->data.fPtr;
+			continue;
+        case RE_END:/* printf("RE_END %s\n", rex);*/
             return 1;
-        case RE_BREAK:
+        case RE_BREAK:/* printf("RE_BREAK %s\n", rex);*/
             n = n->fNext;
             if (n->fNext == 0) break;
             n = n->fNext;
@@ -805,11 +805,11 @@ int RxMatch(RxNode *rx) {
                     flags = fl;
                     rex = save;
 				} else {
-                    if (RxMatch(n->fNext) == 1) return 1;
+					if (RxMatch(n->fNext) == 1) return 1;
                     flags = fl;
-                    rex = save;
-                    n = n->data.fPtr;
-                    continue;
+					rex = save;
+					n = n->data.fPtr;
+					continue;
                 }
             }
             break;
@@ -823,18 +823,21 @@ int RxMatch(RxNode *rx) {
 }
 
 int RxTry(RxNode *rx, const char *s) {
-
-    int fl = flags, i;
+    int i, fl = flags;
     rex = s;
-    for (i = 0; i < NSEXPS; i++)
+
+	for (i = 0; i < NSEXPS; i++)
         match->Open[i] = match->Close[i] = -1;
-    if (RxMatch(rx)) {
+
+	if (RxMatch(rx)) {
         match->Open[0] = (int)(s - bop);
         match->Close[0] = (int)(rex - bop);
         return 1;
     }
-    flags = fl;
-    return 0;
+
+	flags = fl;
+
+	return 0;
 }
 
 int RxExecMatch(RxNode *Regexp, const char *Data, int Len, const char *Start, RxMatchRes *Match, unsigned int RxOpt) {
@@ -851,7 +854,8 @@ int RxExecMatch(RxNode *Regexp, const char *Data, int Len, const char *Start, Rx
 
 int RxExec(RxNode *Regexp, const char *Data, int Len, const char *Start, RxMatchRes *Match, unsigned int RxOpt) {
     char Ch;
-    int i;
+	int i;
+
     if (Regexp == 0) return 0;
 
     match = Match;
@@ -859,9 +863,6 @@ int RxExec(RxNode *Regexp, const char *Data, int Len, const char *Start, RxMatch
     eop = Data + Len;
 
     flags = RxOpt;
-
-    // RxTry does this, why do it here
-    //for (i = 0; i < NSEXPS; i++) Match->Open[i] = Match->Close[i] = -1;
 
     switch (Regexp->fWhat) { // this should be more clever
     case RE_ATBOL:     // match is anchored
@@ -1154,19 +1155,35 @@ int RxReplace(const char *rep, const char *Src, int len, RxMatchRes match, char 
     return 0;
 }
 
-/*
+#ifdef REGEX_MAIN
+void try(const char *r, const char *s) {
+	RxMatchRes matches;
+	RxNode *re = RxCompile(r);
+	int result;
+	printf("%s/%s %p\n", r, s, re);
+	result = RxExec(re, s, strlen(s), s, &matches, RX_CASE);
+	printf("%i ", result);
+	if (result)
+		printf("%i to %i\n", matches.Open[0] + 1, matches.Close[0]);
+	else
+		printf("\n");
+	RxFree(re);
+}
+
 int main(int argc, char **argv)
 {
+
 	//const char regstr[] = {123,251,129,105,117,184,89,215,105,124,0};
 	//const char str[] = {251,129,105,117,184,89,215,105,124,0};
+
+	// seg fault, non-greedy back to a greedy
 	const char *regstr = "{x?}+y";//argv[1];
 	const char *str = "xxy"; //argv[2];
 
-	RxMatchRes matches;
-	RxNode *r = RxCompile(regstr);
-	printf("%s/%s %p\n", regstr, str, r);
-	printf("%i\n", RxExec(r, str, strlen(str), str, &matches, RX_CASE));
-	RxFree(r);
+	try("[A-Z][a-z]+", "and John ran");
+	try(regstr, str);
+
 	return 0;
 }
-*/
+
+#endif
