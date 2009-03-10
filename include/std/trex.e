@@ -1,3 +1,5 @@
+include std/math.e
+
 --****
 -- == Regular Expressions based on T-Rex
 --
@@ -59,6 +61,24 @@ end procedure
 
 public function find(atom re, sequence haystack, integer from=1)
 	return machine_func(M_TREX_EXEC, { re, haystack, from })
+end function
+
+public function find_all(atom re, sequence haystack, integer from=1)
+	object result
+	
+	sequence results = {}
+	while sequence(result) entry do
+		results = append(results, result[1])
+		from = max(result) + 1
+
+		if from > length(haystack) then
+			exit
+		end if
+	entry
+		result = machine_func(M_TREX_EXEC, { re, haystack, from })
+	end while
+	
+	return results
 end function
 
 public function has_match(atom re, sequence haystack, integer from=1)

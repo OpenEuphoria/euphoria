@@ -19,18 +19,22 @@ test_equal("find() #4", {{5,7}}, regex:find(re, "the dog is happy", 4))
 test_equal("find() #5", {{9,10}}, regex:find(re, "the dog is happy", 8))
 regex:free(re)
 
---re = regex:new("[A-Z]+")
---test_equal("find_all() #1", {{5,7}, {13,14}},
---	regex:find_all(re, "the DOG ran UP" ))
---regex:free(re)
+re = regex:new("[A-Z]+")
+test_equal("find_all() #1", {{5,7}, {13,14}},
+	regex:find_all(re, "the DOG ran UP" ))
+regex:free(re)
 
---re = regex:new("^")
---test_equal("find_all ^", {{1,0}}, regex:find_all(re, "hello world"))
---regex:free(re)
+re = regex:new("^")
+if sequence(re) then
+	test_fail("find_all ^: " & re)
+else
+	test_equal("find_all ^", {{1,0}}, regex:find_all(re, "hello world"))
+	regex:free(re)
+end if
 
---re = regex:new("<")
---test_equal("find_all <", {{1,0},{7,6}}, regex:find_all(re, "hello world"))
---regex:free(re)
+re = regex:new("\\w+")
+test_equal("find_all \\w+", {{1,5},{7,11}}, regex:find_all(re, "hello world"))
+regex:free(re)
 
 --re = regex:new("([A-Za-z0-9]+)\\.([A-Za-z0-9]+)")
 --test_equal("replace() #1", "Filename: filename Extension: txt",
@@ -56,11 +60,11 @@ re = regex:new("(x?)+y")
 test_equal("regex fixed runaway", {{1,3},{1,1}}, regex:find(re, "xxy"))
 regex:free(re)
 
-re = regex:new("^")
+re = regex:new("^hello")
 if sequence(re) then
 	test_fail("regex bol on empty string: " & re)
 else
-	test_equal("regex bol on empty string", {{1,0}}, regex:find(re, ""))
+	test_equal("regex bol on empty string", 0, regex:find(re, ""))
 	regex:free(re)
 end if
 
@@ -68,7 +72,7 @@ re = regex:new("$")
 if sequence(re) then
 	test_fail("regex eol on empty string: " & re)
 else
-	test_equal("regex eol on empty string", {{1,0}}, regex:find(re, "hello"))
+	test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
 	regex:free(re)
 end if
 
