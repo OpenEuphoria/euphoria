@@ -102,6 +102,9 @@ global procedure transoptions()
 				bor_option = TRUE
 				
 			elsif equal("-GCC", uparg) then
+				-- on windows this is MinGW
+				-- cygwin should get its own option
+				-- probably -CYG
 				gcc_option = TRUE
 				
 			elsif equal("-STACK", uparg) then
@@ -259,11 +262,6 @@ global procedure transoptions()
 		CompileErr( "Fast FP option only available for DOS" )
 	end if
 
-	if gcc_option and (not (TUNIX or TDOS)) then
-		-- could happen, mingw for example.
-		Warning( "Using GCC option for non-UNIX target.  If you are porting cygwin or mingw please consider adding another option to this translator.", translator_warning_flag )
-	end if
-	
 end procedure
 				
 function get_bor_path()
