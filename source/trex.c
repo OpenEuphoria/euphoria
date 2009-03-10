@@ -530,12 +530,14 @@ static const TRexChar *trex_matchnode(TRex* exp,TRexNode *node,const TRexChar *s
 /* public api */
 TRex *trex_compile(const TRexChar *pattern,const TRexChar **error)
 {
+	TRex *exp;
+
 	if (*pattern == '\0') {
 		*error = _SC("empty pattern");
 		return 0;
 	}
 
-	TRex *exp = (TRex *)malloc(sizeof(TRex));
+	exp = (TRex *)malloc(sizeof(TRex));
 	exp->_error = error;
  	exp->_eol = exp->_bol = NULL;
 	exp->_p = pattern;

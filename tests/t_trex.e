@@ -76,6 +76,7 @@ else
 	regex:free(re)
 end if
 
+-- This returns an error sequence, so no need to free re
 re = regex:new({123,251,129,105,117,184,89,215,105,124})
 test_true("invalid regex 1", sequence(re))
 
@@ -84,5 +85,9 @@ re = regex:new("{x?}+y")
 ignore = regex:find(re, "xxy")
 test_pass("regex new/match combo that produced a seg fault 1")
 regex:free(re)
+
+-- This returns an error sequence, so no need to free re
+re = regex:new({0,1,2,3})
+test_pass("regex w/zero starting the pattern")
 
 test_report()
