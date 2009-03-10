@@ -37,7 +37,7 @@ IF "%1" =="--debug" (
 	GOTO EndLoop
 )
 
-echo Unknown option '%1'
+GOTO Help
 
 :EndLoop
 SHIFT
@@ -77,3 +77,22 @@ if not exist %BUILDDIR%\backobj.wat copy backobj.dst %BUILDDIR%\backobj.wat
 if not exist %BUILDDIR%\dosobj.wat copy dosobj.dst %BUILDDIR%\dosobj.wat
 if not exist %BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %BUILDDIR%\dosbkobj.wat
 if not exist %BUILDDIR%\dostrobj.wat copy dostrobj.dst %BUILDDIR%\dostrobj.wat
+
+GOTO Completed
+
+:Help
+echo Configures and prepares the euphoria source for building
+echo.
+echo CONFIGURE.BAT [options]
+echo.
+echo Options:
+echo     --without-euphoria
+echo     --prefix value
+echo     --managed-mem       enable managed memory
+echo     --eubin value
+echo     --build value       set the build directory
+echo     --full
+echo     --debug             turn debugging on
+echo.
+
+:Completed
