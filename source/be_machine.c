@@ -5243,6 +5243,22 @@ object machine(object opcode, object x)
 			case M_TREX_FREE:
 				return eu_trex_free(x);
 
+			case M_PCRE_COMPILE:
+				x = (object)SEQ_PTR(x);
+				return compile_pcre(*(((s1_ptr)x)->base+1), 
+							 *(((s1_ptr)x)->base+2));
+				break;
+
+			case M_PCRE_EXEC:
+				return exec_pcre(x);
+				break;
+
+			case M_PCRE_FREE:
+				free_pcre(x);
+				return 1;
+				break;
+
+
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

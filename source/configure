@@ -131,3 +131,6 @@ export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
 
+cd pcre
+make
+cd ..

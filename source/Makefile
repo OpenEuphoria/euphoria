@@ -45,6 +45,7 @@ CONFIG = Makefile.eu
 endif
 
 include $(CONFIG)
+include $(TRUNKDIR)/source/pcre/objects.mak
 
 EU_VERSION = 4.0
 
@@ -220,7 +221,9 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
 	$(BUILDDIR)/$(OBJDIR)/back/regex.o \
-	$(BUILDDIR)/$(OBJDIR)/back/trex.o
+	$(BUILDDIR)/$(OBJDIR)/back/trex.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_pcre.o \
+	$(addprefix $(TRUNKDIR)/source/pcre/,$(PCRE_OBJECTS))
 
 EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
@@ -234,7 +237,9 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/regex.o \
-	$(BUILDDIR)/$(OBJDIR)/back/trex.o
+	$(BUILDDIR)/$(OBJDIR)/back/trex.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_pcre.o \
+	$(addprefix $(TRUNKDIR)/source/pcre/,$(PCRE_OBJECTS))
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))

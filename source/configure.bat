@@ -78,6 +78,10 @@ if not exist %BUILDDIR%\dosobj.wat copy dosobj.dst %BUILDDIR%\dosobj.wat
 if not exist %BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %BUILDDIR%\dosbkobj.wat
 if not exist %BUILDDIR%\dostrobj.wat copy dostrobj.dst %BUILDDIR%\dostrobj.wat
 
+cd pcre
+wmake -f makefile.wat
+cd ..
+
 GOTO Completed
 
 :Help

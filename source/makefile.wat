@@ -70,6 +70,9 @@ CONFIG=config.wat
 !endif
 !include $(CONFIG)
 
+BASEPATH=pcre
+!include $(BASEPATH)\objects.wat
+
 EU_CORE_FILES = &
 	rev.e &
 	main.e &
@@ -136,7 +139,9 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_trex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\regex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\trex.obj
+	$(BUILDDIR)\$(OBJDIR)\back\trex.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
+	$(PCRE_OBJECTS)
 #       &
 #       $(BUILDDIR)\$(OBJDIR)\memory.obj
 
@@ -152,7 +157,9 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_trex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\trex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\regex.obj
+	$(BUILDDIR)\$(OBJDIR)\back\regex.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
+	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
 	.\backend.ex &
@@ -242,6 +249,9 @@ distclean : .SYMBOLIC clean
 	@ECHO Please run configure
 	error
 !endif
+	cd pcre
+	wmake -f makefile.wat clean
+	cd ..
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\back\*.*	
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i\back
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*	

@@ -405,3 +405,7 @@ struct char_cell {
 #define M_TREX_COMPILE       76
 #define M_TREX_EXEC          77
 #define M_TREX_FREE          78
+
+#define M_PCRE_COMPILE       79
+#define M_PCRE_FREE          80
+#define M_PCRE_EXEC          81
