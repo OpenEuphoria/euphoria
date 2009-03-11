@@ -154,7 +154,7 @@ Source: "cleanbranch\include\euphoria.h"; DestDir: {app}\include\; Flags: ignore
 
 ; Sources
 Source: "cleanbranch\source\*.*"; Excludes: up.bat; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
-Source: "cleanbranch\source\codepage\*.*"; DestDir: {app}\source\codepage; Flags: ignoreversion; Components: comp_source
+Source: "cleanbranch\source\codepage\*.*"; DestDir: {app}\bin\codepage; Flags: ignoreversion;
 
 ; Test
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
