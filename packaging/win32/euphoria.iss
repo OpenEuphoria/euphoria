@@ -39,7 +39,9 @@ Name: comp_source; Description: "Source code"; Types: full;
 Name: comp_tests; Description: "Unit tests"; Types: full standard windows dos;
 
 [Tasks]
-Name: associate; Description: "&Associate file extensions";
+Name: associate; Description: "&Associate file extensions"; Flags: unchecked
+Name: update_env; Description: "&Update environment"; Flags: unchecked
+
 ;Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 ;Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
@@ -162,6 +164,9 @@ Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion rec
 ; Tutorial
 Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion; Components: comp_demos
 
+; Others
+Source: "cleanbranch\packaging\win32\setenv.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
+
 [INI]
 ; shortcut file to launch Rapid Euphoria website
 Filename: {app}\RapidEuphoria.url; Section: InternetShortcut; Key: URL; String: http://www.rapideuphoria.com
@@ -186,8 +191,8 @@ Type: files; Name: {app}\EuphoriaManual.url
 
 [Registry]
 ;set EUDIR environment variable and add to PATH on NT/2000/XP machines
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; Flags: uninsdeletevalue; MinVersion: 0, 3.51
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51
+Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env
+Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
 
 ;associate .exw files to be called by EXW.exe
 Root: HKCR; Subkey: ".exw"; ValueType: string; ValueName: ""; ValueData: "EUWinApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
@@ -220,4 +225,10 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 [Run]
 ;Update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
 Filename: "{tmp}\exw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
+
+[Code]
+procedure CreateEnvBatchFile();
+begin
+  SaveStringToFile(ExpandConstant('{app}\setenv.bat'), #13#10 + ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
+end;
 
