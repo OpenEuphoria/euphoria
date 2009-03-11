@@ -55,6 +55,8 @@
 ../include/std/pretty.e
 ../include/std/primes.e
 ../include/std/regex.e
+../include/std/trex.e
+../include/std/pcre.e
 ../include/std/search.e
 ../include/std/sequence.e
 ../include/std/sets.e
@@ -68,10 +70,9 @@
 ../include/std/types.e
 ../include/std/unicode.e
 ../include/std/unittest.e
-../include/std/msgbox.e
 ../include/std/wildcard.e
+../include/std/win32/msgbox.e
 
 ## Release Notes
 ../docs/relnotes.txt
 ../docs/relnotes400.txt
-

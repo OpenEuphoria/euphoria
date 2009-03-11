@@ -1,17 +1,18 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
 --****
--- == Usage Notes
--- <<LEVELTOC depth=2>>
--- This file is not normally included directly. The normal approach is to
--- ##include std/machine.e##, which will automatically include either this file
--- or ##std/safe.e## if the SAFE symbol has been defined.
---
 -- == Low-Level Memory Management
 --
 -- <<LEVELTOC depth=2>>
 --
--- Warning: Some of these routines require a knowledge of 
+-- === Usage Notes
+--
+-- This file is not normally included directly. The normal approach is to
+-- ##include std/machine.e##, which will automatically include either this file
+-- or ##std/safe.e## if the SAFE symbol has been defined.
+--
+-- Warning: Some of these routines require a knowledge of
 -- machine-level programming. You could crash your system!
 --
 -- These routines, along with [[:peek]](), [[:poke]]() and [[:call]](), let you access all
@@ -38,8 +39,6 @@
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
 --
--- <<LEVELTOC depth=2>>
---
 
 constant
         M_ALLOC = 16,
@@ -48,12 +47,14 @@ constant
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
+--**
 -- Positive integer type
 
 public type positive_int(integer x)
         return x >= 1
 end type
 
+--**
 -- Machine address type
 
 public type machine_addr(atom a)

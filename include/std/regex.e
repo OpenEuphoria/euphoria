@@ -7,6 +7,14 @@ include std/math.e
 --
 -- <<LEVELTOC depth=2>>
 --
+-- === Important Alpha Note
+--
+-- Euphoria has three regular expression libraries in the alpha software. It is undecided as to
+-- which will prevail and make it into final. Only one will, not all three. Please be sure to look
+-- also at the [[:Regular Expressions based on PCRE]] and [[:Regular Expressions based on T-Rex]]
+-- libraries.
+--
+-- === Introduction
 --
 -- Regular expressions are a way to specify text patterns when searching for text in a sequence.
 -- Regular expressions consist of normal characters and special operator characters with a
@@ -132,6 +140,8 @@ end type
 --   routines [[:find]], [[:match]] and [[:wildcard_match]] are often times easier to use and
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
+-- See Also:
+--   [[:free]], [[:find]], [[:find_all]]
 
 public function new(sequence pattern)
 	return machine_func(M_REGEX_COMPILE, {pattern})
