@@ -76,14 +76,10 @@ ignore = regex:has_match(re, {251,129,105,117,184,89,215,105,124})
 test_pass("regex new/match combo that produced a seg fault 1")
 regex:free(re)
 
-/*
 -- Runs away only to give a seg fault due to stack problems.
 re = regex:new("{x?}+y")
 ignore = regex:find(re, "xxy")
 test_pass("regex new/match combo that produced a seg fault 1")
 regex:free(re)
-*/
-
-test_fail("regex seg fault 2, runs away w/stack")
 
 test_report()

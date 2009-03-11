@@ -641,9 +641,10 @@ static const char *bop;
 static const char *eop;
 static int flags = RX_CASE;
 static const char *rex;
+static int RE_NOTHING_count = 0;
 
 int RxMatch(RxNode *rx) {
-    RxNode *n = rx;
+	RxNode *n = rx;
 
     //printf("RxMatch>>\n");
     while (n) {
@@ -651,7 +652,9 @@ int RxMatch(RxNode *rx) {
         //RxDump(1, n);
         switch (n->fWhat) {
 		case RE_NOTHING:/* printf("RE_NOTHING %s\n", rex);*/
+			RE_NOTHING_count++;
 			if (bop == eop) return 0;
+			if (RE_NOTHING_count > 1000) return 0;
             break;
         case RE_CASE:/* printf("RE_CASE %s\n", rex);*/
             flags |= RX_CASE;
@@ -826,6 +829,7 @@ int RxTry(RxNode *rx, const char *s) {
     int i, fl = flags;
     rex = s;
 
+	RE_NOTHING_count = 0;
 	for (i = 0; i < NSEXPS; i++)
         match->Open[i] = match->Close[i] = -1;
 
