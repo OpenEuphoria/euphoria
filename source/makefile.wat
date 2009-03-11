@@ -73,6 +73,8 @@ CONFIG=config.wat
 BASEPATH=pcre
 !include $(BASEPATH)\objects.wat
 
+FULLBUILDDIR=$(TRUNKDIR)\source\$(BUILDDIR)
+
 EU_CORE_FILES = &
 	rev.e &
 	main.e &
@@ -363,12 +365,12 @@ translate : .SYMBOLIC translate-win translate-dos
 
 testwin : .SYMBOLIC
 	cd ..\tests
-	$(EXE) ..\bin\eutest.ex -i ..\include -cc wat -exe $(BUILDDIR)\exwc.exe -ec $(BUILDDIR)\ecw.exe -lib $(BUILDDIR)\ecw.lib
+	$(FULLBUILDDIR)\exwc.exe ..\bin\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\exwc.exe -ec $(FULLBUILDDIR)\ecw.exe -lib $(FULLBUILDDIR)\ecw.lib
 	cd ..\source
 
 testdos : .SYMBOLIC dos
 	cd ..\tests
-	$(EXE) ..\bin\eutest.ex -i ..\include -cc wat -exe $(BUILDDIR)\ex.exe -ec $(BUILDDIR)\ec.exe -lib $(BUILDDIR)\ec.lib
+	$(FULLBUILDDIR)\ex.exe ..\bin\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\ex.exe -ec $(FULLBUILDDIR)\ec.exe -lib $(FULLBUILDDIR)\ec.lib
 	cd ..\source
 	
 test : .SYMBOLIC testwin testdos
