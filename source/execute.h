@@ -397,15 +397,9 @@ struct char_cell {
 #define M_REGEX_MATCH        70
 #define M_REGEX_REPLACE      71
 #define M_REGEX_FREE         72
-
 #define M_WARNING_FILE       73
 #define M_SET_ENV            74
 #define M_UNSET_ENV          75
-
-#define M_TREX_COMPILE       76
-#define M_TREX_EXEC          77
-#define M_TREX_FREE          78
-
-#define M_PCRE_COMPILE       79
-#define M_PCRE_FREE          80
-#define M_PCRE_EXEC          81
+#define M_PCRE_COMPILE       76
+#define M_PCRE_FREE          77
+#define M_PCRE_EXEC          78

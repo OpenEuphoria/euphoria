@@ -55,7 +55,6 @@
 ../include/std/pretty.e
 ../include/std/primes.e
 ../include/std/regex.e
-../include/std/trex.e
 ../include/std/pcre.e
 ../include/std/search.e
 ../include/std/sequence.e

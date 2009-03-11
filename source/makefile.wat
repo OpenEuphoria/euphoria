@@ -137,9 +137,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_trex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\regex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\trex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
 	$(PCRE_OBJECTS)
 #       &
@@ -155,8 +153,6 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_trex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\trex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\regex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
 	$(PCRE_OBJECTS)

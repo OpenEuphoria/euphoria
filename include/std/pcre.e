@@ -9,9 +9,9 @@ include std/math.e
 --
 -- === Important Alpha Note
 --
--- Euphoria has three regular expression libraries in the alpha software. It is undecided as to
--- which will prevail and make it into final. Only one will, not all three. Please be sure to look
--- also at the [[:Regular Expressions]] and [[:Regular Expressions based on T-Rex]] libraries.
+-- Euphoria has two regular expression libraries in the alpha software. It is undecided as to
+-- which will prevail and make it into final. Only one wil. Please be sure to look also at the
+-- [[:Regular Expressions]] library.
 --
 -- === Introduction
 --
@@ -22,7 +22,7 @@ include std/math.e
 -- be grouped into sub-patterns.
 --
 
-enum M_PCRE_COMPILE=79, M_PCRE_FREE, M_PCRE_EXEC
+enum M_PCRE_COMPILE=76, M_PCRE_FREE, M_PCRE_EXEC
 
 --****
 -- === Option Constants
