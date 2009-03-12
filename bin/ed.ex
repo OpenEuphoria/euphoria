@@ -1,3 +1,5 @@
+with trace
+trace(3)
 		----------------------------------------------------------
 		--       This Euphoria Editor was developed by          --
 		--            Rapid Deployment Software.                --
@@ -581,7 +583,7 @@ function clean(sequence line)
 		line &= '\n'
 	end if
 	
-	ifdef UNIX  
+	ifdef UNIX  then
 		if length(line) > 2 and line[$-1] = '\r' then
 	   		-- DOS file: remove CR
 	   		cr_removed = TRUE
