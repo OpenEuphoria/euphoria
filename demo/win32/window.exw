@@ -4,7 +4,6 @@
 include std/os.e
 include std/machine.e
 include std/dll.e
-include std/callback.e
 
 constant cbSize = 0,
 	 style  = 4,

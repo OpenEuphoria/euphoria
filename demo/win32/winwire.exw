@@ -16,7 +16,6 @@ without type_check
 include std/dll.e
 include std/machine.e
 include std/wildcard.e
-include std/callback.e
 
 without warning
 

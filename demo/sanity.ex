@@ -18,7 +18,7 @@ include std/io.e
 include std/wildcard.e as wild
 include std/image.e
 include std/dll.e
-include std/msgbox.e
+include std/win32/msgbox.e
 include std/math.e
 include std/os.e
 include std/text.e
