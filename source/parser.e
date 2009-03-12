@@ -2494,6 +2494,8 @@ procedure Ifdef_statement()
 				elsif equal(option, "or") then
 					conjunction = 2
 					continue "deflist"
+				elsif length(option) = 0 then
+					CompileErr("end of file reached while processing ifdef")
 				end if
 
 				-- TODO: Remove after giving users a bit of time to change their code
