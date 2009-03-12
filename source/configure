@@ -28,6 +28,7 @@ if test $UNAME_SYSTEM = "Linux"; then
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	ln pcre/pcre.h.unix pcre/pcre.h
 elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
@@ -35,6 +36,8 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
+	cp pcre/pcre.h.windows pcre/pcre.h
+	cp pcre/config.h.windows pcre/config.h
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
@@ -42,6 +45,8 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW=1 >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	cp pcre/pcre.h.windows pcre/pcre.h
+	cp pcre/config.h.windows pcre/config.h
 else
 	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
@@ -53,6 +58,7 @@ else
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	ln pcre/pcre.h.unix pcre/pcre.h
 fi
 
 case "${UNAME_SYSTEM}:${ECONFIG}" in
@@ -103,7 +109,20 @@ while [ "$1" != "" ]; do
         ;;
 	* )
 			echo "Unknown option '$1'"
-	;;
+			echo "Configures and prepares the euphoria source for building"
+			echo
+ 			echo "configure [options]"
+			echo
+			echo "Options:"
+			echo "    --without-euphoria"
+			echo "    --managed-mem       enable managed memory"
+			echo "    --eubin value"
+			echo "    --build value       set the build directory"
+			echo "    --full"
+			echo "    --debug             turn debugging on"
+			echo
+			exit
+			;;
     esac
     shift
 done
@@ -127,10 +146,9 @@ if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
 	export PPWD=$PWD
 fi
 export TRUNKDIR=$PPWD
+mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
 
-cd pcre
-make
-cd ..
+

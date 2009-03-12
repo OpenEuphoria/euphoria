@@ -20,5 +20,8 @@ config.h: config.h.windows
 pcre.h: pcre.h.windows
 	copy pcre.h.windows pcre.h
 
+distclean : .SYMBOLIC clean
+	del /f/q config.h pcre.h
+	
 clean: .SYMBOLIC
-	del /f/q *.obj config.h pcre.h
+	del /f/q *.obj

@@ -256,6 +256,8 @@ distclean : .SYMBOLIC clean
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i.wat
 	-$(RM) $(CONFIG)
+	-$(RM) pcre\pcre.h
+	-$(RM) pcre\config.h
 
 clean : .SYMBOLIC
 !ifndef DELTREE
@@ -268,6 +270,9 @@ clean : .SYMBOLIC
 	-@for %i in ($(BUILDDIR)\libobj $(BUILDDIR)\winlibobj $(BUILDDIR)\doslibobj) do -$(RMDIR) %i\back
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*
 	-@for %i in ($(BUILDDIR)\libobj $(BUILDDIR)\winlibobj $(BUILDDIR)\doslibobj) do -$(RMDIR) %i
+	cd pcre
+	wmake -f makefile.wat clean
+	cd ..
 
 $(BUILD_DIRS) : .existsonly
 	mkdir $@
@@ -584,4 +589,11 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.c : $(BUILDDIR)\$(OBJDIR)\back\be_execute.ob
 
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
+
+!ifdef PCRE_OBJECTS	
+$(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
+	cd pcre
+	wmake -h -f makefile.wat 
+	cd ..
+!endif
 

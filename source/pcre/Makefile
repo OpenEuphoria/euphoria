@@ -14,7 +14,10 @@ config.h: config.h.unix
 pcre.h: pcre.h.unix
 	cp pcre.h.unix pcre.h
 
-#.PHONY: clean
+.PHONY: clean distclean
+
+distclean :
+	rm -f config.h pcre.h
 
 clean:
 	rm -f *.o config.h pcre.h

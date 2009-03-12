@@ -204,6 +204,8 @@ EU_BACKEND_RUNNER_FILES = \
 	error.e \
 	mode.e
 
+PREFIXED_PCRE_OBJECTS = $(addprefix $(TRUNKDIR)/source/pcre/,$(PCRE_OBJECTS))
+	
 EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_execute.o \
@@ -221,7 +223,7 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
 	$(BUILDDIR)/$(OBJDIR)/back/regex.o \
-	$(addprefix $(TRUNKDIR)/source/pcre/,$(PCRE_OBJECTS))
+	$(PREFIXED_PCRE_OBJECTS)
 
 EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
@@ -235,7 +237,8 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/regex.o \
-	$(addprefix $(TRUNKDIR)/source/pcre/,$(PCRE_OBJECTS))
+	$(PREFIXED_PCRE_OBJECTS)
+	
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
@@ -247,15 +250,17 @@ all : interpreter translator library backend
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
 distclean : clean
-	-rm -f Makefile.eu
+	-rm -f $(CONFIG) pcre/config.h pcre/pcre.h
 	-rm -fr $(BUILD_DIRS)
 
-clean : 
+clean : 	
 	-rm -fr $(BUILDDIR)/{int,trans,lib,back}obj
 	-rm -f $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EBACKENDU) $(BUILDDIR)/$(DEB_SOURCE_DIR).tar.gz
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
 endif
+	make -C pcre clean
+	
 
 .PHONY : clean distclean all
 
@@ -355,15 +360,18 @@ ifeq "$(EMINGW)" "1"
 endif
 
 
-test-djgpp :  
+test :  
+ifeq "$(EDJGPP)" "1"
 ifneq "$(HASCHANGEDDIRECTORY)" "1"
-	cp Makefile.eu revget.ex ../tests
+	cp $(CONFIG) revget.ex ../tests
 	export EUCOMPILEDIR=$(TRUNKDIR)
-	$(MAKE) -k -C ../tests -f ../source/Makefile EUCOMPILEDIR=.. CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 test     
+	$(MAKE) -k -C ../tests -f ../source/Makefile EUCOMPILEDIR=.. CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 test   
+else
+	$(EXE) $(TRUNKDIR)/bin/eutest.ex -i $(TRUNKDIR)/include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
-
-test :
+else # Not DJGPP:
 	cd ../tests && $(EXE) ../bin/eutest.ex -i ../include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
+endif
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
@@ -436,7 +444,7 @@ $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 ifneq	"$(HASCHANGEDDIRECTORY)" "1"
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
-	cp Makefile.eu Makefile revget.ex $(BUILDDIR)/$(OBJDIR)
+	cp Makefile $(CONFIG) revget.ex $(BUILDDIR)/$(OBJDIR)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	$(MAKE) translate-here -k -C $(BUILDDIR)/$(OBJDIR) EU_TARGET=$(EU_TARGET) SHELL=$(SHELL) CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 
 endif
@@ -458,3 +466,9 @@ $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./be_callc.c Makefile.eu
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
+	
+ifdef PCRE_OBJECTS	
+$(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,%.c,$(PREFIXED_PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
+	make -C pcre all
+endif
+	
