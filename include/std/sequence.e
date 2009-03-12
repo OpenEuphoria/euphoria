@@ -1522,12 +1522,25 @@ end function
 --     [[:split_any]], [[:chunk]], [[:join]]
 
 public function split(sequence st, object delim=" ", integer limit=0)
-	sequence ret = {}
-	integer start = 1, pos, next_pos
+	if length(st) = 0 then
+		return {}
+	end if
 
 	if atom(delim) then
 		delim = {delim}
 	end if
+
+	-- Handle the simple case of split("123", ""), opposite is join({"1","2","3"}, "") -- "123"
+	if length(delim) = 0 then
+		for i = 1 to length(st) do
+			st[i] = {st[i]}
+		end for
+
+		return st
+	end if
+
+	sequence ret = {}
+	integer start = 1, pos, next_pos
 
 	while 1 do
 		pos = match_from(delim, st, start)
@@ -1580,6 +1593,10 @@ public function split_any(sequence source, object delim, integer limit=0)
 
 	if atom(delim) then
 		delim = {delim}
+	end if
+
+	if length(delim) = 0 then
+		crash("sequence:split_any(): delimiter length must be greater than 0")
 	end if
 
 	while 1 do

@@ -61,7 +61,9 @@ test_equal("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
 test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"}, 0))
 test_equal("split() limit set", {"a", "b,c"}, split("a,b,c", ',', 1))
 test_equal("split() single sequence delimiter",{"while 1 "," end while ",""},
-    split("while 1 do end while do","do"))
+	split("while 1 do end while do","do"))
+test_equal("split() an empty string", {}, split("", ","))
+test_equal("split() using an empty delimiter", {"1","2","3"}, split("123", ""))
 
 test_equal("split_any()", {"a", "b", "c"}, split_any("a,b.c", ",."))
 test_equal("split_any() limit", {"a", "b", "c|d"},
@@ -70,6 +72,7 @@ test_equal("split_any() limit", {"a", "b", "c|d"},
 test_equal("join() simple string default", "a b c", join({"a", "b", "c"}))
 test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
 test_equal("join() nested sequence", {"John", 0, "Doe"}, join({{"John"}, {"Doe"}}, 0))
+test_equal("join() empty", "123", join({"1","2","3"}, ""))
 
 test_equal("remove() integer sequence", {1,3}, remove({1,2,3}, 2))
 test_equal("remove() string", "Jon", remove("John", 3))
