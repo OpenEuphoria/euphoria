@@ -18,7 +18,95 @@
 
 #include "regex.h"
 
+//#define DEBUG_TRACE_REGEX
+
+#ifdef DEBUG_TRACE_REGEX
+#define debug_printf printf
+#define debug_puts puts
+#else
+#define debug_printf(...)
+#define debug_puts(...)
+#endif
+
 static int RegCount = 0;
+
+static void RxDump(int N, RxNode *n) {
+    int i;
+    while (n) {
+		for (i = 0; i < N; i++) debug_printf("    ");
+		debug_printf("%p ", n);
+        switch (n->fWhat) {
+        case RE_NOTHING:
+            debug_printf("NOTHING\n");
+            break;
+        case RE_CHAR:
+            debug_printf("CHAR '%.1s'\n", n->data.fChar);
+            break;
+        case RE_ATBOL:
+            debug_printf("^\n");
+            break;
+        case RE_ATEOL:
+            debug_printf("$\n");
+            break;
+        case RE_ANY:
+            debug_printf(".\n");
+            break;
+        case RE_INSET:
+            debug_printf("[\n"/*, n->fChar*/);
+            break;
+        case RE_NOTINSET:
+            debug_printf("[^\n"/*, n->fChar*/);
+            break;
+        case RE_ATBOW:
+            debug_printf("<\n");
+            break;
+        case RE_ATEOW:
+            debug_printf(">\n");
+            break;
+        case RE_WSPACE:
+            debug_printf("WSPACE\n");
+            break;
+        case RE_NWSPACE:
+            debug_printf("NWSPACE\n");
+            break;
+        case RE_UPPER:
+            debug_printf("UPPER\n");
+            break;
+        case RE_LOWER:
+            debug_printf("LOWER\n");
+            break;
+        case RE_JUMP:
+			debug_printf("JUMP: %p\n", n->data.fPtr);
+            break;
+        case RE_BREAK:
+            debug_printf("BREAK\n");
+            break;
+        case RE_END:
+            debug_printf("END\n");
+            break;
+        default:
+            if (n->fWhat & RE_GROUP) {
+                if (n->fWhat & RE_MEM) {
+                    if (n->fWhat & RE_OPEN)  debug_printf("(  %d\n", n->fWhat & 0xFF);
+                    if (n->fWhat & RE_CLOSE) debug_printf(")  %d\n", n->fWhat & 0xFF);
+                } else {
+                    if (n->fWhat & RE_OPEN)  debug_printf("{\n");
+                    if (n->fWhat & RE_CLOSE) debug_printf("}\n");
+                }
+            } else if (n->fWhat & RE_BRANCH) {
+                if (n->fWhat & RE_GREEDY) {
+                    debug_printf("%c\n", n->fWhat & 0xFF);
+                } else {
+                    debug_printf("%c\n", n->fWhat & 0xFF);
+                }
+            } else {
+                debug_printf("???????????????\n");
+            }
+            break;
+        }
+        n = n->fNext;
+    }
+}
 
 static  RxNode *NewNode(int aWhat) {
 	RxNode *N = (RxNode *) malloc(sizeof(RxNode));
@@ -387,7 +475,7 @@ static int CountWidth(RxNode *N) {
 }
 
 static int MakeSub(RxNode **F, RxNode **N, char What) {
-    //printf("MakeSub: %c\n", What);
+    debug_printf("MakeSub: %c\n", What);
     if (*N) {
         RxNode *No;
         RxNode *New;
@@ -399,8 +487,8 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
             int C = 1;
 
             while ((C > 0) && P) {
-                //puts("backtracking...-----");
-                //RxDump(0, P);
+                debug_puts("backtracking...-----");
+                RxDump(0, P);
                 if (P->fWhat & RE_GROUP) {
                     if (P->fWhat & RE_CLOSE) C++;
                     else C--;
@@ -409,13 +497,13 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
                 if (C == 0) break;
                 P = P->fPrev;
             }
-            //printf("P = %s, c = %d", P ? "ok":"null", C);
+            debug_printf("P = %s, c = %d", P ? "ok":"null", C);
             if (C != 0) return 0;
         }
         //assert(Last);
         if (What != '?' && What != '|')
             if (CountWidth(Last) == 0) {
-                //                puts("FAILED count");
+                //                debug_puts("FAILED count");
                 return 0;
             }
         switch (What) {
@@ -437,7 +525,7 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
             New->data.fPtr = No;
             No->data.fPtr = New;
             *N = No;
-            //puts("BRANCH ?");
+            debug_puts("BRANCH ?");
             break;
 
         case '*':
@@ -464,7 +552,7 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
 			No->data.fPtr = New;
 			Jump->data.fPtr = New;
             *N = No;
-            //puts("BRANCH *");
+            debug_puts("BRANCH *");
             break;
 
         case '#':
@@ -496,7 +584,7 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
             Jump->data.fPtr = New;
             Skip->data.fPtr = Last;
             *N = No;
-            //puts("BRANCH +");
+            debug_puts("BRANCH +");
             break;
         case '|':
             New = NewNode(RE_BRANCH | RE_GREEDY | What);
@@ -521,7 +609,7 @@ static int MakeSub(RxNode **F, RxNode **N, char What) {
             No->data.fPtr = New;
             Jump->data.fPtr = New;
             *N = No;
-            //puts("BRANCH |");
+            debug_puts("BRANCH |");
             break;
         }
         return 1;
@@ -538,7 +626,7 @@ static RxNode *RxComp(const char **const Regexp, int flags) {
     char Ch;
 
     while (**Regexp) {
-        // puts(*Regexp);
+        // debug_puts(*Regexp);
         switch (Ch = (*(*Regexp)++)) {
         case '?':
         case '*':
@@ -609,9 +697,14 @@ RxNode *RxCompile(const char *Regexp) {
     n = RxComp(&Regexp, 0);
     if (n == 0) return 0;
     n = RxOptimize(n);
+    n->fPrev = 0;
     x = n;
     while (x->fNext) x = x->fNext;
     x->fNext = NewNode(RE_END);
+    if (x->fNext) {
+    	x->fNext->fNext = 0;
+    	x->fNext->fPrev = x->fNext;
+    }
     return n;
 }
 
@@ -642,89 +735,98 @@ static const char *eop;
 static int flags = RX_CASE;
 static const char *rex;
 static int RE_NOTHING_count = 0;
+static int rx_count = 0;
 
-int RxMatch(RxNode *rx) {
+static int char_failed = 0;
+static int re_ended = 0;
+
+int RxMatchB(RxNode *rx) {
 	RxNode *n = rx;
 
-    //printf("RxMatch>>\n");
+    debug_printf("RxMatch %d>>\n", ++rx_count);
     while (n) {
-        //printf("%i,%s\n", n->fWhat, rex);
-        //RxDump(1, n);
+        debug_printf("%i,%s\n", n->fWhat, rex);
+        debug_printf("%i,%i,%i\n", n->fPrev, n, n->fNext, rex);
+        RxDump(1, n);
+	if (re_ended) {
+		return 1;
+	}
         switch (n->fWhat) {
-		case RE_NOTHING:/* printf("RE_NOTHING %s\n", rex);*/
+		case RE_NOTHING: debug_printf("RE_NOTHING %s\n", rex);
 			RE_NOTHING_count++;
 			if (bop == eop) return 0;
 			if (RE_NOTHING_count > 1000) return 0;
             break;
-        case RE_CASE:/* printf("RE_CASE %s\n", rex);*/
+        case RE_CASE: debug_printf("RE_CASE %s\n", rex);
             flags |= RX_CASE;
             break;
-        case RE_NCASE:/* printf("RE_NCASE %s\n", rex);*/
+        case RE_NCASE: debug_printf("RE_NCASE %s\n", rex);
             flags &= ~RX_CASE;
             break;
-        case RE_ATBOL:/* printf("RE_ATBOL %s\n", rex);*/
+        case RE_ATBOL: debug_printf("RE_ATBOL %s\n", rex);
             if (rex != bop) return 0;
             break;
-        case RE_ATEOL:/* printf("RE_ATEOL %s\n", rex);*/
+        case RE_ATEOL: debug_printf("RE_ATEOL %s\n", rex);
             if (rex != eop) return 0;
             break;
-        case RE_ANY:/* printf("RE_ANY %s\n", rex);*/
+        case RE_ANY: debug_printf("RE_ANY %s\n", rex);
             if (rex == eop) return 0;
             rex++;
             break;
-        case RE_WSPACE:/* printf("RE_WSPACE %s\n", rex);*/
+        case RE_WSPACE: debug_printf("RE_WSPACE %s\n", rex);
             if (rex == eop) return 0;
             if (*rex != ' ' && *rex != '\n' && *rex != '\r' && *rex != '\t') return 0;
             rex++;
             break;
-        case RE_NWSPACE:/* printf("RE_NWSPACE %s\n", rex);*/
+        case RE_NWSPACE: debug_printf("RE_NWSPACE %s\n", rex);
             if (rex == eop) return 0;
             if (*rex == ' ' || *rex == '\n' || *rex == '\r' || *rex == '\t') return 0;
             rex++;
             break;
-        case RE_WORD:/* printf("RE_WORD %s\n", rex);*/
+        case RE_WORD: debug_printf("RE_WORD %s\n", rex);
             if (rex == eop) return 0;
             if (!isalnum(*rex)) return 0;
             rex++;
             break;
-        case RE_NWORD:/* printf("RE_NWORD %s\n", rex);*/
+        case RE_NWORD: debug_printf("RE_NWORD %s\n", rex);
             if (rex == eop) return 0;
             if (isalnum(*rex)) return 0;
             rex++;
             break;
-        case RE_DIGIT:/* printf("RE_DIGIT %s\n", rex);*/
+        case RE_DIGIT: debug_printf("RE_DIGIT %s\n", rex);
             if (rex == eop) return 0;
             if (!isdigit(*rex)) return 0;
             rex++;
             break;
-        case RE_NDIGIT:/* printf("RE_NDIGIT %s\n", rex);*/
+        case RE_NDIGIT: debug_printf("RE_NDIGIT %s\n", rex);
             if (rex == eop) return 0;
             if (isdigit(*rex)) return 0;
             rex++;
             break;
-        case RE_UPPER:/* printf("RE_UPPER %s\n", rex);*/
+        case RE_UPPER: debug_printf("RE_UPPER %s\n", rex);
             if (rex == eop) return 0;
             if (!isupper(*rex)) return 0;
             rex++;
             break;
-        case RE_LOWER:/* printf("RE_LOWER %s\n", rex);*/
+        case RE_LOWER: debug_printf("RE_LOWER %s\n", rex);
             if (rex == eop) return 0;
             if (!islower(*rex)) return 0;
             rex++;
             break;
-        case RE_ATBOW:/* printf("RE_ATBOW %s\n", rex);*/
+        case RE_ATBOW: debug_printf("RE_ATBOW %s\n", rex);
             if (rex >= eop) return 0;
             if (rex > bop) {
                 if ((ChClass(*rex) != 1) || (ChClass(*(rex - 1)) != 0)) return 0;
             }
             break;
-        case RE_ATEOW:/* printf("RE_ATEOW %s\n", rex);*/
+        case RE_ATEOW: debug_printf("RE_ATEOW %s\n", rex);
             if (rex <= bop) return 0;
             if (rex < eop) {
                 if ((ChClass(*rex) != 0) || (ChClass(*(rex - 1)) != 1)) return 0;
             }
             break;
-        case RE_CHAR:/* printf("RE_CHAR %s\n", rex);*/
+        case RE_CHAR: debug_printf("RE_CHAR %s\n", rex);
+	char_failed = 1;
             if (rex == eop) return 0;
             if (flags & RX_CASE) {
                 if (*n->data.fChar != *rex) return 0;
@@ -735,24 +837,30 @@ int RxMatch(RxNode *rx) {
                     if (toupper(rex[i]) != toupper(n->data.fChar[i]))
                         return 0;
             }
+	    char_failed = 0;
             rex += n->fLen;
             break;
-        case RE_INSET:/* printf("RE_INSET %s\n", rex);*/
+        case RE_INSET: debug_printf("RE_INSET %s\n", rex);
             if (rex == eop) return 0;
             if ((n->data.fChar[(unsigned char)(*rex) >> 3] & (1 << ((unsigned char)(*rex) & 7))) == 0) return 0;
             rex++;
             break;
-        case RE_NOTINSET:/* printf("RE_NOTINSET %s\n", rex);*/
+        case RE_NOTINSET: debug_printf("RE_NOTINSET %s\n", rex);
             if (rex == eop) return 0;
             if (n->data.fChar[(unsigned char)(*rex) >> 3] & (1 << ((unsigned char)(*rex) & 7))) return 0;
             rex++;
             break;
-		case RE_JUMP:/* printf("RE_JUMP %s\n", rex);*/
+		case RE_JUMP: debug_printf("RE_JUMP %s\n", rex);
+			if (char_failed) {
+				char_failed = 0;
+				return 1;
+			}
 			n = n->data.fPtr;
 			continue;
-        case RE_END:/* printf("RE_END %s\n", rex);*/
+        case RE_END: debug_printf("RE_END %s\n", rex);
+		re_ended = 1;
             return 1;
-        case RE_BREAK:/* printf("RE_BREAK %s\n", rex);*/
+        case RE_BREAK: debug_printf("RE_BREAK %s\n", rex);
             n = n->fNext;
             if (n->fNext == 0) break;
             n = n->fNext;
@@ -774,6 +882,7 @@ int RxMatch(RxNode *rx) {
             }
             break;
         default:
+			debug_printf("default %s\n", rex);
 			if (n->fWhat & RE_GROUP) {
 				if (n->fWhat & RE_MEM) {
 					const char *save = rex;
@@ -805,16 +914,20 @@ int RxMatch(RxNode *rx) {
 
                 if ((n->fWhat & RE_GREEDY) == 0) {
                     if (RxMatch(n->data.fPtr) == 1) return 1;
+		    if (!re_ended) {
                     flags = fl;
                     rex = save;
+		    }
 				} else {
 					if (RxMatch(n->fNext) == 1) return 1;
+		    if (!re_ended) {
                     flags = fl;
 					rex = save;
+		    }
 					n = n->data.fPtr;
 					continue;
                 }
-            }
+	    }
             break;
 		}
 		if (n == 0) return 0;
@@ -825,11 +938,19 @@ int RxMatch(RxNode *rx) {
     return 0;
 }
 
+int RxMatch(RxNode *rx) {
+	int y = RxMatchB(rx);
+    debug_printf("<<RxMatch %d\n", rx_count--);
+}
+
 int RxTry(RxNode *rx, const char *s) {
     int i, fl = flags;
     rex = s;
 
 	RE_NOTHING_count = 0;
+	char_failed = 0;
+	re_ended = 0;
+
 	for (i = 0; i < NSEXPS; i++)
         match->Open[i] = match->Close[i] = -1;
 
@@ -1186,6 +1307,18 @@ int main(int argc, char **argv)
 
 	try("[A-Z][a-z]+", "and John ran");
 	try(regstr, str);
+	try("x?+y", "xxy");
+	try("(x+)?y", "xxy");
+	try("x?y", "xxy");
+	try("x+y", "xxy");
+	try("x+y", "xxy");
+	try("(x?)y", "xxy");
+	try("(x+)y", "xxy");
+	try("(x)+y", "xxy");
+	try("{x?}y", "xxy");
+	try("{x+}y", "xxy");
+	try("{x}+y", "xxy");
+	try("(x?)+y", "y");
 
 	return 0;
 }
