@@ -37,10 +37,16 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses an atom/sequence paradigm
-for data-types. An **atom** is single numeric value (either a number or
-character), while a **sequence** is a collection of numeric values (atoms,
-strings, nested sequences, ... ). 
+What makes Euphoria unique is a design that uses just two basic data-types -
+ //atom// and //sequence//, and two 'helper' data-types - //object// and //integer//.
+
+* An **atom** is single numeric value (either an integer or floating point)
+* A **sequence** is a list of values (atoms, nested sequences)
+* An **object** is a //variant// type in that it can hold an atom or a sequence.
+Actually, a //sequence// is really a list of zero or more //objects//.
+* An //integer// is just a special form of atom that can only hold integers. You
+can use the //integer// type for a performance advantage in situations where
+floating point values are not required.
 
 What follows from this design are some advantages over conventional languages:
 
@@ -53,6 +59,7 @@ conventional lists, arrays, tables, tuples, ..., and all other
 data-structures.
 * sequences are dynamic{{{--}}}you may create and destroy at will{{{--}}}and 
 modify them to any size and complexity
+* it supports both //static// data typing and //dynamic// data typing.
 
 === Euphoria has qualities that go beyond the elegance of sequences
 
@@ -136,8 +143,8 @@ of, or inability to use, this product.
 
 === Discover Euphoria
 
-More information on Euphoria may be found at OpenEuphoria.org, along with
-an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]]. 
+More information on Euphoria may be found at [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
+along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]]. 
 
 Download Euphoria from the [[http://www.rapideuphoria.com|Euphoria Web site]]. 
 You will also find source-code for example programs and library files.
