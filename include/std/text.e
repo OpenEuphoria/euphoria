@@ -16,7 +16,7 @@ include std/sequence.e
 include std/io.e
 include std/search.e
 include std/convert.e
-include std/eds.e
+include std/serialize.e
 
 --**
 -- Signature:
@@ -267,20 +267,27 @@ function load_code_page(sequence cpname)
 			
 	else
 		-- See if its in the database.
-		cp_db = locate_file("ecp.edb")
-		pos = db_open(cp_db)
-		if pos != DB_OK then
+		cp_db = locate_file("ecp.dat")
+		integer fh = open(cp_db, "rb")
+		if fh = -1 then
 			return -2 -- Couldn't open DB
 		end if
-		pos = db_select_table(cpname)
-		if pos != DB_OK then
-			return -1 -- Couldn't find code page in DB
+		object idx
+		object vers
+		vers = deserialize(fh)  -- get the database version
+		if vers[1] = 1 then
+			idx = deserialize(fh)  -- get Code Page index offset
+			pos = seek(fh, idx)
+			idx = deserialize(fh)	-- get the Code Page Index
+			pos = find(cpname, idx[1])
+			if pos != 0 then
+				pos = seek(fh, idx[2][pos])
+				upper_case_SET = deserialize(fh) -- "uppercase"
+				lower_case_SET = deserialize(fh) -- "lowercase"
+				encoding_NAME = deserialize(fh) -- "title"
+			end if
 		end if
-		
-		upper_case_SET = db_fetch_record("uppercase")
-		lower_case_SET = db_fetch_record("lowercase")
-		encoding_NAME = db_fetch_record("title")
-		db_close()
+		close(fh)
 				
 	end if
 	return 0

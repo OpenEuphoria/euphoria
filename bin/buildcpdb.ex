@@ -1,5 +1,5 @@
 -- buildcpdb.ex Build Codepage Database
-include std/eds.e
+include std/serialize.e
 include std/error.e
 include std/io.e
 include std/filesys.e
@@ -19,11 +19,13 @@ sequence db_path = ""
 sequence new_db_name
 sequence backup_db_name
 sequence current_db_name
-integer produce_dump = 0
 integer silent_running = 0
 
 object v_ECP_List
 sequence unicode_list = {}
+
+sequence name_list = {}
+sequence posn_list = {}
 
 -- Get command line options
 for i = 3 to length(cmdline) do
@@ -49,15 +51,12 @@ for i = 3 to length(cmdline) do
 		if not equal(cmdline[1], cmdline[2]) then
 			self_name &= ' ' & cmdline[2]
 		end if
-		printf(1, "\n\nUSAGE:\n  %s [-p<sourcepath>] [-o<outpath>] [-d]\n", {self_name})
+		printf(1, "\n\nUSAGE:\n  %s [-p<sourcepath>] [-o<outpath>] [-q]\n", {self_name})
 		puts(  1, "      where <sourcepath> is the location of the code page source files\n")
 		puts(  1, "            <outpath> is the location to receive the new code page database\n")
-		puts(  1, "            -d will create a text dump of the new database called 'ecp.dmp'\n")
 		puts(  1, "            -q will do a 'quiet' run.\n")
 		puts(  1, "      The default for these is the current directory.\n")
 		abort(0)
-	elsif begins("-d", cmdline[i]) then	
-		produce_dump = 1
 	elsif begins("-q", cmdline[i]) then	
 		silent_running = 1
 	end if
@@ -88,20 +87,25 @@ end if
 
 
 -- Create empty database
-new_db_name = db_path & "new_ecp.edb"
-current_db_name = db_path & "ecp.edb"
-backup_db_name = db_path & "backup_ecp.edb"
+new_db_name = db_path & "new_ecp.dat"
+current_db_name = db_path & "ecp.dat"
+backup_db_name = db_path & "backup_ecp.dat"
 void = delete_file(new_db_name)
 
-if db_create(new_db_name, DB_LOCK_NO, 2 + length(v_ECP_List), 0) != DB_OK then
+integer db = open(new_db_name, "wb")
+if db = -1 then
 	printf(2,"Failed to create new codepage database '%s'\n", {new_db_name})
 	abort(2)
 end if
-void = db_create_table( "version" , 3) 
-void = db_insert( "date", format(now_gmt(), "%Y%m%d%H%M%S" ))
-void = db_insert( "eu", {4,0,0,0}) -- eu:version()
-void = db_insert( "tool", current_version & {filebase(cmdline[2])})
 
+puts(db, serialize({1, -- ECP Databse format version
+          format(now_gmt(), "%Y%m%d%H%M%S" ), -- date
+          {4,0,0,0}, -- eu:version()
+          {filebase(cmdline[2]), current_version } -- creation tool identity
+         })
+    )
+integer idxoffset = where(db) -- Remember where we are in the file.
+puts(db, repeat(0, 9)) -- Reserve some space in the file at this position.
 
 -- For each file in the list, add it to the database.
 for i = 1 to length(v_ECP_List) do
@@ -111,17 +115,24 @@ for i = 1 to length(v_ECP_List) do
 end for
 
 -- Add unicode table to database
+name_list = append(name_list, "unicode")
+posn_list &= 0
+posn_list[$] = where(db)
+
 unicode_list = sort(unicode_list)
-void = db_create_table( "unicode" , 2) 
-void = db_insert( "codepoint", vslice(unicode_list, 1) )
-void = db_insert( "names", vslice(unicode_list, 2) )
+puts(db, serialize( vslice(unicode_list, 1) ) ) -- "code points"
+puts(db, serialize( vslice(unicode_list, 2) ) ) -- "names "
 
-check_free_list()
-if produce_dump then
-	db_dump(db_path & "ecp.dmp")
-end if
 
-db_close()
+integer indx_pos = where(db)
+
+puts(db, serialize( {name_list, posn_list}))
+
+-- Go back to the 'reserved' area in the file.
+void = seek(db, idxoffset)
+puts(db, serialize( indx_pos) )
+
+close(db)
 
 -- Rename old databse
 void = delete_file(backup_db_name)
@@ -274,13 +285,16 @@ procedure load_file(sequence file_path)
 	end while
 
 	-- Build this table.
-	void = db_create_table( filebase(file_path) , 6) 
-	void = db_insert( "bpc", vl_bpc)
-	void = db_insert( "codes", vl_codes)
-	void = db_insert( "lowercase", vl_lowercase)
-	void = db_insert( "title", vl_title)
-	void = db_insert( "unicodes", vl_unicodes)
-	void = db_insert( "uppercase", vl_uppercase)
+	name_list = append(name_list, filebase(file_path))
+	posn_list &= 0
+	posn_list[$] = where(db)
+	
+	puts(db, serialize( vl_uppercase)) -- "uppercase"
+	puts(db, serialize( vl_lowercase)) -- "lowercase"
+	puts(db, serialize( vl_title)) -- "title"
+	puts(db, serialize( vl_bpc)) -- "bpc"
+	puts(db, serialize( vl_codes)) -- "codes"
+	puts(db, serialize( vl_unicodes)) -- "unicodes"
 	
 	
 	if not silent_running then

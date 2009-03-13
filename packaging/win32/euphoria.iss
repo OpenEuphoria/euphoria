@@ -143,6 +143,8 @@ Source: "cleanbranch\bin\where.bat"; DestDir: {app}\bin\; Flags: ignoreversion; 
 Source: "cleanbranch\bin\key.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\eutest.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\make31.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "cleanbranch\bin\ecp.dat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "cleanbranch\bin\buildcpdb.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Demos
 Source: "cleanbranch\demo\*.ex"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
