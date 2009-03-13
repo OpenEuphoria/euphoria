@@ -584,7 +584,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\b
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.c : $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj $(TRUNKDIR)\bin\findjmp.ex
 	cd $(BUILDDIR)\$(OBJDIR)\back
-	$(EXE) $(TRUNKDIR)\bin\findjmp.ex > be_magic.c
+	$(EXE) $(TRUNKDIR)\bin\findjmp.ex be_magic.c
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
