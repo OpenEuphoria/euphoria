@@ -69,19 +69,27 @@ public constant EOF = -1
 -- <built-in> procedure print(integer fn, object x)
 --
 -- Description:
--- Print an object to a file or device, with braces { , , , } to show the structure.
+-- Writes out a **text** representation of an object to a file or device. 
+-- If the object ##x## is a sequence, it uses braces { , , , } to show the structure.
 --
 -- Parameters:
 --		# ##fn##: an integer, the handle to a file or device to output to
 -- 		# ##x##: the object to print
 --
 -- Errors:
--- The target fole or device must be open.
+-- The target file or device must be open.
+--
+-- Comments:
+-- This is not used to write to "binary" files as it only outputs text.
 --
 -- Example 1:
 -- <eucode>
--- print(STDOUT, "ABC")  -- output is:  {65, 66, 67}
--- puts(STDOUT, "ABC")   -- output is:  ABC
+-- print(STDOUT, "ABC")  -- output is:  "{65,66,67}"
+-- puts(STDOUT, "ABC")   -- output is:  "ABC"
+-- print(STDOUT, 65)     -- output is:  "65"
+-- puts(STDOUT, 65)      -- output is:  "A"  (ASCII-65 ==> 'A')
+-- puts(STDOUT, 65.1234) -- output is:  "65.1234"
+-- puts(STDOUT, 65.1234) -- output is:  "A" (Converts to integer first)
 -- </eucode>
 --
 -- Example 2:
