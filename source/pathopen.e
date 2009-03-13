@@ -4,6 +4,7 @@
 include std/memory.e
 include std/os.e
 include std/filesys.e
+include std/text.e
 
 ifdef DOS32 then
 	public include std\dos\memory.e
@@ -212,51 +213,153 @@ global procedure add_include_directory( sequence path )
 	end if
 end procedure
 
-global procedure load_euinc_conf( sequence file )
-	integer fn, absolute
-	object in, home
+sequence seen_conf = {}
+global function load_euinc_conf( sequence file )
+	integer fn
+	object in
+	integer spos, epos
 	sequence conf_path
+	sequence new_args = {}
+	sequence arg
+	sequence parm
+	sequence section
 
-	conf_path = strip_file_from_path( file )
-	home = ""
-	
-	if length(conf_path) = 0 then
-		conf_path = pwd
-	else
-		conf_path = expand_path( conf_path, pwd )
+	-- If supplied 'file' is actually a directory name, look for 'euinc.conf' in that directory
+	if file_type(file) = FILETYPE_DIRECTORY then
+		if file[$] != SLASH then
+			file &= SLASH
+		end if
+		file &= "euinc.conf"
 	end if
 	
-	fn = open( file, "r" )
-	if fn = -1 then return end if
+	conf_path = canonical_path( file )
+	-- Prevent recursive configuration loads.
+	ifdef not UNIX then
+		conf_path = lower(conf_path)
+	end ifdef
+	if find(conf_path, seen_conf) != 0 then
+		return {}
+	end if
+	seen_conf = append(seen_conf, conf_path)
+		
+	section = "all"
+	fn = open( conf_path, "r" )
+	if fn = -1 then return {} end if
 	
 	in = gets( fn )
 	while sequence( in ) do
-		while length(in) and find( in[$], "\n\r \t" ) do
-			in = in[1..$-1]
+		-- Trim
+		spos = 1
+		while spos <= length(in) do
+			if find( in[spos], "\n\r \t" ) = 0 then
+				exit
+			end if
+			spos += 1
 		end while
 		
-		while length(in) and find( in[1], " \t" ) do
-			in = in[2..$]
+		epos = length(in)
+		while epos >= spos do
+			if find( in[epos], "\n\r \t" ) = 0 then
+				exit
+			end if
+			epos -= 1
 		end while
 		
-		if length(in) and match( "--", in ) != 1 then
-			in = expand_path( in, conf_path )  -- allow ~ to refer to $HOME in *nix
-			absolute = find(in[1], SLASH_CHARS) or
-			   (not EUNIX and find(':', in))
+		in = in[spos .. epos]		
+		
+		
+		arg = ""
+		parm = ""
+    	-- Lines starting with a double dash are comments.
+    	-- Blank lines are ignored
+    	-- Lines starting with '[' are change of section headers.
+    	-- Lines starting with a single dash are option switches
+    	-- All other lines are assumed to be '-I' (include path) switch parameters
+    	-- Lines of the format '[name]' begin a new section called 'name'. If 'name'
+    	--     is omitted, then 'all' is assumed.
+		if length(in) > 0 then
+			if in[1] = '[' then
+				-- Start of a new section
+				section = in[2..$]
+				if length(section) > 0 and section[$] = ']' then
+					section = section[1..$-1]
+				end if
+				section = lower(trim(section))
+				if length(section) = 0 then
+					section = "all"
+				end if
+				
+			elsif length(in) > 2 then
+				if in[1] = '-' then
+					if in[2] != '-' then
+						spos = find(' ', in)
+						if spos = 0 then
+							arg = in
+							parm = ""
+						else
+							arg = in[1..spos - 1]
+							parm = in[spos + 1 .. $]
+						end if
+					end if
+				else
+					arg = "-I"
+					parm = in
+				end if
+			else
+				arg = "-I"
+				parm = in
+			end if
+		end if
+		
+		if length(arg) > 0 then
+			integer needed = 0
+			switch section do
+				case "all":
+					needed = 1
+					break
+					
+				case "translate":
+					needed = TRANSLATE
+					break
+					
+				case "interpret":
+					needed = INTERPRET
+					break
+					
+				case "bind":
+					needed = BIND
+					break
+					
+			end switch
 			
-
-			config_inc_paths = append( config_inc_paths, in )
+			if needed then
+				arg = upper(arg)
+				if equal(arg, "-C") then
+					if length(parm) > 0 then
+						new_args &= load_euinc_conf(parm)
+					end if
+				else
+					new_args = append(new_args, arg)
+					if length(parm > 0) then
+						new_args = append(new_args, parm)
+					end if
+				end if
+			end if
 		end if
 		
 		in = gets( fn )
 	end while
 	close(fn)
-end procedure
-
-global procedure load_platform_inc_paths()
-	object env
 	
-	if loaded_config_inc_paths then return end if
+	return new_args
+end function
+
+global function GetDefaultArgs()
+	object env
+	sequence default_args = {}
+	sequence conf_file = "euinc.conf"
+	
+	if loaded_config_inc_paths then return "" end if
 	loaded_config_inc_paths = 1
 
 	-- If a unix variant, this loads the config file from the current working directory
@@ -265,46 +368,53 @@ global procedure load_platform_inc_paths()
 	-- you are loading it such as: C:\euphoria\demo> exwc demo.ex ... In this case
 	-- this command loads C:\euphoria\bin\euinc.conf not C:\euphoria\demo\euinc.conf
 	-- as it would under unix variants.
-	env = strip_file_from_path( exe_path() )
-	load_euinc_conf( env & "euinc.conf" )
-
+	
 	-- platform specific
 	ifdef UNIX then
+		default_args &= load_euinc_conf( "/etc/euphoria/" & conf_file )
+		
 		env = getenv( "HOME" )
 		if sequence(env) then
-			load_euinc_conf( env & "/.euinc.conf" )
+			default_args &= load_euinc_conf( env & "/." & conf_file )
 		end if
-		load_euinc_conf( "/etc/euphoria/euinc.conf" )
 		
 	elsifdef WIN32 then
-		-- load the config file from the current working directory
-		-- This is not needed on unix variants as it is handled above
-		load_euinc_conf("./euinc.conf")
-	
-		env = getenv( "APPDATA" )
-		if sequence(env) then
-			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
-		end if
-
 		env = getenv( "ALLUSERSPROFILE" )
 		if sequence(env) then
-			load_euinc_conf( expand_path( "euphoria", env ) & "euinc.conf" )
+			default_args &= load_euinc_conf( expand_path( "euphoria", env ) & conf_file )
 		end if
+		
+		env = getenv( "APPDATA" )
+		if sequence(env) then
+			default_args &= load_euinc_conf( expand_path( "euphoria", env ) & conf_file )
+		end if
+
+		env = getenv( "HOMEPATH" )
+		if sequence(env) then
+			default_args &= load_euinc_conf( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file )
+		end if
+		
 	elsedef
 		-- none for DOS
 	end ifdef
-end procedure
+	
+	-- From current working directory
+	default_args &= load_euinc_conf("./" & conf_file)
+	
+	-- From where ever the executable is
+	env = strip_file_from_path( exe_path() )
+	default_args &= load_euinc_conf( env & conf_file )
+
+	return default_args
+end function
 
 global function ConfPath(sequence file_name)
 -- Search directories listed on command line and in conf files
-	sequence full_path, file_path
+	sequence file_path
 	integer try
-	if not loaded_config_inc_paths then
-		load_platform_inc_paths()
-	end if
+	
 	for i = 1 to length(config_inc_paths) do
-		full_path = config_inc_paths[i]
-		file_path = full_path & file_name
+		file_path = config_inc_paths[i] & file_name
 		try = open( file_path, "r" )
 		if try != -1 then
 			return {file_path, try}
@@ -433,9 +543,6 @@ global function Include_paths(integer add_converted)
 		return include_Paths
 	end if
 
-	if not loaded_config_inc_paths then
-		load_platform_inc_paths()
-	end if
 
 	include_Paths = append(config_inc_paths, current_dir())
 	num_var = find("EUINC", cache_vars)

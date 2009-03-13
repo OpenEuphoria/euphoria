@@ -278,8 +278,7 @@ function extract_options(sequence cl)
 			elsif match("C", option ) = 1 and op < length(cl) then
 				add_switch( "-c", 0 )
 				add_switch( cl[op+1], 0 )
-				load_euinc_conf( cl[op+1] )
-				cl = cl[1..op-1] & cl[op+2..$]
+				cl = cl[1..op-1] & load_euinc_conf( cl[op+1] ) & cl[op+2..$]
 				
 			else
 				fatal("Invalid option: " & cl[op])

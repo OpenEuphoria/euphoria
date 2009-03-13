@@ -33,6 +33,18 @@ global enum
 	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
 	WARNING_FILE_OPTION	-- warning file name
 
+constant COMMON_PARAMS = {
+	EUINC_OPTION,
+	INCDIR_OPTION,
+	DEFINE_OPTION, -- ifdef defines
+	0,  -- batch processing, do not "Press Enter" on error
+	0,   -- do not execute, only test syntax
+	0,   -- enable all warnings
+	WARNING_OPTION, -- startup warning level
+	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
+	WARNING_FILE_OPTION	-- warning file name
+}
+
 
 -- s = the text of the switch
 -- deferred:  1 = it's an argument for the switch, and won't be added
@@ -52,44 +64,43 @@ global function get_switches()
 	return switches
 end function
 
-global procedure move_args( integer start, integer args )
-	Argc -= args
-	for j = start to Argc do
-		Argv[j] = Argv[j+args]
-	end for
-
+global procedure move_args( integer start )
+	Argv[start .. Argc - 1] = Argv[start + 1 .. Argc ]
+	Argc -= 1
 end procedure
 
 integer option_W
 option_W=0
 global procedure common_options( integer option, integer ix )
-	integer args, n
-	-- we only need to remove our extra options
-	args = 0
+	integer n
+	object param
 
+	-- we only need to remove our extra options
+	param = {}
+	
+	if COMMON_PARAMS[option] != 0 then
+		if ix < Argc then
+			param = Argv[ix+1]
+			add_switch( param, 1 )
+			move_args( ix+1 )	
+		else
+			Warning("missing option parameter for: %s" , cmdline_warning_flag, {Argv[ix]})
+		end if
+	end if
+	
 	switch option do
 	case  EUINC_OPTION:
-		if ix < Argc then
-			load_euinc_conf( Argv[ix+1] )
-			add_switch( Argv[ix+1], 1 )
-			args += 1
-		end if
+		sequence new_args = load_euinc_conf( param )
+		Argv = Argv[1 .. ix] & new_args & Argv[ix + 1 .. $]
+		Argc += length(new_args)
 		break
-
+		
 	case  INCDIR_OPTION:
-		if ix < Argc then
-			add_include_directory( Argv[ix+1] )
-			add_switch( Argv[ix+1], 1 )
-			args += 1
-		end if
+		add_include_directory( param )
 		break
 
 	case  DEFINE_OPTION:
-		if ix < Argc then
-			OpDefines &= {Argv[ix+1]}
-			add_switch(Argv[ix+1], 1)
-			args += 1
-		end if
+		OpDefines &= {param}
 		break
 
 	case  TEST_OPTION:
@@ -102,36 +113,28 @@ global procedure common_options( integer option, integer ix )
 		break
 
 	case  WARNING_OPTION:
-		if ix < Argc then
-			n = find(Argv[ix+1],warning_names)
-			if n>0 then
-				if option_W=1 then
-					OpWarning = or_bits(OpWarning, warning_flags[n])
-				else
-					option_W = 1
-					OpWarning = warning_flags[n]
-				end if
-				prev_OpWarning = OpWarning
+		n = find(param ,warning_names)
+		if n != 0 then
+			if option_W = 1 then
+				OpWarning = or_bits(OpWarning, warning_flags[n])
+			else
+				option_W = 1
+				OpWarning = warning_flags[n]
 			end if
-			add_switch(Argv[ix+1], 1)
-			args += 1
+			prev_OpWarning = OpWarning
 		end if
 		break
 
 	case  WARNING_EXCLUDE_OPTION:
-		if ix < Argc then
-			n = find(Argv[ix+1],warning_names)
-			if n>0 then
-				if option_W=-1 then
-					OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
-				else
-					option_W = -1
-					OpWarning = strict_warning_flag - warning_flags[n]
-				end if
-				prev_OpWarning = OpWarning
+		n = find(param, warning_names)
+		if n != 0 then
+			if option_W = -1 then
+				OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
+			else
+				option_W = -1
+				OpWarning = strict_warning_flag - warning_flags[n]
 			end if
-			add_switch(Argv[ix+1], 1)
-			args += 1
+			prev_OpWarning = OpWarning
 		end if
 		break
 
@@ -140,15 +143,9 @@ global procedure common_options( integer option, integer ix )
 		break
 
 	case  WARNING_FILE_OPTION:
-		if ix < Argc then
-			TempWarningName = Argv[ix+1]
-			add_switch(Argv[ix+1], 1)
-			args += 1
-		end if
+		TempWarningName = param
 		break
 		
 	end switch
-
-	move_args( ix+1, args )
 
 end procedure

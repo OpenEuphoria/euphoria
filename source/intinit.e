@@ -3,14 +3,18 @@
 -- Common initialization (command line options)
 include cominit.e
 include error.e
+include pathopen.e
+
 include std/text.e
 
 global procedure intoptions()
--- set translator command-line options
+-- set interpreter command-line options
 	integer i, option
 	sequence uparg
-
+	
+	object default_args = 0
 	-- put file first, strip out the options
+	
 	i = 3
 	while i <= Argc do
 		if Argv[i][1] = '-' then
@@ -23,17 +27,25 @@ global procedure intoptions()
 			end if
 			add_switch( Argv[i], 0 )
 			-- delete "-" option from the list of args */
+			Argv[i .. Argc-1] = Argv[i+1 .. Argc ]
 			Argc -= 1
-			for j = i to Argc do
-				Argv[j] = Argv[j+1]
-			end for
+			
+		elsif atom(default_args) then
+			default_args = GetDefaultArgs()
+			if length(default_args) > 0 then				
+				Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
+				Argc += length(default_args)
+			end if			
+			
 		else
-			return -- non "-" items are assumed to be the source file
+			exit -- first non "-" item is assumed to be the source file
 		end if
 	end while
+
 	if Strict_is_on then -- overrides any -W/-X switches
 		OpWarning = strict_warning_flag
 		prev_OpWarning = OpWarning
 	end if
+	
 end procedure
 

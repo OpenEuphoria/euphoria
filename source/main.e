@@ -14,7 +14,7 @@ include std/error.e
 include parser.e
 include mode.e
 
-function ProcessOptions()
+function GetSourceName()
 -- record command line options, return source file number
 	integer src_file
 	boolean dot_found
@@ -176,7 +176,7 @@ procedure main()
 
 	-- we have our own, possibly different, idea of argc and argv
 	argv = command_line()
-
+	
 	if BIND then
 		argv = extract_options(argv)
 	end if
@@ -220,7 +220,7 @@ procedure main()
 		InitBackEnd(0)
 	end if
 
-	src_file = ProcessOptions()
+	src_file = GetSourceName()
 
 	if src_file = -1 then
 		-- too early for normal error processing
@@ -264,8 +264,7 @@ procedure main()
 		OutputIL()
 
 	elsif INTERPRET and not test_only then
-ifdef STDDEBUG then
-elsedef
+ifdef not STDDEBUG then
 		BackEnd(0) -- execute IL using Euphoria-coded back-end
 end ifdef
 	end if

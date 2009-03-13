@@ -26,6 +26,7 @@ include std/sort.e
 include compile.e
 include cominit.e
 include tranplat.e
+include pathopen.e
 
 -- true if we want to force the user to choose the compiler
 constant FORCE_CHOOSE = FALSE
@@ -62,6 +63,9 @@ global procedure transoptions()
 	sequence uparg
 	object s
 	
+	Argv &= GetDefaultArgs()
+	Argc = length(Argv)
+
 	-- put file first, strip out the options
 	i = 1
 	while i <= Argc do
@@ -116,7 +120,7 @@ global procedure transoptions()
 							total_stack_size = floor(s[2] / 4) * 4
 						end if
 					end if
-					move_args( i+1, 1 )
+					move_args( i+1 )
 				else
 					Warning("-stack option missing stack size",translator_warning_flag)
 				end if
@@ -129,7 +133,7 @@ global procedure transoptions()
 				if i < Argc then
 					user_library = Argv[i+1]
 					add_switch( user_library, 1 )
-					move_args( i+1, 1 )
+					move_args( i+1 )
 				else
 					Warning("-lib option missing library name",translator_warning_flag)
 				end if
@@ -138,7 +142,7 @@ global procedure transoptions()
 				if i < Argc then
 					s = upper(Argv[i+1])
 					add_switch( Argv[i+1], 1 )
-					move_args( i+1, 1 )
+					move_args( i+1 )
 					if equal( s, "WIN" ) then
 						set_host_platform( WIN32 )
 					elsif equal( s, "DOS" ) then
@@ -158,7 +162,7 @@ global procedure transoptions()
 				if i < Argc then
 					compile_dir = Argv[i+1]
 					add_switch( compile_dir, 1 )
-					move_args( i+1, 1 )
+					move_args( i+1 )
 				else
 					Warning("-com option missing compile directory",translator_warning_flag)
 				end if
@@ -173,12 +177,12 @@ global procedure transoptions()
 			end if
 			-- delete "-" option from the list of args */
 			add_switch( Argv[i], 0 )
-			move_args( i, 1 )
+			move_args( i )
 		else 
 			i += 1 -- ignore non "-" items
 		end if      
 	end while
-
+	
 	if help_option then
 		CompileErr(
 "Usage: ec [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]\n"&
@@ -424,7 +428,7 @@ procedure InitBackEnd(integer c)
 	if sequence(wat_path)+gcc_option+sequence(dj_path)+sequence(bor_path)+lcc_option = 0 then
 		CompileErr( "Cannot determine for which compiler to translate for." ) 
 	end if
-	
+
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 

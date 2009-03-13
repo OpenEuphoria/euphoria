@@ -5129,7 +5129,6 @@ object Command_Line()
 	object_ptr obj_ptr;
 	char **argv;
 	s1_ptr result;
-	int switch_len;
 #ifdef EUNIX
 	char * buff;
 	ssize_t len;
@@ -5140,10 +5139,9 @@ object Command_Line()
 #else
 	if (Executing) {
 #endif
+		
 		// user's program sees one less arg
-		argv = Argv+1; // skip first one
-		switch_len = SEQ_PTR(fe.switches)->length;
-		result = NewS1(Argc - (*file_name_entered == 0) - switch_len);
+		result = NewS1(Argc - (*file_name_entered == 0));
 		obj_ptr = result->base;
 #ifdef EUNIX
 		// We try to get the actual path of the executable on *nix
@@ -5163,11 +5161,9 @@ object Command_Line()
 #ifdef EUNIX
 		free(buff);
 #endif
-		for(i=0; i <= switch_len; i++){
-				argv++;
-		}
 
-		for (i = switch_len + 2; i < Argc; i++){
+		argv = Argv+2; // skip first two
+		for (i = 2; i < Argc; i++){
 			*(++obj_ptr) = NewString(*argv++);
 		}
 		if (*file_name_entered) {
