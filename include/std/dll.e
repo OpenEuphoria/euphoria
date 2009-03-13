@@ -486,7 +486,6 @@ public function call_back(object id)
 	elsedef
 		sequence s, code, rep
 		atom addr, size, repi
-		atom z
 
 		s = machine_func(M_CALL_BACK, {id})
 		addr = s[1]

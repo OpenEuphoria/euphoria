@@ -928,12 +928,14 @@ end function
 
 public function copy_file(sequence src, sequence dest, atom overwrite)
 	
-	if length(dest) and file_type( dest ) = FILETYPE_DIRECTORY then
-		if dest[$] != SLASH then
-			dest &= SLASH
+	if length(dest) then
+		if file_type( dest ) = FILETYPE_DIRECTORY then
+			if dest[$] != SLASH then
+				dest &= SLASH
+			end if
+			sequence info = pathinfo( src )
+			dest &= info[PATH_FILENAME]
 		end if
-		sequence info = pathinfo( src )
-		dest &= info[PATH_FILENAME]
 	end if
 	
 	ifdef WIN32 then
@@ -1294,6 +1296,8 @@ end function
 --		# ##search_list##: a sequence, the list of directories to look in. By
 --        default this is "", meaning that a predefined set of directories
 --        is scanned. See comments below.
+--      # ##subdir##: a sequence, the sub directory within the search directories
+--        to check. This is optional. 
 --
 -- Returns:
 --     A **sequence**, the located file path if found, else the original file name.
@@ -1321,15 +1325,20 @@ end function
 -- * The directories listed in $USERPATH
 -- * The directories listed in $PATH
 --
+-- If the ##subdir## is supplied, the function looks in this sub directory for each
+-- of the directories in the search list.
+--
 -- Example 1:
 -- <eucode>
 --  res = locate_file("abc.def", {"/usr/bin", "/u2/someapp", "/etc"})
 --  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
 --  res = locate_file("abc.def") -- Scan default locations.
+--  res = locate_file("abc.def", , "app") -- Scan the 'app' sub directory in the default locations.
 -- </eucode>
 
-public function locate_file(sequence filename, sequence search_list = {})
+public function locate_file(sequence filename, sequence search_list = {}, sequence subdir = {})
 	object extra_paths
+	sequence this_path
 	
 	if absolute_path(filename) then
 		return filename
@@ -1385,7 +1394,13 @@ public function locate_file(sequence filename, sequence search_list = {})
 			search_list = split(search_list, PATHSEP)
 		end if
 	end if
-		
+
+	if length(subdir) > 0 then
+		if subdir[$] != SLASH then
+			subdir &= SLASH
+		end if	
+	end if
+			
 	for i = 1 to length(search_list) do
 		if length(search_list[i]) = 0 then
 			continue
@@ -1395,9 +1410,17 @@ public function locate_file(sequence filename, sequence search_list = {})
 			search_list[i] &= SLASH
 		end if
 
-		if file_exists(search_list[i] & filename) then
-			return canonical_path(search_list[i] & filename)
+		
+		if length(subdir) > 0 then
+			this_path = search_list[i] & subdir & filename
+		else
+			this_path = search_list[i] & filename
 		end if
+		
+		if file_exists(this_path) then
+			return canonical_path(this_path)
+		end if		
+		
 	end for
 	return filename
 end function
@@ -2137,10 +2160,12 @@ public enum
 sequence file_counters = {}
 
 -- Parameter inst contains two items: 'count_all' flag, and 'index' into file_counters.
+
 function count_files(sequence orig_path, sequence dir_info, sequence inst)
 	integer pos = 0
 	sequence ext
 
+	orig_path = orig_path
 	if equal(dir_info[D_NAME], ".") then
 		return 0
 	end if
@@ -2186,6 +2211,7 @@ function count_files(sequence orig_path, sequence dir_info, sequence inst)
 	end if
 	return 0
 end function
+
 
 --**
 -- Returns the amount of space used by a directory.

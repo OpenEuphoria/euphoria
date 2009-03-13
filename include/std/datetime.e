@@ -764,7 +764,7 @@ end function
 -- datetime parse(wstring string)
 -- parse the string and returns the datetime
 public function parse(sequence sDateTime) --wstring string)
-sequence sWork, dVar, tVar
+sequence dVar, tVar
 	-- this assumes a string of format Y-M-D H:M:S
 	sDateTime = split(sDateTime," ")
 	-- now something like { "2008-10-13", "12:17:23" }
