@@ -654,23 +654,24 @@ subscripts, you can always assume that the final value of the lhs_var will be
 the value of rhs_expr, regardless of any side-effects that may have changed
 lhs_var.
 
-**Euphoria data structures are almost infinitely flexible.** Arrays in other
+**Euphoria data structures are almost infinitely flexible.** Arrays in many
 languages are constrained to have a fixed number of elements, and those
 elements must all be of the same type. Euphoria eliminates both of those
-restrictions.  You can easily add a new structure to the employee sequence
+restrictions by defining all arrays (sequences) as a list of zero or more
+Euphoria objects whose element count can be changed at any time.
+You can easily add a new structure to the employee sequence
 above, or store an unusually long name in the NAME field and Euphoria will take
 care of it for you. If you wish, you can store a variety of different employee
-"structures", with different sizes, all in one sequence. The price to pay is that, when you
+"structures", with different sizes, all in one sequence. However, when you
 retrieve a sequence element, it is not guaranteed to be of any type. You, as a
-programmer, need to make sure the retrieved data is of the type you'd expect, Euphoria will
-not. The only thing it will check is whether the assignment is legal. If you retrieve a
-sequence element in an integer variable, but get a sequence, Euphoria will complain on this
-assignment, not before.
+programmer, need to check that the retrieved data is of the type you'd expect, Euphoria will
+not. The only thing it will check is whether an assignment is legal. For example,
+if you try to assign a sequence to an integer variable, Euphoria will complain
+at the time your code does the assignment. 
 
-Not only can a Euphoria program easily represent all conventional data
+Not only can a Euphoria program represent all conventional data
 structures but you can create very useful, flexible structures that would be
-extremely hard to declare in a conventional language.  See
-[[:Euphoria versus Conventional Languages]].
+hard to declare in many other languages.
 
 Note that expressions in general may not be subscripted, just variables. For
 example: ##{5+2,6-1,7*8,8+1}[3]## is //not// supported, nor is something like:
@@ -922,80 +923,6 @@ or from another context with slightly different rules. Watch out for ##and## and
 
 The equals symbol ##'='## used in an [[:assignment statement]] is not an operator,
 it's just part of the syntax of the language.
-
-== Euphoria versus Conventional Languages
-
-By basing Euphoria on this one, simple, general, recursive data structure, a
-tremendous amount of the complexity normally found in programming languages has
-been avoided. The arrays, structures, unions, arrays of records,
-multidimensional arrays, etc. of other languages can all be easily represented
-in Euphoria with sequences. So can higher-level structures such as lists,
-stacks, queues, trees etc. You gain ultimate flexibility at no performance cost,
-and lose some extra type checking. This looks like a very favourable trade off.
-
-Furthermore, in Euphoria you can have sequences of mixed type; you can assign
-any object to an element of a sequence; and sequences easily grow or shrink in
-length without your having to worry about storage allocation issues.  The exact
-layout of a data structure does not have to be declared in advance, and can
-change dynamically as required. It is easy to write generic code, where, for
-instance, you push or pop a mix of various kinds of data objects using a single
-stack. Making a flexible list that contains a variety of different kinds of
-data objects is trivial in Euphoria, but requires dozens of lines of ugly code
-in other languages.
-
-Data structure manipulations are very efficient since the Euphoria interpreter
-will point to large data objects rather than copy them.
-
-Programming in Euphoria is based entirely on creating and manipulating
-flexible, dynamic sequences of data. Sequences are //it// - there are no
-other data structures to learn.  You operate in a simple, safe, elastic world
-of //values//, that is far removed from the rigid, tedious, dangerous world
-of bits, bytes, pointers and machine crashes.
-
-Unlike other languages such as LISP and Smalltalk, Euphoria's "garbage
-collection" of unused storage is a continuous process that never causes random
-delays in execution of a program, and does not pre-allocate huge regions of
-memory.
-
-The language definitions of conventional languages such as C, C~+~+, Ada, etc.
-are very complex. Most programmers become fluent in only a subset of the
-language. The ANSI standards for these languages read like complex legal
-documents.
-
-You are forced to write different code for different data types simply to copy
-the data, ask for its current length, concatenate it, compare it etc. The
-manuals for those languages are packed with routines such as "strcpy",
-"strncpy", "memcpy", "strcat",  "strlen", "strcmp", "memcmp", etc. that each
-only work on one of the many types of data. The specialised routines may have been more
-efficient when C was developed in the 60s. Hardware has changed tremendously ever since.
-
-Much of the complexity surrounds issues of data type. How do you define new
-types? Which types of data can be mixed? How do you convert one type into
-another in a way that will keep the compiler happy? When you need to do
-something requiring flexibility at run-time, you frequently find yourself
-trying to fake out the compiler.
-
-In these languages the numeric value 4 (for example) can have a different
-meaning depending on whether it is an int, a char, a short, a double, an int *
-etc. In Euphoria, 4 is the atom 4, period. Euphoria has something called types
-as we shall see later, but it is a much simpler concept.
-
-Issues of dynamic storage allocation and deallocation consume a great deal of
-programmer coding time and debugging time in these other languages, and make
-the resulting programs much harder to understand. Programs that must run
-continuously often exhibit storage "leaks", since it takes a great deal of
-discipline to safely and properly free all blocks of storage once they are no
-longer needed. The Euphoria interpreter enforces it and relieves the programmer.
-
-Pointer variables are extensively used. The pointer has been called the "go to"
-of data structures. It forces programmers to think of data as being bound to a
-fixed memory location where it can be manipulated in all sorts of low-level,
-non-portable, tricky ways. A picture of the actual hardware that your program
-will run on is never far from your mind. Euphoria does not expose pointers and
-does not need them exposed. You will soon learn that you can use sequence indexes in most of
-the places you would use pointers. The loss of performance is minimal, and the safety gain is
-maximal. Translating your program gets rid of the performance loss, once you have reaped
-the gains of added safety and less debugging, so you can have it both ways actually.
 
 == Declarations
 
