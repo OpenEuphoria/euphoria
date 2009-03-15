@@ -21,22 +21,71 @@ extern int default_heap;
 
 #include "regex.h"
 
-object regex_compile(object x) {
+struct regex_cleanup{
+	struct cleanup cleanup;
+	RxNode* re;
+};
+typedef struct regex_cleanup *regex_cleanup_ptr;
+
+void regex_deref( object re ){
+	
+	regex_cleanup_ptr rcp = SEQ_PTR(re)->cleanup;
+	if( rcp->re ){
+		RxFree( rcp->re );
+		rcp->re = 0;
+	}
+}
+
+RxNode* compile(object x ){
     s1_ptr re_str_seq;
     char *re_str;
     RxNode *re;
-
-    re_str_seq = SEQ_PTR(SEQ_PTR(x)->base[1]);
+    re_str_seq = SEQ_PTR(x);
     re_str = EMalloc(re_str_seq->length + 1);
-    MakeCString(re_str, SEQ_PTR(x)->base[1]);
-
+    MakeCString(re_str, x);
     re = RxCompile(re_str);
-
     EFree(re_str);
 
-    if ((unsigned) re > (unsigned) MAXINT)
-        return NewDouble((double) (unsigned long) re);
-    return(unsigned long) re;
+    return re;
+}
+
+object regex_compile(object x) {
+    RxNode* re;
+	RefDS(x); // we send a 'naked' sequence for this, and machine() DeRefs
+	regex_cleanup_ptr rcp = (regex_cleanup_ptr) SEQ_PTR(x)->cleanup;
+	if( rcp != 0 ){
+		RxFree( rcp->re );
+	}
+	else{
+		rcp = EMalloc( sizeof( struct regex_cleanup ) );
+		rcp->cleanup.func.builtin = &regex_deref;
+		rcp->cleanup.type = CLEAN_REGEX;
+		SEQ_PTR(x)->cleanup = (cleanup_ptr)rcp;
+	}
+	rcp->re = compile( x );
+	return x;
+}
+
+RxNode* get_re( object x ){
+// Makes sure that the regex has been compiled, and then 
+// returns the compiled regex
+	regex_cleanup_ptr rcp = SEQ_PTR(x)->cleanup;
+	if( rcp == 0 ){
+		RxNode *re = compile( x );
+		if( re == 0 ){
+			return re;
+		}
+		rcp = EMalloc( sizeof( struct regex_cleanup ) );
+		if( rcp == 0 ){
+			// out of memory error
+			RTFatal("Your program has run out of memory.\nOne moment please...");
+		}
+		rcp->re = re;
+		rcp->cleanup.type = CLEAN_REGEX;
+		rcp->cleanup.func.builtin = &regex_deref;
+		SEQ_PTR(x)->cleanup = rcp;
+	}
+	return rcp->re;
 }
 
 object regex_exec(object x, int match) {
@@ -49,11 +98,8 @@ object regex_exec(object x, int match) {
     RxMatchRes matches;
 
     re_ptr = SEQ_PTR(x)->base[1];
-    if (IS_ATOM_INT(re_ptr))
-        re = (RxNode *) re_ptr;
-    else
-		re = (RxNode *) (unsigned int) DBL_PTR(re_ptr)->dbl;
-
+// 	printf("re_ptr: %x\n", re_ptr );
+	re = get_re( re_ptr );
     haystack_seq = SEQ_PTR(SEQ_PTR(x)->base[2]);
     haystack = EMalloc(haystack_seq->length + 1);
 	MakeCString(haystack, SEQ_PTR(x)->base[2]);
@@ -100,10 +146,7 @@ object regex_replace(object x) {
     RxMatchRes match;
 
     re_ptr = SEQ_PTR(x)->base[1];
-    if (IS_ATOM_INT(re_ptr))
-        re = (RxNode *) re_ptr;
-    else
-        re = (RxNode *) (unsigned int) DBL_PTR(re_ptr)->dbl;
+	re = get_re( re_ptr );
 
     haystack_seq = SEQ_PTR(SEQ_PTR(x)->base[2]);
     haystack = EMalloc(haystack_seq->length + 1);
@@ -136,16 +179,21 @@ object regex_replace(object x) {
 }
 
 object regex_free(object x) {
-    object re_ptr;
-    RxNode *re;
-
-    re_ptr = SEQ_PTR(x)->base[1];
-    if (IS_ATOM_INT(re_ptr))
-        re = (RxNode *) re_ptr;
-    else
-        re = (RxNode *) (unsigned int) DBL_PTR(re_ptr)->dbl;
-
-	RxFree(re);
-
+	regex_cleanup_ptr rcp = SEQ_PTR(x)->cleanup;
+	if( rcp != 0 && rcp->cleanup.type == CLEAN_REGEX){
+		RxFree( rcp->re );
+		EFree( rcp );
+		SEQ_PTR(x)->cleanup = 0;
+// 		printf("free'd regex manually for %p [%p] refs: %d\n", x, rcp, SEQ_PTR(x)->ref);
+	}
 	return ATOM_1;
 }
+
+object regex_ok(object x){
+	RxNode *re = get_re( x );
+	if( re == 0 ){
+	
+	}
+	return re != 0;
+}
+

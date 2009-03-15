@@ -77,7 +77,8 @@ constant
 	M_REGEX_EXEC    = 69,
 	M_REGEX_MATCH   = 70,
 	M_REGEX_REPLACE = 71,
-	M_REGEX_FREE    = 72
+	M_REGEX_FREE    = 72,
+	M_REGEX_OK      = 79
 
 
 --****
@@ -87,11 +88,12 @@ constant
 -- Regular expression type
 
 public type regex(object o)
-	return atom(o)
+	return sequence(o)
 end type
 
 --**
--- Return an allocated regular expression which must be freed using [[:free]]() when done.
+-- Return an allocated regular expression which can be freed using [[:free]]() when done,
+-- or automatically freed when the reference count of the sequence drops to zero..
 --
 -- Parameters:
 --   # ##pattern##: a sequence representing a human redable regular expression
@@ -143,21 +145,26 @@ end type
 --   [[:free]], [[:find]], [[:find_all]]
 
 public function new(sequence pattern)
-	return machine_func(M_REGEX_COMPILE, {pattern})
+	return machine_func(M_REGEX_COMPILE, pattern)
 end function
 
 --**
--- Frees the memory used by a [[:regex]].
+--Checks for a valid [[:regex]].  The regex will be compiled if it has not been
+public function ok(regex re )
+	return machine_func(M_REGEX_OK, re )
+end function
+
+--**
+-- Frees the memory used by a [[:regex]].  This routine can be used to free up memory
+-- taken up by a regular expression prior to the reference count of the sequence
+-- dropping to zero.  If the sequence is passed to a regex function, it will be
+-- automatically compiled.
 --
 -- See Also:
 --   [[:new]]
 
 public procedure free(regex re)
-	if equal(re, 0) then
-		return
-	end if
-
-	machine_proc(M_REGEX_FREE, {re})
+	machine_proc(M_REGEX_FREE, re )
 end procedure
 
 

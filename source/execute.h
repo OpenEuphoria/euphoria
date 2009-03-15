@@ -69,17 +69,30 @@
 typedef long object;
 typedef object *object_ptr;
 
+typedef void(*cleanup_func)(object);
+struct cleanup {
+	long type;
+	union func_union{
+		long rid;
+		cleanup_func builtin;
+	} func;
+};
+
+typedef struct cleanup *cleanup_ptr;
+
 struct s1 {                        /* a sequence header block */
 	object_ptr base;               /* pointer to (non-existent) 0th element */
 	long length;                   /* number of elements */
 	long ref;                      /* reference count */
 	long postfill;                 /* number of post-fill objects */
-}; /* total 16 bytes */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+}; /* total 20 bytes */
 
 struct d {                         /* a double precision number */
 	double dbl;                    /* double precision value */
 	long ref;                      /* reference count */
-}; /* total 12 bytes */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+}; /* total 16 bytes */
 
 #define D_SIZE (sizeof(struct d))  
 
@@ -412,3 +425,9 @@ struct char_cell {
 #define M_PCRE_COMPILE       76
 #define M_PCRE_FREE          77
 #define M_PCRE_EXEC          78
+#define M_REGEX_OK           79
+
+enum CLEANUP_TYPES {
+	CLEAN_UDT,
+	CLEAN_REGEX
+	};

@@ -758,6 +758,7 @@ s1_ptr NewS1(long size)
 	s1->length = size;
 	s1->postfill = 0; /* there may be some available but don't waste time */
 					  /* prepend assumes this is set to 0 */
+	s1->cleanup = 0;
 	s1->base[size] = NOVALUE;
 	s1->base--;  // point to "0th" element
 	return(s1);

@@ -42,16 +42,29 @@
 typedef int object;
 typedef int *object_ptr;
 
+typedef void(*cleanup_func)(object);
+struct cleanup {
+	long type;
+	union func_union{
+		long rid;
+		cleanup_func builtin;
+	} func;
+};
+
+typedef struct cleanup *cleanup_ptr;
+
 struct s1 {
 	object_ptr base;
 	long length;
 	long ref;
 	long postfill;
+	cleanup_ptr cleanup;
 };
 
 struct d {
 	double dbl;
 	long ref;
+	cleanup_ptr cleanup; 
 };
 
 struct routine_list {

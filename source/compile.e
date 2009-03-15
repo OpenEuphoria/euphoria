@@ -4542,9 +4542,13 @@ procedure opREPLACE()
 	
 	c_stmt0("{\n")
 		for i = 1 to 4 do
-			c_stmt(sprintf("int p%d = @;\n", i ), Code[pc+i])
+			c_stmt(sprintf("int p%d = @;\n", i-1 ), Code[pc+i])
 		end for
-		c_stmt("int replace_params[5] = { &p1, &p2, &p3, &p4, &@};\n", Code[pc+5] )
+		c_stmt0("int replace_params[5];\n")
+		for i = 0 to 3 do
+			c_stmt0(sprintf("replace_params[%d] = &p%d;\n", {i,i}))
+		end for
+		c_stmt("replace_params[4] = &@;\n", Code[pc+5] )
 		indent -= 4
 		c_stmt0("Replace( &replace_params );\n")
 		

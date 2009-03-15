@@ -5233,7 +5233,10 @@ object machine(object opcode, object x)
 
 			case M_REGEX_FREE:
 				return regex_free(x);
-
+				
+			case M_REGEX_OK:
+				return regex_ok(x);
+				
 			case M_PCRE_COMPILE:
 				x = (object)SEQ_PTR(x);
 				return compile_pcre(*(((s1_ptr)x)->base+1), 
@@ -5248,6 +5251,7 @@ object machine(object opcode, object x)
 				free_pcre(x);
 				return 1;
 				break;
+
 
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */

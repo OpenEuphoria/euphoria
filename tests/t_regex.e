@@ -3,9 +3,9 @@ include std/text.e
 include std/unittest.e
 
 object ignore = 0
-
-regex:regex re = regex:new("[A-Z][a-z]+")
-test_true("new()", re > 0)
+regex:regex re
+re = regex:new("[A-Z][a-z]+")
+test_true("new()", regex:ok(re))
 test_equal("exec() #1", {{5,8}}, regex:find(re, "and John ran"))
 regex:free(re)
 
@@ -33,6 +33,7 @@ test_equal("find_all <", {{1,0},{7,6}}, regex:find_all(re, "hello world"))
 regex:free(re)
 
 re = regex:new("([A-Za-z0-9]+)\\.([A-Za-z0-9]+)")
+
 test_equal("replace() #1", "Filename: filename Extension: txt",
 	regex:replace(re, "filename.txt", "Filename: \\1 Extension: \\2"))
 regex:free(re)
@@ -44,15 +45,15 @@ test_true("has_match() #1", regex:has_match(re, "john DOE had a DOG"))
 test_false("has_match() #2", regex:has_match(re, "john doe had a dog"))
 regex:free(re)
 
-test_false("regex mismatch groups 1", regex:new("(x}"))
-test_false("regex mismatch groups 2", regex:new("{x)"))
+test_false("regex mismatch groups 1", regex:ok("(x}"))
+test_false("regex mismatch groups 2", regex:ok("{x)"))
 
 re = regex:new("{x}")
-test_true("regex matched groups 1", re)
+test_true("regex matched groups 1", regex:ok(re))
 regex:free(re)
 
 re = regex:new("(x)")
-test_true("regex matched groups 2", re)
+test_true("regex matched groups 2", regex:ok(re))
 regex:free(re)
 
 re = regex:new("{x?}#y")

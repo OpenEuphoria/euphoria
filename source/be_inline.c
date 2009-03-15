@@ -83,6 +83,7 @@ object NewDouble(double d)
 
 	new->ref = 1;
 	new->dbl = d;
+	new->cleanup = 0;
 	return MAKE_DBL(new);
 }
 

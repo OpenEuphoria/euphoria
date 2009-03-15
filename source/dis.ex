@@ -31,6 +31,7 @@ include scanner.e
 include emit.e
 include parser.e
 include intinit.e
+include traninit.e
 
 -- Disassembler:
 include dis.e

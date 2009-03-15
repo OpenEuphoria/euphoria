@@ -791,7 +791,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 		if( len >= seq->postfill ){
 			new_len = EXTRA_EXPAND(nseq + len);
 			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 3)*4);
-			new_seq->base = ((object_ptr)new_seq) + 3;
+			new_seq->base = ((object_ptr)new_seq) + 4;
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;
 			
@@ -1329,7 +1329,8 @@ void de_reference(s1_ptr a)
 {
 	object_ptr p;
 	object t;
-
+	
+	
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
@@ -1351,6 +1352,17 @@ void de_reference(s1_ptr a)
 	else { /* SEQUENCE */
 		/* sequence reference count has reached 0 */
 		a = SEQ_PTR(a);
+		if( a->cleanup != 0 ){
+			if( a->cleanup->type == CLEAN_UDT ){
+			
+			}
+			else{
+			puts("calling builtin cleanup");
+				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
+				EFree(a->cleanup);
+				a->cleanup = 0;
+			}
+		}
 		p = a->base;
 #ifdef EXTRA_CHECK
 		if (a->ref < 0)
@@ -1441,6 +1453,16 @@ void de_reference_i(s1_ptr a)
 	else { /* SEQUENCE */
 		/* sequence reference count has reached 0 */
 		a = SEQ_PTR(a);
+		if( a->cleanup != 0 ){
+			if( a->cleanup->type == CLEAN_UDT ){
+			
+			}
+			else{
+				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
+				EFree(a->cleanup);
+				a->cleanup = 0;
+			}
+		}
 #ifdef EXTRA_CHECK
 		if (a->ref < 0)
 			RTInternal("sequence reference count less than 0");

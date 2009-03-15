@@ -1501,7 +1501,7 @@ procedure save_il( sequence name )
 	
 end procedure
 
-
+include std/filesys.e
 procedure InitBackEnd( object ignore )
 -- initialize Interpreter   
     sequence name
@@ -1509,7 +1509,23 @@ procedure InitBackEnd( object ignore )
     -- set up operations
     operation = repeat(-1, length(opnames))
 	
-    for i = 1 to length(opnames) do
+	while 2 <= length(Argv) do
+		if Argv[2][1] != '-' and 
+		(match("dis", Argv[2]) = 1
+		or match( SLASH & "dis", Argv[2] ) ) then
+			exit
+		end if
+		Argv = remove( Argv, 2, 2 )
+	end while
+	Argc = length(Argv)
+	
+	if INTERPRET then
+		intoptions()
+	else
+		transoptions()
+	end if
+    
+	for i = 1 to length(opnames) do
 		name = opnames[i]
 		-- some similar ops are handled by a common routine
 		if find(name, {"RHS_SUBS_CHECK", "RHS_SUBS_I"}) then
@@ -1631,8 +1647,9 @@ integer generate_html = 0
 procedure set_html()
 	generate_html = 1
 end procedure
-
+include std/pretty.e
 global procedure BackEnd( object ignore )
+
 	sequence opts = {
 		{ 0, "html", "html output", NO_PARAMETER, routine_id("set_html") },
 		{ "d", "dir", "output directory", HAS_PARAMETER, routine_id("set_out_dir") },
@@ -1642,10 +1659,11 @@ global procedure BackEnd( object ignore )
 		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") },
 		{ "t", 0, "translator mode", NO_PARAMETER, -1 }
 		}
-	sequence result = cmd_parse( opts )
+	sequence result = cmd_parse( opts, -1, Argv )
 	
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
+	printf(1,"saved to [%s.dis]\n", {file_name[1]})
 	for i = TopLevelSub to length(SymTab) do
 		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY 
 		and sequence(SymTab[i][S_CODE]) 
@@ -1665,3 +1683,4 @@ global procedure BackEnd( object ignore )
 	
 end procedure
 mode:set_backend( routine_id("BackEnd") )
+
