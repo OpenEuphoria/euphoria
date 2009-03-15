@@ -46,15 +46,15 @@ global procedure Warning(sequence msg, integer mask, sequence args = {})
 		end if
 
 		if p then
-			w_name = warning_names[p]
+			w_name = "( " & warning_names[p] & " )"
 		else
-			w_name = "< not named >"
+			w_name = "" -- not maskable
 		end if
 		if length(args) then
 			msg = sprintf(msg,args)
 		end if
 
-		text = sprintf("Warning ( %s ):\n\t%s\n", {w_name,msg})
+		text = sprintf("Warning %s:\n\t%s\n", {w_name,msg})
 		if find(text, warning_list) then
 			return -- duplicate
 		end if

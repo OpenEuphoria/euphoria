@@ -3146,6 +3146,15 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Procedure_call(tok)
 
+		-- EXPERIMENTAL: Ignoring function returns.
+		elsif id = FUNC or id = QUALIFIED_FUNC then
+			if id = FUNC then
+				-- possibly warn for non-inclusion
+				UndefinedVar( tok[T_SYM] )
+			end if
+			StartSourceLine(TRUE)
+			Procedure_call(tok)
+			
 		elsif id = IF then
 			StartSourceLine(TRUE)
 			If_statement()
@@ -3793,7 +3802,15 @@ global procedure real_parser(integer nested)
 			ExecCommand()
 
 		elsif id = FUNC or id = QUALIFIED_FUNC then
-			CompileErr("function result must be assigned or used")
+--	EXPERIMENTAL --<commented this line out>		CompileErr("function result must be assigned or used")
+			StartSourceLine(TRUE)
+			if id = FUNC then
+				-- to check for warning if proc not in include tree
+				UndefinedVar( tok[T_SYM] )
+			end if
+
+			Procedure_call(tok)
+			ExecCommand()
 
 		elsif id = RETURN then
 			Return_statement() -- will fail - not allowed at top level
