@@ -215,3 +215,4 @@ void system_call(int, int);
 void RTFatal(char *);
 int e_match_from(int,int,int);
 int find_from(int,int,int);
+void Replace(int);

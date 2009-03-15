@@ -839,14 +839,14 @@ s1_ptr Add_internal_space(object a,int at,int len)
 }
 
 
-s1_ptr Copy_elements(int start,s1_ptr source, object_ptr target)
+s1_ptr Copy_elements(int start,s1_ptr source, int replace )
 {
 	object_ptr t_elem, s_elem;
 	s1_ptr s1 = *assign_slice_seq;
 	object temp;
 	int i;
 
-	if (s1->ref != 1 || *target != MAKE_SEQ( s1 )) {
+	if (s1->ref != 1 || !replace) {
 		s1_ptr new_seq = NewS1(s1->length);
 		object_ptr next_pos;
 		t_elem = new_seq->base;
@@ -896,6 +896,7 @@ object Insert(object a,object b,int pos)
 	s1->base[pos] = b;
 	return MAKE_SEQ(s1);
 }
+
 
 void Head(s1_ptr s1, int reqlen, object_ptr target)
 {
@@ -969,18 +970,31 @@ void Tail(s1_ptr s1, int start, object_ptr target)
     }
 }
 
-void Remove_elements(int start, int stop, object_ptr target)
+/**
+ * Caller must assign assign_slice_seq to be the address of 
+ * the s1_ptr from which to remove elements.
+ * The caller must also check to see if the ultimate target
+ * (i.e., where this will ultimately be assigned) is the
+ * same as the sequence from which elements are being
+ * removed, as well as if the reference count on the 
+ * target is 1:
+ *
+ *    in_place = (*obj_ptr) == target && SEQ_PTR(target)->ref == 1
+ *
+ * Returns the resulting object (no change if in_place == 1).
+ */
+object Remove_elements(int start, int stop, int in_place )
 {
 	int n = stop-start+1;
 	s1_ptr s1 = *assign_slice_seq;
 	
-	if (UNIQUE(s1) && (SEQ_PTR(*target) == *assign_slice_seq)) {
+	if (in_place) {
 		int i;
 		object_ptr p = s1->base + start;
 		object_ptr q = s1->base + stop + 1;
 		
 		for (i=start;i<=stop;i++)
-			DeRef(*(s1->base+i));
+			DeRef( s1->base[i] );
 		
 		for( ; i <= s1->length+1; i++ ){
 			*(p++) = *(q++);
@@ -988,6 +1002,7 @@ void Remove_elements(int start, int stop, object_ptr target)
 		
 		s1->postfill += n;
 		s1->length -= n;
+		return MAKE_SEQ( s1 );
 	}
 	else {  
 		s1_ptr s2 = NewS1(s1->length-n);
@@ -1009,7 +1024,8 @@ void Remove_elements(int start, int stop, object_ptr target)
 				RefDS(temp);
 			}
 		}
-		ASSIGN_SEQ(target, s2);
+		return MAKE_SEQ( s2 );
+// 		ASSIGN_SEQ(target, s2);
 	}
 }
 
@@ -5651,6 +5667,191 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 		} while (TRUE);
 	}
 	return 0; /* couldn't match */
+}
+
+void Replace( replace_ptr rb ){
+//  normalise arguments, dispatch special cases
+	long start_pos, end_pos, seqlen, replace_len;
+	object copy_from, copy_to, target;
+	s1_ptr s1, s2;
+	
+	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (long)(DBL_PTR(*rb->start)->dbl);
+	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (long)(DBL_PTR(*rb->stop)->dbl);
+	
+	copy_to   = *rb->copy_to;
+	copy_from = *rb->copy_from;
+	
+	seqlen = SEQ_PTR( copy_to )->length;
+	
+	if (end_pos < 0 && start_pos <= seqlen) {  // return (replacement & target)
+		Concat( rb->target, copy_from, copy_to );
+		return;
+	}
+	
+	if (end_pos > seqlen)
+		end_pos = seqlen;   // Can't be after last position.
+	
+	if (start_pos < 1)
+		if (seqlen > 0)
+			start_pos = 1;
+		else
+			start_pos = 0;
+		
+	if (start_pos > seqlen) {  // return (target & replacement)
+		Concat( rb->target, copy_to, copy_from );
+		return;
+	}
+	
+	target = *rb->target;
+	if (start_pos < 2 ) { //replacing start or all
+		if (end_pos == seqlen) { // all
+			Ref(copy_from);
+			if( IS_SEQUENCE( copy_from ) ){
+				*rb->target = copy_from;
+				DeRef(target);
+			}
+			else{
+				if( IS_SEQUENCE( target ) && UNIQUE( SEQ_PTR(target) ) ){
+					s1 = SEQ_PTR( target );
+					s1->postfill += (s1->length - 1);
+					s1->length = 1;
+					s1->base[1] = copy_from;
+					s1->base[2] = NOVALUE;
+				}
+				else{
+					s1 = NewS1( 1 );
+					s1->base[1] = copy_from;
+					*rb->target = MAKE_SEQ( s1 );
+					DeRef( target );
+				}
+			}
+			return;
+		}
+		else if( end_pos < 1 ){
+			Concat( rb->target, copy_from, copy_to );
+			return;
+			}
+		
+	}
+	if (start_pos > end_pos) {  // just splice
+		if (IS_SEQUENCE( copy_from )) {
+			s2 = SEQ_PTR( copy_from );
+			if( (target != copy_to) || ( SEQ_PTR( copy_to )->ref != 1 ) ){
+				// not in place: need to deref the target and ref the orig seq
+				if( target != NOVALUE ){
+					DeRef(target);
+				}
+				
+				// ensures that Add_internal_space will make a copy
+				RefDS( copy_to );
+				
+			}
+			s1 = Add_internal_space( copy_to, start_pos, s2->length );
+			
+			assign_slice_seq = &s1;
+			
+			s1 = Copy_elements( start_pos, s2, (target == copy_to) );
+			*rb->target = MAKE_SEQ( s1 );
+		}
+		else if( (target == copy_to) && ( SEQ_PTR( copy_to )->ref == 1 ) ){
+			// in place
+			*rb->target = Insert( copy_to, copy_from, start_pos );
+		}
+		else{
+			if( target != NOVALUE ){
+				DeRef(target);
+			}
+			RefDS( copy_to );
+			*rb->target = Insert( copy_to, copy_from, start_pos);
+		}
+		return;
+	}
+	// actual inner replacing
+	if (IS_SEQUENCE( copy_from )) {
+		s2 = SEQ_PTR( copy_from );
+		replace_len = s2->length;
+		assign_slice_seq = &s1;
+		if (replace_len > end_pos - start_pos+1) { //replacement longer than replaced
+			
+		/**												a->ref != 1		a->ref==1
+			Assigning to something else	*obj_ptr != a	D(o)			D(o) R(a)
+			Assigning to same var		*obj_ptr == a	R(a)			N/A
+		*/
+			if( target != copy_to ){
+				if( target != NOVALUE ){
+					DeRef(target);
+				}
+				if( ( SEQ_PTR( copy_to )->ref == 1 ) ){
+					RefDS( copy_to );
+				}
+			}
+			else if( SEQ_PTR( copy_to )->ref != 1 ){
+				RefDS( copy_to );
+			}
+			s1 = Add_internal_space( copy_to, end_pos + 1, replace_len + start_pos - end_pos - 1);
+			assign_slice_seq = &s1;
+			s1 = Copy_elements( start_pos, s2, (target == copy_to));
+			
+			*rb->target = MAKE_SEQ(s1);
+		}
+		else { // remove any extra elements, and then assign a regular slice
+			long c;
+			if( (target != copy_to) || ( SEQ_PTR( copy_to )->ref != 1 ) ){
+				// ensures that Add_internal_space will make a copy
+				RefDS( copy_to );
+				c = 1;
+			}
+			else{
+				c = 0;
+			}
+			s1 = SEQ_PTR( copy_to );
+			assign_slice_seq = &s1;
+			if (replace_len < end_pos - start_pos+1) {
+				
+				if( copy_to == target && SEQ_PTR( target )->ref == 1 ){
+					Remove_elements( start_pos + replace_len, end_pos, 1 );
+				}
+				else{
+					*rb->target = Remove_elements( start_pos + replace_len, end_pos, 0 );
+					DeRef( target );
+				}
+				s1 = SEQ_PTR(*rb->target);
+				assign_slice_seq = &s1;
+				s1 = Copy_elements( start_pos, s2, 1 );
+			}
+			else {
+				if( IS_DBL_OR_SEQUENCE( target ) && target != copy_to ){
+					DeRef( target );
+				}
+				s1 = Copy_elements( start_pos, s2, (target == copy_to));
+			}
+			*rb->target = MAKE_SEQ( s1 );
+			if( c ){
+				DeRefDS(copy_to);
+			}
+		}
+	}
+	else {  // replacing by an atom
+		s1 = SEQ_PTR(copy_to);
+		assign_slice_seq = &s1;
+		Ref( copy_from );
+		if (start_pos < end_pos) {
+			object_ptr optr;
+			if( copy_to == target && SEQ_PTR( target )->ref == 1 ){
+				Remove_elements( start_pos + 1, end_pos, 1);
+			}
+			else{
+				*rb->target = Remove_elements( start_pos + 1, end_pos, 0);
+				DeRef( target );
+			}
+			optr = SEQ_PTR( *rb->target )->base+start_pos;
+			DeRef(*optr);
+			*optr = copy_from;
+		}
+		else{
+			AssignElement( copy_from, start_pos, rb->target);
+		}
+	}
 }
 
 #ifdef ERUNTIME

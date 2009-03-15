@@ -266,7 +266,7 @@ extern unsigned default_heap;
 extern s1_ptr Copy_elements();
 extern void Head();
 extern void Tail();
-extern void Remove_elements();
+extern object Remove_elements(int,int,int);
 extern void AssignSlice();
 extern void AssignElement();
 
@@ -4043,7 +4043,12 @@ void do_exec(int *start_pc)
 					Head(s1,nvars,obj_ptr);   //nvars=1+final length
 				else { // carve slice out
 					assign_slice_seq = &s1;
-					Remove_elements(nvars,end_pos,obj_ptr);
+					if( (a == *obj_ptr) && (SEQ_PTR(a)->ref == 1) ){
+						Remove_elements( nvars, end_pos, 1);
+					}
+					else{
+						*obj_ptr = Remove_elements( nvars, end_pos, 0 );
+					}
 				}
 				thread5();
 				BREAK;
@@ -4052,159 +4057,17 @@ void do_exec(int *start_pc)
 			deprintf("case L_REPLACE:");
 				// type check arguments
 				tpc = pc;
-				a = *(object_ptr)pc[1];  //source
-				if (!IS_SEQUENCE(a))
+				if (!IS_SEQUENCE(*(object_ptr)pc[1])) // source
 					RTFatal("First argument to replace() must be a sequence");
-				s1 = SEQ_PTR(a);
-				seqlen = s1->length;
 				
-				b = *(object_ptr)pc[3];  //start
-				if (IS_SEQUENCE(b))
+				if (IS_SEQUENCE(*(object_ptr)pc[3])) // start
 					RTFatal("Third argument to replace() must be an atom");
-				start_pos = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
 				
-				b = *(object_ptr)pc[4];  //stop
-				if (IS_SEQUENCE(b))
+				if (IS_SEQUENCE(*(object_ptr)pc[4])) // stop
 					RTFatal("Fourth argument to replace() must be an atom");
-				end_pos = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
 				
-				b = *(object_ptr)pc[2];  // replacement
-				obj_ptr = (object_ptr)pc[5];  // target
-				top = *obj_ptr;
+				Replace( (replace_ptr)(pc+1) );
 				
-				//  normalise arguments, dispatch special cases
-				if (end_pos < 0 && start_pos <= seqlen) {  // return (replacement & target)
-					Concat(obj_ptr,b,a);
-					pc += 6;
-					thread();
-					BREAK;
-				}
-				
-				if (end_pos > seqlen)
-					end_pos = seqlen;   // Can't be after last position.
-					
-				if (start_pos < 1)
-				    if (seqlen > 0)
-				        start_pos = 1;
-				    else
-				        start_pos = 0;
-				    
-				if (start_pos > seqlen) {  // return (target & replacement)
-					Concat(obj_ptr,a,b);
-					pc += 6;
-					thread();
-					BREAK;
-				}
-				
-				if (start_pos < 2 ) { //replacing start or all
-					if (end_pos == seqlen) { // all
-						Ref(b);
-						*obj_ptr = b;
-						DeRef(top);
-						pc += 6;
-						thread();
-						BREAK;
-					}
-					else if( end_pos < 1 ){
-						Concat(obj_ptr,b,a);
-						pc += 6;
-						thread();
-						BREAK;
-						}
-					
-				}
-				if (start_pos > end_pos) {  // just splice
-					if (IS_SEQUENCE(b)) {
-						s2 = SEQ_PTR(b);
-						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
-							// not in place: need to deref the target and ref the orig seq
-							if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
-							
-							// ensures that Add_internal_space will make a copy
-							RefDS( a );
-							
-						}
-						s1 = Add_internal_space( a, start_pos, s2->length );
-						
-						assign_slice_seq = &s1;
-						
-						s1 = Copy_elements( start_pos, s2, obj_ptr );
-						*obj_ptr = MAKE_SEQ( s1 );
-						
-					}
-					else if( (*obj_ptr == a) && ( SEQ_PTR( a )->ref == 1 ) ){
-						// in place
-						*obj_ptr = Insert( a, b, nvars );
-					}
-					else{
-						if( *obj_ptr != NOVALUE ) DeRef(*(obj_ptr));
-						RefDS( a );
-						*obj_ptr = Insert(a,b,nvars);
-					}
-					//
-					pc += 6;
-					thread();
-					BREAK;
-				}
-				// actual inner replacing
-				if (IS_SEQUENCE(b)) {
-					s2 = SEQ_PTR(b);
-					going_up = s2->length;
-					assign_slice_seq = &s1;
-					if (going_up > end_pos - start_pos+1) { //replacement longer than replaced
-						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
-							// not in place: need to deref the target and ref the orig seq
-							if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
-							
-							// ensures that Add_internal_space will make a copy
-							// Add_internal_space will DeRef a for us
-							RefDS( a );
-							
-						}
-						s1 = Add_internal_space( a, end_pos + 1, going_up + start_pos - end_pos - 1);
-						assign_slice_seq = &s1;
-						s1 = Copy_elements( start_pos, s2, obj_ptr);
-						
-						*obj_ptr = MAKE_SEQ(s1);
-	 				}
-	 				else { // remove any extra elements, and then assign a regular slice
-						if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
-							// ensures that Add_internal_space will make a copy
-							RefDS( a );
-							c = 1;
-						}
-						else c = 0;
-						if (going_up < end_pos - start_pos+1) {
-							s1 = SEQ_PTR( a );
-							assign_slice_seq = &s1;
-							Remove_elements( start_pos + going_up, end_pos, obj_ptr);
-							s1 = SEQ_PTR(*obj_ptr);
-							assign_slice_seq = &s1;
-							s1 = Copy_elements( start_pos, s2, obj_ptr );
-						}
-						else {
-							if( IS_DBL_OR_SEQUENCE( top ) && top != a ) DeRefDS( top );
-							s1 = Copy_elements( start_pos, s2, obj_ptr);
-							if( MAKE_SEQ( s1 ) != *obj_ptr ){
-								*obj_ptr = MAKE_SEQ( s1 );
-							}
-						}
-						if( c ) DeRefDS(a);
-					}
-				}
-				else {  // replacing by an atom
-					assign_slice_seq = &s1;
-					if (!IS_ATOM_INT(b))
-						RefDS(b);
-					if (start_pos < end_pos) {
-						object_ptr optr;
-						Remove_elements(start_pos+1,end_pos,obj_ptr);
-						optr = SEQ_PTR(*obj_ptr)->base+start_pos;
-						DeRef(*optr);
-						*optr = b;
-					}
-					else AssignElement(b, start_pos, obj_ptr);
-				}
 				pc += 6;
 				thread();
 				BREAK;
@@ -4341,7 +4204,7 @@ void do_exec(int *start_pc)
 					s1 = Add_internal_space( a, nvars, s2->length );
 					assign_slice_seq = &s1;
 					
-					s1 = Copy_elements( nvars, s2, assign_slice_seq );
+					s1 = Copy_elements( nvars, s2, (*obj_ptr == a) );
 					*obj_ptr = MAKE_SEQ(s1);
 			}
 				else { // inserting is just adding an extra element and assigning it

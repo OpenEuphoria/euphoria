@@ -941,6 +941,7 @@ int RxMatchB(RxNode *rx) {
 int RxMatch(RxNode *rx) {
 	int y = RxMatchB(rx);
     debug_printf("<<RxMatch %d\n", rx_count--);
+	return y;
 }
 
 int RxTry(RxNode *rx, const char *s) {
@@ -951,9 +952,9 @@ int RxTry(RxNode *rx, const char *s) {
 	char_failed = 0;
 	re_ended = 0;
 
-	for (i = 0; i < NSEXPS; i++)
+	for (i = 0; i < NSEXPS; i++){
         match->Open[i] = match->Close[i] = -1;
-
+	}
 	if (RxMatch(rx)) {
         match->Open[0] = (int)(s - bop);
         match->Close[0] = (int)(rex - bop);

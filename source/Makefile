@@ -254,7 +254,10 @@ distclean : clean
 	-rm -fr $(BUILD_DIRS)
 
 clean : 	
-	-rm -fr $(BUILDDIR)/{int,trans,lib,back}obj
+	-rm -fr $(BUILDDIR)/intobj
+	-rm -fr $(BUILDDIR)/transobj
+	-rm -fr $(BUILDDIR)/libobj
+	-rm -fr $(BUILDDIR)/backobj
 	-rm -f $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EBACKENDU) $(BUILDDIR)/$(DEB_SOURCE_DIR).tar.gz
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}

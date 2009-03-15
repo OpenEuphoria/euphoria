@@ -136,6 +136,15 @@ struct op_info {
 	object (*dblfn)();
 };
 
+struct replace_block {
+	object_ptr copy_to;
+	object_ptr copy_from;
+	object_ptr start;
+	object_ptr stop;
+	object_ptr target;
+};
+typedef struct replace_block *replace_ptr;
+
 #ifdef INT_CODES
 typedef int opcode_type;
 #define opcode(x) (x)

@@ -436,6 +436,8 @@ in_place = replace( in_place, "cd", 3, 2 )
 test_equal( "inplace replace 3, 2", "abcd34567890", in_place )
 test_equal( "replace 3, 2", "abcd34567890", replace( "ab34567890", "cd", 3, 2 ) )
 test_equal( "replace 4,3", "johaaandoe", replace("johndoe", "aaa", 4,3 ))
+test_equal( "replace all with sequence", "5678", replace( "1234", "5678", 1, 4 ) )
+test_equal( "replace all with integer", {1}, replace( "1234", 1, 1, 4 ) )
 
 -- remove in place
 in_place = "1234567890"

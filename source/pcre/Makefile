@@ -27,7 +27,7 @@ pcre.h: pcre.h.unix
 .PHONY: clean distclean
 
 distclean :
-	rm -f config.h pcre.h
+	rm -f *.o config.h pcre.h
 
 clean:
-	rm -f *.o config.h pcre.h
+	rm -f *.o
