@@ -83,26 +83,33 @@ constant M_OPEN_DLL  = 50,
 -- (.so) file. 
 --
 -- Parameters:
--- 		# ##file_name##: a sequence, the name of the shared library to open.
+--   # ##file_name##: a sequence, the name of the shared library to open or a sequence of filename's
+--     to try to open.
 --
 -- Returns:
---		An **atom**, actually a 32-bit address. 0 is returned if the .dll can't be found.
+--   An **atom**, actually a 32-bit address. 0 is returned if the .dll can't be found.
 --
 -- Errors:
--- The length of ##file_name## should not exceed 1,024 characters.
+--   The length of ##file_name## (or any filename contained therein) should not exceed
+--   1,024 characters.
 --
 -- Comments:
--- 		##file_name## can
--- be a relative or an absolute file name. Windows will use the normal search path for 
--- locating .dll files.
+--   ##file_name## can be a relative or an absolute file name. Most operating systems will use
+--   the normal search path for locating non-relative files.
 --
--- The value returned by open_dll() can be passed to define_c_proc(), define_c_func(), 
--- or define_c_var().
+--   ##file_name## can be a list of file names to try. On different Linux platforms especially,
+--   the filename will not always be the same. For instance, you may wish to try opening
+--   libmylib.so, libmylib.so.1, libmylib.so.1.0, libmylib.so.1.0.0. If given a sequence of
+--   file names to try, the first successful library loaded will be returned. If no library
+--   could be loaded, 0 will be returned after exhausting the entire list of file names.
+--
+--   The value returned by open_dll() can be passed to define_c_proc(), define_c_func(),
+--   or define_c_var().
 -- 
--- You can open the same .dll or .so file multiple times. No extra memory is used and you'll 
--- get the same number returned each time.
+--   You can open the same .dll or .so file multiple times. No extra memory is used and you'll
+--   get the same number returned each time.
 -- 
--- Euphoria will close the .dll/.so for you automatically at the end of execution.
+--   Euphoria will close the .dll/.so for you automatically at the end of execution.
 --
 -- Example 1:
 -- <eucode>
@@ -112,12 +119,34 @@ constant M_OPEN_DLL  = 50,
 --    puts(1, "Couldn't open user32.dll!\n")
 -- end if
 -- </eucode>
--- 
+--
+-- Example 2:
+-- <eucode>
+-- atom mysql_lib
+-- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", "libmysqlclient.so.15.0"})
+-- if mysql_lib = 0 then
+--   puts(1, "Couldn't find the mysql client library\n")
+-- end if
+-- </eucode>
+--
 -- See Also:
 --     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
 public function open_dll(sequence file_name)
-	return machine_func(M_OPEN_DLL, file_name)
+	if length(file_name) > 0 and atom(file_name[1]) then
+		return machine_func(M_OPEN_DLL, file_name)
+	end if
+
+	-- We have a list of filenames to try, try each one, when one succeeds
+	-- abort the search and return it's value
+	for idx = 1 to length(file_name) do
+		atom fh = machine_func(M_OPEN_DLL, file_name[idx])
+		if not fh = 0 then
+			return fh
+		end if
+	end for
+
+	return 0
 end function
 
 --**
