@@ -10,7 +10,7 @@ int = 10
 
 atom = 3.4
 
-seq = {"one", 2, 3.4}
+"seq" = {"one", 2, 3.4}
 
 equal = =
 

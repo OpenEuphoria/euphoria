@@ -55,6 +55,9 @@ include std/pretty.e
 include std/eumem.e
 include std/error.e
 include std/sort.e
+include std/serialize.e
+include std/datetime.e
+include std/io.e
 
 constant type_tag      = 1 -- ==> 'tag' for map type
 constant element_count = 2 -- ==> elementCount
@@ -497,13 +500,13 @@ end procedure
 --      # ##scope_p##: An integer that specifies what to compare.
 --        ** 'k' or 'K' to only compare keys.
 --        ** 'v' or 'V' to only compare values.
---        ** 'd' or 'd' to compare both keys and values. This is the default.
+--        ** 'd' or 'D' to compare both keys and values. This is the default.
 --
 -- Returns:
 --   An integer...
 --   * -1 if they are not equal.
 --   * 0 if they are literally the same map.
---   * 1 if they contain the same keys and values.
+--   * 1 if they contain the same keys and/or values.
 --
 -- Example 1:
 --   <eucode>
@@ -537,7 +540,7 @@ public function compare(map map_1_p, map map_2_p, integer scope_p = 'd')
 		case else
 			data_set_1_ = sort(pairs(map_1_p))
 			data_set_2_ = sort(pairs(map_2_p))
-			
+
 	end switch
 				
 	if equal(data_set_1_, data_set_2_) then
@@ -1368,25 +1371,22 @@ end procedure
 -- Loads a map from a file
 --
 -- Parameters:
---		# ##file_name_p##: a sequence, the name of the file to load from.
+--		# ##file_name_p##: The file to load from. This file may have been created
+--                          by the [[:save_map]] function. This can either be a
+--                          name of a file or an already opened file handle.
 --
 -- Returns:
 --		A **map** with all the entries found in ##file_name_p##.
 --
 -- Comments:
--- The imported file format needs to be that it has one entry per line, each
--- line being of the form <key>=<value>.  Whitespace around the key and the
--- value is ignored. Comment lines start with {{{"--"}}} and are also ignored.
--- <values> that can be converted to atom will be, meaning that X=3 is stored
--- as a key of "X" and a value of 3, rather than "3"\\
--- Input file example:
--- :
--- {{{
---    -- Set the verbosity Level
---    verbose=3
---    -- Tell the app where to put the output files.
---    outdir = c:\temp
--- }}}
+-- If ##file_name_p## is an already opened file handle, this routine will write
+-- to that file and not close it. Otherwise, the named file will be created and
+-- closed by this routine.
+--
+-- The input file can be either one created by the [[:save_map]] function or
+-- a manually created/edited text file. See [[:save_map]] for details about
+-- the required layout of the text file.
+--
 --
 -- Example 1:
 -- <eucode>
@@ -1398,47 +1398,94 @@ end procedure
 -- </eucode>
 -- See Also:
 --		[[:new]], [[:save_map]]
-public function load_map(sequence file_name_p)
+public function load_map(object file_name_p)
 	integer file_handle_
 	object line_
 	integer comment_
 	integer delim_
 	object value_
-	sequence key_
+	object key_
 	sequence conv_res_
 	integer new_map_
 
-	file_handle_ = open(file_name_p, "r")
+	if sequence(file_name_p) then
+		file_handle_ = open(file_name_p, "rb")
+	else
+		file_handle_ = file_name_p
+	end if
 	if file_handle_ = -1 then
 		return 0
 	end if
-
+	
 	new_map_ = new(threshold_size) -- Assume a small map initially.
-	while sequence(line_) entry do
-		comment_ = rmatch("--", line_)
-		if comment_ != 0 then
-			line_ = trim(line_[1..comment_-1])
-		end if
-		delim_ = find('=', line_)
-		if delim_ > 0 then
-			key_ = trim(line_[1..delim_-1])
-			if length(key_) > 0 then
-				value_ = trim(line_[delim_+1..$])
-				value_ = find_replace("\\-", value_, "-")
-				conv_res_ = value(value_,,GET_LONG_ANSWER)
-				if conv_res_[1] = GET_SUCCESS then
-					if conv_res_[3] = length(value_) then
-						value_ = conv_res_[2]
-					end if
-				end if
-				put(new_map_, key_, value_)
-			end if
-		end if
-	  entry
-		line_ = gets(file_handle_)
-	end while
 
-	close(file_handle_)
+	-- Look for a non-printable byte in the first 10 bytes. If none are found then this is a text-formated
+	-- file otherwise it is a 'raw' saved file.
+	
+	for i = 1 to 10 do
+		delim_ = getc(file_handle_)
+		if delim_ = -1 then 
+			exit
+		end if
+	    if not t_print(delim_) then 
+	    	exit
+	    end if
+	    delim_ = -1
+	end for
+	
+	if delim_ = -1 then
+	-- A text format file
+		close(file_handle_)
+		file_handle_ = open(file_name_p, "r")
+		while sequence(line_) entry do
+			comment_ = rmatch("--", line_)
+			if comment_ != 0 then
+				line_ = trim(line_[1..comment_-1])
+			end if
+			delim_ = find('=', line_)
+			if delim_ > 0 then
+				key_ = trim(line_[1..delim_-1])
+				if length(key_) > 0 then
+					key_ = find_replace("\\-", key_, "-")
+					if not t_alpha(key_[1]) then
+						conv_res_ = value(key_,,GET_LONG_ANSWER)
+						if conv_res_[1] = GET_SUCCESS then
+							if conv_res_[3] = length(key_) then
+								key_ = conv_res_[2]
+							end if
+						end if
+					end if
+									
+					value_ = trim(line_[delim_+1..$])
+					value_ = find_replace("\\-", value_, "-")
+					conv_res_ = value(value_,,GET_LONG_ANSWER)
+					if conv_res_[1] = GET_SUCCESS then
+						if conv_res_[3] = length(value_) then
+							value_ = conv_res_[2]
+						end if
+					end if
+					put(new_map_, key_, value_)
+				end if
+			end if
+		  entry
+			line_ = gets(file_handle_)
+		end while
+	else
+		object _ = seek(file_handle_, 0)
+		line_  = deserialize(file_handle_)
+		if line_[1] = 1 then
+			-- Saved Map Format version 1
+			key_   = deserialize(file_handle_)
+			value_ =  deserialize(file_handle_)
+			
+			for i = 1 to length(key_) do
+				put(new_map_, key_[i], value_[i])
+			end for
+		end if
+	end if
+	if sequence(file_name_p) then
+		close(file_handle_)
+	end if
 	optimize(new_map_)
 	return new_map_
 end function
@@ -1448,53 +1495,110 @@ end function
 --
 -- Parameters:
 --		# ##m##: a map.
---		# ##file_name_p##: a sequence, the name of the file to save to.
+--		# ##file_name_p##: Either a sequence, the name of the file to save to,
+--                         or an open file handle as returned by [[:open]]().
+--		# ##type##: an integer. SM_TEXT for a human-readable format (default),
+--                SM_RAW for a smaller and faster format, but not human-readable.
 --
 -- Returns:
---		##integer## = The number of keys saved to the file.
+--		##integer## = The number of keys saved to the file, or -1 if the
+--                    save failed.
 --
 -- Comments:
--- It only saves key/value pairs if the keys only  contain letters, digits and
--- underscore, and only if the value contains only printable characters. This
--- means that numeric keys or nested sequence keys are not saved, nor are 
--- nested sequence values. **Note~:** that numeric values are allowed and
--- will be saved.
+-- If ##file_name_p## is an already opened file handle, this routine will write
+-- to that file and not close it. Otherwise, the named file will be created and
+-- closed by this routine.
+--
+-- The SM_TEXT type saves the map keys and values in a text format which can
+-- be read and edited by standard text editor. Each entry in the map is saved as
+-- a KEY/VALUE pair in the form \\
+-- {{{
+-- key = value
+-- }}}
+-- Note that if the 'key' value is a normal string value, it can be enclosed in
+-- double quotes. If it is not thus quoted, the first character of the key
+-- determines its Euphoria value type. A dash or digit implies an atom, an left-brace
+-- implies a sequence, an alphabetic character implies a text string that extends to the
+-- next equal '=' symbol, and anything else is ignored. 
+--
+-- Note that if a line contains a double-dash, then all text from the double-dash
+-- to the end of the line will be ignored. This is so you can optionally add
+-- comments to the saved map. Also, any blank lines are ignored too.
+--
+-- All text after the '=' symbol is assumed to be the map item's value data.
+--
+-- The SM_RAW type saves the map in an effecient manner. It is generally smaller
+-- than the text format and is faster to process, but it is not human readable and
+-- standard text editors can not be used to edit it. In this format, the file will
+-- contain three serialized sequences:
+-- # Header sequence: {integer:format version, string: date and time of save (YYMMDDhhmmss),
+--                     sequence: euphoria version {major, minor, revision, patch}}
+-- # Keys. A list of all the keys
+-- # Values. A list of the corresponding values for the keys.
 --
 -- Example 1:
 -- <eucode>
 --    map AppOptions
---    if save_map(AppOptions, "c:\myapp\options.txt") = 0
+--    if save_map(AppOptions, "c:\myapp\options.txt") = -1
+--        Error("Failed to save application options")
+--    end if
+--    if save_map(AppOptions, "c:\myapp\options.dat", SM_RAW) = -1
 --        Error("Failed to save application options")
 --    end if
 -- </eucode>
 -- See Also:
 --		[[:load_map]]
-public function save_map(map the_map_, sequence file_name_p)
+
+public enum
+	SM_TEXT,
+	SM_RAW
+	
+public function save_map(map the_map_, object file_name_p, integer type_ = SM_TEXT)
 	integer file_handle_ = -2
 	sequence keys_
 	sequence values_
-	integer out_count_ = 0
 	
+	if sequence(file_name_p) then
+		if type_ = SM_TEXT then
+			file_handle_ = open(file_name_p, "w")
+		else
+			file_handle_ = open(file_name_p, "wb")
+		end if
+	else
+		file_handle_ = file_name_p
+	end if
+	
+	if file_handle_ < 0 then
+		return -1
+	end if
 	
 	keys_ = keys(the_map_)
 	values_ = values(the_map_)
-	for i = 1 to length(keys_) do
-		if char_test(keys_[i], {{'a','z'},{'A', 'Z'}, {'_','_'}}) then
+	
+	if type_ = SM_RAW then
+		puts(file_handle_, serialize(
+				{1, -- saved map version
+				 format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map
+				 {4,0,0,0}} -- Euphoria version
+			 	))	
+		puts(file_handle_, serialize(keys_))
+		puts(file_handle_, serialize(values_))
+	else
+		for i = 1 to length(keys_) do
+			keys_[i] = pretty_sprint(keys_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
+			keys_[i] = find_replace("-", keys_[i], "\\-")
 			values_[i] = pretty_sprint(values_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
 			values_[i] = find_replace("-", values_[i], "\\-")
-			
-			if file_handle_ < 0 then
-				file_handle_ = open(file_name_p, "w")
-				if file_handle_ < 0 then
-					return 0
-				end if
-			end if
+				
 			printf(file_handle_, "%s = %s\n", {keys_[i], values_[i]})
-			out_count_ += 1
-		end if
-	end for
-	close(file_handle_)
-	return out_count_
+			
+		end for
+	end if
+	
+	if sequence(file_name_p) then
+		close(file_handle_)
+	end if
+	return length(keys_)
 end function
 
 public function copy(map the_map_)
