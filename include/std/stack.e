@@ -8,6 +8,7 @@
 -- <<LEVELTOC depth=2>>
 
 include std/error.e
+include std/eumem.e
 
 --****
 -- === Constants
@@ -27,10 +28,23 @@ public constant
 -- === Types
 --
 
+enum type_tag, stack_type, data
+constant type_is_stack = "Eu:StdStack"
+
 --**
 -- A stack is a sequence of objects with some internal data.
-public type stack(object o)
-	return sequence(o) and length(o) >= 1
+
+public type stack(object obj_p)
+	if not valid(obj_p, "") then return 0 end if
+
+	object o = ram_space[obj_p]
+	if not sequence(o) then return 0 end if
+	if not length(o) = data then return 0 end if
+	if not equal(o[type_tag], type_is_stack) then return 0 end if
+	if not find(o[stack_type], { FIFO, FILO }) then return 0 end if
+	if not sequence(o[data]) then return 0 end if
+
+	return 1
 end type
 
 --****
@@ -53,9 +67,36 @@ end type
 --
 -- See Also:
 -- [[:is_empty]]
-public function new(integer stack_type)
-	return {stack_type}
+
+public function new(integer typ)
+	integer new_stack = malloc()
+
+	ram_space[new_stack] = { type_is_stack, typ, {} }
+
+	return new_stack
 end function
+
+--**
+-- Delete an existing stack data structure
+--
+-- Parameters:
+--   # ##sk##: The stack to delete
+--
+-- Comments:
+--   You must use this routine when you have finished with a stack and want
+--   to give the memory back to Euphoria.
+--
+-- Example 1:
+-- <eucode>
+-- stack sk = new() -- sk is a new stack
+-- -- use stack
+-- delete(sk) -- sk is no longer needed, give space back to Euphoria
+-- </eucode>
+--
+
+public procedure delete(stack sk)
+	free(sk)
+end procedure
 
 --**
 -- Determine whether a stack is empty.
@@ -68,8 +109,9 @@ end function
 --
 -- See Also:
 -- [[:size]]
+
 public function is_empty(stack sk)
-	return length(sk) = 1
+	return length(ram_space[sk][data]) = 0
 end function
 
 --**
@@ -80,8 +122,9 @@ end function
 --
 -- Returns:
 --		An **integer**, the number of elements in ##sk##.
+
 public function size(stack sk)
-	return length(sk) - 1
+	return length(ram_space[sk][3])
 end function
 
 --**
@@ -120,21 +163,23 @@ end function
 --
 -- See Also:
 -- [[:size]], [[:top]]
+
 public function at(stack sk, integer idx)
+	sequence o = ram_space[sk]
+
 	if idx <= 0 then
 		-- number from top
-		idx = length(sk) + idx
-		if idx<=1 then
+		idx = length(o[data]) + idx
+		if idx < 1 then
 			crash("stack underflow in at()", {})
 		end if
 	else
-		idx += 1
-		if idx>length(sk) then
+		if idx > length(o[data]) then
 			crash("stack overflow in at()", {})
 		end if
 	end if
 	
-	return sk[idx]
+	return o[data][idx]
 end function
 
 --**
@@ -153,24 +198,27 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
--- sk = push(sk,5)
--- sk = push(sk,"abc")
--- sk = push(sk, {})
+-- push(sk,5)
+-- push(sk,"abc")
+-- push(sk, {})
 -- object x = at(sk,3) -- x is 5
 -- </eucode>
 --
 -- See Also:
 -- [[:pop]], [[:top]]
-public function push(stack sk, object value)
 
-	if sk[1] = FIFO then
-		sk = prepend(sk, FIFO)
-		sk[2] = value
-		return sk
-	else
-		return append(sk, value)
-	end if
-end function
+public procedure push(stack sk, object value)
+	-- Type checking ensures type is either FIFO or FILO
+	switch ram_space[sk][stack_type] do
+		case FIFO:
+			ram_space[sk][data] = prepend(ram_space[sk][data], value)
+			break
+
+		case FILO:
+			ram_space[sk][data] = append(ram_space[sk][data], value)
+			break
+	end switch
+end procedure
 
 --**
 -- Retrieve element pushed first or last on a stack.
@@ -189,20 +237,21 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- sk = push(sk,5)
--- sk = push(sk,"abc")
--- sk = push(sk, {})
+-- push(sk,5)
+-- push(sk,"abc")
+-- push(sk, {})
 -- object x = top(sk) -- x is {}
 -- </eucode>
 --
 -- See Also:
 -- [[:at]], [[:pop]]
+
 public function top(stack sk)
-	if length(sk) = 1 then
+	if length(ram_space[sk][data]) = 0 then
 		crash("stack underflow in top()", {})
 	end if
 
-	return sk[$]
+	return ram_space[sk][data][$]
 end function
 
 --**
@@ -212,31 +261,39 @@ end function
 --		# ##sk##: the stack to pop
 --
 -- Returns:
---	A copy of the original **stack**, with the last element removed.
+--   The top stack item
+--
+-- Side effects:
+--   The top stack item is removed from the stack
 --
 -- Errors:
--- If the stack is empty, an underflow error occurs.
+--   If the stack is empty, an underflow error occurs.
 --
 -- Comments:
--- The object which is removed is at index 0, and was pushed last, in ##FILO## stacks and at position 1, pushed first, in ##FIFO## stacks.
---
--- The size of the returned stack is ##size(sk)-1## on a successful ##pop##:
---
--- To pop a stack and retrieve he popped value, which this routine does not, you have to do this:
+--   The object which is removed is at index 0, and was pushed last, in
+--   ##FILO## stacks and at position 1, pushed first, in ##FIFO## stacks.
 --
 -- Example 1:
 -- <eucode>
--- object x = top(sk)
--- sk = pop(sk)
+-- stack sk = new(FIFO)
+-- push(sk, 1)
+-- push(sk, 2)
+-- ? size(sk) -- 2
+-- ? pop(sk) -- 1
+-- ? size(sk) -- 1
 -- </eucode>
+--
 -- See Also:
 -- [[:push]], [[:top]], [[:is_empty]]
+
 public function pop(stack sk)
-	if length(sk) = 1 then
+	if length(ram_space[sk][data]) = 0 then
 		crash("stack underflow in pop()", {})
 	end if
 
-	return sk[1..$-1]
+	object top_obj = ram_space[sk][data][$]
+	ram_space[sk][data] = ram_space[sk][data][1..$-1]
+	return top_obj
 end function
 
 --**
@@ -254,30 +311,23 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- sk = push(sk,5)
--- sk = push(sk,"abc")
--- sk = push(sk, {})
--- sk = swap(sk)
---	object x = top(sk)  -- x is "abc"
+-- push(sk,5)
+-- push(sk,"abc")
+-- push(sk, {})
+-- swap(sk)
+-- ? top(sk)  -- "abc"
 -- </eucode>
 --
--- Comments:
--- Various algorithms use this primitive.
-public function swap(stack sk)
-	object a, b
 
-	if length(sk) < 3 then
+public procedure swap(stack sk)
+	if length(ram_space[sk][data]) < 2 then
 		crash("stack underflow in swap()", {})
 	end if
 
-	a = sk[$]
-	b = sk[$-1]
-
-	sk[$] = b
-	sk[$-1] = a
-
-	return sk
-end function
+	object tmp = ram_space[sk][data][$]
+	ram_space[sk][data][$] = ram_space[sk][data][$-1]
+	ram_space[sk][data][$-1] = tmp
+end procedure
 
 --**
 -- Repeat the last element of a stack.
@@ -285,35 +335,33 @@ end function
 -- Parameters:
 --		# ##sk##: the stack to swap.
 --
--- Returns:
--- A copy of the original **stack**, with the last element repeated.
+-- Side effects:
+--   The stack copies the value of top() onto the end of itself, thus
+--   the stack size grows by one.
 --
 -- Errors:
--- If the stack has less than two elements, an error occurs.
---
--- Comments:
--- Various algorithms use this primitive.
+--   If the stack has no elements, an error occurs.
 --
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- sk = push(sk,5)
--- sk = push(sk,"abc")
--- sk = push(sk, {})
--- sk = dup(sk)
---	object x = at(sk,3)  -- x is {}
--- x = top(sk) -- {} again
--- ?size(sk) -- 4
+-- push(sk,5)
+-- push(sk,"abc")
+-- push(sk, {})
+-- dup(sk)
+-- ? at(sk,3)  -- x is {}
+-- ? top(sk)   -- {} again
+-- ? size(sk)  -- 4
 -- </eucode>
 --
--- The size of the returned stack is 1 more than ##size(sk)##.
-public function dup(stack sk)
-	if length(sk) = 1 then
+
+public procedure dup(stack sk)
+	if length(ram_space[sk][data]) = 0 then
 		crash("stack underflow in dup()", {})
 	end if
 
-	return sk & {sk[$]}
-end function
+	ram_space[sk][data] = ram_space[sk][data] & { ram_space[sk][data][$] }
+end procedure
 
 --**
 -- Wipe out a stack.
@@ -321,11 +369,12 @@ end function
 -- Parameters:
 -- 		# ##sk##: the stack to clear.
 --
--- Returns:
---		An empty **stack**, which has the type of ##sk##.
+-- Side effect:
+--   The stack contents is emptied.
 --
 -- See Also:
 -- [[:new]], [[is_empty]]
-public function clear(stack sk)
-	return {sk[1]}
-end function
+
+public procedure clear(stack sk)
+	ram_space[sk][data] = {}
+end procedure
