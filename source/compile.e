@@ -32,51 +32,51 @@ constant INT16 = #00007FFF,
 -- Machine Operations - avoid renumbering existing constants
 -- update C copy in execute.h
 constant M_COMPLETE = 0,    -- determine Complete Edition
-		 M_SOUND = 1,
-		 M_LINE = 2,
+		 -- M_SOUND = 1,
+		 -- M_LINE = 2,
 		 M_PALETTE = 3,
-		 M_PIXEL = 4,       -- obsolete, but keep for now
+		 -- M_PIXEL = 4,       -- obsolete, but keep for now
 		 M_GRAPHICS_MODE = 5,
-		 M_CURSOR = 6,
-		 M_WRAP = 7,
-		 M_SCROLL = 8,
-		 M_SET_T_COLOR = 9,
-		 M_SET_B_COLOR = 10,
-		 M_POLYGON = 11,
+		 -- M_CURSOR = 6,
+		 -- M_WRAP = 7,
+		 -- M_SCROLL = 8,
+		 -- M_SET_T_COLOR = 9,
+		 -- M_SET_B_COLOR = 10,
+		 -- M_POLYGON = 11,
 		 M_TEXTROWS = 12,
 		 M_VIDEO_CONFIG = 13,
-		 M_GET_MOUSE = 14,
-		 M_MOUSE_EVENTS = 15,
+		 -- M_GET_MOUSE = 14,
+		 -- M_MOUSE_EVENTS = 15,
 		 M_ALLOC = 16,
-		 M_FREE = 17,
-		 M_ELLIPSE = 18,
+		 -- M_FREE = 17,
+		 -- M_ELLIPSE = 18,
 		 M_SEEK = 19,
 		 M_WHERE = 20,
-		 M_GET_PIXEL = 21, -- obsolete, but keep for now
-		 M_DIR = 22,
+		 -- M_GET_PIXEL = 21, -- obsolete, but keep for now
+		 -- M_DIR = 22,
 		 M_CURRENT_DIR = 23,
-		 M_MOUSE_POINTER = 24,
+		 -- M_MOUSE_POINTER = 24,
 		 M_GET_POSITION = 25,
 		 M_WAIT_KEY = 26,
-		 M_ALL_PALETTE = 27,
+		 -- M_ALL_PALETTE = 27,
 		 M_GET_DISPLAY_PAGE = 28,
-		 M_SET_DISPLAY_PAGE = 29,
+		 -- M_SET_DISPLAY_PAGE = 29,
 		M_GET_ACTIVE_PAGE = 30,
-		M_SET_ACTIVE_PAGE = 31,
+		-- M_SET_ACTIVE_PAGE = 31,
 		M_ALLOC_LOW    = 32,
-		M_FREE_LOW     = 33,
+		-- M_FREE_LOW     = 33,
 		M_INTERRUPT    = 34,
-		M_SET_RAND     = 35,
-		M_USE_VESA     = 36,
-		M_CRASH_MESSAGE = 37,
-		M_TICK_RATE    = 38,
+		-- M_SET_RAND     = 35,
+		-- M_USE_VESA     = 36,
+		-- M_CRASH_MESSAGE = 37,
+		-- M_TICK_RATE    = 38,
 		M_GET_VECTOR   = 39,
-		M_SET_VECTOR   = 40,
-		M_LOCK_MEMORY  = 41,
-		M_ALLOW_BREAK  = 42,
+		-- M_SET_VECTOR   = 40,
+		-- M_LOCK_MEMORY  = 41,
+		-- M_ALLOW_BREAK  = 42,
 		M_CHECK_BREAK  = 43,
-		M_MEM_COPY     = 44,  -- obsolete, but keep for now
-		M_MEM_SET      = 45,  -- obsolete, but keep for now
+		-- M_MEM_COPY     = 44,  -- obsolete, but keep for now
+		-- M_MEM_SET      = 45,  -- obsolete, but keep for now
 		M_A_TO_F64     = 46,
 		M_F64_TO_A     = 47,
 		M_A_TO_F32     = 48,
@@ -84,21 +84,21 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 		M_OPEN_DLL     = 50,
 		M_DEFINE_C     = 51,
 		M_CALLBACK     = 52,
-		M_PLATFORM     = 53,  -- obsolete, but keep for now
-		M_FREE_CONSOLE = 54,
+		-- M_PLATFORM     = 53,  -- obsolete, but keep for now
+		-- M_FREE_CONSOLE = 54,
 		M_INSTANCE     = 55,
 		M_DEFINE_VAR   = 56,
-		M_CRASH_FILE   = 57,
+		-- 	M_CRASH_FILE   = 57,
 		M_GET_SCREEN_CHAR = 58,
-		M_PUT_SCREEN_CHAR = 59,
-		M_FLUSH        = 60,
+		-- M_PUT_SCREEN_CHAR = 59,
+		-- M_FLUSH        = 60,
 		M_LOCK_FILE    = 61,
-		M_UNLOCK_FILE  = 62,
+		-- M_UNLOCK_FILE  = 62,
 		M_CHDIR        = 63,
-		M_SLEEP        = 64,
-		M_BACKEND      = 65,
-		M_CRASH        = 67,
-		M_WARNING_FILE = 72
+		-- M_SLEEP        = 64,
+		-- M_BACKEND      = 65,
+		M_CRASH        = 67
+		--, M_WARNING_FILE = 72
 
 
 constant INIT_CHUNK = 2500 -- maximum number of literals to
@@ -107,7 +107,7 @@ constant INIT_CHUNK = 2500 -- maximum number of literals to
 global sequence target   -- struct minmax
 target = {0, 0}
 
-constant LOOP_VAR = 1, LOOP_TYPE = 2, LOOP_LABEL = 3
+constant LOOP_VAR = 1 --, LOOP_TYPE = 2, LOOP_LABEL = 3
 sequence loop_stack
 
 function min(atom a, atom b)
@@ -1941,12 +1941,11 @@ procedure arg_list(integer i)
 end procedure
 
 -- common vars for do_exec ops
-integer iii, n, t, close_brace, doref, ov
-atom len, j
-sequence inc, range1, range2, x
-integer const_subs, check
-symtab_index sub, sym, p
-sequence gencode, intcode, intcode_extra, intcode2, op, intop
+integer iii, n, t, ov
+atom len
+integer const_subs
+symtab_index sub, sym
+sequence gencode, intcode, intcode_extra, intcode2
 sequence main_name
 integer target_type, target_elem, atom_type
 sequence target_val
@@ -6560,12 +6559,9 @@ end procedure
 without warning
 procedure BackEnd(atom ignore)
 -- Translate the IL into C
-	integer w
 	symtab_index tp
 	sequence string, init_name, switches, cmd_switch
-	integer c, tp_count, slash_ix
-	object xterm
-	boolean use_hex
+	integer tp_count, slash_ix
 	integer max_len
 
 	close(c_code)
@@ -6969,7 +6965,7 @@ procedure BackEnd(atom ignore)
 				
 				if decompress then
 					c_printf( "\"\n\t_%d", SymTab[csym][S_FILE_NO] )
-					c_puts( SymTab[c][S_NAME] )
+					c_puts( SymTab[csym][S_NAME] )
 					c_printf(" = decompress( 0 );\n", SymTab[csym][S_TEMP_NAME])
 				else
 					c_puts("\");\n")

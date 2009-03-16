@@ -216,7 +216,7 @@ procedure NotReached(integer tok, sequence keyword)
 end procedure
 
 
-procedure Forward_InitCheck( token tok, integer fr, integer ref )
+procedure Forward_InitCheck( token tok, integer ref )
 	if ref then
 		ref = new_forward_reference( GLOBAL_INIT_CHECK, tok[T_SYM], GLOBAL_INIT_CHECK )
 		
@@ -896,7 +896,7 @@ procedure Forward_var( token tok, integer init_check = -1, integer op = tok[T_ID
 	ref = new_forward_reference( VARIABLE, tok[T_SYM], op )
 	emit_opnd( - ref )
 	if init_check != -1 then
-		Forward_InitCheck( tok, ref, init_check )
+		Forward_InitCheck( tok, init_check )
 	end if
 end procedure
 
@@ -1040,7 +1040,7 @@ end procedure
 
 procedure Function_call( token tok )
 --	token tok2, tok3
-	integer id, n, scope, opcode, e
+	integer id, scope, opcode, e
 
 	id = tok[T_ID]
 	if id = FUNC or id = TYPE then
@@ -1093,8 +1093,8 @@ end procedure
 
 procedure Factor()
 -- parse a factor in an expression
-	token tok, tok2, tok3
-	integer id, n, scope, opcode, e
+	token tok
+	integer id, n
 	integer save_factors, save_lhs_subs_level
 	symtab_index sym
 
@@ -2301,7 +2301,6 @@ procedure Switch_statement()
 	integer break_base
 	symtab_index cases, jump_table
 	integer else_bp
-	sequence values
 	integer switch_pc
 
 	push_switch()
@@ -3511,7 +3510,6 @@ procedure SetWith(integer on_off)
 	sequence option
 	integer idx
 	token tok
-	object nexttok
 	integer reset_flags = 1
 
 	option = StringToken()

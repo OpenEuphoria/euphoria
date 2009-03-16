@@ -79,7 +79,7 @@ end procedure
 
 global function ShowWarnings(integer errfile)
 -- print the warnings to the screen (or ex.err)
-	integer c,last_change, fn
+	integer c
 
 	if errfile=0 then
 		if display_warnings = 0 then

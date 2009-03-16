@@ -22,7 +22,7 @@ enum
 	INLINE_TARGET,
 	INLINE_ADDR,
 	INLINE_SUB,
-	INLINE_SWITCH_TABLE,
+--	INLINE_SWITCH_TABLE,
 	INLINE_VAR
 
 sequence 
@@ -194,7 +194,7 @@ procedure check_target( integer pc, integer op )
 end procedure
 
 -- genericizes an address or symbol reference for inlining
-function adjust_il( integer pc, integer op, integer size = op_info[op][OP_SIZE] )
+function adjust_il( integer pc, integer op)
 	
 	for i = 1 to op_info[op][OP_SIZE] - 1 do
 		
@@ -769,16 +769,16 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 				case INLINE_SUB:
 					inline_code[pc] = CurrentSub
 					break
-				case INLINE_SWITCH_TABLE:
-					symtab_index new_table = NewStringSym( {-1, length(SymTab) } )
-					SymTab[new_table][S_OBJ] = SymTab[inline_code[pc][2]][S_OBJ]
-					inline_code[pc] = new_table
-					break
+-- 				case INLINE_SWITCH_TABLE:
+-- 					symtab_index new_table = NewStringSym( {-1, length(SymTab) } )
+-- 					SymTab[new_table][S_OBJ] = SymTab[inline_code[pc][2]][S_OBJ]
+-- 					inline_code[pc] = new_table
+-- 					break
 				case INLINE_VAR:
 					replace_var( pc )
 					break
 				case else
-					InternalErr( sprintf("Unhanlded inline type: %d", inline_type) )
+					InternalErr( sprintf("Unhandled inline type: %d", inline_type) )
 			end switch
 		end if
 	end for

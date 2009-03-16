@@ -966,7 +966,7 @@ end procedure
 global procedure Show(symtab_index s)
 -- restore the visibility of a symbol
 -- by adding it to its hash chain
-	symtab_index prev, p
+	symtab_index p
 	
 	p = buckets[SymTab[s][S_HASHVAL]]
 	

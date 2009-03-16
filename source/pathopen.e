@@ -17,7 +17,6 @@ atom oem2char, convert_buffer
 integer convert_length
 global atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
-sequence regs
 
 ifdef WIN32 then
 	u32=machine_func(50,"user32.dll")
@@ -27,6 +26,7 @@ ifdef WIN32 then
 	convert_buffer=allocate(convert_length)
 
 elsifdef DOS32 then
+sequence regs
 	regs=repeat(0,10)
 	fc_table=allocate_low(5)
 	-- query filename country dependent capitalisation table pointer
@@ -175,7 +175,6 @@ function strip_file_from_path( sequence full_path )
 end function
 
 function expand_path( sequence path, sequence prefix )
-	object home
 	integer absolute
 	
 	if not length(path) then
@@ -183,6 +182,7 @@ function expand_path( sequence path, sequence prefix )
 	end if
 	
 	ifdef UNIX then
+		object home
 		if length(path) and path[1] = '~' then
 			home = getenv("HOME")
 			if sequence(home) and length(home) then

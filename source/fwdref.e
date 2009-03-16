@@ -28,7 +28,7 @@ enum
 	FR_BP,
 	FR_QUALIFIED,
 	FR_OP,
-	FR_PRIVATE_LIST,
+--	FR_PRIVATE_LIST, -- not used yet
 	FR_DATA  -- extra info
 
 constant FR_SIZE = FR_DATA

@@ -51,8 +51,10 @@ RxNode* compile(object x ){
 
 object regex_compile(object x) {
     RxNode* re;
+	regex_cleanup_ptr rcp;
+	
 	RefDS(x); // we send a 'naked' sequence for this, and machine() DeRefs
-	regex_cleanup_ptr rcp = (regex_cleanup_ptr) SEQ_PTR(x)->cleanup;
+	rcp = SEQ_PTR(x)->cleanup;
 	if( rcp != 0 ){
 		RxFree( rcp->re );
 	}

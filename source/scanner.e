@@ -65,8 +65,8 @@ constant FILE_NO = 1,           -- file number
 		 OP_DEFINES = 10,        -- ifdef defines
 		 PREV_OP_WARNING = 11,
 		 OP_INLINE = 12,
-		 OP_INDIRECT_INCLUDE = 13,
-		 OP_PREV_INDIRECT_INCLUDE = 14
+		 OP_INDIRECT_INCLUDE = 13
+		 -- , OP_PREV_INDIRECT_INCLUDE = 14 -- not used
 
 integer qualified_fwd = -1 -- remember namespaces for forward reference purposes
 export procedure set_qualified_fwd( integer fwd )
