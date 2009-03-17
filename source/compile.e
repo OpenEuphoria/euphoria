@@ -4548,7 +4548,6 @@ procedure opREPLACE()
 			c_stmt0(sprintf("replace_params[%d] = &p%d;\n", {i,i}))
 		end for
 		c_stmt("replace_params[4] = &@;\n", Code[pc+5] )
-		indent -= 4
 		c_stmt0("Replace( &replace_params );\n")
 		
 		target[MIN] = SeqLen(Code[pc+1])
