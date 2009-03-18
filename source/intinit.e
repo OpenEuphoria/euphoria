@@ -16,6 +16,13 @@ global procedure intoptions()
 	-- put file first, strip out the options
 	
 	i = 3
+	if i > Argc then
+		default_args = GetDefaultArgs()
+		if length(default_args) > 0 then				
+			Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
+			Argc += length(default_args)
+		end if
+	end if
 	while i <= Argc do
 		if Argv[i][1] = '-' then
 			uparg = upper(Argv[i])

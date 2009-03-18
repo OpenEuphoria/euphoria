@@ -36,13 +36,11 @@ include symtab.e
 include std/text.e
 include scanner.e
 include mode.e as mode
+include intinit.e
 include std/pretty.e
 include std/io.e
 
 include std/io.e
-include std/pretty.e
-
-with trace
 
 constant M_CALL_BACK = 52,  
 		 M_CRASH_ROUTINE = 66,
@@ -4083,6 +4081,7 @@ end ifdef
 end procedure
 
 procedure fake_init( integer ignore )
+	intoptions()
 end procedure
 mode:set_init_backend( routine_id("fake_init") )
 
