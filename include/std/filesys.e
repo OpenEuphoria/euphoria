@@ -25,7 +25,7 @@ include std/types.e
 include std/text.e
 
 ifdef UNIX then
-	include std/get.e -- for get_disk_size()
+	include std/get.e -- for disk_size()
 end ifdef
 
 constant
@@ -620,13 +620,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = get_curdir('D') -- Find the current directory on the D: drive.
+-- res = curdir('D') -- Find the current directory on the D: drive.
 -- -- res might be "D:\backup\music\"
--- res = get_curdir()    -- Find the current directory on the current drive.
+-- res = curdir()    -- Find the current directory on the current drive.
 -- -- res might be "C:\myapp\work\"
 -- </eucode>
 
-public function get_curdir(integer drive_id = 0)
+public function curdir(integer drive_id = 0)
 
     sequence lCurDir
 	ifdef not LINUX then
@@ -660,7 +660,7 @@ public function get_curdir(integer drive_id = 0)
 	return lCurDir
 end function
 
-sequence InitCurDir = get_curdir() -- Capture the original PWD
+sequence InitCurDir = curdir() -- Capture the original PWD
 
 --**
 -- Returns the original current directory
@@ -680,10 +680,10 @@ sequence InitCurDir = get_curdir() -- Capture the original PWD
 --
 -- Example 1:
 -- <eucode>
--- res = get_init_curdir() -- Find the original current directory.
+-- res = init_curdir() -- Find the original current directory.
 -- </eucode>
 
-public function get_init_curdir()
+public function init_curdir()
 	return InitCurDir
 end function
 
@@ -1302,12 +1302,12 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
 	then
 		ifdef UNIX then
-				lPath = get_curdir() & lPath
+				lPath = curdir() & lPath
 		elsedef
 				if (length(lDrive) = 0) then
-					lPath = get_curdir() & lPath
+					lPath = curdir() & lPath
 				else
-					lPath = get_curdir(lDrive[1]) & lPath
+					lPath = curdir(lDrive[1]) & lPath
 				end if
 				-- Strip of the drive letter if it got attached again.
 				if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
@@ -1984,10 +1984,11 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = get_disk_metrics("C:\\")
+-- res = disk_metrics("C:\\")
 -- min_file_size = res[SECTORS_PER_CLUSTER] * res[BYTES_PER_SECTOR]
 -- </eucode>
-public function get_disk_metrics(object disk_path) 
+
+public function disk_metrics(object disk_path) 
 	sequence disk_metrics = {0, 0, 0, 0} 
 	atom path_addr = 0
 	atom metric_addr = 0
@@ -2048,7 +2049,7 @@ public function get_disk_metrics(object disk_path)
 			return disk_metrics 
 		end if
 
-		disk_size = get_disk_size(disk_path)
+		disk_size = disk_size(disk_path)
 
 		-- this is hardcoded for now, but may be x86 specific
 		-- on other Unix platforms that run on non x86 hardware, this
@@ -2075,10 +2076,11 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = get_disk_size("C:\\")
+-- res = disk_size("C:\\")
 -- printf(1, "Drive %s has %3.2f%% free space\n", {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
 -- </eucode>
-public function get_disk_size(object disk_path) 
+
+public function disk_size(object disk_path) 
 	sequence disk_size = {0,0,0, disk_path}
 	
 	ifdef WIN32 then
@@ -2086,7 +2088,7 @@ public function get_disk_size(object disk_path)
 		atom bytes_per_cluster
 		
 	
-		disk_metrics = get_disk_metrics(disk_path) 
+		disk_metrics = disk_metrics(disk_path) 
 		
 		bytes_per_cluster = disk_metrics[BYTES_PER_SECTOR] * disk_metrics[SECTORS_PER_CLUSTER]
 	
@@ -2187,13 +2189,16 @@ function count_files(sequence orig_path, sequence dir_info, sequence inst)
 				exit
 			end if
 		end for
+
 		if pos = 0 then
 			file_counters[inst[2]][COUNT_TYPES] &= {{ext, 0, 0}}
 			pos = length(file_counters[inst[2]][COUNT_TYPES])
 		end if
+
 		file_counters[inst[2]][COUNT_TYPES][pos][EXT_COUNT] += 1
 		file_counters[inst[2]][COUNT_TYPES][pos][EXT_SIZE] += dir_info[D_SIZE]
 	end if
+
 	return 0
 end function
 
@@ -2222,7 +2227,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = get_dir_size("/usr/localbin")
+-- res = dir_size("/usr/localbin")
 -- printf(1, "Directory %s contains %d files\n", {"/usr/localbin", res[COUNT_FILES]})
 -- for i = 1 to length(res[COUNT_TYPES]) do
 --   printf(1, "  Type: %s (%d files %d bytes)\n", {res[COUNT_TYPES][i][EXT_NAME],
@@ -2230,7 +2235,8 @@ end function
 --                                                  res[COUNT_TYPES][i][EXT_SIZE]})
 -- end for
 -- </eucode>
-public function get_dir_size(sequence dir_path, integer count_all = 0)
+
+public function dir_size(sequence dir_path, integer count_all = 0)
 	integer ok 
 	sequence fc
 
@@ -2243,5 +2249,6 @@ public function get_dir_size(sequence dir_path, integer count_all = 0)
 	fc = file_counters[$]
 	file_counters = file_counters[1 .. $-1]
 	fc[COUNT_TYPES] = sort(fc[COUNT_TYPES])
+
 	return fc
 end function
