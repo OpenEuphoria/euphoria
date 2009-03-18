@@ -1365,7 +1365,8 @@ end procedure
 --                          name of a file or an already opened file handle.
 --
 -- Returns:
---		A **map** with all the entries found in ##file_name_p##.
+--		Either a **map** with all the entries found in ##file_name_p##, or **-1**
+--      if the file failed to open.
 --
 -- Comments:
 -- If ##file_name_p## is an already opened file handle, this routine will write
@@ -1379,8 +1380,16 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
+--    object loaded
 --    map AppOptions
---    AppOptions = load_map("c:\myapp\options.txt")
+--    sequence SavedMap = "c:\myapp\options.txt"
+--    loaded = load_map(SavedMap)
+--    if equal(loaded, -1) then
+--       crash("Map '%s' failed to open", SavedMap)
+--    end if
+--    -- By now we know that it was loaded and a new map created,
+--    -- so we can assign it to a 'map' variable.
+--    AppOptions = loaded
 --    if get(AppOptions, "verbose", 1) = 3 then
 --        ShowIntructions()
 --    end if
