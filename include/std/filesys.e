@@ -150,214 +150,6 @@ public constant EOL = '\n'
 --****
 -- === Directory Handling
 
---**
--- Create a new directory.
---
--- Parameters:
--- 		# ##name##: a sequence, the name of the new directory to create
---		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 
---		  448 (all rights for owner, none for others).
---      # ##mkparent## If true (default) the parent directories are also created
---        if needed. 
---
--- Returns:
---     An **integer**, 0 on failure, 1 on success.
---
--- Comments:
--- 		##mode## is ignored on non-Unix platforms.
---
--- Example 1:
--- <eucode>
--- if not create_directory("the_new_folder") then
---		crash("Filesystem problem - could not create the new folder")
--- end if
--- 
--- -- This example will also create "myapp/" and "myapp/interface/" if they don't exist.
--- if not create_directory("myapp/interface/letters") then
---		crash("Filesystem problem - could not create the new folder")
--- end if
---
--- -- This example will NOT create "myapp/" and "myapp/interface/" if they don't exist.
--- if not create_directory("myapp/interface/letters",,0) then
---		crash("Filesystem problem - could not create the new folder")
--- end if
--- </eucode>
---
--- See Also:
--- 	[[:remove_directory]], [[:chdir]]
-
-public function create_directory(sequence name, integer mode=448, integer mkparent = 1)
-	atom pname, ret
-	integer pos
-
-	-- Remove any trailing slash.
-	if name[$] = SLASH then
-		name = name[1 .. $-1]
-	end if
-	
-	if mkparent != 0 then
-		pos = rfind(SLASH, name)
-		if pos != 0 then
-			ret = create_directory(name[1.. pos-1], mode, mkparent)
-		end if
-	end if
-	
-	ifdef DOS32 then
-		atom low_buff
-		sequence reg_list
-		mode = mode -- get rid of not used warning
-		low_buff = allocate_low(length (name) + 1)
-		if not low_buff then
-			return 0
-		end if
-
-		poke(low_buff, name & 0)
-		reg_list = repeat(0,10)
-		if short_names then
-			reg_list[REG_AX] = #3900
-		else
-			reg_list[REG_AX] = #7139
-		end if
-
-		reg_list[REG_DS] = floor(low_buff / 16)
-		reg_list[REG_DX] = remainder(low_buff, 16)
-		reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-		reg_list = dos_interrupt(#21, reg_list)
-		free_low(low_buff)
-
-		if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-			return 0
-		else
-			return 1
-		end if
-	elsedef
-		pname = allocate_string(name)
-	end ifdef
-
-	ifdef UNIX then
-		ret = not c_func(xCreateDirectory, {pname, mode})
-	elsifdef WIN32 then
-		ret = c_func(xCreateDirectory, {pname, 0})
-		mode = mode -- get rid of not used warning
-	end ifdef
-
-	return ret
-end function
-
-integer delete_file_id = -1, dir_id = -1
-
---**
--- Remove a directory.
---
--- Parameters:
---		# ##name##: a sequence, the name of the directory to remove.
---      # ##force##: an integer, if 1 this will also remove files and
---                    sub-directories in the directory. The default is
---                   0, which means that it will only remove the
---                   directory if it is already empty.
---
--- Returns:
---     An **integer**, 0 on failure, 1 on success.
---
--- Example 1:
--- <eucode>
--- if not remove_directory("the_old_folder") then
---		crash("Filesystem problem - could not remove the old folder")
--- end if
--- </eucode>
---
--- See Also:
--- 	[[:create_directory]], [[:chdir]], [[:clear_directory]]
-
-public function remove_directory(sequence dir_name, integer force=0)
-	atom pname, ret
-	object files
-	integer D_NAME = 1, D_ATTRIBUTES = 2
-	
-	-- Remove any trailing slash
- 	if length(dir_name) > 0 then
-		if dir_name[$] = SLASH then
-			dir_name = dir_name[1 .. $-1]
-		end if
-	end if
-	
-	if length(dir_name) = 0 then
-		return 0	-- nothing specified to delete.
-		            -- (not allowed to delete root directory btw)
-	end if
-	
-	ifdef WIN32 then
-		if length(dir_name) = 2 then
-			if dir_name[2] = ':' then
-				return 0 -- nothing specified to delete
-			end if
-		end if
-	end ifdef
-
-	files = call_func(dir_id, {dir_name})
-	if atom(files) then
-		return 0
-	end if
-	if not equal(files[1][D_NAME], ".") then
-		return 0	-- Supplied dir_name was not a directory
-	end if
-	
-	
-	dir_name &= SLASH
-	
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-			
-		elsif not force then
-			return 0
-		else
-			if eu:find('d', files[i][D_ATTRIBUTES]) then
-				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
-			else
-				ret = call_func(delete_file_id, {dir_name & files[i][D_NAME]})
-			end if
-			if not ret then
-				return 0
-			end if
-		end if
-	end for
-	
-	ifdef DOS32 then
-	    atom low_buff
-	    sequence reg_list
-	    low_buff = allocate_low(length(dir_name) + 1)
-	    if not low_buff then
-	        return 0
-	    end if
-	    poke(low_buff, dir_name & 0)
-	    reg_list = repeat(0,10)
-	    if short_names then
-	        reg_list[REG_AX] = #3A00
-	    else
-	        reg_list[REG_AX] = #713A
-	    end if
-	    reg_list[REG_DS] = floor(low_buff / 16)
-	    reg_list[REG_DX] = remainder(low_buff, 16)
-	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-	    reg_list = dos_interrupt(#21, reg_list)
-	    free_low(low_buff)
-	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-	        return 0
-	    else
-	        return 1
-	    end if
-	end ifdef
-	
-	pname = allocate_string(dir_name)
-	ret = c_func(xRemoveDirectory, {pname})
-	ifdef UNIX then
-			ret = not ret 
-	end ifdef
-	free(pname)
-	return ret
-end function
-
 public enum 
 	D_NAME,
 	D_ATTRIBUTES,
@@ -368,6 +160,12 @@ public enum
 	D_HOUR,
 	D_MINUTE,
 	D_SECOND
+
+--**
+-- Bad path error code
+
+public constant W_BAD_PATH = -1 -- error code
+
 
 --**
 -- Return directory information for the specified file or directory.
@@ -504,7 +302,6 @@ public function dir(sequence name)
 	end if
 	return data
 end function
-dir_id = routine_id("dir")
 
 --**
 -- Return the name of the current working directory.
@@ -568,11 +365,6 @@ public function chdir(sequence newdir)
 end function
 
 -- Generalized recursive directory walker
-
---**
--- Bad path error code
-
-public constant W_BAD_PATH = -1 -- error code
 
 function default_dir(sequence path)
 -- Default directory sorting function for walk_dir().
@@ -711,51 +503,400 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	return 0
 end function
 
-
---****
--- === File Handling
---
-
 --**
--- Check to see if a file exists
+-- Create a new directory.
 --
 -- Parameters:
---   * name - filename to check existence of
+-- 		# ##name##: a sequence, the name of the new directory to create
+--		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 
+--		  448 (all rights for owner, none for others).
+--      # ##mkparent## If true (default) the parent directories are also created
+--        if needed. 
 --
 -- Returns:
---   1 on yes, 0 on no
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Comments:
+-- 		##mode## is ignored on non-Unix platforms.
 --
 -- Example 1:
 -- <eucode>
--- if file_exists("abc.e") then
---     puts(1, "abc.e exists already\n")
+-- if not create_directory("the_new_folder") then
+--		crash("Filesystem problem - could not create the new folder")
+-- end if
+-- 
+-- -- This example will also create "myapp/" and "myapp/interface/" if they don't exist.
+-- if not create_directory("myapp/interface/letters") then
+--		crash("Filesystem problem - could not create the new folder")
+-- end if
+--
+-- -- This example will NOT create "myapp/" and "myapp/interface/" if they don't exist.
+-- if not create_directory("myapp/interface/letters",,0) then
+--		crash("Filesystem problem - could not create the new folder")
 -- end if
 -- </eucode>
+--
+-- See Also:
+-- 	[[:remove_directory]], [[:chdir]]
 
-public function file_exists(sequence name)
-	ifdef WIN32 then
-		atom pName = allocate_string(name)
-		integer r = c_func(xGetFileAttributes, {pName})
-		free(pName)
+public function create_directory(sequence name, integer mode=448, integer mkparent = 1)
+	atom pname, ret
+	integer pos
 
-		return r > 0
+	-- Remove any trailing slash.
+	if name[$] = SLASH then
+		name = name[1 .. $-1]
+	end if
+	
+	if mkparent != 0 then
+		pos = rfind(SLASH, name)
+		if pos != 0 then
+			ret = create_directory(name[1.. pos-1], mode, mkparent)
+		end if
+	end if
+	
+	ifdef DOS32 then
+		atom low_buff
+		sequence reg_list
+		mode = mode -- get rid of not used warning
+		low_buff = allocate_low(length (name) + 1)
+		if not low_buff then
+			return 0
+		end if
 
-	elsifdef UNIX then
-		atom pName = allocate_string(name)
-		integer r = c_func(xGetFileAttributes, {pName, 0})
-		free(pName)
+		poke(low_buff, name & 0)
+		reg_list = repeat(0,10)
+		if short_names then
+			reg_list[REG_AX] = #3900
+		else
+			reg_list[REG_AX] = #7139
+		end if
 
-		return r = 0
+		reg_list[REG_DS] = floor(low_buff / 16)
+		reg_list[REG_DX] = remainder(low_buff, 16)
+		reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+		reg_list = dos_interrupt(#21, reg_list)
+		free_low(low_buff)
 
+		if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+			return 0
+		else
+			return 1
+		end if
 	elsedef
-
-		return sequence(dir(name))
+		pname = allocate_string(name)
 	end ifdef
+
+	ifdef UNIX then
+		ret = not c_func(xCreateDirectory, {pname, mode})
+	elsifdef WIN32 then
+		ret = c_func(xCreateDirectory, {pname, 0})
+		mode = mode -- get rid of not used warning
+	end ifdef
+
+	return ret
+end function
+
+--**
+-- Returns the current directory, with a trailing SLASH
+--
+-- Parameters:
+--		# ##drive_id##: For non-Unix systems only. This is the Drive letter to
+--      to get the current directory of. If omitted, the current drive is used.
+--
+-- Returns:
+--     A **sequence**, the current directory.
+--
+-- Comment:
+--  Windows and MS-DOS maintain a current directory for each disk drive. You
+--  would use this routine if you wanted the current directory for a drive that
+--  may not be the current drive.
+--
+--  For Unix systems, this is simply ignored because there is only one current
+--  directory at any time on Unix.
+--
+--  **Note**: This always ensures that the returned value has a trailing SLASH
+-- character.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_curdir('D') -- Find the current directory on the D: drive.
+-- -- res might be "D:\backup\music\"
+-- res = get_curdir()    -- Find the current directory on the current drive.
+-- -- res might be "C:\myapp\work\"
+-- </eucode>
+
+public function get_curdir(integer drive_id = 0)
+
+    sequence lCurDir
+	ifdef !LINUX then
+	    sequence lOrigDir = ""
+	    sequence lDrive
+	    object void
+	
+	    if t_alpha(drive_id) then
+		    lOrigDir =  current_dir()
+		    lDrive = "  "
+		    lDrive[1] = drive_id
+		    lDrive[2] = ':'
+		    if chdir(lDrive) = 0 then
+		    	lOrigDir = ""
+		    end if
+		end if
+	end ifdef
+    
+    lCurDir = current_dir()
+	ifdef !LINUX then
+		if length(lOrigDir) > 0 then
+	    	void = chdir(lOrigDir[1..2])
+	    end if
+	end ifdef
+
+	-- Ensure that it ends in a path separator.
+	if (lCurDir[$] != SLASH) then
+		lCurDir &= SLASH
+	end if
+	
+	return lCurDir
+end function
+
+sequence InitCurDir = get_curdir() -- Capture the original PWD
+
+--**
+-- Returns the original current directory
+--
+-- Parameters:
+--		None.
+--
+-- Returns:
+--     A **sequence**, the current directory at the time the program started running.
+--
+-- Comment:
+-- You would use this if the program might change the current directory during
+-- its processing and you wanted to return to the original directory.
+--
+--  **Note**: This always ensures that the returned value has a trailing SLASH
+-- character.
+--
+-- Example 1:
+-- <eucode>
+-- res = get_init_curdir() -- Find the original current directory.
+-- </eucode>
+
+public function get_init_curdir()
+	return InitCurDir
+end function
+
+--- TODO
+--- copy_directory( srcpath, destpath, structonly = 0)
+
+--**
+-- Clear (delete) a directory of all files, but retaining sub-directories.
+--
+-- Parameters:
+--		# ##name##: a sequence, the name of the directory whose files you want to remove.
+--		# ##recurse##: an integer, whether or not to remove files in the 
+--        directory's sub-directories. If 0 then this function is identical
+--        to remove_directory(). If 1, then we recursively delete the
+--        directory and its contents. Defaults to 1.
+--
+-- Returns:
+--     An **integer**, 0 on failure, otherwise the number of files plus 1.
+--
+-- Comment:
+-- This never removes a directory. It only ever removes files. It is used to 
+-- clear a directory structure of all existing files, leaving the structure
+-- intact.
+--
+-- Example 1:
+-- <eucode>
+-- integer cnt = clear_directory("the_old_folder")
+-- if cnt = 0 then
+--		crash("Filesystem problem - could not remove one or more of the files.")
+-- end if
+-- printf(1, "Number of files removed: %d\n", cnt - 1)
+-- </eucode>
+--
+-- See Also:
+-- 	[[:remove_directory]], [[:delete_file]]
+
+public function clear_directory(sequence path, integer recurse = 1)
+	object files
+	integer ret
+	if length(path) > 0 then
+		if path[$] = SLASH then
+			path = path[1 .. $-1]
+		end if
+	end if
+	
+	if length(path) = 0 then
+		return 0 -- Nothing specified to clear. Not safe to assume anything.
+		         -- (btw, not allowed to clear root directory)
+	end if
+	ifdef WIN32 then
+		if length(path) = 2 then
+			if path[2] = ':' then
+				return 0 -- nothing specified to delete
+			end if
+		end if
+	end ifdef
+
+	
+	files = dir(path)
+	if atom(files) then
+		return 0
+	end if
+	if not equal(files[1][D_NAME], ".") then
+		return 0 -- Supplied name was not a directory
+	end if
+	
+	ret = 1
+	path &= SLASH
+	
+	for i = 1 to length(files) do
+		if eu:find(files[i][D_NAME], {".", ".."}) then
+			continue
+		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
+			if recurse then
+				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+				if cnt = 0 then
+					return 0
+				end if
+				ret += cnt
+			else
+				continue
+			end if
+		else
+			if delete_file(path & files[i][D_NAME]) = 0 then
+				return 0
+			end if
+			ret += 1
+		end if
+	end for
+	return ret
+end function
+
+--**
+-- Remove a directory.
+--
+-- Parameters:
+--		# ##name##: a sequence, the name of the directory to remove.
+--      # ##force##: an integer, if 1 this will also remove files and
+--                    sub-directories in the directory. The default is
+--                   0, which means that it will only remove the
+--                   directory if it is already empty.
+--
+-- Returns:
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Example 1:
+-- <eucode>
+-- if not remove_directory("the_old_folder") then
+--		crash("Filesystem problem - could not remove the old folder")
+-- end if
+-- </eucode>
+--
+-- See Also:
+-- 	[[:create_directory]], [[:chdir]], [[:clear_directory]]
+
+public function remove_directory(sequence dir_name, integer force=0)
+	atom pname, ret
+	object files
+	integer D_NAME = 1, D_ATTRIBUTES = 2
+	
+	-- Remove any trailing slash
+ 	if length(dir_name) > 0 then
+		if dir_name[$] = SLASH then
+			dir_name = dir_name[1 .. $-1]
+		end if
+	end if
+	
+	if length(dir_name) = 0 then
+		return 0	-- nothing specified to delete.
+		            -- (not allowed to delete root directory btw)
+	end if
+	
+	ifdef WIN32 then
+		if length(dir_name) = 2 then
+			if dir_name[2] = ':' then
+				return 0 -- nothing specified to delete
+			end if
+		end if
+	end ifdef
+
+	files = dir(dir_name)
+	if atom(files) then
+		return 0
+	end if
+	if not equal(files[1][D_NAME], ".") then
+		return 0	-- Supplied dir_name was not a directory
+	end if
+	
+	
+	dir_name &= SLASH
+	
+	for i = 1 to length(files) do
+		if eu:find(files[i][D_NAME], {".", ".."}) then
+			continue
+			
+		elsif not force then
+			return 0
+		else
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
+			else
+				ret = delete_file(dir_name & files[i][D_NAME])
+			end if
+			if not ret then
+				return 0
+			end if
+		end if
+	end for
+	
+	ifdef DOS32 then
+	    atom low_buff
+	    sequence reg_list
+	    low_buff = allocate_low(length(dir_name) + 1)
+	    if not low_buff then
+	        return 0
+	    end if
+	    poke(low_buff, dir_name & 0)
+	    reg_list = repeat(0,10)
+	    if short_names then
+	        reg_list[REG_AX] = #3A00
+	    else
+	        reg_list[REG_AX] = #713A
+	    end if
+	    reg_list[REG_DS] = floor(low_buff / 16)
+	    reg_list[REG_DX] = remainder(low_buff, 16)
+	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+	    reg_list = dos_interrupt(#21, reg_list)
+	    free_low(low_buff)
+	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+	        return 0
+	    else
+	        return 1
+	    end if
+	end ifdef
+	
+	pname = allocate_string(dir_name)
+	ret = c_func(xRemoveDirectory, {pname})
+	ifdef UNIX then
+			ret = not ret 
+	end ifdef
+	free(pname)
+	return ret
 end function
 
 
 --****
 -- === File name parsing
+
+public enum
+	FILETYPE_UNDEFINED = -1,
+	FILETYPE_NOT_FOUND,
+	FILETYPE_FILE,
+	FILETYPE_DIRECTORY
 
 public enum
 	PATH_DIR,
@@ -776,15 +917,8 @@ public enum
 --		* the file name, without extension
 --		* the file extension
 --		* the drive id
+--
 -- Comments:
---
--- A public enum has been created for ease of using the returned value:
---
--- * PATH_DIR
--- * PATH_FILENAME
--- * PATH_BASENAME
--- * PATH_FILEEXT
--- * PATH_DRIVEID
 --
 -- The host operating system path separator is used in the parsing.
 --
@@ -810,7 +944,9 @@ public enum
 -- </eucode>
 --
 -- See Also:
---   [[:driveid]], [[:dirname]], [[:filename]], [[:fileext]]
+--   [[:driveid]], [[:dirname]], [[:filename]], [[:fileext]],
+--   [[:PATH_BASENAME]], [[:PATH_DIR]], [[:PATH_DRIVEID]], [[:PATH_FILEEXT]],
+--   [[:PATH_FILENAME]]
 
 public function pathinfo(sequence path)
 	integer slash, period, ch
@@ -858,12 +994,371 @@ public function pathinfo(sequence path)
 	return {dir_name, file_full, file_name, file_ext, drive_id}
 end function
 
+--**
+-- Return the directory name of a fully qualified filename
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the full file name part of ##path##.
+--
+-- Comments:
+-- The host operating system path separator is used.
+--
+-- Example 1:
+-- <eucode>
+-- fname = dirname("/opt/euphoria/docs/readme.txt")
+-- -- fname is "/opt/euphoria/docs"
+-- </eucode>
+--
+-- See Also:
+--   [[:driveid]], [[:filename]], [[:pathinfo]]
 
-public enum
-	FILETYPE_UNDEFINED = -1,
-	FILETYPE_NOT_FOUND,
-	FILETYPE_FILE,
-	FILETYPE_DIRECTORY
+public function dirname(sequence path)
+	sequence data
+	data = pathinfo(path)
+	return data[1]
+end function
+
+--**
+-- Return the file name portion of a fully qualified filename
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the file name part of ##path##.
+--
+-- Comments:
+-- The host operating system path separator is used.
+--
+-- Example 1:
+-- <eucode>
+-- fname = filename("/opt/euphoria/docs/readme.txt")
+-- -- fname is "readme.txt"
+-- </eucode>
+--
+-- See Also:
+--   [[:pathinfo]], [[:filebase]], [[:fileext]]
+  
+public function filename(sequence path)
+	sequence data
+
+	data = pathinfo(path)
+
+	return data[2]
+end function
+
+--**
+-- Return the base filename of path.
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the base file name part of ##path##.
+--
+-- TODO: Test
+--
+-- Example 1:
+-- <eucode>
+-- base = filebase("/opt/euphoria/readme.txt")
+-- -- base is "readme"
+-- </eucode>
+--
+-- See Also:
+--     [[:pathinfo]], [[:filename]], [[:fileext]]
+
+public function filebase(sequence path)
+	sequence data
+
+	data = pathinfo(path)
+
+	return data[3]
+end function
+
+--**
+-- Return the file extension of a fully qualified filename
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the file extension part of ##path##.
+--
+-- Comments:
+-- The host operating system path separator is used.
+--
+-- Example 1:
+-- <eucode>
+-- fname = fileext("/opt/euphoria/docs/readme.txt")
+-- -- fname is "txt"
+-- </eucode>
+--
+-- See Also:
+--     [[:pathinfo]], [[:filename]], [[:filebase]]
+
+public function fileext(sequence path)
+	sequence data
+	data = pathinfo(path)
+	return data[4]
+end function
+
+--**
+-- Return the drive letter of the path on //DOS32// and //WIN32// platforms.
+--
+-- Parameters:
+-- 		# ##path##: the path from which to extract information
+--
+-- Returns:
+-- 		A **sequence**, the file extension part of ##path##.
+--
+-- TODO: Test
+--
+-- Example:
+-- <eucode>
+-- letter = driveid("C:\\EUPHORIA\\Readme.txt")
+-- -- letter is "C"
+-- </eucode>
+--
+-- See Also:
+--     [[:pathinfo]], [[:dirname]], [[:filename]]
+
+public function driveid(sequence path)
+	sequence data
+	data = pathinfo(path)
+	return data[5]
+end function
+
+--**
+-- Returns the supplied filepath with the supplied extension, if
+-- the filepath does not have an extension already.
+--
+-- Parameters:
+-- 		# ##path##: the path to check for an extension.
+-- 		# ##defext##: the extentsion to add if ##path## does not have one.
+--
+-- Returns:
+-- 		A **sequence**, the path with an extension.
+--
+-- Example:
+-- <eucode>
+--  -- ensure that the supplied path has an extension, but if it doesn't use "tmp".
+-- theFile = defaultext(UserFileName, "tmp")
+-- </eucode>
+--
+-- See Also:
+--     [[:pathinfo]]
+
+public function defaultext( sequence path, sequence defext)
+	if length(defext) = 0 then
+		return path
+	end if
+	
+	for i = length(path) to 1 by -1 do
+		if path[i] = '.' then
+			-- There is a dot in the file name part
+			return path
+		end if
+		if path[i] = SLASH then
+			if i = length(path) then
+				-- No file name in supplied path
+				return path
+			else
+				-- No dot in file name part.
+				exit
+			end if
+		end if
+	end for
+	
+	if defext[1] != '.' then
+		path &= '.'
+	end if
+	
+	return path & defext
+end function
+
+--**
+-- Determine if the supplied string is an absolute path or a relative path.
+--
+-- Parameters:
+--		# ##filename##: a sequence, the name of the file path
+--
+-- Returns:
+--     An **integer**, 0 if ##filename## is a relative path or 1 otherwise.
+--
+-- Comment:
+-- A //relative// path is one which is relative to the current directory and
+-- an //absolute// path is one that doesn't need to knw the current directory
+-- to find the file.
+--
+-- Example 1:
+-- <eucode>
+-- ? absolute_path("/usr/bin/abc") -- returns 1
+-- ? absolute_path("../abc") -- returns 0
+-- ? absolute_path("c:..\\abc") -- returns 0
+-- ? absolute_path("c:\\windows\\system32\\abc") -- returns 1
+-- </eucode>
+
+public function absolute_path(sequence filename)
+	if filename[1] = SLASH then
+		return 1
+	end if
+	ifdef !WIN32 then
+		if length(filename) > 1 then
+			if filename[2] = ':' then
+				if length(filename) > 2 then
+					if filename[3] = SLASH then
+						return 1
+					else
+						return 0
+					end if
+				else
+					return 0
+				end if
+			end if
+		end if
+	end ifdef
+	return 0
+end function
+
+
+--**
+-- Returns the full path and file name of the supplid file name.
+--
+-- Parameters:
+--	# ##path_in## - A sequence. This is the file name whose full path you want.
+--  # ##directory_given## - An integer. This is zero if ##path_in## is 
+--  to be interpreted as a file specification otherwise it is assumed to be a
+--  directory specification. The default is zero.
+--
+-- Returns:
+--     A **sequence**, the full path and file name.
+--
+-- Comment:
+-- * In non-Unix systems, the result is always in lowercase.
+-- * The supplied file/directory does not have to actually exist.
+-- * Does not (yet) handle UNC paths or unix links.
+--
+--
+-- Example 1:
+-- <eucode>
+-- -- Assuming the current directory is "/usr/foo/bar" 
+-- res = canonical_path("../abc.def")
+-- -- res is now "/usr/foo/abc.def"
+-- </eucode>
+
+public function canonical_path(sequence path_in, integer directory_given = 0)
+    sequence lPath = ""
+    integer lPosA = -1
+    integer lPosB = -1
+    integer lPosC = -1
+    sequence lLevel = ""
+    sequence lHome
+
+	ifdef UNIX then
+		lPath = path_in
+	elsedef
+	    sequence lDrive = ""
+	    -- Replace unix style separators with DOS style
+	    lPath = find_replace("/", path_in, SLASH)
+	end ifdef
+
+    -- Strip off any enclosing quotes.
+    if (length(lPath) > 2 and lPath[1] = '"' and lPath[$] = '"') then
+        lPath = lPath[2..$-1]
+	end if
+
+    -- Replace any leading tilde with 'HOME' directory.
+    if (length(lPath) > 0 and lPath[1] = '~') then
+		ifdef UNIX then
+				lHome = getenv("HOME")
+		elsedef
+				lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+		end ifdef
+		
+		if lHome[$] != SLASH then
+			lHome &= SLASH
+		end if
+		
+		if length(lPath) > 1 and lPath[2] = SLASH then
+			lPath = lHome & lPath[3 .. $]
+		else
+			lPath = lHome & lPath[2 .. $]
+		end if
+    end if
+
+	ifdef !UNIX then
+		-- Strip off any drive letter attached.
+	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
+		then
+			lDrive = lPath[1..2]
+			lPath = lPath[3..$]
+		end if
+	end ifdef
+
+	-- If a relative path, prepend the PWD of the appropriate drive.
+	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
+	then
+		ifdef UNIX then
+				lPath = get_curdir() & lPath
+		elsedef
+				if (length(lDrive) = 0) then
+					lPath = get_curdir() & lPath
+				else
+					lPath = get_curdir(lDrive[1]) & lPath
+				end if
+				-- Strip of the drive letter if it got attached again.
+				if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
+					if (length(lDrive) = 0) then
+						lDrive = lPath[1..2]
+					end if
+					lPath = lPath[3..$]
+				end if
+		end ifdef		
+	end if
+	
+	-- If the input is supposed to be a directory, ensure it ends in a path separator.
+	if ((directory_given != 0) and (lPath[$] != SLASH) ) then
+		lPath &= SLASH
+	end if
+	
+	-- Replace all instances of "/./" with "/"
+	lLevel = SLASH & '.' & SLASH
+	while( lPosA != 0 ) entry do
+		lPath = lPath[1..lPosA-1] & lPath[lPosA + 2 .. $]
+		
+	  entry
+		lPosA = match(lLevel, lPath)
+	end while
+	
+	-- Replace all instances of "X/Y/../" with "X/"
+	lLevel = SLASH & ".." & SLASH
+	
+	while( lPosA != 0 ) entry do
+		-- Locate preceding directory separator.
+		lPosB = lPosA-1
+		while((lPosB > 0) and (lPath[lPosB] != SLASH)) do
+			lPosB -= 1
+		end while
+		if (lPosB <= 0) then
+			lPosB = 1
+		end if
+		
+		lPath = lPath[1..lPosB-1] & lPath[lPosA + 3 .. $]
+		
+	  entry
+		lPosA = match(lLevel, lPath)
+	end while
+	
+	ifdef !UNIX then
+		lPath = lower(lDrive & lPath)
+	end ifdef
+	
+	return lPath
+end function
+
 
 --**
 -- Get the type of a file.
@@ -878,15 +1373,9 @@ public enum
 --      *  1 if filename is a file
 --      *  2 if filename is a directory
 --
--- Comments:
--- A public enum has been created for ease of use:
--- * FILETYPE_UNDEFINED     = -1,
--- * FILETYPE_NOT_FOUND, -- = 0
--- * FILETYPE_FILE,      -- = 1
--- * FILETYPE_DIRECTORY  -- = 2
---
 -- See Also:
--- [[:dir]]
+-- [[:dir]], [[:FILETYPE_DIRECTORY]], [[:FILETYPE_FILE]], [[:FILETYPE_NOT_FOUND]],
+-- [[:FILETYPE_UNDEFINED]]
 
 public function file_type(sequence filename)
 object dirfil
@@ -907,6 +1396,71 @@ object dirfil
 		return FILETYPE_NOT_FOUND
 	end if
 end function
+
+--****
+-- === File Handling
+--
+
+public enum
+	SECTORS_PER_CLUSTER,
+	BYTES_PER_SECTOR,
+	NUMBER_OF_FREE_CLUSTERS,
+	TOTAL_NUMBER_OF_CLUSTERS
+
+public enum
+	TOTAL_BYTES,
+	FREE_BYTES,
+	USED_BYTES
+
+public enum
+	COUNT_DIRS,
+	COUNT_FILES,
+	COUNT_SIZE,
+	COUNT_TYPES
+
+public enum
+	EXT_NAME,
+	EXT_COUNT,
+	EXT_SIZE
+
+--**
+-- Check to see if a file exists
+--
+-- Parameters:
+--   * name - filename to check existence of
+--
+-- Returns:
+--   1 on yes, 0 on no
+--
+-- Example 1:
+-- <eucode>
+-- if file_exists("abc.e") then
+--     puts(1, "abc.e exists already\n")
+-- end if
+-- </eucode>
+
+public function file_exists(sequence name)
+	ifdef WIN32 then
+		atom pName = allocate_string(name)
+		integer r = c_func(xGetFileAttributes, {pName})
+		free(pName)
+
+		return r > 0
+
+	elsifdef UNIX then
+		atom pName = allocate_string(name)
+		integer r = c_func(xGetFileAttributes, {pName, 0})
+		free(pName)
+
+		return r = 0
+
+	elsedef
+
+		return sequence(dir(name))
+	end ifdef
+end function
+
+
 
 --**
 -- Copy a file.
@@ -1063,8 +1617,6 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 
 public function delete_file(sequence name)
-	
-
 	ifdef DOS32 then
 	    atom low_buff
 	    sequence reg_list
@@ -1102,11 +1654,7 @@ public function delete_file(sequence name)
 		free(pfilename)
 		return success
 	end ifdef
-
-	
-	
 end function
-delete_file_id = routine_id("delete_file")
 
 ifdef LINUX then
 	function xstat(atom psrc, atom psrcbuf)
@@ -1117,7 +1665,6 @@ elsifdef UNIX then
 		return c_func(xStatFile, {psrc, psrcbuf})
 	end function
 end ifdef
-integer dirname_id = -1
 
 --**
 -- Move a file to another location.
@@ -1216,10 +1763,10 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 		end if
 		ret = xstat(pdest, pdestbuf)
 		if ret then
-			if length(call_func(dirname_id,{dest})) = 0 then
+			if length(dirname(dest)) = 0 then
 				pdir = allocate_string(current_dir())
 			else
-				pdir = allocate_string(call_func(dirname_id,{dest}))
+				pdir = allocate_string(dirname(dest))
 			end if
 			ret = xstat(pdir, pdestbuf)
 			free(pdir)
@@ -1426,559 +1973,6 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 end function
 
 --**
--- Returns the current directory, with a trailing SLASH
---
--- Parameters:
---		# ##drive_id##: For non-Unix systems only. This is the Drive letter to
---      to get the current directory of. If omitted, the current drive is used.
---
--- Returns:
---     A **sequence**, the current directory.
---
--- Comment:
---  Windows and MS-DOS maintain a current directory for each disk drive. You
---  would use this routine if you wanted the current directory for a drive that
---  may not be the current drive.
---
---  For Unix systems, this is simply ignored because there is only one current
---  directory at any time on Unix.
---
---  **Note**: This always ensures that the returned value has a trailing SLASH
--- character.
---
--- Example 1:
--- <eucode>
--- res = get_curdir('D') -- Find the current directory on the D: drive.
--- -- res might be "D:\backup\music\"
--- res = get_curdir()    -- Find the current directory on the current drive.
--- -- res might be "C:\myapp\work\"
--- </eucode>
-public function get_curdir(integer drive_id = 0)
-
-    sequence lCurDir
-	ifdef !LINUX then
-	    sequence lOrigDir = ""
-	    sequence lDrive
-	    object void
-	
-	    if t_alpha(drive_id) then
-		    lOrigDir =  current_dir()
-		    lDrive = "  "
-		    lDrive[1] = drive_id
-		    lDrive[2] = ':'
-		    if chdir(lDrive) = 0 then
-		    	lOrigDir = ""
-		    end if
-		end if
-	end ifdef
-    
-    lCurDir = current_dir()
-	ifdef !LINUX then
-		if length(lOrigDir) > 0 then
-	    	void = chdir(lOrigDir[1..2])
-	    end if
-	end ifdef
-
-	-- Ensure that it ends in a path separator.
-	if (lCurDir[$] != SLASH) then
-		lCurDir &= SLASH
-	end if
-	
-	return lCurDir
-end function
-
-sequence InitCurDir = get_curdir() -- Capture the original PWD
-
---**
--- Returns the original current directory
---
--- Parameters:
---		None.
---
--- Returns:
---     A **sequence**, the current directory at the time the program started running.
---
--- Comment:
--- You would use this if the program might change the current directory during
--- its processing and you wanted to return to the original directory.
---
---  **Note**: This always ensures that the returned value has a trailing SLASH
--- character.
---
--- Example 1:
--- <eucode>
--- res = get_init_curdir() -- Find the original current directory.
--- </eucode>
-public function get_init_curdir()
-	return InitCurDir
-end function
-
---- TODO
---- copy_directory( srcpath, destpath, structonly = 0)
-
---**
--- Clear (delete) a directory of all files, but retaining sub-directories.
---
--- Parameters:
---		# ##name##: a sequence, the name of the directory whose files you want to remove.
---		# ##recurse##: an integer, whether or not to remove files in the 
---        directory's sub-directories. If 0 then this function is identical
---        to remove_directory(). If 1, then we recursively delete the
---        directory and its contents. Defaults to 1.
---
--- Returns:
---     An **integer**, 0 on failure, otherwise the number of files plus 1.
---
--- Comment:
--- This never removes a directory. It only ever removes files. It is used to 
--- clear a directory structure of all existing files, leaving the structure
--- intact.
---
--- Example 1:
--- <eucode>
--- integer cnt = clear_directory("the_old_folder")
--- if cnt = 0 then
---		crash("Filesystem problem - could not remove one or more of the files.")
--- end if
--- printf(1, "Number of files removed: %d\n", cnt - 1)
--- </eucode>
---
--- See Also:
--- 	[[:remove_directory]], [[:delete_file]]
-public function clear_directory(sequence path, integer recurse = 1)
-	object files
-	integer ret
-	if length(path) > 0 then
-		if path[$] = SLASH then
-			path = path[1 .. $-1]
-		end if
-	end if
-	
-	if length(path) = 0 then
-		return 0 -- Nothing specified to clear. Not safe to assume anything.
-		         -- (btw, not allowed to clear root directory)
-	end if
-	ifdef WIN32 then
-		if length(path) = 2 then
-			if path[2] = ':' then
-				return 0 -- nothing specified to delete
-			end if
-		end if
-	end ifdef
-
-	
-	files = dir(path)
-	if atom(files) then
-		return 0
-	end if
-	if not equal(files[1][D_NAME], ".") then
-		return 0 -- Supplied name was not a directory
-	end if
-	
-	ret = 1
-	path &= SLASH
-	
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
-			if recurse then
-				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
-				if cnt = 0 then
-					return 0
-				end if
-				ret += cnt
-			else
-				continue
-			end if
-		else
-			if delete_file(path & files[i][D_NAME]) = 0 then
-				return 0
-			end if
-			ret += 1
-		end if
-	end for
-	return ret
-end function
-
-
-
---**
--- Return the directory name of a fully qualified filename
---
--- Parameters:
--- 		# ##path##: the path from which to extract information
---
--- Returns:
--- 		A **sequence**, the full file name part of ##path##.
---
--- Comments:
--- The host operating system path separator is used.
---
--- Example 1:
--- <eucode>
--- fname = dirname("/opt/euphoria/docs/readme.txt")
--- -- fname is "/opt/euphoria/docs"
--- </eucode>
---
--- See Also:
---   [[:driveid]], [[:filename]], [[:pathinfo]]
-
-public function dirname(sequence path)
-	sequence data
-	data = pathinfo(path)
-	return data[1]
-end function
-dirname_id = routine_id("dirname")
-
---**
--- Return the file name portion of a fully qualified filename
---
--- Parameters:
--- 		# ##path##: the path from which to extract information
---
--- Returns:
--- 		A **sequence**, the file name part of ##path##.
---
--- Comments:
--- The host operating system path separator is used.
---
--- Example 1:
--- <eucode>
--- fname = filename("/opt/euphoria/docs/readme.txt")
--- -- fname is "readme.txt"
--- </eucode>
---
--- See Also:
---   [[:pathinfo]], [[:filebase]], [[:fileext]]
-  
-public function filename(sequence path)
-	sequence data
-
-	data = pathinfo(path)
-
-	return data[2]
-end function
-
---**
--- Return the base filename of path.
---
--- Parameters:
--- 		# ##path##: the path from which to extract information
---
--- Returns:
--- 		A **sequence**, the base file name part of ##path##.
---
--- TODO: Test
---
--- Example 1:
--- <eucode>
--- base = filebase("/opt/euphoria/readme.txt")
--- -- base is "readme"
--- </eucode>
---
--- See Also:
---     [[:pathinfo]], [[:filename]], [[:fileext]]
-
-public function filebase(sequence path)
-	sequence data
-
-	data = pathinfo(path)
-
-	return data[3]
-end function
-
---**
--- Return the file extension of a fully qualified filename
---
--- Parameters:
--- 		# ##path##: the path from which to extract information
---
--- Returns:
--- 		A **sequence**, the file extension part of ##path##.
---
--- Comments:
--- The host operating system path separator is used.
---
--- Example 1:
--- <eucode>
--- fname = fileext("/opt/euphoria/docs/readme.txt")
--- -- fname is "txt"
--- </eucode>
---
--- See Also:
---     [[:pathinfo]], [[:filename]], [[:filebase]]
-
-public function fileext(sequence path)
-	sequence data
-	data = pathinfo(path)
-	return data[4]
-end function
-
---**
--- Return the drive letter of the path on //DOS32// and //WIN32// platforms.
---
--- Parameters:
--- 		# ##path##: the path from which to extract information
---
--- Returns:
--- 		A **sequence**, the file extension part of ##path##.
---
--- TODO: Test
---
--- Example:
--- <eucode>
--- letter = driveid("C:\\EUPHORIA\\Readme.txt")
--- -- letter is "C"
--- </eucode>
---
--- See Also:
---     [[:pathinfo]], [[:dirname]], [[:filename]]
-
-public function driveid(sequence path)
-	sequence data
-	data = pathinfo(path)
-	return data[5]
-end function
-
---**
--- Returns the supplied filepath with the supplied extension, if
--- the filepath does not have an extension already.
---
--- Parameters:
--- 		# ##path##: the path to check for an extension.
--- 		# ##defext##: the extentsion to add if ##path## does not have one.
---
--- Returns:
--- 		A **sequence**, the path with an extension.
---
--- Example:
--- <eucode>
---  -- ensure that the supplied path has an extension, but if it doesn't use "tmp".
--- theFile = defaultext(UserFileName, "tmp")
--- </eucode>
---
--- See Also:
---     [[:pathinfo]]
-
-public function defaultext( sequence path, sequence defext)
-	if length(defext) = 0 then
-		return path
-	end if
-	
-	for i = length(path) to 1 by -1 do
-		if path[i] = '.' then
-			-- There is a dot in the file name part
-			return path
-		end if
-		if path[i] = SLASH then
-			if i = length(path) then
-				-- No file name in supplied path
-				return path
-			else
-				-- No dot in file name part.
-				exit
-			end if
-		end if
-	end for
-	
-	if defext[1] != '.' then
-		path &= '.'
-	end if
-	
-	return path & defext
-end function
-
---**
--- Determine if the supplied string is an absolute path or a relative path.
---
--- Parameters:
---		# ##filename##: a sequence, the name of the file path
---
--- Returns:
---     An **integer**, 0 if ##filename## is a relative path or 1 otherwise.
---
--- Comment:
--- A //relative// path is one which is relative to the current directory and
--- an //absolute// path is one that doesn't need to knw the current directory
--- to find the file.
---
--- Example 1:
--- <eucode>
--- ? absolute_path("/usr/bin/abc") -- returns 1
--- ? absolute_path("../abc") -- returns 0
--- ? absolute_path("c:..\\abc") -- returns 0
--- ? absolute_path("c:\\windows\\system32\\abc") -- returns 1
--- </eucode>
-public function absolute_path(sequence filename)
-	if filename[1] = SLASH then
-		return 1
-	end if
-	ifdef !WIN32 then
-		if length(filename) > 1 then
-			if filename[2] = ':' then
-				if length(filename) > 2 then
-					if filename[3] = SLASH then
-						return 1
-					else
-						return 0
-					end if
-				else
-					return 0
-				end if
-			end if
-		end if
-	end ifdef
-	return 0
-	
-end function
-
-
---**
--- Returns the full path and file name of the supplid file name.
---
--- Parameters:
---	# ##path_in## - A sequence. This is the file name whose full path you want.
---  # ##directory_given## - An integer. This is zero if ##path_in## is 
---  to be interpreted as a file specification otherwise it is assumed to be a
---  directory specification. The default is zero.
---
--- Returns:
---     A **sequence**, the full path and file name.
---
--- Comment:
--- * In non-Unix systems, the result is always in lowercase.
--- * The supplied file/directory does not have to actually exist.
--- * Does not (yet) handle UNC paths or unix links.
---
---
--- Example 1:
--- <eucode>
--- -- Assuming the current directory is "/usr/foo/bar" 
--- res = canonical_path("../abc.def")
--- -- res is now "/usr/foo/abc.def"
--- </eucode>
-public function canonical_path(sequence path_in, integer directory_given = 0)
-    sequence lPath = ""
-    integer lPosA = -1
-    integer lPosB = -1
-    integer lPosC = -1
-    sequence lLevel = ""
-    sequence lHome
-
-	ifdef UNIX then
-		lPath = path_in
-	elsedef
-	    sequence lDrive = ""
-	    -- Replace unix style separators with DOS style
-	    lPath = find_replace("/", path_in, SLASH)
-	end ifdef
-
-    -- Strip off any enclosing quotes.
-    if (length(lPath) > 2 and lPath[1] = '"' and lPath[$] = '"') then
-        lPath = lPath[2..$-1]
-	end if
-
-    -- Replace any leading tilde with 'HOME' directory.
-    if (length(lPath) > 0 and lPath[1] = '~') then
-		ifdef UNIX then
-				lHome = getenv("HOME")
-		elsedef
-				lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
-		end ifdef
-		
-		if lHome[$] != SLASH then
-			lHome &= SLASH
-		end if
-		
-		if length(lPath) > 1 and lPath[2] = SLASH then
-			lPath = lHome & lPath[3 .. $]
-		else
-			lPath = lHome & lPath[2 .. $]
-		end if
-    end if
-
-	ifdef !UNIX then
-		-- Strip off any drive letter attached.
-	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
-		then
-			lDrive = lPath[1..2]
-			lPath = lPath[3..$]
-		end if
-	end ifdef
-
-	-- If a relative path, prepend the PWD of the appropriate drive.
-	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
-	then
-		ifdef UNIX then
-				lPath = get_curdir() & lPath
-		elsedef
-				if (length(lDrive) = 0) then
-					lPath = get_curdir() & lPath
-				else
-					lPath = get_curdir(lDrive[1]) & lPath
-				end if
-				-- Strip of the drive letter if it got attached again.
-				if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
-					if (length(lDrive) = 0) then
-						lDrive = lPath[1..2]
-					end if
-					lPath = lPath[3..$]
-				end if
-		end ifdef		
-	end if
-	
-	-- If the input is supposed to be a directory, ensure it ends in a path separator.
-	if ((directory_given != 0) and (lPath[$] != SLASH) ) then
-		lPath &= SLASH
-	end if
-	
-	-- Replace all instances of "/./" with "/"
-	lLevel = SLASH & '.' & SLASH
-	while( lPosA != 0 ) entry do
-		lPath = lPath[1..lPosA-1] & lPath[lPosA + 2 .. $]
-		
-	  entry
-		lPosA = match(lLevel, lPath)
-	end while
-	
-	-- Replace all instances of "X/Y/../" with "X/"
-	lLevel = SLASH & ".." & SLASH
-	
-	while( lPosA != 0 ) entry do
-		-- Locate preceding directory separator.
-		lPosB = lPosA-1
-		while((lPosB > 0) and (lPath[lPosB] != SLASH)) do
-			lPosB -= 1
-		end while
-		if (lPosB <= 0) then
-			lPosB = 1
-		end if
-		
-		lPath = lPath[1..lPosB-1] & lPath[lPosA + 3 .. $]
-		
-	  entry
-		lPosA = match(lLevel, lPath)
-	end while
-	
-	ifdef !UNIX then
-		lPath = lower(lDrive & lPath)
-	end ifdef
-	
-	return lPath
-end function
-
-public enum
-	SECTORS_PER_CLUSTER,
-	BYTES_PER_SECTOR,
-	NUMBER_OF_FREE_CLUSTERS,
-	TOTAL_NUMBER_OF_CLUSTERS
-public enum
-	TOTAL_BYTES,
-	FREE_BYTES,
-	USED_BYTES
-
---**
 -- Returns some information about a disk drive.
 --
 -- Parameters:
@@ -2148,15 +2142,6 @@ public function get_disk_size(object disk_path)
 	return disk_size 
 end function 
 
-public enum
-		COUNT_DIRS,
-		COUNT_FILES,
-		COUNT_SIZE,
-		COUNT_TYPES
-public enum		
-		EXT_NAME,
-		EXT_COUNT,
-		EXT_SIZE
 sequence file_counters = {}
 
 -- Parameter inst contains two items: 'count_all' flag, and 'index' into file_counters.
