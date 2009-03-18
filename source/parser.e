@@ -21,8 +21,8 @@ constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
 						DIVIDE_EQUALS, CONCAT_EQUALS}
 constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
 	
-
 without trace
+
 --*****************
 -- Local variables
 --*****************
@@ -3664,7 +3664,10 @@ procedure SetWith(integer on_off)
 
 	elsif on_off and option[1] >= '0' and option[1] <= '9' then
 		-- Ignore numeric stamp - not supported anymore
-		
+
+	elsif equal(option, "batch") then
+		batch_job = on_off
+
 	else
 		CompileErr("unknown with/without option")
 

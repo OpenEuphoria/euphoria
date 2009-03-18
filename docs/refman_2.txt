@@ -2879,12 +2879,13 @@ multiple states.
 
 ==== On/Off options
 
-|| Default || Option ||
+|| Default || Option                     ||
 | off      | [[:Profiling|profile]]       |
 | off      | [[:Profiling|profile_time]]  |
-| off      | [[:trace]]         |
-| on       | [[:type_check]]    |
-| on       | [[:indirect_includes]] |
+| off      | [[:trace]]                   |
+| off      | [[:batch|with_batch]]        |
+| on       | [[:type_check]]              |
+| on       | [[:indirect_includes]]       |
 
 
 ##with## - This turns **on** one of the options while ##without## turns
@@ -2928,6 +2929,15 @@ with the new standard library.
 Note that this setting does not propagate down to included files, unlike
 most ##with/without options##.  Each file begins with ##indirect_includes##
 turned on.
+
+@[with_batch]
+Causes the program to not present the "Press Enter" prompt if an error
+occurs. The exit code will still be set to 1 on error. This is helpful
+for programs that run in a mode where no human may be directly interacting
+with it. For example, a CGI application or a CRON job.
+
+You can also set this option via a
+[[command line parameter|batch_command_line]]..
 
 ==== Complex with/without options
 
@@ -3080,6 +3090,7 @@ The following items may be changed or added, one at a time:
 
 ; ##-D word##:
 : Defines a word as being set. Words are processed by the [[:ifdef statement]].
+  Words can also be defined via the [[with / without define]] directive.
 
 ; ##-TEST##:
 : Parses the code only and issues any warnings or errors to ##STDOUT##. On
@@ -3088,13 +3099,16 @@ The following items may be changed or added, one at a time:
   parameter which enables many editor/IDE programs to test the syntax of your
   Euphoria source in real time.
 
+@[batch_command_line]
 ; ##-BATCH##:
 : Executes the program but if any error occurs, the "Press Enter" prompt is
-  not presented. The exit code will be set to 1 on error, 0 on success.
+  not presented. The exit code will be set to 1 on error, 0 on success. This
+  option can also be set via the [[with batch|with_batch]] directive.
 
 ; ##-STRICT##:
 : This turns on all warnings, overriding any with/without warning statement
-  found in the source.
+  found in the source. This option can also be set via the
+  [[with/without warning]] directive.
 
 ; ##-W warning_name##:
 : Resets, or adds to, the current list of warnings that may be emitted. The list of known names
