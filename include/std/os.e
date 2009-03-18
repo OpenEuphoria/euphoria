@@ -11,7 +11,7 @@ include std/text.e
 include std/machine.e
 
 ifdef DOS32 then
-	include std\dos\interrup.e
+	include std/dos/interrup.e
 elsedef
 	include std/dll.e
 end ifdef

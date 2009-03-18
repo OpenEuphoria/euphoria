@@ -6,8 +6,8 @@ constant
 	M_POLYGON        = 11,
 	M_ELLIPSE        = 18
 
-include ..\image.e
-include ..\graphcst.e
+include std/image.e
+include std/graphcst.e
 
 type point_sequence(sequence x)
 	return length(x) >= 2

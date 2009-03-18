@@ -1,7 +1,7 @@
 
 include base_mem.e
 
-include ../safe.e
+include std/safe.e
 
 safe_address_list = {
 --      {start , length , allocation_number}

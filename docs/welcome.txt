@@ -8,13 +8,14 @@
 
 = Euphoria Programming Language v4.0
 
+== Introduction
+
 Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical 
 **O**bjects for **R**obust **I**nterpreted **A**pplications//.
 
 Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
 **D**eployment **S**oftware (//RDS//).
-There are now enthusiastic users around the world.  
-
+There are now enthusiastic users around the world.
 
 === Yet Another Programming Language?
 

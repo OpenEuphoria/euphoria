@@ -5,7 +5,7 @@
 -- === DOS Image Routines
 --
 ifdef DOS32 then
-include ..\graphcst.e
+include std/graphcst.e
 include base_mem.e
 
 constant
@@ -173,6 +173,7 @@ end function
 public procedure set_active_page(page_number page)
 	machine_proc(M_SET_ACTIVE_PAGE, page)
 end procedure
+
 include std/machine.e
 include std/dos/interrup.e
 

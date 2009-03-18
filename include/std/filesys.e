@@ -10,7 +10,7 @@
 ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
 	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
-	include std\dos\interrup.e
+	include std/dos/interrup.e
 elsedef
 	include std/dll.e
 end ifdef

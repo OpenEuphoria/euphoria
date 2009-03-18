@@ -287,15 +287,16 @@ end function
 -- //large// maps.
 --
 -- Parameters:
---		# ##m##: the map to resize
---		# ##pRequestedSize##: a lower limit for the new size.
+--   # ##m##: the map to resize
+--   # ##requested_bucket_size_p##: a lower limit for the new size.
 --
 -- Returns:
 --		A **map** with the same data in, but more evenly dispatched and hence faster to use.
 --
 -- Comment:
--- If ##pRequestedSize## is not greater than zero, a new width is automatically derived from the current one.
--- SEe Also:
+-- If ##requested_bucket_size_p## is not greater than zero, a new width is automatically derived from the current one.
+--
+-- See Also:
 --		[[:statistics]], [[:optimise]]
 
 
