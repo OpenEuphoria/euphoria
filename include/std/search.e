@@ -12,7 +12,7 @@ include std/error.e
 -- === Equality
 --
 
---**
+--****
 -- Signature:
 --   <built-in> function compare(object compared, object reference)
 --
@@ -56,7 +56,7 @@ include std/error.e
 -- See Also:
 --     [[:equal]], [[:relational operators]], [[:operations on sequences]], [[:sort]]
 
---**
+--****
 -- Signature:
 --     <built-in> function equal(object left, object right)
 --
@@ -97,14 +97,14 @@ include std/error.e
 -- === Finding
 --
 
---**
+--****
 -- Signature:
 --     <built-in> function find(object needle, sequence haystack, integer start)
 --
 -- Description:
 --     Find the first occurrence of a "needle" as an element of a "haystack", starting from position "start"..
 --
---Parameters:
+-- Parameters:
 --		# ##needle##: an object whose presence is being queried
 --		# ##haystack##: a sequence, which is being looked up for ##needle##
 --		# ##start##: an integer, the position at which to start searching. Defaults to 1.
@@ -133,7 +133,7 @@ include std/error.e
 -- See Also:
 --     [[:find_from]], [[:match]], [[:match_from]], [[:compare]]
 
---**
+--****
 -- Signature:
 --     <built-in> function find_from(object needle, object haystack, integer start)
 --
@@ -169,36 +169,6 @@ include std/error.e
 --
 -- See Also:
 --     [[:find]], [[:match]], [[:match_from]], [[:compare]]
-
---**
--- Signature:
---     <built-in> function match_from(sequence needle, sequence haystack, integer start)
---
--- Description:
---     Try to match a "needle" against some slice of a "haystack", starting from some index.
---
--- Parameters:
---		# ##needle##: an sequence whose presence as a subsequence is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
---		# ##start##: an integer, the index in ##haystack## at which to start searching.
---
--- Returns:
---     An **integer**, 0 if no slice of ##haystack## with lower index at least ##start## is ##needle##, else the smallest such index.
---
--- Comments:
---     ##start## may have any value from 1 to the length of ##haystack## plus 1. (Just like the first
---     index of a slice of ##haystack##.)
---
--- ##match##() and [[:match_from]]() are identical, but you can omit giving ##match##() a starting point.
---
--- Example 1:
--- <eucode>
--- location = match_from("pho", "phoEuphoria", 4)
--- -- location is set to 6
--- </eucode>
---
--- See Also:
---     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]]
 
 --**
 -- Find any element from a list inside a sequence. Returns the location of the first hit.
@@ -621,7 +591,7 @@ end function
 -- === Matching
 --
 
---**
+--****
 -- Signature:
 --     <built-in> function match(sequence needle, sequence haystack, integer start)
 --
@@ -648,6 +618,36 @@ end function
 --
 -- See Also:
 --     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard_match]]
+
+--****
+-- Signature:
+--     <built-in> function match_from(sequence needle, sequence haystack, integer start)
+--
+-- Description:
+--     Try to match a "needle" against some slice of a "haystack", starting from some index.
+--
+-- Parameters:
+--		# ##needle##: an sequence whose presence as a subsequence is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--		# ##start##: an integer, the index in ##haystack## at which to start searching.
+--
+-- Returns:
+--     An **integer**, 0 if no slice of ##haystack## with lower index at least ##start## is ##needle##, else the smallest such index.
+--
+-- Comments:
+--     ##start## may have any value from 1 to the length of ##haystack## plus 1. (Just like the first
+--     index of a slice of ##haystack##.)
+--
+-- ##match##() and [[:match_from]]() are identical, but you can omit giving ##match##() a starting point.
+--
+-- Example 1:
+-- <eucode>
+-- location = match_from("pho", "phoEuphoria", 4)
+-- -- location is set to 6
+-- </eucode>
+--
+-- See Also:
+--     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]]
 
 --**
 -- Match all items of haystack in needle.

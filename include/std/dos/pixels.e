@@ -70,6 +70,7 @@ end procedure
 -- </eucode>
 -- See Also:
 -- 		[[:draw_line]]
+
 public procedure polygon(color c, boolean fill, point_sequence xyarray)
 	machine_proc(M_POLYGON, {c, fill, xyarray})
 end procedure
@@ -189,7 +190,7 @@ public function save_image(graphics_point top_left, graphics_point bottom_right)
 	return save
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function get_pixel(sequence coords)
 --

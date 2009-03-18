@@ -869,10 +869,10 @@ procedure save_keys()
 	end if
 end procedure
 
+--****
+-- === Managing databases
+
 --**
---
--- ==== Managing databases
---
 -- Create a new database, given a file path and a lock method.
 --
 -- Parameters:

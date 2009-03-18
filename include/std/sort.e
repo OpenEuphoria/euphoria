@@ -1,5 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
 --****
 -- == Sorting
 --
@@ -10,14 +11,17 @@
 -- === Constants
 --
 
---**
--- The following constants define in which order sorting is done:
--- * ASCENDING: ascending sort order, always the default. When a sequence is sorted in
--- ##ASCENDING## order, its first element is the smallest as per the sort ordder, and its 
--- last element the largest.
--- * DESCENDING: descending sort order, which is the exact reverse of the ##ASCENDING## order..
-
-public constant ASCENDING = 1, DESCENDING = -1
+public constant
+	--**
+	-- ascending sort order, always the default.
+	--
+	-- When a sequence is sorted in ##ASCENDING## order, its first element
+	-- is the smallest as per the sort order and its last element is the
+	-- largest
+	ASCENDING = 1,
+	--**
+	-- descending sort order, which is the reverse of ##ASCENDING##.
+	DESCENDING = -1
 
 include std/text.e -- upper/lower
 

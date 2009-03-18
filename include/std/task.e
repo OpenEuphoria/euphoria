@@ -23,6 +23,7 @@ constant M_SLEEP = 64
 --
 -- See Also:
 -- [[:sleep]]
+
 public procedure task_delay(atom delaytime)
 	atom t
 	t = time()
@@ -33,7 +34,7 @@ public procedure task_delay(atom delaytime)
 	end while
 end procedure
 
---**
+--****
 -- Signature:
 -- <built-in> procedure task_clock_start()
 --
@@ -64,8 +65,9 @@ end procedure
 -- See Also: 
 --  [[:task_clock_stop]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]], 
 -- [[:task_delay]]
--- 
---**
+--
+
+--****
 -- Signature:
 -- <built-in> procedure task_clock_stop()
 --
@@ -87,7 +89,8 @@ end procedure
 --  [[:task_clock_start]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]], 
 -- [[:task_delay]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function task_create(integer rid, sequence args)
 --
@@ -126,8 +129,9 @@ end procedure
 --  
 -- See Also: 
 --   [[:task_schedule]], [[:task_yield]], [[:task_suspend]], [[:task_self]]
--- 
---**
+--
+
+--****
 -- Signature:
 -- <built-in> function task_list()
 --
@@ -157,7 +161,8 @@ end procedure
 -- See Also: 
 -- [[:task_status]], [[:task_create]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> procedure task_schedule(atom task_id, object schedule)
 --
@@ -243,7 +248,8 @@ end procedure
 -- See Also: 
 --   [[:task_create]], [[:task_yield]], [[:task_suspend]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function task_self()
 --
@@ -263,7 +269,8 @@ end procedure
 -- See Also: 
 -- [[:task_create]], [[:task_schedule]], [[:task_yield]], [[:task_suspend]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function task_status(atom task_id)
 --
@@ -300,7 +307,8 @@ end procedure
 -- See Also: 
 --  [[:task_list]], [[:task_create]], [[:task_schedule]], [[:task_suspend]]
 --
--- **
+
+--****
 -- Signature:
 -- <built-in> procedure task_suspend(atom task_id)
 --
@@ -334,7 +342,8 @@ end procedure
 -- See Also: 
 --   [[:task_create]], [[:task_schedule]], [[:task_self]], [[:task_yield]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> procedure task_yield()
 --
@@ -395,5 +404,3 @@ end procedure
 --
 -- See Also: 
 -- [[:task_create]], [[:task_schedule]], [[:task_suspend]]
-
-

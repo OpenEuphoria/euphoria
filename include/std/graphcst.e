@@ -1,15 +1,9 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
 --****
--- === Constants
+-- === Error Code Constants
 --
--- error codes returned by read_bitmap(), save_bitmap() and save_screen()
---
--- * BMP_SUCCESS,
--- * BMP_OPEN_FAILED,
--- * BMP_UNEXPECTED_EOF,
--- * BMP_UNSUPPORTED_FORMAT,
--- * BMP_INVALID_MODE
 
 public enum
 	BMP_SUCCESS,
@@ -19,16 +13,7 @@ public enum
 	BMP_INVALID_MODE
 
 --****
--- Fields for the sequence returned by [[:video_config]]()
---
--- * VC_COLOR
--- * VC_MODE
--- * VC_LINES
--- * VC_COLUMNS
--- * VC_XPIXELS
--- * VC_YPIXELS
--- * VC_NCOLORS
--- * VC_PAGES
+-- === video_config sequence accessors
 
 public enum
 	VC_COLOR,
@@ -43,32 +28,11 @@ public enum
 --****
 -- ==== Colors
 --
--- Normal:
--- * BLACK
--- * BLUE
--- * BROWN
--- * CYAN
--- * GRAY
--- * GREEN
--- * MAGENTA
--- * RED
--- * WHITE
--- * YELLOW
---
--- Bright:
--- * BRIGHT_BLUE
--- * BRIGHT_CYAN
--- * BRIGHT_GREEN
--- * BRIGHT_MAGENTA
--- * BRIGHT_RED
--- * BRIGHT_WHITE
---
--- Miscellaneous:
--- * BLINKING
 
 -- COLOR values -- for characters and pixels
 public constant
-	BLACK = 0,  -- in graphics modes this is "transparent"
+	--** in graphics modes this is "transparent"
+	BLACK = 0,
 	GREEN = 2,
 	MAGENTA = 5,
 	WHITE = 7,
@@ -77,36 +41,38 @@ public constant
 	BRIGHT_MAGENTA = 13,
 	BRIGHT_WHITE = 15
 
-public integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN, BRIGHT_RED, YELLOW
+public integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN,
+	BRIGHT_RED, YELLOW
 
 ifdef UNIX then
-	BLUE  = 4
-	CYAN =  6
-	RED   = 1
-	BROWN = 3
+	BLUE        =  4
+	CYAN        =  6
+	RED         =  1
+	BROWN       =  3
 	BRIGHT_BLUE = 12
 	BRIGHT_CYAN = 14
-	BRIGHT_RED = 9
-	YELLOW = 11
+	BRIGHT_RED  =  9
+	YELLOW      = 11
 elsedef
-	BLUE  = 1
-	CYAN =  3
-	RED   = 4
-	BROWN = 6
-	BRIGHT_BLUE = 9
+	BLUE        =  1
+	CYAN        =  3
+	RED         =  4
+	BROWN       =  6
+	BRIGHT_BLUE =  9
 	BRIGHT_CYAN = 11
-	BRIGHT_RED = 12
-	YELLOW = 14
+	BRIGHT_RED  = 12
+	YELLOW      = 14
 end ifdef
 
-public constant BLINKING = 16  -- add to color to get blinking text
+--** Add to color to get blinking text
+public constant BLINKING = 16
 
 public constant BYTES_PER_CHAR = 2
 
 ifdef DOS32 then
-public constant
-	COLOR_TEXT_MEMORY = #B8000,
-	MONO_TEXT_MEMORY = #B0000
+	public constant
+		COLOR_TEXT_MEMORY = #B8000,
+		MONO_TEXT_MEMORY = #B0000
 end ifdef
 
 public type color(integer x)

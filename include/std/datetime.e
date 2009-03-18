@@ -389,7 +389,7 @@ end type
 --****
 -- === Routines
 
---**
+--****
 -- Signature:
 -- <built-in> function time()
 --
@@ -443,7 +443,7 @@ end type
 -- See Also: 
 -- [[:date]], [[:tick_rate]], [[:now]]
  
---**
+--****
 -- Signature:
 -- <built-in> function date()
 --

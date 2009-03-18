@@ -48,7 +48,7 @@ public constant EOF = -1
 --****
 -- === Read/Write Routines
 
---**
+--****
 -- Signature:
 -- <built-in> procedure ? (no parens around he unique parameter)
 --
@@ -64,7 +64,7 @@ public constant EOF = -1
 -- See Also:
 --   [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure print(integer fn, object x)
 --
@@ -100,7 +100,7 @@ public constant EOF = -1
 -- See Also:
 -- 		[[:?]], [[:puts]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure printf(integer fn, sequence format, object values)
 --
@@ -208,7 +208,7 @@ public constant EOF = -1
 -- See Also:
 --     [[:sprintf]], [[:sprint]], [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure puts(integer fn, object text)
 --
@@ -247,7 +247,7 @@ public constant EOF = -1
 -- See Also:
 --   [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> function getc(integer fn)
 --
@@ -274,7 +274,7 @@ public constant EOF = -1
 -- See Also:
 -- 		[[:gets]], [[:get_key]]
 
---**
+--****
 -- Signature:
 -- <built-in> function gets(integer fn)
 --
@@ -341,7 +341,7 @@ public constant EOF = -1
 -- See Also:
 --		[[:getc]], [[:read_lines]]
 
---**
+--****
 -- Signature:
 -- <built-in> function get_key()
 --
@@ -571,10 +571,6 @@ end function
 -- Described under lock_file()
 --
 
-
---**
--- Lock Type Constants
-
 public enum LOCK_SHARED, LOCK_EXCLUSIVE
 
 --**
@@ -612,7 +608,7 @@ public type byte_range(sequence r)
 	end if
 end type
 
---**
+--****
 -- Signature:
 -- <built-in> function open(sequence path, sequence mode)
 --
@@ -706,7 +702,7 @@ end type
 -- end if
 -- </eucode>
 
---**
+--****
 -- Signature:
 -- <built-in> procedure close(atom fn)
 --
@@ -990,32 +986,33 @@ end procedure
 public function read_lines(object file)
 	object fn, ret, y
 	if sequence(file) then
-			fn = open(file, "r")
+		fn = open(file, "r")
 	else
-			fn = file
+		fn = file
 	end if
 	if fn < 0 then return -1 end if
-	
+
 	ret = {}
 	while sequence(y) entry do
 		if y[$] = '\n' then
 			y = y[1..$-1]
-ifdef UNIX then
-			if length(y) then
-				if y[$] = '\r' then
-					y = y[1..$-1]
+			ifdef UNIX then
+				if length(y) then
+					if y[$] = '\r' then
+						y = y[1..$-1]
+					end if
 				end if
-			end if
-end ifdef
+			end ifdef
 		end if
 		ret = append(ret, y)
 	entry
 		y = gets(fn)
 	end while
-	
+
 	if sequence(file) then
-			close(fn)
+		close(fn)
 	end if
+
 	return ret
 end function
 

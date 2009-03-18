@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Cross Platform Graphics
+-- == Graphics - Cross Platform
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -20,7 +20,7 @@ public include std/console.e
 -- === Routines
 --
 
---**
+--****
 -- Signature:
 -- <built-in> procedure position(integer row, integer column)
 --
@@ -77,6 +77,7 @@ public function get_position()
 end function
 
 public include std/graphcst.e
+
 --**
 -- Set the foreground text color. 
 --

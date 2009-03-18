@@ -13,21 +13,14 @@ include std/error.e
 --
 
 --****
--- === Constants
+-- === Error Status Constants
+-- These are returned from [[:get]] and [[:value]].
 
---**
--- Error status values returned from get() and value() are
---
--- * ##GET_SUCCESS## = 0,
--- * ##GET_EOF## = -1,
--- * ##GET_FAIL## = 1,
--- * ##GET_NOTHING## = -2
-
-public constant GET_SUCCESS = 0,
-				GET_EOF = -1,
-				GET_FAIL = 1,
-				GET_NOTHING = -2
-
+public constant
+	GET_SUCCESS = 0,
+	GET_EOF = -1,
+	GET_FAIL = 1,
+	GET_NOTHING = -2
 
 constant DIGITS = "0123456789",
 		 HEX_DIGITS = DIGITS & "ABCDEF",
@@ -463,6 +456,9 @@ function Get2()
 
 end function
 
+--****
+-- === Answer Types
+
 public constant
 	GET_SHORT_ANSWER = routine_id("Get"),
 	GET_LONG_ANSWER  = routine_id("Get2")
@@ -489,12 +485,6 @@ function get_value(object target, integer start_point, integer answer_type)
 	end if
 	return call_func(answer_type, {})
 end function
-
---**
--- Answer type for ##get##() and ##value##().
--- 
--- * ##GET_SHORT_ANSWER##
--- * ##GET_LONG_ANSWER##
 
 --****
 -- === Routines

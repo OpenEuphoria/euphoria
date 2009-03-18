@@ -6,8 +6,6 @@
 -- Based on EuNet project, version 1.3.2, at SourceForge.
 -- http://www.sourceforge.net/projects/eunet.
 --
--- **Page Contents**
---
 -- <<LEVELTOC depth=2>>
 
 include std/socket.e
@@ -65,6 +63,9 @@ end function
 --****
 -- === URL encoding
 --
+
+-- TODO: This is not parsing correctly with creole or eudoc
+
 -- HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
 -- # Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii
 --   value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable
@@ -351,7 +352,7 @@ end procedure
 --
 -- Returns:	
 --
---	An **ovject**:
+--	An **object**:
 --     * -1 on error
 --     * a sequence in the form, ##{field name, field value}## on success.
 

@@ -1,6 +1,6 @@
 
 --****
--- == DOS Memory Management
+-- == Memory Management - DOS
 --
 -- <<LEVELTOC depth=2>>
 --

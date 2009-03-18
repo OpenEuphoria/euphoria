@@ -18,7 +18,7 @@ include std/search.e
 include std/convert.e
 include std/serialize.e
 
---**
+--****
 -- Signature:
 -- <built-in> function sprintf(sequence format, object values)
 --

@@ -244,6 +244,8 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 	return ret
 end function
 
+integer delete_file_id = -1, dir_id = -1
+
 --**
 -- Remove a directory.
 --
@@ -266,8 +268,6 @@ end function
 --
 -- See Also:
 -- 	[[:create_directory]], [[:chdir]], [[:clear_directory]]
-
-integer delete_file_id = -1, dir_id = -1
 
 public function remove_directory(sequence dir_name, integer force=0)
 	atom pname, ret

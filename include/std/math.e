@@ -20,13 +20,11 @@
 -- </eucode>
 
 public constant
-	E         = 2.7182818284590452353602874
+	E = 2.7182818284590452353602874
+
 
 --**
--- * PI     : 3.141592653589793238 and usual multiples
--- * HALFPI : its half
--- * QUARTPI: its quarter
--- * TWOPI  : its double
+-- PI
 --
 -- Comments:
 -- Enough digits have been used to attain the maximum accuracy possible for a Euphoria atom.
@@ -38,16 +36,21 @@ public constant
 -- </eucode>
 
 public constant
-	PI        = 3.141592653589793238462643,
+	PI        = 3.141592653589793238462643
+
+public constant
+	--** Quarter of PI
 	QUARTPI   = 0.78539816339744830962,
+	--** Half of PI
 	HALFPI    = 1.57079632679489661923,
+	--** Two times PI
 	TWOPI     = 6.28318530717958647692
 
 public constant
 	LN2       = 0.69314718055994530941,
 	INVLN2    = 1 / LN2,
 	LN10      = 2.30258509299404568401,
-	INVLN10   = 1 / LN10,        -- for log10() routine
+	INVLN10   = 1 / LN10,
 	SQRT2     = 1.41421356237309504880,
 	HALFSQRT2 = 0.70710678118654752440,
 	DEGREES_TO_RADIANS  = 0.01745329251994329576,
@@ -75,19 +78,6 @@ type trig_range(object x)
 end type
 
 include std/error.e
-
---**
--- Miscellaneous constants~:
--- * LN2      : natural logarithm of 2
--- * INVLN2   : the inverse of LN2
--- * LN10     : natural logarithm of 10
--- * INVLN10  : the inverse of LN10
--- * SQRT2    : the square root of 2
--- * HALFSQRT2 : the half, and also the inverse, of SQRT2
--- * RADIANS_TO_DEGREES : 180 / PI, how many degrees a radian is worth
--- * DEGREES_TO_RADIANS : PI / 180, how many radians a degree is worth
--- * EULER_GAMMA : the Euler-Mascheroni-Soldner gamma constant: 0.57721566490153286606065121
--- * EULER_NORMAL: 1/sqrt(2*PI), or 0.3989422804014326779399461
 
 --****
 -- === Sign and comparisons
@@ -307,7 +297,7 @@ end function
 -- === Roundings and remainders
 --
 
---**
+--****
 -- Signature:
 --   <built-in> function remainder(object dividend, object divisor)
 --
@@ -404,7 +394,7 @@ public function mod(object x, object y)
 	return x - y * floor(x / y)
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function floor(object value)
 --
@@ -537,7 +527,7 @@ end function
 --****
 -- === Trigonometry
 
---**
+--****
 -- Signature:
 -- <built-in> function arctan(object tangent)
 --
@@ -565,7 +555,7 @@ end function
 -- See Also:
 --		[[:arcsin]], [[arccos]], [[:tan]], [[:flatten]]
 
---**
+--****
 -- Signature:
 -- <built-in> function tan(object angle)
 --
@@ -592,7 +582,7 @@ end function
 -- See Also:
 --		[[:sin]], [[:cos]], [[:arctan]]
 
---**
+--****
 -- Signature:
 --   <built-in> function cos(object angle)
 --
@@ -619,7 +609,7 @@ end function
 -- See Also:
 --		[[:sin]], [[tan]], [[arccos]], [[:PI]], [[:deg2rad]]
 
---**
+--****
 -- Signature:
 -- <built-in> function sin(object angle)
 --
@@ -712,6 +702,7 @@ public function arcsin(trig_range x)
 --  returns angle in radians
 	return 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
+
 --**
 -- Calculate the arctangent of a ratio.
 --
@@ -804,7 +795,8 @@ end function
 --****
 -- === Logarithms and powers.
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function log(object value)
 --
@@ -893,7 +885,7 @@ public function exp(atom x)
 	return power(E, x)
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function power(object base, object exponent)
 --
@@ -949,8 +941,8 @@ end function
 --
 -- See Also:
 --		[[:log]], [[:Operations on sequences]]
---
---**
+
+--****
 -- Signature:
 -- <built-in> function sqrt(object value)
 --
@@ -1291,7 +1283,8 @@ end function
 --****
 -- === Bitwise opreations
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function and_bits(object a, object b)
 --
@@ -1343,7 +1336,8 @@ end function
 -- See Also:
 --  [[:or_bits]], [[:xor_bits]], [[:not_bits]], [[:int_to_bits]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function xor_bits(object a, object b)
 --
@@ -1374,7 +1368,8 @@ end function
 -- 
 -- See Also: 
 --     [[:and_bits]], [[:or_bits]], [[:not_bits]], [[:int_to_bits]]
---**
+
+--****
 -- Signature:
 -- <built-in> function or_bits(object a, object b)
 --
@@ -1412,7 +1407,7 @@ end function
 -- See Also: 
 --    [[:and_bits]], [[:xor_bits]], [[:not_bits]], [[:int_to_bits]]
 
---**
+--****
 -- Signature:
 -- <built-in> function not_bits(object a)
 --
@@ -1607,7 +1602,7 @@ public procedure set_rand(integer seed)
 	machine_proc(M_SET_RAND, seed)
 end procedure
 
---**
+--****
 -- Signature:
 -- <built-in> function rand(object maximum)
 --

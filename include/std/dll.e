@@ -352,7 +352,7 @@ public function define_c_func(object lib, object routine_name,
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function c_func(integer rid, sequence args)
 --
@@ -406,7 +406,7 @@ end function
 -- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[../docs/platform.txt]]
 --        
 
---**
+--****
 -- Signature:
 -- <built-in> procedure c_proc(integer rid, sequence args)
 --

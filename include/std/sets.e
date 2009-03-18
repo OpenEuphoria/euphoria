@@ -1654,7 +1654,6 @@ end function
 --		# ##f##: the map to invert.
 --
 -- Returns:
-
 --   A **map** ##g## such that ##f(g(y)) = y## whenever ##y## is hit by ##f##. and  If f is 
 -- injective, it also holds that ##g(f(x))=x##.
 --

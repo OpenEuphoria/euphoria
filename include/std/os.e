@@ -16,7 +16,6 @@ elsedef
 	include std/dll.e
 end ifdef
 
-
 constant
 	M_SLEEP     = 64,
 	M_SET_ENV   = 74,
@@ -27,11 +26,11 @@ constant
 --
 
 public constant
-	DOS32	= 1, -- ex.exe
-	WIN32	= 2, -- exw.exe
-	LINUX	= 3, -- exu
-	FREEBSD = 3, -- exu
-	OSX		= 4  -- exu
+	DOS32	= 1,
+	WIN32	= 2,
+	LINUX	= 3,
+	FREEBSD = 3,
+	OSX		= 4
 
 public constant
 	NO_PARAMETER = 0,
@@ -47,7 +46,7 @@ enum
 	RID
 --	USECASE
 
---**
+--****
 -- These constants are returned by the [[:platform]] function.
 --
 -- * DOS32 - Host operating system is DOS
@@ -66,9 +65,9 @@ enum
 --
 
 --****
--- === Command line utilities.
+-- === Command line parsing
 
---**
+--****
 -- Signature:
 -- <built-in> procedure command_line()
 --
@@ -134,7 +133,7 @@ enum
 -- See Also:
 -- [[:getenv]], [[:cmd_parse]], [[:show_help]]
 
---**
+--****
 -- Signature:
 -- <built-in> function option_switches()
 --
@@ -602,7 +601,7 @@ public function is_win_nt()
 	end ifdef
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function getenv(sequence var_name)
 --
@@ -669,7 +668,7 @@ public function unsetenv(sequence env)
 	return machine_func(M_UNSET_ENV, {env})
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function platform()
 --
@@ -679,15 +678,15 @@ end function
 -- Returns:
 -- A small **integer**:
 -- <eucode>
---      global constant DOS32 = 1,
---                     WIN32 = 2,
---                     LINUX = 3,
---                     FREEBSD = 3,
---					   OSX   = 4
+-- global constant
+--     DOS32 = 1,
+--     WIN32 = 2,
+--     LINUX = 3,
+--     FREEBSD = 3,
+--     OSX   = 4
 -- </eucode>
 --
--- Comments: 
---
+-- Comments:
 -- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##().
 --
 -- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
@@ -720,7 +719,8 @@ end function
 --****
 -- === Interacting with the OS
 --
---**
+
+--****
 -- Signature:
 -- <built-in> procedure system(sequence command, integer mode)
 --
@@ -783,7 +783,8 @@ end function
 -- See Also:
 -- [[:system_exec]], [[:command_line]], [[:current_dir]], [[:getenv]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function system_exec(sequence command, integer mode)
 --
@@ -847,6 +848,7 @@ end function
 -- See Also:
 -- [[:system]], [[:abort]]
 --
+
 --****
 -- === Miscellaneous
 
@@ -969,7 +971,7 @@ public procedure tick_rate(atom rate)
 	machine_proc(M_TICK_RATE, rate)
 end procedure
 
---**
+--****
 -- Signature:
 -- <built-in> function include_paths(integer convert)
 --
@@ -1011,8 +1013,3 @@ end procedure
 --
 -- See Also:
 -- [[:euinc.conf]], [[:include]], [[:option_switches]]
-
-
-
-
-

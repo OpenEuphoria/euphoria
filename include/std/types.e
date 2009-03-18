@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Extended Types
+-- == Types - Extended
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -30,8 +30,8 @@ public enum
 	CS_Printable,
 	CS_Lowercase,
 	CS_Uppercase,
-	CS_Alphanumeric ,
-	CS_Alphabetic ,
+	CS_Alphanumeric,
+	CS_Alphabetic,
 	CS_ASCII,
 	CS_Control,
 	CS_Digit,

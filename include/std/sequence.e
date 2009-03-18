@@ -308,7 +308,7 @@ public function apply(sequence source, integer rid)
 	return source
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function length(sequence target)
 --
@@ -515,7 +515,7 @@ public function repeat_pattern(sequence pattern, integer count)
 	return result
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function repeat(object item, atom count)
 --
@@ -553,7 +553,7 @@ end function
 -- === Adding to sequences
 --
 
---**
+--****
 -- Signature:
 -- <built-in> function append(sequence target, object x)
 --
@@ -604,7 +604,7 @@ end function
 -- See Also:
 --     [[:prepend]], [[:&]]
 
---**
+--****
 -- Signature:
 -- <built-in> function prepend(sequence target, object x)
 --
@@ -645,7 +645,7 @@ end function
 --     [[:append]], [[:&]]
 
 
---**
+--****
 -- Signature:
 --   <built-in> function insert(sequence target, object what, integer index)
 --
@@ -682,7 +682,7 @@ end function
 -- See Also:
 --     [[:remove]], [[:splice]], [[:append]], [[:prepend]]
 
---**
+--****
 -- Signature:
 --   <built-in> function splice(sequence target, object what, integer index)
 --
@@ -882,7 +882,7 @@ end function
 -- === Extracting, removing, replacing from/into a sequence
 --
 
---**
+--****
 -- Signature:
 -- <built-in> function head(sequence source, atom size=1)
 --
@@ -916,6 +916,44 @@ end function
 --
 -- See Also:
 --     [[:tail]], [[:mid]], [[:slice]]
+
+--****
+-- Signature:
+-- <built-in> function tail(sequence source, atom n=length(source) - 1)
+--
+-- Description:
+-- Return the last items of a sequence.
+--
+-- Parameters:
+--   # ##source##: the sequence to get the tail of.
+--   # ##size##: an integer, the number of items to return. (defaults to length(source) - 1)
+--
+-- Returns:
+--		A **sequence** of length at most ##size##. If the length is less than ##size##, then ##source## was returned. Otherwise, the ##size## last elements of ##source## were returned.
+--
+-- Comments:
+--   ##source## can be any type of sequence, including nested sequences.
+--
+-- Example 1:
+-- <eucode>
+-- s2 = tail("John Doe", 3)
+-- -- s2 is "Doe"
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s2 = tail("John Doe", 50)
+-- -- s2 is "John Doe"
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- s2 = tail({1, 5.4, "John", 30}, 3)
+-- -- s2 is {5.4, "John", 30}
+-- </eucode>
+--
+-- See Also:
+--   [[:head]], [[:mid]], [[:slice]]
 
 --**
 -- Returns a slice of a sequence, given by a starting point and a length.
@@ -1104,45 +1142,7 @@ public function vslice(sequence source, atom colno, object error_control=0)
 	return ret
 end function
 
---**
--- Signature:
--- <built-in> function tail(sequence source, atom n=length(source) - 1)
---
--- Description:
--- Return the last items of a sequence.
---
--- Parameters:
---   # ##source##: the sequence to get the tail of.
---   # ##size##: an integer, the number of items to return. (defaults to length(source) - 1)
---
--- Returns:
---		A **sequence** of length at most ##size##. If the length is less than ##size##, then ##source## was returned. Otherwise, the ##size## last elements of ##source## were returned.
---
--- Comments:
---   ##source## can be any type of sequence, including nested sequences.
---
--- Example 1:
--- <eucode>
--- s2 = tail("John Doe", 3)
--- -- s2 is "Doe"
--- </eucode>
---
--- Example 2:
--- <eucode>
--- s2 = tail("John Doe", 50)
--- -- s2 is "John Doe"
--- </eucode>
---
--- Example 3:
--- <eucode>
--- s2 = tail({1, 5.4, "John", 30}, 3)
--- -- s2 is {5.4, "John", 30}
--- </eucode>
---
--- See Also:
---   [[:head]], [[:mid]], [[:slice]]
-
---**
+--****
 -- Signature:
 -- <built-in> function remove(sequence target, atom start, atom stop=start)
 --
@@ -1370,7 +1370,7 @@ public function filter(sequence source, integer rid)
 	return dest
 end function
 
---**
+--****
 -- Signature:
 -- <built-in> function replace(sequence target, object replacement, integer start, integer stop=start)
 --

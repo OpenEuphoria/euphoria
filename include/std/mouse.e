@@ -14,8 +14,14 @@
 -- * //OS X// - not implemented
 --
 
+--****
+-- === Constants
+--
+-- The following constants can be used to identify and specify mouse events.
+--
 
-public integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP, MIDDLE_DOWN, MIDDLE_UP, ANY_UP
+public integer MOVE, LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP,
+	MIDDLE_DOWN, MIDDLE_UP, ANY_UP
 
 ifdef UNIX then
 	MOVE = 0
@@ -40,22 +46,6 @@ constant M_GET_MOUSE = 14,
 		 M_MOUSE_EVENTS = 15,
 		 M_MOUSE_POINTER = 24
 
---****
--- === Constants
---
-
---**
--- Mouse Events
---
--- The following constants can be used to identify and specify mouse events. They are platform dependent.
--- * MOVE
--- * LEFT_DOWN
--- * LEFT_UP
--- * RIGHT_DOWN
--- * RIGHT_UP
--- * MIDDLE_DOWN
--- * MIDDLE_UP
-	
 --****
 -- === Routines
 
@@ -118,14 +108,15 @@ constant M_GET_MOUSE = 14,
 -- using [[:get_pixel]](). You may have to read x-1,y-1 instead.
 --
 -- Example 1:
--- a return value of: 
--- 	{2, 100, 50}
--- 	would indicate that the left button was pressed down when the
--- mouse pointer was at location x=100, y=50 on the screen.
+--   a return value of:
+-- 	 ##{2, 100, 50}##
+-- 	 would indicate that the left button was pressed down when the
+--   mouse pointer was at location x=100, y=50 on the screen.
 --
 -- Example 2:
--- To test for LEFT_DOWN, write something like the following: 
--- 	object event
+--   To test for LEFT_DOWN, write something like the following:
+--   object event
+--
 -- <eucode>
 -- while 1 do
 --     event = get_mouse()
@@ -137,8 +128,10 @@ constant M_GET_MOUSE = 14,
 --     end if
 -- end while
 -- </eucode>
+--
 -- See Also:
 --	[[:mouse_events]], [[: mouse_pointer]]
+
 public function get_mouse()
 	return machine_func(M_GET_MOUSE, 0)
 end function
@@ -147,7 +140,7 @@ end function
 -- Select the mouse events [[:get_mouse]]() is to report. 
 --
 -- Parameters:
---		# ##events##: an integer, all requested event codes or'ed together.
+--   # ##events##: an integer, all requested event codes or'ed together.
 --
 -- Comments:
 -- By default, [[:get_mouse]]() will report all events. ##mouse_events##() can be called at various stages of the
@@ -167,8 +160,9 @@ end function
 -- being pressed down or released, and the right button
 -- being pressed down. All other events will be ignored.
 --
---See Also:
+-- See Also:
 --		[[:get_mouse]], [[: mouse_pointer]]
+
 public procedure mouse_events(integer events)
 	machine_proc(M_MOUSE_EVENTS, events)
 end procedure
@@ -177,18 +171,22 @@ end procedure
 -- Turn mouse pointer on or off.
 --
 -- Parameters:
--- 		# ##show_it##: an integer, 0 to hide and 1 to show.
+--   # ##show_it##: an integer, 0 to hide and 1 to show.
 --
 -- Comments:
 -- Multiple calls to hide
--- the pointer will require multiple calls to turn it back on. The first call to either [[:get_mouse]]()
--- or [[:mouse_events]]() will also turn the pointer on (once). 
+-- the pointer will require multiple calls to turn it back on. The
+-- first call to either [[:get_mouse]]() or [[:mouse_events]]() will
+-- also turn the pointer on (once).
 --
 -- Under //Linux//, [[:mouse_pointer]]() currently has no effect
 --
--- It may be necessary to hide the mouse pointer temporarily when you update the screen. 
+-- It may be necessary to hide the mouse pointer temporarily when you
+-- update the screen.
 --
--- After a call to [[:text_rows]]() you may have to call [[:mouse_pointer]](1) to see the mouse pointer again.
+-- After a call to [[:text_rows]]() you may have to call [[:mouse_pointer]](1)
+-- to see the mouse pointer again.
+--
 -- See Also:
 --		[[:get_mouse]], [[:mouse_pointer]]
 

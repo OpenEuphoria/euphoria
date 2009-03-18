@@ -1,8 +1,8 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
 --****
 -- == Map (hash table)
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -70,7 +70,8 @@ constant value_list    = 6 -- ==> Small map values
 constant free_list     = 7 -- ==> Small map freespace
 
 constant type_is_map   = "Eu:StdMap"
---**
+
+--****
 -- Signature:
 --   <built-in> function hash(object source, atom algo)
 --
@@ -109,33 +110,17 @@ constant type_is_map   = "Eu:StdMap"
 -- </eucode>
 
 --****
--- === Constants
---**
--- Operation codes for ##put##():
--- * PUT,
--- * ADD,
--- * SUBTRACT,
--- * MULTIPLY,
--- * DIVIDE,
--- * APPEND,
--- * CONCAT
---
--- Types of Maps
--- * SMALLMAP
--- * LARGEMAP
---
--- Hashing Algorithms
--- * FLETCHER32
--- * ADLER32
--- * SHA256
--- * MD5
+-- === Hashing Algorithms
 
 public enum
-     FLETCHER32 = -4,
-     ADLER32,
-     MD5,
-     SHA256
-     
+	FLETCHER32 = -4,
+	ADLER32,
+	MD5,
+	SHA256
+
+--****
+-- === Operation codes for put
+
 public enum
 	PUT,
 	ADD,
@@ -144,6 +129,10 @@ public enum
 	DIVIDE,
 	APPEND,
 	CONCAT
+
+
+--****
+-- === Types of Maps
 
 public constant SMALLMAP = 's'
 public constant LARGEMAP = 'L'
@@ -167,7 +156,6 @@ constant init_small_map_key = -75960.358941
 --   <eucode>
 --   map SymbolTable = new() -- Create a new map to hold the symbol table.
 --   </eucode>
---with s
 
 public type map(object obj_p)
 -- Must be a valid EuMem pointer.

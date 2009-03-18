@@ -79,6 +79,7 @@ end procedure
 --**
 -- Specify a file path name in place of "ex.err" where you want
 -- any diagnostic information to be written.
+--
 -- Parameters:
 -- 		# ##file_path##: a sequence, the new error and traceback file path.
 --
@@ -93,7 +94,7 @@ public procedure crash_file(sequence file_path)
 	machine_proc(M_CRASH_FILE, file_path)
 end procedure
 
---**
+--****
 -- Signature:
 -- <built-in> procedure abort(atom error)
 --
@@ -163,7 +164,7 @@ public procedure warning_file(object file_path)
 	machine_proc(M_WARNING_FILE, file_path)
 end procedure
 
---**
+--****
 -- Signature:
 -- <built-in> procedure warning(sequence message)
 --

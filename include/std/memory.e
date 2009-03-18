@@ -2,7 +2,7 @@
 --
 
 --****
--- == Low-Level Memory Management
+-- == Memory Management - Low-Level
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -134,14 +134,15 @@ end function
 -- See Also:
 --              [[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
 public function allocate_string(sequence s)
-        atom mem
-        
-        mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
-        if mem then
-                poke(mem, s)
-                poke(mem+length(s), 0)  -- Thanks to Aku
-        end if
-        return mem
+	atom mem
+
+	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
+	if mem then
+		poke(mem, s)
+		poke(mem+length(s), 0)  -- Thanks to Aku
+	end if
+
+	return mem
 end function
 
 --**
@@ -263,7 +264,7 @@ end procedure
 --****
 -- === Reading from, Writing to, and Calling into Memory
 
---**
+--****
 -- Signature:
 -- <built-in> function peek(object addr_n_length)
 --
@@ -314,7 +315,8 @@ end procedure
 --  [[:poke]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:peek2u]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function peeks(object addr_n_length)
 --
@@ -368,7 +370,8 @@ end procedure
 --  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:peek2s]], [[peek]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function peek2s(object addr_n_length)
 --
@@ -427,7 +430,8 @@ end procedure
 --  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:peek2u]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function peek2u(object addr_n_length)
 --
@@ -482,7 +486,8 @@ end procedure
 --  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:peek4u]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function peek4s(object addr_n_length)
 --
@@ -537,7 +542,8 @@ end procedure
 -- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
 -- [[:free_low]], [[:peek2s]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> function peek4u(object addr_n_length)
 --
@@ -595,7 +601,7 @@ end procedure
 -- [[:free_low]], [[:peek2u]]
 --
 
---**
+--****
 -- Signature:
 -- <built-in> procedure peek_string(atom addr)
 --
@@ -621,7 +627,7 @@ end procedure
 -- [[:peek]], [[:peek_wstring]], [[:allocate_string]]
 
 
---**
+--****
 -- Signature:
 -- <built-in> procedure poke(atom addr, object x)
 --
@@ -668,8 +674,9 @@ end procedure
 -- See Also:
 -- [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]],
 -- [[[:mem_copy]]], [[:mem_set]]
--- 
---**
+--
+
+--****
 -- Signature:
 -- <built-in> procedure poke2(atom addr, object x)
 --
@@ -718,7 +725,8 @@ end procedure
 -- See Also:
 --     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:allocate]], [[:free]], [[:call]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> procedure poke4(atom addr, object x)
 --
@@ -770,7 +778,8 @@ end procedure
 -- See Also:
 --     [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> procedure mem_copy(atom destination, atom origin, integer len)
 --
@@ -802,7 +811,7 @@ end procedure
 -- [[:mem_set]], [[:peek]], [[:poke]], [[:allocate]], [[:free]]
 -- 
 
---**
+--****
 -- Signature:
 -- <built-in> procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
@@ -831,7 +840,8 @@ end procedure
 -- See Also:
 --   [[:peek]], [[:poke]], [[:allocate]], [[:free]], [[:mem_copy]]
 --
---**
+
+--****
 -- Signature:
 -- <built-in> procedure call(atom addr)
 --
@@ -862,6 +872,7 @@ end procedure
 
 without warning
 integer check_calls = 1
+
 --****
 -- === Safe memory access
 
@@ -907,9 +918,9 @@ integer check_calls = 1
 --   [[:unregister_block]], [[:safe.e]]
 
 public procedure register_block(atom block_addr, atom block_len)
-        -- NOP to avoid strict lint
-        block_addr = block_addr
-        block_len = block_len
+	-- NOP to avoid strict lint
+	block_addr = block_addr
+	block_len = block_len
 end procedure
 
 
@@ -937,8 +948,8 @@ end procedure
 --   [[:register_block]], [[safe.e]]
 
 public procedure unregister_block(atom block_addr)
-        -- NOP to avoid strict lint
-        block_addr =  block_addr
+	-- NOP to avoid strict lint
+	block_addr =  block_addr
 end procedure
 
 --**

@@ -5,7 +5,7 @@ include std/convert.e
 include std/machine.e
 
 --****
--- == Graphical Image Routines
+-- == Grapihcs - Image Routines
 --
 -- <<LEVELTOC depth=2>>
 --

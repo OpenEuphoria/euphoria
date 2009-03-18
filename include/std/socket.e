@@ -230,7 +230,7 @@ public constant MSG_OOB = #1,
 	NS_T_NS = 2,
 	NS_T_PTR = 12,
 	NS_T_MX = 15,
-	NS_T_AAAA = 28, -- deprecated
+	NS_T_AAAA = 28,
 	NS_T_A6 = 38,
 	NS_T_ANY = 255,
 	
@@ -274,8 +274,9 @@ public constant MSG_OOB = #1,
 constant BLOCK_SIZE = 4096
 
 ifdef !WIN32 then
-atom dll_
+	atom dll_
 end ifdef
+
 atom ipdll_, sockdll_, kerneldll_, dnsdll_,
 	wsastart_, wsacleanup_, wsawaitformultipleevents_,
 	wsacreateevent_, wsaeventselect_, wsaenumnetworkevents_, wsacloseevent_,

@@ -65,11 +65,11 @@ public constant
 	ERROR_BADOPTION      =  (-3),
 	ERROR_BADMAGIC       =  (-4),
 	ERROR_UNKNOWN_OPCODE =  (-5),
-	ERROR_UNKNOWN_NODE   =  (-5), -- /* For backward compatibility */
+	ERROR_UNKNOWN_NODE   =  (-5),
 	ERROR_NOMEMORY       =  (-6),
 	ERROR_NOSUBSTRING    =  (-7),
 	ERROR_MATCHLIMIT     =  (-8),
-	ERROR_CALLOUT        =  (-9), -- /* Never used by PCRE itself */
+	ERROR_CALLOUT        =  (-9),
 	ERROR_BADUTF8        = (-10),
 	ERROR_BADUTF8_OFFSET = (-11),
 	ERROR_PARTIAL        = (-12),
@@ -82,7 +82,7 @@ public constant
 	ERROR_DFA_WSSIZE     = (-19),
 	ERROR_DFA_RECURSE    = (-20),
 	ERROR_RECURSIONLIMIT = (-21),
-	ERROR_NULLWSLIMIT    = (-22), -- /* No longer actually used */
+	ERROR_NULLWSLIMIT    = (-22),
 	ERROR_BADNEWLINE     = (-23)
 
 --****
