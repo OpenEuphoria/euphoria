@@ -136,13 +136,12 @@ A **bound executable** file //can// handle standard input and output redirection
 myprog.exe < file.in > file.out
 }}}
 
-If you were to write a small DOS ##.bat## file ##myprog.bat## that contained
-the line "##ex myprog.ex##" you would //not// be able to redirect input and
-output in the following manner does not work in //DOS//!
+If you were to write a small DOS ##.bat## file, say ##myprog.bat##, that contained the line
+"##ex myprog.ex##" you would //not// be able to redirect input and output. The following
+will not work:
 
 {{{
 myprog.bat < file.in > file.out
 }}}
 
 You //could// however use redirection on individual lines //within// the ##.bat## file.
-
