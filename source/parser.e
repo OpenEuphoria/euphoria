@@ -2497,12 +2497,6 @@ procedure Ifdef_statement()
 					CompileErr("end of file reached while processing ifdef")
 				end if
 
-				-- TODO: Remove after giving users a bit of time to change their code
-				if option[1] = '!' then
-					option = option[2..$]
-					negate = 1
-				end if
-
 				integer this_matched = find(option, OpDefines)
 				if negate then
 					this_matched = not this_matched

@@ -629,7 +629,7 @@ end function
 public function get_curdir(integer drive_id = 0)
 
     sequence lCurDir
-	ifdef !LINUX then
+	ifdef not LINUX then
 	    sequence lOrigDir = ""
 	    sequence lDrive
 	    object void
@@ -646,7 +646,7 @@ public function get_curdir(integer drive_id = 0)
 	end ifdef
     
     lCurDir = current_dir()
-	ifdef !LINUX then
+	ifdef not LINUX then
 		if length(lOrigDir) > 0 then
 	    	void = chdir(lOrigDir[1..2])
 	    end if
@@ -974,7 +974,7 @@ public function pathinfo(sequence path)
 	if slash > 0 then
 		dir_name = path[1..slash-1]
 		
-		ifdef !UNIX then
+		ifdef not UNIX then
 			ch = eu:find(':', dir_name)
 			if ch != 0 then
 				drive_id = dir_name[1..ch-1]
@@ -1205,7 +1205,7 @@ public function absolute_path(sequence filename)
 	if filename[1] = SLASH then
 		return 1
 	end if
-	ifdef !WIN32 then
+	ifdef not WIN32 then
 		if length(filename) > 1 then
 			if filename[2] = ':' then
 				if length(filename) > 2 then
@@ -1289,7 +1289,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 		end if
     end if
 
-	ifdef !UNIX then
+	ifdef not UNIX then
 		-- Strip off any drive letter attached.
 	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
 		then
@@ -1352,7 +1352,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 		lPosA = match(lLevel, lPath)
 	end while
 	
-	ifdef !UNIX then
+	ifdef not UNIX then
 		lPath = lower(lDrive & lPath)
 	end ifdef
 	
@@ -2174,7 +2174,7 @@ function count_files(sequence orig_path, sequence dir_info, sequence inst)
 		file_counters[inst[2]][COUNT_DIRS] += 1
 	else
 		file_counters[inst[2]][COUNT_FILES] += 1
-		ifdef !UNIX then
+		ifdef not UNIX then
 			ext = fileext(lower(dir_info[D_NAME]))
 		elsedef
 			ext = fileext(dir_info[D_NAME])
