@@ -5772,7 +5772,7 @@ void Replace( replace_ptr rb ){
 			
 			assign_slice_seq = &s1;
 			
-			s1 = Copy_elements( start_pos, s2, (target == copy_to) );
+			s1 = Copy_elements( start_pos, s2, 1 );
 			*rb->target = MAKE_SEQ( s1 );
 		}
 		else if( (target == copy_to) && ( SEQ_PTR( copy_to )->ref == 1 ) ){
@@ -5801,6 +5801,7 @@ void Replace( replace_ptr rb ){
 		*/
 			if( target != copy_to ){
 				if( target != NOVALUE ){
+					puts("deref target");
 					DeRef(target);
 				}
 				if( ( SEQ_PTR( copy_to )->ref == 1 ) ){
@@ -5812,7 +5813,7 @@ void Replace( replace_ptr rb ){
 			}
 			s1 = Add_internal_space( copy_to, end_pos + 1, replace_len + start_pos - end_pos - 1);
 			assign_slice_seq = &s1;
-			s1 = Copy_elements( start_pos, s2, (target == copy_to));
+			s1 = Copy_elements( start_pos, s2, 1);
 			
 			*rb->target = MAKE_SEQ(s1);
 		}
