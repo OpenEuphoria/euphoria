@@ -742,10 +742,10 @@ end function
 -- Create a datetime value from the unix numeric format (seconds since EPOCH)
 --
 -- Parameters:
---              # ##unix##: an atom, counting seconds elapsed since EPOCH.
+--   # ##unix##: an atom, counting seconds elapsed since EPOCH.
 --
 -- Returns:
---              A **sequence**, more precisely a **datetime** representing the same moment in time.
+--   A **sequence**, more precisely a **datetime** representing the same moment in time.
 --
 -- Example 1:
 -- <eucode>
@@ -760,34 +760,12 @@ public function from_unix(atom unix)
 		return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
--- TODO: create, test, document
--- datetime parse(wstring string)
--- parse the string and returns the datetime
-public function parse(sequence sDateTime) --wstring string)
-sequence dVar, tVar
-	-- this assumes a string of format Y-M-D H:M:S
-	sDateTime = split(sDateTime," ")
-	-- now something like { "2008-10-13", "12:17:23" }
-	dVar = split( sDateTime[1], "-" )
-	tVar = split( sDateTime[2], ":" )
-	-- dVar is now { "2008", "10", "13" }
-	-- tVar is now { "12","17",23" }
-	
-	sDateTime = dVar & tVar -- now { "2008", "10", "13", "12", "17", "23" }
-	for t=1 to 6 do -- get the value of each string
-		sDateTime[t] = value( sDateTime[t] )
-		sDateTime[t] = sDateTime[t][2]
-	end for
-	
-	return sDateTime
-end function
-
 --**
 -- Format the date according to the format string
 --
 -- Parameters:
---              # ##d##: a datetime which is to be printed out
---              # ##format##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
+--   # ##d##: a datetime which is to be printed out
+--   # ##format##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
 --
 -- Comments:
 --
@@ -831,7 +809,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:to_unix]]
+--     [[:to_unix]], [[:parse]]
 
 public function format(datetime d, wstring format)
 	integer in_fmt, ch, tmp
@@ -928,29 +906,142 @@ public function format(datetime d, wstring format)
 	return res
 end function
 
+function parse_get_value(sequence val, integer s, integer e)
+	if length(val) < e then
+		return -1
+	end if
+
+	val = value(val[s..e])
+	if not val[1] = GET_SUCCESS then
+		return -1
+	end if
+
+	return val[2]
+end function
+
+--**
+-- Parse a datetime string according to the given format.
+--
+-- Parameters:
+--   # ##val## - string datetime value
+--   # ##fmt## - datetime format
+--
+-- Comments:
+--   Only a subset of the format specification is currently supported:
+--
+--   * %d  day of month (e.g, 01)
+--   * %H  hour (00..23)
+--   * %m  month (01..12)
+--   * %M  minute (00..59)
+--   * %S  second (00..60)
+--   * %Y  year
+--
+--   More format codes will be added in future versions.
+--
+-- Example 1:
+-- <eucode>
+-- datetime d = parse("05/01/2009 10:20:30", "%m/%d/%Y %H:%M:%S")
+-- </eucode>
+--
+-- See Also:
+--   [[:format]]
+--
+
+public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
+	integer fpos = 1, spos = 1, epos = 1
+	integer year=0, month=0, day=0, hour=0, minute=0, second=0
+
+	while fpos <= length(fmt) do
+		if fmt[fpos] = '%' then
+			fpos += 1
+
+			switch fmt[fpos] do
+				case 'Y':
+					epos = spos + 3
+					year = parse_get_value(val, spos, epos)
+					if year = -1 then
+						return -1
+					end if
+					spos = epos
+					break
+
+				case 'm':
+					epos = spos + 1
+					month = parse_get_value(val, spos, epos)
+					if month = -1 then
+						return -1
+					end if
+					spos = epos
+					break
+
+				case 'd':
+					epos = spos + 1
+					day = parse_get_value(val, spos, epos)
+					if day = -1 then
+						return -1
+					end if
+					spos = epos
+					break
+
+				case 'H':
+					epos = spos + 1
+					hour = parse_get_value(val, spos, epos)
+					if hour = -1 then
+						return -1
+					end if
+					spos = epos
+					break
+
+				case 'M':
+					epos = spos + 1
+					minute = parse_get_value(val, spos, epos)
+					if minute = -1 then
+						return -1
+					end if
+					spos = epos
+					break
+
+				case 'S':
+					epos = spos + 1
+					second = parse_get_value(val, spos, epos)
+					if second = -1 then
+						return -1
+					end if
+					spos = epos
+					break
+			end switch
+		end if
+
+		fpos += 1
+		spos += 1
+	end while
+
+	return new(year, month, day, hour, minute, second)
+end function
+
 --**
 -- Add a number of //intervals// to a datetime.
 --
 -- Parameters:
---              # ##dt##: the base datetime
---              # ##qty##: the number of //intervals// to add. It should be positive.
---              # ##interval##: which kind of interval to add.
+--   # ##dt##: the base datetime
+--   # ##qty##: the number of //intervals// to add. It should be positive.
+--   # ##interval##: which kind of interval to add.
 --
 -- Returns:
---              A **sequence**, more precisely a **datetime** representing the new moment in time.
+--   A **sequence**, more precisely a **datetime** representing the new moment in time.
 --
 -- Comments:
---     Please see Constants for Date/Time for a reference of valid intervals.
+--   Please see Constants for Date/Time for a reference of valid intervals.
 --
---     Do not confuse the item access constants such as YEAR, MONTH, DAY, etc... with the
---     interval constants YEARS, MONTHS, DAYS, etc...
+--   Do not confuse the item access constants such as YEAR, MONTH, DAY, etc... with the
+--   interval constants YEARS, MONTHS, DAYS, etc...
 --
---     When adding MONTHS, it is a calendar based addition. For instance, a date of
---     5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number
---     of days per each month and the average number of days per month.
+--   When adding MONTHS, it is a calendar based addition. For instance, a date of
+--   5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number
+--   of days per each month and the average number of days per month.
 --
---     When adding YEARS, leap year is taken into account. Adding 4 YEARS to a date may result
---     in a different day of month number due to leap year.
+--   When adding YEARS, leap year is taken into account. Adding 4 YEARS to a date may result
+--   in a different day of month number due to leap year.
 --
 -- Example 1:
 -- <eucode>
@@ -1007,25 +1098,26 @@ public function add(datetime dt, object qty, integer interval)
 		qty = datetimeToSeconds(qty)
 	end if
 
-		return secondsToDateTime(datetimeToSeconds(dt) + qty)
+	return secondsToDateTime(datetimeToSeconds(dt) + qty)
 end function
-
 
 --**
 -- Subtract a number of //intervals// to a base datetime.
 --
 -- Parameters:
---              # ##dt##: the base datetime
---              # ##qty##: the number of //intervals// to subtract. It should be positive.
---              # ##interval##: which kind of interval to subtract.
+--   # ##dt##: the base datetime
+--   # ##qty##: the number of //intervals// to subtract. It should be positive.
+--   # ##interval##: which kind of interval to subtract.
 --
 -- Returns:
---              A **sequence**, more precisely a **datetime** representing the new moment in time.
+--   A **sequence**, more precisely a **datetime** representing the new moment
+--   in time.
 --
 -- Comments:
---     Please see Constants for Date/Time for a reference of valid intervals.
+--   Please see Constants for Date/Time for a reference of valid intervals.
 --
---     See the function add() for more information on adding and subtracting date intervals
+--   See the function add() for more information on adding and subtracting date
+--   intervals
 --
 -- Example 1:
 -- <eucode>
@@ -1067,5 +1159,5 @@ end function
 --    [[:add]], [[:subtract]]
 
 public function diff(datetime dt1, datetime dt2)
-		return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
+	return datetimeToSeconds(dt2) - datetimeToSeconds(dt1)
 end function

@@ -267,6 +267,11 @@ for i = 0 to 11 do
 	end if
 end for
 
+test_equal("parse default", { 2009, 5, 1, 0, 1, 2 },
+	d:parse("2009-05-01 00:01:02"))
+test_equal("parse format specified", { 2009, 5, 1, 0, 1, 2 },
+	d:parse("05/01/2009 00:01:02", "%m/%d/%Y %H:%M:%S"))
+
 ifdef !DOS32 then
 	dt1 = d:now_gmt()
 	test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
