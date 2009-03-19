@@ -3475,16 +3475,19 @@ global procedure InitGlobals()
 -- initialize global variables
 	ResetTP()
 	OpTypeCheck = TRUE
+
+	OpDefines &= { "EU400", "EU40", "EU4" }
+
 	if IWINDOWS then
-		OpDefines &= {"EU400", "WIN32"}
+		OpDefines &= {"WIN32"}
 	elsif ILINUX then
-		OpDefines &= {"EU400", "UNIX", "LINUX"}
+		OpDefines &= {"UNIX", "LINUX"}
 	elsif IOSX then
-		OpDefines &= {"EU400", "UNIX", "OSX"}
+		OpDefines &= {"UNIX", "OSX"}
 	elsif IBSD then
-		OpDefines &= {"EU400", "UNIX", "FREEBSD"}
+		OpDefines &= {"UNIX", "FREEBSD"}
 	elsif IDOS then
-		OpDefines &= {"EU400", "DOS32"}
+		OpDefines &= {"DOS32"}
 	end if
 	OpInline = DEFAULT_INLINE
 	OpIndirectInclude = 1
