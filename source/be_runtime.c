@@ -1357,7 +1357,6 @@ void de_reference(s1_ptr a)
 			
 			}
 			else{
-			puts("calling builtin cleanup");
 				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
 				EFree(a->cleanup);
 				a->cleanup = 0;
@@ -5801,7 +5800,6 @@ void Replace( replace_ptr rb ){
 		*/
 			if( target != copy_to ){
 				if( target != NOVALUE ){
-					puts("deref target");
 					DeRef(target);
 				}
 				if( ( SEQ_PTR( copy_to )->ref == 1 ) ){
