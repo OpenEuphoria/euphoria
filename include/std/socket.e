@@ -2535,8 +2535,3 @@ public function getaddrinfo(object node, object service, object hints)
 	
 	return -999
 end function
-
-public function get_addrinfo(object node, object service, object hints)
-	-- Added version 1.3.1 for consistency.
-	return getaddrinfo(node,service,hints)
-end function
