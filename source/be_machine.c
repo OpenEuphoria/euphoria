@@ -5257,7 +5257,25 @@ object machine(object opcode, object x)
 				return 1;
 				break;
 
+			case M_TO_NUMBER:
+				x = (object)SEQ_PTR(x);
+				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
 
+				if (strstr(src, ".") == NULL && strlen(src) < 10) {
+					long int bignum = atol(src);
+					EFree(src);
+
+					if ((unsigned) bignum <= (unsigned) MAXINT)
+						return bignum;
+					return NewDouble((double)bignum);
+				} else {
+					d = strtod(src, src+strlen(src));
+
+					EFree(src);
+					return NewDouble(d);
+				}
+				break;
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

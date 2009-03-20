@@ -426,8 +426,9 @@ struct char_cell {
 #define M_PCRE_FREE          77
 #define M_PCRE_EXEC          78
 #define M_REGEX_OK           79
+#define M_TO_NUMBER          80
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
 	CLEAN_REGEX
-	};
+};
