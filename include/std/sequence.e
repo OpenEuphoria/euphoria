@@ -1495,7 +1495,7 @@ end function
 --
 -- Parameters:
 --   # ##source##: the sequence to split.
---   # ##delim##: an object, the delimiter(s) to split by.
+--   # ##delim##: an object, the delimiter(s) to split by. The default is " " (a space)
 --   # ##limit##: an integer, the maximum number of items to split. Default is 0 (no limit)
 --
 -- Returns:
