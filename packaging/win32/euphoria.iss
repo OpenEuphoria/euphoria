@@ -45,33 +45,32 @@ Name: update_env; Description: "&Update environment"; Flags: unchecked
 ;Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 ;Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
-[Dirs]
-Name: "{app}\backup"; Flags: deleteafterinstall
-
 [Files]
 ; Save all Euphoria subdirectories to backup subdirectory (can't use recursesubdirs here)
 ; bin
-Source: "{app}\bin\*.*"; DestDir: "{app}\backup\bin"; Flags: confirmoverwrite external skipifsourcedoesntexist
+Source: "{app}\bin\*.*"; DestDir: "{code:GetBackupPath}\bin"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 ; include
-Source: "{app}\include\*.*"; DestDir: "{app}\backup\include"; Flags: confirmoverwrite external skipifsourcedoesntexist
-Source: "{app}\include\std\*.*"; DestDir: "{app}\backup\include\std"; Flags: confirmoverwrite external skipifsourcedoesntexist
-Source: "{app}\include\euphoria\*.*"; DestDir: "{app}\backup\include\euphoria"; Flags: confirmoverwrite external skipifsourcedoesntexist
+Source: "{app}\include\*.*"; DestDir: "{code:GetBackupPath}\include"; Flags: confirmoverwrite external skipifsourcedoesntexist
+Source: "{app}\include\std\*.*"; DestDir: "{code:GetBackupPath}\include\std"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
+Source: "{app}\include\euphoria\*.*"; DestDir: "{code:GetBackupPath}\include\euphoria"; Flags: confirmoverwrite external skipifsourcedoesntexist
 ; doc
-Source: "{app}\doc\*.*"; DestDir: "{app}\backup\doc"; Flags: confirmoverwrite external skipifsourcedoesntexist
-Source: "{app}\docs\*.*"; DestDir: "{app}\backup\docs"; Flags: confirmoverwrite external skipifsourcedoesntexist
+Source: "{app}\doc\*.*"; DestDir: "{code:GetBackupPath}\doc"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
+Source: "{app}\docs\*.*"; DestDir: "{code:GetBackupPath}\docs"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 ; htm
-Source: "{app}\html\*.*"; DestDir: "{app}\backup\html"; Flags: confirmoverwrite external skipifsourcedoesntexist
+Source: "{app}\html\*.*"; DestDir: "{code:GetBackupPath}\html"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 ; tutorial
-Source: "{app}\tutorial\*.*"; DestDir: "{app}\backup\tutorial"; Flags: confirmoverwrite external skipifsourcedoesntexist
+Source: "{app}\tutorial\*.*"; DestDir: "{code:GetBackupPath}\tutorial"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
+; tests
+Source: "{app}\tests\*.*"; DestDir: "{code:GetBackupPath}\tests"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 ; demo
-Source: "{app}\demo\*.*"; DestDir: "{app}\backup\demo"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
+Source: "{app}\demo\*.*"; DestDir: "{code:GetBackupPath}\demo"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 ; source
-Source: "{app}\source\*.*"; DestDir: "{app}\backup\source"; Flags: external recursesubdirs skipifsourcedoesntexist;
+Source: "{app}\source\*.*"; DestDir: "{code:GetBackupPath}\source"; Flags: external recursesubdirs skipifsourcedoesntexist;
 ; top level
-Source: "{app}\readme.doc"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
-Source: "{app}\readme.htm"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
-Source: "{app}\license.txt"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
-Source: "{app}\file_id.diz"; DestDir: "{app}\backup"; Flags: external skipifsourcedoesntexist;
+Source: "{app}\readme.doc"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
+Source: "{app}\readme.htm"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
+Source: "{app}\license.txt"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
+Source: "{app}\file_id.diz"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
 
 ; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
 ; create the docs, and exwc.exe (see [Run] section below)
@@ -143,7 +142,7 @@ Source: "cleanbranch\bin\where.bat"; DestDir: {app}\bin\; Flags: ignoreversion; 
 Source: "cleanbranch\bin\key.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\eutest.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\make31.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\ecp.dat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+;Source: "cleanbranch\bin\ecp.dat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\buildcpdb.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Demos
@@ -229,8 +228,18 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 Filename: "{tmp}\exw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
 
 [Code]
+var
+  backupDir : String;
+
 procedure CreateEnvBatchFile();
 begin
   SaveStringToFile(ExpandConstant('{app}\setenv.bat'), #13#10 + ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
+end;
+
+function GetBackupPath(Param: String) : String;
+begin
+  if Length(backupDir) = 0 then
+    backupDir := ExpandConstant('{app}\backup.' + GetDateTimeString('yyyymmddhhnn', #0, #0));
+  Result := backupDir;
 end;
 
