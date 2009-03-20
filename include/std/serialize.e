@@ -6,7 +6,7 @@
 -- <<LEVELTOC depth=2>>
 
 include std/convert.e
-include std/memory.e
+include std/machine.e
 
 -- Serialized format of Euphoria objects
 --

@@ -32,8 +32,8 @@
 ../include/std/datetime.e
 ../include/std/dll.e
 ../include/std/eds.e
-../include/std/machine.e
 ../include/std/error.e
+../include/std/eumem.e
 ../include/std/filesys.e
 ../include/std/graphics.e
 ../include/std/graphcst.e
@@ -44,6 +44,7 @@
 ../include/std/io.e
 ../include/std/locale.e
 ../include/std/localeconv.e
+../include/std/machine.e
 ../include/std/map.e
 ../include/std/math.e
 ../include/std/memory.e
@@ -59,6 +60,7 @@
 ../include/std/pcre.e
 ../include/std/search.e
 ../include/std/sequence.e
+../include/std/serialize.e
 ../include/std/sets.e
 ../include/std/socket.e
 ../include/std/sort.e
