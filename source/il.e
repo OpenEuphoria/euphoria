@@ -11,7 +11,7 @@ include std/machine.e
 include std/text.e
 include std/filesys.e
 include std/io.e
-
+include common.e
 include compress.e
 include backend.e
 include reswords.e
