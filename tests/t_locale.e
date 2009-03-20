@@ -1,5 +1,5 @@
 
-ifdef !DOS32 then
+ifdef not DOS32 then
 include std/localeconv.e as lcc
 include std/locale.e as l
 include std/datetime.e as d
@@ -7,7 +7,7 @@ end ifdef
 
 include std/unittest.e
 
-ifdef !DOS32 then
+ifdef not DOS32 then
 sequence locale
 
 locale = "en_US"

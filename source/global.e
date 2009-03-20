@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Global declarations
-
+public include std/types.e 
 include mode.e as mode
 public include common.e
 
@@ -18,10 +18,6 @@ global constant
 
 global constant
 	EXTRA_CHECK = mode:get_extra_check()
-
-global type boolean(integer x)
-	return x = TRUE or x = FALSE
-end type
 
 global boolean mybsd -- set to true if very little RAM available (build fails)
 mybsd = FALSE  -- default to false

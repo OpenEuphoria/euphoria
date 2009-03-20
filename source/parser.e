@@ -7,10 +7,12 @@ include emit.e
 include symtab.e
 include scanner.e
 include fwdref.e
+include common.e
 
 include std/sequence.e
 include std/text.e
 include std/search.e
+--include std/types.e 
 
 include platinit.e
 include inline.e
@@ -2479,35 +2481,76 @@ procedure Ifdef_statement()
 	while 1 label "top" do
 		if matched = 0 and in_elsedef = 0 then
 			integer negate = 0, conjunction = 0
+			integer at_start = 1
+			sequence prev_conj = ""
 
 			while 1 label "deflist" do
 				option = StringToken()
 				if equal(option, "then") then
-					exit "deflist"
+					if at_start = 1 then
+						CompileErr("ifdef is missing defined word")
+					elsif conjunction = 0 then
+						if negate = 0 then
+							exit "deflist"
+						else
+							CompileErr("ifdef 'then' follows 'not'")
+						end if
+					else
+						CompileErr("ifdef 'then' follows '" & prev_conj & "'")
+					end if
 				elsif equal(option, "not") then
-					negate = 1
-					option = StringToken()
+					if negate = 0 then
+						negate = 1
+						continue "deflist"
+					else
+						CompileErr("ifdef duplicate 'not'")
+					end if
 				elsif equal(option, "and") then
-					conjunction = 1
-					continue "deflist"
+					if at_start = 1 then
+						CompileErr("ifdef is missing defined word")
+					elsif conjunction = 0 then
+						conjunction = 1
+						prev_conj = option
+						continue "deflist"
+					else
+						CompileErr("ifdef 'and' follows '" & prev_conj & "'")
+					end if
 				elsif equal(option, "or") then
-					conjunction = 2
-					continue "deflist"
+					if at_start = 1 then
+						CompileErr("ifdef is missing defined word")
+					elsif conjunction = 0 then
+						conjunction = 2
+						prev_conj = option
+						continue "deflist"
+					else
+						CompileErr("ifdef 'or' follows '" & prev_conj & "'")
+					end if
 				elsif length(option) = 0 then
 					CompileErr("end of file reached while processing ifdef")
+				elsif not at_start and length(prev_conj) = 0 then
+					CompileErr("ifdef not understood")
+				elsif t_identifier(option) = 0 then
+					CompileErr("ifdef word must be an identifier")
+				else
+					at_start = 0
 				end if
 
 				integer this_matched = find(option, OpDefines)
 				if negate then
 					this_matched = not this_matched
+					negate = 0
 				end if
 
 				if conjunction = 0 then
 					matched = this_matched
-				elsif conjunction = 1 then
-					matched = matched and this_matched
-				elsif conjunction = 2 then
-					matched = matched or this_matched
+				else
+					if conjunction = 1 then
+						matched = matched and this_matched
+					elsif conjunction = 2 then
+						matched = matched or this_matched
+					end if
+					conjunction = 0
+					prev_conj = ""
 				end if
 			end while
 
@@ -3633,6 +3676,9 @@ procedure SetWith(integer on_off)
 		end if
 	elsif equal(option, "define") then
 		option = StringToken()
+		if not t_identifier(option) then
+			CompileErr("defined word must only have alphanumerics and underscore")
+		end if
 		if on_off = 0 then
 			idx = find(option, OpDefines)
 			if idx then

@@ -5,14 +5,14 @@ ifdef hello then
     test_fail("not defined #1")
 end ifdef
 
-with define hello?
-ifdef hello? then
+with define hello_
+ifdef hello_ then
     test_pass("defined #1")
 elsedef
     test_fail("defined #1")
 end ifdef
 
-without define hello?
+without define hello_
 ifdef hello then
     test_fail("undefine #1")
 end ifdef

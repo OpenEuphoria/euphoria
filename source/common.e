@@ -5,7 +5,7 @@
 
 include std/os.e
 
-global constant TRUE = 1, FALSE = 0
+public include std/types.e
 
 -- operating system:
 global constant EUNIX = (platform() = LINUX or platform() = FREEBSD or platform() = OSX),

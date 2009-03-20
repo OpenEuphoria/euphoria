@@ -85,4 +85,37 @@ ifdef ABC then
 	end ifdef
 end ifdef
 
+-- ifdef then
+-- end ifdef
+-- 
+-- ifdef ABC DEF then
+-- end ifdef
+-- 
+-- ifdef ABC and and DEF then
+-- end ifdef
+-- 
+-- ifdef ABC or and DEF then
+-- end ifdef
+-- 
+-- ifdef ABC and or DEF then
+-- end ifdef
+-- 
+-- ifdef ABC and then
+-- end ifdef
+-- 
+-- ifdef ABC or then
+-- end ifdef
+-- 
+-- ifdef and then
+-- end ifdef
+-- 
+-- ifdef or then
+-- end ifdef
+-- 
+-- ifdef ABC and DEF GHI then
+-- end ifdef
+-- 
+-- ifdef !ABC then
+-- end ifdef
+-- 
 test_report()

@@ -31,6 +31,7 @@ public enum
 	CS_Lowercase,
 	CS_Uppercase,
 	CS_Alphanumeric,
+	CS_Identifier,
 	CS_Alphabetic,
 	CS_ASCII,
 	CS_Control,
@@ -125,6 +126,7 @@ public procedure set_default_charsets()
 	Defined_Sets = repeat(0, CS_LAST - CS_FIRST - 1)
 	Defined_Sets[CS_Alphabetic	] = {{'a', 'z'}, {'A', 'Z'}}
 	Defined_Sets[CS_Alphanumeric] = {{'0', '9'}, {'a', 'z'}, {'A', 'Z'}}
+	Defined_Sets[CS_Identifier]   = {{'0', '9'}, {'a', 'z'}, {'A', 'Z'}, {'_', '_'}}
 	Defined_Sets[CS_Uppercase 	] = {{'A', 'Z'}}
 	Defined_Sets[CS_Lowercase 	] = {{'a', 'z'}}
 	Defined_Sets[CS_Printable 	] = {{' ', '~'}}
@@ -186,7 +188,7 @@ end function
 --
 -- This is the same format returned by the [[:get_charsets]]() routine.
 --
--- You cnnot create new character sets using this routine.
+-- You cannot create new character sets using this routine.
 --
 -- Example 1:
 -- <eucode>
@@ -291,6 +293,34 @@ public type t_alnum(object pVal)
 end type
 
 --** 
+-- Returns TRUE if argument is an alphanumeric character or if every element of 
+-- the argument is an alphanumeric character.
+--
+-- Returns FALSE if the argument is an empty sequence, or contains sequences,
+-- or contains non-alphanumeric elements
+--
+-- Example 1:
+-- <eucode>
+-- t_identifier(-1)            -- FALSE
+-- t_identifier(0)             -- FALSE 
+-- t_identifier(1)             -- FALSE
+-- t_identifier(1.234)         -- FALSE
+-- t_identifier('A')           -- TRUE
+-- t_identifier('9')           -- TRUE
+-- t_identifier('?')           -- FALSE
+-- t_identifier("abc")         -- TRUE (every element is alphabetic or a digit)
+-- t_identifier("ab3")         -- TRUE
+-- t_identifier("ab_3")        -- TRUE (underscore is allowed)
+-- t_identifier({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- t_identifier({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- t_identifier({})            -- FALSE (empty sequence)
+-- </eucode>
+
+public type t_identifier(object pVal)
+	return char_test(pVal, Defined_Sets[CS_Identifier])
+end type
+
+--** 
 -- Returns TRUE if argument is an alphabetic character or if every element of 
 -- the argument is an alphabetic character.
 --
@@ -299,7 +329,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- t_alnum(-1)            -- FALSE
+-- t_alpha(-1)            -- FALSE
 -- t_alpha(0)             -- FALSE 
 -- t_alpha(1)             -- FALSE
 -- t_alpha(1.234)         -- FALSE
