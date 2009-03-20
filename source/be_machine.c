@@ -22,6 +22,10 @@
 #include <stdlib.h>
 
 #ifdef EUNIX
+
+#include <strings.h>
+#define stricmp strcasecmp
+
 #ifdef EBSD
 #define NAME_MAX 255
 #else

@@ -454,7 +454,7 @@ endif
 
 ifeq "$(HASCHANGEDDIRECTORY)" "1"
 translate-here : 
-	$(EXE) $(TRUNKDIR)/source/ec.ex -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) $(TRUNKDIR)/source/$(EU_TARGET)
+	$(EXE) $(INCDIR) $(TRUNKDIR)/source/ec.ex -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(INCDIR) $(TARGETPLAT) $(TRUNKDIR)/source/$(EU_TARGET)
 
 .PHONY : translate-here
 	
