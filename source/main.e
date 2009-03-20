@@ -5,9 +5,10 @@
 include std/filesys.e
 include std/io.e
 
-ifdef !EU_FULL_RELEASE then
+ifdef not EU_FULL_RELEASE then
 	include rev.e
 end ifdef
+
 include std/get.e
 include pathopen.e
 include std/error.e
@@ -58,7 +59,7 @@ function GetSourceName()
 			end if
 		end if
 
-		ifdef !EU_FULL_RELEASE then
+		ifdef not EU_FULL_RELEASE then
 			screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
 		end ifdef
 		ifdef EU_MANAGED_MEM then
