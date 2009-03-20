@@ -11,14 +11,14 @@ global procedure intoptions()
 -- set interpreter command-line options
 	integer i, option
 	sequence uparg
-	
+
 	object default_args = 0
 	-- put file first, strip out the options
-	
+
 	i = 3
 	if i > Argc then
 		default_args = GetDefaultArgs()
-		if length(default_args) > 0 then				
+		if length(default_args) > 0 then
 			Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
 			Argc += length(default_args)
 		end if
@@ -30,20 +30,21 @@ global procedure intoptions()
 			if option then
 				common_options( option, i )
 			else
+				show_usage()
 				Warning("unknown option: %s" ,cmdline_warning_flag, {Argv[i]})
 			end if
 			add_switch( Argv[i], 0 )
 			-- delete "-" option from the list of args */
 			Argv[i .. Argc-1] = Argv[i+1 .. Argc ]
 			Argc -= 1
-			
+
 		elsif atom(default_args) then
 			default_args = GetDefaultArgs()
-			if length(default_args) > 0 then				
+			if length(default_args) > 0 then
 				Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
 				Argc += length(default_args)
-			end if			
-			
+			end if
+
 		else
 			exit -- first non "-" item is assumed to be the source file
 		end if
@@ -53,6 +54,6 @@ global procedure intoptions()
 		OpWarning = strict_warning_flag
 		prev_OpWarning = OpWarning
 	end if
-	
+
 end procedure
 

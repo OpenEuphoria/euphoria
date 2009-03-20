@@ -102,7 +102,7 @@ global constant
 	                                       -- executing this routine
 	S_STACK_SPACE = 25 - get_backend()*12, -- amount of stack space needed by this routine
 	                                       -- (for private data)
-	S_DEF_ARGS = 26,                  -- {index of first defaulted arg in a routine, last 
+	S_DEF_ARGS = 26,                  -- {index of first defaulted arg in a routine, last
 										--	nondef, list of middle defaulted params}
 	                                    -- or 0 if none
 	S_INLINE = 27                          -- 0 if routine cannot be inlined, or sequence of
@@ -145,7 +145,7 @@ global constant
 	S_ARG_SEQ_LEN_NEW = 50,
 	S_RI_TARGET = 51         -- > 0 if targeted by a routine_id call or other
 	                         -- external call, e.g. call to a DLL
-	
+
 
 global constant
 	SIZEOF_ROUTINE_ENTRY = 27 + 24 * TRANSLATE,
@@ -278,8 +278,8 @@ global symtab_index file_start_sym
 global symtab_index TopLevelSub         -- s.t. index of top level procedure
 global symtab_index CurrentSub          -- s.t. index of current routine
 global integer num_routines = 0         -- sequence number for routine_id lookups
-global integer Argc                     -- (our) number of args to main
-global sequence Argv                    -- (our) arguments to main
+global integer Argc = 0                 -- (our) number of args to main
+global sequence Argv = {}               -- (our) arguments to main
 global integer test_only = 0            -- testing code, not executing
 global integer batch_job = 0            -- batch processing, do not "Press Enter" on error
 global object TempWarningName

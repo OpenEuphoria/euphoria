@@ -1,4 +1,4 @@
-include std/get.e 
+include std/get.e
 include std/filesys.e
 include std/os.e
 
@@ -44,11 +44,11 @@ function is_current( object rev )
 	if fn = -1 then
 		return 0
 	end if
-	
+
 	if atom( rev ) then
 		rev = sprintf( "%d", {rev} )
-	end if	
-	
+	end if
+
 	current = 0
 	while sequence( line ) entry do
 		ix = match( "SVN_REVISION = \"", line )
@@ -64,16 +64,17 @@ function is_current( object rev )
 	entry
 		line = gets( fn )
 	end while
-	
+
 	return current
 end function
 
 -- function attemps to retrieve svnversion program
 -- if the svnversion program is not on the system
 -- or doesn't produce any output it returns 0.  If
--- svnversion does produce some string and this 
+-- svnversion does produce some string and this
 -- string differs from what is already in rev.e, it
 -- updates the rev.e file and returns 1
+
 function rev_with_svnversion()
 	integer x
 	object line, path
@@ -87,6 +88,7 @@ function rev_with_svnversion()
 	elsedef
 		dexe = ".exe"
 	end ifdef
+
 	line = locate_file( "svnversion"&dexe, path )
 	if compare( line, "svnversion"&dexe ) = 0 then
 		return 0
@@ -107,13 +109,13 @@ function rev_with_svnversion()
 	x = open( "rev.tmp", "r" )
 	if x > -1 then
 	  line = gets(x)
-	  close(x)	  
+	  close(x)
 	  if sequence( line ) and length(line) then
 	  	n = line[1..$-1]
 		if not is_current( n ) then
 			update_rev_e( n )
-		end if		
-		x += 0 * delete_file("rev.tmp")		
+		end if
+		x += 0 * delete_file("rev.tmp")
 		return 1
 	  end if
 	  close(x)
@@ -123,7 +125,7 @@ function rev_with_svnversion()
 end function
 
 procedure unknown_rev()
-	update_rev_e( "???" )
+	update_rev_e( "(unknown revision)" )
 end procedure
 
 procedure rev_1_4()
@@ -141,7 +143,7 @@ c = command_line()
 if length(c) = 2 then
 	tryst = 1
 elsif length(c) != 3 then
-	puts(2, "Incorrect usage.\n")
+	unknown_rev()
 	abort(1)
 end if
 
@@ -154,7 +156,6 @@ else
 	h = open(c[3], "r")
 end if
 if h = -1 then
-	puts(2, "Unable to open.\n")
 	unknown_rev()
 	abort(0)
 end if
@@ -218,7 +219,7 @@ c = command_line()
 if length(c) = 2 then
 	tryst = 1
 elsif length(c) != 3 then
-	puts(2, "Incorrect usage.\n")
+	unknown_rev()
 	abort(1)
 end if
 
@@ -231,7 +232,6 @@ else
 	h = open(c[3], "r")
 end if
 if h = -1 then
-	puts(2, "Unable to open.\n")
 	unknown_rev()
 	abort(0)
 end if
@@ -268,7 +268,11 @@ if not is_current( f ) then
 end if
 end procedure
 
-if not rev_with_svnversion() then 
+
+object djpc = command_line()
+
+
+if not rev_with_svnversion() then
 	rev_1_3()
 end if
 

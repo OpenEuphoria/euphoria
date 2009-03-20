@@ -794,7 +794,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 			new_seq->base = ((object_ptr)new_seq) + 4;
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;
-			
+
 		}
 		else{
 			seq->postfill -= len;
@@ -803,7 +803,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 		seq->base[seq->length+1] = NOVALUE;
 		q = seq->base + nseq;
 		p = seq->base + seq->length;
-		
+
 		new_len = seq->length+1;
 		len = nseq+1;
 		for( i = nseq - at; i > -1; i-- ){
@@ -824,7 +824,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	}
 	p += len;
 	while (TRUE) {  // NOVALUE will be copied
-	
+
 		temp = *(++q);
 		*(++p) = temp;
 		if (!IS_ATOM_INT(temp)) {
@@ -902,21 +902,21 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 {
 	int i;
 	object_ptr op, se;
-	
+
 	if (s1->ref == 1 && *target == s1) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
-		
+
 		// First, dereference all existing elements after the new end position.
 		for (op = (s1->base+reqlen), se = s1->base + s1->length; op < se; op++)
 			DeRef(*op);
-			
+
 		// Mark the 'end-of-sequence'
 		*(s1->base+reqlen) = NOVALUE;
-		
+
 		// Update the post-fill count.
 		s1->postfill += (s1->length - reqlen + 2);
-		
+
 		// Adjust the new length.
 		s1->length = reqlen-1;
 	}
@@ -924,13 +924,13 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 		// Build a new sequence.
 		s1_ptr s2 = NewS1(reqlen-1);
 		object temp;
-		
+
 		for (i = 1; i < reqlen; i++) {
 			temp = *(s1->base+i);
 			*(s2->base+i) = temp;
 		  	Ref(temp);
 		}
-		
+
 		*(s2->base+reqlen) = NOVALUE;
 		ASSIGN_SEQ(target, s2);
 	}
@@ -941,16 +941,16 @@ void Tail(s1_ptr s1, int start, object_ptr target)
 	int i;
 	int newlen;
 	object_ptr ss, op, se;
-	
+
 	newlen = s1->length - start + 1;
 	if (s1->ref == 1 && s1 == *target) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
-		
+
 		// First, dereference all existing elements before the new start position.
 		for (ss = op = (s1->base + 1), se = s1->base + start; op < se; op++)
 			DeRef(*op);
-		// Now copy the 'tail' elements to the start of the existing sequence.	
+		// Now copy the 'tail' elements to the start of the existing sequence.
 		memmove((void *)ss,(void *)se, sizeof(object_ptr)*(newlen + 1));
 		s1->postfill += start-1;
 		s1->length = newlen;
@@ -971,12 +971,12 @@ void Tail(s1_ptr s1, int start, object_ptr target)
 }
 
 /**
- * Caller must assign assign_slice_seq to be the address of 
+ * Caller must assign assign_slice_seq to be the address of
  * the s1_ptr from which to remove elements.
  * The caller must also check to see if the ultimate target
  * (i.e., where this will ultimately be assigned) is the
  * same as the sequence from which elements are being
- * removed, as well as if the reference count on the 
+ * removed, as well as if the reference count on the
  * target is 1:
  *
  *    in_place = (*obj_ptr) == target && SEQ_PTR(target)->ref == 1
@@ -987,24 +987,24 @@ object Remove_elements(int start, int stop, int in_place )
 {
 	int n = stop-start+1;
 	s1_ptr s1 = *assign_slice_seq;
-	
+
 	if (in_place) {
 		int i;
 		object_ptr p = s1->base + start;
 		object_ptr q = s1->base + stop + 1;
-		
+
 		for (i=start;i<=stop;i++)
 			DeRef( s1->base[i] );
-		
+
 		for( ; i <= s1->length+1; i++ ){
 			*(p++) = *(q++);
 		}
-		
+
 		s1->postfill += n;
 		s1->length -= n;
 		return MAKE_SEQ( s1 );
 	}
-	else {  
+	else {
 		s1_ptr s2 = NewS1(s1->length-n);
 		int i;
 		object temp, *src = s1->base, *trg = s2->base;
@@ -1329,8 +1329,8 @@ void de_reference(s1_ptr a)
 {
 	object_ptr p;
 	object t;
-	
-	
+
+
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
@@ -1354,7 +1354,7 @@ void de_reference(s1_ptr a)
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
 			if( a->cleanup->type == CLEAN_UDT ){
-			
+
 			}
 			else{
 				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
@@ -1454,7 +1454,7 @@ void de_reference_i(s1_ptr a)
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
 			if( a->cleanup->type == CLEAN_UDT ){
-			
+
 			}
 			else{
 				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
@@ -2470,7 +2470,7 @@ unsigned int calc_adler32(object a)
 				}
 			}
 			else {
-				lC = calc_adler32(av);			
+				lC = calc_adler32(av);
 				lA += lC & 0x0000FFFF; if (lA >= 65521) lA %= 65521;
 				lB += (lC >> 16) & 0x0000FFFF; if (lB >= 65521) lB %= 65521;
 			}
@@ -2675,7 +2675,7 @@ object calc_hash(object a, object b)
 		seeder.ieee_char[tfi] += (tfi + 1) << 8;
 		lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 	}
-	
+
 	if (IS_ATOM_INT(a)) {
 		tf.ieee_uint.a = a;
 		tf.ieee_uint.b = rol(a, 15);
@@ -2706,7 +2706,7 @@ object calc_hash(object a, object b)
 			if (av == NOVALUE) {
 				break;  // we hit the end marker
 			}
-	
+
 			for(tfi = 0; tfi < 8; tfi++)
 			{
 				lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
@@ -2720,14 +2720,14 @@ object calc_hash(object a, object b)
 				prev.ieee_double = (DBL_PTR(lv)->dbl);
 			}
 			else {
-				lv = (unsigned int)(SEQ_PTR(lv)->length);				
+				lv = (unsigned int)(SEQ_PTR(lv)->length);
 				prev.ieee_uint.a = lv;
 				prev.ieee_uint.b = rol(lv, 15);
 			}
-			
+
 			if (IS_ATOM_INT(av)) {
 				tf.ieee_uint.a = av;
-				tf.ieee_uint.b = rol(av, 15);				
+				tf.ieee_uint.b = rol(av, 15);
 			}
 			else if (IS_ATOM_DBL(av)) {
 				tf.ieee_double = (DBL_PTR(av)->dbl);
@@ -2738,14 +2738,14 @@ object calc_hash(object a, object b)
 				if (IS_ATOM_INT(lTemp))
 				{
 					tf.ieee_uint.a = lTemp;
-					tf.ieee_uint.b = rol(lTemp, 15);				
+					tf.ieee_uint.b = rol(lTemp, 15);
 				}
 				else //	if (IS_ATOM_DBL(lTemp))
 				{
 					tf.ieee_double = (DBL_PTR(lTemp)->dbl);
 				}
 				DeRef(lTemp);
-			}	
+			}
 
 			tf.ieee_uint.a += prev.ieee_uint.b;
 			tf.ieee_uint.b += prev.ieee_uint.a;
@@ -2896,8 +2896,8 @@ long find(object a, s1_ptr b)
 			}
 		}
 	}
-	else { // IS_SEQUENCE(a) 
-	
+	else { // IS_SEQUENCE(a)
+
 		long a_len;
 
 		length = b->length;
@@ -2907,7 +2907,7 @@ long find(object a, s1_ptr b)
 			if (bv == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			
+
 			if (IS_SEQUENCE(bv)) {
 				if (a_len == SEQ_PTR(bv)->length) {
 					/* a is SEQUENCE => not INT-INT case */
@@ -2917,7 +2917,7 @@ long find(object a, s1_ptr b)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -3044,14 +3044,14 @@ void RHS_Slice( object a, object start, object end)
 	olda = SEQ_PTR(a);
 	if( startval < 0 ) startval += olda->length;
 	if( endval < 0 )   endval   += olda->length;
-	
+
 	length = endval - startval + 1;
-	
+
 #ifndef ERUNTIME
 	CheckSlice(a, startval, endval, length);
 #endif
 
-	
+
 	if (*rhs_slice_target == a &&
 		olda->ref == 1 &&
 		(olda->base + olda->length - (object_ptr)olda) < 8 * (length+1)) {
@@ -4405,10 +4405,10 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			simple_name++;
 
 		i = 0;
-		
+
 		while (rt00[i].seq_num <= seq_num) {
 			if( (( rt00[i].scope == S_PUBLIC
-					&& ( (rt00[i].file_num == ns_file && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE ) || 
+					&& ( (rt00[i].file_num == ns_file && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE ) ||
 						(rt02[ns_file][rt00[i].file_num] & PUBLIC_INCLUDE &&
 						 rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)))
 				||
@@ -4416,7 +4416,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 					&& rt00[i].file_num == ns_file && rt02[current_file_no][ns_file] & DIRECT_INCLUDE)
 				||
 				( rt00[i].scope == S_GLOBAL
-					&& ( (rt00[i].file_num == ns_file  && rt02[current_file_no][ns_file] ) || 
+					&& ( (rt00[i].file_num == ns_file  && rt02[current_file_no][ns_file] ) ||
 						(rt02[ns_file][rt01[i].file_num] && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)) )
 				||
 				( rt00[i].scope == S_LOCAL && ns_file == current_file_no && ns_file == rt00[i].file_num))
@@ -4452,9 +4452,9 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 
 			if (rt00[i].scope != S_LOCAL &&
 				strcmp(routine_string, rt00[i].name) == 0) {
-				
-				
-				
+
+
+
 				if(rt00[i].scope == S_GLOBAL ){
 					in_include_path = rt02[current_file_no][rt00[i].file_num] != NOT_INCLUDED;
 					if (in_include_path) {
@@ -4466,7 +4466,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 						if(!in_path_found) found = i;
 					}
 				}
-				else if( (rt00[i].scope == S_EXPORT && (rt02[current_file_no][rt00[i].file_num] & DIRECT_INCLUDE)) 
+				else if( (rt00[i].scope == S_EXPORT && (rt02[current_file_no][rt00[i].file_num] & DIRECT_INCLUDE))
 				|| (rt00[i].scope == S_PUBLIC && (rt02[current_file_no][rt00[i].file_num] & DIRECT_OR_PUBLIC_INCLUDE) ) ){
 
 					found = i;
@@ -4475,7 +4475,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 			}
 			i++;
 		}
-		
+
 		if( in_path_found != 1  && ((in_path_found + out_of_path_found) != 1) )
 			return ATOM_M1;
 		return found;
@@ -5170,15 +5170,19 @@ object Command_Line()
 	char * buff;
 	ssize_t len;
 #endif
+
 #ifndef ERUNTIME
 #ifdef BACKEND
 	if (Executing && il_file) {
 #else
 	if (Executing) {
 #endif
-		
+		long eu_args;
+
+		eu_args = SEQ_PTR(fe.switches)->length;
+
 		// user's program sees one less arg
-		result = NewS1(Argc - (*file_name_entered == 0));
+		result = NewS1(Argc - (*file_name_entered == 0) - eu_args);
 		obj_ptr = result->base;
 #ifdef EUNIX
 		// We try to get the actual path of the executable on *nix
@@ -5198,9 +5202,8 @@ object Command_Line()
 #ifdef EUNIX
 		free(buff);
 #endif
-
-		argv = Argv+2; // skip first two
-		for (i = 2; i < Argc; i++){
+		argv = Argv+2 + eu_args; // skip first two and any Eu switches
+		for (i = 2 + eu_args; i < Argc; i++){
 			*(++obj_ptr) = NewString(*argv++);
 		}
 		if (*file_name_entered) {
@@ -5593,7 +5596,7 @@ long find_from(object a, s1_ptr b, object c)
 			}
 		}
 	}
-	else { // IS_SEQUENCE(a) 
+	else { // IS_SEQUENCE(a)
 		long a_len;
 
 		length -= c - 1;
@@ -5603,7 +5606,7 @@ long find_from(object a, s1_ptr b, object c)
 			if (bv == NOVALUE) {
 				break;  // we hit the end marker
 			}
-			
+
 			if (IS_SEQUENCE(bv)) {
 				if (a_len == SEQ_PTR(bv)->length) {
 					/* a is SEQUENCE => not INT-INT case */
@@ -5695,34 +5698,34 @@ void Replace( replace_ptr rb ){
 	long start_pos, end_pos, seqlen, replace_len;
 	object copy_from, copy_to, target;
 	s1_ptr s1, s2;
-	
+
 	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (long)(DBL_PTR(*rb->start)->dbl);
 	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (long)(DBL_PTR(*rb->stop)->dbl);
-	
+
 	copy_to   = *rb->copy_to;
 	copy_from = *rb->copy_from;
-	
+
 	seqlen = SEQ_PTR( copy_to )->length;
-	
+
 	if (end_pos < 0 && start_pos <= seqlen) {  // return (replacement & target)
 		Concat( rb->target, copy_from, copy_to );
 		return;
 	}
-	
+
 	if (end_pos > seqlen)
 		end_pos = seqlen;   // Can't be after last position.
-	
+
 	if (start_pos < 1)
 		if (seqlen > 0)
 			start_pos = 1;
 		else
 			start_pos = 0;
-		
+
 	if (start_pos > seqlen) {  // return (target & replacement)
 		Concat( rb->target, copy_to, copy_from );
 		return;
 	}
-	
+
 	target = *rb->target;
 	if (start_pos < 2 ) { //replacing start or all
 		if (end_pos == seqlen) { // all
@@ -5752,7 +5755,7 @@ void Replace( replace_ptr rb ){
 			Concat( rb->target, copy_from, copy_to );
 			return;
 			}
-		
+
 	}
 	if (start_pos > end_pos) {  // just splice
 		if (IS_SEQUENCE( copy_from )) {
@@ -5762,15 +5765,15 @@ void Replace( replace_ptr rb ){
 				if( target != NOVALUE ){
 					DeRef(target);
 				}
-				
+
 				// ensures that Add_internal_space will make a copy
 				RefDS( copy_to );
-				
+
 			}
 			s1 = Add_internal_space( copy_to, start_pos, s2->length );
-			
+
 			assign_slice_seq = &s1;
-			
+
 			s1 = Copy_elements( start_pos, s2, 1 );
 			*rb->target = MAKE_SEQ( s1 );
 		}
@@ -5793,7 +5796,7 @@ void Replace( replace_ptr rb ){
 		replace_len = s2->length;
 		assign_slice_seq = &s1;
 		if (replace_len > end_pos - start_pos+1) { //replacement longer than replaced
-			
+
 		/**												a->ref != 1		a->ref==1
 			Assigning to something else	*obj_ptr != a	D(o)			D(o) R(a)
 			Assigning to same var		*obj_ptr == a	R(a)			N/A
@@ -5812,7 +5815,7 @@ void Replace( replace_ptr rb ){
 			s1 = Add_internal_space( copy_to, end_pos + 1, replace_len + start_pos - end_pos - 1);
 			assign_slice_seq = &s1;
 			s1 = Copy_elements( start_pos, s2, 1);
-			
+
 			*rb->target = MAKE_SEQ(s1);
 		}
 		else { // remove any extra elements, and then assign a regular slice
@@ -5828,7 +5831,7 @@ void Replace( replace_ptr rb ){
 			s1 = SEQ_PTR( copy_to );
 			assign_slice_seq = &s1;
 			if (replace_len < end_pos - start_pos+1) {
-				
+
 				if( copy_to == target && SEQ_PTR( target )->ref == 1 ){
 					Remove_elements( start_pos + replace_len, end_pos, 1 );
 				}
