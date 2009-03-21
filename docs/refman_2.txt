@@ -2053,14 +2053,33 @@ program operates in a very efficient manner. Since the ifdef statement works at
 parse time, runtime values cannot be checked, instead special definitions can be
 set or unset at parse time as well. Euphoria defines some common words itself:
 
-* **EU400** - Version of Euphoria
+==== Euphoria Version Definitions
+
+* **EU4** - Major Euphoria Version
+* **EU40** - Major and Minor Euphoria Version
+* **EU400** - Major, Minor and Release Euphoria Version
+
+Euphoria is release with the common version scheme of Major, Minor and Release
+version identifiers in the form of major.minor.release. When 4.0.1 is
+released, ##EU400## will no longer be defined, but ##EU401## will be defined.
+When 4.1 is release, ##EU40## will no longer be defined, but ##EU41## will
+be defined. Finally, when 5.0 is released, ##EU4## will no longer be defined,
+but ##EU5## will be defined.
+
+==== Platform Definitions
+
 * **DOS32** - Platform is DOS
 * **WIN32** - Platform is Windows
 * **LINUX** - Platform is Linux
 * **FREEBSD** - Platform is FreeBSD
 * **OSX** - Platform is Mac OS X
 * **UNIX** - Platform is any Unix (currently Linux, FreeBSD or OS X)
+
+==== Miscellaneous Definitions
+
 * **SAFE** - The interpreter is version 4.0 or later.
+
+==== Using ifdef
 
 Further, you can define your own words either in source:
 
@@ -2079,6 +2098,11 @@ This can handle many tasks such as change the behavior of your application
 when running on //Linux// vs. //Windows//, enable or disable debug style code or
 possibly work differently in demo/shareware applications vs. registered
 applications.
+
+Defined words must follow the same character set of an identifier, that is,
+it must start with a letter and contain only letters, numbers and/or an
+underscore. It is common for defined words to be in all upper case, however,
+it is not required.
 
 A few examples:
 
@@ -2105,9 +2129,6 @@ ifdef SHAREWARE then
     end if
 end ifdef
 </eucode>
-
-The tags being used may contain characters that are not legal in Euphoria identifiers, like
-accented characters. Avoid using spaces or any whitespace though.
 
 The ##ifdef## statement is very efficient in that it makes the decision only once during parse
 time and only emits the ##TRUE## portions of code to the resulting interpreter. Thus, in loops
