@@ -4793,8 +4793,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 6)
-		RTFatal("BACKEND requires a sequence of length 6");
+	if (IS_ATOM(x) || x_ptr->length != 7)
+		RTFatal("BACKEND requires a sequence of length 7");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -4802,6 +4802,7 @@ object start_backend(object x)
 	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
 	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
+	fe.argv = x_ptr->base[7];
 
 #if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable

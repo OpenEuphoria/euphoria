@@ -5160,6 +5160,35 @@ void shift_args(int argc, char *argv[])
 }
 
 object Command_Line()
+{
+#ifndef ERUNTIME
+#ifdef BACKEND
+	if (Executing && il_file) {
+#else
+	if (Executing) {
+#endif		
+		SEQ_PTR(fe.argv)->ref++;
+		return fe.argv;
+	}
+	else {
+#endif
+	int i;
+	object_ptr obj_ptr;
+	char **argv;
+	s1_ptr result;
+		argv = Argv;
+		result = NewS1((long)Argc);
+		obj_ptr = result->base;
+		for (i = 0; i < Argc; i++) {
+			*(++obj_ptr) = NewString(*argv++);
+		}
+		return MAKE_SEQ(result);
+#ifndef ERUNTIME
+	}
+#endif
+}
+
+object Old_Command_Line()
 /* return a sequence of command line strings */
 {
 	int i;

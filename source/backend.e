@@ -25,8 +25,8 @@ procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
 -- They will be replaced in the back-end.
-	atom addr, st, tc, sc, nm, ms, tlt, slt, sl, src, lit, fn, entry_addr
-	atom e_addr, l_addr, no_name, sli, include_info, include_node, include_array
+	atom addr, st, nm, ms, sl, lit, fn, entry_addr
+	atom e_addr, l_addr, no_name, include_info, include_node, include_array
 	integer string_size, short, size, repcount
 	sequence lit_string, other_strings
 	object eentry
@@ -249,7 +249,11 @@ procedure BackEnd(integer il_file)
 		
 		include_node += 4
 	end for
+
+	if Argc > 2 then
+		Argv = {Argv[1]} & Argv[3 .. Argc]
+	end if
 	
-	machine_proc(65, {st, sl, ms, lit, include_info, get_switches()})
+	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv})
 end procedure
 mode:set_backend( routine_id("BackEnd") )

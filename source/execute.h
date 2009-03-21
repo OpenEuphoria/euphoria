@@ -241,6 +241,7 @@ struct IL {
 	char *lit;
 	unsigned char **includes;
 	object switches;
+	object argv;
 };
 
 // Task Control Block - sync with euphoria\include\euphoria.h

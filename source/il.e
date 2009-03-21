@@ -224,6 +224,8 @@ function extract_options(sequence cl)
 -- process the command line for any options 
 	sequence option
 	integer op
+
+	cl &= GetDefaultArgs()
 	
 	if length(cl) < 3 then
 		usage()
@@ -351,7 +353,6 @@ procedure OutputIL()
 	integer out, be, m, c, ic, size
 	sequence out_name, last6, backend_name, source_dir
 	object eu_dir
-	
 	if length(user_out) then
 		-- user has chosen the name of the output .exe file
 		out_name = user_out
