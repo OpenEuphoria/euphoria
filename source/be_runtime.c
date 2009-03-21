@@ -5182,75 +5182,25 @@ object Command_Line()
 		for (i = 0; i < Argc; i++) {
 			*(++obj_ptr) = NewString(*argv++);
 		}
+#ifdef EUNIX
+		{
+			char * buff;
+			ssize_t len;
+			// We try to get the actual path of the executable on *nix
+			// systems using readlink()
+			buff = malloc( 2049 );
+			len = readlink( "/proc/self/exe\0", buff, 2048 );
+			if( len != -1 ){
+				buff[len] = 0;
+				result->base[1] = NewString( buff );
+			}
+			free( buff );
+		}
+#endif
 		return MAKE_SEQ(result);
 #ifndef ERUNTIME
 	}
 #endif
-}
-
-object Old_Command_Line()
-/* return a sequence of command line strings */
-{
-	int i;
-	object_ptr obj_ptr;
-	char **argv;
-	s1_ptr result;
-#ifdef EUNIX
-	char * buff;
-	ssize_t len;
-#endif
-
-#ifndef ERUNTIME
-#ifdef BACKEND
-	if (Executing && il_file) {
-#else
-	if (Executing) {
-#endif
-		long eu_args;
-
-		eu_args = SEQ_PTR(fe.switches)->length;
-
-		// user's program sees one less arg
-		result = NewS1(Argc - (*file_name_entered == 0) - eu_args);
-		obj_ptr = result->base;
-#ifdef EUNIX
-		// We try to get the actual path of the executable on *nix
-		// systems using readlink()
-		buff = malloc( 2049 );
-		len = readlink( "/proc/self/exe\0", buff, 2048 );
-		if( len != -1 ){
-			buff[len] = 0;
-			*(++obj_ptr) = NewString( buff );
-		}
-		else
-#endif
-		{
-				// not LINUX, or readlink failed, so we'll just report the actual cmd line
-				*(++obj_ptr) = NewString(*Argv);
-		}
-#ifdef EUNIX
-		free(buff);
-#endif
-		argv = Argv+2 + eu_args; // skip first two and any Eu switches
-		for (i = 2 + eu_args; i < Argc; i++){
-			*(++obj_ptr) = NewString(*argv++);
-		}
-		if (*file_name_entered) {
-			*(++obj_ptr) = NewString(file_name_entered);
-		}
-	}
-	else {
-#endif
-		argv = Argv;
-		result = NewS1((long)Argc);
-		obj_ptr = result->base;
-		for (i = 0; i < Argc; i++) {
-			*(++obj_ptr) = NewString(*argv++);
-		}
-#ifndef ERUNTIME
-	}
-#endif
-	return MAKE_SEQ(result);
 }
 
 void Cleanup(int status)
