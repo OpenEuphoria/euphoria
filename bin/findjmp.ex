@@ -28,6 +28,10 @@ close(asm)
 sequence cmdline = command_line()
 if exec_addr and jmp_addr then
 	integer fh = open(cmdline[3], "w")
+	if fh = -1 then
+		printf(2, "Cannot open \"%s\" for writing\n", {cmdline[3]})
+		abort(1)
+	end if
 	-- create .c file for jumptab address
 	printf(fh,"/* Important! The offset below is based on the object code WATCOM\n" &
 		 " * generates for be_execute.c. It is the address of the internal jump table\n" &

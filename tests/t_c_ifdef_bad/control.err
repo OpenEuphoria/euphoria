@@ -1,5 +1,5 @@
 t_c_ifdef_bad.e:5
-unknown command
+'end' command out of place
 	end if
 	     ^
 

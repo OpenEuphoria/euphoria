@@ -5,7 +5,7 @@
 include std/pretty.e
 include std/sequence.e
 include std/sort.e
-include std/filesys.e as fs
+include std/filesys.e
 include std/io.e
 include std/get.e
 include std/os.e as ut
@@ -16,10 +16,6 @@ include std/math.e
 ifdef DOS32 then
 	include std/text.e
 end ifdef
-
-procedure delete_file(sequence name)
-	object void = fs:delete_file(name)
-end procedure
 
 --integer translator_platform
 
@@ -112,40 +108,35 @@ end function
 -- are deleted and just before the functions exits the error 
 -- files are deleted.
 -- returns 0 iff no errors were raised
-function invoke( sequence cmd, sequence filename, integer err)
-	integer status
-	
-	delete_file("cw.err")
-	delete_file("ex.err")
+function invoke( integer status, sequence cmd, sequence filename, integer err, sequence stage )
+	if delete_file("cw.err") then end if
+	if delete_file("ex.err") then end if	
 	status = system_exec(cmd, 2)
 	if status = -1073741510 then
 		-- user break
 		abort(1)
 	end if
 	sleep( 0.1 )
-	
-	if status then
-		error( filename, err, "program died with status %d", {status} )
-	end if
-	
-	if file_exists( "cw.err" ) then
-		error( filename, err, "Causeway error with status %d", {status}, "cw.err" )
+	if status != 0 or file_exists( "cw.err" ) or file_exists( "ex.err" ) then
+		if file_exists( "cw.err" ) then
+			error( filename, err, "Causeway error with status %d", {status}, "cw.err" )
+		elsif file_exists( "ex.err" ) then
+			error( filename, err, "EUPHORIA error with status %d", {status}, "ex.err" )
+		elsif status then
+			error( filename, err, "program died with status %d", {status} )
+		end if
 		status = 1
-		delete_file("cw.err")
+		if delete_file("cw.err") then end if
+		if delete_file("ex.err") then end if			
+	else
+		status = 0
 	end if
-	
-	if file_exists( "ex.err" ) then
-		error( filename, err, "EUPHORIA error with status %d", {status}, "ex.err" )
-		status = 1
-		delete_file("ex.err")
-	end if
-	
 	return status
 end function
 
 -- returns the location in the log file if there has been
 -- writing to the log or or a string indicating which error 
-function check_log(integer log_where )
+function check_log( sequence filename, integer log_where )
 	integer log_fd = open( "unittest.log", "a" )
 					
 	if log_fd = -1  then
@@ -163,10 +154,10 @@ procedure report_last_error( sequence filename )
 	if length( error_list ) and length( error_list[3] )  then
 		if error_list[3][$] = E_NOERROR then
 			if verbose_switch != 0 then
-				printf(1, "SUCCESS: %s %s\n", {filename, error_list[2][length(error_list[1])]})
+				printf(1, "SUCCESS: %s\n", {error_list[2][length(error_list[1])]})
 			end if
 		else
-			printf(1, "FAILURE: %s %s\n", {filename, error_list[2][length(error_list[1])]})
+			printf(1, "FAILURE: %s\n", {error_list[2][length(error_list[1])]})
 		end if
 	end if
 end procedure
@@ -175,7 +166,7 @@ procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
 	object emake_outcome, files = {}
-	sequence filename, exename, dexe, executable, cmd
+	sequence filename, dexe, executable, cmd
 	sequence interpreter_options = "", translator_options = "", test_options = ""
 	sequence translator = "", library = "", compiler = ""
 	sequence directory
@@ -310,18 +301,18 @@ procedure do_test(sequence cmds)
 	end if
 
 	sequence fail_list = {}
-	if log then
-		delete_file("unittest.dat") 
-		delete_file("unittest.log")
-		delete_file("ctc.log")
+	if log and atom(
+	 delete_file("unittest.dat") 
+	  + delete_file("unittest.log") + delete_file("ctc.log") ) then
 		ctcfh = open( "ctc.log", "w" )
 	end if
 
 	for i = 1 to length(files) do
 		filename = files[i][D_NAME]
-		exename = filename & dexe
-		delete_file( "ex.err" )
-		delete_file( "cw.err" )
+		if delete_file( "ex.err" ) then
+		end if
+		if delete_file( "cw.err" ) then
+		end if
 
 		if 1 label "interpreter" then		
 			printf(1, "interpreting %s:\n", {filename})
@@ -334,7 +325,7 @@ procedure do_test(sequence cmds)
 				expected_status = 1
 				status = system_exec( cmd, 2 )
 			else
-				status = invoke(cmd, filename, E_INTERPRET)
+				status = invoke( 0, cmd, filename, E_INTERPRET, "interpreted" )
 				expected_status = 0
 				if status then
 					failed += 1
@@ -395,7 +386,7 @@ procedure do_test(sequence cmds)
 				break "interpreter"
 			elsif status = 0 then -- expected_status = 0 therefore
 				if log then
-					object token = check_log( log_where )
+					object token = check_log( filename, log_where )
 					if sequence(token) then
 						failed += 1
 						fail_list = append(fail_list, filename )					
@@ -433,56 +424,56 @@ procedure do_test(sequence cmds)
 				if dl then
 					filename = filename[1..dl-1]
 				end if
-				delete_file(exename)
-				delete_file( "cw.err" )
+				if delete_file(filename&dexe) then end if
+				if delete_file( "cw.err" ) then end if
 				if verbose_switch > 0 then
 					printf(1, "compiling %s\n", {filename&".c"})
 				end if
 				emake_outcome = run_emake()
 				if compare(emake_outcome,0) = 0 then
 					if verbose_switch > 0 then
-						printf(1, "executing %s:\n", {exename})
+						printf(1, "executing %s:\n", {filename&dexe})
 					end if
-					cmd = sprintf("./%s %s", {exename, test_options})
-					status = invoke(cmd, exename,  E_EXECUTE) 
+					cmd = sprintf("./%s %s", {filename&dexe, test_options})
+					status = invoke( status, cmd, filename&dexe,  E_EXECUTE, "translated " ) 
 					if status then
 						failed += 1
-						fail_list = append(fail_list, "translated" & " " & exename )
+						fail_list = append(fail_list, "translated" & " " & filename&dexe )
 					else
 						object token
 						if log then
-							token = check_log( log_where )
+							token = check_log( filename, log_where )
 						else
 							token = 0
 						end if	
 						if sequence(token) then
 							failed += 1
-							fail_list = append(fail_list, "translated" & " " & exename )					
-							error( exename, E_EXECUTE, token, {}, "ex.err" )
+							fail_list = append(fail_list, "translated" & " " & filename&dexe )					
+							error( filename&dexe, E_EXECUTE, token, {}, "ex.err" )
 						else
 							log_where = token
-							error( exename, E_NOERROR, "all tests successful", {} )
+							error( filename&dexe, E_NOERROR, "all tests successful", {} )
 						end if -- sequence(token)
 				
 					end if
 					
-					delete_file(exename)
+					if delete_file(filename & dexe) then end if
 				else
 					failed += 1
 					fail_list = append(fail_list, "compiling " & filename )					
 					if sequence( emake_outcome ) then
-						error( exename, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4] )
+						error( filename& dexe, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4] )
 					else
-						error( exename, E_COMPILE, 
+						error( filename& dexe, E_COMPILE, 
 							"program could not be compiled. Compilation process exited with status %d", {emake_outcome} )
 					end if
 				end if
 			elsif expected_status = 0 then
 				failed += 1
 				fail_list = append(fail_list, "translating " & filename )
-				error( exename, E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
+				error( filename&dexe, E_TRANSLATE, "program translation terminated with a bad status %d", {status} )                               
 			end if
-			report_last_error( exename )
+			report_last_error( filename&dexe )
 
 		end if -- length( translator )
 	end for

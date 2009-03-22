@@ -288,9 +288,13 @@ LIBTARGET=$(BUILDDIR)\ecw.lib
 !endif
 
 CC = wcc386
+!ifeq OS DOS
+FE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) /i..\
+BE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
+!else
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) /I..\
-BE_FLAGS = /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
-
+BE_FLAGS = /ol /zp8 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
+!endif
 	
 library : .SYMBOLIC runtime 
     @echo ------- LIBRARY -----------
@@ -327,7 +331,12 @@ objlist : .SYMBOLIC
 $(BUILDDIR)\$(OBJDIR)\back : .EXISTSONLY $(BUILDDIR)\$(OBJDIR)
     -mkdir $(BUILDDIR)\$(OBJDIR)\back
 
-$(BUILDDIR)\$(OBJDIR).wat : $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\back\be_magic.c 
+$(BUILDDIR)\$(OBJDIR).wat : $(BUILDDIR)\$(OBJDIR)\main-.c &
+!ifndef INT_CODES
+$(BUILDDIR)\$(OBJDIR)\back\be_magic.c
+!else
+
+!endif
 	@if exist $(BUILDDIR)\objtmp rmdir /Q /S $(BUILDDIR)\objtmp
 	@mkdir $(BUILDDIR)\objtmp
 	@copy $(BUILDDIR)\$(OBJDIR)\*.c $(BUILDDIR)\objtmp
@@ -581,7 +590,8 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
-	
+
+!ifndef INT_CODES 	
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj $(TRUNKDIR)\bin\findjmp.ex
 	cd $(BUILDDIR)\$(OBJDIR)\back
 	$(EXE) $(INCDIR) $(TRUNKDIR)\bin\findjmp.ex be_magic.c
@@ -589,6 +599,24 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.o
 
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
+!endif
+
+$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj : be_execute.c *.h $(CONFIG)
+$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj : be_decompress.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_task.obj : be_task.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_main.obj : be_main.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj : be_alloc.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj : be_callc.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : be_inline.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : be_machine.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_rterror.obj : be_rterror.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj : be_syncolor.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj : be_runtime.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj : be_regex.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\regex.obj : regex.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
 
 !ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
