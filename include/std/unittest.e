@@ -452,12 +452,9 @@ public procedure test_pass(sequence name)
 end procedure
 
 sequence cmd = command_line()
-
 filename = cmd[2]
 
-if compare( filename, "C:\\Users\\shawn\\Documents\\sf\\rapideuphoria\\tests\\t_switch.exe" ) = 0 then
-	filename = "t_switch.exe"
-end if
+
 -- strip off path information
 while find( SLASH, filename ) do
 	filename = filename[find( SLASH, filename )+1..$]
