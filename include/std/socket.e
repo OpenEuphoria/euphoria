@@ -416,27 +416,6 @@ end function
 
 -------------------------------------------------------------------------------
 
-function get_string(atom lpsz)
-	
-	atom ptr, c
-	sequence s
-	s = ""
-	if lpsz = 0 then
-		return s
-	end if
-	ptr = 0
-	c = peek(lpsz+ptr)
-	while c != 0 do
-		s = s & c
-		ptr = ptr + 1
-		c = peek(lpsz+ptr)
-	end while
-	return s
-	
-end function
-
--------------------------------------------------------------------------------
-
 function get_sockaddr(atom lpsz)
 	
 	sequence s
@@ -2036,7 +2015,7 @@ function unix_dnsquery(sequence dname, integer q_type)
 			free(rtnptr)
 			return -5
 		end if
-		line[2] = get_string(dnameptr)
+		line[2] = peek_string(dnameptr)
 		ptrptr = ptrptr + qlen
 		if ptrptr+10 >= answer_end then
 			free(dnameptr)
@@ -2059,7 +2038,7 @@ function unix_dnsquery(sequence dname, integer q_type)
 		if line[3] = NS_T_NS then
 			qlen = c_func(dnsexpand_,{rtnptr,answer_end,ptrptr,dnameptr,1024})
 			if qlen > 0 then
-				subx[1] = get_string(dnameptr)
+				subx[1] = peek_string(dnameptr)
 				temp = unix_dnsquery(subx[1],NS_T_A)
 				if atom(temp) then
 					rtn = append(rtn,{subx[1],line[3],seq})
@@ -2073,7 +2052,7 @@ function unix_dnsquery(sequence dname, integer q_type)
 			subx[2] = (peek(ptrptr)*256)+peek(ptrptr+1)  -- Priority
 			qlen = c_func(dnsexpand_,{rtnptr,answer_end,ptrptr+2,dnameptr,1024})
 			if qlen > 0 then
-				subx[1] = get_string(dnameptr)
+				subx[1] = peek_string(dnameptr)
 				temp = unix_dnsquery(subx[1],NS_T_A)
 				if atom(temp) then
 					rtn = append(rtn,{subx[1],line[3],subx[2]})
@@ -2139,7 +2118,7 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 		line[6]=peek4u(recptr+16) -- TTL
 		line[7]=peek4u(recptr+20) -- reserved
 		if line[3] = NS_T_MX then
-			subx[1] = get_string(peek4u(recptr+24)) -- Mail server name
+			subx[1] = peek_string(peek4u(recptr+24)) -- Mail server name
 			subx[2] = peek(recptr+28)+(peek(recptr+29)*256) -- Preference
 			temp = windows_dnsquery(subx[1],NS_T_A,options)
 			if atom(temp) then
@@ -2150,7 +2129,7 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 				end for
 			end if
 		elsif line[3] = NS_T_NS then
-			subx[1] = get_string(peek4u(recptr+24)) -- NS server name
+			subx[1] = peek_string(peek4u(recptr+24)) -- NS server name
 			temp = windows_dnsquery(subx[1],NS_T_A,options)
 			if atom(temp) then
 				rtn = append(rtn,{subx[1],line[3],seq})
