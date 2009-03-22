@@ -92,7 +92,7 @@ end procedure
 nst(B,A)
 test_equal( "nested switch", 6, ns )
 
-constant cases = - {1, "345", 2, 3}
+constant cases = - {1, "345", 2, C}
 constant TWO = 2, NEGATIVE_3 = -3
 sequence negative_case = {}
 for i = 1 to length( cases ) do

@@ -1989,7 +1989,7 @@ end function
 -- </eucode>
 
 public function disk_metrics(object disk_path) 
-	sequence disk_metrics = {0, 0, 0, 0} 
+	sequence result = {0, 0, 0, 0} 
 	atom path_addr = 0
 	atom metric_addr = 0
 	
@@ -2008,7 +2008,7 @@ public function disk_metrics(object disk_path)
 		                               metric_addr + 8,
 		                               metric_addr + 12
 		                               }) then 
-			disk_metrics = peek4s({metric_addr, 4}) 
+			result = peek4s({metric_addr, 4}) 
 		end if 
 	 
 		if path_addr != 0 then 
@@ -2046,7 +2046,7 @@ public function disk_metrics(object disk_path)
 		free(psrc)
 		if ret then
 			-- failure
-			return disk_metrics 
+			return result 
 		end if
 
 		disk_size = disk_size(disk_path)
@@ -2054,15 +2054,15 @@ public function disk_metrics(object disk_path)
 		-- this is hardcoded for now, but may be x86 specific
 		-- on other Unix platforms that run on non x86 hardware, this
 		-- may need to be changed - there is no portable way to get this
-		disk_metrics[BYTES_PER_SECTOR] = 512
+		result[BYTES_PER_SECTOR] = 512
 
-		disk_metrics[SECTORS_PER_CLUSTER] = bytes_per_cluster / disk_metrics[BYTES_PER_SECTOR]
-		disk_metrics[TOTAL_NUMBER_OF_CLUSTERS] = disk_size[TOTAL_BYTES] / bytes_per_cluster
-		disk_metrics[NUMBER_OF_FREE_CLUSTERS] = disk_size[FREE_BYTES] / bytes_per_cluster
+		result[SECTORS_PER_CLUSTER] = bytes_per_cluster / result[BYTES_PER_SECTOR]
+		result[TOTAL_NUMBER_OF_CLUSTERS] = disk_size[TOTAL_BYTES] / bytes_per_cluster
+		result[NUMBER_OF_FREE_CLUSTERS] = disk_size[FREE_BYTES] / bytes_per_cluster
 
 	end ifdef 
 	
-	return disk_metrics 
+	return result 
 end function 
  
 --**
@@ -2084,16 +2084,16 @@ public function disk_size(object disk_path)
 	sequence disk_size = {0,0,0, disk_path}
 	
 	ifdef WIN32 then
-		sequence disk_metrics 
+		sequence result 
 		atom bytes_per_cluster
 		
 	
-		disk_metrics = disk_metrics(disk_path) 
+		result = disk_metrics(disk_path) 
 		
-		bytes_per_cluster = disk_metrics[BYTES_PER_SECTOR] * disk_metrics[SECTORS_PER_CLUSTER]
+		bytes_per_cluster = result[BYTES_PER_SECTOR] * result[SECTORS_PER_CLUSTER]
 	
-		disk_size[TOTAL_BYTES] = bytes_per_cluster * disk_metrics[TOTAL_NUMBER_OF_CLUSTERS] 
-		disk_size[FREE_BYTES]  = bytes_per_cluster * disk_metrics[NUMBER_OF_FREE_CLUSTERS] 
+		disk_size[TOTAL_BYTES] = bytes_per_cluster * result[TOTAL_NUMBER_OF_CLUSTERS] 
+		disk_size[FREE_BYTES]  = bytes_per_cluster * result[NUMBER_OF_FREE_CLUSTERS] 
 		disk_size[USED_BYTES]  = disk_size[TOTAL_BYTES] - disk_size[FREE_BYTES] 
 	elsifdef UNIX then
 		integer temph
