@@ -1,7 +1,7 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 
-include std/memory.e
+include std/machine.e
 include std/os.e
 include std/filesys.e
 include std/text.e

@@ -2,7 +2,7 @@
 --
 -- Scanner (low-level parser)
 
-include std/memory.e
+include std/machine.e
 include std/get.e
 include std/filesys.e
 include std/search.e

@@ -8,7 +8,7 @@
 include std/sort.e
 include std/wildcard.e
 include std/types.e
-include std/memory.e
+include std/machine.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,

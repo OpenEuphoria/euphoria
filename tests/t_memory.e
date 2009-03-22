@@ -1,4 +1,4 @@
-include std/memory.e
+include std/machine.e
 include std/unittest.e
 
 atom p, psave
