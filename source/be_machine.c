@@ -5228,25 +5228,7 @@ object machine(object opcode, object x)
 				EFree(src);
 				return !temp;
 				break;
-/*
-			case M_REGEX_COMPILE:
-				return regex_compile(x);
 
-            case M_REGEX_EXEC:
-				return regex_exec(x, 0);
-
-			case M_REGEX_MATCH:
-				return regex_exec(x, 1);
-
-            case M_REGEX_REPLACE:
-				return regex_replace(x);
-
-			case M_REGEX_FREE:
-				return regex_free(x);
-
-			case M_REGEX_OK:
-				return regex_ok(x);
-*/
 			case M_PCRE_COMPILE:
 				x = (object)SEQ_PTR(x);
 				return compile_pcre(*(((s1_ptr)x)->base+1),
@@ -5256,6 +5238,9 @@ object machine(object opcode, object x)
 			case M_PCRE_EXEC:
 				return exec_pcre(x);
 				break;
+
+			case M_PCRE_REPLACE:
+				return find_replace_pcre(x);
 
 			case M_PCRE_FREE:
 				free_pcre(x);

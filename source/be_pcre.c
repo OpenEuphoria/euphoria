@@ -147,3 +147,321 @@ void free_pcre( object x ){
 	pcre *re = get_re(x);
 	(*pcre_free)(re);
 }
+
+#define FLAG_UP_CASE     1
+#define FLAG_DOWN_CASE   2
+#define FLAG_UP_NEXT     4
+#define FLAG_DOWN_NEXT   8
+
+static int add(int *len, char **s, const char *a, int alen, int *flag) {
+    int NewLen = *len + alen;
+    int i;
+
+    NewLen = NewLen * 2;
+
+    if (alen == 0)
+        return 0;
+
+    if (*s) {
+        *s = (char *) realloc(*s, NewLen);
+        //assert(*s);
+        memcpy(*s + *len, a, alen);
+    } else {
+        *s = (char *) malloc(NewLen);
+        //assert(*s);
+        memcpy(*s, a, alen);
+        *len = 0;
+    }
+    if (*flag & FLAG_UP_CASE) {
+        char *p = *s + *len;
+
+        for (i = 0; i < alen; i++) {
+            *p = (char)toupper(*p);
+            p++;
+        }
+    } else if (*flag & FLAG_DOWN_CASE) {
+        char *p = *s + *len;
+
+        for (i = 0; i < alen; i++) {
+            *p = (char)tolower(*p);
+            p++;
+        }
+    }
+    if (*flag & FLAG_UP_NEXT) {
+        char *p = *s + *len;
+
+        *p = (char)toupper(*p);
+        *flag &= ~FLAG_UP_NEXT;
+    } else if (*flag & FLAG_DOWN_NEXT) {
+        char *p = *s + *len;
+
+        *p = (char)tolower(*p);
+        *flag &= ~FLAG_DOWN_NEXT;
+    }
+    *len += alen;
+    return 0;
+}
+/*
+ rep = replacement pattern
+ src = source string
+ ovector = matches from exec_pcre
+ count = match count
+ dest = destination
+ dlen = length of dest
+*/
+
+int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cnt,
+				 char **Dest, int *Dlen)
+{
+    int dlen = 0;
+    char *dest = 0;
+    char Ch;
+    int n, st, en;
+    int flag = 0;
+
+    *Dest = 0;
+    *Dlen = 0;
+    while (*rep) {
+		switch (Ch = *rep++) {
+		case '\\':
+			switch (Ch = *rep++) {
+			case '0':
+			case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+				if (Ch-48 < cnt) {
+					st = 0;
+					for (n = 0; n < Ch-48; n++) {
+						st += 2;
+					}
+
+					if (ovector[st] != -1 && ovector[st+1] != 0) {
+						add(&dlen, &dest, Src + ovector[st], ovector[st+1] - ovector[st], &flag);
+					}
+					else {
+						return -1;
+					}
+				}
+				break;
+            case 0:
+                if (dest) free(dest);
+                return -1; // error
+            case 'r':
+                Ch = '\r';
+                add(&dlen, &dest, &Ch, 1, &flag);
+                break;
+            case 'n':
+                Ch = '\n';
+                add(&dlen, &dest, &Ch, 1, &flag);
+                break;
+            case 'b':
+                Ch = '\b';
+                add(&dlen, &dest, &Ch, 1, &flag);
+                break;
+            case 'a':
+                Ch = '\a';
+                add(&dlen, &dest, &Ch, 1, &flag);
+                break;
+            case 't':
+                Ch = '\t';
+                add(&dlen, &dest, &Ch, 1, &flag);
+                break;
+            case 'U':
+                flag |= FLAG_UP_CASE;
+                break;
+            case 'u':
+                flag |= FLAG_UP_NEXT;
+                break;
+            case 'L':
+                flag |= FLAG_DOWN_CASE;
+                break;
+            case 'l':
+                flag |= FLAG_DOWN_NEXT;
+                break;
+            case 'E':
+            case 'e':
+                flag &= ~(FLAG_UP_CASE | FLAG_DOWN_CASE);
+                break;
+            case 'x': {
+                int N = 0;
+                int A = 0;
+
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 9) N = N + 48 - 65 + 10;
+                if (N > 15) return 0;
+                rep++;
+                A = N << 4;
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 9) N = N + 48 - 65 + 10;
+                if (N > 15) return 0;
+                rep++;
+                A = A + N;
+                Ch = (char)A;
+            }
+            add(&dlen, &dest, &Ch, 1, &flag);
+            break;
+            case 'd': {
+                int N = 0;
+                int A = 0;
+
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 9) {
+                    free(dest);
+                    return 0;
+                }
+                rep++;
+                A = N * 100;
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 9) {
+                    free(dest);
+                    return 0;
+                }
+                rep++;
+                A = N * 10;
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 9) {
+                    free(dest);
+                    return 0;
+                }
+                rep++;
+                A = A + N;
+                Ch = (char)A;
+            }
+            add(&dlen, &dest, &Ch, 1, &flag);
+            break;
+            case 'o': {
+                int N = 0;
+                int A = 0;
+
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 7) {
+                    free(dest);
+                    return 0;
+                }
+                rep++;
+                A = N * 64;
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 7) {
+                    free(dest);
+                    return 0;
+                }
+                rep++;
+                A = N * 8;
+                if (*rep == 0) {
+                    free(dest);
+                    return 0;
+                }
+                N = toupper(*rep) - 48;
+                if (N > 7) {
+                    free(dest);
+                    return 0;
+                }
+                rep++;
+                A = A + N;
+                Ch = (char)A;
+            }
+            add(&dlen, &dest, &Ch, 1, &flag);
+            break;
+            default:
+                add(&dlen, &dest, &Ch, 1, &flag);
+                break;
+            }
+            break;
+        default:
+            add(&dlen, &dest, &Ch, 1, &flag);
+            break;
+        }
+    }
+    *Dlen = dlen;
+    *Dest = dest;
+    return 0;
+}
+
+object find_replace_pcre(object x ){
+	int rc;
+	int ovector[30], out_len = 0;
+	pcre *re;
+	char *str, *rep, *out = 0;
+	s1_ptr s;
+	s1_ptr sub;
+	s1_ptr rep_s;
+	int i, j;
+	object pcre_ptr;
+	int options;
+	int start_from;
+
+	// x[1] = pcre ptr
+	// x[2] = string to search
+	// x[3] = replacement
+	// x[4] = options
+	// x[5] = start_from
+
+	pcre_ptr = SEQ_PTR(x)->base[1];
+	re = get_re(pcre_ptr);
+
+	sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
+	str = EMalloc(sub->length+1);
+	MakeCString( str, SEQ_PTR(x)->base[2] );
+
+	rep_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
+	rep = EMalloc(rep_s->length+1);
+	MakeCString(rep, SEQ_PTR(x)->base[3]);
+
+	options    = get_int( SEQ_PTR(x)->base[4] );
+	start_from = get_int( SEQ_PTR(x)->base[5] ) - 1;
+
+	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
+				   start_from, options, ovector, 30 );
+
+	if( rc <= 0 ) {
+		EFree(rep);
+		EFree(str);
+
+		return rc;
+	}
+
+	rc = replace_pcre(rep, str, sub->length-1, ovector, rc, &out, &out_len);
+
+	EFree(rep);
+	EFree(str);
+
+	rep = EMalloc(out_len + 1);
+	strncpy(rep, out, out_len);
+	rep[out_len] = 0;
+
+	return NewString(rep);
+}

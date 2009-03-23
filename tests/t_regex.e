@@ -32,10 +32,11 @@ re = regex:new("\\b")
 test_equal("find_all \\b", {{{1,0}},{{6,5}},{{7,6}},{{12,11}}}, regex:find_all(re, "hello world"))
 regex:free(re)
 
---re = regex:new("([A-Za-z0-9]+)\\.([A-Za-z0-9]+)")
---test_equal("replace() #1", "Filename: filename Extension: txt",
---	regex:replace(re, "filename.txt", "Filename: \\1 Extension: \\2"))
---regex:free(re)
+re = regex:new(#/([A-Za-z0-9]+)\.([A-Za-z0-9]+)/)
+test_true("replace new()", regex:regex(re))
+test_equal("replace() #1", "Filename: filename Extension: txt",
+	regex:replace(re, "filename.txt", "Filename: \\1 Extension: \\2"))
+regex:free(re)
 
 re = regex:new("[A-Z]+")
 test_true("is_match() #1", regex:is_match(re, "JOHN"))

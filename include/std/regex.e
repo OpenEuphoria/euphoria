@@ -7,22 +7,8 @@ include std/math.e
 --
 -- <<LEVELTOC depth=2>>
 --
--- === Important Alpha Note
---
--- Euphoria has two regular expression libraries in the alpha software. It is undecided as to
--- which will prevail and make it into final. Only one wil. Please be sure to look also at the
--- [[:Regular Expressions]] library.
---
--- === Introduction
---
--- Regular expressions are a way to specify text patterns when searching for text in a sequence.
--- Regular expressions consist of normal characters and special operator characters with a
--- special meaning. Operators allow you to anchor matches, match classes of characters, match
--- a given pattern one or several times, match alternate patterns and more. Operators can also
--- be grouped into sub-patterns.
---
 
-enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC
+enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE
 
 --****
 -- === Option Constants
@@ -286,8 +272,80 @@ end function
 --****
 -- === Replacement
 --
--- The pcre regular expression library does not yet have a replace method like the
--- brother [[:Regular Expressions]] library does. It will, however, have a replace method
--- if it is choosen as the library to keep. If we have problems deciding, a method
--- will be created to help the decision.
+
+--**
+-- Replaces all matches of a regex with the replacement text.
 --
+-- Parameters:
+--   # ##re##: a regex which will be used for matching
+--   # ##text##: a string on which search and replace will apply
+--   # ##replacement##: a string, used to replace each of the full matches found.
+--   # ##options##: an atom, defaulted to 0.
+--
+-- Returns:
+--   A **sequence**, the modified ##text##.
+--
+-- Comments:
+--   Matches may be found against the result of previous replacements. Careful experimentation is
+--   highly recommended before doing things like text = regex:find_replace(re,text,whatever,something).
+
+public function replace(regex re, sequence text, sequence replacement, integer from=1, atom options=0)
+	return machine_func(M_PCRE_REPLACE, { re, text, replacement, options, from })
+end function
+
+--**
+-- Performs a search nd replace operation, with the replacement being computed by a user defined routine.
+--
+-- Parameters:
+--   # ##re##: a regex which will be used for matching
+--   # ##text##: a string on which search and replace will apply
+--   # ##rid##: an integer, the id of a routine which will determine the replacement string at each step.
+--   # ##options##: an atom, defaulted to 0.
+--
+-- Returns:
+--   A **sequence**, the modified ##text##.
+--
+-- Comments:
+--   Whenever a match is found, [[:find_replace]] uses a fixed value as a replacement.
+--   Instead, ##replace_user##() will replace slices by actual substrings, and pass the resulting
+--   sequence to the function you are required to pass the id of.
+--
+--   The custom replace function must take one argument, a sequence of strings, and must return a string.
+--   This string will be used as the replacement for the given full match.
+--
+--   Apart from the above, ##replace_user##() works like [[:replace]].
+--
+--   The routine is responsible for maintaining any state it requires for proper operation.
+--
+-- ==== Special replacement operators
+-- 
+-- * **##\##** Causes the next character to lose its special meaning. 
+-- * **##\n##** Inserts a 0x0A (LF) character. 
+-- * **##\r##** Inserts a 0x0D (CR) character. 
+-- * **##\t##** Inserts a 0x09 (TAB) character. 
+-- * **##\1##** to **##\9##** Recalls stored substrings from registers (\1, \2, \3, to \9).
+-- * **##\0##** Recalls entire matched pattern. 
+-- * **##\u##** Convert next character to uppercase 
+-- * **##\l##** Convert next character to lowercase 
+-- * **##\U##** Convert to uppercase till ##\E## or ##\e## 
+-- * **##\L##** Convert to lowercase till ##\E## or ##\e##
+-- * **##\E##** or **##\e##** Terminate a ##\\U## or ##\L## conversion
+--
+-- See Also:
+--   [[:replace]]
+
+public function replace_user(regex re, sequence text, integer rid, atom options = 0)
+	sequence matches, m
+
+	matches = find_all(re, text, options)
+	for i = length(matches) to 1 by -1 do
+		m = matches[i]
+		for a = 1 to length(m)  do
+			m[a] = text[m[a][1]..m[a][2]]
+		end for
+
+		text = eu:replace(text, call_func(rid, {m}), matches[i][1][1], matches[i][1][2])
+	end for
+
+	return text
+end function

@@ -418,10 +418,11 @@ struct char_cell {
 #define M_PCRE_COMPILE       68
 #define M_PCRE_FREE          69
 #define M_PCRE_EXEC          70
-#define M_WARNING_FILE       71
-#define M_SET_ENV            72
-#define M_UNSET_ENV          73
-#define M_TO_NUMBER          74
+#define M_PCRE_REPLACE       71
+#define M_WARNING_FILE       72
+#define M_SET_ENV            73
+#define M_UNSET_ENV          74
+#define M_TO_NUMBER          75
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
