@@ -415,21 +415,15 @@ struct char_cell {
 #define M_BACKEND            65
 #define M_CRASH_ROUTINE      66
 #define M_CRASH              67
-#define M_REGEX_COMPILE      68
-#define M_REGEX_EXEC         69
-#define M_REGEX_MATCH        70
-#define M_REGEX_REPLACE      71
-#define M_REGEX_FREE         72
-#define M_WARNING_FILE       73
-#define M_SET_ENV            74
-#define M_UNSET_ENV          75
-#define M_PCRE_COMPILE       76
-#define M_PCRE_FREE          77
-#define M_PCRE_EXEC          78
-#define M_REGEX_OK           79
-#define M_TO_NUMBER          80
+#define M_PCRE_COMPILE       68
+#define M_PCRE_FREE          69
+#define M_PCRE_EXEC          70
+#define M_WARNING_FILE       71
+#define M_SET_ENV            72
+#define M_UNSET_ENV          73
+#define M_TO_NUMBER          74
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
-	CLEAN_REGEX
+	CLEAN_PCRE
 };
