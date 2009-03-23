@@ -1,5 +1,6 @@
 include std/regex.e as regex
 include std/text.e
+include std/sequence.e
 include std/unittest.e
 
 object ignore = 0
@@ -32,12 +33,6 @@ re = regex:new("\\b")
 test_equal("find_all \\b", {{{1,0}},{{6,5}},{{7,6}},{{12,11}}}, regex:find_all(re, "hello world"))
 regex:free(re)
 
-re = regex:new(#/([A-Za-z0-9]+)\.([A-Za-z0-9]+)/)
-test_true("replace new()", regex:regex(re))
-test_equal("replace() #1", "Filename: filename Extension: txt",
-	regex:replace(re, "filename.txt", "Filename: \\1 Extension: \\2"))
-regex:free(re)
-
 re = regex:new("[A-Z]+")
 test_true("is_match() #1", regex:is_match(re, "JOHN"))
 test_false("is_match() #2", regex:is_match(re, "john"))
@@ -55,6 +50,12 @@ regex:free(re)
 
 re = regex:new("$")
 test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
+regex:free(re)
+
+re = regex:new(#/([A-Za-z0-9]+)\.([A-Za-z0-9]+)/)
+test_true("find_replace new()", regex:regex(re))
+test_equal("find_replace() #1", "Filename: filename Extension: TXT",
+	regex:find_replace(re, "filename.txt", "Filename: \\1 Extension: \\U\\2\\e"))
 regex:free(re)
 
 test_report()

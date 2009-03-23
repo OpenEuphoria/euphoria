@@ -3,9 +3,24 @@
 include std/math.e
 
 --****
--- == Regular Expressions based on PCRE
+-- == Regular Expressions
 --
 -- <<LEVELTOC depth=2>>
+--
+-- === Introduction
+--
+-- Regular expressions in Euphoria are based on the Perl Compatible Regular Expressions
+-- library created by Philip Hazel. 
+--
+-- This document will detail the Euphoria interface to Regular Expressions, not really
+-- regular expression syntax. It is a very complex subject that many books have been
+-- written on. There are a few good resources online that can help while learning
+-- regular expressions:
+--
+-- * [[Perl Regular Expressions Man Page -> http://perldoc.perl.org/perlre.html]]
+-- * [[Regular Expression Library -> http://regexlib.com/]] (user supplied regular
+--   expressions for just about any task).
+-- * [[WikiPedia Regular Expression Article -> http://en.wikipedia.org/wiki/Regular_expression]]
 --
 
 enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE
@@ -45,6 +60,7 @@ public constant
 
 --****
 -- === Error Constants
+
 public constant
 	ERROR_NOMATCH        =  (-1),
 	ERROR_NULL           =  (-2),
@@ -70,6 +86,9 @@ public constant
 	ERROR_RECURSIONLIMIT = (-21),
 	ERROR_NULLWSLIMIT    = (-22),
 	ERROR_BADNEWLINE     = (-23)
+
+--****
+-- === Create/Destroy
 
 --****
 -- === Create/Destroy
@@ -288,34 +307,6 @@ end function
 -- Comments:
 --   Matches may be found against the result of previous replacements. Careful experimentation is
 --   highly recommended before doing things like text = regex:find_replace(re,text,whatever,something).
-
-public function replace(regex re, sequence text, sequence replacement, integer from=1, atom options=0)
-	return machine_func(M_PCRE_REPLACE, { re, text, replacement, options, from })
-end function
-
---**
--- Performs a search nd replace operation, with the replacement being computed by a user defined routine.
---
--- Parameters:
---   # ##re##: a regex which will be used for matching
---   # ##text##: a string on which search and replace will apply
---   # ##rid##: an integer, the id of a routine which will determine the replacement string at each step.
---   # ##options##: an atom, defaulted to 0.
---
--- Returns:
---   A **sequence**, the modified ##text##.
---
--- Comments:
---   Whenever a match is found, [[:find_replace]] uses a fixed value as a replacement.
---   Instead, ##replace_user##() will replace slices by actual substrings, and pass the resulting
---   sequence to the function you are required to pass the id of.
---
---   The custom replace function must take one argument, a sequence of strings, and must return a string.
---   This string will be used as the replacement for the given full match.
---
---   Apart from the above, ##replace_user##() works like [[:replace]].
---
---   The routine is responsible for maintaining any state it requires for proper operation.
 --
 -- ==== Special replacement operators
 -- 
@@ -331,21 +322,14 @@ end function
 -- * **##\L##** Convert to lowercase till ##\E## or ##\e##
 -- * **##\E##** or **##\e##** Terminate a ##\\U## or ##\L## conversion
 --
--- See Also:
---   [[:replace]]
+-- Example 1:
+-- <eucode>
+-- regex r = new(#/([A-Za-z]+)\.([A-Za-z]+)/)
+-- sequence details = find_replace(r, "hello.txt", #/Filename: \U\1\e Extension: \U\2\e/)
+-- -- details = "Filename: HELLO Extension: TXT"
+-- </eucode>
+--
 
-public function replace_user(regex re, sequence text, integer rid, atom options = 0)
-	sequence matches, m
-
-	matches = find_all(re, text, options)
-	for i = length(matches) to 1 by -1 do
-		m = matches[i]
-		for a = 1 to length(m)  do
-			m[a] = text[m[a][1]..m[a][2]]
-		end for
-
-		text = eu:replace(text, call_func(rid, {m}), matches[i][1][1], matches[i][1][2])
-	end for
-
-	return text
+public function find_replace(regex re, sequence text, sequence replacement, integer from=1, atom options=0)
+	return machine_func(M_PCRE_REPLACE, { re, text, replacement, options, from })
 end function
