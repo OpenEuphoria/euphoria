@@ -333,7 +333,7 @@ end function
 -- See Also:
 --		[[:set]], [[:number]]
 
-public function money(atom amount)
+public function money(object amount)
 	sequence result
 	integer size
 	atom pResult, pTmp
@@ -374,18 +374,26 @@ end function
 -- See Also:
 --		[[:set]], [[:money]]
 
-public function number(atom num)
+public function number(object num)
 	sequence result
 	integer size
 	atom pResult, pTmp
 
 	ifdef UNIX then
 		pResult = allocate(4 * 160)
-		pTmp = allocate_string("%!n")
+		if integer(num) then
+			pTmp = allocate_string("%!.0n")
+		else
+			pTmp = allocate_string("%!n")
+		end if
 		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
 	elsifdef WIN32 then
 		pResult = allocate(4 * 160)
-		pTmp = allocate_string(sprintf("%.8f", {num}))
+		if integer(num) then
+			pTmp = allocate_string(sprintf("%i", {num}))
+		else
+			pTmp = allocate_string(sprintf("%.8f", {num}))
+		end if
 		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 	-- else doesn't work under DOS
 	end ifdef

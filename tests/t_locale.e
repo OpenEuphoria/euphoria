@@ -29,11 +29,13 @@ if l:set(locale & encoding) then
 	test_equal("set/get en_US", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
 	test_equal("money", "$1,020.50", l:money(1020.50))
 	test_equal("number", "1,020.50", l:number(1020.5))
+	test_equal("integer", "1,020", l:number(1020))
 else
 	-- can not test, maybe emit a warning?
 	puts(1, "warning can not test en_US locale, testing against C locale..")
 	test_equal("money", "1020.50", l:money(1020.50))
 	test_equal("number", "1020.50", l:number(1020.5))
+	test_equal("integer", "1020", l:number(1020))
 end if
 
 d:datetime dt1
