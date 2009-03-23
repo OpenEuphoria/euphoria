@@ -1,11 +1,11 @@
-include std/pcre.e as regex
+include std/regex.e as regex
 include std/text.e
 include std/unittest.e
 
 object ignore = 0
 
 object re = regex:new("[A-Z][a-z]+")
-test_true("new()", re > 0)
+test_true("new()", regex(re))
 test_equal("exec() #1", {{5,8}}, regex:find(re, "and John ran"))
 regex:free(re)
 
@@ -45,15 +45,7 @@ test_false("has_match() #2", regex:has_match(re, "john doe had a dog"))
 regex:free(re)
 
 re = regex:new("(x)")
-test_true("regex matched groups 1", re)
-regex:free(re)
-
-re = regex:new("(x?)+y")
-test_equal("regex runaway", regex:ERROR_NOMATCH, regex:find(re, ""))
-regex:free(re)
-
-re = regex:new("(x?)+y")
-test_equal("regex fixed runaway", {{1,3},{3,2}}, regex:find(re, "xxy"))
+test_true("regex matched groups 1", regex(re))
 regex:free(re)
 
 re = regex:new("^")
@@ -62,11 +54,6 @@ regex:free(re)
 
 re = regex:new("$")
 test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
-regex:free(re)
-
-re = regex:new({123,251,129,105,117,184,89,215,105,124})
-ignore = regex:has_match(re, {251,129,105,117,184,89,215,105,124})
-test_pass("regex new/match combo that produced a seg fault 1")
 regex:free(re)
 
 test_report()

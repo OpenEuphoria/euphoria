@@ -22,7 +22,7 @@ include std/math.e
 -- be grouped into sub-patterns.
 --
 
-enum M_PCRE_COMPILE=76, M_PCRE_FREE, M_PCRE_EXEC
+enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC
 
 --****
 -- === Option Constants
@@ -92,7 +92,7 @@ public constant
 -- Regular expression type
 
 public type regex(object o)
-	return atom(o)
+	return sequence(o)
 end type
 
 --**
@@ -158,7 +158,7 @@ end function
 -- See Also:
 --   [[:new]]
 
-public procedure free(atom re)
+public procedure free(regex re)
 	machine_proc(M_PCRE_FREE, { re })
 end procedure
 
@@ -193,7 +193,7 @@ end procedure
 --   </eucode>
 --
 
-public function find(atom re, sequence haystack, integer from=1, integer options=DEFAULT)
+public function find(regex re, sequence haystack, integer from=1, integer options=DEFAULT)
 	return machine_func(M_PCRE_EXEC, { re, haystack, options, from })
 end function
 
@@ -225,7 +225,7 @@ end function
 --   </eucode>
 --
 
-public function find_all(atom re, sequence haystack, integer from=1, integer options=0)
+public function find_all(regex re, sequence haystack, integer from=1, integer options=0)
 	object result
 	
 	sequence results = {}
@@ -256,7 +256,7 @@ end function
 --   An atom. 1 if ##re## matches any portion of ##haystack## or 0 if not.
 --
 
-public function has_match(atom re, sequence haystack, integer from=1, integer options=0)
+public function has_match(regex re, sequence haystack, integer from=1, integer options=0)
 	return sequence(machine_func(M_PCRE_EXEC, { re, haystack, options, from }))
 end function
 
@@ -273,7 +273,7 @@ end function
 --   An atom. 1 if ##re## matches the entire ##haystack## or 0 if not.
 --
 
-public function is_match(atom re, sequence haystack, integer from=1, integer options=0)
+public function is_match(regex re, sequence haystack, integer from=1, integer options=0)
 	object m = machine_func(M_PCRE_EXEC, { re, haystack, options, from })
 
 	if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then

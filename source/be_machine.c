@@ -5228,7 +5228,7 @@ object machine(object opcode, object x)
 				EFree(src);
 				return !temp;
 				break;
-
+/*
 			case M_REGEX_COMPILE:
 				return regex_compile(x);
 
@@ -5246,7 +5246,7 @@ object machine(object opcode, object x)
 
 			case M_REGEX_OK:
 				return regex_ok(x);
-
+*/
 			case M_PCRE_COMPILE:
 				x = (object)SEQ_PTR(x);
 				return compile_pcre(*(((s1_ptr)x)->base+1),

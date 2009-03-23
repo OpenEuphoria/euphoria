@@ -138,8 +138,6 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\regex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
 	$(PCRE_OBJECTS)
 #       &
@@ -154,8 +152,6 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\regex.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
 	$(PCRE_OBJECTS)
 
@@ -614,8 +610,6 @@ $(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj : be_syncolor.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj : be_runtime.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
-$(BUILDDIR)\$(OBJDIR)\back\be_regex.obj : be_regex.c *.h $(CONFIG) 
-$(BUILDDIR)\$(OBJDIR)\back\regex.obj : regex.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
 
 !ifdef PCRE_OBJECTS	
@@ -624,4 +618,3 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	wmake -h -f makefile.wat 
 	cd ..
 !endif
-
