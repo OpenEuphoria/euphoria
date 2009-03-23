@@ -175,6 +175,14 @@ ifdef WIN32 then
 	LC_NUMERIC  = 4
 	LC_TIME     = 5
 	LC_MESSAGES = 6
+	
+	constant FORMAT_SIZE = 6 * 4
+	constant NUM_DIGITS = 0
+	constant LEADING_ZERO = 4
+	constant GROUPING = 8
+	constant DECIMAL_SEP = 12
+	constant THOUSANDS_SEP = 16
+	constant NEGATIVE_ORDER = 20
 
 elsifdef LINUX then
 
@@ -373,7 +381,7 @@ end function
 --
 -- See Also:
 --		[[:set]], [[:money]]
-
+with trace
 public function number(object num)
 	sequence result
 	integer size
@@ -388,13 +396,18 @@ public function number(object num)
 		end if
 		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
 	elsifdef WIN32 then
+		atom lpFormat
 		pResult = allocate(4 * 160)
 		if integer(num) then
-			pTmp = allocate_string(sprintf("%i", {num}))
+			pTmp = allocate_string(sprintf("%d", {num}))
+			-- lpFormat must not only be allocated but completely populated
+			-- with values from the current locale.
+			lpFormat = NULL
 		else
+			lpFormat = NULL
 			pTmp = allocate_string(sprintf("%.8f", {num}))
 		end if
-		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
+		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
 	-- else doesn't work under DOS
 	end ifdef
 
