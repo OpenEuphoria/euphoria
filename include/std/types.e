@@ -294,7 +294,8 @@ end type
 
 --** 
 -- Returns TRUE if argument is an alphanumeric character or if every element of 
--- the argument is an alphanumeric character.
+-- the argument is an alphanumeric character and that the first character is not
+-- numeric and the whole group of characters are not all numeric.
 --
 -- Returns FALSE if the argument is an empty sequence, or contains sequences,
 -- or contains non-alphanumeric elements
@@ -306,17 +307,26 @@ end type
 -- t_identifier(1)             -- FALSE
 -- t_identifier(1.234)         -- FALSE
 -- t_identifier('A')           -- TRUE
--- t_identifier('9')           -- TRUE
+-- t_identifier('9')           -- FALSE
 -- t_identifier('?')           -- FALSE
 -- t_identifier("abc")         -- TRUE (every element is alphabetic or a digit)
 -- t_identifier("ab3")         -- TRUE
 -- t_identifier("ab_3")        -- TRUE (underscore is allowed)
+-- t_identifier("1abc")        -- FALSE (identifier cannot start with a number)
+-- t_identifier("102")         -- FALSE (identifier cannot be all numeric)
 -- t_identifier({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- t_identifier({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_identifier({})            -- FALSE (empty sequence)
 -- </eucode>
 
 public type t_identifier(object pVal)
+	-- Test to make sure the first character is not a number
+	if t_digit(pVal) then
+		return 0
+	elsif sequence(pVal) and length(pVal) > 0 and t_digit(pVal[1]) then
+		return 0
+	end if
+
 	return char_test(pVal, Defined_Sets[CS_Identifier])
 end type
 

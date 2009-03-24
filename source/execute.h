@@ -422,7 +422,6 @@ struct char_cell {
 #define M_WARNING_FILE       72
 #define M_SET_ENV            73
 #define M_UNSET_ENV          74
-#define M_TO_NUMBER          75
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

@@ -13,7 +13,7 @@ constant
 	M_CRASH_FILE = 57,
 	M_CRASH_ROUTINE = 66,
 	M_CRASH = 67,
-	M_WARNING_FILE = 73
+	M_WARNING_FILE = 72
 
 --**
 -- Crash running program, displaying a formatted error message the way printf() does.

@@ -323,6 +323,16 @@ test_false("t_bytearray({1, 2, 9.7)", t_bytearray({1, 2, 9.7}))
 test_true("t_bytearray({1, 2, 'a')", t_bytearray({1, 2, 'a'}))
 test_false("t_bytearray({})", t_bytearray({}))
 
+test_true("t_identifier(abc)", t_identifier("abc"))
+test_true("t_identifier(ABC)", t_identifier("ABC"))
+test_true("t_identifier(_abc)", t_identifier("_abc"))
+test_true("t_identifier(_)", t_identifier("_"))
+test_true("t_identifier(ab_c)", t_identifier("ab_c"))
+test_true("t_identifier(abc_)", t_identifier("abc_"))
+test_false("t_identifier(1abc)", t_identifier("1abc"))
+test_false("t_identifier(1)", t_identifier("1"))
+test_false("t_identifier(1293)", t_identifier("1293"))
+test_false("t_identifier(1_)", t_identifier("1_"))
 
 sequence dc
 dc = get_charsets()
@@ -341,5 +351,3 @@ set_charsets({{CS_SpecWord, "_-#$%"}})
 test_true("Spec Word #3", t_specword('$'))
 
 test_report()
-
-

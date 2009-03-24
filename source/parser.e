@@ -3797,10 +3797,10 @@ global procedure real_parser(integer nested)
 				end if
 				if scope = SC_GLOBAL then
 					CompileErr( "'global' must be followed by:\n" &
-								"<a type>, 'constant', 'procedure', 'type' or 'function'")
+								"<a type>, 'constant', 'enum', 'procedure', 'type' or 'function'")
 				else
 					CompileErr( "'public' or 'export' must be followed by:\n" &
-								"<a type>, 'constant', 'procedure', 'type' or 'function'")
+								"<a type>, 'constant', 'enum', 'procedure', 'type' or 'function'")
 				end if
 			end if
 

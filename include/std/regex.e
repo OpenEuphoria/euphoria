@@ -90,9 +90,6 @@ public constant
 --****
 -- === Create/Destroy
 
---****
--- === Create/Destroy
-
 --**
 -- Regular expression type
 
@@ -308,7 +305,7 @@ end function
 --   Matches may be found against the result of previous replacements. Careful experimentation is
 --   highly recommended before doing things like text = regex:find_replace(re,text,whatever,something).
 --
--- ==== Special replacement operators
+-- ===== Special replacement operators
 -- 
 -- * **##\##** Causes the next character to lose its special meaning. 
 -- * **##\n##** Inserts a 0x0A (LF) character. 

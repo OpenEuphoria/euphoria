@@ -18,8 +18,8 @@ end ifdef
 
 constant
 	M_SLEEP     = 64,
-	M_SET_ENV   = 74,
-	M_UNSET_ENV = 75
+	M_SET_ENV   = 73,
+	M_UNSET_ENV = 74
 
 --****
 -- === Operating System Constants

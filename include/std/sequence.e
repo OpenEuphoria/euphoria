@@ -11,6 +11,9 @@ include std/text.e
 include std/sort.e
 include std/math.e
 
+--****
+-- === Constants
+
 public enum
 	ADD_PREPEND,
 	ADD_APPEND,
