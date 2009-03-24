@@ -4,21 +4,22 @@ Now that you have installed Euphoria, here are some things you can try:
 
 === Run the Demo Programs
 
-Run each of the demo programs in the ##demo## directory. You just type ##ex, exwc##  or 
-##exu## followed by the name of the ##.ex, .exw## or ##.exu## file, e.g.
+Run each of the demo programs in the ##demo## directory. You just type
+##ex <program name>## if you are on a DOS system or  ##exwc <program name>##
+if you are on Windows or ##exu <program name>## if you are on any unix
+variant. An example of running the demos in a Windows console
 
 {{{
-ex buzz
+exwc buzz
 }}}
 
-will run the file ##buzz.ex##. Depending on your graphics card you may have to edit a line in 
+This will run the file ##buzz.ex##. Depending on your graphics card you may have to edit a line in
 some of the ##.ex## files to select a different graphics mode. Some demos try to use 
 **SVGA** modes, which might not work with your video card. You need DOS mouse support to 
 run ##mouse.ex## and ##ttt.ex##.
 
-You can also double-click on a ##.ex## (##.exw##) file from //Windows//, but you will have to 
-"associate" ##.ex## files with ##ex.exe## and ##.exw## files with ##exw.exe##. A few of the 
-demos are meant to be run from the command line, but most will look ok from Windows.
+You can also double-click on a ##.ex##, ##.exw## or ##.exd## file from //Windows// as file
+associations have been setup during the installation process.
 
 === Edit Sample Files
 
