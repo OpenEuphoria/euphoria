@@ -325,6 +325,8 @@ editbuff = FALSE
 
 atom buffer_version,    -- version of buffer contents
 	 my_buffer_version  -- last version used by current window
+buffer_version = 0
+my_buffer_version = 0
 
 boolean control_chars,  -- binary file - view but don't save
 		cr_removed      -- Linux: CR's were removed from DOS file (CR-LF)
