@@ -10,7 +10,7 @@ IF "%1"=="--without-euphoria" (
 	GOTO EndLoop
 )
 IF "%1" =="--prefix" (
-	echo PREFIX="%2" >> config.wat
+	echo PREFIX=%2 >> config.wat
 	SHIFT
 	GOTO EndLoop
 )
