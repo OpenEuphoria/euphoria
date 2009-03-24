@@ -1819,7 +1819,7 @@ procedure get_escape(boolean help)
 				system(delete_cmd & "ex.err > NUL", 0)
 			end ifdef
 		end if
-		ifdef = UNIX then
+		ifdef UNIX then
 			shell("exu \"" & file_name & "\"")
 		elsedef
 			if match(".exw", lower(file_name)) or 
