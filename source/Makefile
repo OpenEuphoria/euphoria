@@ -369,7 +369,7 @@ else
 	$(EXE) $(TRUNKDIR)/bin/eutest.ex -i $(TRUNKDIR)/include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
 else # Not DJGPP:
-	cd ../tests && $(EXE) ../bin/eutest.ex -i ../include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../bin/eutest.ex -i ../include -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
 
 install :
