@@ -1894,10 +1894,31 @@ function finish_block_header(integer opcode)
 
 	tok = next_token()
 	has_entry=0
+
+    -- TODO: Remove after beta 1
 	if tok[T_ID]=ENTRY then
 		has_entry=1
 		tok = next_token()
 	end if
+
+	if tok[T_ID] = WITH then
+	    tok = next_token()
+		switch tok[T_ID] do
+		    case ENTRY:
+				if not (opcode = WHILE or opcode = LOOP) then
+					CompileErr("`with entry` is only valid on a while or loop statement")
+				end if
+
+			    has_entry = 1
+				break
+
+			case else
+			    CompileErr("An unknown `with` option has been specified")
+        end switch
+
+        tok = next_token()
+	end if
+
 	labbel=0
 	if tok[T_ID]=LABEL then
 		tok = next_token()
