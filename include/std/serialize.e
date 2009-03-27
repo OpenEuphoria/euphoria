@@ -307,7 +307,7 @@ end function
 -- You can use the [[:deserialize]] function to convert it back into a standard 
 -- Euphoria object.
 --
--- Example 3:
+-- Example 1:
 -- <eucode>
 --  integer fh
 --  fh = open("cust.dat", "wb")
@@ -325,7 +325,7 @@ end function
 --  close(fh)
 -- </eucode>
 --
--- Example 4:
+-- Example 2:
 -- <eucode>
 --  integer fh
 --  fh = open("cust.dat", "wb")
@@ -389,4 +389,89 @@ public function serialize(object x)
 		end for
 		return s
 	end if
+end function
+
+--**
+-- Saves a Euphoria object to disk in a binary format.
+--
+-- Parameters:
+-- # ##data##, any Euphoria object.
+-- # ##filename##, the name of the file to save it to.
+--
+-- Returns:
+-- An integer. 0 if the function fails, otherwise the number of bytes in the
+-- created file.
+-- 
+-- Comments:
+-- If the named file doesn't exist it is created, otherwise it is overwritten.
+--
+-- You can use the [[:load]] function to recover the data from the file.
+--
+-- Example :
+-- <eucode>
+-- include std/serialize.e
+-- integer size = dump(myData, theFileName) 
+-- if size = 0 then
+--     puts(1, "Failed to save data to file\n")
+-- else
+--     printf(1, "Saved file is %d bytes long\n", size)
+-- end if
+-- </eucode>
+--
+public function dump(sequence data, sequence filename)
+	integer fh
+	sequence sdata
+	
+	fh = open(filename, "wb")
+	if fh < 0 then
+		return 0
+	end if
+	
+	sdata = serialize(data)
+	puts(fh, sdata)
+	
+	close(fh)
+	
+	return length(sdata) -- Length is always > 0
+end function
+
+--**
+-- Restores a Euphoria object that has been saved to disk by [[:dump]].
+--
+-- Parameters:
+-- # ##filename##, the name of the file to restore it from.
+--
+-- Returns:
+-- An sequence. The first elemtn is the result code. If the result code is 0 
+-- then it means that the function failed, otherwise the restored data is in the 
+-- second element.
+-- 
+-- Comments:
+-- This is used to load back data from a file created by the [[:dump]]
+-- function.
+--
+-- Example :
+-- <eucode>
+-- include std/serialize.e
+-- sequence mydata = load(myData, theFileName) 
+-- if mydata[1] = 0 then
+--     puts(1, "Failed to load data from file\n")
+-- else
+--     mydata = mydata[2] -- Restored data is in second element.
+-- end if
+-- </eucode>
+--
+public function load(sequence filename)
+	integer fh
+	sequence sdata
+
+	fh = open(filename, "rb")
+	if fh < 0 then
+		return {0}
+	end if
+	
+	sdata = deserialize(fh)
+	
+	close(fh)
+	return {1, sdata}
 end function

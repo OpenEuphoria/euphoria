@@ -110,6 +110,19 @@ integer pos
  test_equal("serialize #4.4", Address, rAddress)
  test_equal("serialize #4.5", Balance, rBalance)
 
+ integer size
+ 
+objcache = {
+	{"FirstName", "Derek"},
+	{"FamilyName", "Parnell"},
+	{"Telephone", 55559999},
+	{"Address", "1A Main Road, Upper Coombucta West"},
+	{"Balance", 123.45}
+} 
+size = dump(objcache, "cust.dat")
+test_true("Dump", size > 0)
 
- object _ = delete_file("cust.dat")
+test_equal("Load", {1, objcache}, load("cust.dat"))
+
+object _ = delete_file("cust.dat")
 test_report()
