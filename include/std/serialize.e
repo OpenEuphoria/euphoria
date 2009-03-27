@@ -453,7 +453,7 @@ end function
 -- Example :
 -- <eucode>
 -- include std/serialize.e
--- sequence mydata = load(myData, theFileName) 
+-- sequence mydata = load(theFileName) 
 -- if mydata[1] = 0 then
 --     puts(1, "Failed to load data from file\n")
 -- else
