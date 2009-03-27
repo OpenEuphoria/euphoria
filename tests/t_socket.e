@@ -104,6 +104,8 @@ ifdef SOCKET_TESTS then
 	end if
 
 	test_equal("close", 0, close_socket(socket))
+elsedef
+    puts(2, "Warning: all socket tests were not run, use -D SOCKET_TESTS for full test\n")
 end ifdef
 
 test_report()
