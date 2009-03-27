@@ -500,8 +500,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		-- putting the POST data at the end,
 		-- filling in the CONTENT_LENGTH,
 		-- and avoiding sending empty fields for any field
-
-		 success = send(socket,eunet_format_sendheader(),0)
+        success = send(socket,eunet_format_sendheader(),0)
 
 		-- } end version 1.3.0 mod
 		data = ""
@@ -527,6 +526,11 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 
     -- clear any POSTDATA
     set_sendheader("POSTDATA", "")
+	set_sendheader("POST", "")
+	set_sendheader("GET", "")
+	set_sendheader("Content-Type", "")
+	set_sendheader("Content-Length", "0")
+	set_sendheader_default()
 
 	return {header,data}
 end function
@@ -747,6 +751,14 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		end if
 		cpos = match("SET-COOKIE",upper(header2))
 	end while
+
+    -- clear any POSTDATA
+    set_sendheader("POSTDATA", "")
+	set_sendheader("POST", "")
+	set_sendheader("GET", "")
+	set_sendheader("Content-Type", "")
+	set_sendheader("Content-Length", "0")
+	set_sendheader_default()
 
 	return {header,body}
 end function
