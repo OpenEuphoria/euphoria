@@ -1,42 +1,37 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
 --****
 -- == HTTP
 --
 -- Based on EuNet project, version 1.3.2, at SourceForge.
--- http://www.sourceforge.net/projects/eunet.
+-- http://www.sourceforge.net/projects/eunet. Many modifications
+-- for POST support by Kathy Smith <katsmeow@centurytel.net>
 --
 -- <<LEVELTOC depth=2>>
 
-include std/socket.e
+public include std/socket.e
 include std/text.e
 
 sequence
 	this_cookiejar = {},
 	sendheader = {}, -- HTTP header sequence , sent to somewhere (usually the server)
-	recvheader = {}  -- HTTP header sequence , received from somewhere (usually the server)
+	recvheader = {},  -- HTTP header sequence , received from somewhere (usually the server)
+	defaultsendheader = {} -- a list of what may be sent in the sendheader, and minimum typical values
 
--- Andy Serpa's Turbo version
--- c = "object" by Kat ; modded and used in strtok.e
--- c can now be a list {'z','\n','etc'} and s will be parsed by all those in list
--- made case insensitive by Kat
--- mod'd again for eunet
 function eunet_parse(sequence s, object c)
 	integer slen, spt, flag
 	sequence parsed, upperc, uppers
-	
+
 	upperc = ""
 	uppers = ""
-	
-	if atom(c) -- kat
-			then c = {c}
+
+	if atom(c) then
+		c = {c}
 	end if
-	
+
 	parsed = {}
 	slen = length(s)
 	spt = 1
 	flag = 0
-	
+
 	upperc = upper(c)
 	uppers = upper(s)
 	for i = 1 to slen do
@@ -55,7 +50,7 @@ function eunet_parse(sequence s, object c)
 	if flag = 1 then
 		parsed = append(parsed,s[spt..slen])
 	end if
-	
+
 	return parsed
 end function
 
@@ -64,24 +59,29 @@ end function
 -- === URL encoding
 --
 
--- TODO: This is not parsing correctly with creole or eudoc
-
--- HTML form data is usually URL-encoded to package it in a GET or POST submission. In a nutshell, here's how you URL-encode the name-value pairs of the form data:
+-- TODO: This is causing a creole parsing problem
+-- HTML form data is usually URL-encoded to package it into a GET or POST submission.
+-- In a nutshell, here's how you URL-encode the name-value pairs of the form data:
 -- # Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii
---   value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable
---   characters, and any others you want to encode-- there's no danger in encoding too many
---   characters. For simplicity, you might encode all non-alphanumeric characters.
+--	 value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable
+--	 characters, and any others you want to encode-- there's no danger in encoding too many
+--	 characters. For simplicity, you might encode all non-alphanumeric characters.
+--	 A big nono is \n and \r chars in POST data.
 -- # Change all spaces to pluses.
 -- # String the names and values together with = and &, like
---   name1=value1&name2=value2&name3=value3
+--	 name1=value1&name2=value2&name3=value3
 -- # This string is your message body for POST submissions, or the query string for GET submissions.
 --
--- For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors" 
+-- For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors"
 -- that's set to "Fred & Ethel", the URL-encoded form data would be:
 --
---    name=Lucy&neighbors=Fred+%26+Ethel <<== note no \n or \r
+--	  name=Lucy&neighbors=Fred+%26+Ethel <<== note no \n or \r
 --
 -- with a length of 34.
+
+constant
+	alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890",
+	hexnums = "0123456789ABCDEF"
 
 --**
 -- Converts all non-alphanumeric characters in a string to their
@@ -89,11 +89,15 @@ end function
 -- spaces.
 --
 -- Parameters:
---		# ##what##: the string to encode
+--	 # ##what##: the string to encode
+--	 # ##spacecode##: what to insert in place of a space
 --
 -- Returns:
+--	 A **sequence**, the encoded string.
 --
--- 		A **sequence**, the encoded string.
+-- Comments:
+--	 ##spacecode## defaults to ##+## as it is more correct, however, some sites
+--	 want ##%20## as the space encoding.
 --
 -- Example 1:
 -- <eucode>
@@ -101,30 +105,27 @@ end function
 -- -- Prints "Fred+%26+Ethel"
 -- </eucode>
 
-public function urlencode(sequence what)
-	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
-	sequence encoded, alphanum, hexnums
-	object junk, junk1, junk2
-	
-	encoded = ""
-	junk = ""
-	alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890/" -- encode all else
-	hexnums = "0123456789ABCDEF"
-	
+public function urlencode(sequence what, sequence spacecode="+")
+	sequence encoded = ""
+	object junk = "", junk1, junk2
+
 	for idx = 1 to length(what) do
 		if find(what[idx],alphanum) then
 			encoded &= what[idx]
-		else
+
+		elsif equal(what[idx],' ') then
+			encoded &= spacecode
+
+		elsif 1 then
 			junk = what[idx]
 			junk1 = floor(junk / 16)
 			junk2 = floor(junk - (junk1 * 16))
 			encoded &= "%" & hexnums[junk1+1] & hexnums[junk2+1]
 		end if
 	end for
-	
+
 	return encoded
-	
-end function -- urlencode(sequence what)
+end function
 
 --****
 -- === Header management
@@ -132,37 +133,36 @@ end function -- urlencode(sequence what)
 
 --**
 -- Retrieve either the whole sendheader sequence, or just a single
--- field. 
+-- field.
 --
 -- Parameters:
---		# ##field##: an object indicating which part is being requested, see Comments section.
+--	 # ##field##: an object indicating which part is being requested, see Comments section.
 --
 -- Returns:
---		An **object**, either:
--- * -1 if the field cannot be found, 
--- * ##{{"label","delimiter","value"},...}## for the whole sendheader sequence
--- * a three-element sequence in the form ##{"label","delimiter","value"}## when only a single field is selected.
+--	 An **object**, either:
+--	 * -1 if the field cannot be found,
+--	 * ##{{"label","delimiter","value"},...}## for the whole sendheader sequence
+--	 * a three-element sequence in the form ##{"label","delimiter","value"}## when only a single field is selected.
 --
 -- Comments:
--- ##field## can be either an HTTP_HEADER_xxx access constant,
--- the number 0 to retrieve the whole sendheader sequence, or
--- a string matching one of the header field labels.  The string is
--- not case sensitive.
+--	 ##field## can be either an HTTP_HEADER_xxx access constant,
+--	 the number 0 to retrieve the whole sendheader sequence, or
+--	 a string matching one of the header field labels.	The string is
+--	 not case sensitive.
 --
 
 public function get_sendheader(object field)
 	-- if field is 0, return the whole sequence.
 	-- if field is 1..length(sendheader), return just that field
-	-- if field is invalid, return -1.
+	-- if field is invalid, return -1. -- no, this is a problem , some code needs a sequence
 	-- if field is a sequence, try to match it to sendheader[x][1].
-	
+
 	-- Kat: should i return [1] & [2] as well? Mike: yes
 	-- most server interfaces return the only value, saves parsing
 	-- we'll return a {"Name","spacer","value"} format
-	
+
 	sequence upperfield
-	
-	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
+
 	if sequence(field) then
 		upperfield = upper(field)
 		for idx = 1 to length(sendheader) do
@@ -170,9 +170,9 @@ public function get_sendheader(object field)
 				return sendheader[idx]
 			end if
 		end for
-		return -1
+		return {"","",""}
 	elsif field < 0 or field > length(sendheader) then
-		return -1
+		return {"","",""}
 	elsif field = 0 then
 		return sendheader
 	else
@@ -181,58 +181,76 @@ public function get_sendheader(object field)
 end function
 
 --**
--- Sets 21 header elements to default values.  The default User Agent
+-- Sets header elements to default values. The default User Agent
 -- is Opera (currently the most standards compliant).  Before setting
 -- any header option individually, programs must call this procedure.
 --
 -- See Also:
---     [[:get_sendheader]], [[:set_sendheader]], [[:set_sendheader_useragent_msie]]
+--   [[:get_sendheader]], [[:set_sendheader]], [[:set_sendheader_useragent_msie]]
 
 public procedure set_sendheader_default()
-	-- sets some defaults
+	sequence tempnewheader = {}
+	sequence temps = ""
+
+	-- this sets some defaults, if not previously set to something by the user
+	-- if a header line was previously set by the user, do not change it here
 	-- httpversion MUST come before GET in this program: some servers default to 1.0, even if you say 1.1
 	-- NO spaces around [3] on httpversion
 	-- POSTDATA MUST come before Content-Length in this program
 	-- Referer is often used by sites to be sure your fetch was from one of their own pages
 	-- headers with [3] = "" won't be sent
-	
-	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
-	sendheader = { -- you can add more [1], and modify [3], [2] is the ' ' or ": " (GET has no ": ")
-		{"httpversion","","HTTP/1.0"}, -- not a legal http headerline, but to append to GET later
+	-- you can add more [1], and modify [3], [2] is the ' ' or ": " (GET andPOST have no ": ")
+
+	defaultsendheader = {
+		{"httpversion","","HTTP/1.0"}, -- not a legal http headerline, but to append to GET or POST later on
 		{"GET"," ",""}, -- [3] = the filename you want
-		{"Host",": ",""},
-		{"Referer",": ",""}, -- i know it's misspelled, but that's official!
-		{"User-Agent",": ","Opera/5.02 (Windows 98; U)  [en]"}, --</joke> pick your own :-)
-		{"Accept",": ","*/*"},
+		{"POST"," ",""}, -- [3] = the filename you want
+		{"Host",": ",""}, -- the domain. You might think this was obvious, but for vhosting sites it's necessary.
+		{"Referer",": ",""}, -- i know it's misspelled, but that's official! , the site that sent you to this one
+		{"User-Agent",": ","Opera/5.02 (Windows 98; U) [en]"}, --</joke> pick your own :-)
+		{"Accept",": ","*/*"}, -- what your browser or apps knows how to process
 		{"Accept-Charset",": ","ISO-8859-1,utf-8;q=0.7,*;q=0.7"},
 		{"Accept-Encoding",": ","identity"}, -- "identity" = no decoder in eunet so far
 		{"Accept-Language",": ","en-us"}, -- pick your own language abbr here
 		{"Accept-Ranges",": ",""},
 		{"Authorization",": ",""},
-		{"Date",": ",""}, -- who cares if the server has my time?
-		{"If-Modified-Since",": ",""},
-		{"POST"," ",""}, -- if POST, obviously
-		{"POSTDATA","",""}, -- not a legal headerline, but has to go somewhere
-		{"Content-Type",": ",""}, -- if POST transaction
-		{"Content-Length",": ",""}, -- if POST transaction
-		{"From",": ",""}, -- possible in POST or Authorization
-		{"Keep-Alive",": ","0"},
-		{"Cache-Control",": ","no"},
-		{"Connection",": ","close"}
-	}	
+		{"Date",": ",""}, -- who cares if the server has my time? Except for cookie timeouts, that is.
+		{"If-Modified-Since",": ",""}, -- for keeping a local cache sync'd
+		{"POSTDATA","",""}, -- not a legal headerline, but has to go somewhere; put the POST data here, it will be appended to the bottom later
+		{"Content-Type",": ",""}, -- if POST or PUT transaction
+		{"Content-Length",": ",""}, -- if POST or PUT transaction
+		{"From",": ",""}, -- possible in POST or PUT or Authorization
+		{"Keep-Alive",": ",""}, -- set value depending on Connection
+		{"Cache-Control",": ",""},
+		{"Connection",": ","close"} -- this is usually "close", sometimes "keep-alive" for http/1.1 and SSL, even if you set "close" the server may ignore you
+	}
+
+
+  -- the following not only puts the default header lines,
+  -- it sorts the already-set lines to match the defaultsendheader order
+	for defaultndx = 1 to length(defaultsendheader) do-- loop thru defaultsendheader
+	   temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
+	   if equal(temps[1],"") -- was it defined?
+		 then tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
+		 else tempnewheader &= {temps} -- use the pre-definition
+	   end if
+	end for
+
+	sendheader = tempnewheader
+
 end procedure
 
 --**
 -- Set an individual header field.
 --
 -- Parameters:
---		# ##whatheader##: an object, either an explicit name string or a HTTP_HEADER_xxx constant
---		# ##whatdata##: a string, the associated data
+--	 # ##whatheader##: an object, either an explicit name string or a HTTP_HEADER_xxx constant
+--	 # ##whatdata##: a string, the associated data
 --
 -- Comments:
--- If the requested field is not one of the 21
--- default header fields, the field MUST be set by string.  This will
--- increase the length of the header overall.  
+--	 If the requested field is not one of the default header fields,
+--   the field MUST be set by string.  This will increase the length
+--   of the header overall.
 --
 -- Example 1:
 -- <eucode>
@@ -240,92 +258,120 @@ end procedure
 -- </eucode>
 --
 -- See Also:
---     [[:get_sendheader]]
+--	   [[:get_sendheader]]
 
 public procedure set_sendheader(object whatheader, sequence whatdata)
 	if atom(whatheader) then
-		if whatheader > 0 and whatheader <= length(sendheader) then
+		if whatheader > 0 and whatheader <= length(sendheader) then -- how does this work?
 			sendheader[whatheader][3] = whatdata
 		end if
 		return
 	end if
-	
-	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
+
 	for idx = 1 to length(sendheader) do
+		-- is this whatheader already in sendheader?
 		if match(upper(whatheader),upper(sendheader[idx][1])) then
+			-- then simply set it to this value
 			sendheader[idx][3] = whatdata
 			return
 		end if
 	end for
-	
-	--  sendheader &= { whatheader & whatdata } -- you better know what you are doing here!
+
+	-- ok, if we got here, then whatheader isn't in sendheader
+
+	--	you better know what you are doing here!
+	-- ": " is supplied as default, lets hope it's not an abberation like GET or POST
+	-- this doesn't put it in any correct order
 	sendheader = append(sendheader,{whatheader, ": ",whatdata})
-	
-end procedure -- setsendheaderline(sequence whatheader, sequence whatdata)
+end procedure
 
 --**
 -- Inform listener that user agent is Microsoft (R) Internet Explorer (TM).
 --
 -- Comments:
--- This is a convenience procedure to tell a website that a Microsoft
--- Internet Explorer (TM) browser is requesting data.  Because some
--- websites format their response differently (or simply refuse data)
--- depending on the browser, this procedure provides a quick means
--- around that.
+--	 This is a convenience procedure to tell a website that a Microsoft
+--	 Internet Explorer (TM) browser is requesting data.  Because some
+--	 websites format their response differently (or simply refuse data)
+--	 depending on the browser, this procedure provides a quick means
+--	 around that.
 
 public procedure set_sendheader_useragent_msie()
-	set_sendheader("UserAgent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)")
+	set_sendheader("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)")
 end procedure
 
 --------------------------------------------------------------------------------
 -- this can also be used to flatten the sendheader record, for printing, etc
-function eunet_format_sendheader()	
-	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0
-	sequence tempheader, temppostdata, httpversion
-	tempheader = ""
-	temppostdata = ""
-	httpversion = ""
+function eunet_format_sendheader()
+	sequence
+		tempheader = "",
+		temppostdata = "",
+		httpversion = ""
+
 	for idx = 1 to length(sendheader) do
-		if not equal("",sendheader[idx][3]) and
-				not equal("httpversion",sendheader[idx][1]) and
-				not equal("POSTDATA",sendheader[idx][1]) then
-			if equal("GET",sendheader[idx][1])
-					then tempheader &= sendheader[idx][1] & sendheader[idx][2] & sendheader[idx][3] & " " & httpversion & "\n"
-				else tempheader &= sendheader[idx][1] & sendheader[idx][2] & sendheader[idx][3] & "\r\n"
+		if not equal("httpversion",sendheader[idx][1]) and
+				not equal("POSTDATA",sendheader[idx][1])
+		then
+			-- if the data field is not empty...
+			if not equal("",sendheader[idx][3]) then
+				switch sendheader[idx][1] do
+					case "GET":
+						-- append the http version
+						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
+							sendheader[idx][3] & " " & httpversion & "\r\n"
+						break
+
+					case "POST":
+						-- append the http version
+						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
+							sendheader[idx][3] & " " & httpversion & "\r\n"
+						break
+
+					case else
+						-- else just flatten the sequence
+						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
+							sendheader[idx][3] & "\r\n"
+				end switch
 			end if
 		end if
+
+		-- this is done here because
+		-- this is where the POSTDATA is moved to the bottom of the header,
+		-- the Content-length and Content-Type is filled in
+
 		if equal("POSTDATA",sendheader[idx][1]) and not equal("",sendheader[idx][3]) then
-			--temppostdata = urlencode(sendheader[idx][3])
+			-- POSTDATA was set to something
+			set_sendheader("Content-Type","application/x-www-form-urlencoded")
 			temppostdata = sendheader[idx][3]
 			set_sendheader("Content-Length",sprintf("%d",length(temppostdata)))
+			sendheader[idx][3] = "" -- clear it, so it's not accidently sent again
 		end if
+
 		if equal("httpversion",sendheader[idx][1]) and not equal("",sendheader[idx][3]) then
 			httpversion = sendheader[idx][3]
 		end if
 	end for
-	
+
 	tempheader &= "\r\n" -- end of header
-	if not equal(temppostdata,"") -- but if there's POST data,
-			then tempheader &= temppostdata  -- tack that on too
+	if not equal(temppostdata,"") then-- but if there's POST data,
+		 tempheader = tempheader & temppostdata  & "\r\n" -- tack that on too
 	end if
-	
+
 	return tempheader
-	
-end function -- formatsendheader()
+end function
 
 --**
 -- Populates the internal sequence recvheader from the flat string header.
 --
 -- Parameters:
---		# ##header##: a string, the header data
+--	 # ##header##: a string, the header data
 --
 -- Comments:
---     This must be called prior to calling [[:get_recvheader]]().
+--	 This must be called prior to calling [[:get_recvheader]]().
 
 public procedure parse_recvheader(sequence header)
 	sequence junk
 	atom place
-	
+
 	junk = {"",""} -- init it, it looks like this
 	recvheader = eunet_parse(header,{10,13}) -- could be \n or \r or both
 	for idx = 1 to length(recvheader) do
@@ -347,14 +393,13 @@ end procedure
 -- returned by the most recent call to [[:get_http]].
 --
 -- Parameters:
---		# ##field##: an object, either a string holding a field name (case insensitive),
--- 0 to return the whole header, or a numerical index.
+--	 # ##field##: an object, either a string holding a field name (case insensitive),
+--	   0 to return the whole header, or a numerical index.
 --
--- Returns:	
---
---	An **object**:
---     * -1 on error
---     * a sequence in the form, ##{field name, field value}## on success.
+-- Returns:
+--	 An **ovject**:
+--	 * -1 on error
+--	 * a sequence in the form, ##{field name, field value}## on success.
 
 public function get_recvheader(object field)
 	sequence upperfield
@@ -363,28 +408,31 @@ public function get_recvheader(object field)
 	-- if field is 1..length(recvheader), return just that field
 	-- if field is invalid, return -1.
 	-- if field is a sequence, try to match it to recvheader[x][1].
-	
+
 	-- we'll NOT return a {"Name","value"} format
 	-- because that leads to using a junk seq to get the [2] from
 	-- --> And yet, that's exactly what we're doing.  -- Mike.
-	
-	-- Function added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.1
-	
-	if sequence(field) and equal(field,"") then return -1 end if
+
+	if sequence(field) and equal(field,"") then
+		return -1
+	end if
+
 	if atom(field) then
-		if ( field <= 0 ) or ( field > length(recvheader) ) then return -1 end if
+		if ( field <= 0 ) or ( field > length(recvheader) ) then
+			return -1
+		end if
+
 		return recvheader[field]
 	end if
-	
+
 	upperfield = upper(field)
 	for idx = 1 to length(recvheader) do
 		if equal(upperfield,upper(recvheader[idx][1])) then
 			return recvheader[idx] -- {"header_name","value"}
 		end if
 	end for
-	
+
 	return -1 -- not found!
-	
 end function
 
 --****
@@ -395,59 +443,78 @@ end function
 -- Returns data from an http internet site.
 --
 -- Parameters:
---		# ##inet_addr##: a sequence holding an address
---		# ##hostname##: a string, the name for the host
--- 		# ##file##: a file name to transmit
+--	 # ##inet_addr##: a sequence holding an address
+--	 # ##hostname##: a string, the name for the host
+--	 # ##file##: a file name to transmit
 --
 -- Returns:
---   A **sequence**, empty sequence on error, of length 2 on success, like ##{sequence header, sequence data}##.
+--	 A **sequence**, empty sequence on error, of length 2 on success,
+--	 like ##{sequence header, sequence data}##.
 
 public function get_http(sequence inet_addr, sequence hostname, sequence file)
-	
+	object junk
 	atom socket, success, last_data_len
 	sequence header, data, hline
-	
+
 	-- Notes for future additions:
-	--GET /index.html HTTP/1.1
-	--Host: www.amazon.com
-	--Accept: */*
-	--Accept-Language: en-us
-	--User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)
-	
+	-- HUGE differences in HTTP/1.1 vs HTTP/1.0
+	-- GET /index.html HTTP/1.1
+
 	if length(inet_addr)=0 then
 		return {"",""}
 	end if
-	
-	-- Modification added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0 {
-	if equal(sendheader,"") then
-		set_sendheader_default() -- it really should be set to something! But is not **required**
+
+	if length(file)=0 or file[1]!='/' then
+		file = '/' & file
 	end if
-	
-	if length(file)=0 or file[1]!='/' then file = '/'&file end if
-	set_sendheader("GET",file)
-	-- TO DO: Allow transmission of POST data by using set_sendheader("POST",data)
+
+	junk = get_sendheader("POSTDATA")
+	-- was the POSTDATA set?
+	if equal(junk[3],"") then
+		-- if no, assume it's a GET
+		set_sendheader("GET",file)
+	else
+		-- if so, then it's definitely a POST (err, or PUT, but we don't do PUT)
+		set_sendheader("POST",file)
+	end if
+
+	-- This is required for virtual shared hosting. On dedicated boxes on fixed ip,
+	-- you can http to the ip, and GET/POST is enough to deal with it. Setting it is
+	-- safe, either way.
 	set_sendheader("HOST",hostname)
+
+	-- if the user didn't set this to something,
 	hline = get_sendheader("Referer")
 	if equal(hline[3],"") then
+		-- set it to a "default" setting
 		set_sendheader("Referer",hostname)
 	end if
+
 	data = {}
 	last_data_len = 0
+
 	socket = new_socket(AF_INET,SOCK_STREAM,0)
 	success = connect(socket,inet_addr)
 	if success = 0 then
-		--    success = send(socket,
-			--                  sprintf("GET /%s HTTP/1.0\nHost: %s\n\n",{file,hostname}),0)
-		success = send(socket,eunet_format_sendheader(),0)
+		-- eunet_format_sendheader sets up the header to sent,
+		-- putting the POST data at the end,
+		-- filling in the CONTENT_LENGTH,
+		-- and avoiding sending empty fields for any field
+
+		 success = send(socket,eunet_format_sendheader(),0)
+
 		-- } end version 1.3.0 mod
+		data = ""
 		while success > 0 do
-			data = data & recv(socket,0)
-			success = length(data)-last_data_len
-			last_data_len = length(data)
+				junk = recv(socket,0)
+			data = data & junk
+			success = length(junk)
+			--success = length(data)-last_data_len
+			--last_data_len = length(data)
 		end while
 	end if
 	if close_socket(socket) then end if
-	
+
 	success = match({13,10,13,10},data)
 	if success > 0 then
 		header = data[1..success-1]
@@ -457,85 +524,96 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		header = data
 		data = {}
 	end if
+
+    -- clear any POSTDATA
+    set_sendheader("POSTDATA", "")
+
 	return {header,data}
-	
 end function
 
 --**
 -- Works the same as [[:get_url]](), but maintains an internal
--- state register based on cookies received. 
+-- state register based on cookies received.
 --
 -- Parameters:
---		# ##inet_addr##: a sequence holding an address
---		# ##hostname##: a string, the name for the host
--- 		# ##file##: a file name to transmit
+--	 # ##inet_addr##: a sequence holding an address
+--	 # ##hostname##: a string, the name for the host
+--	 # ##file##: a file name to transmit
 --
--- Returns:	
---   A **sequence** {header, body} on success, or an empty sequence on error.
---
--- Comments:
---
---   As of Euphoria 4.0, only the internal state is maintained. Future versions of this 
---   library will expand state functionality.
+-- Returns:
+--	 A **sequence** {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:
 -- <eucode>
 -- addrinfo = getaddrinfo("www.yahoo.com","http",0)
 -- if atom(addrinfo) or length(addrinfo) < 1 or
---    length(addrinfo[1]) < 5 then
---    puts(1,"Uh, oh")
---    return {}
+--	  length(addrinfo[1]) < 5 then
+--	  puts(1,"Uh, oh")
+--	  return {}
 -- else
---     inet_addr = addrinfo[1][5]
+--	   inet_addr = addrinfo[1][5]
 -- end if
 -- data = get_http_use_cookie(inet_addr,"www.yahoo.com","")
 -- </eucode>
 --
 -- See also:
---   [[:get_url]]
+--	 [[:get_url]]
 
-public function get_http_use_cookie(sequence inet_addr, sequence hostname,
-                                          sequence file)
+public function get_http_use_cookie(sequence inet_addr, sequence hostname, sequence file)
 	atom socket, success, last_data_len, cpos, offset
 	sequence header, header2, body, data, updata, hline
 	sequence cookielist, request, cookie
+	object junk -- a general throwaway temp var
+
 	cookielist = {}
 	request = ""
 	-- cookie = {name,domain,path,expires,encrypted,version}
-	
+
 	if length(inet_addr)=0 then
 		return {"",""}
 	end if
-	-- Modification added by Kathy Smith (Kat)(KAT12@coosahs.net), version 1.3.0 {
-	if equal(sendheader,"") then
-		set_sendheader_default() -- it really should be set to something! But is not **required**
-	end if
-	
+
 	if length(file)=0 or file[1]!='/' then file = '/'&file end if
-	set_sendheader("GET",file)
+
+	-- was the POSTDATA set?
+	junk = get_sendheader("POSTDATA")
+	if equal(junk[3],"")  then
+		-- if no, assume it's a GET
+		set_sendheader("GET",file)
+	else
+		-- if so, then it's definitely a POST (err, or PUT, but we don't do PUT)
+		set_sendheader("POST",file)
+	end if
+
+	-- This is required for virtual shared hosting.
+	-- On dedicated boxes on fixed ip,
+	-- you can http to the ip, and GET/POST is enough to deal with it.
+	-- Setting it is safe, either way.
 	set_sendheader("HOST",hostname)
+
 	hline = get_sendheader("Referer")
 	if equal(hline[3],"") then
 		set_sendheader("Referer",hostname)
 	end if
-	
+
 	for ctr = 1 to length(this_cookiejar) do
 		if sequence(this_cookiejar[ctr]) and length(this_cookiejar[ctr])>=2 and
 				sequence(this_cookiejar[ctr][1]) and
 				(match(hostname,this_cookiejar[ctr][2])>0 or match(this_cookiejar[ctr][2],hostname)>0) and
-				(length(file)=0 or match(this_cookiejar[ctr][3],file)>0) then
+				(length(file)=0 or match(this_cookiejar[ctr][3],file)>0)
+		then
 			cookielist = append(cookielist,this_cookiejar[ctr])
 		end if
 	end for
-	
+
 	-- TO DO: Sort cookielist by domain, path (longer path before shorter path)
-	--  request = sprintf("GET /%s HTTP/1.0\nHost: %s\n",{file,hostname})
+	--	request = sprintf("GET /%s HTTP/1.0\nHost: %s\n",{file,hostname})
 	for idx = 1 to length(cookielist) do
-		--    if idx = 1 then
-		--      request = request & "Cookie: "&cookielist[idx][1]
-		--    else
-		--      request = request & "        "&cookielist[idx][1]
-		--    end if
+		--	  if idx = 1 then
+		--		request = request & "Cookie: "&cookielist[idx][1]
+		--	  else
+		--		request = request & "		 "&cookielist[idx][1]
+		--	  end if
 		request = request & cookielist[idx][1]
 		if length(cookielist[idx][3])>0 then
 			request = request & "; $Path=" & cookielist[idx][3]
@@ -547,15 +625,15 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname,
 			--request = request & "\n"
 		end if
 	end for
-	--  request = request & "\n"
+	--	request = request & "\n"
 	set_sendheader("Cookie",request)
-	
+
 	data = {}
 	last_data_len = 0
 	socket = new_socket(AF_INET,SOCK_STREAM,0)
 	success = connect(socket,inet_addr)
 	if success = 0 then
-		--    success = send(socket,request,0)
+		--	  success = send(socket,request,0)
 		success = send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
 		while success > 0 do
@@ -565,7 +643,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname,
 		end while
 	end if
 	if close_socket(socket) then end if
-	
+
 	success = match({13,10,13,10},data)
 	if success > 0 then
 		header = data[1..success-1]
@@ -576,7 +654,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname,
 		body = {}
 		data = {}
 	end if
-	
+
 	header2 = header
 	cpos = match("SET-COOKIE",upper(header2))
 	while cpos > 0 do
@@ -669,7 +747,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname,
 		end if
 		cpos = match("SET-COOKIE",upper(header2))
 	end while
-	
+
 	return {header,body}
 end function
 
@@ -677,32 +755,33 @@ end function
 -- Returns data from an http internet site. Other common protocols will be added in future versions.
 --
 -- Parameters:
---   # ##inet_addr##: a sequence holding an address
---   # ##hostname##: a string, the name for the host
---   # ##file##: a file name to transmit
+--	 # ##inet_addr##: a sequence holding an address
+--	 # ##hostname##: a string, the name for the host
+--	 # ##file##: a file name to transmit
 --
--- Returns:	
---   A **sequence** {header, body} on success, or an empty sequence on error.
+-- Returns:
+--	 A **sequence** {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:
 -- <eucode>
 -- url = "http://banners.wunderground.com/weathersticker/mini" &
---     "Weather2_metric_cond/language/www/US/PA/Philadelphia.gif"
+--	   "Weather2_metric_cond/language/www/US/PA/Philadelphia.gif"
 --
 -- temp = get_url(url)
 -- if length(temp)>=2 and length(temp[2])>0 then
---     tempfp = open(TEMPDIR&"current_weather.gif","wb")
---     puts(tempfp,temp[2])
---     close(tempfp)
+--	   tempfp = open(TEMPDIR&"current_weather.gif","wb")
+--	   puts(tempfp,temp[2])
+--	   close(tempfp)
 -- end if
 -- </eucode>
+
 
 public function get_url(sequence url)
 	sequence node, hostname, protocol, port, file, inet_addr
 	sequence data
 	atom cpos
 	object addrinfo
-	
+
 	-- TO DO: If the changes in version 1.2.2 prove stable, remove redundant
 	-- code under the search for '?'.
 	cpos = match("://",url)
@@ -782,7 +861,7 @@ public function get_url(sequence url)
 			end if
 		end if
 	end if
-	
+
 	if length(file)>0 and file[1]='/' then file = file[2..length(file)] end if
 	addrinfo = getaddrinfo(node,protocol,0)
 	if atom(addrinfo) or length(addrinfo)<1 or length(addrinfo[1])<5 then
@@ -791,10 +870,13 @@ public function get_url(sequence url)
 	else
 		inet_addr = addrinfo[1][5]
 	end if
-	data = {}
+	data = {"",""} -- this is what get_http() returns
 	if eu:compare(lower(protocol),"http")=0 then
 		data = get_http(inet_addr,hostname,file)
 	end if
-	
+
 	return data
 end function
+
+-- set the lines in the "proper" order for sending, not that the defaults will get sent.
+set_sendheader_default()
