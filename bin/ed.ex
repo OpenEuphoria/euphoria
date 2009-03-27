@@ -1,5 +1,3 @@
-with trace
-trace(3)
 		----------------------------------------------------------
 		--       This Euphoria Editor was developed by          --
 		--            Rapid Deployment Software.                --
