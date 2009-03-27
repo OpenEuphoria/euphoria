@@ -258,7 +258,7 @@ clean :
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
 endif
-	make -C pcre clean
+	$(MAKE) -C pcre clean
 	
 
 .PHONY : clean distclean all
@@ -469,9 +469,9 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,%.c,$(PREFIXED_PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 ifeq "$(EMINGW)" "1"
-	make -C pcre mingw
+	$(MAKE) -C pcre mingw
 else
-	make -C pcre all
+	$(MAKE) -C pcre all
 endif
 endif
 	
