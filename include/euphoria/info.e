@@ -10,17 +10,17 @@ enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE
 constant version_info = machine_func(M_EU_INFO, {})
 
 ifdef DOS then
-	constant platform_name = "DOS"
+	constant plat_name = "DOS"
 elsifdef WIN32 then
-	constant platform_name = "Windows"
+	constant plat_name = "Windows"
 elsifdef LINUX then
-	constant platform_name = "Linux"
+	constant plat_name = "Linux"
 elsifdef OSX then
-	constant platform_name = "OS X"
+	constant plat_name = "OS X"
 elsifdef FREEBSD then
-	constant platform_name = "FreeBSD"
+	constant plat_name = "FreeBSD"
 elsedef
-	constant platform_name = "Unknown"
+	constant plat_name = "Unknown"
 end ifdef
 
 --****
@@ -143,6 +143,88 @@ end function
 --
 
 public function version_string_long()
-  return version_string() & " - " & platform_name
+  return version_string() & " - " & plat_name
 end function
 
+--****
+-- === Compiled Platform Information
+
+--**
+-- Get the platform name
+--
+-- Returns:
+--   A ##sequence## containing the platform name, i.e. Windows, Linux, DOS, FreeBSD or OS X.
+--
+
+public function platform_name()
+	return plat_name
+end function
+
+--****
+-- === Copyright Information
+--
+
+--**
+-- Get the copyright statement for Euphoria
+--
+-- Returns:
+--   A ##sequence## containing 2 sequences: product name and copyright message
+--
+-- Example 1:
+-- <eucode>
+-- sequence info = euphoria_copyright()
+-- -- info = {
+-- --     "Euphoria v4.0.0 alpha 3",
+-- --     "Copyright (c) XYZ, ABC\n" &
+-- --     "Copyright (c) ABC, DEF"
+-- -- }
+-- </eucode>
+--
+
+public function euphoria_copyright()
+	return {
+		"Euphoria v" & version_string(),
+		"Copyright (c) 2007-2009 by OpenEuphoria Group.\n" &
+		"Copyright (c) 1993-2006 by Rapid Deployment Software.\n" &
+		"All Rights Reserved."
+	}
+end function
+
+--**
+-- Get the copyright statement for PCRE.
+--
+-- Returns:
+--   A ##sequence## containing 2 sequences: product name and copyright message.
+--
+-- See Also:
+--   [[:euphoria_copyright()]]
+--
+
+public function pcre_copyright()
+	return {
+		"PCRE v7.8",
+		"Copyright (c) 1997-2008 University of Cambridge\n" &
+		"All Rights Reserved"
+	}
+end function
+
+--**
+-- Get all copyrights associated with this version of Euphoria.
+--
+-- Returns:
+--   A ##sequence## of product names and copyright messages.
+-- <eucode>
+-- {
+--     { ProductName, CopyrightMessage },
+--     { ProductName, CopyrightMessage },
+--     ...
+-- }
+-- </eucode>
+--
+
+public function all_copyrights()
+	return {
+		euphoria_copyright(),
+		pcre_copyright()
+	}
+end function
