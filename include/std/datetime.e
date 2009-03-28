@@ -26,13 +26,13 @@ elsifdef OSX then
 elsifdef WIN32 then
 	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
-elsedef
-	constant gmtime_ = -1
-	constant time_ = -1
 end ifdef
 
+ifdef not DOS32 then
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
+end ifdef
 
+ifdef not DOS32 then
 function time()
 	ifdef WIN32 then
 		atom ptra, valhi, vallow, deltahi, deltalow
@@ -51,40 +51,33 @@ function time()
 		end if
 		return floor(((valhi * power(2,32)) + vallow) / 10000000)
 	elsedef
-		ifdef DOS32 then
-			crash( "This function, time(), is not supported for this Operating System." )
-		end ifdef
 		return c_func(time_, {NULL})
 	end ifdef
 end function
-	
+
 function gmtime(atom time)
 	sequence ret
 	atom timep, tm_p
 	integer n
 
-	ifdef DOS32 then
-		crash( "This function, gmtime() is not supported for this Operating System." )
-	elsedef
-		timep = allocate(4)
-		poke4(timep, time)
-		
-		tm_p = c_func(gmtime_, {timep})
-		
-		free(timep)
-		
-		ret = repeat(0, 9)
-		n = 0
+	timep = allocate(4)
+	poke4(timep, time)
 	
-		for i = 1 to 9 do
-			ret[i] = peek4s(tm_p+n)
-			n = n + 4
-		end for
-		
-		return ret
-	end ifdef
-	return 0
+	tm_p = c_func(gmtime_, {timep})
+	
+	free(timep)
+	
+	ret = repeat(0, 9)
+	n = 0
+
+	for i = 1 to 9 do
+		ret[i] = peek4s(tm_p+n)
+		n = n + 4
+	end for
+	
+	return ret
 end function
+end ifdef
 
 constant
 	XLEAP = 1,
@@ -524,7 +517,9 @@ end function
 -- is running under.
 --
 --- Platform:
---	not //DOS//
+-- Under //DOS// this requires a parameter that gives the difference in hours
+-- between your timezone and GMT. The default is zero, which assumes you are 
+-- already in GMT. 
 --
 -- Example 1:
 -- <eucode>
@@ -533,15 +528,21 @@ end function
 -- -- dt would be July 17th, 2008 at 03:34pm GMT
 -- </eucode>
 --
+-- Example 2 (DOS):
+-- <eucode>
+-- dt = now_gmt(10)
+-- -- If time was July 16th, 2008 at 08:34pm Aust EST
+-- -- dt would be July 16th, 2008 at 10:34am GMT
+-- </eucode>
+--
 -- See Also:
 -- [[:now]]
 
-public function now_gmt()
+public function now_gmt(atom gmt_offset = 0)
 ifdef DOS32 then
-	crash( "The function, now_gmt(), is not supported for this Operating System." )
-	-- avoid 'function doesn't return' warning:
-	return -1
+	return (secondsToDateTime(datetimeToSeconds(now()) - (gmt_offset * 3600)))
 elsedef
+	gmt_offset	= gmt_offset -- Avoids (not_used) warning
 	sequence t1 = gmtime(time())
 	return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
 end ifdef
