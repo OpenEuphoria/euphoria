@@ -269,6 +269,7 @@ clean :
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
 endif
+	-rm -f version.e version.h
 	$(MAKE) -C pcre clean
 	
 
