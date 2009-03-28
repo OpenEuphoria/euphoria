@@ -1,4 +1,4 @@
-include std/socket.e
+include std/net/http.e
 
 procedure main(sequence args = command_line())
 	if length(args) = 2 then

@@ -1,6 +1,6 @@
 include std/unittest.e
-include std/socket.e as sock
 include std/console.e
+include std/socket.e as sock
 
 object _ = 0
 
@@ -11,21 +11,26 @@ else
 	test_fail(sprintf("getaddrinfo returned error %d", addrinfo ))
 end if
 
+test_equal("getservbyname http", 80, getservbyname("http"))
+test_equal("getservbyname ftp", 21, getservbyname("ftp"))
+test_equal("getservbyname telnet", 23, getservbyname("telnet"))
 
 test_true("is_inetaddr 1", is_inetaddr("127.0.0.1"))
 test_true("is_inetaddr 2", is_inetaddr("127.0.0.1:100"))
 test_false("is_inetaddr 3", is_inetaddr("john doe"))
 test_false("is_inetaddr 4", is_inetaddr("127.0.0.1:100.5"))
 
-sequence ifaces = get_iface_list()
-test_true("get_iface_list", length(ifaces) > 0)
+ifdef WIN32 or LINUX then
+	sequence ifaces = get_iface_list()
+	test_true("get_iface_list", length(ifaces) > 0)
 
--- TODO: Jeremy could not retrieve details on the #1 interface on
--- his computer. His interface name was "TAP-Win32 Adapter V9". Is
--- this a problem or do some interfaces not have detailed information?
-sequence iface = get_iface_details(ifaces[$])
-test_equal("get_iface_details 1", 15, length(iface))
-test_equal("get_iface_details 2", ifaces[$], iface[1])
+	-- TODO: Jeremy could not retrieve details on the #1 interface on
+	-- his computer. His interface name was "TAP-Win32 Adapter V9". Is
+	-- this a problem or do some interfaces not have detailed information?
+	sequence iface = get_iface_details(ifaces[$])
+	test_equal("get_iface_details 1", 15, length(iface))
+	test_equal("get_iface_details 2", ifaces[$], iface[1])
+end ifdef
 
 ifdef SOCKET_TESTS then
 	--
@@ -67,7 +72,6 @@ ifdef SOCKET_TESTS then
 		test_true("getnsrr yahoo.com 4", integer(_[1][2]))
 		test_true("getnsrr yahoo.com 5", integer(_[1][3]))
 	end if
-
 	_ = sock:gethostbyname("yahoo.com")
 	test_true("gethostbyname yahoo.com", sequence(_))
 

@@ -1,15 +1,16 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
--- socket.e
 --****
 -- == Internet Sockets
 --
 -- Based on EuNet project, version 1.3.2, at SourceForge.
 -- http://www.sourceforge.net/projects/eunet.
 --
--- **Page Contents**
---
 -- <<LEVELTOC depth=2>>
  
+ifdef DOS then
+	include std/error.e
+	crash("socket.e is not supported on the DOS platform")
+end ifdef
+
 include std/dll.e
 include std/machine.e
 include std/get.e
@@ -361,7 +362,7 @@ elsifdef LINUX then
 	dnsdll_ = open_dll("libresolv.so")
 elsifdef FREEBSD then
 	dll_ = open_dll("libc.so")
-	dnsdll_ = open_dll("libresolv.so")
+	dnsdll_ = dll_
 elsifdef OSX then
 	dll_ = open_dll("libc.dylib")
 	dnsdll_ = open_dll("libresolv.dylib")
@@ -417,26 +418,28 @@ end function
 -------------------------------------------------------------------------------
 
 function get_sockaddr(atom lpsz)
-	
-	sequence s
+	sequence s = ""
 	atom port
-	s = ""
-	if lpsz = 0 then  -- Null pointer
+
+	if lpsz = 0 then
 		return s
 	end if
+
 	-- sockaddr
-	-- 2bytes: AF_INET (or other type)
-	-- 2bytes: port
-	-- 4bytes: network address
-	-- 8bytes: null
+	-- 2 bytes: AF_INET (or other type)
+	-- 2 bytes: port
+	-- 4 bytes: network address
+	-- 8 bytes: null
 	for ptr = lpsz+4 to lpsz+7 do
 		s = s & sprintf("%d",peek(ptr))
 		if ptr < lpsz+7 then s = s & '.' end if
 	end for
+
 	port = (peek(lpsz+2)*256)+peek(lpsz+3)
+
 	s = s & sprintf(":%d",port)
+
 	return s
-	
 end function
 
 -------------------------------------------------------------------------------
@@ -2339,10 +2342,8 @@ end function
 -------------------------------------------------------------------------------
 -- GetServByName (deprecated - replaced by GetAddrInfo)
 -------------------------------------------------------------------------------
--- Returns the (integer) port number of the service
 
 function unix_getservbyname(sequence name)
-	-- Based on SOCKS.EXU demo from Irv Mullins.
 	atom name_ptr,port_ptr,port
 	
 	name_ptr = allocate_string(name)
@@ -2351,24 +2352,44 @@ function unix_getservbyname(sequence name)
 		free(name_ptr)
 		return 0
 	end if
+
 	port = (peek(port_ptr+8)*256)+(peek(port_ptr+9))
 	free(name_ptr)
+
 	return port
-	
 end function
 
 function windows_getservbyname(sequence name)
 	return unix_getservbyname(name)
 end function
 
-function getservbyname(sequence name)
+--**
+-- Get the port number by service name
+--
+-- Parameters
+--   # ##name##: service name
+--
+-- Returns:
+--   An ##integer## representing the server port number or 0 on
+--   an error.
+--
+-- Example 1:
+-- <eucode>
+-- ? getservbyname("http")
+-- -- 80
+-- </eucode>
+--
+
+public function getservbyname(sequence name)
 	ifdef WIN32 then
 		return windows_getservbyname(name)
 	elsifdef UNIX then
 		return unix_getservbyname(name)
 	end ifdef
 	
-	return -999
+	-- This should never happen as the file crashes when running 
+	-- under DOS
+	return 0
 end function
 
 -------------------------------------------------------------------------------
@@ -2393,8 +2414,8 @@ end function
 --res A pointer to a linked list of one or more addrinfo structures that contains response information about the host.
 
 function unix_getaddrinfo(object node, object service, object hints)
-	atom addrinfo, success, node_ptr, service_ptr, hints_ptr, addrinfo_ptr, svcport
-	atom cpos
+	atom addrinfo, success, node_ptr, service_ptr, hints_ptr, addrinfo_ptr, 
+		svcport, cpos
 	sequence rtn, val
 	
 	hints = hints -- TODO -- not imlemented.
@@ -2425,7 +2446,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 		free(addrinfo)
 		if sequence(node) then free(node_ptr) end if
 		if sequence(service) then free(service_ptr) end if
-		return success
+		return 0
 	end if
 	rtn = {}
 	-- addrinfo is a pointer to a pointer to a structure in Linux.
@@ -2433,18 +2454,18 @@ function unix_getaddrinfo(object node, object service, object hints)
 	-- 27 Nov 2007: Only one addrinfo structure is supported
 	--  while addrinfo_ptr != 0 do
 	rtn = append(rtn,{
-	peek4u(addrinfo_ptr),
+		peek4u(addrinfo_ptr),
 		peek4u(addrinfo_ptr+4),
 		peek4u(addrinfo_ptr+8),
 		peek4u(addrinfo_ptr+12),
 		get_sockaddr(peek4u(addrinfo_ptr+20))
 	})
+
 	addrinfo_ptr = peek4u(addrinfo_ptr+28)
 	--  end while
+
 	c_proc(freeaddrinfo_,{peek4u(addrinfo)})
-	if svcport = 0 and rtn[1][4] > 0 then
-		svcport = rtn[1][4]
-	end if
+
 	if length(rtn[1][5])=0 and sequence(node) then
 		rtn[1][5] = gethostbyname(node)
 		if sequence(service) and svcport = 0 then
@@ -2463,25 +2484,27 @@ function unix_getaddrinfo(object node, object service, object hints)
 			end if
 		end if
 	end if
+
 	free(addrinfo)
+
 	return rtn
 end function
 
 function windows_getaddrinfo(object node, object service, object hints)
-	return unix_getaddrinfo(node,service,hints)
+	return unix_getaddrinfo(node, service, hints)
 end function
 
 --**
 -- Retrieve information about a given server name and named service.
 --
 -- Parameters:
--- 		# ##node##: an object, ???
---		# ##service##: an object, ???
---		# ##hints##: an object, currently not used
+--   # ##node##: an object, ???
+--   # ##service##: an object, ???
+--   # ##hints##: an object, currently not used
 --
 -- Returns:
---		A **sequence** of sequences containing the requested information.
--- The inner sequences have fields that can be accessed with public constants
+--   A **sequence** of sequences containing the requested information.
+--   The inner sequences have fields that can be accessed with public constants
 --
 -- * ADDR_FLAGS
 -- * ADDR_FAMILY
