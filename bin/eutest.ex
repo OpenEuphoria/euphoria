@@ -262,6 +262,7 @@ procedure do_test(sequence cmds)
 	-- interpreter or translator...
 	integer outstanding_argument_count
 	outstanding_argument_count = 0
+	
 	for i = 3 to length(cmds) do
 		if outstanding_argument_count > 0 then
 			outstanding_argument_count -= 1
@@ -885,6 +886,12 @@ procedure main(sequence cmds = command_line())
 	object buf
 	i = 3
 	while i <= length(cmds) do
+		if find( '-',cmds[i] ) = 1 then
+			if not find( upper(cmds[i]), {"-LOG","-VERBOSE"}) then
+				i += 2
+				continue
+			end if
+		end if
 		buf = dir( cmds[i] )
 		if sequence(buf) and length(buf) > 1 then
 			sl = length(cmds[i])
