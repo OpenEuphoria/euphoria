@@ -6,11 +6,6 @@
 /*                                                                           */
 /*****************************************************************************/
 
-/* BUG FIX: (Borland and LCC-Win32) dir() was not showing sub-directories/files
-			of a given directory if attributes element was an or'd value.
-			Fixed by EUMAN aka H.W Overman > Jan 1, 2002
-*/
-
 /* It's ok to assume that a machine_func/machine_proc call
    is coming from a standard .e file, as far as arguments being sequences
    versus atoms, but don't assume integers will be in 31-bit
@@ -116,6 +111,8 @@ END_COLOR_DEPTH_LIST
 #include "alldefs.h"
 #include "alloc.h"
 #include <signal.h>
+
+#include "version.h"
 
 /*****************/
 /* Local defines */
@@ -4760,6 +4757,17 @@ static object crash_routine(object x)
 	return ATOM_1;
 }
 
+object eu_info()
+{
+	s1_ptr s1;
+	s1 = NewS1(4);
+	s1->base[1] = MAJ_VER;
+	s1->base[2] = MIN_VER;
+	s1->base[3] = PAT_VER;
+	s1->base[4] = NewString(REL_TYPE);
+	return MAKE_SEQ(s1);
+}
+
 #ifdef ERUNTIME
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
@@ -5246,6 +5254,9 @@ object machine(object opcode, object x)
 				free_pcre(x);
 				return 1;
 				break;
+
+			case M_EU_INFO:
+				return eu_info();
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

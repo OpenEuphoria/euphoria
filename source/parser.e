@@ -8,6 +8,7 @@ include symtab.e
 include scanner.e
 include fwdref.e
 include common.e
+include version.e
 
 include std/sequence.e
 include std/text.e
@@ -3540,7 +3541,11 @@ global procedure InitGlobals()
 	ResetTP()
 	OpTypeCheck = TRUE
 
-	OpDefines &= { "EU400", "EU40", "EU4" }
+	OpDefines &= { 
+	    sprintf("EU%d%d%d", { MAJ_VER, MIN_VER, PAT_VER }), 
+	    sprintf("EU%d%d", { MAJ_VER, MIN_VER }), 
+	    sprintf("EU%d", { MAJ_VER }) 
+	}
 
 	if IWINDOWS then
 		OpDefines &= {"WIN32"}

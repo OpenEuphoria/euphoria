@@ -46,8 +46,7 @@ endif
 
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
-
-EU_VERSION = 4.0
+include $(TRUNKDIR)/source/version.mak
 
 ifeq "$(RELEASE)" "1"
 RELEASE_FLAG = -D EU_FULL_RELEASE
@@ -170,7 +169,8 @@ EU_CORE_FILES = \
 	fwdref.e \
 	shift.e \
 	inline.e \
-	rev.e
+	rev.e \
+	version.e
 
 EU_INTERPRETER_FILES = \
 	global.e \
@@ -242,6 +242,17 @@ EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : interpreter translator library backend
 
+version.e : version.mak
+	echo global constant MAJ_VER=$(MAJ_VER) > version.e
+	echo global constant MIN_VER=$(MIN_VER) >> version.e
+	echo global constant PAT_VER=$(PAT_VER) >> version.e
+	echo global constant REL_TYPE=\"$(REL_TYPE)\" >> version.e
+
+version.h: version.mak
+	echo \#define MAJ_VER $(MAJ_VER) > version.h
+	echo \#define MIN_VER $(MIN_VER) >> version.h
+	echo \#define PAT_VER $(PAT_VER) >> version.h
+	echo \#define REL_TYPE \"$(REL_TYPE)\" >> version.h
 
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
@@ -263,7 +274,7 @@ endif
 
 .PHONY : clean distclean all
 
-library : builddirs
+library : version.e version.h builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG)
 $(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
@@ -275,11 +286,11 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex ../.svn/entries
 
-interpreter : builddirs
+interpreter : version.e version.h builddirs
 	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
-translator : builddirs
+translator : version.e version.h builddirs
 	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
@@ -343,7 +354,7 @@ $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EECU)
 
-backend : builddirs
+backend : version.e version.h builddirs
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)
 

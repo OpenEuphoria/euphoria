@@ -15,14 +15,7 @@ else
 	PREFIX=./
 fi
 
-if [ `grep -e "EBSD.*TRUE" "$PREFIX"common.e` ]; then
-	ECONFIG=BSD
-else
-	ECONFIG=LINUX
-fi
-
 if test $UNAME_SYSTEM = "Linux"; then
-	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
@@ -31,7 +24,6 @@ if test $UNAME_SYSTEM = "Linux"; then
 	ln -f pcre/pcre.h.unix pcre/pcre.h
         ln -f pcre/config.h.unix pcre/config.h
 elif test $UNAME_SYSTEM = "MS-DOS"; then
-	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
@@ -40,7 +32,6 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 	cp pcre/pcre.h.windows pcre/pcre.h
 	cp pcre/config.h.windows pcre/config.h
 elif test $UNAME_SYSTEM = "WINDOWS"; then
-	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -re "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
@@ -49,7 +40,6 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	cp pcre/pcre.h.windows pcre/pcre.h
 	cp pcre/config.h.windows pcre/config.h
 else
-	echo EU_VERSION=`grep -e INTERPRETER_VERSION "$PREFIX"global.e | sed -Ee "s/^[^0-9\.]*([0-9\.]+)[^0-9\.]*$/\1/"` > "$PREFIX"Makefile.eu
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	if test $UNAME_SYSTEM = "Darwin"; then
 		echo EOSX=1 >> "$PREFIX"Makefile.eu
@@ -63,25 +53,6 @@ else
         ln -f pcre/config.h.unix pcre/config.h
 fi
 
-case "${UNAME_SYSTEM}:${ECONFIG}" in
-	Linux:BSD)
-		echo Linux:BSD
-		sed -ri -e "s/EBSD = TRUE/EBSD = FALSE/" "$PREFIX"common.e
-		sed -ri -e "s/EOSX = TRUE/EOSX = FALSE/" "$PREFIX"common.e
-		;;
-	*BSD:LINUX)
-		echo BSD:Linux
-		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" "$PREFIX"common.e
-		;;
-	Darwin:LINUX)
-		echo Darwin:Linux
-		sed -Ei .bsd -e "s/EBSD = FALSE/EBSD = TRUE/" "$PREFIX"common.e
-		sed -Ei .osx -e "s/EOSX = FALSE/EOSX = TRUE/" "$PREFIX"common.e
-		;;
-	*)
-		# do nothing
-		;;
-esac
 export BUILDDIR=.
 # parameters
 while [ "$1" != "" ]; do

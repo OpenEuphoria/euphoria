@@ -5,11 +5,9 @@ public include std/types.e
 include mode.e as mode
 public include common.e
 
-global constant MAJ_VER = 4, MIN_VER = 0, PAT_VER = 0
-global constant INTERPRETER_VERSION = "4.0 (development)"
-global constant TRANSLATOR_VERSION = "4.0 (development)"
---global constant INTERPRETER_VERSION = "4.0a1"
---global constant TRANSLATOR_VERSION = "4.0a1"
+include version.e
+global constant INTERPRETER_VERSION = sprintf("%d.%d.%d %s", { MAJ_VER, MIN_VER, PAT_VER, REL_TYPE })
+global constant TRANSLATOR_VERSION = INTERPRETER_VERSION
 
 global constant
 	INTERPRET = mode:get_interpret(),

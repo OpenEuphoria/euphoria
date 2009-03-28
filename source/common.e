@@ -11,8 +11,8 @@ public include std/types.e
 global constant EUNIX = (platform() = LINUX or platform() = FREEBSD or platform() = OSX),
 				EWINDOWS = platform() = WIN32,
 				EDOS = platform() = DOS32,
-				EBSD = FALSE,
-				EOSX = FALSE,
+				EBSD = (platform() = FREEBSD or platform() = OSX),
+				EOSX = platform() = OSX,
 				ELINUX = (platform() = LINUX) and not EBSD and not EOSX,
 				-- this is here so traninit.e and tranplat.e can distinguish between FREEBSD and LINUX
 				ULINUX = LINUX + 0.3,
