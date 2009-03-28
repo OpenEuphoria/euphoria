@@ -1507,6 +1507,9 @@ end function
 -- to that file and not close it. Otherwise, the named file will be created and
 -- closed by this routine.
 --
+--- Platform:
+--	not //DOS// when you use SW_RAW
+--
 -- The SM_TEXT type saves the map keys and values in a text format which can
 -- be read and edited by standard text editor. Each entry in the map is saved as
 -- a KEY/VALUE pair in the form \\
@@ -1574,6 +1577,11 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	values_ = values(the_map_)
 	
 	if type_ = SM_RAW then
+		ifdef DOS32 then
+			crash( "The function, save_map(), with the SW_RAW parameter is not supported for this Operating System." )
+			-- avoid 'function doesn't return' warning:
+			return -1
+		end ifdef
 		puts(file_handle_, serialize(
 				{1, -- saved map version
 				 format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map

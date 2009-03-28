@@ -1,0 +1,6 @@
+t_c_ifdef_no_then.e:3
+end of file reached while processing ifdef
+ifdef NOT_DEFINED
+                ^
+
+

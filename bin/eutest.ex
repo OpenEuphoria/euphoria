@@ -11,7 +11,7 @@ include std/get.e
 include std/os.e as ut
 include std/text.e 
 include std/math.e
-
+with trace
 
 ifdef DOS32 then
 	include std/text.e
@@ -126,8 +126,10 @@ function invoke( integer status, sequence cmd, sequence filename, integer err, s
 			error( filename, err, "program died with status %d", {status} )
 		end if
 		status = 1
-		if delete_file("cw.err") then end if
-		if delete_file("ex.err") then end if			
+		ifdef not REC then
+			if delete_file("cw.err") then end if
+			if delete_file("ex.err") then end if
+		end ifdef			
 	else
 		status = 0
 	end if
@@ -166,7 +168,7 @@ procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
 	object emake_outcome, files = {}
-	sequence filename, dexe, executable, cmd
+	sequence filename, dexe, executable, cmd, ddir
 	sequence interpreter_options = "", translator_options = "", test_options = ""
 	sequence translator = "", library = "", compiler = ""
 	sequence directory
@@ -314,14 +316,30 @@ procedure do_test(sequence cmds)
 		if delete_file( "cw.err" ) then
 		end if
 
-		if 1 label "interpreter" then		
+		if 1 label "interpreter" then
+			sequence path_stack		
+			object control_error_file
 			printf(1, "interpreting %s:\n", {filename})
 			cmd = sprintf("%s %s -D UNITTEST -batch %s %s", {executable, interpreter_options, filename, test_options})
 			if verbose_switch > 0 then
 				printf(1, "CMD '%s'\n", {cmd})
 			end if
-			
-			if match("t_c_", dos_lower(filename)) = 1 then
+
+			-- try tests/t_test.d/interpreter/UNIX/control.err
+			control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "interpreter" & SLASH & interpreter_os_name & SLASH & "control.err"
+			if atom(dir(control_error_file)) then
+			        -- try tests/t_test/UNIX/control.err			
+				control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & interpreter_os_name & SLASH & "control.err"
+			end if
+			if atom(dir(control_error_file)) then
+			        -- try tests/t_test/control.err
+				control_error_file = filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "control.err"
+			end if
+			if atom(dir(control_error_file)) then
+				-- don't try anything
+				control_error_file = 0
+			end if
+			if match("t_c_", dos_lower(filename)) = 1 or sequence( control_error_file ) then
 				expected_status = 1
 				status = system_exec( cmd, 2 )
 			else
@@ -335,45 +353,71 @@ procedure do_test(sequence cmds)
 			end if
 		
 			if expected_status then
-				directory = filename[1..find('.',filename&'.')-1] & SLASH & interpreter_os_name
-				if sequence( dir( directory ) ) then
-					if sequence( dir( directory & SLASH & "control.err" ) ) then
-						control_err = read_lines( directory & SLASH & "control.err" )
-						ex_err = read_lines( "ex.err" )
-						if length(ex_err) > 4 then
-							ex_err = ex_err[1..4]
-						end if
-						if length(control_err) > 4 then
-							control_err = control_err[1..4]
-						end if 
-						comparison = compare( ex_err, control_err )
-						if comparison then
-							failed += 1
-							fail_list = append( fail_list, filename )
-							if length( ex_err ) >=4  and length( control_err ) >= 4 then
-								error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
-							elsif length( ex_err ) then
-								error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
-							else
-								error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
+				
+				if sequence( control_error_file ) then
+					control_err = read_lines( control_error_file )
+					ex_err = read_lines( "ex.err" )
+					if length(ex_err) > 4 then
+						ex_err = ex_err[1..4]
+					end if
+					if length(control_err) > 4 then
+						control_err = control_err[1..4]
+					end if
+					for j = 1 to length(ex_err) do
+						integer mde = match(".e:", ex_err[j]) 
+						integer d32 = match("DOS32", ex_err[j])
+						if mde then
+							integer sl = mde
+							while sl > 1 and ex_err[j][sl] != SLASH do
+								sl -= 1
+							end while
+							ex_err[j] = dos_lower(ex_err[j][sl..$])
+							if sl > 1 then
+								ex_err[j] = "..." & ex_err[j]
 							end if
-								break "interpreter"
 						end if
-		
-					elsif atom( dir( "ex.err" ) ) then
-						error( filename, E_INTERPRET, "ex.err not generated.", {} )
+						if d32 then
+							ex_err[j] = ex_err[j][1..d32+4]
+						end if
+					end for
+					for j = 1 to length(control_err) do
+						integer mde = match(".e:", control_err[j])
+						integer d32 = match("DOS32", ex_err[j])
+						if mde then
+							integer sl = mde
+							while sl > 1 and control_err[j][sl] != SLASH do
+								sl -= 1
+							end while
+							control_err[j] = dos_lower(control_err[j][sl..$])
+							if sl > 1 then
+								control_err[j] = "..." & control_err[j]
+							end if
+						end if
+						if d32 then
+							control_err[j] = control_err[j][1..d32+4]
+						end if
+					end for
+							
+					comparison = compare( ex_err, control_err )
+					if comparison then
+						failed += 1
+						fail_list = append( fail_list, filename )
+						if length( ex_err ) >=4  and length( control_err ) >= 4 then
+							error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
+						elsif length( ex_err ) then
+							error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
+						else
+							error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
+						end if
 							break "interpreter"
 					end if
-					
+	
+				elsif atom( dir( "ex.err" ) ) then
+					error( filename, E_INTERPRET, "ex.err not generated.", {} )
+						break "interpreter"
 				end if
-				ifdef REC then
-					if create_directory( filename[1..find('.',filename&'.')-1] )
-					and create_directory( directory ) 
-					and move_file( "ex.err", directory & SLASH & "control.err" ) then 
-					end if
-				end ifdef
-			end if
-		
+			end if			
+			
 			if status xor expected_status then
 				failed += 1
 				fail_list = append( fail_list, filename )
@@ -383,6 +427,7 @@ procedure do_test(sequence cmds)
 					error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
 		
 				end if
+				
 				break "interpreter"
 			elsif status = 0 then -- expected_status = 0 therefore
 				if log then
@@ -400,6 +445,23 @@ procedure do_test(sequence cmds)
 				error( filename, E_NOERROR, "all tests successful", {} )
 			end if
 		end if -- interpreter
+		ifdef REC then
+			if status then
+				object void
+				if match("t_c_", dos_lower(filename)) != 1 then
+					directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
+				else
+					trace(1)
+					directory = filename[1..find('.',filename&'.')] & "d"
+				end if
+				void = create_directory( filename[1..find('.',filename&'.')] & "d" ) 
+				void = create_directory( directory )
+				-- the ex.err file disappears before this code is reached and the code must be here
+				-- for platform specific crashes.  Is it being deleted prematurely?
+				void = move_file( "ex.err", directory & SLASH & "control.err" )
+			end if
+		end ifdef
+		
 		report_last_error( filename )
 		
 		if length(translator) and expected_status = 0 then
@@ -819,6 +881,29 @@ procedure do_process_log(sequence cmds)
 end procedure
 
 procedure main(sequence cmds = command_line())
+	integer i, sl
+	object buf
+	i = 3
+	while i <= length(cmds) do
+		buf = dir( cmds[i] )
+		if sequence(buf) and length(buf) > 1 then
+			sl = length(cmds[i])
+			while sl >= 1 and cmds[i][sl] != SLASH do
+				sl -= 1
+			end while
+			for j = 1 to length(buf) do
+				if sl then
+					buf[j] = cmds[i][1..sl] & buf[j][D_NAME]
+				else
+					buf[j] = buf[j][D_NAME]
+				end if
+			end for
+			cmds = cmds[1..i-1] & buf & cmds[i+1..$]
+			i += length(buf)
+		else	
+			i = i + 1
+		end if
+	end while
 	if find("-help", cmds) or find("--help",cmds) or find("/?", cmds) then
 		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n"
 		&"\t[-exe interpreter-path-and-filename]\n"

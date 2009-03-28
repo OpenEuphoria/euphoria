@@ -1,0 +1,9 @@
+c:\euphoria\include\std/dll.e:143 in function open_dll() 
+open_dll() is not supported in Euphoria for DOS32 
+    file_name = {
+                  {110'n',111'o',110'n',97'a',109'm',101'e',100'd',108'l',
+108'l',46'.',100'd',108'l',108'l'},
+                  {117'u',115's',101'e',114'r',51'3',50'2',46'.',100'd',
+108'l',108'l'},
+
+

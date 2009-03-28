@@ -6,7 +6,7 @@
 --
 -- <<LEVELTOC depth=2>>
  
-ifdef DOS then
+ifdef DOS32 then
 	include std/error.e
 	crash("socket.e is not supported on the DOS platform")
 end ifdef

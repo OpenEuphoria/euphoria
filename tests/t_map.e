@@ -147,22 +147,24 @@ map:put(m1, "This has a \\backslash", "Test back\\- slash handling")
 test_equal("map save #1", 12, save_map(m1, "save_map.txt", SM_TEXT))
 m2 = load_map("save_map.txt")
 test_equal("map save #2", 1, map:compare(m1,m2))
-
-test_equal("map save #3", 12, save_map(m1, "save_map.raw", SM_RAW))
-m2 = load_map("save_map.raw")
-test_equal("map save #4", 1, map:compare(m1,m2))
-
-
-integer fhs
-fhs = open("save_map.raw2", "wb")
-test_equal("map save #5", 12, save_map(m1, fhs, SM_RAW))
-close(fhs)
-
-fhs = open("save_map.raw2", "rb")
-m2 = load_map(fhs)
-close(fhs)
-test_equal("map save #6", 1, map:compare(m1,m2))
-
+	
+ifdef not DOS32 then
+	test_equal("map save #3", 12, save_map(m1, "save_map.raw", SM_RAW))
+	m2 = load_map("save_map.raw")
+	test_equal("map save #4", 1, map:compare(m1,m2))
+	
+	
+	integer fhs
+	fhs = open("save_map.raw2", "wb")
+	test_equal("map save #5", 12, save_map(m1, fhs, SM_RAW))
+	close(fhs)
+	
+	fhs = open("save_map.raw2", "rb")
+	m2 = load_map(fhs)
+	close(fhs)
+	test_equal("map save #6", 1, map:compare(m1,m2))
+end ifdef
+	
 map:map m5
 m5 = map:new(10)
 map:put( m5, ADD, 1 )

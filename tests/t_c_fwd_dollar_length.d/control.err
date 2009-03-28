@@ -1,0 +1,10 @@
+t_c_fwd_dollar_length.e:29
+Errors resolving the following references:
+	t_c_fwd_dollar_length.e (29): data_result
+	t_c_fwd_dollar_length.e (29): data_result
+	t_c_fwd_dollar_length.e (29): data_result
+
+	data_result[$][i] = sprintf("%s",{col_attr[i][ColumnName]}) 
+	           ^
+
+
