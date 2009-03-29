@@ -34,7 +34,7 @@ end function
 
 integer fd = open("command_line.txt","w")
 if fd >= 0 then
-	pretty_print(fd, splice( command_line(), option_switches(), 2 ), {2,2,1,78,"%d","%.10g",32,127,1000,1})
+	pretty_print(fd, command_line(), {2,2,1,78,"%d","%.10g",32,127,1000,1})
 	puts(fd, '\n')
 	close(fd)
 end if
