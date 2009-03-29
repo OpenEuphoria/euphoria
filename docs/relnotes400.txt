@@ -211,3 +211,6 @@ $$(doneby Derek Parnell, C. Cuvier.)
 * New: ##with/without indirect_includes## help with using pre-eu4 code that uses
   global symbols with eu4 code, especially with respect to the respective standard
   libraries.  $$(doneby Matt Lewis)
+* New: ##delete_routine()## and ##delete()## for automatic garbage collection using
+  user defined routines.  Also, regexes automatically clean up after themselves.
+  $$(doneby Matt Lewis)
