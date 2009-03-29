@@ -46,12 +46,12 @@ ifdef WIN32 then
 elsifdef LINUX then
 	constant lib = open_dll("")
 
-elsifdef FREEBSD then
+elsifdef FREEBSD or SUNOS then
 	constant lib = open_dll("libc.so")
 	
 elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
-	
+
 elsedef
 	constant xCopyFile          = -1
 	constant xMoveFile          = -1
@@ -931,7 +931,7 @@ public enum
 --
 -- Example 2:
 -- <eucode>
--- -- Linux/FreeBSD
+-- -- Unix variants
 -- info = pathinfo("/opt/euphoria/docs/readme.txt")
 -- -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
 -- </eucode>
@@ -1743,7 +1743,7 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 		stat_t_offset = 0
 		stat_buf_size = 88
 		dev_t_size = 8
-	elsifdef FREEBSD then
+	elsifdef FREEBSD or SUNOS then
 		--TODO
 		stat_t_offset = 0
 		stat_buf_size = 88
@@ -2031,7 +2031,7 @@ public function disk_metrics(object disk_path)
 			stat_t_offset = 48
 			stat_buf_size = 88
 			dev_t_size = 4
-		elsifdef FREEBSD then
+		elsifdef FREEBSD or SUNON then
 			--TODO
 			stat_t_offset = 48
 			stat_buf_size = 88

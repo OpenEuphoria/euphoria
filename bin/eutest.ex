@@ -211,15 +211,17 @@ procedure do_test(sequence cmds)
 	end while
 
 	if (length(translator) >= 7 and match( upper("ecw.exe"), upper(translator) ) != 0)
-		or ( length(translator) = 0 and platform() = WIN32 ) then
-		--translator_platform = WIN32
+		or ( length(translator) = 0 and platform() = WIN32 ) 
+	then
 		translator_options &= " -CON"
 	elsif ( match( upper("ecu"), upper(translator) ) != 0 )
-		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX } ) ) then
-		--translator_platform = LINUX -- means FREEBSD or OSX too
+		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS } ) ) 
+	then
+		-- NOOP
 	elsif ( length(translator) = 0 and platform() = DOS32 ) or 
-			match( upper("ec.exe"), upper(translator) ) != 0 then
-		--translator_platform = DOS32
+			match( upper("ec.exe"), upper(translator) ) != 0 
+	then
+		-- NOOP
 	else
 		printf( 2, "Cannot determine translator\'s platform.", {} )
 		abort(1)
@@ -234,7 +236,7 @@ procedure do_test(sequence cmds)
 			interpreter_os_name = "DOS32"
 		elsif platform() = WIN32 then
 			interpreter_os_name = "WIN32"		
-		elsif find( platform(), { LINUX, OSX, FREEBSD } ) then
+		elsif find( platform(), { LINUX, OSX, FREEBSD, SUNOS } ) then
 			interpreter_os_name = "UNIX"
 		elsif platform() = DOS32
 			interpreter_os_name = "DOS32"

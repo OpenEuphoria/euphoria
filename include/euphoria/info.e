@@ -17,6 +17,8 @@ elsifdef LINUX then
 	constant plat_name = "Linux"
 elsifdef OSX then
 	constant plat_name = "OS X"
+elsifdef SUNOS then
+	constant plat_name = "SunOS"
 elsifdef FREEBSD then
 	constant plat_name = "FreeBSD"
 elsedef

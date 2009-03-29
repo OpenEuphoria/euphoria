@@ -153,6 +153,8 @@ global procedure transoptions()
 						set_host_platform( UFREEBSD )
 					elsif equal( s, "OSX" ) then
 						set_host_platform( UOSX )
+					elsif equal( s, "SUNOS" ) then
+						set_host_platform( USUNOS )
 					else
 						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
 					end if
@@ -196,6 +198,7 @@ global procedure transoptions()
 "       Linux  :  [-gcc] [-dll]\n" &
 "       FreeBSD:  [-gcc] [-dll]\n" &
 "       OSX    :  [-gcc] [-dll]\n" &
+"       SunOS  :  [-gcc] [-dll]\n" &
 "\n"&
 "LCC Only: -lccopt-off\n\n"&
 "Explainations:\n" &
@@ -435,7 +438,7 @@ mode:set_init_backend( routine_id("InitBackEnd") )
 procedure CheckPlatform()
 -- make sure the defines reflect the target platform
 	
-	if TLINUX or TBSD or TOSX then
+	if TLINUX or TBSD or TOSX or TSUNOS then
 		OpDefines = OpDefines[1..$-2]
 	else
 		OpDefines = OpDefines[1..$-1]
@@ -445,10 +448,12 @@ procedure CheckPlatform()
 		OpDefines &= {"WIN32"}
 	elsif TOSX then
 		OpDefines &= {"UNIX", "OSX"}
+	elsif TSUNOS then
+		OpDefines &= {"UNIX", "SUNOS"}
 	elsif TBSD then
 		OpDefines &= {"UNIX", "FREEBSD"}
 	elsif TLINUX then
-		OpDefines &= {"LINUX", "UNIX"}
+		OpDefines &= {"UNIX", "LINUX"}
 	elsif TUNIX then --right now this can never happen
 		OpDefines &= {"UNIX"}
 	elsif TDOS then

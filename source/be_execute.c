@@ -4783,13 +4783,15 @@ void do_exec(int *start_pc)
 			case L_PLATFORM: // only shrouded code needs this (for portability)
 			deprintf("case L_PLATFORM:");
 				DeRef(*(object_ptr)pc[1]);
-#ifdef EOSX
-				top = 4;  // OSX
-#else
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
-#endif // EUNIX
-#endif // EOSX
+#endif
+#ifdef EOSX
+				top = 4;  // OSX
+#endif
+#ifdef ESUNOS
+				top = 5; // SUNOS
+#endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32
 #endif

@@ -38,6 +38,37 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+
+#ifndef LOCK_SH
+#define LOCK_SH  1 /* shared lock */
+#define LOCK_EX  2 /* exclusive lock */
+#define LOCK_NB  4 /* don't block when locking */
+#define LOCK_UN  8 /* unlock */
+#endif
+
+#ifdef ESUNOS
+#include <fcntl.h>
+
+int emul_flock(fd, cmd)
+	int fd, cmd;
+{
+	struct flock f;
+
+	memset(&f, 0, sizeof(f));
+	
+	if (cmd & LOCK_UN)
+		f.l_type = F_UNLCK;
+	if (cmd & LOCK_SH)
+		f.l_type = F_RDLCK;
+	if (cmd & LOCK_EX)
+		f.l_type = F_WRLCK;
+
+	return fcntl(fd, (cmd & LOCK_NB) ? F_SETLK : F_SETLKW, &f);
+}
+
+#define flock(f,c) emul_flock(f,c)
+#endif
+
 #else
 
 #include <direct.h>
@@ -5112,6 +5143,9 @@ object machine(object opcode, object x)
 
 			case M_PLATFORM:
 				/* obsolete, but keep it */
+#ifdef ESUNOS
+				return 5;
+#endif
 #ifdef EOSX
 				return 4;
 #endif

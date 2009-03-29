@@ -26,7 +26,7 @@ global constant
 	EBORLAND = FALSE,
 	ELCC     = FALSE,
 	EDJGPP   = FALSE
-	-- (assume GNU C for LINUX/FreeBSD)
+	-- (assume GNU C for Unix variants)
 
 global constant EGPM = 0     -- GPM mouse support on Linux
 
@@ -43,10 +43,12 @@ elsif EWINDOWS then
 	version_name = "WIN32"
 elsif ELINUX then
 	version_name = "Linux"
-elsif EBSD then
-	version_name = "BSD"
+elsif ESUNOS then
+	version_name = "SunOS"
 elsif EOSX then
 	version_name = "Mac OS X"
+elsif EBSD then
+	version_name = "BSD"
 elsif EUNIX then  --should never happen
 	version_name = "UNIX"
 end if

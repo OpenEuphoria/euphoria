@@ -197,7 +197,7 @@ elsifdef LINUX then
 	LC_MONETARY = 4
 	LC_MESSAGES = 5
 
-elsifdef FREEBSD then
+elsifdef FREEBSD or SUNOS then
 
 	lib = open_dll("libc.so")
 	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)

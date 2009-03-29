@@ -60,12 +60,15 @@ ifdef EBACKEND
 BACKEND_FLAGS = -DBACKEND
 endif
 
-ifeq  "$(EBSD)" "1"
+ifeq "$(EBSD)" "1"
   LDLFLAG=
   EBSDFLAG=-DEBSD -DEBSD62
   SEDFLAG=-Ei
   ifeq "$(EOSX)" "1"
     EBSDFLAG=-DEBSD -DEBSD62 -DEOSX
+  endif
+  ifeq "$(ESUNOS)" "1"
+    EBSDFLAG=-DEBSD -DEBSD62 -DESUNOS
   endif
 else
   LDLFLAG=-ldl

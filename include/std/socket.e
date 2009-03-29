@@ -363,6 +363,9 @@ elsifdef LINUX then
 elsifdef FREEBSD then
 	dll_ = open_dll("libc.so")
 	dnsdll_ = dll_
+elsifdef SUNOS then
+	dll_ = open_dll("libsocket.so")
+	dnsdll_ = open_dll("libresolv.so")
 elsifdef OSX then
 	dll_ = open_dll("libc.dylib")
 	dnsdll_ = open_dll("libresolv.dylib")

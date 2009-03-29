@@ -30,7 +30,8 @@ public constant
 	WIN32	= 2,
 	LINUX	= 3,
 	FREEBSD = 3,
-	OSX		= 4
+	OSX	= 4,
+	SUNOS	= 5
 
 public constant
 	NO_PARAMETER = 0,
@@ -54,14 +55,15 @@ enum
 -- * LINUX - Host operating system is Linux **or** FreeBSD
 -- * FREEBSD - Host operating system is Linux **or** FreeBSD
 -- * OSX - Host operating system is Mac OS X
+-- * SUNOS - Host operating system is Sun's OpenSolaris
 --
 -- Note:
--- Via the [[:platform]] call, there is no way to determine if you are on Linux
--- or FreeBSD. This was done to provide a generic UNIX return value for
--- [[:platform]].
+--   Via the [[:platform]] call, there is no way to determine if you are on Linux
+--   or FreeBSD. This was done to provide a generic UNIX return value for
+--   [[:platform]].
 --
--- In most situations you are better off to test the host platform by using
--- the [[:ifdef statement]]. It is both more accurate and faster.
+--   In most situations you are better off to test the host platform by using
+--   the [[:ifdef statement]]. It is both more accurate and faster.
 --
 
 --****
@@ -465,7 +467,7 @@ ifdef WIN32 then
 	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
 elsifdef LINUX then
 	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
-elsifdef FREEBSD then
+elsifdef FREEBSD or SUNOS then
 	constant UNAME = define_c_func(open_dll("libc.so"), "uname", {C_POINTER}, C_INT)
 elsifdef OSX then
 	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
@@ -679,18 +681,19 @@ end function
 -- A small **integer**:
 -- <eucode>
 -- global constant
---     DOS32 = 1,
---     WIN32 = 2,
---     LINUX = 3,
---     FREEBSD = 3,
---     OSX   = 4
+--     DOS32   = 1,
+--     WIN32   = 2,
+--     LINUX   = 3,
+--     FREEBSD = 3, -- NOTE: take notices, same as LINUX.
+--     OSX     = 4,
+--     SUNOS   = 5
 -- </eucode>
 --
 -- Comments:
 -- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##().
 --
 -- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
--- When exu is running the platform is //LINUX// (or //FREEBSD//) or //OSX//.
+-- When exu is running the platform is //LINUX//, //FreeBSD//, //OS X// or //SunOS//.
 --
 --  ##platform##() used to be the way to execute different code depending on which platform the program is running on.
 -- Additional platforms will be added as Euphoria is ported to new machines and operating environments.

@@ -18,11 +18,15 @@ ifdef hello then
 end ifdef
 
 ifdef UNIX then
-    if platform() = 3 or platform() = 4 then
+    if platform() >= 3 and platform() <= 5 then
 		test_pass("UNIX test")
 	else
 		test_fail("UNIX test")
 	end if
+end ifdef
+
+ifdef SUNOS then
+	test_equal("SunOS test", 5, platform())
 end ifdef
 
 ifdef OSX then
@@ -50,6 +54,19 @@ ifdef EU400 then
 elsedef
     test_fail("EU400")
 end ifdef
+
+ifdef EU40 then
+	test_pass("EU40")
+elsedef
+	test_fail("EU40")
+end ifdef
+
+ifdef EU4 then
+	test_pass("EU4")
+elsedef
+	test_fail("EU4")
+end ifdef
+
 
 test_report()
 

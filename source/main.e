@@ -43,6 +43,8 @@ function GetSourceName()
 			else
 				if EOSX then
 					screen_output(STDERR, "for OS X.\n")
+				elsif ESUNOS then
+					screen_output(STDERR, "for OpenSolaris.\n")
 				elsif EBSD then
 					screen_output(STDERR, "for FreeBSD.\n")
 				else

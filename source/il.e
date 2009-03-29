@@ -388,7 +388,7 @@ procedure OutputIL()
 		
 		eu_dir = getenv("EUDIR")
 		if atom(eudir) then
-			eudir = SLASH & "euphoria" -- Linux/FreeBSD?
+			eudir = SLASH & "euphoria" -- Unix?
 		end if
 
 		source_dir = command_line()

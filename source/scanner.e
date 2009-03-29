@@ -42,7 +42,7 @@ boolean public_include -- TRUE if we should pass along public includes
 global integer LastLineNumber  -- last global line number (avoid dups in line tab)
 LastLineNumber = -1     
 
-global object shebang              -- #! line (if any) for Linux/FreeBSD
+global object shebang              -- #! line (if any) for Unix
 shebang = 0
 
 sequence default_namespaces

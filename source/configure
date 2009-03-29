@@ -18,6 +18,7 @@ fi
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
@@ -26,6 +27,7 @@ if test $UNAME_SYSTEM = "Linux"; then
 elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
@@ -34,11 +36,21 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW=1 >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
 	cp pcre/pcre.h.windows pcre/pcre.h
 	cp pcre/config.h.windows pcre/config.h
+elif test $UNAME_SYSTEM = "SunOS"; then
+	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ESUNOS=1 >> "$PREFIX"Makefile.eu
+	echo ELINUX= >> "$PREFIX"Makefile.eu
+	echo EMINGW= >> "$PREFIX"Makefile.eu
+	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	cp pcre/pcre.h.unix pcre/pcre.h
+	cp pcre/config.h.unix pcre/config.h
 else
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	if test $UNAME_SYSTEM = "Darwin"; then
@@ -46,6 +58,7 @@ else
 	else
 		echo EOSX= >> "$PREFIX"Makefile.eu
 	fi
+	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu

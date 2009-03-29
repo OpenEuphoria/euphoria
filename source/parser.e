@@ -3553,11 +3553,14 @@ global procedure InitGlobals()
 		OpDefines &= {"UNIX", "LINUX"}
 	elsif IOSX then
 		OpDefines &= {"UNIX", "OSX"}
+	elsif ISUNOS then
+		OpDefines &= {"UNIX", "SUNOS"}
 	elsif IBSD then
 		OpDefines &= {"UNIX", "FREEBSD"}
 	elsif IDOS then
 		OpDefines &= {"DOS32"}
 	end if
+
 	OpInline = DEFAULT_INLINE
 	OpIndirectInclude = 1
 end procedure

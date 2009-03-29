@@ -9,6 +9,7 @@ global integer TLINUX
 global integer TUNIX
 global integer TBSD
 global integer TOSX
+global integer TSUNOS
 global sequence HOSTNL
 
 integer ihost_platform
@@ -19,6 +20,7 @@ TLINUX   = ELINUX
 TUNIX    = EUNIX
 TBSD     = EBSD
 TOSX     = EOSX
+TSUNOS   = ESUNOS
 if TUNIX then
 	HOSTNL = "\n"
 else
@@ -27,12 +29,13 @@ end if
 
 global procedure set_host_platform( atom plat )
 	ihost_platform = floor(plat)
-	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX)
+	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX or plat = USUNOS)
 	TWINDOWS = plat = WIN32
 	TDOS     = plat = DOS32
 	TBSD     = plat = UFREEBSD
 	TOSX     = plat = UOSX
 	TLINUX   = plat = ULINUX
+	TSUNOS   = plat = USUNOS
 	if TUNIX then
 		HOSTNL = "\n"
 	else
@@ -44,6 +47,7 @@ global procedure set_host_platform( atom plat )
 	IBSD = TBSD
 	IOSX = TOSX
 	ILINUX = TLINUX
+	ISUNOS = TSUNOS
 end procedure
 
 ihost_platform = platform()
