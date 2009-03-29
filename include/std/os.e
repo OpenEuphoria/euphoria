@@ -9,6 +9,7 @@
 include std/sequence.e
 include std/text.e
 include std/machine.e
+include std/math.e as math
 
 ifdef DOS32 then
 	include std/dos/interrup.e
@@ -236,6 +237,108 @@ public procedure show_help(sequence opts, integer add_help_rid=-1)
 		call_proc(add_help_rid, {})
 	end if
 end procedure
+
+type sequence_of_atoms( object x )
+	if atom(x) then return 0 end if
+	for i = 1 to length(x) do
+		if sequence(x[i]) then return 0 end if
+	end for
+	return 1
+end type
+
+type sequence_of_sequence_of_atoms( object s )
+	if atom(s) then return 0 end if
+	for i = 1 to length(s) do
+		if not sequence_of_atoms(s[i]) then
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+function eat0s( sequence s )
+	integer i
+	i = 1
+	while i <= length(s) do
+		if s[i] = 0 then
+			s = s[1..i-1] & s[i+1..$]
+		else
+			i += 1
+		end if
+	end while
+	return s
+end function
+
+-- Return a quoted string version of the argument list s such that
+-- if you call system with the returned value as its argument
+-- the child process' value returned by command_line() would be
+-- s.
+-- put quotes around spaces, no embedded quoting is handled
+global function space_quote( sequence_of_atoms s )
+	integer j, k
+	integer inquote
+	sequence t
+	inquote = 0
+	j = min( eat0s( {find( ' ', s ), find( '\"', s ), find( '\\', s ), length(s) + 1 } ) )
+	for i = 1 to 1000 do
+			if j > length(s) then
+				exit
+			end if
+			if s[j] = ' ' then
+				s = s[1..j-1] & "\"" & s[j..$]
+				j = j + 2
+				while j <= length(s) and s[j] = ' ' do
+					j = j + 1
+				end while
+				s = s[1..j-1] & "\"" & s[j..$]				
+			elsif s[j] = '\"' then
+				s = s[1..j-1] & "\\" & s[j..$]				
+				j = j + 1
+			end if
+			if j > length(s) then
+				exit
+			end if
+			j = math:min( eat0s( { find( ' ', s[j+1..$] ), find( '\"', s[j+1..$] ), length(s) + 1 } ) ) + j
+			if j > length(s) then
+				exit
+			end if
+	end for	
+	return s
+end function
+
+constant quote_table = { 
+	{ '\"' },
+	{ "\\\"" }
+}
+
+-- Return a quoted string version of the argument list s such that
+-- if you call system with the returned value as its argument
+-- the child process' value returned by command_line() would be
+-- s.
+global function qe_quote( sequence_of_atoms s )
+	integer j
+	sequence t
+	if sequence_of_atoms( s ) then
+		for i = length(s) to 1 by -1 do
+			j = find( s[i], quote_table[1] )
+			if j then
+				s = s[1..i-1] & quote_table[2][j] & s[i+1..$]
+			end if
+		end for
+		return "\"" & s & "\""
+	end if
+end function
+
+public function command_line_quote( sequence_of_sequence_of_atoms cmds )
+	sequence t
+	integer spl
+	t = ""
+	for i = 2 to length(cmds) do
+		t = t & " " & qe_quote(cmds[i])
+	end for
+	t = space_quote( cmds[1] ) & t
+	return t	
+end function
 
 function find_opt(sequence opts, integer typ, object name)
 	integer slash
