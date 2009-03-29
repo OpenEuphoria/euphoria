@@ -8,17 +8,22 @@ include std/os.e
 public include std/types.e
 
 -- operating system:
-global constant EUNIX = (platform() = LINUX or platform() = FREEBSD or platform() = OSX),
-				EWINDOWS = platform() = WIN32,
-				EDOS = platform() = DOS32,
-				EBSD = (atom(dir("/proc/dev/net")) or platform() = OSX),
-				EOSX = platform() = OSX,
-				ELINUX = (platform() = LINUX) and not EBSD and not EOSX,
-				-- this is here so traninit.e and tranplat.e can distinguish between FREEBSD and LINUX
-				ULINUX = LINUX + 0.3,
-				UFREEBSD = FREEBSD + 0.4,
-				-- this is not strictly necessary yet
-				UOSX = OSX + 0.5
+ifdef DOS32 then
+	global constant EDOS=1, EWINDOWS=0, EUNIX=0, ELINUX=0, EBSD=0, EOSX=0
+elsifdef WIN32 then
+	global constant EDOS=0, EWINDOWS=1, EUNIX=0, ELINUX=0, EBSD=0, EOSX=0
+elsifdef OSX then
+	global constant EDOS=0, EWINDOWS=0, EUNIX=1, ELINUX=0, EBSD=1, EOSX=1
+elsifdef FREEBSD then
+	global constant EDOS=0, EWINDOWS=0, EUNIX=1, ELINUX=0, EBSD=1, EOSX=0
+elsifdef LINUX then
+	global constant EDOS=0, EWINDOWS=0, EUNIX=1, ELINUX=1, EBSD=1, EOSX=0
+end ifdef
+
+global constant
+	ULINUX = LINUX + 0.3,
+	UFREEBSD = FREEBSD + 0.4,
+	UOSX = OSX + 0.5
 
 global integer PATH_SEPARATOR
 global sequence SLASH_CHARS
