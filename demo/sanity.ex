@@ -24,7 +24,7 @@ include std/os.e
 include std/text.e
 include std/error.e
 include std/convert.e
-ifdef DOS32
+ifdef DOS32 then
 include std/dos/pixels.e
 end ifdef
 constant msg = 1 -- place to send messages
@@ -708,7 +708,7 @@ procedure patterns()
     if wildcard_file("ABC*DEF.*", "XBCDEF.E") then
 	crash(generic_msg)
     end if
-    ifdef !UNIX then
+    ifdef not UNIX then
     	if not wildcard_file("A?B?C?D", "a1b2C3D") then
 			crash(generic_msg)
     	end if
