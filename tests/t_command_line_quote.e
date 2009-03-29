@@ -41,6 +41,7 @@ ifdef not EC then
  		sequence cmdline
  		cmds = { interpreter,
  			"print_command_line.ex" } & command_arrays[i]
+		cmds = splice( cmds, option_switches(), 2 )
  		cmdline = build_commandline(cmds)
  		system( cmdline, 2 )
  		fd = open( "command_line.txt", "r" )
