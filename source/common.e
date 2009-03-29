@@ -17,7 +17,7 @@ elsifdef OSX then
 elsifdef FREEBSD then
 	global constant EDOS=0, EWINDOWS=0, EUNIX=1, ELINUX=0, EBSD=1, EOSX=0
 elsifdef LINUX then
-	global constant EDOS=0, EWINDOWS=0, EUNIX=1, ELINUX=1, EBSD=1, EOSX=0
+	global constant EDOS=0, EWINDOWS=0, EUNIX=1, ELINUX=1, EBSD=0, EOSX=0
 end ifdef
 
 global constant
