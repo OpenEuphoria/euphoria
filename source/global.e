@@ -139,14 +139,14 @@ global constant
 
 	S_ARG_SEQ_LEN = 49,
 	S_ARG_SEQ_LEN_NEW = 50,
-	S_RI_TARGET = 51         -- > 0 if targeted by a routine_id call or other
+	S_RI_TARGET = 51,        -- > 0 if targeted by a routine_id call or other
 	                         -- external call, e.g. call to a DLL
-
+	S_HAS_DELETE = 52
 
 global constant
-	SIZEOF_ROUTINE_ENTRY = 27 + 24 * TRANSLATE,
-	SIZEOF_VAR_ENTRY     = 15 + 36 * TRANSLATE,
-	SIZEOF_TEMP_ENTRY    =  5 + 29 * TRANSLATE
+	SIZEOF_ROUTINE_ENTRY = 27 + 25 * TRANSLATE,
+	SIZEOF_VAR_ENTRY     = 15 + 37 * TRANSLATE,
+	SIZEOF_TEMP_ENTRY    =  5 + 30 * TRANSLATE
 
 -- Permitted values for various symbol table fields
 

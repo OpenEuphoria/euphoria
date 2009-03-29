@@ -69,16 +69,20 @@
 typedef long object;
 typedef object *object_ptr;
 
+struct cleanup;
+typedef struct cleanup *cleanup_ptr;
 typedef void(*cleanup_func)(object);
+
 struct cleanup {
 	long type;
 	union func_union{
 		long rid;
 		cleanup_func builtin;
 	} func;
+	cleanup_ptr next;
 };
 
-typedef struct cleanup *cleanup_ptr;
+
 
 struct s1 {                        /* a sequence header block */
 	object_ptr base;               /* pointer to (non-existent) 0th element */
@@ -120,6 +124,7 @@ struct routine_list {
 	short int num_args;
 	short int convention;
 	char scope;
+	cleanup_ptr cleanup;
 };
 
 struct ns_list {

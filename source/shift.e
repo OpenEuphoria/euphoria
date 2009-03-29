@@ -48,6 +48,8 @@ procedure init_op_info()
 	op_info[C_FUNC              ] = { FIXED_SIZE, 5, {}, {4}, {3} }
 	op_info[C_PROC              ] = { FIXED_SIZE, 4, {}, {}, {3} }
 	op_info[DATE                ] = { FIXED_SIZE, 2, {}, {1}, {} }
+	op_info[DELETE_ROUTINE      ] = { FIXED_SIZE, 4, {}, {3}, {} }
+	op_info[DELETE_OBJECT       ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[DIV2                ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[DIVIDE              ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[ELSE                ] = { FIXED_SIZE, 2, {1}, {}, {} }

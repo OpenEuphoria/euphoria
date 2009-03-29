@@ -75,6 +75,7 @@ struct routine_list {
 	short int num_args;
 	short int convention;
 	char scope;
+	cleanup_ptr cleanup;
 };
 
 struct ns_list {

@@ -3432,6 +3432,22 @@ procedure opMACHINE_PROC()
 	pc += 3
 end procedure
 
+procedure opDELETE_ROUTINE()
+	-- TODO: how to make this all work inside eu.ex?
+	-- probably need to do a custom cleanup routine here, and then
+	-- call the user's RID
+	RTFatal("delete_routine not implemented for euphoria backend")
+	pc += 5
+end procedure
+
+procedure opDELETE_OBJECT()
+	-- TODO: how to make this all work inside eu.ex?
+	-- probably need to do a custom cleanup routine here, and then
+	-- call the user's RID
+	RTFatal("delete not implemented for euphoria backend")
+	pc += 2
+end procedure
+
 ifdef CALLPROC then
 
 procedure do_exec()

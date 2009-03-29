@@ -676,6 +676,10 @@ procedure CDeRef(integer v)
 	LeftSym = TRUE
 	CName(v)
 	c_puts(");\n")
+	
+	if HasDelete( v ) then
+		NewBB(1, E_ALL_EFFECT, 0)
+	end if
 end procedure
 
 procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
@@ -717,7 +721,7 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 	else
 		target_type = GType(Code[pc+1])
 	end if
-	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 end procedure
 
 procedure seg_peek_string(integer target, integer source, integer mode)
@@ -1107,7 +1111,7 @@ procedure main_temps()
 					c_puts(" = 0")
 					-- avoids DeRef in 1st BB, but may hurt global type:
 					target = {0, 0}
-					SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT)
+					SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0 )
 				end if
 				c_puts(";\n")
 			end if
@@ -1480,7 +1484,7 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 	end if
 
 	CDeRefStr("_0")
-	SetBBType(Code[pc+3], target_type, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+3], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+3] ))
 end procedure
 
 function unary_optimize(integer pc, integer target_type, sequence target_val,
@@ -1500,7 +1504,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 			   TypeIs(Code[pc+1], TYPE_INTEGER) then
 				c_stmt(intcode2, {Code[pc+2], Code[pc+1]})
 				CDeRefStr("_0")
-				SetBBType(Code[pc+2], TYPE_INTEGER, target_val, TYPE_OBJECT)
+				SetBBType(Code[pc+2], TYPE_INTEGER, target_val, TYPE_OBJECT, HasDelete( Code[pc+2] ) )
 				pc += 3
 				if Code[pc] = INTEGER_CHECK then
 					pc += 2 -- skip it
@@ -1526,7 +1530,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 	end if
 
 	CDeRefStr("_0")
-	SetBBType(Code[pc+2], target_type, target_val, TYPE_OBJECT)
+	SetBBType(Code[pc+2], target_type, target_val, TYPE_OBJECT, HasDelete( Code[pc+2] ) )
 	return pc + 3
 end function
 
@@ -1691,7 +1695,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 				-- constant folding code was emitted
 				CDeRefStr("_0")
 				SetBBType(Code[pc+3], TYPE_INTEGER, target,
-									  TYPE_OBJECT)
+									  TYPE_OBJECT, 0)
 				return np
 
 			elsif SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
@@ -1703,7 +1707,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 				if target[MIN] = NOVALUE then
 					target = novalue
 				end if
-				SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+				SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 				return np
 			end if
 		end if
@@ -1712,9 +1716,9 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 		if iii then
 			-- int operands => int result
-			SetBBType(Code[pc+3], TYPE_INTEGER, target_val, TYPE_OBJECT)
+			SetBBType(Code[pc+3], TYPE_INTEGER, target_val, TYPE_OBJECT, 0)
 		else
-			SetBBType(Code[pc+3], TYPE_ATOM, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+3], TYPE_ATOM, novalue, TYPE_OBJECT, 0 )
 		end if
 
 		-- now that Code[pc+3]'s type and value have been updated:
@@ -1741,7 +1745,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		else
 			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem)
+				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
 				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
 			end if
@@ -1767,7 +1771,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
 				SetBBType(Code[pc+3], GType(Code[pc+3]),
-									  target_val, target_elem)
+									  target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
 				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
 			end if
@@ -1790,7 +1794,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		else
 			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem)
+				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem,0)
 				-- now that Code[pc+3]'s value has been updated:
 				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
 			end if
@@ -1914,7 +1918,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 	end if
 
 	CDeRefStr("_0")
-	SetBBType(Code[pc+3], target_type, target_val, target_elem)
+	SetBBType(Code[pc+3], target_type, target_val, target_elem, 0)
 	return pc + 4
 end function
 
@@ -2123,16 +2127,19 @@ procedure opPROC()
 
 		if SymTab[sub][S_GTYPE] = TYPE_INTEGER then
 			target = {SymTab[sub][S_OBJ_MIN], SymTab[sub][S_OBJ_MAX]}
-			SetBBType(Code[pc+n-1], SymTab[sub][S_GTYPE], target, TYPE_OBJECT)
+			SetBBType(Code[pc+n-1], SymTab[sub][S_GTYPE], target, TYPE_OBJECT,
+				HasDelete( sub ) )
 
 		elsif SymTab[sub][S_GTYPE] = TYPE_SEQUENCE then
 			target[MIN] = SymTab[sub][S_SEQ_LEN]
 			SetBBType(Code[pc+n-1], SymTab[sub][S_GTYPE], target,
-							  SymTab[sub][S_SEQ_ELEM])
+							  SymTab[sub][S_SEQ_ELEM],
+							  HasDelete( sub ) )
 
 		else
 			SetBBType(Code[pc+n-1], SymTab[sub][S_GTYPE], novalue,
-							  SymTab[sub][S_SEQ_ELEM])
+							  SymTab[sub][S_SEQ_ELEM],
+							  HasDelete( sub ) )
 
 		end if
 		SymTab[Code[pc+n-1]][S_ONE_REF] = FALSE
@@ -2157,7 +2164,7 @@ procedure opRHS_SUBS()
 		else
 			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
 			-- element type of pc[1] is changed
-			SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_OBJECT, 0 )
 		end if
 	else
 		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
@@ -2179,27 +2186,29 @@ procedure opRHS_SUBS()
 		CDeRefStr("_0")
 		SetBBType(Code[pc+3],
 						 TYPE_OBJECT,    -- we don't know the element type
-						 novalue, TYPE_OBJECT)
+						 novalue, TYPE_OBJECT, 0)
 	else
 		if Code[pc] = RHS_SUBS_I then
 			-- target is integer var - convert doubles to ints
 			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT)
+				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
 				c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+3])
 				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", {Code[pc+3], Code[pc+3]})
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT,
+				HasDelete( Code[pc+3] ) )
 
 		elsif Code[pc+4] = INTEGER_CHECK and Code[pc+5] = Code[pc+3] then
 			-- INTEGER_CHECK coming next
 			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT)
+				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT,
+					HasDelete( Code[pc+3] ) )
 				c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+3])
 				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", {Code[pc+3], Code[pc+3]})
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 			pc += 2 -- skip INTEGER_CHECK
 
 		else
@@ -2213,7 +2222,8 @@ procedure opRHS_SUBS()
 				end if
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], SeqElem(Code[pc+1]), novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+3], SeqElem(Code[pc+1]), novalue, TYPE_OBJECT, 
+				HasDelete(Code[pc+1]) )
 		end if
 	end if
 
@@ -2495,7 +2505,7 @@ procedure opINTEGER_CHECK()
 		c_stmt("DeRefDS(@);\n", sym)
 		c_stmt("@ = _1;\n", sym)
 		c_stmt0("}\n")
-		SetBBType(sym, TYPE_INTEGER, novalue, TYPE_OBJECT)
+		SetBBType(sym, TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 	end if
 	pc += 2
 end procedure
@@ -2594,7 +2604,8 @@ procedure opASSIGN_SUBS()
 		-- at this point, but we must adjust the global view
 		-- of the element type. We shouldn't say TYPE_OBJECT either.
 		target[MIN] = -1
-		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, GType(Code[pc+3]))
+		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, GType(Code[pc+3]),
+			HasDelete(Code[pc+1]) )
 	end if
 	pc += 4
 end procedure
@@ -2614,7 +2625,7 @@ procedure opLENGTH()
 			target = {0, MAXLEN}
 		end if
 		CDeRefStr("_0")
-		SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+		SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
 	else
 		if opcode = PLENGTH then
 			-- we have a pointer to a sequence
@@ -2623,7 +2634,7 @@ procedure opLENGTH()
 			c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
 		end if
 		CDeRefStr("_0")
-		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT)
+		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 	end if
 	pc += 3
 end procedure
@@ -2641,10 +2652,11 @@ procedure opASSIGN()
 
 	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
 		target[MIN] = SeqLen(Code[pc+1])
-		SetBBType(Code[pc+2], GType(Code[pc+1]), target, SeqElem(Code[pc+1]))
+		SetBBType(Code[pc+2], GType(Code[pc+1]), target, SeqElem(Code[pc+1]),
+			HasDelete( Code[pc+1] ) )
 	else
 		SetBBType(Code[pc+2], GType(Code[pc+1]), ObjMinMax(Code[pc+1]),
-				  TYPE_OBJECT)
+				  TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	end if
 	pc += 3
 end procedure
@@ -2652,7 +2664,7 @@ end procedure
 procedure opASSIGN_I()
 -- source & destination are known to be integers */
 	c_stmt("@ = @;\n", {Code[pc+2], Code[pc+1]})
-	SetBBType(Code[pc+2], TYPE_INTEGER, ObjMinMax(Code[pc+1]), TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, ObjMinMax(Code[pc+1]), TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -2706,9 +2718,11 @@ procedure opRIGHT_BRACE_N()
 	end if
 
 	n = 0 -- repeat count
+	integer has_delete = 0
 	for i = 1 to Code[pc+1] do
 		t = Code[pc+len-i]
 		SymTab[t][S_ONE_REF] = FALSE
+		has_delete = has_delete or HasDelete( t )
 		if i < Code[pc+1] and t = Code[pc+len-i-1] then
 			n += 1   -- same as the next one
 		else
@@ -2746,7 +2760,7 @@ procedure opRIGHT_BRACE_N()
 		t = or_type(t, GType(Code[pc+len-i]))
 	end for
 	target[MIN] = Code[pc+1]
-	SetBBType(Code[pc+len], TYPE_SEQUENCE, target, t)
+	SetBBType(Code[pc+len], TYPE_SEQUENCE, target, t, has_delete )
 	pc += 3 + Code[pc+1]
 end procedure
 
@@ -2765,7 +2779,8 @@ procedure opRIGHT_BRACE_2()
 	CDeRefStr("_0")
 	target[MIN] = 2
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, target,
-			  or_type(GType(Code[pc+1]), GType(Code[pc+2])))
+			  or_type(GType(Code[pc+1]), GType(Code[pc+2])),
+			  HasDelete( Code[pc+1] ) or HasDelete( Code[pc+2] ) )
 	pc += 4
 end procedure
 
@@ -2826,7 +2841,7 @@ procedure opPLUS1()
 			else
 				-- destroy any value, check for overflow
 				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val,
-								  target_elem)
+								  target_elem, HasDelete( Code[pc+3] ) )
 				c_stmt("if (@ > MAXINT)\n", Code[pc+3])
 				c_stmt("@ = NewDouble((double)@);\n", {Code[pc+3], Code[pc+3]})
 			end if
@@ -2848,7 +2863,7 @@ procedure opPLUS1()
 
 	CDeRefStr("_0")
 
-	SetBBType(Code[pc+3], target_type, target_val, target_elem)
+	SetBBType(Code[pc+3], target_type, target_val, target_elem, HasDelete( Code[pc+3] ) )
 	pc = np
 end procedure
 
@@ -2898,7 +2913,7 @@ procedure opLHS_SUBS()
 		c_stmt("Ref(@);\n", Code[pc+4])
 		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+4])
 		target[MIN] = SeqLen(Code[pc+1])
-		SetBBType(Code[pc+4], TYPE_SEQUENCE, target, SeqElem(Code[pc+1]))
+		SetBBType(Code[pc+4], TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete( Code[pc+1] ) )
 	end if
 
 	c_stmt0("if (!UNIQUE(_2)) {\n")
@@ -2934,22 +2949,23 @@ procedure opASSIGN_OP_SLICE()
 -- ASSIGN_OP_SLICE / PASSIGN_OP_SLICE
 -- var[i..j] op= expr
 -- Note: _3 is set by above op
-
+	integer has_delete = 0
 	c_stmt("rhs_slice_target = (object_ptr)&@;\n", Code[pc+4])
 	if opcode = PASSIGN_OP_SLICE then
 		-- adjust etype of Code[pc+1]? - no, not the top level
 		c_stmt0("assign_slice_seq = (s1_ptr *)_3;\n")
 		c_stmt("RHS_Slice(*(int *)_3, @, @);\n",
 			   {Code[pc+2], Code[pc+3]})
+			
 	else
 		c_stmt("assign_slice_seq = (s1_ptr *)&@;\n", Code[pc+1])
 		target[MIN] = -1
-		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, TYPE_OBJECT)
+		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 		-- OR-in the element type
 		c_stmt("RHS_Slice(@, @, @);\n",
 			   {Code[pc+1], Code[pc+2], Code[pc+3]})
 	end if
-	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	--length might be knowable
 	pc += 5
 end procedure
@@ -2968,7 +2984,7 @@ procedure opASSIGN_SLICE()
 	else
 		c_stmt("assign_slice_seq = (s1_ptr *)&@;\n", Code[pc+1])
 		target[MIN] = -1
-		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, GType(Code[pc+4]))
+		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, GType(Code[pc+4]), HasDelete( Code[pc+4] ) )
 		-- OR-in the element type
 	end if
 	c_stmt("AssignSlice(@, @, @);\n", {Code[pc+2], Code[pc+3], Code[pc+4]})
@@ -2996,10 +3012,10 @@ procedure opRHS_SLICE()
 		-- don't let this operation affect our
 		-- global idea of sequence element type
 		preserve = SymTab[t][S_SEQ_ELEM_NEW]
-		SetBBType(t, TYPE_SEQUENCE, target, SeqElem(Code[pc+1]))
+		SetBBType(t, TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete(Code[pc+1]) )
 		SymTab[t][S_SEQ_ELEM_NEW] = preserve
 	else
-		SetBBType(t, TYPE_SEQUENCE, target, SeqElem(Code[pc+1]))
+		SetBBType(t, TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete(Code[pc+1]) )
 	end if
 	pc += 5
 end procedure
@@ -3044,7 +3060,7 @@ procedure opIS_AN_INTEGER()
 	end if
 	CDeRefStr("_0")
 	target = {0, 1}
-	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -3059,7 +3075,7 @@ procedure opIS_AN_ATOM()
 	end if
 	CDeRefStr("_0")
 	target = {0, 1}
-	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
 	pc += 3
 end procedure
 
@@ -3074,7 +3090,7 @@ procedure opIS_A_SEQUENCE()
 	end if
 	CDeRefStr("_0")
 	target = {0, 1}
-	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -3082,7 +3098,7 @@ procedure opIS_AN_OBJECT()
 	CDeRef(Code[pc+2])
 	c_stmt("@ = 1;\n", Code[pc+2])
 	target = {1, 1}
-	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -3638,9 +3654,9 @@ procedure opSC1_AND()
 	end if
 
 	if TypeIs(Code[pc+1], TYPE_INTEGER) then
-		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT)
+		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
 	else
-		SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT)
+		SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, 0)
 	end if
 	pc += 4
 end procedure
@@ -3683,9 +3699,9 @@ procedure opSC1_OR()
 
 	if Code[pc] = SC1_OR then
 		if TypeIs(Code[pc+1], TYPE_INTEGER) then
-			SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
 		else
-			SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, 0 )
 		end if
 	end if
 	pc += 4
@@ -3711,7 +3727,7 @@ procedure opSC2_OR()
 		c_stmt("@ = DBL_PTR(@)->dbl != 0.0;\n", {Code[pc+2], Code[pc+1]})
 	end if
 
-	SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -4008,7 +4024,7 @@ procedure opCALL_PROC()
 			c_stmt("@ = _1;\n", Code[pc+3])
 			SymTab[Code[pc+3]][S_ONE_REF] = FALSE
 			-- hard to ever know the return type here
-			SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT, GDelete() )
 		end if
 	end if
 	pc += 3 + (Code[pc] = CALL_FUNC)
@@ -4191,7 +4207,7 @@ procedure opROUTINE_ID()
 	c_stmt(", @);\n", Code[pc+2])  -- name
 	CDeRefStr("_0")
 	target = {-1, 1000000}
-	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
 	pc += 5
 end procedure
 
@@ -4213,11 +4229,15 @@ procedure opAPPEND()
 		-- global idea of sequence element type
 		preserve = or_type(SymTab[t][S_SEQ_ELEM_NEW], GType(Code[pc+2]))
 		SetBBType(t, TYPE_SEQUENCE, target,
-				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])))
+				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
+				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 		SymTab[t][S_SEQ_ELEM_NEW] = preserve
 	else
 		SetBBType(t, TYPE_SEQUENCE, target,
-				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])))
+				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
+				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 	end if
 	pc += 4
 end procedure
@@ -4240,11 +4260,15 @@ procedure opPREPEND()
 		-- global idea of sequence element type
 		preserve = or_type(SymTab[t][S_SEQ_ELEM_NEW], GType(Code[pc+2]))
 		SetBBType(t, TYPE_SEQUENCE, target,
-				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])))
+				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
+				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 		SymTab[t][S_SEQ_ELEM_NEW] = preserve
 	else
 		SetBBType(t, TYPE_SEQUENCE, target,
-				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])))
+				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
+				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 	end if
 	pc += 4
 end procedure
@@ -4343,18 +4367,24 @@ procedure opCONCAT()
 		-- don't let this operation affect our
 		-- global idea of sequence element type
 		preserve = or_type(SymTab[p3][S_SEQ_ELEM_NEW], t)
-		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t))
+		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t),
+			HasDelete( p3 ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 		SymTab[p3][S_SEQ_ELEM_NEW] = preserve
 
 	elsif p3 = Code[pc+2] and SymTab[p3][S_MODE] = M_NORMAL then
 		-- don't let this operation affect our
 		-- global idea of sequence element type
 		preserve = or_type(SymTab[p3][S_SEQ_ELEM_NEW], j)
-		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t))
+		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t),
+			HasDelete( p3 ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 		SymTab[p3][S_SEQ_ELEM_NEW] = preserve
 
 	else
-		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t))
+		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t),
+			HasDelete( p3 ) or HasDelete( Code[pc+1] ) 
+				  or HasDelete( Code[pc+2] ))
 
 	end if
 
@@ -4408,7 +4438,9 @@ procedure opSPLICE()
 	else
 		t = TYPE_OBJECT
 	end if
-	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, t)
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, t,
+		HasDelete( Code[pc+4] ) or HasDelete( Code[pc+2] )
+		or HasDelete( Code[pc+3] ) )
 	pc += 5
 end procedure
 
@@ -4448,7 +4480,8 @@ procedure opINSERT()
 	end if
 	
 	c_stmt0("}\n")
-	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])))
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])),
+		HasDelete( Code[pc+1] ) or HasDelete( Code[pc+2] ) or HasDelete( Code[pc+4] ))
 	pc += 5
 end procedure
 
@@ -4465,7 +4498,8 @@ procedure opHEAD()
 	c_stmt0("}\n")
 	c_stmt("else Head(SEQ_PTR(@),size+1,&@);\n",{Code[pc+1], Code[pc+3]})
 	c_stmt0("}\n")
-	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]))
+	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
+		HasDelete( Code[pc+1] ) )
 	pc += 4
 end procedure
 
@@ -4484,7 +4518,8 @@ procedure opTAIL()
 	c_stmt0("}\n")
 	c_stmt("else Tail(SEQ_PTR(@), len-size+1, &@);\n",{Code[pc+1], Code[pc+3]})
 	c_stmt0("}\n")
-	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]))
+	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
+		HasDelete(Code[pc+1]) )
 	pc += 4
 end procedure
 
@@ -4524,7 +4559,8 @@ procedure opREMOVE()
 	
 	c_stmt0("}\n")
 	c_stmt0("}\n")
-	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]))
+	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
+		HasDelete(Code[pc+1]))
 	pc += 5
 end procedure
 
@@ -4551,7 +4587,8 @@ procedure opREPLACE()
 		c_stmt0("Replace( &replace_params );\n")
 		
 		target[MIN] = SeqLen(Code[pc+1])
-		SetBBType(Code[pc+5], TYPE_SEQUENCE, {-1,-1}, or_type( SeqElem(Code[pc+1]), SeqElem(Code[pc+2])) )
+		SetBBType(Code[pc+5], TYPE_SEQUENCE, {-1,-1}, or_type( SeqElem(Code[pc+1]), SeqElem(Code[pc+2])),
+			HasDelete( Code[pc+1] ) or HasDelete( Code[pc+2] ) )
 		
 	c_stmt0("}\n")
 	
@@ -4567,10 +4604,12 @@ procedure opCONCAT_N()
 	c_printf("%d];\n\n", n)
 
 	t = TYPE_NULL
+	integer has_delete = 0
 	for i = 0 to n-1 do
 		c_stmt0("concat_list[")
 		c_printf("%d] = ", i)
 		CName(Code[pc+2+i])
+		has_delete = has_delete or HasDelete( Code[pc+2+i] )
 		c_puts(";\n")
 		if TypeIs(Code[pc+2+i], TYPE_SEQUENCE) then
 			t = or_type(t, SeqElem(Code[pc+2+i]))
@@ -4581,7 +4620,7 @@ procedure opCONCAT_N()
 	c_stmt("Concat_N((object_ptr)&@, concat_list", Code[pc+n+2])
 	c_printf(", %d);\n", n)
 	c_stmt0("}\n")
-	SetBBType(Code[pc+n+2], TYPE_SEQUENCE, novalue, t)
+	SetBBType(Code[pc+n+2], TYPE_SEQUENCE, novalue, t, has_delete)
 	pc += n+3
 end procedure
 
@@ -4592,9 +4631,10 @@ procedure opREPEAT()
 	CDeRefStr("_0")
 	if TypeIs(Code[pc+2], TYPE_INTEGER) then
 		target[MIN] = ObjValue(Code[pc+2])
-		SetBBType(Code[pc+3], TYPE_SEQUENCE, target, GType(Code[pc+1]))
+		SetBBType(Code[pc+3], TYPE_SEQUENCE, target, GType(Code[pc+1]), 0)
 	else
-		SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, GType(Code[pc+1]))
+		SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, GType(Code[pc+1]),
+			HasDelete( Code[pc+1] ) )
 	end if
 	pc += 4
 end procedure
@@ -4603,14 +4643,14 @@ procedure opDATE()
 	CDeRef(Code[pc+1])  -- Code[pc+1] not used in next expression
 	c_stmt("@ = Date();\n", Code[pc+1])
 	target[MIN] = 8
-	SetBBType(Code[pc+1], TYPE_SEQUENCE, target, TYPE_INTEGER)
+	SetBBType(Code[pc+1], TYPE_SEQUENCE, target, TYPE_INTEGER, 0)
 	pc += 2
 end procedure
 
 procedure opTIME()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = NewDouble(current_time());\n", Code[pc+1])
-	SetBBType(Code[pc+1], TYPE_DOUBLE, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+1], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0)
 	pc += 2
 end procedure
 
@@ -4618,7 +4658,7 @@ procedure opSPACE_USED() -- #ifdef EXTRA_STATS or HEAP_CHECK
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
 	c_stmt("@ = bytes_allocated;\n", Code[pc+1])
 	CDeRefStr("_0")
-	SetBBType(Code[pc+1], TYPE_INTEGER, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+1], TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
 	pc += 2
 end procedure
 
@@ -4638,7 +4678,7 @@ procedure opEQUAL()
 	c_stmt("@ = (compare(@, @) == 0);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {0, 1}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -4648,7 +4688,7 @@ procedure opHASH()
 		   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
-	SetBBType(Code[pc+3], TYPE_ATOM, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_ATOM, target, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -4663,7 +4703,7 @@ procedure opCOMPARE()
 	c_stmt("@ = compare(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {-1, 1}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -4673,7 +4713,7 @@ procedure opFIND()
 		   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -4683,7 +4723,7 @@ procedure opFIND_FROM() -- extra 3rd atom arg
 		   {Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3]})
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
-	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 5
 end procedure
 
@@ -4693,7 +4733,7 @@ procedure opMATCH()
 		   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -4703,7 +4743,7 @@ procedure opMATCH_FROM()
 		   {Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3]})
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
-	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 5
 end procedure
 
@@ -4723,7 +4763,7 @@ procedure opPEEK_STRING()
 
 			-- FIX: in first BB we might assume TYPE_INTEGER, value 0
 			-- so CName will output a 0 instead of the var's name
-			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT, 0)
 
 			if Code[pc] = PEEK4S then
 				c_stmt("if (@ < MININT || @ > MAXINT)\n",
@@ -4775,7 +4815,7 @@ procedure opPEEK()
 
 			-- FIX: in first BB we might assume TYPE_INTEGER, value 0
 			-- so CName will output a 0 instead of the var's name
-			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT, 0)
 
 			if Code[pc] = PEEK4S then
 				c_stmt("if (@ < MININT || @ > MAXINT)\n",
@@ -4815,7 +4855,7 @@ procedure opPEEK()
 		elsif find( Code[pc], {PEEK4U, PEEK4S}) then
 
 			seg_peek4(Code[pc+2], Code[pc+1], 1)
-			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT, 0)
 			if Code[pc] = PEEK4S then
 				c_stmt("if (@ < MININT || @ > MAXINT)\n",
 							{Code[pc+2], Code[pc+2]})
@@ -4941,35 +4981,35 @@ procedure opPEEK()
 	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
 		if Code[pc] = PEEK then
 			target = {0, 255}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT,0 )
 		elsif Code[pc] = PEEKS then
 			target = {-127, 127}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT,0 )
 		elsif Code[pc] = PEEK2S then
 			target = {-32768, 32767}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 		elsif Code[pc] = PEEK2U then
 			target = {0, #FFFF}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 		elsif Code[pc] = PEEK_STRING then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER )
+			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0 )
 		else
 			-- poke4
-			SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, 0)
 		end if
 
 	elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		if find(Code[pc], { PEEK, PEEKS, PEEK2U, PEEK2S }) then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER)
+			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
 		else
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_ATOM)
+			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_ATOM, 0)
 		end if
 	else
 		if Code[pc] = PEEK_STRING then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER )
+			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0 )
 		end if
 		-- TYPE_OBJECT */
-		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT)
+		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
 
 	end if
 
@@ -5164,14 +5204,14 @@ procedure opGET_PIXEL()
 	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		if SeqLen(Code[pc+1]) = 2 then
 			target = {0, 255}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 		elsif SeqLen(Code[pc+1]) = 3 then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER)
+			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
 		else
-			SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT)
+			SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
 		end if
 	else
-		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT)
+		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
 	end if
 	pc += 3
 end procedure
@@ -5196,7 +5236,7 @@ procedure opSYSTEM_EXEC()
 			{Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	-- probably 0..255, but we can't be totally sure
-	SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -5207,7 +5247,7 @@ procedure opOPEN()
 	c_stmt("@ = EOpen(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	target = {-1, 100000}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 4
 end procedure
 
@@ -5287,7 +5327,7 @@ procedure opGETC()
 
 	CDeRefStr("_0")
 	target = {-1, 255}
-	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -5296,7 +5336,7 @@ procedure opGETS()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	c_stmt("@ = EGets(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
-	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER) -- N.B.
+	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER, 0) -- N.B.
 	pc += 3
 end procedure
 
@@ -5309,7 +5349,7 @@ procedure opGET_KEY()
 	c_stmt("@ = get_key(0);\n", Code[pc+1])
 	CDeRefStr("_0")
 	target = {-1, 1000}
-	SetBBType(Code[pc+1], TYPE_INTEGER, target, TYPE_OBJECT)
+	SetBBType(Code[pc+1], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	pc += 2
 end procedure
 
@@ -5345,7 +5385,7 @@ procedure opSPRINTF()
 	c_stmt("@ = EPrintf(" & sprintf("%d", DOING_SPRINTF) & ", @, @);\n",
 		   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
-	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, TYPE_INTEGER)
+	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
 	pc += 4
 end procedure
 
@@ -5354,7 +5394,7 @@ procedure opCOMMAND_LINE()
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
 	c_stmt("@ = Command_Line();\n" , Code[pc+1])
 	CDeRefStr("_0")
-	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE)
+	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE, 0)
 	pc += 2
 end procedure
 
@@ -5363,7 +5403,7 @@ procedure opOPTION_SWITCHES()
 	c_stmt0("RefDS(_0switches);\n")
 	c_stmt("@ = _0switches;\n", Code[pc+1] )
 	CDeRefStr("_0")
-	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE)
+	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE, 0)
 	pc += 2
 end procedure
 
@@ -5371,7 +5411,7 @@ procedure opGETENV()
 	CSaveStr("_0", Code[pc+2], 0, 0, 0)
 	c_stmt("@ = EGetEnv(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
-	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER) -- N.B.
+	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER, 0) -- N.B.
 	pc += 3
 end procedure
 
@@ -5381,13 +5421,131 @@ procedure opMACHINE_FUNC()
 	CDeRefStr("_0")
 	target = machine_func_type(Code[pc+1])
 	SetBBType(Code[pc+3], target[1], target[2],
-			  machine_func_elem_type(Code[pc+1]))
+			  machine_func_elem_type(Code[pc+1]), 0)
 	pc += 4
 end procedure
 
 procedure opMACHINE_PROC()
 	c_stmt("machine(@, @);\n", {Code[pc+1], Code[pc+2]})
 	pc += 3
+end procedure
+
+procedure delete_double( symtab_index obj )
+	c_stmt("if(DBL_PTR(@)->cleanup != 0 ){\n", obj )
+		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
+	c_stmt0("}\n")
+	c_stmt("DBL_PTR(@)->cleanup = (cleanup_ptr)_1;\n", obj )
+end procedure
+
+procedure delete_sequence( symtab_index obj )
+	c_stmt("if(SEQ_PTR(@)->cleanup != 0 ){\n", obj )
+		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
+	c_stmt0("}\n")
+	c_stmt("SEQ_PTR(@)->cleanup = (cleanup_ptr)_1;\n", obj )
+end procedure
+
+procedure promote_integer_delete( symtab_index obj, symtab_index target )
+	c_stmt("@ = NewDouble( (double) @ );\n", {target, obj})
+	SetBBType( target, TYPE_DOUBLE, ObjMinMax( obj ), TYPE_OBJECT, 1)
+end procedure
+
+procedure assign_delete_target( symtab_index target, symtab_index obj )
+	CDeRef( target )
+	c_stmt( "@ = @;\n", {target, obj})
+	if TypeIs( obj, {TYPE_SEQUENCE, TYPE_OBJECT}) then
+		SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
+	else
+		SetBBType(target, GType(obj), ObjMinMax(obj), TYPE_OBJECT, 1)
+	end if
+
+end procedure
+
+procedure opDELETE_ROUTINE()
+	symtab_index 
+		obj = Code[pc+1],
+		rid = Code[pc+2],
+		target = Code[pc+3]
+	
+	if SymTab[obj][S_MODE] = M_TEMP 
+	and compare( SymTab[obj][S_OBJ], NOVALUE) then
+		-- make a copy of a literal
+		c_stmt("_2 = DeleteRoutine( @ );\n", rid )
+		object val = SymTab[obj][S_OBJ]
+		if atom(val) then
+			if integer(val) then
+				c_stmt( "_1 = NewDouble( (double) @ );\n", obj )
+			elsif atom(val) then
+				c_stmt( "_1 = NewDouble( DBL_PTR(@)->dbl );\n", obj )
+			end if
+			c_stmt0("DBL_PTR(_1)->cleanup = (cleanup_ptr)_2;\n")
+			SetBBType(target, GType(obj), ObjMinMax(obj), TYPE_OBJECT, 1)
+		else
+			c_stmt("_1 = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", obj )
+			c_stmt0("SEQ_PTR(_1)->cleanup = (cleanup_ptr)_2;\n")
+			SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
+		end if
+		if SymTab[target][S_MODE] != M_TEMP then
+			CDeRef( target )
+		end if
+		c_stmt( "@ = _1;\n", target )
+		
+	else
+		if TypeIs( obj, TYPE_INTEGER ) then
+			promote_integer_delete( obj, target )
+
+		elsif TypeIs( obj, TYPE_ATOM ) and not TypeIsNot( obj, TYPE_DOUBLE ) then
+			c_stmt("if( !IS_ATOM_DBL(@) ){\n", obj )
+				c_stmt("@ = NewDouble( @ );\n", {target, obj})
+			c_stmt0("}\n")
+			c_stmt0("else{\n")
+				assign_delete_target( target, obj )
+			c_stmt0("}\n")
+		elsif obj != target then
+			assign_delete_target( target, obj )
+		end if
+		
+		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
+		if TypeIs( target, TYPE_DOUBLE ) then
+			delete_double( target )
+		elsif TypeIs( target, TYPE_SEQUENCE ) then
+			delete_sequence( target )
+		else
+			c_stmt("if( IS_ATOM(@) ){\n", target )
+				c_stmt("if( IS_ATOM_INT(@) ){\n", target )
+					promote_integer_delete( obj, target )
+				c_stmt0("}\n")
+				delete_double( target )
+			c_stmt0("}\n")
+			c_stmt0("else{\n")
+				delete_sequence( target )
+			c_stmt0("}\n")
+		end if
+	end if
+	
+	pc += 4
+end procedure
+
+procedure opDELETE_OBJECT()
+	symtab_index obj = Code[pc+1]
+	NewBB(1, E_ALL_EFFECT, 0)
+	if TypeIs( obj, TYPE_SEQUENCE ) then
+		c_stmt( "cleanup_sequence( SEQ_PTR( @ ) );\n", obj )
+		if SeqElem( obj ) = TYPE_INTEGER then
+			SetBBType( obj, TYPE_SEQUENCE, {SeqLen(Code[pc+1]), 0}, TYPE_INTEGER, 0)
+		end if
+	elsif TypeIs( obj, TYPE_DOUBLE ) then
+		c_stmt( "cleanup_double( DBL_PTR( @ ) );\n", obj )
+		SetBBType( obj, TYPE_DOUBLE, ObjValue(obj), TYPE_OBJECT, 0 )
+		
+	elsif not TypeIs( obj, TYPE_INTEGER ) then
+		c_stmt("if( IS_SEQUENCE(@) ){\n", obj )
+			c_stmt("cleanup_sequence(SEQ_PTR(@));\n", obj )
+		c_stmt0("}\n")
+		c_stmt("if( IS_ATOM_DBL(@)){\n", obj )
+			c_stmt("cleanup_double(DBL_PTR(@));\n", obj )
+		c_stmt0("}\n")
+	end if
+	pc += 2
 end procedure
 
 procedure opC_FUNC()
@@ -5402,7 +5560,7 @@ procedure opC_FUNC()
 	NewBB(1, E_ALL_EFFECT, 0) -- Windows call-back to Euphoria routine could occur
 
 	SetBBType(Code[pc+4], TYPE_OBJECT, -- might be call to Euphoria routine
-			  novalue, TYPE_OBJECT)
+			  novalue, TYPE_OBJECT, GDelete())
 	pc += 5
 end procedure
 
@@ -5461,7 +5619,7 @@ procedure opTASK_CREATE()
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt("@ = task_create(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
-	SetBBType(Code[pc+3], TYPE_DOUBLE, novalue, TYPE_OBJECT) -- always TYPE_DOUBLE
+	SetBBType(Code[pc+3], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0) -- always TYPE_DOUBLE
 	tasks_created = TRUE
 	pc += 4
 end procedure
@@ -5482,7 +5640,7 @@ procedure opTASK_SELF()
 	dll_tasking()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = NewDouble(tcb[current_task].tid);\n", {Code[pc+1]})
-	SetBBType(Code[pc+1], TYPE_DOUBLE, novalue, TYPE_OBJECT) -- always TYPE_DOUBLE
+	SetBBType(Code[pc+1], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0) -- always TYPE_DOUBLE
 	pc += 2
 end procedure
 
@@ -5496,7 +5654,7 @@ procedure opTASK_LIST()
 	dll_tasking()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = task_list();\n", {Code[pc+1]})
-	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_DOUBLE)
+	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_DOUBLE, 0)
 	pc += 2
 end procedure
 
@@ -5505,7 +5663,7 @@ procedure opTASK_STATUS()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	c_stmt("@ = task_status(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
-	SetBBType(Code[pc+2], TYPE_INTEGER, {-1,+1}, TYPE_OBJECT)
+	SetBBType(Code[pc+2], TYPE_INTEGER, {-1,+1}, TYPE_OBJECT, 0)
 	pc += 3
 end procedure
 
@@ -6414,7 +6572,15 @@ global procedure init_opcodes()
 				-- never emitted
 				operation[i] = routine_id("opINTERNAL_ERROR")
 				break
-				
+			
+			case "DELETE_ROUTINE":
+				operation[i] = routine_id("opDELETE_ROUTINE")
+				break
+			
+			case "DELETE_OBJECT":
+				operation[i] = routine_id("opDELETE_OBJECT")
+				break
+			
 			case else
 				operation[i] = -1
 		end switch

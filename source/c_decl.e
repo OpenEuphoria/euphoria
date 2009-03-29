@@ -30,7 +30,8 @@ global constant BB_VAR = 1,      -- the var / type / constant
 		 BB_TYPE = 2,     -- main type
 		 BB_ELEM = 3,     -- element type for sequences
 		 BB_SEQLEN = 4,   -- sequence length
-		 BB_OBJ = 5       -- integer value min/max
+		 BB_OBJ = 5,      -- integer value min/max
+		 BB_DELETE = 6    -- may have a delete routine
 global sequence BB_info
 BB_info = {}
 
@@ -179,6 +180,27 @@ global function GType(symtab_index s)
 	return local_t
 end function
 
+integer 
+	g_has_delete = 0,
+	p_has_delete = 0
+
+export function GDelete()
+	return g_has_delete
+end function
+
+export function HasDelete( symtab_index s )
+	
+	for i = length(BB_info) to 1 by -1 do
+		if BB_info[i][BB_VAR] = s then
+			return BB_info[i][BB_DELETE]
+		end if
+	end for
+	if length(SymTab[s]) < S_HAS_DELETE then
+		return 0
+	end if
+	return SymTab[s][S_HAS_DELETE]
+end function
+
 global function ObjValue(symtab_index s) 
 -- the value of an integer constant or variable 
 	sequence t, local_t
@@ -269,7 +291,7 @@ global function or_type(integer t1, integer t2)
 	end if
 end function
 
-global procedure SetBBType(symtab_index s, integer t, sequence val, integer etype)
+global procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 -- Set the type and value, or sequence length and element type,
 -- of a temp or var s locally within a BB. 
 
@@ -281,8 +303,15 @@ global procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 -- etype is the element type of a sequence or object. If an object is 
 -- subscripted or sliced that shows that it's a sequence in that instance, 
 -- and its element type can be used. 
-	
+
+-- has_delete is 1 if the object might have a delete routine attached, or 0 if not
+-- 	if has_delete then ? 1/0 end if
 	integer found, i, tn
+	
+	if has_delete then
+		p_has_delete = 1
+		g_has_delete = 1
+	end if
 	
 	if find(SymTab[s][S_MODE], {M_TEMP, M_NORMAL}) then
 		found = FALSE
@@ -385,18 +414,19 @@ global procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 
 		if not found then
 			-- add space for a new entry
-			BB_info = append(BB_info, repeat(0, 5))
+			BB_info = append(BB_info, repeat(0, 6))
 		end if
 		
 		if t = TYPE_NULL then
 			if not found then
 				-- add read-only dummy reference
-				BB_info[i] = {s, t, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}}
+				BB_info[i] = {s, t, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}, 0}
 			end if
 			-- don't record anything if the var already exists in this BB
 		else 
 			BB_info[i][BB_VAR] = s
 			BB_info[i][BB_TYPE] = t
+			BB_info[i][BB_DELETE] = has_delete
 			-- etype shouldn't matter if the var is not a sequence here
 			if t = TYPE_SEQUENCE and val[MIN] = -1 then
 				-- assign to subscript or slice of a sequence
@@ -437,6 +467,7 @@ global procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 			SymTab[s][S_OBJ_MIN] = val[MIN] 
 			SymTab[s][S_OBJ_MAX] = val[MAX] 
 		end if
+		SymTab[s][S_HAS_DELETE] = has_delete
 	end if
 end procedure
 
@@ -510,7 +541,7 @@ global procedure CName(symtab_index s)
 		if s != CurrentSub and SymTab[s][S_NREFS] < 2 then
 			SymTab[s][S_NREFS] += 1
 		end if
-		SetBBType(s, TYPE_NULL, novalue, TYPE_OBJECT) -- record that this var was referenced in this BB
+		SetBBType(s, TYPE_NULL, novalue, TYPE_OBJECT, 0) -- record that this var was referenced in this BB
 	
 	
 	elsif SymTab[s][S_MODE] = M_CONSTANT then
@@ -647,6 +678,7 @@ global procedure PromoteTypeInfo()
 -- at the end of each pass, certain info becomes valid 
 	symtab_index s
 	
+	g_has_delete = p_has_delete
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		if SymTab[s][S_TOKEN] = FUNC or SymTab[s][S_TOKEN] = TYPE then
@@ -824,7 +856,7 @@ global procedure DeclareRoutineList()
 					c_puts(", 0")  -- default: call with normal or __cdecl convention
 				end if
 				
-				c_printf(", %d", SymTab[s][S_SCOPE] )
+				c_printf(", %d, 0", SymTab[s][S_SCOPE] )
 				
 				c_puts("}")
 				
@@ -1786,7 +1818,7 @@ global procedure GenerateUserRoutines()
 									c_puts(" = 0")
 									target[MIN] = 0
 									target[MAX] = 0
-									SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT)
+									SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0)
 								end if
 								c_puts(";\n")
 								break
@@ -1814,7 +1846,7 @@ global procedure GenerateUserRoutines()
 									-- avoids DeRef in 1st BB, but may hurt global type:
 									target = {0, 0}
 									-- PROBLEM: sp could be temp or symtab entry?
-									SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT)
+									SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT, 0)
 								end if
 								ifdef DEBUG then
 									c_puts(sprintf("; // %d %d\n", {temps, SymTab[temps][S_TEMP_NAME]} ) )
@@ -1847,7 +1879,7 @@ global procedure GenerateUserRoutines()
 						if SymTab[sp][S_ARG_TYPE] = TYPE_SEQUENCE then
 							target[MIN] = SymTab[sp][S_ARG_SEQ_LEN]
 							SetBBType(sp, SymTab[sp][S_ARG_TYPE], target, 
-										SymTab[sp][S_ARG_SEQ_ELEM])
+										SymTab[sp][S_ARG_SEQ_ELEM], 0)
 					
 						elsif SymTab[sp][S_ARG_TYPE] = TYPE_INTEGER then
 							if SymTab[sp][S_ARG_MIN] = NOVALUE then
@@ -1857,15 +1889,15 @@ global procedure GenerateUserRoutines()
 								target[MIN] = SymTab[sp][S_ARG_MIN]
 								target[MAX] = SymTab[sp][S_ARG_MAX]
 							end if
-							SetBBType(sp, SymTab[sp][S_ARG_TYPE], target, TYPE_OBJECT)
+							SetBBType(sp, SymTab[sp][S_ARG_TYPE], target, TYPE_OBJECT, 0)
 					
 						elsif SymTab[sp][S_ARG_TYPE] = TYPE_OBJECT then
 							-- object might have valid seq_elem
 							SetBBType(sp, SymTab[sp][S_ARG_TYPE], novalue, 
-									SymTab[sp][S_ARG_SEQ_ELEM]) 
+									SymTab[sp][S_ARG_SEQ_ELEM], 0) 
 					
 						else 
-							SetBBType(sp, SymTab[sp][S_ARG_TYPE], novalue, TYPE_OBJECT) 
+							SetBBType(sp, SymTab[sp][S_ARG_TYPE], novalue, TYPE_OBJECT, 0) 
 					
 						end if
 						sp = SymTab[sp][S_NEXT]

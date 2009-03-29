@@ -205,5 +205,7 @@ static char *opnames[] = {
 	"REMOVE",
 	"REPLACE",
 	"SWITCH_RT",
-	"PROC_TAIL"
+	"PROC_TAIL",
+	"DELETE_ROUTINE",
+	"DELETE_OBJECT"
 };

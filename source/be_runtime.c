@@ -92,6 +92,8 @@ extern int in_from_keyb;
 extern int screen_col;
 #endif
 extern symtab_ptr *e_routine;
+extern cleanup_ptr *e_cleanup;
+extern struct routine_list *rt00;
 extern symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3,
 				  call_back_arg4, call_back_arg5, call_back_arg6,
 				  call_back_arg7, call_back_arg8, call_back_arg9,
@@ -776,8 +778,11 @@ void Append(object_ptr target, object s1, object a)
 	ASSIGN_SEQ(target, new_seq);
 }
 
+/**
+ * Adds some room at at for len in seq.  If a has refcount > 1,
+ * it makes a copy and derefs a.
+ */
 s1_ptr Add_internal_space(object a,int at,int len)
-/*Adds some room at at for len in seq*/
 {
 	char *obj_ptr;
 	s1_ptr new_seq;
@@ -1322,6 +1327,115 @@ object Repeat(object item, object repcount)
 	return MAKE_SEQ(s1);
 }
 
+/**
+ * Calls the specified routine id for cleaning up the UDT object.
+ */
+void udt_clean( object o, long rid ){
+#ifdef ERUNTIME
+	int pre_ref;
+	
+	pre_ref = SEQ_PTR( o )->ref;
+	if( pre_ref == 0 ){
+		SEQ_PTR( o )->ref += 2;
+	}
+	else{
+		RefDS( o );
+	}
+#ifdef EWINDOWS
+	if( rt00[rid].convention ){
+		// stdcall
+		(*(int (__stdcall *)())rt00[rid].addr)( o );
+	}
+	else
+#endif
+	{ // cdecl
+		(*(int ( *)())rt00[rid].addr)( o );
+	}
+	
+	if( pre_ref == 0 ){
+		SEQ_PTR( o )->ref = pre_ref;;
+	}
+#else
+	int **code[4];
+	static s1_ptr s = 0;
+	object args;
+	int pre_ref;
+	int *save_tpc;
+	if( s == 0 ){
+		s = NewS1( 1 );
+	}
+	pre_ref = SEQ_PTR(o)->ref;
+	s->base[1] = o;
+	if( pre_ref == 0 ){
+		SEQ_PTR( o )->ref += 2;
+	}
+	else{
+		RefDS( o );
+	}
+	args = MAKE_SEQ( s );
+	
+	code[0] = (int **)opcode(CALL_PROC);
+	code[1] = (int **)&rid;
+	code[2] = (int **)&args;
+	code[3] = (int *)opcode(CALL_BACK_RETURN);
+	
+	*expr_top++ = (object)tpc;    // needed for traceback
+	*expr_top++ = NULL;           // prevents restore_privates()
+
+	save_tpc = tpc;
+	do_exec((int *)code);  // execute routine without setting up new stack
+	tpc = save_tpc;
+	expr_top -= 2;
+	if( pre_ref == 0 ){
+		SEQ_PTR(o)->ref = pre_ref;
+	}
+	else{
+		DeRefDS( o );
+	}
+#endif
+}
+
+void cleanup_sequence( s1_ptr seq ){
+	cleanup_ptr cp, next;
+	
+	cp = seq->cleanup;
+	seq->cleanup = 0;
+	while( cp ){
+		if( cp->type == CLEAN_UDT ){
+			udt_clean( MAKE_SEQ(seq), cp->func.rid );
+		}
+		else{
+			(cp->func.builtin)( MAKE_SEQ( seq ) );
+			EFree( cp );
+		}
+		next = cp->next;
+		if( next ){
+			EFree( cp );
+		}
+		cp = next;
+	}
+}
+
+void cleanup_double( d_ptr dbl ){
+	cleanup_ptr cp, next;
+	cp = dbl->cleanup;
+	dbl->cleanup = 0;
+	while( cp ){
+		if( cp->type == CLEAN_UDT ){
+			udt_clean( MAKE_DBL(dbl), cp->func.rid );
+		}
+		else{
+			(cp->func.builtin)( MAKE_DBL( dbl ) );
+			EFree( cp );
+		}
+		next = cp->next;
+		if( next ){
+			EFree( cp );
+		}
+		cp = next;
+	}
+}
+
 /* non-recursive - no chance of stack overflow */
 void de_reference(s1_ptr a)
 /* frees an object whose reference count is 0 */
@@ -1342,10 +1456,14 @@ void de_reference(s1_ptr a)
 	if (IS_ATOM_DBL(a)) {
 #ifdef EXTRA_CHECK
 		a1 = (s1_ptr)DBL_PTR(a);
+		
 		if (a1->ref < 0)
 			RTInternal("f.p. reference count less than 0");
 #endif
 		a = (s1_ptr)DBL_PTR(a);
+		if( ((d_ptr)a)->cleanup != 0 ){
+			cleanup_double( (d_ptr)a );
+		}
 		FreeD((unsigned char *)a);
 	}
 
@@ -1353,14 +1471,7 @@ void de_reference(s1_ptr a)
 		/* sequence reference count has reached 0 */
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
-			if( a->cleanup->type == CLEAN_UDT ){
-
-			}
-			else{
-				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
-				EFree(a->cleanup);
-				a->cleanup = 0;
-			}
+			cleanup_sequence( a );
 		}
 		p = a->base;
 #ifdef EXTRA_CHECK
@@ -1388,12 +1499,18 @@ void de_reference(s1_ptr a)
 				}
 				else if (--(DBL_PTR(t)->ref) == 0) {
 					if (IS_ATOM_DBL(t)) {
+						if( DBL_PTR(t)->cleanup != 0 ){
+							cleanup_double( DBL_PTR(t) );
+						}
 						FreeD((unsigned char *)DBL_PTR(t));
 					}
 					else {
 						// switch to subsequence
 						// was: de_reference((s1_ptr)t);
 						t = (object)SEQ_PTR(t);
+						if( ((s1_ptr)t)->cleanup != 0 ){
+							cleanup_sequence( (s1_ptr)t );
+						}
 						((s1_ptr)t)->ref = (long)a;
 						((s1_ptr)t)->length = (long)p;
 						a = (s1_ptr)t;
@@ -1440,12 +1557,16 @@ void de_reference_i(s1_ptr a)
 		RTInternal("more than 1000 refs");
 #endif
 	if (IS_ATOM_DBL(a)) {
+		printf("freeing a double %p\n", a );
 #ifdef EXTRA_CHECK
 		a1 = (s1_ptr)DBL_PTR(a);
 		if (a1->ref < 0)
 			RTInternal("f.p. reference count less than 0");
 #endif
 		a = (s1_ptr)DBL_PTR(a);
+		if( ((d_ptr)a)->cleanup != 0 ){
+			cleanup_double( (d_ptr)a );
+		}
 		FreeD((unsigned char *)a);
 	}
 
@@ -1453,14 +1574,7 @@ void de_reference_i(s1_ptr a)
 		/* sequence reference count has reached 0 */
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
-			if( a->cleanup->type == CLEAN_UDT ){
-
-			}
-			else{
-				(a->cleanup->func.builtin)( MAKE_SEQ( a ) );
-				EFree(a->cleanup);
-				a->cleanup = 0;
-			}
+			cleanup_sequence( a );
 		}
 #ifdef EXTRA_CHECK
 		if (a->ref < 0)
@@ -5855,6 +5969,35 @@ void Replace( replace_ptr rb ){
 			AssignElement( copy_from, start_pos, rb->target);
 		}
 	}
+}
+
+cleanup_ptr DeleteRoutine( int e_index ){
+	cleanup_ptr cup;
+#ifdef ERUNTIME
+	cup = rt00[e_index].cleanup;
+#else
+	cup = e_cleanup[e_index];
+#endif
+	if( cup == 0 ){
+		cup = (cleanup_ptr)EMalloc( sizeof(struct cleanup) );
+#ifdef ERUNTIME
+		rt00[e_index].cleanup = cup;
+#else
+		e_cleanup[e_index] = cup;
+#endif
+	}
+	cup->type = CLEAN_UDT;
+	cup->func.rid = e_index;
+	cup->next = 0;
+	return cup;
+}
+
+cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
+	cleanup_ptr new_cup;
+	new_cup = (cleanup_ptr)EMalloc( sizeof(struct cleanup) );
+	memcpy( new_cup, old, sizeof(struct cleanup) );
+	new_cup->next = prev;
+	return new_cup;
 }
 
 #ifdef ERUNTIME

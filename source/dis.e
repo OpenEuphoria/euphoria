@@ -1263,6 +1263,13 @@ procedure opREPLACE()
 	quadary()
 end procedure
 
+procedure opDELETE_ROUTINE()
+	binary()
+end procedure
+
+procedure opDELETE_OBJECT()
+	punary()
+end procedure
 
 function strip_path( sequence file )
 	for i = length( file ) to 1 by -1 do

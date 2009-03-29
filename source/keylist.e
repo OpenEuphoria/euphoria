@@ -155,7 +155,9 @@ keylist =
 	{"tail",             SC_PREDEF, FUNC, TAIL,             2, E_PURE, 
 	{0,{{BUILT_IN,"length"},{LEFT_ROUND,0},{DEF_PARAM,1},{RIGHT_ROUND,0},{MINUS,0},{ATOM,1}}},{2,1,{2}}},
 	{"remove",           SC_PREDEF, FUNC, REMOVE,           3, E_PURE, {0,0,{{DEF_PARAM,2}}}, {3,2,{3}}},
-	{"replace",          SC_PREDEF, FUNC, REPLACE,          4, E_PURE, {0,0,0,{{DEF_PARAM,3}}}, {4,3,{4}}}
+	{"replace",          SC_PREDEF, FUNC, REPLACE,          4, E_PURE, {0,0,0,{{DEF_PARAM,3}}}, {4,3,{4}}},
+	{"delete_routine",   SC_PREDEF, FUNC, DELETE_ROUTINE,   2, E_PURE},
+	{"delete",           SC_PREDEF, PROC, DELETE_OBJECT,    1, E_OTHER_EFFECT}
 }
 	-- new words must go at end to maintain compatibility 
 

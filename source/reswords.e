@@ -208,7 +208,9 @@ global constant
 	REPLACE				= 203,
 	SWITCH_RT           = 204,
 	PROC_TAIL           = 205,
-	MAX_OPCODE          = 205
+	DELETE_ROUTINE      = 206,
+	DELETE_OBJECT       = 207,
+	MAX_OPCODE          = 207
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

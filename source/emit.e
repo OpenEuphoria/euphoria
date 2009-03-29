@@ -1013,7 +1013,7 @@ global procedure emit_op(integer op)
 	-- 2 inputs, 1 output   
 	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, 
 					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
-					OPEN, SPRINTF, TASK_CREATE, HASH, HEAD, TAIL}) then
+					OPEN, SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE}) then
 		cont21ii(op, FALSE)
 
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
@@ -1257,7 +1257,7 @@ global procedure emit_op(integer op)
 		Push(c)
 		emit_addr(c)
 
-	elsif find(op, {CLOSE, ABORT, CALL}) then
+	elsif find(op, {CLOSE, ABORT, CALL, DELETE_OBJECT}) then
 		emit_opcode(op)
 		emit_addr(Pop())       
 		assignable = FALSE

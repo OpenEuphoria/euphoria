@@ -358,7 +358,7 @@ global function GetDefaultArgs()
 	object env
 	sequence default_args = {}
 	sequence conf_file = "euinc.conf"
-	
+
 	if loaded_config_inc_paths then return "" end if
 	loaded_config_inc_paths = 1
 

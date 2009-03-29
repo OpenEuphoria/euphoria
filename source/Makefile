@@ -129,7 +129,7 @@ endif
 endif
 
 ifdef EDEBUG
-DEBUG_FLAGS=-g3 -O0
+DEBUG_FLAGS=-g3 -O0 -Wall
 CALLC_DEBUG=-g3
 EC_DEBUG=-D DEBUG
 else

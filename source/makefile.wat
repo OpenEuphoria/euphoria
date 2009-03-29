@@ -374,11 +374,13 @@ translate : .SYMBOLIC translate-win translate-dos
 
 testwin : .SYMBOLIC
 	cd ..\tests
+	set EUDIR=$(TRUNKDIR) 
 	$(EUBIN)\exwc.exe ..\bin\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\exwc.exe -ec $(FULLBUILDDIR)\ecw.exe -lib $(FULLBUILDDIR)\ecw.lib
 	cd ..\source
 
 testdos : .SYMBOLIC dos
 	cd ..\tests
+	set EUDIR=$(TRUNKDIR)
 	$(EUBIN)\ex.exe ..\bin\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\ex.exe -ec $(FULLBUILDDIR)\ec.exe -lib $(FULLBUILDDIR)\ec.lib
 	cd ..\source
 	

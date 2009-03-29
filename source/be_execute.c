@@ -269,7 +269,10 @@ extern void Tail();
 extern object Remove_elements(int,int,int);
 extern void AssignSlice();
 extern void AssignElement();
-
+extern cleanup_ptr DeleteRoutine( int);
+extern cleanup_ptr ChainDeleteRoutine( cleanup_ptr, cleanup_ptr);
+extern void cleanup_sequence(s1_ptr);
+extern void cleanup_double(d_ptr);
 /**********************/
 /* Declared functions */
 /**********************/
@@ -1096,6 +1099,7 @@ void code_set_pointers(int **code)
 			case TASK_SELF:
 			case TASK_SUSPEND:
 			case TASK_LIST:
+			case DELETE_OBJECT:
 				// one operand
 				code[i+1] = SET_OPERAND(code[i+1]);
 				i += 2;
@@ -1237,6 +1241,7 @@ void code_set_pointers(int **code)
 			case HASH:
 			case HEAD:
 			case TAIL:
+			case DELETE_ROUTINE:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1868,8 +1873,8 @@ void do_exec(int *start_pc)
  NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TYPE_CHECK_FORWARD not emitted */
   &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
-  &&L_PROC_TAIL
-/* 205 (previous) */
+  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT
+/* 207 (previous) */
   };
 #endif
 #endif
@@ -2526,7 +2531,12 @@ void do_exec(int *start_pc)
 				for (a = 1; a <= nvars; a++) {
 					/* the last one comes first */
 					*obj_ptr = *((object_ptr)pc[0]);
-					Ref(*obj_ptr);
+					if( ((symtab_ptr)pc[0])->mode != M_TEMP ){
+						Ref(*obj_ptr);
+					}
+					else{
+						*((object_ptr)pc[0]) = NOVALUE;
+					}
 					pc++;
 					obj_ptr--;
 				}
@@ -2543,9 +2553,19 @@ void do_exec(int *start_pc)
 				obj_ptr = s1->base;
 				/* the second one comes first */
 				obj_ptr[1] = *((object_ptr)pc[2]);
-				Ref(obj_ptr[1]);
+				if( ((symtab_ptr)(pc[2]))->mode != M_TEMP ){
+					Ref(obj_ptr[1]);
+				}
+				else{
+					*((object_ptr)pc[2]) = NOVALUE;
+				}
 				obj_ptr[2] = *((object_ptr)pc[1]);
-				Ref(obj_ptr[2]);
+				if( ((symtab_ptr)(pc[1]))->mode != M_TEMP ){
+					Ref(obj_ptr[2]);
+				}
+				else{
+					*((object_ptr)pc[1]) = NOVALUE;
+				}
 				DeRef(*(object_ptr)pc[3]);  
 				*(object_ptr)pc[3] = MAKE_SEQ(s1);
 				pc += 4;
@@ -3966,6 +3986,77 @@ void do_exec(int *start_pc)
 				*(object_ptr)pc[5] = b;
 				pc += 6;
 				/*thread();*/
+				BREAK;
+			
+			case L_DELETE_ROUTINE:
+			deprintf("case L_DELETE_ROUTINE:");
+				a = *(object_ptr)pc[1]; // the object
+				
+				// get the routine symtab_ptr:
+				b = get_pos_int("call_proc/call_func", *(object_ptr)pc[2]); 
+				if ((unsigned)b >= e_routine_next) {
+					RTFatal("invalid routine id");
+				}
+				obj_ptr = (object_ptr) DeleteRoutine( b );
+				
+				// Only ref if source and target are different, and the source
+				// isn't a temp.  If copied below, then don't ref, either.
+				b = (pc[1] != pc[3]) && (((symtab_ptr)pc[1])->mode != M_TEMP);
+				if( IS_ATOM_INT(a) ){
+					a = NewDouble( (double)a );
+					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
+					b = 0;
+				}
+				else if( IS_ATOM_DBL(a) ){
+					if( ((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+						a = NewDouble( DBL_PTR(a)->dbl );
+						b = 0;
+					}
+					else{
+						c = (object) DBL_PTR( a )->cleanup;
+						if( c != 0 ){
+							obj_ptr = (object_ptr) ChainDeleteRoutine( (cleanup_ptr)obj_ptr, (cleanup_ptr)c );
+						}
+					}
+					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
+				}
+				else{ // sequence
+					if( ((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+						a = MAKE_SEQ( SequenceCopy( SEQ_PTR(a) ) );
+						b = 0;
+					}
+					else{
+						c = (object) SEQ_PTR( a )->cleanup;
+						if( c != 0 ){
+							obj_ptr = (object_ptr) ChainDeleteRoutine( (cleanup_ptr)obj_ptr, (cleanup_ptr)c );
+						}
+					}
+					SEQ_PTR(a)->cleanup = (cleanup_ptr)obj_ptr;
+				}
+				obj_ptr = pc[3];
+				if( a != *obj_ptr ){
+					DeRef( *obj_ptr );
+					*obj_ptr = a;
+				}
+				
+				if( b != 0 ){
+					RefDS( a );
+				}
+				thread4();
+				BREAK;
+			
+			case L_DELETE_OBJECT:
+				a = *(object_ptr)pc[1];
+				if( !IS_ATOM_INT(a) ){
+					if( IS_ATOM_DBL(a) ){
+						cleanup_double( DBL_PTR(a) );
+					}
+					else if( IS_SEQUENCE(a) ){
+						cleanup_sequence( DBL_PTR(a) );
+					}
+				}
+				pc += 2;
+				thread();
 				BREAK;
 
 			case L_APPEND:

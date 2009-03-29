@@ -38,7 +38,8 @@ extern char **file_name;
 symtab_ptr TopLevelSub;   /* symbol table pointer of top level procedure. */
 						  /* All user-defined symbols come after this */
 
-symtab_ptr *e_routine = NULL; /* array of symbol table pointers */
+symtab_ptr *e_routine = NULL;  /* array of symbol table pointers */
+cleanup_ptr *e_cleanup = NULL; /* array of cleanup_ptr pointers */ 
 int e_routine_next = 0;       /* index of next available element */
 
 /*******************/
@@ -351,11 +352,15 @@ int RoutineId(symtab_ptr current_sub, object name, int file_no)
 		if (e_routine == NULL) {
 			e_routine_size = 20;
 			e_routine = (symtab_ptr *)EMalloc(e_routine_size * sizeof(symtab_ptr));
+			e_cleanup = (cleanup_ptr*) EMalloc( e_routine_size * sizeof(cleanup_ptr) );
+			e_cleanup[0] = 0;
 		}
 		else {
 			e_routine_size += 20;
 			e_routine = (symtab_ptr *)ERealloc((char *)e_routine, 
 								 e_routine_size * sizeof(symtab_ptr));
+			e_cleanup = (cleanup_ptr*) ERealloc( (char *)e_cleanup, e_routine_size * sizeof(cleanup_ptr) );
+			e_cleanup[e_routine_size-1] = 0;
 		}
 	}
 	
