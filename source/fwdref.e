@@ -182,6 +182,7 @@ procedure patch_forward_call( token tok, integer ref )
 			-- set up the environment
 			
 			show_params( sub )
+			set_error_info( ref )
 			call_proc( parse_arg_rid, { sub, defarg, fwd_private_name, fwd_private_sym } )
 			hide_params( sub )
 			params[defarg] = call_func( pop_rid, {} )

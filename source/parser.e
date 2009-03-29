@@ -3013,6 +3013,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	   		tok = next_token()
    			putback(tok)
 	   		if tok[T_ID] = EQUALS then -- assign on declare
+--	   			StartSourceLine( TRUE )
 	   			Assignment({VARIABLE,sym})
 			end if
 		end if
@@ -3049,6 +3050,7 @@ procedure Private_declaration(symtab_index type_sym)
    		tok = next_token()
    		if tok[T_ID] = EQUALS then -- assign on declare
 		    putback(tok)
+		    StartSourceLine( TRUE )
 		    -- TODO: MWL 7/6/08: This line and its companion below allow use of another,
 		    -- previously declared variable to be used when initializing a private variable.
 		    -- I think this should be removed, and caught at run-time as a variable not
@@ -3178,6 +3180,7 @@ procedure Statement_list()
 				token forward = next_token()
 				switch forward[T_ID] do
 					case LEFT_ROUND:
+						StartSourceLine( TRUE )
 						Forward_call( tok )
 						continue
 					case VARIABLE:
@@ -3770,6 +3773,7 @@ global procedure real_parser(integer nested)
 				token forward = next_token()
 				switch forward[T_ID] do
 					case LEFT_ROUND:
+						StartSourceLine( TRUE )
 						Forward_call( tok )
 						continue
 						

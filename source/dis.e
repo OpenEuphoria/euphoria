@@ -258,7 +258,7 @@ procedure opEMBEDDED_FUNCTION_CALL()
 end procedure
 
 -- based on execute.e
-function find_line(symtab_index sub, integer pc)
+function find_line(symtab_index sub, integer pc, integer file_only = 1)
 -- return the file name and line that matches pc in sub
 	sequence linetab
 	integer line, gline
@@ -275,7 +275,12 @@ function find_line(symtab_index sub, integer pc)
 		end if
 	end for
 	gline = SymTab[sub][S_FIRSTLINE] + line - 1
-	return slist[gline][LOCAL_FILE_NO]
+	if file_only then
+		return slist[gline][LOCAL_FILE_NO]
+	else
+		return {file_name[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC]}
+	end if
+	
 end function
 
 procedure opPROC()  -- Normal subroutine call
@@ -1472,6 +1477,7 @@ procedure save_il( sequence name )
 	
 	line_format = sprintf("%%%ds %%%dd : %%s\n", {max_width, floor(log( length(slist) ) / log(10) ) + 1})
 	
+	
 	for j = 1 to length(slist) do
 		if atom(slist[j][SRC]) then
 			slist[j][SRC] = fetch_line(slist[j][SRC])
@@ -1629,11 +1635,23 @@ procedure dis( integer sub )
 	
 	printf( out, "\nSubProgram [%s-%s:%05d] %s\n", 
 		{file_name[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
-	 
+	
 	map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1
+	sequence line_table = SymTab[sub][S_LINETAB]
+	print( out, line_table)
+	puts(out, "\n")
 	while pc <= length(Code) do
+		integer ln = find( pc-1, line_table )
+		if ln > 0 and ln <= length(line_table) then
+			sequence line = find_line( sub, pc, 0 )
+			printf(out, "[%s:%d] %s", find_line( sub, pc, 0 ) )
+			if not length(line[3]) then
+				puts(out,"\n")
+			end if
+		end if
+		
 		op = Code[pc]
 		call_proc(operation[op], {}) 
 	end while
@@ -1671,6 +1689,9 @@ global procedure BackEnd( object ignore )
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
 	printf(1,"saved to [%s.dis]\n", {file_name[1]})
+	if atom(slist[$]) then
+		slist = s_expand(slist)
+	end if
 	for i = TopLevelSub to length(SymTab) do
 		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY 
 		and sequence(SymTab[i][S_CODE]) 
