@@ -273,12 +273,9 @@ test_equal("parse format specified", { 2009, 5, 1, 0, 1, 2 },
 	d:parse("05/01/2009 00:01:02", "%m/%d/%Y %H:%M:%S"))
 
 
-ifdef DOS32 then
-	dt1 = d:now_gmt(11)
-elsedef	
-	dt1 = d:now_gmt()
-end ifdef
-	test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
+
+dt1 = d:now_gmt()
+test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
 
 
 test_report()

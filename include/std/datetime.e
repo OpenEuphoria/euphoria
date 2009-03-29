@@ -518,28 +518,55 @@ end function
 --
 --- Platform:
 -- Under //DOS// this requires a parameter that gives the difference in hours
--- between your timezone and GMT. The default is zero, which assumes you are 
--- already in GMT. 
+-- between your local timezone and GMT. This can either be a number of hours difference
+-- or the name of an environment variable that holds the hours difference.
+-- The default for the parameter is "" which means it will look for an environment symbol called
+-- "TZOFFSET". Note that the difference value is the number of hours to add to GMT to
+-- get the current local time.
 --
 -- Example 1:
 -- <eucode>
 -- dt = now_gmt()
--- -- If time was July 16th, 2008 at 10:34pm CST
+-- -- If local time was July 16th, 2008 at 10:34pm CST
 -- -- dt would be July 17th, 2008 at 03:34pm GMT
 -- </eucode>
 --
 -- Example 2 (DOS):
 -- <eucode>
--- dt = now_gmt(10)
--- -- If time was July 16th, 2008 at 08:34pm Aust EST
+-- -- assume that TZOFFSET was set to 10.
+-- dt = now_gmt()
+-- -- If local time was July 16th, 2008 at 08:34pm
 -- -- dt would be July 16th, 2008 at 10:34am GMT
+-- dt = now_gmt(-5)
+-- -- If local time was July 16th, 2008 at 08:34pm 
+-- -- dt would be July 17th, 2008 at 01:34am GMT
+-- setenv("GMT", "1")
+-- dt = now_gmt("GMT")
+-- -- If local time was July 16th, 2008 at 08:34pm 
+-- -- dt would be July 16th, 2008 at 07:34pm GMT
 -- </eucode>
 --
 -- See Also:
 -- [[:now]]
 
-public function now_gmt(atom gmt_offset = 0)
+public function now_gmt(object gmt_offset = {})
 ifdef DOS32 then
+	if sequence(gmt_offset) then
+		if length(gmt_offset) = 0 then
+			gmt_offset = "TZOFFSET"
+		end if
+		gmt_offset = getenv(gmt_offset)
+		if atom(gmt_offset) then
+			gmt_offset = 0
+		else
+			gmt_offset = value(gmt_offset)
+			if equal(gmt_offset[1], GET_SUCCESS) then
+				gmt_offset = gmt_offset[2]
+			else
+				gmt_offset = 0
+			end if
+		end if
+	end if
 	return (secondsToDateTime(datetimeToSeconds(now()) - (gmt_offset * 3600)))
 elsedef
 	gmt_offset	= gmt_offset -- Avoids (not_used) warning
