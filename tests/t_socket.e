@@ -100,11 +100,38 @@ ifdef SOCKET_TESTS then
 	puts(1, "===============================\n")
 
 	atom socket = new_socket(AF_INET, SOCK_STREAM, 0)
-	if connect(socket, "127.0.0.1:5000") = -1 then
-		test_fail("connect to server")
-	else
-		test_equal("send", 7, send(socket, "hello\r\n", 0))
-		test_equal("recv", "hello\r\n", recv(socket, 0))
+	for i = 1 to 4 do
+		_ = connect(socket, "127.0.0.1:5000") 
+		if _ != -1 then
+			exit
+		end if
+		if i = 4 then
+			test_fail("connect to server")
+		else
+			if i = 1 then
+				puts(1, "waiting for server to start .. ")
+			else
+				puts(1, " .. ")
+			end if
+			
+		end if
+	end for
+	
+	if _ != -1 then
+		
+		sequence send_data = "Hello, "
+		test_equal("send w/o newline", length(send_data), send(socket, send_data, 0))
+		test_equal("recv w/o newline", send_data, recv(socket, 0))
+		
+		send_data = "world\n"
+		test_equal("send with newline", length(send_data), send(socket, send_data, 0))
+		test_equal("recv with newline", send_data, recv(socket, 0))
+		
+		send_data = repeat('a', 511) & "\n"
+		test_equal("send large", length(send_data), send(socket, send_data, 0))
+		test_equal("recv large", send_data, recv(socket, 0))
+		
+		_ = send(socket, "quit\n", 0)
 	end if
 
 	test_equal("close", 0, close_socket(socket))
