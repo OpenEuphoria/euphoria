@@ -773,6 +773,19 @@ end type
 
 set_default_charsets()
 
+--** 
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more integers.
+--
+-- Example 1:
+-- <eucode>
+-- integer_array(-1)            -- FALSE (not a sequence)
+-- integer_array("abc")         -- TRUE (all single characters)
+-- integer_array({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- integer_array({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- integer_array({1, 2, 'a')    -- TRUE
+-- integer_array({})            -- TRUE
+-- </eucode>
 public type integer_array( object x )
 	if not sequence(x) then 
 		return 0
@@ -786,6 +799,24 @@ public type integer_array( object x )
 	return 1
 end type
 
+--** 
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more characters.
+--
+-- Comment:
+-- A 'character' is defined as a positive integer or zero. This is a broad
+-- definition that may be refined once proper UNICODE support is implemented.
+--
+-- Example 1:
+-- <eucode>
+-- t_text(-1)            -- FALSE (not a sequence)
+-- t_text("abc")         -- TRUE (all single characters)
+-- t_text({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- t_text({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- t_text({1, 2, 'a')    -- TRUE
+-- t_text({1, -2, 'a')   -- FALSE (contains a negativce integer)
+-- t_text({})            -- TRUE
+-- </eucode>
 public type t_text( object x )
 	if not sequence(x) then 
 		return 0
@@ -802,6 +833,19 @@ public type t_text( object x )
 	return 1
 end type
 
+--** 
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more numbers.
+--
+-- Example 1:
+-- <eucode>
+-- number_array(-1)            -- FALSE (not a sequence)
+-- number_array("abc")         -- TRUE (all single characters)
+-- number_array({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- number_array({1, 2, 9.7)    -- TRUE
+-- number_array({1, 2, 'a')    -- TRUE
+-- number_array({})            -- TRUE
+-- </eucode>
 public type number_array( object x )
 	if not sequence(x) then 
 		return 0
