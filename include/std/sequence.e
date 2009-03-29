@@ -1407,6 +1407,66 @@ end function
 -- See Also:
 --     [[:splice]], [[:remove]], [[:remove_all]]
 
+--****
+-- Description:
+-- Replaces all occurances of ##target## with ##replacement##
+--
+-- Parameters:
+--   # ##source##: the sequence in which replacements will be done.
+--   # ##target##: the sequence/item which is going to be replaced. If this
+--                 is an empty sequence, the ##source## is returned as is.
+--   # ##replacement##: the sequence/item which will be the replacement
+--
+-- Returns:
+--		A **sequence**, which is made of ##source## with all ##target## occurances
+--      repaced by ##replacement##.
+--
+-- Comments:
+--   This also removes all ##target## occurances when ##replacement## is "".
+--
+-- Example:
+-- <eucode>
+-- s = replace_all("abracadabra", 'a', 'X')
+-- -- s is now "XbrXcXdXbrX"
+-- s = replace_all("abracadabra", "ra", 'X')
+-- -- s is now "abXcadabX"
+-- s = replace_all("abracadabra", "a", "aa")
+-- -- s is now "aabraacaadaabraa"
+-- s = replace_all("abracadabra", "a", "")
+-- -- s is now "brcdbr"
+-- </eucode>
+--
+-- See Also:
+--     [[:replace]], [[:remove_all]]
+
+public function replace_all(sequence source, object target, object replacement)
+	integer startpos
+	integer endpos
+	
+	if atom(target) then
+		target = {target}
+	end if
+	
+	if atom(replacement) then
+		replacement = {replacement}
+	end if
+	
+	if length(target) = 0 then
+		return source
+	end if
+	
+	endpos = 1
+	while startpos != 0 with entry do
+		endpos = startpos + length(target) - 1
+		source = replace(source, replacement, startpos, endpos)
+		endpos = startpos + length(replacement)
+	entry
+		startpos = match_from(target, source, endpos)
+	end while
+	
+	return source
+end function
+
 --**
 -- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
 --
@@ -1740,6 +1800,8 @@ end function
 --
 -- Parameters:
 --		# ##s##: the sequence to flatten out.
+--      # delim##: An optional delimiter to place after each flattened subsequence (except
+--                 the last one). 
 --
 -- Returns:
 --		A **sequence** of atoms, all the atoms in ##s## enumerated.
@@ -1761,20 +1823,40 @@ end function
 -- s = flatten({18,{ 19, {45}}, {18.4, {}, 29.3}})
 -- -- s is {18, 19, 45, 18.4, 29.3}
 -- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- Using the delimiter argument.
+-- s = flatten({"abc", "def", "ghi"}, ", ")
+-- -- s is "abc, def, ghi"
+-- </eucode>
 
-public function flatten(sequence s)
+
+public function flatten(sequence s, object delim = "")
 	sequence ret
 	object x
 	integer len
 	integer pos
-			
+		
+	if atom(delim) then
+		delim = {delim}
+	end if	
 	ret = s
 	pos = 1
 	len = length(ret)
 	while pos <= len do
 		x = ret[pos]
 		if sequence(x) then
-			ret = ret[1..pos-1] & flatten(x) & ret[pos+1 .. $]
+			if length(delim) = 0 then
+				ret = ret[1..pos-1] & flatten(x) & ret[pos+1 .. $]
+			else
+				sequence temp = ret[1..pos-1] & flatten(x)
+				if pos != length(ret) then
+					ret = temp &  delim & ret[pos+1 .. $]
+				else
+					ret = temp & ret[pos+1 .. $]
+				end if
+			end if
 			len = length(ret)
 		else
 			pos += 1
@@ -1783,6 +1865,7 @@ public function flatten(sequence s)
 	
 	return ret
 end function
+
 
 --**
 -- Returns a sequence of three sub-sequences. The sub-sequences contain

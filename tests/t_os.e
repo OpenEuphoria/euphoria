@@ -60,5 +60,8 @@ test_equal("getenv() #4", "2", getenv("EUTEST_EXAMPLE"))
 test_equal("unsetenv()", 1, unsetenv("EUTEST_EXAMPLE"))
 test_equal("getenv() #5", -1, getenv("EUTEST_EXAMPLE"))
 
+test_equal("build_commandline #1", "abc def ghi", build_commandline({"abc", "def", "ghi"}))
+test_equal("build_commandline #2", "abc \"def ghi\"", build_commandline({"abc", "def ghi"}))
+
 test_report()
 

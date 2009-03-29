@@ -208,6 +208,10 @@ test_equal("flatten() deeply nested", {1,2,3}, flatten({{{{1}}}, 2, {{{{{3}}}}}}
 test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
 test_equal("flatten() empty", "", flatten({{"", {""}},{{}}}))
 
+test_equal("flatten() nested text delim", "abc def g h i", flatten({"abc", "def", "g h i"}, " "))
+test_equal("flatten() nested no delim", "abcdefg h i", flatten({"abc", "def", "g h i"}, ""))
+test_equal("flatten() nested char delim", "abc,def,g h i", flatten({"abc", "def", "g h i"}, ','))
+
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
 
@@ -449,6 +453,13 @@ in_place = remove( in_place, 2, 3 )
 test_equal( "remove in place 2,3", "367890", in_place )
 in_place = remove( in_place, 5, 6 )
 test_equal( "remove in place 5,6", "3678", in_place )
+
+-- replace_all
+test_equal("replace_all #1", "XbrXcXdXbrX", replace_all("abracadabra", 'a', 'X'))
+test_equal("replace_all #2", "abXcadabX", replace_all("abracadabra", "ra", 'X'))
+test_equal("replace_all #3", "aabraacaadaabraa", replace_all("abracadabra", "a", "aa"))
+test_equal("replace_all #4", "brcdbr", replace_all("abracadabra", "a", ""))
+test_equal("replace_all #5", "abracadabra", replace_all("abracadabra", "", "X"))
 
 test_report()
 

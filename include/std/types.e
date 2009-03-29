@@ -772,3 +772,46 @@ public type t_consonant(object pVal)
 end type
 
 set_default_charsets()
+
+public type integer_array( object x )
+	if not sequence(x) then 
+		return 0
+	end if
+	
+	for i = 1 to length(x) do
+		if not integer(x[i]) then 
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+public type t_text( object x )
+	if not sequence(x) then 
+		return 0
+	end if
+	
+	for i = 1 to length(x) do
+		if not integer(x[i]) then 
+			return 0
+		end if
+		if x[i] < 0 then
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+public type number_array( object x )
+	if not sequence(x) then 
+		return 0
+	end if
+	
+	for i = 1 to length(x) do
+		if not atom(x[i]) then 
+			return 0
+		end if
+	end for
+	return 1
+end type
+

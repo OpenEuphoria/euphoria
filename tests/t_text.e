@@ -120,4 +120,11 @@ test_equal("Encoding uppercase #4", {#80,#81,#8A,#8C,#8D,#8E,#8F,#A1,#A3,#A5,#A8
 
 set_encoding_properties("", "", "")
 
+-- quote()
+test_equal("quote #1", "\"The small man\"", quote("The small man"))
+test_equal("quote #2", "(The small man)", quote("The small man", {"(", ")"} ))
+test_equal("quote #3", "(The ~(small~) man)", quote("The (small) man", {"(", ")"}, '~' ))
+test_equal("quote #4", "The (small) man", quote("The (small) man", {"(", ")"}, '~', "#" ))
+test_equal("quote #5", "(The #1 ~(small~) man)", quote("The #1 (small) man", {"(", ")"}, '~', "#" ))
+
 test_report()

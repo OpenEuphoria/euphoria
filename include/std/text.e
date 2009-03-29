@@ -907,3 +907,138 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 	return lKeyValues
 end function
 
+
+--**
+-- Return a quoted version of the first argument.
+--
+-- Parameters:
+--   # ##text_in##: The string or set of strings to quote.
+--   # ##quote_pair##: A sequence of two strings. The first string is the opening
+--              quote to use, and the second string is the closing quote to use.
+--              The default is {"\"", "\""} which means that the output will be
+--              enclosed by double-quotation marks.
+--   # ##esc##: A single escape character. If this is not negative (the default), 
+--              then this is used to 'escape' any embedded quote characters and 
+--              'esc' characters already in the ##text_in## string.
+--   # ##sp##: A list of zero or more special characters. The ##text_in## is only
+--             quoted if it contains any of the special characters. The default
+--             is "" which means that the ##text_in## is always quoted.
+--
+-- Returns:
+--   A **sequence**, the quoted version of ##text_in##.
+--
+-- Example 1:
+-- <eucode>
+-- -- Using the defaults. Output enclosed in double-quotes, no escapes and no specials.
+-- s = quote("The small man")
+-- -- 's' now contains '"the small man"' including the double-quote characters.
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = quote("The small man", {"(", ")"} )
+-- -- 's' now contains '(the small man)'
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- s = quote("The (small) man", {"(", ")"}, '~' )
+-- -- 's' now contains '(the ~(small~) man)'
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- s = quote("The (small) man", {"(", ")"}, '~', "#" )
+-- -- 's' now contains 'the (small) man'
+-- -- because the input did not contain a '#' character.
+-- </eucode>
+--
+-- Example 5:
+-- <eucode>
+-- s = quote("The #1 (small) man", {"(", ")"}, '~', "#" )
+-- -- 's' now contains '(the #1 ~(small~) man)'
+-- -- because the input did contain a '#' character.
+-- </eucode>
+--
+-- Example 6:
+-- <eucode>
+-- -- input is a set of strings...
+-- s = quote({"a b c", "def", "g hi"},)
+-- -- 's' now contains three quoted strings: '"a b c"', '"def"', and '"g hi"'
+-- </eucode>
+public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integer esc = -1, t_text sp = "" )
+
+	if length(text_in) = 0 then
+		return text_in
+	end if
+	
+	if atom(quote_pair) then
+		quote_pair = {{quote_pair}, {quote_pair}}
+	elsif length(quote_pair) = 1 then
+		quote_pair = {quote_pair[1], quote_pair[1]}
+	elsif length(quote_pair) = 0 then
+		quote_pair = {"\"", "\""}
+	end if
+	
+	if sequence(text_in[1]) then
+		for i = 1 to length(text_in) do
+			if sequence(text_in[i]) then
+				text_in[i] = quote(text_in[i], quote_pair, esc, sp)
+			end if
+		end for
+		
+		return text_in
+	end if
+	
+	-- Only quote the input if it contains any of the items in 'sp'	
+	for i = 1 to length(sp) do
+		if find(sp[i], text_in) then
+			exit
+		end if
+		
+		if i = length(sp) then
+			-- Contains none of them, so just return the input untouched.
+			return text_in
+		end if
+	end for
+	
+	if esc >= 0  then
+		-- If the input already contains a quote, replace them with esc-quote,
+		-- but make sure that if the input already contains esc-quote that all
+		-- embedded esces are replaced with esc-esc first.
+		if atom(quote_pair[1]) then
+			quote_pair[1] = {quote_pair[1]}
+		end if
+		if atom(quote_pair[2]) then
+			quote_pair[2] = {quote_pair[2]}
+		end if
+		
+		if equal(quote_pair[1], quote_pair[2]) then
+			-- Simple case where both open and close quote are the same.
+			if match(quote_pair[1], text_in) then
+				if match(esc & quote_pair[1], text_in) then	
+					text_in = replace_all(text_in, esc, esc & esc)
+				end if
+				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
+			end if
+		else
+			if match(quote_pair[1], text_in) or
+			   match(quote_pair[2], text_in) then
+				if match(esc & quote_pair[1], text_in) then	
+					text_in = replace_all(text_in, esc & quote_pair[1], esc & esc & esc & quote_pair[1])
+				end if
+				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
+			end if
+			
+			if match(quote_pair[2], text_in) then
+				if match(esc & quote_pair[2], text_in) then	
+					text_in = replace_all(text_in, esc & quote_pair[2], esc & esc & esc & quote_pair[2])
+				end if
+				text_in = replace_all(text_in, quote_pair[2], esc & quote_pair[2])
+			end if
+		end if
+	end if
+		
+	return quote_pair[1] & text_in & quote_pair[2]
+
+end function
