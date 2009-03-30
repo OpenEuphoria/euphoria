@@ -124,7 +124,7 @@ global procedure Cleanup(integer status)
 
 	w = ShowWarnings(status)
 
-	if not TRANSLATE and (BIND or EWINDOWS or EUNIX) and (w or Errors) then
+	if not TRANSLATE and BIND and (w or Errors) then
 		if not batch_job then
 			screen_output(STDERR, "\nPress Enter\n")
 			if getc(0) then -- prompt

@@ -15,9 +15,8 @@ include std/os.e
 include std/filesys.e
 
 -- Translator initialization
-include std/get.e
-include common.e
 include global.e
+include std/get.e
 include mode.e as mode
 include c_out.e
 include c_decl.e
@@ -25,7 +24,6 @@ include std/error.e
 include std/sort.e
 include compile.e
 include cominit.e
-include tranplat.e
 include pathopen.e
 
 -- true if we want to force the user to choose the compiler

@@ -111,11 +111,11 @@ atom next_task_id     -- for multitasking
 next_task_id = 1
 
 atom clock_period
-if EDOS then
+ifdef DOS32 then
 	clock_period = 0.055  -- DOS default (can change)
-else
+elsedef
 	clock_period = 0.01   -- Windows/Linux/FreeBSD
-end if
+end ifdef
 
 -- TCB fields
 constant TASK_RID = 1,      -- routine id
@@ -422,11 +422,11 @@ procedure trace_back(sequence msg)
 					exit
 				else
 					both_puts("^^^ call-back from ")
-					if EWINDOWS then
+					ifdef WIN32 then
 						both_puts("Windows\n")
-					else    
+					elsedef
 						both_puts("external program\n")
-					end if
+					end ifdef
 				end if
 			
 			else
@@ -557,12 +557,14 @@ procedure call_crash_routines()
 end procedure
 
 procedure quit_after_error()
--- final termination    
-	if EWINDOWS then
+-- final termination
+	-- TODO: Should this check for batch_job?
+	ifdef WIN32 then
 		puts(2, "\nPress Enter...\n")
 		if getc(0) then
 		end if
-	end if
+	end ifdef
+
 	abort(1)
 end procedure
 
@@ -1070,11 +1072,11 @@ trace_line = 0
 
 procedure one_trace_line(sequence line)
 -- write one fixed-width 79-char line to ctrace.out
-	if EUNIX then
+	ifdef UNIX then
 		printf(trace_file, "%-78.78s\n", {line})
-	else
+	elsedef
 		printf(trace_file, "%-77.77s\r\n", {line})
-	end if
+	end ifdef
 end procedure
 
 procedure opSTARTLINE()
@@ -3422,10 +3424,12 @@ procedure opMACHINE_PROC()
 			display_warnings = (val[b] >= 0)
 		end if
 
-	elsif EDOS and v = M_TICK_RATE and val[b] > 18 and val[b] < 10000 then
+ifdef DOS32 then
+	elsif v = M_TICK_RATE and val[b] > 18 and val[b] < 10000 then
 		clock_period = 1 / val[b]
 		machine_proc(v, val[b]) 
-	
+end ifdef
+
 	else
 		machine_proc(v, val[b]) 
 	end if

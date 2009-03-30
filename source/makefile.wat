@@ -112,7 +112,6 @@ EU_TRANSLATOR_FILES = &
 	c_out.e &
 	cominit.e &
 	traninit.e &
-	tranplat.e &
 	compress.e
 	
 !include $(BUILDDIR)\transobj.wat

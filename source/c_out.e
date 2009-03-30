@@ -90,12 +90,12 @@ global procedure c_printf8(atom value)
 				
 				elsif buff[p] = 'n' or buff[p] = 'N' then
 					-- NaN - not needed currently 
-					if EUNIX then
+					ifdef UNIX then
 						buff = CREATE_NAN1
 						if neg then
 							buff = prepend(buff, '-')
 						end if
-					else
+					elsedef
 						if sequence(wat_path) or sequence(bor_path) then
 							buff = CREATE_NAN2
 							if not neg then
@@ -109,7 +109,7 @@ global procedure c_printf8(atom value)
 							end if
 						end if
 						exit
-					end if
+					end ifdef
 				end if
 				p += 1
 			end while

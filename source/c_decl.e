@@ -14,7 +14,6 @@ include std/filesys.e
 include global.e
 include reswords.e
 include symtab.e
-include tranplat.e
 include compile.e
 
 with type_check
@@ -1639,9 +1638,11 @@ global procedure finish_emake()
 	end if
 		
 	close(doit)
-	if TUNIX and EUNIX then
-		system("chmod +x emake", 2)
-	end if
+	ifdef UNIX then
+		if TUNIX then
+			system("chmod +x emake", 2)
+		end if
+	end ifdef
 end procedure
 
 global procedure GenerateUserRoutines()
@@ -1650,8 +1651,6 @@ global procedure GenerateUserRoutines()
 	symtab_index s, sp
 	integer next_c_char, q, temps
 	sequence buff, base_name, long_c_file, c_file
-
-
 
 	for file_no = 1 to length(file_name) do
 		if file_no = 1 or any_code(file_no) then 

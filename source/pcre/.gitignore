@@ -1,0 +1,4 @@
+config.h
+pcre.h
+*.obj
+*.o

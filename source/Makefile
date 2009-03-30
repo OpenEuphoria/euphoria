@@ -193,8 +193,7 @@ EU_TRANSLATOR_FILES = \
 	c_out.e \
 	global.e \
 	cominit.e \
-	traninit.e \
-	tranplat.e
+	traninit.e
 
 EU_BACKEND_RUNNER_FILES = \
 	intinit.e \

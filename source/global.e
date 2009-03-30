@@ -33,25 +33,21 @@ global constant EGPM = 0     -- GPM mouse support on Linux
 global boolean w32 -- Windows option for BIND
 
 global sequence version_name
-if EDOS then
-	if EDJGPP then
-		version_name = "DOS32 built for DJGPP"
-	else
-		version_name = "DOS32"
-	end if
-elsif EWINDOWS then
+ifdef DOS32 then
+	version_name = "DOS32"
+elsifdef WIN32 then
 	version_name = "WIN32"
-elsif ELINUX then
+elsifdef LINUX then
 	version_name = "Linux"
-elsif ESUNOS then
+elsifdef SUNOS then
 	version_name = "SunOS"
-elsif EOSX then
+elsifdef OSX then
 	version_name = "Mac OS X"
-elsif EBSD then
-	version_name = "BSD"
-elsif EUNIX then  --should never happen
+elsifdef FREEBSD then
+	version_name = "FreeBSD"
+elsifdef UNIX then  --should never happen
 	version_name = "UNIX"
-end if
+end ifdef
 
 -- common fields for all symbols, literal constants and temporaries
 global enum

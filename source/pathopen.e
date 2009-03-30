@@ -180,7 +180,8 @@ function expand_path( sequence path, sequence prefix )
 	if not length(path) then
 		return pwd
 	end if
-	
+
+	-- TODO: ~ expansion should be modified to work on Windows as well
 	ifdef UNIX then
 		object home
 		if length(path) and path[1] = '~' then
@@ -189,10 +190,12 @@ function expand_path( sequence path, sequence prefix )
 				path = home & path[2..$]
 			end if
 		end if
+
+		absolute = find(path[1], SLASH_CHARS)
+	elsedef
+		absolute = find(path[1], SLASH_CHARS) or find(':', path)
 	end ifdef
 	
-	absolute = find(path[1], SLASH_CHARS) or
-		(not EUNIX and find(':', path))
 	if not absolute then
 		path = prefix & SLASH & path
 	end if

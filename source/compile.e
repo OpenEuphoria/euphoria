@@ -17,7 +17,6 @@ include mode.e as mode
 include c_decl.e
 include cominit.e
 include compress.e
-include tranplat.e
 include scanner.e
 include emit.e
 include opnames.e

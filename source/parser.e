@@ -15,7 +15,6 @@ include std/text.e
 include std/search.e
 --include std/types.e 
 
-include platinit.e
 include inline.e
 
 constant UNDEFINED = -999

@@ -37,30 +37,32 @@ function GetSourceName()
 								  INTERPRETER_VERSION & " ")
 		end if
 
-		if EUNIX then
+		ifdef UNIX then
 			if BIND then
 				screen_output(STDERR, "for Linux/FreeBSD/OS X.\n")
 			else
-				if EOSX then
+				ifdef OSX then
 					screen_output(STDERR, "for OS X.\n")
-				elsif ESUNOS then
+				elsifdef SUNOS then
 					screen_output(STDERR, "for OpenSolaris.\n")
-				elsif EBSD then
+				elsifdef FREEBSD then
 					screen_output(STDERR, "for FreeBSD.\n")
-				else
+				elsedef
 					screen_output(STDERR, "for Linux.\n")
-				end if
+				end ifdef
 			end if
 
-		else
+		elsedef
 			if BIND then
 				screen_output(STDERR, "for DOS/Windows.\n")
-			elsif EWINDOWS then
-				screen_output(STDERR, "for 32-bit Windows.\n")
 			else
-				screen_output(STDERR, "for 32-bit DOS.\n")
+				ifdef WIN32 then
+					screen_output(STDERR, "for 32-bit Windows.\n")
+				elsedef
+					screen_output(STDERR, "for 32-bit DOS.\n")
+				end ifdef
 			end if
-		end if
+		end ifdef
 
 		ifdef not EU_FULL_RELEASE then
 			screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
@@ -127,22 +129,12 @@ function GetSourceName()
 	if not dot_found then
 		-- no dot found --
 		-- N.B. The list of default extentions must always end with the first one again.
-		if EUNIX then
-			exts = { ".exu", ".exw", ".ex", "", ".exu" }
+		ifdef UNIX then
+			exts = { ".ex", ".exu", ".exw", "" }
+		elsedef
+			exts = { ".ex", ".exd", ".exw" }
+		end ifdef
 
-		elsif BIND then
-			if w32 then
-				exts = { ".exw", ".ex", ".exu", ".exw" }
-			else
-				exts = { ".ex", ".exw", ".exu", ".ex" }
-			end if
-		else
-			if EWINDOWS then
-				exts = { ".exw", ".ex", ".exu", ".exw" }
-			else
-				exts = { ".ex", ".exw", ".exu", ".ex" }
-			end if
-		end if
 		-- Add a placeholder in the file list.
 		file_name = append(file_name, "")
 
@@ -192,7 +184,7 @@ procedure main()
 
 	eudir = getenv("EUDIR")
 	if atom(eudir) then
-		if EUNIX then
+		ifdef UNIX then
 			-- should check search PATH for euphoria/bin ?
 			eudir = getenv("HOME")
 			if atom(eudir) then
@@ -200,14 +192,14 @@ procedure main()
 			else
 				eudir = eudir & "/euphoria"
 			end if
-		else
+		elsedef
 			eudir = getenv("HOMEPATH")
 			if atom(eudir) then
 				eudir = "\\EUPHORIA"
 			else
 				eudir = getenv("HOMEDRIVE") & eudir & "EUPHORIA"
 			end if
-		end if
+		end ifdef
 
 	else
 		-- This is a special RDS hack because the RapidEuphoria shared
@@ -229,7 +221,8 @@ procedure main()
 	if src_file = -1 then
 		-- too early for normal error processing
 		screen_output(STDERR, sprintf("Can't open %s\n", {file_name[$]}))
-		if BIND or EWINDOWS or EUNIX then
+		-- TODO: Should this check batch_job?
+		if BIND then
 			screen_output(STDERR, "\nPress Enter\n")
 			if getc(0) then
 			end if

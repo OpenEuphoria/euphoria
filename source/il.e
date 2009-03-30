@@ -36,12 +36,14 @@ del_vars = 0
 procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
-	if not EUNIX then
+	ifdef not UNIX then
+		-- TODO: Should we check for batch_job?
 		-- we run bind and bindw using backendw.exe, so this is needed
 		puts(2, "\nPress Enter\n")
 		if getc(0) then
 		end if
-	end if
+	end ifdef
+
 	abort(1)
 end procedure
 
@@ -196,11 +198,11 @@ procedure OutputHeader(file f)
 			puts(f, shebang)
 		else
 			puts(f, "#!" & eudir & SLASH & "bin" & SLASH)
-			if EUNIX then
+			ifdef UNIX then
 				puts(f, "backendu\n")
-			else
+			elsedef
 				puts(f, "backendw.exe\n") -- assume Apache CGI
-			end if
+			end ifdef
 		end if
 	end if
 	puts(f, IL_MAGIC)
@@ -372,8 +374,10 @@ procedure OutputIL()
 	
 		if shroud_only then
 			out_name &= ".il"
-		elsif not EUNIX then
-			out_name &= ".exe"
+		else
+			ifdef not UNIX then
+				out_name &= ".exe"
+			end ifdef
 		end if
 	end if
 	
@@ -405,12 +409,14 @@ procedure OutputIL()
 		be = -1
 		if w32 then
 			backend_name = "backendw.exe"
-		elsif EUNIX then
-			backend_name = "backendu"
-			-- try to get the installed eubackend, if it exists:
-			be = open( "/usr/bin/eubackend", "r" )
-		else    
-			backend_name = "backendd.exe"
+		else
+			ifdef UNIX then
+				backend_name = "backendu"
+				-- try to get the installed eubackend, if it exists:
+				be = open( "/usr/bin/eubackend", "r" )
+			elsedef
+				backend_name = "backendd.exe"
+			end ifdef
 		end if
 		if compare( backend_name, locate_file( backend_name, { 
 			eu_dir & SLASH & "bin", source_dir }
@@ -511,25 +517,28 @@ procedure OutputIL()
 	if not quiet then
 		printf(1, "deleted %d unused routines and %d unused variables.\n",
 				{del_routines, del_vars})
-		if EUNIX then
+		ifdef UNIX then
 			system("chmod +x " & out_name, 2)
-		end if
+		end ifdef
 		if shroud_only then
 			puts(1, "You may now use backend")
-			if EUNIX then
+			ifdef UNIX then
 				puts(1, "u")
-			elsif w32 then
-				puts(1, "w.exe")
-			else
-				puts(1, ".exe")
-			end if
+			elsedef
+				if w32 then
+					puts(1, "w.exe")
+				else
+					puts(1, ".exe")
+				end if
+			end ifdef
 			printf(1, " to run %s\n", {out_name})        
 		else
-			if EUNIX then
+			ifdef UNIX then
 				out_name = "./" & out_name
-			end if
+			end ifdef
 			puts(1, "You may now run " & out_name & '\n')
 		end if
+		-- TODO: Should this be checking batch_job?
 		puts(1, "\nPress Enter\n")
 		if getc(0) then
 		end if

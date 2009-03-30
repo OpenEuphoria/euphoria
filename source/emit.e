@@ -3,12 +3,11 @@
 -- Routines to emit the IL opcode stream
 include std/os.e
 
+include global.e
 include pathopen.e
 include reswords.e
-include global.e
 include symtab.e
 include scanner.e
-include tranplat.e
 include fwdref.e
 include parser.e
 

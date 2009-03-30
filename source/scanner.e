@@ -223,9 +223,11 @@ global procedure AppendSourceLine()
 		-- record the options and maybe keep the source line too
 		src = ThisLine
 
-		if EUNIX and TRANSLATE and mybsd then
-			src = ""  -- save space, only 8Mb available!
-		end if
+		ifdef UNIX then
+			if TRANSLATE and mybsd then
+				src = ""  -- save space, only 8Mb available!
+			end if
+		end ifdef
 
 		if OpTrace then
 			options = SOP_TRACE
@@ -380,8 +382,13 @@ function path_open()
 	-- skip whitespace not necessary - String Token does it
 	
 	-- check for leading backslash
-	absolute = find(new_include_name[1], SLASH_CHARS) or
-			   (not EUNIX and find(':', new_include_name))
+	-- TODO: abstract function to is_absolute_path() or something
+	--     this same method is used elsewhere.
+	ifdef UNIX then
+		absolute = find(new_include_name[1], SLASH_CHARS)
+	elsedef
+		absolute = find(new_include_name[1], SLASH_CHARS) or find(':', new_include_name)
+	end ifdef
 	
 	if absolute then
 		-- open new_include_name exactly as it is
@@ -509,20 +516,20 @@ end function
 
 function same_name(sequence a, sequence b)
 -- return TRUE if two file names (or paths) are equal
-	if EUNIX then
+	ifdef UNIX then
 		return equal(a, b) -- case sensitive
-	end if
-	-- DOS/Windows
-	if length(a) != length(b) then
-		return FALSE
-	elsif EWINDOWS then
-		return win_compare(a,b)
-	else
-		return dos_compare(a,b)
-	end if
+	elsedef
+		if length(a) != length(b) then
+			return FALSE
+		else
+			ifdef WIN32 then
+				return win_compare(a,b)
+			elsedef
+				return dos_compare(a,b)
+			end ifdef
+		end if
+	end ifdef
 end function
-
-
 
 function NameSpace_declaration(symtab_index sym)
 -- add a new namespace symbol to the symbol table.
