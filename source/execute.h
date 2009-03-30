@@ -429,19 +429,19 @@ struct char_cell {
 #define M_UNSET_ENV          74
 #define M_EU_INFO            75
 #define M_UNAME              76
-#define M_SOCK_GETSERVBYNAME 76
-#define M_SOCK_GETSERVBYPORT 77
-#define M_SOCK_GETHOSTBYNAME 78
-#define M_SOCK_GETHOSTBYADDR 79
-#define M_SOCK_SOCKET        80
-#define M_SOCK_CLOSE         81
-#define M_SOCK_SHUTDOWN      82
-#define M_SOCK_CONNECT       83
-#define M_SOCK_SEND          84
-#define M_SOCK_RECV          85
-#define M_SOCK_BIND          86
-#define M_SOCK_LISTEN        87
-#define M_SOCK_ACCEPT        88
+#define M_SOCK_GETSERVBYNAME 77
+#define M_SOCK_GETSERVBYPORT 78
+#define M_SOCK_GETHOSTBYNAME 79
+#define M_SOCK_GETHOSTBYADDR 80
+#define M_SOCK_SOCKET        81
+#define M_SOCK_CLOSE         82
+#define M_SOCK_SHUTDOWN      83
+#define M_SOCK_CONNECT       84
+#define M_SOCK_SEND          85
+#define M_SOCK_RECV          86
+#define M_SOCK_BIND          87
+#define M_SOCK_LISTEN        88
+#define M_SOCK_ACCEPT        89
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
