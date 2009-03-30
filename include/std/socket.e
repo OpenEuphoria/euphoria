@@ -18,7 +18,9 @@ include std/wildcard.e
 include std/text.e
 
 enum M_SOCK_GETSERVBYNAME=76, M_SOCK_GETSERVBYPORT, M_SOCK_GETHOSTBYNAME,
-	M_SOCK_GETHOSTBYADDR
+	M_SOCK_GETHOSTBYADDR, M_SOCK_SOCKET, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
+	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
+	M_SOCK_ACCEPT
 
 --****
 -- === Constants
@@ -284,9 +286,9 @@ end ifdef
 atom ipdll_, sockdll_, kerneldll_, dnsdll_,
 	wsastart_, wsacleanup_, wsawaitformultipleevents_,
 	wsacreateevent_, wsaeventselect_, wsaenumnetworkevents_, wsacloseevent_,
-	ioctl_, socket_, bind_, connect_, listen_, accept_,
-	send_, sendto_, sendmsg_, recv_, recvfrom_, recvmsg_,
-	poll_, close_, shutdown_,
+	ioctl_,
+	sendto_, sendmsg_, recvfrom_, recvmsg_,
+	poll_,
 	getsockopts_, setsockopts_,
 	dnsquery_, dnsrlfree_, dnsexpand_,
 	getaddrinfo_, freeaddrinfo_,
@@ -317,25 +319,14 @@ elsifdef WIN32 then
 	kerneldll_ = open_dll("kernel32.dll")
 	dnsdll_ = open_dll("dnsapi.dll")
 	error_ = define_c_func(sockdll_,"WSAGetLastError",{},C_INT)
-	socket_ = define_c_func(sockdll_,"socket",{C_INT,C_INT,C_INT},C_INT)
-	bind_ = define_c_func(sockdll_,"bind",{C_INT,C_POINTER,C_INT},C_INT)
-	connect_ = define_c_func(sockdll_,"connect",{C_INT,C_POINTER,C_INT},C_INT)
 	poll_ = define_c_func(sockdll_,"WSAPoll",{C_POINTER,C_INT,C_INT},C_INT)
-	listen_ = define_c_func(sockdll_,"listen",{C_INT,C_INT},C_INT)
-	--  accept_ = define_c_func(sockdll_,"accept",{C_INT,C_POINTER,C_POINTER},C_INT)
-	accept_ = define_c_func(sockdll_,"WSAAccept",{C_INT,C_POINTER,C_POINTER,C_POINTER,C_INT},C_INT)
-	socket_ = define_c_func(sockdll_,"socket",{C_INT,C_INT,C_INT},C_INT)
 	ioctl_ = define_c_func(sockdll_,"ioctlsocket",{C_INT,C_INT,C_POINTER},C_INT)
 	getsockopts_ = define_c_func(sockdll_,"getsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
 	setsockopts_ = define_c_func(sockdll_,"setsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_INT},C_INT)
-	send_ = define_c_func(sockdll_,"send",{C_INT,C_POINTER,C_INT,C_INT},C_INT)
 	sendto_ = define_c_func(sockdll_,"sendto",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},C_INT)
 	sendmsg_ = define_c_func(sockdll_,"sendmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	recv_ = define_c_func(sockdll_,"recv",{C_INT,C_POINTER,C_INT,C_INT},C_INT)
 	recvfrom_ = define_c_func(sockdll_,"recvfrom",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
 	recvmsg_ = define_c_func(sockdll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	close_ = define_c_func(sockdll_,"closesocket",{C_INT},C_INT)
-	shutdown_ = define_c_func(sockdll_,"shutdown",{C_INT,C_INT},C_INT)
 	getaddrinfo_ = define_c_func(sockdll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	freeaddrinfo_ = define_c_proc(sockdll_,"freeaddrinfo",{C_POINTER})
 	-- WSAStartup() is required when using WinSock.
@@ -374,22 +365,13 @@ end ifdef
 ifdef UNIX then
 	error_ = define_c_func(dll_,"__errno_location",{},C_INT)
 	ioctl_ = define_c_func(dll_,"ioctl",{C_INT,C_INT,C_INT},C_INT)
-	socket_ = define_c_func(dll_,"socket",{C_INT,C_INT,C_INT},C_INT)
 	getsockopts_ = define_c_func(dll_,"getsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
 	setsockopts_ = define_c_func(dll_,"setsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_INT},C_INT)
-	bind_ = define_c_func(dll_,"bind",{C_INT,C_POINTER,C_INT},C_INT)
-	connect_ = define_c_func(dll_,"connect",{C_INT,C_POINTER,C_INT},C_INT)
 	poll_ = define_c_func(dll_,"poll",{C_POINTER,C_INT,C_INT},C_INT)
-	listen_ = define_c_func(dll_,"listen",{C_INT,C_INT},C_INT)
-	accept_ = define_c_func(dll_,"accept",{C_INT,C_POINTER,C_POINTER},C_INT)
-	send_ = define_c_func(dll_,"send",{C_INT,C_POINTER,C_INT,C_INT},C_INT)
 	sendto_ = define_c_func(dll_,"sendto",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},C_INT)
 	sendmsg_ = define_c_func(dll_,"sendmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	recv_ = define_c_func(dll_,"recv",{C_INT,C_POINTER,C_INT,C_INT},C_INT)
 	recvfrom_ = define_c_func(dll_,"recvfrom",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
 	recvmsg_ = define_c_func(dll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	close_ = define_c_func(dll_,"close",{C_INT},C_INT)
-	shutdown_ = define_c_func(dll_,"shutdown",{C_INT,C_INT},C_INT)
 	getaddrinfo_ = define_c_func(dll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	freeaddrinfo_ = define_c_proc(dll_,"freeaddrinfo",{C_POINTER})
 	delay_ = define_c_func(dll_,"nanosleep",{C_POINTER,C_POINTER},C_INT)
@@ -725,35 +707,18 @@ end function
 -- === Socket routines - server side
 --
 
--------------------------------------------------------------------------------
--- Bind
--------------------------------------------------------------------------------
--- Bind is typically used in TCP and SOCK_STREAM connections.
--- It returns 0 on success and -1 on failure.
-function unix_bind(atom socket, sequence inet_addr)
-	atom sockaddr
-	sockaddr = make_sockaddr(inet_addr)
-	if sockaddr = 0 then
-		return -1
-	end if
-	return c_func(bind_,{socket,sockaddr,16})
-end function
-
-function windows_bind(atom socket, sequence inet_addr)
-	-- Windows does bind the same as Linux
-	return unix_bind(socket,inet_addr)
-end function
-
 --**
 -- Joins a socket to a specific local internet address and port so
 -- later calls only need to provide the socket. 
 --
 -- Parameters:
---		# ##socket##: an atom, the socket id
---		# ##inet_addr##: a sequence, the address to bind the socket to
+--   # ##socket##: the socket
+--   # ##address##: the address to bind the socket to
+--   # ##port##: optional, if not specified you must include :PORT in
+--     the address parameter.
 --
 -- Returns 
---		An **integer**, 0 on success and -1 on failure.
+--   An **integer**, 0 on success and -1 on failure.
 --
 -- Example 1:
 -- <eucode>
@@ -761,186 +726,115 @@ end function
 -- -- Look for connections on port 8080 for any interface.
 -- </eucode>
 
-public function bind(atom socket, sequence inet_addr)
-	ifdef WIN32 then
-		return windows_bind(socket,inet_addr)
-	elsifdef UNIX then
-		return unix_bind(socket,inet_addr)
-	end ifdef
-	
-	return -1
-end function
+public function bind(atom socket, sequence address, integer port=0)
+	if port = 0 then
+		integer colon = find(':', address)
+		if colon = 0 then
+			return -1
+		end if
 
--------------------------------------------------------------------------------
--- Listen
--------------------------------------------------------------------------------
--- Listen is typically used in TCP and SOCK_STREAM connections.
--- It returns 0 on success and error_code on failure.
-function unix_listen(atom socket, integer pending_conn_len)
-	return c_func(listen_,{socket,pending_conn_len})
-end function
+		object port_v = value(address[colon+1..$])
+		if port_v[1] != GET_SUCCESS then
+			return -1
+		end if
 
-function windows_listen(atom socket, integer pending_conn_len)
-	-- Windows does listen the same as Linux
-	return unix_listen(socket,pending_conn_len)
+		port = port_v[2]
+		address = address[1..colon-1]
+	end if
+
+	return machine_func(M_SOCK_BIND, { socket, address, port })
 end function
 
 --**
 -- Start monitoring a connection. Only works with TCP sockets.
 --
 -- Parameters:
---		# ##socket##: an atom, the socket id
---		# ##pending_conn_len##: an integer, the number of connection requests that
--- can be kept waiting before the OS refuses to hear any more.
+--   # ##socket##: an atom, the socket id
+--   # ##backlog##: the number of connection requests that
+--     can be kept waiting before the OS refuses to hear any more.
 --
 -- Returns:
---    An **integer**, 0 on success and an error code on failure.
+--   An **integer**, 0 on success and an error code on failure.
 --
 -- Comments:
--- This function is used in a program that will be receiving
--- connections.
+--   This function is used in a program that will be receiving
+--   connections.
 --
--- The value of ##pending_conn_len## is strongly dependent on both the hardware and the
--- amount of time it takes the program to process each connection
--- request. 
+--   The value of ##backlog## is strongly dependent on both the hardware
+--   and the amount of time it takes the program to process each
+--   connection request.
 --
--- This function must be executed after [[:bind]]().
+--   This function must be executed after [[:bind]]().
 
-public function listen(atom socket, integer pending_conn_len)
-	ifdef WIN32 then
-		return windows_listen(socket, pending_conn_len)
-	elsifdef UNIX then
-		return unix_listen(socket, pending_conn_len)
-	end ifdef
-	
-	return -1
-end function
-
--- Accept: Returns {atom new_socket, sequence peer_ip_addres} on success, or
--- -1 on error.
-
-function unix_accept(atom socket)
-	
-	atom sockptr, result
-	sequence peer
-	
-	sockptr = allocate(20)
-	poke4(sockptr,16)
-	for ctr = 4 to 16 by 4 do
-		poke4(sockptr+ctr,0)
-	end for
-	result = c_func(accept_,{socket,sockptr+4,sockptr})
-	if result < 0 then
-		free(sockptr)
-		return -1
-	end if
-	peer = get_sockaddr(sockptr+4)
-	free(sockptr)
-	return {result,peer}
-	
-end function
-
-function windows_accept(atom socket)
-	
-	atom sockptr, result
-	sequence peer
-	
-	sockptr = allocate(20)
-	poke4(sockptr,16)
-	for ctr = 4 to 16 by 4 do
-		poke4(sockptr+ctr,0)
-	end for
-	result = c_func(accept_,{socket,sockptr+4,sockptr,0,0})
-	if result < 0 then
-		free(sockptr)
-		return -1
-	end if
-	peer = get_sockaddr(sockptr+4)
-	free(sockptr)
-	return {result,peer}
-	
+public function listen(atom socket, integer backlog)
+	return machine_func(M_SOCK_LISTEN, { socket, backlog })
 end function
 
 --**
 -- Produces a new socket for an incoming connection.
 --
 -- Parameters:
---		# ##socket##: an atom, the side connection socket id
+--   # ##socket##: an atom, the side connection socket id
 --
 -- Returns:
---     An **object**, either -1 on failure, or a sequence {atom new_socket, sequence peer_ip_address} on success.
+--   An **object**, either -1 on failure, or a sequence
+--   {atom new_socket, sequence peer_ip_address} on success.
 --
 -- Comments:
--- Using this function allows
--- communication to occur on a "side channel" while the main server
--- socket remains available for new connections. 
+--   Using this function allows communication to occur on a
+--   "side channel" while the main server socket remains available
+--   for new connections.
 --
--- ##accept##() must be called after ##bind##() and ##listen##().
+--   ##accept##() must be called after ##bind##() and ##listen##().
 --
--- On failure, use [[:get_error]] to determine the cause of the failure.
+--   On failure, use [[:get_error]] to determine the cause of the failure.
 --
 
 public function accept(atom socket)
-	ifdef WIN32 then
-		return windows_accept(socket)
-	elsifdef UNIX then
-		return unix_accept(socket)
-	end ifdef
-	
-	return -1
+	return machine_func(M_SOCK_ACCEPT, { socket })
 end function
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Client-side sockets (connect)
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 --****
 -- === Socket routines - client side
-
--- Returns 0 on success and -1 on failure
-
-function unix_connect(atom socket, sequence inet_addr)
-	atom sockaddr
-	sockaddr = make_sockaddr(inet_addr)
-	if sockaddr = 0 then
-		return -1
-	end if
-	return c_func(connect_,{socket,sockaddr,16})
-end function
-
-
-function windows_connect(atom socket, sequence inet_addr)
-	-- Windows connect works the same as Linux
-	return unix_connect(socket,inet_addr)
-end function
 
 --**
 -- Establish an outgoing connection to a remote computer. Only works with TCP sockets.
 --
 -- Parameters:
---		# ##socket##: an atom, the socket id
---		# ##inet_addr##: a sequence, the address to bind the socket to
+--   # ##family##: type of socket
+--   # ##socket##: the socket
+--   # ##address##: ip address to connect, optionally with :PORT at the end
+--   # ##port##: port number
 --
 -- Returns 
---		An **integer**, 0 for success and -1 on failure.
+--   An **integer**, 0 for success and -1 on failure.
 --
 -- Comments:
---	##inet_address## should contain both the IP address and port of the remote listening socket as a string.
+--   ##address## can contain a port number. If it does not, it has to be supplied
+--   to the ##port## parameter.
 --
 -- Example 1:
 -- <eucode>
--- success = connect(socket, "11.1.1.1:80")
+-- success = connect(AF_INET, socket, "11.1.1.1:80")
 -- </eucode>
 
-public function connect(atom socket, sequence inet_addr)
-	ifdef WIN32 then
-		return windows_connect(socket,inet_addr)
-	elsifdef UNIX then
-		return unix_connect(socket,inet_addr)
-	end ifdef
-	
-	return -1
+public function connect(integer family, atom socket, sequence address, integer port=0)
+	if port = 0 then
+		integer colon = find(':', address)
+		if colon = 0 then
+			return -1
+		end if
+
+		object port_v = value(address[colon+1..$])
+		if port_v[1] != GET_SUCCESS then
+			return -1
+		end if
+
+		port = port_v[2]
+		address = address[1..colon-1]
+	end if
+
+	return machine_func(M_SOCK_CONNECT, { family, socket, address, port })
 end function
 
 -------------------------------------------------------------------------------
@@ -951,19 +845,6 @@ end function
 --****
 -- === Socket routines - both sides
 --
-
--------------------------------------------------------------------------------
--- New socket
--------------------------------------------------------------------------------
-
-function unix_new_socket(integer family, integer sock_type, integer protocol)
-	return c_func(socket_,{family,sock_type,protocol})
-end function
-
-function windows_new_socket(integer family, integer sock_type, integer protocol)
-	-- Windows does socket the same as Linux
-	return unix_new_socket(family,sock_type,protocol)
-end function
 
 --**
 -- Returns a handle to a newly created socket.
@@ -982,26 +863,7 @@ end function
 -- </eucode>
 
 public function new_socket(integer family, integer sock_type, integer protocol)
-	ifdef WIN32 then	
-		return windows_new_socket(family,sock_type,protocol)
-	elsifdef UNIX then
-		return unix_new_socket(family,sock_type,protocol)
-	end ifdef
-	
-	return -1
-	
-end function
-
--------------------------------------------------------------------------------
--- Close socket
--------------------------------------------------------------------------------
-
-function unix_close_socket(atom socket)
-	return c_func(close_,{socket})
-end function
-
-function windows_close_socket(atom socket)
-	return c_func(close_,{socket})
+	return machine_func(M_SOCK_SOCKET, { family, sock_type, protocol })
 end function
 
 --**
@@ -1018,52 +880,27 @@ end function
 -- 
 
 public function close_socket(atom socket)
-	ifdef WIN32 then
-		return windows_close_socket(socket)
-	elsifdef UNIX then
-		return unix_close_socket(socket)
-	end ifdef
-	
-	return -1
-end function
-
--------------------------------------------------------------------------------
--- Shutdown socket
--------------------------------------------------------------------------------
-
-function unix_shutdown_socket(atom socket, atom method)
-	return c_func(shutdown_,{socket,method})
-end function
-
-function windows_shutdown_socket(atom socket, atom method)
-	return c_func(shutdown_,{socket,method})
+	return machine_func(M_SOCK_CLOSE, { socket })
 end function
 
 --**
 -- Partially or fully close a socket. 
 --
 -- Parameters:
---		# ##socket##: an atom, the socket to close
---      # ##method##: an integer, the method used to close the socket
+--   # ##socket##: an atom, the socket to close
+--   # ##method##: an integer, the method used to close the socket
 --
 -- Returns:
---		An **integer**, 0 on success and -1 on error. 
+--   An **integer**, 0 on success and -1 on error.
 --
 -- Comments:
---
--- A method of 0 closes the socket for reading, 1 closes the socket for writing, and
--- 2 closes the socket for both.
+--   A method of 0 closes the socket for reading, 1 closes the socket for writing, and
+--   2 closes the socket for both.
 --
 --  It may take several minutes for the OS to declare the socket as closed.
 
 public function shutdown_socket(atom socket, atom method)
-	ifdef WIN32 then
-		return windows_shutdown_socket(socket,method)
-	elsifdef UNIX then
-		return unix_shutdown_socket(socket,method)
-	end ifdef
-	
-	return -1
+	return machine_func(M_SOCK_SHUTDOWN, { socket, method })
 end function
 
 -------------------------------------------------------------------------------
@@ -1289,48 +1126,20 @@ public function poll(sequence socket_list, atom timeout)
 	return -1
 end function
 
--------------------------------------------------------------------------------
--- Send (requires bound/connected socket)
--------------------------------------------------------------------------------
--- Returns the # of chars sent, or -1 for error
-function unix_send(atom socket, sequence data, atom flags)
-	atom datalen, dataptr, status
-	datalen = length(data)
-	dataptr = allocate(datalen+1)
-	poke(dataptr,data&0)
-	status = c_func(send_,{socket,dataptr,datalen,flags})
-	free(dataptr)
-	return status
-end function
-
-function windows_send(atom socket, sequence data, atom flags)
-	-- Windows does send the same as Linux
-	return unix_send(socket,data,flags)
-end function
-
 --**
 -- Send TCP data to a socket connected remotely.
 --
 -- Parameters:
---		# ##socket##: an atom, the socket id
---		# ##data##: a sequence of atoms, what to send
---		# ##flags##: an atom,
+--   # ##socket##: an atom, the socket id
+--   # ##data##: a sequence of atoms, what to send
+--   # ##flags##: an atom,
 --
 -- Returns:
---		An **integer**, the number of characters sent, or -1 for an error.
+--   An **integer**, the number of characters sent, or -1 for an error.
 --
--- Comments:
--- ##sSend##() works regardless of which socket is the listener and which is the
--- connector. 
 
-public function send(atom socket, sequence data, atom flags)
-	ifdef WIN32 then
-		return windows_send(socket,data,flags)
-	elsifdef UNIX then
-		return unix_send(socket,data,flags)
-	end ifdef
-	
-	return -1
+public function send(atom socket, sequence data, atom flags=0)
+	return machine_func(M_SOCK_SEND, { socket, data, flags })
 end function
 
 -------------------------------------------------------------------------------
@@ -1378,63 +1187,28 @@ public function sendto(atom socket, sequence data, atom flags, sequence inet_add
 	return -1
 end function
 
--------------------------------------------------------------------------------
--- recv (for connected sockets)
--------------------------------------------------------------------------------
--- Returns either a sequence of data, or a 2-element sequence {ERROR_CODE,ERROR_STRING}.
-function unix_recv(atom socket, atom flags)
-	atom buf, buflen, rtnlen
-	sequence rtndata
-	buflen = BLOCK_SIZE
-	buf = allocate(buflen)
-	rtnlen = c_func(recv_,{socket,buf,buflen,flags})
-	if rtnlen < 0 then
-		free(buf)
-		return get_error()
-	end if
-	rtndata = peek({buf,rtnlen})
-	free(buf)
-	return rtndata
-end function
-
-function windows_recv(atom socket, atom flags)
-	-- Windows does recv the same as Linux
-	-- The flag MSG_DONTWAIT is a Linux-only extension, and should not be used
-	-- in cross-platform applications.
-	-- From the Linux Man page on recv:
-	-- The MSG_DONTWAIT flag requests the call to return when it would block otherwise.
-	-- If no data is available, errno is set to EAGAIN. This flag is not available in
-	-- strict ANSI or C99 compilation mode.
-	return unix_recv(socket,flags)
-end function
-
 --**
 -- Receive data from a bound socket. 
 --
 -- Parameters:
---		# ##socket##: an atom, the socket id
---		# ##flags##: an atom,
+--   # ##socket##: an atom, the socket id
+--   # ##flags##: an atom,
 --
 -- Returns:     
---   A **sequence**, either a full string of data on success, or a pair {error code, error string} on error or no data.
+--   A **sequence**, either a full string of data on success, or an atom indicating
+--   the error code.
 --
 -- Comments:
--- This function will not return
--- until data is actually received on the socket, unless the flags
--- parameter contains MSG_DONTWAIT.
+-- This function will not return until data is actually received on the socket,
+-- unless the flags parameter contains MSG_DONTWAIT.
 --
 -- MSG_DONTWAIT only works on Linux kernels 2.4 and above.  Similar
 -- functionality is not available in Windows.  The only way to set
 -- up a non-blocking polling loop on Windows is to use poll().
+--
 
-public function recv(atom socket, atom flags)
-	ifdef WIN32 then
-		return windows_recv(socket, flags)
-	elsifdef UNIX then
-		return unix_recv(socket,flags)
-	end ifdef
-	
-	return -1
+public function recv(atom socket, atom flags=0)
+	return machine_func(M_SOCK_RECV, { socket, flags })
 end function
 
 -------------------------------------------------------------------------------

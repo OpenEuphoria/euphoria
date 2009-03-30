@@ -5338,6 +5338,33 @@ object machine(object opcode, object x)
 			case M_SOCK_GETHOSTBYADDR:
 				return eusock_gethostbyaddr(x);
 
+			case M_SOCK_SOCKET:
+				return eusock_socket(x);
+
+			case M_SOCK_CLOSE:
+				return eusock_close(x);
+
+			case M_SOCK_SHUTDOWN:
+				return eusock_shutdown(x);
+
+			case M_SOCK_CONNECT:
+				return eusock_connect(x);
+
+			case M_SOCK_SEND:
+				return eusock_send(x);
+
+			case M_SOCK_RECV:
+				return eusock_recv(x);
+
+			case M_SOCK_BIND:
+				return eusock_bind(x);
+
+			case M_SOCK_LISTEN:
+				return eusock_listen(x);
+
+			case M_SOCK_ACCEPT:
+				return eusock_accept(x);
+
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

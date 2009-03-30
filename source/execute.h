@@ -433,6 +433,15 @@ struct char_cell {
 #define M_SOCK_GETSERVBYPORT 77
 #define M_SOCK_GETHOSTBYNAME 78
 #define M_SOCK_GETHOSTBYADDR 79
+#define M_SOCK_SOCKET        80
+#define M_SOCK_CLOSE         81
+#define M_SOCK_SHUTDOWN      82
+#define M_SOCK_CONNECT       83
+#define M_SOCK_SEND          84
+#define M_SOCK_RECV          85
+#define M_SOCK_BIND          86
+#define M_SOCK_LISTEN        87
+#define M_SOCK_ACCEPT        88
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

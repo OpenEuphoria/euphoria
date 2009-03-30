@@ -20,6 +20,8 @@ extern int default_heap;
 #include "alldefs.h"
 #include "alloc.h"
 
+#define BUFF_SIZE 1024
+
 #ifdef EWINDOWS
 int eusock_wsastarted = 0;
 
@@ -34,7 +36,7 @@ void eusock_wsastart()
 	err = WSAStartup(wVersionRequested, &wsaData);
 	if (err != 0)
 	{
-		tempBuff = EMalloc(1024);
+		tempBuff = EMalloc(BUFF_SIZE);
 		sprintf(tempBuff, "WSAStartup failed with error: %d", err);
 		RTFatal(tempBuff);
 		EFree(tempBuff);
@@ -59,6 +61,12 @@ int eusock_geterror()
 	return ATOM_0;
 }
 #endif
+
+/* ============================================================================
+ *
+ * Information functions
+ *
+ * ========================================================================== */
 
 /*
  * getservbyname(name, proto)
@@ -272,4 +280,229 @@ object eusock_gethostbyaddr(object x)
 	EFree(address);
 
 	return eusock_build_hostent(ent);
+}
+
+/* ============================================================================
+ *
+ * Shared Client/Server functions
+ *
+ * ========================================================================== */
+
+/*
+ * socket(af, type, protocol)
+ */
+object eusock_socket(object x)
+{
+	int af, type, protocol;
+	SOCKET sock;
+
+	af = SEQ_PTR(x)->base[1];
+	type = SEQ_PTR(x)->base[2];
+	protocol = SEQ_PTR(x)->base[3];
+
+	sock = socket(af, type, protocol);
+	if (sock == INVALID_SOCKET)
+	{
+		return eusock_geterror();
+	}
+
+
+	return sock;
+}
+
+/*
+ * close(sock)
+ */
+object eusock_close(object x)
+{
+	if (closesocket(SEQ_PTR(x)->base[1]) == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return ATOM_1;
+}
+
+/*
+ * shutdown(sock, how)
+ */
+object eusock_shutdown(object x)
+{
+	if (shutdown(SEQ_PTR(x)->base[1], SEQ_PTR(x)->base[2]) == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return ATOM_1;
+}
+
+/*
+ * connect(family, sock, address, port)
+ */
+object eusock_connect(object x)
+{
+	SOCKET s;
+	struct sockaddr_in addr;
+	int result;
+
+	s1_ptr address_s;
+	char *address;
+
+	s = SEQ_PTR(x)->base[2];
+	addr.sin_family = SEQ_PTR(x)->base[1];
+	addr.sin_port = htons(SEQ_PTR(x)->base[4]);
+
+	address_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
+	address = EMalloc(address_s->length+1);
+	MakeCString(address, SEQ_PTR(x)->base[3]);
+
+	addr.sin_addr.s_addr = inet_addr(address);
+	if (addr.sin_addr.s_addr == INADDR_NONE)
+	{
+		// TODO: Give a real error message
+		return ATOM_0;
+	}
+
+	result = connect(s, (SOCKADDR *) &addr, sizeof(addr));
+
+	EFree(address);
+
+	if (result == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return ATOM_1;
+}
+
+/*
+ * send(sock, buf, flags)
+ */
+object eusock_send(object x)
+{
+	SOCKET s;
+	int flags, result;
+
+	s1_ptr buf_s;
+	char *buf;
+
+	s = SEQ_PTR(x)->base[1];
+	flags = SEQ_PTR(x)->base[3];
+
+	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
+	buf = EMalloc(buf_s->length+1);
+	MakeCString(buf, SEQ_PTR(x)->base[2]);
+
+	result = send(s, buf, buf_s->length, flags);
+
+	EFree(buf);
+
+	if (result == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return result;
+}
+
+/*
+ * recv(sock, flags)
+ */
+object eusock_recv(object x)
+{
+	SOCKET s;
+	int flags, result;
+	char buf[BUFF_SIZE];
+
+	s = SEQ_PTR(x)->base[1];
+	flags = SEQ_PTR(x)->base[2];
+
+	result = recv(s, buf, BUFF_SIZE, flags);
+
+	if (result > 0)
+	{
+		buf[result] = 0;
+		return NewString(buf);
+	} else if (result == 0) {
+		return ATOM_0;
+	} else {
+		return eusock_geterror();
+	}
+}
+
+/* ============================================================================
+ *
+ * Server functions
+ *
+ * ========================================================================== */
+
+/*
+ * bind(socket, address, port)
+ */
+object eusock_bind(object x)
+{
+	SOCKET s;
+	s1_ptr address_s;
+	char *address;
+	int port, result;
+
+	struct sockaddr_in service;
+
+	s = SEQ_PTR(x)->base[1];
+	port = SEQ_PTR(x)->base[3];
+
+	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
+	address = EMalloc(address_s->length+1);
+	MakeCString(address, SEQ_PTR(x)->base[2] );
+
+	service.sin_family = AF_INET;
+	service.sin_addr.s_addr = inet_addr(address);
+	service.sin_port = htons(port);
+
+	result = bind(s, (SOCKADDR *) &service, sizeof(service));
+
+	EFree(address);
+
+	return result;
+}
+
+/*
+ * listen(socket, backlog)
+ */
+object eusock_listen(object x)
+{
+	int result;
+
+	if (listen(SEQ_PTR(x)->base[1], SEQ_PTR(x)->base[2]) == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return ATOM_0;
+}
+
+/*
+ * accept(socket)
+ */
+object eusock_accept(object x)
+{
+	SOCKET client;
+	struct sockaddr_in addr;
+	int addr_len;
+
+	s1_ptr client_seq;
+
+	addr_len = sizeof(addr);
+	client = accept(SEQ_PTR(x)->base[1], &addr, &addr_len);
+
+	if (client == INVALID_SOCKET)
+	{
+		return eusock_geterror();
+	}
+
+	client_seq = NewS1(2);
+	client_seq->base[1] = client;
+	client_seq->base[2] = NewString(inet_ntoa(addr.sin_addr));
+
+	return MAKE_SEQ(client_seq);
 }
