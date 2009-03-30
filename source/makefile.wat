@@ -214,6 +214,8 @@ EX=$(EUBIN)\exwc.exe
 EXE=$(EX)
 INCDIR=-i $(TRUNKDIR)\include
 
+PWD=$(%cdrive):$(%cwd)
+
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 all :  .SYMBOLIC
     @echo ------- ALL -----------
@@ -297,9 +299,11 @@ library : .SYMBOLIC version.e version.h runtime
 	wmake -h -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
 doslibrary : .SYMBOLIC 
+    @echo ------- DOS LIBRARY -----------
 	wmake -h -f makefile.wat OS=DOS library  $(VARS)
 
 winlibrary : .SYMBOLIC
+    @echo ------- WINDOWS LIBRARY -----------
 	wmake -h -f makefile.wat OS=WIN library  $(VARS)
 
 runtime: .SYMBOLIC 
@@ -404,28 +408,52 @@ interpreter : .SYMBOLIC version.e version.h
 	wmake -h -f makefile.wat $(BUILDDIR)\exwc.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install-generic : .SYMBOLIC
-	@for %i in (*.e) do @copy %i $(PREFIX)\source\
-	@for %i in (*.ex) do @copy %i $(PREFIX)\source\
-	@copy ..\include\* $(PREFIX)\include\
+	@echo --------- install-generic $(PREFIX) ------------
+	@if not $(PWD)==$(PREFIX)\source for %i in (*.e) do @copy %i $(PREFIX)\source\
+	@if not $(PWD)==$(PREFIX)\source for %i in (*.ex) do @copy %i $(PREFIX)\source\
+	@if not $(PWD)==$(PREFIX)\source copy ..\include\* $(PREFIX)\include\
 	@if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
-	@copy ..\include\std\* $(PREFIX)\include\std
+	@if not $(PWD)==$(PREFIX)\source copy ..\include\std\* $(PREFIX)\include\std
 	@if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
-	@copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	@if not $(PWD)==$(PREFIX)\source copy ..\include\euphoria\* $(PREFIX)\include\euphoria
 	
-installwin : .SYMBOLIC install-generic
-	@copy $(BUILDDIR)\ecw.exe $(PREFIX)\bin\
-	@copy $(BUILDDIR)\exw.exe $(PREFIX)\bin\
-	@copy $(BUILDDIR)\exwc.exe $(PREFIX)\bin\
-	@copy $(BUILDDIR)\backendw.exe $(PREFIX)\bin\
-	@copy $(BUILDDIR)\backendc.exe $(PREFIX)\bin\
-	@copy $(BUILDDIR)\ecw.lib $(PREFIX)\bin\
+installwin : .SYMBOLIC install-generic installwinbin
+	@echo --------- installwin $(PREFIX) ------------
 
-installdos : .SYMBOLIC install-generic
-	@copy $(BUILDDIR)\ec.exe $(PREFIX)\bin\
-	@copy $(BUILDDIR)\backendd.exe $(%PREFIX)\bin\
-	@copy $(BUILDDIR)\ec.lib $(PREFIX)\bin\
+installwinbin : .SYMBOLIC
+	@echo --------- installwinbin $(PREFIX) ------------
+	@if exist $(BUILDDIR)\ecw.exe copy $(BUILDDIR)\ecw.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\exw.exe copy $(BUILDDIR)\exw.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\exwc.exe copy $(BUILDDIR)\exwc.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\backendw.exe copy $(BUILDDIR)\backendw.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\backendc.exe copy $(BUILDDIR)\backendc.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\ecw.lib $(RM) $(BUILDDIR)\ecw.lib
+	@if exist $(BUILDDIR)\ecw.exe $(RM) $(BUILDDIR)\ecw.exe
+	@if exist $(BUILDDIR)\exw.exe $(RM) $(BUILDDIR)\exw.exe
+	@if exist $(BUILDDIR)\exwc.exe $(RM) $(BUILDDIR)\exwc.exe
+	@if exist $(BUILDDIR)\backendw.exe $(RM) $(BUILDDIR)\backendw.exe
+	@if exist $(BUILDDIR)\backendc.exe $(RM) $(BUILDDIR)\backendc.exe
+	@if exist $(BUILDDIR)\ecw.lib $(RM) $(BUILDDIR)\ecw.lib
+
+installdos : .SYMBOLIC install-generic installdosbin
+	@echo --------- installdos $(PREFIX) ------------
+	
+installdosbin : .SYMBOLIC
+	@echo --------- installdosbin $(PREFIX) ------------
+	@if exist $(BUILDDIR)\ex.exe copy $(BUILDDIR)\ex.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\ec.exe copy $(BUILDDIR)\ec.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\backendd.exe copy $(BUILDDIR)\backendd.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\ec.lib copy $(BUILDDIR)\ec.lib $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\ex.exe $(RM) $(BUILDDIR)\ex.exe
+	@if exist $(BUILDDIR)\ec.exe $(RM) $(BUILDDIR)\ec.exe
+	@if exist $(BUILDDIR)\backendd.exe $(RM) $(BUILDDIR)\backendd.exe
+	@if exist $(BUILDDIR)\ec.lib $(RM) $(BUILDDIR)\ec.lib
 	
 install : .SYMBOLIC installwin installdos
+	@echo --------- install $(PREFIX) ------------
+	
+installbin : .SYMBOLIC installwinbin installdosbin
+	@echo --------- installbin $(PREFIX) ------------
 	
 	
 $(BUILDDIR)\ecw.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
@@ -438,11 +466,13 @@ $(BUILDDIR)\ecw.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLA
 
 
 translator : .SYMBOLIC version.e version.h
+    @echo ------- TRANSLATOR -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h -f makefile.wat objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
 	wmake -h -f makefile.wat $(BUILDDIR)\ecw.exe EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=transobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 dostranslator : .SYMBOLIC version.e version.h
+    @echo ------- DOS TRANSLATOR -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dostrobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=dostrobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -h -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\ec.exe EX=$(EUBIN)\exwc.exe EU_TARGET=ec. OBJDIR=dostrobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
@@ -472,16 +502,19 @@ dosbackend : .SYMBOLIC version.e version.h backendflag
 	wmake -h -f makefile.wat $(BUILDDIR)\backendd.exe EX=$(EUBIN)\exwc.exe EU_TARGET=backend. OBJDIR=dosbkobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 dos : .SYMBOLIC version.e version.h
+    @echo ------- DOS -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dosobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
 doseubin : .SYMBOLIC version.e version.h
+    @echo ------- DOS EUBIN -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dosobj\main-.c EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\ex.exe EX=$(EUBIN)\exwc.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
 $(BUILDDIR)\backendd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+    @echo ------- DOS BACKEND -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\exb.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\exb.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\exb.lbc option caseexact
@@ -502,6 +535,7 @@ $(BUILDDIR)\backendd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNE
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+    @echo ------- DOS INTERPRETER -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\ex.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\ex.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\ex.lbc option caseexact
@@ -522,6 +556,7 @@ $(BUILDDIR)\ex.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\ec.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+    @echo ------- DOS TRANSLATOR EXE -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\ec.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option caseexact
@@ -613,19 +648,22 @@ $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
 
 version.e: version.mak
-	echo global constant MAJ_VER=$(MAJ_VER) > version.e
-	echo global constant MIN_VER=$(MIN_VER) >> version.e
-	echo global constant PAT_VER=$(PAT_VER) >> version.e
-	echo global constant REL_TYPE="$(REL_TYPE)" >> version.e
+    @echo ------- VERSION.E -----------
+	@echo global constant MAJ_VER=$(MAJ_VER) > version.e
+	@echo global constant MIN_VER=$(MIN_VER) >> version.e
+	@echo global constant PAT_VER=$(PAT_VER) >> version.e
+	@echo global constant REL_TYPE="$(REL_TYPE)" >> version.e
 
 version.h: version.mak
-	echo $#define MAJ_VER $(MAJ_VER) > version.h
-	echo $#define MIN_VER $(MIN_VER) >> version.h
-	echo $#define PAT_VER $(PAT_VER) >> version.h
-	echo $#define REL_TYPE "$(REL_TYPE)" >> version.h
+    @echo ------- VERSION.H -----------
+	@echo $#define MAJ_VER $(MAJ_VER) > version.h
+	@echo $#define MIN_VER $(MIN_VER) >> version.h
+	@echo $#define PAT_VER $(PAT_VER) >> version.h
+	@echo $#define REL_TYPE "$(REL_TYPE)" >> version.h
 
 !ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
+    @echo ------- REG EXP -----------
 	cd pcre
 	wmake -h -f makefile.wat 
 	cd ..
