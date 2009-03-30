@@ -17,6 +17,9 @@ include std/get.e
 include std/wildcard.e
 include std/text.e
 
+enum M_SOCK_GETSERVBYNAME=76, M_SOCK_GETSERVBYPORT, M_SOCK_GETHOSTBYNAME,
+	M_SOCK_GETHOSTBYADDR
+
 --****
 -- === Constants
 --
@@ -286,7 +289,7 @@ atom ipdll_, sockdll_, kerneldll_, dnsdll_,
 	poll_, close_, shutdown_,
 	getsockopts_, setsockopts_,
 	dnsquery_, dnsrlfree_, dnsexpand_,
-	gethostbyname_, getservbyname_, getaddrinfo_, freeaddrinfo_,
+	getaddrinfo_, freeaddrinfo_,
 	--     read_, write_, getsockname_, getpeername_,
 	error_, delay_
 
@@ -333,8 +336,6 @@ elsifdef WIN32 then
 	recvmsg_ = define_c_func(sockdll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
 	close_ = define_c_func(sockdll_,"closesocket",{C_INT},C_INT)
 	shutdown_ = define_c_func(sockdll_,"shutdown",{C_INT,C_INT},C_INT)
-	gethostbyname_ = define_c_func(sockdll_,"gethostbyname",{C_POINTER},C_POINTER)
-	getservbyname_ = define_c_func(sockdll_,"getservbyname",{C_POINTER,C_POINTER}, C_POINTER)
 	getaddrinfo_ = define_c_func(sockdll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	freeaddrinfo_ = define_c_proc(sockdll_,"freeaddrinfo",{C_POINTER})
 	-- WSAStartup() is required when using WinSock.
@@ -389,8 +390,6 @@ ifdef UNIX then
 	recvmsg_ = define_c_func(dll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
 	close_ = define_c_func(dll_,"close",{C_INT},C_INT)
 	shutdown_ = define_c_func(dll_,"shutdown",{C_INT,C_INT},C_INT)
-	gethostbyname_ = define_c_func(dll_,"gethostbyname",{C_POINTER},C_POINTER)
-	getservbyname_ = define_c_func(dll_,"getservbyname",{C_POINTER,C_POINTER}, C_POINTER)
 	getaddrinfo_ = define_c_func(dll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	freeaddrinfo_ = define_c_proc(dll_,"freeaddrinfo",{C_POINTER})
 	delay_ = define_c_func(dll_,"nanosleep",{C_POINTER,C_POINTER},C_INT)
@@ -1989,130 +1988,124 @@ public function getnsrr(sequence dname, atom options)
 	return dnsquery(dname,NS_T_NS,options)
 end function
 
--------------------------------------------------------------------------------
--- GetHostByName (deprecated - replaced by GetAddrInfo)
--------------------------------------------------------------------------------
-
-function unix_gethostbyname(sequence name)
-	
-	-- Based on SOCKS.EXU demo from Irv Mullins.
-	
-	atom hostent,name_ptr,host_addr_ptr
-	sequence host_addr
-	
-	name_ptr = allocate_string(name)
-	hostent = c_func(gethostbyname_,{name_ptr})
-	free(name_ptr)
-
-	if hostent = 0 then
-		return ""
-	end if
-
-	host_addr_ptr = peek4u(hostent+16)  -- May be hostent+12 on Windows, may be hostent+16 on Linux
-
-	if host_addr_ptr > 0 then
-		host_addr = sprintf("%d.%d.%d.%d",peek({peek4u(host_addr_ptr),4}))
-	else
-		host_addr = ""
-	end if
-
-	return host_addr
-end function
-
-function windows_gethostbyname(sequence name)
-	-- The returned structure may not be the same on Windows and Linux, but
-	-- we'll assume they are for now.
-	
-	atom hostent,name_ptr,host_addr_ptr
-	sequence host_addr
-	
-	name_ptr = allocate_string(name)
-	hostent = c_func(gethostbyname_,{name_ptr})
-	free(name_ptr)
-	if hostent = 0 then
-		return ""
-	end if
-	host_addr_ptr = peek4u(hostent+12)  -- May be hostent+12 on Windows, may be hostent+16 on Linux
-	if host_addr_ptr > 0 then
-		host_addr = sprintf("%d.%d.%d.%d",peek({peek4u(host_addr_ptr),4}))
-	else
-		host_addr = ""
-	end if
-	-- Windows does not permit freeing the hostent structure
-	return host_addr
-	
-end function
-
 --**
--- Get host address, given its name.
---
--- Parameters:
---		# ##name##: a string, the name of te host to look up.
---
--- Returns:
---	A **sequence**, a string representing the IP address of queried host.
-
-public function gethostbyname(sequence name)
-	ifdef WIN32 then
-		return windows_gethostbyname(name)
-	elsifdef UNIX then
-		return unix_gethostbyname(name)
-	end ifdef
-	
-	return -999
-end function
-
--------------------------------------------------------------------------------
--- GetServByName (deprecated - replaced by GetAddrInfo)
--------------------------------------------------------------------------------
-
-function unix_getservbyname(sequence name)
-	atom name_ptr,port_ptr,port
-	
-	name_ptr = allocate_string(name)
-	port_ptr = c_func(getservbyname_,{name_ptr,0})
-	if port_ptr = 0 then
-		free(name_ptr)
-		return 0
-	end if
-
-	port = (peek(port_ptr+8)*256)+(peek(port_ptr+9))
-	free(name_ptr)
-
-	return port
-end function
-
-function windows_getservbyname(sequence name)
-	return unix_getservbyname(name)
-end function
-
---**
--- Get the port number by service name
+-- Get service information by name.
 --
 -- Parameters
---   # ##name##: service name
+--   # ##name##: service name.
+--   # ##protocol##: protocol. Default is not to search by protocol.
 --
 -- Returns:
---   An ##integer## representing the server port number or 0 on
---   an error.
+--   A ##sequence## containing { offical protocol name, protocol, port number } or
+--   an atom indicating the error code.
 --
 -- Example 1:
 -- <eucode>
--- ? getservbyname("http")
--- -- 80
+-- object result = getservbyname("http")
+-- -- result = { "http", "tcp", 80 }
+-- </eucode>
+--
+public function getservbyname(sequence name, object protocol=0)
+	return machine_func(M_SOCK_GETSERVBYNAME, { name, protocol })
+end function
+
+--**
+-- Get service information by port number.
+--
+-- Parameters
+--   # ##port##: port number.
+--   # ##protocol##: protocol. Default is not to search by protocol.
+--
+-- Returns:
+--   A ##sequence## containing { offical protocol name, protocol, port number } or
+--   an atom indicating the error code.
+--
+-- Example 1:
+-- <eucode>
+-- object result = getservbyport(80)
+-- -- result = { "http", "tcp", 80 }
+-- </eucode>
+--
+public function getservbyport(integer port, object protocol=0)
+	return machine_func(M_SOCK_GETSERVBYPORT, { port, protocol })
+end function
+
+--**
+-- Get the host information by name.
+--
+-- Parameters:
+--   # ##name##: host name
+--
+-- Returns:
+--   A ##sequence## containing
+--   <eucode>
+--   {
+--     offical name,
+--     { alias1, alias2, ... },
+--     { ip1, ip2, ... },
+--     address_type
+--   }
+--   </eucode>
+--
+-- Example 1:
+-- <eucode>
+-- object data = gethostbyname("www.google.com")
+-- -- data = {
+-- --   "www.l.google.com",
+-- --   {
+-- --     "www.google.com"
+-- --   },
+-- --   {
+-- --     "74.125.93.104",
+-- --     "74.125.93.147",
+-- --     ...
+-- --   },
+-- --   2
+-- -- }
 -- </eucode>
 --
 
-public function getservbyname(sequence name)
-	ifdef WIN32 then
-		return windows_getservbyname(name)
-	elsifdef UNIX then
-		return unix_getservbyname(name)
-	end ifdef
-	
-	-- This should never happen as the file crashes when running 
-	-- under DOS
-	return 0
+public function gethostbyname(sequence name)
+	return machine_func(M_SOCK_GETHOSTBYNAME, { name })
+end function
+
+--**
+-- Get the host information by address.
+--
+-- Parameters:
+--   # ##address##: host address
+--
+-- Returns:
+--   A ##sequence## containing
+--   <eucode>
+--   {
+--     offical name,
+--     { alias1, alias2, ... },
+--     { ip1, ip2, ... },
+--     address_type
+--   }
+--   </eucode>
+--
+-- Example 1:
+-- <eucode>
+-- object data = gethostbyaddr("74.125.93.147")
+-- -- data = {
+-- --   "www.l.google.com",
+-- --   {
+-- --     "www.google.com"
+-- --   },
+-- --   {
+-- --     "74.125.93.104",
+-- --     "74.125.93.147",
+-- --     ...
+-- --   },
+-- --   2
+-- -- }
+-- </eucode>
+--
+
+public function gethostbyaddr(sequence address)
+	return machine_func(M_SOCK_GETHOSTBYADDR, { address })
 end function
 
 -------------------------------------------------------------------------------

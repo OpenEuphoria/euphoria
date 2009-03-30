@@ -429,6 +429,10 @@ struct char_cell {
 #define M_UNSET_ENV          74
 #define M_EU_INFO            75
 #define M_UNAME              76
+#define M_SOCK_GETSERVBYNAME 76
+#define M_SOCK_GETSERVBYPORT 77
+#define M_SOCK_GETHOSTBYNAME 78
+#define M_SOCK_GETHOSTBYADDR 79
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

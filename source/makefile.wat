@@ -138,6 +138,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
 	$(PCRE_OBJECTS)
 #       &
@@ -152,6 +153,7 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
 	$(PCRE_OBJECTS)
 
@@ -395,6 +397,7 @@ $(BUILDDIR)\exwc.exe $(BUILDDIR)\exw.exe: $(BUILDDIR)\$(OBJDIR)\int.c $(EU_CORE_
 	@%create $(BUILDDIR)\$(OBJDIR)\int.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\int.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\int.lbc option caseexact
+	@%append $(BUILDDIR)\$(OBJDIR)\int.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\int.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\int.lbc name $(BUILDDIR)\exwc.exe
 	wrc -q -ad exw.res $(BUILDDIR)\exwc.exe
@@ -634,6 +637,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj : be_syncolor.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj : be_runtime.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
 
 version.e: version.mak

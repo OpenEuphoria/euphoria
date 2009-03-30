@@ -5326,6 +5326,18 @@ object machine(object opcode, object x)
 			case M_UNAME:
 				return eu_uname();
 
+			case M_SOCK_GETSERVBYNAME:
+				return eusock_getservbyname(x);
+
+			case M_SOCK_GETSERVBYPORT:
+				return eusock_getservbyport(x);
+
+			case M_SOCK_GETHOSTBYNAME:
+				return eusock_gethostbyname(x);
+
+			case M_SOCK_GETHOSTBYADDR:
+				return eusock_gethostbyaddr(x);
+
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */
