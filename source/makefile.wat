@@ -452,6 +452,7 @@ $(BUILDDIR)\ecw.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLA
 	@%create $(BUILDDIR)\$(OBJDIR)\ec.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\ec.lbc option caseexact
+	@%append $(BUILDDIR)\$(OBJDIR)\ec.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\ec.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\ec.lbc name $(BUILDDIR)\ecw.exe
 	wrc -q -ad exw.res $(BUILDDIR)\ecw.exe
@@ -474,6 +475,7 @@ $(BUILDDIR)\backendw.exe :  $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_
 	@%create $(BUILDDIR)\$(OBJDIR)\exwb.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc option caseexact
+	@%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\exwb.lbc file %i
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\exwb.lbc name $(BUILDDIR)\backendw.exe
 	wrc -q -ad exw.res $(BUILDDIR)\backendw.exe
@@ -519,6 +521,7 @@ $(BUILDDIR)\backendd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNE
 	@%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION QUIET
 	@%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION ELIMINATE
 	@%append $(BUILDDIR)\$(OBJDIR)\exb.lbc OPTION CASEEXACT
+	@%append $(BUILDDIR)\$(OBJDIR)\int.lbc library ws2_32
 	@for %i in ($(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\exb.lbc file %i
 	wlink  $(DEBUGLINK) @$(BUILDDIR)\$(OBJDIR)\exb.lbc name $(BUILDDIR)\backendd.exe
 	cd $(BUILDDIR)

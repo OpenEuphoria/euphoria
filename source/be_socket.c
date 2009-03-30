@@ -3,6 +3,8 @@
  * See License.txt
  */
 
+#ifndef EDOS
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,10 +14,21 @@
 #include <ws2tcpip.h>
 
 extern int default_heap;
-#else
+#else // ifdef EWINDOWS
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#endif
+
+#ifdef ESUNOS
+#include <unistd.h>
+
+#define SOCKET int
+#define SOCKET_ERROR -1
+#define INVALID_SOCKET -1
+#define SOCKADDR struct sockaddr_in
+#define closesocket close
+#endif // ESUNOS
+#endif // ifdef EWINDOWS else
 
 #include "alldefs.h"
 #include "alloc.h"
@@ -55,12 +68,13 @@ int eusock_geterror()
 {
 	return WSAGetLastError();
 }
-#else
+#else // ifdef EWINDOWS
+#include <errno.h>
 int eusock_geterror()
 {
-	return ATOM_0;
+	return errno;
 }
-#endif
+#endif // ifdef EWINDOWS else
 
 /* ============================================================================
  *
@@ -506,3 +520,5 @@ object eusock_accept(object x)
 
 	return MAKE_SEQ(client_seq);
 }
+
+#endif // ifndef EDOS

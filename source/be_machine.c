@@ -5326,6 +5326,7 @@ object machine(object opcode, object x)
 			case M_UNAME:
 				return eu_uname();
 
+#ifndef EDOS
 			case M_SOCK_GETSERVBYNAME:
 				return eusock_getservbyname(x);
 
@@ -5364,6 +5365,8 @@ object machine(object opcode, object x)
 
 			case M_SOCK_ACCEPT:
 				return eusock_accept(x);
+
+#endif // ifndef EDOS
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
