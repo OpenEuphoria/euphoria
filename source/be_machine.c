@@ -4808,7 +4808,7 @@ object eu_uname()
 	s1_ptr s1;
 
 	ret = uname(&buf);
-	if (ret != 0)
+	if (ret < 0)
 		return ATOM_M1;
 
 #ifdef _GNU_SOURCE
