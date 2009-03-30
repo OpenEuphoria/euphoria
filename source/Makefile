@@ -224,6 +224,7 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_syncolor.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
 	$(PREFIXED_PCRE_OBJECTS)
 
@@ -234,6 +235,7 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_alloc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_pcre.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \

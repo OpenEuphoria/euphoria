@@ -19,7 +19,7 @@ extern int default_heap;
 #include <sys/socket.h>
 #include <netdb.h>
 
-#ifdef ESUNOS
+#ifdef EUNIX
 #include <unistd.h>
 
 #define SOCKET int
@@ -27,7 +27,7 @@ extern int default_heap;
 #define INVALID_SOCKET -1
 #define SOCKADDR struct sockaddr_in
 #define closesocket close
-#endif // ESUNOS
+#endif // UNIX
 #endif // ifdef EWINDOWS else
 
 #include "alldefs.h"
