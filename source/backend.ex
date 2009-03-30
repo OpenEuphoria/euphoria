@@ -149,21 +149,19 @@ if current_db = -1 then
 	fatal("Can't open .exe file")
 end if
 
-integer OUR_SIZE -- Must be less than or equal to actual backend size.
-				 -- We seek to this position and then search for the marker.
-		
-ifdef DOS32 then		 
-	OUR_SIZE = 170000 -- backend.exe (Causeway compression)
+-- Must be less than or equal to actual backend size.
+-- We seek to this position and then search for the marker.
+ifdef DOS32 then
+	constant OUR_SIZE = 170000 -- backend.exe (Causeway compression)
 
-elsifdef UNIX then
-	ifdef BSD then
-		OUR_SIZE = 150000  -- backendu for FreeBSD (not compressed)
-	elsedef 
-		OUR_SIZE = 150000  -- backendu for Linux
-	end ifdef
+elsifdef FREEBSD or OSX or SUNOS then
+	constant OUR_SIZE = 150000 -- backendu for FreeBSD (not compressed)
+
+elsifdef LINUX then
+	constant OUR_SIZE = 150000  -- backendu for Linux
 
 elsedef
-	OUR_SIZE = 67000  -- backendw.exe (upx compression)
+	constant OUR_SIZE = 67000  -- backendw.exe (upx compression)
 end ifdef
 
 if seek(current_db, OUR_SIZE) then
