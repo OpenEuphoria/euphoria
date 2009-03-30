@@ -38,6 +38,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <sys/utsname.h>
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
@@ -4799,6 +4800,36 @@ object eu_info()
 	return MAKE_SEQ(s1);
 }
 
+object eu_uname()
+{
+#ifdef EUNIX
+	int ret;
+	struct utsname buf;
+	s1_ptr s1;
+
+	ret = uname(&buf);
+	if (ret != 0)
+		return ATOM_M1;
+
+#ifdef _GNU_SOURCE
+	s1 = NewS1(6);
+#else
+	s1 = NewS1(5);
+#endif
+	s1->base[1] = NewString(buf.sysname);
+	s1->base[2] = NewString(buf.nodename);
+	s1->base[3] = NewString(buf.release);
+	s1->base[4] = NewString(buf.version);
+	s1->base[5] = NewString(buf.machine);
+#ifdef _GNU_SOURCE
+	s1->base[6] = NewString(buf.domainname);
+#endif
+	return MAKE_SEQ(s1);
+#else
+	return ATOM_0;
+#endif
+}
+
 #ifdef ERUNTIME
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
@@ -5291,6 +5322,9 @@ object machine(object opcode, object x)
 
 			case M_EU_INFO:
 				return eu_info();
+
+			case M_UNAME:
+				return eu_uname();
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

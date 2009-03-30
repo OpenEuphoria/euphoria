@@ -465,21 +465,46 @@ public function instance()
 end function
 
 ifdef WIN32 then
-	constant UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
-elsifdef LINUX then
-	constant UNAME = define_c_func(open_dll(""), "uname", {C_POINTER}, C_INT)
-elsifdef FREEBSD or SUNOS then
-	constant UNAME = define_c_func(open_dll("libc.so"), "uname", {C_POINTER}, C_INT)
-elsifdef OSX then
-	constant UNAME = define_c_func(open_dll("libc.dylib"), "uname", {C_POINTER}, C_INT)
+	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
+elsifdef UNIX then
+	constant M_UNAME = 76
 end ifdef
 
 --**
 -- Retrieves the name of the host OS.
 --
 -- Returns:
---    A **sequence**, starting with the OS name. If identification fails, returned string
---    is "". Extra information depends on the OS (details unavailable).
+--    A **sequence**, starting with the OS name. If identification fails, returns
+--    an OS name of UNKNOWN. Extra information depends on the OS.
+--
+--    On DOS, returns an OS name of "DOS" as well as a string representing the
+--    DOS version number (e.g. "5.0").
+--
+--    On Unix, returns the same information as the uname() syscall in the same
+--    order as the struct utsname. This information is:
+--        OS Name/Kernel Name
+--        Local Hostname
+--        Kernel Version/Kernel Release
+--        Kernel Specific Version information (This is usually the date that the
+--        kernel was compiled on and the name of the host that performed the compiling.)
+--        Architecture Name (Usually a string of i386 vs x86_64 vs ARM vs etc)
+--
+--    On Windows, returns the following in order:
+--        Windows Platform (out of WinCE, Win9x, WinNT, Win32s, or Unknown Windows)
+--        Name of Windows OS (Windows 3.1, Win95, WinXP, etc)
+--        Platform Number
+--        Build Number
+--        Minor OS version number
+--        Major OS version number
+--
+--    On UNKNOWN, returns an OS name of "UNKNOWN". No other information is returned.
+--
+--    Returns a string of "" if an internal error has occured.
+--
+-- Comments:
+-- On Unix, M_UNAME is defined as a machine_func() and this is passed to the C
+-- backend. If the M_UNAME call fails, the raw machine_func() returns -1.
+-- On non Unix platforms, calling the machine_func() directly returns 0.
 
 public function uname()
 	ifdef WIN32 then
@@ -488,7 +513,7 @@ public function uname()
 		integer maj, mine, build, plat
 		buf = allocate(148)
 		poke4(buf, 148)
-		if c_func(UNAME, {buf}) then
+		if c_func(M_UNAME, {buf}) then
 			maj = peek4u(buf+4)
 			mine = peek4u(buf+8)
 			build = peek4u(buf+12)
@@ -543,38 +568,11 @@ public function uname()
 			return {}
 		end if
 	elsifdef UNIX then
-		atom buf, pbuf
-		integer i, c, k
-		sequence sbuf, snam
-		buf = allocate(4096) --excessive, but to be safe
-		if c_func(UNAME, {buf}) = 0 then
-			sbuf = {}
-			pbuf = buf
-			snam = ""
-			i = 0
-			k = 0
-			while 1 do
-				c = peek(pbuf)
-				i = i + 1
-				if c = 0 and length(snam) then
-					sbuf = append(sbuf, snam)
-					snam = ""
-					k = k + 1
-					if k > 4 then exit end if
-				elsif c != 0 then
-					snam &= c
-					pbuf = pbuf + 1
-					i = i + 1
-				else
-					pbuf = pbuf + 1
-					i = i + 1
-				end if
-			end while
-			free(buf)
-			return sbuf
+		object o = machine_func(M_UNAME, {})
+		if atom(o) then
+			return {}
 		else
-			free(buf)
-			return ""
+			return o
 		end if
 	elsifdef DOS32 then
     	sequence reg_list
