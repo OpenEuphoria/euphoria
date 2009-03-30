@@ -409,13 +409,13 @@ interpreter : .SYMBOLIC version.e version.h
 
 install-generic : .SYMBOLIC
 	@echo --------- install-generic $(PREFIX) ------------
-	@if not $(PWD)==$(PREFIX)\source for %i in (*.e) do @copy %i $(PREFIX)\source\
-	@if not $(PWD)==$(PREFIX)\source for %i in (*.ex) do @copy %i $(PREFIX)\source\
-	@if not $(PWD)==$(PREFIX)\source copy ..\include\* $(PREFIX)\include\
+	@if /I not $(PWD)==$(PREFIX)\source for %i in (*.e) do @copy %i $(PREFIX)\source\
+	@if /I not $(PWD)==$(PREFIX)\source for %i in (*.ex) do @copy %i $(PREFIX)\source\
+	@if /I not $(PWD)==$(PREFIX)\source copy ..\include\* $(PREFIX)\include\
 	@if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
-	@if not $(PWD)==$(PREFIX)\source copy ..\include\std\* $(PREFIX)\include\std
+	@if /I not $(PWD)==$(PREFIX)\source copy ..\include\std\* $(PREFIX)\include\std
 	@if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
-	@if not $(PWD)==$(PREFIX)\source copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	@if /I not $(PWD)==$(PREFIX)\source copy ..\include\euphoria\* $(PREFIX)\include\euphoria
 	
 installwin : .SYMBOLIC install-generic installwinbin
 	@echo --------- installwin $(PREFIX) ------------
@@ -427,13 +427,6 @@ installwinbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\exwc.exe copy $(BUILDDIR)\exwc.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\backendw.exe copy $(BUILDDIR)\backendw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\backendc.exe copy $(BUILDDIR)\backendc.exe $(PREFIX)\bin\
-	@if exist $(BUILDDIR)\ecw.lib $(RM) $(BUILDDIR)\ecw.lib
-	@if exist $(BUILDDIR)\ecw.exe $(RM) $(BUILDDIR)\ecw.exe
-	@if exist $(BUILDDIR)\exw.exe $(RM) $(BUILDDIR)\exw.exe
-	@if exist $(BUILDDIR)\exwc.exe $(RM) $(BUILDDIR)\exwc.exe
-	@if exist $(BUILDDIR)\backendw.exe $(RM) $(BUILDDIR)\backendw.exe
-	@if exist $(BUILDDIR)\backendc.exe $(RM) $(BUILDDIR)\backendc.exe
-	@if exist $(BUILDDIR)\ecw.lib $(RM) $(BUILDDIR)\ecw.lib
 
 installdos : .SYMBOLIC install-generic installdosbin
 	@echo --------- installdos $(PREFIX) ------------
@@ -444,10 +437,6 @@ installdosbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\ec.exe copy $(BUILDDIR)\ec.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\backendd.exe copy $(BUILDDIR)\backendd.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\ec.lib copy $(BUILDDIR)\ec.lib $(PREFIX)\bin\
-	@if exist $(BUILDDIR)\ex.exe $(RM) $(BUILDDIR)\ex.exe
-	@if exist $(BUILDDIR)\ec.exe $(RM) $(BUILDDIR)\ec.exe
-	@if exist $(BUILDDIR)\backendd.exe $(RM) $(BUILDDIR)\backendd.exe
-	@if exist $(BUILDDIR)\ec.lib $(RM) $(BUILDDIR)\ec.lib
 	
 install : .SYMBOLIC installwin installdos
 	@echo --------- install $(PREFIX) ------------
