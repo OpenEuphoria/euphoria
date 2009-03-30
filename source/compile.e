@@ -13,6 +13,7 @@ include std/filesys.e
 include std/io.e
 
 include global.e
+include platform.e
 include mode.e as mode
 include c_decl.e
 include cominit.e

@@ -16,6 +16,7 @@ include std/filesys.e
 
 -- Translator initialization
 include global.e
+include platform.e
 include std/get.e
 include mode.e as mode
 include c_out.e
@@ -434,28 +435,10 @@ end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
 procedure CheckPlatform()
--- make sure the defines reflect the target platform
-	
-	if TLINUX or TBSD or TOSX or TSUNOS then
-		OpDefines = OpDefines[1..$-2]
-	else
-		OpDefines = OpDefines[1..$-1]
-	end if
-	
-	if TWINDOWS then
-		OpDefines &= {"WIN32"}
-	elsif TOSX then
-		OpDefines &= {"UNIX", "OSX"}
-	elsif TSUNOS then
-		OpDefines &= {"UNIX", "SUNOS"}
-	elsif TBSD then
-		OpDefines &= {"UNIX", "FREEBSD"}
-	elsif TLINUX then
-		OpDefines &= {"UNIX", "LINUX"}
-	elsif TUNIX then --right now this can never happen
-		OpDefines &= {"UNIX"}
-	elsif TDOS then
-		OpDefines &= {"DOS32"}
-	end if
+	-- make sure the defines reflect the target platform
+	OpDefines = remove(OpDefines,
+		find("_PLAT_START", OpDefines),
+		find("_PLAT_STOP", OpDefines))
+	OpDefines &= GetPlatformDefines(1)
 end procedure
 mode:set_check_platform( routine_id("CheckPlatform") )

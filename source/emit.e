@@ -4,6 +4,7 @@
 include std/os.e
 
 include global.e
+include platform.e
 include pathopen.e
 include reswords.e
 include symtab.e

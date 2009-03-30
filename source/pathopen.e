@@ -12,6 +12,7 @@ ifdef DOS32 then
 end ifdef
 
 include common.e
+include platform.e
 
 atom oem2char, convert_buffer
 integer convert_length

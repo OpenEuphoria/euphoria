@@ -12,6 +12,7 @@ include std/os.e
 include std/filesys.e
 
 include global.e
+include platform.e
 include reswords.e
 include symtab.e
 include compile.e

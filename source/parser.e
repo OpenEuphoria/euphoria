@@ -3,6 +3,7 @@
 -- Euphoria 4.0
 -- Parser
 include global.e
+include platform.e
 include emit.e
 include symtab.e
 include scanner.e
@@ -13,7 +14,6 @@ include version.e
 include std/sequence.e
 include std/text.e
 include std/search.e
---include std/types.e 
 
 include inline.e
 
@@ -3549,19 +3549,7 @@ global procedure InitGlobals()
 	    sprintf("EU%d", { MAJ_VER }) 
 	}
 
-	if IWINDOWS then
-		OpDefines &= {"WIN32"}
-	elsif ILINUX then
-		OpDefines &= {"UNIX", "LINUX"}
-	elsif IOSX then
-		OpDefines &= {"UNIX", "OSX"}
-	elsif ISUNOS then
-		OpDefines &= {"UNIX", "SUNOS"}
-	elsif IBSD then
-		OpDefines &= {"UNIX", "FREEBSD"}
-	elsif IDOS then
-		OpDefines &= {"DOS32"}
-	end if
+	OpDefines &= GetPlatformDefines()
 
 	OpInline = DEFAULT_INLINE
 	OpIndirectInclude = 1

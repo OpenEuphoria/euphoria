@@ -15,6 +15,7 @@ include std/error.e
 include parser.e
 include mode.e
 include common.e
+include platform.e
 
 function GetSourceName()
 -- record command line options, return source file number

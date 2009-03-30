@@ -2,14 +2,16 @@
 --
 -- Scanner (low-level parser)
 
-include std/machine.e
-include std/get.e
-include std/filesys.e
-include std/search.e
-include common.e
-include global.e
-include reswords.e
 include std/error.e
+include std/filesys.e
+include std/get.e
+include std/machine.e
+include std/search.e
+
+include global.e
+include common.e
+include platform.e
+include reswords.e
 include symtab.e
 include scinot.e
 include fwdref.e
