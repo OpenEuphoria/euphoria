@@ -156,12 +156,11 @@ ifdef DOS32 then
 	OUR_SIZE = 170000 -- backend.exe (Causeway compression)
 
 elsifdef UNIX then
-	if EBSD then
-		-- set EBSD manually above on FreeBSD
+	ifdef BSD then
 		OUR_SIZE = 150000  -- backendu for FreeBSD (not compressed)
-	else    
+	elsedef 
 		OUR_SIZE = 150000  -- backendu for Linux
-	end if
+	end ifdef
 
 elsedef
 	OUR_SIZE = 67000  -- backendw.exe (upx compression)
