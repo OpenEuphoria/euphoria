@@ -88,7 +88,7 @@ keylist =
 	{"match",            SC_PREDEF, FUNC, MATCH_FROM,       3, E_PURE, {0,0,{{ATOM,1}}}, {3,2,{3}}},
 	{"time",             SC_PREDEF, FUNC, TIME,             0, E_PURE},
 	{"command_line",     SC_PREDEF, FUNC, COMMAND_LINE,     0, E_PURE},
-	{"open",             SC_PREDEF, FUNC, OPEN,             2, E_OTHER_EFFECT},
+	{"open",             SC_PREDEF, FUNC, OPEN,             3, E_OTHER_EFFECT, {0,0,{{ATOM,0}}}, {3,2,{3}} },
 	{"close",            SC_PREDEF, PROC, CLOSE,            1, E_OTHER_EFFECT},
 	{"trace",            SC_PREDEF, PROC, TRACE,            1, E_PURE},
 	{"getenv",           SC_PREDEF, FUNC, GETENV,           1, E_PURE},

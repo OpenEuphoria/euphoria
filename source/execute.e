@@ -3013,7 +3013,8 @@ end procedure
 procedure opOPEN()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	target = Code[pc+3]
+	c = Code[pc+3]
+	target = Code[pc+4]
 	
 	if atom(val[b]) or length(val[b]) > 2 then
 	   RTFatal("invalid open mode")
@@ -3021,8 +3022,11 @@ procedure opOPEN()
 	if atom(val[a]) then
 	   RTFatal("device or file name must be a sequence")
 	end if         
-	val[target] = open(val[a], val[b])
-	pc += 4
+	if not atom(val[c]) then
+		RTFatal("cleanup must be an atom")
+	end if
+	val[target] = open(val[a], val[b], val[c])
+	pc += 5
 end procedure
 
 procedure opCLOSE()

@@ -189,7 +189,7 @@ unsigned long get_pos_int(char *, int);
 int memory_set(int, int, int);
 int memory_copy(int, int, int);
 int getc(void *);
-int EOpen(int, int);
+int EOpen(int, int,int);
 void EClose(int);
 int EPrintf(int, int, int);
 void EPuts(int, int);

@@ -1111,7 +1111,7 @@ end procedure
 -- I/O routines
 
 procedure opOPEN()
-	binary()
+	trinary()
 end procedure
 
 procedure opCLOSE()

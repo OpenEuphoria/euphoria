@@ -445,5 +445,6 @@ struct char_cell {
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
-	CLEAN_PCRE
+	CLEAN_PCRE,
+	CLEAN_FILE
 };

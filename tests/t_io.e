@@ -68,5 +68,17 @@ test_true("lock_type #1", lock_type(LOCK_SHARED))
 test_true("lock_type #2", lock_type(LOCK_EXCLUSIVE))
 test_false("lock_type #3", lock_type(20))
 
+tmp = open( "file.txt", "r", 1 )
+test_not_equal( "open file with auto close", -1, tmp )
+delete(tmp)
+
+tmp = open( "file.txt", "r", 1 )
+test_not_equal( "open file with auto close after calling delete", -1, tmp )
+tmp = 0
+
+tmp = open( "file.txt", "r", 1 )
+test_not_equal( "open file with auto close after deref closing", -1, tmp )
+delete(tmp)
+
 test_report()
 

@@ -175,6 +175,15 @@ procedure report_last_error( sequence filename )
 	end if
 end procedure
 
+function strip_path_junk( sequence path )
+	for i = 1 to length( path ) do
+		if not find( path[i], "./\\" ) then
+			return path[i..$]
+		end if
+	end for
+	return ""
+end function
+
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
@@ -376,6 +385,8 @@ procedure do_test(sequence cmds)
 					if length(control_err) > 4 then
 						control_err = control_err[1..4]
 					end if
+					ex_err[1] = strip_path_junk( ex_err[1] )
+					control_err[1] = strip_path_junk( control_err[1] )
 					for j = 1 to length(ex_err) do
 						integer mde = match(".e:", ex_err[j]) 
 						integer d32 = match("DOS32", ex_err[j])

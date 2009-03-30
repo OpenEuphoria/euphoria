@@ -1421,17 +1421,18 @@ void cleanup_double( d_ptr dbl ){
 	cp = dbl->cleanup;
 	dbl->cleanup = 0;
 	while( cp ){
+		next = cp->next;
 		if( cp->type == CLEAN_UDT ){
 			udt_clean( MAKE_DBL(dbl), cp->func.rid );
+			if( next ){
+				EFree( cp );
+			}
 		}
 		else{
 			(cp->func.builtin)( MAKE_DBL( dbl ) );
 			EFree( cp );
 		}
-		next = cp->next;
-		if( next ){
-			EFree( cp );
-		}
+		
 		cp = next;
 	}
 }
@@ -3399,10 +3400,25 @@ int strcmp_ins(char *s, char *t)
 	}
 }
 
-object EOpen(filename, mode_obj)
+void EClose(object a)
+/* close a file */
+{
+	int file_no;
+
+	last_w_file_no = NOVALUE;
+	last_r_file_no = NOVALUE;
+	file_no = CheckFileNumber(a);
+	if (user_file[file_no].mode != EF_CLOSED) {
+		iclose(user_file[file_no].fptr);
+		user_file[file_no].mode = EF_CLOSED;
+	}
+}
+
+object EOpen(filename, mode_obj, cleanup)
 /* open a file */
 object filename;
 object mode_obj;
+object cleanup;
 {
 	char cname[MAX_FILE_NAME+1];
 	char cmode[8];
@@ -3410,6 +3426,7 @@ object mode_obj;
 	long length;
 	int i;
 	long mode, text_mode;
+	cleanup_ptr cup;
 
 	if (IS_ATOM(mode_obj))
 		RTFatal("open mode must be a sequence");
@@ -3487,7 +3504,18 @@ object mode_obj;
 		else {
 			user_file[i].fptr = fp;
 			user_file[i].mode = mode;
-			return MAKE_INT(i);
+			if( get_pos_int( "open", cleanup ) ){
+				cup = (cleanup_ptr) EMalloc( sizeof( struct cleanup ) );
+				cup->type = CLEAN_FILE;
+				cup->func.builtin = &EClose;
+				cup->next = 0;
+				cleanup = NewDouble( (double) i );
+				DBL_PTR(cleanup)->cleanup = cup;
+				return cleanup;
+			}
+			else{
+				return MAKE_INT(i);
+			}
 		}
 	}
 	else {
@@ -3495,20 +3523,6 @@ object mode_obj;
 	}
 }
 
-
-void EClose(object a)
-/* close a file */
-{
-	int file_no;
-
-	last_w_file_no = NOVALUE;
-	last_r_file_no = NOVALUE;
-	file_no = CheckFileNumber(a);
-	if (user_file[file_no].mode != EF_CLOSED) {
-		iclose(user_file[file_no].fptr);
-		user_file[file_no].mode = EF_CLOSED;
-	}
-}
 
 object EGets(object file_no)
 /* reads a line from a file for the user (GETS) */

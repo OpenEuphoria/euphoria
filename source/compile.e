@@ -5243,12 +5243,16 @@ end procedure
 -- start of I/O routines */
 
 procedure opOPEN()
-	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
-	c_stmt("@ = EOpen(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
+	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
+	c_stmt("@ = EOpen(@, @, @);\n", {Code[pc+4], Code[pc+1], Code[pc+2], Code[pc+3]})
 	CDeRefStr("_0")
 	target = {-1, 100000}
-	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
-	pc += 4
+	if ObjValue( Code[pc+3] ) = 0 then
+		SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	else
+		SetBBType(Code[pc+4], TYPE_ATOM, target, TYPE_OBJECT, 1)
+	end if
+	pc += 5
 end procedure
 
 procedure opCLOSE()

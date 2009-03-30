@@ -290,7 +290,7 @@ op_result[OPTION_SWITCHES] = T_SEQUENCE
 op_result[SPRINTF] = T_SEQUENCE
 op_result[ROUTINE_ID] = T_INTEGER
 op_result[GETC] = T_INTEGER
-op_result[OPEN] = T_INTEGER
+op_result[OPEN] = T_ATOM
 op_result[LENGTH] = T_INTEGER   -- assume less than a billion
 op_result[PLENGTH] = T_INTEGER  -- ""
 op_result[IS_AN_OBJECT] = T_INTEGER
@@ -1013,7 +1013,7 @@ global procedure emit_op(integer op)
 	-- 2 inputs, 1 output   
 	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, 
 					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
-					OPEN, SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE}) then
+					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE}) then
 		cont21ii(op, FALSE)
 
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
@@ -1045,7 +1045,7 @@ global procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output 
-	elsif find(op, {RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE}) then
+	elsif find(op, {RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN}) then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()

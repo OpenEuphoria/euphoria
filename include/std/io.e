@@ -610,7 +610,7 @@ end type
 
 --****
 -- Signature:
--- <built-in> function open(sequence path, sequence mode)
+-- <built-in> function open(sequence path, sequence mode, integer cleanup = 0)
 --
 -- Description:
 -- Open a file or device, to get the file number. 
@@ -618,6 +618,9 @@ end type
 -- Parameters:
 --		# ##path##: a string, the path to the file or device to open.
 -- 		# ##mode##: a string, the mode being used o open the file.
+--		# ##cleanup##: an integer, if 0, then the file must be manually closed by the
+--coder.  If 1, then the file will be closed when either the file handle's references
+--goes to 0, or if called as a parameter to ##delete()##.
 --
 -- Returns:
 -- 		A small **integer**, -1 on failure, else 0 or more.

@@ -128,7 +128,7 @@ procedure init_op_info()
 	op_info[NOTEQ_IFW_I         ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[NOT_BITS            ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[NOT_IFW             ] = { FIXED_SIZE, 3, {2}, {}, {} }
-	op_info[OPEN                ] = { FIXED_SIZE, 4, {}, {3}, {} }
+	op_info[OPEN                ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[OPTION_SWITCHES     ] = { FIXED_SIZE, 2, {}, {1}, {} }
 	op_info[OR                  ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[OR_BITS             ] = { FIXED_SIZE, 4, {}, {3}, {} }

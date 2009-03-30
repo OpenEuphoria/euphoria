@@ -1204,7 +1204,6 @@ void code_set_pointers(int **code)
 			case XOR_BITS:
 			case APPEND:
 			case REPEAT:
-			case OPEN: 
 			case PREPEND:
 			case COMPARE:
 			case FIND:
@@ -1293,6 +1292,7 @@ void code_set_pointers(int **code)
 			case SPLICE:
 			case INSERT:
 			case REMOVE:
+			case OPEN:
 				// 4 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -4791,10 +4791,11 @@ void do_exec(int *start_pc)
 			deprintf("case L_OPEN:");
 				tpc = pc;
 				top = EOpen(*(object_ptr)pc[1], 
-							*(object_ptr)pc[2]);
-				DeRef(*(object_ptr)pc[3]);
-				*(object_ptr)pc[3] = top;
-				pc += 4;
+							*(object_ptr)pc[2],
+							*(object_ptr)pc[3]);
+				DeRef(*(object_ptr)pc[4]);
+				*(object_ptr)pc[4] = top;
+				pc += 5;
 				thread(); 
 				BREAK;
 
