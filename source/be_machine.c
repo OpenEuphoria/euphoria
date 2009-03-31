@@ -5365,6 +5365,12 @@ object machine(object opcode, object x)
 
 			case M_SOCK_ACCEPT:
 				return eusock_accept(x);
+			
+			case M_SOCK_GETSOCKOPT:
+				return eusock_getsockopt(x);
+
+			case M_SOCK_SETSOCKOPT:
+				return eusock_setsockopt(x);
 
 #endif // ifndef EDOS
 

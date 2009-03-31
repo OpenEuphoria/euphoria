@@ -530,4 +530,49 @@ object eusock_accept(object x)
 	return MAKE_SEQ(client_seq);
 }
 
+/*
+ * getsockopt(socket, level, optname)
+ */
+
+object eusock_getsockopt(object x)
+{
+	SOCKET s;
+	int level, optname, optlen, optval;
+
+	optlen = sizeof(int);
+	s = SEQ_PTR(x)->base[1];
+	level = SEQ_PTR(x)->base[2];
+	optname = SEQ_PTR(x)->base[3];
+
+	if (getsockopt(s, level, optname, (char *) &optval, optlen) == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return optval;
+}
+
+/*
+ * setsockopt(socket, level, optname, value)
+ */
+
+object eusock_setsockopt(object x)
+{
+	SOCKET s;
+	int level, optname, optlen, optval;
+
+	optlen = sizeof(int);
+	s = SEQ_PTR(x)->base[1];
+	level = SEQ_PTR(x)->base[2];
+	optname = SEQ_PTR(x)->base[3];
+	optval = SEQ_PTR(x)->base[4];
+
+	if (setsockopt(s, level, optname, (char *) &optval, &optlen) == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return optval;
+}
+
 #endif // ifndef EDOS

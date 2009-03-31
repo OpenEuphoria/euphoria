@@ -62,6 +62,7 @@ ifdef WIN32 then
 	constant dnsquery_ = define_c_func(dnsdll_,"DnsQuery_A",{C_POINTER,C_USHORT,C_INT,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	constant dnsrlfree_ = define_c_proc(dnsdll_,"DnsRecordListFree",{C_POINTER,C_INT})
 	constant dnsexpand_ = -1
+	constant freeaddrinfo_ = define_c_proc(sockdll_,"freeaddrinfo",{C_POINTER})
 
 elsifdef LINUX or SUNOS then
 	constant dnsdll_ = open_dll("libresolv.so")

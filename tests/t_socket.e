@@ -72,6 +72,10 @@ ifdef SOCKET_TESTS then
 		_ = send(socket, "quit\n", 0)
 	end if
 
+	test_equal("get_socket_option #1", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
+	test_equal("set_socket_option #1", 1, set_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE, 1))
+	test_equal("get_socket_option #1", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
+
 	test_equal("close", 1, close_socket(socket))
 elsedef
     puts(2, "Warning: all socket tests were not run, use -D SOCKET_TESTS for full test\n")

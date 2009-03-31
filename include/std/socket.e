@@ -19,7 +19,7 @@ include std/text.e
 
 enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
-	M_SOCK_ACCEPT
+	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT
 
 --****
 -- === Constants
@@ -278,8 +278,6 @@ atom ipdll_, kerneldll_,
 	ioctl_,
 	sendto_, sendmsg_, recvfrom_, recvmsg_,
 	poll_,
-	getsockopts_, setsockopts_,
-	--     read_, write_, getsockname_, getpeername_,
 	error_, delay_
 
 sequence windows_poll_seq = {}
@@ -308,13 +306,10 @@ elsifdef WIN32 then
 	error_ = define_c_func(sockdll_,"WSAGetLastError",{},C_INT)
 	poll_ = define_c_func(sockdll_,"WSAPoll",{C_POINTER,C_INT,C_INT},C_INT)
 	ioctl_ = define_c_func(sockdll_,"ioctlsocket",{C_INT,C_INT,C_POINTER},C_INT)
-	getsockopts_ = define_c_func(sockdll_,"getsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
-	setsockopts_ = define_c_func(sockdll_,"setsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_INT},C_INT)
 	sendto_ = define_c_func(sockdll_,"sendto",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},C_INT)
 	sendmsg_ = define_c_func(sockdll_,"sendmsg",{C_INT,C_POINTER,C_INT},C_INT)
 	recvfrom_ = define_c_func(sockdll_,"recvfrom",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
 	recvmsg_ = define_c_func(sockdll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	freeaddrinfo_ = define_c_proc(sockdll_,"freeaddrinfo",{C_POINTER})
 	-- WSAStartup() is required when using WinSock.
 	wsastart_ = define_c_func(sockdll_,"WSAStartup",{C_USHORT,C_POINTER},C_INT)
 	wsadata = allocate(4096)
@@ -344,8 +339,6 @@ end ifdef
 ifdef UNIX then
 	error_ = define_c_func(dll_,"__errno_location",{},C_INT)
 	ioctl_ = define_c_func(dll_,"ioctl",{C_INT,C_INT,C_INT},C_INT)
-	getsockopts_ = define_c_func(dll_,"getsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
-	setsockopts_ = define_c_func(dll_,"setsockopt",{C_INT,C_INT,C_INT,C_POINTER,C_INT},C_INT)
 	poll_ = define_c_func(dll_,"poll",{C_POINTER,C_INT,C_INT},C_INT)
 	sendto_ = define_c_func(dll_,"sendto",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},C_INT)
 	sendmsg_ = define_c_func(dll_,"sendmsg",{C_INT,C_POINTER,C_INT},C_INT)
@@ -459,7 +452,6 @@ function make_sockaddr(sequence inet_addr)
 	
 end function
 
--------------------------------------------------------------------------------
 --****
 -- === Support routines
 --
@@ -468,13 +460,12 @@ end function
 -- Checks if x is an IP address in the form (#.#.#.#[:#])
 --
 -- Parameters:
---		# ##x##: the address to check
+--   # ##x##: the address to check
 --
 -- Returns:
 --   An **integer**, 1 if x is an inetaddr, 0 if it is not
 
 public function is_inetaddr(object s)
-	
 	-- Checks if s is an IP address in the form (#.#.#.#[:#])
 	
 	atom numdots, numcols
@@ -1281,42 +1272,6 @@ public function recvfrom(atom socket, atom flags)
 	return -1
 end function
 
--------------------------------------------------------------------------------
--- Socket options
--------------------------------------------------------------------------------
--- Get_socket_options returns an OBJECT containing the option value, or {"ERROR",errcode} on error.
--- Set_socket_options returns 0 on success and -1 on error.
-
-function unix_getsockopts(atom socket, integer level, integer optname)
-	object rtn
-	atom buf, status, bufsiz
-	buf = allocate(1028)
-	poke4(buf,1024)
-	status = c_func(getsockopts_,{socket,level,optname,buf+4,buf})
-	if status = 0 then
-		bufsiz = peek4u(buf)
-		if bufsiz = 0 then
-			rtn = {}
-		elsif bufsiz = 4 then
-			rtn = peek4u(buf+4)
-		else
-			rtn = {}
-			for ctr = 1 to bufsiz do
-				rtn = rtn & peek(buf+3+ctr)
-			end for
-		end if
-	else
-		rtn = {"ERROR",status}
-	end if
-	free(buf)
-	return rtn
-	
-end function
-
-function windows_getsockopts(atom socket, integer level, integer optname)
-	return unix_getsockopts(socket,level,optname)
-end function
-
 --**
 -- Get options for a socket.
 -- 
@@ -1337,42 +1292,14 @@ end function
 -- SOL_SOCKET (#FFFF).
 --
 -- Returns:
---    On error, {"ERROR",error_code}.  On success, either an atom or
---    a sequence containing the option value.
+--   On error, an atom indicating the error code.  On success, either an atom or
+--   a sequence containing the option value.
 --
 -- See also:
---     set_socket_options
+--   [[:set_socket_options]]
 
 public function get_socket_options(atom socket, integer level, integer optname)
-	ifdef WIN32 then
-		return windows_getsockopts(socket,level,optname)
-	elsifdef UNIX then
-		return unix_getsockopts(socket,level,optname)
-	end ifdef
-	
-	return {"ERROR",-999}
-end function
-
-function unix_setsockopts(atom socket, integer level, integer optname, object val)
-	object rtn
-	atom buf, bufsiz
-	if atom(val) then
-		buf = allocate(8)
-		bufsiz = 4
-		poke4(buf,bufsiz)
-		poke4(buf+4,val)
-	else
-		buf = allocate(length(val)+4)
-		bufsiz = length(val)
-		poke4(buf,bufsiz)
-		poke(buf+4,val)
-	end if
-	rtn = c_func(setsockopts_,{socket,level,optname,buf+4,buf})
-	return rtn
-end function
-
-function windows_setsockopts(atom socket, integer level, integer optname, object val)
-	return unix_setsockopts(socket,level,optname,val)
+	return machine_func(M_SOCK_GETSOCKOPT, { socket, level, optname })
 end function
 
 --**
@@ -1398,13 +1325,7 @@ end function
 --    [[:get_socket_options]]
 
 public function set_socket_options(atom socket, integer level, integer optname, object val)
-	ifdef WIN32 then
-		return windows_setsockopts(socket,level,optname,val)
-	elsifdef UNIX then
-		return unix_setsockopts(socket,level,optname,val)
-	end ifdef
-	
-	return -999 -- TODO: is this correct, or -1?
+	return machine_func(M_SOCK_SETSOCKOPT, { socket, level, optname, val })
 end function
 
 --**
