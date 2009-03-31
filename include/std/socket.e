@@ -17,8 +17,7 @@ include std/get.e
 include std/wildcard.e
 include std/text.e
 
-enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_GETHOSTBYNAME,
-	M_SOCK_GETHOSTBYADDR, M_SOCK_SOCKET, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
+enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
 	M_SOCK_ACCEPT
 
@@ -1448,83 +1447,5 @@ end function
 --
 public function getservbyport(integer port, object protocol=0)
 	return machine_func(M_SOCK_GETSERVBYPORT, { port, protocol })
-end function
-
---**
--- Get the host information by name.
---
--- Parameters:
---   # ##name##: host name
---
--- Returns:
---   A ##sequence## containing
---   <eucode>
---   {
---     offical name,
---     { alias1, alias2, ... },
---     { ip1, ip2, ... },
---     address_type
---   }
---   </eucode>
---
--- Example 1:
--- <eucode>
--- object data = gethostbyname("www.google.com")
--- -- data = {
--- --   "www.l.google.com",
--- --   {
--- --     "www.google.com"
--- --   },
--- --   {
--- --     "74.125.93.104",
--- --     "74.125.93.147",
--- --     ...
--- --   },
--- --   2
--- -- }
--- </eucode>
---
-
-public function gethostbyname(sequence name)
-	return machine_func(M_SOCK_GETHOSTBYNAME, { name })
-end function
-
---**
--- Get the host information by address.
---
--- Parameters:
---   # ##address##: host address
---
--- Returns:
---   A ##sequence## containing
---   <eucode>
---   {
---     offical name,
---     { alias1, alias2, ... },
---     { ip1, ip2, ... },
---     address_type
---   }
---   </eucode>
---
--- Example 1:
--- <eucode>
--- object data = gethostbyaddr("74.125.93.147")
--- -- data = {
--- --   "www.l.google.com",
--- --   {
--- --     "www.google.com"
--- --   },
--- --   {
--- --     "74.125.93.104",
--- --     "74.125.93.147",
--- --     ...
--- --   },
--- --   2
--- -- }
--- </eucode>
---
-
-public function gethostbyaddr(sequence address)
-	return machine_func(M_SOCK_GETHOSTBYADDR, { address })
 end function
 

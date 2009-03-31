@@ -18,6 +18,7 @@ include std/machine.e
 include std/get.e
 
 constant BLOCK_SIZE = 4096
+enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
 
 --**
 -- getaddrinfo accessors
@@ -542,5 +543,83 @@ public function getaddrinfo(object node, object service, object hints)
 	end ifdef
 	
 	return -999
+end function
+
+--**
+-- Get the host information by name.
+--
+-- Parameters:
+--   # ##name##: host name
+--
+-- Returns:
+--   A ##sequence## containing
+--   <eucode>
+--   {
+--     offical name,
+--     { alias1, alias2, ... },
+--     { ip1, ip2, ... },
+--     address_type
+--   }
+--   </eucode>
+--
+-- Example 1:
+-- <eucode>
+-- object data = gethostbyname("www.google.com")
+-- -- data = {
+-- --   "www.l.google.com",
+-- --   {
+-- --     "www.google.com"
+-- --   },
+-- --   {
+-- --     "74.125.93.104",
+-- --     "74.125.93.147",
+-- --     ...
+-- --   },
+-- --   2
+-- -- }
+-- </eucode>
+--
+
+public function gethostbyname(sequence name)
+	return machine_func(M_SOCK_GETHOSTBYNAME, { name })
+end function
+
+--**
+-- Get the host information by address.
+--
+-- Parameters:
+--   # ##address##: host address
+--
+-- Returns:
+--   A ##sequence## containing
+--   <eucode>
+--   {
+--     offical name,
+--     { alias1, alias2, ... },
+--     { ip1, ip2, ... },
+--     address_type
+--   }
+--   </eucode>
+--
+-- Example 1:
+-- <eucode>
+-- object data = gethostbyaddr("74.125.93.147")
+-- -- data = {
+-- --   "www.l.google.com",
+-- --   {
+-- --     "www.google.com"
+-- --   },
+-- --   {
+-- --     "74.125.93.104",
+-- --     "74.125.93.147",
+-- --     ...
+-- --   },
+-- --   2
+-- -- }
+-- </eucode>
+--
+
+public function gethostbyaddr(sequence address)
+	return machine_func(M_SOCK_GETHOSTBYADDR, { address })
 end function
 
