@@ -10,8 +10,12 @@
 
 #ifdef EWINDOWS
 #include <windows.h>
+
+#ifndef AF_INET
+// Support older version of Watcom < 1.8
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#endif // AF_INET
 
 extern int default_heap;
 #else // ifdef EWINDOWS
