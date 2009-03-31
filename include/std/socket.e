@@ -78,6 +78,10 @@ public constant
 public constant
 	SOL_SOCKET = #FFFF,
 		
+	SD_SEND = 0,
+	SD_RECEIVE = 1,
+	SD_BOTH = 2,
+
 	SO_DEBUG = 1,
 	SO_ACCEPTCONN = 2,
 	SO_REUSEADDR = 4,
@@ -736,6 +740,7 @@ end function
 --
 -- Parameters:
 --   # ##socket##: the socket
+--   # ##family##: socket family
 --   # ##address##: the address to bind the socket to
 --   # ##port##: optional, if not specified you must include :PORT in
 --     the address parameter.
@@ -745,11 +750,11 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- success = bind(socket, "0.0.0.0:8080")
+-- success = bind(socket, AF_INET, "0.0.0.0:8080")
 -- -- Look for connections on port 8080 for any interface.
 -- </eucode>
 
-public function bind(atom socket, sequence address, integer port=0)
+public function bind(atom socket, integer family, sequence address, integer port=0)
 	if port = 0 then
 		integer colon = find(':', address)
 		if colon = 0 then
@@ -765,7 +770,7 @@ public function bind(atom socket, sequence address, integer port=0)
 		address = address[1..colon-1]
 	end if
 
-	return machine_func(M_SOCK_BIND, { socket, address, port })
+	return machine_func(M_SOCK_BIND, { socket, family, address, port })
 end function
 
 --**
@@ -922,7 +927,7 @@ end function
 --
 --  It may take several minutes for the OS to declare the socket as closed.
 
-public function shutdown_socket(atom socket, atom method)
+public function shutdown_socket(atom socket, atom method=SD_BOTH)
 	return machine_func(M_SOCK_SHUTDOWN, { socket, method })
 end function
 

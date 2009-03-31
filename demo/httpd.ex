@@ -110,10 +110,11 @@ procedure server()
 		bind_addr = args[3]
 	end if
 
-	atom server = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0)
-
-	if sock:bind(server, bind_addr) = -1 then
-		crash("Could not bind %s", { bind_addr })
+	atom server = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0),
+	  result = sock:bind(server, sock:AF_INET, bind_addr)
+	  
+	if result != 0 then
+		crash("Could not bind %s, error=%d", { bind_addr, result })
 	end if
 
 	log(LOG_INFO, "Waiting for connections on %s", { bind_addr })

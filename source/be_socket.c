@@ -324,7 +324,6 @@ object eusock_socket(object x)
 		return eusock_geterror();
 	}
 
-
 	return sock;
 }
 
@@ -455,31 +454,37 @@ object eusock_recv(object x)
  * ========================================================================== */
 
 /*
- * bind(socket, address, port)
+ * bind(socket, family, address, port)
  */
 object eusock_bind(object x)
 {
 	SOCKET s;
 	s1_ptr address_s;
 	char *address;
-	int port, result;
+	int port, family, result;
 
 	struct sockaddr_in service;
 
 	s = SEQ_PTR(x)->base[1];
-	port = SEQ_PTR(x)->base[3];
+	family = SEQ_PTR(x)->base[2];
+	port = SEQ_PTR(x)->base[4];
 
-	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
+	address_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
 	address = EMalloc(address_s->length+1);
-	MakeCString(address, SEQ_PTR(x)->base[2] );
+	MakeCString(address, SEQ_PTR(x)->base[3] );
 
-	service.sin_family = AF_INET;
+	service.sin_family = family;
 	service.sin_addr.s_addr = inet_addr(address);
 	service.sin_port = htons(port);
 
 	result = bind(s, (SOCKADDR *) &service, sizeof(service));
 
 	EFree(address);
+
+	if (result == SOCKET_ERROR)
+	{
+	  return eusock_geterror();
+	}
 
 	return result;
 }
