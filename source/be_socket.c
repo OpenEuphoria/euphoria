@@ -104,7 +104,7 @@ object eusock_getservbyname(object x)
 	name = EMalloc(name_s->length+1);
 	MakeCString(name, SEQ_PTR(x)->base[1] );
 
-	if (IS_SEQUENCE(SEQ_PTR(SEQ_PTR(x)->base[2])))
+	if (IS_SEQUENCE(SEQ_PTR(x)->base[2]))
 	{
 		proto_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 		proto = EMalloc(proto_s->length+1);
