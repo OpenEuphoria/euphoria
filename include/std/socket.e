@@ -302,7 +302,7 @@ elsifdef WIN32 then
 	ipdll_ = open_dll("iphlpapi.dll")
 	sockdll_ = open_dll("ws2_32.dll")
 	kerneldll_ = open_dll("kernel32.dll")
-	dnsdll_ = open_dll("dnsapi.dll")
+	atom dnsdll_ = open_dll("dnsapi.dll")
 	error_ = define_c_func(sockdll_,"WSAGetLastError",{},C_INT)
 	poll_ = define_c_func(sockdll_,"WSAPoll",{C_POINTER,C_INT,C_INT},C_INT)
 	ioctl_ = define_c_func(sockdll_,"ioctlsocket",{C_INT,C_INT,C_POINTER},C_INT)

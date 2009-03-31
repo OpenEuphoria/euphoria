@@ -21,9 +21,10 @@ ifdef SOCKET_TESTS then
 		atom t = time()
 		_ = delay(120)
 		test_true("delay 100", time() - t > 0.1)	
+	elsedef
+		test_fail("delay 100 causes machine fault on OS X")
 	end ifdef
 	
-	test_fail("delay 100 causes machine fault on OS X")
 
 	--
 	-- testing both client and server in this case as the sever
@@ -74,7 +75,7 @@ ifdef SOCKET_TESTS then
 
 	test_equal("get_socket_option #1", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
 	test_equal("set_socket_option #1", 1, set_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE, 1))
-	test_equal("get_socket_option #1", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
+	test_equal("get_socket_option #2", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
 
 	test_equal("close", 1, close_socket(socket))
 elsedef
