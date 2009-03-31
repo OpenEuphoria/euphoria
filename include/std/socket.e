@@ -276,7 +276,7 @@ atom ipdll_, kerneldll_,
 	wsastart_, wsacleanup_, wsawaitformultipleevents_,
 	wsacreateevent_, wsaeventselect_, wsaenumnetworkevents_, wsacloseevent_,
 	ioctl_,
-	sendto_, sendmsg_, recvfrom_, recvmsg_,
+	sendmsg_, recvmsg_,
 	poll_,
 	error_, delay_
 
@@ -302,14 +302,9 @@ elsifdef WIN32 then
 	ipdll_ = open_dll("iphlpapi.dll")
 	sockdll_ = open_dll("ws2_32.dll")
 	kerneldll_ = open_dll("kernel32.dll")
-	atom dnsdll_ = open_dll("dnsapi.dll")
 	error_ = define_c_func(sockdll_,"WSAGetLastError",{},C_INT)
 	poll_ = define_c_func(sockdll_,"WSAPoll",{C_POINTER,C_INT,C_INT},C_INT)
 	ioctl_ = define_c_func(sockdll_,"ioctlsocket",{C_INT,C_INT,C_POINTER},C_INT)
-	sendto_ = define_c_func(sockdll_,"sendto",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},C_INT)
-	sendmsg_ = define_c_func(sockdll_,"sendmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	recvfrom_ = define_c_func(sockdll_,"recvfrom",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
-	recvmsg_ = define_c_func(sockdll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
 	-- WSAStartup() is required when using WinSock.
 	wsastart_ = define_c_func(sockdll_,"WSAStartup",{C_USHORT,C_POINTER},C_INT)
 	wsadata = allocate(4096)
@@ -340,31 +335,8 @@ ifdef UNIX then
 	error_ = define_c_func(dll_,"__errno_location",{},C_INT)
 	ioctl_ = define_c_func(dll_,"ioctl",{C_INT,C_INT,C_INT},C_INT)
 	poll_ = define_c_func(dll_,"poll",{C_POINTER,C_INT,C_INT},C_INT)
-	sendto_ = define_c_func(dll_,"sendto",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},C_INT)
-	sendmsg_ = define_c_func(dll_,"sendmsg",{C_INT,C_POINTER,C_INT},C_INT)
-	recvfrom_ = define_c_func(dll_,"recvfrom",{C_INT,C_POINTER,C_INT,C_INT,C_POINTER,C_POINTER},C_INT)
-	recvmsg_ = define_c_func(dll_,"recvmsg",{C_INT,C_POINTER,C_INT},C_INT)
 	delay_ = define_c_func(dll_,"nanosleep",{C_POINTER,C_POINTER},C_INT)
 end ifdef
-
--------------------------------------------------------------------------------
-
-export function _socket_trim(sequence s)
-	atom c
-	sequence rs
-	rs = s
-	c = 1
-	while c <= length(s) and rs[c] <= 32 do
-		c = c + 1
-	end while
-	rs = rs[c..length(rs)]
-	c = length(rs)
-	while c > 0 and rs[c] <= 32 do
-		c = c - 1
-	end while
-	rs = rs[1..c]
-	return rs
-end function
 
 -------------------------------------------------------------------------------
 
@@ -392,8 +364,6 @@ export function get_sockaddr(atom lpsz)
 
 	return s
 end function
-
--------------------------------------------------------------------------------
 
 function make_sockaddr(sequence inet_addr)
 	
@@ -669,6 +639,23 @@ end function
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+function parse_address(sequence address)
+	integer colon = find(':', address)
+	if colon = 0 then
+		return 0
+	end if
+
+	object port_v = value(address[colon+1..$])
+	if port_v[1] != GET_SUCCESS then
+		return 0
+	end if
+
+	return {
+		address = address[1..colon-1],
+		port_v[2]
+	}
+end function
+
 --****
 -- === Socket routines - server side
 --
@@ -695,18 +682,11 @@ end function
 
 public function bind(atom socket, integer family, sequence address, integer port=0)
 	if port = 0 then
-		integer colon = find(':', address)
-		if colon = 0 then
-			return -1
-		end if
+		object sock_data = parse_address(address)
+		if atom(sock_data) then return -1 end if
 
-		object port_v = value(address[colon+1..$])
-		if port_v[1] != GET_SUCCESS then
-			return -1
-		end if
-
-		port = port_v[2]
-		address = address[1..colon-1]
+		address = sock_data[1]
+		port = sock_data[2]
 	end if
 
 	return machine_func(M_SOCK_BIND, { socket, family, address, port })
@@ -787,18 +767,11 @@ end function
 
 public function connect(integer family, atom socket, sequence address, integer port=0)
 	if port = 0 then
-		integer colon = find(':', address)
-		if colon = 0 then
-			return -1
-		end if
+		object sock_data = parse_address(address)
+		if atom(sock_data) then return -1 end if
 
-		object port_v = value(address[colon+1..$])
-		if port_v[1] != GET_SUCCESS then
-			return -1
-		end if
-
-		port = port_v[2]
-		address = address[1..colon-1]
+		address = sock_data[1]
+		port = sock_data[2]
 	end if
 
 	return machine_func(M_SOCK_CONNECT, { family, socket, address, port })
@@ -1109,51 +1082,6 @@ public function send(atom socket, sequence data, atom flags=0)
 	return machine_func(M_SOCK_SEND, { socket, data, flags })
 end function
 
--------------------------------------------------------------------------------
--- Sendto (good for stateless / broadcast datagrams)
--------------------------------------------------------------------------------
--- Returns the # of chars sent, or -1 for error
-
-function unix_sendto(atom socket, sequence data, atom flags, sequence inet_addr)
-	atom dataptr, datalen, sockaddr
-	atom status
-	sockaddr = make_sockaddr(inet_addr)
-	datalen = length(data)
-	dataptr = allocate(datalen+1)
-	poke(dataptr,data&0)
-	status = c_func(sendto_,{socket,dataptr,datalen,flags,sockaddr,16})
-	free(sockaddr)
-	free(dataptr)
-	return status
-end function
-
-function windows_sendto(atom socket, sequence data, atom flags, sequence inet_addr)
-	-- Windows does sendto the same as Linux
-	return unix_sendto(socket,data,flags,inet_addr)
-end function
-
---**
--- Send data to either a connected or unconnected socket.
---
--- Parameters:
---   # ##socket##: an atom, the socket id
---   # ##data##: a sequence of atoms, what to send
---   # ##flags##: an atom,
---   # ##inet_addr##: a sequence representing an IP address
---
--- Returns:
---   An **integer**, the number of characters sent, or -1 for an error.
-
-public function sendto(atom socket, sequence data, atom flags, sequence inet_addr)
-	ifdef WIN32 then
-		return windows_sendto(socket,data,flags,inet_addr)
-	elsifdef UNIX then
-		return unix_sendto(socket,data,flags,inet_addr)
-	end ifdef
-	
-	return -1
-end function
-
 --**
 -- Receive data from a bound socket. 
 --
@@ -1176,100 +1104,6 @@ end function
 
 public function recv(atom socket, atom flags=0)
 	return machine_func(M_SOCK_RECV, { socket, flags })
-end function
-
--------------------------------------------------------------------------------
--- recvfrom (for unconnected sockets)
--------------------------------------------------------------------------------
--- Returns a sequence {sequence data, {atom error_number, sequence error_string}, string peer_address}
-function unix_recvfrom(atom socket, atom flags)
-	atom buf, buflen, rtnlen, sockaddr
-	sequence rtndata, peer_addr, errno
-	
-	buflen = BLOCK_SIZE
-	buf = allocate(buflen)
-	sockaddr = allocate(20)
-	poke4(sockaddr,16)
-	rtnlen = c_func(recvfrom_,{socket,buf,buflen,flags,sockaddr+4,sockaddr})
-	errno = get_error()
-	
-	if not find(errno[1],{EAGAIN,EBADF,EWOULDBLOCK,ECONNRESET,EFAULT,EINTR,EINVAL,EIO,ENOBUFS,ENOMEM,
-			ENOSR,ENOTCONN,ENOTSOCK,EOPNOTSUPP,ETIMEDOUT}) then
-		-- Only these errors are thrown by recvfrom.  Any other error is from a different function call.
-		errno = {0,""}
-	end if
-	
-	peer_addr = get_sockaddr(sockaddr+4)
-	free(sockaddr)
-	
-	if rtnlen < 0 then
-		free(buf)
-		return {{},errno,peer_addr}
-	end if
-	
-	rtndata = peek({buf,rtnlen})
-	free(buf)
-	
-	return {rtndata,errno,peer_addr}
-end function
-
-function windows_recvfrom(atom socket, atom flags)
-	-- Windows does recvfrom the same as Linux
-	return unix_recvfrom(socket,flags)
-end function
-
---**
--- Receive data from either a bound or unbound socket.
---
--- Parameters:
---   # ##socket##: an atom, the socket id
---   # ##flags##: an atom,
---
--- Returns:
---   A **sequence** as follows:
--- <eucode>
--- s = {
---     sequence data,
---     {atom error_number, sequence error_string},
--- 	    sequence peer_address
--- }
--- </eucode>
---
--- Here, ##peer_address## is the same string format used when passing an
--- internet address to a function, and can be used as is in
--- [[:sendto]]().
---
--- Comments:
--- This function will not return until data is actually received on
--- the socket, unless the flags parameter contains MSG_DONTWAIT.
---
--- Example 1:
--- <eucode>
--- t1 = time()
--- t2 = t1
--- while t2 < t1+15 and recvdata[2][1]=EAGAIN do
---     recvdata = recvfrom(socket,MSG_DONTWAIT)
---     if length(recvdata[1])>0 then
---         msg = msg & recvdata[1]
---         lastpeer = recvdata[3]
---         t1 = t1 - 60
---         recvdata = {"",{EAGAIN,""},""}
---     elsif recvdata[2][1] != EAGAIN then
---         puts(1,"Error: "&recvdata[2][2]&"\n")
---     end if
---     t2 = time()
--- end while
--- puts(1,sprintf("%d: ",cycle)&lastpeer&":  "&msg&'\n')
--- </eucode>
-
-public function recvfrom(atom socket, atom flags)
-	ifdef WIN32 then
-		return windows_recvfrom(socket, flags)
-	elsifdef UNIX then
-		return unix_recvfrom(socket,flags)
-	end ifdef
-
-	return -1
 end function
 
 --**
@@ -1369,4 +1203,3 @@ end function
 public function getservbyport(integer port, object protocol=0)
 	return machine_func(M_SOCK_GETSERVBYPORT, { port, protocol })
 end function
-

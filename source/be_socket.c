@@ -89,6 +89,7 @@ int eusock_geterror()
 /*
  * getservbyname(name, proto)
  */
+
 object eusock_getservbyname(object x)
 {
 	char *name, *proto;
@@ -140,6 +141,7 @@ object eusock_getservbyname(object x)
 /*
  * getservbyport(port, proto)
  */
+
 object eusock_getservbyport(object x)
 {
 	char *proto;
@@ -242,6 +244,7 @@ object eusock_build_hostent(struct hostent *ent)
 /*
  * gethostbyname(name)
  */
+
 object eusock_gethostbyname(object x)
 {
 	char *name;
@@ -269,6 +272,7 @@ object eusock_gethostbyname(object x)
 /*
  * gethostbyaddr(addr)
  */
+
 object eusock_gethostbyaddr(object x)
 {
 	char *address;
@@ -309,6 +313,7 @@ object eusock_gethostbyaddr(object x)
 /*
  * socket(af, type, protocol)
  */
+
 object eusock_socket(object x)
 {
 	int af, type, protocol;
@@ -330,6 +335,7 @@ object eusock_socket(object x)
 /*
  * close(sock)
  */
+
 object eusock_close(object x)
 {
 	if (closesocket(SEQ_PTR(x)->base[1]) == SOCKET_ERROR)
@@ -343,6 +349,7 @@ object eusock_close(object x)
 /*
  * shutdown(sock, how)
  */
+
 object eusock_shutdown(object x)
 {
 	if (shutdown(SEQ_PTR(x)->base[1], SEQ_PTR(x)->base[2]) == SOCKET_ERROR)
@@ -356,6 +363,7 @@ object eusock_shutdown(object x)
 /*
  * connect(family, sock, address, port)
  */
+
 object eusock_connect(object x)
 {
 	SOCKET s;
@@ -395,6 +403,7 @@ object eusock_connect(object x)
 /*
  * send(sock, buf, flags)
  */
+
 object eusock_send(object x)
 {
 	SOCKET s;
@@ -425,6 +434,7 @@ object eusock_send(object x)
 /*
  * recv(sock, flags)
  */
+
 object eusock_recv(object x)
 {
 	SOCKET s;
@@ -456,6 +466,7 @@ object eusock_recv(object x)
 /*
  * bind(socket, family, address, port)
  */
+
 object eusock_bind(object x)
 {
 	SOCKET s;
@@ -492,6 +503,7 @@ object eusock_bind(object x)
 /*
  * listen(socket, backlog)
  */
+
 object eusock_listen(object x)
 {
 	int result;
@@ -507,6 +519,7 @@ object eusock_listen(object x)
 /*
  * accept(socket)
  */
+
 object eusock_accept(object x)
 {
 	SOCKET client;

@@ -1501,6 +1501,7 @@ global procedure finish_emake()
 			else
 				printf(link_file, "FILE %s\\ecw.lib\n", {bin_path}) 	
 			end if
+			puts(link_file, "LIBRARY ws2_32\n")
 			if compare( short_c_file, file0 ) != 0 then
 				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
 			end if			

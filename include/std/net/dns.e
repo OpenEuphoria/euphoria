@@ -82,7 +82,24 @@ ifdef UNIX then
 	constant getaddrinfo_ = define_c_func(dll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
 	constant freeaddrinfo_ = define_c_proc(dll_,"freeaddrinfo",{C_POINTER})
 end ifdef
-	
+
+function _socket_trim(sequence s)
+	atom c
+	sequence rs
+	rs = s
+	c = 1
+	while c <= length(s) and rs[c] <= 32 do
+		c = c + 1
+	end while
+	rs = rs[c..length(rs)]
+	c = length(rs)
+	while c > 0 and rs[c] <= 32 do
+		c = c - 1
+	end while
+	rs = rs[1..c]
+	return rs
+end function
+
 -- Returns a set of sequences of {ip_addr, q_type, order} resolving the IP address for
 -- the given domain name and/or host.
 -- At present, only A,MX,and NS queries are supported.

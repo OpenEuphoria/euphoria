@@ -40,7 +40,6 @@
 ../include/std/image.e
 ../include/std/dos/image.e
 ../include/std/dos/pixels.e
-../include/std/net/http.e
 ../include/std/io.e
 ../include/std/locale.e
 ../include/std/localeconv.e
@@ -62,6 +61,8 @@
 ../include/std/serialize.e
 ../include/std/sets.e
 ../include/std/socket.e
+../include/std/net/dns.e
+../include/std/net/http.e
 ../include/std/sort.e
 ../include/std/stack.e
 ../include/std/stats.e
