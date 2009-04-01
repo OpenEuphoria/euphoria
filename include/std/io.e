@@ -547,7 +547,7 @@ public function get_dstring(integer fh, integer delim = 0)
 
 	s = repeat(-1, 256)
 	i = 0
-	while c != delim entry do
+	while c != delim with entry do
 		i += 1
 		if i > length(s) then
 			s &= repeat(-1, 256)
@@ -996,7 +996,7 @@ public function read_lines(object file)
 	if fn < 0 then return -1 end if
 
 	ret = {}
-	while sequence(y) entry do
+	while sequence(y) with entry do
 		if y[$] = '\n' then
 			y = y[1..$-1]
 			ifdef UNIX then

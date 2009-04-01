@@ -50,7 +50,7 @@ function is_current( object rev )
 	end if
 
 	current = 0
-	while sequence( line ) entry do
+	while sequence( line ) with entry do
 		ix = match( "SVN_REVISION = \"", line )
 		if ix then
 			jx = find_from( '"', line, ix + 17 )

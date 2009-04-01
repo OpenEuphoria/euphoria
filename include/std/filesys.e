@@ -1326,7 +1326,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 	
 	-- Replace all instances of "/./" with "/"
 	lLevel = SLASH & '.' & SLASH
-	while( lPosA != 0 ) entry do
+	while( lPosA != 0 ) with entry do
 		lPath = lPath[1..lPosA-1] & lPath[lPosA + 2 .. $]
 		
 	  entry
@@ -1336,7 +1336,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 	-- Replace all instances of "X/Y/../" with "X/"
 	lLevel = SLASH & ".." & SLASH
 	
-	while( lPosA != 0 ) entry do
+	while( lPosA != 0 ) with entry do
 		-- Locate preceding directory separator.
 		lPosB = lPosA-1
 		while((lPosB > 0) and (lPath[lPosB] != SLASH)) do
@@ -1511,7 +1511,7 @@ public function copy_file(sequence src, sequence dest, atom overwrite)
 			integer h = open( dest, "wb" )
 			if h != -1 then
 				integer c
-				while c != -1 entry do
+				while c != -1 with entry do
 					puts(h, c)
 				entry
 					c = getc(f)

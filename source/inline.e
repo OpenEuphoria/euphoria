@@ -884,7 +884,7 @@ export procedure inline_deferred_calls()
 				symtab_index calling_sub = deferred_inline_calls[i][cx]
 				CurrentSub = calling_sub
 				Code = SymTab[calling_sub][S_CODE]
-				while ix and ix < length( Code ) entry do
+				while ix and ix < length( Code ) with entry do
 					
 					if SymTab[sub][S_TOKEN] != PROC then
 						Push( Code[ix + SymTab[sub][S_NUM_ARGS] + 2] )

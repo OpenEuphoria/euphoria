@@ -148,7 +148,7 @@ function signature( symtab_index proc )
 		symtab_index arg_sym = e[S_NEXT]
 		symtab_entry arg = SymTab[arg_sym]
 		
-		while args > 0 entry do
+		while args > 0 with entry do
 			sig &= ", "
 			arg_sym = arg[S_NEXT]
 			arg = SymTab[arg_sym]

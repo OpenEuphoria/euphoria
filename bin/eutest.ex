@@ -214,7 +214,7 @@ procedure do_test(sequence cmds)
 	verbose_switch = find( "-verbose", cmds )
 	
 	integer ex
-	while ex and ex < length(cmds) entry do
+	while ex and ex < length(cmds) with entry do
 		executable = cmds[ex+1]
 		cmds = cmds[1..ex-1] & cmds[ex+2..$]
 	entry
@@ -223,7 +223,7 @@ procedure do_test(sequence cmds)
 
 
 	integer ec
-	while ec and ec < length(cmds) entry do
+	while ec and ec < length(cmds) with entry do
 		translator = cmds[ec+1]
 		cmds = cmds[1..ec-1] & cmds[ec+2..$]
 	entry
@@ -269,7 +269,7 @@ procedure do_test(sequence cmds)
 	integer cci
 	
 	compiler = ""
-	while cci and cci < length(cmds) entry do
+	while cci and cci < length(cmds) with entry do
 		if cmds[cci+1][1] != '-' then
 			compiler = "-" & cmds[cci+1]
 		else
@@ -608,7 +608,7 @@ sequence unsummarized_files = {}
 
 procedure ascii_out(sequence data)
 	switch data[1] do
-		case "file":
+		case "file" then
 			unsummarized_files = append( unsummarized_files, data[2] )
 			printf(1, "%s\n", { data[2] })
 			puts(1, "===========================================================================\n")
@@ -618,7 +618,7 @@ procedure ascii_out(sequence data)
 			end if
 			break
 
-		case "failed":
+		case "failed" then
 			printf(1, "  Failed: %s (%f) expected ", { data[2], data[5] })
 			pretty_print(1, data[3], {2, 2, 12, 78, "%d", "%.15g"})
 			puts(1, " got ")
@@ -626,7 +626,7 @@ procedure ascii_out(sequence data)
 			puts(1, "\n")
 			break
 
-		case "passed":
+		case "passed" then
 			sequence anum
 			if data[3] = 0 then
 				anum = "0"
@@ -636,7 +636,7 @@ procedure ascii_out(sequence data)
 			printf(1, "  Passed: %s (%s)\n", { data[2], anum })
 			break
 
-		case "summary":
+		case "summary" then
 			puts(1, "---------------------------------------------------------------------------\n")
 			sequence status
 			if find( data[2], unsummarized_files ) then
@@ -677,7 +677,7 @@ procedure html_out(sequence data)
 	integer err
 
 	switch data[1] do
-		case "file":
+		case "file" then
 			unsummarized_files = append( unsummarized_files, data[2] )
 			printf( 1, "<table width=100%%><tr bgcolor=#dddddd><th colspan=3 align=left><a name='%s'>%s</a></th><td><a href='#summary'>all file summary</a></th></tr>\n", { data[2], data[2] } )
 			err = find( data[2], error_list[1] ) 
@@ -705,13 +705,13 @@ procedure html_out(sequence data)
 			end if
 			break
 
-		case "failed":
+		case "failed" then
 			printf(1, "<tr bgcolor=\"#ffaaaa\"><th align=left width=50%%>%s</th><td>%f</td><td>%s</td><td>%s</td></tr>\n",
 				{ data[2], pretty_sprint(data[5]), pretty_sprint(data[3]), data[4] })
 
 			break
 
-		case "passed":
+		case "passed" then
 			sequence anum
 			if data[3] = 0 then
 				anum = "0"
@@ -722,7 +722,7 @@ procedure html_out(sequence data)
 				{ data[2], anum })
 			break
 
-		case "summary":
+		case "summary" then
 			if length(unsummarized_files) then
 				unsummarized_files = unsummarized_files[1..$-1] 
 			end if
@@ -828,17 +828,17 @@ procedure do_process_log(sequence cmds)
 	
 			switch data[1] do
 				
-				case "failed":
+				case "failed" then
 					total_failed += 1
 					total_time += data[5]
 					break
 	
-				case "passed":
+				case "passed" then
 					total_passed += 1
 					total_time += data[3]
 					break
 				
-				case "file":
+				case "file" then
 					integer ofi = find( data[2], other_files )
 					if ofi != 0 then
 						other_files = other_files[1..ofi-1] & other_files[ofi+1..$]

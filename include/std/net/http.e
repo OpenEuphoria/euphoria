@@ -530,7 +530,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 
 		-- } end version 1.3.0 mod
 		data = ""
-		while sequence(junk) entry do
+		while sequence(junk) with entry do
 			data = data & junk
 		entry
 			junk = sock:recv(sock, 0)

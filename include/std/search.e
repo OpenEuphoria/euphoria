@@ -233,7 +233,7 @@ end function
 public function find_all(object needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
-	while start > 0 entry do
+	while start > 0 with entry do
 		ret &= start
 		start += 1
 	entry
@@ -672,7 +672,7 @@ end function
 public function match_all(sequence needle, sequence haystack, integer start=1)
 	sequence ret = {}
 
-	while start > 0 entry do
+	while start > 0 with entry do
 		ret &= start
 		start += length(needle)
 	entry

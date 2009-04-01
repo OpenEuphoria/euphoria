@@ -1300,7 +1300,7 @@ public function remove_all(object needle, sequence haystack)
 	se -= 1
 	te = se
 	
-	while se > 0 entry do
+	while se > 0 with entry do
 		-- Shift elements down the sequence.
 		haystack[ts .. te] = haystack[ss .. se]
 

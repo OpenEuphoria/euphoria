@@ -231,7 +231,7 @@ public function find_all(regex re, sequence haystack, integer from=1, integer op
 	object result
 	
 	sequence results = {}
-	while sequence(result) entry do
+	while sequence(result) with entry do
 		results = append(results, result)
 		from = max(result) + 1
 

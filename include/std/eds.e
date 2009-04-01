@@ -213,7 +213,7 @@ function get_string()
 
 	s = repeat(0, 256)
 	i = 0
-	while c entry do
+	while c with entry do
 		if c = -1 then
 			fatal(MISSING_END, "string is missing 0 terminator", "get_string", {where(current_db)})
 			exit
@@ -235,7 +235,7 @@ function equal_string(sequence target)
 	integer i
 
 	i = 0
-	while c entry do
+	while c with entry do
 		if c = -1 then
 			fatal(MISSING_END, "string is missing 0 terminator", "equal_string", {where(current_db)})
 			return DB_FATAL_FAIL
@@ -540,7 +540,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 		puts(fn, "            Disk Dump\nDiskAddr " & repeat('-', 58))
 		void = seek(current_db, 0)
 		a = 0
-		while c >= 0 entry do
+		while c >= 0 with entry do
 
 			if c = -1 then
 				exit

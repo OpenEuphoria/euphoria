@@ -740,7 +740,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 	else -- Small Map
 		if equal(the_key_p, init_small_map_key) then
 			from_ = 1
-			while index_ > 0 entry do
+			while index_ > 0 with entry do
 				if ram_space[the_map_p][free_list][index_] = 0 then
 					exit
 				end if
@@ -1297,7 +1297,7 @@ public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333
 		end if
 		
 		next_guess_ = max({1, floor(ram_space[the_map_p][element_count] / max_p)})
-		while 1 entry do
+		while 1 with entry do
 		
 			if stats_[LARGEST_BUCKET] <= max_p then
 				exit -- Largest is now smaller than the maximum I wanted.
@@ -1396,7 +1396,7 @@ public function load_map(object file_name_p)
 	-- A text format file
 		close(file_handle_)
 		file_handle_ = open(file_name_p, "r")
-		while sequence(line_) entry do
+		while sequence(line_) with entry do
 			comment_ = rmatch("--", line_)
 			if comment_ != 0 then
 				line_ = trim(line_[1..comment_-1])

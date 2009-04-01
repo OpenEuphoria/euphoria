@@ -1272,7 +1272,7 @@ global function Scanner()
 				
 			bp -= 1  --ungetch
 
-			while i != 0 entry do
+			while i != 0 with entry do
 			    yytext = yytext[1 .. i-1] & yytext[i+1 .. $]
 			  entry
 			    i = find('_', yytext)
@@ -1488,7 +1488,7 @@ global function Scanner()
 			elsif ch = '*' then
 				cline = line_number
 				-- block comment start
-				while ch = 0 entry do
+				while ch = 0 with entry do
 					read_line()
 					if ThisLine[1] = END_OF_FILE_CHAR then
 						exit

@@ -1723,7 +1723,7 @@ procedure GLabel_statement()
 	goto_labels = append(goto_labels, labbel)
 	goto_addr = append(goto_addr, laddr)
 
-	while n entry do
+	while n with entry do
 		backpatch(goto_list[n], laddr)
 		goto_delay[n] = "" --clear it
 		goto_line[n] = {-1,""} --clear it
@@ -1891,12 +1891,6 @@ function finish_block_header(integer opcode)
 
 	tok = next_token()
 	has_entry=0
-
-    -- TODO: Remove after beta 1
-	if tok[T_ID]=ENTRY then
-		has_entry=1
-		tok = next_token()
-	end if
 
 	if tok[T_ID] = WITH then
 		tok = next_token()
