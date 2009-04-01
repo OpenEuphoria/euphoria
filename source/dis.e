@@ -1642,8 +1642,6 @@ procedure dis( integer sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1
 	sequence line_table = SymTab[sub][S_LINETAB]
-	print( out, line_table)
-	puts(out, "\n")
 	while pc <= length(Code) do
 		integer ln = find( pc-1, line_table )
 		if ln > 0 and ln <= length(line_table) then

@@ -1356,16 +1356,24 @@ void udt_clean( object o, long rid ){
 		SEQ_PTR( o )->ref = pre_ref;;
 	}
 #else
-	int **code[4];
-	static s1_ptr s = 0;
+	int *code;
+	int seq[7]; // seq struct on the stack
+	s1_ptr s;
 	object args;
 	int pre_ref;
 	int *save_tpc;
-	if( s == 0 ){
-		s = NewS1( 1 );
-	}
-	pre_ref = SEQ_PTR(o)->ref;
+	
+	s = (s1_ptr)&seq;
+	s->base = &(s->cleanup);
+	s->ref = 2;
+	s->length = 1;
+	s->cleanup = 0;
+	s->base[0] = 0;
 	s->base[1] = o;
+	s->base[2] = NOVALUE;
+	
+	pre_ref = SEQ_PTR(o)->ref;
+	
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
 	}
@@ -1374,16 +1382,19 @@ void udt_clean( object o, long rid ){
 	}
 	args = MAKE_SEQ( s );
 	
+	code = EMalloc( 4*sizeof(int*) );
 	code[0] = (int **)opcode(CALL_PROC);
 	code[1] = (int **)&rid;
 	code[2] = (int **)&args;
 	code[3] = (int *)opcode(CALL_BACK_RETURN);
 	
 	*expr_top++ = (object)tpc;    // needed for traceback
-	*expr_top++ = NULL;           // prevents restore_privates()
+	*expr_top++ = *(expr_top-2);           // prevents restore_privates()
 
 	save_tpc = tpc;
-	do_exec((int *)code);  // execute routine without setting up new stack
+	do_exec(code);  // execute routine without setting up new stack
+	EFree(code);
+	
 	tpc = save_tpc;
 	expr_top -= 2;
 	if( pre_ref == 0 ){
@@ -1420,6 +1431,7 @@ void cleanup_double( d_ptr dbl ){
 	cleanup_ptr cp, next;
 	cp = dbl->cleanup;
 	dbl->cleanup = 0;
+	
 	while( cp ){
 		next = cp->next;
 		if( cp->type == CLEAN_UDT ){

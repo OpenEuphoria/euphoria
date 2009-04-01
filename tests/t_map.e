@@ -214,7 +214,6 @@ test_equal( "new_extra #2", m7, m8)
 clear(m1)
 test_equal( "map clear #1", 0, map:size(m1))
 test_equal( "map clear #2", SMALLMAP, map:type_of(m1))
-
 delete(m1)
 test_false( "delete #1", map:map(m1))
 

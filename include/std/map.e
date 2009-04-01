@@ -384,7 +384,7 @@ end procedure
 public function new(integer initial_size_p = 690)
 	integer buckets_
 	sequence new_map_
-	integer temp_map_
+	atom temp_map_
 
 	if initial_size_p < 3 then
 		initial_size_p = 3
@@ -855,7 +855,7 @@ end procedure
 --
 -- See also:  [[:put]]
 public procedure nested_put( map the_map_p, sequence the_keys_p, object the_value_p, integer operation_p = PUT, integer trigger_p = 51 )
-	integer temp_map_
+	atom temp_map_
 
 	if length( the_keys_p ) = 1 then
 		put( the_map_p, the_keys_p[1], the_value_p, operation_p, trigger_p )
@@ -1365,7 +1365,7 @@ public function load_map(object file_name_p)
 	object value_
 	object key_
 	sequence conv_res_
-	integer new_map_
+	atom new_map_
 
 	if sequence(file_name_p) then
 		file_handle_ = open(file_name_p, "rb")
@@ -1561,7 +1561,7 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 end function
 
 public function copy(map the_map_)
-	integer temp_map_
+	atom temp_map_
 	
  	temp_map_ = malloc()
  	ram_space[temp_map_] = ram_space[the_map_]
@@ -1571,7 +1571,7 @@ end function
 ---- Local Functions ------------
 procedure convert_to_large_map(map the_map_)
 	sequence temp_map_
-	integer map_handle_
+	atom map_handle_
 
 	temp_map_ = ram_space[the_map_]
 	if temp_map_[map_type] = LARGEMAP then

@@ -3730,7 +3730,6 @@ void do_exec(int *start_pc)
 				
 				if (sub->u.subp.resident_task != -1) {
 					/* someone is using the sub - save the privates and temps */
-
 					block = save_private_block(sub);
 					
 					/* save & copy the args */

@@ -21,14 +21,16 @@ integer free_rid
 -- # ##mem_struct_p##, The initial structure (sequence) to occupy the allocated
 -- block. If this is an integer, a sequence of zero this long is used. The default
 -- is the number 1, meaning that the default initial structure is {0}
--- # ##cleanup##, Identifies whether the memory should be released automatically
+-- # ##cleanup_p##, Identifies whether the memory should be released automatically
 -- when the reference count for the handle for the allocated block drops to
 -- zero, or when passed to ##delete()##.  If 0, then the block must be freed
 -- using the [[:free]] procedure.
 --
 -- Returns:
 -- A handle to the acquired block. Once you acquire this, you can use it as you
--- need to. 
+-- need to.  Note that if ##cleanup_p## is 1, then the variable holding the 
+-- handle must be capable of storing an atom as a double floating point value
+-- (i.e., not an integer).
 -- 
 -- Example 1:
 -- <eucode>
@@ -43,8 +45,13 @@ export function malloc(object mem_struct_p = 1, integer cleanup_p = 1)
 	end if
 	if ram_free_list = 0 then
 		ram_space = append(ram_space, mem_struct_p)
-		return length(ram_space)
+		if cleanup_p then
+			return delete_routine( length(ram_space), free_rid )
+		else
+			return length(ram_space)
+		end if
 	end if
+	
 	temp_ = ram_free_list
 	ram_free_list = ram_space[temp_]
 	ram_space[temp_] = mem_struct_p
@@ -70,7 +77,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  myspot = malloc()
+--  myspot = malloc(1,0)
 --  ram_space[myspot] = my_data
 --  . . . do some processing  . . 
 --  free(myspot)
@@ -78,9 +85,9 @@ end function
 export procedure free(atom mem_p)
 	if mem_p < 1 then return end if
 	if mem_p > length(ram_space) then return end if
-printf(1,"freeing %d\n", mem_p)
+
 	ram_space[mem_p] = ram_free_list
-	ram_free_list = mem_p
+	ram_free_list = floor(mem_p)
 end procedure
 free_rid = routine_id("free")
 

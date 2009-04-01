@@ -47,6 +47,10 @@ constant
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
+integer 
+	FREE_RID,
+	FREE_ARRAY_RID
+
 --**
 -- Positive integer type
 
@@ -72,15 +76,24 @@ end type
 --
 -- Parameters:
 --              # ##n##, a positive integer, the size of the requested block.
+--              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--                automatically freed when its reference count drops to zero, or
+--                when passed as a parameter to [[:delete]].
 --
 -- Return:
 --              An **atom**, the address of the allocated memory or 0 if the memory
 -- can't be allocated.
 --
 -- Comments:
+-- Since ##allocate_string##() allocates memory, you are responsible to
+-- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- If ##cleanup## is non-zero, then the memory can be freed by calling
+-- [[:delete]], or when the ponter's reference count drops to zero.
+
 -- When you are finished using the block, you should pass the address of the block to 
--- ##[[:free]]()##. This will free the block and make the memory available for other purposes. 
--- Euphoria will never free or reuse your block until you explicitly call ##[[:free]]()##. When 
+-- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
+--can be freed by calling [[:delete]], or when the ponter's reference count drops to zero.
+-- This will free the block and make the memory available for other purposes. When 
 -- your program terminates, the operating system will reclaim all memory for use with other 
 -- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
 -- For that purpose you may use ##[[:allocate_code]]()## instead. 
@@ -98,10 +111,14 @@ end type
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
 
-public function allocate(positive_int n)
+public function allocate(positive_int n, integer cleanup = 0)
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
-        return machine_func(M_ALLOC, n)
+	if cleanup then
+		return delete_routine( machine_func(M_ALLOC, n ), FREE_RID )
+	else
+		return machine_func(M_ALLOC, n)
+	end if
 end function
 
 
@@ -110,6 +127,9 @@ end function
 --
 -- Parameters:
 --              # ##s##, a sequence, the string to store in RAM.
+--              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--                automatically freed when its reference count drops to zero, or
+--                when passed as a parameter to [[:delete]].  
 --
 -- Returns:
 --              An **atom**, the address of the memory block where the string was
@@ -122,7 +142,9 @@ end function
 -- craft one by adapting the code for ##allocate_string##.
 --
 -- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it.
+-- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- If ##cleanup## is non-zero, then the memory can be freed by calling
+-- [[:delete]], or when the ponter's reference count drops to zero.
 --
 -- Example 1:
 -- <eucode>
@@ -133,13 +155,17 @@ end function
 -- 
 -- See Also:
 --              [[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
-public function allocate_string(sequence s)
+public function allocate_string(sequence s, integer cleanup = 0 )
 	atom mem
-
+	
 	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
+	
 	if mem then
 		poke(mem, s)
 		poke(mem+length(s), 0)  -- Thanks to Aku
+		if cleanup then
+			mem = delete_routine( mem, FREE_RID )
+		end if
 	end if
 
 	return mem
@@ -150,6 +176,9 @@ end function
 --
 -- Parameters:
 --   # #pointers# - A sequence of pointers to add to the pointer array.
+--   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]]
 --
 -- Comments:
 --   This function adds the NULL terminator.
@@ -162,7 +191,7 @@ end function
 -- See Also:
 --   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
 
-public function allocate_pointer_array(sequence pointers)
+public function allocate_pointer_array(sequence pointers, integer cleanup = 0)
     atom pList
 
     if atom(pointers) then
@@ -172,7 +201,9 @@ public function allocate_pointer_array(sequence pointers)
     pointers &= 0
     pList = allocate(length(pointers) * 4)
     poke4(pList, pointers)
-
+	if cleanup then
+		return delete_routine( pList, FREE_ARRAY_RID )
+	end if
     return pList
 end function
 
@@ -181,6 +212,9 @@ end function
 --
 -- Parameters:
 --   # #string_list# - sequence of strings to store in RAM.
+--   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]]
 --
 -- Returns:
 --   An **atom**, the address of the memory block where the string pointer
@@ -195,12 +229,16 @@ end function
 -- See Also:
 --   [[:free_pointers_array]]
 
-public function allocate_string_pointer_array(object string_list)
+public function allocate_string_pointer_array(object string_list, integer cleanup = 0)
 	for i = 1 to length(string_list) do
 		string_list[i] = allocate_string(string_list[i])
 	end for
 
-	return allocate_pointer_array(string_list)
+	if cleanup then
+		return delete_routine( allocate_pointer_array(string_list), FREE_ARRAY_RID )
+	else
+		return allocate_pointer_array(string_list)
+	end if
 end function
 
 --**
@@ -223,7 +261,8 @@ end function
 -- ##addr## must have been allocated previously using [[:allocate]](). You
 -- cannot use it to relinquish part of a block. Instead, you have to allocate
 -- a block of the new size, copy useful contents from old block there and
--- then free() the old block.
+-- then free() the old block.  If the memory was allocated and automatic cleanup
+-- was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
 --
 -- Example 1:
 --   ##demo/callmach.ex##
@@ -234,6 +273,7 @@ end function
 public procedure free(machine_addr addr)
         machine_proc(M_FREE, addr)
 end procedure
+FREE_RID = routine_id("free")
 
 --**
 -- Free a NULL terminated pointers array.
@@ -242,7 +282,9 @@ end procedure
 --   # #pointers_array# - memory address of where the NULL terminated array exists at.
 --
 -- Comments:
---   This is for NULL terminated lists.
+--   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
+--   Do not call ##free_pointer_array()## for a pointer that was allocated to be cleaned
+--   up automatically.  Instead, use [[:delete]].
 --
 -- See Also:
 --   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
@@ -260,6 +302,7 @@ public procedure free_pointer_array(atom pointers_array)
 
 	free(saved)
 end procedure
+FREE_ARRAY_RID = routine_id("free_pointer_array")
 
 --****
 -- === Reading from, Writing to, and Calling into Memory
@@ -975,3 +1018,56 @@ end procedure
 public procedure check_all_blocks()
 end procedure
 with warning
+
+-- ****
+-- === Automatic Resource Management
+--
+-- Euphoria objects are automatically garbage collected when they are no
+-- longer referenced anywhere.  Euphoria also provides the ability to manage 
+-- resources associated with euphoria objects.  These resources could be open file 
+-- handles, allocated memory, or other euphoria objects.  There are two built-in
+-- routines for managing these external resources.
+
+--**
+-- Signature:
+-- <built-in>function delete_routine( object x, integer rid )
+-- 
+-- Description:
+-- Associates a routine for cleaning up after a euphoria object.
+-- 
+-- Comments:
+-- delete_routine() associates a euphoria object with a routine id meant
+-- to clean up any allocated resources.  It always returns an atom
+-- (double) or a sequence, depending on what was passed (integers are
+-- promoted to atoms).
+-- 
+-- The routine specified by delete_routine() should be a procedure that
+-- takes a single parameter, being the object to be cleaned up after.
+-- Objects are cleaned up under one of two circumstances.  The first is
+-- if it's called as a parameter to delete().  After the call, the
+-- association with the delete routine is removed.
+-- 
+-- The second way for the delete routine to be called is when its
+-- reference count is reduced to 0.  Before its memory is freed, the
+-- delete routine is called.
+-- 
+-- delete_routine() may be called multiple times for the same object.
+-- In this case, the routines are called in reverse order compared to
+-- how they were associated.
+
+--**
+-- Signature:
+-- <built-in>procedure delete( object x )
+-- 
+-- Description:
+-- Calls the cleanup routines associated with the object, and removes the
+-- association with those routines.
+-- 
+-- Comments:
+-- The cleanup routines associated with the object are called in reverse
+-- order than they were added.  If the object is an integer, or if no
+-- cleanup routines are associated with the object, then nothing happens.
+-- 
+-- After the cleanup routines are called, the value of the object is 
+-- unchanged, though the cleanup routine will no longer be associated
+-- with the object.
