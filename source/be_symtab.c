@@ -353,14 +353,19 @@ int RoutineId(symtab_ptr current_sub, object name, int file_no)
 			e_routine_size = 20;
 			e_routine = (symtab_ptr *)EMalloc(e_routine_size * sizeof(symtab_ptr));
 			e_cleanup = (cleanup_ptr*) EMalloc( e_routine_size * sizeof(cleanup_ptr) );
-			e_cleanup[0] = 0;
+			for( i = e_routine_size - 20; i < e_routine_size; ++i ){
+				e_cleanup[i] = 0;
+			}
 		}
 		else {
 			e_routine_size += 20;
 			e_routine = (symtab_ptr *)ERealloc((char *)e_routine, 
 								 e_routine_size * sizeof(symtab_ptr));
 			e_cleanup = (cleanup_ptr*) ERealloc( (char *)e_cleanup, e_routine_size * sizeof(cleanup_ptr) );
-			e_cleanup[e_routine_size-1] = 0;
+			for( i = e_routine_size - 20; i < e_routine_size; ++i ){
+				e_cleanup[i] = 0;
+			}
+			
 		}
 	}
 	

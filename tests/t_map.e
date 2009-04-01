@@ -215,10 +215,10 @@ clear(m1)
 test_equal( "map clear #1", 0, map:size(m1))
 test_equal( "map clear #2", SMALLMAP, map:type_of(m1))
 
-map:delete(m1)
+delete(m1)
 test_false( "delete #1", map:map(m1))
 
-map:delete(city_population, 1)
+delete(city_population)
 test_false( "delete #2", map:map(city_population))
 
 o2 = map:threshold(20)

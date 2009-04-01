@@ -10,6 +10,8 @@ include std/error.e
 include std/map.e
 include dot.e
 include std/os.e
+
+include global.e
 include dox.e as dox
 
 integer out, pc, a, b, c, d, target, len, keep_running

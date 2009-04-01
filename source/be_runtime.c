@@ -1401,15 +1401,15 @@ void cleanup_sequence( s1_ptr seq ){
 	cp = seq->cleanup;
 	seq->cleanup = 0;
 	while( cp ){
+		next = cp->next;
 		if( cp->type == CLEAN_UDT ){
 			udt_clean( MAKE_SEQ(seq), cp->func.rid );
+			if( next ){
+				EFree( cp );
+			}
 		}
 		else{
 			(cp->func.builtin)( MAKE_SEQ( seq ) );
-			EFree( cp );
-		}
-		next = cp->next;
-		if( next ){
 			EFree( cp );
 		}
 		cp = next;
@@ -1558,7 +1558,6 @@ void de_reference_i(s1_ptr a)
 		RTInternal("more than 1000 refs");
 #endif
 	if (IS_ATOM_DBL(a)) {
-		printf("freeing a double %p\n", a );
 #ifdef EXTRA_CHECK
 		a1 = (s1_ptr)DBL_PTR(a);
 		if (a1->ref < 0)

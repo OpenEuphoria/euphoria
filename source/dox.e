@@ -9,6 +9,8 @@ include std/map.e as map
 include keylist.e
 include std/search.e
 
+include global.e
+
 sequence out_dir           = "eudox" & SLASH
 integer  show_dependencies = 1
 integer  show_callgraphs   = 1

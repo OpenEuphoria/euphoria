@@ -13,7 +13,7 @@ namespace eumem
 export sequence ram_space = {}
 
 integer ram_free_list = 0
-
+integer free_rid
 --****
 -- Allocate a block of (pseudo) memory
 --
@@ -21,6 +21,10 @@ integer ram_free_list = 0
 -- # ##mem_struct_p##, The initial structure (sequence) to occupy the allocated
 -- block. If this is an integer, a sequence of zero this long is used. The default
 -- is the number 1, meaning that the default initial structure is {0}
+-- # ##cleanup##, Identifies whether the memory should be released automatically
+-- when the reference count for the handle for the allocated block drops to
+-- zero, or when passed to ##delete()##.  If 0, then the block must be freed
+-- using the [[:free]] procedure.
 --
 -- Returns:
 -- A handle to the acquired block. Once you acquire this, you can use it as you
@@ -31,7 +35,7 @@ integer ram_free_list = 0
 --  myspot = malloc()
 --  ram_space[myspot] = my_data
 -- </eucode>
-export function malloc(object mem_struct_p = 1)
+export function malloc(object mem_struct_p = 1, integer cleanup_p = 1)
 	integer temp_
 
 	if atom(mem_struct_p) then
@@ -41,12 +45,15 @@ export function malloc(object mem_struct_p = 1)
 		ram_space = append(ram_space, mem_struct_p)
 		return length(ram_space)
 	end if
-
 	temp_ = ram_free_list
 	ram_free_list = ram_space[temp_]
 	ram_space[temp_] = mem_struct_p
 
-	return temp_
+	if cleanup_p then
+		return delete_routine( temp_, free_rid )
+	else
+		return temp_
+	end if
 end function
 
 --****
@@ -58,7 +65,8 @@ end function
 -- Comments:
 -- This allows the location to be used by other parts of your application. You 
 -- should no longer access this location again because it could be acquired by
--- some other process in your application.
+-- some other process in your application.  This routine should only be called
+-- if you passed 0 as ##cleanup_p## to [[:malloc]].
 --
 -- Example 1:
 -- <eucode>
@@ -67,13 +75,14 @@ end function
 --  . . . do some processing  . . 
 --  free(myspot)
 -- </eucode>
-export procedure free(integer mem_p)
+export procedure free(atom mem_p)
 	if mem_p < 1 then return end if
 	if mem_p > length(ram_space) then return end if
-
+printf(1,"freeing %d\n", mem_p)
 	ram_space[mem_p] = ram_free_list
 	ram_free_list = mem_p
 end procedure
+free_rid = routine_id("free")
 
 --****
 -- Validates a block of (pseudo) memory

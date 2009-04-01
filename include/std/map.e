@@ -369,12 +369,16 @@ end procedure
 --		An empty **map**.
 --
 -- Comments:
---   A new object of type map is created.
+--   A new object of type map is created.  The resources allocated for the map will
+--   be automatically cleaned up if the reference count of the returned value drops
+--  to zero, or if passed in a call to [[:delete]].
 --
 -- Example 1:
 --   <eucode>
 --   map m = new()  -- m is now an empty map
 --   map x = new(threshold()) -- Forces a small map to be initialized
+--   x = new()    -- the resources for the map previously stored in x are released automatically
+--   delete( m )  -- the resources for the map are released
 --   </eucode>
 
 public function new(integer initial_size_p = 690)
@@ -436,49 +440,6 @@ public function new_extra(object the_map_p, integer initial_size_p = 690)
 	end if
 end function
 
---**
--- Delete an existing map data structure
---
--- Parameters:
---		# ##the_map_p##: The map to delete.
---      # ##embedded##: If not zero, this will also delete any maps contained
---      in this map's keys or values. The default is 0.
---
--- Comments:
---   * You use this routine when you have finished with a map and want to 
---   give back the memory to Euphoria. You don't normally have to do this
---   because all memory is reclaimed when the program ends, but it can be
---   useful if your program is not finished but it has finished using the map.
---   * If you have been using [[:nested_put]], you might want to use the
---   ##embedded## parameter to also delete sub-maps automatically created
---   by ##nested_put##.
---
--- Example 1:
---   <eucode>
---   map m = new()  -- m is a new map
---   . . .
---   delete(m) -- No longer needed, so give space back to Euphoria.
---   </eucode>
-
-public procedure delete(map the_map_p, integer embedded_p = 0)
-	sequence data_
-	
-	if embedded_p != 0 then
-		data_ = keys(the_map_p)
-		for i = 1 to length(data_) do
-			if map(data_[i]) then
-				delete( data_[i], 1 )
-			end if
-		end for
-		data_ = values(the_map_p)
-		for i = 1 to length(data_) do
-			if map(data_[i]) then
-				delete( data_[i], 1 )
-			end if
-		end for
-	end if
-	free(the_map_p)
-end procedure
 
 --**
 -- Compares two maps to test equality.
@@ -1625,7 +1586,6 @@ procedure convert_to_large_map(map the_map_)
 	end for
 
 	ram_space[the_map_] = ram_space[map_handle_]
-	delete(map_handle_)
 	return
 end procedure
 
