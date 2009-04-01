@@ -905,6 +905,6 @@ export procedure inline_deferred_calls()
 			end for
 		end if
 	end for
-	delete( inline_var_map )
+--	delete( inline_var_map )
 end procedure
 

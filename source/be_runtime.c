@@ -131,6 +131,8 @@ extern unsigned default_heap;
 #endif
 
 extern object_ptr expr_top;
+extern object_ptr expr_max;    // top limit of call stack
+extern object_ptr expr_limit;  // don't start a new routine above this
 extern int *tpc;
 
 /**********************/
@@ -1357,14 +1359,15 @@ void udt_clean( object o, long rid ){
 	}
 #else
 	int *code;
-	int seq[7]; // seq struct on the stack
+	int seq[9]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
 	int *save_tpc;
 	
-	s = (s1_ptr)&seq;
-	s->base = &(s->cleanup);
+	// Need to make sure that s is 8-byte aligned
+	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
+	s->base = (long*)&(s->cleanup);
 	s->ref = 2;
 	s->length = 1;
 	s->cleanup = 0;
@@ -1381,15 +1384,17 @@ void udt_clean( object o, long rid ){
 		RefDS( o );
 	}
 	args = MAKE_SEQ( s );
-	
 	code = EMalloc( 4*sizeof(int*) );
 	code[0] = (int **)opcode(CALL_PROC);
 	code[1] = (int **)&rid;
 	code[2] = (int **)&args;
 	code[3] = (int *)opcode(CALL_BACK_RETURN);
-	
+	if (expr_top >= expr_limit) {
+		expr_max = BiggerStack();
+		expr_limit = expr_max - 3;
+	} 
 	*expr_top++ = (object)tpc;    // needed for traceback
-	*expr_top++ = *(expr_top-2);           // prevents restore_privates()
+	*expr_top++ = *(expr_top-2);  // prevents restore_privates()
 
 	save_tpc = tpc;
 	do_exec(code);  // execute routine without setting up new stack

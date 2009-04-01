@@ -315,7 +315,6 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 	}
 }
 
-
 int RoutineId(symtab_ptr current_sub, object name, int file_no)
 /* Look up routine name in symbol table.
    The routine must be defined before the currently executing line. */

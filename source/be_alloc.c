@@ -808,3 +808,7 @@ s1_ptr SequenceCopy(register s1_ptr a)
 	return c;
 }
 
+char *TransAlloc(unsigned long size){
+// Convenience function for translated code to use EMalloc
+	return EMalloc( size );
+}

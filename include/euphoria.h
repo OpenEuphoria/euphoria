@@ -42,13 +42,23 @@
 typedef int object;
 typedef int *object_ptr;
 
+struct cleanup;
+typedef struct cleanup *cleanup_ptr;
 typedef void(*cleanup_func)(object);
+
 struct cleanup {
 	long type;
 	union func_union{
 		long rid;
 		cleanup_func builtin;
 	} func;
+	cleanup_ptr next;
+};
+
+enum CLEANUP_TYPES {
+	CLEAN_UDT,
+	CLEAN_PCRE,
+	CLEAN_FILE
 };
 
 typedef struct cleanup *cleanup_ptr;
@@ -230,3 +240,4 @@ void RTFatal(char *);
 int e_match_from(int,int,int);
 int find_from(int,int,int);
 void Replace(int);
+char *TransAlloc(unsigned long);

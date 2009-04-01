@@ -5464,6 +5464,18 @@ procedure assign_delete_target( symtab_index target, symtab_index obj )
 
 end procedure
 
+
+procedure DeleteRoutine( symtab_index rid )
+	c_stmt("_1 = _00[@].cleanup;", rid )
+	c_stmt0("if( _1 == 0 ){\n")
+		c_stmt0("_1 = TransAlloc( sizeof(struct cleanup) );\n")
+		c_stmt( "_00[@].cleanup = (cleanup_ptr)_1;\n", rid)
+	c_stmt0("}\n")
+	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT;\n")
+	c_stmt( "((cleanup_ptr)_1)->func.rid = @;\n", rid)
+	c_stmt0("((cleanup_ptr)_1)->next = 0;\n")
+end procedure
+
 procedure opDELETE_ROUTINE()
 	symtab_index 
 		obj = Code[pc+1],
@@ -5473,25 +5485,26 @@ procedure opDELETE_ROUTINE()
 	if SymTab[obj][S_MODE] = M_TEMP 
 	and compare( SymTab[obj][S_OBJ], NOVALUE) then
 		-- make a copy of a literal
-		c_stmt("_2 = DeleteRoutine( @ );\n", rid )
+		DeleteRoutine( rid )
+--		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
 		object val = SymTab[obj][S_OBJ]
 		if atom(val) then
 			if integer(val) then
-				c_stmt( "_1 = NewDouble( (double) @ );\n", obj )
+				c_stmt( "_2 = NewDouble( (double) @ );\n", obj )
 			elsif atom(val) then
-				c_stmt( "_1 = NewDouble( DBL_PTR(@)->dbl );\n", obj )
+				c_stmt( "_2 = NewDouble( DBL_PTR(@)->dbl );\n", obj )
 			end if
-			c_stmt0("DBL_PTR(_1)->cleanup = (cleanup_ptr)_2;\n")
+			c_stmt0("DBL_PTR(_2)->cleanup = (cleanup_ptr)_1;\n")
 			SetBBType(target, GType(obj), ObjMinMax(obj), TYPE_OBJECT, 1)
 		else
-			c_stmt("_1 = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", obj )
-			c_stmt0("SEQ_PTR(_1)->cleanup = (cleanup_ptr)_2;\n")
+			c_stmt("_2 = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", obj )
+			c_stmt0("SEQ_PTR(_2)->cleanup = (cleanup_ptr)_1;\n")
 			SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
 		end if
 		if SymTab[target][S_MODE] != M_TEMP then
 			CDeRef( target )
 		end if
-		c_stmt( "@ = _1;\n", target )
+		c_stmt( "@ = _2;\n", target )
 		
 	else
 		if TypeIs( obj, TYPE_INTEGER ) then
@@ -5508,7 +5521,9 @@ procedure opDELETE_ROUTINE()
 			assign_delete_target( target, obj )
 		end if
 		
-		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
+		
+		DeleteRoutine( rid )
+--		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
 		if TypeIs( target, TYPE_DOUBLE ) then
 			delete_double( target )
 		elsif TypeIs( target, TYPE_SEQUENCE ) then
