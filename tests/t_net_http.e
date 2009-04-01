@@ -3,6 +3,8 @@ include std/net/http.e
 include std/search.e
 include std/math.e
 
+ifdef NON_FUNCTIONAL_TESTS then
+
 -- TODO: Test HTTP stuff
 
 test_equal("urlencode 1", "Hello+%26+World", urlencode("Hello & World"))
@@ -26,7 +28,9 @@ ifdef URL_TESTS then
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", data, content[2])
 elsedef
-    puts(2, "Warning: URL tests were not run, use -D URL_TESTS for full test\n")
+    puts(2, " WARNING: URL tests were not run, use -D URL_TESTS for full test\n")
 end ifdef
 
 test_report()
+
+end ifdef

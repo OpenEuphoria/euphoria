@@ -5372,6 +5372,9 @@ object machine(object opcode, object x)
 			case M_SOCK_SETSOCKOPT:
 				return eusock_setsockopt(x);
 
+			case M_SOCK_SELECT:
+				return eusock_select(x);
+
 #endif // ifndef EDOS
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */

@@ -444,6 +444,7 @@ struct char_cell {
 #define M_SOCK_ACCEPT        89
 #define M_SOCK_SETSOCKOPT    90
 #define M_SOCK_GETSOCKOPT    91
+#define M_SOCK_SELECT        92
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

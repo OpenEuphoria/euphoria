@@ -1,6 +1,8 @@
 include std/unittest.e
 include std/net/dns.e as dns
 
+ifdef NON_FUNCTIONAL_TESTS then
+
 object _
 
 	object addrinfo = dns:getaddrinfo("localhost", "http", 0)
@@ -57,3 +59,4 @@ object _
 		test_true("getaddrinfo yahoo.com 5", sequence(_[1][ADDR_ADDRESS]))
 	end if
 
+end ifdef

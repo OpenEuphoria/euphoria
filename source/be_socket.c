@@ -72,12 +72,17 @@ int eusock_geterror()
 {
 	return WSAGetLastError();
 }
+
+#define eusock_ensure_init() if (eusock_wsastarted == 0) eusock_wsastart();
+
 #else // ifdef EWINDOWS
 #include <errno.h>
 int eusock_geterror()
 {
 	return errno;
 }
+
+#define eusock_ensure_init()
 #endif // ifdef EWINDOWS else
 
 /* ============================================================================
@@ -97,12 +102,10 @@ object eusock_getservbyname(object x)
 
 	struct servent *ent;
 
-#ifdef EWINDOWS
-	if (eusock_wsastarted == 0) eusock_wsastart();
-#endif
+	eusock_ensure_init();
 
 	name_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
-	name = EMalloc(name_s->length+1);
+	name   = EMalloc(name_s->length+1);
 	MakeCString(name, SEQ_PTR(x)->base[1] );
 
 	if (IS_SEQUENCE(SEQ_PTR(x)->base[2]))
@@ -150,9 +153,7 @@ object eusock_getservbyport(object x)
 
 	struct servent *ent;
 
-#ifdef EWINDOWS
-	if (eusock_wsastarted == 0) eusock_wsastart();
-#endif
+	eusock_ensure_init();
 
 	port = SEQ_PTR(x)->base[1];
 
@@ -253,12 +254,10 @@ object eusock_gethostbyname(object x)
 
 	struct hostent *ent;
 
-#ifdef EWINDOWS
-	if (eusock_wsastarted == 0) eusock_wsastart();
-#endif
+	eusock_ensure_init();
 
 	name_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
-	name = EMalloc(name_s->length+1);
+	name   = EMalloc(name_s->length+1);
 	MakeCString(name, SEQ_PTR(x)->base[1] );
 
 	// ent is static data, do not free
@@ -281,12 +280,10 @@ object eusock_gethostbyaddr(object x)
 	struct hostent *ent;
 	struct in_addr addr;
 
-#ifdef EWINDOWS
-	if (eusock_wsastarted == 0) eusock_wsastart();
-#endif
+	eusock_ensure_init();
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
-	address = EMalloc(address_s->length+1);
+	address   = EMalloc(address_s->length+1);
 	MakeCString(address, SEQ_PTR(x)->base[1] );
 
 	addr.s_addr = inet_addr(address);
@@ -319,8 +316,10 @@ object eusock_socket(object x)
 	int af, type, protocol;
 	SOCKET sock;
 
-	af = SEQ_PTR(x)->base[1];
-	type = SEQ_PTR(x)->base[2];
+	eusock_ensure_init();
+
+	af       = SEQ_PTR(x)->base[1];
+	type     = SEQ_PTR(x)->base[2];
 	protocol = SEQ_PTR(x)->base[3];
 
 	sock = socket(af, type, protocol);
@@ -373,12 +372,14 @@ object eusock_connect(object x)
 	s1_ptr address_s;
 	char *address;
 
+	eusock_ensure_init();
+
 	s = SEQ_PTR(x)->base[2];
 	addr.sin_family = SEQ_PTR(x)->base[1];
-	addr.sin_port = htons(SEQ_PTR(x)->base[4]);
+	addr.sin_port   = htons(SEQ_PTR(x)->base[4]);
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
-	address = EMalloc(address_s->length+1);
+	address   = EMalloc(address_s->length+1);
 	MakeCString(address, SEQ_PTR(x)->base[3]);
 
 	addr.sin_addr.s_addr = inet_addr(address);
@@ -412,11 +413,11 @@ object eusock_send(object x)
 	s1_ptr buf_s;
 	char *buf;
 
-	s = SEQ_PTR(x)->base[1];
+	s     = SEQ_PTR(x)->base[1];
 	flags = SEQ_PTR(x)->base[3];
 
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
-	buf = EMalloc(buf_s->length+1);
+	buf   = EMalloc(buf_s->length+1);
 	MakeCString(buf, SEQ_PTR(x)->base[2]);
 
 	result = send(s, buf, buf_s->length, flags);
@@ -441,7 +442,7 @@ object eusock_recv(object x)
 	int flags, result;
 	char buf[BUFF_SIZE];
 
-	s = SEQ_PTR(x)->base[1];
+	s     = SEQ_PTR(x)->base[1];
 	flags = SEQ_PTR(x)->base[2];
 
 	result = recv(s, buf, BUFF_SIZE, flags);
@@ -476,17 +477,17 @@ object eusock_bind(object x)
 
 	struct sockaddr_in service;
 
-	s = SEQ_PTR(x)->base[1];
+	s      = SEQ_PTR(x)->base[1];
 	family = SEQ_PTR(x)->base[2];
-	port = SEQ_PTR(x)->base[4];
+	port   = SEQ_PTR(x)->base[4];
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
-	address = EMalloc(address_s->length+1);
+	address   = EMalloc(address_s->length+1);
 	MakeCString(address, SEQ_PTR(x)->base[3] );
 
-	service.sin_family = family;
+	service.sin_family      = family;
 	service.sin_addr.s_addr = inet_addr(address);
-	service.sin_port = htons(port);
+	service.sin_port        = htons(port);
 
 	result = bind(s, (SOCKADDR *) &service, sizeof(service));
 
@@ -529,7 +530,7 @@ object eusock_accept(object x)
 	s1_ptr client_seq;
 
 	addr_len = sizeof(addr);
-	client = accept(SEQ_PTR(x)->base[1], &addr, &addr_len);
+	client   = accept(SEQ_PTR(x)->base[1], &addr, &addr_len);
 
 	if (client == INVALID_SOCKET)
 	{
@@ -552,12 +553,12 @@ object eusock_getsockopt(object x)
 	SOCKET s;
 	int level, optname, optlen, optval;
 
-	optlen = sizeof(int);
-	s = SEQ_PTR(x)->base[1];
-	level = SEQ_PTR(x)->base[2];
+	optlen  = sizeof(int);
+	s       = SEQ_PTR(x)->base[1];
+	level   = SEQ_PTR(x)->base[2];
 	optname = SEQ_PTR(x)->base[3];
 
-	if (getsockopt(s, level, optname, (char *) &optval, optlen) == SOCKET_ERROR)
+	if (getsockopt(s, level, optname, (char *) &optval, &optlen) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
@@ -574,11 +575,11 @@ object eusock_setsockopt(object x)
 	SOCKET s;
 	int level, optname, optlen, optval;
 
-	optlen = sizeof(int);
-	s = SEQ_PTR(x)->base[1];
-	level = SEQ_PTR(x)->base[2];
+	optlen  = sizeof(int);
+	s       = SEQ_PTR(x)->base[1];
+	level   = SEQ_PTR(x)->base[2];
 	optname = SEQ_PTR(x)->base[3];
-	optval = SEQ_PTR(x)->base[4];
+	optval  = SEQ_PTR(x)->base[4];
 
 	if (setsockopt(s, level, optname, (char *) &optval, &optlen) == SOCKET_ERROR)
 	{
@@ -586,6 +587,15 @@ object eusock_setsockopt(object x)
 	}
 
 	return optval;
+}
+
+/*
+ * select({ socket, ... }, timeout)
+ */
+
+object eusock_select(object x)
+{
+	return ATOM_M1;
 }
 
 #endif // ifndef EDOS

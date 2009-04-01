@@ -8,24 +8,22 @@ test_equal("getservbyname http", { "http", "tcp", 80 }, getservbyname("http", "t
 test_equal("getservbyname ftp", { "ftp", "tcp", 21 }, getservbyname("ftp", "tcp"))
 test_equal("getservbyname telnet", { "telnet", "tcp", 23}, getservbyname("telnet", "tcp"))
 
-test_true("is_inetaddr 1", is_inetaddr("127.0.0.1"))
-test_true("is_inetaddr 2", is_inetaddr("127.0.0.1:100"))
-test_false("is_inetaddr 3", is_inetaddr("john doe"))
-test_false("is_inetaddr 4", is_inetaddr("127.0.0.1:100.5"))
+test_true( "is_inetaddr #1", is_inetaddr("127.0.0.1"))
+test_true( "is_inetaddr #2", is_inetaddr("0.0.0.0"))
+test_true( "is_inetaddr #3", is_inetaddr("127.0.0.1:100"))
+test_true( "is_inetaddr #3", is_inetaddr("155.212.244.8"))
+test_false("is_inetaddr #4", is_inetaddr("john doe"))
+test_false("is_inetaddr #5", is_inetaddr("127.0.0.1:100.5"))
+test_false("is_inetaddr #6", is_inetaddr("327.0.0.1"))
+test_false("is_inetaddr #7", is_inetaddr("1.256.0.1"))
+test_false("is_inetaddr #8", is_inetaddr("1.-18.0.1"))
+
+atom socket = new_socket(AF_INET, SOCK_STREAM, 0)
+test_equal("get_socket_option #1", 0, get_socket_options(socket, SOL_SOCKET, SO_DEBUG))
+test_equal("set_socket_option #1", 1, set_socket_options(socket, SOL_SOCKET, SO_DEBUG, 1))
+test_equal("get_socket_option #2", 1, get_socket_options(socket, SOL_SOCKET, SO_DEBUG))
 
 ifdef SOCKET_TESTS then
-	--
-	-- delay
-	--
-	ifdef not OSX then
-		atom t = time()
-		_ = delay(120)
-		test_true("delay 100", time() - t > 0.1)	
-	elsedef
-		test_fail("delay 100 causes machine fault on OS X")
-	end ifdef
-	
-
 	--
 	-- testing both client and server in this case as the sever
 	-- is written in euphoria as well
@@ -39,7 +37,6 @@ ifdef SOCKET_TESTS then
 	any_key("Press any key when you are ready")
 	puts(1, "===============================\n")
 
-	atom socket = new_socket(AF_INET, SOCK_STREAM, 0)
 	for i = 1 to 4 do
 		_ = connect(AF_INET, socket, "127.0.0.1:5000") 
 		if _ != -1 then
@@ -72,15 +69,12 @@ ifdef SOCKET_TESTS then
 		
 		_ = send(socket, "quit\n", 0)
 	end if
+end ifdef
 
-	test_equal("get_socket_option #1", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
-	test_equal("set_socket_option #1", 1, set_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE, 1))
-	test_equal("get_socket_option #2", 1, get_socket_options(socket, SOL_SOCKET, SO_KEEPALIVE))
+test_equal("close", 1, close_socket(socket))
 
-	test_equal("close", 1, close_socket(socket))
-elsedef
-    puts(2, "Warning: all socket tests were not run, use -D SOCKET_TESTS for full test\n")
+ifdef not SOCKET_TESTS then
+    puts(2, " WARNING: all socket tests were not run, use -D SOCKET_TESTS for full test\n")
 end ifdef
 
 test_report()
-
