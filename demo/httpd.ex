@@ -51,13 +51,46 @@ constant ERROR_404 = #$
 </html>
 $
 
+procedure usage_message()
+	puts(1, "  Usage: httpd.ex [-bind ip_address:port] [-root document_root]\n\n")
+end procedure
+
 procedure log(integer level, sequence message, sequence values = {})
 	if level <= LogLevel then
 		puts(1, sprintf(message & "\n", values))
 	end if
 end procedure
 
-procedure handle_request(atom server, sequence client)
+function do_dir(sequence path, sequence doc_root)
+	sequence data = sprintf("<html><head><title>%s</title></head><body><h1>%s</h1>", {
+		path, path })
+
+	data &= "<table><tr><th>Name</th><th>Size</th><th>Date</th></tr>"
+
+	sequence files = dir(doc_root & path)
+	for i = 1 to length(files) do
+		if equal(files[i][D_NAME], ".") or
+				(equal(path, "/") and equal(files[i][D_NAME], ".."))
+		then
+			continue
+		end if
+
+		if find('d', files[i][D_ATTRIBUTES]) then
+			files[i][D_NAME] &= "/"
+		end if
+
+		data &= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%d</td><td>%04d-%02d-%02d %02d:%02d:%02d</td></tr>", {
+			files[i][D_NAME], files[i][D_NAME], files[i][D_SIZE],
+			files[i][D_YEAR], files[i][D_MONTH], files[i][D_DAY],
+			files[i][D_HOUR], files[i][D_MINUTE], files[i][D_SECOND]
+		})
+	end for
+
+	data &= "</table></body></html>"
+	return data
+end function
+
+procedure handle_request(atom server, sequence client, sequence doc_root=".")
 	atom client_sock = client[1]
 	sequence client_addr = client[2]
 	sequence request = split(trim(sock:recv(client_sock, 0)))
@@ -73,15 +106,20 @@ procedure handle_request(atom server, sequence client)
 		version = request[3]
 	end if
 
-	sequence fname = "." & path
-	if fname[$] = '/' then
+	sequence fname = doc_root & path
+	if fname[$] = '/' and file_exists(fname & "index.html") then
 		fname &= "index.html"
 	end if
 
 	sequence data, content_type
 	integer result_code
 
-	if not file_exists(fname) then
+	if fname[$] = '/' then
+		-- already checked for a index.html, let's give them a dir listing
+		result_code = 200
+		content_type = "text/html"
+		data = do_dir(path, doc_root)
+	elsif not file_exists(fname) then
 		result_code = 404
 		content_type = "text/html"
 		data = sprintf(ERROR_404, { path })
@@ -102,16 +140,31 @@ end procedure
 
 procedure server()
 	sequence args = command_line()
-	sequence bind_addr
+	sequence bind_addr = "127.0.0.1:8080", doc_root = "."
 
-	if length(args) < 3 then
-		bind_addr = "127.0.0.1:8080"
-	else
-		bind_addr = args[3]
+	if length(args) = 2 then
+		puts(1, "NOTE: you can customise httpd.ex:\n")
+		usage_message()
 	end if
 
+	for i = 3 to length(args) by 2 do
+		switch args[i] do
+			case "-bind":
+				bind_addr = args[i+1]
+				break
+
+			case "-root":
+				doc_root = args[i+1]
+				break
+
+			case else
+				usage_message()
+				abort(1)
+		end switch
+	end for
+
 	atom server = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0),
-	  result = sock:bind(server, sock:AF_INET, bind_addr)
+		result = sock:bind(server, sock:AF_INET, bind_addr)
 	  
 	if result != 0 then
 		crash("Could not bind %s, error=%d", { bind_addr, result })
@@ -121,7 +174,7 @@ procedure server()
 	while sock:listen(server, 10) = 0 do
 		object client = sock:accept(server)
 		if sequence(client) then
-			handle_request(server, client)
+			handle_request(server, client, doc_root)
 			_ = sock:close_socket(client[1])
 		end if
 	end while
@@ -132,7 +185,6 @@ end procedure
 sequence typs = {
 	{ "htm",  "text/html" },
 	{ "html", "text/html" },
-	{ "txt",  "text/plain" },
 	{ "css",  "text/css" },
 	{ "png",  "image/png" },
 	{ "jpg",  "image/jpeg" },
@@ -144,4 +196,3 @@ for i = 1 to length(typs) do
 end for
 
 server()
-
