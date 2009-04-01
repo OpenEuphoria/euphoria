@@ -391,8 +391,8 @@ procedure OutputIL()
 		-- first, copy backend[w].exe
 		
 		eu_dir = getenv("EUDIR")
-		if atom(eudir) then
-			eudir = SLASH & "euphoria" -- Unix?
+		if atom(eu_dir) then
+			eu_dir = SLASH & "euphoria" -- Unix?
 		end if
 
 		source_dir = command_line()
