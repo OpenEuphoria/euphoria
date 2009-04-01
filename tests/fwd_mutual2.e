@@ -29,10 +29,10 @@ fwd_sub_assign = { 0 }
 fwd_sub_assign[1] = 1
 
 function fwd_switch( object x )
-	switch x do
-		case FWD_CASE_1:
+	switch x with fallthru do
+		case FWD_CASE_1 then
 			return 1
-		case FWD_CASE_2:
+		case FWD_CASE_2 then
 			return 2
 		case else
 			return 0

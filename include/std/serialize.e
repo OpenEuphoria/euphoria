@@ -57,26 +57,26 @@ function deserialize_file(integer fh, integer c)
 		end if
 	end if
 	
-	switch c do
-		case I2B:
+	switch c with fallthru do
+		case I2B then
 			return getc(fh) +
 				#100 * getc(fh) +
 				MIN2B
 
-		case I3B:
+		case I3B then
 			return getc(fh) +
 				#100 * getc(fh) +
 				#10000 * getc(fh) +
 				MIN3B
 
-		case I4B:
+		case I4B then
 			return get4(fh) + MIN4B
 
-		case F4B:
+		case F4B then
 			return float32_to_atom({getc(fh), getc(fh),
 				getc(fh), getc(fh)})
 
-		case F8B:
+		case F8B then
 			return float64_to_atom({getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh),
@@ -125,26 +125,26 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 		end if
 	end if
 	
-	switch c do
-		case I2B:
+	switch c with fallthru do
+		case I2B then
 			return {sdata[pos] +
 				#100 * sdata[pos+1] +
 				MIN2B, pos + 2}
 
-		case I3B:
+		case I3B then
 			return {sdata[pos] +
 				#100 * sdata[pos+1] +
 				#10000 * sdata[pos+2] +
 				MIN3B, pos + 3}
 
-		case I4B:
+		case I4B then
 			return {getp4(sdata, pos) + MIN4B, pos + 4}
 
-		case F4B:
+		case F4B then
 			return {float32_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3]}), pos + 4}
 
-		case F8B:
+		case F8B then
 			return {float64_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3],
 				sdata[pos+4], sdata[pos+5],

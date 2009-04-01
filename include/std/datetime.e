@@ -983,8 +983,8 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 		if fmt[fpos] = '%' then
 			fpos += 1
 
-			switch fmt[fpos] do
-				case 'Y':
+			switch fmt[fpos] with fallthru do
+				case 'Y' then
 					epos = spos + 3
 					year = parse_get_value(val, spos, epos)
 					if year = -1 then
@@ -993,7 +993,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					spos = epos
 					break
 
-				case 'm':
+				case 'm' then
 					epos = spos + 1
 					month = parse_get_value(val, spos, epos)
 					if month = -1 then
@@ -1002,7 +1002,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					spos = epos
 					break
 
-				case 'd':
+				case 'd' then
 					epos = spos + 1
 					day = parse_get_value(val, spos, epos)
 					if day = -1 then
@@ -1011,7 +1011,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					spos = epos
 					break
 
-				case 'H':
+				case 'H' then
 					epos = spos + 1
 					hour = parse_get_value(val, spos, epos)
 					if hour = -1 then
@@ -1020,7 +1020,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					spos = epos
 					break
 
-				case 'M':
+				case 'M' then
 					epos = spos + 1
 					minute = parse_get_value(val, spos, epos)
 					if minute = -1 then
@@ -1029,7 +1029,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					spos = epos
 					break
 
-				case 'S':
+				case 'S' then
 					epos = spos + 1
 					second = parse_get_value(val, spos, epos)
 					if second = -1 then

@@ -23,7 +23,7 @@ constant SWITCH = { 1, 2, "a", 3, "sdflkjasdfglkj" }
 sequence s
 s = {}
 for i = 1 to length( SWITCH ) label "top" do
-	switch SWITCH[i] do
+	switch SWITCH[i] with fallthru do
 		case 1 then
 			s = append( s, SWITCH[1] )
 		case 2 then
@@ -66,12 +66,12 @@ test_false( "no matching case", zero )
 integer ns = 0
 enum A,B,C
 procedure nst(object pA, object pB = -1)
-switch pA do
+switch pA with fallthru do
     case C then
         ns = 1
         break
     case B then
-    	switch pB do
+    	switch pB with fallthru do
     		case C then
         		ns = 2
         		break
@@ -96,7 +96,7 @@ constant cases = - {1, "345", 2, C}
 constant TWO = 2, NEGATIVE_3 = -3
 sequence negative_case = {}
 for i = 1 to length( cases ) do
-	switch cases[i] do
+	switch cases[i] with fallthru do
 		case -1 then
 			negative_case = append( negative_case,-1 )
 			break
@@ -115,7 +115,7 @@ end for
 test_equal( "switch with negative cases",  cases, negative_case )
 
 integer static_int
-switch 2 do
+switch 2 with fallthru do
 	case 2 then
 		static_int = 2
 		break
@@ -125,7 +125,7 @@ end switch
 test_equal( "static int", 2, static_int )
 
 integer z = 0
-switch "foo" do
+switch "foo" with fallthru do
 	case 1 then
 		z = 1
 		break
@@ -136,7 +136,7 @@ test_equal( "int cases, sequence switch with else", 2, z )
 
 function int_switch1( object cond )
 	integer ret = 0
-	switch cond do
+	switch cond with fallthru do
 		case 1 then
 			ret = 1
 			break
@@ -157,7 +157,7 @@ test_equal( "int_switch1( \"foo\" )", 3, z )
 
 function int_switch2( object cond )
 	integer ret = 0
-	switch cond do
+	switch cond with fallthru do
 		case 1 then
 			ret = 1
 			break
@@ -175,7 +175,7 @@ test_equal( "int_switch2 -- check for sequence optimization with case else", 3, 
 
 function int_switch3( object cond )
 	integer ret = 0
-	switch cond do
+	switch cond with fallthru do
 		case 1 then
 			ret = 1
 			break
@@ -191,7 +191,7 @@ test_equal( "int_switch3 -- check for sequence optimization without case else", 
 
 function int_switch4( object cond )
 	integer ret = 0
-	switch cond do
+	switch cond with fallthru do
 		case 1 then
 			ret = 1
 			break
@@ -210,7 +210,7 @@ test_equal( "int_switch4 -- detect integer cond through r_id", 1, z )
 function int_switch5( object cond )
 	integer ret = 0
 	goto "foo"
-	switch cond do
+	switch cond with fallthru do
 		case 1 then
 		label "foo"
 			ret = 1
@@ -228,7 +228,7 @@ test_equal( "int_switch5: goto label exists (forward goto), don't optimize away 
 function int_switch6( object cond )
 	integer ret = 0
 	
-	switch cond do
+	switch cond with fallthru do
 		case 1 then
 		label "foo"
 			ret = 1
@@ -254,7 +254,7 @@ constant
 	E = {1,2,"3"}
 
 function rt_int_switch( object x )
-	switch x do
+	switch x with fallthru do
 		case A then
 			return A
 		case D then
@@ -265,7 +265,7 @@ function rt_int_switch( object x )
 end function
 
 function rt_switch( object x )
-	switch x do
+	switch x fallthru do
 		case D then
 			return D
 		case E then

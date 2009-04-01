@@ -287,26 +287,26 @@ function decompress(integer c)
 		end if
 	end if
 
-	switch c do
-		case I2B:
+	switch c with fallthru do
+		case I2B then
 			return getc(current_db) +
 				#100 * getc(current_db) +
 				MIN2B
 
-		case I3B:
+		case I3B then
 			return getc(current_db) +
 				#100 * getc(current_db) +
 				#10000 * getc(current_db) +
 				MIN3B
 
-		case I4B:
+		case I4B then
 			return get4() + MIN4B
 
-		case F4B:
+		case F4B then
 			return float32_to_atom({getc(current_db), getc(current_db),
 				getc(current_db), getc(current_db)})
 
-		case F8B:
+		case F8B then
 			return float64_to_atom({getc(current_db), getc(current_db),
 				getc(current_db), getc(current_db),
 				getc(current_db), getc(current_db),

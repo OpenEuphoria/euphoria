@@ -118,36 +118,35 @@ global procedure common_options( integer option, integer ix )
 		end if
 	end if
 
-	switch option do
-	case  EUINC_OPTION:
+	switch option with fallthru do
+	case  EUINC_OPTION then
 		sequence new_args = load_euinc_conf( param )
 		Argv = Argv[1 .. ix] & new_args & Argv[ix + 1 .. $]
 		Argc += length(new_args)
 		break
 
-	case  INCDIR_OPTION:
+	case  INCDIR_OPTION then
 		add_include_directory( param )
 		break
 
-	case  DEFINE_OPTION:
+	case  DEFINE_OPTION then
 		OpDefines &= {param}
 		break
 
-	case  TEST_OPTION:
+	case  TEST_OPTION then
 		test_only = 1
 		batch_job = 1
 		break
 
-	case  BATCH_OPTION:
+	case  BATCH_OPTION then
 		batch_job = 1
 		break
 
-	case  HELP_OPTION:
-	case  HELP2_OPTION:
+	case  HELP_OPTION, HELP2_OPTION then
 		show_usage()
 		break
 
-	case  WARNING_OPTION:
+	case  WARNING_OPTION then
 		n = find(param ,warning_names)
 		if n != 0 then
 			if option_W = 1 then
@@ -160,7 +159,7 @@ global procedure common_options( integer option, integer ix )
 		end if
 		break
 
-	case  WARNING_EXCLUDE_OPTION:
+	case  WARNING_EXCLUDE_OPTION then
 		n = find(param, warning_names)
 		if n != 0 then
 			if option_W = -1 then
@@ -173,7 +172,7 @@ global procedure common_options( integer option, integer ix )
 		end if
 		break
 
-	case  STRICT_OPTION:
+	case  STRICT_OPTION then
 		Strict_is_on = 1
 		break
 

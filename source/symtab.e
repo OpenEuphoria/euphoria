@@ -468,8 +468,8 @@ global procedure InitSymTab()
 	        if sequence(si[j]) then
 	            sj = si[j] -- a sequence of tokens
 				for ij=1 to length(sj) do
-	                switch sj[ij][T_ID] do
-	                    case ATOM: -- must crate a lasting temp
+	                switch sj[ij][T_ID] with fallthru do
+	                    case ATOM then -- must create a lasting temp
 	                    	if integer(sj[ij][T_SYM]) then
 								st_index = NewIntSym(sj[ij][T_SYM])
 							else
@@ -478,15 +478,15 @@ global procedure InitSymTab()
 							SymTab[st_index][S_SCOPE] = IN_USE -- TempKeep()
 							sj[ij][T_SYM] = st_index
 							break
-						case STRING: -- same
+						case STRING then -- same
 	                    	st_index = NewStringSym(sj[ij][T_SYM])
 							SymTab[st_index][S_SCOPE] = IN_USE -- TempKeep()
 							sj[ij][T_SYM] = st_index
 							break
-						case BUILT_IN: -- name of a builtin in econd field
+						case BUILT_IN then -- name of a builtin in econd field
                             sj[ij] = keyfind(sj[ij][T_SYM],-1)
 							break
-						case DEF_PARAM:
+						case DEF_PARAM then
 							sj[ij][T_SYM] &= fixups[i]
 					end switch
 				end for
@@ -560,18 +560,18 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 				SymTab[p][attribute] += 1
 			else
 				scope = SymTab[p][S_SCOPE]
-				switch scope do
-					case SC_PUBLIC:
+				switch scope with fallthru do
+					case SC_PUBLIC then
 						if and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[current_file_no][sym_file] ) then
 							SymTab[p][attribute] += 1
 						end if
 						break
-					case SC_EXPORT:
+					case SC_EXPORT then
 						if not and_bits( DIRECT_INCLUDE, include_matrix[current_file_no][sym_file] ) then
 							break
 						end if
 						-- fallthrough
-					case SC_GLOBAL:
+					case SC_GLOBAL then
 						SymTab[p][attribute] += 1
 						
 				end switch
@@ -645,15 +645,15 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 
 				scope = SymTab[st_ptr][S_SCOPE]
 
-				switch scope do
-				case SC_OVERRIDE:
+				switch scope with fallthru do
+				case SC_OVERRIDE then
 					dup_overrides &= st_ptr
 					break
 					
-				case SC_PREDEF:
+				case SC_PREDEF then
 					st_builtin = st_ptr
 					break
-				case SC_GLOBAL:
+				case SC_GLOBAL then
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file
 
@@ -674,8 +674,8 @@ global function keyfind(sequence word, integer file_no, integer scanning_file = 
 					break
 					-- continue looking for more globals with same name
 
-				case SC_EXPORT:
-				case SC_PUBLIC:
+				case SC_EXPORT then
+				case SC_PUBLIC then
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found export in current file
 						if BIND then
@@ -718,7 +718,7 @@ ifdef STDDEBUG then
 					end if
 end ifdef
 					break
-				case SC_LOCAL:
+				case SC_LOCAL then
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found local in current file
 
@@ -761,14 +761,14 @@ end ifdef
 					elsif file_no = tok_file then
 						good = 1
 					else
-						switch scope do
-						case SC_GLOBAL:
+						switch scope with fallthru do
+						case SC_GLOBAL then
 							good = and_bits( ANY_INCLUDE, include_matrix[file_no][tok_file] )
 							break
-						case SC_PUBLIC:
+						case SC_PUBLIC then
 							good = and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file_no][tok_file] )
 							break
-						case SC_EXPORT:
+						case SC_EXPORT then
 							good = and_bits( DIRECT_INCLUDE, include_matrix[file_no][tok_file] )
 						end switch
 					end if

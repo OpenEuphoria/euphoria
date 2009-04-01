@@ -1423,18 +1423,18 @@ function format_symbol( sequence symbol )
 	if symbol[S_MODE] = M_TEMP then
 		symbol[S_USAGE] = TEMP_USAGES[symbol[S_USAGE]]
 	else
-		switch symbol[S_USAGE] do
-		case U_UNUSED:
+		switch symbol[S_USAGE] with fallthru do
+		case U_UNUSED then
 			symbol[S_USAGE] = "U_UNUSED"
 			break
-		case U_DELETED:
+		case U_DELETED then
 			symbol[S_USAGE] = "U_DELETED"
 			break
-		case U_READ:
-		case U_WRITTEN:
+		case U_READ then
+		case U_WRITTEN then
 			symbol[S_USAGE] = USAGES[symbol[S_USAGE]]
 			break
-		case 3:
+		case 3 then
 			symbol[S_USAGE] = "U_READ + U_WRITTEN"
 			break
 		case else

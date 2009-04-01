@@ -336,9 +336,9 @@ function inline_op( integer pc )
 		return adjust_il( pc, op )
 		
 	else
-		switch op do
-			case CONCAT_N:
-			case RIGHT_BRACE_N:
+		switch op with fallthru do
+			case CONCAT_N then
+			case RIGHT_BRACE_N then
 				
 				if check_for_param( pc + 2 + inline_code[pc+1] ) then
 					-- don't need to do anything here
@@ -415,15 +415,15 @@ export procedure check_inline( symtab_index sub )
 	while pc < length( inline_code ) do
 	
 		integer op = inline_code[pc]
-		switch op do
-			case PROC_FORWARD:
-			case FUNC_FORWARD:
+		switch op with fallthru do
+			case PROC_FORWARD then
+			case FUNC_FORWARD then
 				defer()
 				restore_code()
 				return
 				
-			case PROC:
-			case FUNC:
+			case PROC then
+			case FUNC then
 				symtab_index routine = inline_code[pc+1]
 				if routine = sub then
 					-- it's recursive, so can't be inlined (don't defer)
@@ -445,7 +445,7 @@ export procedure check_inline( symtab_index sub )
 				
 				break
 			
-			case SWITCH_RT:
+			case SWITCH_RT then
 				sequence values = SymTab[inline_code[pc+2]][S_OBJ]
 				for i = 1 to length( values ) do
 					if sequence( values[i] ) then
@@ -531,8 +531,8 @@ end procedure
 
 procedure fixup_special_op( integer pc )
 	integer op = inline_code[pc]
-	switch op do
-		case SWITCH_RT:
+	switch op with fallthru do
+		case SWITCH_RT then
 			fix_switch_rt( pc )
 			break
 	end switch
@@ -701,10 +701,10 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	while length(inline_code) > check_pc do
 		integer op = inline_code[check_pc]
 		
-		switch op do
-			case ATOM_CHECK:
-			case SEQUENCE_CHECK:
-			case INTEGER_CHECK:
+		switch op with fallthru do
+			case ATOM_CHECK then
+			case SEQUENCE_CHECK then
+			case INTEGER_CHECK then
 				symtab_index sym = get_param_sym( check_pc + 1 )
 				
 				if is_literal( sym ) then
@@ -740,7 +740,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					check_pc += 2
 				end if
 				continue
-			case STARTLINE:
+			case STARTLINE then
 				check_pc += 2
 				continue
 			
@@ -752,29 +752,29 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	for pc = 1 to length( inline_code ) do
 		if sequence( inline_code[pc] ) then
 			integer inline_type = inline_code[pc][1]
-			switch inline_type do
-				case INLINE_TEMP:
+			switch inline_type with fallthru do
+				case INLINE_TEMP then
 					replace_temp( pc )
 					break
-				case INLINE_PARAM:
+				case INLINE_PARAM then
 					replace_param( pc )
 					break
-				case INLINE_ADDR:
+				case INLINE_ADDR then
 					inline_code[pc] = inline_start + inline_code[pc][2]
 					break
-				case INLINE_TARGET:
+				case INLINE_TARGET then
 					inline_code[pc] = inline_target
 					add_inline_target( pc + inline_start )
 					break
-				case INLINE_SUB:
+				case INLINE_SUB then
 					inline_code[pc] = CurrentSub
 					break
--- 				case INLINE_SWITCH_TABLE:
+-- 				case INLINE_SWITCH_TABLE then
 -- 					symtab_index new_table = NewStringSym( {-1, length(SymTab) } )
 -- 					SymTab[new_table][S_OBJ] = SymTab[inline_code[pc][2]][S_OBJ]
 -- 					inline_code[pc] = new_table
 -- 					break
-				case INLINE_VAR:
+				case INLINE_VAR then
 					replace_var( pc )
 					break
 				case else

@@ -287,16 +287,16 @@ end procedure
 
 function expected_name( integer id )
 	
-	switch id do
-		case PROC:
-		case PROC_FORWARD:
+	switch id with fallthru do
+		case PROC then
+		case PROC_FORWARD then
 			return "a procedure"
 			
-		case FUNC:
-		case FUNC_FORWARD:
+		case FUNC then
+		case FUNC_FORWARD then
 			return "a function"
 		
-		case VARIABLE:
+		case VARIABLE then
 			return "a variable, constant or enum"
 		case else
 			return "something"
@@ -574,9 +574,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		integer fr_type  = fr[FR_TYPE]
 		integer sym_tok
 		
-		switch fr_type label "fr_type" do
-			case PROC:
-			case FUNC:
+		switch fr_type with fallthru label "fr_type" do
+			case PROC then
+			case FUNC then
 				
 				sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
 				if sym_tok = TYPE then
@@ -585,9 +585,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				if sym_tok != fr_type then
 					forward_error( tok, ref )
 				end if
-				switch sym_tok do
-					case PROC:
-					case FUNC:
+				switch sym_tok with fallthru do
+					case PROC then
+					case FUNC then
 						patch_forward_call( tok, ref )
 						break "fr_type"
 												
@@ -596,35 +596,35 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 						
 				end switch
 				
-			case VARIABLE:
+			case VARIABLE then
 				sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
 				if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 					errors &= ref
 					continue
 				end if
-				switch sym_tok do
-					case CONSTANT:
-					case ENUM:
-					case VARIABLE:
+				switch sym_tok with fallthru do
+					case CONSTANT then
+					case ENUM then
+					case VARIABLE then
 						patch_forward_variable( tok, ref )
 						break "fr_type"
 					case else
 						forward_error( tok, ref )
 				end switch
 
-			case TYPE_CHECK:
+			case TYPE_CHECK then
 				patch_forward_type_check( tok, ref )
 				break
 			
-			case GLOBAL_INIT_CHECK:
+			case GLOBAL_INIT_CHECK then
 				patch_forward_init_check( tok, ref )
 				break
 			
-			case CASE:
+			case CASE then
 				patch_forward_case( tok, ref )
 				break
 				
-			case TYPE:
+			case TYPE then
 				patch_forward_type( tok, ref )
 				break
 				

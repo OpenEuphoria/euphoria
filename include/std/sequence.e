@@ -863,17 +863,17 @@ public function add_item(object needle, sequence haystack, integer pOrder = 1)
 	if find(needle, haystack) then
 		return haystack
 	end if
-	switch pOrder do
-		case ADD_PREPEND:
+	switch pOrder with fallthru do
+		case ADD_PREPEND then
 			return prepend(haystack, needle)
 			
-		case ADD_APPEND:
+		case ADD_APPEND then
 			return append(haystack, needle)
 			
-		case ADD_SORT_UP:
+		case ADD_SORT_UP then
 			return sort(append(haystack, needle))
 			
-		case ADD_SORT_DOWN:
+		case ADD_SORT_DOWN then
 			return sort(append(haystack, needle), DESCENDING)
 
 	end switch

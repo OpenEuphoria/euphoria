@@ -1803,14 +1803,13 @@ global procedure GenerateUserRoutines()
 					-- declare the private vars 
 					while sp do
 						integer scope = SymTab[sp][S_SCOPE]
-						switch scope do
-							case SC_LOOP_VAR:
-							case SC_UNDEFINED:
+						switch scope with fallthru do
+							case SC_LOOP_VAR, SC_UNDEFINED then
 								-- don't need to declare this
 								-- an undefined var is a forward reference
 								break
 						
-							case SC_PRIVATE:
+							case SC_PRIVATE then
 								c_stmt0("int ")
 								c_puts("_")
 								c_puts(ok_name(SymTab[sp][S_NAME]))

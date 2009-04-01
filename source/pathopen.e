@@ -317,20 +317,20 @@ global function load_euinc_conf( sequence file )
 		
 		if length(arg) > 0 then
 			integer needed = 0
-			switch section do
-				case "all":
+			switch section with fallthru do
+				case "all" then
 					needed = 1
 					break
 					
-				case "translate":
+				case "translate" then
 					needed = TRANSLATE
 					break
 					
-				case "interpret":
+				case "interpret" then
 					needed = INTERPRET
 					break
 					
-				case "bind":
+				case "bind" then
 					needed = BIND
 					break
 					

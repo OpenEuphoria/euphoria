@@ -86,10 +86,10 @@ test_pass( "shift when pc = addr" )
 
 with inline
 function int_switch( integer i )
-	switch i do
-		case 1:
+	switch i with fallthru do
+		case 1 then
 			return 1
-		case 2:
+		case 2 then
 			return 2
 		case else
 			return 0

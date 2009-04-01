@@ -6,9 +6,9 @@ integer foo = 0
 ifdef FOO then
 	integer bar = 0
 	for i = 1 to 3 do
-		switch i do
-			case 1:
-			case 2:
+		switch i with fallthru do
+			case 1 then
+			case 2 then
 			case else
 				bar = i
 		end switch

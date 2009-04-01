@@ -912,12 +912,12 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 		tok = next_token()
 		integer id = tok[T_ID]
 		
-		switch id do
-			case COMMA:
+		switch id with fallthru do
+			case COMMA then
 				emit_opnd( 0 ) -- clean this up later
 				args += 1
 				break
-			case RIGHT_ROUND:
+			case RIGHT_ROUND then
 				exit
 			case else
 				putback( tok )
@@ -926,10 +926,10 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 				
 				tok = next_token()
 				id = tok[T_ID]
-				switch id do
-					case RIGHT_ROUND:
+				switch id with fallthru do
+					case RIGHT_ROUND then
 						exit
-					case COMMA:
+					case COMMA then
 						break
 					case else
 						CompileErr("expected ',' or ')'")
@@ -1108,9 +1108,8 @@ procedure Factor()
 		tok = read_recorded_token(tok[T_SYM])
 		id = tok[T_ID]
 	end if
-	switch id label "factor" do
-		case VARIABLE:
-		case QUALIFIED_VARIABLE:
+	switch id with fallthru label "factor" do
+		case VARIABLE, QUALIFIED_VARIABLE:
 		
 			sym = tok[T_SYM]
 			if SymTab[sym][S_SCOPE] = SC_UNDEFINED then
@@ -1169,7 +1168,7 @@ procedure Factor()
 			short_circuit += 1
 			break
 			
-		case DOLLAR:
+		case DOLLAR then
 			if length(current_sequence) then
 				emit_op(DOLLAR)
 			else
@@ -1177,30 +1176,27 @@ procedure Factor()
 			end if
 			break
 			
-		case ATOM:
+		case ATOM then
 			emit_opnd(tok[T_SYM])
 			break
 			
-		case LEFT_BRACE:
+		case LEFT_BRACE then
 			n = Expr_list()
 			tok_match(RIGHT_BRACE)
 			op_info1 = n
 			emit_op(RIGHT_BRACE_N)
 			break
 			
-		case STRING:
+		case STRING then
 			emit_opnd(tok[T_SYM])
 			break
 
-		case LEFT_ROUND:
+		case LEFT_ROUND then
 			call_proc(forward_expr, {})
 			tok_match(RIGHT_ROUND)
 			break
 		
-		case FUNC:
-		case TYPE:
-		case QUALIFIED_FUNC:
-		case QUALIFIED_TYPE:
+		case FUNC, TYPE, QUALIFIED_FUNC, QUALIFIED_TYPE then
 			Function_call( tok )
 			break
 			
@@ -1905,8 +1901,8 @@ function finish_block_header(integer opcode)
 	if tok[T_ID] = WITH or tok[T_ID] = WITHOUT then
 		integer is_with = tok[T_ID] = WITH
 	    tok = next_token()
-		switch tok[T_ID] do
-		    case ENTRY:
+		switch tok[T_ID] with fallthru do
+		    case ENTRY then
 		    	if not is_with then
 		    		CompileErr("`without entry` is not valid")
 		    	end if
@@ -1918,7 +1914,7 @@ function finish_block_header(integer opcode)
 			    has_entry = 1
 				break
 				
-			case FALLTHRU:
+			case FALLTHRU then
 				if not opcode = SWITCH then
 					CompileErr("`with fallthru` is only valid in a switch statement")
 				end if
@@ -2711,13 +2707,11 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 
 	scope = SymTab[s][S_SCOPE]
 	switch scope do
-		case SC_PRIVATE:
-		case SC_LOOP_VAR:
+		case SC_PRIVATE, SC_LOOP_VAR then
 			DefinedYet(s)
 			return s
 		
-		case SC_UNDEFINED:
-		case SC_MULTIPLY_DEFINED:
+		case SC_UNDEFINED, SC_MULTIPLY_DEFINED then
 			SymTab[s][S_SCOPE] = SC_PRIVATE
 			SymTab[s][S_VARNUM] = n
 			SymTab[s][S_VTYPE] = type_sym
@@ -2726,11 +2720,7 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 			end if
 			return s
 		
-		case SC_LOCAL:
-		case SC_GLOBAL:
-		case SC_PREDEF:
-		case SC_PUBLIC:
-		case SC_EXPORT:
+		case SC_LOCAL, SC_GLOBAL, SC_PREDEF, SC_PUBLIC, SC_EXPORT then
 			hashval = SymTab[s][S_HASHVAL]
 			t = buckets[hashval]
 			buckets[hashval] = NewEntry(SymTab[s][S_NAME], n, SC_PRIVATE,
@@ -3242,12 +3232,12 @@ procedure Statement_list()
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
-				switch forward[T_ID] do
-					case LEFT_ROUND:
+				switch forward[T_ID] with fallthru do
+					case LEFT_ROUND then
 						StartSourceLine( TRUE )
 						Forward_call( tok )
 						continue
-					case VARIABLE:
+					case VARIABLE then
 						putback( forward )
 						if param_num != -1 then
 							-- if we're in a routine, we need to know how much stack space will be required
@@ -3826,13 +3816,13 @@ global procedure real_parser(integer nested)
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
-				switch forward[T_ID] do
-					case LEFT_ROUND:
+				switch forward[T_ID] with fallthru do
+					case LEFT_ROUND then
 						StartSourceLine( TRUE )
 						Forward_call( tok )
 						continue
 						
-					case VARIABLE:
+					case VARIABLE then
 						putback( forward )
 						Global_declaration( tok[T_SYM], SC_LOCAL )
 						continue

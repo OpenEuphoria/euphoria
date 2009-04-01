@@ -2141,10 +2141,10 @@ end function
 
 public function has_unit(operation f, integer flags = SIDE_BOTH)
 	flags = and_bits(flags, SIDE_BOTH)
-    switch flags do
-    	case SIDE_LEFT:
+    switch flags with fallthru do
+    	case SIDE_LEFT then
     		return has_left_unit(f)
-    	case SIDE_RIGHT:
+    	case SIDE_RIGHT then
     		return has_right_unit(f)
     	case else
 			return has_unit_(f)

@@ -191,12 +191,12 @@ end function
 
 public procedure push(stack sk, object value)
 	-- Type checking ensures type is either FIFO or FILO
-	switch ram_space[sk][stack_type] do
-		case FIFO:
+	switch ram_space[sk][stack_type] with fallthru do
+		case FIFO then
 			ram_space[sk][data] = prepend(ram_space[sk][data], value)
 			break
 
-		case FILO:
+		case FILO then
 			ram_space[sk][data] = append(ram_space[sk][data], value)
 			break
 	end switch

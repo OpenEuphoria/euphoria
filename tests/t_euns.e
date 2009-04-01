@@ -36,11 +36,11 @@ include case_file.e
 
 sequence cf = repeat( 0, 2 )
 for i = 1 to 2 do
-	switch i do
-		case CASE_FILE:CASE_1:
+	switch i with fallthru do
+		case CASE_FILE:CASE_1 then
 			cf[i] = CASE_FILE:CASE_2
 			break
-		case CASE_FILE:CASE_2:
+		case CASE_FILE:CASE_2 then
 			cf[i] = CASE_FILE:CASE_1
 	end switch
 end for

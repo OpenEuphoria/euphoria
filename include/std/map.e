@@ -474,15 +474,15 @@ public function compare(map map_1_p, map map_2_p, integer scope_p = 'd')
 		return 0
 	end if
 	
-	switch scope_p do
-		case 'v':
-		case 'V':
+	switch scope_p with fallthru do
+		case 'v' then
+		case 'V' then
 			data_set_1_ = sort(values(map_1_p))
 			data_set_2_ = sort(values(map_2_p))
 			break
 			
-		case 'k':
-		case 'K':
+		case 'k' then
+		case 'K' then
 			data_set_1_ = sort(keys(map_1_p))
 			data_set_2_ = sort(keys(map_2_p))
 			break
@@ -682,32 +682,32 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		index_ = find(the_key_p, ram_space[the_map_p][key_buckets][bucket_])
 		if index_ > 0 then
 			-- The the_value_p already exists.
-			switch operation_p do
-				case PUT:
+			switch operation_p with fallthru do
+				case PUT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] = the_value_p
 					break
 					
-				case ADD:
+				case ADD then
 					ram_space[the_map_p][value_buckets][bucket_][index_] += the_value_p
 					break
 					
-				case SUBTRACT:
+				case SUBTRACT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] -= the_value_p
 					break
 					
-				case MULTIPLY:
+				case MULTIPLY then
 					ram_space[the_map_p][value_buckets][bucket_][index_] *= the_value_p
 					break
 					
-				case DIVIDE:
+				case DIVIDE then
 					ram_space[the_map_p][value_buckets][bucket_][index_] /= the_value_p
 					break
 					
-				case APPEND:
+				case APPEND then
 					ram_space[the_map_p][value_buckets][bucket_][index_] = append( ram_space[the_map_p][value_buckets][bucket_][index_], the_value_p )
 					break
 					
-				case CONCAT:
+				case CONCAT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] &= the_value_p
 					break					
 			end switch
@@ -771,32 +771,32 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			end if
 		end if
 		
-		switch operation_p do
-			case PUT:
+		switch operation_p with fallthru do
+			case PUT then
 				ram_space[the_map_p][value_list][index_] = the_value_p
 				break
 				
-			case ADD:
+			case ADD then
 				ram_space[the_map_p][value_list][index_] += the_value_p
 				break
 				
-			case SUBTRACT:
+			case SUBTRACT then
 				ram_space[the_map_p][value_list][index_] -= the_value_p
 				break
 				
-			case MULTIPLY:
+			case MULTIPLY then
 				ram_space[the_map_p][value_list][index_] *= the_value_p
 				break
 				
-			case DIVIDE:
+			case DIVIDE then
 				ram_space[the_map_p][value_list][index_] /= the_value_p
 				break
 				
-			case APPEND:
+			case APPEND then
 				ram_space[the_map_p][value_list][index_] = append( ram_space[the_map_p][value_list][index_], the_value_p )
 				break
 				
-			case CONCAT:
+			case CONCAT then
 				ram_space[the_map_p][value_list][index_] &= the_value_p
 				break
 				

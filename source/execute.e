@@ -3479,543 +3479,543 @@ procedure do_exec()
 		ifdef DEBUG then
 			printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
 		end ifdef
-		switch op do
-			case ABORT:
+		switch op with fallthru do
+			case ABORT then
 				opABORT()
 				break
-			case AND:
+			case AND then
 				opAND()
 				break
-			case AND_BITS:
+			case AND_BITS then
 				opAND_BITS()
 				break
-			case APPEND:
+			case APPEND then
 				opAPPEND()
 				break
-			case ARCTAN:
+			case ARCTAN then
 				opARCTAN()
 				break
-			case ASSIGN:
-			case ASSIGN_I:
+			case ASSIGN then
+			case ASSIGN_I then
 				opASSIGN()
 				break
-			case ASSIGN_OP_SLICE:
+			case ASSIGN_OP_SLICE then
 				opASSIGN_OP_SLICE()
 				break
-			case ASSIGN_OP_SUBS:
+			case ASSIGN_OP_SUBS then
 				opASSIGN_OP_SUBS()
 				break
-			case ASSIGN_SLICE:
+			case ASSIGN_SLICE then
 				opASSIGN_SLICE()
 				break
-			case ASSIGN_SUBS:
-			case ASSIGN_SUBS_CHECK:
-			case ASSIGN_SUBS_I:
+			case ASSIGN_SUBS then
+			case ASSIGN_SUBS_CHECK then
+			case ASSIGN_SUBS_I then
 				opASSIGN_SUBS()
 				break
-			case ATOM_CHECK:
+			case ATOM_CHECK then
 				opATOM_CHECK()
 				break
-			case BADRETURNF:
+			case BADRETURNF then
 				opBADRETURNF()
 				break
-			case C_FUNC:
+			case C_FUNC then
 				opC_FUNC()
 				break
-			case C_PROC:
+			case C_PROC then
 				opC_PROC()
 				break
-			case CALL:
+			case CALL then
 				opCALL()
 				break
-			case CALL_BACK_RETURN:
+			case CALL_BACK_RETURN then
 				opCALL_BACK_RETURN()
 				break
-			case CALL_PROC:
-			case CALL_FUNC:
+			case CALL_PROC then
+			case CALL_FUNC then
 				opCALL_PROC()
 				break
-			case CASE:
+			case CASE then
 				opCASE()
 				break
-			case CLEAR_SCREEN:
+			case CLEAR_SCREEN then
 				opCLEAR_SCREEN()
 				break
-			case CLOSE:
+			case CLOSE then
 				opCLOSE()
 				break
-			case COMMAND_LINE:
+			case COMMAND_LINE then
 				opCOMMAND_LINE()
 				break
-			case COMPARE:
+			case COMPARE then
 				opCOMPARE()
 				break
-			case CONCAT:
+			case CONCAT then
 				opCONCAT()
 				break
-			case CONCAT_N:
+			case CONCAT_N then
 				opCONCAT_N()
 				break
-			case COS:
+			case COS then
 				opCOS()
 				break
-			case DATE:
+			case DATE then
 				opDATE()
 				break
-			case DIV2:
+			case DIV2 then
 				opDIV2()
 				break
-			case DIVIDE:
+			case DIVIDE then
 				opDIVIDE()
 				break
-			case ELSE:
-			case EXIT:
-			case ENDWHILE:
-			case RETRY:
+			case ELSE then
+			case EXIT then
+			case ENDWHILE then
+			case RETRY then
 				opELSE()
 				break
-			case ENDFOR_GENERAL:
-			case ENDFOR_UP:
-			case ENDFOR_DOWN:
-			case ENDFOR_INT_UP:
-			case ENDFOR_INT_DOWN:
-			case ENDFOR_INT_DOWN1:
+			case ENDFOR_GENERAL then
+			case ENDFOR_UP then
+			case ENDFOR_DOWN then
+			case ENDFOR_INT_UP then
+			case ENDFOR_INT_DOWN then
+			case ENDFOR_INT_DOWN1 then
 				opENDFOR_GENERAL()
 				break
-			case ENDFOR_INT_UP1:
+			case ENDFOR_INT_UP1 then
 				opENDFOR_INT_UP1()
 				break
-			case EQUAL:
+			case EQUAL then
 				opEQUAL()
 				break
-			case EQUALS:
+			case EQUALS then
 				opEQUALS()
 				break
-			case EQUALS_IFW:
-			case EQUALS_IFW_I:
+			case EQUALS_IFW then
+			case EQUALS_IFW_I then
 				opEQUALS_IFW()
 				break
-			case FIND:
+			case FIND then
 				opFIND()
 				break
-			case FIND_FROM:
+			case FIND_FROM then
 				opFIND_FROM()
 				break
-			case FLOOR:
+			case FLOOR then
 				opFLOOR()
 				break
-			case FLOOR_DIV:
+			case FLOOR_DIV then
 				opFLOOR_DIV()
 				break
-			case FLOOR_DIV2:
+			case FLOOR_DIV2 then
 				opFLOOR_DIV2()
 				break
-			case FOR:
-			case FOR_I:
+			case FOR then
+			case FOR_I then
 				opFOR()
 				break
-			case GET_KEY:
+			case GET_KEY then
 				opGET_KEY()
 				break
-			case GET_PIXEL:
+			case GET_PIXEL then
 				opGET_PIXEL()
 				break
-			case GETC:
+			case GETC then
 				opGETC()
 				break
-			case GETENV:
+			case GETENV then
 				opGETENV()
 				break
-			case GETS:
+			case GETS then
 				opGETS()
 				break
-			case GLABEL:
+			case GLABEL then
 				opGLABEL()
 				break
-			case GLOBAL_INIT_CHECK:
-			case PRIVATE_INIT_CHECK:
+			case GLOBAL_INIT_CHECK then
+			case PRIVATE_INIT_CHECK then
 				opGLOBAL_INIT_CHECK()
 				break
-			case GOTO:
+			case GOTO then
 				opGOTO()
 				break
-			case GREATER:
+			case GREATER then
 				opGREATER()
 				break
-			case GREATER_IFW:
-			case GREATER_IFW_I:
+			case GREATER_IFW then
+			case GREATER_IFW_I then
 				opGREATER_IFW()
 				break
-			case GREATEREQ:
+			case GREATEREQ then
 				opGREATEREQ()
 				break
-			case GREATEREQ_IFW:
-			case GREATEREQ_IFW_I:
+			case GREATEREQ_IFW then
+			case GREATEREQ_IFW_I then
 				opGREATEREQ_IFW()
 				break
-			case HASH:
+			case HASH then
 				opHASH()
 				break
-			case HEAD:
+			case HEAD then
 				opHEAD()
 				break
-			case IF:
+			case IF then
 				opIF()
 				break
-			case INSERT:
+			case INSERT then
 				opINSERT()
 				break
-			case INTEGER_CHECK:
+			case INTEGER_CHECK then
 				opINTEGER_CHECK()
 				break
-			case IS_A_SEQUENCE:
+			case IS_A_SEQUENCE then
 				opIS_A_SEQUENCE()
 				break
-			case IS_AN_ATOM:
+			case IS_AN_ATOM then
 				opIS_AN_ATOM()
 				break
-			case IS_AN_INTEGER:
+			case IS_AN_INTEGER then
 				opIS_AN_INTEGER()
 				break
-			case IS_AN_OBJECT:
+			case IS_AN_OBJECT then
 				opIS_AN_OBJECT()
 				break
-			case LENGTH:
+			case LENGTH then
 				opLENGTH()
 				break
-			case LESS:
+			case LESS then
 				opLESS()
 				break
-			case LESS_IFW_I:
-			case LESS_IFW:
+			case LESS_IFW_I then
+			case LESS_IFW then
 				opLESS_IFW()
 				break
-			case LESSEQ:
+			case LESSEQ then
 				opLESSEQ()
 				break
-			case LESSEQ_IFW:
-			case LESSEQ_IFW_I:
+			case LESSEQ_IFW then
+			case LESSEQ_IFW_I then
 				opLESSEQ_IFW()
 				break
-			case LHS_SUBS:
+			case LHS_SUBS then
 				opLHS_SUBS()
 				break
-			case LHS_SUBS1:
+			case LHS_SUBS1 then
 				opLHS_SUBS1()
 				break
-			case LHS_SUBS1_COPY:
+			case LHS_SUBS1_COPY then
 				opLHS_SUBS1_COPY()
 				break
-			case LOG:
+			case LOG then
 				opLOG()
 				break
-			case MACHINE_FUNC:
+			case MACHINE_FUNC then
 				opMACHINE_FUNC()
 				break
-			case MACHINE_PROC:
+			case MACHINE_PROC then
 				opMACHINE_PROC()
 				break
-			case MATCH:
+			case MATCH then
 				opMATCH()
 				break
-			case MATCH_FROM:
+			case MATCH_FROM then
 				opMATCH_FROM()
 				break
-			case MEM_COPY:
+			case MEM_COPY then
 				opMEM_COPY()
 				break
-			case MEM_SET:
+			case MEM_SET then
 				opMEM_SET()
 				break
-			case MINUS:
-			case MINUS_I:
+			case MINUS then
+			case MINUS_I then
 				opMINUS()
 				break
-			case MULTIPLY:
+			case MULTIPLY then
 				opMULTIPLY()
 				break
-			case NOP2:
-			case SC2_NULL:
-			case ASSIGN_SUBS2:
-			case PLATFORM:
-			case END_PARAM_CHECK:
-			case NOPWHILE:
-			case NOP1:
+			case NOP2 then
+			case SC2_NULL then
+			case ASSIGN_SUBS2 then
+			case PLATFORM then
+			case END_PARAM_CHECK then
+			case NOPWHILE then
+			case NOP1 then
 				opNOP2()
 				break
-			case NOPSWITCH:
+			case NOPSWITCH then
 				opNOPSWITCH()
 				break
-			case NOT:
+			case NOT then
 				opNOT()
 				break
-			case NOT_BITS:
+			case NOT_BITS then
 				opNOT_BITS()
 				break
-			case NOT_IFW:
+			case NOT_IFW then
 				opNOT_IFW()
 				break
-			case NOTEQ:
+			case NOTEQ then
 				opNOTEQ()
 				break
-			case NOTEQ_IFW:
-			case NOTEQ_IFW_I:
+			case NOTEQ_IFW then
+			case NOTEQ_IFW_I then
 				opNOTEQ_IFW()
 				break
-			case OPEN:
+			case OPEN then
 				opOPEN()
 				break
-			case OPTION_SWITCHES:
+			case OPTION_SWITCHES then
 				opOPTION_SWITCHES()
 				break
-			case OR:
+			case OR then
 				opOR()
 				break
-			case OR_BITS:
+			case OR_BITS then
 				opOR_BITS()
 				break
-			case PASSIGN_OP_SLICE:
+			case PASSIGN_OP_SLICE then
 				opPASSIGN_OP_SLICE()
 				break
-			case PASSIGN_OP_SUBS:
+			case PASSIGN_OP_SUBS then
 				opPASSIGN_OP_SUBS()
 				break
-			case PASSIGN_SLICE:
+			case PASSIGN_SLICE then
 				opPASSIGN_SLICE()
 				break
-			case PASSIGN_SUBS:
+			case PASSIGN_SUBS then
 				opPASSIGN_SUBS()
 				break
-			case PEEK:
+			case PEEK then
 				opPEEK()
 				break
-			case PEEK_STRING:
+			case PEEK_STRING then
 				opPEEK_STRING()
 				break
-			case PEEK2S:
+			case PEEK2S then
 				opPEEK2S()
 				break
-			case PEEK2U:
+			case PEEK2U then
 				opPEEK2U()
 				break
-			case PEEK4S:
+			case PEEK4S then
 				opPEEK4S()
 				break
-			case PEEK4U:
+			case PEEK4U then
 				opPEEK4U()
 				break
-			case PEEKS:
+			case PEEKS then
 				opPEEKS()
 				break
-			case PIXEL:
+			case PIXEL then
 				opPIXEL()
 				break
-			case PLENGTH:
+			case PLENGTH then
 				opPLENGTH()
 				break
-			case PLUS:
-			case PLUS_I:
+			case PLUS then
+			case PLUS_I then
 				opPLUS()
 				break
-			case PLUS1:
-			case PLUS1_I:
+			case PLUS1 then
+			case PLUS1_I then
 				opPLUS1()
 				break
-			case POKE:
+			case POKE then
 				opPOKE()
 				break
-			case POKE2:
+			case POKE2 then
 				opPOKE2()
 				break
-			case POKE4:
+			case POKE4 then
 				opPOKE4()
 				break
-			case POSITION:
+			case POSITION then
 				opPOSITION()
 				break
-			case POWER:
+			case POWER then
 				opPOWER()
 				break
-			case PREPEND:
+			case PREPEND then
 				opPREPEND()
 				break
-			case PRINT:
+			case PRINT then
 				opPRINT()
 				break
-			case PRINTF:
+			case PRINTF then
 				opPRINTF()
 				break
-			case PROC_TAIL:
+			case PROC_TAIL then
 				opPROC_TAIL()
 				break
-			case PROC:
+			case PROC then
 				opPROC()
 				break
-			case PROFILE:
-			case DISPLAY_VAR:
-			case ERASE_PRIVATE_NAMES:
-			case ERASE_SYMBOL:
+			case PROFILE then
+			case DISPLAY_VAR then
+			case ERASE_PRIVATE_NAMES then
+			case ERASE_SYMBOL then
 				opPROFILE()
 				break
-			case PUTS:
+			case PUTS then
 				opPUTS()
 				break
-			case QPRINT:
+			case QPRINT then
 				opQPRINT()
 				break
-			case RAND:
+			case RAND then
 				opRAND()
 				break
-			case REMAINDER:
+			case REMAINDER then
 				opREMAINDER()
 				break
-			case REMOVE:
+			case REMOVE then
 				opREMOVE()
 				break
-			case REPEAT:
+			case REPEAT then
 				opREPEAT()
 				break
-			case REPLACE:
+			case REPLACE then
 				opREPLACE()
 				break
-			case RETURNF:
+			case RETURNF then
 				opRETURNF()
 				break
-			case RETURNP:
+			case RETURNP then
 				opRETURNP()
 				break
-			case RETURNT:
+			case RETURNT then
 				opRETURNT()
 				break
-			case RHS_SLICE:
+			case RHS_SLICE then
 				opRHS_SLICE()
 				break
-			case RHS_SUBS:
-			case RHS_SUBS_CHECK:
-			case RHS_SUBS_I:
+			case RHS_SUBS then
+			case RHS_SUBS_CHECK then
+			case RHS_SUBS_I then
 				opRHS_SUBS()
 				break
-			case RIGHT_BRACE_2:
+			case RIGHT_BRACE_2 then
 				opRIGHT_BRACE_2()
 				break
-			case RIGHT_BRACE_N:
+			case RIGHT_BRACE_N then
 				opRIGHT_BRACE_N()
 				break
-			case ROUTINE_ID:
+			case ROUTINE_ID then
 				opROUTINE_ID()
 				break
-			case SC1_AND:
+			case SC1_AND then
 				opSC1_AND()
 				break
-			case SC1_AND_IF:
+			case SC1_AND_IF then
 				opSC1_AND_IF()
 				break
-			case SC1_OR:
+			case SC1_OR then
 				opSC1_OR()
 				break
-			case SC1_OR_IF:
+			case SC1_OR_IF then
 				opSC1_OR_IF()
 				break
-			case SC2_OR:
-			case SC2_AND:
+			case SC2_OR then
+			case SC2_AND then
 				opSC2_OR()
 				break
-			case SEQUENCE_CHECK:
+			case SEQUENCE_CHECK then
 				opSEQUENCE_CHECK()
 				break
-			case SIN:
+			case SIN then
 				opSIN()
 				break
-			case SPACE_USED:
+			case SPACE_USED then
 				opSPACE_USED()
 				break
-			case SPLICE:
+			case SPLICE then
 				opSPLICE()
 				break
-			case SPRINTF:
+			case SPRINTF then
 				opSPRINTF()
 				break
-			case SQRT:
+			case SQRT then
 				opSQRT()
 				break
-			case STARTLINE:
+			case STARTLINE then
 				opSTARTLINE()
 				break
-			case SWITCH:
-			case SWITCH_I:
+			case SWITCH then
+			case SWITCH_I then
 				opSWITCH()
 				break
-			case SWITCH_SPI:
+			case SWITCH_SPI then
 				opSWITCH_SPI()
 				break
-			case SWITCH_RT:
+			case SWITCH_RT then
 				opSWITCH_RT()
 				break
-			case SYSTEM:
+			case SYSTEM then
 				opSYSTEM()
 				break
-			case SYSTEM_EXEC:
+			case SYSTEM_EXEC then
 				opSYSTEM_EXEC()
 				break
-			case TAIL:
+			case TAIL then
 				opTAIL()
 				break
-			case TAN:
+			case TAN then
 				opTAN()
 				break
-			case TASK_CLOCK_START:
+			case TASK_CLOCK_START then
 				opTASK_CLOCK_START()
 				break
-			case TASK_CLOCK_STOP:
+			case TASK_CLOCK_STOP then
 				opTASK_CLOCK_STOP()
 				break
-			case TASK_CREATE:
+			case TASK_CREATE then
 				opTASK_CREATE()
 				break
-			case TASK_LIST:
+			case TASK_LIST then
 				opTASK_LIST()
 				break
-			case TASK_SCHEDULE:
+			case TASK_SCHEDULE then
 				opTASK_SCHEDULE()
 				break
-			case TASK_SELF:
+			case TASK_SELF then
 				opTASK_SELF()
 				break
-			case res:TASK_STATUS:
+			case res thenTASK_STATUS then
 				opTASK_STATUS()
 				break
-			case TASK_SUSPEND:
+			case TASK_SUSPEND then
 				opTASK_SUSPEND()
 				break
-			case TASK_YIELD:
+			case TASK_YIELD then
 				opTASK_YIELD()
 				break
-			case TIME:
+			case TIME then
 				opTIME()
 				break
-			case TRACE:
+			case TRACE then
 				opTRACE()
 				break
-			case TYPE_CHECK:
+			case TYPE_CHECK then
 				opTYPE_CHECK()
 				break
-			case UMINUS:
+			case UMINUS then
 				opUMINUS()
 				break
-			case UPDATE_GLOBALS:
+			case UPDATE_GLOBALS then
 				opUPDATE_GLOBALS()
 				break
-			case WHILE:
+			case WHILE then
 				opWHILE()
 				break
-			case XOR:
+			case XOR then
 				opXOR()
 				break
-			case XOR_BITS:
+			case XOR_BITS then
 				opXOR_BITS()
 				break
 			case else
-				RTFatal( sprintf("Unknown opcode: %d", op ) )
+				RTFatal( sprintf("Unknown opcode then %d", op ) )
 		end switch
 	end while
 	keep_running = TRUE -- so higher-level do_exec() will keep running

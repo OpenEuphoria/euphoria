@@ -249,16 +249,16 @@ export function advance( integer pc, sequence code = Code )
 	if info[OP_SIZE_TYPE] = FIXED_SIZE then
 		return pc + info[OP_SIZE]
 	else
-		switch op do
-			case PROC:
-			case PROC_TAIL:
+		switch op with fallthru do
+			case PROC then
+			case PROC_TAIL then
 				return pc + SymTab[code[pc+1]][S_NUM_ARGS] + 2 + (SymTab[code[pc+1]][S_TOKEN] != PROC)
-			case PROC_FORWARD:
+			case PROC_FORWARD then
 				return pc + code[pc+2] + 3
-			case FUNC_FORWARD:
+			case FUNC_FORWARD then
 				return pc + code[pc+2] + 4
-			case RIGHT_BRACE_N:
-			case CONCAT_N:
+			case RIGHT_BRACE_N then
+			case CONCAT_N then
 				return pc + 3 + code[pc+1]
 			case else
 				InternalErr( sprintf("Unknown op found when shifting code: ", op ) )
@@ -340,11 +340,11 @@ export procedure shift( integer start, integer amount, integer bound = start )
 		op = Code[pc]
 		for i = 1 to length( op_info[op][OP_ADDR] ) do
 			
-			switch op do
-				case SWITCH:
-				case SWITCH_I:
-				case SWITCH_SPI:
-				case SWITCH_RT:
+			switch op with fallthru do
+				case SWITCH then
+				case SWITCH_I then
+				case SWITCH_SPI then
+				case SWITCH_RT then
 					-- these have relative jumps, so we treat them specially
 					shift_switch( pc, start, amount )
 					break
