@@ -14,6 +14,7 @@ include std/get.e
 include std/wildcard.e
 include std/text.e
 include std/regex.e as re
+include std/sequence.e
 
 enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
@@ -115,7 +116,9 @@ public constant
 	FD_ACCEPT  = 8,
 	FD_CONNECT = 16,
 	FD_CLOSE   = 32
-	
+
+constant DEFAULT_PORT = 80
+		
 --****
 -- === Support routines
 --
@@ -150,21 +153,49 @@ end function
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-function parse_address(sequence address)
-	integer colon = eu:find(':', address)
-	if colon = 0 then
-		return 0
+--**
+-- Converts a text "address:port" into {"address", port} format.
+--
+-- Parameters:
+--   # ##address##: ip address to connect, optionally with :PORT at the end
+--   # ##port##: optional, if not specified you may include :PORT in
+--     the address parameter otherwise the default port 80 is used.
+--
+-- Comments:
+-- If ##port## is supplied, it overrides any ":PORT" value in the input address.
+--
+-- Returns 
+--   A sequence of two elements: "address" and integer port number.
+--
+-- Example 1:
+-- <eucode>
+-- addr = parse_address("11.1.1.1") --> {"11.1.1.1", 80} -- default port
+-- addr = parse_address("11.1.1.1:110") --> {"11.1.1.1", 110}
+-- addr = parse_address("11.1.1.1", 345) --> {"11.1.1.1", 345}
+-- </eucode>
+public function parse_address(sequence address, integer port = -1)
+	address = split(address, ':')
+	
+	if length(address) = 1 then
+		if port < 0 or port > 65_535 then
+			address &= DEFAULT_PORT
+		else
+			address &= port
+		end if
+	else
+		if port < 0 or port > 65_535 then
+			address[2] = value(address[2])
+			if address[2][1] != GET_SUCCESS then
+				address[2] = DEFAULT_PORT
+			else
+				address[2] = address[2][2]
+			end if
+		else
+			address[2] = port
+		end if
 	end if
-
-	object port_v = value(address[colon+1..$])
-	if port_v[1] != GET_SUCCESS then
-		return 0
-	end if
-
-	return {
-		address[1..colon-1],
-		port_v[2]
-	}
+	
+	return address
 end function
 
 --****
@@ -187,20 +218,18 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- success = bind(socket, AF_INET, "0.0.0.0:8080")
 -- -- Look for connections on port 8080 for any interface.
+-- success = bind(socket, AF_INET, "0.0.0.0:8080")
+-- -- Look for connections on default port 80 for any interface.
+-- success = bind(socket, AF_INET, "0.0.0.0")
+-- -- Look for connections on port 345 for any interface.
+-- success = bind(socket, AF_INET, "0.0.0.0", 345)
 -- </eucode>
 
-public function bind(atom socket, integer family, sequence address, integer port=0)
-	if port = 0 then
-		object sock_data = parse_address(address)
-		if atom(sock_data) then return -1 end if
+public function bind(atom socket, integer family, sequence address, integer port=-1)
+	object sock_data = parse_address(address, port)
 
-		address = sock_data[1]
-		port = sock_data[2]
-	end if
-
-	return machine_func(M_SOCK_BIND, { socket, family, address, port })
+	return machine_func(M_SOCK_BIND, { socket, family, sock_data[1], sock_data[2] })
 end function
 
 --**
@@ -273,19 +302,15 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- success = connect(AF_INET, socket, "11.1.1.1:80")
+-- success = connect(AF_INET, socket, "11.1.1.1") -- uses default port 80
+-- success = connect(AF_INET, socket, "11.1.1.1:110") -- uses port 110
+-- success = connect(AF_INET, socket, "11.1.1.1", 345) -- uses port 345
 -- </eucode>
 
-public function connect(integer family, atom socket, sequence address, integer port=0)
-	if port = 0 then
-		object sock_data = parse_address(address)
-		if atom(sock_data) then return -1 end if
+public function connect(integer family, atom socket, sequence address, integer port=-1)
+	object sock_data = parse_address(address, port)
 
-		address = sock_data[1]
-		port = sock_data[2]
-	end if
-
-	return machine_func(M_SOCK_CONNECT, { family, socket, address, port })
+	return machine_func(M_SOCK_CONNECT, { family, socket, sock_data[1], sock_data[2] })
 end function
 
 -------------------------------------------------------------------------------
