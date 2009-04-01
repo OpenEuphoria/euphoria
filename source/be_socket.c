@@ -477,6 +477,8 @@ object eusock_bind(object x)
 
 	struct sockaddr_in service;
 
+	eusock_ensure_init();
+
 	s      = SEQ_PTR(x)->base[1];
 	family = SEQ_PTR(x)->base[2];
 	port   = SEQ_PTR(x)->base[4];
