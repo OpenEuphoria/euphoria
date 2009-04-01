@@ -1384,7 +1384,7 @@ void udt_clean( object o, long rid ){
 		RefDS( o );
 	}
 	args = MAKE_SEQ( s );
-	code = EMalloc( 4*sizeof(int*) );
+	code = (int *)EMalloc( 4*sizeof(int*) );
 	code[0] = (int **)opcode(CALL_PROC);
 	code[1] = (int **)&rid;
 	code[2] = (int **)&args;
