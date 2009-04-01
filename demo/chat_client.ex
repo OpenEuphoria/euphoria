@@ -2,7 +2,7 @@ object _ = 0
 
 include std/console.e
 include std/text.e
-include std/socket.e as sock
+include std/socket.e as slib
 
 puts(1, #/
 ____1. You must first enter your nick name.
@@ -12,7 +12,7 @@ ____1. You must first enter your nick name.
 
 object name = trim(prompt_string("Enter your nickname please: "))
 
-sock:socket sock = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
+slib:socket sock = slib:create(slib:AF_INET, slib:SOCK_STREAM, 0)
 
 sequence addr = "127.0.0.1:5000",
 	args = command_line()
@@ -23,14 +23,14 @@ end if
 
 printf(1, "Connecting to %s\n", { addr })
 
-integer result = sock:connect(sock, "127.0.0.1:5000")
+integer result = slib:connect(sock, "127.0.0.1:5000")
 if not result then
 	printf(1, "Could not connect to server %s, is it running?\nError = %d\n", { addr, result })
 	abort(1)
 end if
 
 -- Send our nickname to the server
-_ = sock:send(sock, name & "\n", 0)
+_ = slib:send(sock, name & "\n", 0)
 
 -- Print the server greeting message
 puts(1, recv(sock, 0))
@@ -50,8 +50,7 @@ while 1 label "top" do
 			exit "top"
 	end switch
 
-	object sock_data = sock:select(sock, 0)
-	? { 100, sock[1], sock_data }
+	object sock_data = slib:select(sock, 0)
 	if sock_data[1][SELECT_IS_ERROR] then
 		puts(1, "We've lost the server, exiting\n")
 		exit "top"
@@ -61,4 +60,4 @@ while 1 label "top" do
 	end if
 end while
 
-_ = sock:close(sock)
+_ = slib:close(sock)

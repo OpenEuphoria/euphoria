@@ -42,12 +42,10 @@ procedure main(sequence args)
 		abort(1)
 	end if
 
-
 	printf(1, "Waiting for connections on %s\n", { addr })
 	while sock:listen(server, 0) label "MAIN" do
-
 		-- get socket states
-		object sock_data = sock:select(server & clients, 0)
+		object sock_data = sock:select({ server } & clients, 0)
 
 		-- check for new incoming connects on server socket
 		if sock_data[1][SELECT_IS_READABLE] = 1 then
@@ -58,6 +56,7 @@ procedure main(sequence args)
 			object got_data = sock:recv(client[1], 0)
 			if atom(got_data) then
 				-- client disconnected already!? Ignore them then
+				puts(1, "Could not get data from client, aborting this connection\n")
 			else
 				got_data = trim(got_data)
 				clients &= { client[1] }
