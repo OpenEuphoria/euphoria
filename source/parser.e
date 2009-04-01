@@ -1109,7 +1109,7 @@ procedure Factor()
 		id = tok[T_ID]
 	end if
 	switch id with fallthru label "factor" do
-		case VARIABLE, QUALIFIED_VARIABLE:
+		case VARIABLE, QUALIFIED_VARIABLE then
 		
 			sym = tok[T_SYM]
 			if SymTab[sym][S_SCOPE] = SC_UNDEFINED then

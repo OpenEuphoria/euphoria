@@ -7,11 +7,11 @@ integer nx = 1
 
 --test_true("case-less switch", nx = 1)
 
-switch nx do
-   case 1
+switch nx with fallthru do
+   case 1 then
       nx = 2
       break
-   case 2
+   case 2 then
       nx = 3
       break
 end switch
@@ -53,7 +53,7 @@ end for
 integer zero
 zero = 0
 switch 1 do
-	case 0:
+	case 0 then
 		zero = 1
 end switch
 constant 
@@ -265,7 +265,7 @@ function rt_int_switch( object x )
 end function
 
 function rt_switch( object x )
-	switch x fallthru do
+	switch x with fallthru do
 		case D then
 			return D
 		case E then

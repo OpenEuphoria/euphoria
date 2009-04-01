@@ -337,14 +337,14 @@ function eunet_format_sendheader()
 		then
 			-- if the data field is not empty...
 			if not equal("",sendheader[idx][3]) then
-				switch sendheader[idx][1] do
-					case "GET":
+				switch sendheader[idx][1] with fallthru do
+					case "GET" then
 						-- append the http version
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
 							sendheader[idx][3] & " " & httpversion & "\r\n"
 						break
 
-					case "POST":
+					case "POST" then
 						-- append the http version
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
 							sendheader[idx][3] & " " & httpversion & "\r\n"

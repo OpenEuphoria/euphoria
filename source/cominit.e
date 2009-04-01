@@ -176,7 +176,7 @@ global procedure common_options( integer option, integer ix )
 		Strict_is_on = 1
 		break
 
-	case  WARNING_FILE_OPTION:
+	case  WARNING_FILE_OPTION then
 		TempWarningName = param
 		break
 

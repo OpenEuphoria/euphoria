@@ -6144,7 +6144,7 @@ global procedure init_opcodes()
 				break
 				
 			
-			case "OPEN":
+			case "OPEN" then
 				operation[i] = routine_id("opOPEN")
 				break
 				
