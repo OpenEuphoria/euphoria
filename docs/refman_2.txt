@@ -2183,7 +2183,7 @@ while x > 0 do
 end while
 </eucode>
 
-==== loop ... until statement.
+==== loop ... until statement
 
 A **loop ... until** statement tests a condition to see if it is
 non-zero (true), and until it is true a loop is executed. e.g.

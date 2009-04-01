@@ -1,5 +1,5 @@
 
-= Language Reference
+= Library Reference
 
 <<LEVELTOC depth=3>>
 

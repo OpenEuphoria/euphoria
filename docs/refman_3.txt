@@ -11,12 +11,13 @@ screen, and a detailed report in a file called ex.err. These reports include a
 full English description of what happened, along with a call-stack traceback.
 The file **ex.err** will also have a dump of all variable values, and
 optionally a list of the most recently executed statements. For extremely large
-sequences, only a partial dump is shown. If the name **ex.err** is not convenient, or if a nondefault path is required, you
-can choose another file name, anywhere on your system, by calling [[:crash_file]]().
+sequences, only a partial dump is shown. If the name **ex.err** is not convenient, or
+if a nondefault path is required, you can choose another file name, anywhere on your
+system, by calling [[:crash_file]]().
 
-In addition, you are able to create [[:udt|user-defined types]] that precisely determine the set
-of legal values for each of your variables. An error report will occur the moment that one of 
-your variables is assigned an illegal value.
+In addition, you are able to create [[:udt|user-defined types]] that precisely
+determine the set of legal values for each of your variables. An error report will
+occur the moment that one of your variables is assigned an illegal value.
 
 Sometimes a program will misbehave without failing any run-time checks. In any
 programming language it may be a good idea to simply study the source code and
@@ -26,6 +27,7 @@ of the program. This approach is particularly convenient in an interpreted
 language like Euphoria since you can simply edit the source and rerun the
 program without waiting for a re-compile/re-link.
 @[trace]
+
 ==== The with/without trace directive
 
 The interpreter provides you with additional powerful tools for debugging.
