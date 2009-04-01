@@ -287,7 +287,8 @@ global enum
 	ENUM,
 	EXPORT,
 	OVERRIDE,
-	PUBLIC
+	PUBLIC,
+	FALLTHRU
 
 global enum 
 	FUNC = 501,

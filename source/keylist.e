@@ -62,7 +62,8 @@ keylist =
 	{"override",  SC_KEYWORD, OVERRIDE,  0, 0, 0},
 	{"goto",      SC_KEYWORD, GOTO,      0, 0, 0},
 	{"public",    SC_KEYWORD, PUBLIC,    0, 0, 0 },
-	-- new ones must go at end to maintain compatibility with old shrouded code
+	{"fallthru",  SC_KEYWORD, FALLTHRU,  0, 0, 0},
+	-- new ones must go at end to maintain compatib	ility with old shrouded code
 
 	-- PREDEFINED SUBPROGRAMS and TYPEs 
 	{"length",           SC_PREDEF, FUNC, LENGTH,           1, E_PURE},

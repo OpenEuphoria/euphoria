@@ -286,5 +286,48 @@ test_equal( "rt switch #3", "else", rt_switch( 0 ) )
 test_equal( "rt switch #4", "else", rt_switch( "" ) )
 
 
+
+function s_w_f( object x )
+	sequence y = {}
+	switch x with fallthru do
+		case 1 then
+			y &=  1
+		case 2, 3 then
+			y &=  2
+		case else
+			y &= 4
+	end switch
+	return y
+end function
+
+test_equal("swith with fallthru 1", {1,2,4}, s_w_f( 1 ) )
+test_equal("swith with fallthru 2", {2,4}, s_w_f( 2 ) )
+test_equal("swith with fallthru 3", {2,4}, s_w_f( 3 ) )
+test_equal("swith with fallthru 4", {4}, s_w_f( 4 ) )
+
+function s_wo_f( object x )
+	sequence y = {}
+	switch x without fallthru do
+		case 5 then
+			y &= 6
+			fallthru
+		case 1 then
+			y &=  1
+		case 2, 3 then
+			y &=  2
+		
+		case else
+			y &=  4
+	end switch
+	return y
+end function
+
+
+test_equal("swith without fallthru 1", {1}, s_wo_f( 1 ) )
+test_equal("swith without fallthru 2", {2}, s_wo_f( 2 ) )
+test_equal("swith without fallthru 3", {2}, s_wo_f( 3 ) )
+test_equal("swith without fallthru 4", {4}, s_wo_f( 4 ) )
+test_equal("swith without fallthru 5", {6, 1}, s_wo_f( 5 ) )
+
 test_report()
 

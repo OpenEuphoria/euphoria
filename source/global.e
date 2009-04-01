@@ -290,12 +290,13 @@ global constant -- maskable warning flags
 	cmdline_warning_flag		= 256,
 	not_reached_warning_flag	= 512,
 	mixed_profile_warning_flag	= 1024,
-	strict_warning_flag			= 2047
+	empty_case_warning_flag     = 2048,
+	strict_warning_flag			= 4095
 
 constant default_maskable_warnings =
 	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
 	translator_warning_flag + cmdline_warning_flag + not_reached_warning_flag +
-	mixed_profile_warning_flag + custom_warning_flag
+	mixed_profile_warning_flag + custom_warning_flag + empty_case_warning_flag
 
 global constant warning_flags = {
 	no_warning_flag,
@@ -310,6 +311,7 @@ global constant warning_flags = {
 	cmdline_warning_flag,
 	not_reached_warning_flag,
 	mixed_profile_warning_flag,
+	empty_case_warning_flag,
 	strict_warning_flag
 }
 
@@ -326,6 +328,7 @@ global constant warning_names = {
 	"cmdline",
 	"not_reached",
 	"mixed_profile",
+	"empty_case",
 	"strict"
 }
 

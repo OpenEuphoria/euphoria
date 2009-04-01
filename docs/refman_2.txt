@@ -1926,14 +1926,14 @@ however.  A switch statement operates upon the value of a single expression, and
 flow continues based upon defined cases.  The syntax of a switch statement:
 
 <eucode>
-switch <expr> [label "<label name>"] do
-    case <val1>:
+switch <expr> [label "<label name>"] [without fallthru] do
+    case <val1>[, val2,...] then
         [code block 1]
         [break]
-    case <val2>:
+    case <val2>[,...] then
         [code block 2]
         [break]
-    case <val3>:
+    case <val3>[, ...]:
         [code block 3]
         [break]
     ...
@@ -1968,22 +1968,49 @@ end if
 </eucode>
 
 The <val> in a ##case## must be either an atom, literal string, constant or
-enum.  One
-important difference between a switch block and an if block is that control
-does not automatically go to the end of the block when the next case statement
-is encountered.  This is referred to as **fall-through**, and allows the same code
-to be used for multiple values.  ##break## can be used to redirect program flow to
-the end of the block.  Fall-through can also be used when different cases
-require most of the same code, but one might require extra processing:
-
+enum.  Multiple values for a single ##case## can be specified by separating the
+values by commas.  By default, control flows to the end of the ##switch## block
+when the next ##case## is encountered.  The default behavior can be modified in
+two ways.  The default for a particular ##switch## block can be changed so that
+control passes to the next executable statement whenever a new case is encountered
+by using ##with fallthru## in the ##switch## statement:
+<eucode>
+switch x with fallthru do
+    case 1 then
+        ? 1
+    case 2 then
+        ? 2
+        break
+    case else
+        ? 0
+end switch
+</eucode>
+Note that when ##with fallthru## is used, the ##break## statement can be used
+to jump out of the ##switch## block.  The behavior of individual ##case##s can 
+be changed by using the ##fallthru## statement:
+<eucode>
+switch x do
+    case 1 then
+        ? 1
+        fallthru
+    case 2 then
+        ? 2
+    case else
+        ? 0
+end switch
+</eucode>
+Note that the ##break## statement before ##case else## was omitted, because 
+the equivalent action is taken automatically by default.
 <eucode>
 switch length(x) do
-    case 1:
-    case 2:
+    case 1 then
+        -- do something
+        fallthru
+    case 2 then
         -- do something extra
-    case 3:
+    case 3 then
         -- do something usual
-        break
+        
     case else
         -- do something else
 end switch
@@ -1995,30 +2022,26 @@ enclosing switch rather than just the owning switch. \\
 Example:
 <eucode>
 switch opt label "LBLa" do
-    case 1:
-    case 5:
-    case 8:
+    case 1, 5, 8 then
         FuncA()
-        break
+        
 
-    case 4:
-    case 2:
-    case 7:
+    case 4, 2, 7 then
         FuncB()
         switch alt label "LBLb" do
-           case "X":
+           case "X" then
                 FuncC()
                 break "LBLa"
 
-           case "Y":
+           case "Y" then
                 FuncD()
-                break
+                
            case else
                 FuncE()
        end switch
        FuncF()
 
-    case 3:
+    case 3 then
        FuncG()
        break
 
@@ -3035,6 +3058,9 @@ and ignores any **with/without warnings** statement.
                       both ##with profile## and ##with profile_time## in the
                       same section of code. The profile statement read
                       last is ignored, and this warning is issued.
+| ##empty_case## | In ##switch## that have ##without fallthru##, an empty case
+                   block will result in no code being executed within the switch
+                   statement.
 | ##strict## | Turns all warnings on. They can still be disabled by
                with/without warning directives.
 

@@ -203,7 +203,8 @@ enum
 	SWITCH_CASES,
 	SWITCH_JUMP_TABLE,
 	SWITCH_ELSE,
-	SWITCH_PC
+	SWITCH_PC,
+	SWITCH_FALLTHRU
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
@@ -1901,19 +1902,32 @@ function finish_block_header(integer opcode)
 		tok = next_token()
 	end if
 
-	if tok[T_ID] = WITH then
+	if tok[T_ID] = WITH or tok[T_ID] = WITHOUT then
+		integer is_with = tok[T_ID] = WITH
 	    tok = next_token()
 		switch tok[T_ID] do
 		    case ENTRY:
+		    	if not is_with then
+		    		CompileErr("`without entry` is not valid")
+		    	end if
+		    	
 				if not (opcode = WHILE or opcode = LOOP) then
 					CompileErr("`with entry` is only valid on a while or loop statement")
 				end if
 
 			    has_entry = 1
 				break
-
+				
+			case FALLTHRU:
+				if not opcode = SWITCH then
+					CompileErr("`with fallthru` is only valid in a switch statement")
+				end if
+				
+				switch_stack[$][SWITCH_FALLTHRU] = is_with
+				break
+				
 			case else
-			    CompileErr("An unknown `with` option has been specified")
+			    CompileErr("An unknown `with/without` option has been specified")
         end switch
 
         tok = next_token()
@@ -2091,7 +2105,9 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	switch_stack = append( switch_stack, { {}, {}, 0, 0 })
+	-- TODO:  SWITCH_FALLTHRU currently 1 while we transition.
+	--        This will change to be zero in the future.
+	switch_stack = append( switch_stack, { {}, {}, 0, 0, 1 })
 	push_scope()
 end procedure
 
@@ -2129,34 +2145,48 @@ procedure case_else()
 
 end procedure
 
+integer fallthru_case = 0
 procedure Case_statement()
 	token tok
 	symtab_index condition
-
+	
 	if not in_switch() then
-		CompileErr( "a case must be inside a switch" )
-
-	elsif else_case() then
-		CompileErr( "a case block cannot follow a case else block" )
-
+			CompileErr( "a case must be inside a switch" )
 	end if
 	
-	maybe_namespace()
-	tok = next_token()
-	integer sign
-	if tok[T_ID] = MINUS then
-		sign = -1
-		tok = next_token()
-
-	else
-		sign = 1
-	end if
+	if length(switch_stack[$][SWITCH_CASES]) 
+	and not switch_stack[$][SWITCH_FALLTHRU] then
 	
-	integer fwd = 0
-	
-	while 1 do
+		if Code[$-1] != ELSE and not fallthru_case then
 		
+			putback( {CASE, 0} )
+			Break_statement()
+			tok = next_token()
+		end if
+		
+	end if
+	
+	fallthru_case = 0
+	integer start_line = line_number
+	while 1 do
+	
+		if else_case() then
+			CompileErr( "a case block cannot follow a case else block" )
+		end if
+		maybe_namespace()
+		tok = next_token()
+		integer sign
+		if tok[T_ID] = MINUS then
+			sign = -1
+			tok = next_token()
+	
+		else
+			sign = 1
+		end if
+		
+		integer fwd = 0	
 		if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
+
 			if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
 				if SymTab[tok[T_SYM]][S_CODE] then
 					tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
@@ -2188,15 +2218,39 @@ procedure Case_statement()
 		
 		tok = next_token()
 		if find( tok[T_ID],  {COLON, THEN}) then
-			exit
+			tok = next_token()	
+		
+			if tok[T_ID] = CASE then
+				if switch_stack[$][SWITCH_FALLTHRU] then
+					start_line = line_number
+				else
+					putback( tok )
+					Warning(sprintf("%.99s:%d - empty case block without fallthru",
+						{file_name[current_file_no], start_line}),
+						empty_case_warning_flag )
+					exit
+				end if
+			else
+				putback( tok )
+				exit
+			end if
+			
 		elsif tok[T_ID] != COMMA then
 			putback( tok )
 			exit
-		else
-			tok = next_token()
+
 		end if
 	end while
 	StartSourceLine( TRUE )
+end procedure
+
+procedure Fallthru_statement()
+	if not in_switch() then
+		CompileErr( "a fallthru must be inside a switch" )
+	end if
+	tok_match( CASE )
+	fallthru_case = 1
+	Case_statement()
 end procedure
 
 -- We modified the value of something, and need to update translator info,
@@ -2356,8 +2410,9 @@ procedure Switch_statement()
 	emit_op(SWITCH)
 	emit_forward_addr()  -- the else
 	else_bp = length( Code )
-
+	
 	tok_match(CASE)
+	
 	Case_statement()
 
 	Statement_list()
@@ -3288,6 +3343,9 @@ procedure Statement_list()
 		elsif id = SWITCH then
 			StartSourceLine(TRUE)
 			Switch_statement()
+		
+		elsif id = FALLTHRU then
+			Fallthru_statement()
 
 		elsif id = TYPE or id = QUALIFIED_TYPE then
 			StartSourceLine(TRUE)
