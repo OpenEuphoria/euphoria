@@ -1,9 +1,10 @@
 include std/unittest.e
+
+ifdef NON_FUNCTIONAL_TESTS then
+
 include std/net/http.e
 include std/search.e
 include std/math.e
-
-ifdef NON_FUNCTIONAL_TESTS then
 
 -- TODO: Test HTTP stuff
 
@@ -31,6 +32,6 @@ elsedef
     puts(2, " WARNING: URL tests were not run, use -D URL_TESTS for full test\n")
 end ifdef
 
-test_report()
-
 end ifdef
+
+test_report()

@@ -1,7 +1,8 @@
 include std/unittest.e
-include std/net/dns.e as dns
 
 ifdef NON_FUNCTIONAL_TESTS then
+
+include std/net/dns.e as dns
 
 object _
 
@@ -60,3 +61,5 @@ object _
 	end if
 
 end ifdef
+
+test_report()
