@@ -412,13 +412,16 @@ interpreter : .SYMBOLIC version.e version.h
 
 install-generic : .SYMBOLIC
 	@echo --------- install-generic $(PREFIX) ------------
-	@if /I not $(PWD)==$(PREFIX)\source for %i in (*.e) do @copy %i $(PREFIX)\source\
-	@if /I not $(PWD)==$(PREFIX)\source for %i in (*.ex) do @copy %i $(PREFIX)\source\
-	@if /I not $(PWD)==$(PREFIX)\source copy ..\include\* $(PREFIX)\include\
-	@if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
-	@if /I not $(PWD)==$(PREFIX)\source copy ..\include\std\* $(PREFIX)\include\std
-	@if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
-	@if /I not $(PWD)==$(PREFIX)\source copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	if /I $(PWD)==$(PREFIX)\source exit
+	for %i in (*.e) do @copy %i $(PREFIX)\source\
+	for %i in (*.ex) do @copy %i $(PREFIX)\source\
+	if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
+	copy ..\include\* $(PREFIX)\include\
+	copy ..\include\std\* $(PREFIX)\include\std
+	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
+	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	
+	
 	
 installwin : .SYMBOLIC install-generic installwinbin
 	@echo --------- installwin $(PREFIX) ------------

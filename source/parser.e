@@ -1898,15 +1898,10 @@ function finish_block_header(integer opcode)
 		tok = next_token()
 	end if
 
-	if tok[T_ID] = WITH or tok[T_ID] = WITHOUT then
-		integer is_with = tok[T_ID] = WITH
-	    tok = next_token()
+	if tok[T_ID] = WITH then
+		tok = next_token()
 		switch tok[T_ID] with fallthru do
 		    case ENTRY then
-		    	if not is_with then
-		    		CompileErr("`without entry` is not valid")
-		    	end if
-		    	
 				if not (opcode = WHILE or opcode = LOOP) then
 					CompileErr("`with entry` is only valid on a while or loop statement")
 				end if
@@ -1919,7 +1914,7 @@ function finish_block_header(integer opcode)
 					CompileErr("`with fallthru` is only valid in a switch statement")
 				end if
 				
-				switch_stack[$][SWITCH_FALLTHRU] = is_with
+				switch_stack[$][SWITCH_FALLTHRU] = 1
 				break
 				
 			case else
@@ -2101,9 +2096,7 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	-- TODO:  SWITCH_FALLTHRU currently 1 while we transition.
-	--        This will change to be zero in the future.
-	switch_stack = append( switch_stack, { {}, {}, 0, 0, 1 })
+	switch_stack = append( switch_stack, { {}, {}, 0, 0, 0 })
 	push_scope()
 end procedure
 
@@ -2200,6 +2193,7 @@ procedure Case_statement()
 				CompileErr( "expected an atom, string or a constant assigned an atom or a string" )
 			end if
 			case_else()
+			exit
 	
 		elsif fwd then
 			integer fwdref
@@ -2213,7 +2207,7 @@ procedure Case_statement()
 		end if
 		
 		tok = next_token()
-		if find( tok[T_ID],  {COLON, THEN}) then
+		if tok[T_ID] = THEN then
 			tok = next_token()	
 		
 			if tok[T_ID] = CASE then
@@ -2232,8 +2226,7 @@ procedure Case_statement()
 			end if
 			
 		elsif tok[T_ID] != COMMA then
-			putback( tok )
-			exit
+			CompileErr(sprintf("expected 'then' or ',', not %s",{LexName(tok[T_ID])}) )
 
 		end if
 	end while

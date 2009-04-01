@@ -1926,7 +1926,7 @@ however.  A switch statement operates upon the value of a single expression, and
 flow continues based upon defined cases.  The syntax of a switch statement:
 
 <eucode>
-switch <expr> [without fallthru] [label "<label name>"] do
+switch <expr> [with fallthru] [label "<label name>"] do
     case <val1>[, val2,...] then
         [code block 1]
         [break]
