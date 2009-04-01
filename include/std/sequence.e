@@ -1585,42 +1585,63 @@ end function
 --     [[:split_any]], [[:chunk]], [[:join]]
 
 public function split(sequence st, object delim=" ", integer limit=0)
-	if length(st) = 0 then
-		return {}
-	end if
-
-	if atom(delim) then
-		delim = {delim}
-	end if
-
-	-- Handle the simple case of split("123", ""), opposite is join({"1","2","3"}, "") -- "123"
-	if length(delim) = 0 then
-		for i = 1 to length(st) do
-			st[i] = {st[i]}
-		end for
-
-		return st
-	end if
-
 	sequence ret = {}
-	integer start = 1, pos, next_pos
+	integer start
+	integer pos
+	
+	if length(st) = 0 then
+		return ret
+	end if
 
-	while 1 do
-		pos = match_from(delim, st, start)
-		next_pos = pos+length(delim)
 
-		if pos then
+	if sequence(delim) then	
+		-- Handle the simple case of split("123", ""), opposite is join({"1","2","3"}, "") -- "123"
+		if equal(delim, "") then
+			for i = 1 to length(st) do
+				st[i] = {st[i]}
+				limit -= 1
+				if limit = 0 then
+					st = append(st[1 .. i],st[i+1 .. $])
+					exit
+				end if
+			end for
+	
+			return st
+		end if
+		
+		start = 1
+		while start <= length(st) do
+			pos = match_from(delim, st, start)
+
+			if pos = 0 then
+				exit
+			end if
+			
 			ret = append(ret, st[start..pos-1])
-			start = next_pos
+			start = pos+length(delim)
 			limit -= 1
 			if limit = 0 then
 				exit
 			end if
-		else
-			exit
-		end if
-	end while
-
+		end while
+	else
+		start = 1
+		while start <= length(st) do
+			pos = find_from(delim, st, start)
+	
+			if pos = 0 then
+				exit
+			end if
+			
+			ret = append(ret, st[start..pos-1])
+			start = pos + 1
+			limit -= 1
+			if limit = 0 then
+				exit
+			end if
+		end while
+	end if
+	
 	ret = append(ret, st[start..$])
 
 	return ret

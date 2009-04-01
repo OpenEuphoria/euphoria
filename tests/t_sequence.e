@@ -64,6 +64,7 @@ test_equal("split() single sequence delimiter",{"while 1 "," end while ",""},
 	split("while 1 do end while do","do"))
 test_equal("split() an empty string", {}, split("", ","))
 test_equal("split() using an empty delimiter", {"1","2","3"}, split("123", ""))
+test_equal("split() using an empty delimiter and limit", {"1","23"}, split("123", "", 1))
 
 test_equal("split_any()", {"a", "b", "c"}, split_any("a,b.c", ",."))
 test_equal("split_any() limit", {"a", "b", "c|d"},
