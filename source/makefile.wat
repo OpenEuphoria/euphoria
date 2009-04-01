@@ -258,7 +258,6 @@ distclean : .SYMBOLIC clean
 	-$(RM) pcre\config.h
 	-$(RM) version.h
 	-$(RM) version.e
-	-$(RMDIR) $(BUILDDIR)
 
 clean : .SYMBOLIC
 !ifndef DELTREE
