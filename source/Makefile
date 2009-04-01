@@ -81,7 +81,7 @@ endif
 ifeq "$(EMINGW)" "1"
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
-	LDLFLAG=
+	LDLFLAG=-lws2_32
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
