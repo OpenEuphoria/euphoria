@@ -7,7 +7,8 @@
 --
 -- <<LEVELTOC depth=2>>
 
-public include std/socket.e
+include std/socket.e
+include std/net/dns.e
 include std/text.e
 
 public constant
@@ -484,6 +485,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	-- GET /index.html HTTP/1.1
 
 	if length(inet_addr)=0 then
+		puts(1, "len inet_addr=0\n")
 		return {"",""}
 	end if
 
@@ -517,8 +519,8 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	last_data_len = 0
 
 	socket = new_socket(AF_INET,SOCK_STREAM,0)
-	success = connect(socket,inet_addr)
-	if success = 0 then
+	success = connect(AF_INET, socket,inet_addr)
+	if success = 1 then
 		-- eunet_format_sendheader sets up the header to sent,
 		-- putting the POST data at the end,
 		-- filling in the CONTENT_LENGTH,
@@ -527,12 +529,10 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 
 		-- } end version 1.3.0 mod
 		data = ""
-		while success > 0 do
-				junk = recv(socket,0)
+		while sequence(junk) entry do
 			data = data & junk
-			success = length(junk)
-			--success = length(data)-last_data_len
-			--last_data_len = length(data)
+		entry
+			junk = recv(socket, 0)
 		end while
 	end if
 	if close_socket(socket) then end if
@@ -585,7 +585,7 @@ end function
 --
 -- See also:
 --	 [[:get_url]]
-
+/*
 public function get_http_use_cookie(sequence inet_addr, sequence hostname, sequence file)
 	atom socket, success, last_data_len, cpos, offset
 	sequence header, header2, body, data, updata, hline
@@ -658,7 +658,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 	data = {}
 	last_data_len = 0
 	socket = new_socket(AF_INET,SOCK_STREAM,0)
-	success = connect(socket,inet_addr)
+	success = connect(AF_INET, socket,inet_addr)
 	if success = 0 then
 		--	  success = send(socket,request,0)
 		success = send(socket,eunet_format_sendheader(),0)
@@ -785,6 +785,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 
 	return {header,body}
 end function
+*/
 
 --**
 -- Returns data from an http internet site. Other common protocols will be added in future versions.
@@ -898,13 +899,14 @@ public function get_url(sequence url)
 	end if
 
 	if length(file)>0 and file[1]='/' then file = file[2..length(file)] end if
-	addrinfo = getaddrinfo(node,protocol,0)
-	if atom(addrinfo) or length(addrinfo)<1 or length(addrinfo[1])<5 then
-		-- attempt to use deprecated methods
-		return {} -- failed
-	else
-		inet_addr = addrinfo[1][5]
+	--addrinfo = getaddrinfo(node,protocol,0)
+	addrinfo = gethostbyname(node)
+	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
+		return 0
 	end if
+
+	inet_addr = addrinfo[3][1] -- 1st ip
+
 	data = {"",""} -- this is what get_http() returns
 	if eu:compare(lower(protocol),"http")=0 then
 		data = get_http(inet_addr,hostname,file)

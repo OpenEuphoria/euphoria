@@ -13,8 +13,6 @@ ifdef DOS32 then
 end ifdef
 
 include std/socket.e
-include std/dll.e
-include std/machine.e
 include std/get.e
 
 constant BLOCK_SIZE = 4096
@@ -24,6 +22,8 @@ enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
 -- getaddrinfo accessors
 
 public enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
+
+public enum HOST_OFFICIAL_NAME, HOST_ALIASES, HOST_IPS, HOST_TYPE
 
 public constant
 	DNS_QUERY_STANDARD = 0,
@@ -55,6 +55,7 @@ public constant
 	NS_T_A6 = 38,
 	NS_T_ANY = 255
 
+/*
 ifdef WIN32 then
 	constant dnsdll_ = open_dll("dnsapi.dll")
 
@@ -562,6 +563,7 @@ public function getaddrinfo(object node, object service, object hints)
 	
 	return -999
 end function
+*/
 
 --**
 -- Get the host information by name.
@@ -640,4 +642,3 @@ end function
 public function gethostbyaddr(sequence address)
 	return machine_func(M_SOCK_GETHOSTBYADDR, { address })
 end function
-

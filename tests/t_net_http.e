@@ -1,12 +1,7 @@
 include std/unittest.e
-
-ifdef NON_FUNCTIONAL_TESTS then
-
 include std/net/http.e
 include std/search.e
 include std/math.e
-
--- TODO: Test HTTP stuff
 
 test_equal("urlencode 1", "Hello+%26+World", urlencode("Hello & World"))
 test_equal("urlencode 2", "Hello%20%26%20World", urlencode("Hello & World", "%20"))
@@ -30,8 +25,6 @@ ifdef URL_TESTS then
 	test_equal("get_url post 4", data, content[2])
 elsedef
     puts(2, " WARNING: URL tests were not run, use -D URL_TESTS for full test\n")
-end ifdef
-
 end ifdef
 
 test_report()
