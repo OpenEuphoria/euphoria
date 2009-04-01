@@ -30,7 +30,7 @@ while 1 label "top" do
 	integer key = get_key()
 	switch key do
 		case -1: break
-		case 't':
+		case 's':
 			sequence data = prompt_string(sprintf("%10s > ", { name }))
 			if length(data) > 0 then
 				_ = send(socket, sprintf("%10s > %s\n", { name, data }), 0)

@@ -47,7 +47,7 @@ procedure main(sequence args)
 	while sock:listen(server, 0) = 0 label "MAIN" do
 
 		-- get socket states
-		object sock_data = sock:select(server & clients, -1)
+		object sock_data = sock:select(server & clients, 0)
 
 		-- check for new incoming connects on server socket
 		if sock_data[1][SELECT_IS_READABLE] = 1 then
