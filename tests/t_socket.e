@@ -4,9 +4,12 @@ include std/socket.e as sock
 
 object _ = 0
 
-test_equal("getservbyname http", { "http", "tcp", 80 }, getservbyname("http", "tcp"))
+test_equal("getservbyname echo", { "echo", "tcp", 7 }, getservbyname("echo", "tcp"))
 test_equal("getservbyname ftp", { "ftp", "tcp", 21 }, getservbyname("ftp", "tcp"))
 test_equal("getservbyname telnet", { "telnet", "tcp", 23}, getservbyname("telnet", "tcp"))
+test_equal("getservbyport echo", { "echo", "tcp", 7 }, getservbyport(7, "tcp"))
+test_equal("getservbyport ftp", { "ftp", "tcp", 21 }, getservbyport(21, "tcp"))
+test_equal("getservbyport telnet", { "telnet", "tcp", 23}, getservbyport(23, "tcp"))
 
 test_true( "is_inetaddr #1", is_inetaddr("127.0.0.1"))
 test_true( "is_inetaddr #2", is_inetaddr("0.0.0.0"))
