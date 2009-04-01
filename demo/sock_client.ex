@@ -11,9 +11,6 @@ if result != 1 then
 	abort(1)
 end if
 
--- Print the server greeting message
-puts(1, recv(socket, 0))
-
 while 1 do
 	sequence data = prompt_string("What do you want to say to the server or quit? ")
 	if equal(data, "quit") then

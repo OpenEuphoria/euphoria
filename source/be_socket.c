@@ -633,9 +633,9 @@ object eusock_select(object x)
 	for (i=1; i <= socks_p->length; i++) {
 		tmp_sp = NewS1(4);
 		tmp_sp->base[1] = socks_p->base[i];
-		tmp_sp->base[2] = FD_ISSET(socks_p->base[i], &readable);
-		tmp_sp->base[3] = FD_ISSET(socks_p->base[i], &writable);
-		tmp_sp->base[4] = FD_ISSET(socks_p->base[i], &errd);
+		tmp_sp->base[2] = FD_ISSET(socks_p->base[i], &readable) != 0;
+		tmp_sp->base[3] = FD_ISSET(socks_p->base[i], &writable) != 0;
+		tmp_sp->base[4] = FD_ISSET(socks_p->base[i], &errd) != 0;
 
 		result_p->base[i] = MAKE_SEQ(tmp_sp);
 	}

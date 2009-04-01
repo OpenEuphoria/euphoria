@@ -12,11 +12,20 @@ ____1. You must first enter your nick name.
 
 object name = trim(prompt_string("Enter your nickname please: "))
 
+sequence addr = "127.0.0.1:5000",
+	args = command_line()
+
+if length(args) > 2 then
+	addr = args[3]
+end if
+
+printf(1, "Connecting to %s\n", { addr })
+
 atom socket = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0),
-	result = sock:connect(sock:AF_INET, socket, "127.0.0.1:5000") 
+	result = sock:connect(sock:AF_INET, socket, addr) 
 
 if result != 1 then
-	printf(1, "Could not connect to server, is it running?\nError = %d\n", { result })
+	printf(1, "Could not connect to server %s, is it running?\nError = %d\n", { addr, result })
 	abort(1)
 end if
 
