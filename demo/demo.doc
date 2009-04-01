@@ -49,7 +49,14 @@
  buzz.ex   - "buzzword" generator - Try adding your own phrases.
 
  callmach.ex - examples of calling machine code from Euphoria
- 
+
+ chat_client.ex - socket example that connects to the multi-user
+                  chat_server.ex application.
+
+ char_server.ex - socket example that shows off using non-blocking
+                  sockets and a multi-user server w/no threads
+                  needed.
+
  csort.ex    - an example of calling custom_sort() with a routine id
  
  hash.ex   - counts the frequency of words in standard input by building a

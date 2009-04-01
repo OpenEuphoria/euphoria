@@ -597,7 +597,50 @@ object eusock_setsockopt(object x)
 
 object eusock_select(object x)
 {
-	return ATOM_M1;
+	int i, timeout, result, max_sock;
+	fd_set readable, writable, errd;
+	struct timeval tv_timeout;
+
+	s1_ptr socks_p, result_p, tmp_sp;
+
+	socks_p = SEQ_PTR(SEQ_PTR(x)->base[1]);
+	timeout = SEQ_PTR(x)->base[2];
+	max_sock = 0;
+
+	// prepare our fd_set
+	FD_ZERO(&readable);
+	FD_ZERO(&writable);
+	FD_ZERO(&errd);
+
+	for (i=1; i <= socks_p->length; i++) {
+		FD_SET(socks_p->base[i], &readable);
+		FD_SET(socks_p->base[i], &writable);
+		FD_SET(socks_p->base[i], &errd);
+
+		max_sock = (max_sock > socks_p->base[i]) ? max_sock : socks_p->base[i];
+	}
+
+	tv_timeout.tv_sec = 0;
+	tv_timeout.tv_usec = timeout;
+
+	result = select(max_sock + 1, &readable, &writable, &errd, &tv_timeout);
+
+	if (result == -1) {
+		return eusock_geterror();
+	}
+
+	result_p = NewS1(socks_p->length);
+	for (i=1; i <= socks_p->length; i++) {
+		tmp_sp = NewS1(4);
+		tmp_sp->base[1] = socks_p->base[i];
+		tmp_sp->base[2] = FD_ISSET(socks_p->base[i], &readable);
+		tmp_sp->base[3] = FD_ISSET(socks_p->base[i], &writable);
+		tmp_sp->base[4] = FD_ISSET(socks_p->base[i], &errd);
+
+		result_p->base[i] = MAKE_SEQ(tmp_sp);
+	}
+
+	return MAKE_SEQ(result_p);
 }
 
 #endif // ifndef EDOS

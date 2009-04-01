@@ -11,9 +11,19 @@ if result != 1 then
 	abort(1)
 end if
 
-sequence data = prompt_string("What do you want to say to the server? ")
-_ = send(socket, data & "\n", 0)
-puts(1, "The server says: " & recv(socket, 0))
+-- Print the server greeting message
+puts(1, recv(socket, 0))
+
+while 1 do
+	sequence data = prompt_string("What do you want to say to the server or quit? ")
+	if equal(data, "quit") then
+		exit
+	end if
+
+	_ = send(socket, data & "\n", 0)
+
+	printf(1, "The server says: %s", { recv(socket, 0) })
+end while
 
 _ = sock:close_socket(socket)
 

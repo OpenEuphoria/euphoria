@@ -8,11 +8,7 @@ ifdef DOS32 then
 	crash("socket.e is not supported on the DOS platform")
 end ifdef
 
-include std/dll.e
-include std/machine.e
 include std/get.e
-include std/wildcard.e
-include std/text.e
 include std/regex.e as re
 include std/sequence.e
 
@@ -52,6 +48,12 @@ elsifdef FREEBSD then
 		AF_UNSPEC=0, AF_UNIX=1, AF_INET=2, AF_APPLETALK=16, AF_INET6=28,
 		SOCK_STREAM=1, SOCK_DGRAM=2, SOCK_RAW=3, SOCK_RDM=4, SOCK_SEQPACKET=5
 end ifdef
+
+public enum
+	SELECT_SOCKET,
+	SELECT_IS_READABLE,
+	SELECT_IS_WRITABLE,
+	SELECT_IS_ERROR
 
 public constant
 	SD_SEND    = 0,
@@ -392,7 +394,7 @@ end function
 --
 -- Returns:
 --   A sequence of the same size of sockets containing
---   { read_status, write_status, error_status } for each socket passed
+--   { socket, read_status, write_status, error_status } for each socket passed
 --   to the function.
 --
 
