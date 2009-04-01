@@ -90,8 +90,8 @@ function do_dir(sequence path, sequence doc_root)
 	return data
 end function
 
-procedure handle_request(atom server, sequence client, sequence doc_root=".")
-	atom client_sock = client[1]
+procedure handle_request(sock:socket server, sequence client, sequence doc_root=".")
+	sock:socket client_sock = client[1]
 	sequence client_addr = client[2]
 	sequence request = split(trim(sock:recv(client_sock, 0)))
 	sequence command = "", path = "/", version = ""
@@ -163,23 +163,23 @@ procedure server()
 		end switch
 	end for
 
-	atom server = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0),
-		result = sock:bind(server, sock:AF_INET, bind_addr)
+	sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
+	atom result = sock:bind(server, bind_addr)
 	  
-	if result != 0 then
+	if not result then
 		crash("Could not bind %s, error=%d", { bind_addr, result })
 	end if
 
 	log(LOG_INFO, "Waiting for connections on %s", { bind_addr })
-	while sock:listen(server, 10) = 0 do
+	while sock:listen(server, 10) do
 		object client = sock:accept(server)
 		if sequence(client) then
 			handle_request(server, client, doc_root)
-			_ = sock:close_socket(client[1])
+			_ = sock:close(client[1])
 		end if
 	end while
 
-	_ = sock:close_socket(server)
+	_ = sock:close(server)
 end procedure
 
 sequence typs = {

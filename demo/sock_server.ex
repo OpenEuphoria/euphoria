@@ -10,17 +10,17 @@ elsedef
 	constant addr = "127.0.0.1:5000"
 end ifdef
 
-atom server = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0),
-	result = sock:bind(server, sock:AF_INET, addr)
+sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
+integer result = sock:bind(server, addr)
 
-if result != 0 then
+if not result then
 	printf(1, "Could not bind server to %s, error=%d\n", { addr, result })
 	abort(1)
 end if
 
 object client
 
-while sock:listen(server, 10) = 0 label "MAIN" do
+while sock:listen(server, 10) label "MAIN" do
 	printf(1, "Waiting for connections on %s\n", { addr })
 	client = sock:accept(server)
 	if sequence(client) then
@@ -35,7 +35,7 @@ while sock:listen(server, 10) = 0 label "MAIN" do
 			printf(1, "Client sent: %s\n", { trim(got_data) })
 			_ = sock:send(client[1], got_data, 0)
 			if match("quit\n", got_data) then
-				_ = sock:close_socket(client[1])
+				_ = sock:close(client[1])
 				exit "MAIN"
 			end if
 		end while

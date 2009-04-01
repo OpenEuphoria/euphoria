@@ -37,6 +37,10 @@ extern int default_heap;
 #include "alldefs.h"
 #include "alloc.h"
 
+// Accessors for the socket sequence given to many functions
+#define SOCK_SOCKET   1
+#define SOCK_SOCKADDR 2
+
 #define BUFF_SIZE 1024
 
 #ifdef EWINDOWS
@@ -309,12 +313,17 @@ object eusock_gethostbyaddr(object x)
 
 /*
  * socket(af, type, protocol)
+ *
+ * return { socket, sockaddr_in }
  */
 
 object eusock_socket(object x)
 {
 	int af, type, protocol;
 	SOCKET sock;
+	struct sockaddr_in *addr;
+
+	s1_ptr result_p;
 
 	eusock_ensure_init();
 
@@ -328,7 +337,19 @@ object eusock_socket(object x)
 		return eusock_geterror();
 	}
 
-	return sock;
+	addr = EMalloc(sizeof(addr));
+	addr->sin_family = af;
+	addr->sin_port   = 0;
+
+	result_p = NewS1(2);
+	result_p->base[1] = sock;
+
+	if ((unsigned) addr > (unsigned)MAXINT)
+		result_p->base[2] = NewDouble((double)(unsigned long) addr);
+	else
+		result_p->base[2] = addr;
+
+	return MAKE_SEQ(result_p);
 }
 
 /*
@@ -337,7 +358,11 @@ object eusock_socket(object x)
 
 object eusock_close(object x)
 {
-	if (closesocket(SEQ_PTR(x)->base[1]) == SOCKET_ERROR)
+	SOCKET s;
+
+	s = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+
+	if (closesocket(s) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
@@ -351,7 +376,13 @@ object eusock_close(object x)
 
 object eusock_shutdown(object x)
 {
-	if (shutdown(SEQ_PTR(x)->base[1], SEQ_PTR(x)->base[2]) == SOCKET_ERROR)
+	SOCKET s;
+	int how;
+
+	s = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	how = SEQ_PTR(x)->base[2];
+
+	if (shutdown(s, how) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
@@ -360,13 +391,13 @@ object eusock_shutdown(object x)
 }
 
 /*
- * connect(family, sock, address, port)
+ * connect(sock, address, port)
  */
 
 object eusock_connect(object x)
 {
 	SOCKET s;
-	struct sockaddr_in addr;
+	struct sockaddr_in *addr;
 	int result;
 
 	s1_ptr address_s;
@@ -374,22 +405,23 @@ object eusock_connect(object x)
 
 	eusock_ensure_init();
 
-	s = SEQ_PTR(x)->base[2];
-	addr.sin_family = SEQ_PTR(x)->base[1];
-	addr.sin_port   = htons(SEQ_PTR(x)->base[4]);
+	s    = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	addr = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
 
-	address_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
+	addr->sin_port = htons(SEQ_PTR(x)->base[3]);
+
+	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
-	MakeCString(address, SEQ_PTR(x)->base[3]);
+	MakeCString(address, SEQ_PTR(x)->base[2]);
 
-	addr.sin_addr.s_addr = inet_addr(address);
-	if (addr.sin_addr.s_addr == INADDR_NONE)
+	addr->sin_addr.s_addr = inet_addr(address);
+	if (addr->sin_addr.s_addr == INADDR_NONE)
 	{
 		// TODO: Give a real error message
 		return ATOM_0;
 	}
 
-	result = connect(s, (SOCKADDR *) &addr, sizeof(addr));
+	result = connect(s, addr, sizeof(SOCKADDR));
 
 	EFree(address);
 
@@ -413,7 +445,7 @@ object eusock_send(object x)
 	s1_ptr buf_s;
 	char *buf;
 
-	s     = SEQ_PTR(x)->base[1];
+	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 	flags = SEQ_PTR(x)->base[3];
 
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
@@ -442,7 +474,7 @@ object eusock_recv(object x)
 	int flags, result;
 	char buf[BUFF_SIZE];
 
-	s     = SEQ_PTR(x)->base[1];
+	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 	flags = SEQ_PTR(x)->base[2];
 
 	result = recv(s, buf, BUFF_SIZE, flags);
@@ -465,7 +497,7 @@ object eusock_recv(object x)
  * ========================================================================== */
 
 /*
- * bind(socket, family, address, port)
+ * bind(socket, address, port)
  */
 
 object eusock_bind(object x)
@@ -473,25 +505,24 @@ object eusock_bind(object x)
 	SOCKET s;
 	s1_ptr address_s;
 	char *address;
-	int port, family, result;
+	int port, result;
 
-	struct sockaddr_in service;
+	struct sockaddr_in *service;
 
 	eusock_ensure_init();
 
-	s      = SEQ_PTR(x)->base[1];
-	family = SEQ_PTR(x)->base[2];
-	port   = SEQ_PTR(x)->base[4];
+	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	service = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
+	port    = SEQ_PTR(x)->base[3];
 
-	address_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
+	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
-	MakeCString(address, SEQ_PTR(x)->base[3] );
+	MakeCString(address, SEQ_PTR(x)->base[2]);
 
-	service.sin_family      = family;
-	service.sin_addr.s_addr = inet_addr(address);
-	service.sin_port        = htons(port);
+	service->sin_addr.s_addr = inet_addr(address);
+	service->sin_port        = htons(port);
 
-	result = bind(s, (SOCKADDR *) &service, sizeof(service));
+	result = bind(s, service, sizeof(SOCKADDR));
 
 	EFree(address);
 
@@ -500,7 +531,7 @@ object eusock_bind(object x)
 	  return eusock_geterror();
 	}
 
-	return result;
+	return ATOM_1;
 }
 
 /*
@@ -509,14 +540,18 @@ object eusock_bind(object x)
 
 object eusock_listen(object x)
 {
-	int result;
+	SOCKET s;
+	int backlog;
 
-	if (listen(SEQ_PTR(x)->base[1], SEQ_PTR(x)->base[2]) == SOCKET_ERROR)
+	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	backlog = SEQ_PTR(x)->base[2];
+
+	if (listen(s, backlog) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
 
-	return ATOM_0;
+	return ATOM_1;
 }
 
 /*
@@ -525,22 +560,28 @@ object eusock_listen(object x)
 
 object eusock_accept(object x)
 {
-	SOCKET client;
+	SOCKET server, client;
 	struct sockaddr_in addr;
 	int addr_len;
 
-	s1_ptr client_seq;
+	s1_ptr client_seq, client_sock_p;
+
+	server = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 
 	addr_len = sizeof(addr);
-	client   = accept(SEQ_PTR(x)->base[1], &addr, &addr_len);
+	client   = accept(server, &addr, &addr_len);
 
 	if (client == INVALID_SOCKET)
 	{
 		return eusock_geterror();
 	}
 
+	client_sock_p = NewS1(2);
+	client_sock_p->base[1] = client;
+	client_sock_p->base[2] = 0;
+
 	client_seq = NewS1(2);
-	client_seq->base[1] = client;
+	client_seq->base[1] = MAKE_SEQ(client_sock_p);
 	client_seq->base[2] = NewString(inet_ntoa(addr.sin_addr));
 
 	return MAKE_SEQ(client_seq);
@@ -556,7 +597,7 @@ object eusock_getsockopt(object x)
 	int level, optname, optlen, optval;
 
 	optlen  = sizeof(int);
-	s       = SEQ_PTR(x)->base[1];
+	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 	level   = SEQ_PTR(x)->base[2];
 	optname = SEQ_PTR(x)->base[3];
 
@@ -578,7 +619,7 @@ object eusock_setsockopt(object x)
 	int level, optname, optlen, optval;
 
 	optlen  = sizeof(int);
-	s       = SEQ_PTR(x)->base[1];
+	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 	level   = SEQ_PTR(x)->base[2];
 	optname = SEQ_PTR(x)->base[3];
 	optval  = SEQ_PTR(x)->base[4];
@@ -597,6 +638,7 @@ object eusock_setsockopt(object x)
 
 object eusock_select(object x)
 {
+	SOCKET tmp_socket;
 	int i, timeout, result, max_sock;
 	fd_set readable, writable, errd;
 	struct timeval tv_timeout;
@@ -613,11 +655,13 @@ object eusock_select(object x)
 	FD_ZERO(&errd);
 
 	for (i=1; i <= socks_p->length; i++) {
-		FD_SET(socks_p->base[i], &readable);
-		FD_SET(socks_p->base[i], &writable);
-		FD_SET(socks_p->base[i], &errd);
+		tmp_socket = SEQ_PTR(socks_p->base[i])->base[SOCK_SOCKET];
 
-		max_sock = (max_sock > socks_p->base[i]) ? max_sock : socks_p->base[i];
+		FD_SET(tmp_socket, &readable);
+		FD_SET(tmp_socket, &writable);
+		FD_SET(tmp_socket, &errd);
+
+		max_sock = (max_sock > tmp_socket) ? max_sock : tmp_socket;
 	}
 
 	tv_timeout.tv_sec = 0;
@@ -631,11 +675,13 @@ object eusock_select(object x)
 
 	result_p = NewS1(socks_p->length);
 	for (i=1; i <= socks_p->length; i++) {
+		tmp_socket = SEQ_PTR(socks_p->base[i])->base[SOCK_SOCKET];
+
 		tmp_sp = NewS1(4);
 		tmp_sp->base[1] = socks_p->base[i];
-		tmp_sp->base[2] = FD_ISSET(socks_p->base[i], &readable) != 0;
-		tmp_sp->base[3] = FD_ISSET(socks_p->base[i], &writable) != 0;
-		tmp_sp->base[4] = FD_ISSET(socks_p->base[i], &errd) != 0;
+		tmp_sp->base[2] = FD_ISSET(tmp_socket, &readable);
+		tmp_sp->base[3] = FD_ISSET(tmp_socket, &writable);
+		tmp_sp->base[4] = FD_ISSET(tmp_socket, &errd);
 
 		result_p->base[i] = MAKE_SEQ(tmp_sp);
 	}

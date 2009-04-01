@@ -7,7 +7,7 @@
 --
 -- <<LEVELTOC depth=2>>
 
-include std/socket.e
+include std/socket.e as sock
 include std/net/dns.e
 include std/text.e
 
@@ -477,7 +477,8 @@ end function
 
 public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	object junk
-	atom socket, success, last_data_len
+	sock:socket sock
+	atom success, last_data_len
 	sequence header, data, hline
 
 	-- Notes for future additions:
@@ -518,24 +519,24 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	data = {}
 	last_data_len = 0
 
-	socket = new_socket(AF_INET,SOCK_STREAM,0)
-	success = connect(AF_INET, socket,inet_addr)
+	sock = sock:create(AF_INET,SOCK_STREAM,0)
+	success = sock:connect(sock,inet_addr)
 	if success = 1 then
 		-- eunet_format_sendheader sets up the header to sent,
 		-- putting the POST data at the end,
 		-- filling in the CONTENT_LENGTH,
 		-- and avoiding sending empty fields for any field
-        success = send(socket,eunet_format_sendheader(),0)
+        success = sock:send(sock,eunet_format_sendheader(),0)
 
 		-- } end version 1.3.0 mod
 		data = ""
 		while sequence(junk) entry do
 			data = data & junk
 		entry
-			junk = recv(socket, 0)
+			junk = sock:recv(sock, 0)
 		end while
 	end if
-	if close_socket(socket) then end if
+	if sock:close(sock) then end if
 
 	success = match({13,10,13,10},data)
 	if success > 0 then
@@ -657,14 +658,14 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 
 	data = {}
 	last_data_len = 0
-	socket = new_socket(AF_INET,SOCK_STREAM,0)
-	success = connect(AF_INET, socket,inet_addr)
+	socket = sock:create(AF_INET,SOCK_STREAM,0)
+	success = sock:connect(AF_INET, socket,inet_addr)
 	if success = 0 then
-		--	  success = send(socket,request,0)
-		success = send(socket,eunet_format_sendheader(),0)
+		--	  success = sock:send(socket,request,0)
+		success = sock:send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
 		while success > 0 do
-			data = data & recv(socket,0)
+			data = data & sock:recv(socket,0)
 			success = length(data)-last_data_len
 			last_data_len = length(data)
 		end while

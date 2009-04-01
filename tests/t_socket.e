@@ -21,10 +21,10 @@ test_false("is_inetaddr #6", is_inetaddr("327.0.0.1"))
 test_false("is_inetaddr #7", is_inetaddr("1.256.0.1"))
 test_false("is_inetaddr #8", is_inetaddr("1.-18.0.1"))
 
-atom socket = new_socket(AF_INET, SOCK_STREAM, 0)
-test_equal("get_socket_option #1", 0, get_socket_options(socket, SOL_SOCKET, SO_DEBUG))
-test_equal("set_socket_option #1", 1, set_socket_options(socket, SOL_SOCKET, SO_DEBUG, 1))
-test_equal("get_socket_option #2", 1, get_socket_options(socket, SOL_SOCKET, SO_DEBUG))
+sock:socket sock = sock:create(AF_INET, SOCK_STREAM, 0)
+test_equal("get_socket_option #1", 0, get_socket_options(sock, SOL_SOCKET, SO_DEBUG))
+test_equal("set_socket_option #1", 1, set_socket_options(sock, SOL_SOCKET, SO_DEBUG, 1))
+test_equal("get_socket_option #2", 1, get_socket_options(sock, SOL_SOCKET, SO_DEBUG))
 
 ifdef SOCKET_TESTS then
 	--
@@ -41,7 +41,7 @@ ifdef SOCKET_TESTS then
 	puts(1, "===============================\n")
 
 	for i = 1 to 4 do
-		_ = connect(AF_INET, socket, "127.0.0.1:5000") 
+		_ = sock:connect(sock, "127.0.0.1:5000")
 		if _ != -1 then
 			exit
 		end if
@@ -59,22 +59,22 @@ ifdef SOCKET_TESTS then
 	
 	if _ != -1 then
 		sequence send_data = "Hello, "
-		test_equal("send w/o newline", length(send_data), send(socket, send_data, 0))
-		test_equal("recv w/o newline", send_data, recv(socket, 0))
+		test_equal("send w/o newline", length(send_data), sock:send(sock, send_data, 0))
+		test_equal("recv w/o newline", send_data, sock:recv(sock, 0))
 		
 		send_data = "world\n"
-		test_equal("send with newline", length(send_data), send(socket, send_data, 0))
-		test_equal("recv with newline", send_data, recv(socket, 0))
+		test_equal("send with newline", length(send_data), sock:send(sock, send_data, 0))
+		test_equal("recv with newline", send_data, sock:recv(sock, 0))
 		
 		send_data = repeat('a', 511) & "\n"
-		test_equal("send large", length(send_data), send(socket, send_data, 0))
-		test_equal("recv large", send_data, recv(socket, 0))
+		test_equal("send large", length(send_data), sock:send(sock, send_data, 0))
+		test_equal("recv large", send_data, sock:recv(sock, 0))
 		
-		_ = send(socket, "quit\n", 0)
+		_ = send(sock, "quit\n", 0)
 	end if
 end ifdef
 
-test_equal("close", 1, close_socket(socket))
+test_equal("close", 1, sock:close(sock))
 
 ifdef not SOCKET_TESTS then
     puts(2, " WARNING: all socket tests were not run, use -D SOCKET_TESTS for full test\n")

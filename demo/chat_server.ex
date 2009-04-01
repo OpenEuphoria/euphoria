@@ -16,7 +16,7 @@ procedure remove_client(integer sock)
 	for i = 1 to length(clients) do
 		if sock = clients[i] then
 			sequence nick = nicks[i]
-			printf(1, "Client %d (%d of %d) disconnected\n", { sock, i, length(clients) })
+			printf(1, "Client %d of %d disconnected\n", { i, length(clients) })
 			clients = remove(clients, i)
 			nicks = remove(nicks, i)
 
@@ -34,17 +34,17 @@ procedure main(sequence args)
 	end if
 
 	sequence remove_sockets = {}
-	atom server = sock:new_socket(sock:AF_INET, sock:SOCK_STREAM, 0),
-		result = sock:bind(server, sock:AF_INET, addr)
+	sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
+	atom result = sock:bind(server, addr)
 
-	if result != 0 then
+	if not result then
 		printf(1, "Could not bind server to %s, error=%d\n", { addr, result })
 		abort(1)
 	end if
 
 
 	printf(1, "Waiting for connections on %s\n", { addr })
-	while sock:listen(server, 0) = 0 label "MAIN" do
+	while sock:listen(server, 0) label "MAIN" do
 
 		-- get socket states
 		object sock_data = sock:select(server & clients, 0)
@@ -52,7 +52,7 @@ procedure main(sequence args)
 		-- check for new incoming connects on server socket
 		if sock_data[1][SELECT_IS_READABLE] = 1 then
 			object client = sock:accept(server)
-			printf(1, "Connection from " & client[2] & ", socket = %d\n", { client[1] })
+			printf(1, "Connection from %s (client count now %d)\n",  { client[2], length(clients) + 1 })
 
 			-- Client sends their name, get it and send a join message
 			object got_data = sock:recv(client[1], 0)
@@ -60,7 +60,7 @@ procedure main(sequence args)
 				-- client disconnected already!? Ignore them then
 			else
 				got_data = trim(got_data)
-				clients &= client[1]
+				clients &= { client[1] }
 				nicks &= { got_data }
 				_ = sock:send(client[1], "Welcome to the Euphoria Chat Server Demo, " &
 					trim(got_data) & "\n", 0)
@@ -78,15 +78,15 @@ procedure main(sequence args)
 					continue
 				end if
 
-				printf(1, "Client %d (%d of %d) sent %s\n", {
-					sock_data[i][SELECT_SOCKET], i - 1, length(clients), trim(got_data)
+				printf(1, "Client %d of %d sent %s\n", {
+					i - 1, length(clients), trim(got_data)
 				})
 
 				-- Send the message out to everyone
 				send_to_all(got_data, i-1)
 			elsif sock_data[i][SELECT_IS_ERROR] then
-				printf(1, "Client %d (%d of %d) is in an error state, disconnecting\n", {
-					sock_data[i][SELECT_SOCKET], i - 1, length(clients)
+				printf(1, "Client %d of %d is in an error state, disconnecting\n", {
+					i - 1, length(clients)
 				})
 				remove_sockets &= sock_data[i][SELECT_SOCKET]
 			end if
