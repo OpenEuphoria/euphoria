@@ -61,8 +61,6 @@ enum CLEANUP_TYPES {
 	CLEAN_FILE
 };
 
-typedef struct cleanup *cleanup_ptr;
-
 struct s1 {
 	object_ptr base;
 	long length;
