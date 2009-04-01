@@ -307,7 +307,7 @@ test_equal("swith with fallthru 4", {4}, s_w_f( 4 ) )
 
 function s_wo_f( object x )
 	sequence y = {}
-	switch x without fallthru do
+	switch x do
 		case 5 then
 			y &= 6
 			fallthru
