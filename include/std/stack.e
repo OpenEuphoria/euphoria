@@ -58,7 +58,10 @@ end type
 --		# ##stack_type##: an integer, defining the semantics of the stack
 --
 -- Returns:
---		An empty **stack**.
+--		An empty **stack**.  Note that the variable storing the stack must
+--      not be an integer.  The resources allocated for the stack will
+--      be automatically cleaned up if the reference count of the returned value drops
+--      to zero, or if passed in a call to [[:delete]].
 --
 -- Comments:
 -- There are two sorts of stacks, designated by the types ##FIFO## and ##FILO##:
@@ -69,34 +72,13 @@ end type
 -- [[:is_empty]]
 
 public function new(integer typ)
-	integer new_stack = malloc()
+	atom new_stack = malloc()
 
 	ram_space[new_stack] = { type_is_stack, typ, {} }
 
 	return new_stack
 end function
 
---**
--- Delete an existing stack data structure
---
--- Parameters:
---   # ##sk##: The stack to delete
---
--- Comments:
---   You must use this routine when you have finished with a stack and want
---   to give the memory back to Euphoria.
---
--- Example 1:
--- <eucode>
--- stack sk = new() -- sk is a new stack
--- -- use stack
--- delete(sk) -- sk is no longer needed, give space back to Euphoria
--- </eucode>
---
-
-public procedure delete(stack sk)
-	free(sk)
-end procedure
 
 --**
 -- Determine whether a stack is empty.

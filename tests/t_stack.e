@@ -52,7 +52,7 @@ s:clear(sk)
 test_equal("FIFO clear()", 0, s:size(sk))
 test_true("is_empty() #2", s:is_empty(sk))
 
-s:delete(sk)
+delete(sk)
 test_pass("FIFO delete")
 
 --
@@ -103,7 +103,7 @@ test_equal("FILO at #1", {30,40}, s:at(sk, 0))
 test_equal("FILO at #3", {30,40}, s:at(sk, -1))
 test_equal("FILO at #2", {10,20}, s:at(sk, -2))
 
-s:delete(sk)
+delete(sk)
 test_pass("FILO delete")
 
 test_report()
