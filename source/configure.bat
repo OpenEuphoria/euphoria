@@ -59,10 +59,9 @@ IF exist %WINDIR%\command\deltree.exe (
 )
 if not exist %BUILDDIR% mkdir %BUILDDIR%
 cd ..
-if not exist build mkdir build
-cd > build\config.wat.tmp
-set /p PWD=<build\config.wat.tmp
-del build\config.wat.tmp
+cd > source\%BUILDDIR%\config.wat.tmp
+set /p PWD=<source\%BUILDDIR%\config.wat.tmp
+del source\%BUILDDIR%\config.wat.tmp
 set PWD > NUL
 cd source
 
