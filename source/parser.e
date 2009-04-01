@@ -2154,38 +2154,48 @@ procedure Case_statement()
 	
 	integer fwd = 0
 	
-	if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
-		if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
-			if SymTab[tok[T_SYM]][S_CODE] then
-				tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
-			end if
-		elsif tok[T_ID] = VARIABLE and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-			-- forward reference to a variable
-			fwd = tok[T_SYM]
-		else
-			CompileErr( "expected else, an atom, string, constant or enum" )
-		end if
-	end if
-
-	if tok[T_ID] = ELSE then
-		if sign = -1 then
-			CompileErr( "expected an atom, string or a constant assigned an atom or a string" )
-		end if
-		case_else()
-
-	elsif fwd then
-		tok_optional( COLON )
-		integer fwdref
-		fwdref = new_forward_reference( CASE, fwd )
-		add_case( {fwdref}, sign )
-		fwd:set_data( fwdref, switch_stack[$][SWITCH_PC] )
+	while 1 do
 		
-	else
-		condition = tok[T_SYM]
-		tok_optional( COLON )
-		add_case( condition, sign )
-	end if
-
+		if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
+			if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
+				if SymTab[tok[T_SYM]][S_CODE] then
+					tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
+				end if
+			elsif tok[T_ID] = VARIABLE and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+				-- forward reference to a variable
+				fwd = tok[T_SYM]
+			else
+				CompileErr( "expected else, an atom, string, constant or enum" )
+			end if
+		end if
+	
+		if tok[T_ID] = ELSE then
+			if sign = -1 then
+				CompileErr( "expected an atom, string or a constant assigned an atom or a string" )
+			end if
+			case_else()
+	
+		elsif fwd then
+			integer fwdref
+			fwdref = new_forward_reference( CASE, fwd )
+			add_case( {fwdref}, sign )
+			fwd:set_data( fwdref, switch_stack[$][SWITCH_PC] )
+			
+		else
+			condition = tok[T_SYM]
+			add_case( condition, sign )
+		end if
+		
+		tok = next_token()
+		if find( tok[T_ID],  {COLON, THEN}) then
+			exit
+		elsif tok[T_ID] != COMMA then
+			putback( tok )
+			exit
+		else
+			tok = next_token()
+		end if
+	end while
 	StartSourceLine( TRUE )
 end procedure
 

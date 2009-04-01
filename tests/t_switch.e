@@ -24,15 +24,15 @@ sequence s
 s = {}
 for i = 1 to length( SWITCH ) label "top" do
 	switch SWITCH[i] do
-		case 1:
+		case 1 then
 			s = append( s, SWITCH[1] )
-		case 2:
+		case 2 then
 			s = append( s, SWITCH[2] )
 			break
 			
-		case 3:
+		case 3 then
 			switch i - 3 do
-				case 1:
+				case 1 then
 					s &= 3
 					break
 					
@@ -41,7 +41,7 @@ for i = 1 to length( SWITCH ) label "top" do
 			end switch
 			break
 			
-		case "a":
+		case "a" then
 			s = append( s, SWITCH[i] )
 			break
 			
@@ -67,24 +67,24 @@ integer ns = 0
 enum A,B,C
 procedure nst(object pA, object pB = -1)
 switch pA do
-    case C:
+    case C then
         ns = 1
         break
-    case B:
+    case B then
     	switch pB do
-    		case C:
+    		case C then
         		ns = 2
         		break
         		
-    		case B:
+    		case B then
         		ns = 5
         		break
-    		case A:
+    		case A then
         		ns = 6
         		break
         end switch
         break
-    case A:
+    case A then
         ns = 3
         break
 end switch
@@ -97,16 +97,16 @@ constant TWO = 2, NEGATIVE_3 = -3
 sequence negative_case = {}
 for i = 1 to length( cases ) do
 	switch cases[i] do
-		case -1:
+		case -1 then
 			negative_case = append( negative_case,-1 )
 			break
-		case -"345":
+		case -"345" then
 			negative_case = append( negative_case, -"345" )
 			break
-		case -TWO:
+		case -TWO then
 			negative_case = append( negative_case, -TWO )
 			break
-		case NEGATIVE_3:
+		case NEGATIVE_3 then
 			negative_case = append( negative_case, NEGATIVE_3 )
 			break
 	end switch
@@ -116,7 +116,7 @@ test_equal( "switch with negative cases",  cases, negative_case )
 
 integer static_int
 switch 2 do
-	case 2:
+	case 2 then
 		static_int = 2
 		break
 	case else
@@ -126,7 +126,7 @@ test_equal( "static int", 2, static_int )
 
 integer z = 0
 switch "foo" do
-	case 1:
+	case 1 then
 		z = 1
 		break
 	case else
@@ -137,10 +137,10 @@ test_equal( "int cases, sequence switch with else", 2, z )
 function int_switch1( object cond )
 	integer ret = 0
 	switch cond do
-		case 1:
+		case 1 then
 			ret = 1
 			break
-		case 2:
+		case 2 then
 			ret = 2
 			break
 		case else
@@ -158,10 +158,10 @@ test_equal( "int_switch1( \"foo\" )", 3, z )
 function int_switch2( object cond )
 	integer ret = 0
 	switch cond do
-		case 1:
+		case 1 then
 			ret = 1
 			break
-		case 2:
+		case 2 then
 			ret = 2
 			break
 		case else
@@ -176,10 +176,10 @@ test_equal( "int_switch2 -- check for sequence optimization with case else", 3, 
 function int_switch3( object cond )
 	integer ret = 0
 	switch cond do
-		case 1:
+		case 1 then
 			ret = 1
 			break
-		case 2:
+		case 2 then
 			ret = 2
 			break
 	end switch
@@ -192,10 +192,10 @@ test_equal( "int_switch3 -- check for sequence optimization without case else", 
 function int_switch4( object cond )
 	integer ret = 0
 	switch cond do
-		case 1:
+		case 1 then
 			ret = 1
 			break
-		case 2:
+		case 2 then
 			ret = 2
 			break
 	end switch
@@ -211,11 +211,11 @@ function int_switch5( object cond )
 	integer ret = 0
 	goto "foo"
 	switch cond do
-		case 1:
+		case 1 then
 		label "foo"
 			ret = 1
 			break
-		case 2:
+		case 2 then
 			ret = 2
 			break
 	end switch
@@ -229,11 +229,11 @@ function int_switch6( object cond )
 	integer ret = 0
 	
 	switch cond do
-		case 1:
+		case 1 then
 		label "foo"
 			ret = 1
 			break
-		case 2:
+		case 2 then
 			ret = 2
 			break
 	end switch
@@ -255,9 +255,9 @@ constant
 
 function rt_int_switch( object x )
 	switch x do
-		case A:
+		case A then
 			return A
-		case D:
+		case D then
 			return D
 		case else
 			return "else"
@@ -266,9 +266,9 @@ end function
 
 function rt_switch( object x )
 	switch x do
-		case D:
+		case D then
 			return D
-		case E:
+		case E then
 			return E
 		case else
 			return "else"
