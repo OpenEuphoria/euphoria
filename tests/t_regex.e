@@ -55,6 +55,8 @@ test_equal("matches() #1", { "John Doe", "John", "Doe" }, regex:matches(re, "Joh
 test_equal("matches() STRING_OFFSET #1",
 	{ { "John Doe", 1, 8 }, { "John", 1, 4 }, { "Doe", 6, 8 } },
 	regex:matches(re, "John Doe and Jane Doe", 1, regex:STRING_OFFSETS))
+test_equal("matches() no match #1", ERROR_NOMATCH, regex:matches(re, "12"))
+
 test_equal("all_matches() #1", { { "John Doe", "John", "Doe" }, { "Jane Doe", "Jane", "Doe" } },
 	regex:all_matches(re, "John Doe Jane Doe"))
 test_equal("all_matches() STRING_OFFSET #1",
@@ -71,6 +73,7 @@ test_equal("all_matches() STRING_OFFSET #1",
 		}
 	},
 	regex:all_matches(re, "John Doe and Jane Doe", 1, regex:STRING_OFFSETS))
+test_equal("all_matches() no match #1", ERROR_NOMATCH, regex:all_matches(re, "12"))
 regex:free(re)
 
 re = regex:new(#/,\s/)

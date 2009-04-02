@@ -345,6 +345,8 @@ public function matches(regex re, sequence haystack, integer from=1, object opti
 	integer str_offsets = and_bits(STRING_OFFSETS, options)
 	object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
+	if atom(match_data) then return ERROR_NOMATCH end if
+
 	for i = 1 to length(match_data) do
 		sequence tmp = haystack[match_data[i][1]..match_data[i][2]]
 		if str_offsets then
@@ -415,6 +417,8 @@ end function
 public function all_matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
 	integer str_offsets = and_bits(STRING_OFFSETS, options)
 	object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
+
+	if length(match_data) = 0 then return ERROR_NOMATCH end if
 
 	for i = 1 to length(match_data) do
 		for j = 1 to length(match_data[i]) do
