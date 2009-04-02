@@ -249,12 +249,15 @@ EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 all : interpreter translator library backend
 
 version.e : version.mak
-	echo global constant MAJ_VER=$(MAJ_VER) > version.e
+	echo -- DO NOT EDIT, EDIT version.mak INSTEAD > version.e
+	echo global constant MAJ_VER=$(MAJ_VER) >> version.e
 	echo global constant MIN_VER=$(MIN_VER) >> version.e
 	echo global constant PAT_VER=$(PAT_VER) >> version.e
 	echo global constant REL_TYPE=\"$(REL_TYPE)\" >> version.e
 
 version.h: version.mak
+	echo // DO NOT EDIT, EDIT version.mak INSTEAD > version.h
+	echo \#define MAJ_VER $(MAJ_VER) >> version.h
 	echo \#define MAJ_VER $(MAJ_VER) > version.h
 	echo \#define MIN_VER $(MIN_VER) >> version.h
 	echo \#define PAT_VER $(PAT_VER) >> version.h

@@ -648,14 +648,16 @@ $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG)
 
 version.e: version.mak
     @echo ------- VERSION.E -----------
-	@echo global constant MAJ_VER=$(MAJ_VER) > version.e
+	@echo -- DO NOT EDIT, EDIT version.mak INSTEAD > version.e
+	@echo global constant MAJ_VER=$(MAJ_VER) >> version.e
 	@echo global constant MIN_VER=$(MIN_VER) >> version.e
 	@echo global constant PAT_VER=$(PAT_VER) >> version.e
 	@echo global constant REL_TYPE="$(REL_TYPE)" >> version.e
 
 version.h: version.mak
     @echo ------- VERSION.H -----------
-	@echo $#define MAJ_VER $(MAJ_VER) > version.h
+	@echo // DO NOT EDIT, EDIT version.mak INSTEAD > version.h
+	@echo $#define MAJ_VER $(MAJ_VER) >> version.h
 	@echo $#define MIN_VER $(MIN_VER) >> version.h
 	@echo $#define PAT_VER $(PAT_VER) >> version.h
 	@echo $#define REL_TYPE "$(REL_TYPE)" >> version.h
