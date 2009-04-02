@@ -286,6 +286,91 @@ public function is_match(regex re, sequence haystack, integer from=1, integer op
 	return 0
 end function
 
+--**
+-- Get the matched text only
+-- 
+-- Parameters:
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--
+-- Returns:
+--   Returns a sequence of matches.
+--
+-- Example 1:
+--   <eucode>
+--   constant re_number = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
+--   object matches = re:find_all(re_number, "John Doe and Jane Doe")
+--
+--   -- matches is:
+--   -- {
+--   --   "John Doe", -- full match data
+--   --   "John",     -- first group
+--   --   "Doe"       -- second group
+--   -- }
+--   </eucode>
+--
+-- See Also:
+--   [[:all_matches]]
+
+public function matches(regex re, sequence haystack, integer from=1, integer options=0)
+	object match_data = find(re, haystack, from, options)
+
+	for i = 1 to length(match_data) do
+		match_data[i] = haystack[match_data[i][1]..match_data[i][2]]
+	end for
+
+	return match_data
+end function
+
+--**
+-- Get the text of all matches
+-- 
+-- Parameters:
+--   # ##re##: a regex for a subject to be matched against
+--   # ##haystack##: a string in which to searched
+--   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--
+-- Returns:
+--   Returns a sequence of matches.
+--
+-- Example 1:
+--   <eucode>
+--   constant re_number = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
+--   object matches = re:find_all(re_number, "John Doe and Jane Doe")
+--
+--   -- matches is:
+--   -- {
+--   --   {             -- first match
+--   --     "John Doe", -- full match data
+--   --     "John",     -- first group
+--   --     "Doe"       -- second group
+--   --   },
+--   --   {             -- second match
+--   --     "Jane Doe", -- full match data
+--   --     "Jane",     -- first group
+--   --     "Doe"       -- second group
+--   --   }
+--   -- }
+--   </eucode>
+--
+-- See Also:
+--   [[:matches]]
+
+public function all_matches(regex re, sequence haystack, integer from=1, integer options=0)
+	object match_data = find_all(re, haystack, from, options)
+
+	for i = 1 to length(match_data) do
+		for j = 1 to length(match_data[i]) do
+			match_data[i][j] = haystack[match_data[i][j][1]..match_data[i][j][2]]
+		end for
+	end for
+
+	return match_data
+end function
+
 --****
 -- === Replacement
 --

@@ -40,6 +40,12 @@ test_true("has_match() #1", regex:has_match(re, "john DOE had a DOG"))
 test_false("has_match() #2", regex:has_match(re, "john doe had a dog"))
 regex:free(re)
 
+re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
+test_equal("matches() #1", { "John Doe", "John", "Doe" }, regex:matches(re, "John Doe Jane Doe"))
+test_equal("all_matches() #1", { { "John Doe", "John", "Doe" }, { "Jane Doe", "Jane", "Doe" } },
+	regex:all_matches(re, "John Doe Jane Doe"))
+regex:free(re)
+
 re = regex:new("(x)")
 test_true("regex matched groups 1", regex(re))
 regex:free(re)
