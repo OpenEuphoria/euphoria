@@ -221,6 +221,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
 
     *Dest = 0;
     *Dlen = 0;
+	add(&dlen, &dest, Src, ovector[0], &flag);
     while (*rep) {
 		switch (Ch = *rep++) {
 		case '\\':
@@ -406,12 +407,15 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
             break;
         }
     }
+	add(&dlen, &dest, Src + ovector[1], len - ovector[1] + 1, &flag);
+
     *Dlen = dlen;
     *Dest = dest;
+
     return 0;
 }
 
-object find_replace_pcre(object x ){
+object find_replace_pcre(object x ) {
 	int rc;
 	int ovector[30], out_len = 0;
 	pcre *re;
@@ -423,12 +427,14 @@ object find_replace_pcre(object x ){
 	object pcre_ptr;
 	int options;
 	int start_from;
+	int limit;
 
 	// x[1] = pcre ptr
 	// x[2] = string to search
 	// x[3] = replacement
 	// x[4] = options
 	// x[5] = start_from
+	// x[6] = limit
 
 	pcre_ptr = SEQ_PTR(x)->base[1];
 	re = get_re(pcre_ptr);
@@ -441,27 +447,35 @@ object find_replace_pcre(object x ){
 	rep = EMalloc(rep_s->length+1);
 	MakeCString(rep, SEQ_PTR(x)->base[3]);
 
-	options    = get_int( SEQ_PTR(x)->base[4] );
-	start_from = get_int( SEQ_PTR(x)->base[5] ) - 1;
+	options    = get_int(SEQ_PTR(x)->base[4]);
+	start_from = get_int(SEQ_PTR(x)->base[5]) - 1;
+	limit      = get_int(SEQ_PTR(x)->base[6]);
+	out_len    = SEQ_PTR(SEQ_PTR(x)->base[2])->length;
 
-	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
-				   start_from, options, ovector, 30 );
+	while (1) {
+		rc = pcre_exec(re, NULL, str, out_len, start_from, options, ovector, 30);
 
-	if( rc <= 0 ) {
-		EFree(rep);
+		if (rc <= 0 || limit == 0) {
+			EFree(rep);
+
+			return NewString(str);
+		}
+
+		if (out != 0) {
+			EFree(out);
+		}
+
+		rc = replace_pcre(rep, str, out_len-1, ovector, rc, &out, &out_len);
 		EFree(str);
 
-		return rc;
+		str = EMalloc(out_len + 1);
+		strncpy(str, out, out_len);
+		str[out_len] = 0;
+
+		start_from = ovector[rc+1];
+		limit -= 1;
 	}
 
-	rc = replace_pcre(rep, str, sub->length-1, ovector, rc, &out, &out_len);
-
-	EFree(rep);
-	EFree(str);
-
-	rep = EMalloc(out_len + 1);
-	strncpy(rep, out, out_len);
-	rep[out_len] = 0;
-
-	return NewString(rep);
+	return ATOM_0;
 }
+

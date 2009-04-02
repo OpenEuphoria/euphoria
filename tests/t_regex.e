@@ -58,6 +58,9 @@ test_equal("find_replace #2", "hello DOE, john!", regex:find_replace(re, "hello 
 test_equal("find_replace #3", "hello \nDoe, John!", regex:find_replace(re, "hello John Doe!", #/\n\2, \1/))
 test_equal("find_replace #4", "hello John\tDoe!", regex:find_replace(re, "hello John Doe!", #/\1\t\2/))
 test_equal("find_replace #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", #/Mr. \1 \2/))
+
+test_equal("find_replace_limit #1", "JOHN DOE Jane Doe", 
+	regex:find_replace_limit(re, "John Doe Jane Doe", #/\U\1 \2\e/, 1))
 regex:free(re)
 
 test_report()
