@@ -166,7 +166,7 @@ global procedure common_options( integer option, integer ix )
 				OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
 			else
 				option_W = -1
-				OpWarning = strict_warning_flag - warning_flags[n]
+				OpWarning = all_warning_flag - warning_flags[n]
 			end if
 			prev_OpWarning = OpWarning
 		end if

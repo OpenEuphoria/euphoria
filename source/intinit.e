@@ -51,7 +51,7 @@ global procedure intoptions()
 	end while
 
 	if Strict_is_on then -- overrides any -W/-X switches
-		OpWarning = strict_warning_flag
+		OpWarning = all_warning_flag
 		prev_OpWarning = OpWarning
 	end if
 

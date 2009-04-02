@@ -912,13 +912,14 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 		tok = next_token()
 		integer id = tok[T_ID]
 		
-		switch id with fallthru do
+		switch id do
 			case COMMA then
 				emit_opnd( 0 ) -- clean this up later
 				args += 1
-				break
+				
 			case RIGHT_ROUND then
 				exit
+				
 			case else
 				putback( tok )
 				call_proc( forward_expr, {} )
@@ -926,14 +927,13 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 				
 				tok = next_token()
 				id = tok[T_ID]
-				switch id with fallthru do
-					case RIGHT_ROUND then
-						exit
-					case COMMA then
-						break
-					case else
+				if id = RIGHT_ROUND then
+					exit
+				end if
+										
+				if id != COMMA then
 						CompileErr("expected ',' or ')'")
-				end switch
+				end if
 		end switch
 	end while
 	
@@ -1108,7 +1108,7 @@ procedure Factor()
 		tok = read_recorded_token(tok[T_SYM])
 		id = tok[T_ID]
 	end if
-	switch id with fallthru label "factor" do
+	switch id label "factor" do
 		case VARIABLE, QUALIFIED_VARIABLE then
 		
 			sym = tok[T_SYM]
@@ -1166,7 +1166,7 @@ procedure Factor()
 			current_sequence = current_sequence[1..$-1]
 			putback(tok)
 			short_circuit += 1
-			break
+			
 			
 		case DOLLAR then
 			if length(current_sequence) then
@@ -1174,31 +1174,31 @@ procedure Factor()
 			else
 				CompileErr("'$' must only appear between '[' and ']'")
 			end if
-			break
+			
 			
 		case ATOM then
 			emit_opnd(tok[T_SYM])
-			break
+			
 			
 		case LEFT_BRACE then
 			n = Expr_list()
 			tok_match(RIGHT_BRACE)
 			op_info1 = n
 			emit_op(RIGHT_BRACE_N)
-			break
+			
 			
 		case STRING then
 			emit_opnd(tok[T_SYM])
-			break
+			
 
 		case LEFT_ROUND then
 			call_proc(forward_expr, {})
 			tok_match(RIGHT_ROUND)
-			break
+			
 		
 		case FUNC, TYPE, QUALIFIED_FUNC, QUALIFIED_TYPE then
 			Function_call( tok )
-			break
+			
 			
 		case else
 			CompileErr(sprintf(
@@ -1894,14 +1894,13 @@ function finish_block_header(integer opcode)
 
 	if tok[T_ID] = WITH then
 		tok = next_token()
-		switch tok[T_ID] with fallthru do
+		switch tok[T_ID] do
 		    case ENTRY then
 				if not (opcode = WHILE or opcode = LOOP) then
 					CompileErr("`with entry` is only valid on a while or loop statement")
 				end if
 
 			    has_entry = 1
-				break
 				
 			case FALLTHRU then
 				if not opcode = SWITCH then
@@ -1909,7 +1908,6 @@ function finish_block_header(integer opcode)
 				end if
 				
 				switch_stack[$][SWITCH_FALLTHRU] = 1
-				break
 				
 			case else
 			    CompileErr("An unknown `with/without` option has been specified")
@@ -2106,12 +2104,21 @@ procedure pop_switch( integer break_base )
 end procedure
 
 procedure add_case( object sym, integer sign )
-	switch_stack[$][SWITCH_CASES]       = append( switch_stack[$][SWITCH_CASES], sign * sym )
-	switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+
+	if sign < 0 then
+		sym = -sym
+	end if
 	
-	if TRANSLATE then
-		emit_addr( CASE )
-		emit_addr( length( switch_stack[$][SWITCH_CASES] ) )
+	if find(sym, switch_stack[$][SWITCH_CASES] ) = 0 then
+		switch_stack[$][SWITCH_CASES]       = append( switch_stack[$][SWITCH_CASES], sym )
+		switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+	
+		if TRANSLATE then
+			emit_addr( CASE )
+			emit_addr( length( switch_stack[$][SWITCH_CASES] ) )
+		end if
+	else
+		CompileErr( "duplicate case value used." )		
 	end if
 end procedure
 
@@ -2132,9 +2139,9 @@ integer fallthru_case = 0
 procedure Case_statement()
 	token tok
 	symtab_index condition
-	
+
 	if not in_switch() then
-			CompileErr( "a case must be inside a switch" )
+		CompileErr( "a case must be inside a switch" )
 	end if
 	
 	if length(switch_stack[$][SWITCH_CASES]) 
@@ -2170,15 +2177,16 @@ procedure Case_statement()
 		integer fwd = 0	
 		if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
 
-			if SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
-				if SymTab[tok[T_SYM]][S_CODE] then
-					tok[T_SYM] = SymTab[tok[T_SYM]][S_CODE]
+			integer symi = tok[T_SYM]
+			if symi > 0 and SymTab[symi][S_MODE] = M_CONSTANT then
+				if SymTab[symi][S_CODE] then
+					tok[T_SYM] = SymTab[symi][S_CODE]
 				end if
-			elsif tok[T_ID] = VARIABLE and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+			elsif tok[T_ID] = VARIABLE and SymTab[symi][S_SCOPE] = SC_UNDEFINED then
 				-- forward reference to a variable
-				fwd = tok[T_SYM]
+				fwd = symi
 			else
-				CompileErr( "expected else, an atom, string, constant or enum" )
+				CompileErr( "expected 'else', an atom, string, constant or enum" )
 			end if
 		end if
 	
@@ -3219,11 +3227,12 @@ procedure Statement_list()
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
-				switch forward[T_ID] with fallthru do
+				switch forward[T_ID] do
 					case LEFT_ROUND then
 						StartSourceLine( TRUE )
 						Forward_call( tok )
 						continue
+						
 					case VARIABLE then
 						putback( forward )
 						if param_num != -1 then
@@ -3234,6 +3243,7 @@ procedure Statement_list()
 							Global_declaration( tok[T_SYM], SC_LOCAL )
 						end if
 						continue
+						
 				end switch
 				putback( forward )
 			end if
@@ -3573,6 +3583,10 @@ procedure SubProg(integer prog_type, integer scope)
 		end if
 	end if
 
+	if Strict_Override > 0 then
+		Strict_Override -= 1	-- Reset at the end of each routine.
+	end if
+
 	SymTab[p][S_STACK_SPACE] += temps_allocated + param_num
 	if temps_allocated + param_num > max_stack_per_call then
 		max_stack_per_call = temps_allocated + param_num
@@ -3675,6 +3689,8 @@ procedure SetWith(integer on_off)
 		end if
 
 	elsif equal(option, "warning") then
+		integer good_sofar = line_number
+		reset_flags = 1
 		tok = next_token()
 		if tok[T_ID] = CONCAT_EQUALS then
 			tok = next_token()
@@ -3691,6 +3707,14 @@ procedure SetWith(integer on_off)
 			elsif equal(option, "restore") then
 				OpWarning = prev_OpWarning
 				tok = {}
+				
+			elsif equal(option, "strict") then
+				if on_off = 0 then
+					Strict_Override += 1
+				elsif Strict_Override > 0 then
+					Strict_Override -= 1
+				end if
+				tok = {}
 			end if
 		end if
 
@@ -3699,7 +3723,7 @@ procedure SetWith(integer on_off)
 				if on_off = 0 then
 					OpWarning = no_warning_flag
 				else
-					OpWarning = strict_warning_flag
+					OpWarning = all_warning_flag
 				end if
 			end if
 			
@@ -3710,20 +3734,28 @@ procedure SetWith(integer on_off)
 				    	option = SymTab[tok[T_SYM]][S_NAME]
 					elsif tok[T_ID] = STRING then
 						option = SymTab[tok[T_SYM]][S_OBJ]
+					elsif good_sofar != line_number then
+						CompileErr("too many warning errors")
 					else
 						tok = next_token()	
 						continue
 					end if
 					idx = find(option, warning_names)
 					if idx = 0 then
-							CompileErr("Unknown warning name")
+						Warning(sprintf("%.99s:%d - Unknown warning name '%s'",
+							{file_name[current_file_no], line_number, option}),
+							0 -- unmaskable 
+							)
+						tok = next_token()	
+						continue
 					end if
+					
 					idx = warning_flags[idx]
 					if idx = 0 then
 						if on_off then
 							OpWarning = no_warning_flag
 						else
-						    OpWarning = strict_warning_flag
+						    OpWarning = all_warning_flag
 						end if
 					else
 						if on_off then
@@ -3803,7 +3835,7 @@ global procedure real_parser(integer nested)
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
-				switch forward[T_ID] with fallthru do
+				switch forward[T_ID] do
 					case LEFT_ROUND then
 						StartSourceLine( TRUE )
 						Forward_call( tok )
@@ -3815,7 +3847,7 @@ global procedure real_parser(integer nested)
 						continue
 						
 					case else
-					putback( forward )
+						putback( forward )
 				end switch
 			end if
 			StartSourceLine(TRUE)

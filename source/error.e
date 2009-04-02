@@ -36,7 +36,7 @@ global procedure Warning(sequence msg, integer mask, sequence args = {})
 		return
 	end if
 	p = mask -- =0 for non maskable warnings - none implemented so far
-	if Strict_is_on then
+	if Strict_is_on and Strict_Override = 0 then
 		mask = 0
 	end if
 

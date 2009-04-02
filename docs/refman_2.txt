@@ -3021,9 +3021,14 @@ The forms available are ...
 ; ##with warning restore##
 : causes the previously saved state to be restored.
 
+; ##without warning strict##
+: overrides the -strict command line option, but only until the end of the
+  next function or procedure. 
+
 The **with/without warnings** directives will have no effect if the
 ##-STRICT## command line switch is used. The latter turns on all warnings
-and ignores any **with/without warnings** statement.
+and ignores any **with/without warnings** statement. However, it can be temporarily
+affected by the "##without warning strict##" directive.
 
 ----
 
@@ -3061,7 +3066,7 @@ and ignores any **with/without warnings** statement.
 | ##empty_case## | In ##switch## that have ##without fallthru##, an empty case
                    block will result in no code being executed within the switch
                    statement.
-| ##strict## | Turns all warnings on. They can still be disabled by
+| ##all## | Turns all warnings on. They can still be disabled by
                with/without warning directives.
 
 **Example**

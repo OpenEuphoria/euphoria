@@ -278,20 +278,20 @@ global object TempWarningName
 -- With/Without Options
 
 global constant -- maskable warning flags
-	no_warning_flag				= 0,
-	resolution_warning_flag		= 1,
-	short_circuit_warning_flag  = 2,
-	override_warning_flag		= 4,
-	builtin_chosen_warning_flag	= 8,
-	not_used_warning_flag		= 16,
-	no_value_warning_flag		= 32,
-	custom_warning_flag			= 64,
-	translator_warning_flag		= 128,
-	cmdline_warning_flag		= 256,
-	not_reached_warning_flag	= 512,
-	mixed_profile_warning_flag	= 1024,
-	empty_case_warning_flag     = 2048,
-	strict_warning_flag			= 4095
+	no_warning_flag				= #0000,
+	resolution_warning_flag		= #0001,
+	short_circuit_warning_flag  = #0002,
+	override_warning_flag		= #0004,
+	builtin_chosen_warning_flag	= #0008,
+	not_used_warning_flag		= #0010,
+	no_value_warning_flag		= #0020,
+	custom_warning_flag			= #0040,
+	translator_warning_flag		= #0080,
+	cmdline_warning_flag		= #0100,
+	not_reached_warning_flag	= #0200,
+	mixed_profile_warning_flag	= #0400,
+	empty_case_warning_flag     = #0800,
+	all_warning_flag            = #0FFF
 
 constant default_maskable_warnings =
 	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
@@ -312,7 +312,7 @@ global constant warning_flags = {
 	not_reached_warning_flag,
 	mixed_profile_warning_flag,
 	empty_case_warning_flag,
-	strict_warning_flag
+	all_warning_flag
 }
 
 global constant warning_names = {
@@ -329,11 +329,11 @@ global constant warning_names = {
 	"not_reached",
 	"mixed_profile",
 	"empty_case",
-	"strict"
+	"all"
 }
 
 global integer Strict_is_on = 0
-
+global integer Strict_Override = 0
 global integer OpWarning = default_maskable_warnings -- compile-time warnings option
 global integer prev_OpWarning = OpWarning
 global integer OpTrace              -- trace option
