@@ -241,6 +241,28 @@ function scan_white() -- returns TRUE if a blank line was parsed
 	return FALSE
 end function
 
+function scan_multicomment()
+	if (Look != '/') then return FALSE end if
+  	if (input[in+1] != '*') then return FALSE end if
+	scan_char() -- skip the *
+	scan_char()
+	Token[TTYPE] = T_COMMENT
+	Token[TDATA] = "/*"
+	while 1 do
+		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
+		if (Look = '*') then
+			if (input[in+1] = '/') then
+				exit
+			end if
+		end if
+		Token[TDATA] &= Look
+		scan_char()
+	end while
+	scan_char() -- skip the *
+	scan_char()
+	return TRUE
+end function
+
 constant QFLAGS = "trn\\\'\""
 
 procedure scan_escaped_char()
@@ -279,6 +301,30 @@ function scan_string()
 		if ERR then return TRUE end if
 	end while
 	scan_char()
+	return TRUE
+end function
+
+function scan_multistring()
+	integer end_of_string
+
+	if (Look != '#') then return FALSE end if
+	if not find(input[in+1], "#'`~$^/\\|") then return FALSE end if
+
+	scan_char()
+	end_of_string = Look
+	scan_char()
+	Token[TTYPE] = T_STRING
+	Token[TDATA] = ""
+
+	while (Look != end_of_string) do
+		if (Look = EOL) then report_error(ERR_EOL_STRING) return TRUE end if
+
+		Token[TDATA] &= Look
+		scan_char()
+	end while
+
+	scan_char()
+
 	return TRUE
 end function
 
@@ -486,7 +532,9 @@ procedure next_token()
 
 	elsif scan_identifier() then
 	elsif scan_qchar() then
+	elsif scan_multicomment() then
 	elsif scan_string() then
+	elsif scan_multistring() then -- must be before scan_hex()
 	elsif scan_hex() then
 	elsif scan_number() then
 	else -- error or end of file
