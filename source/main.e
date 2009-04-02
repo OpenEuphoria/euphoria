@@ -222,12 +222,8 @@ procedure main()
 	if src_file = -1 then
 		-- too early for normal error processing
 		screen_output(STDERR, sprintf("Can't open %s\n", {file_name[$]}))
-		-- TODO: Should this check batch_job?
-		if BIND then
-			screen_output(STDERR, "\nPress Enter\n")
-			if getc(0) then
-			end if
-		end if
+		screen_output(STDERR, "\nPress Enter\n")
+		getc(0)
 		Cleanup(1)
 	end if
 
@@ -271,4 +267,3 @@ end ifdef
 end procedure
 
 main()
-

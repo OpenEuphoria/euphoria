@@ -30,8 +30,7 @@ procedure fatal(sequence msg)
 -- fatal error 
 	puts(2, msg & '\n')
 	puts(2, "\nPress Enter\n")
-	if getc(0) then -- prompt
-	end if
+	getc(0)
 	abort(1)
 end procedure
 

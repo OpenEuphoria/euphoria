@@ -561,8 +561,7 @@ procedure quit_after_error()
 	-- TODO: Should this check for batch_job?
 	ifdef WIN32 then
 		puts(2, "\nPress Enter...\n")
-		if getc(0) then
-		end if
+		getc(0)
 	end ifdef
 
 	abort(1)

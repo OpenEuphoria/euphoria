@@ -120,15 +120,17 @@ end function
 
 global procedure Cleanup(integer status)
 -- clean things up before quitting
-	integer w
+	integer w, show_error = 0
+
+	ifdef WIN32 or UNIX then
+		show_error = 1
+	end ifdef
 
 	w = ShowWarnings(status)
-
-	if not TRANSLATE and BIND and (w or Errors) then
+	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
 		if not batch_job then
 			screen_output(STDERR, "\nPress Enter\n")
-			if getc(0) then -- prompt
-			end if
+			getc(0) -- wait
 		end if
 	end if
 
@@ -214,10 +216,9 @@ global procedure InternalErr(sequence msg)
 		   {file_name[current_file_no], line_number, msg}))
 	end if
 
-	if batch_job = 0 then
+	if not batch_job then
 		screen_output(STDERR, "\nPress Enter\n")
-		if getc(0) then
-		end if
+		getc(0)
 	end if
 	
     -- M_CRASH = 67

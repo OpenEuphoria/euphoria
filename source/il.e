@@ -40,8 +40,7 @@ procedure fatal(sequence msg)
 		-- TODO: Should we check for batch_job?
 		-- we run bind and bindw using backendw.exe, so this is needed
 		puts(2, "\nPress Enter\n")
-		if getc(0) then
-		end if
+		getc(0)
 	end ifdef
 
 	abort(1)
@@ -538,10 +537,8 @@ procedure OutputIL()
 			end ifdef
 			puts(1, "You may now run " & out_name & '\n')
 		end if
-		-- TODO: Should this be checking batch_job?
 		puts(1, "\nPress Enter\n")
-		if getc(0) then
-		end if
+		getc(0)
 	end if
 end procedure
 set_output_il( routine_id("OutputIL") )
