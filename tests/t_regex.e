@@ -46,6 +46,14 @@ test_equal("all_matches() #1", { { "John Doe", "John", "Doe" }, { "Jane Doe", "J
 	regex:all_matches(re, "John Doe Jane Doe"))
 regex:free(re)
 
+re = regex:new(#/,\s/)
+test_equal("split() #1", { "euphoria programming", "source code", "reference manual" },
+	regex:split(re, "euphoria programming, source code, reference manual"))
+
+test_equal("split_limit() #1", { "euphoria programming", "source code, reference manual" },
+	regex:split_limit(re, "euphoria programming, source code, reference manual", 1))
+regex:free(re)
+
 re = regex:new("(x)")
 test_true("regex matched groups 1", regex(re))
 regex:free(re)

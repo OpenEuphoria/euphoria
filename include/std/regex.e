@@ -371,6 +371,57 @@ public function all_matches(regex re, sequence haystack, integer from=1, integer
 	return match_data
 end function
 
+--**
+-- Split a string based on a regex as a delimiter
+--
+-- Parameters:
+--   # ##re##: a regex which will be used for matching
+--   # ##text##: a string on which search and replace will apply
+--   # ##from##: optional start position
+--   # ##options##: match options, defaults to [[:DEFAULT]]
+--
+-- Returns:
+--   A sequence of string values split at the delimiter.
+--   
+-- Example 1:
+-- <eucode>
+-- regex comma_space_re = re:new(#/\s,/)
+-- sequence data = re:split(comma_space_re, "euphoria programming, source code, reference data")
+-- -- data is
+-- -- {
+-- --   "euphoria programming",
+-- --   "source code",
+-- --   "reference data"
+-- -- }
+-- </eucode>
+-- 
+
+public function split(regex re, sequence text, integer from=1, integer options=0)
+	return split_limit(re, text, 0, from, options)
+end function
+
+public function split_limit(regex re, sequence text, integer limit=0, integer from=1, integer options=0)
+	sequence match_data = find_all(re, text, from, options), result
+	integer last = 1
+
+	if limit = 0 then
+		limit = length(match_data)
+	end if
+
+	result = repeat(0, limit)
+
+	for i = 1 to limit do
+		result[i] = text[last..match_data[i][1][1] - 1]
+		last = match_data[i][1][2] + 1
+	end for
+
+	if last < length(text) then
+		result &= { text[last..$] }
+	end if
+
+	return result
+end function
+
 --****
 -- === Replacement
 --
