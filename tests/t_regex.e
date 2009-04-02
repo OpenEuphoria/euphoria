@@ -52,10 +52,13 @@ re = regex:new("$")
 test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
 regex:free(re)
 
-re = regex:new(#/([A-Za-z0-9]+)\.([A-Za-z0-9]+)/)
-test_true("find_replace new()", regex:regex(re))
-test_equal("find_replace() #1", "Filename: filename Extension: TXT",
-	regex:find_replace(re, "filename.txt", "Filename: \\1 Extension: \\U\\2\\e"))
+re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
+test_equal("find_replace #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", #/\2, \1/))
+test_equal("find_replace #2", "hello DOE, john!", regex:find_replace(re, "hello John Doe!", #/\U\2\e, \L\1\e/))
+test_equal("find_replace #3", "hello \nDoe, John!", regex:find_replace(re, "hello John Doe!", #/\n\2, \1/))
+test_equal("find_replace #4", "hello John\tDoe!", regex:find_replace(re, "hello John Doe!", #/\1\t\2/))
+test_equal("find_replace #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", #/Mr. \1 \2/))
 regex:free(re)
 
 test_report()
+

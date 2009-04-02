@@ -1,6 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 
 include std/math.e
+include std/text.e
 
 --****
 -- == Regular Expressions
@@ -289,21 +290,24 @@ end function
 -- === Replacement
 --
 
+enum TR_NONE, TR_UPPER_CHAR, TR_LOWER_CHAR, TR_UPPER, TR_LOWER
+
+public function fro(regex ex, sequence text, sequence replacement, integer from=1, atom options=0)
+	return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from })
+end function
+
 --**
 -- Replaces all matches of a regex with the replacement text.
 --
 -- Parameters:
 --   # ##re##: a regex which will be used for matching
 --   # ##text##: a string on which search and replace will apply
---   # ##replacement##: a string, used to replace each of the full matches found.
---   # ##options##: an atom, defaulted to 0.
+--   # ##replacement##: a string, used to replace each of the full matches found
+--   # ##from##: optional start position
+--   # ##options##: match options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
---
--- Comments:
---   Matches may be found against the result of previous replacements. Careful experimentation is
---   highly recommended before doing things like text = regex:find_replace(re,text,whatever,something).
 --
 -- ===== Special replacement operators
 -- 
@@ -327,6 +331,108 @@ end function
 -- </eucode>
 --
 
-public function find_replace(regex re, sequence text, sequence replacement, integer from=1, atom options=0)
-	return machine_func(M_PCRE_REPLACE, { re, text, replacement, options, from })
+public function find_replace(regex ex, sequence text, sequence replacement, integer from=1, atom options=0)
+	return find_replace_limit(ex, text, replacement, 0, from, options)
 end function
+
+--**
+-- Replaces up to ##limit## matches of ##ex## in ##text##.
+--
+-- This function is identical to [[:find_replace]] except it allows you to limit the number of
+-- replacements to perform. Please see the documentation for [[:find_replace]] for all the
+-- details.
+--
+-- Parameters:
+--   # ##re##: a regex which will be used for matching
+--   # ##text##: a string on which search and replace will apply
+--   # ##replacement##: a string, used to replace each of the full matches found
+--   # ##limit##: the number of matches to process
+--   # ##from##: optional start position
+--   # ##options##: match options, defaults to [[:DEFAULT]]
+--
+-- Returns:
+--   A **sequence**, the modified ##text##.
+--
+-- See Also:
+--   [[:find_replace]]
+--
+
+public function find_replace_limit(regex ex, sequence text, sequence replacement, 
+			integer limit, integer from=1, atom options=0)
+	object m = find_all(ex, text, from, options)
+	sequence new_text = "", tmp_text
+	integer ch, r_idx = 1, last_add = 1, transform = TR_NONE
+
+	if limit = 0 then
+		limit = length(m)
+	elsif limit > length(m) then
+		limit = length(m) -- duplicate to not suffer the "or" slow down of an if
+	end if
+
+	-- Process each match
+	for i = 1 to limit do
+		r_idx = 1
+
+		-- this match
+		sequence tm = m[i]
+
+		-- Add the beginning text that was not part of the match
+		new_text &= text[last_add..tm[1][1]-1]
+		last_add = tm[1][2]+1
+
+		while r_idx <= length(replacement) do
+			ch = replacement[r_idx]
+			switch ch do
+				case '\\' then
+					r_idx += 1
+					ch = replacement[r_idx]
+					switch ch do
+						case '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' then
+							tmp_text = text[tm[ch-47][1]..tm[ch-47][2]]
+							switch transform do
+								case TR_UPPER_CHAR then
+									tmp_text[1] = upper(tmp_text[1])
+									transform = TR_NONE
+								case TR_LOWER_CHAR then
+									tmp_text[1] = lower(tmp_text[1])
+									transform = TR_NONE
+								case TR_UPPER then
+									tmp_text = upper(tmp_text)
+								case TR_LOWER then
+									tmp_text = lower(tmp_text)
+							end switch
+
+							new_text &= tmp_text
+						case 'U' then
+							transform = TR_UPPER
+						case 'L' then
+							transform = TR_LOWER
+						case 'u' then
+							transform = TR_UPPER_CHAR
+						case 'l' then
+							transform = TR_LOWER_CHAR
+						case 'e', 'E' then
+							transform = TR_NONE
+						case 'n' then
+							new_text &= '\n'
+						case 'r' then
+							new_text &= '\r'
+						case 't' then
+							new_text &= '\t'
+						case else
+							new_text &= '\\' & ch
+					end switch
+				case else
+					new_text &= replacement[r_idx]
+			end switch
+
+			r_idx += 1
+		end while
+	end for
+
+	-- Add the ending text that was not part of the match
+	new_text &= text[m[limit][1][2]+1..$]
+
+	return new_text
+end function
+
