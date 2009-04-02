@@ -26,6 +26,8 @@ printf(1, "Connecting to %s\n", { addr })
 integer result = slib:connect(sock, "127.0.0.1:5000")
 if not result then
 	printf(1, "Could not connect to server %s, is it running?\nError = %d\n", { addr, result })
+	puts(1, "Maybe try connecting to a different IP/Port?\n")
+	puts(1, "   Usage: exwc chat_client.ex [IP:PORT]\n")
 	abort(1)
 end if
 
@@ -38,15 +40,17 @@ puts(1, recv(sock, 0))
 while 1 label "top" do
 	integer key = get_key()
 	switch key do
-		case -1: break
-		case 's':
+		case -1 then
+			break
+
+		case 's' then
 			sequence data = prompt_string(sprintf("%10s > ", { name }))
 			if length(data) > 0 then
 				_ = send(sock, sprintf("%10s > %s\n", { name, data }), 0)
 			end if
 			break
 
-		case 'l':
+		case 'l' then
 			exit "top"
 	end switch
 

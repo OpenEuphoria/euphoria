@@ -677,11 +677,13 @@ object eusock_select(object x)
 	for (i=1; i <= socks_p->length; i++) {
 		tmp_socket = SEQ_PTR(socks_p->base[i])->base[SOCK_SOCKET];
 
+		RefDS(socks_p->base[i]);
+
 		tmp_sp = NewS1(4);
-		tmp_sp->base[1] = SEQ_PTR(socks_p->base[i]);
-		tmp_sp->base[2] = FD_ISSET(tmp_socket, &readable);
-		tmp_sp->base[3] = FD_ISSET(tmp_socket, &writable);
-		tmp_sp->base[4] = FD_ISSET(tmp_socket, &errd);
+		tmp_sp->base[1] = socks_p->base[i];
+		tmp_sp->base[2] = FD_ISSET(tmp_socket, &readable) != 0;
+		tmp_sp->base[3] = FD_ISSET(tmp_socket, &writable) != 0;
+		tmp_sp->base[4] = FD_ISSET(tmp_socket, &errd) != 0;
 
 		result_p->base[i] = MAKE_SEQ(tmp_sp);
 	}

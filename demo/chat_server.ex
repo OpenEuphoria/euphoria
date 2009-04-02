@@ -12,9 +12,9 @@ procedure send_to_all(sequence message, integer skip=0)
 	end for
 end procedure
 
-procedure remove_client(integer sock)
+procedure remove_client(socket sock)
 	for i = 1 to length(clients) do
-		if sock = clients[i] then
+		if equal(sock, clients[i]) then
 			sequence nick = nicks[i]
 			printf(1, "Client %d of %d disconnected\n", { i, length(clients) })
 			clients = remove(clients, i)
@@ -39,6 +39,8 @@ procedure main(sequence args)
 
 	if not result then
 		printf(1, "Could not bind server to %s, error=%d\n", { addr, result })
+		puts(1, "You may try another IP and/or port:\n")
+		puts(1, "  Usage: exwc chat_sever.ex [IP:PORT]\n")
 		abort(1)
 	end if
 
