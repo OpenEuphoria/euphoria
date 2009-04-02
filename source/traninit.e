@@ -184,27 +184,31 @@ global procedure transoptions()
 		end if      
 	end while
 	
+	
 	if help_option then
-		CompileErr(
-"Usage: ec [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]\n"&
-"          [-com /compile_directory/] [-keep] [-debug] [-silent]\n"&
-"          [-lib /library relative to %EUDIR%\\bin/] [-stack /stack size/]\n"&
-"          [/os specific options/]:\n" &
-"\n"&
-"OS Specific Options:\n"&
-"       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]\n" &
-"       DOS    :  [-djg|-wat] [-fastfp]\n" &
-"       Linux  :  [-gcc] [-dll]\n" &
-"       FreeBSD:  [-gcc] [-dll]\n" &
-"       OSX    :  [-gcc] [-dll]\n" &
-"       SunOS  :  [-gcc] [-dll]\n" &
-"\n"&
-"LCC Only: -lccopt-off\n\n"&
-"Explainations:\n" &
-"       -CON : Don't create a new window when using the console.\n"
-			   
-			   
-			   )	
+		object msgtext =##
+Usage: ec  [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]
+           [-com /compile_directory/] [-keep] [-debug] [-silent]
+           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
+           [/os specific options/]:
+
+OS Specific Options:
+       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]
+       DOS    :  [-djg|-wat] [-fastfp]
+       Linux  :  [-gcc] [-dll]
+       FreeBSD:  [-gcc] [-dll]
+       OSX    :  [-gcc] [-dll]
+       SunOS  :  [-gcc] [-dll]
+
+LCC Only: -lccopt-off
+
+Explainations:
+       -CON : Don't create a new window when using the console.
+#
+		if TWINDOWS	then
+			msgtext[10] = 'w'
+		end if
+		CompileErr( msgtext)	
 	end if
 	
 	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option,  bor_option}, {0,0,0,0} ) = 0 then
