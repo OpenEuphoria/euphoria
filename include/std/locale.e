@@ -16,6 +16,7 @@ include std/io.e
 include std/map.e
 include std/localeconv.e as lcc
 include std/lcid.e as lcid
+include std/convert.e
 
 ------------------------------------------------------------------------------------------
 --
@@ -405,7 +406,7 @@ public function number(object num)
 			lpFormat = NULL
 		else
 			lpFormat = NULL
-			pTmp = allocate_string(sprintf("%.8f", {num}))
+			pTmp = allocate_string(sprintf("%.15f", {num}))
 		end if
 		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
 	-- else doesn't work under DOS
@@ -415,6 +416,42 @@ public function number(object num)
 	free(pResult)
 	free(pTmp)
 
+	-- Assumption: All locales remove trailing zeros and decimal point from integers
+	integer is_int = integer(num)
+	if is_int = 0 then
+		sequence float = sprintf("%.15f", num)
+		is_int = find('.', float)
+		if is_int then
+			for i = length(float) to is_int+1 by -1 do
+				if float[i] != '0' then
+					is_int = 0
+					exit
+				end if
+			end for
+		end if
+	end if
+	if is_int != 0 then -- The input was an integer
+		-- remove all trailing zeros and decimal point, but not any trailing symbols --
+		-- Step 1. Locate rightmost digit.
+		is_int = 0
+		for i = length(result) to 1 by -1 do
+			if find(result[i], "1234567890") then
+				is_int = i + 1
+				exit
+			end if
+		end for
+		-- Step 2. From rightmost digit, stop when we get to a non-zero
+		for i = is_int - 1 to 1 by -1 do
+			if result[i] != '0' then
+				if not find(result[i], "1234567890") then
+					-- Step 3. Remove decimal point and all zeros, preserving any trailing symbols.
+					result = result[1..i-1] & result[is_int .. $]
+				end if
+				exit
+			end if
+		end for
+	end if
+	
 	return result
 end function
 
