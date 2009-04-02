@@ -317,7 +317,7 @@ function scan_multistring()
 	Token[TDATA] = ""
 
 	while (Look != end_of_string) do
-		if (Look = EOL) then report_error(ERR_EOL_STRING) return TRUE end if
+		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
 
 		Token[TDATA] &= Look
 		scan_char()
