@@ -300,8 +300,8 @@ public function is_match(regex re, sequence haystack, integer from=1, object opt
 end function
 
 --**
--- Get the matched text only
--- 
+-- Get the matched text only.
+--
 -- Parameters:
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
@@ -309,18 +309,32 @@ end function
 --   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   Returns a sequence of matches.
+--   Returns a sequence of strings, the first being the entire match and subsequent
+--   items being each of the captured groups. The size of the sequence is the number
+--   of groups in the expression plus one (for the entire match).
+--
+--   If ##options## contains the bit [[:STRING_OFFSETS]], then the result is different.
+--   For each item, a sequence is returned containing the matched text, the starting
+--   index in ##haystack## and the ending index in ##haystack##.
 --
 -- Example 1:
 --   <eucode>
---   constant re_number = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
---   object matches = re:find_all(re_number, "John Doe and Jane Doe")
+--   constant re_name = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 --
+--   object matches = re:matches(re_name, "John Doe and Jane Doe")
 --   -- matches is:
 --   -- {
 --   --   "John Doe", -- full match data
 --   --   "John",     -- first group
 --   --   "Doe"       -- second group
+--   -- }
+--
+--   matches = re:matches(re_name, "John Doe and Jane Doe", STRING_OFFSETS)
+--   -- matches is:
+--   -- {
+--   --   { "John Doe", 1, 8 }, -- full match data
+--   --   { "John",     1, 4 }, -- first group
+--   --   { "Doe",      6, 8 }  -- second group
 --   -- }
 --   </eucode>
 --
@@ -328,10 +342,16 @@ end function
 --   [[:all_matches]]
 
 public function matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	object match_data = find(re, haystack, from, options)
+	integer str_offsets = and_bits(STRING_OFFSETS, options)
+	object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
 	for i = 1 to length(match_data) do
-		match_data[i] = haystack[match_data[i][1]..match_data[i][2]]
+		sequence tmp = haystack[match_data[i][1]..match_data[i][2]]
+		if str_offsets then
+			match_data[i] = { tmp, match_data[i][1], match_data[i][2] }
+		else
+			match_data[i] = tmp
+		end if
 	end for
 
 	return match_data
@@ -347,13 +367,19 @@ end function
 --   # ##options##: options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
---   Returns a sequence of matches.
+--   Returns a sequence of a sequence of strings, the first being the entire match and
+--   subsequent items being each of the captured groups. The size of the sequence is
+--   the number of groups in the expression plus one (for the entire match).
+--
+--   If ##options## contains the bit [[:STRING_OFFSETS]], then the result is different.
+--   For each item, a sequence is returned containing the matched text, the starting
+--   index in ##haystack## and the ending index in ##haystack##.
 --
 -- Example 1:
 --   <eucode>
---   constant re_number = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
---   object matches = re:find_all(re_number, "John Doe and Jane Doe")
+--   constant re_name = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 --
+--   object matches = re:match_all(re_name, "John Doe and Jane Doe")
 --   -- matches is:
 --   -- {
 --   --   {             -- first match
@@ -367,17 +393,37 @@ end function
 --   --     "Doe"       -- second group
 --   --   }
 --   -- }
---   </eucode>
+--
+--   matches = re:match_all(re_name, "John Doe and Jane Doe")
+--   -- matches is:
+--   -- {
+--   --   {                         -- first match
+--   --     { "John Doe",  1,  8 }, -- full match data
+--   --     { "John",      1,  4 }, -- first group
+--   --     { "Doe",       6,  8 }  -- second group
+--   --   },
+--   --   {                         -- second match
+--   --     { "Jane Doe", 14, 21 }, -- full match data
+--   --     { "Jane",     14, 17 }, -- first group
+--   --     { "Doe",      19, 21 }  -- second group
+--   --   }
+--   -- }--   </eucode>
 --
 -- See Also:
 --   [[:matches]]
 
 public function all_matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	object match_data = find_all(re, haystack, from, options)
+	integer str_offsets = and_bits(STRING_OFFSETS, options)
+	object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
 	for i = 1 to length(match_data) do
 		for j = 1 to length(match_data[i]) do
-			match_data[i][j] = haystack[match_data[i][j][1]..match_data[i][j][2]]
+			sequence tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
+			if str_offsets then
+				match_data[i][j] = { tmp, match_data[i][j][1], match_data[i][j][2] }
+			else
+				match_data[i][j] = tmp
+			end if
 		end for
 	end for
 

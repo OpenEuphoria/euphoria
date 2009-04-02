@@ -52,8 +52,25 @@ regex:free(re)
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 test_equal("matches() #1", { "John Doe", "John", "Doe" }, regex:matches(re, "John Doe Jane Doe"))
+test_equal("matches() STRING_OFFSET #1",
+	{ { "John Doe", 1, 8 }, { "John", 1, 4 }, { "Doe", 6, 8 } },
+	regex:matches(re, "John Doe and Jane Doe", 1, regex:STRING_OFFSETS))
 test_equal("all_matches() #1", { { "John Doe", "John", "Doe" }, { "Jane Doe", "Jane", "Doe" } },
 	regex:all_matches(re, "John Doe Jane Doe"))
+test_equal("all_matches() STRING_OFFSET #1",
+	{
+		{                           -- first match
+			{ "John Doe",  1,  8 }, -- full match data
+			{ "John",      1,  4 }, -- first group
+			{ "Doe",       6,  8 }  -- second group
+		},
+		{                           -- second match
+			{ "Jane Doe", 14, 21 }, -- full match data
+			{ "Jane",     14, 17 }, -- first group
+			{ "Doe",      19, 21 }  -- second group
+		}
+	},
+	regex:all_matches(re, "John Doe and Jane Doe", 1, regex:STRING_OFFSETS))
 regex:free(re)
 
 re = regex:new(#/,\s/)
@@ -100,4 +117,3 @@ test_equal("find_replace_callback() #3", "John Doe JANE DOE",
 regex:free(re)
 
 test_report()
-
