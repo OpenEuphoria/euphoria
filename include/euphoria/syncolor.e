@@ -44,26 +44,18 @@ global procedure set_colors(sequence pColorList)
 	for i = 1 to length(pColorList) do
 		lColorName = upper(pColorList[i][1])
 		switch lColorName do
-			case "NORMAL":
+			case "NORMAL" then
 				NORMAL_COLOR  = pColorList[i][2]
-				break
-			case "COMMENT":
+			case "COMMENT" then
 				COMMENT_COLOR  = pColorList[i][2]
-				break
-			case "KEYWORD":
+			case "KEYWORD" then
 				KEYWORD_COLOR  = pColorList[i][2]
-				break
-			case "BUILTIN":
+			case "BUILTIN" then
 				BUILTIN_COLOR  = pColorList[i][2]
-				break
-			case "STRING":
+			case "STRING" then
 				STRING_COLOR  = pColorList[i][2]
-				break
-			case "BRACKET":
+			case "BRACKET" then
 				BRACKET_COLOR  = pColorList[i][2]
-				break
-			case else
-				break
 		end switch
 	end for
 end procedure

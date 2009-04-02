@@ -2578,7 +2578,7 @@ opening the same file, there has to be a way to break from the loop, which the
 The same optional parameters that can be used in an **exit** statement can apply to a
 **retry** statement.
 
-==== entry statement
+==== with entry statement
 
 It is often the case that the first iteration of a loop is somehow special.
 Some things have to be done before the loop starts - they are done before the
@@ -2589,10 +2589,10 @@ and forgetting to update them. Just add the **entry** keyword at
 the point you wish the first iteration starts.
 
 <eucode>
-global function find_all(object x, sequence source, integer from)
+public function find_all(object x, sequence source, integer from)
     sequence ret = {}
 
-    while from > 0 entry do
+    while from > 0 with entry do
         ret &= from
         from += 1
     entry
