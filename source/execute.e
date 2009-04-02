@@ -3981,7 +3981,7 @@ procedure do_exec()
 			case TASK_SELF then
 				opTASK_SELF()
 				break
-			case res thenTASK_STATUS then
+			case TASK_STATUS then
 				opTASK_STATUS()
 				break
 			case TASK_SUSPEND then
