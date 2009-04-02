@@ -10,7 +10,7 @@ end ifdef
 
 include std/get.e
 include std/regex.e as re
-include std/sequence.e
+include std/sequence.e as seq
 
 enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
@@ -460,7 +460,7 @@ end function
 -- </eucode>
 
 public function parse_address(sequence address, integer port = -1)
-	address = split(address, ':')
+	address = seq:split(address, ':')
 	
 	if length(address) = 1 then
 		if port < 0 or port > 65_535 then
