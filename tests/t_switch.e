@@ -1,22 +1,4 @@
 include std/unittest.e
-without warning
-
-integer nx = 1
---switch nx do
---end switch
-
---test_true("case-less switch", nx = 1)
-
-switch nx with fallthru do
-   case 1 then
-      nx = 2
-      break
-   case 2 then
-      nx = 3
-      break
-end switch
-
-test_true("colon-less switch", nx = 2)
 
 constant SWITCH = { 1, 2, "a", 3, "sdflkjasdfglkj" }
 
@@ -91,6 +73,7 @@ end switch
 end procedure
 nst(B,A)
 test_equal( "nested switch", 6, ns )
+
 
 constant cases = - {1, "345", 2, C}
 constant TWO = 2, NEGATIVE_3 = -3
@@ -207,6 +190,10 @@ integer is4rid = routine_id("int_switch4" )
 z = call_func( is4rid, {1} )
 test_equal( "int_switch4 -- detect integer cond through r_id", 1, z )
 
+
+with warning save
+without warning &=(not_reached) -- I know this will occur here and that's ok.
+without warning strict          -- even if -strict has been used.
 function int_switch5( object cond )
 	integer ret = 0
 	goto "foo"
@@ -221,6 +208,7 @@ function int_switch5( object cond )
 	end switch
 	return ret
 end function
+with warning restore
 
 z = int_switch5( "foo" )
 test_equal( "int_switch5: goto label exists (forward goto), don't optimize away because of sequence", 1, z )
@@ -292,7 +280,7 @@ function s_w_f( object x )
 	switch x with fallthru do
 		case 1 then
 			y &=  1
-		case 2, 3 then
+		case 2, 3, 5 then
 			y &=  2
 		case else
 			y &= 4
@@ -300,10 +288,11 @@ function s_w_f( object x )
 	return y
 end function
 
-test_equal("swith with fallthru 1", {1,2,4}, s_w_f( 1 ) )
-test_equal("swith with fallthru 2", {2,4}, s_w_f( 2 ) )
-test_equal("swith with fallthru 3", {2,4}, s_w_f( 3 ) )
-test_equal("swith with fallthru 4", {4}, s_w_f( 4 ) )
+test_equal("switch with fallthru 1", {1,2,4}, s_w_f( 1 ) )
+test_equal("switch with fallthru 2", {2,4}, s_w_f( 2 ) )
+test_equal("switch with fallthru 3", {2,4}, s_w_f( 3 ) )
+test_equal("switch with fallthru 4", {4}, s_w_f( 4 ) )
+test_equal("switch with fallthru 5", {2,4}, s_w_f( 5 ) )
 
 function s_wo_f( object x )
 	sequence y = {}
@@ -330,4 +319,4 @@ test_equal("swith without fallthru 4", {4}, s_wo_f( 4 ) )
 test_equal("swith without fallthru 5", {6, 1}, s_wo_f( 5 ) )
 
 test_report()
-
+      
