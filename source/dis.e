@@ -1645,11 +1645,7 @@ procedure dis( integer sub )
 	while pc <= length(Code) do
 		integer ln = find( pc-1, line_table )
 		if ln > 0 and ln <= length(line_table) then
-			sequence line = find_line( sub, pc, 0 )
-			printf(out, "[%s:%d] %s\n", find_line( sub, pc, 0 ) )
---			if not length(line[3]) or line[3][$] != '\n' then
---				puts(out,"\n")
---			end if
+			printf(out, "\n        [%s:%d] %s\n", find_line( sub, pc, 0 ) )
 		end if
 		
 		op = Code[pc]
