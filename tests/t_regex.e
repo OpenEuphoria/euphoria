@@ -67,14 +67,26 @@ test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
 regex:free(re)
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
-test_equal("find_replace #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", #/\2, \1/))
-test_equal("find_replace #2", "hello DOE, john!", regex:find_replace(re, "hello John Doe!", #/\U\2\e, \L\1\e/))
-test_equal("find_replace #3", "hello \nDoe, John!", regex:find_replace(re, "hello John Doe!", #/\n\2, \1/))
-test_equal("find_replace #4", "hello John\tDoe!", regex:find_replace(re, "hello John Doe!", #/\1\t\2/))
-test_equal("find_replace #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", #/Mr. \1 \2/))
+test_equal("find_replace() #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", #/\2, \1/))
+test_equal("find_replace() #2", "hello DOE, john!", regex:find_replace(re, "hello John Doe!", #/\U\2\e, \L\1\e/))
+test_equal("find_replace() #3", "hello \nDoe, John!", regex:find_replace(re, "hello John Doe!", #/\n\2, \1/))
+test_equal("find_replace() #4", "hello John\tDoe!", regex:find_replace(re, "hello John Doe!", #/\1\t\2/))
+test_equal("find_replace() #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", #/Mr. \1 \2/))
 
-test_equal("find_replace_limit #1", "JOHN DOE Jane Doe", 
+test_equal("find_replace_limit() #1", "JOHN DOE Jane Doe", 
 	regex:find_replace_limit(re, "John Doe Jane Doe", #/\U\1 \2\e/, 1))
+
+function myupper(sequence params)
+	return upper(params[1])
+end function
+
+test_equal("find_replace_callback() #1", "JOHN DOE JANE DOE",
+	regex:find_replace_callback(re, "John Doe Jane Doe", routine_id("myupper")))
+test_equal("find_replace_callback() #2", "JOHN DOE Jane Doe",
+	regex:find_replace_callback(re, "John Doe Jane Doe", routine_id("myupper"), 1))
+test_equal("find_replace_callback() #3", "John Doe JANE DOE",
+	regex:find_replace_callback(re, "John Doe Jane Doe", routine_id("myupper"), 0, 9))
+
 regex:free(re)
 
 test_report()

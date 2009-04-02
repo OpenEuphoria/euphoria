@@ -492,3 +492,64 @@ public function find_replace_limit(regex ex, sequence text, sequence replacement
 	return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, limit })
 end function
 
+--**
+-- Replaces up to ##limit## matches of ##ex## in ##text## with the result of a user
+-- defined callback. The callback should take one sequence which will contain a string
+-- representing the entire match and also a string for every group within the regluar
+-- expression.
+--
+-- Parameters:
+--   # ##re##: a regex which will be used for matching
+--   # ##text##: a string on which search and replace will apply
+--   # ##rid##: routine id to execute for each match
+--   # ##limit##: the number of matches to process
+--   # ##from##: optional start position
+--   # ##options##: match options, defaults to [[:DEFAULT]]
+--
+-- Returns:
+--   A **sequence**, the modified ##text##.
+--
+-- Example 1:
+-- <eucode>
+-- function my_convert(sequence params)
+--     switch params[1] do
+--         case "1" then 
+--             return "one "
+--         case "2" then
+--             return "two "
+--         case else
+--             return "unknown "
+--     end switch
+-- end function
+--
+-- regex r = re:new(#/\d/)
+-- sequence result = re:find_replace_callback(r, "125", routine_id("my_convert"))
+-- -- result = "one two unknown "
+-- </eucode>
+--
+
+public function find_replace_callback(regex ex, sequence text, integer rid, integer limit=0, 
+		integer from=1, integer options=0)
+	sequence match_data = find_all(ex, text, from, options), replace_data
+
+	if limit = 0 then
+		limit = length(match_data)
+	end if
+	replace_data = repeat(0, limit)
+
+	for i = 1 to limit do
+		sequence params = repeat(0, length(match_data[i]))
+		for j = 1 to length(match_data[i]) do
+			params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
+		end for
+
+		replace_data[i] = call_func(rid, { params })
+	end for
+
+	for i = limit to 1 by -1 do
+		text = replace(text, replace_data[i], match_data[i][1][1], match_data[i][1][2])
+	end for
+
+	return text
+end function
+
