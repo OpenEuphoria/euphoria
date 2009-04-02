@@ -23,6 +23,13 @@ include std/text.e
 --   expressions for just about any task).
 -- * [[WikiPedia Regular Expression Article -> http://en.wikipedia.org/wiki/Regular_expression]]
 --
+-- === General Use
+--
+-- Many functions take an optional ##options## parameter. This parameter can be either
+-- a single option constant (see [[:Option Constants]], multiple option constants or'ed
+-- together into a single atom or a sequence of options, in which the function will take
+-- care of ensuring the are or'ed together correctly.
+--
 
 enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE
 
@@ -57,7 +64,8 @@ public constant
 	NEWLINE_ANY        = #00400000,
 	NEWLINE_ANYCRLF    = #00500000,
 	BSR_ANYCRLF        = #00800000,
-	BSR_UNICODE        = #01000000
+	BSR_UNICODE        = #01000000,
+	STRING_OFFSETS     = #0C000000
 
 --****
 -- === Error Constants
@@ -103,7 +111,7 @@ end type
 --
 -- Parameters:
 --   # ##pattern##: a sequence representing a human redable regular expression
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]
+--   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
 --   A [[:regex]] which other regular expression routines can work on or < 0 indicates an error.
@@ -152,6 +160,8 @@ end type
 --   [[:free]], [[:find]], [[:find_all]]
 
 public function new(sequence pattern, object options=DEFAULT)
+	if sequence(options) then options = or_all(options) end if
+
 	return machine_func(M_PCRE_COMPILE, { pattern, options })
 end function
 
@@ -176,7 +186,7 @@ end procedure
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
 --   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
 --   An object which is either an atom of 0, meaning nothing found or a sequence of matched pairs.
@@ -196,7 +206,9 @@ end procedure
 --   </eucode>
 --
 
-public function find(regex re, sequence haystack, integer from=1, integer options=DEFAULT)
+public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+	if sequence(options) then options = or_all(options) end if
+
 	return machine_func(M_PCRE_EXEC, { re, haystack, options, from })
 end function
 
@@ -208,7 +220,7 @@ end function
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
 --   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
 --   Returns a sequence of matches. Please see [[:find]] for a detailed description of the return
@@ -228,9 +240,10 @@ end function
 --   </eucode>
 --
 
-public function find_all(regex re, sequence haystack, integer from=1, integer options=0)
+public function find_all(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+	if sequence(options) then options = or_all(options) end if
+
 	object result
-	
 	sequence results = {}
 	while sequence(result) with entry do
 		results = append(results, result)
@@ -240,7 +253,7 @@ public function find_all(regex re, sequence haystack, integer from=1, integer op
 			exit
 		end if
 	entry
-		result = machine_func(M_PCRE_EXEC, { re, haystack, options, from })
+		result = find(re, haystack, from, options)
 	end while
 	
 	return results
@@ -253,14 +266,14 @@ end function
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
 --   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
 --   An atom. 1 if ##re## matches any portion of ##haystack## or 0 if not.
 --
 
-public function has_match(regex re, sequence haystack, integer from=1, integer options=0)
-	return sequence(machine_func(M_PCRE_EXEC, { re, haystack, options, from }))
+public function has_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+	return sequence(find(re, haystack, from, options))
 end function
 
 --**
@@ -270,14 +283,14 @@ end function
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
 --   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
 --   An atom. 1 if ##re## matches the entire ##haystack## or 0 if not.
 --
 
-public function is_match(regex re, sequence haystack, integer from=1, integer options=0)
-	object m = machine_func(M_PCRE_EXEC, { re, haystack, options, from })
+public function is_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+	object m = find(re, haystack, from, options)
 
 	if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
 		return 1
@@ -293,7 +306,7 @@ end function
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
 --   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
 --   Returns a sequence of matches.
@@ -314,7 +327,7 @@ end function
 -- See Also:
 --   [[:all_matches]]
 
-public function matches(regex re, sequence haystack, integer from=1, integer options=0)
+public function matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
 	object match_data = find(re, haystack, from, options)
 
 	for i = 1 to length(match_data) do
@@ -331,7 +344,7 @@ end function
 --   # ##re##: a regex for a subject to be matched against
 --   # ##haystack##: a string in which to searched
 --   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: find options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options##: options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
 --   Returns a sequence of matches.
@@ -359,7 +372,7 @@ end function
 -- See Also:
 --   [[:matches]]
 
-public function all_matches(regex re, sequence haystack, integer from=1, integer options=0)
+public function all_matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
 	object match_data = find_all(re, haystack, from, options)
 
 	for i = 1 to length(match_data) do
@@ -371,6 +384,9 @@ public function all_matches(regex re, sequence haystack, integer from=1, integer
 	return match_data
 end function
 
+--****
+-- == Splitting
+
 --**
 -- Split a string based on a regex as a delimiter
 --
@@ -378,7 +394,7 @@ end function
 --   # ##re##: a regex which will be used for matching
 --   # ##text##: a string on which search and replace will apply
 --   # ##from##: optional start position
---   # ##options##: match options, defaults to [[:DEFAULT]]
+--   # ##options##: options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
 --   A sequence of string values split at the delimiter.
@@ -396,11 +412,11 @@ end function
 -- </eucode>
 -- 
 
-public function split(regex re, sequence text, integer from=1, integer options=0)
+public function split(regex re, sequence text, integer from=1, object options=DEFAULT)
 	return split_limit(re, text, 0, from, options)
 end function
 
-public function split_limit(regex re, sequence text, integer limit=0, integer from=1, integer options=0)
+public function split_limit(regex re, sequence text, integer limit=0, integer from=1, object options=DEFAULT)
 	sequence match_data = find_all(re, text, from, options), result
 	integer last = 1
 
@@ -434,7 +450,7 @@ end function
 --   # ##text##: a string on which search and replace will apply
 --   # ##replacement##: a string, used to replace each of the full matches found
 --   # ##from##: optional start position
---   # ##options##: match options, defaults to [[:DEFAULT]]
+--   # ##options##: options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
@@ -461,8 +477,9 @@ end function
 -- </eucode>
 --
 
-public function find_replace(regex ex, sequence text, sequence replacement, integer from=1, atom options=0)
-	return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, -1 })
+public function find_replace(regex ex, sequence text, sequence replacement, integer from=1,
+		object options=DEFAULT)
+	return find_replace_limit(ex, text, replacement, -1, from, options)
 end function
 
 --**
@@ -478,7 +495,7 @@ end function
 --   # ##replacement##: a string, used to replace each of the full matches found
 --   # ##limit##: the number of matches to process
 --   # ##from##: optional start position
---   # ##options##: match options, defaults to [[:DEFAULT]]
+--   # ##options##: options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
@@ -488,7 +505,9 @@ end function
 --
 
 public function find_replace_limit(regex ex, sequence text, sequence replacement, 
-			integer limit, integer from=1, atom options=0)
+			integer limit, integer from=1, object options=DEFAULT)
+	if sequence(options) then options = or_all(options) end if
+
 	return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, limit })
 end function
 
@@ -504,7 +523,7 @@ end function
 --   # ##rid##: routine id to execute for each match
 --   # ##limit##: the number of matches to process
 --   # ##from##: optional start position
---   # ##options##: match options, defaults to [[:DEFAULT]]
+--   # ##options##: options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
@@ -529,7 +548,7 @@ end function
 --
 
 public function find_replace_callback(regex ex, sequence text, integer rid, integer limit=0, 
-		integer from=1, integer options=0)
+		integer from=1, object options=DEFAULT)
 	sequence match_data = find_all(ex, text, from, options), replace_data
 
 	if limit = 0 then
@@ -552,4 +571,3 @@ public function find_replace_callback(regex ex, sequence text, integer rid, inte
 
 	return text
 end function
-

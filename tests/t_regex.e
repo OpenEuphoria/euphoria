@@ -20,6 +20,16 @@ test_equal("find() #4", {{5,7}}, regex:find(re, "the dog is happy", 4))
 test_equal("find() #5", {{9,10}}, regex:find(re, "the dog is happy", 8))
 regex:free(re)
 
+re = regex:new(#/[A-Z][a-z]+\s/, { regex:CASELESS })
+test_equal("find() #6", {{1,4}}, regex:find(re, "and John ran"))
+test_equal("find() #7", -1, regex:find(re, "15 dogs ran", regex:ANCHORED))
+regex:free(re)
+
+re = regex:new(#/[A-Z][a-z]+\s/, { regex:CASELESS, regex:ANCHORED })
+test_equal("find() #8", {{1,4}}, regex:find(re, "and John ran"))
+test_equal("find() #9", -1, regex:find(re, "15 dogs ran"))
+regex:free(re)
+
 re = regex:new("[A-Z]+")
 test_equal("find_all() #1", {{{5,7}}, {{13,14}}},
 	regex:find_all(re, "the DOG ran UP" ))
