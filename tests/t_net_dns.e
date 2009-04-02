@@ -4,7 +4,7 @@ include std/net/dns.e as dns
 
 object _
 
-ifdef DNS_TESTS then
+ifdef not NO_INET then
 	object check_ip = 0
 
 	_ = gethostbyname("www.google.com")
@@ -43,7 +43,7 @@ ifdef DNS_TESTS then
 	end if
 
 elsedef
-    puts(2, " WARNING: DNS tests were not run, use -D DNS_TESTS for full test\n")
+    puts(2, " WARNING: DNS tests were not run\n")
 end ifdef
 
 
