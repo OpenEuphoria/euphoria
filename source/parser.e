@@ -3517,15 +3517,7 @@ procedure SubProg(integer prog_type, integer scope)
 	if SymTab[p][S_TOKEN] = TYPE and param_num != 1 then
 		CompileErr("types must have exactly one parameter")
 	end if
-	tok = next_token()
-	-- parameters are numbered: 0, 1, ... num_args-1
-	-- other privates are numbered: num_args, num_args+1, ...
-	while tok[T_ID] = TYPE or tok[T_ID] = QUALIFIED_TYPE do
-		-- parse the next private variable declaration
-		Private_declaration(tok[T_SYM])
-		tok = next_token()
-	end while
-
+	
 	-- code to perform type checks on all the parameters
 	sym = SymTab[p][S_NEXT]
 	for i = 1 to SymTab[p][S_NUM_ARGS] do
@@ -3535,6 +3527,15 @@ procedure SubProg(integer prog_type, integer scope)
 		TypeCheck(sym)
 		sym = SymTab[sym][S_NEXT]
 	end for
+
+	-- parse private variable declarations
+	-- (parameters are numbered: 0, 1, ... num_args-1 and
+	--  other privates are numbered: num_args, num_args+1, ...)
+	tok = next_token()
+	while tok[T_ID] = TYPE or tok[T_ID] = QUALIFIED_TYPE do
+		Private_declaration(tok[T_SYM])
+		tok = next_token()
+	end while
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -3554,8 +3555,11 @@ procedure SubProg(integer prog_type, integer scope)
 	end if
 	putback(tok)
 
+	-- parse body of routine.
 	FuncReturn = FALSE
 	Statement_list()
+	
+	-- parse routine end.
 	tok_match(END)
 	ExitScope()
 	tok_match(prog_type)
