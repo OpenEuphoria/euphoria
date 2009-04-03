@@ -149,13 +149,11 @@ procedure server()
 
 	for i = 3 to length(args) by 2 do
 		switch args[i] do
-			case "-bind":
+			case "-bind" then
 				bind_addr = args[i+1]
-				break
 
-			case "-root":
+			case "-root" then
 				doc_root = args[i+1]
-				break
 
 			case else
 				usage_message()

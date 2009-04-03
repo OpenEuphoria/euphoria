@@ -1,5 +1,5 @@
 include std/unittest.e
-include std/socket.e        -- is_inetaddr
+include std/net/common.e
 include std/net/dns.e as dns
 
 

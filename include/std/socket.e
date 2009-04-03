@@ -11,6 +11,7 @@ end ifdef
 include std/get.e
 include std/regex.e as re
 include std/sequence.e as seq
+include std/net/common.e
 
 enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
@@ -155,36 +156,6 @@ public constant
 	FD_ACCEPT  = 8,
 	FD_CONNECT = 16,
 	FD_CLOSE   = 32
-
-constant DEFAULT_PORT = 80
-		
---****
--- === Support routines
---
-
-constant ip_re = re:new(#/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\:[0-9]+)?$/)
-
---**
--- Checks if x is an IP address in the form (#.#.#.#[:#])
---
--- Parameters:
---   # ##address##: the address to check
---
--- Returns:
---   An **integer**, 1 if x is an inetaddr, 0 if it is not
---
--- Comments:
---   Some ip validation algorithms do not allow 0.0.0.0. We do here because
---   many times you will want to bind to 0.0.0.0. However, you cannot connect
---   to 0.0.0.0 of course.
---
---   With sockets, normally binding to 0.0.0.0 means bind to all interfaces
---   that the computer has.
---
-
-public function is_inetaddr(object address)
-	return re:is_match(ip_re, address)
-end function
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -423,7 +394,7 @@ end function
 -- </eucode>
 
 public function connect(socket sock, sequence address, integer port=-1)
-	object sock_data = parse_address(address, port)
+	object sock_data = parse_ip_address(address, port)
 
 	return machine_func(M_SOCK_CONNECT, { sock, sock_data[1], sock_data[2] })
 end function
@@ -436,53 +407,6 @@ end function
 
 --****
 -- === Server side only
-
---**
--- Converts a text "address:port" into {"address", port} format.
---
--- Parameters:
---   # ##address##: ip address to connect, optionally with :PORT at the end
---   # ##port##: optional, if not specified you may include :PORT in
---     the address parameter otherwise the default port 80 is used.
---
--- Comments:
---   If ##port## is supplied, it overrides any ":PORT" value in the input
---   address.
---
--- Returns 
---   A sequence of two elements: "address" and integer port number.
---
--- Example 1:
--- <eucode>
--- addr = parse_address("11.1.1.1") --> {"11.1.1.1", 80} -- default port
--- addr = parse_address("11.1.1.1:110") --> {"11.1.1.1", 110}
--- addr = parse_address("11.1.1.1", 345) --> {"11.1.1.1", 345}
--- </eucode>
-
-public function parse_address(sequence address, integer port = -1)
-	address = seq:split(address, ':')
-	
-	if length(address) = 1 then
-		if port < 0 or port > 65_535 then
-			address &= DEFAULT_PORT
-		else
-			address &= port
-		end if
-	else
-		if port < 0 or port > 65_535 then
-			address[2] = value(address[2])
-			if address[2][1] != GET_SUCCESS then
-				address[2] = DEFAULT_PORT
-			else
-				address[2] = address[2][2]
-			end if
-		else
-			address[2] = port
-		end if
-	end if
-	
-	return address
-end function
 
 --**
 -- Joins a socket to a specific local internet address and port so
@@ -508,7 +432,7 @@ end function
 -- </eucode>
 
 public function bind(socket sock, sequence address, integer port=-1)
-	object sock_data = parse_address(address, port)
+	object sock_data = parse_ip_address(address, port)
 
 	return machine_func(M_SOCK_BIND, { sock, sock_data[1], sock_data[2] })
 end function
