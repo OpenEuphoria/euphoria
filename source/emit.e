@@ -110,6 +110,7 @@ constant token_name =
 	{RIGHT_BRACE, "}"},
 	{RIGHT_ROUND, ")"},
 	{RIGHT_SQUARE, "]"},
+	{ROUTINE, "routine"},
 	{SLICE, "a slice"},
 	{STRING, "a character string"},
 	{TO, "to"},

@@ -424,18 +424,18 @@ export procedure check_inline( symtab_index sub )
 				
 			case PROC then
 			case FUNC then
-				symtab_index routine = inline_code[pc+1]
-				if routine = sub then
+				symtab_index rtn_idx = inline_code[pc+1]
+				if rtn_idx = sub then
 					-- it's recursive, so can't be inlined (don't defer)
 					restore_code()
 					return
 				end if
 				
-				integer args = SymTab[routine][S_NUM_ARGS]
-				if SymTab[routine][S_TOKEN] != PROC and check_for_param( pc + args + 2 ) then
+				integer args = SymTab[rtn_idx][S_NUM_ARGS]
+				if SymTab[rtn_idx][S_TOKEN] != PROC and check_for_param( pc + args + 2 ) then
 					
 				end if
-				for i = 2 to args + 1 + (SymTab[routine][S_TOKEN] != PROC) do
+				for i = 2 to args + 1 + (SymTab[rtn_idx][S_TOKEN] != PROC) do
 					if not adjust_symbol( pc + i ) then 
 						defer()
 						return

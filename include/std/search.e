@@ -301,7 +301,7 @@ public constant
 -- See Also:
 -- [[:find]], [[:rfind]], [[:find_any]], [[:fetch]]
 
-public function find_nested(object needle, sequence haystack, integer flags=0, integer routine=-1)
+public function find_nested(object needle, sequence haystack, integer flags=0, integer rtn_id=-1)
 	sequence occurrences = {} -- accumulated results
 	integer depth = 0
 	sequence branches = {}, indexes = {}, last_indexes = {} -- saved states
@@ -321,14 +321,14 @@ public function find_nested(object needle, sequence haystack, integer flags=0, i
 	        x = haystack[current_idx]
 	        
 	        -- is x what we want?
-			if routine <= -1 then
+			if rtn_id <= -1 then
 	         	if any then
 	         		rc = find(x, needle)
 	         	else
 					rc = equal(x, needle)
 	         	end if
 	        else
-		        rc = call_func(routine, {x, needle})
+		        rc = call_func(rtn_id, {x, needle})
 	        end if
 	        
 	        if rc then

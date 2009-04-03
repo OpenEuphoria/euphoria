@@ -229,7 +229,7 @@ constant SP_TASK_NUMBER = 1,
 		 SP_BLOCK = 3,
 		 SP_NEXT = 4
 
-procedure save_private_block(symtab_index routine, sequence block)
+procedure save_private_block(symtab_index rtn_idx, sequence block)
 -- save block for resident task on the private list for this routine
 -- reuse any empty spot 
 -- save in last-in, first-out order
@@ -237,10 +237,10 @@ procedure save_private_block(symtab_index routine, sequence block)
 	sequence saved, saved_list, eentry
 	integer task, spot, tn
 	
-	task = SymTab[routine][S_RESIDENT_TASK]
+	task = SymTab[rtn_idx][S_RESIDENT_TASK]
 	-- save it
 	eentry = {task, tcb[task][TASK_TID], block, 0}
-	saved = SymTab[routine][S_SAVED_PRIVATES]
+	saved = SymTab[rtn_idx][S_SAVED_PRIVATES]
 	
 	if length(saved) = 0 then
 		-- first time set up
@@ -273,16 +273,16 @@ procedure save_private_block(symtab_index routine, sequence block)
 		saved[2] = saved_list
 	end if
 	
-	SymTab[routine][S_SAVED_PRIVATES] = saved
+	SymTab[rtn_idx][S_SAVED_PRIVATES] = saved
 end procedure
 
-function load_private_block(symtab_index routine, integer task)
+function load_private_block(symtab_index rtn_idx, integer task)
 -- retrieve a private block and remove it from the list for this routine
 -- (we know that the block must be there)
 	sequence saved, saved_list, block
 	integer p, prev_p, first
 	
-	saved = SymTab[routine][S_SAVED_PRIVATES]
+	saved = SymTab[rtn_idx][S_SAVED_PRIVATES]
 	first = saved[1]
 	p = first -- won't be 0
 	prev_p = -1
@@ -299,7 +299,7 @@ function load_private_block(symtab_index routine, integer task)
 			end if
 			saved[1] = first
 			saved[2] = saved_list
-			SymTab[routine][S_SAVED_PRIVATES] = saved
+			SymTab[rtn_idx][S_SAVED_PRIVATES] = saved
 			return block
 		end if
 		prev_p = p
@@ -3211,11 +3211,11 @@ sequence operation
 -- need several of them on that system.
 
 integer fwd_do_exec = -1
-function general_callback(sequence routine, sequence args)
+function general_callback(sequence rtn_def, sequence args)
 -- call the user's function from an external source 
 -- (interface for Euphoria-coded call-backs)
 
-	val[t_id] = routine[C_USER_ROUTINE]
+	val[t_id] = rtn_def[C_USER_ROUTINE]
 	val[t_arglist] = args
 	
 	SymTab[call_back_routine][S_RESIDENT_TASK] = current_task
@@ -3244,12 +3244,12 @@ forward_general_callback = routine_id("general_callback")
 function machine_callback(atom cbx, atom ptr)
 -- call the user's function from an external source 
 -- (interface for machine-coded call-backs)
-	sequence routine, args
+	sequence rtn_def, args
 	
-	routine = call_backs[cbx]
+	rtn_def = call_backs[cbx]
 	args = peek4u(ptr & call_backs[cbx][C_NUM_ARGS])
 	
-	return general_callback(routine, args)
+	return general_callback(rtn_def, args)
 end function
 
 call_backs = {}
