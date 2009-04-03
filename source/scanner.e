@@ -7,7 +7,6 @@ include std/filesys.e
 include std/get.e
 include std/machine.e
 include std/search.e
-include std/text.e as txt
 
 include global.e
 include common.e
@@ -467,8 +466,6 @@ end function
 function win_compare(sequence a,sequence b)
 	atom conv
 	integer rc
-
-	return equal(txt:lower(a),txt:lower(b))
 
 	conv=allocate_string(a)
 	conv=c_func(char_upper,{conv}) -- conv is unchanged

@@ -508,7 +508,7 @@ global function ScanPath(sequence file_name,sequence env,integer flag)
 					return {file_path,try}
 				end if
 				ifdef WIN32 then
-					if 0 and find(1, full_path>=128) then
+					if find(1, full_path>=128) then
 						-- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
 						file_path = full_path & file_name
@@ -585,7 +585,7 @@ global function Include_paths(integer add_converted)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
 				ifdef WIN32 then
-					if 0 and find(1, full_path>=128) then
+					if find(1, full_path>=128) then
 						-- accented characters, try converting them. There is no guarantee that
 						-- the conversion is valid
 						cache_converted[num_var] = append(cache_converted[num_var], 
