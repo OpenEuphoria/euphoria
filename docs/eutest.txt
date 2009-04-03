@@ -1,54 +1,101 @@
-@@(title Euphoria Unit Testing System for EUPHORIA 4.0)@
-%%maxnumlevel = 4
-%%splitname = eu400
-%%splitlevel = 2
-%%toclevel = 3
 
-<<TOC level=3>>
+== Euphoria Testing System for EUPHORIA Programming Language v4.0
 
-= Euphoria Testing System for EUPHORIA Programming Language v4.0
-== Introduction
+=== Introduction
 
-The testing system gives you the ability to check if the library, interpreter and translator works properly by use of 'unit tests.'  The unit tests are **EUPHORIA** include files that ##include unittest.e## at the top, several test-routines for comparison between expected value and true value and at the end of the program a call to ##test_report()##.  There are error control files for when we expect the interpreter to fail but we want it to fail with a particular error message.  
+The testing system gives you the ability to check if the library,
+interpreter and translator works properly by use of 'unit tests.'  The
+unit tests are **EUPHORIA** include files that ##include unittest.e##
+at the top, several test-routines for comparison between expected value
+and true value and at the end of the program a call to
+##test_report()##.  There are error control files for when we expect
+the interpreter to fail but we want it to fail with a particular error
+message.
 
 === The eutest Program
 
 ==== Synopsis for running the tests
-##//stable-interpreter-path// [-D REC] eutest.ex [-verbose] [-log] [-i //include path for test interpreter//] [-cc wat|gcc] [-exe //test interpreter path//] [-ec //test translator path//] [-lib //test binary-library path//] [//optional list of unit test files//]##
+
+{{{
+stable-interpreter-path [-D REC] eutest.ex
+    [-verbose] [-log] [-i include path] [-cc wat|gcc] [-exe interpreter]
+    [-ec translator] [-lib binary library path]
+    [optional list of unit test files]
+}}}
 
 ==== Synopsis for creating report from the log
+
 ##//stable-interpreter-path// eutest.ex -process-log [-html]##
 
 ==== General behavior
 
-For your //stable-interpreter-path// please use a stable interpreter, to run eutest.ex.  You should use a alpha or beta release copy as your '//stable-interpreter-path//', then you can use -exe to specify your '//test interpreter path//' which could be your build of an SVN version or your own hacked copy.  If you want to test translation as well, you can specify it in a similar way with -ec.  Developers, *please* do not modify eutest.ex to use features not available in the last two alpha releases.  If you don't specify unit tests on the command line eutest will scan the directory for unit test files using the pattern ##t_*.e##.  If you specify a pattern it will interpret the pattern as some shells do not do this for programs.
+For your //stable-interpreter-path// please use a stable interpreter,
+to run eutest.ex.  You should use a alpha or beta release copy as your
+'//stable-interpreter-path//', then you can use -exe to specify your
+'//test interpreter path//' which could be your build of an SVN version
+or your own hacked copy.  If you want to test translation as well, you
+can specify it in a similar way with -ec.  Developers, *please* do not
+modify eutest.ex to use features not available in the last two alpha
+releases.  If you don't specify unit tests on the command line eutest
+will scan the directory for unit test files using the pattern
+##t_*.e##.  If you specify a pattern it will interpret the pattern as
+some shells do not do this for programs.
 
 ==== Options detail
-* -D REC: Is for creating control files, use only when on tests that work already on an interpreter that correctly works or correctly *fails* with them.  This option must come before the eutest.ex program itself in the command line and is the option with that requirement.
+
+* -D REC: Is for creating control files, use only when on tests that
+work already on an interpreter that correctly works or correctly
+*fails* with them.  This option must come before the eutest.ex program
+itself in the command line and is the option with that requirement.
 * -log: Is for creating a log file for later processing
-* -process-log: Is for processing a log created by a previous invokation of eutest.ex output is sent to standard output as a report of how the tests went.  By default this is in ascii format.  Use -html to make it HTML format.
+* -process-log: Is for processing a log created by a previous
+invokation of eutest.ex output is sent to standard output as a report
+of how the tests went.  By default this is in ascii format.  Use -html
+to make it HTML format.
 * -html: Is for making the report creation to be in HTML format
-
-
 
 === The Unit Test Program
 
-Unit test files must match a pattern ##t_*.e##.  If the unit test file matches ##t_c_*.e## the test program will expect the program to fail, if there is an error control file in a directory with its same name and no extension it will also expect it to fail according to the control file's contents.
+Unit test files must match a pattern ##t_*.e##.  If the unit test file
+matches ##t_c_*.e## the test program will expect the program to fail,
+if there is an error control file in a directory with its same name and
+no extension it will also expect it to fail according to the control
+file's contents.
 
 === The Error Control Files
 
-There are times when we expect something to fail.  We want good EUPHORIA code to do the correct thing and there is a correct thing to do also for *bad* code.  It is not acceptable for the interpreter to crash under any input, or to return an error message which is unrelated to why it failed.  We must thus check the ex.err file to see if it has the correct error message.  In the DOS case, we expect tests for things that are not for DOS to fail and we want them to fail in a specific way.  
+There are times when we expect something to fail.  We want good
+EUPHORIA code to do the correct thing and there is a correct thing to
+do also for *bad* code.  It is not acceptable for the interpreter to
+crash under any input, or to return an error message which is unrelated
+to why it failed.  We must thus check the ex.err file to see if it has
+the correct error message.  In the DOS case, we expect tests for things
+that are not for DOS to fail and we want them to fail in a specific
+way.
 
-If the unit test is ##t_foo.e## then the location for its control file can be in the following locations:
+If the unit test is ##t_foo.e## then the location for its control file
+can be in the following locations:
 
 * ##t_foo.d/interpreter///OSNAME///control.err##
 * ##t_foo.d///OSNAME///control.err##
 * ##t_foo.d/control.err##
 
-The //OSNAME// is the name of the operating system.  Which is either UNIX, DOS32 or Win32.
+The //OSNAME// is the name of the operating system.  Which is either
+UNIX, DOS32 or Win32.
 
-Now, if ##t_foo.d/DOS32/control.err## exists, then the testing program eutest.ex expects t_foo.e to fail when run with the DOS32 interpreter.  However, this is not necessarily true for other platforms.  In DOS32, eutest runs it, watches it fail, then compares the ex.err file to ##t_foo.d/DOS32/control.err##.  If they ex.err is different from control.err an error message is written to the log.  Now without this file, t_foo.e is tested normally.  Thus you can have different expectations for differing platforms.  Some feature that is not possible to implement under DOS32 can be put into a unit test and the resulting ex.err file can be
-put into a control file for DOS32.  Then we get an error when the DOS32 case fails incorrectly or in the case of others, when the case fails. 
+Now, if ##t_foo.d/DOS32/control.err## exists, then the testing program
+eutest.ex expects t_foo.e to fail when run with the DOS32 interpreter. 
+However, this is not necessarily true for other platforms.  In DOS32,
+eutest runs it, watches it fail, then compares the ex.err file to
+##t_foo.d/DOS32/control.err##.  If they ex.err is different from
+control.err an error message is written to the log.  Now without this
+file, t_foo.e is tested normally.  Thus you can have different
+expectations for differing platforms.  Some feature that is not
+possible to implement under DOS32 can be put into a unit test and the
+resulting ex.err file can be put into a control file for DOS32.  Then
+we get an error when the DOS32 case fails incorrectly or in the case of
+others, when the case fails. 
 
-How do we construct these control files?  You don't really need to, you can take an ex.err file that results from running a stable interpreter on a test and rename it and move it to the appropriate place.
-
+How do we construct these control files?  You don't really need to, you
+can take an ex.err file that results from running a stable interpreter
+on a test and rename it and move it to the appropriate place.

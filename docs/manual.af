@@ -1,3 +1,7 @@
+#
+# Euphoria Manual Assembly File
+#
+
 # Front-Matter
 ../docs/welcome.txt
 ../docs/install.txt
@@ -23,6 +27,7 @@
 ../docs/trouble.txt
 ../docs/platform.txt
 ../docs/perform.txt
+../docs/eutest.txt
 
 # API docs
 ../docs/api.txt
