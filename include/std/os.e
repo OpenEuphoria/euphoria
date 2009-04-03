@@ -72,7 +72,7 @@ enum
 
 --****
 -- Signature:
--- <built-in> procedure command_line()
+-- <built-in> function command_line()
 --
 -- Description:
 -- A **sequence** of strings, where each string is a word from the command-line that started your program.
@@ -134,7 +134,7 @@ enum
 -- </eucode>
 --
 -- See Also:
--- [[:getenv]], [[:cmd_parse]], [[:show_help]]
+-- [[:build_commandline]], [[::option_switches]],  [[:getenv]], [[:cmd_parse]], [[:show_help]]
 
 --****
 -- Signature:
@@ -1031,12 +1031,29 @@ end procedure
 --  quoted if they contain spaces, and then concatenated to form a single
 --  string.
 --
+--
 -- Example 1:
 -- <eucode>
 --  s = build_commandline( { "-d", "/usr/my docs/"} )
 -- -- s now contains '-d "/usr/my docs/"' 
 -- </eucode>
-
+--
+-- Example 2:
+--     You can use this to run things that might be diffucult to quote out:
+--     Suppose you want to run a program that requires quotes on its
+--     command line?  Use this function to pass quotation marks:
+-- <eucode>
+--    s = build_commandline( { "awk", "-e", "'{ print $1"x"$2; }'" } )
+--    system(s,0)
+-- </eucode>
+--     
+-- Comments:
+--    Though this function does the quoting for you it is not going to protect
+-- your programs from globing *, ?.  And it is not specied here what happens if you
+-- pass redirection or piping characters.  
+--
+-- See Also:
+-- [[:system]], [[:system_exec]], [[:command_line]]
 public function build_commandline(sequence cmds)
 	return flatten(quote( cmds,,'\\'," " ), " ") 		
 end function
