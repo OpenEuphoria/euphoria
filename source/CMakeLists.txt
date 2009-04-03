@@ -92,11 +92,30 @@ INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_BINARY_DIR}" )
 #
 # Source File Lists
 
-SET( EU_INTERPRETER_SOURCES
-  int/c_out.c int/compress.c int/cominit.c int/intinit.c int/symtab_0.c
-  int/get.c int/sort.c int/wildcard.c int/sequence.c int/text.c int/tranplat.c int/types.c
-  int/dll.c int/filesys.c int/memory.c int/backend.c
+SET( PCRE_SOURCES
+  pcre/pcre_chartables.c
+  pcre/pcre_compile.c
+  pcre/pcre_config.c
+  pcre/pcre_dfa_exec.c
+  pcre/pcre_exec.c
+  pcre/pcre_fullinfo.c
+  pcre/pcre_get.c
+  pcre/pcre_globals.c
+  pcre/pcre_info.c
+  pcre/pcre_maketables.c
+  pcre/pcre_newline.c
+  pcre/pcre_ord2utf8.c
+  pcre/pcre_refcount.c
+  pcre/pcre_study.c
+  pcre/pcre_tables.c
+  pcre/pcre_try_flipped.c
+  pcre/pcre_ucd.c
+  pcre/pcre_valid_utf8.c
+  pcre/pcre_version.c
+  pcre/pcre_xclass.c
+  pcre/pcreposix.c
 )
+
 SET( EU_TRANSLATOR_SOURCES
   trans/ec.c trans/0rror.c trans/c_decl.c trans/c_dec0.c trans/c_dec1.c trans/c_out.c
   trans/cominit.c trans/compile.c trans/compil_0.c trans/compil_1.c trans/compil_2.c
@@ -108,10 +127,27 @@ SET( EU_TRANSLATOR_SOURCES
 )
 
 SET( EU_BACKEND_RUNNER_SOURCES
-  back/main-.c back/init-.c back/cominit.c back/error.c back/intinit.c
-  back/mode.c back/0ackend.c back/pathopen.c back/backend.c back/text.c
-  back/sort.c back/types.c back/convert.c back/compress.c back/dll.c
-  back/io.c back/filesys.c back/get.c back/wildcard.c back/search.c back/memory.c
+  back/0ackend.c
+  back/backend.c
+  back/cominit.c
+  back/compress.c
+  back/convert.c
+  back/dll.c
+  back/error.c
+  back/filesys.c
+  back/init-.c
+  back/intinit.c
+  back/machine.c
+  back/main-.c
+  back/main-.h
+  back/memory.c
+  back/mode.c
+  back/pathopen.c
+  back/search.c
+  back/sort.c
+  back/text.c
+  back/types.c
+  back/wildcard.c
 )
 
 #SET( EU_CORE_SOURCES_PLAIN
@@ -121,24 +157,141 @@ SET( EU_BACKEND_RUNNER_SOURCES
 #)
 
 SET( EU_CORE_SOURCES_INTERP
-  int/main-.c int/main-0.c int/convert.c int/pathopen.c int/init-.c int/error.c int/mode.c int/symtab.c int/scanner.c int/scientific.c
-  int/scanne_0.c int/main.c int/emit.c int/emit_0.c int/emit_1.c int/parser.c int/parser_0.c int/parser_1.c int/parser_2.c int/parser_3.c
- int/search.c int/scanne_1.c
+  int/backend.c
+  int/cominit.c
+  int/compress.c
+  int/convert.c
+  int/datetime.c
+  int/dll.c
+  int/emit.c
+  int/emit_0.c
+  int/emit_1.c
+  int/error.c
+  int/eumem.c
+  int/filesys.c
+  int/fwdref.c
+  int/fwdref_0.c
+  int/get.c
+  int/init-.c
+  int/inline.c
+  int/inline_0.c
+  int/int.c
+  int/intinit.c
+  int/machine.c
+  int/main-.c
+  int/main-0.c
+  int/main.c
+  int/map.c
+  int/memory.c
+  int/mode.c
+  int/parser.c
+  int/parser_0.c
+  int/parser_1.c
+  int/parser_2.c
+  int/parser_3.c
+  int/parser_4.c
+  int/parser_5.c
+  int/pathopen.c
+  int/platform.c
+  int/primes.c
+  int/scanne_0.c
+  int/scanne_1.c
+  int/scanner.c
+  int/scinot.c
+  int/search.c
+  int/shift.c
+  int/shift_0.c
+  int/sort.c
+  int/symtab.c
+  int/symtab_0.c
+  int/symtab_1.c
+  int/text.c
+  int/types.c
+  int/wildcard.c
 )
 
 SET( EU_CORE_SOURCES_TRANS
-  trans/main-.c trans/main-0.c trans/convert.c trans/pathopen.c trans/init-.c trans/error.c trans/mode.c trans/symtab.c trans/scanner.c trans/scientific.c
-  trans/scanne_0.c trans/main.c trans/emit.c trans/emit_0.c trans/emit_1.c trans/parser.c trans/parser_0.c trans/parser_1.c trans/parser_2.c trans/parser_3.c
- trans/search.c trans/scanne_1.c
+  trans/c_dec0.c
+  trans/c_dec1.c
+  trans/c_dec2.c
+  trans/c_decl.c
+  trans/c_out.c
+  trans/cominit.c
+  trans/compil_0.c
+  trans/compil_1.c
+  trans/compil_2.c
+  trans/compil_3.c
+  trans/compil_4.c
+  trans/compil_5.c
+  trans/compil_6.c
+  trans/compil_7.c
+  trans/compil_8.c
+  trans/compil_9.c
+  trans/compil_A.c
+  trans/compil_B.c
+  trans/compil_C.c
+  trans/compil_D.c
+  trans/compile.c
+  trans/compress.c
+  trans/convert.c
+  trans/datetime.c
+  trans/dll.c
+  trans/ec.c
+  trans/emit.c
+  trans/emit_0.c
+  trans/emit_1.c
+  trans/error.c
+  trans/eumem.c
+  trans/filesys.c
+  trans/fwdref.c
+  trans/fwdref_0.c
+  trans/get.c
+  trans/init-.c
+  trans/inline.c
+  trans/inline_0.c
+  trans/machine.c
+  trans/main-.c
+  trans/main-0.c
+  trans/main-1.c
+  trans/main.c
+  trans/map.c
+  trans/math.c
+  trans/memory.c
+  trans/mode.c
+  trans/parser.c
+  trans/parser_0.c
+  trans/parser_1.c
+  trans/parser_2.c
+  trans/parser_3.c
+  trans/parser_4.c
+  trans/parser_5.c
+  trans/pathopen.c
+  trans/platform.c
+  trans/primes.c
+  trans/scanne_0.c
+  trans/scanne_1.c
+  trans/scanner.c
+  trans/scinot.c
+  trans/search.c
+  trans/shift.c
+  trans/shift_0.c
+  trans/sort.c
+  trans/symtab.c
+  trans/symtab_0.c
+  trans/symtab_1.c
+  trans/text.c
+  trans/traninit.c
+  trans/types.c
+  trans/wildcard.c
 )
 
 SET( EU_BACKEND_SOURCES
   be_execute.c be_decompress.c be_task.c be_main.c be_alloc.c be_callc.c be_inline.c be_machine.c
-  be_regex.c regex.c be_rterror.c be_syncolor.c be_runtime.c be_symtab.c be_w.c
+  be_pcre.c be_socket.c be_rterror.c be_syncolor.c be_runtime.c be_symtab.c be_w.c
 )
 
 SET( EU_LIB_SOURCES
-  be_decompress.c be_machine.c be_w.c be_alloc.c be_inline.c be_runtime.c be_task.c be_regex.c regex.c
+  be_decompress.c be_machine.c be_w.c be_alloc.c be_inline.c be_runtime.c be_task.c be_pcre.c be_socket.c
   be_callc.c
 )
 
@@ -176,11 +329,16 @@ ADD_CUSTOM_COMMAND(
 
 
 IF( WIN32 )
-  ADD_EXECUTABLE( exwc WIN32 ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_EXECUTABLE( exw WIN32 ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_EXECUTABLE( ecw WIN32 ${EU_CORE_SOURCES_TRANS} ${EU_TRANSLATOR_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_EXECUTABLE( backendw WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_EXECUTABLE( backendc WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} )
+  ADD_EXECUTABLE( exwc WIN32 ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+  ADD_EXECUTABLE( exw WIN32 ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+  ADD_EXECUTABLE( ecw WIN32 ${EU_CORE_SOURCES_TRANS} ${EU_TRANSLATOR_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+  ADD_EXECUTABLE( backendw WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+  ADD_EXECUTABLE( backendc WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+  TARGET_LINK_LIBRARIES( exwc ws2_32 )
+  TARGET_LINK_LIBRARIES( exw ws2_32 )
+  TARGET_LINK_LIBRARIES( ecw ws2_32 )
+  TARGET_LINK_LIBRARIES( backendw ws2_32 )
+  TARGET_LINK_LIBRARIES( backendc ws2_32 )
   ADD_LIBRARY( ecwl STATIC ${EU_LIB_SOURCES} )
   SET_TARGET_PROPERTIES( ecwl PROPERTIES COMPILE_FLAGS -DERUNTIME )
 ENDIF( WIN32)
