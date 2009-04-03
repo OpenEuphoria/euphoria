@@ -433,6 +433,7 @@ installwinbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\exwc.exe copy $(BUILDDIR)\exwc.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\backendw.exe copy $(BUILDDIR)\backendw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\backendc.exe copy $(BUILDDIR)\backendc.exe $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\ecw.lib copy $(BUILDDIR)\ecw.lib $(PREFIX)\bin\
 
 installdos : .SYMBOLIC install-generic installdosbin
 	@echo --------- installdos $(PREFIX) ------------
