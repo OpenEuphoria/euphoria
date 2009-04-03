@@ -224,7 +224,7 @@ function is_temp( symtab_index sym )
 		return 0
 	end if
 	
-	return (SymTab[sym][S_MODE] = M_TEMP) and (INTERPRET or equal( NOVALUE, SymTab[sym][S_OBJ]) )
+	return (SymTab[sym][S_MODE] = M_TEMP) and (not TRANSLATE or equal( NOVALUE, SymTab[sym][S_OBJ]) )
 end function
 
 function is_literal( symtab_index sym )
@@ -269,7 +269,7 @@ function returnf( integer pc )
 		if pc != length( inline_code ) - 3 then
 			code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
 			
-		elsif INTERPRET then -- or inline_code[$] = BADRETURNF then
+		elsif not TRANSLATE then -- or inline_code[$] = BADRETURNF then
 			replace_code( {}, length(inline_code), length(inline_code) )
 			
 		end if
@@ -282,7 +282,7 @@ function returnf( integer pc )
 		if pc != length( inline_code ) - 3 then
 			code &= { ELSE, {INLINE_ADDR, length( inline_code ) + 1 }}
 			
-		elsif INTERPRET or inline_code[$] = BADRETURNF then
+		elsif not TRANSLATE or inline_code[$] = BADRETURNF then
 			replace_code( {}, length(inline_code), length(inline_code) )
 		end if
 		
@@ -752,31 +752,26 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	for pc = 1 to length( inline_code ) do
 		if sequence( inline_code[pc] ) then
 			integer inline_type = inline_code[pc][1]
-			switch inline_type with fallthru do
+			switch inline_type do
 				case INLINE_TEMP then
 					replace_temp( pc )
-					break
+					
 				case INLINE_PARAM then
 					replace_param( pc )
-					break
+					
 				case INLINE_ADDR then
 					inline_code[pc] = inline_start + inline_code[pc][2]
-					break
+					
 				case INLINE_TARGET then
 					inline_code[pc] = inline_target
 					add_inline_target( pc + inline_start )
-					break
+					
 				case INLINE_SUB then
 					inline_code[pc] = CurrentSub
-					break
--- 				case INLINE_SWITCH_TABLE then
--- 					symtab_index new_table = NewStringSym( {-1, length(SymTab) } )
--- 					SymTab[new_table][S_OBJ] = SymTab[inline_code[pc][2]][S_OBJ]
--- 					inline_code[pc] = new_table
--- 					break
+					
 				case INLINE_VAR then
 					replace_var( pc )
-					break
+					
 				case else
 					InternalErr( sprintf("Unhandled inline type: %d", inline_type) )
 			end switch
@@ -788,12 +783,16 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	end for
 	
 	for i = 1 to length(inline_temps) do
-		if int_sym = 0 then
-			int_sym = NewIntSym( 0 )
-		end if
+		if inline_temps[i] then
+			
+			if int_sym = 0 then
+				int_sym = NewIntSym( 0 )
+			end if
+			
+			-- force earlier deref of temps to prevent unnecessary COWs
+			epilog &= {ASSIGN, int_sym, inline_temps[i]}
 		
-		-- force earlier deref of temps to prevent unnecessary COWs
-		epilog &= {ASSIGN, int_sym, inline_temps[i]}
+		end if
 	end for
 	
 	if is_proc then

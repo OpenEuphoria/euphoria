@@ -1534,7 +1534,7 @@ procedure InitBackEnd( object ignore )
 	end while
 	Argc = length(Argv)
 	
-	if INTERPRET then
+	if not TRANSLATE then
 		intoptions()
 	else
 		transoptions()
@@ -1678,7 +1678,8 @@ global procedure BackEnd( object ignore )
 		{ "s", "std", "show standard library information", NO_PARAMETER, routine_id("suppress_stdlib") },
 		{ "f", "file", "include this file", HAS_PARAMETER, routine_id("document_file") },
 		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") },
-		{ "t", 0, "translator mode", NO_PARAMETER, -1 }
+		{ "t", 0, "translator mode", NO_PARAMETER, -1 },
+		{ "b", 0, "binder mode", NO_PARAMETER, -1 }
 		}
 	sequence result = cmd_parse( opts, -1, Argv )
 	
