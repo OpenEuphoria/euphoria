@@ -4690,7 +4690,7 @@ char **make_arg_cv(char *cmdline, int *argc)
    When double-clicked under Windows, cmdline will
    typically contain double-quoted strings. */
 {
-	int i, w;
+	int i, w, j;
 	char **argv;
 
 	// don't use EMalloc yet:
@@ -4708,6 +4708,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 		w = 0;
 	   }
 	i = 0;
+
 	while (TRUE) {
 		/* skip white space */
 		while (cmdline[i] == ' '  ||
@@ -4716,14 +4717,23 @@ char **make_arg_cv(char *cmdline, int *argc)
 			i++;
 		}
 		if (cmdline[i] == '\0')
-			break;
+			break;		
 		if (cmdline[i] == '\"') {
 			i++; // skip leading double-quote
 			argv[w++] = &cmdline[i]; // start of new quoted word
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
-				i++;  // what about quotes within quotes?
+			
+				/* allow a quote after a backslash,
+				   then we copy over the backslash */
+				if (cmdline[i] == '\\' && cmdline[i+1] == '\"') {
+					/* copy the rest of the string over the backslash */
+					for (j = ++i;cmdline[j-1] = cmdline[j]; ++j) /* do nothing */; 
+				}
+					
+				i++;  
 			}
+			
 		}
 		else {
 			argv[w++] = &cmdline[i]; // start of new unquoted word
@@ -4733,12 +4743,14 @@ char **make_arg_cv(char *cmdline, int *argc)
 				cmdline[i] != '\t' &&
 				cmdline[i] != '\n' &&
 				cmdline[i] != '\0') {
+			
 				i++;
 			}
 		}
 		if (cmdline[i] == '\0')
 			break;
 		cmdline[i] = '\0';  // end marker for string - is this Kosher?
+				    // it's Kosher.
 		i++;
 	}
 	*argc = w;

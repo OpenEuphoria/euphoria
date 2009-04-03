@@ -8,20 +8,17 @@ include std/pretty.e
 include std/get.e
 include std/os.e
 
-ifdef UNIX then
 constant command_arrays = { { "1", "2", "3" }, { "1 2", "3" }, { "\"1 2\" 3" },
 				{"hi there", "bye" },
 				{ "This is the \"best\" first sentence.", 
-				   "This is another sentence." }
-							
-			}
-elsedef
-constant command_arrays = { { "1", "2", "3" }, { "1 2", "3" }, 
+				   "This is another sentence." },							
+				{ "1", "2", "3" }, 
+				{ "1 2", "3" }, 
 				{"hi there", "bye" },
 				{ "This is the best first sentence.", 
-				   "This is another sentence." }
+				   "This is another sentence." },
+				{ "C:\\Program Files\\FOOFT\\FOOFT.exe", "-send", "C:\\Documents and Settings\\Charles Wallace\\A Wrinkle In Time.txt", "MY FRIEND" } 
 			}
-end ifdef
 
 
 sequence cmds
@@ -53,7 +50,6 @@ ifdef not EC then
  			 close(fd)
  		end if
  		if delete_file("command_line.txt") then end if
-
 	end for
 end ifdef
 test_report()
