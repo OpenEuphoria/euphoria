@@ -57,8 +57,8 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 
 #ifdef ELCC
 #ifdef EMSVC
-#define push() __asm { PUSH [last_offset] } 1 == 1
-#define  pop() __asm { ADD esp,[as_offset] } 1 == 1
+#define push() __asm { PUSH [last_offset] } do { } while (0)
+#define  pop() __asm { ADD esp,[as_offset] } do { } while (0)
 #else
 #endif
 #endif
