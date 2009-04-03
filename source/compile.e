@@ -4450,7 +4450,7 @@ procedure opINSERT()
 	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
 	
 	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
-		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
 		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
 		c_stmt0("}\n")
@@ -4468,7 +4468,7 @@ procedure opINSERT()
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0( "}\n" )
 	else
-		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
 		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
 		c_stmt0("}\n")
@@ -4524,7 +4524,7 @@ procedure opTAIL()
 end procedure
 
 procedure opREMOVE()
-	c_stmt0("{;\n")
+	c_stmt0("{\n")
 	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
 	c_stmt0("int len = assign_space->length;\n")
 	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
