@@ -1,5 +1,4 @@
--- DO NOT EDIT, EDIT version.mak INSTEAD 
-global constant MAJ_VER=4 
-global constant MIN_VER=0 
-global constant PAT_VER=0 
-global constant REL_TYPE="development" 
+public constant MAJ_VER=4
+public constant MIN_VER=0
+public constant PAT_VER=0
+public constant REL_TYPE="development"

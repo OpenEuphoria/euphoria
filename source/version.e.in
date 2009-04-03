@@ -1,0 +1,4 @@
+public constant MAJ_VER=${VER_MAJ}
+public constant MIN_VER=${VER_MIN}
+public constant PAT_VER=${VER_PAT}
+public constant REL_TYPE="${VER_TYPE}"

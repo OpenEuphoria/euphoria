@@ -10,6 +10,16 @@
 #
 
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4 )
+PROJECT(Euphoria C)
+
+#
+# Versioning
+#
+
+SET( VER_MAJ 4 )
+SET( VER_MIN 0 )
+SET( VER_PAT 0 )
+SET( VER_TYPE "development" )
 
 #
 # Options
@@ -81,8 +91,12 @@ IF( UNIX )
   ENDIF( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    ADD_DEFINITIONS( -DEOSX )
+    ADD_DEFINITIONS( -DEBSD -DEOSX )
   ENDIF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "SunOS" )
+    ADD_DEFINITIONS( -DEBSD -DSUNOS )
+  ENDIF( ${CMAKE_SYSTEM_NAME} MATCHES "SunOS" )
 
   SET( TRANSLATOR ecu )
 ENDIF( UNIX )
@@ -91,278 +105,150 @@ INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_BINARY_DIR}" )
 
 #
 # Source File Lists
+#
 
-SET( PCRE_SOURCES
-  pcre/pcre_chartables.c
-  pcre/pcre_compile.c
-  pcre/pcre_config.c
-  pcre/pcre_dfa_exec.c
-  pcre/pcre_exec.c
-  pcre/pcre_fullinfo.c
-  pcre/pcre_get.c
-  pcre/pcre_globals.c
-  pcre/pcre_info.c
-  pcre/pcre_maketables.c
-  pcre/pcre_newline.c
-  pcre/pcre_ord2utf8.c
-  pcre/pcre_refcount.c
-  pcre/pcre_study.c
-  pcre/pcre_tables.c
-  pcre/pcre_try_flipped.c
-  pcre/pcre_ucd.c
-  pcre/pcre_valid_utf8.c
-  pcre/pcre_version.c
-  pcre/pcre_xclass.c
-  pcre/pcreposix.c
+FILE( GLOB PCRE_SOURCES "pcre/*.c" )
+
+SET( EU_CORE_FILES
+  common.e 
+  emit.e 
+  error.e 
+  fwdref.e 
+  global.e 
+  inline.e
+  keylist.e 
+  main.e
+  mode.e 
+  opnames.e 
+  parser.e 
+  pathopen.e 
+  reswords.e 
+  rev.e
+  scanner.e 
+  scinot.e 
+  shift.e 
+  symtab.e
+  version.e
 )
 
-SET( EU_TRANSLATOR_SOURCES
-  trans/ec.c trans/0rror.c trans/c_decl.c trans/c_dec0.c trans/c_dec1.c trans/c_out.c
-  trans/cominit.c trans/compile.c trans/compil_0.c trans/compil_1.c trans/compil_2.c
-  trans/compil_3.c trans/compil_4.c trans/compil_5.c trans/compil_6.c trans/compil_7.c
-  trans/compil_8.c trans/compil_9.c trans/compil_A.c trans/compress.c trans/get.c
-  trans/global.c trans/sort.c trans/symtab_0.c trans/traninit.c trans/tranplat.c
-  trans/wildcard.c trans/sequence.c trans/text.c trans/types.c trans/dll.c
-  trans/filesys.c trans/io.c trans/memory.c
-)
-
-SET( EU_BACKEND_RUNNER_SOURCES
-  back/0ackend.c
-  back/backend.c
-  back/cominit.c
-  back/compress.c
-  back/convert.c
-  back/dll.c
-  back/error.c
-  back/filesys.c
-  back/init-.c
-  back/intinit.c
-  back/machine.c
-  back/main-.c
-  back/main-.h
-  back/memory.c
-  back/mode.c
-  back/pathopen.c
-  back/search.c
-  back/sort.c
-  back/text.c
-  back/types.c
-  back/wildcard.c
-)
-
-#SET( EU_CORE_SOURCES_PLAIN
-#  main-.c main-0.c convert.c pathopen.c init-.c error.c mode.c symtab.c scanner.c scientific.c
-#  scanne_0.c main.c emit.c emit_0.c emit_1.c parser.c parser_0.c parser_1.c parser_2.c parser_3.c
-# search.c scanne_1.c
-#)
-
-SET( EU_CORE_SOURCES_INTERP
-  int/backend.c
-  int/cominit.c
-  int/compress.c
-  int/convert.c
-  int/datetime.c
-  int/dll.c
-  int/emit.c
-  int/emit_0.c
-  int/emit_1.c
-  int/error.c
-  int/eumem.c
-  int/filesys.c
-  int/fwdref.c
-  int/fwdref_0.c
-  int/get.c
-  int/init-.c
-  int/inline.c
-  int/inline_0.c
-  int/int.c
-  int/intinit.c
-  int/machine.c
-  int/main-.c
-  int/main-0.c
-  int/main.c
-  int/map.c
-  int/memory.c
-  int/mode.c
-  int/parser.c
-  int/parser_0.c
-  int/parser_1.c
-  int/parser_2.c
-  int/parser_3.c
-  int/parser_4.c
-  int/parser_5.c
-  int/pathopen.c
-  int/platform.c
-  int/primes.c
-  int/scanne_0.c
-  int/scanne_1.c
-  int/scanner.c
-  int/scinot.c
-  int/search.c
-  int/shift.c
-  int/shift_0.c
-  int/sort.c
-  int/symtab.c
-  int/symtab_0.c
-  int/symtab_1.c
-  int/text.c
-  int/types.c
-  int/wildcard.c
-)
-
-SET( EU_CORE_SOURCES_TRANS
-  trans/c_dec0.c
-  trans/c_dec1.c
-  trans/c_dec2.c
-  trans/c_decl.c
-  trans/c_out.c
-  trans/cominit.c
-  trans/compil_0.c
-  trans/compil_1.c
-  trans/compil_2.c
-  trans/compil_3.c
-  trans/compil_4.c
-  trans/compil_5.c
-  trans/compil_6.c
-  trans/compil_7.c
-  trans/compil_8.c
-  trans/compil_9.c
-  trans/compil_A.c
-  trans/compil_B.c
-  trans/compil_C.c
-  trans/compil_D.c
-  trans/compile.c
-  trans/compress.c
-  trans/convert.c
-  trans/datetime.c
-  trans/dll.c
-  trans/ec.c
-  trans/emit.c
-  trans/emit_0.c
-  trans/emit_1.c
-  trans/error.c
-  trans/eumem.c
-  trans/filesys.c
-  trans/fwdref.c
-  trans/fwdref_0.c
-  trans/get.c
-  trans/init-.c
-  trans/inline.c
-  trans/inline_0.c
-  trans/machine.c
-  trans/main-.c
-  trans/main-0.c
-  trans/main-1.c
-  trans/main.c
-  trans/map.c
-  trans/math.c
-  trans/memory.c
-  trans/mode.c
-  trans/parser.c
-  trans/parser_0.c
-  trans/parser_1.c
-  trans/parser_2.c
-  trans/parser_3.c
-  trans/parser_4.c
-  trans/parser_5.c
-  trans/pathopen.c
-  trans/platform.c
-  trans/primes.c
-  trans/scanne_0.c
-  trans/scanne_1.c
-  trans/scanner.c
-  trans/scinot.c
-  trans/search.c
-  trans/shift.c
-  trans/shift_0.c
-  trans/sort.c
-  trans/symtab.c
-  trans/symtab_0.c
-  trans/symtab_1.c
-  trans/text.c
-  trans/traninit.c
-  trans/types.c
-  trans/wildcard.c
+SET( EU_INTERPRETER_FILES
+  compress.e
+  backend.e
+  c_out.e
+  cominit.e
+  intinit.e
+  int.ex
 )
 
 SET( EU_BACKEND_SOURCES
-  be_execute.c be_decompress.c be_task.c be_main.c be_alloc.c be_callc.c be_inline.c be_machine.c
-  be_pcre.c be_socket.c be_rterror.c be_syncolor.c be_runtime.c be_symtab.c be_w.c
+  be_alloc.c
+  be_callc.c
+  be_decompress.c
+  be_execute.c
+  be_inline.c
+  be_machine.c
+  be_main.c
+  be_pcre.c
+  be_rterror.c
+  be_runtime.c
+  be_socket.c
+  be_symtab.c
+  be_syncolor.c
+  be_task.c
+  be_w.c
+  version.h
 )
 
 SET( EU_LIB_SOURCES
-  be_decompress.c be_machine.c be_w.c be_alloc.c be_inline.c be_runtime.c be_task.c be_pcre.c be_socket.c
+  be_alloc.c
   be_callc.c
+  be_decompress.c
+  be_inline.c
+  be_machine.c
+  be_pcre.c
+  be_runtime.c
+  be_socket.c
+  be_task.c
+  be_w.c
+  version.h
 )
 
 #
 # Generators
 #
 
-FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/int )
+CONFIGURE_FILE( version.h.in version.h )
+CONFIGURE_FILE( version.e.in version.e )
 
+FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/int )
 ADD_CUSTOM_COMMAND(
-  OUTPUT ${EU_INTERPRETER_SOURCES} ${EU_CORE_SOURCES_INTERP}
+  OUTPUT int/main.c
+  DEPENDS ${EU_CORE_FILES} ${EU_INTERPRETER_FILES}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/int
   COMMAND ${TRANSLATOR} ${CMAKE_CURRENT_SOURCE_DIR}/int.ex
 )
+FILE( GLOB EU_INTERPRETER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/int/*.c" )
 
 FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trans )
-
 ADD_CUSTOM_COMMAND(
-  OUTPUT ${EU_TRANSLATOR_SOURCES} ${EU_CORE_SOURCES_TRANS}
+  OUTPUT trans/main.c
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trans
   COMMAND ${TRANSLATOR} ${CMAKE_CURRENT_SOURCE_DIR}/ec.ex
 )
+FILE( GLOB EU_TRANSLATOR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/trans/*.c" )
 
 FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/back )
-
 ADD_CUSTOM_COMMAND(
-  OUTPUT ${EU_BACKEND_RUNNER_SOURCES}
+  OUTPUT back/main-.c
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/back
   COMMAND ${TRANSLATOR} ${CMAKE_CURRENT_SOURCE_DIR}/backend.ex
 )
+FILE( GLOB EU_BACKEND_RUNNER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/back/*.c" )
 
 #
 # Targets
 #
 
+# Make a library of the PCRE sources, that way we only compile
+# them once and link to it many times.
+ADD_LIBRARY( eu_pcre STATIC ${PCRE_SOURCES} )
+
+ADD_LIBRARY( eruntime STATIC ${EU_LIB_SOURCES} )
+SET_TARGET_PROPERTIES( eruntime PROPERTIES COMPILE_FLAGS -DERUNTIME )
 
 IF( WIN32 )
-  ADD_EXECUTABLE( exwc WIN32 ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
-  ADD_EXECUTABLE( exw WIN32 ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
-  ADD_EXECUTABLE( ecw WIN32 ${EU_CORE_SOURCES_TRANS} ${EU_TRANSLATOR_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
-  ADD_EXECUTABLE( backendw WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
-  ADD_EXECUTABLE( backendc WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
-  TARGET_LINK_LIBRARIES( exwc ws2_32 )
-  TARGET_LINK_LIBRARIES( exw ws2_32 )
-  TARGET_LINK_LIBRARIES( ecw ws2_32 )
-  TARGET_LINK_LIBRARIES( backendw ws2_32 )
-  TARGET_LINK_LIBRARIES( backendc ws2_32 )
-  ADD_LIBRARY( ecwl STATIC ${EU_LIB_SOURCES} )
-  SET_TARGET_PROPERTIES( ecwl PROPERTIES COMPILE_FLAGS -DERUNTIME )
+  FIND_LIBRARY( WINSOCK_LIB ws2_32 PATHS "$ENV{WATCOM}/lib386/nt")
+  IF( NOT WINSOCK_LIB )
+    MESSAGE( FATAL_ERROR  "Could not located the winsock library (ws2_32)")
+  ENDIF( NOT WINSOCK_LIB )
+
+  ADD_EXECUTABLE( eu WIN32 int/main.c ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} )
+  TARGET_LINK_LIBRARIES( eu eu_pcre ${WINSOCK_LIB} )
+
+  ADD_EXECUTABLE( euc WIN32 trans/main.c ${EU_TRANSLATOR_SOURCES} ${EU_BACKEND_SOURCES} )
+  TARGET_LINK_LIBRARIES( euc eu_pcre eruntime ${WINSOCK_LIB} )
+
+  ADD_EXECUTABLE( eub WIN32 back/main-.c ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} )
+  SET_TARGET_PROPERTIES( eub PROPERTIES COMPILE_FLAGS -DEBACKEND )
+  TARGET_LINK_LIBRARIES( eub eu_pcre eruntime ${WINSOCK_LIB} )
+
+  #ADD_EXECUTABLE( backendc WIN32 ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+  #TARGET_LINK_LIBRARIES( backendc ws2_32 )
+
+  IF( WATCOM )
+    SET_TARGET_PROPERTIES( eu  PROPERTIES LINK_FLAGS " SYS nt_win " )
+    SET_TARGET_PROPERTIES( euc PROPERTIES LINK_FLAGS " SYS nt_win " )
+    SET_TARGET_PROPERTIES( eub PROPERTIES LINK_FLAGS " SYS nt_win " )
+  ENDIF( WATCOM )
 ENDIF( WIN32)
 
 IF( UNIX )
-  ADD_EXECUTABLE( exu ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_EXECUTABLE( ecu ${EU_CORE_SOURCES_TRANS} ${EU_TRANSLATOR_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_EXECUTABLE( backendu ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} )
-  ADD_LIBRARY( ecul STATIC ${EU_LIB_SOURCES} )
-  SET_TARGET_PROPERTIES( ecul PROPERTIES COMPILE_FLAGS -DERUNTIME )
-ENDIF( UNIX )
+  ADD_EXECUTABLE( eu ${EU_CORE_SOURCES_INTERP} ${EU_INTERPRETER_SOURCES} ${EU_BACKEND_SOURCES} )
 
-IF( WIN32 )
-  IF( WATCOM )
-    SET_TARGET_PROPERTIES( exw PROPERTIES LINK_FLAGS " SYS nt_win " )
-    SET_TARGET_PROPERTIES( backendw PROPERTIES LINK_FLAGS " SYS nt_win " )
-  ENDIF( WATCOM )
+  ADD_EXECUTABLE( euc ${EU_CORE_SOURCES_TRANS} ${EU_TRANSLATOR_SOURCES} ${EU_BACKEND_SOURCES} )
 
-  SET_TARGET_PROPERTIES( backendc PROPERTIES COMPILE_FLAGS -DEBACKEND )
-  SET_TARGET_PROPERTIES( backendw PROPERTIES COMPILE_FLAGS -DEBACKEND )
-ENDIF( WIN32 )
-
-IF( UNIX )
-  SET_TARGET_PROPERTIES( backendu PROPERTIES COMPILE_FLAGS -DEBACKEND )
+  ADD_EXECUTABLE( eub ${EU_BACKEND_RUNNER_SOURCES} ${EU_BACKEND_SOURCES} )
+  SET_TARGET_PROPERTIES( eub PROPERTIES COMPILE_FLAGS -DEBACKEND )
 ENDIF( UNIX )
 
 # ADD_DEFINITIONS( -DERUNTIME )

@@ -1,0 +1,4 @@
+#define MAJ_VER ${VER_MAJ}
+#define MIN_VER ${VER_MIN}
+#define PAT_VER ${VER_PAT}
+#define REL_TYPE "${VER_TYPE}"
