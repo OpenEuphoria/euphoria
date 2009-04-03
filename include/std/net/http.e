@@ -8,6 +8,7 @@
 -- <<LEVELTOC depth=2>>
 
 include std/socket.e as sock
+include std/net/common.e
 include std/net/dns.e
 include std/text.e
 
@@ -814,103 +815,20 @@ end function
 
 
 public function get_url(sequence url)
-	sequence node, hostname, protocol, port, file, inet_addr
-	sequence data
-	atom cpos
-	object addrinfo
+	object addrinfo, url_data
 
-	-- TO DO: If the changes in version 1.2.2 prove stable, remove redundant
-	-- code under the search for '?'.
-	cpos = match("://",url)
-	if cpos > 0 then
-		protocol = url[1..cpos-1]
-		url = url[cpos+3..length(url)]
-	else
-		protocol = "http"  -- assumed default
-	end if
-	cpos = find(':',url)
-	if cpos = 0 then
-		cpos = find('/',url)
-		if cpos = 0 then
-			cpos = find('?',url)
-			if cpos = 0 then
-				hostname = url
-				node = url
-				port = ""
-				file = ""
-				url = ""
-			else
-				node = url[1..cpos-1]
-				hostname = url
-				port = ""
-				file = ""
-				url = ""
-			end if
-		else
-			node = url[1..cpos-1]
-			url = url[cpos..length(url)]
-			cpos = find('?',url)
-			if cpos = 0 then
-				file = url
-				port = ""
-				hostname = node
-				url = ""
-			else
-				-- hostname = node&url
-				-- file = ""
-				hostname = node
-				file = url
-				port = ""
-				url = ""
-			end if
-		end if
-	else
-		node = url[1..cpos-1]
-		url = url[cpos+1..length(url)]
-		cpos = find('/',url)
-		if cpos = 0 then
-			cpos = find('?',url)
-			if cpos = 0 then
-				port = url
-				hostname = node
-				file = ""
-				url = ""
-			else
-				port = url[1..cpos-1]
-				hostname = node & url[cpos..length(url)]
-				file = ""
-				url = ""
-			end if
-		else
-			port = url[1..cpos-1]
-			url = url[cpos..length(url)]
-			cpos = find('?',url)
-			if cpos = 0 then
-				hostname = node
-				file = url
-				url = ""
-			else
-				--hostname = node & url
-				-- file = ""
-				hostname = node
-				file = url
-				url = ""
-			end if
-		end if
-	end if
+	url_data = parse_url(url)
+	if atom(url_data) then return 0 end if
 
-	if length(file)>0 and file[1]='/' then file = file[2..length(file)] end if
-	--addrinfo = getaddrinfo(node,protocol,0)
-	addrinfo = gethostbyname(node)
+	addrinfo = gethostbyname(url_data[URL_HTTP_DOMAIN])
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return 0
 	end if
 
-	inet_addr = addrinfo[3][1] -- 1st ip
-
-	data = {"",""} -- this is what get_http() returns
-	if eu:compare(lower(protocol),"http")=0 then
-		data = get_http(inet_addr,hostname,file)
+	sequence data = {"",""}
+	if eu:compare(lower(url_data[URL_PROTOCOL]),"http") = 0 then
+		data = get_http(addrinfo[3][1],  url_data[URL_HTTP_DOMAIN],
+			url_data[URL_HTTP_PATH] & url_data[URL_HTTP_QUERY])
 	end if
 
 	return data
