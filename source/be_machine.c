@@ -339,7 +339,7 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned, unsigned);
 #endif
 
-#ifdef EMINGW
+#if defined(EMINGW) || defined(EMSVC)
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len = strlen(name)+1+strlen(value)+1;
@@ -3052,7 +3052,7 @@ static object Seek(object x)
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2);
 	if (pos == -1)
-#if defined(EMINGW) || defined(EDJGPP)
+#if defined(EMINGW) || defined(EDJGPP) || defined(EMSVC)
 		result = iseek(f, 0L, SEEK_END);
 #else
 		result = iiseek(f, 0L, SEEK_END);

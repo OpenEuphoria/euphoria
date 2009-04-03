@@ -90,11 +90,20 @@
 #endif
 
 #ifdef ELCC
+#ifdef EMSVC
+#define push_regs() __asm { PUSHA } 1 == 1
+#define pop_regs() __asm { POPA } 1 == 1
+#define set_esp() __asm { MOV esp, stack_top } 1 == 1
+#define read_esp() __asm { MOV stack_top, esp } 1 == 1
+// this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
+#define read_esp_tc() __asm { MOV stack_top, esp } 1 == 1
+#else
 #define push_regs() _asm("pushal")
 #define pop_regs() _asm("popal")
 #define set_esp() _asm("movl -20(%ebp), %esp")
 #define read_esp() _asm("movl %esp, -20(%ebp)")
 #define read_esp_tc() _asm("movl %esp, -52(%ebp)")
+#endif
 #endif
 
 #ifdef EBORLAND

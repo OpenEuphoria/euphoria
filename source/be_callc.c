@@ -56,8 +56,11 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 #endif  // EUNIX
 
 #ifdef ELCC
-#define push() _asm("pushl -8(%ebp)")
-#define  pop() _asm("addl -36(%ebp), %esp")
+#ifdef EMSVC
+#define push() __asm { PUSH [last_offset] } 1 == 1
+#define  pop() __asm { ADD esp,[as_offset] } 1 == 1
+#else
+#endif
 #endif
 
 #ifdef EDJGPP
@@ -348,7 +351,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	argsize = arg_list_ptr->length << 2;
-	
 	
 	// Push the Arguments
 	
