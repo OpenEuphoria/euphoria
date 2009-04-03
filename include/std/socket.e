@@ -10,6 +10,7 @@ end ifdef
 
 include std/get.e
 include std/regex.e as re
+include std/memory.e as mem
 include std/sequence.e as seq
 include std/net/common.e
 
@@ -167,6 +168,14 @@ public constant
 -- === Server and Client sides
 --
 
+-- Not made public as the end user should have no need of accessing one value
+-- or the other.
+enum
+	--** Accessor index for socket handle of a socket type
+	SOCKET_SOCKET,
+	--** Accessor index for the sockaddr_in pointer of a socket type
+	SOCKET_SOCKADDR_IN
+
 --**
 -- Socket type
 --
@@ -180,13 +189,17 @@ public type socket(object o)
 	return 1
 end type
 
--- Not made public as the end user should have no need of accessing one value
--- or the other.
-enum
-	--** Accessor index for socket handle of a socket type
-	SOCKET_SOCKET,
-	--** Accessor index for the sockaddr_in pointer of a socket type
-	SOCKET_SOCKADDR_IN
+procedure delete_socket(object o)
+	if not socket(o) then 
+		return 
+	end if
+	if o[SOCKET_SOCKADDR_IN] = 0 then 
+		return 
+	end if
+	
+	mem:free(o[SOCKET_SOCKADDR_IN])
+end procedure
+integer delete_socket_rid = routine_id("delete_socket")
 
 --**
 -- Create a new socket
@@ -205,7 +218,9 @@ enum
 -- </eucode>
 
 public function create(integer family, integer sock_type, integer protocol)
-	return machine_func(M_SOCK_SOCKET, { family, sock_type, protocol })
+	object o = machine_func(M_SOCK_SOCKET, { family, sock_type, protocol })
+	if atom(o) then return o end if
+	return delete_routine(o, delete_socket_rid)
 end function
 
 --**
