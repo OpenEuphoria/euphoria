@@ -1071,7 +1071,9 @@ extern void DisableControlCHandling();
 void DisableControlCHandling()
 {
 	// SetConsoleMode(console_input, ENABLE_MOUSE_INPUT);
-	SetConsoleMode(console_input, FALSE);
+	int x = SetConsoleMode(console_input, FALSE);
+	if (!x)
+		screen_output(stderr, "\nBig fail!\n");
 }
 
 #endif

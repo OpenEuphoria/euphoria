@@ -18,7 +18,16 @@ include std/machine.e
 include std/error.e
 
 ifdef DOS32 then
-	crash("pipeio.e is not supported on DOS")
+	include std/io.e
+
+	constant FAIL = 0
+	enum
+		READ,
+		WRITE,
+		CLOSE,
+		PIPE,
+		KILL,
+		ERRNO
 
 elsifdef WIN32 then
 	constant
@@ -77,14 +86,20 @@ end ifdef
 -- === Accessor Constants
 
 public enum
-	--** Process ID
-	PID,
 	--** Child processes standard input
 	STDIN,
 	--** Child processes standard output
 	STDOUT,
 	--** Child processes standard error
-	STDERR
+	STDERR,
+	--** Process ID
+	PID
+
+public enum
+	--** Set of pipes that are for the use of the parent
+	PARENT,
+	--** Set of pipes that are given to the child - should not be used by the parent
+	CHILD
 
 atom os_errno = 0
 
@@ -93,6 +108,8 @@ atom os_errno = 0
 function get_errno()
 	ifdef WIN32 then
 		return c_func(iGetLastError,{})
+	elsifdef DOS32 then
+		return 1
 	elsedef
 		return peek4u(ERRNO)
 	end ifdef
@@ -130,6 +147,15 @@ end type
 
 public function close(atom fd)
 	atom ret
+
+	ifdef DOS32 then
+		if fd = -2 then
+			return 0
+		end if
+		eu:close(fd)
+		return 0
+	end ifdef
+
 	ifdef WIN32 then
 		ret=c_func(iCloseHandle,{fd})
 	elsedef
@@ -158,6 +184,10 @@ end function
 
 public procedure kill(process p, atom signal=15)
 	atom ret
+
+	ifdef DOS32 then
+		return -- nop
+	end ifdef
 	
 	--Close the pipes
 	--If any fail its probably just because they were already closed, so that is ignored
@@ -220,6 +250,13 @@ end function
 --
 
 public function read(atom fd, integer bytes)
+	ifdef DOS32 then
+		if fd = -2 then
+			return ""
+		end if
+		return get_bytes(fd, bytes)
+	end ifdef
+
 	if bytes=0 then return "" end if
 
 	sequence data
@@ -263,6 +300,14 @@ end function
 --
 
 public function write(atom fd, sequence str)
+	ifdef DOS32 then
+		if fd = -2 then
+			return length(str)
+		end if
+		puts(fd, str)
+		return length(str)
+	end ifdef
+
 	atom
 	--	fd = p[2],
 		buf = allocate_string(str),
@@ -347,6 +392,64 @@ ifdef WIN32 then
 	   end if
 	   return ProcInfo
 	end function -- CreateProcess()
+
+	--WIN32 version of create()
+
+	--**
+	-- Create pipes for interprocess communication
+	--
+	-- Returns:
+	--   Returns process handles { {parent side pipes},{child side pipes} }
+	--
+	-- Example 1:
+	-- <eucode>
+	-- object p=pipe:exec("dir", pipe:create())
+	-- </eucode>
+	--
+	public function create()
+	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr, -- handles used by child process
+	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd  -- handles used by parent process
+	
+	object
+	  StdInPipe = {},
+	  StdOutPipe = {},
+	  StdErrPipe = {}
+	  
+	object fnVal
+
+	  -- capture chid process std input
+	    StdInPipe = os_pipe()
+	    if atom(StdInPipe) then return -1 end if
+	    hChildStdInRd = StdInPipe[PIPE_READ_HANDLE]
+	    hChildStdInWr = StdInPipe[PIPE_WRITE_HANDLE]
+	  
+	  
+	  -- capture child process std output  
+	    StdOutPipe = os_pipe()
+	    if atom(StdOutPipe) then 
+	      CloseAllHandles(StdInPipe)
+	      return -1
+	    end if
+	    hChildStdOutWr = StdOutPipe[PIPE_WRITE_HANDLE]
+	    hChildStdOutRd = StdOutPipe[PIPE_READ_HANDLE]
+	  
+	  -- capture child process std error
+	    StdErrPipe = os_pipe()
+	    if atom(fnVal) then
+	       CloseAllHandles(StdErrPipe & StdOutPipe)
+	       return -1
+	    end if
+	    hChildStdErrWr = StdErrPipe[PIPE_WRITE_HANDLE]
+	    hChildStdErrRd = StdErrPipe[PIPE_READ_HANDLE]
+
+	    fnVal = SetHandleInformation(StdInPipe[PIPE_WRITE_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    fnVal = SetHandleInformation(StdOutPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    fnVal = SetHandleInformation(StdErrPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
+
+	  return {{hChildStdInWr,hChildStdOutRd,hChildStdErrRd},
+	         {hChildStdInRd,hChildStdOutWr,hChildStdErrWr}}
+	  
+	end function
 	
 	--WIN32 version of exec()
 
@@ -358,61 +461,25 @@ ifdef WIN32 then
 	--
 	-- Example 1:
 	-- <eucode>
-	-- object p=pipe:exec("dir")
+	-- object p=pipe:exec("dir", pipe:create())
 	-- </eucode>
 	--
 
-	public function exec(sequence cmd)
+	public function exec(sequence cmd, sequence pipe)
 	object fnVal
 	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr, -- handles used by child process
 	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd  -- handles used by parent process
 	atom ret
 	
-	sequence  
-	  StdInPipe = {},
-	  StdOutPipe = {},
-	  StdErrPipe = {}
-	  
+	hChildStdInWr = pipe[1][1]
+	hChildStdOutRd = pipe[1][2]
+	hChildStdErrRd = pipe[1][3]
+	hChildStdInRd = pipe[2][1]
+	hChildStdOutWr = pipe[2][2]
+	hChildStdErrWr = pipe[2][3]
+
 	atom hChildProcess
 	
-	  hChildStdInRd = GetStdHandle(STD_INPUT_HANDLE)
-	  hChildStdOutWr = GetStdHandle(STD_OUTPUT_HANDLE)
-	  hChildStdErrWr = GetStdHandle(STD_ERROR_HANDLE)
-	  hChildStdInWr = FILE_INVALID_HANDLE
-	  hChildStdOutRd = FILE_INVALID_HANDLE
-	  hChildStdErrRd = FILE_INVALID_HANDLE
-	  
-	  -- capture chid process std input
-	    fnVal = os_pipe()
-	    if atom(fnVal) then return -1 end if
-	    hChildStdInRd = fnVal[PIPE_READ_HANDLE]
-	    hChildStdInWr = fnVal[PIPE_WRITE_HANDLE]
-	    StdInPipe = fnVal
-	    fnVal = SetHandleInformation(StdInPipe[PIPE_WRITE_HANDLE],HANDLE_FLAG_INHERIT,0)
-	  
-	  
-	  -- capture child process std output  
-	    fnVal = os_pipe()
-	    if atom(fnVal) then 
-	      CloseAllHandles(StdInPipe)
-	      return -1
-	    end if
-	    hChildStdOutWr = fnVal[PIPE_WRITE_HANDLE]
-	    hChildStdOutRd = fnVal[PIPE_READ_HANDLE]
-	    StdOutPipe = fnVal
-	    fnVal = SetHandleInformation(StdOutPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
-	  
-	  -- capture child process std error
-	    fnVal = os_pipe()
-	    if atom(fnVal) then
-	       CloseAllHandles(StdInPipe & StdOutPipe)
-	       return -1
-	    end if
-	    StdErrPipe = fnVal
-	    hChildStdErrWr = StdErrPipe[PIPE_WRITE_HANDLE]
-	    hChildStdErrRd = StdErrPipe[PIPE_READ_HANDLE]
-	    fnVal = SetHandleInformation(StdErrPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
-	  
 	  -- create child process
 	  fnVal = CreateProcess(cmd,{hChildStdInRd,hChildStdOutWr,hChildStdErrWr})
 	  if atom(fnVal) then
@@ -422,16 +489,23 @@ ifdef WIN32 then
 	  ret=close(fnVal[2]) -- hChildThread not needed.
 	
 	     ret=close(hChildStdInRd)
-	     StdInPipe = {StdInPipe[PIPE_WRITE_HANDLE]}
 	  
 	     ret=close(hChildStdOutWr)
-	     StdOutPipe = {StdOutPipe[PIPE_READ_HANDLE]}
 	  
 	     ret=close(hChildStdErrWr)
-	     StdErrPipe = {StdErrPipe[PIPE_READ_HANDLE]}
 	  
-	  return {hChildProcess,hChildStdInWr,hChildStdOutRd,hChildStdErrRd}
+	  return {hChildStdInWr,hChildStdOutRd,hChildStdErrRd,hChildProcess}
 	
+	end function
+elsifdef DOS32 then
+	public function create()
+		return {{open("tempfile.tmp", "wb"),-2,-2},{-2,-2,-2}}
+	end function
+
+	public function exec(sequence cmd, sequence pipe)
+		close(pipe[1][1])
+		system(cmd&" < tempfile.tmp > tempfil2.tmp", 2)
+		return {-2,open("tempfil2.tmp", "rb"),-2,0}
 	end function
 elsedef
 	--*NIX-specific functions
@@ -479,14 +553,13 @@ elsedef
 	function os_signal(integer signal, atom handler)
 		return c_func(SIGNAL, {signal, handler})
 	end function
+
+	--*NIX version of create()
 	
-	--Linux takes parameters as a sequence of args,
-	--so this is wrapped in a function below to make it compatible with the Windows implementation
-	function exec_args(sequence command,sequence args)
-	    atom pid
-	    integer ret
-	    sequence p
+	--See docs above in WIN32 version
+	public function create()
 	    object ipipe,opipe,epipe
+	    integer ret
 		
 		--Create pipes
 		ipipe=os_pipe()
@@ -509,6 +582,20 @@ elsedef
 			ret=close(opipe[2])
 			return -1
 	    end if
+	    return {{ipipe[2],opipe[1],epipe[1]},{ipipe[1],opipe[2],epipe[2]}}
+	end function
+	
+	--Linux takes parameters as a sequence of args,
+	--so this is wrapped in a function below to make it compatible with the Windows implementation
+	function exec_args(sequence command,sequence args, sequence pipe)
+	    atom pid
+	    integer ret
+	    sequence p
+	    object ipipe,opipe,epipe
+
+	    ipipe = pipe[2][1] & pipe[1][1]
+	    opipe = pipe[1][2] & pipe[2][2]
+	    epipe = pipe[1][3] & pipe[2][3]
 	    
 		--Fork
 	    pid=os_fork()
@@ -556,7 +643,7 @@ elsedef
 			--Parent process
 			
 			--Process info
-			p={pid, ipipe[2], opipe[1], epipe[1]}
+			p={ipipe[2], opipe[1], epipe[1], pid}
 			
 			--Close the sides we don't need, otherwise they will be left hanging
 			ret=close(ipipe[1])
@@ -576,13 +663,13 @@ elsedef
 	--*NIX version of exec()
 	
 	--See docs above in WIN32 version
-	public function exec(sequence cmd)
+	public function exec(sequence cmd, sequence pipe)
 		--*NIX needs exe and args seperated,
 		--but for Windows compatibility, we need to accept a command line
 		
 		--PHP's proc_open() does it this way.
 		--If there is a better way, please fix it.
 		--Need to make sure this works on all *NIX platforms
-		return exec_args("/bin/sh",{"-c", cmd})
+		return exec_args("/bin/sh",{"-c", cmd}, pipe)
 	end function
 end ifdef

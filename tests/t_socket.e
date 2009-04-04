@@ -26,7 +26,7 @@ test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
 -- connect are all tested with the below test
 --
 
-object p = pipe:exec("eui ../demo/sock_server.ex")
+object p = pipe:exec("eui ../demo/sock_server.ex", pipe:create())
 if atom(p) then
 	test_fail("could not launch temporary server")
 else
