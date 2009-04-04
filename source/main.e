@@ -5,10 +5,6 @@
 include std/filesys.e
 include std/io.e
 
-ifdef not EU_FULL_RELEASE then
-	include rev.e
-end ifdef
-
 include std/get.e
 include pathopen.e
 include std/error.e
@@ -22,6 +18,7 @@ function GetSourceName()
 	integer src_file
 	boolean dot_found
 	sequence src_name, exts
+	sequence SVN_REVISION
 
 	if Argc >= 3 then
 		src_name = Argv[3]
@@ -66,6 +63,8 @@ function GetSourceName()
 		end ifdef
 
 		ifdef not EU_FULL_RELEASE then
+			SVN_REVISION = machine_func(75, {})
+			SVN_REVISION = SVN_REVISION[5]
 			screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
 		end ifdef
 		ifdef EU_MANAGED_MEM then

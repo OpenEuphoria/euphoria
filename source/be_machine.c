@@ -146,6 +146,8 @@ END_COLOR_DEPTH_LIST
 
 #include "version.h"
 
+extern char* get_svn_revision(); /* from rev.c */
+
 /*****************/
 /* Local defines */
 /*****************/
@@ -4792,11 +4794,12 @@ static object crash_routine(object x)
 object eu_info()
 {
 	s1_ptr s1;
-	s1 = NewS1(4);
+	s1 = NewS1(5);
 	s1->base[1] = MAJ_VER;
 	s1->base[2] = MIN_VER;
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
+	s1->base[5] = NewString(get_svn_revision());
 	return MAKE_SEQ(s1);
 }
 

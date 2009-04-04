@@ -77,7 +77,6 @@ BASEPATH=pcre
 FULLBUILDDIR=$(BUILDDIR)
 
 EU_CORE_FILES = &
-	rev.e &
 	main.e &
 	global.e &
 	common.e &
@@ -140,6 +139,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
 #       &
 #       $(BUILDDIR)\$(OBJDIR)\memory.obj
@@ -155,6 +155,7 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
@@ -585,7 +586,7 @@ $(BUILDDIR)\dosbkobj\main-.c: $(BUILDDIR)\dosbkobj\back $(EU_CORE_FILES) $(EU_BA
 !ifdef EUPHORIA
 # We should have ifdef EUPHORIA so that make doesn't decide
 # to update rev.e when there is no $(EX)
-rev.e : .recheck .always
+be_rev.c : .recheck .always
 	$(EX) -i ..\include revget.ex
 
 !ifdef EU_TARGET
@@ -646,6 +647,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG) 
 
 version.e: version.mak
     @echo ------- VERSION.E -----------

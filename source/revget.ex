@@ -7,12 +7,12 @@ constant rev = "revision=\""
 
 procedure update_rev_e( object f )
 	integer h
-	puts(1,"updating rev.e\n")
+	puts(1,"updating rev.c\n")
 	if atom(f) then
 	    f = sprintf( "%d", { f } )
 	end if
-	h = open("rev.e", "w")
-	printf(h, "global constant SVN_REVISION = \"%s\"\n", {f})
+	h = open("be_rev.c", "w")
+	printf(h, "extern char* get_svn_revision();\nchar * get_svn_revision() {\nreturn \"%s\";\n}\n", {f})
 	close(h)
 	h = open("rev.dat","w")
 	printf(h,"%s",{f})
@@ -40,7 +40,7 @@ function is_current( object rev )
 	integer current
 	integer ix, jx
 	object line
-	fn = open( "rev.e", "r" )
+	fn = open( "be_rev.c", "r" )
 	if fn = -1 then
 		return 0
 	end if
@@ -51,9 +51,9 @@ function is_current( object rev )
 
 	current = 0
 	while sequence( line ) with entry do
-		ix = match( "SVN_REVISION = \"", line )
+		ix = match( "return \"", line )
 		if ix then
-			jx = find_from( '"', line, ix + 17 )
+			jx = find_from( '"', line, ix + length("return \"") )
 			if jx then
 				if compare( line[ix+16..jx-1], rev ) = 0 then
 					current = 1

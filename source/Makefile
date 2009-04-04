@@ -174,7 +174,6 @@ EU_CORE_FILES = \
 	fwdref.e \
 	shift.e \
 	inline.e \
-	rev.e \
 	version.e
 
 EU_INTERPRETER_FILES = \
@@ -226,6 +225,7 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_rev.o \
 	$(PREFIXED_PCRE_OBJECTS)
 
 EU_LIB_OBJECTS = \
@@ -239,6 +239,7 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_rev.o \
 	$(PREFIXED_PCRE_OBJECTS)
 	
 
