@@ -16,7 +16,7 @@
 #     --without-euphoria      Use this option if you are building Euphoria 
 #		     with only a C compiler.
 # 
-#     --eubin <dir>   Use this option to specify the location of the interpreter
+#     --eubin <dir>   Use this option to speuify the location of the interpreter
 #		     binary to use to translate the front end.  The default
 #		     is ../bin
 #
@@ -33,7 +33,7 @@
 #   Clean up binary and       :  make distclean
 #        translated files
 #   Everything                :  make
-#   Interpreter          (eci):  make interpreter
+#   Interpreter          (eui):  make interpreter
 #   Translator           (euc):  make translator
 #   Translator Library (euc.a):  make library
 #   Backend              (eub):  make eub
@@ -124,7 +124,7 @@ else
 	EBACKENDU=eub
 	EBACKENDC=eub
 	EECU=euc
-	EEXU=eci
+	EEXU=eui
 	EECUA=euc.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
@@ -298,7 +298,7 @@ svn_rev :
 	-$(EXE) -i ../include revget.ex ../.svn/entries
 
 interpreter : version.e version.h builddirs
-	$(MAKE) ecisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
 translator : version.e version.h builddirs
@@ -310,14 +310,14 @@ translator : version.e version.h builddirs
 .PHONY : translator
 .PHONY : svn_rev
 
-ecisource : $(BUILDDIR)/intobj/main-.c
-ecisource :  EU_TARGET = int.ex
+euisource : $(BUILDDIR)/intobj/main-.c
+euisource :  EU_TARGET = int.ex
 eucsource : $(BUILDDIR)/transobj/main-.c
 eucsource :  EU_TARGET = ec.ex
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
 source : builddirs
-	$(MAKE) ecisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
@@ -341,7 +341,7 @@ source-tarball : source
 	cp ../include/euphoria.h $(SOURCEDIR)
 	cp *.h         $(SOURCEDIR)
 	
-.PHONY : ecisource
+.PHONY : euisource
 .PHONY : eucsource
 .PHONY : backendsource
 .PHONY : source
@@ -410,7 +410,7 @@ install :
 	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/include/euphoria
 	install $(EECUA) $(DESTDIR)/usr/lib
-	install eci $(DESTDIR)/usr/bin
+	install eui $(DESTDIR)/usr/bin
 	install euc $(DESTDIR)/usr/bin
 	install euc.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include

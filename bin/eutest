@@ -1,4 +1,4 @@
 #!/bin/sh
 
-exu eutest.ex $@
+eui eutest.ex $@
 
