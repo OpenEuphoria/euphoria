@@ -1057,3 +1057,30 @@ end procedure
 public function build_commandline(sequence cmds)
 	return flatten(quote( cmds,,'\\'," " ), " ") 		
 end function
+
+--****
+-- Description:
+-- Returns a sequence containing information about the current version of euphoria.
+--
+-- Parameters:
+--    # none
+--
+-- Returns:
+--	A **sequence** that contains these elements...
+-- # Major Version (integer)
+-- # Minor Version (integer)
+-- # Patch Level (integer)
+-- # Edition (sequence text)
+-- # Source Revision Level (sequence text)
+--
+--
+-- Example 1:
+-- <eucode>
+--  s = eu_info()
+-- -- s may contain {4,0,0,"development", "3554"}
+-- </eucode>
+constant M_EU_INFO = 75
+public function eu_info()
+	return machine_func(M_EU_INFO, {})
+end function
+
