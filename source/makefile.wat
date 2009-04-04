@@ -121,7 +121,7 @@ EU_TRANSLATOR_FILES = &
 !include $(BUILDDIR)\dosbkobj.wat
 
 EU_BACKEND_OBJECTS = &
-!ifndef INT_CODES
+!ifneq INT_CODES 1
 	$(BUILDDIR)\$(OBJDIR)\back\be_magic.obj &
 !endif	
 	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
@@ -332,7 +332,7 @@ $(BUILDDIR)\$(OBJDIR)\back : .EXISTSONLY $(BUILDDIR)\$(OBJDIR)
     -mkdir $(BUILDDIR)\$(OBJDIR)\back
 
 $(BUILDDIR)\$(OBJDIR).wat : $(BUILDDIR)\$(OBJDIR)\main-.c &
-!ifndef INT_CODES
+!ifneq INT_CODES 1
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 !else
 
@@ -620,7 +620,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
-!ifndef INT_CODES 	
+!ifneq INT_CODES 1
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj $(TRUNKDIR)\bin\findjmp.ex
 	cd $(BUILDDIR)\$(OBJDIR)\back
 	$(EXE) $(INCDIR) $(TRUNKDIR)\bin\findjmp.ex be_magic.c
