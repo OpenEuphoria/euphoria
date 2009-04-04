@@ -55,6 +55,7 @@
 ../include/std/math.e
 ../include/std/mouse.e
 ../include/std/os.e
+../include/std/pipeio.e
 ../include/std/pretty.e
 ../include/std/stats.e
 ../include/std/task.e
