@@ -1436,7 +1436,7 @@ global procedure finish_emake()
 				if fastfp then
 					puts(link_file, "ecfastfp.lib\n") 
 				else    
-					puts(link_file, "ec.lib\n") 
+					puts(link_file, "eu.lib\n")
 				end if
 			end if
 			if not keep then
@@ -1499,7 +1499,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "FILE %s\n", {user_library}) 
 			else
-				printf(link_file, "FILE %s\\ecw.lib\n", {bin_path}) 	
+				printf(link_file, "FILE %s\\eu.lib\n", {bin_path})
 			end if
 			puts(link_file, "LIBRARY ws2_32\n")
 			if compare( short_c_file, file0 ) != 0 then
@@ -1511,7 +1511,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {user_library}) 
 			else
-				printf(link_file, "%s\\ecwb.lib\n", {bin_path}) 	
+				printf(link_file, "%s\\eub.lib\n", {bin_path})
 			end if
 			
 			if not keep then
@@ -1537,7 +1537,7 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {shrink_to_83(user_library)}) 
 			else
-				printf(link_file, "%s\\ecwl.lib\n", {shrink_to_83(bin_path)}) 
+				printf(link_file, "%s\\eul.lib\n", {shrink_to_83(bin_path)})
 			end if
 			
 		end if
@@ -1595,15 +1595,15 @@ global procedure finish_emake()
 		else
 			-- need to check to see if euphoria is installed into
 			-- the system:
-			lib_dir = open("/usr/lib/ecu.a","r" )
+			lib_dir = open("/usr/lib/eu.a","r" )
 			if lib_dir = -1 then
 				printf(doit, 
-					"gcc %s %s.o %s -I%s %s/bin/ecu.a -o %s -lm ",
+					"gcc %s %s.o %s -I%s %s/bin/eu.a -o %s -lm ",
 					{dll_flag, short_c_file, link_line, get_eudir(), get_eudir(), file0})
 			else
 				close(lib_dir)
 				printf(doit,
-					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/ecu.a -o %s -lm",
+					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/eu.a -o %s -lm",
 					{dll_flag, short_c_file, link_line, file0})
 			end if
 			
@@ -1921,6 +1921,3 @@ global procedure GenerateUserRoutines()
 		end if
 	end for   
 end procedure
-
-
-

@@ -33,10 +33,10 @@
 #   Clean up binary and       :  make distclean
 #        translated files
 #   Everything                :  make
-#   Interpreter          (exu):  make interpreter
-#   Translator           (ecu):  make translator
-#   Translator Library (ecu.a):  make library
-#   Backend         (backendu):  make backendu
+#   Interpreter          (eci):  make interpreter
+#   Translator           (euc):  make translator
+#   Translator Library (euc.a):  make library
+#   Backend              (eub):  make eub
 #   Run Unit Tests            :  make test
 #   Run Unit Tests for DJGPP  :  make test-djgpp
 
@@ -121,11 +121,11 @@ else
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
 	EOSMING=-O2
-	EBACKENDU=backendu
-	EBACKENDC=backendu
-	EECU=ecu
-	EEXU=exu
-	EECUA=ecu.a
+	EBACKENDU=eub
+	EBACKENDC=eub
+	EECU=euc
+	EEXU=eci
+	EECUA=euc.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 endif
@@ -279,7 +279,7 @@ clean :
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
 endif
-	-rm -f version.e version.h
+	-rm -f version.h
 	$(MAKE) -C pcre clean
 	
 
@@ -298,11 +298,11 @@ svn_rev :
 	-$(EXE) -i ../include revget.ex ../.svn/entries
 
 interpreter : version.e version.h builddirs
-	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
+	$(MAKE) ecisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
 translator : version.e version.h builddirs
-	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
 .PHONY : builddirs
@@ -310,15 +310,15 @@ translator : version.e version.h builddirs
 .PHONY : translator
 .PHONY : svn_rev
 
-exusource : $(BUILDDIR)/intobj/main-.c
-exusource :  EU_TARGET = int.ex
-ecusource : $(BUILDDIR)/transobj/main-.c
-ecusource :  EU_TARGET = ec.ex
+ecisource : $(BUILDDIR)/intobj/main-.c
+ecisource :  EU_TARGET = int.ex
+eucsource : $(BUILDDIR)/transobj/main-.c
+eucsource :  EU_TARGET = ec.ex
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
 source : builddirs
-	$(MAKE) exusource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
-	$(MAKE) ecusource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
+	$(MAKE) ecisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
 SVN_REV=xxx
@@ -341,8 +341,8 @@ source-tarball : source
 	cp ../include/euphoria.h $(SOURCEDIR)
 	cp *.h         $(SOURCEDIR)
 	
-.PHONY : exusource
-.PHONY : ecusource
+.PHONY : ecisource
+.PHONY : eucsource
 .PHONY : backendsource
 .PHONY : source
 
@@ -410,9 +410,9 @@ install :
 	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/include/euphoria
 	install $(EECUA) $(DESTDIR)/usr/lib
-	install exu $(DESTDIR)/usr/bin
-	install ecu $(DESTDIR)/usr/bin
-	install ecu.a $(DESTDIR)/usr/lib
+	install eci $(DESTDIR)/usr/bin
+	install euc $(DESTDIR)/usr/bin
+	install euc.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
@@ -440,7 +440,7 @@ install :
 	           be_*.c \
 	           *.h
 
-# This doesn't seem right. What about backendu or eushroud ?
+# This doesn't seem right. What about eub or eushroud ?
 uninstall :
 	-rm /usr/bin/$(EEXU) /usr/bin/$(EECU) /usr/lib/$(EECUA)
 	-rm -r /usr/share/euphoria
@@ -496,4 +496,3 @@ else
 	$(MAKE) -C pcre all
 endif
 endif
-	

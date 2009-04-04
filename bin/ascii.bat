@@ -1,3 +1,3 @@
 @echo off
-ex.exe ascii.ex
+eui.exe ascii.ex
 

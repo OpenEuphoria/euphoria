@@ -1,4 +1,4 @@
-#!/usr/bin/exu
+#!/usr/bin/eui
 
 -- Specify -exe <path to interpreter> to use a specific interpreter for tests
 
@@ -199,13 +199,13 @@ procedure do_test(sequence cmds)
 	integer expected_status -- expected status
 	
 	ifdef UNIX then
-		executable = "exu"
+		executable = "eui"
 		dexe = ""
 	elsifdef WIN32 then
-		executable = "exwc"
+		executable = "eui"
 		dexe = ".exe"
 	elsedef
-		executable = "ex"
+		executable = "euid"
 		dexe = ".exe"
 	end ifdef
 
@@ -230,16 +230,16 @@ procedure do_test(sequence cmds)
 		ec = find("-ec", cmds)
 	end while
 
-	if (length(translator) >= 7 and match( upper("ecw.exe"), upper(translator) ) != 0)
+	if (length(translator) >= 7 and match( upper("euc.exe"), upper(translator) ) != 0)
 		or ( length(translator) = 0 and platform() = WIN32 ) 
 	then
 		translator_options &= " -CON"
-	elsif ( match( upper("ecu"), upper(translator) ) != 0 )
+	elsif ( match( upper("euc"), upper(translator) ) != 0 )
 		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS } ) ) 
 	then
 		-- NOOP
 	elsif ( length(translator) = 0 and platform() = DOS32 ) or 
-			match( upper("ec.exe"), upper(translator) ) != 0 
+			match( upper("eucd.exe"), upper(translator) ) != 0
 	then
 		-- NOOP
 	else
@@ -247,12 +247,12 @@ procedure do_test(sequence cmds)
 		abort(1)
 	end if                                  
 	
-	if match( upper("exwc.exe"), upper(executable) ) != 0 then
+	if match( upper("eui.exe"), upper(executable) ) != 0 then
 		interpreter_os_name = "WIN32"		
 	else
-		if match( upper("exu"), upper(executable) ) != 0 then
+		if match( upper("eui"), upper(executable) ) != 0 then
 			interpreter_os_name = "UNIX"
-		elsif match( upper("ex.exe"), upper(executable) ) != 0 then
+		elsif match( upper("euid.exe"), upper(executable) ) != 0 then
 			interpreter_os_name = "DOS32"
 		elsif platform() = WIN32 then
 			interpreter_os_name = "WIN32"		
@@ -928,14 +928,14 @@ procedure main(sequence cmds = command_line())
 		end if
 	end while
 	if find("-help", cmds) or find("--help",cmds) or find("/?", cmds) then
-		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n"
-		&"\t[-exe interpreter-path-and-filename]\n"
-		&"\t[-ec translator-path-and-filename] [-i include directory]\n"
-		&"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n"
-		&"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n"
-		&"\t[-log]\n"
-		&"\t[-verbose]\n"
-		&"\t[unit test files]\n")
+		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n" &
+		"\t[-exe interpreter-path-and-filename]\n" &
+		"\t[-ec translator-path-and-filename] [-i include directory]\n" &
+		"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n" &
+		"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n" &
+		"\t[-log]\n" &
+		"\t[-verbose]\n" &
+		"\t[unit test files]\n")
 		abort(0)
 	end if  
 	if find("-process-log", cmds) then

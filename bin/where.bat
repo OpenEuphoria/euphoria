@@ -1,3 +1,3 @@
 @echo off
-ex.exe where.ex %1 
+eui where.ex %1
 
