@@ -1897,22 +1897,35 @@ function finish_block_header(integer opcode)
 		switch tok[T_ID] do
 		    case ENTRY then
 				if not (opcode = WHILE or opcode = LOOP) then
-					CompileErr("`with entry` is only valid on a while or loop statement")
+					CompileErr("'with entry' is only valid on a while or loop statement")
 				end if
 
 			    has_entry = 1
 				
 			case FALLTHRU then
 				if not opcode = SWITCH then
-					CompileErr("`with fallthru` is only valid in a switch statement")
+					CompileErr("'with fallthru' is only valid in a switch statement")
 				end if
 				
 				switch_stack[$][SWITCH_FALLTHRU] = 1
 				
 			case else
-			    CompileErr("An unknown `with/without` option has been specified")
+			    CompileErr("An unknown 'with/without' option has been specified")
         end switch
 
+        tok = next_token()
+	elsif tok[T_ID] = WITHOUT then
+		tok = next_token()
+		if tok[T_ID] = FALLTHRU then
+			if not opcode = SWITCH then
+				CompileErr("'without fallthru' is only valid in a switch statement")
+			end if
+			
+			switch_stack[$][SWITCH_FALLTHRU] = 0
+				
+		else
+			CompileErr("An unknown 'with/without' option has been specified")
+		end if		
         tok = next_token()
 	end if
 
