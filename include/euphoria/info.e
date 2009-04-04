@@ -9,38 +9,51 @@ enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION
 
 constant version_info = machine_func(M_EU_INFO, {})
 
-ifdef DOS then
-	constant plat_name = "DOS"
-elsifdef WIN32 then
-	constant plat_name = "Windows"
-elsifdef LINUX then
-	constant plat_name = "Linux"
-elsifdef OSX then
-	constant plat_name = "OS X"
-elsifdef SUNOS then
-	constant plat_name = "SunOS"
-elsifdef FREEBSD then
-	constant plat_name = "FreeBSD"
-elsedef
-	constant plat_name = "Unknown"
-end ifdef
 
 --****
 -- === Numeric Version Information
 --
+
+--****
+-- === Compiled Platform Information
+
+--**
+-- Get the platform name
+--
+-- Returns:
+--   A ##sequence## containing the platform name, i.e. Windows, Linux, DOS, FreeBSD or OS X.
+--
+
+public function platform_name()
+ifdef DOS then
+	return "DOS"
+elsifdef WIN32 then
+	return "Windows"
+elsifdef LINUX then
+	return "Linux"
+elsifdef OSX then
+	return "OS X"
+elsifdef SUNOS then
+	return "SunOS"
+elsifdef FREEBSD then
+	return "FreeBSD"
+elsedef
+	return "Unknown"
+end ifdef
+end function
 
 --**
 -- Get the version, as an integer, of the host Euphoria
 --
 -- Returns:
 --   An ##integer## representing Major, Minor and Patch versions. Version
---   4.0.0 will return 400, 4.0.1 will return 401, the future version
---   5.6.2 will return 562, etc...
+--   4.0.0 will return 40000, 4.0.1 will return 40001, 
+--   5.6.2 will return 50602, 5.12.24 will return 512624, etc...
 --
 
 public function version()
-  return (version_info[MAJ_VER] * 100) + 
-	(version_info[MIN_VER] * 10) +
+  return (version_info[MAJ_VER] * 10000) + 
+	(version_info[MIN_VER] * 100) +
 	version_info[PAT_VER]
 end function
 
@@ -157,21 +170,7 @@ end function
 --
 
 public function version_string_long()
-  return version_string() & " - " & plat_name
-end function
-
---****
--- === Compiled Platform Information
-
---**
--- Get the platform name
---
--- Returns:
---   A ##sequence## containing the platform name, i.e. Windows, Linux, DOS, FreeBSD or OS X.
---
-
-public function platform_name()
-	return plat_name
+  return version_string() & " - " & platform_name()
 end function
 
 --****
@@ -198,9 +197,12 @@ end function
 public function euphoria_copyright()
 	return {
 		"Euphoria v" & version_string(),
-		"Copyright (c) 2007-2009 by OpenEuphoria Group.\n" &
-		"Copyright (c) 1993-2006 by Rapid Deployment Software.\n" &
-		"All Rights Reserved."
+		#'
+________
+		Copyright (c) 2007-2009 by OpenEuphoria Group.
+		Copyright (c) 1993-2006 by Rapid Deployment Software.
+		All Rights Reserved.
+		'
 	}
 end function
 
@@ -217,8 +219,10 @@ end function
 public function pcre_copyright()
 	return {
 		"PCRE v7.8",
-		"Copyright (c) 1997-2008 University of Cambridge\n" &
-		"All Rights Reserved"
+		#'
+________Copyright (c) 1997-2008 University of Cambridge
+		All Rights Reserved
+		'
 	}
 end function
 
