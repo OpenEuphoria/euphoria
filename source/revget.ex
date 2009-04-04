@@ -7,7 +7,7 @@ constant rev = "revision=\""
 
 procedure update_rev_e( object f )
 	integer h
-	puts(1,"updating rev.c\n")
+	puts(1,"updating be_rev.c\n")
 	if atom(f) then
 	    f = sprintf( "%d", { f } )
 	end if
