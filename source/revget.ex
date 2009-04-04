@@ -53,9 +53,10 @@ function is_current( object rev )
 	while sequence( line ) with entry do
 		ix = match( "return \"", line )
 		if ix then
-			jx = find_from( '"', line, ix + length("return \"") )
+			ix += length("return \"")
+			jx = find_from( '"', line, ix)
 			if jx then
-				if compare( line[ix+16..jx-1], rev ) = 0 then
+				if equal( line[ix..jx-1], rev ) then
 					current = 1
 				end if
 				exit
