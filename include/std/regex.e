@@ -435,7 +435,7 @@ public function all_matches(regex re, sequence haystack, integer from=1, object 
 end function
 
 --****
--- == Splitting
+-- === Splitting
 
 --**
 -- Split a string based on a regex as a delimiter

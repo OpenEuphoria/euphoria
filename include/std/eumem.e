@@ -1,9 +1,12 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 --****
--- == Serialization of Euphoria Objects
+-- == Pseudo Memory
 --
 -- <<LEVELTOC depth=2>>
+--
+-- One use is to emulate PBR, such as Euphoria's map and stack types.
+--
 
 namespace eumem
 
@@ -14,6 +17,7 @@ export sequence ram_space = {}
 
 integer ram_free_list = 0
 integer free_rid
+
 --****
 -- Allocate a block of (pseudo) memory
 --
@@ -37,6 +41,7 @@ integer free_rid
 --  myspot = malloc()
 --  ram_space[myspot] = my_data
 -- </eucode>
+
 export function malloc(object mem_struct_p = 1, integer cleanup_p = 1)
 	integer temp_
 
@@ -82,6 +87,7 @@ end function
 --  . . . do some processing  . . 
 --  free(myspot)
 -- </eucode>
+
 export procedure free(atom mem_p)
 	if mem_p < 1 then return end if
 	if mem_p > length(ram_space) then return end if
@@ -117,6 +123,7 @@ free_rid = routine_id("free")
 --      free(myspot)
 --  end if
 -- </eucode>
+
 export function valid(object mem_p, object mem_struct_p = 1)
 	if not integer(mem_p) then return 0 end if
 	if mem_p < 1 then return 0 end if

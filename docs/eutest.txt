@@ -1,5 +1,6 @@
+== EuTEST - Unit Testing
 
-== Euphoria Testing System for EUPHORIA Programming Language v4.0
+<<LEVELTOC depth=3>>
 
 === Introduction
 

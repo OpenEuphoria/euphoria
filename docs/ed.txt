@@ -1,4 +1,6 @@
-== The Euphoria Editor
+== Ed - Euphoria Editor
+
+<<LEVELTOC depth=3>>
 
 === Introduction
 

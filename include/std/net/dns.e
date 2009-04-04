@@ -18,8 +18,8 @@ include std/get.e
 constant BLOCK_SIZE = 4096
 enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
 
---**
--- getaddrinfo accessors
+--****
+-- ===  Constants
 
 public enum ADDR_FLAGS, ADDR_FAMILY, ADDR_TYPE, ADDR_PROTOCOL, ADDR_ADDRESS
 
@@ -54,6 +54,9 @@ public constant
 	NS_T_AAAA = 28,
 	NS_T_A6 = 38,
 	NS_T_ANY = 255
+
+--****
+-- === General Routines
 
 /*
 ifdef WIN32 then

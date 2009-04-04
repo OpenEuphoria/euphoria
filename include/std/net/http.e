@@ -534,7 +534,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		while sequence(junk) with entry do
 			data = data & junk
 		entry
-			junk = sock:recv(sock, 0)
+			junk = sock:receive(sock, 0)
 		end while
 	end if
 	if sock:close(sock) then end if
@@ -666,7 +666,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		success = sock:send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
 		while success > 0 do
-			data = data & sock:recv(socket,0)
+			data = data & sock:receive(socket,0)
 			success = length(data)-last_data_len
 			last_data_len = length(data)
 		end while
