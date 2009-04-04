@@ -4,24 +4,24 @@ include std/socket.e as sock
 
 object _ = 0
 
-test_equal("getservbyname echo", { "echo", "tcp", 7 }, getservbyname("echo", "tcp"))
-test_equal("getservbyname ftp", { "ftp", "tcp", 21 }, getservbyname("ftp", "tcp"))
-test_equal("getservbyname telnet", { "telnet", "tcp", 23}, getservbyname("telnet", "tcp"))
-test_equal("getservbyport echo", { "echo", "tcp", 7 }, getservbyport(7, "tcp"))
-test_equal("getservbyport ftp", { "ftp", "tcp", 21 }, getservbyport(21, "tcp"))
-test_equal("getservbyport telnet", { "telnet", "tcp", 23}, getservbyport(23, "tcp"))
+test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
+test_equal("service_by_name ftp", { "ftp", "tcp", 21 }, service_by_name("ftp", "tcp"))
+test_equal("service_by_name telnet", { "telnet", "tcp", 23}, service_by_name("telnet", "tcp"))
+test_equal("service_by_port echo", { "echo", "tcp", 7 }, service_by_port(7, "tcp"))
+test_equal("service_by_port ftp", { "ftp", "tcp", 21 }, service_by_port(21, "tcp"))
+test_equal("service_by_port telnet", { "telnet", "tcp", 23}, service_by_port(23, "tcp"))
 
 sock:socket socket = sock:create(AF_INET, SOCK_STREAM, 0)
-test_equal("get_socket_option #1", 0, get_socket_options(socket, SOL_SOCKET, SO_DEBUG))
-test_equal("set_socket_option #1", 1, set_socket_options(socket, SOL_SOCKET, SO_DEBUG, 1))
-test_equal("get_socket_option #2", 1, get_socket_options(socket, SOL_SOCKET, SO_DEBUG))
+test_equal("get_option #1", 0, get_option(socket, SOL_SOCKET, SO_DEBUG))
+test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_DEBUG, 1))
+test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
 
 ifdef SOCKET_TESTS then
 	--
 	-- testing both client and server in this case as the sever
 	-- is written in euphoria as well
 	--
-	-- new_socket, bind, listen, accept, send, recv, close_socket,
+	-- new_socket, bind, listen, accept, send, receive, close_socket,
 	-- connect are all tested with the below test
 	--
 
@@ -50,15 +50,15 @@ ifdef SOCKET_TESTS then
 	if _ != -1 then
 		sequence send_data = "Hello, "
 		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("recv w/o newline", send_data, sock:recv(socket, 0))
+		test_equal("receive w/o newline", send_data, sock:receive(socket, 0))
 		
 		send_data = "world\n"
 		test_equal("send with newline", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("recv with newline", send_data, sock:recv(socket, 0))
+		test_equal("receive with newline", send_data, sock:receive(socket, 0))
 		
 		send_data = repeat('a', 511) & "\n"
 		test_equal("send large", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("recv large", send_data, sock:recv(socket, 0))
+		test_equal("receive large", send_data, sock:receive(socket, 0))
 		
 		_ = send(socket, "quit\n", 0)
 	end if
