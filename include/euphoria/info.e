@@ -5,7 +5,7 @@
 
 constant M_EU_INFO=75
 
-enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE
+enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION
 
 constant version_info = machine_func(M_EU_INFO, {})
 
@@ -80,6 +80,18 @@ public function version_patch()
   return version_info[PAT_VER]
 end function
 
+--**
+-- Get the source code revision of the hosting Euphoria
+--
+-- Returns:
+--   A text ##sequence## containing the source code manangement system's
+-- revision number that the executing Euphoria was built from.
+--
+
+public function version_revision()
+  return version_info[REVISION]
+end function
+
 --****
 -- === String Version Information
 --
@@ -101,17 +113,17 @@ end function
 -- Get a normal version string
 --
 -- Returns:
---   A ##sequence## representing the Major, Minor, Patch and Type all in
+--   A ##sequence## representing the Major, Minor, Patch, Type and Revision all in
 --   one string.
 --
 --   Example return values:
---   * "4.0.0 alpha 3"
---   * "4.0.0 release"
---   * "4.0.2 beta 1"
+--   * "4.0.0 alpha 3 (r1234)"
+--   * "4.0.0 release (r271)"
+--   * "4.0.2 beta 1 (r2783)"
 --
 
 public function version_string()
-  return sprintf("%d.%d.%d %s", version_info)
+  return sprintf("%d.%d.%d %s (r%s)", version_info)
 end function
 
 --**
