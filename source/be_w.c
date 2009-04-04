@@ -1066,4 +1066,11 @@ void RestoreNormal()
     } // EUCONS
 }
 
+extern void DisableControlCHandling();
+void DisableControlCHandling()
+{
+	// SetConsoleMode(console_input, ENABLE_MOUSE_INPUT);
+	SetConsoleMode(console_input, FALSE);
+}
+
 #endif

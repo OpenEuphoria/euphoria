@@ -55,7 +55,6 @@ struct display_slot {
 /**********************/
 /* Imported variables */
 /**********************/
-extern int skip_prompt;
 extern int tcb_size;
 extern struct tcb *tcb;
 extern int current_task;
@@ -1573,16 +1572,7 @@ void atom_condition()
 /* signal handlers */
 
 #ifdef EWINDOWS
-
-BOOL WINAPI _int_handler(DWORD _type)
-/* if control-c is pressed a second time, abort without waiting for key press */
-{
-	gameover = TRUE;
-	have_console = FALSE;
-	skip_prompt = TRUE;
-	Cleanup(1); 
-}
-
+extern void DisableConsoleCHandling(); // be_w.c
 #endif
 
 void INT_Handler(int sig_no)
@@ -1595,7 +1585,7 @@ void INT_Handler(int sig_no)
 	}
 	gameover = TRUE;
 #ifdef EWINDOWS
-	SetConsoleCtrlHandler(_int_handler, TRUE);
+	DisableConsoleCHandling();
 #endif
 	Cleanup(1); 
 	/* just do this - else DOS extender bug */

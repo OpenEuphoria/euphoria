@@ -77,7 +77,6 @@
 /**********************/
 /* Imported variables */
 /**********************/
-extern int skip_prompt;
 extern int **jumptab;
 extern char *last_traced_line;
 extern unsigned cache_size;
@@ -139,7 +138,6 @@ extern int *tpc;
 /**********************/
 /* Exported variables */
 /**********************/
-int skip_prompt = 0;
 char *file_name_entered = "";
 int warning_count = 0;
 char **warning_list;
@@ -5437,7 +5435,7 @@ void Cleanup(int status)
 
 #ifdef EWINDOWS
 	if (is_batch == 0 && TempWarningName == NULL && display_warnings &&
-		!skip_prompt && (warning_count || (status && !user_abort)))
+		(warning_count || (status && !user_abort)))
 	{
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
