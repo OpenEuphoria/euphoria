@@ -77,6 +77,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
+extern int kill_control_c;
 extern int **jumptab;
 extern char *last_traced_line;
 extern unsigned cache_size;
@@ -5422,7 +5423,7 @@ void Cleanup(int status)
 #endif
 
 #ifdef EUNIX
-	if (is_batch == 0 && have_console && (
+	if (kill_control_c < 2 && is_batch == 0 && have_console && (
 		config.numtextrows < 24 ||
 		config.numtextrows > 25 ||
 		config.numtextcols != 80 ||
@@ -5435,7 +5436,7 @@ void Cleanup(int status)
 
 #ifdef EWINDOWS
 	if (is_batch == 0 && TempWarningName == NULL && display_warnings &&
-		(warning_count || (status && !user_abort)))
+	kill_control_c < 2 && (warning_count || (status && !user_abort)))
 	{
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
