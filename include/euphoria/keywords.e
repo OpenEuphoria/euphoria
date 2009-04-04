@@ -46,6 +46,7 @@ public constant keywords = {
 	"public",
 	"retry",
 	"return",
+	"routine",
 	"switch",
 	"then",
 	"to",
