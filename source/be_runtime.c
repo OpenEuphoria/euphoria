@@ -5440,6 +5440,7 @@ void Cleanup(int status)
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
 		screen_output(stderr, "\n\nPress Enter...\n");
+		DisableControlCHandling();
 		MyReadConsoleChar();
 	}
 #endif
