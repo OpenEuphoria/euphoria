@@ -1585,7 +1585,7 @@ void INT_Handler(int sig_no)
 	}
 	gameover = TRUE;
 #ifdef EWINDOWS
-	DisableConsoleCHandling();
+	DisableControlCHandling();
 #endif
 	Cleanup(1); 
 	/* just do this - else DOS extender bug */
