@@ -368,7 +368,8 @@ static void end_of_line(int c)
     SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
 }
 
-#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
+//#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
+#ifdef EWINDOWS
 int MyReadConsoleChar()
 // Read the next character typed by the user on the console
 {

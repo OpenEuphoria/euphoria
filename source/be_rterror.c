@@ -1572,7 +1572,7 @@ void atom_condition()
 /* signal handlers */
 
 #ifdef EWINDOWS
-extern void DisableConsoleCHandling(); // be_w.c
+extern void DisableControlCHandling(); // be_w.c
 #endif
 
 void INT_Handler(int sig_no)
