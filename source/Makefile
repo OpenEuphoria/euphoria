@@ -90,11 +90,11 @@ ifeq "$(EMINGW)" "1"
 	else
 		EOSMING=-ffast-math -O3 -Os
 	endif
-	EBACKENDU=backendw.exe
-	EBACKENDC=backendc.exe
-	EECU=ecw.exe
-	EEXU=exw.exe
-	EEXUC=exwc.exe
+	EBACKENDU=eubw.exe
+	EBACKENDC=eub.exe
+	EECU=euc.exe
+	EEXU=eui.exe
+	EEXUW=euiw.exe
 	EECUA=ecw.a
 	ifeq "$(MANAGED_MEM)" "1"
 		MEM_FLAGS=
@@ -107,11 +107,11 @@ ifeq "$(EDJGPP)" "1"
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
 	EOSMING=-O2
-	EBACKENDU=backendd.exe
-	EBACKENDC=backendd.exe
-	EECU=ec.exe
-	EEXU=ex.exe
-	EECUA=ec.a
+	EBACKENDU=eubd.exe
+	EBACKENDC=eubd.exe
+	EECU=eucd.exe
+	EEXU=euid.exe
+	EECUA=eud.a
 	PLAT=DOS
 	MEM_FLAGS=
 	LDLFLAG=-lalleg
@@ -277,7 +277,7 @@ clean :
 	-rm -fr $(BUILDDIR)/backobj
 	-rm -f $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EBACKENDU) $(BUILDDIR)/$(DEB_SOURCE_DIR).tar.gz
 ifeq "$(MINGW)" "1"
-	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUC)}
+	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
 	-rm -f version.h
 	$(MAKE) -C pcre clean
@@ -354,7 +354,10 @@ $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@echo $(OS)
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXU)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXUC)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXU)
+	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXUW)
+else
+	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXU)
 endif
 	
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
