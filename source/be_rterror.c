@@ -55,7 +55,6 @@ struct display_slot {
 /**********************/
 /* Imported variables */
 /**********************/
-extern int kill_control_c;
 extern int tcb_size;
 extern struct tcb *tcb;
 extern int current_task;
@@ -121,7 +120,6 @@ extern struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 /**********************/
 /* Exported variables */
 /**********************/
-int kill_control_c = 0;
 //int caught_interrupt = FALSE;   /* did we receive an interrupt? */
 int traced_lines = FALSE;
 int *TraceLineBuff = NULL;      /* place to store traced lines */
@@ -1582,7 +1580,7 @@ void INT_Handler(int sig_no)
 		return;
 	}
 	gameover = TRUE;
-	kill_control_c++;
+	signal(SIGINT, SIG_DFL);
 	Cleanup(1); 
 	/* just do this - else DOS extender bug */
 				 /* seems to crash in Windows */
