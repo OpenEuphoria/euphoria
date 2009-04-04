@@ -1,6 +1,8 @@
 include std/unittest.e
 include std/console.e
+include std/os.e
 include std/socket.e as sock
+include std/pipeio.e as pipe
 
 object _ = 0
 
@@ -16,19 +18,20 @@ test_equal("get_option #1", 0, get_option(socket, SOL_SOCKET, SO_DEBUG))
 test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_DEBUG, 1))
 test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
 
-ifdef SOCKET_TESTS then
-	--
-	-- testing both client and server in this case as the sever
-	-- is written in euphoria as well
-	--
-	-- new_socket, bind, listen, accept, send, receive, close_socket,
-	-- connect are all tested with the below test
-	--
+--
+-- testing both client and server in this case as the sever
+-- is written in euphoria as well
+--
+-- new_socket, bind, listen, accept, send, receive, close_socket,
+-- connect are all tested with the below test
+--
 
-	puts(1, "========== ATTENTION ==========\n")
-	puts(1, "Please open a new shell and execute demo\\sock_server.ex\n")
-	any_key("Press any key when you are ready")
-	puts(1, "===============================\n")
+object p = pipe:exec("eui ../demo/sock_server.ex")
+if atom(p) then
+	test_fail("could not launch temporary server")
+else
+	-- Give the sever a second to actually launch
+	sleep(1)
 
 	for i = 1 to 4 do
 		_ = sock:connect(socket, "127.0.0.1:5000")
@@ -43,7 +46,6 @@ ifdef SOCKET_TESTS then
 			else
 				puts(1, " .. ")
 			end if
-			
 		end if
 	end for
 	
@@ -62,12 +64,10 @@ ifdef SOCKET_TESTS then
 		
 		_ = send(socket, "quit\n", 0)
 	end if
-end ifdef
+
+	pipe:kill(p)
+end if
 
 test_equal("close", 1, sock:close(socket))
-
-ifdef not SOCKET_TESTS then
-    puts(2, " WARNING: all socket tests were not run, use -D SOCKET_TESTS for full test\n")
-end ifdef
 
 test_report()
