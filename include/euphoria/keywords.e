@@ -16,6 +16,8 @@ public constant keywords = {
 	"case",
 	"constant",
 	"continue",
+	"delete",
+	"delete_routine",
 	"do",
 	"else",
 	"elsedef",
