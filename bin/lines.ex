@@ -120,7 +120,7 @@ function scan(integer fileNum)
 		else
 		    lines += 1
 	    	chars += length(line) 
-		    ifdef !UNIX then
+		    ifdef not UNIX then
 				chars += 1  -- line in file contains an extra \r
 	    	end ifdef
 		    if not blank_line(line) then
