@@ -4,10 +4,12 @@
 
 include std/filesys.e
 include std/io.e
-
 include std/get.e
-include pathopen.e
 include std/error.e
+
+include euphoria/info.e
+
+include pathopen.e
 include parser.e
 include mode.e
 include common.e
@@ -24,58 +26,20 @@ function GetSourceName()
 		src_name = Argv[3]
 	else
 		if INTERPRET and not BIND then
-			screen_output(STDERR, "Euphoria Interpreter " &
-								  INTERPRETER_VERSION & " ")
+			screen_output(STDERR, "Euphoria Interpreter ")
 
 		elsif TRANSLATE then
-			screen_output(STDERR, "Euphoria to C Translator " &
-								  TRANSLATOR_VERSION & " ")
+			screen_output(STDERR, "Euphoria to C Translator ")
 		elsif BIND then
-			screen_output(STDERR, "Euphoria Binder " &
-								  INTERPRETER_VERSION & " ")
+			screen_output(STDERR, "Euphoria Binder ")
 		end if
+		screen_output(STDERR, version_string_long() & "\n")
 
-		ifdef UNIX then
-			if BIND then
-				screen_output(STDERR, "for Linux/FreeBSD/OS X.\n")
-			else
-				ifdef OSX then
-					screen_output(STDERR, "for OS X.\n")
-				elsifdef SUNOS then
-					screen_output(STDERR, "for OpenSolaris.\n")
-				elsifdef FREEBSD then
-					screen_output(STDERR, "for FreeBSD.\n")
-				elsedef
-					screen_output(STDERR, "for Linux.\n")
-				end ifdef
-			end if
-
-		elsedef
-			if BIND then
-				screen_output(STDERR, "for DOS/Windows.\n")
-			else
-				ifdef WIN32 then
-					screen_output(STDERR, "for 32-bit Windows.\n")
-				elsedef
-					screen_output(STDERR, "for 32-bit DOS.\n")
-				end ifdef
-			end if
-		end ifdef
-
-		ifdef not EU_FULL_RELEASE then
-			SVN_REVISION = machine_func(75, {})
-			SVN_REVISION = SVN_REVISION[5]
-			screen_output(STDERR, "SVN Revision "&SVN_REVISION&"\n")
-		end ifdef
 		ifdef EU_MANAGED_MEM then
 			screen_output(STDERR, "Using Managed Memory\n")
 		elsedef
 			screen_output(STDERR, "Using System Memory\n")
 		end ifdef
-		screen_output(STDERR, "Copyright (c) Rapid Deployment Software 2008\n")
-
-		screen_output(STDERR,
-			"See http://www.RapidEuphoria.com/License.txt\n")
 
 		if BIND then
 			screen_output(STDERR, "\nfile name to bind/shroud? ")
@@ -129,11 +93,7 @@ function GetSourceName()
 	if not dot_found then
 		-- no dot found --
 		-- N.B. The list of default extentions must always end with the first one again.
-		ifdef UNIX then
-			exts = { ".ex", ".exu", ".exw", "" }
-		elsedef
-			exts = { ".ex", ".exd", ".exw" }
-		end ifdef
+		exts = { ".ex", ".exw", ".exd", "", ".ex" }
 
 		-- Add a placeholder in the file list.
 		file_name = append(file_name, "")

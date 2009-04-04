@@ -164,13 +164,13 @@ end function
 --   name.
 --
 --   Example return values:
---   * "4.0.0 alpha 3 - Windows"
---   * "4.0.0 release - Linux"
---   * "5.6.2 release - OS X"
+--   * "4.0.0 alpha 3 for Windows"
+--   * "4.0.0 release for Linux"
+--   * "5.6.2 release for OS X"
 --
 
 public function version_string_long()
-  return version_string() & " - " & platform_name()
+  return version_string() & " for " & platform_name()
 end function
 
 --****
