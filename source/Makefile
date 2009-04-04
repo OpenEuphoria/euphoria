@@ -35,7 +35,7 @@
 #   Everything                :  make
 #   Interpreter          (eui):  make interpreter
 #   Translator           (euc):  make translator
-#   Translator Library (euc.a):  make library
+#   Translator Library (eu.a):  make library
 #   Backend              (eub):  make eub
 #   Run Unit Tests            :  make test
 #   Run Unit Tests for DJGPP  :  make test-djgpp
@@ -125,7 +125,7 @@ else
 	EBACKENDC=eub
 	EECU=euc
 	EEXU=eui
-	EECUA=euc.a
+	EECUA=eu.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 endif
@@ -415,7 +415,7 @@ install :
 	install $(EECUA) $(DESTDIR)/usr/lib
 	install eui $(DESTDIR)/usr/bin
 	install euc $(DESTDIR)/usr/bin
-	install euc.a $(DESTDIR)/usr/lib
+	install eu.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
