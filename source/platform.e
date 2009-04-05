@@ -99,9 +99,15 @@ end procedure
 
 public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
+	sequence cmds = command_line()
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
 		local_defines &= {"MICROSOFT", "WIN32"}
+		if match("euiw", cmds[1]) then
+			local_defines &= {"WIN32_GUI"}
+		else
+			local_defines &= {"WIN32_CONSOLE"}
+		end if
 	elsif (IDOS and not for_translator) or (TDOS and for_translator) then
 		local_defines &= {"MICROSOFT", "DOS32"}
 	elsif (ILINUX and not for_translator) or (TLINUX and for_translator) then
