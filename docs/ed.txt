@@ -12,9 +12,9 @@ If you don't like **ed**, you have many alternatives. David Cuny's **EE
 editor** is a DOS-based editor for Euphoria that's also written in Euphoria. It
 has a friendly mouse-based user interface with drop down menus etc. It's
 available from the RDS Web site. There are several other Euphoria-oriented
-editors that run on DOS, Windows, Linux and FreeBSD. Check the **Editors**
-section of our Archive. In fact, //any// text editor can be used to edit a
-Euphoria program, including DOS Edit or Windows NotePad.
+editors that run on DOS, Windows, Linux, FreeBSD, OSX, SUNOS, OPENBSD. 
+Check the **Editors** section of our Archive. In fact, //any// text editor can 
+be used to edit a Euphoria program, including DOS Edit or Windows NotePad.
 
 === Summary
 
@@ -40,8 +40,9 @@ are immediately inserted into the file.
 
 In Windows, you can "associate" various types of files with ##ed.bat##. You
 will then be put into **ed** when you //double-click// on these types of files
-- e.g. ##.e, .pro, .doc## etc.  Main Euphoria files ending in ##.ex##
-(##.exw##) might better be associated with ##ex.exe## (##exw.exe##).
+- e.g. ##.e, .pro, .doc## etc.  Main Euphoria files ending in ##.ex##, ##.exd##
+or ##.exw## might better be associated with ##eui.exe##, ##euid.exe##, or 
+##euiw.exe##, respectively.
 
 **ed** is a multi-file/multi-window DOS editor. //Esc c// will split your
 screen so you can view and edit up to 10 files simultaneously, with cutting and
@@ -180,12 +181,12 @@ colors and the cursor size may need adjusting for some operating environments.
 
 === Platform
 
-##euphoria\bin\ed.bat## can be set up to run ##ed.ex## using ##exwc.exe## or 
-##ex.exe##. You are better off running **ed** with ##ex.exe## on Windows 95/98/ME. 
-You'll get much quicker screen updates than with ##exwc.exe##. On Windows XP you'll
-be a bit better off using ##exwc.exe##. You'll get slightly quicker screen updates,
+##euphoria\bin\ed.bat## can be set up to run ##ed.ex## using ##eui.exe## or 
+##euid.exe##. You are better off running **ed** with ##euid.exe## on Windows 95/98/ME. 
+You'll get much quicker screen updates than with ##eui.exe##. On Windows XP you'll
+be a bit better off using ##eui.exe##. You'll get slightly quicker screen updates,
 and you'll be able to create files with long names, not just open existing ones. 
-However some special keys won't work with ##exwc.exe##, e.g. you'll have to use 
-//C-t// and //C-b// instead of //C-Home// and //C-End//. On Linux and FreeBSD there 
+However some special keys won't work with ##eui.exe##, e.g. you'll have to use 
+//C-t// and //C-b// instead of //C-Home// and //C-End//. On other platforms there 
 are no problems with long filenames, and the keyboard response is always fast.
 
