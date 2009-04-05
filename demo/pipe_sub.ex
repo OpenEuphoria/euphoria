@@ -1,1 +1,3 @@
-puts(1,"read from STDIN: '" & gets(0) & "'")
+include std/text.e
+
+puts(1,"pipe_sub.ex: read from STDIN: '" & trim(gets(0)) & "'")
