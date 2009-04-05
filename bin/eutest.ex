@@ -263,37 +263,24 @@ procedure do_test(sequence cmds)
 		-- NOOP
 		
 	else
-		printf( 2, "Cannot determine translator\'s platform.", {} )
+		printf(2, "Cannot determine translator's platform.", {} )
 		abort(1)
 	end if                                  
 	
 	sequence interpreter_base = lower(filebase(executable))
-	if equal( "exwc", interpreter_base ) then
-		interpreter_os_name = "WIN32"		
-		
-	elsif equal( "exu", interpreter_base ) then
-		interpreter_os_name = "UNIX"
-		
-	elsif equal( "ex", interpreter_base ) or
-		  equal( "euid", interpreter_base ) then
+	if match("euid", interpreter_base) then
 		interpreter_os_name = "DOS32"
-		
-	elsif platform() = WIN32 and
-		 ( equal( "eui", interpreter_base ) or length(interpreter_base) = 0 ) then
-		interpreter_os_name = "WIN32"		
-		
-	elsif find( platform(), { LINUX, OSX, FREEBSD, SUNOS, OPENBSD } ) 
-		and ( equal( "eui", interpreter_base ) or length(interpreter_base) = 0 ) then
-		interpreter_os_name = "UNIX"
-		
-	elsif platform() = DOS32 then
-		interpreter_os_name = "DOS32"			
-		
 	else
-		printf( 2, "Cannot determine interpreter_base\'s operating system.", {} )
-		abort(1)
+		ifdef WIN32 then
+			interpreter_os_name = "WIN32"
+		elsifdef UNIX then
+			interpreter_os_name = "UNIX"
+		elsedef
+			printf(2, "Cannot determine interpreter's platform.", {})
+			abort(1)
+		end ifdef
 	end if
-	
+
 	integer cci
 	
 	compiler = ""
@@ -958,14 +945,14 @@ procedure main(sequence cmds = command_line())
 		end if
 	end while
 	if find("-help", cmds) or find("--help",cmds) or find("/?", cmds) then
-		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n"
-		&"\t[-exe interpreter-path-and-filename]\n"
-		&"\t[-ec translator-path-and-filename] [-i include directory]\n"
-		&"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n"
-		&"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n"
-		&"\t[-log]\n"
-		&"\t[-verbose]\n"
-		&"\t[unit test files]\n")
+		puts(2, "Usage:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n" &
+			"  [-exe interpreter-path-and-filename]\n" &
+			"  [-ec translator-path-and-filename] [-i include directory]\n" &
+			"  [-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n" &
+			"  [-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n" &
+			"  [-log]\n" &
+			"  [-verbose]\n" &
+			"  [unit test files]\n")
 		abort(0)
 	end if  
 	if find("-process-log", cmds) then
