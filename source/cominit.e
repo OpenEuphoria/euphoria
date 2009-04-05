@@ -2,10 +2,12 @@
 --
 -- Common initialization (command line options)
 include std/filesys.e
+include std/search.e
+include euphoria/info.e
+
 include global.e
 include pathopen.e
 include common.e
-include euphoria/info.e
 
 sequence switches, switch_cache
 switches = {}
@@ -83,7 +85,7 @@ end procedure
 procedure show_copyrights()
 	sequence notices = all_copyrights()
 	for i = 1 to length(notices) do
-		printf(2, "%s\n%s\n", notices[i])
+		printf(2, "%s\n  %s\n\n", { notices[i][1], find_replace("\n", notices[i][2], "\n  ") })
 	end for
 end procedure
 
@@ -94,17 +96,18 @@ global procedure show_usage()
 ____________
             Euphoria Interpreter Usage: %s [euswitches] [filename [appswitches]] ...
             where euswitches are ...
-            -C <filename>    -- specify a configuration file
-            -I <dirname>     -- specify a directory to search for include files
-            -D <word>        -- define a word
-            -BATCH           -- batch processing, do not "Press Enter" on error
-            -TEST            -- do not execute, only test syntax
-            -STRICT          -- enable all warnings (lint option)
-            -W <warningname> -- defines warning level
-            -X <warningname> -- defines warning level by exclusion
-            -WF <warnfile>   -- defines the file to which the warnings will go
-            -? or -HELP      -- Display this 'usage' help
-            -COPYRIGHT       -- Display copyright notices
+
+              -C <filename>    -- specify a configuration file
+              -I <dirname>     -- specify a directory to search for include files
+              -D <word>        -- define a word
+              -BATCH           -- batch processing, do not "Press Enter" on error
+              -TEST            -- do not execute, only test syntax
+              -STRICT          -- enable all warnings (lint option)
+              -W <warningname> -- defines warning level
+              -X <warningname> -- defines warning level by exclusion
+              -WF <warnfile>   -- defines the file to which the warnings will go
+              -? or -HELP      -- Display this 'usage' help
+              -COPYRIGHT       -- Display copyright notices
 
 		#, {filebase(Argv[1])})
 		usage_shown = 1

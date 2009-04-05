@@ -198,7 +198,7 @@ end function
 
 public function euphoria_copyright()
 	return {
-		"Euphoria v" & version_string(),
+		"Euphoria v" & version_string_long(),
 		#'
 ________
 		Copyright (c) 2007-2009 by OpenEuphoria Group.
