@@ -12,7 +12,7 @@ include std/os.e as ut
 include std/text.e 
 include std/math.e
 include std/search.e  as search
-with trace
+
 
 ifdef DOS32 then
 	include std/text.e
@@ -183,7 +183,7 @@ function strip_path_junk( sequence path )
 	end for
 	return ""
 end function
-with trace
+
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
@@ -238,7 +238,7 @@ procedure do_test(sequence cmds)
 	-- next alpha release.
 	
 	-- lower for Windows or DOS, lower for all.  K.I.S.S.
-	trace(1)
+
 	integer dos_or_win = find(platform(),{WIN32,DOS32})
 	sequence l_translator = lower(translator)
 	sequence translator_base = filebase(l_translator)
