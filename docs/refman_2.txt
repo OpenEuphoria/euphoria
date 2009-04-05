@@ -2056,7 +2056,7 @@ but ##EU5## will be defined.
 
 ==== Miscellaneous Definitions
 
-* **SAFE** - The interpreter is version 4.0 or later.
+* **SAFE** - To change the way machine.e works.  When defined, input to machine.e's functions are checked for validity.
 
 ==== Using ifdef
 
@@ -2077,6 +2077,35 @@ This can handle many tasks such as change the behavior of your application
 when running on //Linux// vs. //Windows//, enable or disable debug style code or
 possibly work differently in demo/shareware applications vs. registered
 applications.
+
+You should surround code that is not portable with ifdefs like:
+<eucode>
+ifdef WIN32 then  
+   -- Windows specific code.
+elsedef
+   include std/error.e
+   crash("This program must be run with the Windows interpreter.")
+end ifdef
+</eucode>
+
+When writing **include files** that you cannot run on some platform, issue a crash
+call in the **include file**. **Yet** make sure that public constants and procedures are defined
+for the unsupported platform as well.
+
+<eucode>
+ifdef DOS32 then
+	include std/error.e
+	crash("socket.e is not supported on the DOS platform")
+end ifdef
+
+-- define exported and public constants and procedures for 
+-- DOS32 as well
+ifdef WIN32 or DOS32 then
+	-- DOS32 is not supported but we define public symbols for it anyhow.
+</eucode>
+
+The reason for doing this is so that the user that includes your include file sees an OS not supported message instead of an undefined reference message. 
+
 
 Defined words must follow the same character set of an identifier, that is,
 it must start with a letter and contain only letters, numbers and/or an
@@ -2137,6 +2166,16 @@ Now, if ##DEBUG## is not defined, then the code the interpreter/translator sees 
 while 1 do
     -- more code
 end while
+</eucode>
+
+Do becareful to put the numbers after the platform names for Windows or DOS:
+
+<eucode>
+-- This puts() routine will never be called
+-- even when run by the DOS interpreter!
+ifdef DOS then
+	puts(1,"I am on DOS\n")
+end ifdef
 </eucode>
 
 
