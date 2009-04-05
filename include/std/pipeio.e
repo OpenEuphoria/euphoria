@@ -435,7 +435,7 @@ ifdef WIN32 then
 	  
 	  -- capture child process std error
 	    StdErrPipe = os_pipe()
-	    if atom(fnVal) then
+	    if atom(StdErrorPipe) then
 	       CloseAllHandles(StdErrPipe & StdOutPipe)
 	       return -1
 	    end if
