@@ -297,7 +297,7 @@ procedure fake_include_line()
 	line_number += 1
 	gline_number += 1
 	
-	ThisLine = "include std/all.e -- injected by the scanner\n"
+	ThisLine = "include euphoria/stddebug.e -- injected by the scanner\n"
 	bp = 1
 	n = length(ThisLine)
 	AppendSourceLine()
@@ -1710,7 +1710,7 @@ end procedure
 
 ifdef STDDEBUG then
 procedure all_include()
-	new_include_name = "std/all.e"
+	new_include_name = "euphoria/stddebug.e"
 	new_include_space = 0
 	start_include = TRUE
 	public_include = FALSE
