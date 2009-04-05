@@ -183,7 +183,7 @@ function strip_path_junk( sequence path )
 	end for
 	return ""
 end function
-
+with trace
 procedure do_test(sequence cmds)
 	atom score
 	integer failed = 0, total, status, comparison
@@ -200,13 +200,15 @@ procedure do_test(sequence cmds)
 	integer expected_status -- expected status
 	
 	ifdef UNIX then
-		executable = "exu"
+		executable = "eui"
 		dexe = ""
+		
 	elsifdef WIN32 then
-		executable = "exwc"
+		executable = "eui"
 		dexe = ".exe"
+		
 	elsedef
-		executable = "ex"
+		executable = "euid"
 		dexe = ".exe"
 	end ifdef
 
@@ -236,55 +238,61 @@ procedure do_test(sequence cmds)
 	-- next alpha release.
 	
 	-- lower for Windows or DOS, lower for all.  K.I.S.S.
-	sequence translator_base = lower(translator[search:rfind(SLASH,translator)+1..$])
-	sequence interpreter_base = lower(executable[search:rfind(SLASH,executable)+1..$])
+	trace(1)
 	integer dos_or_win = find(platform(),{WIN32,DOS32})
-	if (match( "eucd", translator_base ) != 0) or
+	sequence l_translator = lower(translator)
+	sequence translator_base = filebase(l_translator)
+	
+	if equal( "eucd", translator_base ) or
 	   ( length(translator) = 0 and platform() = DOS32 )
 	then
 		-- NOOP
-	elsif (match( "ecw", translator_base ) != 0 and dos_or_win)
-		or (match( "euc", translator_base ) != 0 and dos_or_win ) 
-		or ( length(translator) = 0 and platform() = WIN32 )
-		then
-			translator_options &= " -CON"
-	elsif ( match( "ecu", translator_base ) != 0 ) or
-		( match( upper("euc"), upper(translator) ) != 0 )
-		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS, OPENBSD } ) ) 
+		
+	elsif (equal( "ecw", translator_base ) and dos_or_win) or
+		  (equal( "euc", translator_base ) and dos_or_win ) or
+		  (length(translator) = 0 and platform() = WIN32 ) then
+		translator_options &= " -CON"
+		
+	elsif equal( "ecu", translator_base ) or
+		  equal( "euc", translator_base )  or
+		  ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS, OPENBSD } ) ) 
 	then
 		-- NOOP
-	elsif match( upper("ec.exe"), upper(translator) ) != 0 
-	then
+		
+	elsif equal( "ec", translator_base ) then
 		-- NOOP
+		
 	else
 		printf( 2, "Cannot determine translator\'s platform.", {} )
 		abort(1)
 	end if                                  
 	
-	if match( "exwc.exe", interpreter_base ) != 0 then
+	sequence interpreter_base = lower(filebase(executable))
+	if equal( "exwc", interpreter_base ) then
 		interpreter_os_name = "WIN32"		
-	elsif match( "exu", interpreter_base ) != 0 then
+		
+	elsif equal( "exu", interpreter_base ) then
 		interpreter_os_name = "UNIX"
-	elsif match( "ex.exe", interpreter_base ) != 0 
-		or match( "euid.exe", interpreter_base ) != 0 then
+		
+	elsif equal( "ex", interpreter_base ) or
+		  equal( "euid", interpreter_base ) then
 		interpreter_os_name = "DOS32"
-	elsif platform() = WIN32 
-		and ( match( "eui", interpreter_base ) != 0 or length(interpreter_base) = 0 )
-		then
+		
+	elsif platform() = WIN32 and
+		 ( equal( "eui", interpreter_base ) or length(interpreter_base) = 0 ) then
 		interpreter_os_name = "WIN32"		
+		
 	elsif find( platform(), { LINUX, OSX, FREEBSD, SUNOS, OPENBSD } ) 
-		and ( match( "eui", interpreter_base ) != 0 or length(interpreter_base) = 0 ) then
+		and ( equal( "eui", interpreter_base ) or length(interpreter_base) = 0 ) then
 		interpreter_os_name = "UNIX"
+		
 	elsif platform() = DOS32 then
 		interpreter_os_name = "DOS32"			
+		
 	else
 		printf( 2, "Cannot determine interpreter_base\'s operating system.", {} )
 		abort(1)
 	end if
-	
-	interpreter_base = {}
-	translator_base = {}
-	
 	
 	integer cci
 	
