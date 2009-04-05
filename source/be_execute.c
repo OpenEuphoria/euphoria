@@ -1914,6 +1914,12 @@ void do_exec(int *start_pc)
 		switch(*pc) {
 #else
 // threaded code
+		if (Executing == FALSE)
+		{
+			// TODO  XXX might this affect exit code improperly?
+			Cleanup(1);
+			return;
+		}
 		thread();
 #if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
 		switch((int)pc) {                                       
