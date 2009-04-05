@@ -8,6 +8,16 @@ include std/dll.e
 --
 -- <<LEVELTOC depth=2>>
 --
+-- === SAFE mode
+--
+-- During the development of your application, you can define the word ##SAFE## to cause
+-- ##machine.e## to use alternative memory functions. These functions are slower but
+-- help in the debugging stages. In general, ##SAFE## mode should not be enabled during
+-- production phases but only for development phases.
+--
+-- To define the word ##SAFE## run your application with the ##-DSAFE## command line
+-- option, or add to the top of your main file ##with define SAFE##.
+--
 
 --****
 -- @[dyncall|]
