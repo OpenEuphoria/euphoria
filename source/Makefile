@@ -162,6 +162,7 @@ EU_CORE_FILES = \
 	main.e \
 	mode.e \
 	pathopen.e \
+	platform.e \
 	error.e \
 	symtab.e \
 	scanner.e \

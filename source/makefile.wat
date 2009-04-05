@@ -82,6 +82,7 @@ EU_CORE_FILES = &
 	common.e &
 	mode.e &
 	pathopen.e &
+	platform.e &
 	error.e &
 	symtab.e &
 	scanner.e &
