@@ -1222,12 +1222,12 @@ global procedure start_emake()
 			end if
 		end if
 		link_line = ""
-	else       
-		link_file = open("objfiles.lnk", "w")
-		files_to_delete = append(files_to_delete, "objfiles.lnk")
-		if link_file = -1 then
-			CompileErr("Couldn't open objfiles.lnk for output")
-		end if
+	end if
+	
+	link_file = open("objfiles.lnk", "w")
+	files_to_delete = append(files_to_delete, "objfiles.lnk")
+	if link_file = -1 then
+		CompileErr("Couldn't open objfiles.lnk for output")
 	end if
 	
 	if TDOS then
