@@ -1119,11 +1119,6 @@ global procedure start_emake()
 		CompileErr("Couldn't create batch file for compile.\n")
 	end if
 		
-	if not makefile_option and not (TUNIX or (TWINDOWS and gcc_option)) then
-		puts(doit, "@echo off"&HOSTNL)
-		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
-	end if
-	
 	ifdef DOS32 then
 		prepared_file0 = truncate_to_83(file0)
 	elsedef
@@ -1131,8 +1126,16 @@ global procedure start_emake()
 	end ifdef
 	
 	if makefile_option then
-		-- do nothing yet
-	elsif TDOS then
+		-- nothing more to do if we are using a makefile
+		return
+	end if
+
+	if not (TUNIX or (TWINDOWS and gcc_option)) then
+		puts(doit, "@echo off"&HOSTNL)
+		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
+	end if
+	
+	if TDOS then
 		if sequence(wat_path) then
 			if debug_option then
 				debug_flag = "/d2 "
