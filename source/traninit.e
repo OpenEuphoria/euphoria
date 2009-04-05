@@ -154,6 +154,8 @@ global procedure transoptions()
 						set_host_platform( UOSX )
 					elsif equal( s, "SUNOS" ) then
 						set_host_platform( USUNOS )
+					elsif equal( s, "OPENBSD" ) then
+						set_host_platform( UOPENBSD )
 					else
 						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
 					end if
@@ -193,12 +195,13 @@ Usage: ec  [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]
            [/os specific options/]:
 
 OS Specific Options:
-       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]
        DOS    :  [-djg|-wat] [-fastfp]
+       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]
        Linux  :  [-gcc] [-dll]
-       FreeBSD:  [-gcc] [-dll]
        OSX    :  [-gcc] [-dll]
        SunOS  :  [-gcc] [-dll]
+       FreeBSD:  [-gcc] [-dll]
+       OpenBSD:  [-gcc] [-dll]
 
 LCC Only: -lccopt-off
 

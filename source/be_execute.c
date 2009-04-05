@@ -4889,6 +4889,9 @@ void do_exec(int *start_pc)
 #ifdef ESUNOS
 				top = 5; // SUNOS
 #endif
+#ifdef EOPENBSD
+				top = 6; // OpenBSD
+#endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32
 #endif

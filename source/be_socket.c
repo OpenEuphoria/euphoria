@@ -26,6 +26,10 @@ extern int default_heap;
 #ifdef EUNIX
 #include <unistd.h>
 
+#ifdef EBSD
+#include <netinet/in.h>
+#endif // EFREEBSD
+
 #define SOCKET int
 #define SOCKET_ERROR -1
 #define INVALID_SOCKET -1

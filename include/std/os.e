@@ -29,7 +29,8 @@ public constant
 	LINUX	= 3,
 	FREEBSD = 3,
 	OSX	    = 4,
-	SUNOS	= 5
+	SUNOS	= 5,
+	OPENBSD = 6
 
 --****
 -- These constants are returned by the [[:platform]] function.

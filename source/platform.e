@@ -10,8 +10,8 @@ public constant
 	UFREEBSD = FREEBSD + 0.4,
 	UOSX = OSX + 0.5,
 	USUNOS = SUNOS + 0.6,
+	UOPENBSD = OPENBSD + 0.7,
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
-
 
 -- For cross-translation:
 public integer
@@ -21,7 +21,8 @@ public integer
 	IUNIX    = 0, TUNIX    = 0,
 	IBSD     = 0, TBSD     = 0,
 	IOSX     = 0, TOSX     = 0,
-	ISUNOS   = 0, TSUNOS   = 0
+	ISUNOS   = 0, TSUNOS   = 0,
+	IOPENBSD = 0, TOPENBSD = 0
 
 -- operating system:
 ifdef DOS32 then
@@ -44,18 +45,22 @@ elsifdef FREEBSD then
 	IBSD = 1
 	TBSD = 1
 
+elsifdef OPENBSD then
+	IOPENBSD = 1
+	TOPENBSD = 1
+
 elsifdef LINUX then
 	ILINUX = 1
 	TLINUX = 1
 
 end ifdef
 
-ifdef OSX or SUNOS or FREEBSD then
+ifdef OSX or SUNOS or FREEBSD or OPENBSD then
 	IBSD = 1
 	TBSD = 1
 end ifdef
 
-ifdef OSX or SUNOS or FREEBSD or LINUX then
+ifdef OSX or SUNOS or FREEBSD or OPENBSD or LINUX then
 	IUNIX = 1
 	TUNIX = 1
 end ifdef
@@ -79,13 +84,14 @@ end function
 
 public procedure set_host_platform( atom plat )
 	ihost_platform = floor(plat)
-	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX or plat = USUNOS)
+	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX or plat = USUNOS or plat = UOPENBSD)
 	TWINDOWS = plat = WIN32
 	TDOS     = plat = DOS32
 	TBSD     = plat = UFREEBSD
 	TOSX     = plat = UOSX
 	TLINUX   = plat = ULINUX
 	TSUNOS   = plat = USUNOS
+	TOPENBSD = plat = UOPENBSD
 	if TUNIX then
 		HOSTNL = "\n"
 	else
@@ -98,6 +104,7 @@ public procedure set_host_platform( atom plat )
 	IOSX = TOSX
 	ILINUX = TLINUX
 	ISUNOS = TSUNOS
+	IOPENBSD = TOPENBSD
 end procedure
 
 public function GetPlatformDefines(integer for_translator = 0)
@@ -119,6 +126,8 @@ public function GetPlatformDefines(integer for_translator = 0)
 		local_defines &= {"UNIX", "BSD", "OSX"}
 	elsif (ISUNOS and not for_translator) or (TSUNOS and for_translator) then
 		local_defines &= {"UNIX", "BSD", "SUNOS"}
+	elsif (IOPENBSD and not for_translator) or (TOPENBSD and for_translator) then
+		local_defines &= { "UNIX", "BSD", "OPENBSD"}
 	elsif (IBSD and not for_translator) or (TBSD and for_translator) then
 		local_defines &= {"UNIX", "BSD", "FREEBSD"}
 	end if

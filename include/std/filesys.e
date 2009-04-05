@@ -46,7 +46,7 @@ ifdef WIN32 then
 elsifdef LINUX then
 	constant lib = open_dll("")
 
-elsifdef FREEBSD or SUNOS then
+elsifdef FREEBSD or SUNOS or OPENBSD then
 	constant lib = open_dll("libc.so")
 	
 elsifdef OSX then
