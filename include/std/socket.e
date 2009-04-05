@@ -26,7 +26,7 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
 -- the [[:create]] function.
 --
 
-ifdef WIN32 then
+ifdef WIN32 or DOS32 then
 	public constant
 		--**
 		-- Address family is unspecified

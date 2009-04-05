@@ -1,4 +1,4 @@
-#!/usr/bin/eui
+#!/usr/bin/exu
 
 -- Specify -exe <path to interpreter> to use a specific interpreter for tests
 
@@ -11,6 +11,7 @@ include std/get.e
 include std/os.e as ut
 include std/text.e 
 include std/math.e
+include std/search.e  as search
 with trace
 
 ifdef DOS32 then
@@ -51,6 +52,7 @@ function dos_lower(sequence s)
 end function
 
 function run_emake()
+	-- parse and run the commands in emake.bat.
 	integer emake
 	integer dl
 ifdef UNIX then
@@ -108,7 +110,7 @@ end function
 -- runs cmd using system exec tests for returned error values
 -- and error files.  Before the command is run, the error files
 -- are deleted and just before the functions exits the error 
--- files are deleted.
+-- files are deleted unless REC is defined.
 -- returns 0 iff no errors were raised
 function invoke( sequence cmd, sequence filename, integer err)
 	integer status
@@ -122,26 +124,24 @@ function invoke( sequence cmd, sequence filename, integer err)
 	end if
 	sleep( 0.1 )
 	
-	if status then
-		error( filename, err, "program died with status %d", {status} )
-	end if
-	
 	if file_exists( "cw.err" ) then
 		error( filename, err, "Causeway error with status %d", {status}, "cw.err" )
-		status = 1
+		if not status then
+			status = 1
+		end if
 		ifdef not REC then
 			delete_file("cw.err")
 		end ifdef			
-	else
-		status = 0
-	end if
-	
-	if file_exists( "ex.err" ) then
+	elsif file_exists( "ex.err" ) then
 		error( filename, err, "EUPHORIA error with status %d", {status}, "ex.err" )
-		status = 1
+		if not status then
+			status = 1
+		end if
 		ifdef not REC then
 			delete_file("ex.err")
 		end ifdef
+	elsif status then
+		error( filename, err, "program died with status %d", {status} )
 	end if
 	
 	return status
@@ -192,20 +192,21 @@ procedure do_test(sequence cmds)
 	sequence interpreter_options = "", translator_options = "", test_options = ""
 	sequence translator = "", library = "", compiler = ""
 	sequence directory
-	sequence control_err, ex_err, interpreter_os_name
+	sequence control_err, interpreter_os_name
+	object ex_err
 	integer log_where = 0 -- keep track of unittest.log
 	integer log_fd = 0
 	sequence silent = ""
 	integer expected_status -- expected status
 	
 	ifdef UNIX then
-		executable = "eui"
+		executable = "exu"
 		dexe = ""
 	elsifdef WIN32 then
-		executable = "eui"
+		executable = "exwc"
 		dexe = ".exe"
 	elsedef
-		executable = "euid"
+		executable = "ex"
 		dexe = ".exe"
 	end ifdef
 
@@ -230,16 +231,29 @@ procedure do_test(sequence cmds)
 		ec = find("-ec", cmds)
 	end while
 
-	if (length(translator) >= 7 and match( upper("euc.exe"), upper(translator) ) != 0)
-		or ( length(translator) = 0 and platform() = WIN32 ) 
-	then
-		translator_options &= " -CON"
-	elsif ( match( upper("euc"), upper(translator) ) != 0 )
-		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS } ) ) 
+	-- Check for various executable names to see if we need -CON or not
+	-- We MUST try old nmaes so you can test old code.  Will remove after the
+	-- next alpha release.
+	
+	-- lower for Windows or DOS, lower for all.  K.I.S.S.
+	sequence translator_base = lower(translator[search:rfind(SLASH,translator)+1..$])
+	sequence interpreter_base = lower(executable[search:rfind(SLASH,executable)+1..$])
+	integer dos_or_win = find(platform(),{WIN32,DOS32})
+	if (match( "eucd", translator_base ) != 0) or
+	   ( length(translator) = 0 and platform() = DOS32 )
 	then
 		-- NOOP
-	elsif ( length(translator) = 0 and platform() = DOS32 ) or 
-			match( upper("eucd.exe"), upper(translator) ) != 0
+	elsif (match( "ecw", translator_base ) != 0 and dos_or_win)
+		or (match( "euc", translator_base ) != 0 and dos_or_win ) 
+		or ( length(translator) = 0 and platform() = WIN32 )
+		then
+			translator_options &= " -CON"
+	elsif ( match( "ecu", translator_base ) != 0 ) or
+		( match( upper("euc"), upper(translator) ) != 0 )
+		or ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS, OPENBSD } ) ) 
+	then
+		-- NOOP
+	elsif match( upper("ec.exe"), upper(translator) ) != 0 
 	then
 		-- NOOP
 	else
@@ -247,25 +261,31 @@ procedure do_test(sequence cmds)
 		abort(1)
 	end if                                  
 	
-	if match( upper("eui.exe"), upper(executable) ) != 0 then
+	if match( "exwc.exe", interpreter_base ) != 0 then
 		interpreter_os_name = "WIN32"		
+	elsif match( "exu", interpreter_base ) != 0 then
+		interpreter_os_name = "UNIX"
+	elsif match( "ex.exe", interpreter_base ) != 0 
+		or match( "euid.exe", interpreter_base ) != 0 then
+		interpreter_os_name = "DOS32"
+	elsif platform() = WIN32 
+		and ( match( "eui", interpreter_base ) != 0 or length(interpreter_base) = 0 )
+		then
+		interpreter_os_name = "WIN32"		
+	elsif find( platform(), { LINUX, OSX, FREEBSD, SUNOS, OPENBSD } ) 
+		and ( match( "eui", interpreter_base ) != 0 or length(interpreter_base) = 0 ) then
+		interpreter_os_name = "UNIX"
+	elsif platform() = DOS32 then
+		interpreter_os_name = "DOS32"			
 	else
-		if match( upper("eui"), upper(executable) ) != 0 then
-			interpreter_os_name = "UNIX"
-		elsif match( upper("euid.exe"), upper(executable) ) != 0 then
-			interpreter_os_name = "DOS32"
-		elsif platform() = WIN32 then
-			interpreter_os_name = "WIN32"		
-		elsif find( platform(), { LINUX, OSX, FREEBSD, SUNOS } ) then
-			interpreter_os_name = "UNIX"
-		elsif platform() = DOS32
-			interpreter_os_name = "DOS32"
-		else
-			printf( 2, "Cannot determine executable\'s operating system.", {} )
-			abort(1)
-		end if                                  
+		printf( 2, "Cannot determine interpreter_base\'s operating system.", {} )
+		abort(1)
 	end if
-
+	
+	interpreter_base = {}
+	translator_base = {}
+	
+	
 	integer cci
 	
 	compiler = ""
@@ -363,111 +383,115 @@ procedure do_test(sequence cmds)
 			end if
 			if match("t_c_", dos_lower(filename)) = 1 or sequence( control_error_file ) then
 				expected_status = 1
-				status = system_exec( cmd, 2 )
-			else
-				status = invoke(cmd, filename, E_INTERPRET)
-				expected_status = 0
-				if status then
-					failed += 1
-					fail_list = append(fail_list, filename )
-						break "interpreter"
-				end if
-			end if
-		
-			if expected_status then
-				
-				if sequence( control_error_file ) then
+				status = system_exec( cmd, 2 )				
+				if sequence( control_error_file ) then 
+					-- Now we will compare the control error file to the newly created 
+					-- ex.exe.  If ex.err doesn't exist or there is no match error()
+					-- is called and we add to the failed list.
 					control_err = read_lines( control_error_file )
 					ex_err = read_lines( "ex.err" )
-					if length(ex_err) > 4 then
-						ex_err = ex_err[1..4]
-					end if
-					if length(control_err) > 4 then
-						control_err = control_err[1..4]
-					end if
-					ex_err[1] = strip_path_junk( ex_err[1] )
-					control_err[1] = strip_path_junk( control_err[1] )
-					for j = 1 to length(ex_err) do
-						integer mde = match(".e:", ex_err[j]) 
-						integer d32 = match("DOS32", ex_err[j])
-						if mde then
-							integer sl = mde
-							while sl > 1 and ex_err[j][sl] != SLASH do
-								sl -= 1
-							end while
-							ex_err[j] = dos_lower(ex_err[j][sl..$])
-							if sl > 1 then
-								ex_err[j] = "..." & ex_err[j]
+					if sequence(ex_err) then
+						if length(ex_err) > 4 then
+							ex_err = ex_err[1..4]
+						end if
+						if length(control_err) > 4 then
+							control_err = control_err[1..4]
+						end if
+						ex_err[1] = strip_path_junk( ex_err[1] )
+						control_err[1] = strip_path_junk( control_err[1] )
+						for j = 1 to length(ex_err) do
+							integer mde = match(".e:", ex_err[j]) 
+							integer d32 = match("DOS32", ex_err[j])
+							if mde then
+								integer sl = mde
+								while sl > 1 and ex_err[j][sl] != SLASH do
+									sl -= 1
+								end while
+								ex_err[j] = dos_lower(ex_err[j][sl..$])
+								if sl > 1 then
+									ex_err[j] = "..." & ex_err[j]
+								end if
 							end if
-						end if
-						if d32 then
-							ex_err[j] = ex_err[j][1..d32+4]
-						end if
-					end for
-					for j = 1 to length(control_err) do
-						integer mde = match(".e:", control_err[j])
-						integer d32 = match("DOS32", ex_err[j])
-						if mde then
-							integer sl = mde
-							while sl > 1 and control_err[j][sl] != SLASH do
-								sl -= 1
-							end while
-							control_err[j] = dos_lower(control_err[j][sl..$])
-							if sl > 1 then
-								control_err[j] = "..." & control_err[j]
+							if d32 then
+								ex_err[j] = ex_err[j][1..d32+4]
 							end if
-						end if
-						if d32 then
-							control_err[j] = control_err[j][1..d32+4]
-						end if
-					end for
+						end for
+						for j = 1 to length(control_err) do
+							integer mde = match(".e:", control_err[j])
+							integer d32 = match("DOS32", ex_err[j])
+							if mde then
+								integer sl = mde
+								while sl > 1 and control_err[j][sl] != SLASH do
+									sl -= 1
+								end while
+								control_err[j] = dos_lower(control_err[j][sl..$])
+								if sl > 1 then
+									control_err[j] = "..." & control_err[j]
+								end if
+							end if
+							if d32 then
+								control_err[j] = control_err[j][1..d32+4]
+							end if
+						end for
+					end if -- sequence(ex_err)
 							
 					comparison = compare( ex_err, control_err )
 					if comparison then
 						failed += 1
 						fail_list = append( fail_list, filename )
-						if length( ex_err ) >=4  and length( control_err ) >= 4 then
+						if atom( ex_err ) then
+							error( filename, E_INTERPRET, "No ex.err has been generated.", {} )
+						elsif length( ex_err ) >=4  and length( control_err ) >= 4 then
 							error( filename, E_INTERPRET, "Unexpected ex.err expected: \'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n", control_err & ex_err, "ex.err" )
 						elsif length( ex_err ) then
 							error( filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err )
 						else
 							error( filename, E_INTERPRET, "Unexpected empty ex.err", {} )
 						end if
-							break "interpreter"
 					end if
-	
-				elsif atom( dir( "ex.err" ) ) then
-					error( filename, E_INTERPRET, "ex.err not generated.", {} )
-						break "interpreter"
-				end if
-			end if			
-			
-			if status xor expected_status then
-				failed += 1
-				fail_list = append( fail_list, filename )
-				if not file_exists("ex.err") then
-					error( filename , E_INTERPRET, "program closed with status %d", {status} )
+				else	
+					-- no control_error_file. thus, there is nothing to compare to we go on as if the files matched.					
+					comparison = 0
+				end if  -- sequence( control_error_file )
+				if comparison = 0 then
+					if status = 0 then
+						-- Here, we were expecting the test to fail.  Yet, we recieved a 0 error status.
+						-- This is a failure for we should get some other number for errors.
+						failed += 1
+						fail_list = append( fail_list, filename )
+						error( filename, E_INTERPRET, "The unit test exited with 0 while we expected a failure.", {} )
+					else						
+						error( filename, E_NOERROR, "The unit test failed in the expected manner. Error status %d.", {status} )						
+					end if
 				else
-					error( filename, E_INTERPRET, "program closed with status %d", {status}, "ex.err" )
-		
+					-- error() has been called in the previous block if comparsion != 0
 				end if
-				
-				break "interpreter"
-			elsif status = 0 then -- expected_status = 0 therefore
-				if log then
-					object token = check_log( log_where )
+			else    -- not match(t_c_*.e)
+				-- in this branch error() is called once and only once in all sub-branches
+				status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
+				expected_status = 0
+				if status then
+					failed += 1
+					fail_list = append(fail_list, filename )
+					-- error() called in invoke()
+				else
+					object token
+					if log then
+						token = check_log( log_where )
+					else
+						token = 0
+					end if -- log
 					if sequence(token) then
 						failed += 1
 						fail_list = append(fail_list, filename )					
 						error( filename, E_INTERPRET, token, {}, "ex.err" )
-						break "interpreter"
 					else
 						log_where = token
-					end if -- sequence(token)
-				
-				end if -- log
-				error( filename, E_NOERROR, "all tests successful", {} )
+						error( filename, E_NOERROR, "all tests successful", {} )
+					end if -- sequence(token)				
+				end if
 			end if
+		
 		end if -- interpreter
 		ifdef REC then
 			if status then
@@ -475,13 +499,10 @@ procedure do_test(sequence cmds)
 				if match("t_c_", dos_lower(filename)) != 1 then
 					directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
 				else
-					trace(1)
 					directory = filename[1..find('.',filename&'.')] & "d"
 				end if
 				void = create_directory( filename[1..find('.',filename&'.')] & "d" ) 
 				void = create_directory( directory )
-				-- the ex.err file disappears before this code is reached and the code must be here
-				-- for platform specific crashes.  Is it being deleted prematurely?
 				void = move_file( "ex.err", directory & SLASH & "control.err" )
 			end if
 		end ifdef
@@ -542,6 +563,7 @@ procedure do_test(sequence cmds)
 					fail_list = append(fail_list, "compiling " & filename )					
 					if sequence( emake_outcome ) then
 						error( exename, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4] )
+						status = emake_outcome[3][1]
 					else
 						error( exename, E_COMPILE, 
 							"program could not be compiled. Compilation process exited with status %d", {emake_outcome} )
@@ -928,14 +950,14 @@ procedure main(sequence cmds = command_line())
 		end if
 	end while
 	if find("-help", cmds) or find("--help",cmds) or find("/?", cmds) then
-		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n" &
-		"\t[-exe interpreter-path-and-filename]\n" &
-		"\t[-ec translator-path-and-filename] [-i include directory]\n" &
-		"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n" &
-		"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n" &
-		"\t[-log]\n" &
-		"\t[-verbose]\n" &
-		"\t[unit test files]\n")
+		puts(2, "USAGE:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n"
+		&"\t[-exe interpreter-path-and-filename]\n"
+		&"\t[-ec translator-path-and-filename] [-i include directory]\n"
+		&"\t[-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n"
+		&"\t[-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n"
+		&"\t[-log]\n"
+		&"\t[-verbose]\n"
+		&"\t[unit test files]\n")
 		abort(0)
 	end if  
 	if find("-process-log", cmds) then

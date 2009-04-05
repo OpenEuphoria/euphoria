@@ -7,6 +7,11 @@
 --
 -- <<LEVELTOC depth=2>>
 
+ifdef DOS32 then
+	include std/error.e
+	crash("http.e is not supported on the DOS platform")
+end ifdef
+
 include std/socket.e as sock
 include std/net/common.e
 include std/net/dns.e
@@ -836,3 +841,4 @@ end function
 
 -- set the lines in the "proper" order for sending, not that the defaults will get sent.
 set_sendheader_default()
+
