@@ -6,6 +6,7 @@ include std/filesys.e
 include std/io.e
 include std/get.e
 include std/error.e
+include std/console.e
 
 include euphoria/info.e
 
@@ -14,12 +15,13 @@ include parser.e
 include mode.e
 include common.e
 include platform.e
+include cominit.e
 
 function GetSourceName()
 -- record command line options, return source file number
 	integer src_file
 	boolean dot_found
-	sequence src_name, exts
+	sequence src_name
 	sequence SVN_REVISION
 
 	if Argc >= 3 then
@@ -41,42 +43,7 @@ function GetSourceName()
 			screen_output(STDERR, "Using System Memory\n")
 		end ifdef
 
-		if BIND then
-			screen_output(STDERR, "\nfile name to bind/shroud? ")
-
-		elsif INTERPRET then
-			screen_output(STDERR, "\nfile name to execute? ")
-
-		elsif TRANSLATE then
-			screen_output(STDERR, "\nfile name to translate to C? ")
-
-		end if
-
-		src_name = gets(STDIN)
-
-		screen_output(STDERR, "\n")
-
-		-- remove leading blanks
-		while length(src_name) and find(src_name[1], " \t\n") do
-			src_name = src_name[2..$]
-		end while
-
-		if length(src_name) = 0 then
-			Cleanup(1)
-		end if
-
-		-- remove trailing blanks
-		while length(src_name) and find(src_name[$], " \t\n") do
-			src_name = src_name[1..$-1]
-		end while
-
-		-- add src_name as 2nd arg for command_line()
-		Argc = 2
-		Argv = {Argv[1], src_name}
-
-		file_name_entered = src_name -- passed to back-end for command_line()
-
-		-- .ex or .exw might be added to src_name below
+		return -2 -- No source file
 	end if
 
 	-- check src_name for last '.'
@@ -93,14 +60,12 @@ function GetSourceName()
 	if not dot_found then
 		-- no dot found --
 		-- N.B. The list of default extentions must always end with the first one again.
-		exts = { ".ex", ".exw", ".exd", "", ".ex" }
-
 		-- Add a placeholder in the file list.
 		file_name = append(file_name, "")
 
 		-- test each ext until you find the file.
-		for i = 1 to length( exts ) do
-			file_name[$] = src_name & exts[i]
+		for i = 1 to length( DEFAULT_EXTS ) do
+			file_name[$] = src_name & DEFAULT_EXTS[i]
 			src_file = e_path_open(file_name[$], "r")
 			if src_file != -1 then
 				exit
@@ -181,12 +146,12 @@ procedure main()
 	if src_file = -1 then
 		-- too early for normal error processing
 		screen_output(STDERR, sprintf("Can't open %s\n", {file_name[$]}))
-		screen_output(STDERR, "\nPress Enter\n")
-		getc(0)
+		any_key("\nPress any key", STDERR)
 		Cleanup(1)
+	elsif src_file >= 0 then
+		main_path = full_path(file_name[$])
 	end if
 
-	main_path = full_path(file_name[$])
 
 	if TRANSLATE then
 		InitBackEnd(1)
@@ -202,10 +167,19 @@ procedure main()
 	
 	-- sets up the internal namespace
 	eu_namespace()
+
+	if src_file = -2 then	
+		-- No source supplied on command line
+		show_usage()
+		if find("WIN32_GUI", OpDefines) then
+			any_key("(press any key and window will close ...)", STDERR)
+		end if
+		Cleanup(1)
+	end if
 	
 	-- starts reading and checks for a default namespace
 	main_file()
-	
+
 	parser()
 	
 	-- we've parsed successfully

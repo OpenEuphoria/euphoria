@@ -1,9 +1,11 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Common initialization (command line options)
-
+include std/filesys.e
 include global.e
 include pathopen.e
+include common.e
+include euphoria/info.e
 
 sequence switches, switch_cache
 switches = {}
@@ -21,7 +23,8 @@ global constant COMMON_OPTIONS = {
 	"-X",    -- defines warning level by exclusion
 	"-WF",   -- defines the file to which the warnings will go instead of stderr
 	"-?",    -- Display 'usage' help
-	"-HELP"  -- Display 'usage' help
+	"-HELP", -- Display 'usage' help
+	"-COPYRIGHT" -- Display all copyright notices.
 }
 
 global enum
@@ -35,7 +38,8 @@ global enum
 	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
 	WARNING_FILE_OPTION,	-- warning file name
 	HELP_OPTION,  -- Show command line usage
-	HELP2_OPTION  -- Show command line usage
+	HELP2_OPTION,  -- Show command line usage
+	COPYRIGHT_OPTION -- Show copyright notices
 
 constant COMMON_PARAMS = {
 	EUINC_OPTION,
@@ -47,8 +51,9 @@ constant COMMON_PARAMS = {
 	WARNING_OPTION, -- startup warning level
 	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
 	WARNING_FILE_OPTION,	-- warning file name
-	0,   -- COmmand line usage
-	0   -- COmmand line usage
+	0,   -- Command line usage
+	0,   -- Command line usage
+	0    -- Copyright notices
 }
 
 
@@ -75,13 +80,20 @@ global procedure move_args( integer start )
 	Argc -= 1
 end procedure
 
-integer usage_shown = 0
+procedure show_copyrights()
+	sequence notices = all_copyrights()
+	for i = 1 to length(notices) do
+		printf(2, "%s\n%s\n", notices[i])
+	end for
+end procedure
+
 global procedure show_usage()
 	if usage_shown = 0 then
-		puts(1,
+		printf(1,
 ##
 ____________
-            Euphoria Interpreter Usage: Command line arguments ...
+            Euphoria Interpreter Usage: %s [euswitches] [filename [appswitches]] ...
+            where euswitches are ...
             -C <filename>    -- specify a configuration file
             -I <dirname>     -- specify a directory to search for include files
             -D <word>        -- define a word
@@ -92,8 +104,9 @@ ____________
             -X <warningname> -- defines warning level by exclusion
             -WF <warnfile>   -- defines the file to which the warnings will go
             -? or -HELP      -- Display this 'usage' help
+            -COPYRIGHT       -- Display copyright notices
 
-		#)
+		#, {filebase(Argv[1])})
 		usage_shown = 1
 	end if
 end procedure
@@ -144,6 +157,10 @@ global procedure common_options( integer option, integer ix )
 
 	case  HELP_OPTION, HELP2_OPTION then
 		show_usage()
+		break
+
+	case  COPYRIGHT_OPTION then
+		show_copyrights()
 		break
 
 	case  WARNING_OPTION then

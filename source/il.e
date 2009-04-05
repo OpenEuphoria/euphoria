@@ -11,6 +11,7 @@ include std/machine.e
 include std/text.e
 include std/filesys.e
 include std/io.e
+include euphoria/info.e
 include common.e
 include compress.e
 include backend.e
@@ -214,11 +215,29 @@ procedure OutputMisc(file f)
 			   sample_size, gline_number, file_name})
 end procedure
 
+procedure copyrights()
+	sequence notices = all_copyrights()
+	for i = 1 to length(notices) do
+		printf(2, "%s\n%s\n", notices[i])
+	end for
+end procedure
+
 procedure usage()
-	puts(2, "usage 1:  bind[w|u] [-full_debug] [-con] [-list] [-quiet]\n")
-	puts(2, "          [-out executable_file] [-icon iconfile[.ico]] filename\n\n")
-	puts(2, "usage 2:  shroud [-full_debug] [-con] [-list] [-quiet]\n") 
-	fatal(  "          [-out shrouded_file] filename")
+	if usage_shown != 0 then
+		return
+	end if
+	usage_shown += 1
+	puts(2, #'
+______________usage 1:  bind[w|u] [-full_debug] [-con] [-list] [-quiet]
+                                  [-out executable_file] [-icon iconfile[.ico]]
+                                  filename
+              
+              
+              usage 2:  shroud[w] [-full_debug] [-con] [-list] [-quiet]
+                                  [-out shrouded_file] filename
+
+              ')
+
 end procedure
 
 function extract_options(sequence cl)
@@ -228,10 +247,6 @@ function extract_options(sequence cl)
 
 	cl &= GetDefaultArgs()
 	
-	if length(cl) < 3 then
-		usage()
-	end if
-	
 	op = 3
 	while op <= length(cl) do
 		option = upper(cl[op])
@@ -239,49 +254,58 @@ function extract_options(sequence cl)
 		if length(option) > 1 and option[1] = '-' then
 			option = option[2..$]
 			
-			if match("SHROUD_ONLY", option) then
+			if equal("SHROUD_ONLY", option) then
 				shroud_only = TRUE
 				cl = cl[1..op-1] & cl[op+1..$]
 			
-			elsif match("QUIET", option) = 1 then
+			elsif equal("QUIET", option) then
 				quiet = TRUE
 				cl = cl[1..op-1] & cl[op+1..$]
 			
-			elsif match("LIST", option) = 1 then
+			elsif equal("LIST", option) then
 				list = TRUE
 				cl = cl[1..op-1] & cl[op+1..$]
 			
-			elsif match("W32", option) = 1 then
+			elsif equal("W32", option) then
 				w32 = TRUE
 				cl = cl[1..op-1] & cl[op+1..$]
 			
-			-- do before "CON"
-			elsif match("ICON", option) = 1 and op < length(cl) then
+			elsif equal("ICON", option) and op < length(cl) then
 				icon = cl[op+1]
 				cl = cl[1..op-1] & cl[op+2..$]
 			
-			elsif match("CON", option) = 1 then
+			elsif equal("CON", option) then
 				con = TRUE
 				cl = cl[1..op-1] & cl[op+1..$]
 				
-			elsif match("FULL_DEBUG", option) then
+			elsif equal("FULL_DEBUG", option) then
 				full_debug = TRUE
 				cl = cl[1..op-1] & cl[op+1..$]
 			
-			elsif match("OUT", option) = 1 and op < length(cl) then
+			elsif equal("OUT", option) and op < length(cl) then
 				user_out = cl[op+1]
 				cl = cl[1..op-1] & cl[op+2..$]
 			
-			elsif match("I", option) = 1 and op < length(cl) then
+			elsif equal("I", option) and op < length(cl) then
 				add_switch( "-i", 0 )
 				add_switch( cl[op+1], 0 )
 				add_include_directory( cl[op+1] )
 				cl = cl[1..op-1] & cl[op+2..$]
 				
-			elsif match("C", option ) = 1 and op < length(cl) then
+			elsif equal("C", option ) and op < length(cl) then
 				add_switch( "-c", 0 )
 				add_switch( cl[op+1], 0 )
 				cl = cl[1..op-1] & load_euinc_conf( cl[op+1] ) & cl[op+2..$]
+				
+			elsif equal("HELP", option )
+			   or equal("?", option )
+			then
+				usage()
+				cl = cl[1..op-1] & cl[op+2..$]
+				
+			elsif equal("COPYRIGHT", option ) then
+				copyrights()
+				cl = cl[1..op-1] & cl[op+2..$]
 				
 			else
 				fatal("Invalid option: " & cl[op])
@@ -290,6 +314,11 @@ function extract_options(sequence cl)
 			op += 1
 		end if
 	end while
+	if length(cl) < 3 then
+		usage()
+		abort(0)
+	end if
+	
 	return cl
 end function
 set_extract_options( routine_id("extract_options") )

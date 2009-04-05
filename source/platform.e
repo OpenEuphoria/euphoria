@@ -4,11 +4,14 @@
 
 include std/os.e
 
+
 public constant
 	ULINUX = LINUX + 0.3,
 	UFREEBSD = FREEBSD + 0.4,
 	UOSX = OSX + 0.5,
-	USUNOS = SUNOS + 0.6
+	USUNOS = SUNOS + 0.6,
+	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
+
 
 -- For cross-translation:
 public integer
@@ -99,14 +102,14 @@ end procedure
 
 public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
-	sequence cmds = command_line()
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
-		local_defines &= {"MICROSOFT", "WIN32"}
-		if match("euiw", cmds[1]) then
-			local_defines &= {"WIN32_GUI"}
+		local_defines &= {"MICROSOFT", "WIN32"}		
+		sequence lcmds = command_line()
+		if match("euiw", lcmds[1]) != 0 then
+			local_defines = append(local_defines, "WIN32_GUI")
 		else
-			local_defines &= {"WIN32_CONSOLE"}
+			local_defines = append(local_defines, "WIN32_CONSOLE")
 		end if
 	elsif (IDOS and not for_translator) or (TDOS and for_translator) then
 		local_defines &= {"MICROSOFT", "DOS32"}
