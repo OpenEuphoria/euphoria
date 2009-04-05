@@ -37,6 +37,8 @@ elsifdef SUNOS then
 	return "SunOS"
 elsifdef FREEBSD then
 	return "FreeBSD"
+elsifdef OPENBSD then
+	return "OpenBSD"
 elsedef
 	return "Unknown"
 end ifdef
