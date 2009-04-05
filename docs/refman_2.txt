@@ -2043,11 +2043,16 @@ but ##EU5## will be defined.
 ==== Platform Definitions
 
 * **DOS32** - Platform is DOS
-* **WIN32** - Platform is Windows
+* **WIN32_CONSOLE** - Platform is Windows and is being executed
+  with the Console version of the interpreter (eui.exe)
+* **WIN32_GUI** - Platform is Windows and is being executed with
+  the GUI version of the interpreter (euiw.exe)
+* **WIN32** - Platform is Windows (GUI or Console)
 * **LINUX** - Platform is Linux
 * **FREEBSD** - Platform is FreeBSD
 * **OSX** - Platform is Mac OS X
-* **UNIX** - Platform is any Unix (currently Linux, FreeBSD or OS X)
+* **SUNOS** - Platform is SunOS (Open Solaris)
+* **UNIX** - Platform is any Unix
 
 ==== Miscellaneous Definitions
 
