@@ -1,4 +1,4 @@
-#!/usr/bin/exu
+#!/usr/bin/env eui
 
 -- Specify -exe <path to interpreter> to use a specific interpreter for tests
 

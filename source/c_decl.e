@@ -32,36 +32,27 @@ global constant BB_VAR = 1,      -- the var / type / constant
 		 BB_SEQLEN = 4,   -- sequence length
 		 BB_OBJ = 5,      -- integer value min/max
 		 BB_DELETE = 6    -- may have a delete routine
-global sequence BB_info
-BB_info = {}
+global sequence BB_info = {}
 
-global integer LeftSym   -- to force name to appear, not value
-LeftSym = FALSE    
+global integer LeftSym = FALSE   -- to force name to appear, not value
 
-global boolean dll_option, con_option, fastfp, lccopt_option
-dll_option = FALSE
-con_option = FALSE
-fastfp = FALSE
-lccopt_option = TRUE
+global boolean 
+	dll_option = FALSE,
+	con_option = FALSE,
+	fastfp = FALSE,
+	lccopt_option = TRUE,
+	makefile_option = FALSE
 
-sequence files_to_delete
-files_to_delete = {
-"main-.c",
-"main-.h",
-"init-.c"
+sequence files_to_delete = {
+	"main-.c",
+	"main-.h",
+	"init-.c"
 }
 
-global boolean keep -- emake should keep .c files or delete?
-keep = FALSE
-
-global boolean debug_option
-debug_option = FALSE
-
-global sequence user_library
-user_library = ""
-
-global integer total_stack_size  -- default size for OPTION STACK
-total_stack_size = -1  -- (for now) 
+global boolean keep = FALSE -- emake should keep .c files or delete?
+global boolean debug_option = FALSE
+global sequence user_library = ""
+global integer total_stack_size = -1 -- default size for OPTION STACK
 
 -- first check EUCOMPILEDIR, to allow the user to override and use a different
 -- directory than EUDIR. THen use EUDIR, then default to /usr/share/euphoria
@@ -671,8 +662,7 @@ global procedure DeclareFileVars()
 	c_hputs("\n")
 end procedure
    
-integer deleted_routines 
-deleted_routines = 0
+integer deleted_routines = 0
 
 global procedure PromoteTypeInfo()
 -- at the end of each pass, certain info becomes valid 
@@ -1052,28 +1042,40 @@ function unique_c_name(sequence name)
 	return name
 end function
 
+sequence makefile_src_line = "", makefile_obj_line = ""
 sequence link_line
 integer link_file
 
 procedure add_file(sequence filename)
--- add a file to the list of files to be linked 
-	if TUNIX or (TWINDOWS and gcc_option) then
+	sequence obj_fname = filename, src_fname = filename & ".c"
+
+	if sequence(wat_path) or sequence(bor_path) then
+		obj_fname &= ".obj"
+	else
+		obj_fname &= ".o"
+	end if
+
+	if makefile_option then
+		makefile_src_line &= src_fname & " "
+		makefile_obj_line &= obj_fname & " "
+
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		link_line &= filename & ".o "
 	
 	elsif TDOS then
 		if sequence(wat_path) then
-			printf(link_file, "FILE %s.obj\n", {filename})
+			printf(link_file, "FILE %s\n", {obj_fname})
 		else
-			printf(link_file, "%s.o\n", {filename})
+			printf(link_file, "%s\n", {obj_fname})
 		end if
 	
 	else
 		if sequence(wat_path) then
-			printf(link_file, "FILE %s.obj\n", {filename})
+			printf(link_file, "FILE %s\n", {obj_fname})
 		elsif sequence(bor_path) then
-			printf(link_file, "%s.c\n", {filename})
+			printf(link_file, "%s\n", {src_fname})
 		else
-			printf(link_file, "%s.obj\n", {filename})
+			printf(link_file, "%s\n", {obj_fname})
 		end if
 	end if
 end procedure
@@ -1096,16 +1098,18 @@ function any_code(integer file_no)
 end function
 
 integer doit
-sequence cc_name, echo
+sequence cc_name
 sequence file0
 sequence prepared_file0
 
 global procedure start_emake()
 -- start creating emake.bat     
-	sequence debug_flag
-	debug_flag = ""
+	sequence debug_flag = ""
 	
-	if TUNIX or (TWINDOWS and gcc_option) then
+	if makefile_option then
+		doit = open(file0 & ".mak", "wb")
+		add_file(file0)
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		doit = open("emake", "wb")
 	else       
 		doit = open("emake.bat", "wb")
@@ -1115,7 +1119,7 @@ global procedure start_emake()
 		CompileErr("Couldn't create batch file for compile.\n")
 	end if
 		
-	if not (TUNIX or (TWINDOWS and gcc_option)) then
+	if not makefile_option and not (TUNIX or (TWINDOWS and gcc_option)) then
 		puts(doit, "@echo off"&HOSTNL)
 		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
 	end if
@@ -1126,7 +1130,9 @@ global procedure start_emake()
 		prepared_file0 = file0
 	end ifdef
 	
-	if TDOS then
+	if makefile_option then
+		-- do nothing yet
+	elsif TDOS then
 		if sequence(wat_path) then
 			if debug_option then
 				debug_flag = "/d2 "
@@ -1151,9 +1157,7 @@ global procedure start_emake()
 			puts(doit, "echo compiling with DJGPP"&HOSTNL)
 			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
 		end if
-	end if
-
-	if TWINDOWS then
+	elsif TWINDOWS then
 		if sequence(wat_path) then
 			puts(doit, "echo compiling with WATCOM"&HOSTNL)
 			if debug_option then
@@ -1197,12 +1201,10 @@ global procedure start_emake()
 		end if
 		
 		c_opts &= sprintf( " -I%s", {get_eudir()})
-	end if
 	
-	if TUNIX or (TWINDOWS and gcc_option) then
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		puts(doit, "echo compiling with GNU C"&HOSTNL)
 		cc_name = "gcc"
-		echo = "echo"
 		if debug_option then
 			debug_flag = " -g3"
 		else
@@ -1221,7 +1223,6 @@ global procedure start_emake()
 		end if
 		link_line = ""
 	else       
-		echo = "echo"
 		link_file = open("objfiles.lnk", "w")
 		files_to_delete = append(files_to_delete, "objfiles.lnk")
 		if link_file = -1 then
@@ -1404,22 +1405,22 @@ global procedure finish_emake()
 	end if
 
 	-- init-.c files
-	if atom(bor_path) then
-		printf(doit, "%s init-.c"&HOSTNL, {echo})
+	if atom(bor_path) and not makefile_option then
+		puts(doit, "echo init-.c"&HOSTNL)
 		printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
 	end if
 	add_file("init-")
 	for i = 0 to init_name_num-1 do -- now that we know init_name_num
-		if atom(bor_path) then
-			printf(doit, "%s init-%d.c"&HOSTNL, {echo, i})
+		if atom(bor_path) and not makefile_option then
+			printf(doit, "echo init-%d.c"&HOSTNL, {i})
 			printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
 		end if
 		buff = sprintf("init-%d", i)
 		add_file(buff)
 	end for
 		
-	if atom(bor_path) then
-		printf(doit, "%s linking"&HOSTNL, {echo})
+	if atom(bor_path) and not makefile_option then
+		puts(doit, "echo linking"&HOSTNL)
 	end if
 	
 	ifdef DOS32 then
@@ -1432,7 +1433,9 @@ global procedure finish_emake()
 		bin_path = get_eudir() & SLASH & "bin"
 	end if
 	
-	if TDOS then    
+	if makefile_option then
+		-- do nothing special
+	elsif TDOS then    
 		if sequence(wat_path) then
 			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length( user_library ) then
@@ -1497,9 +1500,7 @@ global procedure finish_emake()
 					{truncate_to_83(file0),file0} )
 			end if
 		end if
-	end if      
-
-	if TWINDOWS then
+	elsif TWINDOWS then
 		if sequence(wat_path) then     
 			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length(user_library) then
@@ -1584,9 +1585,8 @@ global procedure finish_emake()
 			close(def_file)
 		end if
 		close(link_file)
-	end if
-
-	if TUNIX or (TWINDOWS and gcc_option) then
+	
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		if dll_option then
 			dll_flag = "-shared -nostartfiles"
 			if TWINDOWS then
@@ -1657,10 +1657,16 @@ global procedure finish_emake()
 		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
 		puts(doit, ":done"&HOSTNL)
 	end if
+
+	if makefile_option then
+		printf(doit, "%s_SOURCES=%s\n", { upper(file0), makefile_src_line })
+		printf(doit, "%s_OBJECTS=%s\n", { upper(file0), makefile_obj_line })
+	end if
 		
 	close(doit)
+
 	ifdef UNIX then
-		if TUNIX then
+		if TUNIX and not makefile_option then
 			system("chmod +x emake", 2)
 		end if
 	end ifdef
@@ -1708,14 +1714,14 @@ global procedure GenerateUserRoutines()
 				-- do the standard top-level files as well 
 
 				if Pass = LAST_PASS then
-					if atom(bor_path) then
-						printf(doit, "%s main-.c"&HOSTNL, {echo})                
+					if atom(bor_path) and not makefile_option then
+						puts(doit, "echo main-.c"&HOSTNL)                
 						printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
 					end if
 					add_file("main-")
 					for i = 0 to main_name_num-1 do
-						if atom(bor_path) then
-							printf(doit, "%s main-%d.c"&HOSTNL, {echo, i})               
+						if atom(bor_path) and not makefile_option then
+							printf(doit, "echo main-%d.c"&HOSTNL, {i})               
 							printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
 						end if
 						buff = sprintf("main-%d", i)
@@ -1726,8 +1732,8 @@ global procedure GenerateUserRoutines()
 			end if
 		
 			if Pass = LAST_PASS then
-				if atom(bor_path) then
-					printf(doit, "%s %s.c"&HOSTNL, {echo, c_file})
+				if atom(bor_path) and not makefile_option then
+					printf(doit, "echo %s.c"&HOSTNL, {c_file})
 					printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 				end if
 			end if
@@ -1774,8 +1780,8 @@ global procedure GenerateUserRoutines()
 							next_c_char = 1  -- (unique_c_name will resolve)
 						end if
 						
-						if atom(bor_path) then
-							printf(doit, "%s %s.c"&HOSTNL, {echo, c_file})
+						if atom(bor_path) and not makefile_option then
+							printf(doit, "echo %s.c"&HOSTNL, {c_file})
 							printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 						end if
 						add_file(c_file)

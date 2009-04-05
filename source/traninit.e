@@ -13,16 +13,16 @@
 
 include std/os.e
 include std/filesys.e
+include std/get.e
+include std/error.e
+include std/sort.e
 
 -- Translator initialization
 include global.e
 include platform.e
-include std/get.e
 include mode.e as mode
 include c_out.e
 include c_decl.e
-include std/error.e
-include std/sort.e
 include compile.e
 include cominit.e
 include pathopen.e
@@ -37,8 +37,7 @@ bor_option = FALSE
 lcc_option = FALSE
 gcc_option = FALSE
 
-sequence compile_dir
-compile_dir = ""
+sequence compile_dir  =""
 
 function extract_options(sequence s)
 -- dummy    
@@ -169,6 +168,8 @@ global procedure transoptions()
 				else
 					Warning("-com option missing compile directory",translator_warning_flag)
 				end if
+			elsif equal("-MAKEFILE", uparg) then
+				makefile_option = TRUE
 			else
 				option = find( uparg, COMMON_OPTIONS )
 				if option then
@@ -189,8 +190,9 @@ global procedure transoptions()
 	
 	if help_option then
 		object msgtext =##
-Usage: ec  [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]
-           [-com /compile_directory/] [-keep] [-debug] [-silent]
+Usage: euc [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
+           [-wat|-djg|-lcc|-bor|-gcc] [-com /compile_directory/]
+           [-makefile] [-keep] [-debug] [-silent] 
            [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
            [/os specific options/]:
 
@@ -206,7 +208,10 @@ OS Specific Options:
 LCC Only: -lccopt-off
 
 Explainations:
-       -CON : Don't create a new window when using the console.
+  -CON      : Don't create a new window when using the console.
+  -MAKEFILE : Generate a <prgname>.mak file that can be included into
+              a larger Makefile project
+
 #
 		if TWINDOWS	then
 			msgtext[10] = 'w'
