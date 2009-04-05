@@ -1057,7 +1057,7 @@ integer link_file
 
 procedure add_file(sequence filename)
 -- add a file to the list of files to be linked 
-	if TUNIX then
+	if TUNIX or (TWINDOWS and gcc_option) then
 		link_line &= filename & ".o "
 	
 	elsif TDOS then
@@ -1105,7 +1105,7 @@ global procedure start_emake()
 	sequence debug_flag
 	debug_flag = ""
 	
-	if TUNIX then      
+	if TUNIX or (TWINDOWS and gcc_option) then
 		doit = open("emake", "wb")
 	else       
 		doit = open("emake.bat", "wb")
@@ -1115,7 +1115,7 @@ global procedure start_emake()
 		CompileErr("Couldn't create batch file for compile.\n")
 	end if
 		
-	if not TUNIX then
+	if not (TUNIX or (TWINDOWS and gcc_option)) then
 		puts(doit, "@echo off"&HOSTNL)
 		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
 	end if
@@ -1181,7 +1181,7 @@ global procedure start_emake()
 			end if
 			c_opts &= bor_path & "\\include -L" & bor_path & "\\lib"
 
-		else 
+		elsif not gcc_option then
 			-- LccWin 
 			if debug_option then
 				debug_flag = " -g"
@@ -1199,7 +1199,7 @@ global procedure start_emake()
 		c_opts &= sprintf( " -I%s", {get_eudir()})
 	end if
 	
-	if TUNIX then
+	if TUNIX or (TWINDOWS and gcc_option) then
 		puts(doit, "echo compiling with GNU C"&HOSTNL)
 		cc_name = "gcc"
 		echo = "echo"
@@ -1212,6 +1212,12 @@ global procedure start_emake()
 			c_opts = "-c -w -fPIC -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
 		else 
 			c_opts = "-c -w -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
+		end if
+		if TWINDOWS then
+			c_opts &= " -mno-cygwin" -- only for MinGW
+			if not con_option then
+				c_opts &= " -mwindows"
+			end if
 		end if
 		link_line = ""
 	else       
@@ -1270,7 +1276,7 @@ global procedure start_emake()
 		elsif sequence(bor_path) then
 			cc_name = "bcc32"
 			
-		else 
+		elsif not gcc_option then
 			cc_name = "lcc"
 			
 		end if
@@ -1518,7 +1524,7 @@ global procedure finish_emake()
 				puts(doit, "del *.tds > NUL"&HOSTNL)
 			end if
 			
-		else 
+		elsif not gcc_option then 
 			-- Lcc 
 			if dll_option then
 				printf(doit, 
@@ -1580,13 +1586,21 @@ global procedure finish_emake()
 		close(link_file)
 	end if
 
-	if TUNIX then
+	if TUNIX or (TWINDOWS and gcc_option) then
 		if dll_option then
 			dll_flag = "-shared -nostartfiles"
-			exe_suffix = ".so" 
+			if TWINDOWS then
+				exe_suffix = ".dll"
+			else
+				exe_suffix = ".so" 
+			end if
 		else 
 			dll_flag = ""
-			exe_suffix = ""
+			if TWINDOWS then
+				exe_suffix = ".exe"
+			else
+				exe_suffix = ""
+			end if
 		end if
 		if length(user_library) then
 			printf(doit, 
@@ -1609,7 +1623,12 @@ global procedure finish_emake()
 			
 		end if
 		
-		if not TBSD then
+		if TWINDOWS and gcc_option then
+			puts(doit, " -lws2_32 -mno-cygwin")
+			if not con_option then
+				puts(doit, " -mwindows")
+			end if
+		elsif not TBSD then
 			puts(doit, " -ldl")
 		end if      
 		printf(doit, " -o %s%s"&HOSTNL, {file0, exe_suffix})
