@@ -1,12 +1,13 @@
 -- test that indeed the function quote_command_line(s) returns a value that can be passed to
 -- system() so that in the resulting process command_line() will return the original s from its
 -- parent process.
+
 include std/unittest.e
 include std/io.e
 include std/filesys.e
 include std/pretty.e
 include std/get.e
-include std/os.e
+include std/cmdline.e
 
 constant command_arrays = { { "1", "2", "3" }, { "1 2", "3" }, { "\"1 2\" 3" },
 				{"hi there", "bye" },

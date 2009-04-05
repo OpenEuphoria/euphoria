@@ -48,6 +48,7 @@
 := General Routine Reference
 : <<LEVELTOC depth=3>>
 
+../include/std/cmdline.e
 ../include/std/console.e
 ../include/std/datetime.e
 ../include/std/filesys.e
