@@ -1881,18 +1881,18 @@ flow continues based upon defined cases.  The syntax of a switch statement:
 switch <expr> [with fallthru] [label "<label name>"] do
     case <val1>[, val2,...] then
         [code block 1]
-        [break]
+        [break [label]]
     case <val2>[,...] then
         [code block 2]
-        [break]
-    case <val3>[, ...]:
+        [break [label]]
+    case <val3>[, ...] then
         [code block 3]
-        [break]
+        [break [label]]
     ...
 
     [case else]
         [code block 4]
-        [break]
+        [break [label]]
 end switch
 </eucode>
 
