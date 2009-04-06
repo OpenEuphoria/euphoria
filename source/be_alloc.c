@@ -801,3 +801,14 @@ char *TransAlloc(unsigned long size){
 // Convenience function for translated code to use EMalloc
 	return EMalloc( size );
 }
+
+#ifdef ELINUX
+size_t strlcpy(char *dest, char *src, size_t maxlen)
+{
+	strncpy(dest, src, maxlen);
+	dest[maxlen-1] = 0;
+
+	return strlen(src) > maxlen ? maxlen : strlen(src);
+}
+#endif
+

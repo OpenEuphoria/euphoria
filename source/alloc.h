@@ -62,3 +62,8 @@ struct block_list {
 #define EFree(ptr) free(ptr)
 #define ERealloc(orig, newsize) realloc(orig, newsize)
 #endif
+
+#ifdef ELINUX
+extern size_t strlcpy(char *dest, char *src, size_t maxlen);
+#endif
+
