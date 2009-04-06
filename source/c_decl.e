@@ -70,18 +70,26 @@ end ifdef
 	return x
 end function
 
-procedure delete_files(integer doit)
+procedure delete_files(integer doit, sequence objextn)
 -- output commands to delete .c and .h files
-	if not keep then
-		for i = 1 to length(files_to_delete) do
-			if TUNIX then
-				puts(doit, "rm ")
-			else
-				puts(doit, "del ")
-			end if
-			puts(doit, files_to_delete[i] & HOSTNL)
-		end for 
+	if keep then
+		return
 	end if
+	
+	for i = 1 to length(files_to_delete) do
+		if TUNIX then
+			puts(doit, "rm ")
+		else
+			puts(doit, "del ")
+		end if
+		puts(doit, files_to_delete[i] & HOSTNL)
+		
+		-- Assume each '.c' file creates a single object file.
+		if files_to_delete[i][$] = 'c' then
+			printf(doit, "rm %s%s" & HOSTNL, {files_to_delete[i][1..$-2], objextn})
+		end if
+	end for 
+
 end procedure
 
 global procedure NewBB(integer a_call, integer mask, symtab_index sub)
@@ -1451,9 +1459,7 @@ global procedure finish_emake()
 					puts(link_file, "eu.lib\n")
 				end if
 			end if
-			if not keep then
-				puts(doit, "del *.obj > NUL"&HOSTNL)
-			end if
+			delete_files(doit, ".obj")
 			path = get_eudir() & "\\bin\\le23p.exe"
 			fp = open(path, "rb")
 			if fp != -1 then
@@ -1490,9 +1496,7 @@ global procedure finish_emake()
 			
 			printf(link_file, "%slib\\liballeg.a\n", {dj_path[1..sl]}) 
 			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, repeat(truncate_to_83(file0), 2))
-			if not keep then
-				puts(doit, "del *.o"&HOSTNL)
-			end if
+			delete_files(doit, ".o")
 			if not debug_option then
 				puts(doit, "set LFN=n"&HOSTNL)
 				printf(doit, "strip %s.exe"&HOSTNL, {file0})
@@ -1551,10 +1555,8 @@ global procedure finish_emake()
 			end if
 			
 		end if
+		delete_files(doit, ".obj")
 			
-		if not keep then
-			puts(doit, "del *.obj > NUL"&HOSTNL)
-		end if
 			
 		def_name = sprintf("%s.def", {file0})
 		def_file = -1
@@ -1635,16 +1637,13 @@ global procedure finish_emake()
 			puts(doit, " -ldl")
 		end if      
 		printf(doit, " -o %s%s"&HOSTNL, {file0, exe_suffix})
-		if not keep then
-			puts(doit, "rm -f *.o"&HOSTNL)
-		end if
 			
 		if dll_option then
 			printf(doit, "echo you can now link with: ./%s.so"&HOSTNL, {file0})
 		else    
 			printf(doit, "echo you can now execute: ./%s"&HOSTNL, {file0})
 		end if
-		delete_files(doit)
+		delete_files(doit, ".o")
 		
 	else
 		if dll_option then
@@ -1654,7 +1653,7 @@ global procedure finish_emake()
 			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
 			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
 		end if
-		delete_files(doit)
+		delete_files(doit, ".obj")
 		puts(doit, "goto done"&HOSTNL)
 		puts(doit, ":nofiles"&HOSTNL)
 		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
