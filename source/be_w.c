@@ -720,7 +720,7 @@ static void expand_tabs(char *raw_string)
     }
 }
 
-void screen_output(IFILE f, char *out_string, ...)
+void screen_output_vararg(IFILE f, char *out_string, ...)
 {
 	va_list ap;
 
@@ -734,10 +734,10 @@ void screen_output_va(IFILE f, char *out_string, va_list ap)
 	char buf[1024];
 	vsnprintf(buf, 1024, out_string, ap);
 	buf[1023] = '\0';
-	screen_output_helper(f, buf);
+	screen_output(f, buf);
 }
 
-void screen_output_helper(IFILE f, char *out_string)
+void screen_output(IFILE f, char *out_string)
 /* All output from the compiler, interpreter or user program
    comes here (except for some EPuts() output). It is then directed to the
    appropriate window or passed to a file. */
