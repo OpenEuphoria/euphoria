@@ -397,8 +397,8 @@ int IsWin95()
 		wd = "C:\\WINDOWS";
 
 	// Look for explorer.exe
-	strcpy(path, wd);
-	strcat(path, "\\explorer.exe");
+	snprintf(path, 260, "%s\\%s", wd, "explorer.exe");
+	path[260] = 0; // ensure NULL
 	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
@@ -3070,7 +3070,8 @@ static object Seek(object x)
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
-	char path[MAX_FILE_NAME+1+4];
+	int path_size = MAX_FILE_NAME + 1 + 4;
+	char path[path_size];
 	s1_ptr result, row;
 #ifdef EBORLAND
 	struct ffblk direntp;
@@ -3124,7 +3125,8 @@ static object Dir(object x)
 		strchr(path, '*') == NULL &&
 		strchr(path, '?') == NULL)) {
 		// it's a single directory entry - add *.*
-		strcat(path, "\\*.*");
+		strncat(path, "\\*.*", path_size - strlen(path));
+		path[path_size] = 0; // ensure NULL
 #ifdef EBORLAND
 		dirp = findfirst(path, &direntp, bits);
 #else
@@ -3342,9 +3344,12 @@ static object Dir(object x)
 	struct stat stbuf;
 	struct tm *date_time;
 #if defined(EDJGPP) || defined(EMINGW)
-	char full_name[MAX_FILE_NAME+1+257];
+	int full_name_size = MAX_FILE_NAME + 1 + 257;
+	char full_name[full_name_size];
+
 #else
-	char full_name[MAX_FILE_NAME+1+NAME_MAX+1];
+	int full_name_size = MAX_FILE_NAME + 1 + NAME_MAX + 1;
+	char full_name[full_name_size];
 #endif
 
 	/* x will be sequence if called via dir() */
@@ -3384,9 +3389,8 @@ static object Dir(object x)
 
 		// opendir/readdir with stat method
 		if (dirp != NULL) {
-			strcpy(full_name, path);  // trailing blanks?
-			strcat(full_name, "/");
-			strcat(full_name, direntp->d_name);
+			snprintf(full_name, full_name_size, "%s/%s", path, direntp->d_name);
+			full_name[full_name_size] = 0; // ensure NULL
 			r = stat(full_name, &stbuf);
 		}
 		if (r == -1) {

@@ -216,9 +216,10 @@ void be_init()
 			eudir = "euphoria";  
 		}
 		else {
-			p = (char *)malloc(strlen(eudir)+12);
-			strcpy(p, eudir);
-			strcat(p, "/euphoria");
+			int p_size = strlen(eudir) + 12;
+			p = (char *)malloc(p_size);
+			snprintf(p, p_size, "%s/euphoria", eudir);
+			p[p_size] = 0; // ensure NULL
 			eudir = p;
 		}
 #else

@@ -312,30 +312,33 @@ static void DisplayLine(long n, int highlight)
 	set_text_color(0);
 	if (highlight) {
 		string_color = 10;
-		if (text) 
-			set_bk_color(_CYAN);
+		if (text) set_bk_color(_CYAN);
 		snprintf(TempBuff, TEMP_SIZE, brief ? ">" : "%5u==>", slist[n].line);
+		TempBuff[TEMP_SIZE] = 0; // ensure NULL
 	}
 	else {
 		string_color = 2;
-		if (text)
-			set_bk_color(_WHITE);
+		if (text) set_bk_color(_WHITE);
 		snprintf(TempBuff, TEMP_SIZE, brief ? " " : "%5u:  ", slist[n].line);
+		TempBuff[TEMP_SIZE] = 0; // ensure NULL
 	}
 	line = slist[n].src; 
 	if (slist[n].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME))
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strcat(TempBuff, "\376\n");
+		strncat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff));
 #else
-		strcat(TempBuff, "\021\n");
+		strncat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff));
 #endif
+		TempBuff[TEMP_SIZE] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strcat(TempBuff, line); // must be <=200 chars
-		strcat(TempBuff, "\n"); // will end in \0
+		strncat(TempBuff, line, TEMP_SIZE - strlen(TempBuff)); // must be <=200 chars
+		TempBuff[TEMP_SIZE] = 0; // ensure NULL (have to do because of next call)
+		strncat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff)); // will end in \0
+		TempBuff[TEMP_SIZE] = 0; // ensure NULL
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
