@@ -618,7 +618,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	register int i, already_there;
 	int col, found, inc, len_required;
 	object val, screen_val;
-	char val_string[40]; // Warning snprintf uses hardcoded size value below
+	char val_string[40]; // Warning snprintf/strncpy uses hardcoded size value below
 	int add_char, iv;
 	char prompt[80];
 		
@@ -632,7 +632,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		if (val == NOVALUE) 
-			strcpy(val_string, "<no value>");
+			strncpy(val_string, "<no value>", 80);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
 			snprintf(val_string, 40, "%ld", iv);
@@ -641,6 +641,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		}
 		else 
 			snprintf(val_string, 40, "%.10g", DBL_PTR(val)->dbl);
+		val_string[40] = 0; // ensure NULL
 		len_required = strlen(s_ptr->name) + 1 + strlen(val_string) + add_char;
 		if (len_required < VAR_WIDTH)
 			inc = 1;
@@ -1380,15 +1381,16 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
-					strcpy(TempBuff, "\n^^^ called to handle run-time crash\n");
+					strncpy(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
 				}
 				else {
 #ifdef EWINDOWS         
-					strcpy(TempBuff, "\n^^^ call-back from Windows\n");
+					strncpy(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
-					strcpy(TempBuff, "\n^^^ call-back from external source\n");
+					strncpy(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
 #endif          
 				}
+				TempBuff[TEMP_SIZE] = 0; // ensure NULL
 				sf_output(TempBuff);
 				if (expr_top <= expr_stack+3)
 					break;

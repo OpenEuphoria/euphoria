@@ -729,23 +729,29 @@ void screen_output(IFILE f, char *out_string)
 /* f is output file, or NULL if debug screen, or DOING_SPRINTF */
 /* out_string is null-terminated string of characters to write out */
 {
-    int len;
+    int len, collect_len;
 
     if ((int)f == DOING_SPRINTF) {
         /* save characters as a C string in memory */
         len = strlen(out_string);
         if (collect == NULL) {
-            collect_free = 80;
-            collect = EMalloc(len+1+collect_free);
-            strcpy(collect, out_string);
+			collect_free = 80;
+			collect_len = len + 1 + collect_free;
+            collect = EMalloc(collect_len);
+			strncpy(collect, out_string, collect_len);
+			collect[collect_len] = 0;
             collect_next = len;
         }
         else {
             if (len > collect_free) {
-                collect_free = len + 200;
-                collect = ERealloc(collect, collect_next + 1 + collect_free);
-            }
-            strcpy(collect+collect_next, out_string);
+				collect_free = len + 200;
+				collect_len = collect_next + 1 + collect_free;
+                collect = ERealloc(collect, collect_len);
+			} else {
+				collect_len = len;
+			}
+			strncpy(collect+collect_next, out_string, collect_len);
+			collect[collect_len] = 0;
             collect_free -= len;
             collect_next += len;
         }

@@ -548,7 +548,8 @@ void call_crash_routines()
 
 	free(TempErrName);
 	TempErrName = (char *)malloc(16);
-	strcpy(TempErrName, "ex_crash.err");
+	strncpy(TempErrName, "ex_crash.err", 16);
+	TempErrName[16] = 0; // ensure NULL
 
 #ifndef ERUNTIME
 	// clear the interpreter call stack
@@ -3491,12 +3492,14 @@ object cleanup;
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
 		text_mode = 0;
-		strcpy(cmode, "r+b");
+		strncpy(cmode, "r+b", 8);
+		cmode[8] = 0; // ensure NULL
 	}
 
 	else if (strcmp(cmode, "u") == 0) {
 		mode = EF_READ | EF_WRITE;
-		strcpy(cmode, "r+");
+		strncpy(cmode, "r+", 8);
+		cmode[8] = 0; // ensure NULL
 	}
 
 	else
@@ -4657,7 +4660,8 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	setran();
 	InitFiles();
 	TempErrName = (char *)malloc(8);  // malloc, not EMalloc
-	strcpy(TempErrName, "ex.err");
+	strncpy(TempErrName, "ex.err", 8);
+	TempErrName[8] = 0; // ensure NULL
 	TempWarningName = NULL;
 	display_warnings = 1;
 #ifdef EBORLAND
