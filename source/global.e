@@ -43,6 +43,8 @@ elsifdef SUNOS then
 	version_name = "SunOS"
 elsifdef OPENBSD then
 	version_name = "OpenBSD"
+elsifdef NETBSD then
+	version_name = "NetBSD"
 elsifdef OSX then
 	version_name = "Mac OS X"
 elsifdef FREEBSD then

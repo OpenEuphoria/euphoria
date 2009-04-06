@@ -58,7 +58,7 @@
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
-#elif defined(EBSD) || defined(EOSX) || defined(EOPENBSD)
+#elif defined(EBSD) || defined(EOSX)
 	/* 64bit support is automatic */
 #	define IFILE FILE*
 #	define IOFF long long

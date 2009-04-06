@@ -30,7 +30,8 @@ public constant
 	FREEBSD = 3,
 	OSX	    = 4,
 	SUNOS	= 5,
-	OPENBSD = 6
+	OPENBSD = 6,
+	NETBSD  = 7
 
 --****
 -- These constants are returned by the [[:platform]] function.
@@ -41,6 +42,8 @@ public constant
 -- * FREEBSD - Host operating system is Linux **or** FreeBSD
 -- * OSX     - Host operating system is Mac OS X
 -- * SUNOS   - Host operating system is Sun's OpenSolaris
+-- * OPENBSD - Host operating system is OpenBSD
+-- * NETBSD  - Host operating system is NetBSD
 --
 -- Note:
 --   Via the [[:platform]] call, there is no way to determine if you are on Linux

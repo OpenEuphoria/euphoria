@@ -5177,6 +5177,12 @@ object machine(object opcode, object x)
 
 			case M_PLATFORM:
 				/* obsolete, but keep it */
+#ifdef ENETBSD
+				return 7;
+#endif
+#ifdef EOPENBSD
+				return 6;
+#endif
 #ifdef ESUNOS
 				return 5;
 #endif

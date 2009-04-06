@@ -72,6 +72,12 @@ ifeq "$(EBSD)" "1"
     LDLFLAG=-lsocket -lresolv -lnsl
     EBSDFLAG=-DEBSD -DEBSD62 -DESUNOS
   endif
+  ifeq "$(EOPENBSD)" "1"
+    EBSDFLAG=-DEBSD -DEBSD62 -DEOPENBSD
+  endif
+  ifeq "$(ENETBSD)" "1"
+    EBSDFLAG=-DEBSD -DEBSD62 -DENETBSD
+  endif
 else
   LDLFLAG=-ldl -lresolv -lnsl
   PREREGEX=$(FROMBSDREGEX)

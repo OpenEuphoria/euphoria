@@ -155,6 +155,8 @@ global procedure transoptions()
 						set_host_platform( USUNOS )
 					elsif equal( s, "OPENBSD" ) then
 						set_host_platform( UOPENBSD )
+					elsif equal( s, "NETBSD" ) then
+						set_host_platform( UNETBSD )
 					else
 						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
 					end if
@@ -204,6 +206,7 @@ OS Specific Options:
        SunOS  :  [-gcc] [-dll]
        FreeBSD:  [-gcc] [-dll]
        OpenBSD:  [-gcc] [-dll]
+       NetBSD :  [-gcc] [-dll]
 
 LCC Only: -lccopt-off
 

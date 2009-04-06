@@ -4892,6 +4892,9 @@ void do_exec(int *start_pc)
 #ifdef EOPENBSD
 				top = 6; // OpenBSD
 #endif
+#ifdef ENETBSD
+				top = 7; // NetBSD
+#endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32
 #endif

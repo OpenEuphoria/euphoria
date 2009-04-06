@@ -18,15 +18,17 @@ fi
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOPENBSD= >> "$PREFIX"Makefile.eu
+	echo ENETBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
 	ln -f pcre/pcre.h.unix pcre/pcre.h
-        ln -f pcre/config.h.unix pcre/config.h
+    ln -f pcre/config.h.unix pcre/config.h
 elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
+	echo ENETBSD= >> "$PREFIX"Makefile.eu
 	echo EOPENBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ESUNOS= >> "$PREFIX"Makefile.eu
@@ -38,33 +40,47 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ENETBSD= >> "$PREFIX"Makefile.eu
 	echo EOPENBSD= >> "$PREFIX"Makefile.eu
 	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW=1 >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	cp pcre/pcre.h.windows pcre/pcre.h
-	cp pcre/config.h.windows pcre/config.h
+	ln -f pcre/pcre.h.windows pcre/pcre.h
+	ln -f pcre/config.h.windows pcre/config.h
 elif test $UNAME_SYSTEM = "SunOS"; then
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo ENETBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo EOPENBSD= >> "$PREFIX"Makefile.eu
 	echo ESUNOS=1 >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	cp pcre/pcre.h.unix pcre/pcre.h
-	cp pcre/config.h.unix pcre/config.h
+	ln -f pcre/pcre.h.unix pcre/pcre.h
+	ln -f pcre/config.h.unix pcre/config.h
 elif test $UNAME_SYSTEM = "OpenBSD"; then
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo ENETBSD= >> "$PREFIX"Makefile.eu
 	echo EOPENBSD=1 >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
 	echo ESUNOS= >> "$PREFIX"Makefile.eu
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	cp pcre/pcre.h.unix pcre/pcre.h
-	cp pcre/config.h.unix pcre/config.h
+	ln -f pcre/pcre.h.unix pcre/pcre.h
+	ln -f pcre/config.h.unix pcre/config.h
+elif test $UNAME_SYSTEM = "NetBSD"; then
+	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo ENETBSD=1 >> "$PREFIX"Makefile.eu
+	echo EOPENBSD= >> "$PREFIX"Makefile.eu
+	echo EOSX= >> "$PREFIX"Makefile.eu
+	echo ESUNOS= >> "$PREFIX"Makefile.eu
+	echo ELINUX= >> "$PREFIX"Makefile.eu
+	echo EMINGW= >> "$PREFIX"Makefile.eu
+	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	ln -f pcre/pcre.h.unix pcre/pcre.h
+	ln -f pcre/config.h.unix pcre/config.h
 else
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	if test $UNAME_SYSTEM = "Darwin"; then
@@ -78,7 +94,7 @@ else
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
 	ln -f pcre/pcre.h.unix pcre/pcre.h
-        ln -f pcre/config.h.unix pcre/config.h
+    ln -f pcre/config.h.unix pcre/config.h
 fi
 
 export BUILDDIR=.
@@ -88,28 +104,22 @@ while [ "$1" != "" ]; do
         --without-euphoria )
 			export EUPHORIA=0
         ;;
-	--eubin )
+		--eubin )
 			echo "EUBIN=$2" >> "$PREFIX"Makefile.eu
 			shift
-	;;
+		;;
         --full )
-                       echo RELEASE=1 >> "$PREFIX"Makefile.eu
+			echo RELEASE=1 >> "$PREFIX"Makefile.eu
         ;;
-        --managed-mem )
-		       # currently this is Windows only;
-		       export MANAGED_MEM=1
-                       echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu       
-	;;
 	
         --build )
-             		export BUILDDIR=$2
-                        mkdir -p $BUILDDIR
+			export BUILDDIR=$2
 			shift
-	;;
+		;;
         --debug )
-                       echo EDEBUG=1 >> "$PREFIX"Makefile.eu
+			echo EDEBUG=1 >> "$PREFIX"Makefile.eu
         ;;
-	* )
+		* )
 			echo "Unknown option '$1'"
 			echo "Configures and prepares the euphoria source for building"
 			echo
@@ -117,7 +127,6 @@ while [ "$1" != "" ]; do
 			echo
 			echo "Options:"
 			echo "    --without-euphoria"
-			echo "    --managed-mem       enable managed memory"
 			echo "    --eubin value"
 			echo "    --build value       set the build directory"
 			echo "    --full"
@@ -152,5 +161,3 @@ mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
-
-
