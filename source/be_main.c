@@ -217,8 +217,8 @@ void be_init()
 		}
 		else {
 			p = (char *)malloc(strlen(eudir)+12);
-			strlcpy(p, eudir, sizeof(p));
-			strlcat(p, "/euphoria", sizeof(p));
+			strcpy(p, eudir);
+			strcat(p, "/euphoria");
 			eudir = p;
 		}
 #else

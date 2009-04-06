@@ -16,13 +16,12 @@
 #if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
 #include <graph.h>
 #include <bios.h>
-#endif // EBORLAND, ELCC, EDJGP, EMINGW
+#endif
 #include <conio.h>
-#endif // EUNIX
+#endif
 
 #include <signal.h>
 #include <string.h>
-
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
@@ -326,15 +325,15 @@ static void DisplayLine(long n, int highlight)
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strlcat(TempBuff, "\376\n", TEMP_SIZE);
+		strcat(TempBuff, "\376\n");
 #else
-		strlcat(TempBuff, "\021\n", TEMP_SIZE);
+		strcat(TempBuff, "\021\n");
 #endif
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strlcat(TempBuff, line, TEMP_SIZE); // must be <=200 chars
-		strlcat(TempBuff, "\n", TEMP_SIZE); // will end in \0
+		strcat(TempBuff, line); // must be <=200 chars
+		strcat(TempBuff, "\n"); // will end in \0
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
@@ -1443,9 +1442,9 @@ void RTInternal(char *msg)
 	char RTImsg[100];
 	
 	gameover = TRUE;
-	strlcpy(RTImsg, "\n   !!! Internal Error: ", sizeof(RTImsg));
-	strlcat(RTImsg, msg, sizeof(RTImsg));
-	strlcat(RTImsg, "\n", sizeof(RTImsg));
+	strcpy(RTImsg, "\n   !!! Internal Error: "); 
+	strcat(RTImsg, msg);
+	strcat(RTImsg, "\n");
 	
 	debug_msg(RTImsg);
 	

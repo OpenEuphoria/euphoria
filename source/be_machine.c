@@ -400,8 +400,8 @@ int IsWin95()
 		wd = "C:\\WINDOWS";
 
 	// Look for explorer.exe
-	strlcpy(path, wd, sizeof(path));
-	strlcat(path, "\\explorer.exe", sizeof(path));
+	strcpy(path, wd);
+	strcat(path, "\\explorer.exe");
 	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
@@ -506,7 +506,7 @@ char *long_to_short(char *long_name)
 	}
 
 	// convert long filename to DOS 8.3 short filename
-	strcpy(long_buff_ptr, long_name);
+	strlcpy(long_buff_ptr, long_name, sizeof(long_buff_ptr));
 	short_buff_ptr[0] = 0;
 
 	reglist.eax = 0x7160; // major code
@@ -3134,7 +3134,7 @@ static object Dir(object x)
 		strchr(path, '*') == NULL &&
 		strchr(path, '?') == NULL)) {
 		// it's a single directory entry - add *.*
-		strlcat(path, "\\*.*", sizeof(path));
+		strcat(path, "\\*.*");
 #ifdef EBORLAND
 		dirp = findfirst(path, &direntp, bits);
 #else
@@ -3394,10 +3394,9 @@ static object Dir(object x)
 
 		// opendir/readdir with stat method
 		if (dirp != NULL) {
-			// TODO: Detect if full_name has been truncated and terminate?
-			strlcpy(full_name, path, sizeof(full_name));  // trailing blanks?
-			strlcat(full_name, "/", sizeof(full_name));
-			strlcat(full_name, direntp->d_name, sizeof(full_name));
+			strcpy(full_name, path);  // trailing blanks?
+			strcat(full_name, "/");
+			strcat(full_name, direntp->d_name);
 			r = stat(full_name, &stbuf);
 		}
 		if (r == -1) {
