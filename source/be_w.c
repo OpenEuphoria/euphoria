@@ -117,9 +117,10 @@ char *EMalloc();
 char *ERealloc();
 #else
 #include "alloc.h"
+#endif
+// TODO: This is required due to a bug in global.h that Jim discovered.
 #ifdef EWINDOWS
 extern unsigned default_heap;
-#endif
 #endif
 static void expand_tabs();
 void SetPosition();
