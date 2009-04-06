@@ -151,6 +151,8 @@
 ########
 := Release Notes
 : <<LEVELTOC depth=2>>
+:@@(color <<font color="$(1)" text=`$(+)`>>)@
+:@@(bugfix **$$(color #009999 bug fixed:)**)@
+:@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
 
-../docs/relnotes.txt
 ../docs/relnotes400.txt
