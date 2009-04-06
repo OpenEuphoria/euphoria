@@ -23,6 +23,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -133,10 +134,13 @@ size_t _msize();
 
 #ifdef HEAP_CHECK
 
-void RTInternal(char *msg)
+void RTInternal(char *msg, ...)
 // Internal error
 {
-	RTFatal(msg);
+	va_list ap;
+	va_start(ap, msg);
+	RTFatal_va(msg);
+	va_end(ap);
 }
 
 

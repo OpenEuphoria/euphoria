@@ -10,6 +10,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <setjmp.h>
 
 #ifndef EUNIX
@@ -1435,16 +1436,26 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 }
 
 #ifdef EXTRA_CHECK
-void RTInternal(char *msg)
+void RTInternal(char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	RTInternal_va(msg, ap);
+	va_end(ap);
+}
+
+void RTInternal_va(char *msg, va_list ap)
 /* handles run-time internal errors 
    - see InternalErr() for compile-time errors */
 {
+	char RTIbuf[100];
 	char RTImsg[100];
 	
 	gameover = TRUE;
-	strcpy(RTImsg, "\n   !!! Internal Error: "); 
-	strcat(RTImsg, msg);
-	strcat(RTImsg, "\n");
+	snprintf(RTIbuf, 100, "\n   !!! Internal Error: %s\n", msg);
+	RTIbuf[99] = '\0';
+	vsnprintf(RTImsg, 100, msg, ap);
+	RTImsg[99] = '\0';
 	
 	debug_msg(RTImsg);
 	
@@ -1457,9 +1468,21 @@ void RTInternal(char *msg)
 }
 #endif
 
-void CleanUpError(char *msg, symtab_ptr s_ptr)
+void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
+{
+	va_list ap;
+	va_start(ap, s_ptr);
+	CleanUpError_va(msg, s_ptr, ap);
+	va_end(ap);
+}
+
+void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
 	int i;
+	char RTImsg[100];
+	
+	vsnprintf(RTImsg, 100, msg, ap);
+	RTImsg[99] = '\0';
 	
 	if (crash_msg != NULL) {
 #ifdef EDOS
@@ -1472,7 +1495,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr)
 		screen_output(stderr, crash_msg);
 	}
 	OpenErrFile();
-	TraceBack(msg, s_ptr);
+	TraceBack(RTImsg, s_ptr);
 	
 	iprintf(TempErrFile, "\n");
 	

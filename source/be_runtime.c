@@ -10,6 +10,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -416,7 +417,7 @@ char *getenv();
 IFILE long_iopen();
 void Cleanup();
 void UserCleanup();
-void RTFatal();
+void RTFatal(char *, ...);
 void MainScreen();
 void RTInternal();
 int wingetch();
@@ -588,21 +589,26 @@ void call_crash_routines()
 }
 
 
-static void SimpleRTFatal(char *msg)
+static void SimpleRTFatal(char *msg, va_list ap)
 /* Fatal errors for translated code */
 {
+	va_list aq;
+	va_copy (aq, ap);
+
 	if (crash_msg == NULL || crash_count > 0) {
 		screen_output(stderr, "\nFatal run-time error:\n");
-		screen_output(stderr, msg);
+		screen_output_va(stderr, msg, aq);
 		screen_output(stderr, "\n\n");
 	}
 	else {
 		screen_output(stderr, crash_msg);
 	}
+	va_end(aq);
 	TempErrFile = iopen(TempErrName, "w");
 	if (TempErrFile != NULL) {
 		iprintf(TempErrFile, "Fatal run-time error:\n");
-		iprintf(TempErrFile, "%s\n", msg);
+		vfprintf(TempErrFile, msg, ap);
+		iprintf(TempErrFile, "\n");
 
 		if (last_traced_line != NULL) {
 			if (crash_msg == NULL || crash_count > 0)
@@ -617,15 +623,22 @@ static void SimpleRTFatal(char *msg)
 	Cleanup(1);
 }
 
-void RTFatal(char *msg)
+void RTFatal(char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	RTFatal_va(msg, ap);
+	va_end(ap);
+}
+void RTFatal_va(char *msg, va_list ap)
 /* handle run time fatal errors */
 {
 #ifndef ERUNTIME
 	if (Executing)
-		CleanUpError(msg, NULL);
+		CleanUpError_va(msg, NULL, ap);
 	else
 #endif
-		SimpleRTFatal(msg);
+		SimpleRTFatal(msg, ap);
 }
 
 
@@ -4463,9 +4476,12 @@ void ctrace(char *line)
 }
 
 #ifdef EXTRA_CHECK
-void RTInternal(char *msg)
+void RTInternal(char *msg, ...)
 {
-	iprintf(stderr, msg);
+	va_list ap;
+	va_start(ap, msg);
+	vprintf(stderr, msg, ap);
+	va_end(ap);
 	exit(1);
 }
 #endif

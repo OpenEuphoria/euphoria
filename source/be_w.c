@@ -10,6 +10,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <time.h>
 #ifdef EUNIX
 #include <sys/stat.h>
@@ -719,7 +720,24 @@ static void expand_tabs(char *raw_string)
     }
 }
 
-void screen_output(IFILE f, char *out_string)
+void screen_output(IFILE f, char *out_string, ...)
+{
+	va_list ap;
+
+	va_start(ap, out_string);
+	screen_output_va(f, out_string, ap);
+	va_end(ap);
+}
+
+void screen_output_va(IFILE f, char *out_string, va_list ap)
+{
+	char buf[1024];
+	vsnprintf(buf, 1024, out_string, ap);
+	buf[1023] = '\0';
+	screen_output_helper(f, buf);
+}
+
+void screen_output_helper(IFILE f, char *out_string)
 /* All output from the compiler, interpreter or user program
    comes here (except for some EPuts() output). It is then directed to the
    appropriate window or passed to a file. */
