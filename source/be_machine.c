@@ -400,8 +400,8 @@ int IsWin95()
 		wd = "C:\\WINDOWS";
 
 	// Look for explorer.exe
-	strcpy(path, wd);
-	strcat(path, "\\explorer.exe");
+	strlcpy(path, wd, sizeof(path));
+	strlcat(path, "\\explorer.exe", sizeof(path));
 	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
@@ -3134,7 +3134,7 @@ static object Dir(object x)
 		strchr(path, '*') == NULL &&
 		strchr(path, '?') == NULL)) {
 		// it's a single directory entry - add *.*
-		strcat(path, "\\*.*");
+		strlcat(path, "\\*.*", sizeof(path));
 #ifdef EBORLAND
 		dirp = findfirst(path, &direntp, bits);
 #else
@@ -3394,9 +3394,10 @@ static object Dir(object x)
 
 		// opendir/readdir with stat method
 		if (dirp != NULL) {
-			strcpy(full_name, path);  // trailing blanks?
-			strcat(full_name, "/");
-			strcat(full_name, direntp->d_name);
+			// TODO: Detect if full_name has been truncated and terminate?
+			strlcpy(full_name, path, sizeof(full_name));  // trailing blanks?
+			strlcat(full_name, "/", sizeof(full_name));
+			strlcat(full_name, direntp->d_name, sizeof(full_name));
 			r = stat(full_name, &stbuf);
 		}
 		if (r == -1) {
