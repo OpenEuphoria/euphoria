@@ -740,6 +740,7 @@ void screen_output(IFILE f, char *out_string)
             collect = EMalloc(collect_len);
 			strncpy(collect, out_string, collect_len);
 			collect[collect_len] = 0;
+			//strcpy(collect, out_string);
             collect_next = len;
         }
         else {
@@ -750,8 +751,9 @@ void screen_output(IFILE f, char *out_string)
 			} else {
 				collect_len = len;
 			}
-			strncpy(collect+collect_next, out_string, collect_len);
-			collect[collect_len] = 0;
+			//strncpy(collect+collect_next, out_string, collect_len);
+			//collect[collect_len] = 0;
+			strcpy(collect+collect_next, out_string);
             collect_free -= len;
             collect_next += len;
         }
