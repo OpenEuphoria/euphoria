@@ -616,8 +616,7 @@ static int which_task(double tid)
 			return i;
 		}
 	}
-	sprintf(buff, "Invalid task id: %10.3g", tid);
-	RTFatal(buff);
+	RTFatal("Invalid task id: %10.3g", tid);
 }
 
 
@@ -881,10 +880,8 @@ object task_create(object r_id, object args)
 #endif  
 	
 	if (SEQ_PTR(args)->length != proc_args) {
-		sprintf(TempBuff, 
-		"Incorrect number of arguments (passing %d where %d are expected)",
-		SEQ_PTR(args)->length, proc_args);
-		RTFatal(TempBuff);
+		RTFatal("Incorrect number of arguments (passing %d where %d are expected)",
+				SEQ_PTR(args)->length, proc_args);
 	}
 	
 	recycle = -1;
@@ -1018,13 +1015,11 @@ object task_create(object r_id, object args)
 		// will be updated again when current task yields
 		
 		if (tcb[biggest].expr_stack > tcb[biggest].expr_top) {
-			sprintf(TempBuff, 
-					"Task %.0f (%.40s) no longer has enough stack space (%d bytes)",
-					tcb[biggest].tid, 
-					(tcb[biggest].tid == 0.0) ? "initial task" : 
-											  _00[tcb[biggest].rid].name,
+			RTFatal("Task %.0f (%.40s) no longer has enough stack space (%d bytes)",
+					tcb[biggest].tid,
+					(tcb[biggest].tid == 0.0) ? "initial task" :
+					_00[tcb[biggest].rid].name,
 					size);
-			RTFatal(TempBuff);
 		}
 		
 		if (tcb[biggest].expr_top > word) // don't overwrite live stack data
@@ -1201,13 +1196,11 @@ void scheduler(double now)
 		
 		if ((object_ptr)stack_top < tcb[current_task].expr_stack ||
 			*(tcb[current_task].expr_stack) != (object)STACK_MARKER) {
-			sprintf(TempBuff,
-					"Task %.0f (%.40s) exceeded its stack size limit of %d bytes",
-					tcb[current_task].tid, 
+			RTFatal("Task %.0f (%.40s) exceeded its stack size limit of %d bytes",
+					tcb[current_task].tid,
 					(tcb[current_task].tid == 0.0) ? "initial task" :
-					 _00[tcb[current_task].rid].name,
+					_00[tcb[current_task].rid].name,
 					tcb[current_task].stack_size);
-			RTFatal(TempBuff);
 		}
 #else       
 		// save current stack info

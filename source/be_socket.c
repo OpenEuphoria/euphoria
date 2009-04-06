@@ -55,16 +55,12 @@ void eusock_wsastart()
 	WORD wVersionRequested;
 	WSADATA wsaData;
 	int err;
-	char *tempBuff;
 
 	wVersionRequested = MAKEWORD(2,2);
 	err = WSAStartup(wVersionRequested, &wsaData);
 	if (err != 0)
 	{
-		tempBuff = EMalloc(BUFF_SIZE);
-		sprintf(tempBuff, "WSAStartup failed with error: %d", err);
-		RTFatal(tempBuff);
-		EFree(tempBuff);
+		RTFatal("WSAStartup failed with error: %d", err);
 		return;
 	}
 

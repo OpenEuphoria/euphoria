@@ -199,7 +199,6 @@ symtab_ptr RTLookup();
 void OpenErrFile()
 // open the error diagnostics file - normally "ex.err"
 {
-	char buff[40];
 	int n;
 	
 	TempErrFile = iopen(TempErrName, "w");
@@ -210,7 +209,9 @@ void OpenErrFile()
 			screen_output(stderr, "\n");
 			n = NumberOpen();
 			if (n > 13) {
-				sprintf(buff, "Too many open files? (%d)\n", n);
+				char buff[40];
+				snprintf(buff, 40, "Too many open files? (%d)\n", n);
+				buff[40] = '\0'; // ensure NULL
 				screen_output(stderr, buff);
 			}
 		}
@@ -313,13 +314,13 @@ static void DisplayLine(long n, int highlight)
 		string_color = 10;
 		if (text) 
 			set_bk_color(_CYAN);
-		sprintf(TempBuff, brief ? ">" : "%5u==>", slist[n].line);
+		snprintf(TempBuff, TEMP_SIZE, brief ? ">" : "%5u==>", slist[n].line);
 	}
 	else {
 		string_color = 2;
 		if (text)
 			set_bk_color(_WHITE);
-		sprintf(TempBuff, brief ? " " : "%5u:  ", slist[n].line);
+		snprintf(TempBuff, TEMP_SIZE, brief ? " " : "%5u:  ", slist[n].line);
 	}
 	line = slist[n].src; 
 	if (slist[n].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME))
@@ -433,9 +434,9 @@ static void Refresh(long line_num, int vars_too)
 		if (TEXT_MODE)
 			set_bk_color(_BROWN);
 
-		sprintf(TempBuff, 
-		" %.20s  F1=main  F2=trace  Enter  down-arrow  ?  q  Q  !", 
-						name_ext(file_name[slist[line_num].file_no]));
+		snprintf(TempBuff, TEMP_SIZE,
+				 " %.20s  F1=main  F2=trace  Enter  down-arrow  ?  q  Q  !",
+				 name_ext(file_name[slist[line_num].file_no]));
 		buffer_screen();
 		screen_output(NULL, TempBuff);
 		screen_blank(NULL, col_max-40);
@@ -614,7 +615,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	register int i, already_there;
 	int col, found, inc, len_required;
 	object val, screen_val;
-	char val_string[40];
+	char val_string[40]; // Warning snprintf uses hardcoded size value below
 	int add_char, iv;
 	char prompt[80];
 		
@@ -631,12 +632,12 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			strcpy(val_string, "<no value>");
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			sprintf(val_string, "%ld", iv); 
-			if (iv >= ' ' && iv <= 127) 
+			snprintf(val_string, 40, "%ld", iv);
+			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
 		else 
-			sprintf(val_string, "%.10g", DBL_PTR(val)->dbl);
+			snprintf(val_string, 40, "%.10g", DBL_PTR(val)->dbl);
 		len_required = strlen(s_ptr->name) + 1 + strlen(val_string) + add_char;
 		if (len_required < VAR_WIDTH)
 			inc = 1;
@@ -701,7 +702,8 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		SetVarPosition(found, 0);
-		sprintf(TempBuff, "%s=", s_ptr->name);
+		snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
+		TempBuff[TEMP_SIZE] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	display_list[found].value_on_screen = val; 
@@ -727,7 +729,8 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #endif          
 			ClearScreen();
 			set_text_color(15);  // Al Getz bug
-			sprintf(TempBuff, "%s=", s_ptr->name);
+			snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
+			TempBuff[TEMP_SIZE] = 0; // ensure NULL
 			screen_output(NULL, TempBuff);
 			Print(NULL, val, line_max-5, vars_per_line*VAR_WIDTH-3, 
 				  strlen(s_ptr->name), TRUE);
@@ -1225,7 +1228,8 @@ static void DumpGlobals(IFILE f)
 
 static int screen_err_out;
 
-static char TPTempBuff[400]; // TempBuff might contain the error message
+#define TPTEMP_BUFF_SIZE 400
+static char TPTempBuff[TPTEMP_BUFF_SIZE]; // TempBuff might contain the error message
 
 static sf_output(char *string)
 // output error info to ex.err and optionally to the screen
@@ -1258,12 +1262,14 @@ static void TracePrint(symtab_ptr proc, int *pc)
 		subtype = "type";
 
 	if (proc == TopLevelSub) {
-		sprintf(TPTempBuff, "%.300s:%u", file_name[file], line);
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u", file_name[file], line);
+		TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 	else {
-		sprintf(TPTempBuff, "%.300s:%u in %s %.99s() ", 
-				file_name[file], line, subtype, proc->name);
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u in %s %.99s() ",
+				 file_name[file], line, subtype, proc->name);
+		TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 }
@@ -1303,8 +1309,9 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			else {
 				routine_name = e_routine[tcb[current_task].rid]->name;
 			}
-			sprintf(TPTempBuff, " TASK ID %.0f %.99s ",
-								tcb[current_task].tid, routine_name);
+			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %.99s ",
+					 tcb[current_task].tid, routine_name);
+			TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
 			dash_count = 60;
 			if (strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
@@ -1330,12 +1337,14 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// display the error message
 			show_message = FALSE;
 			if (s_ptr == NULL) {
-				sprintf(TPTempBuff, "\n%.99s", msg);      
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%.99s", msg);
+				TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
 				sf_output(TPTempBuff);
 			}
 			else {
 				sf_output(type_error_msg); // test
-				sprintf(TPTempBuff, "%.99s is ", s_ptr->name);
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.99s is ", s_ptr->name);
+				TPTempBuff[TPTEMP_BUFF_SIZE] = 0;
 				sf_output(TPTempBuff);
 				if (screen_err_out)
 					Print(stderr,  s_ptr->obj, 1, 50, 0, FALSE);
@@ -1401,7 +1410,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 		} // end while
 		
 		if (skipping > 0) {
-			sprintf(TempBuff, "\n... (skipping %d levels)\n\n", skipping);
+			snprintf(TempBuff, TEMP_SIZE, "\n... (skipping %d levels)\n\n", skipping);
+			TempBuff[TEMP_SIZE] = 0; // ensure NULL
 			sf_output(TempBuff);
 		}   
 	
@@ -1543,17 +1553,16 @@ object_ptr BiggerStack()
 void BadSubscript(object subs, long length)
 /* report a subscript violation */
 {
-	char subs_buff[40];
+	char subs_buff[40]; // warning hardcoded size below in snprintfs
 	
 	if (IS_ATOM_INT(subs))
-		sprintf(subs_buff, "%d", subs);
+		snprintf(subs_buff, 40, "%d", subs);
 	else
-		sprintf(subs_buff, "%.10g", DBL_PTR(subs)->dbl);
-	
-	sprintf(TempBuff, 
-  "subscript value %s is out of bounds, assigning to a sequence of length %ld",
-				subs_buff, length);
-	RTFatal(TempBuff);
+		snprintf(subs_buff, 40, "%.10g", DBL_PTR(subs)->dbl);
+	subs_buff[40] = 0; // ensure NULL
+
+	RTFatal("subscript value %s is out of bounds, assigning to a sequence of length %ld",
+			subs_buff, length);
 }
 
 void SubsAtomAss()
@@ -1568,23 +1577,21 @@ void SubsNotAtom()
 
 void RangeReading(object subs, int len)
 {
-	char subs_buff[40];
+	char subs_buff[40]; // warning hardcoded size below in snprintfs
 	
 	if (IS_ATOM_INT(subs))
-		sprintf(subs_buff, "%d", subs);
+		snprintf(subs_buff, 40, "%d", subs);
 	else
-		sprintf(subs_buff, "%.10g", DBL_PTR(subs)->dbl);
+		snprintf(subs_buff, 40, "%.10g", DBL_PTR(subs)->dbl);
+	subs_buff[40] = 0; // ensure NULL
 	
-	sprintf(TempBuff, 
-  "subscript value %s is out of bounds, reading from a sequence of length %ld",
-	subs_buff, len);
-	RTFatal(TempBuff);
+	RTFatal("subscript value %s is out of bounds, reading from a sequence of length %ld",
+			subs_buff, len);
 }
 
 void NoValue(symtab_ptr s)
 {
-	sprintf(TempBuff, "variable %s has not been assigned a value", s->name);
-	RTFatal(TempBuff);
+	RTFatal("variable %s has not been assigned a value", s->name);
 }
 
 void atom_condition()
@@ -1615,5 +1622,3 @@ void INT_Handler(int sig_no)
 				 /* seems to crash in Windows */
 	/* RTFatal("program interrupted");*/
 }
-
-

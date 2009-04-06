@@ -469,8 +469,8 @@ void debug_int(int num)
 // send an integer to debug.log
 {
 	char buff[40];
-
-	sprintf(buff, "%d", num);
+	snprintf(buff, 40, "%d", num);
+	buff[40] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
@@ -478,8 +478,8 @@ void debug_dbl(double num)
 // send a double to debug.log
 {
 	char buff[40];
-
-	sprintf(buff, "%g", num);
+	snprintf(buff, 40, "%g", num);
+	buff[40] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
@@ -525,8 +525,7 @@ int matherr(struct _exception *err)  // OW wants this
 			msg = "internal";
 			break;
 	}
-	sprintf(sbuff, "math function %s error", msg);
-	RTFatal(sbuff);
+	RTFatal("math function %s error", msg);
 	return 0;
 }
 #endif
@@ -2433,10 +2432,8 @@ object binary_op(int fn, object a, object b)
 		b = (object)SEQ_PTR(b);
 		length = ((s1_ptr)a)->length;
 		if (length != ((s1_ptr)b)->length) {
-			sprintf(TempBuff,
-				"sequence lengths are not the same (%ld != %ld)",
-				length, ((s1_ptr)b)->length);
-			RTFatal(TempBuff);
+			RTFatal("sequence lengths are not the same (%ld != %ld)",
+					length, ((s1_ptr)b)->length);
 		}
 		c = NewS1(length);
 		cp = c->base;
@@ -3127,30 +3124,24 @@ static void CheckSlice(s1_ptr a, long startval, long endval, long length)
 		RTFatal("attempt to slice an atom");
 
 	if (startval < 1) {
-		sprintf(TempBuff, "slice lower index is less than 1 (%ld)", startval);
-		RTFatal(TempBuff);
+		RTFatal("slice lower index is less than 1 (%ld)", startval);
 	}
 	if (endval < 0) {
-		sprintf(TempBuff, "slice upper index is less than 0 (%ld)", endval);
-		RTFatal(TempBuff);
+		RTFatal("slice upper index is less than 0 (%ld)", endval);
 	}
 
 	if (length < 0 ) {
-		sprintf(TempBuff, "slice length is less than 0 (%ld)", length);
-		RTFatal(TempBuff);
+		RTFatal("slice length is less than 0 (%ld)", length);
 	}
 
 	a = SEQ_PTR(a);
 	n = a->length;
 	if (startval > n + 1 || length > 0 && startval > n) {
-		sprintf(TempBuff, "slice starts past end of sequence (%ld > %ld)",
+		RTFatal("slice starts past end of sequence (%ld > %ld)",
 				startval, n);
-		RTFatal(TempBuff);
 	}
 	if (endval > n) {
-		sprintf(TempBuff, "slice ends past end of sequence (%ld > %ld)",
-				endval, n);
-		RTFatal(TempBuff);
+		RTFatal("slice ends past end of sequence (%ld > %ld)", endval, n);
 	}
 }
 #endif
@@ -3300,10 +3291,8 @@ void AssignSlice(object start, object end, s1_ptr val)
 		val = SEQ_PTR(val);
 		v_elem = val->base+1;
 		if (val->length != length) {
-			sprintf(TempBuff,
-			"lengths do not match on assignment to slice (%ld != %ld)",
-			length, val->length);
-			RTFatal(TempBuff);
+			RTFatal("lengths do not match on assignment to slice (%ld != %ld)",
+					length, val->length);
 		}
 		while (TRUE) {
 			if (!IS_ATOM_INT(*v_elem)) {
@@ -3386,8 +3375,7 @@ int CheckFileNumber(object a)
 	else
 		RTFatal("file number must be an atom");
 	if (file_no < 0 || file_no >= MAX_USER_FILE) {
-		sprintf(TempBuff, "bad file number (%ld)", file_no);
-		RTFatal(TempBuff);
+		RTFatal("bad file number (%ld)", file_no);
 	}
 	return (int)file_no;
 }
@@ -3403,8 +3391,7 @@ IFILE which_file(object a, int mode)
 		return user_file[file_no].fptr;
 	else {
 		if (user_file[file_no].mode == EF_CLOSED) {
-			sprintf(TempBuff, "file number %d is not open", file_no);
-			RTFatal(TempBuff);
+			RTFatal("file number %d is not open", file_no);
 		}
 		else {
 			RTFatal("wrong file mode for attempted operation");
@@ -3868,7 +3855,8 @@ static void rPrint(object a)
 
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
-			sprintf(sbuff, "%ld", a);
+			snprintf(sbuff, NUM_SIZE, "%ld", a);
+			sbuff[NUM_SIZE] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' &&
@@ -3884,7 +3872,8 @@ static void rPrint(object a)
                         print_chars += strlen("NOVALUE");
                 }
 		else {
-			sprintf(sbuff, "%.10g", DBL_PTR(a)->dbl);
+			snprintf(sbuff, NUM_SIZE, "%.10g", DBL_PTR(a)->dbl);
+			sbuff[NUM_SIZE] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 		}
@@ -4071,7 +4060,7 @@ object_ptr f_elem;
 object_ptr f_last;
 object_ptr v_elem;
 {
-	int flen;
+	int flen, sbuff_len=0;
 	char c;
 	long dval;
 	unsigned long uval;
@@ -4089,8 +4078,7 @@ object_ptr v_elem;
 		cstring[flen++] = c;
 		if (++f_elem > f_last) {
 			cstring[flen] = '\0';
-			sprintf(TempBuff, "format specifier is incomplete (%s)", cstring);
-			RTFatal(TempBuff);
+			RTFatal("format specifier is incomplete (%s)", cstring);
 		}
 		c = Char(*f_elem);
 	} while (IsDigit(c) || c == '.' || c == '-' || c == '+');
@@ -4117,12 +4105,16 @@ object_ptr v_elem;
 			sval[1] = '\0';
 		}
 		if (slength + flen > TEMP_SIZE) {
-			sbuff = EMalloc(slength + flen);
+			sbuff_len = slength + flen;
+			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
-		else
+		else {
 			sbuff = TempBuff;
-		sprintf(sbuff, cstring, sval);
+			sbuff_len = TEMP_SIZE;
+		}
+		snprintf(sbuff, sbuff_len, cstring, sval);
+		sbuff[sbuff_len] = 0; // ensure NULL
 		screen_output(f, sbuff);
 		if (free_sv)
 			EFree(sval);
@@ -4158,17 +4150,22 @@ object_ptr v_elem;
 			}
 		}
 		if (NUM_SIZE + flen > TEMP_SIZE) {
-			sbuff = EMalloc(NUM_SIZE + (long)flen);
+			sbuff_len = NUM_SIZE + (long) flen;
+			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
-		else
+		else {
 			sbuff = TempBuff;
+			sbuff_len = TEMP_SIZE;
+		}
+
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
 		if (c == 'f')
-			sprintf(sbuff, cstring, gval);
+			snprintf(sbuff, sbuff_len, cstring, gval);
 		else
-			sprintf(sbuff, cstring, dval);
+			snprintf(sbuff, sbuff_len, cstring, dval);
+		sbuff[sbuff_len] = 0; // ensure NULL
 		screen_output(f, sbuff);
 	}
 	else if (c == 'e' || c == 'f' || c == 'g') {
@@ -4179,19 +4176,23 @@ object_ptr v_elem;
 		else
 			gval = DBL_PTR(*v_elem)->dbl;
 		if (NUM_SIZE + flen > TEMP_SIZE) {
-			sbuff = EMalloc(NUM_SIZE + (long)flen);
+			sbuff_len = NUM_SIZE + (long) flen;
+			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
-		else
+		else {
 			sbuff = TempBuff;
-		sprintf(sbuff, cstring, gval);
+			sbuff_len = TEMP_SIZE;
+		}
+
+		snprintf(sbuff, sbuff_len, cstring, gval);
+		sbuff[sbuff_len] = 0; // ensure NULL
 		screen_output(f, sbuff);
 	}
 	else {
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
-		sprintf(TempBuff, "Unknown printf format (%s)", cstring);
-		RTFatal(TempBuff);
+		RTFatal("Unknown printf format (%s)", cstring);
 	}
 	if (free_sb)
 		EFree(sbuff);
@@ -4217,11 +4218,9 @@ object EPrintf(int file_no, object format_obj, object values)
 	s1_ptr format;
 
 	if (file_no == DOING_SPRINTF) {
-		/* sprintf */
 		f = (IFILE )DOING_SPRINTF;
 	}
 	else {
-		/* printf */
 		if (file_no == last_w_file_no)
 			f = last_w_file_ptr;
 		else {
@@ -4316,7 +4315,6 @@ object EPrintf(int file_no, object format_obj, object values)
 	}
 	flush_screen();
 	if (file_no == DOING_SPRINTF) {
-		/* sprintf */
 		result = NewString(collect);
 		EFree(collect);
 		collect = NULL;
@@ -4690,10 +4688,7 @@ void Position(object line, object col)
 	line_val > line_max ||
 #endif
 		 col_val < 1 ||  col_val > col_max) {
-		sprintf(TempBuff,
-		"attempt to move cursor off the screen to line %d, column %d",
-		line_val, col_val);
-		RTFatal(TempBuff);
+		RTFatal("attempt to move cursor off the screen to line %d, column %d", line_val, col_val);
 	}
 	if (current_screen != MAIN_SCREEN)
 		MainScreen();
@@ -4937,8 +4932,6 @@ void match_samples()
 static void show_prof_line(IFILE f, long i)
 /* display one line of profile output */
 {
-	char buff[20];
-
 	if (*(slist[i].src+4) == END_OF_FILE_CHAR) {
 		screen_output(f, "       |\021\n");
 		return;
@@ -4947,12 +4940,13 @@ static void show_prof_line(IFILE f, long i)
 		screen_output(f, "       |");
 	}
 	else {
+		char buff[20]; // warning hardcoded size values in snprintfs below
 		if (slist[i].options & OP_PROFILE_TIME) {
-			sprintf(buff, "%6.2f |",
-			(double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
+			snprintf(buff, 20, "%6.2f |",
+					 (double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
 		}
 		else {
-			sprintf(buff, "%6ld |", *(int *)slist[i].src);
+			snprintf(buff, 20, "%6ld |", *(int *)slist[i].src);
 		}
 		screen_output(f, buff);
 	}
@@ -5695,8 +5689,7 @@ long find_from(object a, s1_ptr b, object c)
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > length+1) {
-		sprintf(TempBuff, "third argument of find_from() is out of bounds (%ld)", c);
-		RTFatal(TempBuff);
+		RTFatal("third argument of find_from() is out of bounds (%ld)", c);
 	}
 
 	bp = b->base;
@@ -5810,8 +5803,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > lengthb+1) {
-		sprintf(TempBuff, "third argument of match_from() is out of bounds (%ld)", c);
-		RTFatal(TempBuff);
+		RTFatal("third argument of match_from() is out of bounds (%ld)", c);
 	}
 
 	b1 = b->base;

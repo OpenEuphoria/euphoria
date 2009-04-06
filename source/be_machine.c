@@ -344,11 +344,12 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 #ifdef EMINGW
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
-	int len = strlen(name)+1+strlen(value)+1;
+	int len = strlen(name)+1+strlen(value)+1, real_len;
 	char * str = malloc(len);
 	if (!overwrite && (getenv(name) != NULL))
 		return 0;
-	sprintf(str, "%s=%s", name, value);
+	real_len = snprintf(str, len, "%s=%s", name, value);
+	str[len] = '\0'; // ensure NULL
 	return putenv(str);
 }
 #endif
@@ -361,9 +362,7 @@ unsigned long get_pos_int(char *where, object x)
 	else if (IS_ATOM(x))
 		return (unsigned long)(DBL_PTR(x)->dbl);
 	else {
-		sprintf(TempBuff,
-		"%s: an integer was expected, not a sequence", where);
-		RTFatal(TempBuff);
+		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
 }
 
@@ -375,9 +374,7 @@ unsigned IOFF get_pos_off(char *where, object x)
 	else if (IS_ATOM(x))
 		return (unsigned IOFF)(DBL_PTR(x)->dbl);
 	else {
-		sprintf(TempBuff,
-		"%s: an integer was expected, not a sequence", where);
-		RTFatal(TempBuff);
+		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
 }
 
@@ -724,11 +721,7 @@ void EndGraphics()
 void not_supported(char *feature)
 /* Report that a feature isn't supported on this platform */
 {
-	char buff[100];
-
-	sprintf(buff, "%s is not supported in Euphoria for %s",
-				  feature, version_name);
-	RTFatal(buff);
+	RTFatal("%s is not supported in Euphoria for %s", feature, version_name);
 }
 
 static object SetSound(object x)
@@ -2413,9 +2406,6 @@ static object MousePointer(object x)
 
 int Mouse_Handler(Gpm_Event *event, void *clientdata) {
 // handles mouse events
-	//sprintf(buff, "x=%d, y=%d, buttons=%x, modifiers=%x, clicks=%x\n",
-		   //event->x, event->y, event->buttons, event->modifiers, event->clicks);
-	//sprintf(buff, "vc=%x, type=%d\n", event->vc, event->type);
 	mouse.lock = 1;
 	mouse.code = event->buttons; //FOR NOW
 	if (mouse.code == 32)
@@ -4453,7 +4443,8 @@ object DefineC(object x)
 #endif
 		}
 		/* assign a sequence value to routine_ptr */
-		sprintf(TempBuff, "machine code routine at %x", proc_address);
+		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %x", proc_address);
+		TempBuff[TEMP_SIZE] = '\0'; // ensure NULL
 		routine_name = NewString(TempBuff);
 		routine_ptr = SEQ_PTR(routine_name);
 	}
@@ -5390,8 +5381,7 @@ object machine(object opcode, object x)
 			default:
 				/* could be out-of-range int, or double, or sequence */
 				if (IS_ATOM_INT(opcode)) {
-					sprintf(TempBuff, "machine_proc/func(%d,...) not supported", opcode);
-					RTFatal(TempBuff);
+					RTFatal("machine_proc/func(%d,...) not supported", opcode);
 				}
 				else if (IS_ATOM(opcode)) {
 					d = DBL_PTR(opcode)->dbl;

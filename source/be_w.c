@@ -570,13 +570,13 @@ void update_screen_string(char *s)
 // record that a string of characters was written to the screen
 {
     int i, col, line;
-    char buff[60];
+    char buff[60]; // Warning, snprintf calls below use a hardcoded size value
 
     i = 0;
     line = screen_line - 1;
     col = screen_col - 1;
     if (line < 0 || line >= line_max) {
-        sprintf(buff, "line corrupted (%d), s is %s, col is %d",
+        snprintf(buff, 60, "line corrupted (%d), s is %s, col is %d",
         line, s, col);
         debug_msg(buff);
     }
@@ -587,7 +587,7 @@ void update_screen_string(char *s)
         screen_image[line][col].bg_color = current_bg_color;
         col += 1;
         if (col < 0 || col > col_max) {
-            sprintf(buff, "col corrupted (%d)", col);
+            snprintf(buff, 50, "col corrupted (%d)", col);
             debug_msg(buff);
         }
         i += 1;
@@ -956,8 +956,8 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 void SetPosition(int line, int col)
 {
 #ifdef EUNIX
-    char lbuff[20];
-    char cbuff[20];
+    char lbuff[20]; // Warning snprintf uses hardcoded size value below
+    char cbuff[20]; // Warning snprintf uses hardcoded size value below
 #endif
 
 #ifdef EDOS
@@ -980,8 +980,8 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 #endif
 
 #ifdef EUNIX
-    sprintf(lbuff, "%d", line);
-    sprintf(cbuff, "%d", col);
+    snprintf(lbuff, 20, "%d", line); lbuff[20] = '\0'; // ensure NULL
+    snprintf(cbuff, 20, "%d", col); cbuff[20] = '\0'; // ensure NULL
     // ANSI code
     iputs("\033[", stdout);
     iputs(lbuff, stdout);
