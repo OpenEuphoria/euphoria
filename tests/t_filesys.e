@@ -53,13 +53,13 @@ test_equal("file_exists #2", 0, file_exists("nononononono.txt"))
 
 test_false("absolute_path('')", absolute_path(""))
 test_true("absolute_path('/usr/bin/abc')", absolute_path("/usr/bin/abc"))
-test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
 test_false("absolute_path('../abc')", absolute_path("../abc"))
 test_false("absolute_path('local/abc.txt')", absolute_path("local/abc.txt"))
 test_false("absolute_path('abc.txt')", absolute_path("abc.txt"))
 test_false("absolute_path('c:..\\abc')", absolute_path("c:..\\abc"))
 
 ifdef MICROSOFT then
+test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
 test_true("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
 test_true("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
 else
