@@ -632,7 +632,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		if (val == NOVALUE) 
-			strncpy(val_string, "<no value>", 80);
+			strlcpy(val_string, "<no value>", 80);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
 			snprintf(val_string, 40, "%ld", iv);
@@ -1381,16 +1381,15 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
-					strncpy(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
+					strlcpy(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
 				}
 				else {
 #ifdef EWINDOWS         
-					strncpy(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
+					strlcpy(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
-					strncpy(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
+					strlcpy(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
 #endif          
 				}
-				TempBuff[TEMP_SIZE] = 0; // ensure NULL
 				sf_output(TempBuff);
 				if (expr_top <= expr_stack+3)
 					break;

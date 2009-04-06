@@ -143,7 +143,7 @@ static int e_path_open(char *name, int mode)
 			/* end of a directory */
 			if (fn > 0) {
 				full_name[fn++] = SLASH;
-				strncpy(full_name + fn, name, PATH_MAX+1);
+				strlcpy(full_name + fn, name, PATH_MAX+1);
 				full_name[PATH_MAX+1] = 0; // ensure NULL
 				src_file = long_open(full_name, mode);
 				if (src_file > -1) {
@@ -206,7 +206,7 @@ void be_init()
 #endif
 #endif
 	TempErrName = (char *)malloc(8); // uses malloc, not EMalloc
-	strncpy(TempErrName, "ex.err", 8); // can change
+	strlcpy(TempErrName, "ex.err", 8); // can change
 	TempErrName[8] = 0; // ensure NULL
 	
 	eudir = getenv("EUDIR");
@@ -230,7 +230,7 @@ void be_init()
 	}
 	
 #if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
-	strncpy(main_path, file_name[1], PATH_MAX+1); // FOR NOW!
+	strlcpy(main_path, file_name[1], PATH_MAX+1); // FOR NOW!
 	main_path[PATH_MAX+1] = 0; // ensure NULL
 #else
 	(void)_fullpath(main_path, file_name[1], PATH_MAX+1); 

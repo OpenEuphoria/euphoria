@@ -474,8 +474,7 @@ char *long_to_short(char *long_name)
 	if (win95 == UNKNOWN) {
 		// check if the filesystem supports long filenames for DOS programs
 
-		strncpy(long_buff_ptr, "C:\\", 300);
-		long_buff_ptr[3] = 0; // ensure NULL
+		strlcpy(long_buff_ptr, "C:\\", 300);
 		short_buff_ptr[0] = 0;
 
 		reglist.eax = 0x71A0; //w95 long to short
@@ -504,8 +503,7 @@ char *long_to_short(char *long_name)
 	}
 
 	// convert long filename to DOS 8.3 short filename
-	strncpy(long_buff_ptr, long_name, 300);
-	long_buff_ptr[300] = 0; // ensure NULL
+	strlcpy(long_buff_ptr, long_name, 300);
 	short_buff_ptr[0] = 0;
 
 	reglist.eax = 0x7160; // major code

@@ -418,8 +418,7 @@ static void MyWriteConsole(char *string, int nchars)
     ch.X = screen_loc.Left;
     ch.Y = screen_loc.Top;
 
-    strncpy(old_string, string, 80);
-    old_string[81] = '\0';
+    strlcpy(old_string, string, 80);
 
     for (i = 0; i < nchars; i++)
     {
@@ -738,8 +737,7 @@ void screen_output(IFILE f, char *out_string)
 			collect_free = 80;
 			collect_len = len + 1 + collect_free;
             collect = EMalloc(collect_len);
-			strncpy(collect, out_string, collect_len);
-			collect[collect_len] = 0;
+			strlcpy(collect, out_string, collect_len);
 			//strcpy(collect, out_string);
             collect_next = len;
         }
@@ -751,8 +749,7 @@ void screen_output(IFILE f, char *out_string)
 			} else {
 				collect_len = len;
 			}
-			//strncpy(collect+collect_next, out_string, collect_len);
-			//collect[collect_len] = 0;
+			//strlcpy(collect+collect_next, out_string, collect_len);
 			strcpy(collect+collect_next, out_string);
             collect_free -= len;
             collect_next += len;
