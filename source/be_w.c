@@ -720,30 +720,6 @@ static void expand_tabs(char *raw_string)
     }
 }
 
-void screen_output_vararg(IFILE f, char *out_string, ...)
-{
-	va_list ap;
-
-	va_start(ap, out_string);
-	screen_output_va(f, out_string, ap);
-	va_end(ap);
-}
-
-void screen_output_va(IFILE f, char *out_string, va_list ap)
-{
-	int nsize;
-	char * buf;
-	char dummy[1];
-
-	// figure out how long the string will be
-	nsize = vsnprintf(dummy, 0, out_string, ap);
-
-	buf = malloc(nsize+1); // add one for the trailing '\0'
-	vsnprintf(buf, nsize+1, out_string, ap);
-
-	screen_output(f, buf);
-	free(buf);
-}
 
 void screen_output(IFILE f, char *out_string)
 /* All output from the compiler, interpreter or user program
@@ -814,6 +790,31 @@ void screen_output(IFILE f, char *out_string)
 		iflush(f);
         }
     }
+}
+
+void screen_output_va(IFILE f, char *out_string, va_list ap)
+{
+	int nsize;
+	char * buf;
+	char dummy[1];
+
+	// figure out how long the string will be
+	nsize = vsnprintf(dummy, 0, out_string, ap);
+
+	buf = malloc(nsize+1); // add one for the trailing '\0'
+	vsnprintf(buf, nsize+1, out_string, ap);
+
+	screen_output(f, buf);
+	free(buf);
+}
+
+void screen_output_vararg(IFILE f, char *out_string, ...)
+{
+	va_list ap;
+
+	va_start(ap, out_string);
+	screen_output_va(f, out_string, ap);
+	va_end(ap);
 }
 
 #ifdef EWINDOWS

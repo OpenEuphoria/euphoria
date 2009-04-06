@@ -622,13 +622,6 @@ static void SimpleRTFatal(char *msg, va_list ap)
 	Cleanup(1);
 }
 
-void RTFatal(char *msg, ...)
-{
-	va_list ap;
-	va_start(ap, msg);
-	RTFatal_va(msg, ap);
-	va_end(ap);
-}
 void RTFatal_va(char *msg, va_list ap)
 /* handle run time fatal errors */
 {
@@ -640,6 +633,13 @@ void RTFatal_va(char *msg, va_list ap)
 		SimpleRTFatal(msg, ap);
 }
 
+void RTFatal(char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	RTFatal_va(msg, ap);
+	va_end(ap);
+}
 
 void InitFiles()
 /* initialize user files before executing */

@@ -1478,14 +1478,6 @@ void RTInternal_va(char *msg, va_list ap)
 }
 #endif
 
-void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
-{
-	va_list ap;
-	va_start(ap, s_ptr);
-	CleanUpError_va(msg, s_ptr, ap);
-	va_end(ap);
-}
-
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
 	int i;
@@ -1525,6 +1517,14 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	
 	gameover = TRUE;
 	Cleanup(1);
+}
+
+void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
+{
+	va_list ap;
+	va_start(ap, s_ptr);
+	CleanUpError_va(msg, s_ptr, ap);
+	va_end(ap);
 }
 
 void RTFatalType(int *pc)
