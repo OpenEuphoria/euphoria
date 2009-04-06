@@ -1168,7 +1168,7 @@ global procedure start_emake()
 			puts(doit, "echo compiling with DJGPP"&HOSTNL)
 			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
 		end if
-	elsif TWINDOWS then
+	elsif TWINDOWS and not gcc_option then
 		if sequence(wat_path) then
 			puts(doit, "echo compiling with WATCOM"&HOSTNL)
 			if debug_option then
@@ -1507,7 +1507,7 @@ global procedure finish_emake()
 					{truncate_to_83(file0),file0} )
 			end if
 		end if
-	elsif TWINDOWS then
+	elsif TWINDOWS and not gcc_option then
 		if sequence(wat_path) then     
 			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length(user_library) then
