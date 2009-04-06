@@ -208,84 +208,80 @@ is handy for editing and executing Euphoria programs. Take a look at
 To run a Euphoria program you type the name of the interpreter followed by the
 filename of the program you want to run. Such as:
 
-##ex example.ex##
+##eui example.ex##
 
 What you just typed is known as the //command-line//.
 
 Depending on the platform you are using the interpreter could be called:
 
-# ##ex##
-# ##exw##
-# ##exwc##
-# ##exu##
+|| Executable || Purpose                                        ||
+| ##eui##     | General interpreter on Windows and *nix variants |
+| ##euiw##    | Console-less Windows interpreter                 |
+| ##euid##    | DOS only interpreter                             |
 
 The command-line may contain extra information. Following your program filename
- you may add extra words (known as //arguments//) that can used in your program
-  to customize its behavior. These arguments are read within your program by
-  the built-in function [[command_line]]().
+you may add extra words (known as //arguments//) that can used in your
+program to customize its behavior. These arguments are read within your
+program by the built-in function [[command_line]]().
 
 Optionally, you may also use [[command line switches]] that are typed between
- the interpreter name and the program name. Command line switches customize 
- how the interpreter itself behaves.
+the interpreter name and the program name. Command line switches
+customize  how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
- special command-line options for ##ex##, ##exw## or ##exu##. Only the name of
- you Euphoria file is expected, and if you don't supply it, you will be
- prompted for it.
+special command-line options for ##ex##, ##exw## or ##exu##. Only the
+name of you Euphoria file is expected, and if you don't supply it, you
+will be prompted for it.
 
-The //DOS32// version of the Euphoria interpreter is called ##ex.exe##. The 
-//WIN32// version is called ##exw.exe## and the //WIN32// console version is
- called ##exwc.exe##. The //Linux/FreeBSD// version is called ##exu##.
-
-Euphoria is forgiving about your choice of file extensions. By convention, main
-Euphoria files have an extension of ##.ex##, ##.exw##, or ##.exu##. Other
-Euphoria files, that are meant to be included in a larger program, end in 
-##.e## or sometimes ##.ew## or ##.eu##. To save typing, you can leave off the
-"##.ex##", and the ##ex## command will supply it for you automatically.
- ##exw.exe## will supply "##.exw##", and ##exu## will supply "##.exu##". 
-Each will try the other possible extensions as well if the default fails. If
- the file can't be found in the current directory, your ##PATH## will be
- searched (using the most likely extension, then the others). 
+Euphoria is forgiving about your choice of file extensions. By
+convention, however, main Euphoria files have an extension of ##.ex##
+unless your program is DOS only, then the extension should be ##.exd##.
+Euphoria include files should have the extension ##.e##. The only other
+extension that is used is ##.exw## which should be used for any
+windowed application. This is a GUI application, not necessarly a
+Microsoft Windows (tm) program. A GUI application can exist on Linux,
+OS X, FreeBSD, etc...
 
 You can redirect standard input and standard output when you run a Euphoria
  program, for example:
 {{{
-ex filesort.ex < raw.txt > sorted.txt
+eui filesort.ex < raw.txt > sorted.txt
 }}}
 or simply,
 {{{
-ex filesort < raw.txt > sorted.txt
+eui filesort < raw.txt > sorted.txt
 }}}
-Under Windows, you will need to use ##Start -> Run...## facility if you need to
-enter command line switches or other arguments to a .exw program.
 
 For frequently-used programs under //DOS/Windows// you might want to make a
- small ##.bat## (batch) file, perhaps called ##myprog.bat##, containing two
-  statements like:
+small ##.bat## (batch) file, perhaps called ##myprog.bat##, containing two
+statements like:
 {{{
 @echo off
-ex myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
+eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 }}}
 The first statement turns off echoing of commands to the screen. The second
- runs ##ex myprog.ex## with up to 9 command-line arguments. See 
- [[:command_line]]() for an example of how to read these arguments. Having 
- a .bat file will save you the minor inconvenience of typing ##ex## (or
-  ##exw##) all the time; i.e., you can just type:
+runs ##ex myprog.ex## with up to 9 command-line arguments. See
+[[:command_line]]() for an example of how to read these arguments. Having
+a .bat file will save you the minor inconvenience of typing ##eui##
+all the time; i.e., you can just type:
 {{{
 myprog
 }}}
 instead of:
 {{{
-ex myprog
+eui myprog
 }}}
 
 Unfortunately //DOS// will not allow redirection of standard input and output
- when you use a ##.bat## file. However, this works in a Windows DOS box.
+when you use a ##.bat## file. However, this works in a Windows DOS box.
 
-Under //Linux/FreeBSD//, you can type the path to the Euphoria interpreter on
- the first line of your main file, e.g. if your program is called ##foo.exu##:
+Under modern //Unix// variants, you can use ##~#!/usr/bin/env eui## as the
+first line of your script file. On older //Unix// variants, you may need to
+use the full path to ##eui##, ##~#!/usr/local/bin/eui##.
+
+If your program is called ##foo.exu##:
 <eucode>
-#!/home/rob/euphoria/bin/exu
+#!/usr/bin/env eui
 
 procedure foo()
    ? 2+2
@@ -293,72 +289,46 @@ end procedure
 
 foo()
 </eucode>
+
 Then if you make your file executable:
 
 {{{
-chmod +x foo.exu
+chmod +x foo.ex
 }}}
 
 You can just type: 
 
 {{{
-foo.exu 
+foo.ex
 }}}
 
 to run your program. You could even shorten the name to simply "foo". Euphoria
 ignores the first line when it starts with **#!**.  Be careful though that
-your first line ends with the //Linux/FreeBSD//-style ##\n##, and not the
-//DOS/Windows//-style ##\r\n##, or the //Linux/FreeBSD// shell might get
-confused. If your file is shrouded, you must give the path to ##backendu##,
-not ##exu##.
+your first line ends with the unix-style ##\n##, and not the
+//DOS/Windows//-style ##\r\n##, or the unix shell might get confused. If your
+file is shrouded, you must give the path to ##eub##, not ##eui##.
 
-You can also run ##bind.bat## (//DOS32//), or ##bindw.bat## (//WIN32//) or 
-##bindu## (//Linux/FreeBSD//) to combine your Euphoria program with ##ex.exe##,
-##exw.exe## or ##exu##, to make a stand-alone executable file (##.exe## file on
-//DOS/Windows//). With a stand-alone ##.exe## file you //can// redirect
-standard input and output. Binding is discussed further in [[:Distributing a
-Program]].
+You can also run ##bind## or ##bindd## (//DOS//) to combine your Euphoria program
+with ##eui## interpreter, to make a stand-alone executable file. With a
+stand-alone executable, you //can// redirect standard input and output. Binding
+is discussed further in [[:Distributing a Program]].
 
 Using the [[:Euphoria to C Translator]], you can also make a stand-alone 
-##.exe## file, and it will normally run much faster than a bound program.
-
-##exu##, ##ex.exe##, ##exw.exe##  and ##exwc## will be in the ##euphoria\bin##
-directory which must be on your search path. The environment variable
-##EUDIR## should be set to the main Euphoria directory, e.g. ##c:\euphoria##.
+executable file, and it will normally run much faster than a bound program.
 
 === Running under Windows
 
 You can run Euphoria programs directly from the //Windows// environment, or
 from a //DOS// shell that you have opened from //Windows//. By "associating"
-##.ex## files with ##ex.exe##, and ##.exw## files with ##exw.exe## you can
-simply double-click on a ##.ex## or ##.exw## file to run it. Under //Windows//
-you would define a new file type for ##.ex##, by clicking on 
-##My Computer / view / options / file types##. It is possible to have several
-Euphoria programs active in different windows. If you turn your program into a
-##.exe## file, you can simply double-click on it to run it.
-
-=== Use of a Swap File
-
-If you run a Euphoria program under //Linux/FreeBSD// or //Windows// 
-(or in a //DOS// shell under //Windows//), and the program runs out of physical
-memory, it will start using "virtual memory". The operating system provides
-this virtual memory automatically by swapping out the least-recently-used code
-and data to a system swap file. To change the size of the //Windows// 
-swap file, click on ##Control Panel / 386 Enhanced / "virtual memory..."##.
-Under OS/2 you can adjust the "DPMI_MEMORY_LIMIT" by clicking the 
-##Virtual //DOS// machine icon / "//DOS// Settings"## to allocate more extended
-memory for your program.
-
-Under pure //DOS//, outside of //Windows//, there is no system swap file so the
-//DOS//-extender built in to ##ex.exe## (//DOS//32) will create one for
-possible use by your program. See [[:swap file]].
+##.ex## files with ##eui.exe##, ##.exd## files with ##euid.exe## and ##.exw##
+files with ##euiw.exe##. You will then be able to double click a Euphoria source
+file to run it. The installer will perform this operation for you, if you wish.
 
 === Editing a Program
 
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
 with its own special editor that is written entirely in Euphoria. Type: ##ed##
-followed by the complete name of the file you wish to edit 
-(the ##.ex##/##.exw##/##.exu## extension is not assumed). You can use this
+followed by the complete name of the file you wish to edit. You can use this
 editor to edit any kind of text file. When you edit a Euphoria file, some extra
 features such as color syntax highlighting and auto-completion of certain
 statements, are available to make your job easier.
@@ -371,8 +341,7 @@ screen.
 
 Under //Windows// you can associate ##ed.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
-##.exw##, ##.exu##, ##.e##, ##.ew##, ##.eu##, and ##.pro##
-([[:profile_file|profile files]]).
+##.exw##, ##.exd##, ##.e## and ##.pro## ([[:profile_file|profile files]]).
 
 Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
@@ -391,51 +360,43 @@ Euphoria, it is remarkably concise and easy to understand. The same
 functionality implemented in a language like C, would take far more lines of
 code.
 
-##ed## is a simple text-mode editor that runs on //DOS//, //Linux//, 
-//FreeBSD// and the //Windows// console. See also David Cuny's excellent 
-##ee.ex## editor for //DOS// and //Linux/FreeBSD//. You can download 
-##ee.ex## from the [[http://www.RapidEuphoria.com|Euphoria Web site]]. 
-There are also some //Windows// editors oriented to Euphoria. These are also
-on [[http://www.RapidEuphoria.com|the Web site]].
+##ed## is a simple text-mode editor that runs on all platforms and is
+distributed with Euphoria. There are other editors in
+[[The Archive -> http://rapideuphoria.com/edi.htm]]. In addition to that many
+popular editors include syntax highlighting for Euphoria or can be made to.
 
 === Distributing a Program
 
 Euphoria provides you with 4 distinct ways of distributing a program.
 
-In the first method you simply ship your users the ##ex.exe## or ##exw.exe##
-or ##exu## file, along with your main Euphoria ##.ex##, ##.exw##, or ##.exu##
-file and any ##.e## include files that are needed (including any of the
-standard ones from ##euphoria\include##). If the Euphoria source files are
-placed together in one directory and ##ex.exe##, ##exw.exe##, ##exwc.exe## or
-##exu## is placed in the same directory or somewhere on the search path, then
-your user can run your program by typing ##ex## (##exw##), ##exwc## or 
-(##exu##) followed by the path of your main ##.ex##, ##.exw##, or ##.exu##
+In the first method you simply ship your users the interpreter along with your
+Euphoria source files including any Euphoria includes that may be necessary
+from the ##euphoria/include## directory. If the Euphoria source files and the
+interpreter are placed together in one directory then your user can run your
+program by typing ##eui## followed by the path of your main executable sort
 file. You might also provide a small ##.bat## file so people won't actually
-have to type ##ex## (##exw##). This method assumes that you are willing to
+have to type the interpreter name. This method assumes that you are willing to
 share your Euphoria source code with your users.
 
 The Binder gives you two more methods of distribution. You can ##shroud## your
 program, or you can ##bind## your program. **Shrouding** combines all of the
-##.e## files that your program needs, along with your main file to create a
-single ##.il## file. **Binding** combines your shrouded program with 
-##backend.exe##, ##backendw.exe## or ##backendu## to create a single, 
-stand-alone executable (##.exe##) file. For example, if your program is called
-"##myprog.ex##" you can create "##myprog.exe##" which will run identically. For
-more information about shrouding and binding, see bind.doc.
+Euphoria source code that your program needs to create a single ##.il## file.
+**Binding** combines your shrouded program with the Euphoria backend
+(##eub##, ##eubw##, or ##eubd##) to create a single, stand-alone executable file.
+For example, if your program is called "##myprog.ex##" you can create "##myprog.exe##"
+which will run identically. For more information about shrouding and binding,
+see bind.doc.
 
 Finally, with the [[:Euphoria To C Translator]], you can translate your
 Euphoria program into C and then compile it with a C compiler to get an
-executable (##.exe##) file. 
-
+executable program.
 
 === Licensing
 
 This product is free and open source, and has benefited from the contributions
 of many people. You have complete royalty-free rights to distribute any
-Euphoria programs that you develop. You are also free to distribute ##ex.exe##,
-##exw.exe##, ##exwc.exe## and ##exu## files so anyone can run your program.
-You can also distribute the interpreter backend: ##backend.exe##,
-##backendw.exe## and  ##backendu##. You can can ##shroud## or ##bind## your
+Euphoria programs that you develop. You are also free to distribute the interpreter,
+backend and even translator. You can can ##shroud## or ##bind## your
 program and distribute the resulting files royalty-free.
 
 You may incorporate any Euphoria source files from this package into your
@@ -466,8 +427,8 @@ Some additional 3rd-party legal restrictions might apply when you use the
 You can launch Euphoria with some extra command line switches, in order to add
 or change configuration elements. When running a GUI, there is always some way
 to open a prompt and enter any text with options, arguments and whatever the
-program being launched may need for proper, expected operation. Under //Windows//, this is
-achieved by clicking the Run... start menu entry, or hitting Windows-R.
+program being launched may need for proper, expected operation. Under //Windows//,
+this is achieved by clicking the Run... start menu entry, or hitting Windows-R.
 
 The following items may be changed or added, one at a time:
 @[euinc.conf]
