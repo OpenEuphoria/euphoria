@@ -731,10 +731,18 @@ void screen_output_vararg(IFILE f, char *out_string, ...)
 
 void screen_output_va(IFILE f, char *out_string, va_list ap)
 {
-	char buf[1024];
-	vsnprintf(buf, 1024, out_string, ap);
-	buf[1023] = '\0';
+	int nsize;
+	char * buf;
+	char dummy[1];
+
+	// figure out how long the string will be
+	nsize = vsnprintf(dummy, 0, out_string, ap);
+
+	buf = malloc(nsize+1); // add one for the trailing '\0'
+	vsnprintf(buf, nsize+1, out_string, ap);
+
 	screen_output(f, buf);
+	free(buf);
 }
 
 void screen_output(IFILE f, char *out_string)
