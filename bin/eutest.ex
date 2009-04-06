@@ -257,6 +257,9 @@ procedure do_test(sequence cmds)
 	elsif equal( "ec", translator_base ) then
 		-- NOOP
 
+	elsif length(translator) = 0 then
+		-- NOOP
+
 	else
 		printf(2, "Cannot determine translator's platform.", {} )
 		abort(1)
