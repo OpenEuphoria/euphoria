@@ -468,9 +468,8 @@ object find_replace_pcre(object x ) {
 		rc = replace_pcre(rep, str, out_len-1, ovector, rc, &out, &out_len);
 		EFree(str);
 
-		str = EMalloc(out_len + 1);
-		strlcpy(str, out, out_len);
-		str[out_len] = 0;
+		str = EMalloc(out_len + 2);
+		strlcpy(str, out, out_len + 1);
 
 		start_from = ovector[rc+1];
 		limit -= 1;

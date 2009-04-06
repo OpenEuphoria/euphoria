@@ -344,11 +344,11 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 #ifdef EMINGW
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
-	int len = strlen(name)+1+strlen(value)+1, real_len;
-	char * str = malloc(len);
+	int len = strlen(name)+strlen(value)+1, real_len;
+	char * str = malloc(len + 1);
 	if (!overwrite && (getenv(name) != NULL))
 		return 0;
-	real_len = snprintf(str, len, "%s=%s", name, value);
+	real_len = snprintf(str, len+1, "%s=%s", name, value);
 	str[len] = '\0'; // ensure NULL
 	return putenv(str);
 }
@@ -398,7 +398,7 @@ int IsWin95()
 
 	// Look for explorer.exe
 	snprintf(path, 260, "%s\\%s", wd, "explorer.exe");
-	path[260] = 0; // ensure NULL
+	path[259] = 0; // ensure NULL
 	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
@@ -3344,12 +3344,12 @@ static object Dir(object x)
 	struct stat stbuf;
 	struct tm *date_time;
 #if defined(EDJGPP) || defined(EMINGW)
-	int full_name_size = MAX_FILE_NAME + 1 + 257;
-	char full_name[full_name_size];
+	int full_name_size = MAX_FILE_NAME + 257;
+	char full_name[full_name_size + 1];
 
 #else
-	int full_name_size = MAX_FILE_NAME + 1 + NAME_MAX + 1;
-	char full_name[full_name_size];
+	int full_name_size = MAX_FILE_NAME + NAME_MAX + 1;
+	char full_name[full_name_size + 1];
 #endif
 
 	/* x will be sequence if called via dir() */
@@ -4448,7 +4448,7 @@ object DefineC(object x)
 		}
 		/* assign a sequence value to routine_ptr */
 		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %x", proc_address);
-		TempBuff[TEMP_SIZE] = '\0'; // ensure NULL
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		routine_name = NewString(TempBuff);
 		routine_ptr = SEQ_PTR(routine_name);
 	}

@@ -5162,7 +5162,7 @@ void do_exec(int *start_pc)
 														OP_PROFILE_TIME)) ?
 								 slist[top].src+4 :
 								 slist[top].src);
-						one_line[120] = '\0'; // ensure NULL
+						one_line[119] = '\0'; // ensure NULL
 
 						b = TraceOn;
 						TraceOn = TRUE;

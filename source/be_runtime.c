@@ -470,7 +470,7 @@ void debug_int(int num)
 {
 	char buff[40];
 	snprintf(buff, 40, "%d", num);
-	buff[40] = 0; // ensure NULL
+	buff[39] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
@@ -479,7 +479,7 @@ void debug_dbl(double num)
 {
 	char buff[40];
 	snprintf(buff, 40, "%g", num);
-	buff[40] = 0; // ensure NULL
+	buff[39] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
@@ -3856,7 +3856,7 @@ static void rPrint(object a)
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
 			snprintf(sbuff, NUM_SIZE, "%ld", a);
-			sbuff[NUM_SIZE] = 0; // ensure NULL
+			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' &&
@@ -3873,7 +3873,7 @@ static void rPrint(object a)
                 }
 		else {
 			snprintf(sbuff, NUM_SIZE, "%.10g", DBL_PTR(a)->dbl);
-			sbuff[NUM_SIZE] = 0; // ensure NULL
+			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 		}
@@ -4114,7 +4114,7 @@ object_ptr v_elem;
 			sbuff_len = TEMP_SIZE;
 		}
 		snprintf(sbuff, sbuff_len, cstring, sval);
-		sbuff[sbuff_len] = 0; // ensure NULL
+		sbuff[sbuff_len-1] = 0; // ensure NULL
 		screen_output(f, sbuff);
 		if (free_sv)
 			EFree(sval);
@@ -4165,7 +4165,7 @@ object_ptr v_elem;
 			snprintf(sbuff, sbuff_len, cstring, gval);
 		else
 			snprintf(sbuff, sbuff_len, cstring, dval);
-		sbuff[sbuff_len] = 0; // ensure NULL
+		sbuff[sbuff_len-1] = 0; // ensure NULL
 		screen_output(f, sbuff);
 	}
 	else if (c == 'e' || c == 'f' || c == 'g') {
@@ -4186,7 +4186,7 @@ object_ptr v_elem;
 		}
 
 		snprintf(sbuff, sbuff_len, cstring, gval);
-		sbuff[sbuff_len] = 0; // ensure NULL
+		sbuff[sbuff_len-1] = 0; // ensure NULL
 		screen_output(f, sbuff);
 	}
 	else {
@@ -4944,9 +4944,11 @@ static void show_prof_line(IFILE f, long i)
 		if (slist[i].options & OP_PROFILE_TIME) {
 			snprintf(buff, 20, "%6.2f |",
 					 (double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
+			buff[19] = 0; // ensure NULL
 		}
 		else {
 			snprintf(buff, 20, "%6ld |", *(int *)slist[i].src);
+			buff[19] = 0; // ensure NULL
 		}
 		screen_output(f, buff);
 	}

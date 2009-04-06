@@ -268,7 +268,7 @@ static void flush(int new_color)
 	if (new_color != color) {
 		if (color != -1) {
 			set_text_color(color);
-			strlcpy(segment, line+seg_start, seg_end - seg_start + 1);
+			strlcpy(segment, line+seg_start, seg_end - seg_start);
 			screen_output(NULL, segment);
 			seg_start = seg_end + 1;
 		}
@@ -380,7 +380,7 @@ void DisplayColorLine(char *pline, int string_color)
 	
 	if (color != -1) 
 		set_text_color(color);
-	strlcpy(segment, line+seg_start, seg_end - seg_start + 1);
+	strlcpy(segment, line+seg_start, seg_end - seg_start);
 	screen_output(NULL, segment);
 }
 

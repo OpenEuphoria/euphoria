@@ -211,7 +211,7 @@ void OpenErrFile()
 			if (n > 13) {
 				char buff[40];
 				snprintf(buff, 40, "Too many open files? (%d)\n", n);
-				buff[40] = '\0'; // ensure NULL
+				buff[39] = 0; // ensure NULL
 				screen_output(stderr, buff);
 			}
 		}
@@ -314,31 +314,31 @@ static void DisplayLine(long n, int highlight)
 		string_color = 10;
 		if (text) set_bk_color(_CYAN);
 		snprintf(TempBuff, TEMP_SIZE, brief ? ">" : "%5u==>", slist[n].line);
-		TempBuff[TEMP_SIZE] = 0; // ensure NULL
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 	}
 	else {
 		string_color = 2;
 		if (text) set_bk_color(_WHITE);
 		snprintf(TempBuff, TEMP_SIZE, brief ? " " : "%5u:  ", slist[n].line);
-		TempBuff[TEMP_SIZE] = 0; // ensure NULL
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 	}
 	line = slist[n].src; 
 	if (slist[n].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME))
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strncat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff));
+		strncat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #else
-		strncat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff));
+		strncat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #endif
-		TempBuff[TEMP_SIZE] = 0; // ensure NULL
+		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strncat(TempBuff, line, TEMP_SIZE - strlen(TempBuff)); // must be <=200 chars
-		TempBuff[TEMP_SIZE] = 0; // ensure NULL (have to do because of next call)
-		strncat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff)); // will end in \0
-		TempBuff[TEMP_SIZE] = 0; // ensure NULL
+		strncat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
+		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL (have to do because of next call)
+		strncat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
+		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
@@ -440,6 +440,7 @@ static void Refresh(long line_num, int vars_too)
 		snprintf(TempBuff, TEMP_SIZE,
 				 " %.20s  F1=main  F2=trace  Enter  down-arrow  ?  q  Q  !",
 				 name_ext(file_name[slist[line_num].file_no]));
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		buffer_screen();
 		screen_output(NULL, TempBuff);
 		screen_blank(NULL, col_max-40);
@@ -641,7 +642,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		}
 		else 
 			snprintf(val_string, 40, "%.10g", DBL_PTR(val)->dbl);
-		val_string[40] = 0; // ensure NULL
+		val_string[39] = 0; // ensure NULL
 		len_required = strlen(s_ptr->name) + 1 + strlen(val_string) + add_char;
 		if (len_required < VAR_WIDTH)
 			inc = 1;
@@ -707,7 +708,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	else {
 		SetVarPosition(found, 0);
 		snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
-		TempBuff[TEMP_SIZE] = 0; // ensure NULL
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	display_list[found].value_on_screen = val; 
@@ -734,7 +735,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			ClearScreen();
 			set_text_color(15);  // Al Getz bug
 			snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
-			TempBuff[TEMP_SIZE] = 0; // ensure NULL
+			TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 			screen_output(NULL, TempBuff);
 			Print(NULL, val, line_max-5, vars_per_line*VAR_WIDTH-3, 
 				  strlen(s_ptr->name), TRUE);
@@ -1267,13 +1268,13 @@ static void TracePrint(symtab_ptr proc, int *pc)
 
 	if (proc == TopLevelSub) {
 		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u", file_name[file], line);
-		TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
+		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 	else {
 		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u in %s %.99s() ",
 				 file_name[file], line, subtype, proc->name);
-		TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
+		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 }
@@ -1315,7 +1316,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			}
 			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %.99s ",
 					 tcb[current_task].tid, routine_name);
-			TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
+			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
 			if (strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
@@ -1342,13 +1343,13 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			show_message = FALSE;
 			if (s_ptr == NULL) {
 				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%.99s", msg);
-				TPTempBuff[TPTEMP_BUFF_SIZE] = 0; // ensure NULL
+				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 				sf_output(TPTempBuff);
 			}
 			else {
 				sf_output(type_error_msg); // test
 				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.99s is ", s_ptr->name);
-				TPTempBuff[TPTEMP_BUFF_SIZE] = 0;
+				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0;
 				sf_output(TPTempBuff);
 				if (screen_err_out)
 					Print(stderr,  s_ptr->obj, 1, 50, 0, FALSE);
@@ -1415,7 +1416,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 		
 		if (skipping > 0) {
 			snprintf(TempBuff, TEMP_SIZE, "\n... (skipping %d levels)\n\n", skipping);
-			TempBuff[TEMP_SIZE] = 0; // ensure NULL
+			TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 			sf_output(TempBuff);
 		}   
 	
@@ -1467,9 +1468,9 @@ void RTInternal_va(char *msg, va_list ap)
 	
 	gameover = TRUE;
 	snprintf(RTIbuf, 100, "\n   !!! Internal Error: %s\n", msg);
-	RTIbuf[99] = '\0';
+	RTIbuf[99] = 0;
 	vsnprintf(RTImsg, 100, msg, ap);
-	RTImsg[99] = '\0';
+	RTImsg[99] = 0;
 	
 	debug_msg(RTImsg);
 	
@@ -1488,7 +1489,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	char RTImsg[100];
 	
 	vsnprintf(RTImsg, 100, msg, ap);
-	RTImsg[99] = '\0';
+	RTImsg[99] = 0;
 	
 	if (crash_msg != NULL) {
 #ifdef EDOS
@@ -1563,7 +1564,7 @@ void BadSubscript(object subs, long length)
 		snprintf(subs_buff, 40, "%d", subs);
 	else
 		snprintf(subs_buff, 40, "%.10g", DBL_PTR(subs)->dbl);
-	subs_buff[40] = 0; // ensure NULL
+	subs_buff[39] = 0; // ensure NULL
 
 	RTFatal("subscript value %s is out of bounds, assigning to a sequence of length %ld",
 			subs_buff, length);
@@ -1587,7 +1588,7 @@ void RangeReading(object subs, int len)
 		snprintf(subs_buff, 40, "%d", subs);
 	else
 		snprintf(subs_buff, 40, "%.10g", DBL_PTR(subs)->dbl);
-	subs_buff[40] = 0; // ensure NULL
+	subs_buff[39] = 0; // ensure NULL
 	
 	RTFatal("subscript value %s is out of bounds, reading from a sequence of length %ld",
 			subs_buff, len);

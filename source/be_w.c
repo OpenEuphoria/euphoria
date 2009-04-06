@@ -577,7 +577,8 @@ void update_screen_string(char *s)
     col = screen_col - 1;
     if (line < 0 || line >= line_max) {
         snprintf(buff, 60, "line corrupted (%d), s is %s, col is %d",
-        line, s, col);
+				 line, s, col);
+		buff[59] = 0; // ensure NULL
         debug_msg(buff);
     }
     // we shouldn't get any \n's or \r's, but just in case:
@@ -587,7 +588,8 @@ void update_screen_string(char *s)
         screen_image[line][col].bg_color = current_bg_color;
         col += 1;
         if (col < 0 || col > col_max) {
-            snprintf(buff, 50, "col corrupted (%d)", col);
+			snprintf(buff, 60, "col corrupted (%d)", col);
+			buff[59] = 0; // ensure NULL
             debug_msg(buff);
         }
         i += 1;
@@ -735,8 +737,8 @@ void screen_output(IFILE f, char *out_string)
         len = strlen(out_string);
         if (collect == NULL) {
 			collect_free = 80;
-			collect_len = len + 1 + collect_free;
-            collect = EMalloc(collect_len);
+			collect_len = len + collect_free;
+            collect = EMalloc(collect_len + 1);
 			strlcpy(collect, out_string, collect_len);
 			//strcpy(collect, out_string);
             collect_next = len;
@@ -744,8 +746,8 @@ void screen_output(IFILE f, char *out_string)
         else {
             if (len > collect_free) {
 				collect_free = len + 200;
-				collect_len = collect_next + 1 + collect_free;
-                collect = ERealloc(collect, collect_len);
+				collect_len = collect_next + collect_free;
+                collect = ERealloc(collect, collect_len + 1);
 			} else {
 				collect_len = len;
 			}
@@ -987,8 +989,8 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 #endif
 
 #ifdef EUNIX
-    snprintf(lbuff, 20, "%d", line); lbuff[20] = '\0'; // ensure NULL
-    snprintf(cbuff, 20, "%d", col); cbuff[20] = '\0'; // ensure NULL
+    snprintf(lbuff, 20, "%d", line); lbuff[19] = '\0'; // ensure NULL
+    snprintf(cbuff, 20, "%d", col); cbuff[19] = '\0'; // ensure NULL
     // ANSI code
     iputs("\033[", stdout);
     iputs(lbuff, stdout);
