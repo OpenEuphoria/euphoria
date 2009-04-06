@@ -189,7 +189,9 @@ procedure do_test(sequence cmds)
 	integer failed = 0, total, status, comparison
 	object emake_outcome, files = {}
 	sequence filename, dexe, executable, cmd, ddir
-	sequence interpreter_options = "", translator_options = "", test_options = ""
+	sequence interpreter_options = ""
+	sequence translator_options = ""
+	sequence test_options = ""
 	sequence translator = "", library = "", compiler = ""
 	sequence directory
 	sequence control_err, interpreter_os_name
@@ -226,58 +228,55 @@ procedure do_test(sequence cmds)
 
 
 	integer ec
-	while ec and ec < length(cmds) with entry do
-		translator = cmds[ec+1]
-		cmds = cmds[1..ec-1] & cmds[ec+2..$]
+	while ec and ec <= length(cmds) with entry do
+		if ec < length(cmds) then
+			if cmds[ec+1][1] != '-' then
+				translator = cmds[ec+1]
+				cmds = cmds[1..ec-1] & cmds[ec+2..$]
+			else
+				translator = "-"
+				cmds = cmds[1..ec-1] & cmds[ec+1..$]
+			end if
+		else
+			translator = "-"
+			cmds = cmds[1..ec-1] & cmds[ec+1..$]
+		end if
 	entry
 		ec = find("-ec", cmds)
 	end while
+	
+	if equal(translator, "-") then
+	ifdef UNIX then
+		translator = "euc"
+		
+	elsifdef WIN32 then
+		translator = "euc.exe"
+		
+	elsedef
+		translator = "eucd.exe"
+	end ifdef
+	end if	
 
 	-- Check for various executable names to see if we need -CON or not
-	-- We MUST try old nmaes so you can test old code.  Will remove after the
-	-- next alpha release.
 	
 	-- lower for Windows or DOS, lower for all.  K.I.S.S.
 
-	integer dos_or_win = find(platform(),{WIN32,DOS32})
-	sequence l_translator = lower(translator)
-	sequence translator_base = filebase(l_translator)
-	
-	if equal( "eucd", translator_base ) or ( length(translator) = 0 and platform() = DOS32 ) then
-		-- NOOP
-
-	elsif (equal( "euc", translator_base ) and dos_or_win) or
-		(length(translator) = 0 and platform() = WIN32 )
-	then
-		translator_options &= " -CON"
-
-	elsif equal( "euc", translator_base ) then
-		-- NOOP
-
-	elsif equal( "ec", translator_base ) then
-		-- NOOP
-
-	elsif length(translator) = 0 then
-		-- NOOP
-
-	else
-		printf(2, "Cannot determine translator's platform.", {} )
-		abort(1)
-	end if                                  
-	
-	sequence interpreter_base = lower(filebase(executable))
-	if match("euid", interpreter_base) then
-		interpreter_os_name = "DOS32"
-	else
-		ifdef WIN32 then
+	ifdef UNIX then
+		interpreter_os_name = "UNIX"
+	elsifdef WIN32 or DOS32 then
+		if length(translator) > 0 then
+			translator_options &= " -CON"
+		end if
+		
+		if equal("euid", lower(filebase(executable))) then
+			interpreter_os_name = "DOS32"
+		else
 			interpreter_os_name = "WIN32"
-		elsifdef UNIX then
-			interpreter_os_name = "UNIX"
-		elsedef
-			printf(2, "Cannot determine interpreter's platform.", {})
-			abort(1)
-		end ifdef
-	end if
+		end if
+	elsedef
+		puts(2, "eutest is only supported on Unix, MS-DOS, and Windows.\n")
+		abort(1)
+	end ifdef
 
 	integer cci
 	
