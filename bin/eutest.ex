@@ -243,25 +243,20 @@ procedure do_test(sequence cmds)
 	sequence l_translator = lower(translator)
 	sequence translator_base = filebase(l_translator)
 	
-	if equal( "eucd", translator_base ) or
-	   ( length(translator) = 0 and platform() = DOS32 )
-	then
+	if equal( "eucd", translator_base ) or ( length(translator) = 0 and platform() = DOS32 ) then
 		-- NOOP
-		
-	elsif (equal( "ecw", translator_base ) and dos_or_win) or
-		  (equal( "euc", translator_base ) and dos_or_win ) or
-		  (length(translator) = 0 and platform() = WIN32 ) then
+
+	elsif (equal( "euc", translator_base ) and dos_or_win) or
+		(length(translator) = 0 and platform() = WIN32 )
+	then
 		translator_options &= " -CON"
-		
-	elsif equal( "ecu", translator_base ) or
-		  equal( "euc", translator_base )  or
-		  ( length(translator) = 0 and find( platform(), { LINUX, FREEBSD, OSX, SUNOS, OPENBSD } ) ) 
-	then
+
+	elsif equal( "euc", translator_base ) then
 		-- NOOP
-		
+
 	elsif equal( "ec", translator_base ) then
 		-- NOOP
-		
+
 	else
 		printf(2, "Cannot determine translator's platform.", {} )
 		abort(1)
