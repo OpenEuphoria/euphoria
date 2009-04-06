@@ -503,7 +503,7 @@ char *long_to_short(char *long_name)
 	}
 
 	// convert long filename to DOS 8.3 short filename
-	strlcpy(long_buff_ptr, long_name, sizeof(long_buff_ptr));
+	strcpy(long_buff_ptr, long_name);
 	short_buff_ptr[0] = 0;
 
 	reglist.eax = 0x7160; // major code
