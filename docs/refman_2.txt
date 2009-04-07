@@ -2923,6 +2923,7 @@ multiple states.
 | off      | [[:batch|with_batch]]        |
 | on       | [[:type_check]]              |
 | on       | [[:indirect_includes]]       |
+| on       | [[:inline|with_inline]]      |
 
 
 ##with## - This turns **on** one of the options while ##without## turns
@@ -3083,6 +3084,7 @@ Initially, only the following warnings are enabled:
 
 This set can be changed using -W or -X command line switches.
 
+@[with_define]
 ===== with / without define
 
 As mentioned about [[:ifdef statement]], this top level statement is used to
@@ -3100,12 +3102,11 @@ The following tags have a predefined meaning in Euphoria:
             ##safe.e## when defined. Switching mode by renaming files **//no longer works//**.
 * EU400:    defined on all versions of the interpreter above 4.0
 
-The name of a tag may contain any character that are not white space, including ones that
-would not be legal in an identifier. However, for consistency, using identifier-like,
-uppercase words is recommended. "MY TAG" is not a valid tag (TAG has not been declared), but
-"MY@TAG" or "MY�TAG" is. The latter is not recommended because it may display differently on
-different computers.
+The name of a tag may contain any character that is a valid
+identifier character, that is ##A-Za-z0-9_##. It is not required, but
+by convention defined words are upper case.
 
+@[with_inline]
 ==== with / without inline
 
 This directive allows coders some flexibility with inlined routines.  The default is
