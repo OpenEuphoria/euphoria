@@ -1383,14 +1383,33 @@ procedure write_makefile()
 			puts(doit, "CC     = wcc386" & HOSTNL)
 			puts(doit, "CFLAGS = /i$(%EUDIR) /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" &
 				HOSTNL)
-			puts(doit, "LINKER = wlink" & HOSTNL)
 			puts(doit, "LFLAGS = SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
 			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
 			puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib LIBRARY ws2_32" & HOSTNL)
 		   	puts(doit, HOSTNL)
 
 		elsif TUNIX or gcc_option then
-			puts(doit, "# Not yet complete for Unix/MinGW" & HOSTNL)
+			puts(doit, "CC     = gcc" & HOSTNL)
+			if TWINDOWS then
+			-- TODO add support for console apps
+			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O3 -Os -mno-cygwin -mwindows" &
+				HOSTNL)
+			else
+			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O2" &
+				HOSTNL)
+			end if
+			if TWINDOWS then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lws2_32" & HOSTNL)
+			elsif TSUNOS then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lsocket -lresolv -lnsl" & HOSTNL)
+			elsif TOSX then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lresolv" & HOSTNL)
+			elsif TLINUX then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -ldl -lresolv -lnsl" & HOSTNL)
+			else -- OPENBSD, NETBSD, FREEBSD
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm" & HOSTNL)
+			end if
+		   	puts(doit, HOSTNL)
 		end if
 	end if
 
@@ -1413,8 +1432,22 @@ procedure write_makefile()
 			puts  (doit, ".c.obj: .autodepend" & HOSTNL)
 			puts  (doit, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
 
-		elsif TUNIX or gcc_option then
-			puts(doit, "# Not yet complete for Unix/MinGW" & HOSTNL)
+		elsif TUNIX or (TWINDOWS and gcc_option) then
+			printf(doit, "%s: $(%s_OBJECTS)" & HOSTNL, { lower(file0), upper(file0) })
+			printf(doit, "\t$(CC) $(LFLAGS) -o %s" & HOSTNL, {lower(file0)})
+			puts  (doit, HOSTNL)
+			printf(doit, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { lower(file0), lower(file0) })
+			puts  (doit, HOSTNL)
+			printf(doit, "%s-clean: " & HOSTNL, { lower(file0) })
+			printf(doit, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+			puts  (doit, HOSTNL)
+			printf(doit, "%s-clean-all: %s-clean" & HOSTNL,
+				{ lower(file0), lower(file0) })
+			printf(doit, "\trm -rf $(%s_SOURCES)" & HOSTNL, { upper(file0) })
+			puts  (doit, HOSTNL)
+			puts  (doit, "%.o: %.c" & HOSTNL)
+			puts  (doit, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
+
 		end if
 	end if
 end procedure
