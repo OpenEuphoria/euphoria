@@ -552,7 +552,6 @@ void call_crash_routines()
 #define CCR_len (16)
 	TempErrName = (char *)malloc(CCR_len);
 	strlcpy(TempErrName, "ex_crash.err", CCR_len);
-	TempErrName[CCR_len - 1] = '\0';
 
 #ifndef ERUNTIME
 	// clear the interpreter call stack
@@ -4987,7 +4986,7 @@ static void show_prof_line(IFILE f, long i)
 	}
 	else {
 #define SPL_len (20)
-		char buff[SPL_len]; // warning hardcoded size values in snprintfs below
+		char buff[SPL_len];
 		if (slist[i].options & OP_PROFILE_TIME) {
 			snprintf(buff, SPL_len, "%6.2f |",
 					 (double)(*(int *)slist[i].src)*100.0 / (double)total_samples);

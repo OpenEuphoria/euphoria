@@ -207,7 +207,6 @@ void be_init()
 #define TempErrName_len (30)
 	TempErrName = (char *)malloc(TempErrName_len); // uses malloc, not EMalloc
 	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
-	TempErrName[TempErrName_len - 1] = 0; // ensure a NULL
 	
 	eudir = getenv("EUDIR");
 	if (eudir == NULL) {

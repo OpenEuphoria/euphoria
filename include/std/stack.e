@@ -346,6 +346,43 @@ public procedure dup(stack sk)
 end procedure
 
 --**
+-- Set a value on the stack
+--
+-- Parameters:
+--   # ##sk##: the stack being queried
+--   # ##idx##: an integer, the place to inspect.
+--   # ##val##: an object, the value to place on the stack
+--
+-- Errors:
+-- If the supplied value of ##idx## does not correspond to an existing element, an error occurs.
+--
+-- Comments:
+-- ##idx## may be negative, in which case it refers to an element counted backwards. Thus, 0 stands for the last element.
+--
+-- In a ##FIFO## type stack, the first object is the one popped last. In a ##FILO## stack, it is popped first. The distinction applies for all possible values of ##idx##.
+--
+-- See Also:
+-- [[:size]], [[:top]]
+
+public procedure set(stack sk, integer idx, object val)
+	sequence o = ram_space[sk]
+
+	if idx <= 0 then
+		-- number from top
+		idx = length(o[data]) + idx
+		if idx < 1 then
+			crash("stack underflow in at()", {})
+		end if
+	else
+		if idx > length(o[data]) then
+			crash("stack overflow in at()", {})
+		end if
+	end if
+	
+	ram_space[sk][data][idx] = val
+end procedure
+
+--**
 -- Wipe out a stack.
 --
 -- Parameters:

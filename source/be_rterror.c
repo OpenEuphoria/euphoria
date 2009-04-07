@@ -332,14 +332,11 @@ static void DisplayLine(long n, int highlight)
 #else
 		strlcat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #endif
-		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	else {
 		strlcat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
-		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL (have to do because of next call)
 		strlcat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
-		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
@@ -621,7 +618,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	int col, found, inc, len_required;
 	object val, screen_val;
 #define DV_len (40)
-	char val_string[DV_len]; // Warning snprintf/strncpy uses hardcoded size value below
+	char val_string[DV_len];
 	int add_char, iv;
 		
 	add_char = 0;
@@ -1586,7 +1583,7 @@ void BadSubscript(object subs, long length)
 /* report a subscript violation */
 {
 #define BadSubscript_bufflen (40)
-	char subs_buff[BadSubscript_bufflen]; // warning hardcoded size below in snprintfs
+	char subs_buff[BadSubscript_bufflen];
 	
 	if (IS_ATOM_INT(subs))
 		snprintf(subs_buff, BadSubscript_bufflen, "%d", subs);
@@ -1611,7 +1608,7 @@ void SubsNotAtom()
 void RangeReading(object subs, int len)
 {
 #define RangeReading_buflen (40)
-	char subs_buff[RangeReading_buflen]; // warning hardcoded size below in snprintfs
+	char subs_buff[RangeReading_buflen];
 	
 	if (IS_ATOM_INT(subs))
 		snprintf(subs_buff, RangeReading_buflen, "%d", subs);

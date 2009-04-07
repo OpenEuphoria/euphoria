@@ -431,7 +431,7 @@ static void MyWriteConsole(char *string, int nchars)
 	}
 
     strlcpy(old_string, string, nchars);
-	*(old_string + nchars) = '\0';
+
 	// Blank out any EOL characters
     for (i = 0; i < nchars; i++)
     {
@@ -584,7 +584,7 @@ void update_screen_string(char *s)
 {
     int i, col, line;
 #define USS_len (60)
-    char buff[USS_len]; // Warning, snprintf calls below use a hardcoded size value
+    char buff[USS_len];
 
     i = 0;
     line = screen_line - 1;
@@ -978,8 +978,8 @@ void SetPosition(int line, int col)
 {
 #ifdef EUNIX
 #define SP_buflen (20)
-    char lbuff[SP_buflen]; // Warning snprintf uses hardcoded size value below
-    char cbuff[SP_buflen]; // Warning snprintf uses hardcoded size value below
+    char lbuff[SP_buflen];
+    char cbuff[SP_buflen];
 #endif
 
 #ifdef EDOS

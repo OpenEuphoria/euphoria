@@ -3130,7 +3130,6 @@ static object Dir(object x)
 		strchr(path, '?') == NULL)) {
 		// it's a single directory entry - add *.*
 		strlcat(path, "\\*.*", path_size - strlen(path));
-		path[path_size] = 0; // ensure NULL
 #ifdef EBORLAND
 		dirp = findfirst(path, &direntp, bits);
 #else
