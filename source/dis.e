@@ -1660,7 +1660,7 @@ function dis_crash( object c )
 end function
 crash_routine(routine_id("dis_crash"))
 
-global function extract_options(sequence s)
+export function extract_options(sequence s)
 	return s
 end function
 
@@ -1669,8 +1669,7 @@ procedure set_html()
 	generate_html = 1
 end procedure
 include std/pretty.e
-global procedure BackEnd( object ignore )
-
+export procedure BackEnd( object ignore )
 	sequence opts = {
 		{ 0, "html", "html output", NO_PARAMETER, routine_id("set_html") },
 		{ "d", "dir", "output directory", HAS_PARAMETER, routine_id("set_out_dir") },
