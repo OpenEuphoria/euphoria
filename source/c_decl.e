@@ -18,6 +18,7 @@ include platform.e
 include reswords.e
 include symtab.e
 include compile.e
+include error.e
 
 with type_check
 -- Translator

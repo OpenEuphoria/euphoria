@@ -5,6 +5,7 @@ include reswords.e
 include global.e
 include symtab.e
 include fwdref.e
+include error.e
 
 export enum
 	FIXED_SIZE,

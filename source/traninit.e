@@ -26,6 +26,7 @@ include c_decl.e
 include compile.e
 include cominit.e
 include pathopen.e
+include error.e
 
 -- true if we want to force the user to choose the compiler
 constant FORCE_CHOOSE = FALSE

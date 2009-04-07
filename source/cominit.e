@@ -8,10 +8,9 @@ include euphoria/info.e
 include global.e
 include pathopen.e
 include common.e
+include error.e
 
-sequence switches, switch_cache
-switches = {}
-switch_cache = {}
+sequence switches = {}, switch_cache = {}
 
 -- These flags are available for both the interpreter and translator
 global constant COMMON_OPTIONS = {

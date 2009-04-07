@@ -11,6 +11,7 @@ include symtab.e
 include scanner.e
 include fwdref.e
 include parser.e
+include error.e
 
 export integer op_info1, op_info2
 export integer optimized_while

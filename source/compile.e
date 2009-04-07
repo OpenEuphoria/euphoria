@@ -23,6 +23,7 @@ include emit.e
 include opnames.e
 include symtab.e
 include reswords.e
+include error.e
 
 integer np, pc
 

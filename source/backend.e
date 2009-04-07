@@ -11,6 +11,7 @@ include common.e
 include mode.e as mode
 include intinit.e
 include reswords.e
+include error.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then

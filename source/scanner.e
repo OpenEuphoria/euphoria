@@ -15,6 +15,7 @@ include reswords.e
 include symtab.e
 include scinot.e
 include fwdref.e
+include error.e
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
 constant MAX_FILE = 256       -- maximum number of source files
