@@ -14,6 +14,7 @@ include std/io.e
 include std/sequence.e
 include std/text.e
 
+include global.e
 include common.e
 include reswords.e
 include compress.e
@@ -21,8 +22,7 @@ include cominit.e
 include pathopen.e
 
 sequence misc
-integer il_file
-il_file = 0
+integer il_file = 0
 
 include backend.e
 

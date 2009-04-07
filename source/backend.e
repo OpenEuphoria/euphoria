@@ -6,6 +6,7 @@
 
 include std/machine.e
 
+include global.e
 include common.e
 include mode.e as mode
 include intinit.e

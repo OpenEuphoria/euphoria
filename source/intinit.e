@@ -1,11 +1,12 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Common initialization (command line options)
+include std/text.e
+
+include global.e
 include cominit.e
 include error.e
 include pathopen.e
-
-include std/text.e
 
 global procedure intoptions()
 -- set interpreter command-line options

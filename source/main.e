@@ -10,6 +10,7 @@ include std/console.e
 
 include euphoria/info.e
 
+include global.e
 include pathopen.e
 include parser.e
 include mode.e

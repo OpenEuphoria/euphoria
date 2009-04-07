@@ -11,6 +11,7 @@ ifdef DOS32 then
 	include std\dos\interrup.e
 end ifdef
 
+include global.e
 include common.e
 include platform.e
 
