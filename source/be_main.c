@@ -12,35 +12,31 @@
 #include <stdio.h>
 #include <time.h>
 #ifdef EWINDOWS
-#include <windows.h>
-#include <limits.h>
+#  include <windows.h>
+#  include <limits.h>
 #endif
 #ifdef EUNIX
-#include <unistd.h>
-#ifdef EBSD
-#include <limits.h>
+#  include <unistd.h>
+#  ifdef EBSD
+#    include <limits.h>
+#  else
+#    include <linux/limits.h>
+#  endif
+#  include <sys/types.h>
+#  include <sys/stat.h>
 #else
-#include <linux/limits.h>
-#endif
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#ifdef EBORLAND
-#include <float.h>
-#else
-#ifdef EMINGW
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#include <sys\types.h>
-#include <sys\stat.h>
-#endif
-#if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
-#include <i86.h>
-#include <bios.h>
-#include <graph.h>
-#endif
-#endif
+#  ifdef EMINGW
+#    include <sys/types.h>
+#    include <sys/stat.h>
+#  else
+#    include <sys\types.h>
+#    include <sys\stat.h>
+#  endif
+#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#    include <i86.h>
+#    include <bios.h>
+#    include <graph.h>
+#  endif
 #endif
 #include <fcntl.h>
 #include <string.h>
@@ -198,12 +194,6 @@ void be_init()
 #endif
 #endif
 
-#ifdef EWINDOWS
-	
-#ifdef EBORLAND
-	_control87(MCW_EM,MCW_EM);
-#endif
-#endif
 #define TempErrName_len (30)
 	TempErrName = (char *)malloc(TempErrName_len); // uses malloc, not EMalloc
 	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
@@ -270,4 +260,3 @@ void Stats()
 	printf("bad time-profile samples: %d\n", bad_samples);
 }
 #endif
-
