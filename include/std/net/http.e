@@ -825,7 +825,7 @@ public function get_url(sequence url)
 	url_data = parse_url(url)
 	if atom(url_data) then return 0 end if
 
-	addrinfo = gethostbyname(url_data[URL_HTTP_DOMAIN])
+	addrinfo = host_by_name(url_data[URL_HTTP_DOMAIN])
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return 0
 	end if

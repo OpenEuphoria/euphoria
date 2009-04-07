@@ -587,7 +587,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- object data = gethostbyname("www.google.com")
+-- object data = host_by_name("www.google.com")
 -- -- data = {
 -- --   "www.l.google.com",
 -- --   {
@@ -603,7 +603,7 @@ end function
 -- </eucode>
 --
 
-public function gethostbyname(sequence name)
+public function host_by_name(sequence name)
 	return machine_func(M_SOCK_GETHOSTBYNAME, { name })
 end function
 
@@ -626,7 +626,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- object data = gethostbyaddr("74.125.93.147")
+-- object data = host_by_addr("74.125.93.147")
 -- -- data = {
 -- --   "www.l.google.com",
 -- --   {
@@ -642,6 +642,6 @@ end function
 -- </eucode>
 --
 
-public function gethostbyaddr(sequence address)
+public function host_by_addr(sequence address)
 	return machine_func(M_SOCK_GETHOSTBYADDR, { address })
 end function
