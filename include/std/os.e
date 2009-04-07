@@ -51,7 +51,7 @@ public constant
 --   [[:platform]].
 --
 --   In most situations you are better off to test the host platform by using
---   the [[:ifdef statement]]. It is both more accurate and faster.
+--   the [[:ifdef statement]]. It is both more precise and faster.
 --
 
 --****

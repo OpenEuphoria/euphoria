@@ -12,9 +12,17 @@ If you don't like **ed**, you have many alternatives. David Cuny's **EE
 editor** is a DOS-based editor for Euphoria that's also written in Euphoria. It
 has a friendly mouse-based user interface with drop down menus etc. It's
 available from the RDS Web site. There are several other Euphoria-oriented
-editors that run on DOS, Windows, Linux, FreeBSD, OSX, SUNOS, OPENBSD. 
-Check the **Editors** section of our Archive. In fact, //any// text editor can 
-be used to edit a Euphoria program, including DOS Edit or Windows NotePad.
+editors that run on DOS, Windows and support files for use with other editors
+with EUPHORIA.
+
+If you search for **Editor** in our Archive, you'll find many editors written
+**in** EUPHORIA or **for** EUPHORIA.  Some written **in** EUPHORIA and *for* EUPHORIA.
+In fact, //any// text editor can be used to edit a Euphoria program, 
+such as vi, jEdit, Emacs, and even dinasaur applications like DOS Edit and Windows NotePad.
+
+Among the editors you will find Judith's IDE and wxIDE: Integrated Development Enviroments.
+
+Do you still want to use this ##ed##?  Then read on...
 
 === Summary
 
@@ -166,9 +174,9 @@ DOS 8.3 length. (but see Platform below)
 
 === Line Terminator
 
-The end-of-line terminator on Linux/FreeBSD is simply ##\n##. On DOS and
-Windows, text files have lines ending with ##\r\n##.  If you copy a DOS or
-Windows file to Linux/FreeBSD and try to modify it, **ed** will give you a
+The end-of-line terminator on Linux/FreeBSD/OSX/SUNOS/OPENBSD/NETBSD 
+is simply ##\n##. On DOS and Windows, text files have lines ending with ##\r\n##.  
+If you copy a DOS or Windows file to Linux/FreeBSD and try to modify it, **ed** will give you a
 choice of either keeping the ##\r\n## terminators, or saving the file with
 ##\n## terminators.
 
