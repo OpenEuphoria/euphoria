@@ -19,24 +19,24 @@ include compile.e
 
 with type_check
 -- Translator
-global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
+export constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
 
-global constant LAST_PASS = 7        -- number of Translator passes
+export constant LAST_PASS = 7        -- number of Translator passes
 
-global integer Pass   -- the pass number, 1 ... LAST_PASS 
+export integer Pass   -- the pass number, 1 ... LAST_PASS 
 
 -- What we currently know locally in this basic block about var values etc.
-global constant BB_VAR = 1,      -- the var / type / constant
+export constant BB_VAR = 1,      -- the var / type / constant
 		 BB_TYPE = 2,     -- main type
 		 BB_ELEM = 3,     -- element type for sequences
 		 BB_SEQLEN = 4,   -- sequence length
 		 BB_OBJ = 5,      -- integer value min/max
 		 BB_DELETE = 6    -- may have a delete routine
-global sequence BB_info = {}
+export sequence BB_info = {}
 
-global integer LeftSym = FALSE   -- to force name to appear, not value
+export integer LeftSym = FALSE   -- to force name to appear, not value
 
-global boolean 
+export boolean 
 	dll_option = FALSE,
 	con_option = FALSE,
 	fastfp = FALSE,
@@ -49,10 +49,10 @@ sequence files_to_delete = {
 	"init-.c"
 }
 
-global boolean keep = FALSE -- emake should keep .c files or delete?
-global boolean debug_option = FALSE
-global sequence user_library = ""
-global integer total_stack_size = -1 -- default size for OPTION STACK
+export boolean keep = FALSE -- emake should keep .c files or delete?
+export boolean debug_option = FALSE
+export sequence user_library = ""
+export integer total_stack_size = -1 -- default size for OPTION STACK
 
 -- first check EUCOMPILEDIR, to allow the user to override and use a different
 -- directory than EUDIR. THen use EUDIR, then default to /usr/share/euphoria
@@ -92,7 +92,7 @@ procedure delete_files(integer doit, sequence objextn)
 
 end procedure
 
-global procedure NewBB(integer a_call, integer mask, symtab_index sub)
+export procedure NewBB(integer a_call, integer mask, symtab_index sub)
 -- Start a new Basic Block at a label or after a subroutine call 
 
 	symtab_index s
@@ -121,7 +121,7 @@ global procedure NewBB(integer a_call, integer mask, symtab_index sub)
 	end if 
 end procedure
 
-global function BB_var_obj(integer var)
+export function BB_var_obj(integer var)
 -- return the local min/max value of an integer, based on BB info.
 	sequence fail
 	
@@ -138,7 +138,7 @@ global function BB_var_obj(integer var)
 	return fail
 end function
 
-global function BB_var_type(integer var)
+export function BB_var_type(integer var)
 -- return the local type of a var, based on BB info (only) 
 	for i = length(BB_info) to 1 by -1 do
 		if BB_info[i][BB_VAR] = var and
@@ -157,7 +157,7 @@ global function BB_var_type(integer var)
 	return TYPE_OBJECT
 end function
 
-global function GType(symtab_index s)  
+export function GType(symtab_index s)  
 -- return our best estimate of the current type of a var or temp 
 	integer t, local_t
 	
@@ -200,7 +200,7 @@ export function HasDelete( symtab_index s )
 	return SymTab[s][S_HAS_DELETE]
 end function
 
-global function ObjValue(symtab_index s) 
+export function ObjValue(symtab_index s) 
 -- the value of an integer constant or variable 
 	sequence t, local_t
 
@@ -223,7 +223,7 @@ global function ObjValue(symtab_index s)
 	end if
 end function
 
-global function TypeIs(integer x, object types) 
+export function TypeIs(integer x, object types) 
 	if atom(types) then
 		return GType(x) = types
 	else
@@ -231,7 +231,7 @@ global function TypeIs(integer x, object types)
 	end if
 end function
 
-global function TypeIsNot(integer x, object types) 
+export function TypeIsNot(integer x, object types) 
 	if atom(types) then
 		return GType(x) != types
 	else
@@ -239,7 +239,7 @@ global function TypeIsNot(integer x, object types)
 	end if
 end function
 
-global function or_type(integer t1, integer t2)
+export function or_type(integer t1, integer t2)
 -- OR two types to get the (least general) type that includes both 
 	if t1 = TYPE_NULL then
 		return t2
@@ -290,7 +290,7 @@ global function or_type(integer t1, integer t2)
 	end if
 end function
 
-global procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
+export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 -- Set the type and value, or sequence length and element type,
 -- of a temp or var s locally within a BB. 
 
@@ -471,7 +471,7 @@ global procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 end procedure
 
 
-global function ok_name(sequence name)
+export function ok_name(sequence name)
 -- return a different name to avoid conflicts with certain C compiler
 -- reserved words. Only needed for private variables (no file number attached). 
 -- split into two lists for speed 
@@ -518,7 +518,7 @@ global function ok_name(sequence name)
 	end if
 end function
 
-global procedure CName(symtab_index s)
+export procedure CName(symtab_index s)
 -- display the C name or literal value of an operand 
 	object v
 	
@@ -572,7 +572,7 @@ global procedure CName(symtab_index s)
 end procedure
 with warning
 
-global procedure c_stmt(sequence stmt, object arg)
+export procedure c_stmt(sequence stmt, object arg)
 -- output a C statement with replacements for @ or @1 @2 @3, ... @9
 	integer argcount, i
 	
@@ -627,14 +627,14 @@ global procedure c_stmt(sequence stmt, object arg)
 	adjust_indent_after(stmt)
 end procedure
 
-global procedure c_stmt0(sequence stmt)
+export procedure c_stmt0(sequence stmt)
 -- output a C statement with no arguments
 	if emit_c_output then
 		c_stmt(stmt, {})
 	end if
 end procedure
 
-global procedure DeclareFileVars()
+export procedure DeclareFileVars()
 -- emit C declaration for each local and global constant and var 
 	symtab_index s
 	symtab_entry eentry
@@ -672,7 +672,7 @@ end procedure
    
 integer deleted_routines = 0
 
-global procedure PromoteTypeInfo()
+export procedure PromoteTypeInfo()
 -- at the end of each pass, certain info becomes valid 
 	symtab_index s
 	
@@ -779,7 +779,7 @@ global procedure PromoteTypeInfo()
 	end for
 end procedure
 
-global procedure DeclareRoutineList()
+export procedure DeclareRoutineList()
 -- Declare the list of routines for routine_id search 
 	symtab_index s, p
 	integer first, seq_num
@@ -890,7 +890,7 @@ global procedure DeclareRoutineList()
 end procedure   
 
 
-global procedure DeclareNameSpaceList()
+export procedure DeclareNameSpaceList()
 -- Declare the list of namespace qualifiers for routine_id search 
 	symtab_index s
 	integer first, seq_num
@@ -978,13 +978,13 @@ procedure Write_def_file(integer def_file)
 	end while
 end procedure
 
-global procedure version()
+export procedure version()
 	c_puts("// Euphoria To C version " & TRANSLATOR_VERSION & "\n")
 end procedure
 
 sequence c_opts
 
-global procedure new_c_file(sequence name)
+export procedure new_c_file(sequence name)
 -- end the old .c file and start a new one 
 	cfile_size = 0
 	if Pass != LAST_PASS then
@@ -1110,7 +1110,7 @@ sequence cc_name
 sequence file0
 sequence prepared_file0
 
-global procedure start_emake()
+export procedure start_emake()
 -- start creating emake.bat     
 	sequence debug_flag = ""
 	
@@ -1392,7 +1392,7 @@ function truncate_to_83( sequence lfn )
 	end if
 end function
 
-global procedure finish_emake()
+export procedure finish_emake()
 -- finish emake.bat 
 	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file, arguments
 	object bin_path
@@ -1674,7 +1674,7 @@ global procedure finish_emake()
 	end ifdef
 end procedure
 
-global procedure GenerateUserRoutines()
+export procedure GenerateUserRoutines()
 -- walk through the user-defined routines, computing types and
 -- optionally generating code 
 	symtab_index s, sp
