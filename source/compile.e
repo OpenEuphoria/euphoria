@@ -22,6 +22,7 @@ include scanner.e
 include emit.e
 include opnames.e
 include symtab.e
+include reswords.e
 
 integer np, pc
 

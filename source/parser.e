@@ -16,6 +16,7 @@ include scanner.e
 include fwdref.e
 include common.e
 include inline.e
+include reswords.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile

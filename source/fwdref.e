@@ -9,6 +9,7 @@ include symtab.e
 include error.e
 include scanner.e
 include shift.e
+include reswords.e
 
 -- Tracking forward references
 sequence 

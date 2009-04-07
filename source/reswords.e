@@ -2,7 +2,7 @@
 --
 -- IL opcodes, scanner tokens etc.
 
-global constant 
+export constant 
 	LESS                = 1,  -- keep relops consecutive LESS..GREATER, NOT
 	GREATEREQ           = 2,
 	EQUALS              = 3,
@@ -223,7 +223,7 @@ global constant
 --
 -- codes for characters that are simply returned to the parser 
 -- without any processing <= -20
-global constant
+export constant
 	ILLEGAL_CHAR  = -20,
 	END_OF_FILE   = -21,
 	DOLLAR        = -22,
@@ -239,7 +239,7 @@ global constant
 
 -- codes for classes of characters that the scanner 
 -- has to process in some way
-global constant
+export constant
 	NUMBER_SIGN  = -11,
 	KEYWORD      = -10,
 	BUILTIN      = -9,
@@ -253,12 +253,12 @@ global constant
 	BANG         = -1
 
 -- other scanner tokens 
-global constant VARIABLE = -100
+export constant VARIABLE = -100
 
-global constant END_OF_FILE_CHAR = 26 -- use this char to indicate EOF
+export constant END_OF_FILE_CHAR = 26 -- use this char to indicate EOF
 
 -- other keywords
-global enum 
+export enum 
 	END = 402,
 	TO,
 	BY,
@@ -291,7 +291,7 @@ global enum
 	FALLTHRU,
 	ROUTINE
 
-global enum 
+export enum 
 	FUNC = 501,
 	ATOM,
 	STRING,

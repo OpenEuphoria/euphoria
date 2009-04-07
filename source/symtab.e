@@ -9,6 +9,7 @@ include c_out.e
 include keylist.e
 include error.e
 include fwdref.e
+include reswords.e
 
 constant NBUCKETS = 2003  -- prime helps
 
