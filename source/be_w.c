@@ -382,7 +382,8 @@ int MyReadConsoleChar()
     return buff[0];
 }
 #endif
-
+static char *old_string = 0;
+static int  oldstr_len = 0;
 static void MyWriteConsole(char *string, int nchars)
 // write a string of plain characters to the console and
 // update the cursor position
@@ -390,11 +391,11 @@ static void MyWriteConsole(char *string, int nchars)
     int i;
     static int first = 0;
     CONSOLE_SCREEN_BUFFER_INFO console_info;
-    char old_string[82];
+
     COORD ch;
 
     show_console();
-    /* hack - if we are exwc, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
+    /* hack - if we are eui, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
     GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
     if ( (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1) &&
     (already_had_console==1) && !first) {
@@ -417,19 +418,31 @@ static void MyWriteConsole(char *string, int nchars)
 
     ch.X = screen_loc.Left;
     ch.Y = screen_loc.Top;
+	if (old_string == 0) {
+		oldstr_len = max(nchars + 3, 256);
+		old_string = (char *)malloc(oldstr_len);
+		if (old_string == 0) return;
+	}
 
-    strlcpy(old_string, string, 80);
+	if (nchars > oldstr_len) {
+		oldstr_len = nchars + 3;
+		old_string = (char *)realloc(old_string, oldstr_len);
+		if (old_string == 0) return;
+	}
 
+    strlcpy(old_string, string, nchars);
+	*(old_string + nchars) = '\0';
+	// Blank out any EOL characters
     for (i = 0; i < nchars; i++)
     {
         if (old_string[i] == '\n')
             old_string[i] = ' ';
-        if (old_string[i] == '\r')
+        else if (old_string[i] == '\r')
             old_string[i] = ' ';
     }
 
     SetConsoleCursorPosition(console_output, ch);
-    WriteConsole(console_output, string, nchars, &i, NULL);
+    WriteConsole(console_output, old_string, nchars, &i, NULL);
     SetConsoleCursorPosition(console_output, ch);
 
     } else {
@@ -570,15 +583,16 @@ void update_screen_string(char *s)
 // record that a string of characters was written to the screen
 {
     int i, col, line;
-    char buff[60]; // Warning, snprintf calls below use a hardcoded size value
+#define USS_len (60)
+    char buff[USS_len]; // Warning, snprintf calls below use a hardcoded size value
 
     i = 0;
     line = screen_line - 1;
     col = screen_col - 1;
     if (line < 0 || line >= line_max) {
-        snprintf(buff, 60, "line corrupted (%d), s is %s, col is %d",
+        snprintf(buff, USS_len, "line corrupted (%d), s is %s, col is %d",
 				 line, s, col);
-		buff[59] = 0; // ensure NULL
+		buff[USS_len - 1] = 0; // ensure NULL
         debug_msg(buff);
     }
     // we shouldn't get any \n's or \r's, but just in case:
@@ -588,8 +602,8 @@ void update_screen_string(char *s)
         screen_image[line][col].bg_color = current_bg_color;
         col += 1;
         if (col < 0 || col > col_max) {
-			snprintf(buff, 60, "col corrupted (%d)", col);
-			buff[59] = 0; // ensure NULL
+			snprintf(buff, USS_len, "col corrupted (%d)", col);
+			buff[USS_len - 1] = 0; // ensure NULL
             debug_msg(buff);
         }
         i += 1;
@@ -740,7 +754,6 @@ void screen_output(IFILE f, char *out_string)
 			collect_len = len + collect_free;
             collect = EMalloc(collect_len + 1);
 			strlcpy(collect, out_string, collect_len);
-			//strcpy(collect, out_string);
             collect_next = len;
         }
         else {
@@ -751,7 +764,7 @@ void screen_output(IFILE f, char *out_string)
 			} else {
 				collect_len = len;
 			}
-			//strlcpy(collect+collect_next, out_string, collect_len);
+			// safe to use strcpy here 'cos we already checked the remaining length.
 			strcpy(collect+collect_next, out_string);
             collect_free -= len;
             collect_next += len;
@@ -804,10 +817,9 @@ void screen_output_va(IFILE f, char *out_string, va_list ap)
 {
 	int nsize;
 	char * buf;
-	char dummy[1];
 
 	// figure out how long the string will be
-	nsize = vsnprintf(dummy, 0, out_string, ap);
+	nsize = vsnprintf(0, 0, out_string, ap);
 
 	buf = malloc(nsize+1); // add one for the trailing '\0'
 	vsnprintf(buf, nsize+1, out_string, ap);
@@ -965,8 +977,9 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 void SetPosition(int line, int col)
 {
 #ifdef EUNIX
-    char lbuff[20]; // Warning snprintf uses hardcoded size value below
-    char cbuff[20]; // Warning snprintf uses hardcoded size value below
+#define SP_buflen (20)
+    char lbuff[SP_buflen]; // Warning snprintf uses hardcoded size value below
+    char cbuff[SP_buflen]; // Warning snprintf uses hardcoded size value below
 #endif
 
 #ifdef EDOS
@@ -989,8 +1002,8 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 #endif
 
 #ifdef EUNIX
-    snprintf(lbuff, 20, "%d", line); lbuff[19] = '\0'; // ensure NULL
-    snprintf(cbuff, 20, "%d", col); cbuff[19] = '\0'; // ensure NULL
+    snprintf(lbuff, SP_buflen, "%d", line); lbuff[SP_buflen - 1] = '\0'; // ensure NULL
+    snprintf(cbuff, SP_buflen, "%d", col); cbuff[SP_buflen - 1] = '\0'; // ensure NULL
     // ANSI code
     iputs("\033[", stdout);
     iputs(lbuff, stdout);

@@ -11,6 +11,7 @@ extern int default_heap;
 #if defined(EWINDOWS) || defined(EDOS)
 #include "pcre/config.h" /* cannot make it link w/o it */
 #endif
+void RTFatal(char *, ...);
 
 #include <string.h>
 #include "alldefs.h"
@@ -50,7 +51,7 @@ object compile(object pattern, object eflags) {
 	}
 
 	str = EMalloc( SEQ_PTR(pattern)->length + 1);
-	MakeCString( str, pattern );
+	MakeCString( str, pattern, SEQ_PTR(pattern)->length + 1 );
 	re = pcre_compile( str, pflags, &error, &erroffset, NULL );
 	if( re == NULL ){
 		// error, so pass the error string to caller
@@ -119,7 +120,7 @@ object exec_pcre(object x ){
 
 	sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	str = EMalloc(sub->length+1);
-	MakeCString( str, SEQ_PTR(x)->base[2] );
+	MakeCString( str, SEQ_PTR(x)->base[2], sub->length+1 );
 
 	options    = get_int( SEQ_PTR(x)->base[3] );
 	start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
@@ -441,11 +442,11 @@ object find_replace_pcre(object x ) {
 
 	sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	str = EMalloc(sub->length+1);
-	MakeCString( str, SEQ_PTR(x)->base[2] );
+	MakeCString( str, SEQ_PTR(x)->base[2], sub->length+1 );
 
 	rep_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
 	rep = EMalloc(rep_s->length+1);
-	MakeCString(rep, SEQ_PTR(x)->base[3]);
+	MakeCString(rep, SEQ_PTR(x)->base[3], rep_s->length+1);
 
 	options    = get_int(SEQ_PTR(x)->base[4]);
 	start_from = get_int(SEQ_PTR(x)->base[5]) - 1;

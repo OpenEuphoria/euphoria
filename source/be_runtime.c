@@ -468,18 +468,20 @@ void debug_msg(char *msg)
 void debug_int(int num)
 // send an integer to debug.log
 {
-	char buff[40];
-	snprintf(buff, 40, "%d", num);
-	buff[39] = 0; // ensure NULL
+#define dbg_int_len (40)
+	char buff[dbg_int_len];
+	snprintf(buff, dbg_int_len, "%d", num);
+	buff[dbg_int_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
 void debug_dbl(double num)
 // send a double to debug.log
 {
-	char buff[40];
-	snprintf(buff, 40, "%g", num);
-	buff[39] = 0; // ensure NULL
+#define dbg_dbl_len (40)
+	char buff[dbg_dbl_len];
+	snprintf(buff, dbg_dbl_len, "%g", num);
+	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
@@ -546,9 +548,11 @@ void call_crash_routines()
 		return;
 	crash_count++;
 
-	free(TempErrName);
-	TempErrName = (char *)malloc(16);
-	strlcpy(TempErrName, "ex_crash.err", 16);
+	if (TempErrName) free(TempErrName);
+#define CCR_len (16)
+	TempErrName = (char *)malloc(CCR_len);
+	strlcpy(TempErrName, "ex_crash.err", CCR_len);
+	TempErrName[CCR_len - 1] = '\0';
 
 #ifndef ERUNTIME
 	// clear the interpreter call stack
@@ -3329,28 +3333,43 @@ object Date()
 	return MAKE_SEQ(result);
 }
 
-void MakeCString(char *s, object obj)
+void MakeCString(char *s, object obj, int slen)
 /* make an atom or sequence into a C string */
 /* N.B. caller must allow one extra for the null terminator */
 {
 	object_ptr elem;
 	object x;
+	int seqlen;
 
-	if (IS_ATOM(obj))
-		*s++ = Char(obj);
-	else {
-		obj = (object)SEQ_PTR(obj);
-		elem = ((s1_ptr)obj)->base;
-		while (TRUE) {
-			x = *(++elem);
-			if (IS_ATOM_INT(x)) {
-				*s++ = (char)x;
+#ifdef EXTRA_CHECK
+	if (s == 0) RTInternal("MakeCString null buffer");
+#endif
+	while (slen > 1) {
+		if (IS_ATOM(obj)) {
+			*s++ = Char(obj);
+			slen = 1;
+		}
+		else {
+			obj = (object)SEQ_PTR(obj);
+			elem = ((s1_ptr)obj)->base;
+			seqlen = ((s1_ptr)obj)->length;
+			while (seqlen && (slen > 1)) {
+				x = *(++elem);
+				seqlen--;
+				if (IS_ATOM_INT(x)) {
+					*s++ = (char)x;
+				}
+				else {
+					if (x == NOVALUE) {
+						slen = 1;
+						seqlen = 0;
+					}
+					else
+						*s++ = doChar(x);
+				}
+				slen--;
 			}
-			else {
-				if (x == NOVALUE)
-					break;
-				*s++ = doChar(x);
-			}
+			slen = 1;
 		}
 	}
 	*s = '\0';
@@ -3437,7 +3456,8 @@ object mode_obj;
 object cleanup;
 {
 	char cname[MAX_FILE_NAME+1];
-	char cmode[8];
+#define EOpen_cmode_len (8)
+	char cmode[EOpen_cmode_len];
 	IFILE fp;
 	long length;
 	int i;
@@ -3453,11 +3473,11 @@ object cleanup;
 	length = SEQ_PTR(filename)->length + 1;
 	if (length > MAX_FILE_NAME)
 		return ATOM_M1;
-	MakeCString(cname, filename);
+	MakeCString(cname, filename, MAX_FILE_NAME+1);
 
 	if (SEQ_PTR(mode_obj)->length > 3)
 		RTFatal("invalid open mode");
-	MakeCString(cmode, mode_obj);
+	MakeCString(cmode, mode_obj, EOpen_cmode_len );
 
 	length = strlen(cmode);
 	text_mode = 1;  /* assume text file */
@@ -3491,12 +3511,12 @@ object cleanup;
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
 		text_mode = 0;
-		strlcpy(cmode, "r+b", 8);
+		strlcpy(cmode, "r+b", EOpen_cmode_len);
 	}
 
 	else if (strcmp(cmode, "u") == 0) {
 		mode = EF_READ | EF_WRITE;
-		strlcpy(cmode, "r+", 8);
+		strlcpy(cmode, "r+", EOpen_cmode_len);
 	}
 
 	else
@@ -4085,6 +4105,7 @@ object_ptr v_elem;
 
 	free_sb = FALSE;
 	if (c == 's') {
+		int len_used;
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
 		free_sv = FALSE;
@@ -4093,10 +4114,13 @@ object_ptr v_elem;
 			if (slength > LOCAL_SPACE) {
 				sval = EMalloc(slength);
 				free_sv = TRUE;
+				len_used = slength;
 			}
-			else
+			else {
 				sval = quick_alloc1;
-			MakeCString(sval, *v_elem);
+				len_used = LOCAL_SPACE;
+			}
+			MakeCString(sval, *v_elem, len_used);
 		}
 		else {
 			slength = 4L;
@@ -4514,7 +4538,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 		return ATOM_M1;
 
 	routine_string = (char *)&TempBuff;
-	MakeCString(routine_string, name);
+	MakeCString(routine_string, name, TEMP_SIZE);
 
 	colon = strchr(routine_string, ':');
 
@@ -4656,8 +4680,9 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	InitEMalloc();
 	setran();
 	InitFiles();
-	TempErrName = (char *)malloc(8);  // malloc, not EMalloc
-	strlcpy(TempErrName, "ex.err", 8);
+#define TempErrName_len (16)
+	TempErrName = (char *)malloc(TempErrName_len);  // malloc, not EMalloc
+	strlcpy(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
 #ifdef EBORLAND
@@ -4776,6 +4801,7 @@ void system_call(object command, object wait)
 {
 	char *string_ptr;
 	int len, w;
+	int len_used;
 	long c;
 
 	if (!IS_SEQUENCE(command))
@@ -4789,12 +4815,19 @@ void system_call(object command, object wait)
 		RTFatal("second argument of system() must be an atom");
 
 	len = SEQ_PTR(command)->length + 1;
-	if (len > TEMP_SIZE)
-		RTFatal("system() command is too long");
-	else
+	if (len > TEMP_SIZE) {
+		string_ptr = (char *)malloc(len);
+		len_used = len;
+	}
+	else {
 		string_ptr = TempBuff;
-	MakeCString(string_ptr, command);
+		len_used = TEMP_SIZE;
+	}
+	
+	MakeCString(string_ptr, command, len_used);
 	system(string_ptr);
+	if (len > TEMP_SIZE)
+		free(string_ptr);
 
 	if (w == 1) {
 #ifdef EDOS
@@ -4818,6 +4851,7 @@ object system_exec_call(object command, object wait)
 	char *string_ptr;
 	char **argv;
 	int len, w, exit_code;
+	int len_used;
 	long c;
 
 	if (!IS_SEQUENCE(command))
@@ -4831,11 +4865,16 @@ object system_exec_call(object command, object wait)
 		RTFatal("second argument of system_exec() must be an atom");
 
 	len = SEQ_PTR(command)->length + 1;
-	if (len > TEMP_SIZE)
-		return (object) -1;
-	else
+	if (len > TEMP_SIZE) {
+		string_ptr = (char *)malloc(len);
+		len_used = len;
+	}
+	else {
 		string_ptr = TempBuff;
-	MakeCString(string_ptr, command);
+		len_used = TEMP_SIZE;
+	}
+	
+	MakeCString(string_ptr, command, len_used);
 
 	exit_code = 0;
 
@@ -4847,6 +4886,8 @@ object system_exec_call(object command, object wait)
 	exit_code = spawnvp(P_WAIT, argv[0], argv);
 	free(argv);
 #endif
+	if (len > TEMP_SIZE)
+		free(string_ptr);
 
 	if (w == 1) {
 #ifdef EDOS
@@ -4872,18 +4913,23 @@ object EGetEnv(s1_ptr name)
 	char *string;
 	char *result;
 	int len;
+	int len_used;
 
 	if (!IS_SEQUENCE(name))
 		RTFatal("argument to getenv must be a sequence");
 	len = SEQ_PTR(name)->length+1;
-	if (len > TEMP_SIZE)
-		string = (char *)EMalloc(len);
-	else
+	if (len > TEMP_SIZE) {
+		string = (char *)malloc(len);
+		len_used = len;
+	}
+	else {
 		string = TempBuff;
-	MakeCString(string, (object)name);
+		len_used = TEMP_SIZE;
+	}
+	MakeCString(string, (object)name, len_used);
 	result = getenv(string);
 	if (len > TEMP_SIZE)
-		EFree(string);
+		free(string);
 	if (result == NULL)
 		return ATOM_M1;
 	else
@@ -4940,15 +4986,16 @@ static void show_prof_line(IFILE f, long i)
 		screen_output(f, "       |");
 	}
 	else {
-		char buff[20]; // warning hardcoded size values in snprintfs below
+#define SPL_len (20)
+		char buff[SPL_len]; // warning hardcoded size values in snprintfs below
 		if (slist[i].options & OP_PROFILE_TIME) {
-			snprintf(buff, 20, "%6.2f |",
+			snprintf(buff, SPL_len, "%6.2f |",
 					 (double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
-			buff[19] = 0; // ensure NULL
+			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		else {
-			snprintf(buff, 20, "%6ld |", *(int *)slist[i].src);
-			buff[19] = 0; // ensure NULL
+			snprintf(buff, SPL_len, "%6ld |", *(int *)slist[i].src);
+			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		screen_output(f, buff);
 	}

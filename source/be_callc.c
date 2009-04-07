@@ -42,6 +42,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
+void RTFatal(char *, ...);
 extern unsigned char TempBuff[];
 extern int c_routine_next;         /* index of next available element */
 extern struct arg_info *c_routine; /* array of c_routine structs */
@@ -288,7 +289,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	int cdecl_call;
 	int (*int_proc_address)();
 	unsigned return_type;
-	char NameBuff[100];
 	unsigned long as_offset;
 	unsigned long last_offset;
 
@@ -323,22 +323,22 @@ object call_c(int func, object proc_ad, object arg_list)
 	return_type = c_routine[proc_index].return_size; // will be INT
 	
 	if (func && return_type == 0 || !func && return_type != 0) {
-		if (c_routine[proc_index].name->length < 100)
-			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name));
+		if (c_routine[proc_index].name->length < TEMP_SIZE)
+			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name, TEMP_SIZE));
 		else
-			NameBuff[0] = '\0';
+			TempBuff[0] = '\0';
 		RTFatal(func ? "%s does not return a value" :
 				"%s returns a value",
-				NameBuff);
+				TempBuff);
 	}
 		
 	if (arg_list_ptr->length != arg_size_ptr->length) {
 		if (c_routine[proc_index].name->length < 100)
-			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name));
+			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name, TEMP_SIZE));
 		else
-			NameBuff[0] = '\0';
+			TempBuff[0] = '\0';
 		RTFatal("C routine %s() needs %d argument%s, not %d",
-				NameBuff,
+				TempBuff,
 				arg_size_ptr->length,
 				(arg_size_ptr->length == 1) ? "" : "s",
 				arg_list_ptr->length);

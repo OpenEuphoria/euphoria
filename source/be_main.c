@@ -204,8 +204,10 @@ void be_init()
 	_control87(MCW_EM,MCW_EM);
 #endif
 #endif
-	TempErrName = (char *)malloc(8); // uses malloc, not EMalloc
-	strlcpy(TempErrName, "ex.err", 8); // can change
+#define TempErrName_len (30)
+	TempErrName = (char *)malloc(TempErrName_len); // uses malloc, not EMalloc
+	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
+	TempErrName[TempErrName_len - 1] = 0; // ensure a NULL
 	
 	eudir = getenv("EUDIR");
 	if (eudir == NULL) {

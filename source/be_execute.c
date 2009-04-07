@@ -60,6 +60,7 @@
 #include "alldefs.h"
 #include "alloc.h"
 #include <signal.h>
+void RTFatal(char *, ...);
 
 /******************/
 /* Local defines  */
@@ -5154,15 +5155,16 @@ void do_exec(int *start_pc)
 				if (a & OP_TRACE) {
 					start_line = top;
 					if (file_trace) {
-						char one_line[120];
-						snprintf(one_line, 120, "%.20s:%d\t%.80s",
+#define one_line_len (120)
+						char one_line[one_line_len];
+						snprintf(one_line, one_line_len, "%.20s:%d\t%.80s",
 								 name_ext(file_name[slist[top].file_no]),
 								 slist[top].line,
 								 (slist[top].options & (OP_PROFILE_STATEMENT |
 														OP_PROFILE_TIME)) ?
 								 slist[top].src+4 :
 								 slist[top].src);
-						one_line[119] = '\0'; // ensure NULL
+						one_line[one_line_len - 1] = '\0'; // ensure NULL
 
 						b = TraceOn;
 						TraceOn = TRUE;

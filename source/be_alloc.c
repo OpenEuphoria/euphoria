@@ -47,6 +47,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
+void RTFatal(char *, ...);
 extern int Executing;
 extern symtab_ptr CurrentSub;
 extern int temps_allocated;

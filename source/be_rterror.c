@@ -189,7 +189,7 @@ static int screen_size();
 void RTInternal();
 void UpdateGlobals();
 void EraseSymbol();
-void RTFatal();
+void RTFatal(char *, ...);
 symtab_ptr RTLookup();
 
 /*********************/
@@ -209,9 +209,10 @@ void OpenErrFile()
 			screen_output(stderr, "\n");
 			n = NumberOpen();
 			if (n > 13) {
-				char buff[40];
-				snprintf(buff, 40, "Too many open files? (%d)\n", n);
-				buff[39] = 0; // ensure NULL
+#define OpenErrFile_buff_len (40)
+				char buff[OpenErrFile_buff_len];
+				snprintf(buff, OpenErrFile_buff_len, "Too many open files? (%d)\n", n);
+				buff[OpenErrFile_buff_len - 1] = 0; // ensure NULL
 				screen_output(stderr, buff);
 			}
 		}
@@ -327,17 +328,17 @@ static void DisplayLine(long n, int highlight)
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strncat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
+		strlcat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #else
-		strncat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
+		strlcat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #endif
 		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strncat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
+		strlcat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
 		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL (have to do because of next call)
-		strncat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
+		strlcat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
 		TempBuff[TEMP_SIZE - 1] = 0; // ensure NULL
 		
 		if (color_trace && COLOR_DISPLAY) 
@@ -619,9 +620,9 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	register int i, already_there;
 	int col, found, inc, len_required;
 	object val, screen_val;
-	char val_string[40]; // Warning snprintf/strncpy uses hardcoded size value below
+#define DV_len (40)
+	char val_string[DV_len]; // Warning snprintf/strncpy uses hardcoded size value below
 	int add_char, iv;
-	char prompt[80];
 		
 	add_char = 0;
 	if (TEXT_MODE)
@@ -633,16 +634,16 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		if (val == NOVALUE) 
-			strlcpy(val_string, "<no value>", 80);
+			strlcpy( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			snprintf(val_string, 40, "%ld", iv);
+			snprintf(val_string,  DV_len, "%ld", iv);
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
 		else 
-			snprintf(val_string, 40, "%.10g", DBL_PTR(val)->dbl);
-		val_string[39] = 0; // ensure NULL
+			snprintf(val_string,  DV_len, "%.10g", DBL_PTR(val)->dbl);
+		val_string[ DV_len - 1] = 0; // ensure NULL
 		len_required = strlen(s_ptr->name) + 1 + strlen(val_string) + add_char;
 		if (len_required < VAR_WIDTH)
 			inc = 1;
@@ -1463,22 +1464,30 @@ void RTInternal_va(char *msg, va_list ap)
 /* handles run-time internal errors 
    - see InternalErr() for compile-time errors */
 {
-	char RTIbuf[100];
-	char RTImsg[100];
+#define RTI_bufflen (1000)
+	char *msg;
+	char *buf;
 	
+    msg = (char *)malloc(RTI_bufflen);
+	if (msg)
+	    buf = msg;
+		vsnprintf(msg, RTI_bufflen, msg, ap);
+		msg[RTI_bufflen - 1] = 0;
+	else {
+		msg = "RTI malloc failed\n";
+		buf = 0;
+	}
 	gameover = TRUE;
-	snprintf(RTIbuf, 100, "\n   !!! Internal Error: %s\n", msg);
-	RTIbuf[99] = 0;
-	vsnprintf(RTImsg, 100, msg, ap);
-	RTImsg[99] = 0;
-	
-	debug_msg(RTImsg);
+
+	debug_msg(msg);
 	
 	OpenErrFile();  // exits if error file name is ""
 
-	TraceBack(RTImsg, NULL);
+	TraceBack(msg, NULL);
 	
 	iflush(TempErrFile);
+
+	if (buf) free(msg);
 	Cleanup(1);
 }
 #endif
@@ -1486,11 +1495,27 @@ void RTInternal_va(char *msg, va_list ap)
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
 	int i;
-	char RTImsg[100];
+#define CUE_bufflen (1000)
+	char *msgtext;
+	char *buf;
 	
-	vsnprintf(RTImsg, 100, msg, ap);
-	RTImsg[99] = 0;
-	
+	if (msg) {
+	    msgtext = (char *)malloc(CUE_bufflen);
+		if (msgtext) {
+		    buf = msgtext;
+			vsnprintf(msgtext, CUE_bufflen, msg, ap);
+			msgtext[CUE_bufflen - 1] = 0;
+		}
+		else {
+			msgtext = "CleanUpError malloc failed\n";
+			buf = 0;
+		}
+	}
+	else {
+		msgtext = 0;	// Special for type check messaging.
+		buf = 0;
+	}
+
 	if (crash_msg != NULL) {
 #ifdef EDOS
 #ifndef EDJGPP
@@ -1502,7 +1527,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 		screen_output(stderr, crash_msg);
 	}
 	OpenErrFile();
-	TraceBack(RTImsg, s_ptr);
+	TraceBack(msgtext, s_ptr);
 	
 	iprintf(TempErrFile, "\n");
 	
@@ -1521,6 +1546,8 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	call_crash_routines();  
 	
 	gameover = TRUE;
+
+	if (buf) free(msgtext);
 	Cleanup(1);
 }
 
@@ -1558,13 +1585,14 @@ object_ptr BiggerStack()
 void BadSubscript(object subs, long length)
 /* report a subscript violation */
 {
-	char subs_buff[40]; // warning hardcoded size below in snprintfs
+#define BadSubscript_bufflen (40)
+	char subs_buff[BadSubscript_bufflen]; // warning hardcoded size below in snprintfs
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, 40, "%d", subs);
+		snprintf(subs_buff, BadSubscript_bufflen, "%d", subs);
 	else
-		snprintf(subs_buff, 40, "%.10g", DBL_PTR(subs)->dbl);
-	subs_buff[39] = 0; // ensure NULL
+		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
+	subs_buff[BadSubscript_bufflen - 1] = 0; // ensure NULL
 
 	RTFatal("subscript value %s is out of bounds, assigning to a sequence of length %ld",
 			subs_buff, length);
@@ -1582,13 +1610,14 @@ void SubsNotAtom()
 
 void RangeReading(object subs, int len)
 {
-	char subs_buff[40]; // warning hardcoded size below in snprintfs
+#define RangeReading_buflen (40)
+	char subs_buff[RangeReading_buflen]; // warning hardcoded size below in snprintfs
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, 40, "%d", subs);
+		snprintf(subs_buff, RangeReading_buflen, "%d", subs);
 	else
-		snprintf(subs_buff, 40, "%.10g", DBL_PTR(subs)->dbl);
-	subs_buff[39] = 0; // ensure NULL
+		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);
+	subs_buff[RangeReading_buflen - 1] = 0; // ensure NULL
 	
 	RTFatal("subscript value %s is out of bounds, reading from a sequence of length %ld",
 			subs_buff, len);

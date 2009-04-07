@@ -15,6 +15,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+void RTInternal();
+void RTFatal(char *, ...);
 
 #ifdef EUNIX
 
@@ -387,7 +389,8 @@ int IsWin95()
   (not pure DOS 7 on win95) */
 {
 	char *wd;
-	char path[260];
+#define PATH_len (260)
+	char path[PATH_len];
 	union REGS regs;
 	IFILE f;
 
@@ -397,8 +400,8 @@ int IsWin95()
 		wd = "C:\\WINDOWS";
 
 	// Look for explorer.exe
-	snprintf(path, 260, "%s\\%s", wd, "explorer.exe");
-	path[259] = 0; // ensure NULL
+	snprintf(path, PATH_len, "%s\\%s", wd, "explorer.exe");
+	path[PATH_len - 1] = 0; // ensure NULL
 	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
@@ -442,6 +445,7 @@ char *long_to_short(char *long_name)
 	} reglist;
 
 #ifndef EDJGPP
+#define long_buff_len (300)
 	if (!win95)
 		return long_name;
 
@@ -451,7 +455,7 @@ char *long_to_short(char *long_name)
 		// long name buffer:
 		segread(&seg_regs);
 		regs.w.ax = 0x0ff21;
-		size = 300;
+		size = long_buff_len;
 		regs.w.bx = size; // add 1 - Dave said there was a bug on NT
 		int386x(0x31, &regs, &regs, &seg_regs);
 		if (regs.x.cflag != 0)
@@ -474,11 +478,11 @@ char *long_to_short(char *long_name)
 	if (win95 == UNKNOWN) {
 		// check if the filesystem supports long filenames for DOS programs
 
-		strlcpy(long_buff_ptr, "C:\\", 300);
+		strlcpy(long_buff_ptr, "C:\\", long_buff_len);
 		short_buff_ptr[0] = 0;
 
 		reglist.eax = 0x71A0; //w95 long to short
-		reglist.ecx = 300; // size of short buff es/edi
+		reglist.ecx = long_buff_len; // size of short buff es/edi
 
 		reglist.ds = long_buff;  reglist.edx = 0;
 		reglist.es = short_buff; reglist.edi = 0;
@@ -503,7 +507,7 @@ char *long_to_short(char *long_name)
 	}
 
 	// convert long filename to DOS 8.3 short filename
-	strlcpy(long_buff_ptr, long_name, 300);
+	strlcpy(long_buff_ptr, long_name, long_buff_len);
 	short_buff_ptr[0] = 0;
 
 	reglist.eax = 0x7160; // major code
@@ -3070,7 +3074,7 @@ static object Seek(object x)
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
-	int path_size = MAX_FILE_NAME + 1 + 4;
+#define path_size (MAX_FILE_NAME + 1 + 4)
 	char path[path_size];
 	s1_ptr result, row;
 #ifdef EBORLAND
@@ -3087,7 +3091,7 @@ static object Dir(object x)
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x);
+	MakeCString(path, x, path_size);
 
 	bits = _A_SUBDIR | _A_HIDDEN | _A_SYSTEM;
 
@@ -3125,7 +3129,7 @@ static object Dir(object x)
 		strchr(path, '*') == NULL &&
 		strchr(path, '?') == NULL)) {
 		// it's a single directory entry - add *.*
-		strncat(path, "\\*.*", path_size - strlen(path));
+		strlcat(path, "\\*.*", path_size - strlen(path));
 		path[path_size] = 0; // ensure NULL
 #ifdef EBORLAND
 		dirp = findfirst(path, &direntp, bits);
@@ -3237,7 +3241,7 @@ static object Dir(object x)
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x);
+	MakeCString(path, x, MAX_FILE_NAME+1);
 
 	last = strlen(path)-1;
 	while (last > 0 &&
@@ -3344,20 +3348,18 @@ static object Dir(object x)
 	struct stat stbuf;
 	struct tm *date_time;
 #if defined(EDJGPP) || defined(EMINGW)
-	int full_name_size = MAX_FILE_NAME + 257;
-	char full_name[full_name_size + 1];
-
+#define full_name_size (MAX_FILE_NAME + 257)
 #else
-	int full_name_size = MAX_FILE_NAME + NAME_MAX + 1;
-	char full_name[full_name_size + 1];
+#define full_name_size (MAX_FILE_NAME + NAME_MAX + 1)
 #endif
 
+	char full_name[full_name_size + 1];
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x);
+	MakeCString(path, x, MAX_FILE_NAME+1);
 
 	dirp = opendir(path); // on Linux, path *must* be a directory
 
@@ -3779,7 +3781,7 @@ static object crash_message(object x)
 	}
 	else {
 		crash_msg = EMalloc(SEQ_PTR(x)->length + 1);
-		MakeCString(crash_msg, x);
+		MakeCString(crash_msg, x, SEQ_PTR(x)->length + 1);
 	}
 	return ATOM_1;
 }
@@ -3791,7 +3793,7 @@ static object crash_file(object x)
 	// use malloc/free
 	free(TempErrName);
 	TempErrName = malloc(SEQ_PTR(x)->length + 1);
-	MakeCString(TempErrName, x);
+	MakeCString(TempErrName, x, SEQ_PTR(x)->length + 1);
 	return ATOM_1;
 }
 
@@ -3807,7 +3809,7 @@ static object warning_file(object x)
 	}
 	else {
 		TempWarningName = malloc(SEQ_PTR(x)->length + 1);
-		MakeCString(TempWarningName, x);
+		MakeCString(TempWarningName, x, SEQ_PTR(x)->length + 1);
 	}
 	return ATOM_1;
 }
@@ -3832,7 +3834,7 @@ static object change_dir(object x)
 	int r;
 
 	new_dir = malloc(SEQ_PTR(x)->length + 1);
-	MakeCString(new_dir, x);
+	MakeCString(new_dir, x, SEQ_PTR(x)->length + 1);
 	r = chdir(new_dir);
 	free(new_dir);
 	if (r == 0)
@@ -4307,7 +4309,7 @@ object OpenDll(object x)
 	if (dll_ptr->length >= TEMP_SIZE)
 		RTFatal("name for open_dll() is too long");
 	dll_string = TempBuff;
-	MakeCString(dll_string, (object)x);
+	MakeCString(dll_string, (object)x, TEMP_SIZE);
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
 	// add to dll list so we can close it at end of execution
@@ -4362,7 +4364,7 @@ object DefineCVar(object x)
 	if (variable_ptr->length >= TEMP_SIZE)
 		RTFatal("variable name is too long");
 	variable_string = TempBuff;
-	MakeCString(variable_string, variable_name);
+	MakeCString(variable_string, variable_name, TEMP_SIZE);
 #ifdef EWINDOWS
 	//Ray Smith says this works.
 	variable_address = (char *)(int (*)())GetProcAddress((void *)lib, variable_string);
@@ -4462,7 +4464,7 @@ object DefineC(object x)
 		if (routine_ptr->length >= TEMP_SIZE)
 			RTFatal("routine name is too long");
 		routine_string = TempBuff;
-		MakeCString(routine_string, routine_name);
+		MakeCString(routine_string, routine_name, TEMP_SIZE);
 #ifdef EWINDOWS
 		if (routine_string[0] == '+') {
 			routine_string++;
@@ -4884,7 +4886,7 @@ object start_backend(object x)
 	for (i=1; i <= switch_len; i++) {
 		x_ptr = SEQ_PTR(fe.switches)->base[i];
 		w = (char *)EMalloc(SEQ_PTR(x_ptr)->length + 1);
-		MakeCString(w, (object) x_ptr);
+		MakeCString(w, (object) x_ptr, SEQ_PTR(x_ptr)->length + 1);
 
 		if (stricmp(w, "-batch") == 0) {
 			is_batch = 1;
@@ -5277,8 +5279,10 @@ object machine(object opcode, object x)
 				x = (object)SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				dest = EMalloc(SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
-				MakeCString(dest, (object) *(((s1_ptr)x)->base+2));
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
+				MakeCString(dest, (object) *(((s1_ptr)x)->base+2), 
+							SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
 				temp = setenv(src, dest, *(((s1_ptr)x)->base+3));
 				EFree(dest);
 				EFree(src);
@@ -5288,7 +5292,8 @@ object machine(object opcode, object x)
 			case M_UNSET_ENV:
 				x = (object) SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
 #else

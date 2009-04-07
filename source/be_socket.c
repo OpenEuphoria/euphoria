@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+void RTFatal(char *, ...);
 
 #ifdef EWINDOWS
 #include <windows.h>
@@ -110,13 +111,13 @@ object eusock_getservbyname(object x)
 
 	name_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
 	name   = EMalloc(name_s->length+1);
-	MakeCString(name, SEQ_PTR(x)->base[1] );
+	MakeCString(name, SEQ_PTR(x)->base[1], name_s->length+1 );
 
 	if (IS_SEQUENCE(SEQ_PTR(x)->base[2]))
 	{
 		proto_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 		proto = EMalloc(proto_s->length+1);
-		MakeCString(proto, SEQ_PTR(x)->base[2]);
+		MakeCString(proto, SEQ_PTR(x)->base[2], proto_s->length+1);
 	}
 	else
 	{
@@ -165,7 +166,7 @@ object eusock_getservbyport(object x)
 	{
 		proto_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 		proto = EMalloc(proto_s->length+1);
-		MakeCString(proto, SEQ_PTR(x)->base[2]);
+		MakeCString(proto, SEQ_PTR(x)->base[2], proto_s->length+1);
 	}
 	else
 	{
@@ -262,7 +263,7 @@ object eusock_gethostbyname(object x)
 
 	name_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
 	name   = EMalloc(name_s->length+1);
-	MakeCString(name, SEQ_PTR(x)->base[1] );
+	MakeCString(name, SEQ_PTR(x)->base[1], name_s->length+1 );
 
 	// ent is static data, do not free
 	ent = gethostbyname(name);
@@ -288,7 +289,7 @@ object eusock_gethostbyaddr(object x)
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
 	address   = EMalloc(address_s->length+1);
-	MakeCString(address, SEQ_PTR(x)->base[1] );
+	MakeCString(address, SEQ_PTR(x)->base[1], address_s->length+1 );
 
 	addr.s_addr = inet_addr(address);
 	if (addr.s_addr == INADDR_NONE)
@@ -412,7 +413,7 @@ object eusock_connect(object x)
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
-	MakeCString(address, SEQ_PTR(x)->base[2]);
+	MakeCString(address, SEQ_PTR(x)->base[2], address_s->length+1);
 
 	addr->sin_addr.s_addr = inet_addr(address);
 	if (addr->sin_addr.s_addr == INADDR_NONE)
@@ -450,7 +451,7 @@ object eusock_send(object x)
 
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	buf   = EMalloc(buf_s->length+1);
-	MakeCString(buf, SEQ_PTR(x)->base[2]);
+	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length+1);
 
 	result = send(s, buf, buf_s->length, flags);
 
@@ -517,7 +518,7 @@ object eusock_bind(object x)
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
-	MakeCString(address, SEQ_PTR(x)->base[2]);
+	MakeCString(address, SEQ_PTR(x)->base[2], address_s->length+1);
 
 	service->sin_addr.s_addr = inet_addr(address);
 	service->sin_port        = htons(port);
