@@ -108,7 +108,7 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 constant INIT_CHUNK = 2500 -- maximum number of literals to
 						   -- initialize in one init-*.c file (one routine)
 
-global sequence target   -- struct minmax
+export sequence target   -- struct minmax
 target = {0, 0}
 
 constant LOOP_VAR = 1 --, LOOP_TYPE = 2, LOOP_LABEL = 3
@@ -5704,7 +5704,7 @@ end procedure
 
 sequence operation -- routine ids for all opcode handlers
 
-global procedure init_opcodes()
+export procedure init_opcodes()
 -- initialize routine id's for opcode handlers
 	sequence name
 
@@ -6649,7 +6649,7 @@ procedure do_exec(integer start_pc)
 	
 end procedure
 
-global procedure Execute(symtab_index proc)
+export procedure Execute(symtab_index proc)
 -- top level executor
 
 	CurrentSub = proc
