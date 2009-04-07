@@ -136,7 +136,7 @@ end function
 --
 --Takes a sequence of bits (all elements either 0 or 1) and converts it
 --into a sequence of bytes.
-global function bits_to_bytes( sequence bits )
+export function bits_to_bytes( sequence bits )
 		sequence bytes
 		integer r
 		r = remainder( length(bits), 8 )
@@ -156,7 +156,7 @@ end function
 --
 --Converts a sequence of bytes (all elements integers between 0 and 255) and
 --converts it into a sequence of bits.
-global function bytes_to_bits( sequence bytes )
+export function bytes_to_bits( sequence bytes )
 		sequence bits
 		bits = {}
 		for i = 1 to length(bytes) do
@@ -259,7 +259,7 @@ end function
 --returns a sequence of bytes in the raw format of an IEEE 754 double 
 --precision floating point number.  This value can be passed to the euphoria
 --library function, float64_to_atom().
-global function scientific_to_float64( sequence s )
+export function scientific_to_float64( sequence s )
 		integer dp, e, exp
 		sequence int_bits, frac_bits, mbits, ebits, sbits
 		
@@ -393,7 +393,7 @@ end function
 --
 --Takes a string reprepresentation of a number in scientific notation and returns
 --an atom.
-global function scientific_to_atom( sequence s )
+export function scientific_to_atom( sequence s )
 		return float64_to_atom( scientific_to_float64( s ) )
 end function
 
