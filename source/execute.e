@@ -15,9 +15,12 @@
 -- carefully hand-coded back-end written in C.
 
 include std/os.e
+include std/pretty.e
+include std/io.e
+include std/io.e
+
 include global.e
 include opnames.e
-
 
 -- Note: In several places we omit checking for bad arguments to 
 -- built-in routines. Those errors will be caught by the underlying 
@@ -37,10 +40,6 @@ include std/text.e
 include scanner.e
 include mode.e as mode
 include intinit.e
-include std/pretty.e
-include std/io.e
-
-include std/io.e
 
 constant M_CALL_BACK = 52,  
 		 M_CRASH_ROUTINE = 66,
@@ -218,7 +217,7 @@ procedure show_var(symtab_index x)
 		puts(err_file, "<no value>")
 	else
 		pretty_print(err_file, val[x], 
-		{1, 2, length(SymTab[x][S_NAME]) + 7, 78, "%d", "%.10g", 32, 127, 500})
+			{1, 2, length(SymTab[x][S_NAME]) + 7, 78, "%d", "%.10g", 32, 127, 500})
 	end if
 	puts(err_file, '\n')
 end procedure
@@ -4108,7 +4107,7 @@ procedure fake_init( integer ignore )
 end procedure
 mode:set_init_backend( routine_id("fake_init") )
 
-global procedure Execute(symtab_index proc, integer start_index)
+export procedure Execute(symtab_index proc, integer start_index)
 -- top level executor 
 	InitBackEnd( 0 )
 	current_task = 1
@@ -4128,10 +4127,10 @@ end procedure
 set_backend( routine_id("BackEnd") )
 
 -- dummy routines, not used
-global procedure OutputIL()
+export procedure OutputIL()
 end procedure
 
-global function extract_options(sequence s)
+export function extract_options(sequence s)
 -- dummy routine, not used by interpreter
 	return s
 end function
