@@ -16,11 +16,15 @@ include global.e
 include platform.e
 include mode.e as mode
 include c_decl.e
+include c_out.e
 include cominit.e
 include compress.e
 include scanner.e
 include emit.e
 include opnames.e
+include symtab.e
+include reswords.e
+include error.e
 
 integer np, pc
 
@@ -104,7 +108,7 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 constant INIT_CHUNK = 2500 -- maximum number of literals to
 						   -- initialize in one init-*.c file (one routine)
 
-global sequence target   -- struct minmax
+export sequence target   -- struct minmax
 target = {0, 0}
 
 constant LOOP_VAR = 1 --, LOOP_TYPE = 2, LOOP_LABEL = 3
@@ -4450,7 +4454,7 @@ procedure opINSERT()
 	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
 	
 	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
-		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
 		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
 		c_stmt0("}\n")
@@ -4468,7 +4472,7 @@ procedure opINSERT()
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0( "}\n" )
 	else
-		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {;\n",{Code[pc+1]})
+		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
 		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
 		c_stmt0("}\n")
@@ -4524,7 +4528,7 @@ procedure opTAIL()
 end procedure
 
 procedure opREMOVE()
-	c_stmt0("{;\n")
+	c_stmt0("{\n")
 	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
 	c_stmt0("int len = assign_space->length;\n")
 	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
@@ -5700,7 +5704,7 @@ end procedure
 
 sequence operation -- routine ids for all opcode handlers
 
-global procedure init_opcodes()
+export procedure init_opcodes()
 -- initialize routine id's for opcode handlers
 	sequence name
 
@@ -6645,7 +6649,7 @@ procedure do_exec(integer start_pc)
 	
 end procedure
 
-global procedure Execute(symtab_index proc)
+export procedure Execute(symtab_index proc)
 -- top level executor
 
 	CurrentSub = proc
@@ -7187,18 +7191,24 @@ procedure BackEnd(atom ignore)
 	finish_emake()
 
 	if not silent then
-		screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
-		if TUNIX then
-			if dll_option then
-				screen_output(STDERR, "To build your shared library, type: ./emake\n")
-			else
-				screen_output(STDERR, "To build your executable file, type: ./emake\n")
-			end if
+		if makefile_option then
+			screen_output(STDERR, "Project makefile was created.\n")
+			screen_output(STDERR, "To use, you must include the new .mak file into your " &
+				"own master Makefile.\n")
 		else
-			if dll_option then
-				screen_output(STDERR, "To build your .dll file, type: emake\n")
+			screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
+			if TUNIX then
+				if dll_option then
+					screen_output(STDERR, "To build your shared library, type: ./emake\n")
+				else
+					screen_output(STDERR, "To build your executable file, type: ./emake\n")
+				end if
 			else
-				screen_output(STDERR, "To build your .exe file, type: emake\n")
+				if dll_option then
+					screen_output(STDERR, "To build your .dll file, type: emake\n")
+				else
+					screen_output(STDERR, "To build your .exe file, type: emake\n")
+				end if
 			end if
 		end if
 	end if

@@ -4,7 +4,8 @@
 
 include global.e
 include reswords.e
-global enum
+
+export enum
 	K_NAME,      -- string
 	K_SCOPE,     -- keyword or predefined 
 	K_TOKEN,     -- token number returned to parser 
@@ -15,11 +16,9 @@ global enum
 	K_CODE,
 	K_DEF_ARGS
 
-global sequence keylist
 -- N.B. order and number of keywords and builtins 
 -- is assumed by scanner.e, euphoria\bin\keywords.e, and others
-keylist = 
-  {  
+export sequence keylist = {
 	-- KEYWORDS
 	{"if",        SC_KEYWORD, IF,        0, 0, 0},
 	{"end",       SC_KEYWORD, END,       0, 0, 0},
@@ -158,7 +157,9 @@ keylist =
 	{"remove",           SC_PREDEF, FUNC, REMOVE,           3, E_PURE, {0,0,{{DEF_PARAM,2}}}, {3,2,{3}}},
 	{"replace",          SC_PREDEF, FUNC, REPLACE,          4, E_PURE, {0,0,0,{{DEF_PARAM,3}}}, {4,3,{4}}},
 	{"delete_routine",   SC_PREDEF, FUNC, DELETE_ROUTINE,   2, E_PURE},
-	{"delete",           SC_PREDEF, PROC, DELETE_OBJECT,    1, E_OTHER_EFFECT}
+	{"delete",           SC_PREDEF, PROC, DELETE_OBJECT,    1, E_OTHER_EFFECT},
+	{"routine",          SC_KEYWORD, ROUTINE,   0, 0, 0}
+	
 }
 	-- new words must go at end to maintain compatibility 
 

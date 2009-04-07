@@ -13,19 +13,20 @@
 
 include std/os.e
 include std/filesys.e
+include std/get.e
+include std/error.e
+include std/sort.e
 
 -- Translator initialization
 include global.e
 include platform.e
-include std/get.e
 include mode.e as mode
 include c_out.e
 include c_decl.e
-include std/error.e
-include std/sort.e
 include compile.e
 include cominit.e
 include pathopen.e
+include error.e
 
 -- true if we want to force the user to choose the compiler
 constant FORCE_CHOOSE = FALSE
@@ -37,8 +38,7 @@ bor_option = FALSE
 lcc_option = FALSE
 gcc_option = FALSE
 
-sequence compile_dir
-compile_dir = ""
+sequence compile_dir  =""
 
 function extract_options(sequence s)
 -- dummy    
@@ -56,7 +56,7 @@ function upper(sequence s)
 end function
 
 
-global procedure transoptions()
+export procedure transoptions()
 -- set translator command-line options  
 	integer i, option
 	sequence uparg
@@ -154,6 +154,10 @@ global procedure transoptions()
 						set_host_platform( UOSX )
 					elsif equal( s, "SUNOS" ) then
 						set_host_platform( USUNOS )
+					elsif equal( s, "OPENBSD" ) then
+						set_host_platform( UOPENBSD )
+					elsif equal( s, "NETBSD" ) then
+						set_host_platform( UNETBSD )
 					else
 						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
 					end if
@@ -167,6 +171,8 @@ global procedure transoptions()
 				else
 					Warning("-com option missing compile directory",translator_warning_flag)
 				end if
+			elsif equal("-MAKEFILE", uparg) then
+				makefile_option = TRUE
 			else
 				option = find( uparg, COMMON_OPTIONS )
 				if option then
@@ -187,23 +193,29 @@ global procedure transoptions()
 	
 	if help_option then
 		object msgtext =##
-Usage: ec  [-plat win|dos|linux|freebsd|osx] [-wat|-djg|-lcc|-bor|-gcc]
-           [-com /compile_directory/] [-keep] [-debug] [-silent]
+Usage: euc [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
+           [-wat|-djg|-lcc|-bor|-gcc] [-com /compile_directory/]
+           [-makefile] [-keep] [-debug] [-silent] 
            [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
            [/os specific options/]:
 
 OS Specific Options:
-       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]
        DOS    :  [-djg|-wat] [-fastfp]
+       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]
        Linux  :  [-gcc] [-dll]
-       FreeBSD:  [-gcc] [-dll]
        OSX    :  [-gcc] [-dll]
        SunOS  :  [-gcc] [-dll]
+       FreeBSD:  [-gcc] [-dll]
+       OpenBSD:  [-gcc] [-dll]
+       NetBSD :  [-gcc] [-dll]
 
 LCC Only: -lccopt-off
 
 Explainations:
-       -CON : Don't create a new window when using the console.
+  -CON      : Don't create a new window when using the console.
+  -MAKEFILE : Generate a <prgname>.mak file that can be included into
+              a larger Makefile project
+
 #
 		if TWINDOWS	then
 			msgtext[10] = 'w'

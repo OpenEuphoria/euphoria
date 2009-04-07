@@ -1,4 +1,0 @@
-
-= Mini-Guides
-<<LEVELTOC depth=2>>
-

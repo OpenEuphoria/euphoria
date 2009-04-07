@@ -369,10 +369,10 @@ end function
 -- Converts a number into a string representing that number.
 --
 -- Parameters:
---		# ##num##: an atom, the value to write out.
+--   # ##num##: an atom, the value to write out.
 --
 -- Returns:
--- 		A **sequence**, a string that writes out ##num##.
+--   A **sequence**, a string that writes out ##num##.
 --
 -- Example 1:
 -- <eucode>
@@ -381,8 +381,8 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:set]], [[:money]]
-with trace
+--   [[:set]], [[:money]]
+
 public function number(object num)
 	sequence result
 	integer size
@@ -476,11 +476,11 @@ end function
 -- Formats a date according to current locale.
 --
 -- Parameters:
---		# ##fmt##: A format string, as described in [[:format]]
---		# ##dtm##: the datetime to write out.
+--   # ##fmt##: A format string, as described in [[:format]]
+--   # ##dtm##: the datetime to write out.
 --
 -- Returns:
---		A **sequence**, representing the formatted date.
+--   A **sequence**, representing the formatted date.
 --
 -- Example 1:
 -- <eucode>
@@ -488,7 +488,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:format]]
+--   [[:format]]
 
 public function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm

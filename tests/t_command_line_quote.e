@@ -1,27 +1,25 @@
 -- test that indeed the function quote_command_line(s) returns a value that can be passed to
 -- system() so that in the resulting process command_line() will return the original s from its
 -- parent process.
+
 include std/unittest.e
 include std/io.e
 include std/filesys.e
 include std/pretty.e
 include std/get.e
-include std/os.e
+include std/cmdline.e
 
-ifdef UNIX then
 constant command_arrays = { { "1", "2", "3" }, { "1 2", "3" }, { "\"1 2\" 3" },
 				{"hi there", "bye" },
 				{ "This is the \"best\" first sentence.", 
-				   "This is another sentence." }
-							
-			}
-elsedef
-constant command_arrays = { { "1", "2", "3" }, { "1 2", "3" }, 
+				   "This is another sentence." },							
+				{ "1", "2", "3" }, 
+				{ "1 2", "3" }, 
 				{"hi there", "bye" },
 				{ "This is the best first sentence.", 
-				   "This is another sentence." }
+				   "This is another sentence." },
+				{ "C:\\Program Files\\FOOFT\\FOOFT.exe", "-send", "C:\\Documents and Settings\\Charles Wallace\\A Wrinkle In Time.txt", "MY FRIEND" } 
 			}
-end ifdef
 
 
 sequence cmds
@@ -53,7 +51,6 @@ ifdef not EC then
  			 close(fd)
  		end if
  		if delete_file("command_line.txt") then end if
-
 	end for
 end ifdef
 test_report()

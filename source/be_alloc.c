@@ -23,6 +23,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -31,6 +32,7 @@
 #endif
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 
 /******************/
 /* Local defines  */
@@ -112,9 +114,6 @@ static unsigned int tmps_remaining = 0;
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef EBORLAND
-char *_expand();
-#endif
 #ifndef ESIMPLE_MALLOC
 char *EMalloc(unsigned long);
 char *ERealloc(unsigned char *, unsigned long);
@@ -133,10 +132,13 @@ size_t _msize();
 
 #ifdef HEAP_CHECK
 
-void RTInternal(char *msg)
+void RTInternal(char *msg, ...)
 // Internal error
 {
-	RTFatal(msg);
+	va_list ap;
+	va_start(ap, msg);
+	RTFatal_va(msg);
+	va_end(ap);
 }
 
 
@@ -261,11 +263,8 @@ void StorageStats()
 void Allocated(long n)
 /* record that n bytes were allocated */
 {
-	char buff[80];
-
 	if (n < 0 || n >= 40000000L) {
-		sprintf(buff, "bad value passed to Allocated (%d)", n);
-		RTInternal(buff);
+		RTInternal("bad value passed to Allocated (%d)", n);
 	}
 	bytes_allocated += n;
 	if (bytes_allocated > max_bytes_allocated)
@@ -275,16 +274,13 @@ void Allocated(long n)
 static DeAllocated(long n)
 /* record that n bytes were freed */
 {
-	char buff[100];
-
 	bytes_allocated -= n;
 	if (n < 0 || n >= 40000000L)
 		RTInternal("bad value passed to DeAllocated");
 #ifdef FIX
 	if (bytes_allocated < 0 || bytes_allocated >= 140000000L) {
-		sprintf(buff, "DeAllocated: bytes_allocated is %d, n is %d\n",
+		RTInternal("DeAllocated: bytes_allocated is %d, n is %d\n",
 				bytes_allocated, n);
-		RTInternal(buff);
 	}
 #endif
 }
@@ -391,10 +387,6 @@ static char *Out_Of_Space(long nbytes)
 	}
 }
 
-#ifdef HEAP_CHECK
-	char msg[80];
-#endif
-
 #ifndef ESIMPLE_MALLOC
 char *EMalloc(unsigned long nbytes)
 /* storage allocator */
@@ -425,8 +417,7 @@ char *EMalloc(unsigned long nbytes)
 		list = pool_map[((nbytes & 7) != 0) + (nbytes >> LOG_RESOLUTION)];
 #ifdef HEAP_CHECK
 		if (list->size < nbytes) {
-			sprintf(msg, "Alloc - size is %d, nbytes is %d", list->size, nbytes);
-			RTInternal(msg);
+			RTInternal("Alloc - size is %d, nbytes is %d", list->size, nbytes);
 		}
 #endif
 		temp = (char *)list->first;
@@ -514,21 +505,17 @@ void EFree(unsigned char *p)
 	register long nbytes;
 	register struct block_list *list;
 	int align;
-#ifdef HEAP_CHECK
-	char msg[80];
-#endif
 
 #if defined(EUNIX) || defined(ESIMPLE_MALLOC)
 		free(p);
 		return;
 #else
-
 #ifdef HEAP_CHECK
 	check_pool();
 
 	if (((long)p & 7) != 0)
 		RTInternal("EFree: badly aligned pointer");
-#endif
+#endif // HEAP_CHECK
 	q = p;
 	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 		q = q - 4;
@@ -538,11 +525,11 @@ void EFree(unsigned char *p)
 		RTInternal("EFree: already free?");
 	DeAllocated(nbytes);
 	if (nbytes < RESOLUTION || nbytes > 40000000L || (nbytes % 4 != 0)) {
-		sprintf(msg, "Free - bad nbytes: %d\n", nbytes);
-		RTInternal(msg); /* what if compile time? */
+		RTInternal("Free - bad nbytes: %d\n", nbytes);
+		/* what if compile time? */
 	}
 	Trash(p, nbytes - ((char *)p - q));
-#endif
+#endif // HEAP_CHECK
 
 	if (nbytes > MAX_CACHED_SIZE || (eu_dll_exists && cache_size > CACHE_LIMIT)) {
 		free(q); /* too big to cache, or cache is full */
@@ -560,7 +547,7 @@ void EFree(unsigned char *p)
 			RTInternal("Free - list size is small");
 
 		AlreadyFree(list->first, (free_block_ptr)p);  /* can be very slow */
-#endif
+#endif // HEAP_CHECK
 		((free_block_ptr)p)->next = list->first;
 		list->first = (free_block_ptr)p;
 		cache_size += 2;
@@ -812,3 +799,14 @@ char *TransAlloc(unsigned long size){
 // Convenience function for translated code to use EMalloc
 	return EMalloc( size );
 }
+
+#ifdef ELINUX
+size_t strlcpy(char *dest, char *src, size_t maxlen)
+{
+	strncpy(dest, src, maxlen);
+	dest[maxlen-1] = 0;
+
+	return strlen(src) > maxlen ? maxlen : strlen(src);
+}
+#endif
+

@@ -42,7 +42,7 @@ procedure main(sequence args)
 	_ = slib:send(sock, name & "\n", 0)
 
 	-- Print the server greeting message
-	puts(1, recv(sock, 0))
+	puts(1, receive(sock, 0))
 
 	while 1 label "top" do
 		integer key = get_key()
@@ -65,7 +65,7 @@ procedure main(sequence args)
 			lost_server()
 
 		elsif sock_data[1][SELECT_IS_READABLE] then
-			object o = recv(sock, 0)
+			object o = receive(sock, 0)
 			if atom(o) then
 				lost_server()
 			end if

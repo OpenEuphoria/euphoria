@@ -26,7 +26,7 @@ while sock:listen(server, 10) label "MAIN" do
 	if sequence(client) then
 		puts(1, "Connection from " & client[2] & "\n")
 		while 1 do
-			object got_data = sock:recv(client[1], 0)
+			object got_data = sock:receive(client[1], 0)
 			if atom(got_data) then
 				-- client disconnected
 				continue "MAIN"
@@ -42,6 +42,6 @@ while sock:listen(server, 10) label "MAIN" do
 	end if
 end while
 
-_ = sock:shutdown_socket(server)
+_ = sock:shutdown(server)
 puts(1, "Server closed\n")
 

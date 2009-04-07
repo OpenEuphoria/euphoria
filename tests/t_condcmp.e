@@ -49,16 +49,16 @@ ifdef DOS32 then
 	test_equal("DOS32 test", 1, platform())
 end ifdef
 
-ifdef EU400 then
-    test_pass("EU400")
+ifdef EU40000 then
+    test_pass("EU40000")
 elsedef
-    test_fail("EU400")
+    test_fail("EU40000")
 end ifdef
 
-ifdef EU40 then
-	test_pass("EU40")
+ifdef EU400 then
+	test_pass("EU400")
 elsedef
-	test_fail("EU40")
+	test_fail("EU400")
 end ifdef
 
 ifdef EU4 then

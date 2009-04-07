@@ -1,6 +1,6 @@
 == Debugging and Profiling
 
-<<LEVELTOC depth=2>>
+<<LEVELTOC depth=3>>
 
 === Debugging
 

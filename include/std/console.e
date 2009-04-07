@@ -179,6 +179,7 @@ end function
 --
 -- Parameters:
 -- 		# ##prompt## - Prompt to display, defaults to "Press Any Key to continue..."
+--      # ##con## - Either 1 (stdout), or 2 (stderr). Defaults to 1.
 --
 -- Comments:
 -- This wraps [[:wait_key]] by giving a clue to user that s/he should press a key, and 
@@ -198,12 +199,15 @@ end function
 --
 -- 	[[:wait_key]]
 
-public procedure any_key(object prompt="Press Any Key to continue...")
+public procedure any_key(object prompt="Press Any Key to continue...", integer con = 1)
 	object ignore
 
-	puts(1, prompt)
+	if not find(con, {1,2}) then
+		con = 1
+	end if
+	puts(con, prompt)
 	ignore = wait_key()
-	puts(1, "\n")
+	puts(con, "\n")
 end procedure
 
 --**

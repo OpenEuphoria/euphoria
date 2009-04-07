@@ -1534,7 +1534,7 @@ procedure InitBackEnd( object ignore )
 	end while
 	Argc = length(Argv)
 	
-	if INTERPRET then
+	if not TRANSLATE then
 		intoptions()
 	else
 		transoptions()
@@ -1660,7 +1660,7 @@ function dis_crash( object c )
 end function
 crash_routine(routine_id("dis_crash"))
 
-global function extract_options(sequence s)
+export function extract_options(sequence s)
 	return s
 end function
 
@@ -1669,8 +1669,7 @@ procedure set_html()
 	generate_html = 1
 end procedure
 include std/pretty.e
-global procedure BackEnd( object ignore )
-
+export procedure BackEnd( object ignore )
 	sequence opts = {
 		{ 0, "html", "html output", NO_PARAMETER, routine_id("set_html") },
 		{ "d", "dir", "output directory", HAS_PARAMETER, routine_id("set_out_dir") },
@@ -1678,7 +1677,8 @@ global procedure BackEnd( object ignore )
 		{ "s", "std", "show standard library information", NO_PARAMETER, routine_id("suppress_stdlib") },
 		{ "f", "file", "include this file", HAS_PARAMETER, routine_id("document_file") },
 		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") },
-		{ "t", 0, "translator mode", NO_PARAMETER, -1 }
+		{ "t", 0, "translator mode", NO_PARAMETER, -1 },
+		{ "b", 0, "binder mode", NO_PARAMETER, -1 }
 		}
 	sequence result = cmd_parse( opts, -1, Argv )
 	

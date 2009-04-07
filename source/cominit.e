@@ -1,16 +1,19 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Common initialization (command line options)
+include std/filesys.e
+include std/search.e
+include euphoria/info.e
 
 include global.e
 include pathopen.e
+include common.e
+include error.e
 
-sequence switches, switch_cache
-switches = {}
-switch_cache = {}
+sequence switches = {}, switch_cache = {}
 
 -- These flags are available for both the interpreter and translator
-global constant COMMON_OPTIONS = {
+export constant COMMON_OPTIONS = {
 	"-C",    -- specify a euinc.conf file
 	"-I",    -- specify a directory to search for include files
 	"-D",    -- define a word
@@ -21,10 +24,11 @@ global constant COMMON_OPTIONS = {
 	"-X",    -- defines warning level by exclusion
 	"-WF",   -- defines the file to which the warnings will go instead of stderr
 	"-?",    -- Display 'usage' help
-	"-HELP"  -- Display 'usage' help
+	"-HELP", -- Display 'usage' help
+	"-COPYRIGHT" -- Display all copyright notices.
 }
 
-global enum
+export enum
 	EUINC_OPTION,  -- -conf
 	INCDIR_OPTION, -- -include dirs
 	DEFINE_OPTION, -- ifdef defines
@@ -35,7 +39,8 @@ global enum
 	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
 	WARNING_FILE_OPTION,	-- warning file name
 	HELP_OPTION,  -- Show command line usage
-	HELP2_OPTION  -- Show command line usage
+	HELP2_OPTION,  -- Show command line usage
+	COPYRIGHT_OPTION -- Show copyright notices
 
 constant COMMON_PARAMS = {
 	EUINC_OPTION,
@@ -47,8 +52,9 @@ constant COMMON_PARAMS = {
 	WARNING_OPTION, -- startup warning level
 	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
 	WARNING_FILE_OPTION,	-- warning file name
-	0,   -- COmmand line usage
-	0   -- COmmand line usage
+	0,   -- Command line usage
+	0,   -- Command line usage
+	0    -- Copyright notices
 }
 
 
@@ -56,7 +62,7 @@ constant COMMON_PARAMS = {
 -- deferred:  1 = it's an argument for the switch, and won't be added
 --                to the list of switches until the next non-deferred
 --                switch is passed
-global procedure add_switch( sequence s, integer deferred )
+export procedure add_switch( sequence s, integer deferred )
 	if deferred then
 		switch_cache = append( switch_cache, s )
 	else
@@ -66,41 +72,50 @@ global procedure add_switch( sequence s, integer deferred )
 	end if
 end procedure
 
-global function get_switches()
+export function get_switches()
 	return switches
 end function
 
-global procedure move_args( integer start )
+export procedure move_args( integer start )
 	Argv[start .. Argc - 1] = Argv[start + 1 .. Argc ]
 	Argc -= 1
 end procedure
 
-integer usage_shown = 0
-global procedure show_usage()
+procedure show_copyrights()
+	sequence notices = all_copyrights()
+	for i = 1 to length(notices) do
+		printf(2, "%s\n  %s\n\n", { notices[i][1], find_replace("\n", notices[i][2], "\n  ") })
+	end for
+end procedure
+
+export procedure show_usage()
 	if usage_shown = 0 then
-		puts(1,
+		printf(1,
 ##
 ____________
-            Euphoria Interpreter Usage: Command line arguments ...
-            -C <filename>    -- specify a configuration file
-            -I <dirname>     -- specify a directory to search for include files
-            -D <word>        -- define a word
-            -BATCH           -- batch processing, do not "Press Enter" on error
-            -TEST            -- do not execute, only test syntax
-            -STRICT          -- enable all warnings (lint option)
-            -W <warningname> -- defines warning level
-            -X <warningname> -- defines warning level by exclusion
-            -WF <warnfile>   -- defines the file to which the warnings will go
-            -? or -HELP      -- Display this 'usage' help
+            Euphoria Interpreter Usage: %s [euswitches] [filename [appswitches]] ...
+            where euswitches are ...
 
-		#)
+              -C <filename>    -- specify a configuration file
+              -I <dirname>     -- specify a directory to search for include files
+              -D <word>        -- define a word
+              -BATCH           -- batch processing, do not "Press Enter" on error
+              -TEST            -- do not execute, only test syntax
+              -STRICT          -- enable all warnings (lint option)
+              -W <warningname> -- defines warning level
+              -X <warningname> -- defines warning level by exclusion
+              -WF <warnfile>   -- defines the file to which the warnings will go
+              -? or -HELP      -- Display this 'usage' help
+              -COPYRIGHT       -- Display copyright notices
+
+		#, {filebase(Argv[1])})
 		usage_shown = 1
 	end if
 end procedure
 
 integer option_W
 option_W=0
-global procedure common_options( integer option, integer ix )
+export procedure common_options( integer option, integer ix )
 	integer n
 	object param
 
@@ -144,6 +159,10 @@ global procedure common_options( integer option, integer ix )
 
 	case  HELP_OPTION, HELP2_OPTION then
 		show_usage()
+		break
+
+	case  COPYRIGHT_OPTION then
+		show_copyrights()
 		break
 
 	case  WARNING_OPTION then

@@ -3,31 +3,27 @@
 -- Compile-time Error Handling
 
 include std/io.e
---include std/error.e
+
 include global.e
 include reswords.e
 
-integer Errors
-Errors = 0   -- number of errors detected during compile
+integer Errors = 0 -- number of errors detected during compile
 
-global integer TempErrFile
-global sequence TempErrName
-global integer display_warnings
-global object ThisLine = ""        -- current line of source (or -1)
-global object ForwardLine     -- remember the line when a possible forward reference occurs
+export integer TempErrFile
+export sequence TempErrName
+export integer display_warnings
+export object ThisLine = ""   -- current line of source (or -1)
+export object ForwardLine     -- remember the line when a possible forward reference occurs
+export integer bp = 0         -- input line index of next character
+export integer forward_bp     -- cached line index for a possible forward reference   
+export sequence warning_list = {}
 
-global integer bp = 0         -- input line index of next character
-global integer forward_bp     -- cached line index for a possible forward reference   
-
-global sequence warning_list
-warning_list = {}
-
-global procedure screen_output(integer f, sequence msg)
+export procedure screen_output(integer f, sequence msg)
 -- output messages to the screen or a file
 	puts(f, msg)
 end procedure
 
-global procedure Warning(sequence msg, integer mask, sequence args = {})
+export procedure Warning(sequence msg, integer mask, sequence args = {})
 -- add a warning message to the list
 	integer p
 	sequence text, w_name
@@ -62,7 +58,7 @@ global procedure Warning(sequence msg, integer mask, sequence args = {})
 	end if
 end procedure
 
-global procedure Log_warnings(object policy)
+export procedure Log_warnings(object policy)
 	display_warnings = 1
 	if sequence(policy) then
 		if length(policy)=0 then
@@ -77,7 +73,7 @@ global procedure Log_warnings(object policy)
 	end if
 end procedure
 
-global function ShowWarnings(integer errfile)
+export function ShowWarnings(integer errfile)
 -- print the warnings to the screen (or ex.err)
 	integer c
 
@@ -118,7 +114,7 @@ global function ShowWarnings(integer errfile)
 	return length(warning_list)
 end function
 
-global procedure Cleanup(integer status)
+export procedure Cleanup(integer status)
 -- clean things up before quitting
 	integer w, show_error = 0
 
@@ -137,7 +133,7 @@ global procedure Cleanup(integer status)
 	abort(status)
 end procedure
 
-global procedure OpenErrFile()
+export procedure OpenErrFile()
 -- open the error diagnostics file - normally "ex.err"
 	TempErrFile = open(TempErrName, "w")
 	if TempErrFile = -1 then
@@ -171,7 +167,7 @@ procedure ShowErr(integer f)
 	screen_output(f, "^\n\n")
 end procedure
 
-global procedure CompileErr(sequence msg)
+export procedure CompileErr(sequence msg)
 -- Handle fatal compilation errors
 	sequence errmsg
 
@@ -206,7 +202,7 @@ procedure not_supported_compile(sequence feature)
 					   {feature, version_name}))
 end procedure
 
-global procedure InternalErr(sequence msg)
+export procedure InternalErr(sequence msg)
 -- Handles internal compile-time errors
 -- see RTInternal() for run-time internal errors
 	if TRANSLATE then

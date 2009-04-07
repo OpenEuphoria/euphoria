@@ -1,3 +1,3 @@
 @echo off
-ex.exe eprint.ex %1
+eui eprint.ex %1
 

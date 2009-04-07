@@ -1,4 +1,7 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+
+--****
+-- == Syntax Coloring
 --
 --				Syntax Color
 -- Break Euphoria statements into words with multiple colors.

@@ -17,7 +17,7 @@ include std/error.e
 ifdef LINUX then
 	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll(""), "time", {C_POINTER}, C_INT)
-elsifdef FREEBSD or SUNOS then
+elsifdef FREEBSD or SUNOS or OPENBSD then
 	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
 elsifdef OSX then

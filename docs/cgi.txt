@@ -64,34 +64,31 @@ located under a directory called "public_html" which contains all your
 publicly-visible HTML files. cgi-bin has special permissions that allow
 visitors to your site to execute the programs it contains.
 
-On Linux and FreeBSD, and also on Windows (if the system uses Apache Web
-Server), you can use a "shebang" line as the very first line of your main
-Euphoria file. It will show the system where the Euphoria interpreter (exu or
-exw.exe) is located. e.g.
+You can use a "shebang" line as the very first line of your main
+Euphoria file. It will show the system or web server where the 
+Euphoria interpreter (eui or eui.exe) is located. e.g.
 
 {{{
-#!./exu
+#!./eui
 }}}
  
 would say that the interpreter is in the current directory (cgi-bin). If you
-upload this file to //Linux/FreeBSD//, be careful that the line ends with just
-##\n##, not ##\r\n##.
+upload this file to another computer, be careful that the uploaded file will
+use the line ending conventions of that system.  FTP's ASCII-transfer mode is useful
+for this purpose.  It will handle the details for you.
  
-**Note:** on Windows you should use exwc.exe, not exw.exe. exwc handles
+**Note:** you should use eui.exe, not euiw.exe. eui.exe handles
 standard output better, and that's critical for CGI. You should also say
 "without warning" at the top of your main file. Warning messages could cause
 problems in properly terminating your program.
 
-On //Linux/FreeBSD// you must set execute permission on any CGI program.  When
+On all OSes that use permissions you must set execute permission on any CGI program.  When
 a user tries to run your program, a special process on the server actually runs
 your program and it needs to find and have access to your Euphoria files. You
 should probably set your files so anyone can read or execute them, but only you
-can write them. e.g.  ##rwx r-x r-x## or ##chmod 755 myfile.exu##. Remember
-also to make exu executable by yourself and others.
-
-On a Linux system, if your /tmp directory is not writable, or for other
-reasons, you may need to run a non-compressed version of exu.  You can get this
-from the RDS download page, or by decompressing exu using UPX.
+can write them.  To change permissions choose the 'Properties' option in the pop-up Window
+or use ##chmod 755 myfile.exu## if ##chmod## is available on the server system. Remember
+also to make eui executable by yourself and others.
 
 To make your life simple, you may wish to copy all files into cgi-bin that your
 program will need. That includes the standard Euphoria files from

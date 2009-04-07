@@ -131,12 +131,6 @@ FreeBSD distribution.
 To run the //Mac OS X// version of Euphoria, you need any reasonably up-to-date
 Intel based Mac.
 
-=== Shareware Vendors
-
-We encourage you to distribute this Euphoria Interpreter package. You can
-charge whatever you like for it. People can use Euphoria for as long as they
-like without obligation.
-
 === Disclaimer
 
 Euphoria is provided "as is" without warranty of any kind. In no event shall
@@ -150,3 +144,13 @@ along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]].
 
 Download Euphoria from the [[http://www.rapideuphoria.com|Euphoria Web site]]. 
 You will also find source-code for example programs and library files.
+
+=== Conventions used in the manual
+
+Euphoria has multiple interpreters, the main one being ##eui##. If you
+are running on DOS, you should use ##euid## in place of ##eui##. The
+manual will reference ##eui## only in examples and instructions, the
+reader is left to choose the correct interpreter. ##euiw## also exists
+on Windows platforms and it is identical to ##eui## however, it does
+not create a console window, thus can be used for GUI applications.
+

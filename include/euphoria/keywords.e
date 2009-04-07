@@ -1,6 +1,12 @@
+--****
+-- == Keyword Data
+
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Keywords and routines built in to ex, exw and exu
+
+--**
+-- Sequence of Euphoria keywords
 
 public constant keywords = {
 	"and",
@@ -10,6 +16,8 @@ public constant keywords = {
 	"case",
 	"constant",
 	"continue",
+	"delete",
+	"delete_routine",
 	"do",
 	"else",
 	"elsedef",
@@ -38,6 +46,7 @@ public constant keywords = {
 	"public",
 	"retry",
 	"return",
+	"routine",
 	"switch",
 	"then",
 	"to",
@@ -48,6 +57,9 @@ public constant keywords = {
 	"without",
 	"xor"
 }
+
+--**
+-- Sequence of Euphoria's built-in function names
 
 public constant builtins = {
     "?",

@@ -38,6 +38,7 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
+#include "be_runtime.h"
 
 /**********************/
 /* Imported variables */
@@ -67,200 +68,6 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 #define push() asm("pushl -4(%ebp)")
 #define pop() 
 #endif
-
-#ifdef EBORLAND
-// dummy code - will be replaced at run-time with: ff 75 fc 90 90 90 90
-// 90 is NOP instruction, 
-// 99999 = hex 00 01 86 9F
-#define push() arg = 99999;   
-
-// dummy code - will be replaced at run-time with: 03 65 f8 90 90 90 90
-// 88888 = hex 00 01 5B 38
-#define pop() argsize = 88888;   
-
-//...if tasm32.exe were available:
-//#define push() _asm {
-//                     push [ebp-4]
-//                    }
-//#define pop()  _asm {
-//                     add esp,[ebp-8]
-//                    }
-
-object call_c();
-void end_of_call_c();
-object task_create();
-void scheduler();
-void end_of_scheduler();
-
-#define NO_OP 0x90
-
-void PatchCallc()
-/* insert push/pop instructions into call_c() and special stack instructions
-   into scheduler() and task_create().
-   This is necessary because the free Borland compiler doesn't support
-   machine code insertions in the C source code. */
-{
-	unsigned char *start;
-	unsigned char *stop;
-	int patched, patch_count;
-	
-	// callc insertions
-	
-	start = (unsigned char *)call_c;
-	stop = (unsigned char *)end_of_call_c;
-
-	patched = 0;
-	patch_count = 0;
-	while (start < stop-7) {
-		if (start[0] == 0xC7 &&
-			start[1] == 0x45) {
-		
-			if (start[2] == 0xFC &&
-				start[3] == 0x9F &&
-				start[4] == 0x86 &&
-				start[5] == 0x01 &&
-				start[6] == 0x00) {
-
-				start[0] = 0xFF;
-				start[1] = 0x75;
-				start[2] = 0xFC;
-				patched = 1;
-			}
-			else if (
-				 start[2] == 0xF8 && 
-				 start[3] == 0x38 &&
-				 start[4] == 0x5B &&
-				 start[5] == 0x01 &&
-				 start[6] == 0x00) {
-
-				start[0] = 0x03;
-				start[1] = 0x65;
-				start[2] = 0xF8;
-				patched = 1;
-			}
-			if (patched) {
-				start[3] = NO_OP;
-				start[4] = NO_OP;
-				start[5] = NO_OP;
-				start[6] = NO_OP;
-				patched = 0;
-				patch_count++;
-				start += 6;
-			}
-		}
-		start++;
-	}
-	if (patch_count != 9)
-		debug_msg("BORLAND PATCH ERROR! - callc");
-	
-	// task_create() insertion - 1 patch to make - read_esp_tc()
-	
-	start = (unsigned char *)task_create;
-	stop = (unsigned char *)scheduler;
-	patch_count = 0;
-	while (start < stop-7) {
-		if (start[0] == 0xC7 && // read_esp_tc()
-			start[1] == 0x45 &&
-			start[2] == 0xFC &&
-			start[3] == 0x03 &&
-			start[4] == 0xD9 &&
-			start[5] == 0x00 &&
-			start[6] == 0x00) {
-
-			start[0] = 0x89;
-			start[1] = 0x65;
-			start[2] = 0xFC; // [EBP-4]
-			start[3] = NO_OP;
-			start[4] = NO_OP;
-			start[5] = NO_OP;
-			start[6] = NO_OP;
-			start += 6;
-			patch_count++;
-		}
-		start++;
-	}
-	if (patch_count != 1)
-		debug_msg("BORLAND PATCH ERROR! - task_create");
-	
-	// scheduler() insertions - 5 patches, 
-	// push_regs(), pop_regs(), set_esp()x2, read_esp()
-	
-	start = (unsigned char *)scheduler;
-	stop = (unsigned char *)end_of_scheduler;
-	patch_count = 0;
-	patched = 0;
-	while (start < stop-7) {
-		
-		if (start[0] == 0xC7 &&
-			start[1] == 0x45 &&
-			start[2] == 0xFC) {
-			
-			if (start[3] == 0x9F &&  // push_regs() 
-				start[4] == 0x86 &&
-				start[5] == 0x01 &&
-				start[6] == 0x00) {
-				
-				start[0] = 0x60;  // PUSHAD
-				start[1] = NO_OP;
-				start[2] = NO_OP;
-				patched = 1;
-			}
-			
-			else if (
-				start[3] == 0x38 && // pop_regs()
-				start[4] == 0x5B &&
-				start[5] == 0x01 &&
-				start[6] == 0x00) {
-		
-				start[0] = 0x61;  // POPAD
-				start[1] = NO_OP;
-				start[2] = NO_OP;
-				patched = 1;
-			}
-			else if (
-				start[3] == 0xD1 && // set_esp()
-				start[4] == 0x2F &&
-				start[5] == 0x01 &&
-				start[6] == 0x00) {
-
-				start[0] = 0x8B; // MOV
-				start[1] = 0x65; // memory
-				start[2] = 0xFC; // ESP
-				patched = 1;
-			}
-			else if (
-				start[3] == 0x6A && // read_esp()
-				start[4] == 0x04 &&
-				start[5] == 0x01 &&
-				start[6] == 0x00) {
-
-				start[0] = 0x89; // MOV
-				start[1] = 0x65; // ESP
-				start[2] = 0xFC; // memory
-				patched = 1;
-			}
-			
-			if (patched) {
-				start[3] = NO_OP;
-				start[4] = NO_OP;
-				start[5] = NO_OP;
-				start[6] = NO_OP;
-				patched = 0;
-				patch_count++;
-				start += 6;
-			}
-		}
-		start++;
-	}
-	if (patch_count != 5)
-		debug_msg("BORLAND PATCH ERROR! - scheduler");
-
-}
-
-#pragma codeseg _DATA
-// put call_c() into the Borland DATA segment so I can modify it at run-time
-
-#endif // EBORLAND
 
 #ifdef EWATCOM
 void wcpush(long X);
@@ -853,7 +660,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	int cdecl_call;
 	int (*int_proc_address)();
 	unsigned return_type;
-	char NameBuff[100];
 	unsigned long as_offset;
 	unsigned long last_offset;
 
@@ -867,8 +673,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
 	if ((unsigned)proc_index >= c_routine_next) {
-		sprintf(TempBuff, "c_proc/c_func: bad routine number (%d)", proc_index);
-		RTFatal(TempBuff);
+		RTFatal("c_proc/c_func: bad routine number (%d)", proc_index);
 	}
 	
 	int_proc_address = c_routine[proc_index].address;
@@ -889,27 +694,25 @@ object call_c(int func, object proc_ad, object arg_list)
 	return_type = c_routine[proc_index].return_size; // will be INT
 	
 	if (func && return_type == 0 || !func && return_type != 0) {
-		if (c_routine[proc_index].name->length < 100)
-			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name));
+		if (c_routine[proc_index].name->length < TEMP_SIZE)
+			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name, TEMP_SIZE));
 		else
-			NameBuff[0] = '\0';
-		sprintf(TempBuff, func ? "%s does not return a value" :
-								 "%s returns a value",
-								 NameBuff);
-		RTFatal(TempBuff);
+			TempBuff[0] = '\0';
+		RTFatal(func ? "%s does not return a value" :
+				"%s returns a value",
+				TempBuff);
 	}
 		
 	if (arg_list_ptr->length != arg_size_ptr->length) {
 		if (c_routine[proc_index].name->length < 100)
-			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name));
+			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name, TEMP_SIZE));
 		else
-			NameBuff[0] = '\0';
-		sprintf(TempBuff, "C routine %s() needs %d argument%s, not %d",
-						  NameBuff,
-						  arg_size_ptr->length,
-						  (arg_size_ptr->length == 1) ? "" : "s",
-						  arg_list_ptr->length);
-		RTFatal(TempBuff);
+			TempBuff[0] = '\0';
+		RTFatal("C routine %s() needs %d argument%s, not %d",
+				TempBuff,
+				arg_size_ptr->length,
+				(arg_size_ptr->length == 1) ? "" : "s",
+				arg_list_ptr->length);
 	}
 	
 	argsize = arg_list_ptr->length << 2;
@@ -1089,14 +892,3 @@ object call_c(int func, object proc_ad, object arg_list)
 }
 
 #endif //ifdef EMSVC
-
-#ifdef EBORLAND // put this at the end of the source file
-#pragma codeseg _DATA
-void end_of_call_c()
-/* end marker */
-{
-}
-#pragma codeseg
-#endif
-
-

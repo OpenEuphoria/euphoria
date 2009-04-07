@@ -10,14 +10,15 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <setjmp.h>
 
 #ifndef EUNIX
-#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
-#include <graph.h>
-#include <bios.h>
-#endif
-#include <conio.h>
+#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#    include <graph.h>
+#    include <bios.h>
+#  endif
+#  include <conio.h>
 #endif
 
 #include <signal.h>
@@ -25,7 +26,9 @@
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
+
 #include "alldefs.h"
+#include "be_runtime.h"
 
 /******************/
 /* Local defines  */
@@ -188,7 +191,6 @@ static int screen_size();
 void RTInternal();
 void UpdateGlobals();
 void EraseSymbol();
-void RTFatal();
 symtab_ptr RTLookup();
 
 /*********************/
@@ -198,7 +200,6 @@ symtab_ptr RTLookup();
 void OpenErrFile()
 // open the error diagnostics file - normally "ex.err"
 {
-	char buff[40];
 	int n;
 	
 	TempErrFile = iopen(TempErrName, "w");
@@ -209,7 +210,10 @@ void OpenErrFile()
 			screen_output(stderr, "\n");
 			n = NumberOpen();
 			if (n > 13) {
-				sprintf(buff, "Too many open files? (%d)\n", n);
+#define OpenErrFile_buff_len (40)
+				char buff[OpenErrFile_buff_len];
+				snprintf(buff, OpenErrFile_buff_len, "Too many open files? (%d)\n", n);
+				buff[OpenErrFile_buff_len - 1] = 0; // ensure NULL
 				screen_output(stderr, buff);
 			}
 		}
@@ -310,30 +314,30 @@ static void DisplayLine(long n, int highlight)
 	set_text_color(0);
 	if (highlight) {
 		string_color = 10;
-		if (text) 
-			set_bk_color(_CYAN);
-		sprintf(TempBuff, brief ? ">" : "%5u==>", slist[n].line);
+		if (text) set_bk_color(_CYAN);
+		snprintf(TempBuff, TEMP_SIZE, brief ? ">" : "%5u==>", slist[n].line);
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 	}
 	else {
 		string_color = 2;
-		if (text)
-			set_bk_color(_WHITE);
-		sprintf(TempBuff, brief ? " " : "%5u:  ", slist[n].line);
+		if (text) set_bk_color(_WHITE);
+		snprintf(TempBuff, TEMP_SIZE, brief ? " " : "%5u:  ", slist[n].line);
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 	}
 	line = slist[n].src; 
 	if (slist[n].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME))
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strcat(TempBuff, "\376\n");
+		strlcat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #else
-		strcat(TempBuff, "\021\n");
+		strlcat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #endif
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strcat(TempBuff, line); // must be <=200 chars
-		strcat(TempBuff, "\n"); // will end in \0
+		strlcat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
+		strlcat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
@@ -432,9 +436,10 @@ static void Refresh(long line_num, int vars_too)
 		if (TEXT_MODE)
 			set_bk_color(_BROWN);
 
-		sprintf(TempBuff, 
-		" %.20s  F1=main  F2=trace  Enter  down-arrow  ?  q  Q  !", 
-						name_ext(file_name[slist[line_num].file_no]));
+		snprintf(TempBuff, TEMP_SIZE,
+				 " %.20s  F1=main  F2=trace  Enter  down-arrow  ?  q  Q  !",
+				 name_ext(file_name[slist[line_num].file_no]));
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		buffer_screen();
 		screen_output(NULL, TempBuff);
 		screen_blank(NULL, col_max-40);
@@ -613,9 +618,9 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	register int i, already_there;
 	int col, found, inc, len_required;
 	object val, screen_val;
-	char val_string[40];
+#define DV_len (40)
+	char val_string[DV_len];
 	int add_char, iv;
-	char prompt[80];
 		
 	add_char = 0;
 	if (TEXT_MODE)
@@ -627,15 +632,16 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		if (val == NOVALUE) 
-			strcpy(val_string, "<no value>");
+			strlcpy( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			sprintf(val_string, "%ld", iv); 
-			if (iv >= ' ' && iv <= 127) 
+			snprintf(val_string,  DV_len, "%ld", iv);
+			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
 		else 
-			sprintf(val_string, "%.10g", DBL_PTR(val)->dbl);
+			snprintf(val_string,  DV_len, "%.10g", DBL_PTR(val)->dbl);
+		val_string[ DV_len - 1] = 0; // ensure NULL
 		len_required = strlen(s_ptr->name) + 1 + strlen(val_string) + add_char;
 		if (len_required < VAR_WIDTH)
 			inc = 1;
@@ -700,7 +706,8 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		SetVarPosition(found, 0);
-		sprintf(TempBuff, "%s=", s_ptr->name);
+		snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		screen_output(NULL, TempBuff);
 	}
 	display_list[found].value_on_screen = val; 
@@ -726,7 +733,8 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #endif          
 			ClearScreen();
 			set_text_color(15);  // Al Getz bug
-			sprintf(TempBuff, "%s=", s_ptr->name);
+			snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
+			TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 			screen_output(NULL, TempBuff);
 			Print(NULL, val, line_max-5, vars_per_line*VAR_WIDTH-3, 
 				  strlen(s_ptr->name), TRUE);
@@ -1224,7 +1232,8 @@ static void DumpGlobals(IFILE f)
 
 static int screen_err_out;
 
-static char TPTempBuff[400]; // TempBuff might contain the error message
+#define TPTEMP_BUFF_SIZE 400
+static char TPTempBuff[TPTEMP_BUFF_SIZE]; // TempBuff might contain the error message
 
 static sf_output(char *string)
 // output error info to ex.err and optionally to the screen
@@ -1257,12 +1266,14 @@ static void TracePrint(symtab_ptr proc, int *pc)
 		subtype = "type";
 
 	if (proc == TopLevelSub) {
-		sprintf(TPTempBuff, "%.300s:%u", file_name[file], line);
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u", file_name[file], line);
+		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 	else {
-		sprintf(TPTempBuff, "%.300s:%u in %s %.99s() ", 
-				file_name[file], line, subtype, proc->name);
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u in %s %.99s() ",
+				 file_name[file], line, subtype, proc->name);
+		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 }
@@ -1302,8 +1313,9 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			else {
 				routine_name = e_routine[tcb[current_task].rid]->name;
 			}
-			sprintf(TPTempBuff, " TASK ID %.0f %.99s ",
-								tcb[current_task].tid, routine_name);
+			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %.99s ",
+					 tcb[current_task].tid, routine_name);
+			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
 			if (strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
@@ -1329,12 +1341,14 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// display the error message
 			show_message = FALSE;
 			if (s_ptr == NULL) {
-				sprintf(TPTempBuff, "\n%.99s", msg);      
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%.99s", msg);
+				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 				sf_output(TPTempBuff);
 			}
 			else {
 				sf_output(type_error_msg); // test
-				sprintf(TPTempBuff, "%.99s is ", s_ptr->name);
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.99s is ", s_ptr->name);
+				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0;
 				sf_output(TPTempBuff);
 				if (screen_err_out)
 					Print(stderr,  s_ptr->obj, 1, 50, 0, FALSE);
@@ -1367,13 +1381,13 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
-					strcpy(TempBuff, "\n^^^ called to handle run-time crash\n");
+					strlcpy(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
 				}
 				else {
 #ifdef EWINDOWS         
-					strcpy(TempBuff, "\n^^^ call-back from Windows\n");
+					strlcpy(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
-					strcpy(TempBuff, "\n^^^ call-back from external source\n");
+					strlcpy(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
 #endif          
 				}
 				sf_output(TempBuff);
@@ -1400,7 +1414,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 		} // end while
 		
 		if (skipping > 0) {
-			sprintf(TempBuff, "\n... (skipping %d levels)\n\n", skipping);
+			snprintf(TempBuff, TEMP_SIZE, "\n... (skipping %d levels)\n\n", skipping);
+			TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 			sf_output(TempBuff);
 		}   
 	
@@ -1435,32 +1450,70 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 }
 
 #ifdef EXTRA_CHECK
-void RTInternal(char *msg)
+void RTInternal(char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	RTInternal_va(msg, ap);
+	va_end(ap);
+}
+
+void RTInternal_va(char *msg, va_list ap)
 /* handles run-time internal errors 
    - see InternalErr() for compile-time errors */
 {
-	char RTImsg[100];
+#define RTI_bufflen (1000)
+	char *msg;
+	char *buf;
 	
+    msg = (char *)malloc(RTI_bufflen);
+	if (msg)
+	    buf = msg;
+		vsnprintf(msg, RTI_bufflen, msg, ap);
+		msg[RTI_bufflen - 1] = 0;
+	else {
+		msg = "RTI malloc failed\n";
+		buf = 0;
+	}
 	gameover = TRUE;
-	strcpy(RTImsg, "\n   !!! Internal Error: "); 
-	strcat(RTImsg, msg);
-	strcat(RTImsg, "\n");
-	
-	debug_msg(RTImsg);
+
+	debug_msg(msg);
 	
 	OpenErrFile();  // exits if error file name is ""
 
-	TraceBack(RTImsg, NULL);
+	TraceBack(msg, NULL);
 	
 	iflush(TempErrFile);
+
+	if (buf) free(msg);
 	Cleanup(1);
 }
 #endif
 
-void CleanUpError(char *msg, symtab_ptr s_ptr)
+void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
 	int i;
+#define CUE_bufflen (1000)
+	char *msgtext;
+	char *buf;
 	
+	if (msg) {
+	    msgtext = (char *)malloc(CUE_bufflen);
+		if (msgtext) {
+		    buf = msgtext;
+			vsnprintf(msgtext, CUE_bufflen, msg, ap);
+			msgtext[CUE_bufflen - 1] = 0;
+		}
+		else {
+			msgtext = "CleanUpError malloc failed\n";
+			buf = 0;
+		}
+	}
+	else {
+		msgtext = 0;	// Special for type check messaging.
+		buf = 0;
+	}
+
 	if (crash_msg != NULL) {
 #ifdef EDOS
 #ifndef EDJGPP
@@ -1472,7 +1525,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr)
 		screen_output(stderr, crash_msg);
 	}
 	OpenErrFile();
-	TraceBack(msg, s_ptr);
+	TraceBack(msgtext, s_ptr);
 	
 	iprintf(TempErrFile, "\n");
 	
@@ -1491,7 +1544,17 @@ void CleanUpError(char *msg, symtab_ptr s_ptr)
 	call_crash_routines();  
 	
 	gameover = TRUE;
+
+	if (buf) free(msgtext);
 	Cleanup(1);
+}
+
+void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
+{
+	va_list ap;
+	va_start(ap, s_ptr);
+	CleanUpError_va(msg, s_ptr, ap);
+	va_end(ap);
 }
 
 void RTFatalType(int *pc)
@@ -1520,17 +1583,17 @@ object_ptr BiggerStack()
 void BadSubscript(object subs, long length)
 /* report a subscript violation */
 {
-	char subs_buff[40];
+#define BadSubscript_bufflen (40)
+	char subs_buff[BadSubscript_bufflen];
 	
 	if (IS_ATOM_INT(subs))
-		sprintf(subs_buff, "%d", subs);
+		snprintf(subs_buff, BadSubscript_bufflen, "%d", subs);
 	else
-		sprintf(subs_buff, "%.10g", DBL_PTR(subs)->dbl);
-	
-	sprintf(TempBuff, 
-  "subscript value %s is out of bounds, assigning to a sequence of length %ld",
-				subs_buff, length);
-	RTFatal(TempBuff);
+		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
+	subs_buff[BadSubscript_bufflen - 1] = 0; // ensure NULL
+
+	RTFatal("subscript value %s is out of bounds, assigning to a sequence of length %ld",
+			subs_buff, length);
 }
 
 void SubsAtomAss()
@@ -1545,23 +1608,22 @@ void SubsNotAtom()
 
 void RangeReading(object subs, int len)
 {
-	char subs_buff[40];
+#define RangeReading_buflen (40)
+	char subs_buff[RangeReading_buflen];
 	
 	if (IS_ATOM_INT(subs))
-		sprintf(subs_buff, "%d", subs);
+		snprintf(subs_buff, RangeReading_buflen, "%d", subs);
 	else
-		sprintf(subs_buff, "%.10g", DBL_PTR(subs)->dbl);
+		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);
+	subs_buff[RangeReading_buflen - 1] = 0; // ensure NULL
 	
-	sprintf(TempBuff, 
-  "subscript value %s is out of bounds, reading from a sequence of length %ld",
-	subs_buff, len);
-	RTFatal(TempBuff);
+	RTFatal("subscript value %s is out of bounds, reading from a sequence of length %ld",
+			subs_buff, len);
 }
 
 void NoValue(symtab_ptr s)
 {
-	sprintf(TempBuff, "variable %s has not been assigned a value", s->name);
-	RTFatal(TempBuff);
+	RTFatal("variable %s has not been assigned a value", s->name);
 }
 
 void atom_condition()
@@ -1570,6 +1632,10 @@ void atom_condition()
 }
 
 /* signal handlers */
+
+#ifdef EWINDOWS
+extern void DisableControlCHandling(); // be_w.c
+#endif
 
 void INT_Handler(int sig_no)
 /* control-c, control-break */
@@ -1580,10 +1646,11 @@ void INT_Handler(int sig_no)
 		return;
 	}
 	gameover = TRUE;
+#ifdef EWINDOWS
+	DisableControlCHandling();
+#endif
 	Cleanup(1); 
 	/* just do this - else DOS extender bug */
 				 /* seems to crash in Windows */
 	/* RTFatal("program interrupted");*/
 }
-
-

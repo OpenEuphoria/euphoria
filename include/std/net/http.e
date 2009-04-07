@@ -7,6 +7,11 @@
 --
 -- <<LEVELTOC depth=2>>
 
+ifdef DOS32 then
+	include std/error.e
+	crash("http.e is not supported on the DOS platform")
+end ifdef
+
 include std/socket.e as sock
 include std/net/common.e
 include std/net/dns.e
@@ -534,7 +539,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		while sequence(junk) with entry do
 			data = data & junk
 		entry
-			junk = sock:recv(sock, 0)
+			junk = sock:receive(sock, 0)
 		end while
 	end if
 	if sock:close(sock) then end if
@@ -666,7 +671,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		success = sock:send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
 		while success > 0 do
-			data = data & sock:recv(socket,0)
+			data = data & sock:receive(socket,0)
 			success = length(data)-last_data_len
 			last_data_len = length(data)
 		end while
@@ -820,7 +825,7 @@ public function get_url(sequence url)
 	url_data = parse_url(url)
 	if atom(url_data) then return 0 end if
 
-	addrinfo = gethostbyname(url_data[URL_HTTP_DOMAIN])
+	addrinfo = host_by_name(url_data[URL_HTTP_DOMAIN])
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return 0
 	end if
@@ -836,3 +841,4 @@ end function
 
 -- set the lines in the "proper" order for sending, not that the defaults will get sent.
 set_sendheader_default()
+

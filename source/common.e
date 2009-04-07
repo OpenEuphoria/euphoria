@@ -28,3 +28,5 @@ public integer AnyTimeProfile      -- time profile option was ever selected
 public integer AnyStatementProfile -- statement profile option was ever selected 
 
 public sequence all_source = {} -- pointers to chunks
+
+public integer usage_shown = 0 -- Indicates if the help/usage text has shown yet.

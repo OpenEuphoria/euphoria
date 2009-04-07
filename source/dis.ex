@@ -14,6 +14,8 @@ include mode.e
 sequence cmd = command_line()
 if find( "-t", cmd ) then
 	set_mode( "translate", 0 )
+elsif find("-b", cmd ) then
+	set_mode( "bind",  0 )
 else
 	set_mode( "interpret", 0 )
 end if

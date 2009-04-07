@@ -2,6 +2,12 @@
 --
 -- Euphoria 4.0
 -- Parser
+include euphoria/info.e
+
+include std/sequence.e
+include std/text.e
+include std/search.e
+
 include global.e
 include platform.e
 include emit.e
@@ -9,13 +15,10 @@ include symtab.e
 include scanner.e
 include fwdref.e
 include common.e
-include version.e
-
-include std/sequence.e
-include std/text.e
-include std/search.e
-
 include inline.e
+include reswords.e
+include error.e
+include c_out.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
@@ -166,7 +169,7 @@ procedure LeaveTopLevel()
 	previous_op = -1
 end procedure
 
-global procedure InitParser()
+export procedure InitParser()
 	goto_stack = {}
 	--goto_list = {}
 	--goto_delay = {}
@@ -1897,22 +1900,35 @@ function finish_block_header(integer opcode)
 		switch tok[T_ID] do
 		    case ENTRY then
 				if not (opcode = WHILE or opcode = LOOP) then
-					CompileErr("`with entry` is only valid on a while or loop statement")
+					CompileErr("'with entry' is only valid on a while or loop statement")
 				end if
 
 			    has_entry = 1
 				
 			case FALLTHRU then
 				if not opcode = SWITCH then
-					CompileErr("`with fallthru` is only valid in a switch statement")
+					CompileErr("'with fallthru' is only valid in a switch statement")
 				end if
 				
 				switch_stack[$][SWITCH_FALLTHRU] = 1
 				
 			case else
-			    CompileErr("An unknown `with/without` option has been specified")
+			    CompileErr("An unknown 'with/without' option has been specified")
         end switch
 
+        tok = next_token()
+	elsif tok[T_ID] = WITHOUT then
+		tok = next_token()
+		if tok[T_ID] = FALLTHRU then
+			if not opcode = SWITCH then
+				CompileErr("'without fallthru' is only valid in a switch statement")
+			end if
+			
+			switch_stack[$][SWITCH_FALLTHRU] = 0
+				
+		else
+			CompileErr("An unknown 'with/without' option has been specified")
+		end if		
         tok = next_token()
 	end if
 
@@ -3517,15 +3533,7 @@ procedure SubProg(integer prog_type, integer scope)
 	if SymTab[p][S_TOKEN] = TYPE and param_num != 1 then
 		CompileErr("types must have exactly one parameter")
 	end if
-	tok = next_token()
-	-- parameters are numbered: 0, 1, ... num_args-1
-	-- other privates are numbered: num_args, num_args+1, ...
-	while tok[T_ID] = TYPE or tok[T_ID] = QUALIFIED_TYPE do
-		-- parse the next private variable declaration
-		Private_declaration(tok[T_SYM])
-		tok = next_token()
-	end while
-
+	
 	-- code to perform type checks on all the parameters
 	sym = SymTab[p][S_NEXT]
 	for i = 1 to SymTab[p][S_NUM_ARGS] do
@@ -3535,6 +3543,15 @@ procedure SubProg(integer prog_type, integer scope)
 		TypeCheck(sym)
 		sym = SymTab[sym][S_NEXT]
 	end for
+
+	-- parse private variable declarations
+	-- (parameters are numbered: 0, 1, ... num_args-1 and
+	--  other privates are numbered: num_args, num_args+1, ...)
+	tok = next_token()
+	while tok[T_ID] = TYPE or tok[T_ID] = QUALIFIED_TYPE do
+		Private_declaration(tok[T_SYM])
+		tok = next_token()
+	end while
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -3554,8 +3571,11 @@ procedure SubProg(integer prog_type, integer scope)
 	end if
 	putback(tok)
 
+	-- parse body of routine.
 	FuncReturn = FALSE
 	Statement_list()
+	
+	-- parse routine end.
 	tok_match(END)
 	ExitScope()
 	tok_match(prog_type)
@@ -3597,15 +3617,15 @@ procedure SubProg(integer prog_type, integer scope)
 	EnterTopLevel()
 end procedure
 
-global procedure InitGlobals()
+export procedure InitGlobals()
 -- initialize global variables
 	ResetTP()
 	OpTypeCheck = TRUE
 
 	OpDefines &= { 
-	    sprintf("EU%d%d%d", { MAJ_VER, MIN_VER, PAT_VER }), 
-	    sprintf("EU%d%d", { MAJ_VER, MIN_VER }), 
-	    sprintf("EU%d", { MAJ_VER }) 
+	    sprintf("EU%d", { version_major() }),
+		sprintf("EU%d", { (version_major() * 100) + version_minor() }),
+		sprintf("EU%d", { version() })
 	}
 
 	OpDefines &= GetPlatformDefines()
@@ -3821,7 +3841,7 @@ procedure ExecCommand()
 	StraightenBranches()  -- straighten top-level
 end procedure
 
-global procedure real_parser(integer nested)
+export procedure real_parser(integer nested)
 -- top level of the parser - command level
 	token tok
 	integer id
@@ -4065,14 +4085,14 @@ global procedure real_parser(integer nested)
 	SymTab[TopLevelSub][S_LINETAB] = LineTable
 end procedure
 
-global procedure parser()
+export procedure parser()
 	real_parser(0)
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
 	inline_deferred_calls()
 end procedure
 
-global procedure nested_parser()
+export procedure nested_parser()
 	real_parser(1)
 end procedure
 

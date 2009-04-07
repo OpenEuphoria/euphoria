@@ -93,7 +93,7 @@ end function
 procedure handle_request(sock:socket server, sequence client, sequence doc_root=".")
 	sock:socket client_sock = client[1]
 	sequence client_addr = client[2]
-	sequence request = split(trim(sock:recv(client_sock, 0)))
+	sequence request = split(trim(sock:receive(client_sock, 0)))
 	sequence command = "", path = "/", version = ""
 
 	if length(request) >= 1 then

@@ -103,12 +103,6 @@ END_COLOR_DEPTH_LIST
 //END_JOYSTICK_DRIVER_LIST
 #endif
 
-#ifdef EBORLAND
-#include <io.h>
-#include <dos.h>
-#include <dir.h>
-#endif
-
 #ifdef ELCC
 #include <io.h>
 #endif
@@ -140,11 +134,15 @@ END_COLOR_DEPTH_LIST
 #include <dirent.h>
 #endif
 
-#include "alldefs.h"
-#include "alloc.h"
 #include <signal.h>
 
+#include "alldefs.h"
+#include "alloc.h"
+
 #include "version.h"
+#include "be_runtime.h"
+
+extern char* get_svn_revision(); /* from rev.c */
 
 /*****************/
 /* Local defines */
@@ -342,11 +340,12 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 #if defined(EMINGW) || defined(EMSVC)
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
-	int len = strlen(name)+1+strlen(value)+1;
-	char * str = malloc(len);
+	int len = strlen(name)+strlen(value)+1, real_len;
+	char * str = malloc(len + 1);
 	if (!overwrite && (getenv(name) != NULL))
 		return 0;
-	sprintf(str, "%s=%s", name, value);
+	real_len = snprintf(str, len+1, "%s=%s", name, value);
+	str[len] = '\0'; // ensure NULL
 	return putenv(str);
 }
 #endif
@@ -359,9 +358,7 @@ unsigned long get_pos_int(char *where, object x)
 	else if (IS_ATOM(x))
 		return (unsigned long)(DBL_PTR(x)->dbl);
 	else {
-		sprintf(TempBuff,
-		"%s: an integer was expected, not a sequence", where);
-		RTFatal(TempBuff);
+		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
 }
 
@@ -373,9 +370,7 @@ unsigned IOFF get_pos_off(char *where, object x)
 	else if (IS_ATOM(x))
 		return (unsigned IOFF)(DBL_PTR(x)->dbl);
 	else {
-		sprintf(TempBuff,
-		"%s: an integer was expected, not a sequence", where);
-		RTFatal(TempBuff);
+		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
 }
 
@@ -388,7 +383,8 @@ int IsWin95()
   (not pure DOS 7 on win95) */
 {
 	char *wd;
-	char path[260];
+#define PATH_len (260)
+	char path[PATH_len];
 	union REGS regs;
 	IFILE f;
 
@@ -398,8 +394,8 @@ int IsWin95()
 		wd = "C:\\WINDOWS";
 
 	// Look for explorer.exe
-	strcpy(path, wd);
-	strcat(path, "\\explorer.exe");
+	snprintf(path, PATH_len, "%s\\%s", wd, "explorer.exe");
+	path[PATH_len - 1] = 0; // ensure NULL
 	f = iopen(path, "r");
 	if (f == NULL)
 		return FALSE;
@@ -443,6 +439,7 @@ char *long_to_short(char *long_name)
 	} reglist;
 
 #ifndef EDJGPP
+#define long_buff_len (300)
 	if (!win95)
 		return long_name;
 
@@ -452,7 +449,7 @@ char *long_to_short(char *long_name)
 		// long name buffer:
 		segread(&seg_regs);
 		regs.w.ax = 0x0ff21;
-		size = 300;
+		size = long_buff_len;
 		regs.w.bx = size; // add 1 - Dave said there was a bug on NT
 		int386x(0x31, &regs, &regs, &seg_regs);
 		if (regs.x.cflag != 0)
@@ -475,11 +472,11 @@ char *long_to_short(char *long_name)
 	if (win95 == UNKNOWN) {
 		// check if the filesystem supports long filenames for DOS programs
 
-		strcpy(long_buff_ptr, "C:\\");
+		strlcpy(long_buff_ptr, "C:\\", long_buff_len);
 		short_buff_ptr[0] = 0;
 
 		reglist.eax = 0x71A0; //w95 long to short
-		reglist.ecx = 300; // size of short buff es/edi
+		reglist.ecx = long_buff_len; // size of short buff es/edi
 
 		reglist.ds = long_buff;  reglist.edx = 0;
 		reglist.es = short_buff; reglist.edi = 0;
@@ -504,7 +501,7 @@ char *long_to_short(char *long_name)
 	}
 
 	// convert long filename to DOS 8.3 short filename
-	strcpy(long_buff_ptr, long_name);
+	strlcpy(long_buff_ptr, long_name, long_buff_len);
 	short_buff_ptr[0] = 0;
 
 	reglist.eax = 0x7160; // major code
@@ -722,11 +719,7 @@ void EndGraphics()
 void not_supported(char *feature)
 /* Report that a feature isn't supported on this platform */
 {
-	char buff[100];
-
-	sprintf(buff, "%s is not supported in Euphoria for %s",
-				  feature, version_name);
-	RTFatal(buff);
+	RTFatal("%s is not supported in Euphoria for %s", feature, version_name);
 }
 
 static object SetSound(object x)
@@ -2085,7 +2078,7 @@ object SetTColor(object x)
 static long colors[16];
 #endif
 
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
 static long colors[16] = {
 	_BLACK, _BLUE, _GREEN, _CYAN,
 	_RED, _MAGENTA, _BROWN, _WHITE,
@@ -2411,9 +2404,6 @@ static object MousePointer(object x)
 
 int Mouse_Handler(Gpm_Event *event, void *clientdata) {
 // handles mouse events
-	//sprintf(buff, "x=%d, y=%d, buttons=%x, modifiers=%x, clicks=%x\n",
-		   //event->x, event->y, event->buttons, event->modifiers, event->clicks);
-	//sprintf(buff, "vc=%x, type=%d\n", event->vc, event->type);
 	mouse.lock = 1;
 	mouse.code = event->buttons; //FOR NOW
 	if (mouse.code == 32)
@@ -3072,19 +3062,16 @@ static object Seek(object x)
 
 // 3 implementations of dir()
 
-#if defined(ELCC) || defined(EBORLAND)
+#if defined(ELCC)
 	// 1 of 3: findfirst method
 
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
-	char path[MAX_FILE_NAME+1+4];
+#define path_size (MAX_FILE_NAME + 1 + 4)
+	char path[path_size];
 	s1_ptr result, row;
-#ifdef EBORLAND
-	struct ffblk direntp;
-#else
 	struct _finddata_t direntp;
-#endif
 	object_ptr obj_ptr, temp;
 	int dirp, last, bits;
 	unsigned date, time, attrib;
@@ -3094,7 +3081,7 @@ static object Dir(object x)
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x);
+	MakeCString(path, x, path_size);
 
 	bits = _A_SUBDIR | _A_HIDDEN | _A_SYSTEM;
 
@@ -3108,36 +3095,15 @@ static object Dir(object x)
 		last--;
 	}
 	path[last+1] = 0; // delete any trailing backslash - Borland won't accept it
-#ifdef EBORLAND
-	dirp = findfirst(path, &direntp, bits);
-#else
 	dirp = _findfirst(path, &direntp);
-#endif
 	if (path[last] == ':' ||
-		(dirp != -1 && (
-#ifdef EBORLAND
-		direntp.ff_attrib
-#else
-		direntp.attrib
-#endif
-		/* BUG FIX by EUMAN 2002
-		   Borland and LCC-Win would not show sub-directories/files
-		   of a given directory if attributes element was an or'd value,
-		   e.g. READ_ONLY | SUBDIR. */
-
-		&   /* THE FIX: use bitwise AND, not == _A_SUBDIR */
-
-		_A_SUBDIR) &&
-
-		strchr(path, '*') == NULL &&
-		strchr(path, '?') == NULL)) {
+		(dirp != -1 && (direntp.attrib & _A_SUBDIR) &&
+		 strchr(path, '*') == NULL &&
+		 strchr(path, '?') == NULL))
+	{
 		// it's a single directory entry - add *.*
-		strcat(path, "\\*.*");
-#ifdef EBORLAND
-		dirp = findfirst(path, &direntp, bits);
-#else
+		strlcat(path, "\\*.*", path_size - strlen(path));
 		dirp = _findfirst(path, &direntp);
-#endif
 	}
 	if (dirp == -1)
 		return ATOM_M1; /* couldn't open directory (or file) */
@@ -3150,20 +3116,10 @@ static object Dir(object x)
 		row = NewS1((long)9);
 
 		obj_ptr = row->base;
-		obj_ptr[1] = NewString(
-#ifdef EBORLAND
-		direntp.ff_name
-#else
-		direntp.name
-#endif
-		);
+		obj_ptr[1] = NewString(direntp.name);
 		obj_ptr[2] = NewString("");
 		temp = &obj_ptr[2];
-#ifdef EBORLAND
-		attrib = direntp.ff_attrib;
-#else
 		attrib = direntp.attrib;
-#endif
 		if (attrib & _A_RDONLY)
 			Append(temp, *temp, MAKE_INT('r'));
 		if (attrib & _A_HIDDEN)
@@ -3174,51 +3130,33 @@ static object Dir(object x)
 			Append(temp, *temp, MAKE_INT('d'));
 		if (attrib & _A_ARCH)
 			Append(temp, *temp, MAKE_INT('a'));
-#ifdef EBORLAND
-		if (attrib & FA_LABEL)
-			Append(temp, *temp, MAKE_INT('v'));
-		obj_ptr[3] = direntp.ff_fsize;
-		date = direntp.ff_fdate;
-		time = direntp.ff_ftime;
-		obj_ptr[4] = 1980 + date/512;
-		obj_ptr[5] = (date/32) & 0x0F;
-		obj_ptr[6] = date & 0x01F;
 
-		obj_ptr[7] = time/2048;
-		obj_ptr[8] = (time/32) & 0x03F;
-		obj_ptr[9] = (time & 0x01F) << 1;
-#else
 		obj_ptr[3] = direntp.size;
 		{
-		struct tm *now;
+			struct tm *now;
 
-		now = localtime(&direntp.time_write);
+			now = localtime(&direntp.time_write);
 
-		obj_ptr[4] = now->tm_year+1900;
-		obj_ptr[5] = now->tm_mon+1;
-		obj_ptr[6] = now->tm_mday;
+			obj_ptr[4] = now->tm_year+1900;
+			obj_ptr[5] = now->tm_mon+1;
+			obj_ptr[6] = now->tm_mday;
 
-		obj_ptr[7] = now->tm_hour;
-		obj_ptr[8] = now->tm_min;
-		obj_ptr[9] = now->tm_sec;
+			obj_ptr[7] = now->tm_hour;
+			obj_ptr[8] = now->tm_min;
+			obj_ptr[9] = now->tm_sec;
 		}
-#endif
+
 		if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
 			// file size over 1Gb
 			obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
 		}
 		/* append row to overall result (ref count 1) */
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
-#ifdef EBORLAND
-		dirp = findnext(&direntp);
-		if (dirp == -1)
-			break; /* end of list */
-#else
+
 		if (_findnext(dirp, &direntp)) {
 			_findclose(dirp);
 			break; /* end of list */
 		}
-#endif
 	}
 
 	return (object)result;
@@ -3243,7 +3181,7 @@ static object Dir(object x)
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x);
+	MakeCString(path, x, MAX_FILE_NAME+1);
 
 	last = strlen(path)-1;
 	while (last > 0 &&
@@ -3350,17 +3288,18 @@ static object Dir(object x)
 	struct stat stbuf;
 	struct tm *date_time;
 #if defined(EDJGPP) || defined(EMINGW)
-	char full_name[MAX_FILE_NAME+1+257];
+#define full_name_size (MAX_FILE_NAME + 257)
 #else
-	char full_name[MAX_FILE_NAME+1+NAME_MAX+1];
+#define full_name_size (MAX_FILE_NAME + NAME_MAX + 1)
 #endif
 
+	char full_name[full_name_size + 1];
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x);
+	MakeCString(path, x, MAX_FILE_NAME+1);
 
 	dirp = opendir(path); // on Linux, path *must* be a directory
 
@@ -3392,9 +3331,8 @@ static object Dir(object x)
 
 		// opendir/readdir with stat method
 		if (dirp != NULL) {
-			strcpy(full_name, path);  // trailing blanks?
-			strcat(full_name, "/");
-			strcat(full_name, direntp->d_name);
+			snprintf(full_name, full_name_size, "%s/%s", path, direntp->d_name);
+			full_name[full_name_size] = 0; // ensure NULL
 			r = stat(full_name, &stbuf);
 		}
 		if (r == -1) {
@@ -3783,7 +3721,7 @@ static object crash_message(object x)
 	}
 	else {
 		crash_msg = EMalloc(SEQ_PTR(x)->length + 1);
-		MakeCString(crash_msg, x);
+		MakeCString(crash_msg, x, SEQ_PTR(x)->length + 1);
 	}
 	return ATOM_1;
 }
@@ -3795,7 +3733,7 @@ static object crash_file(object x)
 	// use malloc/free
 	free(TempErrName);
 	TempErrName = malloc(SEQ_PTR(x)->length + 1);
-	MakeCString(TempErrName, x);
+	MakeCString(TempErrName, x, SEQ_PTR(x)->length + 1);
 	return ATOM_1;
 }
 
@@ -3811,7 +3749,7 @@ static object warning_file(object x)
 	}
 	else {
 		TempWarningName = malloc(SEQ_PTR(x)->length + 1);
-		MakeCString(TempWarningName, x);
+		MakeCString(TempWarningName, x, SEQ_PTR(x)->length + 1);
 	}
 	return ATOM_1;
 }
@@ -3836,7 +3774,7 @@ static object change_dir(object x)
 	int r;
 
 	new_dir = malloc(SEQ_PTR(x)->length + 1);
-	MakeCString(new_dir, x);
+	MakeCString(new_dir, x, SEQ_PTR(x)->length + 1);
 	r = chdir(new_dir);
 	free(new_dir);
 	if (r == 0)
@@ -4311,7 +4249,7 @@ object OpenDll(object x)
 	if (dll_ptr->length >= TEMP_SIZE)
 		RTFatal("name for open_dll() is too long");
 	dll_string = TempBuff;
-	MakeCString(dll_string, (object)x);
+	MakeCString(dll_string, (object)x, TEMP_SIZE);
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
 	// add to dll list so we can close it at end of execution
@@ -4366,7 +4304,7 @@ object DefineCVar(object x)
 	if (variable_ptr->length >= TEMP_SIZE)
 		RTFatal("variable name is too long");
 	variable_string = TempBuff;
-	MakeCString(variable_string, variable_name);
+	MakeCString(variable_string, variable_name, TEMP_SIZE);
 #ifdef EWINDOWS
 	//Ray Smith says this works.
 	variable_address = (char *)(int (*)())GetProcAddress((void *)lib, variable_string);
@@ -4451,7 +4389,8 @@ object DefineC(object x)
 #endif
 		}
 		/* assign a sequence value to routine_ptr */
-		sprintf(TempBuff, "machine code routine at %x", proc_address);
+		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %x", proc_address);
+		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		routine_name = NewString(TempBuff);
 		routine_ptr = SEQ_PTR(routine_name);
 	}
@@ -4465,7 +4404,7 @@ object DefineC(object x)
 		if (routine_ptr->length >= TEMP_SIZE)
 			RTFatal("routine name is too long");
 		routine_string = TempBuff;
-		MakeCString(routine_string, routine_name);
+		MakeCString(routine_string, routine_name, TEMP_SIZE);
 #ifdef EWINDOWS
 		if (routine_string[0] == '+') {
 			routine_string++;
@@ -4792,11 +4731,12 @@ static object crash_routine(object x)
 object eu_info()
 {
 	s1_ptr s1;
-	s1 = NewS1(4);
+	s1 = NewS1(5);
 	s1->base[1] = MAJ_VER;
 	s1->base[2] = MIN_VER;
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
+	s1->base[5] = NewString(get_svn_revision());
 	return MAKE_SEQ(s1);
 }
 
@@ -4886,7 +4826,7 @@ object start_backend(object x)
 	for (i=1; i <= switch_len; i++) {
 		x_ptr = SEQ_PTR(fe.switches)->base[i];
 		w = (char *)EMalloc(SEQ_PTR(x_ptr)->length + 1);
-		MakeCString(w, (object) x_ptr);
+		MakeCString(w, (object) x_ptr, SEQ_PTR(x_ptr)->length + 1);
 
 		if (stricmp(w, "-batch") == 0) {
 			is_batch = 1;
@@ -5174,6 +5114,12 @@ object machine(object opcode, object x)
 
 			case M_PLATFORM:
 				/* obsolete, but keep it */
+#ifdef ENETBSD
+				return 7;
+#endif
+#ifdef EOPENBSD
+				return 6;
+#endif
 #ifdef ESUNOS
 				return 5;
 #endif
@@ -5273,8 +5219,10 @@ object machine(object opcode, object x)
 				x = (object)SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				dest = EMalloc(SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
-				MakeCString(dest, (object) *(((s1_ptr)x)->base+2));
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
+				MakeCString(dest, (object) *(((s1_ptr)x)->base+2), 
+							SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
 				temp = setenv(src, dest, *(((s1_ptr)x)->base+3));
 				EFree(dest);
 				EFree(src);
@@ -5284,7 +5232,8 @@ object machine(object opcode, object x)
 			case M_UNSET_ENV:
 				x = (object) SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1));
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
 #else
@@ -5381,8 +5330,7 @@ object machine(object opcode, object x)
 			default:
 				/* could be out-of-range int, or double, or sequence */
 				if (IS_ATOM_INT(opcode)) {
-					sprintf(TempBuff, "machine_proc/func(%d,...) not supported", opcode);
-					RTFatal(TempBuff);
+					RTFatal("machine_proc/func(%d,...) not supported", opcode);
 				}
 				else if (IS_ATOM(opcode)) {
 					d = DBL_PTR(opcode)->dbl;

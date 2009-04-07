@@ -3,18 +3,18 @@
 -- compression / decompression
 include std/convert.e
 
-global constant IL_MAGIC = 79, -- indicates an IL file
+export constant IL_MAGIC = 79, -- indicates an IL file
 			  IL_VERSION = -- 10 (2.5 alpha) IL version number
 						   -- 11 -- (2.5 beta)
 						   -- 12 -- 3.0.0 Open Source, no encryption
 						   13 -- 3.2? Added file_include
   
-global constant IL_START = "YTREWQ\n"
+export constant IL_START = "YTREWQ\n"
 
 -- Compressed / Decompress Euphoria objects
 
 -- tags for various values:
-global constant 
+export constant 
 		 I2B = 249,   -- 2-byte signed integer follows
 		 I3B = 250,   -- 3-byte signed integer follows
 		 I4B = 251,   -- 4-byte signed integer follows
@@ -24,7 +24,7 @@ global constant
 		 S4B = 255    -- sequence, 4-byte length follows, then elements
 
 -- ranges for various sizes:
-global constant 
+export constant 
 		 MIN1B = -2,  -- minimum integer value stored in one byte
 		 MAX1B = 246, -- maximum integer value (if no cache)
 		 MIN2B = -power(2, 15),
@@ -33,7 +33,7 @@ global constant
 		 MAX3B =  power(2, 23)-1,
 		 MIN4B = -power(2, 31)
 
-global function compress(object x)
+export function compress(object x)
 -- Return the compressed representation of a Euphoria object 
 -- as a sequence of bytes (in memory). 
 -- The compression cache is not used. Decompression occurs in be_execute.c
@@ -97,17 +97,17 @@ constant COMP_CACHE_SIZE = 64  -- power of 2: number of large integers to cache
 
 constant CACHE0 = 255-7-COMP_CACHE_SIZE -- just before cache
 
-global integer max1b  -- maximum integer value to store in one byte
+export integer max1b  -- maximum integer value to store in one byte
 max1b = CACHE0 + MIN1B
 
 sequence comp_cache  -- stores recent large (hopefully over one byte) values
 
-global procedure init_compress()
+export procedure init_compress()
 -- do this before a series of calls to fcompress() or fdecompress()    
 	comp_cache = repeat({}, COMP_CACHE_SIZE)
 end procedure
 
-global procedure fcompress(integer f, object x)
+export procedure fcompress(integer f, object x)
 -- Write the compressed representation of a Euphoria object 
 -- to disk as a sequence of bytes. A compression cache is used.
 	sequence x4, s
@@ -177,7 +177,7 @@ mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
 
-global integer current_db
+export integer current_db
 
 function get4()
 -- read 4-byte value at current position in database file
@@ -188,7 +188,7 @@ function get4()
 	return peek4u(mem0)
 end function
 
-global function fdecompress(integer c)
+export function fdecompress(integer c)
 -- read a compressed Euphoria object from disk.
 -- A compression cache is used.
 -- if c is set, then c is not in byte range.

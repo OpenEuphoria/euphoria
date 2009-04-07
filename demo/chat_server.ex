@@ -55,7 +55,7 @@ procedure main(sequence args)
 			printf(1, "Connection from %s (client count now %d)\n",  { client[2], length(clients) + 1 })
 
 			-- Client sends their name, get it and send a join message
-			object got_data = sock:recv(client[1], 0)
+			object got_data = sock:receive(client[1], 0)
 			if atom(got_data) then
 				-- client disconnected already!? Ignore them then
 				puts(1, "Could not get data from client, aborting this connection\n")
@@ -73,7 +73,7 @@ procedure main(sequence args)
 		-- check for any activity on the client sockets
 		for i = 2 to length(sock_data) do
 			if sock_data[i][SELECT_IS_READABLE] then
-				object got_data = sock:recv(sock_data[i][SELECT_SOCKET], 0)
+				object got_data = sock:receive(sock_data[i][SELECT_SOCKET], 0)
 				if atom(got_data) then
 					remove_client(sock_data[i][SELECT_SOCKET])
 					continue
@@ -100,7 +100,7 @@ procedure main(sequence args)
 		remove_sockets = {}
 	end while
 
-	_ = sock:shutdown_socket(server)
+	_ = sock:shutdown(server)
 	puts(1, "Server closed\n")
 end procedure
 

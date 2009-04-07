@@ -1,4 +1,5 @@
 @echo off
+
 set BUILDDIR=.
 echo # Configuration for Watcom > config.wat
 
@@ -14,8 +15,9 @@ IF "%1" =="--prefix" (
 	SHIFT
 	GOTO EndLoop
 )
-IF "%1" =="--managed-mem" (
-	echo MANAGED_MEM=1 >> config.wat
+IF "%1" =="--no-managed-mem" (
+	echo MANAGED_MEM=0 >> config.wat
+        SET DISABLED_MANAGED_MEM=1
 	GOTO EndLoop
 )
 IF "%1" =="--eubin" (
@@ -44,8 +46,11 @@ GOTO Help
 SHIFT
 GOTO Loop
 :Continue
-if "%NOEU%" == "" (
+IF "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
+)
+IF "%DISABLED_MANAGED_MEM%" == "" (
+	echo MANAGED_MEM=1 >> config.wat
 )
 IF not exist %WINDIR%\command\deltree.exe (
 	echo DELTREE=del /Q /S >> config.wat
@@ -57,7 +62,7 @@ IF exist %WINDIR%\command\deltree.exe (
 	echo RM=deltree /y >> config.wat
 	echo RMDIR=deltree /y >> config.wat
 )
-if not exist %BUILDDIR% mkdir %BUILDDIR%
+IF not exist %BUILDDIR% mkdir %BUILDDIR%
 cd ..
 cd > source\%BUILDDIR%\config.wat.tmp
 set /p PWD=<source\%BUILDDIR%\config.wat.tmp
@@ -91,7 +96,7 @@ echo.
 echo Options:
 echo     --without-euphoria
 echo     --prefix value
-echo     --managed-mem       enable managed memory
+echo     --no-managed-mem    disable managed memory
 echo     --eubin value
 echo     --build value       set the build directory
 echo     --full

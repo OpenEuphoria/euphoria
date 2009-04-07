@@ -15,6 +15,7 @@ extern int default_heap;
 #include <string.h>
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 #include "pcre/pcre.h"
 
 struct pcre_cleanup {
@@ -50,7 +51,7 @@ object compile(object pattern, object eflags) {
 	}
 
 	str = EMalloc( SEQ_PTR(pattern)->length + 1);
-	MakeCString( str, pattern );
+	MakeCString( str, pattern, SEQ_PTR(pattern)->length + 1 );
 	re = pcre_compile( str, pflags, &error, &erroffset, NULL );
 	if( re == NULL ){
 		// error, so pass the error string to caller
@@ -119,7 +120,7 @@ object exec_pcre(object x ){
 
 	sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	str = EMalloc(sub->length+1);
-	MakeCString( str, SEQ_PTR(x)->base[2] );
+	MakeCString( str, SEQ_PTR(x)->base[2], sub->length+1 );
 
 	options    = get_int( SEQ_PTR(x)->base[3] );
 	start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
@@ -441,11 +442,11 @@ object find_replace_pcre(object x ) {
 
 	sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	str = EMalloc(sub->length+1);
-	MakeCString( str, SEQ_PTR(x)->base[2] );
+	MakeCString( str, SEQ_PTR(x)->base[2], sub->length+1 );
 
 	rep_s = SEQ_PTR(SEQ_PTR(x)->base[3]);
 	rep = EMalloc(rep_s->length+1);
-	MakeCString(rep, SEQ_PTR(x)->base[3]);
+	MakeCString(rep, SEQ_PTR(x)->base[3], rep_s->length+1);
 
 	options    = get_int(SEQ_PTR(x)->base[4]);
 	start_from = get_int(SEQ_PTR(x)->base[5]) - 1;
@@ -468,9 +469,8 @@ object find_replace_pcre(object x ) {
 		rc = replace_pcre(rep, str, out_len-1, ovector, rc, &out, &out_len);
 		EFree(str);
 
-		str = EMalloc(out_len + 1);
-		strncpy(str, out, out_len);
-		str[out_len] = 0;
+		str = EMalloc(out_len + 2);
+		strlcpy(str, out, out_len + 1);
 
 		start_from = ovector[rc+1];
 		limit -= 1;

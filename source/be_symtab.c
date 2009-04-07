@@ -333,7 +333,7 @@ int RoutineId(symtab_ptr current_sub, object name, int file_no)
 		return ATOM_M1;
 
 	routine_string = (char *)&TempBuff;
-	MakeCString(routine_string, name);
+	MakeCString(routine_string, name, TEMP_SIZE);
 
 	p = RTLookup(routine_string, file_no, NULL, current_sub, SymTabLen); 
 

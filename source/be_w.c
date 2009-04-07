@@ -10,39 +10,40 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <time.h>
 #ifdef EUNIX
-#include <sys/stat.h>
-#include <unistd.h>
+#  include <sys/stat.h>
+#  include <unistd.h>
 #else
-#ifdef EMINGW
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#include <sys\types.h>
-#include <sys\stat.h>
-#endif
-#ifdef EDJGPP
-#include <pc.h>
-#include <sys/farptr.h>
-#include <dpmi.h>
-#include <go32.h>
-#include <allegro.h>
-#else
-#if !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
-#include <graph.h>
-#endif
-#endif
+#  ifdef EMINGW
+#    include <sys/types.h>
+#    include <sys/stat.h>
+#  else
+#    include <sys\types.h>
+#    include <sys\stat.h>
+#  endif
+#  ifdef EDJGPP
+#    include <pc.h>
+#    include <sys/farptr.h>
+#    include <dpmi.h>
+#    include <go32.h>
+#    include <allegro.h>
+#  else
+#    if !defined(ELCC) && !defined(EMINGW)
+#      include <graph.h>
+#    endif
+#  endif
 #endif
 #include <string.h>
 #ifdef EWINDOWS
-#include <windows.h>
+#  include <windows.h>
 #endif
 #include "alldefs.h"
 #ifdef EWATCOM
-#ifdef EDOS
-#include <i86.h>
-#endif
+#  ifdef EDOS
+#    include <i86.h>
+#  endif
 #endif
 
 /******************/
@@ -116,9 +117,10 @@ char *EMalloc();
 char *ERealloc();
 #else
 #include "alloc.h"
+#endif
+// TODO: This is required due to a bug in global.h that Jim discovered.
 #ifdef EWINDOWS
 extern unsigned default_heap;
-#endif
 #endif
 static void expand_tabs();
 void SetPosition();
@@ -368,7 +370,7 @@ static void end_of_line(int c)
     SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
 }
 
-#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
+#ifdef EWINDOWS
 int MyReadConsoleChar()
 // Read the next character typed by the user on the console
 {
@@ -379,7 +381,8 @@ int MyReadConsoleChar()
     return buff[0];
 }
 #endif
-
+static char *old_string = 0;
+static int  oldstr_len = 0;
 static void MyWriteConsole(char *string, int nchars)
 // write a string of plain characters to the console and
 // update the cursor position
@@ -387,11 +390,11 @@ static void MyWriteConsole(char *string, int nchars)
     int i;
     static int first = 0;
     CONSOLE_SCREEN_BUFFER_INFO console_info;
-    char old_string[82];
+
     COORD ch;
 
     show_console();
-    /* hack - if we are exwc, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
+    /* hack - if we are eui, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
     GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
     if ( (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1) &&
     (already_had_console==1) && !first) {
@@ -414,20 +417,31 @@ static void MyWriteConsole(char *string, int nchars)
 
     ch.X = screen_loc.Left;
     ch.Y = screen_loc.Top;
+	if (old_string == 0) {
+		oldstr_len = max(nchars + 3, 256);
+		old_string = (char *)malloc(oldstr_len);
+		if (old_string == 0) return;
+	}
 
-    strncpy(old_string, string, 80);
-    old_string[81] = '\0';
+	if (nchars > oldstr_len) {
+		oldstr_len = nchars + 3;
+		old_string = (char *)realloc(old_string, oldstr_len);
+		if (old_string == 0) return;
+	}
 
+    strlcpy(old_string, string, nchars);
+
+	// Blank out any EOL characters
     for (i = 0; i < nchars; i++)
     {
         if (old_string[i] == '\n')
             old_string[i] = ' ';
-        if (old_string[i] == '\r')
+        else if (old_string[i] == '\r')
             old_string[i] = ' ';
     }
 
     SetConsoleCursorPosition(console_output, ch);
-    WriteConsole(console_output, string, nchars, &i, NULL);
+    WriteConsole(console_output, old_string, nchars, &i, NULL);
     SetConsoleCursorPosition(console_output, ch);
 
     } else {
@@ -568,14 +582,16 @@ void update_screen_string(char *s)
 // record that a string of characters was written to the screen
 {
     int i, col, line;
-    char buff[60];
+#define USS_len (60)
+    char buff[USS_len];
 
     i = 0;
     line = screen_line - 1;
     col = screen_col - 1;
     if (line < 0 || line >= line_max) {
-        sprintf(buff, "line corrupted (%d), s is %s, col is %d",
-        line, s, col);
+        snprintf(buff, USS_len, "line corrupted (%d), s is %s, col is %d",
+				 line, s, col);
+		buff[USS_len - 1] = 0; // ensure NULL
         debug_msg(buff);
     }
     // we shouldn't get any \n's or \r's, but just in case:
@@ -585,7 +601,8 @@ void update_screen_string(char *s)
         screen_image[line][col].bg_color = current_bg_color;
         col += 1;
         if (col < 0 || col > col_max) {
-            sprintf(buff, "col corrupted (%d)", col);
+			snprintf(buff, USS_len, "col corrupted (%d)", col);
+			buff[USS_len - 1] = 0; // ensure NULL
             debug_msg(buff);
         }
         i += 1;
@@ -718,6 +735,7 @@ static void expand_tabs(char *raw_string)
     }
 }
 
+
 void screen_output(IFILE f, char *out_string)
 /* All output from the compiler, interpreter or user program
    comes here (except for some EPuts() output). It is then directed to the
@@ -725,23 +743,28 @@ void screen_output(IFILE f, char *out_string)
 /* f is output file, or NULL if debug screen, or DOING_SPRINTF */
 /* out_string is null-terminated string of characters to write out */
 {
-    int len;
+    int len, collect_len;
 
     if ((int)f == DOING_SPRINTF) {
         /* save characters as a C string in memory */
         len = strlen(out_string);
         if (collect == NULL) {
-            collect_free = 80;
-            collect = EMalloc(len+1+collect_free);
-            strcpy(collect, out_string);
+			collect_free = 80;
+			collect_len = len + collect_free;
+            collect = EMalloc(collect_len + 1);
+			strlcpy(collect, out_string, collect_len);
             collect_next = len;
         }
         else {
             if (len > collect_free) {
-                collect_free = len + 200;
-                collect = ERealloc(collect, collect_next + 1 + collect_free);
-            }
-            strcpy(collect+collect_next, out_string);
+				collect_free = len + 200;
+				collect_len = collect_next + collect_free;
+                collect = ERealloc(collect, collect_len + 1);
+			} else {
+				collect_len = len;
+			}
+			// safe to use strcpy here 'cos we already checked the remaining length.
+			strcpy(collect+collect_next, out_string);
             collect_free -= len;
             collect_next += len;
         }
@@ -787,6 +810,30 @@ void screen_output(IFILE f, char *out_string)
 		iflush(f);
         }
     }
+}
+
+void screen_output_va(IFILE f, char *out_string, va_list ap)
+{
+	int nsize;
+	char * buf;
+
+	// figure out how long the string will be
+	nsize = vsnprintf(0, 0, out_string, ap);
+
+	buf = malloc(nsize+1); // add one for the trailing '\0'
+	vsnprintf(buf, nsize+1, out_string, ap);
+
+	screen_output(f, buf);
+	free(buf);
+}
+
+void screen_output_vararg(IFILE f, char *out_string, ...)
+{
+	va_list ap;
+
+	va_start(ap, out_string);
+	screen_output_va(f, out_string, ap);
+	va_end(ap);
 }
 
 #ifdef EWINDOWS
@@ -929,8 +976,9 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 void SetPosition(int line, int col)
 {
 #ifdef EUNIX
-    char lbuff[20];
-    char cbuff[20];
+#define SP_buflen (20)
+    char lbuff[SP_buflen];
+    char cbuff[SP_buflen];
 #endif
 
 #ifdef EDOS
@@ -953,8 +1001,8 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 #endif
 
 #ifdef EUNIX
-    sprintf(lbuff, "%d", line);
-    sprintf(cbuff, "%d", col);
+    snprintf(lbuff, SP_buflen, "%d", line); lbuff[SP_buflen - 1] = '\0'; // ensure NULL
+    snprintf(cbuff, SP_buflen, "%d", col); cbuff[SP_buflen - 1] = '\0'; // ensure NULL
     // ANSI code
     iputs("\033[", stdout);
     iputs(lbuff, stdout);
@@ -1064,6 +1112,13 @@ void RestoreNormal()
         console_output = console_save;
         SetConsoleActiveScreenBuffer(console_output);
     } // EUCONS
+}
+
+extern void DisableControlCHandling();
+void DisableControlCHandling()
+{
+	// SetConsoleMode(console_input, ENABLE_MOUSE_INPUT);
+	SetConsoleMode(console_input, FALSE);
 }
 
 #endif

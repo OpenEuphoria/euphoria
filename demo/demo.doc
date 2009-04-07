@@ -75,6 +75,9 @@
              It is probably already available on your Linux or FreeBSD
              system. See the top of news.exu for details.
  
+ pipes.ex  - Starts a sub-process and communicates to it via piped io.
+             The sub process is pipe_sub.ex
+ 
  queens.ex - solves the N queens problem - how to place N queens on an NxN
 	     chess board so they do not attack each other
 

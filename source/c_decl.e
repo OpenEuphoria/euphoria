@@ -6,6 +6,8 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
+include euphoria/info.e
+
 include std/text.e
 include std/math.e
 include std/os.e
@@ -16,52 +18,45 @@ include platform.e
 include reswords.e
 include symtab.e
 include compile.e
+include error.e
+include c_out.e
 
 with type_check
 -- Translator
-global constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
+export constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
 
-global constant LAST_PASS = 7        -- number of Translator passes
+export constant LAST_PASS = 7        -- number of Translator passes
 
-global integer Pass   -- the pass number, 1 ... LAST_PASS 
+export integer Pass   -- the pass number, 1 ... LAST_PASS 
 
 -- What we currently know locally in this basic block about var values etc.
-global constant BB_VAR = 1,      -- the var / type / constant
+export constant BB_VAR = 1,      -- the var / type / constant
 		 BB_TYPE = 2,     -- main type
 		 BB_ELEM = 3,     -- element type for sequences
 		 BB_SEQLEN = 4,   -- sequence length
 		 BB_OBJ = 5,      -- integer value min/max
 		 BB_DELETE = 6    -- may have a delete routine
-global sequence BB_info
-BB_info = {}
+export sequence BB_info = {}
 
-global integer LeftSym   -- to force name to appear, not value
-LeftSym = FALSE    
+export integer LeftSym = FALSE   -- to force name to appear, not value
 
-global boolean dll_option, con_option, fastfp, lccopt_option
-dll_option = FALSE
-con_option = FALSE
-fastfp = FALSE
-lccopt_option = TRUE
+export boolean 
+	dll_option = FALSE,
+	con_option = FALSE,
+	fastfp = FALSE,
+	lccopt_option = TRUE,
+	makefile_option = FALSE
 
-sequence files_to_delete
-files_to_delete = {
-"main-.c",
-"main-.h",
-"init-.c"
+sequence files_to_delete = {
+	"main-.c",
+	"main-.h",
+	"init-.c"
 }
 
-global boolean keep -- emake should keep .c files or delete?
-keep = FALSE
-
-global boolean debug_option
-debug_option = FALSE
-
-global sequence user_library
-user_library = ""
-
-global integer total_stack_size  -- default size for OPTION STACK
-total_stack_size = -1  -- (for now) 
+export boolean keep = FALSE -- emake should keep .c files or delete?
+export boolean debug_option = FALSE
+export sequence user_library = ""
+export integer total_stack_size = -1 -- default size for OPTION STACK
 
 -- first check EUCOMPILEDIR, to allow the user to override and use a different
 -- directory than EUDIR. THen use EUDIR, then default to /usr/share/euphoria
@@ -79,21 +74,29 @@ end ifdef
 	return x
 end function
 
-procedure delete_files(integer doit)
+procedure delete_files(integer doit, sequence objextn)
 -- output commands to delete .c and .h files
-	if not keep then
-		for i = 1 to length(files_to_delete) do
-			if TUNIX then
-				puts(doit, "rm ")
-			else
-				puts(doit, "del ")
-			end if
-			puts(doit, files_to_delete[i] & HOSTNL)
-		end for 
+	if keep then
+		return
 	end if
+	
+	for i = 1 to length(files_to_delete) do
+		if TUNIX then
+			puts(doit, "rm ")
+		else
+			puts(doit, "del ")
+		end if
+		puts(doit, files_to_delete[i] & HOSTNL)
+		
+		-- Assume each '.c' file creates a single object file.
+		if files_to_delete[i][$] = 'c' then
+			printf(doit, "rm %s%s" & HOSTNL, {files_to_delete[i][1..$-2], objextn})
+		end if
+	end for 
+
 end procedure
 
-global procedure NewBB(integer a_call, integer mask, symtab_index sub)
+export procedure NewBB(integer a_call, integer mask, symtab_index sub)
 -- Start a new Basic Block at a label or after a subroutine call 
 
 	symtab_index s
@@ -122,7 +125,7 @@ global procedure NewBB(integer a_call, integer mask, symtab_index sub)
 	end if 
 end procedure
 
-global function BB_var_obj(integer var)
+export function BB_var_obj(integer var)
 -- return the local min/max value of an integer, based on BB info.
 	sequence fail
 	
@@ -139,7 +142,7 @@ global function BB_var_obj(integer var)
 	return fail
 end function
 
-global function BB_var_type(integer var)
+export function BB_var_type(integer var)
 -- return the local type of a var, based on BB info (only) 
 	for i = length(BB_info) to 1 by -1 do
 		if BB_info[i][BB_VAR] = var and
@@ -158,7 +161,7 @@ global function BB_var_type(integer var)
 	return TYPE_OBJECT
 end function
 
-global function GType(symtab_index s)  
+export function GType(symtab_index s)  
 -- return our best estimate of the current type of a var or temp 
 	integer t, local_t
 	
@@ -201,7 +204,7 @@ export function HasDelete( symtab_index s )
 	return SymTab[s][S_HAS_DELETE]
 end function
 
-global function ObjValue(symtab_index s) 
+export function ObjValue(symtab_index s) 
 -- the value of an integer constant or variable 
 	sequence t, local_t
 
@@ -224,7 +227,7 @@ global function ObjValue(symtab_index s)
 	end if
 end function
 
-global function TypeIs(integer x, object types) 
+export function TypeIs(integer x, object types) 
 	if atom(types) then
 		return GType(x) = types
 	else
@@ -232,7 +235,7 @@ global function TypeIs(integer x, object types)
 	end if
 end function
 
-global function TypeIsNot(integer x, object types) 
+export function TypeIsNot(integer x, object types) 
 	if atom(types) then
 		return GType(x) != types
 	else
@@ -240,7 +243,7 @@ global function TypeIsNot(integer x, object types)
 	end if
 end function
 
-global function or_type(integer t1, integer t2)
+export function or_type(integer t1, integer t2)
 -- OR two types to get the (least general) type that includes both 
 	if t1 = TYPE_NULL then
 		return t2
@@ -291,7 +294,7 @@ global function or_type(integer t1, integer t2)
 	end if
 end function
 
-global procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
+export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 -- Set the type and value, or sequence length and element type,
 -- of a temp or var s locally within a BB. 
 
@@ -472,7 +475,7 @@ global procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 end procedure
 
 
-global function ok_name(sequence name)
+export function ok_name(sequence name)
 -- return a different name to avoid conflicts with certain C compiler
 -- reserved words. Only needed for private variables (no file number attached). 
 -- split into two lists for speed 
@@ -519,7 +522,7 @@ global function ok_name(sequence name)
 	end if
 end function
 
-global procedure CName(symtab_index s)
+export procedure CName(symtab_index s)
 -- display the C name or literal value of an operand 
 	object v
 	
@@ -573,7 +576,7 @@ global procedure CName(symtab_index s)
 end procedure
 with warning
 
-global procedure c_stmt(sequence stmt, object arg)
+export procedure c_stmt(sequence stmt, object arg)
 -- output a C statement with replacements for @ or @1 @2 @3, ... @9
 	integer argcount, i
 	
@@ -628,14 +631,14 @@ global procedure c_stmt(sequence stmt, object arg)
 	adjust_indent_after(stmt)
 end procedure
 
-global procedure c_stmt0(sequence stmt)
+export procedure c_stmt0(sequence stmt)
 -- output a C statement with no arguments
 	if emit_c_output then
 		c_stmt(stmt, {})
 	end if
 end procedure
 
-global procedure DeclareFileVars()
+export procedure DeclareFileVars()
 -- emit C declaration for each local and global constant and var 
 	symtab_index s
 	symtab_entry eentry
@@ -671,10 +674,9 @@ global procedure DeclareFileVars()
 	c_hputs("\n")
 end procedure
    
-integer deleted_routines 
-deleted_routines = 0
+integer deleted_routines = 0
 
-global procedure PromoteTypeInfo()
+export procedure PromoteTypeInfo()
 -- at the end of each pass, certain info becomes valid 
 	symtab_index s
 	
@@ -781,7 +783,7 @@ global procedure PromoteTypeInfo()
 	end for
 end procedure
 
-global procedure DeclareRoutineList()
+export procedure DeclareRoutineList()
 -- Declare the list of routines for routine_id search 
 	symtab_index s, p
 	integer first, seq_num
@@ -892,7 +894,7 @@ global procedure DeclareRoutineList()
 end procedure   
 
 
-global procedure DeclareNameSpaceList()
+export procedure DeclareNameSpaceList()
 -- Declare the list of namespace qualifiers for routine_id search 
 	symtab_index s
 	integer first, seq_num
@@ -980,13 +982,13 @@ procedure Write_def_file(integer def_file)
 	end while
 end procedure
 
-global procedure version()
-	c_puts("// Euphoria To C version " & TRANSLATOR_VERSION & "\n")
+export procedure version()
+	c_puts("// Euphoria To C version " & version_string() & "\n")
 end procedure
 
 sequence c_opts
 
-global procedure new_c_file(sequence name)
+export procedure new_c_file(sequence name)
 -- end the old .c file and start a new one 
 	cfile_size = 0
 	if Pass != LAST_PASS then
@@ -1052,28 +1054,40 @@ function unique_c_name(sequence name)
 	return name
 end function
 
+sequence makefile_src_line = "", makefile_obj_line = ""
 sequence link_line
 integer link_file
 
 procedure add_file(sequence filename)
--- add a file to the list of files to be linked 
-	if TUNIX then
+	sequence obj_fname = filename, src_fname = filename & ".c"
+
+	if sequence(wat_path) or sequence(bor_path) then
+		obj_fname &= ".obj"
+	else
+		obj_fname &= ".o"
+	end if
+
+	if makefile_option then
+		makefile_src_line &= src_fname & " "
+		makefile_obj_line &= obj_fname & " "
+
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		link_line &= filename & ".o "
 	
 	elsif TDOS then
 		if sequence(wat_path) then
-			printf(link_file, "FILE %s.obj\n", {filename})
+			printf(link_file, "FILE %s\n", {obj_fname})
 		else
-			printf(link_file, "%s.o\n", {filename})
+			printf(link_file, "%s\n", {obj_fname})
 		end if
 	
 	else
 		if sequence(wat_path) then
-			printf(link_file, "FILE %s.obj\n", {filename})
+			printf(link_file, "FILE %s\n", {obj_fname})
 		elsif sequence(bor_path) then
-			printf(link_file, "%s.c\n", {filename})
+			printf(link_file, "%s\n", {src_fname})
 		else
-			printf(link_file, "%s.obj\n", {filename})
+			printf(link_file, "%s\n", {obj_fname})
 		end if
 	end if
 end procedure
@@ -1096,16 +1110,18 @@ function any_code(integer file_no)
 end function
 
 integer doit
-sequence cc_name, echo
+sequence cc_name
 sequence file0
 sequence prepared_file0
 
-global procedure start_emake()
+export procedure start_emake()
 -- start creating emake.bat     
-	sequence debug_flag
-	debug_flag = ""
+	sequence debug_flag = ""
 	
-	if TUNIX then      
+	if makefile_option then
+		doit = open(file0 & ".mak", "wb")
+		add_file(file0)
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		doit = open("emake", "wb")
 	else       
 		doit = open("emake.bat", "wb")
@@ -1115,16 +1131,21 @@ global procedure start_emake()
 		CompileErr("Couldn't create batch file for compile.\n")
 	end if
 		
-	if not TUNIX then
-		puts(doit, "@echo off"&HOSTNL)
-		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
-	end if
-	
 	ifdef DOS32 then
 		prepared_file0 = truncate_to_83(file0)
 	elsedef
 		prepared_file0 = file0
 	end ifdef
+	
+	if makefile_option then
+		-- nothing more to do if we are using a makefile
+		return
+	end if
+
+	if not (TUNIX or (TWINDOWS and gcc_option)) then
+		puts(doit, "@echo off"&HOSTNL)
+		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
+	end if
 	
 	if TDOS then
 		if sequence(wat_path) then
@@ -1151,9 +1172,7 @@ global procedure start_emake()
 			puts(doit, "echo compiling with DJGPP"&HOSTNL)
 			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
 		end if
-	end if
-
-	if TWINDOWS then
+	elsif TWINDOWS and not gcc_option then
 		if sequence(wat_path) then
 			puts(doit, "echo compiling with WATCOM"&HOSTNL)
 			if debug_option then
@@ -1181,7 +1200,7 @@ global procedure start_emake()
 			end if
 			c_opts &= bor_path & "\\include -L" & bor_path & "\\lib"
 
-		else 
+		elsif not gcc_option then
 			-- LccWin 
 			if debug_option then
 				debug_flag = " -g"
@@ -1197,12 +1216,10 @@ global procedure start_emake()
 		end if
 		
 		c_opts &= sprintf( " -I%s", {get_eudir()})
-	end if
 	
-	if TUNIX then
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		puts(doit, "echo compiling with GNU C"&HOSTNL)
 		cc_name = "gcc"
-		echo = "echo"
 		if debug_option then
 			debug_flag = " -g3"
 		else
@@ -1213,14 +1230,19 @@ global procedure start_emake()
 		else 
 			c_opts = "-c -w -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
 		end if
-		link_line = ""
-	else       
-		echo = "echo"
-		link_file = open("objfiles.lnk", "w")
-		files_to_delete = append(files_to_delete, "objfiles.lnk")
-		if link_file = -1 then
-			CompileErr("Couldn't open objfiles.lnk for output")
+		if TWINDOWS then
+			c_opts &= " -mno-cygwin" -- only for MinGW
+			if not con_option then
+				c_opts &= " -mwindows"
+			end if
 		end if
+		link_line = ""
+	end if
+	
+	link_file = open("objfiles.lnk", "w")
+	files_to_delete = append(files_to_delete, "objfiles.lnk")
+	if link_file = -1 then
+		CompileErr("Couldn't open objfiles.lnk for output")
 	end if
 	
 	if TDOS then
@@ -1270,7 +1292,7 @@ global procedure start_emake()
 		elsif sequence(bor_path) then
 			cc_name = "bcc32"
 			
-		else 
+		elsif not gcc_option then
 			cc_name = "lcc"
 			
 		end if
@@ -1374,7 +1396,7 @@ function truncate_to_83( sequence lfn )
 	end if
 end function
 
-global procedure finish_emake()
+export procedure finish_emake()
 -- finish emake.bat 
 	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file, arguments
 	object bin_path
@@ -1398,22 +1420,22 @@ global procedure finish_emake()
 	end if
 
 	-- init-.c files
-	if atom(bor_path) then
-		printf(doit, "%s init-.c"&HOSTNL, {echo})
+	if atom(bor_path) and not makefile_option then
+		puts(doit, "echo init-.c"&HOSTNL)
 		printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
 	end if
 	add_file("init-")
 	for i = 0 to init_name_num-1 do -- now that we know init_name_num
-		if atom(bor_path) then
-			printf(doit, "%s init-%d.c"&HOSTNL, {echo, i})
+		if atom(bor_path) and not makefile_option then
+			printf(doit, "echo init-%d.c"&HOSTNL, {i})
 			printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
 		end if
 		buff = sprintf("init-%d", i)
 		add_file(buff)
 	end for
 		
-	if atom(bor_path) then
-		printf(doit, "%s linking"&HOSTNL, {echo})
+	if atom(bor_path) and not makefile_option then
+		puts(doit, "echo linking"&HOSTNL)
 	end if
 	
 	ifdef DOS32 then
@@ -1426,7 +1448,9 @@ global procedure finish_emake()
 		bin_path = get_eudir() & SLASH & "bin"
 	end if
 	
-	if TDOS then    
+	if makefile_option then
+		-- do nothing special
+	elsif TDOS then    
 		if sequence(wat_path) then
 			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length( user_library ) then
@@ -1436,12 +1460,10 @@ global procedure finish_emake()
 				if fastfp then
 					puts(link_file, "ecfastfp.lib\n") 
 				else    
-					puts(link_file, "ec.lib\n") 
+					puts(link_file, "eu.lib\n")
 				end if
 			end if
-			if not keep then
-				puts(doit, "del *.obj > NUL"&HOSTNL)
-			end if
+			delete_files(doit, ".obj")
 			path = get_eudir() & "\\bin\\le23p.exe"
 			fp = open(path, "rb")
 			if fp != -1 then
@@ -1478,9 +1500,7 @@ global procedure finish_emake()
 			
 			printf(link_file, "%slib\\liballeg.a\n", {dj_path[1..sl]}) 
 			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, repeat(truncate_to_83(file0), 2))
-			if not keep then
-				puts(doit, "del *.o"&HOSTNL)
-			end if
+			delete_files(doit, ".o")
 			if not debug_option then
 				puts(doit, "set LFN=n"&HOSTNL)
 				printf(doit, "strip %s.exe"&HOSTNL, {file0})
@@ -1491,15 +1511,13 @@ global procedure finish_emake()
 					{truncate_to_83(file0),file0} )
 			end if
 		end if
-	end if      
-
-	if TWINDOWS then
+	elsif TWINDOWS and not gcc_option then
 		if sequence(wat_path) then     
 			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length(user_library) then
 				printf(link_file, "FILE %s\n", {user_library}) 
 			else
-				printf(link_file, "FILE %s\\ecw.lib\n", {bin_path}) 	
+				printf(link_file, "FILE %s\\eu.lib\n", {bin_path})
 			end if
 			puts(link_file, "LIBRARY ws2_32\n")
 			if compare( short_c_file, file0 ) != 0 then
@@ -1511,14 +1529,14 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {user_library}) 
 			else
-				printf(link_file, "%s\\ecwb.lib\n", {bin_path}) 	
+				printf(link_file, "%s\\eub.lib\n", {bin_path})
 			end if
 			
 			if not keep then
 				puts(doit, "del *.tds > NUL"&HOSTNL)
 			end if
 			
-		else 
+		elsif not gcc_option then 
 			-- Lcc 
 			if dll_option then
 				printf(doit, 
@@ -1537,15 +1555,24 @@ global procedure finish_emake()
 			if length(user_library) then
 				printf(link_file, "%s\n", {shrink_to_83(user_library)}) 
 			else
-				printf(link_file, "%s\\ecwl.lib\n", {shrink_to_83(bin_path)}) 
+				printf(link_file, "%s\\eul.lib\n", {shrink_to_83(bin_path)})
 			end if
 			
 		end if
-			
-		if not keep then
-			puts(doit, "del *.obj > NUL"&HOSTNL)
+
+		if dll_option then
+			printf(doit, "if not exist %s.dll goto done"&HOSTNL, {file0})
+			printf(doit, "echo you can now link with: %s.dll"&HOSTNL, {file0})
+		else 
+			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
+			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
 		end if
-			
+		delete_files(doit, ".obj")
+		puts(doit, "goto done"&HOSTNL)
+		puts(doit, ":nofiles"&HOSTNL)
+		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
+		puts(doit, ":done"&HOSTNL)
+
 		def_name = sprintf("%s.def", {file0})
 		def_file = -1
 		if dll_option then
@@ -1578,15 +1605,22 @@ global procedure finish_emake()
 			close(def_file)
 		end if
 		close(link_file)
-	end if
-
-	if TUNIX then
+	
+	elsif TUNIX or (TWINDOWS and gcc_option) then
 		if dll_option then
 			dll_flag = "-shared -nostartfiles"
-			exe_suffix = ".so" 
+			if TWINDOWS then
+				exe_suffix = ".dll"
+			else
+				exe_suffix = ".so" 
+			end if
 		else 
 			dll_flag = ""
-			exe_suffix = ""
+			if TWINDOWS then
+				exe_suffix = ".exe"
+			else
+				exe_suffix = ""
+			end if
 		end if
 		if length(user_library) then
 			printf(doit, 
@@ -1595,59 +1629,55 @@ global procedure finish_emake()
 		else
 			-- need to check to see if euphoria is installed into
 			-- the system:
-			lib_dir = open("/usr/lib/ecu.a","r" )
+			lib_dir = open("/usr/lib/eu.a","r" )
 			if lib_dir = -1 then
 				printf(doit, 
-					"gcc %s %s.o %s -I%s %s/bin/ecu.a -o %s -lm ",
+					"gcc %s %s.o %s -I%s %s/bin/eu.a -o %s -lm ",
 					{dll_flag, short_c_file, link_line, get_eudir(), get_eudir(), file0})
 			else
 				close(lib_dir)
 				printf(doit,
-					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/ecu.a -o %s -lm",
+					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/eu.a -o %s -lm",
 					{dll_flag, short_c_file, link_line, file0})
 			end if
 			
 		end if
 		
-		if not TBSD then
+		if TWINDOWS and gcc_option then
+			puts(doit, " -lws2_32 -mno-cygwin")
+			if not con_option then
+				puts(doit, " -mwindows")
+			end if
+		elsif not TBSD then
 			puts(doit, " -ldl")
 		end if      
 		printf(doit, " -o %s%s"&HOSTNL, {file0, exe_suffix})
-		if not keep then
-			puts(doit, "rm -f *.o"&HOSTNL)
-		end if
 			
 		if dll_option then
 			printf(doit, "echo you can now link with: ./%s.so"&HOSTNL, {file0})
 		else    
 			printf(doit, "echo you can now execute: ./%s"&HOSTNL, {file0})
 		end if
-		delete_files(doit)
-		
-	else
-		if dll_option then
-			printf(doit, "if not exist %s.dll goto done"&HOSTNL, {file0})
-			printf(doit, "echo you can now link with: %s.dll"&HOSTNL, {file0})
-		else 
-			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
-			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
-		end if
-		delete_files(doit)
-		puts(doit, "goto done"&HOSTNL)
-		puts(doit, ":nofiles"&HOSTNL)
-		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
-		puts(doit, ":done"&HOSTNL)
+
+		-- TODO: Need some type of if not exists %s, then skip removing of the files
+		delete_files(doit, ".o")
+	end if
+
+	if makefile_option then
+		printf(doit, "%s_SOURCES=%s\n", { upper(file0), makefile_src_line })
+		printf(doit, "%s_OBJECTS=%s\n", { upper(file0), makefile_obj_line })
 	end if
 		
 	close(doit)
+
 	ifdef UNIX then
-		if TUNIX then
+		if TUNIX and not makefile_option then
 			system("chmod +x emake", 2)
 		end if
 	end ifdef
 end procedure
 
-global procedure GenerateUserRoutines()
+export procedure GenerateUserRoutines()
 -- walk through the user-defined routines, computing types and
 -- optionally generating code 
 	symtab_index s, sp
@@ -1689,14 +1719,14 @@ global procedure GenerateUserRoutines()
 				-- do the standard top-level files as well 
 
 				if Pass = LAST_PASS then
-					if atom(bor_path) then
-						printf(doit, "%s main-.c"&HOSTNL, {echo})                
+					if atom(bor_path) and not makefile_option then
+						puts(doit, "echo main-.c"&HOSTNL)                
 						printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
 					end if
 					add_file("main-")
 					for i = 0 to main_name_num-1 do
-						if atom(bor_path) then
-							printf(doit, "%s main-%d.c"&HOSTNL, {echo, i})               
+						if atom(bor_path) and not makefile_option then
+							printf(doit, "echo main-%d.c"&HOSTNL, {i})               
 							printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
 						end if
 						buff = sprintf("main-%d", i)
@@ -1707,8 +1737,8 @@ global procedure GenerateUserRoutines()
 			end if
 		
 			if Pass = LAST_PASS then
-				if atom(bor_path) then
-					printf(doit, "%s %s.c"&HOSTNL, {echo, c_file})
+				if atom(bor_path) and not makefile_option then
+					printf(doit, "echo %s.c"&HOSTNL, {c_file})
 					printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 				end if
 			end if
@@ -1755,8 +1785,8 @@ global procedure GenerateUserRoutines()
 							next_c_char = 1  -- (unique_c_name will resolve)
 						end if
 						
-						if atom(bor_path) then
-							printf(doit, "%s %s.c"&HOSTNL, {echo, c_file})
+						if atom(bor_path) and not makefile_option then
+							printf(doit, "echo %s.c"&HOSTNL, {c_file})
 							printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 						end if
 						add_file(c_file)
@@ -1921,6 +1951,3 @@ global procedure GenerateUserRoutines()
 		end if
 	end for   
 end procedure
-
-
-

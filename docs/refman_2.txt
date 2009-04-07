@@ -1,6 +1,8 @@
-== Language Definition
+= Language Reference
 
-<<LEVELTOC depth=2>>
+<<LEVELTOC depth=3>>
+
+== Definition
 
 === Objects
 
@@ -382,7 +384,7 @@ These operators can also be applied to sequences. See below.
 
 In some cases [[:short-circuit]] evaluation will be used for expressions containing ##and##
 or ##or##. Specifically, short circuiting applies inside decision taking statements, like the
-[[:if statement]], [[:while statement]] or [[:loop ... until statement]]. More on this later.
+[[:if statement]], [[:while statement]] or [[:loop until statement]]. More on this later.
 
 ==== Arithmetic Operators
 
@@ -1179,6 +1181,230 @@ enum ONE, TWO, THREE, ABC=10, DEF, XYZ
 -- END_OF_ENUM is 12
 </eucode>
 
+=== Specifying the type of a variable
+
+So far you've already seen some examples of variable types but now we will
+define types more precisely.
+
+Variable declarations have a type name followed by a list of the variables
+being declared. For example,
+
+<eucode>
+object a
+
+global integer x, y, z
+
+procedure fred(sequence q, sequence r)
+</eucode>
+
+The types: **object**, **sequence**, **atom** and **integer** are
+**predefined**.  Variables of type **object** may take on //any// value.  Those
+declared with type **sequence** must always be sequences.  Those declared with
+type **atom** must always be atoms.
+
+Variables declared with type **integer** must be atoms with
+integer values from -1073741824 to +1073741823 inclusive. You can perform exact
+calculations on larger integer values, up to about 15 decimal digits, but
+declare them as **atom**, rather than integer.
+
+;**Note~:**
+:In a procedure or function parameter list like the one for fred() above, a type
+name may only be followed by a single parameter name.
+
+;**Performance Note~:**
+:Calculations using variables declared as integer will usually be somewhat
+faster than calculations involving variables declared as atom. If your machine
+has floating-point hardware, Euphoria will use it to manipulate atoms that
+are not integers. If your machine doesn't have floating-point
+hardware (this may happen on old 386 or 486 PCs), Euphoria will call software floating-point
+arithmetic routines contained in **ex.exe** (or in Windows).  You can force ex.exe to
+bypass any floating-point hardware, by setting an environment variable:
+{{{
+SET NO87=1
+}}}
+The slower software routines will be used, but this could be of some advantage
+if you are worried about the floating-point bug in some early Pentium
+chips.
+
+@[udt]
+To augment the [[:predefined types]], you can create **user-defined types**. All you have to
+do is define a single-parameter function, but declare it with **type ...
+end type** instead of **function ... end function**.  For
+example,
+
+<eucode>
+type hour(integer x)
+    return x >= 0 and x <= 23
+end type
+
+hour h1, h2
+
+h1 = 10      -- ok
+h2 = 25      -- error! program aborts with a message
+</eucode>
+
+Variables h1 and h2 can only be assigned integer values in the range 0 to 23
+inclusive. After each assignment to h1 or h2 the interpreter will call hour(),
+passing the new value.  The value will first be checked to see if it is an
+integer (because of "integer x"). If it is, the return statement will be
+executed to test the value of x (i.e. the new value of h1 or h2).  If hour()
+returns true, execution continues normally. If hour() returns false then the
+program is aborted with a suitable diagnostic message.
+
+"hour" can be used to declare subroutine parameters as well:
+
+<eucode>
+procedure set_time(hour h)
+</eucode>
+
+set_time() can only be called with a reasonable value for parameter h,
+otherwise the program will abort with a message.
+
+A variable's type will be checked after each assignment to the variable (except
+where the compiler can predetermine that a check will not be necessary), and
+the program will terminate immediately if the type function returns false.
+Subroutine parameter types are checked each time that the subroutine is called.
+This checking guarantees that a variable can never have a value that does not
+belong to the type of that variable.
+
+Unlike other languages, the type of a variable does not affect any calculations on the
+variable, nor the way its contents are displayed. Only the value of the variable matters
+in an expression. The type just serves as an error check to prevent any
+"corruption" of the variable.    User-defined types can catch unexpected
+logical errors in your program.  They are not designed to catch or correct user
+input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
+@[type_check]
+Type checking can be turned off or on between subroutines using the with
+type_check or without type_check (see [[:special
+statements]].  It is initially on by default.
+
+;**Note to Bench markers~:**
+: When comparing the speed of Euphoria programs against programs written in other
+languages, you should specify **without type_check** at the top of
+the file.  This gives Euphoria permission to skip run-time type checks, thereby
+saving some execution time. All other checks are still performed, e.g.
+subscript checking, uninitialized variable checking etc.  Even when you turn
+off type checking, Euphoria reserves the right to make checks at strategic
+places, since this can actually allow it to run your program //faster// in
+many cases.  So you may still get a type check failure even when you have
+turned off type checking. Whether type checking is on or off, you will never
+get a **//machine-level//** exception.  **You will always get a
+meaningful message from Euphoria when something goes wrong**.  (//This
+might not be the case when you [[:poke]] directly
+into memory, or call routines written in C or machine code.//)
+
+Euphoria's method of defining types is simpler than what you will find in other
+languages, yet Euphoria provides the programmer with //greater// flexibility
+in defining the legal values for a type of data. Any algorithm can be used to
+include or exclude values. You can even declare a variable to be of type object
+which will allow it to take on //any// value. Routines can be written to
+work with very specific types, or very general types.
+
+For many programs, there is little advantage in defining new types, and you may
+wish to stick with the four [[:predefined types]].
+Unlike other languages, Euphoria's type mechanism is optional.  You don't need
+it to create a program.
+
+However, for larger programs, strict type definitions can aid the process of
+debugging.  Logic errors are caught close to their source and are not allowed
+to propagate in subtle ways through the rest of the program.  Furthermore, it
+is easier to reason about the misbehavior of a section of code when you are
+guaranteed that the variables involved always had a legal value, if not the
+desired value.
+
+Types also provide meaningful, machine-checkable documentation about your
+program, making it easier for you or others to understand your code at a later
+date. Combined with the subscript checking,
+uninitialized variable checking, and other checking that is always present,
+strict run-time type checking makes debugging much easier in Euphoria than in
+most other languages. It also increases the reliability of the final program
+since many latent bugs that would have survived the testing phase in other
+languages will have been caught by Euphoria.
+
+;**Anecdote 1~:**
+: In porting a large C program to Euphoria, a number of latent bugs were
+discovered. Although this C program was believed to be totally "correct", we
+found: a situation where an uninitialized variable was being read; a place
+where element number "-1" of an array was routinely written and read; and a
+situation where something was written just off the screen. These problems
+resulted in errors that weren't easily visible to a casual observer, so they
+had survived testing of the C code.
+
+;**Anecdote 2~:**
+:The Quick Sort algorithm presented on page 117 of //Writing Efficient
+Programs// by Jon Bentley has a subscript error! The algorithm will sometimes
+read the element just //before// the beginning of the array to be sorted,
+and will sometimes read the element just //after// the end of the array.
+Whatever garbage is read, the algorithm will still work - this is probably why
+the bug was never caught. But what if there isn't any (virtual) memory just
+before or just after the array? Bentley later modifies the algorithm such that
+this bug goes away -- but he presented this version as being correct.
+**//Even the experts need subscript checking!//**
+
+;**Performance Note~:**
+: When typical user-defined types are used extensively, type checking adds only
+20 to 40 percent to execution time. Leave it on unless you really need the
+extra speed. You might also consider turning it off for just a few
+heavily-executed routines.  [[:Profiling]] can help with this decision.
+
+==== integer
+
+An Euphoria ##integer## is a mathematical integer restricted to the range -1,073,741,824 to +1,073,741,823.
+As a result, a variable of the integer type, while allowing computations as fast as possible,
+cannot hold 32-bit machine addresses, even though the latter are mathematical integers. You
+must use the [[:atom]] type for this purpose. Also, even though the product of two integers
+is a mathematical integer, it may not fit into an integer, and should be kept in an atom instead.
+
+==== atom
+
+An ##atom## can hold three kinds of data:
+* Mathematical integers in the range ##-power(2,53)## to +##power(2,53)##
+* Floating point numbers, in the range ##-power(2,1024)+1## to ##+power(2,1024)-1##
+* Large mathematical integers in the same range, but with a fuzz that grows
+ with the magnitude of the integer.
+
+##power(2,53)## is slightly above 9.10^^15^^, ##power(2,1024)## is in the 10^^308^^ range.
+
+Because of these constraints, which arise in part from common hardware
+limitations, some care is needed for specific purposes:
+* The sum or product of two integers is an ##atom##, but may not be an ##integer##.
+* Memory addresses, or handles acquired from anything non Euphoria, including
+the operating system, **must** be stored as an ##atom##.
+* For large numbers, usual operations may yield strange results:
+<eucode>
+integer n = power(2, 27) -- ok
+integer n_plus = n + 1, n_minus = n - 1 -- ok
+atom a = n * n -- ok
+atom a1 = n_plus * n_minus -- still ok
+? a - a1 -- prints 0, should be 1 mathematically
+</eucode>
+
+//This is not an Euphoria bug//. The IEEE 754 standard for floating point numbers provides for 53
+bits of precision for any real number, and an accurate computation of ##a-a1## would require
+54 of them. Intel FPU chips do have 64 bit precision registers, but the low order 16 bits are only
+used internally, and Intel recommends against using them for high precision arithmetic. Their
+SIMD machine instruction set only uses the IEEE 754 defined format.
+
+==== sequence
+
+A sequence is a type that is a //container//. A sequence has //elements// which can be
+accessed through their //index//, like in ##my_sequence[3]##. ##sequence##s are so generic as
+being able to store all sorts of data structures: strings, trees, lists, anything.
+Accesses to sequences are always bound checked, so that you cannot read or write an element
+that doesn't exist, ever. A large amount of extraction and shape change operations on
+sequences is available, both as built-in operations and library routines. The
+elements of a sequence can have any type.
+
+##sequence##s are implemented very efficiently. Programmers used to pointers will soon notice
+that they can get most usual pointer operations done using sequence indexes. The loss is
+efficiency is usually hard to notice, and the gain is code safety and bug prevention far outweighs it.
+
+==== object
+
+This type can hold any data Euphoria can handle, both atoms and sequences.
+
+The ##object##() type returns 0 if a variable is not initialised, else 1.
+
 === Scope
 
 ==== Why scopes, and what are they?
@@ -1487,256 +1713,7 @@ If an identifier is declared global, public or export, but not override, and the
 same name, Euphoria will not assume an override, and will choose the built-in. A warning will
 be generated whenever this happens.
 
-=== Specifying the type of a variable
-
-So far you've already seen some examples of variable types but now we will
-define types more precisely.
-
-Variable declarations have a type name followed by a list of the variables
-being declared. For example,
-
-<eucode>
-object a
-
-global integer x, y, z
-
-procedure fred(sequence q, sequence r)
-</eucode>
-
-The types: **object**, **sequence**, **atom** and **integer** are
-**predefined**.  Variables of type **object** may take on //any// value.  Those
-declared with type **sequence** must always be sequences.  Those declared with
-type **atom** must always be atoms.
-
-Variables declared with type **integer** must be atoms with
-integer values from -1073741824 to +1073741823 inclusive. You can perform exact
-calculations on larger integer values, up to about 15 decimal digits, but
-declare them as **atom**, rather than integer.
-
-;**Note~:**
-:In a procedure or function parameter list like the one for fred() above, a type
-name may only be followed by a single parameter name.
-
-;**Performance Note~:**
-:Calculations using variables declared as integer will usually be somewhat
-faster than calculations involving variables declared as atom. If your machine
-has floating-point hardware, Euphoria will use it to manipulate atoms that
-are not integers. If your machine doesn't have floating-point
-hardware (this may happen on old 386 or 486 PCs), Euphoria will call software floating-point
-arithmetic routines contained in **ex.exe** (or in Windows).  You can force ex.exe to
-bypass any floating-point hardware, by setting an environment variable:
-{{{
-SET NO87=1
-}}}
-The slower software routines will be used, but this could be of some advantage
-if you are worried about the floating-point bug in some early Pentium
-chips.
-
-@[udt]
-To augment the [[:predefined types]], you can create **user-defined types**. All you have to
-do is define a single-parameter function, but declare it with **type ...
-end type** instead of **function ... end function**.  For
-example,
-
-<eucode>
-type hour(integer x)
-    return x >= 0 and x <= 23
-end type
-
-hour h1, h2
-
-h1 = 10      -- ok
-h2 = 25      -- error! program aborts with a message
-</eucode>
-
-Variables h1 and h2 can only be assigned integer values in the range 0 to 23
-inclusive. After each assignment to h1 or h2 the interpreter will call hour(),
-passing the new value.  The value will first be checked to see if it is an
-integer (because of "integer x"). If it is, the return statement will be
-executed to test the value of x (i.e. the new value of h1 or h2).  If hour()
-returns true, execution continues normally. If hour() returns false then the
-program is aborted with a suitable diagnostic message.
-
-"hour" can be used to declare subroutine parameters as well:
-
-<eucode>
-procedure set_time(hour h)
-</eucode>
-
-set_time() can only be called with a reasonable value for parameter h,
-otherwise the program will abort with a message.
-
-A variable's type will be checked after each assignment to the variable (except
-where the compiler can predetermine that a check will not be necessary), and
-the program will terminate immediately if the type function returns false.
-Subroutine parameter types are checked each time that the subroutine is called.
-This checking guarantees that a variable can never have a value that does not
-belong to the type of that variable.
-
-Unlike other languages, the type of a variable does not affect any calculations on the
-variable, nor the way its contents are displayed. Only the value of the variable matters
-in an expression. The type just serves as an error check to prevent any
-"corruption" of the variable.    User-defined types can catch unexpected
-logical errors in your program.  They are not designed to catch or correct user
-input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
-@[type_check]
-Type checking can be turned off or on between subroutines using the with
-type_check or without type_check (see [[:special
-statements]].  It is initially on by default.
-
-;**Note to Bench markers~:**
-: When comparing the speed of Euphoria programs against programs written in other
-languages, you should specify **without type_check** at the top of
-the file.  This gives Euphoria permission to skip run-time type checks, thereby
-saving some execution time. All other checks are still performed, e.g.
-subscript checking, uninitialized variable checking etc.  Even when you turn
-off type checking, Euphoria reserves the right to make checks at strategic
-places, since this can actually allow it to run your program //faster// in
-many cases.  So you may still get a type check failure even when you have
-turned off type checking. Whether type checking is on or off, you will never
-get a **//machine-level//** exception.  **You will always get a
-meaningful message from Euphoria when something goes wrong**.  (//This
-might not be the case when you [[:poke]] directly
-into memory, or call routines written in C or machine code.//)
-
-Euphoria's method of defining types is simpler than what you will find in other
-languages, yet Euphoria provides the programmer with //greater// flexibility
-in defining the legal values for a type of data. Any algorithm can be used to
-include or exclude values. You can even declare a variable to be of type object
-which will allow it to take on //any// value. Routines can be written to
-work with very specific types, or very general types.
-
-For many programs, there is little advantage in defining new types, and you may
-wish to stick with the four [[:predefined types]].
-Unlike other languages, Euphoria's type mechanism is optional.  You don't need
-it to create a program.
-
-However, for larger programs, strict type definitions can aid the process of
-debugging.  Logic errors are caught close to their source and are not allowed
-to propagate in subtle ways through the rest of the program.  Furthermore, it
-is easier to reason about the misbehavior of a section of code when you are
-guaranteed that the variables involved always had a legal value, if not the
-desired value.
-
-Types also provide meaningful, machine-checkable documentation about your
-program, making it easier for you or others to understand your code at a later
-date. Combined with the subscript checking,
-uninitialized variable checking, and other checking that is always present,
-strict run-time type checking makes debugging much easier in Euphoria than in
-most other languages. It also increases the reliability of the final program
-since many latent bugs that would have survived the testing phase in other
-languages will have been caught by Euphoria.
-
-;**Anecdote 1~:**
-: In porting a large C program to Euphoria, a number of latent bugs were
-discovered. Although this C program was believed to be totally "correct", we
-found: a situation where an uninitialized variable was being read; a place
-where element number "-1" of an array was routinely written and read; and a
-situation where something was written just off the screen. These problems
-resulted in errors that weren't easily visible to a casual observer, so they
-had survived testing of the C code.
-
-;**Anecdote 2~:**
-:The Quick Sort algorithm presented on page 117 of //Writing Efficient
-Programs// by Jon Bentley has a subscript error! The algorithm will sometimes
-read the element just //before// the beginning of the array to be sorted,
-and will sometimes read the element just //after// the end of the array.
-Whatever garbage is read, the algorithm will still work - this is probably why
-the bug was never caught. But what if there isn't any (virtual) memory just
-before or just after the array? Bentley later modifies the algorithm such that
-this bug goes away -- but he presented this version as being correct.
-**//Even the experts need subscript checking!//**
-
-;**Performance Note~:**
-: When typical user-defined types are used extensively, type checking adds only
-20 to 40 percent to execution time. Leave it on unless you really need the
-extra speed. You might also consider turning it off for just a few
-heavily-executed routines.  [[:Profiling]] can help with this decision.
-
-==== Predefined types.
-
-===== integer
-
-An Euphoria ##integer## is a mathematical integer restricted to the range -1,073,741,824 to +1,073,741,823.
-As a result, a variable of the integer type, while allowing computations as fast as possible,
-cannot hold 32-bit machine addresses, even though the latter are mathematical integers. You
-must use the [[:atom]] type for this purpose. Also, even though the product of two integers
-is a mathematical integer, it may not fit into an integer, and should be kept in an atom instead.
-
-===== atom
-
-An ##atom## can hold three kinds of data:
-* Mathematical integers in the range ##-power(2,53)## to +##power(2,53)##
-* Floating point numbers, in the range ##-power(2,1024)+1## to ##+power(2,1024)-1##
-* Large mathematical integers in the same range, but with a fuzz that grows
- with the magnitude of the integer.
-
-##power(2,53)## is slightly above 9.10^^15^^, ##power(2,1024)## is in the 10^^308^^ range.
-
-Because of these constraints, which arise in part from common hardware
-limitations, some care is needed for specific purposes:
-* The sum or product of two integers is an ##atom##, but may not be an ##integer##.
-* Memory addresses, or handles acquired from anything non Euphoria, including
-the operating system, **must** be stored as an ##atom##.
-* For large numbers, usual operations may yield strange results:
-<eucode>
-integer n = power(2, 27) -- ok
-integer n_plus = n + 1, n_minus = n - 1 -- ok
-atom a = n * n -- ok
-atom a1 = n_plus * n_minus -- still ok
-? a - a1 -- prints 0, should be 1 mathematically
-</eucode>
-
-//This is not an Euphoria bug//. The IEEE 754 standard for floating point numbers provides for 53
-bits of precision for any real number, and an accurate computation of ##a-a1## would require
-54 of them. Intel FPU chips do have 64 bit precision registers, but the low order 16 bits are only
-used internally, and Intel recommends against using them for high precision arithmetic. Their
-SIMD machine instruction set only uses the IEEE 754 defined format.
-
-===== sequence
-
-A sequence is a type that is a //container//. A sequence has //elements// which can be
-accessed through their //index//, like in ##my_sequence[3]##. ##sequence##s are so generic as
-being able to store all sorts of data structures: strings, trees, lists, anything.
-Accesses to sequences are always bound checked, so that you cannot read or write an element
-that doesn't exist, ever. A large amount of extraction and shape change operations on
-sequences is available, both as built-in operations and library routines. The
-elements of a sequence can have any type.
-
-##sequence##s are implemented very efficiently. Programmers used to pointers will soon notice
-that they can get most usual pointer operations done using sequence indexes. The loss is
-efficiency is usually hard to notice, and the gain is code safety and bug prevention far outweighs it.
-
-===== object
-
-This type can hold any data Euphoria can handle, both atoms and sequences.
-
-The ##object##() type returns 0 if a variable is not initialised, else 1.
-
-== Statements
-
-The following kinds of executable statements are available:
-
-* [[:Assignment statement]]
-* [[:procedure call]]
-* [[:return statement]]
-* [[:if statement]]
-* [[:switch statement]]
-* [[:ifdef statement]]
-* [[:while statement]]
-* [[:loop ... until statement]]
-* [[:for statement]]
-* [[:exit statement]]
-* [[:break statement]]
-* [[:continue statement]]
-* [[:retry statement]]
-
-Semicolons are not used in Euphoria, but you are free to put as many statements
-as you like on one line, or to split a single statement across many lines. You
-may not split a statement in the middle of an identifier, string, number or
-keyword.
-
-=== Assignment statement
+== Assignment statement
 
 An **assignment statement** assigns the value of an expression to
 a simple variable, or to a subscript or slice of a variable. e.g.
@@ -1773,7 +1750,7 @@ equality testing.  There is never any confusion
 because an assignment in Euphoria is a statement only, it can't be used as an
 expression (as in C).
 
-==== Assignment with Operator
+=== Assignment with Operator
 
 Euphoria also provides some additional forms of the assignment statement.
 
@@ -1847,32 +1824,7 @@ copy of itself on the right side.
 You cannot use assignment with operators while declaring a variable, because that variable is
 not initialised when you perform the assignment.
 
-=== procedure call
-
-A **procedure call** starts execution of a procedure, passing it
-an optional list of argument values. e.g.
-
-<eucode>
-plot(x, 23)
-</eucode>
-
-The list of arguments must match the list of formal parameters in the declaration of the
-procedure, after taking defaulted parameters into account. Parameters left to default are
-simply omitted if they are at the end of the list, or simply denoted with nothing between
-commas if they are not.
-
-
-=== return statement
-
-A **return statement** returns immediately from a subroutine. If
-the subroutine is a function or type then a value must also be returned.
-e.g.
-
-<eucode>
-return -- legal in a procedure only
-
-return {50, "FRED", {}} -- legal in a function/type only
-</eucode>
+== Branching Statements
 
 === if statement
 
@@ -1929,18 +1881,18 @@ flow continues based upon defined cases.  The syntax of a switch statement:
 switch <expr> [with fallthru] [label "<label name>"] do
     case <val1>[, val2,...] then
         [code block 1]
-        [break]
+        [break [label]]
     case <val2>[,...] then
         [code block 2]
-        [break]
-    case <val3>[, ...]:
+        [break [label]]
+    case <val3>[, ...] then
         [code block 3]
-        [break]
+        [break [label]]
     ...
 
     [case else]
         [code block 4]
-        [break]
+        [break [label]]
 end switch
 </eucode>
 
@@ -2067,7 +2019,6 @@ FuncM()
 In other words, the ##break "LBLa"## skips to the end of the switch called "LBLa"
 rather than the switch called "LBLb".
 
-
 === ifdef statement
 
 The ifdef statement is unlike all of the other statements in that it is
@@ -2092,15 +2043,19 @@ but ##EU5## will be defined.
 ==== Platform Definitions
 
 * **DOS32** - Platform is DOS
-* **WIN32** - Platform is Windows
+* **WIN32_CONSOLE** - Platform is Windows and is being executed
+  with the Console version of the interpreter (eui.exe)
+* **WIN32_GUI** - Platform is Windows and is being executed with
+  the GUI version of the interpreter (euiw.exe)
+* **WIN32** - Platform is Windows (GUI or Console)
+* **MICROSOFT** - Platform is any Microsoft platform (DOS32, WIN32)
 * **LINUX** - Platform is Linux
-* **FREEBSD** - Platform is FreeBSD
 * **OSX** - Platform is Mac OS X
-* **UNIX** - Platform is any Unix (currently Linux, FreeBSD or OS X)
-
-==== Miscellaneous Definitions
-
-* **SAFE** - The interpreter is version 4.0 or later.
+* **SUNOS** - Platform is SunOS (Open Solaris)
+* **FREEBSD** - Platform is FreeBSD
+* **OPENBSD** - Platform is OpenBSD
+* **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, SunOS and OS X)
+* **UNIX** - Platform is any Unix
 
 ==== Using ifdef
 
@@ -2121,6 +2076,35 @@ This can handle many tasks such as change the behavior of your application
 when running on //Linux// vs. //Windows//, enable or disable debug style code or
 possibly work differently in demo/shareware applications vs. registered
 applications.
+
+You should surround code that is not portable with ifdefs like:
+<eucode>
+ifdef WIN32 then  
+   -- Windows specific code.
+elsedef
+   include std/error.e
+   crash("This program must be run with the Windows interpreter.")
+end ifdef
+</eucode>
+
+When writing **include files** that you cannot run on some platform, issue a crash
+call in the **include file**. **Yet** make sure that public constants and procedures are defined
+for the unsupported platform as well.
+
+<eucode>
+ifdef DOS32 then
+	include std/error.e
+	crash("socket.e is not supported on the DOS platform")
+end ifdef
+
+-- define exported and public constants and procedures for 
+-- DOS32 as well
+ifdef WIN32 or DOS32 then
+	-- DOS32 is not supported but we define public symbols for it anyhow.
+</eucode>
+
+The reason for doing this is so that the user that includes your include file sees an OS not supported message instead of an undefined reference message. 
+
 
 Defined words must follow the same character set of an identifier, that is,
 it must start with a letter and contain only letters, numbers and/or an
@@ -2183,7 +2167,18 @@ while 1 do
 end while
 </eucode>
 
-=== Iterative code blocks, aka loops.
+Do becareful to put the numbers after the platform names for Windows or DOS:
+
+<eucode>
+-- This puts() routine will never be called
+-- even when run by the DOS interpreter!
+ifdef DOS then
+	puts(1,"I am on DOS\n")
+end ifdef
+</eucode>
+
+
+== Loop statements
 
 An iterative code block repeats its own execution zero, one or more times.
 There are several ways to specify for how long the process should go on, and
@@ -2194,7 +2189,7 @@ loop.
 Euphoria has three flavours of loops. They all may harbor a [[:labelled header]], in
 order to make exiting or resuming them more flexible.
 
-==== while statement
+=== while statement
 
 A **while statement** tests a condition to see if it is non-zero
 (true), and while it is true a loop is executed. e.g.
@@ -2206,9 +2201,9 @@ while x > 0 do
 end while
 </eucode>
 
-==== loop ... until statement
+=== loop until statement
 
-A **loop ... until** statement tests a condition to see if it is
+A **loop until** statement tests a condition to see if it is
 non-zero (true), and until it is true a loop is executed. e.g.
 
 <eucode>
@@ -2243,7 +2238,7 @@ This differs from a **while** loop in more than one way:
 # The footer of the block, instead of being "end loop", has a distinctive form and holds the
   termination test.
 
-==== for statement
+=== for statement
 
 A **for** statement sets up a special loop that has its own **loop variable**.
 The **loop variable** starts with the specified initial value and increments or
@@ -2308,7 +2303,7 @@ increment is specified then +1 is assumed. The limit and increment values are
 established only on entering the loop, and are not affected by anything that
 happens during the execution of the loop.
 
-=== Flow control statements
+== Flow control statements
 
 Program execution flow refers to the order in which program statements are run in.
 By default, the next statement to run after the current one is the next statement
@@ -2337,7 +2332,7 @@ The following flow control keywords are available.
 break retry entry exit continue return goto end
 </eucode>
 
-==== exit statement
+=== exit statement
 Exiting a loop is done with the keyword **exit**. This causes flow
 to immediately leave the current loop and recommence with the first statement
 after the end of the loop.
@@ -2396,7 +2391,6 @@ The output from this is ...
 
 The **exit "main"** causes execution flow to leave the **for** block named //main//.
 
-
 The same thing could be achieved using the **exit N** format...
 
 <eucode>
@@ -2431,7 +2425,6 @@ programs, and are provided mostly for this purpose.
 
 For information on how to associate a string o a block of code, see the section
 [[:labelled headers]].
-
 
 An **exit** without any label or number in a [[:while statement]] or a [[:for statement]]
 causes immediate termination of that loop, with control passing to the first statement after
@@ -2468,7 +2461,7 @@ statement** at some arbitrary point in the body of the loop.
 top of the loop. There's just a simple unconditional jump from **end while**
 back to the first statement inside the loop.
 
-==== break statement
+=== break statement
 
 Works exactly like the **exit statement**, but applies to
 **if statements** or **switch statements** rather than to loop statements of any kind.
@@ -2502,13 +2495,13 @@ This code results in:
 The same optional parameters can be used with the **break** statement as with the **exit**
 statement, but of course apply to if and switch blocks only, instead of loops.
 
-==== continue statement
+=== continue statement
 
 Likewise, skipping the rest of an iteration in a single
 code block is done using a single keyword, **continue**.
 The **continue statement** continues execution of the loop it
 applies to by going to the next iteration now. Going to the next iteration
-means testing a condition (for **while** and **loop ... until** loops, or changing
+means testing a condition (for **while** and **loop until** loops, or changing
 the **for** loop variable index and checking
 whether it is still within bounds.
 
@@ -2524,7 +2517,6 @@ end for
 </eucode>
 
 This will print 3, 9, 4, (2), 5 25, 6 36.
-
 
 <eucode>
 integer b
@@ -2546,7 +2538,7 @@ end for
 The same optional parameters that can be used in an **exit** statement can apply to a
 **continue** statement.
 
-==== retry statement
+=== retry statement
 
 The **retry statement** retries executing the current iteration of the loop it applies to.
 The statement branches to the first statement of the designated loop, without testing
@@ -2578,7 +2570,7 @@ opening the same file, there has to be a way to break from the loop, which the
 The same optional parameters that can be used in an **exit** statement can apply to a
 **retry** statement.
 
-==== with entry statement
+=== with entry statement
 
 It is often the case that the first iteration of a loop is somehow special.
 Some things have to be done before the loop starts - they are done before the
@@ -2625,7 +2617,7 @@ used).
 With **exw.exe** or **exu**, control-c will always
 stop your program immediately.
 
-==== goto statement
+=== goto statement
 
 ##goto## instructs the computer to resume code execution at a place which does not follow the statement.
 The place to resume execution is called the //target// of the statement. It is restricted to 
@@ -2673,7 +2665,7 @@ may be defined only in that scope, and they may or may not have sensible values.
 the programmer to take appropriate action in this respect.
 
 
-=== Labelled headers
+=== Labeled headers
 
 As shown in the above section on control flow statements, most of them may take
 a string referencing a block of code. In order to do so, it is enough to do
@@ -2697,6 +2689,7 @@ while 1 entry label "top" do
 </eucode>
 
 are both correct and equivalent.
+
 @[short-circuit]
 == Short-Circuit Evaluation
 
@@ -2930,6 +2923,7 @@ multiple states.
 | off      | [[:batch|with_batch]]        |
 | on       | [[:type_check]]              |
 | on       | [[:indirect_includes]]       |
+| on       | [[:inline|with_inline]]      |
 
 
 ##with## - This turns **on** one of the options while ##without## turns
@@ -3090,6 +3084,7 @@ Initially, only the following warnings are enabled:
 
 This set can be changed using -W or -X command line switches.
 
+@[with_define]
 ===== with / without define
 
 As mentioned about [[:ifdef statement]], this top level statement is used to
@@ -3107,12 +3102,11 @@ The following tags have a predefined meaning in Euphoria:
             ##safe.e## when defined. Switching mode by renaming files **//no longer works//**.
 * EU400:    defined on all versions of the interpreter above 4.0
 
-The name of a tag may contain any character that are not white space, including ones that
-would not be legal in an identifier. However, for consistency, using identifier-like,
-uppercase words is recommended. "MY TAG" is not a valid tag (TAG has not been declared), but
-"MY@TAG" or "MY�TAG" is. The latter is not recommended because it may display differently on
-different computers.
+The name of a tag may contain any character that is a valid
+identifier character, that is ##A-Za-z0-9_##. It is not required, but
+by convention defined words are upper case.
 
+@[with_inline]
 ==== with / without inline
 
 This directive allows coders some flexibility with inlined routines.  The default is
@@ -3121,124 +3115,3 @@ effect will never be inlined.
 
 ##with inline## takes an optional integer parameter that defines the largest routine
 (by size of IL code) that will be considered for inlining.  The default is 30.
-
-== Command line switches
-
-You can launch Euphoria with some extra command line switches, in order to add
-or change configuration elements. When running a GUI, there is always some way
-to open a prompt and enter any text with options, arguments and whatever the
-program being launched may need for proper, expected operation. Under //Windows//, this is
-achieved by clicking the Run... start menu entry, or hitting Windows-R.
-
-The following items may be changed or added, one at a time:
-@[euinc.conf]
-; ##-C config_file##:
-: Specifies either a file name or the path for where the default file called
-  euinc.conf exists. The configuration file which holds a set of additional
-  command line switches.
-
-; ##-I include_path##:
-: Specifies an extra include path.
-
-; ##-D word##:
-: Defines a word as being set. Words are processed by the [[:ifdef statement]].
-  Words can also be defined via the [[with / without define]] directive.
-
-; ##-TEST##:
-: Parses the code only and issues any warnings or errors to ##STDOUT##. On
-  error the exit code will be 1, otherwise 0. If an error was found, the
-  normal "Press Enter" prompt will not be presented when using the ##-TEST##
-  parameter which enables many editor/IDE programs to test the syntax of your
-  Euphoria source in real time.
-
-@[batch_command_line]
-; ##-BATCH##:
-: Executes the program but if any error occurs, the "Press Enter" prompt is
-  not presented. The exit code will be set to 1 on error, 0 on success. This
-  option can also be set via the [[with batch|with_batch]] directive.
-
-; ##-STRICT##:
-: This turns on all warnings, overriding any with/without warning statement
-  found in the source. This option can also be set via the
-  [[with/without warning]] directive.
-
-; ##-W warning_name##:
-: Resets, or adds to, the current list of warnings that may be emitted. The list of known names
-  is to be found in the subsection [[:with/without warning]]. A name should appear without quotes.
-  The first ##-W## switch resets the list to the warning being introduced, and each subsequent
-  switch adds to the list.
-
-; ##-X##;
-: Resets, or adds to, the list of warnings that will not be issued. This is symmetric of
-  the ##-W## switch.
-
-; ##-WF##:
-: Sets the file where the warnings should go instead of the standard error.
-
-The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
-
-== Further notes
-
-* Included files are searched for in all included paths, in the following order:
-## The current path
-## Paths specified in a ##-I## command line switch, which can also come from any
-   configuration files found. 
-## Paths listed in the ##EUINC## environment variable, in the order in which they appear
-## Paths listed in the ##EUDIR## environment variable, in the order in which they appear
-## The interpreter's path
-
-== euinc.conf ==
-Euphoria supports reading command line switches from configuration files. The default
-name for the configuration file is ##euinc.conf##. However you can specify different
-ones by using the ##-C## switch. 
-
-=== Configuration file format ===
-The file is a text file. Each line in the file is either a command line switch,
-a section header, an include path or a comment.
-* Comments are lines that begin with a double dash {{{"--"}}}. Everying on the line
-is ignored.
-* A section header is a //name// enclosed in square brackets. eg. ##[interpret]##.
-** There are a number of predefined sections. 
-** The lines in a section are only added to the command line switches if they
- apply to the mode that Euphoria is running in.
-*** [interpret] Applies to the interpreter only.
-*** [translate] Applies to the translator only.
-*** [bind] Applies to the binder only.
-*** [all] Applies to all running modes.
-** All configuration lines before the first section header are assumed to be the
-##[all]## section.
-** You can have any number of section headers, but only the predefined ones are
-used. All lines in other sections are treated as comments.
-* A command line switch is a line that begins with a single dash. The entire line
- is added to the actual command line as if it was originally there.
-* An include path is any other line that is not one of the above. The string ##-I##
-is prepended to the line and then it is added to the command line.
-
-When Euphoria starts up, it looks for configuration files in the following order ...
-* for UNIX systems
-## /etc/euphoria/euinc.conf
-## ${HOME}/.euinc.conf
-## From where ever the executable is run from "<exepath>/euinc.conf"
-## Current working directory - "./euinc.conf"
-## Command line -C switches
-* for WINDOWS systems
-## ~%ALLUSERSPROFILE~%\euphoria\euinc.conf
-## ~%APPDATA~%\euphoria\euinc.conf
-## ~%HOMEDRIVE~%\~%HOMEPATH~%\euinc.conf
-## From where ever the executable is run from "<exepath>/euinc.conf"
-## Current working directory - "./euinc.conf"
-## Command line -C switches
-* for DOS systems
-## From where ever the executable is run from "<exepath>/euinc.conf"
-## Current working directory - "./euinc.conf"
-## Command line -C switches
-
-* Euphoria processes every configuration file found, and in the order described above.
-This means that setting specified in earlier configuration files may be overridded by
-subsequent configuration files. For example, a configuration file in the current
-directory will override the same settings in a configuration file in the executable's
-directory.
-* If a configuration file contains a "-C" switch, the new configuration file
-specified on that switch is processed before subsequent lines in the old file.
-* A configuration file is only ever processed once. Additional references to the
-same file are ignored.

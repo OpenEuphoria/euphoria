@@ -11,12 +11,13 @@ ifdef DOS32 then
 	include std\dos\interrup.e
 end ifdef
 
+include global.e
 include common.e
 include platform.e
 
 atom oem2char, convert_buffer
 integer convert_length
-global atom u32,fc_table,char_upper
+export atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
 
 ifdef WIN32 then
@@ -27,7 +28,7 @@ ifdef WIN32 then
 	convert_buffer=allocate(convert_length)
 
 elsifdef DOS32 then
-sequence regs
+	sequence regs
 	regs=repeat(0,10)
 	fc_table=allocate_low(5)
 	-- query filename country dependent capitalisation table pointer
@@ -80,7 +81,7 @@ object exe_path_cache = 0
 
 sequence pwd = current_dir()
 
-global function exe_path()
+export function exe_path()
 	if sequence(exe_path_cache) then
 		return exe_path_cache
 	end if
@@ -144,7 +145,7 @@ function check_cache(sequence env,sequence inc_path)
 end function
 
 
-global function get_conf_dirs()
+export function get_conf_dirs()
 	integer delimiter
 	sequence dirs
 	
@@ -208,7 +209,7 @@ function expand_path( sequence path, sequence prefix )
 	return path
 end function
 
-global procedure add_include_directory( sequence path )
+export procedure add_include_directory( sequence path )
 
 	path = expand_path( path, pwd )
    
@@ -218,7 +219,7 @@ global procedure add_include_directory( sequence path )
 end procedure
 
 sequence seen_conf = {}
-global function load_euinc_conf( sequence file )
+export function load_euinc_conf( sequence file )
 	integer fn
 	object in
 	integer spos, epos
@@ -358,7 +359,7 @@ global function load_euinc_conf( sequence file )
 	return new_args
 end function
 
-global function GetDefaultArgs()
+export function GetDefaultArgs()
 	object env
 	sequence default_args = {}
 	sequence conf_file = "euinc.conf"
@@ -412,7 +413,7 @@ global function GetDefaultArgs()
 	return default_args
 end function
 
-global function ConfPath(sequence file_name)
+export function ConfPath(sequence file_name)
 -- Search directories listed on command line and in conf files
 	sequence file_path
 	integer try
@@ -427,7 +428,7 @@ global function ConfPath(sequence file_name)
 	return -1
 end function
 
-global function ScanPath(sequence file_name,sequence env,integer flag)
+export function ScanPath(sequence file_name,sequence env,integer flag)
 -- returns -1 if no path in geenv(env) leads to file_name, else {full_path,handle}
 -- if flag is 1, the include_subfolder constant is prepended to filename
 	object inc_path
@@ -537,7 +538,7 @@ end function
 
 sequence include_Paths = {}
 
-global function Include_paths(integer add_converted)
+export function Include_paths(integer add_converted)
 	integer status,pos
 	object inc_path
 	sequence full_path
@@ -619,7 +620,7 @@ end function
 
 -- open a file by searching the user's PATH
 
-global function e_path_open(sequence name, sequence mode)
+export function e_path_open(sequence name, sequence mode)
 -- follow the search path, if necessary to open the main file
 	integer src_file
 	object scan_result

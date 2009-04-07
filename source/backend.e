@@ -6,9 +6,14 @@
 
 include std/machine.e
 
+include global.e
 include common.e
 include mode.e as mode
 include intinit.e
+include reswords.e
+include error.e
+include cominit.e
+include compress.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then

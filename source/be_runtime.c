@@ -10,43 +10,46 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 #ifdef EUNIX
-#include <unistd.h>
-#include <termios.h>
-#include <time.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#ifdef EGPM
-#include <gpm.h>
-#endif
+#  include <unistd.h>
+#  include <termios.h>
+#  include <time.h>
+#  include <sys/ioctl.h>
+#  include <sys/types.h>
+#  ifdef EGPM
+#    include <gpm.h>
+#  endif
 #else
-#if !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
-#include <bios.h>
-#endif
-#ifdef EDJGPP
-#include <go32.h>
-#include <allegro.h>
-#endif
-#if !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
-#include <graph.h>
-#endif
-#ifdef ELCC
-#include <conio.h>
-#else
-#include <dos.h>
-#endif
-#include <process.h>
+#  if !defined(ELCC) && !defined(EMINGW)
+#    include <bios.h>
+#  endif
+#  ifdef EDJGPP
+#    include <go32.h>
+#    include <allegro.h>
+#  endif
+#  if !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
+#    include <graph.h>
+#  endif
+#  ifdef ELCC
+#    include <conio.h>
+#  else
+#    include <dos.h>
+#  endif
+#  include <process.h>
 #endif
 //#include <malloc.h>
 #include <string.h>
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
+
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 
 /******************/
 /* Local defines  */
@@ -416,9 +419,7 @@ char *getenv();
 IFILE long_iopen();
 void Cleanup();
 void UserCleanup();
-void RTFatal();
 void MainScreen();
-void RTInternal();
 int wingetch();
 
 /*********************/
@@ -467,18 +468,20 @@ void debug_msg(char *msg)
 void debug_int(int num)
 // send an integer to debug.log
 {
-	char buff[40];
-
-	sprintf(buff, "%d", num);
+#define dbg_int_len (40)
+	char buff[dbg_int_len];
+	snprintf(buff, dbg_int_len, "%d", num);
+	buff[dbg_int_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
 void debug_dbl(double num)
 // send a double to debug.log
 {
-	char buff[40];
-
-	sprintf(buff, "%g", num);
+#define dbg_dbl_len (40)
+	char buff[dbg_dbl_len];
+	snprintf(buff, dbg_dbl_len, "%g", num);
+	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
 
@@ -528,8 +531,7 @@ int matherr(struct _exception *err)  // OW wants this
 			msg = "internal";
 			break;
 	}
-	sprintf(sbuff, "math function %s error", msg);
-	RTFatal(sbuff);
+	RTFatal("math function %s error", msg);
 	return 0;
 }
 #endif
@@ -550,9 +552,10 @@ void call_crash_routines()
 		return;
 	crash_count++;
 
-	free(TempErrName);
-	TempErrName = (char *)malloc(16);
-	strcpy(TempErrName, "ex_crash.err");
+	if (TempErrName) free(TempErrName);
+#define CCR_len (16)
+	TempErrName = (char *)malloc(CCR_len);
+	strlcpy(TempErrName, "ex_crash.err", CCR_len);
 
 #ifndef ERUNTIME
 	// clear the interpreter call stack
@@ -592,21 +595,26 @@ void call_crash_routines()
 }
 
 
-static void SimpleRTFatal(char *msg)
+static void SimpleRTFatal(char *msg, va_list ap)
 /* Fatal errors for translated code */
 {
+	va_list aq;
+	va_copy (aq, ap);
+
 	if (crash_msg == NULL || crash_count > 0) {
 		screen_output(stderr, "\nFatal run-time error:\n");
-		screen_output(stderr, msg);
+		screen_output_va(stderr, msg, aq);
 		screen_output(stderr, "\n\n");
 	}
 	else {
 		screen_output(stderr, crash_msg);
 	}
+	va_end(aq);
 	TempErrFile = iopen(TempErrName, "w");
 	if (TempErrFile != NULL) {
 		iprintf(TempErrFile, "Fatal run-time error:\n");
-		iprintf(TempErrFile, "%s\n", msg);
+		vfprintf(TempErrFile, msg, ap);
+		iprintf(TempErrFile, "\n");
 
 		if (last_traced_line != NULL) {
 			if (crash_msg == NULL || crash_count > 0)
@@ -621,17 +629,24 @@ static void SimpleRTFatal(char *msg)
 	Cleanup(1);
 }
 
-void RTFatal(char *msg)
+void RTFatal_va(char *msg, va_list ap)
 /* handle run time fatal errors */
 {
 #ifndef ERUNTIME
 	if (Executing)
-		CleanUpError(msg, NULL);
+		CleanUpError_va(msg, NULL, ap);
 	else
 #endif
-		SimpleRTFatal(msg);
+		SimpleRTFatal(msg, ap);
 }
 
+void RTFatal(char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	RTFatal_va(msg, ap);
+	va_end(ap);
+}
 
 void InitFiles()
 /* initialize user files before executing */
@@ -2424,10 +2439,8 @@ object binary_op(int fn, object a, object b)
 		b = (object)SEQ_PTR(b);
 		length = ((s1_ptr)a)->length;
 		if (length != ((s1_ptr)b)->length) {
-			sprintf(TempBuff,
-				"sequence lengths are not the same (%ld != %ld)",
-				length, ((s1_ptr)b)->length);
-			RTFatal(TempBuff);
+			RTFatal("sequence lengths are not the same (%ld != %ld)",
+					length, ((s1_ptr)b)->length);
 		}
 		c = NewS1(length);
 		cp = c->base;
@@ -3118,30 +3131,24 @@ static void CheckSlice(s1_ptr a, long startval, long endval, long length)
 		RTFatal("attempt to slice an atom");
 
 	if (startval < 1) {
-		sprintf(TempBuff, "slice lower index is less than 1 (%ld)", startval);
-		RTFatal(TempBuff);
+		RTFatal("slice lower index is less than 1 (%ld)", startval);
 	}
 	if (endval < 0) {
-		sprintf(TempBuff, "slice upper index is less than 0 (%ld)", endval);
-		RTFatal(TempBuff);
+		RTFatal("slice upper index is less than 0 (%ld)", endval);
 	}
 
 	if (length < 0 ) {
-		sprintf(TempBuff, "slice length is less than 0 (%ld)", length);
-		RTFatal(TempBuff);
+		RTFatal("slice length is less than 0 (%ld)", length);
 	}
 
 	a = SEQ_PTR(a);
 	n = a->length;
 	if (startval > n + 1 || length > 0 && startval > n) {
-		sprintf(TempBuff, "slice starts past end of sequence (%ld > %ld)",
+		RTFatal("slice starts past end of sequence (%ld > %ld)",
 				startval, n);
-		RTFatal(TempBuff);
 	}
 	if (endval > n) {
-		sprintf(TempBuff, "slice ends past end of sequence (%ld > %ld)",
-				endval, n);
-		RTFatal(TempBuff);
+		RTFatal("slice ends past end of sequence (%ld > %ld)", endval, n);
 	}
 }
 #endif
@@ -3291,10 +3298,8 @@ void AssignSlice(object start, object end, s1_ptr val)
 		val = SEQ_PTR(val);
 		v_elem = val->base+1;
 		if (val->length != length) {
-			sprintf(TempBuff,
-			"lengths do not match on assignment to slice (%ld != %ld)",
-			length, val->length);
-			RTFatal(TempBuff);
+			RTFatal("lengths do not match on assignment to slice (%ld != %ld)",
+					length, val->length);
 		}
 		while (TRUE) {
 			if (!IS_ATOM_INT(*v_elem)) {
@@ -3331,28 +3336,43 @@ object Date()
 	return MAKE_SEQ(result);
 }
 
-void MakeCString(char *s, object obj)
+void MakeCString(char *s, object obj, int slen)
 /* make an atom or sequence into a C string */
 /* N.B. caller must allow one extra for the null terminator */
 {
 	object_ptr elem;
 	object x;
+	int seqlen;
 
-	if (IS_ATOM(obj))
-		*s++ = Char(obj);
-	else {
-		obj = (object)SEQ_PTR(obj);
-		elem = ((s1_ptr)obj)->base;
-		while (TRUE) {
-			x = *(++elem);
-			if (IS_ATOM_INT(x)) {
-				*s++ = (char)x;
+#ifdef EXTRA_CHECK
+	if (s == 0) RTInternal("MakeCString null buffer");
+#endif
+	while (slen > 1) {
+		if (IS_ATOM(obj)) {
+			*s++ = Char(obj);
+			slen = 1;
+		}
+		else {
+			obj = (object)SEQ_PTR(obj);
+			elem = ((s1_ptr)obj)->base;
+			seqlen = ((s1_ptr)obj)->length;
+			while (seqlen && (slen > 1)) {
+				x = *(++elem);
+				seqlen--;
+				if (IS_ATOM_INT(x)) {
+					*s++ = (char)x;
+				}
+				else {
+					if (x == NOVALUE) {
+						slen = 1;
+						seqlen = 0;
+					}
+					else
+						*s++ = doChar(x);
+				}
+				slen--;
 			}
-			else {
-				if (x == NOVALUE)
-					break;
-				*s++ = doChar(x);
-			}
+			slen = 1;
 		}
 	}
 	*s = '\0';
@@ -3377,8 +3397,7 @@ int CheckFileNumber(object a)
 	else
 		RTFatal("file number must be an atom");
 	if (file_no < 0 || file_no >= MAX_USER_FILE) {
-		sprintf(TempBuff, "bad file number (%ld)", file_no);
-		RTFatal(TempBuff);
+		RTFatal("bad file number (%ld)", file_no);
 	}
 	return (int)file_no;
 }
@@ -3394,8 +3413,7 @@ IFILE which_file(object a, int mode)
 		return user_file[file_no].fptr;
 	else {
 		if (user_file[file_no].mode == EF_CLOSED) {
-			sprintf(TempBuff, "file number %d is not open", file_no);
-			RTFatal(TempBuff);
+			RTFatal("file number %d is not open", file_no);
 		}
 		else {
 			RTFatal("wrong file mode for attempted operation");
@@ -3441,7 +3459,8 @@ object mode_obj;
 object cleanup;
 {
 	char cname[MAX_FILE_NAME+1];
-	char cmode[8];
+#define EOpen_cmode_len (8)
+	char cmode[EOpen_cmode_len];
 	IFILE fp;
 	long length;
 	int i;
@@ -3457,11 +3476,11 @@ object cleanup;
 	length = SEQ_PTR(filename)->length + 1;
 	if (length > MAX_FILE_NAME)
 		return ATOM_M1;
-	MakeCString(cname, filename);
+	MakeCString(cname, filename, MAX_FILE_NAME+1);
 
 	if (SEQ_PTR(mode_obj)->length > 3)
 		RTFatal("invalid open mode");
-	MakeCString(cmode, mode_obj);
+	MakeCString(cmode, mode_obj, EOpen_cmode_len );
 
 	length = strlen(cmode);
 	text_mode = 1;  /* assume text file */
@@ -3495,12 +3514,12 @@ object cleanup;
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
 		text_mode = 0;
-		strcpy(cmode, "r+b");
+		strlcpy(cmode, "r+b", EOpen_cmode_len);
 	}
 
 	else if (strcmp(cmode, "u") == 0) {
 		mode = EF_READ | EF_WRITE;
-		strcpy(cmode, "r+");
+		strlcpy(cmode, "r+", EOpen_cmode_len);
 	}
 
 	else
@@ -3859,7 +3878,8 @@ static void rPrint(object a)
 
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
-			sprintf(sbuff, "%ld", a);
+			snprintf(sbuff, NUM_SIZE, "%ld", a);
+			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' &&
@@ -3875,7 +3895,8 @@ static void rPrint(object a)
                         print_chars += strlen("NOVALUE");
                 }
 		else {
-			sprintf(sbuff, "%.10g", DBL_PTR(a)->dbl);
+			snprintf(sbuff, NUM_SIZE, "%.10g", DBL_PTR(a)->dbl);
+			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 		}
@@ -4062,7 +4083,7 @@ object_ptr f_elem;
 object_ptr f_last;
 object_ptr v_elem;
 {
-	int flen;
+	int flen, sbuff_len=0;
 	char c;
 	long dval;
 	unsigned long uval;
@@ -4080,14 +4101,14 @@ object_ptr v_elem;
 		cstring[flen++] = c;
 		if (++f_elem > f_last) {
 			cstring[flen] = '\0';
-			sprintf(TempBuff, "format specifier is incomplete (%s)", cstring);
-			RTFatal(TempBuff);
+			RTFatal("format specifier is incomplete (%s)", cstring);
 		}
 		c = Char(*f_elem);
 	} while (IsDigit(c) || c == '.' || c == '-' || c == '+');
 
 	free_sb = FALSE;
 	if (c == 's') {
+		int len_used;
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
 		free_sv = FALSE;
@@ -4096,10 +4117,13 @@ object_ptr v_elem;
 			if (slength > LOCAL_SPACE) {
 				sval = EMalloc(slength);
 				free_sv = TRUE;
+				len_used = slength;
 			}
-			else
+			else {
 				sval = quick_alloc1;
-			MakeCString(sval, *v_elem);
+				len_used = LOCAL_SPACE;
+			}
+			MakeCString(sval, *v_elem, len_used);
 		}
 		else {
 			slength = 4L;
@@ -4108,12 +4132,16 @@ object_ptr v_elem;
 			sval[1] = '\0';
 		}
 		if (slength + flen > TEMP_SIZE) {
-			sbuff = EMalloc(slength + flen);
+			sbuff_len = slength + flen;
+			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
-		else
+		else {
 			sbuff = TempBuff;
-		sprintf(sbuff, cstring, sval);
+			sbuff_len = TEMP_SIZE;
+		}
+		snprintf(sbuff, sbuff_len, cstring, sval);
+		sbuff[sbuff_len-1] = 0; // ensure NULL
 		screen_output(f, sbuff);
 		if (free_sv)
 			EFree(sval);
@@ -4149,17 +4177,22 @@ object_ptr v_elem;
 			}
 		}
 		if (NUM_SIZE + flen > TEMP_SIZE) {
-			sbuff = EMalloc(NUM_SIZE + (long)flen);
+			sbuff_len = NUM_SIZE + (long) flen;
+			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
-		else
+		else {
 			sbuff = TempBuff;
+			sbuff_len = TEMP_SIZE;
+		}
+
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
 		if (c == 'f')
-			sprintf(sbuff, cstring, gval);
+			snprintf(sbuff, sbuff_len, cstring, gval);
 		else
-			sprintf(sbuff, cstring, dval);
+			snprintf(sbuff, sbuff_len, cstring, dval);
+		sbuff[sbuff_len-1] = 0; // ensure NULL
 		screen_output(f, sbuff);
 	}
 	else if (c == 'e' || c == 'f' || c == 'g') {
@@ -4170,19 +4203,23 @@ object_ptr v_elem;
 		else
 			gval = DBL_PTR(*v_elem)->dbl;
 		if (NUM_SIZE + flen > TEMP_SIZE) {
-			sbuff = EMalloc(NUM_SIZE + (long)flen);
+			sbuff_len = NUM_SIZE + (long) flen;
+			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
-		else
+		else {
 			sbuff = TempBuff;
-		sprintf(sbuff, cstring, gval);
+			sbuff_len = TEMP_SIZE;
+		}
+
+		snprintf(sbuff, sbuff_len, cstring, gval);
+		sbuff[sbuff_len-1] = 0; // ensure NULL
 		screen_output(f, sbuff);
 	}
 	else {
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
-		sprintf(TempBuff, "Unknown printf format (%s)", cstring);
-		RTFatal(TempBuff);
+		RTFatal("Unknown printf format (%s)", cstring);
 	}
 	if (free_sb)
 		EFree(sbuff);
@@ -4208,11 +4245,9 @@ object EPrintf(int file_no, object format_obj, object values)
 	s1_ptr format;
 
 	if (file_no == DOING_SPRINTF) {
-		/* sprintf */
 		f = (IFILE )DOING_SPRINTF;
 	}
 	else {
-		/* printf */
 		if (file_no == last_w_file_no)
 			f = last_w_file_ptr;
 		else {
@@ -4307,7 +4342,6 @@ object EPrintf(int file_no, object format_obj, object values)
 	}
 	flush_screen();
 	if (file_no == DOING_SPRINTF) {
-		/* sprintf */
 		result = NewString(collect);
 		EFree(collect);
 		collect = NULL;
@@ -4379,7 +4413,7 @@ int get_key(int wait)
 #endif
 
 #ifdef EWINDOWS
-#if defined(EBORLAND) || defined(ELCC) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 		if (wait || winkbhit()) {
 			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
 			a = wingetch();
@@ -4467,9 +4501,12 @@ void ctrace(char *line)
 }
 
 #ifdef EXTRA_CHECK
-void RTInternal(char *msg)
+void RTInternal(char *msg, ...)
 {
-	iprintf(stderr, msg);
+	va_list ap;
+	va_start(ap, msg);
+	vprintf(stderr, msg, ap);
+	va_end(ap);
 	exit(1);
 }
 #endif
@@ -4504,7 +4541,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 		return ATOM_M1;
 
 	routine_string = (char *)&TempBuff;
-	MakeCString(routine_string, name);
+	MakeCString(routine_string, name, TEMP_SIZE);
 
 	colon = strchr(routine_string, ':');
 
@@ -4646,13 +4683,12 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	InitEMalloc();
 	setran();
 	InitFiles();
-	TempErrName = (char *)malloc(8);  // malloc, not EMalloc
-	strcpy(TempErrName, "ex.err");
+#define TempErrName_len (16)
+	TempErrName = (char *)malloc(TempErrName_len);  // malloc, not EMalloc
+	strlcpy(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
-#ifdef EBORLAND
-	PatchCallc();
-#endif
+
 	if (Argc)
 		InitTask();  // i.e. don't do this in a Euphoria .dll/.so
 }
@@ -4678,10 +4714,7 @@ void Position(object line, object col)
 	line_val > line_max ||
 #endif
 		 col_val < 1 ||  col_val > col_max) {
-		sprintf(TempBuff,
-		"attempt to move cursor off the screen to line %d, column %d",
-		line_val, col_val);
-		RTFatal(TempBuff);
+		RTFatal("attempt to move cursor off the screen to line %d, column %d", line_val, col_val);
 	}
 	if (current_screen != MAIN_SCREEN)
 		MainScreen();
@@ -4694,7 +4727,7 @@ char **make_arg_cv(char *cmdline, int *argc)
    When double-clicked under Windows, cmdline will
    typically contain double-quoted strings. */
 {
-	int i, w;
+	int i, w, j;
 	char **argv;
 
 	// don't use EMalloc yet:
@@ -4712,6 +4745,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 		w = 0;
 	   }
 	i = 0;
+
 	while (TRUE) {
 		/* skip white space */
 		while (cmdline[i] == ' '  ||
@@ -4720,14 +4754,23 @@ char **make_arg_cv(char *cmdline, int *argc)
 			i++;
 		}
 		if (cmdline[i] == '\0')
-			break;
+			break;		
 		if (cmdline[i] == '\"') {
 			i++; // skip leading double-quote
 			argv[w++] = &cmdline[i]; // start of new quoted word
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
-				i++;  // what about quotes within quotes?
+			
+				/* allow a quote after a backslash,
+				   then we copy over the backslash */
+				if (cmdline[i] == '\\' && cmdline[i+1] == '\"') {
+					/* copy the rest of the string over the backslash */
+					for (j = ++i;cmdline[j-1] = cmdline[j]; ++j) /* do nothing */; 
+				}
+					
+				i++;  
 			}
+			
 		}
 		else {
 			argv[w++] = &cmdline[i]; // start of new unquoted word
@@ -4737,12 +4780,14 @@ char **make_arg_cv(char *cmdline, int *argc)
 				cmdline[i] != '\t' &&
 				cmdline[i] != '\n' &&
 				cmdline[i] != '\0') {
+			
 				i++;
 			}
 		}
 		if (cmdline[i] == '\0')
 			break;
 		cmdline[i] = '\0';  // end marker for string - is this Kosher?
+				    // it's Kosher.
 		i++;
 	}
 	*argc = w;
@@ -4757,6 +4802,7 @@ void system_call(object command, object wait)
 {
 	char *string_ptr;
 	int len, w;
+	int len_used;
 	long c;
 
 	if (!IS_SEQUENCE(command))
@@ -4770,12 +4816,19 @@ void system_call(object command, object wait)
 		RTFatal("second argument of system() must be an atom");
 
 	len = SEQ_PTR(command)->length + 1;
-	if (len > TEMP_SIZE)
-		RTFatal("system() command is too long");
-	else
+	if (len > TEMP_SIZE) {
+		string_ptr = (char *)malloc(len);
+		len_used = len;
+	}
+	else {
 		string_ptr = TempBuff;
-	MakeCString(string_ptr, command);
+		len_used = TEMP_SIZE;
+	}
+	
+	MakeCString(string_ptr, command, len_used);
 	system(string_ptr);
+	if (len > TEMP_SIZE)
+		free(string_ptr);
 
 	if (w == 1) {
 #ifdef EDOS
@@ -4799,6 +4852,7 @@ object system_exec_call(object command, object wait)
 	char *string_ptr;
 	char **argv;
 	int len, w, exit_code;
+	int len_used;
 	long c;
 
 	if (!IS_SEQUENCE(command))
@@ -4812,11 +4866,16 @@ object system_exec_call(object command, object wait)
 		RTFatal("second argument of system_exec() must be an atom");
 
 	len = SEQ_PTR(command)->length + 1;
-	if (len > TEMP_SIZE)
-		return (object) -1;
-	else
+	if (len > TEMP_SIZE) {
+		string_ptr = (char *)malloc(len);
+		len_used = len;
+	}
+	else {
 		string_ptr = TempBuff;
-	MakeCString(string_ptr, command);
+		len_used = TEMP_SIZE;
+	}
+	
+	MakeCString(string_ptr, command, len_used);
 
 	exit_code = 0;
 
@@ -4828,6 +4887,8 @@ object system_exec_call(object command, object wait)
 	exit_code = spawnvp(P_WAIT, argv[0], argv);
 	free(argv);
 #endif
+	if (len > TEMP_SIZE)
+		free(string_ptr);
 
 	if (w == 1) {
 #ifdef EDOS
@@ -4853,18 +4914,23 @@ object EGetEnv(s1_ptr name)
 	char *string;
 	char *result;
 	int len;
+	int len_used;
 
 	if (!IS_SEQUENCE(name))
 		RTFatal("argument to getenv must be a sequence");
 	len = SEQ_PTR(name)->length+1;
-	if (len > TEMP_SIZE)
-		string = (char *)EMalloc(len);
-	else
+	if (len > TEMP_SIZE) {
+		string = (char *)malloc(len);
+		len_used = len;
+	}
+	else {
 		string = TempBuff;
-	MakeCString(string, (object)name);
+		len_used = TEMP_SIZE;
+	}
+	MakeCString(string, (object)name, len_used);
 	result = getenv(string);
 	if (len > TEMP_SIZE)
-		EFree(string);
+		free(string);
 	if (result == NULL)
 		return ATOM_M1;
 	else
@@ -4913,8 +4979,6 @@ void match_samples()
 static void show_prof_line(IFILE f, long i)
 /* display one line of profile output */
 {
-	char buff[20];
-
 	if (*(slist[i].src+4) == END_OF_FILE_CHAR) {
 		screen_output(f, "       |\021\n");
 		return;
@@ -4923,12 +4987,16 @@ static void show_prof_line(IFILE f, long i)
 		screen_output(f, "       |");
 	}
 	else {
+#define SPL_len (20)
+		char buff[SPL_len];
 		if (slist[i].options & OP_PROFILE_TIME) {
-			sprintf(buff, "%6.2f |",
-			(double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
+			snprintf(buff, SPL_len, "%6.2f |",
+					 (double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
+			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		else {
-			sprintf(buff, "%6ld |", *(int *)slist[i].src);
+			snprintf(buff, SPL_len, "%6ld |", *(int *)slist[i].src);
+			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		screen_output(f, buff);
 	}
@@ -5432,7 +5500,8 @@ void Cleanup(int status)
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
 		screen_output(stderr, "\n\nPress Enter...\n");
-		wingetch();
+		DisableControlCHandling();
+		MyReadConsoleChar();
 	}
 #endif
 
@@ -5466,7 +5535,7 @@ void UserCleanup(int status)
 static unsigned char one_line[84];
 static unsigned char *next_char_ptr = NULL;
 
-#if defined(EBORLAND) || defined(ELCC) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 int winkbhit()
 /* kbhit for Windows GUI apps */
 {
@@ -5490,7 +5559,7 @@ int winkbhit()
 int wingetch()
 // Windows - read next char from keyboard
 {
-#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 	int c;
 
 	c = MyReadConsoleChar();
@@ -5670,8 +5739,7 @@ long find_from(object a, s1_ptr b, object c)
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > length+1) {
-		sprintf(TempBuff, "third argument of find_from() is out of bounds (%ld)", c);
-		RTFatal(TempBuff);
+		RTFatal("third argument of find_from() is out of bounds (%ld)", c);
 	}
 
 	bp = b->base;
@@ -5785,8 +5853,7 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > lengthb+1) {
-		sprintf(TempBuff, "third argument of match_from() is out of bounds (%ld)", c);
-		RTFatal(TempBuff);
+		RTFatal("third argument of match_from() is out of bounds (%ld)", c);
 	}
 
 	b1 = b->base;

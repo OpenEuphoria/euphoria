@@ -57,9 +57,12 @@
 #ifdef EWINDOWS
 #	include <windows.h>
 #endif
+#include <signal.h>
+
 #include "alldefs.h"
 #include "alloc.h"
-#include <signal.h>
+#include "be_runtime.h"
+
 
 /******************/
 /* Local defines  */
@@ -951,12 +954,10 @@ static int recover_rhs_subscript(object subscript, s1_ptr s)
 static void wrong_arg_count(symtab_ptr sub, object a)
 // report wrong arg count in call via routine id
 {
-	sprintf(TempBuff,
-		   "call to %s() via routine-id should pass %d argument%s, not %d",
-		   sub->name, sub->u.subp.num_args, 
-		   (sub->u.subp.num_args == 1) ? "" :"s",
-		   ((s1_ptr)a)->length);
-	RTFatal(TempBuff);
+	RTFatal("call to %s() via routine-id should pass %d argument%s, not %d",
+			sub->name, sub->u.subp.num_args,
+			(sub->u.subp.num_args == 1) ? "" :"s",
+			((s1_ptr)a)->length);
 }
 
 static int recover_lhs_subscript(object subscript, s1_ptr s)
@@ -1054,24 +1055,18 @@ void code_set_pointers(int **code)
 {
 	int len, i, j, n, sub, word;
 	
-	char msg[100]; 
-	
 	len = (int)code[0];
 	i = 1;
 	while (i <= len) {
 		word = (int)code[i];
 		
 		if (word > MAX_OPCODE || word < 1) {
-			sprintf(msg, "BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d",
+			RTFatal("BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d",
 					i, word, len);
-			RTFatal(msg);
 		}
 		
 		code[i] = (int *)opcode(word);
 
-		//sprintf(msg, "word is %d", word);
-		//debug_msg(msg);
-		
 		switch (word) {
 			case TYPE_CHECK:
 			case CALL_BACK_RETURN:
@@ -1914,19 +1909,18 @@ void do_exec(int *start_pc)
 
 		if (*pc < 1 || *pc > MAX_OPCODE) {
 			tpc = pc;
-			sprintf(TempBuff, "Runtime bad opcode (%d) at %lx", *pc, pc);
-			RTFatal(TempBuff);
+			RTFatal("Runtime bad opcode (%d) at %lx", *pc, pc);
 		}
-		
-		//{
-		//char dm[100];
-		//sprintf(dm, "%d: %s", *pc, opnames[*pc]);
-		//debug_msg(dm);
-		//}
 		
 		switch(*pc) {
 #else
 // threaded code
+		if (Executing == FALSE)
+		{
+			// TODO  XXX might this affect exit code improperly?
+			Cleanup(1);
+			return;
+		}
 		thread();
 #if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
 		switch((int)pc) {                                       
@@ -3713,17 +3707,13 @@ void do_exec(int *start_pc)
 					cf = FALSE;
 					pc++;
 					if (sub->token == PROC) {
-						sprintf(TempBuff, "%s() does not return a value",
-								sub->name);
-						RTFatal(TempBuff);
+						RTFatal("%s() does not return a value", sub->name);
 					}
 				}
 				else {
 					if (sub->token != PROC) {
-						sprintf(TempBuff, 
-						  "the value returned by %s() must be assigned or used",
+						RTFatal("the value returned by %s() must be assigned or used",
 								sub->name);
-						RTFatal(TempBuff);
 					}
 				}
 				
@@ -4896,6 +4886,12 @@ void do_exec(int *start_pc)
 #ifdef ESUNOS
 				top = 5; // SUNOS
 #endif
+#ifdef EOPENBSD
+				top = 6; // OpenBSD
+#endif
+#ifdef ENETBSD
+				top = 7; // NetBSD
+#endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32
 #endif
@@ -5174,15 +5170,17 @@ void do_exec(int *start_pc)
 				if (a & OP_TRACE) {
 					start_line = top;
 					if (file_trace) {
-						char one_line[120];
+#define one_line_len (120)
+						char one_line[one_line_len];
+						snprintf(one_line, one_line_len, "%.20s:%d\t%.80s",
+								 name_ext(file_name[slist[top].file_no]),
+								 slist[top].line,
+								 (slist[top].options & (OP_PROFILE_STATEMENT |
+														OP_PROFILE_TIME)) ?
+								 slist[top].src+4 :
+								 slist[top].src);
+						one_line[one_line_len - 1] = '\0'; // ensure NULL
 
-						sprintf(one_line, "%.20s:%d\t%.80s",
-								name_ext(file_name[slist[top].file_no]),
-								slist[top].line,
-								(slist[top].options & (OP_PROFILE_STATEMENT | 
-													   OP_PROFILE_TIME)) ? 
-									 slist[top].src+4 :
-									 slist[top].src);
 						b = TraceOn;
 						TraceOn = TRUE;
 						ctrace(one_line);

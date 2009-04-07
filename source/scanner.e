@@ -15,6 +15,8 @@ include reswords.e
 include symtab.e
 include scinot.e
 include fwdref.e
+include error.e
+include keylist.e
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
 constant MAX_FILE = 256       -- maximum number of source files
@@ -31,20 +33,20 @@ constant BUILTIN_BASE = 170  -- 171..234  N.B. can't use: 253,254,255
 							 -- binding/shrouding that does not use single-byte
 							 -- codes
 -- global variables
-global sequence main_path         -- path of main file being executed 
-global integer src_file           -- the source file 
-global sequence new_include_name  -- name of file to be included at end of line
-global symtab_index new_include_space -- new namespace qualifier or NULL
+export sequence main_path         -- path of main file being executed 
+export integer src_file           -- the source file 
+export sequence new_include_name  -- name of file to be included at end of line
+export symtab_index new_include_space -- new namespace qualifier or NULL
 
 boolean start_include   -- TRUE if we should start a new file at end of line
 start_include = FALSE
 
 boolean public_include -- TRUE if we should pass along public includes
 
-global integer LastLineNumber  -- last global line number (avoid dups in line tab)
+export integer LastLineNumber  -- last global line number (avoid dups in line tab)
 LastLineNumber = -1     
 
-global object shebang              -- #! line (if any) for Unix
+export object shebang              -- #! line (if any) for Unix
 shebang = 0
 
 sequence default_namespaces
@@ -81,7 +83,7 @@ end function
 
 -- list of source lines & execution counts 
 
-global procedure InitLex()
+export procedure InitLex()
 -- initialize lexical analyzer 
 	gline_number = 0
 	line_number = 0
@@ -137,7 +139,7 @@ global procedure InitLex()
 	default_namespaces = {0}
 end procedure
 
-global procedure ResetTP()
+export procedure ResetTP()
 -- turn off all trace/profile flags 
 	OpTrace = FALSE
 	OpProfileStatement = FALSE
@@ -188,7 +190,7 @@ function pack_source(object src)
 	return start + SOURCE_CHUNK * (length(all_source)-1)
 end function
 
-global function fetch_line(integer start)
+export function fetch_line(integer start)
 -- get the line of source stored at offset start (without \n)
 	sequence line
 	integer c, chunk
@@ -212,7 +214,7 @@ global function fetch_line(integer start)
 	return line
 end function
 
-global procedure AppendSourceLine()
+export procedure AppendSourceLine()
 -- add source line to the list 
 	sequence new, old
 	integer options
@@ -271,7 +273,7 @@ global procedure AppendSourceLine()
 	end if
 end procedure
 
-global function s_expand(sequence slist)
+export function s_expand(sequence slist)
 -- expand slist to full size if required
 	sequence new_slist
 	
@@ -297,7 +299,7 @@ procedure fake_include_line()
 	line_number += 1
 	gline_number += 1
 	
-	ThisLine = "include std/all.e -- injected by the scanner\n"
+	ThisLine = "include euphoria/stddebug.e -- injected by the scanner\n"
 	bp = 1
 	n = length(ThisLine)
 	AppendSourceLine()
@@ -312,7 +314,7 @@ export procedure set_dont_read( integer read )
 	dont_read = read
 end procedure
 
-global procedure read_line()
+export procedure read_line()
 -- read next line of source  
 	integer n
 	
@@ -846,7 +848,7 @@ end procedure
 
 
 
-global function IncludePop()
+export function IncludePop()
 -- stop reading from current source file and restore info for previous file
 -- (if any)  
 	sequence top
@@ -1027,7 +1029,7 @@ export procedure maybe_namespace()
 	might_be_namespace = 1
 end procedure
 
-global function Scanner()
+export function Scanner()
 -- The scanner main routine: returns a lexical token  
 	integer ch, i, sp, prev_Nne, ech
 	integer cline
@@ -1560,7 +1562,7 @@ global function Scanner()
 end function
 scanner_rid = routine_id("Scanner")
 
-global procedure eu_namespace()
+export procedure eu_namespace()
 -- add the "eu" namespace
 	token eu_tok
 	symtab_index eu_ns
@@ -1572,7 +1574,7 @@ global procedure eu_namespace()
 	SymTab[eu_ns][S_SCOPE] = SC_GLOBAL
 end procedure
 
-global function StringToken()
+export function StringToken()
 -- scans until blank, tab, end of line, or end of file. 
 -- returns a raw string - leading whitespace ignored, 
 -- comment chopped off.
@@ -1602,7 +1604,7 @@ global function StringToken()
 	return gtext
 end function
 
-global procedure IncludeScan( integer is_public )
+export procedure IncludeScan( integer is_public )
 -- Special scan for an include statement:
 -- include filename as namespace
    
@@ -1709,22 +1711,22 @@ global procedure IncludeScan( integer is_public )
 end procedure
 
 ifdef STDDEBUG then
-procedure all_include()
-	new_include_name = "std/all.e"
-	new_include_space = 0
-	start_include = TRUE
-	public_include = FALSE
-end procedure
+	procedure all_include()
+		new_include_name = "euphoria/stddebug.e"
+		new_include_space = 0
+		start_include = TRUE
+		public_include = FALSE
+	end procedure
 end ifdef
 
 -- start parsing the main file
-global procedure main_file()
-ifdef STDDEBUG then
-	all_include()
-	IncludePush()
-	fake_include_line()
-elsedef
-	read_line()
-	default_namespace( )
-end ifdef
+export procedure main_file()
+	ifdef STDDEBUG then
+		all_include()
+		IncludePush()
+		fake_include_line()
+	elsedef
+		read_line()
+		default_namespace( )
+	end ifdef
 end procedure

@@ -268,8 +268,7 @@ static void flush(int new_color)
 	if (new_color != color) {
 		if (color != -1) {
 			set_text_color(color);
-			strncpy(segment, line+seg_start, seg_end - seg_start + 1);
-			segment[seg_end-seg_start+1] = '\0';
+			strlcpy(segment, line+seg_start, seg_end - seg_start);
 			screen_output(NULL, segment);
 			seg_start = seg_end + 1;
 		}
@@ -317,8 +316,7 @@ void DisplayColorLine(char *pline, int string_color)
 					}
 				}
 			}
-			strncpy(word, line + seg_end + 1, last - seg_end);
-			word[last - seg_end] = '\0';
+			strlcpy(word, line + seg_end + 1, last - seg_end);
 			s_type = s_find(word);
 			if (s_type == S_KEYWORD) 
 				flush(KEYWORD_COLOR);
@@ -382,8 +380,7 @@ void DisplayColorLine(char *pline, int string_color)
 	
 	if (color != -1) 
 		set_text_color(color);
-	strncpy(segment, line+seg_start, seg_end - seg_start + 1);
-	segment[seg_end-seg_start+1] = '\0';
+	strlcpy(segment, line+seg_start, seg_end - seg_start);
 	screen_output(NULL, segment);
 }
 

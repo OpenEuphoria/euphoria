@@ -46,7 +46,7 @@ ifdef WIN32 then
 elsifdef LINUX then
 	constant lib = open_dll("")
 
-elsifdef FREEBSD or SUNOS then
+elsifdef FREEBSD or SUNOS or OPENBSD then
 	constant lib = open_dll("libc.so")
 	
 elsifdef OSX then
@@ -141,7 +141,7 @@ ifdef UNIX then
 	public constant PATHSEP = ':'
 elsedef
 	public constant SLASH='\\'
-	public constant SLASHES = ":\\/"
+	public constant SLASHES = "\\/:"
 	public constant EOLSEP = "\r\n"
 	public constant PATHSEP = ';'
 end ifdef
@@ -1190,34 +1190,47 @@ end function
 --
 -- Comment:
 -- A //relative// path is one which is relative to the current directory and
--- an //absolute// path is one that doesn't need to knw the current directory
+-- an //absolute// path is one that doesn't need to know the current directory
 -- to find the file.
 --
 -- Example 1:
 -- <eucode>
+-- ? absolute_path("") -- returns 0
 -- ? absolute_path("/usr/bin/abc") -- returns 1
+-- ? absolute_path("\\temp\\somefile.doc") -- returns 1
 -- ? absolute_path("../abc") -- returns 0
+-- ? absolute_path("local/abc.txt") -- returns 0
+-- ? absolute_path("abc.txt") -- returns 0
 -- ? absolute_path("c:..\\abc") -- returns 0
--- ? absolute_path("c:\\windows\\system32\\abc") -- returns 1
+-- -- The next two examples return 0 on Unix platforms and 1 on Microsoft platforms
+-- ? absolute_path("c:\\windows\\system32\\abc")
+-- ? absolute_path("c:/windows/system32/abc")
 -- </eucode>
 
 public function absolute_path(sequence filename)
-	if filename[1] = SLASH then
+	if length(filename) = 0 then
+		return 0
+	end if
+	
+	if eu:find(filename[1], SLASHES) then
 		return 1
 	end if
-	ifdef not WIN32 then
-		if length(filename) > 1 then
-			if filename[2] = ':' then
-				if length(filename) > 2 then
-					if filename[3] = SLASH then
-						return 1
-					else
-						return 0
-					end if
-				else
-					return 0
-				end if
-			end if
+	
+	ifdef MICROSOFT then
+		if length(filename) = 1 then
+			return 0
+		end if
+		
+		if filename[2] != ':' then
+			return 0
+		end if
+		
+		if length(filename) < 3 then
+			return 0
+		end if
+		
+		if eu:find(filename[3], SLASHES) then
+			return 1
 		end if
 	end ifdef
 	return 0
@@ -1225,7 +1238,7 @@ end function
 
 
 --**
--- Returns the full path and file name of the supplid file name.
+-- Returns the full path and file name of the supplied file name.
 --
 -- Parameters:
 --	# ##path_in## - A sequence. This is the file name whose full path you want.

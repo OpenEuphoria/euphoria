@@ -2,36 +2,28 @@
 --
 -- Symbol Table Routines
 
+include std/search.e
+
 include global.e
 include c_out.e
 include keylist.e
 include error.e
 include fwdref.e
-
-include std/search.e
+include reswords.e
 
 constant NBUCKETS = 2003  -- prime helps
-global sequence buckets   -- hash buckets
-buckets = repeat(0, NBUCKETS)
 
-global symtab_index object_type       -- s.t. index of object type
-global symtab_index atom_type         -- s.t. index of atom type
-global symtab_index sequence_type     -- s.t. index of sequence type
-global symtab_index integer_type      -- s.t. index of integer type
+export sequence buckets = repeat(0, NBUCKETS)  -- hash buckets
+export symtab_index object_type       -- s.t. index of object type
+export symtab_index atom_type         -- s.t. index of atom type
+export symtab_index sequence_type     -- s.t. index of sequence type
+export symtab_index integer_type      -- s.t. index of integer type
 
-sequence e_routine   -- sequence of symbol table pointers for routine_id
-e_routine = {}
+export symtab_index literal_init = 0
+export integer last_sym = 0
 
-global symtab_index literal_init
-literal_init = 0
-
-sequence lastintval, lastintsym
-lastintval = {}
-lastintsym = {}
-
-global integer last_sym
-last_sym = 0
-
+sequence lastintval = {}, lastintsym = {}
+sequence e_routine  = {}  -- sequence of symbol table pointers for routine_id
 sequence scope_stack = {}   -- for using loops and if blocks for scope
 integer scope_id = 0        -- each scope gets a unique id
 sequence scoped_vars = {}   -- remember vars created in each scope so we can hide them at the correct time
@@ -54,7 +46,7 @@ end function
 
 -- take a symbol out of the chain of hashes, which effectively hides it from
 -- ever being found
-global procedure remove_symbol( symtab_index sym )
+export procedure remove_symbol( symtab_index sym )
 	integer hash
 	integer st_ptr
 	
@@ -142,7 +134,7 @@ export function NewBasicEntry(sequence name, integer varnum, integer scope,
 	return length(SymTab)
 end function
 
-global function NewEntry(sequence name, integer varnum, integer scope,
+export function NewEntry(sequence name, integer varnum, integer scope,
 				  integer token, integer hashval, symtab_index samehash,
 				  symtab_index type_sym)
 -- Enter a symbol into the table at the next available position
@@ -161,7 +153,7 @@ end function
 
 constant BLANK_ENTRY = repeat(0, SIZEOF_TEMP_ENTRY)
 
-global function tmp_alloc()
+export function tmp_alloc()
 -- return SymTab index for a new temporary var/literal constant
 	symtab_index new
 
@@ -200,7 +192,7 @@ function PrivateName(sequence name, symtab_index proc)
 	return FALSE
 end function
 
-global procedure DefinedYet(symtab_index sym)
+export procedure DefinedYet(symtab_index sym)
 -- make sure sym has not been defined yet, except possibly as
 -- a predefined symbol, or a global in a previous file
 	if not find(SymTab[sym][S_SCOPE],
@@ -211,7 +203,7 @@ global procedure DefinedYet(symtab_index sym)
 	end if
 end procedure
 
-global function name_ext(sequence s)
+export function name_ext(sequence s)
 -- Returns the file name & extension part of a path.
 -- Note: both forward slash and backslash are handled for all platforms.
 	for i = length(s) to 1 by -1 do
@@ -225,7 +217,7 @@ end function
 
 constant SEARCH_LIMIT = 20 + 500 * (TRANSLATE or BIND)
 
-global function NewStringSym(sequence s)
+export function NewStringSym(sequence s)
 -- create a new temp that holds a string
 	symtab_index p, tp, prev
 	integer search_count
@@ -277,7 +269,7 @@ global function NewStringSym(sequence s)
 	return p
 end function
 
-global function NewIntSym(integer int_val)
+export function NewIntSym(integer int_val)
 -- New integer symbol
 -- int_val must not be too big for a Euphoria int
 	symtab_index p
@@ -307,7 +299,7 @@ global function NewIntSym(integer int_val)
 	end if
 end function
 
-global function NewDoubleSym(atom d)
+export function NewDoubleSym(atom d)
 -- allocate space for a new double literal value at compile-time
 	symtab_index p, tp, prev
 	integer search_count
@@ -351,10 +343,10 @@ global function NewDoubleSym(atom d)
 	return p
 end function
 
-global integer temps_allocated   -- number of temps allocated for CurrentSub
+export integer temps_allocated   -- number of temps allocated for CurrentSub
 temps_allocated = 0
 
-global function NewTempSym( integer inlining = 0)
+export function NewTempSym( integer inlining = 0)
 -- allocate a new temp and link it with the list of temps
 -- for the current subprogram
 	symtab_index p, q
@@ -403,7 +395,7 @@ global function NewTempSym( integer inlining = 0)
 	return p
 end function
 
-global procedure InitSymTab()
+export procedure InitSymTab()
 -- Initialize the Symbol Table
 	integer hashval, len
 	--register symtab_index *bptr
@@ -497,7 +489,7 @@ global procedure InitSymTab()
 	end for
 end procedure
 
-global procedure add_ref(token tok)
+export procedure add_ref(token tok)
 -- BIND only: add a reference to a symbol from the current routine
 	symtab_index s
 
@@ -510,7 +502,7 @@ global procedure add_ref(token tok)
 	end if
 end procedure
 
-global procedure MarkTargets(symtab_index s, integer attribute)
+export procedure MarkTargets(symtab_index s, integer attribute)
 -- Note the possible targets of a routine id call
 	symtab_index p
 	sequence sname
@@ -581,7 +573,7 @@ global procedure MarkTargets(symtab_index s, integer attribute)
 	end if
 end procedure
 
-global sequence dup_globals, dup_overrides, in_include_path
+export sequence dup_globals, dup_overrides, in_include_path
 
 -- remember which files have gotten warnings already to avoid issuing too many
 sequence include_warnings
@@ -608,8 +600,8 @@ export function get_resolve_unincluded_globals()
 	return Resolve_unincluded_globals
 end function
 
-global integer No_new_entry = 0
-global function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
+export integer No_new_entry = 0
+export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier.
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
@@ -939,7 +931,7 @@ end ifdef
 end function
 
 
-global procedure Hide(symtab_index s)
+export procedure Hide(symtab_index s)
 -- remove the visibility of a symbol
 -- by deleting it from its hash chain
 	symtab_index prev, p
@@ -963,7 +955,7 @@ global procedure Hide(symtab_index s)
 	SymTab[s][S_SAMEHASH] = 0
 end procedure
 
-global procedure Show(symtab_index s)
+export procedure Show(symtab_index s)
 -- restore the visibility of a symbol
 -- by adding it to its hash chain
 	symtab_index p
@@ -1050,7 +1042,7 @@ procedure LintCheck(symtab_index s)
 	end if
 end procedure
 
-global procedure HideLocals()
+export procedure HideLocals()
 -- hide the local symbols and "lint" check them
 	symtab_index s
 
@@ -1067,7 +1059,7 @@ global procedure HideLocals()
 	end while
 end procedure
 
-global procedure ExitScope()
+export procedure ExitScope()
 -- delete all the private scope entries for the current routine
 -- and "lint" check them
 	symtab_index s

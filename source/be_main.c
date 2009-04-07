@@ -12,35 +12,31 @@
 #include <stdio.h>
 #include <time.h>
 #ifdef EWINDOWS
-#include <windows.h>
-#include <limits.h>
+#  include <windows.h>
+#  include <limits.h>
 #endif
 #ifdef EUNIX
-#include <unistd.h>
-#ifdef EBSD
-#include <limits.h>
+#  include <unistd.h>
+#  ifdef EBSD
+#    include <limits.h>
+#  else
+#    include <linux/limits.h>
+#  endif
+#  include <sys/types.h>
+#  include <sys/stat.h>
 #else
-#include <linux/limits.h>
-#endif
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#ifdef EBORLAND
-#include <float.h>
-#else
-#ifdef EMINGW
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#include <sys\types.h>
-#include <sys\stat.h>
-#endif
-#if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
-#include <i86.h>
-#include <bios.h>
-#include <graph.h>
-#endif
-#endif
+#  ifdef EMINGW
+#    include <sys/types.h>
+#    include <sys/stat.h>
+#  else
+#    include <sys\types.h>
+#    include <sys\stat.h>
+#  endif
+#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#    include <i86.h>
+#    include <bios.h>
+#    include <graph.h>
+#  endif
 #endif
 #include <fcntl.h>
 #include <string.h>
@@ -99,7 +95,7 @@ extern char *EMalloc();
 #else
 #include "alloc.h"
 #endif
-#ifndef EWINDOWS // !defined(EBORLAND) && !defined(ELCC)
+#ifndef EWINDOWS // !defined(ELCC)
 extern void *malloc();
 #endif
 
@@ -143,7 +139,7 @@ static int e_path_open(char *name, int mode)
 			/* end of a directory */
 			if (fn > 0) {
 				full_name[fn++] = SLASH;
-				strcpy(full_name + fn, name);
+				strlcpy(full_name + fn, name, PATH_MAX);
 				src_file = long_open(full_name, mode);
 				if (src_file > -1) {
 					file_name[1] = full_name;           
@@ -198,14 +194,9 @@ void be_init()
 #endif
 #endif
 
-#ifdef EWINDOWS
-	
-#ifdef EBORLAND
-	_control87(MCW_EM,MCW_EM);
-#endif
-#endif
-	TempErrName = (char *)malloc(8); // uses malloc, not EMalloc
-	strcpy(TempErrName, "ex.err"); // can change
+#define TempErrName_len (30)
+	TempErrName = (char *)malloc(TempErrName_len); // uses malloc, not EMalloc
+	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
 	
 	eudir = getenv("EUDIR");
 	if (eudir == NULL) {
@@ -216,9 +207,10 @@ void be_init()
 			eudir = "euphoria";  
 		}
 		else {
-			p = (char *)malloc(strlen(eudir)+12);
-			strcpy(p, eudir);
-			strcat(p, "/euphoria");
+			int p_size = strlen(eudir) + 12;
+			p = (char *)malloc(p_size + 1);
+			snprintf(p, p_size+1, "%s/euphoria", eudir);
+			p[p_size] = 0; // ensure NULL
 			eudir = p;
 		}
 #else
@@ -227,7 +219,7 @@ void be_init()
 	}
 	
 #if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
-	strcpy(main_path, file_name[1]); // FOR NOW!
+	strlcpy(main_path, file_name[1], PATH_MAX); // FOR NOW!
 #else
 	(void)_fullpath(main_path, file_name[1], PATH_MAX+1); 
 #endif
@@ -237,10 +229,6 @@ void be_init()
 		;
 	*(p+1) = '\0'; /* keep the path, truncate off the final name */    
 
-#ifdef EBORLAND
-	PatchCallc();  // ? translator init does this
-#endif
-	
 	InitExecute();
 	InitDebug();
 	InitTraceWindow();
@@ -268,4 +256,3 @@ void Stats()
 	printf("bad time-profile samples: %d\n", bad_samples);
 }
 #endif
-

@@ -26,6 +26,7 @@
 #include "execute.h"
 #include "symtab.h"
 #include "reswords.h"
+#include "be_runtime.h"
 
 /*********************/
 /* Local definitions */
@@ -104,16 +105,6 @@
 #define read_esp() _asm("movl %esp, -20(%ebp)")
 #define read_esp_tc() _asm("movl %esp, -52(%ebp)")
 #endif
-#endif
-
-#ifdef EBORLAND
-// This is just dummy code. It will be searched and replaced at start-up.
-// See PatchCallc() in be_callc.c 
-#define push_regs() stack_top = 99999;   // 99999 = hex 00 01 86 9F
-#define pop_regs() stack_top = 88888;    // 88888 = hex 00 01 5B 38
-#define set_esp() stack_top = 77777;     // 77777 = hex 00 01 2F D1
-#define read_esp() stack_top = 66666;    // 66666 = hex 00 01 04 6A
-#define read_esp_tc() stack_top = 55555; // 55555 = hex 00 00 d9 03
 #endif
 
 #ifdef EDJGPP
@@ -625,8 +616,7 @@ static int which_task(double tid)
 			return i;
 		}
 	}
-	sprintf(buff, "Invalid task id: %10.3g", tid);
-	RTFatal(buff);
+	RTFatal("Invalid task id: %10.3g", tid);
 }
 
 
@@ -847,12 +837,6 @@ void task_clock_start()
 	}
 }
 
-#ifdef EBORLAND
-#pragma codeseg _DATA
-// put task_create() and scheduler() into the DATA segment 
-// so I can patch them at run-time
-#endif
-
 object task_create(object r_id, object args)
 // Create a new task - return a double task id - assumed by Translator
 {
@@ -890,10 +874,8 @@ object task_create(object r_id, object args)
 #endif  
 	
 	if (SEQ_PTR(args)->length != proc_args) {
-		sprintf(TempBuff, 
-		"Incorrect number of arguments (passing %d where %d are expected)",
-		SEQ_PTR(args)->length, proc_args);
-		RTFatal(TempBuff);
+		RTFatal("Incorrect number of arguments (passing %d where %d are expected)",
+				SEQ_PTR(args)->length, proc_args);
 	}
 	
 	recycle = -1;
@@ -1027,13 +1009,11 @@ object task_create(object r_id, object args)
 		// will be updated again when current task yields
 		
 		if (tcb[biggest].expr_stack > tcb[biggest].expr_top) {
-			sprintf(TempBuff, 
-					"Task %.0f (%.40s) no longer has enough stack space (%d bytes)",
-					tcb[biggest].tid, 
-					(tcb[biggest].tid == 0.0) ? "initial task" : 
-											  _00[tcb[biggest].rid].name,
+			RTFatal("Task %.0f (%.40s) no longer has enough stack space (%d bytes)",
+					tcb[biggest].tid,
+					(tcb[biggest].tid == 0.0) ? "initial task" :
+					_00[tcb[biggest].rid].name,
 					size);
-			RTFatal(TempBuff);
 		}
 		
 		if (tcb[biggest].expr_top > word) // don't overwrite live stack data
@@ -1210,13 +1190,11 @@ void scheduler(double now)
 		
 		if ((object_ptr)stack_top < tcb[current_task].expr_stack ||
 			*(tcb[current_task].expr_stack) != (object)STACK_MARKER) {
-			sprintf(TempBuff,
-					"Task %.0f (%.40s) exceeded its stack size limit of %d bytes",
-					tcb[current_task].tid, 
+			RTFatal("Task %.0f (%.40s) exceeded its stack size limit of %d bytes",
+					tcb[current_task].tid,
 					(tcb[current_task].tid == 0.0) ? "initial task" :
-					 _00[tcb[current_task].rid].name,
+					_00[tcb[current_task].rid].name,
 					tcb[current_task].stack_size);
-			RTFatal(TempBuff);
 		}
 #else       
 		// save current stack info
@@ -1287,13 +1265,3 @@ void scheduler(double now)
 		}
 	}
 }
-
-#ifdef EBORLAND
-#pragma codeseg _DATA
-void end_of_scheduler()
-/* end marker */
-{
-}
-#pragma codeseg
-#endif
-

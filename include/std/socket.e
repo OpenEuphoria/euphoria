@@ -1,7 +1,8 @@
 --****
--- == Sockets
+-- == Core Sockets
 --
 -- <<LEVELTOC depth=2>>
+--
  
 ifdef DOS32 then
 	include std/error.e
@@ -10,6 +11,7 @@ end ifdef
 
 include std/get.e
 include std/regex.e as re
+include std/memory.e as mem
 include std/sequence.e as seq
 include std/net/common.e
 
@@ -18,16 +20,55 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
 	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT, M_SOCK_SELECT
 
 --****
--- === Constants
+-- === Socket Type Constants
+--
+-- These values are passed as the ##family## and ##sock_type## parameters of
+-- the [[:create]] function.
 --
 
---**
--- Socket types
-
-ifdef WIN32 then
+ifdef WIN32 or DOS32 then
 	public constant
-		AF_UNSPEC=0, AF_UNIX=-1, AF_INET=2, AF_APPLETALK=17, AF_INET6=23, AF_BTH=32,
-		SOCK_STREAM=1, SOCK_DGRAM=2, SOCK_RAW=3, SOCK_RDM=4, SOCK_SEQPACKET=5
+		--**
+		-- Address family is unspecified
+		AF_UNSPEC=0,
+		--**
+		-- Local communications
+		AF_UNIX=-1,
+		--**
+		-- IPv4 Internet protocols
+		AF_INET=2,
+		--**
+		-- IPv6 Internet protocols
+		AF_INET6=23,
+		--**
+		-- Appletalk
+		AF_APPLETALK=17,
+		--**
+		-- Bluetooth
+		AF_BTH=32
+
+	public constant
+		--**
+		-- Provides sequenced, reliable, two-way, connection-based byte streams.
+		-- An out-of-band data transmission mechanism may be supported.
+		SOCK_STREAM=1,
+
+		--**
+		-- Supports datagrams (connectionless, unreliable messages of a
+		-- fixed maximum length).
+		SOCK_DGRAM=2,
+
+		--**
+		-- Provides raw network protocol access.
+		SOCK_RAW=3,
+
+		--**
+		-- Provides a reliable datagram layer that does not guarantee ordering.
+		SOCK_RDM=4,
+
+		--**
+		-- Obsolete and should not be used in new programs
+		SOCK_SEQPACKET=5
 
 elsifdef LINUX then
 	public constant
@@ -57,13 +98,20 @@ end ifdef
 --
 
 public enum
-	--** The socket
+	--**
+	-- The socket
 	SELECT_SOCKET,
-	--** Boolean value indicating the readability.
+
+	--**
+	-- Boolean (1/0) value indicating the readability.
 	SELECT_IS_READABLE,
-	--** Boolean value indicating the writability.
+
+	--**
+	-- Boolean (1/0) value indicating the writability.
 	SELECT_IS_WRITABLE,
-	--** Boolean value indicating the error state.
+
+	--**
+	-- Boolean (1/0) value indicating the error state.
 	SELECT_IS_ERROR
 
 --****
@@ -73,18 +121,30 @@ public enum
 --
 
 public constant
-	--** Shutdown the send operations.
-	SD_SEND    = 0,
-	--** Shutdown the receive operations.
+	--**
+	-- Shutdown the send operations.
+	SD_SEND = 0,
+
+	--**
+	-- Shutdown the receive operations.
 	SD_RECEIVE = 1,
-	--** Shutdown both send and receive operations.
-	SD_BOTH    = 2
+
+	--**
+	-- Shutdown both send and receive operations.
+	SD_BOTH = 2
 
 --****
 -- === Socket Options
 --
 -- Pass to the ##optname## parameter of the functions [[:get_socket_options]]
 -- and [[:set_socket_options]].
+--
+-- These options are highly OS specific and are normally not needed for most
+-- socket communication. They are provided here for your convience. If you should
+-- need to set socket options, please refer to your OS reference material.
+--
+-- There may be other values that your OS defines and some defined here are not
+-- supported on all operating systems.
 
 public constant
 	SOL_SOCKET     = #FFFF,
@@ -98,7 +158,7 @@ public constant
 	SO_LINGER      = #0080,
 	SO_DONTLINGER  = not_bits(SO_LINGER),
 	SO_OOBINLINE   = #0100,
-	SO_REUSEPORT   = #9999, -- TODO: Undefined for Windows, what is it elsewhere?
+	SO_REUSEPORT   = #9999,
 	SO_SNDBUF      = #1001,
 	SO_RCVBUF      = #1002,
 	SO_SNDLOWAT    = #1003,
@@ -128,44 +188,122 @@ public constant
 --
 
 public constant
+	--**
+	-- Sends out-of-band data on sockets that support this notion (e.g., of
+    -- type [[:SOCK_STREAM]]); the underlying protocol must also support
+	-- out-of-band data.
+
 	MSG_OOB       = #1,
+
+	--**
+	-- This flag causes the receive operation to return data from the
+    -- beginning of the receive queue without removing that data from the
+    -- queue.  Thus, a subsequent receive call will return the same data.
+
 	MSG_PEEK      = #2,
+
+	--**
+	-- Don't use a gateway to send out the packet, only send to hosts on
+    -- directly connected networks.  This is usually used only by diagnostic
+    -- or routing programs.  This is only defined for protocol families that
+    -- route; packet sockets don't.
+
 	MSG_DONTROUTE = #4,
+
 	MSG_TRYHARD   = #4,
+
+	--**
+	-- indicates that some control data were discarded due to lack of space in
+    -- the buffer for ancillary data.
+
 	MSG_CTRUNC    = #8,
+
 	MSG_PROXY     = #10,
+
+	--**
+	-- indicates that the trailing portion of a datagram was discarded because
+    -- the datagram was larger than the buffer supplied.
+
 	MSG_TRUNC     = #20,
+
+	--**
+	-- Enables non-blocking operation; if the operation would block, [[:EAGAIN]]
+	-- or [[:EWOULDBLOCK]] is returned.
+
 	MSG_DONTWAIT  = #40,
+
+	--**
+	-- Terminates a record (when this notion is supported, as for sockets of
+    -- type [[:SOCK_SEQPACKET]]).
+
 	MSG_EOR       = #80,
+
+	--**
+	-- This flag requests that the operation block until the full request is
+    -- satisfied.  However, the call may still return less data than requested
+    -- if a signal is caught, an error or disconnect occurs, or the next data
+    -- to be received is of a different type than that returned.
+
 	MSG_WAITALL   = #100,
+
 	MSG_FIN       = #200,
+
 	MSG_SYN       = #400,
+
+	--**
+	-- Tell the link layer that forward progress happened: you got a
+    -- successful reply from the other side.  If the link layer doesn't get
+    -- this it will regularly reprobe the neighbor (e.g., via a unicast ARP).
+    -- Only valid on [[:SOCK_DGRAM]] and [[:SOCK_RAW]] sockets and currently only
+    -- implemented for IPv4 and IPv6.
+
 	MSG_CONFIRM   = #800,
+
 	MSG_RST       = #1000,
+
+	--**
+	-- indicates that no data was received but an extended error from the
+    -- socket error queue.
+
 	MSG_ERRQUEUE  = #2000,
+
+	--**
+	-- Requests not to send [[:SIGPIPE]] on errors on stream oriented sockets when
+    -- the other end breaks the connection. The [[:EPIPE]] error is still
+    -- returned.
+
 	MSG_NOSIGNAL  = #4000,
+
+	--**
+	-- The caller has more data to send. This flag is used with TCP sockets
+    -- to obtain the same effect as the TCP_CORK socket option, with the
+	-- difference that this flag can be set on a per-call basis.
+
 	MSG_MORE      = #8000
 
 --****
--- === Other Constants
+-- === Error Constants
 
-public constant
-	FD_READ    = 1,
-	FD_WRITE   = 2,
-	FD_OOB     = 4,
-	FD_ACCEPT  = 8,
-	FD_CONNECT = 16,
-	FD_CLOSE   = 32
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Routines for both server & client (socket, read, write, select)
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
+public enum
+	--** No error, call was a success.
+	EOK = 1
 
 --****
 -- === Server and Client sides
 --
+
+-- Not made public as the end user should have no need of accessing one value
+-- or the other.
+export enum
+	--**
+	-- Accessor index for socket handle of a socket type
+
+	SOCKET_SOCKET,
+
+	--**
+	-- Accessor index for the sockaddr_in pointer of a socket type
+
+	SOCKET_SOCKADDR_IN
 
 --**
 -- Socket type
@@ -180,13 +318,17 @@ public type socket(object o)
 	return 1
 end type
 
--- Not made public as the end user should have no need of accessing one value
--- or the other.
-enum
-	--** Accessor index for socket handle of a socket type
-	SOCKET_SOCKET,
-	--** Accessor index for the sockaddr_in pointer of a socket type
-	SOCKET_SOCKADDR_IN
+procedure delete_socket(object o)
+	if not socket(o) then 
+		return 
+	end if
+	if o[SOCKET_SOCKADDR_IN] = 0 then 
+		return 
+	end if
+	
+	mem:free(o[SOCKET_SOCKADDR_IN])
+end procedure
+integer delete_socket_rid = routine_id("delete_socket")
 
 --**
 -- Create a new socket
@@ -195,6 +337,20 @@ enum
 --   # ##family##: an integer
 --   # ##sock_type##: an integer, the type of socket to create
 --   # ##protocol##: an integer, the communication protocol being used
+--
+-- ##family## options:
+--   * [[:AF_UNIX]]
+--   * [[:AF_INET]]
+--   * [[:AF_INET6]]
+--   * [[:AF_APPLETALK]]
+--   * [[:AF_BTH]]
+--
+-- ##sock_type## options:
+--   * [[:SOCK_STREAM]]
+--   * [[:SOCK_DGRAM]]
+--   * [[:SOCK_RAW]]
+--   * [[:SOCK_RDM]]
+--   * [[:SOCK_SEQPACKET]]
 --
 -- Returns:
 --   An **atom**, -1 on failure, else a supposedly valid socket id.
@@ -205,7 +361,9 @@ enum
 -- </eucode>
 
 public function create(integer family, integer sock_type, integer protocol)
-	return machine_func(M_SOCK_SOCKET, { family, sock_type, protocol })
+	object o = machine_func(M_SOCK_SOCKET, { family, sock_type, protocol })
+	if atom(o) then return o end if
+	return delete_routine(o, delete_socket_rid)
 end function
 
 --**
@@ -244,7 +402,7 @@ end function
 --  It may take several minutes for the OS to declare the socket as closed.
 --
 
-public function shutdown_socket(socket sock, atom method=SD_BOTH)
+public function shutdown(socket sock, atom method=SD_BOTH)
 	return machine_func(M_SOCK_SHUTDOWN, { sock, method })
 end function
 
@@ -302,14 +460,14 @@ end function
 --
 -- Comments:
 --   This function will not return until data is actually received on the socket,
---   unless the flags parameter contains MSG_DONTWAIT.
+--   unless the flags parameter contains [[:MSG_DONTWAIT]].
 --
---   MSG_DONTWAIT only works on Linux kernels 2.4 and above. To be cross-platform
+--   [[:MSG_DONTWAIT]] only works on Linux kernels 2.4 and above. To be cross-platform
 --   you should use [[:select]] to determine if a socket is readable, i.e. has data
 --   waiting.
 --
 
-public function recv(socket sock, atom flags=0)
+public function receive(socket sock, atom flags=0)
 	return machine_func(M_SOCK_RECV, { sock, flags })
 end function
 
@@ -330,16 +488,17 @@ end function
 --   Primarily for use in multicast or more advanced socket
 --   applications.  Level is the option level, and option_name is the
 --   option for which values are being sought. Level is usually
---   SOL_SOCKET (#FFFF).
+--   [[:SOL_SOCKET]].
 --
 -- Returns:
 --   On error, an atom indicating the error code.  On success, either an atom or
 --   a sequence containing the option value.
 --
 -- See also:
---   [[:set_socket_options]]
+--   [[:get_option]]
+--
 
-public function get_socket_options(socket sock, integer level, integer optname)
+public function get_option(socket sock, integer level, integer optname)
 	return machine_func(M_SOCK_GETSOCKOPT, { sock, level, optname })
 end function
 
@@ -359,12 +518,12 @@ end function
 --   Primarily for use in multicast or more advanced socket
 --   applications.  Level is the option level, and option_name is the
 --   option for which values are being set.  Level is usually
---   SOL_SOCKET (#FFFF).
+--   [[:SOL_SOCKET]].
 --
 -- See Also:
---   [[:get_socket_options]]
+--   [[:get_option]]
 
-public function set_socket_options(socket sock, integer level, integer optname, object val)
+public function set_option(socket sock, integer level, integer optname, object val)
 	return machine_func(M_SOCK_SETSOCKOPT, { sock, level, optname, val })
 end function
 
@@ -398,12 +557,6 @@ public function connect(socket sock, sequence address, integer port=-1)
 
 	return machine_func(M_SOCK_CONNECT, { sock, sock_data[1], sock_data[2] })
 end function
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Server-side sockets (bind, listeners, signal hooks, accepters)
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 
 --****
 -- === Server side only
@@ -470,8 +623,9 @@ end function
 --   # ##sock##: the server socket
 --
 -- Returns:
---   An **object**, either -1 on failure, or a sequence
---   {socket client, sequence client_ip_address} on success.
+--   An atom on error or a sequence
+--   ##{socket client, sequence client_ip_address}##
+--   on success.
 --
 -- Comments:
 --   Using this function allows communication to occur on a
@@ -479,8 +633,6 @@ end function
 --   for new connections.
 --
 --   ##accept##() must be called after ##bind##() and ##listen##().
---
---   On failure, use [[:get_error]] to determine the cause of the failure.
 --
 
 public function accept(socket sock)
@@ -507,8 +659,10 @@ end function
 -- -- result = { "http", "tcp", 80 }
 -- </eucode>
 --
+-- See Also:
+--   [[:service_by_port]]
 
-public function getservbyname(sequence name, object protocol=0)
+public function service_by_name(sequence name, object protocol=0)
 	return machine_func(M_SOCK_GETSERVBYNAME, { name, protocol })
 end function
 
@@ -529,7 +683,9 @@ end function
 -- -- result = { "http", "tcp", 80 }
 -- </eucode>
 --
+-- See Also:
+--   [[:service_by_name]]
 
-public function getservbyport(integer port, object protocol=0)
+public function service_by_port(integer port, object protocol=0)
 	return machine_func(M_SOCK_GETSERVBYPORT, { port, protocol })
 end function
