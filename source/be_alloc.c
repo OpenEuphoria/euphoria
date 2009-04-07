@@ -635,8 +635,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 #else
 	if (newsize <= oldsize) {
 		// make a smaller block
-		q = realloc(p, newsize);  // no _expand() available
-								  // Borland has it, but it sometimes fails
+		q = realloc(p, newsize);
 	}
 	else {
 		q = NULL;

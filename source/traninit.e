@@ -315,7 +315,7 @@ procedure InitBackEnd(integer c)
 	-- If no compiler has been chosen test the variables to
 	-- see which is installed.  If a UNIX system choose gcc.
 	-- If Windows or DOS
-	-- Try in the order: WATCOM, DJGPP, or Borland
+	-- Try in the order: WATCOM then DJGPP
 	
 	
 	if TDOS then

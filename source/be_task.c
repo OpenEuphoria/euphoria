@@ -61,13 +61,6 @@
 // the read_esp_tc() macro. If not, fix the macro. Then move on to scheduler
 // and check that the C compiler's offset for "stack_top" matches the macros.
 
-// For Borland, you can run borelib.bat to create be_task.asm, but first edit
-// borelib.bat, adding the -S option to the bcc32 command that compiles 
-// be_task.c. Remember to remove the -S when you are done.
-// To avoid a Borland bug, you must also comment out the "#pragma codeseg"
-// statements temporarily while you create the asm file. Put them back in
-// when you are done. be_task.asm will be created for you.
-
 // For Lcc, run lccelib.bat, but first edit the line that compiles be_task.c,
 // adding the -S flag. Then look at the be_task.asm file that results.
 // Remember to remove the -S flag when you are done.
