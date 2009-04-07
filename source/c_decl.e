@@ -6,6 +6,8 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
+include euphoria/info.e
+
 include std/text.e
 include std/math.e
 include std/os.e
@@ -979,7 +981,7 @@ procedure Write_def_file(integer def_file)
 end procedure
 
 export procedure version()
-	c_puts("// Euphoria To C version " & TRANSLATOR_VERSION & "\n")
+	c_puts("// Euphoria To C version " & version_string() & "\n")
 end procedure
 
 sequence c_opts

@@ -180,8 +180,7 @@ EU_CORE_FILES = \
 	keylist.e \
 	fwdref.e \
 	shift.e \
-	inline.e \
-	version.e
+	inline.e
 
 EU_INTERPRETER_FILES = \
 	global.e \
@@ -256,13 +255,6 @@ EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : interpreter translator library backend
 
-version.e : version.mak
-	echo -- DO NOT EDIT, EDIT version.mak INSTEAD > version.e
-	echo global constant MAJ_VER=$(MAJ_VER) >> version.e
-	echo global constant MIN_VER=$(MIN_VER) >> version.e
-	echo global constant PAT_VER=$(PAT_VER) >> version.e
-	echo global constant REL_TYPE=\"$(REL_TYPE)\" >> version.e
-
 version.h: version.mak
 	echo // DO NOT EDIT, EDIT version.mak INSTEAD > version.h
 	echo \#define MAJ_VER $(MAJ_VER) >> version.h
@@ -292,7 +284,7 @@ endif
 
 .PHONY : clean distclean all
 
-library : version.e version.h builddirs
+library : version.h builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG)
 $(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
@@ -304,11 +296,11 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex ../.svn/entries
 
-interpreter : version.e version.h builddirs
+interpreter : version.h builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
-translator : version.e version.h builddirs
+translator : version.h builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG)
 
@@ -375,7 +367,7 @@ $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EECU)
 
-backend : version.e version.h builddirs
+backend : version.h builddirs
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)
 	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)
 

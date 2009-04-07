@@ -5,10 +5,6 @@ public include std/types.e
 include mode.e as mode
 public include common.e
 
-include version.e
-global constant INTERPRETER_VERSION = sprintf("%d.%d.%d %s", { MAJ_VER, MIN_VER, PAT_VER, REL_TYPE })
-global constant TRANSLATOR_VERSION = INTERPRETER_VERSION
-
 global constant
 	INTERPRET = mode:get_interpret(),
 	TRANSLATE = mode:get_translate(),

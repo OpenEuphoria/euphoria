@@ -2,6 +2,12 @@
 --
 -- Euphoria 4.0
 -- Parser
+include euphoria/info.e
+
+include std/sequence.e
+include std/text.e
+include std/search.e
+
 include global.e
 include platform.e
 include emit.e
@@ -9,12 +15,6 @@ include symtab.e
 include scanner.e
 include fwdref.e
 include common.e
-include version.e
-
-include std/sequence.e
-include std/text.e
-include std/search.e
-
 include inline.e
 
 constant UNDEFINED = -999
@@ -3620,9 +3620,9 @@ global procedure InitGlobals()
 	OpTypeCheck = TRUE
 
 	OpDefines &= { 
-	    sprintf("EU%d%d%d", { MAJ_VER, MIN_VER, PAT_VER }), 
-	    sprintf("EU%d%d", { MAJ_VER, MIN_VER }), 
-	    sprintf("EU%d", { MAJ_VER }) 
+	    sprintf("EU%d", { version_major() }),
+		sprintf("EU%d%d", { version_major() * 10000, version_minor() * 100 }),
+		sprintf("EU%d", { version() })
 	}
 
 	OpDefines &= GetPlatformDefines()

@@ -297,7 +297,7 @@ FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DE
 BE_FLAGS = /ol /zp8 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
 !endif
 	
-library : .SYMBOLIC version.e version.h runtime
+library : .SYMBOLIC version.h runtime
     @echo ------- LIBRARY -----------
 	wmake -h -f makefile.wat $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
@@ -353,11 +353,11 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 	rmdir $(BUILDDIR)\objtmp
 
 
-exwsource : .SYMBOLIC version.e version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-ecwsource : .SYMBOLIC version.e version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-backendsource : .SYMBOLIC version.e version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-ecsource : .SYMBOLIC version.e version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-exsource : .SYMBOLIC version.e version.h $(BUILDDIR)\$(OBJDIR)\main-.c
+exwsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
+ecwsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
+backendsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
+ecsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
+exsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
 
 !endif
 # OBJDIR
@@ -405,7 +405,7 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\int.c $(EU_CORE_
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\euiw.exe
 	wrc -q -ad exw.res $(BUILDDIR)\euiw.exe
 
-interpreter : .SYMBOLIC version.e version.h
+interpreter : .SYMBOLIC version.h
 	wmake -h -f makefile.wat $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h -f makefile.wat objlist OBJDIR=intobj $(VARS) EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
 	wmake -h -f makefile.wat $(BUILDDIR)\euiw.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -463,13 +463,13 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLA
 	wrc -q -ad exw.res $(BUILDDIR)\euc.exe
 
 
-translator : .SYMBOLIC version.e version.h
+translator : .SYMBOLIC version.h
     @echo ------- TRANSLATOR -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h -f makefile.wat objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
 	wmake -h -f makefile.wat $(BUILDDIR)\euc.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-dostranslator : .SYMBOLIC version.e version.h
+dostranslator : .SYMBOLIC version.h
     @echo ------- DOS TRANSLATOR -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dostrobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=dostrobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -h -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS $(VARS) OS=DOS
@@ -488,25 +488,25 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJE
 	wrc -q -ad exw.res $(BUILDDIR)\eub.exe
 
 
-backend : .SYMBOLIC version.e version.h backendflag
+backend : .SYMBOLIC version.h backendflag
     @echo ------- BACKEND -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\backobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h -f makefile.wat objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS $(VARS)
 	wmake -h -f makefile.wat $(BUILDDIR)\eubw.exe EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-dosbackend : .SYMBOLIC version.e version.h backendflag
+dosbackend : .SYMBOLIC version.h backendflag
     @echo ------- BACKEND -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dosbkobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=dosbkobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -h -f makefile.wat objlist OBJDIR=dosbkobj EU_NAME_OBJECT=EU_DOSBACKEND_RUNNER_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\eubd.exe EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=dosbkobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-dos : .SYMBOLIC version.e version.h
+dos : .SYMBOLIC version.h
     @echo ------- DOS -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dosobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\euid.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-doseubin : .SYMBOLIC version.e version.h
+doseubin : .SYMBOLIC version.h
     @echo ------- DOS EUBIN -----------
 	wmake -h -f makefile.wat $(BUILDDIR)\dosobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS $(VARS) OS=DOS
@@ -647,14 +647,6 @@ $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG) 
-
-version.e: version.mak
-    @echo ------- VERSION.E -----------
-	@echo -- DO NOT EDIT, EDIT version.mak INSTEAD > version.e
-	@echo global constant MAJ_VER=$(MAJ_VER) >> version.e
-	@echo global constant MIN_VER=$(MIN_VER) >> version.e
-	@echo global constant PAT_VER=$(PAT_VER) >> version.e
-	@echo global constant REL_TYPE="$(REL_TYPE)" >> version.e
 
 version.h: version.mak
     @echo ------- VERSION.H -----------
