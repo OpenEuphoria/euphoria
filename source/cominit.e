@@ -116,10 +116,11 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                  NetBSD :  [-gcc] [-dll]
 
                  LCC Only: -lccopt-off
-             Explainations:
-                 -CON      : Don't create a new window when using the console.
-                 -MAKEFILE : Generate a <prgname>.mak file that can be included into
-                             a larger Makefile project
+              Explainations:
+                 -CON           : Don't create a new window when using the console.
+                 -MAKEFILE      : Generate a <prgname>.mak file that can be included into
+                                a larger Makefile project
+                 -MAKEFILE-FULL : Generate a full Makefile for stand alone use
 
 #
 		if TDOS	then
