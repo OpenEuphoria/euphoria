@@ -1559,9 +1559,20 @@ export procedure finish_emake()
 			end if
 			
 		end if
+
+		if dll_option then
+			printf(doit, "if not exist %s.dll goto done"&HOSTNL, {file0})
+			printf(doit, "echo you can now link with: %s.dll"&HOSTNL, {file0})
+		else 
+			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
+			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
+		end if
 		delete_files(doit, ".obj")
-			
-			
+		puts(doit, "goto done"&HOSTNL)
+		puts(doit, ":nofiles"&HOSTNL)
+		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
+		puts(doit, ":done"&HOSTNL)
+
 		def_name = sprintf("%s.def", {file0})
 		def_file = -1
 		if dll_option then
@@ -1647,21 +1658,9 @@ export procedure finish_emake()
 		else    
 			printf(doit, "echo you can now execute: ./%s"&HOSTNL, {file0})
 		end if
+
+		-- TODO: Need some type of if not exists %s, then skip removing of the files
 		delete_files(doit, ".o")
-		
-	else
-		if dll_option then
-			printf(doit, "if not exist %s.dll goto done"&HOSTNL, {file0})
-			printf(doit, "echo you can now link with: %s.dll"&HOSTNL, {file0})
-		else 
-			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
-			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
-		end if
-		delete_files(doit, ".obj")
-		puts(doit, "goto done"&HOSTNL)
-		puts(doit, ":nofiles"&HOSTNL)
-		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
-		puts(doit, ":done"&HOSTNL)
 	end if
 
 	if makefile_option then
