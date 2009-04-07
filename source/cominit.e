@@ -13,7 +13,7 @@ include error.e
 sequence switches = {}, switch_cache = {}
 
 -- These flags are available for both the interpreter and translator
-global constant COMMON_OPTIONS = {
+export constant COMMON_OPTIONS = {
 	"-C",    -- specify a euinc.conf file
 	"-I",    -- specify a directory to search for include files
 	"-D",    -- define a word
@@ -28,7 +28,7 @@ global constant COMMON_OPTIONS = {
 	"-COPYRIGHT" -- Display all copyright notices.
 }
 
-global enum
+export enum
 	EUINC_OPTION,  -- -conf
 	INCDIR_OPTION, -- -include dirs
 	DEFINE_OPTION, -- ifdef defines
@@ -62,7 +62,7 @@ constant COMMON_PARAMS = {
 -- deferred:  1 = it's an argument for the switch, and won't be added
 --                to the list of switches until the next non-deferred
 --                switch is passed
-global procedure add_switch( sequence s, integer deferred )
+export procedure add_switch( sequence s, integer deferred )
 	if deferred then
 		switch_cache = append( switch_cache, s )
 	else
@@ -72,11 +72,11 @@ global procedure add_switch( sequence s, integer deferred )
 	end if
 end procedure
 
-global function get_switches()
+export function get_switches()
 	return switches
 end function
 
-global procedure move_args( integer start )
+export procedure move_args( integer start )
 	Argv[start .. Argc - 1] = Argv[start + 1 .. Argc ]
 	Argc -= 1
 end procedure
@@ -88,7 +88,7 @@ procedure show_copyrights()
 	end for
 end procedure
 
-global procedure show_usage()
+export procedure show_usage()
 	if usage_shown = 0 then
 		printf(1,
 ##
@@ -115,7 +115,7 @@ end procedure
 
 integer option_W
 option_W=0
-global procedure common_options( integer option, integer ix )
+export procedure common_options( integer option, integer ix )
 	integer n
 	object param
 
