@@ -15,31 +15,31 @@
 #include <math.h>
 #include <time.h>
 #ifdef EUNIX
-#include <unistd.h>
-#include <termios.h>
-#include <time.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#ifdef EGPM
-#include <gpm.h>
-#endif
+#  include <unistd.h>
+#  include <termios.h>
+#  include <time.h>
+#  include <sys/ioctl.h>
+#  include <sys/types.h>
+#  ifdef EGPM
+#    include <gpm.h>
+#  endif
 #else
-#if !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
-#include <bios.h>
-#endif
-#ifdef EDJGPP
-#include <go32.h>
-#include <allegro.h>
-#endif
-#if !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
-#include <graph.h>
-#endif
-#ifdef ELCC
-#include <conio.h>
-#else
-#include <dos.h>
-#endif
-#include <process.h>
+#  if !defined(ELCC) && !defined(EMINGW)
+#    include <bios.h>
+#  endif
+#  ifdef EDJGPP
+#    include <go32.h>
+#    include <allegro.h>
+#  endif
+#  if !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
+#    include <graph.h>
+#  endif
+#  ifdef ELCC
+#    include <conio.h>
+#  else
+#    include <dos.h>
+#  endif
+#  include <process.h>
 #endif
 //#include <malloc.h>
 #include <string.h>
@@ -4409,7 +4409,7 @@ int get_key(int wait)
 #endif
 
 #ifdef EWINDOWS
-#if defined(EBORLAND) || defined(ELCC) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 		if (wait || winkbhit()) {
 			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
 			a = wingetch();
@@ -4684,9 +4684,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	strlcpy(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
-#ifdef EBORLAND
-	PatchCallc();
-#endif
+
 	if (Argc)
 		InitTask();  // i.e. don't do this in a Euphoria .dll/.so
 }
@@ -5533,7 +5531,7 @@ void UserCleanup(int status)
 static unsigned char one_line[84];
 static unsigned char *next_char_ptr = NULL;
 
-#if defined(EBORLAND) || defined(ELCC) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 int winkbhit()
 /* kbhit for Windows GUI apps */
 {
@@ -5557,7 +5555,7 @@ int winkbhit()
 int wingetch()
 // Windows - read next char from keyboard
 {
-#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 	int c;
 
 	c = MyReadConsoleChar();

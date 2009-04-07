@@ -14,11 +14,11 @@
 #include <setjmp.h>
 
 #ifndef EUNIX
-#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
-#include <graph.h>
-#include <bios.h>
-#endif
-#include <conio.h>
+#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#    include <graph.h>
+#    include <bios.h>
+#  endif
+#  include <conio.h>
 #endif
 
 #include <signal.h>
