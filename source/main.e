@@ -16,6 +16,7 @@ include mode.e
 include common.e
 include platform.e
 include cominit.e
+include emit.e
 
 function GetSourceName()
 -- record command line options, return source file number

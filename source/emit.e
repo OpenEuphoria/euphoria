@@ -12,41 +12,24 @@ include scanner.e
 include fwdref.e
 include parser.e
 
-global integer op_info1, op_info2
-global integer optimized_while
-
-global integer trace_called 
-trace_called = FALSE
-
-global integer last_routine_id
-last_routine_id = 0
-
-global integer max_params   -- maximum number of parameters in user routines 
-max_params = 0
-
-global integer last_max_params
-last_max_params = 0
-
-previous_op = -1  
-
-global sequence current_sequence  -- stack needed by $ operation
-current_sequence = {}
-
-global boolean lhs_ptr   -- are we parsing multiple LHS subscripts?
-lhs_ptr = FALSE
-
+export integer op_info1, op_info2
+export integer optimized_while
+export integer trace_called = FALSE
+export integer last_routine_id = 0
+export integer max_params = 0  -- maximum number of parameters in user routines 
+export integer last_max_params = 0
+export sequence current_sequence = {}  -- stack needed by $ operation
+export  boolean lhs_ptr = FALSE  -- are we parsing multiple LHS subscripts?
 -- temps needed for LHS subscripting
-global symtab_index lhs_subs1_copy_temp,
-					lhs_target_temp      
-
+export symtab_index lhs_subs1_copy_temp, lhs_target_temp      
 -- Code generation Stack 
-global sequence cg_stack -- expression stack 
-
-boolean assignable   -- did previous op have a re-assignable result?
-assignable = FALSE         
+export  sequence cg_stack -- expression stack 
+boolean assignable  = FALSE  -- did previous op have a re-assignable result?
 
 constant LEX_NUMBER = 1
 constant LEX_NAME = 2
+
+previous_op = -1  
 
 -- descriptive names for scanner tokens - keep up-to-date 
 constant token_name = 
@@ -125,18 +108,17 @@ constant token_name =
 	{'?', "?"}
 } 
 
-
-global procedure Push(symtab_index x)
+export procedure Push(symtab_index x)
 -- Push element onto code gen stack 
 	cg_stack = append(cg_stack, x)
 end procedure
 
-global function Top()
+export function Top()
 -- return top element on code gen stack 
 	return cg_stack[$]
 end function
 
-global function Pop()
+export function Pop()
 -- Pop top element from code gen stack 
 	symtab_index t
 
@@ -165,7 +147,7 @@ export procedure TempKeep(symtab_index x)
 	end if
 end procedure
 
-global procedure TempFree(symtab_index x)
+export procedure TempFree(symtab_index x)
 	if x > 0 then
 		if SymTab[x][S_MODE] = M_TEMP then
 			SymTab[x][S_SCOPE] = FREE 
@@ -180,7 +162,7 @@ procedure TempInteger(symtab_index x)
 end procedure
 
 
-global function LexName(integer t)
+export function LexName(integer t)
 -- returns token name given token number 
 	sequence name
 	for i = 1 to length(token_name) do
@@ -196,7 +178,7 @@ global function LexName(integer t)
 	
 end function
 
-global procedure InitEmit()
+export procedure InitEmit()
 -- initialize code emission 
 	cg_stack = {}
 end procedure
@@ -254,13 +236,13 @@ end procedure
 -- - BE CAREFUL! Often there must be some expression (opnd)
 -- prior to the current op.
 
-global procedure emit_opnd(symtab_index opnd)
+export procedure emit_opnd(symtab_index opnd)
 -- emit an operand into the IL  
 		Push(opnd)
 		previous_op = -1  -- N.B.
 end procedure
 
-global procedure emit_addr(atom x)
+export procedure emit_addr(atom x)
 	--if Parser_mode != PAM_RECORD then
 		Code = append(Code, x)
 end procedure
@@ -270,7 +252,7 @@ procedure emit_opcode(integer op)
 	Code = append(Code, op)
 end procedure
 
-global procedure backpatch(integer index, integer val)
+export procedure backpatch(integer index, integer val)
 -- back patch a word of code 
 		Code[index] = val
 end procedure
@@ -437,7 +419,7 @@ export procedure clear_inline_targets()
 	inlined_targets = {}
 end procedure
 
-global procedure emit_op(integer op)
+export procedure emit_op(integer op)
 -- Emit a postfix operator.
 -- The cases have been sorted according to profile frequency.
 -- About 60% of the time it's one of the first 6 cases.
@@ -1395,7 +1377,7 @@ global procedure emit_op(integer op)
 
 end procedure
 
-global procedure emit_assign_op(integer op)
+export procedure emit_assign_op(integer op)
 -- emit the appropriate assignment operator 
 	if op = PLUS_EQUALS then
 		emit_op(PLUS)
@@ -1410,7 +1392,7 @@ global procedure emit_assign_op(integer op)
 	end if
 end procedure
 
-global procedure StartSourceLine(integer sl)
+export procedure StartSourceLine(integer sl)
 -- record code offset at start of new source statement, 
 -- optionally emit start of line op
 -- sl is true if we want a STARTLINE emitted as well

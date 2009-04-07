@@ -55,7 +55,7 @@ function upper(sequence s)
 end function
 
 
-global procedure transoptions()
+export procedure transoptions()
 -- set translator command-line options  
 	integer i, option
 	sequence uparg
