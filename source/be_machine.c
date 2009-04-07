@@ -15,8 +15,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-void RTInternal();
-void RTFatal(char *, ...);
 
 #ifdef EUNIX
 
@@ -142,11 +140,13 @@ END_COLOR_DEPTH_LIST
 #include <dirent.h>
 #endif
 
-#include "alldefs.h"
-#include "alloc.h"
 #include <signal.h>
 
+#include "alldefs.h"
+#include "alloc.h"
+
 #include "version.h"
+#include "be_runtime.h"
 
 extern char* get_svn_revision(); /* from rev.c */
 

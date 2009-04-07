@@ -32,6 +32,7 @@
 #endif
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 
 /******************/
 /* Local defines  */
@@ -47,7 +48,6 @@
 /**********************/
 /* Imported variables */
 /**********************/
-void RTFatal(char *, ...);
 extern int Executing;
 extern symtab_ptr CurrentSub;
 extern int temps_allocated;

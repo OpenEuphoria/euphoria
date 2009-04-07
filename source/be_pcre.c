@@ -11,11 +11,11 @@ extern int default_heap;
 #if defined(EWINDOWS) || defined(EDOS)
 #include "pcre/config.h" /* cannot make it link w/o it */
 #endif
-void RTFatal(char *, ...);
 
 #include <string.h>
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 #include "pcre/pcre.h"
 
 struct pcre_cleanup {

@@ -26,7 +26,9 @@
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
+
 #include "alldefs.h"
+#include "be_runtime.h"
 
 /******************/
 /* Local defines  */
@@ -189,7 +191,6 @@ static int screen_size();
 void RTInternal();
 void UpdateGlobals();
 void EraseSymbol();
-void RTFatal(char *, ...);
 symtab_ptr RTLookup();
 
 /*********************/

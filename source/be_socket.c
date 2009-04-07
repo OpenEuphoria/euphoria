@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-void RTFatal(char *, ...);
 
 #ifdef EWINDOWS
 #include <windows.h>
@@ -41,6 +40,7 @@ extern int default_heap;
 
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 
 // Accessors for the socket sequence given to many functions
 #define SOCK_SOCKET   1

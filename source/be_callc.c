@@ -38,11 +38,11 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
+#include "be_runtime.h"
 
 /**********************/
 /* Imported variables */
 /**********************/
-void RTFatal(char *, ...);
 extern unsigned char TempBuff[];
 extern int c_routine_next;         /* index of next available element */
 extern struct arg_info *c_routine; /* array of c_routine structs */

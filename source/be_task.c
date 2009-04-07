@@ -26,7 +26,7 @@
 #include "execute.h"
 #include "symtab.h"
 #include "reswords.h"
-void RTFatal(char *, ...);
+#include "be_runtime.h"
 
 /*********************/
 /* Local definitions */

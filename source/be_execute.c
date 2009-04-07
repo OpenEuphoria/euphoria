@@ -57,10 +57,12 @@
 #ifdef EWINDOWS
 #	include <windows.h>
 #endif
+#include <signal.h>
+
 #include "alldefs.h"
 #include "alloc.h"
-#include <signal.h>
-void RTFatal(char *, ...);
+#include "be_runtime.h"
+
 
 /******************/
 /* Local defines  */

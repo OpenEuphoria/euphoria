@@ -46,8 +46,10 @@
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
+
 #include "alldefs.h"
 #include "alloc.h"
+#include "be_runtime.h"
 
 /******************/
 /* Local defines  */
@@ -417,9 +419,7 @@ char *getenv();
 IFILE long_iopen();
 void Cleanup();
 void UserCleanup();
-void RTFatal(char *, ...);
 void MainScreen();
-void RTInternal();
 int wingetch();
 
 /*********************/
