@@ -114,9 +114,6 @@ static unsigned int tmps_remaining = 0;
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef EBORLAND
-char *_expand();
-#endif
 #ifndef ESIMPLE_MALLOC
 char *EMalloc(unsigned long);
 char *ERealloc(unsigned char *, unsigned long);
