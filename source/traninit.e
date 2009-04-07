@@ -167,8 +167,13 @@ export procedure transoptions()
 				else
 					Warning("-com option missing compile directory",translator_warning_flag)
 				end if
+
 			elsif equal("-MAKEFILE", uparg) then
-				makefile_option = TRUE
+				makefile_option = MAKE_SHORT
+
+			elsif equal("-MAKEFILE-FULL", uparg) then
+				makefile_option = MAKE_FULL
+
 			else
 				option = find( uparg, COMMON_OPTIONS )
 				if option then
@@ -191,7 +196,7 @@ export procedure transoptions()
 		object msgtext =##
 Usage: euc [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
            [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
-           [-makefile] [-keep] [-debug] [-silent] 
+           [-makefile] [-full-makefile] [-keep] [-debug] [-silent]
            [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
            [/os specific options/]:
 
@@ -208,9 +213,10 @@ OS Specific Options:
 LCC Only: -lccopt-off
 
 Explainations:
-  -CON      : Don't create a new window when using the console.
-  -MAKEFILE : Generate a <prgname>.mak file that can be included into
-              a larger Makefile project
+  -CON           : Don't create a new window when using the console.
+  -MAKEFILE      : Generate a <prgname>.mak file that can be included into
+                   a larger Makefile project
+  -FULL-MAKEFILE : Generate a full Makefile for stand alone use
 
 #
 		if TWINDOWS	then
