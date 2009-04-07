@@ -3624,7 +3624,7 @@ export procedure InitGlobals()
 
 	OpDefines &= { 
 	    sprintf("EU%d", { version_major() }),
-		sprintf("EU%d%d", { version_major() * 10000, version_minor() * 100 }),
+		sprintf("EU%d", { (version_major() * 100) + version_minor() }),
 		sprintf("EU%d", { version() })
 	}
 
