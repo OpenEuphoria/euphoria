@@ -9,6 +9,7 @@ include global.e
 include pathopen.e
 include common.e
 include error.e
+include platform.e
 
 sequence switches = {}, switch_cache = {}
 
@@ -89,8 +90,43 @@ procedure show_copyrights()
 end procedure
 
 export procedure show_usage()
-	if usage_shown = 0 then
-		printf(1,
+	object msgtext
+	
+	if usage_shown != 0 then
+		return
+	end if
+	usage_shown = 1
+	
+	if TRANSLATE then
+	msgtext = ##
+______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
+                          [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
+                          [-makefile] [-keep] [-debug] [-silent] 
+                          [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
+                          [/os specific options/]:
+
+              OS Specific Options:
+                 DOS    :  [-djg|-wat] [-fastfp]
+                 Windows:  [-con] [-wat|-djg|-lcc] [-dll]
+                 Linux  :  [-gcc] [-dll]
+                 OSX    :  [-gcc] [-dll]
+                 SunOS  :  [-gcc] [-dll]
+                 FreeBSD:  [-gcc] [-dll]
+                 OpenBSD:  [-gcc] [-dll]
+                 NetBSD :  [-gcc] [-dll]
+
+                 LCC Only: -lccopt-off
+             Explainations:
+                 -CON      : Don't create a new window when using the console.
+                 -MAKEFILE : Generate a <prgname>.mak file that can be included into
+                             a larger Makefile project
+
+#
+		if TDOS	then
+			msgtext[11] = 'd'
+		end if
+	else
+		msgtext = sprintf(
 ##
 ____________
             Euphoria Interpreter Usage: %s [euswitches] [filename [appswitches]] ...
@@ -109,8 +145,9 @@ ____________
               -COPYRIGHT       -- Display copyright notices
 
 		#, {filebase(Argv[1])})
-		usage_shown = 1
 	end if
+
+	puts(1, msgtext)
 end procedure
 
 integer option_W

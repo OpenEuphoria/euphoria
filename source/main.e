@@ -43,10 +43,15 @@ function GetSourceName()
 		screen_output(STDERR, version_string_long() & "\n")
 
 		ifdef EU_MANAGED_MEM then
-			screen_output(STDERR, "Using Managed Memory\n")
+			screen_output(STDERR, "Using Managed Memory")
 		elsedef
-			screen_output(STDERR, "Using System Memory\n")
+			screen_output(STDERR, "Using System Memory")
 		end ifdef
+		object EuConsole = getenv("EUCONS")
+		if equal(EuConsole, "1") then
+			screen_output(STDERR, ", EuConsole")
+		end if
+		screen_output(STDERR, "\n")
 
 		return -2 -- No source file
 	end if

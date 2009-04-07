@@ -27,6 +27,7 @@ include compile.e
 include cominit.e
 include pathopen.e
 include error.e
+include platform.e
 
 -- true if we want to force the user to choose the compiler
 constant FORCE_CHOOSE = FALSE
@@ -193,36 +194,8 @@ export procedure transoptions()
 	
 	
 	if help_option then
-		object msgtext =##
-Usage: euc [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
-           [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
-           [-makefile] [-full-makefile] [-keep] [-debug] [-silent]
-           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
-           [/os specific options/]:
-
-OS Specific Options:
-       DOS    :  [-djg|-wat] [-fastfp]
-       Windows:  [-con] [-wat|-djg|-lcc] [-dll]
-       Linux  :  [-gcc] [-dll]
-       OSX    :  [-gcc] [-dll]
-       SunOS  :  [-gcc] [-dll]
-       FreeBSD:  [-gcc] [-dll]
-       OpenBSD:  [-gcc] [-dll]
-       NetBSD :  [-gcc] [-dll]
-
-LCC Only: -lccopt-off
-
-Explainations:
-  -CON           : Don't create a new window when using the console.
-  -MAKEFILE      : Generate a <prgname>.mak file that can be included into
-                   a larger Makefile project
-  -FULL-MAKEFILE : Generate a full Makefile for stand alone use
-
-#
-		if TWINDOWS	then
-			msgtext[10] = 'w'
-		end if
-		CompileErr( msgtext)	
+		show_usage()
+		CompileErr( "" )	
 	end if
 	
 	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option }, {0,0,0} ) = 0 then
