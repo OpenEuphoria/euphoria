@@ -168,7 +168,7 @@ procedure LeaveTopLevel()
 	previous_op = -1
 end procedure
 
-global procedure InitParser()
+export procedure InitParser()
 	goto_stack = {}
 	--goto_list = {}
 	--goto_delay = {}
@@ -3616,7 +3616,7 @@ procedure SubProg(integer prog_type, integer scope)
 	EnterTopLevel()
 end procedure
 
-global procedure InitGlobals()
+export procedure InitGlobals()
 -- initialize global variables
 	ResetTP()
 	OpTypeCheck = TRUE
@@ -3840,7 +3840,7 @@ procedure ExecCommand()
 	StraightenBranches()  -- straighten top-level
 end procedure
 
-global procedure real_parser(integer nested)
+export procedure real_parser(integer nested)
 -- top level of the parser - command level
 	token tok
 	integer id
@@ -4084,14 +4084,14 @@ global procedure real_parser(integer nested)
 	SymTab[TopLevelSub][S_LINETAB] = LineTable
 end procedure
 
-global procedure parser()
+export procedure parser()
 	real_parser(0)
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
 	inline_deferred_calls()
 end procedure
 
-global procedure nested_parser()
+export procedure nested_parser()
 	real_parser(1)
 end procedure
 
