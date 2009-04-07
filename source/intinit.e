@@ -8,7 +8,7 @@ include cominit.e
 include error.e
 include pathopen.e
 
-global procedure intoptions()
+export procedure intoptions()
 -- set interpreter command-line options
 	integer i, option
 	sequence uparg
