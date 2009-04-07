@@ -3094,7 +3094,7 @@ static object Dir(object x)
 		   (path[last] == '\\' || path[last] == ' ' || path[last] == '\t')) {
 		last--;
 	}
-	path[last+1] = 0; // delete any trailing backslash - Borland won't accept it
+	path[last+1] = 0; // delete any trailing backslash
 	dirp = _findfirst(path, &direntp);
 	if (path[last] == ':' ||
 		(dirp != -1 && (direntp.attrib & _A_SUBDIR) &&

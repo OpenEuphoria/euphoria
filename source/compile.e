@@ -883,7 +883,7 @@ procedure seg_poke1(integer source, boolean dbl)
 	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
-			if TWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(wat_path) then
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (signed char)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke_addr = _1;\n")
@@ -918,7 +918,7 @@ procedure seg_poke2(integer source, boolean dbl)
 	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
-			if TWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(wat_path) then
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (signed short)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke2_addr = _1;\n")
@@ -953,7 +953,7 @@ procedure seg_poke4(integer source, boolean dbl)
 	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
-			if TWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(wat_path) then
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (unsigned long)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke4_addr = (unsigned long)_1;\n")
@@ -5147,7 +5147,7 @@ procedure opPOKE()
 		c_stmt0("break;\n")
 		c_stmt0("else {\n")
 		if Code[pc] = POKE4 then
-			if TWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(wat_path) then
 				-- work around an Lcc bug
 				c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*(int *)poke4_addr++ = (unsigned long)_0;\n")
@@ -5155,7 +5155,7 @@ procedure opPOKE()
 				c_stmt0("*(int *)poke4_addr++ = (unsigned long)DBL_PTR(_2)->dbl;\n")
 			end if
 		elsif Code[pc] = POKE2 then
-			if TWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(wat_path) then
 				-- work around an Lcc bug
 				c_stmt0("_0 = (unsigned short)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*poke2_addr++ = (unsigned short)_0;\n")
@@ -5163,7 +5163,7 @@ procedure opPOKE()
 				c_stmt0("*poke2_addr++ = (unsigned short)DBL_PTR(_2)->dbl;\n")
 			end if
 		else
-			if TWINDOWS and atom(bor_path) and atom(wat_path) then
+			if TWINDOWS and atom(wat_path) then
 				-- work around an Lcc bug
 				c_stmt0("_0 = (signed char)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*poke_addr++ = (signed char)_0;\n")
@@ -6808,9 +6808,6 @@ procedure BackEnd(atom ignore)
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
 	end if
-	if sequence(bor_path) then
-		c_puts("#include <float.h>\n")
-	end if
 	c_puts("#include \"main-.h\"\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
@@ -6820,7 +6817,7 @@ procedure BackEnd(atom ignore)
 
 	if TWINDOWS then
 		c_puts("unsigned default_heap;\n")
-		if sequence(wat_path) or sequence(bor_path) then
+		if sequence(wat_path) then
 			c_puts("__declspec(dllimport) unsigned __stdcall GetProcessHeap(void);\n")
 		else
 		c_puts("unsigned __stdcall GetProcessHeap(void);\n")
@@ -6878,12 +6875,7 @@ procedure BackEnd(atom ignore)
 		end if
 		c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
 	else
-		if sequence(bor_path) and con_option then
-			c_stmt0("\nvoid main(int argc, char *argv[])\n")
-		else
-			c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
-
-		end if
+		c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
 	end if
 
 	elsif TUNIX then
@@ -6910,25 +6902,12 @@ procedure BackEnd(atom ignore)
 		c_stmt0("default_heap = GetProcessHeap();\n")
 		--c_stmt0("Backlink = bl;\n")
 	else
-		if sequence(bor_path) and con_option then
-			c_stmt0("void *hInstance;\n\n")
-			c_stmt0("hInstance = 0;\n")
-		else
-			c_stmt0("int argc;\n")
-			c_stmt0("char **argv;\n\n")
-		end if
-		if sequence(bor_path) then
-			c_stmt0("_control87(MCW_EM,MCW_EM);\n")
-		end if
+		c_stmt0("int argc;\n")
+		c_stmt0("char **argv;\n\n")
 		c_stmt0("default_heap = GetProcessHeap();\n")
-		if sequence(bor_path) and con_option then
-			c_stmt0("Argc = argc;\n")
-			c_stmt0("Argv = argv;\n")
-		else
-			c_stmt0("argc = 1;\n")
-			c_stmt0("Argc = 1;\n")
-			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
-		end if
+		c_stmt0("argc = 1;\n")
+		c_stmt0("Argc = 1;\n")
+		c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
 		c_stmt0("winInstance = hInstance;\n")
 	end if
 
@@ -7042,13 +7021,9 @@ procedure BackEnd(atom ignore)
 	if TWINDOWS then
 	if dll_option then
 		c_stmt0("\n")
-		if atom(bor_path) then
-			-- Lcc and WATCOM seem to need this instead
-			-- (Lcc had __declspec(dllexport))
-			c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
-		else
-			c_stmt0("int __declspec (dllexport) __stdcall DllMain(int hDLL, int Reason, void *Reserved)\n")
-		end if
+		-- Lcc and WATCOM seem to need this instead
+		-- (Lcc had __declspec(dllexport))
+		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
 		c_stmt0("{\n")
 		c_stmt0("if (Reason == 1)\n")
 		c_stmt0("EuInit();\n")

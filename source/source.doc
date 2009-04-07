@@ -26,7 +26,7 @@ To translate the interpreter into a fast .exe for a given platform:
    
    ec [-wat] [-djg] eu.ex    (DOS)
 
-   ecw [-wat] [-bor] eu.ex   (Windows)
+   ecw [-wat] eu.ex          (Windows)
 
    ecu eu.ex                 (Linux / FreeBSD)
 

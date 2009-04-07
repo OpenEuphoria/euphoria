@@ -46,10 +46,6 @@ be_callc.c and be_task.c
 Warnings / Error Messages During Build
 --------------------------------------
 
-* When building the Translator library for Borland,
-  an "Internal compiler error" message might be issued. This appears
-  to have no effect on the generated code, and the library works fine.
-
 * When building with WATCOM for Windows you will see 
   "Warning(1008): cannot open graph.lib". This can be ignored.
 
@@ -66,11 +62,11 @@ General Notes:
   
   The .def files were generated automatically by the WATCOM compiler
   for Windows (-v option). They contain C function prototypes. They may
-  cause a few errors when you compile with Borland, Lcc or GNU.
-  Commenting out the offending lines in main.def and runtime.def and others
-  will solve the problem. If you compile with WATCOM for DOS, at first you'll
-  get numerous errors, but on the next try it should work because WATCOM
-  for DOS will create it's own .def files. The .def files aren't used at all
+  cause a few errors when you compile with Lcc or GNU. Commenting out the
+  offending lines in main.def and runtime.def and others will solve the
+  problem. If you compile with WATCOM for DOS, at first you'll get
+  numerous errors, but on the next try it should work because WATCOM for
+  DOS will create it's own .def files. The .def files aren't used at all
   with DJGPP, so there shouldn't be any problem there.
   
   
@@ -80,14 +76,13 @@ General Notes:
   to push arbitrary amounts of data on the machine-level call stack.
   To do this, we must execute a machine-level PUSH instruction, something
   that can't be done directly in C. Inserting the PUSH instruction is 
-  simple enough, (except with the free version of Borland, which doesn't 
-  support machine code insertions), but we need to say what the operand of 
-  the PUSH is. The PUSH instruction that we use references a certain 
-  offset on the stack. That offset must be the offset of our C "arg" 
-  variable. The trouble is, the C compiler doesn't know what we are doing, 
-  so it may change the offset of "arg" whenever we add new code, or 
-  compile with different options etc. We also need to figure out the offset
-  of the "argsize" variable.
+  simple enough, but we need to say what the operand of the PUSH is. The
+  PUSH instruction that we use references a certain offset on the
+  stack. That offset must be the offset of our C "arg" variable. The
+  trouble is, the C compiler doesn't know what we are doing, so it may
+  change the offset of "arg" whenever we add new code, or compile with
+  different options etc. We also need to figure out the offset of the
+  "argsize" variable.
   
   If the offsets are wrong, Euphoria will crash when you call a C routine, 
   but everything else should run ok. To find the correct offset for "arg", 
@@ -107,7 +102,7 @@ General Notes:
   offset for "arg". If the offset in the PUSH is different, you'll have 
   to edit the push() macro in be_callc.c to make them the same. 
   
-  To get an assembly listing with GNU, Borland, or Lcc you can add the
+  To get an assembly listing with GNU or Lcc you can add the
   -S option to the compile command for be_callc.c
   
   To help you find the offset of "arg" (and "argsize"), there's a dummy
@@ -118,10 +113,6 @@ General Notes:
   which you can locate in the assembly listing by looking for "9999"
   or "270f". This will help you find the correct offsets for arg and argsize,
   which you must plug into the push() and pop() macros.
-  
-  Since the free Borland doesn't support machine-code insertions, we run 
-  PatchCallc() at startup to patch the PUSH instructions, and POP (stack add) 
-  dynamically.
   
   Speed:
   
@@ -164,13 +155,14 @@ General Notes:
   has over 100 labels in a long list. The WATCOM disassembler shows the 
   relative offsets of the code and data.
   
-  For the other compilers, Lcc and Borland, you can probably set up the
-  same mechanism as RDS has used for WATCOM. You need to know the address
-  of the C switch table, and you need a method of jumping dynamically from one
-  case to the next. Until you figure that out, you can use -DINT_CODES.
-  
+  For the other compilers, Lcc, you can probably set up the same
+  mechanism as RDS has used for WATCOM. You need to know the address of
+  the C switch table, and you need a method of jumping dynamically from
+  one case to the next. Until you figure that out, you can use
+  -DINT_CODES.
+
   The interactive trace code has been added in this release, but it has never
-  been ported/tested completely for Borland, Lcc or DJGPP.
+  been ported/tested completely for  Lcc or DJGPP.
 
 
 Specific Notes for each C compiler
@@ -178,16 +170,6 @@ Specific Notes for each C compiler
 			Euphoria for Windows, exw.exe
 
 
-BORLAND
-=======
-  build exw.exe with: borexw.bat
-
-  Note: be_callc.c will probably generate an Internal error message, 
-  but callc.obj will be ok.  Edit borfiles.lnk, changing be_callc.c to 
-  callc.obj so it won't try to compile it again (and fail).
-  
-  The interactive trace, trace(1), works, but might need extra keypresses.
-  
 LCC
 ===
   build exw.exe with: lccexw.bat
@@ -287,12 +269,13 @@ Platforms:
    EUNIX
    EWINDOWS
    EBSD  (EUNIX must also be defined)
+   EOSX
    
 Compilers:
    EWATCOM
    EDJGPP
-   EBORLAND
    ELCC
+   EMSVC
 
 Translator:
    TRANSLATE (in Euphoria front end)
