@@ -103,12 +103,6 @@ END_COLOR_DEPTH_LIST
 //END_JOYSTICK_DRIVER_LIST
 #endif
 
-#ifdef EBORLAND
-#include <io.h>
-#include <dos.h>
-#include <dir.h>
-#endif
-
 #ifdef ELCC
 #include <io.h>
 #endif
@@ -2084,7 +2078,7 @@ object SetTColor(object x)
 static long colors[16];
 #endif
 
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
 static long colors[16] = {
 	_BLACK, _BLUE, _GREEN, _CYAN,
 	_RED, _MAGENTA, _BROWN, _WHITE,
@@ -3068,7 +3062,7 @@ static object Seek(object x)
 
 // 3 implementations of dir()
 
-#if defined(ELCC) || defined(EBORLAND)
+#if defined(ELCC)
 	// 1 of 3: findfirst method
 
 static object Dir(object x)
@@ -3077,11 +3071,7 @@ static object Dir(object x)
 #define path_size (MAX_FILE_NAME + 1 + 4)
 	char path[path_size];
 	s1_ptr result, row;
-#ifdef EBORLAND
-	struct ffblk direntp;
-#else
 	struct _finddata_t direntp;
-#endif
 	object_ptr obj_ptr, temp;
 	int dirp, last, bits;
 	unsigned date, time, attrib;
@@ -3105,36 +3095,15 @@ static object Dir(object x)
 		last--;
 	}
 	path[last+1] = 0; // delete any trailing backslash - Borland won't accept it
-#ifdef EBORLAND
-	dirp = findfirst(path, &direntp, bits);
-#else
 	dirp = _findfirst(path, &direntp);
-#endif
 	if (path[last] == ':' ||
-		(dirp != -1 && (
-#ifdef EBORLAND
-		direntp.ff_attrib
-#else
-		direntp.attrib
-#endif
-		/* BUG FIX by EUMAN 2002
-		   Borland and LCC-Win would not show sub-directories/files
-		   of a given directory if attributes element was an or'd value,
-		   e.g. READ_ONLY | SUBDIR. */
-
-		&   /* THE FIX: use bitwise AND, not == _A_SUBDIR */
-
-		_A_SUBDIR) &&
-
-		strchr(path, '*') == NULL &&
-		strchr(path, '?') == NULL)) {
+		(dirp != -1 && (direntp.attrib & _A_SUBDIR) &&
+		 strchr(path, '*') == NULL &&
+		 strchr(path, '?') == NULL))
+	{
 		// it's a single directory entry - add *.*
 		strlcat(path, "\\*.*", path_size - strlen(path));
-#ifdef EBORLAND
-		dirp = findfirst(path, &direntp, bits);
-#else
 		dirp = _findfirst(path, &direntp);
-#endif
 	}
 	if (dirp == -1)
 		return ATOM_M1; /* couldn't open directory (or file) */
@@ -3147,20 +3116,10 @@ static object Dir(object x)
 		row = NewS1((long)9);
 
 		obj_ptr = row->base;
-		obj_ptr[1] = NewString(
-#ifdef EBORLAND
-		direntp.ff_name
-#else
-		direntp.name
-#endif
-		);
+		obj_ptr[1] = NewString(direntp.name);
 		obj_ptr[2] = NewString("");
 		temp = &obj_ptr[2];
-#ifdef EBORLAND
-		attrib = direntp.ff_attrib;
-#else
 		attrib = direntp.attrib;
-#endif
 		if (attrib & _A_RDONLY)
 			Append(temp, *temp, MAKE_INT('r'));
 		if (attrib & _A_HIDDEN)
@@ -3171,51 +3130,33 @@ static object Dir(object x)
 			Append(temp, *temp, MAKE_INT('d'));
 		if (attrib & _A_ARCH)
 			Append(temp, *temp, MAKE_INT('a'));
-#ifdef EBORLAND
-		if (attrib & FA_LABEL)
-			Append(temp, *temp, MAKE_INT('v'));
-		obj_ptr[3] = direntp.ff_fsize;
-		date = direntp.ff_fdate;
-		time = direntp.ff_ftime;
-		obj_ptr[4] = 1980 + date/512;
-		obj_ptr[5] = (date/32) & 0x0F;
-		obj_ptr[6] = date & 0x01F;
 
-		obj_ptr[7] = time/2048;
-		obj_ptr[8] = (time/32) & 0x03F;
-		obj_ptr[9] = (time & 0x01F) << 1;
-#else
 		obj_ptr[3] = direntp.size;
 		{
-		struct tm *now;
+			struct tm *now;
 
-		now = localtime(&direntp.time_write);
+			now = localtime(&direntp.time_write);
 
-		obj_ptr[4] = now->tm_year+1900;
-		obj_ptr[5] = now->tm_mon+1;
-		obj_ptr[6] = now->tm_mday;
+			obj_ptr[4] = now->tm_year+1900;
+			obj_ptr[5] = now->tm_mon+1;
+			obj_ptr[6] = now->tm_mday;
 
-		obj_ptr[7] = now->tm_hour;
-		obj_ptr[8] = now->tm_min;
-		obj_ptr[9] = now->tm_sec;
+			obj_ptr[7] = now->tm_hour;
+			obj_ptr[8] = now->tm_min;
+			obj_ptr[9] = now->tm_sec;
 		}
-#endif
+
 		if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
 			// file size over 1Gb
 			obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
 		}
 		/* append row to overall result (ref count 1) */
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
-#ifdef EBORLAND
-		dirp = findnext(&direntp);
-		if (dirp == -1)
-			break; /* end of list */
-#else
+
 		if (_findnext(dirp, &direntp)) {
 			_findclose(dirp);
 			break; /* end of list */
 		}
-#endif
 	}
 
 	return (object)result;
