@@ -1,2 +1,0 @@
-#!/bin/sh
-exu /usr/share/euphoria/source/bind.ex -shroud_only $@
