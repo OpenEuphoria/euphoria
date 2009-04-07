@@ -19,6 +19,7 @@ include reswords.e
 include symtab.e
 include compile.e
 include error.e
+include c_out.e
 
 with type_check
 -- Translator

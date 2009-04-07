@@ -4,55 +4,47 @@
 include global.e
 
 -- gtype values, TRANSLATOR:
-global constant TYPE_NULL = 0,    -- initial value for ORing of types
+export constant TYPE_NULL = 0,    -- initial value for ORing of types
 		 TYPE_INTEGER = 1, -- definitely in Euphoria integer form
 		 TYPE_DOUBLE = 2,  -- definitely in double form
 		 TYPE_ATOM = 4,    -- a value stored as either an integer or a double
 		 TYPE_SEQUENCE = 8,-- definitely a sequence 
 		 TYPE_OBJECT = 16  -- could be unknown or anything 
 
-global boolean emit_c_output
-emit_c_output = FALSE
+export boolean emit_c_output = FALSE
+export file c_code, c_h
+export integer main_name_num = 0, init_name_num = 0
+export sequence novalue = {MININT, MAXINT} --, target= {0, 0}
 
-global file c_code, c_h
-
-global integer main_name_num, init_name_num
-main_name_num = 0
-init_name_num = 0
-
-global sequence novalue--, target
-novalue = {MININT, MAXINT}
--- target = {0, 0}
-
-global procedure c_putc(integer c)
+export procedure c_putc(integer c)
 -- output a byte of C source code 
 	if emit_c_output then
 		puts(c_code, c)
 	end if
 end procedure
 
-global procedure c_hputs(sequence c_source)
+export procedure c_hputs(sequence c_source)
 -- output a string of C source code to the .h file 
 	if emit_c_output then
 		puts(c_h, c_source)    
 	end if
 end procedure
 
-global procedure c_puts(sequence c_source)
+export procedure c_puts(sequence c_source)
 -- output a string of C source code 
 	if emit_c_output then
 		puts(c_code, c_source)
 	end if
 end procedure
 
-global procedure c_hprintf(sequence format, integer value)
+export procedure c_hprintf(sequence format, integer value)
 -- output C source code to a .h file with (one) 4-byte formatted value
 	if emit_c_output then
 		printf(c_h, format, value)
 	end if
 end procedure
 
-global procedure c_printf(sequence format, object value)
+export procedure c_printf(sequence format, object value)
 -- output C source code with (one) 4-byte formatted value (should allow multiple values later)
 	if emit_c_output then
 		printf(c_code, format, value)
@@ -65,7 +57,7 @@ constant CREATE_INF = "(1.0/sqrt(0.0))"
 constant CREATE_NAN1 = "sqrt(-1.0)",
 		 CREATE_NAN2 = "((1.0/sqrt(0.0)) / (1.0/sqrt(0.0)))"
 
-global procedure c_printf8(atom value)
+export procedure c_printf8(atom value)
 -- output C source code with (one) 8-byte formatted value 
 	sequence buff
 	integer neg, p
@@ -119,12 +111,12 @@ global procedure c_printf8(atom value)
 end procedure
 
 
-global integer indent       -- long term indent with braces
-global integer temp_indent  -- just for next statement
+export integer indent       -- long term indent with braces
+export integer temp_indent  -- just for next statement
 temp_indent = 0
 indent = 0
 
-global procedure adjust_indent_before(sequence stmt)
+export procedure adjust_indent_before(sequence stmt)
 -- adjust indent before a statement 
 	integer p, i
 	boolean lb, rb
@@ -160,7 +152,7 @@ global procedure adjust_indent_before(sequence stmt)
 	temp_indent = 0    
 end procedure
 
-global procedure adjust_indent_after(sequence stmt)
+export procedure adjust_indent_after(sequence stmt)
 -- adjust indent after a statement 
 	integer p
 	

@@ -16,6 +16,7 @@ include global.e
 include platform.e
 include mode.e as mode
 include c_decl.e
+include c_out.e
 include cominit.e
 include compress.e
 include scanner.e
