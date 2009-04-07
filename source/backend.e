@@ -13,6 +13,7 @@ include intinit.e
 include reswords.e
 include error.e
 include cominit.e
+include compress.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then
