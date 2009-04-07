@@ -21,6 +21,7 @@ include compress.e
 include scanner.e
 include emit.e
 include opnames.e
+include symtab.e
 
 integer np, pc
 

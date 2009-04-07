@@ -17,6 +17,8 @@ include common.e
 include platform.e
 include cominit.e
 include emit.e
+include symtab.e
+include scanner.e
 
 function GetSourceName()
 -- record command line options, return source file number
