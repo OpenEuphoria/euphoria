@@ -1,4 +1,6 @@
 include global.e
+include reswords.e
+
 include std/get.e
 include std/map.e as map
 include std/sequence.e

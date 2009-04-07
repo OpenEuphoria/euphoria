@@ -10,6 +10,7 @@ include keylist.e
 include std/search.e
 
 include global.e
+include reswords.e
 
 sequence out_dir           = "eudox" & SLASH
 integer  show_dependencies = 1

@@ -9,9 +9,15 @@ include std/pretty.e
 include std/error.e
 include std/map.e
 include dot.e
-include std/os.e
+--include std/os.e
+include std/cmdline.e
 
 include global.e
+include reswords.e
+include symtab.e
+include traninit.e
+include scanner.e
+
 include dox.e as dox
 
 integer out, pc, a, b, c, d, target, len, keep_running
@@ -1680,7 +1686,7 @@ export procedure BackEnd( object ignore )
 		{ "t", 0, "translator mode", NO_PARAMETER, -1 },
 		{ "b", 0, "binder mode", NO_PARAMETER, -1 }
 		}
-	sequence result = cmd_parse( opts, -1, Argv )
+--	sequence result = cmd_parse( opts, -1, Argv )
 	
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
