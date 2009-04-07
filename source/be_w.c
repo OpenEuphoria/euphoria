@@ -13,37 +13,37 @@
 #include <stdarg.h>
 #include <time.h>
 #ifdef EUNIX
-#include <sys/stat.h>
-#include <unistd.h>
+#  include <sys/stat.h>
+#  include <unistd.h>
 #else
-#ifdef EMINGW
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#include <sys\types.h>
-#include <sys\stat.h>
-#endif
-#ifdef EDJGPP
-#include <pc.h>
-#include <sys/farptr.h>
-#include <dpmi.h>
-#include <go32.h>
-#include <allegro.h>
-#else
-#if !defined(ELCC) && !defined(EBORLAND) && !defined(EMINGW)
-#include <graph.h>
-#endif
-#endif
+#  ifdef EMINGW
+#    include <sys/types.h>
+#    include <sys/stat.h>
+#  else
+#    include <sys\types.h>
+#    include <sys\stat.h>
+#  endif
+#  ifdef EDJGPP
+#    include <pc.h>
+#    include <sys/farptr.h>
+#    include <dpmi.h>
+#    include <go32.h>
+#    include <allegro.h>
+#  else
+#    if !defined(ELCC) && !defined(EMINGW)
+#      include <graph.h>
+#    endif
+#  endif
 #endif
 #include <string.h>
 #ifdef EWINDOWS
-#include <windows.h>
+#  include <windows.h>
 #endif
 #include "alldefs.h"
 #ifdef EWATCOM
-#ifdef EDOS
-#include <i86.h>
-#endif
+#  ifdef EDOS
+#    include <i86.h>
+#  endif
 #endif
 
 /******************/
@@ -370,7 +370,6 @@ static void end_of_line(int c)
     SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
 }
 
-//#if defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
 #ifdef EWINDOWS
 int MyReadConsoleChar()
 // Read the next character typed by the user on the console
