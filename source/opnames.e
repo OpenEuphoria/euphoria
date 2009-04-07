@@ -1,9 +1,6 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
---
--- Euphoria 3.1
 -- Names of the IL opcodes
 
-global constant opnames = {
+export constant opnames = {
 	"LESS",
 	"GREATEREQ",
 	"EQUALS",
