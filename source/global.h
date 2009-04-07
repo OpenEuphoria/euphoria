@@ -107,8 +107,8 @@
 #define MAX_LONG 0x7fffffffL /* largest positive long integer */
 #define LMAX 200             /* maximum input line length */
 
-#if defined(EBORLAND) || defined(ELCC) || defined(EDJGPP)
-	#define PATH_MAX 512
+#if defined(ELCC) || defined(EDJGPP)
+#  define PATH_MAX 512
 #endif
 
 struct time_info {
@@ -118,34 +118,30 @@ struct time_info {
 	long tot_ticks;
 };
 
-#if defined(EUNIX) || defined(EDJGPP) || defined(ELCC) || defined(EBORLAND) || defined(EMINGW)
-#define KEYBUFF_SIZE 50
-#define __far
-#ifndef EBORLAND
-#define FAR
-#endif
-#if defined(ELCC)
+#if defined(EUNIX) || defined(EDJGPP) || defined(ELCC) || defined(EMINGW)
+#  define KEYBUFF_SIZE 50
+#  define __far
+#  define FAR
+#  if defined(ELCC)
 void show_console();
-#else
-#ifndef EBORLAND
-#ifndef EMINGW
+#  else
+#    ifndef EMINGW
 typedef int (*FARPROC)();
-#define CALLBACK
-#define WINAPI
-#endif
-#endif
-#endif
-#define __interrupt
-#define LRESULT long
-#if !defined(EBORLAND) && !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
-#define O_TEXT 0
-#define HINSTANCE int
-#endif
+#      define CALLBACK
+#      define WINAPI
+#    endif
+#  endif
+#  define __interrupt
+#  define LRESULT long
+#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#    define O_TEXT 0
+#    define HINSTANCE int
+#  endif
 struct videoconfig {
 	int monitor;
-#define _MONO 1
-#define _ANALOGMONO 2
-#define _COLOR 3
+#  define _MONO 1
+#  define _ANALOGMONO 2
+#  define _COLOR 3
 	int mode;
 	int numcolors;
 	int numxpixels;
@@ -153,18 +149,18 @@ struct videoconfig {
 	int numtextrows;
 	int numtextcols;
 	int numvideopages;
-#ifdef EDJGPP
+#  ifdef EDJGPP
 	int mask; // mask pixel values for compatibility
 	int x;    // pixel coordinate for text in graphics modes
 	int y;    // pixel coordinate for text in graphics modes
-#endif
+#  endif
 };
-#define _WHITE 7
-#define _BLACK 0
-#define _BLUE 4
-#define _BROWN 3
-#define _CYAN 6
-#define _YELLOW 11
+#  define _WHITE 7
+#  define _BLACK 0
+#  define _BLUE 4
+#  define _BROWN 3
+#  define _CYAN 6
+#  define _YELLOW 11
 struct rccoord {
 	int row;
 	int col;
