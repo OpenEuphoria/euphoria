@@ -799,7 +799,7 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-#ifdef ELINUX
+#if defined(ELINUX) || defined(EMSVC)
 size_t strlcpy(char *dest, char *src, size_t maxlen)
 {
 	strncpy(dest, src, maxlen);
@@ -809,3 +809,10 @@ size_t strlcpy(char *dest, char *src, size_t maxlen)
 }
 #endif
 
+#if defined(EMSVC)
+size_t strlcat(char *dest, char *src, size_t maxlen)
+{
+	strncat(dest, src, maxlen);
+	return 0;
+}
+#endif

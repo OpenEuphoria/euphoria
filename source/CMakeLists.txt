@@ -12,6 +12,8 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4 )
 PROJECT(Euphoria C)
 
+SET( CMAKE_BUILD_TYPE "Release" )
+
 #
 # Versioning
 #
@@ -66,17 +68,20 @@ IF( WIN32 )
 
   IF( MSVC )
     ADD_DEFINITIONS( -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DMSVC -DEMSVC -DELCC )
+    #SET( CMAKE_C_FLAGS "/Ox" )
+    MESSAGE( "Compiler: ${CMAKE_C_COMPILER}" )
   ENDIF( MSVC )
 
   IF( WATCOM )
+    #SET( CMAKE_C_FLAGS "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol" )
     ADD_DEFINITIONS( -DEWATCOM -DEOW )
-    ADD_DEFINITIONS( /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s )
-    ADD_DEFINITIONS( /ol )
+    #ADD_DEFINITIONS( /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s )
+    #ADD_DEFINITIONS( /ol )
   ENDIF( WATCOM )
 
   ADD_DEFINITIONS( -DEWINDOWS )
 
-  SET( TRANSLATOR ecw.exe )
+  SET( TRANSLATOR euc.exe )
 ENDIF( WIN32 )
 
 IF( UNIX )
@@ -149,6 +154,7 @@ SET( EU_BACKEND_SOURCES
   be_machine.c
   be_main.c
   be_pcre.c
+  be_rev.c
   be_rterror.c
   be_runtime.c
   be_socket.c
@@ -165,6 +171,7 @@ SET( EU_LIB_SOURCES
   be_decompress.c
   be_inline.c
   be_machine.c
+  be_rev.c
   be_pcre.c
   be_runtime.c
   be_socket.c
@@ -205,6 +212,8 @@ ADD_CUSTOM_COMMAND(
 )
 FILE( GLOB EU_BACKEND_RUNNER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/back/*.c" )
 
+MESSAGE( "Args = ${CMAKE_C_FLAGS}" )
+
 #
 # Targets
 #
@@ -217,6 +226,8 @@ ADD_LIBRARY( eruntime STATIC ${EU_LIB_SOURCES} )
 SET_TARGET_PROPERTIES( eruntime PROPERTIES COMPILE_FLAGS -DERUNTIME )
 
 IF( WIN32 )
+  MESSAGE( " CFlags = ${CMAKE_C_FLAGS}" )
+  MESSAGE( " CFlags_Release = ${CMAKE_C_FLAGS_Release}" )
   FIND_LIBRARY( WINSOCK_LIB ws2_32 PATHS "$ENV{WATCOM}/lib386/nt")
   IF( NOT WINSOCK_LIB )
     MESSAGE( FATAL_ERROR  "Could not located the winsock library (ws2_32)")

@@ -63,7 +63,16 @@ struct block_list {
 #define ERealloc(orig, newsize) realloc(orig, newsize)
 #endif
 
-#ifdef ELINUX
+#if defined(ELINUX) || defined(EMSVC)
 extern size_t strlcpy(char *dest, char *src, size_t maxlen);
+
+#if defined(EMSVC)
+extern size_t strlcat(char *dest, char *src, size_t maxlen);
+#define snprintf _snprintf
+#endif
 #endif
 
+#if !defined(va_copy)
+#define va_copy(dst, src) \
+   ((void) memcpy(&(dst), &(src), sizeof(va_list)))
+#endif

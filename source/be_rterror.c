@@ -29,6 +29,7 @@
 
 #include "alldefs.h"
 #include "be_runtime.h"
+#include "alloc.h"
 
 /******************/
 /* Local defines  */
