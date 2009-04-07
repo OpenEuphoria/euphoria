@@ -95,7 +95,7 @@ extern char *EMalloc();
 #else
 #include "alloc.h"
 #endif
-#ifndef EWINDOWS // !defined(EBORLAND) && !defined(ELCC)
+#ifndef EWINDOWS // !defined(ELCC)
 extern void *malloc();
 #endif
 
@@ -229,10 +229,6 @@ void be_init()
 		;
 	*(p+1) = '\0'; /* keep the path, truncate off the final name */    
 
-#ifdef EBORLAND
-	PatchCallc();  // ? translator init does this
-#endif
-	
 	InitExecute();
 	InitDebug();
 	InitTraceWindow();
