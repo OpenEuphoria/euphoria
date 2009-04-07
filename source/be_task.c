@@ -98,16 +98,6 @@
 #define read_esp_tc() _asm("movl %esp, -52(%ebp)")
 #endif
 
-#ifdef EBORLAND
-// This is just dummy code. It will be searched and replaced at start-up.
-// See PatchCallc() in be_callc.c 
-#define push_regs() stack_top = 99999;   // 99999 = hex 00 01 86 9F
-#define pop_regs() stack_top = 88888;    // 88888 = hex 00 01 5B 38
-#define set_esp() stack_top = 77777;     // 77777 = hex 00 01 2F D1
-#define read_esp() stack_top = 66666;    // 66666 = hex 00 01 04 6A
-#define read_esp_tc() stack_top = 55555; // 55555 = hex 00 00 d9 03
-#endif
-
 #ifdef EDJGPP
 #define push_regs() asm("pushal")
 #define pop_regs() asm("popal")
@@ -838,12 +828,6 @@ void task_clock_start()
 	}
 }
 
-#ifdef EBORLAND
-#pragma codeseg _DATA
-// put task_create() and scheduler() into the DATA segment 
-// so I can patch them at run-time
-#endif
-
 object task_create(object r_id, object args)
 // Create a new task - return a double task id - assumed by Translator
 {
@@ -1272,13 +1256,3 @@ void scheduler(double now)
 		}
 	}
 }
-
-#ifdef EBORLAND
-#pragma codeseg _DATA
-void end_of_scheduler()
-/* end marker */
-{
-}
-#pragma codeseg
-#endif
-
