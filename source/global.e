@@ -18,7 +18,6 @@ export boolean mybsd = FALSE -- set to true if very little RAM available (build 
 -- specific C compiler used (one may be TRUE)
 export constant
 	EWATCOM  = TRUE,
-	EBORLAND = FALSE,
 	ELCC     = FALSE,
 	EDJGPP   = FALSE
 	-- (assume GNU C for Unix variants)
@@ -344,7 +343,7 @@ export integer OpInline             -- inline max size (0 = off)
 export integer OpIndirectInclude
 
 -- COMPILE only
-export object dj_path = 0, wat_path = 0, bor_path = 0
+export object dj_path = 0, wat_path = 0
 export integer cfile_count = 0, cfile_size = 0
 export integer Initializing = FALSE
 
@@ -395,5 +394,5 @@ export sequence goto_delay = {}, goto_list = {}
 export sequence private_sym = {}
 export integer use_private_list = 0
 
-export boolean wat_option, djg_option, bor_option, lcc_option, gcc_option
+export boolean wat_option, djg_option, lcc_option, gcc_option
 export boolean silent = FALSE

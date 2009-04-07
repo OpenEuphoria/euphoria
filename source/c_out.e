@@ -88,7 +88,7 @@ export procedure c_printf8(atom value)
 							buff = prepend(buff, '-')
 						end if
 					elsedef
-						if sequence(wat_path) or sequence(bor_path) then
+						if sequence(wat_path) then
 							buff = CREATE_NAN2
 							if not neg then
 								buff = prepend(buff, '-')

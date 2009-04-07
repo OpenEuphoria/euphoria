@@ -1,6 +1,6 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- This module sets one of wat_path, bor_path, or dj_path or none at all 
+-- This module sets one of wat_path, or dj_path or none at all 
 -- to indicate lcc or gcc.  Using the command line options or environment variables
 -- as hints it checks for command line sanity and sets the said environment
 -- variables.
@@ -34,7 +34,6 @@ constant FORCE_CHOOSE = FALSE
 boolean help_option = FALSE
 wat_option = FALSE
 djg_option = FALSE
-bor_option = FALSE
 lcc_option = FALSE
 gcc_option = FALSE
 
@@ -101,9 +100,6 @@ export procedure transoptions()
 			elsif equal("-LCC", uparg) then
 				lcc_option = TRUE
 
-			elsif equal("-BOR", uparg) then
-				bor_option = TRUE
-				
 			elsif equal("-GCC", uparg) then
 				-- on windows this is MinGW
 				-- cygwin should get its own option
@@ -194,14 +190,14 @@ export procedure transoptions()
 	if help_option then
 		object msgtext =##
 Usage: euc [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
-           [-wat|-djg|-lcc|-bor|-gcc] [-com /compile_directory/]
+           [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
            [-makefile] [-keep] [-debug] [-silent] 
            [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
            [/os specific options/]:
 
 OS Specific Options:
        DOS    :  [-djg|-wat] [-fastfp]
-       Windows:  [-con] [-wat|-djg|-lcc|-bor] [-dll]
+       Windows:  [-con] [-wat|-djg|-lcc] [-dll]
        Linux  :  [-gcc] [-dll]
        OSX    :  [-gcc] [-dll]
        SunOS  :  [-gcc] [-dll]
@@ -223,12 +219,12 @@ Explainations:
 		CompileErr( msgtext)	
 	end if
 	
-	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option,  bor_option}, {0,0,0,0} ) = 0 then
-		Warning( "No compiler specified for Windows or DOS (Watcom (-wat), DJG (-djg), LCC (-lcc), or Borland (-bor)).\n", translator_warning_flag  )
+	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option }, {0,0,0} ) = 0 then
+		Warning( "No compiler specified for Windows or DOS (Watcom (-wat), DJG (-djg), or LCC (-lcc)).\n", translator_warning_flag  )
 	end if
 	
-	if (TWINDOWS or TDOS) and compare( sort({wat_option,  djg_option,  lcc_option,  bor_option}), {0,0,0,1} ) > 0 then
-		Warning( "You should specify one and only one compiler you want to use: Watcom (-wat), DJG (-djg), LCC (-lcc), or Borland (-bor).", translator_warning_flag )
+	if (TWINDOWS or TDOS) and compare( sort({wat_option,  djg_option,  lcc_option}), {0,0,1} ) > 0 then
+		Warning( "You should specify one and only one compiler you want to use: Watcom (-wat), DJG (-djg), or LCC (-lcc).", translator_warning_flag )
 	end if
 	
 	-- The platform might have changed, so clean up in case of inconsistent options
@@ -267,10 +263,6 @@ Explainations:
 		CompileErr( "DJGPP option only available for DOS." )
 	end if
 
-	if bor_option and not TWINDOWS then
-		CompileErr( "Borland option only available for Windows." )
-	end if
-	
 	if lcc_option and not TWINDOWS then
 		CompileErr( "LCC option only available for Windows." )
 	end if
@@ -285,60 +277,6 @@ Explainations:
 	end if
 
 end procedure
-				
-function get_bor_path()
--- return the path to the Borland C++ files, e.g. c:\borland\bcc55 
-	object p
-	integer b, c
-	sequence path
-				  
-	p = getenv("PATH")
-	if atom(p) then
-		return 0
-	end if
-	
-	path = upper(p)
-	
-	for i = 1 to length(path) do
-		if path[i] = '/' then
-			path[i] = '\\'
-		end if
-	end for
-	
-	b = match("BORLAND\\BCC", path)
-	if b = 0 then
-		b = match("\\BCC", path)
-		if b = 0 then
-			b = match("BORLAND\\", path)
-			if b = 0 then
-				return 0
-			else 
-				c = b+length("BORLAND\\")
-			end if
-		else 
-			c = b+length("\\BCC")
-		end if
-	else 
-		c = b+length("BORLAND\\BCC")
-	end if
-	
-	-- move forward to backslash
-	while c <= length(path) and not find(path[c], SLASH_CHARS) do
-		c += 1
-	end while
-	path = path[1..c-1]
-	
-	-- move backward to ; or start
-	while b > 1 and path[b] != ';' do
-		b -= 1
-	end while
-	if b and path[b] = ';' then
-		b += 1
-	end if
-	
-	return path[b..$]
-end function
---END PRIVATE
 
 procedure OpenCFiles()
 -- open and initialize translator output files
@@ -405,32 +343,19 @@ procedure InitBackEnd(integer c)
 		if djg_option and atom(dj_path) then
 			CompileErr("DJGPP environment variable is not set")
 		end if
-		bor_path = 0
 	end if
 
 	if TWINDOWS then
 		dj_path = 0
-		bor_path = 0
 		wat_path = 0
 		if not lcc_option then
-			if not bor_option then
-				if length(compile_dir) then
-					wat_path = compile_dir
-				else
-					wat_path = getenv("WATCOM")
-				end if
+			if length(compile_dir) then
+				wat_path = compile_dir
 			else
-				if length(compile_dir) then
-					bor_path = compile_dir
-				else
-					bor_path = get_bor_path()
-				end if
+				wat_path = getenv("WATCOM")
 			end if
 		end if
 	
-		if bor_option and atom(bor_path) then
-			CompileErr("Can't find Borland installation directory")
-		end if
 		if wat_option and atom(wat_path) then
 			CompileErr("WATCOM environment variable is not set")
 		end if
@@ -440,10 +365,9 @@ procedure InitBackEnd(integer c)
 		dj_path = 0
 		gcc_option = 1
 		wat_path = 0
-		bor_path = 0
 	end if
 	
-	if sequence(wat_path)+gcc_option+sequence(dj_path)+sequence(bor_path)+lcc_option = 0 then
+	if sequence(wat_path) + gcc_option + sequence(dj_path) + lcc_option = 0 then
 		CompileErr( "Cannot determine for which compiler to translate for." ) 
 	end if
 

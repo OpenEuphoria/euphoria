@@ -962,11 +962,7 @@ procedure Write_def_file(integer def_file)
 	while s do
 		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
 			if is_exported( s ) then
-				if sequence(bor_path) then             
-					printf(def_file, "%s=_%d%s\n", 
-						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
-							SymTab[s][S_NAME]})
-				elsif sequence(wat_path) then
+				if sequence(wat_path) then
 					printf(def_file, "EXPORT %s='__%d%s@%d'\n", 
 						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
 							SymTab[s][S_NAME], SymTab[s][S_NUM_ARGS] * 4})
@@ -1061,7 +1057,7 @@ integer link_file
 procedure add_file(sequence filename)
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
-	if sequence(wat_path) or sequence(bor_path) then
+	if sequence(wat_path) then
 		obj_fname &= ".obj"
 	else
 		obj_fname &= ".o"
@@ -1084,8 +1080,6 @@ procedure add_file(sequence filename)
 	else
 		if sequence(wat_path) then
 			printf(link_file, "FILE %s\n", {obj_fname})
-		elsif sequence(bor_path) then
-			printf(link_file, "%s\n", {src_fname})
 		else
 			printf(link_file, "%s\n", {obj_fname})
 		end if
@@ -1185,21 +1179,6 @@ export procedure start_emake()
 				c_opts = "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
 			end if
 			
-		elsif sequence(bor_path) then
-			if debug_option then
-				debug_flag = " -v "
-			end if
-			puts(doit, "echo compiling with BORLAND"&HOSTNL)
-			c_opts = " -q -w- -O2 -5 -a4 -I" & debug_flag
-			if dll_option then
-				c_opts = "-tWD" & c_opts
-			elsif con_option then
-				c_opts = "-tWC" & c_opts
-			else    
-				c_opts = "-tW" & c_opts
-			end if
-			c_opts &= bor_path & "\\include -L" & bor_path & "\\lib"
-
 		elsif not gcc_option then
 			-- LccWin 
 			if debug_option then
@@ -1289,8 +1268,6 @@ export procedure start_emake()
 			puts(link_file, "OPTION ELIMINATE\n") 
 			puts(link_file, "OPTION CASEEXACT\n") 
 			printf(link_file, "FILE %s.obj\n", {prepared_file0} )			
-		elsif sequence(bor_path) then
-			cc_name = "bcc32"
 			
 		elsif not gcc_option then
 			cc_name = "lcc"
@@ -1420,13 +1397,13 @@ export procedure finish_emake()
 	end if
 
 	-- init-.c files
-	if atom(bor_path) and not makefile_option then
+	if not makefile_option then
 		puts(doit, "echo init-.c"&HOSTNL)
 		printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
 	end if
 	add_file("init-")
 	for i = 0 to init_name_num-1 do -- now that we know init_name_num
-		if atom(bor_path) and not makefile_option then
+		if not makefile_option then
 			printf(doit, "echo init-%d.c"&HOSTNL, {i})
 			printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
 		end if
@@ -1434,7 +1411,7 @@ export procedure finish_emake()
 		add_file(buff)
 	end for
 		
-	if atom(bor_path) and not makefile_option then
+	if not makefile_option then
 		puts(doit, "echo linking"&HOSTNL)
 	end if
 	
@@ -1524,18 +1501,6 @@ export procedure finish_emake()
 				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
 			end if			
 
-		elsif sequence(bor_path) then
-			printf(doit, "bcc32 %s %s.c @objfiles.lnk"&HOSTNL, {c_opts, file0})
-			if length(user_library) then
-				printf(link_file, "%s\n", {user_library}) 
-			else
-				printf(link_file, "%s\\eub.lib\n", {bin_path})
-			end if
-			
-			if not keep then
-				puts(doit, "del *.tds > NUL"&HOSTNL)
-			end if
-			
 		elsif not gcc_option then 
 			-- Lcc 
 			if dll_option then
@@ -1577,8 +1542,8 @@ export procedure finish_emake()
 		def_file = -1
 		if dll_option then
 			-- write out exported symbols 
-			if sequence(bor_path) or atom(wat_path) then
-				-- Borland or Lcc 
+			if atom(wat_path) then
+				-- Lcc
 				def_file= open(def_name, "w")
 				if def_file = -1 then
 					CompileErr("Couldn't open .def file for output")
@@ -1587,17 +1552,6 @@ export procedure finish_emake()
 			else 
 				-- WATCOM - just add to objfiles.lnk 
 				Write_def_file(link_file)
-			end if
-		else
-			if sequence(bor_path) then
-				def_file= open(def_name, "w")
-				if def_file = -1 then
-					CompileErr("Couldn't open .def file for output")
-				end if
-				-- set reserved *and* committed memory, 
-				-- else a crash will occur
-				printf(def_file, "STACKSIZE %d,%d\n", 
-					   {total_stack_size, total_stack_size})
 			end if
 		end if
 		if def_file != -1 then
@@ -1719,13 +1673,13 @@ export procedure GenerateUserRoutines()
 				-- do the standard top-level files as well 
 
 				if Pass = LAST_PASS then
-					if atom(bor_path) and not makefile_option then
+					if not makefile_option then
 						puts(doit, "echo main-.c"&HOSTNL)                
 						printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
 					end if
 					add_file("main-")
 					for i = 0 to main_name_num-1 do
-						if atom(bor_path) and not makefile_option then
+						if not makefile_option then
 							printf(doit, "echo main-%d.c"&HOSTNL, {i})               
 							printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
 						end if
@@ -1737,7 +1691,7 @@ export procedure GenerateUserRoutines()
 			end if
 		
 			if Pass = LAST_PASS then
-				if atom(bor_path) and not makefile_option then
+				if not makefile_option then
 					printf(doit, "echo %s.c"&HOSTNL, {c_file})
 					printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 				end if
@@ -1785,7 +1739,7 @@ export procedure GenerateUserRoutines()
 							next_c_char = 1  -- (unique_c_name will resolve)
 						end if
 						
-						if atom(bor_path) and not makefile_option then
+						if not makefile_option then
 							printf(doit, "echo %s.c"&HOSTNL, {c_file})
 							printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 						end if
