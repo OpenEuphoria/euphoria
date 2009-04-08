@@ -1879,22 +1879,21 @@ flow continues based upon defined cases.  The syntax of a switch statement:
 
 <eucode>
 switch <expr> [with fallthru] [label "<label name>"] do
-    case <val1,1>[, <val1,2>,...] then
-        [code block 1]
+    case <val>[, <val2>, ...] then
+        [code block]
         [[break [label]]|fallthru]
-    case <val2,1>[,...] then
-        [code block 2]
+    case <val>[, <val2>, ...] then
+        [code block]
         [[break [label]]|fallthru]
-    case <val 3,1>[, ...]:
-        [code block 3]
+    case <val>[, <val2>, ...] then
+        [code block]
         [[break [label]]|fallthru]
     ...
  
     [case else]
-        [code block 4]
+        [code block]
         [[break [label]]|fallthru]
 end switch
-
 </eucode>
 
 The above example could be written with ##if## statements like this ..
