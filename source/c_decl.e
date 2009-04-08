@@ -1400,15 +1400,15 @@ procedure write_makefile()
 				HOSTNL)
 			end if
 			if TWINDOWS then
-			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lws2_32" & HOSTNL)
+				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lws2_32" & HOSTNL)
 			elsif TSUNOS then
-			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lsocket -lresolv -lnsl" & HOSTNL)
+				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lsocket -lresolv -lnsl" & HOSTNL)
 			elsif TOSX then
-			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lresolv" & HOSTNL)
+				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lresolv" & HOSTNL)
 			elsif TLINUX then
-			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -ldl -lresolv -lnsl" & HOSTNL)
+				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -ldl -lresolv -lnsl" & HOSTNL)
 			else -- OPENBSD, NETBSD, FREEBSD
-			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm" & HOSTNL)
+				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm" & HOSTNL)
 			end if
 		   	puts(doit, HOSTNL)
 		end if
@@ -1435,7 +1435,7 @@ procedure write_makefile()
 
 		elsif TUNIX or (TWINDOWS and gcc_option) then
 			printf(doit, "%s: $(%s_OBJECTS)" & HOSTNL, { lower(file0), upper(file0) })
-			printf(doit, "\t$(CC) $(LFLAGS) -o %s" & HOSTNL, {lower(file0)})
+			printf(doit, "\t$(CC) $(%s_OBJECTS) $(LFLAGS) -o %s" & HOSTNL, {upper(file0), lower(file0)})
 			puts  (doit, HOSTNL)
 			printf(doit, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { lower(file0), lower(file0) })
 			puts  (doit, HOSTNL)
