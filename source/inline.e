@@ -246,7 +246,6 @@ function file_and_name( symtab_index sym )
 	return sprintf("%s:%s:%d", {file_name[SymTab[sym][S_FILE_NO]], SymTab[sym][S_NAME], sym})
 end function
 
-
 function returnf( integer pc )
 	-- RETURNF SUB BLOCK RETSYM [BADRETURNF]
 	symtab_index retsym = inline_code[pc+3]
@@ -268,9 +267,10 @@ function returnf( integer pc )
 		
 		if not (find( retsym, inline_params ) or find( retsym, proc_vars )) then
 			ret_pc = rfind( generic_symbol( retsym ), inline_code, pc )
+			
 		end if
 		
-		if ret_pc then
+		if ret_pc and eu:compare( inline_code[ret_pc-1], PRIVATE_INIT_CHECK ) then
 			inline_code[ret_pc] = {INLINE_TARGET}
 		else
 			code = {ASSIGN, generic_symbol( retsym ), {INLINE_TARGET}}
