@@ -64,7 +64,7 @@ elsifdef WIN32 then
 elsedef
 	--*NIX-specific constants
 	constant
-		STDLIB = open_dll({ "", "libc.so", "libc.dylib" }),
+		STDLIB = open_dll({ "libc.so", "libc.dylib", "" }),
 		PIPE   = define_c_func(STDLIB, "pipe",   {C_POINTER}, C_INT),
 		READ   = define_c_func(STDLIB, "read",   {C_INT, C_POINTER, C_INT}, C_INT),
 		WRITE  = define_c_func(STDLIB, "write",  {C_INT, C_POINTER, C_INT}, C_INT),
