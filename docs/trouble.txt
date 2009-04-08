@@ -22,7 +22,7 @@ Here are some commonly reported problems and their solutions.
 
 ==== Console window disappeared
 
-//I ran my program with ##exw.exe## and the console window disappeared
+//I ran my program with ##euiw.exe## and the console window disappeared
 before I could read the output.//
 
 The console window will only appear if required, and will disappear immediately when your program 
@@ -35,12 +35,11 @@ end if
 </eucode>
 at the end of your program.
 
-You may also run your console program with ##exwc.exe##.
+You may also run your console program with ##eui.exe##.
 
 ==== Press Enter
 
-//At the end of execution of my program, I see "Press Enter" and I have to hit the Enter key. How do I get rid of
-that?//
+//At the end of execution of my program, I see "Press Enter" and I have to hit the Enter key. How do I get rid of that?//
 
 Call [[:free_console]] just before your program terminates.
 
@@ -52,11 +51,19 @@ free_console()
 
 ==== Full Screen Console
 
-//When I run ##ex.exe## in a DOS Window, it makes my small DOS window go to full
+//When I run ##euid.exe## in a DOS Window, it makes my small DOS window go to full
 screen.//
 
-This will only happen the first time you run ##ex.exe## after creating a new small
-DOS window. You can make the window small again by pressing //Alt-Enter//. It will stay small after that. 
+This is only susposed to happen the first time you run ##euid.exe## after creating a new small
+DOS window. This can be prevented by setting the EUCONS environment variable to "1".  
+You can make the window small again by pressing //Alt-Enter//. It may go full-screen again. 
+
+These days, you should only use ##euid.exe## for applications that require it.  This
+interpreter provides routines for full-screen graphics but does so in a way that is 
+not compatable with Windows Vista.  You can have graphics with ##eui.exe## using a
+graphics library.  In summary, if you don't want a full-screen application you shouldn't
+use this interpreter!
+
 Your Euphoria program can keep the window small by executing:
 
 <eucode>
@@ -72,7 +79,7 @@ if graphics_mode(3) then
 end if
 </eucode>
 
-You may also wish to execute your program using ##exwc.exe## instead.
+You may also wish to execute your program using ##eui.exe## instead.
 
 ==== CGI Program Hangs/No Output
 
@@ -82,12 +89,12 @@ Look for an ex.err file in your cgi-bin directory. Turn on ##with trace## /
 ##trace(3)## to see what statements are executed (see ##ctrace.out## in your
 cgi-bin). Insert ##without warning## at the top of your program. On
 //Windows//, when there are warnings, Euphoria will issue a prompt before terminating,
-causing your program to hang. On Windows you should always use ##exwc.exe##
+causing your program to hang. On Windows you should always use ##eui.exe##
 to run CGI programs, or you may have problems with standard output. With
 Apache Web Server, you can have a first line in your program of:
-#!.\exwc.exe to run your program using exwc.exe in the current (cgi-bin)
-directory. On //Linux/FreeBSD//, be careful that your first line ends in LF, not
-CR-LF, or the ###!## won't be handled correctly. On //Linux// you must also set the
+#!.\eui.exe to run your program using eui.exe in the current (cgi-bin)
+directory. Be careful that your first line ends with the line breaking characters
+appopriate for your platform, or the ###!## won't be handled correctly. You must also set the
 execute permissions on your program correctly, and ##ex.err## and ctrace.out
 must be writable by the server process or they won't be updated. See a
 href=cgi.htm>cgi.htm</a> for more.
@@ -218,11 +225,13 @@ general problem that you must face in most programming languages.
 Always remember: floating-point numbers are just an approximation
 to the "real" numbers in mathematics. Assume that any floating-point calculation
 might have a tiny bit of error in the result. Sometimes you can
-solve the problem by rounding, e.g. x = floor(x + 0.5) would round
-x off to the nearest integer. Storing money values as an integer 
+solve the problem by rounding, e.g. x = round( x, 100 ) would round
+x off to the nearest hundredth.  Storing money values as an integer 
 number of pennies, rather than a fractional number of dollars 
 (or similar currency) will help, but some calculations could still 
 cause problems.
+
+
 
 ==== Number to a string?
 
@@ -231,8 +240,20 @@ cause problems.
 Use [[:sprintf]]:
 
 <eucode>
-string = sprintf("%d", number)
+string = eu:sprintf("%d", 10) -- string is "10"
 </eucode>
+
+or use [[:number]]:
+
+<eucode>
+include std/locale.e as locale
+string = locale:number(10) -- string is probably "10.00" if called in the U.S.
+                           -- It depends on the locale preferences set on your computer.
+</eucode>
+
+Number formats according to the locale setting on your computer and
+strangely, this means to give you two decimal places whether or not
+you supply an integer value for the U.S. locale.
 
 Besides ##%d##, you can also try other formats, such as
 ##%x## (Hex) or ##%f## (floating-point).
@@ -346,9 +367,9 @@ Your ##config.sys## should have just ##HIMEM.SYS## but not ##EMM386.EXE## in it.
 
 ==== Windows NT character-mode executable
 
-//I try to run a program with ##exw.exe## and it says "this is a Windows NT
+//I try to run a program with ##euiw.exe## and it says "this is a Windows NT
 character-mode executable."//
 
-##exw.exe## is a **32-bit Windows program**. It must be run under
+##euiw.exe## is a **32-bit Windows program**. It must be run under
 //Windows// or in a //DOS// window in //Windows//. It will not work under
-plain DOS on an old system. ##ex.exe## **will** work under plain //DOS//.
+plain DOS on an old system. ##euid.exe## **will** work under plain //DOS//.

@@ -32,8 +32,12 @@ The sixth platform is **Sun OS**.  Sun OS was developed by and is owned by
 SUN Microsystems Inc.  It is also based on UNIX.
 
 The seventh platform is **Open BSD**.  
+Open BSD is also a UNIX-like Operating System and is developed by volunteers.
 
 The eighth platform is **Net BSD**.  
+Net BSD is also a UNIX-like Operating System  and is designed to be easily 
+portable to other hardware platforms.
+
 
 The Euphoria for DOS32+WIN32 installation file contains several  
 **.exe** files. 
