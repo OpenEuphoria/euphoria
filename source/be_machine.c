@@ -3018,7 +3018,7 @@ static object Where(object x)
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
 		result = NewDouble((double)result);  // maximum 2 billion
-#if defined(ELINUX) | defined(EWATCOM)
+#if defined(ELINUX) || defined(EWATCOM)
 	else
 		result = iitell(f); // for better accuracy
 #endif
