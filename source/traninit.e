@@ -151,6 +151,8 @@ export procedure transoptions()
 						set_host_platform( UOPENBSD )
 					elsif equal( s, "NETBSD" ) then
 						set_host_platform( UNETBSD )
+					elsif equal( s, "DJGPP" ) then
+						set_host_platform( UDJGPP )
 					else
 						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
 					end if

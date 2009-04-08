@@ -12,6 +12,7 @@ public constant
 	USUNOS = SUNOS + 0.6,
 	UOPENBSD = OPENBSD + 0.7,
 	UNETBSD = NETBSD + 0.8,
+	UDJGPP = -9, --TODO hack
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
 
 -- For cross-translation:
@@ -25,6 +26,7 @@ public integer
 	ISUNOS   = 0, TSUNOS   = 0,
 	IOPENBSD = 0, TOPENBSD = 0,
 	INETBSD  = 0, TNETBSD  = 0
+	IDJGPP  = 0,  TDJGPP   = 0
 
 -- operating system:
 ifdef DOS32 then
@@ -34,6 +36,10 @@ ifdef DOS32 then
 elsifdef WIN32 then
 	IWINDOWS = 1
 	TWINDOWS = 1
+
+elsifdef UDJGPP then
+	IDJGPP = 1
+	TDJGPP = 1
 
 elsifdef OSX then
 	IOSX = 1
@@ -91,7 +97,7 @@ public procedure set_host_platform( atom plat )
 	ihost_platform = floor(plat)
 
 	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX or plat = USUNOS or
-	            plat = UOPENBSD or plat = UNETBSD)
+	            plat = UOPENBSD or plat = UNETBSD or plat = UDJGPP)
 
 	TWINDOWS = plat = WIN32
 	TDOS     = plat = DOS32
@@ -101,6 +107,7 @@ public procedure set_host_platform( atom plat )
 	TSUNOS   = plat = USUNOS
 	TOPENBSD = plat = UOPENBSD
 	TNETBSD  = plat = UNETBSD
+	TDJGPP   = plat = UDJGPP
 	IUNIX    = TUNIX
 	IWINDOWS = TWINDOWS
 	IDOS     = TDOS
@@ -110,6 +117,7 @@ public procedure set_host_platform( atom plat )
 	ISUNOS   = TSUNOS
 	IOPENBSD = TOPENBSD
 	INETBSD  = TNETBSD
+	IDJGPP   = TDJGPP
 
 	if TUNIX then
 		HOSTNL = "\n"
@@ -143,6 +151,8 @@ public function GetPlatformDefines(integer for_translator = 0)
 		local_defines &= { "UNIX", "BSD", "NETBSD"}
 	elsif (IBSD and not for_translator) or (TBSD and for_translator) then
 		local_defines &= {"UNIX", "BSD", "FREEBSD"}
+	elsif (IDJGPP and not for_translator) or (TDJGPP and for_translator) then
+		local_defines &= {"UNIX", "UDJGPP"}
 	end if
 
 	-- So the translator knows what to strip from defines if translating
