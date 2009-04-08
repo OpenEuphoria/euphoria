@@ -44,8 +44,10 @@ export boolean
 	dll_option = FALSE,
 	con_option = FALSE,
 	fastfp = FALSE,
-	lccopt_option = TRUE,
-	makefile_option = FALSE
+	lccopt_option = TRUE
+
+export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL
+export integer makefile_option = MAKE_NONE
 
 sequence files_to_delete = {
 	"main-.c",
@@ -794,7 +796,8 @@ export procedure DeclareRoutineList()
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		if SymTab[s][S_USAGE] != U_DELETED and
-			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
+			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE})
+		then
 			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) and dll_option then
 				-- declare the global routine as an exported DLL function
 				if TWINDOWS then            
@@ -1113,6 +1116,7 @@ export procedure start_emake()
 	sequence debug_flag = ""
 	
 	if makefile_option then
+		-- TODO: Create projectname.mak or Makefile when makefile_option = MAKE_FULL?
 		doit = open(file0 & ".mak", "wb")
 		add_file(file0)
 	elsif TUNIX or (TWINDOWS and gcc_option) then
@@ -1373,6 +1377,82 @@ function truncate_to_83( sequence lfn )
 	end if
 end function
 
+procedure write_makefile()
+	if makefile_option = MAKE_FULL then
+		if TWINDOWS and not gcc_option then
+			puts(doit, "CC     = wcc386" & HOSTNL)
+			puts(doit, "CFLAGS = /i$(%EUDIR) /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" &
+				HOSTNL)
+			puts(doit, "LINKER = wlink" & HOSTNL)
+			puts(doit, "LFLAGS = SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
+			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
+			puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib LIBRARY ws2_32" & HOSTNL)
+		   	puts(doit, HOSTNL)
+
+		elsif TUNIX or gcc_option then
+			puts(doit, "CC     = gcc" & HOSTNL)
+			if TWINDOWS then
+			-- TODO add support for console apps
+			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O3 -Os -mno-cygwin -mwindows" &
+				HOSTNL)
+			else
+			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O2" &
+				HOSTNL)
+			end if
+			if TWINDOWS then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lws2_32" & HOSTNL)
+			elsif TSUNOS then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lsocket -lresolv -lnsl" & HOSTNL)
+			elsif TOSX then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lresolv" & HOSTNL)
+			elsif TLINUX then
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -ldl -lresolv -lnsl" & HOSTNL)
+			else -- OPENBSD, NETBSD, FREEBSD
+			puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm" & HOSTNL)
+			end if
+		   	puts(doit, HOSTNL)
+		end if
+	end if
+
+	printf(doit, "%s_SOURCES=%s" & HOSTNL, { upper(file0), makefile_src_line })
+	printf(doit, "%s_OBJECTS=%s" & HOSTNL, { upper(file0), makefile_obj_line })
+	puts  (doit, HOSTNL)
+
+	if makefile_option = MAKE_FULL then
+		if TWINDOWS and not gcc_option then
+			printf(doit, "%s.exe: $(%s_OBJECTS)" & HOSTNL, { lower(file0), upper(file0) })
+			puts  (doit, "\t$(LINKER) $(LFLAGS) name $@ file { $< }" & HOSTNL)
+			puts  (doit, HOSTNL)
+			printf(doit, "%s-clean: .SYMBOLIC" & HOSTNL, { lower(file0) })
+			printf(doit, "\tdel /f/q $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+			puts  (doit, HOSTNL)
+			printf(doit, "%s-clean-all: .SYMBOLIC %s-clean" & HOSTNL,
+				{ lower(file0), lower(file0) })
+			printf(doit, "\tdel /f/q $(%s_SOURCES)" & HOSTNL, { upper(file0) })
+			puts  (doit, HOSTNL)
+			puts  (doit, ".c.obj: .autodepend" & HOSTNL)
+			puts  (doit, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
+
+		elsif TUNIX or (TWINDOWS and gcc_option) then
+			printf(doit, "%s: $(%s_OBJECTS)" & HOSTNL, { lower(file0), upper(file0) })
+			printf(doit, "\t$(CC) $(LFLAGS) -o %s" & HOSTNL, {lower(file0)})
+			puts  (doit, HOSTNL)
+			printf(doit, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { lower(file0), lower(file0) })
+			puts  (doit, HOSTNL)
+			printf(doit, "%s-clean: " & HOSTNL, { lower(file0) })
+			printf(doit, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+			puts  (doit, HOSTNL)
+			printf(doit, "%s-clean-all: %s-clean" & HOSTNL,
+				{ lower(file0), lower(file0) })
+			printf(doit, "\trm -rf $(%s_SOURCES)" & HOSTNL, { upper(file0) })
+			puts  (doit, HOSTNL)
+			puts  (doit, "%.o: %.c" & HOSTNL)
+			puts  (doit, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
+
+		end if
+	end if
+end procedure
+
 export procedure finish_emake()
 -- finish emake.bat 
 	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file, arguments
@@ -1618,8 +1698,7 @@ export procedure finish_emake()
 	end if
 
 	if makefile_option then
-		printf(doit, "%s_SOURCES=%s\n", { upper(file0), makefile_src_line })
-		printf(doit, "%s_OBJECTS=%s\n", { upper(file0), makefile_obj_line })
+		write_makefile()
 	end if
 		
 	close(doit)

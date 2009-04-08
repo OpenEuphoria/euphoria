@@ -154,10 +154,20 @@ public procedure show_help(sequence opts, integer add_help_rid=-1)
 	pad_size = 0
 	for i = 1 to length(opts) do
 		this_size = 0
-		if sequence(opts[i][SINGLE]) then this_size += length(opts[i][SINGLE]) + 1 end if
-		if sequence(opts[i][DOUBLE]) then this_size += length(opts[i][DOUBLE]) + 2 end if
 
-		if equal(opts[i][PARAM], HAS_PARAMETER) then
+		if sequence(opts[i][SINGLE]) then
+			this_size += length(opts[i][SINGLE]) + 1
+		end if
+		if sequence(opts[i][DOUBLE]) then
+			this_size += length(opts[i][DOUBLE]) + 2
+		end if
+		if sequence(opts[i][SINGLE]) and sequence(opts[i][DOUBLE]) then
+			this_size += 2
+		end if
+
+		if sequence(opts[i][PARAM]) then
+			this_size += 4 + length(opts[i][PARAM])
+		elsif equal(opts[i][PARAM], HAS_PARAMETER) then
 			this_size += 4
 		end if
 
@@ -171,14 +181,18 @@ public procedure show_help(sequence opts, integer add_help_rid=-1)
 		cmd = ""
 		if sequence(opts[i][SINGLE]) then
 			cmd &= '-' & opts[i][SINGLE]
-			if equal(opts[i][PARAM],HAS_PARAMETER) then
+			if sequence(opts[i][PARAM]) then
+				cmd &= " " & opts[i][PARAM]
+			elsif equal(opts[i][PARAM],HAS_PARAMETER) then
 				cmd &= " x"
 			end if
 		end if
 		if sequence(opts[i][DOUBLE]) then
 			if length(cmd) > 0 then cmd &= ", " end if
 			cmd &= "--" & opts[i][DOUBLE]
-			if equal(opts[i][PARAM], HAS_PARAMETER) then
+			if sequence(opts[i][PARAM]) then
+				cmd &= "=" & opts[i][PARAM]
+			elsif equal(opts[i][PARAM], HAS_PARAMETER) then
 				cmd &= "=x"
 			end if
 		end if
@@ -339,6 +353,11 @@ public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 			from_ = 2
 		end if
 
+		if find(cmd[from_..$], { "h", "?", "help" }) then
+			show_help(opts, add_help_rid)
+			abort(0)
+		end if
+
 		find_result = find_opt(opts, lType, cmd[from_..$])
 
 		if find_result[1] = 0 then
@@ -349,7 +368,7 @@ public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 		elsif find_result[1] > 0 then
 			sequence opt = opts[find_result[1]]
 
-			if equal(opt[PARAM], HAS_PARAMETER) then
+			if sequence(opt[PARAM]) or equal(opt[PARAM], HAS_PARAMETER) then
 				idx += 1
 				if idx <= length(cmds) then
 					param = cmds[idx]
@@ -357,7 +376,7 @@ public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 					param = ""
 				end if
 
-			elsif equal(opt[PARAM], NO_PARAMETER) then
+			elsif atom(opt[PARAM]) and equal(opt[PARAM], NO_PARAMETER) then
 				param = 1
 
 			elsif sequence(opt[PARAM]) then

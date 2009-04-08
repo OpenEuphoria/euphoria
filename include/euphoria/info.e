@@ -25,7 +25,7 @@ constant version_info = machine_func(M_EU_INFO, {})
 --
 
 public function platform_name()
-ifdef DOS then
+ifdef DOS32 then
 	return "DOS"
 elsifdef WIN32 then
 	return "Windows"

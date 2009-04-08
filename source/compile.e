@@ -7166,10 +7166,14 @@ procedure BackEnd(atom ignore)
 	finish_emake()
 
 	if not silent then
-		if makefile_option then
+		if makefile_option = MAKE_SHORT then
 			screen_output(STDERR, "Project makefile was created.\n")
 			screen_output(STDERR, "To use, you must include the new .mak file into your " &
 				"own master Makefile.\n")
+
+		elsif makefile_option = MAKE_FULL then
+			screen_output(STDERR, "Project makefile was created.\n")
+
 		else
 			screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
 			if TUNIX then
