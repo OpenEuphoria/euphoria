@@ -130,7 +130,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	if (func && return_type == 0 || !func && return_type != 0) {
 		if (c_routine[proc_index].name->length < TEMP_SIZE)
-			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name, TEMP_SIZE));
+			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name), TEMP_SIZE);
 		else
 			TempBuff[0] = '\0';
 		RTFatal(func ? "%s does not return a value" :
@@ -140,7 +140,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		
 	if (arg_list_ptr->length != arg_size_ptr->length) {
 		if (c_routine[proc_index].name->length < 100)
-			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name, TEMP_SIZE));
+			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name), TEMP_SIZE);
 		else
 			TempBuff[0] = '\0';
 		RTFatal("C routine %s() needs %d argument%s, not %d",

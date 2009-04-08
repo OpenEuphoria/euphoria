@@ -188,7 +188,6 @@ static void RestoreDebugImage();
 struct rccoord GetTextPositionP();
 static void ShowName();
 static int screen_size();
-void RTInternal();
 void UpdateGlobals();
 void EraseSymbol();
 symtab_ptr RTLookup();

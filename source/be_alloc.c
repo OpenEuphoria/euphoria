@@ -807,5 +807,12 @@ size_t strlcpy(char *dest, char *src, size_t maxlen)
 
 	return strlen(src) > maxlen ? maxlen : strlen(src);
 }
+
+size_t strlcat(char *dest, char *src, size_t maxlen)
+{
+	strncat(dest, src, maxlen-1);
+	dest[maxlen-1] = 0;
+	return strlen(dest);
+}
 #endif
 

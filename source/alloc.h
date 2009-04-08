@@ -65,5 +65,6 @@ struct block_list {
 
 #ifdef ELINUX
 extern size_t strlcpy(char *dest, char *src, size_t maxlen);
+extern size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
 
