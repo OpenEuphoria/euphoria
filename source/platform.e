@@ -122,7 +122,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
-		local_defines &= {"MICROSOFT", "WIN32"}
+		local_defines &= {"DOSFAMILY", "WIN32"}
 		sequence lcmds = command_line()
 		if match("euiw", lcmds[1]) != 0 then
 			local_defines &= { "WIN32_GUI" }
@@ -130,7 +130,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 			local_defines &= { "WIN32_CONSOLE" }
 		end if
 	elsif (IDOS and not for_translator) or (TDOS and for_translator) then
-		local_defines &= {"MICROSOFT", "DOS32"}
+		local_defines &= {"DOSFAMILY", "DOS32"}
 	elsif (ILINUX and not for_translator) or (TLINUX and for_translator) then
 		local_defines &= {"UNIX", "LINUX"}
 	elsif (IOSX and not for_translator) or (TOSX and for_translator) then

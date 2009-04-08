@@ -58,7 +58,7 @@ test_false("absolute_path('local/abc.txt')", absolute_path("local/abc.txt"))
 test_false("absolute_path('abc.txt')", absolute_path("abc.txt"))
 test_false("absolute_path('c:..\\abc')", absolute_path("c:..\\abc"))
 
-ifdef MICROSOFT then
+ifdef DOSFAMILY then
 test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
 test_true("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
 test_true("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
