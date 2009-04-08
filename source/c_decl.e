@@ -1383,6 +1383,7 @@ procedure write_makefile()
 			puts(doit, "CC     = wcc386" & HOSTNL)
 			puts(doit, "CFLAGS = /i$(%EUDIR) /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" &
 				HOSTNL)
+			puts(doit, "LINKER = wlink" & HOSTNL)
 			puts(doit, "LFLAGS = SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
 			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
 			puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib LIBRARY ws2_32" & HOSTNL)
