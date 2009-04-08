@@ -4268,10 +4268,12 @@ object OpenDll(object x)
 	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
-	if ((unsigned)lib <= (unsigned)MAXINT_VAL)
-		return MAKE_INT((unsigned long)lib);
-	else
+	if ((unsigned)lib <= (unsigned)MAXINT_VAL){
+			return MAKE_INT((unsigned long)lib);
+	}
+	else{
 		return NewDouble((double)(unsigned long)lib);
+	}
 #endif
 }
 
@@ -4413,6 +4415,7 @@ object DefineC(object x)
 		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
+		
 #else
 #ifdef EUNIX
 		proc_address = (int (*)())dlsym((void *)lib, routine_string);
@@ -4479,7 +4482,6 @@ object DefineC(object x)
 	c_routine[c_routine_next].arg_size = SEQ_PTR(arg_size);
 	c_routine[c_routine_next].return_size = t;
 	c_routine[c_routine_next].convention = convention;
-
 	return c_routine_next++;
 }
 

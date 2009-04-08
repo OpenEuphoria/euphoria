@@ -10,6 +10,7 @@ include error.e
 include scanner.e
 include shift.e
 include reswords.e
+include block.e
 
 -- Tracking forward references
 sequence 
@@ -52,6 +53,10 @@ end procedure
 export function get_fwdref_count()
 	return fwdref_count
 end function
+
+export procedure set_glabel_block( integer ref, symtab_index block )
+	forward_references[ref][FR_DATA] &= block
+end procedure
 
 procedure insert_code( sequence code, integer index, integer subprog )
 	shifting_sub = subprog
@@ -125,6 +130,14 @@ end procedure
 procedure reset_private_lists()
 	fwd_private_sym  = {}
 	fwd_private_name = {}
+end procedure
+
+procedure patch_forward_goto( token tok, integer ref )
+	sequence fr = forward_references[ref]
+	set_code( ref )
+	Goto_block(  fr[FR_DATA][1], fr[FR_DATA][2], fr[FR_PC] )
+	reset_code()
+	resolved_reference( ref )
 end procedure
 
 procedure patch_forward_call( token tok, integer ref )
@@ -542,6 +555,9 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_QUALIFIED] = get_qualified_fwd()
 	forward_references[ref][FR_OP]        = op
 	
+	if op = GOTO then
+		forward_references[ref][FR_DATA] = { sym }
+	end if
 	active_references &= ref
 	active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
 	fwdref_count += 1
@@ -628,7 +644,10 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			case TYPE then
 				patch_forward_type( tok, ref )
 				break
-				
+			
+			case GOTO then
+				patch_forward_goto( tok, ref )
+				break
 			case else
 				-- ?? what is it?
 				InternalErr( sprintf("unrecognized forward reference type: %d (%s)", {fr[FR_TYPE], fr[FR_NAME]} ))

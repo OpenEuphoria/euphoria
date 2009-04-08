@@ -210,7 +210,8 @@ export constant
 	PROC_TAIL           = 205,
 	DELETE_ROUTINE      = 206,
 	DELETE_OBJECT       = 207,
-	MAX_OPCODE          = 207
+	EXIT_BLOCK          = 208,
+	MAX_OPCODE          = 208
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

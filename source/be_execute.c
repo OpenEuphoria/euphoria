@@ -1075,7 +1075,6 @@ void code_set_pointers(int **code)
 			case INTEGER_CHECK:
 			case ATOM_CHECK: 
 			case SEQUENCE_CHECK:
-			case RETURNP:
 			case DATE: 
 			case TIME: 
 			case SPACE_USED: 
@@ -1095,6 +1094,7 @@ void code_set_pointers(int **code)
 			case TASK_SUSPEND:
 			case TASK_LIST:
 			case DELETE_OBJECT:
+			case EXIT_BLOCK:
 				// one operand
 				code[i+1] = SET_OPERAND(code[i+1]);
 				i += 2;
@@ -1144,7 +1144,6 @@ void code_set_pointers(int **code)
 			case IS_AN_OBJECT:
 			case NOT_BITS:
 			case CALL_PROC:
-			case RETURNF: 
 			case POSITION: 
 			case PEEK4S: 
 			case PEEK4U:
@@ -1165,6 +1164,7 @@ void code_set_pointers(int **code)
 			case SC2_OR:
 			case TASK_SCHEDULE: 
 			case TASK_STATUS:
+			case RETURNP:
 				// 2 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1236,6 +1236,7 @@ void code_set_pointers(int **code)
 			case HEAD:
 			case TAIL:
 			case DELETE_ROUTINE:
+			case RETURNF:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1420,11 +1421,12 @@ void symtab_set_pointers()
 	s++;  // point to first real entry
 	for (i = 1; i <= len; i++) {
 		s->next = (symtab_ptr)SET_OPERAND(s->next);
+		s->next_in_block = (symtab_ptr)SET_OPERAND(s->next_in_block);
 		
 		if (s->mode == M_NORMAL) {
 			// normal variables, routines
 			s->obj = NOVALUE;
-
+			
 			if (s->token == PROC ||
 				s->token == FUNC || 
 				s->token == TYPE) {
@@ -1442,6 +1444,7 @@ void symtab_set_pointers()
 				if (s->name[0] == '_' && strcmp(s->name, "_toplevel_") == 0) {
 					TopLevelSub = s;
 				}
+				s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );
 			}
 		}
 		else if (s->mode == M_CONSTANT ) {
@@ -1455,6 +1458,9 @@ void symtab_set_pointers()
 				// forward references that require init checks
 				s->obj = NOVALUE;
 			}
+		}
+		else if (s->mode == M_BLOCK ) {
+			s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );
 		}
 
 		else {
@@ -1868,8 +1874,8 @@ void do_exec(int *start_pc)
  NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TYPE_CHECK_FORWARD not emitted */
   &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
-  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT
-/* 207 (previous) */
+  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK
+/* 208 (previous) */
   };
 #endif
 #endif
@@ -3911,7 +3917,7 @@ void do_exec(int *start_pc)
 
 			case L_RETURNF: /* return from function */
 			deprintf("case L_RETURNF:");
-				result_val = *(object_ptr)pc[2]; /* the return value */
+				result_val = *(object_ptr)pc[3]; /* the return value */
 				Ref(result_val);
 				// record the place to put the return value 
 				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
@@ -3919,22 +3925,18 @@ void do_exec(int *start_pc)
 			case L_RETURNP: /* return from procedure */
 			deprintf("case L_RETURNP:");
 				sub = ((symtab_ptr)pc[1]);
-				sym = sub->next; /* first private var */
 				
 				/* free the privates and set to NOVALUE */
-				while (sym && sym->scope <= S_PRIVATE) {
-					DeRef(sym->obj);
-					sym->obj = NOVALUE; // not actually needed for params
-					sym = sym->next;
+				sym = (symtab_ptr)pc[2];
+				b = (object_ptr) sub->u.subp.block;
+				while( sym != (symtab_ptr)b ){
+					while( obj_ptr = (object_ptr)sym->next_in_block ){
+						DeRef( *obj_ptr);
+						*obj_ptr = NOVALUE;
+					}
+					sym = sym->u.subp.block;
 				}
 					
-				/* free the temps and set to NOVALUE */ 
-				sym = sub->u.subp.temps;
-				while (sym != NULL) {
-					DeRef(sym->obj);
-					sym->obj = NOVALUE;
-					sym = sym->next;
-				}
 				
 				// vacating this routine
 				sub->u.subp.resident_task = -1;
@@ -3962,8 +3964,21 @@ void do_exec(int *start_pc)
 					scheduler(current_time());
 					pc = tpc;
 				}
+				
+				goto exit_block;
+			
+			case L_EXIT_BLOCK:
+			deprintf("case L_EXIT_BLOCK:");
+				sym = ((symtab_ptr)pc[1]);
+				pc += 2;
+				
+				exit_block:
+					// other places may jump here (RETURNP, END_FOR, etc)
+					while( sym = sym->next_in_block ){
+						DeRef(sym->obj);
+						sym->obj = NOVALUE;
+					}
 				thread();
-				BREAK;
 
 			case L_ROUTINE_ID:
 			deprintf("case L_ROUTINE_ID:");

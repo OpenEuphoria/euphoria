@@ -10,10 +10,12 @@
 struct temp_entry { // must match symtab_entry 
 	object obj;     // initialized for literal values, NOVALUE for temps 
 	struct temp_entry *next;  // pointer to next temp, or NULL 
+	struct symtab_entry *next_in_block; // next entry in the same scope
 	char mode;    // M_TEMP or M_CONSTANT 
 	char scope;   // compile time: FREE or IN_USE or DELETED (Compiler-only) 
 	unsigned char file_no; // don't care 
 	unsigned char dummy;   // not used 
+	
 };
 
 struct symtab_entry {
@@ -22,10 +24,12 @@ struct symtab_entry {
 				  // run time object (vars)  
 				  // must be first field 
 	struct symtab_entry *next;  // pointer to next symbol, or NULL
+	struct symtab_entry *next_in_block; // next entry in the same scope
 	char mode;      
 #define M_NORMAL   1      // all variables      
 #define M_CONSTANT 2      // literals and declared constants 
 #define M_TEMP     3      // temporaries 
+#define M_BLOCK    4      // blocks
 
 	char scope;         // scope as below: 
 #define S_LOOP_VAR  2   // "private" loop vars known within a single loop 
@@ -47,7 +51,6 @@ struct symtab_entry {
 	
 	char *name;     // name string 
 	int token;      // parsing token - could be just 2 bytes 
-	
 	union {
 		struct {
 			// for variables only: 
@@ -63,9 +66,13 @@ struct symtab_entry {
 			int resident_task; // task that's currently executing in this routine or -1
 			struct private_block *saved_privates;  // pointer to list of private blocks 
 			unsigned int stack_space; // set by fe - stack required 
+			struct symtab_entry *block; // the scope for the routine
 		} subp;
+		
 	} u;
-};  /* size=52 bytes assumed in backend.e */ 
+	
+	
+};  /* size=60 bytes assumed in backend.e */ 
 
 typedef struct symtab_entry *symtab_ptr; 
 typedef struct temp_entry *temp_ptr;

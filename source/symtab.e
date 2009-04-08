@@ -24,9 +24,6 @@ export integer last_sym = 0
 
 sequence lastintval = {}, lastintsym = {}
 sequence e_routine  = {}  -- sequence of symbol table pointers for routine_id
-sequence scope_stack = {}   -- for using loops and if blocks for scope
-integer scope_id = 0        -- each scope gets a unique id
-sequence scoped_vars = {}   -- remember vars created in each scope so we can hide them at the correct time
 
 function hashfn(sequence name)
 -- hash function for symbol table
@@ -198,7 +195,7 @@ export procedure DefinedYet(symtab_index sym)
 	if not find(SymTab[sym][S_SCOPE],
 				{SC_UNDEFINED, SC_MULTIPLY_DEFINED, SC_PREDEF}) then
 		if SymTab[sym][S_FILE_NO] = current_file_no then
-			CompileErr(sprintf("attempt to redefine %s", {SymTab[sym][S_NAME]}))
+			CompileErr(sprintf("attempt to redefine %s.", {SymTab[sym][S_NAME]}))
 		end if
 	end if
 end procedure
@@ -915,7 +912,7 @@ end ifdef
 	elsif length(dup_overrides) then
 		defined = SC_OVERRIDE
 	end if
-
+	
 	if No_new_entry then
 		return {IGNORED,word}
 	end if
@@ -923,10 +920,7 @@ end ifdef
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
-
-	if length( scope_stack ) then
-		scoped_vars = append( scoped_vars, { scope_stack[$], tok[T_SYM] } )
-	end if
+	
 	return tok  -- no ref on newly declared symbol
 end function
 
@@ -988,7 +982,7 @@ export procedure show_params( symtab_index s )
 	end for
 end procedure
 
-procedure LintCheck(symtab_index s)
+export procedure LintCheck(symtab_index s)
 -- do some lint-like checks on s
 	integer u, n, warn_level
 	sequence vtype, place, problem, file
@@ -1059,39 +1053,34 @@ export procedure HideLocals()
 	end while
 end procedure
 
-export procedure ExitScope()
--- delete all the private scope entries for the current routine
--- and "lint" check them
-	symtab_index s
+export function sym_name( symtab_index sym )
+	return SymTab[sym][S_NAME]
+end function
 
-	s = SymTab[CurrentSub][S_NEXT]
-	while s do
-		if SymTab[s][S_SCOPE] = SC_PRIVATE then
-			Hide(s)
-			LintCheck(s)
-		end if
-		s = SymTab[s][S_NEXT]
-	end while
-end procedure
+export function sym_token( symtab_index sym )
+	return SymTab[sym][S_TOKEN]
+end function
 
--- functions for dealing with scopes created by loops, ifs and switches
-export procedure push_scope()
-	scope_id += 1
-	scope_stack &= scope_id
-end procedure
+export function sym_scope( symtab_index sym )
+	return SymTab[sym][S_SCOPE]
+end function
 
-export procedure pop_scope()
-	if not length(scope_stack) then
-		return
-	end if
-	integer scope = scope_stack[$]
-	scope_stack = scope_stack[1..$-1]
-	integer sx
-	-- now hide the variables
-	sx = length( scoped_vars )
-	while sx and scoped_vars[sx][1] = scope do
-		Hide( scoped_vars[sx][2] )
-		sx -= 1
-	end while
-	scoped_vars = scoped_vars[1..sx]
-end procedure
+export function sym_mode( symtab_index sym )
+	return SymTab[sym][S_MODE]
+end function
+
+export function sym_obj( symtab_index sym )
+	return SymTab[sym][S_OBJ]
+end function
+
+export function sym_next( symtab_index sym )
+	return SymTab[sym][S_NEXT]
+end function
+
+export function sym_block( symtab_index sym )
+	return SymTab[sym][S_BLOCK]
+end function
+
+export function sym_next_in_block( symtab_index sym )
+	return SymTab[sym][S_NEXT_IN_BLOCK]
+end function

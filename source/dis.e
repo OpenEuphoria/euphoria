@@ -340,15 +340,15 @@ result = 0
 object result_val
 
 procedure opRETURNP()   -- return from procedure (or function)
-    il( "RETURNP", 1 )
-	pc += 2
+    pbinary()
+--	pc += 3
 end procedure
 
 procedure opRETURNF()  
 -- return from function
-	result_val = Code[pc+2]
-	il(	sprintf( "RETURNF: %s", {name_or_literal(result_val)}), 2)
-	pc += 3
+	result_val = Code[pc+3]
+	il(	sprintf( "RETURNF: %s block[%d]", {name_or_literal(result_val), Code[pc+2]}), 3)
+	pc += 4
 end procedure
 
 procedure opCALL_BACK_RETURN()
@@ -1284,6 +1284,10 @@ procedure opDELETE_OBJECT()
 	punary()
 end procedure
 
+procedure opEXIT_BLOCK()
+	punary()
+end procedure
+
 function strip_path( sequence file )
 	for i = length( file ) to 1 by -1 do
 		if find( file[i], "/\\" ) then
@@ -1391,7 +1395,7 @@ procedure line_print( integer fn, object p )
 	puts(fn, p )
 end procedure
 
-constant MODES = {"M_NORMAL", "M_CONSTANT", "M_TEMP" }
+constant MODES = {"M_NORMAL", "M_CONSTANT", "M_TEMP", "M_SCOPE" }
 constant SCOPES = {
 	"SC_?",
 	"SC_LOOP_VAR",    -- "private" loop vars known within a single loop

@@ -23,13 +23,33 @@ procedure InitBackEnd(integer x)
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
-constant ST_ENTRY_SIZE = 52  -- size (bytes) of back-end symbol table entry
+constant ST_ENTRY_SIZE = 60  -- size (bytes) of back-end symbol table entry
 							 -- for interpreter. Fixed size for all entries.
 
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
 
 without warning
 
+constant
+	ST_OBJ            = 0,
+	ST_NEXT           = 4,
+	ST_NEXT_IN_BLOCK  = 8,
+	ST_MODE           = 12,
+	ST_SCOPE          = 13,
+	ST_FILE_NO        = 14,
+	ST_DUMMY          = 15,
+	ST_NAME           = 16,
+	ST_TOKEN          = 20,
+	ST_CODE           = 24,
+	ST_LINETAB        = 28,
+	ST_FIRSTLINE      = 32,
+	ST_TEMPS          = 36,
+	ST_NUM_ARGS       = 40,
+	ST_RESIDENT_TASK  = 44,
+	ST_SAVED_PRIVATES = 48,
+	ST_STACK_SPACE    = 52,
+	ST_BLOCK          = 56
+	
 procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
@@ -61,19 +81,21 @@ procedure BackEnd(integer il_file)
 		-- "constant" variables are initialized with executable code
 		if atom(eentry) then
 			-- deleted
-			poke4(addr+4, eentry) -- NEXT
-			poke(addr+8, M_TEMP) -- MODE
-			poke(addr+9, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
+			poke4(addr + ST_NEXT, eentry) -- NEXT
+			poke(addr + ST_MODE, M_TEMP) -- MODE
+			poke(addr + ST_SCOPE, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
+			
 		
 		else
-			poke4(addr+4, eentry[S_NEXT])
-			poke(addr+8, eentry[S_MODE])
-			poke(addr+9, eentry[S_SCOPE])
+			poke4(addr + ST_NEXT, eentry[S_NEXT])
+			poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK])
+			poke(addr + ST_MODE, eentry[S_MODE])
+			poke(addr + ST_SCOPE, eentry[S_SCOPE])
 
 			if length(eentry) >= S_NAME and sequence(eentry[S_NAME]) then
 				-- temps and literals have no NAME field
-				poke(addr+10, eentry[S_FILE_NO])
-				poke4(addr+16, eentry[S_TOKEN])
+				poke(addr + ST_FILE_NO, eentry[S_FILE_NO])
+				poke4(addr + ST_TOKEN, eentry[S_TOKEN])
 				string_size += length(eentry[S_NAME])+1
 			end if
 		
@@ -87,25 +109,31 @@ procedure BackEnd(integer il_file)
 						e_addr = allocate(4+4*length(eentry[S_CODE])) -- IL code
 						poke4(e_addr, length(eentry[S_CODE]))
 						poke4(e_addr+4, eentry[S_CODE])
-						poke4(addr+20, e_addr)
+						poke4(addr + ST_CODE, e_addr)
 					
 						if sequence(eentry[S_LINETAB]) then
 							-- line table
 							l_addr = allocate(4*length(eentry[S_LINETAB])) 
 							poke4(l_addr, eentry[S_LINETAB])
-							poke4(addr+24, l_addr)
+							poke4(addr + ST_LINETAB, l_addr)
 						else
 							-- pointer to linetable will be NULL
 						end if
 					end if
-					poke4(addr+28, eentry[S_FIRSTLINE])
-					poke4(addr+32, eentry[S_TEMPS])
-					poke4(addr+36, eentry[S_NUM_ARGS])
+					poke4(addr + ST_FIRSTLINE, eentry[S_FIRSTLINE])
+					poke4(addr + ST_TEMPS, eentry[S_TEMPS])
+					poke4(addr + ST_NUM_ARGS, eentry[S_NUM_ARGS])
 					--
 					--
-					poke4(addr+48, eentry[S_STACK_SPACE])
+					poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
+					poke4(addr + ST_BLOCK, eentry[S_BLOCK])
+					
 				end if
-			
+				
+			elsif eentry[S_MODE] = M_BLOCK then
+				poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
+				poke4(addr + ST_BLOCK, eentry[S_BLOCK])
+				
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory
@@ -138,7 +166,7 @@ procedure BackEnd(integer il_file)
 			if length(eentry) >= S_NAME then
 				if sequence(eentry[S_NAME]) then
 					-- record the address of the name string
-					poke4(entry_addr+12, addr) 
+					poke4(entry_addr + ST_NAME, addr) 
 					-- store the name string
 					poke(addr, eentry[S_NAME])
 					addr += length(eentry[S_NAME])
@@ -147,7 +175,7 @@ procedure BackEnd(integer il_file)
 				
 				else
 					-- no name
-					poke4(entry_addr+12, no_name)
+					poke4(entry_addr + ST_NAME, no_name)
 				end if
 				
 				if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
