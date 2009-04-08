@@ -493,7 +493,7 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,%.c,$(PREFIXED_PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 ifeq "$(EMINGW)" "1"
-	$(MAKE) -C pcre mingw
+	$(MAKE) -C pcre mingw CC=$(CC)
 else
 	$(MAKE) -C pcre all
 endif
