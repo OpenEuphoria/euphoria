@@ -27,19 +27,19 @@ for i = 0 to 255 do
     end if
     printf(SCREEN, "%3d: ", i)
     switch i do
-    	case 0:
+    	case 0 then
 			puts(SCREEN, "NUL ")
 			break
 			
-		case 9:
+		case 9 then
 			puts(SCREEN, "TAB ")
 			break
 			
-		case 10:
+		case 10 then
 			puts(SCREEN, "LF  ")
 			break
 			
-		case 13:
+		case 13 then
 			puts(SCREEN, "CR  ")
 			break
 			
