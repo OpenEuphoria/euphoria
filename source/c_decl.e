@@ -46,7 +46,7 @@ export boolean
 	fastfp = FALSE,
 	lccopt_option = TRUE
 
-export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL
+export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL, CMAKE
 export integer makefile_option = MAKE_NONE
 
 sequence files_to_delete = {
@@ -1115,8 +1115,10 @@ export procedure start_emake()
 -- start creating emake.bat     
 	sequence debug_flag = ""
 	
-	if makefile_option then
-		-- TODO: Create projectname.mak or Makefile when makefile_option = MAKE_FULL?
+	if makefile_option = CMAKE then
+		doit = open(file0 & ".cmake", "wb")
+		add_file(file0)
+	elsif makefile_option then -- MAKE_FULL, MAKE_SHORT
 		doit = open(file0 & ".mak", "wb")
 		add_file(file0)
 	elsif TUNIX or (TWINDOWS and gcc_option) then
@@ -1414,8 +1416,15 @@ procedure write_makefile()
 		end if
 	end if
 
-	printf(doit, "%s_SOURCES=%s" & HOSTNL, { upper(file0), makefile_src_line })
-	printf(doit, "%s_OBJECTS=%s" & HOSTNL, { upper(file0), makefile_obj_line })
+	if makefile_option = CMAKE then
+		printf(doit, "SET( %s_SOURCES %s)" & HOSTNL, { upper(file0), makefile_src_line })
+		printf(doit, "SET( %s_OBJECTS %s)" & HOSTNL, { upper(file0), makefile_obj_line })
+
+	elsif makefile_option then -- MAKE_FULL, MAKE_SHORT
+		printf(doit, "%s_SOURCES=%s" & HOSTNL, { upper(file0), makefile_src_line })
+		printf(doit, "%s_OBJECTS=%s" & HOSTNL, { upper(file0), makefile_obj_line })
+	end if
+
 	puts  (doit, HOSTNL)
 
 	if makefile_option = MAKE_FULL then

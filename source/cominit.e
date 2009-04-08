@@ -119,8 +119,10 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
               Explainations:
                  -CON           : Don't create a new window when using the console.
                  -MAKEFILE      : Generate a <prgname>.mak file that can be included into
-                                a larger Makefile project
+                                  a larger Makefile project
                  -MAKEFILE-FULL : Generate a full Makefile for stand alone use
+                 -CMAKEFILE     : Generate a <prgname>.txt file that can be included into
+                                  a larger CMake project
 
 #
 		if TDOS	then

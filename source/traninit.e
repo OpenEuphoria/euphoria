@@ -175,6 +175,9 @@ export procedure transoptions()
 			elsif equal("-MAKEFILE-FULL", uparg) then
 				makefile_option = MAKE_FULL
 
+			elsif equal("-CMAKEFILE", uparg) then
+				makefile_option = CMAKE
+
 			else
 				option = find( uparg, COMMON_OPTIONS )
 				if option then

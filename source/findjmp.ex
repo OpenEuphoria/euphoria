@@ -6,30 +6,49 @@ include std/os.e
 include std/types.e
 include std/convert.e
 
+sequence
+	cmds = command_line(),
+	obj = "be_execute.obj",
+	outfile = "be_magic.c"
 
-system( "wdis be_execute.obj > be_execute.asm", 0 )
+if length(cmds) > 2 then
+	outfile = cmds[3]
+end if
+
+if length(cmds) > 3 then
+	obj = cmds[4]
+end if
+
+system( "wdis " & obj & " > be_execute.asm", 0 )
+
 integer asm = open("be_execute.asm","r")
 object line
 atom exec_addr = 0, jmp_addr = 0
+
 line = ""
+
 while sequence(line) and not
 	 match( " Execute_:", line ) do
 	line = gets(asm)
 end while
+
 if sequence(line) and length(line) > 7 then
 	exec_addr = hex_text(line[1..8] )
 end if
+
 line = gets(asm)
+
 while sequence(line) and not match( " DD\t", line ) do
 	line = gets(asm)
 end while
+
 jmp_addr = hex_text(line[1..8])
 close(asm)
-sequence cmdline = command_line()
+
 if exec_addr and jmp_addr then
-	integer fh = open(cmdline[3], "w")
+	integer fh = open(outfile, "w")
 	if fh = -1 then
-		printf(2, "Cannot open \"%s\" for writing\n", {cmdline[3]})
+		printf(2, "Cannot open \"%s\" for writing\n", {outfile})
 		abort(1)
 	end if
 	-- create .c file for jumptab address
@@ -41,6 +60,7 @@ if exec_addr and jmp_addr then
 		"void Execute(int *);\nint ** jumptab = ((int**)Execute)+%d;\n", 
 	     	{jmp_addr - exec_addr }/4 )
 	close(fh)
+
 else
 	abort(1) -- tell Make to quit
 end if

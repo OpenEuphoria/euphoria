@@ -7198,6 +7198,11 @@ procedure BackEnd(atom ignore)
 		elsif makefile_option = MAKE_FULL then
 			screen_output(STDERR, "Project makefile was created.\n")
 
+		elsif makefile_option = CMAKE then
+			screen_output(STDERR, "Project CMake file was created.\n")
+			screen_output(STDERR, "To use, you must include the new .cmake file into your " &
+				"own master CMakeLists.txt file.\n")
+
 		else
 			screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
 			if TUNIX then
