@@ -802,10 +802,12 @@ char *TransAlloc(unsigned long size){
 #if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
 size_t strlcpy(char *dest, char *src, size_t maxlen)
 {
+	int i;
 	strncpy(dest, src, maxlen);
 	dest[maxlen-1] = 0;
 
-	return strlen(src) > maxlen ? maxlen : strlen(src);
+	i = strlen(src);
+	return i > maxlen ? maxlen : i;
 }
 
 size_t strlcat(char *dest, char *src, size_t maxlen)
