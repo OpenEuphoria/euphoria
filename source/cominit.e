@@ -100,14 +100,14 @@ export procedure show_usage()
 	if TRANSLATE then
 	msgtext = ##
 ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
-                          [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
+                          [-wat|-lcc|-gcc] [-com /compile_directory/]
                           [-makefile] [-keep] [-debug] [-silent] 
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
                           [/os specific options/]:
 
               OS Specific Options:
-                 DOS    :  [-djg|-wat] [-fastfp]
-                 Windows:  [-con] [-wat|-djg|-lcc] [-dll]
+                 DOS    :  [-gcc|-wat] [-fastfp]
+                 Windows:  [-con] [-wat|-gcc|-lcc] [-dll]
                  Linux  :  [-gcc] [-dll]
                  OSX    :  [-gcc] [-dll]
                  SunOS  :  [-gcc] [-dll]

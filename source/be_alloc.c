@@ -556,7 +556,6 @@ void EFree(unsigned char *p)
 }
 #endif // !ESIMPLE_MALLOC
 
-#ifndef EDJGPP
 #ifndef EUNIX
 #ifndef ELCC
 #ifndef EWINDOWS
@@ -599,7 +598,6 @@ int heap_dump(char *ptr)
 	}
 	return found;
 }
-#endif
 #endif
 #endif
 #endif
@@ -712,9 +710,6 @@ unsigned char *p;
 	if ((long)p % 8 != 0)
 		RTInternal("freeS1: misaligned pointer returned");
 	if (nbytes < D_SIZE
-#ifdef EDJGPP
-	- 8
-#endif
 	|| nbytes > 1024)
 		RTInternal("FreeD - bad nbytes ");
 	Trash(p, D_SIZE);
@@ -799,7 +794,7 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-#if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
+#if !defined(EBSD) || defined(EMINGW)
 size_t strlcpy(char *dest, char *src, size_t maxlen)
 {
 	int i;

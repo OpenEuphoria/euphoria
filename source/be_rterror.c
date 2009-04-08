@@ -14,7 +14,7 @@
 #include <setjmp.h>
 
 #ifndef EUNIX
-#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(ELCC) && !defined(EMINGW)
 #    include <graph.h>
 #    include <bios.h>
 #  endif
@@ -252,9 +252,7 @@ static void set_bk_color(int c)
 		col = _BLACK;
 	}
 #ifdef EDOS
-#ifndef EDJGPP
 	_setbkcolor(col);
-#endif
 #else
 	if (col == _WHITE)
 		col = 7;
@@ -380,7 +378,7 @@ static void Refresh(long line_num, int vars_too)
 		EClearLines(2+num_trace_lines, line_max, col_max, bottom_attrib); 
 #endif
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX)
 	if (vars_too && !(TEXT_MODE)) {
 		ClearScreen();
 	}
@@ -527,10 +525,7 @@ void MainScreen()
 	else {
 		/* graphics mode */
 #ifdef EDOS
-#ifndef EDJGPP
-		/* TO BE COMPLETED FOR DJGPP */
 		_putimage(0, 0, MainScreenSave, _GPSET);
-#endif
 #endif
 	}
 	SetPosition(MainPos.row, MainPos.col);
@@ -540,13 +535,8 @@ void MainScreen()
 	screen_line = main_screen_line;
 
 #ifdef EDOS
-#ifdef EDJGPP
-	SetTColor(MainCol);
-	SetBColor(MainBkCol);
-#else   
 	_settextcolor(MainCol);
 	_setbkcolor(MainBkCol);
-#endif
 #endif
 #ifdef EUNIX
 	SetTColor(MainCol);
@@ -809,10 +799,6 @@ void ShowDebug()
 	if (current_screen == DEBUG_SCREEN)
 		return;
 
-#ifdef EDJGPP
-	return;    // trace screen not implemented yet for DJGPP
-#endif
-	
 	main_screen_col = screen_col;
 	main_screen_line = screen_line;
 	screen_col = debug_screen_col;
@@ -832,11 +818,9 @@ void ShowDebug()
 #endif
 
 #ifdef EDOS   
-#ifndef EDJGPP   // for now
 	MainPos = GetTextPositionP();
 	MainCol = _gettextcolor();
 	MainBkCol = _getbkcolor(); 
-#endif  
 	size = screen_size();
 	if (MainScreenSave == NULL) {
 		MainScreenSave = EMalloc(size);
@@ -853,9 +837,7 @@ void ShowDebug()
 		gettextimage(MainScreenSave, size); /* save text */
 	}
 	else {
-#ifndef EDJGPP  // for now
 		_getimage(0, 0, config.numxpixels-1, config.numypixels-1, MainScreenSave);
-#endif  
 	}
 #endif
 
@@ -896,9 +878,7 @@ static int screen_size()
 #ifdef EDOS
 	else {
 		/* graphics mode */
-#ifndef EDJGPP  // for now      
 		return _imagesize(0, 0, config.numxpixels-1, config.numypixels-1);
-#endif  
 	}    
 #endif
 }
@@ -919,17 +899,13 @@ static void SaveDebugImage()
 		gettextimage(DebugScreenSave, DebugScreenSize); /* save text */
 	}
 	else {
-#ifndef EDJGPP  // for now
 		_getimage(0, 0, config.numxpixels-1, config.numypixels-1, 
 				  DebugScreenSave);
-#endif  
 	}
 	/* save other aspects of display */
-#ifndef EDJGPP  // for now  
 	DebugCol = _gettextcolor();
 	DebugBkCol = _getbkcolor();
 	DebugPos = GetTextPositionP();  //EUNIX too?
-#endif
 #endif
 }
 
@@ -946,19 +922,11 @@ static void RestoreDebugImage()
 		puttextimage(DebugScreenSave, DebugScreenSize);
 	}
 	else {
-#ifndef EDJGPP
-		/* TO BE COMPLETED FOR DJGPP */
 		_putimage(0, 0, DebugScreenSave, _GPSET);
-#endif  
 	}
 	free(DebugScreenSave);
-#ifdef EDJGPP   
-	SetTColor(DebugCol);
-	SetBColor(DebugBkCol);
-#else   
 	_settextcolor(DebugCol);
 	_setbkcolor(DebugBkCol);
-#endif  
 	SetPosition(DebugPos.row, DebugPos.col);
 #endif
 	screen_col = debug_screen_col;
@@ -1046,9 +1014,6 @@ static void DebugCommand()
 void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
-#ifdef EDJGPP
-	return;    // trace screen not implemented yet for DJGPP
-#endif
 	/* set up the debug screen */
 	if (current_screen == DEBUG_SCREEN)
 		ShowTraceLine(start_line);
@@ -1515,9 +1480,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 
 	if (crash_msg != NULL) {
 #ifdef EDOS
-#ifndef EDJGPP
 		_setvideomode((short)-1);       
-#endif
 #else
 		ClearScreen();
 #endif

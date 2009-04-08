@@ -1001,9 +1001,6 @@ export procedure new_c_file(sequence name)
 	end if  
 	cfile_count += 1
 	version()
-	if TDOS and sequence(dj_path) then
-		c_puts("#include <go32.h>\n")
-	end if
 	c_puts("#include \"include/euphoria.h\"\n")
 	
 	c_puts("#include \"main-.h\"\n\n")
@@ -1074,11 +1071,7 @@ procedure add_file(sequence filename)
 		link_line &= filename & ".o "
 	
 	elsif TDOS then
-		if sequence(wat_path) then
 			printf(link_file, "FILE %s\n", {obj_fname})
-		else
-			printf(link_file, "%s\n", {obj_fname})
-		end if
 	
 	else
 		if sequence(wat_path) then
@@ -1146,7 +1139,6 @@ export procedure start_emake()
 	end if
 	
 	if TDOS then
-		if sequence(wat_path) then
 			if debug_option then
 				debug_flag = "/d2 "
 			end if
@@ -1161,15 +1153,6 @@ export procedure start_emake()
 				c_opts = debug_flag & "/w0 /zq /j /zp4 /fpc /5r /otimra /s"
 			end if
 				
-		else 
-			if debug_option then
-				debug_flag = " -g3"
-			else
-				debug_flag = " -fomit-frame-pointer -g0"
-			end if
-			puts(doit, "echo compiling with DJGPP"&HOSTNL)
-			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
-		end if
 	elsif TWINDOWS and not gcc_option then
 		if sequence(wat_path) then
 			puts(doit, "echo compiling with WATCOM"&HOSTNL)
@@ -1229,7 +1212,6 @@ export procedure start_emake()
 	end if
 	
 	if TDOS then
-		if sequence(wat_path) then  
 			cc_name = "wcc386"
 			if not dll_option and debug_option then
 				puts(link_file, "DEBUG ALL\n")
@@ -1244,9 +1226,6 @@ export procedure start_emake()
 			puts(link_file, "OPTION ELIMINATE\n") 
 			puts(link_file, "OPTION CASEEXACT\n")
 			printf(link_file, "FILE %s.obj\n", {prepared_file0} )
-		else 
-			cc_name = "gcc"
-		end if
 		c_opts &= sprintf( " -I%s", {shrink_to_83(get_eudir())})
 	end if      
 
@@ -1508,7 +1487,6 @@ export procedure finish_emake()
 	if makefile_option then
 		-- do nothing special
 	elsif TDOS then    
-		if sequence(wat_path) then
 			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
 			if length( user_library ) then
 				printf(link_file, "FILE %s", {shrink_to_83(user_library)})
@@ -1540,33 +1518,6 @@ export procedure finish_emake()
 			end if
 			close(link_file)
 
-		else 
-			-- DJGPP 
-			if length(user_library) then
-				printf(link_file, "%s\n", {user_library}) 
-			else
-				printf(link_file, "%s\\ec.a\n", {bin_path}) 
-			end if
-			
-			integer nsl,sl
-			nsl = 0
-			loop do
-				sl = nsl
-				nsl = sl + find( '\\', dj_path[sl+1..$] )
-			until sl = nsl
-			
-			printf(link_file, "%slib\\liballeg.a\n", {dj_path[1..sl]}) 
-			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, repeat(truncate_to_83(file0), 2))
-			delete_files(doit, ".o")
-			if not debug_option then
-				puts(doit, "set LFN=n"&HOSTNL)
-				printf(doit, "strip %s.exe"&HOSTNL, {file0})
-				puts(doit, "set LFN="&HOSTNL)
-			end if
-			if compare(truncate_to_83(file0), file0)!=0 then
-				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, 
-					{truncate_to_83(file0),file0} )
-			end if
 		end if
 	elsif TWINDOWS and not gcc_option then
 		if sequence(wat_path) then     

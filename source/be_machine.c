@@ -74,35 +74,6 @@ int emul_flock(fd, cmd)
 
 #include <direct.h>
 
-#ifdef EDJGPP
-#include <dpmi.h>
-#include <go32.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <allegro.h>
-
-BEGIN_GFX_DRIVER_LIST
-GFX_DRIVER_VBEAF
-GFX_DRIVER_VGA
-GFX_DRIVER_VESA3
-GFX_DRIVER_VESA2L
-GFX_DRIVER_VESA2B
-GFX_DRIVER_VESA1
-END_GFX_DRIVER_LIST
-
-BEGIN_COLOR_DEPTH_LIST
-COLOR_DEPTH_8
-END_COLOR_DEPTH_LIST
-
-// Actually made .exe bigger???
-//BEGIN_DIGI_DRIVER_LIST
-//END_DIGI_DRIVER_LIST
-//BEGIN_MIDI_DRIVER_LIST
-//END_MIDI_DRIVER_LIST
-//BEGIN_JOYSTICK_DRIVER_LIST
-//END_JOYSTICK_DRIVER_LIST
-#endif
-
 #ifdef ELCC
 #include <io.h>
 #endif
@@ -245,9 +216,7 @@ extern IFILE last_w_file_ptr;
 /* Local variables */
 /*******************/
 #ifdef EDOS
-#ifndef EDJGPP
 static int page_was_set = 0;
-#endif
 #endif
 static int win95 = UNKNOWN;   /* TRUE if long filenames are supported in DOS */
 
@@ -281,11 +250,7 @@ static short original_vesa;  /* original setting of _SVGAType */
 
 char *version_name =
 #ifdef EDOS
-#ifdef EDJGPP
-"DOS32 built for DJGPP";
-#else
 "DOS32";
-#endif
 #endif
 
 #ifdef EWINDOWS
@@ -438,7 +403,6 @@ char *long_to_short(char *long_name)
 		unsigned short z4;
 	} reglist;
 
-#ifndef EDJGPP
 #define long_buff_len (300)
 	if (!win95)
 		return long_name;
@@ -524,14 +488,13 @@ char *long_to_short(char *long_name)
 	else {
 		return short_buff_ptr;
 	}
-#endif
 }
 #endif
 
 IFILE long_iopen(char *name, char *mode)
 /* iopen a file. Has support for Windows 95 long filenames */
 {
-#if defined(EDOS) && !defined(EDJGPP)
+#if defined(EDOS)
 	return iopen(long_to_short(name), mode);
 #endif
 	return iopen(name, mode);
@@ -540,7 +503,7 @@ IFILE long_iopen(char *name, char *mode)
 int long_open(char *name, int mode)
 /* open a file. Has support for Windows 95 long filenames */
 {
-#if defined(EDOS) && !defined(EDJGPP)
+#if defined(EDOS)
 	return open(long_to_short(name), mode);
 #else
 	return open(name, mode);
@@ -607,12 +570,6 @@ void InitGraphics()
 /* initialize for graphics */
 {
 #ifdef EDOS
-#ifdef EDJGPP
-	allegro_init();
-	allegro_404_char = ' ';
-	install_timer();
-	// set_uformat(U_ASCII);
-#else
 	extern unsigned short _BiosSeg;
 	extern unsigned long _BiosOff;
 	union REGS regs;
@@ -622,7 +579,6 @@ void InitGraphics()
 	abs_rows = (*(int *)0x484) & 0xff; // for Causeway NT text-rows bug
 	abs_rows++;
 	original_vesa = _SVGAType;
-#endif
 #endif
 
 #ifdef EUNIX
@@ -637,7 +593,7 @@ void InitGraphics()
 
 	NewConfig(FALSE);
 
-#if defined(EDOS) && !defined(EDJGPP)
+#if defined(EDOS)
 if (!(getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1))
 {
 	if (config.numtextcols > 80 || config.mode > 10 ||
@@ -702,9 +658,6 @@ void EndGraphics()
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
 #endif
 #ifdef EDOS
-#ifdef EDJGPP
-	allegro_exit();
-#else
 /*    (void)Cursor(C_UNDERLINE); */
 
 	if (page_was_set) {
@@ -712,7 +665,6 @@ void EndGraphics()
 	_setvisualpage(0);
 	}
 
-#endif
 #endif
 }
 
@@ -739,13 +691,6 @@ static object SetSound(object x)
 	return ATOM_1;
 }
 
-
-#ifdef EDJGPP
-struct xycoord {
-	int xcoord;   // with WATCOM these are short ints
-	int ycoord;
-};
-#endif
 
 #ifdef EDOS
 static int is_rectangle(struct xycoord *xyarray)
@@ -800,46 +745,14 @@ static object Line(object x, int style)
 		xyarray[i].ycoord = get_int(*(s1_pair->base+2));
 		pair++;
 	}
-#ifndef EDJGPP
 	_setcolor((short)colour);
-#endif
 	if (style == M_LINE) {
-#ifdef EDJGPP
-		for (i = 0; i < length-1; i++)
-			line(screen, xyarray[i  ].xcoord, xyarray[i  ].ycoord,
-						 xyarray[i+1].xcoord, xyarray[i+1].ycoord,
-						 colour);
-#else
 		_moveto(xyarray[0].xcoord, xyarray[0].ycoord);
 		for (i = 1; i < length; i++)
 			_lineto(xyarray[i].xcoord, xyarray[i].ycoord);
-#endif
 	}
 	else {
 		fill = get_int(*(((s1_ptr)x)->base+2));
-#ifdef EDJGPP
-		if (fill) {
-			if (length == 4 && is_rectangle(xyarray)) {
-				/* not faster, but makes it more compatible with Watcom,
-				   otherwise it seems to drop last row and last column */
-				rectfill(screen, xyarray[0].xcoord, xyarray[0].ycoord,
-								 xyarray[2].xcoord, xyarray[2].ycoord, colour);
-			}
-			else {
-				polygon(screen, length, (int *)xyarray, colour);
-			}
-		}
-		else {
-			for (i = 0; i < length-1; i++) {
-				line(screen, xyarray[i  ].xcoord, xyarray[i  ].ycoord,
-							 xyarray[i+1].xcoord, xyarray[i+1].ycoord,
-							 colour);
-			}
-			// connect last point to first
-			line(screen, xyarray[length-1].xcoord, xyarray[length-1].ycoord,
-						 xyarray[0].xcoord, xyarray[0].ycoord, colour);
-		}
-#else
 		fill = fill ? (short)_GFILLINTERIOR : (short)_GBORDER;
 		if (length == 4 && is_rectangle(xyarray)) {
 			/* faster */
@@ -851,7 +764,6 @@ static object Line(object x, int style)
 		else {
 			_polygon((short)fill, (short)length, xyarray);
 		}
-#endif
 	}
 	if (length > TEMP_SIZE / sizeof(struct xycoord))
 		EFree((char *)xyarray);
@@ -902,24 +814,14 @@ object Pixel(object pixels, object hv_sequence)
 			if ((unsigned)h < MODE_19_WIDTH &&
 				(unsigned)v < MODE_19_HEIGHT) {
 				first_ptr = (char *)MODE_19_BASE + h + (v << 8) + (v << 6);
-#ifdef EDJGPP
-				_farpokeb(_go32_info_block.selector_for_linear_memory,
-						  (unsigned long)first_ptr,
-						  (unsigned char)c);
-#else
 				*first_ptr = c;
-#endif
 			}
 		}
 		else {
 			/* 2/3 of atom pixel time spent in next two routines:
 			only 1/3 in Euphoria overhead */
-#ifdef EDJGPP
-			putpixel(screen, h, v, c & config.mask);
-#else
 			_setcolor((short)c);
 			_setpixel((short)h, (short)v);
-#endif
 		}
 	}
 
@@ -945,32 +847,18 @@ object Pixel(object pixels, object hv_sequence)
 				while (len-- > 0) {   // sentinel didn't help much at all
 					pix = *pixel_ptr++;
 					if (IS_ATOM_INT(pix)) {
-#ifdef EDJGPP
-						_farpokeb(_go32_info_block.selector_for_linear_memory,
-								  (unsigned long)first_ptr,
-								  (unsigned char)pix);
-
-#else
 						*first_ptr = pix;
-#endif
 					}
 					else {
 						if (pix == NOVALUE)
 							break;
-#ifdef EDJGPP
-						_farpokeb(_go32_info_block.selector_for_linear_memory,
-								  (unsigned long)first_ptr,
-								  (unsigned char)get_int(pix));
-#else
 						*first_ptr = get_int(pix); // might have fatal error
-#endif
 					}
 					first_ptr++;
 				}
 			}
 		}
 
-#ifndef EDJGPP
 		else if (image_ok && len >= 3 && len <= 1024) {
 			TempBuff[0] = len & 255;
 			TempBuff[1] = len >> 8;
@@ -1103,19 +991,14 @@ object Pixel(object pixels, object hv_sequence)
 			}
 			_putimage(h, v, TempBuff, _GPSET);
 		}
-#endif
 		else {
 			/* slow code: we can't use _putimage */
 			for (i = 0; i < len; i++) {
 				pix = *pixel_ptr++;
 				c = Get_Int(pix);
-#ifdef EDJGPP
-				putpixel(screen, h, v, c & config.mask);
-#else
 
 				_setcolor((short)c);
 				_setpixel((short)h, (short)v);
-#endif
 				h++;
 			}
 		}
@@ -1156,22 +1039,13 @@ object Get_Pixel(object x)
 				(unsigned)v < MODE_19_HEIGHT) {
 				first_ptr = (char *)MODE_19_BASE + h + (v << 8) + (v << 6);
 				return (unsigned char)
-#ifdef EDJGPP
-				_farpeekb(_go32_info_block.selector_for_linear_memory,
-						 (unsigned)first_ptr);
-#else
 				*first_ptr;
-#endif
 			}
 			else
 				return ATOM_0;
 		}
 		else {
-#ifdef EDJGPP
-			return MAKE_INT(getpixel(screen, h, v));
-#else
 			return MAKE_INT(_getpixel((short)h, (short)v));
-#endif
 		}
 	}
 
@@ -1186,7 +1060,6 @@ object Get_Pixel(object x)
 		prefill = 0;
 		postfill = 0;
 
-#ifndef EDJGPP
 		if (image_ok && len >= 3 && len <= 1024) {
 			/* use fast getimage into TempBuff */
 			if (h < config.numxpixels && h+len > config.numxpixels) {
@@ -1277,19 +1150,12 @@ object Get_Pixel(object x)
 
 		else {
 			/* slow code: we can't use _getimage */
-#endif
 			for (i = 0; i < len; i++) {
-#ifdef EDJGPP
-				c = getpixel(screen, h, v);
-#else
 				c = _getpixel((short)h, (short)v);
-#endif
 				h++;
 				*obj_ptr++ = MAKE_INT(c);
 			}
-#ifndef EDJGPP
 		}
-#endif
 		return MAKE_SEQ(result);
 	}
 #endif
@@ -1316,20 +1182,9 @@ static object E_Ellipse(object x)
 	hv_sequence2 = SEQ_PTR(*(((s1_ptr)x)->base+4));
 	x2 = get_int(*(hv_sequence2->base+1));
 	y2 = get_int(*(hv_sequence2->base+2));
-#ifdef EDJGPP
-	cx = (x1 + x2) >> 1;
-	cy = (y1 + y2) >> 1;
-	rx = cx - x1;
-	ry = cy - y1;
-	if (fill)
-		ellipsefill(screen, cx, cy, rx, ry, colour);
-	else
-		ellipse(screen, cx, cy, rx, ry, colour);
-#else
 	_setcolor((short)colour);
 	_ellipse(fill ? (short)_GFILLINTERIOR : (short)_GBORDER,
 			(short)x1, (short)y1, (short)x2, (short)y2);
-#endif
 #endif
 	return ATOM_1;
 }
@@ -1356,14 +1211,9 @@ static object Palette(object x)
 	blue  = get_int(*(rgb_sequence->base+3));
 	new_color = red + (green << 8) + (blue << 16);
 
-#ifdef EDJGPP
-	get_color(c, (RGB *)&old_color);
-	set_color(c, (RGB *)&new_color);
-#else
 	old_color = _remappalette((short)c, new_color);
 	if (old_color == -1)
 		return (object)ATOM_M1;
-#endif
 
 	result = NewS1((long)3);
 	obj_ptr = result->base;
@@ -1407,11 +1257,7 @@ static object AllPalette(object x)
 		long_buff[i] = red + (green << 8) + (blue << 16);
 		rgb_ptr++;
 	}
-#ifdef EDJGPP
-	set_palette_range((RGB *)long_buff, 0, len, 0);
-#else
 	_remapallpalette(long_buff); /* always returns -1, contrary to docs */
-#endif
 #endif
 	return ATOM_1;
 }
@@ -1420,7 +1266,7 @@ void RestoreConfig()
 /* put graphics mode etc back the way it is supposed to be
    e.g. after system call */
 {
-#if defined(EDOS) && !defined(EDJGPP)
+#if defined(EDOS)
 	_setvideomoderows(config.mode, config.numtextrows);
 	ClearScreen();
 	_wrapon(wrap_around);
@@ -1431,7 +1277,7 @@ void RestoreConfig()
 static void fast_image_check()
 /* see if we can use the fast pixel display method */
 {
-#if defined(EDOS) && !defined(EDJGPP)
+#if defined(EDOS)
 	image_ok = FALSE;
 	if (TEXT_MODE)
 		return;
@@ -1561,15 +1407,6 @@ void NewConfig(int raise_console)
 #ifdef EDOS
 	/* Things don't seem to work properly after a system call that
 	   flips into graphics mode. */
-#ifdef EDJGPP
-	config.numvideopages = 1;
-	line_max = ScreenRows(); // maybe use env var
-	col_max = ScreenCols();  // maybe use env var
-	config.monitor = _COLOR;
-	config.numtextrows = line_max;
-	config.numtextcols = col_max;
-	image_ok = FALSE;
-#else
 
 if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 {
@@ -1590,7 +1427,6 @@ else
 	fast_image_check();
 } // endif EUVISTA
 #endif
-#endif
 
 	screen_col = 1;
 	if (config.monitor == _MONO ||
@@ -1609,103 +1445,10 @@ static object Graphics_Mode(object x)
 
 	mode = get_int(x);
 #ifdef EDOS
-#ifdef EDJGPP
-	switch (mode) {
-		case -1:
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 7:
-			/* TEXT MODES */
-			config.mode = 3;
-			config.numcolors = 16;
-			config.numxpixels = 0;
-			config.numypixels = 0;
-			config.numtextrows = 25;
-			config.numtextcols = 80;
-			set_gfx_mode(GFX_TEXT, 25, 80, 0, 0);
-			ScreenSetCursor(0, 0);
-			return 0;
-		case 4:
-			width = 320; height = 200; colors = 4;
-			break;
-		case 5:
-			width = 320; height = 200; colors = 4;
-			break;
-		case 6:
-			width = 640; height = 200; colors = 2;
-			break;
-		case 11:
-			width = 720; height = 350; colors = 2;
-			break;
-		case 13:
-			width = 320; height = 200; colors = 16;
-			break;
-		case 14:
-			width = 640; height = 200; colors = 16;
-			break;
-		case 15:
-			width = 640; height = 350; colors = 2;
-			break;
-		case 16:
-			width = 640; height = 350; colors = 4;
-			break;
-		case 17:
-			width = 640; height = 480; colors = 2;
-			break;
-		case 18:
-			width = 640; height = 480; colors = 16;
-			break;
-		case 19:
-			width = 320; height = 200; colors = 256;
-			break;
-		case 256:
-			width = 640; height = 400; colors = 256;
-			break;
-		case 257:
-			width = 640; height = 480; colors = 256;
-			break;
-		case 258:
-			width = 800; height = 600; colors = 16;
-			break;
-		case 259:
-			width = 800; height = 600; colors = 256;
-			break;
-		case 260:
-			width = 1024; height = 768; colors = 16;
-			break;
-		case 261:
-			width = 1024; height = 768; colors = 256;
-			break;
-		default:
-			return 1; // failure
-	}
-	status = set_gfx_mode(GFX_AUTODETECT, width, height, 0, 0) != 0;
-	if (status == 0) {
-		set_clip(screen, 0, 0, width-1, height-1);
-		config.mode = mode;
-		config.numxpixels = width;
-		config.numypixels = height;
-		config.numcolors = colors;
-		config.mask = 0xFFFFFFFF;
-		if (colors == 16)
-			config.mask = 0x000F;
-		else if (colors == 4)
-			config.mask = 0x0003;
-		else if (colors == 2)
-			config.mask = 0x0001;
-		config.x = 0;
-		config.y = 0;
-		text_mode(0);
-	}
-	return status;
-#else
 	_setvideomode((short)mode);
 	status = _grstatus();
 	NewConfig(TRUE);
 	return (status != 0);
-#endif
 #else
 #if defined(EWINDOWS)
 	NewConfig(TRUE);
@@ -1754,9 +1497,7 @@ static object Cursor(object x)
 	SetConsoleCursorInfo(console_output, &c);
 #endif
 #ifdef EDOS
-#ifndef EDJGPP
 	_settextcursor(style);
-#endif
 #endif
 #ifdef EUNIX
 	// leaveok(stdscr, style != 0x02000); doesn't work very well
@@ -1781,11 +1522,7 @@ static object TextRows(object x)
 #endif
 #ifdef EDOS
 	new_rows = get_int(x);
-#ifdef EDJGPP
-	_set_screen_lines(new_rows);
-#else
 	rows = _settextrows(new_rows);
-#endif
 #endif
 	NewConfig(TRUE);
 	return MAKE_INT(line_max);
@@ -1796,9 +1533,7 @@ object Wrap(object x)
 {
 	wrap_around = get_int(x);
 #ifdef EDOS
-#ifndef EDJGPP
 	_wrapon(wrap_around ? _GWRAPON : _GWRAPOFF);
-#endif
 #else
 #if defined(EWINDOWS)
 	show_console();
@@ -1838,38 +1573,11 @@ void blank_lines(int line, int n)
 }
 #endif
 
-#ifdef EDJGPP
-void blank_lines(int line, int n)
-// Write n blank lines at the current cursor position.
-// The cursor is moved. Note: screen_output() is bypassed.
-{
-	int b;
-	int j;
-
-	for (j = 1; j <= n; j++) {
-		ScreenSetCursor(line++, 0);
-		b = config.numtextcols;
-		while (b >= 20) {
-			mem_cputs("                    "); // 20 blanks
-			b -= 20;
-		}
-		while (b >= 1) {
-			mem_cputs(" ");
-			b -= 1;
-		}
-	}
-}
-#endif
-
 void do_scroll(int top, int bottom, int amount)
 // scroll the screen from top line to bottom line by amount
 // amount is positive => text moves up
 {
-#ifdef EDJGPP
-	int r1, c1, r2, c2;
-#else
 	short r1, c1, r2, c2;
-#endif
 	int i, j;
 	int fg, bg, b, t, prev_t, prev_b;
 #ifdef EWINDOWS
@@ -1971,44 +1679,7 @@ void do_scroll(int top, int bottom, int amount)
 	current_bg_color = bg;
 #endif
 
-#ifdef EDJGPP
-	// save the current position
-	ScreenGetCursor(&r1, &c1);
-
-	if (abs(amount) > abs(bottom - top)) {
-		// clear the window
-		blank_lines(top-1, bottom-top+1);
-	}
-	else if (amount > 0) {
-		// scroll some lines up
-		ScreenSetCursor(top-1, 0);
-		// delete some lines
-		for (i = 1; i <= amount; i++)
-			delline();
-		ScreenSetCursor(bottom-amount, 0);
-		// insert some empty lines
-		for (i = 1; i <= amount; i++)
-			insline();
-		//blank_lines(bottom-amount, amount);
-	}
-	else if (amount < 0) {
-		// scroll some lines down
-		ScreenSetCursor(bottom + amount, 0);
-		// delete lines
-		for (i = 1; i <= -amount; i++)
-			delline();
-		ScreenSetCursor(top-1, 0);
-		// insert empty lines
-		for (i = 1; i <= -amount; i++)
-			insline();
-		//blank_lines(top-1, -amount);
-	}
-
-	// restore the current position
-	ScreenSetCursor(r1, c1);
-#endif
-
-#if defined(EDOS) && !defined(EDJGPP)
+#if defined(EDOS)
 	_gettextwindow(&r1, &c1, &r2, &c2);
 	_settextwindow(top, c1, bottom, c2);
 	if (abs(amount) > abs(bottom - top))
@@ -2064,21 +1735,17 @@ object SetTColor(object x)
 #endif
 
 #ifdef EDOS
-#ifdef EDJGPP
-	textcolor(c);
-#else
 	_settextcolor(c);
-#endif
 #endif
 	return ATOM_1;
 }
 
-#if defined(EDJGPP) || defined(ELCC) || defined(EMINGW)
+#if defined(ELCC) || defined(EMINGW)
 // temporary
 static long colors[16];
 #endif
 
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
+#if !defined(EUNIX) && !defined(ELCC) && !defined(EMINGW)
 static long colors[16] = {
 	_BLACK, _BLUE, _GREEN, _CYAN,
 	_RED, _MAGENTA, _BROWN, _WHITE,
@@ -2115,14 +1782,7 @@ object SetBColor(object x)
 
 #ifdef EDOS
 	if (c >= 0 && c < 16)
-#ifdef EDJGPP
-		current_bg_color = c;
-		if (!TEXT_MODE)
-			text_mode(c);
-		textbackground(c);
-#else
 		_setbkcolor(colors[c]);
-#endif
 #endif
 	return ATOM_1;
 }
@@ -2134,10 +1794,6 @@ object SetBColor(object x)
 static void _loadds far click_handler(int max, int mcx, int mdx)
 {
 #pragma aux click_handler parm [EAX] [ECX] [EDX]
-#endif
-#ifdef EDJGPP
-static void click_handler(int max, int mcx, int mdx)
-{
 #endif
 	/* add event to queue */
 	if (mouse.lock != 2) {
@@ -2174,114 +1830,6 @@ static void show_mouse_cursor(int x)
 }
 static void lock_mouse_pages()
 {
-}
-
-#else
-
-#ifdef EDJGPP
-static object MousePointer(object x)
-/* show or hide mouse pointer */
-{
-	int show_it;
-
-	show_it = get_int(x);
-	if (show_it == 0)
-		scare_mouse();
-	else
-		unscare_mouse();
-	return ATOM_1;
-}
-
-static object MouseEvents(int interrupts)
-{
-	return ATOM_1;
-}
-
-static int mouse_is_installed = FALSE;
-int mouse_installed()
-{
-	if (mouse_is_installed) {
-		//remove_mouse();  Allegro exit will do this
-		return 0;
-	}
-	else {
-		mouse.code = -1;
-		mouse.x = -1;
-		mouse.y = -1;
-		mouse_is_installed = install_mouse() != -1;
-		position_mouse(0,0);
-	}
-	return mouse_is_installed;
-}
-
-static void show_mouse_cursor(int x)
-{
-	if (x == 1)
-		show_mouse(screen);
-	else
-		show_mouse(NULL);
-}
-
-static void lock_mouse_pages()
-{
-}
-
-static int current_b = -1;
-static int mouse_changed()
-/* reports if DJGPP mouse pointer moved or button was clicked */
-{
-	int prev_b, prev_left, prev_right, prev_middle;
-
-	if (mouse_x != mouse.x ||
-		mouse_y != mouse.y ||
-		mouse_b != current_b) {
-
-		/* might help to grab all the values early, since they could change
-		   via an interrupt while we are in here */
-		prev_b = current_b;
-		current_b = mouse_b;
-
-		/* check for movement */
-		mouse.code = (mouse.x != mouse_x ||
-					  mouse.y != mouse_y);
-		mouse.x = mouse_x;
-		mouse.y = mouse_y;
-
-		/* check left button */
-		prev_left = (prev_b & 1);
-		if ((current_b & 1) == 1) {
-			mouse.code |= ((prev_left == 0) << 1); // left went down
-		}
-		else {
-			mouse.code |= ((prev_left == 1) << 2); // left went up
-		}
-
-		/* check right button */
-		prev_right = (prev_b & 2);
-		if ((current_b & 2) == 2) {
-			mouse.code |= ((prev_right == 0) << 3); // right went down
-		}
-		else {
-			mouse.code |= ((prev_right == 2) << 4); // right went up
-		}
-
-		/* check middle button */
-		prev_middle = (prev_b & 4);
-		if ((current_b & 4) == 4) {
-			mouse.code |= ((prev_middle == 0) << 5); // middle went down
-		}
-		else {
-			mouse.code |= ((prev_middle == 4) << 6); // middle went up
-		}
-
-		if (mouse.code == 0)  // could happen due to interrupt
-			mouse.code = 1;
-
-		return TRUE;
-	}
-	else {
-		return FALSE;
-	}
 }
 
 #else
@@ -2365,7 +1913,6 @@ static object MousePointer(object x)
 		show_mouse_cursor(0x1);
 	return ATOM_1;
 }
-#endif
 #endif
 
 #ifdef EUNIX
@@ -2564,11 +2111,7 @@ static object GetMouse()
 			MouseEvents(MAKE_INT(0x0000FFFF));
 		}
 	}
-#ifdef EDJGPP
-	if (mouse_changed()) {
-#else
 	if (mouse.lock) {
-#endif
 		/* there's something in the queue */
 
 		result = NewS1((long)3);
@@ -2576,14 +2119,7 @@ static object GetMouse()
 
 		mouse.lock = 2; /* critical section */
 		obj_ptr[1] = mouse.code;
-#ifdef EDJGPP
-		if (TEXT_MODE)
-			obj_ptr[1] = (mouse.x << 1);
-		else
-			obj_ptr[1] = mouse.x;
-#else
 		obj_ptr[2] = mouse.x;
-#endif
 		obj_ptr[3] = mouse.y;
 		mouse.lock = 0;
 
@@ -2595,13 +2131,6 @@ static object GetMouse()
 	else
 		return ATOM_M1;
 }
-#endif
-
-#ifdef EDJGPP
-#define WASTE_SIZE 25
-#define WASTE_CHUNK 50000
-static char *waste[WASTE_SIZE];
-static int waste_num = 0;
 #endif
 
 static object user_allocate(object x)
@@ -2627,19 +2156,6 @@ static object user_allocate(object x)
 #endif
 #endif
 
-#ifdef EDJGPP
-	/* we must not let allocate() return an address less than a million */
-	/* we assume that those are low memory addresses */
-	while ((unsigned)addr <= LOW_MEMORY_MAX) {
-		if (waste_num < WASTE_SIZE)
-			waste[waste_num++] = addr;
-		if (nbytes < WASTE_CHUNK)
-			nbytes = WASTE_CHUNK;
-		addr = malloc(nbytes);
-	}
-	if (waste_num > 0)
-		free(waste[--waste_num]);  // can use it for sequence memory etc.
-#endif
 	// we don't allow -ve addresses, so can't use -ve Euphoria ints
 	if ((unsigned long)addr <= (unsigned)MAXINT_VAL)
 		return (unsigned long)addr;
@@ -2688,9 +2204,6 @@ static object set_vector(object x)
 	int intnum, a_int;
 	object a;
 	unsigned seg, offs;
-#ifdef EDJGPP
-	__dpmi_paddr address;
-#endif
 
 	x = (object)SEQ_PTR(x); // can assume length-2 sequence
 							// if called from machine.e
@@ -2700,13 +2213,7 @@ static object set_vector(object x)
 	seg = get_int(*(((s1_ptr)a)->base+1)); // ok to use get_int - 16 bit value
 	offs =        *(((s1_ptr)a)->base+2);
 	offs = get_pos_int("set_vector", offs);
-#ifdef EDJGPP
-	address.selector = seg;
-	address.offset32 = offs;
-	__dpmi_set_protected_mode_interrupt_vector(intnum, &address);
-#else
 	_dos_setvect(intnum, (void (__interrupt __far *)())MK_FP(seg,offs));
-#endif
 	return ATOM_1;
 }
 
@@ -2718,20 +2225,11 @@ static object get_vector(object x)
 	object offs, seg;
 	s1_ptr result;
 	object_ptr obj_ptr;
-#ifdef EDJGPP
-	__dpmi_paddr address;
-#endif
 
 	intnum = get_int(x);
-#ifdef EDJGPP
-	__dpmi_get_protected_mode_interrupt_vector(intnum, &address);
-	seg = address.selector;
-	offs = address.offset32;
-#else
 	addr = _dos_getvect(intnum);
 	seg  = FP_SEG(addr);  //16-bit value
 	offs = FP_OFF(addr);  //32-bit value
-#endif
 	if ((unsigned)offs <= (unsigned)MAXINT_VAL)
 		offs = MAKE_INT((unsigned long)offs);
 	else
@@ -2801,19 +2299,12 @@ static object user_allocate_low(object x)
 #else
 	unsigned int nbytes, nparagraphs;
 	unsigned short segment;
-#ifdef EDJGPP
-	int selector;
-#else
 	unsigned short selector;
-#endif
 	unsigned int wider;
 	union REGS regs;
 
 	nbytes = (unsigned int)get_pos_int("allocate_low", x);
 	nparagraphs = (nbytes >> 4) + 2;
-#ifdef EDJGPP
-	 segment = __dpmi_allocate_dos_memory(nparagraphs, &selector);
-#else
 	memset(&regs, 0, sizeof(regs));
 	regs.w.ax = 0x0ff21;
 	regs.w.bx = nparagraphs;
@@ -2824,7 +2315,6 @@ static object user_allocate_low(object x)
 	}
 	segment = (unsigned int)regs.w.ax;
 	selector = regs.w.dx;
-#endif
 #ifdef EXTRA_CHECK
 	//iprintf(stderr, "selector allocated is %x\n", selector);
 #endif
@@ -2852,14 +2342,6 @@ static object user_free_low(object x)
 	selector = get_selector(addr);
 	if (selector == -1)
 		return ATOM_1; // can't find selector
-#ifdef EDJGPP
-	if (__dpmi_free_dos_memory(selector)) {
-#ifdef EXTRA_CHECK
-		RTInternal("dpmi_free_dos_memory failed!")
-#endif
-		;
-	}
-#else
 	memset(&regs, 0, sizeof(regs));
 	regs.w.ax = 0x0ff23;
 	regs.w.dx = selector;
@@ -2871,7 +2353,6 @@ static object user_free_low(object x)
 #ifdef EXTRA_CHECK
 	if (regs.x.cflag != 0)
 		RTInternal("RelMemDOS failed!");
-#endif
 #endif
 #endif
 	return ATOM_1;
@@ -2890,9 +2371,6 @@ static object dos_interrupt(object x)
 	s1_ptr result, reg_sequence;
 	object_ptr obj_ptr;
 
-#ifdef EDJGPP
-	__dpmi_regs reglist;
-#else
 	// register list for Causeway IntXX
 	struct xx {
 		unsigned int edi;
@@ -2915,28 +2393,12 @@ static object dos_interrupt(object x)
 	} reglist;
 	union REGS regs;
 	struct SREGS seg_regs;
-#endif
 
 	x = (object)SEQ_PTR(x);
 	int_no =       get_int(*(((s1_ptr)x)->base+1));
 	reg_sequence = SEQ_PTR(*(((s1_ptr)x)->base+2));
 
 	// fill up reglist based on 16-bit values in Euphoria sequence
-#ifdef EDJGPP
-	reglist.x.di = get_int(*(reg_sequence->base+1));
-	reglist.x.si = get_int(*(reg_sequence->base+2));
-	reglist.x.bp = get_int(*(reg_sequence->base+3));
-	reglist.x.bx = get_int(*(reg_sequence->base+4));
-	reglist.x.dx = get_int(*(reg_sequence->base+5));
-	reglist.x.cx = get_int(*(reg_sequence->base+6));
-	reglist.x.ax = get_int(*(reg_sequence->base+7));
-	reglist.x.flags = get_int(*(reg_sequence->base+8));
-	reglist.x.es = get_int(*(reg_sequence->base+9));
-	reglist.x.ds = get_int(*(reg_sequence->base+10));
-
-	__dpmi_int(int_no, &reglist);
-
-#else
 	reglist.edi = get_int(*(reg_sequence->base+1));
 	reglist.esi = get_int(*(reg_sequence->base+2));
 	reglist.ebp = get_int(*(reg_sequence->base+3));
@@ -2963,24 +2425,11 @@ static object dos_interrupt(object x)
 	regs.x.eax = 0x0ff01; // Causeway Simulate real mode interrupt
 
 	int386x(0x31, &regs, &regs, &seg_regs);
-#endif
 
 	// fill up result sequence based on values in reglist
 	result = NewS1((long)10);
 	obj_ptr = result->base;
 
-#ifdef EDJGPP
-	obj_ptr[1] = MAKE_INT(reglist.x.di);
-	obj_ptr[2] = MAKE_INT(reglist.x.si);
-	obj_ptr[3] = MAKE_INT(reglist.x.bp);
-	obj_ptr[4] = MAKE_INT(reglist.x.bx);
-	obj_ptr[5] = MAKE_INT(reglist.x.dx);
-	obj_ptr[6] = MAKE_INT(reglist.x.cx);
-	obj_ptr[7] = MAKE_INT(reglist.x.ax);
-	obj_ptr[8] = MAKE_INT(reglist.x.flags);
-	obj_ptr[9] = MAKE_INT(reglist.x.es);
-	obj_ptr[10] = MAKE_INT(reglist.x.ds);
-#else
 	obj_ptr[1] = MAKE_INT(reglist.edi);
 	obj_ptr[2] = MAKE_INT(reglist.esi);
 	obj_ptr[3] = MAKE_INT(reglist.ebp);
@@ -2991,7 +2440,6 @@ static object dos_interrupt(object x)
 	obj_ptr[8] = MAKE_INT(reglist.flags);
 	obj_ptr[9] = MAKE_INT(reglist.es);
 	obj_ptr[10] = MAKE_INT(reglist.ds);
-#endif
 	return MAKE_SEQ(result);
 #endif
 }
@@ -3042,7 +2490,7 @@ static object Seek(object x)
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2);
 	if (pos == -1)
-#if defined(EMINGW) || defined(EDJGPP)
+#if defined(EMINGW)
 		result = iseek(f, 0L, SEEK_END);
 #else
 		result = iiseek(f, 0L, SEEK_END);
@@ -3265,15 +2713,7 @@ static object Dir(object x)
 }
 #endif
 
-#ifdef EDJGPP
-// this speeds things up quite a bit, but dir() is still much
-// slower than with WATCOM
-unsigned short _djstat_flags =
-					_STAT_INODE | _STAT_EXEC_EXT | _STAT_EXEC_MAGIC |
-					_STAT_DIRSIZE | _STAT_ROOT_TIME | _STAT_WRITEBIT;
-#endif
-
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 	// 3 of 3: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
@@ -3287,7 +2727,7 @@ static object Dir(object x)
 	int r;
 	struct stat stbuf;
 	struct tm *date_time;
-#if defined(EDJGPP) || defined(EMINGW)
+#if defined(EMINGW)
 #define full_name_size (MAX_FILE_NAME + 257)
 #else
 #define full_name_size (MAX_FILE_NAME + NAME_MAX + 1)
@@ -3545,21 +2985,9 @@ static object GetPosition()
 	obj_ptr[1] = MAKE_INT(console_info.dwCursorPosition.Y+1);
 	obj_ptr[2] = MAKE_INT(console_info.dwCursorPosition.X+1);
 #else
-#ifdef EDJGPP
-	if (TEXT_MODE) {
-		ScreenGetCursor((int *)&obj_ptr[1], (int *)&obj_ptr[2]);
-	}
-	else {
-		obj_ptr[1] = config.y / text_height(font);
-		obj_ptr[2] = config.x / text_length(font, "m");
-	}
-	obj_ptr[1] += 1;
-	obj_ptr[2] += 1;
-#else
 	pos = GetTextPositionP();
 	obj_ptr[1] = MAKE_INT(pos.row);
 	obj_ptr[2] = MAKE_INT(pos.col);
-#endif
 #endif
 	return MAKE_SEQ(result);
 }
@@ -3698,14 +3126,12 @@ static object use_vesa(object x)
 #ifndef EDOS
 	not_supported("use_vesa()");
 #else
-#ifndef EDJGPP
 	c = get_int(x);
 
 	if (c)
 		_SVGAType = c;
 	else
 		_SVGAType = original_vesa;
-#endif
 #endif
 	return ATOM_1;
 }
@@ -3846,15 +3272,6 @@ DWORD WINAPI WinTimer(LPVOID lpParameter)
 #endif
 
 
-#ifdef EDJGPP
-static void TickHandler()
-{
-	our_clock_ticks++;
-}
-END_OF_FUNCTION(TickHandler)
-
-#else
-
 static void __interrupt __far TickHandler()
 /* handles clock-tick interrupts */
 {
@@ -3900,14 +3317,11 @@ static void __interrupt __far TickHandler()
 #endif
 }
 
-#endif
-
 void ESetTimer(void (__interrupt __far *handler)())
 /* Do some initialization */
 {
 #ifdef EDOS
 	lock_region((int *)handler, 4096);
-#ifndef EDJGPP
 	/* Store the current BIOS handler and set up our own */
 	BIOSTimerHandler = _dos_getvect(TIMERINTR);
 	_dos_setvect(TIMERINTR, handler);
@@ -3917,23 +3331,18 @@ void ESetTimer(void (__interrupt __far *handler)())
 	outp(0x0040, interval % 256);
 	outp(0x0040, interval / 256);
 #endif
-#endif
 }
 
 static void CleanUpTimer()
 /* Restore the normal clock frequency */
 {
 #ifdef EDOS
-#ifdef EDJGPP
-	remove_int(TickHandler);
-#else
 	outp(0x0043, 0x34);
 	outp(0x0040, 0);
 	outp(0x0040, 0);
 
 	/* Restore the normal ticker handler */
 	_dos_setvect(TIMERINTR, BIOSTimerHandler);
-#endif
 #endif
 }
 
@@ -3981,13 +3390,7 @@ object tick_rate(object x)
 	clock_ticks = 0;
 	interval = (int) (MASTER_FREQUENCY / rate + 0.5);
 	clock_frequency = MASTER_FREQUENCY / (double)interval;
-#ifdef EDJGPP
-	LOCK_VARIABLE(our_clock_ticks);
-	LOCK_FUNCTION(TickHandler);
-	install_int_ex(TickHandler, BPS_TO_TIMER((int)rate));
-#else
 	ESetTimer(TickHandler);
-#endif
 
 #endif
 	return ATOM_1;
@@ -4076,12 +3479,6 @@ object memory_copy(object d, object s, object n)
 	char *dest;
 	char *src;
 	unsigned nbytes;
-#ifdef EDJGPP
-	char *start;
-	char *targ;
-	int step;
-	long ss;
-#endif
 
 #ifdef EDOS
 	/* flip to main screen in case of video write */
@@ -4091,106 +3488,6 @@ object memory_copy(object d, object s, object n)
 	dest   = (char *)get_pos_int("mem_copy", d);
 	src    = (char *)get_pos_int("mem_copy", s);
 	nbytes = get_pos_int("mem_copy", n);
-#ifdef EDJGPP
-	if ((unsigned)dest <= LOW_MEMORY_MAX ||
-		(unsigned) src <= LOW_MEMORY_MAX) {
-
-		if ((unsigned)src > LOW_MEMORY_MAX) {
-			/* then dest is low memory - no overlap, important for video writes */
-			start = src;
-			step = 4;
-			targ = dest;
-			while (nbytes >= 4) {
-				_farpokel(_go32_info_block.selector_for_linear_memory,
-						(unsigned long)targ,
-						*(unsigned *)start);
-				nbytes -= 4;
-				start += 4;
-				targ += 4;
-			}
-		}
-
-		else if ((unsigned)dest > LOW_MEMORY_MAX) {
-			/* then src is low memory - no overlap */
-			start = src;
-			step = 4;
-			targ = dest;
-			while (nbytes >= 4) {
-				*(unsigned *)targ = _farpeekl(_go32_info_block.selector_for_linear_memory,
-											 (unsigned)start);
-				nbytes -= 4;
-				start += 4;
-				targ += 4;
-			}
-		}
-
-		else {
-			/* both are low memory - be careful about overlap */
-			if ((unsigned)dest <= (unsigned)src) {
-				/* start from the front */
-				start = src;
-				targ = dest;
-				step = +4;
-			}
-			else {
-				/* start from the end */
-				start = src + nbytes;
-				targ = dest + nbytes;
-				if (nbytes >= 4) {
-					start -= 4;
-					targ -= 4;
-				}
-				else {
-					start -= 1;
-					targ -= 1;
-				}
-				step = -4;
-			}
-			while (nbytes >= 4) {
-				ss = _farpeekl(_go32_info_block.selector_for_linear_memory,
-							  (unsigned)start);
-				_farpokel(_go32_info_block.selector_for_linear_memory,
-						(unsigned long)targ,
-						ss);
-				nbytes -= 4;
-				start += step;
-				targ += step;
-			}
-			if (step < 0) {
-				start += 3;
-				targ += 3;
-			}
-		}
-
-		if (step > 0)
-			step = +1;
-		else
-			step = -1;
-
-		while (nbytes >= 1) {
-			/* do the last few bytes, if any */
-			if ((unsigned)start <= LOW_MEMORY_MAX) {
-				ss = _farpeekb(_go32_info_block.selector_for_linear_memory,
-							  (unsigned)start);
-			}
-			else {
-				ss = *start;
-			}
-			if ((unsigned)targ <= LOW_MEMORY_MAX) {
-				_farpokeb(_go32_info_block.selector_for_linear_memory,
-						  (unsigned long)targ,
-						  (char)ss);
-			}
-			else {
-				*targ = (unsigned char)ss;
-			}
-			nbytes -= 1;
-			start += step;
-			targ += step;
-		}
-	}
-	else
-#endif
 	memmove(dest, src, nbytes); /* overlapping regions handled correctly */
 	return ATOM_1;
 }
@@ -4209,19 +3506,6 @@ object memory_set(object d, object v, object n)
 	dest   = (char *)get_pos_int("mem_set", d);
 	value  = (int)get_pos_int("mem_set", v);
 	nbytes = get_pos_int("mem_set", n);
-#ifdef EDJGPP
-	if ((unsigned)dest <= LOW_MEMORY_MAX) {
-		/* low memory */
-		while (nbytes) {
-			_farpokeb(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)dest,
-					  (unsigned char)value);
-			dest++;
-			nbytes--;
-		}
-	}
-	else
-#endif
 	memset(dest, value, nbytes);
 	return ATOM_1;
 }
@@ -4816,7 +4100,7 @@ object start_backend(object x)
 	fe.switches = x_ptr->base[6];
 	fe.argv = x_ptr->base[7];
 
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
 #endif
 
@@ -4837,7 +4121,7 @@ object start_backend(object x)
 		EFree(w);
 	}
 
-	be_init(); //earlier for DJGPP
+	be_init();
 
 	Execute(TopLevelSub->u.subp.code);
 
@@ -5000,14 +4284,14 @@ object machine(object opcode, object x)
 				return PutScreenChar(x);
 				break;
 			case M_GET_DISPLAY_PAGE:
-#if !defined(EDOS) || defined(EDJGPP)
+#if !defined(EDOS)
 				not_supported("get_display_page()");
 #else
 				return MAKE_INT(_getvisualpage());
 #endif
 				break;
 			case M_SET_DISPLAY_PAGE:
-#if !defined(EDOS) || defined(EDJGPP)
+#if !defined(EDOS)
 				not_supported("set_display_page()");
 #else
 				page_was_set = 1;
@@ -5016,14 +4300,14 @@ object machine(object opcode, object x)
 				return ATOM_1;
 				break;
 			case M_GET_ACTIVE_PAGE:
-#if !defined(EDOS) || defined(EDJGPP)
+#if !defined(EDOS)
 				return 0;
 #else
 				return MAKE_INT(_getactivepage());
 #endif
 				break;
 			case M_SET_ACTIVE_PAGE:
-#if !defined(EDOS) || defined(EDJGPP)
+#if !defined(EDOS)
 				if (get_int(x) != 0)
 					not_supported("set_active_page");
 #else
@@ -5116,6 +4400,9 @@ object machine(object opcode, object x)
 
 			case M_PLATFORM:
 				/* obsolete, but keep it */
+#ifdef EUDJGPP
+				return -9; // TODO hack
+#endif
 #ifdef ENETBSD
 				return 7;
 #endif

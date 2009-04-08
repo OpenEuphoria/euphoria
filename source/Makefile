@@ -79,9 +79,15 @@ ifeq "$(EBSD)" "1"
     EBSDFLAG=-DEBSD -DEBSD62 -DENETBSD
   endif
 else
+ifeq "$(EUDJGPP)" "1"
+  LDLFLAG=
+  EBSDFLAG=-DEUDJGPP
+  SEDFLAG=-ri
+else
   LDLFLAG=-ldl -lresolv -lnsl
   PREREGEX=$(FROMBSDREGEX)
   SEDFLAG=-ri
+endif
 endif
 
 ifeq "$(EMINGW)" "1"
@@ -108,21 +114,6 @@ ifeq "$(EMINGW)" "1"
 		MEM_FLAGS=-DESIMPLE_MALLOC
 	endif
 else
-ifeq "$(EDJGPP)" "1"
-	EOSTYPE=-DEDOS -DEDJGPP
-	EOSFLAGS=
-	EOSFLAGSCONSOLE=
-	EOSMING=-O2
-	EBACKENDU=eubd.exe
-	EBACKENDC=eubd.exe
-	EECU=eucd.exe
-	EEXU=euid.exe
-	EECUA=eud.a
-	PLAT=DOS
-	MEM_FLAGS=
-	LDLFLAG=-lalleg
-	ECHO=echo
-else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
@@ -133,7 +124,6 @@ else
 	EEXU=eui
 	EECUA=eu.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
-endif
 endif
 
 ifdef EDEBUG
@@ -384,7 +374,7 @@ endif
 
 
 test :  
-ifeq "$(EDJGPP)" "1"
+ifeq "$(EUDJGPP)" "1"
 ifneq "$(HASCHANGEDDIRECTORY)" "1"
 	cp $(CONFIG) revget.ex ../tests
 	export EUCOMPILEDIR=$(TRUNKDIR)

@@ -91,14 +91,6 @@
 #define read_esp_tc() _asm("movl %esp, -52(%ebp)")
 #endif
 
-#ifdef EDJGPP
-#define push_regs() asm("pushal")
-#define pop_regs() asm("popal")
-#define set_esp() asm("movl 60(%esp), %esp")
-#define read_esp() asm("movl %esp, 60(%esp)")
-#define read_esp_tc() asm("movl %esp, 36(%esp)")
-#endif
-
 #ifdef EWATCOM
 #pragma aux push_regs = \
 		"PUSHAD" \

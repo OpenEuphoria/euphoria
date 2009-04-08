@@ -730,7 +730,6 @@ end procedure
 
 procedure seg_peek_string(integer target, integer source, integer mode)
 -- emit code for a single-byte peek  - uses _1 as a temp
-	if atom(dj_path) then
 		-- WATCOM: memory is seamless */
 		if mode = 1 then
 			c_stmt("@ = NewString((char *)(unsigned long)(DBL_PTR(@)->dbl));\n",
@@ -739,28 +738,6 @@ procedure seg_peek_string(integer target, integer source, integer mode)
 			c_stmt("@ =  NewString((char *)@);\n", {target, source})
 		end if
 
-	else
-		-- DJGPP: low memory is in a separate segment,
-		--        high memory is always >= one million
-		-- OPTIMIZE if source is a constant
-		if mode = 1 then
-			c_stmt("_1 = (int)(unsigned)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("if ((unsigned)_1 > LOW_MEMORY_MAX)\n")
-			c_stmt("@ = NewString((char *)_1);\n", target)
-			c_stmt0("else\n")
-			c_stmt("@ = NewString( (char*)_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)_1));\n",
-					target)
-
-		elsif mode = 2 then
-
-		else
-			c_stmt("if ((unsigned)@ > LOW_MEMORY_MAX)\n", source)
-			c_stmt("@ = NewString((char *)@);\n", {target, source})
-			c_stmt0("else\n")
-			c_stmt("@ = NewString((char *) _farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)@));\n",
-					{target, source})
-		end if
-	end if
 end procedure
 
 procedure seg_peek1(integer target, integer source, integer mode)
@@ -771,7 +748,6 @@ procedure seg_peek1(integer target, integer source, integer mode)
 	else
 		sign = "signed"
 	end if
-	if atom(dj_path) then
 		-- WATCOM: memory is seamless */
 		if mode = 1 then
 			c_stmt(sprintf("@ = *(%s char *)(unsigned long)(DBL_PTR(@)->dbl);\n", {sign}),
@@ -780,28 +756,6 @@ procedure seg_peek1(integer target, integer source, integer mode)
 			c_stmt(sprintf("@ = *(%s char *)@;\n",{sign}), {target, source})
 		end if
 
-	else
-		-- DJGPP: low memory is in a separate segment,
-		--        high memory is always >= one million
-		-- OPTIMIZE if source is a constant
-		if mode = 1 then
-			c_stmt("_1 = (int)(unsigned)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("if ((unsigned)_1 > LOW_MEMORY_MAX)\n")
-			c_stmt("@ = *(unsigned char *)_1;\n", target)
-			c_stmt0("else\n")
-			c_stmt(sprintf("@ = (%s char)_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)_1);\n",{sign}),
-					target)
-
-		elsif mode = 2 then
-
-		else
-			c_stmt("if ((unsigned)@ > LOW_MEMORY_MAX)\n", source)
-			c_stmt(sprintf("@ = *(%s char *)@;\n",{sign}), {target, source})
-			c_stmt0("else\n")
-			c_stmt(sprintf("@ =(%s char) _farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)@);\n",{sign}),
-					{target, source})
-		end if
-	end if
 end procedure
 
 procedure seg_peek2(integer target, integer source, integer mode)
@@ -812,7 +766,6 @@ procedure seg_peek2(integer target, integer source, integer mode)
 	else
 		sign = "signed"
 	end if
-	if atom(dj_path) then
 		-- WATCOM: memory is seamless */
 		if mode = 1 then
 			c_stmt(sprintf("@ = *(%s short *)(unsigned long)(DBL_PTR(@)->dbl);\n",{sign}),
@@ -821,33 +774,10 @@ procedure seg_peek2(integer target, integer source, integer mode)
 			c_stmt(sprintf("@ = *(%s short *)@;\n",{sign}), {target, source})
 		end if
 
-	else
-		-- DJGPP: low memory is in a separate segment,
-		--        high memory is always >= one million
-		-- OPTIMIZE if source is a constant
-		if mode = 1 then
-			c_stmt("_1 = (int)(unsigned)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("if ((unsigned)_1 > LOW_MEMORY_MAX)\n")
-			c_stmt(sprintf("@ = *(%s short *)_1;\n",{sign}), target)
-			c_stmt0("else\n")
-			c_stmt(sprintf("@ = (%s short) _farpeekw(_go32_info_block.selector_for_linear_memory, (unsigned)_1);\n", {sign}),
-					target)
-
-		elsif mode = 2 then
-
-		else
-			c_stmt("if ((unsigned)@ > LOW_MEMORY_MAX)\n", source)
-			c_stmt(sprintf("@ = *(%s short *)@;\n",{sign}), {target, source})
-			c_stmt0("else\n")
-			c_stmt(sprintf("@ = (%s short)_farpeekw(_go32_info_block.selector_for_linear_memory, (unsigned)@);\n",{sign}),
-					{target, source})
-		end if
-	end if
 end procedure
 
 procedure seg_peek4(integer target, integer source, boolean dbl)
 -- emit code for a 4-byte signed or unsigned peek
-	if atom(dj_path) then
 		-- WATCOM: memory is seamless
 		if dbl then
 			c_stmt("@ = *(unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
@@ -857,30 +787,10 @@ procedure seg_peek4(integer target, integer source, boolean dbl)
 			c_stmt("@ = *(unsigned long *)@;\n", {target, source})
 		end if
 
-	else
-		-- DJGPP: low memory is in a separate segment,
-		--        high memory is always >= one million
-		-- OPTIMIZE if source is a constant
-		if dbl then
-			c_stmt("_1 = (int)(unsigned)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("if ((unsigned)_1 > LOW_MEMORY_MAX)\n")
-			c_stmt("@ = *(unsigned long *)_1;\n", target)
-			c_stmt0("else\n")
-			c_stmt("@ = _farpeekl(_go32_info_block.selector_for_linear_memory, (unsigned)_1);\n",
-					target)
-		else
-			c_stmt("if ((unsigned)@ > LOW_MEMORY_MAX)\n", source)
-			c_stmt("@ = *(unsigned long *)@;\n", {target, source})
-			c_stmt0("else\n")
-			c_stmt("@ = _farpeekl(_go32_info_block.selector_for_linear_memory, (unsigned)@);\n",
-					{target, source})
-		end if
-	end if
 end procedure
 
 procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
-	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
 			if TWINDOWS and atom(wat_path) then
@@ -894,28 +804,10 @@ procedure seg_poke1(integer source, boolean dbl)
 			c_stmt("*poke_addr = (unsigned char)@;\n", source)
 		end if
 
-	else
-		-- DJGPP
-		if dbl then
-			c_stmt0("if ((unsigned)poke_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke_addr = (signed char)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)poke_addr, (unsigned char)DBL_PTR(@)->dbl);\n",
-					source)
-
-		else
-			c_stmt0("if ((unsigned)poke_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke_addr = (unsigned char)@;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)poke_addr, (unsigned char)@);\n",
-					source)
-		end if
-	end if
 end procedure
 
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
-	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
 			if TWINDOWS and atom(wat_path) then
@@ -929,28 +821,10 @@ procedure seg_poke2(integer source, boolean dbl)
 			c_stmt("*poke2_addr = (unsigned short)@;\n", source)
 		end if
 
-	else
-		-- DJGPP
-		if dbl then
-			c_stmt0("if ((unsigned)poke2_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke2_addr = (signed char)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokew(_go32_info_block.selector_for_linear_memory, (unsigned long)poke_addr, (unsigned char)DBL_PTR(@)->dbl);\n",
-					source)
-
-		else
-			c_stmt0("if ((unsigned)poke2_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke2_addr = (unsigned short)@;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokew(_go32_info_block.selector_for_linear_memory, (unsigned long)poke_addr, (unsigned char)@);\n",
-					source)
-		end if
-	end if
 end procedure
 
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
-	if atom(dj_path) then
 		-- WATCOM etc.
 		if dbl then
 			if TWINDOWS and atom(wat_path) then
@@ -964,22 +838,6 @@ procedure seg_poke4(integer source, boolean dbl)
 			c_stmt("*poke4_addr = (unsigned long)@;\n", source)
 		end if
 
-	else
-		-- DJGPP
-		if dbl then
-			c_stmt0("if ((unsigned)poke4_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke4_addr = (unsigned long)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)poke4_addr, (unsigned long)DBL_PTR(@)->dbl);\n",
-					source)
-		else
-			c_stmt0("if ((unsigned)poke4_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke4_addr = (unsigned long)@;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)poke4_addr, (unsigned long)@);\n",
-					source)
-		end if
-	end if
 end procedure
 
 function machine_func_type(integer x)
@@ -4916,47 +4774,6 @@ procedure opPEEK()
 		c_stmt("@ = MAKE_SEQ(poke4_addr);\n", Code[pc+2])
 		c_stmt0("poke4_addr = (unsigned long *)((s1_ptr)poke4_addr)->base;\n")
 
-		if sequence(dj_path) then
-			if find( Code[pc], { PEEK, PEEKS } ) then
-				c_stmt0("if ((unsigned)poke_addr <= LOW_MEMORY_MAX) {\n")
-			elsif find( Code[pc], {PEEK2S, PEEK2U}) then
-				c_stmt0("if ((unsigned)poke2_addr <= LOW_MEMORY_MAX) {\n")
-			else
-				c_stmt0("if ((unsigned)peek4_addr <= LOW_MEMORY_MAX) {\n")
-			end if
-			c_stmt0("while (--_2 >= 0) {\n")  -- SLOW WHILE
-			c_stmt0("poke4_addr++;\n")
-			if find( Code[pc],  {PEEK, PEEKS})  then
-				c_stmt0("*(int *)poke4_addr = _farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)(poke_addr++));\n")
-				if Code[pc] = PEEKS then
-					c_stmt0("_1 = (int)(signed char)_1);\n")
-				else
-					c_stmt0("_1 = (int)(unsigned char)_1;\n")
-				end if
-			elsif find( Code[pc], {PEEK2S, PEEK2U}) then
-				c_stmt0("*(int *)poke4_addr = _farpeekw(_go32_info_block.selector_for_linear_memory, (unsigned)(poke2_addr++));\n")
-				if Code[pc] = PEEK2S then
-					c_stmt0("_1 = (int)(signed short)_1);\n")
-				else
-					c_stmt0("_1 = (int)(unsigned short)_1;\n")
-				end if
-				c_stmt0("*(short *)poke4_addr = _1;\n")
-			else
-				c_stmt0("_1 = _farpeekl(_go32_info_block.selector_for_linear_memory, (unsigned)(peek4_addr++));\n")
-				if Code[pc] = PEEK4S then
-					c_stmt0("if (_1 < MININT || _1 > MAXINT)\n")
-					c_stmt0("_1 = NewDouble((double)(long)_1);\n")
-				else  -- PEEK4U
-					c_stmt0("if ((unsigned)_1 > (unsigned)MAXINT)\n")
-					c_stmt0("_1 = NewDouble((double)(unsigned long)_1);\n")
-				end if
-				c_stmt0("*(int *)poke4_addr = _1;\n")
-			end if
-			c_stmt0("}\n")
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-		end if
-
 		c_stmt0("while (--_2 >= 0) {\n")  -- FAST WHILE
 		c_stmt0("poke4_addr++;\n")
 		if find( Code[pc], {PEEK, PEEKS}) then
@@ -4987,9 +4804,6 @@ procedure opPEEK()
 		end if
 		c_stmt0("}\n")
 
-		if sequence(dj_path) then
-			c_stmt0("}\n")
-		end if
 	end if
 
 	if TypeIs(Code[pc+1], TYPE_OBJECT) then
@@ -5113,41 +4927,6 @@ procedure opPOKE()
 		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+2])
 		c_stmt0("_1 = (int)((s1_ptr)_1)->base;\n")
 
-		if sequence(dj_path) then
-			if Code[pc] = POKE4 then
-				c_stmt0("if ((unsigned)poke4_addr <= LOW_MEMORY_MAX) {\n")
-			elsif Code[pc] = POKE2 then
-				c_stmt0("if ((unsigned)poke2_addr <= LOW_MEMORY_MAX) {\n")
-			else
-				c_stmt0("if ((unsigned)poke_addr <= LOW_MEMORY_MAX) {\n")
-			end if
-
-			c_stmt0("while (1) {\n")  -- SLOW WHILE
-			c_stmt0("_1 += 4;\n")
-			c_stmt0("_2 = *((int *)_1);\n")
-			c_stmt0("if (IS_ATOM_INT(_2))\n")
-			if Code[pc] = POKE4 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke4_addr++), (unsigned long)_2);\n")
-			elsif Code[pc] = POKE2 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke4_addr++), (unsigned short)_2);\n")
-			else
-				c_stmt0("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke_addr++), (unsigned char)_2);\n")
-			end if
-			c_stmt0("else if (_2 == NOVALUE)\n")
-			c_stmt0("break;\n")
-			c_stmt0("else\n")
-			if Code[pc] = POKE4 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke4_addr++), (unsigned long)DBL_PTR(_2)->dbl);\n")
-			elsif Code[pc] = POKE2 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke2_addr++), (unsigned short)DBL_PTR(_2)->dbl);\n")
-			else
-				c_stmt0("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke_addr++), (unsigned char)DBL_PTR(_2)->dbl);\n")
-			end if
-			c_stmt0("}\n")
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-		end if
-
 		c_stmt0("while (1) {\n") -- FAST WHILE
 		c_stmt0("_1 += 4;\n")
 		c_stmt0("_2 = *((int *)_1);\n")
@@ -5190,9 +4969,6 @@ procedure opPOKE()
 		c_stmt0("}\n")
 		c_stmt0("}\n")
 
-		if sequence(dj_path) then
-			c_stmt0("}\n")
-		end if
 	end if
 
 	if TypeIs(Code[pc+2], TYPE_OBJECT) then
@@ -6821,11 +6597,6 @@ procedure BackEnd(atom ignore)
 
 	version()
 
-	if TDOS then
-		if sequence(dj_path) then
-			c_puts("#include <go32.h>\n")
-		end if
-	end if
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
 
@@ -6846,10 +6617,6 @@ procedure BackEnd(atom ignore)
 		else
 		c_puts("unsigned __stdcall GetProcessHeap(void);\n")
 	end if
-	end if
-
-	if TDOS and sequence(dj_path) then
-		c_hputs("extern __Go32_Info_Block _go32_info_block;\n")
 	end if
 
 	c_puts("unsigned long *peek4_addr;\n")
@@ -6880,9 +6647,6 @@ procedure BackEnd(atom ignore)
 		else
 			total_stack_size = (248 + 8) * 1024
 		end if
-	end if
-	if TDOS and sequence(dj_path) then
-		c_printf("unsigned _stklen=%d;\n", total_stack_size)
 	end if
 	c_printf("int total_stack_size = %d;\n", total_stack_size)
 	c_hputs("extern int total_stack_size;\n")

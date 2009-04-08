@@ -27,11 +27,7 @@
 #  if !defined(ELCC) && !defined(EMINGW)
 #    include <bios.h>
 #  endif
-#  ifdef EDJGPP
-#    include <go32.h>
-#    include <allegro.h>
-#  endif
-#  if !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
+#  if !defined(ELCC) && !defined(EMINGW)
 #    include <graph.h>
 #  endif
 #  ifdef ELCC
@@ -495,7 +491,7 @@ void MainScreen()
 extern int color_trace;
 #endif
 
-#if !defined(EDJGPP) && !defined(EBSD62)
+#if !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
 #if (defined(ELCC) || defined(EWATCOM) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
@@ -3729,22 +3725,14 @@ void set_text_color(int c)
 		if (c == 0 && !TEXT_MODE)
 			c = 8; /* graphics mode can't handle black (0) */
 #ifdef EDOS
-#ifdef EDJGPP
-		textcolor(c);
-#else
 		_settextcolor(c);
-#endif
 #else
 		SetTColor(MAKE_INT(c));
 #endif
 	}
 	else {
 #ifdef EDOS
-#ifdef EDJGPP
-		textcolor(15);
-#else
 		_settextcolor(7);
-#endif
 #else
 		SetTColor(MAKE_INT(7));
 #endif
@@ -4379,13 +4367,7 @@ int get_key(int wait)
 		// see if a key is there
 		p1 = (short *)1050;
 		p2 = (short *)1052;
-#ifdef EDJGPP
-		if (_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)p1) ==
-			_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)p2)
-		   )
-#else
 		if (*p1 == *p2)
-#endif
 			return -1;
 		if (in_from_keyb && !kbhit())
 			return -1;
@@ -4394,7 +4376,7 @@ int get_key(int wait)
 	if (in_from_keyb) {
 		a = getch();
 		if (a == 0)
-			return 256 + getch();     // DJGPP too?
+			return 256 + getch();
 		else
 			return a;
 	}
@@ -5599,19 +5581,7 @@ void key_gets(unsigned char *input_string)
 	cursor.col = console_info.dwCursorPosition.X+1;
 #else
 
-#ifdef EDJGPP
-	if (TEXT_MODE) {
-		ScreenGetCursor(&cursor.row, &cursor.col);
-	}
-	else {
-		cursor.row = config.y / text_height(font);
-		cursor.col = config.x / text_length(font, "m");
-	}
-	cursor.row += 1;
-	cursor.col += 1;
-#else
 	cursor = GetTextPositionP();
-#endif
 
 #endif
 	line = cursor.row;

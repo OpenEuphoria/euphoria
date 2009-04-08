@@ -39,21 +39,17 @@ struct block_list {
 
 // Size of the usable space in an allocated block
 #ifdef EUNIX 
-#ifdef EBSD
+#ifndef LINUX
 #define block_size(p) 1    // length is not stored with the block
 #else
 #define block_size(p) (malloc_usable_size(p))
 #endif
 
 #else
-#ifdef EDJGPP
-#define block_size(p) (((*(unsigned long *)((char *)(p) - 4)) & ~3))
-#else
 #ifdef EWINDOWS
 #define block_size(p) HeapSize((void *)default_heap, 0, p)
 #else
 #define block_size(p) (_msize(p))
-#endif
 #endif
 #endif
 
@@ -63,7 +59,7 @@ struct block_list {
 #define ERealloc(orig, newsize) realloc(orig, newsize)
 #endif
 
-#if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
+#if defined(ELINUX) || defined(EMINGW) || !defined(EBSD)
 extern size_t strlcpy(char *dest, char *src, size_t maxlen);
 extern size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif

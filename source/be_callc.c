@@ -61,11 +61,6 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 #define  pop() _asm("addl -36(%ebp), %esp")
 #endif
 
-#ifdef EDJGPP
-#define push() asm("pushl -4(%ebp)")
-#define pop() 
-#endif
-
 #ifdef EWATCOM
 void wcpush(long X);
 #define push() wcpush(last_offset);
