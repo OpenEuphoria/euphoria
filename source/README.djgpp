@@ -23,4 +23,5 @@ can and must use backslashes.  Yet anything else you pass to configure or make
 must use forward slashes.  I haven't had any success invoking make from sh.exe 
 on djgpp.
 
-
+TODO add note about dlopen() support on DJGPP. For now, see the following URL:
+http://www.geocities.com/dborca/djgpp/dxe3/dxe3.html
