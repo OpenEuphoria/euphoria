@@ -799,7 +799,7 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-#ifdef ELINUX
+#if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
 size_t strlcpy(char *dest, char *src, size_t maxlen)
 {
 	strncpy(dest, src, maxlen);
