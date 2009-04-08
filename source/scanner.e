@@ -723,13 +723,13 @@ procedure IncludePush()
 -- start reading from new source file with given name  
 	integer new_file, old_file_no
 	sequence new_name
-				
+	
 	start_include = FALSE
 
 	new_file = path_open() -- sets new_include_name to full path 
 
 	new_name = name_ext(new_include_name)
-	
+					
 	for i = length(file_name) to 1 by -1 do
 		-- compare file names first to reduce calls to dir() 
 		if same_name(new_name, name_ext(file_name[i])) and
@@ -851,8 +851,7 @@ end procedure
 export function IncludePop()
 -- stop reading from current source file and restore info for previous file
 -- (if any)  
-	sequence top
-	
+	sequence top	
 	Resolve_forward_references()
 	HideLocals()
 	

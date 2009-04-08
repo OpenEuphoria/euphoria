@@ -57,90 +57,95 @@ export enum
 	S_MODE,  -- M_NORMAL, M_TEMP or M_CONSTANT
 	S_SCOPE, -- for temps at compile time: FREE or IN_USE,
 	         -- or DELETED (Translator-only)
-	S_USAGE  -- for temps: type T_UNKNOWN or T_INTEGER
+	S_USAGE, -- for temps: type T_UNKNOWN or T_INTEGER
 	         -- for vars, read/written/to be deleted
+	S_NEXT_IN_BLOCK  --  Linked list of vars in a block
 
 -- extra fields for vars (and routines) only but not temps
 export constant
-	S_FILE_NO = 6 - get_backend(), -- file number where symbol is defined
-	S_NAME = 7 - get_backend(),    -- name string
-	S_SAMEHASH = 8,                -- index of next symbol with same hash value
-	S_TOKEN = 9 - get_backend()*2, -- token number to return to parser
-	S_HASHVAL = 10,                -- hash value
-	S_NREFS = 11,                  -- number of references to this symbol
-	S_CODE = 12 - get_backend()*4  -- IL code for proc/func/type
+	S_FILE_NO = 7 - get_backend(), -- file number where symbol is defined
+	S_NAME = 8 - get_backend(),    -- name string
+	S_SAMEHASH = 9,                -- index of next symbol with same hash value
+	S_TOKEN = 10 - get_backend()*2, -- token number to return to parser
+	S_HASHVAL = 11,                -- hash value
+	S_NREFS = 12,                  -- number of references to this symbol
+	S_CODE = 13 - get_backend()*4  -- IL code for proc/func/type
 
 -- canned tokens for defaulted routine parameters
 -- for vars only:
 export constant
-	S_VARNUM = 15,    -- local variable number
-	S_INITLEVEL = 13, -- nesting level where initialized or -1
-	S_VTYPE = 14      -- variable type or NULL
-
+	
+	S_INITLEVEL = 14, -- nesting level where initialized or -1
+	S_VTYPE = 15,     -- variable type or NULL
+	S_VARNUM = 16,    -- local variable number
+	
+	S_BLOCK = 17    -- Either the containing scope for a var or the main scope for a routine
+	
 -- for routines only:
 export constant
-	S_LINETAB = 16 - get_backend()*7,      -- Line table for traceback
-	S_FIRSTLINE = 17 - get_backend()*5,    -- global line number of start of routine
-	S_TEMPS = 18 - get_backend()*8,        -- pointer to linked list of temps, or 0
-	S_OPCODE = 19,                         -- opcode to emit (predefined subprograms)
-	S_NUM_ARGS = 20 - get_backend()*9,     -- number of arguments
-	S_EFFECT = 21,                         -- side effects
-	S_REFLIST = 22,                        -- list of referenced symbols (for BIND)
-	S_RESIDENT_TASK = 23,                  -- the task that's currently using this routine
+	S_LINETAB = 18 - get_backend()*7,      -- Line table for traceback
+	S_FIRSTLINE = 19 - get_backend()*5,    -- global line number of start of routine
+	S_TEMPS = 20 - get_backend()*8,        -- pointer to linked list of temps, or 0
+	S_OPCODE = 21,                         -- opcode to emit (predefined subprograms)
+	S_NUM_ARGS = 22 - get_backend()*9,     -- number of arguments
+	S_EFFECT = 23,                         -- side effects
+	S_REFLIST = 24,                        -- list of referenced symbols (for BIND)
+	S_RESIDENT_TASK = 25,                  -- the task that's currently using this routine
 	                                       -- (at run-time) or 0 if none
-	S_SAVED_PRIVATES = 24,                 -- private data of any suspended tasks
+	S_SAVED_PRIVATES = 26,                 -- private data of any suspended tasks
 	                                       -- executing this routine
-	S_STACK_SPACE = 25 - get_backend()*12, -- amount of stack space needed by this routine
+	S_STACK_SPACE = 27 - get_backend()*12, -- amount of stack space needed by this routine
 	                                       -- (for private data)
-	S_DEF_ARGS = 26,                  -- {index of first defaulted arg in a routine, last
+	S_DEF_ARGS = 28,                  -- {index of first defaulted arg in a routine, last
 										--	nondef, list of middle defaulted params}
 	                                    -- or 0 if none
-	S_INLINE = 27                          -- 0 if routine cannot be inlined, or sequence of
+	S_INLINE = 29                          -- 0 if routine cannot be inlined, or sequence of
 	                                       -- inline code if it can
+	
 
 -- extra fields for TRANSLATOR (for temps and vars/routines)
 export constant
-	S_OBJ_MIN = 28,   -- minimum integer value
-	S_OBJ_MAX = 29,   -- maximum integer value
-	S_SEQ_LEN = 30,   -- length of a sequence
-	S_SEQ_ELEM = 31,  -- type of all elements of a sequence, or
+	S_OBJ_MIN = 30,   -- minimum integer value
+	S_OBJ_MAX = 31,   -- maximum integer value
+	S_SEQ_LEN = 32,   -- length of a sequence
+	S_SEQ_ELEM = 33,  -- type of all elements of a sequence, or
 	                  -- type returned by a function/type
-	S_TEMP_NAME = 32, -- for temps: number to use in the outputted C name
-	S_ONE_REF = 33,   -- TRUE if we see that a variable can only ever have
+	S_TEMP_NAME = 34, -- for temps: number to use in the outputted C name
+	S_ONE_REF = 35,   -- TRUE if we see that a variable can only ever have
 	                  -- 1 reference count
-	S_GTYPE = 34      -- current global idea of what the worst-case type is
+	S_GTYPE = 36      -- current global idea of what the worst-case type is
 
 -- extra fields for TRANSLATOR (for vars/routines only)
 export constant
-	S_LHS_SUBS2 = 35,        -- routine does double or more LHS subscripting
-	S_GTYPE_NEW = 36,        -- new idea being formed of global type
-	S_SEQ_LEN_NEW = 37,      -- new idea being formed of length of a sequence
-	S_SEQ_ELEM_NEW = 38,     -- new type being formed on a pass
+	S_LHS_SUBS2 = 37,        -- routine does double or more LHS subscripting
+	S_GTYPE_NEW = 38,        -- new idea being formed of global type
+	S_SEQ_LEN_NEW = 39,      -- new idea being formed of length of a sequence
+	S_SEQ_ELEM_NEW = 40,     -- new type being formed on a pass
 
-	S_OBJ_MIN_NEW = 39,      -- new integer value
-	S_OBJ_MAX_NEW = 40,      -- new integer value
+	S_OBJ_MIN_NEW = 41,      -- new integer value
+	S_OBJ_MAX_NEW = 42,      -- new integer value
 
-	S_ARG_TYPE = 41,         -- argument type info, stable and new versions
-	S_ARG_TYPE_NEW = 42,
+	S_ARG_TYPE = 43,         -- argument type info, stable and new versions
+	S_ARG_TYPE_NEW = 44,
 
-	S_ARG_SEQ_ELEM = 43,
-	S_ARG_SEQ_ELEM_NEW = 44,
+	S_ARG_SEQ_ELEM = 45,
+	S_ARG_SEQ_ELEM_NEW = 46,
 
-	S_ARG_MIN = 45,          -- argument min/max integers or NOVALUE or -NOVALUE
-	S_ARG_MAX = 46,
-	S_ARG_MIN_NEW = 47,
-	S_ARG_MAX_NEW = 48,
+	S_ARG_MIN = 47,          -- argument min/max integers or NOVALUE or -NOVALUE
+	S_ARG_MAX = 48,
+	S_ARG_MIN_NEW = 49,
+	S_ARG_MAX_NEW = 50,
 
-	S_ARG_SEQ_LEN = 49,
-	S_ARG_SEQ_LEN_NEW = 50,
-	S_RI_TARGET = 51,        -- > 0 if targeted by a routine_id call or other
+	S_ARG_SEQ_LEN = 51,
+	S_ARG_SEQ_LEN_NEW = 52,
+	S_RI_TARGET = 53,        -- > 0 if targeted by a routine_id call or other
 	                         -- external call, e.g. call to a DLL
-	S_HAS_DELETE = 52
+	S_HAS_DELETE = 54
 
 export constant
-	SIZEOF_ROUTINE_ENTRY = 27 + 25 * TRANSLATE,
-	SIZEOF_VAR_ENTRY     = 15 + 37 * TRANSLATE,
-	SIZEOF_TEMP_ENTRY    =  5 + 30 * TRANSLATE
+	SIZEOF_ROUTINE_ENTRY = 29 + 25 * TRANSLATE,
+	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,
+	SIZEOF_TEMP_ENTRY    =  6 + 32 * TRANSLATE
 
 -- Permitted values for various symbol table fields
 
@@ -148,7 +153,8 @@ export constant
 export enum
 	M_NORMAL,    -- all variables
 	M_CONSTANT,  -- literals and declared constants
-	M_TEMP       -- temporaries
+	M_TEMP,      -- temporaries
+	M_BLOCK      -- code block for scoping variables
 
 -- SCOPE values:
 export enum
@@ -354,7 +360,7 @@ export enum
 
 export integer Execute_id
 
-export sequence Code       -- The IL Code we are currently working with
+export sequence Code ={}   -- The IL Code we are currently working with
 export sequence LineTable  -- the line table we are currently building
 
 export sequence slist = {}

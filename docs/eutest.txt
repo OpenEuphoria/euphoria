@@ -26,7 +26,9 @@ stable-interpreter-path [-D REC] eutest.ex
 
 ==== Synopsis for creating report from the log
 
-##//stable-interpreter-path// eutest.ex -process-log [-html]##
+{{{
+stable-interpreter-path eutest.ex -process-log [-html]
+}}}
 
 ==== General behavior
 
@@ -49,6 +51,13 @@ work already on an interpreter that correctly works or correctly
 *fails* with them.  This option must come before the eutest.ex program
 itself in the command line and is the option with that requirement.
 * -log: Is for creating a log file for later processing
+* -verbose: Is for eutest.ex to give you detail of what it is doing
+* -i: is for specify the include path which will be passed to both the
+  interpreter and the translator when interpreting and translating the
+  test.
+* -cc: is for specifying the compiler.  This can be any one of -wat, 
+  djg, or lcc.  Each of these represent the kind of compiler we will
+  request the translator to use.
 * -process-log: Is for processing a log created by a previous
 invokation of eutest.ex output is sent to standard output as a report
 of how the tests went.  By default this is in ascii format.  Use -html

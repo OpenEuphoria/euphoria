@@ -63,13 +63,13 @@ struct block_list {
 #define ERealloc(orig, newsize) realloc(orig, newsize)
 #endif
 
-#if defined(ELINUX) || defined(EMSVC)
+#if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP) || defined(EMSVC)
 extern size_t strlcpy(char *dest, char *src, size_t maxlen);
-
-#if defined(EMSVC)
 extern size_t strlcat(char *dest, char *src, size_t maxlen);
-#define snprintf _snprintf
 #endif
+#if defined(EMSVC)
+// TODO MSVC 9.0 may have both snprintf() and _snprintf()
+#define snprintf _snprintf
 #endif
 
 #if !defined(va_copy)

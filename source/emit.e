@@ -13,6 +13,7 @@ include fwdref.e
 include parser.e
 include error.e
 include c_out.e
+include block.e
 
 export integer op_info1, op_info2
 export integer optimized_while
@@ -1215,15 +1216,22 @@ export procedure emit_op(integer op)
 		c = NewTempSym() 
 		Push(c)
 		emit_addr(c)
-			
+	
+	elsif op = EXIT_BLOCK then
+		emit_opcode( op )
+		emit_addr( Pop() )
+		assignable = FALSE
+		
 	elsif op = RETURNP then
 		emit_opcode(op)
 		emit_addr(CurrentSub)
+		emit_addr(top_block())
 		assignable = FALSE
 
 	elsif op = RETURNF then
 		emit_opcode(op)
 		emit_addr(CurrentSub)
+		emit_addr(top_block())
 		emit_addr(Pop())
 		assignable = FALSE
 

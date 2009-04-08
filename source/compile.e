@@ -3745,7 +3745,8 @@ procedure opFOR()
 	integer is_loop_var = find( SymTab[Code[pc+5]][S_SCOPE] , {SC_LOOP_VAR, SC_GLOOP_VAR})
 	if is_loop_var then
 		-- inlined loop vars are regular vars
-		c_stmt("{ int @;\n", Code[pc+5])
+		c_stmt0("{\n")
+		c_stmt("int @;\n", Code[pc+5])
 	else
 		c_stmt0("{\n")
 	end if
@@ -4047,20 +4048,21 @@ end procedure
 
 procedure opRETURNF()
 -- generate code for return from function
-	symtab_index sym, sub
+	symtab_index sym, sub, ret
 	boolean doref
 	sequence x
 
 	sub = Code[pc+1]
-
+	ret = Code[pc+3]
+	
 	-- update function return type, and sequence element type
 	SymTab[sub][S_GTYPE_NEW] = or_type(SymTab[sub][S_GTYPE_NEW],
 									   GType(Code[pc+2]))
 	SymTab[sub][S_SEQ_ELEM_NEW] = or_type(SymTab[sub][S_SEQ_ELEM_NEW],
 											 SeqElem(Code[pc+2]))
 
-	if GType(Code[pc+2]) = TYPE_INTEGER then
-		x = ObjMinMax(Code[pc+2])
+	if GType(Code[pc+3]) = TYPE_INTEGER then
+		x = ObjMinMax(ret)
 		if SymTab[sub][S_OBJ_MIN_NEW] = -NOVALUE then
 			SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
 			SymTab[sub][S_OBJ_MAX_NEW] = x[MAX]
@@ -4074,10 +4076,10 @@ procedure opRETURNF()
 			end if
 		end if
 
-	elsif GType(Code[pc+2]) = TYPE_SEQUENCE then
+	elsif GType(Code[pc+3]) = TYPE_SEQUENCE then
 		if SymTab[sub][S_SEQ_LEN_NEW] = -NOVALUE then
-			SymTab[sub][S_SEQ_LEN_NEW] = SeqLen(Code[pc+2])
-		elsif SymTab[sub][S_SEQ_LEN_NEW] != SeqLen(Code[pc+2]) then
+			SymTab[sub][S_SEQ_LEN_NEW] = SeqLen(ret)
+		elsif SymTab[sub][S_SEQ_LEN_NEW] != SeqLen(ret) then
 			SymTab[sub][S_SEQ_LEN_NEW] = NOVALUE
 		end if
 
@@ -4093,7 +4095,7 @@ procedure opRETURNF()
 	for i = 1 to length(loop_stack) do
 		if loop_stack[i][LOOP_VAR] != 0 then
 			-- active for-loop var
-			if loop_stack[i][LOOP_VAR] = Code[pc+2] then
+			if loop_stack[i][LOOP_VAR] = ret then
 				doref = FALSE
 			else
 				CDeRef(loop_stack[i][LOOP_VAR])
@@ -4107,7 +4109,7 @@ procedure opRETURNF()
 		sym = SymTab[sub][S_TEMPS]
 		while sym != 0 do
 			if SymTab[sym][S_SCOPE] != DELETED and
-			   SymTab[sym][S_TEMP_NAME] = SymTab[Code[pc+2]][S_TEMP_NAME] then
+			   SymTab[sym][S_TEMP_NAME] = SymTab[ret][S_TEMP_NAME] then
 				doref = FALSE
 				exit
 			end if
@@ -4120,7 +4122,7 @@ procedure opRETURNF()
 		while sym != 0 and SymTab[sym][S_SCOPE] <= SC_PRIVATE do
 			if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
 			   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
-				if sym = Code[pc+2] then
+				if sym = ret then
 					doref = FALSE
 					exit
 				end if
@@ -4130,29 +4132,25 @@ procedure opRETURNF()
 	end if
 
 	if doref then
-		CRef(Code[pc+2])
+		CRef(ret)
 	end if
 
 	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
 
 	-- DeRef private vars/temps before returning
-
-	sym = SymTab[sub][S_NEXT]
-	while sym != 0 and SymTab[sym][S_SCOPE] <= SC_PRIVATE do
-		if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
-			SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
-			if sym != Code[pc+2] then
-				CDeRef(sym)
-			end if
-		end if
-		sym = SymTab[sym][S_NEXT]
+	symtab_index block = Code[pc+2]
+	symtab_index sub_block = SymTab[sub][S_BLOCK]
+	while block != sub_block do
+		exit_block( block )
+		block = SymTab[block][S_BLOCK]
 	end while
-
+	exit_block( sub_block )
+	
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
 		if SymTab[sym][S_SCOPE] != DELETED then
-			if SymTab[Code[pc+2]][S_MODE] != M_TEMP or
-			   SymTab[sym][S_TEMP_NAME] != SymTab[Code[pc+2]][S_TEMP_NAME] then
+			if SymTab[ret][S_MODE] != M_TEMP or
+			   SymTab[sym][S_TEMP_NAME] != SymTab[ret][S_TEMP_NAME] then
 				-- temp type can be TYPE_NULL here if temp was not used
 				FinalDeRef(sym)
 			end if
@@ -4162,10 +4160,29 @@ procedure opRETURNF()
 	FlushDeRef()
 
 	c_stmt0("return ")
-	CName(Code[pc+2])
+	CName(ret)
 	c_puts(";\n")
 
-	pc += 3
+	pc += 4
+end procedure
+
+procedure exit_block( symtab_index block )
+	ifdef DEBUG then
+		c_puts(sprintf("\n// Exiting block %s\n", {SymTab[block][S_NAME]}))
+	end ifdef
+	sym = block
+	while sym != 0 with entry do
+		CDeRef(sym)
+	entry
+		sym = SymTab[sym][S_NEXT_IN_BLOCK]
+	end while
+	
+end procedure
+
+procedure opEXIT_BLOCK()
+	
+	exit_block( Code[pc+1] )
+	pc += 2
 end procedure
 
 procedure opRETURNP()
@@ -4180,15 +4197,14 @@ procedure opRETURNP()
 
 	-- deref the temps and privates
 	sub = Code[pc+1]
-
-	sym = SymTab[sub][S_NEXT]
-	while sym != 0 and SymTab[sym][S_SCOPE] <= SC_PRIVATE do
-		if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
-		   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
-			CDeRef(sym)
-		end if
-		sym = SymTab[sym][S_NEXT]
+	
+	symtab_index block = Code[pc+2]
+	symtab_index sub_block = SymTab[sub][S_BLOCK]
+	while block != sub_block do
+		exit_block( block )
+		block = SymTab[block][S_BLOCK]
 	end while
+	exit_block( sub_block )
 
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
@@ -4199,7 +4215,7 @@ procedure opRETURNP()
 	end while
 	FlushDeRef()
 	c_stmt0("return 0;\n")
-	pc += 2
+	pc += 3
 end procedure
 
 procedure opROUTINE_ID()
@@ -5490,7 +5506,11 @@ procedure opDELETE_ROUTINE()
 	and compare( SymTab[obj][S_OBJ], NOVALUE) then
 		-- make a copy of a literal
 		DeleteRoutine( rid )
---		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
+		
+		if SymTab[target][S_MODE] != M_TEMP then
+			CDeRef( target )
+		end if
+		
 		object val = SymTab[obj][S_OBJ]
 		if atom(val) then
 			if integer(val) then
@@ -5501,13 +5521,12 @@ procedure opDELETE_ROUTINE()
 			c_stmt0("DBL_PTR(_2)->cleanup = (cleanup_ptr)_1;\n")
 			SetBBType(target, GType(obj), ObjMinMax(obj), TYPE_OBJECT, 1)
 		else
+			c_stmt("RefDS(@);\n", obj )
 			c_stmt("_2 = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", obj )
 			c_stmt0("SEQ_PTR(_2)->cleanup = (cleanup_ptr)_1;\n")
 			SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
 		end if
-		if SymTab[target][S_MODE] != M_TEMP then
-			CDeRef( target )
-		end if
+		
 		c_stmt( "@ = _2;\n", target )
 		
 	else
@@ -5624,6 +5643,7 @@ end procedure
 procedure opUPDATE_GLOBALS()
 	pc += 1
 end procedure
+
 
 
 -- Multitasking ops
@@ -6604,6 +6624,10 @@ export procedure init_opcodes()
 				operation[i] = routine_id("opDELETE_OBJECT")
 				break
 			
+			case "EXIT_BLOCK" then
+				operation[i] = routine_id("opEXIT_BLOCK" )
+				break
+			
 			case else
 				operation[i] = -1
 		end switch
@@ -6751,7 +6775,7 @@ procedure BackEnd(atom ignore)
 	sequence string, init_name, switches, cmd_switch
 	integer tp_count, slash_ix
 	integer max_len
-
+	
 	close(c_code)
 	emit_c_output = FALSE
 

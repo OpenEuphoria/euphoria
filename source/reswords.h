@@ -218,7 +218,8 @@
 #define PROC_TAIL           205
 #define DELETE_ROUTINE      206
 #define DELETE_OBJECT       207
-#define MAX_OPCODE          207
+#define EXIT_BLOCK          208
+#define MAX_OPCODE          208
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

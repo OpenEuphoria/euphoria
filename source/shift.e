@@ -55,6 +55,7 @@ procedure init_op_info()
 	op_info[DIVIDE              ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[ELSE                ] = { FIXED_SIZE, 2, {1}, {}, {} }
 	op_info[EXIT                ] = { FIXED_SIZE, 2, {1}, {}, {} }
+	op_info[EXIT_BLOCK          ] = { FIXED_SIZE, 2, {},  {}, {} }
 	op_info[ENDWHILE            ] = { FIXED_SIZE, 2, {1}, {}, {} }
 	op_info[RETRY               ] = { FIXED_SIZE, 2, {1}, {}, {} }
 	op_info[GOTO                ] = { FIXED_SIZE, 2, {1}, {}, {} }
@@ -169,8 +170,8 @@ procedure init_op_info()
 	op_info[REMOVE              ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[REPEAT              ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[REPLACE             ] = { FIXED_SIZE, 6, {}, {5}, {} }
-	op_info[RETURNF             ] = { FIXED_SIZE, 3, {}, {}, {} }
-	op_info[RETURNP             ] = { FIXED_SIZE, 2, {}, {}, {} }
+	op_info[RETURNF             ] = { FIXED_SIZE, 4, {}, {}, {} }
+	op_info[RETURNP             ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[RETURNT             ] = { FIXED_SIZE, 1, {}, {}, {} }
 	op_info[RHS_SLICE           ] = { FIXED_SIZE, 5, {}, {}, {} }
 	op_info[RHS_SUBS            ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -247,6 +248,7 @@ export function advance( integer pc, sequence code = Code )
 
 	integer op = code[pc]
 	sequence info = op_info[op]
+	
 	if info[OP_SIZE_TYPE] = FIXED_SIZE then
 		return pc + info[OP_SIZE]
 	else

@@ -207,5 +207,6 @@ static char *opnames[] = {
 	"SWITCH_RT",
 	"PROC_TAIL",
 	"DELETE_ROUTINE",
-	"DELETE_OBJECT"
+	"DELETE_OBJECT",
+	"EXIT_BLOCK"
 };

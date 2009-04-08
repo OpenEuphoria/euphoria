@@ -94,7 +94,8 @@ EU_CORE_FILES = &
 	keylist.e &
 	fwdref.e &
 	shift.e &
-	inline.e
+	inline.e &
+	block.e
 
 EU_INTERPRETER_FILES = &
 	compress.e &
@@ -209,6 +210,7 @@ MEMFLAG = $(MEMFLAG) /dINT_CODES
 DEBUGFLAG = /d2 /dEDEBUG /dHEAP_CHECK
 #DEBUGFLAG = /d2 /dEDEBUG /dDEBUG_OPCODE_TRACE
 DEBUGLINK = debug all
+EUDEBUG=-D DEBUG
 !endif
 
 !ifndef EX
@@ -594,14 +596,14 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_T
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !endif
 !endif

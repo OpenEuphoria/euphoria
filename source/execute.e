@@ -1216,23 +1216,39 @@ integer result
 result = 0
 object result_val
 
+procedure exit_block( symtab_index block )
+	a = SymTab[block][S_NEXT_IN_BLOCK]	
+	while a  do
+		a = SymTab[a][S_NEXT_IN_BLOCK]	
+	end while
+end procedure
+
+procedure opEXIT_BLOCK()
+	exit_block( Code[pc+1] )
+	pc += 2
+end procedure
+
 procedure opRETURNP()   
 -- return from procedure (or function)
 	symtab_index arg, sub, caller
 	
 	sub = Code[pc+1]
 	
+	
+	-- set sub privates to NOVALUE -- necessary? - we do it at routine entry
+	symtab_index block = Code[pc+2]
+	symtab_index sub_block = SymTab[sub][S_BLOCK]
+	
+	while block != sub_block do
+		exit_block( block )
+		block = SymTab[block][S_BLOCK]
+	end while
+	exit_block( sub_block )
+
 	-- set up for caller
 	pc = call_stack[$-1]
 	call_stack = call_stack[1..$-2]
 	
-	-- set sub privates to NOVALUE -- necessary? - we do it at routine entry
-	arg = SymTab[sub][S_NEXT]
-	while arg and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
-		val[arg] = NOVALUE
-		arg = SymTab[arg][S_NEXT]
-	end while
-
 	SymTab[sub][S_RESIDENT_TASK] = 0
 	
 	if length(call_stack) then
@@ -1251,7 +1267,7 @@ end procedure
 
 procedure opRETURNF()  
 -- return from function
-	result_val = val[Code[pc+2]]
+	result_val = val[Code[pc+3]]
 	result = call_stack[$-1] - 1
 	opRETURNP()
 end procedure
@@ -4011,6 +4027,9 @@ procedure do_exec()
 				break
 			case XOR_BITS then
 				opXOR_BITS()
+				break
+			case EXIT_BLOCK then
+				opEXIT_BLOCK()
 				break
 			case else
 				RTFatal( sprintf("Unknown opcode then %d", op ) )
