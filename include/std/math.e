@@ -1669,7 +1669,7 @@ integer use_r2 = 0
 --	# ##mu##, an atom, The Normal Distribution's mean. Defaults to 0.0
 --	# ##sigma##, an atom, The Normal Distribution's standard deviation. Defaults to 1.0
 --	# ##set##, an integer. The number of random numbers to return. If this is
---             zero, a single atom is returned. For numbers greater than zero
+--             zero or omitted, a single atom is returned. For numbers greater than zero
 --             it returns a sequence containing the requested count of random
 --             numbers.
 --
