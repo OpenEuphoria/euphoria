@@ -11,7 +11,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.4 )
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 SET( CMAKE_BUILD_TYPE "Release" )
 
-INCLUDE( "${CMAKE_SOURCE_DIR}/source/CMakeMacros.cmake" )
+INCLUDE ("${CMAKE_SOURCE_DIR}/source/CMakeMacros.cmake" )
 
 #
 # Project Setup
@@ -22,7 +22,6 @@ SET( VER_MAJ 4 )
 SET( VER_MIN 0 )
 SET( VER_PAT 0 )
 SET( VER_TYPE "development" )
-
 
 INCLUDE(InstallRequiredSystemLibraries)
 

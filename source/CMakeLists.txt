@@ -74,7 +74,7 @@ INCLUDE_DIRECTORIES( "$ENV{EUDIR}" )
 
 # Core files (backend, translator and interpreter)
 SET( EU_CORE_FILES block.e common.e emit.e error.e fwdref.e global.e inline.e keylist.e main.e mode.e
-  opnames.e parser.e pathopen.e reswords.e scanner.e scinot.e shift.e symtab.e )
+  opnames.e parser.e pathopen.e platform.e reswords.e scanner.e scinot.e shift.e symtab.e )
 
 # Temporary backend library
 SET( EU_BACKEND_SOURCES be_alloc.c be_callc.c be_decompress.c be_execute.c be_inline.c
@@ -84,8 +84,8 @@ ADD_LIBRARY( eu_back STATIC ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
 
 # Euphoria runtime library
 SET( EU_LIB_SOURCES be_alloc.c be_callc.c be_decompress.c be_inline.c be_machine.c be_pcre.c
-  be_rev.c be_runtime.c be_socket.c be_task.c be_w.c version.h )
-ADD_LIBRARY( eu STATIC ${PCRE_SOURCES} ${EU_LIB_SOURCES} )
+  be_rev.c be_runtime.c be_socket.c be_task.c be_w.c version.h ${PCRE_SOURCES} )
+ADD_LIBRARY( eu STATIC ${EU_LIB_SOURCES} )
 
 INSTALL( TARGETS eu ARCHIVE DESTINATION bin COMPONENT core )
 

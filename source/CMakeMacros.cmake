@@ -10,19 +10,11 @@
 
 SET( TRANSLATOR  "$ENV{EUDIR}/bin/euc" )
 SET( INTERPRETER "$ENV{EUDIR}/bin/eui" )
-SET( LINK_FLAGS "" )
-SET( EXTRA_LIBS "" )
-SET( EXECUTABLE_FLAG "" )
-SET( LIB_PATHS "" )
-SET( DEBUG 0 )
-
-IF( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  SET( DEBUG 1 )
-ENDIF()
 
 # This hits Cygwin, MinGW and all Unixes
 IF( CMAKE_COMPILER_IS_GNUCC AND NOT DEBUG )
-  SET( CMAKE_C_FLAGS "-w -ffast-math -O3 -Os" )
+  SET( C_FLAGS_RELEASE "-w -ffast-math -O3 -Os" )
+  SET( C_FLAGS_DEBUG   "-g3 -O0 -Wall" )
 ENDIF()
 
 IF( WIN32 )
@@ -43,24 +35,20 @@ IF( WIN32 )
   ENDIF()
 
   IF( WATCOM )
-    SET( LIB_PATHS "$ENV{WATCOM}/lib386/nt" )
-    SET( EXECUTABLE_FLAG "WIN32" )
-
     ADD_DEFINITIONS( -DEWATCOM -DEOW )
 
-    IF( DEBUG )
-      SET( CMAKE_C_FLAGS "/d2 /dEDEBUG /dHEAP_CHECK" )
-      SET( LINK_FLAGS "DEBUG ALL" )
-    ELSE()
-      SET( CMAKE_C_FLAGS "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol /zp8 " )
-      SET( LINK_FLAGS "OPTION QUIET OPTION CASEEXACT OPTION ELIMINATE" )
-    ENDIF()
+    SET( LIB_PATHS          "$ENV{WATCOM}/lib386/nt" )
+    SET( EXECUTABLE_FLAG    "WIN32" )
+    SET( C_FLAGS_RELEASE    "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol /zp8 " )
+    SET( C_FLAGS_DEBUG      "${CMAKE_C_FLAGS_RELEASE} /d2 /dEDEBUG /dHEAP_CHECK" )
+    SET( LINK_FLAGS_RELEASE "OPTION QUIET OPTION CASEEXACT OPTION ELIMINATE" )
+    SET( LINK_FLAGS_DEBUG   "${LINK_FLAGS_RELEASE} DEBUG ALL" )
   ENDIF()
 ENDIF( WIN32 )
 
 IF( UNIX )
   ADD_DEFINITIONS( -DEUNIX )
-  SET( LIBPATHS "/MinGW/lib;/lib;/usr/lib;/usr/local/lib;/opt/lib;/opt/local/lib" )
+  SET( LIB_PATHS "/MinGW/lib;/lib;/usr/lib;/usr/local/lib;/opt/lib;/opt/local/lib" )
 
   # Platform specific
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
@@ -84,7 +72,7 @@ IF( UNIX )
   ENDIF()
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
-    ADD_DEFINITIONS( -DELINUX=1 )
+    ADD_DEFINITIONS( -DELINUX )
   ENDIF()
 ENDIF()
 
@@ -121,6 +109,15 @@ FIND_LIBRARY( WINSOCK_LIB ws2_32 PATHS ${LIB_PATHS} )
 IF( WINSOCK_LIB )
   MESSAGE( STATUS "winsock library found, adding to linker" )
   LIST( APPEND EXTRA_LIBS "${WINSOCK_LIB}" )
+ENDIF()
+
+IF( CMAKE_BUILD_TYPE MATCHES "Debug" )
+  ADD_DEFINITIONS( -DEDEBUG )
+  SET( CMAKE_C_FLAGS ${C_FLAGS_DEBUG} )
+  SET( LINK_FLAGS    ${LINK_FLAGS_DEBUG} )
+ELSE()
+  SET( CMAKE_C_FLAGS ${C_FLAGS_RELEASE} )
+  SET( LINK_FLAGS    ${LINK_FLAGS_RELEASE} )
 ENDIF()
 
 #
