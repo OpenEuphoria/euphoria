@@ -73,7 +73,7 @@ INCLUDE_DIRECTORIES( "$ENV{EUDIR}" )
 #
 
 # Core files (backend, translator and interpreter)
-SET( EU_CORE_FILES common.e emit.e error.e fwdref.e global.e inline.e keylist.e main.e mode.e
+SET( EU_CORE_FILES block.e common.e emit.e error.e fwdref.e global.e inline.e keylist.e main.e mode.e
   opnames.e parser.e pathopen.e reswords.e scanner.e scinot.e shift.e symtab.e )
 
 # Temporary backend library
