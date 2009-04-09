@@ -1,4 +1,4 @@
 #!/bin/sh
 
-eui eutest.ex $@
+eui $EUDIR/source/eutest.ex $@
 
