@@ -590,7 +590,9 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 		if deferred_inlining then
 			SymTab[CurrentSub][S_STACK_SPACE] += 1
 		else
-			param_num += 1
+			if param_num != -1 then
+				param_num += 1
+			end if
 		end if
 		SymTab[var][S_USAGE] = U_READ + U_WRITTEN
 		if reuse then
@@ -821,7 +823,6 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 --		end if
 		end if
 	end if
-	
 	
 	return prolog & inline_code & epilog
 end function

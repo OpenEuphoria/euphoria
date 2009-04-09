@@ -3649,6 +3649,7 @@ procedure SubProg(integer prog_type, integer scope)
 	param_num = -1
 	StraightenBranches()
 	check_inline( p )
+	param_num = -1
 	EnterTopLevel()
 end procedure
 
