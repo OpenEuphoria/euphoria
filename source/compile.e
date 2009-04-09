@@ -6814,7 +6814,7 @@ procedure BackEnd(atom ignore)
 	-- Now, actually emit the C code */
 	emit_c_output = TRUE
 
-	c_code = open("main-.c", "w")
+	c_code = open(output_dir & "main-.c", "w")
 	if c_code = -1 then
 		CompileErr("Can't open main-.c for output\n")
 	end if
@@ -7063,7 +7063,7 @@ procedure BackEnd(atom ignore)
 
 	close(c_code)
 
-	c_code = open("init-.c", "a")
+	c_code = open(output_dir & "init-.c", "a")
 	if c_code = -1 then
 		CompileErr("Can't open init-.c for append\n")
 	end if
