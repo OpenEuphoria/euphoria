@@ -10,6 +10,7 @@
 
 SET( TRANSLATOR  "$ENV{EUDIR}/bin/euc" )
 SET( INTERPRETER "$ENV{EUDIR}/bin/eui" )
+SET( EXTRA_LIBS "" )
 
 # This hits Cygwin, MinGW and all Unixes
 IF( CMAKE_COMPILER_IS_GNUCC AND NOT DEBUG )
@@ -79,7 +80,7 @@ ENDIF()
 # Let CMake find the libraries, if found, we need to link to it, if not
 # then the said functionality appears in libc already, no extra lib needed.
 SET( CMAKE_FIND_LIBRARY_PREFIXES "lib;" )
-SET( CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.a;.so;.dylib" )
+SET( CMAKE_FIND_LIBRARY_SUFFIXES ".so;.dylib;.lib;.a" )
 
 FIND_LIBRARY( DL_LIB dl PATHS ${LIB_PATHS} )
 IF( DL_LIB )
@@ -119,6 +120,8 @@ ELSE()
   SET( CMAKE_C_FLAGS ${C_FLAGS_RELEASE} )
   SET( LINK_FLAGS    ${LINK_FLAGS_RELEASE} )
 ENDIF()
+
+MESSAGE( STATUS "Libs: ${EXTRA_LIBS}" )
 
 #
 # Helper Macros
