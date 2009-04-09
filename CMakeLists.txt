@@ -1,30 +1,6 @@
 #
 # CMake build file for Euphoria (All Platforms, All Compilers)
 #
-# Quick Instructions:
-#
-#   1. Download/Install CMake (http://cmake.org)
-#   2. cd C:\Euphoria
-#   3. mkdir build
-#   4. cd build
-#   5. cmake -G "Watcom WMake" ..
-#   6. wmake
-#
-# If you prefer a GUI, you can:
-#
-#   1. Download/Install CMake (http://cmake.org)
-#   2. cd C:\Euphoria
-#   3. cmake-gui.exe
-#   4. Select C:\Euphoria for the "Where is the source code:" prompt
-#   5. Select C:\Euphoria\build for the "Where to build the binaries" prompt
-#   6. Click "Configure"
-#   7. Change any options you wish (use Advanced/Group View if you want more options)
-#   8. Click "Configure" again if you change any options
-#   9. cd C:\Euphoria\build
-#  10. wmake
-#
-#   You can change these options any time by running cmake-gui again.
-#
 
 #
 # CMake settings
@@ -42,25 +18,97 @@ INCLUDE( "$ENV{EUDIR}/source/CMakeMacros.cmake" )
 #
 
 PROJECT( Euphoria )
-
-#
-# Versioning
-#
-
 SET( VER_MAJ 4 )
 SET( VER_MIN 0 )
 SET( VER_PAT 0 )
 SET( VER_TYPE "development" )
+
+
+INCLUDE(InstallRequiredSystemLibraries)
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Euphoria Programming Language")
+SET(CPACK_PACKAGE_VENDOR "The OpenEuphoria Group")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/file_id.diz")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+SET(CPACK_PACKAGE_VERSION_MAJOR "${VER_MAJ}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${VER_MIN}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${VER_PAT}")
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Euphoria${VER_MAJ}.${VER_MIN}")
+IF(WIN32 AND NOT UNIX)
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_CURRENT_SOURCE_DIR}\\\\source\\\\euphoria.ico")
+  SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} RapidEuphoria")
+  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openeuphoria.org\\\\EUforum\\\\")
+  SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.rapideuphoria.com")
+  SET(CPACK_NSIS_CONTACT "jeremy@cowgar.com")
+  SET(CPACK_NSIS_MODIFY_PATH ON)
+ELSE(WIN32 AND NOT UNIX)
+  SET(CPACK_STRIP_FILES "bin/eui.exe")
+  SET(CPACK_SOURCE_STRIP_FILES "")
+ENDIF(WIN32 AND NOT UNIX)
+SET(CPACK_PACKAGE_EXECUTABLES "eui" "Euphoria Interpreter")
+INCLUDE(CPack)
 
 #
 # Options
 #
 
 OPTION( USE_INT_CODES   "Use INT_CODES"                  OFF )
-OPTION( USE_MANAGED_MEM "Use Managed Memory"             ON  )
-OPTION( ENABLE_DEBUG    "Enable debug"                   OFF )
+IF( NOT UNIX AND NOT MINGW )
+  OPTION( USE_MANAGED_MEM "Use Managed Memory"           ON  )
+ENDIF()
+
 OPTION( BUILD_RELEASE   "Build a release version"        OFF )
 OPTION( BUILD_TOOLS     "Build the tools (eutest/eudoc)" OFF )
 OPTION( BUILD_DOCS      "Build the documentation"        OFF )
+
+#
+# General Installation
+#
+
+INSTALL( DIRECTORY include DESTINATION "./"
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+  DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  COMPONENT "Core"
+  PATTERN ".svn" EXCLUDE
+  PATTERN "creole" EXCLUDE )
+
+INSTALL( DIRECTORY demo DESTINATION "./"
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+  DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  COMPONENT "Demos"
+  PATTERN ".svn" EXCLUDE
+  PATTERN "*.exe" EXCLUDE
+  PATTERN "*.err" EXCLUDE
+  PATTERN "*.edb" EXCLUDE )
+
+INSTALL( DIRECTORY tutorial DESTINATION "./"
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+  DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  COMPONENT "Demos"
+  PATTERN ".svn" EXCLUDE
+  PATTERN "*.exe" EXCLUDE
+  PATTERN "*.err" EXCLUDE
+  PATTERN "tutorial/*" )
+
+INSTALL( DIRECTORY source DESTINATION "./"
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+  DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  COMPONENT "Source"
+  PATTERN ".svn" EXCLUDE
+  PATTERN "*.o" EXCLUDE
+  PATTERN "*.obj" EXCLUDE
+  PATTERN "build*" EXCLUDE
+  PATTERN "source/*" )
+
+#
+# Sub Directories
+#
 
 ADD_SUBDIRECTORY( source )

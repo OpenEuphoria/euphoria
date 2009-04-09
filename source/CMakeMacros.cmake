@@ -13,8 +13,15 @@ SET( INTERPRETER "$ENV{EUDIR}/bin/eui" )
 SET( LINK_FLAGS "" )
 SET( EXTRA_LIBS "" )
 SET( EXECUTABLE_FLAG "" )
+SET( LIB_PATHS "" )
+SET( DEBUG 0 )
 
-IF( CMAKE_COMPILER_IS_GNUCC AND NOT ENABLE_DEBUG )
+IF( CMAKE_BUILD_TYPE MATCHES "Debug" )
+  SET( DEBUG 1 )
+ENDIF()
+
+# This hits Cygwin, MinGW and all Unixes
+IF( CMAKE_COMPILER_IS_GNUCC AND NOT DEBUG )
   SET( CMAKE_C_FLAGS "-w -ffast-math -O3 -Os" )
 ENDIF()
 
@@ -27,6 +34,7 @@ IF( WIN32 )
   ENDIF()
 
   IF( MINGW )
+    SET( LIB_PATHS "/MinGW/lib" )
     ADD_DEFINITIONS( -DEMINGW -mno-cygwin -mwindows )
   ENDIF()
 
@@ -35,84 +43,84 @@ IF( WIN32 )
   ENDIF()
 
   IF( WATCOM )
+    SET( LIB_PATHS "$ENV{WATCOM}/lib386/nt" )
     SET( EXECUTABLE_FLAG "WIN32" )
+
     ADD_DEFINITIONS( -DEWATCOM -DEOW )
 
-    SET( CMAKE_C_FLAGS "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol /zp8 " )
-    SET( LINK_FLAGS "OPTION QUIET OPTION CASEEXACT OPTION ELIMINATE" )
-
-    FIND_LIBRARY( WSOCK_LIB ws2_32 PATHS "$ENV{WATCOM}/lib386/nt")
-    IF( NOT WSOCK_LIB )
-      MESSAGE( FATAL_ERROR  "Could not located the winsock library (ws2_32)")
+    IF( DEBUG )
+      SET( CMAKE_C_FLAGS "/d2 /dEDEBUG /dHEAP_CHECK" )
+      SET( LINK_FLAGS "DEBUG ALL" )
+    ELSE()
+      SET( CMAKE_C_FLAGS "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol /zp8 " )
+      SET( LINK_FLAGS "OPTION QUIET OPTION CASEEXACT OPTION ELIMINATE" )
     ENDIF()
-
-    LIST( APPEND EXTRA_LIBS "${WSOCK_LIB}" )
   ENDIF()
 ENDIF( WIN32 )
 
 IF( UNIX )
-  ADD_DEFINITIONS( -DEUNIX=1 )
-
-  SET( CMAKE_FIND_LIBRARY_PREFIXES "lib" )
-  SET( CMAKE_FIND_LIBRARY_SUFFIXES ".so;.dylib" )
+  ADD_DEFINITIONS( -DEUNIX )
+  SET( LIBPATHS "/MinGW/lib;/lib;/usr/lib;/usr/local/lib;/opt/lib;/opt/local/lib" )
 
   # Platform specific
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    SET( BSD 1 )
-    SET( OSX 1 )
     ADD_DEFINITIONS( -DEBSD -DEBSD62 -DOSX )
   ENDIF()
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "SunOS" )
-    SET( BSD 1 )
-    SET( SUNOS 1 )
     ADD_DEFINITIONS( -DEBSD -DEBSD62 -DESUNOS )
   ENDIF()
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
-    SET( BSD 1 )
-    SET( FREEBSD 1 )
     ADD_DEFINITIONS( -DEBSD -DEBSD62 -DEFREEBSD )
   ENDIF()
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" )
-    SET( BSD 1 )
-    SET( OPENBSD 1 )
     ADD_DEFINITIONS( -DEBSD -DEBSD62 -DEOPENBSD )
   ENDIF()
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "NetBSD" )
-    SET( BSD 1 )
-    SET( NETBSD 1 )
     ADD_DEFINITIONS( -DEBSD -DEBSD62 -DENETBSD )
   ENDIF()
 
   IF( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
-    SET( LINUX 1 )
     ADD_DEFINITIONS( -DELINUX=1 )
   ENDIF()
+ENDIF()
 
-  # Let CMake find the libraries, if found, we need to link to it, if not
-  # then the said functionality appears in libc already, no extra lib needed.
-  FIND_LIBRARY( DL_LIB dl )
-  IF( DL_LIB )
-    LIST( APPEND EXTRA_LIBS "${DL_LIB}" )
-  ENDIF()
+# Let CMake find the libraries, if found, we need to link to it, if not
+# then the said functionality appears in libc already, no extra lib needed.
+SET( CMAKE_FIND_LIBRARY_PREFIXES "lib;" )
+SET( CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.a;.so;.dylib" )
 
-  FIND_LIBRARY( RESOLV_LIB resolv )
-  IF( RESOLV_LIB )
-    LIST( APPEND EXTRA_LIBS "${RESOLV_LIB}" )
-  ENDIF()
+FIND_LIBRARY( DL_LIB dl PATHS ${LIB_PATHS} )
+IF( DL_LIB )
+  MESSAGE( STATUS "dl library found, adding to linker" )
+  LIST( APPEND EXTRA_LIBS "${DL_LIB}" )
+ENDIF()
 
-  FIND_LIBRARY( NSL_LIB nsl )
-  IF( NSL_LIB )
-    LIST( APPEND EXTRA_LIBS "${NSL_LIB}" )
-  ENDIF()
+FIND_LIBRARY( RESOLV_LIB resolv PATHS ${LIB_PATHS} )
+IF( RESOLV_LIB )
+  MESSAGE( STATUS "resolv library found, adding to linker" )
+  LIST( APPEND EXTRA_LIBS "${RESOLV_LIB}" )
+ENDIF()
 
-  FIND_LIBRARY( MATH_LIB m )
-  IF( MATH_LIB )
-    LIST( APPEND EXTRA_LIBS "${MATH_LIB}" )
-  ENDIF()
+FIND_LIBRARY( NSL_LIB nsl PATHS ${LIB_PATHS} )
+IF( NSL_LIB )
+  MESSAGE( STATUS "nsl library found, adding to linker" )
+  LIST( APPEND EXTRA_LIBS "${NSL_LIB}" )
+ENDIF()
+
+FIND_LIBRARY( MATH_LIB m PATHS ${LIB_PATHS} )
+IF( MATH_LIB )
+  MESSAGE( STATUS "math library found, adding to linker" )
+  LIST( APPEND EXTRA_LIBS "${MATH_LIB}" )
+ENDIF()
+
+FIND_LIBRARY( WINSOCK_LIB ws2_32 PATHS ${LIB_PATHS} )
+IF( WINSOCK_LIB )
+  MESSAGE( STATUS "winsock library found, adding to linker" )
+  LIST( APPEND EXTRA_LIBS "${WINSOCK_LIB}" )
 ENDIF()
 
 #
