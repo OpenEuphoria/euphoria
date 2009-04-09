@@ -121,8 +121,6 @@ ELSE()
   SET( LINK_FLAGS    ${LINK_FLAGS_RELEASE} )
 ENDIF()
 
-MESSAGE( STATUS "Libs: ${EXTRA_LIBS}" )
-
 #
 # Helper Macros
 #
