@@ -4061,7 +4061,7 @@ procedure opRETURNF()
 	SymTab[sub][S_SEQ_ELEM_NEW] = or_type(SymTab[sub][S_SEQ_ELEM_NEW],
 											 SeqElem(Code[pc+2]))
 
-	if GType(Code[pc+3]) = TYPE_INTEGER then
+	if GType(ret) = TYPE_INTEGER then
 		x = ObjMinMax(ret)
 		if SymTab[sub][S_OBJ_MIN_NEW] = -NOVALUE then
 			SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
@@ -4076,7 +4076,7 @@ procedure opRETURNF()
 			end if
 		end if
 
-	elsif GType(Code[pc+3]) = TYPE_SEQUENCE then
+	elsif GType(ret) = TYPE_SEQUENCE then
 		if SymTab[sub][S_SEQ_LEN_NEW] = -NOVALUE then
 			SymTab[sub][S_SEQ_LEN_NEW] = SeqLen(ret)
 		elsif SymTab[sub][S_SEQ_LEN_NEW] != SeqLen(ret) then
@@ -4105,7 +4105,7 @@ procedure opRETURNF()
 
 	-- deref the temps and privates
 	-- check if we are derefing the return var/temp
-	if SymTab[Code[pc+2]][S_MODE] = M_TEMP then
+	if SymTab[ret][S_MODE] = M_TEMP then
 		sym = SymTab[sub][S_TEMPS]
 		while sym != 0 do
 			if SymTab[sym][S_SCOPE] != DELETED and
@@ -4135,7 +4135,7 @@ procedure opRETURNF()
 		CRef(ret)
 	end if
 
-	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
+	SymTab[ret][S_ONE_REF] = FALSE
 
 	-- DeRef private vars/temps before returning
 	symtab_index block = Code[pc+2]
