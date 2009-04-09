@@ -13,8 +13,6 @@ export constant
 export constant
 	EXTRA_CHECK = mode:get_extra_check()
 
-export boolean mybsd = FALSE -- set to true if very little RAM available (build fails)
-
 -- specific C compiler used (one may be TRUE)
 export constant
 	EWATCOM  = TRUE,

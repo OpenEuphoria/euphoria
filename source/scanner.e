@@ -227,12 +227,6 @@ export procedure AppendSourceLine()
 		-- record the options and maybe keep the source line too
 		src = ThisLine
 
-		ifdef UNIX then
-			if TRANSLATE and mybsd then
-				src = ""  -- save space, only 8Mb available!
-			end if
-		end ifdef
-
 		if OpTrace then
 			options = SOP_TRACE
 		end if

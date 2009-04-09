@@ -27,7 +27,6 @@ function GetSourceName()
 	integer src_file
 	boolean dot_found
 	sequence src_name
-	sequence SVN_REVISION
 
 	if Argc >= 3 then
 		src_name = Argv[3]
@@ -135,14 +134,8 @@ procedure main()
 				eudir = getenv("HOMEDRIVE") & eudir & "EUPHORIA"
 			end if
 		end ifdef
-
-	else
-		-- This is a special RDS hack because the RapidEuphoria shared
-		-- host machine does not provide enough memory to complete a
-		-- normal build.
-		mybsd = match("/usr231/home/r/h/rhc", eudir) > 0 --RapidEuphoria.com
-
 	end if
+
 	TempErrName = "ex.err"
 	TempWarningName = STDERR
 	display_warnings = 1
