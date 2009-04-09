@@ -81,18 +81,20 @@ procedure delete_files(integer doit, sequence objextn)
 	if keep then
 		return
 	end if
+
+	sequence rm_cmd
+	if TUNIX or gcc_option then
+		rm_cmd = "rm "
+	else
+		rm_cmd = "del "
+	end if
 	
 	for i = 1 to length(files_to_delete) do
-		if TUNIX then
-			puts(doit, "rm ")
-		else
-			puts(doit, "del ")
-		end if
-		puts(doit, files_to_delete[i] & HOSTNL)
+		puts(doit, rm_cmd & files_to_delete[i] & HOSTNL)
 		
 		-- Assume each '.c' file creates a single object file.
 		if files_to_delete[i][$] = 'c' then
-			printf(doit, "rm %s%s" & HOSTNL, {files_to_delete[i][1..$-2], objextn})
+			printf(doit, "%s%s%s" & HOSTNL, {rm_cmd, files_to_delete[i][1..$-2], objextn})
 		end if
 	end for 
 
