@@ -391,6 +391,11 @@ int rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
 int con_was_opened = FALSE; /* TRUE if CON device was ever opened */
 int current_screen = MAIN_SCREEN;
 
+int EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console support
+                      for euid running on Windows systems that do not support 
+                      'full screen DOS' mode; eg. Vista.
+                   */
+
 /*******************/
 /* Local variables */
 /*******************/
@@ -425,6 +430,35 @@ int wingetch();
 /*********************/
 /* Defined functions */
 /*********************/
+/* Copies character from one buffer (source) to another (target). 
+   It copies a maximum of the smaller of 'max_chars' and strlen(source) from source.
+   It adds a null character at the end of the copied characters in target but only
+   if it can fit it in.
+   
+   It returns the number of remaining characters positions in target. If this is 
+   less than 1 then the target buffer was not big enough to hold the source and
+   the target buffer is not terminated with a null character.
+*/
+int charcopy(char *target, char *source, int max_chars, int buff_size)
+{
+	int chars_remaining = max_chars;
+	int buff_remaining = buff_size;
+	
+	while ((chars_remaining > 0) && (buff_remaining > 0) && (*source != '\0'))
+	{
+		*target = *source;
+		target++;
+		source++;
+		chars_remaining--;
+		buff_remaining--;
+	}
+	
+	if (buff_remaining > 0)
+		*target = '\0';
+		
+	return buff_remaining;
+}
+
 
 #ifdef ELINUX
 // for largefile support on 32bit

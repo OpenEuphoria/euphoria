@@ -45,6 +45,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
+extern int EuConsole;
 extern int clocks_per_sec;
 extern int clk_tck;
 #ifdef EWINDOWS
@@ -183,6 +184,7 @@ void be_init()
 	long c;
 	char *temp;
 
+	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;
 #ifdef ELCC 
 	clk_tck = CLOCKS_PER_SEC;

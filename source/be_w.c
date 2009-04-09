@@ -49,12 +49,12 @@
 /******************/
 /* Local defines  */
 /******************/
-#define MAX_SCREEN_WIDTH 200 /* what if resolutions get really high? >1280 */
-#define TAB_WIDTH 8    /* power of 2 assumed */
+#define TAB_WIDTH 4    /* power of 2 assumed */
 
 /**********************/
 /* Imported variables */
 /**********************/
+extern int EuConsole;
 extern int current_screen;
 extern int line_max, col_max;
 extern int con_was_opened;
@@ -96,8 +96,9 @@ static COORD buff_size;
 static COORD buff_start;
 static SMALL_RECT screen_loc;
 #endif
-static char expanded_string[MAX_SCREEN_WIDTH];
-static char *expanded_ptr = expanded_string;
+static char *expanded_string = 0;
+static char *expanded_ptr;
+static char *expanded_end;
 static int must_flush = TRUE; /* flush output to screen or not */
 static int collect_next;   /* place to store next collect output */
 static int collect_free;   /* number of chars of empty space remaining */
@@ -306,8 +307,8 @@ void show_console()
                                 NULL);
     }
 
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
-	/* when EUCONS is set, allow stderr to be redirected so rxvt (which redirects it to a pipe) will work */
+    if (EuConsole){
+	/* when this is set, allow stderr to be redirected so rxvt (which redirects it to a pipe) will work */
     	stderr_cons = GetStdHandle(STD_ERROR_HANDLE);
     	err_to_screen = GetConsoleScreenBufferInfo(stderr_cons, &info);
     } else {
@@ -345,7 +346,7 @@ static void end_of_line(int c)
             COORD pos;
             CHAR_INFO fill_char;
 
-            if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+            if (EuConsole){
                 pos.X = 0;
                 pos.Y = console_info.dwSize.Y-1;
                 SetConsoleCursorPosition(console_output, pos);
@@ -394,13 +395,12 @@ static void MyWriteConsole(char *string, int nchars)
     COORD ch;
 
     show_console();
-    /* hack - if we are eui, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
+    /* hack - if we are eui, output something to avoid data appearing on the
+     last line of the console which we later on will not be able to see */
     GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
-    if ( (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1) &&
-    (already_had_console==1) && !first) {
+    if ( EuConsole && (already_had_console==1) && !first) {
         if (!(console_info.dwCursorPosition.Y < console_info.dwSize.Y - 1))
         {
-            //WriteConsole(console_output, "\n", 1, &i, NULL);
             end_of_line('\n');
         }
         first = 1;
@@ -413,60 +413,67 @@ static void MyWriteConsole(char *string, int nchars)
     screen_loc.Left = console_info.dwCursorPosition.X; //screen_col-1;
     screen_loc.Right = console_info.dwMaximumWindowSize.X - 1;
 
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
 
-    ch.X = screen_loc.Left;
-    ch.Y = screen_loc.Top;
-	if (old_string == 0) {
-		oldstr_len = max(nchars + 3, 256);
-		old_string = (char *)malloc(oldstr_len);
-		if (old_string == 0) return;
-	}
-
-	if (nchars > oldstr_len) {
-		oldstr_len = nchars + 3;
-		old_string = (char *)realloc(old_string, oldstr_len);
-		if (old_string == 0) return;
-	}
-
-    strlcpy(old_string, string, nchars);
-
-	// Blank out any EOL characters
-    for (i = 0; i < nchars; i++)
-    {
-        if (old_string[i] == '\n')
-            old_string[i] = ' ';
-        else if (old_string[i] == '\r')
-            old_string[i] = ' ';
-    }
-
-    SetConsoleCursorPosition(console_output, ch);
-    WriteConsole(console_output, old_string, nchars, &i, NULL);
-    SetConsoleCursorPosition(console_output, ch);
+	    ch.X = screen_loc.Left;
+	    ch.Y = screen_loc.Top;
+		if (old_string == 0) {
+			oldstr_len = max(nchars + 3, 256);
+			old_string = (char *)malloc(oldstr_len);
+			if (old_string == 0) return;
+		}
+	
+		if (nchars > oldstr_len) {
+			oldstr_len = nchars + 3;
+			old_string = (char *)realloc(old_string, oldstr_len);
+			if (old_string == 0) return;
+		}
+	
+	    charcopy(old_string, string, nchars, oldstr_len);
+	
+		// Blank out any EOL characters
+	    for (i = 0; i < nchars; i++)
+	    {
+	        if (old_string[i] == '\n')
+	            old_string[i] = ' ';
+	        else if (old_string[i] == '\r')
+	            old_string[i] = ' ';
+	    }
+	
+	    SetConsoleCursorPosition(console_output, ch);
+	    WriteConsole(console_output, old_string, nchars, &i, NULL);
+	    SetConsoleCursorPosition(console_output, ch);
 
     } else {
 
-    i = 0;
-    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
-        if (line_buffer != 0) {
-            EFree(line_buffer);
-        }
-        line_buffer_size = console_info.dwMaximumWindowSize.X;
-        line_buffer = (CHAR_INFO*) EMalloc( sizeof( CHAR_INFO ) * line_buffer_size );
+	    i = 0;
+	    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
+	        if (line_buffer != 0) {
+	            EFree(line_buffer);
+	        }
+	        line_buffer_size = console_info.dwMaximumWindowSize.X;
+	        line_buffer = (CHAR_INFO*) EMalloc( sizeof( CHAR_INFO ) * line_buffer_size );
+	    }
+	
+	    while (*string != '\0' && i < line_buffer_size) {
+		    // Avoid outputing newline characters.
+		    char ch;
+		    
+		    ch = *string;
+		    if ( ch != '\n' && ch != '\r')
+	        	line_buffer[i].Char.AsciiChar = ch;
+	        else
+	        	line_buffer[i].Char.AsciiChar = ' ';
+	        line_buffer[i].Attributes = console_info.wAttributes;
+	        string++;
+	        i++;
+	    }
+	    WriteConsoleOutput(console_output,
+	                       line_buffer, // was:  &line_buffer ?
+	                       buff_size,
+	                       buff_start,
+	                       &screen_loc);
     }
-
-    while (*string != '\0') {
-        line_buffer[i].Char.AsciiChar = *string;
-        line_buffer[i].Attributes = console_info.wAttributes;
-        string++;
-        i++;
-    }
-    WriteConsoleOutput(console_output,
-                       line_buffer, // was:  &line_buffer ?
-                       buff_size,
-                       buff_start,
-                       &screen_loc);
-    } // EUCONS
 
     console_info.dwCursorPosition.X += nchars; // what if becomes 80? (i.e 1 too big)
     SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
@@ -620,7 +627,16 @@ static void expand_tabs(char *raw_string)
  */
 {
     int c, i, nblanks, true_screen_col;
+	static int screen_width;
+	int colpos;
 
+    if (expanded_string == 0) {
+	    screen_width = 200;
+	    expanded_string = (char *)malloc(screen_width + 3); // Extra 3 for \n\r\0
+	    expanded_ptr = expanded_string;
+	    expanded_end = expanded_string + screen_width;
+    }
+    
     while ((c = *raw_string++) != 0) {
 
         if (screen_col + (expanded_ptr - expanded_string) > col_max) {
@@ -664,6 +680,13 @@ static void expand_tabs(char *raw_string)
             if (true_screen_col + nblanks > col_max)
                 nblanks = col_max - true_screen_col + 1;
             for (i = 1; i <= nblanks; i++) {
+	            if (expanded_ptr >= expanded_end) {
+		            colpos = expanded_ptr - expanded_string;
+		            screen_width += 100;
+		            expanded_string = (char *)realloc(expanded_string, screen_width + 3);
+		            expanded_ptr = expanded_string + colpos;
+		            expanded_end = expanded_string + screen_width;
+	            }
                 *expanded_ptr++ = ' ';
             }
         }
@@ -705,6 +728,14 @@ static void expand_tabs(char *raw_string)
         }
 
         else if (screen_col <= col_max) {
+//             if (expanded_ptr >= expanded_end) {
+// 	            colpos = expanded_ptr - expanded_string;
+// 	            screen_width += 100;
+// 	            expanded_string = (char *)realloc(expanded_string, screen_width + 3);
+// 	            expanded_ptr = expanded_string + colpos;
+// 	            expanded_end = expanded_string + screen_width;
+//             }
+	        
             // normal characters
             *expanded_ptr++ = c;
         }
@@ -804,9 +835,8 @@ void screen_output(IFILE f, char *out_string)
         }
 
         iputs(out_string, f);
-        if ((f == stdout || f == stderr) &&
-		(getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1)) {
-		// for rxvt - note that in this instance EUCONS will also work on DOS
+        if ((f == stdout || f == stderr) &&	EuConsole) {
+		// for rxvt
 		iflush(f);
         }
     }
@@ -1076,42 +1106,42 @@ struct rccoord console_trace_pos;
 void SaveNormal()
 {
     int size = 65536;
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         ReadInto(console_save_buf, console_save_str, size, &console_save_buf_n, &console_save_str_n, &console_save_saved, &console_save_pos);
     } else {
         console_save = console_output;
-    } // EUCONS
+    }
 }
 
 void SaveTrace()
 {
     int size = 65536;
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         ReadInto(console_trace_buf, console_trace_str, size, &console_save_buf_n, &console_save_str_n, &console_trace_saved, &console_trace_pos);
     } else {
         SetConsoleActiveScreenBuffer(console_var_display);
         console_output = console_var_display;
-    } // EUCONS
+    }
 }
 
 void RestoreTrace()
 {
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         WriteOutFrom(console_trace_buf, console_trace_str, console_save_buf_n, console_save_str_n, &console_trace_saved, &console_trace_pos);
     } else {
         SetConsoleActiveScreenBuffer(console_trace);
         console_output = console_trace;
-    } // EUCONS
+    }
 }
 
 void RestoreNormal()
 {
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         WriteOutFrom(console_save_buf, console_save_str, console_save_buf_n, console_save_str_n, &console_save_saved, &console_save_pos);
     } else {
         console_output = console_save;
         SetConsoleActiveScreenBuffer(console_output);
-    } // EUCONS
+    }
 }
 
 extern void DisableControlCHandling();

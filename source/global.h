@@ -105,7 +105,6 @@
 #define DEBUG_SCREEN 2
 
 #define MAX_LONG 0x7fffffffL /* largest positive long integer */
-#define LMAX 200             /* maximum input line length */
 
 #if defined(ELCC) || defined(EDJGPP)
 #  define PATH_MAX 512
