@@ -1560,6 +1560,38 @@ public function rnd()
 end function
 
 --**
+-- Return a random floating point number in the range 0 to less than 1.
+--
+-- Parameters:
+--		None.
+--
+-- Returns:
+--		An **atom** randomly drawn between 0.0 and a number less than 1.0 
+--
+-- Comments:
+--	 In order to get reproducible results from this function, you should
+-- call ##set_rand##() with a reproducible value prior to calling this.
+--
+-- Example 1:
+-- <eucode>
+-- set_rand(1001)
+-- s = rnd_1()
+--   -- s is 0.2634879318
+-- </eucode>
+-- See Also:
+--	[[:rand]], [[:set_rand]], [[:rand_range]]
+
+public function rnd_1()
+	atom r
+	
+	while r >= 1.0 with entry do
+	entry
+		r = rnd()
+	end while	 
+	return r
+end function
+
+--**
 -- Reset the random number generator.
 --
 -- Parameters:
@@ -1601,6 +1633,96 @@ public procedure set_rand(integer seed)
 -- random numbers to be generated from the rand() function
 	machine_proc(M_SET_RAND, seed)
 end procedure
+
+-- /*************************************
+-- Normal distribution.
+-- mu is the mean, and sigma is the standard deviation. Not thread safe.
+-- */
+-- double normal(double mu=0.0, double sigma=1.0) {
+--     // When x and y are two variables from [0, 1), uniformly
+--     // distributed, then
+--     //
+--     //    cos(2*pi*x)*sqrt(-2*log(1-y))
+--     //    sin(2*pi*x)*sqrt(-2*log(1-y))
+--     //
+--     // are two *independent* variables with normal distribution
+--     // (mu = 0, sigma = 1).
+--     // (Lambert Meertens)
+--     static double gauss_next; // nan
+--     auto z = gauss_next;
+--     gauss_next = double.init; // nan
+--     if (isnan(z)) {
+--         double x2pi = random() * PI * 2;
+--         double g2rad = sqrt(-2.0 * log(1.0 - random()));
+--         z = cos(x2pi) * g2rad;
+--         gauss_next = sin(x2pi) * g2rad;
+--     }
+--     return mu + z * sigma;
+-- }
+
+atom r2
+integer use_r2 = 0
+--**
+-- Get a random number from with a Normal Distribution
+--
+-- Parameters:
+--	# ##mu##, an atom, The Normal Distribution's mean. Defaults to 0.0
+--	# ##sigma##, an atom, The Normal Distribution's standard deviation. Defaults to 1.0
+--	# ##set##, an integer. The number of random numbers to return. If this is
+--             zero or omitted, a single atom is returned. For numbers greater than zero
+--             it returns a sequence containing the requested count of random
+--             numbers.
+--
+-- Returns:
+--      An atom. 
+-- Example 1:
+-- <eucode>
+-- set_rand(12345)
+-- s[1] = rand_normal()
+-- s[2] = rand_normal(4.5, 0.05)
+-- s[3] = rand_normal(4.5, 0.50)
+-- ? s
+--  </eucode>
+-- Should return {0.8381062659,4.563054761,4.987177067}
+-- 
+-- Example 1:
+-- <eucode>
+-- -- Returns a sequence of 100 numbers in a Normal Distribution around 90 with
+-- -- a standard deviation of 10
+-- sample_weights = rand_normal(90, 10, 100)
+--  </eucode>
+--
+-- See Also:
+--		[[:rand]], [[:rnd]], [[:rnd_1]]
+public function rand_normal(atom mu = 0.0, atom sigma = 1.0, integer set = 0)
+	atom x2pi
+	atom g2rad
+	atom r1
+	sequence rr
+	
+	if set > 0 then
+		rr = repeat(0, set)
+		for i = 1 to set do
+			rr[i] = rand_normal(mu, sigma, 0)
+		end for
+		return rr
+	end if
+	
+	if use_r2 then
+		use_r2 = 0
+		return mu + r2 * sigma
+	end if
+	
+	x2pi = rnd_1() * PI
+	x2pi += x2pi
+	g2rad = log(1.0 - rnd_1())
+	g2rad = -(g2rad + g2rad)
+	g2rad = sqrt(g2rad)
+	r1 = cos(x2pi) * g2rad
+    r2 = sin(x2pi) * g2rad
+    use_r2 = 1
+	return mu + r1 * sigma
+end function
 
 --****
 -- Signature:

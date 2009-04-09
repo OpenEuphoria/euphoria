@@ -3919,7 +3919,7 @@ procedure opRETURNF()
 	SymTab[sub][S_SEQ_ELEM_NEW] = or_type(SymTab[sub][S_SEQ_ELEM_NEW],
 											 SeqElem(Code[pc+2]))
 
-	if GType(Code[pc+3]) = TYPE_INTEGER then
+	if GType(ret) = TYPE_INTEGER then
 		x = ObjMinMax(ret)
 		if SymTab[sub][S_OBJ_MIN_NEW] = -NOVALUE then
 			SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
@@ -3934,7 +3934,7 @@ procedure opRETURNF()
 			end if
 		end if
 
-	elsif GType(Code[pc+3]) = TYPE_SEQUENCE then
+	elsif GType(ret) = TYPE_SEQUENCE then
 		if SymTab[sub][S_SEQ_LEN_NEW] = -NOVALUE then
 			SymTab[sub][S_SEQ_LEN_NEW] = SeqLen(ret)
 		elsif SymTab[sub][S_SEQ_LEN_NEW] != SeqLen(ret) then
@@ -3963,7 +3963,7 @@ procedure opRETURNF()
 
 	-- deref the temps and privates
 	-- check if we are derefing the return var/temp
-	if SymTab[Code[pc+2]][S_MODE] = M_TEMP then
+	if SymTab[ret][S_MODE] = M_TEMP then
 		sym = SymTab[sub][S_TEMPS]
 		while sym != 0 do
 			if SymTab[sym][S_SCOPE] != DELETED and
@@ -3993,7 +3993,7 @@ procedure opRETURNF()
 		CRef(ret)
 	end if
 
-	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
+	SymTab[ret][S_ONE_REF] = FALSE
 
 	-- DeRef private vars/temps before returning
 	symtab_index block = Code[pc+2]
@@ -6590,7 +6590,7 @@ procedure BackEnd(atom ignore)
 	-- Now, actually emit the C code */
 	emit_c_output = TRUE
 
-	c_code = open("main-.c", "w")
+	c_code = open(output_dir & "main-.c", "w")
 	if c_code = -1 then
 		CompileErr("Can't open main-.c for output\n")
 	end if
@@ -6827,7 +6827,7 @@ procedure BackEnd(atom ignore)
 
 	close(c_code)
 
-	c_code = open("init-.c", "a")
+	c_code = open(output_dir & "init-.c", "a")
 	if c_code = -1 then
 		CompileErr("Can't open init-.c for append\n")
 	end if
@@ -6961,6 +6961,11 @@ procedure BackEnd(atom ignore)
 
 		elsif makefile_option = MAKE_FULL then
 			screen_output(STDERR, "Project makefile was created.\n")
+
+		elsif makefile_option = CMAKE then
+			screen_output(STDERR, "Project CMake file was created.\n")
+			screen_output(STDERR, "To use, you must include the new .cmake file into your " &
+				"own master CMakeLists.txt file.\n")
 
 		else
 			screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))

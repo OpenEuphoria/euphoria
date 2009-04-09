@@ -624,9 +624,9 @@ $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\b
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
 !ifneq INT_CODES 1
-$(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj $(TRUNKDIR)\bin\findjmp.ex
+$(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj $(TRUNKDIR)\source\findjmp.ex
 	cd $(BUILDDIR)\$(OBJDIR)\back
-	$(EXE) $(INCDIR) $(TRUNKDIR)\bin\findjmp.ex be_magic.c
+	$(EXE) $(INCDIR) $(TRUNKDIR)\source\findjmp.ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c

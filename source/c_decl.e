@@ -46,7 +46,7 @@ export boolean
 	fastfp = FALSE,
 	lccopt_option = TRUE
 
-export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL
+export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL, CMAKE
 export integer makefile_option = MAKE_NONE
 
 sequence files_to_delete = {
@@ -57,7 +57,7 @@ sequence files_to_delete = {
 
 export boolean keep = FALSE -- emake should keep .c files or delete?
 export boolean debug_option = FALSE
-export sequence user_library = ""
+export sequence user_library = "", output_dir = ""
 export integer total_stack_size = -1 -- default size for OPTION STACK
 
 -- first check EUCOMPILEDIR, to allow the user to override and use a different
@@ -995,10 +995,13 @@ export procedure new_c_file(sequence name)
 	end if
 
 	close(c_code)
-	c_code = open(name & ".c", "w")
+
+	c_code = open(output_dir & name & ".c", "w")
+
 	if c_code = -1 then
 		CompileErr("Couldn't open .c file for output")
-	end if  
+	end if
+
 	cfile_count += 1
 	version()
 	c_puts("#include \"include/euphoria.h\"\n")
@@ -1064,8 +1067,8 @@ procedure add_file(sequence filename)
 	end if
 
 	if makefile_option then
-		makefile_src_line &= src_fname & " "
-		makefile_obj_line &= obj_fname & " "
+		makefile_src_line &= output_dir & src_fname & " "
+		makefile_obj_line &= output_dir & obj_fname & " "
 
 	elsif TUNIX or (TWINDOWS and gcc_option) then
 		link_line &= filename & ".o "
@@ -1107,15 +1110,20 @@ sequence prepared_file0
 export procedure start_emake()
 -- start creating emake.bat     
 	sequence debug_flag = ""
-	
-	if makefile_option then
-		-- TODO: Create projectname.mak or Makefile when makefile_option = MAKE_FULL?
-		doit = open(file0 & ".mak", "wb")
+
+	if makefile_option = CMAKE then
+		doit = open(output_dir & file0 & ".cmake", "wb")
 		add_file(file0)
+
+	elsif makefile_option then -- MAKE_FULL, MAKE_SHORT
+		doit = open(output_dir & file0 & ".mak", "wb")
+		add_file(file0)
+
 	elsif TUNIX or (TWINDOWS and gcc_option) then
-		doit = open("emake", "wb")
+		doit = open(output_dir & "emake", "wb")
+
 	else       
-		doit = open("emake.bat", "wb")
+		doit = open(output_dir & "emake.bat", "wb")
 	end if      
 		
 	if doit = -1 then
@@ -1205,7 +1213,7 @@ export procedure start_emake()
 		link_line = ""
 	end if
 	
-	link_file = open("objfiles.lnk", "w")
+	link_file = open(output_dir & "objfiles.lnk", "w")
 	files_to_delete = append(files_to_delete, "objfiles.lnk")
 	if link_file = -1 then
 		CompileErr("Couldn't open objfiles.lnk for output")
@@ -1393,8 +1401,15 @@ procedure write_makefile()
 		end if
 	end if
 
-	printf(doit, "%s_SOURCES=%s" & HOSTNL, { upper(file0), makefile_src_line })
-	printf(doit, "%s_OBJECTS=%s" & HOSTNL, { upper(file0), makefile_obj_line })
+	if makefile_option = CMAKE then
+		printf(doit, "SET( %s_SOURCES %s)" & HOSTNL, { upper(file0), makefile_src_line })
+		printf(doit, "SET( %s_OBJECTS %s)" & HOSTNL, { upper(file0), makefile_obj_line })
+
+	elsif makefile_option then -- MAKE_FULL, MAKE_SHORT
+		printf(doit, "%s_SOURCES=%s" & HOSTNL, { upper(file0), makefile_src_line })
+		printf(doit, "%s_OBJECTS=%s" & HOSTNL, { upper(file0), makefile_obj_line })
+	end if
+
 	puts  (doit, HOSTNL)
 
 	if makefile_option = MAKE_FULL then
@@ -1575,7 +1590,7 @@ export procedure finish_emake()
 			-- write out exported symbols 
 			if atom(wat_path) then
 				-- Lcc
-				def_file= open(def_name, "w")
+				def_file= open(output_dir & def_name, "w")
 				if def_file = -1 then
 					CompileErr("Couldn't open .def file for output")
 				end if

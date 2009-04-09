@@ -1351,9 +1351,6 @@ void udt_clean( object o, long rid ){
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
 	}
-	else{
-		RefDS( o );
-	}
 #ifdef EWINDOWS
 	if( rt00[rid].convention ){
 		// stdcall
@@ -1391,9 +1388,6 @@ void udt_clean( object o, long rid ){
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
 	}
-	else{
-		RefDS( o );
-	}
 	args = MAKE_SEQ( s );
 	code = (int *)EMalloc( 4*sizeof(int*) );
 	code[0] = (int **)opcode(CALL_PROC);
@@ -1418,6 +1412,7 @@ void udt_clean( object o, long rid ){
 	}
 	else{
 		DeRefDS( o );
+		
 	}
 #endif
 }
