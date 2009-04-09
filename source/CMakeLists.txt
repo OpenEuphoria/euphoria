@@ -1,8 +1,6 @@
 #
+# source directory builds
 #
-#
-
-INCLUDE( CMakeMacros.cmake )
 
 #
 # Source Compile Options
@@ -26,7 +24,11 @@ IF( BUILD_RELEASE )
   ADD_DEFINITIONS( -DEU_FULL_RELEASE )
 ENDIF()
 
-FILE( GLOB PCRE_SOURCES "pcre/*.c" )
+#
+# Include our Euphoria macros
+#
+
+INCLUDE( CMakeMacros.cmake )
 
 #
 # Euphoria source requirements
@@ -43,6 +45,8 @@ CHECK_FUNCTION_EXISTS(_snprintf HAS__SNPRINTF)
 #
 # Generators
 #
+
+FILE( GLOB PCRE_SOURCES "pcre/*.c" )
 
 CONFIGURE_FILE( version.h.in version.h )
 
@@ -91,7 +95,9 @@ SET( EU_INTERPRETER_FILES int.ex compress.e backend.e c_out.e cominit.e intinit.
 EUC( "${EU_CORE_FILES};${EU_INTERPRETER_FILES}" "int" )
 ADD_EXECUTABLE( eui ${EXECUTABLE_FLAG} ${INT_SOURCES} )
 TARGET_LINK_LIBRARIES( eui eu_back ${EXTRA_LIBS} )
-SET_TARGET_PROPERTIES( eui  PROPERTIES LINK_FLAGS ${LINK_FLAGS} )
+IF( LINK_FLAGS )
+  SET_TARGET_PROPERTIES( eui  PROPERTIES LINK_FLAGS ${LINK_FLAGS} )
+ENDIF()
 
 #
 # Translator
@@ -101,7 +107,9 @@ SET( EU_TRANSLATOR_FILES ec.ex compile.e ec.ex c_decl.e c_out.e cominit.e tranin
 EUC( "${EU_CORE_FILES};${EU_TRANSLATOR_FILES}" "ec" )
 ADD_EXECUTABLE( euc ${EXECUTABLE_FLAG} ${EC_SOURCES} )
 TARGET_LINK_LIBRARIES( euc eu_back ${EXTRA_LIBS} )
-SET_TARGET_PROPERTIES( euc  PROPERTIES LINK_FLAGS ${LINK_FLAGS} )
+IF( LINK_FLAGS )
+  SET_TARGET_PROPERTIES( euc  PROPERTIES LINK_FLAGS ${LINK_FLAGS} )
+ENDIF()
 
 #
 # Backend
@@ -111,7 +119,9 @@ SET( EU_BACKEND_RUNNER_FILES backend.ex compress.e reswords.e common.e cominit.e
 EUC( "${EU_CORE_FILES};${EU_BACKEND_RUNNER_FILES}" "backend" )
 ADD_EXECUTABLE( eub ${EXECUTABLE_FLAG} ${BACKEND_SOURCES} )
 TARGET_LINK_LIBRARIES( eub eu_back ${EXTRA_LIBS} )
-SET_TARGET_PROPERTIES( eub  PROPERTIES LINK_FLAGS ${LINK_FLAGS} )
+IF( LINK_FLAGS )
+  SET_TARGET_PROPERTIES( eub  PROPERTIES LINK_FLAGS ${LINK_FLAGS} )
+ENDIF()
 
 #
 # Tools

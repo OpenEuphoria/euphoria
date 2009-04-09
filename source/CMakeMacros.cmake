@@ -14,13 +14,24 @@ SET( LINK_FLAGS "" )
 SET( EXTRA_LIBS "" )
 SET( EXECUTABLE_FLAG "" )
 
+IF( CMAKE_COMPILER_IS_GNUCC AND NOT ENABLE_DEBUG )
+  SET( CMAKE_C_FLAGS "-w -ffast-math -O3 -Os" )
+ENDIF()
+
 IF( WIN32 )
   # Window specific definitions
   ADD_DEFINITIONS( -DEWINDOWS )
 
   # Special compiler definitions
+  IF( CYGWIN )
+  ENDIF()
+
   IF( MINGW )
-    ADD_DEFINITIONS( -DEMINGW -O3 -Os -ffast-math -mno-cygwin -mwindows )
+    ADD_DEFINITIONS( -DEMINGW -mno-cygwin -mwindows )
+  ENDIF()
+
+  IF( MSVC )
+    ADD_DEFINITIONS( -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC )
   ENDIF()
 
   IF( WATCOM )
@@ -38,6 +49,64 @@ IF( WIN32 )
     LIST( APPEND EXTRA_LIBS "${WSOCK_LIB}" )
   ENDIF()
 ENDIF( WIN32 )
+
+IF( UNIX )
+  ADD_DEFINITIONS( -DEUNIX )
+  SET( CMAKE_FIND_LIBRARY_PREFIXES "lib" )
+  SET( CMAKE_FIND_LIBRARY_SUFFIXES ".so;.dylib" )
+
+  # Platform specific
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+    SET( BSD 1 )
+    SET( OSX 1 )
+    ADD_DEFINITIONS( -DEBSD -DEBSD62 -DOSX )
+  ENDIF()
+
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "SunOS" )
+    SET( BSD 1 )
+    SET( SUNOS 1 )
+    ADD_DEFINITIONS( -DEBSD -DEBSD62 -DESUNOS )
+  ENDIF()
+
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
+    SET( BSD 1 )
+    SET( FREEBSD 1 )
+    ADD_DEFINITIONS( -DEBSD -DEBSD62 -DEFREEBSD )
+  ENDIF()
+
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" )
+    SET( BSD 1 )
+    SET( OPENBSD 1 )
+    ADD_DEFINITIONS( -DEBSD -DEBSD62 -DEOPENBSD )
+  ENDIF()
+
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "NetBSD" )
+    SET( BSD 1 )
+    SET( NETBSD 1 )
+    ADD_DEFINITIONS( -DEBSD -DEBSD62 -DENETBSD )
+  ENDIF()
+
+  IF( LINUX )
+    ADD_DEFINITIONS( -DELINUX )
+  ENDIF()
+
+  # Let CMake find the libraries, if found, we need to link to it, if not
+  # then the said functionality appears in libc already, no extra lib needed.
+  FIND_LIBRARY( DL_LIB dl )
+  IF( DL_LIB )
+    LIST( APPEND EXTRA_LIBS "${DL_LIB}" )
+  ENDIF()
+
+  FIND_LIBRARY( RESOLV_LIB resolv )
+  IF( RESOLV_LIB )
+    LIST( APPEND EXTRA_LIBS "${RESOLV_LIB}" )
+  ENDIF()
+
+  FIND_LIBRARY( NSL_LIB nsl )
+  IF( NSL_LIB )
+    LIST( APPEND EXTRA_LIBS "${NSL_LIB}" )
+  ENDIF()
+ENDIF()
 
 #
 # Helper Macros
