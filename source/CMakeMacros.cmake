@@ -51,7 +51,8 @@ IF( WIN32 )
 ENDIF( WIN32 )
 
 IF( UNIX )
-  ADD_DEFINITIONS( -DEUNIX )
+  ADD_DEFINITIONS( -DEUNIX=1 )
+
   SET( CMAKE_FIND_LIBRARY_PREFIXES "lib" )
   SET( CMAKE_FIND_LIBRARY_SUFFIXES ".so;.dylib" )
 
@@ -86,8 +87,9 @@ IF( UNIX )
     ADD_DEFINITIONS( -DEBSD -DEBSD62 -DENETBSD )
   ENDIF()
 
-  IF( LINUX )
-    ADD_DEFINITIONS( -DELINUX )
+  IF( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+    SET( LINUX 1 )
+    ADD_DEFINITIONS( -DELINUX=1 )
   ENDIF()
 
   # Let CMake find the libraries, if found, we need to link to it, if not
@@ -105,6 +107,11 @@ IF( UNIX )
   FIND_LIBRARY( NSL_LIB nsl )
   IF( NSL_LIB )
     LIST( APPEND EXTRA_LIBS "${NSL_LIB}" )
+  ENDIF()
+
+  FIND_LIBRARY( MATH_LIB m )
+  IF( MATH_LIB )
+    LIST( APPEND EXTRA_LIBS "${MATH_LIB}" )
   ENDIF()
 ENDIF()
 

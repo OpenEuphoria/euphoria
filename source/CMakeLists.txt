@@ -80,7 +80,7 @@ SET( EU_CORE_FILES common.e emit.e error.e fwdref.e global.e inline.e keylist.e 
 SET( EU_BACKEND_SOURCES be_alloc.c be_callc.c be_decompress.c be_execute.c be_inline.c
   be_machine.c be_main.c be_pcre.c be_rev.c be_rterror.c be_runtime.c be_socket.c be_symtab.c
   be_syncolor.c be_task.c be_w.c version.h )
-ADD_LIBRARY( eu_back STATIC ${PCRE_SOURCES} ${EU_BACKEND_SOURCES} )
+ADD_LIBRARY( eu_back STATIC ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
 
 # Euphoria runtime library
 SET( EU_LIB_SOURCES be_alloc.c be_callc.c be_decompress.c be_inline.c be_machine.c be_pcre.c
