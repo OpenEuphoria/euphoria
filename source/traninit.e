@@ -175,6 +175,21 @@ export procedure transoptions()
 			elsif equal("-MAKEFILE-FULL", uparg) then
 				makefile_option = MAKE_FULL
 
+			elsif equal("-CMAKEFILE", uparg) then
+				makefile_option = CMAKE
+
+			elsif equal("-O", uparg) then
+				if i < Argc then
+					output_dir = Argv[i+1]
+					add_switch( output_dir, 1 )
+					move_args( i+1)
+					create_directory( output_dir )
+					output_dir &= '/'
+				else
+					puts(1, "-o expects a directory name\n")
+					abort(1)
+				end if
+
 			else
 				option = find( uparg, COMMON_OPTIONS )
 				if option then
@@ -259,7 +274,7 @@ end procedure
 
 procedure OpenCFiles()
 -- open and initialize translator output files
-	c_code = open("init-.c", "w")
+	c_code = open(output_dir & "init-.c", "w")
 	if c_code = -1 then
 		CompileErr("Can't open init-.c for output\n")
 	end if
@@ -273,7 +288,7 @@ procedure OpenCFiles()
 	c_puts("include" & SLASH & "euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 	
-	c_h = open("main-.h", "w")
+	c_h = open(output_dir & "main-.h", "w")
 	if c_h = -1 then
 		CompileErr("Can't open main-.h file for output\n")
 	end if

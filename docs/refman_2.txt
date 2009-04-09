@@ -1879,22 +1879,21 @@ flow continues based upon defined cases.  The syntax of a switch statement:
 
 <eucode>
 switch <expr> [with fallthru] [label "<label name>"] do
-    case <val1,1>[, <val1,2>,...] then
-        [code block 1]
+    case <val>[, <val2>, ...] then
+        [code block]
         [[break [label]]|fallthru]
-    case <val2,1>[,...] then
-        [code block 2]
+    case <val>[, <val2>, ...] then
+        [code block]
         [[break [label]]|fallthru]
-    case <val 3,1>[, ...]:
-        [code block 3]
+    case <val>[, <val2>, ...] then
+        [code block]
         [[break [label]]|fallthru]
     ...
  
     [case else]
-        [code block 4]
+        [code block]
         [[break [label]]|fallthru]
 end switch
-
 </eucode>
 
 The above example could be written with ##if## statements like this ..
@@ -2049,7 +2048,7 @@ but ##EU5## will be defined.
 * **WIN32_GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
 * **WIN32** - Platform is Windows (GUI or Console)
-* **MICROSOFT** - Platform is any Microsoft platform (DOS32, WIN32)
+* **DOSFAMILY** - Platform is any DOS or DOS-related platform (DOS32, WIN32)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
 * **SUNOS** - Platform is SunOS (Open Solaris)

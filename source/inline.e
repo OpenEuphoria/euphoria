@@ -590,7 +590,9 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 		if deferred_inlining then
 			SymTab[CurrentSub][S_STACK_SPACE] += 1
 		else
-			param_num += 1
+			if param_num != -1 then
+				param_num += 1
+			end if
 		end if
 		SymTab[var][S_USAGE] = U_READ + U_WRITTEN
 		if reuse then
@@ -763,6 +765,12 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		if sequence( inline_code[pc] ) then
 			integer inline_type = inline_code[pc][1]
 			switch inline_type do
+				case INLINE_SUB then
+					inline_code[pc] = CurrentSub
+					
+				case INLINE_VAR then
+					replace_var( pc )
+					break
 				case INLINE_TEMP then
 					replace_temp( pc )
 					
@@ -775,13 +783,8 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 				case INLINE_TARGET then
 					inline_code[pc] = inline_target
 					add_inline_target( pc + inline_start )
-					
-				case INLINE_SUB then
-					inline_code[pc] = CurrentSub
-					
-				case INLINE_VAR then
-					replace_var( pc )
-					
+					break
+				
 				case else
 					InternalErr( sprintf("Unhandled inline type: %d", inline_type) )
 			end switch
@@ -820,7 +823,6 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 --		end if
 		end if
 	end if
-	
 	
 	return prolog & inline_code & epilog
 end function

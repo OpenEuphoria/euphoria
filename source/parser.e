@@ -1180,7 +1180,7 @@ procedure Factor()
 			current_sequence = current_sequence[1..$-1]
 			putback(tok)
 			short_circuit += 1
-			
+			break
 			
 		case DOLLAR then
 			if length(current_sequence) then
@@ -1188,11 +1188,11 @@ procedure Factor()
 			else
 				CompileErr("'$' must only appear between '[' and ']'")
 			end if
-			
+			break
 			
 		case ATOM then
 			emit_opnd(tok[T_SYM])
-			
+			break
 			
 		case LEFT_BRACE then
 			n = Expr_list()
@@ -1203,7 +1203,7 @@ procedure Factor()
 			
 		case STRING then
 			emit_opnd(tok[T_SYM])
-			
+			break
 
 		case LEFT_ROUND then
 			call_proc(forward_expr, {})
@@ -2175,7 +2175,7 @@ procedure Case_statement()
 	if length(switch_stack[$][SWITCH_CASES]) then
 		Sibling_block( CASE )
 		if not switch_stack[$][SWITCH_FALLTHRU] 
-		and Code[$-1] != ELSE and not fallthru_case then
+		and not fallthru_case then
 			putback( {CASE, 0} )
 			Break_statement()
 			tok = next_token()
@@ -2184,6 +2184,8 @@ procedure Case_statement()
 		push_block( CASE )
 	end if
 	
+	StartSourceLine(TRUE)
+			
 	fallthru_case = 0
 	integer start_line = line_number
 	while 1 do
@@ -3371,7 +3373,6 @@ procedure Statement_list()
 			Ifdef_statement()
 
 		elsif id = CASE then
-			StartSourceLine(TRUE)
 			Case_statement()
 
 		elsif id = SWITCH then
@@ -3648,6 +3649,7 @@ procedure SubProg(integer prog_type, integer scope)
 	param_num = -1
 	StraightenBranches()
 	check_inline( p )
+	param_num = -1
 	EnterTopLevel()
 end procedure
 
@@ -4088,7 +4090,6 @@ export procedure real_parser(integer nested)
 			Ifdef_statement()
 
 		elsif id = CASE then
-			StartSourceLine(TRUE)
 			Case_statement()
 
 		elsif id = SWITCH then
