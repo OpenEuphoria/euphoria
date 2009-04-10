@@ -349,32 +349,9 @@ ifdef WIN32 then
 		end if
 		return page_size
 	end function
-	global constant PAGE_SIZE = get_page_size()
-
-elsifdef UNIX then
-	constant MAP_ANONYMOUS = #20, MAP_PRIVATE = #2
-	--,MAP_SHARED = #1, MAP_TYPE = #F, MAP_FIXED = #10,
-	--MAP_FILE = 0
-	atom getpagesize_rid, mmap_rid, mprotect_rid, munmap_rid,
-		mlock_rid, munlock_rid
-
-	getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )
-	mmap_rid = define_c_func( -1, "mmap", { C_POINTER, C_UINT, C_INT, C_INT, C_INT, C_INT }, C_POINTER )
-	mprotect_rid = define_c_func( -1, "mprotect", { C_POINTER, C_UINT, C_INT }, C_INT )
-	munmap_rid = define_c_func( -1, "munmap", { C_POINTER, C_UINT }, C_INT )
-	mlock_rid = define_c_func( -1, "mlock", { C_POINTER, C_UINT }, C_INT )
-	munlock_rid = define_c_func( -1, "munlock", { C_POINTER, C_UINT }, C_INT )
-	integer page_size = 0
-	function get_page_size()
-		if page_size then
-			return page_size
-		end if
-		if getpagesize_rid != -1 then
-			page_size = c_func( getpagesize_rid, {} )
-		end if
-		return page_size
-	end function
-    global constant PAGE_SIZE = get_page_size()
+	public constant PAGE_SIZE = get_page_size()
+elsedef
+	public constant PAGE_SIZE = -1
 
 end ifdef
 
@@ -384,20 +361,6 @@ ifdef WIN32 then
 		r1 = c_func( VirtualAlloc_rid, {addr, size, flallocationtype, flprotect } )
 		return r1
 	end function
-end ifdef
-
-ifdef UNIX then
-	function mmap( object start, integer length, integer protection, integer flags, integer fd, integer offset )
-		atom pc
-		if atom( start ) then
-			return c_func( mmap_rid, { start, length, protection, flags, fd, offset } )
-		else
-			pc = mmap( 0, length, protection, flags, fd, offset )
-			poke( pc, start )
-			return pc
-		end if
-	end function
-
 end ifdef
 
 type valid_windows_memory_protection_constant( integer x )
@@ -462,20 +425,6 @@ public function allocate_code( sequence data )
 
 			return addr
 
-		elsifdef UNIX then
-			addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-			if addr = -1 then
-				return 0
-			end if
-
-			register_block( addr, size )
-			poke( addr, data )
-			if c_func( mprotect_rid, { addr, size, PROT_EXEC } ) != 0 then
-				-- non zero indicates failure here
-				return 0
-			end if
-
-			return addr
 		end ifdef
 
 	end if
@@ -543,21 +492,6 @@ public function allocate_protect( sequence data, valid_windows_memory_protection
 
 			return addr
 
-		elsifdef UNIX then
-			addr = c_func( mmap_rid, { 0, size, PROT_WRITE, or_bits( MAP_PRIVATE, MAP_ANONYMOUS ), 0, 0 } )
-			if addr = -1 then
-				return 0
-			end if
-
-			register_block( addr, size )
-
-			poke( addr, data )
-			if c_func( mprotect_rid, { addr, size, protection } ) != 0 then
-				-- non zero indicates failure in mprotect
-				return 0
-			end if
-
-			return addr
 		end ifdef
 	end if
 
@@ -614,8 +548,6 @@ public procedure free_code( atom addr, integer size )
 
 	ifdef WIN32 then
 		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
-	elsifdef UNIX then
-		free_succeeded = not c_func( munmap_rid, { addr, size } )
 	end ifdef
 
 	unregister_block( addr )
