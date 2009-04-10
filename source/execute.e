@@ -18,11 +18,18 @@ include std/os.e
 include std/pretty.e
 include std/io.e
 include std/io.e
+include std/text.e
 
 include global.e
 include opnames.e
+include error.e
+include reswords.e as res
+include symtab.e
+include scanner.e
+include mode.e as mode
+include intinit.e
 
--- Note: In several places we omit checking for bad arguments to 
+-- Note: In several places we omit checking for bad arguments to
 -- built-in routines. Those errors will be caught by the underlying 
 -- interpreter or Euphoria run-time system, and an error will be raised 
 -- against execute.e. To correct this would require a lot of 
@@ -32,14 +39,6 @@ include opnames.e
 -- we handle these operations specially because they refer to routine ids
 -- in the user program, not the interpreter itself. We can't just let 
 -- Euphoria do the work.
-
-include global.e
-include reswords.e as res
-include symtab.e
-include std/text.e
-include scanner.e
-include mode.e as mode
-include intinit.e
 
 constant M_CALL_BACK = 52,  
 		 M_CRASH_ROUTINE = 66,
@@ -52,17 +51,14 @@ constant C_MY_ROUTINE = 1,
 		 C_USER_ROUTINE = 2,
 		 C_NUM_ARGS = 3
 
-object crash_msg
-crash_msg = 0
+object crash_msg = 0
 
 sequence call_backs, call_back_code
 symtab_index t_id, t_arglist, t_return_val, call_back_routine
 
-sequence crash_list  -- list of routine id's to call if there's a fatal crash
-crash_list = {}
+sequence crash_list = {} -- list of routine id's to call if there's a fatal crash
 
-integer crash_count
-crash_count = 0
+integer crash_count = 0
 
 -- only need one set of temps for call-backs
 t_id = tmp_alloc()
@@ -96,24 +92,20 @@ sequence val
 
 constant TASK_NEVER = 1e300
 constant TASK_ID_MAX = 9e15 -- wrap to 0 after this (and avoid in-use ones)
-boolean id_wrap             -- have task id's wrapped around? (very rare)
-id_wrap = FALSE  
+boolean id_wrap = FALSE     -- have task id's wrapped around? (very rare)
 
 integer current_task  -- internal number of currently-executing task
-
 sequence call_stack   -- active subroutine call stack
 -- At each subroutine call we push two items: 
 -- 1. the return pc value
 -- 2. the current subroutine index
 
-atom next_task_id     -- for multitasking
+atom next_task_id = 1 -- for multitasking
 next_task_id = 1
 
-atom clock_period
+atom clock_period = 0.01 -- Non DOS
 ifdef DOS32 then
 	clock_period = 0.055  -- DOS default (can change)
-elsedef
-	clock_period = 0.01   -- Windows/Linux/FreeBSD
 end ifdef
 
 -- TCB fields
@@ -143,23 +135,21 @@ constant ST_ACTIVE = 0,
 constant T_REAL_TIME = 1,
 		 T_TIME_SHARE = 2
 		 
-sequence tcb    -- task control block for real-time and time-shared tasks
-tcb = {
-	   -- initial "top-level" task, tid=0
-	   {-1, 0, T_TIME_SHARE, ST_ACTIVE, 0,
-		 0, 0, 1, 1, 1, 1, 0, {}, 1, {}, {}} 
-	  }
+-- task control block for real-time and time-shared task
+ssequence tcb = {
+	-- initial "top-level" task, tid=0
+	{
+		-1, 0, T_TIME_SHARE, ST_ACTIVE, 0, 0, 0, 1, 1, 1, 1, 0, {}, 1, {}, {}
+	}
+}
 
-integer rt_first, ts_first
-rt_first = 0 -- unsorted list of active rt tasks
-ts_first = 1 -- unsorted list of active ts tasks (initialized to initial task)
+integer
+	rt_first = 0, -- unsorted list of active rt tasks
+	ts_first = 1  -- unsorted list of active ts tasks (initialized to initial task)
 
-sequence e_routine -- list of routines with a routine id assigned to them
-e_routine = {}
-
+sequence e_routine = {} -- list of routines with a routine id assigned to them
 integer err_file
-sequence err_file_name
-err_file_name = "ex.err" 
+sequence err_file_name = "ex.err"
 
 procedure open_err_file()
 -- open ex.err  
