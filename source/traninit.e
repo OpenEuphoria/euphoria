@@ -177,6 +177,8 @@ export procedure transoptions()
 
 			elsif equal("-CMAKEFILE", uparg) then
 				makefile_option = CMAKE
+			elsif equal("-AM", uparg) then
+				am_build = TRUE
 
 			elsif equal("-O", uparg) then
 				if i < Argc then
@@ -202,7 +204,11 @@ export procedure transoptions()
 			-- delete "-" option from the list of args */
 			add_switch( Argv[i], 0 )
 			move_args( i )
-		else 
+		else
+			if i > 2 and length(main_ex_file) = 0 then
+				main_ex_file = Argv[i]
+			end if
+
 			i += 1 -- ignore non "-" items
 		end if      
 	end while
@@ -274,9 +280,25 @@ end procedure
 
 procedure OpenCFiles()
 -- open and initialize translator output files
-	c_code = open(output_dir & "init-.c", "w")
-	if c_code = -1 then
-		CompileErr("Can't open init-.c for output\n")
+	sequence main_filename = filebase(main_ex_file)
+
+	if am_build then
+		c_code = open(output_dir & main_filename & ".c", "w")
+		if c_code = -1 then
+			CompileErr("Can't open " & main_filename & ".c for output\n")
+		end if
+
+		files_to_delete = append(files_to_delete, main_filename & ".c")
+		if TUNIX or gcc_option then
+			files_to_delete = append(files_to_delete, main_filename & ".o")
+		else
+			files_to_delete = append(files_to_delete, main_filename & ".obj")
+		end if
+	else
+		c_code = open(output_dir & "init-.c", "w")
+		if c_code = -1 then
+			CompileErr("Can't open init-.c for output\n")
+		end if
 	end if
 	
 	emit_c_output = TRUE
@@ -284,11 +306,21 @@ procedure OpenCFiles()
 	if TDOS and sequence(dj_path) then
 		c_puts("#include <go32.h>\n")
 	end if
+
 	c_puts("#include \"")
 	c_puts("include" & SLASH & "euphoria.h\"\n")
-	c_puts("#include \"main-.h\"\n\n")
-	
-	c_h = open(output_dir & "main-.h", "w")
+
+	if am_build then
+		c_puts("#include \"" & main_filename & ".h\"\n\n")
+		c_h = open(output_dir & main_filename & ".h", "w")
+
+		files_to_delete = append(files_to_delete, main_filename & ".h")
+	else
+		c_puts("#include \"main-.h\"\n\n")
+		c_h = open(output_dir & "main-.h", "w")
+
+		files_to_delete = append(files_to_delete, "main-.h")
+	end if
 	if c_h = -1 then
 		CompileErr("Can't open main-.h file for output\n")
 	end if
@@ -297,20 +329,19 @@ end procedure
 procedure InitBackEnd(integer c)
 -- Initialize special stuff for the translator
 	
+	init_opcodes()
+	
+	transoptions()
+
 	if c = 1 then
 		OpenCFiles()
 		return
 	end if
-	
-	init_opcodes()
-	
-	transoptions()
 
 	-- If no compiler has been chosen test the variables to
 	-- see which is installed.  If a UNIX system choose gcc.
 	-- If Windows or DOS
 	-- Try in the order: WATCOM then DJGPP
-	
 	
 	if TDOS then
 		if gcc_option then

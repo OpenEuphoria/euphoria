@@ -2873,7 +2873,7 @@ end procedure
 
 procedure opRETURNT()
 -- return from top-level "procedure"
-	if cfile_size > MAX_CFILE_SIZE then
+	if cfile_size > MAX_CFILE_SIZE and not am_build then
 		c_stmt0("main")
 		c_printf("%d();\n", main_name_num)
 		c_stmt0("}\n")
@@ -6776,7 +6776,10 @@ procedure BackEnd(atom ignore)
 	integer tp_count, slash_ix
 	integer max_len
 	
-	close(c_code)
+	if not am_build then
+		close(c_code)
+	end if
+
 	emit_c_output = FALSE
 
 	slist = s_expand(slist)
@@ -6814,9 +6817,11 @@ procedure BackEnd(atom ignore)
 	-- Now, actually emit the C code */
 	emit_c_output = TRUE
 
-	c_code = open(output_dir & "main-.c", "w")
-	if c_code = -1 then
-		CompileErr("Can't open main-.c for output\n")
+	if not am_build then
+		c_code = open(output_dir & "main-.c", "w")
+		if c_code = -1 then
+			CompileErr("Can't open main-.c for output\n")
+		end if
 	end if
 
 	version()
@@ -6827,12 +6832,14 @@ procedure BackEnd(atom ignore)
 		end if
 	end if
 	c_puts("#include <time.h>\n")
-	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
+	if not am_build then
+		c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
+		c_puts("#include \"main-.h\"\n\n")
+	end if
 
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
 	end if
-	c_puts("#include \"main-.h\"\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
 
@@ -7061,11 +7068,13 @@ procedure BackEnd(atom ignore)
 
 	GenerateUserRoutines()  -- needs init_name_num
 
-	close(c_code)
+	if not am_build then
+		close(c_code)
 
-	c_code = open(output_dir & "init-.c", "a")
-	if c_code = -1 then
-		CompileErr("Can't open init-.c for append\n")
+		c_code = open(output_dir & "init-.c", "a")
+		if c_code = -1 then
+			CompileErr("Can't open init-.c for append\n")
+		end if
 	end if
 
 -- declare all *used* constants, and local and global variables as ints

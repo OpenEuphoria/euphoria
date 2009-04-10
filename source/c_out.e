@@ -12,7 +12,7 @@ export constant TYPE_NULL = 0,    -- initial value for ORing of types
 		 TYPE_OBJECT = 16  -- could be unknown or anything 
 
 export boolean emit_c_output = FALSE
-export file c_code, c_h
+export file c_code=-1, c_h
 export integer main_name_num = 0, init_name_num = 0
 export sequence novalue = {MININT, MAXINT} --, target= {0, 0}
 

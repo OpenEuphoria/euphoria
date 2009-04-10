@@ -103,7 +103,7 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                           [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
                           [-makefile] [-keep] [-debug] [-silent] [-o /output dir/]
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
-                          [/os specific options/]:
+                          [-am] [/os specific options/]:
 
               OS Specific Options:
                  DOS    :  [-djg|-wat] [-fastfp]
@@ -124,6 +124,10 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                  -MAKEFILE-FULL : Generate a full Makefile for stand alone use
                  -CMAKEFILE     : Generate a <prgname>.cmake file that can be included into
                                   a larger CMake project
+				 -AM            : Generate an amalgamation build (all files in one .c). This
+								  is easier to deal with and sometimes produces faster executables
+								  as many compilers can better optimise when everything is known
+								  inside of one source file.
 
 #
 		if TDOS	then

@@ -44,16 +44,15 @@ export boolean
 	dll_option = FALSE,
 	con_option = FALSE,
 	fastfp = FALSE,
-	lccopt_option = TRUE
+	lccopt_option = TRUE,
+	am_build = FALSE
 
 export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL, CMAKE
 export integer makefile_option = MAKE_NONE
+export sequence main_ex_file = ""
 
-sequence files_to_delete = {
-	"main-.c",
-	"main-.h",
-	"init-.c"
-}
+--** Sequence to contain files that are generated and should be removed when done compiling.
+export sequence files_to_delete = {}
 
 export boolean keep = FALSE -- emake should keep .c files or delete?
 export boolean debug_option = FALSE
@@ -76,8 +75,11 @@ end ifdef
 	return x
 end function
 
+--**
+-- Output commands to delete the .c, .h and .o/obj files
+--
+
 procedure delete_files(integer doit, sequence objextn)
--- output commands to delete .c and .h files
 	if keep then
 		return
 	end if
@@ -91,18 +93,14 @@ procedure delete_files(integer doit, sequence objextn)
 	
 	for i = 1 to length(files_to_delete) do
 		puts(doit, rm_cmd & files_to_delete[i] & HOSTNL)
-		
-		-- Assume each '.c' file creates a single object file.
-		if files_to_delete[i][$] = 'c' then
-			printf(doit, "%s%s%s" & HOSTNL, {rm_cmd, files_to_delete[i][1..$-2], objextn})
-		end if
 	end for 
-
 end procedure
 
-export procedure NewBB(integer a_call, integer mask, symtab_index sub)
--- Start a new Basic Block at a label or after a subroutine call 
+--**
+-- Start a new Basic Block at a label or after a subroutine call
+--
 
+export procedure NewBB(integer a_call, integer mask, symtab_index sub)
 	symtab_index s
 	
 	if a_call then
@@ -129,8 +127,9 @@ export procedure NewBB(integer a_call, integer mask, symtab_index sub)
 	end if 
 end procedure
 
-export function BB_var_obj(integer var)
+--**
 -- return the local min/max value of an integer, based on BB info.
+export function BB_var_obj(integer var)
 	sequence fail
 	
 	fail = {NOVALUE, NOVALUE}
@@ -992,20 +991,27 @@ sequence c_opts
 export procedure new_c_file(sequence name)
 -- end the old .c file and start a new one 
 	cfile_size = 0
+
 	if Pass != LAST_PASS then
+		return
+	end if
+
+	-- If an amalgamation build and we already have a file opened,
+	-- we do not want to open any more C files.
+	if am_build and c_code != -1 then
 		return
 	end if
 
 	close(c_code)
 
 	c_code = open(output_dir & name & ".c", "w")
-
 	if c_code = -1 then
 		CompileErr("Couldn't open .c file for output")
 	end if
 
 	cfile_count += 1
 	version()
+
 	if TDOS and sequence(dj_path) then
 		c_puts("#include <go32.h>\n")
 	end if
@@ -1013,10 +1019,16 @@ export procedure new_c_file(sequence name)
 	
 	c_puts("#include \"main-.h\"\n\n")
 
+	files_to_delete = append(files_to_delete, name & ".c")
+	if TUNIX or gcc_option then
+		files_to_delete = append(files_to_delete, name & ".o")
+	else
+		files_to_delete = append(files_to_delete, name & ".obj")
+	end if
+
 	if not TUNIX then
 		name = lower(name)  -- for faster compare later
 	end if
-	files_to_delete = append(files_to_delete, name & ".c")
 end procedure
 
 -- These characters are assumed to be legal and safe to use 
@@ -1063,6 +1075,7 @@ sequence link_line
 integer link_file
 
 procedure add_file(sequence filename)
+	--if am_build then return end if
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
 	if sequence(wat_path) then
@@ -1070,6 +1083,9 @@ procedure add_file(sequence filename)
 	else
 		obj_fname &= ".o"
 	end if
+
+	files_to_delete = append(files_to_delete, src_fname)
+	files_to_delete = append(files_to_delete, obj_fname)
 
 	if makefile_option then
 		makefile_src_line &= output_dir & src_fname & " "
@@ -1152,7 +1168,7 @@ export procedure start_emake()
 
 	if not (TUNIX or (TWINDOWS and gcc_option)) then
 		puts(doit, "@echo off"&HOSTNL)
-		puts(doit, "if not exist main-.c goto nofiles"&HOSTNL)
+		puts(doit, "if not exist " & file0 & ".c goto nofiles"&HOSTNL)
 	end if
 	
 	if TDOS then
@@ -1233,10 +1249,10 @@ export procedure start_emake()
 	end if
 	
 	link_file = open(output_dir & "objfiles.lnk", "w")
-	files_to_delete = append(files_to_delete, "objfiles.lnk")
 	if link_file = -1 then
 		CompileErr("Couldn't open objfiles.lnk for output")
 	end if
+	files_to_delete = append(files_to_delete, "objfiles.lnk")
 	
 	if TDOS then
 		if sequence(wat_path) then  
@@ -1391,15 +1407,23 @@ procedure write_makefile()
 	if makefile_option = MAKE_FULL then
 		if TWINDOWS and not gcc_option then
 			puts(doit, "CC     = wcc386" & HOSTNL)
-			puts(doit, "CFLAGS = /i$(%EUDIR) /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" &
-				HOSTNL)
+			puts(doit, "CFLAGS = /i$(%EUDIR) /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s")
+			if debug_option then
+				puts(doit, " /d3")
+			end if
+			puts(doit, HOSTNL)
+
 			puts(doit, "LINKER = wlink" & HOSTNL)
-			puts(doit, "LFLAGS = SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
+			puts(doit, "LFLAGS = ")
+			if debug_option then
+				puts(doit, "DEBUG ALL ")
+			end if
+			puts(doit, "SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
 			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
 			if length(user_library) then
-				printf(doit, "\tFILE %s" & HOSTNL, { user_library })
+				printf(doit, "\tFILE %s &" & HOSTNL, { user_library })
 			else
-				puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib" & HOSTNL)
+				puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib &" & HOSTNL)
 			end if
 			puts(doit, "\tLIBRARY ws2_32" & HOSTNL)
 		   	puts(doit, HOSTNL)
@@ -1407,13 +1431,16 @@ procedure write_makefile()
 		elsif TUNIX or gcc_option then
 			puts(doit, "CC     = gcc" & HOSTNL)
 			if TWINDOWS then
-			-- TODO add support for console apps
-			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O3 -Os -mno-cygwin -mwindows" &
-				HOSTNL)
+				-- TODO add support for console apps
+				puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer " &
+					"-O3 -Os -mno-cygwin -mwindows")
 			else
-			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O2" &
-				HOSTNL)
+				puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O2")
 			end if
+			if debug_option then
+				puts(doit, " -g")
+			end if
+			puts(doit, HOSTNL)
 
 			-- Build the LFLAGS line
 			puts(doit, "LFLAGS = ")
@@ -1489,7 +1516,7 @@ export procedure finish_emake()
 	object bin_path
 	integer lib_dir
 	integer fp, def_file
-	
+
 	arguments = command_line()
 	if length( arguments ) > 0 then
 		integer sl
@@ -1506,21 +1533,24 @@ export procedure finish_emake()
 		bin_path = 0
 	end if
 
-	-- init-.c files
-	if not makefile_option then
-		puts(doit, "echo init-.c"&HOSTNL)
-		printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
-	end if
-	add_file("init-")
-	for i = 0 to init_name_num-1 do -- now that we know init_name_num
+	if not am_build then
+		-- init-.c files
 		if not makefile_option then
-			printf(doit, "echo init-%d.c"&HOSTNL, {i})
-			printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
+			puts(doit, "echo init-.c"&HOSTNL)
+			printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
 		end if
-		buff = sprintf("init-%d", i)
-		add_file(buff)
-	end for
-		
+		add_file("init-")
+
+		for i = 0 to init_name_num-1 do -- now that we know init_name_num
+			if not makefile_option then
+				printf(doit, "echo init-%d.c"&HOSTNL, {i})
+				printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
+			end if
+			buff = sprintf("init-%d", i)
+			add_file(buff)
+		end for
+	end if
+
 	if not makefile_option then
 		puts(doit, "echo linking"&HOSTNL)
 	end if
@@ -1642,7 +1672,9 @@ export procedure finish_emake()
 			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
 			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
 		end if
+
 		delete_files(doit, ".obj")
+
 		puts(doit, "goto done"&HOSTNL)
 		puts(doit, ":nofiles"&HOSTNL)
 		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
@@ -1664,10 +1696,12 @@ export procedure finish_emake()
 				Write_def_file(link_file)
 			end if
 		end if
+
 		if def_file != -1 then
 			files_to_delete = append(files_to_delete, def_name)
 			close(def_file)
 		end if
+
 		close(link_file)
 	
 	elsif TUNIX or (TWINDOWS and gcc_option) then
@@ -1686,9 +1720,9 @@ export procedure finish_emake()
 				exe_suffix = ""
 			end if
 		end if
+
 		if length(user_library) then
-			printf(doit, 
-				  "gcc %s %s.o %s %s -o %s -lm ",
+			printf(doit,  "gcc %s %s.o %s %s -o %s -lm ",
 				  {dll_flag, short_c_file, link_line, user_library, file0})
 		else
 			-- need to check to see if euphoria is installed into
@@ -1779,23 +1813,25 @@ export procedure GenerateUserRoutines()
 			end if
 		
 			if file_no = 1 then
-				-- do the standard top-level files as well 
-
-				if Pass = LAST_PASS then
-					if not makefile_option then
-						puts(doit, "echo main-.c"&HOSTNL)                
-						printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
-					end if
-					add_file("main-")
-					for i = 0 to main_name_num-1 do
+				if not am_build then
+					-- do the standard top-level files as well
+					if Pass = LAST_PASS then
 						if not makefile_option then
-							printf(doit, "echo main-%d.c"&HOSTNL, {i})               
-							printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
+							puts(doit, "echo main-.c"&HOSTNL)                
+							printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
 						end if
-						buff = sprintf("main-%d", i)
-						add_file(buff)
-					end for
+						add_file("main-")
+						for i = 0 to main_name_num-1 do
+							if not makefile_option then
+								printf(doit, "echo main-%d.c"&HOSTNL, {i})               
+								printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
+							end if
+							buff = sprintf("main-%d", i)
+							add_file(buff)
+						end for
+					end if
 				end if
+
 				file0 = long_c_file
 			end if
 		
