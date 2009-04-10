@@ -1396,7 +1396,12 @@ procedure write_makefile()
 			puts(doit, "LINKER = wlink" & HOSTNL)
 			puts(doit, "LFLAGS = SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
 			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
-			puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib LIBRARY ws2_32" & HOSTNL)
+			if length(user_library) then
+				printf(doit, "\tFILE %s" & HOSTNL, { user_library })
+			else
+				puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib" & HOSTNL)
+			end if
+			puts(doit, "\tLIBRARY ws2_32" & HOSTNL)
 		   	puts(doit, HOSTNL)
 
 		elsif TUNIX or gcc_option then
@@ -1409,16 +1414,24 @@ procedure write_makefile()
 			puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O2" &
 				HOSTNL)
 			end if
+
+			-- Build the LFLAGS line
+			puts(doit, "LFLAGS = ")
+			if length(user_library) then
+				puts(doit, user_library)
+			else
+				puts(doit, "$(EUDIR)/bin/eu.a")
+			end if
 			if TWINDOWS then
-				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lws2_32" & HOSTNL)
+				puts(doit, " -lws2_32" & HOSTNL)
 			elsif TSUNOS then
-				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lsocket -lresolv -lnsl" & HOSTNL)
+				puts(doit, " -lm -lsocket -lresolv -lnsl" & HOSTNL)
 			elsif TOSX then
-				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -lresolv" & HOSTNL)
+				puts(doit, " -lm -lresolv" & HOSTNL)
 			elsif TLINUX then
-				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm -ldl -lresolv -lnsl" & HOSTNL)
+				puts(doit, " -lm -ldl -lresolv -lnsl" & HOSTNL)
 			else -- OPENBSD, NETBSD, FREEBSD
-				puts(doit, "LFLAGS = $(EUDIR)/bin/eu.a -lm" & HOSTNL)
+				puts(doit, " -lm" & HOSTNL)
 			end if
 		   	puts(doit, HOSTNL)
 		end if
