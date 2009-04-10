@@ -799,29 +799,19 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-// Shouldn't this be #if __GNUC__ instead?
 #if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
-size_t strnlen(char *str, size_t maxlen)
-{
-	int x;
-	for (x=0;x<maxlen && str[x]!='\0';++x);
-	return x;
-}
-	
 size_t strlcpy(char *dest, char *src, size_t maxlen)
 {
-	int i;
 	strncpy(dest, src, maxlen);
 	dest[maxlen-1] = 0;
-
-	return strnlen(src,maxlen);
+	return strlen(src);
 }
 
 size_t strlcat(char *dest, char *src, size_t maxlen)
 {
 	strncat(dest, src, maxlen-1);
 	dest[maxlen-1] = 0;
-	return strnlen(dest,maxlen);
+	return strlen(dest) + strlen(src);
 }
 #endif
 
