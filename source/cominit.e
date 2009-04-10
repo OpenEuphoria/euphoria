@@ -118,16 +118,14 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                  LCC Only: -lccopt-off
 
               Explainations:
-                 -CON           : Don't create a new window when using the console.
-                 -MAKEFILE      : Generate a <prgname>.mak file that can be included into
-                                  a larger Makefile project
+                 -CON           : Don't create a new window when using the console
+                 -MAKEFILE      : Generate a <prgname>.mak file that can be included
+                                  into a larger Makefile project
                  -MAKEFILE-FULL : Generate a full Makefile for stand alone use
-                 -CMAKEFILE     : Generate a <prgname>.cmake file that can be included into
-                                  a larger CMake project
-				 -AM            : Generate an amalgamation build (all files in one .c). This
-								  is easier to deal with and sometimes produces faster executables
-								  as many compilers can better optimise when everything is known
-								  inside of one source file.
+                 -CMAKEFILE     : Generate a <prgname>.cmake file that can be included
+                                  into a larger CMake project
+                 -AM            : Generate an amalgamation build (all files in one .c/.h)
+
 
 #
 		if TDOS	then

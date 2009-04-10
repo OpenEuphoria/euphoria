@@ -1019,11 +1019,13 @@ export procedure new_c_file(sequence name)
 	
 	c_puts("#include \"main-.h\"\n\n")
 
-	files_to_delete = append(files_to_delete, name & ".c")
-	if TUNIX or gcc_option then
-		files_to_delete = append(files_to_delete, name & ".o")
-	else
-		files_to_delete = append(files_to_delete, name & ".obj")
+	if am_build then
+		files_to_delete = append(files_to_delete, name & ".c")
+		if TUNIX or gcc_option then
+			files_to_delete = append(files_to_delete, name & ".o")
+		else
+			files_to_delete = append(files_to_delete, name & ".obj")
+		end if
 	end if
 
 	if not TUNIX then
@@ -1075,6 +1077,8 @@ sequence link_line
 integer link_file
 
 procedure add_file(sequence filename)
+	if am_build then return end if
+
 	--if am_build then return end if
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
@@ -1836,7 +1840,7 @@ export procedure GenerateUserRoutines()
 			end if
 		
 			if Pass = LAST_PASS then
-				if not makefile_option then
+				if not makefile_option and (file_no = 1 or not am_build) then
 					printf(doit, "echo %s.c"&HOSTNL, {c_file})
 					printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 				end if
@@ -1884,7 +1888,7 @@ export procedure GenerateUserRoutines()
 							next_c_char = 1  -- (unique_c_name will resolve)
 						end if
 						
-						if not makefile_option then
+						if not makefile_option and not am_build then
 							printf(doit, "echo %s.c"&HOSTNL, {c_file})
 							printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
 						end if
