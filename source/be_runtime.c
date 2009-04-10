@@ -3983,6 +3983,20 @@ static void rPrint(object a)
 	}
 }
 
+#ifdef EDJGPP
+    int vsnprintf(char * buffer, size_t buffer_len, char * fmt, va_list ap) {
+	    return vsprintf( buffer, fmt, ap);
+    }
+    int snprintf(char * buffer, size_t buflen, char * msg, ... ) {
+	int out;
+	va_list argptr;
+	va_start(argptr, msg);
+	out = vsnprintf(buffer,buflen,msg,argptr);
+	va_end(argptr);	
+	return out; 
+    }
+#endif	
+
 void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 /* print an object */
 {
