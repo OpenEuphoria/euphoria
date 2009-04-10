@@ -1422,7 +1422,7 @@ procedure write_makefile()
 			if debug_option then
 				puts(doit, "DEBUG ALL ")
 			end if
-			puts(doit, "SYSTEM NT OPTION STACK=262144 COMMIT STACK=262144 &" & HOSTNL)
+			printf(doit, "SYSTEM NT OPTION STACK=%d COMMIT STACK=%d &" & HOSTNL, repeat( total_stack_size, 2 ))
 			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
 			if length(user_library) then
 				printf(doit, "\tFILE %s &" & HOSTNL, { user_library })

@@ -792,8 +792,10 @@ void Append(object_ptr target, object s1, object a)
 							   (char *)(base + new_len + 2) - (char *)s1p);
 			new_s1p->base = (object_ptr)new_s1p +
 							 ((object_ptr)base - (object_ptr)s1p);
+			
 			s1p = new_s1p;
 			s1p->postfill = new_len - len;
+			
 			*target = MAKE_SEQ(s1p);
 		/* OPTIMIZE: we may have more space in the malloc'd block
 		   than we think, due to power of 2 round up etc. Can
@@ -1379,15 +1381,18 @@ object Repeat(object item, object repcount)
 }
 
 /**
- * Calls the specified routine id for cleaning up the UDT object.
+ * Calls the specified translated routine id for cleaning up the 
+ * UDT object.
  */
-void udt_clean( object o, long rid ){
-#ifdef ERUNTIME
+void udt_clean_rt( object o, long rid ){
 	int pre_ref;
 	
 	pre_ref = SEQ_PTR( o )->ref;
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
+	}
+	else{
+		RefDS( o );
 	}
 #ifdef EWINDOWS
 	if( rt00[rid].convention ){
@@ -1403,7 +1408,14 @@ void udt_clean( object o, long rid ){
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref = pre_ref;;
 	}
-#else
+}
+
+#ifndef ERUNTIME
+/**
+ * Calls the specified routine id for cleaning up the UDT object.
+ */
+void udt_clean( object o, long rid ){
+
 	int *code;
 	int seq[9]; // seq struct on the stack
 	s1_ptr s;
@@ -1425,6 +1437,9 @@ void udt_clean( object o, long rid ){
 	
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
+	}
+	else{
+		RefDS( o );
 	}
 	args = MAKE_SEQ( s );
 	code = (int *)EMalloc( 4*sizeof(int*) );
@@ -1452,8 +1467,8 @@ void udt_clean( object o, long rid ){
 		DeRefDS( o );
 		
 	}
-#endif
 }
+#endif
 
 void cleanup_sequence( s1_ptr seq ){
 	cleanup_ptr cp, next;
@@ -1462,8 +1477,17 @@ void cleanup_sequence( s1_ptr seq ){
 	seq->cleanup = 0;
 	while( cp ){
 		next = cp->next;
+#ifndef ERUNTIME
 		if( cp->type == CLEAN_UDT ){
 			udt_clean( MAKE_SEQ(seq), cp->func.rid );
+			if( next ){
+				EFree( cp );
+			}
+		}
+		else
+#endif 
+		if( cp->type == CLEAN_UDT_RT ){
+			udt_clean_rt( MAKE_SEQ(seq), cp->func.rid );
 			if( next ){
 				EFree( cp );
 			}
@@ -1483,8 +1507,17 @@ void cleanup_double( d_ptr dbl ){
 	
 	while( cp ){
 		next = cp->next;
+#ifndef ERUNTIME
 		if( cp->type == CLEAN_UDT ){
 			udt_clean( MAKE_DBL(dbl), cp->func.rid );
+			if( next ){
+				EFree( cp );
+			}
+		}
+		else
+#endif 
+		if( cp->type == CLEAN_UDT_RT ){
+			udt_clean_rt( MAKE_DBL(dbl), cp->func.rid );
 			if( next ){
 				EFree( cp );
 			}
@@ -1505,7 +1538,6 @@ void de_reference(s1_ptr a)
 {
 	object_ptr p;
 	object t;
-
 
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
@@ -1609,7 +1641,6 @@ void de_reference_i(s1_ptr a)
 {
 	object_ptr p;
 	object t;
-
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 

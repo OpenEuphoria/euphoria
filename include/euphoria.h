@@ -57,6 +57,7 @@ struct cleanup {
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
+	CLEAN_UDT_RT,
 	CLEAN_PCRE,
 	CLEAN_FILE
 };

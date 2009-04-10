@@ -3921,22 +3921,31 @@ void do_exec(int *start_pc)
 				Ref(result_val);
 				// record the place to put the return value 
 				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
-
+				
+				goto return_p;
+				
 			case L_RETURNP: /* return from procedure */
 			deprintf("case L_RETURNP:");
+			
+				result_ptr = 0;
+			
+			return_p:
 				sub = ((symtab_ptr)pc[1]);
-				
 				/* free the privates and set to NOVALUE */
 				sym = (symtab_ptr)pc[2];
-				b = (object_ptr) sub->u.subp.block;
-				while( sym != (symtab_ptr)b ){
-					while( obj_ptr = (object_ptr)sym->next_in_block ){
-						DeRef( *obj_ptr);
-						*obj_ptr = NOVALUE;
+				
+				while(1){
+					obj_ptr = (object_ptr)sym;
+					while( obj_ptr = (object_ptr)((symtab_ptr)obj_ptr)->next_in_block ){
+						if( obj_ptr != result_ptr ){
+							DeRef( *obj_ptr);
+							*obj_ptr = NOVALUE;
+						}
+						
 					}
+					if( sym == sub->u.subp.block ) break;
 					sym = sym->u.subp.block;
-				}
-					
+				} 
 				
 				// vacating this routine
 				sub->u.subp.resident_task = -1;
@@ -3965,11 +3974,13 @@ void do_exec(int *start_pc)
 					pc = tpc;
 				}
 				
-				goto exit_block;
+				thread();
+				BREAK;
 			
 			case L_EXIT_BLOCK:
 			deprintf("case L_EXIT_BLOCK:");
 				sym = ((symtab_ptr)pc[1]);
+				result_ptr = 0;
 				pc += 2;
 				
 				exit_block:
@@ -3977,6 +3988,7 @@ void do_exec(int *start_pc)
 					while( sym = sym->next_in_block ){
 						DeRef(sym->obj);
 						sym->obj = NOVALUE;
+						
 					}
 				thread();
 

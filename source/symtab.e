@@ -10,6 +10,7 @@ include keylist.e
 include error.e
 include fwdref.e
 include reswords.e
+include block.e
 
 constant NBUCKETS = 2003  -- prime helps
 
@@ -389,6 +390,7 @@ export function NewTempSym( integer inlining = 0)
 	SymTab[p][S_OBJ] = NOVALUE
 	SymTab[p][S_USAGE] = T_UNKNOWN
 	SymTab[p][S_SCOPE] = IN_USE
+--	Block_var( p )
 	return p
 end function
 

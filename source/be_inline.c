@@ -42,6 +42,8 @@ extern unsigned default_heap;
 /*********************/
 /* Defined Functions */
 /*********************/
+
+
 object NewDouble(double d)
 /* allocate space for a new double value */
 {
@@ -54,8 +56,7 @@ object NewDouble(double d)
 #ifdef HEAP_CHECK  
 	char *q;
 	int align;
-#endif  
-	
+#endif 
 	if (d_list != NULL) {
 		new = (d_ptr)d_list;
 		d_list = (d_ptr)((free_block_ptr)new)->next;
@@ -81,7 +82,6 @@ object NewDouble(double d)
 #endif
 
 #endif
-
 	new->ref = 1;
 	new->dbl = d;
 	new->cleanup = 0;

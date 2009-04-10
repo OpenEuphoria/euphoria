@@ -362,7 +362,7 @@ object eusock_socket(object x)
 		return eusock_geterror();
 	}
 
-	addr = EMalloc(sizeof(addr));
+	addr = EMalloc(sizeof(struct sockaddr_in));
 	addr->sin_family = af;
 	addr->sin_port   = 0;
 

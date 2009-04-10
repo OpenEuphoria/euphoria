@@ -60,6 +60,8 @@ export procedure Block_var( symtab_index sym )
 	
 	if length(block[BLOCK_VARS]) then
 		SymTab[block[BLOCK_VARS][$]][S_NEXT_IN_BLOCK] = sym
+	else
+		SymTab[block[BLOCK_SYM]][S_NEXT_IN_BLOCK] = sym
 	end if
 	
 	block[BLOCK_VARS] &= sym
@@ -207,9 +209,10 @@ end procedure
 
 procedure Leave_block( integer offset )
 -- Emits an EXIT_BLOCK for the block $-offset
-	Push( top_block( offset ) )
-	emit_op( EXIT_BLOCK )
-	
+	if length( block_stack[$-offset][BLOCK_VARS]) then
+		Push( top_block( offset ) )
+		emit_op( EXIT_BLOCK )
+	end if
 end procedure
 
 function Block_opcode( integer bx )

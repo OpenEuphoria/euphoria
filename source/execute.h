@@ -109,7 +109,8 @@ struct free_block {                /* a free storage block */
 	struct free_block *next;       /* pointer to next free block */
 	long filler;
 	long ref;                      /* reference count */
-}; /* 12 bytes */
+	long filler2;
+}; /* 16 bytes */
 
 struct symtab_entry;
 
@@ -448,6 +449,7 @@ struct char_cell {
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
+	CLEAN_UDT_RT,
 	CLEAN_PCRE,
 	CLEAN_FILE
 };

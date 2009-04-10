@@ -2662,6 +2662,9 @@ procedure opASSIGN()
 		SetBBType(Code[pc+2], GType(Code[pc+1]), ObjMinMax(Code[pc+1]),
 				  TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	end if
+--	if sym_mode( Code[pc+1] ) = M_TEMP and equal( sym_obj( Code[pc+1] ), NOVALUE ) then
+--		c_stmt("@ = NOVALUE;\n", Code[pc+1])
+--	end if
 	pc += 3
 end procedure
 
@@ -4141,10 +4144,10 @@ procedure opRETURNF()
 	symtab_index block = Code[pc+2]
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	while block != sub_block do
-		exit_block( block )
+		exit_block( block, ret )
 		block = SymTab[block][S_BLOCK]
 	end while
-	exit_block( sub_block )
+	exit_block( sub_block, ret )
 	
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
@@ -4166,13 +4169,24 @@ procedure opRETURNF()
 	pc += 4
 end procedure
 
-procedure exit_block( symtab_index block )
+procedure exit_block( symtab_index block, integer except_sym = 0 )
 	ifdef DEBUG then
 		c_puts(sprintf("\n// Exiting block %s\n", {SymTab[block][S_NAME]}))
 	end ifdef
 	sym = block
 	while sym != 0 with entry do
-		CDeRef(sym)
+		if sym != except_sym then
+			
+			ifdef DEBUG then
+				c_puts(sprintf("\n// block var %s\n", {sym_name(sym)}))
+			end ifdef
+--			c_puts( sprintf("puts(\"Free Block var [%d] [%s] from [%s] \");\n", 
+--				{ sym, sym_name(sym), sym_name( block )}) )
+			CDeRef(sym)
+			if not except_sym and not TypeIs( sym, T_INTEGER ) then
+				c_stmt( "@ = NOVALUE;\n", sym )
+			end if
+		end if
 	entry
 		sym = SymTab[sym][S_NEXT_IN_BLOCK]
 	end while
@@ -5486,12 +5500,12 @@ end procedure
 
 
 procedure DeleteRoutine( symtab_index rid )
-	c_stmt("_1 = _00[@].cleanup;", rid )
+	c_stmt("_1 = _00[@].cleanup;\n", rid )
 	c_stmt0("if( _1 == 0 ){\n")
 		c_stmt0("_1 = TransAlloc( sizeof(struct cleanup) );\n")
 		c_stmt( "_00[@].cleanup = (cleanup_ptr)_1;\n", rid)
 	c_stmt0("}\n")
-	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT;\n")
+	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT_RT;\n")
 	c_stmt( "((cleanup_ptr)_1)->func.rid = @;\n", rid)
 	c_stmt0("((cleanup_ptr)_1)->next = 0;\n")
 end procedure

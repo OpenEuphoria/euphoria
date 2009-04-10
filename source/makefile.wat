@@ -207,10 +207,14 @@ MEMFLAG = $(MEMFLAG) /dINT_CODES
 !endif
 
 !ifeq DEBUG 1
-DEBUGFLAG = /d2 /dEDEBUG /dHEAP_CHECK
+DEBUGFLAG = /d2 /dEDEBUG 
 #DEBUGFLAG = /d2 /dEDEBUG /dDEBUG_OPCODE_TRACE
 DEBUGLINK = debug all
 EUDEBUG=-D DEBUG
+!endif
+
+!ifeq HEAP_CHECK 1
+HEAPCHECKFLAG=/dHEAP_CHECK
 !endif
 
 !ifndef EX
@@ -292,11 +296,11 @@ LIBTARGET=$(BUILDDIR)\eu.lib
 
 CC = wcc386
 !ifeq OS DOS
-FE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) /i..\
-BE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
+FE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /i..\
+BE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
 !else
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) /I..\
-BE_FLAGS = /ol /zp8 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
+BE_FLAGS = /ol /zp8 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
 !endif
 	
 library : .SYMBOLIC version.h runtime
@@ -383,13 +387,13 @@ translate : .SYMBOLIC translate-win translate-dos
 testwin : .SYMBOLIC
 	cd ..\tests
 	set EUDIR=$(TRUNKDIR) 
-	$(EUBIN)\eui.exe ..\bin\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib $(FULLBUILDDIR)\eu.lib
+	$(EUBIN)\eui.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib $(FULLBUILDDIR)\eu.lib
 	cd ..\source
 
 testdos : .SYMBOLIC dos
 	cd ..\tests
 	set EUDIR=$(TRUNKDIR)
-	$(EUBIN)\euid.exe ..\bin\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.lib
+	$(EUBIN)\euid.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.lib
 	cd ..\source
 	
 test : .SYMBOLIC testwin testdos
