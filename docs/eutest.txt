@@ -64,13 +64,22 @@ of how the tests went.  By default this is in ascii format.  Use -html
 to make it HTML format.
 * -html: Is for making the report creation to be in HTML format
 
-=== The Unit Test Program
+=== The Unit Test Files
 
 Unit test files must match a pattern ##t_*.e##.  If the unit test file
 matches ##t_c_*.e## the test program will expect the program to fail,
 if there is an error control file in a directory with its same name and
-no extension it will also expect it to fail according to the control
-file's contents.
+'.d' extension it will also expect it to fail according to the control
+file's contents.  Found in the said directory.
+
+==== A trivial example
+
+The following is a minimal unit test file:
+{{{
+include std/unittest.e
+
+test_report()
+}}}
 
 === The Error Control Files
 
