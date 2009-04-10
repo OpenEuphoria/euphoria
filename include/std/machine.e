@@ -581,14 +581,8 @@ end function
 -- Returns 1 if the DEP executing data only memory would cause an exception
 function dep_works()
 	ifdef WIN32 then
-		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1
-		and GetLastError_rid != -1 and GetSystemInfo_rid != -1
-	elsifdef UNIX then
-		ifdef LINUX then
-			return 0
-		end ifdef
-		return getpagesize_rid != -1 and mmap_rid != -1
-		and mprotect_rid != -1 and munmap_rid != -1
+		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 and
+		    GetLastError_rid != -1 and GetSystemInfo_rid != -1			
 	end ifdef
 
 	return 0
