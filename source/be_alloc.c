@@ -809,9 +809,10 @@ size_t strlcpy(char *dest, char *src, size_t maxlen)
 
 size_t strlcat(char *dest, char *src, size_t maxlen)
 {
+	int orig_dest_len = strlen(dest);
 	strncat(dest, src, maxlen-1);
 	dest[maxlen-1] = 0;
-	return strlen(dest) + strlen(src);
+	return orig_dest_len + strlen(src);
 }
 #endif
 
