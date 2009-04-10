@@ -1462,29 +1462,29 @@ void RTInternal_va(char *msg, va_list ap)
    - see InternalErr() for compile-time errors */
 {
 #define RTI_bufflen (1000)
-	char *msg;
+	char *msgtext;
 	char *buf;
 	
-    msg = (char *)malloc(RTI_bufflen);
-	if (msg)
-	    buf = msg;
-		vsnprintf(msg, RTI_bufflen, msg, ap);
-		msg[RTI_bufflen - 1] = 0;
+    msgtext = (char *)malloc(RTI_bufflen);
+	if (msgtext)
+	    buf = msgtext;
+		vsnprintf(msgtext, RTI_bufflen, msg, ap);
+		msgtext[RTI_bufflen - 1] = 0;
 	else {
-		msg = "RTI malloc failed\n";
+		msgtext = "RTI malloc failed\n";
 		buf = 0;
 	}
 	gameover = TRUE;
 
-	debug_msg(msg);
+	debug_msg(msgtext);
 	
 	OpenErrFile();  // exits if error file name is ""
 
-	TraceBack(msg, NULL);
+	TraceBack(msgtext, NULL);
 	
 	iflush(TempErrFile);
 
-	if (buf) free(msg);
+	if (buf) free(msgtext);
 	Cleanup(1);
 }
 #endif
