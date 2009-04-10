@@ -18,7 +18,7 @@ ifdef hello then
 end ifdef
 
 ifdef UNIX then
-    if platform() >= 3 and platform() <= 5 then
+    if platform() >= 3 then
 		test_pass("UNIX test")
 	else
 		test_fail("UNIX test")
@@ -34,7 +34,7 @@ ifdef OSX then
 end ifdef
 
 ifdef FREEBSD then
-	test_equal("FREEBSD test", 3, platform())
+	test_equal("FREEBSD test", 8, platform())
 end ifdef
 
 ifdef LINUX then

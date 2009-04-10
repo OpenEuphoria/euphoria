@@ -5128,7 +5128,10 @@ object machine(object opcode, object x)
 #ifdef EOSX
 				return 4;
 #endif
-#ifdef EUNIX
+#ifdef EBSD // FreeBSD by this point
+				return 8;
+#endif
+#ifdef ELINUX
 				return 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
 #ifdef EWINDOWS

@@ -4882,6 +4882,9 @@ void do_exec(int *start_pc)
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
+#ifdef EBSD
+				top = 8; // FreeBSD
+#endif
 #ifdef EOSX
 				top = 4;  // OSX
 #endif

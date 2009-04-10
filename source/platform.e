@@ -4,7 +4,6 @@
 
 include std/os.e
 
-
 public constant
 	ULINUX = LINUX + 0.3,
 	UFREEBSD = FREEBSD + 0.4,

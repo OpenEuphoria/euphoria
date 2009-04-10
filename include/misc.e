@@ -7,7 +7,7 @@
 global constant DOS32 = 1,  -- ex.exe
 		WIN32 = 2,  -- exw.exe
 		LINUX = 3,  -- exu
-		FREEBSD = 3 -- exu
+		FREEBSD = 8 -- exu
 
 constant M_INSTANCE = 55, M_SLEEP = 64
 

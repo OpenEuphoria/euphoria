@@ -27,11 +27,11 @@ public constant
 	DOS32	= 1,
 	WIN32	= 2,
 	LINUX	= 3,
-	FREEBSD = 3,
 	OSX	    = 4,
 	SUNOS	= 5,
 	OPENBSD = 6,
-	NETBSD  = 7
+	NETBSD  = 7,
+	FREEBSD = 8
 
 --****
 -- These constants are returned by the [[:platform]] function.
