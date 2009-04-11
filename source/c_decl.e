@@ -1004,40 +1004,32 @@ export procedure new_c_file(sequence name)
 
 	close(c_code)
 
-	if equal(name, "main-") then
-		c_code = open(output_dir & name & ".c", "a")
-		if c_code = -1 then
-			CompileErr("Couldn't open .c file for output")
-		end if
-		version()
-	else
-		c_code = open(output_dir & name & ".c", "w")
-		if c_code = -1 then
-			CompileErr("Couldn't open .c file for output")
-		end if
+	c_code = open(output_dir & name & ".c", "w")
+	if c_code = -1 then
+		CompileErr("Couldn't open .c file for output")
+	end if
 
-		cfile_count += 1
-		version()
+	cfile_count += 1
+	version()
 
-		if TDOS and sequence(dj_path) then
-			c_puts("#include <go32.h>\n")
-		end if
-		c_puts("#include \"include/euphoria.h\"\n")
-		
-		c_puts("#include \"main-.h\"\n\n")
+	if TDOS and sequence(dj_path) then
+		c_puts("#include <go32.h>\n")
+	end if
+	c_puts("#include \"include/euphoria.h\"\n")
+	
+	c_puts("#include \"main-.h\"\n\n")
 
-		if am_build then
-			files_to_delete = append(files_to_delete, name & ".c")
-			if TUNIX or gcc_option then
-				files_to_delete = append(files_to_delete, name & ".o")
-			else
-				files_to_delete = append(files_to_delete, name & ".obj")
-			end if
+	if am_build then
+		files_to_delete = append(files_to_delete, name & ".c")
+		if TUNIX or gcc_option then
+			files_to_delete = append(files_to_delete, name & ".o")
+		else
+			files_to_delete = append(files_to_delete, name & ".obj")
 		end if
+	end if
 
-		if not TUNIX then
-			name = lower(name)  -- for faster compare later
-		end if
+	if not TUNIX then
+		name = lower(name)  -- for faster compare later
 	end if
 end procedure
 
@@ -1819,7 +1811,8 @@ export procedure GenerateUserRoutines()
 				c_file = truncate_to_83(c_file)
 			end ifdef
 
-			if Pass = LAST_PASS and file_no > 1 then
+			--if Pass = LAST_PASS and file_no > 1 then
+			if Pass = LAST_PASS then
 				c_file = unique_c_name(c_file)
 				add_file(c_file)
 			end if
@@ -1854,11 +1847,7 @@ export procedure GenerateUserRoutines()
 				end if
 			end if
 		
-			if file_no = 1 then
-				new_c_file("main-")
-			else
-				new_c_file(c_file)
-			end if
+			new_c_file(c_file)
 		
 			s = SymTab[TopLevelSub][S_NEXT]
 			while s do
