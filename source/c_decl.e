@@ -1842,8 +1842,13 @@ export procedure GenerateUserRoutines()
 		
 			if Pass = LAST_PASS then
 				if not makefile_option and (file_no = 1 or not am_build) then
-					printf(doit, "echo %s.c"&HOSTNL, {c_file})
-					printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
+					if am_build then
+						printf(doit, "echo %s.c"&HOSTNL, {file0})
+						printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, file0})
+					else
+						printf(doit, "echo %s.c"&HOSTNL, {c_file})
+						printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
+					end if
 				end if
 			end if
 		
