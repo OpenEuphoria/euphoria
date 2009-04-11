@@ -15,7 +15,7 @@ include std/dll.e
 -- help in the debugging stages. In general, ##SAFE## mode should not be enabled during
 -- production phases but only for development phases.
 --
--- To define the word ##SAFE## run your application with the ##-DSAFE## command line
+-- To define the word ##SAFE## run your application with the ##-D SAFE## command line
 -- option, or add to the top of your main file ##with define SAFE##.
 --
 
