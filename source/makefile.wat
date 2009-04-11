@@ -400,7 +400,7 @@ test : .SYMBOLIC testwin testdos
 
 !endif #EUPHORIA	
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\int.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) 
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) 
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
@@ -459,7 +459,7 @@ installbin : .SYMBOLIC installwinbin installdosbin
 	@echo --------- installbin $(PREFIX) ------------
 	
 	
-$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option caseexact
@@ -481,7 +481,7 @@ dostranslator : .SYMBOLIC version.h
 	wmake -h -f makefile.wat objlist OBJDIR=dostrobj EU_NAME_OBJECT=EU_TRANSDOS_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\eucd.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=dostrobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS
 
-$(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option quiet
@@ -518,7 +518,7 @@ doseubin : .SYMBOLIC version.h
 	wmake -h -f makefile.wat objlist OBJDIR=dosobj EU_NAME_OBJECT=EU_DOS_OBJECTS $(VARS) OS=DOS
 	wmake -h -f makefile.wat $(BUILDDIR)\euid.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=dosobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=1 OS=DOS DOSEUBIN="-WAT -PLAT DOS"
 
-$(BUILDDIR)\eubd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\eubd.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_DOSBACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- DOS BACKEND -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eubd.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eubd.lbc option quiet
@@ -539,7 +539,7 @@ $(BUILDDIR)\eubd.exe : $(BUILDDIR)\$(OBJDIR)\backend.c $(EU_DOSBACKEND_RUNNER_OB
 	cwc eubd.exe
 	cd $(TRUNKDIR)\source
 
-$(BUILDDIR)\euid.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\euid.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_DOS_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- DOS INTERPRETER -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\euid.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euid.lbc option quiet
@@ -560,7 +560,7 @@ $(BUILDDIR)\euid.exe : $(BUILDDIR)\$(OBJDIR)\int.c $(EU_DOS_OBJECTS) $(EU_BACKEN
 	cwc euid.exe
 	cd $(TRUNKDIR)\source
 
-$(BUILDDIR)\eucd.exe : $(BUILDDIR)\$(OBJDIR)\ec.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\eucd.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_TRANSDOS_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- DOS TRANSLATOR EXE -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eucd.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eucd.lbc option quiet
