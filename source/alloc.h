@@ -63,7 +63,7 @@ struct block_list {
 #define ERealloc(orig, newsize) realloc(orig, newsize)
 #endif
 
-#if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
+#if defined(ELINUX) || defined(EMINGW) || (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
 extern size_t strlcpy(char *dest, char *src, size_t maxlen);
 extern size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
