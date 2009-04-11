@@ -54,14 +54,15 @@ INCLUDE(CPack)
 # Options
 #
 
-OPTION( USE_INT_CODES   "Use INT_CODES"                  OFF )
+OPTION( USE_AMALGAMATION  "Translate using -am"            OFF )
+OPTION( USE_INT_CODES     "Use INT_CODES"                  OFF )
 IF( NOT UNIX AND NOT MINGW )
-  OPTION( USE_MANAGED_MEM "Use Managed Memory"           ON  )
+  OPTION( USE_MANAGED_MEM "Use Managed Memory"             ON  )
 ENDIF()
 
-OPTION( BUILD_RELEASE   "Build a release version"        OFF )
-OPTION( BUILD_TOOLS     "Build the tools (eutest/eudoc)" OFF )
-OPTION( BUILD_DOCS      "Build the documentation"        OFF )
+OPTION( BUILD_RELEASE     "Build a release version"        OFF )
+OPTION( BUILD_TOOLS       "Build the tools (eutest/eudoc)" OFF )
+OPTION( BUILD_DOCS        "Build the documentation"        OFF )
 
 #
 # General Installation
