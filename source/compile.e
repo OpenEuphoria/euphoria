@@ -4144,10 +4144,10 @@ procedure opRETURNF()
 	symtab_index block = Code[pc+2]
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	while block != sub_block do
-		exit_block( block, ret )
+		exit_block( block, 0, ret )
 		block = SymTab[block][S_BLOCK]
 	end while
-	exit_block( sub_block, ret )
+	exit_block( sub_block, 0, ret )
 	
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
@@ -4169,7 +4169,7 @@ procedure opRETURNF()
 	pc += 4
 end procedure
 
-procedure exit_block( symtab_index block, integer except_sym = 0 )
+procedure exit_block( symtab_index block, integer novalue = 1, integer except_sym = 0 )
 	ifdef DEBUG then
 		c_puts(sprintf("\n// Exiting block %s\n", {SymTab[block][S_NAME]}))
 	end ifdef
@@ -4180,10 +4180,10 @@ procedure exit_block( symtab_index block, integer except_sym = 0 )
 			ifdef DEBUG then
 				c_puts(sprintf("\n// block var %s\n", {sym_name(sym)}))
 			end ifdef
---			c_puts( sprintf("puts(\"Free Block var [%d] [%s] from [%s] \");\n", 
---				{ sym, sym_name(sym), sym_name( block )}) )
+			
+			
 			CDeRef(sym)
-			if not except_sym and not TypeIs( sym, T_INTEGER ) then
+			if novalue and not except_sym and not TypeIs( sym, T_INTEGER ) then
 				c_stmt( "@ = NOVALUE;\n", sym )
 			end if
 		end if
@@ -4215,10 +4215,10 @@ procedure opRETURNP()
 	symtab_index block = Code[pc+2]
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	while block != sub_block do
-		exit_block( block )
+		exit_block( block, 0 )
 		block = SymTab[block][S_BLOCK]
 	end while
-	exit_block( sub_block )
+	exit_block( sub_block, 0 )
 
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
@@ -5544,6 +5544,7 @@ procedure opDELETE_ROUTINE()
 		c_stmt( "@ = _2;\n", target )
 		
 	else
+		-- b = (pc[1] != pc[3]) && (((symtab_ptr)pc[1])->mode != M_TEMP);
 		if TypeIs( obj, TYPE_INTEGER ) then
 			promote_integer_delete( obj, target )
 
@@ -5560,7 +5561,7 @@ procedure opDELETE_ROUTINE()
 		
 		
 		DeleteRoutine( rid )
---		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
+		
 		if TypeIs( target, TYPE_DOUBLE ) then
 			delete_double( target )
 		elsif TypeIs( target, TYPE_SEQUENCE ) then
@@ -5575,6 +5576,10 @@ procedure opDELETE_ROUTINE()
 			c_stmt0("else{\n")
 				delete_sequence( target )
 			c_stmt0("}\n")
+		end if
+		
+		if obj != target and sym_mode( obj ) = M_NORMAL then
+			c_stmt("RefDS(@);\n", target )
 		end if
 	end if
 	
