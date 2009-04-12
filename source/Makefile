@@ -180,7 +180,8 @@ EU_CORE_FILES = \
 	keylist.e \
 	fwdref.e \
 	shift.e \
-	inline.e
+	inline.e \
+	block.e
 
 EU_INTERPRETER_FILES = \
 	global.e \
@@ -391,10 +392,10 @@ ifneq "$(HASCHANGEDDIRECTORY)" "1"
 	export EUCOMPILEDIR=$(TRUNKDIR)
 	$(MAKE) -k -C ../tests -f ../source/Makefile EUCOMPILEDIR=.. CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 test   
 else
-	$(EXE) $(TRUNKDIR)/bin/eutest.ex -i $(TRUNKDIR)/include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
+	$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
 else # Not DJGPP:
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../bin/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
 
 install :

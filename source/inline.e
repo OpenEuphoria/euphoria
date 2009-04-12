@@ -697,6 +697,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			if TRANSLATE then
 				inline_target = new_inline_var( sub, 0 )
 				SymTab[inline_target][S_VTYPE] = object_type
+				Pop_block_var()
 			else
 				inline_target = NewTempSym()
 				

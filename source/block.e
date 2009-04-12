@@ -257,6 +257,15 @@ export procedure Drop_block( integer opcode )
 end procedure
 
 export procedure Pop_block_var()
+	symtab_index sym = block_stack[$][BLOCK_VARS][$]
+	symtab_index block_sym = block_stack[$][BLOCK_SYM]
+	while sym_next_in_block( block_sym ) != sym do
+		block_sym = sym_next_in_block( block_sym )
+	end while
+	
+	SymTab[block_sym][S_NEXT_IN_BLOCK] = sym_next_in_block( sym )
+	SymTab[sym][S_NEXT_IN_BLOCK] = 0
+	
 	block_stack[$][BLOCK_VARS] = remove( block_stack[$][BLOCK_VARS], 
 		length(block_stack[$][BLOCK_VARS]) )
 end procedure
