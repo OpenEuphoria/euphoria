@@ -288,11 +288,11 @@ procedure OpenCFiles()
 			CompileErr("Can't open " & main_filename & ".c for output\n")
 		end if
 
-		files_to_delete = append(files_to_delete, main_filename & ".c")
+		generated_files = append(generated_files, main_filename & ".c")
 		if TUNIX or gcc_option then
-			files_to_delete = append(files_to_delete, main_filename & ".o")
+			generated_files = append(generated_files, main_filename & ".o")
 		else
-			files_to_delete = append(files_to_delete, main_filename & ".obj")
+			generated_files = append(generated_files, main_filename & ".obj")
 		end if
 	else
 		c_code = open(output_dir & "init-.c", "w")
@@ -314,12 +314,12 @@ procedure OpenCFiles()
 		c_puts("#include \"" & main_filename & ".h\"\n\n")
 		c_h = open(output_dir & main_filename & ".h", "w")
 
-		files_to_delete = append(files_to_delete, main_filename & ".h")
+		generated_files = append(generated_files, main_filename & ".h")
 	else
 		c_puts("#include \"main-.h\"\n\n")
 		c_h = open(output_dir & "main-.h", "w")
 
-		files_to_delete = append(files_to_delete, "main-.h")
+		generated_files = append(generated_files, "main-.h")
 	end if
 	if c_h = -1 then
 		CompileErr("Can't open main-.h file for output\n")

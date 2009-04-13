@@ -22,20 +22,49 @@ include error.e
 include c_out.e
 
 with type_check
--- Translator
-export constant MAX_CFILE_SIZE = 2500 -- desired max size of created C files
 
-export constant LAST_PASS = 7        -- number of Translator passes
+--**
+-- desired max size of created C files
+export constant MAX_CFILE_SIZE = 2500
 
-export integer Pass   -- the pass number, 1 ... LAST_PASS 
+--**
+-- number of Translator passes
+export constant LAST_PASS = 7
 
+--**
+-- the pass number, 1 ... LAST_PASS
+export integer Pass
+
+export enum
+	--**
+	-- the var / type / constant
+	BB_VAR,
+
+	--**
+	-- main type
+	BB_TYPE,
+
+	--**
+	-- element type for sequences
+	BB_ELEM,
+
+	--**
+	-- sequence length
+	BB_SEQLEN,
+
+	--**
+	-- integer value min/max
+	BB_OBJ,
+
+	--**
+	-- may have a delete routine
+	BB_DELETE
+
+--**
 -- What we currently know locally in this basic block about var values etc.
-export constant BB_VAR = 1,      -- the var / type / constant
-		 BB_TYPE = 2,     -- main type
-		 BB_ELEM = 3,     -- element type for sequences
-		 BB_SEQLEN = 4,   -- sequence length
-		 BB_OBJ = 5,      -- integer value min/max
-		 BB_DELETE = 6    -- may have a delete routine
+--
+-- See Also:
+-- [[:BB_VAR]], [[:BB_TYPE]], [[:BB_ELEM]], [[:BB_SEQLEN]], [[:BB_OBJ]], [[:BB_DELETE]]
 export sequence BB_info = {}
 
 export integer LeftSym = FALSE   -- to force name to appear, not value
@@ -51,12 +80,31 @@ export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL, CMAKE
 export integer makefile_option = MAKE_NONE
 export sequence main_ex_file = ""
 
---** Sequence to contain files that are generated and should be removed when done compiling.
-export sequence files_to_delete = {}
+--**
+-- Sequence to contain files that are generated and should be delt with
+-- when creating a build file and/or removed when done compiling.
+export sequence generated_files = {}
 
-export boolean keep = FALSE -- emake should keep .c files or delete?
+--**
+-- Flag to determine if the source files should be kept or deleted
+-- when a compile is finished.
+export boolean keep = FALSE
+
+--**
+-- Debug mode is enabled. This should affect the build process.
 export boolean debug_option = FALSE
-export sequence user_library = "", output_dir = ""
+
+--**
+-- If not-empty, then the build file should link against user_library
+-- not the standard %EUDIR%/bin/eu.lib file.
+export sequence user_library = ""
+
+--**
+-- Write all generated files to this directory.
+export sequence output_dir = ""
+
+--**
+-- Stack size (used in Watcom only).
 export integer total_stack_size = -1 -- default size for OPTION STACK
 
 -- first check EUCOMPILEDIR, to allow the user to override and use a different
@@ -78,7 +126,6 @@ end function
 --**
 -- Output commands to delete the .c, .h and .o/obj files
 --
-
 procedure delete_files(integer doit, sequence objextn)
 	if keep then
 		return
@@ -91,8 +138,8 @@ procedure delete_files(integer doit, sequence objextn)
 		rm_cmd = "del "
 	end if
 	
-	for i = 1 to length(files_to_delete) do
-		puts(doit, rm_cmd & files_to_delete[i] & HOSTNL)
+	for i = 1 to length(generated_files) do
+		puts(doit, rm_cmd & generated_files[i] & HOSTNL)
 	end for 
 end procedure
 
@@ -128,7 +175,7 @@ export procedure NewBB(integer a_call, integer mask, symtab_index sub)
 end procedure
 
 --**
--- return the local min/max value of an integer, based on BB info.
+-- Return the local min/max value of an integer, based on BB info.
 export function BB_var_obj(integer var)
 	sequence fail
 	
@@ -145,8 +192,9 @@ export function BB_var_obj(integer var)
 	return fail
 end function
 
+--**
+-- Return the local type of a var, based on BB info (only)
 export function BB_var_type(integer var)
--- return the local type of a var, based on BB info (only) 
 	for i = length(BB_info) to 1 by -1 do
 		if BB_info[i][BB_VAR] = var and
 		   SymTab[BB_info[i][BB_VAR]][S_MODE] = M_NORMAL then
@@ -164,8 +212,9 @@ export function BB_var_type(integer var)
 	return TYPE_OBJECT
 end function
 
+--**
+-- Return our best estimate of the current type of a var or temp
 export function GType(symtab_index s)  
--- return our best estimate of the current type of a var or temp 
 	integer t, local_t
 	
 	t = SymTab[s][S_GTYPE]
@@ -207,8 +256,9 @@ export function HasDelete( symtab_index s )
 	return SymTab[s][S_HAS_DELETE]
 end function
 
-export function ObjValue(symtab_index s) 
+--**
 -- the value of an integer constant or variable 
+export function ObjValue(symtab_index s) 
 	sequence t, local_t
 
 	t = {SymTab[s][S_OBJ_MIN], SymTab[s][S_OBJ_MAX]}
@@ -246,8 +296,9 @@ export function TypeIsNot(integer x, object types)
 	end if
 end function
 
-export function or_type(integer t1, integer t2)
+--**
 -- OR two types to get the (least general) type that includes both 
+export function or_type(integer t1, integer t2)
 	if t1 = TYPE_NULL then
 		return t2
 	
@@ -297,21 +348,21 @@ export function or_type(integer t1, integer t2)
 	end if
 end function
 
-export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
+--**
 -- Set the type and value, or sequence length and element type,
 -- of a temp or var s locally within a BB. 
+--
+-- Parameters:
+--   # ##t##: the type
+--   # ##val##: is either the integer min & max values, or the length of a
+--     sequence in min, or -1 if we are to just OR-in the etype.
+--   # ##etype##: is the element type of a sequence or object. If an object is
+--     subscripted or sliced that shows that it's a sequence in that instance,
+--     and its element type can be used.
+--   # ##has_delete##: is 1 if the object might have a delete routine attached,
+-- 	   or 0 if not if has_delete then ? 1/0 end if
 
--- t is the type
-
--- val is either the integer min & max values, or the length of a 
--- sequence in min, or -1 if we are to just OR-in the etype. 
-
--- etype is the element type of a sequence or object. If an object is 
--- subscripted or sliced that shows that it's a sequence in that instance, 
--- and its element type can be used. 
-
--- has_delete is 1 if the object might have a delete routine attached, or 0 if not
--- 	if has_delete then ? 1/0 end if
+export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 	integer found, i, tn
 	
 	if has_delete then
@@ -478,11 +529,12 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 end procedure
 
 
-export function ok_name(sequence name)
+--**
 -- return a different name to avoid conflicts with certain C compiler
 -- reserved words. Only needed for private variables (no file number attached). 
 -- split into two lists for speed 
-	
+
+export function ok_name(sequence name)
 	if name[1] <= 'f' then
 		if    equal(name, "Bool") then
 			return "Bool97531"
@@ -525,8 +577,9 @@ export function ok_name(sequence name)
 	end if
 end function
 
-export procedure CName(symtab_index s)
+--**
 -- display the C name or literal value of an operand 
+export procedure CName(symtab_index s)
 	object v
 	
 	v = ObjValue(s)
@@ -579,8 +632,9 @@ export procedure CName(symtab_index s)
 end procedure
 with warning
 
-export procedure c_stmt(sequence stmt, object arg)
+--**
 -- output a C statement with replacements for @ or @1 @2 @3, ... @9
+export procedure c_stmt(sequence stmt, object arg)
 	integer argcount, i
 	
 	if Pass = LAST_PASS and Initializing = FALSE then
@@ -634,15 +688,17 @@ export procedure c_stmt(sequence stmt, object arg)
 	adjust_indent_after(stmt)
 end procedure
 
-export procedure c_stmt0(sequence stmt)
+--**
 -- output a C statement with no arguments
+export procedure c_stmt0(sequence stmt)
 	if emit_c_output then
 		c_stmt(stmt, {})
 	end if
 end procedure
 
-export procedure DeclareFileVars()
+--**
 -- emit C declaration for each local and global constant and var 
+export procedure DeclareFileVars()
 	symtab_index s
 	symtab_entry eentry
 	
@@ -679,8 +735,9 @@ end procedure
    
 integer deleted_routines = 0
 
-export procedure PromoteTypeInfo()
+--**
 -- at the end of each pass, certain info becomes valid 
+export procedure PromoteTypeInfo()
 	symtab_index s
 	
 	g_has_delete = p_has_delete
@@ -786,8 +843,9 @@ export procedure PromoteTypeInfo()
 	end for
 end procedure
 
-export procedure DeclareRoutineList()
+--**
 -- Declare the list of routines for routine_id search 
+export procedure DeclareRoutineList()
 	symtab_index s, p
 	integer first, seq_num
 	
@@ -897,9 +955,9 @@ export procedure DeclareRoutineList()
 	c_puts("object _0switches;\n")
 end procedure   
 
-
-export procedure DeclareNameSpaceList()
+--**
 -- Declare the list of namespace qualifiers for routine_id search 
+export procedure DeclareNameSpaceList()
 	symtab_index s
 	integer first, seq_num
 	
@@ -936,8 +994,9 @@ export procedure DeclareNameSpaceList()
 	c_puts("  {\"\", 0, 999999999, 0}\n};\n\n")  -- end marker
 end procedure
 
-function is_exported( symtab_index s )
+--**
 -- returns 1 if symbol should be exported from dll/so
+function is_exported( symtab_index s )
 	sequence eentry = SymTab[s]
 	integer scope = eentry[S_SCOPE]
 	if eentry[S_MODE] = M_NORMAL then
@@ -953,9 +1012,9 @@ function is_exported( symtab_index s )
 	return 0
 end function
 
-
-procedure Write_def_file(integer def_file)
+--**
 -- output the list of exported symbols for a .dll 
+procedure Write_def_file(integer def_file)
 	symtab_index s
 	
 	if atom(wat_path) then
@@ -988,8 +1047,9 @@ end procedure
 
 sequence c_opts
 
-export procedure new_c_file(sequence name)
+--**
 -- end the old .c file and start a new one 
+export procedure new_c_file(sequence name)
 	cfile_size = 0
 
 	if Pass != LAST_PASS then
@@ -1020,11 +1080,11 @@ export procedure new_c_file(sequence name)
 	c_puts("#include \"main-.h\"\n\n")
 
 	if am_build then
-		files_to_delete = append(files_to_delete, name & ".c")
+		generated_files = append(generated_files, name & ".c")
 		if TUNIX or gcc_option then
-			files_to_delete = append(files_to_delete, name & ".o")
+			generated_files = append(generated_files, name & ".o")
 		else
-			files_to_delete = append(files_to_delete, name & ".obj")
+			generated_files = append(generated_files, name & ".obj")
 		end if
 	end if
 
@@ -1033,13 +1093,15 @@ export procedure new_c_file(sequence name)
 	end if
 end procedure
 
+--**
 -- These characters are assumed to be legal and safe to use 
 -- in a file name on any platform. We can generate up to 
 -- length(file_chars) squared (i.e. over 1000) .c files per Euphoria file.
 constant file_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-function unique_c_name(sequence name)
+--**
 -- See if name has been used already. If so, change the first char.
+function unique_c_name(sequence name)
 	integer i
 	sequence compare_name
 	integer next_fc 
@@ -1047,13 +1109,13 @@ function unique_c_name(sequence name)
 	compare_name = name & ".c"
 	if not TUNIX then
 		compare_name = lower(compare_name)
-		-- .c's on files_to_delete are already lower
+		-- .c's on generated_files are already lower
 	end if
 	next_fc = 1
 	i = 1
-	while i <= length(files_to_delete) do
+	while i <= length(generated_files) do
 		-- extract the base name
-		if equal(files_to_delete[i], compare_name) then
+		if equal(generated_files[i], compare_name) then
 			-- name conflict 
 			if next_fc > length(file_chars) then
 				CompileErr("Sorry, too many .c files with the same base name")
@@ -1079,7 +1141,6 @@ integer link_file
 procedure add_file(sequence filename)
 	if am_build then return end if
 
-	--if am_build then return end if
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
 	if sequence(wat_path) then
@@ -1088,8 +1149,8 @@ procedure add_file(sequence filename)
 		obj_fname &= ".o"
 	end if
 
-	files_to_delete = append(files_to_delete, src_fname)
-	files_to_delete = append(files_to_delete, obj_fname)
+	generated_files = append(generated_files, src_fname)
+	generated_files = append(generated_files, obj_fname)
 
 	if makefile_option then
 		makefile_src_line &= output_dir & src_fname & " "
@@ -1114,9 +1175,11 @@ procedure add_file(sequence filename)
 	end if
 end procedure
 
-function any_code(integer file_no)
+--**
 -- return TRUE if the corresponding C file will contain any code
 -- Note: top level code goes into main-.c   
+
+function any_code(integer file_no)
 	symtab_index s
 	
 	s = SymTab[TopLevelSub][S_NEXT]
@@ -1136,8 +1199,9 @@ sequence cc_name
 sequence file0
 sequence prepared_file0
 
-export procedure start_emake()
+--**
 -- start creating emake.bat     
+export procedure start_emake()
 	sequence debug_flag = ""
 
 	if makefile_option = CMAKE then
@@ -1256,7 +1320,7 @@ export procedure start_emake()
 	if link_file = -1 then
 		CompileErr("Couldn't open objfiles.lnk for output")
 	end if
-	files_to_delete = append(files_to_delete, "objfiles.lnk")
+	generated_files = append(generated_files, "objfiles.lnk")
 	
 	if TDOS then
 		if sequence(wat_path) then  
@@ -1514,8 +1578,9 @@ procedure write_makefile()
 	end if
 end procedure
 
-export procedure finish_emake()
+--**
 -- finish emake.bat 
+export procedure finish_emake()
 	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file, arguments
 	object bin_path
 	integer lib_dir
@@ -1702,7 +1767,7 @@ export procedure finish_emake()
 		end if
 
 		if def_file != -1 then
-			files_to_delete = append(files_to_delete, def_name)
+			generated_files = append(generated_files, def_name)
 			close(def_file)
 		end if
 
@@ -1778,9 +1843,10 @@ export procedure finish_emake()
 	end ifdef
 end procedure
 
-export procedure GenerateUserRoutines()
+--**
 -- walk through the user-defined routines, computing types and
 -- optionally generating code 
+export procedure GenerateUserRoutines()
 	symtab_index s, sp
 	integer next_c_char, q, temps
 	sequence buff, base_name, long_c_file, c_file
@@ -1865,7 +1931,8 @@ export procedure GenerateUserRoutines()
 					if Pass = LAST_PASS and 
 					   (cfile_size > MAX_CFILE_SIZE or 
 						(s != TopLevelSub and cfile_size > MAX_CFILE_SIZE/4 and 
-						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE)) then
+						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE))
+					then
 						-- start a new C file 
 						-- (we generate about 1 line of C per element of CODE)
 						
@@ -1979,8 +2046,9 @@ export procedure GenerateUserRoutines()
 								and not find( name, names ) then
 								c_stmt0("int ")
 								c_puts( name )
-								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] 
-																!= TYPE_INTEGER then
+								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE]
+									!= TYPE_INTEGER
+								then
 									c_puts(" = 0")
 									-- avoids DeRef in 1st BB, but may hurt global type:
 									target = {0, 0}
@@ -1995,7 +2063,8 @@ export procedure GenerateUserRoutines()
 								names = prepend( names, name )
 							else
 								ifdef DEBUG then
-									c_printf("// skipping %s  name type: %d\n", {name,temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] } )
+									c_printf("// skipping %s  name type: %d\n", { name,
+										temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] } )
 								end ifdef
 							end if
 						end if
@@ -2018,7 +2087,7 @@ export procedure GenerateUserRoutines()
 						if SymTab[sp][S_ARG_TYPE] = TYPE_SEQUENCE then
 							target[MIN] = SymTab[sp][S_ARG_SEQ_LEN]
 							SetBBType(sp, SymTab[sp][S_ARG_TYPE], target, 
-										SymTab[sp][S_ARG_SEQ_ELEM], 0)
+								SymTab[sp][S_ARG_SEQ_ELEM], 0)
 					
 						elsif SymTab[sp][S_ARG_TYPE] = TYPE_INTEGER then
 							if SymTab[sp][S_ARG_MIN] = NOVALUE then
