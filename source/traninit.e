@@ -25,6 +25,7 @@ include c_out.e
 include c_decl.e
 include compile.e
 include cominit.e
+include buildsys.e
 include pathopen.e
 include error.e
 include platform.e
@@ -55,7 +56,6 @@ function upper(sequence s)
 	return s
 end function
 
-
 export procedure transoptions()
 -- set translator command-line options  
 	integer i, option
@@ -85,12 +85,14 @@ export procedure transoptions()
 				
 			elsif equal("-WAT", uparg) then
 				wat_option = TRUE
+				compiler_type = COMPILER_WATCOM
 				
 			elsif equal("-KEEP", uparg) then
 				keep = TRUE
 				
 			elsif equal("-DJG", uparg) then
 				djg_option = TRUE
+				compiler_type = COMPILER_DJGPP
 				
 			elsif equal("-FASTFP", uparg) then
 				fastfp = TRUE
@@ -100,12 +102,14 @@ export procedure transoptions()
 				
 			elsif equal("-LCC", uparg) then
 				lcc_option = TRUE
+				compiler_type = COMPILER_LCC
 
 			elsif equal("-GCC", uparg) then
 				-- on windows this is MinGW
 				-- cygwin should get its own option
 				-- probably -CYG
 				gcc_option = TRUE
+				compiler_type = COMPILER_GCC
 				
 			elsif equal("-STACK", uparg) then
 				if i < Argc then
@@ -171,14 +175,15 @@ export procedure transoptions()
 
 			elsif equal("-MAKEFILE", uparg) then
 				makefile_option = MAKE_SHORT
+				build_system_type = BUILD_MAKEFILE
 
 			elsif equal("-MAKEFILE-FULL", uparg) then
 				makefile_option = MAKE_FULL
+				build_system_type = BUILD_MAKEFILE_FULL
 
 			elsif equal("-CMAKEFILE", uparg) then
 				makefile_option = CMAKE
-			elsif equal("-AM", uparg) then
-				am_build = TRUE
+				build_system_type = BUILD_CMAKE
 
 			elsif equal("-O", uparg) then
 				if i < Argc then
@@ -240,20 +245,23 @@ export procedure transoptions()
 	if wat_option then
 		if not (TWINDOWS or TDOS) then
 			set_host_platform( WIN32 )
-			Warning( "Watcom option only available for Windows or DOS... Choosing Windows", translator_warning_flag )
+			Warning( "Watcom option only available for Windows or DOS... Choosing Windows",
+				translator_warning_flag )
 		end if
 	
 		if atom( getenv( "WATCOM" ) ) then
 	    		-- let this die later..
 		elsif find( ' ', getenv("WATCOM" ) ) != 0 then
-			Warning( "Watcom cannot build translated files when there is a space in its parent folders", translator_warning_flag )
+			Warning( "Watcom cannot build translated files when there is a space in its parent folders",
+				translator_warning_flag )
 		elsif atom( getenv( "INCLUDE" ) ) then
 			Warning( "Watcom needs to have an INCLUDE variable set to its included directories",
 				translator_warning_flag )
-		elsif match( upper(getenv("WATCOM") & "\\H;" 
-			& getenv("WATCOM") & "\\H\\NT"),
-			upper(getenv("INCLUDE")) ) != 1 then
-				Warning( "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable.", translator_warning_flag )
+		elsif match( upper(getenv("WATCOM") & "\\H;" & getenv("WATCOM") & "\\H\\NT"),
+			upper(getenv("INCLUDE")) ) != 1
+		then
+			Warning( "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable.",
+				translator_warning_flag )
 			--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
 		end if
 	
@@ -275,32 +283,20 @@ export procedure transoptions()
 		fastfp = FALSE
 		CompileErr( "Fast FP option only available for DOS" )
 	end if
-
 end procedure
 
-procedure OpenCFiles()
+--**
 -- open and initialize translator output files
+procedure OpenCFiles()
 	sequence main_filename = filebase(main_ex_file)
 
-	if am_build then
-		c_code = open(output_dir & main_filename & ".c", "w")
-		if c_code = -1 then
-			CompileErr("Can't open " & main_filename & ".c for output\n")
-		end if
-
-		generated_files = append(generated_files, main_filename & ".c")
-		if TUNIX or gcc_option then
-			generated_files = append(generated_files, main_filename & ".o")
-		else
-			generated_files = append(generated_files, main_filename & ".obj")
-		end if
-	else
-		c_code = open(output_dir & "init-.c", "w")
-		if c_code = -1 then
-			CompileErr("Can't open init-.c for output\n")
-		end if
+	c_code = open(output_dir & "init-.c", "w")
+	if c_code = -1 then
+		CompileErr("Can't open init-.c for output\n")
 	end if
-	
+
+	generated_files = append(generated_files, "init-.c")
+
 	emit_c_output = TRUE
 
 	if TDOS and sequence(dj_path) then
@@ -310,17 +306,11 @@ procedure OpenCFiles()
 	c_puts("#include \"")
 	c_puts("include" & SLASH & "euphoria.h\"\n")
 
-	if am_build then
-		c_puts("#include \"" & main_filename & ".h\"\n\n")
-		c_h = open(output_dir & main_filename & ".h", "w")
+	c_puts("#include \"main-.h\"\n\n")
+	c_h = open(output_dir & "main-.h", "w")
 
-		generated_files = append(generated_files, main_filename & ".h")
-	else
-		c_puts("#include \"main-.h\"\n\n")
-		c_h = open(output_dir & "main-.h", "w")
+	generated_files = append(generated_files, "main-.h")
 
-		generated_files = append(generated_files, "main-.h")
-	end if
 	if c_h = -1 then
 		CompileErr("Can't open main-.h file for output\n")
 	end if

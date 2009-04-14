@@ -12,19 +12,20 @@
 include std/filesys.e
 include std/io.e
 
-include global.e
-include platform.e
-include mode.e as mode
+include buildsys.e
 include c_decl.e
 include c_out.e
 include cominit.e
 include compress.e
-include scanner.e
 include emit.e
-include opnames.e
-include symtab.e
-include reswords.e
 include error.e
+include global.e
+include mode.e as mode
+include opnames.e
+include platform.e
+include reswords.e
+include scanner.e
+include symtab.e
 
 integer np, pc
 
@@ -2876,7 +2877,7 @@ end procedure
 
 procedure opRETURNT()
 -- return from top-level "procedure"
-	if cfile_size > MAX_CFILE_SIZE and not am_build then
+	if cfile_size > MAX_CFILE_SIZE then
 		c_stmt0("main")
 		c_printf("%d();\n", main_name_num)
 		c_stmt0("}\n")
@@ -6795,9 +6796,7 @@ procedure BackEnd(atom ignore)
 	integer tp_count, slash_ix
 	integer max_len
 	
-	if not am_build then
-		close(c_code)
-	end if
+	close(c_code)
 
 	emit_c_output = FALSE
 
@@ -6836,11 +6835,9 @@ procedure BackEnd(atom ignore)
 	-- Now, actually emit the C code */
 	emit_c_output = TRUE
 
-	if not am_build then
-		c_code = open(output_dir & "main-.c", "w")
-		if c_code = -1 then
-			CompileErr("Can't open main-.c for output\n")
-		end if
+	c_code = open(output_dir & "main-.c", "w")
+	if c_code = -1 then
+		CompileErr("Can't open main-.c for output\n")
 	end if
 
 	version()
@@ -6851,10 +6848,8 @@ procedure BackEnd(atom ignore)
 		end if
 	end if
 	c_puts("#include <time.h>\n")
-	if not am_build then
-		c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
-		c_puts("#include \"main-.h\"\n\n")
-	end if
+	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
+	c_puts("#include \"main-.h\"\n\n")
 
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
@@ -7083,17 +7078,13 @@ procedure BackEnd(atom ignore)
 	end if
 
 	-- Final walk through user-defined routines, generating C code
-	start_emake()
-
 	GenerateUserRoutines()  -- needs init_name_num
 
-	if not am_build then
-		close(c_code)
+	close(c_code)
 
-		c_code = open(output_dir & "init-.c", "a")
-		if c_code = -1 then
-			CompileErr("Can't open init-.c for append\n")
-		end if
+	c_code = open(output_dir & "init-.c", "a")
+	if c_code = -1 then
+		CompileErr("Can't open init-.c for append\n")
 	end if
 
 -- declare all *used* constants, and local and global variables as ints
@@ -7215,7 +7206,7 @@ procedure BackEnd(atom ignore)
 	close(c_code)
 	close(c_h)
 
-	finish_emake()
+	write_buildfile()
 
 	if not silent then
 		if makefile_option = MAKE_SHORT then

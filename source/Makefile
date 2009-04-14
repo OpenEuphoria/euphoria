@@ -193,14 +193,14 @@ EU_INTERPRETER_FILES = \
 	int.ex
 
 EU_TRANSLATOR_FILES = \
-	compile.e \
-	compress.e \
-	global.e \
-	ec.ex \
+	buildsys.e \
 	c_decl.e \
 	c_out.e \
-	global.e \
 	cominit.e \
+	compile.e \
+	compress.e \
+	ec.ex \
+	global.e \
 	traninit.e
 
 EU_BACKEND_RUNNER_FILES = \
