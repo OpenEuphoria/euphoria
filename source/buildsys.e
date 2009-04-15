@@ -61,6 +61,7 @@ export enum
 	COMPILER_LCC
 
 export integer compiler_type = COMPILER_UNKNOWN
+export sequence compiler_dir = ""
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT
 
@@ -260,7 +261,6 @@ procedure write_emake()
 	printf(fh, "%s %s ", { settings[SETUP_LEXE], settings[SETUP_LFLAGS] })
 
 	for i = 1 to length(generated_files) do
-		printf(1, "Generated file: %s\n", { generated_files[i] })
 		if generated_files[i][$] != 'c' then
 			continue
 		end if
@@ -298,6 +298,7 @@ procedure write_emake()
 
 	if compiler_type = COMPILER_WATCOM then
 		puts(fh, " LIBRARY ws2_32 ")
+		printf(fh, " NAME %s.exe", { file0 })
 	end if
 
 	puts(fh, HOSTNL)
@@ -305,8 +306,7 @@ procedure write_emake()
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
 	else
-		printf(fh, "if not exists %s.exe then goto done" & HOSTNL, {
-			file0 })
+		printf(fh, "if not exist %s.exe goto done" & HOSTNL, { file0 })
 	end if
 
 	printf(fh, "echo You can now execute %s", { file0 })
@@ -327,14 +327,14 @@ procedure write_emake()
 		end for
 	end if
 
-	if not compiler_type = COMPILER_GCC then
+	if compiler_type != COMPILER_GCC then
 		puts(fh, ":done" & HOSTNL)
 	end if
 
 	close(fh)
 
 	ifdef UNIX then
-		if TUNIX and not makefile_option then
+		if TUNIX then
 			system("chmod +x emake", 2)
 		end if
 	end ifdef
@@ -348,7 +348,8 @@ end procedure
 --   [[:BUILD_MAKEFILE_FULL]], [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
 
 export procedure write_buildfile()
-	switch build_system_type do
+	/*
+	switch build_system do
 		case BUILD_CMAKE then
 			write_cmake()
 
@@ -364,4 +365,17 @@ export procedure write_buildfile()
 		case else
 			CompileErr("Unknown build file type")
 	end switch
+	*/
+
+	if build_system_type = BUILD_CMAKE then
+		write_cmake()
+	elsif build_system_type = BUILD_MAKEFILE_FULL then
+		write_makefile_full()
+	elsif build_system_type = BUILD_MAKEFILE then
+		write_makefile()
+	elsif build_system_type = BUILD_EMAKE then
+		write_emake()
+	else
+		CompileErr("Unknown build file type")
+	end if
 end procedure

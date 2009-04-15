@@ -28,8 +28,6 @@ constant ST_ENTRY_SIZE = 60  -- size (bytes) of back-end symbol table entry
 
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
 
-without warning
-
 constant
 	ST_OBJ            = 0,
 	ST_NEXT           = 4,

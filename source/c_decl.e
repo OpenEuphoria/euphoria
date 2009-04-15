@@ -75,10 +75,6 @@ export boolean
 	fastfp = FALSE,
 	lccopt_option = TRUE
 
-export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL, CMAKE
-export integer makefile_option = MAKE_NONE
-export sequence main_ex_file = ""
-
 --**
 -- Sequence to contain files that are generated and should be delt with
 -- when creating a build file and/or removed when done compiling.
@@ -1086,13 +1082,16 @@ function unique_c_name(sequence name)
 			if next_fc > length(file_chars) then
 				CompileErr("Sorry, too many .c files with the same base name")
 			end if
+
 			name[1] = file_chars[next_fc]
 			compare_name = name & ".c"
 			if not TUNIX then
 				compare_name = lower(compare_name)
 			end if
+
 			next_fc += 1
 			i = 1 -- start over and compare again
+
 		else
 			i += 1
 		end if
@@ -1101,9 +1100,18 @@ function unique_c_name(sequence name)
 	return name
 end function
 
-sequence makefile_src_line = "", makefile_obj_line = ""
+--**
+-- Add a file to the generated files list that will later be used for
+-- writing build files (emake, makefile, etc...)
+export procedure add_file(sequence filename)
+	if match(".c", filename) then
+		filename = filename[1..$-2]
 
-procedure add_file(sequence filename)
+	elsif find('.', filename) then
+		generated_files = append(generated_files, filename)
+		return
+	end if
+
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
 	if sequence(wat_path) then
@@ -1271,7 +1279,6 @@ export procedure GenerateUserRoutines()
 			--if Pass = LAST_PASS and file_no > 1 then
 			if Pass = LAST_PASS then
 				c_file = unique_c_name(c_file)
-				printf(1, "1: add_file: %s\n", { c_file })
 				add_file(c_file)
 			end if
 		
@@ -1281,7 +1288,6 @@ export procedure GenerateUserRoutines()
 					add_file("main-")
 					for i = 0 to main_name_num-1 do
 						buff = sprintf("main-%d", i)
-						printf(1, "2: add_file: %s\n", { buff })
 						add_file(buff)
 					end for
 				end if
@@ -1332,7 +1338,6 @@ export procedure GenerateUserRoutines()
 							next_c_char = 1  -- (unique_c_name will resolve)
 						end if
 
-						printf(1, "3: add_file: %s\n", { c_file })
 						add_file(c_file)
 					end if
 					

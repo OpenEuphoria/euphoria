@@ -1,4 +1,3 @@
-without warning
 without trace
 include mode.e as mode
 include intinit.e
