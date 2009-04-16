@@ -142,11 +142,12 @@ function setup_build()
 					l_flags &= " SYSTEM NT_DLL initinstance terminstance"
 				else
 					c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
-				end if
-				if con_option then
-					l_flags &= " SYSTEM NT"
-				else
-					l_flags &= " SYSTEM NT_WIN RUNTIME WINDOWS=4.0"
+					if con_option then
+						-- SYSTEM NT *MUST* come first, otherwise memory dump
+						l_flags = " SYSTEM NT" & l_flags
+					else
+						l_flags = " SYSTEM NT_WIN RUNTIME WINDOWS=4.0" & l_flags
+					end if
 				end if
 			end if
 
