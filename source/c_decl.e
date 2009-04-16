@@ -73,12 +73,7 @@ export boolean
 	dll_option = FALSE,
 	con_option = FALSE,
 	fastfp = FALSE,
-	lccopt_option = TRUE,
-	am_build = FALSE
-
-export enum MAKE_NONE=0, MAKE_SHORT, MAKE_FULL, CMAKE
-export integer makefile_option = MAKE_NONE
-export sequence main_ex_file = ""
+	lccopt_option = TRUE
 
 --**
 -- Sequence to contain files that are generated and should be delt with
@@ -107,41 +102,24 @@ export sequence output_dir = ""
 -- Stack size (used in Watcom only).
 export integer total_stack_size = -1 -- default size for OPTION STACK
 
--- first check EUCOMPILEDIR, to allow the user to override and use a different
--- directory than EUDIR. THen use EUDIR, then default to /usr/share/euphoria
-function get_eudir()
-	object x
-	x = getenv("EUCOMPILEDIR")
+--**
+-- first check ##EUCOMPILEDIR##, to allow the user to override and use a
+-- different directory than ##EUDIR##. THen use ##EUDIR##, then default
+-- to ##/usr/share/euphoria##
+export function get_eudir()
+	object x = getenv("EUCOMPILEDIR")
 	if equal(x, -1) then
 		x = getenv("EUDIR")
 	end if
-ifdef UNIX then
-	if equal(x, -1) then
-		x = "/usr/share/euphoria"
-	end if
-end ifdef
+
+	ifdef UNIX then
+		if equal(x, -1) then
+			x = "/usr/share/euphoria"
+		end if
+	end ifdef
+
 	return x
 end function
-
---**
--- Output commands to delete the .c, .h and .o/obj files
---
-procedure delete_files(integer doit, sequence objextn)
-	if keep then
-		return
-	end if
-
-	sequence rm_cmd
-	if TUNIX or gcc_option then
-		rm_cmd = "rm "
-	else
-		rm_cmd = "del "
-	end if
-	
-	for i = 1 to length(generated_files) do
-		puts(doit, rm_cmd & generated_files[i] & HOSTNL)
-	end for 
-end procedure
 
 --**
 -- Start a new Basic Block at a label or after a subroutine call
@@ -1045,20 +1023,12 @@ export procedure version()
 	c_puts("// Euphoria To C version " & version_string() & "\n")
 end procedure
 
-sequence c_opts
-
 --**
 -- end the old .c file and start a new one 
 export procedure new_c_file(sequence name)
 	cfile_size = 0
 
 	if Pass != LAST_PASS then
-		return
-	end if
-
-	-- If an amalgamation build and we already have a file opened,
-	-- we do not want to open any more C files.
-	if am_build and c_code != -1 then
 		return
 	end if
 
@@ -1078,15 +1048,6 @@ export procedure new_c_file(sequence name)
 	c_puts("#include \"include/euphoria.h\"\n")
 	
 	c_puts("#include \"main-.h\"\n\n")
-
-	if am_build then
-		generated_files = append(generated_files, name & ".c")
-		if TUNIX or gcc_option then
-			generated_files = append(generated_files, name & ".o")
-		else
-			generated_files = append(generated_files, name & ".obj")
-		end if
-	end if
 
 	if not TUNIX then
 		name = lower(name)  -- for faster compare later
@@ -1109,10 +1070,11 @@ function unique_c_name(sequence name)
 	compare_name = name & ".c"
 	if not TUNIX then
 		compare_name = lower(compare_name)
-		-- .c's on generated_files are already lower
 	end if
+
 	next_fc = 1
 	i = 1
+
 	while i <= length(generated_files) do
 		-- extract the base name
 		if equal(generated_files[i], compare_name) then
@@ -1120,26 +1082,35 @@ function unique_c_name(sequence name)
 			if next_fc > length(file_chars) then
 				CompileErr("Sorry, too many .c files with the same base name")
 			end if
+
 			name[1] = file_chars[next_fc]
 			compare_name = name & ".c"
 			if not TUNIX then
 				compare_name = lower(compare_name)
 			end if
+
 			next_fc += 1
 			i = 1 -- start over and compare again
+
 		else
 			i += 1
 		end if
 	end while
+
 	return name
 end function
 
-sequence makefile_src_line = "", makefile_obj_line = ""
-sequence link_line
-integer link_file
+--**
+-- Add a file to the generated files list that will later be used for
+-- writing build files (emake, makefile, etc...)
+export procedure add_file(sequence filename)
+	if match(".c", filename) then
+		filename = filename[1..$-2]
 
-procedure add_file(sequence filename)
-	if am_build then return end if
+	elsif find('.', filename) then
+		generated_files = append(generated_files, filename)
+		return
+	end if
 
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
@@ -1151,28 +1122,6 @@ procedure add_file(sequence filename)
 
 	generated_files = append(generated_files, src_fname)
 	generated_files = append(generated_files, obj_fname)
-
-	if makefile_option then
-		makefile_src_line &= output_dir & src_fname & " "
-		makefile_obj_line &= output_dir & obj_fname & " "
-
-	elsif TUNIX or (TWINDOWS and gcc_option) then
-		link_line &= filename & ".o "
-	
-	elsif TDOS then
-		if sequence(wat_path) then
-			printf(link_file, "FILE %s\n", {obj_fname})
-		else
-			printf(link_file, "%s\n", {obj_fname})
-		end if
-	
-	else
-		if sequence(wat_path) then
-			printf(link_file, "FILE %s\n", {obj_fname})
-		else
-			printf(link_file, "%s\n", {obj_fname})
-		end if
-	end if
 end procedure
 
 --**
@@ -1194,185 +1143,7 @@ function any_code(integer file_no)
 	return FALSE
 end function
 
-integer doit
-sequence cc_name
-sequence file0
-sequence prepared_file0
-
---**
--- start creating emake.bat     
-export procedure start_emake()
-	sequence debug_flag = ""
-
-	if makefile_option = CMAKE then
-		doit = open(output_dir & file0 & ".cmake", "wb")
-		add_file(file0)
-
-	elsif makefile_option then -- MAKE_FULL, MAKE_SHORT
-		doit = open(output_dir & file0 & ".mak", "wb")
-		add_file(file0)
-
-	elsif TUNIX or (TWINDOWS and gcc_option) then
-		doit = open(output_dir & "emake", "wb")
-
-	else       
-		doit = open(output_dir & "emake.bat", "wb")
-	end if      
-		
-	if doit = -1 then
-		CompileErr("Couldn't create batch file for compile.\n")
-	end if
-		
-	ifdef DOS32 then
-		prepared_file0 = truncate_to_83(file0)
-	elsedef
-		prepared_file0 = file0
-	end ifdef
-	
-	if makefile_option then
-		-- nothing more to do if we are using a makefile
-		return
-	end if
-
-	if not (TUNIX or (TWINDOWS and gcc_option)) then
-		puts(doit, "@echo off"&HOSTNL)
-		puts(doit, "if not exist " & file0 & ".c goto nofiles"&HOSTNL)
-	end if
-	
-	if TDOS then
-		if sequence(wat_path) then
-			if debug_option then
-				debug_flag = "/d2 "
-			end if
-			-- /ol removed due to bugs with SEQ_PTR() inside a loop
-			-- can remove /fpc and add /fp5 /fpi87 for extra speed
-			puts(doit, "echo compiling with WATCOM"&HOSTNL)
-			if fastfp then
-				-- fast f.p. that assumes f.p. hardware
-				c_opts = debug_flag & " /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s"
-			else    
-				-- slower f.p. but works on all machines
-				c_opts = debug_flag & "/w0 /zq /j /zp4 /fpc /5r /otimra /s"
-			end if
-				
-		else 
-			if debug_option then
-				debug_flag = " -g3"
-			else
-				debug_flag = " -fomit-frame-pointer -g0"
-			end if
-			puts(doit, "echo compiling with DJGPP"&HOSTNL)
-			c_opts = "-c -w -fsigned-char -O2 -ffast-math" & debug_flag
-		end if
-	elsif TWINDOWS and not gcc_option then
-		if sequence(wat_path) then
-			puts(doit, "echo compiling with WATCOM"&HOSTNL)
-			if debug_option then
-				debug_flag = " /d3"
-			end if
-			--  /ol removed due to bugs with SEQ_PTR() inside a loop
-			if dll_option then
-				c_opts = "/bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
-			else
-				c_opts = "/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s" & debug_flag
-			end if
-			
-		elsif not gcc_option then
-			-- LccWin 
-			if debug_option then
-				debug_flag = " -g"
-			end if
-			puts(doit, "echo compiling with LCCWIN"&HOSTNL)
-			c_opts = "-w -Zp4" & debug_flag
-
-			-- -O causes some problems sometimes. Use -LCCOPT-OFF to
-			-- disable the use of -O on LCC.
-			if lccopt_option = TRUE then
-				c_opts &= " -O"
-			end if
-		end if
-		
-		c_opts &= sprintf( " -I%s", {get_eudir()})
-	
-	elsif TUNIX or (TWINDOWS and gcc_option) then
-		puts(doit, "echo compiling with GNU C"&HOSTNL)
-		cc_name = "gcc"
-		if debug_option then
-			debug_flag = " -g3"
-		else
-			debug_flag = " -fomit-frame-pointer"
-		end if
-		if dll_option then
-			c_opts = "-c -w -fPIC -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
-		else 
-			c_opts = "-c -w -fsigned-char -O2 -I"&get_eudir()&" -ffast-math" & debug_flag
-		end if
-		if TWINDOWS then
-			c_opts &= " -mno-cygwin" -- only for MinGW
-			if not con_option then
-				c_opts &= " -mwindows"
-			end if
-		end if
-		link_line = ""
-	end if
-	
-	link_file = open(output_dir & "objfiles.lnk", "w")
-	if link_file = -1 then
-		CompileErr("Couldn't open objfiles.lnk for output")
-	end if
-	generated_files = append(generated_files, "objfiles.lnk")
-	
-	if TDOS then
-		if sequence(wat_path) then  
-			cc_name = "wcc386"
-			if not dll_option and debug_option then
-				puts(link_file, "DEBUG ALL\n")
-			end if
-			puts(link_file, "option osname='CauseWay'\n")
-			printf(link_file, "libpath %s\\lib386\n", {wat_path})
-			printf(link_file, "libpath %s\\lib386\\dos\n", {wat_path})
-			printf(link_file, "OPTION stub=%s\\bin\\cwstub.exe\n", {shrink_to_83(get_eudir())})
-			puts(link_file, "format os2 le ^\n")
-			printf(link_file, "OPTION STACK=%d\n", total_stack_size) 
-			puts(link_file, "OPTION QUIET\n") 
-			puts(link_file, "OPTION ELIMINATE\n") 
-			puts(link_file, "OPTION CASEEXACT\n")
-			printf(link_file, "FILE %s.obj\n", {prepared_file0} )
-		else 
-			cc_name = "gcc"
-		end if
-		c_opts &= sprintf( " -I%s", {shrink_to_83(get_eudir())})
-	end if      
-
-	if TWINDOWS then    
-		if sequence(wat_path) then		
-			cc_name = "wcc386"
-			
-			if not dll_option and debug_option then
-				puts(link_file, "DEBUG ALL\n")
-			end if
-			if dll_option then    
-				puts(link_file, "SYSTEM NT_DLL initinstance terminstance\n")
-			elsif con_option then
-				puts(link_file, "SYSTEM NT\n")
-			else    
-				puts(link_file, "SYSTEM NT_WIN\n")
-				puts(link_file, "RUNTIME WINDOWS=4.0\n") 
-			end if
-			printf(link_file, "OPTION STACK=%d\n", total_stack_size) 
-			printf(link_file, "COMMIT STACK=%d\n", total_stack_size) 
-			
-			puts(link_file, "OPTION QUIET\n") 
-			puts(link_file, "OPTION ELIMINATE\n") 
-			puts(link_file, "OPTION CASEEXACT\n") 
-			printf(link_file, "FILE %s.obj\n", {prepared_file0} )			
-			
-		elsif not gcc_option then
-			cc_name = "lcc"
-			
-		end if
-	end if      
-end procedure       
+export sequence file0
 
 type legaldos_filename_char( integer i )
 	if ('A' <= i and i <= 'Z') or
@@ -1413,7 +1184,7 @@ type legaldos_filename( sequence s )
 	return 1
 end type
 
-function shrink_to_83( sequence s )
+export function shrink_to_83( sequence s )
 	integer dl, -- dot location
 		sl, -- slash location
 		osl -- old slash location
@@ -1457,7 +1228,7 @@ function shrink_to_83( sequence s )
 	return s
 end function
 
-function truncate_to_83( sequence lfn )
+export function truncate_to_83( sequence lfn )
 	integer dl
 	dl = find( '.', lfn )
 	if dl = 0 and length(lfn) > 8 then
@@ -1470,378 +1241,6 @@ function truncate_to_83( sequence lfn )
 		CompileErr( "Cannot use the filename, " & lfn & ", under DOS.  Use the Windows version with -plat DOS instead.\n")
 	end if
 end function
-
-procedure write_makefile()
-	if makefile_option = MAKE_FULL then
-		if TWINDOWS and not gcc_option then
-			puts(doit, "CC     = wcc386" & HOSTNL)
-			puts(doit, "CFLAGS = /i$(%EUDIR) /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s")
-			if debug_option then
-				puts(doit, " /d3")
-			end if
-			puts(doit, HOSTNL)
-
-			puts(doit, "LINKER = wlink" & HOSTNL)
-			puts(doit, "LFLAGS = ")
-			if debug_option then
-				puts(doit, "DEBUG ALL ")
-			end if
-			printf(doit, "SYSTEM NT OPTION STACK=%d COMMIT STACK=%d &" & HOSTNL, repeat( total_stack_size, 2 ))
-			puts(doit, "\tOPTION QUIET OPTION ELIMINATE OPTION CASEEXACT &" & HOSTNL)
-			if length(user_library) then
-				printf(doit, "\tFILE %s &" & HOSTNL, { user_library })
-			else
-				puts(doit, "\tFILE $(%EUDIR)\\bin\\eu.lib &" & HOSTNL)
-			end if
-			puts(doit, "\tLIBRARY ws2_32" & HOSTNL)
-		   	puts(doit, HOSTNL)
-
-		elsif TUNIX or gcc_option then
-			puts(doit, "CC     = gcc" & HOSTNL)
-			if TWINDOWS then
-				-- TODO add support for console apps
-				puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer " &
-					"-O3 -Os -mno-cygwin -mwindows")
-			else
-				puts(doit, "CFLAGS = -I$(EUDIR) -c -w -fsigned-char -ffast-math -fomit-frame-pointer -O2")
-			end if
-			if debug_option then
-				puts(doit, " -g")
-			end if
-			puts(doit, HOSTNL)
-
-			-- Build the LFLAGS line
-			puts(doit, "LFLAGS = ")
-			if length(user_library) then
-				puts(doit, user_library)
-			else
-				puts(doit, "$(EUDIR)/bin/eu.a")
-			end if
-			if TWINDOWS then
-				puts(doit, " -lws2_32" & HOSTNL)
-			elsif TSUNOS then
-				puts(doit, " -lm -lsocket -lresolv -lnsl" & HOSTNL)
-			elsif TOSX then
-				puts(doit, " -lm -lresolv" & HOSTNL)
-			elsif TLINUX then
-				puts(doit, " -lm -ldl -lresolv -lnsl" & HOSTNL)
-			else -- OPENBSD, NETBSD, FREEBSD
-				puts(doit, " -lm" & HOSTNL)
-			end if
-		   	puts(doit, HOSTNL)
-		end if
-	end if
-
-	if makefile_option = CMAKE then
-		printf(doit, "SET( %s_SOURCES %s)" & HOSTNL, { upper(file0), makefile_src_line })
-		printf(doit, "SET( %s_OBJECTS %s)" & HOSTNL, { upper(file0), makefile_obj_line })
-
-	elsif makefile_option then -- MAKE_FULL, MAKE_SHORT
-		printf(doit, "%s_SOURCES=%s" & HOSTNL, { upper(file0), makefile_src_line })
-		printf(doit, "%s_OBJECTS=%s" & HOSTNL, { upper(file0), makefile_obj_line })
-	end if
-
-	puts  (doit, HOSTNL)
-
-	if makefile_option = MAKE_FULL then
-		if TWINDOWS and not gcc_option then
-			printf(doit, "%s.exe: $(%s_OBJECTS)" & HOSTNL, { lower(file0), upper(file0) })
-			puts  (doit, "\t$(LINKER) $(LFLAGS) name $@ file { $< }" & HOSTNL)
-			puts  (doit, HOSTNL)
-			printf(doit, "%s-clean: .SYMBOLIC" & HOSTNL, { lower(file0) })
-			printf(doit, "\tdel /f/q $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
-			puts  (doit, HOSTNL)
-			printf(doit, "%s-clean-all: .SYMBOLIC %s-clean" & HOSTNL,
-				{ lower(file0), lower(file0) })
-			printf(doit, "\tdel /f/q $(%s_SOURCES)" & HOSTNL, { upper(file0) })
-			puts  (doit, HOSTNL)
-			puts  (doit, ".c.obj: .autodepend" & HOSTNL)
-			puts  (doit, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
-
-		elsif TUNIX or (TWINDOWS and gcc_option) then
-			printf(doit, "%s: $(%s_OBJECTS)" & HOSTNL, { lower(file0), upper(file0) })
-			printf(doit, "\t$(CC) $(%s_OBJECTS) $(LFLAGS) -o %s" & HOSTNL, {upper(file0), lower(file0)})
-			puts  (doit, HOSTNL)
-			printf(doit, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { lower(file0), lower(file0) })
-			puts  (doit, HOSTNL)
-			printf(doit, "%s-clean: " & HOSTNL, { lower(file0) })
-			printf(doit, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
-			puts  (doit, HOSTNL)
-			printf(doit, "%s-clean-all: %s-clean" & HOSTNL,
-				{ lower(file0), lower(file0) })
-			printf(doit, "\trm -rf $(%s_SOURCES)" & HOSTNL, { upper(file0) })
-			puts  (doit, HOSTNL)
-			puts  (doit, "%.o: %.c" & HOSTNL)
-			puts  (doit, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
-
-		end if
-	end if
-end procedure
-
---**
--- finish emake.bat 
-export procedure finish_emake()
-	sequence path, def_name, dll_flag, exe_suffix, buff, subsystem, short_c_file, arguments
-	object bin_path
-	integer lib_dir
-	integer fp, def_file
-
-	arguments = command_line()
-	if length( arguments ) > 0 then
-		integer sl
-		sl = length( arguments[1] )
-		while sl and arguments[1][sl] != SLASH do
-			sl -= 1
-		end while
-		if sl then
-			bin_path = arguments[1][1..sl-1]
-		else
-			bin_path = 0 
-		end if
-	else
-		bin_path = 0
-	end if
-
-	if not am_build then
-		-- init-.c files
-		if not makefile_option then
-			puts(doit, "echo init-.c"&HOSTNL)
-			printf(doit, "%s %s init-.c"&HOSTNL, {cc_name, c_opts})
-		end if
-		add_file("init-")
-
-		for i = 0 to init_name_num-1 do -- now that we know init_name_num
-			if not makefile_option then
-				printf(doit, "echo init-%d.c"&HOSTNL, {i})
-				printf(doit, "%s %s init-%d.c"&HOSTNL, {cc_name, c_opts, i})
-			end if
-			buff = sprintf("init-%d", i)
-			add_file(buff)
-		end for
-	end if
-
-	if not makefile_option then
-		puts(doit, "echo linking"&HOSTNL)
-	end if
-	
-	ifdef DOS32 then
-		short_c_file = truncate_to_83(file0)
-	elsedef
-		short_c_file = file0
-	end ifdef
-
-	if atom(bin_path) then
-		bin_path = get_eudir() & SLASH & "bin"
-	end if
-	
-	if makefile_option then
-		-- do nothing special
-	elsif TDOS then    
-		if sequence(wat_path) then
-			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
-			if length( user_library ) then
-				printf(link_file, "FILE %s", {shrink_to_83(user_library)})
-			else
-				printf(link_file, "FILE %s\\", {bin_path})
-				if fastfp then
-					puts(link_file, "ecfastfp.lib\n") 
-				else    
-					puts(link_file, "eu.lib\n")
-				end if
-			end if
-			delete_files(doit, ".obj")
-			path = get_eudir() & "\\bin\\le23p.exe"
-			fp = open(path, "rb")
-			if fp != -1 then
-				close(fp)
-				path = get_eudir() & "\\bin\\cwc.exe"
-				fp = open(path, "rb")
-				if fp != -1 then
-					close(fp)
-					if not debug_option then
-						printf(doit, "le23p %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
-						printf(doit, "cwc %s.exe"&HOSTNL, {shrink_to_83(short_c_file)})
-					end if
-					if compare( short_c_file, file0 ) != 0 then
-						printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
-					end if 
-				end if
-			end if
-			close(link_file)
-
-		else 
-			-- DJGPP 
-			if length(user_library) then
-				printf(link_file, "%s\n", {user_library}) 
-			else
-				printf(link_file, "%s\\ec.a\n", {bin_path}) 
-			end if
-			
-			integer nsl,sl
-			nsl = 0
-			loop do
-				sl = nsl
-				nsl = sl + find( '\\', dj_path[sl+1..$] )
-			until sl = nsl
-			
-			printf(link_file, "%slib\\liballeg.a\n", {dj_path[1..sl]}) 
-			printf(doit, "gcc %s.o -o%s.exe @objfiles.lnk"&HOSTNL, repeat(truncate_to_83(file0), 2))
-			delete_files(doit, ".o")
-			if not debug_option then
-				puts(doit, "set LFN=n"&HOSTNL)
-				printf(doit, "strip %s.exe"&HOSTNL, {file0})
-				puts(doit, "set LFN="&HOSTNL)
-			end if
-			if compare(truncate_to_83(file0), file0)!=0 then
-				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, 
-					{truncate_to_83(file0),file0} )
-			end if
-		end if
-	elsif TWINDOWS and not gcc_option then
-		if sequence(wat_path) then     
-			printf(doit, "wlink @objfiles.lnk"&HOSTNL, {})
-			if length(user_library) then
-				printf(link_file, "FILE %s\n", {user_library}) 
-			else
-				printf(link_file, "FILE %s\\eu.lib\n", {bin_path})
-			end if
-			puts(link_file, "LIBRARY ws2_32\n")
-			if compare( short_c_file, file0 ) != 0 then
-				printf(doit, "move %s.exe \"%s.exe\""&HOSTNL, { short_c_file, file0 })
-			end if			
-
-		elsif not gcc_option then 
-			-- Lcc 
-			if dll_option then
-				printf(doit, 
-				"lcclnk -s -dll -subsystem windows %s.obj %s.def @objfiles.lnk"&HOSTNL,
-				{file0, file0})
-			else 
-				if con_option then
-					subsystem = "console"
-				else
-					subsystem = "windows"
-				end if
-				printf(doit, 
-				"lcclnk -s -subsystem %s -stack-reserve %d -stack-commit %d %s.obj @objfiles.lnk"&HOSTNL, 
-				{subsystem, total_stack_size, total_stack_size, file0})
-			end if
-			if length(user_library) then
-				printf(link_file, "%s\n", {shrink_to_83(user_library)}) 
-			else
-				printf(link_file, "%s\\eul.lib\n", {shrink_to_83(bin_path)})
-			end if
-			
-		end if
-
-		if dll_option then
-			printf(doit, "if not exist %s.dll goto done"&HOSTNL, {file0})
-			printf(doit, "echo you can now link with: %s.dll"&HOSTNL, {file0})
-		else 
-			printf(doit, "if not exist %s.exe goto done"&HOSTNL, {file0})
-			printf(doit, "echo you can now execute: %s.exe"&HOSTNL, {file0})
-		end if
-
-		delete_files(doit, ".obj")
-
-		puts(doit, "goto done"&HOSTNL)
-		puts(doit, ":nofiles"&HOSTNL)
-		puts(doit, "echo Run the translator to create new .c files"&HOSTNL)
-		puts(doit, ":done"&HOSTNL)
-
-		def_name = sprintf("%s.def", {file0})
-		def_file = -1
-		if dll_option then
-			-- write out exported symbols 
-			if atom(wat_path) then
-				-- Lcc
-				def_file= open(output_dir & def_name, "w")
-				if def_file = -1 then
-					CompileErr("Couldn't open .def file for output")
-				end if
-				Write_def_file(def_file)
-			else 
-				-- WATCOM - just add to objfiles.lnk 
-				Write_def_file(link_file)
-			end if
-		end if
-
-		if def_file != -1 then
-			generated_files = append(generated_files, def_name)
-			close(def_file)
-		end if
-
-		close(link_file)
-	
-	elsif TUNIX or (TWINDOWS and gcc_option) then
-		if dll_option then
-			dll_flag = "-shared -nostartfiles"
-			if TWINDOWS then
-				exe_suffix = ".dll"
-			else
-				exe_suffix = ".so" 
-			end if
-		else 
-			dll_flag = ""
-			if TWINDOWS then
-				exe_suffix = ".exe"
-			else
-				exe_suffix = ""
-			end if
-		end if
-
-		if length(user_library) then
-			printf(doit,  "gcc %s %s.o %s %s -o %s -lm ",
-				  {dll_flag, short_c_file, link_line, user_library, file0})
-		else
-			-- need to check to see if euphoria is installed into
-			-- the system:
-			lib_dir = open("/usr/lib/eu.a","r" )
-			if lib_dir = -1 then
-				printf(doit, 
-					"gcc %s %s.o %s -I%s %s/bin/eu.a -o %s -lm ",
-					{dll_flag, short_c_file, link_line, get_eudir(), get_eudir(), file0})
-			else
-				close(lib_dir)
-				printf(doit,
-					"gcc %s %s.o %s -I/usr/include/euphoria/ /usr/lib/eu.a -o %s -lm",
-					{dll_flag, short_c_file, link_line, file0})
-			end if
-			
-		end if
-		
-		if TWINDOWS and gcc_option then
-			puts(doit, " -lws2_32 -mno-cygwin")
-			if not con_option then
-				puts(doit, " -mwindows")
-			end if
-		elsif not TBSD then
-			puts(doit, " -ldl")
-		end if      
-		printf(doit, " -o %s%s"&HOSTNL, {file0, exe_suffix})
-			
-		if dll_option then
-			printf(doit, "echo you can now link with: ./%s.so"&HOSTNL, {file0})
-		else    
-			printf(doit, "echo you can now execute: ./%s"&HOSTNL, {file0})
-		end if
-
-		-- TODO: Need some type of if not exists %s, then skip removing of the files
-		delete_files(doit, ".o")
-	end if
-
-	if makefile_option then
-		write_makefile()
-	end if
-		
-	close(doit)
-
-	ifdef UNIX then
-		if TUNIX and not makefile_option then
-			system("chmod +x emake", 2)
-		end if
-	end ifdef
-end procedure
 
 --**
 -- walk through the user-defined routines, computing types and
@@ -1884,38 +1283,16 @@ export procedure GenerateUserRoutines()
 			end if
 		
 			if file_no = 1 then
-				if not am_build then
-					-- do the standard top-level files as well
-					if Pass = LAST_PASS then
-						if not makefile_option then
-							puts(doit, "echo main-.c"&HOSTNL)                
-							printf(doit, "%s %s main-.c"&HOSTNL, {cc_name, c_opts})
-						end if
-						add_file("main-")
-						for i = 0 to main_name_num-1 do
-							if not makefile_option then
-								printf(doit, "echo main-%d.c"&HOSTNL, {i})               
-								printf(doit, "%s %s main-%d.c"&HOSTNL, {cc_name, c_opts, i})
-							end if
-							buff = sprintf("main-%d", i)
-							add_file(buff)
-						end for
-					end if
+				-- do the standard top-level files as well
+				if Pass = LAST_PASS then
+					add_file("main-")
+					for i = 0 to main_name_num-1 do
+						buff = sprintf("main-%d", i)
+						add_file(buff)
+					end for
 				end if
 
 				file0 = long_c_file
-			end if
-		
-			if Pass = LAST_PASS then
-				if not makefile_option and (file_no = 1 or not am_build) then
-					if am_build then
-						printf(doit, "echo %s.c"&HOSTNL, {file0})
-						printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, file0})
-					else
-						printf(doit, "echo %s.c"&HOSTNL, {c_file})
-						printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
-					end if
-				end if
 			end if
 		
 			new_c_file(c_file)
@@ -1960,11 +1337,7 @@ export procedure GenerateUserRoutines()
 						if next_c_char > length(file_chars) then
 							next_c_char = 1  -- (unique_c_name will resolve)
 						end if
-						
-						if not makefile_option and not am_build then
-							printf(doit, "echo %s.c"&HOSTNL, {c_file})
-							printf(doit, "%s %s %s.c"&HOSTNL, {cc_name, c_opts, c_file})
-						end if
+
 						add_file(c_file)
 					end if
 					

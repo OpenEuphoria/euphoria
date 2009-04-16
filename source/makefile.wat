@@ -77,43 +77,44 @@ BASEPATH=pcre
 FULLBUILDDIR=$(BUILDDIR)
 
 EU_CORE_FILES = &
-	main.e &
-	global.e &
+	block.e &
 	common.e &
+	emit.e &
+	error.e &
+	fwdref.e &
+	global.e &
+	inline.e &
+	keylist.e &
+	main.e &
 	mode.e &
+	opnames.e &
+	parser.e &
 	pathopen.e &
 	platform.e &
-	error.e &
-	symtab.e &
+	reswords.e &
 	scanner.e &
 	scinot.e &
-	emit.e &
-	parser.e &
-	opnames.e &
-	reswords.e &
-	keylist.e &
-	fwdref.e &
 	shift.e &
-	inline.e &
-	block.e
+	symtab.e
 
 EU_INTERPRETER_FILES = &
-	compress.e &
+	$(TRUNKDIR)\include\std\get.e &
 	backend.e &
 	c_out.e &
 	cominit.e &
-	intinit.e &
-	$(TRUNKDIR)\include\std\get.e &
-	int.ex
+	compress.e &
+	int.ex &
+	intinit.e
 
 EU_TRANSLATOR_FILES = &
-	compile.e &
-	ec.ex &
+	buildsys.e &
 	c_decl.e &
 	c_out.e &
 	cominit.e &
-	traninit.e &
-	compress.e
+	compile.e &
+	compress.e &
+	ec.ex &
+	traninit.e
 	
 !include $(BUILDDIR)\transobj.wat
 !include $(BUILDDIR)\intobj.wat

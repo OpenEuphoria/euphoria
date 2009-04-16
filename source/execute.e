@@ -4128,9 +4128,9 @@ end procedure
 
 Execute_id = routine_id("Execute")
 
-without warning
-procedure BackEnd(atom ignore)
+--**
 -- The Interpreter back end
+procedure BackEnd(atom ignore)
 	Execute(TopLevelSub, 1)
 end procedure
 set_backend( routine_id("BackEnd") )
@@ -4139,8 +4139,9 @@ set_backend( routine_id("BackEnd") )
 export procedure OutputIL()
 end procedure
 
-export function extract_options(sequence s)
+--**
 -- dummy routine, not used by interpreter
+export function extract_options(sequence s)
 	return s
 end function
 

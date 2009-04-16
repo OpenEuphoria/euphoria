@@ -25,6 +25,7 @@ include c_out.e
 include c_decl.e
 include compile.e
 include cominit.e
+include buildsys.e
 include pathopen.e
 include error.e
 include platform.e
@@ -33,12 +34,8 @@ include platform.e
 constant FORCE_CHOOSE = FALSE
 
 boolean help_option = FALSE
-wat_option = FALSE
-djg_option = FALSE
-lcc_option = FALSE
-gcc_option = FALSE
 
-sequence compile_dir  =""
+sequence compile_dir = ""
 
 function extract_options(sequence s)
 -- dummy    
@@ -54,7 +51,6 @@ function upper(sequence s)
 	end for
 	return s
 end function
-
 
 export procedure transoptions()
 -- set translator command-line options  
@@ -84,13 +80,13 @@ export procedure transoptions()
 				con_option = TRUE
 				
 			elsif equal("-WAT", uparg) then
-				wat_option = TRUE
+				compiler_type = COMPILER_WATCOM
 				
 			elsif equal("-KEEP", uparg) then
 				keep = TRUE
 				
 			elsif equal("-DJG", uparg) then
-				djg_option = TRUE
+				compiler_type = COMPILER_DJGPP
 				
 			elsif equal("-FASTFP", uparg) then
 				fastfp = TRUE
@@ -99,13 +95,10 @@ export procedure transoptions()
 				lccopt_option = FALSE
 				
 			elsif equal("-LCC", uparg) then
-				lcc_option = TRUE
+				compiler_type = COMPILER_LCC
 
 			elsif equal("-GCC", uparg) then
-				-- on windows this is MinGW
-				-- cygwin should get its own option
-				-- probably -CYG
-				gcc_option = TRUE
+				compiler_type = COMPILER_GCC
 				
 			elsif equal("-STACK", uparg) then
 				if i < Argc then
@@ -170,15 +163,13 @@ export procedure transoptions()
 				end if
 
 			elsif equal("-MAKEFILE", uparg) then
-				makefile_option = MAKE_SHORT
+				build_system_type = BUILD_MAKEFILE
 
 			elsif equal("-MAKEFILE-FULL", uparg) then
-				makefile_option = MAKE_FULL
+				build_system_type = BUILD_MAKEFILE_FULL
 
 			elsif equal("-CMAKEFILE", uparg) then
-				makefile_option = CMAKE
-			elsif equal("-AM", uparg) then
-				am_build = TRUE
+				build_system_type = BUILD_CMAKE
 
 			elsif equal("-O", uparg) then
 				if i < Argc then
@@ -205,102 +196,26 @@ export procedure transoptions()
 			add_switch( Argv[i], 0 )
 			move_args( i )
 		else
-			if i > 2 and length(main_ex_file) = 0 then
-				main_ex_file = Argv[i]
-			end if
-
 			i += 1 -- ignore non "-" items
 		end if      
 	end while
-	
-	
+
 	if help_option then
 		show_usage()
 		CompileErr( "" )	
 	end if
-	
-	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option }, {0,0,0} ) = 0 then
-		Warning( "No compiler specified for Windows or DOS (Watcom (-wat), DJG (-djg), or LCC (-lcc)).\n", translator_warning_flag  )
-	end if
-	
-	if (TWINDOWS or TDOS) and compare( sort({wat_option,  djg_option,  lcc_option}), {0,0,1} ) > 0 then
-		Warning( "You should specify one and only one compiler you want to use: Watcom (-wat), DJG (-djg), or LCC (-lcc).", translator_warning_flag )
-	end if
-	
-	-- The platform might have changed, so clean up in case of inconsistent options
-	if dll_option and (TDOS) then
-		dll_option = FALSE
-		Warning( "cannot build a dll for DOS",translator_warning_flag )
-	end if
-	
-	if con_option and not TWINDOWS then
-		Warning( "console option only available for Windows",translator_warning_flag )
-	end if
-	
-	if wat_option then
-		if not (TWINDOWS or TDOS) then
-			set_host_platform( WIN32 )
-			Warning( "Watcom option only available for Windows or DOS... Choosing Windows", translator_warning_flag )
-		end if
-	
-		if atom( getenv( "WATCOM" ) ) then
-	    		-- let this die later..
-		elsif find( ' ', getenv("WATCOM" ) ) != 0 then
-			Warning( "Watcom cannot build translated files when there is a space in its parent folders", translator_warning_flag )
-		elsif atom( getenv( "INCLUDE" ) ) then
-			Warning( "Watcom needs to have an INCLUDE variable set to its included directories",
-				translator_warning_flag )
-		elsif match( upper(getenv("WATCOM") & "\\H;" 
-			& getenv("WATCOM") & "\\H\\NT"),
-			upper(getenv("INCLUDE")) ) != 1 then
-				Warning( "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable.", translator_warning_flag )
-			--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
-		end if
-	
-	end if
-	
-	if djg_option and not TDOS then
-		CompileErr( "DJGPP option only available for DOS." )
-	end if
-
-	if lcc_option and not TWINDOWS then
-		CompileErr( "LCC option only available for Windows." )
-	end if
-	
-	if not lccopt_option and not TWINDOWS then
-		CompileErr( "LCC Opt-Off only available for Windows." )
-	end if
-	
-	if fastfp and not TDOS then
-		fastfp = FALSE
-		CompileErr( "Fast FP option only available for DOS" )
-	end if
-
 end procedure
 
-procedure OpenCFiles()
+--**
 -- open and initialize translator output files
-	sequence main_filename = filebase(main_ex_file)
-
-	if am_build then
-		c_code = open(output_dir & main_filename & ".c", "w")
-		if c_code = -1 then
-			CompileErr("Can't open " & main_filename & ".c for output\n")
-		end if
-
-		generated_files = append(generated_files, main_filename & ".c")
-		if TUNIX or gcc_option then
-			generated_files = append(generated_files, main_filename & ".o")
-		else
-			generated_files = append(generated_files, main_filename & ".obj")
-		end if
-	else
-		c_code = open(output_dir & "init-.c", "w")
-		if c_code = -1 then
-			CompileErr("Can't open init-.c for output\n")
-		end if
+procedure OpenCFiles()
+	c_code = open(output_dir & "init-.c", "w")
+	if c_code = -1 then
+		CompileErr("Can't open init-.c for output\n")
 	end if
-	
+
+	add_file("init-.c")
+
 	emit_c_output = TRUE
 
 	if TDOS and sequence(dj_path) then
@@ -310,92 +225,107 @@ procedure OpenCFiles()
 	c_puts("#include \"")
 	c_puts("include" & SLASH & "euphoria.h\"\n")
 
-	if am_build then
-		c_puts("#include \"" & main_filename & ".h\"\n\n")
-		c_h = open(output_dir & main_filename & ".h", "w")
-
-		generated_files = append(generated_files, main_filename & ".h")
-	else
-		c_puts("#include \"main-.h\"\n\n")
-		c_h = open(output_dir & "main-.h", "w")
-
-		generated_files = append(generated_files, "main-.h")
-	end if
+	c_puts("#include \"main-.h\"\n\n")
+	c_h = open(output_dir & "main-.h", "w")
 	if c_h = -1 then
 		CompileErr("Can't open main-.h file for output\n")
 	end if
+
+	add_file("main-.h")
 end procedure
 
-procedure InitBackEnd(integer c)
+--**
 -- Initialize special stuff for the translator
-	
+procedure InitBackEnd(integer c)
 	init_opcodes()
-	
 	transoptions()
 
 	if c = 1 then
 		OpenCFiles()
+
 		return
 	end if
 
-	-- If no compiler has been chosen test the variables to
-	-- see which is installed.  If a UNIX system choose gcc.
-	-- If Windows or DOS
-	-- Try in the order: WATCOM then DJGPP
-	
-	if TDOS then
-		if gcc_option then
-			djg_option = 1
-		end if
-		wat_path = 0
-		if length(compile_dir) then
-			if djg_option then
-				dj_path  = compile_dir
-			else
-				wat_path = compile_dir
-			end if
-			return
-		end if
-			
-		dj_path = getenv("DJGPP")
-		if atom(dj_path) or wat_option then
-			wat_path = getenv("WATCOM")
-			if atom(wat_path) then
-				CompileErr("WATCOM environment variable is not set")
-			end if
-			dj_path = 0
-		end if
-		if djg_option and atom(dj_path) then
-			CompileErr("DJGPP environment variable is not set")
+	if compiler_type = COMPILER_UNKNOWN then
+		if TWINDOWS or TDOS then
+			compiler_type = COMPILER_WATCOM
+		elsif TUNIX then
+			compiler_type = COMPILER_GCC
 		end if
 	end if
 
-	if TWINDOWS then
-		dj_path = 0
-		wat_path = 0
-		if not lcc_option then
-			if length(compile_dir) then
-				wat_path = compile_dir
+	if TDOS and compiler_type = COMPILER_GCC then
+		compiler_type = COMPILER_DJGPP
+	end if
+
+	switch compiler_type do
+	  	case COMPILER_GCC then
+			-- Nothing special we have to do for gcc
+			break -- to avoid empty block warning
+
+		case COMPILER_DJGPP then
+			if length(compiler_dir) then
+				dj_path = compiler_dir
+			else
+				dj_path = getenv("DJGPP")
+			end if
+
+			if atom(dj_path) then
+				CompileErr("DJGPP environment variable is not set")
+			end if
+
+			if not TDOS then
+				CompileErr( "DJGPP option only available for DOS." )
+			end if
+
+		case COMPILER_LCC then
+			if not TWINDOWS then
+				CompileErr( "LCC option only available for Windows." )
+			end if
+
+		case COMPILER_WATCOM then
+			if length(compiler_dir) then
+				wat_path = compiler_dir
 			else
 				wat_path = getenv("WATCOM")
 			end if
-		end if
-	
-		if wat_option and atom(wat_path) then
-			CompileErr("WATCOM environment variable is not set")
-		end if
-	end if
-	
-	if TUNIX then
-		dj_path = 0
-		gcc_option = 1
-		wat_path = 0
-	end if
-	
-	if sequence(wat_path) + gcc_option + sequence(dj_path) + lcc_option = 0 then
-		CompileErr( "Cannot determine for which compiler to translate for." ) 
-	end if
+		
+			if atom(wat_path) then
+				CompileErr("WATCOM environment variable is not set")
+			elsif find(' ', wat_path) then
+				Warning( "Watcom cannot build translated files when there is a space in its parent folders",
+					translator_warning_flag)
+			elsif atom(getenv("INCLUDE")) then
+				Warning( "Watcom needs to have an INCLUDE variable set to its included directories",
+					translator_warning_flag )
+			elsif match(upper(wat_path & "\\H;" & getenv("WATCOM") & "\\H\\NT"),
+				upper(getenv("INCLUDE"))) != 1
+			then
+				Warning( "Watcom should have the H and the H\\NT includes at the front " &
+					"of the INCLUDE variable.", translator_warning_flag )
+				--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
+			end if
 
+		case else
+			CompileErr("Unknown compiler")
+
+	end switch
+
+	if dll_option and TDOS then
+		CompileErr("cannot build a dll for DOS")
+	end if
+	
+	if con_option and not TWINDOWS then
+		CompileErr("console option only available for Windows")
+	end if
+	
+	if not lccopt_option and not TWINDOWS then
+		CompileErr("LCC Opt-Off only available for Windows.")
+	end if
+	
+	if fastfp and not TDOS then
+		CompileErr("Fast FP option only available for DOS")
+	end if
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 

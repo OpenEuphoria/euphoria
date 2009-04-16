@@ -398,5 +398,4 @@ export sequence goto_delay = {}, goto_list = {}
 export sequence private_sym = {}
 export integer use_private_list = 0
 
-export boolean wat_option, djg_option, lcc_option, gcc_option
 export boolean silent = FALSE

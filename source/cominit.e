@@ -1,14 +1,16 @@
 -- (c) Copyright 2007 Rapid Deployment Software - See License.txt
 --
 -- Common initialization (command line options)
-include std/filesys.e
-include std/search.e
+
 include euphoria/info.e
 
-include global.e
-include pathopen.e
+include std/filesys.e
+include std/search.e
+
 include common.e
 include error.e
+include global.e
+include pathopen.e
 include platform.e
 
 sequence switches = {}, switch_cache = {}
@@ -103,7 +105,7 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                           [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
                           [-makefile] [-keep] [-debug] [-silent] [-o /output dir/]
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
-                          [-am] [/os specific options/]:
+                          [/os specific options/]:
 
               OS Specific Options:
                  DOS    :  [-djg|-wat] [-fastfp]
@@ -124,7 +126,6 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                  -MAKEFILE-FULL : Generate a full Makefile for stand alone use
                  -CMAKEFILE     : Generate a <prgname>.cmake file that can be included
                                   into a larger CMake project
-                 -AM            : Generate an amalgamation build (all files in one .c/.h)
 
 
 #
@@ -243,5 +244,4 @@ export procedure common_options( integer option, integer ix )
 		break
 
 	end switch
-
 end procedure
