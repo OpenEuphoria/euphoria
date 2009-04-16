@@ -386,13 +386,13 @@ translate : .SYMBOLIC translate-win translate-dos
 
 testwin : .SYMBOLIC
 	cd ..\tests
-	set EUDIR=$(TRUNKDIR) 
-	$(EUBIN)\eui.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib $(FULLBUILDDIR)\eu.lib
+	set EUCOMPILEDIR=$(TRUNKDIR) 
+	$(EUBIN)\eui.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.lib
 	cd ..\source
 
 testdos : .SYMBOLIC dos
 	cd ..\tests
-	set EUDIR=$(TRUNKDIR)
+	set EUCOMPILEDIR=$(TRUNKDIR)
 	$(EUBIN)\euid.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.lib
 	cd ..\source
 	
