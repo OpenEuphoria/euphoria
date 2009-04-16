@@ -4169,7 +4169,7 @@ procedure opRETURNF()
 	pc += 4
 end procedure
 
-procedure exit_block( symtab_index block, integer novalue = 1, integer except_sym = 0 )
+procedure exit_block( symtab_index block, integer no_value = 1, integer except_sym = 0 )
 	ifdef DEBUG then
 		c_puts(sprintf("\n// Exiting block %s\n", {SymTab[block][S_NAME]}))
 	end ifdef
@@ -4183,9 +4183,12 @@ procedure exit_block( symtab_index block, integer novalue = 1, integer except_sy
 			
 			
 			CDeRef(sym)
-			if novalue and not except_sym and not TypeIs( sym, T_INTEGER ) then
+			if no_value and not except_sym and not TypeIs( sym, T_INTEGER ) then
 				c_stmt( "@ = NOVALUE;\n", sym )
 			end if
+			
+			-- set the type to an integer to prevent de-referencing
+			SetBBType(sym, TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
 		end if
 	entry
 		sym = SymTab[sym][S_NEXT_IN_BLOCK]
