@@ -114,6 +114,10 @@ function setup_build()
 
 			l_flags = user_library
 
+			if TLINUX then
+				l_flags &= " -ldl -lm"
+			end if
+
 		case COMPILER_DJGPP then
 			c_exe = "gcc"
 			l_exe = "gcc"
@@ -351,7 +355,11 @@ procedure write_emake()
 	end for
 
 	printf(fh, "echo Linking %s" & HOSTNL, { file0 })
-	printf(fh, "%s %s ", { settings[SETUP_LEXE], settings[SETUP_LFLAGS] })
+	puts(fh, settings[SETUP_LEXE])
+
+	if compiler_type = COMPILER_GCC or compiler_type = COMPILER_DJGPP then
+		printf(fh, " -o %s%s ", { file0, settings[SETUP_EXE_EXT] })
+	end if
 
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] != 'c' then
@@ -369,7 +377,7 @@ procedure write_emake()
 		printf(fh, " NAME %s.exe", { file0 })
 	end if
 
-	puts(fh, HOSTNL)
+	puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
 
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
