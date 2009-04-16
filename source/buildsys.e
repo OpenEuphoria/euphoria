@@ -61,7 +61,7 @@ export enum
 export integer compiler_type = COMPILER_UNKNOWN
 export sequence compiler_dir = ""
 
-enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT
+enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT
 
 --**
 -- Setup the build environment. This includes things such as the
@@ -69,7 +69,23 @@ enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT
 -- etc...
 
 function setup_build()
-	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = ""
+	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "", exe_ext = ""
+
+	if length(user_library) = 0 then
+		if TUNIX or compiler_type = COMPILER_GCC or compiler_type = COMPILER_DJGPP then
+			user_library = get_eudir() & "/bin/eu.a"
+		else
+			user_library = get_eudir() & "\\bin\\eu"
+			if TDOS then
+				user_library &= "d"
+			end if
+			user_library &= ".lib"
+		end if
+	end if
+
+	if TDOS or TWINDOWS then
+		exe_ext = ".exe"
+	end if
 
 	switch compiler_type do
 		case COMPILER_GCC then
@@ -96,6 +112,8 @@ function setup_build()
 				end if
 			end if
 
+			l_flags = user_library
+
 		case COMPILER_DJGPP then
 			c_exe = "gcc"
 			l_exe = "gcc"
@@ -108,6 +126,8 @@ function setup_build()
 			end if
 
 			c_flags &= " -c -w -fsigned-char -O2 -ffast-math"
+
+			l_flags = user_library
 
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
@@ -147,6 +167,8 @@ function setup_build()
 						l_flags = " SYSTEM NT_WIN RUNTIME WINDOWS=4.0" & l_flags
 					end if
 				end if
+
+				l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			end if
 
 		case COMPILER_LCC then
@@ -176,7 +198,7 @@ function setup_build()
 			CompileErr("Compiler is unknown")
 	end switch
 
-	return { c_exe, c_flags, l_exe, l_flags, obj_ext }
+	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext }
 end function
 
 --**
@@ -205,25 +227,8 @@ procedure write_cmake()
 	close(fh)
 end procedure
 
---**
--- Write a full Makefile
 
-procedure write_makefile_full()
-	sequence settings = setup_build()
-	integer fh = open(output_dir & file0 & ".mak", "wb")
-
-
-
-	close(fh)
-end procedure
-
---**
--- Write a partial Makefile
-
-procedure write_makefile()
-	sequence settings = setup_build()
-	integer fh = open(output_dir & file0 & ".mak", "wb")
-
+procedure write_makefile_srcobj_list(integer fh)
 	printf(fh, "%s_SOURCES =", { upper(file0) })
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
@@ -239,6 +244,67 @@ procedure write_makefile()
 		end if
 	end for
 	puts(fh, HOSTNL)
+end procedure
+
+--**
+-- Write a full Makefile
+
+procedure write_makefile_full()
+	sequence settings = setup_build()
+	integer fh = open(output_dir & file0 & ".mak", "wb")
+
+	printf(fh, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
+	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
+	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
+	printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
+	puts(fh, HOSTNL)
+
+	write_makefile_srcobj_list(fh)
+	puts(fh, HOSTNL)
+
+	if compiler_type = COMPILER_WATCOM then
+		printf(fh, "%s.exe: $(%s_OBJECTS)" & HOSTNL, { file0, upper(file0) })
+		puts(fh, "\t$(LINKER) $(LFLAGS) NAME $@ FILE { $< }" & HOSTNL)
+		puts(fh, HOSTNL)
+		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
+		printf(fh, "\tdel /f/q $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+		puts(fh, HOSTNL)
+		printf(fh, "%s-clean-all: .SYMBOLIC %s-clean" & HOSTNL, { file0, file0 })
+		printf(fh, "\tdel /f/q $(%s_SOURCES) %s.exe" & HOSTNL, { upper(file0), file0 })
+		puts(fh, HOSTNL)
+		puts(fh, ".c.obj: .autodepend" & HOSTNL)
+		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
+		puts(fh, HOSTNL)
+
+	else
+		printf(fh, "%s%s: $(%s_OBJECTS)" & HOSTNL, { file0, settings[SETUP_EXE_EXT], upper(file0) })
+		printf(fh, "\t$(LINKER) -o %s%s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
+			file0, settings[SETUP_EXE_EXT], upper(file0) })
+		puts(fh, HOSTNL)
+		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
+		puts(fh, HOSTNL)
+		printf(fh, "%s-clean:" & HOSTNL, { file0 })
+		printf(fh, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+		puts(fh, HOSTNL)
+		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
+		printf(fh, "\trm -rf $(%s_SOURCES) %s%s" & HOSTNL, { upper(file0), file0, settings[SETUP_EXE_EXT] })
+		puts(fh, HOSTNL)
+		puts(fh, "%.o: %.c" & HOSTNL)
+		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
+		puts(fh, HOSTNL)
+	end if
+
+	close(fh)
+end procedure
+
+--**
+-- Write a partial Makefile
+
+procedure write_makefile()
+	sequence settings = setup_build()
+	integer fh = open(output_dir & file0 & ".mak", "wb")
+
+	write_makefile_srcobj_list(fh)
 
 	close(fh)
 end procedure
@@ -299,32 +365,7 @@ procedure write_emake()
 		printf(fh, " %s.%s ", { filebase(generated_files[i]), settings[SETUP_OBJ_EXT] })
 	end for
 
-	if length(user_library) then
-		if compiler_type = COMPILER_WATCOM or compiler_type = COMPILER_LCC then
-			puts(fh, " FILE ")
-		end if
-
-		puts(fh, user_library)
-	else
-		if compiler_type = COMPILER_WATCOM or compiler_type = COMPILER_LCC then
-			puts(fh, " FILE ")
-		end if
-
-		puts(fh, get_eudir() & "\\bin\\eu")
-	end if
-
-	if TDOS then
-		puts(fh, "d")
-	end if
-
-	if TUNIX or compiler_type = COMPILER_GCC or compiler_type = COMPILER_DJGPP then
-		puts(fh, ".a")
-	else
-		puts(fh, ".lib")
-	end if
-
 	if compiler_type = COMPILER_WATCOM then
-		puts(fh, " LIBRARY ws2_32 ")
 		printf(fh, " NAME %s.exe", { file0 })
 	end if
 
