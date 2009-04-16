@@ -116,6 +116,10 @@ function setup_build()
 
 			if TLINUX then
 				l_flags &= " -ldl -lm"
+			elsif TOSX then
+				l_flags &= " -lresolv"
+			elsif TSUNOS then
+				l_flags &= " -lsocket -lresolv -lnsl"
 			end if
 
 		case COMPILER_DJGPP then
