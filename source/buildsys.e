@@ -3,15 +3,13 @@
 --
 
 include std/filesys.e
+include std/text.e
 
 include c_decl.e
 include c_out.e
---include compile.e
 include error.e
 include global.e
 include platform.e
---include reswords.e
---include symtab.e
 
 --****
 -- = buildsys.e
@@ -188,7 +186,21 @@ procedure write_cmake()
 	sequence settings = setup_build()
 	integer fh = open(output_dir & file0 & ".cmake", "wb")
 
+	printf(fh, "SET( %s_SOURCES", { upper(file0) })
+	for i = 1 to length(generated_files) do
+		if generated_files[i][$] = 'c' then
+			puts(fh, " " & generated_files[i])
+		end if
+	end for
+	puts(fh, " )" & HOSTNL)
 
+	printf(fh, "SET( %s_OBJECTS", { upper(file0) })
+	for i = 1 to length(generated_files) do
+		if match(".o", generated_files[i]) then
+			puts(fh, " " & generated_files[i])
+		end if
+	end for
+	puts(fh, " )" & HOSTNL)
 
 	close(fh)
 end procedure
@@ -212,7 +224,21 @@ procedure write_makefile()
 	sequence settings = setup_build()
 	integer fh = open(output_dir & file0 & ".mak", "wb")
 
+	printf(fh, "%s_SOURCES =", { upper(file0) })
+	for i = 1 to length(generated_files) do
+		if generated_files[i][$] = 'c' then
+			puts(fh, " " & generated_files[i])
+		end if
+	end for
+	puts(fh, HOSTNL)
 
+	printf(fh, "%s_OBJECTS =", { upper(file0) })
+	for i = 1 to length(generated_files) do
+		if match(".o", generated_files[i]) then
+			puts(fh, " " & generated_files[i])
+		end if
+	end for
+	puts(fh, HOSTNL)
 
 	close(fh)
 end procedure
