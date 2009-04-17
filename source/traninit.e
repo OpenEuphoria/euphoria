@@ -58,6 +58,40 @@ export procedure transoptions()
 	sequence uparg
 	object s
 	
+	-- Preprocess real command line args for host platform
+	for j = 1 to length(Argv) do
+		if equal("-PLAT", upper(Argv[j]) ) then
+			if j < length(Argv) then
+				switch upper(Argv[j+1]) do
+					case "WIN" then
+						set_host_platform( WIN32 )
+					
+					case "DOS" then
+						set_host_platform( DOS32 )
+						
+					case "LINUX" then
+						set_host_platform( ULINUX )
+						
+					case "FREEBSD" then
+						set_host_platform( UFREEBSD )
+						
+					case "OSX" then
+						set_host_platform( UOSX )
+						
+					case "SUNOS" then
+						set_host_platform( USUNOS )
+						
+					case "OPENBSD" then
+						set_host_platform( UOPENBSD )
+						
+					case "NETBSD" then
+						set_host_platform( UNETBSD )
+						
+				end switch
+			end if
+		end if
+	end for
+				
 	Argv &= GetDefaultArgs()
 	Argc = length(Argv)
 
@@ -132,25 +166,34 @@ export procedure transoptions()
 					s = upper(Argv[i+1])
 					add_switch( Argv[i+1], 1 )
 					move_args( i+1 )
-					if equal( s, "WIN" ) then
-						set_host_platform( WIN32 )
-					elsif equal( s, "DOS" ) then
-						set_host_platform( DOS32 )
-					elsif equal( s, "LINUX" ) then
-						set_host_platform( ULINUX )
-					elsif equal( s, "FREEBSD" ) then
-						set_host_platform( UFREEBSD )
-					elsif equal( s, "OSX" ) then
-						set_host_platform( UOSX )
-					elsif equal( s, "SUNOS" ) then
-						set_host_platform( USUNOS )
-					elsif equal( s, "OPENBSD" ) then
-						set_host_platform( UOPENBSD )
-					elsif equal( s, "NETBSD" ) then
-						set_host_platform( UNETBSD )
-					else
-						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
-					end if
+					switch s do
+						case "WIN" then
+							set_host_platform( WIN32 )
+						
+						case "DOS" then
+							set_host_platform( DOS32 )
+							
+						case "LINUX" then
+							set_host_platform( ULINUX )
+							
+						case "FREEBSD" then
+							set_host_platform( UFREEBSD )
+							
+						case "OSX" then
+							set_host_platform( UOSX )
+							
+						case "SUNOS" then
+							set_host_platform( USUNOS )
+							
+						case "OPENBSD" then
+							set_host_platform( UOPENBSD )
+							
+						case "NETBSD" then
+							set_host_platform( UNETBSD )
+							
+						case else
+							Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
+					end switch
 				end if
 			
 			elsif equal("-COM", uparg ) then

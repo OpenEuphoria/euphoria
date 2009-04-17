@@ -503,9 +503,21 @@ is ignored.
 ** There are a number of predefined sections. 
 ** The lines in a section are only added to the command line switches if they
  apply to the mode that Euphoria is running in.
-*** [interpret] Applies to the interpreter only.
-*** [translate] Applies to the translator only.
-*** [bind] Applies to the binder only.
+*** [win32] Applies to Windows platform only.
+*** [dos32] Applies to DOS platform only.
+*** [unix] Applies to any Unix platform only.
+*** [interpret] Applies to the interpreter running in any platform.
+*** [translate] Applies to the translator running in any platform.
+*** [bind] Applies to the binder running in any platform.
+*** [interpret:win32] Applies to the interpreter when running under Windows only.
+*** [interpret:dos32] Applies to the interpreter when running under DOS only.
+*** [interpret:unix] Applies to the interpreter when running under Unix only.
+*** [translate:win32] Applies to the translator when running under Windows only.
+*** [translate:dos32] Applies to the translator when running under DOS only.
+*** [translate:unix] Applies to the translator when running under Unix only.
+*** [bind:win32] Applies to the binder when running under Windows only.
+*** [bind:dos32] Applies to the binder when running under DOS only.
+*** [bind:unix] Applies to the binder when running under Unix only.
 *** [all] Applies to all running modes.
 ** All configuration lines before the first section header are assumed to be the
 ##[all]## section.

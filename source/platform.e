@@ -86,20 +86,19 @@ public function host_platform()
 	return ihost_platform
 end function
 
+sequence unices = {ULINUX, UFREEBSD, UOSX, USUNOS, UOPENBSD, UNETBSD}
 public procedure set_host_platform( atom plat )
 	ihost_platform = floor(plat)
 
-	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX or plat = USUNOS or
-	            plat = UOPENBSD or plat = UNETBSD)
-
-	TWINDOWS = plat = WIN32
-	TDOS     = plat = DOS32
-	TBSD     = plat = UFREEBSD
-	TOSX     = plat = UOSX
-	TLINUX   = plat = ULINUX
-	TSUNOS   = plat = USUNOS
-	TOPENBSD = plat = UOPENBSD
-	TNETBSD  = plat = UNETBSD
+	TUNIX    = (find(ihost_platform, unices) != 0) 
+	TWINDOWS = (ihost_platform = WIN32)
+	TDOS     = (ihost_platform = DOS32)
+	TBSD     = (ihost_platform = UFREEBSD)
+	TOSX     = (ihost_platform = UOSX)
+	TLINUX   = (ihost_platform = ULINUX)
+	TSUNOS   = (ihost_platform = USUNOS)
+	TOPENBSD = (ihost_platform = UOPENBSD)
+	TNETBSD  = (ihost_platform = UNETBSD)
 	IUNIX    = TUNIX
 	IWINDOWS = TWINDOWS
 	IDOS     = TDOS

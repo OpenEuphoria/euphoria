@@ -318,22 +318,55 @@ export function load_euinc_conf( sequence file )
 		
 		if length(arg) > 0 then
 			integer needed = 0
-			switch section with fallthru do
+			switch section do
 				case "all" then
 					needed = 1
-					break
 					
+				case "win32" then
+					needed = TWINDOWS
+			
+				case "unix" then
+					needed = TUNIX
+			
+				case "dos32" then
+					needed = TDOS
+			
 				case "translate" then
 					needed = TRANSLATE
-					break
 					
+				case "translate:win32", "win32:translate" then
+					needed = TRANSLATE and TWINDOWS
+					
+				case "translate:unix", "unix:translate" then
+					needed = TRANSLATE and TUNIX
+					
+				case "translate:dos32", "dos32:translate" then
+					needed = TRANSLATE and TDOS
+			
 				case "interpret" then
 					needed = INTERPRET
-					break
 					
+				case "interpret:win32", "win32:interpret" then
+					needed = INTERPRET and TWINDOWS
+			
+				case "interpret:unix", "unix:interpret" then
+					needed = INTERPRET and TUNIX
+					
+				case "interpret:dos32", "dos32:interpret" then
+					needed = INTERPRET and TDOS
+			
 				case "bind" then
 					needed = BIND
-					break
+					
+				case "bind:win32", "win32:bind" then
+					needed = BIND and TWINDOWS
+			
+				case "bind:unix", "unix:bind" then
+					needed = BIND and TUNIX
+			
+				case "bind:dos32", "dos32:bind" then
+					needed = BIND and TDOS
+		
 					
 			end switch
 			

@@ -177,6 +177,9 @@ export procedure CompileErr(sequence msg)
 					 line_number, msg})
 	else
 		errmsg = msg
+		if length(msg) > 0 and msg[$] != '\n' then
+			errmsg &= '\n'
+		end if
 	end if
 		-- try to open err file *before* displaying diagnostics on screen
 	OpenErrFile() -- exits if error filename is ""
