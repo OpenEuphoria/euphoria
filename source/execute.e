@@ -136,7 +136,7 @@ constant T_REAL_TIME = 1,
 		 T_TIME_SHARE = 2
 		 
 -- task control block for real-time and time-shared task
-ssequence tcb = {
+sequence tcb = {
 	-- initial "top-level" task, tid=0
 	{
 		-1, 0, T_TIME_SHARE, ST_ACTIVE, 0, 0, 0, 1, 1, 1, 1, 0, {}, 1, {}, {}
