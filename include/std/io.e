@@ -42,7 +42,7 @@ public constant SCREEN = 1
 --**
 -- End of file
 
-public constant EOF = -1
+public constant EOF = (-1)
 
 
 --****
