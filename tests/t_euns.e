@@ -42,6 +42,8 @@ for i = 1 to 2 do
 			break
 		case CASE_FILE:CASE_2 then
 			cf[i] = CASE_FILE:CASE_1
+		case else
+			-- deliberate no case-else used.
 	end switch
 end for
 test_equal( "switch with cases that use namespace", {2,1}, cf )
