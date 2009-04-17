@@ -293,7 +293,8 @@ export constant -- maskable warning flags
 	not_reached_warning_flag	= #0200,
 	mixed_profile_warning_flag	= #0400,
 	empty_case_warning_flag     = #0800,
-	all_warning_flag            = #0FFF
+	no_case_else_warning_flag   = #1000,
+	all_warning_flag            = #1FFF
 
 constant default_maskable_warnings =
 	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
@@ -314,6 +315,7 @@ export constant warning_flags = {
 	not_reached_warning_flag,
 	mixed_profile_warning_flag,
 	empty_case_warning_flag,
+	no_case_else_warning_flag,
 	all_warning_flag
 }
 
@@ -331,6 +333,7 @@ export constant warning_names = {
 	"not_reached",
 	"mixed_profile",
 	"empty_case",
+	"default_case",
 	"all"
 }
 

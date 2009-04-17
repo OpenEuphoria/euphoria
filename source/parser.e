@@ -2446,6 +2446,12 @@ procedure Switch_statement()
 		emit_op(NOPSWITCH)
 	end if
 
+	if not else_case() then
+		Warning(sprintf("%.99s:%d - no 'case else' supplied.",
+				{file_name[current_file_no], line_number}),
+				no_case_else_warning_flag )
+	end if
+	
 	pop_switch( break_base )
 end procedure
 
