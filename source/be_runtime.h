@@ -3,6 +3,6 @@
 
 extern void RTFatal(char *, ...);
 extern void RTInternal(char *msg, ...);
-extern int charcopy(char *, char *, int, int);
+extern int charcopy(char *, int, char *, int);
 
 #endif /* BE_RUNTIME_H */

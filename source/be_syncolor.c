@@ -271,7 +271,7 @@ static void flush(int new_color)
 	if (new_color != color) {
 		if (color != -1) {
 			set_text_color(color);
-			if (charcopy(segment, line+seg_start, seg_end - seg_start + 1, LMAX) <= 0)
+			if (charcopy(segment, LMAX, line+seg_start, seg_end - seg_start + 1) <= 0)
 				segment[LMAX-1] = 0; // Force null terminator if buffer too small.
 			screen_output(NULL, segment);
 			seg_start = seg_end + 1;
@@ -320,7 +320,7 @@ void DisplayColorLine(char *pline, int string_color)
 					}
 				}
 			}
-			if (charcopy(word, line + seg_end + 1, last - seg_end, LMAX) <= 0)
+			if (charcopy(word, LMAX, line + seg_end + 1, last - seg_end) <= 0)
 				word[LMAX - 1] = 0; // Force null terminator if buffer was too small.
 			s_type = s_find(word);
 			if (s_type == S_KEYWORD) 
@@ -385,7 +385,7 @@ void DisplayColorLine(char *pline, int string_color)
 	
 	if (color != -1) 
 		set_text_color(color);
-	if (charcopy(segment, line+seg_start, seg_end - seg_start+1, LMAX) <= 0)
+	if (charcopy(segment, LMAX, line+seg_start, seg_end - seg_start+1) <= 0)
 		segment[LMAX - 1] = 0; // Force null terminator if buffer too small.
 	screen_output(NULL, segment);
 }

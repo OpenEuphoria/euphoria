@@ -429,7 +429,7 @@ static void MyWriteConsole(char *string, int nchars)
 			if (old_string == 0) return;
 		}
 	
-	    charcopy(old_string, string, nchars, oldstr_len);
+	    charcopy(old_string, oldstr_len, string, nchars);
 	
 		// Blank out any EOL characters
 	    for (i = 0; i < nchars; i++)
