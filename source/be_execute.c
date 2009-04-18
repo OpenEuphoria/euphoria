@@ -221,6 +221,39 @@ union pc_t {
 							DeRef(a);             \
 						}
 
+#ifdef EDJGPP                       
+#define peek4(peek4_addr)	(((unsigned)peek4_addr <= LOW_MEMORY_MAX) ? \
+					_farpeekl(_go32_info_block.selector_for_linear_memory, \ 
+									   (unsigned)peek4_addr)\
+					:                       \
+					*peek4_addr)
+
+#define peek1(peek1_addr)	(((unsigned)peek1_addr <= LOW_MEMORY_MAX) ?\
+							 _farpeekb(_go32_info_block.selector_for_linear_memory,\ 
+												   (unsigned)peek1_addr)\
+							 :    *peek1_addr )
+
+#define	poke4(addr,long_value)   			{if ((unsigned)addr <= LOW_MEMORY_MAX) \
+			_farpokel(_go32_info_block.selector_for_linear_memory,\
+				(unsigned long)addr, ((unsigned long)long_value));\
+				else *addr = ((unsigned long)long_value);}
+
+#define poke1(addr,char_value)	{\      
+					if ((unsigned)addr <= LOW_MEMORY_MAX)\
+						_farpokeb(_go32_info_block.selector_for_linear_memory,\
+						   (unsigned long)addr, (unsigned char)char_value);\
+					else\
+						*poke_addr = (unsigned char)b;\
+				}
+			
+#else
+
+#define peek4(peek4_addr)	*peek4_addr
+#define peek1(peek1_addr)	*peek1_addr
+#define	poke4(peek4_addr,long_value)	*peek4_addr = ((unsigned long)long_value)
+#define poke1(addr,char_value)  *addr = char_value
+#endif
+
 
 /**********************/
 /* Imported variables */
@@ -450,13 +483,8 @@ static object do_peek2(object a, int b, int *pc)
 		if (b) {
 			// unsigned
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory,
-									   (unsigned)peek2_addr++);
-				else    
-#endif                      
-					top = (object)*peek2_addr++;
+				top = (object)peek4(peek2_addr);
+				++peek2_addr;
 				if ((unsigned)top > (unsigned)MAXINT)
 					top = NewDouble((double)(unsigned long)top);
 				*(++obj_ptr) = top;
@@ -465,13 +493,8 @@ static object do_peek2(object a, int b, int *pc)
 		else {
 			// signed
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												(unsigned)peek2_addr++);
-				else    
-#endif
-					top = (object)(short)*peek2_addr++;
+				top = peek4(peek2_addr);
+				++peek2_addr;
 				if (top < MININT || top > MAXINT)
 					top = NewDouble((double)(long)top);
 				*(++obj_ptr) = top;
@@ -485,22 +508,15 @@ static object do_peek2(object a, int b, int *pc)
 		(unsigned)peek2_addr < (unsigned)0xC0000) 
 		MainScreen();
 #endif              
-#ifdef EDJGPP                       
-	if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-		top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)peek2_addr);
-	else    
-#endif                      
-		
 	if (b) {
 		// unsigned
-		top = (object)*peek2_addr;
+		top = (object)peek4(peek2_addr);
 		if ((unsigned)top > (unsigned)MAXINT)
 			top = NewDouble((double)(unsigned long)top);
 	}
 	else {
 		// signed
-		top = (object)(signed short)*peek2_addr;
+		top = (object)(signed short)peek4(peek2_addr);
 		if (top < MININT || top > MAXINT)
 			top = NewDouble((double)(long)top);
 	}
@@ -548,13 +564,8 @@ static object do_peek4(object a, int b, int *pc)
 		if (b) {
 			// unsigned
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek4_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-									   (unsigned)peek4_addr++);
-				else    
-#endif                      
-					top = (object)*peek4_addr++;
+				top = peek4(peek4_addr);
+				++peek4_addr;
 				if ((unsigned)top > (unsigned)MAXINT)
 					top = NewDouble((double)(unsigned long)top);
 				*(++obj_ptr) = top;
@@ -563,13 +574,8 @@ static object do_peek4(object a, int b, int *pc)
 		else {
 			// signed
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek4_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												(unsigned)peek4_addr++);
-				else    
-#endif                      
-					top = (object)*peek4_addr++;
+				top = peek4(peek4_addr);
+				++peek4_addr;
 				if (top < MININT || top > MAXINT)
 					top = NewDouble((double)(long)top);
 				*(++obj_ptr) = top;
@@ -582,14 +588,8 @@ static object do_peek4(object a, int b, int *pc)
 		(unsigned)peek4_addr >= (unsigned)0xA0000 && 
 		(unsigned)peek4_addr < (unsigned)0xC0000) 
 		MainScreen();
-#endif              
-#ifdef EDJGPP                       
-	if ((unsigned)peek4_addr <= LOW_MEMORY_MAX)
-		top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)peek4_addr);
-	else    
-#endif                      
-		top = (object)*peek4_addr;
+#endif   
+	top = peek4(peek4_addr);
 	if (b) {
 		// unsigned
 		if ((unsigned)top > (unsigned)MAXINT)
@@ -630,25 +630,13 @@ static void do_poke2(object a, object top)
 #endif
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr, (unsigned long)INT_VAL(top));
-		else
-#endif      
-			*poke2_addr = (unsigned long)INT_VAL(top);
+		poke4(poke2_addr,INT_VAL(top));
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal("poke2 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr, (unsigned long)temp_dbl);
-		else
-#endif      
-			*poke2_addr = (unsigned short)temp_dbl;
+		poke4(poke2_addr,temp_dbl);
 	}
 	else {
 		/* second arg is sequence */
@@ -657,13 +645,8 @@ static void do_poke2(object a, object top)
 		while (TRUE) { 
 			top = *(++obj_ptr); 
 			if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-				if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr++, (unsigned long)INT_VAL(top));
-				else
-#endif
-					*poke2_addr++ = (unsigned short)INT_VAL(top);
+				poke4(poke2_addr,INT_VAL(top));
+				++poke2_addr;
 			}
 			else if (IS_ATOM(top)) {
 				if (top == NOVALUE)
@@ -671,13 +654,8 @@ static void do_poke2(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal("poke2 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-				if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr++, (unsigned long)temp_dbl);
-				else
-#endif      
-					*poke2_addr++ = (unsigned long)temp_dbl;
+				poke4(poke2_addr,temp_dbl);
+				++poke2_addr;
 			}
 			else {
 				RTFatal("sequence to be poked must only contain atoms");
@@ -712,40 +690,23 @@ static void do_poke4(object a, object top)
 #endif
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-		if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr, (unsigned long)INT_VAL(top));
-		else
-#endif      
-			*poke4_addr = (unsigned long)INT_VAL(top);
+		poke4(poke4_addr,INT_VAL(top));
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal("poke4 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-		if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr, (unsigned long)temp_dbl);
-		else
-#endif      
-			*poke4_addr = (unsigned long)temp_dbl;
+		poke4(poke4_addr,temp_dbl);
 	}
 	else {
 		/* second arg is sequence */
 		s1 = SEQ_PTR(top);
 		obj_ptr = s1->base;
 		while (TRUE) { 
-			top = *(++obj_ptr); 
+			top = *(++obj_ptr);			
 			if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-				if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr++, (unsigned long)INT_VAL(top));
-				else
-#endif      
-					*poke4_addr++ = (unsigned long)INT_VAL(top);
+				poke4(poke4_addr,INT_VAL(top));
+				++poke4_addr;
 			}
 			else if (IS_ATOM(top)) {
 				if (top == NOVALUE)
@@ -753,13 +714,8 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal("poke4 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-				if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr++, (unsigned long)temp_dbl);
-				else
-#endif
-					*poke4_addr++ = (unsigned long)temp_dbl;
+				poke4(poke4_addr,temp_dbl);
+				++poke4_addr;
 			}
 			else {
 				RTFatal("sequence to be poked must only contain atoms");
@@ -4666,22 +4622,11 @@ void do_exec(int *start_pc)
 				b = top;
 				
 				if (IS_ATOM_INT(b)) {
-#ifdef EDJGPP       
-					if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-						_farpokeb(_go32_info_block.selector_for_linear_memory,
-						   (unsigned long)poke_addr, (unsigned char)b);
-					else
-#endif      
-						*poke_addr = (unsigned char)b;
+					poke1(poke_addr,b);
 				}
 				else if (IS_ATOM(b)) {
-#ifdef EDJGPP       
-					if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-						_farpokeb(_go32_info_block.selector_for_linear_memory,
-						(unsigned long)poke_addr, (unsigned char)DBL_PTR(b)->dbl);
-					else
-#endif      
-						*poke_addr = (signed char)DBL_PTR(b)->dbl;
+					/* no check for overflow here.. hmm*/
+					poke1(poke_addr,DBL_PTR(b)->dbl);
 				}
 				else {
 					/* second arg is sequence */
@@ -4690,29 +4635,18 @@ void do_exec(int *start_pc)
 					while (TRUE) { 
 						b = *(++obj_ptr); 
 						if (IS_ATOM_INT(b)) {
-#ifdef EDJGPP       
-							if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-								_farpokeb(_go32_info_block.selector_for_linear_memory,
-								(unsigned long)poke_addr++, (unsigned char)b);
-							else
-#endif      
-								*poke_addr++ = (unsigned char)b;
+							poke1(poke_addr,b);
 						}
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
-								break;
-#ifdef EDJGPP       
-							if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-								_farpokeb(_go32_info_block.selector_for_linear_memory,
-								(unsigned long)poke_addr++, (unsigned char)DBL_PTR(b)->dbl);
-							else
-#endif      
-								*poke_addr++ = (signed char)DBL_PTR(b)->dbl;
+								break;							
+							poke1(poke_addr,DBL_PTR(b)->dbl);
 						}
 						else {
 							RTFatal(
 							"sequence to be poked must only contain atoms");
 						}
+						++poke_addr;
 					}
 				}
 				inc3pc();

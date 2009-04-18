@@ -282,7 +282,7 @@ static short original_vesa;  /* original setting of _SVGAType */
 char *version_name =
 #ifdef EDOS
 #ifdef EDJGPP
-"DOS32 built for DJGPP";
+"DOS32 built with DJGPP";
 #else
 "DOS32";
 #endif
