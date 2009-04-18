@@ -317,3 +317,59 @@ export enum
 	QUALIFIED_TYPE,
 	NAMESPACE
 
+enum -- token category name id
+	TC_ILLCHAR,
+	TC_EOF,
+	TC_PUNC,
+	TC_PREDEF,
+	TC_VAR,
+	TC_PROC,
+	TC_FUNC,
+	TC_TYPE,
+	TC_OPER,
+	TC_NAMESPACE
+export constant token_catname = {
+	"illegal character",
+	"end of file",
+	"punctuation",
+	"predefined",
+	"variable",
+	"procedure",
+	"function",
+	"type",
+	"operation",
+	"namespace"
+	}	
+export constant token_category = {
+	{ILLEGAL_CHAR, TC_ILLCHAR},
+	{END_OF_FILE, TC_EOF},
+	{DOLLAR, TC_PUNC},
+	{COLON, TC_PUNC},
+	{LEFT_BRACE, TC_PUNC},
+	{RIGHT_BRACE, TC_PUNC},
+	{LEFT_ROUND, TC_PUNC},
+	{RIGHT_ROUND, TC_PUNC},
+	{LEFT_SQUARE, TC_PUNC},
+	{RIGHT_SQUARE, TC_PUNC},
+	{COMMA, TC_PUNC},
+	{QUESTION_MARK, TC_PREDEF},
+	{NUMBER_SIGN, TC_PUNC},
+	{SINGLE_QUOTE, TC_PUNC},
+	{DOUBLE_QUOTE, TC_PUNC},
+	{DOT, TC_PUNC},
+	{BANG, TC_PUNC},
+	{INCLUDE_PATHS, TC_PREDEF},
+	{BUILT_IN, TC_PREDEF},
+	{QUALIFIED_VARIABLE, TC_VAR},
+	{SLICE, TC_PREDEF},
+	{PLUS_EQUALS, TC_OPER},
+	{MINUS_EQUALS, TC_OPER},
+	{MULTIPLY_EQUALS, TC_OPER},
+	{DIVIDE_EQUALS, TC_OPER},
+	{CONCAT_EQUALS, TC_OPER},
+	{QUALIFIED_FUNC, TC_FUNC},
+	{QUALIFIED_PROC, TC_PROC},
+	{QUALIFIED_TYPE, TC_TYPE},
+	{NAMESPACE, TC_NAMESPACE}
+
+}

@@ -20,6 +20,7 @@ include reswords.e
 include error.e
 include c_out.e
 include block.e
+include keylist.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
@@ -1376,6 +1377,13 @@ procedure TypeCheck(symtab_index var)
 	end if
 	
 	which_type = SymTab[var][S_VTYPE]
+	if which_type = 0 then
+		return	-- Not a typed identifier.
+	end if
+	if which_type > 0 and length(SymTab[which_type]) < S_TOKEN then
+		return	-- Not a typed identifier.
+	end if
+	
 	if which_type < 0 or SymTab[which_type][S_TOKEN] = VARIABLE  then
 		integer ref = new_forward_reference( TYPE_CHECK, which_type, TYPE )
 		Code &= { TYPE_CHECK_FORWARD, var, OpTypeCheck }
@@ -3509,7 +3517,13 @@ procedure SubProg(integer prog_type, integer scope)
 		type_sym = tok[T_SYM]
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC, NAMESPACE}) then
-			CompileErr("a parameter name is expected here")
+			sequence tokcat = find_category(tok[T_ID])
+			if tok[T_SYM] != 0 and length(SymTab[tok[T_SYM]]) >= S_NAME then
+				CompileErr(sprintf("found %s '%s' but was expecting a parameter name instead.",
+							{tokcat, SymTab[tok[T_SYM]][S_NAME]}))
+			else
+				CompileErr(sprintf("found %s but was expecting a parameter name instead.",{LexName(tok[T_ID])}))
+			end if
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
 		param_num += 1

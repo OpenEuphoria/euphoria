@@ -172,7 +172,19 @@ end if
 -- top level pseudo-procedure (assumed to be last on the list) 
 keylist = append(keylist, {"_toplevel_", SC_PREDEF, PROC, 0, 0, E_ALL_EFFECT})
 
--- Howw to add defaulted parms to builtins:
+export function find_category(integer tokid)
+	sequence catname = "reserved word"
+	for i = 1 to length(token_category) do
+		if token_category[i][1] = tokid then
+			catname = token_catname[token_category[i][2]]
+			exit
+		end if
+	end for
+	return catname
+end function
+--===========================================
+-- How to add defaulted parms to builtins
+--===========================================
 --
 -- Here are fictitious entries in keylist, which have been used for testing purposes:
 -- Here, equal() gets its second parameter defaulted, not the first.
