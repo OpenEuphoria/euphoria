@@ -1183,8 +1183,11 @@ export function Scanner()
 			
 			return tok
 			
-		elsif class <= ILLEGAL_CHAR then
+		elsif class < ILLEGAL_CHAR then
 			return {class, 0}  -- brackets, punctuation, eof, illegal char etc.
+
+		elsif class = ILLEGAL_CHAR then
+			CompileErr("illegal character in source")
 
 		elsif class = NEWLINE then
 			if start_include then
