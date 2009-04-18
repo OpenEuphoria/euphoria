@@ -808,19 +808,19 @@ end function
 --
 -- Parameters:
 -- # ##needle##:   object to add.
--- # ##haystack##: sequence in which to add it to.
--- # ##order##:    an integer in the ADD_* enum, the position the way to add ##needle## to ##haystack##.
+-- # ##haystack##: sequence to add it to.
+-- # ##order##:    an integer; determines how the ##needle## affects the ##haystack##.
+--                 It can be added to the front (prepended), to the back (appended), 
+--                 or sorted after adding. The default is to prepend it.
 --
 -- Returns:
---   A **sequence**, which is made of ##target## with the ##start..stop## slice removed
---   and replaced by ##replacement##, which is [[:splice]]()d in.
+--   A **sequence**, which is ##haystack## with ##needle## added to it.
 --
 -- Comments:
 --
---   To replace by just one element, enclose ##replacement## in curly braces, which will be
---   removed at replace time.
+--   An error occurs if an invalid ##order## argument is supplied.
 --
--- The following enum is provided for specifying pOrder:
+-- The following enum is provided for specifying ##order##:
 -- * ADD_PREPEND   : prepend ##needle## to ##haystack##. This is the default option.
 -- * ADD_APPEND    : append ##needle## to ##haystack##.
 -- * ADD_SORT_UP   : sort ##haystack## in ascending order after inserting ##needle##
@@ -828,25 +828,25 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = add_item( 1, {3,4,2} ) -- prepend
+-- s = add_item( 1, {3,4,2}, ADD_PREPEND ) -- prepend
 -- -- s is {1,3,4,2}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- s = add_item( 1, {3,4,2}, 2 ) -- append
+-- s = add_item( 1, {3,4,2}, ADD_APPEND ) -- append
 -- -- s is {3,4,2,1}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
--- s = add_item( 1, {3,4,2}, 3 ) -- ascending
+-- s = add_item( 1, {3,4,2}, ADD_SORT_UP ) -- ascending
 -- -- s is {1,2,3,4}
 -- </eucode>
 --
 -- Example 4:
 -- <eucode>
--- s = add_item( 1, {3,4,2}, 4 ) -- descending
+-- s = add_item( 1, {3,4,2}, ADD_SORT_DOWN ) -- descending
 -- -- s is {4,3,2,1}
 -- </eucode>
 --
@@ -855,15 +855,12 @@ end function
 -- s = add_item( 1, {3,1,4,2} )
 -- -- s is {3,1,4,2} -- Item was already in list so no change.
 -- </eucode>
---
--- See Also:
---   [[:remove_all]]
 
 public function add_item(object needle, sequence haystack, integer pOrder = 1)
 	if find(needle, haystack) then
 		return haystack
 	end if
-	switch pOrder with fallthru do
+	switch pOrder do
 		case ADD_PREPEND then
 			return prepend(haystack, needle)
 			
@@ -876,6 +873,8 @@ public function add_item(object needle, sequence haystack, integer pOrder = 1)
 		case ADD_SORT_DOWN then
 			return sort(append(haystack, needle), DESCENDING)
 
+		case else
+			crash("sequence.e:add_item() invalid Order argument '%d'", pOrder)
 	end switch
 	
 	return haystack
