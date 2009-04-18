@@ -17,6 +17,7 @@ elsedef
 		interpreter = "eui"
 	end if
 end ifdef
+ifdef not DOS32 then
 object z = pipe:create()
 object p = pipe:exec(interpreter & " "&text:join({"..","demo","pipe_sub.ex"},fs:SLASH), z)
 if atom(p) then
@@ -36,5 +37,5 @@ else
 end if
 
 pipe:kill(p)
-
+end ifdef
 test_report()
