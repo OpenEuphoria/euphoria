@@ -2,8 +2,10 @@ include std/unittest.e
 include std/pipeio.e as pipe
 include std/filesys.e as fs
 include std/text.e as text
+
 sequence list, interpreter
 list = command_line()
+
 ifdef EC then
 	-- pray eui is in the path.
 	interpreter = "eui"
@@ -17,7 +19,7 @@ elsedef
 		interpreter = "eui"
 	end if
 end ifdef
-ifdef not DOS32 then
+
 object z = pipe:create()
 object p = pipe:exec(interpreter & " "&text:join({"..","demo","pipe_sub.ex"},fs:SLASH), z)
 if atom(p) then
@@ -37,5 +39,6 @@ else
 end if
 
 pipe:kill(p)
-end ifdef
+
 test_report()
+

@@ -4,13 +4,13 @@
 -- ==== Notes
 -- Due to a bug, Euphoria does not handle STDERR properly
 -- STDERR cannot captured for Euphoria programs (other programs will work fully)
--- Pipes does not work on DOS, as it relies on multitasking being possible
 -- The IO functions currently work with file handles, a future version might wrap them in streams
 -- so that they can be used directly alongside other file/socket/other-streams with a
 -- stream_select() function.
-
---Namespace
-namespace pipe
+--
+-- DOS support is limited to writing data in one large chunk, then reading
+-- data back from stdout. You cannot mix read/write calls in DOS.
+--
 
 --Includes
 include std/dll.e
@@ -102,7 +102,6 @@ public enum
 	CHILD
 
 atom os_errno = 0
-
 
 -- Common functions
 function get_errno()
