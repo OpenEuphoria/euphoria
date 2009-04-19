@@ -682,34 +682,31 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		index_ = find(the_key_p, ram_space[the_map_p][key_buckets][bucket_])
 		if index_ > 0 then
 			-- The the_value_p already exists.
-			switch operation_p with fallthru do
+			switch operation_p do
 				case PUT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] = the_value_p
-					break
 					
 				case ADD then
 					ram_space[the_map_p][value_buckets][bucket_][index_] += the_value_p
-					break
 					
 				case SUBTRACT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] -= the_value_p
-					break
 					
 				case MULTIPLY then
 					ram_space[the_map_p][value_buckets][bucket_][index_] *= the_value_p
-					break
 					
 				case DIVIDE then
 					ram_space[the_map_p][value_buckets][bucket_][index_] /= the_value_p
-					break
 					
 				case APPEND then
 					ram_space[the_map_p][value_buckets][bucket_][index_] = append( ram_space[the_map_p][value_buckets][bucket_][index_], the_value_p )
-					break
 					
 				case CONCAT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] &= the_value_p
-					break					
+					
+				case else
+					crash("Unknown operation given to map.e:put()")
+					
 			end switch
 			return
 		end if
@@ -771,34 +768,30 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			end if
 		end if
 		
-		switch operation_p with fallthru do
+		switch operation_p do
 			case PUT then
 				ram_space[the_map_p][value_list][index_] = the_value_p
-				break
 				
 			case ADD then
 				ram_space[the_map_p][value_list][index_] += the_value_p
-				break
 				
 			case SUBTRACT then
 				ram_space[the_map_p][value_list][index_] -= the_value_p
-				break
 				
 			case MULTIPLY then
 				ram_space[the_map_p][value_list][index_] *= the_value_p
-				break
 				
 			case DIVIDE then
 				ram_space[the_map_p][value_list][index_] /= the_value_p
-				break
 				
 			case APPEND then
 				ram_space[the_map_p][value_list][index_] = append( ram_space[the_map_p][value_list][index_], the_value_p )
-				break
 				
 			case CONCAT then
 				ram_space[the_map_p][value_list][index_] &= the_value_p
-				break
+				
+			case else
+				crash("Unknown operation given to map.e:put()")
 				
 		end switch
 		return
