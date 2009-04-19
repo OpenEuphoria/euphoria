@@ -112,7 +112,7 @@ end ifdef
 constant TASK_RID = 1,      -- routine id
 		 TASK_TID = 2,      -- external task id
 		 TASK_TYPE = 3,     -- type of task: T_REAL_TIME or T_TIME_SHARED
-		 TASK_STATUS = 4,   -- status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
+		 TASK_STATE = 4,   -- status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
 		 TASK_START = 5,    -- start time of current run
 		 TASK_MIN_INC = 6,  -- time increment for min
 		 TASK_MAX_INC = 7,  -- time increment for max 
@@ -422,13 +422,20 @@ procedure trace_back(sequence msg)
 				both_printf("%s:%d ", find_line(sub, pc)) 
 	
 				if not equal(SymTab[sub][S_NAME], "_toplevel_") then
-					if SymTab[sub][S_TOKEN] = PROC then
-						both_puts("in procedure ")
-					elsif SymTab[sub][S_TOKEN] = FUNC then
-						both_puts("in function ")
-					elsif SymTab[sub][S_TOKEN] = TYPE then
-						both_puts("in type ")
-					end if
+					switch SymTab[sub][S_TOKEN] do
+						case PROC then
+							both_puts("in procedure ")
+							
+						case FUNC then
+							both_puts("in function ")
+							
+						case TYPE then
+							both_puts("in type ")
+							
+						case else
+							RTInternal("SymTab[sub][S_TOKEN] is not a routine")
+							
+					end switch
 			
 					both_printf("%s()", {SymTab[sub][S_NAME]})
 				end if
@@ -478,12 +485,12 @@ procedure trace_back(sequence msg)
 			levels += 1
 		end while
 		
-		tcb[current_task][TASK_STATUS] = ST_DEAD -- mark as "deleted"
+		tcb[current_task][TASK_STATE] = ST_DEAD -- mark as "deleted"
 		
 		-- choose next task to display
 		task = current_task
 		for i = 1 to length(tcb) do
-			if tcb[i][TASK_STATUS] != ST_DEAD and 
+			if tcb[i][TASK_STATE] != ST_DEAD and 
 			   length(tcb[i][TASK_STACK]) > 0 then
 				current_task = i
 				call_stack = tcb[i][TASK_STACK]
@@ -772,7 +779,7 @@ procedure opTASK_YIELD()
 -- to pick a new task
 	atom now
 	
-	if tcb[current_task][TASK_STATUS] = ST_ACTIVE then
+	if tcb[current_task][TASK_STATE] = ST_ACTIVE then
 		if tcb[current_task][TASK_RUNS_LEFT] > 0 then
 			tcb[current_task][TASK_RUNS_LEFT] -= 1
 		end if
@@ -811,7 +818,7 @@ procedure kill_task(integer task)
 	else    
 		ts_first = task_delete(ts_first, task)
 	end if
-	tcb[task][TASK_STATUS] = ST_DEAD
+	tcb[task][TASK_STATE] = ST_DEAD
 	-- its tcb entry will be recycled later
 end procedure
 
@@ -838,9 +845,9 @@ procedure opTASK_STATUS()
 	r = -1
 	for t = 1 to length(tcb) do
 		if tcb[t][TASK_TID] = tid then
-			if tcb[t][TASK_STATUS] = ST_ACTIVE then
+			if tcb[t][TASK_STATE] = ST_ACTIVE then
 				r = 1
-			elsif tcb[t][TASK_STATUS] = ST_SUSPENDED then
+			elsif tcb[t][TASK_STATE] = ST_SUSPENDED then
 				r = 0
 			end if
 			exit
@@ -857,7 +864,7 @@ procedure opTASK_LIST()
 	target = Code[pc+1]
 	list = {}
 	for i = 1 to length(tcb) do
-		if tcb[i][TASK_STATUS] != ST_DEAD then
+		if tcb[i][TASK_STATE] != ST_DEAD then
 			list = append(list, tcb[i][TASK_TID])
 		end if
 	end for
@@ -907,7 +914,7 @@ procedure opTASK_SUSPEND()
 	
 	a = Code[pc+1]
 	task = which_task(val[a])
-	tcb[task][TASK_STATUS] = ST_SUSPENDED
+	tcb[task][TASK_STATE] = ST_SUSPENDED
 	tcb[task][TASK_MAX_TIME] = TASK_NEVER
 	if tcb[task][TASK_TYPE] = T_REAL_TIME then
 		rt_first = task_delete(rt_first, task)
@@ -939,7 +946,7 @@ procedure opTASK_CREATE()
 	
 	recycle = FALSE
 	for i = 1 to length(tcb) do
-		if tcb[i][TASK_STATUS] = ST_DEAD then
+		if tcb[i][TASK_STATE] = ST_DEAD then
 			-- this task is dead, recycle its entry 
 			-- (but not its external task id)
 			tcb[i] = new_entry
@@ -1001,7 +1008,7 @@ procedure opTASK_SCHEDULE()
 			rt_first = task_delete(rt_first, task)
 		end if
 		if tcb[task][TASK_TYPE] = T_REAL_TIME or
-			  tcb[task][TASK_STATUS] = ST_SUSPENDED then
+			  tcb[task][TASK_STATE] = ST_SUSPENDED then
 			ts_first = task_insert(ts_first, task)
 		end if
 		tcb[task][TASK_TYPE] = T_TIME_SHARE
@@ -1042,12 +1049,12 @@ procedure opTASK_SCHEDULE()
 			ts_first = task_delete(ts_first, task)
 		end if
 		if tcb[task][TASK_TYPE] = T_TIME_SHARE or
-			  tcb[task][TASK_STATUS] = ST_SUSPENDED then
+			  tcb[task][TASK_STATE] = ST_SUSPENDED then
 			rt_first = task_insert(rt_first, task)
 		end if
 		tcb[task][TASK_TYPE] = T_REAL_TIME
 	end if
-	tcb[task][TASK_STATUS] = ST_ACTIVE
+	tcb[task][TASK_STATE] = ST_ACTIVE
 	pc += 3
 end procedure
 
@@ -3185,8 +3192,6 @@ procedure opUPDATE_GLOBALS()
 	pc += 1
 end procedure
 
-sequence operation 
-
 
 --            Call-backs
 --
@@ -3215,7 +3220,6 @@ sequence operation
 -- 4-argument call-backs are quite common in Windows, so you might
 -- need several of them on that system.
 
-integer fwd_do_exec = -1
 function general_callback(sequence rtn_def, sequence args)
 -- call the user's function from an external source 
 -- (interface for Euphoria-coded call-backs)
@@ -3232,7 +3236,7 @@ function general_callback(sequence rtn_def, sequence args)
 	Code = call_back_code 
 	pc = 1 
 	 
-	call_proc( fwd_do_exec, {} )
+	do_exec()
 	
 	-- remove the stack frame
 	pc = call_stack[$-1]
@@ -3413,34 +3417,39 @@ procedure opMACHINE_PROC()
 	b = Code[pc+2]
 	v = val[a]
 	-- some things must be handled at our level, not a lower level
-	if v = M_CRASH_ROUTINE then
+	switch v do
+		case M_CRASH_ROUTINE then
 		-- routine id's must be handled at our level
-		do_crash_routine(b) 
+			do_crash_routine(b) 
 
-	elsif v = M_CRASH_MESSAGE then
-		crash_msg = val[b]
+		case M_CRASH_MESSAGE then
+			crash_msg = val[b]
 
-	elsif v = M_CRASH_FILE and sequence(val[b]) then
-		err_file_name = val[b]  
+		case M_CRASH_FILE then
+			if sequence(val[b]) then
+				err_file_name = val[b]  
+			end if
 	
-	elsif v = M_WARNING_FILE then
-		display_warnings = 1
-		if sequence(val[b]) then
-			TempWarningName = val[b]
-		else
-			TempWarningName = STDERR
-			display_warnings = (val[b] >= 0)
-		end if
+		case M_WARNING_FILE then
+			display_warnings = 1
+			if sequence(val[b]) then
+				TempWarningName = val[b]
+			else
+				TempWarningName = STDERR
+				display_warnings = (val[b] >= 0)
+			end if
 
 ifdef DOS32 then
-	elsif v = M_TICK_RATE and val[b] > 18 and val[b] < 10000 then
-		clock_period = 1 / val[b]
-		machine_proc(v, val[b]) 
+		case M_TICK_RATE then
+			if val[b] > 18 and val[b] < 10000 then
+				clock_period = 1 / val[b]
+				machine_proc(v, val[b]) 
+			end if
 end ifdef
 
-	else
-		machine_proc(v, val[b]) 
-	end if
+		case else
+			machine_proc(v, val[b]) 
+	end switch
 	pc += 3
 end procedure
 
@@ -3460,21 +3469,6 @@ procedure opDELETE_OBJECT()
 	pc += 2
 end procedure
 
-ifdef CALLPROC then
-
-procedure do_exec()
--- execute IL code, starting at pc 
-	integer op
-	keep_running = TRUE
-	while keep_running do 
-		op = Code[pc]
-		call_proc(operation[op], {}) -- opcodes start at 1
-	end while
-	keep_running = TRUE -- so higher-level do_exec() will keep running
-end procedure
-
-elsedef
-
 procedure do_exec()
 -- execute IL code, starting at pc 
 	keep_running = TRUE
@@ -3483,544 +3477,510 @@ procedure do_exec()
 		ifdef DEBUG then
 			printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
 		end ifdef
-		switch op with fallthru do
+		switch op do
 			case ABORT then
 				opABORT()
-				break
+				
 			case AND then
 				opAND()
-				break
+				
 			case AND_BITS then
 				opAND_BITS()
-				break
+				
 			case APPEND then
 				opAPPEND()
-				break
+				
 			case ARCTAN then
 				opARCTAN()
-				break
-			case ASSIGN then
-			case ASSIGN_I then
+				
+			case ASSIGN, ASSIGN_I then
 				opASSIGN()
-				break
+				
 			case ASSIGN_OP_SLICE then
 				opASSIGN_OP_SLICE()
-				break
+				
 			case ASSIGN_OP_SUBS then
 				opASSIGN_OP_SUBS()
-				break
+				
 			case ASSIGN_SLICE then
 				opASSIGN_SLICE()
-				break
-			case ASSIGN_SUBS then
-			case ASSIGN_SUBS_CHECK then
-			case ASSIGN_SUBS_I then
+				
+			case ASSIGN_SUBS, ASSIGN_SUBS_CHECK, ASSIGN_SUBS_I then
 				opASSIGN_SUBS()
-				break
+				
 			case ATOM_CHECK then
 				opATOM_CHECK()
-				break
+				
 			case BADRETURNF then
 				opBADRETURNF()
-				break
+				
 			case C_FUNC then
 				opC_FUNC()
-				break
+				
 			case C_PROC then
 				opC_PROC()
-				break
+				
 			case CALL then
 				opCALL()
-				break
+				
 			case CALL_BACK_RETURN then
 				opCALL_BACK_RETURN()
-				break
-			case CALL_PROC then
-			case CALL_FUNC then
+				
+			case CALL_PROC, CALL_FUNC then
 				opCALL_PROC()
-				break
+				
 			case CASE then
 				opCASE()
-				break
+				
 			case CLEAR_SCREEN then
 				opCLEAR_SCREEN()
-				break
+				
 			case CLOSE then
 				opCLOSE()
-				break
+				
 			case COMMAND_LINE then
 				opCOMMAND_LINE()
-				break
+				
 			case COMPARE then
 				opCOMPARE()
-				break
+				
 			case CONCAT then
 				opCONCAT()
-				break
+				
 			case CONCAT_N then
 				opCONCAT_N()
-				break
+				
 			case COS then
 				opCOS()
-				break
+				
 			case DATE then
 				opDATE()
-				break
+				
 			case DIV2 then
 				opDIV2()
-				break
+				
 			case DIVIDE then
 				opDIVIDE()
-				break
-			case ELSE then
-			case EXIT then
-			case ENDWHILE then
-			case RETRY then
+				
+			case ELSE, EXIT, ENDWHILE, RETRY then
 				opELSE()
-				break
-			case ENDFOR_GENERAL then
-			case ENDFOR_UP then
-			case ENDFOR_DOWN then
-			case ENDFOR_INT_UP then
-			case ENDFOR_INT_DOWN then
-			case ENDFOR_INT_DOWN1 then
+				
+			case ENDFOR_GENERAL, ENDFOR_UP, ENDFOR_DOWN, ENDFOR_INT_UP,
+					ENDFOR_INT_DOWN, ENDFOR_INT_DOWN1 then
 				opENDFOR_GENERAL()
-				break
+				
 			case ENDFOR_INT_UP1 then
 				opENDFOR_INT_UP1()
-				break
+				
 			case EQUAL then
 				opEQUAL()
-				break
+				
 			case EQUALS then
 				opEQUALS()
-				break
-			case EQUALS_IFW then
-			case EQUALS_IFW_I then
+				
+			case EQUALS_IFW, EQUALS_IFW_I then
 				opEQUALS_IFW()
-				break
-			case FIND then
-				opFIND()
-				break
-			case FIND_FROM then
-				opFIND_FROM()
-				break
-			case FLOOR then
-				opFLOOR()
-				break
-			case FLOOR_DIV then
-				opFLOOR_DIV()
-				break
-			case FLOOR_DIV2 then
-				opFLOOR_DIV2()
-				break
-			case FOR then
-			case FOR_I then
-				opFOR()
-				break
-			case GET_KEY then
-				opGET_KEY()
-				break
-			case GET_PIXEL then
-				opGET_PIXEL()
-				break
-			case GETC then
-				opGETC()
-				break
-			case GETENV then
-				opGETENV()
-				break
-			case GETS then
-				opGETS()
-				break
-			case GLABEL then
-				opGLABEL()
-				break
-			case GLOBAL_INIT_CHECK then
-			case PRIVATE_INIT_CHECK then
-				opGLOBAL_INIT_CHECK()
-				break
-			case GOTO then
-				opGOTO()
-				break
-			case GREATER then
-				opGREATER()
-				break
-			case GREATER_IFW then
-			case GREATER_IFW_I then
-				opGREATER_IFW()
-				break
-			case GREATEREQ then
-				opGREATEREQ()
-				break
-			case GREATEREQ_IFW then
-			case GREATEREQ_IFW_I then
-				opGREATEREQ_IFW()
-				break
-			case HASH then
-				opHASH()
-				break
-			case HEAD then
-				opHEAD()
-				break
-			case IF then
-				opIF()
-				break
-			case INSERT then
-				opINSERT()
-				break
-			case INTEGER_CHECK then
-				opINTEGER_CHECK()
-				break
-			case IS_A_SEQUENCE then
-				opIS_A_SEQUENCE()
-				break
-			case IS_AN_ATOM then
-				opIS_AN_ATOM()
-				break
-			case IS_AN_INTEGER then
-				opIS_AN_INTEGER()
-				break
-			case IS_AN_OBJECT then
-				opIS_AN_OBJECT()
-				break
-			case LENGTH then
-				opLENGTH()
-				break
-			case LESS then
-				opLESS()
-				break
-			case LESS_IFW_I then
-			case LESS_IFW then
-				opLESS_IFW()
-				break
-			case LESSEQ then
-				opLESSEQ()
-				break
-			case LESSEQ_IFW then
-			case LESSEQ_IFW_I then
-				opLESSEQ_IFW()
-				break
-			case LHS_SUBS then
-				opLHS_SUBS()
-				break
-			case LHS_SUBS1 then
-				opLHS_SUBS1()
-				break
-			case LHS_SUBS1_COPY then
-				opLHS_SUBS1_COPY()
-				break
-			case LOG then
-				opLOG()
-				break
-			case MACHINE_FUNC then
-				opMACHINE_FUNC()
-				break
-			case MACHINE_PROC then
-				opMACHINE_PROC()
-				break
-			case MATCH then
-				opMATCH()
-				break
-			case MATCH_FROM then
-				opMATCH_FROM()
-				break
-			case MEM_COPY then
-				opMEM_COPY()
-				break
-			case MEM_SET then
-				opMEM_SET()
-				break
-			case MINUS then
-			case MINUS_I then
-				opMINUS()
-				break
-			case MULTIPLY then
-				opMULTIPLY()
-				break
-			case NOP2 then
-			case SC2_NULL then
-			case ASSIGN_SUBS2 then
-			case PLATFORM then
-			case END_PARAM_CHECK then
-			case NOPWHILE then
-			case NOP1 then
-				opNOP2()
-				break
-			case NOPSWITCH then
-				opNOPSWITCH()
-				break
-			case NOT then
-				opNOT()
-				break
-			case NOT_BITS then
-				opNOT_BITS()
-				break
-			case NOT_IFW then
-				opNOT_IFW()
-				break
-			case NOTEQ then
-				opNOTEQ()
-				break
-			case NOTEQ_IFW then
-			case NOTEQ_IFW_I then
-				opNOTEQ_IFW()
-				break
-			case OPEN then
-				opOPEN()
-				break
-			case OPTION_SWITCHES then
-				opOPTION_SWITCHES()
-				break
-			case OR then
-				opOR()
-				break
-			case OR_BITS then
-				opOR_BITS()
-				break
-			case PASSIGN_OP_SLICE then
-				opPASSIGN_OP_SLICE()
-				break
-			case PASSIGN_OP_SUBS then
-				opPASSIGN_OP_SUBS()
-				break
-			case PASSIGN_SLICE then
-				opPASSIGN_SLICE()
-				break
-			case PASSIGN_SUBS then
-				opPASSIGN_SUBS()
-				break
-			case PEEK then
-				opPEEK()
-				break
-			case PEEK_STRING then
-				opPEEK_STRING()
-				break
-			case PEEK2S then
-				opPEEK2S()
-				break
-			case PEEK2U then
-				opPEEK2U()
-				break
-			case PEEK4S then
-				opPEEK4S()
-				break
-			case PEEK4U then
-				opPEEK4U()
-				break
-			case PEEKS then
-				opPEEKS()
-				break
-			case PIXEL then
-				opPIXEL()
-				break
-			case PLENGTH then
-				opPLENGTH()
-				break
-			case PLUS then
-			case PLUS_I then
-				opPLUS()
-				break
-			case PLUS1 then
-			case PLUS1_I then
-				opPLUS1()
-				break
-			case POKE then
-				opPOKE()
-				break
-			case POKE2 then
-				opPOKE2()
-				break
-			case POKE4 then
-				opPOKE4()
-				break
-			case POSITION then
-				opPOSITION()
-				break
-			case POWER then
-				opPOWER()
-				break
-			case PREPEND then
-				opPREPEND()
-				break
-			case PRINT then
-				opPRINT()
-				break
-			case PRINTF then
-				opPRINTF()
-				break
-			case PROC_TAIL then
-				opPROC_TAIL()
-				break
-			case PROC then
-				opPROC()
-				break
-			case PROFILE then
-			case DISPLAY_VAR then
-			case ERASE_PRIVATE_NAMES then
-			case ERASE_SYMBOL then
-				opPROFILE()
-				break
-			case PUTS then
-				opPUTS()
-				break
-			case QPRINT then
-				opQPRINT()
-				break
-			case RAND then
-				opRAND()
-				break
-			case REMAINDER then
-				opREMAINDER()
-				break
-			case REMOVE then
-				opREMOVE()
-				break
-			case REPEAT then
-				opREPEAT()
-				break
-			case REPLACE then
-				opREPLACE()
-				break
-			case RETURNF then
-				opRETURNF()
-				break
-			case RETURNP then
-				opRETURNP()
-				break
-			case RETURNT then
-				opRETURNT()
-				break
-			case RHS_SLICE then
-				opRHS_SLICE()
-				break
-			case RHS_SUBS then
-			case RHS_SUBS_CHECK then
-			case RHS_SUBS_I then
-				opRHS_SUBS()
-				break
-			case RIGHT_BRACE_2 then
-				opRIGHT_BRACE_2()
-				break
-			case RIGHT_BRACE_N then
-				opRIGHT_BRACE_N()
-				break
-			case ROUTINE_ID then
-				opROUTINE_ID()
-				break
-			case SC1_AND then
-				opSC1_AND()
-				break
-			case SC1_AND_IF then
-				opSC1_AND_IF()
-				break
-			case SC1_OR then
-				opSC1_OR()
-				break
-			case SC1_OR_IF then
-				opSC1_OR_IF()
-				break
-			case SC2_OR then
-			case SC2_AND then
-				opSC2_OR()
-				break
-			case SEQUENCE_CHECK then
-				opSEQUENCE_CHECK()
-				break
-			case SIN then
-				opSIN()
-				break
-			case SPACE_USED then
-				opSPACE_USED()
-				break
-			case SPLICE then
-				opSPLICE()
-				break
-			case SPRINTF then
-				opSPRINTF()
-				break
-			case SQRT then
-				opSQRT()
-				break
-			case STARTLINE then
-				opSTARTLINE()
-				break
-			case SWITCH then
-			case SWITCH_I then
-				opSWITCH()
-				break
-			case SWITCH_SPI then
-				opSWITCH_SPI()
-				break
-			case SWITCH_RT then
-				opSWITCH_RT()
-				break
-			case SYSTEM then
-				opSYSTEM()
-				break
-			case SYSTEM_EXEC then
-				opSYSTEM_EXEC()
-				break
-			case TAIL then
-				opTAIL()
-				break
-			case TAN then
-				opTAN()
-				break
-			case TASK_CLOCK_START then
-				opTASK_CLOCK_START()
-				break
-			case TASK_CLOCK_STOP then
-				opTASK_CLOCK_STOP()
-				break
-			case TASK_CREATE then
-				opTASK_CREATE()
-				break
-			case TASK_LIST then
-				opTASK_LIST()
-				break
-			case TASK_SCHEDULE then
-				opTASK_SCHEDULE()
-				break
-			case TASK_SELF then
-				opTASK_SELF()
-				break
-			case TASK_STATUS then
-				opTASK_STATUS()
-				break
-			case TASK_SUSPEND then
-				opTASK_SUSPEND()
-				break
-			case TASK_YIELD then
-				opTASK_YIELD()
-				break
-			case TIME then
-				opTIME()
-				break
-			case TRACE then
-				opTRACE()
-				break
-			case TYPE_CHECK then
-				opTYPE_CHECK()
-				break
-			case UMINUS then
-				opUMINUS()
-				break
-			case UPDATE_GLOBALS then
-				opUPDATE_GLOBALS()
-				break
-			case WHILE then
-				opWHILE()
-				break
-			case XOR then
-				opXOR()
-				break
-			case XOR_BITS then
-				opXOR_BITS()
-				break
+				
 			case EXIT_BLOCK then
 				opEXIT_BLOCK()
-				break
+				
+			case FIND then
+				opFIND()
+				
+			case FIND_FROM then
+				opFIND_FROM()
+				
+			case FLOOR then
+				opFLOOR()
+				
+			case FLOOR_DIV then
+				opFLOOR_DIV()
+				
+			case FLOOR_DIV2 then
+				opFLOOR_DIV2()
+				
+			case FOR, FOR_I then
+				opFOR()
+				
+			case GET_KEY then
+				opGET_KEY()
+				
+			case GET_PIXEL then
+				opGET_PIXEL()
+				
+			case GETC then
+				opGETC()
+				
+			case GETENV then
+				opGETENV()
+				
+			case GETS then
+				opGETS()
+				
+			case GLABEL then
+				opGLABEL()
+				
+			case GLOBAL_INIT_CHECK, PRIVATE_INIT_CHECK then
+				opGLOBAL_INIT_CHECK()
+				
+			case GOTO then
+				opGOTO()
+				
+			case GREATER then
+				opGREATER()
+				
+			case GREATER_IFW, GREATER_IFW_I then
+				opGREATER_IFW()
+				
+			case GREATEREQ then
+				opGREATEREQ()
+				
+			case GREATEREQ_IFW, GREATEREQ_IFW_I then
+				opGREATEREQ_IFW()
+				
+			case HASH then
+				opHASH()
+				
+			case HEAD then
+				opHEAD()
+				
+			case IF then
+				opIF()
+				
+			case INSERT then
+				opINSERT()
+				
+			case INTEGER_CHECK then
+				opINTEGER_CHECK()
+				
+			case IS_A_SEQUENCE then
+				opIS_A_SEQUENCE()
+				
+			case IS_AN_ATOM then
+				opIS_AN_ATOM()
+				
+			case IS_AN_INTEGER then
+				opIS_AN_INTEGER()
+				
+			case IS_AN_OBJECT then
+				opIS_AN_OBJECT()
+				
+			case LENGTH then
+				opLENGTH()
+				
+			case LESS then
+				opLESS()
+				
+			case LESS_IFW_I, LESS_IFW then
+				opLESS_IFW()
+				
+			case LESSEQ then
+				opLESSEQ()
+				
+			case LESSEQ_IFW, LESSEQ_IFW_I then
+				opLESSEQ_IFW()
+				
+			case LHS_SUBS then
+				opLHS_SUBS()
+				
+			case LHS_SUBS1 then
+				opLHS_SUBS1()
+				
+			case LHS_SUBS1_COPY then
+				opLHS_SUBS1_COPY()
+				
+			case LOG then
+				opLOG()
+				
+			case MACHINE_FUNC then
+				opMACHINE_FUNC()
+				
+			case MACHINE_PROC then
+				opMACHINE_PROC()
+				
+			case MATCH then
+				opMATCH()
+				
+			case MATCH_FROM then
+				opMATCH_FROM()
+				
+			case MEM_COPY then
+				opMEM_COPY()
+				
+			case MEM_SET then
+				opMEM_SET()
+				
+			case MINUS, MINUS_I then
+				opMINUS()
+				
+			case MULTIPLY then
+				opMULTIPLY()
+				
+			case NOP2, SC2_NULL, ASSIGN_SUBS2, PLATFORM, END_PARAM_CHECK,
+					NOPWHILE, NOP1 then
+				opNOP2()
+				
+			case NOPSWITCH then
+				opNOPSWITCH()
+				
+			case NOT then
+				opNOT()
+				
+			case NOT_BITS then
+				opNOT_BITS()
+				
+			case NOT_IFW then
+				opNOT_IFW()
+				
+			case NOTEQ then
+				opNOTEQ()
+				
+			case NOTEQ_IFW, NOTEQ_IFW_I then
+				opNOTEQ_IFW()
+				
+			case OPEN then
+				opOPEN()
+				
+			case OPTION_SWITCHES then
+				opOPTION_SWITCHES()
+				
+			case OR then
+				opOR()
+				
+			case OR_BITS then
+				opOR_BITS()
+				
+			case PASSIGN_OP_SLICE then
+				opPASSIGN_OP_SLICE()
+				
+			case PASSIGN_OP_SUBS then
+				opPASSIGN_OP_SUBS()
+				
+			case PASSIGN_SLICE then
+				opPASSIGN_SLICE()
+				
+			case PASSIGN_SUBS then
+				opPASSIGN_SUBS()
+				
+			case PEEK then
+				opPEEK()
+				
+			case PEEK_STRING then
+				opPEEK_STRING()
+				
+			case PEEK2S then
+				opPEEK2S()
+				
+			case PEEK2U then
+				opPEEK2U()
+				
+			case PEEK4S then
+				opPEEK4S()
+				
+			case PEEK4U then
+				opPEEK4U()
+				
+			case PEEKS then
+				opPEEKS()
+				
+			case PIXEL then
+				opPIXEL()
+				
+			case PLENGTH then
+				opPLENGTH()
+				
+			case PLUS, PLUS_I then
+				opPLUS()
+				
+			case PLUS1, PLUS1_I then
+				opPLUS1()
+				
+			case POKE then
+				opPOKE()
+				
+			case POKE2 then
+				opPOKE2()
+				
+			case POKE4 then
+				opPOKE4()
+				
+			case POSITION then
+				opPOSITION()
+				
+			case POWER then
+				opPOWER()
+				
+			case PREPEND then
+				opPREPEND()
+				
+			case PRINT then
+				opPRINT()
+				
+			case PRINTF then
+				opPRINTF()
+				
+			case PROC_TAIL then
+				opPROC_TAIL()
+				
+			case PROC then
+				opPROC()
+				
+			case PROFILE, DISPLAY_VAR, ERASE_PRIVATE_NAMES, ERASE_SYMBOL then
+				opPROFILE()
+				
+			case PUTS then
+				opPUTS()
+				
+			case QPRINT then
+				opQPRINT()
+				
+			case RAND then
+				opRAND()
+				
+			case REMAINDER then
+				opREMAINDER()
+				
+			case REMOVE then
+				opREMOVE()
+				
+			case REPEAT then
+				opREPEAT()
+				
+			case REPLACE then
+				opREPLACE()
+				
+			case RETURNF then
+				opRETURNF()
+				
+			case RETURNP then
+				opRETURNP()
+				
+			case RETURNT then
+				opRETURNT()
+				
+			case RHS_SLICE then
+				opRHS_SLICE()
+				
+			case RHS_SUBS, RHS_SUBS_CHECK, RHS_SUBS_I then
+				opRHS_SUBS()
+				
+			case RIGHT_BRACE_2 then
+				opRIGHT_BRACE_2()
+				
+			case RIGHT_BRACE_N then
+				opRIGHT_BRACE_N()
+				
+			case ROUTINE_ID then
+				opROUTINE_ID()
+				
+			case SC1_AND then
+				opSC1_AND()
+				
+			case SC1_AND_IF then
+				opSC1_AND_IF()
+				
+			case SC1_OR then
+				opSC1_OR()
+				
+			case SC1_OR_IF then
+				opSC1_OR_IF()
+				
+			case SC2_OR, SC2_AND then
+				opSC2_OR()
+				
+			case SEQUENCE_CHECK then
+				opSEQUENCE_CHECK()
+				
+			case SIN then
+				opSIN()
+				
+			case SPACE_USED then
+				opSPACE_USED()
+				
+			case SPLICE then
+				opSPLICE()
+				
+			case SPRINTF then
+				opSPRINTF()
+				
+			case SQRT then
+				opSQRT()
+				
+			case STARTLINE then
+				opSTARTLINE()
+				
+			case SWITCH, SWITCH_I then
+				opSWITCH()
+				
+			case SWITCH_SPI then
+				opSWITCH_SPI()
+				
+			case SWITCH_RT then
+				opSWITCH_RT()
+				
+			case SYSTEM then
+				opSYSTEM()
+				
+			case SYSTEM_EXEC then
+				opSYSTEM_EXEC()
+				
+			case TAIL then
+				opTAIL()
+				
+			case TAN then
+				opTAN()
+				
+			case TASK_CLOCK_START then
+				opTASK_CLOCK_START()
+				
+			case TASK_CLOCK_STOP then
+				opTASK_CLOCK_STOP()
+				
+			case TASK_CREATE then
+				opTASK_CREATE()
+				
+			case TASK_LIST then
+				opTASK_LIST()
+				
+			case TASK_SCHEDULE then
+				opTASK_SCHEDULE()
+				
+			case TASK_SELF then
+				opTASK_SELF()
+				
+			case TASK_STATUS then
+				opTASK_STATUS()
+				
+			case TASK_SUSPEND then
+				opTASK_SUSPEND()
+				
+			case TASK_YIELD then
+				opTASK_YIELD()
+				
+			case TIME then
+				opTIME()
+				
+			case TRACE then
+				opTRACE()
+				
+			case TYPE_CHECK then
+				opTYPE_CHECK()
+				
+			case UMINUS then
+				opUMINUS()
+				
+			case UPDATE_GLOBALS then
+				opUPDATE_GLOBALS()
+				
+			case WHILE then
+				opWHILE()
+				
+			case XOR then
+				opXOR()
+				
+			case XOR_BITS then
+				opXOR_BITS()
+				
 			case else
 				RTFatal( sprintf("Unknown opcode then %d", op ) )
 		end switch
@@ -4028,11 +3988,7 @@ procedure do_exec()
 	keep_running = TRUE -- so higher-level do_exec() will keep running
 end procedure
 
-end ifdef -- CALLPROC
-
-fwd_do_exec = routine_id("do_exec")
-
-procedure InitBackEnd(integer ignore)
+procedure InitBackEnd()
 -- initialize Interpreter
 -- Some ops are treated exactly the same as other ops.
 -- In the hand-coded C back-end, they might be treated differently
@@ -4044,71 +4000,6 @@ procedure InitBackEnd(integer ignore)
 	for i = 1 to length(SymTab) do
 		val[i] = SymTab[i][S_OBJ] -- might be NOVALUE
 	end for
-ifdef CALLPROC then
-
-	-- set up operations
-	operation = repeat(-1, length(opnames))
-	
-	for i = 1 to length(opnames) do
-		name = opnames[i]
-		-- some similar ops are handled by a common routine
-		if find(name, {"RHS_SUBS_CHECK", "RHS_SUBS_I"}) then
-			name = "RHS_SUBS"
-		elsif find(name, {"ASSIGN_SUBS_CHECK", "ASSIGN_SUBS_I"}) then
-			name = "ASSIGN_SUBS"
-		elsif equal(name, "ASSIGN_I") then
-			name = "ASSIGN"
-		elsif find(name, {"EXIT", "ENDWHILE", "RETRY"}) then
-			name = "ELSE"
-		elsif equal(name, "PLUS1_I") then
-			name = "PLUS1"      
-		elsif equal(name, "PRIVATE_INIT_CHECK") then
-			name = "GLOBAL_INIT_CHECK"
-		elsif equal(name, "PLUS_I") then
-			name = "PLUS"
-		elsif equal(name, "MINUS_I") then
-			name = "MINUS"
-		elsif equal(name, "FOR_I") then
-			name = "FOR"
-		elsif find(name, {"ENDFOR_UP", "ENDFOR_DOWN", 
-						  "ENDFOR_INT_UP", "ENDFOR_INT_DOWN",
-						  "ENDFOR_INT_DOWN1"}) then
-			name = "ENDFOR_GENERAL"
-		elsif equal(name, "CALL_FUNC") then
-			name = "CALL_PROC"
-		elsif find(name, {"DISPLAY_VAR", "ERASE_PRIVATE_NAMES", 
-						  "ERASE_SYMBOL"}) then
-			name = "PROFILE"
-		elsif equal(name, "SC2_AND") then
-			name = "SC2_OR"
-		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
-						  "END_PARAM_CHECK", "NOPWHILE", "NOP1",
-						  "PROC_FORWARD", "FUNC_FORWARD",
-						  "TYPE_CHECK_FORWARD"}) then 
-			-- never emitted
-			name = "NOP2" 
-		elsif equal(name, "GREATER_IFW_I") then
-			name = "GREATER_IFW"
-		elsif equal(name, "LESS_IFW_I") then
-			name = "LESS_IFW"
-		elsif equal(name, "EQUALS_IFW_I") then
-			name = "EQUALS_IFW"
-		elsif equal(name, "NOTEQ_IFW_I") then
-			name = "NOTEQ_IFW"
-		elsif equal(name, "GREATEREQ_IFW_I") then
-			name = "GREATEREQ_IFW"
-		elsif equal(name, "LESSEQ_IFW_I") then
-			name = "LESSEQ_IFW"
-		elsif equal(name, "SWITCH_I") then
-			name = "SWITCH"
-		end if
-		
-		operation[i] = routine_id("op" & name)
-		if operation[i] = -1 then
-			RTInternal("no routine id for op" & name)
-		end if
-	end for
-end ifdef
 end procedure
 
 procedure fake_init( integer ignore )
@@ -4118,7 +4009,7 @@ mode:set_init_backend( routine_id("fake_init") )
 
 export procedure Execute(symtab_index proc, integer start_index)
 -- top level executor 
-	InitBackEnd( 0 )
+	InitBackEnd()
 	current_task = 1
 	call_stack = {proc}
 	pc = start_index
