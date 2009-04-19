@@ -32,6 +32,7 @@ ifdef DOS32 then
 elsifdef WIN32 then
 	constant
 		kernel32 = open_dll("kernel32.dll"),
+		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
 		iCreatePipe = define_c_func(kernel32,"CreatePipe",{C_POINTER,C_POINTER,C_POINTER,C_INT},C_INT),
 		iReadFile = define_c_func(kernel32,"ReadFile",{C_UINT,C_POINTER,C_UINT,C_POINTER,C_POINTER},C_INT),
 		iWriteFile = define_c_func(kernel32,"WriteFile",{C_INT,C_POINTER,C_INT,C_POINTER,C_POINTER},C_INT),
@@ -41,15 +42,14 @@ elsifdef WIN32 then
 		iGetStdHandle = define_c_func(kernel32,"GetStdHandle",{C_INT},C_INT),
 		iSetHandleInformation = define_c_func(kernel32,"SetHandleInformation",{C_UINT,C_UINT,C_UINT},C_INT),
 		iCreateProcess = define_c_func(kernel32,"CreateProcessA",{C_POINTER,C_POINTER,C_POINTER,
-			C_POINTER,C_UINT,C_UINT,C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_UINT),
-		iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT)
+			C_POINTER,C_UINT,C_UINT,C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_UINT)
 	
 	constant
-		STD_INPUT_HANDLE = -10,
-		STD_OUTPUT_HANDLE = -11,
-		STD_ERROR_HANDLE = -12,
-		FILE_INVALID_HANDLE = -1,
-		ERROR_BROKEN_PIPE = 109,
+-- 		STD_INPUT_HANDLE = -10,
+-- 		STD_OUTPUT_HANDLE = -11,
+-- 		STD_ERROR_HANDLE = -12,
+-- 		FILE_INVALID_HANDLE = -1,
+-- 		ERROR_BROKEN_PIPE = 109,
 		SA_SIZE = 12,
 		PIPE_WRITE_HANDLE = 1, PIPE_READ_HANDLE=2,
 		HANDLE_FLAG_INHERIT=1,
@@ -197,7 +197,7 @@ public procedure kill(process p, atom signal=15)
 	--Error may result, but it is usually just because the process has already ended.
 	ifdef WIN32 then
 		--Not how to handle "signal", so its ignored on Windows for now
-		ret=c_func(iTerminateProcess,{p[PID],0})
+		ret=c_func(iTerminateProcess,{p[PID],signal and 0})
 	elsedef
 		ret=c_func(KILL, {p[PID], signal})
 	end ifdef
