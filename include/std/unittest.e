@@ -374,6 +374,7 @@ public procedure test_not_equal(sequence name, object a, object b)
 			success = ((b-a) >= 1e-9)
 		end if
 	end if
+	a = "anything but '" & pretty_sprint( a, {2,2,1,78,"%d", "%.15g"}) & "'"
 	record_result(success, name, a, b)
 end procedure
 

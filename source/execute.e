@@ -2567,7 +2567,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 		global_found = FALSE
 		s = SymTab[TopLevelSub][S_NEXT]
 		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
-			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_PUBLIC }) and 
+			if SymTab[s][S_SCOPE] = SC_GLOBAL and 
 			   equal(name, SymTab[s][S_NAME]) then
 			
 				s_in_include_path = include_matrix[file][SymTab[s][S_FILE_NO]] != 0
@@ -2580,11 +2580,13 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 					end if
 					found_outside_path += 1
 				end if
-			elsif SymTab[s][S_SCOPE] = SC_EXPORT and equal( name, SymTab[s][S_NAME] ) then
-				if and_bits( DIRECT_INCLUDE, include_matrix[file][SymTab[s][S_FILE_NO]] ) then
-					global_found = s
-				end if
-					found_in_path += 1
+			elsif (sym_scope( s ) = SC_PUBLIC and equal( name, SymTab[s][S_NAME] ) and
+			and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][SymTab[s][S_FILE_NO]] )) or
+			(sym_scope( s ) = SC_EXPORT and equal( name, SymTab[s][S_NAME] ) and 
+			and_bits( DIRECT_INCLUDE, include_matrix[file][SymTab[s][S_FILE_NO]] ) ) then
+				
+				global_found = s
+				found_in_path += 1
 			end if
 			s = SymTab[s][S_NEXT]
 		end while 
