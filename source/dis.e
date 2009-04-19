@@ -1539,7 +1539,7 @@ procedure InitBackEnd( object ignore )
 		or match( SLASH & "dis", Argv[2] ) ) then
 			exit
 		end if
-		Argv = remove( Argv, 2, 2 )
+		Argv = eu:remove( Argv, 2, 2 )
 	end while
 	Argc = length(Argv)
 	

@@ -53,8 +53,9 @@ constant C_MY_ROUTINE = 1,
 
 object crash_msg = 0
 
-sequence call_backs, call_back_code
-symtab_index t_id, t_arglist, t_return_val, call_back_routine
+sequence call_backs, call_back_code, delete_code
+symtab_index t_id, t_arglist, t_return_val, 
+	call_back_routine, delete_code_routine
 
 sequence crash_list = {} -- list of routine id's to call if there's a fatal crash
 
@@ -81,6 +82,22 @@ call_back_code = {CALL_FUNC,
 				 }
 
 SymTab[call_back_routine][S_CODE] = call_back_code
+
+
+delete_code_routine = NewEntry("_delete_object_", 0, 0, PROC, 0, 0, 0)
+SymTab[delete_code_routine] = SymTab[delete_code_routine] & 
+							repeat(0, SIZEOF_ROUTINE_ENTRY - 
+							length(SymTab[delete_code_routine]))
+
+SymTab[delete_code_routine][S_SAVED_PRIVATES] = {}
+
+delete_code = {CALL_PROC,
+				  t_id,
+				  t_arglist,
+				  CALL_BACK_RETURN
+				 }
+
+SymTab[delete_code_routine][S_CODE] = delete_code
 
 integer TraceOn
 TraceOn = FALSE
@@ -1213,10 +1230,13 @@ integer result
 result = 0
 object result_val
 
-procedure exit_block( symtab_index block )
-	a = SymTab[block][S_NEXT_IN_BLOCK]	
-	while a  do
-		a = SymTab[a][S_NEXT_IN_BLOCK]	
+procedure exit_block( symtab_index block, integer except = 0 )
+	a = SymTab[block][S_NEXT_IN_BLOCK]
+	while a do
+		if a != except then
+			val[a] = NOVALUE
+		end if
+		a = SymTab[a][S_NEXT_IN_BLOCK]
 	end while
 end procedure
 
@@ -1237,11 +1257,20 @@ procedure opRETURNP()
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	
 	while block != sub_block do
-		exit_block( block )
+		if result then
+			exit_block( block, Code[pc+3] )
+		else
+			exit_block( block )
+		end if
 		block = SymTab[block][S_BLOCK]
 	end while
-	exit_block( sub_block )
-
+	
+	if result then
+		exit_block( block, Code[pc+3] )
+	else
+		exit_block( block )
+	end if
+	
 	-- set up for caller
 	pc = call_stack[$-1]
 	call_stack = call_stack[1..$-2]
@@ -1743,6 +1772,9 @@ procedure opASSIGN_SUBS() -- also ASSIGN_SUBS_CHECK, ASSIGN_SUBS_I
 	x = val[c]
 	subs = val[b]
 	val[a][subs] = x  -- single LHS subscript
+	if sym_mode( c ) = M_TEMP then
+		val[c] = NOVALUE
+	end if
 	pc += 4
 end procedure
 
@@ -2565,11 +2597,68 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 	end if
 end function
 
+procedure do_call_proc( symtab_index sub, sequence args, integer advance )
+	integer n, arg
+	
+	n = SymTab[sub][S_NUM_ARGS]
+	arg = SymTab[sub][S_NEXT]
+	
+	if SymTab[sub][S_RESIDENT_TASK] != 0 then
+		-- save the parameters, privates and temps
+		
+		-- save and set the args
+		sequence private_block = repeat(0, SymTab[sub][S_STACK_SPACE])
+		integer p = 1
+		for i = 1 to n do
+			private_block[p] = val[arg]
+			p += 1
+			val[arg] = args[i]
+			arg = SymTab[arg][S_NEXT]
+		end for
+	
+		-- save the privates
+		while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
+			private_block[p] = val[arg]
+			p += 1
+			val[arg] = NOVALUE -- necessary?
+			arg = SymTab[arg][S_NEXT]
+		end while
+	
+		-- save temps
+		arg = SymTab[sub][S_TEMPS]
+		while arg != 0 do
+			private_block[p] = val[arg]
+			p += 1
+			val[arg] = NOVALUE -- necessary?
+			arg = SymTab[arg][S_NEXT]
+		end while
+	
+		-- save this block of private data
+		save_private_block(sub, private_block)
+	else
+		-- routine is not in use, no need to save 
+		-- just set the args 
+		for i = 1 to n do
+			val[arg] = args[i]
+			arg = SymTab[arg][S_NEXT]
+		end for
+	end if
+	
+	SymTab[sub][S_RESIDENT_TASK] = current_task
+	
+	pc += advance
+	
+	call_stack = append(call_stack, pc) 
+	call_stack = append(call_stack, sub)
+	
+	Code = SymTab[sub][S_CODE]
+	pc = 1
+end procedure
+
 procedure opCALL_PROC() 
 -- CALL_PROC, CALL_FUNC - call via routine id
-	integer cf, n, arg, p
+	integer cf
 	symtab_index sub
-	sequence private_block
 	
 	cf = Code[pc] = CALL_FUNC
 	
@@ -2601,59 +2690,7 @@ procedure opCALL_PROC()
 				 
 	end if
 	
-	n = SymTab[sub][S_NUM_ARGS]
-	arg = SymTab[sub][S_NEXT]
-	
-	if SymTab[sub][S_RESIDENT_TASK] != 0 then
-		-- save the parameters, privates and temps
-		
-		-- save and set the args
-		private_block = repeat(0, SymTab[sub][S_STACK_SPACE])
-		p = 1
-		for i = 1 to n do
-			private_block[p] = val[arg]
-			p += 1
-			val[arg] = val[b][i]
-			arg = SymTab[arg][S_NEXT]
-		end for
-	
-		-- save the privates
-		while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
-			private_block[p] = val[arg]
-			p += 1
-			val[arg] = NOVALUE -- necessary?
-			arg = SymTab[arg][S_NEXT]
-		end while
-	
-		-- save temps
-		arg = SymTab[sub][S_TEMPS]
-		while arg != 0 do
-			private_block[p] = val[arg]
-			p += 1
-			val[arg] = NOVALUE -- necessary?
-			arg = SymTab[arg][S_NEXT]
-		end while
-	
-		-- save this block of private data
-		save_private_block(sub, private_block)
-	else
-		-- routine is not in use, no need to save 
-		-- just set the args 
-		for i = 1 to n do
-			val[arg] = val[b][i]
-			arg = SymTab[arg][S_NEXT]
-		end for
-	end if
-	
-	SymTab[sub][S_RESIDENT_TASK] = current_task
-	
-	pc += 3 + cf
-	
-	call_stack = append(call_stack, pc) 
-	call_stack = append(call_stack, sub)
-	
-	Code = SymTab[sub][S_CODE]
-	pc = 1
+	do_call_proc( sub, val[b], 3 + cf )
 end procedure
 			  
 procedure opROUTINE_ID()
@@ -3453,19 +3490,158 @@ end ifdef
 	pc += 3
 end procedure
 
+constant MAX_USER_DELETE = 20
+
+sequence
+	eu_delete_rid   = repeat( -1, MAX_USER_DELETE ),
+	user_delete_rid = repeat( -1, MAX_USER_DELETE )
+
+integer delete_advance = 0
+symtab_index delete_sym = 0
+
+procedure do_delete_routine( integer dx, object o )
+	val[t_id] = user_delete_rid[dx]
+	val[t_arglist] = {o}
+	
+	SymTab[delete_code_routine][S_RESIDENT_TASK] = current_task
+	
+	-- create a stack frame
+	call_stack = append(call_stack, pc)
+	call_stack = append(call_stack, delete_code_routine)
+
+	Code = delete_code 
+	pc = 1
+	
+	do_exec()
+	
+	-- remove the stack frame
+	pc = call_stack[$-1]
+	call_stack = call_stack[1..$-2]
+	
+	-- restore
+	Code = SymTab[call_stack[$]][S_CODE]
+end procedure
+
+procedure user_delete_01( object o )
+	do_delete_routine( 1, o )
+end procedure
+eu_delete_rid[1] = routine_id("user_delete_01")
+
+procedure user_delete_02( object o )
+	do_delete_routine( 2, o )
+end procedure
+eu_delete_rid[2] = routine_id("user_delete_02")
+
+procedure user_delete_03( object o )
+	do_delete_routine( 3, o )
+end procedure
+eu_delete_rid[3] = routine_id("user_delete_03")
+
+procedure user_delete_04( object o )
+	do_delete_routine( 4, o )
+end procedure
+eu_delete_rid[4] = routine_id("user_delete_04")
+
+procedure user_delete_05( object o )
+	do_delete_routine( 5, o )
+end procedure
+eu_delete_rid[5] = routine_id("user_delete_05")
+
+procedure user_delete_06( object o )
+	do_delete_routine( 6, o )
+end procedure
+eu_delete_rid[6] = routine_id("user_delete_06")
+
+procedure user_delete_07( object o )
+	do_delete_routine( 7, o )
+end procedure
+eu_delete_rid[7] = routine_id("user_delete_07")
+
+procedure user_delete_08( object o )
+	do_delete_routine( 8, o )
+end procedure
+eu_delete_rid[8] = routine_id("user_delete_08")
+
+procedure user_delete_09( object o )
+	do_delete_routine( 9, o )
+end procedure
+eu_delete_rid[9] = routine_id("user_delete_09")
+
+procedure user_delete_10( object o )
+	do_delete_routine( 10, o )
+end procedure
+eu_delete_rid[10] = routine_id("user_delete_10")
+
+procedure user_delete_11( object o )
+	do_delete_routine( 11, o )
+end procedure
+eu_delete_rid[11] = routine_id("user_delete_11")
+
+procedure user_delete_12( object o )
+	do_delete_routine( 12, o )
+end procedure
+eu_delete_rid[12] = routine_id("user_delete_12")
+
+procedure user_delete_13( object o )
+	do_delete_routine( 13, o )
+end procedure
+eu_delete_rid[13] = routine_id("user_delete_13")
+
+procedure user_delete_14( object o )
+	do_delete_routine( 14, o )
+end procedure
+eu_delete_rid[14] = routine_id("user_delete_14")
+
+procedure user_delete_15( object o )
+	do_delete_routine( 15, o )
+end procedure
+eu_delete_rid[15] = routine_id("user_delete_15")
+
+procedure user_delete_16( object o )
+	do_delete_routine( 16, o )
+end procedure
+eu_delete_rid[16] = routine_id("user_delete_16")
+
+procedure user_delete_17( object o )
+	do_delete_routine( 17, o )
+end procedure
+eu_delete_rid[17] = routine_id("user_delete_17")
+
+procedure user_delete_18( object o )
+	do_delete_routine( 18, o )
+end procedure
+eu_delete_rid[18] = routine_id("user_delete_18")
+
+procedure user_delete_19( object o )
+	do_delete_routine( 19, o )
+end procedure
+eu_delete_rid[19] = routine_id("user_delete_19")
+
+procedure user_delete_20( object o )
+	do_delete_routine( 20, o )
+end procedure
+eu_delete_rid[20] = routine_id("user_delete_20")
+
+
 procedure opDELETE_ROUTINE()
-	-- TODO: how to make this all work inside eu.ex?
-	-- probably need to do a custom cleanup routine here, and then
-	-- call the user's RID
-	RTFatal("delete_routine not implemented for euphoria backend")
-	pc += 5
+	a = Code[pc+1]
+	
+	integer rid = val[Code[pc+2]]
+	b = find( rid, user_delete_rid )
+	if not b then
+		b = find( -1, user_delete_rid )
+		if not b then
+			RTFatal("Maximum of 20 user defined delete routines exceeded.")
+		end if
+		user_delete_rid[b] = rid
+	end if
+	object obj = val[a]
+	val[Code[pc+3]] = delete_routine( obj, eu_delete_rid[b] )
+	pc += 4
 end procedure
 
 procedure opDELETE_OBJECT()
-	-- TODO: how to make this all work inside eu.ex?
-	-- probably need to do a custom cleanup routine here, and then
-	-- call the user's RID
-	RTFatal("delete not implemented for euphoria backend")
+	delete( val[Code[pc+1]] )
 	pc += 2
 end procedure
 
@@ -3475,7 +3651,11 @@ procedure do_exec()
 	while keep_running do 
 		integer op = Code[pc]
 		ifdef DEBUG then
-			printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
+			if op > 0 and op <= length(opnames) then
+				printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
+			else
+				printf(1,"[%s]:[%d] %d\n", {SymTab[call_stack[$]][S_NAME], pc, op})
+			end if
 		end ifdef
 		switch op do
 			case ABORT then
@@ -3981,8 +4161,14 @@ procedure do_exec()
 			case XOR_BITS then
 				opXOR_BITS()
 				
+			case DELETE_ROUTINE then
+				opDELETE_ROUTINE()
+				
+			case DELETE_OBJECT then
+				opDELETE_OBJECT()
+				
 			case else
-				RTFatal( sprintf("Unknown opcode then %d", op ) )
+				RTFatal( sprintf("Unknown opcode: %d", op ) )
 		end switch
 	end while
 	keep_running = TRUE -- so higher-level do_exec() will keep running

@@ -398,6 +398,9 @@ else # Not DJGPP:
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
 
+testeu :
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) $(TRUNKDIR)/source/eu.ex"
+
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std

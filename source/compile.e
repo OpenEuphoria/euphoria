@@ -2528,15 +2528,16 @@ procedure opASSIGN_SUBS()
 -- Code[pc+3] has the source
 
 	const_subs = -1
+	symtab_index rhs = Code[pc+3]
 
 	-- get the subscript */
 
-	CRef(Code[pc+3]) -- takes care of ASSIGN_SUBS_I
-	SymTab[Code[pc+3]][S_ONE_REF] = FALSE
+	CRef( rhs) -- takes care of ASSIGN_SUBS_I
+	SymTab[rhs][S_ONE_REF] = FALSE
 
-	if Code[pc+1] = Code[pc+3] then
+	if Code[pc+1] = rhs then
 		-- must point to original sequence
-		c_stmt("_0 = @;\n", Code[pc+3])
+		c_stmt("_0 = @;\n", rhs)
 	end if
 
 	-- check for uniqueness
@@ -2557,6 +2558,7 @@ procedure opASSIGN_SUBS()
 			c_stmt("@ = MAKE_SEQ(_2);\n", Code[pc+1])
 			c_stmt0("}\n")
 		end if
+		
 
 	end if
 
@@ -2579,7 +2581,7 @@ procedure opASSIGN_SUBS()
 		-- in ASSIGN_OP_SUBS above
 
 		c_stmt0("_1 = *(int *)_2;\n")
-		if Code[pc+1] = Code[pc+3] then
+		if Code[pc+1] = rhs then
 			c_stmt0("*(int *)_2 = _0;\n")
 		else
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
@@ -2591,10 +2593,21 @@ procedure opASSIGN_SUBS()
 			c_stmt0("_1 = *(int *)_2;\n")
 		end if
 
-		if Code[pc+1] = Code[pc+3] then
+		if Code[pc+1] = rhs then
 			c_stmt0("*(int *)_2 = _0;\n")
 		else
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
+		end if
+		
+		if sym_mode( rhs ) = M_TEMP and equal( sym_obj( rhs ), NOVALUE ) then 
+			CDeRef( rhs )
+			if not TypeIs( rhs, T_INTEGER ) then
+				c_stmt( "@ = NOVALUE;\n", rhs )
+			end if
+			
+			-- set the type to an integer to prevent de-referencing
+			SetBBType( rhs, TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
+			
 		end if
 
 		if SeqElem(Code[pc+1]) != TYPE_INTEGER then

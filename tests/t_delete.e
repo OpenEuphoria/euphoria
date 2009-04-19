@@ -1,4 +1,4 @@
-
+without inline
 include std/unittest.e
 
 integer delete_counter = 0
@@ -57,6 +57,15 @@ test_equal( "sequence, 2 delete routines, explicitly deleted", 2, delete_count()
 s = delete_routine( delete_routine( repeat( 0, 1 ), CUSTOM_DELETE ), CUSTOM_DELETE )
 s = ""
 test_equal( "sequence, 2 delete routines, deleted by derefs", 2, delete_count() )
+
+s = {0}
+s[1] = delete_routine( 1, CUSTOM_DELETE )
+s[1] = 0
+test_equal( "ASSIGN_SUBS_I release atom by refcount", 1, delete_count() )
+
+s[1] = delete_routine( 1, CUSTOM_DELETE )
+s[1] = 1.1
+test_equal( "ASSIGN_SUBS release atom by refcount", 1, delete_count() )
 
 
 test_report()

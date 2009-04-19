@@ -384,6 +384,11 @@ translate-dos : .SYMBOLIC
 	
 translate : .SYMBOLIC translate-win translate-dos
 
+testeu : .SYMBOLIC
+	cd ..\tests
+	set EUCOMPILEDIR=$(TRUNKDIR) 
+	$(EUBIN)\eui.exe ..\source\eutest.ex -i ..\include -cc wat -exe "$(FULLBUILDDIR)\eui.exe $(TRUNKDIR)\source\eu.ex"
+	cd ..\source
 
 testwin : .SYMBOLIC
 	cd ..\tests

@@ -2035,7 +2035,13 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					obj_ptr = (object_ptr)SequenceCopy((s1_ptr)obj_ptr);
 					*(object_ptr)pc[1] = MAKE_SEQ(obj_ptr);
-				}   
+				}
+				if(!IS_ATOM_INT(top) && ((symtab_ptr)pc[3])->mode == M_TEMP ){
+					// Since it's a temp, an extra ref count would prevent it
+					// from ever being freed.
+					DeRef( top );
+					*((object_ptr)pc[3]) = NOVALUE;
+				}
 			  as:   
 				a = *(object_ptr)pc[2]; /* the subscript */
 				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) { 
@@ -2045,7 +2051,8 @@ void do_exec(int *start_pc)
 				}   
 				obj_ptr = a + ((s1_ptr)obj_ptr)->base;
 				a = *obj_ptr;
-				*obj_ptr = top; 
+				*obj_ptr = top;
+				
 				pc += 4;
 				if (IS_ATOM_INT_NV(a)) {
 					thread();
