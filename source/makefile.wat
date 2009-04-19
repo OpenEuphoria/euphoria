@@ -52,6 +52,7 @@
 #		     Win32 and DOS  wmake -f makefile.wat test
 #			Win32 Only  wmake -f makefile.wat testwin
 #			  DOS Only  wmake -f makefile.wat testdos
+#			Using eu.ex wmake -f makefile.wat testeu
 #
 # The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
 # The default for SVN_REV is 'xxx'.

@@ -39,6 +39,7 @@
 #   Backend              (eub):  make eub
 #   Run Unit Tests            :  make test
 #   Run Unit Tests for DJGPP  :  make test-djgpp
+#   Run Unit Tests with eu.ex :  make testeu
 
 ifndef CONFIG
 CONFIG = Makefile.eu
