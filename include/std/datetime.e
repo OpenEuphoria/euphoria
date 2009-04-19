@@ -13,6 +13,7 @@ include std/dll.e
 include std/sequence.e
 include std/get.e
 include std/error.e
+include std/types.e
 
 ifdef LINUX then
 	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
@@ -934,26 +935,16 @@ public function format(datetime d, wstring format)
 	return res
 end function
 
-function parse_get_value(sequence val, integer s, integer e)
-	if length(val) < e then
-		return -1
-	end if
-
-	val = value(val[s..e])
-	if not val[1] = GET_SUCCESS then
-		return -1
-	end if
-
-	return val[2]
-end function
-
 --**
 -- Parse a datetime string according to the given format.
 --
 -- Parameters:
 --   # ##val## - string datetime value
---   # ##fmt## - datetime format
+--   # ##fmt## - datetime format. Default is "%Y-%m-%d %H:%M:%S"
 --
+-- Returns:
+--	A datetime value.
+-- 
 -- Comments:
 --   Only a subset of the format specification is currently supported:
 --
@@ -965,6 +956,11 @@ end function
 --   * %Y  year
 --
 --   More format codes will be added in future versions.
+--  
+--   All non-format characters in the format string are ignored and are not
+--   matched against the input string.
+--
+--   All non-digits in the input string are ignored.
 --
 -- Example 1:
 -- <eucode>
@@ -976,75 +972,89 @@ end function
 --
 
 public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
-	integer fpos = 1, spos = 1, epos = 1
-	integer year=0, month=0, day=0, hour=0, minute=0, second=0
+	integer fpos = 1, spos = 1, maxlen, rpos 
+	sequence res = {0,0,0,0,0,0}
 
 	while fpos <= length(fmt) do
 		if fmt[fpos] = '%' then
 			fpos += 1
 
-			switch fmt[fpos] with fallthru do
+			switch fmt[fpos] do
 				case 'Y' then
-					epos = spos + 3
-					year = parse_get_value(val, spos, epos)
-					if year = -1 then
-						return -1
-					end if
-					spos = epos
-					break
+					rpos = 1
+					maxlen = 4
 
 				case 'm' then
-					epos = spos + 1
-					month = parse_get_value(val, spos, epos)
-					if month = -1 then
-						return -1
-					end if
-					spos = epos
-					break
+					rpos = 2
+					maxlen = 2
 
 				case 'd' then
-					epos = spos + 1
-					day = parse_get_value(val, spos, epos)
-					if day = -1 then
-						return -1
-					end if
-					spos = epos
-					break
+					rpos = 3
+					maxlen = 2
 
 				case 'H' then
-					epos = spos + 1
-					hour = parse_get_value(val, spos, epos)
-					if hour = -1 then
-						return -1
-					end if
-					spos = epos
-					break
+					rpos = 4
+					maxlen = 2
 
 				case 'M' then
-					epos = spos + 1
-					minute = parse_get_value(val, spos, epos)
-					if minute = -1 then
-						return -1
-					end if
-					spos = epos
-					break
+					rpos = 5
+					maxlen = 2
 
 				case 'S' then
-					epos = spos + 1
-					second = parse_get_value(val, spos, epos)
-					if second = -1 then
-						return -1
-					end if
-					spos = epos
-					break
-			end switch
-		end if
+					rpos = 6
+					maxlen = 2
 
+				case else
+					-- Ignore any invalid format character.
+					rpos = 0
+					
+			end switch
+			
+			if rpos then
+				sequence got
+				integer epos
+				while spos <= length(val) do
+					if t_digit(val[spos]) then
+						exit
+					end if
+					spos += 1
+				end while
+			    
+				epos = spos + 1
+				while epos <= length(val) and epos < spos + maxlen do
+					if not t_digit(val[epos]) then
+						exit
+					end if
+					epos += 1
+				end while
+				
+				got = value(val[spos .. epos-1], , GET_LONG_ANSWER)
+				if got[1] != GET_SUCCESS then
+					return -1
+				end if
+
+				res[rpos] = got[2]
+				spos = epos
+			end if
+		end if
 		fpos += 1
-		spos += 1
+
 	end while
 
-	return new(year, month, day, hour, minute, second)
+	-- Ensure that what we got could be a date-time value.
+	if not datetime(res) then
+		return -1
+	end if
+	
+	-- Ensure no remaining digits in string.
+	while spos <= length(val) do
+		if t_digit(val[spos]) then
+			return -1
+		end if
+		spos += 1
+	end while
+	
+	return new(res[1], res[2], res[3], res[4], res[5], res[6])
 end function
 
 --**

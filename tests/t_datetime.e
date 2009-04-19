@@ -271,7 +271,12 @@ test_equal("parse default", { 2009, 5, 1, 0, 1, 2 },
 	d:parse("2009-05-01 00:01:02"))
 test_equal("parse format specified", { 2009, 5, 1, 0, 1, 2 },
 	d:parse("05/01/2009 00:01:02", "%m/%d/%Y %H:%M:%S"))
-
+test_equal( "parse nonUSA #1", { 2001, 10, 30, 0, 52, 9}, 
+	d:parse("30.10.2001 005209", "%d%m%Y%H%M%S"))
+test_equal( "parse nonUSA #2", { 2001, 10, 30, 0, 52, 9}, 
+	d:parse("30/10/2001 00:52:09", "%d%m%Y%H%M%S"))
+test_equal( "parse fail #1", -1, d:parse("213/10/2001 00:52:09", "%d%m%Y%H%M%S"))
+test_equal( "parse fail #2", -1, d:parse("2.3/10/2001 00:52:09", "%d%m%Y%H%M%S"))
 
 
 dt1 = d:now_gmt()
