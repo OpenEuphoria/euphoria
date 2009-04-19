@@ -29,12 +29,12 @@ constant platform_names =
         									os:LINUX, {}, ), 
 	        							os:FREEBSD, {}, ), 
 							      os:OSX, {}, ),  
-	    	    				os:DOS32,  "DOS32" , 100, map:APPEND ), 
-	        				os:WIN32,  "WIN32" , 100, map:APPEND ), 
-	        			os:LINUX, "LINUX", 100, map:APPEND ), 
-	        		os:LINUX,    "UNIX", 100, map:APPEND ), 
-	        	os:FREEBSD,  "FREEBSD" , 100, map:APPEND ), 
-	      os:OSX,  "OSX" , 100, map:APPEND ) 
+	    	    				os:DOS32,  "DOS32" , map:APPEND, 100 ), 
+	        				os:WIN32,  "WIN32" , map:APPEND, 100 ), 
+	        			os:LINUX, "LINUX", map:APPEND, 100 ), 
+	        		os:LINUX,    "UNIX", map:APPEND, 100 ), 
+	        	os:FREEBSD,  "FREEBSD" , map:APPEND, 100 ), 
+	      os:OSX,  "OSX" , map:APPEND, 100 ) 
 
 constant platform_values = 
 	putm(  
