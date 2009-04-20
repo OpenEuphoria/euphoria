@@ -1950,7 +1950,7 @@ end procedure
 procedure opIS_AN_OBJECT()
 	a = Code[pc+1]
 	target = Code[pc+2]
-	val[target] = (val[a] != NOVALUE)
+	val[target] = not equal(val[a], NOVALUE)
 	pc += 3
 end procedure
 				
@@ -2930,12 +2930,7 @@ procedure opMATCH_FROM()
 				pc += 5
 				return
 		end if
-		s = s[c..$]
-		b = match( val[Code[pc+1]], s )
-		if b then
-				b += c - 1
-		end if
-		val[target] = b
+		val[target] = match( val[Code[pc+1]], s, c )
 		pc += 5
 end procedure
 
