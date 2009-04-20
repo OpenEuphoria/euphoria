@@ -177,13 +177,13 @@ ifdef WIN32 then
 	LC_TIME     = 5
 	LC_MESSAGES = 6
 	
-	constant FORMAT_SIZE = 6 * 4
-	constant NUM_DIGITS = 0
-	constant LEADING_ZERO = 4
-	constant GROUPING = 8
-	constant DECIMAL_SEP = 12
-	constant THOUSANDS_SEP = 16
-	constant NEGATIVE_ORDER = 20
+-- 	constant FORMAT_SIZE = 6 * 4
+-- 	constant NUM_DIGITS = 0
+-- 	constant LEADING_ZERO = 4
+-- 	constant GROUPING = 8
+-- 	constant DECIMAL_SEP = 12
+-- 	constant THOUSANDS_SEP = 16
+-- 	constant NEGATIVE_ORDER = 20
 
 elsifdef LINUX then
 
