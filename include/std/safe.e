@@ -97,8 +97,7 @@ end while
 
 constant OK = 1, BAD = 0
 constant M_ALLOC = 16,
-		 M_FREE = 17,
-		 M_LOCK_MEMORY = 41
+		 M_FREE = 17
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -232,7 +231,7 @@ function bad_address(atom a)
 	return sprintf(" ADDRESS!!!! %d (#%08x)", {a, a})
 end function
 
-without warning
+without warning &= (override)
 
 override function peek(object x)
 -- safe version of peek 
@@ -271,8 +270,6 @@ override function peeks(object x)
 		die("BAD PEEK" & bad_address(a))
 	end if
 end function
-
-without warning
 
 override function peek2u(object x)
 -- safe version of peek 
@@ -350,7 +347,7 @@ override function peek4u(object x)
 	end if
 end function
 
-without warning
+
 override function peek_string(object x)
 -- safe version of peek_string 
 	integer len
