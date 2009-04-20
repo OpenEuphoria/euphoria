@@ -842,8 +842,8 @@ end type
 -- number_array(-1)            -- FALSE (not a sequence)
 -- number_array("abc")         -- TRUE (all single characters)
 -- number_array({1, 2, "abc"}) -- FALSE (contains a sequence)
--- number_array({1, 2, 9.7)    -- TRUE
--- number_array({1, 2, 'a')    -- TRUE
+-- number_array(1, 2, 9.7)    -- TRUE
+-- number_array(1, 2, 'a')    -- TRUE
 -- number_array({})            -- TRUE
 -- </eucode>
 public type number_array( object x )
@@ -859,3 +859,101 @@ public type number_array( object x )
 	return 1
 end type
 
+--** 
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more sequences.
+--
+-- Example 1:
+-- <eucode>
+-- sequence_array(-1)            -- FALSE (not a sequence)
+-- sequence_array("abc")         -- FALSE (all single characters)
+-- sequence_array({1, 2, "abc"}) -- TRUE (contains a sequence)
+-- sequence_array(1, 2, 9.7)     -- FALSE
+-- sequence_array(1, 2, 'a')     -- FALSE
+-- sequence_array({"abc", {3.4, 99182.78737}}) -- TRUE
+-- sequence_array({})            -- TRUE
+-- </eucode>
+public type sequence_array( object x )
+	if not sequence(x) then 
+		return 0
+	end if
+	
+	for i = 1 to length(x) do
+		if not sequence(x[i]) then 
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+--** 
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more ASCII characters.
+--
+-- Comment:
+-- An ASCII 'character' is defined as a integer in the range [0 to 127].
+--
+-- Example 1:
+-- <eucode>
+-- ascii_string(-1)            -- FALSE (not a sequence)
+-- ascii_string("abc")         -- TRUE (all single ASCII characters)
+-- ascii_string({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- ascii_string({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- ascii_string({1, 2, 'a')    -- TRUE
+-- ascii_string({1, -2, 'a')   -- FALSE (contains a negativce integer)
+-- ascii_string({})            -- TRUE
+-- </eucode>
+public type ascii_string( object x )
+	if not sequence(x) then 
+		return 0
+	end if
+	
+	for i = 1 to length(x) do
+		if not integer(x[i]) then 
+			return 0
+		end if
+		if x[i] < 0 then
+			return 0
+		end if
+		if x[i] > 127 then
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+--** 
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more byte characters.
+--
+-- Comment:
+-- A byte 'character' is defined as a integer in the range [0 to 255].
+--
+-- Example 1:
+-- <eucode>
+-- string(-1)            -- FALSE (not a sequence)
+-- string("abc§¶")       -- TRUE (all single byte characters)
+-- string({1, 2, "abc§¶"}) -- FALSE (contains a sequence)
+-- string({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- string({1, 2, 'a')    -- TRUE
+-- string({1, -2, 'a')   -- FALSE (contains a negativce integer)
+-- string({})            -- TRUE
+-- </eucode>
+public type string( object x )
+	if not sequence(x) then 
+		return 0
+	end if
+	
+	for i = 1 to length(x) do
+		if not integer(x[i]) then 
+			return 0
+		end if
+		if x[i] < 0 then
+			return 0
+		end if
+		if x[i] > 255 then
+			return 0
+		end if
+	end for
+	return 1
+end type
