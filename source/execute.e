@@ -1251,22 +1251,30 @@ procedure opRETURNP()
 	
 	sub = Code[pc+1]
 	
-	
 	-- set sub privates to NOVALUE -- necessary? - we do it at routine entry
 	symtab_index block = Code[pc+2]
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	
+	integer local_result = result
+	integer except
+	object local_result_val
+	if local_result then
+		except = Code[pc+3]
+		result = 0
+		local_result_val = result_val
+	end if
+	
 	while block != sub_block do
-		if result then
-			exit_block( block, Code[pc+3] )
+		if local_result then
+			exit_block( block, except )
 		else
 			exit_block( block )
 		end if
 		block = SymTab[block][S_BLOCK]
 	end while
 	
-	if result then
-		exit_block( block, Code[pc+3] )
+	if local_result then
+		exit_block( block, except )
 	else
 		exit_block( block )
 	end if
@@ -1281,14 +1289,14 @@ procedure opRETURNP()
 		caller = call_stack[$]
 		Code = SymTab[caller][S_CODE]
 		restore_privates(caller)
-		if result then
-			val[Code[result]] = result_val
-			result = 0
+		if local_result then
+			val[Code[local_result]] = local_result_val
 		end if
 	else
 		kill_task(current_task)
 		scheduler()
 	end if
+	
 end procedure
 
 procedure opRETURNF()  
@@ -2913,12 +2921,12 @@ procedure opMATCH_FROM()
 				return
 		end if
 		if c < 1 then
-				RTFatal("index out of bounds in match_from()")
+				RTFatal(sprintf("index (%d) out of bounds in match_from()", c ))
 				pc += 5
 				return
 		end if
-		if not (length(s) = 0 and c = 1) and c > length(s) then
-				RTFatal("index out of bounds in match_from()")
+		if not (length(s) = 0 and c = 1) and c > length(s) + 1 then
+				RTFatal(sprintf("index (%d) out of bounds in match_from()", c ))
 				pc += 5
 				return
 		end if
