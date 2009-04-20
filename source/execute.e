@@ -1484,6 +1484,7 @@ procedure opSWITCH_RT()
 -- pc+2: case values
 -- pc+3: jump_table
 -- pc+4: else jump
+	
 	sequence values = val[Code[pc+2]]
 	integer all_ints = 1
 	integer max = MININT
@@ -1514,25 +1515,31 @@ procedure opSWITCH_RT()
 		end if
 	end for
 	
-	val[Code[pc+2]] = values
 	if all_ints and max - min < 1024 then
 		Code[pc] = SWITCH_SPI
-		SymTab[call_stack[$]][S_CODE] = Code
+		
 		sequence jump = val[Code[pc+3]]
-		sequence switch_table = repeat( val[Code[pc+4]], max - min + 1 )
+		sequence switch_table = repeat( Code[pc+4] - pc, max - min + 1 )
 		integer offset = min - 1
 		for i = 1 to length( values ) do
 			switch_table[values[i] - offset] = jump[i]
 		end for
-		val[Code[pc+3]] = offset
-		val[Code[pc+2]] = switch_table
+		Code[pc+2] = offset
 		
+		val = append( val, switch_table )
+		Code[pc+3] = length(val)
+		
+		SymTab[call_stack[$]][S_CODE] = Code
 		opSWITCH_SPI()
 	else
 		Code[pc] = SWITCH
+		val = append( val, values )
+		Code[pc+2] = length(val)
+		
 		SymTab[call_stack[$]][S_CODE] = Code
 		opSWITCH()
 	end if
+	
 end procedure
 
 procedure opCASE()
@@ -2495,7 +2502,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 			return 0 -- couldn't find ns
 		end if
 		
-		ns_file = SymTab[s][S_OBJ]
+		ns_file = val[s]
 		
 		-- trim off any leading whitespace from name
 		while length(name) and (name[1] = ' ' or name[1] = '\t') do
@@ -4187,6 +4194,7 @@ procedure InitBackEnd()
 	val = repeat(0, length(SymTab))
 	for i = 1 to length(SymTab) do
 		val[i] = SymTab[i][S_OBJ] -- might be NOVALUE
+		SymTab[i][S_OBJ] = 0
 	end for
 end procedure
 

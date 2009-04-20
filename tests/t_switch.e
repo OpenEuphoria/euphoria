@@ -242,7 +242,7 @@ constant
 	E = {1,2,"3"}
 
 function rt_int_switch( object x )
-	switch x with fallthru do
+	switch x do
 		case A then
 			return A
 		case D then
@@ -253,7 +253,7 @@ function rt_int_switch( object x )
 end function
 
 function rt_switch( object x )
-	switch x with fallthru do
+	switch x do
 		case D then
 			return D
 		case E then
