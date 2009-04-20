@@ -3451,8 +3451,8 @@ procedure SubProg(integer prog_type, integer scope)
 					else
 						again = ""
 					end if
-					Warning(sprintf("built-in routine %%s() overridden%s in %s",
-									{ again, file_name[current_file_no]}),
+					Warning(sprintf("built-in routine %%s() overridden%s in %s:%d",
+									{ again, file_name[current_file_no],line_number}),
 									override_warning_flag, {SymTab[p][S_NAME]})
 			end if
 		end if
@@ -3806,19 +3806,34 @@ procedure SetWith(integer on_off)
 			if tok[T_ID] = LEFT_ROUND then
 				tok = next_token()
 				while tok[T_ID] != RIGHT_ROUND do
-					if tok[T_ID] = VARIABLE then
-				    	option = SymTab[tok[T_SYM]][S_NAME]
-					elsif tok[T_ID] = STRING then
-						option = SymTab[tok[T_SYM]][S_OBJ]
-					elsif good_sofar != line_number then
-						CompileErr("too many warning errors")
-					else
+					if tok[T_ID] = COMMA then
 						tok = next_token()	
 						continue
 					end if
+						
+					if tok[T_ID] = STRING then
+						option = SymTab[tok[T_SYM]][S_OBJ]
+					elsif length(SymTab[tok[T_SYM]]) >= S_NAME then
+						option = SymTab[tok[T_SYM]][S_NAME]
+					else
+						option = ""
+						for k = 1 to length(keylist) do
+							if keylist[k][S_SCOPE] = SC_KEYWORD and
+								keylist[k][S_TOKEN] = tok[T_ID] 
+							then
+									option = keylist[k][S_NAME]
+									exit
+							end if
+						end for
+						
+					end if
+					
 					idx = find(option, warning_names)
 					if idx = 0 then
-						Warning(sprintf("%.99s:%d - Unknown warning name '%s'",
+	 					if good_sofar != line_number then
+ 							CompileErr("too many warning errors")
+ 						end if
+						Warning(sprintf("%.99s:%d - Unknown warning name %s",
 							{file_name[current_file_no], line_number, option}),
 							0 -- unmaskable 
 							)
