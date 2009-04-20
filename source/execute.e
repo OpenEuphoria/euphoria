@@ -2497,7 +2497,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 
 		-- step 1: look up NAMESPACE symbol 
 		s = SymTab[TopLevelSub][S_NEXT]
-		while s != 0 and s <= stlen do
+		while s != 0 do
 			if file = SymTab[s][S_FILE_NO] and 
 				SymTab[s][S_TOKEN] = NAMESPACE and 
 				equal(ns, SymTab[s][S_NAME]) then
