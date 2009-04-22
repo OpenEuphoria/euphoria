@@ -4,6 +4,7 @@
 
 include std/os.e
 include std/text.e
+include std/io.e
 
 public constant
 	ULINUX = LINUX + 0.3,
@@ -123,10 +124,54 @@ public function GetPlatformDefines(integer for_translator = 0)
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
 		local_defines &= {"DOSFAMILY", "WIN32"}
 		sequence lcmds = command_line()
-		if match("euiw", lower(lcmds[1])) != 0 then
-			local_defines &= { "WIN32_GUI" }
+		
+		-- Examine the executable's image file to determine subsystem.
+		integer fh
+		fh = open(lcmds[1], "rb")
+		if fh = -1 then
+			-- for some reason I can't open the file, so use the name instead.
+ 			if match("euiw", lower(lcmds[1])) != 0 then
+ 				local_defines &= { "WIN32_GUI" }
+ 			else
+ 				local_defines &= { "WIN32_CONSOLE" }
+ 			end if
 		else
-			local_defines &= { "WIN32_CONSOLE" }
+			atom sk
+			sk = seek(fh, #18) -- Fixed location of relocation table.
+			sk = get_integer16(fh)
+			if sk = #40 then
+				-- We have a Windows image and not a MS-DOS image.
+				sk = seek(fh, #3C) -- Fixed location of COFF signature offset.
+				sk = get_integer32(fh)
+				sk = seek(fh, sk)
+				sk = get_integer16(fh)
+				if sk = #4550 then -- "PE" in intel endian
+					sk = get_integer16(fh)
+					if sk = 0 then
+						-- We got a Portable Image format
+						sk = seek(fh, where(fh) + 88 )
+						sk = get_integer16(fh)
+					else
+						sk = 0	-- Don't know this format.
+					end if
+				elsif sk = #454E then -- "NE" in intel endian
+					-- We got a pre-Win95 image
+					sk = seek(fh, where(fh) + 54 )
+					sk = getc(fh)
+				else
+					sk = 0
+				end if
+			else
+				sk = 0
+			end if
+			if sk = 2 then
+				local_defines &= { "WIN32_GUI" }
+			elsif sk = 3 then
+				local_defines &= { "WIN32_CONSOLE" }
+			else
+				local_defines &= { "WIN32_UNKNOWN" }
+			end if
+			close(fh)
 		end if
 	elsif (IDOS and not for_translator) or (TDOS and for_translator) then
 		local_defines &= {"DOSFAMILY", "DOS32"}

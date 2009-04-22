@@ -485,6 +485,39 @@ public function get_integer32(integer fh)
 end function
 
 --**
+-- Read the next two bytes from a file and returns them as a single integer.
+--
+-- Parameters:
+--		# ##fh##: an integer, the handle to an open file to read from.
+--
+-- Returns:
+--		An **atom**, made of the bytes that could be read from the file.
+--
+-- Comments:
+--     * This function is normally used with files opened in binary mode, "rb".
+--     * Assumes that there at least two bytes available to be read.
+--
+-- Example 1:
+--     <eucode>
+--     
+--     integer fn
+--     fn = open("temp", "rb")  -- an existing file
+--
+--     atom file_type_code
+--     file_type_code = get_integer16(fn)
+--     </eucode>
+--
+-- See Also:
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+
+public function get_integer16(integer fh)
+-- read the 4 bytes as a single integer value at current position in file
+	poke(mem0, getc(fh))
+	poke(mem1, getc(fh))
+	return peek2u(mem0)
+end function
+
+--**
 -- Write the supplied integer as four bytes to a file.
 --
 -- Parameters:
@@ -509,6 +542,33 @@ end function
 public procedure put_integer32(integer fh, integer val)
 	poke4(mem0, val)
 	puts(fh, peek({mem0,4}))
+end procedure
+
+--**
+-- Write the supplied integer as two bytes to a file.
+--
+-- Parameters:
+--		# ##fh##: an integer, the handle to an open file to write to.
+--      # ##val##: an integer 
+--
+-- Comments:
+--     * This function is normally used with files opened in binary mode, "wb".
+--
+-- Example 1:
+--     <eucode>
+--     
+--     integer fn
+--     fn = open("temp", "wb")
+--
+--     put_integer16(fn, 1234)
+--     </eucode>
+--
+-- See Also:
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+
+public procedure put_integer16(integer fh, integer val)
+	poke2(mem0, val)
+	puts(fh, peek({mem0,2}))
 end procedure
 
 --**
