@@ -3,6 +3,7 @@
 --
 
 include std/os.e
+include std/text.e
 
 public constant
 	ULINUX = LINUX + 0.3,
@@ -122,7 +123,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
 		local_defines &= {"DOSFAMILY", "WIN32"}
 		sequence lcmds = command_line()
-		if match("euiw", lcmds[1]) != 0 then
+		if match("euiw", lower(lcmds[1])) != 0 then
 			local_defines &= { "WIN32_GUI" }
 		else
 			local_defines &= { "WIN32_CONSOLE" }
