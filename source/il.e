@@ -18,6 +18,10 @@ include backend.e
 include reswords.e
 include scanner.e
 include cominit.e
+include mode.e
+include global.e
+include pathopen.e
+include error.e
 
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con
@@ -39,7 +43,7 @@ procedure fatal(sequence msg)
 	puts(2, msg & '\n')
 	ifdef not UNIX then
 		-- TODO: Should we check for batch_job?
-		-- we run bind and bindw using backendw.exe, so this is needed
+		-- we run bind and bindw using eubw.exe, so this is needed
 		puts(2, "\nPress Enter\n")
 		getc(0)
 	end ifdef
@@ -199,9 +203,9 @@ procedure OutputHeader(file f)
 		else
 			puts(f, "#!" & eudir & SLASH & "bin" & SLASH)
 			ifdef UNIX then
-				puts(f, "backendu\n")
+				puts(f, "eub\n")
 			elsedef
-				puts(f, "backendw.exe\n") -- assume Apache CGI
+				puts(f, "eubw.exe\n") -- assume Apache CGI
 			end ifdef
 		end if
 	end if
@@ -416,7 +420,7 @@ procedure OutputIL()
 
 	if not shroud_only then
 		-- binding:
-		-- first, copy backend[w].exe
+		-- first, copy eub[w].exe
 		
 		eu_dir = getenv("EUDIR")
 		if atom(eu_dir) then
@@ -436,23 +440,30 @@ procedure OutputIL()
 				
 		be = -1
 		if w32 then
-			backend_name = "backendw.exe"
+			backend_name = "eubw.exe"
 		else
 			ifdef UNIX then
-				backend_name = "backendu"
-				-- try to get the installed eubackend, if it exists:
-				be = open( "/usr/bin/eubackend", "r" )
+				backend_name = "eub"
+				-- try to get the installed backend, if it exists:
+				be = open( "/usr/bin/eub", "r" )
 			elsedef
-				backend_name = "backendd.exe"
+				backend_name = "eubd.exe"
 			end ifdef
 		end if
-		if compare( backend_name, locate_file( backend_name, { 
-			eu_dir & SLASH & "bin", source_dir }
-			) ) then
-			backend_name = locate_file( backend_name, { 
-			eu_dir & SLASH & "bin", source_dir }
-			)
+		sequence ondisk_name = locate_file( backend_name, 
+									{ eu_dir & SLASH & "bin", source_dir }
+									)
+		ifdef UNIX then
+		if not equal( backend_name,  ondisk_name) then
+			backend_name = ondisk_name
 		end if
+		elsedef
+		-- do case-insensitive check on DOS/WIN
+		if not equal( lower(backend_name),  lower(ondisk_name)) then
+			backend_name = ondisk_name
+		end if
+		end ifdef
+		
 		if be = -1 then
 			be = open(backend_name, "rb")
 		end if
@@ -460,7 +471,7 @@ procedure OutputIL()
 			fatal("couldn't open " & backend_name & "!")
 		end if
 	
-		-- copy backend[w].exe to output .exe file
+		-- copy eub[w].exe to output .exe file
 		-- w32: replace the icon with user's icon file if any
 		--      con: replace 2 with 3 in header at #DC
 		last6 = repeat(' ', 6)
