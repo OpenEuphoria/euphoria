@@ -20,7 +20,6 @@
 /* Imported variables */
 /**********************/
 void RTInternal();
-extern d_ptr d_list;
 extern unsigned cache_size;
 extern int align4;
 #ifdef HEAP_CHECK

@@ -3,6 +3,10 @@
 /*                        STORAGE ALLOCATION MACROS                          */
 /*                                                                           */
 /*****************************************************************************/
+#ifndef _ALLOC_H_
+#define _ALLOC_H_ 1
+#define RESOLUTION 8            /* minimum size & increment before mapping */
+#define LOG_RESOLUTION 3        /* log2 of RESOLUTION */
 #define CACHE_LIMIT 2000        /* desired maximum size of storage cache. */
 								/* doubles are 1, others are 2            */ 
 
@@ -68,3 +72,38 @@ extern size_t strlcpy(char *dest, char *src, size_t maxlen);
 extern size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
 
+#ifdef EBSD
+extern char *malloc_options="A"; // abort
+#endif
+
+#ifdef EUNIX
+extern int pagesize;  // needed for Linux only, not FreeBSD
+#endif
+
+extern int eu_dll_exists; // a Euphoria .dll is being used
+extern int align4;
+extern int low_on_space;  // are we almost out of memory?
+extern unsigned cache_size;
+extern symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3, call_back_arg4,
+ 		   call_back_arg5, call_back_arg6, call_back_arg7, call_back_arg8,
+ 		   call_back_arg9, call_back_result;
+
+#ifdef EXTRA_STATS
+extern unsigned recycles;          /* calls to Recycle() */
+extern long a_miss;                /* cache list was empty */
+extern long a_hit;                 /* found in cache */
+extern long a_too_big;             /* too big - no caching */
+extern long funny_expand;          /* _expand returns new pointer */
+extern long funny_align;           /* number mallocs not 8-aligned */
+#endif
+
+#ifdef HEAP_CHECK
+extern long bytes_allocated;       /* current number of object blocks alloc'd */
+extern long max_bytes_allocated;   /* high water mark */
+#endif
+
+extern s1_ptr d_list;
+extern struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired 
+                                                                     to appropriate list */
+
+#endif

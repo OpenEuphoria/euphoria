@@ -283,7 +283,6 @@ extern object last_r_file_no;
 extern IFILE last_r_file_ptr;
 extern long bytes_allocated;
 extern int current_screen;
-extern d_ptr d_list;
 extern int color_trace;
 extern int file_trace;
 extern symtab_ptr *e_routine;

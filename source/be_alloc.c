@@ -38,8 +38,6 @@
 /* Local defines  */
 /******************/
 #define NUMBER_OF_SIZES 14      /* number of size lists in pool */
-#define RESOLUTION 8            /* minimum size & increment before mapping */
-#define LOG_RESOLUTION 3        /* log2 of RESOLUTION */
 #define STR_CHUNK_SIZE 4096     /* chars */
 #define SYM_CHUNK_SIZE 50       /* entries */
 #define TMP_CHUNK_SIZE 50       /* entries */

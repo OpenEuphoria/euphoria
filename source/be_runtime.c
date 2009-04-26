@@ -115,7 +115,6 @@ extern char **Argv;
 extern struct sline *slist;
 extern long gline_number;
 extern unsigned char TempBuff[];
-extern d_ptr d_list;
 extern struct videoconfig config;
 extern int il_file;
 extern struct IL fe;
