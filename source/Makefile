@@ -116,8 +116,8 @@ ifeq "$(EDJGPP)" "1"
 	EOSMING=-O2
 	EBACKENDU=eubd.exe
 	EBACKENDC=eubd.exe
-	EECU=eucd.exe
-	EEXU=euid.exe
+	EECU=euc.exe
+	EEXU=eui.exe
 	EECUA=eud.a
 	PLAT=DOS
 	MEM_FLAGS=
@@ -149,7 +149,7 @@ ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
 
-EXE=$(EEXU)
+EXE=$(EUBIN)/$(EEXU)
 INCDIR=-i $(TRUNKDIR)/include
 
 ifdef PLAT
@@ -215,7 +215,7 @@ EU_BACKEND_RUNNER_FILES = \
 	error.e \
 	mode.e
 
-PREFIXED_PCRE_OBJECTS = $(addprefix $(TRUNKDIR)/source/pcre/,$(PCRE_OBJECTS))
+PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
 	
 EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
@@ -268,7 +268,7 @@ version.h: version.mak
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
 distclean : clean
-	-rm -f $(CONFIG) pcre/config.h pcre/pcre.h
+	-rm -f $(CONFIG)
 	-rm -fr $(BUILD_DIRS)
 
 clean : 	
@@ -281,7 +281,7 @@ ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
 	-rm -f version.h
-	$(MAKE) -C pcre clean
+	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	
 
 .PHONY : clean distclean all
@@ -497,10 +497,6 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
 	
 ifdef PCRE_OBJECTS	
-$(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,%.c,$(PREFIXED_PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
-ifeq "$(EMINGW)" "1"
-	$(MAKE) -C pcre mingw CC=$(CC)
-else
-	$(MAKE) -C pcre all
-endif
+$(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
+	$(MAKE) -C pcre all EOSTYPE=$(EOSTYPE) CONFIG=../$(CONFIG)
 endif

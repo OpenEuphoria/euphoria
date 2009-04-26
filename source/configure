@@ -24,8 +24,6 @@ if test $UNAME_SYSTEM = "Linux"; then
 	echo ELINUX=1 >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	ln -f pcre/pcre.h.unix pcre/pcre.h
-    ln -f pcre/config.h.unix pcre/config.h
 elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo ENETBSD= >> "$PREFIX"Makefile.eu
@@ -35,8 +33,6 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
-	cp pcre/pcre.h.windows pcre/pcre.h
-	cp pcre/config.h.windows pcre/config.h
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
@@ -46,8 +42,6 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW=1 >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	ln -f pcre/pcre.h.windows pcre/pcre.h
-	ln -f pcre/config.h.windows pcre/config.h
 elif test $UNAME_SYSTEM = "SunOS"; then
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	echo ENETBSD= >> "$PREFIX"Makefile.eu
@@ -57,8 +51,6 @@ elif test $UNAME_SYSTEM = "SunOS"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	ln -f pcre/pcre.h.unix pcre/pcre.h
-	ln -f pcre/config.h.unix pcre/config.h
 elif test $UNAME_SYSTEM = "OpenBSD"; then
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	echo ENETBSD= >> "$PREFIX"Makefile.eu
@@ -68,8 +60,6 @@ elif test $UNAME_SYSTEM = "OpenBSD"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	ln -f pcre/pcre.h.unix pcre/pcre.h
-	ln -f pcre/config.h.unix pcre/config.h
 elif test $UNAME_SYSTEM = "NetBSD"; then
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	echo ENETBSD=1 >> "$PREFIX"Makefile.eu
@@ -79,8 +69,6 @@ elif test $UNAME_SYSTEM = "NetBSD"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	ln -f pcre/pcre.h.unix pcre/pcre.h
-	ln -f pcre/config.h.unix pcre/config.h
 else
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	if test $UNAME_SYSTEM = "Darwin"; then
@@ -93,8 +81,6 @@ else
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
-	ln -f pcre/pcre.h.unix pcre/pcre.h
-    ln -f pcre/config.h.unix pcre/config.h
 fi
 
 export BUILDDIR=.

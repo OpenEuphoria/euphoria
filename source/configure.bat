@@ -89,9 +89,6 @@ if not exist %BUILDDIR%\dosobj.wat copy dosobj.dst %BUILDDIR%\dosobj.wat
 if not exist %BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %BUILDDIR%\dosbkobj.wat
 if not exist %BUILDDIR%\dostrobj.wat copy dostrobj.dst %BUILDDIR%\dostrobj.wat
 
-copy /y pcre\pcre.h.windows pcre\pcre.h
-copy /y pcre\config.h.windows pcre\config.h
-
 GOTO Completed
 
 :Help

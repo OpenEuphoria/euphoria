@@ -71,8 +71,8 @@ CONFIG=config.wat
 !endif
 !include $(CONFIG)
 
-BASEPATH=pcre
-!include $(BASEPATH)\objects.wat
+BASEPATH=$(BUILDDIR)\pcre
+!include pcre\objects.wat
 !include $(TRUNKDIR)\source\version.mak
 
 FULLBUILDDIR=$(BUILDDIR)
@@ -256,7 +256,7 @@ distclean : .SYMBOLIC clean
 	error
 !endif
 	cd pcre
-	wmake -f makefile.wat clean
+	wmake -f makefile.wat CONFIG=..\$(CONFIG) distclean
 	cd ..
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\back\*.*	
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i\back
@@ -264,11 +264,9 @@ distclean : .SYMBOLIC clean
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i.wat
 	-$(RM) $(CONFIG)
-	-$(RM) pcre\pcre.h
-	-$(RM) pcre\config.h
 	-$(RM) version.h
 
-clean : .SYMBOLIC
+clean : .SYMBOLIC pcre
 !ifndef DELTREE
 	@ECHO Please run configure
 	error
@@ -280,7 +278,7 @@ clean : .SYMBOLIC
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*
 	-@for %i in ($(BUILDDIR)\libobj $(BUILDDIR)\winlibobj $(BUILDDIR)\doslibobj) do -$(RMDIR) %i
 	cd pcre
-	wmake -f makefile.wat clean
+	-wmake -f makefile.wat CONFIG=..\$(CONFIG) clean
 	cd ..
 
 $(BUILD_DIRS) : .existsonly
@@ -673,6 +671,6 @@ version.h: version.mak
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
     @echo ------- REG EXP -----------
 	cd pcre
-	wmake -h -f makefile.wat 
+	wmake -h -f makefile.wat CONFIG=..\$(CONFIG) EOSTYPE=-D$(OSFLAG)
 	cd ..
 !endif
