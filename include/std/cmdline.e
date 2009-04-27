@@ -5,21 +5,186 @@
 include std/text.e
 include std/sequence.e
 include std/map.e as map
+include std/error.e
 
 --****
 -- == Constants
 
-public constant
-	NO_PARAMETER  = 0,
-	HAS_PARAMETER = 1,
-	NO_CASE       = 0,
-	HAS_CASE      = 1
+public constant -- Processing options
+	NO_PARAMETER  = 'n',
+	HAS_PARAMETER = 'p',
+	NO_CASE       = 'i',
+	HAS_CASE      = 'c',
+	MANDATORY     = 'm',
+	OPTIONAL      = 'o',
+	ONCE          = '1',
+	MULTIPLE      = '*',
+	HELP          = 'h'
+	
+public enum -- Record fields in the option call back parameter
+	OPT_IDX,
+	OPT_CNT,
+	OPT_VAL,
+	OPT_REV
+	
+enum -- Record fields in 'opts' argument.
+	SHORTNAME = 1,
+	LONGNAME = 2,
+	DESCRIPTION = 3,
+	OPTIONS = 4,
+	CALLBACK = 5,
+	MAPNAME = 6
 
-enum
-	SINGLE,
-	DOUBLE,
-	HELP,
-	PARAM
+
+-- Local routine to validate and reformat option records if they are not in the standard format.
+function standardize_opts(sequence opts)
+	integer lExtras = 0 -- Ensure that there is zero or one 'extras' record only.
+	
+	for i = 1 to length(opts) do
+		sequence opt = opts[i]
+		integer updated = 0
+		
+		if length(opt) < MAPNAME then
+			opt &= repeat(-1, MAPNAME - length(opt))
+			updated = 1
+		end if
+		
+		if sequence(opt[SHORTNAME]) and length(opt[SHORTNAME]) = 0 then
+			opt[SHORTNAME] = 0
+			updated = 1
+		end if
+		
+		if sequence(opt[LONGNAME]) and length(opt[LONGNAME]) = 0 then
+			opt[LONGNAME] = 0
+			updated = 1
+		end if
+		
+		if atom(opt[LONGNAME]) and atom(opt[SHORTNAME]) then
+			if lExtras != 0 then
+				crash("cmd_opts: There must be less than two 'extras' option records.\n")
+			else
+				lExtras = i
+				if atom(opt[MAPNAME]) then
+					opt[MAPNAME] = "extras"
+					updated = 1
+				end if
+			end if
+		end if
+		
+		if atom(opt[DESCRIPTION]) then
+			opt[DESCRIPTION] = ""
+			updated = 1
+		end if
+		
+		
+		if atom(opt[OPTIONS]) then
+			if equal(opt[OPTIONS], HAS_PARAMETER) then
+				opt[OPTIONS] = {HAS_PARAMETER}
+			else
+				opt[OPTIONS] = {}
+			end if
+			updated = 1
+		else
+			for j = 1 to length(opt[OPTIONS]) do
+				if find_from(opt[OPTIONS][j], opt[OPTIONS], j + 1) != 0 then
+					crash("cmd_opts: Duplicate processing options are not allowed in an option record.\n")
+				end if
+			end for
+			
+			if find(HAS_PARAMETER, opt[OPTIONS]) then
+				if find(NO_PARAMETER, opt[OPTIONS]) then
+					crash("cmd_opts: Cannot have both HAS_PARAMETER and NO_PARAMETER in an option record.\n")
+				end if
+			end if
+
+			if find(HAS_CASE, opt[OPTIONS]) then
+				if find(NO_CASE, opt[OPTIONS]) then
+					crash("cmd_opts: Cannot have both HAS_CASE and NO_CASE in an option record.\n")
+				end if
+			end if
+
+			if find(MANDATORY, opt[OPTIONS]) then
+				if find(OPTIONAL, opt[OPTIONS]) then
+					crash("cmd_opts: Cannot have both MANDATORY and OPTIONAL in an option record.\n")
+				end if
+			end if
+			
+			if find(ONCE, opt[OPTIONS]) then
+				if find(MULTIPLE, opt[OPTIONS]) then
+					crash("cmd_opts: Cannot have both ONCE and MULTIPLE in an option record.\n")
+				end if
+			end if
+			
+		end if
+		
+		if sequence(opt[CALLBACK]) then
+			opt[CALLBACK] = -1
+			updated = 1
+		elsif not integer(opt[CALLBACK]) then
+			opt[CALLBACK] = -1
+			updated = 1
+		elsif opt[CALLBACK] < 0 then
+			opt[CALLBACK] = -1
+			updated = 1
+		end if
+		
+		if sequence(opt[MAPNAME]) and length(opt[MAPNAME]) = 0 then
+			opt[MAPNAME] = 0
+			updated = 1
+		end if
+		
+		if atom(opt[MAPNAME]) then
+			if sequence(opt[LONGNAME]) then
+				opt[MAPNAME] = opt[LONGNAME]
+			elsif sequence(opt[SHORTNAME]) then
+				opt[MAPNAME] = opt[SHORTNAME]
+			else
+				opt[MAPNAME] = "extras"
+			end if
+			updated = 1
+		end if
+		
+		if updated then
+			opts[i] = opt
+		end if
+	end for
+	
+	-- Check for duplicate option records.
+	for i = 1 to length(opts) do
+		sequence opt
+		opt = opts[i]
+		if sequence(opt[SHORTNAME]) then
+			for j = i + 1 to length(opts) do
+				if equal(opt[SHORTNAME], opts[j][SHORTNAME]) then
+					crash("cmd_opts: Duplicate Short Names are not allowed in an option record.\n")
+				end if
+			end for
+		end if
+		
+		if sequence(opt[LONGNAME]) then
+			for j = i + 1 to length(opts) do
+				if equal(opt[LONGNAME], opts[j][LONGNAME]) then
+					crash("cmd_opts: Duplicate Long Names are not allowed in an option record.\n")
+				end if
+			end for
+		end if
+	end for
+
+	-- Insert the default 'help' option	if one is not already there.
+	integer has_help = 0
+	for i = 1 to length(opts) do
+		if find(HELP, opts[i][OPTIONS]) then
+			has_help = 1
+			exit
+		end if
+	end for
+	if not has_help then
+		opts = append(opts, {"h", "help", "Display the command options", {HELP}, -1})
+		opts = append(opts, {"?", 0, "Display the command options", {HELP}, -1})
+	end if
+	
+	return opts
+end function
 
 --****
 -- == Routines
@@ -110,145 +275,269 @@ enum
 -- See Also:
 -- [[:Command line switches]]
 
---**
--- Show help message for the given opts.
---
--- Parameters:
--- # ##opts##: a sequence of options. See the Comments: section for details
--- # ##add_help_rid##: an integer, the routine_id of a procedure that will be called on
---     completion. Defaults to -1 (no call).
---
--- Comments:
--- If ##add_help_rid## is specified, it must be the id of a procedure that takes no arguments.
---
--- ##opts## is a sequence of records, each of which describes a command line option for a program.
--- The name of the program is fetched from the command line. Each option record is a 5 element
--- sequence
--- # a sequence representing some text following a "-". Use an atom if not relevant;
--- # a sequence representing some text following a "--". Use an atom if not relevant;
--- # a sequence, some help text which concerns the above synonymous options.
--- # either 1 to denote a parameter of the options, or anything else if none.
--- # an integer, a routine_id. Currently not used by this procedure.
---
--- When the second element is specified and there is a parameter, the syntax "=x" is used. When
--- the first element is specified, the " x" syntax is used.
---
--- Example 1:
--- <eucode>
--- -- in myfile.ex
--- show_help({
---      {"q", "silent", "Suppresses any output to console", NO_PARAMETER, 0},
---      {"r", 0, "Sets how many lines the console should display", HAS_PARAMETER, 1}})
--- </eucode>
---
--- myfile.ex options:
--- -q, ~--silent		Suppresses any output to console
--- -r x				Sets how many lines the console should display
-
-public procedure show_help(sequence opts, integer add_help_rid=-1)
+procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), integer std = 0)
 	integer pad_size, this_size
-	sequence cmds, cmd
+	sequence cmd
+	integer has_param
+	integer is_mandatory
+	integer extras_mandatory = 0
 
-	cmds = command_line()
-
+	if std = 0 then
+		opts = standardize_opts(opts)
+	end if
+	
+	-- Calculate the size of the padding required to keep option text aligned.
 	pad_size = 0
 	for i = 1 to length(opts) do
 		this_size = 0
 
-		if sequence(opts[i][SINGLE]) then
-			this_size += length(opts[i][SINGLE]) + 1
+		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
+			if find(MANDATORY, opts[i][OPTIONS]) then
+				extras_mandatory = i
+			end if
+			-- Ignore 'extras' record
+			continue
 		end if
-		if sequence(opts[i][DOUBLE]) then
-			this_size += length(opts[i][DOUBLE]) + 2
+		
+		if sequence(opts[i][SHORTNAME]) then
+			this_size += length(opts[i][SHORTNAME]) + 1 -- Allow for "-"
+			if find(MANDATORY, opts[i][OPTIONS]) = 0 then
+				this_size += 2 -- Allow for '[' ']'
+			end if
 		end if
-		if sequence(opts[i][SINGLE]) and sequence(opts[i][DOUBLE]) then
-			this_size += 2
+		
+		if sequence(opts[i][LONGNAME]) then
+			this_size += length(opts[i][LONGNAME]) + 2 -- Allow for "--"
+			if find(MANDATORY, opts[i][OPTIONS]) = 0 then
+				this_size += 2 -- Allow for '[' ']'
+			end if
+		end if
+		
+		if sequence(opts[i][SHORTNAME]) and sequence(opts[i][LONGNAME]) then
+			this_size += 2 -- Allow for ", " between short and long names
 		end if
 
-		if sequence(opts[i][PARAM]) then
-			this_size += 4 + length(opts[i][PARAM])
-		elsif equal(opts[i][PARAM], HAS_PARAMETER) then
-			this_size += 4
+		if find(HAS_PARAMETER, opts[i][OPTIONS]) then
+			this_size += 4 -- Allow for " = x"
 		end if
+		
 
-		if pad_size < this_size + 6 then
-			pad_size = this_size + 6
+		if pad_size < this_size then
+			pad_size = this_size
 		end if
 	end for
+	pad_size += 3 -- Allow for minimum gap between cmd and its description
 
 	printf(1, "%s options:\n", {cmds[2]})
 	for i = 1 to length(opts) do
+		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
+			-- Ignore 'extras' record
+			continue
+		end if
+		
+		has_param    = (find(HAS_PARAMETER, opts[i][OPTIONS]) != 0)
+		is_mandatory = (find(MANDATORY,     opts[i][OPTIONS]) != 0)
 		cmd = ""
-		if sequence(opts[i][SINGLE]) then
-			cmd &= '-' & opts[i][SINGLE]
-			if sequence(opts[i][PARAM]) then
-				cmd &= " " & opts[i][PARAM]
-			elsif equal(opts[i][PARAM],HAS_PARAMETER) then
+		
+		if sequence(opts[i][SHORTNAME]) then
+			if not is_mandatory then
+				cmd &= '['
+			end if
+			cmd &= '-' & opts[i][SHORTNAME]
+			if has_param then
 				cmd &= " x"
 			end if
-		end if
-		if sequence(opts[i][DOUBLE]) then
-			if length(cmd) > 0 then cmd &= ", " end if
-			cmd &= "--" & opts[i][DOUBLE]
-			if sequence(opts[i][PARAM]) then
-				cmd &= "=" & opts[i][PARAM]
-			elsif equal(opts[i][PARAM], HAS_PARAMETER) then
-				cmd &= "=x"
+			if not is_mandatory then
+				cmd &= ']'
 			end if
 		end if
-		puts(1, "     " & pad_tail(cmd, pad_size))
-		puts(1, " " & opts[i][HELP] & '\n')
+		
+		if sequence(opts[i][LONGNAME]) then
+			if length(cmd) > 0 then cmd &= ", " end if
+			if not is_mandatory then
+				cmd &= '['
+			end if
+			cmd &= "--" & opts[i][LONGNAME]
+			if has_param then
+				cmd &= "=x"
+			end if
+			if not is_mandatory then
+				cmd &= ']'
+			end if
+		end if
+		puts(1, "   " & pad_tail(cmd, pad_size))
+		puts(1, opts[i][DESCRIPTION] & '\n')
 	end for
 
-	if add_help_rid >= 0 then
-		puts(1, "\n")
-		call_proc(add_help_rid, {})
+	if atom(add_help_rid) then
+		if add_help_rid >= 0 then
+			puts(1, "\n")
+			call_proc(add_help_rid, {})
+			puts(1, "\n")
+		end if
+	else
+		if length(add_help_rid) > 0 then
+			puts(1, "\n")
+			if atom(add_help_rid[1]) then
+				puts(1, add_help_rid)
+				if add_help_rid[$] != '\n' then
+					puts(1, '\n')
+				end if
+			else
+				for i = 1 to length(add_help_rid) do
+					puts(1, add_help_rid[i])
+					if add_help_rid[i][$] != '\n' then
+						puts(1, '\n')
+					end if		
+				end for
+			end if
+			puts(1, "\n")
+		end if
+	end if
+	
+	if extras_mandatory != 0 then
+		if length(opts[extras_mandatory][DESCRIPTION]) > 0 then
+			puts(1, opts[extras_mandatory][DESCRIPTION])
+			puts(1, '\n')
+		else
+			puts(1, "One or more additional arguments are also required\n")
+		end if
 	end if
 end procedure
 
-function find_opt(sequence opts, integer typ, object name)
+--**
+-- Show help message for the given opts.
+--
+-- Parameters:
+-- # ##opts##: a sequence of options. See the [[:cmd_parse]] for details.
+-- # ##add_help_rid##: an object. See the [[:cmd_parse]] for details.
+--
+-- Comments:
+-- The parameters ##opts## and ##add_help_rid## are identical to the same ones
+-- used by [[:cmd_parse]]
+--
+-- Example 1:
+-- <eucode>
+-- -- in myfile.ex
+-- constant desc = {
+--        "Creates a file containing an analysis of the weather.",
+--        "The analysis includes temperature and rainfall data",
+--        "for the past week."
+--       }
+
+-- show_help({
+--      {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
+--      {"r", 0, "Sets how many lines the console should display", HAS_PARAMETER, -1}},
+--      desc)
+-- </eucode>
+-- Outputs:
+--{{{
+-- myfile.ex options:
+-- -q, --silent      Suppresses any output to console
+-- -r x              Sets how many lines the console should display
+-- Creates a file containing an analysis of the weather.
+-- The analysis includes temperature and rainfall data
+-- for the past week.
+--}}}
+--
+
+public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line())
+	local_show_help(opts, add_help_rid, cmds, 0)
+end procedure
+
+function find_opt(sequence opts, sequence typ, object cmd_text)
 	integer slash
 	integer posn = 0
 	sequence opt_name
 	object opt_param
-
-	opt_name = repeat(' ', length(name))
-	opt_param = 0
-	for i = 1 to length(name) do
-		if name[i] = '"' then
-			posn = i
-		elsif find(name[i], ":=") then
-			if posn = 0 then
-				posn = i
-				opt_name = opt_name[1 .. posn - 1]
-				opt_param = name[posn + 1 .. $]
-				exit
+	integer param_found = 0
+	integer reversed = 0
+	
+	if length(cmd_text) >= 2 then
+		-- Strip off any enclosing quotes
+		if cmd_text[1] = '\'' or cmd_text[1] = '"' then
+			if cmd_text[$] = cmd_text[1] then
+				cmd_text = cmd_text[2 .. $-1]
 			end if
 		end if
-
-		opt_name[i] = name[i]
+	end if
+	
+	if length(cmd_text) > 0 then
+		if find(cmd_text[1], "!-") then
+			reversed = 1
+			cmd_text = cmd_text[2 .. $]
+		end if
+	end if
+	if length(cmd_text) < 1 then
+		return {-1, "Empty command text"}
+	end if
+	
+	opt_name = repeat(' ', length(cmd_text))
+	opt_param = 0
+	for i = 1 to length(cmd_text) do
+		if find(cmd_text[i], ":=-+") then
+			if find(cmd_text[i], "-+") then
+				posn = i
+			else
+				posn = i + 1
+			end if
+			opt_name = opt_name[1 .. i - 1]
+			opt_param = cmd_text[posn .. $]
+			if length(opt_param) >= 2 then
+				-- Strip off any enclosing quotes
+				if opt_param[1] = '\'' or opt_param[1] = '"' then
+					if opt_param[$] = opt_param[1] then
+						opt_param = opt_param[2 .. $-1]
+					end if
+				end if
+			end if
+			
+			if length(opt_param) > 0 then
+				param_found = 1
+			end if
+			
+			exit
+		else
+			opt_name[i] = cmd_text[i]
+		end if
 	end for
 
-
-	slash = 0 -- should we check both single char and words?
-	if typ = 3 then
-		slash = 1
-		typ = 2
+	if param_found then
+		if typ[1] = SHORTNAME then
+			if find(lower(opt_param), {"1", "on", "yes", "y", "true", "ok", "+"}) then
+				opt_param = 1
+			elsif find(lower(opt_param), {"0", "off", "no", "n", "false", "-"}) then
+				opt_param = 0
+			end if
+		end if
 	end if
 
 	for i = 1 to length(opts) do
-		if length(opts[i]) > 5 then
-			if equal(opts[i][6], NO_CASE) then
-				if equal(lower(opt_name), lower(opts[i][typ])) or 
-					(slash and equal(lower(opt_name), lower(opts[i][1]))) 
-				then
-					return {i, opt_param}
-				end if
+		if find(NO_CASE,  opts[i][OPTIONS]) then
+			if not equal(lower(opt_name), lower(opts[i][typ[1]])) then
+				continue
+			end if
+		else
+			if not equal(opt_name, opts[i][typ[1]]) then
+				continue
 			end if
 		end if
-
-		if equal(opt_name, opts[i][typ]) or (slash and equal(opt_name, opts[i][1])) then
-			return {i, opt_param}
+		
+		if find(HAS_PARAMETER,  opts[i][OPTIONS]) = 0 then
+			if param_found then
+				return {0, "Option should not have a parameter"}
+			end if
+		end if
+		
+		if param_found then
+			return {i, opt_name, reversed, opt_param}
+		else
+			if typ[1] = SHORTNAME then
+				if find(HAS_PARAMETER, opts[i][OPTIONS]) = 0 then
+					return {i, opt_name, reversed, 1 }
+				end if
+			end if
+			return {i, opt_name, reversed}
 		end if
 	end for
 
@@ -260,7 +549,11 @@ end function
 --
 -- Parameters:
 -- # ##opts## - a sequence of valid option records: See Comments: section for details
--- # ##add_help_rid## - an integer, the id of ???. Defaults to -1.
+-- # ##add_help_rid##: an optional object, Either the routine_id of a procedure that will be called on
+--     completion, or a sequence containing additional help text to be displayed. 
+--     If omitted, only the command line options are displayed.
+-- # ##cmds## - an optional sequence of command line arguments. If omitted the output from 
+--              command_line() is used.
 --
 -- Returns:
 -- A map containing the options set. The returned map has one special key named "extras"
@@ -268,65 +561,166 @@ end function
 -- a list of files ##myprog -verbose file1.txt file2.txt##.
 --
 -- Comments:
+-- If ##add_help_rid## is specified as a routine_id, it must be the id of a 
+-- procedure that takes no arguments.
 --
--- 6 sorts of tokens are recognized on the command line:
--- # a single '-'. Simply added to the option list
+-- If ##add_help_rid## is specified as a sequence, it can either be a text string
+-- or a sequence containing text strings, in which case each one is displayed
+-- on a line of its own.
+--
+-- Token types recognized on the command line:
+-- # a single '-'. Simply added to the 'extras' list
 -- # a single "~-~-". This signals the end of command line options. What remains of the command
---   line is added to the option list, and the parsing terminates.
--- # -something. The option will be looked up in ##opts##.
--- # ~-~-something. Ditto.
--- # /something. Ditto.
--- # anything else. The word is simply added to the option list.
+--   line is added to the 'extras' list, and the parsing terminates.
+-- # -shortname. The option will be looked up in the short name field of ##opts##.
+-- # /shortname. Same as -shortname.
+-- # -!shortname. If the 'shortname' has already been found the option is removed.
+-- # /!shortname. Same as -!shortname
+-- # ~-~-longname. The option will be looked up in the long name field of ##opts##.
+-- # ~-~-!longname. If the 'longname' has already been found the option is removed.
+-- # anything else. The word is simply added to the 'extras' list.
+--
+-- For those options that require a parameter to also be supplied, the parameter
+-- can be given as either the next command line argument, or by appending '=' or ':'
+-- to the command option then appending the parameter data. \\
+-- For example, **##-path=/usr/local##** or as **##-path /usr/local##**.
 --
 -- On a failed lookup, the program shows the help by calling [[:show_help]](##opts##,
--- ##add_help_rid##) and terminates with status code 1.
+-- ##add_help_rid##, ##cmds##) and terminates with status code 1.
 --
 -- Option records have the following structure:
--- # a sequence representing some text following a "-". Use an atom if not relevant;
--- # a sequence representing some text following a "~-~-". Use an atom if not relevant;
--- # a sequence, some help text which concerns the above synonymous options.
--- # either ##HAS_PARAMETER## to denote a parameter of the options, or anything else if none.
--- # an integer, a [[:routine_id]]. This id will be called when a lookup he this entry.
--- # an integer, a value of ##NO_CASE## to indicate that the case of the supplied option
---   is not significant.
+-- # a sequence representing the (short name) text that will follow the "-" option format.
+--  Use an atom if not relevant
+-- # a sequence representing the (long name) text that will follow the "~-~-" option format.
+--  Use an atom if not relevant
+-- # a sequence, text that describes the option's purpose. Usually short as it is
+--   displayed when "-h"/"--help" is on the command line. Use an atom if not required.
+-- # An object ...
+--  ** If an **atom** then it can be either ##HAS_PARAMETER## or anything
+--     else if there is no parameter for this option. This format also implies that
+--     the option is optional, case-sensitive and can only occur once.
+--  ** If a **sequence**, it can containing zero or more processing flags in any order ...
+--   *** ##MANDATORY## to indicate that the option must always be supplied.
+--   *** ##HAS_PARAMETER## to indicate that the option must have a parameter following it
+--   *** ##NO_CASE## to indicate that the case of the supplied option is not significant.
+--   *** ##ONCE## to indicate that the option must only occur once on the command line.
+--   *** ##MULTIPLE## to indicate that the option can occur any number of times on the command line.
+-- # an integer; a [[:routine_id]]. This function will be called when the option is located
+--   on the command line and before it updates the map. \\
+--   Use -1 if cmd_parse is not to invoke a function for this option.\\
+--   The user defined function must accept a single sequence parameter containing four values. 
+--   If the function returns ##1## then the command option does not update the map.
+--   You can use the predefined index values OPT_IDX, OPT_CNT, OPT_VAL, OPT_REV when
+--   referencing the function's parameter elements.
+--   ## An index into the ##opts## list.
+--   ## The number of times that the routine has been called
+--      by cmd_parse for this option
+--   ## The option's value as found on the command line
+--   ## 1 if the command line indicates that this option is to remove any earlier occurances of it.
 --
--- When assigning a value to the resulting map, the key is first the long name. If the long
--- name is not present, then it reverts to the short name.
+-- When assigning a value to the resulting map, the key is the long name if present,
+-- otherwise it uses the short name. For options, you must supply a short name,
+-- a long name or both.
+--
+-- If you want cmd_parse to call a user routine for the extra command line values,
+-- you need to specify an Option Record that has neither a short name or a long name,
+-- in which case only the routine_id field is used.
 --
 -- For more details on how the command line is being pre parsed, see [[:command_line]].
 --
 -- Example:
 -- <eucode>
--- sequence option_definition = {
---     { "v", "verbose", "Verbose output",	NO_PARAMETER, routine_id("opt_verbose") },
---     { "o", "output",  "Output filename", HAS_PARAMETER, routine_id("opt_output_filename") }
+-- sequence option_definition
+-- integer gVerbose = 0
+-- sequence gOutFile = {}
+-- sequence gInFile = {}
+-- procedure opt_verbose( sequence value)
+--    if value[OPT_VAL] = -1 then -- (-!v used on command line)
+--    	gVerbose = 0
+--    else
+--      if value[OPT_CNT] = 1 then
+--         gVerbose = 1
+--      else
+--         gVerbose += 1
+--      end if
+--    end if
+-- end procedure
+--
+-- procedure opt_output_filename( sequence value)
+--    gOutFile = value[OPT_VAL]
+-- end procedure
+--
+-- procedure opt_extras( sequence value)
+--    if not file_exists(value[OPT_VAL]) then
+--        show_help(option_definitions, sprintf("Cannot find '%s'", value[OPT_VAL]))
+--        abort(1)
+--    end if
+--    gInFile = append(gInFile, value[OPT_VAL])
+-- end procedure
+--
+-- option_definition = {
+--     { "v", "verbose", "Verbose output",{NO_PARAMETER}, routine_id("opt_verbose")},
+--     { "h", "hash", "Calculate hash values",{NO_PARAMETER}, -1},
+--     { "o", "output",  "Output filename",{MANDATORY, HAS_PARAMETER, ONCE} , routine_id("opt_output_filename") },
+--     { "i", "import",  "An inport path", {HAS_PARAMETER, MULTIPLE}, -1 },
+--     {  0,  0, 0, 0, routine_id("opt_extras")}
 -- }
 --
 -- map:map opts = cmd_parse(option_definition)
 --
--- -- When run as: eui myprog.ex -v -o john.txt input1.txt input2.txt
+-- -- When run as: eui myprog.ex -v -o john.txt -i /usr/local -i /etc/app input1.txt input2.txt
 --
--- -- map:get(opts, "verbose") -- 1
--- -- map:get(opts, "output") -- john.txt
--- -- map:get(opts, "extras") -- { "input1.txt", "input2.txt" }
+-- -- map:get(opts, "verbose") --> 1
+-- -- map:get(opts, "hash") --> 0 (not supplied on command line)
+-- -- map:get(opts, "output") --> "john.txt"
+-- -- map:get(opts, "import") --> {"/usr/local", "/etc/app"}
+-- -- map:get(opts, "extras") --> {"input1.txt", "input2.txt"}
 -- </eucode>
 --
 -- See Also:
---   [[:show_help]], [[command_line]]
+--   [[:show_help]], [[:command_line]]
 
-public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds = command_line())
+public function cmd_parse(sequence opts, object add_help_rid=-1, sequence cmds = command_line())
 	integer idx, opts_done
 	sequence cmd
 	object param
 	sequence find_result
-	integer lType
+	sequence type_
 	integer from_
+	sequence help_opts
+	sequence call_count
+	
+	opts = standardize_opts(opts)
+
+	call_count = repeat(0, length(opts))
+	
 	map:map parsed_opts = map:new()
 
 	map:put(parsed_opts, "extras", {})
 
 	idx = 2
 	opts_done = 0
+	
+	-- Find if there are any user-defined help options.
+	help_opts = { "h", "?", "help" }
+	for i = 1 to length(opts) do
+		if find(HELP, opts[i][OPTIONS]) then
+			help_opts = {}
+			if sequence(opts[i][SHORTNAME]) then
+				help_opts = append(help_opts, opts[i][SHORTNAME])
+			end if
+			if sequence(opts[i][LONGNAME]) then
+				help_opts = append(help_opts, opts[i][LONGNAME])
+			end if
+			if find(NO_CASE, opts[i][OPTIONS]) then
+				help_opts = lower(help_opts)
+				idx = length(help_opts)
+				for j = 1 to idx do
+					help_opts = append(help_opts, upper(help_opts[j]))
+				end for
+			end if
+		end if
+	end for		
 
 	while idx < length(cmds) do
 		idx += 1
@@ -343,64 +737,106 @@ public function cmd_parse(sequence opts, integer add_help_rid=-1, sequence cmds 
 		end if
 
 		if equal(cmd[1..2], "--") then	  -- found --opt-name
-			lType = 2
+			type_ = {LONGNAME, "--"}
 			from_ = 3
 		elsif cmd[1] = '-' then -- found -opt
-			lType = 1
+			type_ = {SHORTNAME, "-"}
 			from_ = 2
 		else  -- found /opt
-			lType = 3
+			type_ = {SHORTNAME, "/"}
 			from_ = 2
 		end if
 
-		if find(cmd[from_..$], { "h", "?", "help" }) then
-			show_help(opts, add_help_rid)
+		if find(cmd[from_..$], help_opts) then
+			local_show_help(opts, add_help_rid, cmds, 1)
 			abort(0)
 		end if
 
-		find_result = find_opt(opts, lType, cmd[from_..$])
+		find_result = find_opt(opts, type_, cmd[from_..$])
 
+		if find_result[1] < 0 then
+			continue -- Couldn't use this command argument for anything.
+		end if
+		
 		if find_result[1] = 0 then
 			-- something is wrong with the option
-			printf(1, "%s option: %s\n\n", {find_result[2], cmd})
-			show_help(opts, add_help_rid)
+			printf(1, "option '%s': %s\n\n", {cmd, find_result[2]})
+			local_show_help(opts, add_help_rid, cmds, 1)
 			abort(1)
-		elsif find_result[1] > 0 then
-			sequence opt = opts[find_result[1]]
-
-			if sequence(opt[PARAM]) or equal(opt[PARAM], HAS_PARAMETER) then
+		end if
+		
+		sequence opt = opts[find_result[1]]
+		
+		if find(HAS_PARAMETER, opt[OPTIONS]) != 0 then
+			if length(find_result) < 4 then
 				idx += 1
 				if idx <= length(cmds) then
 					param = cmds[idx]
-				else
-					param = ""
-				end if
-
-			elsif atom(opt[PARAM]) and equal(opt[PARAM], NO_PARAMETER) then
-				param = 1
-
-			elsif sequence(opt[PARAM]) then
-				if atom(find_result[2]) then
-					idx += 1
-					if idx <= length(cmds) then
-						param = cmds[idx]
-					else
+					if length(param) > 1 and find(param[1], "-/") then
 						param = ""
 					end if
 				else
-					param = find_result[2]
+					param = ""
 				end if
-			end if
-
-			-- try to use the long name for the var storage into the map first
-			if sequence(opt[DOUBLE]) and length(opt[DOUBLE]) then
-				map:put(parsed_opts, opt[DOUBLE], param)
+				
+				if length(param) = 0 then
+					printf(1, "option '%s' must have a parameter\n\n", {find_result[2]})
+					local_show_help(opts, add_help_rid, cmds, 1)
+					abort(1)
+				end if
 			else
-				map:put(parsed_opts, opt[SINGLE], param)
+				param = find_result[4]
+			end if
+		else
+			param = find_result[4]
+		end if
+
+		if opt[CALLBACK] >= 0 then
+			integer pos = find_result[1]
+			call_count[pos] += 1
+			--                              OPT_IDX        OPT_CNT         OPT_VAL  OPT_REV
+			if call_func(opt[CALLBACK], {{find_result[1], call_count[pos], param,  find_result[3]}}) = 0 then
+				continue
 			end if
 		end if
+		
+		if find_result[3] = 1 then
+			map:remove(parsed_opts, opt[MAPNAME])
+		else
+			if find(MULTIPLE, opt[OPTIONS]) = 0 then
+				if map:has(parsed_opts, opt[MAPNAME]) then
+					printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
+					local_show_help(opts, add_help_rid, cmds, 1)
+					abort(1)
+				else
+					map:put(parsed_opts, opt[MAPNAME], param)
+				end if
+			else
+				map:put(parsed_opts, opt[MAPNAME], param, map:APPEND)
+			end if
+		end if
+		
 	end while
 
+	-- Check that all mandatory options have been supplied.
+	for i = 1 to length(opts) do
+		if find(MANDATORY, opts[i][OPTIONS]) then
+			if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
+				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
+					puts(1, "Additional arguments were expected.\n\n")
+					local_show_help(opts, add_help_rid, cmds, 1)
+					abort(1)
+				end if
+			else
+				if not map:has(parsed_opts, opts[i][MAPNAME]) then
+					printf(1, "option '%s' is mandatory but was not supplied.\n\n", {opts[i][MAPNAME]})
+					local_show_help(opts, add_help_rid, cmds, 1)
+					abort(1)
+				end if
+			end if
+		end if
+	end for
+	
 	return parsed_opts
 end function
 
