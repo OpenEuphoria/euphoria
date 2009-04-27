@@ -80,7 +80,10 @@ echo TRUNKDIR=%PWD% >> config.wat
 if "%BUILDDIR%" == "." (
 	echo BUILDDIR=%PWD%\source >> config.wat
 ) else (
-	echo BUILDDIR=%BUILDDIR% >> config.wat
+	set TEMPCD=%PWD%
+	cd %BUILDDIR%
+	echo BUILDDIR=%PWD% >> config.wat
+	cd %TEMPCD%
 )
 if not exist %BUILDDIR%\transobj.wat copy transobj.dst %BUILDDIR%\transobj.wat
 if not exist %BUILDDIR%\intobj.wat copy intobj.dst %BUILDDIR%\intobj.wat
