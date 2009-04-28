@@ -405,6 +405,42 @@ test : .SYMBOLIC testwin testdos
 
 !endif #EUPHORIA	
 
+!ifdef BUILD_TOOLS
+$(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr\main-.c $(BUILDDIR)\eutestdr.wat $(BUILDDIR)\eu.lib $(BUILDDIR)\eutestdr
+	@%create $(BUILDDIR)\eutestdr\eutestdr.lbc
+	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc option quiet
+	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc option caseexact
+	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc library ws2_32
+	@for %i in ($(EUTEST_OBJECTS)) do @%append $(BUILDDIR)\eutestdr\eutest.lbc file %i
+	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\eutestdr\eutestdr.lbc name $(BUILDDIR)\eutest.exe
+
+$(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
+	@if exist $(BUILDDIR)\objtmp rmdir /Q /S $(BUILDDIR)\objtmp
+	@mkdir $(BUILDDIR)\objtmp
+	@copy $(BUILDDIR)\eutestdr\*.c $(BUILDDIR)\objtmp
+	@cd $(BUILDDIR)\objtmp
+	ren *.c *.obj
+	%create eutestdr.wat
+	%append eutestdr.wat $(EU_NAME_OBJECT) = &  
+	for %i in (*.obj) do @%append eutestdr.wat $(BUILDDIR)\eutestdr\%i & 
+	%append eutestdr.wat    
+	del *.obj
+	cd $(TRUNKDIR)\source
+	move $(BUILDDIR)\objtmp\eutestdr.wat $(BUILDDIR)
+	rmdir $(BUILDDIR)\objtmp
+
+
+$(BUILDDIR)\eutestdr\main-.c : $(TRUNKDIR)\source\eutest.ex $(BUILDDIR)\eutestdr
+	-$(RM) $(BUILDDIR)\eutestdr\*.*
+	cd  $(BUILDDIR)\eutestdr
+	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
+	cd $(TRUNKDIR)\source
+
+$(BUILDDIR)\eutestdr :
+	mkdir $(BUILDDIR)\eutestdr
+
+!endif #BUILD_TOOLS
+
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) 
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
